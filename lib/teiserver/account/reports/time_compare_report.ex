@@ -139,10 +139,6 @@ defmodule Teiserver.Account.TimeCompareReport do
     acc_values
     |> Map.merge(%{
       "the_date" => "Today",
-      "account_user1" => "#3074 Flaka",
-      "account_user2" => "#1332 Flash",
-      "account_user3" => "#14643 eL_bArTo",
-      "account_user4" => "#2401, Fire[Z]torm_",
       "overlap" => "false",
       "skip_nil" => "false"
     })
