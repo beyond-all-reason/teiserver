@@ -1,38 +1,9 @@
 <% {_fg, _bg, bsname} = view_colour() |> colours() %>
 
-<style type="text/css">
-  .min-table {
+<script src={Routes.static_path(@conn, "/js/d3.js")}></script>
+<script src={Routes.static_path(@conn, "/js/c3.min.js")}></script>
 
-  }
-
-  .min-table td {
-    margin: 0;
-    padding: 0;
-    width: 50px;
-    height: 1px;
-    border-right: 1px solid #333;
-  }
-
-  .offline {
-    background-color: #000;
-  }
-
-  .menu {
-    background-color: #555;
-  }
-
-  .lobby {
-    background-color: #33A;
-  }
-
-  .spectator {
-    background-color: #3A3;
-  }
-
-  .player {
-    background-color: #A33;
-  }
-</style>
+<link href="/css/c3.min.css" rel="stylesheet">
 
 <%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
 
@@ -41,6 +12,32 @@
   name: "account_user",
   title: "User search"
 %>
+
+<script>
+  $(function() {
+    var chart = c3.generate({
+      bindto: '#chart',
+      data: {
+        x: 'x',
+        xFormat: '%H:%M:%S',
+        columns: <%= raw Jason.encode!([["x" | @keys] | @lines]) %>,
+        types: {
+          <%= for n <- @line_names do %>
+            '<%= n %>': 'step',
+          <% end %>
+        }
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%H:%M:%S'
+          }
+        }
+      }
+    });
+  });
+</script>
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -62,10 +59,28 @@
         <form action={Routes.ts_reports_report_path(@conn, :show, "time_compare")} method="post" class="form-horizontal">
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
-          <input type="hidden" name="report[account_user1]" value={@params["account_user1"]} class="form-control" />
-          <input type="hidden" name="report[account_user2]" value={@params["account_user2"]} class="form-control" />
+          <%= for i <- 1..@user_count_max do %>
+            <input type="hidden" name={"report[account_user#{i}]"} value={@params["account_user#{i}"]} />
+          <% end %>
 
-          <input type="hidden" name="report[the_date]" value={Timex.shift(@start_date, days: -1) |> date_to_str(format: :ymd)} class="form-control" />
+          <input type="hidden" name="report[overlap]" value={@params["overlap"]} />
+          <input type="hidden" name="report[skip_nil]" value={@params["skip_nil"]} />
+
+          <input type="hidden" name="report[the_date]" value={Timex.shift(@start_date, days: 1) |> date_to_str(format: :ymd)} />
+
+          <input type="submit" value="1 day younger" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
+        </form>
+
+        <form action={Routes.ts_reports_report_path(@conn, :show, "time_compare")} method="post" class="form-horizontal">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <%= for i <- 1..@user_count_max do %>
+            <input type="hidden" name={"report[account_user#{i}]"} value={@params["account_user#{i}"]} />
+          <% end %>
+          <input type="hidden" name="report[overlap]" value={@params["overlap"]} />
+          <input type="hidden" name="report[skip_nil]" value={@params["skip_nil"]} />
+
+          <input type="hidden" name="report[the_date]" value={Timex.shift(@start_date, days: -1) |> date_to_str(format: :ymd)} />
 
           <input type="submit" value="1 day older" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
         </form>
@@ -74,23 +89,16 @@
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
           <div class="row">
-            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
-              <label for="search_account_user1" class="control-label">User 1: </label>
-              <%= render CentralWeb.Account.UserView, "picker.html",
-                input_name: "report[account_user1]",
-                input_id: "report_account_user1",
-                value: @params["account_user1"]
-              %>
-            </div>
-
-            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
-              <label for="search_account_user2" class="control-label">User 2: </label>
-              <%= render CentralWeb.Account.UserView, "picker.html",
-                input_name: "report[account_user2]",
-                input_id: "report_account_user2",
-                value: @params["account_user2"]
-              %>
-            </div>
+            <%= for i <- 1..@user_count_max do %>
+              <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+                <label for={"search_account_user#{i}"} class="control-label">User <%= i %>: </label>
+                <%= render CentralWeb.Account.UserView, "picker.html",
+                  input_name: "report[account_user#{i}]",
+                  input_id: "report_account_user#{i}",
+                  value: @params["account_user#{i}"]
+                %>
+              </div>
+            <% end %>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_the_date" class="control-label">Date:</label>
@@ -136,28 +144,18 @@
 
         </div>
 
-        <table class="min-table">
-          <%= if false do %>
-          <thead>
-            <tr>
-              <th>Time</th>
+        <div id="chart" class='with-transitions mt-3' style="height: 400px;">
+        </div>
 
-              <%= for userid <- @user_ids do %>
-                <th><%= @users[userid].name %></th>
-              <% end %>
-            </tr>
-          </thead>
-          <% end %>
-          <tbody>
-            <%= for {_ts, statuses} <- @data do %>
-              <tr>
-                <%= for userid <- @user_ids do %>
-                  <td class={statuses[userid]}>&nbsp;</td>
-                <% end %>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
+        <div class="row">
+          <div class="col">&nbsp;</div>
+          <div class="col">0 = Offline</div>
+          <div class="col">1 = Menu</div>
+          <div class="col">2 = Lobby</div>
+          <div class="col">3 = Spectator</div>
+          <div class="col">4 = Player</div>
+          <div class="col">&nbsp;</div>
+        </div>
 
       </div>
     </div>

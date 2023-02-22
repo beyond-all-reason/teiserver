@@ -10,6 +10,8 @@ defmodule Teiserver.Account.TimeCompareReport do
   @spec permissions() :: String.t()
   def permissions(), do: "teiserver.admin"
 
+  @user_count_max 4
+
   @spec run(Plug.Conn.t(), map()) :: {list(), map()}
   def run(_conn, params) do
     params = apply_defaults(params)
@@ -25,12 +27,16 @@ defmodule Teiserver.Account.TimeCompareReport do
         {nil, nil}
     end
 
-    {data, user_ids, users} = get_data(params, {start_date, end_date})
+    {keys, lines} = get_data(params, {start_date, end_date})
+
+    line_names = lines
+      |> Enum.map(fn [name | _] -> name end)
 
     %{
-      data: data,
-      user_ids: user_ids,
-      users: users,
+      user_count_max: @user_count_max,
+      keys: keys,
+      lines: lines,
+      line_names: line_names,
       start_date: start_date || Timex.today(),
       params: params,
       presets: DatePresets.presets()
@@ -42,15 +48,11 @@ defmodule Teiserver.Account.TimeCompareReport do
   end
 
   defp get_data(params, {start_date, end_date}) do
-    userid1 = get_hash_id(params["account_user1"])
-    userid2 = get_hash_id(params["account_user2"])
-
-    user_ids = [userid1, userid2]
+    user_ids = 1..@user_count_max
+      |> Enum.map(fn i ->
+        get_hash_id(params["account_user#{i}"])
+      end)
       |> Enum.reject(&(&1 == nil))
-
-    users = user_ids
-      |> Account.list_users_from_cache()
-      |> Map.new(fn user -> {user.id, user} end)
 
     logs = Telemetry.list_server_minute_logs(
       search: [
@@ -64,14 +66,17 @@ defmodule Teiserver.Account.TimeCompareReport do
         cdata = log.data["client"]
 
         userdata = user_ids
-          |> Map.new(fn id ->
+          |> Enum.with_index
+          |> Map.new(fn {id, idx} ->
+            idx_mod = idx * 0.1
+
             status = cond do
-              cdata == nil -> :offline
-              Enum.member?(cdata["lobby"], id) -> :lobby
-              Enum.member?(cdata["menu"], id) -> :menu
-              Enum.member?(cdata["player"], id) -> :player
-              Enum.member?(cdata["spectator"], id) -> :spectator
-              true -> :offline
+              cdata == nil -> 0
+              Enum.member?(cdata["menu"], id) -> 1 - idx_mod
+              Enum.member?(cdata["lobby"], id) -> 2 - idx_mod
+              Enum.member?(cdata["spectator"], id) -> 3 - idx_mod
+              Enum.member?(cdata["player"], id) -> 4 - idx_mod
+              true -> 0
             end
 
             {id, status}
@@ -89,7 +94,7 @@ defmodule Teiserver.Account.TimeCompareReport do
         |> Enum.filter(fn {_, data} ->
           data
             |> Map.values
-            |> Enum.reject(&(&1 == :offline))
+            |> Enum.reject(&(&1 == 0))
             |> Enum.any?
         end)
     else
@@ -102,7 +107,7 @@ defmodule Teiserver.Account.TimeCompareReport do
         |> Enum.filter(fn {_, data} ->
           d = data
             |> Map.values
-            |> Enum.reject(&(&1 == :offline))
+            |> Enum.reject(&(&1 == 0))
 
           Enum.count(d) >= 2
         end)
@@ -110,20 +115,37 @@ defmodule Teiserver.Account.TimeCompareReport do
       logs
     end
 
-    IO.puts ""
-    IO.inspect logs
-    IO.puts ""
+    keys = logs
+      |> Enum.map(fn {ts, _} -> TimexHelper.date_to_str(ts, format: :hms) end)
 
-    {logs, user_ids, users}
+    lines = user_ids
+      |> Enum.map(fn userid -> [Account.get_username_by_id(userid) | build_line(logs, userid)] end)
+
+    {keys, lines}
+  end
+
+  @spec build_line(list, integer()) :: list()
+  defp build_line(logs, userid) do
+    logs
+      |> Enum.map(fn {_, statuses} -> statuses[userid] end)
   end
 
   defp apply_defaults(params) do
-    Map.merge(%{
+    acc_values = 1..@user_count_max
+      |> Map.new(fn i ->
+        {"account_user#{i}", ""}
+      end)
+
+    acc_values
+    |> Map.merge(%{
       "the_date" => "Today",
       "account_user1" => "#3074 Flaka",
       "account_user2" => "#1332 Flash",
-      "overlap" => "true",
-      "skip_nil" => "true"
-    }, Map.get(params, "report", %{}))
+      "account_user3" => "#14643 eL_bArTo",
+      "account_user4" => "#2401, Fire[Z]torm_",
+      "overlap" => "false",
+      "skip_nil" => "false"
+    })
+    |> Map.merge(Map.get(params, "report", %{}))
   end
 end
