@@ -22,7 +22,8 @@ defmodule Teiserver.Game.BalancerServer do
       rating_upper_boundary: state.rating_upper_boundary,
       mean_diff_max: state.mean_diff_max,
       stddev_diff_max: state.stddev_diff_max,
-      fuzz_multiplier: state.fuzz_multiplier
+      fuzz_multiplier: state.fuzz_multiplier,
+      shuffle_first_pick: state.shuffle_first_pick
     ]
 
     {balance, new_state} = make_balance(team_count, state, opts)
@@ -48,7 +49,8 @@ defmodule Teiserver.Game.BalancerServer do
       rating_upper_boundary: state.rating_upper_boundary,
       mean_diff_max: state.mean_diff_max,
       fuzz_multiplier: state.fuzz_multiplier,
-      stddev_diff_max: state.stddev_diff_max
+      stddev_diff_max: state.stddev_diff_max,
+      shuffle_first_pick: state.shuffle_first_pick
     }
 
     {:reply, result, state}
@@ -69,7 +71,7 @@ defmodule Teiserver.Game.BalancerServer do
   end
 
   def handle_cast({:set, key, value}, state) do
-    valid_keys = ~w(max_deviation rating_lower_boundary rating_upper_boundary mean_diff_max stddev_diff_max fuzz_multiplier)a
+    valid_keys = ~w(max_deviation rating_lower_boundary rating_upper_boundary mean_diff_max stddev_diff_max fuzz_multiplier shuffle_first_pick)a
 
     new_state = case Enum.member?(valid_keys, key) do
       true ->

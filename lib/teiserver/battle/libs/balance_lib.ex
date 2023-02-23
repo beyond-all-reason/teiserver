@@ -38,6 +38,10 @@ defmodule Teiserver.Battle.BalanceLib do
   # teams. It is defaulted here as the server uses this library to get defaults
   @fuzz_multiplier 0.5
 
+  # When set to true, if there are any teams with 0 points (first pick) it randomises
+  # which one will get to pick first
+  @shuffle_first_pick true
+
   @spec defaults() :: map()
   def defaults() do
     %{
@@ -46,7 +50,8 @@ defmodule Teiserver.Battle.BalanceLib do
       rating_upper_boundary: @rating_upper_boundary,
       mean_diff_max: @mean_diff_max,
       stddev_diff_max: @stddev_diff_max,
-      fuzz_multiplier: @fuzz_multiplier
+      fuzz_multiplier: @fuzz_multiplier,
+      shuffle_first_pick: @shuffle_first_pick
     }
   end
 
@@ -122,7 +127,7 @@ defmodule Teiserver.Battle.BalanceLib do
 
     {reversed_team_groups, logs} = case opts[:algorithm] || :loser_picks do
       :loser_picks ->
-        loser_picks(group_pairs ++ solo_players, teams)
+        loser_picks(group_pairs ++ solo_players, teams, opts)
     end
 
     team_groups = reversed_team_groups
@@ -439,8 +444,8 @@ defmodule Teiserver.Battle.BalanceLib do
 
   groups is a list of tuples: {members, rating, member_count}
   """
-  @spec loser_picks([expanded_group_or_pair()], map()) :: {map(), list()}
-  def loser_picks(groups, teams) do
+  @spec loser_picks([expanded_group_or_pair()], map(), list()) :: {map(), list()}
+  def loser_picks(groups, teams, opts) do
     total_members = groups
       |> Enum.map(fn
         {%{count: count1}, %{count: count2}} -> count1 + count2
@@ -453,12 +458,12 @@ defmodule Teiserver.Battle.BalanceLib do
       |> Enum.sum
 
     max_teamsize = total_members/Enum.count(teams) |> :math.ceil() |> round()
-    do_loser_picks(groups, teams, max_teamsize, [])
+    do_loser_picks(groups, teams, max_teamsize, [], opts)
   end
 
-  @spec do_loser_picks([expanded_group()], map(), non_neg_integer(), list()) :: {map(), list()}
-  defp do_loser_picks([], teams, _, logs), do: {teams, logs}
-  defp do_loser_picks([picked | remaining_groups], teams, max_teamsize, logs) do
+  @spec do_loser_picks([expanded_group()], map(), non_neg_integer(), list(), list()) :: {map(), list()}
+  defp do_loser_picks([], teams, _, logs, _opts), do: {teams, logs}
+  defp do_loser_picks([picked | remaining_groups], teams, max_teamsize, logs, opts) do
     team_skills = teams
       |> Enum.reject(fn {_team_number, member_groups} ->
         size = sum_group_membership_size(member_groups)
@@ -474,7 +479,20 @@ defmodule Teiserver.Battle.BalanceLib do
     case picked do
       # Single player
       %{count: 1} ->
-        current_team = hd(team_skills) |> elem(1)
+        current_team = if opts[:shuffle_first_pick] do
+          # Filter out any team with a higher rating than the first
+          low_rating = hd(team_skills) |> elem(0)
+
+          team_skills
+            |> Enum.reject(fn {rating, _id} -> rating > low_rating end)
+            |> Enum.shuffle
+            |> hd
+            |> elem(1)
+        else
+          hd(team_skills)
+            |> elem(1)
+        end
+
         new_team = [picked | teams[current_team]]
         new_team_map = Map.put(teams, current_team, new_team)
 
@@ -487,7 +505,7 @@ defmodule Teiserver.Battle.BalanceLib do
           "Picked #{names} for team #{current_team}, adding #{round(picked.group_rating, 2)} points for new total of #{round(new_total, 2)}"
         ]
 
-        do_loser_picks(remaining_groups, new_team_map, max_teamsize, new_logs)
+        do_loser_picks(remaining_groups, new_team_map, max_teamsize, new_logs, opts)
 
       # Groups, so we just merge a bunch of them into teams
       groups ->
@@ -513,7 +531,7 @@ defmodule Teiserver.Battle.BalanceLib do
 
         new_logs = logs ++ extra_logs
 
-        do_loser_picks(remaining_groups, new_team_map, max_teamsize, new_logs)
+        do_loser_picks(remaining_groups, new_team_map, max_teamsize, new_logs, opts)
     end
   end
 
