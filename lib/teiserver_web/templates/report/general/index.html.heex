@@ -274,6 +274,17 @@
       link: Routes.ts_reports_report_path(@conn, :show, "open_skill")
     %>
   <% end %>
+
+  <%= if allow?(@current_user, Teiserver.Game.MappingReport.permissions()) do %>
+    <%=
+      central_component "menu_card",
+      size: :small,
+      icon: Teiserver.Game.MappingReport.icon(),
+      name: "mapping",
+      text: "Mapping",
+      link: Routes.ts_reports_report_path(@conn, :show, "mapping")
+    %>
+  <% end %>
 </div>
 
 <div class="row mt-2">

@@ -187,3 +187,14 @@
     url: Routes.ts_reports_report_path(@conn, :show, "open_skill")
   %>
 <% end %>
+
+<%= if allow?(@current_user, Teiserver.Game.MappingReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "mapping",
+    label: "Mapping",
+    active: @active,
+    icon: Teiserver.Game.MappingReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "mapping")
+  %>
+<% end %>
