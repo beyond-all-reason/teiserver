@@ -689,12 +689,6 @@ defmodule Teiserver.Battle.BalanceLib do
   # First argument is the size of each combination
   # Second is the list of items to make a combination from
   @spec make_combinations(integer(), list) :: [list]
-  # defp make_combinations(0, _), do: [[]]
-  # defp make_combinations(_, []), do: []
-  # defp make_combinations(n, [x|xs]) do
-  #   (for y <- make_combinations(n - 1, xs), do: [x|y]) ++ make_combinations(n, xs)
-  # end
-
   defp make_combinations(0, _), do: [[]]
   defp make_combinations(_, []), do: []
   defp make_combinations(n, [x|xs]) do
