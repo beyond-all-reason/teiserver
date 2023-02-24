@@ -11,6 +11,11 @@ defmodule Teiserver.Battle.LobbyCache do
     call_lobby(int_parse(id), :get_lobby_state)
   end
 
+  @spec get_lobby_founder_id(T.lobby_id()) :: String.t() | nil
+  def get_lobby_founder_id(lobby_id) do
+    call_lobby(lobby_id, :get_founder_id)
+  end
+
   @spec get_lobby_match_uuid(T.lobby_id()) :: String.t() | nil
   def get_lobby_match_uuid(lobby_id) do
     call_lobby(lobby_id, :get_match_uuid)

@@ -183,6 +183,11 @@ defmodule Teiserver.Battle.MatchLib do
       where: matches.uuid == ^uuid
   end
 
+  def _search(query, :founder_id, founder_id) do
+    from matches in query,
+      where: matches.founder_id == ^founder_id
+  end
+
   def _search(query, :server_uuid, server_uuid) do
     from matches in query,
       where: matches.server_uuid == ^server_uuid

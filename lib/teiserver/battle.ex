@@ -285,29 +285,58 @@ defmodule Teiserver.Battle do
   @spec stop_match(nil | T.lobby_id()) :: :ok
   def stop_match(nil), do: :ok
   def stop_match(lobby_id) do
-    Telemetry.increment(:matches_stopped)
-    {uuid, params} = MatchLib.stop_match(lobby_id)
+    founder_id = get_lobby_founder_id(lobby_id)
+    uuid = get_lobby_match_uuid(lobby_id)
 
-    LobbyCache.cast_lobby(lobby_id, :stop_match)
-
-    case list_matches(search: [uuid: uuid]) do
-      [match] ->
-        update_match(match, params)
-        PubSub.broadcast(
-          Central.PubSub,
-          "global_match_updates",
-          %{
-            channel: "global_match_updates",
-            event: :match_completed,
-            match_id: match.id
-          }
-        )
-      _ ->
-        :ok
+    match_by_founder = find_open_match_by_founder_id(founder_id)
+    if match_by_founder do
+      do_stop_match(match_by_founder, lobby_id)
+    else
+      case list_matches(search: [uuid: uuid]) do
+        [match] ->
+          do_stop_match(match, lobby_id)
+        _ ->
+          :ok
+      end
     end
 
     Coordinator.cast_consul(lobby_id, :match_stop)
     :ok
+  end
+
+  defp do_stop_match(match, lobby_id) do
+    {_uuid, params} = MatchLib.stop_match(lobby_id)
+    Telemetry.increment(:matches_stopped)
+
+    LobbyCache.cast_lobby(lobby_id, :stop_match)
+
+    update_match(match, params)
+    PubSub.broadcast(
+      Central.PubSub,
+      "global_match_updates",
+      %{
+        channel: "global_match_updates",
+        event: :match_completed,
+        match_id: match.id
+      }
+    )
+  end
+
+  defp find_open_match_by_founder_id(founder_id) do
+    started_after = Timex.now() |> Timex.shift(hours: -2)
+
+    matches = list_matches(search: [
+      founder_id: founder_id,
+      never_finished: true,
+      started_after: started_after
+    ], limit: 1)
+
+    case matches do
+      [m] ->
+        m
+      _ ->
+        nil
+    end
   end
 
   @spec generate_lobby_uuid :: String.t()
@@ -503,6 +532,9 @@ defmodule Teiserver.Battle do
   """
   @spec get_combined_lobby_state(T.lobby_id()) :: map() | nil
   defdelegate get_combined_lobby_state(id), to: LobbyCache
+
+  @spec get_lobby_founder_id(T.lobby_id()) :: T.userid() | nil
+  defdelegate get_lobby_founder_id(id), to: LobbyCache
 
   @spec get_lobby_match_uuid(T.lobby_id()) :: String.t() | nil
   defdelegate get_lobby_match_uuid(id), to: LobbyCache
