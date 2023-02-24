@@ -144,6 +144,14 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         end
       end)
 
+    lobby_memberships = clients
+      |> Map.values
+      |> Enum.reject(fn %{lobby_id: lobby_id} -> lobby_id == nil end)
+      |> Enum.reduce(%{}, fn (client, memberships) ->
+        new_lobby_membership = [client.userid | Map.get(memberships, client.lobby_id, [])]
+        Map.put(memberships, client.lobby_id, new_lobby_membership)
+      end)
+
     counters = state.counters
 
     %{
@@ -154,6 +162,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         menu: menu_ids,
         total: Enum.uniq(player_ids ++ spectator_ids ++ lobby_ids ++ menu_ids)
       },
+      lobby_memberships: lobby_memberships,
       battle: %{
         total: total_battles,
         lobby: total_battles - Enum.count(battles_in_progress),
