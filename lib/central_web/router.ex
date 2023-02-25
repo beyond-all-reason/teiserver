@@ -619,8 +619,10 @@ defmodule CentralWeb.Router do
 
     resources("/achievements", AchievementController)
 
+    get("/lobbies/:id/server_chat/download", LobbyController, :server_chat_download)
     get("/lobbies/:id/server_chat", LobbyController, :server_chat)
     get("/lobbies/:id/server_chat/:page", LobbyController, :server_chat)
+    get("/lobbies/:id/lobby_chat/download", LobbyController, :lobby_chat_download)
     get("/lobbies/:id/lobby_chat", LobbyController, :lobby_chat)
     get("/lobbies/:id/lobby_chat/:page", LobbyController, :lobby_chat)
   end

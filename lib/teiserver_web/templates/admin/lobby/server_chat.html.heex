@@ -24,13 +24,19 @@
             Server grouping
           </a>
 
-          <%= if (not @last_page or @page != 0) and allow?(@conn, "admin.dev") do %>
+          <%= if (not @last_page or @page != 0) do %>
             <a href={Routes.ts_admin_lobby_path(@conn, :server_chat, @server_uuid, "all")} class="btn btn-outline-secondary">
               <i class='fa-fw fa-solid fa-list'></i>
               &nbsp;
               Full chat
             </a>
           <% end %>
+
+          <a href={Routes.ts_admin_lobby_path(@conn, :server_chat_download, @server_uuid)} class="btn btn-outline-secondary">
+            <i class='fa-fw fa-solid fa-download'></i>
+            &nbsp;
+            Download
+          </a>
         </div>
 
         <h4>Lobby chat - Page <%= @page + 1 %></h4>

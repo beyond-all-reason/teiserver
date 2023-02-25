@@ -70,6 +70,26 @@ defmodule TeiserverWeb.Admin.LobbyController do
       |> render("lobby_chat.html")
   end
 
+  @spec lobby_chat_download(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def lobby_chat_download(conn, %{"id" => lobby_guid}) do
+    file_contents = Chat.list_lobby_messages(
+      search: [
+        lobby_guid: lobby_guid
+      ],
+      preload: [:user],
+      limit: :infinity,
+      order_by: "Oldest first"
+    )
+      |> Enum.map_join("\n", fn msg ->
+        "#{msg.user.name}: #{msg.content}"
+      end)
+
+    conn
+      |> put_resp_content_type("text/plain")
+      |> put_resp_header("content-disposition", "attachment; filename=\"lobby_chat.txt\"")
+      |> send_resp(200, file_contents)
+  end
+
   @spec server_chat(Plug.Conn.t(), map) :: Plug.Conn.t()
   def server_chat(conn, params = %{"id" => server_uuid}) do
     uuids = Battle.list_matches(
@@ -108,5 +128,31 @@ defmodule TeiserverWeb.Admin.LobbyController do
       |> assign(:lobby, lobby)
       |> add_breadcrumb(name: "Show: #{server_uuid}", url: conn.request_path)
       |> render("server_chat.html")
+  end
+
+  @spec server_chat_download(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def server_chat_download(conn, %{"id" => server_uuid}) do
+    uuids = Battle.list_matches(
+      search: [server_uuid: server_uuid],
+      select: [:uuid]
+    )
+      |> Enum.map(fn %{uuid: uuid} -> uuid end)
+
+    file_contents = Chat.list_lobby_messages(
+      search: [
+        lobby_guid_in: uuids
+      ],
+      preload: [:user],
+      limit: :infinity,
+      order_by: "Oldest first"
+    )
+      |> Enum.map_join("\n", fn msg ->
+        "#{msg.lobby_guid} - #{msg.user.name}: #{msg.content}"
+      end)
+
+    conn
+      |> put_resp_content_type("text/plain")
+      |> put_resp_header("content-disposition", "attachment; filename=\"server_group_chat.txt\"")
+      |> send_resp(200, file_contents)
   end
 end
