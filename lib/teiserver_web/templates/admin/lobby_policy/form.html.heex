@@ -1,0 +1,100 @@
+<% bsname = view_colour() %>
+
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
+<script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $('.list-builder-select').select2({
+      width: "100%"
+    });
+  });
+</script>
+
+<%= form_for @changeset, @action, fn f -> %>
+  <%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p>Oops, something went wrong! Please check the errors below.</p>
+    </div>
+  <% end %>
+
+  <div class="row">
+    <div class="col-lg-6 my-2">
+      <%= label f, :name, class: "control-label" %>
+      <%= text_input f, :name, class: "form-control", autofocus: :autofocus %>
+      <%= error_tag f, :name %>
+    </div>
+
+    <div class="col-lg-6 my-2">
+      <%= input_with_type f, :colour, "color" %>
+    </div>
+
+    <div class="col-lg-6 my-2">
+      <%= central_component "fa5_icon_picker", %{form: f, field: :icon} %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-3 col-md-6 my-2">
+      <%= label f, :min_rating, class: "control-label" %>
+      <%= text_input f, :min_rating, class: "form-control" %>
+      <%= error_tag f, :min_rating %>
+    </div>
+
+    <div class="col-lg-3 col-md-6 my-2">
+      <%= label f, :max_rating, class: "control-label" %>
+      <%= text_input f, :max_rating, class: "form-control" %>
+      <%= error_tag f, :max_rating %>
+    </div>
+
+    <div class="col-lg-3 col-md-6 my-2">
+      <%= label f, :min_uncertainty, class: "control-label" %>
+      <%= text_input f, :min_uncertainty, class: "form-control" %>
+      <%= error_tag f, :min_uncertainty %>
+    </div>
+
+    <div class="col-lg-3 col-md-6 my-2">
+      <%= label f, :max_uncertainty, class: "control-label" %>
+      <%= text_input f, :max_uncertainty, class: "form-control" %>
+      <%= error_tag f, :max_uncertainty %>
+    </div>
+
+    <div class="col-lg-3 col-md-6 my-2">
+      <%= label f, :min_rank, class: "control-label" %>
+      <%= text_input f, :min_rank, class: "form-control" %>
+      <%= error_tag f, :min_rank %>
+    </div>
+
+    <div class="col-lg-3 col-md-6 my-2">
+      <%= label f, :max_rank, class: "control-label" %>
+      <%= text_input f, :max_rank, class: "form-control" %>
+      <%= error_tag f, :max_rank %>
+    </div>
+
+    <div class="col-lg-3 col-md-6 my-2">
+      <%= label f, :min_teamsize, class: "control-label" %>
+      <%= text_input f, :min_teamsize, class: "form-control" %>
+      <%= error_tag f, :min_teamsize %>
+    </div>
+
+    <div class="col-lg-3 col-md-6 my-2">
+      <%= label f, :max_teamsize, class: "control-label" %>
+      <%= text_input f, :max_teamsize, class: "form-control" %>
+      <%= error_tag f, :max_teamsize %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12 my-2">
+      <%= if @changeset.data.id do %>
+        <a href={Routes.admin_lobby_policy_path(@conn, :show, @lobby_policy)} class="btn btn-secondary btn-outline">
+          Cancel
+        </a>
+
+        <input type="submit" value="Save changes" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
+      <% else %>
+        <input type="submit" value="Create" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
+      <% end %>
+    </div>
+  </div>
+<% end %>

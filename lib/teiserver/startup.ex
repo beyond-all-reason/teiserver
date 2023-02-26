@@ -89,6 +89,7 @@ defmodule Teiserver.Startup do
     Central.cache_put(:lists, :rooms, [])
 
     Teiserver.Data.Matchmaking.pre_cache_queues()
+    Teiserver.Game.pre_cache_policies()
 
     # Add in achievements
     Teiserver.Game.GenerateAchievementTypes.perform()

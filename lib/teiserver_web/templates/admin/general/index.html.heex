@@ -64,6 +64,17 @@
     %>
   <% end %>
 
+  <%= if allow?(@conn, "teiserver.staff.admin") do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Game.LobbyPolicyLib.icon(),
+      name: "lobby_policies",
+      text: "Lobby policies",
+      icon_class: "fa-duotone",
+      link: Routes.admin_lobby_policy_path(@conn, :index)
+    %>
+  <% end %>
+
   <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
     <%=
       central_component "menu_card",

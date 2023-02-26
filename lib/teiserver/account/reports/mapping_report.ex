@@ -1,7 +1,6 @@
 defmodule Teiserver.Game.MappingReport do
   alias Central.Helpers.DatePresets
   alias Teiserver.{Battle}
-  alias Teiserver.Account.BadgeTypeLib
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-map"

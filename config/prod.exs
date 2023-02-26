@@ -77,7 +77,8 @@ config :central, Teiserver,
   ],
   enable_benchmark: false,
   enable_agent_mode: false,
-  node_name: "server3"
+  node_name: "node-name",
+  enable_managed_lobbies: false
 
 # Do not print debug messages in production
 config :logger,

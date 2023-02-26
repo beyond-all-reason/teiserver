@@ -15,6 +15,7 @@ defmodule TeiserverWeb.Admin.GeneralView do
   def view_colour("tools"), do: Central.Admin.ToolLib.colours()
   def view_colour("chat"), do: Central.Communication.CommentLib.colours()
   def view_colour("accolades"), do: Teiserver.Account.AccoladeLib.colours()
+  def view_colour("lobby_policies"), do: Teiserver.Game.LobbyPolicyLib.colours()
   def view_colour("matches"), do: Teiserver.Battle.MatchLib.colours()
   def view_colour("badge_types"), do: Teiserver.Account.BadgeTypeLib.colours()
   def view_colour("achievements"), do: Teiserver.Game.AchievementTypeLib.colour()

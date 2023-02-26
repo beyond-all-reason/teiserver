@@ -1,0 +1,26 @@
+<% bsname = view_colour() %>
+
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "lobby_policies"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Admin.LobbyPolicyView, "section_menu.html", Map.merge(assigns, %{
+          quick_search: "",
+          show_search: false,
+          active: "new"
+        })
+        %>
+
+        <hr />
+
+<%= render "form.html", Map.put(assigns, :action, Routes.admin_lobby_policy_path(@conn, :update, @lobby_policy)) %>
+
+
+<hr />
+<%= link raw("<i class='far fa-fw fa-trash'></i> Delete"), to: Routes.admin_lobby_policy_path(@conn, :delete, @lobby_policy), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-outline" %>
+      </div>
+    </div>
+  </div>
+</div>

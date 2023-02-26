@@ -72,6 +72,18 @@ defmodule Teiserver.Chat.WordLib do
     end
   end
 
+  @spec reserved_name?(String.t()) :: boolean()
+  def reserved_name?(name) do
+    name = String.downcase(name)
+
+    cond do
+      String.contains?(name, "[lm]") -> true
+      String.contains?(name, "[ts]") -> true
+      String.contains?(name, "[tei]") -> true
+      true -> false
+    end
+  end
+
   @spec blacklisted_phrase?(String.t()) :: boolean()
   def blacklisted_phrase?(text) do
     @blacklisted_regexs

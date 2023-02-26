@@ -563,6 +563,11 @@ defmodule CentralWeb.Router do
     get("/report_form/:id", ReportFormController, :index)
   end
 
+  scope "/admin", TeiserverWeb.Admin, as: :admin do
+    pipe_through([:browser, :standard_layout, :protected])
+    resources("/lobby_policies", LobbyPolicyController, only: [:index, :new, :create, :show, :edit, :update, :delete])
+  end
+
   scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do
     pipe_through([:browser, :standard_layout, :protected])
 

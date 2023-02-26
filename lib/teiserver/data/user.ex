@@ -186,6 +186,9 @@ defmodule Teiserver.User do
     max_username_length = Config.get_site_config_cache("teiserver.Username max length")
 
     cond do
+      WordLib.reserved_name?(name) ->
+        {:error, "That name is in restricted for use by the server, please choose another"}
+
       WordLib.acceptable_name?(name) == false ->
         {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}
 
@@ -221,6 +224,9 @@ defmodule Teiserver.User do
     max_username_length = Config.get_site_config_cache("teiserver.Username max length")
 
     cond do
+      WordLib.reserved_name?(name) ->
+        {:error, "That name is in restricted for use by the server, please choose another"}
+
       WordLib.acceptable_name?(name) == false ->
         {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}
 
@@ -397,6 +403,9 @@ defmodule Teiserver.User do
     cond do
       is_restricted?(userid, ["Community", "Renaming"]) ->
         {:error, "Your account is restricted from renaming"}
+
+      admin_action == false and WordLib.reserved_name?(new_name) == true ->
+        {:error, "That name is in restricted for use by the server, please choose another"}
 
       admin_action == false and WordLib.acceptable_name?(new_name) == false ->
         {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}

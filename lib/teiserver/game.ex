@@ -789,4 +789,162 @@ defmodule Teiserver.Game do
   def change_rating_log(%RatingLog{} = rating_log) do
     RatingLog.changeset(rating_log, %{})
   end
+
+  alias Teiserver.Game.{LobbyPolicy, LobbyPolicyLib}
+
+  @spec lobby_policy_query(List.t()) :: Ecto.Query.t()
+  def lobby_policy_query(args) do
+    lobby_policy_query(nil, args)
+  end
+
+  @spec lobby_policy_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def lobby_policy_query(id, args) do
+    LobbyPolicyLib.query_lobby_policies
+    |> LobbyPolicyLib.search(%{id: id})
+    |> LobbyPolicyLib.search(args[:search])
+    |> LobbyPolicyLib.preload(args[:preload])
+    |> LobbyPolicyLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of lobby_policies.
+
+  ## Examples
+
+      iex> list_lobby_policies()
+      [%LobbyPolicy{}, ...]
+
+  """
+  @spec list_lobby_policies(List.t()) :: List.t()
+  def list_lobby_policies(args \\ []) do
+    lobby_policy_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Gets a single lobby_policy.
+
+  Raises `Ecto.NoResultsError` if the LobbyPolicy does not exist.
+
+  ## Examples
+
+      iex> get_lobby_policy!(123)
+      %LobbyPolicy{}
+
+      iex> get_lobby_policy!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_lobby_policy!(Integer.t() | List.t()) :: LobbyPolicy.t()
+  @spec get_lobby_policy!(Integer.t(), List.t()) :: LobbyPolicy.t()
+  def get_lobby_policy!(id) when not is_list(id) do
+    lobby_policy_query(id, [])
+    |> Repo.one!
+  end
+  def get_lobby_policy!(args) do
+    lobby_policy_query(nil, args)
+    |> Repo.one!
+  end
+  def get_lobby_policy!(id, args) do
+    lobby_policy_query(id, args)
+    |> Repo.one!
+  end
+
+  # Uncomment this if needed, default files do not need this function
+  # @doc """
+  # Gets a single lobby_policy.
+
+  # Returns `nil` if the LobbyPolicy does not exist.
+
+  # ## Examples
+
+  #     iex> get_lobby_policy(123)
+  #     %LobbyPolicy{}
+
+  #     iex> get_lobby_policy(456)
+  #     nil
+
+  # """
+  # def get_lobby_policy(id, args \\ []) when not is_list(id) do
+  #   lobby_policy_query(id, args)
+  #   |> Repo.one
+  # end
+
+  @doc """
+  Creates a lobby_policy.
+
+  ## Examples
+
+      iex> create_lobby_policy(%{field: value})
+      {:ok, %LobbyPolicy{}}
+
+      iex> create_lobby_policy(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_lobby_policy(Map.t()) :: {:ok, LobbyPolicy.t()} | {:error, Ecto.Changeset.t()}
+  def create_lobby_policy(attrs \\ %{}) do
+    %LobbyPolicy{}
+    |> LobbyPolicy.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a lobby_policy.
+
+  ## Examples
+
+      iex> update_lobby_policy(lobby_policy, %{field: new_value})
+      {:ok, %LobbyPolicy{}}
+
+      iex> update_lobby_policy(lobby_policy, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_lobby_policy(LobbyPolicy.t(), Map.t()) :: {:ok, LobbyPolicy.t()} | {:error, Ecto.Changeset.t()}
+  def update_lobby_policy(%LobbyPolicy{} = lobby_policy, attrs) do
+    lobby_policy
+    |> LobbyPolicy.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a LobbyPolicy.
+
+  ## Examples
+
+      iex> delete_lobby_policy(lobby_policy)
+      {:ok, %LobbyPolicy{}}
+
+      iex> delete_lobby_policy(lobby_policy)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_lobby_policy(LobbyPolicy.t()) :: {:ok, LobbyPolicy.t()} | {:error, Ecto.Changeset.t()}
+  def delete_lobby_policy(%LobbyPolicy{} = lobby_policy) do
+    Repo.delete(lobby_policy)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking lobby_policy changes.
+
+  ## Examples
+
+      iex> change_lobby_policy(lobby_policy)
+      %Ecto.Changeset{source: %LobbyPolicy{}}
+
+  """
+  @spec change_lobby_policy(LobbyPolicy.t()) :: Ecto.Changeset.t()
+  def change_lobby_policy(%LobbyPolicy{} = lobby_policy) do
+    LobbyPolicy.changeset(lobby_policy, %{})
+  end
+
+  # Lobby policy lib stuff
+  alias Teiserver.Game.LobbyPolicyLib
+
+  @spec pre_cache_policies() :: :ok
+  defdelegate pre_cache_policies(), to: LobbyPolicyLib
+
 end

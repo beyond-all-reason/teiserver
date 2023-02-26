@@ -58,6 +58,8 @@ defmodule Central.Application do
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueWaitRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueMatchRegistry]},
 
+        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ManagedLobbyRegistry]},
+
         # These are for tracking the number of servers on the local node
         {Registry, keys: :duplicate, name: Teiserver.LocalPoolRegistry},
         {Registry, keys: :duplicate, name: Teiserver.LocalServerRegistry},
@@ -114,6 +116,7 @@ defmodule Central.Application do
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.LobbySupervisor},
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.ClientSupervisor},
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.PartySupervisor},
+        {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.LobbyPolicySupervisor},
 
         # Matchmaking
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueSupervisor},
