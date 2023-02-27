@@ -137,4 +137,10 @@ defmodule Central.Helpers.StringHelper do
         String.slice(word, 0..max_length)
       end)
   end
+
+  def convert_textarea_to_array(str) do
+    str
+    |> String.split("\n")
+    |> Enum.map(&String.trim/1)
+  end
 end

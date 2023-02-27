@@ -20,8 +20,9 @@ defmodule Central.Repo.Migrations.AddLobbyPolicies do
       add :min_rank, :integer
       add :max_rank, :integer
 
-      add :min_teamsize, :integer
-      add :max_teamsize, :integer
+      add :max_teamcount, :integer, default: 2
+      add :teamsize, :integer
+      add :preset, :string
 
       timestamps()
     end

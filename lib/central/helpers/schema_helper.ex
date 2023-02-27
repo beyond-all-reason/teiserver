@@ -143,6 +143,24 @@ defmodule Central.Helpers.SchemaHelper do
     end)
   end
 
+  @spec min_and_max(Map.t(), [atom]) :: Map.t()
+  def min_and_max(params, [field1, field2]) do
+    field1 = Atom.to_string(field1)
+    field2 = Atom.to_string(field2)
+
+    value1 = params[field1]
+    value2 = params[field2]
+
+    mapped_values = cond do
+      value1 == nil or value2 == nil -> %{}
+      value1 > value2 -> %{field1 => value2, field2 => value1}
+      true -> %{}
+    end
+
+    Map.merge(params, mapped_values)
+  end
+
+
   @spec uniq_lists(Map.t(), List.t()) :: Map.t()
   def uniq_lists(params, names) do
     names = Enum.map(names, fn n -> Atom.to_string(n) end)

@@ -232,8 +232,8 @@ defmodule Teiserver.Account.TimeCompareReport do
       "overlap" => "false",
       "skip_nil" => "false",
 
-      "account_user1" => "#17899, EvolvedMonkey",
-      "account_user2" => "#1332, Flash",
+      # "account_user1" => "#17899, EvolvedMonkey",
+      # "account_user2" => "#1332, Flash",
 
       "tabular" => "false"
     })

@@ -41,7 +41,7 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   def handle_call(:get_founder_id, _from, state) do
-    {:reply, state.founder_id, state}
+    {:reply, state.lobby.founder_id, state}
   end
 
   def handle_call(:get_match_uuid, _from, state) do
