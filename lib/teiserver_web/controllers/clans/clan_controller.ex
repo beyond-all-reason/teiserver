@@ -259,6 +259,11 @@ defmodule TeiserverWeb.Clans.ClanController do
     clan = Clans.get_clan!(clan_id)
 
     cond do
+      user_id == nil ->
+        conn
+        |> put_flash(:danger, "User id missing")
+        |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites")
+
       role == nil ->
         add_audit_log(conn, "Teiserver:Invite to clan", %{
           clan_id: clan_id,
