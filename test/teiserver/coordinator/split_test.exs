@@ -327,4 +327,77 @@ defmodule Teiserver.Coordinator.SplitTest do
       5 => true,
     }
   end
+
+  test "test minimum player split", %{host: _host, player: player1, psocket: psocket1, lobby_id: lobby_id, listener: listener, empty_lobby_id: empty_lobby_id} do
+    %{user: player2, socket: psocket2} = tachyon_auth_setup()
+    %{user: player3, socket: psocket3} = tachyon_auth_setup()
+    %{user: player4, socket: psocket4} = tachyon_auth_setup()
+    %{user: player5, socket: psocket5} = tachyon_auth_setup()
+    %{user: player6, socket: psocket6} = tachyon_auth_setup()
+
+    # Add players to the lobby
+    Lobby.add_user_to_battle(player2.id, lobby_id, "script_password")
+    Lobby.add_user_to_battle(player3.id, lobby_id, "script_password")
+    Lobby.add_user_to_battle(player4.id, lobby_id, "script_password")
+    Lobby.add_user_to_battle(player5.id, lobby_id, "script_password")
+    Lobby.add_user_to_battle(player6.id, lobby_id, "script_password")
+
+    # Normally the player joins through the standard means but we're doing a test so it's a bit janky atm
+    send(Client.get_client_by_id(player1.id).tcp_pid, {:put, :lobby_id, lobby_id})
+    send(Client.get_client_by_id(player2.id).tcp_pid, {:put, :lobby_id, lobby_id})
+    send(Client.get_client_by_id(player3.id).tcp_pid, {:put, :lobby_id, lobby_id})
+    send(Client.get_client_by_id(player4.id).tcp_pid, {:put, :lobby_id, lobby_id})
+    send(Client.get_client_by_id(player5.id).tcp_pid, {:put, :lobby_id, lobby_id})
+    send(Client.get_client_by_id(player6.id).tcp_pid, {:put, :lobby_id, lobby_id})
+
+    data = %{cmd: "c.lobby.message", message: "$splitlobby 3"}
+    _tachyon_send(psocket1, data)
+
+    # Check state
+    split = Coordinator.call_consul(lobby_id, {:get, :split})
+    assert split.first_splitter_id == player1.id
+    assert split.splitters == %{}
+
+    _tachyon_send(psocket1, %{cmd: "c.lobby.message", message: "$n"})
+    _tachyon_send(psocket2, %{cmd: "c.lobby.message", message: "$n"})
+    :timer.sleep(200)
+
+    # Time to resolve
+    _tachyon_send(psocket1, %{cmd: "c.lobby.message", message: "$dosplit"})
+    :timer.sleep(200)
+
+    # Split should fail, no one followed
+    assert Client.get_client_by_id(player1.id).lobby_id == lobby_id
+    assert Client.get_client_by_id(player2.id).lobby_id == lobby_id
+    assert Client.get_client_by_id(player3.id).lobby_id == lobby_id
+    assert Client.get_client_by_id(player4.id).lobby_id == lobby_id
+
+    # Split only if 3 players agree
+    data = %{cmd: "c.lobby.message", message: "$splitlobby 3"}
+    _tachyon_send(psocket1, data)
+
+    # Check state
+    split = Coordinator.call_consul(lobby_id, {:get, :split})
+    assert split.first_splitter_id == player1.id
+    assert split.splitters == %{}
+
+
+    _tachyon_send(psocket1, %{cmd: "c.lobby.message", message: "$y"})
+    _tachyon_send(psocket2, %{cmd: "c.lobby.message", message: "$y"})
+    _tachyon_send(psocket3, %{cmd: "c.lobby.message", message: "$y"})
+    _tachyon_send(psocket4, %{cmd: "c.lobby.message", message: "$y"})
+    :timer.sleep(200)
+
+    # Time to resolve
+    _tachyon_send(psocket1, %{cmd: "c.lobby.message", message: "$dosplit"})
+    :timer.sleep(200)
+
+    # Split should pass, 4 people agreed to split
+    assert Client.get_client_by_id(player1.id).lobby_id == empty_lobby_id
+    assert Client.get_client_by_id(player2.id).lobby_id == empty_lobby_id
+    assert Client.get_client_by_id(player3.id).lobby_id == empty_lobby_id
+    assert Client.get_client_by_id(player4.id).lobby_id == empty_lobby_id
+    assert Client.get_client_by_id(player5.id).lobby_id == lobby_id
+    assert Client.get_client_by_id(player6.id).lobby_id == lobby_id
+  end
 end

@@ -239,9 +239,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state
   end
 
-  def handle_command(%{command: "splitlobby", senderid: senderid} = cmd, %{split: nil} = state) do
+  def handle_command(%{command: "splitlobby", remaining: rem, senderid: senderid} = cmd, %{split: nil} = state) do
     ConsulServer.say_command(cmd, state)
     sender_name = User.get_username(senderid)
+
+    min_players = get_default_min_players(rem)
+
+    LobbyChat.sayex(state.coordinator_id, "Split lobby sequence started ($y to move, $n to cancel, $follow <name> to follow user)", state.lobby_id)
 
     Lobby.list_lobby_players!(state.lobby_id)
     |> Enum.each(fn playerid ->
@@ -249,7 +253,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         @splitter,
         "#{sender_name} is moving to a new lobby, to follow them say $y.",
         "If you want to follow someone else then say $follow <name> and you will follow that user.",
-        "The split will take place in #{round(@split_delay/1_000)} seconds",
+        "The split will take place in #{round(@split_delay/1_000)} seconds if at least #{min_players} player(s) agree to move.",
         "You can change your mind at any time. Say $n to cancel your decision and stay here.",
         @splitter,
       ])
@@ -266,7 +270,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     new_split = %{
       split_uuid: split_uuid,
       first_splitter_id: senderid,
-      splitters: %{}
+      splitters: %{},
+      min_players: min_players
     }
 
     Logger.info("Started split lobby #{Kernel.inspect new_split}")
@@ -1126,6 +1131,17 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         |> Map.get(userid)
       false ->
         -1
+    end
+  end
+
+  defp get_default_min_players(str) do
+    case String.trim(str) do
+      "" ->
+      1
+
+      _ ->
+        String.to_integer(str |> String.trim)
+        |> max(1)
     end
   end
 
