@@ -10,9 +10,9 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   @password_chance 0.5
 
   @map_hash "1565299817"
-  @game_hash "1984061964"
-  @game_name "Beyond All Reason test-21011-a3dc60e"
-  @engine_version "105.1.1-1214-gcf8d087 BAR105"
+  @game_hash "156940380"
+  @game_name "Beyond All Reason test-22066-2652edb"
+  @engine_version "105.1.1-1354-g72b2d55 BAR105"
 
   def handle_info(:startup, state) do
     socket = AgentLib.get_socket()
@@ -28,7 +28,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   end
 
   def handle_info(:tick, state) do
-    battle = Lobby.get_battle(state.lobby_id)
+    battle = Lobby.get_lobby(state.lobby_id)
 
     new_state = cond do
       # Chance of doing nothing
@@ -94,6 +94,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   defp handle_msg(%{"cmd" => "s.lobby.updated"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.updated_client_battlestatus"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.set_modoptions"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.remove_modoptions"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.update_values"}, state), do: state
 
   defp open_battle(state) do
@@ -122,9 +123,10 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   end
 
   defp leave_battle(state) do
-    AgentLib._send(state.socket, %{cmd: "c.lobby.leave"})
-    AgentLib.post_agent_update(state.id, "left battle")
-    %{state | lobby_id: nil}
+    # AgentLib._send(state.socket, %{cmd: "c.lobby.leave"})
+    # AgentLib.post_agent_update(state.id, "left battle")
+    # %{state | lobby_id: nil}
+    state
   end
 
   # Startup

@@ -18,13 +18,6 @@ config :central, Central.Config,
 config :central,
   ecto_repos: [Central.Repo]
 
-config :central, Extensions,
-  applications: [Teiserver.Application],
-  startups: [Teiserver.Startup],
-  routers: [TeiserverWeb.Router],
-  index_views: [TeiserverWeb.General.CentralView],
-  topmenu_views: [TeiserverWeb.General.CentralView]
-
 # Configures the endpoint
 config :central, CentralWeb.Endpoint,
   url: [host: "localhost"],
@@ -50,7 +43,7 @@ config :central, Teiserver,
     tachyon: 8202
   ],
   website: [
-    url: "https://server3.beyondallreason.info"
+    url: "mywebsite.com"
   ],
   enable_benchmark: false,
   enable_hooks: true,
@@ -61,6 +54,7 @@ config :central, Teiserver,
   heartbeat_timeout: 120,
   test_mode: false,
 
+  server_admin_name: "Server Admin",
   game_name: "Full game name",
   game_name_short: "Game",
   main_website: "https://site.com/",
@@ -94,9 +88,12 @@ config :central, Teiserver,
     battle_minimum_seconds: 120
   }
 
+# config :grpc,
+#   start_server: true
+
 config :logger, :console,
-  format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+  format: "$date $time $metadata[$level] $message\n",
+  metadata: [:request_id, :user_id]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
@@ -120,10 +117,6 @@ config :central, Oban,
 
         # Every day at 2am
         {"0 2 * * *", Central.Logging.AggregateViewLogsTask},
-        {"0 2 * * *", Central.Account.UserReportCleanupTask},
-
-        # Every minute
-        {"* * * * *", Teiserver.Moderation.RefreshUserRestrictionsTask},
 
         # 1:07 am
         {"7 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
@@ -133,9 +126,7 @@ config :central, Oban,
 
         # Every minute
         {"* * * * *", Teiserver.Telemetry.Tasks.PersistServerMinuteTask},
-
-        # Every 5 minutes
-        # {"*/5 * * * *", Teiserver.Battle.Tasks.PostMatchProcessTask},
+        {"* * * * *", Teiserver.Moderation.RefreshUserRestrictionsTask},
 
         # Every minute
         {"* * * * *", Teiserver.Battle.Tasks.PostMatchProcessTask},
@@ -152,8 +143,8 @@ config :central, Oban,
         {"43 2 * * *", Teiserver.Game.AchievementCleanupTask},
 
         # 0302 and 1202 every day, gives time for multiple telemetry day tasks to run if needed
-        {"2 3 * * *", Teiserver.Account.RecalculateUserStatTask},
-        {"2 12 * * *", Teiserver.Account.RecalculateUserStatTask},
+        {"2 3 * * *", Teiserver.Account.RecalculateUserDailyStatTask},
+        {"2 12 * * *", Teiserver.Account.RecalculateUserDailyStatTask},
       ]
     }
   ],

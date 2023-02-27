@@ -1661,6 +1661,8 @@ defmodule Teiserver.Telemetry do
     case property_name do
       "hardware:cpuinfo" ->
         Account.merge_update_client(userid, %{app_status: :accepted})
+        client = Account.get_client_by_id(userid)
+        send(client.tcp_pid, {:put, :app_status, :accepted})
         Teiserver.Account.create_smurf_key(userid, "chobby_hash", hash)
         Teiserver.Account.update_cache_user(userid, %{chobby_hash: hash})
 

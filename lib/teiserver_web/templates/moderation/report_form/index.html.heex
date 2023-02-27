@@ -1,26 +1,35 @@
 <% bsname = view_colour() %>
 
 <script type="text/javascript" charset="utf-8">
-  function select_type(t) {
-    $("#report_type").attr("value", t);
-    $(".type-card").hide();
-    $("#type-card-" + t).show();
-    $("#icon-type-" + t).removeClass("fa-regular");
-    $("#icon-type-" + t).addClass("fa-solid");
+  var type_selected = false;
+  var sub_type_selected = false;
 
-    $(".sub_type-row").hide();
-    $("#sub_type-row-" + t).show();
+  function select_type(t) {
+    if (type_selected == false) {
+      $("#report_type").attr("value", t);
+      $(".type-card").hide();
+      $("#type-card-" + t).show();
+      $("#icon-type-" + t).removeClass("fa-regular");
+      $("#icon-type-" + t).addClass("fa-solid");
+
+      $(".sub_type-row").hide();
+      $("#sub_type-row-" + t).show();
+      type_selected = true;
+    }
   }
 
   function select_sub_type(st) {
-    $("#report_sub_type").attr("value", st);
-    $("#submission-form").show();
+    if (sub_type_selected == false) {
+      $("#report_sub_type").attr("value", st);
+      $("#submission-form").show();
 
-    $("#icon-sub_type-" + st).removeClass("fa-regular");
-    $("#icon-sub_type-" + st).addClass("fa-solid");
+      $("#icon-sub_type-" + st).removeClass("fa-regular");
+      $("#icon-sub_type-" + st).addClass("fa-solid");
 
-    $("#type-row").append($("#sub_type-card-" + st));
-    $(".sub_type-row").hide();
+      $("#type-row").append($("#sub_type-card-" + st));
+      $(".sub_type-row").hide();
+      sub_type_selected = true;
+    }
   }
 </script>
 
@@ -87,7 +96,8 @@
           <%= if not Enum.empty?(@matches) do %>
             <div class="row">
               <div class="col">
-                Did the action take place during one of these games?
+                Did the action take place during one of these games?<br />
+                If you've selected "In game actions" and don't select a game please include extra info or your report will be ignored.
 
                 <%= central_component "radio",
                   name: "report[match_id]",
@@ -127,8 +137,8 @@
           <% end %>
 
           <div class="row">
-            <label for="control_id" class="col-md-2 control-label">Optional extra info:</label>
-            <div class="col-md-10">
+            <label for="control_id" class="col-md-12 control-label">Extra info, this can help us identify what actually happened.</label>
+            <div class="col-md-12">
               <input type="text" name="report[extra_text]" id="report[extra_text]" maxlength="255" value="" class="form-control" />
             </div>
           </div>

@@ -12,12 +12,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
   @spec check_user(T.userid()) :: nil
   def check_user(userid) do
     check_wrapper(userid)
-    # case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
-    #   [{pid, _}] ->
-    #     GenServer.call(pid, {:check_user, userid})
-    #   _ ->
-    #     nil
-    # end
   end
 
   @spec start_automod_server() :: :ok | {:failure, String.t()}
@@ -71,12 +65,12 @@ defmodule Teiserver.Coordinator.AutomodServer do
     {:noreply, state}
   end
 
-  def handle_info({:client_inout, :login, userid}, state) do
+  def handle_info(%{channel: "client_inout", event: :login, userid: userid}, state) do
     delay = Config.get_site_config_cache("teiserver.Automod action delay") * 1000
     :timer.send_after(delay, {:check_user, userid})
     {:noreply, state}
   end
-  def handle_info({:client_inout, :disconnect, _userid, _reason}, state), do: {:noreply, state}
+  def handle_info(%{channel: "client_inout"}, state), do: {:noreply, state}
 
   # Catchall handle_info
   def handle_info(msg, state) do
@@ -114,7 +108,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
           Enum.member?(user.roles, "Trusted") -> "Trusted account"
           true ->
             do_check(userid)
-            # do_old_check(userid)
         end
     end
   end
@@ -149,11 +142,12 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
     {:ok, action} = Moderation.create_action(%{
       target_id: userid,
-      reason: "Banned",
+      reason: "Banned (Automod)",
       restrictions: ["Login", "Site"],
       score_modifier: 0,
       expires: Timex.now() |> Timex.shift(years: 1000)
     })
+    Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
 
     add_audit_log(
       coordinator_user_id,
@@ -170,68 +164,4 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
     "Banned user"
   end
-
-  # Old method
-  # @spec do_check(T.userid()) :: String.t()
-  # def do_check(userid) do
-  #   user = Account.get_user_by_id(userid)
-  #   if User.is_restricted?(user, ["Login"]) do
-  #     "Already banned"
-  #   else
-  #     smurf_keys = Account.list_smurf_keys(search: [user_id: userid], select: [:type_id, :value])
-
-  #     value_list = smurf_keys |> Enum.map(fn %{value: value} -> value end)
-
-  #     actions = Account.list_automod_actions(search: [
-  #       enabled: true,
-  #       any_value: value_list,
-  #       added_before: user.inserted_at
-  #     ])
-
-  #     case actions do
-  #       [] ->
-  #         "No action"
-  #       _ ->
-  #         automod_action = hd(actions)
-  #         do_ban(userid, automod_action)
-  #     end
-  #   end
-  # end
-
-  # def do_ban(userid, automod_action) do
-  #   Account.update_user_stat(userid, %{"autoban_id" => automod_action.id})
-
-  #   coordinator_user_id = Coordinator.get_coordinator_userid()
-
-  #   {:ok, report} = Central.Account.create_report(%{
-  #     "location" => "Automod",
-  #     "location_id" => nil,
-  #     "reason" => "Automod",
-  #     "reporter_id" => coordinator_user_id,
-  #     "target_id" => userid,
-  #     "response_text" => "Automod",
-  #     "response_action" => "Restrict",
-  #     "responded_at" => Timex.now(),
-  #     "followup" => nil,
-  #     "code_references" => [],
-  #     "expires" => nil,
-  #     "responder_id" => coordinator_user_id,
-  #     "action_data" => %{
-  #       "restriction_list" => ["Login", "Site"]
-  #     }
-  #   })
-
-  #   add_audit_log(
-  #     coordinator_user_id,
-  #     "127.0.0.0",
-  #     "Teiserver:Automod action enacted",
-  #     %{
-  #       "report_id" => report.id,
-  #       "target_user_id" => userid,
-  #       "automod_action_id" => automod_action.id,
-  #     }
-  #   )
-
-  #   "Banned user"
-  # end
 end

@@ -89,3 +89,37 @@ AdminAction {
   sendAnnoucement :: String -> ()
 }
 ```
+
+### Schema
+Tournament
+- name
+- description
+- rules {:array, String()}
+- type (1v1, 3v3, 5v5, FFA etc)
+- format (swiss, round robin etc)
+- start date
+- discord_event_id
+- challonge_id
+- config_map (e.g. allow spectators, welcome-messages)
+- bracket_data (maps per bracket etc)
+
+TournamentMember
+- userid (discord_id is tracked against user)
+- tournament_id
+- role (organiser, caster, player, coach etc)
+- noshow (boolean)
+- eliminated (boolean)
+- position (int)
+
+TournamentSeries
+- tournament_id
+
+TournamentGame
+- series_id
+- match_id
+- tournament_id
+
+TournamentPrediction
+- userid
+- tournament_id
+- prediction_data (map)

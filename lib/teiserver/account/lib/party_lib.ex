@@ -1,10 +1,11 @@
 defmodule Teiserver.Account.Party do
-  @enforce_keys [:id, :leader, :members, :pending_invites]
+  @enforce_keys [:id, :leader, :members, :pending_invites, :queues]
   defstruct [
     :id,
     :leader,
     :members,
-    :pending_invites
+    :pending_invites,
+    :queues
   ]
 end
 
@@ -69,10 +70,11 @@ defmodule Teiserver.Account.PartyLib do
   def create_party(nil), do: nil
   def create_party(leader_id) do
     party = %Party{
-      id: UUID.uuid4(),
+      id: ExULID.ULID.generate(),
       leader: leader_id,
       members: [leader_id],
-      pending_invites: []
+      pending_invites: [],
+      queues: []
     }
     start_party_server(party)
     party
@@ -102,6 +104,21 @@ defmodule Teiserver.Account.PartyLib do
   @spec kick_user_from_party(T.party_id(), T.userid()) :: :ok | nil
   def kick_user_from_party(party_id, userid) when is_integer(userid) do
     cast_party(party_id, {:kick_member, userid})
+  end
+
+  @spec move_user_to_party(T.party_id(), T.userid()) :: :ok | nil
+  def move_user_to_party(party_id, userid) when is_integer(userid) do
+    cast_party(party_id, {:add_member, userid})
+  end
+
+  @spec party_join_queue(T.party_id(), T.queue_id()) :: :ok | nil
+  def party_join_queue(party_id, queue_id) when is_integer(queue_id) do
+    cast_party(party_id, {:join_queue, queue_id})
+  end
+
+  @spec party_leave_queue(T.party_id(), T.queue_id()) :: :ok | nil
+  def party_leave_queue(party_id, queue_id) when is_integer(queue_id) do
+    cast_party(party_id, {:leave_queue, queue_id})
   end
 
   # Process stuff

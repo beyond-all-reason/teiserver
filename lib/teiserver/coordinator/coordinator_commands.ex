@@ -1,7 +1,6 @@
 defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.{User, Account, Client, Coordinator, Moderation}
   alias Teiserver.Battle.Lobby
-  alias Teiserver.Data.Matchmaking
   alias Central.Helpers.NumberHelper
   alias Teiserver.Account.{AccoladeLib, CodeOfConductData}
   alias Teiserver.Coordinator.CoordinatorLib
@@ -63,7 +62,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     state
   end
 
-  defp do_handle(%{command: "party", remaining: remaining, senderid: senderid} = _cmd, state) do
+  defp do_handle(%{command: "party", senderid: senderid} = _cmd, state) do
     client = Account.get_client_by_id(senderid)
     {:ok, code} = Account.create_code(%{
       value: UUID.uuid1(),
@@ -88,7 +87,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     state
   end
 
-  defp do_handle(%{command: "matchmaking", remaining: remaining, senderid: senderid} = _cmd, state) do
+  defp do_handle(%{command: "matchmaking", senderid: senderid} = _cmd, state) do
     client = Account.get_client_by_id(senderid)
     {:ok, code} = Account.create_code(%{
       value: UUID.uuid1(),

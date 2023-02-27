@@ -60,6 +60,8 @@ defmodule TeiserverWeb.API.SpadsController do
       _ -> :error
     end
 
+    team_count = int_parse(params["nbTeams"])
+
     balance_enabled = cond do
       player_data == :error -> false
       Enum.empty?(player_data) -> false
@@ -86,8 +88,6 @@ defmodule TeiserverWeb.API.SpadsController do
           |> render("empty.json")
 
       balance_enabled == true ->
-        team_count = int_parse(params["nbTeams"])
-
         opts = [
           allow_groups: params["balanceMode"] != "skill"
         ]

@@ -30,7 +30,6 @@ defmodule Teiserver.Client do
         # Battle stuff
         ready: false,
         unready_at: nil,
-        readyup_history: [],
         player_number: 0,# In spring this is team_number
         team_colour: "0",
         team_number: 0, # In spring this would be ally_team_number
@@ -62,8 +61,11 @@ defmodule Teiserver.Client do
         muted: false,
         restricted: false,
         lobby_host: false,
+        queues: [],
         party_id: nil,
-        clan_tag: nil
+        clan_tag: nil,
+
+        protocol: nil
       },
       client
     )
@@ -86,8 +88,8 @@ defmodule Teiserver.Client do
     }
   end
 
-  @spec login(T.user(), String.t() | nil) :: T.client()
-  def login(user, ip \\ nil) do
+  @spec login(T.user(), atom(), String.t() | nil) :: T.client()
+  def login(user, protocol, ip \\ nil) do
     stats = Account.get_user_stat_data(user.id)
 
     clan_tag = case Clans.get_clan(user.clan_id) do
@@ -114,7 +116,8 @@ defmodule Teiserver.Client do
         awaiting_warn_ack: false,
         warned: false,
 
-        clan_tag: clan_tag
+        clan_tag: clan_tag,
+        protocol: protocol
       })
 
     ClientLib.start_client_server(client)
@@ -128,7 +131,11 @@ defmodule Teiserver.Client do
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_client_inout",
-      {:client_inout, :login, user.id}
+      %{
+        channel: "client_inout",
+        event: :login,
+        userid: user.id
+      }
     )
 
     PubSub.broadcast(
@@ -147,12 +154,6 @@ defmodule Teiserver.Client do
         channel: "teiserver_client_watch:#{user.id}",
         event: :connected
       }
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_client_action_updates:#{user.id}",
-      {:client_action, :client_connect, user.id}
     )
 
     # Message logging
@@ -295,15 +296,15 @@ defmodule Teiserver.Client do
 
     PubSub.broadcast(
       Central.PubSub,
-      "teiserver_client_action_updates:#{client.userid}",
-      {:client_action, :client_disconnect, client.userid}
+      "teiserver_client_inout",
+      %{
+        channel: "client_inout",
+        event: :disconnect,
+        userid: client.userid,
+        reason: reason
+      }
     )
 
-    PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_client_inout",
-      {:client_inout, :disconnect, client.userid, reason}
-    )
 
     PubSub.broadcast(
       Central.PubSub,

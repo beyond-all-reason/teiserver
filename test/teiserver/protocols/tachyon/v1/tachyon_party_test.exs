@@ -1,6 +1,7 @@
 defmodule Teiserver.Protocols.V1.TachyonPartyTest do
   use Central.ServerCase
   alias Teiserver.{User, Account}
+  require Logger
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1]
@@ -15,7 +16,7 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
     %{user: other2, socket: osocket2} = tachyon_auth_setup()
 
     # Check we have zero parties
-    assert Enum.count(Account.list_party_ids()) == 0
+    assert Enum.empty?(Account.list_party_ids())
 
     # Now setup the friends
     User.create_friend_request(user.id, friend1.id)
@@ -247,7 +248,7 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
       "cmd" => "s.party.updated",
       "party_id" => party_id,
       "new_values" => %{
-        "leader" => friend1.id,
+        # "leader" => friend1.id,
         "members" => [user.id, friend1.id]
       }
     }
@@ -267,6 +268,9 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
 
     _tachyon_recv_until(fsocket2)
 
+    :timer.sleep(200)
+    Logger.warn("----------- #{user.id} Accepting #{other_party_id}, thus leaving #{party_id}")
+
     # Accept the invite, thus leaving the other party
     _tachyon_send(usocket, %{"cmd" => "c.party.accept", "party_id" => other_party_id})
     [resp] = _tachyon_recv(usocket)
@@ -274,6 +278,9 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
       "cmd" => "s.party.left_party",
       "party_id" => party_id
     }
+
+    :timer.sleep(200)
+    Logger.warn("-----------")
 
     [resp] = _tachyon_recv(usocket)
     assert resp == %{
@@ -286,6 +293,12 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
       }
     }
 
+    # Check we've been removed from the other party!
+    party = Account.get_party(other_party_id)
+    assert party.leader == other1.id
+    assert party.members == [user.id, other2.id, other1.id]
+    assert party.pending_invites == []
+
     # Check we've been removed from the first party!
     party = Account.get_party(party_id)
     assert not Enum.member?(party.members, user.id)
@@ -296,5 +309,38 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
 
     party = Account.get_party(party_id)
     assert party == nil
+  end
+
+  test "party leader disconnects" do
+    %{socket: usocket, user: user, pid: _pid} = tachyon_auth_setup()
+
+    %{user: friend1, socket: fsocket1} = tachyon_auth_setup()
+    %{user: friend2, socket: fsocket2} = tachyon_auth_setup()
+
+    %{id: party_id} = Account.create_party(user.id)
+    Account.move_user_to_party(party_id, friend1.id)
+    Account.move_user_to_party(party_id, friend2.id)
+
+    party = Account.get_party(party_id)
+    assert party == %Account.Party{
+      id: party_id,
+      members: [friend2.id, friend1.id, user.id],
+      leader: user.id,
+      pending_invites: [],
+      queues: []
+    }
+
+    # User 1 disconnects
+    Teiserver.Client.disconnect(user.id)
+    :timer.sleep(500)
+
+    party = Account.get_party(party_id)
+    assert party == %Account.Party{
+      id: party_id,
+      members: [friend2.id, friend1.id],
+      leader: friend1.id,
+      pending_invites: [],
+      queues: []
+    }
   end
 end

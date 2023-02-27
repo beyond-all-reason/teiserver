@@ -10,7 +10,12 @@ Teiserver channels always send a map as the object and include the channel name 
 Used for sending out global messages about server events.
 ```elixir
 %{
-  event: "stop",
+  event: :stopping,
+  node: node
+}
+
+%{
+  event: :started,
   node: node
 }
 ```
@@ -87,10 +92,13 @@ Limited information pertaining to the creation/deletion of battle lobbies.
 }
 ```
 
-#### teiserver_global_match_updates
-
+#### global_match_updates
+Used to communicate information to everybody regarding matches.
 ```elixir
-  {:global_match_updates, :match_completed, match_id}
+%{
+  event: :match_completed,
+  match_id: match_id
+}
 ```
 
 ## Lobbies
@@ -132,6 +140,9 @@ Valid events:
 
   # Client
   {:lobby_update, :updated_client_battlestatus, lobby_id, {Client, reason}}
+  
+  # Queue
+  {:lobby_update, :updated_queue, lobby_id, id_list}
 ```
 
 #### teiserver_liveview_client:#{client_id}
@@ -179,8 +190,17 @@ Updates specifically for liveview chat interfaces, due to the way messages are p
 #### teiserver_client_inout
 A message every time a user logs in or logs out. Unlike legacy all_user_updates it does not give any status updates.
 ```elixir
-  {:client_inout, :login, userid}
-  {:client_inout, :disconnect, userid, reason}
+%{
+  event: :login
+  userid: userid
+}
+
+%{
+  event: :disconnect
+  userid: userid,
+  reason: String
+}
+
 ```
 
 #### teiserver_client_messages:#{userid}
@@ -195,8 +215,24 @@ This is the channel for sending messages to the client. It allows the client on 
   event: :disconnected
 }
 
+%{
+  event: :client_updated,
+  new_status: map()
+}
 
 # Matchmaking
+%{
+  event: :matchmaking,
+  sub_event: :joined_queue,
+  queue_id: queue_id
+}
+
+%{
+  event: :matchmaking,
+  sub_event: :left_queue,
+  queue_id: queue_id
+}
+
 %{
   event: :matchmaking,
   sub_event: :match_ready,
@@ -217,9 +253,20 @@ This is the channel for sending messages to the client. It allows the client on 
   match_id: match_id
 }
 
+# Used to say you (or someone in your party) declined
+# the match and thus you are in no queues any more
 %{
   event: :matchmaking,
   sub_event: :match_declined,
+  queue_id: queue_id,
+  match_id: match_id
+}
+
+# Used to say your match was created and (in theory) started
+# and as a result you are not in any queues
+%{
+  event: :matchmaking,
+  sub_event: :match_created,
   queue_id: queue_id,
   match_id: match_id
 }
@@ -315,17 +362,6 @@ Gives information about the activities of a client without containing anything p
 }
 ```
 
-#### teiserver_client_action_updates:#{userid}
-Informs about actions performed by a specific client
-Aside from connect/disconnect there should always be the structure of `{:client_action, :join_queue, userid, data}`
-```elixir
-  {:client_action, :client_connect, userid}
-  {:client_action, :client_disconnect, userid}
-
-  {:client_action, :join_lobby, userid, lobby_id}
-  {:client_action, :leave_lobby, userid, lobby_id}
-```
-
 #### teiserver_client_application:#{userid}
 Designed for lobby applications to display/perform various actions as opposed to internal agent clients or any web interfaces
 ```elixir
@@ -391,25 +427,75 @@ Valid events
 All updates about the room and content for the room. Likely to be kept as is and renamed as a teiserver channel due to its nature.
 
 ### Matchmaking
-#### teiserver_queue_wait:#{queue_id}
+#### teiserver_global_matchmaking
+Used to communicate to all wait servers so groups can be added/removed from queues correctly.
+```elixir
+# A match has been found, stop these groups searching for now
+%{
+  event: :pause_search
+  groups: [group_id]
+}
+
+# Match failed to start, these groups are to resume searching
+%{
+  event: :resume_search
+  groups: [group_id]
+}
+
+# This can fire for both a match starting and a match being declined
+%{
+  event: :cancel_search
+  groups: [group_id]
+}
+```
+
+#### teiserver_queue:#{queue_id}
 Sent from the queue wait server to update regarding it's status
 Valid events
 ```elixir
-  {:queue_wait, :queue_add_user, queue_id, userid}
-  {:queue_wait, :queue_remove_user, queue_id, userid}
-  
-  {:queue_wait, :queue_add_party, queue_id, party_id}
-  {:queue_wait, :queue_remove_party, queue_id, party_id}
+%{
+  event: :queue_periodic_update,
+  queue_id: queue_id,
+  buckets: map(),
+  groups_map: map()
+}
 
-  {:queue_match, :match_attempt, queue_id, match_id}
-  {:queue_match, :match_made, queue_id, lobby_id}
+%{
+  event: :queue_add_group,
+  queue_id: queue_id
+  group_id: group_id
+}
+
+%{
+  event: :queue_remove_group,
+  queue_id: queue_id
+  group_id: group_id
+}
+
+
+%{
+  event: :match_attempt,
+  queue_id: queue_id,
+  match_id: match_id
+}
+
+%{
+  event: :match_made,
+  queue_id: queue_id,
+  lobby_id: lobby_id
+}
 ```
 
-#### teiserver_queue_all_queues
+#### teiserver_all_queues
 Data for those watching all queues at the same time
 Valid events
 ```elixir
-  {:queue_periodic_update, queue_id, queue_size, mean_wait_time}
+  %{
+    event: :all_queues_periodic_update,
+    queue_id: queue_id,
+    group_count: integer,
+    mean_wait_time: number
+  }
 ```
 
 ## Moderation

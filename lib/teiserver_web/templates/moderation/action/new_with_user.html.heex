@@ -1,4 +1,7 @@
-<% bsname = view_colour() %>
+<%
+  discord_link = Application.get_env(:central, Teiserver)[:discord]
+  bsname = view_colour()
+%>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -37,8 +40,6 @@
 </div>
 
 <h3>Adding action against <%= @user.name %></h3>
-
-
 
 <div class="row">
   <div class="col-md-12 mb-4">
@@ -114,18 +115,42 @@
       </div>
 
       <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
-        $('#code_references').val('1.4');
-        $('#code_references').trigger('change');
-        $('#action_restriction_Singular_warning').prop('checked', true);
+        $('#action_restriction_Warning_reminder').prop('checked', true);
         $('#action_restriction_All_lobbies').prop('checked', true);
         $('#action_restriction_Room_chat').prop('checked', true);
         $('#action_restriction_All_lobbies').prop('checked', true);
         $('#action_restriction_Matchmaking').prop('checked', true);
         $('#action_restriction_Community').prop('checked', true);
-        $('#report_form_reason').val('Please rename to a name not in breach of the Code of Conduct and contact a moderator to have the restrictions lifted.');
-        $('#report_expires').val('never');
+        $('#action_reason').val('Please rename to a name not in breach of the Code of Conduct and contact a moderator to have the restrictions lifted.');
+        $('#action_expires').val('1000 years');
       ">
         Add rename
+      </div>
+
+      <div class={"btn btn-outline-#{bsname} btn-block"} onclick={"
+        $('#action_restriction_Warning_reminder').prop('checked', true);
+        $('#action_reason').val('Smurf accounts are not allowed, if you need an exemption or you think there has been an error please use the #open-ticket discord channel to talk to the moderation team. The discord can be accessed at #{discord_link}');
+        $('#action_expires').val('1 day');
+      "}>
+        Add smurf warning
+      </div>
+
+      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+        $('#action_restriction_Site').prop('checked', true);
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('This account has been flagged as a smurf by the server. If this is in error please use #open-ticket on the discord to talk to the moderation team.');
+        $('#action_expires').val('1000 years');
+      ">
+        Add smurf ban
+      </div>
+
+      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+        $('#action_restriction_Site').prop('checked', true);
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('Disrupting an event after being asked/warned not to.');
+        $('#action_expires').val('1 hour');
+      ">
+        Add event disruption
       </div>
 
       <div class={"btn btn-outline-#{bsname} btn-block"} onclick="

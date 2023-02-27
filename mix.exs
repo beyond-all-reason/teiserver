@@ -46,13 +46,13 @@ defmodule Central.MixProject do
   defp deps do
     [
       # Default phoenix deps
-      {:phoenix, "~> 1.6.2"},
+      {:phoenix, "~> 1.6.15"},
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.6"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 3.0"},
       {:phoenix_live_reload, "~> 1.3.2", only: :dev},
-      {:phoenix_live_view, "~> 0.17"},
+      {:phoenix_live_view, "~> 0.18"},
       {:floki, ">= 0.31.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.6"},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
@@ -73,7 +73,7 @@ defmodule Central.MixProject do
       {:argon2_elixir, "~> 3.0"},
       {:bodyguard, "~> 2.4"},
       {:human_time, "~> 0.3.0"},
-      {:oban, "~> 2.11"},
+      {:oban, "~> 2.14"},
       {:parallel, "~> 0.0"},
       {:con_cache, "~> 1.0"},
       {:phoenix_pubsub, "~> 2.0"},
@@ -84,6 +84,7 @@ defmodule Central.MixProject do
       {:dart_sass, "~> 0.3", only: [:dev]},
       {:libcluster, "~> 3.3"},
       {:tzdata, "~> 1.1"},
+      {:ex_ulid, "~> 0.1.0"},
 
       # Teiserver libs
       {:openskill, "~> 1.0.1"},
@@ -92,9 +93,27 @@ defmodule Central.MixProject do
       {:csv, "~> 2.4"},
       {:earmark, "~> 1.4"},
       {:ranch, "~> 1.8"},
-      {:alchemy, "~> 0.7.0", hex: :discord_alchemy},
       {:horde, "~> 0.8"},
-      {:etop, "~> 0.7.0"}
+      {:etop, "~> 0.7.0"},
+
+      # {:grpc_gun, "~> 0.5.0"},
+      # {:remedy_gun, "~> 0.5.0"},
+      # {:grpc, "~> 0.5.0"},
+      {:grpc, git:  "https://github.com/elixir-grpc/grpc"},
+
+      # {:gun, "~> 2.0.1", hex: :grpc_gun, override: true},
+      {:gun, "~> 2.0", hex: :remedy_gun, override: true},
+
+      {:protobuf, "~> 0.10.0"},
+      {:google_protos, "~> 0.1"},
+
+      # If you want to connect to discord in dev mode, use this
+      # {:nostrum, "~> 0.6", runtime: Mix.env() != :test},
+
+      # If you only want to connect to discord in prod, use this
+      {:nostrum, "~> 0.6", runtime: Mix.env() == :prod},
+
+      {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true}
     ]
   end
 

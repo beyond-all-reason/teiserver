@@ -1,7 +1,0 @@
-<div class="dropdown-menu">
-  <%= if @automod_action.enabled do %>
-    <%= link "Disable", to: Routes.ts_admin_automod_action_path(@conn, :disable, @automod_action), class: "dropdown-item", method: "put" %>
-  <% else %>
-    <%= link "Enable", to: Routes.ts_admin_automod_action_path(@conn, :enable, @automod_action), class: "dropdown-item", method: "put" %>
-  <% end %>
-</div>

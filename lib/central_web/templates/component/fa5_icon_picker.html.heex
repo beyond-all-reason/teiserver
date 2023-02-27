@@ -10,7 +10,11 @@
 
   field_id = "#{form.name}_#{@field}"
 
-  value = Ecto.Changeset.get_field(@form.source, @field) || ""
+  value = if @form do
+    Ecto.Changeset.get_field(@form.source, @field) || ""
+  else
+    ""
+  end
   {style, thickness, the_icon} = case value |> String.split(" ") do
     [a, b] -> {"", a, b}
     [the_icon] -> {"", "fa-solid", the_icon}
@@ -63,7 +67,7 @@
   <div class="col-md-3">
     <select class="form-control" id={"#{field_id}_style"} onchange={"icon_updated_#{field_id}(); #{onchange}"}>
       <option value="">Classic</option>
-      <!--<option value="fa-sharp">Sharp</option>-->
+      <option value="fa-sharp">Sharp</option>
     </select>
   </div>
   <div class="col-md-4">

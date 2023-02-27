@@ -13,10 +13,6 @@
     <%= central_component "menu_card", icon_class: "fa-solid", icon: Central.Account.GroupLib.icon, text: "Groups", link: Routes.admin_group_path(@conn, :index) %>
   <% end %>
 
-  <%= if allow?(@current_user, "admin.report") do %>
-    <%= central_component "menu_card", icon_class: "fa-solid", icon: Central.Account.ReportLib.icon, text: "Reports", link: Routes.admin_report_path(@conn, :index) %>
-  <% end %>
-
   <%= if allow?(@current_user, "admin.dev") do %>
     <%= central_component "menu_card", icon_class: "fa-solid", icon: Central.Account.CodeLib.icon, text: "Codes", link: Routes.admin_code_path(@conn, :index) %>
   <% end %>

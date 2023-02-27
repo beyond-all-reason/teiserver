@@ -20,7 +20,7 @@ defmodule Teiserver.Coordinator.CoordinatorLib do
       {"leaveq", [], "Removes you from the join queue.", :everybody},
       {"status", [], "Status info about the battle lobby.", :everybody},
       {"afks", [], "Lists possible afk players.", :everybody},
-      {"password?", [], "Tells you the room password, not to be confused with $password which sets the password", :everybody},
+      {"password?", [], "Tells you the room password", :everybody},
       {"splitlobby", [], "Causes a \"vote\" to start where other players can elect to join you in splitting the lobby, follow someone
 of their choosing or remain in place. After 20 seconds you are moved to a new (empty) lobby and those that voted yes
 or are following someone that voted yes are also moved to that lobby.", :everybody},
@@ -43,14 +43,23 @@ or are following someone that voted yes are also moved to that lobby.", :everybo
 - hardt1: T1 but no seaplanes or hovers either
 - crazy: Random combination of several settings
 - undo: Removes all meme effects", :everybody},
-      {"welcome-message", ["message"], "Sets the welcome message sent to anybody joining the lobby. Requires boss privileges. Use $$ to add a line return.", :everybody},
+      {"welcome-message", ["message"], "Sets the welcome message sent to anybody joining the lobby. Run this command without a message to clear the existing message. Requires boss privileges. Use $$ to add a line return.", :everybody},
       {"gatekeeper", ["(default | friends | friendsplay | clan)"],
 "sets the gatekeeper for this battle. Requires boss privileges.
 > default: no limitations
 > friends allows only friends of existing members to join the lobby
 > friendsplay: allows only friends of existing players to become players (but anybody can join to spectate)", :everybody},
-      {"rename", ["new name"],"Renames the lobby to the name given. Requires boss privileges.", :everybody},
-      {"password", ["new password"],"Sets the lobby password to the new password. If the password is empty then the password is removed. Requires boss permissions and should not be confused with the $password? command which queries the password.", :everybody},
+      {"rename", ["new name"], "Renames the lobby to the name given. Requires boss privileges.", :everybody},
+
+      {"resetratinglevels", [], "Resets the rating level limits to not exist. Player limiting commands are designed to be used with $rename, please be careful not to abuse them. Requires boss privileges.", :everybody},
+      {"minratinglevel", ["min-level"], "Sets the minimum level for players, you must be at least this rating to be a player. Requires boss privileges.", :everybody},
+      {"maxratinglevel", ["max-level"], "Sets the maximum level for players, you must be at below this rating to be a player. Requires boss privileges.", :everybody},
+      {"setratinglevels", ["min-level", "max-level"], "Sets the minimum and maximum rating levels for players. Requires boss privileges.", :everybody},
+
+      # {"resetranklevels", [], "Resets the rank level limits to not exist. Player limiting commands are designed to be used with $rename, please be careful not to abuse them. Requires boss privileges.", :everybody},
+      # {"minranklevel", ["min-level"], "Sets the minimum rank level for players, you must be at least this rank to be a player. Requires boss privileges.", :everybody},
+      # {"maxranklevel", ["max-level"], "Sets the maximum rank level for players, you must be at below this rank to be a player. Requires boss privileges.", :everybody},
+      # {"setranklevels", ["min-level", "max-level"], "Sets the minimum and maximum rank levels for players. Requires boss privileges.", :everybody},
 
       #---- "hosts" only ----
       {"lock", ["(team | player | spectator | side)"], "Engages a lock on that mode, when engaged members are unable to change that attribute about themselves.

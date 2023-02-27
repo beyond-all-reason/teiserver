@@ -42,10 +42,10 @@
       <th>Type</th>
       <th>Map</th>
       <th>Queue</th>
-      
+
       <th>Teams</th>
       <th>Team size</th>
-      <th>Duration (mins)</th>
+      <th>Duration</th>
       <th>Finished</th>
       <th colspan="1">&nbsp;</th>
     </tr>
@@ -60,8 +60,8 @@
 
       <td><%= match.team_count %></td>
       <td><%= match.team_size %></td>
-      
-      <td><%= if match.finished, do: Timex.diff(match.finished, match.started, :minute) %></td>
+
+      <td><%= if match.finished, do: duration_to_str_short(match.game_duration) %></td>
       <td><%= date_to_str match.finished, format: :ymd_hms %></td>
 
       <td>

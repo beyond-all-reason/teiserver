@@ -3,8 +3,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   alias Phoenix.PubSub
 
   alias Teiserver
-  alias Teiserver.Battle
+  alias Teiserver.{Battle, Account}
   alias Teiserver.Battle.{Lobby, LobbyLib}
+
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   @impl true
   def mount(_params, session, socket) do
@@ -13,6 +15,8 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       |> AuthPlug.live_call(session)
       |> TSAuthPlug.live_call(session)
       |> NotificationPlug.live_call()
+
+    client = Account.get_client_by_id(socket.assigns[:current_user].id)
 
     lobbies = Lobby.list_lobbies()
       |> Enum.map(fn lobby ->
@@ -25,14 +29,15 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       |> sort_lobbies
 
     socket = socket
-      |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
+      # |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/teiserver/battle/lobbies")
-      |> assign(:site_menu_active, "teiserver_lobbies")
+      |> assign(:client, client)
+      |> assign(:site_menu_active, "lobbies")
       |> assign(:view_colour, LobbyLib.colours())
       |> assign(:lobbies, lobbies)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, :standard_live}}
   end
 
   @impl true
@@ -89,18 +94,51 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     {:noreply, assign(socket, :lobbies, lobbies)}
   end
 
+  # Client action
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
+    {:noreply,
+      socket
+        |> assign(:client, Account.get_client_by_id(socket.assigns[:current_user].id))
+    }
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
+    {:noreply,
+      socket
+        |> assign(:client, nil)
+    }
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _}, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("join", _, %{assigns: %{client: nil}} = socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("join", %{"lobby_id" => lobby_id}, %{assigns: assigns} = socket) do
+    lobby_id = int_parse(lobby_id)
+
+    if Battle.server_allows_join?(assigns.client.userid, lobby_id) == true do
+      Battle.add_user_to_lobby(assigns.current_user.id, lobby_id, Teiserver.Battle.Lobby.new_script_password())
+    end
+
+    {:noreply, socket}
+  end
+
   defp sort_lobbies(lobbies) do
     lobbies
       |> Enum.sort_by(
         fn v -> {v.locked, v.password != nil, -v.member_count, v.name} end,
         &<=/2
       )
-
-      # |> Enum.sort_by(fn v -> v end, &<=/2)
   end
 
   defp apply_action(socket, :index, _params) do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_lobby_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{socket.assigns[:current_user].id}")
 
     socket
       |> assign(:page_title, "Listing Battles")

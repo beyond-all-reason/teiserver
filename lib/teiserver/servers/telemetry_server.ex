@@ -144,6 +144,14 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         end
       end)
 
+    lobby_memberships = clients
+      |> Map.values
+      |> Enum.reject(fn %{lobby_id: lobby_id} -> lobby_id == nil end)
+      |> Enum.reduce(%{}, fn (client, memberships) ->
+        new_lobby_membership = [client.userid | Map.get(memberships, client.lobby_id, [])]
+        Map.put(memberships, client.lobby_id, new_lobby_membership)
+      end)
+
     counters = state.counters
 
     %{
@@ -154,6 +162,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         menu: menu_ids,
         total: Enum.uniq(player_ids ++ spectator_ids ++ lobby_ids ++ menu_ids)
       },
+      lobby_memberships: lobby_memberships,
       battle: %{
         total: total_battles,
         lobby: total_battles - Enum.count(battles_in_progress),
@@ -189,6 +198,20 @@ defmodule Teiserver.Telemetry.TelemetryServer do
     #     other -> other
     #   end
 
+    process_counts = %{
+      system_servers: Horde.Registry.count(Teiserver.ServerRegistry),
+      lobby_servers: Horde.Registry.count(Teiserver.LobbyRegistry),
+      client_servers: Horde.Registry.count(Teiserver.ClientRegistry),
+      party_servers: Horde.Registry.count(Teiserver.PartyRegistry),
+      queue_wait_servers: Horde.Registry.count(Teiserver.QueueWaitRegistry),
+      queue_match_servers: Horde.Registry.count(Teiserver.QueueMatchRegistry)
+    }
+
+    process_counts = Map.merge(process_counts, %{
+      beam_total: Process.list() |> Enum.count(),
+      teiserver_total: process_counts |> Map.values |> Enum.sum
+    })
+
     %{
       cpu_avg1: :cpu_sup.avg1(),
       cpu_avg5: :cpu_sup.avg5(),
@@ -196,7 +219,8 @@ defmodule Teiserver.Telemetry.TelemetryServer do
       cpu_nprocs: :cpu_sup.nprocs(),
       # cpu_per_core: cpu_per_core |> Map.new(),
       # disk: disk |> Map.new(),
-      system_mem: :memsup.get_system_memory_data() |> Map.new()
+      system_mem: :memsup.get_system_memory_data() |> Map.new(),
+      processes: process_counts
     }
   end
 

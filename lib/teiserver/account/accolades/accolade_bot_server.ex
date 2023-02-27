@@ -64,14 +64,14 @@ defmodule Teiserver.Account.AccoladeBotServer do
     # We only subscribe to this if we're not in test, if we are it'll generate a bunch of SQL errors
     # without actually breaking anything
     if not Application.get_env(:central, Teiserver)[:test_mode] do
-      :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_match_updates")
+      :ok = PubSub.subscribe(Central.PubSub, "global_match_updates")
     end
 
     {:noreply, state}
   end
 
   # Match ending
-  def handle_info({:global_match_updates, :match_completed, match_id}, state) do
+  def handle_info(%{channel: "global_match_updates", event: :match_completed, match_id: match_id}, state) do
     case Battle.get_match(match_id) do
       nil ->
         nil
@@ -88,7 +88,9 @@ defmodule Teiserver.Account.AccoladeBotServer do
 
     {:noreply, state}
   end
-  def handle_info({:global_match_updates, _, _}, state), do: {:noreply, state}
+  def handle_info(%{channel: "global_match_updates"}, state) do
+    {:noreply, state}
+  end
 
   # Direct/Room messaging
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
@@ -133,7 +135,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   end
 
   # Client inout
-  def handle_info({:client_inout, :login, userid}, state) do
+  def handle_info(%{channel: "client_inout", event: :login, userid: userid}, state) do
     :timer.send_after(500, {:do_client_inout, :login, userid})
     {:noreply, state}
   end

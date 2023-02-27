@@ -11,6 +11,11 @@ defmodule Teiserver.Battle.LobbyCache do
     call_lobby(int_parse(id), :get_lobby_state)
   end
 
+  @spec get_lobby_founder_id(T.lobby_id()) :: String.t() | nil
+  def get_lobby_founder_id(lobby_id) do
+    call_lobby(lobby_id, :get_founder_id)
+  end
+
   @spec get_lobby_match_uuid(T.lobby_id()) :: String.t() | nil
   def get_lobby_match_uuid(lobby_id) do
     call_lobby(lobby_id, :get_match_uuid)
@@ -85,7 +90,7 @@ defmodule Teiserver.Battle.LobbyCache do
   end
 
   def update_lobby(%{id: lobby_id} = lobby, nil, reason) do
-    Logger.warn("update_lobby is still being called, reason: #{reason}")
+    Logger.warn("update_lobby (no data) is still being called, reason: #{reason}")
     cast_lobby(lobby_id, {:update_lobby, lobby})
 
     PubSub.broadcast(
@@ -98,7 +103,7 @@ defmodule Teiserver.Battle.LobbyCache do
   end
 
   def update_lobby(%{id: lobby_id} = lobby, data, reason) do
-    Logger.warn("update_lobby is still being called, reason: #{reason}")
+    Logger.warn("update_lobby (with data) is still being called, reason: #{reason}")
     cast_lobby(lobby_id, {:update_lobby, lobby})
 
     if Enum.member?([:update_battle_info], reason) do

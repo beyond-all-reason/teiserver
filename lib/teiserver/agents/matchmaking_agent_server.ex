@@ -98,6 +98,10 @@ defmodule Teiserver.Agents.MatchmakingAgentServer do
   end
 
 
+  defp handle_msg(%{"cmd" => "s.lobby.joined"}, state) do
+    :timer.send_after(@leave_delay, :leave_lobby)
+    %{state | queues: [],  allow_join: false}
+  end
   defp handle_msg(%{"cmd" => "s.lobby.remove_user"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.leave"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.updated"}, state), do: state

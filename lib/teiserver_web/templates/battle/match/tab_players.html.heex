@@ -7,7 +7,7 @@
       <th colspan="2" style="text-align: center; bbackground-color: #EEF;">Metal</th>
       <th colspan="2" style="text-align: center; bbackground-color: #FFE;">Energy</th>
 
-      <th>&nbsp;</th>
+      <th colspan="2">&nbsp;</th>
     </tr>
 
     <tr>
@@ -27,6 +27,7 @@
       <th>Used</th>
 
       <th>Post-match rating</th>
+      <th>&nbsp;</th>
     </tr>
   </thead>
   <tbody>
@@ -51,9 +52,9 @@
         <% else %>
           <td style={"background-color: #{rgba_css m.user.colour};"} width="50">&nbsp;</td>
         <% end %>
-        
+
         <td><%= m.team_id + 1 %></td>
-        
+
         <td><%= normalize m.stats["damageDealt"] %></td>
         <td><%= normalize m.stats["damageReceived"] %></td>
 
@@ -66,7 +67,15 @@
         <td><%= normalize m.stats["energyProduced"] %></td>
         <td><%= normalize m.stats["energyUsed"] %></td>
 
-        <th><%= if rating, do: rating.value["rating_value"] |> round(2) %></th>
+        <td><%= if rating, do: rating.value["rating_value"] |> round(2) %></td>
+
+        <td>
+          <a href={Routes.moderation_report_form_path(@conn, :index, m.user_id)} class="btn btn-sm btn-warning">
+            <i class={"fa-fw #{Teiserver.Moderation.ReportLib.icon()}"}></i>
+            &nbsp;
+            Report
+          </a>
+        </td>
       </tr>
     <% end %>
   </tbody>

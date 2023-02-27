@@ -4,13 +4,16 @@ defmodule Teiserver.Bridge.MessageCommands do
   alias Teiserver.Account.AccoladeLib
   alias Central.Helpers.NumberHelper
   alias alias Teiserver.Bridge.UnitNames
+  alias Nostrum.Api
   require Logger
 
   @unauth ~w(discord)
   @always_allow ~w(whoami help whatwas unit)
 
-  @spec handle(Alchemy.Message.t()) :: any
-  def handle(%Alchemy.Message{author: %{id: author}, channel_id: channel, content: "$" <> content, attachments: []} = _message) do
+  @spec handle(Nostrum.Struct.Message.t()) :: any
+  def handle(%Nostrum.Struct.Message{author: %{id: author}, channel_id: channel, content: "$" <> content, attachments: []}) do
+    Logger.warn("1")
+
     [cmd | remaining] = String.split(content, " ")
     remaining = Enum.join(remaining, " ")
     user = User.get_user_by_discord_id(author)
@@ -29,7 +32,10 @@ defmodule Teiserver.Bridge.MessageCommands do
     end
   end
 
-  def handle(_) do
+  def handle(_msg) do
+    # Logger.warn("2")
+    # IO.inspect msg
+
     :ok
   end
 
@@ -189,10 +195,6 @@ defmodule Teiserver.Bridge.MessageCommands do
 
   defp reply(channel, message) when is_list(message), do: reply(channel, Enum.join(message, "\n"))
   defp reply(channel, message) do
-    Alchemy.Client.send_message(
-      channel,
-      message,
-      []# Options
-    )
+    Api.create_message(channel, message)
   end
 end

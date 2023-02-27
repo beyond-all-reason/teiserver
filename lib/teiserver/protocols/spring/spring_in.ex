@@ -998,7 +998,7 @@ defmodule Teiserver.Protocols.SpringIn do
       keys =
         data
         |> String.downcase()
-        |> String.split("\t")
+        |> String.split(" ")
 
       Battle.remove_modoptions(state.lobby_id, keys)
     end
@@ -1340,12 +1340,12 @@ defmodule Teiserver.Protocols.SpringIn do
     end
   end
 
-  @spec engage_flood_protection(map()) :: {:stop, String.t(), map()}
-  defp engage_flood_protection(state) do
-    state.protocol_out.reply(:disconnect, "Spring status flood protection", nil, state)
-    User.set_flood_level(state.userid, 10)
-    Client.disconnect(state.userid, "SpringIn.status.flood_protection")
-    Logger.error("Spring Status command overflow from #{state.username}/#{state.userid}")
-    {:stop, "Spring status flood protection", state}
-  end
+  # @spec engage_flood_protection(map()) :: {:stop, String.t(), map()}
+  # defp engage_flood_protection(state) do
+  #   state.protocol_out.reply(:disconnect, "Spring status flood protection", nil, state)
+  #   User.set_flood_level(state.userid, 10)
+  #   Client.disconnect(state.userid, "SpringIn.status.flood_protection")
+  #   Logger.error("Spring Status command overflow from #{state.username}/#{state.userid}")
+  #   {:stop, "Spring status flood protection", state}
+  # end
 end

@@ -36,6 +36,7 @@
         selected: @params["timeframe"] || "24 hours",
         enumerable: [
           %{id: "24 hours", icon: "fa-solid fa-square", colour: fg},
+          %{id: "2 days", icon: "fa-solid fa-square", colour: fg},
           %{id: "7 days", icon: "fa-solid fa-square", colour: fg},
           %{id: "All time", icon: "fa-solid fa-square", colour: fg},
         ]
@@ -64,6 +65,15 @@
     </div>
 
     <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <%= central_component "checkbox", %{
+        name: "search[include_bots]",
+        id: "search_include_bots",
+        checked: @params["include_bots"] == "true",
+        label: "Include bot accounts"
+      } %>
+    </div>
+
+    <div class="col-md-4 col-lg-3 col-xl-2 my-2">
       <label for="search_mode" class="control-label">Mode: </label>
       <%= central_component "icon_dropdown", %{
         name: "search[mode]",
@@ -71,6 +81,7 @@
         selected: @params["mode"],
         enumerable: [
           %{id: "Lobby", icon: Teiserver.Battle.LobbyLib.icon(), colour: fg},
+          %{id: "Party", icon: Teiserver.Account.PartyLib.icon(), colour: fg},
           %{id: "Room", icon: Central.Communication.CommentLib.icon(), colour: fg},
         ]
       } %>

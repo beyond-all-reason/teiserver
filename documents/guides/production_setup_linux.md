@@ -101,7 +101,7 @@ sudo aptitude -y install snapd
 sudo snap install core; sudo snap refresh core
 sudo snap install --classic certbot
 sudo ln -s /snap/bin/certbot /usr/bin/certbot
-sudo certbot --nginx
+sudo certbot --nginx -d yourdomain.com -m your@email.com --agree-tos
 
 # This will place your certs in /etc/letsencrypt/live/yourdomain.com
 # We'll point the site directly here but also the TLS instance of ranch

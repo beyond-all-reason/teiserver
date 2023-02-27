@@ -1,8 +1,14 @@
-<% bsname = @view_colour %>
+<%
+  bsname = @view_colour
+  accepted_app = (@client == nil or @client.app_status == :accepted)
+  # accepted_app = true
+%>
 
-<%= render TeiserverWeb.Game.GeneralView, "sub_menu.html", %{active: "queues", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
+<%=
+  render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "matchmaking", conn: Map.put(@socket, :permissions, @current_user.permissions)}
+%>
 
-<div class="row">
+<div class="row mt-3">
   <div class="col-md-12">
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
@@ -40,14 +46,34 @@
           <% end %>
         </h4>
 
+<br />
+
+<div class="alert alert-warning">
+  Matchmaking is in an early stage so there are a few things to bear in mind:
+  <ul>
+    <li>Bugs are expected; please post them to the Teiserver channel in the discord</li>
+    <li>This page doesn't always update correctly, if it seems stuck please refresh it</li>
+  </ul>
+</div>
+
+<%= if @client != nil and not accepted_app do %>
+  <div class="alert alert-danger">
+    Unfortunately non-chobby clients are having issues updating correctly and block matchmaking from working. You can get Chobby at the <a href="https://www.beyondallreason.info/download#How-To-Install">BAR downloads page</a>.
+  </div>
+<% else %>
+  <div class="alert alert-primary">
+    Matchmaking represents a more competitive experience and as a result griefing, smurfing and throwing will be treated more harshly than in casual games.
+  </div>
+<% end %>
+
 <h4>Listing Queues</h4>
 
 <table class="table table-sm">
   <thead>
     <tr>
       <th>Name</th>
-      <th>Size</th>
-      <th>Mean wait (s)</th>
+      <th>Size (Groups)</th>
+      <th>Mean wait (secs)</th>
       <th colspan="2">&nbsp;</th>
     </tr>
   </thead>
@@ -59,31 +85,39 @@
     <tr>
       <td><%= queue.name %></td>
 
-      <td><%= info.member_count %></td>
-      <td><%= round(info.mean_wait_time) %></td>
+      <%= if info do %>
+        <td><%= info.group_count %></td>
+        <td><%= round(info.mean_wait_time) %></td>
+        <td>
+          <%= if @is_admin or Enum.member?(@queue_membership, queue_id) do %>
+            <%= live_redirect "Show", to: Routes.ts_game_queue_show_path(@socket, :show, queue_id), class: "btn btn-sm btn-outline-#{bsname}" %>
+          <% end %>
+        </td>
+        <td>
+          <%= cond do %>
+            <% @client == nil -> %>
+              Connect with client to join queue
 
-      <td>
-        <%= if @is_admin do %>
-          <%= live_redirect "Show", to: Routes.ts_game_queue_show_path(@socket, :show, queue_id), class: "btn btn-sm btn-outline-#{bsname}" %>
-        <% end %>
-      </td>
+            <% @client.player -> %>
+              You can't join matchmaking as a player in a game, you need to become a spectator
 
-      <td>
-        <%= cond do %>
-          <% @client == nil -> %>
-            Connect with client to join queue
+            <% accepted_app == false -> %>
+              Non-chobby client, cannot connect to Matchmaking
 
-          <% Enum.member?(@queue_membership, queue_id) -> %>
-            <span class={"btn btn-sm btn-warning"} phx-click="leave-queue" phx-value-queue_id={queue_id}>
-              Leave queue
-            </span>
+            <% Enum.member?(@queue_membership, queue_id) -> %>
+              <span class={"btn btn-sm btn-warning"} phx-click="leave-queue" phx-value-queue_id={queue_id}>
+                Leave queue
+              </span>
 
-          <% true -> %>
-            <span class={"btn btn-sm btn-primary"} phx-click="join-queue" phx-value-queue_id={queue_id}>
-              Join queue
-            </span>
-        <% end %>
-      </td>
+            <% true -> %>
+              <span class={"btn btn-sm btn-primary"} phx-click="join-queue" phx-value-queue_id={queue_id}>
+                Join queue
+              </span>
+          <% end %>
+        </td>
+      <% else %>
+        <td colspan="4" class="text-danger">System error</td>
+      <% end %>
     </tr>
 <% end %>
   </tbody>

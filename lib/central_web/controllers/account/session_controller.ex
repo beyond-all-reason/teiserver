@@ -81,8 +81,8 @@ defmodule CentralWeb.Account.SessionController do
   @spec logout(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def logout(conn, _) do
     conn
-    |> Guardian.Plug.sign_out(clear_remember_me: true)
-    |> redirect(to: "/login")
+      |> Guardian.Plug.sign_out(clear_remember_me: true)
+      |> redirect(to: "/login")
   end
 
   defp login_reply({:ok, user}, conn, redirect_route) do
@@ -90,7 +90,7 @@ defmodule CentralWeb.Account.SessionController do
       |> put_flash(:info, "Welcome back!")
       |> Guardian.Plug.sign_in(user)
       |> Guardian.Plug.remember_me(user)
-      |> redirect(to: redirect_route)
+      |> redirect(to: redirect_route || "/")
   end
 
   defp login_reply({:ok, user}, conn) do

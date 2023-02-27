@@ -67,6 +67,14 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
       total: []
     },
 
+    low_user_counts: %{
+      player: [],
+      spectator: [],
+      lobby: [],
+      menu: [],
+      total: []
+    },
+
     # Per user minute counts for the day as a whole
     minutes_per_user: %{
       total: %{},
@@ -125,6 +133,14 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
       lobby: 0,
       menu: 0,
       total: 0
+    },
+
+    low_user_counts: %{
+      player: nil,
+      spectator: nil,
+      lobby: nil,
+      menu: nil,
+      total: nil
     },
 
     # Per user minute counts for the day as a whole
@@ -265,6 +281,14 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
         total: segment.peak_user_counts.total ++ [extend.peak_user_counts.total]
       },
 
+      low_user_counts: %{
+        player: segment.low_user_counts.player ++ [extend.low_user_counts.player],
+        spectator: segment.low_user_counts.spectator ++ [extend.low_user_counts.spectator],
+        lobby: segment.low_user_counts.lobby ++ [extend.low_user_counts.lobby],
+        menu: segment.low_user_counts.menu ++ [extend.low_user_counts.menu],
+        total: segment.low_user_counts.total ++ [extend.low_user_counts.total]
+      },
+
       # Per user minute counts for the day as a whole
       minutes_per_user: %{
         total: add_maps(segment.minutes_per_user.total, extend.minutes_per_user.total),
@@ -350,6 +374,14 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
         total: max_counts(logs, ~w(client total))
       },
 
+      low_user_counts: %{
+        player: min_counts(logs, ~w(client player)),
+        spectator: min_counts(logs, ~w(client spectator)),
+        lobby: min_counts(logs, ~w(client lobby)),
+        menu: min_counts(logs, ~w(client menu)),
+        total: min_counts(logs, ~w(client total))
+      },
+
       # Per user minute counts for the day as a whole
       minutes_per_user: user_maps,
     }
@@ -371,17 +403,24 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
 
     # Calculate peak users across the day
     peak_user_counts = @client_states
-    |> Map.new(fn state_key ->
-      counts = data.peak_user_counts[state_key]
-      {state_key, Enum.max(counts)}
-    end)
+      |> Map.new(fn state_key ->
+        counts = data.peak_user_counts[state_key]
+        {state_key, Enum.max(counts)}
+      end)
+
+    low_user_counts = @client_states
+      |> Map.new(fn state_key ->
+        counts = data.low_user_counts[state_key]
+        {state_key, Enum.min(counts)}
+      end)
 
     aggregate_stats = %{
       accounts_created: accounts_created,
       unique_users: data.tmp_reduction.unique_users |> Enum.uniq |> Enum.count,
       unique_players: data.tmp_reduction.unique_players |> Enum.uniq |> Enum.count,
       battles: battles,
-      peak_user_counts: peak_user_counts
+      peak_user_counts: peak_user_counts,
+      low_user_counts: low_user_counts
     }
 
     NestedMaps.put(data, ~w(aggregates stats)a, aggregate_stats)
@@ -418,6 +457,13 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
     items
     |> Enum.reduce([], fn (row, acc) ->
       acc ++ (NestedMaps.get(row, path) || [])
+    end)
+  end
+
+  defp min_counts(items, path) do
+    items
+    |> Enum.reduce(0, fn (row, acc) ->
+      min(acc, Enum.count(NestedMaps.get(row, path) || []))
     end)
   end
 

@@ -22,9 +22,6 @@ defmodule Central.Account.User do
     field :permissions, {:array, :string}, default: []
 
     has_many :user_configs, Central.Config.UserConfig
-    has_many :reports_against, Central.Account.Report, foreign_key: :target_id
-    has_many :reports_made, Central.Account.Report, foreign_key: :reporter_id
-    has_many :reports_responded, Central.Account.Report, foreign_key: :responder_id
 
     # Extra user.ex relations go here
     belongs_to :clan, Teiserver.Clans.Clan

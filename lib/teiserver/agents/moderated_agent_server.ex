@@ -1,7 +1,6 @@
 defmodule Teiserver.Agents.ModeratedAgentServer do
   use GenServer
-  alias Central.Account
-  alias Teiserver.Coordinator
+  alias Teiserver.Moderation
   alias Teiserver.Agents.AgentLib
   require Logger
 
@@ -26,9 +25,9 @@ defmodule Teiserver.Agents.ModeratedAgentServer do
     AgentLib._send(socket, %{cmd: "c.auth.disconnect"})
 
     # Create the report
-    case Account.list_reports(search: [target_id: user.id]) do
+    case Moderation.list_actions(search: [target_id: user.id]) do
       [] ->
-        create_report(user, state.action)
+        create_action(user, state.action)
       _ ->
         :ok
     end
@@ -100,63 +99,33 @@ defmodule Teiserver.Agents.ModeratedAgentServer do
     state
   end
 
-  defp create_report(user, "Warning") do
-    {:ok, _report} = Account.create_report(%{
-      "location" => "web-admin-instant",
-      "location_id" => nil,
-      "reason" => "Agent mode test",
-      "reporter_id" => Coordinator.get_coordinator_userid(),
-      "target_id" => user.id,
-      "response_text" => "Agent mode test",
-      "response_action" => "Restrict",
-      "responded_at" => Timex.now(),
-      "followup" => "",
-      "code_references" => [],
-      "expires" => nil,
-      "responder_id" => Coordinator.get_coordinator_userid(),
-      "action_data" => %{
-        "restriction_list" => ["Warning reminder"]
-      }
+  defp create_action(user, "Warning") do
+    {:ok, _report} = Moderation.create_action(%{
+      target_id: user.id,
+      reason: "Agent mode test",
+      restrictions: ["Warning reminder"],
+      score_modifier: 0,
+      expires: Timex.now() |> Timex.shift(years: 1000)
     })
   end
 
-  defp create_report(user, "Mute") do
-    {:ok, _report} = Account.create_report(%{
-      "location" => "web-admin-instant",
-      "location_id" => nil,
-      "reason" => "Agent mode test",
-      "reporter_id" => Coordinator.get_coordinator_userid(),
-      "target_id" => user.id,
-      "response_text" => "Agent mode test",
-      "response_action" => "Restrict",
-      "responded_at" => Timex.now(),
-      "followup" => "",
-      "code_references" => [],
-      "expires" => nil,
-      "responder_id" => Coordinator.get_coordinator_userid(),
-      "action_data" => %{
-        "restriction_list" => ["All chat"]
-      }
+  defp create_action(user, "Mute") do
+    {:ok, _report} = Moderation.create_action(%{
+      target_id: user.id,
+      reason: "Agent mode test",
+      restrictions: ["All chat"],
+      score_modifier: 0,
+      expires: Timex.now() |> Timex.shift(years: 1000)
     })
   end
 
-  defp create_report(user, "Ban") do
-    {:ok, _report} = Account.create_report(%{
-      "location" => "web-admin-instant",
-      "location_id" => nil,
-      "reason" => "Agent mode test",
-      "reporter_id" => Coordinator.get_coordinator_userid(),
-      "target_id" => user.id,
-      "response_text" => "Agent mode test",
-      "response_action" => "Restrict",
-      "responded_at" => Timex.now(),
-      "followup" => "",
-      "code_references" => [],
-      "expires" => nil,
-      "responder_id" => Coordinator.get_coordinator_userid(),
-      "action_data" => %{
-        "restriction_list" => ["Login", "Site"]
-      }
+  defp create_action(user, "Ban") do
+    {:ok, _report} = Moderation.create_action(%{
+      target_id: user.id,
+      reason: "Agent mode test",
+      restrictions: ["Login", "Site"],
+      score_modifier: 0,
+      expires: Timex.now() |> Timex.shift(years: 1000)
     })
   end
 

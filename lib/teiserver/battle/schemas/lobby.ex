@@ -116,9 +116,12 @@ defmodule Teiserver.Battle.Lobby do
         # To tie it into matchmaking
         queue_id: nil,
 
-        # Consul flags
+        # Rename flags
+        # consul rename means it was renamed by a player and overrides spads
         consul_rename: false,
-        consul_balance: false,
+
+        # server rename means the server renamed it and overrides players
+        server_rename: false,
 
         # Meta data
         silence: false,
@@ -145,12 +148,6 @@ defmodule Teiserver.Battle.Lobby do
   defdelegate list_lobby_players!(id), to: LobbyCache
   defdelegate add_lobby(lobby), to: LobbyCache
   defdelegate close_lobby(lobby_id, reason \\ :closed), to: LobbyCache
-
-  # Refactor of above from when we called them battle
-  def update_battle(battle, data, reason), do: LobbyCache.update_lobby(battle, data, reason)
-  def get_battle(lobby_id), do: LobbyCache.get_lobby(lobby_id)
-  def add_battle(battle), do: LobbyCache.add_lobby(battle)
-
 
   @spec start_battle_lobby_throttle(T.lobby_id()) :: pid()
   def start_battle_lobby_throttle(battle_lobby_id) do
@@ -219,12 +216,6 @@ defmodule Teiserver.Battle.Lobby do
 
       PubSub.broadcast(
         Central.PubSub,
-        "teiserver_client_action_updates:#{userid}",
-        {:client_action, :join_lobby, userid, lobby_id}
-      )
-
-      PubSub.broadcast(
-        Central.PubSub,
         "teiserver_client_messages:#{userid}",
         %{
           channel: "teiserver_client_messages:#{userid}",
@@ -289,12 +280,6 @@ defmodule Teiserver.Battle.Lobby do
 
         PubSub.broadcast(
           Central.PubSub,
-          "teiserver_client_action_updates:#{userid}",
-          {:client_action, :leave_lobby, userid, lobby_id}
-        )
-
-        PubSub.broadcast(
-          Central.PubSub,
           "legacy_all_battle_updates",
           {:remove_user_from_battle, userid, lobby_id}
         )
@@ -322,7 +307,6 @@ defmodule Teiserver.Battle.Lobby do
           nil
 
         :removed ->
-          LobbyChat.persist_system_message("#{user.name} was kicked from the battle", lobby_id)
           Coordinator.cast_consul(lobby_id, {:user_kicked, userid})
 
           PubSub.broadcast(
@@ -391,7 +375,7 @@ defmodule Teiserver.Battle.Lobby do
   @spec do_remove_user_from_lobby(integer(), integer()) ::
           :closed | :removed | :not_member | :no_battle
   defp do_remove_user_from_lobby(userid, lobby_id) do
-    battle = get_battle(lobby_id)
+    battle = get_lobby(lobby_id)
     Client.leave_battle(userid)
     Battle.remove_user_from_lobby(userid, lobby_id)
 
@@ -423,11 +407,16 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec rename_lobby(T.lobby_id(), String.t()) :: :ok
   @spec rename_lobby(T.lobby_id(), String.t(), boolean) :: :ok
-  def rename_lobby(lobby_id, new_name, consul_rename \\ false) do
+  @spec rename_lobby(T.lobby_id(), String.t(), boolean, boolean) :: :ok
+  def rename_lobby(lobby_id, new_name, consul_rename \\ false, server_rename \\ false) do
     case Battle.lobby_exists?(lobby_id) do
       false -> nil
       true ->
-        Battle.update_lobby_values(lobby_id, %{name: new_name, consul_rename: consul_rename})
+        Battle.update_lobby_values(lobby_id, %{
+          name: new_name,
+          consul_rename: consul_rename,
+          server_rename: server_rename
+        })
     end
 
     :ok
@@ -443,10 +432,22 @@ defmodule Teiserver.Battle.Lobby do
     LobbyCache.remove_start_area(lobby_id, team_id)
   end
 
-  @spec silence_lobby(T.lobby() | T.lobby_id()) :: T.lobby()
-  def silence_lobby(lobby_id) when is_integer(lobby_id), do: silence_lobby(get_lobby(lobby_id))
-  def silence_lobby(lobby) do
-    update_lobby(%{lobby | silence: true}, nil, :silence)
+  @spec lock_lobby(T.lobby_id()) :: :ok | nil
+  def lock_lobby(lobby_id) when is_integer(lobby_id) do
+    Battle.update_lobby_values(lobby_id, %{locked: true})
+  end
+
+  @spec unlock_lobby(T.lobby_id()) :: :ok | nil
+  def unlock_lobby(lobby_id) when is_integer(lobby_id) do
+    Battle.update_lobby_values(lobby_id, %{locked: true})
+  end
+
+  @spec silence_lobby(T.lobby() | T.lobby_id()) :: :ok
+  def silence_lobby(lobby_id) when is_integer(lobby_id) do
+    Battle.update_lobby_values(lobby_id, %{silence: true})
+  end
+  def silence_lobby(%{id: lobby_id}) do
+    Battle.update_lobby_values(lobby_id, %{silence: true})
   end
 
   @spec unsilence_lobby(T.lobby() | T.lobby_id()) :: T.lobby()
@@ -459,9 +460,45 @@ defmodule Teiserver.Battle.Lobby do
           {:failure, String.t()} | {:waiting_on_host, String.t()}
   def can_join?(userid, lobby_id, password \\ nil, script_password \\ nil) do
     lobby_id = int_parse(lobby_id)
-    battle = get_battle(lobby_id)
+    server_result = server_allows_join?(userid, lobby_id, password)
+
+    if server_result == true do
+      script_password = if script_password == nil, do: new_script_password(), else: script_password
+      lobby = get_lobby(lobby_id)
+      if lobby != nil do
+        case Account.get_client_by_id(lobby.founder_id) do
+          nil ->
+            {:failure, "Battle closed"}
+
+          host_client ->
+            # TODO: Depreciate
+            send(host_client.tcp_pid, {:request_user_join_lobby, userid})
+
+            PubSub.broadcast(
+              Central.PubSub,
+              "teiserver_lobby_host_message:#{lobby_id}",
+              %{
+                channel: "teiserver_lobby_host_message:#{lobby_id}",
+                event: :user_requests_to_join,
+                lobby_id: lobby_id,
+                userid: userid,
+                script_password: script_password
+              }
+            )
+            {:waiting_on_host, script_password}
+        end
+      else
+        {:failure, "No lobby found (type 2)"}
+      end
+    else
+      server_result
+    end
+  end
+
+  @spec server_allows_join?(Types.userid(), integer(), String.t() | nil) :: {:failure, String.t()} | true
+  def server_allows_join?(userid, lobby_id, password \\ nil) do
+    lobby = get_lobby(lobby_id)
     user = Account.get_user_by_id(userid)
-    script_password = if script_password == nil, do: new_script_password(), else: script_password
 
     # In theory this would never happen but it's possible to see this at startup when
     # not everything is loaded and ready, hence the case statement
@@ -488,13 +525,13 @@ defmodule Teiserver.Battle.Lobby do
       user == nil ->
         {:failure, "You are not a user"}
 
-      battle == nil ->
-        {:failure, "No battle found"}
+      lobby == nil ->
+        {:failure, "No lobby found (type 1)"}
 
-       battle.locked == true and ignore_locked == false ->
+       lobby.locked == true and ignore_locked == false ->
         {:failure, "Battle locked"}
 
-      battle.password != nil and password != battle.password and not ignore_password ->
+      lobby.password != nil and password != lobby.password and not ignore_password ->
         {:failure, "Invalid password"}
 
       consul_response == false ->
@@ -504,28 +541,7 @@ defmodule Teiserver.Battle.Lobby do
         {:failure, "You are currently banned from joining lobbies"}
 
       true ->
-        # Okay, so far so good, what about the host? Are they okay with it?
-        case Client.get_client_by_id(battle.founder_id) do
-          nil ->
-            {:failure, "Battle closed"}
-
-          host_client ->
-            # TODO: Depreciate
-            send(host_client.tcp_pid, {:request_user_join_lobby, userid})
-
-            PubSub.broadcast(
-              Central.PubSub,
-              "teiserver_lobby_host_message:#{lobby_id}",
-              %{
-                channel: "teiserver_lobby_host_message:#{lobby_id}",
-                event: :user_requests_to_join,
-                lobby_id: lobby_id,
-                userid: userid,
-                script_password: script_password
-              }
-            )
-            {:waiting_on_host, script_password}
-        end
+        true
     end
   end
 
@@ -616,7 +632,7 @@ defmodule Teiserver.Battle.Lobby do
   def allow?(_userid, :host, _), do: true
 
   def allow?(changer, field, lobby_id) when is_integer(lobby_id),
-    do: allow?(changer, field, get_battle(lobby_id))
+    do: allow?(changer, field, get_lobby(lobby_id))
 
   def allow?(changer_id, field, battle) when is_integer(changer_id),
     do: allow?(Client.get_client_by_id(changer_id), field, battle)

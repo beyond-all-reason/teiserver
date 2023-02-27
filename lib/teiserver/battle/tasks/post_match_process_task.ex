@@ -1,4 +1,7 @@
 defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
+  @moduledoc """
+  Used to process data about a match after it has ended.
+  """
   use Oban.Worker, queue: :teiserver
 
   alias Teiserver.{Battle, User, Coordinator}
@@ -65,8 +68,9 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
       |> Map.new(fn stats -> {stats["name"], stats["win"] == 1} end)
 
     host_game_duration = max(export_data["gameDuration"], 1)
+    memberships = Battle.list_match_memberships(search: [match_id: match.id])
 
-    winning_team = Battle.list_match_memberships(search: [match_id: match.id])
+    winning_team = memberships
     |> Enum.map(fn m ->
       username = User.get_username(m.user_id)
       win = Map.get(win_map, username, false)
@@ -112,6 +116,11 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
     |> elem(0)
 
     Battle.update_match(match, %{winning_team: winning_team, game_duration: host_game_duration})
+
+    memberships
+    |> Enum.map(fn m ->
+      Teiserver.Account.RecacheUserStatsTask.match_processed(match, m.user_id)
+    end)
   end
   defp use_export_data(_), do: []
 

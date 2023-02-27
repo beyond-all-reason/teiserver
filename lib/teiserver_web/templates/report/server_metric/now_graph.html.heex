@@ -81,7 +81,7 @@
                     %{id: "60", name: "60"},
                     %{id: "180", name: "180 (3 hours)"},
                     %{id: "720", name: "720 (12 hours)"},
-                    %{id: "1440", name: "1440 (24 days)"}
+                    %{id: "1440", name: "1440 (24 hours)"}
                   ],
                   selected: Map.get(@params, "minutes", "30")
                 %>
@@ -110,20 +110,20 @@
               </div>
             </div>
           </form>
-        
+
           <div class="col-md-12 col-lg-6">
             <div id="chart_players" class='with-transitions chart-div'></div>
 
             <div id="chart_matches" class='with-transitions chart-div'></div>
-            
+
             <div id="chart_matches_start_stop" class='with-transitions chart-div'></div>
           </div>
 
           <div class="col-md-12 col-lg-6">
             <div id="chart_user_connections" class='with-transitions chart-div'></div>
-            
+
             <div id="chart_bot_connections" class='with-transitions chart-div'></div>
-            
+
             <div id="chart_cpu" class='with-transitions chart-div'></div>
           </div>
         </div>

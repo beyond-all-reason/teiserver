@@ -1,7 +1,7 @@
 defmodule Teiserver.HookServer do
   use GenServer
   alias Phoenix.PubSub
-  alias Teiserver.Coordinator
+  require Logger
 
   def start_link(opts \\ []) do
     GenServer.start_link(__MODULE__, nil, opts)
@@ -11,30 +11,18 @@ defmodule Teiserver.HookServer do
   def handle_info(%{channel: "global_moderation"} = data, state) do
     case data.event do
       :new_report ->
-        # Coordinator.create_report(payload)# This DMs the user saying thank you for submitting it, we don't need that any more as it's done via the website
-
-        Teiserver.Bridge.DiscordBridge.new_report(data.report)
-
-        # Teiserver.User.create_report(payload, reason) # Reports used to have action, we don't need this at this point
-
-      :updated_report ->
-        :ok
+        if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
+          Teiserver.Bridge.DiscordBridge.new_report(data.report)
+        end
 
       :new_action ->
-        # Coordinator.update_report(payload, reason)
-        # Teiserver.Bridge.DiscordBridge.report_updated(payload, reason)
-        # Teiserver.User.update_report(payload, reason)
-
-        # Teiserver.Bridge.DiscordBridge.new_action(data.report)
-        :ok
+        if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
+          Teiserver.Bridge.DiscordBridge.new_action(data.action)
+        end
+        Teiserver.User.new_moderation_action(data.action)
 
       :updated_action ->
-        # Coordinator.update_report(payload, reason)
-        # Teiserver.Bridge.DiscordBridge.report_updated(payload, reason)
-        # Teiserver.User.update_report(payload, reason)
-
-        # Teiserver.Bridge.DiscordBridge.updated_action(data.report)
-        :ok
+        Teiserver.User.updated_moderation_action(data.action)
 
       :new_proposal ->
         :ok
@@ -45,6 +33,9 @@ defmodule Teiserver.HookServer do
       :new_ban ->
         :ok
 
+      event ->
+        Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line} - No handler for event '#{event}'")
+        :ok
     end
 
     {:noreply, state}
@@ -85,8 +76,11 @@ defmodule Teiserver.HookServer do
     {:noreply, state}
   end
 
-  def handle_info({:application, app_event}, state) do
+  def handle_info(%{channel: "application", event: app_event}, state) do
     case app_event do
+      :started ->
+        :ok
+
       :prep_stop ->
         # Currently we don't do anything but we will
         # later want to tell each client everything is stopping for a
@@ -96,7 +90,7 @@ defmodule Teiserver.HookServer do
           "teiserver_server",
           %{
             channel: "teiserver_server",
-            event: "stop",
+            event: :prep_stop,
             node: Node.self()
           }
         )

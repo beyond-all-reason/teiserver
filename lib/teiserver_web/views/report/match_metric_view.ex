@@ -25,14 +25,4 @@ defmodule TeiserverWeb.Report.MatchMetricView do
     until = Timex.shift(now, seconds: s)
     time_until(until, now)
   end
-
-  def round(value, decimal_places) do
-    dp_mult = :math.pow(10, decimal_places)
-    round(value * dp_mult)/dp_mult
-  end
-
-  @spec percent(number) :: integer
-  def percent(v) do
-    round(v * 100)
-  end
 end

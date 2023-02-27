@@ -3,6 +3,7 @@ defmodule Teiserver.Account.OpenSkillReport do
 
   alias Teiserver.Game.MatchRatingLib
   alias Central.Repo
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-chart-line"
@@ -14,32 +15,48 @@ defmodule Teiserver.Account.OpenSkillReport do
   def run(_conn, params) do
     params = apply_defaults(params)
 
-    rating_type_id = MatchRatingLib.rating_type_name_lookup()[params["rating_type"]]
-    metrics_column_name = convert_metrics_name_to_db_column_name(params["metrics"])
+    last_active = case params["last_active"] do
+      "Forever" -> Timex.today() |> Timex.shift(years: -1000) |> Timex.to_datetime()
+      "7 days" -> Timex.today() |> Timex.shift(days: -7) |> Timex.to_datetime()
+      "31 days" -> Timex.today() |> Timex.shift(days: -31) |> Timex.to_datetime()
+      "180 days" -> Timex.today() |> Timex.shift(days: -180) |> Timex.to_datetime()
+    end
 
-    data = query_data(metrics_column_name, rating_type_id)
+    uncertainty = params["uncertainty"] |> int_parse
+
+    rating_type_id = MatchRatingLib.rating_type_name_lookup()[params["rating_type"]]
+    metric_column_name = convert_metric_name_to_db_column_name(params["metric"])
+
+    data = query_data(metric_column_name, rating_type_id, last_active, uncertainty)
 
     assigns = %{
-      params: params
+      params: params,
+      results: data
     }
 
-    {data, assigns}
+    {nil, assigns}
   end
 
-  defp query_data(metrics_column_name, rating_type_id) do
+  defp query_data(metric_column_name, rating_type_id, last_active, uncertainty) do
     query = """
-    SELECT ROUND(#{metrics_column_name}) #{metrics_column_name}_rounded, COUNT(user_id) #{metrics_column_name}
+    SELECT
+      ROUND(#{metric_column_name}) #{metric_column_name}_rounded,
+      COUNT(user_id) #{metric_column_name}
     FROM
       teiserver_account_ratings
     WHERE
       rating_type_id = #{rating_type_id}
+    AND
+      last_updated >= $1
+    AND
+      uncertainty <= $2
     GROUP BY
-    #{metrics_column_name}_rounded
+      #{metric_column_name}_rounded
     ORDER BY
-    #{metrics_column_name}_rounded
+      #{metric_column_name}_rounded
     """
 
-    case Ecto.Adapters.SQL.query(Repo, query, []) do
+    case Ecto.Adapters.SQL.query(Repo, query, [last_active, uncertainty]) do
       {:ok, results} ->
         [results.columns | results.rows]
 
@@ -52,15 +69,17 @@ defmodule Teiserver.Account.OpenSkillReport do
     Map.merge(
       %{
         "rating_type" => "Team",
-        "metrics" => "Rating"
+        "metric" => "Rating",
+        "last_active" => "7 days",
+        "uncertainty" => "5"
       },
       Map.get(params, "report", %{})
     )
   end
 
-  defp convert_metrics_name_to_db_column_name("Rating"), do: "rating_value"
-  defp convert_metrics_name_to_db_column_name("Skill"), do: "skill"
-  defp convert_metrics_name_to_db_column_name("Uncertainty"), do: "uncertainty"
-  defp convert_metrics_name_to_db_column_name("Leaderboard Rating"), do: "leaderboard_rating"
-  defp convert_metrics_name_to_db_column_name(unhandled_rating_metrics), do: Logger.error("use of unhandled rating metrics: #{unhandled_rating_metrics}")
+  defp convert_metric_name_to_db_column_name("Rating"), do: "rating_value"
+  defp convert_metric_name_to_db_column_name("Skill"), do: "skill"
+  defp convert_metric_name_to_db_column_name("Uncertainty"), do: "uncertainty"
+  defp convert_metric_name_to_db_column_name("Leaderboard Rating"), do: "leaderboard_rating"
+  defp convert_metric_name_to_db_column_name(unhandled_rating_metric), do: Logger.error("use of unhandled rating metric: #{unhandled_rating_metric}")
 end

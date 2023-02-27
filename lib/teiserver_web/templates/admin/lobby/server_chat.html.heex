@@ -23,16 +23,22 @@
             <i class="fa-fw fa-regular fa-server"></i>
             Server grouping
           </a>
-          
-          <%= if (not @last_page or @page != 0) and allow?(@conn, "admin.dev") do %>
+
+          <%= if (not @last_page or @page != 0) do %>
             <a href={Routes.ts_admin_lobby_path(@conn, :server_chat, @server_uuid, "all")} class="btn btn-outline-secondary">
               <i class='fa-fw fa-solid fa-list'></i>
               &nbsp;
               Full chat
             </a>
           <% end %>
+
+          <a href={Routes.ts_admin_lobby_path(@conn, :server_chat_download, @server_uuid)} class="btn btn-outline-secondary">
+            <i class='fa-fw fa-solid fa-download'></i>
+            &nbsp;
+            Download
+          </a>
         </div>
-      
+
         <h4>Lobby chat - Page <%= @page + 1 %></h4>
         Oldest chat at the top (read top to bottom)
 
@@ -59,7 +65,7 @@
                   </a>
                 </td>
                 <td class="message"><%= msg.content %></td>
-                <td class="d-none d-lg-block"><%= date_to_str(msg.inserted_at, :hms_dmy) %></td>
+                <td class="d-none d-lg-block"><%= date_to_str(msg.inserted_at, :ymd_hms) %></td>
               </tr>
             <% end %>
           </tbody>
@@ -71,7 +77,7 @@
             <textarea rows="8" cols="40" class="form-control"><%= for msg <- @chat_messages do %>
   <%= msg.user.name %>: <%= msg.content %><% end %></textarea>
           </div>
-  
+
           <div class="col-md-6">
             Discord formatted:
             <textarea rows="8" cols="40" class="form-control"><%= for msg <- @chat_messages do %>

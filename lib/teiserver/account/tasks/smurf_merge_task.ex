@@ -3,40 +3,40 @@ defmodule Teiserver.Account.SmurfMergeTask do
   alias Teiserver.Battle.BalanceLib
   require Logger
   alias Teiserver.Data.Types, as: T
-  alias Central.Repo
+  # alias Central.Repo
 
   @spec perform(T.userid(), T.userid(), map()) :: :ok
   def perform(from_id, to_id, settings) do
     merge_ratings(from_id, to_id, settings["ratings"])
-    merge_reports(from_id, to_id, settings["reports"])
+    # merge_actions(from_id, to_id, settings["reports"])
     merge_names(from_id, to_id, settings["names"])
     merge_mutes(from_id, to_id, settings["mutes"])
 
     :ok
   end
 
-  defp merge_reports(from_id, to_id, "true") do
-    fields = ~w(target_id location location_id reason reporter_id response_text response_action followup code_references action_data responded_at expires responder_id inserted_at updated_at)a
+  # defp merge_actions(from_id, to_id, "true") do
+  #   fields = ~w(target_id location location_id reason reporter_id response_text response_action followup code_references action_data responded_at expires responder_id inserted_at updated_at)a
 
-    new_reports = Account.list_reports(
-      search: [target_id: from_id],
-      limit: :infinity
-    )
-      |> Enum.map(fn report ->
-        fields
-          |> Map.new(fn k ->
-            {k, Map.get(report, k)}
-          end)
-          |> Map.put(:target_id, to_id)
-      end)
+  #   new_reports = Account.list_reports(
+  #     search: [target_id: from_id],
+  #     limit: :infinity
+  #   )
+  #     |> Enum.map(fn report ->
+  #       fields
+  #         |> Map.new(fn k ->
+  #           {k, Map.get(report, k)}
+  #         end)
+  #         |> Map.put(:target_id, to_id)
+  #     end)
 
-    Ecto.Multi.new()
-      |> Ecto.Multi.insert_all(:insert_all, Central.Account.Report, new_reports)
-      |> Repo.transaction()
+  #   Ecto.Multi.new()
+  #     |> Ecto.Multi.insert_all(:insert_all, Central.Account.Report, new_reports)
+  #     |> Repo.transaction()
 
-    :ok
-  end
-  defp merge_reports(_from_id, _to_id, "false"), do: :ok
+  #   :ok
+  # end
+  # defp merge_actions(_from_id, _to_id, "false"), do: :ok
 
   @spec merge_ratings(T.userid(), T.userid(), String.t()) :: :ok
   defp merge_ratings(_from_id, _to_id, "false"), do: :ok

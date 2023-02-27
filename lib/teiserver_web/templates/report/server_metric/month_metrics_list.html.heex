@@ -12,7 +12,7 @@
             active: "month_metrics"
           })
         %>
-        
+
         <a href={Routes.ts_reports_match_metric_path(@conn, :month_metrics_list)} class={"btn float-end btn-outline-#{TeiserverWeb.Report.MatchMetricView.view_colour}"}>
           <%= central_component "icon", icon: TeiserverWeb.Report.MatchMetricView.icon %>
           &nbsp;
@@ -27,7 +27,7 @@
             No month by month metric logs found
           <% end %>
         </h4>
-        <table class="table">
+        <table class="table table-sm">
           <thead>
             <tr>
               <th>Year</th>

@@ -59,6 +59,22 @@ defmodule Teiserver.Account.ClientLib do
     call_client(userid, {:change_party, party_id})
   end
 
+  # Queues
+  @spec add_client_to_queue(T.userid(), T.queue_id()) :: :ok | nil
+  def add_client_to_queue(userid, queue_id) do
+    cast_client(userid, {:add_to_queue, queue_id})
+  end
+
+  @spec remove_client_from_queue(T.userid(), T.queue_id()) :: :ok | nil
+  def remove_client_from_queue(userid, queue_id) do
+    cast_client(userid, {:remove_from_queue, queue_id})
+  end
+
+  @spec remove_client_from_all_queues(T.userid()) :: :ok | nil
+  def remove_client_from_all_queues(userid) do
+    cast_client(userid, :remove_from_all_queues)
+  end
+
   # Updates
   @spec merge_update_client(Map.t()) :: nil | :ok
   def merge_update_client(%{userid: userid} = partial_client) do
@@ -158,48 +174,6 @@ defmodule Teiserver.Account.ClientLib do
 
     client
   end
-
-  # def replace_update_client(%{userid: userid} = client, reason) do
-  #   # Update the process with it
-  #   cast_client(userid, {:update_client, client})
-
-  #   if reason != :silent do
-  #     PubSub.broadcast(Central.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
-
-  #     if client.lobby_id do
-  #       PubSub.broadcast(
-  #         Central.PubSub,
-  #         "teiserver_lobby_updates:#{client.lobby_id}",
-  #         {:lobby_update, :updated_client_battlestatus, client.lobby_id, {client, reason}}
-  #       )
-
-  #       if client.lobby_host do
-  #         case Battle.get_lobby(client.lobby_id) do
-  #           nil -> :ok
-  #           lobby ->
-  #             case {lobby.in_progress, client.in_game} do
-  #               {true, false} ->
-  #                 new_lobby = %{lobby |
-  #                   in_progress: false,
-  #                   started_at: nil
-  #                 }
-  #                 Battle.update_lobby(new_lobby, nil, :host_updated_clientstatus)
-  #               {false, true} ->
-  #                 new_lobby = %{lobby |
-  #                   in_progress: true,
-  #                   started_at: System.system_time(:second)
-  #                 }
-  #                 Battle.update_lobby(new_lobby, nil, :host_updated_clientstatus)
-  #               _ ->
-  #                 :ok
-  #             end
-  #         end
-  #       end
-  #     end
-  #   end
-
-  #   client
-  # end
 
   # Process stuff
   @spec start_client_server(T.lobby()) :: pid()

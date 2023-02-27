@@ -75,14 +75,23 @@
     %>
   <% end %>
 
+  <%= if allow_any?(@conn, ~w(teiserver.reports teiserver.staff)) do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Game.AchievementTypeLib.icon(),
+      name: "achievements",
+      text: "Achievements",
+      icon_class: "fa-duotone",
+      link: Routes.ts_admin_achievement_path(@conn, :index)
+    %>
+  <% end %>
+
   <%= if allow?(@conn, "teiserver.admin") do %>
     <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: Teiserver.Account.BadgeTypeLib.icon(), text: "Badge types", link: Routes.ts_admin_badge_type_path(@conn, :index) %>
   <% end %>
 </div>
 
 <div class="row">
-
-
   <%= if allow_any?(@conn, ~w(teiserver.reports teiserver.staff)) do %>
     <%=
       central_component "menu_card",

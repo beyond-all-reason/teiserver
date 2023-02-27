@@ -4,6 +4,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
   require Logger
 
   alias Teiserver
+  alias Teiserver.Account
   alias Teiserver.Data.Matchmaking
   alias Teiserver.Game.QueueLib
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -34,19 +35,21 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
       |> assign(:messages, [])
       |> assign(:extra_menu_content, extra_content)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, :standard_live}}
   end
 
   @impl true
   def handle_params(%{"id" => id}, _opts, socket) do
-    case allow?(socket.assigns[:current_user], "teiserver.staff.moderator") do
-      true ->
+    # case allow?(socket.assigns[:current_user], "teiserver.staff.moderator") do
+    #   true ->
         id = int_parse(id)
-        PubSub.subscribe(Central.PubSub, "teiserver_queue_wait:#{id}")
+        PubSub.subscribe(Central.PubSub, "teiserver_queue:#{id}")
         queue = Matchmaking.get_queue(id)
 
-        wait_pid = Matchmaking.get_queue_wait_pid(id)
-        queue_state = :sys.get_state(wait_pid)
+        queue_state = if allow?(socket, "admin.dev.developer") do
+          wait_pid = Matchmaking.get_queue_wait_pid(id)
+          :sys.get_state(wait_pid)
+        end
 
         case queue do
           nil ->
@@ -57,38 +60,56 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
           _ ->
             {:noreply,
             socket
-            |> assign(:page_title, page_title(socket.assigns.live_action))
-            |> add_breadcrumb(name: queue.name, url: "/teiserver/admin/queues/#{id}")
-            |> assign(:id, id)
-            |> assign(:queue, queue)
-            |> assign(:queue_state, queue_state)}
+              |> assign(:page_title, page_title(socket.assigns.live_action))
+              |> add_breadcrumb(name: queue.name, url: "/teiserver/admin/queues/#{id}")
+              |> assign(:id, id)
+              |> assign(:queue, queue)
+              |> assign(:queue_state, queue_state)
+              |> assign_group_id
+              |> assign_queue_info
+            }
         end
-      false ->
-        {:noreply,
-         socket
-         |> redirect(to: Routes.general_page_path(socket, :index))}
-    end
+    #   false ->
+    #     {:noreply,
+    #      socket
+    #      |> redirect(to: Routes.general_page_path(socket, :index))}
+    # end
   end
 
   @impl true
-  def handle_info(_msg, %{assigns: assigns} = socket) do
-    wait_pid = Matchmaking.get_queue_wait_pid(assigns.id)
+  def handle_info(%{channel: "teiserver_queue:" <> _}, %{assigns: assigns} = socket) do
+    queue_state = if allow?(assigns.current_user, "admin.dev.developer") do
+      wait_pid = Matchmaking.get_queue_wait_pid(assigns.id)
+      :sys.get_state(wait_pid)
+    end
 
     {:noreply,
       socket
-      |> assign(:queue_state, :sys.get_state(wait_pid))
+        |> assign(:queue_state, queue_state)
+        |> assign_group_id
+        |> assign_queue_info
     }
   end
 
+  defp assign_group_id(socket) do
+    client = Account.get_client_by_id(socket.assigns.current_user.id)
+    group_id = case client do
+      nil -> nil
+      %{party_id: nil} -> client.userid
+      %{party_id: party_id} -> party_id
+    end
+
+    socket
+      |> assign(group_id: group_id)
+  end
+
+  defp assign_queue_info(%{assigns: %{id: queue_id, group_id: group_id}} = socket) do
+    queue_info = Matchmaking.get_queue_info_for_group(queue_id, group_id)
+
+    socket
+      |> assign(queue_info: queue_info)
+      |> assign(system_time: System.system_time(:second))
+  end
+
   defp page_title(:show), do: "Show Queue"
-  # defp index_redirect(socket) do
-  #   {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
-  # end
-  # defp maybe_index_redirect(socket) do
-  #   if socket.assigns[:battle] == nil do
-  #     index_redirect(socket)
-  #   else
-  #     socket
-  #   end
-  # end
 end

@@ -9,6 +9,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   alias Central.Config
   require Logger
   alias Teiserver.Data.Types, as: T
+  alias Nostrum.Api
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -30,13 +31,11 @@ defmodule Teiserver.Bridge.BridgeServer do
     user = User.get_user_by_id(userid)
 
     cond do
-      user.discord_dm_channel == nil -> nil
+      user.discord_dm_channel == nil ->
+        nil
       true ->
-        Alchemy.Client.send_message(
-          user.discord_dm_channel,
-          message,
-          []# Options
-        )
+        channel_id = user.discord_dm_channel
+        Api.create_message(channel_id, message)
     end
   end
 
@@ -107,6 +106,9 @@ defmodule Teiserver.Bridge.BridgeServer do
       message_contains?(message, "https:") ->
         nil
 
+      message_starts_with?(message, "/") ->
+        nil
+
       User.is_restricted?(user, ["Bridging"]) ->
         # Non-bridged user, ignore it
         nil
@@ -157,17 +159,13 @@ defmodule Teiserver.Bridge.BridgeServer do
   def handle_info(%{channel: "teiserver_client_messages:" <> _}, state), do: {:noreply, state}
 
 
-  def handle_info({:application, :prep_stop}, state) do
+  def handle_info(%{channel: "teiserver_server", event: :started}, state) do
     channels = Application.get_env(:central, DiscordBridge)[:bridges]
       |> Enum.filter(fn {_, name} -> name == "server-updates" end)
 
     case channels do
       [{channel_id, _}] ->
-        Alchemy.Client.send_message(
-          channel_id,
-          "Teiserver shutdown for node #{Teiserver.node_name()}",
-          []# Options
-        )
+        Api.create_message(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
       _ ->
         :ok
     end
@@ -175,7 +173,48 @@ defmodule Teiserver.Bridge.BridgeServer do
     {:noreply, state}
   end
 
-  def handle_info({:application, _}, state), do: {:noreply, state}
+  def handle_info(%{channel: "teiserver_server", event: :prep_stop}, state) do
+    channels = Application.get_env(:central, DiscordBridge)[:bridges]
+      |> Enum.filter(fn {_, name} -> name == "server-updates" end)
+
+    case channels do
+      [{channel_id, _}] ->
+        Api.create_message(channel_id, "Teiserver shutdown for node #{Teiserver.node_name()}")
+      _ ->
+        :ok
+    end
+
+    {:noreply, state}
+  end
+
+  def handle_info(%{channel: "teiserver_server"}, state), do: {:noreply, state}
+
+  # pid = Teiserver.Bridge.BridgeServer.get_bridge_pid()
+  # send(pid, :gdt_check)
+  def handle_info(:gdt_check, state) do
+    Api.list_guild_threads(Application.get_env(:central, DiscordBridge)[:guild_id])
+
+    # Api.list_joined_private_archived_threads(channel_id)
+    # When a thread in 👇｜game-design-team has gone 48 hours without any new messages:
+    # 1. Lock the thread
+    # 2. Create a thread in ☝｜game-design-voting with the same name and (Vote) appended to the end
+    # 3. In the first message of the thread, ping the Admins and Game Design Team roles, and if possible, copy the content of the first post in the original thread
+
+    # When a thread in ☝｜game-design-voting has gone 48 hours without any new messages:
+    # 1. Create a poll for the members of the GDC to vote on, with the options being Accept and Reject, since making context aware voting options is probably too complicated
+    # 2. Ping the Game Design Team role to vote
+    # For threads in 💡｜suggestions , we haven't agreed on a process yet, which we'll need to do before we can get a bot to do what we want
+
+
+
+    # # Currently having an issue where I can't get the ID for the emoji
+    # # luckily we can just put the emjoi character in and it should work
+    # Nostrum.Api.create_reaction(thread.id, message.id, "👍")
+    # Nostrum.Api.create_reaction(thread.id, message.id, "👎")
+    # Nostrum.Api.create_reaction(thread.id, message.id, "👐")
+
+    {:noreply, state}
+  end
 
   # Catchall handle_info
   def handle_info(msg, state) do
@@ -186,6 +225,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   defp is_promo?(message) do
     regexes = [
       Regex.run(~r/\+\d+( more|needed)?$/, message),
+      Regex.run(~r/\d+ more needed$/, message),
       Regex.run(~r/\d+\+? (more )?for \d(v|vs)\d/, message),
       Regex.run(~r/(more|needed) for \d(v|vs)\d/, message),
       Regex.run(~r/\d needed/, message)
@@ -226,26 +266,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
     end)
 
-    # Startup message
-    channels = Application.get_env(:central, DiscordBridge)[:bridges]
-      |> Enum.filter(fn {_, name} -> name == "server-updates" end)
-
-    # node_start_time = Central.cache_get(:application_metadata_cache, :node_startup_datetime)
-    # diff_ms = Timex.diff(Timex.now(), node_start_time, :milliseconds)
-
-    case channels do
-      [{channel_id, _}] ->
-        Logger.info("Discord connected, posting startup message")
-        Alchemy.Client.send_message(
-          channel_id,
-          "Teiserver startup for node #{Teiserver.node_name()}",
-          []# Options
-        )
-      _ ->
-        :ok
-    end
-
-    :ok = PubSub.subscribe(Central.PubSub, "application")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
 
     state
@@ -257,11 +278,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     new_message = message
       |> convert_emoticons
 
-    Alchemy.Client.send_message(
-      channel,
-      "**#{author}**: #{new_message}",
-      []# Options
-    )
+    Api.create_message(channel, "**#{author}**: #{new_message}")
   end
 
   defp convert_emoticons(message) do
@@ -316,12 +333,10 @@ defmodule Teiserver.Bridge.BridgeServer do
   def change_channel_name(_, ""), do: false
   def change_channel_name("", _), do: false
   def change_channel_name(channel_id, new_name) do
-    case Alchemy.Client.get_channel(channel_id) do
-      {:ok, _channel} ->
-        Alchemy.Client.edit_channel(channel_id, name: new_name)
-      _ ->
-        false
-    end
+    Api.modify_channel(channel_id, %{
+      name: new_name
+    })
+    false
   end
 
   @spec make_password() :: String.t
@@ -341,13 +356,22 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
   defp message_contains?(message, contains), do: String.contains?(message, contains)
 
+  defp message_starts_with?(messages, text) when is_list(messages) do
+    messages
+    |> Enum.filter(fn m -> String.starts_with?(m, text) end)
+    |> Enum.any?
+  end
+  defp message_starts_with?(message, text), do: String.starts_with?(message, text)
+
   @impl true
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
     if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
       send(self(), :begin)
     end
+
     Central.cache_put(:application_metadata_cache, "teiserver_bridge_pid", self())
+
     Horde.Registry.register(
       Teiserver.ServerRegistry,
       "BridgeServer",

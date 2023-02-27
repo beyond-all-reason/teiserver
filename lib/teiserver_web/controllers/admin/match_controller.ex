@@ -147,7 +147,7 @@ defmodule TeiserverWeb.Admin.MatchController do
   end
 
   @spec user_show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def user_show(conn, %{"user_id" => userid}) do
+  def user_show(conn, params = %{"user_id" => userid}) do
     matches = Battle.list_matches(
       search: [
         user_id: userid
@@ -156,7 +156,7 @@ defmodule TeiserverWeb.Admin.MatchController do
         :queue
       ],
       order_by: "Newest first",
-      limit: 100
+      limit: params["limit"] || 100
     )
 
     queues = Game.list_queues(order_by: "Name (A-Z)")

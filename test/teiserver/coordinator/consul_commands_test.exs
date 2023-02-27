@@ -3,6 +3,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   alias Teiserver.Battle.Lobby
   alias Teiserver.Account.ClientLib
   alias Teiserver.Common.PubsubListener
+  alias Teiserver.Game.MatchRatingLib
   alias Teiserver.{Account, Battle, User, Client, Coordinator}
   alias Teiserver.Coordinator.ConsulServer
 
@@ -52,6 +53,18 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     _tachyon_recv_until(hsocket)
 
     {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener}
+  end
+
+  defp make_rating(userid, rating_type_id, rating_value) do
+    {:ok, _} = Account.create_rating(%{
+      user_id: userid,
+      rating_type_id: rating_type_id,
+      rating_value: rating_value,
+      skill: rating_value,
+      uncertainty: 0,
+      leaderboard_rating: rating_value,
+      last_updated: Timex.now(),
+    })
   end
 
   test "non existent command", %{hsocket: hsocket} do
@@ -329,6 +342,9 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
       "sender_id" => host.id
     }
 
+    rating_type_id = MatchRatingLib.rating_type_name_lookup()["Duel"]
+    make_rating(player.id, rating_type_id, 20)
+
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$%explain"})
 
     [reply] = _tachyon_recv(hsocket)
@@ -357,6 +373,8 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
         "Tried grouped mode, got a deviation of 100 and reverted to solo mode",
         "Picked #{player.name} for team 1, adding 16.67 points for new total of 16.67",
         "Deviation of: 100",
+        "Team 1 - sum: 16.7, mean: 16.7, stdev: 0.0",
+        "Team 2 - sum: 0.0, mean: 0.0, stdev: 0.0",
         "Time taken: #{balance_result.time_taken}us",
         "---------------------------"
       ] |> Enum.join("\n"),
@@ -383,42 +401,148 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     }
   end
 
-  test "leveltoplay", %{lobby_id: lobby_id, hsocket: hsocket} do
-    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_play})
-    assert setting == 0
+  test "ratingtoplay", %{lobby_id: lobby_id, hsocket: hsocket} do
+    # Minimum
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_rating_to_play}) == 0
 
-    data = %{cmd: "c.lobby.message", message: "$leveltoplay 3"}
+    data = %{cmd: "c.lobby.message", message: "$minplaylevel 3"}
     _tachyon_send(hsocket, data)
     :timer.sleep(500)
 
-    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_play})
-    assert setting == 3
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_rating_to_play}) == 3
 
-    data = %{cmd: "c.lobby.message", message: "$leveltoplay Xy"}
+    data = %{cmd: "c.lobby.message", message: "$minplaylevel Xy"}
     _tachyon_send(hsocket, data)
     :timer.sleep(500)
 
-    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_play})
-    assert setting == 3
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_rating_to_play}) == 3
+
+    # Maximum
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_rating_to_play}) == 1000
+
+    data = %{cmd: "c.lobby.message", message: "$maxplaylevel 13"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_rating_to_play}) == 13
+
+    data = %{cmd: "c.lobby.message", message: "$maxplaylevel Xy"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_rating_to_play}) == 13
+
+    # Now try to set each the other side of the other
+    data = %{cmd: "c.lobby.message", message: "$maxplaylevel 1"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_rating_to_play}) == 4
+
+    data = %{cmd: "c.lobby.message", message: "$maxplaylevel 16"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_rating_to_play}) == 16
+
+    data = %{cmd: "c.lobby.message", message: "$minplaylevel 20"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_rating_to_play}) == 15
+
+    data = %{cmd: "c.lobby.message", message: "$setplaylevels 7 9"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_rating_to_play}) == 7
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_rating_to_play}) == 9
+
+    data = %{cmd: "c.lobby.message", message: "$setplaylevels 50 33"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_rating_to_play}) == 33
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_rating_to_play}) == 50
+
+    data = %{cmd: "c.lobby.message", message: "$resetplaylevels"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_rating_to_play}) == 0
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_rating_to_play}) == 1000
   end
 
-  test "leveltospectate", %{lobby_id: lobby_id, hsocket: hsocket} do
-    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_spectate})
-    assert setting == 0
+  test "ranktoplay", %{lobby_id: lobby_id, hsocket: hsocket} do
+    # Minimum
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_rank_to_play}) == 0
 
-    data = %{cmd: "c.lobby.message", message: "$leveltospectate 3"}
+    data = %{cmd: "c.lobby.message", message: "$minranklevel 3"}
     _tachyon_send(hsocket, data)
     :timer.sleep(500)
 
-    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_spectate})
-    assert setting == 3
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_rank_to_play}) == 3
 
-    data = %{cmd: "c.lobby.message", message: "$leveltospectate Xy"}
+    data = %{cmd: "c.lobby.message", message: "$minranklevel Xy"}
     _tachyon_send(hsocket, data)
     :timer.sleep(500)
 
-    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_spectate})
-    assert setting == 3
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_rank_to_play}) == 3
+
+    # Maximum
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_rank_to_play}) == 1000
+
+    data = %{cmd: "c.lobby.message", message: "$maxranklevel 13"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_rank_to_play}) == 13
+
+    data = %{cmd: "c.lobby.message", message: "$maxranklevel Xy"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_rank_to_play}) == 13
+
+    # Now try to set each the other side of the other
+    data = %{cmd: "c.lobby.message", message: "$maxranklevel 1"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_rank_to_play}) == 4
+
+    data = %{cmd: "c.lobby.message", message: "$maxranklevel 16"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_rank_to_play}) == 16
+
+    data = %{cmd: "c.lobby.message", message: "$minranklevel 20"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_rank_to_play}) == 15
+
+    data = %{cmd: "c.lobby.message", message: "$setranklevels 7 9"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_rank_to_play}) == 7
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_rank_to_play}) == 9
+
+    data = %{cmd: "c.lobby.message", message: "$setranklevels 50 33"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_rank_to_play}) == 33
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_rank_to_play}) == 50
+
+    data = %{cmd: "c.lobby.message", message: "$resetranklevels"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_rank_to_play}) == 0
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_rank_to_play}) == 1000
   end
 
   test "timeout", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
@@ -516,6 +640,8 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     # Add player2 to the battle but not player 3
     Lobby.add_user_to_battle(player2.id, lobby_id, "script_password")
+    Account.merge_update_client(player1.id, %{player: true})
+    Account.merge_update_client(player2.id, %{player: true})
 
     player1_client = Account.get_client_by_id(player1.id)
     player2_client = Account.get_client_by_id(player2.id)
@@ -661,7 +787,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert Battle.get_lobby(lobby_id).name == "New Lobby Name::?"
   end
 
-  test "password and password?", %{lobby_id: lobby_id, hsocket: hsocket} do
+  test "password? weth no password", %{lobby_id: lobby_id, hsocket: hsocket} do
     coordinator_id = Coordinator.get_coordinator_userid()
 
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$password?"})
@@ -673,58 +799,6 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     }
     assert Battle.get_lobby(lobby_id).password == nil
     assert Battle.get_lobby(lobby_id).passworded == false
-
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$password abcdef"})
-    [reply] = _tachyon_recv(hsocket)
-    assert reply == %{
-      "cmd" => "s.lobby.update_values",
-      "new_values" => %{"passworded" => true},
-      "lobby_id" => lobby_id
-    }
-    assert Battle.get_lobby(lobby_id).password == "abcdef"
-    assert Battle.get_lobby(lobby_id).passworded == true
-
-    [reply] = _tachyon_recv(hsocket)
-    assert reply == %{
-      "cmd" => "s.lobby.announce",
-      "message" => "Password updated",
-      "sender_id" => coordinator_id,
-      "lobby_id" => lobby_id
-    }
-
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$password?"})
-    [reply] = _tachyon_recv(hsocket)
-    assert reply == %{
-      "cmd" => "s.lobby.received_lobby_direct_announce",
-      "message" => "The lobby password is currently: abcdef",
-      "sender_id" => coordinator_id
-    }
-
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$password"})
-    [reply] = _tachyon_recv(hsocket)
-    assert reply == %{
-      "cmd" => "s.lobby.update_values",
-      "new_values" => %{"passworded" => false},
-      "lobby_id" => lobby_id
-    }
-    assert Battle.get_lobby(lobby_id).password == nil
-    assert Battle.get_lobby(lobby_id).passworded == false
-
-    [reply] = _tachyon_recv(hsocket)
-    assert reply == %{
-      "cmd" => "s.lobby.announce",
-      "message" => "Password removed",
-      "sender_id" => coordinator_id,
-      "lobby_id" => lobby_id
-    }
-
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$password?"})
-    [reply] = _tachyon_recv(hsocket)
-    assert reply == %{
-      "cmd" => "s.lobby.received_lobby_direct_announce",
-      "message" => "This lobby has no password set",
-      "sender_id" => coordinator_id
-    }
   end
 
   test "passthrough", %{hsocket: hsocket, listener: listener} do

@@ -20,7 +20,7 @@ defmodule Teiserver.EmailHelper do
         user_id: user.id
       })
 
-    message_id = UUID.uuid4()
+    message_id = "<#{UUID.uuid4()}@#{host}>"
 
     game_name = Application.get_env(:central, Teiserver)[:game_name]
     discord = Application.get_env(:central, Teiserver)[:discord]
@@ -32,11 +32,11 @@ defmodule Teiserver.EmailHelper do
       verification_code
     }</span><p>
 
-    <p>This game also has a <a href="#{website_url}">website</a> component.<p>
+    <p>To find out more about #{game_name} visit our <a href="#{website_url}">website</a> .<p>
 
     <p>Please also take time to read our <a href="#{website_url}/privacy_policy">privacy policy</a>.</p>
 
-    <p>If you have any questions please get in touch through the <a href="#{discord}">discord</a>.</p>
+    <p>If you experience any issues with registration or have other questions please get in touch through our <a href="#{discord}">discord</a>.</p>
     """
 
     text_body = """
@@ -44,11 +44,11 @@ defmodule Teiserver.EmailHelper do
 
     You will be asked for a verification code, it is: #{verification_code}
 
-    This client also has a website component at #{website_url}.<p>
+    To find out more about #{game_name} visit our website at #{website_url}.
 
     Please also take time to read our privacy policy at #{website_url}/privacy_policy.
 
-    If you have any questions please get in touch through the discord at #{discord}.
+    If you experience any issues with registration or have other questions please get in touch through our  discord at #{discord}.
     """
 
     date = TimexHelper.date_to_str(Timex.now(), format: :email_date)

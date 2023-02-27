@@ -6,7 +6,7 @@ You will need to install:
 - [Elixir/Erlang installed](https://elixir-lang.org/install.html).
 - [Postresql](https://www.postgresql.org/download).
 
-Make sure that Elixir is in correct version (currently 1.14). You can find required version [here](https://github.com/beyond-all-reason/teiserver/blob/master/mix.exs#L8).
+Make sure that Elixir is in correct version (currently using 1.13.2). You can find required version [here](https://github.com/beyond-all-reason/teiserver/blob/master/mix.exs#L8).
 You can use [asdf](https://github.com/asdf-vm/asdf) to install correct version.
 
 ### Clone repo
@@ -49,6 +49,20 @@ exit
 # this next command will perform database migrations
 mix ecto.create
 ```
+
+#### Protobuf
+sudo aptitude install -y protobuf-compiler
+
+Add this to your `.bashrc` or `.zshrc`.
+```bash
+PATH=~/.asdf/installs/elixir/1.13.2/.mix/escripts:$PATH
+```
+
+Then in your teiserver folder
+```bash
+protoc --elixir_out=./lib lib/teiserver/protocols/tachyon_v1/tachyonv1.proto
+```
+
 
 #### Localhost certs
 To run the TLS server locally you will also need to create localhost certificates in `priv/certs` using the following commands

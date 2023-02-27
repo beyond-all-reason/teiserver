@@ -28,7 +28,15 @@
             url: Routes.ts_battle_lobby_index_path(@conn, :index),
             icon: Teiserver.Battle.LobbyLib.icon()
           %>
-          
+
+          <%= central_component "sub_menu_icon",
+            name: "matchmaking",
+            label: "Matchmaking",
+            active: @active,
+            url: Routes.ts_game_queue_index_path(@conn, :index),
+            icon: Teiserver.Game.QueueLib.icon()
+          %>
+
           <%= central_component "sub_menu_icon",
             name: "parties",
             label: "Parties",

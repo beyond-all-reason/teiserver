@@ -22,6 +22,17 @@
   %>
 <% end %>
 
+<%= if allow?(@current_user, Teiserver.Account.TimeCompareReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "time_compare",
+    label: "Time compare",
+    active: @active,
+    icon: Teiserver.Account.TimeCompareReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "time_compare")
+  %>
+<% end %>
+
 <%= if allow?(@current_user, Teiserver.Account.RanksReport.permissions()) do %>
   <%= central_component "section_menu_button",
     name: "ranks",
@@ -52,6 +63,17 @@
     icon: Teiserver.Account.RetentionReport.icon(),
     bsname: bsname,
     url: Routes.ts_reports_report_path(@conn, :show, "retention")
+  %>
+<% end %>
+
+<%= if allow?(@current_user, Teiserver.Account.PopulationReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "population",
+    label: "Population",
+    active: @active,
+    icon: Teiserver.Account.PopulationReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "population")
   %>
 <% end %>
 
@@ -88,6 +110,17 @@
   %>
 <% end %>
 
+<%= if allow?(@current_user, Teiserver.Account.TournamentReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "tournament",
+    label: "Tournament",
+    active: @active,
+    icon: "fa-regular fa-ranking-star",
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "tournament")
+  %>
+<% end %>
+
 <%= if allow?(@current_user, Teiserver.Account.LeaderboardReport.permissions()) do %>
   <%= central_component "section_menu_button",
     name: "leaderboard",
@@ -99,23 +132,12 @@
   %>
 <% end %>
 
-<%= if false and allow?(@current_user, Teiserver.Account.WinnersReport.permissions()) do %>
-  <%= central_component "section_menu_button",
-    name: "winners",
-    label: "Winners",
-    active: @active,
-    icon: Teiserver.Account.WinnersReport.icon(),
-    bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "winners")
-  %>
-<% end %>
-
 <%= if allow?(@current_user, Teiserver.Account.RecordsReport.permissions()) do %>
   <%= central_component "section_menu_button",
     name: "records",
     label: "Records",
     active: @active,
-    icon: Teiserver.Account.WinnersReport.icon(),
+    icon: Teiserver.Account.RecordsReport.icon(),
     bsname: bsname,
     url: Routes.ts_reports_report_path(@conn, :show, "records")
   %>
@@ -133,6 +155,16 @@
   %>
 <% end %>
 
+<%= if allow?(@current_user, Teiserver.Account.GrowthReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "growth",
+    label: "Growth",
+    active: @active,
+    icon: Teiserver.Account.GrowthReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "growth")
+  %>
+<% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.NewSmurfReport.permissions()) do %>
   <%= central_component "section_menu_button",
@@ -153,5 +185,16 @@
     icon: Teiserver.Account.OpenSkillReport.icon(),
     bsname: bsname,
     url: Routes.ts_reports_report_path(@conn, :show, "open_skill")
+  %>
+<% end %>
+
+<%= if allow?(@current_user, Teiserver.Game.MappingReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "mapping",
+    label: "Mapping",
+    active: @active,
+    icon: Teiserver.Game.MappingReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "mapping")
   %>
 <% end %>

@@ -5,6 +5,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   alias Teiserver
   alias Teiserver.{Battle, Coordinator}
   alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Data.Matchmaking
 
   @impl true
   def mount(_params, session, socket) do
@@ -18,12 +19,13 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> assign(:view_colour, Central.Admin.AdminLib.colours())
       |> assign(:telemetry_loading, true)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
+      |> update_queues
       |> update_lobbies
       |> update_server_pids
 
     :timer.send_interval(5_000, :tick)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, :standard_live}}
   end
 
   @impl true
@@ -42,6 +44,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   def handle_info(:tick, socket) do
     {:noreply,
       socket
+        |> update_queues
         |> update_lobbies
         |> update_server_pids
     }
@@ -57,12 +60,22 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   end
 
   @impl true
+  def handle_event("restart-consuls", _event, socket) do
+    Coordinator.start_all_consuls()
+    {:noreply, socket}
+  end
+
   def handle_event("reinit-consuls", _event, socket) do
     Battle.list_lobby_ids()
       |> Enum.each(fn lobby_id ->
         Coordinator.cast_consul(lobby_id, :reinit)
       end)
 
+    {:noreply, socket}
+  end
+
+  def handle_event("restart-balances", _event, socket) do
+    Coordinator.start_all_balancers()
     {:noreply, socket}
   end
 
@@ -73,6 +86,19 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       end)
 
     {:noreply, socket}
+  end
+
+  @spec update_queues(Plug.Socket.t()) :: Plug.Socket.t()
+  defp update_queues(socket) do
+    queues = Matchmaking.list_queues()
+      |> Enum.map(fn queue ->
+        wait_pid = Matchmaking.get_queue_wait_pid(queue.id)
+        {queue, wait_pid}
+      end)
+      |> Enum.sort_by(fn t -> elem(t, 0).name end, &<=/2)
+
+    socket
+      |> assign(:queues, queues)
   end
 
   @spec update_lobbies(Plug.Socket.t()) :: Plug.Socket.t()

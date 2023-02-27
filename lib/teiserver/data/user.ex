@@ -12,7 +12,6 @@ defmodule Teiserver.User do
   alias Argon2
   alias Central.Account.Guardian
   alias Teiserver.Data.Types, as: T
-  import Central.Logging.Helpers, only: [add_audit_log: 4]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   require Logger
@@ -24,7 +23,7 @@ defmodule Teiserver.User do
   @default_icon "fa-solid fa-user"
 
   @spec role_list :: [String.t()]
-  def role_list(), do: ~w(Tester Streamer Donor Caster Contributor Dev Moderator Admin Verified Bot)
+  def role_list(), do: ~w(Tester Streamer Donor Caster Contributor GDT Dev Moderator Admin Verified Bot)
 
   @spec keys() :: [atom]
   def keys(), do: [:id, :name, :email, :inserted_at, :clan_id, :permissions, :colour, :icon, :behaviour_score, :trust_score]
@@ -55,7 +54,8 @@ defmodule Teiserver.User do
     :print_server_messages,
     :spring_password,
     :discord_id,
-    :discord_dm_channel
+    :discord_dm_channel,
+    :steam_id
   ]
   def data_keys(), do: @data_keys
 
@@ -84,7 +84,8 @@ defmodule Teiserver.User do
     print_server_messages: false,
     spring_password: true,
     discord_id: nil,
-    discord_dm_channel: nil
+    discord_dm_channel: nil,
+    steam_id: nil
   }
 
   def default_data(), do: @default_data
@@ -101,7 +102,7 @@ defmodule Teiserver.User do
   # ]
 
   # Leaderboard rating ranks
-  @rank_levels [3, 7, 12, 21, 26, 35, 100]
+  @rank_levels [3, 7, 12, 21, 26, 35, 1000]
 
   def get_rank_levels(), do: @rank_levels
 
@@ -233,7 +234,7 @@ defmodule Teiserver.User do
         {:error, "Username already taken"}
 
       get_user_by_email(email) ->
-        {:error, "Email already attached to a user"}
+        {:error, "Email already attached to a user (#{email})"}
 
       valid_email?(email) == false ->
         {:error, "Invalid email"}
@@ -702,7 +703,7 @@ defmodule Teiserver.User do
       nil -> :error
       user ->
         {:ok, user} = do_login(user, "127.0.0.1", "Teiserver Internal Client", "IC")
-        client = Client.login(user, "127.0.0.1")
+        client = Client.login(user, :internal, "127.0.0.1")
         {:ok, user, client}
     end
   end
@@ -772,7 +773,11 @@ defmodule Teiserver.User do
             {:error, "LobbyHash/UserID missing in login"}
 
           test_password(md5_password, user.password_hash) == false ->
-            {:error, "Invalid password"}
+            if String.contains?(username, "@") do
+              {:error, "Invalid password for username, check you are not using your email address as the name"}
+            else
+              {:error, "Invalid password"}
+            end
 
           is_restricted?(user, ["Login"]) ->
             {:error, "Banned, please see Discord for details"}
@@ -790,12 +795,12 @@ defmodule Teiserver.User do
 
           Client.get_client_by_id(user.id) != nil ->
             Client.disconnect(user.id, "Already logged in")
-            if not is_bot?(user) do
-              Central.cache_put(:teiserver_login_count, user.id, 10)
-              {:error, "Existing session, please retry in 20 seconds to clear the cache"}
-            else
+            if is_bot?(user) do
               :timer.sleep(1000)
               do_login(user, ip, lobby, lobby_hash)
+            else
+              Central.cache_put(:teiserver_login_count, user.id, 10)
+              {:error, "Existing session, please retry in 20 seconds to clear the cache"}
             end
 
           true ->
@@ -875,6 +880,16 @@ defmodule Teiserver.User do
     {:ok, user}
   end
 
+  @spec new_moderation_action(Teiserver.Moderation.Action.t()) :: :ok
+  def new_moderation_action(_action) do
+    :ok
+  end
+
+  @spec updated_moderation_action(Teiserver.Moderation.Action.t()) :: :ok
+  def updated_moderation_action(_action) do
+    :ok
+  end
+
   @spec create_report(T.report(), atom) :: :ok
   def create_report(report, reason) do
     if report.response_text != nil do
@@ -890,7 +905,9 @@ defmodule Teiserver.User do
     # If the report is being updated we'll need to update their restrictions
     # and that won't take place correctly in some cases
     # by making the expiry now we make it so the next check will mark them as clear
-    expires_as_string = Timex.now() |> Jason.encode! |> Jason.decode!
+    expires_as_string = Timex.now()
+      |> Jason.encode!
+      |> Jason.decode!
 
     # Get the new restrictions
     new_restrictions = user.restrictions ++ Map.get(report.action_data || %{}, "restriction_list", [])
@@ -964,45 +981,6 @@ defmodule Teiserver.User do
   def restrict_user(user, restriction) do
     new_restrictions = Enum.uniq([restriction | user.restrictions])
     update_user(%{user | restrictions: new_restrictions}, persist: true)
-  end
-
-  @spec unbridge_user(T.user() | T.userid(), String.t(), non_neg_integer(), String.t()) :: any
-  def unbridge_user(userid, message, flagged_word_count, location) when is_integer(userid) do
-    unbridge_user(get_user_by_id(userid), message, flagged_word_count, location)
-  end
-
-  def unbridge_user(nil, _, _, _), do: :no_user
-  def unbridge_user(user, message, flagged_word_count, location) do
-    if not is_restricted?(user, ["Bridging"]) do
-      coordinator_user_id = Coordinator.get_coordinator_userid()
-
-      {:ok, _report} = Central.Account.create_report(%{
-        "location" => "Automod",
-        "location_id" => nil,
-        "reason" => "Automod detected flagged words",
-        "reporter_id" => coordinator_user_id,
-        "target_id" => user.id,
-        "response_text" => "Unbridging because said: #{message}",
-        "response_action" => "Restrict",
-        "responded_at" => Timex.now(),
-        "followup" => nil,
-        "code_references" => [],
-        "expires" => nil,
-        "responder_id" => coordinator_user_id,
-        "action_data" => %{
-          "restriction_list" => ["Bridging"]
-        }
-      })
-
-      restrict_user(user, "Bridging")
-
-      client = Client.get_client_by_id(user.id) || %{ip: "no client"}
-      add_audit_log(user.id, client.ip, "Teiserver:De-bridged user", %{
-        message: message,
-        flagged_word_count: flagged_word_count,
-        location: location
-      })
-    end
   end
 
   @spec is_restricted?(T.userid() | T.user(), String.t()) :: boolean()
@@ -1129,6 +1107,30 @@ defmodule Teiserver.User do
       required ->
         Enum.member?(user.roles, required)
     end
+  end
+
+  @doc """
+  If a user possesses any of these roles it returns true
+  """
+  @spec has_any_role?(T.userid() | T.user() | nil, String.t() [String.t()]) :: boolean()
+  def has_any_role?(nil, _), do: false
+  def has_any_role?(userid, roles) when is_integer(userid), do: has_any_role?(get_user_by_id(userid), roles)
+  def has_any_role?(user, roles) do
+    roles
+      |> Enum.map(fn role -> Enum.member?(user.roles, role) end)
+      |> Enum.any?
+  end
+
+  @doc """
+  If a user possesses all of these roles it returns true, if any are lacking it returns false
+  """
+  @spec has_all_roles?(T.userid() | T.user() | nil, String.t() [String.t()]) :: boolean()
+  def has_all_roles?(nil, _), do: false
+  def has_all_roles?(userid, roles) when is_integer(userid), do: has_all_roles?(get_user_by_id(userid), roles)
+  def has_all_roles?(user, roles) do
+    roles
+      |> Enum.map(fn role -> Enum.member?(user.roles, role) end)
+      |> Enum.all?
   end
 
   @spec valid_email?(String.t()) :: boolean

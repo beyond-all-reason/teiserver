@@ -114,7 +114,7 @@ defmodule Teiserver.SpringRawTest do
                "CLIENTSTATUS",
                "LOGININFOEND",
                ""
-             ]
+             ], message: "Got: #{inspect commands}"
 
     _send_raw(socket, "EXIT\n")
     _ = _recv_raw(socket)

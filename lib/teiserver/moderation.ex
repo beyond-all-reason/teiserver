@@ -298,9 +298,9 @@ defmodule Teiserver.Moderation do
   @spec create_action(Map.t()) :: {:ok, Action.t()} | {:error, Ecto.Changeset.t()}
   def create_action(attrs \\ %{}) do
     %Action{}
-    |> Action.changeset(attrs)
-    |> Repo.insert()
-    |> broadcast_create_action()
+      |> Action.changeset(attrs)
+      |> Repo.insert()
+      |> broadcast_create_action()
   end
 
   def broadcast_create_action({:ok, action}) do
@@ -825,7 +825,7 @@ defmodule Teiserver.Moderation do
   def unbridge_user(nil, _, _, _), do: :no_user
   def unbridge_user(user, message, flagged_word_count, location) do
     if not Teiserver.User.is_restricted?(user, ["Bridging"]) do
-      {:ok, action} = create_action(%{
+      {:ok, _action} = create_action(%{
         target_id: user.id,
         reason: "Automod detected flagged words",
         restrictions: ["Bridging"],

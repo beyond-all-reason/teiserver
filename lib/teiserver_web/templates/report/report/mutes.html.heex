@@ -6,12 +6,51 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
+        <div class="btn btn-primary2 float-end" onclick="$('.help-box, .help-box-large').toggle();">
+          <i class='fa-fw fa-solid fa-circle-info'></i>
+          &nbsp;
+          Show/Hide help
+        </div>
         <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "mutes"
           })
         %>
+        <br /><br />
+
+        <form action={Routes.ts_reports_report_path(@conn, :show, "mutes")} method="post" class="form-horizontal mb-4">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <div class="row">
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="report_days" class="control-label">Active in the last X days: </label>
+              <input type="text" name="report[days]" id="report_days" value={@params["days"]} class="form-control" />
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="report_limit" class="control-label">Exclude banned users</label>
+              <%= central_component "checkbox",
+                name: "report[exclude_banned]",
+                id: "report_exclude_banned",
+                value: "true",
+                label: "",
+                checked: @params["exclude_banned"] == "true",
+
+                description: "exclude banned users from all queries"
+              %>
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              &nbsp;<br />
+              <input type="submit" value="Update report" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+            </div>
+          </div>
+        </form>
+
+        <div class="help-box-large">
+          Lists users sorted by number of mutes
+        </div>
 
         <table class='table mt-3'>
           <thead>

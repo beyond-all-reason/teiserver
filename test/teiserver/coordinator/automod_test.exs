@@ -106,7 +106,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
   test "ban added after user", %{banned_user: banned_user} do
     bad_user1 = new_user()
     Account.create_smurf_key(bad_user1.id, "chobby_hash", "123456789")
-    :timer.sleep(200)
+    :timer.sleep(1_000)
 
     {:ok, _ban} = Moderation.create_ban(%{
       enabled: true,
@@ -115,7 +115,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
       source_id: banned_user.id,
       reason: "hw-ban"
     })
-    :timer.sleep(200)
+    :timer.sleep(1_000)
 
     bad_user2 = new_user()
     Account.create_smurf_key(bad_user2.id, "chobby_hash", "123456789")

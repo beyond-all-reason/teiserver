@@ -1,0 +1,35 @@
+<div>
+  <div class={"card page-card"}>
+    <div class="card-body">
+      <%= for {team, players} <- @teams do %>
+        <strong class="px-2">Team <%= team + 1 %></strong>
+        <ul class="list-unstyled">
+          <%= for p <- players do %>
+            <li>
+              <%= if @admin do %>
+                <a href={Routes.ts_admin_client_show_path(@socket, :show, p.userid)}><%= p.name %></a>
+              <% else %>
+                <%= p.name %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+      <br />
+
+      <strong class="px-2">Spectators</strong>
+      <ul class="list-unstyled">
+        <%= for p <- @spectators do %>
+          <li>
+            <%= if @admin do %>
+              <a href={Routes.ts_admin_client_show_path(@socket, :show, p.userid)}><%= p.name %></a>
+            <% else %>
+              <%= p.name %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+
+</div>

@@ -39,7 +39,7 @@
         url: Routes.ts_admin_user_path(@conn, :data_search)
       %>
     <% end %>
-    
+
     <%= if @active == "show" do %>
       <%= central_component "section_menu_button",
         name: "show",
@@ -50,7 +50,7 @@
         url: "#"
       %>
     <% end %>
-    
+
     <%= if @active == "edit" do %>
       <%= central_component "section_menu_button",
         name: "edit",
@@ -61,18 +61,7 @@
         url: "#"
       %>
     <% end %>
-    
-    <%= if @active == "automod_action" do %>
-      <%= central_component "section_menu_button",
-        name: "automod_action",
-        label: "Automod action",
-        active: @active,
-        icon: Teiserver.Account.AutomodActionLib.icon(),
-        bsname: bsname,
-        url: "#"
-      %>
-    <% end %>
-    
+
     <%= if @active == "smurf" do %>
       <%= central_component "section_menu_button",
         name: "smurf",
@@ -83,7 +72,7 @@
         url: "#"
       %>
     <% end %>
-    
+
     <%= if @active == "smurf_merge_form" do %>
       <%= central_component "section_menu_button",
         name: "smurf_merge_form",
@@ -94,18 +83,7 @@
         url: "#"
       %>
     <% end %>
-    
-    <%= if @active == "reports_submitted" do %>
-      <%= central_component "section_menu_button",
-        name: "reports_submitted",
-        label: "Reports submitted",
-        active: @active,
-        icon: "fa-solid #{Central.Account.ReportLib.icon()}",
-        bsname: bsname,
-        url: "#"
-      %>
-    <% end %>
-    
+
     <%= if @active == "ratings" do %>
       <%= central_component "section_menu_button",
         name: "ratings",
@@ -116,7 +94,7 @@
         url: "#"
       %>
     <% end %>
-    
+
     <%= if @active == "ratings_form" do %>
       <%= central_component "section_menu_button",
         name: "ratings_form",
@@ -127,7 +105,7 @@
         url: "#"
       %>
     <% end %>
-    
+
     <%= if @active == "moderation" do %>
       <%= central_component "section_menu_button",
         name: "moderation",

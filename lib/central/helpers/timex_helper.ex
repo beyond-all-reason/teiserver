@@ -295,6 +295,7 @@ defmodule Central.Helpers.TimexHelper do
     end
   end
 
+  def duration_to_str_short(nil), do: nil
   def duration_to_str_short(seconds) do
     {days, remaining} = if seconds >= @day do
       days = seconds/@day |> :math.floor |> round

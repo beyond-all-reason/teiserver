@@ -47,7 +47,7 @@
               </a>
             </td>
             <td class="message"><%= msg.content %></td>
-            <td><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
+            <td><%= date_to_str(msg.inserted_at, :ymd_hms) %></td>
           </tr>
         <% end %>
       </tbody>

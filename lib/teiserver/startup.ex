@@ -1,6 +1,7 @@
 defmodule Teiserver.Startup do
   use CentralWeb, :startup
   require Logger
+  alias Phoenix.PubSub
 
   @spec startup :: :ok
   def startup do
@@ -69,6 +70,81 @@ defmodule Teiserver.Startup do
 
     add_group_type("Teiserver clan", %{fields: []})
 
+    {umbrella_group, player_group, internal_group} = create_groups()
+
+    Central.cache_put(:application_metadata_cache, "teiserver_umbrella_group", umbrella_group.id)
+    Central.cache_put(:application_metadata_cache, "teiserver_user_group", player_group.id)
+    Central.cache_put(:application_metadata_cache, "teiserver_internal_group", internal_group.id)
+
+    Central.store_put(:application_metadata_cache, "random_names_3",
+      ~w(tick pawn lazarus rocketeer crossbow mace centurion tumbleweed smuggler compass ghost sprinter butler webber platypus hound welder recluse archangel gunslinger sharpshooter umbrella fatboy marauder vanguard razorback titan)
+      ++
+      ~w(grunt graverobber aggravator trasher thug bedbug deceiver augur spectre fiend twitcher duck skuttle sumo arbiter manticore termite commando mammoth shiva karganeth catapult behemoth juggernaught)
+    )
+
+    Central.Account.GroupCacheLib.update_caches(player_group)
+    Central.Account.GroupCacheLib.update_caches(internal_group)
+    Central.Account.GroupCacheLib.update_caches(umbrella_group)
+
+    Central.cache_put(:lists, :rooms, [])
+
+    Teiserver.Data.Matchmaking.pre_cache_queues()
+
+    # Add in achievements
+    Teiserver.Game.GenerateAchievementTypes.perform()
+
+    if Application.get_env(:central, Teiserver)[:enable_match_monitor] do
+      spawn(fn ->
+        :timer.sleep(200)
+        Teiserver.Battle.start_match_monitor()
+      end)
+    end
+
+    if Application.get_env(:central, Teiserver)[:enable_coordinator_mode] do
+      spawn(fn ->
+        :timer.sleep(200)
+        Teiserver.Coordinator.start_coordinator()
+        Teiserver.Coordinator.AutomodServer.start_automod_server()
+      end)
+    end
+
+    if Application.get_env(:central, Teiserver)[:enable_accolade_mode] do
+      spawn(fn ->
+        :timer.sleep(200)
+        Teiserver.Account.AccoladeLib.start_accolade_server()
+      end)
+    end
+
+    # We want this to start up later than the coordinator
+    if Application.get_env(:central, Teiserver)[:enable_agent_mode] do
+      spawn(fn ->
+        :timer.sleep(650)
+        Teiserver.agent_mode()
+      end)
+    end
+
+    Central.cache_put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
+    Central.cache_put(:application_metadata_cache, "teiserver_full_startup_completed", true)
+
+    # Give everything else a chance to have started up
+    spawn(fn ->
+      :timer.sleep(1000)
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_server",
+        %{
+          channel: "teiserver_server",
+          event: :started,
+          node: Node.self()
+        }
+      )
+    end)
+
+    time_taken = System.system_time(:millisecond) - start_time
+    Logger.info("Teiserver startup complete, took #{time_taken}ms")
+  end
+
+  def create_groups() do
     umbrella_group =
       case Central.Account.get_group(nil, search: [name: "Teiserver umbrella group"]) do
         nil ->
@@ -137,61 +213,6 @@ defmodule Teiserver.Startup do
           group
       end
 
-    Central.cache_put(:application_metadata_cache, "teiserver_umbrella_group", umbrella_group.id)
-    Central.cache_put(:application_metadata_cache, "teiserver_user_group", player_group.id)
-    Central.cache_put(:application_metadata_cache, "teiserver_internal_group", internal_group.id)
-
-    Central.store_put(:application_metadata_cache, "random_names_3",
-      ~w(tick pawn lazarus rocketeer crossbow mace centurion tumbleweed smuggler compass ghost sprinter butler webber platypus hound welder recluse archangel gunslinger sharpshooter umbrella fatboy marauder vanguard razorback titan)
-      ++
-      ~w(grunt graverobber aggravator trasher thug bedbug deceiver augur spectre fiend twitcher duck skuttle sumo arbiter manticore termite commando mammoth shiva karganeth catapult behemoth juggernaught)
-    )
-
-    Central.Account.GroupCacheLib.update_caches(player_group)
-    Central.Account.GroupCacheLib.update_caches(internal_group)
-    Central.Account.GroupCacheLib.update_caches(umbrella_group)
-
-    Central.cache_put(:lists, :rooms, [])
-
-    Teiserver.Data.Matchmaking.pre_cache_queues()
-
-    # Add in achievements
-    Teiserver.Game.GenerateAchievementTypes.perform()
-
-    if Application.get_env(:central, Teiserver)[:enable_match_monitor] do
-      spawn(fn ->
-        :timer.sleep(200)
-        Teiserver.Battle.start_match_monitor()
-      end)
-    end
-
-    if Application.get_env(:central, Teiserver)[:enable_coordinator_mode] do
-      spawn(fn ->
-        :timer.sleep(200)
-        Teiserver.Coordinator.start_coordinator()
-        Teiserver.Coordinator.AutomodServer.start_automod_server()
-      end)
-    end
-
-    if Application.get_env(:central, Teiserver)[:enable_accolade_mode] do
-      spawn(fn ->
-        :timer.sleep(200)
-        Teiserver.Account.AccoladeLib.start_accolade_server()
-      end)
-    end
-
-    # We want this to start up later than the coordinator
-    if Application.get_env(:central, Teiserver)[:enable_agent_mode] do
-      spawn(fn ->
-        :timer.sleep(650)
-        Teiserver.agent_mode()
-      end)
-    end
-
-    Central.cache_put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
-    Central.cache_put(:application_metadata_cache, "teiserver_full_startup_completed", true)
-
-    time_taken = System.system_time(:millisecond) - start_time
-    Logger.info("Teiserver startup complete, took #{time_taken}ms")
+    {umbrella_group, player_group, internal_group}
   end
 end

@@ -128,19 +128,6 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        old_reports =
-          Central.Account.list_reports(
-            search: [
-              filter: {"target", user.id}
-            ],
-            preload: [
-              :reporter,
-              :target,
-              :responder
-            ],
-            order_by: "Newest first"
-          )
-
         reports_made = Moderation.list_reports(
           search: [
             reporter_id: user.id
@@ -177,13 +164,11 @@ defmodule TeiserverWeb.Admin.UserController do
         client = Account.get_client_by_id(user.id)
 
         conn
-          |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
           |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
           |> assign(:user, user)
           |> assign(:client, client)
           |> assign(:user_stats, user_stats)
           |> assign(:roles, roles)
-          |> assign(:old_reports, old_reports)
           |> assign(:reports_made, reports_made)
           |> assign(:reports_against, reports_against)
           |> assign(:actions, actions)
@@ -279,7 +264,8 @@ defmodule TeiserverWeb.Admin.UserController do
       {"donor", "Donor"},
       {"contributor", "Contributor"},
       {"caster", "Caster"},
-      {"core", "Core team"}
+      {"core", "Core team"},
+      {"gdt", "GDT"}
     ]
     |> Enum.map(fn {k, v} -> if user_params[k] == "true", do: v end)
     |> Enum.reject(&(&1 == nil))
@@ -338,44 +324,6 @@ defmodule TeiserverWeb.Admin.UserController do
         conn
         |> put_flash(:success, "Password reset email sent to user")
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
-    end
-  end
-
-  @spec reports_submitted(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def reports_submitted(conn, %{"id" => id}) do
-    user = Account.get_user(id)
-
-    case Central.Account.UserLib.has_access(user, conn) do
-      {true, _} ->
-        reports =
-          Central.Account.list_reports(
-            search: [
-              filter: {"reporter", user.id}
-            ],
-            preload: [
-              :reporter,
-              :target,
-              :responder
-            ],
-            order_by: "Newest first"
-          )
-
-        user
-          |> UserLib.make_favourite()
-          |> insert_recently(conn)
-
-        conn
-          |> assign(:user, user)
-          |> assign(:reports, reports)
-          |> assign(:section_menu_active, "reports_submitted")
-          |> add_breadcrumb(name: "Show: #{user.name}", url: Routes.ts_admin_user_path(conn, :show, user.id))
-          |> add_breadcrumb(name: "Submitted reports", url: conn.request_path)
-          |> render("reports_submitted.html")
-
-      _ ->
-        conn
-          |> put_flash(:danger, "Unable to access this user")
-          |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     end
   end
 
@@ -558,7 +506,7 @@ defmodule TeiserverWeb.Admin.UserController do
   end
 
   @spec perform_action(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def perform_action(conn, %{"id" => id, "action" => action} = params) do
+  def perform_action(conn, %{"id" => id, "action" => action}) do
     user = Account.get_user!(id)
 
     case Central.Account.UserLib.has_access(user, conn) do
@@ -567,176 +515,18 @@ defmodule TeiserverWeb.Admin.UserController do
           case action do
             "recache" ->
               Teiserver.User.recache_user(user.id)
-              {:ok, nil, ""}
+              {:ok, ""}
 
             "reset_flood_protection" ->
               ConCache.put(:teiserver_login_count, user.id, 0)
-              {:ok, nil, ""}
-
-            "report_action" ->
-              action = params["report_response_action"]
-              reason = params["reason"]
-              followup = params["followup"]
-              code_references = params["code_references"]
-
-              restriction_list = params["restrict"]
-                |> Enum.filter(fn {_, v} -> v != "false" end)
-                |> Enum.map(fn {_, v} -> v end)
-
-              case Central.Account.ReportLib.perform_action(%{}, action, params["until"]) do
-                {:ok, expires} ->
-                  {:ok, _report} =
-                    Central.Account.create_report(%{
-                      "location" => "web-admin-instant",
-                      "location_id" => nil,
-                      "reason" => reason,
-                      "reporter_id" => conn.user_id,
-                      "target_id" => user.id,
-                      "response_text" => reason,
-                      "response_action" => params["report_response_action"],
-                      "responded_at" => Timex.now(),
-                      "followup" => followup,
-                      "code_references" => code_references,
-                      "expires" => expires,
-                      "responder_id" => conn.user_id,
-                      "action_data" => %{
-                        "restriction_list" => restriction_list
-                      }
-                    })
-
-                    {:ok, nil, "#moderation_tab"}
-
-                err ->
-                  err
-              end
+              {:ok, ""}
           end
 
         case result do
-          {:ok, nil, tab} ->
+          {:ok, tab} ->
             conn
             |> put_flash(:info, "Action performed.")
             |> redirect(to: Routes.ts_admin_user_path(conn, :applying, user) <> "?tab=#{tab}")
-
-          {:error, msg} ->
-            conn
-            |> put_flash(:danger, "There was an error: #{msg}")
-            |> redirect(to: Routes.ts_admin_user_path(conn, :show, user))
-        end
-
-      _ ->
-        conn
-        |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
-    end
-  end
-
-  @spec respond_form(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def respond_form(conn, %{"id" => id}) do
-    report =
-      Central.Account.get_report!(id,
-        preload: [
-          :reporter,
-          :target,
-          :responder
-        ]
-      )
-
-    case Central.Account.UserLib.has_access(report.target, conn) do
-      {true, _} ->
-        changeset = Central.Account.change_report(report)
-
-        fav =
-          report
-          |> Central.Account.ReportLib.make_favourite()
-
-        conn
-        |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
-        |> assign(:report, report)
-        |> assign(:changeset, changeset)
-        |> add_breadcrumb(name: "Respond to report against: #{fav.item_label}", url: conn.request_path)
-        |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
-        |> render("respond.html")
-
-      _ ->
-        conn
-        |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
-    end
-  end
-
-  @spec respond_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def respond_post(conn, %{"id" => id, "report" => report_params} = params) do
-    report =
-      Central.Account.get_report!(id,
-        preload: [
-          :reporter,
-          :target,
-          :responder
-        ]
-      )
-
-    expires_string = if report_params["expires"] == "" do
-      "never"
-    else
-      report_params["expires"]
-    end
-
-    case Central.Account.UserLib.has_access(report.target, conn) do
-      {true, _} ->
-        case Central.Account.ReportLib.perform_action(
-               report,
-               report_params["response_action"],
-               expires_string
-             ) do
-          {:ok, expires} ->
-            restriction_list = (params["restrict"] || [])
-              |> Enum.filter(fn {_, v} -> v != "false" end)
-              |> Enum.map(fn {_, v} -> v end)
-
-            report_params = if Enum.empty?(restriction_list) do
-              Map.merge(report_params, %{
-                "response_action" => "Ignore report",
-                "expires" => "never",
-                "responder_id" => conn.user_id,
-                "followup" => "",
-                "code_references" => [],
-                "action_data" => %{"restriction_list" => []},
-                "responded_at" => Timex.now(),
-              })
-            else
-              Map.merge(report_params, %{
-                "expires" => expires,
-                "responder_id" => conn.user_id,
-                "followup" => report_params["followup"],
-                "code_references" => report_params["code_references"],
-                "action_data" => %{"restriction_list" => restriction_list},
-                "responded_at" => Timex.now(),
-              })
-            end
-
-            case Central.Account.update_report(report, report_params, :respond) do
-              {:ok, _report} ->
-                conn
-                |> put_flash(:success, "Report updated.")
-                |> redirect(to: Routes.ts_admin_user_path(conn, :applying, report.target_id) <> "?tab=reports_tab")
-
-              {:error, %Ecto.Changeset{} = changeset} ->
-                conn
-                |> assign(:report, report)
-                |> assign(:changeset, changeset)
-                |> render("respond.html")
-            end
-
-          {:error, error} ->
-            changeset = Central.Account.change_report(report)
-
-            conn
-            |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
-            |> assign(:error, error)
-            |> assign(:report, report)
-            |> assign(:changeset, changeset)
-            |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
-            |> render("respond.html")
         end
 
       _ ->
@@ -800,6 +590,11 @@ defmodule TeiserverWeb.Admin.UserController do
           |> Enum.sort_by(fn {_k, v} -> v.last_updated end, &<=/2)
           |> Map.new
 
+        stats_map = users
+          |> Map.new(fn %{id: id} ->
+            {id, Account.get_user_stat_data(id)}
+          end)
+
         stats = Account.get_user_stat_data(user.id)
 
         conn
@@ -813,6 +608,7 @@ defmodule TeiserverWeb.Admin.UserController do
           |> assign(:users, users)
           |> assign(:key_lookup, key_lookup)
           |> assign(:user_key_lookup, user_key_lookup)
+          |> assign(:stats_map, stats_map)
           |> render("smurf_list.html")
 
       _ ->
@@ -896,128 +692,6 @@ defmodule TeiserverWeb.Admin.UserController do
         conn
           |> put_flash(:danger, "Unable to access at least one of these users")
           |> redirect(to: Routes.ts_admin_user_path(conn, :index))
-    end
-  end
-
-  @spec automod_action_form(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def automod_action_form(conn, %{"id" => id}) do
-    user = Account.get_user!(id)
-    matching_users = Account.smurf_search(user)
-      |> Enum.map(fn {_type, users} -> users end)
-      |> List.flatten
-      |> Enum.map(fn %{user: user} -> user.id end)
-      |> Enum.uniq
-      |> Enum.map(fn userid -> Account.get_user_by_id(userid) end)
-      |> Enum.reject(fn user ->
-        Teiserver.User.is_restricted?(user, ["Site", "Login"])
-      end)
-
-    all_keys = Account.list_smurf_keys(
-      search: [
-        user_id: user.id
-      ],
-      limit: :infinity,
-      preload: [:type],
-      order_by: "Newest first"
-    )
-
-    key_types = Account.list_smurf_key_types(limit: :infinity)
-
-    # Update their hw_key
-    hw_fingerprint = user.id
-      |> Account.get_user_stat_data
-      |> Teiserver.Account.CalculateSmurfKeyTask.calculate_hw1_fingerprint()
-
-    Account.update_user_stat(user.id, %{
-      hw_fingerprint: hw_fingerprint
-    })
-
-    user_stats = case Account.get_user_stat(user.id) do
-      nil -> %{}
-      stats -> stats.data
-    end
-
-    changeset = Account.change_automod_action(%Account.AutomodAction{})
-
-    conn
-      |> assign(:key_types, key_types)
-      |> assign(:matching_users, matching_users)
-      |> assign(:changeset, changeset)
-      |> add_breadcrumb(name: "Add automod action form", url: conn.request_path)
-      |> assign(:user, user)
-      |> assign(:user_stats, user_stats)
-      |> assign(:userid, user.id)
-      |> assign(:all_keys, all_keys)
-      |> render("automod_action_form.html")
-  end
-
-  @spec automod_action_post(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def automod_action_post(conn, %{"id" => id, "automod_action" => automod_action_params}) do
-    values = automod_action_params["values"]
-      |> Enum.reject(fn r -> r == "false" end)
-
-    automod_action_params = Map.merge(automod_action_params, %{
-      "added_by_id" => conn.current_user.id,
-      "values" => values
-    })
-
-    case Account.create_automod_action(automod_action_params) do
-      {:ok, automod_action} ->
-        conn
-        |> put_flash(:info, "AutomodAction created successfully.")
-        |> redirect(to: Routes.ts_admin_automod_action_path(conn, :show, automod_action.id))
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        user = Account.get_user!(id)
-
-        key_types = Account.list_smurf_key_types(limit: :infinity)
-
-        matching_users = Account.smurf_search(user)
-          |> Enum.map(fn {_type, users} -> users end)
-          |> List.flatten
-          |> Enum.map(fn %{user: user} -> user.id end)
-          |> Enum.uniq
-          |> Enum.map(fn userid -> Account.get_user_by_id(userid) end)
-          |> Enum.reject(fn user ->
-            Teiserver.User.is_restricted?(user, ["Site", "Login"])
-          end)
-
-        user_stats = case Account.get_user_stat(user.id) do
-          nil -> %{}
-          stats -> stats.data
-        end
-
-        error_message = cond do
-          changeset.errors[:value] != nil ->
-            "Please select a hash type"
-          changeset.errors[:actions] != nil ->
-            "Please select one or more actions"
-          changeset.errors[:reason] != nil or changeset.errors[:expires] != nil ->
-            "Please ensure both a reason and expiry (even if never) are inputted"
-          true ->
-            nil
-        end
-
-        all_keys = Account.list_smurf_keys(
-          search: [
-            user_id: user.id
-          ],
-          limit: :infinity,
-          preload: [:type],
-          order_by: "Newest first"
-        )
-
-        conn
-          |> add_breadcrumb(name: "Add automod action form", url: conn.request_path)
-          |> assign(:matching_users, matching_users)
-          |> assign(:key_types, key_types)
-          |> assign(:changeset, changeset)
-          |> assign(:user, user)
-          |> assign(:user_stats, user_stats)
-          |> assign(:userid, user.id)
-          |> assign(:all_keys, all_keys)
-          |> put_flash(:danger, error_message)
-          |> render("automod_action_form.html")
     end
   end
 

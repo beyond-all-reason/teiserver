@@ -36,7 +36,6 @@ defmodule Central.Helpers.QueryHelpers do
   defmacro array_overlap_a_in_b(a, b) do
     quote do
       fragment("? \\?| ?", unquote(a), unquote(b))
-      # fragment("? && ?", unquote(a), unquote(b))
     end
   end
 

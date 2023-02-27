@@ -1,0 +1,153 @@
+<% bsname = view_colour() %>
+
+<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+
+<script src={Routes.static_path(@conn, "/js/d3.js")}></script>
+<script src={Routes.static_path(@conn, "/js/c3.min.js")}></script>
+
+<link href="/css/c3.min.css" rel="stylesheet">
+
+<script>
+  function generate_chart (elem_id, json) {
+    var chart = c3.generate({
+      bindto: elem_id,
+      data: {
+        x: 'x',
+        columns: json
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%Y-%m-%d'
+          }
+        },
+        y: {
+          min: 0
+        }
+      }
+    });
+  }
+
+  $(function() {
+    generate_chart("#unique-counts", <%= raw Jason.encode!([["x" | @unique_counts |> elem(0)] | @unique_counts |> elem(1)]) %>);
+    generate_chart("#peak-counts", <%= raw Jason.encode!([["x" | @peak_counts |> elem(0)] | @peak_counts |> elem(1)]) %>);
+    generate_chart("#time-counts", <%= raw Jason.encode!([["x" | @time_counts |> elem(0)] | @time_counts |> elem(1)]) %>);
+    generate_chart("#pvp-counts", <%= raw Jason.encode!([["x" | @pvp_counts |> elem(0)] | @pvp_counts |> elem(1)]) %>);
+    generate_chart("#pve-counts", <%= raw Jason.encode!([["x" | @pve_counts |> elem(0)] | @pve_counts |> elem(1)]) %>);
+    generate_chart("#singleplayer-counts", <%= raw Jason.encode!([["x" | @singleplayer_counts |> elem(0)] | @singleplayer_counts |> elem(1)]) %>);
+  });
+</script>
+
+<div class="row my-3" id="growth-report-form">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "growth"
+          })
+        %>
+
+        <span onclick="
+          $('.sub-menu').hide();
+          $('#top-nav').hide();
+          $('#breadcrumb-wrapper').hide();
+          $('#growth-report-form').hide();
+        " class={"btn btn-#{bsname} float-end"}>
+          <i class="fa-fw fa-solid fa-camera"></i>
+          &nbsp;
+          Screenshot mode
+        </span>
+
+        <form action={Routes.ts_reports_report_path(@conn, :show, "growth")} method="post" class="form-horizontal mb-4">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <div class="row">
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="report_days" class="control-label">Time period (days): </label>
+              <input type="text" name="report[days]" id="report_days" value={@params["days"]} class="form-control" />
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="report_columns" class="control-label">Columns: </label>
+              <input type="text" name="report[columns]" id="report_columns" value={@params["columns"]} class="form-control" />
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              &nbsp;<br />
+              <input type="submit" value="Update report" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%
+  col_class = case String.trim(@params["columns"]) do
+    "4" -> "col-md-3"
+    "3" -> "col-md-4"
+    "2" -> "col-md-6"
+    _ -> "col-md-12"
+  end
+  col_class = col_class <> " my-2"
+%>
+
+<div class="row">
+  <div class={col_class}>
+    <div class={"card border-#{bsname} page-card"}>
+      <div class="card-body">
+        <div id="unique-counts" class='with-transitions' style="height: 400px;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class={col_class}>
+    <div class={"card border-#{bsname} page-card"}>
+      <div class="card-body">
+        <div id="peak-counts" class='with-transitions' style="height: 400px;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class={col_class}>
+    <div class={"card border-#{bsname} page-card"}>
+      <div class="card-body">
+        <div id="time-counts" class='with-transitions' style="height: 400px;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class={col_class}>
+    <div class={"card border-#{bsname} page-card"}>
+      <div class="card-body">
+        <div id="pvp-counts" class='with-transitions' style="height: 400px;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class={col_class}>
+    <div class={"card border-#{bsname} page-card"}>
+      <div class="card-body">
+        <div id="pve-counts" class='with-transitions' style="height: 400px;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class={col_class}>
+    <div class={"card border-#{bsname} page-card"}>
+      <div class="card-body">
+        <div id="singleplayer-counts" class='with-transitions' style="height: 400px;">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

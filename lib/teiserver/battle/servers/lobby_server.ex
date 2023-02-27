@@ -40,6 +40,10 @@ defmodule Teiserver.Battle.LobbyServer do
     }, new_state}
   end
 
+  def handle_call(:get_founder_id, _from, state) do
+    {:reply, state.founder_id, state}
+  end
+
   def handle_call(:get_match_uuid, _from, state) do
     {:reply, state.match_uuid, state}
   end
@@ -474,13 +478,15 @@ defmodule Teiserver.Battle.LobbyServer do
 
   @impl true
   @spec init(Map.t()) :: {:ok, Map.t()}
-  def init(data = %{lobby: %{id: id}}) do
+  def init(%{lobby: %{id: id}} = data) do
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
       Teiserver.LobbyRegistry,
       id,
       id
     )
+
+    Logger.metadata([request_id: "LobbyServer##{id}"])
 
     :timer.send_interval(2_000, :tick)
     match_uuid = Battle.generate_lobby_uuid([id])

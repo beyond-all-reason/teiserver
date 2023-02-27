@@ -22,17 +22,12 @@
   <div class="col-md-12 col-lg-8">
     <h4>Restrictions</h4>
     <div class="row">
-      <%= for {section, r_list} <- @restrictions_lists do %>
+      <%= if Enum.empty?(@user.data["restrictions"]) do %>
+        No restrictions
+      <% else %>
         <div class="col-lg-3 col-xl-2 col-xxl-2">
-          <strong><%= section %></strong>
-          <%= for r <- r_list do %>
-            <% r_clean = String.replace(r, " ", "_") %>
-            <%= central_component "checkbox",
-              id: "to_restriction_#{r_clean}",
-              name: "_",
-              label: r,
-              checked: Enum.member?(@user.data["restrictions"] || [], r)
-            %>
+          <%= for r <- @user.data["restrictions"] do %>
+            <%= r %><br />
           <% end %>
         </div>
       <% end %>
@@ -62,7 +57,7 @@
     icon_class: "fa-solid",
     link: Routes.ts_admin_user_path(@conn, :ratings, @user)
   %>
-  
+
   <%=
     central_component "menu_card",
     icon: Teiserver.icon(:relationship),
@@ -114,20 +109,11 @@
 
   <%=
     central_component "menu_card",
-    icon: "fa-solid #{Central.Account.ReportLib.icon()}",
-    name: "reports",
-    text: "Submitted reports (old)",
-    icon_class: "fa-solid",
-    link: Routes.ts_admin_user_path(@conn, :reports_submitted, @user.id)
-  %>
-  
-  <%=
-    central_component "menu_card",
     icon: "fa-solid fa-face-angry-horns",
     name: "smurf",
     text: "Smurf search",
     icon_class: "fa-solid",
     link: Routes.ts_admin_user_path(@conn, :smurf_search, @user.id)
   %>
-  
+
 </div>

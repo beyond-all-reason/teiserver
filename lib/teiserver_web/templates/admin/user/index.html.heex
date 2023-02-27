@@ -59,7 +59,7 @@
       <th>Contributor</th>
       <th>Moderator</th>
       <th>Registered</th>
-      
+
       <%= if is_admin do %>
         <th colspan="2">&nbsp;</th>
       <% else %>
@@ -88,15 +88,15 @@
         %>
 
         <%= if banned do %>
-          <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Ban")}"}></i>
+          <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}></i>
         <% end %>
 
         <%= if muted do %>
-          <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Mute")}"}></i>
+          <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Mute")}"}></i>
         <% end %>
 
         <%= if warned do %>
-          <i class={"fa-fw text-warning #{Central.Account.ReportLib.action_icon("Warn")}"}></i>
+          <i class={"fa-fw text-warning #{Teiserver.Moderation.ActionLib.action_icon("Warn")}"}></i>
         <% end %>
 
         <%= if unverified do %>

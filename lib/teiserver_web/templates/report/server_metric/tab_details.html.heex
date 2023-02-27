@@ -12,6 +12,11 @@
     %>
 
     <%= central_component "detail_line",
+      label: "Peak players",
+      value: format_number @data["aggregates"]["stats"]["peak_user_counts"]["player"]
+    %>
+
+    <%= central_component "detail_line",
       label: "User registrations",
       value: format_number @data["aggregates"]["stats"]["accounts_created"]
     %>
@@ -23,8 +28,13 @@
     %>
 
     <%= central_component "detail_line",
-      label: "Peak players",
-      value: format_number @data["aggregates"]["stats"]["peak_user_counts"]["player"]
+      label: "Low total users",
+      value: format_number @data["aggregates"]["stats"]["low_user_counts"]["total"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Low players",
+      value: format_number @data["aggregates"]["stats"]["low_user_counts"]["player"]
     %>
   </div>
 </div>

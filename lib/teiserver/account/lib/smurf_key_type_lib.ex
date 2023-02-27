@@ -38,18 +38,14 @@ defmodule Teiserver.Account.SmurfKeyTypeLib do
       where: smurf_key_types.name == ^name
   end
 
+  def _search(query, :name_in, names) do
+    from smurf_key_types in query,
+      where: smurf_key_types.name in ^names
+  end
+
   def _search(query, :id_list, id_list) do
     from smurf_key_types in query,
       where: smurf_key_types.id in ^id_list
-  end
-
-  def _search(query, :basic_search, ref) do
-    ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
-
-    from smurf_key_types in query,
-      where: (
-            ilike(smurf_key_types.name, ^ref_like)
-        )
   end
 
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t

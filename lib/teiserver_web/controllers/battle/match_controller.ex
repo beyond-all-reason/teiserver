@@ -11,12 +11,11 @@ defmodule TeiserverWeb.Battle.MatchController do
     user: {Central.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
-    site_menu_active: "teiserver_match",
+    site_menu_active: "match",
     sub_menu_active: "match"
   )
 
-  plug :add_breadcrumb, name: 'Battle', url: '/teiserver'
-  plug :add_breadcrumb, name: 'Logs', url: '/teiserver/matches'
+  plug :add_breadcrumb, name: 'Matches', url: '/teiserver/matches'
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do

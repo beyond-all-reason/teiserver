@@ -112,6 +112,7 @@ defmodule Teiserver.Battle.MatchLib do
     }}
   end
 
+  def make_match_name(nil), do: "Unnamed match"
   def make_match_name(match) do
     case match.game_type do
       "Duel" -> "Duel on #{match.map}"
@@ -162,6 +163,16 @@ defmodule Teiserver.Battle.MatchLib do
       where: matches.id == ^id
   end
 
+  def _search(query, :id_before, id) do
+    from matches in query,
+      where: matches.id < ^id
+  end
+
+  def _search(query, :id_after, id) do
+    from matches in query,
+      where: matches.id > ^id
+  end
+
   def _search(query, :id_in, ids) do
     from matches in query,
       where: matches.id in ^ids
@@ -170,6 +181,11 @@ defmodule Teiserver.Battle.MatchLib do
   def _search(query, :uuid, uuid) do
     from matches in query,
       where: matches.uuid == ^uuid
+  end
+
+  def _search(query, :founder_id, founder_id) do
+    from matches in query,
+      where: matches.founder_id == ^founder_id
   end
 
   def _search(query, :server_uuid, server_uuid) do
@@ -254,6 +270,11 @@ defmodule Teiserver.Battle.MatchLib do
       where: matches.processed == true,
       where: not is_nil(matches.finished),
       where: not is_nil(matches.started)
+  end
+
+  def _search(query, :has_winning_team, true) do
+    from matches in query,
+      where: not is_nil(matches.winning_team)
   end
 
   def _search(query, :basic_search, ref) do

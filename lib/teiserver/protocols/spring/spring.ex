@@ -49,10 +49,10 @@ defmodule Teiserver.Protocols.Spring do
   # b6..b9 = ally team no. (from 0 to 15. b6 is LSB, b9 is MSB)
   # b10 = mode (0 = spectator, 1 = normal player)
   # b11..b17 = handicap (7-bit number. Must be in range 0..100). Note: Only host can change handicap values of the players in the battle (with HANDICAP command). These 7 bits are always ignored in this command. They can only be changed using HANDICAP command.
-  # b18..b21 = reserved for future use (with pre 0.71 versions these bits were used for team color index)
+  # b18..b21 = reserved for future use (with pre 0.71 versions these bits were used for team colour index) Experimental: Use these for team no. extension (16->256)
   # b22..b23 = sync status (0 = unknown, 1 = synced, 2 = unsynced)
   # b24..b27 = side (e.g.: arm, core, tll, ... Side index can be between 0 and 15, inclusive)
-  # b28..b31 = undefined (reserved for future use)
+  # b28..b31 = undefined (reserved for future use) Experimental: Use these for ally team no. extension (16->256)
   @spec parse_battle_status(String.t()) :: Map.t()
   def parse_battle_status(status) do
     status_bits =
@@ -82,28 +82,22 @@ defmodule Teiserver.Protocols.Spring do
       h5,
       h6,
       h7,
-      # Undefined
-      _,
-      # Undefined
-      _,
-      # Undefined
-      _,
-      # Undefined
-      _,
+      # Experimental extension for team no. > 16
+      t5,
+      t6,
+      t7,
+      t8,
       sync1,
       sync2,
       side1,
       side2,
       side3,
       side4,
-      # Undefined
-      _,
-      # Undefined
-      _,
-      # Undefined
-      _,
-      # Undefined
-      _
+      # Experimental extension for ally team no. > 16
+      a5,
+      a6,
+      a7,
+      a8
     ] = status_bits
 
     sync = [sync2, sync1] |> Integer.undigits(2)
@@ -126,8 +120,8 @@ defmodule Teiserver.Protocols.Spring do
     %{
       ready: ready == 1,
       handicap: [h7, h6, h5, h4, h3, h2, h1] |> Integer.undigits(2),
-      player_number: [t4, t3, t2, t1] |> Integer.undigits(2),
-      team_number: [a4, a3, a2, a1] |> Integer.undigits(2),
+      player_number: [t8, t7, t6, t5, t4, t3, t2, t1] |> Integer.undigits(2),
+      team_number: [a8, a7, a6, a5, a4, a3, a2, a1] |> Integer.undigits(2),
       player: player == 1,
       sync: sync,
       side: [side4, side3, side2, side1] |> Integer.undigits(2)
@@ -143,8 +137,8 @@ defmodule Teiserver.Protocols.Spring do
 
     sync = if sync, do: 1, else: 2
 
-    [t4, t3, t2, t1] = BitParse.parse_bits("#{client.player_number}", 4)
-    [a4, a3, a2, a1] = BitParse.parse_bits("#{client.team_number}", 4)
+    [t8, t7, t6, t5, t4, t3, t2, t1] = BitParse.parse_bits("#{client.player_number}", 8)
+    [a8, a7, a6, a5, a4, a3, a2, a1] = BitParse.parse_bits("#{client.team_number}", 8)
     [h7, h6, h5, h4, h3, h2, h1] = BitParse.parse_bits("#{client.handicap}", 7)
     [sync2, sync1] = BitParse.parse_bits("#{sync}", 2)
     [side4, side3, side2, side1] = BitParse.parse_bits("#{client.side}", 4)
@@ -168,20 +162,20 @@ defmodule Teiserver.Protocols.Spring do
       h5,
       h6,
       h7,
-      0,
-      0,
-      0,
-      0,
+      t5,
+      t6,
+      t7,
+      t8,
       sync1,
       sync2,
       side1,
       side2,
       side3,
       side4,
-      0,
-      0,
-      0,
-      0
+      a5,
+      a6,
+      a7,
+      a8
     ]
     |> Enum.reverse()
     |> Integer.undigits(2)

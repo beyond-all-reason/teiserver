@@ -107,7 +107,7 @@ defmodule Central.Helpers.DatePresets do
 
   def parse("End of time"), do: Timex.to_date({9999, 1, 1})
 
-  def parse(period), do: parse(period, nil, nil)
+  def parse(period), do: parse(period, "", "")
 
   @spec parse(String.t(), String.t(), String.t()) :: {Date.t(), Date.t()}
   def parse(period_name, start_date, end_date) do

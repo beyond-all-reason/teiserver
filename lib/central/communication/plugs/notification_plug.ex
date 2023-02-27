@@ -34,8 +34,8 @@ defmodule Central.Communication.NotificationPlug do
       |> Enum.count()
 
     socket
-    |> Phoenix.LiveView.assign(:user_notifications, notifications)
-    |> Phoenix.LiveView.assign(:user_notifications_unread_count, unread_count)
+    |> Phoenix.LiveView.Utils.assign(:user_notifications, notifications)
+    |> Phoenix.LiveView.Utils.assign(:user_notifications_unread_count, unread_count)
   end
 
   defp assign_notificiations(conn, nil) do

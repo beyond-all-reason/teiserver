@@ -34,18 +34,28 @@ defmodule Teiserver.Chat.PartyMessageLib do
   end
 
   def _search(query, :user_id, user_id) do
-    from room_messages in query,
-      where: room_messages.user_id == ^user_id
+    from party_messages in query,
+      where: party_messages.user_id == ^user_id
+  end
+
+  def _search(query, :user_id_in, id_list) do
+    from party_messages in query,
+      where: party_messages.user_id in ^id_list
+  end
+
+  def _search(query, :user_id_not_in, id_list) do
+    from party_messages in query,
+      where: party_messages.user_id not in ^id_list
   end
 
   def _search(query, :party_guid, party_guid) do
-    from room_messages in query,
-      where: room_messages.party_guid == ^party_guid
+    from party_messages in query,
+      where: party_messages.party_guid == ^party_guid
   end
 
   def _search(query, :party_guid_in, party_guids) do
-    from room_messages in query,
-      where: room_messages.party_guid in ^party_guids
+    from party_messages in query,
+      where: party_messages.party_guid in ^party_guids
   end
 
   def _search(query, :id_list, id_list) do

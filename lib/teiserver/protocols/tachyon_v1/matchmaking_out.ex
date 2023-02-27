@@ -30,7 +30,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingOut do
         "queue_id" => queue.id,
         "name" => queue.name,
         "mean_wait_time" => info.mean_wait_time,
-        "member_count" => info.member_count
+        "group_count" => info.group_count
       }
     }
   end

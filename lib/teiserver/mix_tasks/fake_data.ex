@@ -84,6 +84,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   end
 
   defp make_accounts() do
+    Teiserver.Startup.create_groups()
     root_user = add_root_user()
 
     new_users = Range.new(0, @settings.days)
@@ -138,6 +139,14 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
       logs = Range.new(1, 1440)
         |> Enum.map(fn m ->
+          {menu, lobby, player, spectator} = {
+            random_pick_from(user_ids, 0.2),
+            random_pick_from(user_ids, 0.2),
+            random_pick_from(user_ids, 0.2),
+            random_pick_from(user_ids, 0.2)
+          }
+          total = [menu, lobby, player, spectator] |> List.flatten
+
           %{
             timestamp: Timex.shift(date |> Timex.to_datetime, minutes: m),
             data: %{
@@ -152,7 +161,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
                 menu: random_pick_from(user_ids),
                 lobby: random_pick_from(user_ids),
                 player: random_pick_from(user_ids),
-                spectator: random_pick_from(user_ids)
+                spectator: random_pick_from(user_ids),
+                total: total
               },
               os_mon: %{
                 cpu_avg1: :rand.uniform(50) + 50,

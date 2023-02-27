@@ -12,7 +12,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]
   require Logger
 
-  @dispute_string "If you feel that you have been the target of an erroneous or unjust moderation action please contact the head of moderation, Beherith"
+  @dispute_string "If you feel you have been the target of an erroneous or unjust moderation action please contact the head of moderation, Beherith"
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -76,27 +76,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_inout")
     :ok = PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
 
-    {:noreply, state}
-  end
-
-  # New report
-  def handle_info({:new_report, report_id}, state) do
-    case Account.get_report(report_id) do
-      nil ->
-        nil
-      report ->
-        User.send_direct_message(state.userid, report.reporter_id, "Thank you for submitting your report, it has been passed on to the moderation team.")
-    end
-    {:noreply, state}
-  end
-
-  def handle_info({:update_report, report_id}, state) do
-    case Account.get_report(report_id) do
-      nil ->
-        nil
-      report ->
-        User.send_direct_message(state.userid, report.reporter_id, "Thank you for submitting your report, it has been passed on to the moderation team.")
-    end
     {:noreply, state}
   end
 
@@ -198,15 +177,21 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   end
 
   # Client inout
-  def handle_info({:client_inout, :login, userid}, state) do
+  def handle_info(%{channel: "client_inout", event: :login, userid: userid}, state) do
     delay = Config.get_site_config_cache("teiserver.Post login action delay")
     :timer.send_after(delay, {:do_client_inout, :login, userid})
 
     {:noreply, state}
   end
 
-  # p = Teiserver.Coordinator.get_coordinator_pid()
-  # send(p, {:do_client_inout, :login, 2563})
+  def handle_info(%{channel: "client_inout", event: :disconnect, userid: userid}, state) do
+    Teiserver.Account.RecacheUserStatsTask.disconnected(userid)
+
+    {:noreply, state}
+  end
+
+  def handle_info(%{channel: "client_inout"}, state), do: {:noreply, state}
+
   def handle_info({:do_client_inout, :login, userid}, state) do
     user = User.get_user_by_id(userid)
     if user do
@@ -214,65 +199,49 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         |> Enum.filter(fn r -> not Enum.member?(["Bridging"], r) end)
 
       if not Enum.empty?(relevant_restrictions) do
-        reports = Account.list_reports(search: [
+        actions = Moderation.list_actions(search: [
           target_id: userid,
-          expired: false,
-          response_action: "Restrict",
-          filter: "closed"
+          expiry: "Unexpired only"
         ])
 
         # Reasons you've had action taken against you
-        reasons = reports
-          |> Enum.filter(fn r ->
+        reasons = actions
+          |> Enum.filter(fn action ->
             cond do
-              r.responder_id == state.userid -> false
+              Enum.member?(action.restrictions, "Bridging") -> false
               true -> true
             end
           end)
-          |> Enum.map(fn report ->
-            expires = if report.expires do
-              ", expires #{date_to_str(report.expires, format: :ymd_hms)}"
+          |> Enum.map(fn action ->
+            expires = if action.expires do
+              ", expires #{date_to_str(action.expires, format: :ymd_hms)}"
             else
               ""
             end
 
-            " - #{report.response_text}#{expires}"
+            " - #{action.reason}#{expires}"
           end)
 
         msg = [
           "This is a reminder that you received one or more formal moderation actions as listed below:"
         ] ++ reasons
 
-        # Follow-up
-        followups = reports
-          |> Enum.filter(fn r -> r.followup != nil and r.followup != "" end)
-          |> Enum.map(fn r -> "- #{r.followup}" end)
-
-        msg = if Enum.empty?(followups) do
-          msg
-        else
-          msg ++ ["If the behaviour continues one or more of the following actions may be performed:"] ++ followups
-        end
-
-        # Code of conduct references
-        cocs = reports
-          |> Enum.map(fn r -> r.code_references end)
+        has_warning = actions
+          |> Enum.map(fn a -> a.restrictions end)
           |> List.flatten
-          |> Enum.uniq
-
-        msg = case cocs do
-          [] -> msg
-          _ -> msg ++ ["Please refer to Code of Conduct points #{Enum.join(cocs, ", ")}"]
-        end
+          |> Enum.member?("Warning reminder")
 
         # Do we need an acknowledgement? If they are muted then no.
-        msg = if User.has_mute?(user) do
-          msg ++ [@dispute_string]
-        else
-          Lobby.remove_user_from_any_lobby(user.id)
-          Client.set_awaiting_warn_ack(userid)
-          acknowledge_prompt = Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
-          msg ++ [@dispute_string, acknowledge_prompt]
+        msg = cond do
+          User.has_mute?(user) ->
+            msg ++ [@dispute_string]
+          has_warning ->
+            Lobby.remove_user_from_any_lobby(user.id)
+            Client.set_awaiting_warn_ack(userid)
+            acknowledge_prompt = Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
+            msg ++ [@dispute_string, acknowledge_prompt]
+          true ->
+            msg ++ [@dispute_string]
         end
 
         Coordinator.send_to_user(userid, msg)
@@ -280,7 +249,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     end
     {:noreply, state}
   end
-  def handle_info({:client_inout, :disconnect, _userid, _reason}, state), do: {:noreply, state}
+
 
   # Special debugging to see what is being sent
   def handle_info({:timeout, duration}, state) do

@@ -28,6 +28,10 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
         :duplicate -> true
         :failed -> false
         :missing -> false
+        :oversized_group -> false
+        :moderated -> false
+        :not_party_leader -> false
+        :no_queue -> false
       end
 
     case joined do
@@ -37,6 +41,10 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
       false ->
         reason = case resp do
           :missing -> "No queue found"
+          :no_queue -> "No queue found"
+          :moderated -> "Moderation action"
+          :not_party_leader -> "Not party leader"
+          :oversized_group -> "Group is larger than the queue team size"
           _ -> "Failure"
         end
         reply(:matchmaking, :join_queue_failure, {queue_id, reason}, state)
@@ -44,14 +52,14 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
   end
 
   def do_handle("leave_queue", %{"queue_id" => queue_id}, state) when is_integer(queue_id) do
-    Matchmaking.remove_user_from_queue(queue_id, state.userid)
+    Matchmaking.remove_group_from_queue(queue_id, state.userid)
     state
   end
 
   def do_handle("leave_all_queues", _cmd, state) do
     state.queues
     |> Enum.each(fn queue_id ->
-      Matchmaking.remove_user_from_queue(queue_id, state.userid)
+      Matchmaking.remove_group_from_queue(queue_id, state.userid)
     end)
 
     state
@@ -64,7 +72,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
 
   def do_handle("decline", %{"match_id" => match_id}, state) do
     Matchmaking.player_decline(match_id, state.userid)
-    do_handle("leave_all_queues", nil, state)
+    state
   end
 
   # def do_handle(cmd, data, msg_id, state) do

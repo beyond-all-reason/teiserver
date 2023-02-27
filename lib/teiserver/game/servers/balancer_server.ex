@@ -4,7 +4,6 @@ defmodule Teiserver.Game.BalancerServer do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.{Battle, Coordinator}
-  alias Phoenix.PubSub
 
   @tick_interval 2_000
 
@@ -23,7 +22,8 @@ defmodule Teiserver.Game.BalancerServer do
       rating_upper_boundary: state.rating_upper_boundary,
       mean_diff_max: state.mean_diff_max,
       stddev_diff_max: state.stddev_diff_max,
-      fuzz_multiplier: state.fuzz_multiplier
+      fuzz_multiplier: state.fuzz_multiplier,
+      shuffle_first_pick: state.shuffle_first_pick
     ]
 
     {balance, new_state} = make_balance(team_count, state, opts)
@@ -49,7 +49,8 @@ defmodule Teiserver.Game.BalancerServer do
       rating_upper_boundary: state.rating_upper_boundary,
       mean_diff_max: state.mean_diff_max,
       fuzz_multiplier: state.fuzz_multiplier,
-      stddev_diff_max: state.stddev_diff_max
+      stddev_diff_max: state.stddev_diff_max,
+      shuffle_first_pick: state.shuffle_first_pick
     }
 
     {:reply, result, state}
@@ -70,7 +71,7 @@ defmodule Teiserver.Game.BalancerServer do
   end
 
   def handle_cast({:set, key, value}, state) do
-    valid_keys = ~w(max_deviation rating_lower_boundary rating_upper_boundary mean_diff_max stddev_diff_max fuzz_multiplier)a
+    valid_keys = ~w(max_deviation rating_lower_boundary rating_upper_boundary mean_diff_max stddev_diff_max fuzz_multiplier shuffle_first_pick)a
 
     new_state = case Enum.member?(valid_keys, key) do
       true ->
@@ -100,23 +101,23 @@ defmodule Teiserver.Game.BalancerServer do
     {:noreply, state}
   end
 
-  def handle_info({:lobby_update, :updated_client_battlestatus, _lobby_id, {_client, _reason}}, state) do
-    {:noreply, state}
-  end
+  # def handle_info({:lobby_update, :updated_client_battlestatus, _lobby_id, {_client, _reason}}, state) do
+  #   {:noreply, state}
+  # end
 
-  def handle_info({:lobby_update, :add_user, _lobby_id, _userid}, state) do
-    {:noreply, state}
-  end
+  # def handle_info({:lobby_update, :add_user, _lobby_id, _userid}, state) do
+  #   {:noreply, state}
+  # end
 
-  def handle_info({:lobby_update, _, _, _}, state), do: {:noreply, state}
+  # def handle_info({:lobby_update, _, _, _}, state), do: {:noreply, state}
 
-  def handle_info({:host_update, _userid, _host_data}, state) do
-    {:noreply, state}
-  end
+  # def handle_info({:host_update, _userid, _host_data}, state) do
+  #   {:noreply, state}
+  # end
 
-  def handle_info(%{channel: "teiserver_server"}, state) do
-    {:noreply, state}
-  end
+  # def handle_info(%{channel: "teiserver_server"}, state) do
+  #   {:noreply, state}
+  # end
 
   @spec make_balance(non_neg_integer(), T.balance_server_state(), list()) :: {map(), T.balance_server_state()}
   defp make_balance(team_count, state, opts) do
@@ -145,8 +146,7 @@ defmodule Teiserver.Game.BalancerServer do
   defp make_player_hash(team_count, players, opts) do
     client_string = players
       |> Enum.sort_by(fn c -> c.userid end)
-      |> Enum.map(fn c -> "#{c.userid}:#{c.party_id}" end)
-      |> Enum.join(",")
+      |> Enum.map_join(",", fn c -> "#{c.userid}:#{c.party_id}" end)
 
     opts_string = Kernel.inspect(opts)
 
@@ -161,7 +161,7 @@ defmodule Teiserver.Game.BalancerServer do
     rating_type = cond do
       player_count == 2 -> "Duel"
       team_count > 2 ->
-        if player_count > team_count, do: "Team FFA", else: "FFA"
+        if player_count > team_count, do: "Team", else: "FFA"
       true -> "Team"
     end
 
@@ -253,8 +253,9 @@ defmodule Teiserver.Game.BalancerServer do
   def init(opts) do
     lobby_id = opts[:lobby_id]
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
+    # These were never actually used
+    # :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    # :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(

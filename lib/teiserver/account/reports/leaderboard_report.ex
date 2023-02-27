@@ -46,7 +46,7 @@ defmodule Teiserver.Account.LeaderboardReport do
     extra_data = if params["extended"] == "true" do
       userids = ratings |> Enum.map(fn r -> r.user_id end)
 
-      get_memberships(userids, activity_time, type_name)
+      get_extra_data(userids, activity_time, type_name)
     else
       nil
     end
@@ -72,7 +72,11 @@ defmodule Teiserver.Account.LeaderboardReport do
       "Uncertainty",
       "Days since update",
       "Game count",
-      "Win rate"
+      "Win rate",
+      "Stayed %",
+      "Early %",
+      "Abandoned %",
+      "Noshow %"
     ]]
     headings ++ output
   end
@@ -83,7 +87,11 @@ defmodule Teiserver.Account.LeaderboardReport do
         age = Timex.diff(Timex.now(), rating.last_updated, :days)
         extra = extra_data[rating.user_id] || %{
           count: 1,
-          wins: 1
+          wins: 1,
+          stayed: 0,
+          early: 0,
+          abandoned: 0,
+          noshow: 0
         }
 
         [
@@ -95,7 +103,11 @@ defmodule Teiserver.Account.LeaderboardReport do
           rating.uncertainty,
           age,
           extra.count,
-          extra.wins/extra.count
+          extra.wins/extra.count,
+          extra.stayed,
+          extra.early,
+          extra.abandoned,
+          extra.noshow
         ]
       end)
       |> add_csv_headings
@@ -112,7 +124,7 @@ defmodule Teiserver.Account.LeaderboardReport do
     }, Map.get(params, "report", %{}))
   end
 
-  defp get_memberships(userids, after_date, type_name) do
+  defp get_extra_data(userids, after_date, type_name) do
     id_str = Enum.join(userids, ", ")
     date_str = TimexHelper.date_to_str(after_date, format: :ymd_hms)
 
@@ -139,7 +151,16 @@ defmodule Teiserver.Account.LeaderboardReport do
       {:ok, results} ->
         results.rows
         |> Map.new(fn [userid, count, wins] ->
-          {userid, %{count: count, wins: wins}}
+          stats = Account.get_user_stat_data(userid)
+
+          {userid, %{
+            stayed: stats["exit_status.team.stayed"],
+            early: stats["exit_status.team.early"],
+            abandoned: stats["exit_status.team.abandoned"],
+            noshow: stats["exit_status.team.noshow"],
+            count: count,
+            wins: wins
+          }}
         end)
 
       {a, b} ->

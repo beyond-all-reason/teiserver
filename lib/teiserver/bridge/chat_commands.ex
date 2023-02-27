@@ -1,28 +1,82 @@
 defmodule Teiserver.Bridge.ChatCommands do
   @moduledoc false
-  alias Teiserver.User
+  alias Teiserver.{Account, User}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Bridge.UnitNames
+  alias Nostrum.Api
+  require Logger
 
   @always_allow ~w(whatwas unit)
 
-  @spec handle(Alchemy.Message.t()) :: any
-  def handle(%Alchemy.Message{author: %{id: author}, channel_id: channel, content: "$" <> content, attachments: []} = _message) do
+  @spec handle(Nostrum.Struct.Message.t()) :: any
+  def handle(%Nostrum.Struct.Message{id: message_id, author: %{id: author_id}, channel_id: channel_id, content: "$" <> content, attachments: []}) do
     [cmd | remaining] = String.split(content, " ")
     remaining = Enum.join(remaining, " ")
-    user = User.get_user_by_discord_id(author)
+    user = Account.get_user_by_discord_id(author_id)
 
     if allow?(cmd, user) do
-      handle_message({user, author}, cmd, remaining, channel)
+      handle_command({user, author_id, message_id}, cmd, remaining, channel_id)
     end
   end
 
-  @spec handle_message({T.user(), String.t()}, String.t(), String.t(), String.t()) :: any
-  def handle_message({user, discord_id}, "echo", remaining, channel) do
-    reply(channel, "Echoing <@!#{discord_id}> (aka #{user.name}), #{remaining}")
+  def handle(_) do
+    :ok
   end
 
-  def handle_message({_user, _discord_id}, "whatwas", remaining, channel) do
+  @spec handle_command({T.user(), String.t()}, String.t(), String.t(), non_neg_integer()) :: any
+  def handle_command({user, discord_id, _message_id}, "echo", remaining, channel_id) do
+    reply(channel_id, "Echoing <@!#{discord_id}> (aka #{user.name}), #{remaining}")
+  end
+
+  def handle_command({_user, _discord_id, message_id}, "gdt", _remaining, channel_id) do
+    gdt_forum = Application.get_env(:central, DiscordBridge)[:bridges]
+      |> Enum.filter(fn {_, name} -> name == "gdt-discussion" end)
+
+    case gdt_forum do
+      [{forum_id, _}] ->
+        # Post message to channel
+        Api.create_message(channel_id, "Thank you for your suggestion, the game design team will be discussing it. Once they have finished discussing it they will vote on it and post an update to this thread.")
+
+        # Delete the message that was posted
+        Api.delete_message(channel_id, message_id)
+
+        # channel_id = 1071140326644920353
+        {:ok, channel} = Api.get_channel(channel_id)
+
+        # Create new thread in gdt-discussion
+        {:ok, thread} = Api.start_thread(forum_id, %{
+          name: "Discussion for #{channel.name}",
+          message: %{
+            content: "Thread to discuss #{channel.name} - <##{channel_id}>",
+          },
+          type: 11
+        })
+
+        {:ok, message} = Api.create_message(thread.id, %{
+          content: "Thread to discuss #{channel.name} - <##{channel_id}>"
+        })
+
+        # Pin message
+        Api.add_pinned_channel_message(thread.id, message.id)
+
+        # Add GDTs to thread
+        Account.list_users(search: [
+          gdt_member: "GDT"
+        ], select: [:data])
+        |> Enum.map(fn %{data: data} -> data["discord_id"] end)
+        |> Enum.reject(&(&1 == nil))
+        |> Enum.each(fn user_discord_id ->
+          Nostrum.Api.add_thread_member(thread.id, user_discord_id)
+        end)
+
+      _ ->
+        :ok
+    end
+
+    :ignore
+  end
+
+  def handle_command({_user, _discord_id, _message_id}, "whatwas", remaining, channel) do
     name = remaining
       |> String.trim()
       |> String.downcase()
@@ -48,7 +102,7 @@ defmodule Teiserver.Bridge.ChatCommands do
     end
   end
 
-  def handle_message({_user, _discord_id}, "unit", remaining, channel) do
+  def handle_command({_user, _discord_id, _message_id}, "unit", remaining, channel) do
     name = remaining
       |> String.trim()
       |> String.downcase()
@@ -74,11 +128,13 @@ defmodule Teiserver.Bridge.ChatCommands do
     end
   end
 
-  def handle_message(_, _, _, _) do
-    nil
+  def handle_command(_, _, _, _) do
+    :ignore
   end
 
-  @spec allow?(map(), map()) :: boolean
+  @spec allow?(String.t(), map()) :: boolean
+  defp allow?("discord", _), do: true
+  defp allow?("gdt", user), do: User.has_any_role?(user, ["Admin", "Moderator", "GDT"])
   defp allow?(cmd, user) do
     if Enum.member?(@always_allow, cmd) do
       true
@@ -88,10 +144,7 @@ defmodule Teiserver.Bridge.ChatCommands do
   end
 
   defp reply(channel, message) do
-    Alchemy.Client.send_message(
-      channel,
-      message,
-      []# Options
-    )
+    Api.create_message(channel, message)
+    :ignore
   end
 end

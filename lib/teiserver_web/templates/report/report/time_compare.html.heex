@@ -1,0 +1,223 @@
+<% {_fg, _bg, bsname} = view_colour() |> colours() %>
+
+<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+
+<%= central_component "picker_script",
+  module: Central.Account.UserLib,
+  name: "account_user",
+  title: "User search"
+%>
+
+<%= if assigns[:lines] do %>
+  <script src={Routes.static_path(@conn, "/js/d3.js")}></script>
+  <script src={Routes.static_path(@conn, "/js/c3.min.js")}></script>
+
+  <link href="/css/c3.min.css" rel="stylesheet">
+
+  <script>
+    $(function() {
+      var chart = c3.generate({
+        bindto: '#chart',
+        data: {
+          x: 'x',
+          xFormat: '%H:%M:%S',
+          columns: <%= raw Jason.encode!([["x" | @keys] | @lines]) %>,
+          types: {
+            <%= for n <- @line_names do %>
+              '<%= n %>': 'step',
+            <% end %>
+          }
+        },
+        axis: {
+          x: {
+            type: 'timeseries',
+            tick: {
+              format: '%H:%M:%S'
+            }
+          }
+        }
+      });
+    });
+  </script>
+<% end %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+
+        <div class="btn btn-primary2 float-end" onclick="$('.help-box, .help-box-large').toggle();">
+          <i class='fa-fw fa-solid fa-circle-info'></i>
+          &nbsp;
+          Show/Hide help
+        </div>
+        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "time_compare"
+          })
+        %>
+        <br /><br />
+
+        <%= if @end_date do %>
+          <h4><%= date_to_str @start_date, format: :ymd_hms %></h4>
+        <% else %>
+          <h4>No date found</h4>
+        <% end %>
+
+        <form action={Routes.ts_reports_report_path(@conn, :show, "time_compare")} method="post" class="form-horizontal">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <%= for i <- 1..@user_count_max do %>
+            <input type="hidden" name={"report[account_user#{i}]"} value={@params["account_user#{i}"]} />
+          <% end %>
+
+          <input type="hidden" name="report[overlap]" value={@params["overlap"]} />
+          <input type="hidden" name="report[skip_nil]" value={@params["skip_nil"]} />
+
+          <input type="hidden" name="report[the_date]" value={Timex.shift(@start_date, days: 1) |> date_to_str(format: :ymd)} />
+
+          <input type="submit" value="1 day younger" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
+        </form>
+
+        <form action={Routes.ts_reports_report_path(@conn, :show, "time_compare")} method="post" class="form-horizontal">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <%= for i <- 1..@user_count_max do %>
+            <input type="hidden" name={"report[account_user#{i}]"} value={@params["account_user#{i}"]} />
+          <% end %>
+          <input type="hidden" name="report[overlap]" value={@params["overlap"]} />
+          <input type="hidden" name="report[skip_nil]" value={@params["skip_nil"]} />
+
+          <input type="hidden" name="report[the_date]" value={Timex.shift(@start_date, days: -1) |> date_to_str(format: :ymd)} />
+
+          <input type="submit" value="1 day older" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
+        </form>
+
+        <form action={Routes.ts_reports_report_path(@conn, :show, "time_compare")} method="post" class="form-horizontal">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <div class="row">
+            <%= for i <- 1..@user_count_max do %>
+              <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+                <label for={"search_account_user#{i}"} class="control-label">User <%= i %>: </label>
+                <%= render CentralWeb.Account.UserView, "picker.html",
+                  input_name: "report[account_user#{i}]",
+                  input_id: "report_account_user#{i}",
+                  value: @params["account_user#{i}"]
+                %>
+              </div>
+            <% end %>
+
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="report_the_date" class="control-label">Date:</label>
+              <input type="text" id="report_the_date" name="report[the_date]" value={@params["the_date"]} class="form-control datepicker" />
+            </div>
+
+            <div class="col-md-3 col-xl-2 search-form-input">
+              <label for="report_overlap" class="control-label">Overlaps:</label>
+              <%= central_component "checkbox",
+                name: "report[overlap]",
+                id: "report_overlap",
+                value: "true",
+                label: "Only show overlapping data",
+                checked: @params["overlap"] == "true",
+
+                description: ""
+              %>
+            </div>
+
+            <div class="col-md-3 col-xl-2 search-form-input">
+              <label for="report_skip_nil" class="control-label">Ignore empty:</label>
+              <%= central_component "checkbox",
+                name: "report[skip_nil]",
+                id: "report_skip_nil",
+                value: "true",
+                label: "Ignore logs with no activity",
+                checked: @params["skip_nil"] == "true",
+
+                description: ""
+              %>
+            </div>
+
+          <!--
+            <div class="col-md-3 col-xl-2 search-form-input">
+              <label for="report_tabular" class="control-label">Tabular data:</label>
+              <%= central_component "checkbox",
+                name: "report[tabular]",
+                id: "report_tabular",
+                value: "true",
+                label: "Show a week of tabular data",
+                checked: @params["tabular"] == "true",
+
+                description: ""
+              %>
+            </div>
+          -->
+          </div>
+
+          <div class="row">
+            <div class="offset-md-8 col-md-4 offset-xl-9 col-xl-3">
+              &nbsp;<br />
+              <input type="submit" value="Update report" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+            </div>
+          </div>
+        </form>
+
+        <div class="help-box-large">
+
+        </div>
+
+        <%= if @params["tabular"] != "true" do %>
+          <div id="chart" class='with-transitions mt-3' style="height: 400px;">
+          </div>
+
+          <div class="row">
+            <div class="col">&nbsp;</div>
+            <div class="col">0 = Offline</div>
+            <div class="col">1 = Menu</div>
+            <div class="col">2 = Lobby</div>
+            <div class="col">3 = Spectator</div>
+            <div class="col">4 = Player</div>
+            <div class="col">&nbsp;</div>
+          </div>
+        <% end %>
+
+        <%= if assigns[:stats] do %>
+          <table class="table d-inline float-start">
+            <thead>
+              <tr>
+                <th>&nbsp;</th>
+                <%= for {u1, u2} <- @stats |> Map.keys do %>
+                  <th><%= @usernames[u1] %> / <%= @usernames[u2] %></th>
+                <% end %>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Total mins</td>
+                <%= for col_stats <- @stats |> Map.values do %>
+                  <td><%= format_number col_stats.count %></td>
+                <% end %>
+              </tr>
+              <tr>
+                <td>Online</td>
+                <%= for col_stats <- @stats |> Map.values do %>
+                  <td><%= percent(col_stats.online_at_same_time/col_stats.count) %>% (<%= format_number col_stats.online_at_same_time %>)</td>
+                <% end %>
+              </tr>
+              <tr>
+                <td>Lobby & Spec</td>
+                <%= for col_stats <- @stats |> Map.values do %>
+                  <td><%= percent(col_stats.lobby_spec_at_same_time/col_stats.count) %>% (<%= format_number col_stats.lobby_spec_at_same_time %>)</td>
+                <% end %>
+              </tr>
+            </tbody>
+          </table>
+        <% end %>
+
+
+      </div>
+    </div>
+  </div>
+</div>

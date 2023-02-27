@@ -80,10 +80,12 @@ config :central, Teiserver,
   node_name: "server3"
 
 # Do not print debug messages in production
-config :logger, level: :info
+config :logger,
+  format: "$date $time [$level] $metadata $message\n",
+  metadata: [:request_id, :user_id],
+  level: :info
 
 config :logger,
-  format: "[$level] $message\n",
   backends: [
     {LoggerFileBackend, :error_log},
     {LoggerFileBackend, :info_log},
@@ -92,10 +94,14 @@ config :logger,
 
 config :logger, :error_log,
   path: "/var/log/central/error.log",
+  format: "$date $time [$level] $metadata $message\n",
+  metadata: [:request_id, :user_id],
   level: :error
 
 config :logger, :info_log,
   path: "/var/log/central/info.log",
+  format: "$date $time [$level] $metadata $message\n",
+  metadata: [:request_id, :user_id],
   level: :info
 
 # Overwritten in secret

@@ -46,7 +46,7 @@ Operates the same way as the queue query but with a preset set of filters, only 
     "queue_id": 123,
     "name": "Best queue name in the world",
     "mean_wait_time": 33,
-    "member_count": 2
+    "group_count": 2
   }
 }
 ```

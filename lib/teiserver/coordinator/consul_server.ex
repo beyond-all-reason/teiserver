@@ -7,7 +7,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   require Logger
   alias Teiserver.{Account, Coordinator, Client, User, Battle}
   alias Teiserver.Battle.{Lobby, LobbyChat}
-  import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2]
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Central.Config
   alias Phoenix.PubSub
   alias Teiserver.Bridge.BridgeServer
@@ -19,8 +19,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @coordinator_bot ~w(whoami whois check discord help coc ignore mute ignore unmute unignore matchmaking website party modparty unparty)
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? explain)
-  @boss_commands ~w(gatekeeper welcome-message meme reset-approval rename password)
+  @boss_commands ~w(gatekeeper welcome-message meme reset-approval rename password resetplaylevels minplaylevel maxplaylevel setplaylevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
+
+  @splitter "########################################"
 
   @afk_check_duration 40_000
 
@@ -46,6 +48,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:reply, request_user_change_status(client, state), state}
   end
 
+  def handle_call(:queue_state, _from, state) do
+    {:reply, get_queue(state), state}
+  end
+
   # Infos
   @impl true
   def handle_info(:tick, state) do
@@ -53,7 +59,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       new_state = check_queue_status(state)
       player_count_changed(new_state)
       fix_ids(new_state)
-      {new_balance_hash, new_balance_result} = balance_teams(state)
       new_state = afk_check_update(new_state)
 
       # It is possible we can "forget" the coordinator_id
@@ -65,10 +70,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         new_state
       end
 
-      {:noreply, %{new_state |
-        last_balance_hash: new_balance_hash,
-        balance_result: new_balance_result
-      }}
+      {:noreply, new_state}
     else
       {:noreply, state}
     end
@@ -82,29 +84,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_info({:merge, new_map}, state) do
     new_state = Map.merge(state, new_map)
     {:noreply, new_state}
-  end
-
-  def handle_info(:balance, state) do
-    lobby = Battle.get_lobby(state.lobby_id)
-
-    new_state = if lobby.consul_balance == true do
-      {new_balance_hash, new_balance_result} = force_rebalance(state)
-
-      %{state |
-        coordinator_id: Coordinator.get_coordinator_userid(),
-        last_balance_hash: new_balance_hash,
-        balance_result: new_balance_result
-      }
-    else
-      state
-    end
-
-    {:noreply, new_state}
-  end
-
-  def handle_info(:consul_balance_enabled, state) do
-    set_skill_modoptions(state)
-    {:noreply, state}
   end
 
   # Doesn't do anything at this stage
@@ -145,15 +124,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, %{state |
       join_queue: state.join_queue |> List.delete(userid),
       low_priority_join_queue: state.low_priority_join_queue |> List.delete(userid)
-    }}
+    } |> queue_size_changed}
   end
 
   def handle_info({:user_joined, userid}, state) do
     new_approved = [userid | state.approved_users] |> Enum.uniq
 
-    if state.consul_balance == true do
-      set_skill_modoptions_for_user(state, userid)
-    end
+    username = Account.get_username(userid)
+    LobbyChat.persist_system_message("#{username} joined the lobby", state.lobby_id)
 
     {:noreply, %{state |
       approved_users: new_approved,
@@ -162,6 +140,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info({:user_left, userid}, state) do
+    username = Account.get_username(userid)
+    LobbyChat.persist_system_message("#{username} left the lobby", state.lobby_id)
+
     player_count_changed(state)
     {:noreply, %{state |
       join_queue: state.join_queue |> List.delete(userid),
@@ -172,13 +153,15 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info({:user_kicked, userid}, state) do
-    new_approved = state.approved_users |> List.delete(userid)
+    username = Account.get_username(userid)
+    LobbyChat.persist_system_message("#{username} kicked from the lobby", state.lobby_id)
+
     player_count_changed(state)
     {:noreply, %{state |
       join_queue: state.join_queue |> List.delete(userid),
       low_priority_join_queue: state.low_priority_join_queue |> List.delete(userid),
       last_seen_map: state.last_seen_map |> Map.delete(userid),
-      approved_users: new_approved
+      approved_users: state.approved_users |> List.delete(userid)
     }}
   end
 
@@ -284,10 +267,53 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_info({:lobby_update, :add_user, _lobby_id, userid}, state) do
     user = User.get_user_by_id(userid)
 
-    if state.welcome_message do
-      splitter = "########################################"
-      parts = String.split(state.welcome_message, "$$")
-      Coordinator.send_to_user(userid, [splitter] ++ parts ++ [splitter])
+    min_rate_play = state.minimum_rating_to_play
+    max_rate_play = state.maximum_rating_to_play
+    play_level_bounds = cond do
+      min_rate_play > 0 and max_rate_play < 1000 ->
+        "Play rating boundaries set to min: #{min_rate_play}, max: #{max_rate_play}"
+
+      min_rate_play > 0 ->
+        "Play rating boundaries set to min: #{min_rate_play}"
+
+      max_rate_play < 1000 ->
+        "Play rating boundaries set to max: #{max_rate_play}"
+
+      true ->
+        nil
+    end
+
+    min_rank_play = state.minimum_rank_to_play
+    max_rank_play = state.maximum_rank_to_play
+
+    play_rank_bounds = cond do
+      min_rank_play > 0 and max_rank_play < 1000 ->
+        "Play rank boundaries set to min: #{min_rank_play}, max: #{max_rank_play}"
+
+      min_rank_play > 0 ->
+        "Play rank boundaries set to min: #{min_rank_play}"
+
+      max_rank_play < 1000 ->
+        "Play rank boundaries set to max: #{max_rank_play}"
+
+      true ->
+        nil
+    end
+
+    welcome_message = if state.welcome_message do
+      String.split(state.welcome_message, "$$")
+    end
+
+    msg = [
+      welcome_message,
+      play_level_bounds,
+      play_rank_bounds
+    ]
+    |> List.flatten
+    |> Enum.filter(fn s -> s != nil end)
+
+    if not Enum.empty?(msg) do
+      Coordinator.send_to_user(userid, [@splitter] ++ msg ++ [@splitter])
     end
 
     # If the client is muted, we need to tell the host
@@ -374,29 +400,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
     %{state | ring_timestamps: new_ring_timestamps}
   end
 
-  defp handle_lobby_chat(userid, "!autobalance on" <> _, %{consul_balance: true} = state) do
-    User.send_direct_message(state.coordinator_id, userid, "Server balance is currently enabled and trying to enable auto balance will mess things up.")
-    LobbyChat.say(userid, "!ev", state.lobby_id)
-    state
-  end
-
-  defp handle_lobby_chat(userid, "!autobalance adv" <> _, %{consul_balance: true} = state) do
-    User.send_direct_message(state.coordinator_id, userid, "Server balance is currently enabled and trying to enable auto balance will mess things up.")
-    LobbyChat.say(userid, "!ev", state.lobby_id)
-    state
-  end
-
-  defp handle_lobby_chat(userid, "!balancemode" <> _, %{consul_balance: true} = state) do
-    User.send_direct_message(state.coordinator_id, userid, "Server balance is currently enabled and calling !balancemode will not do anything.")
-    LobbyChat.say(userid, "!ev", state.lobby_id)
-    state
-  end
-
-  defp handle_lobby_chat(userid, "!balance" <> _, %{consul_balance: true} = state) do
-    User.send_direct_message(state.coordinator_id, userid, "Server balance is currently enabled and calling !balance will not do anything.")
-    state
-  end
-
   defp handle_lobby_chat(userid, "!bset tweakdefs" <> _, state) do
     is_boss = Enum.member?(state.host_bosses, userid)
     if not is_boss do
@@ -470,21 +473,35 @@ defmodule Teiserver.Coordinator.ConsulServer do
   # defp request_user_change_status(new_client, %{moderator: true}, _state), do: {true, new_client}
   defp request_user_change_status(_new_client, nil, _state), do: {false, nil}
   defp request_user_change_status(new_client, %{userid: userid} = existing, state) do
+    user = Account.get_user_by_id(userid)
     list_status = get_list_status(userid, state)
 
+    # We were using this as there were concerns over an autoready feature, leaving it here for now
     # Are they readying up really fast?
-    if existing.ready == false and new_client.ready == true and existing.unready_at != nil do
-      time_elapsed = System.system_time(:millisecond) - existing.unready_at
-      if time_elapsed < 1000 do
-        Logger.warn("Ready up in #{time_elapsed}ms by #{existing.userid}/#{existing.name} using #{existing.lobby_client}")
-      end
+    # if existing.ready == false and new_client.ready == true and existing.unready_at != nil do
+    #   time_elapsed = System.system_time(:millisecond) - existing.unready_at
+    #   if time_elapsed < 1000 do
+    #     Logger.warn("Ready up in #{time_elapsed}ms by #{existing.userid}/#{existing.name} using #{existing.lobby_client}")
+    #   end
+    # end
+
+    player_rating = if state.minimum_rating_to_play > 0 or state.maximum_rating_to_play < 1000 do
+      BalanceLib.get_user_balance_rating_value(userid, "Team") |> max(1)
+    else
+      18
     end
 
-    # Level to play?
-    new_client = if existing.rank >= state.level_to_play do
-      new_client
-    else
+    block_as_player = cond do
+      state.minimum_rating_to_play >= player_rating or state.maximum_rating_to_play <= player_rating -> true
+      # state.minimum_rank_to_play >= existing.rank or state.maximum_rank_to_play <= existing.rank -> true
+      not Enum.empty?(existing.queues) -> true
+      true -> false
+    end
+
+    new_client = if block_as_player do
       %{new_client | player: false}
+    else
+      new_client
     end
 
     # Player limit, if they want to be a player and we have
@@ -501,7 +518,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       player_count = Battle.get_lobby_player_count(state.lobby_id)
 
       if player_count > 4 do
-        user = Account.get_user_by_id(userid)
         if user.hw_hash == nil do
           Logger.warn("[ConsulServer] hw hash block for #{Account.get_username(userid)}")
           %{new_client | player: false}
@@ -520,7 +536,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       player_count = Battle.get_lobby_player_count(state.lobby_id)
 
       if player_count > 4 do
-        user = Account.get_user_by_id(userid)
         if user.chobby_hash == nil do
           Logger.warn("[ConsulServer] Chobby data block for #{Account.get_username(userid)}")
           %{new_client | player: false}
@@ -702,7 +717,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def broadcast_update(state, reason \\ nil) do
-    Phoenix.PubSub.broadcast(
+    PubSub.broadcast(
       Central.PubSub,
       "teiserver_liveview_lobby_updates:#{state.lobby_id}",
       {:liveview_lobby_update, :consul_server_updated, state.lobby_id, reason}
@@ -812,67 +827,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  @spec balance_teams(T.consul_state()) :: {String.t(), map()}
-  defp balance_teams(state) do
-    current_hash = make_balance_hash(state)
-    lobby = Battle.get_lobby(state.lobby_id)
-
-    if not lobby.in_progress and current_hash != state.last_balance_hash and lobby.consul_balance == true do
-      force_rebalance(state)
-    else
-      {state.last_balance_hash, state.balance_result}
-    end
-  end
-
-  @spec force_rebalance(T.consul_state()) :: {String.t(), map()}
-  defp force_rebalance(state) do
-    players = list_players(state)
-    player_count = Enum.count(players)
-    if player_count > 1 do
-      player_ids = Enum.map(players, fn %{userid: u} -> u end)
-
-      rating_type = cond do
-        player_count == 2 -> "Duel"
-        state.host_teamcount > 2 ->
-          if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
-        true -> "Team"
-      end
-
-      groups = player_ids
-        |> Enum.map(fn userid ->
-          {[userid], BalanceLib.get_user_rating_value(userid, rating_type)}
-        end)
-
-      balance = BalanceLib.create_balance(groups, state.host_teamcount)
-
-      balance
-        |> Map.get(:team_players)
-        |> Enum.each(fn {team_number, members} ->
-          members
-          |> Enum.each(fn userid ->
-            Lobby.force_change_client(state.coordinator_id, userid, %{team_number: team_number - 1})
-          end)
-        end)
-
-      LobbyChat.sayex(state.coordinator_id, "Rebalanced via server, deviation at #{balance.deviation}% for #{player_count} players", state.lobby_id)
-
-      :timer.sleep(100)
-      {make_balance_hash(state), balance}
-    else
-      {make_balance_hash(state), %{}}
-    end
-  end
-
-  @spec make_balance_hash(T.consul_state()) :: String.t()
-  defp make_balance_hash(state) do
-    client_string = list_players(state)
-      |> Enum.map(fn c -> "#{c.userid}:#{c.team_number}" end)
-      |> Enum.join(",")
-
-    :crypto.hash(:md5, client_string)
-      |> Base.encode64()
-  end
-
   defp player_count_changed(%{join_queue: [], low_priority_join_queue: []} = _state), do: nil
   defp player_count_changed(state) do
     if get_player_count(state) < get_max_player_count(state) do
@@ -900,6 +854,19 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
+  @spec queue_size_changed(T.consul_state()) :: T.consul_state()
+  def queue_size_changed(state) do
+    if state.join_queue != state.last_queue_state do
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_lobby_updates:#{state.lobby_id}",
+        {:lobby_update, :updated_queue, state.lobby_id, get_queue(state)}
+      )
+    end
+
+    %{state | last_queue_state: state.join_queue}
+  end
+
   @spec get_max_player_count(map()) :: non_neg_integer()
   def get_max_player_count(%{host_teamcount: nil, player_limit: player_limit}), do: min(16, player_limit)
   def get_max_player_count(%{host_teamsize: nil, player_limit: player_limit}), do: min(16, player_limit)
@@ -924,8 +891,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @spec get_player_count(map()) :: non_neg_integer
   def get_player_count(%{lobby_id: lobby_id}) do
-    # Battle.get_lobby_player_count(lobby_id)
-
     list_players(%{lobby_id: lobby_id})
       |> Enum.count
   end
@@ -940,7 +905,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     case User.get_userid(name) do
       nil ->
         # Try partial search of players in lobby
-        battle = Lobby.get_battle(state.lobby_id)
+        battle = Lobby.get_lobby(state.lobby_id)
         found = Client.list_clients(battle.players)
           |> Enum.filter(fn client ->
             String.contains?(String.downcase(client.name), name)
@@ -1008,7 +973,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
       lobby_id: lobby_id,
       host_id: founder_id,
       gatekeeper: "default",
-      level_to_play: 0,
+
+      minimum_rating_to_play: 0,
+      maximum_rating_to_play: 1000,
+
+      minimum_rank_to_play: 0,
+      maximum_rank_to_play: 1000,
+
       level_to_spectate: 0,
       locks: [],
       bans: %{},
@@ -1038,55 +1009,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
       # Toggle with Coordinator.cast_consul(lobby_id, {:put, :unready_can_play, true})
       unready_can_play: false,
 
-      consul_balance: false,
       last_balance_hash: nil,
+      last_queue_state: [],
       balance_result: nil,
 
       player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
     }
-  end
-
-  # def set_skill_modoptions(state), do: state
-  # def set_skill_modoptions_for_user(state, _userid), do: state
-
-  def set_skill_modoptions(state) do
-    player_count = Battle.get_lobby_player_count(state.lobby_id)
-    rating_type = cond do
-      player_count == 2 -> "Duel"
-      state.host_teamcount > 2 ->
-        if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
-      true -> "Team"
-    end
-    new_opts = state.lobby_id
-      |> Battle.get_lobby_member_list()
-      |> Enum.map(fn userid ->
-        {rating_value, uncertainty} = BalanceLib.get_user_rating_value_uncertainty_pair(userid, rating_type)
-        username = Account.get_username_by_id(userid) |> String.downcase()
-        [
-          {"game/players/#{username}/skill", round(rating_value, 2)},
-          {"game/players/#{username}/skilluncertainty", round(uncertainty, 2)}
-        ]
-      end)
-      |> List.flatten
-      |> Map.new
-    Battle.set_modoptions(state.lobby_id, new_opts)
-  end
-  defp set_skill_modoptions_for_user(state, userid) do
-    player_count = Battle.get_lobby_player_count(state.lobby_id)
-    rating_type = cond do
-      player_count == 2 -> "Duel"
-      state.host_teamcount > 2 ->
-        if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
-      true -> "Team"
-    end
-    username = Account.get_username_by_id(userid) |> String.downcase()
-    {rating_value, uncertainty} = BalanceLib.get_user_rating_value_uncertainty_pair(userid, rating_type)
-
-    new_opts = %{
-      "game/players/#{username}/skill" => round(rating_value, 2),
-      "game/players/#{username}/skilluncertainty" => round(uncertainty, 2)
-    }
-    Battle.set_modoptions(state.lobby_id, new_opts)
   end
 
   @spec get_level(String.t()) :: :banned | :spectator | :player
@@ -1111,7 +1039,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     %{state |
       join_queue: join_queue,
       low_priority_join_queue: low_priority_join_queue
-    }
+    } |> queue_size_changed
   end
 
   @spec get_queue(map()) :: [T.userid()]
@@ -1127,6 +1055,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
+    Logger.metadata([request_id: "ConsulServer##{lobby_id}"])
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(

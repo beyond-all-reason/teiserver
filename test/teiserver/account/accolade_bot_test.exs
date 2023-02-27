@@ -74,7 +74,11 @@ defmodule Teiserver.Account.AccoladeBotTest do
 
     assert Account.list_accolades(search: [giver_id: player11.id]) == []
 
-    AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
+    AccoladeLib.cast_accolade_bot(%{
+      channel: "global_match_updates",
+      event: :match_completed,
+      match_id: match.id
+    })
     :timer.sleep(100)
 
     # Now, player11 should have zero messages because it was a short game
@@ -85,7 +89,11 @@ defmodule Teiserver.Account.AccoladeBotTest do
     # player11 should have no accolades given
     assert Account.list_accolades(search: [giver_id: player11.id]) == []
 
-    AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
+    AccoladeLib.cast_accolade_bot(%{
+      channel: "global_match_updates",
+      event: :match_completed,
+      match_id: match.id
+    })
     :timer.sleep(100)
 
     # Now, player11 should have a set of messages
@@ -152,7 +160,11 @@ defmodule Teiserver.Account.AccoladeBotTest do
     # player11 should have no accolades given
     assert Account.list_accolades(search: [giver_id: player11.id]) == []
 
-    AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
+    AccoladeLib.cast_accolade_bot(%{
+      channel: "global_match_updates",
+      event: :match_completed,
+      match_id: match.id
+    })
     :timer.sleep(100)
 
     # Now, player11 should have a set of messages
@@ -194,7 +206,11 @@ defmodule Teiserver.Account.AccoladeBotTest do
     # player11 should have no accolades given
     assert Account.list_accolades(search: [giver_id: player11.id]) == []
 
-    AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
+    AccoladeLib.cast_accolade_bot(%{
+      channel: "global_match_updates",
+      event: :match_completed,
+      match_id: match.id
+    })
     :timer.sleep(100)
 
     # Now, player11 should have a set of messages
@@ -237,7 +253,11 @@ defmodule Teiserver.Account.AccoladeBotTest do
     })
     :timer.sleep(100)
 
-    AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
+    AccoladeLib.cast_accolade_bot(%{
+      channel: "global_match_updates",
+      event: :match_completed,
+      match_id: match.id
+    })
     :timer.sleep(100)
 
     # Now, player11 should not have a message
@@ -252,7 +272,11 @@ defmodule Teiserver.Account.AccoladeBotTest do
     User.restrict_user(player12.id, "Accolades")
     :timer.sleep(100)
 
-    AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
+    AccoladeLib.cast_accolade_bot(%{
+      channel: "global_match_updates",
+      event: :match_completed,
+      match_id: match.id
+    })
     :timer.sleep(100)
 
     # Now, player11 should not have a message

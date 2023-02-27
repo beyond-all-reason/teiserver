@@ -139,6 +139,12 @@ defmodule Teiserver.TeiserverQuickActions do
         url: "/teiserver/reports/show/retention"
       },
       %{
+        label: "Population",
+        icons: ["fa-regular #{Teiserver.Account.PopulationReport.icon()}"],
+        permissions: Teiserver.Account.PopulationReport.permissions(),
+        url: "/teiserver/reports/show/population"
+      },
+      %{
         label: "New user funnel",
         icons: ["fa-regular #{Teiserver.Account.NewUserFunnelReport.icon()}"],
         permissions: "teiserver.staff.moderator",

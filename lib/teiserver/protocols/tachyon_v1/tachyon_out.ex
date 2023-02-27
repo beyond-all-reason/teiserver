@@ -40,7 +40,8 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonOut do
   end
 
   # This sends a message to the self to send out a message
-  @spec _send(Map.t(), Map.t()) :: any()
+  @spec _send(nil | Map.t(), Map.t()) :: any()
+  defp _send(nil, _), do: :ok
   defp _send(msg, state) do
     _send(msg, state.socket, state.transport)
   end

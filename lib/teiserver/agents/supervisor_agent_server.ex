@@ -17,7 +17,7 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
     add_servers("unfriender", 3)
     add_servers("partyhost", 3)
     add_servers("partyjoin", 10)
-    add_servers("matchmaking", 1)
+    # add_servers("matchmaking", 1)
 
     add_servers("moderated", 1, 1, %{action: "Warning"})
     add_servers("moderated", 2, 2, %{action: "Mute"})

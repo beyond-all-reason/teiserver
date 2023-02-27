@@ -23,6 +23,20 @@
         <hr />
 
         <div class="float-end">
+          <a class={"btn btn-outline-#{bsname}"} href={Routes.moderation_report_form_path(@conn, :index, @user.id)}>
+            <%= central_component "icon", icon: icon(), class: "fa-solid" %>
+            &nbsp;
+            Report form
+          </a>
+
+          <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+            <a class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"} href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@user.id}_"}>
+              <%= central_component "icon", icon: Teiserver.Moderation.ActionLib.icon(), class: "fa-solid" %>
+              &nbsp;
+              Action user
+            </a>
+          <% end %>
+
           <%= if allow?(@conn, "teiserver.staff.moderator") do %>
             <a class={"btn btn-outline-#{bsname}"} href={Routes.ts_admin_user_path(@conn, :show, @user)}>View user</a>
           <% end %>
@@ -50,7 +64,7 @@
           </li>
 
           <li class="nav-item" role="presentation">
-            <a href="#old_moderation_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+            <a href="#actions_tab" role="tab" class="nav-link" data-bs-toggle="tab">
               <%= central_component "icon", icon: Teiserver.Moderation.ActionLib.icon(), class: "fa-solid" %>
               Actions (<%= Enum.count(@actions) %>)
             </a>
@@ -66,7 +80,7 @@
             <%= render "tab_from.html", assigns %>
           </div>
 
-          <div class="tab-pane" id="old_moderation_tab" style="padding:5px;">
+          <div class="tab-pane" id="actions_tab" style="padding:5px;">
             <%= render "tab_actions.html", assigns %>
           </div>
         </div>

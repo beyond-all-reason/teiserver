@@ -13,13 +13,59 @@
           })
         %>
 
+        <form action={Routes.ts_reports_report_path(@conn, :show, "new_smurf")} method="post" class="form-horizontal mb-4">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <div class="row">
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="report_age" class="control-label">Age (days): </label>
+              <input type="text" name="report[age]" id="report_age" value={@params["age"]} class="form-control" />
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="report_require_games" class="control-label">Require games</label>
+              <%= central_component "checkbox",
+                name: "report[require_games]",
+                id: "report_require_games",
+                value: "true",
+                label: "",
+                checked: @params["require_games"] == "true",
+
+                description: "Require 1 or more rated games"
+              %>
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="report_ignore_banned" class="control-label">Ignore banned users</label>
+              <%= central_component "checkbox",
+                name: "report[ignore_banned]",
+                id: "report_ignore_banned",
+                value: "true",
+                label: "",
+                checked: @params["ignore_banned"] == "true",
+
+                description: "Ignore users already banned"
+              %>
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              &nbsp;<br />
+              <input type="submit" value="Update report" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+            </div>
+          </div>
+        </form>
+
         <table class="table table-sm mt-4">
           <thead>
             <tr>
               <th>New user</th>
               <th>Status</th>
               <th>Registered</th>
-              
+
+              <th>Duel</th>
+              <th>FFA</th>
+              <th>Team</th>
+
               <th>&nbsp;</th>
             </tr>
           </thead>
@@ -27,6 +73,7 @@
             <%= for user <- @relevant_new_users do %>
               <%
                 user_r = %{restrictions: user.data["restrictions"] || []}
+                stats = @user_stats[user.id]
 
                 banned = Teiserver.User.is_restricted?(user_r, ["Login"])
                 muted = Teiserver.User.is_restricted?(user_r, ["All chat", "Room chat", "Direct chat", "Lobby chat", "Battle chat"])
@@ -37,18 +84,35 @@
                 <td><%= user.name %></td>
                 <td>
                   <%= if banned do %>
-                    <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Ban")}"}></i>
+                    <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}></i>
                   <% end %>
 
                   <%= if muted do %>
-                    <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Mute")}"}></i>
+                    <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Mute")}"}></i>
                   <% end %>
 
                   <%= if warned do %>
-                    <i class={"fa-fw text-warning #{Central.Account.ReportLib.action_icon("Warn")}"}></i>
+                    <i class={"fa-fw text-warning #{Teiserver.Moderation.ActionLib.action_icon("Warn")}"}></i>
                   <% end %>
                 </td>
+
                 <td><%= date_to_str(user.inserted_at, format: :hms_or_dmy) %></td>
+
+                <td>
+                  <%= if stats["recent_count.duel"] do %>
+                    <%= stats["win_rate.duel"] %>% of <%= stats["recent_count.duel"] %>
+                  <% end %>
+                </td>
+                <td>
+                  <%= if stats["recent_count.ffa"] do %>
+                    <%= stats["win_rate.ffa"] %>% of <%= stats["recent_count.ffa"] %>
+                  <% end %>
+                </td>
+                <td>
+                  <%= if stats["recent_count.team"] do %>
+                    <%= stats["win_rate.team"] %>% of <%= stats["recent_count.team"] %>
+                  <% end %>
+                </td>
 
                 <td>
                   <a href={Routes.ts_admin_user_path(@conn, :smurf_search, user.id)} class="btn btn-secondary btn-sm">
@@ -59,7 +123,7 @@
             <% end %>
           </tbody>
         </table>
-        
+
       </div>
     </div>
   </div>
