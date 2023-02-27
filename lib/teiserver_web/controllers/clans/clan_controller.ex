@@ -261,7 +261,7 @@ defmodule TeiserverWeb.Clans.ClanController do
     cond do
       user_id == nil ->
         conn
-        |> put_flash(:danger, "User id missing")
+        |> put_flash(:danger, "Unable to find user")
         |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites")
 
       role == nil ->
