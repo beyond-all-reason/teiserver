@@ -50,7 +50,7 @@
             <%= for m <- @party.pending_invites do %>
               <tr>
                 <td>
-                  <%= @user_lookup[m].name %>
+                  <%= (@user_lookup[m] || %{name: "Err, no user"}).name %>
                 </td>
                 <td>
                   <%= if leader do %>
