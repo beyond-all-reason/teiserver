@@ -243,7 +243,16 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     ConsulServer.say_command(cmd, state)
     sender_name = User.get_username(senderid)
 
-    min_players = get_default_min_players(rem)
+    min_players = case String.trim(rem) do
+      "" ->
+        1
+
+      _ ->
+        rem
+        |> String.trim
+        |> String.to_integer
+        |> max(1)
+    end
 
     LobbyChat.sayex(state.coordinator_id, "Split lobby sequence started ($y to move, $n to cancel, $follow <name> to follow user)", state.lobby_id)
 
@@ -1131,17 +1140,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         |> Map.get(userid)
       false ->
         -1
-    end
-  end
-
-  defp get_default_min_players(str) do
-    case String.trim(str) do
-      "" ->
-      1
-
-      _ ->
-        String.to_integer(str |> String.trim)
-        |> max(1)
     end
   end
 
