@@ -21,8 +21,8 @@ defmodule Teiserver.Coordinator.CoordinatorLib do
       {"status", [], "Status info about the battle lobby.", :everybody},
       {"afks", [], "Lists possible afk players.", :everybody},
       {"password?", [], "Tells you the room password", :everybody},
-      {"splitlobby", [], "Causes a \"vote\" to start where other players can elect to join you in splitting the lobby, follow someone
-of their choosing or remain in place. After 20 seconds you are moved to a new (empty) lobby and those that voted yes
+      {"splitlobby", ["minimum players"], "Causes a \"vote\" to start where other players can elect to join you in splitting the lobby, follow someone
+of their choosing or remain in place. After 30 seconds, if at least the minimum number of players agreed to split, you are moved to a new (empty) lobby and those that voted yes
 or are following someone that voted yes are also moved to that lobby.", :everybody},
       {"roll", ["range"], "Rolls a random number based on the range format.
 - Dice format: nDs, where n is number of dice and s is sides of die. E.g. 4D6 - 4 dice with 6 sides are rolled
