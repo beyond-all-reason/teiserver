@@ -9,6 +9,8 @@ defmodule TeiserverWeb.AdminDashLive.Index do
 
   @impl true
   def mount(_params, session, socket) do
+    telemetry_data = Central.cache_get(:application_temp_cache, :telemetry_data)
+
     socket = socket
       |> AuthPlug.live_call(session)
       |> NotificationPlug.live_call()
@@ -17,8 +19,9 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> add_breadcrumb(name: "Dashboard", url: "/teiserver/admin/dashboard")
       |> assign(:site_menu_active, "teiserver_admin")
       |> assign(:view_colour, Central.Admin.AdminLib.colours())
-      |> assign(:telemetry_loading, true)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
+      |> assign(:telemetry_client, telemetry_data.client)
+      |> assign(:telemetry_battle, telemetry_data.battle)
       |> update_queues
       |> update_lobbies
       |> update_server_pids
@@ -127,7 +130,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   defp update_server_pids(socket) do
     lobby_id_server_pid = case Horde.Registry.lookup(Teiserver.ServerRegistry, "LobbyIdServer") do
       [{pid, _}] -> pid
-      _ ->nil
+      _ -> nil
     end
 
     server_pids = [

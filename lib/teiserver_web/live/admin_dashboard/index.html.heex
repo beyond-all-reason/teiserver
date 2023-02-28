@@ -1,31 +1,26 @@
 <div class="row mt-2">
   <div class="col-md-6 mb-4 col-xl-4 col-xxl-3">
-    <%= if @telemetry_loading do %>
-      <h4>Telemetry</h4>
-      Loading...
-    <% else %>
-      <h4>Telemetry</h4>
-      <table class='table table-sm table-hover'>
-        <tbody>
-          <tr>
-            <td>Users</td>
-            <td><%= @telemetry_client.total %></td>
-          </tr>
-          <tr>
-            <td>Players</td>
-            <td><%= @telemetry_client.player %></td>
-          </tr>
-          <tr>
-            <td>Lobbies</td>
-            <td><%= @telemetry_battle.total %></td>
-          </tr>
-          <tr>
-            <td>Matches</td>
-            <td><%= @telemetry_battle.in_progress %></td>
-          </tr>
-        </tbody>
-      </table>
-    <% end %>
+    <h4>Telemetry</h4>
+    <table class='table table-sm table-hover'>
+      <tbody>
+        <tr>
+          <td>Users</td>
+          <td><%= @telemetry_client.total %></td>
+        </tr>
+        <tr>
+          <td>Players</td>
+          <td><%= @telemetry_client.player %></td>
+        </tr>
+        <tr>
+          <td>Lobbies</td>
+          <td><%= @telemetry_battle.total %></td>
+        </tr>
+        <tr>
+          <td>Matches</td>
+          <td><%= @telemetry_battle.in_progress %></td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <div class="col-md-6 mb-4 col-xl-4 col-xxl-3 d-none">

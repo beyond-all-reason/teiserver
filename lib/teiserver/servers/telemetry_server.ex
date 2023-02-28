@@ -74,18 +74,22 @@ defmodule Teiserver.Telemetry.TelemetryServer do
     :telemetry.execute([:teiserver, :client], client, %{})
     :telemetry.execute([:teiserver, :battle], state.battle, %{})
 
+    data = %{
+      client: client,
+      battle: state.battle
+    }
+
     # TODO: Is there a way to hook into the above data for our liveviews?
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_telemetry",
       %{
         channel: "teiserver_telemetry",
-        data: %{
-          client: client,
-          battle: state.battle
-        }
+        data: data
       }
     )
+
+    Central.cache_put(:application_temp_cache, :telemetry_data, data)
 
     PubSub.broadcast(
       Central.PubSub,
@@ -205,7 +209,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
       party_servers: Horde.Registry.count(Teiserver.PartyRegistry),
       queue_wait_servers: Horde.Registry.count(Teiserver.QueueWaitRegistry),
       queue_match_servers: Horde.Registry.count(Teiserver.QueueMatchRegistry),
-      managed_lobby_servers: Horde.Registry.count(Teiserver.ManagedLobbyRegistry)
+      managed_lobby_servers: Horde.Registry.count(Teiserver.LobbyPolicyRegistry)
     }
 
     process_counts = Map.merge(process_counts, %{
