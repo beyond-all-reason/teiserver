@@ -180,16 +180,20 @@ defmodule Teiserver.Data.Matchmaking do
 
     update_queue(queue)
 
-    result = DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
-      QueueWaitServer,
-      data: %{queue: queue}
-    })
-    case result do
-      {:error, err} ->
-        Logger.error("Error starting QueueWaitServer: #{__ENV__.file}:#{__ENV__.line}\n#{inspect err}")
-        {:error, err}
-      {:ok, _pid} ->
-        :ok
+    if get_queue_wait_pid(queue.id) do
+      :exists
+    else
+      result = DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
+        QueueWaitServer,
+        data: %{queue: queue}
+      })
+      case result do
+        {:error, err} ->
+          Logger.error("Error starting QueueWaitServer: #{__ENV__.file}:#{__ENV__.line}\n#{inspect err}")
+          {:error, err}
+        {:ok, _pid} ->
+          :ok
+      end
     end
   end
 
