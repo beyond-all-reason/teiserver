@@ -163,10 +163,8 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
 
   @impl true
   def handle_event("create_invite", %{"userid" => userid_str}, socket) do
-    if leader?(socket) do
       userid = int_parse(userid_str)
       Account.create_party_invite(socket.assigns.party_id, userid)
-    end
     {:noreply, socket}
   end
 

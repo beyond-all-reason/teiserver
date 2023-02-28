@@ -27,7 +27,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyIn do
   end
 
   def do_handle("invite", %{"userid" => userid}, state) do
-    if state.party_id != nil and state.party_role == :leader do
+    if state.party_id != nil do
       Account.create_party_invite(state.party_id, userid)
     end
     state
