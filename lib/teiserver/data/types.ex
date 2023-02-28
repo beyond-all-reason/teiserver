@@ -20,5 +20,7 @@ defmodule Teiserver.Data.Types do
   @type consul_state() :: map()
   @type balance_server_state() :: map()
 
+  @type lobby_policy_id() :: non_neg_integer()
+
   @type party() :: Teiserver.Account.Party.t()
 end

@@ -4,7 +4,6 @@ defmodule Central.Repo.Migrations.AddLobbyPolicies do
   def change do
     create table(:lobby_policies) do
       add :name, :string
-      add :lobby_name_format, :string
       add :clan_tag, :string
 
       add :icon, :string
@@ -14,6 +13,8 @@ defmodule Central.Repo.Migrations.AddLobbyPolicies do
 
       add :map_list, {:array, :string}
       add :agent_name_list, {:array, :string}
+      add :agent_name_format, :string
+      add :lobby_name_format, :string
 
       add :min_rating, :integer
       add :max_rating, :integer

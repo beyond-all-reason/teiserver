@@ -1295,6 +1295,12 @@ defmodule Teiserver.Account do
   @spec make_bot_password() :: String.t()
   defdelegate make_bot_password(), to: UserLib
 
+  @spec rename_user(T.userid(), String.t(), boolean) :: :success | {:error, String.t()}
+  defdelegate rename_user(userid, new_name, admin_action \\ false), to: User
+
+  @spec system_change_user_name(T.userid(), String.t()) :: :ok
+  defdelegate system_change_user_name(userid, new_name), to: User
+
   # Client stuff
   alias Teiserver.Account.ClientLib
 

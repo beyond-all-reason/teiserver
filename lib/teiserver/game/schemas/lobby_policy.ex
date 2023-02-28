@@ -6,7 +6,6 @@ defmodule Teiserver.Game.LobbyPolicy do
 
   schema "lobby_policies" do
     field :name, :string
-    field :lobby_name_format, :string
     field :clan_tag, :string, default: "TEI"
 
     field :icon, :string
@@ -15,7 +14,10 @@ defmodule Teiserver.Game.LobbyPolicy do
     field :enabled, :boolean, default: false
 
     field :map_list, {:array, :string}, default: []
+
     field :agent_name_list, {:array, :string}, default: []
+    field :agent_name_format, :string
+    field :lobby_name_format, :string
 
     field :min_rating, :integer
     field :max_rating, :integer
@@ -43,7 +45,7 @@ defmodule Teiserver.Game.LobbyPolicy do
   def changeset(struct, params \\ %{}) do
     params =
       params
-      |> remove_whitespace(~w(name lobby_name_format clan_tag)a)
+      |> remove_whitespace(~w(name agent_name_format clan_tag)a)
       |> remove_characters(~w(name clan_tag)a, [~r/[:]/])
       |> min_and_max(~w(min_rating max_rating)a)
       |> min_and_max(~w(min_uncertainty max_uncertainty)a)
@@ -51,7 +53,7 @@ defmodule Teiserver.Game.LobbyPolicy do
       |> min_and_max(~w(min_teamsize max_teamsize)a)
 
     struct
-      |> cast(params, ~w(name lobby_name_format clan_tag icon colour enabled map_list agent_name_list min_rating max_rating min_uncertainty max_uncertainty min_rank max_rank max_teamcount min_teamsize max_teamsize preset)a)
+      |> cast(params, ~w(name clan_tag icon colour enabled map_list agent_name_list agent_name_format lobby_name_format min_rating max_rating min_uncertainty max_uncertainty min_rank max_rank max_teamcount min_teamsize max_teamsize preset)a)
       |> validate_required(~w(name)a)
   end
 

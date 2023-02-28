@@ -947,4 +947,9 @@ defmodule Teiserver.Game do
   @spec pre_cache_policies() :: :ok
   defdelegate pre_cache_policies(), to: LobbyPolicyLib
 
+  @spec call_lobby_organiser(T.lobby_policy_id(), any) :: any | nil
+  defdelegate call_lobby_organiser(lobby_policy_id, msg), to: LobbyPolicyLib
+
+  @spec cast_lobby_organiser(T.lobby_policy_id(), any) :: any | nil
+  defdelegate cast_lobby_organiser(lobby_policy_id, msg), to: LobbyPolicyLib
 end

@@ -31,6 +31,16 @@ Used for broadcasting internal telemetry for consumers (such as admin dashboard)
 }
 ```
 
+#### lobby_policy_internal:#{lobby_policy_id}
+Used for internal communication around lobby_policies where something needs to be seen by all processes. Typically these will all originate from the organiser, as such all entries will have a sender field of either :organiser or the name of the agent.
+```elixir
+# Used to request a status update from all the agent nodes
+%{
+  event: :request_status_update,
+  sender: :organiser | agent_name
+}
+```
+
 #### teiserver_public_stats
 Similar to the `teiserver_telemetry` channel but specifically limited to be public info.
 ```elixir

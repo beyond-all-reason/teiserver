@@ -466,6 +466,22 @@ defmodule Teiserver.User do
     :ok
   end
 
+  @doc """
+  Used to change the name of an internal client, should not be triggered
+  by user events.
+  """
+  @spec system_change_user_name(T.userid(), String.t()) :: :ok
+  def system_change_user_name(userid, new_name) do
+    Client.disconnect(userid, "System rename")
+
+    db_user = Account.get_user!(userid)
+    Account.update_user(db_user, %{"name" => new_name})
+
+    :timer.sleep(100)
+    recache_user(userid)
+    :ok
+  end
+
 
   def request_password_reset(user) do
     db_user = Account.get_user!(user.id)

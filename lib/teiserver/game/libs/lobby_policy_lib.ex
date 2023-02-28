@@ -2,7 +2,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
   @moduledoc false
   use CentralWeb, :library
   alias Teiserver.{Game, Account}
-  alias Teiserver.Game.{LobbyPolicy, LobbyPolicyOrganiserServer}
+  alias Teiserver.Game.{LobbyPolicy, LobbyPolicyOrganiserServer, LobbyPolicyBotServer}
   alias Teiserver.Data.Types, as: T
   require Logger
 
@@ -120,26 +120,29 @@ defmodule Teiserver.Game.LobbyPolicyLib do
   Given the name of the agent and the format for the name it will ensure the agent exists
   if it doesn't it will create it and then return the result
   """
-  @spec get_or_make_agent_user(String.t(), String.t(), LobbyPolicy.t()) :: T.user()
-  def get_or_make_agent_user(base_name, format, lobby_policy) do
-    formatted_name = format
+  @spec get_or_make_agent_user(String.t(), LobbyPolicy.t()) :: T.user()
+  def get_or_make_agent_user(base_name, lobby_policy) do
+    formatted_name = lobby_policy.agent_name_format
       |> String.replace("{agent}", base_name)
+      |> String.replace("{id}", "#{lobby_policy.id}")
 
     email_domain = Application.get_env(:central, Teiserver)[:bot_email_domain]
-    email_addr = "#{base_name}@#{email_domain}"
+    email_addr = "#{lobby_policy.clan_tag}_#{base_name}_#{lobby_policy.id}@#{email_domain}"
 
-    user = Account.get_user(nil, search: [
+    user_name = "[#{lobby_policy.clan_tag}]#{formatted_name}"
+
+    db_user = Account.get_user(nil, search: [
       email: email_addr
     ])
 
-    case user do
+    case db_user do
       nil ->
         # Make account
-        {:ok, account} = Account.create_user(%{
-          name: "Coordinator",
-          email: "coordinator@teiserver",
-          icon: "fa-solid fa-sitemap",
-          colour: "#AA00AA",
+        {:ok, user} = Account.create_user(%{
+          name: user_name,
+          email: email_addr,
+          icon: "fa-solid fa-solar-system",
+          colour: "#0000AA",
           admin_group_id: Teiserver.internal_group_id(),
           password: Account.make_bot_password(),
           data: %{
@@ -150,30 +153,51 @@ defmodule Teiserver.Game.LobbyPolicyLib do
           }
         })
 
-        Account.update_user_stat(account.id, %{
+        Account.update_user_stat(user.id, %{
           country_override: Application.get_env(:central, Teiserver)[:server_flag],
         })
 
         Account.create_group_membership(%{
-          user_id: account.id,
+          user_id: user.id,
           group_id: Teiserver.internal_group_id()
         })
 
-        User.recache_user(account.id)
-        account
+        Account.recache_user(user.id)
+        user
 
-      account ->
-        account
+      _ ->
+        # Ensure the username is correct (for if we changed the name format around)
+        if db_user.name != user_name do
+          Account.system_change_user_name(db_user.id, user_name)
+        end
+
+        db_user
     end
+  end
+
+  @spec start_lobby_policy_bot(T.lobby_policy_id(), Central.Account.User.t()) :: pid()
+  def start_lobby_policy_bot(lobby_policy_id, user) do
+    {:ok, consul_pid} =
+      DynamicSupervisor.start_child(Teiserver.LobbyPolicySupervisor, {
+        LobbyPolicyBotServer,
+        name: "lobby_policy_bot_#{lobby_policy_id}_#{user.name}",
+        data: %{
+          user: user,
+          lobby_policy_id: lobby_policy_id,
+        }
+      })
+
+    consul_pid
   end
 
   @spec add_policy(LobbyPolicy.t()) :: :ok | {:error, any}
   def add_policy(nil), do: {:error, "no policy"}
-  def add_policy(policy) do
+  def add_policy(lobby_policy) do
     result = DynamicSupervisor.start_child(Teiserver.LobbyPolicySupervisor, {
       LobbyPolicyOrganiserServer,
-      %{
-        lobby_policy: policy
+      name: "lobby_policy_supervisor_#{lobby_policy.id}",
+      data: %{
+        lobby_policy: lobby_policy
       }
     })
 
@@ -183,6 +207,46 @@ defmodule Teiserver.Game.LobbyPolicyLib do
         {:error, err}
       {:ok, _pid} ->
         :ok
+    end
+  end
+
+  @spec get_lobby_organiser_pid(T.lobby_policy_id()) :: pid() | nil
+  def get_lobby_organiser_pid(lobby_policy_id) when is_integer(lobby_policy_id) do
+    case Horde.Registry.lookup(Teiserver.LobbyRegistry, lobby_policy_id) do
+      [{pid, _}] -> pid
+      _ -> nil
+    end
+  end
+
+  @doc """
+  GenServer.cast the message to the LobbyServer process for lobby_policy_id
+  """
+  @spec cast_lobby_organiser(T.lobby_policy_id(), any) :: :ok | nil
+  def cast_lobby_organiser(lobby_policy_id, message) when is_integer(lobby_policy_id) do
+    case get_lobby_organiser_pid(lobby_policy_id) do
+      nil -> nil
+      pid ->
+        GenServer.cast(pid, message)
+        :ok
+    end
+  end
+
+  @doc """
+  GenServer.call the message to the LobbyServer process for lobby_policy_id and return the result
+  """
+  @spec call_lobby_organiser(T.lobby_policy_id(), any) :: any | nil
+  def call_lobby_organiser(lobby_policy_id, message) when is_integer(lobby_policy_id) do
+    case get_lobby_organiser_pid(lobby_policy_id) do
+      nil -> nil
+      pid ->
+        try do
+          GenServer.call(pid, message)
+
+          # If the process has somehow died, we just return nil
+        catch
+          :exit, _ ->
+            nil
+        end
     end
   end
 end
