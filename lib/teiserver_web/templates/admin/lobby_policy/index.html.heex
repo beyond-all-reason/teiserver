@@ -23,7 +23,10 @@
     <tr>
       <th colspan="2">Policy</th>
 
-      <th>Name format</th>
+      <th>Enabled</th>
+
+      <th>Agent format</th>
+      <th>Lobby format</th>
 
       <th>Preset</th>
 
@@ -41,7 +44,17 @@
       </td>
       <td style={"background-color: #{rgba_css lobby_policy.colour};"}><%= lobby_policy.name %></td>
 
+      <td>
+        <%= if lobby_policy.enabled do %>
+          <i class="fa-fw fa-regular fa-check text-success"></i>
+        <% else %>
+          <i class="fa-fw fa-regular fa-times text-danger"></i>
+        <% end %>
+      </td>
+
       <td><%= lobby_policy.agent_name_format %></td>
+      <td><%= lobby_policy.lobby_name_format %></td>
+
       <td><%= lobby_policy.preset %></td>
 
       <td><%= Enum.count(lobby_policy.map_list) %></td>
