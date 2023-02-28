@@ -395,6 +395,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
         "mean_diff_max: 5",
         "rating_lower_boundary: 3",
         "rating_upper_boundary: 5",
+        "shuffle_first_pick: true",
         "stddev_diff_max: 3"
       ] |> Enum.join("\n"),
       "sender_id" => Coordinator.get_coordinator_userid()
