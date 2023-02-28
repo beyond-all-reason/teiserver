@@ -1292,6 +1292,9 @@ defmodule Teiserver.Account do
   @spec decache_user(T.userid()) :: :ok | :no_user
   defdelegate decache_user(userid), to: UserCache
 
+  @spec make_bot_password() :: String.t()
+  defdelegate make_bot_password(), to: UserLib
+
   # Client stuff
   alias Teiserver.Account.ClientLib
 

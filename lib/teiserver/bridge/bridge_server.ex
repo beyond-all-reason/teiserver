@@ -303,7 +303,7 @@ defmodule Teiserver.Bridge.BridgeServer do
           icon: "fa-brands fa-discord",
           colour: "#0066AA",
           admin_group_id: Teiserver.internal_group_id(),
-          password: make_password(),
+          password: Account.make_bot_password(),
           data: %{
             bot: true,
             moderator: false,
@@ -337,11 +337,6 @@ defmodule Teiserver.Bridge.BridgeServer do
       name: new_name
     })
     false
-  end
-
-  @spec make_password() :: String.t
-  defp make_password() do
-    :crypto.strong_rand_bytes(64) |> Base.encode64(padding: false) |> binary_part(0, 64)
   end
 
   defp clean_message(message) do

@@ -327,7 +327,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           icon: "fa-solid fa-camera-cctv",
           colour: "#00AA66",
           admin_group_id: Teiserver.internal_group_id(),
-          password: make_password(),
+          password: Account.make_bot_password(),
           data: %{
             bot: true,
             moderator: false,
@@ -351,11 +351,6 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       account ->
         account
     end
-  end
-
-  @spec make_password() :: String.t
-  defp make_password() do
-    :crypto.strong_rand_bytes(64) |> Base.encode64(padding: false) |> binary_part(0, 64)
   end
 
   @impl true

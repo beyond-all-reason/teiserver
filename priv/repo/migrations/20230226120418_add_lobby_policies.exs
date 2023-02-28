@@ -5,9 +5,12 @@ defmodule Central.Repo.Migrations.AddLobbyPolicies do
     create table(:lobby_policies) do
       add :name, :string
       add :lobby_name_format, :string
+      add :clan_tag, :string
 
       add :icon, :string
       add :colour, :string
+
+      add :enabled, :boolean, default: false
 
       add :map_list, {:array, :string}
       add :agent_name_list, {:array, :string}

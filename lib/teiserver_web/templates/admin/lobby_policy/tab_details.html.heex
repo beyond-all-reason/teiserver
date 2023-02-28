@@ -1,6 +1,21 @@
 <div class="row">
   <div class="col-md-6">
     <%= central_component "detail_line",
+      label: "Name format",
+      value: @lobby_policy.lobby_name_format
+    %>
+
+    <%= central_component "detail_line",
+      label: "Teamsize",
+      value: "#{@lobby_policy.min_teamsize} - #{@lobby_policy.max_teamsize}"
+    %>
+
+    <%= central_component "detail_line",
+      label: "Team count",
+      value: @lobby_policy.max_teamcount
+    %>
+
+    <%= central_component "detail_line",
       label: "Rating",
       value: "#{@lobby_policy.min_rating} - #{@lobby_policy.max_rating}"
     %>

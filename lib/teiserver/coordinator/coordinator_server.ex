@@ -278,7 +278,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           icon: "fa-solid fa-sitemap",
           colour: "#AA00AA",
           admin_group_id: Teiserver.internal_group_id(),
-          password: make_password(),
+          password: Account.make_bot_password(),
           data: %{
             bot: true,
             moderator: true,
@@ -302,11 +302,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       account ->
         account
     end
-  end
-
-  @spec make_password() :: String.t
-  defp make_password() do
-    :crypto.strong_rand_bytes(64) |> Base.encode64(padding: false) |> binary_part(0, 64)
   end
 
   @impl true

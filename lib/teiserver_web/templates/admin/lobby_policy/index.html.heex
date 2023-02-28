@@ -23,6 +23,12 @@
     <tr>
       <th colspan="2">Policy</th>
 
+      <th>Name format</th>
+
+      <th>Preset</th>
+
+      <th>Maps</th>
+      <th>Agents</th>
 
       <th colspan="2">&nbsp;</th>
     </tr>
@@ -35,10 +41,20 @@
       </td>
       <td style={"background-color: #{rgba_css lobby_policy.colour};"}><%= lobby_policy.name %></td>
 
+      <td><%= lobby_policy.lobby_name_format %></td>
+      <td><%= lobby_policy.preset %></td>
+
+      <td><%= Enum.count(lobby_policy.map_list) %></td>
+      <td><%= Enum.count(lobby_policy.agent_name_list) %></td>
 
       <td>
         <a href={Routes.admin_lobby_policy_path(@conn, :show, lobby_policy.id)} class="btn btn-secondary btn-sm">
           Show
+        </a>
+      </td>
+      <td>
+        <a href={Routes.admin_lobby_policy_path(@conn, :edit, lobby_policy.id)} class="btn btn-secondary btn-sm">
+          Edit
         </a>
       </td>
     </tr>

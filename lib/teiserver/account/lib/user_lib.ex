@@ -296,4 +296,9 @@ defmodule Teiserver.Account.UserLib do
     }
     |> Map.merge(role_icons)
   end
+
+  @spec make_bot_password() :: String.t
+  def make_bot_password() do
+    :crypto.strong_rand_bytes(64) |> Base.encode64(padding: false) |> binary_part(0, 64)
+  end
 end

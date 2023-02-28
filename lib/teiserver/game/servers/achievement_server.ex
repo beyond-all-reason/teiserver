@@ -125,6 +125,8 @@ defmodule Teiserver.Game.AchievementServer do
 
   @impl true
   def init(_) do
+    Logger.metadata([request_id: "AchievementServer"])
+
     # If it's a test server this will break as the SQL connection will bork
     if not Application.get_env(:central, Teiserver)[:test_mode] do
       :timer.send_after(10_000, :refresh_type_map)

@@ -252,6 +252,7 @@ defmodule Teiserver.Game.BalancerServer do
   @spec init(Map.t()) :: {:ok, T.balance_server_state()}
   def init(opts) do
     lobby_id = opts[:lobby_id]
+    Logger.metadata([request_id: "BalancerServer##{opts.lobby_id}"])
 
     # These were never actually used
     # :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")

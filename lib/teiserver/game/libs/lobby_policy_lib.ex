@@ -1,8 +1,9 @@
 defmodule Teiserver.Game.LobbyPolicyLib do
   @moduledoc false
   use CentralWeb, :library
-  alias Teiserver.Game
+  alias Teiserver.{Game, Account}
   alias Teiserver.Game.{LobbyPolicy, LobbyPolicyOrganiserServer}
+  alias Teiserver.Data.Types, as: T
   require Logger
 
   # Functions
@@ -115,17 +116,70 @@ defmodule Teiserver.Game.LobbyPolicyLib do
     Logger.info("pre_cache_policies, got #{policy_count} policies")
   end
 
+  @doc """
+  Given the name of the agent and the format for the name it will ensure the agent exists
+  if it doesn't it will create it and then return the result
+  """
+  @spec get_or_make_agent_user(String.t(), String.t(), LobbyPolicy.t()) :: T.user()
+  def get_or_make_agent_user(base_name, format, lobby_policy) do
+    formatted_name = format
+      |> String.replace("{agent}", base_name)
+
+    email_domain = Application.get_env(:central, Teiserver)[:bot_email_domain]
+    email_addr = "#{base_name}@#{email_domain}"
+
+    user = Account.get_user(nil, search: [
+      email: email_addr
+    ])
+
+    case user do
+      nil ->
+        # Make account
+        {:ok, account} = Account.create_user(%{
+          name: "Coordinator",
+          email: "coordinator@teiserver",
+          icon: "fa-solid fa-sitemap",
+          colour: "#AA00AA",
+          admin_group_id: Teiserver.internal_group_id(),
+          password: Account.make_bot_password(),
+          data: %{
+            bot: true,
+            moderator: true,
+            verified: true,
+            lobby_client: "Teiserver Internal Process"
+          }
+        })
+
+        Account.update_user_stat(account.id, %{
+          country_override: Application.get_env(:central, Teiserver)[:server_flag],
+        })
+
+        Account.create_group_membership(%{
+          user_id: account.id,
+          group_id: Teiserver.internal_group_id()
+        })
+
+        User.recache_user(account.id)
+        account
+
+      account ->
+        account
+    end
+  end
+
   @spec add_policy(LobbyPolicy.t()) :: :ok | {:error, any}
   def add_policy(nil), do: {:error, "no policy"}
   def add_policy(policy) do
     result = DynamicSupervisor.start_child(Teiserver.LobbyPolicySupervisor, {
       LobbyPolicyOrganiserServer,
-      policy
+      %{
+        lobby_policy: policy
+      }
     })
 
     case result do
       {:error, err} ->
-        Logger.error("Error starting policyWaitServer: #{__ENV__.file}:#{__ENV__.line}\n#{inspect err}")
+        Logger.error("Error starting LobbyPolicySupervisor: #{__ENV__.file}:#{__ENV__.line}\n#{inspect err}")
         {:error, err}
       {:ok, _pid} ->
         :ok
