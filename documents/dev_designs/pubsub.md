@@ -382,10 +382,14 @@ Gives information about the activities of a client without containing anything p
 }
 ```
 
-#### teiserver_client_application:#{userid}
+#### client_application:#{userid}
 Designed for lobby applications to display/perform various actions as opposed to internal agent clients or any web interfaces
 ```elixir
-  {:teiserver_client_application, :ring, userid, ringer_id}
+  %{
+    event: :ring,
+    userid: userid,
+    ringer_id: ringer_id
+  }
 ```
 
 #### teiserver_user_updates:#{userid}

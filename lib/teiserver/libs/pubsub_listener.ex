@@ -1,6 +1,6 @@
 defmodule Teiserver.Common.PubsubListener do
   @moduledoc """
-  A genserver whose sole purpose is to listen to one pubusbs and record what they hear
+  A genserver whose sole purpose is to listen to one or more pubusbs and record what they get sent
   """
 
   use GenServer

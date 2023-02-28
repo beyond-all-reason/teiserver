@@ -662,7 +662,16 @@ defmodule Teiserver.User do
   @spec ring(T.userid(), T.userid()) :: :ok
   def ring(ringee_id, ringer_id) do
     PubSub.broadcast(Central.PubSub, "legacy_user_updates:#{ringee_id}", {:action, {:ring, ringer_id}})
-    PubSub.broadcast(Central.PubSub, "teiserver_client_application:#{ringee_id}", {:teiserver_client_application, :ring, ringee_id, ringer_id})
+    PubSub.broadcast(
+      Central.PubSub,
+      "client_application:#{ringee_id}",
+      %{
+        channel: "client_application:#{ringee_id}",
+        event: :ring,
+        userid: ringee_id,
+        ringer_id: ringer_id
+      }
+    )
     :ok
   end
 
