@@ -58,7 +58,7 @@ defmodule Central.Application do
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueWaitRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueMatchRegistry]},
 
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ManagedLobbyRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.LobbyPolicyRegistry]},
 
         # These are for tracking the number of servers on the local node
         {Registry, keys: :duplicate, name: Teiserver.LocalPoolRegistry},

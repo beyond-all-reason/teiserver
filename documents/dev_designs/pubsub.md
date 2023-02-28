@@ -32,12 +32,16 @@ Used for broadcasting internal telemetry for consumers (such as admin dashboard)
 ```
 
 #### lobby_policy_internal:#{lobby_policy_id}
-Used for internal communication around lobby_policies where something needs to be seen by all processes. Typically these will all originate from the organiser, as such all entries will have a sender field of either :organiser or the name of the agent.
+Used for internal communication around lobby_policies where something needs to be seen by all processes. These will all originate from the organiser.
 ```elixir
 # Used to request a status update from all the agent nodes
 %{
-  event: :request_status_update,
-  sender: :organiser | agent_name
+  event: :request_status_update
+}
+
+# Used to tell all bots of that policy to disconnect
+%{
+  event: :disconnect
 }
 ```
 

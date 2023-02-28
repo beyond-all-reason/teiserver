@@ -26,9 +26,26 @@
     </div>
 
     <div class="col-lg-6 my-2">
+      <%= central_component "checkbox",
+        name: "lobby_policy[enabled]",
+        id: "lobby_policy_enabled",
+        value: "true",
+        label: "Enabled",
+        field: :enabled,
+        changeset: @changeset
+      %>
+    </div>
+
+    <div class="col-lg-6 my-2">
       <%= label f, :agent_name_format, class: "control-label" %>
       <%= text_input f, :agent_name_format, class: "form-control" %>
       <%= error_tag f, :agent_name_format %>
+    </div>
+
+    <div class="col-lg-6 my-2">
+      <%= label f, :lobby_name_format, class: "control-label" %>
+      <%= text_input f, :lobby_name_format, class: "form-control" %>
+      <%= error_tag f, :lobby_name_format %>
     </div>
 
     <div class="col-lg-6 my-2">

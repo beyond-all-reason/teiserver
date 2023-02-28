@@ -57,7 +57,7 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
 
     conn
     |> assign(:changeset, changeset)
-    |> add_breadcrumb(name: "New badge type", url: conn.request_path)
+    |> add_breadcrumb(name: "New lobby policy", url: conn.request_path)
     |> render("new.html")
   end
 
@@ -69,9 +69,11 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
     })
 
     case Game.create_lobby_policy(lobby_policy_params) do
-      {:ok, _lobby_policy} ->
+      {:ok, lobby_policy} ->
+        Game.add_policy_from_db(lobby_policy)
+
         conn
-        |> put_flash(:info, "Badge Type created successfully.")
+        |> put_flash(:info, "Lobby policy created successfully.")
         |> redirect(to: Routes.admin_lobby_policy_path(conn, :index))
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -104,9 +106,11 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
     lobby_policy = Game.get_lobby_policy!(id)
 
     case Game.update_lobby_policy(lobby_policy, lobby_policy_params) do
-      {:ok, _lobby_policy} ->
+      {:ok, lobby_policy} ->
+        Game.add_policy_from_db(lobby_policy)
+
         conn
-        |> put_flash(:info, "Badge Type updated successfully.")
+        |> put_flash(:info, "Lobby policy updated successfully.")
         |> redirect(to: Routes.admin_lobby_policy_path(conn, :index))
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
@@ -127,7 +131,7 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
     {:ok, _lobby_policy} = Game.delete_lobby_policy(lobby_policy)
 
     conn
-    |> put_flash(:info, "Badge Type deleted successfully.")
+    |> put_flash(:info, "Lobby policy deleted successfully.")
     |> redirect(to: Routes.admin_lobby_policy_path(conn, :index))
   end
 end

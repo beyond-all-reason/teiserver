@@ -22,6 +22,30 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
     {:noreply, %{state | agent_status: new_agent_status}}
   end
 
+  def handle_cast({:updated_policy, new_lobby_policy}, state) do
+    # If it's being enabled or disabled, do stuff
+    case {state.db_policy.enabled, new_lobby_policy.enabled} do
+      {true, false} ->
+        PubSub.broadcast(
+          Central.PubSub,
+          "lobby_policy_internal:#{state.id}",
+          %{
+            channel: "lobby_policy_internal:#{state.id}",
+            event: :disconnect
+          }
+        )
+        :ok
+
+      {false, true} ->
+        :ok
+
+      _ ->
+        :ok
+    end
+
+    {:noreply, %{state | db_policy: new_lobby_policy}}
+  end
+
   @impl true
   def handle_info(%{channel: "lobby_policy_internal:" <> _}, state) do
     {:noreply, state}
@@ -37,14 +61,17 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
     {:noreply, state}
   end
 
+  def handle_info(:tick, %{db_policy: %{enabled: false}} = state) do
+    {:noreply, state}
+  end
+
   def handle_info(:tick, state) do
     PubSub.broadcast(
       Central.PubSub,
       "lobby_policy_internal:#{state.id}",
       %{
         channel: "lobby_policy_internal:#{state.id}",
-        event: :request_status_update,
-        sender: :organiser
+        event: :request_status_update
       }
     )
 
@@ -90,7 +117,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
     :ok = PubSub.subscribe(Central.PubSub, "lobby_policy_internal:#{id}")
 
     Horde.Registry.register(
-      Teiserver.ManagedLobbyRegistry,
+      Teiserver.LobbyPolicyRegistry,
       "LobbyPolicyOrganiserServer:#{id}",
       id
     )

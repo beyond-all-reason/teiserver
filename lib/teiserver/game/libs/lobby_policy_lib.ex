@@ -110,7 +110,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
   def pre_cache_policies() do
     policy_count =
       Game.list_lobby_policies
-      |> Parallel.map(&add_policy/1)
+      |> Parallel.map(&add_policy_from_db/1)
       |> Enum.count()
 
     Logger.info("pre_cache_policies, got #{policy_count} policies")
@@ -182,7 +182,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
         LobbyPolicyBotServer,
         name: "lobby_policy_bot_#{lobby_policy_id}_#{user.name}",
         data: %{
-          user: user,
+          userid: user.id,
           lobby_policy_id: lobby_policy_id,
         }
       })
@@ -190,29 +190,38 @@ defmodule Teiserver.Game.LobbyPolicyLib do
     consul_pid
   end
 
-  @spec add_policy(LobbyPolicy.t()) :: :ok | {:error, any}
-  def add_policy(nil), do: {:error, "no policy"}
-  def add_policy(lobby_policy) do
-    result = DynamicSupervisor.start_child(Teiserver.LobbyPolicySupervisor, {
-      LobbyPolicyOrganiserServer,
-      name: "lobby_policy_supervisor_#{lobby_policy.id}",
-      data: %{
-        lobby_policy: lobby_policy
-      }
-    })
+  @spec add_policy_from_db(LobbyPolicy.t()) :: :ok | :exists | {:error, any}
+  def add_policy_from_db(nil), do: {:error, "no policy"}
+  def add_policy_from_db(%{enabled: false} = lobby_policy) do
+    cast_lobby_organiser(lobby_policy.id, {:updated_policy, lobby_policy})
+    :exists
+  end
+  def add_policy_from_db(%{enabled: true} = lobby_policy) do
+    if get_lobby_organiser_pid(lobby_policy.id) do
+      cast_lobby_organiser(lobby_policy.id, {:updated_policy, lobby_policy})
+      :exists
+    else
+      result = DynamicSupervisor.start_child(Teiserver.LobbyPolicySupervisor, {
+        LobbyPolicyOrganiserServer,
+        name: "lobby_policy_supervisor_#{lobby_policy.id}",
+        data: %{
+          lobby_policy: lobby_policy
+        }
+      })
 
-    case result do
-      {:error, err} ->
-        Logger.error("Error starting LobbyPolicySupervisor: #{__ENV__.file}:#{__ENV__.line}\n#{inspect err}")
-        {:error, err}
-      {:ok, _pid} ->
-        :ok
+      case result do
+        {:error, err} ->
+          Logger.error("Error starting LobbyPolicySupervisor: #{__ENV__.file}:#{__ENV__.line}\n#{inspect err}")
+          {:error, err}
+        {:ok, _pid} ->
+          :ok
+      end
     end
   end
 
   @spec get_lobby_organiser_pid(T.lobby_policy_id()) :: pid() | nil
   def get_lobby_organiser_pid(lobby_policy_id) when is_integer(lobby_policy_id) do
-    case Horde.Registry.lookup(Teiserver.LobbyRegistry, lobby_policy_id) do
+    case Horde.Registry.lookup(Teiserver.LobbyPolicyRegistry, "LobbyPolicyOrganiserServer:#{lobby_policy_id}") do
       [{pid, _}] -> pid
       _ -> nil
     end

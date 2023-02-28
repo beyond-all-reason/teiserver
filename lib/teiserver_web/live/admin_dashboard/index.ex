@@ -3,7 +3,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   alias Phoenix.PubSub
 
   alias Teiserver
-  alias Teiserver.{Battle, Coordinator}
+  alias Teiserver.{Battle, Coordinator, Game}
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Data.Matchmaking
 
@@ -23,6 +23,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> assign(:telemetry_client, telemetry_data.client)
       |> assign(:telemetry_battle, telemetry_data.battle)
       |> update_queues
+      |> update_policies
       |> update_lobbies
       |> update_server_pids
 
@@ -48,6 +49,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     {:noreply,
       socket
         |> update_queues
+        |> update_policies
         |> update_lobbies
         |> update_server_pids
     }
@@ -102,6 +104,19 @@ defmodule TeiserverWeb.AdminDashLive.Index do
 
     socket
       |> assign(:queues, queues)
+  end
+
+  @spec update_policies(Plug.Socket.t()) :: Plug.Socket.t()
+  defp update_policies(socket) do
+    policies = Game.list_lobby_policies()
+      |> Enum.map(fn lobby_policy ->
+        organiser_pid = Game.get_lobby_organiser_pid(lobby_policy.id)
+        {lobby_policy, organiser_pid}
+      end)
+      |> Enum.sort_by(fn t -> elem(t, 0).name end, &<=/2)
+
+    socket
+      |> assign(:policies, policies)
   end
 
   @spec update_lobbies(Plug.Socket.t()) :: Plug.Socket.t()
