@@ -6,6 +6,7 @@ defmodule Teiserver.Game.LobbyPolicy do
 
   schema "lobby_policies" do
     field :name, :string
+    field :lobby_name_format, :string
 
     field :icon, :string
     field :colour, :string
@@ -23,7 +24,8 @@ defmodule Teiserver.Game.LobbyPolicy do
     field :max_rank, :integer
 
     field :max_teamcount, :integer, default: 2
-    field :teamsize, :integer
+    field :min_teamsize, :integer
+    field :max_teamsize, :integer
     field :preset, :string
 
     timestamps()
@@ -41,9 +43,10 @@ defmodule Teiserver.Game.LobbyPolicy do
       |> min_and_max(~w(min_rating max_rating)a)
       |> min_and_max(~w(min_uncertainty max_uncertainty)a)
       |> min_and_max(~w(min_rank max_rank)a)
+      |> min_and_max(~w(min_teamsize max_teamsize)a)
 
     struct
-      |> cast(params, ~w(name icon colour map_list agent_name_list min_rating max_rating min_uncertainty max_uncertainty min_rank max_rank max_teamcount teamsize preset)a)
+      |> cast(params, ~w(name icon colour map_list agent_name_list min_rating max_rating min_uncertainty max_uncertainty min_rank max_rank max_teamcount min_teamsize max_teamsize preset)a)
       |> validate_required(~w(name)a)
   end
 

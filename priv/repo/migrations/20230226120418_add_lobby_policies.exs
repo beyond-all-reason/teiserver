@@ -4,6 +4,7 @@ defmodule Central.Repo.Migrations.AddLobbyPolicies do
   def change do
     create table(:lobby_policies) do
       add :name, :string
+      add :lobby_name_format, :string
 
       add :icon, :string
       add :colour, :string
@@ -21,7 +22,8 @@ defmodule Central.Repo.Migrations.AddLobbyPolicies do
       add :max_rank, :integer
 
       add :max_teamcount, :integer, default: 2
-      add :teamsize, :integer
+      add :min_teamsize, :integer
+      add :max_teamsize, :integer
       add :preset, :string
 
       timestamps()
