@@ -10,7 +10,7 @@ Make sure that Elixir is in correct version (currently using 1.13.2). You can fi
 You can use [asdf](https://github.com/asdf-vm/asdf) to install correct version.
 
 ### Clone repo
-```krtn
+```bash
 git clone git@github.com:beyond-all-reason/teiserver.git
 cd teiserver
 ```
