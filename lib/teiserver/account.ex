@@ -1299,7 +1299,7 @@ defmodule Teiserver.Account do
   defdelegate rename_user(userid, new_name, admin_action \\ false), to: User
 
   @spec system_change_user_name(T.userid(), String.t()) :: :ok
-  defdelegate system_change_user_name(userid, new_name), to: User
+  defdelegate system_change_user_name(userid, new_name), to: Teiserver.User
 
   # Client stuff
   alias Teiserver.Account.ClientLib

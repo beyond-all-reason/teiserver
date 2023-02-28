@@ -49,10 +49,16 @@ defmodule TeiserverWeb.ClientLive.Show do
             }
 
           _ ->
-            connection_state = :sys.get_state(client.tcp_pid)
+            connection_state = if Process.alive?(client.tcp_pid) do
+              :sys.get_state(client.tcp_pid)
+            else
+              %{}
+            end
 
-            server_debug_messages = connection_state.print_server_messages
-            client_debug_messages = connection_state.print_client_messages
+            # If viewing an internal server process you it won't have these keys and thus we use
+            # this method
+            server_debug_messages = Map.get(connection_state, :print_server_messages, false)
+            client_debug_messages = Map.get(connection_state, :print_client_messages, false)
 
             {:noreply,
               socket

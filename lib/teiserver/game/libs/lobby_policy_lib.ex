@@ -127,9 +127,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
       |> String.replace("{id}", "#{lobby_policy.id}")
 
     email_domain = Application.get_env(:central, Teiserver)[:bot_email_domain]
-    email_addr = "#{lobby_policy.clan_tag}_#{base_name}_#{lobby_policy.id}@#{email_domain}"
-
-    user_name = "[#{lobby_policy.clan_tag}]#{formatted_name}"
+    email_addr = "#{base_name}_#{lobby_policy.id}_lobby_policy_bot@#{email_domain}"
 
     db_user = Account.get_user(nil, search: [
       email: email_addr
@@ -139,7 +137,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
       nil ->
         # Make account
         {:ok, user} = Account.create_user(%{
-          name: user_name,
+          name: formatted_name,
           email: email_addr,
           icon: "fa-solid fa-solar-system",
           colour: "#0000AA",
@@ -167,8 +165,8 @@ defmodule Teiserver.Game.LobbyPolicyLib do
 
       _ ->
         # Ensure the username is correct (for if we changed the name format around)
-        if db_user.name != user_name do
-          Account.system_change_user_name(db_user.id, user_name)
+        if db_user.name != formatted_name do
+          Account.system_change_user_name(db_user.id, formatted_name)
         end
 
         db_user

@@ -7,6 +7,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   alias Teiserver.{Game, User, Client}
   alias Teiserver.Battle.Lobby
   # alias Teiserver.Game.LobbyPolicyLib
+  alias Teiserver.Data.Types, as: T
   use GenServer
   require Logger
 
@@ -41,16 +42,36 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     {:noreply, state}
   end
 
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :added_to_lobby, lobby_id: lobby_id}, state) do
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+
+    PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+
+    {:noreply, %{state | lobby_id: lobby_id}}
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :client_updated}, state) do
+    {:noreply, state}
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :force_join_lobby}, state) do
+    {:noreply, state}
+  end
+
   def handle_info(%{channel: "teiserver_client_messages:" <> _} = m, state) do
+    Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\n#{inspect m.event}")
     {:noreply, state}
   end
 
   # No lobby, need to find one!
   def handle_info(:tick, %{lobby_id: nil} = state) do
-    Logger.warn("Bot tick")
     # TODO: Use the coordinator to request a new lobby be hosted by SPADS
     empty_lobby = Lobby.find_empty_lobby(fn l ->
-      String.starts_with?(l.name, "EU ") or String.starts_with?(l.name, "BH ")
+      (String.starts_with?(l.name, "EU ") or String.starts_with?(l.name, "BH "))
+      and
+      l.password == nil
     end)
 
     case empty_lobby do
@@ -59,17 +80,36 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
         {:noreply, state}
 
       _ ->
+        Lobby.force_add_user_to_lobby(state.userid, empty_lobby.id)
+
         Logger.info("LobbyPolicyBotServer found an empty lobby")
         {:noreply, %{state | lobby_id: empty_lobby.id}}
     end
+  end
+
+  # Lobby chat
+  def handle_info({:lobby_update, _action, _lobby_id, _data}, state) do
+    # IO.inspect {action, data}, label: "lobby_update"
+    {:noreply, state}
+  end
+
+  # Lobby chat
+  def handle_info({:lobby_chat, _action, _lobby_id, senderid, message}, state) do
+    new_state = handle_chat(senderid, message, state)
+    {:noreply, new_state}
   end
 
   def handle_info(:tick, state) do
     {:noreply, state}
   end
 
-  def handle_info(_, state) do
+  def handle_info({:force_join_battle, _, _}, state) do
     {:noreply, state}
+  end
+
+  @spec handle_chat(T.userid(), String.t(), map()) :: map()
+  defp handle_chat(_senderid, _message, state) do
+    state
   end
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
