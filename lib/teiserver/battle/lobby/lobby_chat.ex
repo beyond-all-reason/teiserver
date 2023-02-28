@@ -82,7 +82,13 @@ defmodule Teiserver.Battle.LobbyChat do
       PubSub.broadcast(
         Central.PubSub,
         "teiserver_lobby_chat:#{lobby_id}",
-        {:lobby_chat, :say, lobby_id, userid, msg}
+        %{
+          channel: "teiserver_lobby_chat:#{lobby_id}",
+          event: :say,
+          lobby_id: lobby_id,
+          userid: userid,
+          message: msg
+        }
       )
 
       :ok
@@ -128,7 +134,13 @@ defmodule Teiserver.Battle.LobbyChat do
       PubSub.broadcast(
         Central.PubSub,
         "teiserver_lobby_chat:#{lobby_id}",
-        {:lobby_chat, :announce, lobby_id, userid, msg}
+        %{
+          channel: "teiserver_lobby_chat:#{lobby_id}",
+          event: :announce,
+          lobby_id: lobby_id,
+          userid: userid,
+          message: msg
+        }
       )
       :ok
     else

@@ -109,10 +109,23 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     cond do
       content == "" -> :ok
       not allow_send_message?(content, current_user) ->
-        send(self(), {:lobby_chat, :say, :ok, current_user.id, "--- Unable to send messages starting with s:, a:, ! or $ via the web interface ---"})
+        send(self(), %{
+          channel: "teiserver_lobby_chat:#{id}",
+          event: :say,
+          lobby_id: id,
+          userid: current_user.id,
+          message: "--- Unable to send messages starting with s:, a:, ! or $ via the web interface ---"
+        })
 
       flood_protect?(message_timestamps) ->
-        send(self(), {:lobby_chat, :say, :ok, current_user.id, "--- FLOOD PROTECTION IN PLACE, PLEAES WAIT BEFORE SENDING ANOTHER MESSAGE ---"})
+        send(self(), %{
+          channel: "teiserver_lobby_chat:#{id}",
+          event: :say,
+          lobby_id: id,
+          userid: current_user.id,
+          message: "--- FLOOD PROTECTION IN PLACE, PLEASE WAIT BEFORE SENDING ANOTHER MESSAGE ---"
+        })
+
       true ->
         Lobby.say(current_user.id, "web: #{content}", id)
     end
@@ -125,15 +138,22 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
   @impl true
   def handle_info({:liveview_lobby_chat, :say, userid, message}, socket) do
-    send(self(), {:lobby_chat, :say, nil, userid, message})
+    send(self(), %{
+      channel: "teiserver_lobby_chat:#{socket.assigns.id}",
+      event: :say,
+      lobby_id: socket.assigns.id,
+      userid: userid,
+      message: message
+    })
+
     {:noreply, socket}
   end
 
-  def handle_info({:lobby_chat, :announce, _lobby_id, _, _}, socket) do
+  def handle_info(%{channel: "teiserver_lobby_chat:" <> _, event: :announce}, socket) do
     {:noreply, socket}
   end
 
-  def handle_info({:lobby_chat, _say_or_announce, _lobby_id, userid, message}, socket) do
+  def handle_info(%{channel: "teiserver_lobby_chat:" <> _, userid: userid, message: message}, socket) do
     {userid, message} = case Regex.run(~r/^<(.*?)> (.+)$/u, message) do
       [_, username, remainder] ->
         userid = User.get_userid(username) || userid

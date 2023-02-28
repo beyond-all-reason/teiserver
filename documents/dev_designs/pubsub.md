@@ -176,14 +176,20 @@ Updates for clients using the liveview to help prevent doubling up on certain ot
 
 #### teiserver_lobby_chat:#{battle_lobby_id}
 Information specific to the chat in a battle lobby, state changes to the battle are not sent via this channel.
-Valid events:
 ```elixir
-  # Structure
-  {:lobby_chat, _action, lobby_id, userid, _data}
-
-  # Chatting
-  {:lobby_chat, :say, lobby_id, userid, msg}
-  {:lobby_chat, :announce, lobby_id, userid, msg}
+  %{
+    event: :say,
+    lobby_id: lobby_id,
+    userid: user_id,
+    message: message
+  }
+  
+  %{
+    event: :announce,
+    lobby_id: lobby_id,
+    userid: user_id,
+    message: message
+  }
 ```
 
 #### teiserver_liveview_lobby_updates:#{battle_lobby_id}

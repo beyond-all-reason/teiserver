@@ -280,8 +280,8 @@ defmodule Teiserver.TachyonTcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:lobby_chat, event, lobby_id, userid, data}, state) do
-    {:noreply, state.protocol_out.reply(:lobby_chat, event, {lobby_id, userid, data}, state)}
+  def handle_info(event = %{channel: "teiserver_lobby_chat:" <> _}, state) do
+    {:noreply, state.protocol_out.reply(:lobby_chat, event.event, {event.lobby_id, event.userid, event.message}, state)}
   end
 
   def handle_info({:lobby_update, event, lobby_id, data}, state) do

@@ -94,8 +94,8 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   # Lobby chat
-  def handle_info({:lobby_chat, _action, _lobby_id, senderid, message}, state) do
-    new_state = handle_chat(senderid, message, state)
+  def handle_info(%{channel: "teiserver_lobby_chat:" <> _, userid: userid, message: message}, state) do
+    new_state = handle_chat(userid, message, state)
     {:noreply, new_state}
   end
 

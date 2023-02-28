@@ -107,11 +107,9 @@ defmodule Teiserver.Coordinator.SplitTest do
 
     # Check what got sent
     messages = PubsubListener.get(listener)
-    assert messages == [{:lobby_chat, :say, lobby_id, player1.id, "$splitlobby"}]
-    # assert messages == [
-    #   {:lobby_chat, :announce, lobby_id, Coordinator.get_coordinator_userid(), "#{player1.name} is moving to a new lobby, to follow them say $y. If you want to follow someone else then say $follow <name> and you will follow that user. The split will take place in 30 seconds, you can change your mind at any time. Say $n to cancel your decision and stay here."},
-    #   {:lobby_chat, :say, lobby_id, player1.id, "$splitlobby"},
-    # ]
+    assert Enum.member?(messages, %{channel: "teiserver_lobby_chat:#{lobby_id}", event: :announce, lobby_id: lobby_id, message: "Split lobby sequence started ($y to move, $n to cancel, $follow <name> to follow user)", userid: Coordinator.get_coordinator_userid()}), message: inspect(messages)
+
+    assert Enum.member?(messages, %{channel: "teiserver_lobby_chat:#{lobby_id}", event: :say, lobby_id: lobby_id, message: "$splitlobby", userid: player1.id}), message: inspect(messages)
 
     # Check state
     split = Coordinator.call_consul(lobby_id, {:get, :split})
