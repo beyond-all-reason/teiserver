@@ -10,9 +10,9 @@ defmodule Tachyon.TachyonSocket do
   end
 
   def connect(state) do
-    # IO.puts "connect"
-    # IO.inspect state
-    # IO.puts ""
+    IO.puts ""
+    IO.inspect state, label: "connect"
+    IO.puts ""
 
     # Callback to retrieve relevant data from the connection.
     # The map contains options, params, transport and endpoint keys.
@@ -20,9 +20,9 @@ defmodule Tachyon.TachyonSocket do
   end
 
   def init(state) do
-    # IO.puts "init"
-    # IO.inspect state
-    # IO.puts ""
+    IO.puts ""
+    IO.inspect state, label: "init"
+    IO.puts ""
 
     # Now we are effectively inside the process that maintains the socket.
     {:ok, state}
