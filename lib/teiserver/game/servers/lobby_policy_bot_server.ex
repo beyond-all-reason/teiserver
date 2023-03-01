@@ -272,19 +272,23 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
 
   # Returns true if the name of the map sent to it is allowed
   defp is_map_allowed?(current_map, state) do
-    map_name = current_map
-      |> String.downcase()
-      |> String.replace(" ", "_")
+    if Enum.empty?(state.lobby_policy.map_list) do
+      true
+    else
+      map_name = current_map
+        |> String.downcase()
+        |> String.replace(" ", "_")
 
-    state.lobby_policy.map_list
-      |> Enum.filter(fn allowed_map ->
-        allowed_name = allowed_map
-          |> String.downcase()
-          |> String.replace(" ", "_")
+      state.lobby_policy.map_list
+        |> Enum.filter(fn allowed_map ->
+          allowed_name = allowed_map
+            |> String.downcase()
+            |> String.replace(" ", "_")
 
-        String.contains?(map_name, allowed_name)
-      end)
-      |> Enum.any?
+          String.contains?(map_name, allowed_name)
+        end)
+        |> Enum.any?
+    end
   end
 
   defp pick_random_map(state) do
