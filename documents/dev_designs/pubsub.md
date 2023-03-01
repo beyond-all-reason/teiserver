@@ -39,6 +39,12 @@ Used for internal communication around lobby_policies where something needs to b
   event: :request_status_update
 }
 
+# Used to request a status update from all the agent nodes
+%{
+  event: :updated_policy,
+  new_policy: LobbyPolicy
+}
+
 # Used to tell all bots of that policy to disconnect
 %{
   event: :disconnect

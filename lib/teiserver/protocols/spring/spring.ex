@@ -101,18 +101,25 @@ defmodule Teiserver.Protocols.Spring do
     ] = status_bits
 
     sync = [sync2, sync1] |> Integer.undigits(2)
-    sync = if sync == 1 do
-      %{
-        game: 1,
-        engine: 1,
-        map: 1
-      }
-    else
-      %{
-        game: 0,
-        engine: 0,
-        map: 0
-      }
+    sync = case sync do
+      1 ->
+        %{
+          game: 1,
+          engine: 1,
+          map: 1
+        }
+
+      2 ->
+        %{
+          game: 0,
+          engine: 0,
+          map: 0
+        }
+
+      0 ->
+        %{
+          bot: 1
+        }
     end
 
     # Team is the player
@@ -130,12 +137,17 @@ defmodule Teiserver.Protocols.Spring do
 
   @spec create_battle_status(Map.t()) :: Integer.t()
   def create_battle_status(client) do
-    sync = client
-      |> Map.get(:sync, %{})
+    sync_value = Map.get(client, :sync, %{})
+
+    all_one = sync_value
       |> Enum.filter(fn {_key, value} -> value != 1 end)
       |> Enum.empty?()
 
-    sync = if sync, do: 1, else: 2
+    sync = cond do
+      Map.get(sync_value, :bot, nil) == 1 -> 0
+      all_one == true -> 1
+      true -> 2
+    end
 
     [t8, t7, t6, t5, t4, t3, t2, t1] = BitParse.parse_bits("#{client.player_number}", 8)
     [a8, a7, a6, a5, a4, a3, a2, a1] = BitParse.parse_bits("#{client.team_number}", 8)

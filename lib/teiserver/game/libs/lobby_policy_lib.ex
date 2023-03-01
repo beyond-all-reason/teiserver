@@ -173,19 +173,20 @@ defmodule Teiserver.Game.LobbyPolicyLib do
     end
   end
 
-  @spec start_lobby_policy_bot(T.lobby_policy_id(), Central.Account.User.t()) :: pid()
-  def start_lobby_policy_bot(lobby_policy_id, user) do
-    {:ok, consul_pid} =
+  @spec start_lobby_policy_bot(LobbyPolicy.t(), String.t(), Central.Account.User.t()) :: pid()
+  def start_lobby_policy_bot(lobby_policy, base_name, user) do
+    {:ok, policy_bot_pid} =
       DynamicSupervisor.start_child(Teiserver.LobbyPolicySupervisor, {
         LobbyPolicyBotServer,
-        name: "lobby_policy_bot_#{lobby_policy_id}_#{user.name}",
+        name: "lobby_policy_bot_#{lobby_policy.id}_#{user.name}",
         data: %{
           userid: user.id,
-          lobby_policy_id: lobby_policy_id,
+          base_name: base_name,
+          lobby_policy: lobby_policy,
         }
       })
 
-    consul_pid
+    policy_bot_pid
   end
 
   @spec add_policy_from_db(LobbyPolicy.t()) :: :ok | :exists | {:error, any}
