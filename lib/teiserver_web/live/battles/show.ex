@@ -224,7 +224,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
   def handle_event("join", _, %{assigns: assigns} = socket) do
     if Battle.server_allows_join?(assigns.client.userid, assigns.id) == true do
-      Battle.add_user_to_lobby(assigns.current_user.id, assigns.id, Teiserver.Battle.Lobby.new_script_password())
+      Battle.force_add_user_to_lobby(assigns.current_user.id, assigns.id)
     end
 
     {:noreply, socket}
