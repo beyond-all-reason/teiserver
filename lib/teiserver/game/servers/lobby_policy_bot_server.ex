@@ -270,6 +270,34 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     User.send_direct_message(state.userid, state.founder_id, msg)
   end
 
+  defp apply_policy_config(state) do
+    lp = state.lobby_policy
+
+    # Rating levels
+    case {lp.min_rating, lp.max_rating} do
+      {nil, nil} -> send_chat(state, "$%resetratinglevels")
+      {r, nil} -> send_chat(state, "$%minratinglevel #{r}")
+      {nil, r} -> send_chat(state, "$%maxratinglevel #{r}")
+      {r1, r2} -> send_chat(state, "$%setratinglevels #{r1} #{r2}")
+    end
+
+    # Rank
+    case {lp.min_rank, lp.max_rank} do
+      {nil, nil} -> send_chat(state, "$%resetranklevels")
+      {r, nil} -> send_chat(state, "$%minranklevel #{r}")
+      {nil, r} -> send_chat(state, "$%maxranklevel #{r}")
+      {r1, r2} -> send_chat(state, "$%setranklevels #{r1} #{r2}")
+    end
+
+    # Uncertainty (not in use yet)
+    # case {lp.min_uncertainty, lp.max_uncertainty} do
+    #   {nil, nil} -> send_chat(state, "$%resetuncertaintylevels")
+    #   {r, nil} -> send_chat(state, "$%minuncertaintylevel #{r}")
+    #   {nil, r} -> send_chat(state, "$%maxuncertaintylevel #{r}")
+    #   {r1, r2} -> send_chat(state, "$%setuncertaintylevels #{r1} #{r2}")
+    # end
+  end
+
   # Returns true if the name of the map sent to it is allowed
   defp is_map_allowed?(current_map, state) do
     if Enum.empty?(state.lobby_policy.map_list) do

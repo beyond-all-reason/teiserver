@@ -272,6 +272,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     min_rate_play = state.minimum_rating_to_play
     max_rate_play = state.maximum_rating_to_play
+
     play_level_bounds = cond do
       min_rate_play > 0 and max_rate_play < 1000 ->
         "Play rating boundaries set to min: #{min_rate_play}, max: #{max_rate_play}"
@@ -982,6 +983,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       minimum_rank_to_play: 0,
       maximum_rank_to_play: 1000,
+
+      minimum_uncertainty_to_play: 0,
+      maximum_uncertainty_to_play: 1000,
 
       level_to_spectate: 0,
       locks: [],
