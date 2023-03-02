@@ -17,36 +17,32 @@ defmodule CentralWeb do
   and import those modules here.
   """
 
+  def channel do
+    quote do
+      use Phoenix.Channel
+      import CentralWeb.Gettext
+    end
+  end
+
   def controller do
     quote do
       use Phoenix.Controller, namespace: CentralWeb
       import Phoenix.LiveView.Controller
+      import Plug.Conn
+      import CentralWeb.Gettext
 
       use Breadcrumble
 
-      import Central.Helpers.StringHelper, only: [get_hash_id: 1]
-      import Central.Logging.LoggingLib, only: [do_not_log: 1]
       alias Central.General.AssignPlug
 
       import Central.Logging.Helpers, only: [add_audit_log: 3]
 
       alias Bodyguard.Plug.Authorize
-      alias Central.Account.AuthLib
-      alias Central.Account.GroupLib
 
-      alias Central.Helpers.TimexHelper
-
-      import Plug.Conn
-      import CentralWeb.Gettext
       alias CentralWeb.Router.Helpers, as: Routes
-      alias Central.Helpers.StylingHelper
-
-      import Central.Config, only: [get_user_config_cache: 2, set_user_config: 3]
 
       import Central.Account.RecentlyUsedCache,
         only: [remove_recently: 2, insert_recently: 2, insert_recently: 1, get_recently: 1]
-
-      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
     end
   end
 
@@ -175,13 +171,6 @@ defmodule CentralWeb do
       import Plug.Conn
       import Phoenix.Controller
       import Phoenix.LiveView.Router
-    end
-  end
-
-  def channel do
-    quote do
-      use Phoenix.Channel
-      import CentralWeb.Gettext
     end
   end
 

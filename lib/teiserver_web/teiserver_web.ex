@@ -10,24 +10,6 @@ defmodule TeiserverWeb do
     end
   end
 
-  def controller do
-    quote do
-      use CentralWeb, :controller
-    end
-  end
-
-  def schema do
-    quote do
-      use CentralWeb, :schema
-    end
-  end
-
-  def library do
-    quote do
-      use CentralWeb, :library
-    end
-  end
-
   def live_view do
     quote do
       use CentralWeb, :live_view_structure

@@ -1,6 +1,6 @@
 defmodule Teiserver.Moderation.ProposalVote do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use CentralWeb, :schema
 
   @primary_key false
   schema "moderation_proposal_votes" do

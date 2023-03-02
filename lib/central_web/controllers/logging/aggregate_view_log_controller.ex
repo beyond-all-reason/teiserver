@@ -4,6 +4,7 @@ defmodule CentralWeb.Logging.AggregateViewLogController do
   alias Central.Logging
   alias Central.Logging.AggregateViewLogLib
   alias Central.Logging.AggregateViewLogsTask
+  alias Central.Helpers.TimexHelper
 
   alias Central.Helpers.TimexHelper
 

@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Report.ReportController do
   use CentralWeb, :controller
+  import Central.Account.AuthLib, only: [allow?: 2]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",

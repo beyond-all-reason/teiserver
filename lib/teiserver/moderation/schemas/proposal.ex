@@ -1,6 +1,6 @@
 defmodule Teiserver.Moderation.Proposal do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use CentralWeb, :schema
 
   schema "moderation_proposals" do
     belongs_to :proposer, Central.Account.User

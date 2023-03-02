@@ -2,11 +2,10 @@ defmodule CentralWeb.Admin.GroupController do
   use CentralWeb, :controller
 
   alias Central.Account
-  alias Central.Account.Group
-  alias Central.Account.GroupLib
-  alias Central.Account.GroupTypeLib
-  alias Central.Account.GroupCacheLib
+  alias Central.Account.{Group, GroupLib, GroupTypeLib, GroupCacheLib}
   alias Central.Helpers.StylingHelper
+  import Central.Helpers.StringHelper, only: [get_hash_id: 1]
+  import Central.Account.AuthLib, only: [allow?: 2]
 
   plug :add_breadcrumb, name: 'Admin', url: '/admin'
   plug :add_breadcrumb, name: 'Groups', url: '/admin/groups'

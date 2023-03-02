@@ -1,6 +1,6 @@
 defmodule Teiserver.Moderation.Ban do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use CentralWeb, :schema
 
   schema "moderation_bans" do
     belongs_to :source, Central.Account.User

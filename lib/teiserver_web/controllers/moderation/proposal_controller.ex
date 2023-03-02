@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Moderation.ProposalController do
   @moduledoc false
-  use TeiserverWeb, :controller
+  use CentralWeb, :controller
 
   alias Teiserver.{Account, Moderation}
   alias Teiserver.Moderation.{Proposal, ProposalLib}

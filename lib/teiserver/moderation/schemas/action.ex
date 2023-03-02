@@ -1,6 +1,6 @@
 defmodule Teiserver.Moderation.Action do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use CentralWeb, :schema
 
   schema "moderation_actions" do
     belongs_to :target, Central.Account.User

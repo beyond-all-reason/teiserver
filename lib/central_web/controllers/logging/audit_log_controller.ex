@@ -5,6 +5,8 @@ defmodule CentralWeb.Logging.AuditLogController do
   alias Central.Logging
   alias Central.Logging.AuditLogLib
 
+  import Central.Helpers.StringHelper, only: [get_hash_id: 1]
+
   plug :add_breadcrumb, name: 'Logging', url: '/logging'
   plug :add_breadcrumb, name: 'Audit', url: '/logging/audit'
 

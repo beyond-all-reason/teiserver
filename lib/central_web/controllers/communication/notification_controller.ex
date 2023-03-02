@@ -2,6 +2,8 @@ defmodule CentralWeb.Communication.NotificationController do
   use CentralWeb, :controller
   alias Central.Communication
 
+  import Central.Helpers.StringHelper, only: [get_hash_id: 1]
+
   plug :add_breadcrumb, name: 'Notifications', url: '/communication/notifications'
 
   def index(conn, _params) do

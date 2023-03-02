@@ -263,6 +263,10 @@ defmodule Central.Config do
   def cast_user_config_value(type_key, value) do
     type = get_user_config_type(type_key)
 
+    IO.puts ""
+    IO.inspect {type, type_key, value}
+    IO.puts ""
+
     case type.type do
       "integer" -> Central.Helpers.NumberHelper.int_parse(value)
       "boolean" -> if value == "true", do: true, else: false

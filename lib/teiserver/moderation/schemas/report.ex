@@ -1,6 +1,6 @@
 defmodule Teiserver.Moderation.Report do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use CentralWeb, :schema
 
   schema "moderation_reports" do
     belongs_to :reporter, Central.Account.User

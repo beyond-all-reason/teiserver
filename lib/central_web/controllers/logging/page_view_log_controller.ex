@@ -2,6 +2,9 @@ defmodule CentralWeb.Logging.PageViewLogController do
   use CentralWeb, :controller
 
   alias Central.Logging
+  alias Central.Account.GroupLib
+  alias Central.Helpers.TimexHelper
+  import Central.Helpers.StringHelper, only: [get_hash_id: 1]
 
   plug :add_breadcrumb, name: 'Logging', url: '/logging'
   plug :add_breadcrumb, name: 'Page views', url: '/logging/page_views'

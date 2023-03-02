@@ -2,13 +2,14 @@ defmodule CentralWeb.Admin.UserController do
   use CentralWeb, :controller
 
   alias Central.Account
-  alias Central.Account.User
+  alias Central.Account.{User, AuthLib}
   alias Central.Account.GroupLib
   alias Central.Helpers.StylingHelper
   alias Central.Account.UserLib
   alias Central.Config
 
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Central.Helpers.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,
     policy: Central.Account.User,
