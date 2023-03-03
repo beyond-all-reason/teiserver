@@ -51,18 +51,15 @@ mix ecto.create
 ```
 
 #### Protobuf
+```bash
 sudo aptitude install -y protobuf-compiler
+mix escript.install hex protobuf
+```
 
 Add this to your `.bashrc` or `.zshrc`.
 ```bash
-PATH=~/.asdf/installs/elixir/1.13.2/.mix/escripts:$PATH
+PATH=~/.asdf/installs/elixir/1.14.3-otp-25/.mix/escripts:$PATH
 ```
-
-Then in your teiserver folder
-```bash
-protoc --elixir_out=./lib lib/teiserver/protocols/tachyon_v1/tachyonv1.proto
-```
-
 
 #### Localhost certs
 To run the TLS server locally you will also need to create localhost certificates in `priv/certs` using the following commands
