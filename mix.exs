@@ -98,7 +98,7 @@ defmodule Central.MixProject do
 
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
 
-      {:protobuf, "~> 0.10.0"},
+      {:protobuf, "~> 0.11.0"},
       {:google_protos, "~> 0.1"},
 
       # If you want to connect to discord in dev mode, use this
