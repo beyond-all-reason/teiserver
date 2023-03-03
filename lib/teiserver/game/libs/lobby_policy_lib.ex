@@ -196,25 +196,30 @@ defmodule Teiserver.Game.LobbyPolicyLib do
     :exists
   end
   def add_policy_from_db(%{enabled: true} = lobby_policy) do
-    if get_lobby_organiser_pid(lobby_policy.id) do
-      cast_lobby_organiser(lobby_policy.id, {:updated_policy, lobby_policy})
-      :exists
-    else
-      result = DynamicSupervisor.start_child(Teiserver.LobbyPolicySupervisor, {
-        LobbyPolicyOrganiserServer,
-        name: "lobby_policy_supervisor_#{lobby_policy.id}",
-        data: %{
-          lobby_policy: lobby_policy
-        }
-      })
+    cond do
+      Application.get_env(:central, Teiserver)[:enable_managed_lobbies] == false ->
+        :disabled
 
-      case result do
-        {:error, err} ->
-          Logger.error("Error starting LobbyPolicySupervisor: #{__ENV__.file}:#{__ENV__.line}\n#{inspect err}")
-          {:error, err}
-        {:ok, _pid} ->
-          :ok
-      end
+      get_lobby_organiser_pid(lobby_policy.id) != nil ->
+        cast_lobby_organiser(lobby_policy.id, {:updated_policy, lobby_policy})
+        :exists
+
+      true ->
+        result = DynamicSupervisor.start_child(Teiserver.LobbyPolicySupervisor, {
+          LobbyPolicyOrganiserServer,
+          name: "lobby_policy_supervisor_#{lobby_policy.id}",
+          data: %{
+            lobby_policy: lobby_policy
+          }
+        })
+
+        case result do
+          {:error, err} ->
+            Logger.error("Error starting LobbyPolicySupervisor: #{__ENV__.file}:#{__ENV__.line}\n#{inspect err}")
+            {:error, err}
+          {:ok, _pid} ->
+            :ok
+        end
     end
   end
 
