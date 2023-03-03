@@ -353,7 +353,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
       |> assign(:columns_memory, columns_memory)
       |> assign(:columns_cpu_load, columns_cpu_load)
       |> assign(:axis_key, axis_key)
-      |> add_breadcrumb(name: "Now", url: conn.request_path)
+      |> add_breadcrumb(name: "Load", url: conn.request_path)
       |> render("load_graph.html")
   end
 end
