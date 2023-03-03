@@ -38,8 +38,8 @@ defmodule Teiserver.Tachyon.TachyonPbLib do
   def server_encode(data) do
     Tachyon.ServerMessage.encode(data)
   end
-  @spec server_wrap({atom, map}, list()) :: binary()
 
+  @spec server_wrap_and_encode({atom, map}, list()) :: binary()
   def server_wrap_and_encode({type, object}, attrs) do
     server_wrap({type, object}, attrs)
     |> server_encode
