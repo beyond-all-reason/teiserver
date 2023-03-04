@@ -22,9 +22,9 @@ These are just the highlights, full documentation can be found in the documentat
 - [Matchmaking](/documents/spring/matchmaking.md)
 - [Reputation/Reporting system](/documents/planned_designs/reputation.md)
 - [Agent mode/Lobby dev assist](/documents/planned_designs/agent_mode.md)
+- [Parties](/documents/spring/parties.md)
 
 ### Features planned but not started
-- [Parties](/documents/spring/parties.md)
 - [Clans](/documents/planned_designs/clans.md)
 
 ### Contributing
