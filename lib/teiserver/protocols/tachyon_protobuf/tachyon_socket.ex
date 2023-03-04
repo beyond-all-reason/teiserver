@@ -2,57 +2,49 @@ defmodule Tachyon.TachyonSocket do
   @behaviour Phoenix.Socket.Transport
 
   require Logger
+  alias Phoenix.PubSub
+  alias Central.Config
   alias Teiserver.Tachyon.{TachyonPbLib, ClientDispatcher}
+  alias Teiserver.Protocols.Tachyon.TachyonProtobufIn
 
-  def child_spec(opts) do
+  @type ws_state() :: map()
+
+  @spec child_spec(any) :: any()
+  def child_spec(_opts) do
     # We won't spawn any process, so let's return a dummy task
     %{id: __MODULE__, start: {Task, :start_link, [fn -> :ok end]}, restart: :transient}
   end
 
+  @spec connect(ws_state()) :: {:ok, ws_state()}
   def connect(state) do
-    # IO.puts ""
-    # IO.inspect state, label: "connect"
-    # IO.puts ""
-
-    # Callback to retrieve relevant data from the connection.
-    # The map contains options, params, transport and endpoint keys.
     {:ok, state}
   end
 
+  @spec init(ws_state()) :: {:ok, ws_state()}
   def init(state) do
-    # IO.puts ""
-    # IO.inspect state, label: "init"
-    # IO.puts ""
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
 
-    # Now we are effectively inside the process that maintains the socket.
-    {:ok, state}
+    {:ok, Map.put(state, :conn, new_state())}
   end
 
-  def handle_in({text, _opts}, state) do
-    # IO.puts ""
-    # IO.inspect text, label: "handle_in"
-    # IO.puts ""
+  @spec handle_in({atom, any}, ws_state()) :: {:reply, :ok, {:binary, binary}, ws_state()}
+  def handle_in({text, _opts}, %{conn: conn} = state) do
+    {result_type, result_object, metadata, conn_updates} = TachyonProtobufIn.handle(text, conn)
 
-    {{type, object}, metadata} = TachyonPbLib.client_decode_and_unwrap(text)
-    Logger.debug("WS in: " <> inspect_object(object))
-
-    {result_type, result_object} = ClientDispatcher.dispatch(type, object, state)
+    new_conn = if conn_updates do
+      Map.merge(conn, conn_updates)
+    else
+      conn
+    end
 
     resp = TachyonPbLib.server_wrap_and_encode({result_type, result_object}, metadata)
-
     Logger.debug("WS out: " <> inspect_object(result_object))
 
-    # Good request
-    # A2 06 11 0A 05 65 6D 61 69 6C 12 08 70 61 73 73 77 6F 72 64
-
-    # Bad request
-    # A2 06 0E 0A 05 65 6D 61 69 6C 12 05 77 72 6F 6E 67
-
-
-    {:reply, :ok, {:binary, resp}, state}
+    {:reply, :ok, {:binary, resp}, %{state | conn: new_conn}}
   end
 
-  def handle_info(msg, state) do
+  @spec handle_info(any, ws_state()) :: {:reply, :ok, {:binary, binary}, ws_state()}
+  def handle_info(_msg, state) do
     # IO.puts ""
     # IO.inspect msg, label: "ws handle_info"
     # IO.puts ""
@@ -61,13 +53,34 @@ defmodule Tachyon.TachyonSocket do
     {:reply, :ok, {:binary, <<111>>}, state}
   end
 
+  @spec terminate(any, any) :: :ok
+  def terminate(_reason, _state) do
+    :ok
+  end
+
+  @spec new_state() :: map()
+  defp new_state() do
+    %{
+      # Client state
+      userid: nil,
+      username: nil,
+      lobby_host: false,
+      queues: [],
+      lobby_id: nil,
+      party_id: nil,
+      party_role: nil,
+      exempt_from_cmd_throttle: true,
+      cmd_timestamps: [],
+
+      # Caching app configs
+      flood_rate_limit_count: Config.get_site_config_cache("teiserver.Tachyon flood rate limit count"),
+      floot_rate_window_size: Config.get_site_config_cache("teiserver.Tachyon flood rate window size")
+    }
+  end
+
   defp inspect_object(object) do
     object
       |> Map.drop([:__unknown_fields__])
       |> inspect
-  end
-
-  def terminate(_reason, _state) do
-    :ok
   end
 end
