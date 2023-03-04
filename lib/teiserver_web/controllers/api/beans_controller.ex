@@ -19,8 +19,8 @@ defmodule TeiserverWeb.API.BeansController do
 
   @spec create_user(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create_user(conn, params) do
-    email = (params["email"] || params["name"]) <> "@beans"
-    name = params["name"] <> "_beans"
+    email = (params["email"] || params["name"]) <> "@hailstorm"
+    name = params["name"] <> "_hailstorm"
 
     result = case Account.get_user_by_email(email) do
       nil ->
@@ -124,6 +124,6 @@ end
 defmodule Teiserver.API.BeansAuth do
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
   def authorize(_, _, _) do
-    Application.get_env(:central, Teiserver)[:enable_beans]
+    Application.get_env(:central, Teiserver)[:enable_hailstorm]
   end
 end

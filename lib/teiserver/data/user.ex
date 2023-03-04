@@ -283,7 +283,7 @@ defmodule Teiserver.User do
           |> add_user
           |> update_user(persist: true)
 
-        if not String.ends_with?(user.email, "@agents") and not String.ends_with?(user.email, "@beans") do
+        if not String.ends_with?(user.email, "@agents") and not String.ends_with?(user.email, "@hailstorm") do
           case EmailHelper.new_user(user) do
             {:error, error} ->
               Logger.error("Error sending new user email - #{user.email} - #{error}")

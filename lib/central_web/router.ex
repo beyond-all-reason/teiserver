@@ -480,7 +480,7 @@ defmodule CentralWeb.Router do
     post "/login", SessionController, :login
   end
 
-  scope "/teiserver/api/beans", TeiserverWeb.API, as: :ts do
+  scope "/teiserver/api/hailstorm", TeiserverWeb.API, as: :ts do
     pipe_through([:api])
     post("/up", BeansController, :up)
     post("/update_site_config", BeansController, :update_site_config)

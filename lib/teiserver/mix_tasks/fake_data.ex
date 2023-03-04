@@ -22,7 +22,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   @spec run(list()) :: :ok
   def run(_args) do
-    if Application.get_env(:central, Teiserver)[:enable_beans] do
+    if Application.get_env(:central, Teiserver)[:enable_hailstorm] do
       # Start by rebuilding the database
       Mix.Task.run("ecto.reset")
 

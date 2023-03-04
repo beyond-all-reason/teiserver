@@ -63,7 +63,7 @@ config :central, Teiserver,
   heartbeat_timeout: nil,
   enable_discord_bridge: false,
   enable_agent_mode: true,
-  enable_beans: true,
+  enable_hailstorm: true,
   use_geoip: true,
   accept_all_emails: true
 
