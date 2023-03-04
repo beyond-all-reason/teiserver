@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.API.BeansController do
   use CentralWeb, :controller
+  alias Central.Config
   alias Teiserver.{Account, User}
 
   plug(Bodyguard.Plug.Authorize,
@@ -8,9 +9,17 @@ defmodule TeiserverWeb.API.BeansController do
     user: {Central.Account.AuthLib, :current_user}
   )
 
+  @spec up(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def up(conn, _params) do
+    conn
+      |> put_status(201)
+      |> assign(:result, %{up: true})
+      |> render("result.json")
+  end
+
   @spec create_user(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create_user(conn, params) do
-    email = params["email"] <> "@beans"
+    email = (params["email"] || params["name"]) <> "@beans"
     name = params["name"] <> "_beans"
 
     result = case Account.get_user_by_email(email) do
@@ -67,6 +76,16 @@ defmodule TeiserverWeb.API.BeansController do
     conn
       |> put_status(201)
       |> assign(:result, result)
+      |> render("result.json")
+  end
+
+  @spec update_site_config(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def update_site_config(conn, %{"key" => key, "value" => value}) do
+    Config.update_site_config(key, value)
+
+    conn
+      |> put_status(201)
+      |> assign(:result, %{})
       |> render("result.json")
   end
 
