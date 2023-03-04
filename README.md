@@ -32,4 +32,4 @@ All contributors are welcome; if you spot an issue or bug with it mention me on 
 
 #### Special thanks
 - Beherith for extensive help with the autohosts
-- Skynet and AKU for extensive finding of and reporting bugs
+- Skynet and AKU for extensive finding and reporting of bugs
