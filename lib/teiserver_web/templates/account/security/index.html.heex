@@ -21,6 +21,10 @@
                 <strong>User agent:</strong> <%= token.user_agent %><br />
                 <strong>IP:</strong> <%= token.ip %><br />
                 <strong>Last used:</strong> <%= date_to_str(token.last_used, format: :ymd_hms) %><br />
+                <%= if allow?(@conn, "admin.dev") do %>
+                  <strong>Value:</strong> <input type="text" value={token.value} class="form-control" />
+                  <strong>Escaped:</strong> <input type="text" value={URI.encode_query(%{"qqq" => token.value}) |> String.replace("qqq=", "")} class="form-control" />
+                <% end %>
                 <br />
 
                 <%= link raw("Delete token"), to: Routes.ts_account_security_path(@conn, :delete_token, token), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger2" %>

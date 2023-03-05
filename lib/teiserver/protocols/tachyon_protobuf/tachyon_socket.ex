@@ -6,6 +6,7 @@ defmodule Tachyon.TachyonSocket do
   alias Central.Config
   alias Teiserver.Tachyon.{TachyonPbLib, ClientDispatcher}
   alias Teiserver.Protocols.Tachyon.TachyonProtobufIn
+  alias Teiserver.Data.Types, as: T
 
   @type ws_state() :: map()
 
@@ -16,15 +17,28 @@ defmodule Tachyon.TachyonSocket do
   end
 
   @spec connect(ws_state()) :: {:ok, ws_state()}
-  def connect(state) do
-    {:ok, state}
+  def connect(%{params: %{"token" => token}} = state) do
+    case Central.Account.get_user_token_by_value(token) do
+      nil ->
+        :error
+
+      %{user: user, expires: expires} ->
+        if expires == nil or Timex.compare(expires, Timex.now) == 1 do
+          {:ok, Map.put(state, :conn, new_state(user))}
+        else
+          :error
+        end
+    end
+  end
+  def connect(_state) do
+    :error
   end
 
   @spec init(ws_state()) :: {:ok, ws_state()}
   def init(state) do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
 
-    {:ok, Map.put(state, :conn, new_state())}
+    {:ok, state}
   end
 
   @spec handle_in({atom, any}, ws_state()) :: {:reply, :ok, {:binary, binary}, ws_state()}
@@ -58,12 +72,11 @@ defmodule Tachyon.TachyonSocket do
     :ok
   end
 
-  @spec new_state() :: map()
-  defp new_state() do
+  @spec new_state(Central.Account.User.t()) :: map()
+  defp new_state(user) do
     %{
       # Client state
-      userid: nil,
-      username: nil,
+      userid: user.id,
       lobby_host: false,
       queues: [],
       lobby_id: nil,

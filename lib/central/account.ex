@@ -896,16 +896,30 @@ defmodule Central.Account do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user_token(value, args \\ []) do
-    user_token_query(value, args)
+  def get_user_token(id, args \\ []) do
+    user_token_query(id, args)
     |> QueryHelpers.limit_query(args[:limit] || 1)
     |> Repo.one()
   end
 
-  def get_user_token!(value, args \\ []) do
-    user_token_query(value, args)
+  def get_user_token!(id, args \\ []) do
+    user_token_query(id, args)
     |> QueryHelpers.limit_query(args[:limit] || 1)
     |> Repo.one!()
+  end
+
+  @spec get_user_token_by_value(String.t()) :: UserToken.t() | nil
+  def get_user_token_by_value(value) do
+    user_token_query(nil,
+      search: [
+        value: value
+      ],
+      preload: [
+        :user
+      ]
+    )
+    |> QueryHelpers.limit_query(1)
+    |> Repo.one()
   end
 
   # Uncomment this if needed, default files do not need this function

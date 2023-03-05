@@ -19,7 +19,7 @@ defmodule TeiserverWeb.API.BeansController do
 
   @spec create_user(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create_user(conn, params) do
-    email = (params["email"] || params["name"]) <> "@hailstorm"
+    email = (params["email"] || params["name"])
     name = params["name"] <> "_hailstorm"
 
     result = case Account.get_user_by_email(email) do
