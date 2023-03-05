@@ -69,65 +69,37 @@ defmodule Tachyon.ClientMessage do
           __unknown_fields__: []
         },
         %Google.Protobuf.FieldDescriptorProto{
-          name: "token_request",
+          name: "empty",
           extendee: nil,
-          number: 100,
+          number: 80,
           label: :LABEL_OPTIONAL,
           type: :TYPE_MESSAGE,
-          type_name: ".tachyon.TokenRequest",
+          type_name: ".tachyon.Empty",
           default_value: nil,
           options: nil,
           oneof_index: 0,
-          json_name: "tokenRequest",
+          json_name: "empty",
           proto3_optional: nil,
           __unknown_fields__: []
         },
         %Google.Protobuf.FieldDescriptorProto{
-          name: "login_request",
+          name: "failure",
           extendee: nil,
-          number: 101,
+          number: 81,
           label: :LABEL_OPTIONAL,
           type: :TYPE_MESSAGE,
-          type_name: ".tachyon.LoginRequest",
+          type_name: ".tachyon.Failure",
           default_value: nil,
           options: nil,
           oneof_index: 0,
-          json_name: "loginRequest",
-          proto3_optional: nil,
-          __unknown_fields__: []
-        },
-        %Google.Protobuf.FieldDescriptorProto{
-          name: "verify_request",
-          extendee: nil,
-          number: 102,
-          label: :LABEL_OPTIONAL,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.VerifyRequest",
-          default_value: nil,
-          options: nil,
-          oneof_index: 0,
-          json_name: "verifyRequest",
-          proto3_optional: nil,
-          __unknown_fields__: []
-        },
-        %Google.Protobuf.FieldDescriptorProto{
-          name: "registration_request",
-          extendee: nil,
-          number: 103,
-          label: :LABEL_OPTIONAL,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.RegistrationResponse",
-          default_value: nil,
-          options: nil,
-          oneof_index: 0,
-          json_name: "registrationRequest",
+          json_name: "failure",
           proto3_optional: nil,
           __unknown_fields__: []
         },
         %Google.Protobuf.FieldDescriptorProto{
           name: "account_migration_request",
           extendee: nil,
-          number: 104,
+          number: 100,
           label: :LABEL_OPTIONAL,
           type: :TYPE_MESSAGE,
           type_name: ".tachyon.AccountMigrationRequest",
@@ -139,16 +111,44 @@ defmodule Tachyon.ClientMessage do
           __unknown_fields__: []
         },
         %Google.Protobuf.FieldDescriptorProto{
-          name: "disconnect_request",
+          name: "myself_request",
+          extendee: nil,
+          number: 101,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.MyselfRequest",
+          default_value: nil,
+          options: nil,
+          oneof_index: 0,
+          json_name: "myselfRequest",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "user_list_request",
+          extendee: nil,
+          number: 102,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.UserListRequest",
+          default_value: nil,
+          options: nil,
+          oneof_index: 0,
+          json_name: "userListRequest",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "lobby_list_request",
           extendee: nil,
           number: 120,
           label: :LABEL_OPTIONAL,
           type: :TYPE_MESSAGE,
-          type_name: ".tachyon.DisconnectRequest",
+          type_name: ".tachyon.LobbyListRequest",
           default_value: nil,
           options: nil,
           oneof_index: 0,
-          json_name: "disconnectRequest",
+          json_name: "lobbyListRequest",
           proto3_optional: nil,
           __unknown_fields__: []
         }
@@ -174,23 +174,24 @@ defmodule Tachyon.ClientMessage do
   oneof :object, 0
 
   field :id, 1, type: :int64
-  field :token_request, 100, type: Tachyon.TokenRequest, json_name: "tokenRequest", oneof: 0
-  field :login_request, 101, type: Tachyon.LoginRequest, json_name: "loginRequest", oneof: 0
-  field :verify_request, 102, type: Tachyon.VerifyRequest, json_name: "verifyRequest", oneof: 0
+  field :empty, 80, type: Tachyon.Empty, oneof: 0
+  field :failure, 81, type: Tachyon.Failure, oneof: 0
 
-  field :registration_request, 103,
-    type: Tachyon.RegistrationResponse,
-    json_name: "registrationRequest",
-    oneof: 0
-
-  field :account_migration_request, 104,
+  field :account_migration_request, 100,
     type: Tachyon.AccountMigrationRequest,
     json_name: "accountMigrationRequest",
     oneof: 0
 
-  field :disconnect_request, 120,
-    type: Tachyon.DisconnectRequest,
-    json_name: "disconnectRequest",
+  field :myself_request, 101, type: Tachyon.MyselfRequest, json_name: "myselfRequest", oneof: 0
+
+  field :user_list_request, 102,
+    type: Tachyon.UserListRequest,
+    json_name: "userListRequest",
+    oneof: 0
+
+  field :lobby_list_request, 120,
+    type: Tachyon.LobbyListRequest,
+    json_name: "lobbyListRequest",
     oneof: 0
 end
 
@@ -246,65 +247,9 @@ defmodule Tachyon.ServerMessage do
           __unknown_fields__: []
         },
         %Google.Protobuf.FieldDescriptorProto{
-          name: "token_response",
-          extendee: nil,
-          number: 100,
-          label: :LABEL_OPTIONAL,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.TokenResponse",
-          default_value: nil,
-          options: nil,
-          oneof_index: 0,
-          json_name: "tokenResponse",
-          proto3_optional: nil,
-          __unknown_fields__: []
-        },
-        %Google.Protobuf.FieldDescriptorProto{
-          name: "login_response",
-          extendee: nil,
-          number: 101,
-          label: :LABEL_OPTIONAL,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.LoginResponse",
-          default_value: nil,
-          options: nil,
-          oneof_index: 0,
-          json_name: "loginResponse",
-          proto3_optional: nil,
-          __unknown_fields__: []
-        },
-        %Google.Protobuf.FieldDescriptorProto{
-          name: "verify_response",
-          extendee: nil,
-          number: 102,
-          label: :LABEL_OPTIONAL,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.VerifyResponse",
-          default_value: nil,
-          options: nil,
-          oneof_index: 0,
-          json_name: "verifyResponse",
-          proto3_optional: nil,
-          __unknown_fields__: []
-        },
-        %Google.Protobuf.FieldDescriptorProto{
-          name: "registration_response",
-          extendee: nil,
-          number: 103,
-          label: :LABEL_OPTIONAL,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.RegistrationResponse",
-          default_value: nil,
-          options: nil,
-          oneof_index: 0,
-          json_name: "registrationResponse",
-          proto3_optional: nil,
-          __unknown_fields__: []
-        },
-        %Google.Protobuf.FieldDescriptorProto{
           name: "account_migration_response",
           extendee: nil,
-          number: 104,
+          number: 100,
           label: :LABEL_OPTIONAL,
           type: :TYPE_MESSAGE,
           type_name: ".tachyon.AccountMigrationResponse",
@@ -312,6 +257,48 @@ defmodule Tachyon.ServerMessage do
           options: nil,
           oneof_index: 0,
           json_name: "accountMigrationResponse",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "myself_response",
+          extendee: nil,
+          number: 101,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.MyselfResponse",
+          default_value: nil,
+          options: nil,
+          oneof_index: 0,
+          json_name: "myselfResponse",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "user_list_response",
+          extendee: nil,
+          number: 102,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.UserListResponse",
+          default_value: nil,
+          options: nil,
+          oneof_index: 0,
+          json_name: "userListResponse",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "lobby_list_response",
+          extendee: nil,
+          number: 120,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.LobbyListResponse",
+          default_value: nil,
+          options: nil,
+          oneof_index: 0,
+          json_name: "lobbyListResponse",
           proto3_optional: nil,
           __unknown_fields__: []
         }
@@ -339,18 +326,22 @@ defmodule Tachyon.ServerMessage do
   field :id, 1, type: :int64
   field :empty, 80, type: Tachyon.Empty, oneof: 0
   field :failure, 81, type: Tachyon.Failure, oneof: 0
-  field :token_response, 100, type: Tachyon.TokenResponse, json_name: "tokenResponse", oneof: 0
-  field :login_response, 101, type: Tachyon.LoginResponse, json_name: "loginResponse", oneof: 0
-  field :verify_response, 102, type: Tachyon.VerifyResponse, json_name: "verifyResponse", oneof: 0
 
-  field :registration_response, 103,
-    type: Tachyon.RegistrationResponse,
-    json_name: "registrationResponse",
-    oneof: 0
-
-  field :account_migration_response, 104,
+  field :account_migration_response, 100,
     type: Tachyon.AccountMigrationResponse,
     json_name: "accountMigrationResponse",
+    oneof: 0
+
+  field :myself_response, 101, type: Tachyon.MyselfResponse, json_name: "myselfResponse", oneof: 0
+
+  field :user_list_response, 102,
+    type: Tachyon.UserListResponse,
+    json_name: "userListResponse",
+    oneof: 0
+
+  field :lobby_list_response, 120,
+    type: Tachyon.LobbyListResponse,
+    json_name: "lobbyListResponse",
     oneof: 0
 end
 

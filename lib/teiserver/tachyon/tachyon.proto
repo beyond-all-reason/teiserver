@@ -30,14 +30,16 @@ service LobbyService {
 message ClientMessage {
   int64 id = 1;
   oneof object {
-    // Auth
-    TokenRequest token_request = 100;
-    LoginRequest login_request = 101;
-    VerifyRequest verify_request = 102;
-    RegistrationResponse registration_request = 103;
-    AccountMigrationRequest account_migration_request = 104;
+    // Generics
+    Empty empty = 80;
+    Failure failure = 81;
     
-    DisconnectRequest disconnect_request = 120;
+    // Auth
+    AccountMigrationRequest account_migration_request = 100;
+    MyselfRequest myself_request = 101;
+    UserListRequest user_list_request = 102;
+    
+    LobbyListRequest lobby_list_request = 120;
   }
 }
 
@@ -49,11 +51,11 @@ message ServerMessage {
     Failure failure = 81;
     
     // Auth
-    TokenResponse token_response = 100;
-    LoginResponse login_response = 101;
-    VerifyResponse verify_response = 102;
-    RegistrationResponse registration_response = 103;
-    AccountMigrationResponse account_migration_response = 104;
+    AccountMigrationResponse account_migration_response = 100;
+    MyselfResponse myself_response = 101;
+    UserListResponse user_list_response = 102;
+    
+    LobbyListResponse lobby_list_response = 120;
   }
 }
 

@@ -7,86 +7,96 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonProtobuf do
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
 
-  @spec protocol_in :: Teiserver.Protocols.Tachyon.V1.TachyonProtobufIn
-  def protocol_in(), do: Teiserver.Protocols.Tachyon.V1.TachyonProtobufIn
+  def make_private_user(user) do
+    Tachyon.PrivateUser.new(
+      id: user.id,
+      name: user.name,
+      bot: user.bot,
+      clan_id: user.clan_id,
+      icons: Teiserver.Account.UserLib.generate_user_icons(user),
 
-  @spec protocol_out :: Teiserver.Protocols.Tachyon.V1.TachyonProtobufOut
-  def protocol_out(), do: Teiserver.Protocols.Tachyon.V1.TachyonProtobufOut
-
-  @doc """
-  Used to convert objects into something that will be sent back over the wire. We use this
-  as there might be internal fields we don't want sent out (e.g. email).
-  """
-  @spec convert_object(Map.t() | nil, :user | :user_extended | :user_extended_icons | :client | :battle | :queue | :blog_post) :: Map.t() | nil
-  def convert_object(nil, _), do: nil
-  def convert_object(objects, type) when is_list(objects) do
-    objects
-      |> Enum.map(fn object -> convert_object(object, type) end)
-  end
-
-  def convert_object(user, :user) do
-    Map.merge(
-      Map.take(user, ~w(id name bot clan_id country)a),
-      %{"icons" => Teiserver.Account.UserLib.generate_user_icons(user)}
-    )
-  end
-  def convert_object(user, :user_extended), do: Map.take(user, ~w(id name bot clan_id permissions
-                    friends friend_requests ignores country)a)
-  def convert_object(user, :user_extended_icons) do
-    Map.merge(
-      convert_object(user, :user_extended),
-      %{"icons" => Teiserver.Account.UserLib.generate_user_icons(user)}
+      permissions: user.permissions,
+      friends: user.friends,
+      friend_requests: user.friend_requests,
+      ignores: user.ignored
     )
   end
 
-  def convert_object(client, :client) do
-    sync_list = case client.sync do
-      true -> ["game", "map"]
-      1 -> ["game", "map"]
-      false -> []
-      0 -> []
-      s -> s
-    end
 
-    Map.take(client, ~w(userid in_game away ready player_number
-        team_number team_colour player bonus muted clan_tag
-        faction lobby_id)a
-    )
-      |> Map.put(:sync, sync_list)
-      |> Map.put(:party_id, nil)
-  end
-  def convert_object(client, :client_friend) do
-    sync_list = case client.sync do
-      true -> ["game", "map"]
-      1 -> ["game", "map"]
-      false -> []
-      0 -> []
-      s -> s
-    end
+  # @doc """
+  # Used to convert objects into something that will be sent back over the wire. We use this
+  # as there might be internal fields we don't want sent out (e.g. email).
+  # """
+  # @spec convert_object(Map.t() | nil, :user | :user_extended | :user_extended_icons | :client | :battle | :queue | :blog_post) :: Map.t() | nil
+  # def convert_object(nil, _), do: nil
+  # def convert_object(objects, type) when is_list(objects) do
+  #   objects
+  #     |> Enum.map(fn object -> convert_object(object, type) end)
+  # end
 
-    Map.take(client, ~w(userid in_game away ready player_number
-        team_number team_colour player bonus muted party_id clan_tag
-        faction lobby_id)a
-    )
-      |> Map.put(:sync, sync_list)
-  end
-  def convert_object(queue, :queue), do: Map.take(queue, ~w(id name team_size conditions settings map_list)a)
-  def convert_object(party, :party_full), do: Map.take(party, ~w(id leader members pending_invites)a)
-  def convert_object(party, :party_public), do: Map.take(party, ~w(id leader members)a)
-  def convert_object(post, :blog_post), do: Map.take(post, ~w(id short_content content url tags live_from)a)
-  def convert_object(type, :user_config_type) do
-    opts = type[:opts] |> Map.new
-    Map.take(type, ~w(default description key section type value_label)a)
-      |> Map.put(:opts, opts)
-  end
+  # def convert_object(user, :user) do
+  #   Map.merge(
+  #     Map.take(user, ~w(id name bot clan_id country)a),
+  #     %{"icons" => Teiserver.Account.UserLib.generate_user_icons(user)}
+  #   )
+  # end
+  # def convert_object(user, :user_extended), do: Map.take(user, ~w(id name bot clan_id permissions
+  #                   friends friend_requests ignores country)a)
+  # def convert_object(user, :user_extended_icons) do
+  #   Map.merge(
+  #     convert_object(user, :user_extended),
+  #     %{"icons" => Teiserver.Account.UserLib.generate_user_icons(user)}
+  #   )
+  # end
 
-  # Slightly more complex conversions
-  def convert_object(lobby, :lobby) do
-    Map.take(lobby, ~w(id name founder_id type max_players game_name
-                   locked engine_name engine_version players spectators bots ip port
-                   settings map_name passworded public
-                   map_hash tags disabled_units in_progress started_at start_areas)a)
-  end
+  # def convert_object(client, :client) do
+  #   sync_list = case client.sync do
+  #     true -> ["game", "map"]
+  #     1 -> ["game", "map"]
+  #     false -> []
+  #     0 -> []
+  #     s -> s
+  #   end
+
+  #   Map.take(client, ~w(userid in_game away ready player_number
+  #       team_number team_colour player bonus muted clan_tag
+  #       faction lobby_id)a
+  #   )
+  #     |> Map.put(:sync, sync_list)
+  #     |> Map.put(:party_id, nil)
+  # end
+  # def convert_object(client, :client_friend) do
+  #   sync_list = case client.sync do
+  #     true -> ["game", "map"]
+  #     1 -> ["game", "map"]
+  #     false -> []
+  #     0 -> []
+  #     s -> s
+  #   end
+
+  #   Map.take(client, ~w(userid in_game away ready player_number
+  #       team_number team_colour player bonus muted party_id clan_tag
+  #       faction lobby_id)a
+  #   )
+  #     |> Map.put(:sync, sync_list)
+  # end
+  # def convert_object(queue, :queue), do: Map.take(queue, ~w(id name team_size conditions settings map_list)a)
+  # def convert_object(party, :party_full), do: Map.take(party, ~w(id leader members pending_invites)a)
+  # def convert_object(party, :party_public), do: Map.take(party, ~w(id leader members)a)
+  # def convert_object(post, :blog_post), do: Map.take(post, ~w(id short_content content url tags live_from)a)
+  # def convert_object(type, :user_config_type) do
+  #   opts = type[:opts] |> Map.new
+  #   Map.take(type, ~w(default description key section type value_label)a)
+  #     |> Map.put(:opts, opts)
+  # end
+
+  # # Slightly more complex conversions
+  # def convert_object(lobby, :lobby) do
+  #   Map.take(lobby, ~w(id name founder_id type max_players game_name
+  #                  locked engine_name engine_version players spectators bots ip port
+  #                  settings map_name passworded public
+  #                  map_hash tags disabled_units in_progress started_at start_areas)a)
+  # end
 
   @spec do_action(atom, any(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
   def do_action(:login_accepted, user, state) do

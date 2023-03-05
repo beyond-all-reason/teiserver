@@ -1,7 +1,7 @@
 defmodule Teiserver.Protocols.Tachyon.TachyonProtobufIn do
   require Logger
   alias Teiserver.Tachyon.TachyonPbLib
-  alias Teiserver.Tachyon.ClientAuthHandler
+  alias Teiserver.Tachyon.{ClientAuthHandler, AccountHandler}
 
   @spec handle(binary(), map) :: map
   def handle(raw_data, conn) do
@@ -26,7 +26,9 @@ defmodule Teiserver.Protocols.Tachyon.TachyonProtobufIn do
   end
 
   @spec get_handler(atom) :: function
-  defp get_handler(:token_request), do: &ClientAuthHandler.handle_token_request/2
+  defp get_handler(:myself_request), do: &AccountHandler.handle_myself_request/2
+
+  defp get_handler(type), do: raise "No TachyonIn handler for type '#{type}'"
 
   # @spec dispatch(String.t(), map(), map()) :: map()
   # defp dispatch(nil, data, state) do

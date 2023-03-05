@@ -4,12 +4,23 @@ defmodule Teiserver.Tachyon.TachyonPbLib do
   """
 
   @module_from_atom %{
+    # General
     empty: Tachyon.Empty,
     failure: Tachyon.Failure,
 
-    token_response: Tachyon.TokenResponse,
+    # Account Service
+    account_migration_request: Tachyon.AccountMigrationRequest,
+    account_migration_response: Tachyon.AccountMigrationResponse,
 
-    token_request: Tachyon.TokenRequest,
+    myself_request: Tachyon.MyselfRequest,
+    myself_response: Tachyon.MyselfResponse,
+
+    user_list_request: UserListRequest,
+    user_list_response: UserListResponse,
+
+    # Lobby Service
+    lobby_list_request: LobbyListRequest,
+    lobby_list_response: LobbyListResponse
   }
 
   @atom_from_module @module_from_atom
