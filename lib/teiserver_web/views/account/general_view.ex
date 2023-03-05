@@ -14,4 +14,7 @@ defmodule TeiserverWeb.Account.GeneralView do
   def view_colour("preferences"), do: Central.Config.UserConfigLib.colours()
   def view_colour("clans"), do: Teiserver.Clans.ClanLib.colours()
   def view_colour("achievements"), do: Teiserver.Game.AchievementTypeLib.colour()
+
+  def view_colour("details"), do: :primary
+  def view_colour("password"), do: :primary
 end

@@ -6,7 +6,7 @@
     text: "My profile",
     link: Routes.ts_account_profile_path(@conn, :show, @conn.current_user.id)
   %>
-  
+
   <%= central_component "menu_card",
     icon_class: "fa-duotone",
     name: "",
@@ -14,7 +14,7 @@
     text: "Friends/Mutes/Invites",
     link: Routes.ts_account_relationships_path(@conn, :index)
   %>
-  
+
   <%= central_component "menu_card",
     icon_class: "fa-duotone",
     name: "appearance",
@@ -22,7 +22,7 @@
     text: "Appearance",
     link: Routes.ts_account_general_path(@conn, :customisation_form)
   %>
-  
+
   <%= central_component "menu_card",
     icon_class: "fa-duotone",
     name: "clans",
@@ -30,13 +30,29 @@
     text: "Clans",
     link: Routes.ts_clans_clan_path(@conn, :index)
   %>
-  
+
   <%= central_component "menu_card",
     icon_class: "fa-duotone",
     name: "",
     icon: Central.Config.UserConfigLib.icon(),
     text: "Preferences",
     link: Routes.ts_account_preferences_path(@conn, :index)
+  %>
+
+  <%=
+    central_component "menu_card",
+    icon: Central.Account.icon(),
+    text: "Account details",
+    icon_class: "fa-duotone",
+    link: Routes.ts_account_general_path(@conn, :edit_details)
+  %>
+
+  <%=
+    central_component "menu_card",
+    icon: "fa-duotone fa-lock",
+    text: "Password",
+    icon_class: "fa-duotone",
+    link: Routes.ts_account_general_path(@conn, :edit_password)
   %>
 </div>
 

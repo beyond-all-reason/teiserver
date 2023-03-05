@@ -1274,7 +1274,7 @@ defmodule Teiserver.Account do
   @spec list_users_from_cache(list) :: list
   def list_users_from_cache(id_list), do: UserCache.list_users(id_list)
 
-  @spec recache_user(Integer.t()) :: :ok
+  @spec recache_user(T.userid() | User.t()) :: :ok
   defdelegate recache_user(id), to: UserCache
 
   @spec convert_user(T.user()) :: T.user()

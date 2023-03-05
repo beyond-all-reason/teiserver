@@ -68,4 +68,71 @@ defmodule TeiserverWeb.Account.GeneralController do
     |> put_flash(:success, "Icon and colour updated")
     |> render("customisation_form.html")
   end
+
+  @spec edit_details(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def edit_details(conn, _params) do
+    user = Account.get_user!(conn.user_id)
+    changeset = Account.change_user(user)
+
+    conn
+    |> add_breadcrumb(name: "Details", url: conn.request_path)
+    |> assign(:changeset, changeset)
+    |> assign(:user, user)
+    |> render("edit_details.html")
+  end
+
+  @spec update_details(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def update_details(conn, %{"user" => user_params}) do
+    user = Account.get_user!(conn.user_id)
+
+    Account.decache_user(user.id)
+
+    user_params = Map.put(user_params, "password", user_params["password_confirmation"])
+
+    user_params = if Central.Config.get_site_config_cache("user.Enable renames") do
+      user_params
+    else
+      Map.drop(user_params, ["name"])
+    end
+
+    case Central.Account.update_user(user, user_params, :user_form) do
+      {:ok, _user} ->
+        conn
+        |> put_flash(:info, "Account details updated successfully.")
+        |> redirect(to: Routes.ts_account_general_path(conn, :index))
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        render(conn, "edit_details.html", user: user, changeset: changeset)
+    end
+  end
+
+  @spec edit_password(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def edit_password(conn, _params) do
+    user = Account.get_user!(conn.user_id)
+    changeset = Account.change_user(user)
+
+    conn
+    |> add_breadcrumb(name: "Password", url: conn.request_path)
+    |> assign(:changeset, changeset)
+    |> assign(:user, user)
+    |> render("edit_password.html")
+  end
+
+  @spec update_password(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def update_password(conn, %{"user" => user_params}) do
+    user = Account.get_user!(conn.user_id)
+
+    case Central.Account.update_user(user, user_params, :password) do
+      {:ok, _user} ->
+        # User password updated
+        Teiserver.User.set_new_spring_password(user.id, user_params["password"])
+
+        conn
+        |> put_flash(:info, "Account password updated successfully.")
+        |> redirect(to: Routes.ts_account_general_path(conn, :index))
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        render(conn, "edit_password.html", user: user, changeset: changeset)
+    end
+  end
 end
