@@ -16,5 +16,5 @@ defmodule TeiserverWeb.Account.GeneralView do
   def view_colour("achievements"), do: Teiserver.Game.AchievementTypeLib.colour()
 
   def view_colour("details"), do: :primary
-  def view_colour("password"), do: :primary
+  def view_colour("security"), do: :danger
 end

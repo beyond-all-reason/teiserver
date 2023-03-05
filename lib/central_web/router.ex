@@ -332,6 +332,14 @@ defmodule CentralWeb.Router do
     get("/", GeneralController, :index)
     get("/customisation_form", GeneralController, :customisation_form)
     get("/customisation_select/:role", GeneralController, :customisation_select)
+
+    get("/details", GeneralController, :edit_details)
+    put("/update_details", GeneralController, :update_details)
+
+    get("/security", SecurityController, :index)
+    get("/security/edit_password", SecurityController, :edit_password)
+    put("/security/update_password", SecurityController, :update_password)
+    delete("/security/delete_token/:id", SecurityController, :delete_token)
   end
 
   scope "/teiserver", TeiserverWeb.Account, as: :ts_account do
