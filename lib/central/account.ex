@@ -993,6 +993,12 @@ defmodule Central.Account do
     UserToken.changeset(user_token, %{})
   end
 
+  def create_token_value(length \\ 128) do
+    :crypto.strong_rand_bytes(length)
+      |> Base.encode64(padding: false)
+      |> binary_part(0, length)
+  end
+
   @doc """
   Uses :application_metadata_cache store to generate a random username
   based on the keys random_names_1, random_names_2 and random_names_3

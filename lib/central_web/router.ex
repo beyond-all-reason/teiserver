@@ -486,6 +486,7 @@ defmodule CentralWeb.Router do
   scope "/teiserver/api", TeiserverWeb.API do
     pipe_through :api
     post "/login", SessionController, :login
+    post "/request_token", SessionController, :request_token
   end
 
   scope "/teiserver/api/hailstorm", TeiserverWeb.API, as: :ts do
