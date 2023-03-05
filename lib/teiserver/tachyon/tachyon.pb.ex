@@ -1,3 +1,50 @@
+defmodule Tachyon.LobbyStatus do
+  @moduledoc false
+  use Protobuf, enum: true, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.EnumDescriptorProto{
+      name: "LobbyStatus",
+      value: [
+        %Google.Protobuf.EnumValueDescriptorProto{
+          name: "LOBBY_UNLOCKED",
+          number: 0,
+          options: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.EnumValueDescriptorProto{
+          name: "LOBBY_FRIENDS",
+          number: 1,
+          options: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.EnumValueDescriptorProto{
+          name: "LOBBY_WHITELIST",
+          number: 2,
+          options: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.EnumValueDescriptorProto{
+          name: "LOBBY_LOCKED",
+          number: 3,
+          options: nil,
+          __unknown_fields__: []
+        }
+      ],
+      options: nil,
+      reserved_range: [],
+      reserved_name: [],
+      __unknown_fields__: []
+    }
+  end
+
+  field :LOBBY_UNLOCKED, 0
+  field :LOBBY_FRIENDS, 1
+  field :LOBBY_WHITELIST, 2
+  field :LOBBY_LOCKED, 3
+end
+
 defmodule Tachyon.ClientMessage do
   @moduledoc false
   use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
@@ -1157,4 +1204,1170 @@ defmodule Tachyon.User do
   field :bot, 3, type: :bool
   field :clan_id, 4, type: :int32, json_name: "clanId"
   field :icons, 5, repeated: true, type: Tachyon.User.IconsEntry, map: true
+end
+
+defmodule Tachyon.PrivateUser.IconsEntry do
+  @moduledoc false
+  use Protobuf, map: true, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      name: "IconsEntry",
+      field: [
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "key",
+          extendee: nil,
+          number: 1,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_STRING,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "key",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "value",
+          extendee: nil,
+          number: 2,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_STRING,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "value",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        }
+      ],
+      nested_type: [],
+      enum_type: [],
+      extension_range: [],
+      extension: [],
+      options: %Google.Protobuf.MessageOptions{
+        message_set_wire_format: false,
+        no_standard_descriptor_accessor: false,
+        deprecated: false,
+        map_entry: true,
+        uninterpreted_option: [],
+        __pb_extensions__: %{},
+        __unknown_fields__: []
+      },
+      oneof_decl: [],
+      reserved_range: [],
+      reserved_name: [],
+      __unknown_fields__: []
+    }
+  end
+
+  field :key, 1, type: :string
+  field :value, 2, type: :string
+end
+
+defmodule Tachyon.PrivateUser do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      name: "PrivateUser",
+      field: [
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "id",
+          extendee: nil,
+          number: 1,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_INT32,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "id",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "name",
+          extendee: nil,
+          number: 2,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_STRING,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "name",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "bot",
+          extendee: nil,
+          number: 3,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_BOOL,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "bot",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "clan_id",
+          extendee: nil,
+          number: 4,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_INT32,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "clanId",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "icons",
+          extendee: nil,
+          number: 5,
+          label: :LABEL_REPEATED,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.PrivateUser.IconsEntry",
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "icons",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "permissions",
+          extendee: nil,
+          number: 9,
+          label: :LABEL_REPEATED,
+          type: :TYPE_STRING,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "permissions",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "friends",
+          extendee: nil,
+          number: 10,
+          label: :LABEL_REPEATED,
+          type: :TYPE_INT32,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "friends",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "friend_requests",
+          extendee: nil,
+          number: 11,
+          label: :LABEL_REPEATED,
+          type: :TYPE_INT32,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "friendRequests",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "ignores",
+          extendee: nil,
+          number: 12,
+          label: :LABEL_REPEATED,
+          type: :TYPE_INT32,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "ignores",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        }
+      ],
+      nested_type: [
+        %Google.Protobuf.DescriptorProto{
+          name: "IconsEntry",
+          field: [
+            %Google.Protobuf.FieldDescriptorProto{
+              name: "key",
+              extendee: nil,
+              number: 1,
+              label: :LABEL_OPTIONAL,
+              type: :TYPE_STRING,
+              type_name: nil,
+              default_value: nil,
+              options: nil,
+              oneof_index: nil,
+              json_name: "key",
+              proto3_optional: nil,
+              __unknown_fields__: []
+            },
+            %Google.Protobuf.FieldDescriptorProto{
+              name: "value",
+              extendee: nil,
+              number: 2,
+              label: :LABEL_OPTIONAL,
+              type: :TYPE_STRING,
+              type_name: nil,
+              default_value: nil,
+              options: nil,
+              oneof_index: nil,
+              json_name: "value",
+              proto3_optional: nil,
+              __unknown_fields__: []
+            }
+          ],
+          nested_type: [],
+          enum_type: [],
+          extension_range: [],
+          extension: [],
+          options: %Google.Protobuf.MessageOptions{
+            message_set_wire_format: false,
+            no_standard_descriptor_accessor: false,
+            deprecated: false,
+            map_entry: true,
+            uninterpreted_option: [],
+            __pb_extensions__: %{},
+            __unknown_fields__: []
+          },
+          oneof_decl: [],
+          reserved_range: [],
+          reserved_name: [],
+          __unknown_fields__: []
+        }
+      ],
+      enum_type: [],
+      extension_range: [],
+      extension: [],
+      options: nil,
+      oneof_decl: [],
+      reserved_range: [],
+      reserved_name: [],
+      __unknown_fields__: []
+    }
+  end
+
+  field :id, 1, type: :int32
+  field :name, 2, type: :string
+  field :bot, 3, type: :bool
+  field :clan_id, 4, type: :int32, json_name: "clanId"
+  field :icons, 5, repeated: true, type: Tachyon.PrivateUser.IconsEntry, map: true
+  field :permissions, 9, repeated: true, type: :string
+  field :friends, 10, repeated: true, type: :int32
+  field :friend_requests, 11, repeated: true, type: :int32, json_name: "friendRequests"
+  field :ignores, 12, repeated: true, type: :int32
+end
+
+defmodule Tachyon.MyselfRequest do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      name: "MyselfRequest",
+      field: [],
+      nested_type: [],
+      enum_type: [],
+      extension_range: [],
+      extension: [],
+      options: nil,
+      oneof_decl: [],
+      reserved_range: [],
+      reserved_name: [],
+      __unknown_fields__: []
+    }
+  end
+end
+
+defmodule Tachyon.MyselfResponse do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      name: "MyselfResponse",
+      field: [
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "user",
+          extendee: nil,
+          number: 2,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.PrivateUser",
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "user",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        }
+      ],
+      nested_type: [],
+      enum_type: [],
+      extension_range: [],
+      extension: [],
+      options: nil,
+      oneof_decl: [],
+      reserved_range: [],
+      reserved_name: [],
+      __unknown_fields__: []
+    }
+  end
+
+  field :user, 2, type: Tachyon.PrivateUser
+end
+
+defmodule Tachyon.UserListRequest do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      name: "UserListRequest",
+      field: [
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "id_list",
+          extendee: nil,
+          number: 1,
+          label: :LABEL_REPEATED,
+          type: :TYPE_INT32,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "idList",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        }
+      ],
+      nested_type: [],
+      enum_type: [],
+      extension_range: [],
+      extension: [],
+      options: nil,
+      oneof_decl: [],
+      reserved_range: [],
+      reserved_name: [],
+      __unknown_fields__: []
+    }
+  end
+
+  field :id_list, 1, repeated: true, type: :int32, json_name: "idList"
+end
+
+defmodule Tachyon.UserListResponse do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      name: "UserListResponse",
+      field: [
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "user_list",
+          extendee: nil,
+          number: 1,
+          label: :LABEL_REPEATED,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.User",
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "userList",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        }
+      ],
+      nested_type: [],
+      enum_type: [],
+      extension_range: [],
+      extension: [],
+      options: nil,
+      oneof_decl: [],
+      reserved_range: [],
+      reserved_name: [],
+      __unknown_fields__: []
+    }
+  end
+
+  field :user_list, 1, repeated: true, type: Tachyon.User, json_name: "userList"
+end
+
+defmodule Tachyon.LobbyListRequest do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      name: "LobbyListRequest",
+      field: [
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "id_list",
+          extendee: nil,
+          number: 1,
+          label: :LABEL_REPEATED,
+          type: :TYPE_INT32,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "idList",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "locked",
+          extendee: nil,
+          number: 2,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_ENUM,
+          type_name: ".tachyon.LobbyStatus",
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "locked",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "passworded",
+          extendee: nil,
+          number: 3,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_BOOL,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "passworded",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        }
+      ],
+      nested_type: [],
+      enum_type: [],
+      extension_range: [],
+      extension: [],
+      options: nil,
+      oneof_decl: [],
+      reserved_range: [],
+      reserved_name: [],
+      __unknown_fields__: []
+    }
+  end
+
+  field :id_list, 1, repeated: true, type: :int32, json_name: "idList"
+  field :locked, 2, type: Tachyon.LobbyStatus, enum: true
+  field :passworded, 3, type: :bool
+end
+
+defmodule Tachyon.LobbyListResponse do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      name: "LobbyListResponse",
+      field: [
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "lobby_list",
+          extendee: nil,
+          number: 1,
+          label: :LABEL_REPEATED,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.Lobby",
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "lobbyList",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        }
+      ],
+      nested_type: [],
+      enum_type: [],
+      extension_range: [],
+      extension: [],
+      options: nil,
+      oneof_decl: [],
+      reserved_range: [],
+      reserved_name: [],
+      __unknown_fields__: []
+    }
+  end
+
+  field :lobby_list, 1, repeated: true, type: Tachyon.Lobby, json_name: "lobbyList"
+end
+
+defmodule Tachyon.StartArea.ValuesEntry do
+  @moduledoc false
+  use Protobuf, map: true, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      name: "ValuesEntry",
+      field: [
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "key",
+          extendee: nil,
+          number: 1,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_STRING,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "key",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "value",
+          extendee: nil,
+          number: 2,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_SINT32,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "value",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        }
+      ],
+      nested_type: [],
+      enum_type: [],
+      extension_range: [],
+      extension: [],
+      options: %Google.Protobuf.MessageOptions{
+        message_set_wire_format: false,
+        no_standard_descriptor_accessor: false,
+        deprecated: false,
+        map_entry: true,
+        uninterpreted_option: [],
+        __pb_extensions__: %{},
+        __unknown_fields__: []
+      },
+      oneof_decl: [],
+      reserved_range: [],
+      reserved_name: [],
+      __unknown_fields__: []
+    }
+  end
+
+  field :key, 1, type: :string
+  field :value, 2, type: :sint32
+end
+
+defmodule Tachyon.StartArea do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      name: "StartArea",
+      field: [
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "type",
+          extendee: nil,
+          number: 1,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_STRING,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "type",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "values",
+          extendee: nil,
+          number: 2,
+          label: :LABEL_REPEATED,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.StartArea.ValuesEntry",
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "values",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        }
+      ],
+      nested_type: [
+        %Google.Protobuf.DescriptorProto{
+          name: "ValuesEntry",
+          field: [
+            %Google.Protobuf.FieldDescriptorProto{
+              name: "key",
+              extendee: nil,
+              number: 1,
+              label: :LABEL_OPTIONAL,
+              type: :TYPE_STRING,
+              type_name: nil,
+              default_value: nil,
+              options: nil,
+              oneof_index: nil,
+              json_name: "key",
+              proto3_optional: nil,
+              __unknown_fields__: []
+            },
+            %Google.Protobuf.FieldDescriptorProto{
+              name: "value",
+              extendee: nil,
+              number: 2,
+              label: :LABEL_OPTIONAL,
+              type: :TYPE_SINT32,
+              type_name: nil,
+              default_value: nil,
+              options: nil,
+              oneof_index: nil,
+              json_name: "value",
+              proto3_optional: nil,
+              __unknown_fields__: []
+            }
+          ],
+          nested_type: [],
+          enum_type: [],
+          extension_range: [],
+          extension: [],
+          options: %Google.Protobuf.MessageOptions{
+            message_set_wire_format: false,
+            no_standard_descriptor_accessor: false,
+            deprecated: false,
+            map_entry: true,
+            uninterpreted_option: [],
+            __pb_extensions__: %{},
+            __unknown_fields__: []
+          },
+          oneof_decl: [],
+          reserved_range: [],
+          reserved_name: [],
+          __unknown_fields__: []
+        }
+      ],
+      enum_type: [],
+      extension_range: [],
+      extension: [],
+      options: nil,
+      oneof_decl: [],
+      reserved_range: [],
+      reserved_name: [],
+      __unknown_fields__: []
+    }
+  end
+
+  field :type, 1, type: :string
+  field :values, 2, repeated: true, type: Tachyon.StartArea.ValuesEntry, map: true
+end
+
+defmodule Tachyon.Lobby.SettingsEntry do
+  @moduledoc false
+  use Protobuf, map: true, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      name: "SettingsEntry",
+      field: [
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "key",
+          extendee: nil,
+          number: 1,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_STRING,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "key",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "value",
+          extendee: nil,
+          number: 2,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_STRING,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "value",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        }
+      ],
+      nested_type: [],
+      enum_type: [],
+      extension_range: [],
+      extension: [],
+      options: %Google.Protobuf.MessageOptions{
+        message_set_wire_format: false,
+        no_standard_descriptor_accessor: false,
+        deprecated: false,
+        map_entry: true,
+        uninterpreted_option: [],
+        __pb_extensions__: %{},
+        __unknown_fields__: []
+      },
+      oneof_decl: [],
+      reserved_range: [],
+      reserved_name: [],
+      __unknown_fields__: []
+    }
+  end
+
+  field :key, 1, type: :string
+  field :value, 2, type: :string
+end
+
+defmodule Tachyon.Lobby.StartAreasEntry do
+  @moduledoc false
+  use Protobuf, map: true, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      name: "StartAreasEntry",
+      field: [
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "key",
+          extendee: nil,
+          number: 1,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_INT32,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "key",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "value",
+          extendee: nil,
+          number: 2,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.StartArea",
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "value",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        }
+      ],
+      nested_type: [],
+      enum_type: [],
+      extension_range: [],
+      extension: [],
+      options: %Google.Protobuf.MessageOptions{
+        message_set_wire_format: false,
+        no_standard_descriptor_accessor: false,
+        deprecated: false,
+        map_entry: true,
+        uninterpreted_option: [],
+        __pb_extensions__: %{},
+        __unknown_fields__: []
+      },
+      oneof_decl: [],
+      reserved_range: [],
+      reserved_name: [],
+      __unknown_fields__: []
+    }
+  end
+
+  field :key, 1, type: :int32
+  field :value, 2, type: Tachyon.StartArea
+end
+
+defmodule Tachyon.Lobby do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      name: "Lobby",
+      field: [
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "id",
+          extendee: nil,
+          number: 1,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_INT32,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "id",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "name",
+          extendee: nil,
+          number: 2,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_STRING,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "name",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "founder_id",
+          extendee: nil,
+          number: 3,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_INT32,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "founderId",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "passworded",
+          extendee: nil,
+          number: 4,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_BOOL,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "passworded",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "locked",
+          extendee: nil,
+          number: 5,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_ENUM,
+          type_name: ".tachyon.LobbyStatus",
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "locked",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "engine_name",
+          extendee: nil,
+          number: 6,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_STRING,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "engineName",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "engine_version",
+          extendee: nil,
+          number: 7,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_STRING,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "engineVersion",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "players",
+          extendee: nil,
+          number: 8,
+          label: :LABEL_REPEATED,
+          type: :TYPE_INT32,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "players",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "spectators",
+          extendee: nil,
+          number: 9,
+          label: :LABEL_REPEATED,
+          type: :TYPE_INT32,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "spectators",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "ip",
+          extendee: nil,
+          number: 11,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_STRING,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "ip",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "settings",
+          extendee: nil,
+          number: 12,
+          label: :LABEL_REPEATED,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.Lobby.SettingsEntry",
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "settings",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "start_areas",
+          extendee: nil,
+          number: 13,
+          label: :LABEL_REPEATED,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.Lobby.StartAreasEntry",
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "startAreas",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "map_name",
+          extendee: nil,
+          number: 14,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_STRING,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "mapName",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "map_hash",
+          extendee: nil,
+          number: 15,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_STRING,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "mapHash",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          name: "public",
+          extendee: nil,
+          number: 16,
+          label: :LABEL_OPTIONAL,
+          type: :TYPE_BOOL,
+          type_name: nil,
+          default_value: nil,
+          options: nil,
+          oneof_index: nil,
+          json_name: "public",
+          proto3_optional: nil,
+          __unknown_fields__: []
+        }
+      ],
+      nested_type: [
+        %Google.Protobuf.DescriptorProto{
+          name: "SettingsEntry",
+          field: [
+            %Google.Protobuf.FieldDescriptorProto{
+              name: "key",
+              extendee: nil,
+              number: 1,
+              label: :LABEL_OPTIONAL,
+              type: :TYPE_STRING,
+              type_name: nil,
+              default_value: nil,
+              options: nil,
+              oneof_index: nil,
+              json_name: "key",
+              proto3_optional: nil,
+              __unknown_fields__: []
+            },
+            %Google.Protobuf.FieldDescriptorProto{
+              name: "value",
+              extendee: nil,
+              number: 2,
+              label: :LABEL_OPTIONAL,
+              type: :TYPE_STRING,
+              type_name: nil,
+              default_value: nil,
+              options: nil,
+              oneof_index: nil,
+              json_name: "value",
+              proto3_optional: nil,
+              __unknown_fields__: []
+            }
+          ],
+          nested_type: [],
+          enum_type: [],
+          extension_range: [],
+          extension: [],
+          options: %Google.Protobuf.MessageOptions{
+            message_set_wire_format: false,
+            no_standard_descriptor_accessor: false,
+            deprecated: false,
+            map_entry: true,
+            uninterpreted_option: [],
+            __pb_extensions__: %{},
+            __unknown_fields__: []
+          },
+          oneof_decl: [],
+          reserved_range: [],
+          reserved_name: [],
+          __unknown_fields__: []
+        },
+        %Google.Protobuf.DescriptorProto{
+          name: "StartAreasEntry",
+          field: [
+            %Google.Protobuf.FieldDescriptorProto{
+              name: "key",
+              extendee: nil,
+              number: 1,
+              label: :LABEL_OPTIONAL,
+              type: :TYPE_INT32,
+              type_name: nil,
+              default_value: nil,
+              options: nil,
+              oneof_index: nil,
+              json_name: "key",
+              proto3_optional: nil,
+              __unknown_fields__: []
+            },
+            %Google.Protobuf.FieldDescriptorProto{
+              name: "value",
+              extendee: nil,
+              number: 2,
+              label: :LABEL_OPTIONAL,
+              type: :TYPE_MESSAGE,
+              type_name: ".tachyon.StartArea",
+              default_value: nil,
+              options: nil,
+              oneof_index: nil,
+              json_name: "value",
+              proto3_optional: nil,
+              __unknown_fields__: []
+            }
+          ],
+          nested_type: [],
+          enum_type: [],
+          extension_range: [],
+          extension: [],
+          options: %Google.Protobuf.MessageOptions{
+            message_set_wire_format: false,
+            no_standard_descriptor_accessor: false,
+            deprecated: false,
+            map_entry: true,
+            uninterpreted_option: [],
+            __pb_extensions__: %{},
+            __unknown_fields__: []
+          },
+          oneof_decl: [],
+          reserved_range: [],
+          reserved_name: [],
+          __unknown_fields__: []
+        }
+      ],
+      enum_type: [],
+      extension_range: [],
+      extension: [],
+      options: nil,
+      oneof_decl: [],
+      reserved_range: [],
+      reserved_name: [],
+      __unknown_fields__: []
+    }
+  end
+
+  field :id, 1, type: :int32
+  field :name, 2, type: :string
+  field :founder_id, 3, type: :int32, json_name: "founderId"
+  field :passworded, 4, type: :bool
+  field :locked, 5, type: Tachyon.LobbyStatus, enum: true
+  field :engine_name, 6, type: :string, json_name: "engineName"
+  field :engine_version, 7, type: :string, json_name: "engineVersion"
+  field :players, 8, repeated: true, type: :int32
+  field :spectators, 9, repeated: true, type: :int32
+  field :ip, 11, type: :string
+  field :settings, 12, repeated: true, type: Tachyon.Lobby.SettingsEntry, map: true
+
+  field :start_areas, 13,
+    repeated: true,
+    type: Tachyon.Lobby.StartAreasEntry,
+    json_name: "startAreas",
+    map: true
+
+  field :map_name, 14, type: :string, json_name: "mapName"
+  field :map_hash, 15, type: :string, json_name: "mapHash"
+  field :public, 16, type: :bool
 end

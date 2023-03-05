@@ -10,16 +10,20 @@ service WsMessaging {
   rpc Server (ServerMessage) returns (ClientMessage) {}
 }
 
-// These are not used directly but are wrapped in the websocket
-// Authentication
-service Authentication {
-  rpc GetToken (TokenRequest) returns (TokenResponse) {}
-  rpc Login (LoginRequest) returns (LoginResponse) {}
-  rpc Verify (VerifyRequest) returns (VerifyResponse) {}
-  rpc Registration (RegistrationResponse) returns (RegistrationResponse) {}
+
+service AccountService {
   rpc AccountMigration (AccountMigrationRequest) returns (AccountMigrationResponse) {}
-  rpc Disconnect (DisconnectRequest) returns (Empty) {}
+  rpc WhoisMyself (MyselfRequest) returns (MyselfResponse) {}
+  rpc ListUsers (UserListRequest) returns (UserListResponse) {}
 }
+
+service LobbyService {
+  rpc ListLobbies (LobbyListRequest) returns (LobbyListResponse) {}
+}
+
+// service LobbyHostService {
+  
+// }
 
 // WS encoding messages
 // Client requesting something from the server
@@ -127,19 +131,47 @@ message User {
   map<string, string> icons = 5;
 }
 
-// // Same as a user but contains privilaged information
-// message PrivateUser {
-//   int32 id = 1;
-//   string name = 2;
-//   bool bot = 3;
-//   int32 clan_id = 4;
-//   map<string, string> icons = 5;
+// Same as a user but contains privilaged information
+message PrivateUser {
+  int32 id = 1;
+  string name = 2;
+  bool bot = 3;
+  int32 clan_id = 4;
+  map<string, string> icons = 5;
   
-//   repeated string permissions = 9;
-//   repeated int32 friends = 10;
-//   repeated int32 friend_requests = 11;// Users requesting this user to be their friend
-//   repeated int32 ignores = 12;
-// }
+  repeated string permissions = 9;
+  repeated int32 friends = 10;
+  repeated int32 friend_requests = 11;// Users requesting this user to be their friend
+  repeated int32 ignores = 12;
+}
+
+message MyselfRequest {
+  
+}
+
+message MyselfResponse {
+  // Client client = 1;
+  PrivateUser user = 2;
+}
+
+message UserListRequest {
+  repeated int32 id_list = 1;
+}
+
+message UserListResponse {
+  repeated User user_list = 1;
+}
+
+
+message LobbyListRequest {
+  repeated int32 id_list = 1;
+  LobbyStatus locked = 2;
+  bool passworded = 3;
+}
+
+message LobbyListResponse {
+  repeated Lobby lobby_list = 1;
+}
 
 // // This represents a user who is logged in. A user who is logged out will not have a client object.
 // message Client {
@@ -164,39 +196,41 @@ message User {
 //   bool muted = 14;
 // }
 
-// enum LobbyStatus {
-//   LOBBY_UNLOCKED = 0;
-//   LOBBY_FRIENDS = 1;
-//   LOBBY_WHITELIST = 2;
-//   LOBBY_LOCKED = 3;
-// }
+enum LobbyStatus {
+  LOBBY_UNLOCKED = 0;
+  LOBBY_FRIENDS = 1;
+  LOBBY_WHITELIST = 2;
+  LOBBY_LOCKED = 3;
+}
 
-// message StartArea {
-//   string type = 1;
-//   map<string, sint32> values = 2;
-// }
+message StartArea {
+  string type = 1;
+  map<string, sint32> values = 2;
+}
 
-// message Lobby {
-//   int32 id = 1;
-//   string name = 2;
-//   int32 founder_id = 3;
-//   bool passworded = 4;
-//   LobbyStatus locked = 5;
+message Lobby {
+  int32 id = 1;
+  string name = 2;
+  int32 founder_id = 3;
+  bool passworded = 4;
+  LobbyStatus locked = 5;
   
-//   string engine_name = 6;
-//   string engine_version = 7;
+  string engine_name = 6;
+  string engine_version = 7;
   
-//   repeated int32 players = 8;
-//   repeated int32 spectators = 9;
-//   repeated int32 bots = 10;// Ummm, they're not userids, this is wrong
+  repeated int32 players = 8;
+  repeated int32 spectators = 9;
   
-//   string ip = 11;
-//   map<string, string> settings = 12;
-//   map<int32, StartArea> start_areas = 13;
-//   string map_name = 14;
-//   string map_hash = 15;
-//   bool public = 16;
-// }
+  // Bots will go here once we work out how best to transmit them
+  // repeated int32 bots = 10;// Ummm, they're not userids, this is wrong
+  
+  string ip = 11;
+  map<string, string> settings = 12;
+  map<int32, StartArea> start_areas = 13;
+  string map_name = 14;
+  string map_hash = 15;
+  bool public = 16;
+}
 
 // message Queue {
 //   int32 id = 1;
