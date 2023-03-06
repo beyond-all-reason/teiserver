@@ -15,12 +15,13 @@
         <%= if Enum.empty?(@user_tokens) do %>
           You have no user tokens active.
         <% else %>
-          <div class="row m-2 mt-4">
+          <div class="row">
             <%= for token <- @user_tokens do %>
-              <div class="col-md-6">
+              <div class="col-md-6 mt-1 mb-4">
                 <strong>User agent:</strong> <%= token.user_agent %><br />
                 <strong>IP:</strong> <%= token.ip %><br />
                 <strong>Last used:</strong> <%= date_to_str(token.last_used, format: :ymd_hms) %><br />
+                <strong>Expires:</strong> <%= date_to_str(token.expires, format: :ymd_hms) %><br />
                 <%= if allow?(@conn, "admin.dev") do %>
                   <strong>Value:</strong> <input type="text" value={token.value} class="form-control" />
                   <strong>Escaped:</strong> <input type="text" value={URI.encode_query(%{"qqq" => token.value}) |> String.replace("qqq=", "")} class="form-control" />

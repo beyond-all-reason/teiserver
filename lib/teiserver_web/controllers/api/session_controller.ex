@@ -25,7 +25,20 @@ defmodule TeiserverWeb.API.SessionController do
   end
 
   @spec request_token(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def request_token(conn, %{"email" => email, "password" => raw_password}) do
+  def request_token(conn, %{"email" => email, "password" => raw_password} = params) do
+    expires = case Map.get(params, "ttl", nil) do
+      nil ->
+        nil
+
+      ttl_string ->
+        case Integer.parse(ttl_string) do
+          :error ->
+            nil
+          {value, _} ->
+            Timex.now() |> Timex.shift(seconds: value)
+        end
+    end
+
     result = case User.get_user_by_email(email) do
       nil ->
         {:error, "Invalid email"}
@@ -44,7 +57,7 @@ defmodule TeiserverWeb.API.SessionController do
                 User.recache_user(user.id)
                 User.update_user(%{user | spring_password: false}, persist: true)
 
-                make_token(conn, user)
+                make_token(conn, user, expires)
               false ->
                 {:error, "Invalid credentials."}
             end
@@ -53,7 +66,7 @@ defmodule TeiserverWeb.API.SessionController do
             db_user = Account.get_user!(user.id)
             case Central.Account.User.verify_password(raw_password, db_user.password) do
               true ->
-                make_token(conn, user)
+                make_token(conn, user, expires)
               false ->
                 {:error, "Invalid credentials"}
             end
@@ -64,7 +77,7 @@ defmodule TeiserverWeb.API.SessionController do
     |> token_reply(result)
   end
 
-  defp make_token(conn, user) do
+  defp make_token(conn, user, expires) do
     ip = Central.Logging.LoggingPlug.get_ip_from_conn(conn)
       |> Tuple.to_list()
       |> Enum.join(".")
@@ -80,7 +93,7 @@ defmodule TeiserverWeb.API.SessionController do
       ip: ip,
       user_agent: user_agent,
 
-      expires: nil
+      expires: expires
     })
     {:ok, token.value}
   end
