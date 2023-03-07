@@ -8,7 +8,7 @@ defmodule Teiserver.Moderation do
   alias Central.Helpers.QueryHelpers
 
   alias Teiserver.{Account}
-  import Central.Logging.Helpers, only: [add_audit_log: 4]
+  import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
 
 
   alias Teiserver.Moderation.{Report, ReportLib}

@@ -100,16 +100,24 @@ Tournament
 - start date
 - discord_event_id
 - challonge_id
-- config_map (e.g. allow spectators, welcome-messages)
-- bracket_data (maps per bracket etc)
+- configs (e.g. allow spectators, welcome-messages)
+- brackets (maps per bracket etc)
+- stream_urls {:array, String()}
 
-TournamentMember
+TournamentMember # This tracks membership and role in a tourney
 - userid (discord_id is tracked against user)
-- tournament_id
 - role (organiser, caster, player, coach etc)
 - noshow (boolean)
-- eliminated (boolean)
+
+TournamentTeam
+- name
+- tournament_id
 - position (int)
+- eliminated (boolean)
+
+TournamentTeamMember # This tracks membership of a team
+- userid (discord_id is tracked against user)
+- team_id
 
 TournamentSeries
 - tournament_id

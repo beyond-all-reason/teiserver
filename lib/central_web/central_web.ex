@@ -35,7 +35,7 @@ defmodule CentralWeb do
 
       alias Central.General.AssignPlug
 
-      import Central.Logging.Helpers, only: [add_audit_log: 3]
+      import Teiserver.Logging.Helpers, only: [add_audit_log: 3]
 
       alias Bodyguard.Plug.Authorize
 
@@ -151,7 +151,7 @@ defmodule CentralWeb do
       import Central.Account.GroupTypeLib, only: [add_group_type: 2]
 
       import Central.Config, only: [add_user_config_type: 1, add_site_config_type: 1]
-      import Central.Logging.AuditLogLib, only: [add_audit_types: 1]
+      import Teiserver.Logging.AuditLogLib, only: [add_audit_types: 1]
       alias Central.General.QuickAction
     end
   end

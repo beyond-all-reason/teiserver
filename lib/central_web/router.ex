@@ -10,7 +10,7 @@ defmodule CentralWeb.Router do
 
   pipeline :logging_live_auth do
     plug Bodyguard.Plug.Authorize,
-      policy: Central.Logging.LiveLib,
+      policy: Teiserver.Logging.LiveLib,
       action: :live,
       user: {Central.Account.AuthLib, :current_user}
   end
@@ -22,7 +22,7 @@ defmodule CentralWeb.Router do
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
     plug(Central.Account.DefaultsPlug)
-    plug(Central.Logging.LoggingPlug)
+    plug(Teiserver.Logging.LoggingPlug)
     plug(Central.Account.AuthPipeline)
     plug(Central.Account.AuthPlug)
     plug(Teiserver.Account.TSAuthPlug)
@@ -66,7 +66,7 @@ defmodule CentralWeb.Router do
   pipeline :token_api do
     plug(:accepts, ["json"])
     plug(:put_secure_browser_headers)
-    plug(Central.Logging.LoggingPlug)
+    plug(Teiserver.Logging.LoggingPlug)
     plug(Central.Account.AuthPipeline)
     plug(Central.Account.AuthPlug)
     plug(Teiserver.Account.TSAuthPlug)
@@ -79,7 +79,7 @@ defmodule CentralWeb.Router do
     plug(:fetch_session)
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
-    plug(Central.Logging.LoggingPlug)
+    plug(Teiserver.Logging.LoggingPlug)
     plug(Central.Account.AuthPipeline)
     plug(Central.Account.AuthPlug)
     plug(Teiserver.Account.TSAuthPlug)
@@ -156,7 +156,7 @@ defmodule CentralWeb.Router do
     get("/ajax", AjaxController, :index)
   end
 
-  scope "/logging", CentralWeb.Logging, as: :logging do
+  scope "/logging", TeiserverWeb.Logging, as: :logging do
     pipe_through([:browser, :protected, :standard_layout])
 
     get("/", GeneralController, :index)

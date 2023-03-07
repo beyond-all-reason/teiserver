@@ -78,7 +78,7 @@ defmodule TeiserverWeb.API.SessionController do
   end
 
   defp make_token(conn, user, expires) do
-    ip = Central.Logging.LoggingPlug.get_ip_from_conn(conn)
+    ip = Teiserver.Logging.LoggingPlug.get_ip_from_conn(conn)
       |> Tuple.to_list()
       |> Enum.join(".")
 

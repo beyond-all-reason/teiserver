@@ -1,6 +1,6 @@
 defmodule CentralWeb.General.QuickAction.AjaxController do
   use CentralWeb, :controller
-  import Central.Logging.LoggingLib, only: [do_not_log: 1]
+  import Teiserver.Logging.LoggingLib, only: [do_not_log: 1]
   import Central.Account.AuthLib, only: [allow?: 2]
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

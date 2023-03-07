@@ -1,7 +1,7 @@
 defmodule CentralWeb.ErrorView do
   use CentralWeb, :view
 
-  import Central.Logging.Helpers, only: [add_error_log: 1]
+  import Teiserver.Logging.Helpers, only: [add_error_log: 1]
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-exclamation-triangle"

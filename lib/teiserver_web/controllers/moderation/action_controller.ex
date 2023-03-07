@@ -2,10 +2,10 @@ defmodule TeiserverWeb.Moderation.ActionController do
   @moduledoc false
   use CentralWeb, :controller
 
-  alias Central.Logging
+  alias Teiserver.Logging
   alias Teiserver.{Account, Moderation}
   alias Teiserver.Moderation.{Action, ActionLib}
-  import Central.Logging.Helpers, only: [add_audit_log: 3]
+  import Teiserver.Logging.Helpers, only: [add_audit_log: 3]
   import Central.Helpers.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,

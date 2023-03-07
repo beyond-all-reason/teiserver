@@ -1,10 +1,10 @@
-defmodule CentralWeb.Logging.PageViewLogControllerTest do
+defmodule TeiserverWeb.Logging.PageViewLogControllerTest do
   use CentralWeb.ConnCase, async: true
 
-  alias Central.Logging
+  alias Teiserver.Logging
 
   alias Central.Helpers.GeneralTestLib
-  alias Central.Logging.LoggingTestLib
+  alias Teiserver.Logging.LoggingTestLib
 
   setup do
     GeneralTestLib.conn_setup(~w(logging.page_view.show), child_user: true)

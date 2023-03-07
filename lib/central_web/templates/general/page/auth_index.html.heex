@@ -50,7 +50,7 @@
       central_component "menu_card",
       icon: Teiserver.icon(),
       name: "tei_admin",
-      text: "TS Admin",
+      text: "Administration",
       icon_class: "fa-duotone",
       link: Routes.ts_admin_general_path(@conn, :index)
     %>
@@ -59,7 +59,7 @@
   <%= if allow?(@current_user, "logging") do %>
     <%=
       central_component "menu_card",
-      icon: Central.Logging.icon(),
+      icon: Teiserver.Logging.icon(),
       text: "Logging",
       link: Routes.logging_general_path(@conn, :index)
     %>

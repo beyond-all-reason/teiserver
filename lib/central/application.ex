@@ -227,7 +227,7 @@ defmodule Central.Application do
 
     :telemetry.attach_many("oban-logger", events, &Central.ObanLogger.handle_event/4, [])
 
-    ~w(General Config Account Admin Logging Communication)
+    ~w(General Config Account Admin Communication)
     |> Enum.each(&env_startup/1)
 
     Teiserver.Startup.startup()

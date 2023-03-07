@@ -7,6 +7,8 @@ defmodule Teiserver.Startup do
   def startup do
     start_time = System.system_time(:millisecond)
 
+    Teiserver.Logging.Startup.startup()
+
     Teiserver.TeiserverConfigs.teiserver_configs()
     Teiserver.TeiserverQuickActions.teiserver_quick_actions()
 

@@ -130,7 +130,7 @@ defmodule Central.Helpers.GeneralTestLib do
       users: users,
       groups: groups
     ]
-    |> Central.Logging.LoggingTestLib.seed()
+    |> Teiserver.Logging.LoggingTestLib.seed()
   end
 
   def login(conn, email) do

@@ -1,10 +1,10 @@
-defmodule CentralWeb.Logging.ReportControllerTest do
+defmodule TeiserverWeb.Logging.ReportControllerTest do
   use CentralWeb.ConnCase, async: true
 
   # alias Central.Helpers.DatePresets
 
   alias Central.Helpers.GeneralTestLib
-  alias Central.Logging.LoggingTestLib
+  alias Teiserver.Logging.LoggingTestLib
 
   setup do
     GeneralTestLib.conn_setup(~w(logging.page_view.report))

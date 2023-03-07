@@ -1,4 +1,4 @@
-defmodule Central.Logging do
+defmodule Teiserver.Logging do
   @moduledoc """
   The Logging context.
   """
@@ -10,8 +10,8 @@ defmodule Central.Logging do
   alias Central.Helpers.QueryHelpers
   alias Central.Repo
 
-  alias Central.Logging.AuditLog
-  alias Central.Logging.AuditLogLib
+  alias Teiserver.Logging.AuditLog
+  alias Teiserver.Logging.AuditLogLib
 
   defp audit_log_query(args) do
     audit_log_query(nil, args)
@@ -151,8 +151,8 @@ defmodule Central.Logging do
     AuditLog.changeset(log, %{})
   end
 
-  alias Central.Logging.ErrorLog
-  alias Central.Logging.ErrorLogQueries
+  alias Teiserver.Logging.ErrorLog
+  alias Teiserver.Logging.ErrorLogQueries
 
   @doc """
   Returns the list of logging_logs.
@@ -264,8 +264,8 @@ defmodule Central.Logging do
     ErrorLog.changeset(log, %{})
   end
 
-  alias Central.Logging.PageViewLog
-  alias Central.Logging.PageViewLogLib
+  alias Teiserver.Logging.PageViewLog
+  alias Teiserver.Logging.PageViewLogLib
 
   @doc """
   Returns the list of page_view_logs.
@@ -374,8 +374,8 @@ defmodule Central.Logging do
     PageViewLog.changeset(page_view_log, %{})
   end
 
-  # alias Central.Logging.AggregateViewLog
-  alias Central.Logging.AggregateViewLogLib
+  # alias Teiserver.Logging.AggregateViewLog
+  alias Teiserver.Logging.AggregateViewLogLib
 
   @doc """
   Returns the list of logging_logs.

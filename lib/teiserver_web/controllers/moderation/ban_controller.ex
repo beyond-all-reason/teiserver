@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Moderation.BanController do
   @moduledoc false
   use CentralWeb, :controller
 
-  alias Central.Logging
+  alias Teiserver.Logging
   alias Teiserver.{Account, Moderation}
   alias Teiserver.Moderation.{Ban, BanLib}
   import Central.Helpers.StringHelper, only: [get_hash_id: 1]

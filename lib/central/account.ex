@@ -13,7 +13,7 @@ defmodule Central.Account do
 
   alias Central.Account.User
   alias Central.Account.UserQueries
-  import Central.Logging.Helpers, only: [add_anonymous_audit_log: 3]
+  import Teiserver.Logging.Helpers, only: [add_anonymous_audit_log: 3]
 
   @spec icon :: String.t()
   def icon, do: "fa-duotone fa-user-alt"
