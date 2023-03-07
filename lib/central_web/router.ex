@@ -466,8 +466,8 @@ defmodule CentralWeb.Router do
     post("/infolog/search", InfologController, :search)
     resources("/infolog", InfologController, only: [:index, :show, :delete])
 
-    get("/exports/download/:id", ExportsController, :download)
-    resources("/exports", ExportsController, only: [:index])
+    post("/exports/:id", ExportsController, :download)
+    resources("/exports", ExportsController, only: [:index, :show])
 
     get("/show/:name", ReportController, :show)
     post("/show/:name", ReportController, :show)
