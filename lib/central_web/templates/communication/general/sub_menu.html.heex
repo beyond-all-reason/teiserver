@@ -25,7 +25,7 @@
             name: "blog",
             label: "Blog",
             active: @active,
-            url: Routes.blog_path(@conn, :index),
+            url: ~p"/blog",
             icon: Central.Communication.BlogLib.icon()
           %>
 
@@ -33,7 +33,7 @@
             name: "posts",
             label: "Posts",
             active: @active,
-            url: Routes.blog_post_path(@conn, :index),
+            url: ~p"/blog_admin/posts",
             icon: Central.Communication.PostLib.icon()
           %>
 

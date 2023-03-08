@@ -23,12 +23,16 @@ config :central, CentralWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "6FN12Jv4ZITAK1fq7ehD0MTRvbLsXYWj+wLY3ifkzzlcUIcpUJK7aG/ptrJSemAy",
   live_view: [signing_salt: "wZVVigZo"],
-  render_errors: [view: CentralWeb.ErrorView, accepts: ~w(html json)],
+    render_errors: [
+  # render_errors: [view: CentralWeb.ErrorView, accepts: ~w(html json), layout: false],
+    formats: [html: CentralWeb.ErrorHTML, json: CentralWeb.ErrorJSON],
+    layout: false
+  ],
   # render_errors: [view: CentralWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: Central.PubSub
 
 config :esbuild,
-  version: "0.12.18",
+  version: "0.14.41",
   default: [
     args:
       ~w(js/app.js --bundle --target=es2016 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),

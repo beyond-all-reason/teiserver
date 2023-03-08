@@ -8,7 +8,7 @@
       active: @active,
       icon: Teiserver.Account.ClientLib.icon(),
       bsname: bsname,
-      url: Routes.ts_admin_client_index_path(@conn, :index)
+      url: ~p"/teiserver/admin/client"
     %>
 
     <%= central_component "section_menu_button",
@@ -17,7 +17,7 @@
       active: @active,
       icon: Central.Helpers.StylingHelper.icon(:list),
       bsname: bsname,
-      url: Routes.ts_admin_user_path(@conn, :index)
+      url: ~p"/teiserver/admin/users"
     %>
 
     <%= central_component "section_menu_button",
@@ -26,7 +26,7 @@
       active: @active,
       icon: Central.Helpers.StylingHelper.icon(:search),
       bsname: bsname,
-      url: Routes.ts_admin_user_path(@conn, :index) <> "?search=true"
+      url: ~p"/teiserver/admin/users" <> "?search=true"
     %>
 
     <%= if allow?(@current_user, "admin") do %>
@@ -119,7 +119,7 @@
   </div>
 
   <div class="col-md-3">
-    <form action={Routes.ts_admin_user_path(@conn, :index)} method="get" class="">
+    <form action={~p"/teiserver/admin/users"} method="get" class="">
       <div class="input-group">
         <%
           input_opts = [

@@ -25,7 +25,7 @@
             name: "home",
             label: "Account menu",
             active: @active,
-            url: Routes.ts_account_general_path(@conn, :index),
+            url: ~p"/teiserver/account",
             icon: "fa-solid fa-user"
           %>
 
@@ -57,7 +57,7 @@
             name: "clans",
             label: "Clans",
             active: @active,
-            url: Routes.ts_clans_clan_path(@conn, :index),
+            url: ~p"/teiserver/clans",
             icon: Teiserver.Clans.ClanLib.icon()
           %>
 

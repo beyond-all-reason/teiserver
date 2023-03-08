@@ -26,7 +26,7 @@
               name: "users",
               label: "Users",
               active: @active,
-              url: Routes.ts_admin_user_path(@conn, :index),
+              url: ~p"/teiserver/admin/users",
               icon: "fa-solid fa-users"
             %>
           <% end %>
@@ -44,7 +44,7 @@
               name: "chat",
               label: "Chat",
               active: @active,
-              url: Routes.ts_admin_chat_path(@conn, :index),
+              url: ~p"/teiserver/admin/chat",
               icon: Central.Communication.CommentLib.icon()
             %>
           <% end %>

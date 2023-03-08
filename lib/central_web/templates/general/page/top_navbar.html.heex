@@ -23,21 +23,21 @@
         <%= if Application.get_env(:central, Central)[:enable_blog] do %>
           <%= central_component "top_nav_item",
             text: "Blog",
-            route: Routes.blog_path(@conn, :index),
+            route: ~p"/blog",
             active: @site_menu_active == "central_blog"
           %>
         <% end %>
 
         <%= central_component "top_nav_item",
           text: "My account",
-          route: Routes.ts_account_general_path(@conn, :index),
+          route: ~p"/teiserver/account",
           active: @site_menu_active == "teiserver_account"
         %>
 
         <%= if allow?(@current_user, "admin") do %>
           <%= central_component "top_nav_item",
             text: "C.Admin",
-            route: Routes.admin_general_path(@conn, :index),
+            route: ~p"/admin",
             active: @site_menu_active == "central_admin"
           %>
         <% end %>
@@ -45,7 +45,7 @@
         <%= if allow?(@current_user, "logging") do %>
           <%= central_component "top_nav_item",
             text: "Logging",
-            route: Routes.logging_general_path(@conn, :index),
+            route: ~p"/logging",
             active: @site_menu_active == "central_logging"
           %>
         <% end %>
@@ -54,28 +54,28 @@
           <%=
             central_component "top_nav_item",
             text: "Lobbies",
-            route: Routes.ts_battle_lobby_index_path(@conn, :index),
+            route: ~p"/teiserver/battle/lobbies",
             active: @site_menu_active == "lobbies"
           %>
 
           <%=
             central_component "top_nav_item",
             text: "Matchmaking",
-            route: Routes.ts_game_queue_index_path(@conn, :index),
+            route: ~p"/teiserver/matchmaking/queues",
             active: @site_menu_active == "matchmaking"
           %>
 
           <%=
             central_component "top_nav_item",
             text: "Parties",
-            route: Routes.ts_game_party_index_path(@conn, :index),
+            route: ~p"/teiserver/account/parties",
             active: @site_menu_active == "parties"
           %>
 
           <%=
             central_component "top_nav_item",
             text: "Matches",
-            route: Routes.ts_battle_match_path(@conn, :index),
+            route: ~p"/teiserver/battle/matches",
             active: @site_menu_active == "match"
           %>
 
@@ -91,7 +91,7 @@
         <%= if allow?(@current_user, "teiserver.staff") do %>
           <%= central_component "top_nav_item",
             text: "Reports",
-            route: Routes.ts_reports_general_path(@conn, :index),
+            route: ~p"/teiserver/reports",
             active: @site_menu_active == "teiserver_report"
           %>
         <% end %>
@@ -99,7 +99,7 @@
         <%= if allow?(@current_user, "teiserver.staff.moderator") do %>
           <%= central_component "top_nav_item",
             text: "Users",
-            route: Routes.ts_admin_user_path(@conn, :index),
+            route: ~p"/teiserver/admin/users",
             active: @site_menu_active == "teiserver_user"
           %>
         <% end %>
@@ -115,7 +115,7 @@
         <%= if allow?(@current_user, "teiserver.staff.reviewer") do %>
           <%= central_component "top_nav_item",
             text: "Chat",
-            route: Routes.ts_admin_chat_path(@conn, :index),
+            route: ~p"/teiserver/admin/chat",
             active: @site_menu_active == "chat"
           %>
         <% end %>
@@ -123,7 +123,7 @@
         <%= if allow?(@current_user, "teiserver.staff") do %>
           <%= central_component "top_nav_item",
             text: "Admin",
-            route: Routes.ts_admin_general_path(@conn, :index),
+            route: ~p"/teiserver/admin",
             active: @site_menu_active == "teiserver_admin"
           %>
         <% end %>
@@ -143,7 +143,7 @@
       <% else %>
         <%= central_component "top_nav_button",
           text: "Sign in",
-          route: Routes.account_session_path(@conn, :new),
+          route: ~p"/login",
           style: "button",
           active: false
         %>

@@ -17,6 +17,8 @@ defmodule CentralWeb do
   and import those modules here.
   """
 
+  def static_paths, do: ~w(css js assets webfonts fonts images favicon.ico robots.txt)
+
   def channel do
     quote do
       use Phoenix.Channel
@@ -75,9 +77,23 @@ defmodule CentralWeb do
 
       import Central.Helpers.NumberHelper, only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
 
+      import CentralWeb.CoreComponents
+      unquote(verified_routes())
+
       import Phoenix.LiveView
       import Phoenix.Component
       import Phoenix.LiveView.Helpers
+    end
+  end
+
+  def html do
+    quote do
+      use Phoenix.Component
+      # Import convenience functions from controllers
+      import Phoenix.Controller,
+        only: [get_csrf_token: 0, view_module: 1, view_template: 1]
+      # Include general helpers for rendering HTML
+      unquote(html_helpers())
     end
   end
 
@@ -100,6 +116,7 @@ defmodule CentralWeb do
       alias Central.Account.AuthPlug
       import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
       alias Central.Communication.NotificationPlug
+      unquote(verified_routes())
 
       unquote(view_helpers())
     end
@@ -167,7 +184,7 @@ defmodule CentralWeb do
 
   def router do
     quote do
-      use Phoenix.Router
+      use Phoenix.Router, helpers: false
       import Plug.Conn
       import Phoenix.Controller
       import Phoenix.LiveView.Router
@@ -185,10 +202,35 @@ defmodule CentralWeb do
 
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
+      import CentralWeb.CoreComponents
 
       import CentralWeb.ErrorHelpers
       import CentralWeb.Gettext
       alias CentralWeb.Router.Helpers, as: Routes
+    end
+  end
+
+  defp html_helpers do
+    quote do
+      # HTML escaping functionality
+      import Phoenix.HTML
+      # Core UI components and translation
+      import CentralWeb.CoreComponents
+      import CentralWeb.Gettext
+      # Shortcut for generating JS commands
+      alias Phoenix.LiveView.JS
+      # Routes generation with the ~p sigil
+      unquote(verified_routes())
+    end
+  end
+
+
+  def verified_routes do
+    quote do
+      use Phoenix.VerifiedRoutes,
+        endpoint: CentralWeb.Endpoint,
+        router: CentralWeb.Router,
+        statics: CentralWeb.static_paths()
     end
   end
 

@@ -27,7 +27,7 @@
 
     <hr style="margin: 0;" />
 
-    <form action={Routes.account_session_path(@conn, :logout)} method="post" class="link" id="signout-form" style="margin: 0;">
+    <form action={~p"/logout"} method="post" class="link" id="signout-form" style="margin: 0;">
       <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
       <a class="dropdown-item" data-submit="parent" href="#" rel="nofollow" onclick="$('#signout-form').submit();" id="signout-link">

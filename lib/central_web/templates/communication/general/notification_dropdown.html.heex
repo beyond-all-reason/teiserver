@@ -25,17 +25,17 @@
         <a href="#" class="dropdown-item" id="communication-notifications-empty-marker">You have no unread notifications</a>
       </li>
     <% end %>
-    
+
     <%= if Enum.count(@user_notifications) > 15 do %>
       <li>
-        <a href={Routes.communication_notification_path(@conn, :index)} class="dropdown-item" style="padding-top: 5px; padding-bottom: 3px;">
+        <a href={~p"/communication/notifications"} class="dropdown-item" style="padding-top: 5px; padding-bottom: 3px;">
           <i class='far fa-fw fa-bars'></i>
           &nbsp;
           Showing first 15 notifications, click here to view all notifications
         </a>
       </li>
     <% end %>
-  
+
     <%= for n <- Enum.take(@user_notifications, 15) do %>
       <li>
         <a class="dropdown-item" id={"communication-notifications-li-#{n.id}"} href={Central.Communication.notification_url n}>
@@ -49,7 +49,7 @@
 
     <%= if Enum.count(@user_notifications) <= 15 do %>
       <li>
-        <a href={Routes.communication_notification_path(@conn, :index)} class="dropdown-item" style="padding-top: 5px; padding-bottom: 3px;">
+        <a href={~p"/communication/notifications"} class="dropdown-item" style="padding-top: 5px; padding-bottom: 3px;">
           <i class='far fa-fw fa-bars'></i>
           &nbsp;
           View all notifications

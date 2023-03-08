@@ -10,7 +10,6 @@ defmodule Central.MixProject do
       package: package(),
       dialyzer: dialyzer(),
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
@@ -46,23 +45,26 @@ defmodule Central.MixProject do
   defp deps do
     [
       # Default phoenix deps
-      {:phoenix, "~> 1.6.15"},
+      {:phoenix, "~> 1.7"},
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.6"},
       {:postgrex, ">= 0.0.0"},
-      {:phoenix_html, "~> 3.0"},
-      {:phoenix_live_reload, "~> 1.3.2", only: :dev},
+      {:phoenix_html, "~> 3.3"},
+      {:phoenix_live_reload, "~> 1.4", only: :dev},
       {:phoenix_live_view, "~> 0.18"},
-      {:floki, ">= 0.31.0", only: :test},
-      {:phoenix_live_dashboard, "~> 0.6"},
-      {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
+      {:floki, ">= 0.34.0", only: :test},
+      {:phoenix_live_dashboard, "~> 0.7"},
+      {:esbuild, "~> 0.5", runtime: Mix.env() == :dev},
       {:bamboo, "~> 2.1"},
       {:bamboo_smtp, "~> 4.0"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
-      {:gettext, "~> 0.18"},
+      {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
+
+      # Temporary deps while we transition away from views
+      {:phoenix_view, "~> 2.0"},
 
       # Extra deps
       {:ecto_psql_extras, "~> 0.7"},
@@ -78,7 +80,7 @@ defmodule Central.MixProject do
       {:con_cache, "~> 1.0"},
       {:phoenix_pubsub, "~> 2.0"},
       {:elixir_uuid, "~> 1.2"},
-      {:excoveralls, "~> 0.14.1", only: :test},
+      {:excoveralls, "~> 0.15.3", only: :test},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev], runtime: false},
       {:dart_sass, "~> 0.3", only: [:dev]},

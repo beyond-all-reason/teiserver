@@ -7,7 +7,7 @@
     icon_class: "fa-duotone",
     link: Routes.moderation_action_path(@conn, :index)
   %>
-  
+
   <%=
     central_component "menu_card",
     icon: Teiserver.Moderation.ReportLib.icon(),
@@ -16,7 +16,7 @@
     icon_class: "fa-duotone",
     link: Routes.moderation_report_path(@conn, :index)
   %>
-  
+
   <%=
     central_component "menu_card",
     icon: Teiserver.Moderation.ProposalLib.icon(),
@@ -25,7 +25,7 @@
     icon_class: "fa-duotone",
     link: Routes.moderation_proposal_path(@conn, :index)
   %>
-  
+
   <%=
     central_component "menu_card",
     icon: Teiserver.Moderation.BanLib.icon(),
@@ -43,6 +43,6 @@
       name: "",
       icon: StylingHelper.icon(:back),
       text: "Back",
-      link: Routes.ts_admin_general_path(@conn, :index)
+      link: ~p"/teiserver/admin"
   %>
 </div>

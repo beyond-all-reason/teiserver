@@ -16,7 +16,7 @@
       name: "user_admin",
       text: "Users",
       icon_class: "fa-duotone",
-      link: Routes.ts_admin_user_path(@conn, :index)
+      link: ~p"/teiserver/admin/users"
     %>
   <% end %>
 
@@ -27,7 +27,7 @@
       name: "chat",
       text: "Chat",
       icon_class: "fa-duotone",
-      link: Routes.ts_admin_chat_path(@conn, :index)
+      link: ~p"/teiserver/admin/chat"
     %>
   <% end %>
 
@@ -110,7 +110,7 @@
       name: "reports",
       text: "Reports",
       icon_class: "fa-duotone",
-      link: Routes.ts_reports_general_path(@conn, :index)
+      link: ~p"/teiserver/reports"
     %>
   <% end %>
 

@@ -14,15 +14,13 @@ defmodule Central.Application do
       [
         # Start phoenix pubsub
         {Phoenix.PubSub, name: Central.PubSub},
+        CentralWeb.Telemetry,
 
         # Start the Ecto repository
         Central.Repo,
         # Start the endpoint when the application starts
         CentralWeb.Endpoint,
-        # Starts a worker by calling: Central.Worker.start_link(arg)
-        # {Central.Worker, arg}
         CentralWeb.Presence,
-        CentralWeb.Telemetry,
 
         {Central.General.CacheClusterServer, name: Central.General.CacheClusterServer},
 

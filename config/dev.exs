@@ -73,10 +73,8 @@ config :central, CentralWeb.Endpoint,
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/central_web/(live|views)/.*(ex)$",
-      ~r"lib/central_web/templates/.*(eex)$",
-      ~r"lib/teiserver_web/(live|views)/.*(ex)$",
-      ~r"lib/teiserver_web/templates/.*(eex)$"
+      ~r"lib/central_web/(controllers|live|components)/.*(ex|heex)$",
+      ~r"lib/teiserver_web/(controllers|live|components)/.*(ex|heex)$",
     ]
   ]
 

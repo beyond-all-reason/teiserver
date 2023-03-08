@@ -106,7 +106,6 @@ defmodule Central.Helpers.InputHelper do
 
     row_count = (Enum.count(raw_value) + 2) |> max(3)
 
-    class = "form-group #{state_class(form, field)}"
     field_name = "#{form.name}[#{field}]"
 
     {:safe,

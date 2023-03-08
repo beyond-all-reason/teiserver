@@ -58,7 +58,7 @@
         <%= render CentralWeb.General.SectionsView, "user_dropdown.html", Map.put(assigns, :conn, @socket) %>
       <% else %>
         <li class="nav-item">
-          <a href={Routes.account_session_path(@socket, :new)}>
+          <a href={~p"/login"}>
             <i class="fa fa-user fa-fw"></i>
             Sign in
           </a>

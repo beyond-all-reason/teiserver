@@ -14,7 +14,7 @@
         <ul class="navbar-nav ml-auto">
           <%= if Application.get_env(:central, Central)[:enable_blog] do %>
             <li class="nav-item">
-              <a class="nav-link" href={Routes.blog_path(@conn, :index)}>
+              <a class="nav-link" href={~p"/blog"}>
                 <i class={"fa-fw #{Central.Communication.BlogLib.icon()}"}></i>
                 Blog
               </a>
@@ -23,7 +23,7 @@
 
           <%= if @current_user == nil do %>
             <li class="nav-item">
-              <a class="nav-link" href={Routes.account_session_path(@conn, :new)}>
+              <a class="nav-link" href={~p"/login"}>
                 <i class="fa-solid fa-fw fa-sign-in-alt"></i>
                 Login
               </a>
@@ -53,7 +53,7 @@
           <p class="">
             <%= Application.get_env(:central, Central)[:site_description] %>
           </p>
-          <a href={Routes.account_session_path(@conn, :new)} class="btn btn-lg btn-outline-primary btn-pill align-self-center">
+          <a href={~p"/login"} class="btn btn-lg btn-outline-primary btn-pill align-self-center">
             Login
           </a>
       </div>
