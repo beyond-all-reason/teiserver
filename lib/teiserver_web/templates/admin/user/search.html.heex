@@ -23,7 +23,7 @@
     Show search form
   </div>
 
-  <form action={Routes.ts_admin_user_path(@conn, :search)} method="post" class="form-horizontal" id="search-box" style="display: none;">
+  <form action={~p"/teiserver/admin/users/search"} method="post" class="form-horizontal" id="search-box" style="display: none;">
     <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
     <div class="row">

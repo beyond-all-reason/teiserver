@@ -179,7 +179,7 @@ defmodule TeiserverWeb.Admin.UserController do
       _ ->
         conn
           |> put_flash(:danger, "Unable to access this user")
-          |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+          |> redirect(to: ~p"/teiserver/admin/users")
     end
   end
 
@@ -219,7 +219,7 @@ defmodule TeiserverWeb.Admin.UserController do
       {:ok, _user} ->
         conn
         |> put_flash(:info, "User created successfully.")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+        |> redirect(to: ~p"/teiserver/admin/users")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
@@ -244,7 +244,7 @@ defmodule TeiserverWeb.Admin.UserController do
       _ ->
         conn
         |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+        |> redirect(to: ~p"/teiserver/admin/users")
     end
   end
 
@@ -288,7 +288,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
             conn
             |> put_flash(:info, "User updated successfully.")
-            # |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+            # |> redirect(to: ~p"/teiserver/admin/users")
             |> redirect(to: Routes.ts_admin_user_path(conn, :show, user.id))
 
           {:error, %Ecto.Changeset{} = changeset} ->
@@ -298,7 +298,7 @@ defmodule TeiserverWeb.Admin.UserController do
       _ ->
         conn
         |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+        |> redirect(to: ~p"/teiserver/admin/users")
     end
   end
 
@@ -310,12 +310,12 @@ defmodule TeiserverWeb.Admin.UserController do
       {false, :not_found} ->
         conn
         |> put_flash(:danger, "Unable to find that user")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+        |> redirect(to: ~p"/teiserver/admin/users")
 
       {false, :no_access} ->
         conn
         |> put_flash(:danger, "Unable to find that user")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+        |> redirect(to: ~p"/teiserver/admin/users")
 
       {true, _} ->
         Central.Account.Emails.password_reset(user)
@@ -323,7 +323,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
         conn
         |> put_flash(:success, "Password reset email sent to user")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+        |> redirect(to: ~p"/teiserver/admin/users")
     end
   end
 
@@ -385,7 +385,7 @@ defmodule TeiserverWeb.Admin.UserController do
       _ ->
         conn
           |> put_flash(:danger, "Unable to access this user")
-          |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+          |> redirect(to: ~p"/teiserver/admin/users")
     end
   end
 
@@ -416,7 +416,7 @@ defmodule TeiserverWeb.Admin.UserController do
       _ ->
         conn
           |> put_flash(:danger, "Unable to access this user")
-          |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+          |> redirect(to: ~p"/teiserver/admin/users")
     end
   end
 
@@ -501,7 +501,7 @@ defmodule TeiserverWeb.Admin.UserController do
       _ ->
         conn
           |> put_flash(:danger, "Unable to access this user")
-          |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+          |> redirect(to: ~p"/teiserver/admin/users")
     end
   end
 
@@ -532,7 +532,7 @@ defmodule TeiserverWeb.Admin.UserController do
       _ ->
         conn
         |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+        |> redirect(to: ~p"/teiserver/admin/users")
     end
   end
 
@@ -614,7 +614,7 @@ defmodule TeiserverWeb.Admin.UserController do
       _ ->
         conn
         |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+        |> redirect(to: ~p"/teiserver/admin/users")
     end
   end
 
@@ -631,7 +631,7 @@ defmodule TeiserverWeb.Admin.UserController do
     else
       conn
         |> put_flash(:info, "Unable to find that key")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+        |> redirect(to: ~p"/teiserver/admin/users")
     end
   end
 
@@ -656,7 +656,7 @@ defmodule TeiserverWeb.Admin.UserController do
       _ ->
         conn
           |> put_flash(:danger, "Unable to access at least one of these users")
-          |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+          |> redirect(to: ~p"/teiserver/admin/users")
     end
   end
 
@@ -691,7 +691,7 @@ defmodule TeiserverWeb.Admin.UserController do
       _ ->
         conn
           |> put_flash(:danger, "Unable to access at least one of these users")
-          |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+          |> redirect(to: ~p"/teiserver/admin/users")
     end
   end
 
@@ -788,7 +788,7 @@ defmodule TeiserverWeb.Admin.UserController do
       _ ->
         conn
         |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+        |> redirect(to: ~p"/teiserver/admin/users")
     end
   end
 
@@ -815,7 +815,7 @@ defmodule TeiserverWeb.Admin.UserController do
       _ ->
         conn
         |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+        |> redirect(to: ~p"/teiserver/admin/users")
     end
   end
 
