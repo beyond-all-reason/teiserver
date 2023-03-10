@@ -184,7 +184,7 @@ defmodule CentralWeb do
 
   def router do
     quote do
-      use Phoenix.Router, helpers: false
+      use Phoenix.Router
       import Plug.Conn
       import Phoenix.Controller
       import Phoenix.LiveView.Router

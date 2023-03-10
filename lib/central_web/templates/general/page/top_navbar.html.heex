@@ -99,7 +99,7 @@
         <%= if allow?(@current_user, "teiserver.staff.moderator") do %>
           <%= central_component "top_nav_item",
             text: "Users",
-            route: ~p"/teiserver/admin/users",
+            route: ~p"/teiserver/admin/user",
             active: @site_menu_active == "teiserver_user"
           %>
         <% end %>
