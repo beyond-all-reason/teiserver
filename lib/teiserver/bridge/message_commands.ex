@@ -27,8 +27,15 @@ defmodule Teiserver.Bridge.MessageCommands do
     allowed = allow?(cmd, user)
     Logger.info("MessageCommands.handle #{author}, #{content}, #{allowed}")
 
-    if allow?(cmd, user) do
-      handle_command({user, author}, cmd, remaining, channel)
+    cond do
+      allow?(cmd, user) ->
+        handle_command({user, author}, cmd, remaining, channel)
+
+      user == nil ->
+        no_user_command(channel)
+
+      true ->
+        :ok
     end
   end
 
@@ -122,14 +129,13 @@ defmodule Teiserver.Bridge.MessageCommands do
   end
 
   def handle_command({nil, _}, cmd, _remaining, channel) do
-    response = case cmd do
+    case cmd do
       "help" ->
-        "Currently I don't know which player you are. To link your BAR account with your discord account message the coordinator bot in-game with the message `$discord` and it will send you a code to send to me. Once you send that code I'll know who you are and can respond accordingly."
+        no_user_command(channel)
 
       _ ->
-        "Unfortunately I don't understand that command"
+        reply(channel, "Unfortunately I don't understand that command")
     end
-    reply(channel, response)
   end
 
   def handle_command({user, _}, "whoami", _remaining, channel) do
@@ -179,6 +185,11 @@ defmodule Teiserver.Bridge.MessageCommands do
 
   def handle_command({_sender, _}, _, _remaining, channel) do
     reply(channel, "Your account is linked but at the moment there's nothing else I can do.")
+  end
+
+  defp no_user_command(channel) do
+    response = "Currently I don't know which player you are. To link your BAR account with your discord account message the coordinator bot in-game with the message `$discord` and it will send you a code to send to me. Once you send that code I'll know who you are and can respond accordingly."
+    reply(channel, response)
   end
 
   defp allow?(cmd, nil), do: Enum.member?(@unauth, cmd)
