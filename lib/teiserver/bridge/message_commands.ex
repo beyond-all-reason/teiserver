@@ -41,7 +41,7 @@ defmodule Teiserver.Bridge.MessageCommands do
 
   @spec handle_command({T.user(), String.t()}, String.t(), String.t(), String.t()) :: any
   def handle_command({nil, _discord_id}, "discord", "", channel) do
-    reply(channel, "To begin the process of linking your BAR account to your Discord account, please message the coordinator bot in BAR itself: `discord`")
+    reply(channel, "To begin the process of linking your BAR account to your Discord account, please message the coordinator bot in BAR itself: `$discord`")
   end
 
   def handle_command({nil, discord_id}, "discord", remaining, channel) do
