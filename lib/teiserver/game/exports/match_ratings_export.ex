@@ -3,9 +3,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
 
   """
   alias Central.Helpers.DatePresets
-  alias Teiserver.{Game, Battle}
-  alias Central.Helpers.TimexHelper
-  import Central.Helpers.StringHelper, only: [get_hash_id: 1]
+  alias Teiserver.{Battle}
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-swords"

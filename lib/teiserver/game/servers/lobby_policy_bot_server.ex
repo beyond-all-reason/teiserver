@@ -187,7 +187,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     state
   end
 
-  defp handle_user_chat(userid, message, state) do
+  defp handle_user_chat(_userid, _message, state) do
     # Logger.error("handle_user_chat - #{userid} - #{message}")
     state
   end
