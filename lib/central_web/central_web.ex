@@ -43,6 +43,7 @@ defmodule CentralWeb do
 
       alias CentralWeb.Router.Helpers, as: Routes
 
+      unquote(verified_routes())
       import Central.Account.RecentlyUsedCache,
         only: [remove_recently: 2, insert_recently: 2, insert_recently: 1, get_recently: 1]
     end

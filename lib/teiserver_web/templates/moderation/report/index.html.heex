@@ -14,6 +14,16 @@
               true -> "list"
             end)
         }) %>
+
+        <div class="float-end">
+          <%= if @target_id do %>
+            <a class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"} href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@target_id}_"}>
+              <%= central_component "icon", icon: Teiserver.Moderation.ActionLib.icon(), class: "fa-solid" %>
+              &nbsp;
+              Action user
+            </a>
+          <% end %>
+        </div>
         <br /><br />
 
 <%= if @conn.params["search"] != nil do %>

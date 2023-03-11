@@ -47,7 +47,7 @@
 
         <hr />
 <div class="float-end">
-  <a class={"btn btn-outline-#{bsname}"} href={~p"/teiserver/admin/users/#{@user}"}>View user</a>
+  <a class={"btn btn-outline-#{bsname}"} href={~p"/teiserver/admin/user/#{@user}"}>View user</a>
 </div>
 
 <h3>Adding ban based on <%= @user.name %></h3>
@@ -132,7 +132,7 @@
 
       <div class="row">
         <div class="form-group col-md-3 my-3">
-          <a href={~p"/teiserver/admin/users/#{@user.id}"} class="btn btn-secondary btn-block">
+          <a href={~p"/teiserver/admin/user/#{@user.id}"} class="btn btn-secondary btn-block">
             Cancel
           </a>
         </div>

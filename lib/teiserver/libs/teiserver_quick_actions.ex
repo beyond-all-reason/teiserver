@@ -65,7 +65,7 @@ defmodule Teiserver.TeiserverQuickActions do
         input: "s",
         method: "get",
         placeholder: "Search username",
-        url: "/teiserver/admin/users/search",
+        url: "/teiserver/admin/user/search",
         permissions: "teiserver.staff.moderator"
       },
       %{

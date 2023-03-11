@@ -31,6 +31,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
     )
 
     conn
+      |> assign(:target_id, params["target_id"])
       |> assign(:reports, reports)
       |> render("index.html")
   end
@@ -109,7 +110,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
       _ ->
         conn
           |> put_flash(:danger, "Unable to access this user")
-          |> redirect(to: ~p"/teiserver/admin/users")
+          |> redirect(to: ~p"/teiserver/admin/user")
     end
   end
 

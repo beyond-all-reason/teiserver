@@ -76,7 +76,7 @@ defmodule TeiserverWeb.Moderation.UserController do
       _ ->
         conn
           |> put_flash(:danger, "Unable to access this user")
-          |> redirect(to: ~p"/teiserver/admin/users")
+          |> redirect(to: ~p"/teiserver/admin/user")
     end
   end
 end

@@ -36,7 +36,7 @@
           </a>
 
           <%= if allow?(@conn, "teiserver.staff.moderator") do %>
-            <a class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"} href={~p"/teiserver/admin/users/#{@report.target_id}"}>
+            <a class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"} href={~p"/teiserver/admin/user/#{@report.target_id}"}>
               <%= central_component "icon", icon: Teiserver.Account.UserLib.icon(), class: "fa-solid" %>
               &nbsp;
               View user

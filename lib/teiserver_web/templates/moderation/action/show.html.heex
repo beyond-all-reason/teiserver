@@ -36,7 +36,7 @@
               Edit action
             </a>
 
-            <a href={~p"/teiserver/admin/users/#{@action.target_id}"} class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}>
+            <a href={~p"/teiserver/admin/user/#{@action.target_id}"} class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}>
               <%= central_component "icon", icon: Teiserver.Account.UserLib.icon() %>
               Administrate user
             </a>

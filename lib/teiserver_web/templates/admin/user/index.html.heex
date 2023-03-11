@@ -137,15 +137,14 @@
       </td>
 
       <td>
-        <a href={~p"/teiserver/admin/users/#{user.id}"} class="btn btn-secondary btn-sm">
+        <a href={~p"/teiserver/admin/user/#{user.id}"} class="btn btn-secondary btn-sm">
           Show
         </a>
       </td>
 
       <%= if is_admin do %>
         <td>
-          <a href={Routes\.ts_admin_user_path\(@?(conn|socket), :edit, (@?[0-9\-a-zA-Z_\.]+)\)
-~p"/teiserver/admin/users/#{user.id}/edit"} class="btn btn-secondary btn-sm">
+          <a href={~p"/teiserver/admin/user/#{user.id}/edit"} class="btn btn-secondary btn-sm">
             Edit
           </a>
         </td>

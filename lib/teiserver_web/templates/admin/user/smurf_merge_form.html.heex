@@ -40,7 +40,7 @@
         </ul>
         -->
 
-        <form action={~p"/teiserver/admin/users/smurf_merge_post/#{@from_user.id}/#{@to_user.id}"} method="post" class="">
+        <form action={~p"/teiserver/admin/user/smurf_merge_post/#{@from_user.id}/#{@to_user.id}"} method="post" class="">
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
           <div class="row">
@@ -151,7 +151,7 @@
             </div>
           </div>
 
-          <a href={~p"/teiserver/admin/users/#{@to_user}"} class="btn btn-secondary">
+          <a href={~p"/teiserver/admin/user/#{@to_user}"} class="btn btn-secondary">
             Cancel
           </a>
 
