@@ -19,7 +19,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
     }
   end
 
-  def show_form(conn, params) do
+  def show_form(_conn, params) do
     {start_date, end_date} =
       DatePresets.parse(
         params["date_preset"],
@@ -39,20 +39,25 @@ defmodule Teiserver.Game.MatchRatingsExport do
         game_type: game_type,
         of_interest: true
       ],
-      # limit: :infinity,
-      limit: 5,
+      limit: :infinity,
+      # limit: 5,
       select: [:id]
     )
-      |> Enum.map(fn %{id: id} -> id end)
+      |> Stream.map(fn %{id: id} -> id end)
+      |> Enum.to_list
 
     data = game_ids
-      |> Stream.chunk_every(50)
-      |> Enum.map(fn id_list ->
+      |> Stream.chunk_every(100)
+      |> Stream.map(fn id_list ->
         get_games(id_list)
       end)
+      |> Enum.to_list
       |> List.flatten
 
-    {:raw, data |> Jason.encode!}
+    content_type = "application/json"
+    path = "/tmp/match_ratings_export_123.json"
+    File.write(path, Jason.encode_to_iodata!(data))
+    {:file, path, "match_ratings.json", content_type}
   end
 
   defp get_games(id_list) do
@@ -60,10 +65,25 @@ defmodule Teiserver.Game.MatchRatingsExport do
       search: [
         id_list: id_list
       ],
-      # preload: [:members, :ratings]
-      preload: [:ratings]
+      limit: :infinity,
+      preload: [:members, :ratings],
+      select: ~w(id map uuid server_uuid team_count team_size winning_team game_duration game_type)a
     )
-    |> Enum.map(fn match ->
+    |> Stream.filter(fn match ->
+      cond do
+        Enum.empty?(match.ratings) -> false
+        true -> true
+      end
+    end)
+    |> Stream.map(fn match ->
+      members_lookup = match.members
+        |> Map.new(fn m -> {m.user_id, m} end)
+
+      ratings_and_members = match.ratings
+        |> Enum.map(fn r ->
+          {r, members_lookup[r.user_id]}
+        end)
+
       %{
         id: match.id,
         map: match.map,
@@ -71,30 +91,36 @@ defmodule Teiserver.Game.MatchRatingsExport do
         server_uuid: match.server_uuid,
         team_count: match.team_count,
         team_size: match.team_size,
+        winning_team: match.winning_team,
         game_duration: match.game_duration,
-        ratings: convert_ratings(match.ratings)
+        game_type: match.game_type,
+        members: expand_members(ratings_and_members)
       }
     end)
+    |> Enum.to_list
   end
 
-  def convert_ratings(rating_list) do
+  def expand_members(rating_list) do
     rating_list
-    |> Enum.map(fn log ->
+    |> Enum.map(fn {rating_log, member} ->
       %{
-        user_id: log.user_id,
-        party_id: log.party_id,
+        user_id: rating_log.user_id,
+        party_id: rating_log.party_id,
+        team_id: member.team_id,
+        win: member.win,
+        left_after: member.left_after,
 
-        new_rating: log.value["rating_value"],
-        new_skill: log.value["skill"],
-        new_uncertainty: log.value["uncertainty"],
+        new_rating: rating_log.value["rating_value"],
+        new_skill: rating_log.value["skill"],
+        new_uncertainty: rating_log.value["uncertainty"],
 
-        rating_change: log.value["rating_change"],
-        skill_change: log.value["skill_change"],
-        uncertainty_change: log.value["uncertainty_change"],
+        rating_change: rating_log.value["rating_change"],
+        skill_change: rating_log.value["skill_change"],
+        uncertainty_change: rating_log.value["uncertainty_change"],
 
-        old_rating: log.value["rating_value"] - (log.value["rating_change"] || 0),
-        old_skill: log.value["skill"] - (log.value["skill_change"] || 0),
-        old_uncertainty: log.value["uncertainty"] - (log.value["uncertainty_change"] || 0)
+        old_rating: rating_log.value["rating_value"] - (rating_log.value["rating_value_change"] || 0),
+        old_skill: rating_log.value["skill"] - (rating_log.value["skill_change"] || 0),
+        old_uncertainty: rating_log.value["uncertainty"] - (rating_log.value["uncertainty_change"] || 0)
       }
     end)
   end

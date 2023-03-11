@@ -47,17 +47,20 @@ defmodule TeiserverWeb.Report.ExportsController do
 
     if allow?(conn.current_user, module.permissions) do
       case module.show_form(conn, report_params) do
-        # {:file, file_contents, file_name, format} ->
+        {:file, file_path, file_name, content_type} ->
+          conn
+            |> put_resp_content_type(content_type)
+            |> put_resp_header(
+              "content-disposition",
+              "attachment; filename=\"#{file_name}\""
+            )
+            |> send_file(200, file_path)
+
+        # {:data, file_contents, file_name, format} ->
         #   conn
-        #     |> put_resp_content_type("text/plain")
+        #     |> put_resp_content_type(format)
         #     |> put_resp_header("content-disposition", "attachment; filename=\"#{file_name}\"")
         #     |> send_resp(200, file_contents)
-
-        {:data, file_contents, file_name, format} ->
-          conn
-            |> put_resp_content_type(format)
-            |> put_resp_header("content-disposition", "attachment; filename=\"#{file_name}\"")
-            |> send_resp(200, file_contents)
 
         {:raw, raw_contents} ->
           conn
