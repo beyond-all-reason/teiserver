@@ -69,7 +69,7 @@ defmodule CentralWeb.CoreComponents do
                   class="-m-3 flex-none p-3 opacity-20 hover:opacity-40"
                   aria-label={gettext("close")}
                 >
-                  <Heroicons.x_mark solid class="h-5 w-5 stroke-current" />
+                  <i class="fa-fw fa-regular fa-times"></i>
                 </button>
               </div>
               <div id={"#{@id}-content"}>
