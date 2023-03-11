@@ -2,17 +2,17 @@
   <div id="recache-div" data-user-id={@current_user.id}></div>
 <% end %>
 
-<%= if Phoenix.Flash.get(@conn, :danger) do %>
-  <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger"><%= Phoenix.Flash.get(@conn, :danger) %></p>
+<%= if Phoenix.Flash.get(@flash, :danger) do %>
+  <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger"><%= Phoenix.Flash.get(@flash, :danger) %></p>
 <% end %>
-<%= if Phoenix.Flash.get(@conn, :warning) do %>
-  <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning"><%= Phoenix.Flash.get(@conn, :warning) %></p>
+<%= if Phoenix.Flash.get(@flash, :warning) do %>
+  <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning"><%= Phoenix.Flash.get(@flash, :warning) %></p>
 <% end %>
-<%= if Phoenix.Flash.get(@conn, :info) do %>
-  <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info"><%= Phoenix.Flash.get(@conn, :info) %></p>
+<%= if Phoenix.Flash.get(@flash, :info) do %>
+  <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info"><%= Phoenix.Flash.get(@flash, :info) %></p>
 <% end %>
-<%= if Phoenix.Flash.get(@conn, :success) do %>
-  <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success"><%= Phoenix.Flash.get(@conn, :success) %></p>
+<%= if Phoenix.Flash.get(@flash, :success) do %>
+  <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success"><%= Phoenix.Flash.get(@flash, :success) %></p>
 <% end %>
 
 <div class="main-content-container container-fluid">

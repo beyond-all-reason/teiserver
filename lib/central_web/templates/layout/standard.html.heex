@@ -45,21 +45,21 @@
   <% end %>
 
   <div id="flash-messages">
-    <%= if Phoenix.Flash.get(@conn, :danger) do %>
+    <%= if Phoenix.Flash.get(@flash, :danger) do %>
       <p class="alert alert-danger alert-no-margin alert-dismissible fade show" role="alert" id="app-flash-danger">
-        <%= Phoenix.Flash.get(@conn, :danger) %>
+        <%= Phoenix.Flash.get(@flash, :danger) %>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </p>
     <% end %>
-    <%= if Phoenix.Flash.get(@conn, :info) do %>
+    <%= if Phoenix.Flash.get(@flash, :info) do %>
       <p class="alert alert-info alert-no-margin alert-dismissible fade show" role="alert" id="app-flash-info">
-        <%= Phoenix.Flash.get(@conn, :info) %>
+        <%= Phoenix.Flash.get(@flash, :info) %>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </p>
     <% end %>
-    <%= if Phoenix.Flash.get(@conn, :success) do %>
+    <%= if Phoenix.Flash.get(@flash, :success) do %>
       <p class="alert alert-success alert-no-margin alert-dismissible fade show" role="alert" id="app-flash-success">
-        <%= Phoenix.Flash.get(@conn, :success) %>
+        <%= Phoenix.Flash.get(@flash, :success) %>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </p>
     <% end %>
