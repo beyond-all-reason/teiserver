@@ -38,7 +38,7 @@
           <% end %>
 
           <%= if allow?(@conn, "teiserver.staff.moderator") do %>
-            <a class={"btn btn-outline-#{bsname}"} href={Routes.ts_admin_user_path(@conn, :show, @user)}>View user</a>
+            <a class={"btn btn-outline-#{bsname}"} href={~p"/teiserver/admin/users/#{@user}"}>View user</a>
           <% end %>
         </div>
 

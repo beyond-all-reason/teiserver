@@ -14,7 +14,7 @@
         %>
         <hr />
 
-<a class={"btn btn-outline-#{bsname} float-end"} href={Routes.ts_admin_user_path(@conn, :show, @user)}>View user</a>
+<a class={"btn btn-outline-#{bsname} float-end"} href={~p"/teiserver/admin/users/#{@user}"}>View user</a>
 
 
 <div class="row">
@@ -38,7 +38,7 @@
               <td style={"background-color: #{rgba_css user.colour};"}><%= user.name %></td>
               <td>&nbsp;</td>
               <td>
-                <a href={Routes.ts_admin_user_path(@conn, :show, user.id)} class="btn btn-secondary btn-sm">
+                <a href={~p"/teiserver/admin/users/#{user.id}"} class="btn btn-secondary btn-sm">
                   Show
                 </a>
               </td>
@@ -68,7 +68,7 @@
             <td style={"background-color: #{rgba_css user.colour};"}><%= user.name %></td>
             <td>&nbsp;</td>
             <td>
-              <a href={Routes.ts_admin_user_path(@conn, :show, user.id)} class="btn btn-secondary btn-sm">
+              <a href={~p"/teiserver/admin/users/#{user.id}"} class="btn btn-secondary btn-sm">
                 Show
               </a>
             </td>
@@ -98,7 +98,7 @@
               <td style={"background-color: #{rgba_css user.colour};"}><%= user.name %></td>
               <td>&nbsp;</td>
               <td>
-                <a href={Routes.ts_admin_user_path(@conn, :show, user.id)} class="btn btn-secondary btn-sm">
+                <a href={~p"/teiserver/admin/users/#{user.id}"} class="btn btn-secondary btn-sm">
                   Show
                 </a>
               </td>

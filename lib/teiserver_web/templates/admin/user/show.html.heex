@@ -7,7 +7,8 @@
     $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
 
     page_quick_actions = [
-      {label: "Edit user", icon: "<%= icon() %>", url: "<%= Routes.ts_admin_user_path(@conn, :edit, @user) %>", keywords: ["edit", "user", "edit user"]},
+      {label: "Edit user", icon: "<%= icon() %>", url: "<%= Routes\.ts_admin_user_path\(@?(conn|socket), :edit, (@?[0-9\-a-zA-Z_\.]+)\)
+~p"/teiserver/admin/users/#{@user}/edit" %>", keywords: ["edit", "user", "edit user"]},
     ];
 
     setTimeout(function() {
@@ -55,7 +56,8 @@
           <% end %>
 
           <%= if allow?(@conn, "teiserver.staff.moderator") do %>
-            <a href={Routes.ts_admin_user_path(@conn, :edit, @user)} class={"btn btn-outline-#{bsname}"}>
+            <a href={Routes\.ts_admin_user_path\(@?(conn|socket), :edit, (@?[0-9\-a-zA-Z_\.]+)\)
+~p"/teiserver/admin/users/#{@user}/edit"} class={"btn btn-outline-#{bsname}"}>
               <i class="fa-regular fa-fw fa-wrench"></i>
               Edit user
             </a>

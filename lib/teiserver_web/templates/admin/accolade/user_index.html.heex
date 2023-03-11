@@ -6,8 +6,8 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <a class={"btn btn-outline-#{bsname} float-end"} href={Routes.ts_admin_user_path(@conn, :show, @user.id)}>View user</a>
-      
+        <a class={"btn btn-outline-#{bsname} float-end"} href={~p"/teiserver/admin/users/#{@user.id}"}>View user</a>
+
         <%= render TeiserverWeb.Admin.AccoladeView, "section_menu.html", Map.merge(assigns, %{
             show_search: false,
             active: "user"
@@ -34,7 +34,7 @@
           </td>
           <td style={"background-color: #{rgba_css accolade.badge_type.colour};"}><%= accolade.badge_type.name %></td>
           <td><%= accolade.recipient.name %></td>
-          
+
           <td><%= date_to_str(accolade.inserted_at, format: :hms_or_dmy) %></td>
           <td>
             <a href={Routes.ts_admin_accolade_path(@conn, :show, accolade.id)} class="btn btn-secondary btn-sm">
@@ -66,7 +66,7 @@
           </td>
           <td style={"background-color: #{rgba_css accolade.badge_type.colour};"}><%= accolade.badge_type.name %></td>
           <td><%= accolade.giver.name %></td>
-          
+
           <td><%= date_to_str(accolade.inserted_at, format: :hms_or_dmy) %></td>
           <td>
             <a href={Routes.ts_admin_accolade_path(@conn, :show, accolade.id)} class="btn btn-secondary btn-sm">

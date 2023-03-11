@@ -60,7 +60,7 @@
                   </a>
                 </td>
                 <td>
-                  <a href={Routes.ts_admin_user_path(@conn, :show, msg.user_id)}>
+                  <a href={~p"/teiserver/admin/users/#{msg.user_id}"}>
                     <%= msg.user.name %>
                   </a>
                 </td>

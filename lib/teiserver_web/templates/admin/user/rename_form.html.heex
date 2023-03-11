@@ -14,7 +14,7 @@
         %>
 
         <hr />
-        
+
         <div class="row mt-4">
           <div class="col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
 
@@ -29,10 +29,10 @@
                   <input type='text' name='new_name' id='new_name' value='' class='form-control' autofocus="autofocus" />
                 </div>
               </div>
-            
+
               <div class="row mt-4">
                 <div class="col-md-6">
-                  <a href={Routes.ts_admin_user_path(@conn, :show, @user)} class="btn btn-secondary btn-block">
+                  <a href={~p"/teiserver/admin/users/#{@user}"} class="btn btn-secondary btn-block">
                     Cancel
                   </a>
                 </div>
@@ -43,11 +43,11 @@
                 </div>
               </div>
             </form>
-            
+
             <br />
             <hr />
             <br />
-            
+
             <h4>Random rename</h4>
             <form action={Routes.ts_admin_user_path(@conn, :rename_post, @user)} method='post' class=''>
               <% random_rename = "renamed#{:rand.uniform(899_999_999) + 100_000_000}" %>

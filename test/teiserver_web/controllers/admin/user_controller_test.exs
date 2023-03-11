@@ -36,7 +36,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     test "lists all users - redirect", %{conn: conn} do
       main_user = Central.Account.get_user_by_name("main user")
       conn = get(conn, ~p"/teiserver/admin/users" <> "?s=main user")
-      assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, main_user.id)
+      assert redirected_to(conn) == ~p"/teiserver/admin/users/#{main_user.id}"
     end
 
     test "search", %{conn: conn} do
@@ -47,7 +47,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
 
   describe "show user" do
     test "renders form", %{conn: conn, user: user} do
-      conn = get(conn, Routes.ts_admin_user_path(conn, :show, user.id))
+      conn = get(conn, ~p"/teiserver/admin/users/#{user.id}")
       assert html_response(conn, 200) =~ "Reports"
     end
   end
@@ -67,13 +67,13 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   #       )
 
   #     # assert %{id: id} = redirected_params(conn)
-  #     # assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, id)
+  #     # assert redirected_to(conn) == ~p"/teiserver/admin/users/#{id}"
   #     assert redirected_to(conn) == ~p"/teiserver/admin/users"
 
   #     new_user = Account.list_users(search: [name: @create_attrs.name])
   #     assert Enum.count(new_user) == 1
 
-  #     # conn = get(conn, Routes.ts_admin_user_path(conn, :show, id))
+  #     # conn = get(conn, ~p"/teiserver/admin/users/#{id}")
   #     # assert html_response(conn, 200) =~ "Show User"
   #   end
 
@@ -85,13 +85,15 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
 
   describe "edit user" do
     test "renders form for editing nil", %{conn: conn} do
-      resp = get(conn, Routes.ts_admin_user_path(conn, :edit, -1))
+      resp = get(conn, Routes\.ts_admin_user_path\(@?(conn|socket), :edit, (@?[0-9\-a-zA-Z_\.]+)\)
+~p"/teiserver/admin/users/#{-1}/edit")
       assert resp.private[:phoenix_flash]["danger"] == "Unable to access this user"
       assert redirected_to(resp) == ~p"/teiserver/admin/users"
     end
 
     test "renders form for editing chosen user", %{conn: conn, user: user} do
-      conn = get(conn, Routes.ts_admin_user_path(conn, :edit, user))
+      conn = get(conn, Routes\.ts_admin_user_path\(@?(conn|socket), :edit, (@?[0-9\-a-zA-Z_\.]+)\)
+~p"/teiserver/admin/users/#{user}/edit")
       assert html_response(conn, 200) =~ "Verified"
       assert html_response(conn, 200) =~ "Save changes"
     end
@@ -106,16 +108,16 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
           "data" => %{}
         })
 
-      conn = put(conn, Routes.ts_admin_user_path(conn, :update, user), user: @update_attrs)
-      assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, user)
+      conn = put(conn, ~p"/teiserver/admin/users/#{user}", user: @update_attrs)
+      assert redirected_to(conn) == ~p"/teiserver/admin/users/#{user}"
       # assert redirected_to(conn) == ~p"/teiserver/admin/users"
 
-      conn = get(conn, Routes.ts_admin_user_path(conn, :show, user))
+      conn = get(conn, ~p"/teiserver/admin/users/#{user}")
       assert html_response(conn, 200) =~ "some updated colour"
     end
 
     test "renders errors when data is invalid", %{conn: conn, user: user} do
-      conn = put(conn, Routes.ts_admin_user_path(conn, :update, user), user: @invalid_attrs)
+      conn = put(conn, ~p"/teiserver/admin/users/#{user}", user: @invalid_attrs)
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
     end
   end
@@ -131,9 +133,9 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       Teiserver.User.recache_user(user.id)
 
       conn = put(conn, Routes.ts_admin_user_path(conn, :rename_post, user), new_name: "new_test_name")
-      assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, user)
+      assert redirected_to(conn) == ~p"/teiserver/admin/users/#{user}"
 
-      conn = get(conn, Routes.ts_admin_user_path(conn, :show, user))
+      conn = get(conn, ~p"/teiserver/admin/users/#{user}")
       assert html_response(conn, 200) =~ "new_test_name"
     end
 
@@ -165,7 +167,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   #       reason: "test reason",
   #       until: "5 minutes"
   #     })
-  #     assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, user.id) <> "#reports_tab"
+  #     assert redirected_to(conn) == ~p"/teiserver/admin/users/#{user.id}" <> "#reports_tab"
 
   #     cached_user = UserCache.get_user_by_id(user.id)
   #     [muted, until] = cached_user.muted
@@ -184,7 +186,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   #       reason: "test reason",
   #       until: "never"
   #     })
-  #     assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, user.id) <> "#reports_tab"
+  #     assert redirected_to(conn) == ~p"/teiserver/admin/users/#{user.id}" <> "#reports_tab"
 
   #     cached_user = UserCache.get_user_by_id(user.id)
   #     [muted, until] = cached_user.muted
@@ -204,7 +206,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   #       reason: "test reason",
   #       until: "5 minutes"
   #     })
-  #     assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, user.id) <> "#reports_tab"
+  #     assert redirected_to(conn) == ~p"/teiserver/admin/users/#{user.id}" <> "#reports_tab"
 
   #     cached_user = UserCache.get_user_by_id(user.id)
   #     [banned, until] = cached_user.banned
@@ -225,7 +227,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   #       reason: "test reason",
   #       until: "never"
   #     })
-  #     assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, user.id) <> "#reports_tab"
+  #     assert redirected_to(conn) == ~p"/teiserver/admin/users/#{user.id}" <> "#reports_tab"
 
   #     cached_user = UserCache.get_user_by_id(user.id)
   #     [banned, until] = cached_user.banned

@@ -289,7 +289,7 @@ defmodule TeiserverWeb.Admin.UserController do
             conn
             |> put_flash(:info, "User updated successfully.")
             # |> redirect(to: ~p"/teiserver/admin/users")
-            |> redirect(to: Routes.ts_admin_user_path(conn, :show, user.id))
+            |> redirect(to: ~p"/teiserver/admin/users/#{user.id}")
 
           {:error, %Ecto.Changeset{} = changeset} ->
             render(conn, "edit.html", user: user, changeset: changeset)
@@ -686,7 +686,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
         conn
           |> put_flash(:success, "Applied the changes")
-          |> redirect(to: Routes.ts_admin_user_path(conn, :show, to_user.id))
+          |> redirect(to: ~p"/teiserver/admin/users/#{to_user.id}")
 
       _ ->
         conn
@@ -737,7 +737,7 @@ defmodule TeiserverWeb.Admin.UserController do
       |> assign(:user, user)
       |> assign(:mode, mode)
       |> assign(:messages, messages)
-      |> add_breadcrumb(name: "Show: #{user.name}", url: Routes.ts_admin_user_path(conn, :show, id))
+      |> add_breadcrumb(name: "Show: #{user.name}", url: ~p"/teiserver/admin/users/#{id}")
       |> add_breadcrumb(name: "Chat logs", url: conn.request_path)
       |> render("full_chat.html")
   end
@@ -754,7 +754,7 @@ defmodule TeiserverWeb.Admin.UserController do
     conn
     |> assign(:user, user)
     |> assign(:lookup, lookup)
-    |> add_breadcrumb(name: "Show: #{user.name}", url: Routes.ts_admin_user_path(conn, :show, id))
+    |> add_breadcrumb(name: "Show: #{user.name}", url: ~p"/teiserver/admin/users/#{id}")
     |> add_breadcrumb(name: "Relationships", url: conn.request_path)
     |> render("relationships.html")
   end
@@ -771,7 +771,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
     conn
     |> put_flash(:success, "stat #{key} updated")
-    |> redirect(to: Routes.ts_admin_user_path(conn, :show, user.id) <> "#details_tab")
+    |> redirect(to: ~p"/teiserver/admin/users/#{user.id}" <> "#details_tab")
   end
 
   @spec rename_form(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -802,7 +802,7 @@ defmodule TeiserverWeb.Admin.UserController do
           :success ->
             conn
               |> put_flash(:success, "User renamed")
-              |> redirect(to: Routes.ts_admin_user_path(conn, :show, user.id))
+              |> redirect(to: ~p"/teiserver/admin/users/#{user.id}")
 
           {:error, reason} ->
             conn
@@ -831,7 +831,7 @@ defmodule TeiserverWeb.Admin.UserController do
     end
 
     conn
-    |> redirect(to: Routes.ts_admin_user_path(conn, :show, id) <> tab)
+    |> redirect(to: ~p"/teiserver/admin/users/#{id}" <> tab)
   end
 
   @spec search_defaults(Plug.Conn.t()) :: Map.t()

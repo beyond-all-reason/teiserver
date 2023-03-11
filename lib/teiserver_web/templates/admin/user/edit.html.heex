@@ -15,7 +15,7 @@
 
         <hr />
 
-        <%= render "form.html", Map.put(assigns, :action, Routes.ts_admin_user_path(@conn, :update, @user)) %>
+        <%= render "form.html", Map.put(assigns, :action, ~p"/teiserver/admin/users/#{@user}") %>
 
       </div>
     </div>
