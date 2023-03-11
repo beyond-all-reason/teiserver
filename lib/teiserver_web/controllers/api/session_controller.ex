@@ -77,6 +77,16 @@ defmodule TeiserverWeb.API.SessionController do
     |> token_reply(result)
   end
 
+  def request_token(conn, _) do
+    conn
+    |> token_reply({:error, "You must include both an email and a password in the POST request"})
+  end
+
+  def request_token_get(conn, _) do
+    conn
+    |> token_reply({:error, "Must be a POST request with email and password in the body"})
+  end
+
   defp make_token(conn, user, expires) do
     ip = Teiserver.Logging.LoggingPlug.get_ip_from_conn(conn)
       |> Tuple.to_list()
