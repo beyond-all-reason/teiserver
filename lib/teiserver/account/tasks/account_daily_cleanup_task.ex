@@ -33,6 +33,9 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
 
   @spec do_deletion([T.userid()]) :: {:ok, map()} | {:error, map()}
   def do_deletion(id_list) do
+    id_list
+      |> Enum.each(&Account.decache_user/1)
+
     # Some mass deletion first
     sql_id_list = id_list
       |> Enum.join(",")
