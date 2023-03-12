@@ -22,7 +22,7 @@
   <div class="col-md-12 col-lg-8">
     <h4>Restrictions</h4>
     <div class="row">
-      <%= if Enum.empty?(@user.data["restrictions"]) do %>
+      <%= if Enum.empty?(@user.data["restrictions"] || []) do %>
         No restrictions
       <% else %>
         <div class="col-lg-3 col-xl-2 col-xxl-2">

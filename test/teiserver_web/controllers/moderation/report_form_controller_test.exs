@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Moderation.ReportFormControllerTest do
       user = GeneralTestLib.make_user()
       conn = get(conn, Routes.moderation_report_form_path(conn, :index, user.id))
       assert html_response(conn, 200) =~ "User report form: #{user.name}"
-      assert html_response(conn, 200) =~ "Optional extra info:"
+      assert html_response(conn, 200) =~ "Reason for report"
     end
   end
 

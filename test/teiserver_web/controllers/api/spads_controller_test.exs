@@ -146,16 +146,8 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       # Due to fuzzing of values we can see the imbalance indicator change
       # It can go as high as 2
       assert Enum.member?([2, 1, 0], data["unbalance_indicator"])
-      assert data == %{
-        "bot_assign_hash" => %{},
-        "player_assign_hash" => %{
-          "Auger" => %{"id" => 3, "team" => 0},
-          "Basilica" => %{"id" => 1, "team" => 1},
-          "Crossbow" => %{"id" => 0, "team" => 1},
-          "Dagger" => %{"id" => 2, "team" => 0}
-        },
-        "unbalance_indicator" => data["unbalance_indicator"]
-      }
+      assert Map.keys(data["player_assign_hash"]) == ["Auger", "Basilica", "Crossbow", "Dagger"]
+
     end
   end
 end

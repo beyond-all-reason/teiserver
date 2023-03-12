@@ -14,7 +14,7 @@ defmodule TeiserverWeb.Account.PreferencesControllerTest do
   describe "listing" do
     test "index", %{conn: conn} do
       conn = get(conn, Routes.ts_account_preferences_path(conn, :index))
-      assert html_response(conn, 200) =~ "Teiserver preferences"
+      assert html_response(conn, 200) =~ "Account preferences"
     end
   end
 

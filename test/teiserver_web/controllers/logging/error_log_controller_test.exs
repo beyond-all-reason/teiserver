@@ -10,8 +10,17 @@ defmodule TeiserverWeb.Logging.ErrorLogControllerTest do
   end
 
   defp create_test_error(conn) do
-    assert_raise ArithmeticError,
-                 fn -> get(conn, Routes.admin_tool_path(conn, :test_error)) end
+    {:ok, log} = Logging.create_error_log(%{
+      path: "path",
+      method: "method",
+      reason: "reason",
+      traceback: "traceback",
+      hidden: false,
+      data: %{
+        "params" => %{}
+      },
+      user_id: (conn.assigns.current_user || %{id: nil}).id
+    })
   end
 
   test "lists all entries on index", %{conn: conn} do

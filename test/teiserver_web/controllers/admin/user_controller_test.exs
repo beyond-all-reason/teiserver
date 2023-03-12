@@ -40,7 +40,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     end
 
     test "search", %{conn: conn} do
-      conn = post(conn, ~p"/teiserver/admin/user/search", search: %{})
+      conn = post(conn, ~p"/teiserver/admin/users/search", search: %{})
       assert html_response(conn, 200) =~ "Listing Users"
     end
   end
