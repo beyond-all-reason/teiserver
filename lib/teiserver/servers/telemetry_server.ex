@@ -150,7 +150,10 @@ defmodule Teiserver.Telemetry.TelemetryServer do
 
     lobby_memberships = clients
       |> Map.values
-      |> Enum.reject(fn %{lobby_id: lobby_id} -> lobby_id == nil end)
+      |> Enum.reject(fn
+          %{lobby_id: lobby_id} -> lobby_id == nil
+          _ -> true
+      end)
       |> Enum.reduce(%{}, fn (client, memberships) ->
         new_lobby_membership = [client.userid | Map.get(memberships, client.lobby_id, [])]
         Map.put(memberships, client.lobby_id, new_lobby_membership)

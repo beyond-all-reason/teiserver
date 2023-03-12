@@ -34,6 +34,14 @@ defmodule Teiserver.Game.AchievementServer do
   @impl true
   def handle_info(%{
     channel: "teiserver_telemetry_client_events",
+    userid: nil,
+    event_type_name: "game_start:singleplayer:scenario_end"
+  }, state) do
+    {:noreply, state}
+  end
+
+  def handle_info(%{
+    channel: "teiserver_telemetry_client_events",
     userid: userid,
     event_type_name: "game_start:singleplayer:scenario_end",
     event_value: %{
