@@ -9,6 +9,15 @@
     %>
   <% end %>
 
+  <%= if allow?(@current_user, "teiserver.staff.server") do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Logging.icon(),
+      text: "Logging",
+      link: ~p"/logging"
+    %>
+  <% end %>
+
   <%= if allow?(@conn, "teiserver.staff.moderator") do %>
     <%=
       central_component "menu_card",

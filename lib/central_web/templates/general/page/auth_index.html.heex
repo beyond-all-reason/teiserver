@@ -56,15 +56,6 @@
     %>
   <% end %>
 
-  <%= if allow?(@current_user, "logging") do %>
-    <%=
-      central_component "menu_card",
-      icon: Teiserver.Logging.icon(),
-      text: "Logging",
-      link: ~p"/logging"
-    %>
-  <% end %>
-
   <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
     <%=
       central_component "menu_card",
