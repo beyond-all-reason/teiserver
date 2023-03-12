@@ -1,7 +1,7 @@
 defmodule Teiserver.Coordinator.AutomodTest do
   use Central.ServerCase, async: false
-  alias Central.{Config, Logging}
-  alias Teiserver.{Account, User, Client, Moderation}
+  alias Central.{Config}
+  alias Teiserver.{Account, User, Client, Moderation, Logging}
   alias Teiserver.Coordinator.{CoordinatorServer, AutomodServer}
   alias Teiserver.Account.CalculateSmurfKeyTask
 
