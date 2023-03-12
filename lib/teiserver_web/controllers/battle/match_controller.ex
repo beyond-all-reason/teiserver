@@ -108,11 +108,18 @@ defmodule TeiserverWeb.Battle.MatchController do
     games = Enum.count(logs) |> max(1)
     wins = Enum.filter(logs, fn l -> l.match_membership.win end) |> Enum.count
 
+    first_log = case Enum.reverse(logs) do
+      [l | _] -> l
+      _ -> nil
+    end
+
+      logs |> Enum.reverse |> hd
+
     stats = %{
       games: games,
       winrate: wins/games,
 
-      first_log: logs |> Enum.reverse |> hd,
+      first_log: first_log,
     }
 
     conn
