@@ -1,11 +1,11 @@
-defmodule CentralWeb.Admin.CodeController do
+defmodule TeiserverWeb.Admin.CodeController do
   use CentralWeb, :controller
 
-  alias Central.Account
-  alias Central.Account.{Code, CodeLib}
+  alias Teiserver.Account
+  alias Teiserver.Account.{Code, CodeLib}
 
   plug Bodyguard.Plug.Authorize,
-    policy: Central.Account.Code,
+    policy: Teiserver.Account.Code,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 

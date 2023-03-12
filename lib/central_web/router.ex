@@ -169,7 +169,6 @@ defmodule CentralWeb.Router do
     post("/page_views/report", PageViewLogController, :report)
     get("/page_views/search", PageViewLogController, :index)
     post("/page_views/search", PageViewLogController, :search)
-    get("/page_views/latest_users", PageViewLogController, :latest_users)
     resources("/page_views", PageViewLogController, only: [:index, :show, :delete])
 
     # Aggregate
@@ -237,7 +236,6 @@ defmodule CentralWeb.Router do
     get("/users/config/delete/:user_id/:key", UserController, :config_delete)
 
     # Users
-    get("/users/latest", GeneralController, :latest_users)
     get("/users/permissions/:id", UserController, :edit_permissions)
     post("/users/permissions/:id", UserController, :update_permissions)
     post("/users/copy_permissions/:id", UserController, :copy_permissions)
@@ -260,14 +258,6 @@ defmodule CentralWeb.Router do
 
     get("/groups/delete_check/:id", GroupController, :delete_check)
     resources("/groups", GroupController)
-
-    # Codes
-    resources("/codes", CodeController)
-    put("/codes/extend/:id/:hours", CodeController, :extend)
-
-
-    # Config
-    resources("/site", SiteConfigController, only: [:index, :edit, :update, :delete])
 
     # Tools
     get("/tools", ToolController, :index)
@@ -573,6 +563,17 @@ defmodule CentralWeb.Router do
   scope "/admin", TeiserverWeb.Admin, as: :admin do
     pipe_through([:browser, :standard_layout, :protected])
     resources("/lobby_policies", LobbyPolicyController, only: [:index, :new, :create, :show, :edit, :update, :delete])
+  end
+
+  scope "/teiserver/admin", TeiserverWeb.Admin, as: :admin do
+    pipe_through([:browser, :standard_layout, :protected])
+
+    # Codes
+    resources("/codes", CodeController)
+    put("/codes/extend/:id/:hours", CodeController, :extend)
+
+    # Config
+    resources("/site", SiteConfigController, only: [:index, :edit, :update, :delete])
   end
 
   scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do

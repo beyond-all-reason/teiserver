@@ -422,7 +422,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
   defp do_handle(%{command: "website", senderid: senderid} = _cmd, state) do
     client = Client.get_client_by_id(senderid)
-    {:ok, code} = Central.Account.create_code(%{
+    {:ok, code} = Account.create_code(%{
         value: UUID.uuid1(),
         purpose: "one_time_login",
         expires: Timex.now() |> Timex.shift(minutes: 5),

@@ -7,14 +7,13 @@ defmodule Teiserver.Protocols.SpringIn do
   """
   require Logger
   alias Teiserver.Battle.Lobby
-  alias Teiserver.{Coordinator, Battle, Room, User, Client}
+  alias Teiserver.{Account, Coordinator, Battle, Room, User, Client}
   alias Phoenix.PubSub
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
   alias Teiserver.Protocols.{Spring, SpringOut}
   alias Teiserver.Protocols.Spring.{TelemetryIn, BattleIn}
-  alias Teiserver.{Account}
 
   @status_3_window 1_000
   @status_10_window 60_000
@@ -622,7 +621,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
           true ->
             client = Client.get_client_by_id(state.userid)
-            {:ok, code} = Central.Account.create_code(%{
+            {:ok, code} = Account.create_code(%{
               value: UUID.uuid1(),
               purpose: "one_time_login",
               expires: Timex.now() |> Timex.shift(minutes: 5),

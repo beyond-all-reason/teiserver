@@ -21,7 +21,7 @@ defmodule CentralWeb.Account.RegistrationController do
         {false, "disabled"}
 
       config_setting == "Link only" ->
-        code = Account.get_code(params["code"] || "!no_code!")
+        code = Teiserver.Account.get_code(params["code"] || "!no_code!")
 
         cond do
           params["code"] == nil ->
@@ -73,7 +73,7 @@ defmodule CentralWeb.Account.RegistrationController do
         {false, "disabled"}
 
       config_setting == "Link only" ->
-        code = Account.get_code(user_params["code"] || "!no_code!")
+        code = Teiserver.Account.get_code(user_params["code"] || "!no_code!")
 
         cond do
           user_params["code"] == nil ->
@@ -99,7 +99,7 @@ defmodule CentralWeb.Account.RegistrationController do
     if allowed do
       case Account.self_create_user(user_params) do
         {:ok, _user} ->
-          case Account.get_code(user_params["code"]) do
+          case Teiserver.Account.get_code(user_params["code"]) do
             nil ->
               :ok
             code ->

@@ -14,14 +14,6 @@
   <% end %>
 
   <%= if allow?(@current_user, "admin.dev") do %>
-    <%= central_component "menu_card", icon_class: "fa-solid", icon: Central.Account.CodeLib.icon, text: "Codes", link: Routes.admin_code_path(@conn, :index) %>
-  <% end %>
-
-  <%= if allow?(@current_user, "admin.dev") do %>
-    <%= central_component "menu_card", icon_class: "fa-solid", icon: Central.Config.SiteConfigLib.icon, text: "Site config", link: Routes.admin_site_config_path(@conn, :index) %>
-  <% end %>
-
-  <%= if allow?(@current_user, "admin.dev") do %>
     <%= central_component "menu_card", icon_class: "fa-solid", icon: Central.Admin.ToolLib.icon, text: "Tools", link: Routes.admin_tool_path(@conn, :index) %>
   <% end %>
 </div>

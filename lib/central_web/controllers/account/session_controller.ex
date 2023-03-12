@@ -44,7 +44,7 @@ defmodule CentralWeb.Account.SessionController do
       |> Enum.join(".")
 
     code =
-      Account.get_code(nil,
+      Teiserver.Account.get_code(nil,
         search: [
           value: value,
           purpose: "one_time_login",
@@ -70,7 +70,7 @@ defmodule CentralWeb.Account.SessionController do
 
       true ->
         Logger.debug("SessionController.one_time_login success")
-        Account.delete_code(code)
+        Teiserver.Account.delete_code(code)
 
         user = Account.get_user!(code.user_id)
 
@@ -134,7 +134,7 @@ defmodule CentralWeb.Account.SessionController do
     expected_value = Central.cache_get(:codes, key)
 
     existing_resets =
-      Account.list_codes(
+      Teiserver.Account.list_codes(
         search: [
           user_id: user.id,
           purpose: "reset_password",
@@ -197,7 +197,7 @@ defmodule CentralWeb.Account.SessionController do
 
   @spec password_reset_form(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def password_reset_form(conn, %{"value" => value}) do
-    code = Account.get_code(value, preload: [:user])
+    code = Teiserver.Account.get_code(value, preload: [:user])
 
     cond do
       code == nil ->
@@ -224,7 +224,7 @@ defmodule CentralWeb.Account.SessionController do
 
   @spec password_reset_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def password_reset_post(conn, %{"value" => value, "pass1" => pass1, "pass2" => pass2}) do
-    code = Account.get_code(value, preload: [:user])
+    code = Teiserver.Account.get_code(value, preload: [:user])
 
     cond do
       code == nil ->
@@ -267,7 +267,7 @@ defmodule CentralWeb.Account.SessionController do
             )
 
             # Now delete the code, it's been used
-            Account.delete_code(code)
+            Teiserver.Account.delete_code(code)
 
             conn
             |> put_flash(:success, "Your password has been reset.")

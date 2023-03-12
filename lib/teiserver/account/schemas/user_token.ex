@@ -1,4 +1,4 @@
-defmodule Central.Account.UserToken do
+defmodule Teiserver.Account.UserToken do
   @moduledoc false
   use CentralWeb, :schema
 

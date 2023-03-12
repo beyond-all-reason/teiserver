@@ -1,7 +1,7 @@
-defmodule Central.Account.UserTokenLib do
+defmodule Teiserver.Account.UserTokenLib do
   @moduledoc false
   use CentralWeb, :library
-  alias Central.Account.UserToken
+  alias Teiserver.Account.UserToken
 
   @spec colours :: atom
   def colours(), do: :info

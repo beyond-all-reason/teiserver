@@ -1,4 +1,4 @@
-defmodule Central.Account.Code do
+defmodule Teiserver.Account.Code do
   @moduledoc false
   use CentralWeb, :schema
 

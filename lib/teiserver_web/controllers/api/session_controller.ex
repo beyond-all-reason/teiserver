@@ -96,9 +96,9 @@ defmodule TeiserverWeb.API.SessionController do
       |> Map.new()
       |> Map.get("user-agent")
 
-    {:ok, token} = Central.Account.create_user_token(%{
+    {:ok, token} = Teiserver.Account.create_user_token(%{
       user_id: user.id,
-      value: Central.Account.create_token_value(),
+      value: Teiserver.Account.create_token_value(),
 
       ip: ip,
       user_agent: user_agent,

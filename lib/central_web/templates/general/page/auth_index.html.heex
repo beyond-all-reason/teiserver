@@ -36,15 +36,6 @@
     <% end %>
   <% end %>
 
-  <%= if allow?(@current_user, "admin") do %>
-    <%=
-      central_component "menu_card",
-      icon: Central.Admin.icon(),
-      text: "C.Admin",
-      link: ~p"/admin"
-    %>
-  <% end %>
-
   <%= if allow?(@conn, "teiserver.staff") do %>
     <%=
       central_component "menu_card",
@@ -53,28 +44,6 @@
       text: "Administration",
       icon_class: "fa-duotone",
       link: ~p"/teiserver/admin"
-    %>
-  <% end %>
-
-  <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
-    <%=
-      central_component "menu_card",
-      icon: Central.Communication.CommentLib.icon(),
-      name: "chat",
-      text: "Chat",
-      icon_class: "fa-duotone",
-      link: ~p"/teiserver/admin/chat"
-    %>
-  <% end %>
-
-  <%= if allow?(@conn, "teiserver.staff.moderator") do %>
-    <%=
-      central_component "menu_card",
-      icon: "fa-regular fa-users",
-      name: "user_admin",
-      text: "User admin",
-      icon_class: "fa-duotone",
-      link: ~p"/teiserver/admin/user"
     %>
   <% end %>
 

@@ -1,4 +1,4 @@
-defmodule CentralWeb.Admin.SiteConfigController do
+defmodule TeiserverWeb.Admin.SiteConfigController do
   use CentralWeb, :controller
 
   alias Central.Config

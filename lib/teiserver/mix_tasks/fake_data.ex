@@ -366,7 +366,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
     Central.Config.update_site_config("user.Enable one time links", "true")
 
-    {:ok, _code} = Central.Account.create_code(%{
+    {:ok, _code} = Account.create_code(%{
         value: "fakedata_code$127.0.0.1",
         purpose: "one_time_login",
         expires: Timex.now() |> Timex.shift(hours: 24),

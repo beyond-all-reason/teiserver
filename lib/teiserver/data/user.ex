@@ -650,7 +650,7 @@ defmodule Teiserver.User do
 
       uuid = UUID.uuid1()
       client = Account.get_client_by_id(from_id)
-      {:ok, _code} = Central.Account.create_code(%{
+      {:ok, _code} = Account.create_code(%{
           value: uuid <> "$#{client.ip}",
           purpose: "one_time_login",
           expires: Timex.now() |> Timex.shift(minutes: 5),

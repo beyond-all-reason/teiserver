@@ -13,7 +13,7 @@ defmodule Teiserver.EmailHelper do
     verification_code = stats["verification_code"]
 
     {:ok, _code} =
-      Account.create_code(%{
+      Teiserver.Account.create_code(%{
         value: UUID.uuid4(),
         purpose: "reset_password",
         expires: Timex.now() |> Timex.shift(hours: 24),

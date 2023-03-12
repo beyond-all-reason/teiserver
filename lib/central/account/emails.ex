@@ -14,7 +14,7 @@ defmodule Central.Account.Emails do
         code
       else
         {:ok, code} =
-          Account.create_code(%{
+          Teiserver.Account.create_code(%{
             value: UUID.uuid1(),
             purpose: "reset_password",
             expires: Timex.now() |> Timex.shift(hours: 24),

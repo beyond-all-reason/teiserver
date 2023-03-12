@@ -1,7 +1,7 @@
-defmodule Central.Account.CodeLib do
+defmodule Teiserver.Account.CodeLib do
   @moduledoc false
   use CentralWeb, :library
-  alias Central.Account.Code
+  alias Teiserver.Account.Code
 
   @spec colours :: atom
   def colours(), do: :info

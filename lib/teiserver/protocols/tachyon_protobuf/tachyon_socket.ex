@@ -4,6 +4,7 @@ defmodule Tachyon.TachyonSocket do
   require Logger
   alias Phoenix.PubSub
   alias Central.Config
+  alias Teiserver.Account
   alias Teiserver.Tachyon.{TachyonPbLib, ClientDispatcher}
   alias Teiserver.Protocols.Tachyon.TachyonProtobufIn
   alias Teiserver.Data.Types, as: T
@@ -18,7 +19,7 @@ defmodule Tachyon.TachyonSocket do
 
   @spec connect(ws_state()) :: {:ok, ws_state()}
   def connect(%{params: %{"token" => token}} = state) do
-    case Central.Account.get_user_token_by_value(token) do
+    case Account.get_user_token_by_value(token) do
       nil ->
         :error
 
