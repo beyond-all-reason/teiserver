@@ -52,7 +52,7 @@ defmodule CentralWeb.Account.ForgottenPasswordControllerTest do
       dummy = GeneralTestLib.make_user()
 
       {:ok, _code} =
-        Account.create_code(%{
+        Teiserver.Account.create_code(%{
           value: "existing-request-test-code",
           purpose: "reset_password",
           expires: Timex.now() |> Timex.shift(hours: 24),
@@ -131,7 +131,7 @@ defmodule CentralWeb.Account.ForgottenPasswordControllerTest do
       # assert conn.private[:phoenix_flash]["info"] == nil
 
       code =
-        Account.list_codes(
+        Teiserver.Account.list_codes(
           where: [
             user_id: dummy.id,
             purpose: "reset_password"
@@ -158,7 +158,7 @@ defmodule CentralWeb.Account.ForgottenPasswordControllerTest do
       dummy = GeneralTestLib.make_user()
 
       {:ok, code} =
-        Account.create_code(%{
+        Teiserver.Account.create_code(%{
           value: "not-password-reset",
           purpose: "not-password-reset",
           expires: Timex.now() |> Timex.shift(hours: 24),
@@ -174,7 +174,7 @@ defmodule CentralWeb.Account.ForgottenPasswordControllerTest do
       dummy = GeneralTestLib.make_user()
 
       {:ok, code} =
-        Account.create_code(%{
+        Teiserver.Account.create_code(%{
           value: "expired-password-reset",
           purpose: "reset_password",
           expires: Timex.now() |> Timex.shift(hours: -24),
@@ -190,7 +190,7 @@ defmodule CentralWeb.Account.ForgottenPasswordControllerTest do
       dummy = GeneralTestLib.make_user()
 
       {:ok, code} =
-        Account.create_code(%{
+        Teiserver.Account.create_code(%{
           value: "expired-password-reset",
           purpose: "reset_password",
           expires: Timex.now() |> Timex.shift(hours: 24),
@@ -219,7 +219,7 @@ defmodule CentralWeb.Account.ForgottenPasswordControllerTest do
       dummy = GeneralTestLib.make_user()
 
       {:ok, code} =
-        Account.create_code(%{
+        Teiserver.Account.create_code(%{
           value: "not-password-reset",
           purpose: "not-password-reset",
           expires: Timex.now() |> Timex.shift(hours: 24),
@@ -240,7 +240,7 @@ defmodule CentralWeb.Account.ForgottenPasswordControllerTest do
       dummy = GeneralTestLib.make_user()
 
       {:ok, code} =
-        Account.create_code(%{
+        Teiserver.Account.create_code(%{
           value: "expired-password-reset",
           purpose: "reset_password",
           expires: Timex.now() |> Timex.shift(hours: -24),
@@ -261,7 +261,7 @@ defmodule CentralWeb.Account.ForgottenPasswordControllerTest do
       dummy = GeneralTestLib.make_user()
 
       {:ok, code} =
-        Account.create_code(%{
+        Teiserver.Account.create_code(%{
           value: "not-lining-up",
           purpose: "reset_password",
           expires: Timex.now() |> Timex.shift(hours: 24),
@@ -282,7 +282,7 @@ defmodule CentralWeb.Account.ForgottenPasswordControllerTest do
       dummy = GeneralTestLib.make_user()
 
       {:ok, code} =
-        Account.create_code(%{
+        Teiserver.Account.create_code(%{
           value: "valid-reset",
           purpose: "reset_password",
           expires: Timex.now() |> Timex.shift(hours: 24),

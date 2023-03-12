@@ -105,7 +105,7 @@ defmodule CentralWeb.Account.SessionControllerTest do
     end
 
     test "bad ip", %{conn: conn, user: user} do
-      {:ok, _code} = Account.create_code(%{
+      {:ok, _code} = Teiserver.Account.create_code(%{
         value: "login-code$ip",
         purpose: "one_time_login",
         expires: Timex.now() |> Timex.shift(days: 1),
@@ -120,11 +120,14 @@ defmodule CentralWeb.Account.SessionControllerTest do
     end
 
     test "good ip", %{conn: conn, user: user} do
-      {:ok, _code} = Account.create_code(%{
-        value: "login-code-good$127.0.0.1",
+      {:ok, _code} = Teiserver.Account.create_code(%{
+        value: "login-code-good",
         purpose: "one_time_login",
         expires: Timex.now() |> Timex.shift(days: 1),
-        user_id: user.id
+        user_id: user.id,
+        metadata: %{
+          ip: "127.0.0.1"
+        }
       })
 
       # Site config disabled

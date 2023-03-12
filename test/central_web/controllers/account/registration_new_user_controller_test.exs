@@ -125,7 +125,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
     # Expired code
     test "render form - expired code", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Account.create_code(%{
+      {:ok, code} = Teiserver.Account.create_code(%{
         value: UUID.uuid1(),
         purpose: "user_registration",
         expires: Timex.now() |> Timex.shift(hours: -6),
@@ -139,7 +139,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "valid attrs - expired code", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Account.create_code(%{
+      {:ok, code} = Teiserver.Account.create_code(%{
         value: UUID.uuid1(),
         purpose: "user_registration",
         expires: Timex.now() |> Timex.shift(hours: -6),
@@ -156,7 +156,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "invalid attrs - no details - expired code", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Account.create_code(%{
+      {:ok, code} = Teiserver.Account.create_code(%{
         value: UUID.uuid1(),
         purpose: "user_registration",
         expires: Timex.now() |> Timex.shift(hours: -6),
@@ -199,7 +199,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
     # Bad code type
     test "render form - bad code type", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Account.create_code(%{
+      {:ok, code} = Teiserver.Account.create_code(%{
         value: UUID.uuid1(),
         purpose: "not a code type",
         expires: Timex.now() |> Timex.shift(hours: 6),
@@ -213,7 +213,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "valid attrs - bad code type", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Account.create_code(%{
+      {:ok, code} = Teiserver.Account.create_code(%{
         value: UUID.uuid1(),
         purpose: "not a code type",
         expires: Timex.now() |> Timex.shift(hours: 6),
@@ -230,7 +230,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "invalid attrs - no details - bad code type", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Account.create_code(%{
+      {:ok, code} = Teiserver.Account.create_code(%{
         value: UUID.uuid1(),
         purpose: "not a code type",
         expires: Timex.now() |> Timex.shift(hours: 6),
@@ -248,7 +248,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
     # Valid code
     test "render form", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Account.create_code(%{
+      {:ok, code} = Teiserver.Account.create_code(%{
         value: UUID.uuid1(),
         purpose: "user_registration",
         expires: Timex.now() |> Timex.shift(hours: 6),
@@ -262,7 +262,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "valid attrs", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Account.create_code(%{
+      {:ok, code} = Teiserver.Account.create_code(%{
         value: UUID.uuid1(),
         purpose: "user_registration",
         expires: Timex.now() |> Timex.shift(hours: 6),
@@ -280,7 +280,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "invalid attrs - no details", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Account.create_code(%{
+      {:ok, code} = Teiserver.Account.create_code(%{
         value: UUID.uuid1(),
         purpose: "user_registration",
         expires: Timex.now() |> Timex.shift(hours: 6),
@@ -296,7 +296,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "invalid attrs - short password", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Account.create_code(%{
+      {:ok, code} = Teiserver.Account.create_code(%{
         value: UUID.uuid1(),
         purpose: "user_registration",
         expires: Timex.now() |> Timex.shift(hours: 6),
@@ -320,7 +320,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "invalid attrs - mismatched password", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Account.create_code(%{
+      {:ok, code} = Teiserver.Account.create_code(%{
         value: UUID.uuid1(),
         purpose: "user_registration",
         expires: Timex.now() |> Timex.shift(hours: 6),
