@@ -182,11 +182,6 @@ defmodule CentralWeb.Router do
     get("/error_logs/delete_all", ErrorLogController, :delete_all_form)
     post("/error_logs/delete_all", ErrorLogController, :delete_all_post)
     resources("/error_logs", ErrorLogController, only: [:index, :show, :delete])
-
-    # Reporting
-    get("/reports", ReportController, :index)
-    get("/reports/show/:name", ReportController, :show)
-    post("/reports/show/:name", ReportController, :show)
   end
 
   scope "/communication", CentralWeb.Communication, as: :communication do

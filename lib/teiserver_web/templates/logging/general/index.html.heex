@@ -16,12 +16,8 @@
   <% end %>
 
   <%= if allow?(@conn, "logging.live") do %>
-    <%= central_component "menu_card", icon_class: "fa-solid", icon: "fa-regular fa-tachometer-alt", text: "Live dashboard", link: "/logging/live/dashboard" %>
+    <%= central_component "menu_card", icon_class: "fa-solid", icon: "fa-regular fa-tachometer-alt", text: "Live dashboard", link: ~p"/logging/live/dashboard" %>
   <% end %>
-</div>
-
-<div class="row mt-3">
-  <%= central_component "menu_card", icon_class: "fa-solid", icon: StylingHelper.icon(:report), text: "Reporting", link: Routes.logging_report_path(@conn, :index) %>
 </div>
 
 <div class="row mt-3">

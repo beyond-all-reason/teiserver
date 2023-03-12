@@ -66,18 +66,10 @@
               name: "live_dashboard",
               label: "Live dashboard",
               active: @active,
-              url: "/logging/live/dashboard",
+              url: ~p"/logging/live/dashboard",
               icon: "fa-regular fa-tachometer-alt"
             %>
           <% end %>
-
-          <%= central_component "sub_menu_icon",
-            name: "report",
-            label: "Reports",
-            active: @active,
-            url: Routes.logging_report_path(@conn, :index),
-            icon: Central.Helpers.StylingHelper.icon(:report)
-          %>
 
         </div>
 
