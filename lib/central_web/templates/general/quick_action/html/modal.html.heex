@@ -1,7 +1,7 @@
-<script src={Routes.static_path(@conn, "/js/quick_action.js")}></script>
+<script src={~p"/js/quick_action.js"}></script>
 
 <script>
-  quick_action_url = '<%= Routes.quick_action_ajax_path(@conn, :index) %>';
+  quick_action_url = '<%= ~p"/quick/ajax" %>';
 </script>
 
 <style type="text/css">

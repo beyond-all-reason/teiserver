@@ -16,6 +16,7 @@ defmodule Teiserver.Data.Types do
 
   @type spring_tcp_state() :: map()
   @type tachyon_tcp_state() :: map()
+  @type tachyon_ws_state() :: map()
 
   @type consul_state() :: map()
   @type balance_server_state() :: map()

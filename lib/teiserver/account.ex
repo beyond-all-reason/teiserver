@@ -234,7 +234,7 @@ defmodule Teiserver.Account do
 
       {:ok, user}
     else
-      Central.Logging.Helpers.add_anonymous_audit_log(conn, "Account:Failed login", %{
+      Teiserver.Logging.Helpers.add_anonymous_audit_log(conn, "Account:Failed login", %{
         reason: "Bad password",
         user_id: user.id,
         email: user.email
@@ -1274,7 +1274,7 @@ defmodule Teiserver.Account do
   @spec list_users_from_cache(list) :: list
   def list_users_from_cache(id_list), do: UserCache.list_users(id_list)
 
-  @spec recache_user(Integer.t()) :: :ok
+  @spec recache_user(T.userid() | User.t()) :: :ok
   defdelegate recache_user(id), to: UserCache
 
   @spec convert_user(T.user()) :: T.user()
@@ -1296,7 +1296,7 @@ defmodule Teiserver.Account do
   defdelegate make_bot_password(), to: UserLib
 
   @spec rename_user(T.userid(), String.t(), boolean) :: :success | {:error, String.t()}
-  defdelegate rename_user(userid, new_name, admin_action \\ false), to: User
+  defdelegate rename_user(userid, new_name, admin_action \\ false), to: Teiserver.User
 
   @spec system_change_user_name(T.userid(), String.t()) :: :ok
   defdelegate system_change_user_name(userid, new_name), to: Teiserver.User

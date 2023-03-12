@@ -225,10 +225,12 @@ defmodule Teiserver.Bridge.DiscordBridge do
       restriction_string = action.restrictions
         |> Enum.join(", ")
 
+      formatted_reason = Regex.replace(~r/https:\/\/discord.gg\/\S+/, action.reason, "--discord-link--")
+
       message = [
         "----------------------",
         "#{action.target.name} has been moderated.",
-        "Reason: #{action.reason}",
+        "Reason: #{formatted_reason}",
         "Restriction(s): #{restriction_string}",
         until,
         "----------------------"

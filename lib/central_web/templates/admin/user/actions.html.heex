@@ -1,8 +1,8 @@
 <div class="dropdown-menu">
   <%= if allow?(@current_user, "logging.page_view.show") do %>
     <a class="dropdown-item" href={"#{Routes.logging_page_view_log_path(@conn, :index)}?user_id=#{@user.id}"}>
-      <%= central_component "icon", icon: Central.Logging.LoggingLib.icon() %>
-      <%= central_component "icon", icon: Central.Logging.PageViewLogLib.icon() %>
+      <%= central_component "icon", icon: Teiserver.Logging.LoggingLib.icon() %>
+      <%= central_component "icon", icon: Teiserver.Logging.PageViewLogLib.icon() %>
       &nbsp;
       Page view logs
     </a>

@@ -173,19 +173,20 @@ defmodule Teiserver.Game.LobbyPolicyLib do
     end
   end
 
-  @spec start_lobby_policy_bot(T.lobby_policy_id(), Central.Account.User.t()) :: pid()
-  def start_lobby_policy_bot(lobby_policy_id, user) do
-    {:ok, consul_pid} =
+  @spec start_lobby_policy_bot(LobbyPolicy.t(), String.t(), Central.Account.User.t()) :: pid()
+  def start_lobby_policy_bot(lobby_policy, base_name, user) do
+    {:ok, policy_bot_pid} =
       DynamicSupervisor.start_child(Teiserver.LobbyPolicySupervisor, {
         LobbyPolicyBotServer,
-        name: "lobby_policy_bot_#{lobby_policy_id}_#{user.name}",
+        name: "lobby_policy_bot_#{lobby_policy.id}_#{user.name}",
         data: %{
           userid: user.id,
-          lobby_policy_id: lobby_policy_id,
+          base_name: base_name,
+          lobby_policy: lobby_policy,
         }
       })
 
-    consul_pid
+    policy_bot_pid
   end
 
   @spec add_policy_from_db(LobbyPolicy.t()) :: :ok | :exists | {:error, any}
@@ -195,25 +196,30 @@ defmodule Teiserver.Game.LobbyPolicyLib do
     :exists
   end
   def add_policy_from_db(%{enabled: true} = lobby_policy) do
-    if get_lobby_organiser_pid(lobby_policy.id) do
-      cast_lobby_organiser(lobby_policy.id, {:updated_policy, lobby_policy})
-      :exists
-    else
-      result = DynamicSupervisor.start_child(Teiserver.LobbyPolicySupervisor, {
-        LobbyPolicyOrganiserServer,
-        name: "lobby_policy_supervisor_#{lobby_policy.id}",
-        data: %{
-          lobby_policy: lobby_policy
-        }
-      })
+    cond do
+      Application.get_env(:central, Teiserver)[:enable_managed_lobbies] == false ->
+        :disabled
 
-      case result do
-        {:error, err} ->
-          Logger.error("Error starting LobbyPolicySupervisor: #{__ENV__.file}:#{__ENV__.line}\n#{inspect err}")
-          {:error, err}
-        {:ok, _pid} ->
-          :ok
-      end
+      get_lobby_organiser_pid(lobby_policy.id) != nil ->
+        cast_lobby_organiser(lobby_policy.id, {:updated_policy, lobby_policy})
+        :exists
+
+      true ->
+        result = DynamicSupervisor.start_child(Teiserver.LobbyPolicySupervisor, {
+          LobbyPolicyOrganiserServer,
+          name: "lobby_policy_supervisor_#{lobby_policy.id}",
+          data: %{
+            lobby_policy: lobby_policy
+          }
+        })
+
+        case result do
+          {:error, err} ->
+            Logger.error("Error starting LobbyPolicySupervisor: #{__ENV__.file}:#{__ENV__.line}\n#{inspect err}")
+            {:error, err}
+          {:ok, _pid} ->
+            :ok
+        end
     end
   end
 

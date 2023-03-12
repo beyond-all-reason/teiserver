@@ -8,4 +8,12 @@ defmodule TeiserverWeb.API.SessionView do
   def render("login.json", %{result: :failure, reason: reason}) do
     %{result: :failure, reason: reason}
   end
+
+  def render("token.json", %{token_value: token_value}) do
+    %{result: :success, token_value: token_value}
+  end
+
+  def render("token.json", %{result: :failure, reason: reason}) do
+    %{result: :failure, reason: reason}
+  end
 end

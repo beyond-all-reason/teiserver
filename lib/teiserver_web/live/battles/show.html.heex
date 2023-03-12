@@ -261,7 +261,7 @@
 <br />
 
 <span>
-  <%= live_redirect "Back", to: Routes.ts_battle_lobby_index_path(@socket, :index), class: "btn btn-#{bsname}" %>
+  <%= live_redirect "Back", to: ~p"/teiserver/battle/lobbies", class: "btn btn-#{bsname}" %>
 </span>
 
 <%= if @admin_dev do %>

@@ -14,15 +14,13 @@ defmodule Central.Application do
       [
         # Start phoenix pubsub
         {Phoenix.PubSub, name: Central.PubSub},
+        CentralWeb.Telemetry,
 
         # Start the Ecto repository
         Central.Repo,
         # Start the endpoint when the application starts
         CentralWeb.Endpoint,
-        # Starts a worker by calling: Central.Worker.start_link(arg)
-        # {Central.Worker, arg}
         CentralWeb.Presence,
-        CentralWeb.Telemetry,
 
         {Central.General.CacheClusterServer, name: Central.General.CacheClusterServer},
 
@@ -147,10 +145,7 @@ defmodule Central.Application do
         %{
           id: Teiserver.TachyonTcpServer,
           start: {Teiserver.TachyonTcpServer, :start_link, [[]]}
-        },
-
-        # gRPC server
-        {GRPC.Server.Supervisor, endpoint: Teiserver.Tachyon.Endpoint, port: 8203, start_server: true}
+        }
       ] ++ discord_start()
 
     # Agent mode stuff, should not be enabled in prod
@@ -230,7 +225,7 @@ defmodule Central.Application do
 
     :telemetry.attach_many("oban-logger", events, &Central.ObanLogger.handle_event/4, [])
 
-    ~w(General Config Account Admin Logging Communication)
+    ~w(General Config Account Admin Communication)
     |> Enum.each(&env_startup/1)
 
     Teiserver.Startup.startup()

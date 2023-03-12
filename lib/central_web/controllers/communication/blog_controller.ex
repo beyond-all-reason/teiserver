@@ -5,6 +5,7 @@ defmodule CentralWeb.Communication.BlogController do
   alias Central.Communication.PostLib
 
   alias Central.Helpers.FileHelper
+  import Central.Account.AuthLib, only: [allow?: 2]
 
   plug :add_breadcrumb, name: 'Blog', url: '/blog'
 

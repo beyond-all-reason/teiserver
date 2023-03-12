@@ -65,6 +65,8 @@ defmodule Teiserver.Client do
         party_id: nil,
         clan_tag: nil,
 
+        token_id: nil,
+
         protocol: nil
       },
       client
@@ -89,7 +91,7 @@ defmodule Teiserver.Client do
   end
 
   @spec login(T.user(), atom(), String.t() | nil) :: T.client()
-  def login(user, protocol, ip \\ nil) do
+  def login(user, protocol, ip \\ nil, token_id \\ nil) do
     stats = Account.get_user_stat_data(user.id)
 
     clan_tag = case Clans.get_clan(user.clan_id) do
@@ -115,6 +117,8 @@ defmodule Teiserver.Client do
         muted: User.has_mute?(user),
         awaiting_warn_ack: false,
         warned: false,
+
+        token_id: token_id,
 
         clan_tag: clan_tag,
         protocol: protocol

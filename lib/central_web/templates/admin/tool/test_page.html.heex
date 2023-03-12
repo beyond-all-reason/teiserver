@@ -1,5 +1,9 @@
 <%
-  light = (assigns[:current_user] != nil and Central.Config.get_user_config_cache(@current_user.id, "general.Light mode") == true)
+  light_mode = case get_user_config_cache(@current_user, "general.Colour scheme") do
+    "Site default" -> get_site_config_cache("user.Default light mode")
+    "Light" -> true
+    "Dark" -> false
+  end
 %>
 
 <style type="text/css">
@@ -8,7 +12,7 @@
   }
 </style>
 
-<%= if light do %>
+<%= if light_mode do %>
   <style type="text/css">
     .theme-bg {
       background-color: rgb(233, 236, 239);
@@ -68,7 +72,7 @@
   <div class="col-xl-6 col-lg-12">
     <div class="card">
       <div class="card-body">
-      
+
 <%# Section menu %>
 <%= central_component "section_menu_button",
   name: "list",
@@ -154,7 +158,7 @@
         <% end %>
       </div>
       <div class="col-md-6">
-        
+
       </div>
     </div>
   </div>
@@ -233,7 +237,7 @@
                 <span class="btn btn-secondary" onclick="$('#button-card').css('background-color', '#000000');">Black</span>
               </div>
 
-            
+
               <h5>Standard</h5>
               <%= for c <- colours do %>
                 <div class={"btn btn-#{c}"}><%= c |> String.capitalize %></div>
@@ -305,11 +309,11 @@
           </a>
         </div>
       </div>
-      
+
       <div class="col-md-6">
         &nbsp;
       </div>
-      
+
       <div class="col-md-6">
         <div class="input-group p-2">
           <input type='text' name='' id='' value='' class='form-control' />
@@ -332,7 +336,7 @@
       </div>
 
       <div class="col-md-6">
-      
+
       </div>
 
       <div class="col-md-6">
@@ -394,7 +398,7 @@
       Unauth
     </a>
     <br /><br />
-    
+
     <a href="?layout=admin#layouts_tab" class={"btn btn-#{if @layout_value == "admin.html", do: "", else: "outline-"}secondary"}>
       Admin
     </a>
@@ -402,7 +406,7 @@
       Admin live
     </a>
     <br /><br />
-    
+
     <a href="?layout=nomenu#layouts_tab" class={"btn btn-#{if @layout_value == "nomenu.html", do: "", else: "outline-"}secondary"}>
       No menu
     </a>

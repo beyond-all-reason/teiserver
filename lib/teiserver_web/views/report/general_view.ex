@@ -13,5 +13,6 @@ defmodule TeiserverWeb.Report.GeneralView do
   def view_colour("match_metrics"), do: Teiserver.Battle.MatchLib.colours()
   def view_colour("ratings"), do: Teiserver.Account.RatingLib.colours()
   def view_colour("reports"), do: :danger2
+  def view_colour("exports"), do: :info
   def view_colour("infologs"), do: Teiserver.Telemetry.InfologLib.colours()
 end

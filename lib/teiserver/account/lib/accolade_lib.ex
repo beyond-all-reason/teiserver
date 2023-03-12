@@ -1,4 +1,7 @@
 defmodule Teiserver.Account.AccoladeLib do
+  @moduledoc """
+
+  """
   use CentralWeb, :library
   alias Teiserver.{Account, User}
   alias Teiserver.Account.{Accolade, AccoladeBotServer, AccoladeChatServer}

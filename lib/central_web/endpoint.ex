@@ -5,12 +5,18 @@ defmodule CentralWeb.Endpoint do
     store: :cookie,
     key: "_central_key",
     signing_salt: "zv0zamJX",
+    same_site: "Lax",
     max_age: 1_814_400
   ]
 
   socket("/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]])
 
   socket("/socket", CentralWeb.UserSocket,
+    websocket: true,
+    longpoll: false
+  )
+
+  socket("/tachyon", Tachyon.TachyonSocket,
     websocket: true,
     longpoll: false
   )
@@ -23,7 +29,8 @@ defmodule CentralWeb.Endpoint do
     at: "/",
     from: :central,
     gzip: true,
-    only: ~w(css js assets webfonts fonts images favicon.ico robots.txt)
+    # only: ~w(css js assets webfonts fonts images favicon.ico robots.txt),
+    only: CentralWeb.static_paths()
   )
 
   # Code reloading can be explicitly enabled under the

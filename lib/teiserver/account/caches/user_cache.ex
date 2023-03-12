@@ -135,6 +135,7 @@ defmodule Teiserver.Account.UserCache do
 
     :ok
   end
+
   def recache_user(user) do
     user
       |> convert_user
@@ -225,6 +226,10 @@ defmodule Teiserver.Account.UserCache do
       Central.cache_delete(:users_lookup_name_with_id, user.id)
       Central.cache_delete(:users_lookup_id_with_name, cachename(user.name))
       Central.cache_delete(:users_lookup_id_with_email, cachename(user.email))
+
+      if user.discord_id do
+        Central.cache_delete(:users_lookup_id_with_discord, user.discord_id)
+      end
       :ok
     else
       :no_user

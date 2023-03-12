@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Admin.MatchController do
 
   alias Teiserver.{Battle, Game, Account}
   alias Teiserver.Battle.{MatchLib, BalanceLib}
+  import Central.Helpers.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Staff.Moderator,

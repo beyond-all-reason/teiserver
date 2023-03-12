@@ -154,7 +154,7 @@
               </div>
             </form>
           <% else %>
-            <a href={Routes.account_session_path(@conn, :new)} class="btn btn-primary">
+            <a href={~p"/login"} class="btn btn-primary">
               Log in to comment
             </a>
           <% end %>

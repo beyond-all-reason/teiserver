@@ -10,7 +10,7 @@ defmodule Teiserver.Account.BadgeTypeLib do
   def colours, do: :warning2
 
   @spec purpose_list() :: [String.t()]
-  def purpose_list(), do: ["Accolade"]
+  def purpose_list(), do: ["Accolade", "Improvement", "Criticism", "Observation"]
 
   @spec make_favourite(Map.t()) :: Map.t()
   def make_favourite(badge_type) do

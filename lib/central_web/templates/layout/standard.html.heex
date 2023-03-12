@@ -1,4 +1,4 @@
-<%= if Kernel.function_exported?(@conn.private.phoenix_view, :view_colour, 0) do %>
+<%= if Kernel.function_exported?(@conn.private.phoenix_view._, :view_colour, 0) do %>
   <%
     light_mode = case get_user_config_cache(@current_user, "general.Colour scheme") do
       "Site default" -> get_site_config_cache("user.Default light mode")
@@ -6,7 +6,7 @@
       "Dark" -> false
     end
 
-    {fg, bg, _bsname} = colours(@conn.private.phoenix_view.view_colour(), light_mode)
+    {fg, bg, _bsname} = colours(@conn.private.phoenix_view._.view_colour(), light_mode)
   %>
   <style type="text/css">
     @media print {
@@ -22,7 +22,7 @@
     #breadcrumb {
       background-color: <%= bg %> !important;
     }
-    
+
     .nav-tabs .nav-item .active {
       color: <%= fg %> !important;
       border-bottom-color: <%= fg %> !important;
@@ -45,21 +45,21 @@
   <% end %>
 
   <div id="flash-messages">
-    <%= if get_flash(@conn, :danger) do %>
+    <%= if Phoenix.Flash.get(@flash, :danger) do %>
       <p class="alert alert-danger alert-no-margin alert-dismissible fade show" role="alert" id="app-flash-danger">
-        <%= get_flash(@conn, :danger) %>
+        <%= Phoenix.Flash.get(@flash, :danger) %>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </p>
     <% end %>
-    <%= if get_flash(@conn, :info) do %>
+    <%= if Phoenix.Flash.get(@flash, :info) do %>
       <p class="alert alert-info alert-no-margin alert-dismissible fade show" role="alert" id="app-flash-info">
-        <%= get_flash(@conn, :info) %>
+        <%= Phoenix.Flash.get(@flash, :info) %>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </p>
     <% end %>
-    <%= if get_flash(@conn, :success) do %>
+    <%= if Phoenix.Flash.get(@flash, :success) do %>
       <p class="alert alert-success alert-no-margin alert-dismissible fade show" role="alert" id="app-flash-success">
-        <%= get_flash(@conn, :success) %>
+        <%= Phoenix.Flash.get(@flash, :success) %>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </p>
     <% end %>

@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Report.ClientEventView do
 
   # For the detail view in day metrics
   def heatmap(value, maximum, colour) do
-    CentralWeb.Logging.AggregateViewLogView.heatmap(value, maximum, colour)
+    TeiserverWeb.Logging.AggregateViewLogView.heatmap(value, maximum, colour)
   end
 
   def represent_minutes(nil), do: ""

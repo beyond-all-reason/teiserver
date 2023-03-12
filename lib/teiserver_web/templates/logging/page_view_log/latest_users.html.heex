@@ -1,0 +1,71 @@
+<% bsname = view_colour() %>
+
+<style type="text/css">
+  .block-button {
+    margin-bottom: 20px;
+  }
+</style>
+
+<%= render TeiserverWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "page_view"}) %>
+
+<div class="row mt-3">
+  <div class="col-md-12">
+
+    <div class={"card border-#{bsname}"}>
+      <div class={"card-header text-#{bsname}"}>
+        Logs - Server time: <%= date_to_str @server_time, format: :hms, tz: @tz %>
+      </div>
+      <div class="card-body">
+        <%= render Teiserver.Logging.PageViewLogView, "section_menu.html",
+          conn: @conn,
+          permissions: @current_user.permissions,
+          active: "latest_users"
+        %>
+        <hr />
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Last page view</th>
+
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+        <%= for {userid, name, email, last_timestamp}  <- @data do %>
+            <tr>
+              <td><%= name %></td>
+              <td><%= email %></td>
+
+              <% style = cond do
+                  Timex.compare(last_timestamp, @currently) == 1 ->
+                    "font-weight:bold; background-color: #8F8;"
+                  @now.day == last_timestamp.day && @now.month == last_timestamp.month && @now.year == last_timestamp.year ->
+                    "font-weight:bold; background-color: #CFC;"
+                  Timex.compare(last_timestamp, @recent) == 1 ->
+                    "font-weight:bold; background-color: #EFE;"
+                  true ->
+                    "background-color: #FEE;"
+              end %>
+
+              <td style={style}>
+                <%= date_to_str last_timestamp, format: :hms_dmy, tz: @tz %>
+              </td>
+
+              <td>
+                <a href={"#{Routes.logging_report_path(@conn, :list)}?user_id=#{userid}"} class="btn btn-secondary btn-outline btn-sm">
+                  <i class="fa-regular fa-fw fa-user"></i>
+                  Show user logs
+                </a>
+              </td>
+            </tr>
+        <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

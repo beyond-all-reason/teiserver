@@ -1,7 +1,7 @@
-defmodule CentralWeb.Logging.ErrorLogControllerTest do
+defmodule TeiserverWeb.Logging.ErrorLogControllerTest do
   use CentralWeb.ConnCase, async: true
 
-  alias Central.Logging
+  alias Teiserver.Logging
 
   alias Central.Helpers.GeneralTestLib
 

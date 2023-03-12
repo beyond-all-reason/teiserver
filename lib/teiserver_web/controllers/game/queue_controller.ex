@@ -5,6 +5,7 @@ defmodule TeiserverWeb.Game.QueueController do
   alias Teiserver.Game.Queue
   alias Teiserver.Game.QueueLib
   alias Teiserver.Data.Matchmaking
+  alias Central.Helpers.StylingHelper
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Game.Queue,

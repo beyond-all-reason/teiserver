@@ -10,7 +10,7 @@ config :central, Central.Repo,
   hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10,
-  timeout: 60_000
+  timeout: 180_000
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -63,7 +63,7 @@ config :central, Teiserver,
   heartbeat_timeout: nil,
   enable_discord_bridge: false,
   enable_agent_mode: true,
-  enable_beans: true,
+  enable_hailstorm: true,
   use_geoip: true,
   accept_all_emails: true
 
@@ -73,10 +73,8 @@ config :central, CentralWeb.Endpoint,
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/central_web/(live|views)/.*(ex)$",
-      ~r"lib/central_web/templates/.*(eex)$",
-      ~r"lib/teiserver_web/(live|views)/.*(ex)$",
-      ~r"lib/teiserver_web/templates/.*(eex)$"
+      ~r"lib/central_web/(controllers|live|components|views|templates)/.*(ex|heex)$",
+      ~r"lib/teiserver_web/(controllers|live|components|views|templates)/.*(ex|heex)$",
     ]
   ]
 

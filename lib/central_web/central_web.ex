@@ -17,36 +17,35 @@ defmodule CentralWeb do
   and import those modules here.
   """
 
+  def static_paths, do: ~w(css js assets webfonts fonts images favicon.ico robots.txt)
+
+  def channel do
+    quote do
+      use Phoenix.Channel
+      import CentralWeb.Gettext
+    end
+  end
+
   def controller do
     quote do
       use Phoenix.Controller, namespace: CentralWeb
       import Phoenix.LiveView.Controller
+      import Plug.Conn
+      import CentralWeb.Gettext
 
       use Breadcrumble
 
-      import Central.Helpers.StringHelper, only: [get_hash_id: 1]
-      import Central.Logging.LoggingLib, only: [do_not_log: 1]
       alias Central.General.AssignPlug
 
-      import Central.Logging.Helpers, only: [add_audit_log: 3]
+      import Teiserver.Logging.Helpers, only: [add_audit_log: 3]
 
       alias Bodyguard.Plug.Authorize
-      alias Central.Account.AuthLib
-      alias Central.Account.GroupLib
 
-      alias Central.Helpers.TimexHelper
-
-      import Plug.Conn
-      import CentralWeb.Gettext
       alias CentralWeb.Router.Helpers, as: Routes
-      alias Central.Helpers.StylingHelper
 
-      import Central.Config, only: [get_user_config_cache: 2, set_user_config: 3]
-
+      unquote(verified_routes())
       import Central.Account.RecentlyUsedCache,
         only: [remove_recently: 2, insert_recently: 2, insert_recently: 1, get_recently: 1]
-
-      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
     end
   end
 
@@ -79,9 +78,23 @@ defmodule CentralWeb do
 
       import Central.Helpers.NumberHelper, only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
 
+      import CentralWeb.CoreComponents
+      unquote(verified_routes())
+
       import Phoenix.LiveView
       import Phoenix.Component
       import Phoenix.LiveView.Helpers
+    end
+  end
+
+  def html do
+    quote do
+      use Phoenix.Component
+      # Import convenience functions from controllers
+      import Phoenix.Controller,
+        only: [get_csrf_token: 0, view_module: 1, view_template: 1]
+      # Include general helpers for rendering HTML
+      unquote(html_helpers())
     end
   end
 
@@ -104,6 +117,7 @@ defmodule CentralWeb do
       alias Central.Account.AuthPlug
       import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
       alias Central.Communication.NotificationPlug
+      unquote(verified_routes())
 
       unquote(view_helpers())
     end
@@ -155,7 +169,7 @@ defmodule CentralWeb do
       import Central.Account.GroupTypeLib, only: [add_group_type: 2]
 
       import Central.Config, only: [add_user_config_type: 1, add_site_config_type: 1]
-      import Central.Logging.AuditLogLib, only: [add_audit_types: 1]
+      import Teiserver.Logging.AuditLogLib, only: [add_audit_types: 1]
       alias Central.General.QuickAction
     end
   end
@@ -178,13 +192,6 @@ defmodule CentralWeb do
     end
   end
 
-  def channel do
-    quote do
-      use Phoenix.Channel
-      import CentralWeb.Gettext
-    end
-  end
-
   defp view_helpers do
     quote do
       # Use all HTML functionality (forms, tags, etc)
@@ -196,10 +203,35 @@ defmodule CentralWeb do
 
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
+      import CentralWeb.CoreComponents
 
       import CentralWeb.ErrorHelpers
       import CentralWeb.Gettext
       alias CentralWeb.Router.Helpers, as: Routes
+    end
+  end
+
+  defp html_helpers do
+    quote do
+      # HTML escaping functionality
+      import Phoenix.HTML
+      # Core UI components and translation
+      import CentralWeb.CoreComponents
+      import CentralWeb.Gettext
+      # Shortcut for generating JS commands
+      alias Phoenix.LiveView.JS
+      # Routes generation with the ~p sigil
+      unquote(verified_routes())
+    end
+  end
+
+
+  def verified_routes do
+    quote do
+      use Phoenix.VerifiedRoutes,
+        endpoint: CentralWeb.Endpoint,
+        router: CentralWeb.Router,
+        statics: CentralWeb.static_paths()
     end
   end
 

@@ -1,6 +1,6 @@
 defmodule Teiserver.Moderation.ActionLib do
   @moduledoc false
-  use TeiserverWeb, :library
+  use CentralWeb, :library
   alias Teiserver.Moderation.Action
 
   # Functions

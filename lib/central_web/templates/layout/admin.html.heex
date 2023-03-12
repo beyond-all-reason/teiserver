@@ -97,7 +97,7 @@
         <%= render CentralWeb.General.SectionsView, "user_dropdown.html", assigns %>
       <% else %>
         <li class="nav-item">
-          <a href={Routes.account_session_path(@conn, :new)}>
+          <a href={~p"/login"}>
             <i class="fa fa-user fa-fw"></i>
             Sign in
           </a>
@@ -122,17 +122,17 @@
     <% end %>
 
     <div id="flash-messages">
-      <%= if get_flash(@conn, :danger) do %>
-        <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger"><%= get_flash(@conn, :danger) %></p>
+      <%= if Phoenix.Flash.get(@flash, :danger) do %>
+        <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger"><%= Phoenix.Flash.get(@flash, :danger) %></p>
       <% end %>
-      <%= if get_flash(@conn, :warning) do %>
-        <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning"><%= get_flash(@conn, :warning) %></p>
+      <%= if Phoenix.Flash.get(@flash, :warning) do %>
+        <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning"><%= Phoenix.Flash.get(@flash, :warning) %></p>
       <% end %>
-      <%= if get_flash(@conn, :info) do %>
-        <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info"><%= get_flash(@conn, :info) %></p>
+      <%= if Phoenix.Flash.get(@flash, :info) do %>
+        <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info"><%= Phoenix.Flash.get(@flash, :info) %></p>
       <% end %>
-      <%= if get_flash(@conn, :success) do %>
-        <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success"><%= get_flash(@conn, :success) %></p>
+      <%= if Phoenix.Flash.get(@flash, :success) do %>
+        <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success"><%= Phoenix.Flash.get(@flash, :success) %></p>
       <% end %>
     </div>
 

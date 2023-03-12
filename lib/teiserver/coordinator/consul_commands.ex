@@ -663,6 +663,82 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
+
+    def handle_command(%{command: "resetuncertaintylevels", remaining: ""} = cmd, state) do
+    ConsulServer.say_command(cmd, state)
+    %{state | minimum_uncertainty_to_play: 0, maximum_uncertainty_to_play: 1000}
+  end
+
+  def handle_command(%{command: "minuncertaintylevel", remaining: ""} = cmd, state) do
+    ConsulServer.say_command(cmd, state)
+    %{state | minimum_uncertainty_to_play: 0}
+  end
+  def handle_command(%{command: "minuncertaintylevel", remaining: remaining, senderid: senderid} = cmd, state) do
+    case Integer.parse(remaining |> String.trim) do
+      :error ->
+        Lobby.sayprivateex(state.coordinator_id, senderid, [
+          "Unable to turn '#{remaining}' into an integer",
+        ], state.lobby_id)
+        state
+      {level, _} ->
+        ConsulServer.say_command(cmd, state)
+        %{state |
+          minimum_uncertainty_to_play: level |> max(0) |> min(state.maximum_uncertainty_to_play - 1)
+        }
+    end
+  end
+
+  def handle_command(%{command: "maxuncertaintylevel", remaining: ""} = cmd, state) do
+    ConsulServer.say_command(cmd, state)
+    %{state | maximum_uncertainty_to_play: 1000}
+  end
+  def handle_command(%{command: "maxuncertaintylevel", remaining: remaining, senderid: senderid} = cmd, state) do
+    case Integer.parse(remaining |> String.trim) do
+      :error ->
+        Lobby.sayprivateex(state.coordinator_id, senderid, [
+          "Unable to turn '#{remaining}' into an integer",
+        ], state.lobby_id)
+        state
+      {level, _} ->
+        ConsulServer.say_command(cmd, state)
+        %{state |
+          maximum_uncertainty_to_play: level |> min(1000) |> max(state.minimum_uncertainty_to_play + 1)
+        }
+    end
+  end
+
+  def handle_command(%{command: "setuncertaintylevels", remaining: remaining, senderid: senderid} = cmd, state) do
+    case String.split(remaining, " ") do
+      [smin, smax] ->
+        case {Integer.parse(smin |> String.trim), Integer.parse(smax |> String.trim)} do
+          {:error, _} ->
+            Lobby.sayprivateex(state.coordinator_id, senderid, [
+              "Unable to turn '#{smin}' into an integer",
+            ], state.lobby_id)
+            state
+          {_, :error} ->
+            Lobby.sayprivateex(state.coordinator_id, senderid, [
+              "Unable to turn '#{smax}' into an integer",
+            ], state.lobby_id)
+            state
+          {{min_level_o, _}, {max_level_o, _}} ->
+            min_level = min(min_level_o, max_level_o)
+            max_level = max(min_level_o, max_level_o)
+
+            ConsulServer.say_command(cmd, state)
+            %{state |
+              minimum_uncertainty_to_play: max(min_level, 0),
+              maximum_uncertainty_to_play: min(max_level, 1000)
+            }
+        end
+      _ ->
+        Lobby.sayprivateex(state.coordinator_id, senderid, [
+          "setuncertaintylevels takes two numbers, no more no less",
+        ], state.lobby_id)
+        state
+    end
+  end
+
   #################### Host and Moderator
   def handle_command(%{command: "lock", remaining: remaining, senderid: senderid} = cmd, state) do
     new_locks = case get_lock(remaining) do

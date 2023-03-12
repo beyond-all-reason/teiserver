@@ -47,6 +47,14 @@
             %>
 
             <%= central_component "sub_menu_icon",
+              name: "exports",
+              label: "Exports",
+              active: @active,
+              url: Routes.ts_reports_exports_path(@conn, :index),
+              icon: "fa-regular fa-download"
+            %>
+
+            <%#= central_component "sub_menu_icon",
               name: "ratings",
               label: "Ratings",
               active: @active,
@@ -70,7 +78,7 @@
               name: "reports",
               label: "Reports",
               active: @active,
-              url: Routes.ts_reports_general_path(@conn, :index),
+              url: ~p"/teiserver/reports",
               icon: Central.Helpers.StylingHelper.icon(:report)
             %>
           <% end %>

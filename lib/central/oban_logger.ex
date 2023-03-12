@@ -2,7 +2,7 @@ defmodule Central.ObanLogger do
   @moduledoc false
   require Logger
 
-  import Central.Logging.Helpers, only: [add_error_log: 1]
+  import Teiserver.Logging.Helpers, only: [add_error_log: 1]
 
   def handle_event([:oban, :job, :start], _measure, _meta, _) do
     # Logger.warn("[Oban] :started #{meta.worker} at #{measure.system_time}")

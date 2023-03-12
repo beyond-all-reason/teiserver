@@ -10,7 +10,7 @@
     central_component "menu_card",
     icon: "fa-solid fa-sign-in-alt",
     text: "Sign in",
-    link: Routes.account_session_path(@conn, :new)
+    link: ~p"/login"
   %>
 </div>
 <% end %>
@@ -24,14 +24,14 @@
         central_component "menu_card",
           icon: Central.Communication.BlogLib.icon(),
           text: "Blog posts",
-          link: Routes.blog_post_path(@conn, :index)
+          link: ~p"/blog_admin/posts"
       %>
     <% else %>
       <%=
         central_component "menu_card",
           icon: Central.Communication.BlogLib.icon(),
           text: "Blog",
-          link: Routes.blog_path(@conn, :index)
+          link: ~p"/blog"
       %>
     <% end %>
   <% end %>
@@ -41,7 +41,7 @@
       central_component "menu_card",
       icon: Central.Admin.icon(),
       text: "C.Admin",
-      link: Routes.admin_general_path(@conn, :index)
+      link: ~p"/admin"
     %>
   <% end %>
 
@@ -50,18 +50,18 @@
       central_component "menu_card",
       icon: Teiserver.icon(),
       name: "tei_admin",
-      text: "TS Admin",
+      text: "Administration",
       icon_class: "fa-duotone",
-      link: Routes.ts_admin_general_path(@conn, :index)
+      link: ~p"/teiserver/admin"
     %>
   <% end %>
 
   <%= if allow?(@current_user, "logging") do %>
     <%=
       central_component "menu_card",
-      icon: Central.Logging.icon(),
+      icon: Teiserver.Logging.icon(),
       text: "Logging",
-      link: Routes.logging_general_path(@conn, :index)
+      link: ~p"/logging"
     %>
   <% end %>
 
@@ -72,7 +72,7 @@
       name: "chat",
       text: "Chat",
       icon_class: "fa-duotone",
-      link: Routes.ts_admin_chat_path(@conn, :index)
+      link: ~p"/teiserver/admin/chat"
     %>
   <% end %>
 
@@ -83,7 +83,7 @@
       name: "user_admin",
       text: "User admin",
       icon_class: "fa-duotone",
-      link: Routes.ts_admin_user_path(@conn, :index)
+      link: ~p"/teiserver/admin/user"
     %>
   <% end %>
 
@@ -94,7 +94,7 @@
       name: "reports",
       text: "Reports",
       icon_class: "fa-duotone",
-      link: Routes.ts_reports_general_path(@conn, :index)
+      link: ~p"/teiserver/reports"
     %>
   <% end %>
 </div>
@@ -107,7 +107,7 @@
     name: "battle_lobbies",
     text: "Live lobbies",
     icon_class: "fa-duotone",
-    link: Routes.ts_battle_lobby_index_path(@conn, :index)
+    link: ~p"/teiserver/battle/lobbies"
   %>
 
   <%=
@@ -116,7 +116,7 @@
     name: "parties",
     text: "Parties",
     icon_class: "fa-duotone",
-    link: Routes.ts_game_party_index_path(@conn, :index)
+    link: ~p"/teiserver/account/parties"
   %>
 
   <%=
@@ -125,7 +125,7 @@
     name: "queue",
     text: "Matchmaking",
     icon_class: "fa-duotone",
-    link: Routes.ts_game_queue_index_path(@conn, :index)
+    link: ~p"/teiserver/matchmaking/queues"
   %>
 
   <%= if allow?(@conn, "teiserver.staff.moderator") do %>
@@ -135,7 +135,7 @@
       name: "live_client",
       text: "Live clients",
       icon_class: "fa-duotone",
-      link: Routes.ts_admin_client_index_path(@conn, :index)
+      link: ~p"/teiserver/admin/client"
     %>
   <% end %>
 
@@ -146,7 +146,7 @@
       name: "account",
       text: "Account",
       icon_class: "fa-duotone",
-      link: Routes.ts_account_general_path(@conn, :index)
+      link: ~p"/teiserver/account"
     %>
 
     <%=
@@ -155,7 +155,7 @@
       name: "matches",
       text: "My matches",
       icon_class: "fa-duotone",
-      link: Routes.ts_battle_match_path(@conn, :index)
+      link: ~p"/teiserver/battle/matches"
     %>
 
     <%=
@@ -164,7 +164,7 @@
       name: "clans",
       text: "Clans",
       icon_class: "fa-duotone",
-      link: Routes.ts_clans_clan_path(@conn, :index)
+      link: ~p"/teiserver/clans"
     %>
   <% end %>
 </div>
@@ -180,7 +180,7 @@
     %>
 
     <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
-      <a href={Routes.communication_notification_path(@conn, :index)}>
+      <a href={~p"/communication/notifications"}>
         <%= central_component "icon", icon: notification_icon, class: "fa-4x" %>
         <%= if @user_notifications_unread_count > 0 do %>
           <div class={"badge rounded-pill bg-#{Central.Communication.NotificationLib.colours()}"}
@@ -196,7 +196,7 @@
     </div>
 
     <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
-      <form action={Routes.account_session_path(@conn, :logout)} method="post" class="link" id="signout-form">
+      <form action={~p"/logout"} method="post" class="link" id="signout-form">
         <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
         <a data-submit="parent" href="#" rel="nofollow" onclick="$('#signout-form').submit();">

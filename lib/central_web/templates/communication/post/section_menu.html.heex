@@ -11,7 +11,7 @@
   });
 </script>
 
-<a href={Routes.blog_post_path(@conn, :index)} class={"btn btn-outline-#{bsname}"} id="section-menu-index">
+<a href={~p"/blog_admin/posts"} class={"btn btn-outline-#{bsname}"} id="section-menu-index">
   <i class="fa-regular fa-bars"></i>
   &nbsp;
   List

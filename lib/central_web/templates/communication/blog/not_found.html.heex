@@ -41,7 +41,7 @@
         <h4>We can't seem to find that post</h4>
         <p>Unfortunately it appears this post either doesn't exist or has yet to be published.</p>
 
-        <a href={Routes.blog_path(@conn, :index)} class={"btn btn-outline-#{bsname}"}>
+        <a href={~p"/blog"} class={"btn btn-outline-#{bsname}"}>
           Back to blog
         </a>
       </div>

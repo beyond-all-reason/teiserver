@@ -22,6 +22,14 @@
 
         <div class="row">
           <%= central_component "sub_menu_icon",
+            name: "home",
+            label: "Account menu",
+            active: @active,
+            url: ~p"/teiserver/account",
+            icon: "fa-solid fa-user"
+          %>
+
+          <%= central_component "sub_menu_icon",
             name: "profile",
             label: "Profile",
             active: @active,
@@ -49,7 +57,7 @@
             name: "clans",
             label: "Clans",
             active: @active,
-            url: Routes.ts_clans_clan_path(@conn, :index),
+            url: ~p"/teiserver/clans",
             icon: Teiserver.Clans.ClanLib.icon()
           %>
 

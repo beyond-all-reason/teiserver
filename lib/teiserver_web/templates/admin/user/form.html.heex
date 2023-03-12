@@ -138,7 +138,7 @@
 
   <div class="form-group m-2 my-4">
     <%= if @changeset.data.id do %>
-      <a href={Routes.ts_admin_user_path(@conn, :show, @user)} class="btn btn-secondary btn-outline">
+      <a href={~p"/teiserver/admin/user/#{@user}"} class="btn btn-secondary btn-outline">
         Cancel
       </a>
     <% end %>

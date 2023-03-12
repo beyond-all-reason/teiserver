@@ -13,7 +13,7 @@ defmodule Central.Account do
 
   alias Central.Account.User
   alias Central.Account.UserQueries
-  import Central.Logging.Helpers, only: [add_anonymous_audit_log: 3]
+  import Teiserver.Logging.Helpers, only: [add_anonymous_audit_log: 3]
 
   @spec icon :: String.t()
   def icon, do: "fa-duotone fa-user-alt"
@@ -318,8 +318,7 @@ defmodule Central.Account do
     }
   end
 
-  alias Central.Account.Group
-  alias Central.Account.GroupLib
+  alias Central.Account.{Group, GroupLib}
 
   defp group_query(args) do
     group_query(nil, args)
@@ -712,8 +711,7 @@ defmodule Central.Account do
     GroupInvite.changeset(group_invite, %{})
   end
 
-  alias Central.Account.Code
-  alias Central.Account.CodeLib
+  alias Central.Account.{Code, CodeLib}
 
   def code_query(args) do
     code_query(nil, args)
@@ -852,6 +850,167 @@ defmodule Central.Account do
   """
   def change_code(%Code{} = code) do
     Code.changeset(code, %{})
+  end
+
+  alias Central.Account.{UserToken, UserTokenLib}
+
+  def user_token_query(args) do
+    user_token_query(nil, args)
+  end
+
+  def user_token_query(id, args) do
+    UserTokenLib.query_user_tokens()
+    |> UserTokenLib.search(%{id: id})
+    |> UserTokenLib.search(args[:search])
+    |> UserTokenLib.preload(args[:preload])
+    |> UserTokenLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of user_tokens.
+
+  ## Examples
+
+      iex> list_user_tokens()
+      [%UserToken{}, ...]
+
+  """
+  def list_user_tokens(args \\ []) do
+    user_token_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single user_token.
+
+  Raises `Ecto.NoResultsError` if the UserToken does not exist.
+
+  ## Examples
+
+      iex> get_user_token!(123)
+      %UserToken{}
+
+      iex> get_user_token!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_user_token(id, args \\ []) do
+    user_token_query(id, args)
+    |> QueryHelpers.limit_query(args[:limit] || 1)
+    |> Repo.one()
+  end
+
+  def get_user_token!(id, args \\ []) do
+    user_token_query(id, args)
+    |> QueryHelpers.limit_query(args[:limit] || 1)
+    |> Repo.one!()
+  end
+
+  @spec get_user_token_by_value(String.t()) :: UserToken.t() | nil
+  def get_user_token_by_value(value) do
+    user_token_query(nil,
+      search: [
+        value: value
+      ],
+      preload: [
+        :user
+      ]
+    )
+    |> QueryHelpers.limit_query(1)
+    |> Repo.one()
+  end
+
+  # Uncomment this if needed, default files do not need this function
+  # @doc """
+  # Gets a single user_token.
+
+  # Returns `nil` if the UserToken does not exist.
+
+  # ## Examples
+
+  #     iex> get_user_token(123)
+  #     %UserToken{}
+
+  #     iex> get_user_token(456)
+  #     nil
+
+  # """
+  # def get_user_token(id, args \\ []) when not is_list(id) do
+  #   user_token_query(id, args)
+  #   |> Repo.one
+  # end
+
+  @doc """
+  Creates a user_token.
+
+  ## Examples
+
+      iex> create_user_token(%{field: value})
+      {:ok, %UserToken{}}
+
+      iex> create_user_token(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_user_token(attrs \\ %{}) do
+    %UserToken{}
+    |> UserToken.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a user_token.
+
+  ## Examples
+
+      iex> update_user_token(user_token, %{field: new_value})
+      {:ok, %UserToken{}}
+
+      iex> update_user_token(user_token, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user_token(%UserToken{} = user_token, attrs) do
+    user_token
+    |> UserToken.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a UserToken.
+
+  ## Examples
+
+      iex> delete_user_token(user_token)
+      {:ok, %UserToken{}}
+
+      iex> delete_user_token(user_token)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_user_token(%UserToken{} = user_token) do
+    Repo.delete(user_token)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking user_token changes.
+
+  ## Examples
+
+      iex> change_user_token(user_token)
+      %Ecto.Changeset{source: %UserToken{}}
+
+  """
+  def change_user_token(%UserToken{} = user_token) do
+    UserToken.changeset(user_token, %{})
+  end
+
+  def create_token_value(length \\ 128) do
+    :crypto.strong_rand_bytes(length)
+      |> Base.encode64(padding: false)
+      |> binary_part(0, length)
   end
 
   @doc """

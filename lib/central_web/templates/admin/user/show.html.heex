@@ -45,7 +45,7 @@
               Edit user
             </a>
             <%# Actions float end %>
-            <a href={Routes.ts_admin_user_path(@conn, :show, @user)} class={"btn btn-outline-#{Teiserver.Account.UserLib.colours()}"}>
+            <a href={~p"/teiserver/admin/user/#{@user}"} class={"btn btn-outline-#{Teiserver.Account.UserLib.colours()}"}>
               <i class="far fa-fw fa-robot"></i>
               Teiserver show
             </a>

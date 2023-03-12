@@ -5,7 +5,7 @@
     name: "lobbies",
     text: "Lobbies",
     icon_class: "fa-duotone",
-    link: Routes.ts_battle_lobby_index_path(@conn, :index)
+    link: ~p"/teiserver/battle/lobbies"
   %>
 
   <%= if allow?(@conn, "admin.dev") do %>
@@ -15,7 +15,7 @@
       name: "battle_logs",
       text: "Battle logs",
       icon_class: "fa-duotone",
-      link: Routes.ts_battle_match_path(@conn, :index)
+      link: ~p"/teiserver/battle/matches"
     %>
   <% end %>
 </div>

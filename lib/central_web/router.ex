@@ -10,7 +10,7 @@ defmodule CentralWeb.Router do
 
   pipeline :logging_live_auth do
     plug Bodyguard.Plug.Authorize,
-      policy: Central.Logging.LiveLib,
+      policy: Teiserver.Logging.LiveLib,
       action: :live,
       user: {Central.Account.AuthLib, :current_user}
   end
@@ -22,7 +22,7 @@ defmodule CentralWeb.Router do
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
     plug(Central.Account.DefaultsPlug)
-    plug(Central.Logging.LoggingPlug)
+    plug(Teiserver.Logging.LoggingPlug)
     plug(Central.Account.AuthPipeline)
     plug(Central.Account.AuthPlug)
     plug(Teiserver.Account.TSAuthPlug)
@@ -66,7 +66,7 @@ defmodule CentralWeb.Router do
   pipeline :token_api do
     plug(:accepts, ["json"])
     plug(:put_secure_browser_headers)
-    plug(Central.Logging.LoggingPlug)
+    plug(Teiserver.Logging.LoggingPlug)
     plug(Central.Account.AuthPipeline)
     plug(Central.Account.AuthPlug)
     plug(Teiserver.Account.TSAuthPlug)
@@ -79,7 +79,7 @@ defmodule CentralWeb.Router do
     plug(:fetch_session)
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
-    plug(Central.Logging.LoggingPlug)
+    plug(Teiserver.Logging.LoggingPlug)
     plug(Central.Account.AuthPipeline)
     plug(Central.Account.AuthPlug)
     plug(Teiserver.Account.TSAuthPlug)
@@ -156,7 +156,7 @@ defmodule CentralWeb.Router do
     get("/ajax", AjaxController, :index)
   end
 
-  scope "/logging", CentralWeb.Logging, as: :logging do
+  scope "/logging", TeiserverWeb.Logging, as: :logging do
     pipe_through([:browser, :protected, :standard_layout])
 
     get("/", GeneralController, :index)
@@ -332,6 +332,14 @@ defmodule CentralWeb.Router do
     get("/", GeneralController, :index)
     get("/customisation_form", GeneralController, :customisation_form)
     get("/customisation_select/:role", GeneralController, :customisation_select)
+
+    get("/details", GeneralController, :edit_details)
+    put("/update_details", GeneralController, :update_details)
+
+    get("/security", SecurityController, :index)
+    get("/security/edit_password", SecurityController, :edit_password)
+    put("/security/update_password", SecurityController, :update_password)
+    delete("/security/delete_token/:id", SecurityController, :delete_token)
   end
 
   scope "/teiserver", TeiserverWeb.Account, as: :ts_account do
@@ -458,8 +466,8 @@ defmodule CentralWeb.Router do
     post("/infolog/search", InfologController, :search)
     resources("/infolog", InfologController, only: [:index, :show, :delete])
 
-    get("/exports/download/:id", ExportsController, :download)
-    resources("/exports", ExportsController, only: [:index])
+    post("/exports/:id", ExportsController, :download)
+    resources("/exports", ExportsController, only: [:index, :show])
 
     get("/show/:name", ReportController, :show)
     post("/show/:name", ReportController, :show)
@@ -478,10 +486,14 @@ defmodule CentralWeb.Router do
   scope "/teiserver/api", TeiserverWeb.API do
     pipe_through :api
     post "/login", SessionController, :login
+    post "/request_token", SessionController, :request_token
+    get "/request_token", SessionController, :request_token_get
   end
 
-  scope "/teiserver/api/beans", TeiserverWeb.API, as: :ts do
+  scope "/teiserver/api/hailstorm", TeiserverWeb.API, as: :ts do
     pipe_through([:api])
+    post("/up", BeansController, :up)
+    post("/update_site_config", BeansController, :update_site_config)
     post("/create_user", BeansController, :create_user)
     post("/db_update_user", BeansController, :db_update_user)
     post("/ts_update_user", BeansController, :ts_update_user)

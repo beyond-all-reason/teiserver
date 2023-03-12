@@ -19,7 +19,7 @@
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
 <script src={Routes.static_path(@conn, "/js/select2.js")}></script>
 
-<form action={Routes.ts_admin_chat_path(@conn, :index)} method="post" class="form-horizontal" id="search-box">
+<form action={~p"/teiserver/admin/chat"} method="post" class="form-horizontal" id="search-box">
   <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
   <div class="row">

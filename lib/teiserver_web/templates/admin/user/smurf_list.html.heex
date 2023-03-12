@@ -59,7 +59,7 @@
     Show/Hide help
   </div>
 
-  <a class={"btn btn-outline-#{bsname}"} href={Routes.ts_admin_user_path(@conn, :show, @user)}>Show user</a>
+  <a class={"btn btn-outline-#{bsname}"} href={~p"/teiserver/admin/user/#{@user}"}>Show user</a>
 </div>
 <h3 class="mt-4">Previous names for <%= @user.name %></h3>
 <%=
@@ -162,7 +162,7 @@
           </td>
 
           <td>
-            <a href={Routes.ts_admin_user_path(@conn, :show, @user.id)} class="btn btn-secondary btn-sm">
+            <a href={~p"/teiserver/admin/user/#{@user.id}"} class="btn btn-secondary btn-sm">
               Show
             </a>
           </td>
@@ -247,14 +247,14 @@
           </td>
 
           <td>
-            <a href={Routes.ts_admin_user_path(@conn, :show, user.id)} class="btn btn-secondary btn-sm">
+            <a href={~p"/teiserver/admin/user/#{user.id}"} class="btn btn-secondary btn-sm">
               Show
             </a>
           </td>
 
           <%= if false and is_admin do %>
           <td>
-            <a href={Routes.ts_admin_user_path(@conn, :smurf_merge_form, user.id, @user.id)} class={"btn btn-outline-#{bsname} btn-sm"}>
+            <a href={~p"/teiserver/admin/users/smurf_merge_form/#{user.id}/#{@user.id}"} class={"btn btn-outline-#{bsname} btn-sm"}>
               Merge smurf
             </a>
           </td>

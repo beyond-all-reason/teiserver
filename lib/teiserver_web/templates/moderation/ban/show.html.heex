@@ -25,7 +25,7 @@
         <hr />
 
         <div class="float-end">
-          <a class={"btn btn-outline-#{bsname}"} href={Routes.ts_admin_user_path(@conn, :show, @ban.source_id)}>View user</a>
+          <a class={"btn btn-outline-#{bsname}"} href={~p"/teiserver/admin/user/#{@ban.source_id}"}>View user</a>
 
           <%= if allow?(@conn, "teiserver.staff.moderator") do %>
             <div class="dropdown" style="display: inline-block;">

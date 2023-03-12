@@ -358,17 +358,30 @@ ENDSSH
 
 ## Debugging a bad setup
 #### Website not working
-`curl http://localhost:8888` should produce `curl: (1) Received HTTP/0.9 when not allowed`
-`curl https://localhost:8888` should produce an error starting with `curl: (60) SSL: no alternative certificate subject name matches target host name 'localhost'`
-`curl --insecure https://localhost:8888` should produce a web page similar to `curl http://localhost:4000`
+Ensure the service is running, the logs should be empty
+```
+sudo systemctl status central
+sudo journalctl -u central.server
+```
 
-`curl http://localhost:4000` should produce a web page
-`curl https://localhost:4000` should produce `curl: (35) error:1408F10B:SSL routines:ssl3_get_record:wrong version number`
+- `curl http://localhost:8888` should produce `curl: (1) Received HTTP/0.9 when not allowed`
+- `curl https://localhost:8888` should produce an error starting with `curl: (60) SSL: no alternative certificate subject name matches target host name 'localhost'`
+- `curl --insecure https://localhost:8888` should produce a web page similar to `curl http://localhost:4000`
 
-`curl curl http://localhost:443` should give a 400 result
+- `curl http://localhost:4000` should produce a web page
+- `curl https://localhost:4000` should produce `curl: (35) error:1408F10B:SSL routines:ssl3_get_record:wrong version number`
 
-`openssl s_client localhost:443` should give an SSL certificate info, this is nginx
-`openssl s_client localhost:8888` should give the same info, this is the Phoenix application
+- `curl curl http://localhost:443` should give a 400 result
+
+- `openssl s_client localhost:443` should give an SSL certificate info, this is nginx
+- `openssl s_client localhost:8888` should give the same info, this is the Phoenix application
+
+#### Nginx
+Looking at logs for nginx with this
+```
+sudo systemctl status nginx
+journalctl -u nginx.server
+```
 
 **Possible SSL related errors:**
 - Certbot files not existing

@@ -36,10 +36,16 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
         )
         :ok
 
-      {false, true} ->
-        :ok
-
       _ ->
+        PubSub.broadcast(
+          Central.PubSub,
+          "lobby_policy_internal:#{state.id}",
+          %{
+            channel: "lobby_policy_internal:#{state.id}",
+            event: :updated_policy,
+            new_lobby_policy: new_lobby_policy
+          }
+        )
         :ok
     end
 
@@ -98,7 +104,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
       _ ->
         selected_name = Enum.random(remaining_names)
         user = LobbyPolicyLib.get_or_make_agent_user(selected_name, state.db_policy)
-        LobbyPolicyLib.start_lobby_policy_bot(state.id, user)
+        LobbyPolicyLib.start_lobby_policy_bot(state.db_policy, selected_name, user)
     end
   end
 

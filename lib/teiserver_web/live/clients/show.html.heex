@@ -10,11 +10,11 @@
 <%#= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{conn: @socket, active: "users"}) %>
 
 <div class="float-end">
-  <a href={Routes.ts_admin_user_path(@socket, :show, @user.id)} class={"btn btn-#{bsname}"}>
+  <a href={~p"/teiserver/admin/user/#{@user.id}"} class={"btn btn-#{bsname}"}>
     Show
   </a>
 
-  <a href={Routes.ts_admin_user_path(@socket, :edit, @user.id)} class={"btn btn-#{bsname}"}>
+  <a href={~p"/teiserver/admin/user/#{@user.id}/edit"} class={"btn btn-#{bsname}"}>
     Edit
   </a>
 </div>
@@ -89,7 +89,7 @@
 </div>
 
 <span>
-  <%= live_redirect "Back", to: Routes.ts_admin_client_index_path(@socket, :index), class: "btn btn-secondary" %>
+  <%= live_redirect "Back", to: ~p"/teiserver/admin/client", class: "btn btn-secondary" %>
 </span>
 
       </div>

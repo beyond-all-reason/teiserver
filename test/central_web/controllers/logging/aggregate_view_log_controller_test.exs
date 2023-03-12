@@ -1,10 +1,10 @@
-# defmodule CentralWeb.Logging.AggregateViewLogControllerTest do
+# defmodule TeiserverWeb.Logging.AggregateViewLogControllerTest do
 #   use CentralWeb.ConnCase, async: true
 
 #   alias CentralWeb.General.TimexHelpers
 
 #   alias Central.Helpers.GeneralTestLib
-#   alias Central.Logging.LoggingTestLib
+#   alias Teiserver.Logging.LoggingTestLib
 #   setup do
 #     GeneralTestLib.conn_setup()
 #     |> LoggingTestLib.logging_setup(aggregate_logs: true)

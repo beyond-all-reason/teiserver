@@ -3,6 +3,7 @@ defmodule CentralWeb.Communication.CategoryController do
 
   alias Central.Communication
   alias Central.Communication.Category
+  alias Central.Helpers.StylingHelper
 
   plug Bodyguard.Plug.Authorize,
     policy: Central.Communication.Category,

@@ -2,7 +2,8 @@ defmodule CentralWeb.Account.GroupController do
   use CentralWeb, :controller
 
   alias Central.Account
-  alias Central.Account.GroupTypeLib
+  alias Central.Account.{GroupLib, GroupTypeLib}
+  import Central.Helpers.StringHelper, only: [get_hash_id: 1]
 
   plug :add_breadcrumb, name: 'Account', url: '/account'
   plug :add_breadcrumb, name: 'Groups', url: '/account/groups'

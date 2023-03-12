@@ -25,7 +25,7 @@
     <% end %>
 
     <%= if Enum.count(@user_notifications) > 15 do %>
-      <a href={Routes.communication_notification_path(@conn, :index)} class="dropdown-item" style="padding-top: 5px; padding-bottom: 3px;">
+      <a href={~p"/communication/notifications"} class="dropdown-item" style="padding-top: 5px; padding-bottom: 3px;">
         <i class='far fa-fw fa-bars' style='color: #000;'></i>
         &nbsp;
         Showing first 15 notifications, click here to view all notifications
@@ -42,7 +42,7 @@
     <% end %>
 
     <%= if Enum.count(@user_notifications) <= 15 do %>
-      <a href={Routes.communication_notification_path(@conn, :index)} class="dropdown-item" style="padding-top: 5px; padding-bottom: 3px;">
+      <a href={~p"/communication/notifications"} class="dropdown-item" style="padding-top: 5px; padding-bottom: 3px;">
         <i class='far fa-fw fa-bars' style='color: #000;'></i>
         &nbsp;
         View all notifications

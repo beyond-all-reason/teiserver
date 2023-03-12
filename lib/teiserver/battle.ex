@@ -697,6 +697,9 @@ defmodule Teiserver.Battle do
   @spec remove_user_from_lobby(T.userid(), T.lobby_id()) :: :ok
   defdelegate remove_user_from_lobby(userid, lobby_id), to: LobbyCache
 
+  @spec force_add_user_to_lobby(T.userid(), T.lobby_id()) :: :ok | nil
+  defdelegate force_add_user_to_lobby(userid, lobby_id), to: Lobby
+
   # Balance
   @spec get_lobby_current_balance(T.lobby_id()) :: map() | nil
   defdelegate get_lobby_current_balance(lobby_id), to: LobbyCache

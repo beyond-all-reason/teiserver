@@ -26,12 +26,12 @@
             <%= central_component "top_nav_item",
               text: "Blog",
               icon: Central.Communication.BlogLib.icon(),
-              route: Routes.blog_path(@conn, :index),
+              route: ~p"/blog",
               active: @site_menu_active == "central_blog"
             %>
 
             <li class="nav-item">
-              <a class="nav-link" href={Routes.account_session_path(@conn, :new)}>
+              <a class="nav-link" href={~p"/login"}>
                 <i class="fa-solid fa-fw fa-sign-in-alt"></i>
                 Login
               </a>
@@ -40,10 +40,10 @@
             <%= central_component "top_nav_item",
               text: "Blog",
               icon: Central.Communication.BlogLib.icon(),
-              route: Routes.blog_path(@conn, :index),
+              route: ~p"/blog",
               active: @site_menu_active == "central_blog"
             %>
-          
+
             <%= if allow?(@conn, "communication.blog") do %>
               <li class="nav-item">
                 <a class="nav-link" href={Routes.blog_post_path(@conn, :new)}>
@@ -53,7 +53,7 @@
               </li>
 
               <li class="nav-item">
-                <a class="nav-link" href={Routes.blog_post_path(@conn, :index)}>
+                <a class="nav-link" href={~p"/blog_admin/posts"}>
                   <i class={"fa-fw #{Central.Communication.PostLib.icon()}"}></i>
                   Posts
                 </a>
@@ -93,7 +93,7 @@
   <div class="inner-wrapper mt-auto mb-auto container">
     <div class="row">
       <div class="col-md-12">
-        <a href={Routes.blog_path(@conn, :index)}>
+        <a href={~p"/blog"}>
           <h1>
             <%= Application.get_env(:central, Central)[:blog_title] %>
           </h1>

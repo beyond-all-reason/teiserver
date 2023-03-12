@@ -1,7 +1,7 @@
 defmodule Teiserver.UberserverConvert do
   use Oban.Worker, queue: :teiserver
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Central.Logging.Helpers
+  alias Teiserver.Logging.Helpers
   require Logger
 
   @impl Oban.Worker
