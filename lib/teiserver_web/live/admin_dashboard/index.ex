@@ -14,9 +14,8 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     socket = socket
       |> AuthPlug.live_call(session)
       |> NotificationPlug.live_call()
-      |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
-      |> add_breadcrumb(name: "Dashboard", url: "/teiserver/admin/dashboard")
+      |> add_breadcrumb(name: "Dashboard", url: "/admin/dashboard")
       |> assign(:site_menu_active, "teiserver_admin")
       |> assign(:view_colour, Central.Admin.AdminLib.colours())
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
@@ -65,7 +64,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   end
 
   @impl true
-  def handle_event("restart-consuls", _event, socket) do
+  def handle_event("check-consuls", _event, socket) do
     Coordinator.start_all_consuls()
     {:noreply, socket}
   end
@@ -79,7 +78,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     {:noreply, socket}
   end
 
-  def handle_event("restart-balances", _event, socket) do
+  def handle_event("check-balances", _event, socket) do
     Coordinator.start_all_balancers()
     {:noreply, socket}
   end
@@ -90,6 +89,11 @@ defmodule TeiserverWeb.AdminDashLive.Index do
         Coordinator.cast_balancer(lobby_id, :reinit)
       end)
 
+    {:noreply, socket}
+  end
+
+  def handle_event("restart-policies", _event, socket) do
+    Game.pre_cache_policies()
     {:noreply, socket}
   end
 
@@ -162,7 +166,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_telemetry")
 
     socket
-    |> assign(:page_title, "Listing Clients")
+    |> assign(:page_title, "Admin dashboard")
     |> assign(:client, nil)
   end
 end

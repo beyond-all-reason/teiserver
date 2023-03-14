@@ -1,0 +1,30 @@
+<div class="my-2">
+  <%= live_redirect "Main dashboard", to: ~p"/admin/dashboard", class: "btn btn-outline-primary" %>
+
+  <div class="btn btn-outline-warning" phx-click="disconnect-all-bots">
+    Disconnect all bots
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Lobby</th>
+        <th>&nbsp;</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%= for {name, bot} <- @bots do %>
+        <tr>
+          <td><%= name %></td>
+          <td><%= bot.status.lobby_id %></td>
+          <td>
+            <%= if bot.status.lobby_id do %>
+              <%= live_redirect "Show", to: ~p"/teiserver/battle/lobbies/show/#{bot.status.lobby_id}", class: "btn btn-sm btn-outline-primary" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -12,6 +12,16 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
   @check_delay 5_000
 
   @impl true
+  def handle_call(:get_agent_status, _from, state) do
+    {:reply, state.agent_status, state}
+  end
+
+  @impl true
+  def handle_cast(:disconnect_all_bots, state) do
+    new_state = disconnect_all_bots(state)
+    {:noreply, new_state}
+  end
+
   def handle_cast(%{event: :bot_status_update} = msg, state) do
     status = %{
       updated_at: System.system_time(:second),
@@ -24,17 +34,9 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
 
   def handle_cast({:updated_policy, new_lobby_policy}, state) do
     # If it's being enabled or disabled, do stuff
-    case {state.db_policy.enabled, new_lobby_policy.enabled} do
+    new_state = case {state.db_policy.enabled, new_lobby_policy.enabled} do
       {true, false} ->
-        PubSub.broadcast(
-          Central.PubSub,
-          "lobby_policy_internal:#{state.id}",
-          %{
-            channel: "lobby_policy_internal:#{state.id}",
-            event: :disconnect
-          }
-        )
-        :ok
+        disconnect_all_bots(state)
 
       _ ->
         PubSub.broadcast(
@@ -46,10 +48,10 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
             new_lobby_policy: new_lobby_policy
           }
         )
-        :ok
+        state
     end
 
-    {:noreply, %{state | db_policy: new_lobby_policy}}
+    {:noreply, %{new_state | db_policy: new_lobby_policy}}
   end
 
   @impl true
@@ -81,6 +83,16 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
       }
     )
 
+    PubSub.broadcast(
+      Central.PubSub,
+      "lobby_policy_updates:#{state.id}",
+      %{
+        channel: "lobby_policy_updates:#{state.id}",
+        event: :agent_status,
+        agent_status: state.agent_status
+      }
+    )
+
     # Check the agents after they've all had a chance to check in
     Process.send_after(self(), :check_agents, @check_delay)
 
@@ -106,6 +118,29 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
         user = LobbyPolicyLib.get_or_make_agent_user(selected_name, state.db_policy)
         LobbyPolicyLib.start_lobby_policy_bot(state.db_policy, selected_name, user)
     end
+  end
+
+  defp disconnect_all_bots(state) do
+    PubSub.broadcast(
+      Central.PubSub,
+      "lobby_policy_internal:#{state.id}",
+      %{
+        channel: "lobby_policy_internal:#{state.id}",
+        event: :disconnect
+      }
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "lobby_policy_updates:#{state.id}",
+      %{
+        channel: "lobby_policy_updates:#{state.id}",
+        event: :agent_status,
+        agent_status: %{}
+      }
+    )
+
+    %{state | agent_status: %{}}
   end
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}

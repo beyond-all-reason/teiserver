@@ -51,6 +51,14 @@ Used for internal communication around lobby_policies where something needs to b
 }
 ```
 
+#### lobby_policy_updates:#{lobby_policy_id}
+Used by the bots to send updates to anything listening for them (organiser and liveviews).
+```elixir
+%{
+  event: :disconnect
+}
+```
+
 #### teiserver_public_stats
 Similar to the `teiserver_telemetry` channel but specifically limited to be public info.
 ```elixir

@@ -505,10 +505,11 @@ defmodule CentralWeb.Router do
   end
 
   # ADMIN
-  scope "/teiserver/admin", TeiserverWeb.AdminDashLive, as: :ts do
+  scope "/admin", TeiserverWeb.AdminDashLive, as: :ts do
     pipe_through([:browser, :standard_layout, :protected])
 
     live("/dashboard", Index, :index)
+    live("/dashboard/policy/:id", Policy, :policy)
   end
 
   scope "/teiserver/admin", TeiserverWeb.ClientLive, as: :ts_admin do
