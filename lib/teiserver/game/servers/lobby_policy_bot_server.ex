@@ -190,14 +190,13 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     consul_state = Coordinator.call_consul(state.lobby_id, :get_consul_state)
 
     expected_map = %{
-      minimum_rating_to_play: lp.min_rating,
-      maximum_rating_to_play: lp.max_rating,
-      minimum_uncertainty_to_play: lp.min_uncertainty,
-      maximum_uncertainty_to_play: lp.max_uncertainty,
-      minimum_rank_to_play: lp.min_rank,
-      maximum_rank_to_play: lp.max_rank
+      minimum_rating_to_play: lp.min_rating || 0,
+      maximum_rating_to_play: lp.max_rating || 1000,
+      minimum_uncertainty_to_play: lp.min_uncertainty || 0,
+      maximum_uncertainty_to_play: lp.max_uncertainty || 1000,
+      minimum_rank_to_play: lp.min_rank || 0,
+      maximum_rank_to_play: lp.max_rank || 1000
     }
-      |> Map.reject(fn {_, v} -> v == nil end)
 
     found_map = consul_state
       |> Map.take(Map.keys(expected_map))
