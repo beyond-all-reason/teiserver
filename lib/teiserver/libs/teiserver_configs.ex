@@ -34,6 +34,17 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "bots.Flag",
+      section: "Bots",
+      type: "boolean",
+      permissions: ["teiserver.staff.server"],
+      description: "Country code flag used by bots managed by the server",
+      opts: [],
+      default: "GB",
+      value_label: ""
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Spring flood rate limit count",
       section: "Protocol",
       type: "integer",
