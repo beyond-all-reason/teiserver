@@ -33,7 +33,8 @@ defmodule Teiserver.Account.NewSmurfReport do
     valid_types = Account.list_smurf_key_types(
       search: [
         name_in: ["chobby_mac_hash"]
-      ]
+      ],
+      limit: :infinity,
     )
       |> Enum.map(fn %{id: id} -> id end)
 

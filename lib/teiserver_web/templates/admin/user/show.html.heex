@@ -7,12 +7,13 @@
     $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
 
     page_quick_actions = [
-      {label: "Edit user", icon: "<%= icon() %>", url: <%= ~p"/teiserver/admin/user/#{@user}/edit" %>, keywords: ["edit", "user", "edit user"]},
+      {label: "Edit user", icon: "<%= icon() %>", url: "<%= ~p"/teiserver/admin/user/#{@user}/edit" %>", keywords: ["edit", "user", "edit user"]},
     ];
 
     setTimeout(function() {
       $("#flash-messages").show();
     }, 4001);
+
   });
 </script>
 
