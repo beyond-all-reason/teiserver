@@ -10,7 +10,7 @@
       <tr>
         <th>Name</th>
         <th>Lobby</th>
-        <th>&nbsp;</th>
+        <th colspan="2">&nbsp;</th>
       </tr>
     </thead>
     <tbody>
@@ -20,8 +20,11 @@
           <td><%= bot.status.lobby_id %></td>
           <td>
             <%= if bot.status.lobby_id do %>
-              <%= live_redirect "Show", to: ~p"/teiserver/battle/lobbies/show/#{bot.status.lobby_id}", class: "btn btn-sm btn-outline-primary" %>
+              <%= live_redirect "Show lobby", to: ~p"/teiserver/battle/lobbies/show/#{bot.status.lobby_id}", class: "btn btn-sm btn-outline-primary" %>
             <% end %>
+          </td>
+          <td>
+            <%= live_redirect "Show client", to: ~p"/teiserver/admin/client/#{bot.status.userid}", class: "btn btn-sm btn-outline-success" %>
           </td>
         </tr>
       <% end %>

@@ -4,7 +4,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   """
 
   alias Phoenix.PubSub
-  alias Teiserver.{Game, User, Client, Battle, Account}
+  alias Teiserver.{Game, User, Client, Battle, Account, Coordinator}
   alias Teiserver.Battle.{Lobby, LobbyChat}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Data.Types, as: T
@@ -19,6 +19,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
       event: :bot_status_update,
       name: state.user.name,
       status: %{
+        userid: state.userid,
         lobby_id: state.lobby_id
       }
     })
@@ -137,6 +138,8 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
         send_chat(state, "$rename #{correct_lobby_name}")
 
       true ->
+        check_consul_state(state)
+
         client = state.userid
           |> Account.get_client_by_id()
           |> Map.merge(%{sync: %{
@@ -179,10 +182,37 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     {:noreply, state}
   end
 
+  defp check_consul_state(%{lobby_policy: lp} = state) do
+    consul_state = Coordinator.call_consul(state.lobby_id, :get_consul_state)
+
+    expected_map = %{
+      minimum_rating_to_play: lp.min_rating,
+      maximum_rating_to_play: lp.max_rating,
+      minimum_uncertainty_to_play: lp.min_uncertainty,
+      maximum_uncertainty_to_play: lp.max_uncertainty,
+      minimum_rank_to_play: lp.min_rank,
+      maximum_rank_to_play: lp.max_rank
+    }
+
+    found_map = consul_state
+      |> Map.take(Map.keys(expected_map))
+
+    Logger.error("inspect #{expected_map}")
+    Logger.error("inspect #{found_map}")
+  end
+
   @spec handle_user_chat(T.userid(), String.t(), map()) :: map()
   defp handle_user_chat(userid, "!boss" <> rem, state) do
     if String.trim(rem) != "" do
+      LobbyChat.say(userid, "!ev", state.lobby_id)
       Lobby.kick_user_from_battle(userid, state.lobby_id)
+    end
+    state
+  end
+
+  defp handle_user_chat(userid, "!preset" <> rem, state) do
+    if String.trim(rem) != state.lobby_policy.preset do
+      LobbyChat.say(userid, "!ev", state.lobby_id)
     end
     state
   end
