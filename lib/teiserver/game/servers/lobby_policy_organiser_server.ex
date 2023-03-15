@@ -70,7 +70,8 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
   end
 
   def handle_info(:tick, %{db_policy: %{enabled: false}} = state) do
-    {:noreply, state}
+    new_state = disconnect_all_bots(state)
+    {:noreply, new_state}
   end
 
   def handle_info(:tick, state) do
