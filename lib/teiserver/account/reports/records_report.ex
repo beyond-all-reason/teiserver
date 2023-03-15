@@ -1,5 +1,6 @@
 defmodule Teiserver.Account.RecordsReport do
   alias Central.Repo
+  alias Teiserver.Telemetry
 
   @spec icon() :: String.t()
   def icon(), do: "fa-solid fa-trophy"
@@ -7,30 +8,44 @@ defmodule Teiserver.Account.RecordsReport do
   @spec permissions() :: String.t()
   def permissions(), do: "teiserver.staff.moderator"
 
+  @top_count 3
+
   @spec run(Plug.Conn.t(), map()) :: {nil, map()}
   def run(_conn, _params) do
     records = [
-      {"Peak users", get_max(~w(aggregates stats peak_user_counts total))},
-      {"Peak players", get_max(~w(aggregates stats peak_user_counts player))},
+      {"Peak users", get_top(~w(aggregates stats peak_user_counts total))},
+      {"Peak players", get_top(~w(aggregates stats peak_user_counts player))},
 
-      {"Unique users", get_max(~w(aggregates stats unique_users))},
-      {"Unique players", get_max(~w(aggregates stats unique_players))},
+      {"Unique users", get_top(~w(aggregates stats unique_users))},
+      {"Unique players", get_top(~w(aggregates stats unique_players))},
 
-      {"Player time (days)", get_max(~w(aggregates minutes player)) |> minutes_to_days},
-      {"Total time (days)", get_max(~w(aggregates minutes total)) |> minutes_to_days},
+      {"Player time (days)", get_top(~w(aggregates minutes player)) |> minutes_to_days},
+      {"Total time (days)", get_top(~w(aggregates minutes total)) |> minutes_to_days},
     ]
 
-    assigns = %{
-      records: records
+    # force_recache = (Map.get(params, "recache", false) == "true")
+    force_recache = false
+    today = Telemetry.get_todays_server_log(force_recache)
+
+    today_data = %{
+      "Peak users" => today["aggregates"]["stats"]["peak_user_counts"]["total"],
+      "Peak players" => today["aggregates"]["stats"]["peak_user_counts"]["player"],
+      "Unique users" => today["aggregates"]["stats"]["unique_users"],
+      "Unique players" => today["aggregates"]["stats"]["unique_players"],
+      "Player time (days)" => (today["aggregates"]["minutes"]["player"] |> Kernel.div(1440) |> round),
+      "Total time (days)" => (today["aggregates"]["minutes"]["total"] |> Kernel.div(1440) |> round),
     }
 
-    {nil, assigns}
+    %{
+      top_count: @top_count,
+      records: records,
+      today: today_data
+    }
   end
 
-  defp get_max(fields) do
+  defp get_top(fields) do
     path = fields
-      |> Enum.map(fn f -> "'#{f}'" end)
-      |> Enum.join(" -> ")
+      |> Enum.map_join(" -> ", fn f -> "'#{f}'" end)
 
     query = """
       SELECT
@@ -39,20 +54,25 @@ defmodule Teiserver.Account.RecordsReport do
       FROM teiserver_server_day_logs logs
       ORDER BY
         (logs.data -> #{path}) DESC
-      LIMIT 1
+      LIMIT #{@top_count}
     """
 
     case Ecto.Adapters.SQL.query(Repo, query, []) do
       {:ok, results} ->
-        [date, value] = hd(results.rows)
-        {date, value}
+        results.rows
 
       {a, b} ->
         raise "ERR: #{a}, #{b}"
     end
   end
 
-  defp minutes_to_days({key, minutes}) do
-    {key, round(minutes / 1440)}
+  defp minutes_to_days_cell([key, minutes]) do
+    [key, round(minutes / 1440)]
+  end
+  defp minutes_to_days(rows) do
+    rows
+    |> Enum.map(fn row ->
+      minutes_to_days_cell(row)
+    end)
   end
 end

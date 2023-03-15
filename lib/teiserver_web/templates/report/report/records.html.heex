@@ -1,4 +1,6 @@
-<% bsname = view_colour() %>
+<%
+  bsname = view_colour()
+%>
 
 <%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
 
@@ -20,28 +22,32 @@
         <br /><br />
 
         <div class="help-box-large">
-          
+
         </div>
-        
+
 
         <table class="table">
           <thead>
             <tr>
               <th>Record</th>
-              <th>Value</th>
-              <th>Date</th>
-              <th>&nbsp;</th>
+              <th>Today</th>
+
+              <%= for i <- 1..@top_count do %>
+                <th>Pos: <%= i %></th>
+                <th>Date</th>
+              <% end %>
             </tr>
           </thead>
           <tbody>
-            <%= for {key, {date, value}} <- @records do %>
+            <%= for {key, rows} <- @records do %>
               <tr>
                 <td><%= key %></td>
-                <td><%= value %></td>
-                <td><%= date_to_str(date, format: :ymd) %></td>
-                <td>
-                  <%= link "Show", to: Routes.ts_reports_server_metric_path(@conn, :day_metrics_show, date_to_str(date, format: :ymd)), class: "btn btn-secondary btn-sm" %>
-                </td>
+                <td><%= format_number @today[key] %></td>
+
+                <%= for [date, value] <- rows do %>
+                  <td><%= format_number value %></td>
+                  <td><%= date_to_str(date, format: :ymd) %></td>
+                <% end %>
               </tr>
             <% end %>
           </tbody>
