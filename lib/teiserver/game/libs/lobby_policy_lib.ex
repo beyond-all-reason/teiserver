@@ -133,7 +133,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
       email: email_addr
     ])
 
-    case db_user do
+    user = case db_user do
       nil ->
         # Make account
         {:ok, user} = Account.create_user(%{
@@ -149,10 +149,6 @@ defmodule Teiserver.Game.LobbyPolicyLib do
             verified: true,
             lobby_client: "Teiserver Internal Process"
           }
-        })
-
-        Account.update_user_stat(user.id, %{
-          country_override: Application.get_env(:central, Teiserver)[:server_flag],
         })
 
         Account.create_group_membership(%{
@@ -171,6 +167,11 @@ defmodule Teiserver.Game.LobbyPolicyLib do
 
         db_user
     end
+
+    Account.update_user_stat(user.id, %{
+      country_override: Application.get_env(:central, Teiserver)[:server_flag],
+    })
+    user
   end
 
   @spec start_lobby_policy_bot(LobbyPolicy.t(), String.t(), Central.Account.User.t()) :: pid()
