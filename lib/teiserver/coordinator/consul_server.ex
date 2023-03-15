@@ -48,6 +48,15 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:reply, request_user_change_status(client, state), state}
   end
 
+  def handle_call(:get_consul_state, _from, state) do
+    result = ~w(gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play minimum_uncertainty_to_play maximum_uncertainty_to_play level_to_spectate locks bans timeouts welcome_message join_queue low_priority_join_queue approved_users host_bosses host_preset host_teamsize host_teamcount player_limit)a
+      |> Map.new(fn key ->
+        {key, Map.get(state, key)}
+      end)
+
+    {:reply, result, state}
+  end
+
   def handle_call(:queue_state, _from, state) do
     {:reply, get_queue(state), state}
   end
