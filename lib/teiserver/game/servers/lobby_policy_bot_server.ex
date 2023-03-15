@@ -3,7 +3,6 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   The LobbyPolicyBots are the accounts present in each managed lobby and involved in managing that lobby specifically
   """
 
-  alias Teiserver.Battle.LobbyCache
   alias Phoenix.PubSub
   alias Teiserver.{Game, User, Client, Battle, Account, Coordinator}
   alias Teiserver.Battle.{Lobby, LobbyChat}
@@ -15,13 +14,36 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   @tick_interval 10_000
 
   @impl true
-  def handle_info(%{channel: "lobby_policy_internal:" <> _, event: :request_status_update}, state) do
+  def handle_info(
+    %{channel: "lobby_policy_internal:" <> _, event: :request_status_update},
+    %{lobby_id: nil} = state
+  ) do
     :ok = Game.cast_lobby_organiser(state.lobby_policy.id, %{
       event: :bot_status_update,
       name: state.user.name,
       status: %{
         userid: state.userid,
-        lobby_id: state.lobby_id
+        lobby_id: nil
+      }
+    })
+
+    {:noreply, state}
+  end
+
+  def handle_info(
+    %{channel: "lobby_policy_internal:" <> _, event: :request_status_update},
+    %{lobby_id: lobby_id} = state
+  ) do
+    lobby = Battle.get_lobby(lobby_id)
+
+    :ok = Game.cast_lobby_organiser(state.lobby_policy.id, %{
+      event: :bot_status_update,
+      name: state.user.name,
+      status: %{
+        userid: state.userid,
+        lobby_id: state.lobby_id,
+        in_progress: lobby.in_progress,
+        member_count: Enum.count(lobby.members)
       }
     })
 
