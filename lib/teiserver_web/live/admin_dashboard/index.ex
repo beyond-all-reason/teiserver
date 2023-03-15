@@ -9,7 +9,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
 
   @impl true
   def mount(_params, session, socket) do
-    telemetry_data = Central.cache_get(:application_temp_cache, :telemetry_data)
+    telemetry_data = Central.cache_get(:application_temp_cache, :telemetry_data) || %{}
 
     socket = socket
       |> AuthPlug.live_call(session)

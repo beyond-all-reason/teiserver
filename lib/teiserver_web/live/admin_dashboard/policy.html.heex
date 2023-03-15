@@ -1,8 +1,16 @@
 <div class="my-2">
   <%= live_redirect "Main dashboard", to: ~p"/admin/dashboard", class: "btn btn-outline-primary" %>
 
-  <div class="btn btn-outline-warning" phx-click="disconnect-all-bots">
-    Disconnect all bots
+  <div class="float-end">
+    <a href={~p"/admin/lobby_policies/#{@id}"} class="btn btn-outline-primary">
+      <i class="fa-fw fa-solid fa-eye"></i>
+      &nbsp;
+      Show policy
+    </a>
+
+    <div class="btn btn-warning" phx-click="disconnect-all-bots">
+      Disconnect all bots
+    </div>
   </div>
 
   <table class="table">
