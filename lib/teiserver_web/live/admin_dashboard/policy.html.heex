@@ -14,7 +14,7 @@
       </tr>
     </thead>
     <tbody>
-      <%= for {name, bot} <- @bots do %>
+      <%= for {name, bot} <- @bots || [] do %>
         <tr>
           <td><%= name %></td>
           <td><%= bot.status.lobby_id %></td>
