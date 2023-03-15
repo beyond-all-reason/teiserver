@@ -3,6 +3,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   The LobbyPolicyBots are the accounts present in each managed lobby and involved in managing that lobby specifically
   """
 
+  alias Teiserver.Battle.LobbyCache
   alias Phoenix.PubSub
   alias Teiserver.{Game, User, Client, Battle, Account, Coordinator}
   alias Teiserver.Battle.{Lobby, LobbyChat}
@@ -102,7 +103,9 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     # TODO: Use the coordinator to request a new lobby be hosted by SPADS
     empty_lobby = Lobby.find_empty_lobby(fn l ->
       (
-        # String.starts_with?(l.name, "EU ") or
+        String.starts_with?(l.name, "EU") or
+        # String.starts_with?(l.name, "EU - 1") or
+        # String.starts_with?(l.name, "EU - 3") or
         String.starts_with?(l.name, "US ") or
         String.starts_with?(l.name, "BH ")
       )
@@ -129,13 +132,14 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     lobby = Battle.get_lobby(state.lobby_id)
     correct_lobby_name = generate_lobby_name(state)
 
-    cond do
+    new_state = cond do
       lobby == nil ->
-        :ok
+        leave_lobby(state)
 
       lobby.name != correct_lobby_name ->
         Logger.error("Found name: '#{lobby.name}', Generated: '#{correct_lobby_name}'")
         send_chat(state, "$rename #{correct_lobby_name}")
+        state
 
       true ->
         check_consul_state(state)
@@ -151,10 +155,10 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
 
         Account.replace_update_client(client, :client_updated_battlestatus)
 
-        :ok
+        state
     end
 
-    {:noreply, state}
+    {:noreply, new_state}
   end
 
   # Lobby chat
@@ -193,12 +197,15 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
       minimum_rank_to_play: lp.min_rank,
       maximum_rank_to_play: lp.max_rank
     }
+      |> Map.reject(fn {_, v} -> v == nil end)
 
     found_map = consul_state
       |> Map.take(Map.keys(expected_map))
 
-    Logger.error("inspect #{expected_map}")
-    Logger.error("inspect #{found_map}")
+    if expected_map != found_map do
+      Logger.error("MERGING #{inspect expected_map}")
+      Coordinator.send_consul(state.lobby_id, {:merge, expected_map})
+    end
   end
 
   @spec handle_user_chat(T.userid(), String.t(), map()) :: map()
@@ -298,6 +305,17 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
 
   defp send_to_founder(state, msg) do
     User.send_direct_message(state.userid, state.founder_id, msg)
+  end
+
+  @spec leave_lobby(map()) :: map()
+  defp leave_lobby(%{lobby_id: nil} = state), do: state
+  defp leave_lobby(state) do
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{state.lobby_id}")
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{state.lobby_id}")
+
+    Lobby.remove_user_from_battle(state.userid, state.lobby_id)
+
+    %{state | lobby_id: nil, founder_id: nil}
   end
 
   defp apply_policy_config(state) do
