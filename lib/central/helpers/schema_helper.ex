@@ -148,11 +148,11 @@ defmodule Central.Helpers.SchemaHelper do
     field1 = Atom.to_string(field1)
     field2 = Atom.to_string(field2)
 
-    value1 = params[field1]
-    value2 = params[field2]
+    value1 = params[field1] || ""
+    value2 = params[field2] || ""
 
     mapped_values = cond do
-      value1 == nil or value2 == nil -> %{}
+      value1 == "" or value2 == "" -> %{}
       value1 > value2 -> %{field1 => value2, field2 => value1}
       true -> %{}
     end
