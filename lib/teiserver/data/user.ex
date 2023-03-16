@@ -747,6 +747,15 @@ defmodule Teiserver.User do
     end
   end
 
+  @spec server_full?() :: boolean()
+  defp server_full?() do
+    client_count = (Central.cache_get(:application_temp_cache, :telemetry_data) || %{})
+      |> Map.get(:client, %{})
+      |> Map.get(:total, 0)
+
+    client_count >= 1000
+  end
+
   @spec try_login(String.t(), String.t(), String.t(), String.t()) :: {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), T.userid()}
   def try_login(token, ip, lobby, lobby_hash) do
     wait_for_startup()
@@ -767,6 +776,9 @@ defmodule Teiserver.User do
 
           is_restricted?(user, ["Login"]) ->
             {:error, "Banned, please see Discord for details"}
+
+          not is_bot?(user) and not is_moderator?(user) and server_full?() ->
+            {:error, "Server is currently overloaded, please see discord for details."}
 
           not is_verified?(user) ->
             Account.update_user_stat(user.id, %{
@@ -820,6 +832,9 @@ defmodule Teiserver.User do
 
           is_restricted?(user, ["Login"]) ->
             {:error, "Banned, please see Discord for details"}
+
+          not is_bot?(user) and not is_moderator?(user) and server_full?() ->
+            {:error, "Server is currently overloaded, please see discord for details."}
 
           not is_verified?(user) ->
             # Log them in to save some details we'd not otherwise get
