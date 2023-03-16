@@ -498,23 +498,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
     #   end
     # end
 
-    player_rating = if state.minimum_rating_to_play > 0 or state.maximum_rating_to_play < 1000 do
-      BalanceLib.get_user_balance_rating_value(userid, "Team") |> max(1)
-    else
-      18
-    end
-
-    block_as_player = cond do
-      state.minimum_rating_to_play >= player_rating or state.maximum_rating_to_play <= player_rating -> true
-      # state.minimum_rank_to_play >= existing.rank or state.maximum_rank_to_play <= existing.rank -> true
-      not Enum.empty?(existing.queues) -> true
-      true -> false
-    end
-
-    new_client = if block_as_player do
-      %{new_client | player: false}
-    else
+    new_client = if new_client.player == true and user_allowed_to_play?(user, existing, state) do
       new_client
+    else
+      %{new_client | player: false}
     end
 
     # Player limit, if they want to be a player and we have
@@ -646,6 +633,26 @@ defmodule Teiserver.Coordinator.ConsulServer do
       :clan ->
         # TODO: Implement
         :player
+    end
+  end
+
+  @spec user_allowed_to_play?(T.user(), T.client(), map()) :: boolean()
+  defp user_allowed_to_play?(user, client, state) do
+    {player_rating, player_uncertainty} = BalanceLib.get_user_rating_value_uncertainty_pair(user.id, "Team")
+    player_rating = max(player_rating, 1)
+
+    cond do
+      state.minimum_rating_to_play != nil and player_rating < state.minimum_rating_to_play -> false
+      state.maximum_rating_to_play != nil and player_rating > state.maximum_rating_to_play -> false
+
+      state.minimum_uncertainty_to_play != nil and player_uncertainty < state.minimum_uncertainty_to_play -> false
+      state.maximum_uncertainty_to_play != nil and player_uncertainty > state.maximum_uncertainty_to_play -> false
+
+      state.minimum_rank_to_play != nil and user.rank < state.minimum_rank_to_play -> false
+      state.maximum_rank_to_play != nil and user.rank > state.maximum_rank_to_play -> false
+
+      not Enum.empty?(client.queues) -> false
+      true -> true
     end
   end
 

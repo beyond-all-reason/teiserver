@@ -36,16 +36,29 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   ) do
     lobby = Battle.get_lobby(lobby_id)
 
-    :ok = Game.cast_lobby_organiser(state.lobby_policy.id, %{
+    :ok = if lobby do
+      Game.cast_lobby_organiser(state.lobby_policy.id, %{
+        event: :bot_status_update,
+        name: state.user.name,
+        status: %{
+          userid: state.userid,
+          lobby_id: state.lobby_id,
+          in_progress: lobby.in_progress,
+          member_count: Enum.count(lobby.members)
+        }
+      })
+    else
+      Game.cast_lobby_organiser(state.lobby_policy.id, %{
       event: :bot_status_update,
       name: state.user.name,
       status: %{
         userid: state.userid,
         lobby_id: state.lobby_id,
-        in_progress: lobby.in_progress,
-        member_count: Enum.count(lobby.members)
+        in_progress: false,
+        member_count: -1
       }
     })
+    end
 
     {:noreply, state}
   end
@@ -125,7 +138,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     # TODO: Use the coordinator to request a new lobby be hosted by SPADS
     empty_lobby = Lobby.find_empty_lobby(fn l ->
       (
-        String.starts_with?(l.name, "EU") or
+        String.starts_with?(l.name, "EU - ") or
         # String.starts_with?(l.name, "EU - 1") or
         # String.starts_with?(l.name, "EU - 3") or
         String.starts_with?(l.name, "US ") or
@@ -275,6 +288,11 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
             :ok
         end
 
+
+      {:ok, _json} ->
+        # Logger.error("BarManager unknown json object - #{json_str}\n#{inspect err}")
+        :ok
+
       err ->
         Logger.error("BarManager bad json - #{json_str}\n#{inspect err}")
         :ok
@@ -400,7 +418,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   defp generate_welcome_message(_state) do
-    "This is an experimental server-managed lobby. It is in a testing phase so please feel free to try and break it, report any issues to Teifion. Chat $settings to the bot to get the maplist."
+    "This is an experimental server-managed lobby. It is in a testing phase so please feel free to try and break it. Chat $settings to the bot to get the maplist.$$Feedback is welcome in the discord thread - https://discord.com/channels/549281623154229250/1085711899817152603"
   end
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}

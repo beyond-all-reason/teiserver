@@ -65,8 +65,12 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
   @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def create(conn, %{"lobby_policy" => lobby_policy_params}) do
     lobby_policy_params = Map.merge(lobby_policy_params, %{
-      "map_list" => (lobby_policy_params["map_list"] || "") |> convert_textarea_to_array,
-      "agent_name_list" => (lobby_policy_params["agent_name_list"] || "") |> convert_textarea_to_array,
+      "map_list" => (lobby_policy_params["map_list"] || "")
+        |> convert_textarea_to_array
+        |> Enum.sort,
+      "agent_name_list" => (lobby_policy_params["agent_name_list"] || "")
+        |> convert_textarea_to_array
+        |> Enum.sort,
     })
 
     case Game.create_lobby_policy(lobby_policy_params) do
@@ -100,8 +104,12 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
   @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "lobby_policy" => lobby_policy_params}) do
     lobby_policy_params = Map.merge(lobby_policy_params, %{
-      "map_list" => (lobby_policy_params["map_list"] || "") |> convert_textarea_to_array,
-      "agent_name_list" => (lobby_policy_params["agent_name_list"] || "") |> convert_textarea_to_array,
+      "map_list" => (lobby_policy_params["map_list"] || "")
+        |> convert_textarea_to_array
+        |> Enum.sort,
+      "agent_name_list" => (lobby_policy_params["agent_name_list"] || "")
+        |> convert_textarea_to_array
+        |> Enum.sort,
     })
 
     lobby_policy = Game.get_lobby_policy!(id)
