@@ -43,8 +43,8 @@ defmodule Teiserver.Game.LobbyPolicy do
   def changeset(struct, params \\ %{}) do
     params =
       params
-      |> remove_whitespace(~w(name agent_name_format)a)
-      |> remove_characters(~w(name)a, [~r/[:]/])
+      |> remove_whitespace(~w(agent_name_format)a)
+      |> remove_characters(~w(agent_name_format)a, [~r/[:]/])
       |> min_and_max(~w(min_rating max_rating)a)
       |> min_and_max(~w(min_uncertainty max_uncertainty)a)
       |> min_and_max(~w(min_rank max_rank)a)

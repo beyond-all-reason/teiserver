@@ -133,8 +133,14 @@ defmodule Teiserver.Battle.Lobby do
   end
 
   # Cache functions
+  @spec list_lobby_ids :: [T.lobby_id()]
   defdelegate list_lobby_ids(), to: LobbyCache
+
+  @spec list_lobbies() :: [T.lobby()]
   defdelegate list_lobbies(), to: LobbyCache
+
+  @spec stream_lobbies() :: Stream.t()
+  defdelegate stream_lobbies(), to: LobbyCache
 
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
   defdelegate update_lobby(lobby, data, reason), to: LobbyCache
@@ -362,13 +368,15 @@ defmodule Teiserver.Battle.Lobby do
   @spec find_empty_lobby(function()) :: Map.t()
   def find_empty_lobby(filter_func \\ (fn _ -> true end)) do
     empties =
-      list_lobbies()
-      |> Enum.filter(fn b -> b.players == [] end)
-      |> Enum.filter(filter_func)
+      stream_lobbies()
+      |> Stream.filter(fn lobby -> lobby.in_progress == false and Enum.empty?(lobby.players) end)
+      |> Stream.filter(filter_func)
+      |> Stream.take(1)
+      |> Enum.to_list()
 
     case empties do
       [] -> nil
-      _ -> Enum.random(empties)
+      [l] -> l
     end
   end
 

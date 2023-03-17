@@ -71,6 +71,14 @@ defmodule Teiserver.Battle.LobbyCache do
       |> Enum.filter(fn lobby -> lobby != nil end)
   end
 
+  @spec stream_lobbies() :: Stream.t()
+  def stream_lobbies() do
+    list_lobby_ids()
+      |> Enum.shuffle()
+      |> Stream.map(fn lobby_id -> get_lobby(lobby_id) end)
+      |> Stream.filter(fn lobby -> lobby != nil end)
+  end
+
   @spec update_lobby_values(T.lobby_id(), map()) :: :ok | nil
   def update_lobby_values(lobby_id, new_values) do
     cast_lobby(lobby_id, {:update_values, new_values})
