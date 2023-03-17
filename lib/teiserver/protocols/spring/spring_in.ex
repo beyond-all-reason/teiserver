@@ -15,6 +15,8 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Protocols.{Spring, SpringOut}
   alias Teiserver.Protocols.Spring.{TelemetryIn, BattleIn}
 
+  @unoptimised_lobbies ["SLTS Client d", "LuaLobby Chobby"]
+
   @status_3_window 1_000
   @status_10_window 60_000
 
@@ -262,7 +264,11 @@ defmodule Teiserver.Protocols.SpringIn do
         Map.put(state, :unverified_id, userid)
 
       {:ok, user} ->
-        new_state = SpringOut.do_login_accepted(state, user)
+        new_state = if Enum.member?(@unoptimised_lobbies, user.lobby_client) do
+          SpringOut.do_login_accepted(state, user)
+        else
+          SpringOut.do_optimised_login_accepted(state, user)
+        end
 
         # Do we have a clan?
         if user.clan_id do
@@ -308,7 +314,11 @@ defmodule Teiserver.Protocols.SpringIn do
         Map.put(state, :unverified_id, userid)
 
       {:ok, user} ->
-        new_state = SpringOut.do_login_accepted(state, user)
+        new_state = if Enum.member?(@unoptimised_lobbies, user.lobby_client) do
+          SpringOut.do_login_accepted(state, user)
+        else
+          SpringOut.do_optimised_login_accepted(state, user)
+        end
 
         # Do we have a clan?
         if user.clan_id do
@@ -360,9 +370,11 @@ defmodule Teiserver.Protocols.SpringIn do
         case code == to_string(correct_code) do
           true ->
             User.verify_user(user)
-            new_state = SpringOut.do_login_accepted(state, user)
-
-            new_state
+            if Enum.member?(@unoptimised_lobbies, user.lobby_client) do
+              SpringOut.do_login_accepted(state, user)
+            else
+              SpringOut.do_optimised_login_accepted(state, user)
+            end
 
           false ->
             reply(:denied, "Incorrect code", msg_id, state)

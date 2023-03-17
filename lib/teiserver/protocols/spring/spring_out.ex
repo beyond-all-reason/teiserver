@@ -620,6 +620,12 @@ defmodule Teiserver.Protocols.SpringOut do
     end
   end
 
+  @spec do_optimised_login_accepted(map(), map()) :: map()
+  def do_optimised_login_accepted(state, user) do
+    do_login_accepted(state, user)
+    |> Map.put(:optimise_protocol, true)
+  end
+
   @spec do_login_accepted(map(), map()) :: map()
   def do_login_accepted(state, user) do
     reply(:login_accepted, user.name, nil, state)
@@ -691,7 +697,8 @@ defmodule Teiserver.Protocols.SpringOut do
       user: user,
       username: user.name,
       userid: user.id,
-      exempt_from_cmd_throttle: exempt_from_cmd_throttle
+      exempt_from_cmd_throttle: exempt_from_cmd_throttle,
+      optimise_protocol: false
     }
   end
 
