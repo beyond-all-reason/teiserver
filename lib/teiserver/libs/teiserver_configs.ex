@@ -36,7 +36,7 @@ defmodule Teiserver.TeiserverConfigs do
     add_site_config_type(%{
       key: "bots.Flag",
       section: "Bots",
-      type: "boolean",
+      type: "string",
       permissions: ["teiserver.staff.server"],
       description: "Country code flag used by bots managed by the server",
       opts: [],

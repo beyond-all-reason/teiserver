@@ -1,6 +1,7 @@
 defmodule Teiserver.Game.LobbyPolicyLib do
   @moduledoc false
   use CentralWeb, :library
+  alias Central.Config
   alias Teiserver.{Game, Account}
   alias Teiserver.Game.{LobbyPolicy, LobbyPolicyOrganiserServer, LobbyPolicyBotServer}
   alias Teiserver.Data.Types, as: T
@@ -169,7 +170,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
     end
 
     Account.update_user_stat(user.id, %{
-      country_override: Application.get_env(:central, Teiserver)[:server_flag],
+      country_override: Config.get_site_config_cache("bots.Flag"),
     })
     user
   end
