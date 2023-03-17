@@ -364,8 +364,10 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   # Returns true if the name of the map sent to it is allowed
+  defp is_map_allowed?(_, %{lobby_policy: %{map_list: []}}), do: true
   defp is_map_allowed?(current_map, state) do
     if Enum.empty?(state.lobby_policy.map_list) do
+      Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line} - This shouldn't fire")
       true
     else
       map_name = current_map
