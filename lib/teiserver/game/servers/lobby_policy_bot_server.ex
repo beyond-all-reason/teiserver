@@ -99,9 +99,6 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     lobby_name = generate_lobby_name(state)
     send_chat(new_state, "$rename #{lobby_name}")
 
-    welcome_message = generate_welcome_message(state)
-    send_chat(new_state, "$welcome-message #{welcome_message}")
-
     pick_random_map(new_state)
 
     # TODO: set lobby.lobby_policy to my id
@@ -196,7 +193,15 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     {:noreply, new_state}
   end
 
-  # Lobby chat
+  # Lobby updates
+  def handle_info({:lobby_update, :add_user, _lobby_id, userid}, state) do
+    generate_welcome_message(state)
+    |> Enum.each(fn line ->
+      User.send_direct_message(state.userid, userid, line)
+    end)
+    {:noreply, state}
+  end
+
   def handle_info({:lobby_update, _action, _lobby_id, _data}, state) do
     # IO.inspect {action, data}, label: "lobby_update"
     {:noreply, state}
@@ -230,7 +235,8 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
       minimum_uncertainty_to_play: lp.min_uncertainty || 0,
       maximum_uncertainty_to_play: lp.max_uncertainty || 1000,
       minimum_rank_to_play: lp.min_rank || 0,
-      maximum_rank_to_play: lp.max_rank || 1000
+      maximum_rank_to_play: lp.max_rank || 1000,
+      welcome_message: nil
     }
 
     found_map = consul_state
@@ -357,34 +363,6 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     %{state | lobby_id: nil, founder_id: nil}
   end
 
-  defp apply_policy_config(state) do
-    lp = state.lobby_policy
-
-    # Rating levels
-    case {lp.min_rating, lp.max_rating} do
-      {nil, nil} -> send_chat(state, "$%resetratinglevels")
-      {r, nil} -> send_chat(state, "$%minratinglevel #{r}")
-      {nil, r} -> send_chat(state, "$%maxratinglevel #{r}")
-      {r1, r2} -> send_chat(state, "$%setratinglevels #{r1} #{r2}")
-    end
-
-    # Rank
-    case {lp.min_rank, lp.max_rank} do
-      {nil, nil} -> send_chat(state, "$%resetranklevels")
-      {r, nil} -> send_chat(state, "$%minranklevel #{r}")
-      {nil, r} -> send_chat(state, "$%maxranklevel #{r}")
-      {r1, r2} -> send_chat(state, "$%setranklevels #{r1} #{r2}")
-    end
-
-    # Uncertainty (not in use yet)
-    # case {lp.min_uncertainty, lp.max_uncertainty} do
-    #   {nil, nil} -> send_chat(state, "$%resetuncertaintylevels")
-    #   {r, nil} -> send_chat(state, "$%minuncertaintylevel #{r}")
-    #   {nil, r} -> send_chat(state, "$%maxuncertaintylevel #{r}")
-    #   {r1, r2} -> send_chat(state, "$%setuncertaintylevels #{r1} #{r2}")
-    # end
-  end
-
   # Returns true if the name of the map sent to it is allowed
   defp is_map_allowed?(current_map, state) do
     if Enum.empty?(state.lobby_policy.map_list) do
@@ -418,7 +396,10 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   defp generate_welcome_message(_state) do
-    "This is an experimental server-managed lobby. It is in a testing phase so please feel free to try and break it. Chat $settings to the bot to get the maplist.$$Feedback is welcome in the discord thread - https://discord.com/channels/549281623154229250/1085711899817152603"
+    [
+      "This is an experimental server-managed lobby. It is in a testing phase so please feel free to try and break it. Chat $settings to me to get the maplist and other information.",
+      "Feedback is welcome in the discord thread - https://discord.com/channels/549281623154229250/1085711899817152603"
+    ]
   end
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
