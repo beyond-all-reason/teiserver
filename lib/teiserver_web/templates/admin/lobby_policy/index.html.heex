@@ -26,7 +26,6 @@
       <th>Enabled</th>
 
       <th>Agent format</th>
-      <th>Lobby format</th>
 
       <th>Preset</th>
 
@@ -43,11 +42,17 @@
   </thead>
   <tbody>
 <%= for lobby_policy <- @lobby_policies do %>
+  <%
+    first_name = case lobby_policy.agent_name_list do
+      [n | _] -> n
+      _ -> ""
+    end
+  %>
     <tr>
       <td style={"background-color: #{lobby_policy.colour}; color: #FFF;"} width="22">
         <%= central_component "icon", icon: lobby_policy.icon %>
       </td>
-      <td style={"background-color: #{rgba_css lobby_policy.colour};"}><%= lobby_policy.name %></td>
+      <td style={"background-color: #{rgba_css lobby_policy.colour};"}><%= lobby_policy.lobby_name_format %></td>
 
       <td>
         <%= if lobby_policy.enabled do %>
@@ -58,7 +63,6 @@
       </td>
 
       <td><%= lobby_policy.agent_name_format %></td>
-      <td><%= lobby_policy.lobby_name_format %></td>
 
       <td><%= lobby_policy.preset %></td>
 
@@ -68,7 +72,9 @@
       <td><%= "#{lobby_policy.min_uncertainty} - #{lobby_policy.max_uncertainty}" %></td>
 
       <td><%= Enum.count(lobby_policy.map_list) %></td>
-      <td><%= Enum.count(lobby_policy.agent_name_list) %></td>
+      <td>
+        <%= Enum.count(lobby_policy.agent_name_list) %> (<%= first_name %>)
+      </td>
 
       <td>
         <a href={Routes.admin_lobby_policy_path(@conn, :show, lobby_policy.id)} class={"btn btn-outline-#{bsname} btn-sm"}>
