@@ -128,6 +128,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
     case Lobby.can_join?(state.userid, data["lobby_id"], data["password"]) do
       {:waiting_on_host, script_password} ->
         send(self(), {:action, {:set_script_password, script_password}})
+        send(self(), {:action, {:leave_lobby, state.lobby_id}})
         reply(:lobby, :join, :waiting, state)
 
       {:failure, reason} ->
