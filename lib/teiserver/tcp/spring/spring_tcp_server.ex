@@ -8,6 +8,8 @@ defmodule Teiserver.SpringTcpServer do
   alias Teiserver.{User, Client}
   alias Teiserver.Data.Types, as: T
 
+  @init_timeout 60_000
+
   @behaviour :ranch_protocol
   @spec get_ssl_opts :: [
           {:cacertfile, String.t()} | {:certfile, String.t()} | {:keyfile, String.t()}
@@ -129,6 +131,7 @@ defmodule Teiserver.SpringTcpServer do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
 
     send(self(), {:action, {:welcome, nil}})
+    Process.send_after(self(), :init_timeout, @init_timeout)
     :gen_server.enter_loop(__MODULE__, [], state)
   end
 
@@ -143,6 +146,15 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   @impl true
+  def handle_info(:init_timeout, %{userid: nil} = state) do
+    send(self(), :terminate)
+    {:noreply, state}
+  end
+
+  def handle_info(:init_timeout, state) do
+    {:noreply, state}
+  end
+
   def handle_info({:put, key, value}, state) do
     new_state = Map.put(state, key, value)
     {:noreply, new_state}
