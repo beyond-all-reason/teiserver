@@ -239,7 +239,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
       welcome_message: nil
     }
 
-    found_map = consul_state
+    found_map = (consul_state || %{})
       |> Map.take(Map.keys(expected_map))
 
     send_chat(state, "Incorrect settings detected, correcting.")
@@ -280,25 +280,34 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
         end
 
         if new_status["preset"] != state.lobby_policy.preset do
+          send_chat(state, "Preset must be #{state.lobby_policy.preset}, re-setting it")
           send_to_founder(state, "!preset #{state.lobby_policy.preset}")
           pick_random_map(state)
         end
 
         team_count = new_status["nbTeams"] |> int_parse
-        if team_count > state.lobby_policy.max_teamcount, do: send_to_founder(state, "!set teamcount #{state.lobby_policy.max_teamcount}")
-
-        team_size = new_status["teamSize"] |> int_parse
         cond do
-          team_size < state.lobby_policy.min_teamsize ->
-            send_to_founder(state, "!set teamsize #{state.lobby_policy.min_teamsize}")
-
-          team_size > state.lobby_policy.max_teamsize ->
-            send_to_founder(state, "!set teamsize #{state.lobby_policy.max_teamsize}")
+          team_count > state.lobby_policy.max_teamcount ->
+            send_chat(state, "Max team count is #{state.lobby_policy.max_teamcount}, re-setting it")
+            send_to_founder(state, "!set teamcount #{state.lobby_policy.max_teamcount}")
 
           true ->
             :ok
         end
 
+        team_size = new_status["teamSize"] |> int_parse
+        cond do
+          team_size > state.lobby_policy.max_teamsize ->
+            send_chat(state, "Max team size is #{state.lobby_policy.max_teamsize}, re-setting it")
+            send_to_founder(state, "!set teamsize #{state.lobby_policy.max_teamsize}")
+
+          team_size < state.lobby_policy.min_teamsize ->
+            send_chat(state, "Min team size is #{state.lobby_policy.min_teamsize}, re-setting it")
+            send_to_founder(state, "!set teamsize #{state.lobby_policy.min_teamsize}")
+
+          true ->
+            :ok
+        end
 
       {:ok, _json} ->
         # Logger.error("BarManager unknown json object - #{json_str}\n#{inspect err}")
