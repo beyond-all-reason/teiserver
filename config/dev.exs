@@ -64,7 +64,6 @@ config :central, Teiserver,
   enable_discord_bridge: false,
   enable_agent_mode: true,
   enable_hailstorm: true,
-  use_geoip: true,
   accept_all_emails: true
 
 # Watch static and templates for browser reloading.

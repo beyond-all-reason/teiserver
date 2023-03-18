@@ -45,6 +45,17 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "system.Use geoip",
+      section: "System",
+      type: "boolean",
+      permissions: ["teiserver.staff.server"],
+      description: "When enabled you will use geoip for country code lookups",
+      opts: [],
+      default: true,
+      value_label: ""
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Spring flood rate limit count",
       section: "Protocol",
       type: "integer",
