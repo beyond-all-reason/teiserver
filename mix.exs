@@ -103,6 +103,8 @@ defmodule Central.MixProject do
       {:protobuf, "~> 0.11.0"},
       {:google_protos, "~> 0.1"},
 
+      {:ex_json_schema, "~> 0.9.2"},
+
       # If you want to connect to discord in dev mode, use this
       # {:nostrum, "~> 0.6", runtime: Mix.env() != :test},
 
