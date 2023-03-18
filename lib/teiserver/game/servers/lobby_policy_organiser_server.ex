@@ -3,11 +3,11 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
   There is one organiser and they each handle one lobby management config.
   """
   alias Phoenix.PubSub
-  alias Teiserver.Game
   alias Teiserver.Game.LobbyPolicyLib
   use GenServer
   require Logger
 
+  @minimum_spawn_interval_seconds 30
   @tick_interval 10_000
   @check_delay 5_000
 
@@ -60,13 +60,24 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
   end
 
   def handle_info(:check_agents, state) do
-    if Enum.empty?(state.agent_status) do
-      spawn_agent(state)
+    time_since_last_spawn = System.system_time(:second) - state.last_spawn
+
+    new_state = if time_since_last_spawn > @minimum_spawn_interval_seconds do
+      lobby_agents = (state.agent_status || %{})
+        |> Enum.reject(fn {_, %{status: status}} ->
+          status.in_progress
+        end)
+
+      if Enum.empty?(lobby_agents) do
+        spawn_agent(state)
+      else
+        state
+      end
     else
-      :ok
+      state
     end
 
-    {:noreply, state}
+    {:noreply, new_state}
   end
 
   def handle_info(:tick, %{db_policy: %{enabled: false}} = state) do
@@ -113,11 +124,13 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
 
     case remaining_names do
       [] ->
-        :no_names
+        state
       _ ->
         selected_name = Enum.random(remaining_names)
         user = LobbyPolicyLib.get_or_make_agent_user(selected_name, state.db_policy)
         LobbyPolicyLib.start_lobby_policy_bot(state.db_policy, selected_name, user)
+
+        %{state | last_spawn: System.system_time(:second)}
     end
   end
 
@@ -169,6 +182,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
     state = %{
       id: id,
       db_policy: data.lobby_policy,
+      last_spawn: System.system_time(:second),
       agent_status: %{}
     }
 
