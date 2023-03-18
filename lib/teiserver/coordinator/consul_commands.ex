@@ -198,6 +198,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state
   end
 
+  def handle_command(%{command: "newlobby"} = cmd, state), do: handle_command(Map.put(cmd, :command, "jazlobby"), state)
+  def handle_command(%{command: "jazlobby", senderid: senderid}, state) do
+    LobbyChat.say(senderid, "You can test out the new client at https://github.com/beyond-all-reason/bar-lobby/releases/latest", state.lobby_id)
+    state
+  end
+
   def handle_command(%{command: "afks", senderid: senderid} = cmd, state) do
     min_diff_ms = 20_000
     max_diff_s = 300

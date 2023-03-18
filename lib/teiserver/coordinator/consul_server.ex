@@ -18,7 +18,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   # Commands that are always forwarded to the coordinator itself, not the consul server
   @coordinator_bot ~w(whoami whois check discord help coc ignore mute ignore unmute unignore matchmaking website party modparty unparty)
 
-  @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? explain)
+  @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? explain newlobby jazlobby)
   @boss_commands ~w(gatekeeper welcome-message meme reset-approval rename password resetplaylevels minplaylevel maxplaylevel setplaylevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
 
