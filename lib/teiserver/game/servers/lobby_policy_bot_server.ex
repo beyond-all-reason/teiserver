@@ -242,8 +242,9 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     found_map = consul_state
       |> Map.take(Map.keys(expected_map))
 
+    send_chat(state, "Incorrect settings detected, correcting.")
+
     if expected_map != found_map do
-      Logger.error("MERGING #{inspect expected_map}")
       Coordinator.send_consul(state.lobby_id, {:merge, expected_map})
     end
   end
@@ -273,7 +274,11 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   defp handle_founder_chat("* BarManager|" <> json_str, state) do
     case Jason.decode(json_str) do
       {:ok, %{"BattleStateChanged" => new_status}} ->
-        if new_status["locked"] != "unlocked", do: send_to_founder(state, "!unlock")
+        if new_status["locked"] != "unlocked" do
+          send_chat(state, "Room cannot be locked, unlocking")
+          send_to_founder(state, "!unlock")
+        end
+
         if new_status["preset"] != state.lobby_policy.preset do
           send_to_founder(state, "!preset #{state.lobby_policy.preset}")
           pick_random_map(state)
