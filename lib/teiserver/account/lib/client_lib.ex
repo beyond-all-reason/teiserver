@@ -47,6 +47,7 @@ defmodule Teiserver.Account.ClientLib do
   end
 
   @spec list_clients([T.userid()]) :: [T.client()]
+  def list_clients(nil), do: []
   def list_clients(id_list) do
     id_list
       |> Enum.map(fn c -> get_client_by_id(c) end)

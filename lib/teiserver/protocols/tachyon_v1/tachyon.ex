@@ -6,6 +6,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   alias Teiserver.{Client, User}
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
+  require Logger
 
   @spec protocol_in :: Teiserver.Protocols.Tachyon.V1.TachyonIn
   def protocol_in(), do: Teiserver.Protocols.Tachyon.V1.TachyonIn
@@ -98,6 +99,8 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
 
     PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
     PubSub.subscribe(Central.PubSub, "teiserver_user_updates:#{user.id}")
+
+    Logger.metadata([request_id: "TachyonTcpServer##{user.id}"])
 
     exempt_from_cmd_throttle = (User.is_moderator?(user) == true or User.is_bot?(user) == true)
     %{state |

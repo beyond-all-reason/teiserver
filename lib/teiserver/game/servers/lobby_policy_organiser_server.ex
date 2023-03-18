@@ -65,7 +65,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
     new_state = if time_since_last_spawn > @minimum_spawn_interval_seconds do
       lobby_agents = (state.agent_status || %{})
         |> Enum.reject(fn {_, %{status: status}} ->
-          status.in_progress
+          Map.get(status, :in_progress, false)
         end)
 
       if Enum.empty?(lobby_agents) do
