@@ -30,8 +30,13 @@
 
       <th>Preset</th>
 
+      <th>Size</th>
+      <th>Rank</th>
+      <th>Rating</th>
+      <th>Uncertainty</th>
+
       <th>Maps</th>
-      <th>Agents</th>
+      <th>Names</th>
 
       <th colspan="2">&nbsp;</th>
     </tr>
@@ -56,6 +61,11 @@
       <td><%= lobby_policy.lobby_name_format %></td>
 
       <td><%= lobby_policy.preset %></td>
+
+      <td><%= "#{lobby_policy.min_teamsize} - #{lobby_policy.max_teamsize}" %></td>
+      <td><%= "#{lobby_policy.min_rank} - #{lobby_policy.max_rank}" %></td>
+      <td><%= "#{lobby_policy.min_rating} - #{lobby_policy.max_rating}" %></td>
+      <td><%= "#{lobby_policy.min_uncertainty} - #{lobby_policy.max_uncertainty}" %></td>
 
       <td><%= Enum.count(lobby_policy.map_list) %></td>
       <td><%= Enum.count(lobby_policy.agent_name_list) %></td>
