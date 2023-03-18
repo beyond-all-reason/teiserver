@@ -789,6 +789,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     lobby = Lobby.get_lobby(state.lobby_id)
     cond do
       new_name == "" ->
+        Lobby.rename_lobby(state.lobby_id, lobby.name, false)
         :ok
 
       lobby.lobby_policy != nil ->
