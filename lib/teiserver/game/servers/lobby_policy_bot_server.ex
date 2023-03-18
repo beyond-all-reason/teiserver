@@ -386,6 +386,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     end
   end
 
+  defp pick_random_map(%{lobby_policy: %{map_list: []}}), do: :ok
   defp pick_random_map(state) do
     picked_map = Enum.random(state.lobby_policy.map_list)
     send_to_founder(state, "!map #{picked_map}")
