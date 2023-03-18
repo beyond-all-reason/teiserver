@@ -48,10 +48,21 @@ defmodule Teiserver.TeiserverConfigs do
       key: "system.Use geoip",
       section: "System",
       type: "boolean",
-      permissions: ["teiserver.staff.server"],
+      permissions: ["teiserver.admin"],
       description: "When enabled you will use geoip for country code lookups",
       opts: [],
       default: true,
+      value_label: ""
+    })
+
+    add_site_config_type(%{
+      key: "system.User limit",
+      section: "System",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The cap for number of concurrent users, set to 0 to be infinite",
+      opts: [],
+      default: 1000,
       value_label: ""
     })
 

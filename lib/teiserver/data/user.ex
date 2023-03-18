@@ -753,7 +753,7 @@ defmodule Teiserver.User do
       |> Map.get(:client, %{})
       |> Map.get(:total, 0)
 
-    client_count >= 1000
+    client_count >= Config.get_site_config_cache("system.User limit")
   end
 
   @spec try_login(String.t(), String.t(), String.t(), String.t()) :: {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), T.userid()}
