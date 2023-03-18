@@ -357,6 +357,20 @@ ENDSSH
 ```
 
 ## Debugging a bad setup
+#### Need more swap
+```bash
+#- Make the swap file: 1 minute, creates 8GB swap
+cd /var
+sudo touch swap.img
+sudo chmod 600 swap.img
+sudo dd if=/dev/zero of=/var/swap.img bs=1024k count=8000
+sudo mkswap /var/swap.img
+sudo swapon /var/swap.img
+sudo su -c "echo '/var/swap.img swap swap defaults 0 0' >> /etc/fstab"
+sudo sysctl vm.swappiness=10
+sudo su -c "echo 'vm.swappiness=10' >> /etc/sysctl.conf"
+```
+
 #### Website not working
 Ensure the service is running, the logs should be empty
 ```
