@@ -242,9 +242,8 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     found_map = (consul_state || %{})
       |> Map.take(Map.keys(expected_map))
 
-    send_chat(state, "Incorrect settings detected, correcting.")
-
     if expected_map != found_map do
+      send_chat(state, "Incorrect settings detected, correcting.")
       Coordinator.send_consul(state.lobby_id, {:merge, expected_map})
     end
   end
