@@ -89,6 +89,8 @@ defmodule Teiserver.SpringTcpServer do
       :timer.send_interval(heartbeat, self(), :heartbeat)
     end
 
+    :timer.send_interval(60_000, self(), :message_count)
+
     state = %{
       # Connection state
       message_part: "",
@@ -125,7 +127,9 @@ defmodule Teiserver.SpringTcpServer do
 
       # Caching app configs
       flood_rate_limit_count: Config.get_site_config_cache("teiserver.Spring flood rate limit count"),
-      floot_rate_window_size: Config.get_site_config_cache("teiserver.Spring flood rate window size")
+      floot_rate_window_size: Config.get_site_config_cache("teiserver.Spring flood rate window size"),
+      server_messages: 0,
+      client_messages: 0
     }
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
@@ -155,6 +159,16 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, state}
   end
 
+  def handle_info(:message_count, state) do
+    Teiserver.Telemetry.cast_to_server({
+      :spring_messages_sent,
+      state.userid,
+      state.server_messages,
+      state.client_messages
+    })
+    {:noreply, %{state | server_messages: 0, client_messages: 0}}
+  end
+
   def handle_info({:put, key, value}, state) do
     new_state = Map.put(state, key, value)
     {:noreply, new_state}
@@ -177,7 +191,7 @@ defmodule Teiserver.SpringTcpServer do
         engage_flood_protection(state)
       {false, state} ->
         new_state = state.protocol_in.data_in(data, state)
-        {:noreply, new_state}
+        {:noreply, %{new_state | client_messages: state.client_messages + 1}}
     end
   end
 
@@ -189,7 +203,7 @@ defmodule Teiserver.SpringTcpServer do
         engage_flood_protection(state)
       {false, state} ->
         new_state = state.protocol_in.data_in(data, state)
-        {:noreply, new_state}
+        {:noreply, %{new_state | client_messages: state.client_messages + 1}}
     end
 
     # new_state = state.protocol_in.data_in(to_string(data), state)

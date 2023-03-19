@@ -47,7 +47,7 @@ defmodule Teiserver.Protocols.SpringOut do
     end
 
     _send(msg, msg_id, state)
-    state
+    %{state | server_messages: state.server_messages + 1}
   end
 
   @spec do_reply(atom(), String.t() | list()) :: String.t() | List.t()

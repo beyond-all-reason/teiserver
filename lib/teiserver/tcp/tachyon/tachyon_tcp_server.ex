@@ -67,6 +67,8 @@ defmodule Teiserver.TachyonTcpServer do
       :timer.send_interval(heartbeat, self(), :heartbeat)
     end
 
+    :timer.send_interval(60_000, self(), :message_count)
+
     state = %{
       # Connection state
       message_part: "",
@@ -97,7 +99,9 @@ defmodule Teiserver.TachyonTcpServer do
 
       # Caching app configs
       flood_rate_limit_count: Config.get_site_config_cache("teiserver.Tachyon flood rate limit count"),
-      floot_rate_window_size: Config.get_site_config_cache("teiserver.Tachyon flood rate window size")
+      floot_rate_window_size: Config.get_site_config_cache("teiserver.Tachyon flood rate window size"),
+      server_messages: 0,
+      client_messages: 0
     }
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
@@ -121,6 +125,16 @@ defmodule Teiserver.TachyonTcpServer do
   def handle_info({:put, key, value}, state) do
     new_state = Map.put(state, key, value)
     {:noreply, new_state}
+  end
+
+  def handle_info(:message_count, state) do
+    Teiserver.Telemetry.cast_to_server({
+      :tachyon_messages_sent,
+      state.userid,
+      state.server_messages,
+      state.client_messages
+    })
+    {:noreply, %{state | server_messages: 0, client_messages: 0}}
   end
 
   # If Ctrl + C is sent through it kills the connection, makes telnet debugging easier

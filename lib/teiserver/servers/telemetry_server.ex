@@ -37,8 +37,10 @@ defmodule Teiserver.Telemetry.TelemetryServer do
 
       load: 0,
     },
-    spring_messages_sent: 0,
-    tachyon_messages_sent: 0
+    spring_server_messages_sent: 0,
+    spring_client_messages_sent: 0,
+    tachyon_server_messages_sent: 0,
+    tachyon_client_messages_sent: 0
   }
 
   @impl true
@@ -56,12 +58,18 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   end
 
   @impl true
-  def handle_cast({:spring_messages_sent, _userid, count}, state) do
-    {:noreply, %{state | spring_messages_sent: state.spring_messages_sent + count}}
+  def handle_cast({:spring_messages_sent, _userid, server_count, client_count}, state) do
+    {:noreply, %{state |
+      spring_server_messages_sent: state.spring_server_messages_sent + server_count,
+      spring_client_messages_sent: state.spring_client_messages_sent + client_count,
+    }}
   end
 
-  def handle_cast({:tachyon_messages_sent, _userid, count}, state) do
-    {:noreply, %{state | tachyon_messages_sent: state.tachyon_messages_sent + count}}
+  def handle_cast({:tachyon_messages_sent, _userid, server_count, client_count}, state) do
+    {:noreply, %{state |
+      tachyon_server_messages_sent: state.tachyon_server_messages_sent + server_count,
+      tachyon_client_messages_sent: state.tachyon_client_messages_sent + client_count,
+    }}
   end
 
   def handle_cast({:matchmaking_update, queue_id, data}, %{matchmaking: matchmaking} = state) do
@@ -197,8 +205,10 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         bots_connected: counters.bots_connected,
         bots_disconnected: counters.bots_disconnected
       },
-      spring_messages_sent: state.spring_messages_sent,
-      tachyon_messages_sent: state.tachyon_messages_sent,
+      spring_server_messages_sent: state.spring_server_messages_sent,
+      spring_client_messages_sent: state.spring_client_messages_sent,
+      tachyon_server_messages_sent: state.tachyon_server_messages_sent,
+      tachyon_client_messages_sent: state.tachyon_client_messages_sent,
       os_mon: get_os_mon_data()
     }
   end
