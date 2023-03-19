@@ -70,6 +70,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         data: %{
           verified: true,
           lobby_client: "FakeData",
+          password_hash: Teiserver.User.encrypt_password(Teiserver.User.spring_md5_password("password")),
           roles: ["Verified"]
         }
       })
@@ -106,7 +107,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
             verified: true,
             lobby_client: "FakeData",
             roles: ["Verified"],
-            bot: false
+            bot: false,
+            password_hash: root_user.data.password_hash
           },
           inserted_at: Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert,
           updated_at: Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert
