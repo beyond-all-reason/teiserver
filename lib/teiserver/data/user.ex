@@ -777,7 +777,7 @@ defmodule Teiserver.User do
           is_restricted?(user, ["Login"]) ->
             {:error, "Banned, please see Discord for details"}
 
-          not is_bot?(user) and not is_moderator?(user) and server_full?() ->
+          not is_bot?(user) and not is_moderator?(user) and not has_any_role?(user, ["VIP"]) and server_full?() ->
             {:error, "Server is currently overloaded, please see discord for details."}
 
           not is_verified?(user) ->
@@ -833,7 +833,7 @@ defmodule Teiserver.User do
           is_restricted?(user, ["Login"]) ->
             {:error, "Banned, please see Discord for details"}
 
-          not is_bot?(user) and not is_moderator?(user) and server_full?() ->
+          not is_bot?(user) and not is_moderator?(user) and not has_any_role?(user, ["VIP"]) and server_full?() ->
             {:error, "Server is currently overloaded, please see discord for details."}
 
           not is_verified?(user) ->
