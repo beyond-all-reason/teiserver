@@ -45,6 +45,13 @@
       %>
 
       <%= central_component "checkbox",
+        id: "user_vip",
+        name: "user[vip]",
+        label: "VIP",
+        checked: ("VIP" in (@changeset.data.data["roles"] || []))
+      %>
+
+      <%= central_component "checkbox",
         id: "user_bot",
         name: "user[bot]",
         label: "Bot",

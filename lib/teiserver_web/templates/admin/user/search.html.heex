@@ -151,6 +151,20 @@
       </div>
 
       <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+        <label for="search_vip" class="control-label">VIP: </label>
+        <%= central_component "icon_dropdown", %{
+          name: "search[vip]",
+          id: "search_vip",
+          selected: @params["vip"],
+          enumerable: [
+            %{id: "Any", icon: "fa-solid fa-square", colour: fg},
+            %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
+            %{id: "VIP", icon: "fa-solid fa-sparkles", colour: fg},
+          ]
+        } %>
+      </div>
+
+      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_developer" class="control-label">Developer: </label>
         <%= central_component "icon_dropdown", %{
           name: "search[developer]",

@@ -211,6 +211,16 @@ defmodule Teiserver.Account.UserLib do
       where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Developer\"")
   end
 
+  def _search(query, :vip, "VIP") do
+    from users in query,
+      where: fragment("? -> ? @> ?", users.data, "roles", "\"VIP\"")
+  end
+
+  def _search(query, :vip, "Normal") do
+    from users in query,
+      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"VIP\"")
+  end
+
   def _search(query, :lobby_client, lobby_client) do
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "lobby_client", ^lobby_client)
@@ -277,6 +287,7 @@ defmodule Teiserver.Account.UserLib do
   def role_def("Moderator"), do: {"#FFAA00", "fa-duotone fa-gavel"}
   def role_def("Core team"), do: {"#008800", "fa-duotone fa-code-branch"}
   def role_def("GDT"), do: {"#AA0000", "fa-duotone fa-pen-ruler"}
+  def role_def("VIP"), do: {"#AA8833", "fa-duotone fa-sparkles"}
   def role_def("Contributor"), do: {"#00AA66", "fa-duotone fa-code-commit"}
 
   def role_def("Caster"), do: {"#660066", "fa-duotone fa-microphone-lines"}

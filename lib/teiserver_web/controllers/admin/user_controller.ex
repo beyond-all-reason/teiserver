@@ -73,6 +73,7 @@ defmodule TeiserverWeb.Admin.UserController do
           donor: params["donor"],
           contributor: params["contributor"],
           developer: params["developer"],
+          vip: params["vip"],
           ip: params["ip"],
           lobby_client: params["lobby_client"],
           previous_names: params["previous_names"],
@@ -128,24 +129,6 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        reports_made = Moderation.list_reports(
-          search: [
-            reporter_id: user.id
-          ]
-        )
-
-        reports_against = Moderation.list_reports(
-          search: [
-            target_id: user.id
-          ]
-        )
-
-        actions = Moderation.list_actions(
-          search: [
-            target_id: user.id
-          ]
-        )
-
         user
           |> UserLib.make_favourite()
           |> insert_recently(conn)
@@ -169,9 +152,6 @@ defmodule TeiserverWeb.Admin.UserController do
           |> assign(:client, client)
           |> assign(:user_stats, user_stats)
           |> assign(:roles, roles)
-          |> assign(:reports_made, reports_made)
-          |> assign(:reports_against, reports_against)
-          |> assign(:actions, actions)
           |> assign(:section_menu_active, "show")
           |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
           |> render("show.html")
@@ -265,6 +245,7 @@ defmodule TeiserverWeb.Admin.UserController do
       {"contributor", "Contributor"},
       {"caster", "Caster"},
       {"core", "Core team"},
+      {"vip", "VIP"},
       {"gdt", "GDT"}
     ]
     |> Enum.map(fn {k, v} -> if user_params[k] == "true", do: v end)
