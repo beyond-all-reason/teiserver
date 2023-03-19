@@ -790,12 +790,12 @@ defmodule Teiserver.User do
 
           Client.get_client_by_id(user.id) != nil ->
             Client.disconnect(user.id, "Already logged in")
-            if not is_bot?(user) do
-              Central.cache_put(:teiserver_login_count, user.id, 10)
-              {:error, "Existing session, please retry in 20 seconds to clear the cache"}
-            else
+            if is_bot?(user) do
               :timer.sleep(1000)
               do_login(user, ip, lobby, lobby_hash)
+            else
+              Central.cache_put(:teiserver_login_count, user.id, 10)
+              {:error, "Existing session, please retry in 20 seconds to clear the cache"}
             end
 
           true ->
