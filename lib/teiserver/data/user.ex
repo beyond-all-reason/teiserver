@@ -878,7 +878,13 @@ defmodule Teiserver.User do
           stats["country_override"]
 
         true ->
-          Teiserver.Geoip.get_flag(ip)
+          # Only call to geoip if the IP has changed
+          last_ip = Account.get_user_stat_data(user.id) |> Map.get("last_ip")
+          if last_ip != ip do
+            Teiserver.Geoip.get_flag(ip, user.country)
+          else
+            user.country || "??"
+          end
       end
 
     # Rank
