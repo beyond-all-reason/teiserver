@@ -50,17 +50,6 @@ exit
 mix ecto.create
 ```
 
-#### Protobuf
-```bash
-sudo aptitude install -y protobuf-compiler
-mix escript.install hex protobuf
-```
-
-Add this to your `.bashrc` or `.zshrc`.
-```bash
-PATH=~/.asdf/installs/elixir/1.14.3-otp-25/.mix/escripts:$PATH
-```
-
 #### Localhost certs
 To run the TLS server locally you will also need to create localhost certificates in `priv/certs` using the following commands
 

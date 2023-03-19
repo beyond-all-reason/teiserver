@@ -46,6 +46,9 @@ defmodule Central.Application do
         concache_sup(:communication_user_notifications),
         {Oban, oban_config()},
 
+        # Tachyon schemas
+        concache_perm_sup(:tachyon_schemas),
+
         # Teiserver stuff
         # Global/singleton registries
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ServerRegistry]},
