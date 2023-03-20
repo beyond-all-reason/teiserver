@@ -29,17 +29,22 @@ defmodule Tachyon.TachyonSocket do
   end
 
   @spec connect(ws_state()) :: {:ok, ws_state()}
-  def connect(%{params: %{"token" => token}} = state) do
-    case Account.get_user_token_by_value(token) do
+  def connect(%{params: %{"token" => token_value, "client_hash" => _, "client_name" => _}} = state) do
+    case Account.get_user_token_by_value(token_value) do
       nil ->
         :error
 
-      %{user: user, expires: expires} ->
-        if expires == nil or Timex.compare(expires, Timex.now) == 1 do
-          {:ok, Map.put(state, :conn, new_state(user))}
-        else
-          :error
+      %{user: _user, expires: _expires} = token ->
+        case login(token, state) do
+          {:ok, conn} ->
+            {:ok, Map.put(state, :conn, conn)}
+          _ ->
+            :error
         end
+
+      value ->
+        Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line} - No handler for value of #{inspect value}")
+        :error
     end
   end
 
@@ -86,67 +91,52 @@ defmodule Tachyon.TachyonSocket do
   end
 
   defp handle_command(wrapper, conn) do
+    send(self(), :test)
+
     object = wrapper["data"]
     meta = Map.drop(wrapper, ["data"])
 
-    resp = CommandDispatch.dispatch(conn, object, meta)
-
-    IO.puts ""
-    IO.inspect resp
-    IO.puts ""
-
-    {:ok, %{}, conn}
+    {resp, new_conn} = CommandDispatch.dispatch(conn, object, meta)
+    {:ok, resp, new_conn}
   end
 
-  defp make_resp(user) do
-    %{
-      "id" => user.id,
-      "name" => user.name,
-      "is_bot" => user.bot,
-      "clan_id" => user.clan_id,
-      "icons" => %{},
-      "roles" => [],
-
-      "battle_status" => %{
-        "in_game" => false,
-        "away" => false,
-        "ready" => false,
-        "player_number" => 1,
-        "team_colour" => "colour",
-        "is_player" => false,
-        "bonus" => 0,
-        "sync" => %{},
-        "faction" => "cortex",
-        "lobby_id" => 123,
-        "party_id" => 123,
-        "clan_tag" => "xyz",
-        "muted" => false
-      },
-
-      "permissions" => [],
-      "friends" => [],
-      "friend_requests" => [],
-      "ignores" => []
-    }
-  end
 
   @spec handle_info(any, ws_state()) :: {:reply, :ok, {:binary, binary}, ws_state()}
-  def handle_info(_msg, state) do
-    # IO.puts ""
-    # IO.inspect msg, label: "ws handle_info"
-    # IO.puts ""
+  def handle_info(msg, state) do
+    IO.puts ""
+    IO.inspect msg, label: "ws handle_info"
+    IO.puts ""
 
-    # {:ok, state}
-    {:reply, :ok, {:binary, <<111>>}, state}
+    # Use this to not send anything
+    {:ok, state}
+
+    # This will send stuff
+    # {:reply, :ok, {:binary, <<111>>}, state}
   end
 
   @spec terminate(any, any) :: :ok
+  def terminate(_reason, %{conn: conn} = _state) do
+    Teiserver.Client.disconnect(conn.userid, "ws_error terminate")
+    :ok
+  end
+
   def terminate(_reason, _state) do
     :ok
   end
 
-  @spec new_state(Central.Account.User.t()) :: map()
-  defp new_state(user) do
+  defp login(%{user: user, expires: expires} = token, state) do
+    response = Teiserver.User.login_from_token(token, state)
+
+    case response do
+      {:ok, logged_in_user} ->
+        {:ok, new_conn(logged_in_user)}
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  @spec new_conn(Central.Account.User.t()) :: map()
+  defp new_conn(user) do
     %{
       # Client state
       userid: user.id,

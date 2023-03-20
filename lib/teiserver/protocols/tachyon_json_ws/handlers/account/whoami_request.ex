@@ -34,13 +34,14 @@ defmodule Teiserver.Tachyon.Handlers.Account.WhoamiRequest do
         "muted" => client.muted
       },
 
-      "permissions" => user.permission,
+      "permissions" => user.permissions,
       "friends" => user.friends,
       "friend_requests" => user.friend_requests,
-      "ignores" => user.ignores
+      "ignores" => user.ignored
     }
 
-    resp
+    {resp, conn}
+    # resp
   end
 
   def validate() do

@@ -186,6 +186,9 @@ defmodule Teiserver.User do
     max_username_length = Config.get_site_config_cache("teiserver.Username max length")
 
     cond do
+      Config.get_site_config_cache("teiserver.Enable registrations") == false ->
+        {:error, "Registrations are currently disabled"}
+
       WordLib.reserved_name?(name) ->
         {:error, "That name is in restricted for use by the server, please choose another"}
 
@@ -224,6 +227,9 @@ defmodule Teiserver.User do
     max_username_length = Config.get_site_config_cache("teiserver.Username max length")
 
     cond do
+      Config.get_site_config_cache("teiserver.Enable registrations") == false ->
+        {:error, "Registrations are currently disabled"}
+
       WordLib.reserved_name?(name) ->
         {:error, "That name is in restricted for use by the server, please choose another"}
 
@@ -292,6 +298,8 @@ defmodule Teiserver.User do
             case EmailHelper.new_user(user) do
               {:error, error} ->
                 Logger.error("Error sending new user email - #{user.email} - #{error}")
+              :no_verify ->
+                verify_user(get_user_by_id(user.id))
               {:ok, _} ->
                 :ok
                 # Logger.error("Email sent, response of #{Kernel.inspect response}")
@@ -335,6 +343,9 @@ defmodule Teiserver.User do
           case EmailHelper.new_user(user) do
             {:error, error} ->
               Logger.error("Error sending new user email - #{user.email} - #{Kernel.inspect error}")
+            :no_verify ->
+              verify_user(get_user_by_id(user.id))
+              :ok
             {:ok, _} ->
               :ok
           end
@@ -754,6 +765,69 @@ defmodule Teiserver.User do
       |> Map.get(:total, 0)
 
     client_count >= Config.get_site_config_cache("system.User limit")
+  end
+
+  @spec ip_to_string(String.t() | tuple()) :: Tuple.t()
+  defp ip_to_string({a, b, c, d}) do
+    "#{a}.#{b}.#{c}.#{d}"
+  end
+  defp ip_to_string(ip) do
+    to_string(ip)
+  end
+
+  @spec login_from_token(String.t(), map()) :: {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), T.userid()}
+  def login_from_token(token, ws_state) do
+    ip = get_in(ws_state, [:connect_info, :peer_data, :address]) |> ip_to_string
+    user_agent = get_in(ws_state, [:connect_info, :user_agent])
+    client_hash = ws_state.params["client_hash"]
+    client_name = ws_state.params["client_name"]
+
+    wait_for_startup()
+
+    user = get_user_by_id(token.user.id)
+
+    cond do
+      token.expires != nil and Timex.compare(token.expires, Timex.now) == -1 ->
+        {:error, "Token expired"}
+
+      not is_bot?(user) and login_flood_check(user.id) == :block ->
+        {:error, "Flood protection - Please wait 20 seconds and try again"}
+
+      Enum.member?(["", "0", nil], client_hash) == true ->
+        {:error, "Client hash missing in login"}
+
+      is_restricted?(user, ["Login"]) ->
+        {:error, "Banned, please see Discord for details"}
+
+      not is_bot?(user) and not is_moderator?(user) and not has_any_role?(user, ["VIP", "Contributor"]) and server_full?() ->
+        {:error, "Server is currently overloaded, please see discord for details."}
+
+      not is_verified?(user) ->
+        Account.update_user_stat(user.id, %{
+          client_name: client_name,
+          client_hash: client_hash,
+          last_ip: ip
+        })
+        {:error, "Unverified", user.id}
+
+      Client.get_client_by_id(user.id) != nil ->
+        Client.disconnect(user.id, "Already logged in")
+        if is_bot?(user) do
+          :timer.sleep(1000)
+          do_login(user, ip, client_name, client_hash)
+        else
+          Central.cache_put(:teiserver_login_count, user.id, 10)
+          {:error, "Existing session, please retry in 20 seconds to clear the cache"}
+        end
+
+      true ->
+        {:ok, user} = do_login(user, ip, client_name, client_hash)
+
+        _client = Client.login(user, :tachyon, ip)
+        Logger.metadata([request_id: "TachyonWSServer##{user.id}"])
+
+        {:ok, user}
+    end
   end
 
   @spec try_login(String.t(), String.t(), String.t(), String.t()) :: {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), T.userid()}
