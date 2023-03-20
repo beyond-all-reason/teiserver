@@ -147,7 +147,7 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
       |> Enum.map(fn chunk ->
         result = chunk
           |> Enum.map(fn log ->
-            NestedMaps.get(log.data, path) |> func.()
+            (NestedMaps.get(log.data, path) |> func.()) || 0
           end)
           |> Enum.sum
 
