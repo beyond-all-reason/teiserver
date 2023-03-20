@@ -12,7 +12,6 @@ An Elixir middleware server for game management; primarily used by [Beyond all R
 - [Discord bot](/documents/guides/discord_bot.md)
 
 ### In progress features
-- [Tachyon](/documents/tachyon)
 - [Clustering](/documents/planned_designs/clustering.md)
 - [Matchmaking](/documents/spring/matchmaking.md)
 - [Reputation/Reporting system](/documents/planned_designs/reputation.md)

@@ -1,5 +1,5 @@
 # Hot Reloading code is risky business
-That's right, if you do it wrong you can cause instability in your server; worst case scenario you need to re-release it but I wanted to make it clear this is something you should only do with this understanding.
+That's right, if you do it wrong you can cause instability in your server; worst case scenario you need to re-release it but I want to make it clear: this is something you should only do while understanding the effects and implications.
 
 ### Required reading
 I highly recommend you read [A guide to hot code reloading in Elixir](https://blog.appsignal.com/2021/07/27/a-guide-to-hot-code-reloading-in-elixir.html) on the AppSignal blog.

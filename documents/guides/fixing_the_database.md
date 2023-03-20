@@ -58,4 +58,3 @@ centralapp eval "Central.Release.migrate"
 sudo systemctl restart central.service
 ```
 
-At this stage you can re-run the initial user creation and run your uberserver converter again.

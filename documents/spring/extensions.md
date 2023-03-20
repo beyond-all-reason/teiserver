@@ -8,7 +8,7 @@ Command Arg1[tab]Arg2[tab]Arg3
 ```
 
 #### `c.user.get_token_by_email email password`
-Given the correct email and password combination the server will send back a token that can be used to login as that user. This makes use of the site password as opposed to the md5'd uberserver password used with the normal spring `LOGIN` command. This command must be performed over a TLS connection, if it is attempted over a non-secure connection the server will send back an error.
+Given the correct email and password combination the server will send back a token that can be used to login as that user. This makes use of the site password as opposed to the md5'd spring password used with the normal spring `LOGIN` command. This command must be performed over a TLS connection, if it is attempted over a non-secure connection the server will send back an error.
 ```
 c.user.get_token_by_email email password
 s.user.user_token email token

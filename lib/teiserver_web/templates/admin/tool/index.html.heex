@@ -5,12 +5,6 @@
     <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: Teiserver.Account.BadgeTypeLib.icon(), text: "Badge types", link: Routes.ts_admin_badge_type_path(@conn, :index) %>
   <% end %>
 
-  <%= if Application.get_env(:central, Teiserver)[:enable_uberserver_convert] do %>
-    <%= if allow?(@conn, "admin.dev") do %>
-      <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: "fa-regular fa-file-import", text: "Uberserver converter", link: Routes.ts_admin_tool_path(@conn, :convert_form) %>
-    <% end %>
-  <% end %>
-
   <%= if Application.get_env(:central, Teiserver)[:enable_agent_mode] do %>
     <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: Teiserver.Agents.AgentLib.icon(), text: "Agent mode", link: Routes.ts_admin_agent_index_path(@conn, :index) %>
   <% end %>

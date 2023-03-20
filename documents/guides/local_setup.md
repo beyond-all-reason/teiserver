@@ -132,6 +132,14 @@ config :central, Oban,
 
 ```
 
+### Fake data
+Running this:
+```bash
+mix teiserver.fakedata
+```
+
+Will generate a large amount of fake data and setup a root account for you. The account will have full access to everything and the database will be populated with false data as if generated over a period of time to make development and testing easier.
+
 ### Resetting your user password
 When running locally it's likely you won't want to connect the server to an email account, as such password resets need to be done a little differently.
 
@@ -140,7 +148,7 @@ I suggest turning off agent mode in `config/dev.secret.exs` with `enable_agent_m
 Run your server with `iex -S mix phx.server` and then once it has started up use the following code to update your password.
 
 ```elixir
-user = Central.Account.get_user_by_email("your email here")
+user = Central.Account.get_user_by_email("root@localhost")
 Central.Account.update_user(user, %{"password" => "your password here"})
 ```
 
