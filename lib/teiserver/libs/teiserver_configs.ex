@@ -218,6 +218,26 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "teiserver.Require email verification",
+      section: "Registrations",
+      type: "boolean",
+      permissions: ["admin.dev.developer"],
+      description: "When enabled, users must verify their account via email",
+      opts: [],
+      default: true
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Enable registrations",
+      section: "Registrations",
+      type: "boolean",
+      permissions: ["admin.dev.developer"],
+      description: "Allows users to register",
+      opts: [],
+      default: true
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Require Chobby registration",
       section: "Registrations",
       type: "boolean",
