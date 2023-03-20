@@ -14,6 +14,7 @@ defmodule Teiserver.Tachyon.CommandDispatch do
   @spec get_handler(String.t()) :: module
   defp get_handler("account/who_am_i/request"), do: Handlers.Account.WhoamiRequest
 
-  # TODO: Create a handler that always errors and gives a dispatch error
-  defp get_handler(m), do: Handlers.System.ErrorRequest
+  defp get_handler("disconnect"), do: Handlers.System.DisconnectRequest
+  defp get_handler("force_error"), do: Handlers.System.ForceErrorRequest
+  defp get_handler(_), do: Handlers.System.NoCommandErrorRequest
 end

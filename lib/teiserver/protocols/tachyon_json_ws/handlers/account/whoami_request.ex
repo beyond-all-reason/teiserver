@@ -10,7 +10,7 @@ defmodule Teiserver.Tachyon.Handlers.Account.WhoamiRequest do
     user = Account.get_user_by_id(conn.userid)
     client = Account.get_client_by_id(conn.userid)
 
-    resp = %{
+    response = %{
       "id" => user.id,
       "name" => user.name,
       "is_bot" => user.bot,
@@ -40,8 +40,7 @@ defmodule Teiserver.Tachyon.Handlers.Account.WhoamiRequest do
       "ignores" => user.ignored
     }
 
-    {resp, conn}
-    # resp
+    {@command_id, response, conn}
   end
 
   def validate() do

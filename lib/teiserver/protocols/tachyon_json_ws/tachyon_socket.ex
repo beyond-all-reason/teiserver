@@ -91,17 +91,26 @@ defmodule Tachyon.TachyonSocket do
   end
 
   defp handle_command(wrapper, conn) do
-    send(self(), :test)
-
     object = wrapper["data"]
     meta = Map.drop(wrapper, ["data"])
 
-    {resp, new_conn} = CommandDispatch.dispatch(conn, object, meta)
-    {:ok, resp, new_conn}
+    {command, data, new_conn} = CommandDispatch.dispatch(conn, object, meta)
+
+    response = %{
+      "command" => command,
+      "data" => data
+    }
+
+    {:ok, response, new_conn}
   end
 
 
   @spec handle_info(any, ws_state()) :: {:reply, :ok, {:binary, binary}, ws_state()}
+  def handle_info(:disconnect, state) do
+    {:stop, :disconnected, state}
+  end
+
+
   def handle_info(msg, state) do
     IO.puts ""
     IO.inspect msg, label: "ws handle_info"
