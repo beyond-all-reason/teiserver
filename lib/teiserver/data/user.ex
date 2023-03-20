@@ -880,7 +880,7 @@ defmodule Teiserver.User do
         true ->
           # Only call to geoip if the IP has changed
           last_ip = Account.get_user_stat_data(user.id) |> Map.get("last_ip")
-          if last_ip != ip do
+          if last_ip != ip or (user.country || "??") == "??" do
             Teiserver.Geoip.get_flag(ip, user.country)
           else
             user.country || "??"

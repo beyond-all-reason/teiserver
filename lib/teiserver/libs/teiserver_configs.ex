@@ -56,6 +56,17 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "system.Enable user registration",
+      section: "System",
+      type: "boolean",
+      permissions: ["teiserver.admin"],
+      description: "When enabled users are able to register",
+      opts: [],
+      default: true,
+      value_label: ""
+    })
+
+    add_site_config_type(%{
       key: "system.User limit",
       section: "System",
       type: "integer",
