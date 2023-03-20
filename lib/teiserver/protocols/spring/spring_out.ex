@@ -46,8 +46,13 @@ defmodule Teiserver.Protocols.SpringOut do
       end
     end
 
-    _send(msg, msg_id, state)
-    %{state | server_messages: state.server_messages + 1}
+    if Enum.member?([nil, ""], msg) do
+      state
+    else
+      send(self(), :server_sent_message)
+      _send(msg, msg_id, state)
+      state
+    end
   end
 
   @spec do_reply(atom(), String.t() | list()) :: String.t() | List.t()
@@ -62,8 +67,7 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:motd, nil) do
     @motd
     |> String.split("\n")
-    |> Enum.map(fn m -> "MOTD #{m}\n" end)
-    |> Enum.join("")
+    |> Enum.map_join("", fn m -> "MOTD #{m}\n" end)
   end
 
   defp do_reply(:welcome, nil) do

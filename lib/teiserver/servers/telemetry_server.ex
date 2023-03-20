@@ -97,7 +97,6 @@ defmodule Teiserver.Telemetry.TelemetryServer do
       battle: state.battle
     }
 
-    # TODO: Is there a way to hook into the above data for our liveviews?
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_telemetry",

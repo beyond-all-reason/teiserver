@@ -344,6 +344,9 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     columns_combined_connections = GraphMinuteLogsTask.perform_combined_connections(logs, resolution)
     columns_memory = GraphMinuteLogsTask.perform_memory(logs, resolution)
     columns_cpu_load = GraphMinuteLogsTask.perform_cpu_load(logs, resolution)
+    server_messages = GraphMinuteLogsTask.perform_server_messages(logs, resolution)
+    client_messages = GraphMinuteLogsTask.perform_client_messages(logs, resolution)
+
     axis_key = GraphMinuteLogsTask.perform_axis_key(logs, resolution)
 
     conn
@@ -352,6 +355,8 @@ defmodule TeiserverWeb.Report.ServerMetricController do
       |> assign(:columns_combined_connections, columns_combined_connections)
       |> assign(:columns_memory, columns_memory)
       |> assign(:columns_cpu_load, columns_cpu_load)
+      |> assign(:server_messages, server_messages)
+      |> assign(:client_messages, client_messages)
       |> assign(:axis_key, axis_key)
       |> add_breadcrumb(name: "Load", url: conn.request_path)
       |> render("load_graph.html")

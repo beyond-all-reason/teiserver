@@ -95,6 +95,46 @@
         }
       }
     });
+
+    c3.generate({
+      bindto: '#chart_spring_server_messages',
+      data: {
+        x: 'x',
+        xFormat: '%Y-%m-%d %H:%M:%S',
+        columns: <%= raw Jason.encode!([["x" | @axis_key] | @server_messages]) %>
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%d %H:%M:%S'
+          }
+        },
+        y: {
+          min: 0
+        }
+      }
+    });
+
+    c3.generate({
+      bindto: '#chart_spring_client_messages',
+      data: {
+        x: 'x',
+        xFormat: '%Y-%m-%d %H:%M:%S',
+        columns: <%= raw Jason.encode!([["x" | @axis_key] | @client_messages]) %>
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%d %H:%M:%S'
+          }
+        },
+        y: {
+          min: 0
+        }
+      }
+    });
   });
 </script>
 
@@ -119,7 +159,7 @@
         <div class="row">
           <form action={Routes.ts_reports_server_metric_path(@conn, :load)} method='get' class=''>
             <div class='row'>
-              <div class='col-xl-4 col-lg-6 col-md-12 my-3'>
+              <div class='col-xl-3 col-lg-4 col-md-6 my-2'>
                 <label for='hours' class='control-label'>Hours</label>
                 <%= central_component "icon_dropdown",
                   name: "hours",
@@ -136,7 +176,7 @@
                 %>
               </div>
 
-              <div class='col-xl-4 col-lg-6 col-md-12 my-3'>
+              <div class='col-xl-3 col-lg-4 col-md-6 my-2'>
                 <label for='resolution' class='control-label'>Resolution (minutes per point)</label>
                 <%= central_component "icon_dropdown",
                   name: "resolution",
@@ -152,12 +192,12 @@
                 %>
               </div>
 
-              <div class='col-xl-4 col-lg-6 col-md-12 my-3'>
+              <div class='col-xl-3 col-lg-4 col-md-6 my-2'>
                 <label for='hours' class='control-label'>Hours offset</label>
                 <input type="text" name="offset" id="offset" value={@params["offset"]} class="form-control" />
               </div>
 
-              <div class='col-md-12 my-3'>
+              <div class='col-md-12 my-2'>
                 <button type='submit' class={"btn btn-#{bsname} float-end"}>
                   Submit
                 </button>
@@ -165,14 +205,27 @@
             </div>
           </form>
 
-          <div class="col-md-12 col-lg-6">
-            <div id="chart_players" class='with-transitions chart-div'></div>
-            <div id="chart_memory" class='with-transitions chart-div'></div>
-          </div>
+          <div class="row">
+            <div class="col-md-12 col-lg-6 col-xl-4">
+              <div id="chart_players" class='with-transitions chart-div'></div>
+            </div>
+            <div class="col-md-12 col-lg-6 col-xl-4">
+              <div id="chart_combined_connections" class='with-transitions chart-div'></div>
+            </div>
 
-          <div class="col-md-12 col-lg-6">
-            <div id="chart_combined_connections" class='with-transitions chart-div'></div>
-            <div id="chart_cpu_load" class='with-transitions chart-div'></div>
+            <div class="col-md-12 col-lg-6 col-xl-4">
+              <div id="chart_spring_server_messages" class='with-transitions chart-div'></div>
+            </div>
+            <div class="col-md-12 col-lg-6 col-xl-4">
+              <div id="chart_spring_client_messages" class='with-transitions chart-div'></div>
+            </div>
+
+            <div class="col-md-12 col-lg-6 col-xl-4">
+              <div id="chart_memory" class='with-transitions chart-div'></div>
+            </div>
+            <div class="col-md-12 col-lg-6 col-xl-4">
+              <div id="chart_cpu_load" class='with-transitions chart-div'></div>
+            </div>
           </div>
         </div>
       </div>

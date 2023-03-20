@@ -113,6 +113,20 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
     ]
   end
 
+  @spec perform_server_messages(list, non_neg_integer()) :: list()
+  def perform_server_messages(logs, chunk_size) do
+    [
+      ["Spring server" | extract_value(logs, chunk_size, ~w(spring_server_messages_sent))]
+    ]
+  end
+
+  @spec perform_client_messages(list, non_neg_integer()) :: list()
+  def perform_client_messages(logs, chunk_size) do
+    [
+      ["Spring client" | extract_value(logs, chunk_size, ~w(spring_client_messages_sent))]
+    ]
+  end
+
   @spec perform_axis_key(list, non_neg_integer()) :: list()
   def perform_axis_key(logs, chunk_size) do
     logs

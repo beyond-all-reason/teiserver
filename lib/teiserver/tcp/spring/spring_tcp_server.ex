@@ -215,6 +215,10 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, state}
   end
 
+  def handle_info(:server_sent_message, state) do
+    {:noreply, %{state | server_messages: state.server_messages + 1}}
+  end
+
   # Heartbeat allows us to kill stale connections
   def handle_info(:heartbeat, state) do
     diff = System.system_time(:second) - state.last_msg
