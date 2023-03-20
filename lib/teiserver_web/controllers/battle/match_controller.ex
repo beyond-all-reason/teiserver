@@ -113,8 +113,6 @@ defmodule TeiserverWeb.Battle.MatchController do
       _ -> nil
     end
 
-      logs |> Enum.reverse |> hd
-
     stats = %{
       games: games,
       winrate: wins/games,
