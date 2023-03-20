@@ -763,6 +763,13 @@ defmodule Teiserver.Protocols.SpringOut do
     state
   end
 
+  def prep_send(messages, msg_id, state) when is_list(messages) do
+    prep_send(Enum.join(messages, ""), msg_id, state)
+  end
+  def prep_send(msg, msg_id, state) do
+
+  end
+
   # This sends a message to the self to send out a message
   @spec _send(String.t() | list() | nil, String.t(), map) :: any()
   # defp _send(msg, msg_id, state) do

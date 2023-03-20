@@ -8,6 +8,7 @@ defmodule Teiserver.SpringTcpServer do
   alias Teiserver.{User, Client}
   alias Teiserver.Data.Types, as: T
 
+  @send_interval 100
   @init_timeout 60_000
 
   @behaviour :ranch_protocol
@@ -90,6 +91,7 @@ defmodule Teiserver.SpringTcpServer do
     end
 
     :timer.send_interval(60_000, self(), :message_count)
+    :timer.send_interval(@send_interval, self(), :send_messages)
 
     state = %{
       # Connection state
@@ -124,6 +126,7 @@ defmodule Teiserver.SpringTcpServer do
       app_status: nil,
 
       optimise_protocol: false,
+      pending_messages: [],
 
       # Caching app configs
       flood_rate_limit_count: Config.get_site_config_cache("teiserver.Spring flood rate limit count"),
@@ -157,6 +160,15 @@ defmodule Teiserver.SpringTcpServer do
 
   def handle_info(:init_timeout, state) do
     {:noreply, state}
+  end
+
+  def handle_info(:send_messages, %{pending_messages: []} = state) do
+    {:noreply, state}
+  end
+
+  def handle_info(:send_messages, %{pending_messages: pending_messages} = state) do
+
+    {:noreply, %{state | pending_messages: []}}
   end
 
   def handle_info(:message_count, state) do

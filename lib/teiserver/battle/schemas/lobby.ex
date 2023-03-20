@@ -757,7 +757,7 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec new_script_password() :: String.t()
   def new_script_password() do
-    UUID.uuid1()
+    ExULID.ULID.generate()
     |> Base.encode32(padding: false)
   end
 end

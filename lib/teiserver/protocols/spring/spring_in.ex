@@ -634,7 +634,7 @@ defmodule Teiserver.Protocols.SpringIn do
           true ->
             client = Client.get_client_by_id(state.userid)
             {:ok, code} = Account.create_code(%{
-              value: UUID.uuid1(),
+              value: ExULID.ULID.generate(),
               purpose: "one_time_login",
               expires: Timex.now() |> Timex.shift(minutes: 5),
               user_id: state.userid,

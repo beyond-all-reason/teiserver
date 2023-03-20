@@ -280,7 +280,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       @splitter,
     ])
 
-    split_uuid = UUID.uuid4()
+    split_uuid = ExULID.ULID.generate()
 
     new_split = %{
       split_uuid: split_uuid,

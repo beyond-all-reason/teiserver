@@ -659,7 +659,7 @@ defmodule Teiserver.User do
 
       Coordinator.send_to_user(from_id, "SPADS clans have been replaced by parties. You can access them via #{website_url}/teiserver/parties.")
 
-      uuid = UUID.uuid1()
+      uuid = ExULID.ULID.generate()
       client = Account.get_client_by_id(from_id)
       {:ok, _code} = Account.create_code(%{
           value: uuid <> "$#{client.ip}",
@@ -800,7 +800,7 @@ defmodule Teiserver.User do
         {:error, "Banned, please see Discord for details"}
 
       not is_bot?(user) and not is_moderator?(user) and not has_any_role?(user, ["VIP", "Contributor"]) and server_full?() ->
-        {:error, "Server is currently overloaded, please see discord for details."}
+        {:error, "The server is currently full, please try again in a minute or two."}
 
       not is_verified?(user) ->
         Account.update_user_stat(user.id, %{
@@ -852,7 +852,7 @@ defmodule Teiserver.User do
             {:error, "Banned, please see Discord for details"}
 
           not is_bot?(user) and not is_moderator?(user) and not has_any_role?(user, ["VIP", "Contributor"]) and server_full?() ->
-            {:error, "Server is currently overloaded, please see discord for details."}
+            {:error, "The server is currently full, please try again in a minute or two."}
 
           not is_verified?(user) ->
             Account.update_user_stat(user.id, %{
@@ -908,7 +908,7 @@ defmodule Teiserver.User do
             {:error, "Banned, please see Discord for details"}
 
           not is_bot?(user) and not is_moderator?(user) and not has_any_role?(user, ["VIP", "Contributor"]) and server_full?() ->
-            {:error, "Server is currently overloaded, please see discord for details."}
+            {:error, "The server is currently full, please try again in a minute or two."}
 
           not is_verified?(user) ->
             # Log them in to save some details we'd not otherwise get

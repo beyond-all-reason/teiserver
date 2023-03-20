@@ -65,7 +65,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   defp do_handle(%{command: "party", senderid: senderid} = _cmd, state) do
     client = Account.get_client_by_id(senderid)
     {:ok, code} = Account.create_code(%{
-      value: UUID.uuid1(),
+      value: ExULID.ULID.generate(),
       purpose: "one_time_login",
       expires: Timex.now() |> Timex.shift(minutes: 5),
       user_id: senderid,
@@ -90,7 +90,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   defp do_handle(%{command: "matchmaking", senderid: senderid} = _cmd, state) do
     client = Account.get_client_by_id(senderid)
     {:ok, code} = Account.create_code(%{
-      value: UUID.uuid1(),
+      value: ExULID.ULID.generate(),
       purpose: "one_time_login",
       expires: Timex.now() |> Timex.shift(minutes: 5),
       user_id: senderid,
@@ -423,7 +423,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   defp do_handle(%{command: "website", senderid: senderid} = _cmd, state) do
     client = Client.get_client_by_id(senderid)
     {:ok, code} = Account.create_code(%{
-        value: UUID.uuid1(),
+        value: ExULID.ULID.generate(),
         purpose: "one_time_login",
         expires: Timex.now() |> Timex.shift(minutes: 5),
         user_id: senderid,

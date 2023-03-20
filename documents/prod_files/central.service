@@ -1,3 +1,4 @@
+# /etc/systemd/system/central.service
 [Unit]
 Description=Teiserver elixir app
 After=network.target
@@ -10,6 +11,7 @@ ExecStop=/apps/central/bin/central stop
 Restart=on-failure
 RemainAfterExit=yes
 RestartSec=5
+Environment=ERL_MAX_PORTS=2048
 SyslogIdentifier=central
 
 [Install]

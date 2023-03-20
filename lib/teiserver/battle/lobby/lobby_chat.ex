@@ -15,7 +15,7 @@ defmodule Teiserver.Battle.LobbyChat do
   def say(userid, "!clan" <> _, _lobby_id) do
     client = Account.get_client_by_id(userid)
     {:ok, code} = Account.create_code(%{
-      value: UUID.uuid1(),
+      value: ExULID.ULID.generate(),
       purpose: "one_time_login",
       expires: Timex.now() |> Timex.shift(minutes: 5),
       user_id: userid,

@@ -497,7 +497,7 @@ defmodule Teiserver.Battle.LobbyServer do
       modoptions: %{
         "server/match/uuid" => match_uuid
       },
-      server_uuid: UUID.uuid1(),
+      server_uuid: ExULID.ULID.generate(),
       match_uuid: match_uuid,
       queue_id: nil,
 
