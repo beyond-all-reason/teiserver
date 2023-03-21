@@ -443,8 +443,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
     [cmd | args] = String.split(trimmed_msg, " ")
     {cmd, args} = case cmd do
       "cv" ->
-        [cmd2 | args2] = args
-        {cmd2, args2}
+        case args do
+          [cmd2 | args2] -> {cmd2, args2}
+          _ -> {cmd, args}
+        end
       _ ->
         {cmd, args}
     end
