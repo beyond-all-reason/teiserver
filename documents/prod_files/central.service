@@ -9,6 +9,7 @@ WorkingDirectory=/etc/central
 ExecStart=/apps/central/bin/central start
 ExecStop=/apps/central/bin/central stop
 Restart=on-failure
+LimitNOFILE=65536
 RemainAfterExit=yes
 RestartSec=5
 EnvironmentFile=/apps/ts.vars
