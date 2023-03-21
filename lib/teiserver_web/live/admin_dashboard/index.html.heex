@@ -84,7 +84,11 @@
         <table class='table table-sm table-hover'>
           <tbody>
             <tr>
-              <td>Users</td>
+              <td>Clients</td>
+              <td><%= @total_connected_clients %></td>
+            </tr>
+            <tr>
+              <td>Non-bot users</td>
               <td><%= @telemetry_client.total %></td>
             </tr>
             <tr>

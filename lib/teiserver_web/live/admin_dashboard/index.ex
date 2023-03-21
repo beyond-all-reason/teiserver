@@ -21,6 +21,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
       |> assign(:telemetry_client, telemetry_data.client)
       |> assign(:telemetry_battle, telemetry_data.battle)
+      |> assign(:total_connected_clients, telemetry_data.total_clients_connected)
       |> update_queues
       |> update_policies
       |> update_lobbies
@@ -60,6 +61,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
         |> assign(:telemetry_loading, false)
         |> assign(:telemetry_client, data.client)
         |> assign(:telemetry_battle, data.battle)
+        |> assign(:total_connected_clients, data.total_clients_connected)
     }
   end
 

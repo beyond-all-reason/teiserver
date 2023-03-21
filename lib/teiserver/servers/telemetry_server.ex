@@ -38,6 +38,8 @@ defmodule Teiserver.Telemetry.TelemetryServer do
       load: 0,
     },
 
+    total_clients_connected: 0,
+
     spring_server_messages_sent: 0,
     spring_server_batches_sent: 0,
     spring_client_messages_sent: 0,
@@ -98,7 +100,8 @@ defmodule Teiserver.Telemetry.TelemetryServer do
 
     data = %{
       client: client,
-      battle: state.battle
+      battle: state.battle,
+      total_clients_connected: state.total_clients_connected
     }
 
     PubSub.broadcast(
@@ -122,6 +125,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
           player_count: client.player,
           lobby_count: state.battle.total,
           in_progress_lobby_count: state.battle.in_progress,
+          total_clients_connected: state.total_clients_connected
         }
       }
     )
@@ -208,6 +212,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         bots_connected: counters.bots_connected,
         bots_disconnected: counters.bots_disconnected
       },
+      total_clients_connected: Enum.count(clients),
       spring_server_messages_sent: state.spring_server_messages_sent,
       spring_server_batches_sent: state.spring_server_batches_sent,
       spring_client_messages_sent: state.spring_client_messages_sent,
