@@ -72,7 +72,7 @@ ssh -i ~/.ssh/identity deploy@yourdomain.com
 
 From now on we will be proceeding under the assumption you are logged in as the deploy user.
 
-### Nginx (optional)
+### Nginx
 Nginx is a webserver we'll be using to facilitate the webinterface portion of Teiserver. If you don't want to make use of the web interface you can skip this portion of the setup process. You will need to have your DNS setup ahead of this step or it will fail when you try to setup the SSL part.
 
 ```bash
@@ -84,6 +84,23 @@ sudo chmod +r /var/log/nginx
 # All this index file will do is forward non-https visitors to the https version
 # of your site whereupon Teiserver will handle the request
 echo "<html><head><meta http-equiv=\"refresh\" content=\"0; url=https://yourdomain.com/\" /></head><body>You are being redirected to <a href=\"https://yourdomain.com/\">https://yourdomain.com/</a></body></html>" > /var/www/html/index.html
+```
+
+##### 
+```
+sudo mkdir -p /etc/systemd/system/nginx.service.d
+sudo vi /etc/systemd/system/nginx.service.d/override.conf
+
+# Put this in the file
+[Service]
+LimitNOFILE=65536
+
+# Run this to reload and restart it
+sudo systemctl daemon-reload
+systemctl restart nginx
+
+# Use this to verify the limit has been increased
+cat /proc/<nginx-pid>/limits
 ```
 
 #### Update the Nginx conf file

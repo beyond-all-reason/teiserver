@@ -11,7 +11,7 @@ ExecStop=/apps/central/bin/central stop
 Restart=on-failure
 RemainAfterExit=yes
 RestartSec=5
-Environment=ERL_MAX_PORTS=2048
+EnvironmentFile=/apps/ts.vars
 SyslogIdentifier=central
 
 [Install]

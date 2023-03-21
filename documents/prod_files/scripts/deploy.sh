@@ -31,6 +31,11 @@ rm /var/log/central/info_old.log
 cp /var/log/central/error.log /var/log/central/error_old.log
 cp /var/log/central/info.log /var/log/central/info_old.log
 
+sudo chmod o+rw /apps/central/releases/0.1.0/env.sh
+cat /apps/ts.vars >> /apps/central/releases/0.1.0/env.sh
+
+sed -i 's/##+Q 65536/+Q 65536/g' /apps/central/releases/0.1.0/vm.args
+
 echo "Reset logs"
 > /var/log/central/error.log
 > /var/log/central/info.log
