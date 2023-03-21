@@ -49,9 +49,7 @@ defmodule Teiserver.Protocols.SpringOut do
     if Enum.member?([nil, ""], msg) do
       state
     else
-      send(self(), :server_sent_message)
-      _send(msg, msg_id, state)
-      state
+      prep_to_send(msg, msg_id, state)
     end
   end
 
@@ -736,10 +734,10 @@ defmodule Teiserver.Protocols.SpringOut do
         end
 
       new_members =
-        if not Enum.member?(new_state.room_member_cache[room_name] || [], member_id) do
-          [member_id | (new_state.room_member_cache[room_name] || [])]
-        else
+        if Enum.member?(new_state.room_member_cache[room_name] || [], member_id) do
           new_state.room_member_cache[room_name] || []
+        else
+          [member_id | (new_state.room_member_cache[room_name] || [])]
         end
 
       new_cache = Map.put(state.room_member_cache, room_name, new_members)
@@ -763,21 +761,56 @@ defmodule Teiserver.Protocols.SpringOut do
     state
   end
 
-  def prep_send(messages, msg_id, state) when is_list(messages) do
-    prep_send(Enum.join(messages, ""), msg_id, state)
-  end
-  def prep_send(msg, msg_id, state) do
+  @spec prep_to_send(String.t() | list() | nil, String.t(), map) :: map()
+  def prep_to_send(nil, _, state), do: state
+  def prep_to_send("", _, state), do: state
+  def prep_to_send([], _, state), do: state
 
+  def prep_to_send(messages, msg_id, state) when is_list(messages) do
+    prep_to_send(Enum.join(messages, ""), msg_id, state)
+  end
+
+  def prep_to_send(message, msg_id, state) do
+    content =
+      if msg_id != "" and msg_id != nil do
+        message
+        |> String.trim()
+        |> String.split("\n")
+        |> Enum.map_join("", fn m -> "#{msg_id} #{m}\n" end)
+      else
+        message
+      end
+
+    %{state | pending_messages: [content | state.pending_messages]}
+  end
+
+  @spec send_prepared_messages(map(), list) :: map()
+  def send_prepared_messages(%{mock: true} = state, messages) do
+    content = messages
+      |> Enum.reverse()
+      |> Enum.join("")
+
+    send(state.test_pid, content)
+    state
+  end
+
+  def send_prepared_messages(state, messages) do
+    content = messages
+      |> Enum.reverse()
+      |> Enum.join("")
+
+    state.transport.send(state.socket, content)
+    state
   end
 
   # This sends a message to the self to send out a message
-  @spec _send(String.t() | list() | nil, String.t(), map) :: any()
+  @spec _send(String.t() | list() | nil, String.t(), map) :: map()
   # defp _send(msg, msg_id, state) do
   #   _send(msg, state.socket, state.transport, msg_id)
   # end
 
-  defp _send("", _, _), do: nil
-  defp _send(nil, _, _), do: nil
+  defp _send("", _, state), do: state
+  defp _send(nil, _, state), do: state
 
   defp _send(msg, msg_id, state) when is_list(msg) do
     _send(Enum.join(msg, ""), msg_id, state)
@@ -802,6 +835,7 @@ defmodule Teiserver.Protocols.SpringOut do
       end
 
     _do_send(state, msg)
+    %{state | server_messages: state.server_messages + 1}
   end
 
   # We have this so we can do tests without having to use sockets for everything
