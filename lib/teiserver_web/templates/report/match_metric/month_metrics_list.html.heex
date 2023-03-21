@@ -33,7 +33,9 @@
               <th>Year</th>
               <th>Month</th>
 
-              <th>Total</th>
+              <th>Raw total</th>
+              <th>Weighted total</th>
+
               <th>Duel</th>
               <th>Team</th>
               <th>FFA</th>
@@ -52,6 +54,8 @@
             <td><%= log.month %></td>
 
             <td><%= format_number log.data["totals"]["aggregate"]["total_count"] %></td>
+            <td><%= format_number log.data["totals"]["aggregate"]["weighted_count"] %></td>
+
             <td><%= format_number log.data["duel"]["aggregate"]["total_count"] %></td>
             <td><%= format_number log.data["team"]["aggregate"]["total_count"] %></td>
             <td><%= format_number log.data["ffa"]["aggregate"]["total_count"] %></td>
