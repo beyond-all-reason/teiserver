@@ -86,7 +86,14 @@ sudo chmod +r /var/log/nginx
 echo "<html><head><meta http-equiv=\"refresh\" content=\"0; url=https://yourdomain.com/\" /></head><body>You are being redirected to <a href=\"https://yourdomain.com/\">https://yourdomain.com/</a></body></html>" > /var/www/html/index.html
 ```
 
-##### 
+#### Update the Nginx conf file
+The template file is located in [documents/prod_files/nginx.conf](/documents/prod_files/nginx.conf), you will need to replace the existing nginx conf with it's contents.
+```bash
+sudo rm /etc/nginx/nginx.conf
+sudo vi /etc/nginx/nginx.conf
+```
+
+#### Process limits for nginx
 ```
 sudo mkdir -p /etc/systemd/system/nginx.service.d
 sudo vi /etc/systemd/system/nginx.service.d/override.conf
@@ -97,20 +104,13 @@ LimitNOFILE=65536
 
 # Run this to reload and restart it
 sudo systemctl daemon-reload
-systemctl restart nginx
+sudo systemctl restart nginx
 
 # Use this to verify the limit has been increased
 cat /proc/<nginx-pid>/limits
 ```
 
-#### Update the Nginx conf file
-The template file is located in [documents/prod_files/nginx.conf](/documents/prod_files/nginx.conf), you will need to replace the existing nginx conf with it's contents.
-```bash
-sudo rm /etc/nginx/nginx.conf
-sudo vi /etc/nginx/nginx.conf
-```
-
-#### SSL time
+### SSL time
 We'll be using [letsencrypt](https://letsencrypt.org/) to get a free SSL certificate.
 ```bash
 # This is a Debian version specific command, be sure to check the letsencrypt documentation
