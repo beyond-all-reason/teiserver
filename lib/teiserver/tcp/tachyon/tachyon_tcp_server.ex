@@ -99,8 +99,9 @@ defmodule Teiserver.TachyonTcpServer do
 
       # Caching app configs
       flood_rate_limit_count: Config.get_site_config_cache("teiserver.Tachyon flood rate limit count"),
-      floot_rate_window_size: Config.get_site_config_cache("teiserver.Tachyon flood rate window size"),
+      flood_rate_window_size: Config.get_site_config_cache("teiserver.Tachyon flood rate window size"),
       server_messages: 0,
+      server_batches: 0,
       client_messages: 0
     }
 
@@ -129,12 +130,13 @@ defmodule Teiserver.TachyonTcpServer do
 
   def handle_info(:message_count, state) do
     Teiserver.Telemetry.cast_to_server({
-      :tachyon_messages_sent,
+      :spring_messages_sent,
       state.userid,
       state.server_messages,
+      state.server_batches,
       state.client_messages
     })
-    {:noreply, %{state | server_messages: 0, client_messages: 0}}
+    {:noreply, %{state | server_messages: 0, client_messages: 0, server_batches: 0}}
   end
 
   # If Ctrl + C is sent through it kills the connection, makes telnet debugging easier
@@ -454,7 +456,7 @@ defmodule Teiserver.TachyonTcpServer do
   defp flood_protect?(data, state) do
     cmd_timestamps = if String.contains?(data, "\n") do
       now = System.system_time(:second)
-      limiter = now - state.floot_rate_window_size
+      limiter = now - state.flood_rate_window_size
 
       [now | state.cmd_timestamps]
       |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
