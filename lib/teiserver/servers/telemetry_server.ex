@@ -37,9 +37,13 @@ defmodule Teiserver.Telemetry.TelemetryServer do
 
       load: 0,
     },
+
     spring_server_messages_sent: 0,
+    spring_server_batches_sent: 0,
     spring_client_messages_sent: 0,
+
     tachyon_server_messages_sent: 0,
+    tachyon_server_batches_sent: 0,
     tachyon_client_messages_sent: 0
   }
 
@@ -58,14 +62,14 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   end
 
   @impl true
-  def handle_cast({:spring_messages_sent, _userid, server_count, client_count}, state) do
+  def handle_cast({:spring_messages_sent, _userid, server_count, _batch_count, client_count}, state) do
     {:noreply, %{state |
       spring_server_messages_sent: state.spring_server_messages_sent + server_count,
       spring_client_messages_sent: state.spring_client_messages_sent + client_count,
     }}
   end
 
-  def handle_cast({:tachyon_messages_sent, _userid, server_count, client_count}, state) do
+  def handle_cast({:tachyon_messages_sent, _userid, server_count, _batch_count, client_count}, state) do
     {:noreply, %{state |
       tachyon_server_messages_sent: state.tachyon_server_messages_sent + server_count,
       tachyon_client_messages_sent: state.tachyon_client_messages_sent + client_count,
@@ -205,8 +209,10 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         bots_disconnected: counters.bots_disconnected
       },
       spring_server_messages_sent: state.spring_server_messages_sent,
+      spring_server_batches_sent: state.spring_server_batches_sent,
       spring_client_messages_sent: state.spring_client_messages_sent,
       tachyon_server_messages_sent: state.tachyon_server_messages_sent,
+      tachyon_server_batches_sent: state.tachyon_server_batches_sent,
       tachyon_client_messages_sent: state.tachyon_client_messages_sent,
       os_mon: get_os_mon_data()
     }

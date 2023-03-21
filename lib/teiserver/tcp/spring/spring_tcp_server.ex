@@ -131,7 +131,9 @@ defmodule Teiserver.SpringTcpServer do
       # Caching app configs
       flood_rate_limit_count: Config.get_site_config_cache("teiserver.Spring flood rate limit count"),
       floot_rate_window_size: Config.get_site_config_cache("teiserver.Spring flood rate window size"),
+
       server_messages: 0,
+      server_batches: 0,
       client_messages: 0
     }
 
@@ -167,8 +169,14 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   def handle_info(:send_messages, %{pending_messages: pending_messages} = state) do
+    new_state = %{state |
+      pending_messages: [],
+      server_messages: state.server_messages + Enum.count(pending_messages),
+      server_batches: state.server_batches + 1
+    }
 
-    {:noreply, %{state | pending_messages: []}}
+
+    {:noreply, new_state}
   end
 
   def handle_info(:message_count, state) do
@@ -176,9 +184,11 @@ defmodule Teiserver.SpringTcpServer do
       :spring_messages_sent,
       state.userid,
       state.server_messages,
+      state.server_batches,
       state.client_messages
     })
-    {:noreply, %{state | server_messages: 0, client_messages: 0}}
+
+    {:noreply, %{state | server_messages: 0, client_messages: 0, server_batches: 0}}
   end
 
   def handle_info({:put, key, value}, state) do
