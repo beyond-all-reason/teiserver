@@ -1,11 +1,11 @@
 defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
-  alias Central.NestedMaps
   alias Central.Helpers.{NumberHelper, TimexHelper}
 
   @spec perform_players(list, non_neg_integer()) :: list()
   def perform_players(logs, chunk_size) do
     [
-      ["Users" | extract_value(logs, chunk_size, ~w(client total), &Enum.count/1)],
+      ["Total" | extract_value(logs, chunk_size, ~w(total_clients_connected))],
+      ["People" | extract_value(logs, chunk_size, ~w(client total), &Enum.count/1)],
       ["Players" | extract_value(logs, chunk_size, ~w(client player), &Enum.count/1)]
     ]
   end
@@ -137,7 +137,7 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
   defp extract_value(logs, 1, path) do
     logs
       |> Enum.map(fn log ->
-        NestedMaps.get(log.data, path) || 0
+        get_in(log.data, path) || 0
       end)
   end
 
@@ -147,7 +147,7 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
       |> Enum.map(fn chunk ->
         result = chunk
           |> Enum.map(fn log ->
-            (NestedMaps.get(log.data, path) |> func.()) || 0
+            (get_in(log.data, path) |> func.()) || 0
           end)
           |> Enum.sum
 
