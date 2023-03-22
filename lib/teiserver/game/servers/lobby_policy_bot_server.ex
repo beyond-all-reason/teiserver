@@ -326,6 +326,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     current_map = Enum.join(map_parts, " ")
 
     if not is_map_allowed?(current_map, state) do
+      send_chat(state, "Sorry but that map isn't allowed in this lobby, picking a random one from the approved list")
       pick_random_map(state)
     end
 
