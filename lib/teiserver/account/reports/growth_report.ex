@@ -10,7 +10,7 @@ defmodule Teiserver.Account.GrowthReport do
   def icon(), do: "fa-regular fa-seedling"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "teiserver.admin"
+  def permissions(), do: "teiserver.staff.moderator"
 
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, params) do
