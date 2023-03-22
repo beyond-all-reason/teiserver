@@ -1,0 +1,13 @@
+services:
+  teiserver:
+    volumes:
+      - ./priv:/build/priv
+      - ./assets:/build/assets
+      - ./lib:/build/lib
+      - ./test:/build/test
+      - ./mix.exs:/build/mix.exs
+      - ./mix.lock:/build/mix.lock
+      - ./config/container_dev.exs:/build/config/runtime.exs
+      - ./coveralls.json:/build/coveralls.json
+      - ./.vsls.json:/build/vsls.json
+      - ./.formatter.exs:/build/.formatter.exs
