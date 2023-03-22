@@ -6,6 +6,7 @@ An Elixir middleware server for game management; primarily used by [Beyond all R
 - [Local setup](/documents/guides/local_setup.md)
 - [Prod setup linux](/documents/guides/production_setup_linux.md)/[Prod setup windows](/documents/guides/production_setup_windows.md)
 - [Testing](/documents/guides/testing.md)
+- [Up and Running with docker compose](/documents/guides/container_usage.md)
 
 ### Feature documentation
 - [Metrics](/documents/planned_designs/metrics.md)

@@ -1,0 +1,94 @@
+server {
+    listen                  443 ssl http2;
+    listen                  [::]:443 ssl http2;
+    server_name             ${DOMAIN_NAME};
+
+    # SSL
+    ssl_certificate         /run/secrets/fullchain.pem;
+    ssl_certificate_key     /run/secrets/privkey.pem;
+
+    ## No MTLS
+    #ssl_trusted_certificate ;
+
+    # security headers
+    add_header X-XSS-Protection          "1; mode=block" always;
+    add_header X-Content-Type-Options    "nosniff" always;
+    add_header Referrer-Policy           "no-referrer-when-downgrade" always;
+    add_header Content-Security-Policy   "default-src 'self' http: https: ws: wss: data: blob: 'unsafe-inline'; frame-ancestors 'self';" always;
+    add_header Permissions-Policy        "interest-cohort=()" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    # . files
+    location ~ /\.(?!well-known) {
+        deny all;
+    }
+
+    # reverse proxy
+    location / {
+        proxy_pass            http://teiserver:8080;
+        proxy_set_header Host $host;
+        proxy_http_version                 1.1;
+        proxy_cache_bypass                 $http_upgrade;
+
+        # Proxy SSL
+        proxy_ssl_server_name              on;
+
+        # Proxy headers
+        proxy_set_header Upgrade           $http_upgrade;
+        proxy_set_header Connection        $connection_upgrade;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header Forwarded         $proxy_add_forwarded;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host  $host;
+        proxy_set_header X-Forwarded-Port  $server_port;
+
+        # Proxy timeouts
+        proxy_connect_timeout              60s;
+        proxy_send_timeout                 60s;
+        proxy_read_timeout                 60s;
+    }
+
+    # favicon.ico
+    location = /favicon.ico {
+        log_not_found off;
+    }
+
+    # robots.txt
+    location = /robots.txt {
+        log_not_found off;
+    }
+
+    # gzip
+    gzip            on;
+    gzip_vary       on;
+    gzip_proxied    any;
+    gzip_comp_level 6;
+    gzip_types      text/plain text/css text/xml application/json application/javascript application/rss+xml application/atom+xml image/svg+xml;
+}
+
+# subdomains redirect
+server {
+    listen                  443 ssl http2;
+    listen                  [::]:443 ssl http2;
+    server_name             *.${DOMAIN_NAME};
+
+    # SSL
+    ssl_certificate         /run/secrets/fullchain.pem;
+    ssl_certificate_key     /run/secrets/privkey.pem;
+
+    # No MTLS
+    #ssl_trusted_certificate /etc/letsencrypt/live/example.com/chain.pem;
+    return                  301 https://${DOMAIN_NAME}$request_uri;
+}
+
+# HTTP redirect
+server {
+    listen      80;
+    listen      [::]:80;
+    server_name ${DOMAIN_NAME};
+
+    location / {
+        return 301 https://${DOMAIN_NAME}$request_uri;
+    }
+}
