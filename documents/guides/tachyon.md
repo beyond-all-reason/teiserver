@@ -32,3 +32,11 @@ Messages are expected to have this approximate structure:
 ```
 
 Responses will be of a similar format as defined in the JSON schema held in the [Tachyon repo](https://github.com/beyond-all-reason/tachyon).
+
+
+## Updating schema file
+```bash
+curl -o priv/tachyon/v1.json https://raw.githubusercontent.com/beyond-all-reason/tachyon/master/schema.json
+```
+
+6:46

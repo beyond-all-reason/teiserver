@@ -798,7 +798,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         Lobby.rename_lobby(state.lobby_id, lobby.name, false)
         :ok
 
-      lobby.lobby_policy != nil ->
+      state.lobby_policy_id != nil ->
         Lobby.sayex(state.coordinator_id, "This is a server managed lobby, you cannot rename it", state.lobby_id)
         :ok
 

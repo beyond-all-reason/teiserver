@@ -101,7 +101,9 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
 
     pick_random_map(new_state)
 
-    # TODO: set lobby.lobby_policy to my id
+    # Set lobby_policy_id for both lobby_server and consul_server
+    Coordinator.send_consul(lobby_id, {:set_lobby_policy_id, state.lobby_policy.id})
+    Battle.update_lobby_values(lobby_id, %{lobby_policy_id: state.lobby_policy.id})
 
     {:noreply, new_state}
   end
