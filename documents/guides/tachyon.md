@@ -38,5 +38,3 @@ Responses will be of a similar format as defined in the JSON schema held in the 
 ```bash
 curl -o priv/tachyon/v1.json https://raw.githubusercontent.com/beyond-all-reason/tachyon/master/schema.json
 ```
-
-6:46
