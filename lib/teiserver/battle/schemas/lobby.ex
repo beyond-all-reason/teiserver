@@ -121,7 +121,7 @@ defmodule Teiserver.Battle.Lobby do
         consul_rename: false,
 
         # Used to indicate the lobby is subject to a lobby policy
-        lobby_policy: nil,
+        lobby_policy_id: nil,
 
         # Meta data
         silence: false,
