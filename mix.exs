@@ -100,7 +100,7 @@ defmodule Central.MixProject do
 
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
 
-      {:ex_json_schema, "~> 0.9.2"},
+      {:json_xema, "~> 0.3"},
 
       # If you want to connect to discord in dev mode, use this
       # {:nostrum, "~> 0.6", runtime: Mix.env() != :test},
