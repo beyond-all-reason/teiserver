@@ -4,24 +4,19 @@ defmodule Teiserver.TeiserverConfigs do
 
   @spec teiserver_configs :: any
   def teiserver_configs do
-    site_configs()
+    # User configs
     user_configs()
+
+    # Site based configs
+    site_configs()
+    system_configs()
+    legacy_protocol_configs()
+    moderation_configs()
+    discord_configs()
   end
 
   @spec site_configs :: any
   defp site_configs do
-    add_site_config_type(%{
-      key: "system.Process matches",
-      section: "Background tasks",
-      type: "boolean",
-      permissions: ["teiserver.admin"],
-      description: "Enable/disable post processing of matches",
-      opts: [],
-      default: true,
-
-      value_label: "Enable"
-    })
-
     add_site_config_type(%{
       key: "matchmaking.Use ready check",
       section: "Matchmaking",
@@ -42,148 +37,6 @@ defmodule Teiserver.TeiserverConfigs do
       opts: [],
       default: "GB",
       value_label: ""
-    })
-
-    add_site_config_type(%{
-      key: "system.Use geoip",
-      section: "System",
-      type: "boolean",
-      permissions: ["teiserver.admin"],
-      description: "When enabled you will use geoip for country code lookups",
-      opts: [],
-      default: true,
-      value_label: ""
-    })
-
-    add_site_config_type(%{
-      key: "system.User limit",
-      section: "System",
-      type: "integer",
-      permissions: ["teiserver.admin"],
-      description: "The cap for number of concurrent users, set to 0 to be infinite",
-      opts: [],
-      default: 1000,
-      value_label: ""
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Spring flood rate limit count",
-      section: "Protocol",
-      type: "integer",
-      permissions: ["teiserver.admin"],
-      description: "The number of commands required to trip flood protection for Spring",
-      opts: [],
-      default: 20
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Spring flood rate window size",
-      section: "Protocol",
-      type: "integer",
-      permissions: ["teiserver.admin"],
-      description: "The size of the window in seconds for flood protection to trip for Spring",
-      opts: [],
-      default: 6
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Tachyon flood rate limit count",
-      section: "Protocol",
-      type: "integer",
-      permissions: ["teiserver.admin"],
-      description: "The number of commands required to trip flood protection for Tachyon",
-      opts: [],
-      default: 20
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Tachyon flood rate window size",
-      section: "Protocol",
-      type: "integer",
-      permissions: ["teiserver.admin"],
-      description: "The size of the window in seconds for flood protection to trip for Tachyon",
-      opts: [],
-      default: 6
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Ring flood rate limit count",
-      section: "Protocol",
-      type: "integer",
-      permissions: ["teiserver.admin"],
-      description: "The number of rings required to trip flood protection",
-      opts: [],
-      default: 5
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Ring flood rate window size",
-      section: "Protocol",
-      type: "integer",
-      permissions: ["teiserver.admin"],
-      description: "The size of the window in seconds for flood protection to trip for rings",
-      opts: [],
-      default: 10
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Post login action delay",
-      section: "Protocol",
-      type: "integer",
-      permissions: ["teiserver.admin"],
-      description: "The time in milliseconds to wait until doing something when a user logs in (e.g. sending a message)",
-      opts: [],
-      default: 2500
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Warning acknowledge prompt",
-      section: "Moderation",
-      type: "string",
-      permissions: ["teiserver.admin.account"],
-      description: "The string used to request acknowledgement of warnings",
-      opts: [],
-      default: "Acknowledge this with 'I acknowledge this' to resume play"
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Warning acknowledge response",
-      section: "Moderation",
-      type: "string",
-      permissions: ["teiserver.admin.account"],
-      description: "The response string expected to acknowledge the warning",
-      opts: [],
-      default: "I acknowledge this"
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Automod action delay",
-      section: "Moderation",
-      type: "integer",
-      permissions: ["teiserver.admin"],
-      description: "The delay in seconds after a user logs in for the automod to check on them.",
-      opts: [],
-      default: 120
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Require HW data to play",
-      section: "Moderation",
-      type: "boolean",
-      permissions: ["teiserver.admin"],
-      description: "Prevents someone from being a player if they don't have a HW hash yet.",
-      opts: [],
-      default: false
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Require Chobby data to play",
-      section: "Moderation",
-      type: "boolean",
-      permissions: ["teiserver.admin"],
-      description: "Prevents someone from being a player if they don't have a Chobby key yet.",
-      opts: [],
-      default: false
     })
 
     add_site_config_type(%{
@@ -254,36 +107,6 @@ defmodule Teiserver.TeiserverConfigs do
       description: "Prevents users logging in with anything other than Chobby",
       opts: [],
       default: false
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Bridge from discord",
-      section: "Discord",
-      type: "boolean",
-      permissions: ["teiserver.staff.moderator"],
-      description: "Enables bridging from discord to in-lobby channels",
-      opts: [],
-      default: true
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Bridge from server",
-      section: "Discord",
-      type: "boolean",
-      permissions: ["teiserver.staff.moderator"],
-      description: "Enables bridging from in-lobby channels to discord",
-      opts: [],
-      default: true
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Bridge player numbers",
-      section: "Discord",
-      type: "boolean",
-      permissions: ["teiserver.admin"],
-      description: "Enables bridging of channel names to discord",
-      opts: [],
-      default: true
     })
 
     add_site_config_type(%{
@@ -393,6 +216,209 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver"],
       description:
         "You will be messaged when a lobby you are a player in starts",
+      opts: [],
+      default: true
+    })
+  end
+
+  defp moderation_configs() do
+    add_site_config_type(%{
+      key: "teiserver.Warning acknowledge prompt",
+      section: "Moderation",
+      type: "string",
+      permissions: ["teiserver.admin.account"],
+      description: "The string used to request acknowledgement of warnings",
+      opts: [],
+      default: "Acknowledge this with 'I acknowledge this' to resume play"
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Warning acknowledge response",
+      section: "Moderation",
+      type: "string",
+      permissions: ["teiserver.admin.account"],
+      description: "The response string expected to acknowledge the warning",
+      opts: [],
+      default: "I acknowledge this"
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Automod action delay",
+      section: "Moderation",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The delay in seconds after a user logs in for the automod to check on them.",
+      opts: [],
+      default: 120
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Require HW data to play",
+      section: "Moderation",
+      type: "boolean",
+      permissions: ["teiserver.admin"],
+      description: "Prevents someone from being a player if they don't have a HW hash yet.",
+      opts: [],
+      default: false
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Require Chobby data to play",
+      section: "Moderation",
+      type: "boolean",
+      permissions: ["teiserver.admin"],
+      description: "Prevents someone from being a player if they don't have a Chobby key yet.",
+      opts: [],
+      default: false
+    })
+  end
+
+  defp legacy_protocol_configs() do
+    add_site_config_type(%{
+      key: "teiserver.Spring flood rate limit count",
+      section: "Legacy protocol",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The number of commands required to trip flood protection for Spring",
+      opts: [],
+      default: 20
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Spring flood rate window size",
+      section: "Legacy protocol",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The size of the window in seconds for flood protection to trip for Spring",
+      opts: [],
+      default: 6
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Tachyon flood rate limit count",
+      section: "Legacy protocol",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The number of commands required to trip flood protection for Tachyon",
+      opts: [],
+      default: 20
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Tachyon flood rate window size",
+      section: "Legacy protocol",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The size of the window in seconds for flood protection to trip for Tachyon",
+      opts: [],
+      default: 6
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Ring flood rate limit count",
+      section: "Legacy protocol",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The number of rings required to trip flood protection",
+      opts: [],
+      default: 5
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Ring flood rate window size",
+      section: "Legacy protocol",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The size of the window in seconds for flood protection to trip for rings",
+      opts: [],
+      default: 10
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Post login action delay",
+      section: "Legacy protocol",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The time in milliseconds to wait until doing something when a user logs in (e.g. sending a message)",
+      opts: [],
+      default: 2500
+    })
+  end
+
+  defp system_configs() do
+    add_site_config_type(%{
+      key: "system.Process matches",
+      section: "System",
+      type: "boolean",
+      permissions: ["teiserver.admin"],
+      description: "Enable/disable post processing of matches",
+      opts: [],
+      default: true,
+
+      value_label: "Enable"
+    })
+
+    add_site_config_type(%{
+      key: "system.Use geoip",
+      section: "System",
+      type: "boolean",
+      permissions: ["teiserver.admin"],
+      description: "When enabled you will use geoip for country code lookups",
+      opts: [],
+      default: true,
+      value_label: ""
+    })
+
+    add_site_config_type(%{
+      key: "system.User limit",
+      section: "System",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The cap for number of concurrent users, set to 0 to be infinite",
+      opts: [],
+      default: 1000,
+      value_label: ""
+    })
+
+    add_site_config_type(%{
+      key: "system.Login message",
+      section: "System",
+      type: "string",
+      permissions: ["teiserver.admin"],
+      description: "A message sent to all users when they login, leave empty for no message",
+      opts: [],
+      default: "",
+      value_label: ""
+    })
+  end
+
+  defp discord_configs() do
+    add_site_config_type(%{
+      key: "teiserver.Bridge from discord",
+      section: "Discord",
+      type: "boolean",
+      permissions: ["teiserver.staff.moderator"],
+      description: "Enables bridging from discord to in-lobby channels",
+      opts: [],
+      default: true
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Bridge from server",
+      section: "Discord",
+      type: "boolean",
+      permissions: ["teiserver.staff.moderator"],
+      description: "Enables bridging from in-lobby channels to discord",
+      opts: [],
+      default: true
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Bridge player numbers",
+      section: "Discord",
+      type: "boolean",
+      permissions: ["teiserver.admin"],
+      description: "Enables bridging of channel names to discord",
       opts: [],
       default: true
     })

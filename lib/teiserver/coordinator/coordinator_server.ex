@@ -195,6 +195,12 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   def handle_info({:do_client_inout, :login, userid}, state) do
     user = User.get_user_by_id(userid)
     if user do
+      # Do we have a system welcome message?
+      welcome_message = Config.get_site_config_cache("system.Login message")
+      if welcome_message != "" do
+        Coordinator.send_to_user(userid, welcome_message)
+      end
+
       relevant_restrictions = user.restrictions
         |> Enum.filter(fn r -> not Enum.member?(["Bridging"], r) end)
 
