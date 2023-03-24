@@ -4,7 +4,7 @@ defmodule Teiserver.Tachyon.Handlers.Account.WhoamiRequest do
   """
   alias Teiserver.Account
 
-  @command_id "account.who_am_i.response"
+  @command_id "account/who_am_i/response"
 
   def execute(conn, _object, _meta) do
     user = Account.get_user_by_id(conn.userid)
