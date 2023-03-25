@@ -14,6 +14,6 @@ defmodule Central.Config.SiteConfig do
   def changeset(site_config, attrs) do
     site_config
     |> cast(attrs, [:key, :value])
-    |> validate_required([:key, :value])
+    |> validate_required([:key])
   end
 end
