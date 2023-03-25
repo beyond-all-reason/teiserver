@@ -347,7 +347,9 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     server_messages = GraphMinuteLogsTask.perform_server_messages(logs, resolution)
     client_messages = GraphMinuteLogsTask.perform_client_messages(logs, resolution)
 
-    process_counts = GraphMinuteLogsTask.perform_process_counts(logs, resolution)
+    system_process_counts = GraphMinuteLogsTask.perform_system_process_counts(logs, resolution)
+    user_process_counts = GraphMinuteLogsTask.perform_user_process_counts(logs, resolution)
+    # beam_process_counts = GraphMinuteLogsTask.perform_beam_process_counts(logs, resolution)
 
     axis_key = GraphMinuteLogsTask.perform_axis_key(logs, resolution)
 
@@ -359,7 +361,9 @@ defmodule TeiserverWeb.Report.ServerMetricController do
       |> assign(:columns_cpu_load, columns_cpu_load)
       |> assign(:server_messages, server_messages)
       |> assign(:client_messages, client_messages)
-      |> assign(:process_counts, process_counts)
+      |> assign(:user_process_counts, user_process_counts)
+      |> assign(:system_process_counts, system_process_counts)
+      # |> assign(:beam_process_counts, beam_process_counts)
       |> assign(:axis_key, axis_key)
       |> add_breadcrumb(name: "Load", url: conn.request_path)
       |> render("load_graph.html")

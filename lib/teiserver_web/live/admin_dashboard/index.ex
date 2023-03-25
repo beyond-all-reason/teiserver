@@ -131,7 +131,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> Enum.map(fn lobby_id ->
         consul_pid = Coordinator.get_consul_pid(lobby_id)
         balancer_pid = Coordinator.get_balancer_pid(lobby_id)
-        throttle_pid = case Horde.Registry.lookup(Teiserver.ServerRegistry, "LobbyThrottle:#{lobby_id}") do
+        throttle_pid = case Horde.Registry.lookup(Teiserver.ThrottleRegistry, "LobbyThrottle:#{lobby_id}") do
           [{pid, _}] -> pid
           _ -> nil
         end

@@ -148,11 +148,31 @@
     });
 
     c3.generate({
-      bindto: '#chart_processes',
+      bindto: '#chart_user_processes',
       data: {
         x: 'x',
         xFormat: '%Y-%m-%d %H:%M:%S',
-        columns: <%= raw Jason.encode!([["x" | @axis_key] | @process_counts]) %>
+        columns: <%= raw Jason.encode!([["x" | @axis_key] | @user_process_counts]) %>
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%d %H:%M:%S'
+          }
+        },
+        y: {
+          min: 0
+        }
+      }
+    });
+
+    c3.generate({
+      bindto: '#chart_system_processes',
+      data: {
+        x: 'x',
+        xFormat: '%Y-%m-%d %H:%M:%S',
+        columns: <%= raw Jason.encode!([["x" | @axis_key] | @system_process_counts]) %>
       },
       axis: {
         x: {
@@ -265,7 +285,10 @@
 
 
             <div class={col_class}>
-              <div id="chart_processes" class='with-transitions chart-div'></div>
+              <div id="chart_user_processes" class='with-transitions chart-div'></div>
+            </div>
+            <div class={col_class}>
+              <div id="chart_system_processes" class='with-transitions chart-div'></div>
             </div>
           </div>
         </div>

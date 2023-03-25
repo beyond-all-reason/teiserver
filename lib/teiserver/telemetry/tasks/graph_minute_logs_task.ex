@@ -1,4 +1,5 @@
 defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
+  @moduledoc false
   alias Central.Helpers.{NumberHelper, TimexHelper}
 
   @spec perform_players(list, non_neg_integer()) :: list()
@@ -127,14 +128,33 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
     ]
   end
 
-  @spec perform_process_counts(list, non_neg_integer()) :: list()
-  def perform_process_counts(logs, chunk_size) do
+  @spec perform_system_process_counts(list, non_neg_integer()) :: list()
+  def perform_system_process_counts(logs, chunk_size) do
+    [
+      ["Throttles" | extract_value(logs, chunk_size, ~w(os_mon processes throttle_servers))],
+      ["Accolades" | extract_value(logs, chunk_size, ~w(os_mon processes accolade_servers))],
+
+      ["Lobbies" | extract_value(logs, chunk_size, ~w(os_mon processes lobby_servers))],
+      ["Consuls" | extract_value(logs, chunk_size, ~w(os_mon processes consul_servers))],
+      ["Balancers" | extract_value(logs, chunk_size, ~w(os_mon processes balancer_servers))],
+
+      ["System" | extract_value(logs, chunk_size, ~w(os_mon processes system_servers))],
+    ]
+  end
+
+  @spec perform_user_process_counts(list, non_neg_integer()) :: list()
+  def perform_user_process_counts(logs, chunk_size) do
+    [
+      ["Clients" | extract_value(logs, chunk_size, ~w(os_mon processes client_servers))],
+      ["Parties" | extract_value(logs, chunk_size, ~w(os_mon processes party_servers))]
+    ]
+  end
+
+  @spec perform_beam_process_counts(list, non_neg_integer()) :: list()
+  def perform_beam_process_counts(logs, chunk_size) do
     [
       ["Beam" | extract_value(logs, chunk_size, ~w(os_mon processes beam_total))],
       ["Teiserver" | extract_value(logs, chunk_size, ~w(os_mon processes teiserver_total))],
-      ["Clients" | extract_value(logs, chunk_size, ~w(os_mon processes client_servers))],
-      ["Lobbies" | extract_value(logs, chunk_size, ~w(os_mon processes lobby_servers))],
-      ["System" | extract_value(logs, chunk_size, ~w(os_mon processes system_servers))],
     ]
   end
 
