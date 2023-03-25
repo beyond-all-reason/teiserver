@@ -15,6 +15,9 @@ defmodule Teiserver.HookServer do
           Teiserver.Bridge.DiscordBridge.new_report(data.report)
         end
 
+      :updated_report ->
+        :ok
+
       :new_action ->
         if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
           Teiserver.Bridge.DiscordBridge.new_action(data.action)
