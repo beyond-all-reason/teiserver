@@ -51,9 +51,10 @@ defmodule Central.Application do
 
         # Teiserver stuff
         # Global/singleton registries
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ThrottleRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ServerRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ThrottleRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.AccoladesRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ConsulRegistry]},
 
 
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.LobbyRegistry]},
