@@ -1,4 +1,5 @@
 defmodule Teiserver.Coordinator do
+  @moduledoc false
   alias Teiserver.{Battle, User}
   alias Teiserver.Data.Types, as: T
   require Logger
@@ -217,7 +218,7 @@ defmodule Teiserver.Coordinator do
     case get_balancer_pid(lobby_id) do
       nil -> nil
       p ->
-        DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, p)
+        DynamicSupervisor.terminate_child(Teiserver.Coordinator.BalancerDynamicSupervisor, p)
     end
 
     Teiserver.Throttles.stop_throttle("LobbyThrottle:#{lobby_id}")
