@@ -127,6 +127,17 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
     ]
   end
 
+  @spec perform_process_counts(list, non_neg_integer()) :: list()
+  def perform_process_counts(logs, chunk_size) do
+    [
+      ["Beam" | extract_value(logs, chunk_size, ~w(os_mon processes beam_total))],
+      ["Teiserver" | extract_value(logs, chunk_size, ~w(os_mon processes teiserver_total))],
+      ["Clients" | extract_value(logs, chunk_size, ~w(os_mon processes client_servers))],
+      ["Lobbies" | extract_value(logs, chunk_size, ~w(os_mon processes lobby_servers))],
+      ["System" | extract_value(logs, chunk_size, ~w(os_mon processes system_servers))],
+    ]
+  end
+
   @spec perform_axis_key(list, non_neg_integer()) :: list()
   def perform_axis_key(logs, chunk_size) do
     logs
