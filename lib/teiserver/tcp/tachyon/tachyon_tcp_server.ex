@@ -36,7 +36,8 @@ defmodule Teiserver.TachyonTcpServer do
       :ranch_ssl,
       ssl_opts ++
         [
-          {:port, Application.get_env(:central, Teiserver)[:ports][:tachyon]}
+          max_connections: :infinity,
+          port: Application.get_env(:central, Teiserver)[:ports][:tachyon]
         ],
       __MODULE__,
       []

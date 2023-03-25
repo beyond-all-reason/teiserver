@@ -42,7 +42,8 @@ defmodule Teiserver.SpringTcpServer do
         :ranch_ssl,
         ssl_opts ++
           [
-            {:port, Application.get_env(:central, Teiserver)[:ports][:tls]}
+            max_connections: :infinity,
+            port: Application.get_env(:central, Teiserver)[:ports][:tls]
           ],
         __MODULE__,
         []
@@ -52,7 +53,8 @@ defmodule Teiserver.SpringTcpServer do
         make_ref(),
         :ranch_tcp,
         [
-          {:port, Application.get_env(:central, Teiserver)[:ports][:tcp]}
+          max_connections: :infinity,
+          port: Application.get_env(:central, Teiserver)[:ports][:tcp]
         ],
         __MODULE__,
         []
