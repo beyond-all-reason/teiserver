@@ -559,9 +559,6 @@ defmodule Teiserver.User do
   @spec update_user(T.user(), boolean) :: T.user()
   defdelegate update_user(user, persist \\ false), to: UserCache
 
-  @spec delete_user(T.userid()) :: :ok | :no_user
-  defdelegate delete_user(userid), to: UserCache
-
   @spec decache_user(T.userid()) :: :ok | :no_user
   defdelegate decache_user(userid), to: UserCache
 
