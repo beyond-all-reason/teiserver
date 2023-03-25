@@ -239,9 +239,15 @@ defmodule Teiserver.Telemetry.TelemetryServer do
 
     process_counts = %{
       system_servers: Horde.Registry.count(Teiserver.ServerRegistry),
+      throttle_servers: Horde.Registry.count(Teiserver.ThrottleRegistry),
+      accolade_servers: Horde.Registry.count(AccoladesRegistry),
+      consul_servers: Horde.Registry.count(ConsulRegistry),
+      balancer_servers: Horde.Registry.count(BalancerRegistry),
+
       lobby_servers: Horde.Registry.count(Teiserver.LobbyRegistry),
       client_servers: Horde.Registry.count(Teiserver.ClientRegistry),
       party_servers: Horde.Registry.count(Teiserver.PartyRegistry),
+
       queue_wait_servers: Horde.Registry.count(Teiserver.QueueWaitRegistry),
       queue_match_servers: Horde.Registry.count(Teiserver.QueueMatchRegistry),
       managed_lobby_servers: Horde.Registry.count(Teiserver.LobbyPolicyRegistry)

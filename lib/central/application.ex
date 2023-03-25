@@ -55,10 +55,9 @@ defmodule Central.Application do
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ThrottleRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.AccoladesRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ConsulRegistry]},
-
+        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.BalancerRegistry]},
 
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.LobbyRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.BalancerRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ClientRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.PartyRegistry]},
 
