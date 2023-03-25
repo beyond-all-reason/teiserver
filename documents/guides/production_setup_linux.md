@@ -14,7 +14,7 @@ Before you start I suggest setting up the DNS to point towards your server. It'l
 ### Fresh install time
 ```bash
 apt-get update
-apt-get -y install htop git-core ca-certificates vim sudo curl vnstat sysstat procinfo build-essential net-tools geoip-bin libtinfo-dev aptitude lsb-release grc neofetch tcpdump
+apt-get -y install htop git-core ca-certificates vim sudo curl vnstat sysstat procinfo build-essential net-tools geoip-bin libtinfo-dev aptitude lsb-release grc neofetch tcpdump glances
 apt-get -y upgrade
 apt-get -y autoremove
 
