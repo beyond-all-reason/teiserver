@@ -133,7 +133,7 @@ defmodule Teiserver.Coordinator do
   # Balancer related stuff
   @spec get_balancer_pid(T.lobby_id()) :: pid() | nil
   def get_balancer_pid(lobby_id) do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "BalancerServer:#{lobby_id}") do
+    case Horde.Registry.lookup(Teiserver.BalancerRegistry, lobby_id) do
       [{pid, _}] ->
         pid
       _ ->

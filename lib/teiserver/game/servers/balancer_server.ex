@@ -260,8 +260,8 @@ defmodule Teiserver.Game.BalancerServer do
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
-      Teiserver.ServerRegistry,
-      "BalancerServer:#{lobby_id}",
+      Teiserver.BalancerRegistry,
+      lobby_id,
       lobby_id
     )
 
