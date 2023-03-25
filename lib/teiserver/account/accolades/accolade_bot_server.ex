@@ -210,7 +210,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
     Horde.Registry.register(
-      Teiserver.ServerRegistry,
+      Teiserver.AccoladesRegistry,
       "AccoladeBotServer",
       :accolade_bot
     )
