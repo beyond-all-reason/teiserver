@@ -195,6 +195,15 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   def handle_info({:do_client_inout, :login, userid}, state) do
     user = User.get_user_by_id(userid)
     if user do
+      # FIXME: Remove this after a few weeks
+      if user.lobby_client == "skylobby" do
+        Coordinator.send_to_user(userid,
+          "Dear skylobby user, if you don't configure your lobby to use the BAR CDN " <>
+          "you might soon experience issues with downloading versions of the BAR game " <>
+          "required for the online play. Please do so by following " <>
+          "https://gist.github.com/p2004a/659e97cce92f8106355e011c6a7aad96")
+      end
+
       # Do we have a system welcome message?
       welcome_message = Config.get_site_config_cache("system.Login message")
       if welcome_message != "" do
