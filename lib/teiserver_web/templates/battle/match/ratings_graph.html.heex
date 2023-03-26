@@ -39,12 +39,26 @@
             active: "ratings_graph"
         }) %>
         <br /><br />
-
-    Average ratings
-    <div id="chart" class='with-transitions' style="height: 400px;">
-    </div>
-
-    
+        <div class="row">
+            <div class="col-md-12">
+              <%= for rt <- @rating_type_list do %>
+                <%= if @ratings[rt] != nil do %>
+                  <%= central_component "section_menu_button",
+                    name: rt,
+                    label: raw("#{rt} &nbsp;&nbsp;&nbsp; #{@ratings[rt].rating_value |> round(2)}"),
+                    active: @filter,
+                    url: "?filter=#{rt}",
+                    icon: "",
+                    bsname: bsname
+                  %>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+          <br />
+          Average ratings
+          <div id="chart" class='with-transitions' style="height: 400px;">
+          </div>
       </div>
     </div>
   </div>
