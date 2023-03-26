@@ -753,41 +753,43 @@ defmodule Teiserver.SpringTcpServer do
     end
 
     # Do they know about the battle?
-    state = if not Enum.member?(state.known_battles, lobby_id) do
-      state.protocol_out.reply(:battle_opened, lobby_id, nil, state)
-    else
+    state = if Enum.member?(state.known_battles, lobby_id) do
       state
+    else
+      state.protocol_out.reply(:battle_opened, lobby_id, nil, state)
     end
 
     # Now the user
-    new_user =
-      cond do
-        Enum.member?(state.known_battles, lobby_id) == false ->
-          state.known_users[userid]
+    cond do
+      # User has already left, ignore it
+      Enum.member?(state.known_battles, lobby_id) == false ->
+        state
 
-        state.known_users[userid] == nil ->
-          client = Client.get_client_by_id(userid)
-          state.protocol_out.reply(:user_logged_in, client, nil, state)
-          _blank_user(userid)
+      # We don't even know who they are? Leave it too
+      state.known_users[userid] == nil ->
+        # client = Client.get_client_by_id(userid)
+        # state.protocol_out.reply(:user_logged_in, client, nil, state)
+        # _blank_user(userid)
+        state
 
-        state.known_users[userid].lobby_id == nil ->
-          # No change
-          state.known_users[userid]
+      # We know them but not that they are in the lobby?
+      # ignore it
+      state.known_users[userid].lobby_id == nil ->
+        state
 
-        true ->
-          # We don't care which battle we thought they are in, they're no longer in it
-          state.protocol_out.reply(
-            :remove_user_from_battle,
-            {userid, state.known_users[userid].lobby_id},
-            nil,
-            state
-          )
+      true ->
+        # We don't care which battle we thought they are in, they're no longer in it
+        new_state = state.protocol_out.reply(
+          :remove_user_from_battle,
+          {userid, state.known_users[userid].lobby_id},
+          nil,
+          state
+        )
 
-          %{state.known_users[userid] | lobby_id: nil}
-      end
-
-    new_knowns = Map.put(state.known_users, userid, new_user)
-    %{state | known_users: new_knowns}
+        new_user = %{state.known_users[userid] | lobby_id: nil}
+        new_knowns = Map.put(state.known_users, userid, new_user)
+        %{new_state | known_users: new_knowns}
+    end
   end
 
   defp user_kicked_from_battle(userid, lobby_id, state) do
@@ -812,15 +814,14 @@ defmodule Teiserver.SpringTcpServer do
 
       client ->
         # Do they know about the user?
-        state =
-          case Map.has_key?(state.known_users, from) do
-            false ->
-              state.protocol_out.reply(:user_logged_in, client, nil, state)
-              %{state | known_users: Map.put(state.known_users, from, _blank_user(from))}
+        case Map.has_key?(state.known_users, from) do
+          false ->
+            state = state.protocol_out.reply(:user_logged_in, client, nil, state)
+            %{state | known_users: Map.put(state.known_users, from, _blank_user(from))}
 
-            true ->
-              state
-          end
+          true ->
+            state
+        end
 
         case type do
           :direct_message ->
@@ -832,9 +833,7 @@ defmodule Teiserver.SpringTcpServer do
           :chat_message_ex ->
             state.protocol_out.reply(:chat_message_ex, {from, room_name, msg, state.user}, nil, state)
         end
-      end
-
-    state
+    end
   end
 
   defp user_join_chat_room(userid, room_name, state) do
@@ -848,23 +847,23 @@ defmodule Teiserver.SpringTcpServer do
         state =
           case Map.has_key?(state.known_users, userid) do
             false ->
-              state.protocol_out.reply(:user_logged_in, client, nil, state)
+              state = state.protocol_out.reply(:user_logged_in, client, nil, state)
               %{state | known_users: Map.put(state.known_users, userid, _blank_user(userid))}
 
             true ->
               state
           end
 
-        new_members =
-          if not Enum.member?(state.room_member_cache[room_name] || [], userid) do
-            state.protocol_out.reply(:add_user_to_room, {userid, room_name}, nil, state)
-            [userid | (state.room_member_cache[room_name] || [])]
-          else
-            state.room_member_cache[room_name] || []
-          end
-
-        new_cache = Map.put(state.room_member_cache, room_name, new_members)
-        %{state | room_member_cache: new_cache}
+        if Enum.member?(state.room_member_cache[room_name] || [], userid) do
+          new_members = state.room_member_cache[room_name] || []
+          new_cache = Map.put(state.room_member_cache, room_name, new_members)
+          %{state | room_member_cache: new_cache}
+        else
+          state = state.protocol_out.reply(:add_user_to_room, {userid, room_name}, nil, state)
+          new_members = [userid | (state.room_member_cache[room_name] || [])]
+          new_cache = Map.put(state.room_member_cache, room_name, new_members)
+          %{state | room_member_cache: new_cache}
+        end
     end
   end
 
@@ -875,16 +874,16 @@ defmodule Teiserver.SpringTcpServer do
         state
 
       true ->
-        new_members =
-          if Enum.member?(state.room_member_cache[room_name] || [], userid) do
-            state.protocol_out.reply(:remove_user_from_room, {userid, room_name}, nil, state)
-            state.room_member_cache[room_name] |> Enum.filter(fn m -> m != userid end)
-          else
-            state.room_member_cache[room_name] || []
-          end
-
-        new_cache = Map.put(state.room_member_cache, room_name, new_members)
-        %{state | room_member_cache: new_cache}
+        if Enum.member?(state.room_member_cache[room_name] || [], userid) do
+          state = state.protocol_out.reply(:remove_user_from_room, {userid, room_name}, nil, state)
+          new_members = state.room_member_cache[room_name] |> Enum.filter(fn m -> m != userid end)
+          new_cache = Map.put(state.room_member_cache, room_name, new_members)
+          %{state | room_member_cache: new_cache}
+        else
+          new_members = state.room_member_cache[room_name] || []
+          new_cache = Map.put(state.room_member_cache, room_name, new_members)
+          %{state | room_member_cache: new_cache}
+        end
     end
   end
 
@@ -902,9 +901,8 @@ defmodule Teiserver.SpringTcpServer do
 
       _ ->
         Logger.error("No handler in tcp_server:do_action with action #{action_type}")
+        state
     end
-
-    state
   end
 
   @spec flood_protect?(String.t(), map()) :: {boolean, map()}
@@ -936,35 +934,35 @@ defmodule Teiserver.SpringTcpServer do
     {:stop, "Flood protection", state}
   end
 
-  @spec introduce_user(T.client() | T.userid() | nil, map()) :: map()
-  defp introduce_user(nil, state), do: state
-  defp introduce_user(userid, state) when is_integer(userid) do
-    client = Client.get_client_by_id(userid)
-    forget_user(client, state)
-  end
-  defp introduce_user(client, state) do
-    state.protocol_out.reply(:user_logged_in, client, nil, state)
-    new_known = Map.put(state.known_users, client.userid, _blank_user(client.userid))
-    %{state | known_users: new_known}
-  end
+  # @spec introduce_user(T.client() | T.userid() | nil, map()) :: map()
+  # defp introduce_user(nil, state), do: state
+  # defp introduce_user(userid, state) when is_integer(userid) do
+  #   client = Client.get_client_by_id(userid)
+  #   introduce_user(client, state)
+  # end
+  # defp introduce_user(client, state) do
+  #   new_state = state.protocol_out.reply(:user_logged_in, client, nil, state)
+  #   new_known = Map.put(state.known_users, client.userid, _blank_user(client.userid))
+  #   %{new_state | known_users: new_known}
+  # end
 
-  @spec forget_user(T.client() | T.userid() | nil, map()) :: map()
-  defp forget_user(nil, state), do: state
-  defp forget_user(userid, state) when is_integer(userid) do
-    client = Client.get_client_by_id(userid)
-    forget_user(client, state)
-  end
-  defp forget_user(client, state) do
-    case state.known_users[client.userid] do
-      nil ->
-        state
+  # @spec forget_user(T.client() | T.userid() | nil, map()) :: map()
+  # defp forget_user(nil, state), do: state
+  # defp forget_user(userid, state) when is_integer(userid) do
+  #   client = Client.get_client_by_id(userid)
+  #   forget_user(client, state)
+  # end
+  # defp forget_user(client, state) do
+  #   case state.known_users[client.userid] do
+  #     nil ->
+  #       state
 
-      _ ->
-        state.protocol_out.reply(:user_logged_out, {client.userid, client.name}, nil, state)
-        new_known = Map.delete(state.known_users, client.userid)
-        %{state | known_users: new_known}
-    end
-  end
+  #     _ ->
+  #       state = state.protocol_out.reply(:user_logged_out, {client.userid, client.name}, nil, state)
+  #       new_known = Map.delete(state.known_users, client.userid)
+  #       %{state | known_users: new_known}
+  #   end
+  # end
 
   # Example of how gen-smtp handles upgrading the connection
   # https://github.com/gen-smtp/gen_smtp/blob/master/src/gen_smtp_server_session.erl#L683-L720
