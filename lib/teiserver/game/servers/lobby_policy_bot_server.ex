@@ -101,7 +101,9 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
 
     pick_random_map(new_state)
 
-    # TODO: set lobby.lobby_policy to my id
+    # Set lobby_policy_id for both lobby_server and consul_server
+    Coordinator.send_consul(lobby_id, {:set_lobby_policy_id, state.lobby_policy.id})
+    Battle.update_lobby_values(lobby_id, %{lobby_policy_id: state.lobby_policy.id})
 
     {:noreply, new_state}
   end
@@ -274,12 +276,12 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     case Jason.decode(json_str) do
       {:ok, %{"BattleStateChanged" => new_status}} ->
         if new_status["locked"] != "unlocked" do
-          send_chat(state, "Room cannot be locked, unlocking")
+          send_chat(state, "This lobby cannot be locked, unlocking")
           send_to_founder(state, "!unlock")
         end
 
         if new_status["preset"] != state.lobby_policy.preset do
-          send_chat(state, "Preset must be #{state.lobby_policy.preset}, re-setting it")
+          send_chat(state, "Preset in this lobby must be #{state.lobby_policy.preset}, re-setting it")
           send_to_founder(state, "!preset #{state.lobby_policy.preset}")
           pick_random_map(state)
         end
@@ -287,7 +289,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
         team_count = new_status["nbTeams"] |> int_parse
         cond do
           team_count > state.lobby_policy.max_teamcount ->
-            send_chat(state, "Max team count is #{state.lobby_policy.max_teamcount}, re-setting it")
+            send_chat(state, "Max team count in this lobby is #{state.lobby_policy.max_teamcount}, re-setting it")
             send_to_founder(state, "!set teamcount #{state.lobby_policy.max_teamcount}")
 
           true ->
@@ -297,11 +299,11 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
         team_size = new_status["teamSize"] |> int_parse
         cond do
           team_size > state.lobby_policy.max_teamsize ->
-            send_chat(state, "Max team size is #{state.lobby_policy.max_teamsize}, re-setting it")
+            send_chat(state, "Max team size in this lobby is #{state.lobby_policy.max_teamsize}, re-setting it")
             send_to_founder(state, "!set teamsize #{state.lobby_policy.max_teamsize}")
 
           team_size < state.lobby_policy.min_teamsize ->
-            send_chat(state, "Min team size is #{state.lobby_policy.min_teamsize}, re-setting it")
+            send_chat(state, "Min team size in this lobby is #{state.lobby_policy.min_teamsize}, re-setting it")
             send_to_founder(state, "!set teamsize #{state.lobby_policy.min_teamsize}")
 
           true ->
@@ -326,6 +328,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     current_map = Enum.join(map_parts, " ")
 
     if not is_map_allowed?(current_map, state) do
+      send_chat(state, "Sorry but that map isn't allowed in this lobby, picking a random one from the approved list")
       pick_random_map(state)
     end
 

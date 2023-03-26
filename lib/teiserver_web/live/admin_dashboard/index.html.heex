@@ -11,7 +11,7 @@
 
     &nbsp;
 
-    <div class="btn btn-info2 mx-2" phx-click="restart-consuls">Check consuls</div>
+    <div class="btn btn-info2 mx-2" phx-click="check-consuls">Check consuls</div>
   </div>
 
   <div class="col-md-4">
@@ -19,7 +19,7 @@
 
     &nbsp;
 
-    <div class="btn btn-info2 mx-2" phx-click="restart-balances">Check balances</div>
+    <div class="btn btn-info2 mx-2" phx-click="check-balances">Check balances</div>
   </div>
 
   <div class="col-md-4">
@@ -28,8 +28,135 @@
 </div>
 
 <div class="row mt-4">
+  <div class="col-md-6 mb-4 col-xl-8 col-xxl-9">
+    <div class="row">
+
+      <div class="col-md-12 mb-4 col-xl-6 col-xxl-4">
+        <h4>Telemetry</h4>
+        <table class='table table-sm table-hover'>
+          <tbody>
+            <tr>
+              <td>Clients</td>
+              <td><%= @total_connected_clients %></td>
+            </tr>
+            <tr>
+              <td>Non-bot users</td>
+              <td><%= @telemetry_client.total %></td>
+            </tr>
+            <tr>
+              <td>Players</td>
+              <td><%= @telemetry_client.player %></td>
+            </tr>
+            <tr>
+              <td>Spectators</td>
+              <td><%= @telemetry_client.spectator %></td>
+            </tr>
+            <tr>
+              <td>Lobbies</td>
+              <td><%= @telemetry_battle.total %></td>
+            </tr>
+            <tr>
+              <td>Matches</td>
+              <td><%= @telemetry_battle.in_progress %></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="col-md-12 mb-4 col-xl-6 col-xxl-4">
+        <h4>Queues (<%= Enum.count(@queues) %>)</h4>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Alive</th>
+              <th>&nbsp;</th>
+          </tr>
+          </thead>
+          <tbody>
+            <%= for {queue, wait} <- @queues do %>
+              <tr>
+                <td><%= queue.id %></td>
+                <td><%= queue.name %></td>
+                <td>
+                  <%= if wait == nil do %>
+                    <i class="fa-fw fa-regular fa-times text-danger"></i>
+                  <% else %>
+                    <i class="fa-fw fa-regular fa-check text-success"></i>
+                  <% end %>
+                </td>
+                <td>
+                  <%= live_redirect "Show", to: Routes.ts_game_queue_show_path(@socket, :show, queue.id), class: "btn btn-sm btn-outline-#{queue_bsname}" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="col-md-12 mb-4 col-xl-6 col-xxl-4">
+        <h4>Policies (<%= Enum.count(@policies) %>)</h4>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Organiser</th>
+              <th>&nbsp;</th>
+          </tr>
+          </thead>
+          <tbody>
+            <%= for {policy, organiser} <- @policies do %>
+              <tr>
+                <td><%= policy.id %></td>
+                <td><%= policy.name %></td>
+                <td>
+                  <%= if organiser == nil do %>
+                    <i class="fa-fw fa-regular fa-times text-danger"></i>
+                  <% else %>
+                    <i class="fa-fw fa-regular fa-check text-success"></i>
+                  <% end %>
+                </td>
+                <td>
+                  <%= live_redirect "Show", to: ~p"/admin/dashboard/policy/#{policy.id}", class: "btn btn-sm btn-outline-#{queue_bsname}" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="col-md-12 mb-4 col-xl-6 col-xxl-4">
+        <h4>Servers (<%= Enum.count(@server_pids) %>)</h4>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Running</th>
+          </tr>
+          </thead>
+          <tbody>
+            <%= for {server_name, server_pid} <- @server_pids do %>
+              <tr>
+                <td><%= server_name %></td>
+                <td>
+                  <%= if server_pid == nil do %>
+                    <i class="fa-fw fa-regular fa-times text-danger"></i>
+                  <% else %>
+                    <i class="fa-fw fa-regular fa-check text-success"></i>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <div class="col-md-6 mb-4 col-xl-4 col-xxl-3">
-    <h4>Lobbies</h4>
+    <h4>Lobbies (<%= Enum.count(@lobbies) %>)</h4>
     <table class="table table-sm">
       <thead>
         <tr>
@@ -74,128 +201,5 @@
         <% end %>
       </tbody>
     </table>
-  </div>
-
-  <div class="col-md-6 mb-4 col-xl-8 col-xxl-9">
-    <div class="row">
-
-      <div class="col-md-12 mb-4 col-xl-6 col-xxl-4">
-        <h4>Telemetry</h4>
-        <table class='table table-sm table-hover'>
-          <tbody>
-            <tr>
-              <td>Clients</td>
-              <td><%= @total_connected_clients %></td>
-            </tr>
-            <tr>
-              <td>Non-bot users</td>
-              <td><%= @telemetry_client.total %></td>
-            </tr>
-            <tr>
-              <td>Players</td>
-              <td><%= @telemetry_client.player %></td>
-            </tr>
-            <tr>
-              <td>Lobbies</td>
-              <td><%= @telemetry_battle.total %></td>
-            </tr>
-            <tr>
-              <td>Matches</td>
-              <td><%= @telemetry_battle.in_progress %></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="col-md-12 mb-4 col-xl-6 col-xxl-4">
-        <h4>Queues</h4>
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Alive</th>
-              <th>&nbsp;</th>
-          </tr>
-          </thead>
-          <tbody>
-            <%= for {queue, wait} <- @queues do %>
-              <tr>
-                <td><%= queue.id %></td>
-                <td><%= queue.name %></td>
-                <td>
-                  <%= if wait == nil do %>
-                    <i class="fa-fw fa-regular fa-times text-danger"></i>
-                  <% else %>
-                    <i class="fa-fw fa-regular fa-check text-success"></i>
-                  <% end %>
-                </td>
-                <td>
-                  <%= live_redirect "Show", to: Routes.ts_game_queue_show_path(@socket, :show, queue.id), class: "btn btn-sm btn-outline-#{queue_bsname}" %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="col-md-12 mb-4 col-xl-6 col-xxl-4">
-        <h4>Policies</h4>
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Organiser</th>
-              <th>&nbsp;</th>
-          </tr>
-          </thead>
-          <tbody>
-            <%= for {policy, organiser} <- @policies do %>
-              <tr>
-                <td><%= policy.id %></td>
-                <td><%= policy.name %></td>
-                <td>
-                  <%= if organiser == nil do %>
-                    <i class="fa-fw fa-regular fa-times text-danger"></i>
-                  <% else %>
-                    <i class="fa-fw fa-regular fa-check text-success"></i>
-                  <% end %>
-                </td>
-                <td>
-                  <%= live_redirect "Show", to: ~p"/admin/dashboard/policy/#{policy.id}", class: "btn btn-sm btn-outline-#{queue_bsname}" %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="col-md-12 mb-4 col-xl-6 col-xxl-4">
-        <h4>Servers</h4>
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Running</th>
-          </tr>
-          </thead>
-          <tbody>
-            <%= for {server_name, server_pid} <- @server_pids do %>
-              <tr>
-                <td><%= server_name %></td>
-                <td>
-                  <%= if server_pid == nil do %>
-                    <i class="fa-fw fa-regular fa-times text-danger"></i>
-                  <% else %>
-                    <i class="fa-fw fa-regular fa-check text-success"></i>
-                  <% end %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-    </div>
   </div>
 </div>

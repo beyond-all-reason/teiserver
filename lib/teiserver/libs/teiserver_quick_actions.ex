@@ -159,14 +159,20 @@ defmodule Teiserver.TeiserverQuickActions do
       %{
         label: "Mutes",
         icons: ["fa-regular #{Teiserver.Account.MuteReport.icon()}"],
-        permissions: "teiserver.staff.moderator",
+        permissions: Teiserver.Account.MuteReport.permissions(),
         url: "/teiserver/reports/show/mutes"
       },
       %{
         label: "Review",
         icons: ["fa-regular #{Teiserver.Account.ReviewReport.icon()}"],
-        permissions: "teiserver.staff.moderator",
+        permissions: Teiserver.Account.ReviewReport.permissions(),
         url: "/teiserver/reports/show/review"
+      },
+      %{
+        label: "Growth",
+        icons: ["fa-regular #{Teiserver.Account.GrowthReport.icon()}"],
+        permissions: Teiserver.Account.GrowthReport.permissions(),
+        url: "/teiserver/reports/show/growth"
       },
 
       %{

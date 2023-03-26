@@ -52,6 +52,11 @@ defmodule Central.Application do
         # Teiserver stuff
         # Global/singleton registries
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ServerRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ThrottleRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.AccoladesRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ConsulRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.BalancerRegistry]},
+
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.LobbyRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ClientRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.PartyRegistry]},
@@ -83,11 +88,17 @@ defmodule Central.Application do
         concache_perm_sup(:lists),
 
         # Caches - User
-        concache_sup(:users_lookup_name_with_id, [global_ttl: 300_000]),
-        concache_sup(:users_lookup_id_with_name, [global_ttl: 300_000]),
-        concache_sup(:users_lookup_id_with_email, [global_ttl: 300_000]),
-        concache_sup(:users_lookup_id_with_discord, [global_ttl: 300_000]),
-        concache_sup(:users, [global_ttl: 300_000]),
+        # concache_sup(:users_lookup_name_with_id, [global_ttl: 300_000]),
+        # concache_sup(:users_lookup_id_with_name, [global_ttl: 300_000]),
+        # concache_sup(:users_lookup_id_with_email, [global_ttl: 300_000]),
+        # concache_sup(:users_lookup_id_with_discord, [global_ttl: 300_000]),
+        # concache_sup(:users, [global_ttl: 300_000]),
+
+        concache_perm_sup(:users_lookup_name_with_id),
+        concache_perm_sup(:users_lookup_id_with_name),
+        concache_perm_sup(:users_lookup_id_with_email),
+        concache_perm_sup(:users_lookup_id_with_discord),
+        concache_perm_sup(:users),
 
         concache_sup(:teiserver_login_count, global_ttl: 10_000),
         concache_sup(:teiserver_user_stat_cache),

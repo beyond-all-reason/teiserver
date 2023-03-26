@@ -471,6 +471,7 @@ defmodule CentralWeb.Router do
   scope "/teiserver/api", TeiserverWeb.API do
     pipe_through :api
     post "/login", SessionController, :login
+    post "/register", SessionController, :register
     post "/request_token", SessionController, :request_token
     get "/request_token", SessionController, :request_token_get
   end

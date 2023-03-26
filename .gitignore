@@ -65,5 +65,4 @@ central.tar.gz
 # I'm storing server output here, don't want to push it to git
 example_output
 test_auth
-/bin
 lib/teiserver/account/account_import.ex

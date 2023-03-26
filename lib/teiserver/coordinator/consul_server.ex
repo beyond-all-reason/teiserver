@@ -100,6 +100,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, state}
   end
 
+  def handle_info({:set_lobby_policy_id, new_id}, state) do
+    {:noreply, %{state | lobby_policy_id: new_id}}
+  end
+
   def handle_info(:reinit, state) do
     new_state = Map.merge(empty_state(state.lobby_id), state)
 
@@ -111,7 +115,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info(:match_stop, state) do
-    Battle.get_lobby_member_list(state.lobby_id)
+    (Battle.get_lobby_member_list(state.lobby_id) || [])
       |> Enum.each(fn userid ->
         Lobby.force_change_client(state.coordinator_id, userid, %{ready: false, unready_at: System.system_time(:millisecond)})
 
@@ -994,6 +998,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       coordinator_id: Coordinator.get_coordinator_userid(),
       lobby_id: lobby_id,
       host_id: founder_id,
+      lobby_policy_id: nil,
       gatekeeper: "default",
 
       minimum_rating_to_play: 0,
@@ -1004,6 +1009,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       minimum_uncertainty_to_play: 0,
       maximum_uncertainty_to_play: 1000,
+
+      minimum_skill_to_play: 0,
+      maximum_skill_to_play: 1000,
 
       level_to_spectate: 0,
       locks: [],
@@ -1084,8 +1092,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
-      Teiserver.ServerRegistry,
-      "ConsulServer:#{lobby_id}",
+      Teiserver.ConsulRegistry,
+      lobby_id,
       lobby_id
     )
 

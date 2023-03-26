@@ -176,7 +176,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
-      Teiserver.ServerRegistry,
+      Teiserver.AccoladesRegistry,
       "AccoladeChatServer:#{userid}",
       userid
     )

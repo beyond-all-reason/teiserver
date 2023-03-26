@@ -90,7 +90,7 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
 
     # Delete our cache of them
     id_list
-    |> Enum.each(fn userid -> User.delete_user(userid) end)
+    |> Enum.each(fn userid -> User.decache_user(userid) end)
 
     # Given there are other potential things to worry about we defer to the Central delete user task
     Central.Admin.DeleteUserTask.delete_users(id_list)

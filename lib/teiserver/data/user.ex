@@ -457,6 +457,7 @@ defmodule Teiserver.User do
     user = get_user_by_id(userid)
     set_flood_level(user.id, 10)
     Client.disconnect(userid, "Rename")
+    :timer.sleep(100)
 
     # Log the current name in their history
     previous_names = Account.get_user_stat_data(userid)
@@ -559,9 +560,6 @@ defmodule Teiserver.User do
   @spec update_user(T.user(), boolean) :: T.user()
   defdelegate update_user(user, persist \\ false), to: UserCache
 
-  @spec delete_user(T.userid()) :: :ok | :no_user
-  defdelegate delete_user(userid), to: UserCache
-
   @spec decache_user(T.userid()) :: :ok | :no_user
   defdelegate decache_user(userid), to: UserCache
 
@@ -652,6 +650,7 @@ defmodule Teiserver.User do
     :ok
   end
 
+  def send_direct_message(_, _, nil), do: :ok
   def send_direct_message(from_id, to_id, message) do
     if String.starts_with?(message, "!clan") do
       host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]

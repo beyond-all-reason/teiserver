@@ -211,12 +211,6 @@ defmodule Teiserver.Account.UserCache do
     user
   end
 
-  @spec delete_user(T.userid()) :: :ok | :no_user
-  def delete_user(userid) do
-    Logger.warn("UserCache.delete_user is being depreciated in favour of decache_user")
-    decache_user(userid)
-  end
-
   @spec decache_user(T.userid()) :: :ok | :no_user
   def decache_user(userid) do
     user = get_user_by_id(userid)

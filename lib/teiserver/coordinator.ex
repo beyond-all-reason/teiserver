@@ -1,4 +1,5 @@
 defmodule Teiserver.Coordinator do
+  @moduledoc false
   alias Teiserver.{Battle, User}
   alias Teiserver.Data.Types, as: T
   require Logger
@@ -63,7 +64,7 @@ defmodule Teiserver.Coordinator do
   # Consul related stuff
   @spec get_consul_pid(T.lobby_id()) :: pid() | nil
   def get_consul_pid(lobby_id) do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "ConsulServer:#{lobby_id}") do
+    case Horde.Registry.lookup(Teiserver.ConsulRegistry, lobby_id) do
       [{pid, _}] ->
         pid
       _ ->
@@ -133,7 +134,7 @@ defmodule Teiserver.Coordinator do
   # Balancer related stuff
   @spec get_balancer_pid(T.lobby_id()) :: pid() | nil
   def get_balancer_pid(lobby_id) do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "BalancerServer:#{lobby_id}") do
+    case Horde.Registry.lookup(Teiserver.BalancerRegistry, lobby_id) do
       [{pid, _}] ->
         pid
       _ ->
@@ -217,7 +218,7 @@ defmodule Teiserver.Coordinator do
     case get_balancer_pid(lobby_id) do
       nil -> nil
       p ->
-        DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, p)
+        DynamicSupervisor.terminate_child(Teiserver.Coordinator.BalancerDynamicSupervisor, p)
     end
 
     Teiserver.Throttles.stop_throttle("LobbyThrottle:#{lobby_id}")
