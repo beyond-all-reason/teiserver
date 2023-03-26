@@ -587,34 +587,34 @@ defmodule Teiserver.Protocols.SpringOut do
       PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby.id}")
       PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby.id}")
 
-      reply(:join_battle_success, lobby, nil, state)
-      reply(:add_user_to_battle, {state.userid, lobby.id, script_password}, nil, state)
+      state = reply(:join_battle_success, lobby, nil, state)
+      state = reply(:add_user_to_battle, {state.userid, lobby.id, script_password}, nil, state)
 
       modoptions = Battle.get_modoptions(lobby_id)
-      reply(:add_script_tags, modoptions, nil, state)
+      state = reply(:add_script_tags, modoptions, nil, state)
 
-      [lobby.founder_id | lobby.players]
-      |> Enum.each(fn id ->
-        client = Client.get_client_by_id(id)
-        reply(:client_battlestatus, client, nil, state)
-      end)
-
-      Battle.get_bots(lobby_id)
-        |> Enum.each(fn {_botname, bot} ->
-          reply(:add_bot_to_battle, {lobby.id, bot}, nil, state)
+      state = [lobby.founder_id | lobby.players]
+        |> Enum.reduce(state, fn (id, temp_state) ->
+          client = Client.get_client_by_id(id)
+          reply(:client_battlestatus, client, nil, temp_state)
         end)
 
-      lobby.start_areas
-      |> Enum.each(fn {team, r} ->
-        reply(:add_start_rectangle, {team, r}, nil, state)
-      end)
+      state = Battle.get_bots(lobby_id)
+        |> Enum.reduce(state, fn {{_botname, bot}, temp_state} ->
+          reply(:add_bot_to_battle, {lobby.id, bot}, nil, temp_state)
+        end)
 
-      reply(:request_battle_status, nil, nil, state)
+      state = lobby.start_areas
+        |> Enum.reduce(state, fn {{team, r}, temp_state} ->
+          reply(:add_start_rectangle, {team, r}, nil, temp_state)
+        end)
+
+      state = reply(:request_battle_status, nil, nil, state)
 
       # Queue status
       id_list = Coordinator.call_consul(lobby.id, :queue_state)
 
-      reply(:battle, :queue_status, {lobby.id, id_list}, nil, state)
+      state = reply(:battle, :queue_status, {lobby.id, id_list}, nil, state)
 
       %{state | lobby_id: lobby.id}
     else
@@ -630,8 +630,8 @@ defmodule Teiserver.Protocols.SpringOut do
 
   @spec do_login_accepted(map(), map()) :: map()
   def do_login_accepted(state, user) do
-    reply(:login_accepted, user.name, nil, state)
-    reply(:motd, nil, nil, state)
+    state = reply(:login_accepted, user.name, nil, state)
+    state = reply(:motd, nil, nil, state)
 
     # Login the client
     _client = Client.login(user, :spring, state.ip)
@@ -712,37 +712,37 @@ defmodule Teiserver.Protocols.SpringOut do
     PubSub.unsubscribe(Central.PubSub, "room:#{room_name}")
     :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
 
-    reply(:join_success, room_name, nil, state)
-    reply(:add_user_to_room, {state.userid, room_name}, nil, state)
+    state = reply(:join_success, room_name, nil, state)
+    state = reply(:add_user_to_room, {state.userid, room_name}, nil, state)
 
     author_name = User.get_username(room.author_id)
-    reply(:channel_topic, {room_name, author_name}, nil, state)
+    state = reply(:channel_topic, {room_name, author_name}, nil, state)
 
     # Check for known users
     state = room.members
-    |> Enum.reduce(state, fn (member_id, state_acc) ->
-      # Does the user need to be added?
-      new_state =
-        case Map.has_key?(state_acc.known_users, member_id) do
-          false ->
-            client = Client.get_client_by_id(member_id)
-            state_acc.protocol_out.reply(:user_logged_in, client, nil, state)
-            %{state_acc | known_users: Map.put(state_acc.known_users, member_id, Teiserver.SpringTcpServer._blank_user(member_id))}
+      |> Enum.reduce(state, fn (member_id, state_acc) ->
+        # Does the user need to be added?
+        new_state =
+          case Map.has_key?(state_acc.known_users, member_id) do
+            false ->
+              client = Client.get_client_by_id(member_id)
+              state_acc = reply(:user_logged_in, client, nil, state_acc)
+              %{state_acc | known_users: Map.put(state_acc.known_users, member_id, Teiserver.SpringTcpServer._blank_user(member_id))}
 
-          true ->
-            state_acc
-        end
+            true ->
+              state_acc
+          end
 
-      new_members =
-        if Enum.member?(new_state.room_member_cache[room_name] || [], member_id) do
-          new_state.room_member_cache[room_name] || []
-        else
-          [member_id | (new_state.room_member_cache[room_name] || [])]
-        end
+        new_members =
+          if Enum.member?(new_state.room_member_cache[room_name] || [], member_id) do
+            new_state.room_member_cache[room_name] || []
+          else
+            [member_id | (new_state.room_member_cache[room_name] || [])]
+          end
 
-      new_cache = Map.put(state.room_member_cache, room_name, new_members)
-      %{new_state | room_member_cache: new_cache}
-    end)
+        new_cache = Map.put(state.room_member_cache, room_name, new_members)
+        %{new_state | room_member_cache: new_cache}
+      end)
 
     if not state.exempt_from_cmd_throttle do
       :timer.sleep(Application.get_env(:central, Teiserver)[:spring_post_state_change_delay])
@@ -757,8 +757,6 @@ defmodule Teiserver.Protocols.SpringOut do
       |> Enum.join(" ")
 
     reply(:channel_members, {members, room_name}, nil, state)
-
-    state
   end
 
   @spec prep_to_send(String.t() | list() | nil, String.t(), map) :: map()
