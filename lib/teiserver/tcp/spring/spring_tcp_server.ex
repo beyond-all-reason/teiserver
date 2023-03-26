@@ -171,6 +171,10 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   def handle_info(:send_messages, %{pending_messages: pending_messages} = state) do
+    IO.puts ""
+    IO.inspect pending_messages
+    IO.puts ""
+
     state.protocol_out.send_prepared_messages(state, pending_messages)
     {:noreply, %{state |
       pending_messages: [],

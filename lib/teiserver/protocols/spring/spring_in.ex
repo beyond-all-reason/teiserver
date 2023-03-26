@@ -101,33 +101,32 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("LISTCOMPFLAGS", _, msg_id, state) do
     reply(:compflags, nil, msg_id, state)
-    state
   end
 
   # https://ninenines.eu/docs/en/ranch/1.7/guide/transports/ - Upgrading a TCP socket to SSL
   defp do_handle("STLS", _, msg_id, state) do
-    reply(:okay, "STLS", msg_id, state)
-    new_state = Teiserver.SpringTcpServer.upgrade_connection(state)
-    reply(:welcome, nil, msg_id, new_state)
+    state = reply(:okay, "STLS", msg_id, state)
+    state = Teiserver.SpringTcpServer.upgrade_connection(state)
+    reply(:welcome, nil, msg_id, state)
   end
 
   # Swap to the Tachyon protocol
   defp do_handle("TACHYON", "", msg_id, state) do
-    reply(:okay, "TACHYON", msg_id, state)
+    state = reply(:okay, "TACHYON", msg_id, state)
     {m_in, m_out} = Teiserver.Protocols.TachyonLib.get_modules()
 
     %{state | protocol_in: m_in, protocol_out: m_out}
   end
 
   defp do_handle("TACHYON", "dev", msg_id, state) do
-    reply(:okay, "TACHYON", msg_id, state)
+    state = reply(:okay, "TACHYON", msg_id, state)
     {m_in, m_out} = Teiserver.Protocols.TachyonLib.get_modules("dev")
 
     %{state | protocol_in: m_in, protocol_out: m_out}
   end
 
   defp do_handle("TACHYON", "v" <> _ = version, msg_id, state) do
-    reply(:okay, "TACHYON", msg_id, state)
+    state = reply(:okay, "TACHYON", msg_id, state)
     {m_in, m_out} = Teiserver.Protocols.TachyonLib.get_modules(version)
 
     %{state | protocol_in: m_in, protocol_out: m_out}
@@ -141,7 +140,6 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("c.battles.list_ids", _, msg_id, state) do
     reply(:list_battles, Lobby.list_lobby_ids(), msg_id, state)
-    state
   end
 
   # Specific handlers for different commands
@@ -260,7 +258,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
     case response do
       {:error, "Unverified", userid} ->
-        reply(:agreement, nil, msg_id, state)
+        state = reply(:agreement, nil, msg_id, state)
         Map.put(state, :unverified_id, userid)
 
       {:ok, user} ->
@@ -281,12 +279,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
       {:error, "Banned" <> _} ->
         reply(:denied, "Banned, please see the discord channel #moderation-bot for more details", msg_id, state)
-        state
 
       {:error, reason} ->
         Logger.debug("[command:login] denied with reason #{reason}")
         reply(:denied, reason, msg_id, state)
-        state
     end
   end
 
@@ -310,7 +306,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
     case response do
       {:error, "Unverified", userid} ->
-        reply(:agreement, nil, msg_id, state)
+        state = reply(:agreement, nil, msg_id, state)
         Map.put(state, :unverified_id, userid)
 
       {:ok, user} ->
@@ -331,12 +327,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
       {:error, "Banned" <> _} ->
         reply(:denied, "Banned, please see the discord channel #moderation-bot for more details", msg_id, state)
-        state
 
       {:error, reason} ->
         Logger.debug("[command:login] denied with reason #{reason}")
         reply(:denied, reason, msg_id, state)
-        state
     end
   end
 
@@ -354,8 +348,6 @@ defmodule Teiserver.Protocols.SpringIn do
       _ ->
         _no_match(state, "REGISTER", msg_id, data)
     end
-
-    state
   end
 
   defp do_handle("CONFIRMAGREEMENT", code, msg_id, %{unverified_id: userid} = state) do
@@ -378,7 +370,6 @@ defmodule Teiserver.Protocols.SpringIn do
 
           false ->
             reply(:denied, "Incorrect code", msg_id, state)
-            state
         end
     end
   end
@@ -410,20 +401,16 @@ defmodule Teiserver.Protocols.SpringIn do
       _ ->
         _no_match(state, "CREATEBOTACCOUNT", msg_id, data)
     end
-
-    state
   end
 
   defp do_handle("RENAMEACCOUNT", new_name, msg_id, state) do
     case User.rename_user(state.userid, new_name) do
       :success ->
-        :ok
+        state
 
       {:error, reason} ->
         reply(:servermsg, reason, msg_id, state)
     end
-
-    state
   end
 
   defp do_handle("RESETPASSWORDREQUEST", _, msg_id, state) do
@@ -455,15 +442,13 @@ defmodule Teiserver.Protocols.SpringIn do
         cond do
           correct_code != supplied_code ->
             reply(:change_email_denied, "bad code", msg_id, state)
-            state
 
           new_email != expected_email ->
             reply(:change_email_denied, "bad email", msg_id, state)
-            state
 
           true ->
             new_user = User.change_email(state.user, new_email)
-            reply(:change_email_accepted, nil, msg_id, state)
+            state = reply(:change_email_accepted, nil, msg_id, state)
             %{state | user: new_user}
         end
 
@@ -486,11 +471,9 @@ defmodule Teiserver.Protocols.SpringIn do
       "Email address: #{state.user.email}",
       "Ingame time: #{ingame_hours}"
     ]
-    |> Enum.each(fn msg ->
-      reply(:servermsg, msg, msg_id, state)
+    |> Enum.reduce(state, fn {msg, temp_state} ->
+      reply(:servermsg, msg, msg_id, temp_state)
     end)
-
-    state
   end
 
   defp do_handle("CHANGEPASSWORD", data, msg_id, state) do
@@ -519,8 +502,6 @@ defmodule Teiserver.Protocols.SpringIn do
       _ ->
         _no_match(state, "CHANGEPASSWORD", msg_id, data)
     end
-
-    state
   end
 
   # SLDB commands
@@ -581,8 +562,8 @@ defmodule Teiserver.Protocols.SpringIn do
         %{state | user: new_user}
       _ ->
         _no_match(state, "DECLINEFRIENDREQUEST", msg_id, data)
-      end
     end
+  end
 
   defp do_handle("FRIENDREQUEST", data, msg_id, state) do
     case String.split(data, "=") do
@@ -656,43 +637,6 @@ defmodule Teiserver.Protocols.SpringIn do
     end
   end
 
-  # This is the old function, it is being left as a comment to make rollback much easier if needed
-  # defp do_handle("c.moderation.report_user", data, msg_id, state) do
-  #   case String.split(data, "\t") do
-  #     [target_name, location_type, location_id, reason] ->
-  #       user = User.get_user_by_id(state.userid)
-  #       target_id = User.get_userid(target_name)
-
-  #       cond do
-  #         Enum.member?(user.friends, target_id) ->
-  #           User.send_direct_message(Coordinator.get_coordinator_userid(), state.userid, "Your report has not been submitted, you can't report a friend.")
-  #           reply(:no, {"c.moderation.report_user", "reporting friend"}, msg_id, state)
-
-  #         String.trim(reason) == "" or String.trim(reason) == "None Given" ->
-  #           User.send_direct_message(Coordinator.get_coordinator_userid(), state.userid, "Your report has not been submitted as no reason for the report was given.")
-  #           reply(:no, {"c.moderation.report_user", "no reason given"}, msg_id, state)
-
-  #         User.is_restricted?(state.userid, ["Community", "Reporting"]) ->
-  #           reply(:no, {"c.moderation.report_user", "permission denied"}, msg_id, state)
-
-  #         true ->
-  #           location_id = if location_id == "nil", do: nil, else: location_id
-  #           result = Account.create_report(state.userid, target_id, location_type, location_id, reason)
-
-  #           case result do
-  #             {:ok, _} ->
-  #               reply(:okay, nil, msg_id, state)
-
-  #             {:error, reason} ->
-  #               reply(:no, {"c.moderation.report_user", reason}, msg_id, state)
-  #           end
-  #       end
-
-  #     _ ->
-  #       reply(:no, {"c.moderation.report_user", "bad command format"}, msg_id, state)
-  #   end
-  # end
-
   # Chat related
   defp do_handle("JOIN", data, msg_id, state) do
     regex_result = case Regex.run(~r/(\w+)(?:\t)?(\w+)?/u, data) do
@@ -706,7 +650,7 @@ defmodule Teiserver.Protocols.SpringIn do
         :nomatch
     end
 
-    case regex_result do
+    state = case regex_result do
       :nomatch ->
         _no_match(state, "JOIN", msg_id, data)
 
@@ -729,7 +673,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("LEAVE", room_name, msg_id, state) do
     PubSub.unsubscribe(Central.PubSub, "room:#{room_name}")
-    reply(:left_room, {state.username, room_name}, msg_id, state)
+    state = reply(:left_room, {state.username, room_name}, msg_id, state)
     Room.remove_user_from_room(state.userid, room_name)
     if not state.exempt_from_cmd_throttle do
       :timer.sleep(Application.get_env(:central, Teiserver)[:spring_post_state_change_delay])
@@ -745,24 +689,22 @@ defmodule Teiserver.Protocols.SpringIn do
     case Regex.run(~r/(\w+) (.+)/u, data) do
       [_, room_name, msg] ->
         Room.send_message(state.userid, room_name, msg)
+        state
 
       _ ->
         _no_match(state, "SAY", msg_id, data)
     end
-
-    state
   end
 
   defp do_handle("SAYEX", data, msg_id, state) do
     case Regex.run(~r/(\w+) (.+)/u, data) do
       [_, room_name, msg] ->
         Room.send_message_ex(state.userid, room_name, msg)
+        state
 
       _ ->
         _no_match(state, "SAY", msg_id, data)
     end
-
-    state
   end
 
   # This is meant get a chat history, we currently don't store a chat history
@@ -780,8 +722,6 @@ defmodule Teiserver.Protocols.SpringIn do
       _ ->
         _no_match(state, "SAYPRIVATE", msg_id, data)
     end
-
-    state
   end
 
   # Battles
@@ -850,16 +790,16 @@ defmodule Teiserver.Protocols.SpringIn do
 
     case response do
       {:success, battle} ->
-        reply(:battle_opened, battle.id, msg_id, state)
-        reply(:open_battle_success, battle.id, msg_id, state)
+        state = reply(:battle_opened, battle.id, msg_id, state)
+        state = reply(:open_battle_success, battle.id, msg_id, state)
         PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
         PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
 
-        reply(:join_battle_success, battle, msg_id, state)
+        state = reply(:join_battle_success, battle, msg_id, state)
 
         # Send information about the battle to them
         modoptions = Battle.get_modoptions(battle.id)
-        reply(:add_script_tags, modoptions, msg_id, state)
+        state = reply(:add_script_tags, modoptions, msg_id, state)
 
         battle.start_areas
           |> Enum.each(fn {team, r} ->
@@ -867,7 +807,7 @@ defmodule Teiserver.Protocols.SpringIn do
           end)
 
         # They are offered the chance to give a battle status
-        reply(:request_battle_status, nil, msg_id, state)
+        state = reply(:request_battle_status, nil, msg_id, state)
 
         # Update the client
         Client.join_battle(state.userid, battle.id, true)
@@ -883,7 +823,6 @@ defmodule Teiserver.Protocols.SpringIn do
 
       {:failure, reason} ->
         reply(:open_battle_failure, reason, msg_id, state)
-        state
     end
   end
 
@@ -953,12 +892,11 @@ defmodule Teiserver.Protocols.SpringIn do
         client_id = User.get_userid(username)
         value = int_parse(value)
         Lobby.force_change_client(state.userid, client_id, %{handicap: value})
+        state
 
       _ ->
         _no_match(state, "HANDICAP", msg_id, data)
     end
-
-    state
   end
 
   defp do_handle("ADDSTARTRECT", data, msg_id, state) do
@@ -967,19 +905,17 @@ defmodule Teiserver.Protocols.SpringIn do
         if Lobby.allow?(state.userid, :addstartrect, state.lobby_id) do
           Lobby.add_start_rectangle(state.lobby_id, [team, left, top, right, bottom])
         end
+        state
 
       _ ->
         _no_match(state, "ADDSTARTRECT", msg_id, data)
     end
-
-    state
   end
 
   defp do_handle("REMOVESTARTRECT", team, _msg_id, state) do
     if Lobby.allow?(state.userid, :removestartrect, state.lobby_id) do
       Lobby.remove_start_rectangle(state.lobby_id, team)
     end
-
     state
   end
 
@@ -1294,7 +1230,6 @@ defmodule Teiserver.Protocols.SpringIn do
   # MISC
   defp do_handle("PING", _, msg_id, state) do
     reply(:pong, nil, msg_id, state)
-    state
   end
 
   defp do_handle("RING", username, _msg_id, state) do
@@ -1317,13 +1252,11 @@ defmodule Teiserver.Protocols.SpringIn do
     msg = "No incomming match for #{cmd} with data '#{Kernel.inspect data}'. Userid #{state.userid}"
     Logger.info(msg)
     reply(:servermsg, msg, msg_id, state)
-    state
   end
 
   @spec deny(map(), String.t()) :: map()
   defp deny(state, msg_id) do
     reply(:servermsg, "You do not have permission to execute that command", msg_id, state)
-    state
   end
 
   @spec status_flood_protect?(map()) :: {boolean, map()}
