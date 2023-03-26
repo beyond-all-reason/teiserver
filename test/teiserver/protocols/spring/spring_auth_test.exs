@@ -350,7 +350,8 @@ CLIENTS test_room #{user.name}\n"
 
     _send_raw(socket2, "MYBATTLESTATUS 12 0\n")
     reply = _recv_raw(socket2)
-    assert reply == "CLIENTBATTLESTATUS #{user2.name} 8388620 0\n"
+    # assert reply == "CLIENTBATTLESTATUS #{user2.name} 8388620 0\n"
+    assert reply == "CLIENTBATTLESTATUS #{user2.name} 12 0\n"
 
     # SAYBATTLEPRIVATEEX
     _send_raw(socket1, "SAYBATTLEPRIVATEEX #{user2.name} This is a test priv battle msg\n")

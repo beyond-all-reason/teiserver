@@ -171,9 +171,9 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   def handle_info(:send_messages, %{pending_messages: pending_messages} = state) do
-    IO.puts ""
-    IO.inspect pending_messages
-    IO.puts ""
+    # IO.puts ""
+    # IO.inspect {state.userid, pending_messages}
+    # IO.puts ""
 
     state.protocol_out.send_prepared_messages(state, pending_messages)
     {:noreply, %{state |
@@ -714,14 +714,16 @@ defmodule Teiserver.SpringTcpServer do
       # User is known about and not in a battle, this is the ideal
       # state
       state.known_users[userid].lobby_id == nil ->
-        state.protocol_out.reply(
+        new_state = state.protocol_out.reply(
           :add_user_to_battle,
           {userid, lobby_id, script_password},
           nil,
           state
         )
 
-        %{state.known_users[userid] | lobby_id: lobby_id}
+        new_user = %{new_state.known_users[userid] | lobby_id: lobby_id}
+        new_knowns = Map.put(new_state.known_users, userid, new_user)
+        %{new_state | known_users: new_knowns}
 
       # User is known about but already in a battle
       state.known_users[userid].lobby_id != lobby_id ->
@@ -735,14 +737,14 @@ defmodule Teiserver.SpringTcpServer do
           )
         end
 
-        state.protocol_out.reply(
+        new_state = state.protocol_out.reply(
           :add_user_to_battle,
           {userid, lobby_id, script_password},
           nil,
           state
         )
 
-        %{state.known_users[userid] | lobby_id: lobby_id}
+        %{new_state.known_users[userid] | lobby_id: lobby_id}
 
       # User is known about and in this battle already, no change
       state.known_users[userid].lobby_id == lobby_id ->

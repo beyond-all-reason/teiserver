@@ -292,7 +292,9 @@ defmodule Teiserver.TeiserverTestLib do
       print_client_messages: false,
       print_server_messages: false,
       exempt_from_cmd_throttle: true,
-      script_password: nil
+      script_password: nil,
+
+      pending_messages: []
     }
   end
 
@@ -325,7 +327,9 @@ defmodule Teiserver.TeiserverTestLib do
       print_client_messages: false,
       print_server_messages: false,
       exempt_from_cmd_throttle: true,
-      script_password: nil
+      script_password: nil,
+
+      pending_messages: []
     }
   end
 

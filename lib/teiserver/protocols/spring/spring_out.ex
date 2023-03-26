@@ -255,8 +255,7 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:add_script_tags, tags) do
     tags =
       tags
-      |> Enum.map(fn {key, value} -> "#{key}=#{value}" end)
-      |> Enum.join("\t")
+      |> Enum.map_join("\t", fn {key, value} -> "#{key}=#{value}" end)
 
     "SETSCRIPTTAGS " <> tags <> "\n"
   end
@@ -457,10 +456,9 @@ defmodule Teiserver.Protocols.SpringOut do
     if from_id not in (state_user.ignored || []) or from_user.moderator == true or User.is_bot?(from_user) == true do
       from_name = User.get_username(from_id)
       messages
-      |> Enum.map(fn msg ->
+      |> Enum.map_join("", fn msg ->
         "SAIDEX #{room_name} #{from_name} #{msg}\n"
       end)
-      |> Enum.join("")
     end
   end
 
@@ -513,10 +511,9 @@ defmodule Teiserver.Protocols.SpringOut do
     if sender_id not in (user.ignored || []) do
       username = User.get_username(sender_id)
       messages
-      |> Enum.map(fn msg ->
+      |> Enum.map_join("", fn msg ->
         "SAIDBATTLE #{username} #{msg}\n"
       end)
-      |> Enum.join("")
     end
   end
 
@@ -529,10 +526,9 @@ defmodule Teiserver.Protocols.SpringOut do
     if sender_id not in (user.ignored || []) do
       username = User.get_username(sender_id)
       messages
-      |> Enum.map(fn msg ->
+      |> Enum.map_join("", fn msg ->
         "SAIDBATTLEEX #{username} #{msg}\n"
       end)
-      |> Enum.join("")
     end
   end
 
@@ -600,12 +596,12 @@ defmodule Teiserver.Protocols.SpringOut do
         end)
 
       state = Battle.get_bots(lobby_id)
-        |> Enum.reduce(state, fn {{_botname, bot}, temp_state} ->
+        |> Enum.reduce(state, fn ({_botname, bot}, temp_state) ->
           reply(:add_bot_to_battle, {lobby.id, bot}, nil, temp_state)
         end)
 
       state = lobby.start_areas
-        |> Enum.reduce(state, fn {{team, r}, temp_state} ->
+        |> Enum.reduce(state, fn ({team, r}, temp_state) ->
           reply(:add_start_rectangle, {team, r}, nil, temp_state)
         end)
 

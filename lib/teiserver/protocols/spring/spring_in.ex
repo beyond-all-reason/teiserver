@@ -155,28 +155,26 @@ defmodule Teiserver.Protocols.SpringIn do
     #     engage_flood_protection(state)
     #   {false, state} ->
         case Regex.run(~r/(\d+)/, data) do
-        [_, new_value] ->
-          new_status =
-            Spring.parse_client_status(new_value)
-            |> Map.take([:in_game, :away])
+          [_, new_value] ->
+            new_status =
+              Spring.parse_client_status(new_value)
+              |> Map.take([:in_game, :away])
 
-          case Client.get_client_by_id(state.userid) do
-            nil ->
-              :ok
-            client ->
-              # This just accepts it and updates the client
-              new_client = Map.merge(client, new_status)
-              if client.in_game != new_client.in_game or client.away != new_client.away do
-                Client.update(new_client, :client_updated_status)
-              end
-          end
+            case Client.get_client_by_id(state.userid) do
+              nil ->
+                :ok
+              client ->
+                # This just accepts it and updates the client
+                new_client = Map.merge(client, new_status)
+                if client.in_game != new_client.in_game or client.away != new_client.away do
+                  Client.update(new_client, :client_updated_status)
+                end
+            end
+            state
 
         nil ->
           _no_match(state, "MYSTATUS", msg_id, data)
       end
-    # end
-
-    state
   end
 
   defp do_handle("c.user.get_token_by_email", _data, msg_id, %{transport: :ranch_tcp} = state) do
@@ -471,7 +469,7 @@ defmodule Teiserver.Protocols.SpringIn do
       "Email address: #{state.user.email}",
       "Ingame time: #{ingame_hours}"
     ]
-    |> Enum.reduce(state, fn {msg, temp_state} ->
+    |> Enum.reduce(state, fn msg, temp_state ->
       reply(:servermsg, msg, msg_id, temp_state)
     end)
   end
