@@ -4,6 +4,7 @@ defmodule TeiserverWeb.Battle.MatchController do
   alias Teiserver.{Battle, Game, Account}
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Battle.MatchLib
+  alias Central.Helpers.TimexHelper
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Battle.Match,
@@ -132,4 +133,39 @@ defmodule TeiserverWeb.Battle.MatchController do
       |> render("ratings.html")
 
   end
+
+  @spec ratings_graph(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def ratings_graph(conn, _params) do
+
+    user = conn.assigns.current_user
+
+    filter_type_id = MatchRatingLib.rating_type_name_lookup()["Team"] || 1
+
+    logs = Game.list_rating_logs(
+      search: [
+        user_id: user.id,
+        rating_type_id: filter_type_id
+      ],
+      order_by: "Newest first",
+      limit: 50,
+      preload: [:match, :match_membership]
+    )
+
+    {dates, ratings} =
+      logs
+      |> List.foldl( %{}, fn rating, acc ->
+        Map.update( acc, TimexHelper.date_to_str(rating.inserted_at, format: :ymd), { rating.value["rating_value"], 1 }, fn {match_rating, count} ->
+           { match_rating + rating.value["rating_value"], count+1 }
+        end )
+      end )
+      |> Enum.map( fn { date, { match_rating, count } } -> {date, match_rating / count}  end )
+      |> List.foldl( {[],[]}, fn { date, avg_rating }, {dates, avg_ratings} -> {[date | dates], [avg_rating | avg_ratings]} end )
+
+    conn
+      |> assign(:rating_type_list, MatchRatingLib.rating_type_list())
+      |> assign(:key, dates)
+      |> assign(:columns, [["rating" | ratings]])
+      |> render( "ratings_graph.html" )
+  end
+
 end

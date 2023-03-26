@@ -370,6 +370,7 @@ defmodule CentralWeb.Router do
     get("/ratings/leaderboard/:type", RatingsController, :leaderboard)
 
     get("/matches/ratings", MatchController, :ratings)
+    get("/matches/ratings_graph", MatchController, :ratings_graph)
     resources("/matches", MatchController, only: [:index, :show, :delete])
   end
 
