@@ -13,8 +13,9 @@ defmodule Teiserver.Chat.LobbyMessage do
   """
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
-    params = params
-    |> trim_strings([:content, :lobby_guid])
+    params =
+      params
+      |> trim_strings([:content, :lobby_guid])
 
     struct
     |> cast(params, [:content, :lobby_guid, :inserted_at, :user_id])

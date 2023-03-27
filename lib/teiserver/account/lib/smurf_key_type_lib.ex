@@ -10,21 +10,22 @@ defmodule Teiserver.Account.SmurfKeyTypeLib do
   def colours, do: :default
 
   # Queries
-  @spec query_smurf_key_types() :: Ecto.Query.t
+  @spec query_smurf_key_types() :: Ecto.Query.t()
   def query_smurf_key_types do
-    from smurf_key_types in SmurfKeyType
+    from(smurf_key_types in SmurfKeyType)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -48,8 +49,9 @@ defmodule Teiserver.Account.SmurfKeyTypeLib do
       where: smurf_key_types.id in ^id_list
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Name (A-Z)") do
     from smurf_key_types in query,
       order_by: [asc: smurf_key_types.name]
@@ -70,8 +72,9 @@ defmodule Teiserver.Account.SmurfKeyTypeLib do
       order_by: [desc: property_types.id]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, _preloads) do
     # query = if :things in preloads, do: _preload_things(query), else: query
     query

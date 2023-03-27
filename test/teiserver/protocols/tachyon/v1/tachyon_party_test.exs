@@ -35,11 +35,11 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
     party_id = resp["party"]["id"]
 
     assert resp["party"] == %{
-      "id" => party_id,
-      "leader" => friend1.id,
-      "members" => [friend1.id],
-      "pending_invites" => []
-    }
+             "id" => party_id,
+             "leader" => friend1.id,
+             "members" => [friend1.id],
+             "pending_invites" => []
+           }
 
     # Check we have just the 1 party
     assert Enum.count(Account.list_party_ids()) == 1
@@ -48,66 +48,72 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
     _tachyon_recv_until(fsocket2)
     _tachyon_send(fsocket1, %{"cmd" => "c.party.invite", "userid" => friend2.id})
     [resp] = _tachyon_recv(fsocket1)
+
     assert resp == %{
-      "cmd" => "s.party.updated",
-      "party_id" => party_id,
-      "new_values" => %{
-        "pending_invites" => [friend2.id]
-      }
-    }
+             "cmd" => "s.party.updated",
+             "party_id" => party_id,
+             "new_values" => %{
+               "pending_invites" => [friend2.id]
+             }
+           }
 
     [resp] = _tachyon_recv(fsocket2)
+
     assert resp == %{
-      "cmd" => "s.party.invite",
-      "party" => %{
-        "id" => party_id,
-        "leader" => friend1.id,
-        "members" => [friend1.id],
-        "pending_invites" => [friend2.id]
-      }
-    }
+             "cmd" => "s.party.invite",
+             "party" => %{
+               "id" => party_id,
+               "leader" => friend1.id,
+               "members" => [friend1.id],
+               "pending_invites" => [friend2.id]
+             }
+           }
 
     # Accept invite
     _tachyon_send(fsocket2, %{"cmd" => "c.party.accept", "party_id" => party_id})
     [resp] = _tachyon_recv(fsocket2)
+
     assert resp == %{
-      "cmd" => "s.party.added_to",
-      "party" => %{
-        "id" => party_id,
-        "leader" => friend1.id,
-        "members" => [friend2.id, friend1.id],
-        "pending_invites" => []
-      }
-    }
+             "cmd" => "s.party.added_to",
+             "party" => %{
+               "id" => party_id,
+               "leader" => friend1.id,
+               "members" => [friend2.id, friend1.id],
+               "pending_invites" => []
+             }
+           }
 
     # friend1 should hear about this
     [resp] = _tachyon_recv(fsocket1)
+
     assert resp == %{
-      "cmd" => "s.party.updated",
-      "party_id" => party_id,
-      "new_values" => %{
-        "pending_invites" => [],
-        "members" => [friend2.id, friend1.id]
-      }
-    }
+             "cmd" => "s.party.updated",
+             "party_id" => party_id,
+             "new_values" => %{
+               "pending_invites" => [],
+               "members" => [friend2.id, friend1.id]
+             }
+           }
 
     # Test accepting it a again, should be a failure this time around
     _tachyon_send(fsocket2, %{"cmd" => "c.party.accept", "party_id" => party_id})
     [resp] = _tachyon_recv(fsocket2)
+
     assert resp == %{
-      "cmd" => "s.party.accept",
-      "result" => "failure",
-      "reason" => "Already a member"
-    }
+             "cmd" => "s.party.accept",
+             "result" => "failure",
+             "reason" => "Already a member"
+           }
 
     # This person isn't invited, what happens with them?
     _tachyon_send(osocket1, %{"cmd" => "c.party.accept", "party_id" => party_id})
     [resp] = _tachyon_recv(osocket1)
+
     assert resp == %{
-      "cmd" => "s.party.accept",
-      "result" => "failure",
-      "reason" => "Not invited"
-    }
+             "cmd" => "s.party.accept",
+             "result" => "failure",
+             "reason" => "Not invited"
+           }
 
     # Friend 1 should not hear about this
     resp = _tachyon_recv(fsocket1)
@@ -130,59 +136,92 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
     _tachyon_send(usocket, %{"cmd" => "c.user.list_friend_users_and_clients"})
     [resp] = _tachyon_recv(usocket)
     assert resp["cmd"] == "s.user.list_friend_users_and_clients"
+
     assert resp["client_list"] == [
-      %{"away" => false, "clan_tag" => nil, "in_game" => false, "lobby_id" => nil, "muted" => false, "party_id" => party_id, "player" => false, "player_number" => 0, "ready" => false, "sync" => %{"engine" => 0, "game" => 0, "map" => 0}, "team_colour" => "0", "team_number" => 0, "userid" => friend2.id},
-      %{"away" => false, "clan_tag" => nil, "in_game" => false, "lobby_id" => nil, "muted" => false, "party_id" => party_id, "player" => false, "player_number" => 0, "ready" => false, "sync" => %{"engine" => 0, "game" => 0, "map" => 0}, "team_colour" => "0", "team_number" => 0, "userid" => friend1.id}
-    ]
+             %{
+               "away" => false,
+               "clan_tag" => nil,
+               "in_game" => false,
+               "lobby_id" => nil,
+               "muted" => false,
+               "party_id" => party_id,
+               "player" => false,
+               "player_number" => 0,
+               "ready" => false,
+               "sync" => %{"engine" => 0, "game" => 0, "map" => 0},
+               "team_colour" => "0",
+               "team_number" => 0,
+               "userid" => friend2.id
+             },
+             %{
+               "away" => false,
+               "clan_tag" => nil,
+               "in_game" => false,
+               "lobby_id" => nil,
+               "muted" => false,
+               "party_id" => party_id,
+               "player" => false,
+               "player_number" => 0,
+               "ready" => false,
+               "sync" => %{"engine" => 0, "game" => 0, "map" => 0},
+               "team_colour" => "0",
+               "team_number" => 0,
+               "userid" => friend1.id
+             }
+           ]
 
     # Ensure we get the correct party info
     _tachyon_send(usocket, %{"cmd" => "c.party.info", "party_id" => party_id})
     [resp] = _tachyon_recv(usocket)
+
     assert resp == %{
-      "cmd" => "s.party.info",
-      "party" => %{
-        "id" => party_id,
-        "leader" => friend1.id,
-        "members" => [friend2.id, friend1.id]
-      }
-    }
+             "cmd" => "s.party.info",
+             "party" => %{
+               "id" => party_id,
+               "leader" => friend1.id,
+               "members" => [friend2.id, friend1.id]
+             }
+           }
 
     _tachyon_send(usocket, %{"cmd" => "c.party.info", "party_id" => other_party_id})
     [resp] = _tachyon_recv(usocket)
+
     assert resp == %{
-      "cmd" => "s.party.info",
-      "party" => %{
-        "id" => other_party_id,
-        "leader" => other1.id,
-        "members" => [other2.id, other1.id]
-      }
-    }
+             "cmd" => "s.party.info",
+             "party" => %{
+               "id" => other_party_id,
+               "leader" => other1.id,
+               "members" => [other2.id, other1.id]
+             }
+           }
 
     # Get invited
     _tachyon_send(fsocket1, %{"cmd" => "c.party.invite", "userid" => user.id})
     [resp] = _tachyon_recv(usocket)
+
     assert resp == %{
-      "cmd" => "s.party.invite",
-      "party" => %{
-        "id" => party_id,
-        "leader" => friend1.id,
-        "members" => [friend2.id, friend1.id],
-        "pending_invites" => [user.id]
-      }
-    }
+             "cmd" => "s.party.invite",
+             "party" => %{
+               "id" => party_id,
+               "leader" => friend1.id,
+               "members" => [friend2.id, friend1.id],
+               "pending_invites" => [user.id]
+             }
+           }
 
     # Check info again, should show invites now
     _tachyon_send(usocket, %{"cmd" => "c.party.info", "party_id" => party_id})
     [resp] = _tachyon_recv(usocket)
+
     assert resp == %{
-      "cmd" => "s.party.info",
-      "party" => %{
-        "id" => party_id,
-        "leader" => friend1.id,
-        "members" => [friend2.id, friend1.id],
-        "pending_invites" => [user.id]
-      }
-    }
+             "cmd" => "s.party.info",
+             "party" => %{
+               "id" => party_id,
+               "leader" => friend1.id,
+               "members" => [friend2.id, friend1.id],
+               "pending_invites" => [user.id]
+             }
+           }
 
     # Message the party, this will fail as we're not in the party yet
     _tachyon_send(usocket, %{"cmd" => "c.party.message", "message" => "My message here"})
@@ -192,15 +231,16 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
     # Now accept the invite
     _tachyon_send(usocket, %{"cmd" => "c.party.accept", "party_id" => party_id})
     [resp] = _tachyon_recv(usocket)
+
     assert resp == %{
-      "cmd" => "s.party.added_to",
-      "party" => %{
-        "id" => party_id,
-        "leader" => friend1.id,
-        "members" => [user.id, friend2.id, friend1.id],
-        "pending_invites" => []
-      }
-    }
+             "cmd" => "s.party.added_to",
+             "party" => %{
+               "id" => party_id,
+               "leader" => friend1.id,
+               "members" => [user.id, friend2.id, friend1.id],
+               "pending_invites" => []
+             }
+           }
 
     # Now send a message to the party
     _tachyon_recv_until(fsocket1)
@@ -208,19 +248,21 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
 
     _tachyon_send(usocket, %{"cmd" => "c.party.message", "message" => "My message here"})
     [resp] = _tachyon_recv(usocket)
+
     assert resp == %{
-      "cmd" => "s.party.message",
-      "sender_id" => user.id,
-      "message" => "My message here"
-    }
+             "cmd" => "s.party.message",
+             "sender_id" => user.id,
+             "message" => "My message here"
+           }
 
     # Friend should see it too
     [resp] = _tachyon_recv(fsocket1)
+
     assert resp == %{
-      "cmd" => "s.party.message",
-      "sender_id" => user.id,
-      "message" => "My message here"
-    }
+             "cmd" => "s.party.message",
+             "sender_id" => user.id,
+             "message" => "My message here"
+           }
 
     # But not one of the others
     resp = _tachyon_recv(osocket1)
@@ -233,38 +275,41 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
 
     _tachyon_send(fsocket1, %{"cmd" => "c.party.new_leader", "user_id" => friend2.id})
     [resp] = _tachyon_recv(usocket)
+
     assert resp == %{
-      "cmd" => "s.party.updated",
-      "party_id" => party_id,
-      "new_values" => %{
-        "leader" => friend2.id
-      }
-    }
+             "cmd" => "s.party.updated",
+             "party_id" => party_id,
+             "new_values" => %{
+               "leader" => friend2.id
+             }
+           }
 
     # Leader leaves
     _tachyon_send(fsocket2, %{"cmd" => "c.party.leave"})
     [resp] = _tachyon_recv(usocket)
+
     assert resp == %{
-      "cmd" => "s.party.updated",
-      "party_id" => party_id,
-      "new_values" => %{
-        # "leader" => friend1.id,
-        "members" => [user.id, friend1.id]
-      }
-    }
+             "cmd" => "s.party.updated",
+             "party_id" => party_id,
+             "new_values" => %{
+               # "leader" => friend1.id,
+               "members" => [user.id, friend1.id]
+             }
+           }
 
     # Be invited to a different party
     _tachyon_send(osocket1, %{"cmd" => "c.party.invite", "userid" => user.id})
     [resp] = _tachyon_recv(usocket)
+
     assert resp == %{
-      "cmd" => "s.party.invite",
-      "party" => %{
-        "id" => other_party_id,
-        "leader" => other1.id,
-        "members" => [other2.id, other1.id],
-        "pending_invites" => [user.id]
-      }
-    }
+             "cmd" => "s.party.invite",
+             "party" => %{
+               "id" => other_party_id,
+               "leader" => other1.id,
+               "members" => [other2.id, other1.id],
+               "pending_invites" => [user.id]
+             }
+           }
 
     _tachyon_recv_until(fsocket2)
 
@@ -274,24 +319,26 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
     # Accept the invite, thus leaving the other party
     _tachyon_send(usocket, %{"cmd" => "c.party.accept", "party_id" => other_party_id})
     [resp] = _tachyon_recv(usocket)
+
     assert resp == %{
-      "cmd" => "s.party.left_party",
-      "party_id" => party_id
-    }
+             "cmd" => "s.party.left_party",
+             "party_id" => party_id
+           }
 
     :timer.sleep(200)
     Logger.warn("-----------")
 
     [resp] = _tachyon_recv(usocket)
+
     assert resp == %{
-      "cmd" => "s.party.added_to",
-      "party" => %{
-        "id" => other_party_id,
-        "leader" => other1.id,
-        "members" => [user.id, other2.id, other1.id],
-        "pending_invites" => []
-      }
-    }
+             "cmd" => "s.party.added_to",
+             "party" => %{
+               "id" => other_party_id,
+               "leader" => other1.id,
+               "members" => [user.id, other2.id, other1.id],
+               "pending_invites" => []
+             }
+           }
 
     # Check we've been removed from the other party!
     party = Account.get_party(other_party_id)
@@ -322,25 +369,27 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
     Account.move_user_to_party(party_id, friend2.id)
 
     party = Account.get_party(party_id)
+
     assert party == %Account.Party{
-      id: party_id,
-      members: [friend2.id, friend1.id, user.id],
-      leader: user.id,
-      pending_invites: [],
-      queues: []
-    }
+             id: party_id,
+             members: [friend2.id, friend1.id, user.id],
+             leader: user.id,
+             pending_invites: [],
+             queues: []
+           }
 
     # User 1 disconnects
     Teiserver.Client.disconnect(user.id)
     :timer.sleep(500)
 
     party = Account.get_party(party_id)
+
     assert party == %Account.Party{
-      id: party_id,
-      members: [friend2.id, friend1.id],
-      leader: friend1.id,
-      pending_invites: [],
-      queues: []
-    }
+             id: party_id,
+             members: [friend2.id, friend1.id],
+             leader: friend1.id,
+             pending_invites: [],
+             queues: []
+           }
   end
 end

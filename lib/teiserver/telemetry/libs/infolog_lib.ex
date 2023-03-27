@@ -10,21 +10,22 @@ defmodule Teiserver.Telemetry.InfologLib do
   def icon(), do: "fa-regular fa-barcode-scan"
 
   # Queries
-  @spec query_infologs() :: Ecto.Query.t
+  @spec query_infologs() :: Ecto.Query.t()
   def query_infologs do
-    from infologs in Infolog
+    from(infologs in Infolog)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -44,6 +45,7 @@ defmodule Teiserver.Telemetry.InfologLib do
   end
 
   def _search(query, :log_type, "Any"), do: query
+
   def _search(query, :log_type, log_type) do
     from infologs in query,
       where: infologs.log_type == ^log_type
@@ -68,9 +70,7 @@ defmodule Teiserver.Telemetry.InfologLib do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from infologs in query,
-      where: (
-            ilike(infologs.name, ^ref_like)
-        )
+      where: ilike(infologs.name, ^ref_like)
   end
 
   def _search(query, :inserted_after, timestamp) do
@@ -83,8 +83,9 @@ defmodule Teiserver.Telemetry.InfologLib do
       where: infologs.timestamp < ^timestamp
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Newest first") do
     from infologs in query,
       order_by: [desc: infologs.timestamp]
@@ -105,8 +106,9 @@ defmodule Teiserver.Telemetry.InfologLib do
       order_by: [desc: infologs.size]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :user in preloads, do: _preload_users(query), else: query
     query

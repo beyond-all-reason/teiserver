@@ -25,8 +25,8 @@ defmodule Teiserver.Game.RatingLog do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-      |> cast(params, ~w(user_id rating_type_id match_id value inserted_at party_id)a)
-      |> validate_required(~w(user_id rating_type_id value inserted_at)a)
+    |> cast(params, ~w(user_id rating_type_id match_id value inserted_at party_id)a)
+    |> validate_required(~w(user_id rating_type_id value inserted_at)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

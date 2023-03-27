@@ -18,8 +18,8 @@ defmodule Teiserver.Game.UserAchievement do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-      |> cast(params, ~w(user_id achievement_type_id achieved progress inserted_at)a)
-      |> validate_required(~w(user_id achievement_type_id achieved inserted_at)a)
+    |> cast(params, ~w(user_id achievement_type_id achieved progress inserted_at)a)
+    |> validate_required(~w(user_id achievement_type_id achieved inserted_at)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

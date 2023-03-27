@@ -8,24 +8,29 @@ defmodule Teiserver.Chat.Tasks.DailyCleanupTask do
   @spec perform(any) :: :ok
   def perform(_) do
     days = Application.get_env(:central, Teiserver)[:retention][:room_chat]
-    before_timestamp = Timex.shift(Timex.now(), days: -days)
+
+    before_timestamp =
+      Timex.shift(Timex.now(), days: -days)
       |> date_to_str(format: :ymd_hms)
 
     query = """
-      DELETE FROM teiserver_room_messages
-      WHERE inserted_at < '#{before_timestamp}'
-"""
+          DELETE FROM teiserver_room_messages
+          WHERE inserted_at < '#{before_timestamp}'
+    """
+
     Ecto.Adapters.SQL.query(Repo, query, [])
 
-
     days = Application.get_env(:central, Teiserver)[:retention][:lobby_chat]
-    before_timestamp = Timex.shift(Timex.now(), days: -days)
+
+    before_timestamp =
+      Timex.shift(Timex.now(), days: -days)
       |> date_to_str(format: :ymd_hms)
 
     query = """
-      DELETE FROM teiserver_lobby_messages
-      WHERE inserted_at < '#{before_timestamp}'
-"""
+          DELETE FROM teiserver_lobby_messages
+          WHERE inserted_at < '#{before_timestamp}'
+    """
+
     Ecto.Adapters.SQL.query(Repo, query, [])
 
     :ok

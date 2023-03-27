@@ -6,12 +6,18 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   alias Teiserver.Moderation.ModerationTestLib
 
   alias Central.Helpers.GeneralTestLib
+
   setup do
     GeneralTestLib.conn_setup(["teiserver.staff.reviewer", "teiserver.staff.moderator"])
     |> Teiserver.TeiserverTestLib.conn_setup()
   end
 
-  @create_attrs %{reason: "some name", restrictions: %{"Login" => "Login", "Site" => "Site"}, expires: "1 day", score_modifier: "10000"}
+  @create_attrs %{
+    reason: "some name",
+    restrictions: %{"Login" => "Login", "Site" => "Site"},
+    expires: "1 day",
+    score_modifier: "10000"
+  }
   @update_attrs %{reason: "some updated name", restrictions: %{"Warning" => "Warning"}}
   @invalid_attrs %{reason: nil, restrictions: %{}}
 
@@ -28,14 +34,21 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
     end
 
     test "search", %{conn: conn} do
-      conn = post(conn, Routes.moderation_action_path(conn, :search, search: %{"order" => "Latest expiry first"}))
+      conn =
+        post(
+          conn,
+          Routes.moderation_action_path(conn, :search, search: %{"order" => "Latest expiry first"})
+        )
+
       assert html_response(conn, 200) =~ "Listing Actions"
     end
 
     test "list actions for a user", %{conn: conn} do
       action = ModerationTestLib.action_fixture()
 
-      conn = get(conn, Routes.moderation_action_path(conn, :index) <> "?target_id=#{action.target_id}")
+      conn =
+        get(conn, Routes.moderation_action_path(conn, :index) <> "?target_id=#{action.target_id}")
+
       assert html_response(conn, 200) =~ "Listing Actions"
     end
   end
@@ -48,7 +61,13 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
 
     test "renders creation form", %{conn: conn} do
       user = GeneralTestLib.make_user()
-      conn = get(conn, Routes.moderation_action_path(conn, :new_with_user) <> "?teiserver_user=%23#{user.id}")
+
+      conn =
+        get(
+          conn,
+          Routes.moderation_action_path(conn, :new_with_user) <> "?teiserver_user=%23#{user.id}"
+        )
+
       assert html_response(conn, 200) =~ "Adding action against"
     end
   end
@@ -56,7 +75,12 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   describe "create action" do
     test "redirects to show when data is valid", %{conn: conn} do
       user = GeneralTestLib.make_user()
-      conn = post(conn, Routes.moderation_action_path(conn, :create), action: Map.put(@create_attrs, "target_id", user.id))
+
+      conn =
+        post(conn, Routes.moderation_action_path(conn, :create),
+          action: Map.put(@create_attrs, "target_id", user.id)
+        )
+
       assert redirected_to(conn) == Routes.moderation_action_path(conn, :index)
 
       new_action = Moderation.list_actions(search: [target_id: user.id])
@@ -65,7 +89,12 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
 
     test "renders errors when data is invalid", %{conn: conn} do
       user = GeneralTestLib.make_user()
-      conn = post(conn, Routes.moderation_action_path(conn, :create), action: Map.put(@invalid_attrs, "target_id", user.id))
+
+      conn =
+        post(conn, Routes.moderation_action_path(conn, :create),
+          action: Map.put(@invalid_attrs, "target_id", user.id)
+        )
+
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
     end
   end
@@ -101,7 +130,10 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   describe "update action" do
     test "redirects when data is valid", %{conn: conn} do
       action = ModerationTestLib.action_fixture()
-      conn = put(conn, Routes.moderation_action_path(conn, :update, action), action: @update_attrs)
+
+      conn =
+        put(conn, Routes.moderation_action_path(conn, :update, action), action: @update_attrs)
+
       assert redirected_to(conn) == Routes.moderation_action_path(conn, :index)
 
       conn = get(conn, Routes.moderation_action_path(conn, :show, action))
@@ -110,7 +142,10 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
 
     test "renders errors when data is invalid", %{conn: conn} do
       action = ModerationTestLib.action_fixture()
-      conn = put(conn, Routes.moderation_action_path(conn, :update, action), action: @invalid_attrs)
+
+      conn =
+        put(conn, Routes.moderation_action_path(conn, :update, action), action: @invalid_attrs)
+
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
     end
 

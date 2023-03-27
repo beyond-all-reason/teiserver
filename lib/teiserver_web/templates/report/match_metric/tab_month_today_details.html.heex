@@ -8,50 +8,85 @@
           <th>Month to date</th>
           <th>Last month</th>
           <th>%</th>
-       </tr>
+        </tr>
       </thead>
       <tbody>
         <tr>
           <td>Total completed</td>
-          <td><%= format_number @data["totals"]["aggregate"]["total_count"] %></td>
-          <td><%= format_number @last_month["totals"]["aggregate"]["total_count"] %></td>
-          <td><%= percent @data["totals"]["aggregate"]["total_count"]/@last_month["totals"]["aggregate"]["total_count"] %></td>
+          <td><%= format_number(@data["totals"]["aggregate"]["total_count"]) %></td>
+          <td><%= format_number(@last_month["totals"]["aggregate"]["total_count"]) %></td>
+          <td>
+            <%= percent(
+              @data["totals"]["aggregate"]["total_count"] /
+                @last_month["totals"]["aggregate"]["total_count"]
+            ) %>
+          </td>
         </tr>
         <tr>
           <td>Duel</td>
-          <td><%= format_number @data["duel"]["aggregate"]["total_count"] %></td>
-          <td><%= format_number @last_month["duel"]["aggregate"]["total_count"] %></td>
-          <td><%= percent @data["duel"]["aggregate"]["total_count"]/@last_month["duel"]["aggregate"]["total_count"] %></td>
+          <td><%= format_number(@data["duel"]["aggregate"]["total_count"]) %></td>
+          <td><%= format_number(@last_month["duel"]["aggregate"]["total_count"]) %></td>
+          <td>
+            <%= percent(
+              @data["duel"]["aggregate"]["total_count"] /
+                @last_month["duel"]["aggregate"]["total_count"]
+            ) %>
+          </td>
         </tr>
         <tr>
           <td>FFA</td>
-          <td><%= format_number @data["ffa"]["aggregate"]["total_count"] %></td>
-          <td><%= format_number @last_month["ffa"]["aggregate"]["total_count"] %></td>
-          <td><%= percent @data["ffa"]["aggregate"]["total_count"]/@last_month["ffa"]["aggregate"]["total_count"] %></td>
+          <td><%= format_number(@data["ffa"]["aggregate"]["total_count"]) %></td>
+          <td><%= format_number(@last_month["ffa"]["aggregate"]["total_count"]) %></td>
+          <td>
+            <%= percent(
+              @data["ffa"]["aggregate"]["total_count"] /
+                @last_month["ffa"]["aggregate"]["total_count"]
+            ) %>
+          </td>
         </tr>
         <tr>
           <td>Team</td>
-          <td><%= format_number @data["team"]["aggregate"]["total_count"] %></td>
-          <td><%= format_number @last_month["team"]["aggregate"]["total_count"] %></td>
-          <td><%= percent @data["team"]["aggregate"]["total_count"]/@last_month["team"]["aggregate"]["total_count"] %></td>
+          <td><%= format_number(@data["team"]["aggregate"]["total_count"]) %></td>
+          <td><%= format_number(@last_month["team"]["aggregate"]["total_count"]) %></td>
+          <td>
+            <%= percent(
+              @data["team"]["aggregate"]["total_count"] /
+                @last_month["team"]["aggregate"]["total_count"]
+            ) %>
+          </td>
         </tr>
         <tr>
           <td>Bots</td>
-          <td><%= format_number @data["bots"]["aggregate"]["total_count"] %></td>
-          <td><%= format_number @last_month["bots"]["aggregate"]["total_count"] %></td>
-          <td><%= percent @data["bots"]["aggregate"]["total_count"]/@last_month["bots"]["aggregate"]["total_count"] %></td>
+          <td><%= format_number(@data["bots"]["aggregate"]["total_count"]) %></td>
+          <td><%= format_number(@last_month["bots"]["aggregate"]["total_count"]) %></td>
+          <td>
+            <%= percent(
+              @data["bots"]["aggregate"]["total_count"] /
+                @last_month["bots"]["aggregate"]["total_count"]
+            ) %>
+          </td>
         </tr>
         <tr>
           <td>Scavengers</td>
-          <td><%= format_number @data["scavengers"]["aggregate"]["total_count"] %></td>
-          <td><%= format_number @last_month["scavengers"]["aggregate"]["total_count"] %></td>
-          <td><%= percent @data["scavengers"]["aggregate"]["total_count"]/@last_month["scavengers"]["aggregate"]["total_count"] %></td>
+          <td><%= format_number(@data["scavengers"]["aggregate"]["total_count"]) %></td>
+          <td><%= format_number(@last_month["scavengers"]["aggregate"]["total_count"]) %></td>
+          <td>
+            <%= percent(
+              @data["scavengers"]["aggregate"]["total_count"] /
+                @last_month["scavengers"]["aggregate"]["total_count"]
+            ) %>
+          </td>
         </tr>
         <tr>
           <td>Raptors</td>
-          <td><%= format_number @data["raptors"]["aggregate"]["total_count"] %></td>
-          <td><%= format_number @last_month["raptors"]["aggregate"]["total_count"] %></td>
-          <td><%= percent @data["raptors"]["aggregate"]["total_count"]/@last_month["raptors"]["aggregate"]["total_count"] %></td>
+          <td><%= format_number(@data["raptors"]["aggregate"]["total_count"]) %></td>
+          <td><%= format_number(@last_month["raptors"]["aggregate"]["total_count"]) %></td>
+          <td>
+            <%= percent(
+              @data["raptors"]["aggregate"]["total_count"] /
+                @last_month["raptors"]["aggregate"]["total_count"]
+            ) %>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -66,21 +101,25 @@
           <th>Month to date</th>
           <th>Last month</th>
           <th>%</th>
-       </tr>
+        </tr>
       </thead>
       <tbody>
         <tr>
           <td>Mean duration</td>
-          <td><%= format_number @data["totals"]["aggregate"]["mean_duration_seconds"] %></td>
-          <td><%= format_number @last_month["totals"]["aggregate"]["mean_duration_seconds"] %></td>
+          <td><%= format_number(@data["totals"]["aggregate"]["mean_duration_seconds"]) %></td>
+          <td>
+            <%= format_number(@last_month["totals"]["aggregate"]["mean_duration_seconds"]) %>
+          </td>
           <td></td>
         </tr>
         <%= for t <- ~w(5 10 15 20 25 30 35 40 45 50 55 60) do %>
           <tr>
             <td><%= t %></td>
-            <td><%= format_number @data["totals"]["duration"][t] %></td>
-            <td><%= format_number @last_month["totals"]["duration"][t] %></td>
-            <td><%= percent @data["totals"]["duration"][t]/@last_month["totals"]["duration"][t] %></td>
+            <td><%= format_number(@data["totals"]["duration"][t]) %></td>
+            <td><%= format_number(@last_month["totals"]["duration"][t]) %></td>
+            <td>
+              <%= percent(@data["totals"]["duration"][t] / @last_month["totals"]["duration"][t]) %>
+            </td>
           </tr>
         <% end %>
       </tbody>
@@ -92,11 +131,10 @@
 <div class="row">
   <div class="col-md-6">
     <h4>Map</h4>
-    <%
-      maps = (@data["totals"]["maps"] || [])
-        |> Enum.sort(fn ({_, v1}, {_, v2}) -> v1 >= v2 end)
-    %>
-    
+    <% maps =
+      (@data["totals"]["maps"] || [])
+      |> Enum.sort(fn {_, v1}, {_, v2} -> v1 >= v2 end) %>
+
     <table class="table table-sm">
       <thead>
         <tr>
@@ -104,15 +142,15 @@
           <th>Month to date</th>
           <th>Last month</th>
           <th>%</th>
-       </tr>
+        </tr>
       </thead>
       <tbody>
         <%= for {name, count} <- maps do %>
           <tr>
             <td><%= name %></td>
-            <td><%= format_number count %></td>
-            <td><%= format_number (@last_month["totals"]["maps"][name] || 0) %></td>
-            <td><%= percent count/(max(@last_month["totals"]["maps"][name] || 0, 1)) %></td>
+            <td><%= format_number(count) %></td>
+            <td><%= format_number(@last_month["totals"]["maps"][name] || 0) %></td>
+            <td><%= percent(count / max(@last_month["totals"]["maps"][name] || 0, 1)) %></td>
           </tr>
         <% end %>
       </tbody>
@@ -127,15 +165,20 @@
           <th>Month to date</th>
           <th>Last month</th>
           <th>%</th>
-       </tr>
+        </tr>
       </thead>
       <tbody>
         <%= for t <- 1..8 do %>
           <tr>
             <td><%= t %></td>
-            <td><%= format_number (@data["totals"]["team_sizes"]["#{t}"] || 0) %></td>
-            <td><%= format_number (@last_month["totals"]["team_sizes"]["#{t}"] || 0) %></td>
-            <td><%= percent (@data["totals"]["team_sizes"]["#{t}"] || 0)/(@last_month["totals"]["team_sizes"]["#{t}"] || 0) %></td>
+            <td><%= format_number(@data["totals"]["team_sizes"]["#{t}"] || 0) %></td>
+            <td><%= format_number(@last_month["totals"]["team_sizes"]["#{t}"] || 0) %></td>
+            <td>
+              <%= percent(
+                (@data["totals"]["team_sizes"]["#{t}"] || 0) /
+                  (@last_month["totals"]["team_sizes"]["#{t}"] || 0)
+              ) %>
+            </td>
           </tr>
         <% end %>
       </tbody>

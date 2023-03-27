@@ -1,35 +1,43 @@
 <% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "infologs"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "infologs"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Report.InfologView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Report.InfologView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             show_search: false,
             active: "show"
-        }) %>
+          })
+        ) %>
         <hr />
 
         <div class="float-end">
           <%= if allow?(@conn, "admin.dev") do %>
             <td>
-              <%= link "Delete", to: Routes.ts_reports_infolog_path(@conn, :delete, @infolog.id), class: "btn btn-danger", method: "delete", data: [confirm: "Are you sure?"] %>
+              <%= link("Delete",
+                to: Routes.ts_reports_infolog_path(@conn, :delete, @infolog.id),
+                class: "btn btn-danger",
+                method: "delete",
+                data: [confirm: "Are you sure?"]
+              ) %>
             </td>
           <% end %>
         </div>
 
         <h3>
-          <%= @infolog.log_type %>
-          &nbsp;&nbsp;&nbsp;
-          Uploaded:
-          <%= date_to_str(@infolog.timestamp, format: :ymd_hms) %>
-
-          &nbsp;&nbsp;&nbsp;
-          <%= time_until(@infolog.timestamp) %> ago
-          <br />
-          User: <%= @infolog.user.name %>
+          <%= @infolog.log_type %> &nbsp;&nbsp;&nbsp;
+          Uploaded: <%= date_to_str(@infolog.timestamp, format: :ymd_hms) %> &nbsp;&nbsp;&nbsp; <%= time_until(
+            @infolog.timestamp
+          ) %> ago <br /> User: <%= @infolog.user.name %>
         </h3>
 
         <div class="row">
@@ -46,7 +54,6 @@
             Given the size of this infolog we are not displaying it in the web page. You will need to download it.
           <% end %>
         </div>
-
       </div>
     </div>
   </div>

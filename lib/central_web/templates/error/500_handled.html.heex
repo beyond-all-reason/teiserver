@@ -1,64 +1,75 @@
-<% bsname = :danger %>
-
-<!DOCTYPE html>
+<% bsname = :danger %> <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
 
     <title><%= Application.get_env(:central, CentralWeb)[:page_title] %></title>
-  
-    <%
-      light_mode = case get_user_config_cache(assigns[:current_user], "general.Colour scheme") do
+
+    <% light_mode =
+      case get_user_config_cache(assigns[:current_user], "general.Colour scheme") do
         "Site default" -> get_site_config_cache("user.Default light mode")
         "Light" -> true
         "Dark" -> false
-      end
-    %>
+      end %>
 
     <%= if light_mode do %>
-      <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/mdb_light.css")}/>
+      <link
+        phx-track-static
+        rel="stylesheet"
+        href={Routes.static_path(@conn, "/assets/mdb_light.css")}
+      />
     <% else %>
-      <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/mdb_dark.css")}/>
+      <link
+        phx-track-static
+        rel="stylesheet"
+        href={Routes.static_path(@conn, "/assets/mdb_dark.css")}
+      />
     <% end %>
-    <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/css/fontawesome.css")}/>
+    <link
+      phx-track-static
+      rel="stylesheet"
+      href={Routes.static_path(@conn, "/css/fontawesome.css")}
+    />
 
     <script>
       window.userToken = "<%= assigns[:user_token] %>";
     </script>
 
-    <script defer phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/assets/app.js")}></script>
+    <script
+      defer
+      phx-track-static
+      type="text/javascript"
+      src={Routes.static_path(@conn, "/assets/app.js")}
+    >
+    </script>
   </head>
 
   <body class="blank">
     <div id="container">
       <div class="content animate-panel animated">
+        <div class="row mt-3">
+          <div class="col-md-12">
+            <div class={"card border-#{bsname}"} style="margin: 0px 20px;">
+              <div class="card-body">
+                <a
+                  href={Routes.general_page_path(@conn, :index)}
+                  class="btn btn-primary float-end"
+                >
+                  <i class="fa-solid fa-fw fa-home"></i> Home page
+                </a>
 
-
-
-<div class="row mt-3">
-  <div class="col-md-12">
-
-    <div class={"card border-#{bsname}"} style="margin: 0px 20px;">
-      <div class="card-body">
-        <a href={Routes.general_page_path(@conn, :index)} class="btn btn-primary float-end">
-          <i class="fa-solid fa-fw fa-home"></i>
-          Home page
-        </a>
-
-        <h4 style="padding-bottom: 10px;">Sorry, I can't do that</h4>
-        <%= @msg %>
-        <br /><br />
-      </div>
-    </div>
-
-  </div>
-</div>
-
+                <h4 style="padding-bottom: 10px;">Sorry, I can't do that</h4>
+                <%= @msg %>
+                <br /><br />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </body>
- </html>
+</html>

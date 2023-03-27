@@ -16,7 +16,7 @@ defmodule Central.Account.Startup do
       "Account:Updated user permissions",
       "Account:User registration",
       "Account:Updated report",
-      "Site config:Update value",
+      "Site config:Update value"
     ])
   end
 end

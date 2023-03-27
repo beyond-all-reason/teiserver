@@ -1,10 +1,8 @@
 <div class="row">
   <%= for {bt_id, badge_type} <- @badge_type_lookup do %>
-    <%
-      given = @accolades_given[bt_id] || 0
-      received = @accolades_received[bt_id] || 0
-    %>
-    <%= central_component "menu_card",
+    <% given = @accolades_given[bt_id] || 0
+    received = @accolades_received[bt_id] || 0 %>
+    <%= central_component("menu_card",
       icon_class: "fa-duotone",
       name: "",
       icon: badge_type.icon,
@@ -13,6 +11,6 @@
       col_classes: "col-sm-4 col-md-3 col-lg-2 col-xl-1",
       style: "background-color: #{badge_type.colour}; color: #FFFFFF;",
       link: "#"
-    %>
+    ) %>
   <% end %>
 </div>

@@ -1,5 +1,4 @@
 defmodule Teiserver.Bridge.UnitNames do
-
   @unit_list [
     {"armaap", "advanced aircraft plant", "advanced aircraft plant"},
     {"armalab", "advanced bot lab", "advanced bot lab"},
@@ -382,25 +381,35 @@ defmodule Teiserver.Bridge.UnitNames do
     {"corbats", "warlord", "despot"},
     {"corfav", "weasel", "rascal"},
     {"corwin", "wind generator", "wind turbine"},
-    {"corwolv", "wolverine", "wolverine"},
+    {"corwolv", "wolverine", "wolverine"}
   ]
 
   # Key is the old name, value is {new name, unit_code}
-  @old_keys @unit_list |> Map.new(fn {code, old, new} ->
-    {old, {code, new}}
-  end)
+  @old_keys @unit_list
+            |> Map.new(fn {code, old, new} ->
+              {old, {code, new}}
+            end)
 
-  @new_keys @unit_list |> Map.new(fn {code, old, new} ->
-    {new, {code, old}}
-  end)
+  @new_keys @unit_list
+            |> Map.new(fn {code, old, new} ->
+              {new, {code, old}}
+            end)
 
-  @codes @unit_list |> Map.new(fn {code, _old, new} ->
-    {code, new}
-  end)
+  @codes @unit_list
+         |> Map.new(fn {code, _old, new} ->
+           {code, new}
+         end)
 
-  @spec get_name(binary) :: nil | {:unchanged, any} | {:code, any} | {:reused, any} | {:found_new, any} | {:found_old, any}
+  @spec get_name(binary) ::
+          nil
+          | {:unchanged, any}
+          | {:code, any}
+          | {:reused, any}
+          | {:found_new, any}
+          | {:found_old, any}
   def get_name(name) do
-    name = name
+    name =
+      name
       |> String.downcase()
       |> String.trim()
 
@@ -411,16 +420,22 @@ defmodule Teiserver.Bridge.UnitNames do
     cond do
       code != nil ->
         {:code, code}
+
       old == nil and new == nil ->
         nil
+
       old == new ->
         {:unchanged, new}
+
       old != nil and new != nil ->
         {:reused, {old, new}}
+
       old != nil ->
         {:found_old, old}
+
       new != nil ->
         {:found_new, new}
+
       true ->
         nil
     end

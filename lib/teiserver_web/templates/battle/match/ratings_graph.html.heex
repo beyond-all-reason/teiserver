@@ -1,11 +1,17 @@
 <% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "matches"}) %>
+<%= render(
+  TeiserverWeb.Battle.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "matches"})
+) %>
 
-<script src={Routes.static_path(@conn, "/js/d3.js")}></script>
-<script src={Routes.static_path(@conn, "/js/c3.min.js")}></script>
+<script src={Routes.static_path(@conn, "/js/d3.js")}>
+</script>
+<script src={Routes.static_path(@conn, "/js/c3.min.js")}>
+</script>
 
-<link href="/css/c3.min.css" rel="stylesheet">
+<link href="/css/c3.min.css" rel="stylesheet" />
 
 <script>
   $(function() {
@@ -34,31 +40,33 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Battle.MatchView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Battle.MatchView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             show_search: false,
             active: "ratings_graph"
-        }) %>
+          })
+        ) %>
         <br /><br />
         <div class="row">
-            <div class="col-md-12">
-              <%= for rt <- @rating_type_list do %>
-                <%= if @ratings[rt] != nil do %>
-                  <%= central_component "section_menu_button",
-                    name: rt,
-                    label: raw("#{rt} &nbsp;&nbsp;&nbsp; #{@ratings[rt].rating_value |> round(2)}"),
-                    active: @filter,
-                    url: "?filter=#{rt}",
-                    icon: "",
-                    bsname: bsname
-                  %>
-                <% end %>
+          <div class="col-md-12">
+            <%= for rt <- @rating_type_list do %>
+              <%= if @ratings[rt] != nil do %>
+                <%= central_component("section_menu_button",
+                  name: rt,
+                  label: raw("#{rt} &nbsp;&nbsp;&nbsp; #{@ratings[rt].rating_value |> round(2)}"),
+                  active: @filter,
+                  url: "?filter=#{rt}",
+                  icon: "",
+                  bsname: bsname
+                ) %>
               <% end %>
-            </div>
+            <% end %>
           </div>
-          <br />
-          Average ratings
-          <div id="chart" class='with-transitions' style="height: 400px;">
-          </div>
+        </div>
+        <br /> Average ratings
+        <div id="chart" class="with-transitions" style="height: 400px;"></div>
       </div>
     </div>
   </div>

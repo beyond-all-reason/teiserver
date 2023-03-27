@@ -28,33 +28,35 @@ defmodule CentralWeb.Admin.ToolController do
 
   @spec test_page(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def test_page(conn, params) do
-    layout = case params["layout"] do
-      "unauth" -> "unauth.html"
-      "empty" -> "empty.html"
-      "nomenu" -> "nomenu.html"
-      "nomenu_live" -> "nomenu_live.html"
-      "admin_live" -> "admin_live.html"
-      "admin" -> "admin.html"
-      _ -> "standard.html"
-    end
+    layout =
+      case params["layout"] do
+        "unauth" -> "unauth.html"
+        "empty" -> "empty.html"
+        "nomenu" -> "nomenu.html"
+        "nomenu_live" -> "nomenu_live.html"
+        "admin_live" -> "admin_live.html"
+        "admin" -> "admin.html"
+        _ -> "standard.html"
+      end
 
-    conn = if params["flash"] do
-      # This is for the live pages
-      flash = %{
-        success: "Example flash message success",
-        info: "Example flash message info",
-        danger: "Example flash message danger",
-      }
+    conn =
+      if params["flash"] do
+        # This is for the live pages
+        flash = %{
+          success: "Example flash message success",
+          info: "Example flash message info",
+          danger: "Example flash message danger"
+        }
 
-      conn
+        conn
         |> put_flash(:success, "Example flash message success")
         |> put_flash(:info, "Example flash message info")
         |> put_flash(:danger, "Example flash message danger")
         |> assign(:flash, flash)
-    else
-      conn
-      |> assign(:flash, %{})
-    end
+      else
+        conn
+        |> assign(:flash, %{})
+      end
 
     conn
     |> add_breadcrumb(name: "Test page", url: conn.request_path)

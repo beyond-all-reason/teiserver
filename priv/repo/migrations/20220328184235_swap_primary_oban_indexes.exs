@@ -6,16 +6,16 @@ defmodule Central.Repo.Migrations.SwapPrimaryObanIndexes do
 
   def change do
     create_if_not_exists index(
-      :oban_jobs,
-      [:state, :queue, :priority, :scheduled_at, :id],
-      concurrently: true,
-      prefix: "public"
-    )
+                           :oban_jobs,
+                           [:state, :queue, :priority, :scheduled_at, :id],
+                           concurrently: true,
+                           prefix: "public"
+                         )
 
     drop_if_exists index(
-      :oban_jobs,
-      [:queue, :state, :priority, :scheduled_at, :id],
-      prefix: "public"
-    )
+                     :oban_jobs,
+                     [:queue, :state, :priority, :scheduled_at, :id],
+                     prefix: "public"
+                   )
   end
 end

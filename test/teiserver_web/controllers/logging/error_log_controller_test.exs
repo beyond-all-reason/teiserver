@@ -10,17 +10,18 @@ defmodule TeiserverWeb.Logging.ErrorLogControllerTest do
   end
 
   defp create_test_error(conn) do
-    {:ok, log} = Logging.create_error_log(%{
-      path: "path",
-      method: "method",
-      reason: "reason",
-      traceback: "traceback",
-      hidden: false,
-      data: %{
-        "params" => %{}
-      },
-      user_id: (conn.assigns.current_user || %{id: nil}).id
-    })
+    {:ok, log} =
+      Logging.create_error_log(%{
+        path: "path",
+        method: "method",
+        reason: "reason",
+        traceback: "traceback",
+        hidden: false,
+        data: %{
+          "params" => %{}
+        },
+        user_id: (conn.assigns.current_user || %{id: nil}).id
+      })
   end
 
   test "lists all entries on index", %{conn: conn} do

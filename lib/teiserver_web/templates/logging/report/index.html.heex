@@ -1,37 +1,35 @@
 <% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "report"})
-%>
+<%= render(
+  TeiserverWeb.Logging.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "report"})
+) %>
 
 <div class="row">
   <div class="col-md-12">
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
-
         <div class="row">
           <div class="col-md-12">
             <h4>
-              <%= central_component "icon", icon: Teiserver.Logging.PageViewLogLib.icon() %>
-              Page views
+              <%= central_component("icon", icon: Teiserver.Logging.PageViewLogLib.icon()) %> Page views
             </h4>
           </div>
 
-          <%=
-            central_component "menu_card",
+          <%= central_component("menu_card",
             icon: "fa-regular fa-clock",
             text: "Most recent users",
             link: Routes.logging_report_path(@conn, :show, "most_recent_users")
-          %>
+          ) %>
 
-          <%=
-            central_component "menu_card",
+          <%= central_component("menu_card",
             icon: "fa-regular fa-table",
             text: "Page view stats",
             link: Routes.logging_report_path(@conn, :show, "individual_page_views")
-          %>
+          ) %>
         </div>
         <br /><br />
-
       </div>
     </div>
   </div>

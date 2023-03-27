@@ -4,69 +4,63 @@
   </div>
 
   <%= if allow?(@current_user, "teiserver.staff.telemetry") do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Telemetry.ClientEventLib.icon(),
       name: "client_event",
       text: "Client events",
       link: Routes.ts_reports_client_event_path(@conn, :summary)
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, "teiserver.staff.telemetry") do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Telemetry.ServerDayLogLib.icon(),
       name: "server_metric",
       text: "Server metrics",
       link: Routes.ts_reports_server_metric_path(@conn, :day_metrics_list)
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, "teiserver.staff.telemetry") do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Battle.MatchLib.icon(),
       name: "match_metrics",
       text: "Match metrics",
       link: Routes.ts_reports_match_metric_path(@conn, :day_metrics_list)
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, "teiserver.staff.admin") do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.RatingLib.icon(),
       name: "ratings",
       text: "Ratings",
       link: Routes.ts_reports_rating_path(@conn, :distribution_table)
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, "teiserver.dev.infologs") do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Telemetry.InfologLib.icon(),
       name: "infolog",
       text: "Infologs",
       link: Routes.ts_reports_infolog_path(@conn, :index)
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, "teiserver.staff.admin") do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: "fa-regular fa-download",
       name: "exports",
       text: "Data exports",
       link: Routes.ts_reports_exports_path(@conn, :index)
-    %>
+    ) %>
   <% end %>
 </div>
 
@@ -76,38 +70,34 @@
   </div>
 
   <%= if allow?(@current_user, Teiserver.Account.TimeSpentReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.TimeSpentReport.icon(),
       name: "time_spent",
       text: "Time spent",
       link: Routes.ts_reports_report_path(@conn, :show, "time_spent")
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.MuteReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.MuteReport.icon(),
       name: "mutes",
       text: "Mutes",
       link: Routes.ts_reports_report_path(@conn, :show, "mutes")
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.TimeCompareReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.TimeCompareReport.icon(),
       name: "time_compare",
       text: "Time compare",
       link: Routes.ts_reports_report_path(@conn, :show, "time_compare")
-    %>
+    ) %>
   <% end %>
-
 </div>
 
 <div class="row mt-2">
@@ -116,102 +106,93 @@
   </div>
 
   <%= if allow?(@current_user, Teiserver.Account.ActiveReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.ActiveReport.icon(),
       name: "active",
       text: "Active",
       link: Routes.ts_reports_report_path(@conn, :show, "active")
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.RanksReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.RanksReport.icon(),
       name: "ranks",
       text: "Ranks",
       link: Routes.ts_reports_report_path(@conn, :show, "ranks")
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.VerifiedReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.VerifiedReport.icon(),
       name: "verified",
       text: "Verified",
       link: Routes.ts_reports_report_path(@conn, :show, "verified")
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.RetentionReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.RetentionReport.icon(),
       name: "retention",
       text: "Retention",
       link: Routes.ts_reports_report_path(@conn, :show, "retention")
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.PopulationReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.PopulationReport.icon(),
       name: "population",
       text: "Population",
       link: Routes.ts_reports_report_path(@conn, :show, "population")
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.NewUserFunnelReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.NewUserFunnelReport.icon(),
       name: "new_user_funnel",
       text: "New user funnel",
       link: Routes.ts_reports_report_path(@conn, :show, "new_user_funnel")
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.RecordsReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.RecordsReport.icon(),
       name: "records",
       text: "Records",
       link: Routes.ts_reports_report_path(@conn, :show, "records")
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.NewSmurfReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.NewSmurfReport.icon(),
       name: "new_smurf",
       text: "New smurfs",
       link: Routes.ts_reports_report_path(@conn, :show, "new_smurf")
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.GrowthReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.GrowthReport.icon(),
       name: "growth",
       text: "Growth",
       link: Routes.ts_reports_report_path(@conn, :show, "growth")
-    %>
+    ) %>
   <% end %>
 </div>
 
@@ -221,73 +202,73 @@
   </div>
 
   <%= if allow?(@current_user, Teiserver.Account.AccoladeReport.permissions()) and Application.get_env(:central, Teiserver)[:enable_accolade_mode] == true do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.AccoladeReport.icon(),
       name: "accolades",
       text: "Accolades",
       link: Routes.ts_reports_report_path(@conn, :show, "accolades")
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.TournamentReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: "fa-regular fa-ranking-star",
       name: "tournament",
       text: "Tournament",
       link: Routes.ts_reports_report_path(@conn, :show, "tournament")
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.LeaderboardReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.LeaderboardReport.icon(),
       name: "leaderboard",
       text: "Leaderboard",
       link: Routes.ts_reports_report_path(@conn, :show, "leaderboard")
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.ReviewReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.ReviewReport.icon(),
       name: "review",
       text: "Review",
       link: Routes.ts_reports_report_path(@conn, :show, "review")
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.OpenSkillReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.OpenSkillReport.icon(),
       name: "open_skill",
       text: "Open Skill",
       link: Routes.ts_reports_report_path(@conn, :show, "open_skill")
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Game.MappingReport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Game.MappingReport.icon(),
       name: "mapping",
       text: "Mapping",
       link: Routes.ts_reports_report_path(@conn, :show, "mapping")
-    %>
+    ) %>
   <% end %>
 </div>
 
 <div class="row mt-2">
-  <%= central_component "menu_card",
-  size: :small, icon_class: "fa-solid", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_general_general_path(@conn, :index) %>
+  <%= central_component("menu_card",
+    size: :small,
+    icon_class: "fa-solid",
+    name: "",
+    icon: StylingHelper.icon(:back),
+    text: "Back",
+    link: Routes.ts_general_general_path(@conn, :index)
+  ) %>
 </div>

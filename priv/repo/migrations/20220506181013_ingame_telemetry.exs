@@ -10,7 +10,9 @@ defmodule Central.Repo.Migrations.IngameTelemetry do
       add :hash, :string
       add :timestamp, :utc_datetime
 
-      add :game_event_type_id, references(:teiserver_telemetry_game_event_types, on_delete: :nothing)
+      add :game_event_type_id,
+          references(:teiserver_telemetry_game_event_types, on_delete: :nothing)
+
       add :value, :jsonb
     end
 
@@ -18,7 +20,9 @@ defmodule Central.Repo.Migrations.IngameTelemetry do
       add :user_id, references(:account_users, on_delete: :nothing)
       add :timestamp, :utc_datetime
 
-      add :game_event_type_id, references(:teiserver_telemetry_game_event_types, on_delete: :nothing)
+      add :game_event_type_id,
+          references(:teiserver_telemetry_game_event_types, on_delete: :nothing)
+
       add :value, :jsonb
     end
   end

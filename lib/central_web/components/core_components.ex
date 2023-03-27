@@ -10,6 +10,7 @@ defmodule CentralWeb.CoreComponents do
   use Phoenix.Component
   alias Phoenix.LiveView.JS
   import CentralWeb.Gettext
+
   @doc """
   Renders a modal.
   ## Examples
@@ -35,6 +36,7 @@ defmodule CentralWeb.CoreComponents do
   slot :subtitle
   slot :confirm
   slot :cancel
+
   def modal(assigns) do
     ~H"""
     <div
@@ -112,6 +114,7 @@ defmodule CentralWeb.CoreComponents do
     </div>
     """
   end
+
   @doc """
   Renders flash notices.
   ## Examples
@@ -126,6 +129,7 @@ defmodule CentralWeb.CoreComponents do
   attr :close, :boolean, default: true, doc: "whether the flash can be closed"
   attr :rest, :global, doc: "the arbitrary HTML attributes to add to the flash container"
   slot :inner_block, doc: "the optional inner block that renders the flash message"
+
   def flash(assigns) do
     ~H"""
     <div
@@ -158,12 +162,14 @@ defmodule CentralWeb.CoreComponents do
     </div>
     """
   end
+
   @doc """
   Shows the flash group with standard titles and content.
   ## Examples
       <.flash_group flash={@flash} />
   """
   attr :flash, :map, required: true, doc: "the map of flash messages"
+
   def flash_group(assigns) do
     ~H"""
     <.flash kind={:info} title="Success!" role="alert" flash={@flash} />
@@ -182,6 +188,7 @@ defmodule CentralWeb.CoreComponents do
     </.flash>
     """
   end
+
   @doc """
   Renders a simple form.
   ## Examples
@@ -195,11 +202,14 @@ defmodule CentralWeb.CoreComponents do
   """
   attr :for, :any, required: true, doc: "the datastructure for the form"
   attr :as, :any, default: nil, doc: "the server side parameter to collect all input under"
+
   attr :rest, :global,
     include: ~w(autocomplete name rel action enctype method novalidate target),
     doc: "the arbitrary HTML attributes to apply to the form tag"
+
   slot :inner_block, required: true
   slot :actions, doc: "the slot for form actions, such as a submit button"
+
   def simple_form(assigns) do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
@@ -212,6 +222,7 @@ defmodule CentralWeb.CoreComponents do
     </.form>
     """
   end
+
   @doc """
   Renders a button.
   ## Examples
@@ -222,6 +233,7 @@ defmodule CentralWeb.CoreComponents do
   attr :class, :string, default: nil
   attr :rest, :global, include: ~w(disabled form name value)
   slot :inner_block, required: true
+
   def button(assigns) do
     ~H"""
     <button
@@ -237,6 +249,7 @@ defmodule CentralWeb.CoreComponents do
     </button>
     """
   end
+
   @doc """
   Renders an input with label and error messages.
   A `%Phoenix.HTML.Form{}` and field name may be passed to the input
@@ -250,12 +263,15 @@ defmodule CentralWeb.CoreComponents do
   attr :name, :any
   attr :label, :string, default: nil
   attr :value, :any
+
   attr :type, :string,
     default: "text",
     values: ~w(checkbox color date datetime-local email file hidden month number password
                range radio search select tel text textarea time url week)
+
   attr :field, Phoenix.HTML.FormField,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
+
   attr :errors, :list, default: []
   attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
   attr :prompt, :string, default: nil, doc: "the prompt for select inputs"
@@ -264,6 +280,7 @@ defmodule CentralWeb.CoreComponents do
   attr :rest, :global, include: ~w(autocomplete cols disabled form max maxlength min minlength
                                    pattern placeholder readonly required rows size step)
   slot :inner_block
+
   def input(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
     assigns
     |> assign(field: nil, id: assigns.id || field.id)
@@ -272,9 +289,11 @@ defmodule CentralWeb.CoreComponents do
     |> assign_new(:value, fn -> field.value end)
     |> input()
   end
+
   def input(%{type: "checkbox", value: value} = assigns) do
     assigns =
       assign_new(assigns, :checked, fn -> Phoenix.HTML.Form.normalize_value("checkbox", value) end)
+
     ~H"""
     <div phx-feedback-for={@name}>
       <label class="flex items-center gap-4 text-sm leading-6 text-zinc-600">
@@ -294,6 +313,7 @@ defmodule CentralWeb.CoreComponents do
     </div>
     """
   end
+
   def input(%{type: "select"} = assigns) do
     ~H"""
     <div phx-feedback-for={@name}>
@@ -312,6 +332,7 @@ defmodule CentralWeb.CoreComponents do
     </div>
     """
   end
+
   def input(%{type: "textarea"} = assigns) do
     ~H"""
     <div phx-feedback-for={@name}>
@@ -332,6 +353,7 @@ defmodule CentralWeb.CoreComponents do
     </div>
     """
   end
+
   def input(assigns) do
     ~H"""
     <div phx-feedback-for={@name}>
@@ -354,11 +376,13 @@ defmodule CentralWeb.CoreComponents do
     </div>
     """
   end
+
   @doc """
   Renders a label.
   """
   attr :for, :string, default: nil
   slot :inner_block, required: true
+
   def label(assigns) do
     ~H"""
     <label for={@for} class="block text-sm font-semibold leading-6 text-zinc-800">
@@ -366,10 +390,12 @@ defmodule CentralWeb.CoreComponents do
     </label>
     """
   end
+
   @doc """
   Generates a generic error message.
   """
   slot :inner_block, required: true
+
   def error(assigns) do
     ~H"""
     <p class="phx-no-feedback:hidden mt-3 flex gap-3 text-sm leading-6 text-rose-600">
@@ -378,6 +404,7 @@ defmodule CentralWeb.CoreComponents do
     </p>
     """
   end
+
   @doc """
   Renders a header with title.
   """
@@ -385,6 +412,7 @@ defmodule CentralWeb.CoreComponents do
   slot :inner_block, required: true
   slot :subtitle
   slot :actions
+
   def header(assigns) do
     ~H"""
     <header class={[@actions != [] && "flex items-center justify-between gap-6", @class]}>
@@ -400,6 +428,7 @@ defmodule CentralWeb.CoreComponents do
     </header>
     """
   end
+
   @doc ~S"""
   Renders a table with generic styling.
   ## Examples
@@ -412,18 +441,23 @@ defmodule CentralWeb.CoreComponents do
   attr :rows, :list, required: true
   attr :row_id, :any, default: nil, doc: "the function for generating the row id"
   attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
+
   attr :row_item, :any,
     default: &Function.identity/1,
     doc: "the function for mapping each row before calling the :col and :action slots"
+
   slot :col, required: true do
     attr :label, :string
   end
+
   slot :action, doc: "the slot for showing user actions in the last table column"
+
   def table(assigns) do
     assigns =
       with %{rows: %Phoenix.LiveView.LiveStream{}} <- assigns do
         assign(assigns, row_id: assigns.row_id || fn {id, _item} -> id end)
       end
+
     ~H"""
     <div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
       <table class="mt-11 w-[40rem] sm:w-full">
@@ -468,6 +502,7 @@ defmodule CentralWeb.CoreComponents do
     </div>
     """
   end
+
   @doc """
   Renders a data list.
   ## Examples
@@ -479,6 +514,7 @@ defmodule CentralWeb.CoreComponents do
   slot :item, required: true do
     attr :title, :string, required: true
   end
+
   def list(assigns) do
     ~H"""
     <div class="mt-14">
@@ -491,6 +527,7 @@ defmodule CentralWeb.CoreComponents do
     </div>
     """
   end
+
   @doc """
   Renders a back navigation link.
   ## Examples
@@ -498,6 +535,7 @@ defmodule CentralWeb.CoreComponents do
   """
   attr :navigate, :any, required: true
   slot :inner_block, required: true
+
   def back(assigns) do
     ~H"""
     <div class="mt-16">
@@ -511,6 +549,7 @@ defmodule CentralWeb.CoreComponents do
     </div>
     """
   end
+
   ## JS Commands
   def show(js \\ %JS{}, selector) do
     JS.show(js,
@@ -521,6 +560,7 @@ defmodule CentralWeb.CoreComponents do
          "opacity-100 translate-y-0 sm:scale-100"}
     )
   end
+
   def hide(js \\ %JS{}, selector) do
     JS.hide(js,
       to: selector,
@@ -531,6 +571,7 @@ defmodule CentralWeb.CoreComponents do
          "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"}
     )
   end
+
   def show_modal(js \\ %JS{}, id) when is_binary(id) do
     js
     |> JS.show(to: "##{id}")
@@ -542,6 +583,7 @@ defmodule CentralWeb.CoreComponents do
     |> JS.add_class("overflow-hidden", to: "body")
     |> JS.focus_first(to: "##{id}-content")
   end
+
   def hide_modal(js \\ %JS{}, id) do
     js
     |> JS.hide(
@@ -553,6 +595,7 @@ defmodule CentralWeb.CoreComponents do
     |> JS.remove_class("overflow-hidden", to: "body")
     |> JS.pop_focus()
   end
+
   @doc """
   Translates an error message using gettext.
   """
@@ -580,6 +623,7 @@ defmodule CentralWeb.CoreComponents do
       Gettext.dgettext(CentralWeb.Gettext, "errors", msg, opts)
     end
   end
+
   @doc """
   Translates the errors for a field from a keyword list of errors.
   """

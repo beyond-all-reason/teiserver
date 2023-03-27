@@ -29,28 +29,22 @@ defmodule Teiserver.Protocols.V1.TachyonSocialTest do
     Client.disconnect(friend2.id)
 
     {:ok,
-      socket: socket,
-      user: user,
-      pid: pid,
-
-      friend1: friend1,
-      friend2: friend2,
-
-      pending_friend: pending_friend,
-
-      ignored: ignored,
-
-      nobody: nobody
-    }
+     socket: socket,
+     user: user,
+     pid: pid,
+     friend1: friend1,
+     friend2: friend2,
+     pending_friend: pending_friend,
+     ignored: ignored,
+     nobody: nobody}
   end
 
   test "friends", %{
     socket: socket,
     user: user,
-
     friend1: friend1,
     friend2: friend2
-    } do
+  } do
     User.remove_friend(friend1.id, user.id)
     User.remove_friend(friend2.id, user.id)
 
@@ -58,11 +52,12 @@ defmodule Teiserver.Protocols.V1.TachyonSocialTest do
 
     _tachyon_send(socket, %{"cmd" => "c.user.list_friend_ids"})
     [resp] = _tachyon_recv(socket)
+
     assert resp == %{
-      "cmd" => "s.user.list_friend_ids",
-      "friend_id_list" => [],
-      "request_id_list" => []
-    }
+             "cmd" => "s.user.list_friend_ids",
+             "friend_id_list" => [],
+             "request_id_list" => []
+           }
 
     user = Account.get_user_by_id(user.id)
     assert user.friends == []
@@ -91,19 +86,21 @@ defmodule Teiserver.Protocols.V1.TachyonSocialTest do
 
     # We should now get a message asking us to be friends
     [resp] = _tachyon_recv(socket)
+
     assert resp == %{
-      "cmd" => "s.user.friend_request",
-      "user_id" => friend2.id
-    }
+             "cmd" => "s.user.friend_request",
+             "user_id" => friend2.id
+           }
 
     # Check the data
     _tachyon_send(socket, %{"cmd" => "c.user.list_friend_ids"})
     [resp] = _tachyon_recv(socket)
+
     assert resp == %{
-      "cmd" => "s.user.list_friend_ids",
-      "friend_id_list" => [],
-      "request_id_list" => [friend2.id]
-    }
+             "cmd" => "s.user.list_friend_ids",
+             "friend_id_list" => [],
+             "request_id_list" => [friend2.id]
+           }
 
     # Now reject that request
     _tachyon_send(socket, %{"cmd" => "c.user.reject_friend_request", "user_id" => friend2.id})
@@ -112,11 +109,12 @@ defmodule Teiserver.Protocols.V1.TachyonSocialTest do
 
     _tachyon_send(socket, %{"cmd" => "c.user.list_friend_ids"})
     [resp] = _tachyon_recv(socket)
+
     assert resp == %{
-      "cmd" => "s.user.list_friend_ids",
-      "friend_id_list" => [],
-      "request_id_list" => []
-    }
+             "cmd" => "s.user.list_friend_ids",
+             "friend_id_list" => [],
+             "request_id_list" => []
+           }
 
     # Check friend1 has us in their list
     assert Account.get_user_by_id(friend1.id).friend_requests == [user.id]
@@ -135,11 +133,12 @@ defmodule Teiserver.Protocols.V1.TachyonSocialTest do
 
     _tachyon_send(socket, %{"cmd" => "c.user.list_friend_ids"})
     [resp] = _tachyon_recv(socket)
+
     assert resp == %{
-      "cmd" => "s.user.list_friend_ids",
-      "friend_id_list" => [],
-      "request_id_list" => []
-    }
+             "cmd" => "s.user.list_friend_ids",
+             "friend_id_list" => [],
+             "request_id_list" => []
+           }
 
     # Ensure everything is as we expect
     user = Account.get_user_by_id(user.id)
@@ -181,11 +180,12 @@ defmodule Teiserver.Protocols.V1.TachyonSocialTest do
 
     _tachyon_send(socket, %{"cmd" => "c.user.list_friend_ids"})
     [resp] = _tachyon_recv(socket)
+
     assert resp == %{
-      "cmd" => "s.user.list_friend_ids",
-      "friend_id_list" => [friend1.id],
-      "request_id_list" => []
-    }
+             "cmd" => "s.user.list_friend_ids",
+             "friend_id_list" => [friend1.id],
+             "request_id_list" => []
+           }
 
     # Now add friend2 too
     User.create_friend_request(user.id, friend2.id)
@@ -207,10 +207,10 @@ defmodule Teiserver.Protocols.V1.TachyonSocialTest do
     assert Map.keys(resp) |> Enum.sort() == ["client_list", "cmd", "user_list"]
     assert resp["cmd"] == "s.user.list_friend_users_and_clients"
 
-    client_ids = resp["client_list"] |> Enum.map(fn c -> c["userid"] end) |> Enum.sort
+    client_ids = resp["client_list"] |> Enum.map(fn c -> c["userid"] end) |> Enum.sort()
     assert client_ids == [friend1.id]
 
-    user_ids = resp["user_list"] |> Enum.map(fn c -> c["id"] end) |> Enum.sort
+    user_ids = resp["user_list"] |> Enum.map(fn c -> c["id"] end) |> Enum.sort()
     assert user_ids == [friend1.id, friend2.id]
   end
 end

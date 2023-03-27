@@ -40,21 +40,24 @@ defmodule Teiserver.Account.SmurfMergeTask do
 
   @spec merge_ratings(T.userid(), T.userid(), String.t()) :: :ok
   defp merge_ratings(_from_id, _to_id, "false"), do: :ok
+
   defp merge_ratings(from_id, to_id, "true") do
-    to_ratings = Account.list_ratings(search: [user_id: to_id])
+    to_ratings =
+      Account.list_ratings(search: [user_id: to_id])
       |> Map.new(fn r -> {r.rating_type_id, r} end)
 
     # Now we go through the ratings of the from player and act
     Account.list_ratings(search: [user_id: from_id])
-      |> Enum.each(fn from_rating ->
-        rating_type_id = from_rating.rating_type_id
-        to_rating = to_ratings[rating_type_id] || BalanceLib.default_rating()
+    |> Enum.each(fn from_rating ->
+      rating_type_id = from_rating.rating_type_id
+      to_rating = to_ratings[rating_type_id] || BalanceLib.default_rating()
 
-        from_value = BalanceLib.convert_rating(from_rating)
-        to_value = BalanceLib.convert_rating(to_rating)
+      from_value = BalanceLib.convert_rating(from_rating)
+      to_value = BalanceLib.convert_rating(to_rating)
 
-        if from_value > to_value do
-          {:ok, _rating} = Account.create_or_update_rating(%{
+      if from_value > to_value do
+        {:ok, _rating} =
+          Account.create_or_update_rating(%{
             user_id: to_id,
             rating_type_id: rating_type_id,
             rating_value: from_rating.rating_value,
@@ -64,48 +67,50 @@ defmodule Teiserver.Account.SmurfMergeTask do
             last_updated: Timex.now()
           })
 
-          {:ok, _log} = Game.create_rating_log(%{
+        {:ok, _log} =
+          Game.create_rating_log(%{
             user_id: to_id,
             rating_type_id: rating_type_id,
             match_id: nil,
             inserted_at: Timex.now(),
-
             value: %{
               reason: "Smurf adjustment",
-
               rating_value: from_rating.rating_value,
               skill: from_rating.skill,
               uncertainty: from_rating.uncertainty,
-
               rating_value_change: from_rating.rating_value - to_rating.rating_value,
               skill_change: from_rating.skill - to_rating.skill,
-              uncertainty_change: from_rating.uncertainty - to_rating.uncertainty,
+              uncertainty_change: from_rating.uncertainty - to_rating.uncertainty
             }
           })
-        end
-      end)
+      end
+    end)
   end
 
   @spec merge_names(T.userid(), T.userid(), String.t()) :: :ok
   defp merge_names(_from_id, _to_id, "false"), do: :ok
+
   defp merge_names(from_id, to_id, "true") do
-    previous_names = Account.get_user_stat_data(from_id)
+    previous_names =
+      Account.get_user_stat_data(from_id)
       |> Map.get("previous_names", [])
 
     current_name = Account.get_username_by_id(from_id)
 
-
-    to_previous = Account.get_user_stat_data(to_id)
+    to_previous =
+      Account.get_user_stat_data(to_id)
       |> Map.get("previous_names", [])
 
-    new_previous = (to_previous ++ [current_name | previous_names])
-      |> Enum.uniq
+    new_previous =
+      (to_previous ++ [current_name | previous_names])
+      |> Enum.uniq()
 
     Account.update_user_stat(to_id, %{"previous_names" => new_previous})
   end
 
   @spec merge_mutes(T.userid(), T.userid(), String.t()) :: :ok
   defp merge_mutes(_from_id, _to_id, "false"), do: :ok
+
   defp merge_mutes(from_id, to_id, "true") do
     Account.list_users(
       search: [
@@ -114,9 +119,9 @@ defmodule Teiserver.Account.SmurfMergeTask do
       select: [:id],
       limit: :infinity
     )
-      |> Enum.each(fn %{id: ignorer_id} ->
-        User.ignore_user(ignorer_id, to_id)
-      end)
+    |> Enum.each(fn %{id: ignorer_id} ->
+      User.ignore_user(ignorer_id, to_id)
+    end)
 
     :ok
   end

@@ -45,15 +45,16 @@ defmodule TeiserverWeb.ClientLive.Show do
             {
               :noreply,
               socket
-                |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))
+              |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))
             }
 
           _ ->
-            connection_state = if Process.alive?(client.tcp_pid) do
-              :sys.get_state(client.tcp_pid)
-            else
-              %{}
-            end
+            connection_state =
+              if Process.alive?(client.tcp_pid) do
+                :sys.get_state(client.tcp_pid)
+              else
+                %{}
+              end
 
             # If viewing an internal server process you it won't have these keys and thus we use
             # this method
@@ -61,16 +62,16 @@ defmodule TeiserverWeb.ClientLive.Show do
             client_debug_messages = Map.get(connection_state, :print_client_messages, false)
 
             {:noreply,
-              socket
-                |> assign(:page_title, page_title(socket.assigns.live_action))
-                |> add_breadcrumb(name: client.name, url: "/teiserver/admin/clients/#{id}")
-                |> assign(:id, id)
-                |> assign(:client, client)
-                |> assign(:user, user)
-                |> assign(:client_debug_messages, client_debug_messages)
-                |> assign(:server_debug_messages, server_debug_messages)
-            }
+             socket
+             |> assign(:page_title, page_title(socket.assigns.live_action))
+             |> add_breadcrumb(name: client.name, url: "/teiserver/admin/clients/#{id}")
+             |> assign(:id, id)
+             |> assign(:client, client)
+             |> assign(:user, user)
+             |> assign(:client_debug_messages, client_debug_messages)
+             |> assign(:server_debug_messages, server_debug_messages)}
         end
+
       false ->
         {:noreply,
          socket
@@ -90,8 +91,8 @@ defmodule TeiserverWeb.ClientLive.Show do
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
     {:noreply,
-       socket
-       |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))}
+     socket
+     |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _}, socket) do
@@ -101,30 +102,34 @@ defmodule TeiserverWeb.ClientLive.Show do
   @impl true
   def handle_event("enable-server-message-logging", _event, socket) do
     Client.enable_server_message_print(socket.assigns.id)
-    {:noreply, socket
-      |> assign(:server_debug_messages, true)
-    }
+
+    {:noreply,
+     socket
+     |> assign(:server_debug_messages, true)}
   end
 
   def handle_event("disable-server-message-logging", _event, socket) do
     Client.disable_server_message_print(socket.assigns.id)
-    {:noreply, socket
-      |> assign(:server_debug_messages, false)
-    }
+
+    {:noreply,
+     socket
+     |> assign(:server_debug_messages, false)}
   end
 
   def handle_event("enable-client-message-logging", _event, socket) do
     Client.enable_client_message_print(socket.assigns.id)
-    {:noreply, socket
-      |> assign(:client_debug_messages, true)
-    }
+
+    {:noreply,
+     socket
+     |> assign(:client_debug_messages, true)}
   end
 
   def handle_event("disable-client-message-logging", _event, socket) do
     Client.disable_client_message_print(socket.assigns.id)
-    {:noreply, socket
-      |> assign(:client_debug_messages, false)
-    }
+
+    {:noreply,
+     socket
+     |> assign(:client_debug_messages, false)}
   end
 
   def handle_event("force-error-log", _event, socket) do

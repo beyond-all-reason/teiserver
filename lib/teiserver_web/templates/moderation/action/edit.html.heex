@@ -1,26 +1,39 @@
 <% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Moderation.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "actions"}) %>
+<%= render(
+  TeiserverWeb.Moderation.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "actions"})
+) %>
 
 <div class="row">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Moderation.ActionView, "section_menu.html", Map.merge(assigns, %{
-          basic_search: "",
-          show_search: false,
-          active: "edit"
-        })
-        %>
+        <%= render(
+          TeiserverWeb.Moderation.ActionView,
+          "section_menu.html",
+          Map.merge(assigns, %{
+            basic_search: "",
+            show_search: false,
+            active: "edit"
+          })
+        ) %>
 
         <hr />
 
-<%= render "form.html", Map.put(assigns, :action, Routes.moderation_action_path(@conn, :update, @action)) %>
+        <%= render(
+          "form.html",
+          Map.put(assigns, :action, Routes.moderation_action_path(@conn, :update, @action))
+        ) %>
 
-
-<hr />
-<%= link raw("<i class='fa-solid fa-fw fa-octagon'></i> Halt action"), to: Routes.moderation_action_path(@conn, :halt, @action), method: :put, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-outline" %>
-
+        <hr />
+        <%= link(raw("<i class='fa-solid fa-fw fa-octagon'></i> Halt action"),
+          to: Routes.moderation_action_path(@conn, :halt, @action),
+          method: :put,
+          data: [confirm: "Are you sure?"],
+          class: "btn btn-danger btn-outline"
+        ) %>
       </div>
     </div>
   </div>

@@ -14,33 +14,32 @@ defmodule Teiserver.Game.UserAchievementLib do
     %{
       type_colour: colour(),
       type_icon: icon(),
-
       item_id: user_achievement.id,
       item_type: "teiserver_account_user_achievement",
       item_colour: colour(),
       item_icon: icon(),
       item_label: "#{user_achievement.name}",
-
       url: "/account/user_achievements/#{user_achievement.id}"
     }
   end
 
   # Queries
-  @spec query_user_achievements() :: Ecto.Query.t
+  @spec query_user_achievements() :: Ecto.Query.t()
   def query_user_achievements do
-    from user_achievements in UserAchievement
+    from(user_achievements in UserAchievement)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -93,13 +92,12 @@ defmodule Teiserver.Game.UserAchievementLib do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from user_achievements in query,
-      where: (
-            ilike(user_achievements.name, ^ref_like)
-        )
+      where: ilike(user_achievements.name, ^ref_like)
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Name (A-Z)") do
     from user_achievements in query,
       order_by: [asc: user_achievements.name]
@@ -120,8 +118,9 @@ defmodule Teiserver.Game.UserAchievementLib do
       order_by: [asc: user_achievements.inserted_at]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :achievement_type in preloads, do: _preload_achievement_type(query), else: query
     query

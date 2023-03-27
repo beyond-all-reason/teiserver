@@ -8,7 +8,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMinuteTask do
   @impl Oban.Worker
   def perform(_) do
     if Central.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") == true do
-      now = Timex.now() |> Timex.set([microsecond: 0])
+      now = Timex.now() |> Timex.set(microsecond: 0)
 
       case Telemetry.get_server_minute_log(now) do
         nil ->
@@ -18,11 +18,13 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMinuteTask do
           :ok
       end
     end
+
     :ok
   end
 
   defp perform_telemetry_persist(timestamp) do
-    data = Telemetry.get_totals_and_reset()
+    data =
+      Telemetry.get_totals_and_reset()
       |> Map.drop([:cycle])
 
     if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do

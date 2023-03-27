@@ -12,7 +12,8 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
   def mount(%{"id" => id}, session, socket) do
     :ok = PubSub.subscribe(Central.PubSub, "lobby_policy_updates:#{id}")
 
-    socket = socket
+    socket =
+      socket
       |> AuthPlug.live_call(session)
       |> NotificationPlug.live_call()
       |> assign(:id, int_parse(id))
@@ -34,6 +35,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
     case allow?(socket.assigns[:current_user], "teiserver.staff.server") do
       true ->
         {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+
       false ->
         {:noreply,
          socket
@@ -43,20 +45,20 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
 
   @impl true
   def handle_info(:tick, socket) do
-    {:noreply,
+    {
+      :noreply,
       socket
-        # |> update_queues
-        # |> update_policies
-        # |> update_lobbies
-        # |> update_server_pids
+      # |> update_queues
+      # |> update_policies
+      # |> update_lobbies
+      # |> update_server_pids
     }
   end
 
   def handle_info(%{channel: "lobby_policy_updates:" <> _, event: :agent_status} = msg, state) do
     {:noreply,
-      state
-        |> assign(:bots, msg.agent_status)
-    }
+     state
+     |> assign(:bots, msg.agent_status)}
   end
 
   # def handle_info(%{channel: "lobby_policy_internal:" <> _} = e, state) do
@@ -78,11 +80,11 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
     bots = Game.call_lobby_organiser(socket.assigns.id, :get_agent_status)
 
     socket
-      |> assign(:bots, bots)
+    |> assign(:bots, bots)
   end
 
   defp apply_action(socket, :policy, %{"id" => _id}) do
     socket
-      |> assign(:page_title, "Policies")
+    |> assign(:page_title, "Policies")
   end
 end

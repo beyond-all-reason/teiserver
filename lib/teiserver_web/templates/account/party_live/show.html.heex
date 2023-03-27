@@ -1,25 +1,22 @@
-<%
-  bsname = @view_colour
-  moderator = allow?(@current_user, "teiserver.staff.moderator")
-  leader = moderator or (@party.leader == @user_id)
-%>
+<% bsname = @view_colour
+moderator = allow?(@current_user, "teiserver.staff.moderator")
+leader = moderator or @party.leader == @user_id %>
 
-<%=
-  render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "parties", conn: Map.put(@socket, :permissions, @current_user.permissions)}
-%>
+<%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+  active: "parties",
+  conn: Map.put(@socket, :permissions, @current_user.permissions)
+}) %>
 
 <div class="row mt-3" id="main-content">
   <div class="col-md-12">
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
-
         <div class="float-end">
-          <span class={"btn btn-sm btn-danger2"} phx-click="leave">
+          <span class="btn btn-sm btn-danger2" phx-click="leave">
             Leave party
           </span>
 
           <%= if moderator do %>
-
           <% end %>
         </div>
 
@@ -34,7 +31,7 @@
                 </td>
                 <td>
                   <%= if leader and m != @user_id do %>
-                    <span class={"btn btn-sm btn-danger"} phx-click="kick" phx-value-userid={m}>
+                    <span class="btn btn-sm btn-danger" phx-click="kick" phx-value-userid={m}>
                       Kick
                     </span>
                   <% end %>
@@ -54,7 +51,11 @@
                 </td>
                 <td>
                   <%= if leader do %>
-                    <span class={"btn btn-sm btn-warning"} phx-click="cancel_invite" phx-value-userid={m}>
+                    <span
+                      class="btn btn-sm btn-warning"
+                      phx-click="cancel_invite"
+                      phx-value-userid={m}
+                    >
                       Cancel invite
                     </span>
                   <% end %>
@@ -72,11 +73,14 @@
               <%= if Map.has_key?(@user_lookup, f) do %>
                 <div class="my-2">
                   <%= if not Enum.member?(@party.members, f) and not Enum.member?(@party.pending_invites, f) do %>
-                    <span class={"btn btn-sm btn-#{bsname}"} phx-click="create_invite" phx-value-userid={f}>
+                    <span
+                      class={"btn btn-sm btn-#{bsname}"}
+                      phx-click="create_invite"
+                      phx-value-userid={f}
+                    >
                       Invite <%= @user_lookup[f].name %>
                     </span>
                   <% end %>
-
                 </div>
               <% end %>
             <% end %>
@@ -90,18 +94,20 @@
                 <%= if Map.has_key?(@user_lookup, f) do %>
                   <div class="my-2">
                     <%= if not Enum.member?(@party.members, f) and not Enum.member?(@party.pending_invites, f) do %>
-                      <span class={"btn btn-sm btn-#{bsname}"} phx-click="create_invite" phx-value-userid={f}>
+                      <span
+                        class={"btn btn-sm btn-#{bsname}"}
+                        phx-click="create_invite"
+                        phx-value-userid={f}
+                      >
                         Invite <%= @user_lookup[f].name %>
                       </span>
                     <% end %>
-
                   </div>
                 <% end %>
               <% end %>
             </div>
           <% end %>
         </div>
-
       </div>
     </div>
   </div>

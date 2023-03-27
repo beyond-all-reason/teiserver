@@ -84,39 +84,48 @@ defmodule Teiserver.Account.UserLib do
       where: fragment("(? ->> ?)::jsonb @> ?::jsonb", users.data, ^field, ^value)
   end
 
-
   def _search(query, :bot, "Person") do
     Logger.error("user.data['bot'] is being queried, this property is due to be depreciated")
+
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "bot", "false")
   end
 
   def _search(query, :bot, "Robot") do
     Logger.error("user.data['bot'] is being queried, this property is due to be depreciated")
+
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "bot", "true")
   end
 
   def _search(query, :moderator, "User") do
-    Logger.error("user.data['moderator'] is being queried, this property is due to be depreciated")
+    Logger.error(
+      "user.data['moderator'] is being queried, this property is due to be depreciated"
+    )
+
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "moderator", "false")
   end
 
   def _search(query, :moderator, "Moderator") do
-    Logger.error("user.data['moderator'] is being queried, this property is due to be depreciated")
+    Logger.error(
+      "user.data['moderator'] is being queried, this property is due to be depreciated"
+    )
+
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "moderator", "true")
   end
 
   def _search(query, :verified, "Unverified") do
     Logger.error("user.data['verified'] is being queried, this property is due to be depreciated")
+
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "verified", "false")
   end
 
   def _search(query, :verified, "Verified") do
     Logger.error("user.data['verified'] is being queried, this property is due to be depreciated")
+
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "verified", "true")
   end
@@ -298,7 +307,8 @@ defmodule Teiserver.Account.UserLib do
 
   @spec generate_user_icons(T.user()) :: map()
   def generate_user_icons(user) do
-    role_icons = user.roles
+    role_icons =
+      user.roles
       |> Enum.filter(fn r -> role_def(r) != nil end)
       |> Map.new(fn r -> {r, 1} end)
 
@@ -308,7 +318,7 @@ defmodule Teiserver.Account.UserLib do
     |> Map.merge(role_icons)
   end
 
-  @spec make_bot_password() :: String.t
+  @spec make_bot_password() :: String.t()
   def make_bot_password() do
     :crypto.strong_rand_bytes(64) |> Base.encode64(padding: false) |> binary_part(0, 64)
   end

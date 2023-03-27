@@ -13,7 +13,12 @@
       <tr>
         <td><%= user.name %></td>
         <td>
-          <%= link raw("<i class='fas fa-fw fa-volume-up'></i> Unmute"), to: Routes.ts_account_relationships_path(@conn, :delete, "muted", userid), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-sm btn-danger btn-outline" %>
+          <%= link(raw("<i class='fas fa-fw fa-volume-up'></i> Unmute"),
+            to: Routes.ts_account_relationships_path(@conn, :delete, "muted", userid),
+            method: :delete,
+            data: [confirm: "Are you sure?"],
+            class: "btn btn-sm btn-danger btn-outline"
+          ) %>
         </td>
       </tr>
     <% end %>
@@ -24,13 +29,18 @@
         <input type="hidden" name="action" value="muted" />
 
         <td>
-          <input type="text" name="target_name" value="" placeholder="Enter user name here" class="form-control" />
+          <input
+            type="text"
+            name="target_name"
+            value=""
+            placeholder="Enter user name here"
+            class="form-control"
+          />
         </td>
 
         <td>
           <button type="submit" class={"btn btn-#{bsname} btn-block"}>
-            <i class="fa-fw fas fa-plus"></i>
-            Mute user
+            <i class="fa-fw fas fa-plus"></i> Mute user
           </button>
         </td>
       </form>

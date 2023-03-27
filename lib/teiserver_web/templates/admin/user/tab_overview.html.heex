@@ -9,7 +9,8 @@
 
 <div class="page-row row">
   <div class="col-md-12 col-lg-4">
-    <h4>Status</h4><br />
+    <h4>Status</h4>
+    <br />
     <%= for {name, colour, icon} <- @roles do %>
       <div class="role-badge">
         <i class={"fa-fw fa-2x #{icon}"} style={"color: #{colour}"} title={name}></i>
@@ -40,80 +41,71 @@
     <h4>Profile/history</h4>
   </div>
 
-  <%=
-    central_component "menu_card",
+  <%= central_component("menu_card",
     icon: Central.Communication.ChatRoomLib.icon(),
     name: "chat",
     text: "Chat",
     icon_class: "fa-solid",
     link: Routes.ts_admin_user_path(@conn, :full_chat, @user)
-  %>
+  ) %>
 
-  <%=
-    central_component "menu_card",
+  <%= central_component("menu_card",
     icon: Teiserver.Account.RatingLib.icon(),
     name: "ratings",
     text: "Ratings",
     icon_class: "fa-solid",
     link: Routes.ts_admin_user_path(@conn, :ratings, @user)
-  %>
+  ) %>
 
-  <%=
-    central_component "menu_card",
+  <%= central_component("menu_card",
     icon: Teiserver.icon(:relationship),
     name: "relationships",
     text: "Relationships",
     icon_class: "fa-solid",
     link: Routes.ts_admin_user_path(@conn, :relationships, @user)
-  %>
+  ) %>
 
-  <%=
-    central_component "menu_card",
+  <%= central_component("menu_card",
     icon: Teiserver.Battle.MatchLib.icon(),
     name: "matches",
     text: "Matches",
     icon_class: "fa-solid",
     link: Routes.ts_admin_match_path(@conn, :user_show, @user.id)
-  %>
+  ) %>
 
-  <%=
-    central_component "menu_card",
+  <%= central_component("menu_card",
     icon: Teiserver.Account.AccoladeLib.icon(),
     name: "accolades",
     text: "Accolades",
     icon_class: "fa-solid",
     link: Routes.ts_admin_accolade_path(@conn, :user_show, @user.id)
-  %>
+  ) %>
 
-  <%=
-    central_component "menu_card",
+  <%= central_component("menu_card",
     icon: "fa-solid fa-user-circle",
     name: "profile",
     text: "Profile",
     icon_class: "fa-solid",
     link: Routes.ts_account_profile_path(@conn, :show, @user.id)
-  %>
+  ) %>
 
   <div class="col-md-12">
     <h4>Moderation</h4>
   </div>
 
-  <%=
-    central_component "menu_card",
+  <%= central_component("menu_card",
     icon: "fa-solid #{Teiserver.Moderation.ReportLib.icon()}",
     name: "moderation",
     text: "Moderation",
     icon_class: "fa-solid",
     link: Routes.moderation_report_path(@conn, :user, @user.id)
-  %>
+  ) %>
 
-  <%=
-    central_component "menu_card",
+  <%= central_component("menu_card",
     icon: "fa-solid fa-face-angry-horns",
     name: "smurf",
     text: "Smurf search",
     icon_class: "fa-solid",
     link: Routes.ts_admin_user_path(@conn, :smurf_search, @user.id)
-  %>
-
+  ) %>
 </div>

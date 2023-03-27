@@ -15,7 +15,7 @@ defmodule Teiserver.Moderation.ProposalVote do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-      |> cast(params, ~w(vote user_id proposal_id)a)
-      |> validate_required(~w(vote user_id proposal_id)a)
+    |> cast(params, ~w(vote user_id proposal_id)a)
+    |> validate_required(~w(vote user_id proposal_id)a)
   end
 end

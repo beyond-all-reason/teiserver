@@ -17,33 +17,32 @@ defmodule Teiserver.Account.BadgeTypeLib do
     %{
       type_colour: colours() |> elem(0),
       type_icon: icon(),
-
       item_id: badge_type.id,
       item_type: "teiserver_account_badge_type",
       item_colour: badge_type.colour,
       item_icon: badge_type.icon,
       item_label: "#{badge_type.name}",
-
       url: "/account/badge_types/#{badge_type.id}"
     }
   end
 
   # Queries
-  @spec query_badge_types() :: Ecto.Query.t
+  @spec query_badge_types() :: Ecto.Query.t()
   def query_badge_types do
-    from badge_types in BadgeType
+    from(badge_types in BadgeType)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -71,13 +70,12 @@ defmodule Teiserver.Account.BadgeTypeLib do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from badge_types in query,
-      where: (
-            ilike(badge_types.name, ^ref_like)
-        )
+      where: ilike(badge_types.name, ^ref_like)
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Name (A-Z)") do
     from badge_types in query,
       order_by: [asc: badge_types.name]
@@ -98,8 +96,9 @@ defmodule Teiserver.Account.BadgeTypeLib do
       order_by: [asc: badge_types.inserted_at]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, _preloads) do
     # query = if :things in preloads, do: _preload_things(query), else: query
     query

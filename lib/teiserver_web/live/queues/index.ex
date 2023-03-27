@@ -21,7 +21,8 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_all_queues")
 
-    db_queues = Game.list_queues()
+    db_queues =
+      Game.list_queues()
       |> Enum.filter(fn queue ->
         Map.get(queue.settings, "enabled", true)
       end)
@@ -29,21 +30,26 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
         {queue.id, queue}
       end)
 
-    queue_info = db_queues
+    queue_info =
+      db_queues
       |> Map.keys()
       |> Map.new(fn id ->
         {id, Matchmaking.get_queue_info(id)}
       end)
 
-    queue_membership = Map.keys(db_queues)
+    queue_membership =
+      Map.keys(db_queues)
       |> Parallel.reject(fn queue_id ->
         p = Matchmaking.get_queue_wait_pid(queue_id)
+
         if p != nil do
           state = :sys.get_state(p)
 
           state.groups_map
-            |> Enum.filter(fn {_group_id, %{members: members}} -> Enum.member?(members, socket.assigns[:current_user].id) end)
-            |> Enum.empty?()
+          |> Enum.filter(fn {_group_id, %{members: members}} ->
+            Enum.member?(members, socket.assigns[:current_user].id)
+          end)
+          |> Enum.empty?()
         else
           true
         end
@@ -51,7 +57,8 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
 
     is_admin = allow?(socket.assigns[:current_user], "teiserver.staff.admin")
 
-    socket = socket
+    socket =
+      socket
       |> add_breadcrumb(name: "Matchmaking", url: "/teiserver/game_live/queues")
       |> assign(:client, client)
       |> assign(:queue_membership, queue_membership)
@@ -89,17 +96,19 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   def handle_event("ready-accept", _, %{assigns: assigns} = socket) do
     Matchmaking.player_accept(assigns[:match_id], assigns[:current_user].id)
 
-    {:noreply, socket
-      |> assign(:match_id, nil)
-      |> assign(:queue_membership, [])}
+    {:noreply,
+     socket
+     |> assign(:match_id, nil)
+     |> assign(:queue_membership, [])}
   end
 
   def handle_event("ready-decline", _, %{assigns: assigns} = socket) do
     Matchmaking.player_decline(assigns[:match_id], assigns[:current_user].id)
 
-    {:noreply, socket
-      |> assign(:match_id, nil)
-      |> assign(:queue_membership, [])}
+    {:noreply,
+     socket
+     |> assign(:match_id, nil)
+     |> assign(:queue_membership, [])}
   end
 
   @impl true
@@ -109,13 +118,14 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
       mean_wait_time: event.mean_wait_time
     }
 
-    new_info = socket.assigns[:queue_info]
+    new_info =
+      socket.assigns[:queue_info]
       |> Map.put(event.queue_id, new_data)
 
     {
       :noreply,
       socket
-        |> assign(:queue_info, new_info)
+      |> assign(:queue_info, new_info)
     }
   end
 
@@ -124,113 +134,134 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   end
 
   # Client action
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :joined_queue, queue_id: queue_id}, %{assigns: assigns} = socket) do
-    new_queue_membership = [queue_id | assigns[:queue_membership]]
-      |> Enum.uniq
+  def handle_info(
+        %{channel: "teiserver_client_messages:" <> _, event: :joined_queue, queue_id: queue_id},
+        %{assigns: assigns} = socket
+      ) do
+    new_queue_membership =
+      [queue_id | assigns[:queue_membership]]
+      |> Enum.uniq()
 
     {:noreply,
-    socket
-    |> assign(:queue_membership, new_queue_membership)}
+     socket
+     |> assign(:queue_membership, new_queue_membership)}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :left_queue, queue_id: queue_id}, %{assigns: assigns} = socket) do
+  def handle_info(
+        %{channel: "teiserver_client_messages:" <> _, event: :left_queue, queue_id: queue_id},
+        %{assigns: assigns} = socket
+      ) do
     new_queue_membership = List.delete(assigns[:queue_membership], queue_id)
 
     {:noreply,
-      socket
-      |> assign(:queue_membership, new_queue_membership)}
+     socket
+     |> assign(:queue_membership, new_queue_membership)}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :match_declined, queue_id: queue_id}, %{assigns: assigns} = socket) do
+  def handle_info(
+        %{channel: "teiserver_client_messages:" <> _, event: :match_declined, queue_id: queue_id},
+        %{assigns: assigns} = socket
+      ) do
     new_queue_membership = List.delete(assigns[:queue_membership], queue_id)
 
     {:noreply,
-      socket
-      |> assign(:queue_membership, new_queue_membership)
-      |> assign(:queue_membership, [])
-    }
+     socket
+     |> assign(:queue_membership, new_queue_membership)
+     |> assign(:queue_membership, [])}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :match_created, queue_id: _queue_id}, %{assigns: _assigns} = socket) do
+  def handle_info(
+        %{channel: "teiserver_client_messages:" <> _, event: :match_created, queue_id: _queue_id},
+        %{assigns: _assigns} = socket
+      ) do
     {:noreply,
-      socket
-      |> assign(:queue_membership, [])}
+     socket
+     |> assign(:queue_membership, [])}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
     {:noreply,
-      socket
-        |> assign(:client, Client.get_client_by_id(socket.assigns[:current_user].id))
-        |> assign(:queue_membership, [])
-    }
+     socket
+     |> assign(:client, Client.get_client_by_id(socket.assigns[:current_user].id))
+     |> assign(:queue_membership, [])}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
     userid = socket.assigns[:current_user].id
 
     socket.assigns[:queue_membership]
-      |> Enum.each(fn queue_id ->
-        Matchmaking.remove_group_from_queue(queue_id, userid)
-      end)
+    |> Enum.each(fn queue_id ->
+      Matchmaking.remove_group_from_queue(queue_id, userid)
+    end)
 
     {:noreply,
-      socket
-        |> assign(:client, nil)
-        |> assign(:queue_membership, [])
-    }
+     socket
+     |> assign(:client, nil)
+     |> assign(:queue_membership, [])}
   end
 
-  def handle_info(%{
-    channel: "teiserver_client_messages:" <> _userid_str,
-    event: :matchmaking,
-    sub_event: :match_ready
-  } = data, socket) do
+  def handle_info(
+        %{
+          channel: "teiserver_client_messages:" <> _userid_str,
+          event: :matchmaking,
+          sub_event: :match_ready
+        } = data,
+        socket
+      ) do
     Logger.warn("index.ex Match ready")
-    {:noreply,
-      socket
-      |> assign(:match_id, data.match_id)
-    }
-  end
-
-  def handle_info(%{
-    channel: "teiserver_client_messages:" <> _userid_str,
-    event: :matchmaking,
-    sub_event: :joined_queue,
-    queue_id: queue_id
-  }, socket) do
-    new_queue_membership = socket.assigns.queue_membership ++ [queue_id]
-      |> Enum.uniq
 
     {:noreply,
-      socket
-        |> assign(:queue_membership, new_queue_membership)
-    }
+     socket
+     |> assign(:match_id, data.match_id)}
   end
 
-  def handle_info(%{
-    channel: "teiserver_client_messages:" <> _userid_str,
-    event: :matchmaking,
-    sub_event: :left_queue,
-    queue_id: queue_id
-  }, socket) do
-    new_queue_membership = socket.assigns.queue_membership
+  def handle_info(
+        %{
+          channel: "teiserver_client_messages:" <> _userid_str,
+          event: :matchmaking,
+          sub_event: :joined_queue,
+          queue_id: queue_id
+        },
+        socket
+      ) do
+    new_queue_membership =
+      (socket.assigns.queue_membership ++ [queue_id])
+      |> Enum.uniq()
+
+    {:noreply,
+     socket
+     |> assign(:queue_membership, new_queue_membership)}
+  end
+
+  def handle_info(
+        %{
+          channel: "teiserver_client_messages:" <> _userid_str,
+          event: :matchmaking,
+          sub_event: :left_queue,
+          queue_id: queue_id
+        },
+        socket
+      ) do
+    new_queue_membership =
+      socket.assigns.queue_membership
       |> List.delete(queue_id)
 
     {:noreply,
-      socket
-        |> assign(:queue_membership, new_queue_membership)
-    }
+     socket
+     |> assign(:queue_membership, new_queue_membership)}
   end
 
-  def handle_info(%{
-    channel: "teiserver_client_messages:" <> _userid_str,
-    event: :client_updated,
-    client: client
-  }, socket) do
+  def handle_info(
+        %{
+          channel: "teiserver_client_messages:" <> _userid_str,
+          event: :client_updated,
+          client: client
+        },
+        socket
+      ) do
     {:noreply,
-      socket
-        |> assign(:client, client)
-    }
+     socket
+     |> assign(:client, client)}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _userid_str}, socket) do
@@ -238,7 +269,11 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{socket.assigns[:current_user].id}")
+    :ok =
+      PubSub.subscribe(
+        Central.PubSub,
+        "teiserver_client_messages:#{socket.assigns[:current_user].id}"
+      )
 
     socket
     |> assign(:page_title, "Listing Battles")

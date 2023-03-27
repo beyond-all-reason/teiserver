@@ -101,26 +101,28 @@ defmodule Teiserver.Protocols.Spring do
     ] = status_bits
 
     sync = [sync2, sync1] |> Integer.undigits(2)
-    sync = case sync do
-      1 ->
-        %{
-          game: 1,
-          engine: 1,
-          map: 1
-        }
 
-      2 ->
-        %{
-          game: 0,
-          engine: 0,
-          map: 0
-        }
+    sync =
+      case sync do
+        1 ->
+          %{
+            game: 1,
+            engine: 1,
+            map: 1
+          }
 
-      0 ->
-        %{
-          bot: 1
-        }
-    end
+        2 ->
+          %{
+            game: 0,
+            engine: 0,
+            map: 0
+          }
+
+        0 ->
+          %{
+            bot: 1
+          }
+      end
 
     # Team is the player
     # Ally team is the team the player is on
@@ -139,15 +141,17 @@ defmodule Teiserver.Protocols.Spring do
   def create_battle_status(client) do
     sync_value = Map.get(client, :sync, %{})
 
-    all_one = sync_value
+    all_one =
+      sync_value
       |> Enum.filter(fn {_key, value} -> value != 1 end)
       |> Enum.empty?()
 
-    sync = cond do
-      Map.get(sync_value, :bot, nil) == 1 -> 0
-      all_one == true -> 1
-      true -> 2
-    end
+    sync =
+      cond do
+        Map.get(sync_value, :bot, nil) == 1 -> 0
+        all_one == true -> 1
+        true -> 2
+      end
 
     [t8, t7, t6, t5, t4, t3, t2, t1] = BitParse.parse_bits("#{client.player_number}", 8)
     [a8, a7, a6, a5, a4, a3, a2, a1] = BitParse.parse_bits("#{client.team_number}", 8)
@@ -195,6 +199,7 @@ defmodule Teiserver.Protocols.Spring do
 
   @spec format_log(String.t()) :: String.t()
   def format_log(nil), do: ""
+
   def format_log(s) do
     s
     |> String.trim()
@@ -202,7 +207,6 @@ defmodule Teiserver.Protocols.Spring do
     |> String.replace("\t", "~~")
     |> String.slice(0..100)
   end
-
 
   @doc """
   Takes zipped and base64'd data and tries to extract it
@@ -213,9 +217,11 @@ defmodule Teiserver.Protocols.Spring do
         case unzip(compressed_contents) do
           {:ok, contents} ->
             {:ok, contents}
+
           {:error, _} ->
             {:error, "unzip decode error"}
         end
+
       _ ->
         {:error, "base64 decode error"}
     end
@@ -238,6 +244,7 @@ defmodule Teiserver.Protocols.Spring do
         case Jason.decode(string) do
           {:ok, json} ->
             {:ok, json}
+
           {:error, %Jason.DecodeError{position: position, data: _data}} ->
             {:error, "Json decode error at position #{position}"}
         end

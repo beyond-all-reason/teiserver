@@ -1,5 +1,5 @@
-<%
-  the_icon = if assigns[:icon_class] do
+<% the_icon =
+  if assigns[:icon_class] do
     assigns[:icon]
     |> String.replace("fa-thin ", "#{assigns[:icon_class]} ")
     |> String.replace("fal ", "#{assigns[:icon_class]} ")
@@ -14,32 +14,34 @@
     assigns[:icon]
   end
 
-  style = cond do
+style =
+  cond do
     assigns[:disabled] -> "color: #888; cursor: default;"
     assigns[:style] -> assigns[:style]
     true -> ""
   end
 
-  extra_classes = (assigns[:class] || "")
+extra_classes = assigns[:class] || ""
 
-  col_classes = case assigns[:size] do
+col_classes =
+  case assigns[:size] do
     :small -> "col-sm-6 col-md-4 col-lg-2 col-xl-1 col-xxl-1"
     :medium -> "col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1"
     :large -> "col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-2"
-    nil -> (assigns[:col_classes] || "col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1")
+    nil -> assigns[:col_classes] || "col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1"
   end
 
-  icon_size = case assigns[:size] do
+icon_size =
+  case assigns[:size] do
     :small -> "fa-3x"
     :medium -> "fa-4x"
     :large -> "fa-6x"
-    nil -> (assigns[:col_classes] || "fa-4x")
-  end
-%>
+    nil -> assigns[:col_classes] || "fa-4x"
+  end %>
 
 <div class={"#{col_classes} menu-card #{extra_classes}"}>
   <a href={assigns[:link]} class="block-link" id={"sub-menu-#{assigns[:name]}"} style={style}>
-    <i class={"fa-fw #{the_icon} #{icon_size}"}></i><br />
+    <i class={"fa-fw #{the_icon} #{icon_size}"}></i> <br />
     <%= assigns[:text] %>
   </a>
 </div>

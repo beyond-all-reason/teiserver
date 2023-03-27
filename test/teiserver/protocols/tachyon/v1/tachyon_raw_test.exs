@@ -4,7 +4,18 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
   alias Teiserver.{User, Account}
 
   import Teiserver.TeiserverTestLib,
-    only: [spring_tls_setup: 0, tachyon_tls_setup: 0, raw_setup: 0, _send_raw: 2, _tachyon_send: 2, _recv_raw: 1, _tachyon_recv: 1, new_user: 0, new_user_name: 0, _recv_until: 1]
+    only: [
+      spring_tls_setup: 0,
+      tachyon_tls_setup: 0,
+      raw_setup: 0,
+      _send_raw: 2,
+      _tachyon_send: 2,
+      _recv_raw: 1,
+      _tachyon_recv: 1,
+      new_user: 0,
+      new_user_name: 0,
+      _recv_until: 1
+    ]
 
   alias Teiserver.Protocols.TachyonLib
 
@@ -69,19 +80,40 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
   test "register and auth", %{socket: socket} do
     # Lets start with a bad register command
     existing_user = new_user()
-    data = %{cmd: "c.auth.register", username: "test_name", email: existing_user.email, password: "password"}
+
+    data = %{
+      cmd: "c.auth.register",
+      username: "test_name",
+      email: existing_user.email,
+      password: "password"
+    }
+
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
-    assert reply == [%{"cmd" => "s.auth.register", "result" => "failure", "reason" => "Email already in use"}]
+
+    assert reply == [
+             %{
+               "cmd" => "s.auth.register",
+               "result" => "failure",
+               "reason" => "Email already in use"
+             }
+           ]
 
     # Now a good one
     name = new_user_name()
-    data = %{cmd: "c.auth.register", username: name, email: "tachyon_register@example.e", password: "password"}
+
+    data = %{
+      cmd: "c.auth.register",
+      username: name,
+      email: "tachyon_register@example.e",
+      password: "password"
+    }
+
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
     assert reply == [%{"cmd" => "s.auth.register", "result" => "success"}]
 
-    db_user =  Account.get_user(nil, search: [email: "tachyon_register@example.e"])
+    db_user = Account.get_user(nil, search: [email: "tachyon_register@example.e"])
     assert db_user != nil
 
     cache_user_email = User.get_user_by_email("tachyon_register@example.e")
@@ -96,7 +128,15 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     data = %{cmd: "c.auth.get_token", password: "bad_password", email: user.email, msg_id: 555}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
-    assert reply == [%{"cmd" => "s.auth.get_token", "result" => "failure", "reason" => "Invalid credentials", "msg_id" => 555}]
+
+    assert reply == [
+             %{
+               "cmd" => "s.auth.get_token",
+               "result" => "failure",
+               "reason" => "Invalid credentials",
+               "msg_id" => 555
+             }
+           ]
 
     # Good password
     data = %{cmd: "c.auth.get_token", password: "password", email: user.email}
@@ -107,7 +147,14 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     assert reply == %{"cmd" => "s.auth.get_token", "result" => "success", "token" => token}
 
     # Now do the login, it should work as we only just created the user
-    data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a", lobby_hash: "t1 t2"}
+    data = %{
+      cmd: "c.auth.login",
+      token: token,
+      lobby_name: "ex_test",
+      lobby_version: "1a",
+      lobby_hash: "t1 t2"
+    }
+
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
     assert match?([%{"cmd" => "s.auth.login", "result" => "success"}], reply)
@@ -118,7 +165,14 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
   test "register, verify and auth", %{socket: socket} do
     # Create the user
     name = new_user_name()
-    data = %{cmd: "c.auth.register", username: name, email: "tachyon_verify@example.e", password: "password"}
+
+    data = %{
+      cmd: "c.auth.register",
+      username: name,
+      email: "tachyon_verify@example.e",
+      password: "password"
+    }
+
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
     assert reply == [%{"cmd" => "s.auth.register", "result" => "success"}]
@@ -130,7 +184,15 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     data = %{cmd: "c.auth.get_token", password: "bad_password", email: user.email, msg_id: 555}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
-    assert reply == [%{"cmd" => "s.auth.get_token", "result" => "failure", "reason" => "Invalid credentials", "msg_id" => 555}]
+
+    assert reply == [
+             %{
+               "cmd" => "s.auth.get_token",
+               "result" => "failure",
+               "reason" => "Invalid credentials",
+               "msg_id" => 555
+             }
+           ]
 
     # Good password
     data = %{cmd: "c.auth.get_token", password: "password", email: user.email}
@@ -141,10 +203,24 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     assert reply == %{"cmd" => "s.auth.get_token", "result" => "success", "token" => token}
 
     # Now do the login
-    data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a", lobby_hash: "t1 t2"}
+    data = %{
+      cmd: "c.auth.login",
+      token: token,
+      lobby_name: "ex_test",
+      lobby_version: "1a",
+      lobby_hash: "t1 t2"
+    }
+
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
-    assert reply == [%{"cmd" => "s.auth.login", "result" => "unverified", "agreement" => "User agreement goes here."}]
+
+    assert reply == [
+             %{
+               "cmd" => "s.auth.login",
+               "result" => "unverified",
+               "agreement" => "User agreement goes here."
+             }
+           ]
 
     # Verify - bad token
     data = %{cmd: "c.auth.verify", token: "aaaa", code: "1a"}
@@ -176,7 +252,14 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
   test "auth existing user", %{socket: socket} do
     # Create the user
     name = new_user_name()
-    data = %{cmd: "c.auth.register", username: name, email: "tachyon_existing@example.e", password: "token_password"}
+
+    data = %{
+      cmd: "c.auth.register",
+      username: name,
+      email: "tachyon_existing@example.e",
+      password: "token_password"
+    }
+
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
     assert reply == [%{"cmd" => "s.auth.register", "result" => "success"}]
@@ -188,7 +271,15 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     data = %{cmd: "c.auth.get_token", password: "bad_password", email: user.email, msg_id: 555}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
-    assert reply == [%{"cmd" => "s.auth.get_token", "result" => "failure", "reason" => "Invalid credentials", "msg_id" => 555}]
+
+    assert reply == [
+             %{
+               "cmd" => "s.auth.get_token",
+               "result" => "failure",
+               "reason" => "Invalid credentials",
+               "msg_id" => 555
+             }
+           ]
 
     # Good password
     data = %{cmd: "c.auth.get_token", password: "token_password", email: user.email}
@@ -199,13 +290,30 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     assert reply == %{"cmd" => "s.auth.get_token", "result" => "success", "token" => token}
 
     # Login - bad token
-    data = %{cmd: "c.auth.login", token: "ab", lobby_name: "ex_test", lobby_version: "1a", lobby_hash: "t1 t2"}
+    data = %{
+      cmd: "c.auth.login",
+      token: "ab",
+      lobby_name: "ex_test",
+      lobby_version: "1a",
+      lobby_hash: "t1 t2"
+    }
+
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
-    assert reply == [%{"cmd" => "s.auth.login", "result" => "failure", "reason" => "token_login_failed"}]
+
+    assert reply == [
+             %{"cmd" => "s.auth.login", "result" => "failure", "reason" => "token_login_failed"}
+           ]
 
     # Login - good token
-    data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a", lobby_hash: "t1 t2"}
+    data = %{
+      cmd: "c.auth.login",
+      token: token,
+      lobby_name: "ex_test",
+      lobby_version: "1a",
+      lobby_hash: "t1 t2"
+    }
+
     _tachyon_send(socket, data)
     [reply] = _tachyon_recv(socket)
     assert Map.has_key?(reply, "user")
@@ -223,21 +331,24 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
 
     # Create the user
     username = new_user_name()
-    {:ok, user} = Account.create_user(%{
-      name: username,
-      email: "#{username}@email",
-      password: md5_pass,
-      permissions: [],
-      admin_group_id: Teiserver.user_group_id(),
-      colour: "#AA0000",
-      icon: "fa-solid fa-user",
-      data: %{
-        "bot" => false,
-        "moderator" => false,
-        "verified" => true,
-        "springid" => 123,
-      }
-    })
+
+    {:ok, user} =
+      Account.create_user(%{
+        name: username,
+        email: "#{username}@email",
+        password: md5_pass,
+        permissions: [],
+        admin_group_id: Teiserver.user_group_id(),
+        colour: "#AA0000",
+        icon: "fa-solid fa-user",
+        data: %{
+          "bot" => false,
+          "moderator" => false,
+          "verified" => true,
+          "springid" => 123
+        }
+      })
+
     userid = user.id
     user = Account.get_user!(userid)
 
@@ -246,6 +357,7 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
         "password_hash" => user.password |> String.replace("\"", ""),
         "spring_password" => true
       })
+
     Account.update_user(user, %{data: new_data})
     User.recache_user(userid)
 
@@ -269,9 +381,7 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
 
     assert accepted == "ACCEPTED #{username}",
       message:
-        "Bad password, gave X03MO1qnZdYdgyfeuILPmQ== but needed #{user.data["password_hash"]}. Accepted message is #{
-          accepted
-        }"
+        "Bad password, gave X03MO1qnZdYdgyfeuILPmQ== but needed #{user.data["password_hash"]}. Accepted message is #{accepted}"
 
     # Check the user password hasn't changed
     user = Account.get_user!(userid)
@@ -334,8 +444,6 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
 
     assert accepted == "ACCEPTED #{username}",
       message:
-        "Bad password, gave X03MO1qnZdYdgyfeuILPmQ== but needed #{user.data["password_hash"]}. Accepted message is #{
-          accepted
-        }"
+        "Bad password, gave X03MO1qnZdYdgyfeuILPmQ== but needed #{user.data["password_hash"]}. Accepted message is #{accepted}"
   end
 end

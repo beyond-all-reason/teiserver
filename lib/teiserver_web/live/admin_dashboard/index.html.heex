@@ -1,24 +1,18 @@
-<%
-  lobby_bsname = Teiserver.Battle.LobbyLib.colours()
-  queue_bsname = Teiserver.Game.QueueLib.colours()
-  #policy_bsname = Teiserver.Game.LobbyPolicyLib.colours()
-%>
+<% lobby_bsname = Teiserver.Battle.LobbyLib.colours()
+queue_bsname = Teiserver.Game.QueueLib.colours()
+# policy_bsname = Teiserver.Game.LobbyPolicyLib.colours() %>
 
 <div class="row my-2">
   <h4>Commands</h4>
   <div class="col-md-4">
     <div class="btn btn-info mx-2" phx-click="reinit-consuls">Init consuls</div>
-
     &nbsp;
-
     <div class="btn btn-info2 mx-2" phx-click="check-consuls">Check consuls</div>
   </div>
 
   <div class="col-md-4">
     <div class="btn btn-info mx-2" phx-click="reinit-balances">Init balances</div>
-
     &nbsp;
-
     <div class="btn btn-info2 mx-2" phx-click="check-balances">Check balances</div>
   </div>
 
@@ -30,10 +24,9 @@
 <div class="row mt-4">
   <div class="col-md-6 mb-4 col-xl-8 col-xxl-9">
     <div class="row">
-
       <div class="col-md-12 mb-4 col-xl-6 col-xxl-4">
         <h4>Telemetry</h4>
-        <table class='table table-sm table-hover'>
+        <table class="table table-sm table-hover">
           <tbody>
             <tr>
               <td>Clients</td>
@@ -72,7 +65,7 @@
               <th>Name</th>
               <th>Alive</th>
               <th>&nbsp;</th>
-          </tr>
+            </tr>
           </thead>
           <tbody>
             <%= for {queue, wait} <- @queues do %>
@@ -87,7 +80,10 @@
                   <% end %>
                 </td>
                 <td>
-                  <%= live_redirect "Show", to: Routes.ts_game_queue_show_path(@socket, :show, queue.id), class: "btn btn-sm btn-outline-#{queue_bsname}" %>
+                  <%= live_redirect("Show",
+                    to: Routes.ts_game_queue_show_path(@socket, :show, queue.id),
+                    class: "btn btn-sm btn-outline-#{queue_bsname}"
+                  ) %>
                 </td>
               </tr>
             <% end %>
@@ -104,7 +100,7 @@
               <th>Name</th>
               <th>Organiser</th>
               <th>&nbsp;</th>
-          </tr>
+            </tr>
           </thead>
           <tbody>
             <%= for {policy, organiser} <- @policies do %>
@@ -119,7 +115,10 @@
                   <% end %>
                 </td>
                 <td>
-                  <%= live_redirect "Show", to: ~p"/admin/dashboard/policy/#{policy.id}", class: "btn btn-sm btn-outline-#{queue_bsname}" %>
+                  <%= live_redirect("Show",
+                    to: ~p"/admin/dashboard/policy/#{policy.id}",
+                    class: "btn btn-sm btn-outline-#{queue_bsname}"
+                  ) %>
                 </td>
               </tr>
             <% end %>
@@ -134,7 +133,7 @@
             <tr>
               <th>Name</th>
               <th>Running</th>
-          </tr>
+            </tr>
           </thead>
           <tbody>
             <%= for {server_name, server_pid} <- @server_pids do %>
@@ -166,7 +165,7 @@
           <th>Balancer</th>
           <th>Throttle</th>
           <th>&nbsp;</th>
-       </tr>
+        </tr>
       </thead>
       <tbody>
         <%= for {lobby, consul, balancer, throttle} <- @lobbies do %>
@@ -195,7 +194,10 @@
               <% end %>
             </td>
             <td>
-              <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id), class: "btn btn-sm btn-outline-#{lobby_bsname}" %>
+              <%= live_redirect("Show",
+                to: Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id),
+                class: "btn btn-sm btn-outline-#{lobby_bsname}"
+              ) %>
             </td>
           </tr>
         <% end %>

@@ -16,7 +16,10 @@ defmodule Central.Repo.Migrations.BadgesAndAccolades do
     create table(:teiserver_account_accolades) do
       add :recipient_id, references(:account_users, on_delete: :nothing)
       add :giver_id, references(:account_users, on_delete: :nothing)
-      add :badge_type_id, references(:teiserver_account_badge_types, on_delete: :nothing), null: true
+
+      add :badge_type_id, references(:teiserver_account_badge_types, on_delete: :nothing),
+        null: true
+
       add :inserted_at, :utc_datetime
     end
 

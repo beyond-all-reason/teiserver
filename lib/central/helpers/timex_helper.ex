@@ -25,7 +25,7 @@ defmodule Central.Helpers.TimexHelper do
     date_to_str(the_time, format: format)
   end
 
-  def date_to_str(the_time, [format: :dmy_text, tz: tz]), do: dmy_text(the_time, tz)
+  def date_to_str(the_time, format: :dmy_text, tz: tz), do: dmy_text(the_time, tz)
 
   def date_to_str(the_time, args) do
     format = args[:format] || :dmy
@@ -44,23 +44,56 @@ defmodule Central.Helpers.TimexHelper do
 
     time_str =
       case format do
-        :day_name -> Timex.format!(the_time, "{WDfull}")
-        :dmy -> Timex.format!(the_time, "{0D}/{0M}/{YYYY}")
-        :ymd -> Timex.format!(the_time, "{YYYY}-{0M}-{0D}")
-        :hms_dmy -> Timex.format!(the_time, "{h24}:{m}:{s} {0D}/{0M}/{YYYY}")
-        :ymd_hms -> Timex.format!(the_time, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}")
-        :ymd_t_hms -> Timex.format!(the_time, "{YYYY}-{M}-{D}T{h24}:{m}:{s}")
-        :hms -> Timex.format!(the_time, "{h24}:{m}:{s}")
-        :hm_dmy -> Timex.format!(the_time, "{h24}:{m} {0D}/{0M}/{YYYY}")
-        :hm -> Timex.format!(the_time, "{h24}:{m}")
-        :clock24 -> Timex.format!(the_time, "{h24}{m}")
-        :html_input -> Timex.format!(the_time, "{YYYY}-{0M}-{0D}T{h24}:{m}")
-        :email_date -> Timex.format!(the_time, "{WDshort}, {0D} {Mshort} {YYYY} {h24}:{m}:{s} {Z}")
-        :hms_or_hmsdmy -> _hms_or_hmsdmy(the_time, now)
-        :hms_or_dmy -> _hms_or_dmy(the_time, now)
-        :hms_or_ymd -> _hms_or_ymd(the_time, now)
-        :hm_or_dmy -> _hm_or_dmy(the_time, now)
-        :everything -> Timex.format!(the_time, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}, {WDfull}")
+        :day_name ->
+          Timex.format!(the_time, "{WDfull}")
+
+        :dmy ->
+          Timex.format!(the_time, "{0D}/{0M}/{YYYY}")
+
+        :ymd ->
+          Timex.format!(the_time, "{YYYY}-{0M}-{0D}")
+
+        :hms_dmy ->
+          Timex.format!(the_time, "{h24}:{m}:{s} {0D}/{0M}/{YYYY}")
+
+        :ymd_hms ->
+          Timex.format!(the_time, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}")
+
+        :ymd_t_hms ->
+          Timex.format!(the_time, "{YYYY}-{M}-{D}T{h24}:{m}:{s}")
+
+        :hms ->
+          Timex.format!(the_time, "{h24}:{m}:{s}")
+
+        :hm_dmy ->
+          Timex.format!(the_time, "{h24}:{m} {0D}/{0M}/{YYYY}")
+
+        :hm ->
+          Timex.format!(the_time, "{h24}:{m}")
+
+        :clock24 ->
+          Timex.format!(the_time, "{h24}{m}")
+
+        :html_input ->
+          Timex.format!(the_time, "{YYYY}-{0M}-{0D}T{h24}:{m}")
+
+        :email_date ->
+          Timex.format!(the_time, "{WDshort}, {0D} {Mshort} {YYYY} {h24}:{m}:{s} {Z}")
+
+        :hms_or_hmsdmy ->
+          _hms_or_hmsdmy(the_time, now)
+
+        :hms_or_dmy ->
+          _hms_or_dmy(the_time, now)
+
+        :hms_or_ymd ->
+          _hms_or_ymd(the_time, now)
+
+        :hm_or_dmy ->
+          _hm_or_dmy(the_time, now)
+
+        :everything ->
+          Timex.format!(the_time, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}, {WDfull}")
       end
 
     until_str =
@@ -263,6 +296,7 @@ defmodule Central.Helpers.TimexHelper do
 
   def duration_to_str(nil, _), do: ""
   def duration_to_str(_, nil), do: ""
+
   def duration_to_str(t1, t2) do
     Timex.diff(t1, t2, :second)
     |> abs
@@ -275,7 +309,8 @@ defmodule Central.Helpers.TimexHelper do
   def duration_to_str(seconds) do
     cond do
       seconds >= @day ->
-        days = seconds/@day |> :math.floor |> round
+        days = (seconds / @day) |> :math.floor() |> round
+
         if days == 1 do
           "#{days} day"
         else
@@ -283,7 +318,8 @@ defmodule Central.Helpers.TimexHelper do
         end
 
       seconds >= @hour ->
-        hours = seconds/@hour |> :math.floor |> round
+        hours = (seconds / @hour) |> :math.floor() |> round
+
         if hours == 1 do
           "#{hours} hour"
         else
@@ -296,38 +332,42 @@ defmodule Central.Helpers.TimexHelper do
   end
 
   def duration_to_str_short(nil), do: nil
+
   def duration_to_str_short(seconds) do
-    {days, remaining} = if seconds >= @day do
-      days = seconds/@day |> :math.floor |> round
-      {days, seconds - (days * @day)}
-    else
-      {0, seconds}
-    end
+    {days, remaining} =
+      if seconds >= @day do
+        days = (seconds / @day) |> :math.floor() |> round
+        {days, seconds - days * @day}
+      else
+        {0, seconds}
+      end
 
-    {hours, remaining} = if remaining >= @hour do
-      hours = remaining/@hour |> :math.floor |> round
-      {hours, remaining - (hours * @hour)}
-    else
-      {0, remaining}
-    end
+    {hours, remaining} =
+      if remaining >= @hour do
+        hours = (remaining / @hour) |> :math.floor() |> round
+        {hours, remaining - hours * @hour}
+      else
+        {0, remaining}
+      end
 
-    {minutes, remaining} = if remaining >= @minute do
-      minutes = remaining/@minute |> :math.floor |> round
-      {minutes, remaining - (minutes * @minute)}
-    else
-      {0, remaining}
-    end
+    {minutes, remaining} =
+      if remaining >= @minute do
+        minutes = (remaining / @minute) |> :math.floor() |> round
+        {minutes, remaining - minutes * @minute}
+      else
+        {0, remaining}
+      end
 
     minutes = if minutes < 10, do: "0#{minutes}", else: minutes
     remaining = if remaining < 10, do: "0#{remaining}", else: remaining
 
     [
-      (if days > 0, do: "#{days}d "),
-      (if hours > 0, do: "#{hours}:"),
+      if(days > 0, do: "#{days}d "),
+      if(hours > 0, do: "#{hours}:"),
       "#{minutes}:",
-      "#{remaining}",
+      "#{remaining}"
     ]
-      |> Enum.reject(fn v -> v == nil end)
-      |> Enum.join("")
+    |> Enum.reject(fn v -> v == nil end)
+    |> Enum.join("")
   end
 end

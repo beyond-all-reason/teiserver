@@ -14,6 +14,7 @@ defmodule Central.Repo.Migrations.UserTokens do
 
       timestamps()
     end
+
     create index(:account_user_tokens, [:value])
   end
 end

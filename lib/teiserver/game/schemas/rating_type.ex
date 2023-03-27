@@ -12,12 +12,13 @@ defmodule Teiserver.Game.RatingType do
   """
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
-    params = params
+    params =
+      params
       |> trim_strings(~w(name icon colour)a)
 
     struct
-      |> cast(params, ~w(name icon colour)a)
-      |> validate_required(~w(name icon colour)a)
+    |> cast(params, ~w(name icon colour)a)
+    |> validate_required(~w(name icon colour)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

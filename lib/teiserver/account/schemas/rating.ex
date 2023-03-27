@@ -18,7 +18,12 @@ defmodule Teiserver.Account.Rating do
   @doc false
   def changeset(stats, attrs \\ %{}) do
     stats
-      |> cast(attrs, ~w(user_id rating_type_id rating_value skill uncertainty last_updated leaderboard_rating)a)
-      |> validate_required(~w(user_id rating_type_id rating_value skill uncertainty last_updated leaderboard_rating)a)
+    |> cast(
+      attrs,
+      ~w(user_id rating_type_id rating_value skill uncertainty last_updated leaderboard_rating)a
+    )
+    |> validate_required(
+      ~w(user_id rating_type_id rating_value skill uncertainty last_updated leaderboard_rating)a
+    )
   end
 end

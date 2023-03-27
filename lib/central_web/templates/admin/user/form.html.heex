@@ -1,7 +1,8 @@
 <% bsname = view_colour() %>
 
-<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
-<script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")} />
+<script src={Routes.static_path(@conn, "/js/select2.js")}>
+</script>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -9,7 +10,7 @@
   });
 </script>
 
-<%= central_component "icon_dropdown_js", [] %>
+<%= central_component("icon_dropdown_js", []) %>
 
 <%= form_for @changeset, @action, fn f -> %>
   <%= if @changeset.action do %>
@@ -19,60 +20,63 @@
   <% end %>
 
   <div class="form-group my-3">
-    <%= label f, :name, class: "control-label" %>
-    <%= text_input f, :name, class: "form-control", autofocus: :autofocus %>
-    <%= error_tag f, :name %>
+    <%= label(f, :name, class: "control-label") %>
+    <%= text_input(f, :name, class: "form-control", autofocus: :autofocus) %>
+    <%= error_tag(f, :name) %>
   </div>
 
   <div class="form-group my-3">
-    <%= label f, :email, class: "control-label" %>
-    <%= text_input f, :email, class: "form-control" %>
-    <%= error_tag f, :email %>
+    <%= label(f, :email, class: "control-label") %>
+    <%= text_input(f, :email, class: "form-control") %>
+    <%= error_tag(f, :email) %>
   </div>
 
   <div class="form-group my-3">
-    <%= label f, :admin_group_id, class: "control-label" %>
-    <%= central_component "icon_dropdown", %{
+    <%= label(f, :admin_group_id, class: "control-label") %>
+    <%= central_component("icon_dropdown", %{
       name: "user[admin_group_id]",
       id: "user_admin_group_id",
-      selected: f.data.admin_group_id || Map.get(@changeset.changes, :admin_group_id, @current_user.admin_group_id),
+      selected:
+        f.data.admin_group_id ||
+          Map.get(@changeset.changes, :admin_group_id, @current_user.admin_group_id),
       enumerable: @groups,
-      insert_blank: %{id: "", name: "None", icon: "fa-solid fa-square", colour: "#000000"},
-    } %>
+      insert_blank: %{id: "", name: "None", icon: "fa-solid fa-square", colour: "#000000"}
+    }) %>
   </div>
 
   <div class="form-group my-3">
-    <%= input_with_type f, :colour, "color" %>
+    <%= input_with_type(f, :colour, "color") %>
   </div>
 
   <div class="form-group my-3">
-    <%= central_component "fa5_icon_picker", %{form: f, field: :icon} %>
+    <%= central_component("fa5_icon_picker", %{form: f, field: :icon}) %>
   </div>
 
   <hr />
 
   <div class="form-group my-3">
-    <%
-      data = f.data.data || Map.get(@changeset.changes, :data, @current_user.data)
-    %>
-    <%= label f, :data, class: "control-label" %>
+    <% data = f.data.data || Map.get(@changeset.changes, :data, @current_user.data) %>
+    <%= label(f, :data, class: "control-label") %>
     <textarea id="user_data" name="user[data]" rows="8" class="form-control monospace"><%= Jason.encode! data, pretty: true %></textarea>
-    <%= error_tag f, :data %>
+    <%= error_tag(f, :data) %>
   </div>
 
-  <%#
-  changes: Map.get(@changeset.changes, :default_options, %{})[@option.name],
-  data:
-  description: @option.description
-  %>
 
   <div class="form-group my-3">
     <%= if @changeset.data.id do %>
-      <a href={Routes.admin_user_path(@conn, :show, @changeset.data.id)} class="btn btn-secondary btn-outline">
+      <a
+        href={Routes.admin_user_path(@conn, :show, @changeset.data.id)}
+        class="btn btn-secondary btn-outline"
+      >
         Cancel
       </a>
     <% end %>
 
-    <input type="submit" value="Save changes" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
+    <input
+      type="submit"
+      value="Save changes"
+      name="form.submitted"
+      class={"btn btn-#{bsname} float-end"}
+    />
   </div>
 <% end %>

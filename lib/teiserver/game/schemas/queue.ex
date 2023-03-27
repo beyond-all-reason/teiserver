@@ -35,8 +35,8 @@ defmodule Teiserver.Game.Queue do
       |> remove_characters([:name], [~r/[:]/])
 
     struct
-      |> cast(params, ~w(name icon colour team_size team_count conditions settings map_list)a)
-      |> validate_required(~w(name icon colour team_size team_count map_list)a)
+    |> cast(params, ~w(name icon colour team_size team_count conditions settings map_list)a)
+    |> validate_required(~w(name icon colour team_size team_count map_list)a)
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean

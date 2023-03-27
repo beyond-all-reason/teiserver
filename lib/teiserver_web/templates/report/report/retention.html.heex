@@ -1,12 +1,18 @@
 <% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "reports"})
+) %>
 
 <%= if Map.has_key?(@data, :graph_data) do %>
-  <script src={Routes.static_path(@conn, "/js/d3.js")}></script>
-  <script src={Routes.static_path(@conn, "/js/c3.min.js")}></script>
+  <script src={Routes.static_path(@conn, "/js/d3.js")}>
+  </script>
+  <script src={Routes.static_path(@conn, "/js/c3.min.js")}>
+  </script>
 
-  <link href="/css/c3.min.css" rel="stylesheet">
+  <link href="/css/c3.min.css" rel="stylesheet" />
 
   <script>
     $(function() {
@@ -24,50 +30,73 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <div class="btn btn-primary2 float-end" onclick="$('.help-box, .help-box-large').toggle();">
-          <i class='fa-fw fa-solid fa-circle-info'></i>
-          &nbsp;
+        <div
+          class="btn btn-primary2 float-end"
+          onclick="$('.help-box, .help-box-large').toggle();"
+        >
+          <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
           Show/Hide help
         </div>
 
-        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Report.ReportView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "retention"
           })
-        %>
+        ) %>
         <br /><br />
 
-        <form action={Routes.ts_reports_report_path(@conn, :show, "retention")} method="post" class="form-horizontal">
+        <form
+          action={Routes.ts_reports_report_path(@conn, :show, "retention")}
+          method="post"
+          class="form-horizontal"
+        >
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
           <div class="row">
             <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_date_preset" class="control-label">Date range:</label>
-              <%= select :report, :date_preset, @presets, class: "form-control", selected: @params["date_preset"] %>
+              <%= select(:report, :date_preset, @presets,
+                class: "form-control",
+                selected: @params["date_preset"]
+              ) %>
             </div>
 
             <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_start_date" class="control-label">Start date:</label>
-              <input type="text" id="report_start_date" name="report[start_date]" value={@params["start_date"]} class="form-control datepicker" />
+              <input
+                type="text"
+                id="report_start_date"
+                name="report[start_date]"
+                value={@params["start_date"]}
+                class="form-control datepicker"
+              />
             </div>
 
             <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_end_date" class="control-label">End date:</label>
-              <input type="text" id="report_end_date" name="report[end_date]" value={@params["end_date"]} class="form-control datepicker" />
+              <input
+                type="text"
+                id="report_end_date"
+                name="report[end_date]"
+                value={@params["end_date"]}
+                class="form-control datepicker"
+              />
             </div>
 
             <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_skip0" class="control-label">Skip day 0:</label>
-              <%= central_component "checkbox",
+              <%= central_component("checkbox",
                 name: "report[skip0]",
                 id: "report_skip0",
                 value: "true",
                 label: "Skip day 0",
                 checked: @params["skip0"] == "true",
-                
                 description: ""
-              %>
+              ) %>
             </div>
           </div>
 
@@ -81,14 +110,18 @@
                   <li>Registered within a certain date range</li>
                   <li>Have played at least once</li>
                 </ul>
-                
                 If skip0 is set then the 1st day of results will be skipped (the day their account was created) for the graph but the count and % at the bottom will remain.
               </div>
             </div>
-            
+
             <div class="col-md-4 col-xl-3">
               &nbsp;<br />
-              <input type="submit" value="Update report" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+              <input
+                type="submit"
+                value="Update report"
+                name="form.submitted"
+                class={"btn btn-#{bsname} btn-block"}
+              />
             </div>
           </div>
         </form>
@@ -96,19 +129,18 @@
 
         <%= if Map.has_key?(@data, :graph_data) do %>
           <div class="card-body">
-            <div id="chart" class='with-transitions' style="height: 400px;">
-            </div>
+            <div id="chart" class="with-transitions" style="height: 400px;"></div>
           </div>
         <% end %>
 
-        <table class='table'>
+        <table class="table">
           <thead>
             <tr>
               <th>&nbsp;</th>
               <%= for d <- Range.new(0, @data.max_key) do %>
                 <th><%= d %></th>
               <% end %>
-           </tr>
+            </tr>
           </thead>
           <tbody>
             <tr>
@@ -116,20 +148,19 @@
               <%= for d <- Range.new(0, @data.max_key) do %>
                 <td><%= Map.get(@data.play_retention_grouping, d, 0) %></td>
               <% end %>
-           </tr>
+            </tr>
 
-           <tr>
+            <tr>
               <td>As %</td>
               <%= for d <- Range.new(0, @data.max_key) do %>
-                <td><%=
-                  raw = Map.get(@data.play_retention_grouping, d, 0)/@data.user_count
-                  round(raw * 1000)/10
-                %></td>
+                <td>
+                  <%= raw = Map.get(@data.play_retention_grouping, d, 0) / @data.user_count
+                  round(raw * 1000) / 10 %>
+                </td>
               <% end %>
-           </tr>
+            </tr>
           </tbody>
         </table>
-
       </div>
     </div>
   </div>

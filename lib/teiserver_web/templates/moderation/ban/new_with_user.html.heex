@@ -1,6 +1,10 @@
 <% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Moderation.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "bans"}) %>
+<%= render(
+  TeiserverWeb.Moderation.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "bans"})
+) %>
 
 <script type="text/javascript" charset="utf-8">
   function select_all_keys () {
@@ -12,142 +16,153 @@
   }
 </script>
 
-<%
-  type_colours = %{
-    "hw1" => "danger",
-    "hw2" => "danger",
-    "client_app_hash" => "warning",
-    "wb1" => "success",
-    "chobby_hash" => "info",
-    "chobby_sysinfo_hash" => "info",
-    "chobby_mac_hash" => "info"
-  }
+<% type_colours = %{
+  "hw1" => "danger",
+  "hw2" => "danger",
+  "client_app_hash" => "warning",
+  "wb1" => "success",
+  "chobby_hash" => "info",
+  "chobby_sysinfo_hash" => "info",
+  "chobby_mac_hash" => "info"
+}
 
-  type_icons = %{
-    "hw1" => "fa-computer",
-    "hw2" => "fa-computer",
-    "client_app_hash" => "fa-code-simple",
-    "wb1" => "fa-globe",
-    "chobby_hash" => "fa-computer-classic",
-    "chobby_sysinfo_hash" => "fa-computer-classic",
-    "chobby_mac_hash" => "fa-computer-classic"
-  }
-%>
+type_icons = %{
+  "hw1" => "fa-computer",
+  "hw2" => "fa-computer",
+  "client_app_hash" => "fa-code-simple",
+  "wb1" => "fa-globe",
+  "chobby_hash" => "fa-computer-classic",
+  "chobby_sysinfo_hash" => "fa-computer-classic",
+  "chobby_mac_hash" => "fa-computer-classic"
+} %>
 
 <div class="row mt-4">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Moderation.BanView, "section_menu.html", Map.merge(assigns, %{
-          basic_search: "",
-          show_search: false,
-          active: "new"
-        })
-        %>
+        <%= render(
+          TeiserverWeb.Moderation.BanView,
+          "section_menu.html",
+          Map.merge(assigns, %{
+            basic_search: "",
+            show_search: false,
+            active: "new"
+          })
+        ) %>
 
         <hr />
-<div class="float-end">
-  <a class={"btn btn-outline-#{bsname}"} href={~p"/teiserver/admin/user/#{@user}"}>View user</a>
-</div>
-
-<h3>Adding ban based on <%= @user.name %></h3>
-
-<div class="row">
-  <div class="col-md-12 mb-4">
-    <%= case Enum.count(@matching_users) do %>
-      <% 0 -> %>
-        <div class="alert alert-primary">
-          This account currently has zero smurf key matches.
-        </div>
-
-      <% _ -> %>
-        <div class="alert alert-primary">
-          Potentially matches the following unbanned user(s): <%= (for u <- @matching_users, do: u.name) |> Enum.join(", ") %>. They exist prior to this ban and will not be affected.
-        </div>
-    <% end %>
-
-    <%= form_for @changeset, Routes.moderation_ban_path(@conn, :create), fn f -> %>
-      <%= if @changeset.action do %>
-        <div class="alert alert-danger">
-          <p>Oops, something went wrong! Please check the errors below.</p>
-        </div>
-      <% end %>
-
-      <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
-      <input type='hidden' name='ban[source_id]' value={@user.id} />
-      <input type='hidden' name='ban[enabled]' value="true" />
-
-      <div class="row" id="keys-row">
-        <div class="form-group col-md-12 col-lg-6 my-3">
-          <%= label f, :reason, class: "control-label" %>
-          <%= text_input f, :reason, class: "form-control", autofocus: :autofocus %>
-          <%= error_tag f, :reason %>
-        </div>
-
-        <div class="form-group col-md-12 my-3">
-          <div class="float-end">
-            <span class="btn btn-outline-secondary" onclick="select_all_keys()">Select all keys</span>
-            <span class="btn btn-outline-secondary" onclick="clear_all_keys()">Clear all keys</span>
-          </div>
-
-          <label class="control-label">Hashes:</label>
-          <table class="table table-sm">
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Value</th>
-                <th>Updated</th>
-                <th>&nbsp;</th>
-              </tr>
-            </thead>
-            <tbody>
-              <%= for key <- @all_keys do %>
-                <tr>
-                  <td>
-                    <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}></i>
-                    &nbsp;
-                    <%= key.type.name %>
-                  </td>
-                  <td>
-                    <%= key.value %>
-                  </td>
-                  <td>
-                    <%= date_to_str key.last_updated, format: :hms_or_ymd %>
-                  </td>
-                  <td>
-                    <%= central_component "checkbox",
-                      name: "ban[key_values][]",
-                      id: "ban_type_#{key.value}",
-                      value: key.value,
-                      label: "",
-                      checked: true
-                    %>
-                  </td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="form-group col-md-3 my-3">
-          <a href={~p"/teiserver/admin/user/#{@user.id}"} class="btn btn-secondary btn-block">
-            Cancel
+        <div class="float-end">
+          <a class={"btn btn-outline-#{bsname}"} href={~p"/teiserver/admin/user/#{@user}"}>
+            View user
           </a>
         </div>
 
-        <div class="form-group offset-md-6 col-md-3 my-3">
-          <button type='submit' class={"btn btn-#{bsname} btn-block mt-3"}>
-            Add
-          </button>
+        <h3>Adding ban based on <%= @user.name %></h3>
+
+        <div class="row">
+          <div class="col-md-12 mb-4">
+            <%= case Enum.count(@matching_users) do %>
+              <% 0 -> %>
+                <div class="alert alert-primary">
+                  This account currently has zero smurf key matches.
+                </div>
+              <% _ -> %>
+                <div class="alert alert-primary">
+                  Potentially matches the following unbanned user(s): <%= for(
+                    u <- @matching_users,
+                    do: u.name
+                  )
+                  |> Enum.join(", ") %>. They exist prior to this ban and will not be affected.
+                </div>
+            <% end %>
+
+            <%= form_for @changeset, Routes.moderation_ban_path(@conn, :create), fn f -> %>
+              <%= if @changeset.action do %>
+                <div class="alert alert-danger">
+                  <p>Oops, something went wrong! Please check the errors below.</p>
+                </div>
+              <% end %>
+
+              <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+              <input type="hidden" name="ban[source_id]" value={@user.id} />
+              <input type="hidden" name="ban[enabled]" value="true" />
+
+              <div class="row" id="keys-row">
+                <div class="form-group col-md-12 col-lg-6 my-3">
+                  <%= label(f, :reason, class: "control-label") %>
+                  <%= text_input(f, :reason, class: "form-control", autofocus: :autofocus) %>
+                  <%= error_tag(f, :reason) %>
+                </div>
+
+                <div class="form-group col-md-12 my-3">
+                  <div class="float-end">
+                    <span class="btn btn-outline-secondary" onclick="select_all_keys()">
+                      Select all keys
+                    </span>
+                    <span class="btn btn-outline-secondary" onclick="clear_all_keys()">
+                      Clear all keys
+                    </span>
+                  </div>
+
+                  <label class="control-label">Hashes:</label>
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>Type</th>
+                        <th>Value</th>
+                        <th>Updated</th>
+                        <th>&nbsp;</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <%= for key <- @all_keys do %>
+                        <tr>
+                          <td>
+                            <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}>
+                            </i>
+                            &nbsp; <%= key.type.name %>
+                          </td>
+                          <td>
+                            <%= key.value %>
+                          </td>
+                          <td>
+                            <%= date_to_str(key.last_updated, format: :hms_or_ymd) %>
+                          </td>
+                          <td>
+                            <%= central_component("checkbox",
+                              name: "ban[key_values][]",
+                              id: "ban_type_#{key.value}",
+                              value: key.value,
+                              label: "",
+                              checked: true
+                            ) %>
+                          </td>
+                        </tr>
+                      <% end %>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="form-group col-md-3 my-3">
+                  <a
+                    href={~p"/teiserver/admin/user/#{@user.id}"}
+                    class="btn btn-secondary btn-block"
+                  >
+                    Cancel
+                  </a>
+                </div>
+
+                <div class="form-group offset-md-6 col-md-3 my-3">
+                  <button type="submit" class={"btn btn-#{bsname} btn-block mt-3"}>
+                    Add
+                  </button>
+                </div>
+              </div>
+            <% end %>
+          </div>
         </div>
-      </div>
-    <% end %>
-  </div>
-</div>
-
-
       </div>
     </div>
   </div>

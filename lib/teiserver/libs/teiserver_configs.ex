@@ -44,7 +44,8 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Accolades",
       type: "boolean",
       permissions: ["teiserver.admin.account"],
-      description: "When enabled, players will be offered the chance to bestow accolades to each other.",
+      description:
+        "When enabled, players will be offered the chance to bestow accolades to each other.",
       opts: [],
       default: true
     })
@@ -124,7 +125,8 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Lobbies",
       type: "integer",
       permissions: ["teiserver.admin"],
-      description: "The maximum deviation in mixed party-solo balance before it reverts to purely solo balance",
+      description:
+        "The maximum deviation in mixed party-solo balance before it reverts to purely solo balance",
       opts: [],
       default: 10
     })
@@ -202,8 +204,7 @@ defmodule Teiserver.TeiserverConfigs do
       type: "boolean",
       visible: true,
       permissions: ["teiserver"],
-      description:
-        "You will be messaged when you move from being in the queue to being a player",
+      description: "You will be messaged when you move from being in the queue to being a player",
       opts: [],
       default: true
     })
@@ -214,8 +215,7 @@ defmodule Teiserver.TeiserverConfigs do
       type: "boolean",
       visible: true,
       permissions: ["teiserver"],
-      description:
-        "You will be messaged when a lobby you are a player in starts",
+      description: "You will be messaged when a lobby you are a player in starts",
       opts: [],
       default: true
     })
@@ -339,7 +339,8 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Legacy protocol",
       type: "integer",
       permissions: ["teiserver.admin"],
-      description: "The time in milliseconds to wait until doing something when a user logs in (e.g. sending a message)",
+      description:
+        "The time in milliseconds to wait until doing something when a user logs in (e.g. sending a message)",
       opts: [],
       default: 2500
     })
@@ -354,7 +355,6 @@ defmodule Teiserver.TeiserverConfigs do
       description: "Enable/disable post processing of matches",
       opts: [],
       default: true,
-
       value_label: "Enable"
     })
 

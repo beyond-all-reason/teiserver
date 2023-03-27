@@ -12,23 +12,33 @@
   });
 </script>
 
-<%= render TeiserverWeb.Moderation.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "proposals"}) %>
+<%= render(
+  TeiserverWeb.Moderation.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "proposals"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12 col-xl-6">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Moderation.ProposalView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Moderation.ProposalView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             show_search: false,
             active: "show"
-        }) %>
+          })
+        ) %>
         <hr />
 
         <div class="float-end">
           <%= if @proposal.proposer_id == @current_user.id do %>
-            <a href={Routes.moderation_proposal_path(@conn, :edit, @proposal)} class={"btn btn-outline-#{bsname}"}>
-              <i class="far fa-fw fa-wrench"></i>
-              Edit proposal
+            <a
+              href={Routes.moderation_proposal_path(@conn, :edit, @proposal)}
+              class={"btn btn-outline-#{bsname}"}
+            >
+              <i class="far fa-fw fa-wrench"></i> Edit proposal
             </a>
           <% end %>
         </div>
@@ -38,7 +48,7 @@
         </h3>
         <div class="row">
           <div class="col">
-            <% rows = String.split(@proposal.reason, "\n") |> Enum.count %>
+            <% rows = String.split(@proposal.reason, "\n") |> Enum.count() %>
             <label for="reason-box" class="control-label">Reason:</label>
             <textarea name="" id="reason-box" rows={rows} class="form-control"><%= @proposal.reason %></textarea>
           </div>
@@ -46,25 +56,37 @@
 
         <div class="row mt-4">
           <div class="col">
-            <strong>Restrictions:</strong><br />
+            <strong>Restrictions:</strong> <br />
             <%= Enum.join(@proposal.restrictions, ", ") %>
           </div>
 
           <div class="col">
-            <strong>Duration:</strong><br />
+            <strong>Duration:</strong> <br />
             <%= @proposal.duration %>
           </div>
         </div>
 
         <div class="row mt-4">
           <div class="col">
-            <%= link raw("<i class='fa-solid fa-lg fa-fw fa-cancel'></i> Vote no"), to: Routes.moderation_proposal_path(@conn, :vote, @proposal.id, "no"), method: :put, class: "btn btn-danger btn-block" %>
+            <%= link(raw("<i class='fa-solid fa-lg fa-fw fa-cancel'></i> Vote no"),
+              to: Routes.moderation_proposal_path(@conn, :vote, @proposal.id, "no"),
+              method: :put,
+              class: "btn btn-danger btn-block"
+            ) %>
           </div>
           <div class="col">
-            <%= link raw("<i class='fa-solid fa-lg fa-fw fa-question'></i> Abstain"), to: Routes.moderation_proposal_path(@conn, :vote, @proposal.id, "abstain"), method: :put, class: "btn btn-secondary btn-block" %>
+            <%= link(raw("<i class='fa-solid fa-lg fa-fw fa-question'></i> Abstain"),
+              to: Routes.moderation_proposal_path(@conn, :vote, @proposal.id, "abstain"),
+              method: :put,
+              class: "btn btn-secondary btn-block"
+            ) %>
           </div>
           <div class="col">
-            <%= link raw("<i class='fa-solid fa-lg fa-fw fa-check'></i> Vote yes"), to: Routes.moderation_proposal_path(@conn, :vote, @proposal.id, "yes"), method: :put, class: "btn btn-success btn-block" %>
+            <%= link(raw("<i class='fa-solid fa-lg fa-fw fa-check'></i> Vote yes"),
+              to: Routes.moderation_proposal_path(@conn, :vote, @proposal.id, "yes"),
+              method: :put,
+              class: "btn btn-success btn-block"
+            ) %>
           </div>
         </div>
 
@@ -96,7 +118,6 @@
             <% end %>
           </div>
         </div>
-
       </div>
     </div>
   </div>

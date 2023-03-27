@@ -10,17 +10,17 @@
   <div class="row">
     <div class="col-lg-6">
       <div class="form-group my-2">
-        <%= label f, :reason, class: "control-label" %>
-        <%= textarea f, :reason, class: "form-control", autofocus: :autofocus %>
-        <%= error_tag f, :reason %>
+        <%= label(f, :reason, class: "control-label") %>
+        <%= textarea(f, :reason, class: "form-control", autofocus: :autofocus) %>
+        <%= error_tag(f, :reason) %>
       </div>
     </div>
 
     <div class="col-lg-6">
       <div class="form-group my-2">
-        <%= label f, :duration, class: "control-label" %>
-        <%= text_input f, :duration, class: "form-control" %>
-        <%= error_tag f, :duration %>
+        <%= label(f, :duration, class: "control-label") %>
+        <%= text_input(f, :duration, class: "form-control") %>
+        <%= error_tag(f, :duration) %>
       </div>
     </div>
   </div>
@@ -32,29 +32,43 @@
         <strong><%= section %></strong>
         <%= for r <- r_list do %>
           <% r_clean = String.replace(r, " ", "_") %>
-          <%= central_component "checkbox",
+          <%= central_component("checkbox",
             id: "proposal_restriction_#{r_clean}",
             name: "proposal[restrictions][#{r_clean}]",
             label: r,
             value: r,
-            checked: (Ecto.Changeset.get_field(@changeset, :restrictions) || [])
+            checked:
+              (Ecto.Changeset.get_field(@changeset, :restrictions) || [])
               |> Enum.member?(r)
-          %>
+          ) %>
         <% end %>
       </div>
     <% end %>
-    <%= error_tag f, :restrictions %>
+    <%= error_tag(f, :restrictions) %>
   </div>
 
   <div class="form-group my-4">
     <%= if @changeset.data.id do %>
-      <a href={Routes.moderation_proposal_path(@conn, :show, @proposal)} class="btn btn-secondary btn-outline">
+      <a
+        href={Routes.moderation_proposal_path(@conn, :show, @proposal)}
+        class="btn btn-secondary btn-outline"
+      >
         Cancel
       </a>
 
-      <input type="submit" value="Save changes" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
+      <input
+        type="submit"
+        value="Save changes"
+        name="form.submitted"
+        class={"btn btn-#{bsname} float-end"}
+      />
     <% else %>
-      <input type="submit" value="Create" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
+      <input
+        type="submit"
+        value="Create"
+        name="form.submitted"
+        class={"btn btn-#{bsname} float-end"}
+      />
     <% end %>
   </div>
 <% end %>

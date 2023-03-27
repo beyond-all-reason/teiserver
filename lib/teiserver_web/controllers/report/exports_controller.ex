@@ -30,14 +30,17 @@ defmodule TeiserverWeb.Report.ExportsController do
       assigns = module.show_form(conn)
 
       assigns
-        |> Enum.reduce(conn, fn {key, value}, conn ->
-          assign(conn, key, value)
-        end)
-        |> add_breadcrumb(name: id |> String.capitalize() |> String.replace("_", " "), url: conn.request_path)
-        |> render("#{id}.html")
+      |> Enum.reduce(conn, fn {key, value}, conn ->
+        assign(conn, key, value)
+      end)
+      |> add_breadcrumb(
+        name: id |> String.capitalize() |> String.replace("_", " "),
+        url: conn.request_path
+      )
+      |> render("#{id}.html")
     else
       conn
-        |> redirect(to: Routes.ts_reports_exports_path(conn, :index))
+      |> redirect(to: Routes.ts_reports_exports_path(conn, :index))
     end
   end
 
@@ -49,12 +52,12 @@ defmodule TeiserverWeb.Report.ExportsController do
       case module.show_form(conn, report_params) do
         {:file, file_path, file_name, content_type} ->
           conn
-            |> put_resp_content_type(content_type)
-            |> put_resp_header(
-              "content-disposition",
-              "attachment; filename=\"#{file_name}\""
-            )
-            |> send_file(200, file_path)
+          |> put_resp_content_type(content_type)
+          |> put_resp_header(
+            "content-disposition",
+            "attachment; filename=\"#{file_name}\""
+          )
+          |> send_file(200, file_path)
 
         # {:data, file_contents, file_name, format} ->
         #   conn
@@ -64,12 +67,12 @@ defmodule TeiserverWeb.Report.ExportsController do
 
         {:raw, raw_contents} ->
           conn
-            |> put_resp_content_type("text/plain")
-            |> send_resp(200, raw_contents)
+          |> put_resp_content_type("text/plain")
+          |> send_resp(200, raw_contents)
       end
     else
       conn
-        |> redirect(to: Routes.ts_reports_exports_path(conn, :index))
+      |> redirect(to: Routes.ts_reports_exports_path(conn, :index))
     end
   end
 

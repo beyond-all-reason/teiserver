@@ -17,6 +17,7 @@ defmodule TeiserverWeb.Live.ClientTest do
   describe "client live" do
     test "index", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/teiserver/admin/client")
+
       # Sadly because other clients can still be logged in after their tests we can't actually test this bit...
       # assert html =~ "No clients found"
 
@@ -64,7 +65,8 @@ defmodule TeiserverWeb.Live.ClientTest do
       assert html =~ "Bot: false"
       assert html =~ "Moderator: false"
       assert html =~ "Verified: true"
-      assert html =~ "Battle:"# The nil is on a newline with padding so don't worry about it
+      # The nil is on a newline with padding so don't worry about it
+      assert html =~ "Battle:"
 
       # Log out the user
       # FIXME: this part is failing because the liveview subscribes to old pubsubs
@@ -73,7 +75,8 @@ defmodule TeiserverWeb.Live.ClientTest do
     end
 
     test "show - no client", %{conn: conn} do
-      assert {:error, {:redirect, %{to: "/teiserver/admin/client"}}} = live(conn, "/teiserver/admin/client/0")
+      assert {:error, {:redirect, %{to: "/teiserver/admin/client"}}} =
+               live(conn, "/teiserver/admin/client/0")
     end
 
     test "force disconnect client", %{conn: conn} do

@@ -2,16 +2,48 @@
 <div id="page-content-wrapper" style="margin: 0; padding: 0;">
   <div id="flash-messages">
     <%= if live_flash(@flash, :danger) do %>
-      <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger" phx-click="lv:clear-flash" phx-value-key="danger"><%= live_flash(@flash, :danger) %></p>
+      <p
+        class="alert alert-danger alert-no-margin"
+        role="alert"
+        id="app-flash-danger"
+        phx-click="lv:clear-flash"
+        phx-value-key="danger"
+      >
+        <%= live_flash(@flash, :danger) %>
+      </p>
     <% end %>
     <%= if live_flash(@flash, :warning) do %>
-      <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning" phx-click="lv:clear-flash" phx-value-key="warning"><%= live_flash(@flash, :warning) %></p>
+      <p
+        class="alert alert-warning alert-no-margin"
+        role="alert"
+        id="app-flash-warning"
+        phx-click="lv:clear-flash"
+        phx-value-key="warning"
+      >
+        <%= live_flash(@flash, :warning) %>
+      </p>
     <% end %>
     <%= if live_flash(@flash, :info) do %>
-      <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info" phx-click="lv:clear-flash" phx-value-key="info"><%= live_flash(@flash, :info) %></p>
+      <p
+        class="alert alert-info alert-no-margin"
+        role="alert"
+        id="app-flash-info"
+        phx-click="lv:clear-flash"
+        phx-value-key="info"
+      >
+        <%= live_flash(@flash, :info) %>
+      </p>
     <% end %>
     <%= if live_flash(@flash, :success) do %>
-      <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success" phx-click="lv:clear-flash" phx-value-key="success"><%= live_flash(@flash, :success) %></p>
+      <p
+        class="alert alert-success alert-no-margin"
+        role="alert"
+        id="app-flash-success"
+        phx-click="lv:clear-flash"
+        phx-value-key="success"
+      >
+        <%= live_flash(@flash, :success) %>
+      </p>
     <% end %>
   </div>
 
@@ -25,11 +57,10 @@
   </div>
 </div>
 <!-- /#page-content-wrapper -->
-
 <%= if false do %>
-<footer class="main-footer d-flex p-2 px-3 border-top">
-  <span class="float-end">
-    Created by <%= Application.get_env(:central, Central)[:credit] %>
-  </span>
-</footer>
+  <footer class="main-footer d-flex p-2 px-3 border-top">
+    <span class="float-end">
+      Created by <%= Application.get_env(:central, Central)[:credit] %>
+    </span>
+  </footer>
 <% end %>

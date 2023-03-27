@@ -20,36 +20,42 @@ defmodule Teiserver.Account.LeaderboardReport do
     days = params["days"] |> int_parse
     limit = params["limit"] |> int_parse
 
-    activity_time = Timex.today()
+    activity_time =
+      Timex.today()
       |> Timex.shift(days: -days)
       |> Timex.to_datetime()
 
     type_name = params["game_type"]
-    {type_id, type_name} = case MatchRatingLib.rating_type_name_lookup()[type_name] do
-      nil ->
-        type_name = hd(MatchRatingLib.rating_type_list())
-        {MatchRatingLib.rating_type_name_lookup()[type_name], type_name}
-      v ->
-        {v, type_name}
-    end
 
-    ratings = Account.list_ratings(
-      search: [
-        rating_type_id: type_id,
-        updated_after: activity_time
-      ],
-      order_by: "Leaderboard rating high to low",
-      preload: [:user],
-      limit: limit
-    )
+    {type_id, type_name} =
+      case MatchRatingLib.rating_type_name_lookup()[type_name] do
+        nil ->
+          type_name = hd(MatchRatingLib.rating_type_list())
+          {MatchRatingLib.rating_type_name_lookup()[type_name], type_name}
 
-    extra_data = if params["extended"] == "true" do
-      userids = ratings |> Enum.map(fn r -> r.user_id end)
+        v ->
+          {v, type_name}
+      end
 
-      get_extra_data(userids, activity_time, type_name)
-    else
-      nil
-    end
+    ratings =
+      Account.list_ratings(
+        search: [
+          rating_type_id: type_id,
+          updated_after: activity_time
+        ],
+        order_by: "Leaderboard rating high to low",
+        preload: [:user],
+        limit: limit
+      )
+
+    extra_data =
+      if params["extended"] == "true" do
+        userids = ratings |> Enum.map(fn r -> r.user_id end)
+
+        get_extra_data(userids, activity_time, type_name)
+      else
+        nil
+      end
 
     assigns = %{
       params: params,
@@ -63,65 +69,75 @@ defmodule Teiserver.Account.LeaderboardReport do
   end
 
   defp add_csv_headings(output) do
-    headings = [[
-      "Pos",
-      "Player",
-      "Leaderboard rating",
-      "Game rating",
-      "Skill",
-      "Uncertainty",
-      "Days since update",
-      "Game count",
-      "Win rate",
-      "Stayed %",
-      "Early %",
-      "Abandoned %",
-      "Noshow %"
-    ]]
+    headings = [
+      [
+        "Pos",
+        "Player",
+        "Leaderboard rating",
+        "Game rating",
+        "Skill",
+        "Uncertainty",
+        "Days since update",
+        "Game count",
+        "Win rate",
+        "Stayed %",
+        "Early %",
+        "Abandoned %",
+        "Noshow %"
+      ]
+    ]
+
     headings ++ output
   end
+
   defp make_csv_data(ratings, extra_data) do
     ratings
-      |> Enum.with_index()
-      |> Enum.map(fn {rating, index} ->
-        age = Timex.diff(Timex.now(), rating.last_updated, :days)
-        extra = extra_data[rating.user_id] || %{
-          count: 1,
-          wins: 1,
-          stayed: 0,
-          early: 0,
-          abandoned: 0,
-          noshow: 0
-        }
+    |> Enum.with_index()
+    |> Enum.map(fn {rating, index} ->
+      age = Timex.diff(Timex.now(), rating.last_updated, :days)
 
-        [
-          index + 1,
-          rating.user.name,
-          rating.leaderboard_rating,
-          rating.rating_value,
-          rating.skill,
-          rating.uncertainty,
-          age,
-          extra.count,
-          extra.wins/extra.count,
-          extra.stayed,
-          extra.early,
-          extra.abandoned,
-          extra.noshow
-        ]
-      end)
-      |> add_csv_headings
-      |> CSV.encode(separator: ?\t)
-      |> Enum.to_list
+      extra =
+        extra_data[rating.user_id] ||
+          %{
+            count: 1,
+            wins: 1,
+            stayed: 0,
+            early: 0,
+            abandoned: 0,
+            noshow: 0
+          }
+
+      [
+        index + 1,
+        rating.user.name,
+        rating.leaderboard_rating,
+        rating.rating_value,
+        rating.skill,
+        rating.uncertainty,
+        age,
+        extra.count,
+        extra.wins / extra.count,
+        extra.stayed,
+        extra.early,
+        extra.abandoned,
+        extra.noshow
+      ]
+    end)
+    |> add_csv_headings
+    |> CSV.encode(separator: ?\t)
+    |> Enum.to_list()
   end
 
   defp apply_defaults(params) do
-    Map.merge(%{
-      "days" => "35",
-      "limit" => "50",
-      "game_type" => (MatchRatingLib.rating_type_list() |> hd),
-      "extended" => "false",
-    }, Map.get(params, "report", %{}))
+    Map.merge(
+      %{
+        "days" => "35",
+        "limit" => "50",
+        "game_type" => MatchRatingLib.rating_type_list() |> hd,
+        "extended" => "false"
+      },
+      Map.get(params, "report", %{})
+    )
   end
 
   defp get_extra_data(userids, after_date, type_name) do
@@ -153,14 +169,15 @@ defmodule Teiserver.Account.LeaderboardReport do
         |> Map.new(fn [userid, count, wins] ->
           stats = Account.get_user_stat_data(userid)
 
-          {userid, %{
-            stayed: stats["exit_status.team.stayed"],
-            early: stats["exit_status.team.early"],
-            abandoned: stats["exit_status.team.abandoned"],
-            noshow: stats["exit_status.team.noshow"],
-            count: count,
-            wins: wins
-          }}
+          {userid,
+           %{
+             stayed: stats["exit_status.team.stayed"],
+             early: stats["exit_status.team.early"],
+             abandoned: stats["exit_status.team.abandoned"],
+             noshow: stats["exit_status.team.noshow"],
+             count: count,
+             wins: wins
+           }}
         end)
 
       {a, b} ->

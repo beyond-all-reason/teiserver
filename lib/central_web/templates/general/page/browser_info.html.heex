@@ -1,18 +1,16 @@
-<%
-  {_, accept} = List.keyfind(@conn.req_headers, "accept", 0) || {nil, "Not found"}
-  {_, accept_encoding} = List.keyfind(@conn.req_headers, "accept-encoding", 0) || {nil, "Not found"}
-  {_, accept_language} = List.keyfind(@conn.req_headers, "accept-language", 0) || {nil, "Not found"}
-  {_, user_agent} = List.keyfind(@conn.req_headers, "user-agent", 0) || {nil, "Not found"}
-  {_, dnt} = List.keyfind(@conn.req_headers, "dnt", 0) || {nil, "Not found"}
+<% {_, accept} = List.keyfind(@conn.req_headers, "accept", 0) || {nil, "Not found"}
+{_, accept_encoding} = List.keyfind(@conn.req_headers, "accept-encoding", 0) || {nil, "Not found"}
+{_, accept_language} = List.keyfind(@conn.req_headers, "accept-language", 0) || {nil, "Not found"}
+{_, user_agent} = List.keyfind(@conn.req_headers, "user-agent", 0) || {nil, "Not found"}
+{_, dnt} = List.keyfind(@conn.req_headers, "dnt", 0) || {nil, "Not found"}
 
-  serverside = """
+serverside = """
 Accepted headers: #{accept}
 Accepted encoding: #{accept_encoding}
 Accepted langauge: #{accept_language}
 User agent: #{user_agent}
 DNT: #{dnt}
-"""
-%>
+""" %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -38,13 +36,11 @@ DNT: #{dnt}
 
 <div class="row mt-3">
   <div class="col-md-12">
-
     <div class="card card-default">
       <div class="card-body">
         <%= if @current_user do %>
           <a href={Routes.user_config_path(@conn, :index)} class="btn btn-secondary float-end">
-            <i class="fa fa-user fa-fw"></i>
-            Back to account
+            <i class="fa fa-user fa-fw"></i> Back to account
           </a>
         <% end %>
         <h4>Browser info</h4>
@@ -53,6 +49,5 @@ DNT: #{dnt}
         <textarea id="output_box" rows="20" class="form-control"><%= serverside %></textarea>
       </div>
     </div>
-
   </div>
 </div>

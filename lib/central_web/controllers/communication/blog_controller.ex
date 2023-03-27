@@ -102,11 +102,9 @@ defmodule CentralWeb.Communication.BlogController do
           true -> false
         end
 
-
       if visibility == false do
         conn
         |> render("not_found.html")
-
       else
         conn
         |> assign(

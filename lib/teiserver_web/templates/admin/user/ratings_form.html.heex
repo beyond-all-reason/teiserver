@@ -1,6 +1,10 @@
 <% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
+<%= render(
+  TeiserverWeb.Admin.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "users"})
+) %>
 
 <script type="text/javascript">
   function new_rating_value(index) {
@@ -17,16 +21,23 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Admin.UserView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             active: "ratings_form"
           })
-        %>
+        ) %>
 
         <hr />
 
-        <form action={Routes.ts_admin_user_path(@conn, :ratings_post, @user)} method="post" class="">
+        <form
+          action={Routes.ts_admin_user_path(@conn, :ratings_post, @user)}
+          method="post"
+          class=""
+        >
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
-          
+
           <div class="row my-3" style="text-align: center;">
             <div class="col-md-6">
               <h4>Current</h4>
@@ -34,7 +45,7 @@
             <div class="col-md-6">
               <h4>New values</h4>
             </div>
-            
+
             <div class="col-md-2">
               <h5>Skill</h5>
             </div>
@@ -57,9 +68,7 @@
           </div>
 
           <%= for {r, i} <- Enum.with_index(@rating_type_list) do %>
-            <%
-              rating = @ratings[r] || @default_rating
-            %>
+            <% rating = @ratings[r] || @default_rating %>
             <div class="row my-3">
               <div class="col-md-12">
                 <h4><%= r %></h4>
@@ -68,22 +77,52 @@
                 <input type="text" value={rating.skill} class="form-control" disabled="disabled" />
               </div>
               <div class="col-md-2">
-                <input type="text" value={rating.uncertainty} class="form-control" disabled="disabled" />
+                <input
+                  type="text"
+                  value={rating.uncertainty}
+                  class="form-control"
+                  disabled="disabled"
+                />
               </div>
               <div class="col-md-2" style="border-right: 1px solid #777;">
-                <input type="text" value={rating.rating_value} class="form-control" disabled="disabled" />
+                <input
+                  type="text"
+                  value={rating.rating_value}
+                  class="form-control"
+                  disabled="disabled"
+                />
               </div>
 
               <div class="col-md-2">
                 <input type="hidden" name={"#{r}[old_skill]"} value={rating.skill} />
-                <input type="text" name={"#{r}[skill]"} id={"#{i}_skill"} value={rating.skill} class="form-control" onkeyup={"new_rating_value(#{i})"} />
+                <input
+                  type="text"
+                  name={"#{r}[skill]"}
+                  id={"#{i}_skill"}
+                  value={rating.skill}
+                  class="form-control"
+                  onkeyup={"new_rating_value(#{i})"}
+                />
               </div>
               <div class="col-md-2">
-              <input type="hidden" name={"#{r}[old_uncertainty]"} value={rating.uncertainty} />
-                <input type="text" name={"#{r}[uncertainty]"} id={"#{i}_uncertainty"} value={rating.uncertainty} class="form-control" onkeyup={"new_rating_value(#{i})"} />
+                <input type="hidden" name={"#{r}[old_uncertainty]"} value={rating.uncertainty} />
+                <input
+                  type="text"
+                  name={"#{r}[uncertainty]"}
+                  id={"#{i}_uncertainty"}
+                  value={rating.uncertainty}
+                  class="form-control"
+                  onkeyup={"new_rating_value(#{i})"}
+                />
               </div>
               <div class="col-md-2">
-                <input type="text" id={"#{i}_rating_value"} value={rating.rating_value} class="form-control" disabled="disabled" />
+                <input
+                  type="text"
+                  id={"#{i}_rating_value"}
+                  value={rating.rating_value}
+                  class="form-control"
+                  disabled="disabled"
+                />
               </div>
             </div>
           <% end %>
@@ -96,7 +135,6 @@
             Submit
           </button>
         </form>
-
       </div>
     </div>
   </div>

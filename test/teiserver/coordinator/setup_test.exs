@@ -22,10 +22,11 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
   end
 
   test "test command vs no command", %{user: user, socket: socket} do
-    lobby = TeiserverTestLib.make_battle(%{
-      founder_id: user.id,
-      founder_name: user.name
-    })
+    lobby =
+      TeiserverTestLib.make_battle(%{
+        founder_id: user.id,
+        founder_name: user.name
+      })
 
     lobby = Battle.get_lobby(lobby.id)
     listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby.id}"])
@@ -48,7 +49,10 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
 
     # Converted message should appear here
     [m1, m2] = PubsubListener.get(listener)
-    assert m1 == {:battle_updated, lobby.id, {user.id, "$settag tagname tagvalue", lobby.id}, :say}
+
+    assert m1 ==
+             {:battle_updated, lobby.id, {user.id, "$settag tagname tagvalue", lobby.id}, :say}
+
     {:battle_updated, _lobby_id, %{"tagname" => "tagvalue"}, :add_script_tags} = m2
   end
 end

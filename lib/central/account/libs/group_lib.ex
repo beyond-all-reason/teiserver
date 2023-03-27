@@ -363,6 +363,7 @@ defmodule Central.Account.GroupLib do
     |> Central.Helpers.QueryHelpers.select([:id, :name, :icon, :colour])
     |> order("Name (A-Z)")
     |> Repo.all()
+
     # |> Enum.map(fn %{id: id, name: name} -> {name, id} end)
   end
 

@@ -29,7 +29,6 @@ defmodule Teiserver.Account.AccoladeChatServer do
       recipient_id: recipient_id,
       recipient: User.get_user_by_id(recipient_id),
       match_id: match_id,
-
       stage: :not_started
     }
   end
@@ -47,64 +46,96 @@ defmodule Teiserver.Account.AccoladeChatServer do
 
   # Handling user messages
   def handle_info({:user_message, message}, %{stage: :awaiting_choice} = state) do
-    integer_choice = case Integer.parse(String.trim(message)) do
-      :error -> :error
-      {v, _} -> v
-    end
+    integer_choice =
+      case Integer.parse(String.trim(message)) do
+        :error -> :error
+        {v, _} -> v
+      end
 
-    new_state = cond do
-      String.downcase(message) == "n" ->
-        Account.create_accolade(%{
-          recipient_id: state.recipient_id,
-          giver_id: state.userid,
-          match_id: state.match_id,
-          inserted_at: Timex.now()
-        })
+    new_state =
+      cond do
+        String.downcase(message) == "n" ->
+          Account.create_accolade(%{
+            recipient_id: state.recipient_id,
+            giver_id: state.userid,
+            match_id: state.match_id,
+            inserted_at: Timex.now()
+          })
 
-        increment_miss_count(state.userid, 3)
-        User.send_direct_message(state.bot_id, state.userid, "Thank you for your feedback, no Accolade will be bestowed.")
-        send(self(), :terminate)
-        %{state | stage: :completed}
+          increment_miss_count(state.userid, 3)
 
-      integer_choice == 0 ->
-        increment_miss_count(state.userid, 3)
-        User.send_direct_message(state.bot_id, state.userid, "Thank you for your feedback, no Accolade will be bestowed.")
-        send(self(), :terminate)
-        %{state | stage: :completed}
+          User.send_direct_message(
+            state.bot_id,
+            state.userid,
+            "Thank you for your feedback, no Accolade will be bestowed."
+          )
 
-      integer_choice != :error ->
-        badge_type = state.badge_types
-        |> Enum.filter(fn {i, _} -> i == integer_choice end)
+          send(self(), :terminate)
+          %{state | stage: :completed}
 
-        case badge_type do
-          [] ->
-            User.send_direct_message(state.bot_id, state.userid, "None of the listed Accolades match that option")
-            state
+        integer_choice == 0 ->
+          increment_miss_count(state.userid, 3)
 
-          [{_, selected_type}] ->
-            Account.create_accolade(%{
-              recipient_id: state.recipient_id,
-              giver_id: state.userid,
-              badge_type_id: selected_type.id,
-              match_id: state.match_id,
-              inserted_at: Timex.now()
-            })
+          User.send_direct_message(
+            state.bot_id,
+            state.userid,
+            "Thank you for your feedback, no Accolade will be bestowed."
+          )
 
-            if Config.get_site_config_cache("teiserver.Inform of new accolades") do
-              bot_pid = AccoladeLib.get_accolade_bot_pid()
-              :timer.send_after(30_000, bot_pid, {:new_accolade, state.recipient_id})
-            end
+          send(self(), :terminate)
+          %{state | stage: :completed}
 
-            decrement_miss_count(state.userid, 5)
-            User.send_direct_message(state.bot_id, state.userid, "Thank you for your feedback, this Accolade will be bestowed.")
-            send(self(), :terminate)
-            %{state | stage: :completed}
-        end
+        integer_choice != :error ->
+          badge_type =
+            state.badge_types
+            |> Enum.filter(fn {i, _} -> i == integer_choice end)
 
-      :error ->
-        User.send_direct_message(state.bot_id, state.userid, "I'm sorry but I can't pick an Accolade based on that value")
-        state
-    end
+          case badge_type do
+            [] ->
+              User.send_direct_message(
+                state.bot_id,
+                state.userid,
+                "None of the listed Accolades match that option"
+              )
+
+              state
+
+            [{_, selected_type}] ->
+              Account.create_accolade(%{
+                recipient_id: state.recipient_id,
+                giver_id: state.userid,
+                badge_type_id: selected_type.id,
+                match_id: state.match_id,
+                inserted_at: Timex.now()
+              })
+
+              if Config.get_site_config_cache("teiserver.Inform of new accolades") do
+                bot_pid = AccoladeLib.get_accolade_bot_pid()
+                :timer.send_after(30_000, bot_pid, {:new_accolade, state.recipient_id})
+              end
+
+              decrement_miss_count(state.userid, 5)
+
+              User.send_direct_message(
+                state.bot_id,
+                state.userid,
+                "Thank you for your feedback, this Accolade will be bestowed."
+              )
+
+              send(self(), :terminate)
+              %{state | stage: :completed}
+          end
+
+        :error ->
+          User.send_direct_message(
+            state.bot_id,
+            state.userid,
+            "I'm sorry but I can't pick an Accolade based on that value"
+          )
+
+          state
+      end
+
     {:noreply, new_state}
   end
 
@@ -145,25 +176,33 @@ defmodule Teiserver.Account.AccoladeChatServer do
     accolade_miss_count = Map.get(stats, "accolade_miss_count", 0)
 
     Account.update_user_stat(userid, %{
-      "accolade_miss_count" => min(max(accolade_miss_count + amount, 0), AccoladeBotServer.max_miss_count())
+      "accolade_miss_count" =>
+        min(max(accolade_miss_count + amount, 0), AccoladeBotServer.max_miss_count())
     })
   end
 
   @spec send_initial_message(map()) :: map()
   defp send_initial_message(state) do
-    badge_lines = state.badge_types
-    |> Enum.map(fn {i, bt} -> "#{i} - #{bt.name}, #{bt.description}" end)
+    badge_lines =
+      state.badge_types
+      |> Enum.map(fn {i, bt} -> "#{i} - #{bt.name}, #{bt.description}" end)
 
-    User.send_direct_message(state.bot_id, state.userid, [
-      @line_break,
-      "You have an opportunity to leave feedback on one of the players in your last game. We have selected #{state.recipient.name}",
-      "Which of the following accolades do you feel they most deserve (if any)?",
-      "N - No accolade for this player at all",
-      "0 - No accolade this time, ask again later",
-    ] ++ badge_lines ++ [
-      ".",
-      "Reply to this message with the number corresponding to the Accolade you feel is most appropriate for this player for this match."
-    ])
+    User.send_direct_message(
+      state.bot_id,
+      state.userid,
+      [
+        @line_break,
+        "You have an opportunity to leave feedback on one of the players in your last game. We have selected #{state.recipient.name}",
+        "Which of the following accolades do you feel they most deserve (if any)?",
+        "N - No accolade for this player at all",
+        "0 - No accolade this time, ask again later"
+      ] ++
+        badge_lines ++
+        [
+          ".",
+          "Reply to this message with the number corresponding to the Accolade you feel is most appropriate for this player for this match."
+        ]
+    )
 
     %{state | stage: :awaiting_choice}
   end

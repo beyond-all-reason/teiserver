@@ -1,10 +1,9 @@
-<%
-  light_mode = case get_user_config_cache(@current_user, "general.Colour scheme") do
+<% light_mode =
+  case get_user_config_cache(@current_user, "general.Colour scheme") do
     "Site default" -> get_site_config_cache("user.Default light mode")
     "Light" -> true
     "Dark" -> false
-  end
-%>
+  end %>
 
 <style type="text/css">
   .icon-test {
@@ -61,382 +60,407 @@
   }
 </script>
 
-<%
-  colours = ~w(secondary primary primary2 info info2 success success2 warning warning2 danger danger2)
-%>
+<% colours =
+  ~w(secondary primary primary2 info info2 success success2 warning warning2 danger danger2) %>
 
-<%= render CentralWeb.Admin.ToolView, "sub_menu.html", Map.merge(assigns, %{active: "test_page"}) %>
-
+<%= render(CentralWeb.Admin.ToolView, "sub_menu.html", Map.merge(assigns, %{active: "test_page"})) %>
 
 <div class="row mt-3">
   <div class="col-xl-6 col-lg-12">
     <div class="card">
       <div class="card-body">
+        
+        <%= central_component("section_menu_button",
+          name: "list",
+          label: "List",
+          active: "list",
+          icon: StylingHelper.icon(:list, "thin"),
+          bsname: :primary,
+          url: "#"
+        ) %>
 
-<%# Section menu %>
-<%= central_component "section_menu_button",
-  name: "list",
-  label: "List",
-  active: "list",
-  icon: StylingHelper.icon(:list, "thin"),
-  bsname: :primary,
-  url: "#"
-%>
+        <%= central_component("section_menu_button",
+          name: "show",
+          label: "Show",
+          active: "",
+          icon: StylingHelper.icon(:show, "thin"),
+          bsname: :primary,
+          url: "#"
+        ) %>
 
-<%= central_component "section_menu_button",
-  name: "show",
-  label: "Show",
-  active: "",
-  icon: StylingHelper.icon(:show, "thin"),
-  bsname: :primary,
-  url: "#"
-%>
+        <%= central_component("section_menu_button",
+          name: "edit",
+          label: "Edit",
+          active: "",
+          icon: StylingHelper.icon(:edit, "thin"),
+          bsname: :primary,
+          url: "#"
+        ) %>
+        <br /><br />
 
-<%= central_component "section_menu_button",
-  name: "edit",
-  label: "Edit",
-  active: "",
-  icon: StylingHelper.icon(:edit, "thin"),
-  bsname: :primary,
-  url: "#"
-%>
-<br /><br />
+        <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+          <li class="nav-item" role="presentation">
+            <a href="#icons_tab" role="tab" class="nav-link active" data-bs-toggle="tab">Icons</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="#colours_tab" role="tab" class="nav-link" data-bs-toggle="tab">Colours</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="#cards_tab" role="tab" class="nav-link" data-bs-toggle="tab">Cards</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="#tables_tab" role="tab" class="nav-link" data-bs-toggle="tab">Tables</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="#buttons_tab" role="tab" class="nav-link" data-bs-toggle="tab">Buttons</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="#forms_tab" role="tab" class="nav-link" data-bs-toggle="tab">Forms</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="#layouts_tab" role="tab" class="nav-link" data-bs-toggle="tab">Layouts</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="#calculations_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              Calculations
+            </a>
+          </li>
+        </ul>
 
-<ul class="nav nav-tabs" role="tablist" id="the_tabs">
-  <li class="nav-item" role="presentation">
-    <a href="#icons_tab" role="tab" class="nav-link active" data-bs-toggle="tab">Icons</a>
-  </li>
-  <li class="nav-item" role="presentation">
-    <a href="#colours_tab" role="tab" class="nav-link" data-bs-toggle="tab">Colours</a>
-  </li>
-  <li class="nav-item" role="presentation">
-    <a href="#cards_tab" role="tab" class="nav-link" data-bs-toggle="tab">Cards</a>
-  </li>
-  <li class="nav-item" role="presentation">
-    <a href="#tables_tab" role="tab" class="nav-link" data-bs-toggle="tab">Tables</a>
-  </li>
-  <li class="nav-item" role="presentation">
-    <a href="#buttons_tab" role="tab" class="nav-link" data-bs-toggle="tab">Buttons</a>
-  </li>
-  <li class="nav-item" role="presentation">
-    <a href="#forms_tab" role="tab" class="nav-link" data-bs-toggle="tab">Forms</a>
-  </li>
-  <li class="nav-item" role="presentation">
-    <a href="#layouts_tab" role="tab" class="nav-link" data-bs-toggle="tab">Layouts</a>
-  </li>
-  <li class="nav-item" role="presentation">
-    <a href="#calculations_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-      Calculations
-    </a>
-  </li>
-</ul>
-
-<div class="tab-content">
-  <div class="tab-pane fade show active p-2" id="icons_tab">
-    <div class="row">
-      <div class="col-md-6">
-        One icon per row, no <code>fa-</code> prefix. Columns on the right are <code>fa-thin, fa-light, fa-regular, fa-solid, fa-duotone, fa-brands</code>.
-        <textarea name="icons" id="icons-area" rows="8" class="form-control" onchange="do_icons();">house</textarea>
-        <br />
-        <div class="btn btn-primary">Update</div>
-      </div>
-      <div class="col-md-6">
-        <div id="icon-output">
-
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="tab-pane fade p-2" id="colours_tab">
-    <div class="row">
-      <div class="col-md-6">
-        <h4>text-xxx</h4>
-        <%= for c <- colours do %>
-          <div class={"text-#{c}"}><%= c |> String.capitalize %> lorem ipsum text goes here</div>
-          &nbsp;&nbsp;
-        <% end %>
-      </div>
-      <div class="col-md-6">
-
-      </div>
-    </div>
-  </div>
-
-  <div class="tab-pane fade p-2" id="cards_tab">
-    <div class="row theme-bg" style="margin: 0 -40px; padding: 20px 40px;">
-      <%= for c <- colours do %>
-        <div class="col-md-3 p-2">
-          <div class={"card card-#{c}"}>
-            <div class="card-header">
-              <i class="fa fa-search fa-fw"></i>
-              Title - <%= c %>
+        <div class="tab-content">
+          <div class="tab-pane fade show active p-2" id="icons_tab">
+            <div class="row">
+              <div class="col-md-6">
+                One icon per row, no <code>fa-</code>
+                prefix. Columns on the right are <code>fa-thin, fa-light, fa-regular, fa-solid, fa-duotone, fa-brands</code>. <textarea
+                  name="icons"
+                  id="icons-area"
+                  rows="8"
+                  class="form-control"
+                  onchange="do_icons();"
+                >house</textarea>
+                <br />
+                <div class="btn btn-primary">Update</div>
+              </div>
+              <div class="col-md-6">
+                <div id="icon-output"></div>
+              </div>
             </div>
-
-            <div class="card-body">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-              tempor incididunt ut labore et dolore magna aliqua.
-            </div>
-
-            <div class="card-footer">
-              <i class="fa fa-home fa-fw"></i>
-              Footer - <%= c %>
-            </div>
-
           </div>
-        </div>
-      <% end %>
-    </div>
-  </div>
 
-  <div class="tab-pane fade" id="tables_tab">
-    <div class="card page-card card-default">
-      <div class="card-body">
-        <table class="table table-hover table-striped">
-          <thead>
-            <tr>
-              <th>Col 1</th>
-              <th>Col 2</th>
-              <th>Col 3</th>
-              <th>Col 4</th>
-              <th>Col 5</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for c <- colours do %>
-              <tr>
-                <td>
-                    <span class={"label label-#{c}"}>Added</span>
-                  </td>
-                  <td class="issue-info">
-                    <a href="#">Cell text</a>
-                    <br>
-                    <small>Lorem ipsum in a table row</small>
-                  </td>
-                  <td>Some more words</td>
-                  <td>Extra words</td>
-                  <td class="text-right">
-                    <button class="btn btn-secondary btn-sm"> Action</button>
-                  </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+          <div class="tab-pane fade p-2" id="colours_tab">
+            <div class="row">
+              <div class="col-md-6">
+                <h4>text-xxx</h4>
+                <%= for c <- colours do %>
+                  <div class={"text-#{c}"}>
+                    <%= c |> String.capitalize() %> lorem ipsum text goes here
+                  </div>
+                  &nbsp;&nbsp;
+                <% end %>
+              </div>
+              <div class="col-md-6"></div>
+            </div>
+          </div>
 
-  <div class="tab-pane fade" id="buttons_tab">
-    <div class="col-md-12">
-      <div class="card page-card card-default">
-        <div class="card-body" id="button-card">
-          <div class="row">
-            <div class="col-md-12 my-2">
-              <div class="float-end">
-                <span class="btn btn-secondary" onclick="$('#button-card').css('background-color', '#FFFFFF');">White</span>
-                <span class="btn btn-secondary" onclick="$('#button-card').css('background-color', '#000000');">Black</span>
+          <div class="tab-pane fade p-2" id="cards_tab">
+            <div class="row theme-bg" style="margin: 0 -40px; padding: 20px 40px;">
+              <%= for c <- colours do %>
+                <div class="col-md-3 p-2">
+                  <div class={"card card-#{c}"}>
+                    <div class="card-header">
+                      <i class="fa fa-search fa-fw"></i> Title - <%= c %>
+                    </div>
+
+                    <div class="card-body">
+                      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+                      tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+
+                    <div class="card-footer">
+                      <i class="fa fa-home fa-fw"></i> Footer - <%= c %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="tables_tab">
+            <div class="card page-card card-default">
+              <div class="card-body">
+                <table class="table table-hover table-striped">
+                  <thead>
+                    <tr>
+                      <th>Col 1</th>
+                      <th>Col 2</th>
+                      <th>Col 3</th>
+                      <th>Col 4</th>
+                      <th>Col 5</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <%= for c <- colours do %>
+                      <tr>
+                        <td>
+                          <span class={"label label-#{c}"}>Added</span>
+                        </td>
+                        <td class="issue-info">
+                          <a href="#">Cell text</a>
+                          <br />
+                          <small>Lorem ipsum in a table row</small>
+                        </td>
+                        <td>Some more words</td>
+                        <td>Extra words</td>
+                        <td class="text-right">
+                          <button class="btn btn-secondary btn-sm">Action</button>
+                        </td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="buttons_tab">
+            <div class="col-md-12">
+              <div class="card page-card card-default">
+                <div class="card-body" id="button-card">
+                  <div class="row">
+                    <div class="col-md-12 my-2">
+                      <div class="float-end">
+                        <span
+                          class="btn btn-secondary"
+                          onclick="$('#button-card').css('background-color', '#FFFFFF');"
+                        >
+                          White
+                        </span>
+                        <span
+                          class="btn btn-secondary"
+                          onclick="$('#button-card').css('background-color', '#000000');"
+                        >
+                          Black
+                        </span>
+                      </div>
+
+                      <h5>Standard</h5>
+                      <%= for c <- colours do %>
+                        <div class={"btn btn-#{c}"}><%= c |> String.capitalize() %></div>
+                        &nbsp;&nbsp;
+                      <% end %>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-12 my-2">
+                      <h5>Outline</h5>
+                      <%= for c <- colours do %>
+                        <div class={"btn btn-outline-#{c}"}><%= c |> String.capitalize() %></div>
+                        &nbsp;&nbsp;
+                      <% end %>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-12 my-2">
+                      <h5>Active</h5>
+                      <%= for c <- colours do %>
+                        <div class={"btn active btn-#{c}"}><%= c |> String.capitalize() %></div>
+                        &nbsp;&nbsp;
+                      <% end %>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-12 my-2">
+                      <h5>Disabled</h5>
+                      <%= for c <- colours do %>
+                        <div class={"btn disabled btn-#{c}"}><%= c |> String.capitalize() %></div>
+                        &nbsp;&nbsp;
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <style type="text/css">
+            .picker-group .btn {height: 37px;}
+            .picker-group text {height: 40px;}
+
+            .picker-group .active-button {
+              border-top-right-radius: 0;
+              border-bottom-right-radius: 0;
+            }
+
+            .picker-group .link-button {
+              border-top-left-radius: 0;
+              border-bottom-left-radius: 0;
+            }
+          </style>
+
+          <div class="tab-pane fade" id="forms_tab">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="input-group picker-group p-2">
+                  <span class="input-group-addon btn-primary btn active active-button">
+                    <i class="fa-solid fa-user fa-fw"></i>
+                  </span>
+                  <input type="text" class="form-control picker-shower" value="Search terms" />
+                  <a class="input-group-addon btn btn-primary link-button" href="">
+                    <i class="fa-solid fa-fw fa-user"></i>
+                    <i class="fa-solid fa-fw fa-link"></i>
+                  </a>
+                </div>
               </div>
 
+              <div class="col-md-6">
+                &nbsp;
+              </div>
 
-              <h5>Standard</h5>
-              <%= for c <- colours do %>
-                <div class={"btn btn-#{c}"}><%= c |> String.capitalize %></div>
-                &nbsp;&nbsp;
-              <% end %>
+              <div class="col-md-6">
+                <div class="input-group p-2">
+                  <input type="text" name="" id="" value="" class="form-control" />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="input-group p-2">
+                  <input
+                    type="text"
+                    name=""
+                    id=""
+                    value="With text in the field"
+                    class="form-control"
+                  />
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="input-group p-2">
+                  <select class="form-control">
+                    <option>Dropdown Value 1</option>
+                    <option>Dropdown Value 2</option>
+                    <option>Dropdown Value 3</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-md-6"></div>
+
+              <div class="col-md-6">
+                <div class="p-2">
+                  <%= central_component("checkbox",
+                    name: "cb1",
+                    id: "cb1",
+                    value: "true",
+                    label: "Checkbox 1",
+                    checked: true,
+                    description: ""
+                  ) %>
+
+                  <%= central_component("checkbox",
+                    name: "cb2",
+                    id: "cb2",
+                    value: "true",
+                    label: "Checkbox 2",
+                    checked: false,
+                    description: ""
+                  ) %>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="p-2">
+                  <%= central_component("radio",
+                    name: "rb",
+                    id: "rb1",
+                    value: "true",
+                    label: "Radio button 1",
+                    checked: true,
+                    description: ""
+                  ) %>
+
+                  <%= central_component("radio",
+                    name: "rb",
+                    id: "rb2",
+                    value: "false",
+                    label: "Radio button 2",
+                    checked: false,
+                    description: ""
+                  ) %>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="row">
-            <div class="col-md-12 my-2">
-              <h5>Outline</h5>
-              <%= for c <- colours do %>
-                <div class={"btn btn-outline-#{c}"}><%= c |> String.capitalize %></div>
-                &nbsp;&nbsp;
-              <% end %>
-            </div>
+          <div class="tab-pane fade" id="layouts_tab">
+            <a
+              href="?layout=standard#layouts_tab"
+              class={"btn btn-#{if @layout_value == "standard.html", do: "", else: "outline-"}secondary"}
+            >
+              Standard
+            </a>
+            <a
+              href="?layout=empty#layouts_tab"
+              class={"btn btn-#{if @layout_value == "empty.html", do: "", else: "outline-"}secondary"}
+            >
+              Empty
+            </a>
+            <a
+              href="?layout=unauth#layouts_tab"
+              class={"btn btn-#{if @layout_value == "unauth.html", do: "", else: "outline-"}secondary"}
+            >
+              Unauth
+            </a>
+            <br /><br />
+
+            <a
+              href="?layout=admin#layouts_tab"
+              class={"btn btn-#{if @layout_value == "admin.html", do: "", else: "outline-"}secondary"}
+            >
+              Admin
+            </a>
+            <a
+              href="?layout=admin_live#layouts_tab"
+              class={"btn btn-#{if @layout_value == "admin_live.html", do: "", else: "outline-"}secondary"}
+            >
+              Admin live
+            </a>
+            <br /><br />
+
+            <a
+              href="?layout=nomenu#layouts_tab"
+              class={"btn btn-#{if @layout_value == "nomenu.html", do: "", else: "outline-"}secondary"}
+            >
+              No menu
+            </a>
+            <a
+              href="?layout=nomenu_live#layouts_tab"
+              class={"btn btn-#{if @layout_value == "nomenu_live.html", do: "", else: "outline-"}secondary"}
+            >
+              No menu live
+            </a>
           </div>
 
-          <div class="row">
-            <div class="col-md-12 my-2">
-              <h5>Active</h5>
-              <%= for c <- colours do %>
-                <div class={"btn active btn-#{c}"}><%= c |> String.capitalize %></div>
-                &nbsp;&nbsp;
-              <% end %>
-            </div>
-          </div>
+          <div class="tab-pane fade" id="calculations_tab">
+            <% now = Timex.now() %> Server time is <%= now |> Kernel.inspect() %><br /><br />
 
-          <div class="row">
-            <div class="col-md-12 my-2">
-              <h5>Disabled</h5>
-              <%= for c <- colours do %>
-                <div class={"btn disabled btn-#{c}"}><%= c |> String.capitalize %></div>
-                &nbsp;&nbsp;
-              <% end %>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <style type="text/css">
-    .picker-group .btn {height: 37px;}
-    .picker-group text {height: 40px;}
-
-    .picker-group .active-button {
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-    }
-
-    .picker-group .link-button {
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-    }
-  </style>
-
-  <div class="tab-pane fade" id="forms_tab">
-    <div class="row">
-      <div class="col-md-6">
-        <div class="input-group picker-group p-2">
-          <span class="input-group-addon btn-primary btn active active-button">
-            <i class="fa-solid fa-user fa-fw"></i>
-          </span>
-          <input type="text" class="form-control picker-shower" value="Search terms" />
-          <a class="input-group-addon btn btn-primary link-button" href="">
-            <i class="fa-solid fa-fw fa-user"></i>
-            <i class="fa-solid fa-fw fa-link"></i>
-          </a>
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        &nbsp;
-      </div>
-
-      <div class="col-md-6">
-        <div class="input-group p-2">
-          <input type='text' name='' id='' value='' class='form-control' />
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="input-group p-2">
-          <input type='text' name='' id='' value='With text in the field' class='form-control' />
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <div class="input-group p-2">
-          <select class="form-control">
-            <option>Dropdown Value 1</option>
-            <option>Dropdown Value 2</option>
-            <option>Dropdown Value 3</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="col-md-6">
-
-      </div>
-
-      <div class="col-md-6">
-        <div class="p-2">
-          <%= central_component "checkbox",
-            name: "cb1",
-            id: "cb1",
-            value: "true",
-            label: "Checkbox 1",
-            checked: true,
-            description: ""
-          %>
-
-          <%= central_component "checkbox",
-            name: "cb2",
-            id: "cb2",
-            value: "true",
-            label: "Checkbox 2",
-            checked: false,
-            description: ""
-          %>
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <div class="p-2">
-          <%= central_component "radio",
-            name: "rb",
-            id: "rb1",
-            value: "true",
-            label: "Radio button 1",
-            checked: true,
-            description: ""
-          %>
-
-          <%= central_component "radio",
-            name: "rb",
-            id: "rb2",
-            value: "false",
-            label: "Radio button 2",
-            checked: false,
-            description: ""
-          %>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-
-  <div class="tab-pane fade" id="layouts_tab">
-    <a href="?layout=standard#layouts_tab" class={"btn btn-#{if @layout_value == "standard.html", do: "", else: "outline-"}secondary"}>
-      Standard
-    </a>
-    <a href="?layout=empty#layouts_tab" class={"btn btn-#{if @layout_value == "empty.html", do: "", else: "outline-"}secondary"}>
-      Empty
-    </a>
-    <a href="?layout=unauth#layouts_tab" class={"btn btn-#{if @layout_value == "unauth.html", do: "", else: "outline-"}secondary"}>
-      Unauth
-    </a>
-    <br /><br />
-
-    <a href="?layout=admin#layouts_tab" class={"btn btn-#{if @layout_value == "admin.html", do: "", else: "outline-"}secondary"}>
-      Admin
-    </a>
-    <a href="?layout=admin_live#layouts_tab" class={"btn btn-#{if @layout_value == "admin_live.html", do: "", else: "outline-"}secondary"}>
-      Admin live
-    </a>
-    <br /><br />
-
-    <a href="?layout=nomenu#layouts_tab" class={"btn btn-#{if @layout_value == "nomenu.html", do: "", else: "outline-"}secondary"}>
-      No menu
-    </a>
-    <a href="?layout=nomenu_live#layouts_tab" class={"btn btn-#{if @layout_value == "nomenu_live.html", do: "", else: "outline-"}secondary"}>
-      No menu live
-    </a>
-  </div>
-
-
-  <div class="tab-pane fade" id="calculations_tab">
-    <%
-      now = Timex.now()
-    %>
-    Server time is <%= now |> Kernel.inspect %><br /><br />
-
-    <pre>
+            <pre>
 UTC conversion is <%= date_to_str(now, format: :ymd_hms, tz: "UTC") %>
 Your config conversion is <%= date_to_str(now, format: :ymd_hms, tz: @tz) %> (<%= @tz %>)
 
 GMT conversion is <%= date_to_str(now, format: :ymd_hms, tz: "Europe/London") %>
 New York conversion is <%= date_to_str(now, format: :ymd_hms, tz: "America/New_York") %>
     </pre>
-  </div>
-</div>
+          </div>
+        </div>
 
-<br /><br />
-<a href={Routes.admin_tool_path(@conn, :index)} class="btn btn-secondary">
-  <i class={"fa #{StylingHelper.icon(:back)}"}></i>&nbsp;&nbsp;Back
-</a>
-
+        <br /><br />
+        <a href={Routes.admin_tool_path(@conn, :index)} class="btn btn-secondary">
+          <i class={"fa #{StylingHelper.icon(:back)}"}></i>&nbsp;&nbsp;Back
+        </a>
       </div>
     </div>
   </div>

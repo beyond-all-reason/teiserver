@@ -43,7 +43,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     message = reply["message"]
     assert String.contains?(message, "$whoami")
 
-    #Moderator help test
+    # Moderator help test
     User.update_user(%{user | moderator: true})
     message_coordinator(socket, "$help")
     [reply] = _tachyon_recv(socket)
@@ -81,7 +81,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
   end
 
   test "help pull", %{socket: socket, user: user} do
-    #Normal pull test
+    # Normal pull test
     message_coordinator(socket, "$help pull")
     [reply] = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
@@ -93,7 +93,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     refute String.contains?(message, "Pulls a given user into the battle.")
     refute String.contains?(message, "Displays this help text.")
 
-    #Moderator pull test
+    # Moderator pull test
     User.update_user(%{user | moderator: true})
     message_coordinator(socket, "$help pull")
     [reply] = _tachyon_recv(socket)
@@ -113,17 +113,19 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
+
     assert reply == %{
-      "cmd" => "s.communication.received_direct_message",
-      "message" => String.trim("""
----------------------------
-You are #{user.name}
-Profile link: https://localhost/teiserver/profile/#{user.id}
-Skill ratings:
-You currently have no accolades
-"""),
-      "sender_id" => coordinator_userid
-    }
+             "cmd" => "s.communication.received_direct_message",
+             "message" =>
+               String.trim("""
+               ---------------------------
+               You are #{user.name}
+               Profile link: https://localhost/teiserver/profile/#{user.id}
+               Skill ratings:
+               You currently have no accolades
+               """),
+             "sender_id" => coordinator_userid
+           }
   end
 
   test "whois", %{socket: socket, coordinator_userid: coordinator_userid} do
@@ -134,18 +136,20 @@ You currently have no accolades
     assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
+
     assert reply == %{
-      "cmd" => "s.communication.received_direct_message",
-      "message" => String.trim("""
----------------------------
-Found #{other_user.name}
-Profile link: https://localhost/teiserver/profile/#{other_user.id}
-Ratings:
-No moderation restrictions applied.
----------------------------
-"""),
-      "sender_id" => coordinator_userid
-    }
+             "cmd" => "s.communication.received_direct_message",
+             "message" =>
+               String.trim("""
+               ---------------------------
+               Found #{other_user.name}
+               Profile link: https://localhost/teiserver/profile/#{other_user.id}
+               Ratings:
+               No moderation restrictions applied.
+               ---------------------------
+               """),
+             "sender_id" => coordinator_userid
+           }
 
     # Now with previous names
     Account.update_user_stat(other_user.id, %{
@@ -157,19 +161,21 @@ No moderation restrictions applied.
     assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
+
     assert reply == %{
-      "cmd" => "s.communication.received_direct_message",
-      "message" => String.trim("""
----------------------------
-Found #{other_user.name}
-Previous names: name1, name2
-Profile link: https://localhost/teiserver/profile/#{other_user.id}
-Ratings:
-No moderation restrictions applied.
----------------------------
-"""),
-      "sender_id" => coordinator_userid
-    }
+             "cmd" => "s.communication.received_direct_message",
+             "message" =>
+               String.trim("""
+               ---------------------------
+               Found #{other_user.name}
+               Previous names: name1, name2
+               Profile link: https://localhost/teiserver/profile/#{other_user.id}
+               Ratings:
+               No moderation restrictions applied.
+               ---------------------------
+               """),
+             "sender_id" => coordinator_userid
+           }
   end
 
   test "mute user command", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
@@ -180,11 +186,13 @@ No moderation restrictions applied.
     assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
+
     assert reply == %{
-      "cmd" => "s.communication.received_direct_message",
-      "message" => "#{user2.name} is now ignored, you can unmute them with the $unignore command or via the account section of the server website.",
-      "sender_id" => coordinator_userid
-    }
+             "cmd" => "s.communication.received_direct_message",
+             "message" =>
+               "#{user2.name} is now ignored, you can unmute them with the $unignore command or via the account section of the server website.",
+             "sender_id" => coordinator_userid
+           }
 
     user = User.get_user_by_id(user.id)
     assert user.ignored == [user2.id]
@@ -195,11 +203,12 @@ No moderation restrictions applied.
     assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
+
     assert reply == %{
-      "cmd" => "s.communication.received_direct_message",
-      "message" => "#{user2.name} is now un-ignored.",
-      "sender_id" => coordinator_userid
-    }
+             "cmd" => "s.communication.received_direct_message",
+             "message" => "#{user2.name} is now un-ignored.",
+             "sender_id" => coordinator_userid
+           }
 
     user = User.get_user_by_id(user.id)
     assert user.ignored == []
@@ -210,11 +219,12 @@ No moderation restrictions applied.
     assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
+
     assert reply == %{
-      "cmd" => "s.communication.received_direct_message",
-      "message" => "#{user2.name} is now un-ignored.",
-      "sender_id" => coordinator_userid
-    }
+             "cmd" => "s.communication.received_direct_message",
+             "message" => "#{user2.name} is now un-ignored.",
+             "sender_id" => coordinator_userid
+           }
 
     user = User.get_user_by_id(user.id)
     assert user.ignored == []

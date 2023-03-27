@@ -1,105 +1,112 @@
 <% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "matches"}) %>
+<%= render(
+  TeiserverWeb.Admin.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "matches"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Admin.MatchView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Admin.MatchView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             show_search: false,
             active: "user"
-        }) %>
+          })
+        ) %>
 
         <div class="float-end">
-          <%= central_component "section_menu_button",
+          <%= central_component("section_menu_button",
             name: "ratings",
             label: "Rated matches",
             icon: Teiserver.Account.RatingLib.icon(),
             bsname: bsname,
             url: Routes.ts_admin_user_path(@conn, :ratings, @user.id)
-          %>
+          ) %>
 
-          <%= central_component "section_menu_button",
+          <%= central_component("section_menu_button",
             name: "view_user",
             label: "View user",
             icon: Central.Account.UserLib.icon(),
             bsname: bsname,
             url: ~p"/teiserver/admin/user/#{@user.id}"
-          %>
+          ) %>
         </div>
         <br /><br />
 
-<h4>Listing Matches</h4>
+        <h4>Listing Matches</h4>
 
-<table class="table table-sm">
-  <thead>
-    <tr>
-      <th>Type</th>
-      <th>Map</th>
-      <th>Outcome</th>
-      <th>Teams</th>
-      <th>Team size</th>
-      <th>Duration (mins)</th>
-      <th>Finished</th>
-      <th colspan="1">&nbsp;</th>
-    </tr>
-  </thead>
-  <tbody>
-<%= for match <- @matches do %>
-  <%
-    member_ids = match.members
-      |> Enum.filter(fn mm -> mm.user_id == @user.id end)
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Map</th>
+              <th>Outcome</th>
+              <th>Teams</th>
+              <th>Team size</th>
+              <th>Duration (mins)</th>
+              <th>Finished</th>
+              <th colspan="1">&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for match <- @matches do %>
+              <% member_ids =
+                match.members
+                |> Enum.filter(fn mm -> mm.user_id == @user.id end)
 
-    win = case member_ids do
-      [] -> false
-      [member] -> (match.winning_team == member.team_id)
-    end
-  %>
+              win =
+                case member_ids do
+                  [] -> false
+                  [member] -> match.winning_team == member.team_id
+                end %>
 
-    <tr>
-      <td><%= match.game_type %></td>
-      <td><%= match.map %></td>
+              <tr>
+                <td><%= match.game_type %></td>
+                <td><%= match.map %></td>
 
-      <td>
-        <%= cond do %>
-          <% win -> %>
-            Won
-          <% match.data["export_data"]["result"] == "undecided" -> %>
-            Undecided
-          <% true -> %>
-            &nbsp;
-        <% end %>
-      </td>
+                <td>
+                  <%= cond do %>
+                    <% win -> %>
+                      Won
+                    <% match.data["export_data"]["result"] == "undecided" -> %>
+                      Undecided
+                    <% true -> %>
+                      &nbsp;
+                  <% end %>
+                </td>
 
-      <td><%= match.team_count %></td>
-      <td><%= match.team_size %></td>
+                <td><%= match.team_count %></td>
+                <td><%= match.team_size %></td>
 
-      <td>
-        <%= case {match.finished, match.started} do %>
-          <% {nil, _} -> %>
-            Never finished
+                <td>
+                  <%= case {match.finished, match.started} do %>
+                    <% {nil, _} -> %>
+                      Never finished
+                    <% {_, nil} -> %>
+                      Never started
+                    <% _ -> %>
+                      <%= Timex.diff(match.finished, match.started, :minute) %>
+                  <% end %>
+                </td>
+                <td><%= date_to_str(match.finished, format: :ymd_hms) %></td>
 
-          <% {_, nil} -> %>
-            Never started
-
-          <% _ -> %>
-            <%= Timex.diff(match.finished, match.started, :minute) %>
-
-        <% end %>
-      </td>
-      <td><%= date_to_str match.finished, format: :ymd_hms %></td>
-
-      <td>
-        <a href={Routes.ts_admin_match_path(@conn, :show, match.id)} class="btn btn-secondary btn-sm">
-          Show
-        </a>
-      </td>
-    </tr>
-<% end %>
-  </tbody>
-</table>
-
+                <td>
+                  <a
+                    href={Routes.ts_admin_match_path(@conn, :show, match.id)}
+                    class="btn btn-secondary btn-sm"
+                  >
+                    Show
+                  </a>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

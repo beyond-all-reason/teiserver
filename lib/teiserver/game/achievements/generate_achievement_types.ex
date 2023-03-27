@@ -3,16 +3,17 @@ defmodule Teiserver.Game.GenerateAchievementTypes do
 
   @spec perform() :: :ok
   def perform() do
-    existing_types = Game.list_achievement_types(limit: :infinity, select: [:name])
+    existing_types =
+      Game.list_achievement_types(limit: :infinity, select: [:name])
       |> Enum.map(fn %{name: name} -> name end)
 
     [
       # duel_battle_wins([5, 25, 100]),
       # team_battle_wins([5, 25, 100]),
       # ffa_battle_wins([5, 25, 100]),
-      scenarios(),
+      scenarios()
     ]
-    |> List.flatten
+    |> List.flatten()
     |> Enum.filter(fn %{name: name} ->
       not Enum.member?(existing_types, name)
     end)
@@ -44,29 +45,37 @@ defmodule Teiserver.Game.GenerateAchievementTypes do
       %{base_name: "017 - Infantry simulator"},
       %{base_name: "018 - Tick tock"},
       %{base_name: "019 - Catch those rare comets"},
-      %{base_name: "020 - Fortress assault"},
+      %{base_name: "020 - Fortress assault"}
     ]
 
-    normal = scenarios
+    normal =
+      scenarios
       |> Enum.map(fn data ->
-        Map.merge(%{
-          name: data.base_name <> " (Normal)",
-          grouping: "Single player scenarios (Normal)",
-          icon: "fa-solid fa-pig",
-          colour: "#777777",
-          description: "Win the scenario #{data.base_name} on Normal"
-        }, data)
+        Map.merge(
+          %{
+            name: data.base_name <> " (Normal)",
+            grouping: "Single player scenarios (Normal)",
+            icon: "fa-solid fa-pig",
+            colour: "#777777",
+            description: "Win the scenario #{data.base_name} on Normal"
+          },
+          data
+        )
       end)
 
-    brutal = scenarios
+    brutal =
+      scenarios
       |> Enum.map(fn data ->
-        Map.merge(%{
-          name: data.base_name <> " (Brutal)",
-          grouping: "Single player scenarios (Brutal)",
-          icon: "fa-solid fa-elephant",
-          colour: "#AA6666",
-          description: "Win the scenario #{data.base_name} on Brutal"
-        }, data)
+        Map.merge(
+          %{
+            name: data.base_name <> " (Brutal)",
+            grouping: "Single player scenarios (Brutal)",
+            icon: "fa-solid fa-elephant",
+            colour: "#AA6666",
+            description: "Win the scenario #{data.base_name} on Brutal"
+          },
+          data
+        )
       end)
 
     normal ++ brutal

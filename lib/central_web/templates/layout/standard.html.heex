@@ -1,13 +1,12 @@
 <%= if Kernel.function_exported?(@conn.private.phoenix_view._, :view_colour, 0) do %>
-  <%
-    light_mode = case get_user_config_cache(@current_user, "general.Colour scheme") do
+  <% light_mode =
+    case get_user_config_cache(@current_user, "general.Colour scheme") do
       "Site default" -> get_site_config_cache("user.Default light mode")
       "Light" -> true
       "Dark" -> false
     end
 
-    {fg, bg, _bsname} = colours(@conn.private.phoenix_view._.view_colour(), light_mode)
-  %>
+  {fg, bg, _bsname} = colours(@conn.private.phoenix_view._.view_colour(), light_mode) %>
   <style type="text/css">
     @media print {
       #menu, #header, #navigation {
@@ -37,30 +36,45 @@
   </style>
 <% end %>
 
-<%= render CentralWeb.General.PageView, "top_navbar.html", assigns %>
+<%= render(CentralWeb.General.PageView, "top_navbar.html", assigns) %>
 
 <main>
   <%= if assigns[:breadcrumb_trails] do %>
-    <%= render CentralWeb.ComponentView, "breadcrumb.html", assigns %>
+    <%= render(CentralWeb.ComponentView, "breadcrumb.html", assigns) %>
   <% end %>
 
   <div id="flash-messages">
     <%= if Phoenix.Flash.get(@flash, :danger) do %>
-      <p class="alert alert-danger alert-no-margin alert-dismissible fade show" role="alert" id="app-flash-danger">
+      <p
+        class="alert alert-danger alert-no-margin alert-dismissible fade show"
+        role="alert"
+        id="app-flash-danger"
+      >
         <%= Phoenix.Flash.get(@flash, :danger) %>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        </button>
       </p>
     <% end %>
     <%= if Phoenix.Flash.get(@flash, :info) do %>
-      <p class="alert alert-info alert-no-margin alert-dismissible fade show" role="alert" id="app-flash-info">
+      <p
+        class="alert alert-info alert-no-margin alert-dismissible fade show"
+        role="alert"
+        id="app-flash-info"
+      >
         <%= Phoenix.Flash.get(@flash, :info) %>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        </button>
       </p>
     <% end %>
     <%= if Phoenix.Flash.get(@flash, :success) do %>
-      <p class="alert alert-success alert-no-margin alert-dismissible fade show" role="alert" id="app-flash-success">
+      <p
+        class="alert alert-success alert-no-margin alert-dismissible fade show"
+        role="alert"
+        id="app-flash-success"
+      >
         <%= Phoenix.Flash.get(@flash, :success) %>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        </button>
       </p>
     <% end %>
   </div>
@@ -70,7 +84,7 @@
   </div>
 
   <%= if get_user_config_cache(@conn, "module.Quick action") == true do %>
-    <%= render CentralWeb.General.QuickAction.HtmlView, "modal.html", assigns %>
+    <%= render(CentralWeb.General.QuickAction.HtmlView, "modal.html", assigns) %>
   <% end %>
 </main>
 

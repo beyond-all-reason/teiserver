@@ -15,12 +15,13 @@ defmodule TeiserverWeb.Account.SecurityController do
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, _params) do
-    user_tokens = Account.list_user_tokens(
-      search: [
-        user_id: conn.user_id
-      ],
-      order_by: "Most recently used"
-    )
+    user_tokens =
+      Account.list_user_tokens(
+        search: [
+          user_id: conn.user_id
+        ],
+        order_by: "Most recently used"
+      )
 
     conn
     |> assign(:user_tokens, user_tokens)

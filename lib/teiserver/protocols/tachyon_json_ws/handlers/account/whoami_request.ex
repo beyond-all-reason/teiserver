@@ -17,7 +17,6 @@ defmodule Teiserver.Tachyon.Handlers.Account.WhoamiRequest do
       "clan_id" => user.clan_id,
       "icons" => %{},
       "roles" => [],
-
       "battle_status" => %{
         "in_game" => client.in_game,
         "away" => client.away,
@@ -33,7 +32,6 @@ defmodule Teiserver.Tachyon.Handlers.Account.WhoamiRequest do
         "clan_tag" => client.clan_tag,
         "muted" => client.muted
       },
-
       "permissions" => user.permissions,
       "friends" => user.friends,
       "friend_requests" => user.friend_requests,

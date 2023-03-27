@@ -34,14 +34,17 @@ defmodule Teiserver.Battle.ExportRawMatchMetricsTask do
       match.game_type == "Team"
     end)
     |> Stream.map(fn match ->
-      members = match.members
-      |> Enum.map(fn m -> Map.take(m, ~w(user_id team_id)a) end)
+      members =
+        match.members
+        |> Enum.map(fn m -> Map.take(m, ~w(user_id team_id)a) end)
 
       match
-      |> Map.take(~w(uuid map data team_count team_size passworded game_type founder_id bots started finished)a)
+      |> Map.take(
+        ~w(uuid map data team_count team_size passworded game_type founder_id bots started finished)a
+      )
       |> Map.put(:members, members)
     end)
-    |> Enum.to_list
-    |> Jason.encode!
+    |> Enum.to_list()
+    |> Jason.encode!()
   end
 end

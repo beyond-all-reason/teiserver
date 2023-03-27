@@ -110,7 +110,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
   @spec pre_cache_policies :: :ok
   def pre_cache_policies() do
     policy_count =
-      Game.list_lobby_policies
+      Game.list_lobby_policies()
       |> Parallel.map(&add_policy_from_db/1)
       |> Enum.count()
 
@@ -123,55 +123,62 @@ defmodule Teiserver.Game.LobbyPolicyLib do
   """
   @spec get_or_make_agent_user(String.t(), LobbyPolicy.t()) :: T.user()
   def get_or_make_agent_user(base_name, lobby_policy) do
-    formatted_name = lobby_policy.agent_name_format
+    formatted_name =
+      lobby_policy.agent_name_format
       |> String.replace("{agent}", base_name)
       |> String.replace("{id}", "#{lobby_policy.id}")
 
     email_domain = Application.get_env(:central, Teiserver)[:bot_email_domain]
     email_addr = "#{base_name}_#{lobby_policy.id}_lobby_policy_bot@#{email_domain}"
 
-    db_user = Account.get_user(nil, search: [
-      email: email_addr
-    ])
+    db_user =
+      Account.get_user(nil,
+        search: [
+          email: email_addr
+        ]
+      )
 
-    user = case db_user do
-      nil ->
-        # Make account
-        {:ok, user} = Account.create_user(%{
-          name: formatted_name,
-          email: email_addr,
-          icon: "fa-solid fa-solar-system",
-          colour: "#0000AA",
-          admin_group_id: Teiserver.internal_group_id(),
-          password: Account.make_bot_password(),
-          data: %{
-            bot: true,
-            moderator: true,
-            verified: true,
-            lobby_client: "Teiserver Internal Process"
-          }
-        })
+    user =
+      case db_user do
+        nil ->
+          # Make account
+          {:ok, user} =
+            Account.create_user(%{
+              name: formatted_name,
+              email: email_addr,
+              icon: "fa-solid fa-solar-system",
+              colour: "#0000AA",
+              admin_group_id: Teiserver.internal_group_id(),
+              password: Account.make_bot_password(),
+              data: %{
+                bot: true,
+                moderator: true,
+                verified: true,
+                lobby_client: "Teiserver Internal Process"
+              }
+            })
 
-        Account.create_group_membership(%{
-          user_id: user.id,
-          group_id: Teiserver.internal_group_id()
-        })
+          Account.create_group_membership(%{
+            user_id: user.id,
+            group_id: Teiserver.internal_group_id()
+          })
 
-        Account.recache_user(user.id)
-        user
+          Account.recache_user(user.id)
+          user
 
-      _ ->
-        # Ensure the username is correct (for if we changed the name format around)
-        if db_user.name != formatted_name do
-          Account.system_change_user_name(db_user.id, formatted_name)
-        end
+        _ ->
+          # Ensure the username is correct (for if we changed the name format around)
+          if db_user.name != formatted_name do
+            Account.system_change_user_name(db_user.id, formatted_name)
+          end
 
-        db_user
-    end
+          db_user
+      end
 
     Account.update_user_stat(user.id, %{
-      country_override: Config.get_site_config_cache("bots.Flag"),
+      country_override: Config.get_site_config_cache("bots.Flag")
     })
+
     user
   end
 
@@ -184,7 +191,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
         data: %{
           userid: user.id,
           base_name: base_name,
-          lobby_policy: lobby_policy,
+          lobby_policy: lobby_policy
         }
       })
 
@@ -193,10 +200,12 @@ defmodule Teiserver.Game.LobbyPolicyLib do
 
   @spec add_policy_from_db(LobbyPolicy.t()) :: :ok | :exists | {:error, any}
   def add_policy_from_db(nil), do: {:error, "no policy"}
+
   def add_policy_from_db(%{enabled: false} = lobby_policy) do
     cast_lobby_organiser(lobby_policy.id, {:updated_policy, lobby_policy})
     :exists
   end
+
   def add_policy_from_db(%{enabled: true} = lobby_policy) do
     cond do
       Application.get_env(:central, Teiserver)[:enable_managed_lobbies] == false ->
@@ -207,18 +216,23 @@ defmodule Teiserver.Game.LobbyPolicyLib do
         :exists
 
       true ->
-        result = DynamicSupervisor.start_child(Teiserver.LobbyPolicySupervisor, {
-          LobbyPolicyOrganiserServer,
-          name: "lobby_policy_supervisor_#{lobby_policy.id}",
-          data: %{
-            lobby_policy: lobby_policy
-          }
-        })
+        result =
+          DynamicSupervisor.start_child(Teiserver.LobbyPolicySupervisor, {
+            LobbyPolicyOrganiserServer,
+            name: "lobby_policy_supervisor_#{lobby_policy.id}",
+            data: %{
+              lobby_policy: lobby_policy
+            }
+          })
 
         case result do
           {:error, err} ->
-            Logger.error("Error starting LobbyPolicySupervisor: #{__ENV__.file}:#{__ENV__.line}\n#{inspect err}")
+            Logger.error(
+              "Error starting LobbyPolicySupervisor: #{__ENV__.file}:#{__ENV__.line}\n#{inspect(err)}"
+            )
+
             {:error, err}
+
           {:ok, _pid} ->
             :ok
         end
@@ -227,7 +241,10 @@ defmodule Teiserver.Game.LobbyPolicyLib do
 
   @spec get_lobby_organiser_pid(T.lobby_policy_id()) :: pid() | nil
   def get_lobby_organiser_pid(lobby_policy_id) when is_integer(lobby_policy_id) do
-    case Horde.Registry.lookup(Teiserver.LobbyPolicyRegistry, "LobbyPolicyOrganiserServer:#{lobby_policy_id}") do
+    case Horde.Registry.lookup(
+           Teiserver.LobbyPolicyRegistry,
+           "LobbyPolicyOrganiserServer:#{lobby_policy_id}"
+         ) do
       [{pid, _}] -> pid
       _ -> nil
     end
@@ -239,7 +256,9 @@ defmodule Teiserver.Game.LobbyPolicyLib do
   @spec cast_lobby_organiser(T.lobby_policy_id(), any) :: :ok | nil
   def cast_lobby_organiser(lobby_policy_id, message) when is_integer(lobby_policy_id) do
     case get_lobby_organiser_pid(lobby_policy_id) do
-      nil -> nil
+      nil ->
+        nil
+
       pid ->
         GenServer.cast(pid, message)
         :ok
@@ -252,7 +271,9 @@ defmodule Teiserver.Game.LobbyPolicyLib do
   @spec call_lobby_organiser(T.lobby_policy_id(), any) :: any | nil
   def call_lobby_organiser(lobby_policy_id, message) when is_integer(lobby_policy_id) do
     case get_lobby_organiser_pid(lobby_policy_id) do
-      nil -> nil
+      nil ->
+        nil
+
       pid ->
         try do
           GenServer.call(pid, message)

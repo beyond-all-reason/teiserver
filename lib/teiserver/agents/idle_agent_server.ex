@@ -13,6 +13,7 @@ defmodule Teiserver.Agents.IdleAgentServer do
     AgentLib.post_agent_update(state.id, "idle startup")
 
     socket = AgentLib.get_socket()
+
     AgentLib.login(socket, %{
       name: "Idle_#{state.number}",
       email: "Idle_#{state.number}@agents",
@@ -39,16 +40,18 @@ defmodule Teiserver.Agents.IdleAgentServer do
   end
 
   def handle_info({:ssl, _socket, data}, state) do
-    new_state = data
-    |> AgentLib.translate
-    |> Enum.reduce(state, fn data, acc ->
-      handle_msg(data, acc)
-    end)
+    new_state =
+      data
+      |> AgentLib.translate()
+      |> Enum.reduce(state, fn data, acc ->
+        handle_msg(data, acc)
+      end)
 
     {:noreply, new_state}
   end
 
   defp handle_msg(nil, state), do: state
+
   defp handle_msg(%{"cmd" => "s.system.pong"}, state) do
     state
   end

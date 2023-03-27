@@ -1,7 +1,5 @@
-<%
-  bsname = view_colour()
-  is_admin = allow?(@conn, "teiserver.admin.account")
-%>
+<% bsname = view_colour()
+is_admin = allow?(@conn, "teiserver.admin.account") %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -30,312 +28,343 @@
   }
 </style>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
+<%= render(
+  TeiserverWeb.Admin.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "users"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Admin.UserView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             show_search: false,
             active: "smurf"
-        }) %>
-
+          })
+        ) %>
 
         <div class="help-box-large">
           Lists all users <%= @user.name %> shares a matched key with. In the list of matches it will show the most recent match date as used by the user being matched with. This allows you to see how recently the matched player had that value vs when it was last used by <%= @user.name %>.
         </div>
 
-<div class="float-end py-3">
-  <div class="btn btn-primary2" onclick="$('.key-date').toggle();">
-    <i class='fa-fw fa-solid fa-calendar'></i>
-    &nbsp;
-    Toggle dates
-  </div>
+        <div class="float-end py-3">
+          <div class="btn btn-primary2" onclick="$('.key-date').toggle();">
+            <i class="fa-fw fa-solid fa-calendar"></i> &nbsp;
+            Toggle dates
+          </div>
 
-  <div class="btn btn-primary2" onclick="$('.help-box, .help-box-large').toggle();">
-    <i class='fa-fw fa-solid fa-circle-info'></i>
-    &nbsp;
-    Show/Hide help
-  </div>
+          <div class="btn btn-primary2" onclick="$('.help-box, .help-box-large').toggle();">
+            <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
+            Show/Hide help
+          </div>
 
-  <a class={"btn btn-outline-#{bsname}"} href={~p"/teiserver/admin/user/#{@user}"}>Show user</a>
-</div>
-<h3 class="mt-4">Previous names for <%= @user.name %></h3>
-<%=
-  (@stats["previous_names"] || [])
-    |> Enum.join(", ")
-%>
+          <a class={"btn btn-outline-#{bsname}"} href={~p"/teiserver/admin/user/#{@user}"}>
+            Show user
+          </a>
+        </div>
+        <h3 class="mt-4">Previous names for <%= @user.name %></h3>
+        <%= (@stats["previous_names"] || [])
+        |> Enum.join(", ") %>
 
-<h3 class="mt-4">Listing matches for <%= @user.name %></h3>
+        <h3 class="mt-4">Listing matches for <%= @user.name %></h3>
 
-<%
-  type_colours = %{
-    "hw1" => "danger",
-    "hw2" => "danger",
-    "client_app_hash" => "warning",
-    "wb1" => "success",
-    "chobby_hash" => "info",
-    "chobby_sysinfo_hash" => "info",
-    "chobby_mac_hash" => "info"
-  }
+        <% type_colours = %{
+          "hw1" => "danger",
+          "hw2" => "danger",
+          "client_app_hash" => "warning",
+          "wb1" => "success",
+          "chobby_hash" => "info",
+          "chobby_sysinfo_hash" => "info",
+          "chobby_mac_hash" => "info"
+        }
 
-  type_icons = %{
-    "hw1" => "fa-computer",
-    "hw2" => "fa-computer",
-    "client_app_hash" => "fa-code-simple",
-    "wb1" => "fa-globe",
-    "chobby_hash" => "fa-computer-classic",
-    "chobby_sysinfo_hash" => "fa-computer-classic",
-    "chobby_mac_hash" => "fa-computer-classic"
-  }
+        type_icons = %{
+          "hw1" => "fa-computer",
+          "hw2" => "fa-computer",
+          "client_app_hash" => "fa-code-simple",
+          "wb1" => "fa-globe",
+          "chobby_hash" => "fa-computer-classic",
+          "chobby_sysinfo_hash" => "fa-computer-classic",
+          "chobby_mac_hash" => "fa-computer-classic"
+        }
 
-  short_name = %{
-    "chobby_hash" => "chobby",
-    "chobby_mac_hash" => "mac",
-    "chobby_sysinfo_hash" => "sysinfo",
-    "client_app_hash" => "client",
-  }
-%>
+        short_name = %{
+          "chobby_hash" => "chobby",
+          "chobby_mac_hash" => "mac",
+          "chobby_sysinfo_hash" => "sysinfo",
+          "client_app_hash" => "client"
+        } %>
 
-<div class="row">
-  <div class="col-md-12">
-    <table class="table table-sm">
-      <thead>
-        <tr>
-          <th colspan="3">Name/Domain</th>
-          <th>Status</th>
+        <div class="row">
+          <div class="col-md-12">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th colspan="3">Name/Domain</th>
+                  <th>Status</th>
 
-          <th>Winrate</th>
-          <th>Recents</th>
+                  <th>Winrate</th>
+                  <th>Recents</th>
 
-          <%= for type <- @key_types do %>
-            <th><%= short_name[type] || type %></th>
-          <% end %>
+                  <%= for type <- @key_types do %>
+                    <th><%= short_name[type] || type %></th>
+                  <% end %>
 
-          <th>Last login</th>
-          <th>Registered</th>
+                  <th>Last login</th>
+                  <th>Registered</th>
 
-          <%= if is_admin do %>
-            <th colspan="1">&nbsp;</th>
-          <% else %>
-            <th>&nbsp;</th>
-          <% end %>
-        </tr>
-      </thead>
-      <tbody>
+                  <%= if is_admin do %>
+                    <th colspan="1">&nbsp;</th>
+                  <% else %>
+                    <th>&nbsp;</th>
+                  <% end %>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="selected-user-row">
+                  <% email_domain =
+                    @user.email
+                    |> String.split("@")
+                    |> Enum.reverse()
+                    |> hd %>
 
-        <tr class="selected-user-row">
-          <%
-            email_domain = @user.email
-              |> String.split("@")
-              |> Enum.reverse
-              |> hd
-          %>
+                  <td style={"background-color: #{@user.colour}; color: #FFF;"} width="22">
+                    <%= central_component("icon", icon: @user.icon) %>
+                  </td>
+                  <td><%= @user.name %></td>
+                  <td><%= email_domain %></td>
 
-          <td style={"background-color: #{@user.colour}; color: #FFF;"} width="22">
-            <%= central_component "icon", icon: @user.icon %>
-          </td>
-          <td><%= @user.name %></td>
-          <td><%= email_domain %></td>
+                  <td>
+                    -
+                  </td>
 
-          <td>
-            -
-          </td>
+                  <td><%= @stats["win_rate.team"] %></td>
+                  <td><%= @stats["recent_count.team"] %></td>
 
-          <td><%= @stats["win_rate.team"] %></td>
-          <td><%= @stats["recent_count.team"] %></td>
+                  <%= for _type <- @key_types do %>
+                    <td>
+                      -
+                    </td>
+                  <% end %>
 
-          <%= for _type <- @key_types do %>
-            <td>
-              -
-            </td>
-          <% end %>
+                  <td>
+                    <%= date_to_str(((@user.data["last_login"] || 0) * 60) |> Timex.from_unix(),
+                      format: :hms_or_ymd,
+                      tz: @tz
+                    ) %>
+                  </td>
 
+                  <td>
+                    <%= date_to_str(@user.inserted_at, format: :ymd) %>
+                  </td>
 
-          <td>
-            <%= date_to_str(((@user.data["last_login"] || 0) * 60) |> Timex.from_unix, format: :hms_or_ymd, tz: @tz) %>
-          </td>
+                  <td>
+                    <a
+                      href={~p"/teiserver/admin/user/#{@user.id}"}
+                      class="btn btn-secondary btn-sm"
+                    >
+                      Show
+                    </a>
+                  </td>
+                </tr>
 
-          <td>
-            <%= date_to_str(@user.inserted_at, format: :ymd) %>
-          </td>
+                <tr class="under-selected-user-row">
+                  <td colspan="18" style="height: 5px;"></td>
+                </tr>
 
-          <td>
-            <a href={~p"/teiserver/admin/user/#{@user.id}"} class="btn btn-secondary btn-sm">
-              Show
-            </a>
-          </td>
-        </tr>
+                <%= for user <- @users do %>
+                  <% user_stats = @stats_map[user.id]
 
-        <tr class="under-selected-user-row">
-          <td colspan="18" style="height: 5px;"></td>
-        </tr>
+                  email_domain =
+                    user.email
+                    |> String.split("@")
+                    |> Enum.reverse()
+                    |> hd %>
 
-    <%= for user <- @users do %>
-      <%
-        user_stats = @stats_map[user.id]
+                  <tr>
+                    <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
+                      <%= central_component("icon", icon: user.icon) %>
+                    </td>
+                    <td><%= user.name %></td>
+                    <td><%= email_domain %></td>
 
-        email_domain = user.email
-          |> String.split("@")
-          |> Enum.reverse
-          |> hd
-      %>
+                    <td>
+                      <% unverified = user.data["verified"] != true
+                      user_r = %{restrictions: user.data["restrictions"] || []}
 
-        <tr>
-          <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
-            <%= central_component "icon", icon: user.icon %>
-          </td>
-          <td><%= user.name %></td>
-          <td><%= email_domain %></td>
+                      banned = Teiserver.User.is_restricted?(user_r, ["Login"])
 
-          <td>
-            <%
-              unverified = user.data["verified"] != true
-              user_r = %{restrictions: user.data["restrictions"] || []}
+                      muted =
+                        Teiserver.User.is_restricted?(user_r, [
+                          "All chat",
+                          "Room chat",
+                          "Direct chat",
+                          "Lobby chat",
+                          "Battle chat"
+                        ])
 
-              banned = Teiserver.User.is_restricted?(user_r, ["Login"])
-              muted = Teiserver.User.is_restricted?(user_r, ["All chat", "Room chat", "Direct chat", "Lobby chat", "Battle chat"])
-              warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"])
-            %>
+                      warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"]) %>
 
-            <%= if banned do %>
-              <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}></i>
-            <% end %>
+                      <%= if banned do %>
+                        <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}>
+                        </i>
+                      <% end %>
 
-            <%= if muted do %>
-              <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Mute")}"}></i>
-            <% end %>
+                      <%= if muted do %>
+                        <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Mute")}"}>
+                        </i>
+                      <% end %>
 
-            <%= if warned do %>
-              <i class={"fa-fw text-warning #{Teiserver.Moderation.ActionLib.action_icon("Warn")}"}></i>
-            <% end %>
+                      <%= if warned do %>
+                        <i class={"fa-fw text-warning #{Teiserver.Moderation.ActionLib.action_icon("Warn")}"}>
+                        </i>
+                      <% end %>
 
-            <%= if unverified do %>
-              <i class='fa-fw text-info fas fa-square-question'></i>
-            <% end %>
-          </td>
+                      <%= if unverified do %>
+                        <i class="fa-fw text-info fas fa-square-question"></i>
+                      <% end %>
+                    </td>
 
-          <td><%= user_stats["win_rate.team"] %></td>
-          <td><%= user_stats["recent_count.team"] %></td>
+                    <td><%= user_stats["win_rate.team"] %></td>
+                    <td><%= user_stats["recent_count.team"] %></td>
 
-          <%= for type <- @key_types do %>
-            <td>
-              <%= if Map.has_key?(@key_lookup, {type, user.id}) do %>
-                <%
-                  match = @key_lookup[{type, user.id}]
-                  user_key = @user_key_lookup[match.value]
-                %>
+                    <%= for type <- @key_types do %>
+                      <td>
+                        <%= if Map.has_key?(@key_lookup, {type, user.id}) do %>
+                          <% match = @key_lookup[{type, user.id}]
+                          user_key = @user_key_lookup[match.value] %>
 
-                <i
-                  class={"fa-fw fa-regular #{type_icons[type]} text-#{type_colours[type]}"}
-                  title={"Matching key against #{date_to_str(match.last_updated, format: :ymd)}"}
-                ></i>
-                <span class="key-date">
-                <%= date_to_str(match.last_updated, format: :ymd) %>/<%= date_to_str(user_key.last_updated, format: :ymd) %>
-                </span>
-              <% end %>
-            </td>
-          <% end %>
+                          <i
+                            class={"fa-fw fa-regular #{type_icons[type]} text-#{type_colours[type]}"}
+                            title={"Matching key against #{date_to_str(match.last_updated, format: :ymd)}"}
+                          >
+                          </i>
+                          <span class="key-date">
+                            <%= date_to_str(match.last_updated, format: :ymd) %>/<%= date_to_str(
+                              user_key.last_updated,
+                              format: :ymd
+                            ) %>
+                          </span>
+                        <% end %>
+                      </td>
+                    <% end %>
 
-          <td>
-            <%= date_to_str(((user.data["last_login"] || 0) * 60) |> Timex.from_unix, format: :hms_or_ymd, tz: @tz) %>
-          </td>
+                    <td>
+                      <%= date_to_str(((user.data["last_login"] || 0) * 60) |> Timex.from_unix(),
+                        format: :hms_or_ymd,
+                        tz: @tz
+                      ) %>
+                    </td>
 
-          <td>
-            <%= date_to_str(user.inserted_at, format: :ymd) %>
-          </td>
+                    <td>
+                      <%= date_to_str(user.inserted_at, format: :ymd) %>
+                    </td>
 
-          <td>
-            <a href={~p"/teiserver/admin/user/#{user.id}"} class="btn btn-secondary btn-sm">
-              Show
-            </a>
-          </td>
+                    <td>
+                      <a
+                        href={~p"/teiserver/admin/user/#{user.id}"}
+                        class="btn btn-secondary btn-sm"
+                      >
+                        Show
+                      </a>
+                    </td>
 
-          <%= if false and is_admin do %>
-          <td>
-            <a href={~p"/teiserver/admin/users/smurf_merge_form/#{user.id}/#{@user.id}"} class={"btn btn-outline-#{bsname} btn-sm"}>
-              Merge smurf
-            </a>
-          </td>
-          <% end %>
-        </tr>
-    <% end %>
-      </tbody>
-    </table>
-
-  </div>
-</div>
-
-<div class="row mt-4">
-  <div class="col-xl-4 col-xxl-6">
-    <h4>Key counts</h4>
-    A high number of keys here can increase the chances of a false positive
-    <table class="table table-sm">
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Count</th>
-        </tr>
-      </thead>
-      <tbody>
-        <%= for {type_name, count} <- @key_count_by_type_name do %>
-          <tr>
-            <td>
-              <i class={"fa-fw fa-regular #{type_icons[type_name]} text-#{type_colours[type_name]}"}></i>
-              &nbsp;
-              <%= type_name %>
-            </td>
-            <td>
-              <%= count %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
-
-<%= if allow?(@conn, "admin.dev") do %>
-    <div class="col-xl-8 col-xxl-6">
-      <h4>Key list</h4>
-      <table class="table table-sm">
-        <thead>
-          <tr>
-            <th>Type</th>
-            <th>Value</th>
-            <th>Updated</th>
-            <th>&nbsp;</th>
-          </tr>
-        </thead>
-        <tbody>
-          <%= for key <- @all_keys do %>
-            <tr>
-              <td>
-                <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}></i>
-                &nbsp;
-                <%= key.type.name %>
-              </td>
-              <td>
-                <%= if String.length(key.value) > 50 do %>
-                  <%= key.value |> String.slice(0, 50) %>...
-                <% else %>
-                  <%= key.value %>
+                    <%= if false and is_admin do %>
+                      <td>
+                        <a
+                          href={
+                            ~p"/teiserver/admin/users/smurf_merge_form/#{user.id}/#{@user.id}"
+                          }
+                          class={"btn btn-outline-#{bsname} btn-sm"}
+                        >
+                          Merge smurf
+                        </a>
+                      </td>
+                    <% end %>
+                  </tr>
                 <% end %>
-              </td>
-              <td>
-                <%= date_to_str key.last_updated, format: :hms_or_ymd %>
-              </td>
-              <td>
-                <%= link "Delete", to: Routes.ts_admin_user_path(@conn, :delete_smurf_key, key.id), class: "btn btn-danger btn-sm", method: "delete", data: [confirm: "Are you sure?"] %>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-<% end %>
-  </div>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
+        <div class="row mt-4">
+          <div class="col-xl-4 col-xxl-6">
+            <h4>Key counts</h4>
+            A high number of keys here can increase the chances of a false positive
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <%= for {type_name, count} <- @key_count_by_type_name do %>
+                  <tr>
+                    <td>
+                      <i class={"fa-fw fa-regular #{type_icons[type_name]} text-#{type_colours[type_name]}"}>
+                      </i>
+                      &nbsp; <%= type_name %>
+                    </td>
+                    <td>
+                      <%= count %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+
+          <%= if allow?(@conn, "admin.dev") do %>
+            <div class="col-xl-8 col-xxl-6">
+              <h4>Key list</h4>
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Value</th>
+                    <th>Updated</th>
+                    <th>&nbsp;</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <%= for key <- @all_keys do %>
+                    <tr>
+                      <td>
+                        <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}>
+                        </i>
+                        &nbsp; <%= key.type.name %>
+                      </td>
+                      <td>
+                        <%= if String.length(key.value) > 50 do %>
+                          <%= key.value |> String.slice(0, 50) %>...
+                        <% else %>
+                          <%= key.value %>
+                        <% end %>
+                      </td>
+                      <td>
+                        <%= date_to_str(key.last_updated, format: :hms_or_ymd) %>
+                      </td>
+                      <td>
+                        <%= link("Delete",
+                          to: Routes.ts_admin_user_path(@conn, :delete_smurf_key, key.id),
+                          class: "btn btn-danger btn-sm",
+                          method: "delete",
+                          data: [confirm: "Are you sure?"]
+                        ) %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% end %>
+        </div>
       </div>
     </div>
   </div>

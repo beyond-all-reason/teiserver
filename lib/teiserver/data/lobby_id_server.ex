@@ -12,10 +12,11 @@ defmodule Teiserver.LobbyIdServer do
         {:ok, _coordinator_pid} =
           DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
             __MODULE__,
-            name: __MODULE__,
-            data: %{}
+            name: __MODULE__, data: %{}
           })
+
         :ok
+
       _ ->
         {:failure, "Already started"}
     end
@@ -42,6 +43,7 @@ defmodule Teiserver.LobbyIdServer do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "LobbyIdServer") do
       [{pid, _}] ->
         pid
+
       _ ->
         nil
     end
@@ -68,8 +70,9 @@ defmodule Teiserver.LobbyIdServer do
       :lobby_id_server
     )
 
-    {:ok, %{
-      next_id: 1
-    }}
+    {:ok,
+     %{
+       next_id: 1
+     }}
   end
 end

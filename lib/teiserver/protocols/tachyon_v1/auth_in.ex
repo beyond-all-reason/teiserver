@@ -7,10 +7,12 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
   def do_handle("get_token", _, %{transport: :ranch_tcp} = state) do
     reply(:auth, :user_token, {:failure, "Non-secured connection"}, state)
   end
+
   def do_handle("get_token", %{"email" => email, "password" => plain_text_password}, state) do
     case User.get_user_by_email(email) do
       nil ->
         reply(:auth, :user_token, {:failure, "Incorrect credentials"}, state)
+
       user ->
         # Are they an md5 conversion user?
         case user.spring_password do
@@ -28,16 +30,19 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
 
                 token = User.create_token(user)
                 reply(:auth, :user_token, {:success, token}, state)
+
               false ->
                 reply(:auth, :user_token, {:failure, "Invalid credentials."}, state)
             end
 
           false ->
             db_user = Account.get_user!(user.id)
+
             case Central.Account.User.verify_password(plain_text_password, db_user.password) do
               true ->
                 token = User.create_token(user)
                 reply(:auth, :user_token, {:success, token}, state)
+
               false ->
                 reply(:auth, :user_token, {:failure, "Invalid credentials"}, state)
             end
@@ -45,7 +50,16 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
     end
   end
 
-  def do_handle("login", %{"token" => token, "lobby_name" => lobby_name, "lobby_version" => lobby_version, "lobby_hash" => lobby_hash}, state) do
+  def do_handle(
+        "login",
+        %{
+          "token" => token,
+          "lobby_name" => lobby_name,
+          "lobby_version" => lobby_version,
+          "lobby_hash" => lobby_hash
+        },
+        state
+      ) do
     response = User.try_login(token, state.ip, "#{lobby_name} #{lobby_version}", lobby_hash)
 
     case response do
@@ -86,7 +100,11 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
     state
   end
 
-  def do_handle("register", %{"username" => username, "email" => email, "password" => password}, state) do
+  def do_handle(
+        "register",
+        %{"username" => username, "email" => email, "password" => password},
+        state
+      ) do
     response = User.register_user(username, email, password)
     reply(:auth, :register, response, state)
   end
@@ -95,6 +113,14 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
     # It's possible there is a password in this data, if there is we need to remove it
     data = if Map.has_key?(data, "password"), do: Map.put(data, "password", "*******"), else: data
 
-    reply(:system, :error, %{location: "auth.handle", error: "No match for cmd: '#{cmd}' with data '#{Kernel.inspect data}'"}, state)
+    reply(
+      :system,
+      :error,
+      %{
+        location: "auth.handle",
+        error: "No match for cmd: '#{cmd}' with data '#{Kernel.inspect(data)}'"
+      },
+      state
+    )
   end
 end

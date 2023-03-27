@@ -14,7 +14,7 @@ defmodule Teiserver.Account.SmurfLink do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-      |> cast(params, ~w(user1_id user2_id)a)
-      |> validate_required(~w(user1_id user2_id)a)
+    |> cast(params, ~w(user1_id user2_id)a)
+    |> validate_required(~w(user1_id user2_id)a)
   end
 end

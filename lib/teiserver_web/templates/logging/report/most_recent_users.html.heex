@@ -14,15 +14,18 @@
   }
 </style>
 
-<%= render TeiserverWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "report"})
-%>
+<%= render(
+  TeiserverWeb.Logging.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "report"})
+) %>
 
 <div class="row">
   <div class="col-md-12">
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
         <h4>
-          Latest users - Server time: <%= date_to_str @server_time, format: :hms, tz: @tz %>
+          Latest users - Server time: <%= date_to_str(@server_time, format: :hms, tz: @tz) %>
         </h4>
         <table class="table">
           <thead>
@@ -36,69 +39,72 @@
             </tr>
           </thead>
           <tbody>
-        <%= for {userid, name, email, usericon, usercolour, groupname, groupicon, groupcolour, last_timestamp}  <- @data do %>
-            <tr>
-              <%
-                c = Central.Helpers.ColourHelper.new(usercolour)
+            <%= for {userid, name, email, usericon, usercolour, groupname, groupicon, groupcolour, last_timestamp}  <- @data do %>
+              <tr>
+                <% c = Central.Helpers.ColourHelper.new(usercolour)
 
                 rgba = c |> Central.Helpers.ColourHelper.as_css_style(0.1)
-                rgb = c |> Central.Helpers.ColourHelper.as_css_style()
-              %>
+                rgb = c |> Central.Helpers.ColourHelper.as_css_style() %>
 
-              <td width="22" style={"background-color: #{rgb}; color: #FFF;"}>
-                <%= central_component "icon", icon: usericon %>
-              </td>
-              <td style={"background-color: #{rgba};"}><%= name %></td>
-              <td class="d-lg-none d-xl-table-cell"><%= email %></td>
+                <td width="22" style={"background-color: #{rgb}; color: #FFF;"}>
+                  <%= central_component("icon", icon: usericon) %>
+                </td>
+                <td style={"background-color: #{rgba};"}><%= name %></td>
+                <td class="d-lg-none d-xl-table-cell"><%= email %></td>
 
-              <%
-                c = Central.Helpers.ColourHelper.new(groupcolour)
+                <% c = Central.Helpers.ColourHelper.new(groupcolour)
 
                 rgba = c |> Central.Helpers.ColourHelper.as_css_style(0.1)
-                rgb = c |> Central.Helpers.ColourHelper.as_css_style()
-              %>
+                rgb = c |> Central.Helpers.ColourHelper.as_css_style() %>
 
-              <td width="22" style={"background-color: #{rgb}; color: #FFF;"}>
-                <%= central_component "icon", icon: groupicon %>
-              </td>
-              <td style={"background-color: #{rgba};"}><%= groupname %></td>
+                <td width="22" style={"background-color: #{rgb}; color: #FFF;"}>
+                  <%= central_component("icon", icon: groupicon) %>
+                </td>
+                <td style={"background-color: #{rgba};"}><%= groupname %></td>
 
-              <%# https://hexdocs.pm/timex/Timex.html#compare/2 %>
 
-              <% style = cond do
-                  Timex.compare(last_timestamp, @currently) == 1 ->
-                    "font-weight:bold; background-color: #8F8;"
-                  @now.day == last_timestamp.day && @now.month == last_timestamp.month && @now.year == last_timestamp.year ->
-                    "font-weight:bold; background-color: #CFC;"
-                  Timex.compare(last_timestamp, @recent) == 1 ->
-                    "font-weight:bold; background-color: #EFE;"
-                  true ->
-                    "background-color: #FEE;"
-              end %>
+                <% style =
+                  cond do
+                    Timex.compare(last_timestamp, @currently) == 1 ->
+                      "font-weight:bold; background-color: #8F8;"
 
-              <td style={style}>
-                <%= date_to_str last_timestamp, format: :hms_or_dmy, tz: @tz %>
-              </td>
+                    @now.day == last_timestamp.day && @now.month == last_timestamp.month &&
+                        @now.year == last_timestamp.year ->
+                      "font-weight:bold; background-color: #CFC;"
 
-              <td>
-                <a href={Routes.admin_user_path(@conn, :show, userid)} class="btn btn-secondary btn-outline btn-sm">
-                  <i class="fa-regular fa-fw fa-user"></i>
-                  Show user
-                </a>
-              </td>
+                    Timex.compare(last_timestamp, @recent) == 1 ->
+                      "font-weight:bold; background-color: #EFE;"
 
-              <td>
-                <a href={"#{Routes.logging_page_view_log_path(@conn, :index)}?user_id=#{userid}"} class="btn btn-secondary btn-outline btn-sm">
-                  <i class="fa-regular fa-fw fa-bars"></i>
-                  Show user logs
-                </a>
-              </td>
-            </tr>
-        <% end %>
+                    true ->
+                      "background-color: #FEE;"
+                  end %>
+
+                <td style={style}>
+                  <%= date_to_str(last_timestamp, format: :hms_or_dmy, tz: @tz) %>
+                </td>
+
+                <td>
+                  <a
+                    href={Routes.admin_user_path(@conn, :show, userid)}
+                    class="btn btn-secondary btn-outline btn-sm"
+                  >
+                    <i class="fa-regular fa-fw fa-user"></i> Show user
+                  </a>
+                </td>
+
+                <td>
+                  <a
+                    href={"#{Routes.logging_page_view_log_path(@conn, :index)}?user_id=#{userid}"}
+                    class="btn btn-secondary btn-outline btn-sm"
+                  >
+                    <i class="fa-regular fa-fw fa-bars"></i> Show user logs
+                  </a>
+                </td>
+              </tr>
+            <% end %>
           </tbody>
         </table>
       </div>
     </div>
-
   </div>
 </div>

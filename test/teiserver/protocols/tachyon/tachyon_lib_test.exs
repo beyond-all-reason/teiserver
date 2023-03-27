@@ -10,12 +10,12 @@ defmodule Teiserver.Protocols.TachyonLibTest do
   end
 
   test "format_log" do
-    assert TachyonLib.format_log([1,2,3]) == "[1, 2, 3]"
+    assert TachyonLib.format_log([1, 2, 3]) == "[1, 2, 3]"
     assert TachyonLib.format_log(%{key: "value"}) == "%{key: \"value\"}"
   end
 
   test "encode decode" do
-    data = %{"key" => "value", "lkey" => [1,2,3]}
+    data = %{"key" => "value", "lkey" => [1, 2, 3]}
     r = TachyonLib.encode(data)
 
     assert {:ok, data} == TachyonLib.decode(r)

@@ -9,33 +9,46 @@
 
   <div class="row">
     <div class="col-lg-6 mt-3">
-      <%= label f, :value, class: "control-label" %>
-      <%= text_input f, :value, class: "form-control", autofocus: :autofocus %>
-      <%= error_tag f, :value %>
+      <%= label(f, :value, class: "control-label") %>
+      <%= text_input(f, :value, class: "form-control", autofocus: :autofocus) %>
+      <%= error_tag(f, :value) %>
     </div>
 
     <div class="col-lg-6 mt-3">
-      <%= label f, :purpose, class: "control-label" %>
-      <%= select f, :purpose, @code_types, class: "form-control" %>
-      <%= error_tag f, :purpose %>
+      <%= label(f, :purpose, class: "control-label") %>
+      <%= select(f, :purpose, @code_types, class: "form-control") %>
+      <%= error_tag(f, :purpose) %>
     </div>
 
     <div class="col-lg-6 mt-3">
-      <%= label f, :expires, class: "control-label" %>
-      <%= text_input f, :expires, class: "form-control" %>
-      <%= error_tag f, :expires %>
+      <%= label(f, :expires, class: "control-label") %>
+      <%= text_input(f, :expires, class: "form-control") %>
+      <%= error_tag(f, :expires) %>
     </div>
   </div>
 
   <div class="mt-3">
     <%= if @changeset.data.id do %>
-      <a href={Routes.admin_code_path(@conn, :show, @report)} class="btn btn-secondary btn-outline">
+      <a
+        href={Routes.admin_code_path(@conn, :show, @report)}
+        class="btn btn-secondary btn-outline"
+      >
         Cancel
       </a>
 
-      <input type="submit" value="Save changes" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
+      <input
+        type="submit"
+        value="Save changes"
+        name="form.submitted"
+        class={"btn btn-#{bsname} float-end"}
+      />
     <% else %>
-      <input type="submit" value="Create" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
+      <input
+        type="submit"
+        value="Create"
+        name="form.submitted"
+        class={"btn btn-#{bsname} float-end"}
+      />
     <% end %>
   </div>
 <% end %>

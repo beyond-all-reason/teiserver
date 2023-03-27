@@ -19,8 +19,7 @@ defmodule Teiserver.Agents.AgentLib do
     {:ok, _supervisor_pid} =
       DynamicSupervisor.start_child(Teiserver.Agents.DynamicSupervisor, {
         Teiserver.Agents.SupervisorAgentServer,
-        name: via_tuple(:supervisor),
-        data: %{}
+        name: via_tuple(:supervisor), data: %{}
       })
 
     :ok
@@ -41,14 +40,18 @@ defmodule Teiserver.Agents.AgentLib do
     end
   end
 
-  @spec via_tuple(integer() | :supervisor) :: {:via, Registry, {Teiserver.Agents.ServerRegistry, any}}
-  @spec via_tuple(String.t(), integer()) :: {:via, Registry, {Teiserver.Agents.ServerRegistry, any}}
+  @spec via_tuple(integer() | :supervisor) ::
+          {:via, Registry, {Teiserver.Agents.ServerRegistry, any}}
+  @spec via_tuple(String.t(), integer()) ::
+          {:via, Registry, {Teiserver.Agents.ServerRegistry, any}}
   def via_tuple(:supervisor) do
     via_tuple(Teiserver.Agents.SupervisorAgentServer, 1)
   end
+
   def via_tuple(id) do
     {:via, Registry, {Teiserver.Agents.ServerRegistry, id}}
   end
+
   def via_tuple(service, number) do
     via_tuple("#{service}-#{number}")
   end
@@ -64,7 +67,14 @@ defmodule Teiserver.Agents.AgentLib do
   end
 
   defp do_login(socket, token) do
-    msg = %{cmd: "c.auth.login", token: token, lobby_name: "agent_lobby", lobby_version: "1", lobby_hash: "token1 token2"}
+    msg = %{
+      cmd: "c.auth.login",
+      token: token,
+      lobby_name: "agent_lobby",
+      lobby_version: "1",
+      lobby_hash: "token1 token2"
+    }
+
     _send(socket, msg)
   end
 
@@ -86,13 +96,13 @@ defmodule Teiserver.Agents.AgentLib do
     end
 
     user = User.get_user_by_name(data.name)
+
     with token <- User.create_token(user),
-        :ok <- do_login(socket, token)
-      do
-        {:success, user}
-      else
-        {:error, :login} ->
-          raise "Login error"
+         :ok <- do_login(socket, token) do
+      {:success, user}
+    else
+      {:error, :login} ->
+        raise "Login error"
     end
   end
 
@@ -110,6 +120,7 @@ defmodule Teiserver.Agents.AgentLib do
   def translate('OK cmd=TACHYON\n'), do: []
   def translate('TASSERVER 0.38-33-ga5f3b28 * 8201 0\n'), do: []
   def translate('TASSERVER 0.38-33-ga5f3b28 * 8201 0\nOK cmd=TACHYON\n'), do: []
+
   def translate(raw) do
     raw
     |> to_string
@@ -119,6 +130,7 @@ defmodule Teiserver.Agents.AgentLib do
   end
 
   defp do_translate(""), do: nil
+
   defp do_translate(line) do
     case TachyonLib.decode!(line) do
       %{"cmd" => "s.auth.login"} -> nil
@@ -137,6 +149,7 @@ defmodule Teiserver.Agents.AgentLib do
         data: data
       }
     )
+
     # Logger.info("agent_updates - #{from} > #{msg}")
   end
 end

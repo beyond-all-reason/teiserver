@@ -5,6 +5,7 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
   alias Teiserver.Moderation.ModerationTestLib
 
   alias Central.Helpers.GeneralTestLib
+
   setup do
     GeneralTestLib.conn_setup(["teiserver.staff.reviewer", "teiserver.staff.moderator"])
     |> Teiserver.TeiserverTestLib.conn_setup()
@@ -23,13 +24,22 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
 
     test "show reports by target", %{conn: conn} do
       report = ModerationTestLib.report_fixture()
-      conn = get(conn, Routes.moderation_report_path(conn, :index) <> "?target_id=#{report.target_id}")
+
+      conn =
+        get(conn, Routes.moderation_report_path(conn, :index) <> "?target_id=#{report.target_id}")
+
       assert html_response(conn, 200) =~ "Listing Reports"
     end
 
     test "show reports by reporter", %{conn: conn} do
       report = ModerationTestLib.report_fixture()
-      conn = get(conn, Routes.moderation_report_path(conn, :index) <> "?reporter_id=#{report.reporter_id}")
+
+      conn =
+        get(
+          conn,
+          Routes.moderation_report_path(conn, :index) <> "?reporter_id=#{report.reporter_id}"
+        )
+
       assert html_response(conn, 200) =~ "Listing Reports"
     end
   end
@@ -73,6 +83,7 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
       report = ModerationTestLib.report_fixture()
       conn = delete(conn, Routes.moderation_report_path(conn, :delete, report))
       assert redirected_to(conn) == Routes.moderation_report_path(conn, :index)
+
       assert_error_sent 404, fn ->
         get(conn, Routes.moderation_report_path(conn, :show, report))
       end

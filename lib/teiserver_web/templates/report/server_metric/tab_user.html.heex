@@ -11,25 +11,25 @@
   </thead>
   <tbody>
     <%= for {uid, total} <- @data["minutes_per_user"]["total"] do %>
-      <% user = @users[uid |> String.to_integer] %>
+      <% user = @users[uid |> String.to_integer()] %>
       <%= if user do %>
         <tr>
           <td><%= user.name %></td>
-          <td><%= represent_minutes total %></td>
-          <td><%= represent_minutes @data["minutes_per_user"]["player"][uid] %></td>
-          <td><%= represent_minutes @data["minutes_per_user"]["spectator"][uid] %></td>
-          <td><%= represent_minutes @data["minutes_per_user"]["lobby"][uid] %></td>
-          <td><%= represent_minutes @data["minutes_per_user"]["menu"][uid] %></td>
+          <td><%= represent_minutes(total) %></td>
+          <td><%= represent_minutes(@data["minutes_per_user"]["player"][uid]) %></td>
+          <td><%= represent_minutes(@data["minutes_per_user"]["spectator"][uid]) %></td>
+          <td><%= represent_minutes(@data["minutes_per_user"]["lobby"][uid]) %></td>
+          <td><%= represent_minutes(@data["minutes_per_user"]["menu"][uid]) %></td>
         </tr>
       <% end %>
     <% end %>
     <tr>
       <td><strong>Total:</strong></td>
-      <td><%= represent_minutes @data["aggregates"]["minutes"]["total"] %></td>
-      <td><%= represent_minutes @data["aggregates"]["minutes"]["player"] %></td>
-      <td><%= represent_minutes @data["aggregates"]["minutes"]["spectator"] %></td>
-      <td><%= represent_minutes @data["aggregates"]["minutes"]["lobby"] %></td>
-      <td><%= represent_minutes @data["aggregates"]["minutes"]["menu"] %></td>
+      <td><%= represent_minutes(@data["aggregates"]["minutes"]["total"]) %></td>
+      <td><%= represent_minutes(@data["aggregates"]["minutes"]["player"]) %></td>
+      <td><%= represent_minutes(@data["aggregates"]["minutes"]["spectator"]) %></td>
+      <td><%= represent_minutes(@data["aggregates"]["minutes"]["lobby"]) %></td>
+      <td><%= represent_minutes(@data["aggregates"]["minutes"]["menu"]) %></td>
     </tr>
   </tbody>
 </table>

@@ -40,23 +40,26 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   end
 
   defp post_process_match(match) do
-    new_data = Map.merge((match.data || %{}), %{
-      "player_count" => Enum.count(match.members)
-    })
+    new_data =
+      Map.merge(match.data || %{}, %{
+        "player_count" => Enum.count(match.members)
+      })
 
     use_export_data(match)
     new_data = Map.merge(new_data, extract_export_data(match))
 
-    {:ok, match} = Battle.update_match(match, %{
-      data: new_data,
-      processed: true
-    })
+    {:ok, match} =
+      Battle.update_match(match, %{
+        data: new_data,
+        processed: true
+      })
 
     # We pass match.id to ensure we re-query the match correctly
     Teiserver.Game.MatchRatingLib.rate_match(match.id)
 
     # Tell the host to re-rate some players
-    usernames = match.members
+    usernames =
+      match.members
       |> Enum.map_join(" ", fn m -> User.get_username(m.user_id) end)
 
     msg = "updateSkill #{usernames}"
@@ -64,56 +67,60 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   end
 
   defp use_export_data(%{data: %{"export_data" => export_data}} = match) do
-    win_map = export_data["players"]
+    win_map =
+      export_data["players"]
       |> Map.new(fn stats -> {stats["name"], stats["win"] == 1} end)
 
     host_game_duration = max(export_data["gameDuration"], 1)
     memberships = Battle.list_match_memberships(search: [match_id: match.id])
 
-    winning_team = memberships
-    |> Enum.map(fn m ->
-      username = User.get_username(m.user_id)
-      win = Map.get(win_map, username, false)
+    winning_team =
+      memberships
+      |> Enum.map(fn m ->
+        username = User.get_username(m.user_id)
+        win = Map.get(win_map, username, false)
 
-      stats = export_data["teamStats"]
-        |> Map.get(username, %{})
-        |> Map.drop(~w(allyTeam frameNb))
-        |> Map.new(fn {k, v} ->
-          {k,
-            v
-              |> NumberHelper.int_parse()
-              |> round
-          }
-        end)
+        stats =
+          export_data["teamStats"]
+          |> Map.get(username, %{})
+          |> Map.drop(~w(allyTeam frameNb))
+          |> Map.new(fn {k, v} ->
+            {k,
+             v
+             |> NumberHelper.int_parse()
+             |> round}
+          end)
 
-      player_data = export_data["players"]
-        |> Enum.filter(fn p -> p["accountId"] == to_string(m.user_id) end)
+        player_data =
+          export_data["players"]
+          |> Enum.filter(fn p -> p["accountId"] == to_string(m.user_id) end)
 
-      case player_data do
-        [d] ->
-          left_after = case d["loseTime"] do
-            "" -> host_game_duration
-            v -> v
-          end
+        case player_data do
+          [d] ->
+            left_after =
+              case d["loseTime"] do
+                "" -> host_game_duration
+                v -> v
+              end
 
-          Battle.update_match_membership(m, %{
-            left_after: left_after,
-            win: win,
-            stats: stats
-          })
+            Battle.update_match_membership(m, %{
+              left_after: left_after,
+              win: win,
+              stats: stats
+            })
 
-        _ ->
-          Battle.update_match_membership(m, %{
-            win: win,
-            stats: stats
-          })
-      end
+          _ ->
+            Battle.update_match_membership(m, %{
+              win: win,
+              stats: stats
+            })
+        end
 
-      {m.team_id, win}
-    end)
-    |> Enum.filter(fn {_teamid, win} -> win == true end)
-    |> hd_or_x({nil, nil})
-    |> elem(0)
+        {m.team_id, win}
+      end)
+      |> Enum.filter(fn {_teamid, win} -> win == true end)
+      |> hd_or_x({nil, nil})
+      |> elem(0)
 
     Battle.update_match(match, %{winning_team: winning_team, game_duration: host_game_duration})
 
@@ -122,11 +129,13 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
       Teiserver.Account.RecacheUserStatsTask.match_processed(match, m.user_id)
     end)
   end
+
   defp use_export_data(_), do: []
 
   defp extract_export_data(%{data: %{"export_data" => _export_data}} = _match) do
     %{}
   end
+
   defp extract_export_data(_), do: %{}
 
   defp hd_or_x([], x), do: x

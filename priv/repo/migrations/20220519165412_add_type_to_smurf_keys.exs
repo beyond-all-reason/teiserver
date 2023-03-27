@@ -9,6 +9,7 @@ defmodule Central.Repo.Migrations.AddTypeToSmurfKeys do
     alter table(:teiserver_account_smurf_keys) do
       add :type_id, references(:teiserver_account_smurf_key_types, on_delete: :nothing)
     end
+
     drop index(:teiserver_account_smurf_keys, [:value])
     create index(:teiserver_account_smurf_keys, [:user_id])
   end

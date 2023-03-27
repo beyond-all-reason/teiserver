@@ -16,6 +16,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistMatchDayTask do
         case Battle.list_matches(limit: 1, order_by: "Oldest first") do
           [] ->
             nil
+
           [match] ->
             Timex.to_date(match.inserted_at)
         end
@@ -27,6 +28,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistMatchDayTask do
     cond do
       date == nil ->
         :ok
+
       Timex.compare(date, Timex.today()) == -1 ->
         run(date)
 
@@ -37,7 +39,9 @@ defmodule Teiserver.Telemetry.Tasks.PersistMatchDayTask do
           |> Teiserver.Telemetry.Tasks.PersistMatchDayTask.new()
           |> Oban.insert()
         end
+
         :ok
+
       true ->
         :ok
     end

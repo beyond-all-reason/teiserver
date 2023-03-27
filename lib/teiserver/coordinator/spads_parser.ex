@@ -5,17 +5,17 @@ defmodule Teiserver.Coordinator.SpadsParser do
   def handle_in(msg, state) do
     cond do
       # Team Size
-      (match = Regex.run(~r/teamSize=(\d)+/, msg)) ->
+      match = Regex.run(~r/teamSize=(\d)+/, msg) ->
         [_, size] = match
         {:host_update, %{host_teamsize: String.to_integer(size)}}
 
       # Team count
-      (match = Regex.run(~r/nbTeams=(\d)+/, msg)) ->
+      match = Regex.run(~r/nbTeams=(\d)+/, msg) ->
         [_, count] = match
         {:host_update, %{host_teamcount: String.to_integer(count)}}
 
       # Add a boss
-      (match = Regex.run(~r/Boss mode enabled for (\S+)/, msg)) ->
+      match = Regex.run(~r/Boss mode enabled for (\S+)/, msg) ->
         [_, player_name] = match
         player_id = User.get_userid(player_name)
 
@@ -27,11 +27,12 @@ defmodule Teiserver.Coordinator.SpadsParser do
         end
 
       # Remove all bosses
-      (_match = Regex.run(~r/Boss mode disabled by \S+/, msg)) ->
+      _match = Regex.run(~r/Boss mode disabled by \S+/, msg) ->
         {:host_update, %{host_bosses: []}}
 
       # Not handling it, return nil
-      true -> nil
+      true ->
+        nil
     end
   end
 end

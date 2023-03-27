@@ -34,7 +34,7 @@ defmodule CentralWeb.Account.GroupController do
     invites =
       Account.list_groups(
         search: [
-          pending_inviting: conn.assigns[:current_user].id,
+          pending_inviting: conn.assigns[:current_user].id
         ],
         order: "Name (A-Z)"
       )
@@ -164,8 +164,8 @@ defmodule CentralWeb.Account.GroupController do
 
   def create_membership(conn, %{"group_id" => ""}) do
     conn
-      |> put_flash(:danger, "You do not have the access to add that user to that group.")
-      |> redirect(to: Routes.account_group_path(conn, :index))
+    |> put_flash(:danger, "You do not have the access to add that user to that group.")
+    |> redirect(to: Routes.account_group_path(conn, :index))
   end
 
   def create_membership(conn, params) do
@@ -316,6 +316,7 @@ defmodule CentralWeb.Account.GroupController do
           {:ok, _membership} ->
             user = Account.get_user!(conn.user_id)
             Account.update_user(user, %{"group_id" => group_id})
+
             CentralWeb.Endpoint.broadcast(
               "recache:#{conn.user_id}",
               "recache",
@@ -326,16 +327,12 @@ defmodule CentralWeb.Account.GroupController do
 
             conn
             |> put_flash(:success, "Invite accepted")
-            |> redirect(
-              to: Routes.account_group_path(conn, :index) <> "#invites_tab"
-            )
+            |> redirect(to: Routes.account_group_path(conn, :index) <> "#invites_tab")
 
           {:error, _changeset} ->
             conn
             |> put_flash(:danger, "There was an error accepting the invite")
-            |> redirect(
-              to: Routes.account_group_path(conn, :index) <> "#invites_tab"
-            )
+            |> redirect(to: Routes.account_group_path(conn, :index) <> "#invites_tab")
         end
     end
   end
@@ -372,9 +369,7 @@ defmodule CentralWeb.Account.GroupController do
           {:ok, _group} ->
             conn
             |> put_flash(:success, "Invite blocked.")
-            |> redirect(
-              to: Routes.account_group_path(conn, :index) <> "#invites_tab"
-            )
+            |> redirect(to: Routes.account_group_path(conn, :index) <> "#invites_tab")
 
           {:error, _changeset} ->
             conn
@@ -382,9 +377,7 @@ defmodule CentralWeb.Account.GroupController do
               :success,
               "Invite unable to be blocked, if this persists please contact an admin."
             )
-            |> redirect(
-              to: Routes.account_group_path(conn, :index) <> "#invites_tab"
-            )
+            |> redirect(to: Routes.account_group_path(conn, :index) <> "#invites_tab")
         end
     end
   end

@@ -21,9 +21,7 @@ defmodule Central.Application do
         # Start the endpoint when the application starts
         CentralWeb.Endpoint,
         CentralWeb.Presence,
-
         {Central.General.CacheClusterServer, name: Central.General.CacheClusterServer},
-
         concache_sup(:codes),
         concache_sup(:account_user_cache),
         concache_sup(:account_user_cache_bang),
@@ -37,10 +35,8 @@ defmodule Central.Application do
         concache_perm_sup(:restriction_lookup_store),
         concache_perm_sup(:config_user_type_store),
         concache_perm_sup(:config_site_type_store),
-
         concache_perm_sup(:config_site_cache),
         concache_perm_sup(:application_metadata_cache),
-
         concache_sup(:application_temp_cache),
         concache_sup(:config_user_cache),
         concache_sup(:communication_user_notifications),
@@ -56,14 +52,11 @@ defmodule Central.Application do
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.AccoladesRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ConsulRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.BalancerRegistry]},
-
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.LobbyRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ClientRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.PartyRegistry]},
-
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueWaitRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueMatchRegistry]},
-
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.LobbyPolicyRegistry]},
 
         # These are for tracking the number of servers on the local node
@@ -79,7 +72,6 @@ defmodule Central.Application do
         concache_perm_sup(:teiserver_telemetry_property_types),
         concache_perm_sup(:teiserver_telemetry_game_event_types),
         concache_perm_sup(:teiserver_account_smurf_key_types),
-
         concache_sup(:teiserver_user_ratings, global_ttl: 60_000),
         concache_sup(:teiserver_game_rating_types, global_ttl: 60_000),
 
@@ -99,7 +91,6 @@ defmodule Central.Application do
         concache_perm_sup(:users_lookup_id_with_email),
         concache_perm_sup(:users_lookup_id_with_discord),
         concache_perm_sup(:users),
-
         concache_sup(:teiserver_login_count, global_ttl: 10_000),
         concache_sup(:teiserver_user_stat_cache),
 
@@ -112,7 +103,6 @@ defmodule Central.Application do
         # Caches - Blog - TODO: Is this actually needed? It's not in use
         concache_sup(:teiserver_blog_posts),
         concache_sup(:teiserver_blog_categories),
-
         {Teiserver.HookServer, name: Teiserver.HookServer},
 
         # Liveview throttles
@@ -134,8 +124,10 @@ defmodule Central.Application do
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueSupervisor},
 
         # Coordinator mode
-        {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Coordinator.DynamicSupervisor},
-        {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Coordinator.BalancerDynamicSupervisor},
+        {DynamicSupervisor,
+         strategy: :one_for_one, name: Teiserver.Coordinator.DynamicSupervisor},
+        {DynamicSupervisor,
+         strategy: :one_for_one, name: Teiserver.Coordinator.BalancerDynamicSupervisor},
 
         # Accolades
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Account.AccoladeSupervisor},
@@ -145,7 +137,8 @@ defmodule Central.Application do
 
         # Telemetry
         {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
-        {Teiserver.Telemetry.SpringTelemetryServer, name: Teiserver.Telemetry.SpringTelemetryServer},
+        {Teiserver.Telemetry.SpringTelemetryServer,
+         name: Teiserver.Telemetry.SpringTelemetryServer},
 
         # Ranch servers
         %{
@@ -163,22 +156,23 @@ defmodule Central.Application do
       ] ++ discord_start()
 
     # Agent mode stuff, should not be enabled in prod
-    children = if Application.get_env(:central, Teiserver)[:enable_agent_mode] do
-      children ++
-        [
-          {Registry, keys: :unique, name: Teiserver.Agents.ServerRegistry},
-          {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Agents.DynamicSupervisor},
-        ]
-    else
-      children
-    end
+    children =
+      if Application.get_env(:central, Teiserver)[:enable_agent_mode] do
+        children ++
+          [
+            {Registry, keys: :unique, name: Teiserver.Agents.ServerRegistry},
+            {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Agents.DynamicSupervisor}
+          ]
+      else
+        children
+      end
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Central.Supervisor]
     start_result = Supervisor.start_link(children, opts)
 
-    Logger.info("Central.Supervisor start result: #{Kernel.inspect start_result}")
+    Logger.info("Central.Supervisor start result: #{Kernel.inspect(start_result)}")
 
     startup_sub_functions(start_result)
 
@@ -222,6 +216,7 @@ defmodule Central.Application do
   end
 
   def startup_sub_functions({:error, _}), do: :error
+
   def startup_sub_functions(_) do
     :timer.sleep(100)
 

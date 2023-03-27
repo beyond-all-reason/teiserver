@@ -19,50 +19,47 @@
   <div class="col-md-12">
     <div class="card card-default">
       <div class="card-body" style="padding: 0 15px;">
-
         <div class="row">
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "user",
             label: "Users",
             active: @active,
             url: Routes.admin_user_path(@conn, :index),
             icon: Central.Account.UserLib.icon()
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "group",
             label: "Groups",
             active: @active,
             url: Routes.admin_group_path(@conn, :index),
             icon: Central.Account.GroupLib.icon()
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "codes",
             label: "Codes",
             active: @active,
             url: Routes.admin_code_path(@conn, :index),
             icon: Teiserver.Account.CodeLib.icon()
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "site_config",
             label: "Site config",
             active: @active,
             url: Routes.admin_site_config_path(@conn, :index),
             icon: Central.Config.SiteConfigLib.icon()
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "tool",
             label: "Tools",
             active: @active,
             url: Routes.admin_tool_path(@conn, :index),
             icon: Central.Admin.ToolLib.icon()
-          %>
-
+          ) %>
         </div>
-
       </div>
     </div>
   </div>

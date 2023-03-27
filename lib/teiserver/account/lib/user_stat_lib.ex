@@ -58,9 +58,10 @@ defmodule Teiserver.Account.UserStatLib do
 
   def field_contains(stats, _field, nil), do: stats
   def field_contains(stats, _field, ""), do: stats
+
   def field_contains(stats, field, value) do
     stats
-      |> Stream.filter(fn %{data: data} -> data[field] != nil end)
-      |> Stream.filter(fn %{data: data} -> data[field] |> String.contains?(value) end)
+    |> Stream.filter(fn %{data: data} -> data[field] != nil end)
+    |> Stream.filter(fn %{data: data} -> data[field] |> String.contains?(value) end)
   end
 end

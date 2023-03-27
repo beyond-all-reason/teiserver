@@ -30,9 +30,11 @@ defmodule Teiserver.Client do
         # Battle stuff
         ready: false,
         unready_at: nil,
-        player_number: 0,# In spring this is team_number
+        # In spring this is team_number
+        player_number: 0,
         team_colour: "0",
-        team_number: 0, # In spring this would be ally_team_number
+        # In spring this would be ally_team_number
+        team_number: 0,
         player: false,
         handicap: 0,
         sync: %{
@@ -52,9 +54,7 @@ defmodule Teiserver.Client do
         ip: nil,
         country: nil,
         lobby_client: nil,
-
         app_status: nil,
-
         shadowbanned: false,
         awaiting_warn_ack: false,
         warned: false,
@@ -64,9 +64,7 @@ defmodule Teiserver.Client do
         queues: [],
         party_id: nil,
         clan_tag: nil,
-
         token_id: nil,
-
         protocol: nil
       },
       client
@@ -75,18 +73,19 @@ defmodule Teiserver.Client do
 
   @spec reset_battlestatus(Map.t()) :: Map.t()
   def reset_battlestatus(client) do
-    %{client |
-      player_number: 0,
-      team_number: 0,
-      player: false,
-      handicap: 0,
-      sync: %{
+    %{
+      client
+      | player_number: 0,
+        team_number: 0,
+        player: false,
+        handicap: 0,
+        sync: %{
           engine: 0,
           game: 0,
           map: 0
         },
-      role: "spectator",
-      lobby_id: nil
+        role: "spectator",
+        lobby_id: nil
     }
   end
 
@@ -94,10 +93,11 @@ defmodule Teiserver.Client do
   def login(user, protocol, ip \\ nil, token_id \\ nil) do
     stats = Account.get_user_stat_data(user.id)
 
-    clan_tag = case Clans.get_clan(user.clan_id) do
-      nil -> nil
-      clan -> clan.tag
-    end
+    clan_tag =
+      case Clans.get_clan(user.clan_id) do
+        nil -> nil
+        clan -> clan.tag
+      end
 
     client =
       create(%{
@@ -112,14 +112,11 @@ defmodule Teiserver.Client do
         ip: ip || stats["last_ip"],
         country: stats["country"] || "??",
         lobby_client: stats["lobby_client"],
-
         shadowbanned: User.is_shadowbanned?(user),
         muted: User.has_mute?(user),
         awaiting_warn_ack: false,
         warned: false,
-
         token_id: token_id,
-
         clan_tag: clan_tag,
         protocol: protocol
       })
@@ -203,9 +200,9 @@ defmodule Teiserver.Client do
   @spec list_clients([T.userid()]) :: [T.client()]
   defdelegate list_clients(id_list), to: ClientLib
 
-  @spec update(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: T.client()
+  @spec update(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) ::
+          T.client()
   def update(client, reason), do: ClientLib.replace_update_client(client, reason)
-
 
   @spec get_client_pid(T.userid()) :: pid() | nil
   defdelegate get_client_pid(userid), to: ClientLib
@@ -216,8 +213,6 @@ defmodule Teiserver.Client do
   @spec call_client(T.userid(), any) :: any | nil
   defdelegate call_client(userid, msg), to: ClientLib
 
-
-
   @spec join_battle(T.client_id(), Integer.t(), boolean()) :: nil | T.client()
   def join_battle(userid, lobby_id, lobby_host) do
     case get_client_by_id(userid) do
@@ -226,10 +221,7 @@ defmodule Teiserver.Client do
 
       client ->
         new_client = reset_battlestatus(client)
-        new_client = %{new_client |
-          lobby_id: lobby_id,
-          lobby_host: lobby_host
-        }
+        new_client = %{new_client | lobby_id: lobby_id, lobby_host: lobby_host}
         ClientLib.replace_update_client(new_client, :silent)
         new_client
     end
@@ -309,7 +301,6 @@ defmodule Teiserver.Client do
       }
     )
 
-
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_client_messages:#{client.userid}",
@@ -342,9 +333,11 @@ defmodule Teiserver.Client do
     case get_client_by_id(userid) do
       nil ->
         :ok
+
       client ->
         update(%{client | awaiting_warn_ack: true}, :silent)
     end
+
     :ok
   end
 
@@ -358,7 +351,9 @@ defmodule Teiserver.Client do
   @spec enable_client_message_print(T.userid()) :: :ok
   def enable_client_message_print(userid) do
     case get_client_by_id(userid) do
-      nil -> :ok
+      nil ->
+        :ok
+
       client ->
         send(client.tcp_pid, {:put, :print_client_messages, true})
         :ok
@@ -368,7 +363,9 @@ defmodule Teiserver.Client do
   @spec disable_client_message_print(T.userid()) :: :ok
   def disable_client_message_print(userid) do
     case get_client_by_id(userid) do
-      nil -> :ok
+      nil ->
+        :ok
+
       client ->
         send(client.tcp_pid, {:put, :print_client_messages, false})
         :ok
@@ -378,7 +375,9 @@ defmodule Teiserver.Client do
   @spec enable_server_message_print(T.userid()) :: :ok
   def enable_server_message_print(userid) do
     case get_client_by_id(userid) do
-      nil -> :ok
+      nil ->
+        :ok
+
       client ->
         send(client.tcp_pid, {:put, :print_server_messages, true})
         :ok
@@ -388,7 +387,9 @@ defmodule Teiserver.Client do
   @spec disable_server_message_print(T.userid()) :: :ok
   def disable_server_message_print(userid) do
     case get_client_by_id(userid) do
-      nil -> :ok
+      nil ->
+        :ok
+
       client ->
         send(client.tcp_pid, {:put, :print_server_messages, false})
         :ok

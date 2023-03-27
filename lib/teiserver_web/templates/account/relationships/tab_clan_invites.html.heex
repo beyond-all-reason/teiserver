@@ -15,15 +15,23 @@
           <td><%= clan.name %></td>
           <td><%= clan.tag %></td>
           <td>
-            <%= link raw("<i class='fas fa-fw fa-check'></i> Accept invite"), to: Routes.ts_clans_clan_path(@conn, :respond_to_invite, clan.id, "accept"), method: :put, data: [confirm: "Are you sure?"], class: "btn btn-sm btn-success" %>
-
-            &nbsp;
-
-            <%= link raw("<i class='fas fa-fw fa-times'></i> Decline invite"), to: Routes.ts_clans_clan_path(@conn, :respond_to_invite, clan.id, "decline"), method: :put, data: [confirm: "Are you sure?"], class: "btn btn-sm btn-danger" %>
-
-            &nbsp;&nbsp;&nbsp;
-
-            <%= link raw("<i class='fas fa-fw fa-ban'></i> Decline and block"), to: Routes.ts_clans_clan_path(@conn, :respond_to_invite, clan.id, "block"), method: :put, data: [confirm: "Are you sure?"], class: "btn btn-sm btn-danger2" %>
+            <%= link(raw("<i class='fas fa-fw fa-check'></i> Accept invite"),
+              to: Routes.ts_clans_clan_path(@conn, :respond_to_invite, clan.id, "accept"),
+              method: :put,
+              data: [confirm: "Are you sure?"],
+              class: "btn btn-sm btn-success"
+            ) %> &nbsp; <%= link(raw("<i class='fas fa-fw fa-times'></i> Decline invite"),
+              to: Routes.ts_clans_clan_path(@conn, :respond_to_invite, clan.id, "decline"),
+              method: :put,
+              data: [confirm: "Are you sure?"],
+              class: "btn btn-sm btn-danger"
+            ) %> &nbsp;&nbsp;&nbsp; <%= link(
+              raw("<i class='fas fa-fw fa-ban'></i> Decline and block"),
+              to: Routes.ts_clans_clan_path(@conn, :respond_to_invite, clan.id, "block"),
+              method: :put,
+              data: [confirm: "Are you sure?"],
+              class: "btn btn-sm btn-danger2"
+            ) %>
           </td>
         </tr>
       <% end %>

@@ -1,9 +1,11 @@
 <% bsname = view_colour() %>
 
-<script src={Routes.static_path(@conn, "/js/d3.js")}></script>
-<script src={Routes.static_path(@conn, "/js/c3.min.js")}></script>
+<script src={Routes.static_path(@conn, "/js/d3.js")}>
+</script>
+<script src={Routes.static_path(@conn, "/js/c3.min.js")}>
+</script>
 
-<link href="/css/c3.min.css" rel="stylesheet">
+<link href="/css/c3.min.css" rel="stylesheet" />
 
 <script>
   $(function() {
@@ -28,85 +30,101 @@
   });
 </script>
 
-<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "match_metrics"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "match_metrics"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Report.MatchMetricView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Report.MatchMetricView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "month_graph"
           })
-        %>
+        ) %>
 
-        <a href={Routes.ts_reports_server_metric_path(@conn, :month_metrics_graph)} class={"btn float-end btn-outline-#{TeiserverWeb.Report.ServerMetricView.view_colour}"}>
-          <%= central_component "icon", icon: TeiserverWeb.Report.ServerMetricView.icon %>
-          &nbsp;
+        <a
+          href={Routes.ts_reports_server_metric_path(@conn, :month_metrics_graph)}
+          class={"btn float-end btn-outline-#{TeiserverWeb.Report.ServerMetricView.view_colour}"}
+        >
+          <%= central_component("icon", icon: TeiserverWeb.Report.ServerMetricView.icon()) %> &nbsp;
           Server data
         </a>
         <br /><br />
 
-<div class="row">
-  <div class="col-md-12">
-    <form action={Routes.ts_reports_match_metric_path(@conn, :month_metrics_graph)} method='post' class=''>
-      <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
-      <div class='row'>
-        <div class='col-xl-3 col-lg-4 col-md-12 my-3'>
-          <label for='fields' class='control-label'>Fields</label>
-          <%= central_component "icon_dropdown",
-            name: "fields",
-            id: "fields",
-            enumerable: [
-              %{id: "split", name: "Split"},
-              %{id: "grouped1", name: "Grouped (PvP, PvE, Bots)"},
-              %{id: "grouped2", name: "Grouped (PvP, Co-op)"},
-            ],
-            selected: Map.get(@params, "fields", "split")
-          %>
-        </div>
-        
-        <div class='col-xl-3 col-lg-4 col-md-12 my-3'>
-          <label for='type' class='control-label'>Type</label>
-          <%= central_component "icon_dropdown",
-            name: "type",
-            id: "type",
-            enumerable: [
-              %{id: "total_count", name: "Raw"},
-              %{id: "weighted_count", name: "Weighted"},
-            ],
-            selected: Map.get(@params, "type", "total_count")
-          %>
+        <div class="row">
+          <div class="col-md-12">
+            <form
+              action={Routes.ts_reports_match_metric_path(@conn, :month_metrics_graph)}
+              method="post"
+              class=""
+            >
+              <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+              <div class="row">
+                <div class="col-xl-3 col-lg-4 col-md-12 my-3">
+                  <label for="fields" class="control-label">Fields</label>
+                  <%= central_component("icon_dropdown",
+                    name: "fields",
+                    id: "fields",
+                    enumerable: [
+                      %{id: "split", name: "Split"},
+                      %{id: "grouped1", name: "Grouped (PvP, PvE, Bots)"},
+                      %{id: "grouped2", name: "Grouped (PvP, Co-op)"}
+                    ],
+                    selected: Map.get(@params, "fields", "split")
+                  ) %>
+                </div>
+
+                <div class="col-xl-3 col-lg-4 col-md-12 my-3">
+                  <label for="type" class="control-label">Type</label>
+                  <%= central_component("icon_dropdown",
+                    name: "type",
+                    id: "type",
+                    enumerable: [
+                      %{id: "total_count", name: "Raw"},
+                      %{id: "weighted_count", name: "Weighted"}
+                    ],
+                    selected: Map.get(@params, "type", "total_count")
+                  ) %>
+                </div>
+
+                <div class="col-xl-3 col-lg-4 col-md-12 my-3">
+                  <label for="months" class="control-label">Months</label>
+                  <input
+                    type="text"
+                    name="months"
+                    id="months"
+                    value={@params["months"]}
+                    class="form-control"
+                  />
+                </div>
+
+                <div class="col-md-12 my-3">
+                  <button type="submit" class={"btn btn-#{bsname} float-end"}>
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
 
-        <div class='col-xl-3 col-lg-4 col-md-12 my-3'>
-          <label for='months' class='control-label'>Months</label>
-          <input type='text' name='months' id='months' value={@params["months"]} class='form-control' />
+        <div class="row">
+          <div class="col-md-12">
+            <div class={"card border-#{bsname} page-card"}>
+              <div class="card-body">
+                <div id="chart" class="with-transitions" style="height: 400px;"></div>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <div class="col-md-12 my-3">
-          <button type='submit' class={"btn btn-#{bsname} float-end"}>
-            Submit
-          </button>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-md-12">
-    <div class={"card border-#{bsname} page-card"}>
-      <div class="card-body">
-        <div id="chart" class='with-transitions' style="height: 400px;">
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
       </div>
     </div>
   </div>

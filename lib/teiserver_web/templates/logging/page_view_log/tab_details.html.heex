@@ -1,57 +1,57 @@
 <br />
 
-<%= central_component "detail_line",
+<%= central_component("detail_line",
   label: "Timestamp",
   value: date_to_str(@page_view_log.inserted_at, format: :hms_dmy, tz: @tz)
-%>
+) %>
 
-<%= central_component "detail_line",
+<%= central_component("detail_line",
   label: "User",
   icon: %{
     colour: @page_view_log.user.colour,
-    icon: @page_view_log.user.icon,
+    icon: @page_view_log.user.icon
   },
   value: @page_view_log.user.name,
   link: %{
     path: Routes.admin_user_path(@conn, :show, @page_view_log.user_id),
     bsname: elem(Central.Account.UserLib.colours() |> colours(), 2),
-    icon: Central.Account.UserLib.icon(),
+    icon: Central.Account.UserLib.icon()
   }
-%>
+) %>
 
-<%= central_component "detail_line",
+<%= central_component("detail_line",
   label: "Section",
   value: @page_view_log.section
-%>
+) %>
 
-<%= central_component "detail_line",
+<%= central_component("detail_line",
   label: "Path",
   value: @page_view_log.path
-%>
+) %>
 
-<%= central_component "detail_line",
+<%= central_component("detail_line",
   label: "Full route",
   value: "#{@page_view_log.section}/#{@page_view_log.path}"
-%>
+) %>
 
 <hr />
 
-<%= central_component "detail_line",
+<%= central_component("detail_line",
   label: "Method",
   value: @page_view_log.method
-%>
+) %>
 
-<%= central_component "detail_line",
+<%= central_component("detail_line",
   label: "Status",
   value: @page_view_log.status
-%>
+) %>
 
-<%= central_component "detail_line",
+<%= central_component("detail_line",
   label: "IP",
   value: @page_view_log.ip
-%>
+) %>
 
-<%= central_component "detail_line",
+<%= central_component("detail_line",
   label: "Load time",
-  value: "#{round(@page_view_log.load_time/100)/10}ms"
-%>
+  value: "#{round(@page_view_log.load_time / 100) / 10}ms"
+) %>

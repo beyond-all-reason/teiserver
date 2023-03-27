@@ -39,14 +39,15 @@ defmodule Teiserver.Account.TimeSpentReport do
 
     userid = get_hash_id(params["account_user"]) |> to_string
 
-    columns = Telemetry.list_server_day_logs(
-      search: [
-        start_date: start_date,
-        end_date: end_date
-      ],
-      order: "Oldest first",
-      limit: :infinity
-    )
+    columns =
+      Telemetry.list_server_day_logs(
+        search: [
+          start_date: start_date,
+          end_date: end_date
+        ],
+        order: "Oldest first",
+        limit: :infinity
+      )
       |> Enum.map(fn log ->
         %{
           "key" => log.date,
@@ -54,14 +55,16 @@ defmodule Teiserver.Account.TimeSpentReport do
           "Player" => Map.get(log.data["minutes_per_user"]["player"], userid, 0),
           "Spectator" => Map.get(log.data["minutes_per_user"]["spectator"], userid, 0),
           "Lobby" => Map.get(log.data["minutes_per_user"]["lobby"], userid, 0),
-          "Menu" => Map.get(log.data["minutes_per_user"]["menu"], userid, 0),
+          "Menu" => Map.get(log.data["minutes_per_user"]["menu"], userid, 0)
         }
       end)
 
-    lines = ~w(Total Player Spectator Lobby Menu)
+    lines =
+      ~w(Total Player Spectator Lobby Menu)
       |> Enum.map(fn name -> [name | build_line(columns, name)] end)
 
-    keys = columns
+    keys =
+      columns
       |> Enum.map(fn %{"key" => key} -> key |> TimexHelper.date_to_str(format: :ymd) end)
 
     %{
@@ -73,16 +76,20 @@ defmodule Teiserver.Account.TimeSpentReport do
   @spec build_line(list, String.t()) :: list()
   defp build_line(logs, field_name) do
     logs
-      |> Enum.map(fn log -> log[field_name] end)
-      # |> Enum.map(mapper_function)
+    |> Enum.map(fn log -> log[field_name] end)
+
+    # |> Enum.map(mapper_function)
   end
 
   defp apply_defaults(params) do
-    Map.merge(%{
-      "date_preset" => "This month",
-      "start_date" => "",
-      "end_date" => "",
-      "account_user" => ""
-    }, Map.get(params, "report", %{}))
+    Map.merge(
+      %{
+        "date_preset" => "This month",
+        "start_date" => "",
+        "end_date" => "",
+        "account_user" => ""
+      },
+      Map.get(params, "report", %{})
+    )
   end
 end

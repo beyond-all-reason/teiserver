@@ -1,147 +1,148 @@
 <div class="row page-row">
   <%= if allow?(@conn, "logging.live") do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       icon: "fa-duotone fa-gauge",
       name: "ts_console",
       text: "Dashboard",
       link: Routes.ts_admin_dash_index_path(@conn, :index)
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, "teiserver.staff.server") do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       icon: Teiserver.Logging.icon(),
       text: "Logging",
       link: ~p"/logging"
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@conn, "teiserver.staff.moderator") do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       icon: "fa-regular fa-users",
       name: "user_admin",
       text: "Users",
       icon_class: "fa-duotone",
       link: ~p"/teiserver/admin/user"
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       icon: Central.Communication.CommentLib.icon(),
       name: "chat",
       text: "Chat",
       icon_class: "fa-duotone",
       link: ~p"/teiserver/admin/chat"
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       icon: Teiserver.Battle.MatchLib.icon(),
       name: "matches",
       text: "Matches",
       icon_class: "fa-duotone",
       link: Routes.ts_admin_match_path(@conn, :index)
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@conn, "teiserver.staff.clan") do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       icon: Teiserver.Clans.ClanLib.icon(),
       name: "clan",
       text: "Clans",
       icon_class: "fa-duotone",
       link: Routes.ts_admin_clan_path(@conn, :index)
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@conn, "teiserver.staff.admin") do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       icon: Teiserver.Game.QueueLib.icon(),
       name: "matchmaking",
       text: "Matchmaking",
       icon_class: "fa-duotone",
       link: Routes.ts_game_queue_path(@conn, :index)
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@conn, "teiserver.staff.admin") do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       icon: Teiserver.Game.LobbyPolicyLib.icon(),
       name: "lobby_policies",
       text: "Lobby policies",
       icon_class: "fa-duotone",
       link: Routes.admin_lobby_policy_path(@conn, :index)
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       icon: Teiserver.Moderation.ReportLib.icon(),
       name: "moderation_admin",
       text: "Moderation",
       icon_class: "fa-duotone",
       link: Routes.moderation_general_path(@conn, :index)
-    %>
+    ) %>
   <% end %>
 
   <%= if allow_any?(@conn, ~w(teiserver.reports teiserver.staff)) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       icon: Teiserver.Game.AchievementTypeLib.icon(),
       name: "achievements",
       text: "Achievements",
       icon_class: "fa-duotone",
       link: Routes.ts_admin_achievement_path(@conn, :index)
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@conn, "teiserver.admin") do %>
-    <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: Teiserver.Account.BadgeTypeLib.icon(), text: "Badge types", link: Routes.ts_admin_badge_type_path(@conn, :index) %>
+    <%= central_component("menu_card",
+      icon_class: "fa-solid",
+      name: "",
+      icon: Teiserver.Account.BadgeTypeLib.icon(),
+      text: "Badge types",
+      link: Routes.ts_admin_badge_type_path(@conn, :index)
+    ) %>
   <% end %>
 </div>
 
 <div class="row">
   <%= if allow_any?(@conn, ~w(teiserver.reports teiserver.staff)) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       icon: Central.Helpers.StylingHelper.icon(:summary),
       name: "reports",
       text: "Reports",
       icon_class: "fa-duotone",
       link: ~p"/teiserver/reports"
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, "admin.dev") do %>
-    <%= central_component "menu_card",
+    <%= central_component("menu_card",
       icon_class: "fa-solid",
-      icon: Teiserver.Account.CodeLib.icon,
+      icon: Teiserver.Account.CodeLib.icon(),
       text: "Codes",
       link: Routes.admin_code_path(@conn, :index)
-    %>
+    ) %>
   <% end %>
 
   <%= if allow?(@current_user, "admin.dev") do %>
-    <%= central_component "menu_card",
+    <%= central_component("menu_card",
       icon_class: "fa-solid",
-      icon: Central.Config.SiteConfigLib.icon,
+      icon: Central.Config.SiteConfigLib.icon(),
       text: "Site config",
       link: Routes.admin_site_config_path(@conn, :index)
-    %>
+    ) %>
   <% end %>
 </div>
 
 <div class="row page-row">
-  <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_general_general_path(@conn, :index) %>
+  <%= central_component("menu_card",
+    icon_class: "fa-solid",
+    name: "",
+    icon: StylingHelper.icon(:back),
+    text: "Back",
+    link: Routes.ts_general_general_path(@conn, :index)
+  ) %>
 </div>

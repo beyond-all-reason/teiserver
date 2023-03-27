@@ -1,41 +1,41 @@
 <br />
 
-<%= central_component "detail_line",
+<%= central_component("detail_line",
   label: "Email",
   value: @user.email
-%>
+) %>
 
-<%= central_component "detail_line",
+<%= central_component("detail_line",
   label: "Created",
   value: date_to_str(@user.inserted_at, format: :hms_dmy, tz: @tz)
-%>
+) %>
 
-<%= central_component "detail_line",
+<%= central_component("detail_line",
   label: "Styling",
   icon: %{
     colour: @user.colour,
-    icon: @user.icon,
+    icon: @user.icon
   },
   value: @user.colour
-%>
+) %>
 
 <%= if @user.admin_group do %>
-  <%= central_component "detail_line",
+  <%= central_component("detail_line",
     label: "Admin group",
     icon: %{
       colour: @user.admin_group.colour,
-      icon: @user.admin_group.icon,
+      icon: @user.admin_group.icon
     },
     value: @user.admin_group.name,
     link: %{
       path: Routes.admin_group_path(@conn, :show, @user.admin_group),
       bsname: elem(Central.Account.GroupLib.colours() |> colours(), 2),
-      icon: Central.Account.GroupLib.icon(),
+      icon: Central.Account.GroupLib.icon()
     }
-  %>
+  ) %>
 <% else %>
-  <%= central_component "detail_line",
+  <%= central_component("detail_line",
     label: "Admin group",
     value: "None"
-  %>
+  ) %>
 <% end %>

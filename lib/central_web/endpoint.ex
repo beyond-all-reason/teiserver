@@ -18,9 +18,9 @@ defmodule CentralWeb.Endpoint do
 
   socket("/tachyon", Tachyon.TachyonSocket,
     websocket: [
-      connect_info: [:peer_data, :x_headers, :user_agent],
+      connect_info: [:peer_data, :x_headers, :user_agent]
       # error_handler: {MySocket, :handle_error, []}
-      ],
+    ],
     longpoll: false
   )
 

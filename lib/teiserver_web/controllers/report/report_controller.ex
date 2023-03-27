@@ -19,44 +19,85 @@ defmodule TeiserverWeb.Report.ReportController do
   def show(conn, params) do
     name = params["name"]
 
-    module = case name do
-        "time_spent" -> Teiserver.Account.TimeSpentReport
-        "time_compare" -> Teiserver.Account.TimeCompareReport
-        "active" -> Teiserver.Account.ActiveReport
-        "ranks" -> Teiserver.Account.RanksReport
-        "verified" -> Teiserver.Account.VerifiedReport
-        "retention" -> Teiserver.Account.RetentionReport
-        "population" -> Teiserver.Account.PopulationReport
-        "new_user_funnel" -> Teiserver.Account.NewUserFunnelReport
-        "accolades" -> Teiserver.Account.AccoladeReport
-        "mutes" -> Teiserver.Account.MuteReport
-        "mapping" -> Teiserver.Game.MappingReport
-        "leaderboard" -> Teiserver.Account.LeaderboardReport
-        "review" -> Teiserver.Account.ReviewReport
-        "new_smurf" -> Teiserver.Account.NewSmurfReport
-        "growth" -> Teiserver.Account.GrowthReport
-        "records" -> Teiserver.Account.RecordsReport
-        "open_skill" -> Teiserver.Account.OpenSkillReport
-        "tournament" -> Teiserver.Account.TournamentReport
+    module =
+      case name do
+        "time_spent" ->
+          Teiserver.Account.TimeSpentReport
+
+        "time_compare" ->
+          Teiserver.Account.TimeCompareReport
+
+        "active" ->
+          Teiserver.Account.ActiveReport
+
+        "ranks" ->
+          Teiserver.Account.RanksReport
+
+        "verified" ->
+          Teiserver.Account.VerifiedReport
+
+        "retention" ->
+          Teiserver.Account.RetentionReport
+
+        "population" ->
+          Teiserver.Account.PopulationReport
+
+        "new_user_funnel" ->
+          Teiserver.Account.NewUserFunnelReport
+
+        "accolades" ->
+          Teiserver.Account.AccoladeReport
+
+        "mutes" ->
+          Teiserver.Account.MuteReport
+
+        "mapping" ->
+          Teiserver.Game.MappingReport
+
+        "leaderboard" ->
+          Teiserver.Account.LeaderboardReport
+
+        "review" ->
+          Teiserver.Account.ReviewReport
+
+        "new_smurf" ->
+          Teiserver.Account.NewSmurfReport
+
+        "growth" ->
+          Teiserver.Account.GrowthReport
+
+        "records" ->
+          Teiserver.Account.RecordsReport
+
+        "open_skill" ->
+          Teiserver.Account.OpenSkillReport
+
+        "tournament" ->
+          Teiserver.Account.TournamentReport
+
         _ ->
           raise "No handler for name of '#{name}'"
       end
 
     if allow?(conn.current_user, module.permissions) do
-      assigns = case module.run(conn, params) do
-        {data, assigns} -> Map.put(assigns, :data, data)
-        assigns -> assigns
-      end
+      assigns =
+        case module.run(conn, params) do
+          {data, assigns} -> Map.put(assigns, :data, data)
+          assigns -> assigns
+        end
 
       assigns
-        |> Enum.reduce(conn, fn {key, value}, conn ->
-          assign(conn, key, value)
-        end)
-        |> add_breadcrumb(name: name |> String.capitalize() |> String.replace("_", " "), url: conn.request_path)
-        |> render("#{name}.html")
+      |> Enum.reduce(conn, fn {key, value}, conn ->
+        assign(conn, key, value)
+      end)
+      |> add_breadcrumb(
+        name: name |> String.capitalize() |> String.replace("_", " "),
+        url: conn.request_path
+      )
+      |> render("#{name}.html")
     else
       conn
-        |> redirect(to: Routes.ts_reports_general_path(conn, :index))
+      |> redirect(to: Routes.ts_reports_general_path(conn, :index))
     end
   end
 end

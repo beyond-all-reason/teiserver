@@ -24,33 +24,32 @@ defmodule Teiserver.Moderation.ActionLib do
     %{
       type_colour: colour(),
       type_icon: icon(),
-
       item_id: action.id,
       item_type: "teiserver_moderation_action",
       item_colour: colour(),
       item_icon: icon(),
       item_label: "#{action.target.name}",
-
       url: "/moderation/actions/#{action.id}"
     }
   end
 
   # Queries
-  @spec query_actions() :: Ecto.Query.t
+  @spec query_actions() :: Ecto.Query.t()
   def query_actions do
-    from actions in Action
+    from(actions in Action)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -80,25 +79,30 @@ defmodule Teiserver.Moderation.ActionLib do
   end
 
   def _search(query, :expiry, "All"), do: query
+
   def _search(query, :expiry, "Completed only") do
     from actions in query,
       where: actions.expires < ^Timex.now()
   end
+
   def _search(query, :expiry, "Unexpired only") do
     from actions in query,
       where: actions.expires > ^Timex.now()
   end
+
   def _search(query, :expiry, "Permanent only") do
     from actions in query,
       where: is_nil(actions.expires)
   end
+
   def _search(query, :expiry, "All active") do
     from actions in query,
       where: actions.expires > ^Timex.now() or is_nil(actions.expires)
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Name (A-Z)") do
     from actions in query,
       order_by: [asc: actions.name]
@@ -129,12 +133,18 @@ defmodule Teiserver.Moderation.ActionLib do
       order_by: [desc: actions.expires]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :target in preloads, do: _preload_target(query), else: query
     query = if :reports in preloads, do: _preload_reports(query), else: query
-    query = if :reports_and_reporters in preloads, do: _preload_reports_and_reporters(query), else: query
+
+    query =
+      if :reports_and_reporters in preloads,
+        do: _preload_reports_and_reporters(query),
+        else: query
+
     query
   end
 

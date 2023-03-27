@@ -14,7 +14,7 @@
     #breadcrumb {
       background-color: <%= bg %> !important;
     }
-    
+
     .nav-tabs .nav-item .active {
       color: <%= fg %> !important;
       border-bottom-color: <%= fg %> !important;
@@ -29,22 +29,28 @@
   </style>
 <% end %>
 
-<%= render CentralWeb.General.PageView, "top_navbar.html", Map.put(assigns, :conn, @socket) %>
+<%= render(CentralWeb.General.PageView, "top_navbar.html", Map.put(assigns, :conn, @socket)) %>
 
 <main>
   <%= if assigns[:breadcrumb_trails] do %>
-    <%= render CentralWeb.ComponentView, "breadcrumb.html", assigns %>
+    <%= render(CentralWeb.ComponentView, "breadcrumb.html", assigns) %>
   <% end %>
 
   <div id="flash-messages">
     <%= if live_flash(@flash, :danger) do %>
-      <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger"><%= live_flash(@flash, :danger) %></p>
+      <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger">
+        <%= live_flash(@flash, :danger) %>
+      </p>
     <% end %>
     <%= if live_flash(@flash, :info) do %>
-      <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info"><%= live_flash(@flash, :info) %></p>
+      <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info">
+        <%= live_flash(@flash, :info) %>
+      </p>
     <% end %>
     <%= if live_flash(@flash, :success) do %>
-      <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success"><%= live_flash(@flash, :success) %></p>
+      <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success">
+        <%= live_flash(@flash, :success) %>
+      </p>
     <% end %>
   </div>
 

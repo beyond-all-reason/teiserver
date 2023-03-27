@@ -3,64 +3,64 @@
 <div class="page-row row">
   <div class="col-md-6">
     <%= if allow?(@conn, "teiserver.admin.account") do %>
-      <%= central_component "detail_line",
+      <%= central_component("detail_line",
         label: "Email",
         value: @user.email
-      %>
+      ) %>
     <% end %>
 
-    <%= central_component "detail_line",
+    <%= central_component("detail_line",
       label: "Created",
       value: date_to_str(@user.inserted_at, format: :hms_dmy, tz: @tz)
-    %>
+    ) %>
 
-    <%= central_component "detail_line",
+    <%= central_component("detail_line",
       label: "Last login",
-      value: date_to_str((@user_stats["last_login"] || 0) |> Timex.from_unix, format: :hms_dmy, tz: @tz)
-    %>
+      value:
+        date_to_str((@user_stats["last_login"] || 0) |> Timex.from_unix(),
+          format: :hms_dmy,
+          tz: @tz
+        )
+    ) %>
 
-    <%= central_component "detail_line",
+    <%= central_component("detail_line",
       label: "Lobby",
       value: @user.data["lobby_client"]
-    %>
+    ) %>
 
-    <%= central_component "detail_line",
+    <%= central_component("detail_line",
       label: "Trust",
-      value: format_number @user.trust_score
-    %>
+      value: format_number(@user.trust_score)
+    ) %>
 
-    <%= central_component "detail_line",
+    <%= central_component("detail_line",
       label: "Behaviour",
-      value: format_number @user.behaviour_score
-    %>
+      value: format_number(@user.behaviour_score)
+    ) %>
   </div>
-  
+
   <div class="col-md-6">
-    <%= central_component "detail_line",
+    <%= central_component("detail_line",
       label: "Accolade miss count",
       value: @user_stats["accolade_miss_count"],
       width: 200
-    %>
-    
-    <%
-      mins = rem(@user_stats["player_minutes"] || 0, 60)
-      hours = :math.floor(@user_stats["player_minutes"] || 0)/60 |> round
-    %>
-    <%= central_component "detail_line",
+    ) %>
+
+    <% mins = rem(@user_stats["player_minutes"] || 0, 60)
+    hours = (:math.floor(@user_stats["player_minutes"] || 0) / 60) |> round %>
+    <%= central_component("detail_line",
       label: "Player time",
       value: "#{hours} hours, #{mins} minutes",
       width: 200
-    %>
-    
-    <%
-      mins = rem(@user_stats["spectator_minutes"] || 0, 60)
-      hours = :math.floor(@user_stats["spectator_minutes"] || 0)/60 |> round
-    %>
-    <%= central_component "detail_line",
+    ) %>
+
+    <% mins = rem(@user_stats["spectator_minutes"] || 0, 60)
+    hours = (:math.floor(@user_stats["spectator_minutes"] || 0) / 60) |> round %>
+    <%= central_component("detail_line",
       label: "Spectator time",
       value: "#{hours} hours, #{mins} minutes",
       width: 200
-    %>
+    ) %>
   </div>
 </div>
 
@@ -72,36 +72,35 @@
     <div class="col-md-6">
       <table class="table table-sm">
         <tbody>
-          <%
-            keys = @user_stats
-              |> Map.drop(["password_hash", "ip"])
-              |> Map.keys()
-              |> Enum.sort()
-          %>  
+          <% keys =
+            @user_stats
+            |> Map.drop(["password_hash", "ip"])
+            |> Map.keys()
+            |> Enum.sort() %>
           <%= for key <- keys do %>
             <% value = @user_stats[key] %>
             <tr>
               <td><%= key %></td>
-              <td><%= Kernel.inspect value %></td>
+              <td><%= Kernel.inspect(value) %></td>
             </tr>
           <% end %>
         </tbody>
       </table>
 
       <hr />
-      <form action={Routes.ts_admin_user_path(@conn, :set_stat)} method='post' class=''>
-        <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
-        <input type='hidden' name='userid' value={@user.id} />
+      <form action={Routes.ts_admin_user_path(@conn, :set_stat)} method="post" class="">
+        <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+        <input type="hidden" name="userid" value={@user.id} />
 
-        <div class='row' style="padding: 10px;">
-          <input type='text' name='key' value='' class='form-control' placeholder="key" />
+        <div class="row" style="padding: 10px;">
+          <input type="text" name="key" value="" class="form-control" placeholder="key" />
         </div>
 
-        <div class='row' style="padding: 10px;">
-          <input type='text' name='value' value='' class='form-control' placeholder="value" />
+        <div class="row" style="padding: 10px;">
+          <input type="text" name="value" value="" class="form-control" placeholder="value" />
         </div>
 
-        <button type='submit' class={"btn btn-#{bsname} float-end"}>
+        <button type="submit" class={"btn btn-#{bsname} float-end"}>
           Set stat
         </button>
       </form>

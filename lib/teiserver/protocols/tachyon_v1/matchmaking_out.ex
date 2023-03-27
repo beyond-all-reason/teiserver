@@ -9,7 +9,8 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingOut do
     %{
       "cmd" => "s.matchmaking.query",
       "result" => "success",
-      "queues" => queue_list
+      "queues" =>
+        queue_list
         |> Enum.map(fn b -> Tachyon.convert_object(b, :queue) end)
     }
   end
@@ -18,7 +19,8 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingOut do
     %{
       "cmd" => "s.matchmaking.your_queue_list",
       "result" => "success",
-      "queues" => queue_list
+      "queues" =>
+        queue_list
         |> Enum.map(fn b -> Tachyon.convert_object(b, :queue) end)
     }
   end

@@ -10,27 +10,40 @@
   </thead>
   <tbody>
     <%= for m <- @clan.memberships do %>
-    <%
-      u = m.user
-    %>
-    <tr>
-      <td><%= u.name %></td>
-      <td><%= m.role %></td>
-      <%= if @role == "Admin" do %>
-        <td>
-          <%= if m.role != "Admin" do %>
-            <%= link raw("<i class='fa-fw far fa-arrow-up'></i> Promote"), to: Routes.ts_clans_clan_path(@conn, :promote, @clan.id, u.id), method: :put, data: [confirm: "Are you sure?"], class: "btn btn-outline-#{bsname} btn-sm" %>
-          <% end %>
+      <% u = m.user %>
+      <tr>
+        <td><%= u.name %></td>
+        <td><%= m.role %></td>
+        <%= if @role == "Admin" do %>
+          <td>
+            <%= if m.role != "Admin" do %>
+              <%= link(raw("<i class='fa-fw far fa-arrow-up'></i> Promote"),
+                to: Routes.ts_clans_clan_path(@conn, :promote, @clan.id, u.id),
+                method: :put,
+                data: [confirm: "Are you sure?"],
+                class: "btn btn-outline-#{bsname} btn-sm"
+              ) %>
+            <% end %>
 
-          <%= if m.role != "Member" do %>
-            <%= link raw("<i class='fa-fw far fa-arrow-down'></i> Demote"), to: Routes.ts_clans_clan_path(@conn, :demote, @clan.id, u.id), method: :put, data: [confirm: "Are you sure?"], class: "btn btn-outline-#{bsname} btn-sm" %>
-          <% end %>
-        </td>
-        <td>
-          <%= link "Remove", to: Routes.ts_clans_clan_path(@conn, :delete_membership, @clan.id, u.id), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-sm" %>
-        </td>
-      <% end %>
-    </tr>
+            <%= if m.role != "Member" do %>
+              <%= link(raw("<i class='fa-fw far fa-arrow-down'></i> Demote"),
+                to: Routes.ts_clans_clan_path(@conn, :demote, @clan.id, u.id),
+                method: :put,
+                data: [confirm: "Are you sure?"],
+                class: "btn btn-outline-#{bsname} btn-sm"
+              ) %>
+            <% end %>
+          </td>
+          <td>
+            <%= link("Remove",
+              to: Routes.ts_clans_clan_path(@conn, :delete_membership, @clan.id, u.id),
+              method: :delete,
+              data: [confirm: "Are you sure?"],
+              class: "btn btn-danger btn-sm"
+            ) %>
+          </td>
+        <% end %>
+      </tr>
     <% end %>
   </tbody>
 </table>

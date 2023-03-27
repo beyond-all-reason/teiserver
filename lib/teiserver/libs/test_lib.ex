@@ -21,19 +21,23 @@ defmodule Teiserver.TeiserverTestLib do
   # and upgrade the connection instead?
   @spec spring_tls_setup :: %{socket: port()}
   def spring_tls_setup() do
-    {:ok, socket} = :ssl.connect(@host, 9201,
-      active: false,
-      verify: :verify_none
-    )
+    {:ok, socket} =
+      :ssl.connect(@host, 9201,
+        active: false,
+        verify: :verify_none
+      )
+
     %{socket: socket}
   end
 
   @spec tachyon_tls_setup :: %{socket: port()}
   def tachyon_tls_setup() do
-    {:ok, socket} = :ssl.connect(@host, 9202,
-      active: false,
-      verify: :verify_none
-    )
+    {:ok, socket} =
+      :ssl.connect(@host, 9202,
+        active: false,
+        verify: :verify_none
+      )
+
     %{socket: socket}
   end
 
@@ -68,10 +72,11 @@ defmodule Teiserver.TeiserverTestLib do
         })
 
         user
-          |> User.convert_user()
-          |> Map.put(:springid, SpringIdServer.get_next_id())
-          |> User.add_user()
-          |> User.verify_user()
+        |> User.convert_user()
+        |> Map.put(:springid, SpringIdServer.get_next_id())
+        |> User.add_user()
+        |> User.verify_user()
+
       _ ->
         new_user()
     end
@@ -82,9 +87,10 @@ defmodule Teiserver.TeiserverTestLib do
     user = if user, do: user, else: new_user()
 
     token = User.create_token(user)
+
     case User.try_login(token, "127.0.0.1", "AsyncTest", "token1 token2") do
       {:ok, _user} -> :ok
-      value -> raise "Error setting up user - #{Kernel.inspect value}"
+      value -> raise "Error setting up user - #{Kernel.inspect(value)}"
     end
 
     Client.login(user, :test, "127.0.0.1")
@@ -108,13 +114,17 @@ defmodule Teiserver.TeiserverTestLib do
     )
 
     _ = _recv_until(socket)
-    pid = case Client.get_client_by_id(user.id) do
-      nil ->
-        :timer.sleep(250)
-        Client.get_client_by_id(user.id)
-      client ->
-        client.tcp_pid
-    end
+
+    pid =
+      case Client.get_client_by_id(user.id) do
+        nil ->
+          :timer.sleep(250)
+          Client.get_client_by_id(user.id)
+
+        client ->
+          client.tcp_pid
+      end
+
     %{socket: socket, user: user, pid: pid}
   end
 
@@ -126,7 +136,14 @@ defmodule Teiserver.TeiserverTestLib do
     %{socket: socket} = tachyon_tls_setup()
 
     # Now do our login
-    data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a", lobby_hash: "t1 t2"}
+    data = %{
+      cmd: "c.auth.login",
+      token: token,
+      lobby_name: "ex_test",
+      lobby_version: "1a",
+      lobby_hash: "t1 t2"
+    }
+
     _tachyon_send(socket, data)
     _tachyon_recv(socket)
 
@@ -150,11 +167,14 @@ defmodule Teiserver.TeiserverTestLib do
 
   def _recv_lines(), do: _recv_lines(1)
   def _recv_lines(:until_timeout), do: _recv_lines(99999)
+
   def _recv_lines(lines) do
     receive do
       value ->
         cond do
-          is_tuple(value) -> _recv_lines(lines)
+          is_tuple(value) ->
+            _recv_lines(lines)
+
           true ->
             case lines do
               1 -> value
@@ -192,6 +212,7 @@ defmodule Teiserver.TeiserverTestLib do
   end
 
   def _recv_until(socket), do: _recv_until(socket, "")
+
   def _recv_until(socket = {:sslsocket, _, _}, acc) do
     case :ssl.recv(socket, 0, 500) do
       {:ok, reply} ->
@@ -219,8 +240,11 @@ defmodule Teiserver.TeiserverTestLib do
 
   def _tachyon_recv(socket) do
     case _recv_raw(socket) do
-      :timeout -> :timeout
-      :closed -> :closed
+      :timeout ->
+        :timeout
+
+      :closed ->
+        :closed
 
       resp ->
         resp
@@ -236,19 +260,22 @@ defmodule Teiserver.TeiserverTestLib do
   end
 
   def _tachyon_recv_until(socket), do: _tachyon_recv_until(socket, [])
+
   def _tachyon_recv_until(socket = {:sslsocket, _, _}, acc) do
     case :ssl.recv(socket, 0, 500) do
       {:ok, reply} ->
-        resp = reply
-        |> to_string
-        |> String.split("\n")
-        |> Enum.map(fn line ->
-          case TachyonLib.decode(line) do
-            {:ok, msg} -> msg
-            error -> error
-          end
-        end)
-        |> Enum.filter(fn r -> r != nil end)
+        resp =
+          reply
+          |> to_string
+          |> String.split("\n")
+          |> Enum.map(fn line ->
+            case TachyonLib.decode(line) do
+              {:ok, msg} -> msg
+              error -> error
+            end
+          end)
+          |> Enum.filter(fn r -> r != nil end)
+
         _tachyon_recv_until(socket, acc ++ resp)
 
       {:error, :timeout} ->
@@ -330,7 +357,7 @@ defmodule Teiserver.TeiserverTestLib do
   end
 
   defp make_async_transport() do
-    send = fn (_x, _y) -> nil end
+    send = fn _x, _y -> nil end
 
     %{
       send: send
@@ -498,9 +525,32 @@ defmodule Teiserver.TeiserverTestLib do
   defp seed_badge_types() do
     # Create the badge types
     if Enum.empty?(AccoladeLib.get_badge_types()) do
-      {:ok, _badge_type1} = Account.create_badge_type(%{name: "Badge A", icon: "i", colour: "c", purposes: ["Accolade"], description: "Description for the first badge"})
-      {:ok, _badge_type2} = Account.create_badge_type(%{name: "Badge B", icon: "i", colour: "c", purposes: ["Accolade"], description: "Description for the second badge"})
-      {:ok, _badge_type3} = Account.create_badge_type(%{name: "Badge C", icon: "i", colour: "c", purposes: ["Accolade"], description: "Description for the third badge"})
+      {:ok, _badge_type1} =
+        Account.create_badge_type(%{
+          name: "Badge A",
+          icon: "i",
+          colour: "c",
+          purposes: ["Accolade"],
+          description: "Description for the first badge"
+        })
+
+      {:ok, _badge_type2} =
+        Account.create_badge_type(%{
+          name: "Badge B",
+          icon: "i",
+          colour: "c",
+          purposes: ["Accolade"],
+          description: "Description for the second badge"
+        })
+
+      {:ok, _badge_type3} =
+        Account.create_badge_type(%{
+          name: "Badge C",
+          icon: "i",
+          colour: "c",
+          purposes: ["Accolade"],
+          description: "Description for the third badge"
+        })
     end
   end
 

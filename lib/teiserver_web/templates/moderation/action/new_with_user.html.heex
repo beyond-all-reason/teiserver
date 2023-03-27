@@ -1,7 +1,5 @@
-<%
-  discord_link = Application.get_env(:central, Teiserver)[:discord]
-  bsname = view_colour()
-%>
+<% discord_link = Application.get_env(:central, Teiserver)[:discord]
+bsname = view_colour() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -21,100 +19,126 @@
   }
 </script>
 
-<%= render TeiserverWeb.Moderation.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "actions"}) %>
+<%= render(
+  TeiserverWeb.Moderation.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "actions"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Moderation.ActionView, "section_menu.html", Map.merge(assigns, %{
-          basic_search: "",
-          show_search: false,
-          active: "new"
-        })
-        %>
+        <%= render(
+          TeiserverWeb.Moderation.ActionView,
+          "section_menu.html",
+          Map.merge(assigns, %{
+            basic_search: "",
+            show_search: false,
+            active: "new"
+          })
+        ) %>
 
         <hr />
-<div class="float-end">
-  <a class={"btn btn-outline-#{bsname}"} href={~p"/teiserver/admin/user/#{@user}"}>View user</a>
-</div>
+        <div class="float-end">
+          <a class={"btn btn-outline-#{bsname}"} href={~p"/teiserver/admin/user/#{@user}"}>
+            View user
+          </a>
+        </div>
 
-<h3>Adding action against <%= @user.name %></h3>
+        <h3>Adding action against <%= @user.name %></h3>
 
-<div class="row">
-  <div class="col-md-12 mb-4">
-<%= form_for @changeset, Routes.moderation_action_path(@conn, :create), fn f -> %>
-  <%= if @changeset.action do %>
-    <div class="alert alert-danger">
-      <p>Oops, something went wrong! Please check the errors below.</p>
-    </div>
-  <% end %>
+        <div class="row">
+          <div class="col-md-12 mb-4">
+            <%= form_for @changeset, Routes.moderation_action_path(@conn, :create), fn f -> %>
+              <%= if @changeset.action do %>
+                <div class="alert alert-danger">
+                  <p>Oops, something went wrong! Please check the errors below.</p>
+                </div>
+              <% end %>
 
-  <input type="hidden" name="action[target_id]" value={@user.id} />
+              <input type="hidden" name="action[target_id]" value={@user.id} />
 
-  <div class="row">
-    <div class="col-lg-6">
-      <div class="form-group my-2">
-        <%= label f, :reason, class: "control-label" %>
-        <%= textarea f, :reason, class: "form-control", autofocus: :autofocus, rows: 4, required: "required" %>
-        <%= error_tag f, :reason %>
-      </div>
-    </div>
+              <div class="row">
+                <div class="col-lg-6">
+                  <div class="form-group my-2">
+                    <%= label(f, :reason, class: "control-label") %>
+                    <%= textarea(f, :reason,
+                      class: "form-control",
+                      autofocus: :autofocus,
+                      rows: 4,
+                      required: "required"
+                    ) %>
+                    <%= error_tag(f, :reason) %>
+                  </div>
+                </div>
 
-    <div class="col-lg-6">
-      <div class="form-group my-2">
-        <%= label f, :expires, class: "control-label" %>
-        <%= text_input f, :expires, class: "form-control", required: "required" %>
-        <%= error_tag f, :expires %>
-      </div>
+                <div class="col-lg-6">
+                  <div class="form-group my-2">
+                    <%= label(f, :expires, class: "control-label") %>
+                    <%= text_input(f, :expires, class: "form-control", required: "required") %>
+                    <%= error_tag(f, :expires) %>
+                  </div>
 
-      <div class="form-group my-2">
-        <%= label f, :score_modifier, class: "control-label" %>
-        <%= text_input f, :score_modifier, class: "form-control" %>
-        <%= error_tag f, :score_modifier %>
-      </div>
-    </div>
+                  <div class="form-group my-2">
+                    <%= label(f, :score_modifier, class: "control-label") %>
+                    <%= text_input(f, :score_modifier, class: "form-control") %>
+                    <%= error_tag(f, :score_modifier) %>
+                  </div>
+                </div>
 
-    <h5>Restrictions</h5>
-    <%= for {section, r_list} <- @restrictions_lists do %>
-      <div class="col-md-3 col-lg-2 restrictions-col">
-        <strong><%= section %></strong>
-        <%= for r <- r_list do %>
-          <% r_clean = String.replace(r, " ", "_") %>
-          <%= central_component "checkbox",
-            id: "action_restriction_#{r_clean}",
-            name: "action[restrictions][#{r_clean}]",
-            label: r,
-            value: r,
-            checked: (Ecto.Changeset.get_field(@changeset, :restrictions) || [])
-              |> Enum.member?(r)
-          %>
-        <% end %>
-      </div>
-    <% end %>
-    <%= error_tag f, :restrictions %>
+                <h5>Restrictions</h5>
+                <%= for {section, r_list} <- @restrictions_lists do %>
+                  <div class="col-md-3 col-lg-2 restrictions-col">
+                    <strong><%= section %></strong>
+                    <%= for r <- r_list do %>
+                      <% r_clean = String.replace(r, " ", "_") %>
+                      <%= central_component("checkbox",
+                        id: "action_restriction_#{r_clean}",
+                        name: "action[restrictions][#{r_clean}]",
+                        label: r,
+                        value: r,
+                        checked:
+                          (Ecto.Changeset.get_field(@changeset, :restrictions) || [])
+                          |> Enum.member?(r)
+                      ) %>
+                    <% end %>
+                  </div>
+                <% end %>
+                <%= error_tag(f, :restrictions) %>
 
-    <div class="col-md-3 col-lg-2 mt-3">
-      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+                <div class="col-md-3 col-lg-2 mt-3">
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
         $('#action_restriction_Warning_reminder').prop('checked', true);
-      ">
-        Add warning
-      </div>
+      "
+                  >
+                    Add warning
+                  </div>
 
-      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
         $('#action_restriction_All_chat').prop('checked', true);
-      ">
-        Add mute
-      </div>
+      "
+                  >
+                    Add mute
+                  </div>
 
-      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
         $('#action_restriction_Site').prop('checked', true);
         $('#action_restriction_Login').prop('checked', true);
-      ">
-        Add ban
-      </div>
+      "
+                  >
+                    Add ban
+                  </div>
 
-      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
         $('#action_restriction_Warning_reminder').prop('checked', true);
         $('#action_restriction_All_lobbies').prop('checked', true);
         $('#action_restriction_Room_chat').prop('checked', true);
@@ -123,96 +147,109 @@
         $('#action_restriction_Community').prop('checked', true);
         $('#action_reason').val('Please rename to a name not in breach of the Code of Conduct and contact a moderator to have the restrictions lifted.');
         $('#action_expires').val('1000 years');
-      ">
-        Add rename
-      </div>
+      "
+                  >
+                    Add rename
+                  </div>
 
-      <div class={"btn btn-outline-#{bsname} btn-block"} onclick={"
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick={"
         $('#action_restriction_Warning_reminder').prop('checked', true);
         $('#action_reason').val('Smurf accounts are not allowed, if you need an exemption or you think there has been an error please use the #open-ticket discord channel to talk to the moderation team. The discord can be accessed at #{discord_link}');
         $('#action_expires').val('1 day');
-      "}>
-        Add smurf warning
-      </div>
+      "}
+                  >
+                    Add smurf warning
+                  </div>
 
-      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
         $('#action_restriction_Site').prop('checked', true);
         $('#action_restriction_Login').prop('checked', true);
         $('#action_reason').val('This account has been flagged as a smurf by the server. If this is in error please use #open-ticket on the discord to talk to the moderation team.');
         $('#action_expires').val('1000 years');
-      ">
-        Add smurf ban
-      </div>
+      "
+                  >
+                    Add smurf ban
+                  </div>
 
-      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
         $('#action_restriction_Site').prop('checked', true);
         $('#action_restriction_Login').prop('checked', true);
         $('#action_reason').val('Disrupting an event after being asked/warned not to.');
         $('#action_expires').val('1 hour');
-      ">
-        Add event disruption
-      </div>
+      "
+                  >
+                    Add event disruption
+                  </div>
 
-      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
         $('.restrictions-col .form-check-input').prop('checked', false);
-      ">
-        Clear all restrictions
-      </div>
-    </div>
-  </div>
+      "
+                  >
+                    Clear all restrictions
+                  </div>
+                </div>
+              </div>
 
+              <div class="row mt-4" id="reports-row">
+                <div class="col">
+                  <div class="float-end">
+                    <span class="btn btn-outline-secondary" onclick="select_all_reports()">
+                      Select all reports
+                    </span>
+                    <span class="btn btn-outline-secondary" onclick="clear_all_reports()">
+                      Clear all reports
+                    </span>
+                  </div>
+                  <h5>Which reports (if any) to link to this action?</h5>
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>Reporter</th>
+                        <th>Type</th>
+                        <th>Reason</th>
+                        <th>&nbsp;</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <%= for r <- @reports do %>
+                        <tr>
+                          <td><%= r.reporter.name %></td>
+                          <td><%= r.type %>/<%= r.sub_type %></td>
+                          <td><%= r.extra_text %></td>
+                          <td>
+                            <%= central_component("checkbox",
+                              id: "action_report_#{r.id}",
+                              name: "action[reports][#{r.id}]",
+                              label: "",
+                              value: r.id,
+                              checked: Enum.member?(@selected_report_ids, r.id)
+                            ) %>
+                          </td>
+                        </tr>
+                      <% end %>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-
-  <div class="row mt-4" id="reports-row">
-    <div class="col">
-      <div class="float-end">
-        <span class="btn btn-outline-secondary" onclick="select_all_reports()">Select all reports</span>
-        <span class="btn btn-outline-secondary" onclick="clear_all_reports()">Clear all reports</span>
-      </div>
-      <h5>Which reports (if any) to link to this action?</h5>
-      <table class="table table-sm">
-        <thead>
-          <tr>
-            <th>Reporter</th>
-            <th>Type</th>
-            <th>Reason</th>
-            <th>&nbsp;</th>
-          </tr>
-        </thead>
-        <tbody>
-          <%= for r <- @reports do %>
-            <tr>
-              <td><%= r.reporter.name %></td>
-              <td><%= r.type %>/<%= r.sub_type %></td>
-              <td><%= r.extra_text %></td>
-              <td>
-                <%= central_component "checkbox",
-                  id: "action_report_#{r.id}",
-                  name: "action[reports][#{r.id}]",
-                  label: "",
-                  value: r.id,
-                  checked: Enum.member?(@selected_report_ids, r.id)
-                %>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-lg-12">
-      <button type="submit" class={"btn btn-#{bsname} float-end"}>
-        Apply action
-      </button>
-    </div>
-  </div>
-<% end %>
-
-  </div>
-</div>
-
+              <div class="row">
+                <div class="col-lg-12">
+                  <button type="submit" class={"btn btn-#{bsname} float-end"}>
+                    Apply action
+                  </button>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
       </div>
     </div>
   </div>

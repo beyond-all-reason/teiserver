@@ -15,33 +15,32 @@ defmodule Teiserver.Moderation.ProposalLib do
     %{
       type_colour: colour(),
       type_icon: icon(),
-
       item_id: proposal.id,
       item_type: "teiserver_moderation_proposal",
       item_colour: colour(),
       item_icon: icon(),
       item_label: "#{proposal.target.name}",
-
       url: "/moderation/proposals/#{proposal.id}"
     }
   end
 
   # Queries
-  @spec query_proposals() :: Ecto.Query.t
+  @spec query_proposals() :: Ecto.Query.t()
   def query_proposals do
-    from proposals in Proposal
+    from(proposals in Proposal)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -70,8 +69,6 @@ defmodule Teiserver.Moderation.ProposalLib do
       where: actions.proposer_id in ^id_list
   end
 
-
-
   def _search(query, :id_list, id_list) do
     from proposals in query,
       where: proposals.id in ^id_list
@@ -81,13 +78,12 @@ defmodule Teiserver.Moderation.ProposalLib do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from proposals in query,
-      where: (
-            ilike(proposals.name, ^ref_like)
-        )
+      where: ilike(proposals.name, ^ref_like)
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Name (A-Z)") do
     from proposals in query,
       order_by: [asc: proposals.name]
@@ -108,8 +104,9 @@ defmodule Teiserver.Moderation.ProposalLib do
       order_by: [asc: proposals.inserted_at]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :target in preloads, do: _preload_target(query), else: query
     query = if :proposer in preloads, do: _preload_proposer(query), else: query

@@ -1,4 +1,4 @@
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "chat"}) %>
+<%= render(TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "chat"})) %>
 
 <style type="text/css">
   .message {
@@ -11,71 +11,82 @@
   <div class="col-md-12">
     <div class="card">
       <div class="card-body">
-
         <div class="float-end">
           <%= if @lobby do %>
-            <a href={Routes.ts_battle_lobby_chat_path(@conn, :chat, @lobby.id)} class="btn btn-outline-secondary">
+            <a
+              href={Routes.ts_battle_lobby_chat_path(@conn, :chat, @lobby.id)}
+              class="btn btn-outline-secondary"
+            >
               Live chat
             </a>
           <% end %>
 
           <%= if @match do %>
             <%= if @prev_match do %>
-              <a href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, @prev_match.uuid)} class="btn btn-outline-secondary">
-                <i class='fa-fw fa-solid fa-arrow-left'></i>
-                &nbsp;
+              <a
+                href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, @prev_match.uuid)}
+                class="btn btn-outline-secondary"
+              >
+                <i class="fa-fw fa-solid fa-arrow-left"></i> &nbsp;
                 Prev match
               </a>
             <% end %>
 
             <%= if @next_match do %>
-              <a href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, @next_match.uuid)} class="btn btn-outline-secondary">
-                <i class='fa-fw fa-solid fa-arrow-right'></i>
-                &nbsp;
+              <a
+                href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, @next_match.uuid)}
+                class="btn btn-outline-secondary"
+              >
+                <i class="fa-fw fa-solid fa-arrow-right"></i> &nbsp;
                 Next match
               </a>
             <% end %>
 
             <%= if @match.server_uuid do %>
-              <a href={Routes.ts_admin_match_path(@conn, :server_index, @match.server_uuid)} class="btn btn-outline-secondary">
-                <i class="fa-fw fa-regular fa-server"></i>
-                Server grouping
+              <a
+                href={Routes.ts_admin_match_path(@conn, :server_index, @match.server_uuid)}
+                class="btn btn-outline-secondary"
+              >
+                <i class="fa-fw fa-regular fa-server"></i> Server grouping
               </a>
             <% end %>
             &nbsp;&nbsp;&nbsp;
-
-            <a href={Routes.ts_admin_match_path(@conn, :show, @match.id)} class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}>
-              <%= central_component "icon", icon: Teiserver.Battle.MatchLib.icon() %>
-              Match details
+            <a
+              href={Routes.ts_admin_match_path(@conn, :show, @match.id)}
+              class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}
+            >
+              <%= central_component("icon", icon: Teiserver.Battle.MatchLib.icon()) %> Match details
             </a>
           <% end %>
 
           <%= if not @last_page or @page != 0 do %>
-            <a href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, @lobby_guid, "all")} class="btn btn-outline-secondary">
-              <i class='fa-fw fa-solid fa-list'></i>
-              &nbsp;
+            <a
+              href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, @lobby_guid, "all")}
+              class="btn btn-outline-secondary"
+            >
+              <i class="fa-fw fa-solid fa-list"></i> &nbsp;
               Full chat
             </a>
           <% end %>
 
-          <a href={Routes.ts_admin_lobby_path(@conn, :lobby_chat_download, @lobby_guid)} class="btn btn-outline-secondary">
-            <i class='fa-fw fa-solid fa-download'></i>
-            &nbsp;
+          <a
+            href={Routes.ts_admin_lobby_path(@conn, :lobby_chat_download, @lobby_guid)}
+            class="btn btn-outline-secondary"
+          >
+            <i class="fa-fw fa-solid fa-download"></i> &nbsp;
             Download
           </a>
         </div>
 
         <h4>Lobby chat - Page <%= @page + 1 %> - <%= @match_name %></h4>
-
         Oldest chat at the top (read top to bottom)
-
-        <table class='table table-sm'>
+        <table class="table table-sm">
           <thead>
             <tr>
               <th>Poster</th>
               <th>Message</th>
               <th class="d-none d-lg-block" style="min-width: 200px;">When</th>
-          </tr>
+            </tr>
           </thead>
           <tbody>
             <%= for msg <- @lobby_messages do %>
@@ -96,30 +107,32 @@
 
         <div class="row">
           <div class="col-md-6">
-            Raw chat:
-            <textarea rows="8" cols="40" class="form-control"><%= for msg <- @lobby_messages do %>
+            Raw chat: <textarea rows="8" cols="40" class="form-control"><%= for msg <- @lobby_messages do %>
   <%= msg.user.name %>: <%= msg.content %><% end %></textarea>
           </div>
 
           <div class="col-md-6">
-            Discord formatted:
-            <textarea rows="8" cols="40" class="form-control"><%= for msg <- @lobby_messages do %>
+            Discord formatted: <textarea rows="8" cols="40" class="form-control"><%= for msg <- @lobby_messages do %>
 **<%= msg.user.name %>**: <%= msg.content %><% end %></textarea>
           </div>
         </div>
 
         <%= if @page > 0 do %>
-          <a href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, @lobby_guid, @page - 1)} class="btn btn-secondary">
-            <i class='fa-fw fa-solid fa-arrow-left'></i>
-            &nbsp;
+          <a
+            href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, @lobby_guid, @page - 1)}
+            class="btn btn-secondary"
+          >
+            <i class="fa-fw fa-solid fa-arrow-left"></i> &nbsp;
             Previous page
           </a>
         <% end %>
 
         <%= if not @last_page do %>
-          <a href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, @lobby_guid, @page + 1)} class="btn btn-secondary float-end">
-            <i class='fa-fw fa-solid fa-arrow-right'></i>
-            &nbsp;
+          <a
+            href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, @lobby_guid, @page + 1)}
+            class="btn btn-secondary float-end"
+          >
+            <i class="fa-fw fa-solid fa-arrow-right"></i> &nbsp;
             Next page
           </a>
         <% end %>

@@ -13,10 +13,20 @@
         <td><%= user.name %></td>
 
         <td>
-          <%= link raw("<i class='fas fa-fw fa-check'></i> Accept"), to: Routes.ts_account_relationships_path(@conn, :create, "friend_request", userid), method: :post, data: [confirm: "Are you sure?"], class: "btn btn-sm btn-success btn-outline" %>
+          <%= link(raw("<i class='fas fa-fw fa-check'></i> Accept"),
+            to: Routes.ts_account_relationships_path(@conn, :create, "friend_request", userid),
+            method: :post,
+            data: [confirm: "Are you sure?"],
+            class: "btn btn-sm btn-success btn-outline"
+          ) %>
         </td>
         <td>
-          <%= link raw("<i class='fas fa-fw fa-times'></i> Decline"), to: Routes.ts_account_relationships_path(@conn, :delete, "friend_request", userid), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-sm btn-danger btn-outline" %>
+          <%= link(raw("<i class='fas fa-fw fa-times'></i> Decline"),
+            to: Routes.ts_account_relationships_path(@conn, :delete, "friend_request", userid),
+            method: :delete,
+            data: [confirm: "Are you sure?"],
+            class: "btn btn-sm btn-danger btn-outline"
+          ) %>
         </td>
       </tr>
     <% end %>

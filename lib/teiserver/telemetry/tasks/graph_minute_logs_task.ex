@@ -51,11 +51,13 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
     user_disconnects = extract_value(logs, chunk_size, ~w(server users_disconnected))
     bot_disconnects = extract_value(logs, chunk_size, ~w(server bots_disconnected))
 
-    connected = [user_connects, bot_connects]
+    connected =
+      [user_connects, bot_connects]
       |> Enum.zip()
       |> Enum.map(fn {u, b} -> u + b end)
 
-    disconnected = [user_disconnects, bot_disconnects]
+    disconnected =
+      [user_disconnects, bot_disconnects]
       |> Enum.zip()
       |> Enum.map(fn {u, b} -> u + b end)
 
@@ -66,33 +68,41 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
   end
 
   # Gigabytes
-  @memory_div (1024*1024*1024)
+  @memory_div 1024 * 1024 * 1024
 
   @spec perform_memory(list, non_neg_integer()) :: list()
   def perform_memory(logs, chunk_size) do
-    total = extract_value(logs, chunk_size, ~w(os_mon system_mem total_memory))
+    total =
+      extract_value(logs, chunk_size, ~w(os_mon system_mem total_memory))
       |> Enum.map(fn v -> (v / @memory_div) |> NumberHelper.round(2) end)
 
-    free = extract_value(logs, chunk_size, ~w(os_mon system_mem free_memory))
+    free =
+      extract_value(logs, chunk_size, ~w(os_mon system_mem free_memory))
       |> Enum.map(fn v -> (v / @memory_div) |> NumberHelper.round(2) end)
 
-    cached = extract_value(logs, chunk_size, ~w(os_mon system_mem cached_memory))
+    cached =
+      extract_value(logs, chunk_size, ~w(os_mon system_mem cached_memory))
       |> Enum.map(fn v -> (v / @memory_div) |> NumberHelper.round(2) end)
 
-    buffered = extract_value(logs, chunk_size, ~w(os_mon system_mem buffered_memory))
+    buffered =
+      extract_value(logs, chunk_size, ~w(os_mon system_mem buffered_memory))
       |> Enum.map(fn v -> (v / @memory_div) |> NumberHelper.round(2) end)
 
-    free_swap = extract_value(logs, chunk_size, ~w(os_mon system_mem free_swap))
+    free_swap =
+      extract_value(logs, chunk_size, ~w(os_mon system_mem free_swap))
       |> Enum.map(fn v -> (v / @memory_div) |> NumberHelper.round(2) end)
 
-    total_swap = extract_value(logs, chunk_size, ~w(os_mon system_mem total_swap))
+    total_swap =
+      extract_value(logs, chunk_size, ~w(os_mon system_mem total_swap))
       |> Enum.map(fn v -> (v / @memory_div) |> NumberHelper.round(2) end)
 
-    used = [total, free, cached, buffered]
+    used =
+      [total, free, cached, buffered]
       |> Enum.zip()
       |> Enum.map(fn {t, f, c, b} -> (t - (f + c + b)) |> NumberHelper.round(2) end)
 
-    swap = [total_swap, free_swap]
+    swap =
+      [total_swap, free_swap]
       |> Enum.zip()
       |> Enum.map(fn {t, f} -> (t - f) |> NumberHelper.round(2) end)
 
@@ -101,7 +111,7 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
       ["Used" | used],
       ["Buffered" | buffered],
       ["Cached" | cached],
-      ["Swap" | swap],
+      ["Swap" | swap]
     ]
   end
 
@@ -133,12 +143,10 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
     [
       ["Throttles" | extract_value(logs, chunk_size, ~w(os_mon processes throttle_servers))],
       ["Accolades" | extract_value(logs, chunk_size, ~w(os_mon processes accolade_servers))],
-
       ["Lobbies" | extract_value(logs, chunk_size, ~w(os_mon processes lobby_servers))],
       ["Consuls" | extract_value(logs, chunk_size, ~w(os_mon processes consul_servers))],
       ["Balancers" | extract_value(logs, chunk_size, ~w(os_mon processes balancer_servers))],
-
-      ["System" | extract_value(logs, chunk_size, ~w(os_mon processes system_servers))],
+      ["System" | extract_value(logs, chunk_size, ~w(os_mon processes system_servers))]
     ]
   end
 
@@ -154,35 +162,36 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
   def perform_beam_process_counts(logs, chunk_size) do
     [
       ["Beam" | extract_value(logs, chunk_size, ~w(os_mon processes beam_total))],
-      ["Teiserver" | extract_value(logs, chunk_size, ~w(os_mon processes teiserver_total))],
+      ["Teiserver" | extract_value(logs, chunk_size, ~w(os_mon processes teiserver_total))]
     ]
   end
 
   @spec perform_axis_key(list, non_neg_integer()) :: list()
   def perform_axis_key(logs, chunk_size) do
     logs
-      |> Enum.chunk_every(chunk_size)
-      |> Enum.map(fn [log | _] -> log.timestamp |> TimexHelper.date_to_str(format: :ymd_hms) end)
+    |> Enum.chunk_every(chunk_size)
+    |> Enum.map(fn [log | _] -> log.timestamp |> TimexHelper.date_to_str(format: :ymd_hms) end)
   end
 
   defp extract_value(logs, 1, path) do
     logs
-      |> Enum.map(fn log ->
-        get_in(log.data, path) || 0
-      end)
+    |> Enum.map(fn log ->
+      get_in(log.data, path) || 0
+    end)
   end
 
-  defp extract_value(logs, chunk_size, path, func \\ (fn x -> x end)) do
+  defp extract_value(logs, chunk_size, path, func \\ fn x -> x end) do
     logs
-      |> Enum.chunk_every(chunk_size)
-      |> Enum.map(fn chunk ->
-        result = chunk
-          |> Enum.map(fn log ->
-            (get_in(log.data, path) |> func.()) || 0
-          end)
-          |> Enum.sum
+    |> Enum.chunk_every(chunk_size)
+    |> Enum.map(fn chunk ->
+      result =
+        chunk
+        |> Enum.map(fn log ->
+          get_in(log.data, path) |> func.() || 0
+        end)
+        |> Enum.sum()
 
-        result / chunk_size
-      end)
+      result / chunk_size
+    end)
   end
 end

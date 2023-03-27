@@ -13,10 +13,11 @@ defmodule Teiserver.SpringIdServer do
         {:ok, _coordinator_pid} =
           DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
             __MODULE__,
-            name: __MODULE__,
-            data: %{}
+            name: __MODULE__, data: %{}
           })
+
         :ok
+
       _ ->
         {:failure, "Already started"}
     end
@@ -35,6 +36,7 @@ defmodule Teiserver.SpringIdServer do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "springIdServer") do
       [{pid, _}] ->
         pid
+
       _ ->
         nil
     end
@@ -57,13 +59,15 @@ defmodule Teiserver.SpringIdServer do
       :spring_id_server
     )
 
-    springids = Account.list_users(order_by: "Newest first", limit: 5, select: [:data])
-    |> Enum.map(fn u -> Central.Helpers.NumberHelper.int_parse(u.data["springid"]) end)
+    springids =
+      Account.list_users(order_by: "Newest first", limit: 5, select: [:data])
+      |> Enum.map(fn u -> Central.Helpers.NumberHelper.int_parse(u.data["springid"]) end)
 
     current_springid = Enum.max([0] ++ springids)
 
-    {:ok, %{
-      next_id: current_springid + 1
-    }}
+    {:ok,
+     %{
+       next_id: current_springid + 1
+     }}
   end
 end
