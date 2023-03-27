@@ -78,6 +78,16 @@ defmodule Teiserver.Moderation.ActionLib do
       where: actions.target_id in ^id_list
   end
 
+  def _search(query, :in_restrictions, restrictions) do
+    from actions in query,
+      where: ^restrictions in actions.restrictions
+  end
+
+  def _search(query, :not_in_restrictions, restrictions) when is_list(restrictions) do
+    from actions in query,
+      where: not array_overlap_a_in_b(actions.restrictions, ^restrictions)
+  end
+
   def _search(query, :expiry, "All"), do: query
 
   def _search(query, :expiry, "Completed only") do
@@ -98,6 +108,16 @@ defmodule Teiserver.Moderation.ActionLib do
   def _search(query, :expiry, "All active") do
     from actions in query,
       where: actions.expires > ^Timex.now() or is_nil(actions.expires)
+  end
+
+  def _search(query, :inserted_after, datetime) do
+    from actions in query,
+      where: actions.inserted_at > ^datetime
+  end
+
+  def _search(query, :inserted_before, datetime) do
+    from actions in query,
+      where: actions.inserted_at < ^datetime
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()

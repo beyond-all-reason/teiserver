@@ -370,4 +370,18 @@ defmodule Central.Helpers.TimexHelper do
     |> Enum.reject(fn v -> v == nil end)
     |> Enum.join("")
   end
+
+  def make_date_series(:days, start_date, end_date) do
+    start =
+      start_date
+      |> Timex.beginning_of_day()
+
+    last =
+      end_date
+      |> Timex.beginning_of_day()
+
+    start
+    |> Stream.iterate(&Timex.shift(&1, days: 1))
+    |> Stream.take_while(&(Timex.compare(&1, last) == -1))
+  end
 end

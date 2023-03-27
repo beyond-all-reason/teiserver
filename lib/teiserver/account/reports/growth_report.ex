@@ -41,34 +41,6 @@ defmodule Teiserver.Account.GrowthReport do
     )
   end
 
-  # defp get_server_metrics(days) do
-  #   logs =
-  #     Telemetry.list_server_day_logs(
-  #       order: "Newest first",
-  #       limit: days
-  #     )
-  #     |> Enum.reverse()
-
-  #   # Peak counts
-  #   field_list = ["aggregates.stats.peak_user_counts.total", "aggregates.stats.peak_user_counts.player", "aggregates.stats.accounts_created"]
-  #   columns = ServerGraphDayLogsTask.perform(logs, %{"field_list" => field_list}, fn x -> x end)
-
-  #   key = logs
-  #     |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
-
-  #   peak_counts = {key, columns}
-
-  #   IO.puts ""
-  #   IO.inspect peak_counts
-  #   IO.puts ""
-
-  #   %{
-  #     unique_counts: {[], []},
-  #     peak_counts: {[], []},
-  #     time_counts: {[], []},
-  #   }
-  # end
-
   defp get_server_metrics(days) do
     logs =
       Telemetry.list_server_day_logs(
