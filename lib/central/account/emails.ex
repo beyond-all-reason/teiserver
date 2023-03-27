@@ -1,7 +1,6 @@
 defmodule Central.Account.Emails do
   @moduledoc false
   alias Bamboo.Email
-  alias Central.Account
   alias Central.Helpers.TimexHelper
 
   def password_reset(user, code \\ nil) do

@@ -837,7 +837,7 @@ defmodule Teiserver.User do
           {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), T.userid()}
   def login_from_token(token, ws_state) do
     ip = get_in(ws_state, [:connect_info, :peer_data, :address]) |> ip_to_string
-    user_agent = get_in(ws_state, [:connect_info, :user_agent])
+    _user_agent = get_in(ws_state, [:connect_info, :user_agent])
     client_hash = ws_state.params["client_hash"]
     client_name = ws_state.params["client_name"]
 
