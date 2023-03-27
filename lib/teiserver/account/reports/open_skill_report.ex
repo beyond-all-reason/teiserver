@@ -70,7 +70,7 @@ defmodule Teiserver.Account.OpenSkillReport do
     Map.merge(
       %{
         "rating_type" => "Team",
-        "metric" => "Rating",
+        "metric" => "Game Rating",
         "last_active" => "7 days",
         "uncertainty" => "5"
       },
