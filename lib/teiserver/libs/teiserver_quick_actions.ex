@@ -175,6 +175,12 @@ defmodule Teiserver.TeiserverQuickActions do
         url: "/teiserver/reports/show/growth"
       },
       %{
+        label: "Moderation activity",
+        icons: ["fa-regular #{Teiserver.Moderation.ActivityReport.icon()}"],
+        permissions: Teiserver.Moderation.ActivityReport.permissions(),
+        url: "/teiserver/reports/show/moderation_activity"
+      },
+      %{
         label: "Teiserver infologs",
         icons: ["fa-regular #{Teiserver.Telemetry.InfologLib.icon()}", :list],
         url: "/teiserver/reports/infolog",

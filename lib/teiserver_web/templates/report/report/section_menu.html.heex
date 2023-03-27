@@ -197,3 +197,14 @@
     url: Routes.ts_reports_report_path(@conn, :show, "mapping")
   ) %>
 <% end %>
+
+<%= if allow?(@current_user, Teiserver.Moderation.ActivityReport.permissions()) do %>
+  <%= central_component("section_menu_button",
+    name: "moderation_activity",
+    label: "Moderation",
+    active: @active,
+    icon: Teiserver.Moderation.ActivityReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "moderation_activity")
+  ) %>
+<% end %>

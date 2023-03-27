@@ -260,6 +260,16 @@
       link: Routes.ts_reports_report_path(@conn, :show, "mapping")
     ) %>
   <% end %>
+
+  <%= if allow?(@current_user, Teiserver.Moderation.ActivityReport.permissions()) do %>
+    <%= central_component("menu_card",
+      size: :small,
+      icon: Teiserver.Moderation.ActivityReport.icon(),
+      name: "moderation_activity",
+      text: "Moderation",
+      link: Routes.ts_reports_report_path(@conn, :show, "moderation_activity")
+    ) %>
+  <% end %>
 </div>
 
 <div class="row mt-2">
