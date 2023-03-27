@@ -78,7 +78,7 @@ defmodule Teiserver.Account.OpenSkillReport do
     )
   end
 
-  defp convert_metric_name_to_db_column_name("Rating"), do: "rating_value"
+  defp convert_metric_name_to_db_column_name("Game Rating"), do: "rating_value"
   defp convert_metric_name_to_db_column_name("Skill"), do: "skill"
   defp convert_metric_name_to_db_column_name("Uncertainty"), do: "uncertainty"
   defp convert_metric_name_to_db_column_name("Leaderboard Rating"), do: "leaderboard_rating"
