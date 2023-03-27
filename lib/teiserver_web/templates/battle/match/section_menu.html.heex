@@ -18,6 +18,15 @@
   url: Routes.ts_battle_match_path(@conn, :ratings)
 %>
 
+<%= central_component "section_menu_button",
+  name: "ratings_graph",
+  label: "Progression",
+  active: @active,
+  icon: Teiserver.Account.RatingLib.icon(),
+  bsname: bsname,
+  url: Routes.ts_battle_match_path(@conn, :ratings_graph)
+%>
+
 <%= if @active == "show" do %>
   <%= central_component "section_menu_button",
     name: "show",
