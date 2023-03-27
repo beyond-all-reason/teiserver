@@ -28,19 +28,6 @@
             active: "user"
           })
         ) %>
-
-        <div class="float-end">
-          <a
-            class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
-            href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@user.id}_"}
-          >
-            <%= central_component("icon",
-              icon: Teiserver.Moderation.ActionLib.icon(),
-              class: "fa-solid"
-            ) %> &nbsp;
-            Action user
-          </a>
-        </div>
         <hr />
 
         <div class="float-end">
