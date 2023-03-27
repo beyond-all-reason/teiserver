@@ -190,6 +190,18 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
+        $('#action_restriction_Bridging').prop('checked', true);
+        $('#action_reason').val('Manual unbridging.');
+        $('#action_expires').val('1000 years');
+      "
+                  >
+                    Unbridge
+                  </div>
+
+                  <br />
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
         $('.restrictions-col .form-check-input').prop('checked', false);
       "
                   >
