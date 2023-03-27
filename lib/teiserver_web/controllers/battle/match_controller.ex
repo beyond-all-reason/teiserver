@@ -164,13 +164,13 @@ defmodule TeiserverWeb.Battle.MatchController do
 
     {dates, ratings_data} =
       logs
-      |> List.foldl( %{}, fn rating, acc ->
-        Map.update( acc, TimexHelper.date_to_str(rating.inserted_at, format: :ymd), { rating.value["rating_value"], 1 }, fn {match_rating, count} ->
-           { match_rating + rating.value["rating_value"], count+1 }
-        end )
-      end )
-      |> Enum.map( fn { date, { match_rating, count } } -> {date, Float.round( match_rating / count , 2 )}  end )
-      |> List.foldl( {[],[]}, fn { date, avg_rating }, {dates, avg_ratings} -> {[date | dates], [avg_rating | avg_ratings]} end )
+      |> List.foldl(%{}, fn rating, acc ->
+        Map.update(acc, TimexHelper.date_to_str(rating.inserted_at, format: :ymd), {rating.value["rating_value"], 1}, fn {match_rating, count} ->
+           {match_rating + rating.value["rating_value"], count+1}
+        end)
+      end)
+      |> Enum.map(fn {date, {match_rating, count}} -> {date, Float.round(match_rating / count , 2)}  end)
+      |> List.foldl({[],[]}, fn {date, avg_rating}, {dates, avg_ratings} -> {[date | dates], [avg_rating | avg_ratings]} end)
 
     conn
       |> assign(:filter, filter || "rating-all")
@@ -178,7 +178,7 @@ defmodule TeiserverWeb.Battle.MatchController do
       |> assign(:ratings, ratings)
       |> assign(:key, dates)
       |> assign(:columns, [["rating" | ratings_data]])
-      |> render( "ratings_graph.html" )
+      |> render("ratings_graph.html")
   end
 
 end
