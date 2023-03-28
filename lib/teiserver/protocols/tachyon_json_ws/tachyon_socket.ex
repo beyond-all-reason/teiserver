@@ -10,16 +10,6 @@ defmodule Tachyon.TachyonSocket do
 
   @type ws_state() :: map()
 
-  def validate_schemas() do
-    "priv/tachyon/v1.json"
-    |> File.read!()
-    |> Jason.decode!()
-    |> Enum.each(fn json_def ->
-      schema = ExJsonSchema.Schema.resolve(json_def)
-      Central.store_put(:tachyon_schemas, json_def["$id"], schema)
-    end)
-  end
-
   @spec child_spec(any) :: any()
   def child_spec(_opts) do
     # We won't spawn any process, so let's return a dummy task
@@ -103,6 +93,8 @@ defmodule Tachyon.TachyonSocket do
       "command" => command,
       "data" => data
     }
+
+    Teiserver.Tachyon.Schema.validate!(response)
 
     {:ok, response, new_conn}
   end

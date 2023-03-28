@@ -3,8 +3,6 @@ defmodule Teiserver.Tachyon.Handlers.System.ForceErrorRequest do
 
   """
 
-  # @command_id "system/error"
-
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do
     %{
@@ -12,13 +10,13 @@ defmodule Teiserver.Tachyon.Handlers.System.ForceErrorRequest do
     }
   end
 
-  def execute(conn, _object, _meta) do
+  def execute(conn, %{"command" => command}, _meta) do
+    {command, %{}, conn}
+  end
+
+  def execute(_conn, _object, _meta) do
     raise "Forced error"
 
-    response = %{
-      "reason" => "An error was forced here"
-    }
-
-    {"error", response, conn}
+    {"force_error", %{}, %{}}
   end
 end

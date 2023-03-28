@@ -45,8 +45,4 @@ defmodule Teiserver.Tachyon.Handlers.Account.WhoamiRequest do
 
     {"account/who_am_i/response", response, conn}
   end
-
-  def validate() do
-    schema = Central.store_get(:tachyon_schemas, @command_id)
-  end
 end

@@ -61,8 +61,14 @@
                                                     "type": "boolean"
                                                 },
                                                 "clan_id": {
-                                                    "minimum": 0,
-                                                    "type": "integer"
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "integer"
+                                                        },
+                                                        {
+                                                            "type": "null"
+                                                        }
+                                                    ]
                                                 },
                                                 "icons": {
                                                     "type": "object",
@@ -199,7 +205,6 @@
                                                 "id",
                                                 "name",
                                                 "is_bot",
-                                                "clan_id",
                                                 "icons",
                                                 "roles",
                                                 "battle_status"
@@ -511,7 +516,6 @@
                                                     "id",
                                                     "name",
                                                     "is_bot",
-                                                    "clan_id",
                                                     "icons",
                                                     "roles",
                                                     "battle_status"
@@ -728,7 +732,6 @@
                                             "id",
                                             "name",
                                             "is_bot",
-                                            "clan_id",
                                             "icons",
                                             "roles",
                                             "battle_status"

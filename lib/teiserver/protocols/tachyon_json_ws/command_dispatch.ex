@@ -13,10 +13,19 @@ defmodule Teiserver.Tachyon.CommandDispatch do
   ]
 
   def dispatch(conn, object, meta) do
-    # Get the relevant handler, if none found the no_command fallback will handle it
-    handler = Central.store_get(:tachyon_dispatches, meta["command"]) || Central.store_get(:tachyon_dispatches, "no_command")
+    handler = get_dispatch_handler(meta["command"])
 
     handler.(conn, object, meta)
+  end
+
+  defp get_dispatch_handler(command) do
+    # If we are allowing hailstorm lets ensure we've got the latest dispatches loaded
+    if Application.get_env(:central, Teiserver)[:enable_hailstorm] do
+      build_dispatch_cache()
+    end
+
+    # Get the relevant handler, if none found the no_command fallback will handle it
+    Central.store_get(:tachyon_dispatches, command) || Central.store_get(:tachyon_dispatches, "no_command")
   end
 
   @spec build_dispatch_cache :: :ok
@@ -39,10 +48,6 @@ defmodule Teiserver.Tachyon.CommandDispatch do
 
     no_command_func = &Handlers.System.NoCommandErrorRequest.execute/3
     Central.store_put(:tachyon_dispatches, "no_command", no_command_func)
-
-    IO.puts ""
-    IO.inspect Map.keys(lookup)
-    IO.puts ""
 
     # Delete out-dated keys
     old
