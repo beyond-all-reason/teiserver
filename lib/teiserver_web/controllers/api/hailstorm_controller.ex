@@ -28,7 +28,7 @@ defmodule TeiserverWeb.API.BeansController do
           case User.register_user(name, email, params["password"]) do
             :success ->
               db_user = Account.get_user!(nil, search: [email: email])
-              Central.Account.update_user(db_user, params["permissions"], :permissions)
+              Central.Account.update_user(db_user, params["permissions"] || [], :permissions)
               %{userid: db_user.id}
 
             {:error, reason} ->
