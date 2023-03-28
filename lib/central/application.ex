@@ -44,6 +44,7 @@ defmodule Central.Application do
 
         # Tachyon schemas
         concache_perm_sup(:tachyon_schemas),
+        concache_perm_sup(:tachyon_dispatches),
 
         # Teiserver stuff
         # Global/singleton registries

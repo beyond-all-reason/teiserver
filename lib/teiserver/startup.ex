@@ -15,6 +15,8 @@ defmodule Teiserver.Startup do
     Teiserver.LobbyIdServer.start_lobby_id_server()
     Teiserver.SpringIdServer.start_spring_id_server()
 
+    Teiserver.Tachyon.CommandDispatch.build_dispatch_cache()
+
     # Chat stuff
     Central.Account.UserLib.add_report_restriction_types("Chat", [
       "Bridging",

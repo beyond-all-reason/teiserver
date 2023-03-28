@@ -4,7 +4,12 @@ defmodule Teiserver.Tachyon.Handlers.Account.WhoamiRequest do
   """
   alias Teiserver.Account
 
-  @command_id "account/who_am_i/response"
+  @spec dispatch_handlers :: map()
+  def dispatch_handlers() do
+    %{
+      "account/who_am_i/request" => &execute/3
+    }
+  end
 
   def execute(conn, _object, _meta) do
     user = Account.get_user_by_id(conn.userid)
@@ -38,7 +43,7 @@ defmodule Teiserver.Tachyon.Handlers.Account.WhoamiRequest do
       "ignores" => user.ignored
     }
 
-    {@command_id, response, conn}
+    {"account/who_am_i/response", response, conn}
   end
 
   def validate() do
