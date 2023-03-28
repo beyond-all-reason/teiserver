@@ -71,7 +71,7 @@ defmodule Teiserver.Game.MatchRatingLib do
       match.team_count < 2 ->
         {:error, :not_enough_teams}
 
-      match.duration < 30 ->
+      match.game_duration < 180 ->
         {:error, :too_short}
 
       # If override is set to true we skip the next few checks
