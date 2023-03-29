@@ -41,6 +41,7 @@
         <br /><br />
 
         <%= if @conn.params["search"] != nil do %>
+          <%= render(TeiserverWeb.Moderation.ReportView, "search.html", assigns) %>
         <% end %>
 
         <h4>Listing Reports</h4>

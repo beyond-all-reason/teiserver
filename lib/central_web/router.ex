@@ -539,6 +539,8 @@ defmodule CentralWeb.Router do
 
     get("/", GeneralController, :index)
 
+    get("/report/search", ReportController, :search)
+    post("/report/search", ReportController, :search)
     get("/report/user/:id", ReportController, :user)
     resources("/report", ReportController, only: [:index, :show, :delete])
 
