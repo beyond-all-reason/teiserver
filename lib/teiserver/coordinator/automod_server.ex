@@ -19,6 +19,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
       [{_pid, _}] ->
         {:failure, "Already started"}
+
       _ ->
         do_start()
     end
@@ -29,9 +30,9 @@ defmodule Teiserver.Coordinator.AutomodServer do
     {:ok, _coordinator_pid} =
       DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
         Teiserver.Coordinator.AutomodServer,
-        name: Teiserver.Coordinator.AutomodServer,
-        data: %{}
+        name: Teiserver.Coordinator.AutomodServer, data: %{}
       })
+
     :ok
   end
 
@@ -47,9 +48,10 @@ defmodule Teiserver.Coordinator.AutomodServer do
     if coordinator_id != nil do
       :timer.send_interval(@tick_interval, :tick)
 
-      {:noreply, %{
-        coordinator_id: Coordinator.get_coordinator_userid()
-      }}
+      {:noreply,
+       %{
+         coordinator_id: Coordinator.get_coordinator_userid()
+       }}
     else
       :timer.send_after(5_000, :begin)
       {:noreply, state}
@@ -70,11 +72,12 @@ defmodule Teiserver.Coordinator.AutomodServer do
     :timer.send_after(delay, {:check_user, userid})
     {:noreply, state}
   end
+
   def handle_info(%{channel: "client_inout"}, state), do: {:noreply, state}
 
   # Catchall handle_info
   def handle_info(msg, state) do
-    Logger.error("AutoMod handle_info error. No handler for msg of #{Kernel.inspect msg}")
+    Logger.error("AutoMod handle_info error. No handler for msg of #{Kernel.inspect(msg)}")
     {:noreply, state}
   end
 
@@ -99,13 +102,23 @@ defmodule Teiserver.Coordinator.AutomodServer do
   @spec check_wrapper(T.userid()) :: String.t()
   defp check_wrapper(userid) do
     case User.get_user_by_id(userid) do
-      nil -> "No user"
-      %{bot: true} -> "Bot account"
-      %{moderator: true} -> "Moderator account"
+      nil ->
+        "No user"
+
+      %{bot: true} ->
+        "Bot account"
+
+      %{moderator: true} ->
+        "Moderator account"
+
       user ->
         cond do
-          Enum.member?(user.roles, "Developer") -> "Developer account"
-          Enum.member?(user.roles, "Trusted") -> "Trusted account"
+          Enum.member?(user.roles, "Developer") ->
+            "Developer account"
+
+          Enum.member?(user.roles, "Trusted") ->
+            "Trusted account"
+
           true ->
             do_check(userid)
         end
@@ -115,6 +128,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   @spec do_check(T.userid()) :: String.t()
   def do_check(userid) do
     user = Account.get_user_by_id(userid)
+
     if User.is_restricted?(user, ["Login"]) do
       "Already banned"
     else
@@ -135,18 +149,21 @@ defmodule Teiserver.Coordinator.AutomodServer do
   end
 
   def enact_ban([], _), do: "No action"
+
   def enact_ban([ban | _], userid) do
     Account.update_user_stat(userid, %{"autoban_id" => ban.id})
 
     coordinator_user_id = Coordinator.get_coordinator_userid()
 
-    {:ok, action} = Moderation.create_action(%{
-      target_id: userid,
-      reason: "Banned (Automod)",
-      restrictions: ["Login", "Site"],
-      score_modifier: 0,
-      expires: Timex.now() |> Timex.shift(years: 1000)
-    })
+    {:ok, action} =
+      Moderation.create_action(%{
+        target_id: userid,
+        reason: "Banned (Automod)",
+        restrictions: ["Login", "Site"],
+        score_modifier: 0,
+        expires: Timex.now() |> Timex.shift(years: 1000)
+      })
+
     Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
 
     add_audit_log(
@@ -156,7 +173,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
       %{
         "action_id" => action.id,
         "target_user_id" => userid,
-        "ban_id" => ban.id,
+        "ban_id" => ban.id
       }
     )
 

@@ -4,6 +4,12 @@ defmodule Teiserver.Tachyon.Handlers.System.DisconnectRequest do
   """
 
   # @command_id "system/error"
+  @spec dispatch_handlers :: map()
+  def dispatch_handlers() do
+    %{
+      "disconnect" => &execute/3
+    }
+  end
 
   def execute(%{userid: userid} = conn, _object, _meta) do
     send(self(), :disconnect)

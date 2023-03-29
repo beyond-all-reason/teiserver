@@ -2,7 +2,11 @@ defmodule Teiserver.Protocols.Tachyon.V1.TelemetryIn do
   alias Teiserver.Telemetry
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
-  def do_handle("update_property", %{"hash" => hash, "property" => property, "value" => value}, state) do
+  def do_handle(
+        "update_property",
+        %{"hash" => hash, "property" => property, "value" => value},
+        state
+      ) do
     Telemetry.log_client_property(state.userid, property, value, hash)
     state
   end

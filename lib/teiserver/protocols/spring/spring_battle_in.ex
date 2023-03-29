@@ -24,10 +24,15 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
           host_teamsize: data["teamSize"] |> int_parse,
           host_teamcount: data["nbTeams"] |> int_parse
         }
+
         Coordinator.cast_consul(state.lobby_id, {:host_update, state.userid, host_data})
+
       v ->
-        Logger.error("update_spads instruction error #{Kernel.inspect v}, tried to decode #{json_str}")
+        Logger.error(
+          "update_spads instruction error #{Kernel.inspect(v)}, tried to decode #{json_str}"
+        )
     end
+
     state
   end
 

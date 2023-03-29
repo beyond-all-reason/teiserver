@@ -27,6 +27,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
       updated_at: System.system_time(:second),
       status: msg.status
     }
+
     new_agent_status = Map.put(state.agent_status, msg.name, status)
 
     {:noreply, %{state | agent_status: new_agent_status}}
@@ -34,22 +35,24 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
 
   def handle_cast({:updated_policy, new_lobby_policy}, state) do
     # If it's being enabled or disabled, do stuff
-    new_state = case {state.db_policy.enabled, new_lobby_policy.enabled} do
-      {true, false} ->
-        disconnect_all_bots(state)
+    new_state =
+      case {state.db_policy.enabled, new_lobby_policy.enabled} do
+        {true, false} ->
+          disconnect_all_bots(state)
 
-      _ ->
-        PubSub.broadcast(
-          Central.PubSub,
-          "lobby_policy_internal:#{state.id}",
-          %{
-            channel: "lobby_policy_internal:#{state.id}",
-            event: :updated_policy,
-            new_lobby_policy: new_lobby_policy
-          }
-        )
-        state
-    end
+        _ ->
+          PubSub.broadcast(
+            Central.PubSub,
+            "lobby_policy_internal:#{state.id}",
+            %{
+              channel: "lobby_policy_internal:#{state.id}",
+              event: :updated_policy,
+              new_lobby_policy: new_lobby_policy
+            }
+          )
+
+          state
+      end
 
     {:noreply, %{new_state | db_policy: new_lobby_policy}}
   end
@@ -62,20 +65,22 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
   def handle_info(:check_agents, state) do
     time_since_last_spawn = System.system_time(:second) - state.last_spawn
 
-    new_state = if time_since_last_spawn > @minimum_spawn_interval_seconds do
-      lobby_agents = (state.agent_status || %{})
-        |> Enum.reject(fn {_, %{status: status}} ->
-          Map.get(status, :in_progress, false)
-        end)
+    new_state =
+      if time_since_last_spawn > @minimum_spawn_interval_seconds do
+        lobby_agents =
+          (state.agent_status || %{})
+          |> Enum.reject(fn {_, %{status: status}} ->
+            Map.get(status, :in_progress, false)
+          end)
 
-      if Enum.empty?(lobby_agents) do
-        spawn_agent(state)
+        if Enum.empty?(lobby_agents) do
+          spawn_agent(state)
+        else
+          state
+        end
       else
         state
       end
-    else
-      state
-    end
 
     {:noreply, new_state}
   end
@@ -116,15 +121,18 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
   end
 
   defp spawn_agent(state) do
-    existing_names = state.agent_status
+    existing_names =
+      state.agent_status
       |> Map.keys()
 
-    remaining_names = state.db_policy.agent_name_list
+    remaining_names =
+      state.db_policy.agent_name_list
       |> Enum.reject(fn name -> Enum.member?(existing_names, name) end)
 
     case remaining_names do
       [] ->
         state
+
       _ ->
         selected_name = Enum.random(remaining_names)
         user = LobbyPolicyLib.get_or_make_agent_user(selected_name, state.db_policy)
@@ -167,7 +175,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
   def init(data) do
     id = data.lobby_policy.id
 
-    Logger.metadata([request_id: "LobbyPolicyOrganiserServer##{id}/#{data.lobby_policy.name}"])
+    Logger.metadata(request_id: "LobbyPolicyOrganiserServer##{id}/#{data.lobby_policy.name}")
 
     :ok = PubSub.subscribe(Central.PubSub, "lobby_policy_internal:#{id}")
 

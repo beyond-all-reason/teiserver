@@ -7,6 +7,7 @@ defmodule Teiserver.Agents.UnfrienderAgentServer do
 
   def handle_info(:startup, state) do
     socket = AgentLib.get_socket()
+
     AgentLib.login(socket, %{
       name: "Unfriender_#{state.name}",
       email: "Unfriender_#{state.name}@agents"
@@ -22,11 +23,12 @@ defmodule Teiserver.Agents.UnfrienderAgentServer do
   end
 
   def handle_info({:ssl, _socket, data}, state) do
-    new_state = data
-    |> AgentLib.translate
-    |> Enum.reduce(state, fn data, acc ->
-      handle_msg(data, acc)
-    end)
+    new_state =
+      data
+      |> AgentLib.translate()
+      |> Enum.reduce(state, fn data, acc ->
+        handle_msg(data, acc)
+      end)
 
     {:noreply, new_state}
   end

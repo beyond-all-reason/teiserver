@@ -15,33 +15,32 @@ defmodule Teiserver.Moderation.BanLib do
     %{
       type_colour: colour(),
       type_icon: icon(),
-
       item_id: ban.id,
       item_type: "teiserver_moderation_ban",
       item_colour: colour(),
       item_icon: icon(),
       item_label: "#{ban.source.name}",
-
       url: "/moderation/bans/#{ban.id}"
     }
   end
 
   # Queries
-  @spec query_bans() :: Ecto.Query.t
+  @spec query_bans() :: Ecto.Query.t()
   def query_bans do
-    from bans in Ban
+    from(bans in Ban)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -80,8 +79,9 @@ defmodule Teiserver.Moderation.BanLib do
       where: bans.inserted_at < ^dt
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Name (A-Z)") do
     from bans in query,
       order_by: [asc: bans.name]
@@ -102,8 +102,9 @@ defmodule Teiserver.Moderation.BanLib do
       order_by: [asc: bans.inserted_at]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :source in preloads, do: _preload_source(query), else: query
     query = if :adder in preloads, do: _preload_adder(query), else: query

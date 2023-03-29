@@ -19,49 +19,47 @@
   <div class="col-md-12">
     <div class="card card-default">
       <div class="card-body" style="padding: 0 15px;">
-
         <div class="row">
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "blog",
             label: "Blog",
             active: @active,
             url: ~p"/blog",
             icon: Central.Communication.BlogLib.icon()
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "posts",
             label: "Posts",
             active: @active,
             url: ~p"/blog_admin/posts",
             icon: Central.Communication.PostLib.icon()
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "categories",
             label: "Categories",
             active: @active,
             url: Routes.blog_category_path(@conn, :index),
             icon: Central.Communication.CategoryLib.icon()
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "comments",
             label: "Comments",
             active: @active,
             url: Routes.blog_comment_path(@conn, :index),
             icon: Central.Communication.CommentLib.icon()
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "files",
             label: "Files",
             active: @active,
             url: Routes.blog_file_path(@conn, :index),
             icon: Central.Communication.BlogFileLib.icon()
-          %>
+          ) %>
         </div>
-
       </div>
     </div>
   </div>

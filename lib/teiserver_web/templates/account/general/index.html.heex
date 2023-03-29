@@ -1,62 +1,65 @@
 <div class="row page-row">
-  <%= central_component "menu_card",
+  <%= central_component("menu_card",
     icon_class: "fa-duotone",
     name: "profile",
     icon: "fa-solid fa-user-circle",
     text: "My profile",
     link: Routes.ts_account_profile_path(@conn, :show, @conn.current_user.id)
-  %>
+  ) %>
 
-  <%= central_component "menu_card",
+  <%= central_component("menu_card",
     icon_class: "fa-duotone",
     name: "",
     icon: Teiserver.icon(:relationship),
     text: "Friends/Mutes/Invites",
     link: Routes.ts_account_relationships_path(@conn, :index)
-  %>
+  ) %>
 
-  <%= central_component "menu_card",
+  <%= central_component("menu_card",
     icon_class: "fa-duotone",
     name: "appearance",
     icon: "fa-solid fa-icons",
     text: "Appearance",
     link: Routes.ts_account_general_path(@conn, :customisation_form)
-  %>
+  ) %>
 
-  <%= central_component "menu_card",
+  <%= central_component("menu_card",
     icon_class: "fa-duotone",
     name: "clans",
     icon: Teiserver.Clans.ClanLib.icon(),
     text: "Clans",
     link: ~p"/teiserver/clans"
-  %>
+  ) %>
 
-  <%= central_component "menu_card",
+  <%= central_component("menu_card",
     icon_class: "fa-duotone",
     name: "",
     icon: Central.Config.UserConfigLib.icon(),
     text: "Preferences",
     link: Routes.ts_account_preferences_path(@conn, :index)
-  %>
+  ) %>
 
-  <%=
-    central_component "menu_card",
+  <%= central_component("menu_card",
     icon: Central.Account.icon(),
     text: "Account details",
     icon_class: "fa-duotone",
     link: Routes.ts_account_general_path(@conn, :edit_details)
-  %>
+  ) %>
 
-  <%=
-    central_component "menu_card",
+  <%= central_component("menu_card",
     icon: "fa-duotone fa-lock",
     text: "Security",
     icon_class: "fa-duotone",
     link: Routes.ts_account_security_path(@conn, :index)
-  %>
+  ) %>
 </div>
 
-
 <div class="row page-row">
-  <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_general_general_path(@conn, :index) %>
+  <%= central_component("menu_card",
+    icon_class: "fa-solid",
+    name: "",
+    icon: StylingHelper.icon(:back),
+    text: "Back",
+    link: Routes.ts_general_general_path(@conn, :index)
+  ) %>
 </div>

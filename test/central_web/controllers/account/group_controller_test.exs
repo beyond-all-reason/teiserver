@@ -9,7 +9,11 @@ defmodule CentralWeb.Account.GroupControllerTest do
     GeneralTestLib.conn_setup([])
   end
 
-  @update_attrs %{colour: "some updated colour", icon: "fa-solid fa-wrench", name: "some updated name"}
+  @update_attrs %{
+    colour: "some updated colour",
+    icon: "fa-solid fa-wrench",
+    name: "some updated name"
+  }
 
   defp create_group_type(key) do
     Central.Account.GroupTypeLib.add_group_type(key, %{
@@ -94,7 +98,7 @@ defmodule CentralWeb.Account.GroupControllerTest do
       conn = get(conn, Routes.account_group_path(conn, :edit, unrelated_group.id))
 
       # assert conn.private[:phoenix_flash]["danger"] ==
-               "You do not have edit access to that group"
+      "You do not have edit access to that group"
 
       assert redirected_to(conn) == Routes.account_group_path(conn, :show, unrelated_group.id)
     end
@@ -166,7 +170,7 @@ defmodule CentralWeb.Account.GroupControllerTest do
         )
 
       # assert conn.private[:phoenix_flash]["danger"] ==
-               "You do not have edit access to that group"
+      "You do not have edit access to that group"
 
       assert redirected_to(conn) == Routes.account_group_path(conn, :show, unrelated_group.id)
     end
@@ -174,7 +178,7 @@ defmodule CentralWeb.Account.GroupControllerTest do
 
   describe "create membership" do
     test "create without existing membership - allowed bad data", %{
-      conn: conn,
+      conn: conn
     } do
       conn =
         post(conn, Routes.account_group_path(conn, :create_membership), %{
@@ -217,12 +221,11 @@ defmodule CentralWeb.Account.GroupControllerTest do
                Routes.account_group_path(conn, :show, parent_group.id) <> "#members"
 
       # assert conn.private[:phoenix_flash]["danger"] ==
-               "You do not have the access to add that user to this group."
+      "You do not have the access to add that user to this group."
     end
   end
 
   describe "membership invites" do
-
   end
 
   describe "membership" do
@@ -230,10 +233,11 @@ defmodule CentralWeb.Account.GroupControllerTest do
       child_user = Account.get_user_by_email("child@child.com")
 
       # Add membership
-      {:ok, _agm} = Account.create_group_membership(%{
-        group_id: main_group.id,
-        user_id: child_user.id
-      })
+      {:ok, _agm} =
+        Account.create_group_membership(%{
+          group_id: main_group.id,
+          user_id: child_user.id
+        })
 
       # Update
       conn =
@@ -274,7 +278,7 @@ defmodule CentralWeb.Account.GroupControllerTest do
       assert redirected_to(conn) == Routes.account_group_path(conn, :show, group) <> "#members"
 
       # assert conn.private[:phoenix_flash]["danger"] ==
-               "You do not have the access to add that user to this group."
+      "You do not have the access to add that user to this group."
     end
 
     test "remove with no access", %{conn: conn} do
@@ -287,7 +291,7 @@ defmodule CentralWeb.Account.GroupControllerTest do
       assert redirected_to(conn) == Routes.account_group_path(conn, :show, group) <> "#members"
 
       # assert conn.private[:phoenix_flash]["danger"] ==
-               "You do not have the access to remove that user from this group."
+      "You do not have the access to remove that user from this group."
     end
   end
 end

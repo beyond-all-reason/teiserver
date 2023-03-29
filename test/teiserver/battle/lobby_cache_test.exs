@@ -25,6 +25,7 @@ defmodule Teiserver.Battle.LobbyCacheTest do
         max_players: 12
       }
     }
+
     data = %{cmd: "c.lobby.create", lobby: lobby_data}
     _tachyon_send(hsocket, data)
     [reply] = _tachyon_recv(hsocket)

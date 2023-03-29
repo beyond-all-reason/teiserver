@@ -16,14 +16,18 @@ defmodule TeiserverWeb.ClientLive.Index do
 
   @impl true
   def mount(_params, session, socket) do
-    clients = list_clients()
+    clients =
+      list_clients()
       |> Map.new(fn c -> {c.userid, c} end)
 
     users =
       clients
-      |> Map.new(fn {userid, _} -> {
-        userid, User.get_user_by_id(userid) |> limited_user
-      } end)
+      |> Map.new(fn {userid, _} ->
+        {
+          userid,
+          User.get_user_by_id(userid) |> limited_user
+        }
+      end)
 
     socket =
       socket
@@ -50,6 +54,7 @@ defmodule TeiserverWeb.ClientLive.Index do
     case allow?(socket.assigns[:current_user], "teiserver.staff.moderator") do
       true ->
         {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+
       false ->
         {:noreply,
          socket
@@ -58,17 +63,22 @@ defmodule TeiserverWeb.ClientLive.Index do
   end
 
   @impl true
-  def handle_info({:client_index_throttle, new_clients, removed_clients}, %{assigns: assigns} = socket) do
-    clients = assigns.clients
+  def handle_info(
+        {:client_index_throttle, new_clients, removed_clients},
+        %{assigns: assigns} = socket
+      ) do
+    clients =
+      assigns.clients
       |> Enum.filter(fn {userid, _} ->
         not Enum.member?(removed_clients, userid)
       end)
-      |> Map.new
+      |> Map.new()
       |> Map.merge(new_clients)
 
     client_ids = Map.keys(clients)
 
-    users = client_ids
+    users =
+      client_ids
       |> Enum.map(fn userid ->
         if Map.has_key?(assigns.users, userid) do
           assigns.users[userid]
@@ -79,7 +89,8 @@ defmodule TeiserverWeb.ClientLive.Index do
       end)
       |> Map.new(fn user -> {user.id, user} end)
 
-    socket = socket
+    socket =
+      socket
       |> assign(:clients, clients)
       |> assign(:users, users)
       |> apply_filters
@@ -89,14 +100,16 @@ defmodule TeiserverWeb.ClientLive.Index do
 
   @impl true
   def handle_event("add-filter:" <> filter, _event, socket) do
-    new_filters = [filter | socket.assigns.filters]
-      |> Enum.uniq
+    new_filters =
+      [filter | socket.assigns.filters]
+      |> Enum.uniq()
 
     {:noreply, assign(socket, :filters, new_filters) |> apply_filters}
   end
 
   def handle_event("remove-filter:" <> filter, _event, socket) do
-    new_filters = socket.assigns.filters
+    new_filters =
+      socket.assigns.filters
       |> List.delete(filter)
 
     {:noreply, assign(socket, :filters, new_filters) |> apply_filters}
@@ -118,7 +131,8 @@ defmodule TeiserverWeb.ClientLive.Index do
   defp apply_filters(%{assigns: assigns} = socket) do
     filters = assigns.filters
 
-    client_ids = assigns.clients
+    client_ids =
+      assigns.clients
       |> Enum.filter(fn {_userid, client} ->
         cond do
           Enum.member?(filters, "people") and client.bot ->
@@ -135,7 +149,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> Enum.map(fn {key, _} -> key end)
 
     socket
-      |> assign(:client_ids, client_ids)
+    |> assign(:client_ids, client_ids)
   end
 
   defp limited_user(user) do

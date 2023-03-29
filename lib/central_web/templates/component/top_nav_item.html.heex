@@ -1,6 +1,4 @@
-<%
-  active = if @active, do: "active", else: ""
-%>
+<% active = if @active, do: "active", else: "" %>
 <li class="nav-item">
   <a class={"nav-link #{active}"} href={@route}>
     <%= if assigns[:icon] do %>

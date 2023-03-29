@@ -23,8 +23,8 @@ config :central, CentralWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "6FN12Jv4ZITAK1fq7ehD0MTRvbLsXYWj+wLY3ifkzzlcUIcpUJK7aG/ptrJSemAy",
   live_view: [signing_salt: "wZVVigZo"],
-    render_errors: [
-  # render_errors: [view: CentralWeb.ErrorView, accepts: ~w(html json), layout: false],
+  render_errors: [
+    # render_errors: [view: CentralWeb.ErrorView, accepts: ~w(html json), layout: false],
     formats: [html: CentralWeb.ErrorHTML, json: CentralWeb.ErrorJSON],
     layout: false
   ],
@@ -57,7 +57,6 @@ config :central, Teiserver,
   # Heartbeat timeout is seconds
   heartbeat_timeout: 120,
   test_mode: false,
-
   server_admin_name: "Server Admin",
   game_name: "Full game name",
   game_name_short: "Game",
@@ -78,9 +77,9 @@ config :central, Teiserver,
   server_flag: "GB",
   post_login_delay: 150,
   spring_post_state_change_delay: 150,
-  user_agreement: "A verification code has been sent to your email address. Please read our terms of service at <<<site_url>>> and the code of conduct at <<<URL>>>. Then enter your six digit code below if you agree to the terms.",
+  user_agreement:
+    "A verification code has been sent to your email address. Please read our terms of service at <<<site_url>>> and the code of conduct at <<<URL>>>. Then enter your six digit code below if you agree to the terms.",
   accept_all_emails: false,
-
   retention: %{
     telemetry_infolog: 15,
     telemetry_events: 90,
@@ -115,42 +114,40 @@ config :central, Oban,
   plugins: [
     {Oban.Plugins.Pruner, max_age: 3600},
     {Oban.Plugins.Cron,
-      crontab: [
-        # Every hour
-        {"0 * * * *", Central.Admin.CleanupTask},
+     crontab: [
+       # Every hour
+       {"0 * * * *", Central.Admin.CleanupTask},
 
-        # Every day at 2am
-        {"0 2 * * *", Teiserver.Logging.AggregateViewLogsTask},
+       # Every day at 2am
+       {"0 2 * * *", Teiserver.Logging.AggregateViewLogsTask},
 
-        # 1:07 am
-        {"7 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
-        {"12 1 * * *", Teiserver.Chat.Tasks.DailyCleanupTask},
-        {"17 1 * * *", Teiserver.Battle.Tasks.DailyCleanupTask},
-        {"22 1 * * *", Teiserver.Telemetry.EventCleanupTask},
+       # 1:07 am
+       {"7 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+       {"12 1 * * *", Teiserver.Chat.Tasks.DailyCleanupTask},
+       {"17 1 * * *", Teiserver.Battle.Tasks.DailyCleanupTask},
+       {"22 1 * * *", Teiserver.Telemetry.EventCleanupTask},
 
-        # Every minute
-        {"* * * * *", Teiserver.Telemetry.Tasks.PersistServerMinuteTask},
-        {"* * * * *", Teiserver.Moderation.RefreshUserRestrictionsTask},
+       # Every minute
+       {"* * * * *", Teiserver.Telemetry.Tasks.PersistServerMinuteTask},
+       {"* * * * *", Teiserver.Moderation.RefreshUserRestrictionsTask},
 
-        # Every minute
-        {"* * * * *", Teiserver.Battle.Tasks.PostMatchProcessTask},
+       # Every minute
+       {"* * * * *", Teiserver.Battle.Tasks.PostMatchProcessTask},
 
-        # 2:07 am and 2:17 am
-        {"2 2 * * *", Teiserver.Telemetry.Tasks.PersistServerDayTask},
-        {"12 2 * * *", Teiserver.Telemetry.Tasks.PersistServerMonthTask},
+       # 2:07 am and 2:17 am
+       {"2 2 * * *", Teiserver.Telemetry.Tasks.PersistServerDayTask},
+       {"12 2 * * *", Teiserver.Telemetry.Tasks.PersistServerMonthTask},
+       {"7 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchDayTask},
+       {"17 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchMonthTask},
+       {"27 2 * * *", Teiserver.Telemetry.InfologCleanupTask},
 
-        {"7 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchDayTask},
-        {"17 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchMonthTask},
-        {"27 2 * * *", Teiserver.Telemetry.InfologCleanupTask},
+       # 2:43
+       {"43 2 * * *", Teiserver.Game.AchievementCleanupTask},
 
-        # 2:43
-        {"43 2 * * *", Teiserver.Game.AchievementCleanupTask},
-
-        # 0302 and 1202 every day, gives time for multiple telemetry day tasks to run if needed
-        {"2 3 * * *", Teiserver.Account.RecalculateUserDailyStatTask},
-        {"2 12 * * *", Teiserver.Account.RecalculateUserDailyStatTask},
-      ]
-    }
+       # 0302 and 1202 every day, gives time for multiple telemetry day tasks to run if needed
+       {"2 3 * * *", Teiserver.Account.RecalculateUserDailyStatTask},
+       {"2 12 * * *", Teiserver.Account.RecalculateUserDailyStatTask}
+     ]}
   ],
   queues: [logging: 1, cleanup: 1, teiserver: 10]
 

@@ -16,21 +16,22 @@ defmodule Teiserver.Account.RatingLib do
   def colours, do: :info
 
   # Queries
-  @spec query_ratings() :: Ecto.Query.t
+  @spec query_ratings() :: Ecto.Query.t()
   def query_ratings do
-    from ratings in Rating
+    from(ratings in Rating)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -59,8 +60,9 @@ defmodule Teiserver.Account.RatingLib do
       where: ratings.last_updated > ^datetime
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Rating value high to low") do
     from ratings in query,
       order_by: [desc: ratings.rating_value]
@@ -91,8 +93,9 @@ defmodule Teiserver.Account.RatingLib do
       order_by: [asc: ratings.skill]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :user in preloads, do: _preload_user(query), else: query
     query = if :rating_type in preloads, do: _preload_rating_type(query), else: query

@@ -13,67 +13,78 @@
   }
 </script>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "matches"}) %>
+<%= render(
+  TeiserverWeb.Admin.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "matches"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Admin.MatchView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Admin.MatchView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             show_search: false,
-            active: (cond do
-              @conn.params["search"] != nil -> "advanced_search"
-              # @filter != nil -> @filter
-              true -> "list"
-            end)
-        }) %>
+            active:
+              cond do
+                @conn.params["search"] != nil -> "advanced_search"
+                # @filter != nil -> @filter
+                true -> "list"
+              end
+          })
+        ) %>
 
-<%= if @conn.params["search"] != nil do %>
-  <%= render TeiserverWeb.Admin.MatchView, "search.html", assigns %>
-<% else %>
-  <br /><br />
-<% end %>
+        <%= if @conn.params["search"] != nil do %>
+          <%= render(TeiserverWeb.Admin.MatchView, "search.html", assigns) %>
+        <% else %>
+          <br /><br />
+        <% end %>
 
-<h4>Listing Matches</h4>
+        <h4>Listing Matches</h4>
 
-<table class="table table-sm">
-  <thead>
-    <tr>
-      <th>Type</th>
-      <th>Map</th>
-      <th>Queue</th>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Map</th>
+              <th>Queue</th>
 
-      <th>Teams</th>
-      <th>Team size</th>
-      <th>Duration</th>
-      <th>Finished</th>
-      <th colspan="1">&nbsp;</th>
-    </tr>
-  </thead>
-  <tbody>
-<%= for match <- @matches do %>
-    <tr>
-      <td><%= match.game_type %></td>
-      <td><%= match.map %></td>
+              <th>Teams</th>
+              <th>Team size</th>
+              <th>Duration</th>
+              <th>Finished</th>
+              <th colspan="1">&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for match <- @matches do %>
+              <tr>
+                <td><%= match.game_type %></td>
+                <td><%= match.map %></td>
 
-      <td><%= if match.queue != nil, do: match.queue.name %></td>
+                <td><%= if match.queue != nil, do: match.queue.name %></td>
 
-      <td><%= match.team_count %></td>
-      <td><%= match.team_size %></td>
+                <td><%= match.team_count %></td>
+                <td><%= match.team_size %></td>
 
-      <td><%= if match.finished, do: duration_to_str_short(match.game_duration) %></td>
-      <td><%= date_to_str match.finished, format: :ymd_hms %></td>
+                <td><%= if match.finished, do: duration_to_str_short(match.game_duration) %></td>
+                <td><%= date_to_str(match.finished, format: :ymd_hms) %></td>
 
-      <td>
-        <a href={Routes.ts_admin_match_path(@conn, :show, match.id)} class="btn btn-secondary btn-sm">
-          Show
-        </a>
-      </td>
-    </tr>
-<% end %>
-  </tbody>
-</table>
-
+                <td>
+                  <a
+                    href={Routes.ts_admin_match_path(@conn, :show, match.id)}
+                    class="btn btn-secondary btn-sm"
+                  >
+                    Show
+                  </a>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

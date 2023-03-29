@@ -183,8 +183,8 @@ defmodule CentralWeb.Admin.GroupController do
 
     if group_access[:see_group] do
       group
-        |> GroupLib.make_favourite()
-        |> insert_recently(conn)
+      |> GroupLib.make_favourite()
+      |> insert_recently(conn)
 
       member_lookup =
         if group do

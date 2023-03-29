@@ -15,13 +15,11 @@ defmodule Teiserver.Moderation.ReportLib do
     %{
       type_colour: colour(),
       type_icon: icon(),
-
       item_id: report.id,
       item_type: "teiserver_moderation_report",
       item_colour: colour(),
       item_icon: icon(),
       item_label: "#{report.reporter.name} -> #{report.target.name}",
-
       url: "/teiserver/moderation/reports/#{report.id}"
     }
   end
@@ -51,21 +49,22 @@ defmodule Teiserver.Moderation.ReportLib do
   end
 
   # Queries
-  @spec query_reports() :: Ecto.Query.t
+  @spec query_reports() :: Ecto.Query.t()
   def query_reports do
-    from reports in Report
+    from(reports in Report)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -134,8 +133,9 @@ defmodule Teiserver.Moderation.ReportLib do
       where: reports.id in ^id_list
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Newest first") do
     from reports in query,
       order_by: [desc: reports.inserted_at]
@@ -146,8 +146,9 @@ defmodule Teiserver.Moderation.ReportLib do
       order_by: [asc: reports.inserted_at]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :reporter in preloads, do: _preload_reporter(query), else: query
     query = if :target in preloads, do: _preload_target(query), else: query

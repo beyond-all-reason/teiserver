@@ -1,28 +1,66 @@
 defmodule Teiserver.Protocols.Tachyon.V1.TachyonOut do
   require Logger
   alias Teiserver.Protocols.TachyonLib
-  alias Teiserver.Protocols.Tachyon.V1.{AuthOut, ClientOut, CommunicationOut, ConfigOut, LobbyChatOut, LobbyHostOut, LobbyOut, MatchmakingOut, NewsOut, PartyOut, SystemOut, UserOut}
+
+  alias Teiserver.Protocols.Tachyon.V1.{
+    AuthOut,
+    ClientOut,
+    CommunicationOut,
+    ConfigOut,
+    LobbyChatOut,
+    LobbyHostOut,
+    LobbyOut,
+    MatchmakingOut,
+    NewsOut,
+    PartyOut,
+    SystemOut,
+    UserOut
+  }
 
   @spec reply(atom(), atom(), Map.t(), Map.t()) :: Map.t()
 
   def reply(namespace, reply_cmd, data, state) do
     msg =
       case namespace do
-        :auth -> AuthOut.do_reply(reply_cmd, data)
-        :client -> ClientOut.do_reply(reply_cmd, data)
-        :communication -> CommunicationOut.do_reply(reply_cmd, data)
-        :config -> ConfigOut.do_reply(reply_cmd, data)
-        :lobby_chat -> LobbyChatOut.do_reply(reply_cmd, data)
-        :lobby_host -> LobbyHostOut.do_reply(reply_cmd, data)
-        :lobby -> LobbyOut.do_reply(reply_cmd, data)
+        :auth ->
+          AuthOut.do_reply(reply_cmd, data)
+
+        :client ->
+          ClientOut.do_reply(reply_cmd, data)
+
+        :communication ->
+          CommunicationOut.do_reply(reply_cmd, data)
+
+        :config ->
+          ConfigOut.do_reply(reply_cmd, data)
+
+        :lobby_chat ->
+          LobbyChatOut.do_reply(reply_cmd, data)
+
+        :lobby_host ->
+          LobbyHostOut.do_reply(reply_cmd, data)
+
+        :lobby ->
+          LobbyOut.do_reply(reply_cmd, data)
+
         :battle ->
           Logger.warn("Tachyon :battle namespace message #{reply_cmd}")
           LobbyOut.do_reply(reply_cmd, data)
-        :matchmaking -> MatchmakingOut.do_reply(reply_cmd, data)
-        :news -> NewsOut.do_reply(reply_cmd, data)
-        :party -> PartyOut.do_reply(reply_cmd, data)
-        :system -> SystemOut.do_reply(reply_cmd, data)
-        :user -> UserOut.do_reply(reply_cmd, data)
+
+        :matchmaking ->
+          MatchmakingOut.do_reply(reply_cmd, data)
+
+        :news ->
+          NewsOut.do_reply(reply_cmd, data)
+
+        :party ->
+          PartyOut.do_reply(reply_cmd, data)
+
+        :system ->
+          SystemOut.do_reply(reply_cmd, data)
+
+        :user ->
+          UserOut.do_reply(reply_cmd, data)
       end
       |> add_msg_id(state)
 
@@ -42,6 +80,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonOut do
   # This sends a message to the self to send out a message
   @spec _send(nil | Map.t(), Map.t()) :: any()
   defp _send(nil, _), do: :ok
+
   defp _send(msg, state) do
     _send(msg, state.socket, state.transport)
   end

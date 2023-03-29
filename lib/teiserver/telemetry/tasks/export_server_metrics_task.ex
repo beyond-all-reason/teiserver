@@ -31,7 +31,7 @@ defmodule Teiserver.Telemetry.ExportServerMetricsTask do
       |> Map.drop(["minutes_per_user"])
       |> Map.put("date", log.date)
     end)
-    |> Enum.to_list
-    |> Jason.encode!
+    |> Enum.to_list()
+    |> Jason.encode!()
   end
 end

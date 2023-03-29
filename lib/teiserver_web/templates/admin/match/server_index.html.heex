@@ -13,82 +13,100 @@
   }
 </script>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "matches"}) %>
+<%= render(
+  TeiserverWeb.Admin.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "matches"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Admin.MatchView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Admin.MatchView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             show_search: false,
-            active: (cond do
-              @conn.params["search"] != nil -> "advanced_search"
-              # @filter != nil -> @filter
-              true -> "list"
-            end)
-        }) %>
+            active:
+              cond do
+                @conn.params["search"] != nil -> "advanced_search"
+                # @filter != nil -> @filter
+                true -> "list"
+              end
+          })
+        ) %>
 
-<div class="float-end">
-  <a href={Routes.ts_admin_lobby_path(@conn, :server_chat, @uuid)} class={"btn btn-outline-#{bsname}"}>
-    <i class="fa-fw fa-regular fa-server"></i>
-    &nbsp;
-    Complete server chat
-  </a>
-</div>
+        <div class="float-end">
+          <a
+            href={Routes.ts_admin_lobby_path(@conn, :server_chat, @uuid)}
+            class={"btn btn-outline-#{bsname}"}
+          >
+            <i class="fa-fw fa-regular fa-server"></i> &nbsp;
+            Complete server chat
+          </a>
+        </div>
 
-<%= if @conn.params["search"] != nil do %>
-  <%= render TeiserverWeb.Admin.MatchView, "search.html", assigns %>
-<% else %>
-  <br /><br />
-<% end %>
+        <%= if @conn.params["search"] != nil do %>
+          <%= render(TeiserverWeb.Admin.MatchView, "search.html", assigns) %>
+        <% else %>
+          <br /><br />
+        <% end %>
 
-<h4>Listing Matches in this server group</h4>
+        <h4>Listing Matches in this server group</h4>
 
-<table class="table table-sm">
-  <thead>
-    <tr>
-      <th>UUID</th>
-      
-      <th>Type</th>
-      <th>Map</th>
-      
-      <th>Teams</th>
-      <th>Team size</th>
-      <th>Duration (mins)</th>
-      <th>Finished</th>
-      <th colspan="2">&nbsp;</th>
-    </tr>
-  </thead>
-  <tbody>
-<%= for match <- @matches do %>
-    <tr>
-      <td><%= match.uuid |> String.slice(0..7) %></td>
-    
-      <td><%= match.game_type %></td>
-      <td><%= match.map %></td>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>UUID</th>
 
-      <td><%= match.team_count %></td>
-      <td><%= match.team_size %></td>
-      
-      <td><%= if match.finished, do: Timex.diff(match.finished, match.started, :minute) %></td>
-      <td><%= date_to_str match.finished, format: :ymd_hms %></td>
+              <th>Type</th>
+              <th>Map</th>
 
-      <td>
-        <a href={Routes.ts_admin_match_path(@conn, :show, match.id)} class="btn btn-secondary btn-sm">
-          Show
-        </a>
-      </td>
+              <th>Teams</th>
+              <th>Team size</th>
+              <th>Duration (mins)</th>
+              <th>Finished</th>
+              <th colspan="2">&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for match <- @matches do %>
+              <tr>
+                <td><%= match.uuid |> String.slice(0..7) %></td>
 
-      <td>
-        <a href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, match.uuid)} class="btn btn-secondary btn-sm">
-          Match chat
-        </a>
-      </td>
-    </tr>
-<% end %>
-  </tbody>
-</table>
+                <td><%= match.game_type %></td>
+                <td><%= match.map %></td>
 
+                <td><%= match.team_count %></td>
+                <td><%= match.team_size %></td>
+
+                <td>
+                  <%= if match.finished, do: Timex.diff(match.finished, match.started, :minute) %>
+                </td>
+                <td><%= date_to_str(match.finished, format: :ymd_hms) %></td>
+
+                <td>
+                  <a
+                    href={Routes.ts_admin_match_path(@conn, :show, match.id)}
+                    class="btn btn-secondary btn-sm"
+                  >
+                    Show
+                  </a>
+                </td>
+
+                <td>
+                  <a
+                    href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, match.uuid)}
+                    class="btn btn-secondary btn-sm"
+                  >
+                    Match chat
+                  </a>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

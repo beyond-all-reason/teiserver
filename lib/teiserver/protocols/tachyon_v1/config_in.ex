@@ -9,7 +9,8 @@ defmodule Teiserver.Protocols.Tachyon.V1.ConfigIn do
 
   # Game config
   def do_handle("game_set", %{"configs" => configs}, state) do
-    configs = configs
+    configs =
+      configs
       |> Map.new(fn {key, value} -> {"game_config.#{key}", value} end)
 
     Account.update_user_stat(state.userid, configs)
@@ -18,10 +19,12 @@ defmodule Teiserver.Protocols.Tachyon.V1.ConfigIn do
   end
 
   def do_handle("game_get", %{"keys" => keys}, state) do
-    keys = keys
+    keys =
+      keys
       |> Enum.map(fn key -> "game_config.#{key}" end)
 
-    configs = Account.get_user_stat_data(state.userid)
+    configs =
+      Account.get_user_stat_data(state.userid)
       |> Enum.filter(fn {key, _value} ->
         Enum.member?(keys, key)
       end)
@@ -33,7 +36,8 @@ defmodule Teiserver.Protocols.Tachyon.V1.ConfigIn do
   end
 
   def do_handle("game_delete", %{"keys" => keys}, state) do
-    keys = keys
+    keys =
+      keys
       |> Enum.map(fn key -> "game_config.#{key}" end)
 
     Account.delete_user_stat_keys(state.userid, keys)
@@ -41,10 +45,10 @@ defmodule Teiserver.Protocols.Tachyon.V1.ConfigIn do
     state
   end
 
-
   # User config
   def do_handle("list_user_types", _, state) do
-    types = Config.get_user_config_types
+    types =
+      Config.get_user_config_types()
       |> Enum.filter(fn {_key, type} ->
         type.permissions == [] or type.permissions == ["teiserver"]
       end)
@@ -55,26 +59,29 @@ defmodule Teiserver.Protocols.Tachyon.V1.ConfigIn do
 
   def do_handle("user_set", %{"configs" => configs}, state) do
     configs
-      |> Enum.filter(fn {key, _value} ->
-        type = Config.get_user_config_type(key)
-        cond do
-          type == nil -> false
-          type.permissions == [] -> true
-          type.permissions == ["teiserver"] -> true
-          true -> false
-        end
-      end)
-      |> Enum.each(fn {key, value} ->
-        Config.set_user_config(state.userid, key, value)
-      end)
+    |> Enum.filter(fn {key, _value} ->
+      type = Config.get_user_config_type(key)
+
+      cond do
+        type == nil -> false
+        type.permissions == [] -> true
+        type.permissions == ["teiserver"] -> true
+        true -> false
+      end
+    end)
+    |> Enum.each(fn {key, value} ->
+      Config.set_user_config(state.userid, key, value)
+    end)
 
     state
   end
 
   def do_handle("user_get", %{"keys" => keys}, state) do
-    configs = keys
+    configs =
+      keys
       |> Enum.filter(fn key ->
         type = Config.get_user_config_type(key)
+
         cond do
           type == nil -> false
           type.permissions == [] -> true
@@ -90,6 +97,14 @@ defmodule Teiserver.Protocols.Tachyon.V1.ConfigIn do
   end
 
   def do_handle(cmd, data, state) do
-    reply(:system, :error, %{location: "auth.handle", error: "No match for cmd: '#{cmd}' with data '#{Kernel.inspect data}'"}, state)
+    reply(
+      :system,
+      :error,
+      %{
+        location: "auth.handle",
+        error: "No match for cmd: '#{cmd}' with data '#{Kernel.inspect(data)}'"
+      },
+      state
+    )
   end
 end

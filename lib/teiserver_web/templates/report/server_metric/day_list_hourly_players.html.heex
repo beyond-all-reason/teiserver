@@ -8,13 +8,12 @@
   }
 </style>
 
-<%
-  maximum = @logs
-  |> Enum.reduce(0, fn (log, current_max) ->
+<% maximum =
+  @logs
+  |> Enum.reduce(0, fn log, current_max ->
     this_max = Enum.reduce(log.data["average_user_counts"]["player"], 0, &max/2)
     max(this_max, current_max)
-  end)
-%>
+  end) %>
 
 <table class="table table-sm">
   <thead>
@@ -29,26 +28,38 @@
     </tr>
   </thead>
   <tbody>
-<%= for log <- @logs do %>
-    <tr>
-      <td><%= Timex.format!(log.date, "{0D}/{0M}/{YYYY} {WDshort}") %></td>
-      <%= for i <- 0..23 do %>
-        <td class="hourly-view-td" style={"background-color: ##{heatmap(Enum.fetch!(log.data["average_user_counts"]["player"], i), maximum, "black-red")};"}><%= Enum.fetch!(log.data["average_user_counts"]["player"], i) |> round() %></td>
+    <%= for log <- @logs do %>
+      <tr>
+        <td><%= Timex.format!(log.date, "{0D}/{0M}/{YYYY} {WDshort}") %></td>
+        <%= for i <- 0..23 do %>
+          <td
+            class="hourly-view-td"
+            style={"background-color: ##{heatmap(Enum.fetch!(log.data["average_user_counts"]["player"], i), maximum, "black-red")};"}
+          >
+            <%= Enum.fetch!(log.data["average_user_counts"]["player"], i) |> round() %>
+          </td>
+        <% end %>
+
+        <td>
+          <%= link("Show",
+            to:
+              Routes.ts_reports_server_metric_path(
+                @conn,
+                :day_metrics_show,
+                date_to_str(log.date, format: :ymd)
+              ) <> "#hourly_tab",
+            class: "btn btn-secondary btn-sm"
+          ) %>
+        </td>
+      </tr>
+
+      <%= if log.date.day == 1 do %>
+        <tr>
+          <td colspan="25" style={"background-color: #{bg}"}>
+            <div style="height: 5px;">&nbsp;</div>
+          </td>
+        </tr>
       <% end %>
-
-      <td>
-        <%= link "Show", to: Routes.ts_reports_server_metric_path(@conn, :day_metrics_show, date_to_str(log.date, format: :ymd)) <> "#hourly_tab", class: "btn btn-secondary btn-sm" %>
-      </td>
-    </tr>
-
-  <%= if log.date.day == 1 do %>
-    <tr>
-      <td colspan="25" style={"background-color: #{bg}"}>
-        <div style="height: 5px;">&nbsp;</div>
-      </td>
-    </tr>
-  <% end %>
-
-<% end %>
+    <% end %>
   </tbody>
 </table>

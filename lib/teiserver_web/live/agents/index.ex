@@ -35,6 +35,7 @@ defmodule TeiserverWeb.AgentLive.Index do
     case allow?(socket.assigns[:current_user], "admin.dev.developer") do
       true ->
         {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+
       false ->
         {:noreply,
          socket
@@ -45,9 +46,10 @@ defmodule TeiserverWeb.AgentLive.Index do
   @spec handle_info(any, Phoenix.LiveView.Socket.t()) :: {:noreply, Phoenix.LiveView.Socket.t()}
   @impl true
   def handle_info(new_log, socket) do
-    socket = socket
-    |> assign(:logs, [new_log] ++ socket.assigns[:logs])
-    |> filter_logs()
+    socket =
+      socket
+      |> assign(:logs, [new_log] ++ socket.assigns[:logs])
+      |> filter_logs()
 
     {:noreply, socket}
   end
@@ -58,11 +60,13 @@ defmodule TeiserverWeb.AgentLive.Index do
 
     filters = socket.assigns[:filters]
 
-    new_filters = case key do
-      "agent" -> Map.put(filters, :agent, value)
-    end
+    new_filters =
+      case key do
+        "agent" -> Map.put(filters, :agent, value)
+      end
 
-    socket = socket
+    socket =
+      socket
       |> assign(:filters, new_filters)
       |> filter_logs()
 
@@ -72,14 +76,15 @@ defmodule TeiserverWeb.AgentLive.Index do
   defp filter_logs(socket) do
     filters = socket.assigns[:filters]
 
-    new_filter = socket.assigns[:logs]
-    |> Enum.filter(fn log ->
-      cond do
-        filters[:agent] != nil and filters[:agent] != log.from -> false
-        true -> true
-      end
-    end)
-    |> Enum.take(25)
+    new_filter =
+      socket.assigns[:logs]
+      |> Enum.filter(fn log ->
+        cond do
+          filters[:agent] != nil and filters[:agent] != log.from -> false
+          true -> true
+        end
+      end)
+      |> Enum.take(25)
 
     socket
     |> assign(:filtered_logs, new_filter)

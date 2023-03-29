@@ -19,48 +19,46 @@
   <div class="col-md-12">
     <div class="card card-default">
       <div class="card-body" style="padding: 0 15px;">
-
         <div class="row">
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "coverage",
             label: "Coverage",
             active: @active,
             url: Routes.admin_tool_path(@conn, :coverage_form),
             icon: "fa-regular fa-barcode-scan"
-          %>
-          <%= central_component "sub_menu_icon",
+          ) %>
+          <%= central_component("sub_menu_icon",
             name: "test_page",
             label: "Test page",
             active: @active,
             url: Routes.admin_tool_path(@conn, :test_page),
             icon: "fa-regular fa-map-marker-question"
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "falist",
             label: "FA List",
             active: @active,
             url: Routes.admin_tool_path(@conn, :falist),
             icon: "fa-brands fa-font-awesome"
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "oban",
             label: "Oban",
             active: @active,
             url: Routes.admin_tool_path(@conn, :oban_dashboard),
             icon: "fa-regular fa-circle-notch"
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "conn_params",
             label: "Conn params",
             active: @active,
             url: Routes.admin_tool_path(@conn, :conn_params),
             icon: "fa-regular fa-brackets-curly"
-          %>
+          ) %>
         </div>
-
       </div>
     </div>
   </div>

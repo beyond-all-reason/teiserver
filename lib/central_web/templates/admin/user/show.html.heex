@@ -14,40 +14,47 @@
   });
 </script>
 
-<%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "user"}) %>
+<%= render(CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "user"})) %>
 
 <div class="row mt-3">
   <div class="col-lg-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-
-        <%= render CentralWeb.Admin.UserView, "section_menu.html",
+        <%= render(CentralWeb.Admin.UserView, "section_menu.html",
           conn: @conn,
           permissions: @current_user.permissions,
           show_search: false,
           quick_search: "",
           active: "show"
-        %>
+        ) %>
 
         <hr />
 
         <%= if @edit_access do %>
           <div class="float-end">
             <div class="dropdown" style="display: inline-block;">
-              <div class={"btn btn-#{bsname} dropdown-toggle"} data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <div
+                class={"btn btn-#{bsname} dropdown-toggle"}
+                data-bs-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
                 Actions
               </div>
-              <%= render "actions.html", assigns %>
+              <%= render("actions.html", assigns) %>
             </div>
 
-            <a href={Routes.admin_user_path(@conn, :edit, @user)} class={"btn btn-outline-#{bsname}"}>
-              <i class="fa-regular fa-fw fa-wrench"></i>
-              Edit user
+            <a
+              href={Routes.admin_user_path(@conn, :edit, @user)}
+              class={"btn btn-outline-#{bsname}"}
+            >
+              <i class="fa-regular fa-fw fa-wrench"></i> Edit user
             </a>
-            <%# Actions float end %>
-            <a href={~p"/teiserver/admin/user/#{@user}"} class={"btn btn-outline-#{Teiserver.Account.UserLib.colours()}"}>
-              <i class="far fa-fw fa-robot"></i>
-              Teiserver show
+            <a
+              href={~p"/teiserver/admin/user/#{@user}"}
+              class={"btn btn-outline-#{Teiserver.Account.UserLib.colours()}"}
+            >
+              <i class="far fa-fw fa-robot"></i> Teiserver show
             </a>
           </div>
         <% end %>
@@ -58,30 +65,28 @@
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item">
             <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component "icon", icon: icon() %>
-              Details
+              <%= central_component("icon", icon: icon()) %> Details
             </a>
           </li>
 
           <%= if @edit_access do %>
             <li class="nav-item">
               <a href="#groups_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                <%= central_component "icon", icon: Central.Account.GroupLib.icon() %>
-                Groups (<%= Enum.count(@user.groups) %>)
+                <%= central_component("icon", icon: Central.Account.GroupLib.icon()) %> Groups (<%= Enum.count(
+                  @user.groups
+                ) %>)
               </a>
             </li>
 
             <li class="nav-item">
               <a href="#permissions_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                <%= central_component "icon", icon: Central.Account.AuthLib.icon() %>
-                Permissions
+                <%= central_component("icon", icon: Central.Account.AuthLib.icon()) %> Permissions
               </a>
             </li>
 
             <li class="nav-item">
               <a href="#settings_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                <%= central_component "icon", icon: Central.Config.UserConfigLib.icon() %>
-                Settings
+                <%= central_component("icon", icon: Central.Config.UserConfigLib.icon()) %> Settings
               </a>
             </li>
           <% end %>
@@ -89,20 +94,20 @@
 
         <div class="tab-content">
           <div class="tab-pane" id="details_tab">
-            <%= render "tab_details.html", assigns %>
+            <%= render("tab_details.html", assigns) %>
           </div>
 
           <%= if @edit_access do %>
             <div class="tab-pane" id="groups_tab">
-              <%= render "tab_groups.html", assigns %>
+              <%= render("tab_groups.html", assigns) %>
             </div>
 
             <div class="tab-pane" id="permissions_tab">
-              <%= render "tab_permissions.html", assigns %>
+              <%= render("tab_permissions.html", assigns) %>
             </div>
 
             <div class="tab-pane" id="settings_tab">
-              <%= render "tab_settings.html", assigns %>
+              <%= render("tab_settings.html", assigns) %>
             </div>
           <% end %>
         </div>

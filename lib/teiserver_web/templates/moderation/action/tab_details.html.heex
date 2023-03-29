@@ -1,10 +1,10 @@
 <div class="row">
   <div class="col-md-6">
-    <table class='table table-sm'>
+    <table class="table table-sm">
       <tbody>
         <tr>
           <td>Reason</td>
-          <td><%= breakup_long_words @action.reason %></td>
+          <td><%= breakup_long_words(@action.reason) %></td>
         </tr>
 
         <tr>
@@ -38,11 +38,10 @@
           <td>Score modifier:</td>
           <td><%= @action.score_modifier %></td>
         </tr>
-
       </tbody>
     </table>
   </div>
-  
+
   <div class="col-md-6">
     <table class="table table-sm">
       <thead>
@@ -56,7 +55,10 @@
           <tr>
             <td><%= report.reporter.name %></td>
             <td>
-              <a href={Routes.moderation_report_path(@conn, :show, report.id)} class="btn btn-secondary btn-sm">
+              <a
+                href={Routes.moderation_report_path(@conn, :show, report.id)}
+                class="btn btn-secondary btn-sm"
+              >
                 Show report
               </a>
             </td>

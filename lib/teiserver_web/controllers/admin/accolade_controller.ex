@@ -21,7 +21,8 @@ defmodule TeiserverWeb.Admin.AccoladeController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
-    accolades = Account.list_accolades(
+    accolades =
+      Account.list_accolades(
         search: [
           basic_search: Map.get(params, "s", "") |> String.trim(),
           filter: params["filter"] || "all"
@@ -67,12 +68,13 @@ defmodule TeiserverWeb.Admin.AccoladeController do
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
-    accolade = Account.get_accolade!(id, [
-      joins: [],
-    ])
+    accolade =
+      Account.get_accolade!(id,
+        joins: []
+      )
 
     accolade
-    |> AccoladeLib.make_favourite
+    |> AccoladeLib.make_favourite()
     |> insert_recently(conn)
 
     conn
@@ -128,6 +130,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
         conn
         |> put_flash(:info, "Accolade updated successfully.")
         |> redirect(to: Routes.ts_admin_accolade_path(conn, :index))
+
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         |> assign(:accolade, accolade)
@@ -141,8 +144,8 @@ defmodule TeiserverWeb.Admin.AccoladeController do
     accolade = Account.get_accolade!(id)
 
     accolade
-      |> AccoladeLib.make_favourite
-      |> remove_recently(conn)
+    |> AccoladeLib.make_favourite()
+    |> remove_recently(conn)
 
     {:ok, _accolade} = Account.delete_accolade(accolade)
 

@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Logging.AggregateViewLogView do
   def icon(), do: Teiserver.Logging.AggregateViewLogLib.icon()
 
   def convert_load_time(load_time) do
-    round(load_time / 10) / 100
+    (round(load_time / 10) / 100)
     |> to_string
   end
 
@@ -65,9 +65,9 @@ defmodule TeiserverWeb.Logging.AggregateViewLogView do
     percentage = value / max(maximum, 1)
 
     [
-      (percentage * 255),
-      (percentage * 25),
-      (percentage * 25)
+      percentage * 255,
+      percentage * 25,
+      percentage * 25
     ]
     |> Enum.map_join(fn colour ->
       colour

@@ -8,10 +8,12 @@ defmodule Teiserver.Agents.PartyhostAgentServer do
 
   def handle_info(:startup, state) do
     socket = AgentLib.get_socket()
-    {:success, user} = AgentLib.login(socket, %{
-      name: "Partyhost_#{state.name}",
-      email: "Partyhost_#{state.name}@agents"
-    })
+
+    {:success, user} =
+      AgentLib.login(socket, %{
+        name: "Partyhost_#{state.name}",
+        email: "Partyhost_#{state.name}@agents"
+      })
 
     # Create friendships between this user and the first 10 users to exist
     # currently has a bug because it'll try to update several at once and it won't work
@@ -38,8 +40,9 @@ defmodule Teiserver.Agents.PartyhostAgentServer do
   end
 
   def handle_info({:ssl, _socket, data}, state) do
-    new_state = data
-      |> AgentLib.translate
+    new_state =
+      data
+      |> AgentLib.translate()
       |> Enum.reduce(state, fn data, acc ->
         handle_msg(data, acc)
       end)
@@ -51,20 +54,25 @@ defmodule Teiserver.Agents.PartyhostAgentServer do
   defp handle_msg(%{"cmd" => "s.party.updated"}, state), do: state
   defp handle_msg(%{"cmd" => "s.party.added_to"}, state), do: state
   defp handle_msg(%{"cmd" => "s.party.left_party"}, state), do: state
+
   defp handle_msg(%{"cmd" => "s.party.create", "party" => party}, state) do
     %{state | party_id: party["id"]}
   end
+
   defp handle_msg(%{"cmd" => "s.party.invite", "party" => %{"id" => party_id}}, state) do
     AgentLib._send(state.socket, %{cmd: "c.party.decline", party_id: party_id})
     state
   end
 
-  defp handle_msg(%{"cmd" => "s.user.list_friend_users_and_clients", "client_list" => clients}, state) do
+  defp handle_msg(
+         %{"cmd" => "s.user.list_friend_users_and_clients", "client_list" => clients},
+         state
+       ) do
     clients
-      |> Enum.reject(fn c -> c["party_id"] == state.party_id end)
-      |> Enum.each(fn c ->
-        AgentLib._send(state.socket, %{cmd: "c.party.invite", userid: c["userid"]})
-      end)
+    |> Enum.reject(fn c -> c["party_id"] == state.party_id end)
+    |> Enum.each(fn c ->
+      AgentLib._send(state.socket, %{cmd: "c.party.invite", userid: c["userid"]})
+    end)
 
     state
   end

@@ -29,6 +29,7 @@ defmodule TeiserverWeb.Account.PreferencesController do
   def new(conn, %{"key" => key}) do
     config_info = Config.get_user_config_type(key)
     changeset = UserConfig.creation_changeset(%UserConfig{}, config_info)
+
     user_config = %{
       value: config_info.default
     }
@@ -43,10 +44,12 @@ defmodule TeiserverWeb.Account.PreferencesController do
 
   def create(conn, %{"user_config" => user_config_params}) do
     value = Map.get(user_config_params, "value", "false")
-    user_config_params = Map.merge(user_config_params, %{
-      "user_id" => conn.user_id,
-      "value" => value
-    })
+
+    user_config_params =
+      Map.merge(user_config_params, %{
+        "user_id" => conn.user_id,
+        "value" => value
+      })
 
     case Config.create_user_config(user_config_params) do
       {:ok, _user_config} ->
@@ -84,10 +87,12 @@ defmodule TeiserverWeb.Account.PreferencesController do
     user_config = Config.get_user_config!(id)
 
     value = Map.get(user_config_params, "value", "false")
-    user_config_params = Map.merge(user_config_params, %{
-      "user_id" => conn.user_id,
-      "value" => value
-    })
+
+    user_config_params =
+      Map.merge(user_config_params, %{
+        "user_id" => conn.user_id,
+        "value" => value
+      })
 
     case Config.update_user_config(user_config, user_config_params) do
       {:ok, _user_config} ->

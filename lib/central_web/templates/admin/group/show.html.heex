@@ -8,43 +8,45 @@
   });
 </script>
 
-<%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "group"}) %>
+<%= render(CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "group"})) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render CentralWeb.Admin.GroupView, "section_menu.html", Map.merge(assigns, %{
-          quick_search: "",
-          show_search: false,
-          active: ""
-        })
-        %>
+        <%= render(
+          CentralWeb.Admin.GroupView,
+          "section_menu.html",
+          Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: ""
+          })
+        ) %>
 
         <hr />
 
         <div class="float-end">
-
           <%= if @group_access[:admin] do %>
-            <a href={Routes.admin_group_path(@conn, :edit, @group)} class={"btn btn-outline-#{bsname}"}>
-              <i class="fa-regular fa-fw fa-wrench"></i>
-              Edit group
+            <a
+              href={Routes.admin_group_path(@conn, :edit, @group)}
+              class={"btn btn-outline-#{bsname}"}
+            >
+              <i class="fa-regular fa-fw fa-wrench"></i> Edit group
             </a>
           <% end %>
 
           <%= if false and @group_access[:admin] and allow?(@current_user, "admin.group.delete") do %>
             <a href={Routes.admin_group_path(@conn, :delete_check, @group)} class="btn btn-danger">
-              <i class="fa-regular fa-fw fa-trash"></i>
-              Delete
+              <i class="fa-regular fa-fw fa-trash"></i> Delete
             </a>
           <% end %>
-
         </div>
 
         <h4>
           <div style={"border: 1px solid #{@group.colour}; display: inline-block; padding-right: 6px;"}>
             <div style={"color: #FFF; background-color: #{@group.colour}; padding: 2px 6px; display: inline-block;"}>
-              <%= central_component "icon", icon: @group.icon %>
+              <%= central_component("icon", icon: @group.icon) %>
             </div>
             <%= @group.name %>
           </div>
@@ -54,49 +56,49 @@
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item">
             <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component "icon", icon: icon() %>
-              Details
+              <%= central_component("icon", icon: icon()) %> Details
             </a>
           </li>
 
           <li class="nav-item">
             <a href="#members_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component "icon", icon: "fa-solid fa-users" %>
-              Members (<%= Enum.count(@group.memberships) %>)
+              <%= central_component("icon", icon: "fa-solid fa-users") %> Members (<%= Enum.count(
+                @group.memberships
+              ) %>)
             </a>
           </li>
 
           <li class="nav-item">
             <a href="#invites_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component "icon", icon: "fa-solid fa-envelope" %>
-              Invites (<%= Enum.count(@group.invites) %>)
+              <%= central_component("icon", icon: "fa-solid fa-envelope") %> Invites (<%= Enum.count(
+                @group.invites
+              ) %>)
             </a>
           </li>
 
           <li class="nav-item">
             <a href="#family_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component "icon", icon: "fa-solid fa-sitemap" %>
-              Family
+              <%= central_component("icon", icon: "fa-solid fa-sitemap") %> Family
             </a>
           </li>
         </ul>
 
         <div class="tab-content">
           <div class="tab-pane" id="details_tab" style="padding:5px;">
-            <%= render "tab_details.html", assigns %>
+            <%= render("tab_details.html", assigns) %>
           </div>
 
           <div class="tab-pane" id="members_tab" style="padding:5px;">
-            <%= render "tab_members.html", assigns %>
+            <%= render("tab_members.html", assigns) %>
           </div>
 
           <div class="tab-pane" id="invites_tab" style="padding:5px;">
-            <%= render "tab_invites.html", assigns %>
+            <%= render("tab_invites.html", assigns) %>
           </div>
 
           <%= if allow?(@current_user, "admin.dev.developer") do %>
             <div class="tab-pane" id="family_tab" style="padding:5px;">
-              <%= render "tab_family.html", assigns %>
+              <%= render("tab_family.html", assigns) %>
             </div>
           <% end %>
         </div>

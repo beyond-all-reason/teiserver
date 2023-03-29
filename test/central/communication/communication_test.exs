@@ -135,7 +135,12 @@ defmodule Central.CommunicationTest do
   describe "categories" do
     alias Central.Communication.Category
 
-    @valid_attrs %{"colour" => "some colour", "icon" => "fa-regular fa-home", "name" => "some name", "public" => "true"}
+    @valid_attrs %{
+      "colour" => "some colour",
+      "icon" => "fa-regular fa-home",
+      "name" => "some name",
+      "public" => "true"
+    }
     @update_attrs %{
       "colour" => "some updated colour",
       "icon" => "fa-solid fa-wrench",

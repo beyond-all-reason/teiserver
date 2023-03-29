@@ -10,9 +10,7 @@ defmodule Teiserver.Moderation do
   alias Teiserver.{Account}
   import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
 
-
   alias Teiserver.Moderation.{Report, ReportLib}
-
 
   @spec icon :: String.t()
   defdelegate icon(), to: ReportLib
@@ -27,12 +25,12 @@ defmodule Teiserver.Moderation do
 
   @spec report_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def report_query(id, args) do
-    ReportLib.query_reports
-      |> ReportLib.search(%{id: id})
-      |> ReportLib.search(args[:search])
-      |> ReportLib.preload(args[:preload])
-      |> ReportLib.order_by(args[:order_by])
-      |> QueryHelpers.select(args[:select])
+    ReportLib.query_reports()
+    |> ReportLib.search(%{id: id})
+    |> ReportLib.search(args[:search])
+    |> ReportLib.preload(args[:preload])
+    |> ReportLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
   end
 
   @doc """
@@ -47,8 +45,8 @@ defmodule Teiserver.Moderation do
   @spec list_reports(List.t()) :: List.t()
   def list_reports(args \\ []) do
     report_query(args)
-      |> QueryHelpers.limit_query(args[:limit] || 50)
-      |> Repo.all
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
   end
 
   @doc """
@@ -69,15 +67,17 @@ defmodule Teiserver.Moderation do
   @spec get_report!(Integer.t(), List.t()) :: Report.t()
   def get_report!(id) when not is_list(id) do
     report_query(id, [])
-      |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_report!(args) do
     report_query(nil, args)
-      |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_report!(id, args) do
     report_query(id, args)
-      |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -115,9 +115,9 @@ defmodule Teiserver.Moderation do
   @spec create_report(Map.t()) :: {:ok, Report.t()} | {:error, Ecto.Changeset.t()}
   def create_report(attrs \\ %{}) do
     %Report{}
-      |> Report.changeset(attrs)
-      |> Repo.insert()
-      |> broadcast_create_report
+    |> Report.changeset(attrs)
+    |> Repo.insert()
+    |> broadcast_create_report
   end
 
   def broadcast_create_report({:ok, report}) do
@@ -133,6 +133,7 @@ defmodule Teiserver.Moderation do
 
     {:ok, report}
   end
+
   def broadcast_create_report(v), do: v
 
   @doc """
@@ -150,9 +151,9 @@ defmodule Teiserver.Moderation do
   @spec update_report(Report.t(), Map.t()) :: {:ok, Report.t()} | {:error, Ecto.Changeset.t()}
   def update_report(%Report{} = report, attrs) do
     report
-      |> Report.changeset(attrs)
-      |> Repo.update()
-      |> broadcast_update_report
+    |> Report.changeset(attrs)
+    |> Repo.update()
+    |> broadcast_update_report
   end
 
   def broadcast_update_report({:ok, report}) do
@@ -168,6 +169,7 @@ defmodule Teiserver.Moderation do
 
     {:ok, report}
   end
+
   def broadcast_update_report(v), do: v
 
   @doc """
@@ -210,7 +212,7 @@ defmodule Teiserver.Moderation do
 
   @spec action_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def action_query(id, args) do
-    ActionLib.query_actions
+    ActionLib.query_actions()
     |> ActionLib.search(%{id: id})
     |> ActionLib.search(args[:search])
     |> ActionLib.preload(args[:preload])
@@ -231,7 +233,7 @@ defmodule Teiserver.Moderation do
   def list_actions(args \\ []) do
     action_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -252,15 +254,17 @@ defmodule Teiserver.Moderation do
   @spec get_action!(Integer.t(), List.t()) :: Action.t()
   def get_action!(id) when not is_list(id) do
     action_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_action!(args) do
     action_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_action!(id, args) do
     action_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -298,9 +302,9 @@ defmodule Teiserver.Moderation do
   @spec create_action(Map.t()) :: {:ok, Action.t()} | {:error, Ecto.Changeset.t()}
   def create_action(attrs \\ %{}) do
     %Action{}
-      |> Action.changeset(attrs)
-      |> Repo.insert()
-      |> broadcast_create_action()
+    |> Action.changeset(attrs)
+    |> Repo.insert()
+    |> broadcast_create_action()
   end
 
   def broadcast_create_action({:ok, action}) do
@@ -316,6 +320,7 @@ defmodule Teiserver.Moderation do
 
     {:ok, action}
   end
+
   def broadcast_create_action(v), do: v
 
   @doc """
@@ -351,6 +356,7 @@ defmodule Teiserver.Moderation do
 
     {:ok, action}
   end
+
   def broadcast_update_action(v), do: v
 
   @doc """
@@ -384,8 +390,6 @@ defmodule Teiserver.Moderation do
     Action.changeset(action, %{})
   end
 
-
-
   alias Teiserver.Moderation.{Proposal, ProposalLib}
 
   @spec proposal_query(List.t()) :: Ecto.Query.t()
@@ -395,7 +399,7 @@ defmodule Teiserver.Moderation do
 
   @spec proposal_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def proposal_query(id, args) do
-    ProposalLib.query_proposals
+    ProposalLib.query_proposals()
     |> ProposalLib.search(%{id: id})
     |> ProposalLib.search(args[:search])
     |> ProposalLib.preload(args[:preload])
@@ -416,7 +420,7 @@ defmodule Teiserver.Moderation do
   def list_proposals(args \\ []) do
     proposal_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -437,15 +441,17 @@ defmodule Teiserver.Moderation do
   @spec get_proposal!(Integer.t(), List.t()) :: Proposal.t()
   def get_proposal!(id) when not is_list(id) do
     proposal_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_proposal!(args) do
     proposal_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_proposal!(id, args) do
     proposal_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -483,9 +489,9 @@ defmodule Teiserver.Moderation do
   @spec create_proposal(Map.t()) :: {:ok, Proposal.t()} | {:error, Ecto.Changeset.t()}
   def create_proposal(attrs \\ %{}) do
     %Proposal{}
-      |> Proposal.changeset(attrs)
-      |> Repo.insert()
-      |> broadcast_create_proposal
+    |> Proposal.changeset(attrs)
+    |> Repo.insert()
+    |> broadcast_create_proposal
   end
 
   def broadcast_create_proposal({:ok, proposal}) do
@@ -501,6 +507,7 @@ defmodule Teiserver.Moderation do
 
     {:ok, proposal}
   end
+
   def broadcast_create_proposal(v), do: v
 
   @doc """
@@ -515,12 +522,13 @@ defmodule Teiserver.Moderation do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_proposal(Proposal.t(), Map.t()) :: {:ok, Proposal.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_proposal(Proposal.t(), Map.t()) ::
+          {:ok, Proposal.t()} | {:error, Ecto.Changeset.t()}
   def update_proposal(%Proposal{} = proposal, attrs) do
     proposal
-      |> Proposal.changeset(attrs)
-      |> Repo.update()
-      |> broadcast_update_proposal
+    |> Proposal.changeset(attrs)
+    |> Repo.update()
+    |> broadcast_update_proposal
   end
 
   def broadcast_update_proposal({:ok, proposal}) do
@@ -536,6 +544,7 @@ defmodule Teiserver.Moderation do
 
     {:ok, proposal}
   end
+
   def broadcast_update_proposal(v), do: v
 
   @doc """
@@ -569,7 +578,6 @@ defmodule Teiserver.Moderation do
     Proposal.changeset(proposal, %{})
   end
 
-
   alias Teiserver.Moderation.{ProposalVote, ProposalVoteLib}
 
   @doc """
@@ -589,14 +597,14 @@ defmodule Teiserver.Moderation do
   @spec get_proposal_vote(T.user_id(), integer()) :: ProposalVote.t() | nil
   def get_proposal_vote(user_id, proposal_id) do
     ProposalVoteLib.query_proposal_votes()
-      |> ProposalVoteLib.search(user_id: user_id, proposal_id: proposal_id)
-      |> Repo.one()
+    |> ProposalVoteLib.search(user_id: user_id, proposal_id: proposal_id)
+    |> Repo.one()
   end
 
   def create_proposal_vote(attrs \\ %{}) do
     %ProposalVote{}
-      |> ProposalVote.changeset(attrs)
-      |> Repo.insert()
+    |> ProposalVote.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """
@@ -613,8 +621,8 @@ defmodule Teiserver.Moderation do
   """
   def update_proposal_vote(%ProposalVote{} = proposal_vote, attrs) do
     proposal_vote
-      |> ProposalVote.changeset(attrs)
-      |> Repo.update()
+    |> ProposalVote.changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """
@@ -646,8 +654,6 @@ defmodule Teiserver.Moderation do
     ProposalVote.changeset(proposal_vote, %{})
   end
 
-
-
   alias Teiserver.Moderation.{Ban, BanLib}
 
   @spec ban_query(List.t()) :: Ecto.Query.t()
@@ -657,7 +663,7 @@ defmodule Teiserver.Moderation do
 
   @spec ban_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def ban_query(id, args) do
-    BanLib.query_bans
+    BanLib.query_bans()
     |> BanLib.search(%{id: id})
     |> BanLib.search(args[:search])
     |> BanLib.preload(args[:preload])
@@ -678,7 +684,7 @@ defmodule Teiserver.Moderation do
   def list_bans(args \\ []) do
     ban_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -699,15 +705,17 @@ defmodule Teiserver.Moderation do
   @spec get_ban!(Integer.t(), List.t()) :: Ban.t()
   def get_ban!(id) when not is_list(id) do
     ban_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_ban!(args) do
     ban_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_ban!(id, args) do
     ban_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -763,6 +771,7 @@ defmodule Teiserver.Moderation do
 
     {:ok, ban}
   end
+
   def broadcast_create_ban(v), do: v
 
   @doc """
@@ -815,27 +824,30 @@ defmodule Teiserver.Moderation do
     Ban.changeset(ban, %{})
   end
 
-
   # Others
-  @spec unbridge_user(nil | T.user() | T.userid(), String.t(), non_neg_integer(), String.t()) :: any
+  @spec unbridge_user(nil | T.user() | T.userid(), String.t(), non_neg_integer(), String.t()) ::
+          any
   def unbridge_user(userid, message, flagged_word_count, location) when is_integer(userid) do
     unbridge_user(Account.get_user_by_id(userid), message, flagged_word_count, location)
   end
 
   def unbridge_user(nil, _, _, _), do: :no_user
+
   def unbridge_user(user, message, flagged_word_count, location) do
     if not Teiserver.User.is_restricted?(user, ["Bridging"]) do
-      {:ok, _action} = create_action(%{
-        target_id: user.id,
-        reason: "Automod detected flagged words",
-        restrictions: ["Bridging"],
-        score_modifier: 100,
-        expires: Timex.now() |> Timex.shift(years: 1000)
-      })
+      {:ok, _action} =
+        create_action(%{
+          target_id: user.id,
+          reason: "Automod detected flagged words",
+          restrictions: ["Bridging"],
+          score_modifier: 100,
+          expires: Timex.now() |> Timex.shift(years: 1000)
+        })
 
       Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user.id)
 
       client = Account.get_client_by_id(user.id) || %{ip: "no client"}
+
       add_audit_log(user.id, client.ip, "Moderation:De-bridged user", %{
         message: message,
         flagged_word_count: flagged_word_count,

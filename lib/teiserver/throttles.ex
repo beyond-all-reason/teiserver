@@ -4,8 +4,7 @@ defmodule Teiserver.Throttles do
     {:ok, throttle_pid} =
       DynamicSupervisor.start_child(Teiserver.Throttles.Supervisor, {
         module,
-        name: name,
-        data: %{id: id}
+        name: name, data: %{id: id}
       })
 
     throttle_pid
@@ -16,6 +15,7 @@ defmodule Teiserver.Throttles do
     case Horde.Registry.lookup(Teiserver.ThrottleRegistry, key) do
       [{pid, _}] ->
         pid
+
       _ ->
         nil
     end
@@ -24,7 +24,9 @@ defmodule Teiserver.Throttles do
   @spec stop_throttle({atom(), integer()}) :: nil | :ok
   def stop_throttle(key) do
     case get_throttle_pid(key) do
-      nil -> nil
+      nil ->
+        nil
+
       pid ->
         DynamicSupervisor.terminate_child(Teiserver.Throttles.Supervisor, pid)
         :ok

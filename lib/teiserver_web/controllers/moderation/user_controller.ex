@@ -24,59 +24,62 @@ defmodule TeiserverWeb.Moderation.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        reports_made = Moderation.list_reports(
-          search: [
-            reporter_id: user.id
-          ],
-          preload: [
-            :reporter,
-            :target,
-            :responder
-          ],
-          order_by: "Newest first",
-          limit: :infinity
-        )
+        reports_made =
+          Moderation.list_reports(
+            search: [
+              reporter_id: user.id
+            ],
+            preload: [
+              :reporter,
+              :target,
+              :responder
+            ],
+            order_by: "Newest first",
+            limit: :infinity
+          )
 
-        reports_against = Moderation.list_reports(
-          search: [
-            target_id: user.id
-          ],
-          preload: [
-            :reporter,
-            :target,
-            :responder
-          ],
-          order_by: "Newest first",
-          limit: :infinity
-        )
+        reports_against =
+          Moderation.list_reports(
+            search: [
+              target_id: user.id
+            ],
+            preload: [
+              :reporter,
+              :target,
+              :responder
+            ],
+            order_by: "Newest first",
+            limit: :infinity
+          )
 
-        actions = Moderation.list_actions(
-          search: [
-            target_id: user.id
-          ],
-          order_by: "Most recently inserted first",
-          limit: :infinity
-        )
+        actions =
+          Moderation.list_actions(
+            search: [
+              target_id: user.id
+            ],
+            order_by: "Most recently inserted first",
+            limit: :infinity
+          )
 
         user
-          |> UserLib.make_favourite()
-          |> insert_recently(conn)
+        |> UserLib.make_favourite()
+        |> insert_recently(conn)
 
         conn
-          |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
-          |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
-          |> assign(:user, user)
-          |> assign(:reports_made, reports_made)
-          |> assign(:reports_against, reports_against)
-          |> assign(:actions, actions)
-          |> assign(:section_menu_active, "show")
-          |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
-          |> render("show.html")
+        |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
+        |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
+        |> assign(:user, user)
+        |> assign(:reports_made, reports_made)
+        |> assign(:reports_against, reports_against)
+        |> assign(:actions, actions)
+        |> assign(:section_menu_active, "show")
+        |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
+        |> render("show.html")
 
       _ ->
         conn
-          |> put_flash(:danger, "Unable to access this user")
-          |> redirect(to: ~p"/teiserver/admin/user")
+        |> put_flash(:danger, "Unable to access this user")
+        |> redirect(to: ~p"/teiserver/admin/user")
     end
   end
 end

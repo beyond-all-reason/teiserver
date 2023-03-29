@@ -174,7 +174,12 @@ defmodule Teiserver.TeiserverQuickActions do
         permissions: Teiserver.Account.GrowthReport.permissions(),
         url: "/teiserver/reports/show/growth"
       },
-
+      %{
+        label: "Moderation activity",
+        icons: ["fa-regular #{Teiserver.Moderation.ActivityReport.icon()}"],
+        permissions: Teiserver.Moderation.ActivityReport.permissions(),
+        url: "/teiserver/reports/show/moderation_activity"
+      },
       %{
         label: "Teiserver infologs",
         icons: ["fa-regular #{Teiserver.Telemetry.InfologLib.icon()}", :list],
@@ -203,7 +208,10 @@ defmodule Teiserver.TeiserverQuickActions do
       },
       %{
         label: "Server metrics - Load report",
-        icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", "fa-regular fa-server"],
+        icons: [
+          "fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}",
+          "fa-regular fa-server"
+        ],
         url: "/teiserver/reports/server/day_metrics/load",
         permissions: "teiserver.staff.moderator"
       },

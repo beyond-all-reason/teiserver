@@ -12,85 +12,86 @@
   });
 </script>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "matches"}) %>
+<%= render(
+  TeiserverWeb.Admin.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "matches"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Admin.MatchView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Admin.MatchView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             show_search: false,
             active: ""
-        }) %>
+          })
+        ) %>
         <hr />
 
         <div class="float-end">
           &nbsp;
         </div>
 
-      <h3>
-        <%= @match_name %>
-        &nbsp;&nbsp;&nbsp;&nbsp;
-        <%= if @match.winning_team != nil do %>
-          Team <%= @match.winning_team + 1 %> won
-          &nbsp;&nbsp;&nbsp;&nbsp;
-        <% end %>
-        Duration: <%= duration_to_str_short(@match.game_duration) %>
-      </h3>
-      <br />
-      <ul class="nav nav-tabs" role="tablist" id="the_tabs">
-        <li class="nav-item">
-          <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-            <%= central_component "icon", icon: "fa-solid fa-file-alt" %>
-            Details
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a href="#players_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-            <%= central_component "icon", icon: "fa-solid fa-users" %>
-            Players
-          </a>
-        </li>
-
-        <%= if @rating_logs != %{} do %>
+        <h3>
+          <%= @match_name %> &nbsp;&nbsp;&nbsp;&nbsp;
+          <%= if @match.winning_team != nil do %>
+            Team <%= @match.winning_team + 1 %> won
+            &nbsp;&nbsp;&nbsp;&nbsp;
+          <% end %>
+          Duration: <%= duration_to_str_short(@match.game_duration) %>
+        </h3>
+        <br />
+        <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item">
-            <a href="#ratings_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component "icon", icon: Teiserver.Account.RatingLib.icon() %>
-              Ratings
+            <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <%= central_component("icon", icon: "fa-solid fa-file-alt") %> Details
             </a>
           </li>
 
           <li class="nav-item">
-            <a href="#balance_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component "icon", icon: "fa-solid fa-scale-balanced" %>
-              Balance
+            <a href="#players_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <%= central_component("icon", icon: "fa-solid fa-users") %> Players
             </a>
           </li>
-        <% end %>
-      </ul>
 
-      <div class="tab-content">
-        <div class="tab-pane" id="details_tab" style="padding:5px;">
-          <%= render "tab_details.html", assigns %>
-        </div>
+          <%= if @rating_logs != %{} do %>
+            <li class="nav-item">
+              <a href="#ratings_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                <%= central_component("icon", icon: Teiserver.Account.RatingLib.icon()) %> Ratings
+              </a>
+            </li>
 
-        <div class="tab-pane" id="players_tab" style="padding:5px;">
-          <%= render "tab_players.html", assigns %>
-        </div>
+            <li class="nav-item">
+              <a href="#balance_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                <%= central_component("icon", icon: "fa-solid fa-scale-balanced") %> Balance
+              </a>
+            </li>
+          <% end %>
+        </ul>
 
-        <%= if @rating_logs != %{} do %>
-          <div class="tab-pane" id="ratings_tab" style="padding:5px;">
-            <%= render "tab_ratings.html", assigns %>
+        <div class="tab-content">
+          <div class="tab-pane" id="details_tab" style="padding:5px;">
+            <%= render("tab_details.html", assigns) %>
           </div>
 
-          <div class="tab-pane" id="balance_tab" style="padding:5px;">
-            <%= render "tab_balance.html", assigns %>
+          <div class="tab-pane" id="players_tab" style="padding:5px;">
+            <%= render("tab_players.html", assigns) %>
           </div>
-        <% end %>
-      </div>
-      <%# END OF TABS %>
 
+          <%= if @rating_logs != %{} do %>
+            <div class="tab-pane" id="ratings_tab" style="padding:5px;">
+              <%= render("tab_ratings.html", assigns) %>
+            </div>
+
+            <div class="tab-pane" id="balance_tab" style="padding:5px;">
+              <%= render("tab_balance.html", assigns) %>
+            </div>
+          <% end %>
+        </div>
       </div>
     </div>
   </div>

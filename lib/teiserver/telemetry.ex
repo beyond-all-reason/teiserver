@@ -38,7 +38,6 @@ defmodule Teiserver.Telemetry do
       last_value("teiserver.client.lobby"),
       last_value("teiserver.client.spectator"),
       last_value("teiserver.client.player"),
-
       last_value("teiserver.battle.total"),
       last_value("teiserver.battle.lobby"),
       last_value("teiserver.battle.in_progress"),
@@ -57,7 +56,6 @@ defmodule Teiserver.Telemetry do
       last_value("spring_mult.remove_user_from_battle"),
       last_value("spring_mult.kick_user_from_battle"),
 
-
       # Spring legacy pubsub trackers, raw update count only
       # User
       last_value("spring_raw.user_logged_in"),
@@ -70,7 +68,7 @@ defmodule Teiserver.Telemetry do
       last_value("spring_raw.global_battle_updated"),
       last_value("spring_raw.add_user_to_battle"),
       last_value("spring_raw.remove_user_from_battle"),
-      last_value("spring_raw.kick_user_from_battle"),
+      last_value("spring_raw.kick_user_from_battle")
     ]
   end
 
@@ -374,25 +372,42 @@ defmodule Teiserver.Telemetry do
   end
 
   def get_todays_server_log(recache \\ false) do
-    last_time = Central.cache_get(:application_metadata_cache, "teiserver_day_server_metrics_today_last_time")
-    recache = cond do
-      recache == true -> true
-      last_time == nil -> true
-      Timex.compare(Timex.now() |> Timex.shift(minutes: -15), last_time) == 1 -> true
-      true -> false
-    end
+    last_time =
+      Central.cache_get(
+        :application_metadata_cache,
+        "teiserver_day_server_metrics_today_last_time"
+      )
+
+    recache =
+      cond do
+        recache == true -> true
+        last_time == nil -> true
+        Timex.compare(Timex.now() |> Timex.shift(minutes: -15), last_time) == 1 -> true
+        true -> false
+      end
 
     if recache do
       data = Teiserver.Telemetry.Tasks.PersistServerDayTask.today_so_far()
-      Central.cache_put(:application_metadata_cache, "teiserver_day_server_metrics_today_cache", data)
-      Central.cache_put(:application_metadata_cache, "teiserver_day_server_metrics_today_last_time", Timex.now())
+
+      Central.cache_put(
+        :application_metadata_cache,
+        "teiserver_day_server_metrics_today_cache",
+        data
+      )
+
+      Central.cache_put(
+        :application_metadata_cache,
+        "teiserver_day_server_metrics_today_last_time",
+        Timex.now()
+      )
+
       data
     else
       Central.cache_get(:application_metadata_cache, "teiserver_day_server_metrics_today_cache")
     end
   end
 
-    # Month logs
+  # Month logs
   alias Teiserver.Telemetry.{ServerMonthLog, ServerMonthLogLib}
 
   defp server_month_log_query(args) do
@@ -528,6 +543,7 @@ defmodule Teiserver.Telemetry do
     case Repo.one(query) do
       [year, month] ->
         {year, month}
+
       nil ->
         nil
     end
@@ -535,19 +551,27 @@ defmodule Teiserver.Telemetry do
 
   @spec get_this_months_server_metrics_log(boolean) :: map()
   def get_this_months_server_metrics_log(force_recache \\ false) do
-    last_time = Central.cache_get(:application_metadata_cache, "teiserver_month_server_metrics_last_time")
+    last_time =
+      Central.cache_get(:application_metadata_cache, "teiserver_month_server_metrics_last_time")
 
-    recache = cond do
-      force_recache == true -> force_recache
-      last_time == nil -> true
-      Timex.compare(Timex.now() |> Timex.shift(days: -1), last_time) == 1 -> true
-      true -> false
-    end
+    recache =
+      cond do
+        force_recache == true -> force_recache
+        last_time == nil -> true
+        Timex.compare(Timex.now() |> Timex.shift(days: -1), last_time) == 1 -> true
+        true -> false
+      end
 
     if recache do
       data = Teiserver.Telemetry.Tasks.PersistServerMonthTask.month_so_far()
       Central.cache_put(:application_metadata_cache, "teiserver_month_month_metrics_cache", data)
-      Central.cache_put(:application_metadata_cache, "teiserver_month_server_metrics_last_time", Timex.now())
+
+      Central.cache_put(
+        :application_metadata_cache,
+        "teiserver_month_server_metrics_last_time",
+        Timex.now()
+      )
+
       data
     else
       Central.cache_get(:application_metadata_cache, "teiserver_month_month_metrics_cache")
@@ -555,7 +579,7 @@ defmodule Teiserver.Telemetry do
   end
 
   # Match logs
-    # Day logs
+  # Day logs
   alias Teiserver.Telemetry.{MatchDayLog, MatchDayLogLib}
 
   defp match_day_log_query(args) do
@@ -692,17 +716,29 @@ defmodule Teiserver.Telemetry do
 
   @spec get_todays_match_log :: map()
   def get_todays_match_log() do
-    last_time = Central.cache_get(:application_metadata_cache, "teiserver_day_match_metrics_today_last_time")
-    recache = cond do
-      last_time == nil -> true
-      Timex.compare(Timex.now() |> Timex.shift(minutes: -15), last_time) == 1 -> true
-      true -> false
-    end
+    last_time =
+      Central.cache_get(
+        :application_metadata_cache,
+        "teiserver_day_match_metrics_today_last_time"
+      )
+
+    recache =
+      cond do
+        last_time == nil -> true
+        Timex.compare(Timex.now() |> Timex.shift(minutes: -15), last_time) == 1 -> true
+        true -> false
+      end
 
     if recache do
       data = Teiserver.Telemetry.Tasks.PersistMatchMonthTask.month_so_far()
       Central.cache_put(:application_metadata_cache, "teiserver_month_month_metrics_cache", data)
-      Central.cache_put(:application_metadata_cache, "teiserver_month_server_metrics_last_time", Timex.now())
+
+      Central.cache_put(
+        :application_metadata_cache,
+        "teiserver_month_server_metrics_last_time",
+        Timex.now()
+      )
+
       data
     else
       Central.cache_get(:application_metadata_cache, "teiserver_day_match_metrics_today_cache")
@@ -711,19 +747,27 @@ defmodule Teiserver.Telemetry do
 
   @spec get_this_months_match_metrics_log(boolean) :: map()
   def get_this_months_match_metrics_log(force_recache \\ false) do
-    last_time = Central.cache_get(:application_metadata_cache, "teiserver_month_match_metrics_last_time")
+    last_time =
+      Central.cache_get(:application_metadata_cache, "teiserver_month_match_metrics_last_time")
 
-    recache = cond do
-      force_recache == true -> true
-      last_time == nil -> true
-      Timex.compare(Timex.now() |> Timex.shift(days: -1), last_time) == 1 -> true
-      true -> false
-    end
+    recache =
+      cond do
+        force_recache == true -> true
+        last_time == nil -> true
+        Timex.compare(Timex.now() |> Timex.shift(days: -1), last_time) == 1 -> true
+        true -> false
+      end
 
     if recache do
       data = Teiserver.Telemetry.Tasks.PersistMatchMonthTask.month_so_far()
       Central.cache_put(:application_metadata_cache, "teiserver_month_match_metrics_cache", data)
-      Central.cache_put(:application_metadata_cache, "teiserver_month_match_metrics_last_time", Timex.now())
+
+      Central.cache_put(
+        :application_metadata_cache,
+        "teiserver_month_match_metrics_last_time",
+        Timex.now()
+      )
+
       data
     else
       Central.cache_get(:application_metadata_cache, "teiserver_month_match_metrics_cache")
@@ -865,6 +909,7 @@ defmodule Teiserver.Telemetry do
     case Repo.one(query) do
       [year, month] ->
         {year, month}
+
       nil ->
         nil
     end
@@ -880,7 +925,7 @@ defmodule Teiserver.Telemetry do
 
   @spec event_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def event_type_query(id, args) do
-    EventTypeLib.query_event_types
+    EventTypeLib.query_event_types()
     |> EventTypeLib.search(%{id: id})
     |> EventTypeLib.search(args[:search])
     |> EventTypeLib.preload(args[:preload])
@@ -901,7 +946,7 @@ defmodule Teiserver.Telemetry do
   def list_event_types(args \\ []) do
     event_type_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -922,15 +967,17 @@ defmodule Teiserver.Telemetry do
   @spec get_event_type(Integer.t(), List.t()) :: EventType.t()
   def get_event_type(id) when not is_list(id) do
     event_type_query(id, [])
-    |> Repo.one
+    |> Repo.one()
   end
+
   def get_event_type(args) do
     event_type_query(nil, args)
-    |> Repo.one
+    |> Repo.one()
   end
+
   def get_event_type(id, args) do
     event_type_query(id, args)
-    |> Repo.one
+    |> Repo.one()
   end
 
   @doc """
@@ -969,7 +1016,6 @@ defmodule Teiserver.Telemetry do
     Repo.delete(event_type)
   end
 
-
   alias Teiserver.Telemetry.PropertyType
   alias Teiserver.Telemetry.PropertyTypeLib
 
@@ -980,7 +1026,7 @@ defmodule Teiserver.Telemetry do
 
   @spec property_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def property_type_query(id, args) do
-    PropertyTypeLib.query_property_types
+    PropertyTypeLib.query_property_types()
     |> PropertyTypeLib.search(%{id: id})
     |> PropertyTypeLib.search(args[:search])
     |> PropertyTypeLib.preload(args[:preload])
@@ -1001,7 +1047,7 @@ defmodule Teiserver.Telemetry do
   def list_property_types(args \\ []) do
     property_type_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -1022,15 +1068,17 @@ defmodule Teiserver.Telemetry do
   @spec get_property_type!(Integer.t(), List.t()) :: PropertyType.t()
   def get_property_type!(id) when not is_list(id) do
     property_type_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_property_type!(args) do
     property_type_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_property_type!(id, args) do
     property_type_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   @doc """
@@ -1064,7 +1112,8 @@ defmodule Teiserver.Telemetry do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_property_type(PropertyType.t()) :: {:ok, PropertyType.t()} | {:error, Ecto.Changeset.t()}
+  @spec delete_property_type(PropertyType.t()) ::
+          {:ok, PropertyType.t()} | {:error, Ecto.Changeset.t()}
   def delete_property_type(%PropertyType{} = property_type) do
     Repo.delete(property_type)
   end
@@ -1079,7 +1128,7 @@ defmodule Teiserver.Telemetry do
 
   @spec game_event_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def game_event_type_query(id, args) do
-    GameEventTypeLib.query_game_event_types
+    GameEventTypeLib.query_game_event_types()
     |> GameEventTypeLib.search(%{id: id})
     |> GameEventTypeLib.search(args[:search])
     |> GameEventTypeLib.preload(args[:preload])
@@ -1100,7 +1149,7 @@ defmodule Teiserver.Telemetry do
   def list_game_event_types(args \\ []) do
     game_event_type_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -1121,15 +1170,17 @@ defmodule Teiserver.Telemetry do
   @spec get_game_event_type(Integer.t(), List.t()) :: GameEventType.t()
   def get_game_event_type(id) when not is_list(id) do
     game_event_type_query(id, [])
-    |> Repo.one
+    |> Repo.one()
   end
+
   def get_game_event_type(args) do
     game_event_type_query(nil, args)
-    |> Repo.one
+    |> Repo.one()
   end
+
   def get_game_event_type(id, args) do
     game_event_type_query(id, args)
-    |> Repo.one
+    |> Repo.one()
   end
 
   @doc """
@@ -1163,7 +1214,8 @@ defmodule Teiserver.Telemetry do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_game_event_type(GameEventType.t()) :: {:ok, GameEventType.t()} | {:error, Ecto.Changeset.t()}
+  @spec delete_game_event_type(GameEventType.t()) ::
+          {:ok, GameEventType.t()} | {:error, Ecto.Changeset.t()}
   def delete_game_event_type(%GameEventType{} = game_event_type) do
     Repo.delete(game_event_type)
   end
@@ -1178,7 +1230,7 @@ defmodule Teiserver.Telemetry do
 
   @spec unauth_property_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def unauth_property_query(_id, args) do
-    UnauthPropertyLib.query_unauth_properties
+    UnauthPropertyLib.query_unauth_properties()
     |> UnauthPropertyLib.search(args[:search])
     |> UnauthPropertyLib.preload(args[:preload])
     |> UnauthPropertyLib.order_by(args[:order_by])
@@ -1198,7 +1250,7 @@ defmodule Teiserver.Telemetry do
   def list_unauth_properties(args \\ []) do
     unauth_property_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -1213,7 +1265,8 @@ defmodule Teiserver.Telemetry do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_unauth_property(Map.t()) :: {:ok, UnauthProperty.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_unauth_property(Map.t()) ::
+          {:ok, UnauthProperty.t()} | {:error, Ecto.Changeset.t()}
   def create_unauth_property(attrs \\ %{}) do
     %UnauthProperty{}
     |> UnauthProperty.changeset(attrs)
@@ -1232,19 +1285,22 @@ defmodule Teiserver.Telemetry do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_unauth_property(UnauthProperty.t()) :: {:ok, UnauthProperty.t()} | {:error, Ecto.Changeset.t()}
+  @spec delete_unauth_property(UnauthProperty.t()) ::
+          {:ok, UnauthProperty.t()} | {:error, Ecto.Changeset.t()}
   def delete_unauth_property(%UnauthProperty{} = unauth_property) do
     Repo.delete(unauth_property)
   end
 
   def get_unauth_properties_summary(args) do
-    query = from unauth_properties in UnauthProperty,
-      join: property_types in assoc(unauth_properties, :property_type),
-      group_by: property_types.name,
-      select: {property_types.name, count(unauth_properties.property_type_id)}
+    query =
+      from unauth_properties in UnauthProperty,
+        join: property_types in assoc(unauth_properties, :property_type),
+        group_by: property_types.name,
+        select: {property_types.name, count(unauth_properties.property_type_id)}
 
-    query = query
-    |> UnauthPropertyLib.search(args)
+    query =
+      query
+      |> UnauthPropertyLib.search(args)
 
     Repo.all(query)
     |> Map.new()
@@ -1260,7 +1316,7 @@ defmodule Teiserver.Telemetry do
 
   @spec client_property_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def client_property_query(_id, args) do
-    ClientPropertyLib.query_client_properties
+    ClientPropertyLib.query_client_properties()
     |> ClientPropertyLib.search(args[:search])
     |> ClientPropertyLib.preload(args[:preload])
     |> ClientPropertyLib.order_by(args[:order_by])
@@ -1280,7 +1336,7 @@ defmodule Teiserver.Telemetry do
   def list_client_properties(args \\ []) do
     client_property_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -1295,7 +1351,8 @@ defmodule Teiserver.Telemetry do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_client_property(Map.t()) :: {:ok, ClientProperty.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_client_property(Map.t()) ::
+          {:ok, ClientProperty.t()} | {:error, Ecto.Changeset.t()}
   def create_client_property(attrs \\ %{}) do
     %ClientProperty{}
     |> ClientProperty.changeset(attrs)
@@ -1303,19 +1360,22 @@ defmodule Teiserver.Telemetry do
   end
 
   def get_client_properties_summary(args) do
-    query = from client_properties in ClientProperty,
-      join: property_types in assoc(client_properties, :property_type),
-      group_by: property_types.name,
-      select: {property_types.name, count(client_properties.property_type_id)}
+    query =
+      from client_properties in ClientProperty,
+        join: property_types in assoc(client_properties, :property_type),
+        group_by: property_types.name,
+        select: {property_types.name, count(client_properties.property_type_id)}
 
-    query = query
-    |> ClientPropertyLib.search(args)
+    query =
+      query
+      |> ClientPropertyLib.search(args)
 
     Repo.all(query)
     |> Map.new()
   end
 
-  @spec delete_client_property(ClientProperty.t()) :: {:ok, ClientProperty.t()} | {:error, Ecto.Changeset.t()}
+  @spec delete_client_property(ClientProperty.t()) ::
+          {:ok, ClientProperty.t()} | {:error, Ecto.Changeset.t()}
   def delete_client_property(%ClientProperty{} = client_property) do
     Repo.delete(client_property)
   end
@@ -1330,7 +1390,7 @@ defmodule Teiserver.Telemetry do
 
   @spec unauth_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def unauth_event_query(_id, args) do
-    UnauthEventLib.query_unauth_events
+    UnauthEventLib.query_unauth_events()
     |> UnauthEventLib.search(args[:search])
     |> UnauthEventLib.preload(args[:preload])
     |> UnauthEventLib.order_by(args[:order_by])
@@ -1350,7 +1410,7 @@ defmodule Teiserver.Telemetry do
   def list_unauth_events(args \\ []) do
     unauth_event_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -1373,18 +1433,19 @@ defmodule Teiserver.Telemetry do
   end
 
   def get_unauth_events_summary(args) do
-    query = from unauth_events in UnauthEvent,
-      join: event_types in assoc(unauth_events, :event_type),
-      group_by: event_types.name,
-      select: {event_types.name, count(unauth_events.event_type_id)}
+    query =
+      from unauth_events in UnauthEvent,
+        join: event_types in assoc(unauth_events, :event_type),
+        group_by: event_types.name,
+        select: {event_types.name, count(unauth_events.event_type_id)}
 
-    query = query
-    |> UnauthEventLib.search(args)
+    query =
+      query
+      |> UnauthEventLib.search(args)
 
     Repo.all(query)
     |> Map.new()
   end
-
 
   alias Teiserver.Telemetry.{ClientEvent, ClientEventLib}
 
@@ -1395,7 +1456,7 @@ defmodule Teiserver.Telemetry do
 
   @spec client_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def client_event_query(_id, args) do
-    ClientEventLib.query_client_events
+    ClientEventLib.query_client_events()
     |> ClientEventLib.search(args[:search])
     |> ClientEventLib.preload(args[:preload])
     |> ClientEventLib.order_by(args[:order_by])
@@ -1415,7 +1476,7 @@ defmodule Teiserver.Telemetry do
   def list_client_events(args \\ []) do
     client_event_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -1437,7 +1498,8 @@ defmodule Teiserver.Telemetry do
     |> Repo.insert()
   end
 
-  @spec delete_client_event(ClientEvent.t()) :: {:ok, ClientEvent.t()} | {:error, Ecto.Changeset.t()}
+  @spec delete_client_event(ClientEvent.t()) ::
+          {:ok, ClientEvent.t()} | {:error, Ecto.Changeset.t()}
   def delete_client_event(%ClientEvent{} = client_event) do
     Repo.delete(client_event)
   end
@@ -1452,7 +1514,7 @@ defmodule Teiserver.Telemetry do
 
   @spec unauth_game_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def unauth_game_event_query(_id, args) do
-    UnauthGameEventLib.query_unauth_game_events
+    UnauthGameEventLib.query_unauth_game_events()
     |> UnauthGameEventLib.search(args[:search])
     |> UnauthGameEventLib.preload(args[:preload])
     |> UnauthGameEventLib.order_by(args[:order_by])
@@ -1472,7 +1534,7 @@ defmodule Teiserver.Telemetry do
   def list_unauth_game_events(args \\ []) do
     unauth_game_event_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -1487,7 +1549,8 @@ defmodule Teiserver.Telemetry do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_unauth_game_event(Map.t()) :: {:ok, UnauthGameEvent.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_unauth_game_event(Map.t()) ::
+          {:ok, UnauthGameEvent.t()} | {:error, Ecto.Changeset.t()}
   def create_unauth_game_event(attrs \\ %{}) do
     %UnauthGameEvent{}
     |> UnauthGameEvent.changeset(attrs)
@@ -1495,18 +1558,19 @@ defmodule Teiserver.Telemetry do
   end
 
   def get_unauth_game_events_summary(args) do
-    query = from unauth_game_events in UnauthGameEvent,
-      join: game_event_types in assoc(unauth_game_events, :game_event_type),
-      group_by: game_event_types.name,
-      select: {game_event_types.name, count(unauth_game_events.game_event_type_id)}
+    query =
+      from unauth_game_events in UnauthGameEvent,
+        join: game_event_types in assoc(unauth_game_events, :game_event_type),
+        group_by: game_event_types.name,
+        select: {game_event_types.name, count(unauth_game_events.game_event_type_id)}
 
-    query = query
-    |> UnauthGameEventLib.search(args)
+    query =
+      query
+      |> UnauthGameEventLib.search(args)
 
     Repo.all(query)
     |> Map.new()
   end
-
 
   alias Teiserver.Telemetry.{ClientGameEvent, ClientGameEventLib}
 
@@ -1517,7 +1581,7 @@ defmodule Teiserver.Telemetry do
 
   @spec client_game_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def client_game_event_query(_id, args) do
-    ClientGameEventLib.query_client_game_events
+    ClientGameEventLib.query_client_game_events()
     |> ClientGameEventLib.search(args[:search])
     |> ClientGameEventLib.preload(args[:preload])
     |> ClientGameEventLib.order_by(args[:order_by])
@@ -1537,7 +1601,7 @@ defmodule Teiserver.Telemetry do
   def list_client_game_events(args \\ []) do
     client_game_event_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -1552,34 +1616,38 @@ defmodule Teiserver.Telemetry do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_client_game_event(Map.t()) :: {:ok, ClientGameEvent.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_client_game_event(Map.t()) ::
+          {:ok, ClientGameEvent.t()} | {:error, Ecto.Changeset.t()}
   def create_client_game_event(attrs \\ %{}) do
     %ClientGameEvent{}
     |> ClientGameEvent.changeset(attrs)
     |> Repo.insert()
   end
 
-  @spec delete_client_game_event(ClientGameEvent.t()) :: {:ok, ClientGameEvent.t()} | {:error, Ecto.Changeset.t()}
+  @spec delete_client_game_event(ClientGameEvent.t()) ::
+          {:ok, ClientGameEvent.t()} | {:error, Ecto.Changeset.t()}
   def delete_client_game_event(%ClientGameEvent{} = client_game_event) do
     Repo.delete(client_game_event)
   end
 
   def get_client_events_summary(args) do
-    query = from client_events in ClientEvent,
-      join: event_types in assoc(client_events, :event_type),
-      group_by: event_types.name,
-      select: {event_types.name, count(client_events.event_type_id)}
+    query =
+      from client_events in ClientEvent,
+        join: event_types in assoc(client_events, :event_type),
+        group_by: event_types.name,
+        select: {event_types.name, count(client_events.event_type_id)}
 
-    query = query
-    |> UnauthEventLib.search(args)
+    query =
+      query
+      |> UnauthEventLib.search(args)
 
     Repo.all(query)
     |> Map.new()
   end
 
-
   def log_client_event(nil, event_type_name, value, hash) do
     event_type_id = get_or_add_event_type(event_type_name)
+
     create_unauth_event(%{
       event_type_id: event_type_id,
       hash: hash,
@@ -1588,15 +1656,16 @@ defmodule Teiserver.Telemetry do
     })
   end
 
-
   def log_client_event(userid, event_type_name, value, _hash) do
     event_type_id = get_or_add_event_type(event_type_name)
-    result = create_client_event(%{
-      event_type_id: event_type_id,
-      user_id: userid,
-      value: value,
-      timestamp: Timex.now()
-    })
+
+    result =
+      create_client_event(%{
+        event_type_id: event_type_id,
+        user_id: userid,
+        value: value,
+        timestamp: Timex.now()
+      })
 
     case result do
       {:ok, _event} ->
@@ -1614,6 +1683,7 @@ defmodule Teiserver.Telemetry do
         end
 
         result
+
       _ ->
         result
     end
@@ -1623,10 +1693,14 @@ defmodule Teiserver.Telemetry do
     property_type_id = get_or_add_property_type(value_name)
 
     # Delete existing ones first
-    query = from properties in UnauthProperty,
-      where: properties.property_type_id == ^property_type_id
-        and properties.hash == ^hash
+    query =
+      from properties in UnauthProperty,
+        where:
+          properties.property_type_id == ^property_type_id and
+            properties.hash == ^hash
+
     property = Repo.one(query)
+
     if property do
       Repo.delete(property)
     end
@@ -1643,25 +1717,31 @@ defmodule Teiserver.Telemetry do
     property_type_id = get_or_add_property_type(property_name)
 
     # Delete existing ones first
-    query = from properties in ClientProperty,
-      where: properties.user_id == ^userid
-        and properties.property_type_id == ^property_type_id
+    query =
+      from properties in ClientProperty,
+        where:
+          properties.user_id == ^userid and
+            properties.property_type_id == ^property_type_id
+
     property = Repo.one(query)
+
     if property do
       Repo.delete(property)
     end
 
-    result = create_client_property(%{
-      property_type_id: property_type_id,
-      user_id: userid,
-      value: value,
-      last_updated: Timex.now()
-    })
+    result =
+      create_client_property(%{
+        property_type_id: property_type_id,
+        user_id: userid,
+        value: value,
+        last_updated: Timex.now()
+      })
 
     case property_name do
       "hardware:cpuinfo" ->
         Account.merge_update_client(userid, %{app_status: :accepted})
         client = Account.get_client_by_id(userid)
+
         if client do
           send(client.tcp_pid, {:put, :app_status, :accepted})
           Teiserver.Account.create_smurf_key(userid, "chobby_hash", hash)
@@ -1696,6 +1776,7 @@ defmodule Teiserver.Telemetry do
         end
 
         result
+
       _ ->
         result
     end
@@ -1703,6 +1784,7 @@ defmodule Teiserver.Telemetry do
 
   def log_client_game_event(nil, game_event_type_name, value, hash) do
     game_event_type_id = get_or_add_game_event_type(game_event_type_name)
+
     create_unauth_game_event(%{
       game_event_type_id: game_event_type_id,
       hash: hash,
@@ -1711,20 +1793,21 @@ defmodule Teiserver.Telemetry do
     })
   end
 
-
   def log_client_game_event(userid, game_event_type_name, value, _hash) do
     game_event_type_id = get_or_add_game_event_type(game_event_type_name)
 
-    result = create_client_game_event(%{
-      game_event_type_id: game_event_type_id,
-      user_id: userid,
-      value: value,
-      timestamp: Timex.now()
-    })
+    result =
+      create_client_game_event(%{
+        game_event_type_id: game_event_type_id,
+        user_id: userid,
+        value: value,
+        timestamp: Timex.now()
+      })
 
     case result do
       {:ok, _game_event} ->
         result
+
       _ ->
         result
     end
@@ -1737,11 +1820,13 @@ defmodule Teiserver.Telemetry do
     Central.cache_get_or_store(:teiserver_telemetry_property_types, name, fn ->
       case list_property_types(search: [name: name], select: [:id], order_by: "ID (Lowest first)") do
         [] ->
-          {:ok, property} = %PropertyType{}
+          {:ok, property} =
+            %PropertyType{}
             |> PropertyType.changeset(%{name: name})
             |> Repo.insert()
 
           property.id
+
         [%{id: id} | _] ->
           id
       end
@@ -1755,11 +1840,13 @@ defmodule Teiserver.Telemetry do
     Central.cache_get_or_store(:teiserver_telemetry_event_types, name, fn ->
       case list_event_types(search: [name: name], select: [:id], order_by: "ID (Lowest first)") do
         [] ->
-          {:ok, event} = %EventType{}
+          {:ok, event} =
+            %EventType{}
             |> EventType.changeset(%{name: name})
             |> Repo.insert()
 
           event.id
+
         [%{id: id} | _] ->
           id
       end
@@ -1770,19 +1857,24 @@ defmodule Teiserver.Telemetry do
     name = String.trim(name)
 
     Central.cache_get_or_store(:teiserver_telemetry_game_event_types, name, fn ->
-      case list_game_event_types(search: [name: name], select: [:id], order_by: "ID (Lowest first)") do
+      case list_game_event_types(
+             search: [name: name],
+             select: [:id],
+             order_by: "ID (Lowest first)"
+           ) do
         [] ->
-          {:ok, game_event} = %GameEventType{}
+          {:ok, game_event} =
+            %GameEventType{}
             |> GameEventType.changeset(%{name: name})
             |> Repo.insert()
 
           game_event.id
+
         [%{id: id} | _] ->
           id
       end
     end)
   end
-
 
   alias Teiserver.Telemetry.{ServerEvent, ServerEventLib}
 
@@ -1793,7 +1885,7 @@ defmodule Teiserver.Telemetry do
 
   @spec server_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def server_event_query(_id, args) do
-    ServerEventLib.query_server_events
+    ServerEventLib.query_server_events()
     |> ServerEventLib.search(args[:search])
     |> ServerEventLib.preload(args[:preload])
     |> ServerEventLib.order_by(args[:order_by])
@@ -1813,7 +1905,7 @@ defmodule Teiserver.Telemetry do
   def list_server_events(args \\ []) do
     server_event_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -1835,33 +1927,39 @@ defmodule Teiserver.Telemetry do
     |> Repo.insert()
   end
 
-  @spec delete_server_event(ServerEvent.t()) :: {:ok, ServerEvent.t()} | {:error, Ecto.Changeset.t()}
+  @spec delete_server_event(ServerEvent.t()) ::
+          {:ok, ServerEvent.t()} | {:error, Ecto.Changeset.t()}
   def delete_server_event(%ServerEvent{} = server_event) do
     Repo.delete(server_event)
   end
 
   def get_server_events_summary(args) do
-    query = from server_events in ServerEvent,
-      join: event_types in assoc(server_events, :event_type),
-      group_by: event_types.name,
-      select: {event_types.name, count(server_events.event_type_id)}
+    query =
+      from server_events in ServerEvent,
+        join: event_types in assoc(server_events, :event_type),
+        group_by: event_types.name,
+        select: {event_types.name, count(server_events.event_type_id)}
 
-    query = query
+    query =
+      query
       |> ServerEventLib.search(args)
 
     Repo.all(query)
-      |> Map.new()
+    |> Map.new()
   end
 
-  @spec log_server_event(T.userid() | nil, String.t(), map()) :: {:error, Ecto.Changeset.t()} | {:ok, ServerEvent.t()}
+  @spec log_server_event(T.userid() | nil, String.t(), map()) ::
+          {:error, Ecto.Changeset.t()} | {:ok, ServerEvent.t()}
   def log_server_event(userid, event_type_name, value) do
     event_type_id = get_or_add_event_type(event_type_name)
-    result = create_server_event(%{
-      event_type_id: event_type_id,
-      user_id: userid,
-      value: value,
-      timestamp: Timex.now()
-    })
+
+    result =
+      create_server_event(%{
+        event_type_id: event_type_id,
+        user_id: userid,
+        value: value,
+        timestamp: Timex.now()
+      })
 
     case result do
       {:ok, _event} ->
@@ -1881,6 +1979,7 @@ defmodule Teiserver.Telemetry do
         end
 
         result
+
       _ ->
         result
     end
@@ -1895,7 +1994,7 @@ defmodule Teiserver.Telemetry do
 
   @spec infolog_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def infolog_query(id, args) do
-    InfologLib.query_infologs
+    InfologLib.query_infologs()
     |> InfologLib.search(%{id: id})
     |> InfologLib.search(args[:search])
     |> InfologLib.preload(args[:preload])
@@ -1916,7 +2015,7 @@ defmodule Teiserver.Telemetry do
   def list_infologs(args \\ []) do
     infolog_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @spec get_infolog(Integer.t(), List.t()) :: List.t()

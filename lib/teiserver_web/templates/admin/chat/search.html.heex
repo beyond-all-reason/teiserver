@@ -8,16 +8,17 @@
   });
 </script>
 
-<%= central_component "picker_script",
+<%= central_component("picker_script",
   module: Central.Account.UserLib,
   name: "account_user",
   title: "User search"
-%>
+) %>
 
-<%= central_component "icon_dropdown_js", [] %>
+<%= central_component("icon_dropdown_js", []) %>
 
-<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
-<script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")} />
+<script src={Routes.static_path(@conn, "/js/select2.js")}>
+</script>
 
 <form action={~p"/teiserver/admin/chat"} method="post" class="form-horizontal" id="search-box">
   <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
@@ -25,12 +26,20 @@
   <div class="row">
     <div class="col-md-4 col-lg-3 col-xl-2 my-2">
       <label for="search_term" class="control-label">Term: </label>
-      <input type="text" name="search[term]" id="search_term" value={@params["term"]} placeholder="" autofocus="" class="form-control" />
+      <input
+        type="text"
+        name="search[term]"
+        id="search_term"
+        value={@params["term"]}
+        placeholder=""
+        autofocus=""
+        class="form-control"
+      />
     </div>
 
     <div class="col-md-4 col-lg-3 col-xl-2 my-2">
       <label for="search_timeframe" class="control-label">Timeframe: </label>
-      <%= central_component "icon_dropdown", %{
+      <%= central_component("icon_dropdown", %{
         name: "search[timeframe]",
         id: "search_timeframe",
         selected: @params["timeframe"] || "24 hours",
@@ -38,60 +47,65 @@
           %{id: "24 hours", icon: "fa-solid fa-square", colour: fg},
           %{id: "2 days", icon: "fa-solid fa-square", colour: fg},
           %{id: "7 days", icon: "fa-solid fa-square", colour: fg},
-          %{id: "All time", icon: "fa-solid fa-square", colour: fg},
+          %{id: "All time", icon: "fa-solid fa-square", colour: fg}
         ]
-      } %>
+      }) %>
     </div>
 
     <div class="col-md-4 col-lg-3 col-xl-2 my-2">
       <label for="search_account_user" class="control-label">User: </label>
-      <%= render CentralWeb.Account.UserView, "picker.html",
+      <%= render(CentralWeb.Account.UserView, "picker.html",
         input_name: "search[account_user]",
         value: @params["account_user"]
-      %>
+      ) %>
     </div>
 
     <div class="col-md-4 col-lg-3 col-xl-2 my-2">
       <label for="search_order" class="control-label">Order by: </label>
-      <%= central_component "icon_dropdown", %{
+      <%= central_component("icon_dropdown", %{
         name: "search[order]",
         id: "search_order",
         selected: @params["order"] || "Newest first",
         enumerable: [
           %{id: "Newest first", icon: "fa-solid fa-sort-numeric-down", colour: fg},
-          %{id: "Oldest first", icon: "fa-solid fa-sort-numeric-up", colour: fg},
+          %{id: "Oldest first", icon: "fa-solid fa-sort-numeric-up", colour: fg}
         ]
-      } %>
+      }) %>
     </div>
 
     <div class="col-md-4 col-lg-3 col-xl-2 my-2">
-      <%= central_component "checkbox", %{
+      <%= central_component("checkbox", %{
         name: "search[include_bots]",
         id: "search_include_bots",
         checked: @params["include_bots"] == "true",
         label: "Include bot accounts"
-      } %>
+      }) %>
     </div>
 
     <div class="col-md-4 col-lg-3 col-xl-2 my-2">
       <label for="search_mode" class="control-label">Mode: </label>
-      <%= central_component "icon_dropdown", %{
+      <%= central_component("icon_dropdown", %{
         name: "search[mode]",
         id: "search_mode",
         selected: @params["mode"],
         enumerable: [
           %{id: "Lobby", icon: Teiserver.Battle.LobbyLib.icon(), colour: fg},
           %{id: "Party", icon: Teiserver.Account.PartyLib.icon(), colour: fg},
-          %{id: "Room", icon: Central.Communication.CommentLib.icon(), colour: fg},
+          %{id: "Room", icon: Central.Communication.CommentLib.icon(), colour: fg}
         ]
-      } %>
+      }) %>
     </div>
   </div>
 
   <div class="row">
     <div class="offset-md-8 col-md-4 offset-xl-10 col-xl-2">
       &nbsp;<br />
-      <input type="submit" value="Search" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+      <input
+        type="submit"
+        value="Search"
+        name="form.submitted"
+        class={"btn btn-#{bsname} btn-block"}
+      />
     </div>
   </div>
 </form>

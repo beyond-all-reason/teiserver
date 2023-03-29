@@ -139,7 +139,9 @@ defmodule CentralWeb.Router do
   scope "/config", CentralWeb.Config do
     pipe_through([:browser, :protected, :standard_layout])
 
-    resources("/user", UserConfigController, only: [:index, :edit, :update, :new, :create, :delete])
+    resources("/user", UserConfigController,
+      only: [:index, :edit, :update, :new, :create, :delete]
+    )
   end
 
   scope "/account", CentralWeb.Account, as: :account do
@@ -310,9 +312,7 @@ defmodule CentralWeb.Router do
     put("/relationships/update/:action/:target", RelationshipsController, :update)
     delete("/relationships/delete/:action/:target", RelationshipsController, :delete)
 
-    resources("/preferences", PreferencesController,
-      only: [:index, :edit, :update, :new, :create]
-    )
+    resources("/preferences", PreferencesController, only: [:index, :edit, :update, :new, :create])
 
     get("/", GeneralController, :index)
     get("/customisation_form", GeneralController, :customisation_form)
@@ -370,6 +370,7 @@ defmodule CentralWeb.Router do
     get("/ratings/leaderboard/:type", RatingsController, :leaderboard)
 
     get("/matches/ratings", MatchController, :ratings)
+    get("/matches/ratings_graph", MatchController, :ratings_graph)
     resources("/matches", MatchController, only: [:index, :show, :delete])
   end
 
@@ -395,7 +396,6 @@ defmodule CentralWeb.Router do
     live("/parties/:mode", Index, :index)
     live("/parties/show/:id", Show, :show)
   end
-
 
   # REPORTING
   scope "/teiserver/reports", TeiserverWeb.Report, as: :ts_reports do
@@ -550,7 +550,10 @@ defmodule CentralWeb.Router do
 
     get("/proposal/new_with_user", ProposalController, :new_with_user)
     put("/proposal/vote/:proposal_id/:direction", ProposalController, :vote)
-    resources("/proposal", ProposalController, only: [:index, :show, :new, :create, :edit, :update])
+
+    resources("/proposal", ProposalController,
+      only: [:index, :show, :new, :create, :edit, :update]
+    )
 
     put("/ban/:id/disable", BanController, :disable)
     put("/ban/:id/enable", BanController, :enable)
@@ -564,7 +567,10 @@ defmodule CentralWeb.Router do
 
   scope "/admin", TeiserverWeb.Admin, as: :admin do
     pipe_through([:browser, :standard_layout, :protected])
-    resources("/lobby_policies", LobbyPolicyController, only: [:index, :new, :create, :show, :edit, :update, :delete])
+
+    resources("/lobby_policies", LobbyPolicyController,
+      only: [:index, :new, :create, :show, :edit, :update, :delete]
+    )
   end
 
   scope "/teiserver/admin", TeiserverWeb.Admin, as: :admin do

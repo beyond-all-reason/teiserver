@@ -12,6 +12,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
     name = "Battlejoin_#{state.number}"
 
     socket = AgentLib.get_socket()
+
     AgentLib.login(socket, %{
       name: name,
       email: "Battlejoin_#{state.number}@agents",
@@ -24,61 +25,72 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   end
 
   def handle_info(:tick, state) do
-    new_state = case state.stage do
-      :no_battle ->
-        join_battle(state, Lobby.list_lobby_ids())
+    new_state =
+      case state.stage do
+        :no_battle ->
+          join_battle(state, Lobby.list_lobby_ids())
 
-      :waiting ->
-        state
-
-      :in_battle ->
-        if :rand.uniform() <= @leave_chance do
-          leave_battle(state)
-        else
-          state = if :rand.uniform() <= 0.7, do: update_battlestatus(state), else: state
-          state = if :rand.uniform() <= 0.5, do: chat_message(state), else: state
+        :waiting ->
           state
-        end
-    end
+
+        :in_battle ->
+          if :rand.uniform() <= @leave_chance do
+            leave_battle(state)
+          else
+            state = if :rand.uniform() <= 0.7, do: update_battlestatus(state), else: state
+            state = if :rand.uniform() <= 0.5, do: chat_message(state), else: state
+            state
+          end
+      end
 
     {:noreply, new_state}
   end
 
   def handle_info({:ssl, _socket, data}, state) do
-    new_state = data
-    |> AgentLib.translate
-    |> Enum.reduce(state, fn data, acc ->
-      handle_msg(data, acc)
-    end)
+    new_state =
+      data
+      |> AgentLib.translate()
+      |> Enum.reduce(state, fn data, acc ->
+        handle_msg(data, acc)
+      end)
 
     {:noreply, new_state}
   end
 
   defp handle_msg(nil, state), do: state
+
   defp handle_msg(%{"cmd" => "s.lobby.joined", "lobby" => %{"id" => lobby_id}}, state) do
     %{state | lobby_id: lobby_id, stage: :in_battle}
   end
+
   defp handle_msg(%{"cmd" => "s.lobby.join", "result" => "waiting_for_host"}, state) do
     %{state | stage: :waiting}
   end
+
   defp handle_msg(%{"cmd" => "s.lobby.join", "result" => "failure"}, state) do
     %{state | stage: :no_battle, lobby_id: nil}
   end
+
   defp handle_msg(%{"cmd" => "s.lobby.join_response", "result" => "failure"}, state) do
     %{state | stage: :no_battle, lobby_id: nil}
   end
+
   defp handle_msg(%{"cmd" => "s.lobby.join_response", "result" => "approve"}, state) do
     %{state | stage: :in_battle}
   end
+
   defp handle_msg(%{"cmd" => "s.lobby.join_response", "result" => "reject"}, state) do
     %{state | stage: :no_battle, lobby_id: nil}
   end
+
   defp handle_msg(%{"cmd" => "s.lobby.leave", "result" => "success"}, state) do
     %{state | lobby_id: nil}
   end
+
   defp handle_msg(%{"cmd" => "s.lobby.closed"}, state) do
     %{state | lobby_id: nil}
   end
+
   defp handle_msg(%{"cmd" => "s.lobby.received_lobby_direct_announce"}, state), do: state
   defp handle_msg(%{"cmd" => "s.communication.received_direct_message"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.add_user"}, state), do: state
@@ -92,43 +104,47 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   defp handle_msg(%{"cmd" => "s.lobby.update_values"}, state), do: state
 
   defp update_battlestatus(state) do
-    data = if :rand.uniform() <= 0.7 do
-      %{
-        player: true,
-        ready: Enum.random([true, false]),
-        sync: %{
-          game: 1,
-          engine: 1,
-          map: 1
-        },
-        player_number: Enum.random(0..15),
-        team_number: Enum.random([0, 1, 2, 3]),
-        side: Enum.random([0, 1, 2]),
-        team_colour: Enum.random(0..9322660)
-      }
-    else
-      %{
-        player: false
-      }
-    end
+    data =
+      if :rand.uniform() <= 0.7 do
+        %{
+          player: true,
+          ready: Enum.random([true, false]),
+          sync: %{
+            game: 1,
+            engine: 1,
+            map: 1
+          },
+          player_number: Enum.random(0..15),
+          team_number: Enum.random([0, 1, 2, 3]),
+          side: Enum.random([0, 1, 2]),
+          team_colour: Enum.random(0..9_322_660)
+        }
+      else
+        %{
+          player: false
+        }
+      end
 
     AgentLib._send(state.socket, %{cmd: "c.lobby.update_status", client: data})
     state
   end
 
   defp join_battle(state, []), do: state
+
   defp join_battle(state, lobby_ids) do
     lobby_id = Enum.random(lobby_ids)
 
     case Battle.get_lobby(lobby_id) do
       nil ->
         %{state | lobby_id: nil, stage: :no_battle}
+
       battle ->
         cmd = %{
           cmd: "c.lobby.join",
           lobby_id: lobby_id,
           password: battle.password
         }
+
         AgentLib._send(state.socket, cmd)
 
         AgentLib.post_agent_update(state.id, "opened battle")
@@ -147,16 +163,17 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   defp chat_message(state) do
     r = :rand.uniform()
 
-    msg = cond do
-      r < 0.1 -> "!y, #{state.msg_count}"
-      r < 0.2 -> "!n, #{state.msg_count}"
-      r < 0.3 -> "!b, #{state.msg_count}"
-      r < 0.4 -> "!cv map koom, #{state.msg_count}"
-      r < 0.5 -> "g: Game message, #{state.msg_count}"
-      r < 0.6 -> "s: Spectator message, #{state.msg_count}"
-      r < 0.7 -> "a: Allied message, #{state.msg_count}"
-      true -> "This is a chat message from #{state.name}, #{state.msg_count}"
-    end
+    msg =
+      cond do
+        r < 0.1 -> "!y, #{state.msg_count}"
+        r < 0.2 -> "!n, #{state.msg_count}"
+        r < 0.3 -> "!b, #{state.msg_count}"
+        r < 0.4 -> "!cv map koom, #{state.msg_count}"
+        r < 0.5 -> "g: Game message, #{state.msg_count}"
+        r < 0.6 -> "s: Spectator message, #{state.msg_count}"
+        r < 0.7 -> "a: Allied message, #{state.msg_count}"
+        true -> "This is a chat message from #{state.name}, #{state.msg_count}"
+      end
 
     AgentLib._send(state.socket, %{cmd: "c.lobby.message", message: msg})
 

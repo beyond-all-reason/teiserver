@@ -1,45 +1,47 @@
 <div class="dropdown-menu">
-  <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :perform_action, @user, "recache")}>
-    <%= central_component "icon", icon: "fa-solid fa-sync" %>
-    &nbsp;
+  <a
+    class="dropdown-item"
+    href={Routes.ts_admin_user_path(@conn, :perform_action, @user, "recache")}
+  >
+    <%= central_component("icon", icon: "fa-solid fa-sync") %> &nbsp;
     Recache
   </a>
 
   <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :rename_form, @user)}>
-    <%= central_component "icon", icon: "fa-solid fa-pen-field" %>
-    &nbsp;
+    <%= central_component("icon", icon: "fa-solid fa-pen-field") %> &nbsp;
     Rename
   </a>
 
   <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :full_chat, @user)}>
-    <%= central_component "icon", icon: Central.Communication.ChatRoomLib.icon() %>
-    &nbsp;
+    <%= central_component("icon", icon: Central.Communication.ChatRoomLib.icon()) %> &nbsp;
     Full chat
   </a>
 
   <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :smurf_search, @user.id)}>
-    <%= central_component "icon", icon: "fa-solid fa-face-angry-horns" %>
-    &nbsp;
+    <%= central_component("icon", icon: "fa-solid fa-face-angry-horns") %> &nbsp;
     Smurf search
   </a>
 
   <hr />
 
-  <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :perform_action, @user, "reset_flood_protection")}>
-    <%= central_component "icon", icon: "fa-solid fa-water-arrow-down" %>
-    &nbsp;
+  <a
+    class="dropdown-item"
+    href={Routes.ts_admin_user_path(@conn, :perform_action, @user, "reset_flood_protection")}
+  >
+    <%= central_component("icon", icon: "fa-solid fa-water-arrow-down") %> &nbsp;
     Reset flood protection
   </a>
 
   <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :reset_password, @user.id)}>
-    <%= central_component "icon", icon: "fa-solid fa-shield-alt" %>
-    &nbsp;
+    <%= central_component("icon", icon: "fa-solid fa-shield-alt") %> &nbsp;
     Send password reset email
   </a>
 
-  <a class="dropdown-item" href={"#{Routes.moderation_ban_path(@conn, :new_with_user)}?teiserver_user=#{@user.id}"}>
-    <%= central_component "icon", icon: Teiserver.Moderation.BanLib.icon() %>
-    &nbsp;
+  <a
+    class="dropdown-item"
+    href={"#{Routes.moderation_ban_path(@conn, :new_with_user)}?teiserver_user=#{@user.id}"}
+  >
+    <%= central_component("icon", icon: Teiserver.Moderation.BanLib.icon()) %> &nbsp;
     Add ban
   </a>
 </div>

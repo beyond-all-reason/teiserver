@@ -43,35 +43,35 @@ defmodule Central.Helpers.NestedMapsTest do
 
     # Now check a change takes place when updating
     assert NestedMaps.put(@small_map, ~w(a), 5) == %{
-      "a" => 5,
-      "b" => %{
-        "c" => 2,
-        "d" => %{
-          "e" => 3
-        }
-      }
-    }
+             "a" => 5,
+             "b" => %{
+               "c" => 2,
+               "d" => %{
+                 "e" => 3
+               }
+             }
+           }
 
     assert NestedMaps.put(@small_map, ~w(b c), 7) == %{
-      "a" => 1,
-      "b" => %{
-        "c" => 7,
-        "d" => %{
-          "e" => 3
-        }
-      }
-    }
+             "a" => 1,
+             "b" => %{
+               "c" => 7,
+               "d" => %{
+                 "e" => 3
+               }
+             }
+           }
 
     # And inserting
     assert NestedMaps.put(@small_map, ~w(b d f), 9) == %{
-      "a" => 1,
-      "b" => %{
-        "c" => 2,
-        "d" => %{
-          "e" => 3,
-          "f" => 9
-        }
-      }
-    }
+             "a" => 1,
+             "b" => %{
+               "c" => 2,
+               "d" => %{
+                 "e" => 3,
+                 "f" => 9
+               }
+             }
+           }
   end
 end

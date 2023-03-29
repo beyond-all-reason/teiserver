@@ -6,7 +6,6 @@ defmodule Teiserver.SpringTcpServer do
   alias Phoenix.PubSub
   alias Central.Config
   alias Teiserver.{User, Client}
-  alias Teiserver.Data.Types, as: T
 
   @send_interval 100
   @init_timeout 60_000
@@ -101,8 +100,10 @@ defmodule Teiserver.SpringTcpServer do
       last_msg: System.system_time(:second),
       socket: socket,
       transport: transport,
-      protocol_in: Application.get_env(:central, Teiserver)[:default_spring_protocol].protocol_in(),
-      protocol_out: Application.get_env(:central, Teiserver)[:default_spring_protocol].protocol_out(),
+      protocol_in:
+        Application.get_env(:central, Teiserver)[:default_spring_protocol].protocol_in(),
+      protocol_out:
+        Application.get_env(:central, Teiserver)[:default_spring_protocol].protocol_out(),
       ip: ip,
 
       # Client state
@@ -126,14 +127,14 @@ defmodule Teiserver.SpringTcpServer do
       cmd_timestamps: [],
       status_timestamps: [],
       app_status: nil,
-
       optimise_protocol: false,
       pending_messages: [],
 
       # Caching app configs
-      flood_rate_limit_count: Config.get_site_config_cache("teiserver.Spring flood rate limit count"),
-      floot_rate_window_size: Config.get_site_config_cache("teiserver.Spring flood rate window size"),
-
+      flood_rate_limit_count:
+        Config.get_site_config_cache("teiserver.Spring flood rate limit count"),
+      floot_rate_window_size:
+        Config.get_site_config_cache("teiserver.Spring flood rate window size"),
       server_messages: 0,
       server_batches: 0,
       client_messages: 0
@@ -176,11 +177,14 @@ defmodule Teiserver.SpringTcpServer do
     # IO.puts ""
 
     state.protocol_out.send_prepared_messages(state, pending_messages)
-    {:noreply, %{state |
-      pending_messages: [],
-      server_messages: state.server_messages + Enum.count(pending_messages),
-      server_batches: state.server_batches + 1
-    }}
+
+    {:noreply,
+     %{
+       state
+       | pending_messages: [],
+         server_messages: state.server_messages + Enum.count(pending_messages),
+         server_batches: state.server_batches + 1
+     }}
   end
 
   def handle_info(:message_count, state) do
@@ -215,6 +219,7 @@ defmodule Teiserver.SpringTcpServer do
     case flood_protect?(data, state) do
       {true, state} ->
         engage_flood_protection(state)
+
       {false, state} ->
         new_state = state.protocol_in.data_in(data, state)
         {:noreply, %{new_state | client_messages: state.client_messages + 1}}
@@ -227,6 +232,7 @@ defmodule Teiserver.SpringTcpServer do
     case flood_protect?(data, state) do
       {true, state} ->
         engage_flood_protection(state)
+
       {false, state} ->
         new_state = state.protocol_in.data_in(data, state)
         {:noreply, %{new_state | client_messages: state.client_messages + 1}}
@@ -251,9 +257,11 @@ defmodule Teiserver.SpringTcpServer do
 
     if diff > Application.get_env(:central, Teiserver)[:heartbeat_timeout] do
       new_state = state.protocol_out.reply(:disconnect, "Heartbeat", nil, state)
+
       if new_state.username do
         Logger.info("Heartbeat timeout for #{state.username}")
       end
+
       {:stop, :normal, new_state}
     else
       {:noreply, state}
@@ -270,7 +278,16 @@ defmodule Teiserver.SpringTcpServer do
     coordinator_id = Teiserver.Coordinator.get_coordinator_userid()
 
     state = state.protocol_out.reply(:server_restart, nil, nil, state)
-    state = new_chat_message(:direct_message, coordinator_id, nil, "Teiserver update taking place, see discord for details/issues.", state)
+
+    state =
+      new_chat_message(
+        :direct_message,
+        coordinator_id,
+        nil,
+        "Teiserver update taking place, see discord for details/issues.",
+        state
+      )
+
     {:noreply, state}
   end
 
@@ -283,17 +300,21 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, state}
   end
 
-  def handle_info(%{
-    channel: "teiserver_global_lobby_updates",
-    event: :updated_values,
-    lobby_id: lobby_id,
-    new_values: new_values
-  }, state) do
-    new_state = if Map.has_key?(new_values, :name) do
-      state.protocol_out.reply(:battle, :lobby_rename, lobby_id, nil, state)
-    else
-      state
-    end
+  def handle_info(
+        %{
+          channel: "teiserver_global_lobby_updates",
+          event: :updated_values,
+          lobby_id: lobby_id,
+          new_values: new_values
+        },
+        state
+      ) do
+    new_state =
+      if Map.has_key?(new_values, :name) do
+        state.protocol_out.reply(:battle, :lobby_rename, lobby_id, nil, state)
+      else
+        state
+      end
 
     {:noreply, new_state}
   end
@@ -310,6 +331,7 @@ defmodule Teiserver.SpringTcpServer do
 
   # Client updates
   def handle_info({:user_logged_in, nil}, state), do: {:noreply, state}
+
   def handle_info({:user_logged_in, userid}, state) do
     new_state = user_logged_in(userid, state)
     {:noreply, new_state}
@@ -420,11 +442,12 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   def handle_info({:add_user_to_battle, userid, lobby_id, script_password}, state) do
-    script_password = if userid == state.userid do
-      state.script_password
-    else
-      script_password
-    end
+    script_password =
+      if userid == state.userid do
+        state.script_password
+      else
+        script_password
+      end
 
     new_state = user_join_battle(userid, lobby_id, script_password, state)
     {:noreply, new_state}
@@ -441,13 +464,19 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # Timeout error
-  def handle_info({:tcp_error, _port, :etimedout}, %{socket: socket, transport: transport} = state) do
+  def handle_info(
+        {:tcp_error, _port, :etimedout},
+        %{socket: socket, transport: transport} = state
+      ) do
     transport.close(socket)
     Client.disconnect(state.userid, ":tcp_closed with tcp_error :etimedout")
     {:stop, :normal, %{state | userid: nil}}
   end
 
-  def handle_info({:tcp_error, _port, :ehostunreach}, %{socket: socket, transport: transport} = state) do
+  def handle_info(
+        {:tcp_error, _port, :ehostunreach},
+        %{socket: socket, transport: transport} = state
+      ) do
     transport.close(socket)
     Client.disconnect(state.userid, ":tcp_closed with tcp_error :ehostunreach")
     {:stop, :normal, %{state | userid: nil}}
@@ -499,6 +528,7 @@ defmodule Teiserver.SpringTcpServer do
         case Client.get_client_by_id(userid) do
           nil ->
             state
+
           client ->
             new_state = state.protocol_out.reply(:user_logged_in, client, nil, state)
             new_known = Map.put(new_state.known_users, userid, _blank_user(userid))
@@ -516,6 +546,7 @@ defmodule Teiserver.SpringTcpServer do
         new_state = state.protocol_out.reply(:add_user, client, nil, state)
         new_known = Map.put(new_state.known_users, client.userid, _blank_user(client.userid))
         %{new_state | known_users: new_known}
+
       _ ->
         state
     end
@@ -538,7 +569,7 @@ defmodule Teiserver.SpringTcpServer do
     new_state = %{state | user: new_user}
 
     fields
-    |> Enum.reduce(new_state, fn (field, tmp_state) ->
+    |> Enum.reduce(new_state, fn field, tmp_state ->
       case field do
         :friends ->
           state.protocol_out.reply(:friendlist, new_user, nil, tmp_state)
@@ -660,6 +691,7 @@ defmodule Teiserver.SpringTcpServer do
   defp join_battle_request_response(nil, _, _, state) do
     state.protocol_out.reply(:join_battle_failure, "No battle", nil, state)
   end
+
   defp join_battle_request_response(lobby_id, response, reason, state) do
     case response do
       :accept ->
@@ -700,12 +732,13 @@ defmodule Teiserver.SpringTcpServer do
         client = Client.get_client_by_id(userid)
         new_state = state.protocol_out.reply(:user_logged_in, client, nil, state)
 
-        new_state = new_state.protocol_out.reply(
-          :add_user_to_battle,
-          {userid, lobby_id, script_password},
-          nil,
-          new_state
-        )
+        new_state =
+          new_state.protocol_out.reply(
+            :add_user_to_battle,
+            {userid, lobby_id, script_password},
+            nil,
+            new_state
+          )
 
         new_user = _blank_user(userid, %{lobby_id: lobby_id})
         new_knowns = Map.put(new_state.known_users, userid, new_user)
@@ -714,12 +747,13 @@ defmodule Teiserver.SpringTcpServer do
       # User is known about and not in a battle, this is the ideal
       # state
       state.known_users[userid].lobby_id == nil ->
-        new_state = state.protocol_out.reply(
-          :add_user_to_battle,
-          {userid, lobby_id, script_password},
-          nil,
-          state
-        )
+        new_state =
+          state.protocol_out.reply(
+            :add_user_to_battle,
+            {userid, lobby_id, script_password},
+            nil,
+            state
+          )
 
         new_user = %{new_state.known_users[userid] | lobby_id: lobby_id}
         new_knowns = Map.put(new_state.known_users, userid, new_user)
@@ -737,12 +771,13 @@ defmodule Teiserver.SpringTcpServer do
           )
         end
 
-        new_state = state.protocol_out.reply(
-          :add_user_to_battle,
-          {userid, lobby_id, script_password},
-          nil,
-          state
-        )
+        new_state =
+          state.protocol_out.reply(
+            :add_user_to_battle,
+            {userid, lobby_id, script_password},
+            nil,
+            state
+          )
 
         %{new_state.known_users[userid] | lobby_id: lobby_id}
 
@@ -759,11 +794,12 @@ defmodule Teiserver.SpringTcpServer do
     end
 
     # Do they know about the battle?
-    state = if Enum.member?(state.known_battles, lobby_id) do
-      state
-    else
-      state.protocol_out.reply(:battle_opened, lobby_id, nil, state)
-    end
+    state =
+      if Enum.member?(state.known_battles, lobby_id) do
+        state
+      else
+        state.protocol_out.reply(:battle_opened, lobby_id, nil, state)
+      end
 
     # Now the user
     cond do
@@ -785,12 +821,13 @@ defmodule Teiserver.SpringTcpServer do
 
       true ->
         # We don't care which battle we thought they are in, they're no longer in it
-        new_state = state.protocol_out.reply(
-          :remove_user_from_battle,
-          {userid, state.known_users[userid].lobby_id},
-          nil,
-          state
-        )
+        new_state =
+          state.protocol_out.reply(
+            :remove_user_from_battle,
+            {userid, state.known_users[userid].lobby_id},
+            nil,
+            state
+          )
 
         new_user = %{state.known_users[userid] | lobby_id: nil}
         new_knowns = Map.put(state.known_users, userid, new_user)
@@ -834,10 +871,20 @@ defmodule Teiserver.SpringTcpServer do
             state.protocol_out.reply(:direct_message, {from, msg, state.user}, nil, state)
 
           :chat_message ->
-            state.protocol_out.reply(:chat_message, {from, room_name, msg, state.user}, nil, state)
+            state.protocol_out.reply(
+              :chat_message,
+              {from, room_name, msg, state.user},
+              nil,
+              state
+            )
 
           :chat_message_ex ->
-            state.protocol_out.reply(:chat_message_ex, {from, room_name, msg, state.user}, nil, state)
+            state.protocol_out.reply(
+              :chat_message_ex,
+              {from, room_name, msg, state.user},
+              nil,
+              state
+            )
         end
     end
   end
@@ -866,7 +913,7 @@ defmodule Teiserver.SpringTcpServer do
           %{state | room_member_cache: new_cache}
         else
           state = state.protocol_out.reply(:add_user_to_room, {userid, room_name}, nil, state)
-          new_members = [userid | (state.room_member_cache[room_name] || [])]
+          new_members = [userid | state.room_member_cache[room_name] || []]
           new_cache = Map.put(state.room_member_cache, room_name, new_members)
           %{state | room_member_cache: new_cache}
         end
@@ -881,7 +928,9 @@ defmodule Teiserver.SpringTcpServer do
 
       true ->
         if Enum.member?(state.room_member_cache[room_name] || [], userid) do
-          state = state.protocol_out.reply(:remove_user_from_room, {userid, room_name}, nil, state)
+          state =
+            state.protocol_out.reply(:remove_user_from_room, {userid, room_name}, nil, state)
+
           new_members = state.room_member_cache[room_name] |> Enum.filter(fn m -> m != userid end)
           new_cache = Map.put(state.room_member_cache, room_name, new_members)
           %{state | room_member_cache: new_cache}
@@ -913,16 +962,18 @@ defmodule Teiserver.SpringTcpServer do
 
   @spec flood_protect?(String.t(), map()) :: {boolean, map()}
   defp flood_protect?(_, %{exempt_from_cmd_throttle: true} = state), do: {false, state}
-  defp flood_protect?(data, state) do
-    cmd_timestamps = if String.contains?(data, "\n") do
-      now = System.system_time(:second)
-      limiter = now - state.floot_rate_window_size
 
-      [now | state.cmd_timestamps]
+  defp flood_protect?(data, state) do
+    cmd_timestamps =
+      if String.contains?(data, "\n") do
+        now = System.system_time(:second)
+        limiter = now - state.floot_rate_window_size
+
+        [now | state.cmd_timestamps]
         |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
-    else
-      state.cmd_timestamps
-    end
+      else
+        state.cmd_timestamps
+      end
 
     if Enum.count(cmd_timestamps) > state.flood_rate_limit_count do
       {true, %{state | cmd_timestamps: cmd_timestamps}}
@@ -936,7 +987,11 @@ defmodule Teiserver.SpringTcpServer do
     state.protocol_out.reply(:disconnect, "Flood protection", nil, state)
     User.set_flood_level(state.userid, 10)
     Client.disconnect(state.userid, "SpringTCPServer.flood_protection")
-    Logger.error("Spring command overflow from #{state.username}/#{state.userid} with #{Enum.count(state.cmd_timestamps)} commands. Disconnected and flood protection engaged.")
+
+    Logger.error(
+      "Spring command overflow from #{state.username}/#{state.userid} with #{Enum.count(state.cmd_timestamps)} commands. Disconnected and flood protection engaged."
+    )
+
     {:stop, "Flood protection", state}
   end
 
@@ -992,9 +1047,7 @@ defmodule Teiserver.SpringTcpServer do
 
       err ->
         Logger.error(
-          "Error upgrading connection\nError: #{Kernel.inspect(err)}\nssl_opts: #{
-            Kernel.inspect(ssl_opts)
-          }"
+          "Error upgrading connection\nError: #{Kernel.inspect(err)}\nssl_opts: #{Kernel.inspect(ssl_opts)}"
         )
 
         state

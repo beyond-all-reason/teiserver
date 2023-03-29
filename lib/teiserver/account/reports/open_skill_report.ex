@@ -15,12 +15,13 @@ defmodule Teiserver.Account.OpenSkillReport do
   def run(_conn, params) do
     params = apply_defaults(params)
 
-    last_active = case params["last_active"] do
-      "Forever" -> Timex.today() |> Timex.shift(years: -1000) |> Timex.to_datetime()
-      "7 days" -> Timex.today() |> Timex.shift(days: -7) |> Timex.to_datetime()
-      "31 days" -> Timex.today() |> Timex.shift(days: -31) |> Timex.to_datetime()
-      "180 days" -> Timex.today() |> Timex.shift(days: -180) |> Timex.to_datetime()
-    end
+    last_active =
+      case params["last_active"] do
+        "Forever" -> Timex.today() |> Timex.shift(years: -1000) |> Timex.to_datetime()
+        "7 days" -> Timex.today() |> Timex.shift(days: -7) |> Timex.to_datetime()
+        "31 days" -> Timex.today() |> Timex.shift(days: -31) |> Timex.to_datetime()
+        "180 days" -> Timex.today() |> Timex.shift(days: -180) |> Timex.to_datetime()
+      end
 
     uncertainty = params["uncertainty"] |> int_parse
 
@@ -69,7 +70,7 @@ defmodule Teiserver.Account.OpenSkillReport do
     Map.merge(
       %{
         "rating_type" => "Team",
-        "metric" => "Rating",
+        "metric" => "Game Rating",
         "last_active" => "7 days",
         "uncertainty" => "5"
       },
@@ -77,9 +78,11 @@ defmodule Teiserver.Account.OpenSkillReport do
     )
   end
 
-  defp convert_metric_name_to_db_column_name("Rating"), do: "rating_value"
+  defp convert_metric_name_to_db_column_name("Game Rating"), do: "rating_value"
   defp convert_metric_name_to_db_column_name("Skill"), do: "skill"
   defp convert_metric_name_to_db_column_name("Uncertainty"), do: "uncertainty"
   defp convert_metric_name_to_db_column_name("Leaderboard Rating"), do: "leaderboard_rating"
-  defp convert_metric_name_to_db_column_name(unhandled_rating_metric), do: Logger.error("use of unhandled rating metric: #{unhandled_rating_metric}")
+
+  defp convert_metric_name_to_db_column_name(unhandled_rating_metric),
+    do: Logger.error("use of unhandled rating metric: #{unhandled_rating_metric}")
 end

@@ -7,9 +7,10 @@ defmodule Teiserver.Telemetry.ServerGraphDayLogsTask do
         [name | build_line(logs, path, mapper_function)]
 
       field_name ->
-        name = String.split(field_name, ".")
-        |> Enum.reverse()
-        |> hd
+        name =
+          String.split(field_name, ".")
+          |> Enum.reverse()
+          |> hd
 
         [name | build_line(logs, field_name, mapper_function)]
     end)
@@ -23,7 +24,7 @@ defmodule Teiserver.Telemetry.ServerGraphDayLogsTask do
     |> Enum.map(fn log ->
       get_in(log.data, getter)
     end)
-    |> List.flatten
+    |> List.flatten()
     |> Enum.map(mapper_function)
   end
 end

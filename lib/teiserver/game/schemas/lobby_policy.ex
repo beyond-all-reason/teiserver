@@ -51,8 +51,11 @@ defmodule Teiserver.Game.LobbyPolicy do
       |> min_and_max(~w(min_teamsize max_teamsize)a)
 
     struct
-      |> cast(params, ~w(name icon colour enabled map_list agent_name_list agent_name_format lobby_name_format min_rating max_rating min_uncertainty max_uncertainty min_rank max_rank max_teamcount min_teamsize max_teamsize preset)a)
-      |> validate_required(~w(name)a)
+    |> cast(
+      params,
+      ~w(name icon colour enabled map_list agent_name_list agent_name_format lobby_name_format min_rating max_rating min_uncertainty max_uncertainty min_rank max_rank max_teamcount min_teamsize max_teamsize preset)a
+    )
+    |> validate_required(~w(name)a)
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean

@@ -40,10 +40,11 @@ defmodule Teiserver.Account.AccoladeBotServer do
     account = get_accolade_account()
     Central.cache_put(:application_metadata_cache, "teiserver_accolade_userid", account.id)
 
-    {user, client} = case User.internal_client_login(account.id) do
-      {:ok, user, client} -> {user, client}
-      :error -> raise "No accolade user found"
-    end
+    {user, client} =
+      case User.internal_client_login(account.id) do
+        {:ok, user, client} -> {user, client}
+        :error -> raise "No accolade user found"
+      end
 
     state = %{
       ip: "127.0.0.1",
@@ -71,12 +72,17 @@ defmodule Teiserver.Account.AccoladeBotServer do
   end
 
   # Match ending
-  def handle_info(%{channel: "global_match_updates", event: :match_completed, match_id: match_id}, state) do
+  def handle_info(
+        %{channel: "global_match_updates", event: :match_completed, match_id: match_id},
+        state
+      ) do
     case Battle.get_match(match_id) do
       nil ->
         nil
+
       match ->
         duration = Timex.diff(match.finished, match.started, :second)
+
         if duration > 600 do
           if Config.get_site_config_cache("teiserver.Enable accolades") do
             post_match_messages(match)
@@ -88,6 +94,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
 
     {:noreply, state}
   end
+
   def handle_info(%{channel: "global_match_updates"}, state) do
     {:noreply, state}
   end
@@ -100,8 +107,9 @@ defmodule Teiserver.Account.AccoladeBotServer do
   def handle_info({:new_message_ex, _userid, _room_name, _message}, state), do: {:noreply, state}
 
   def handle_info({:direct_message, from_id, parts}, state) when is_list(parts) do
-    new_state = parts
-      |> Enum.reduce(state, fn (part, acc_state) ->
+    new_state =
+      parts
+      |> Enum.reduce(state, fn part, acc_state ->
         {_, new_state} = handle_info({:direct_message, from_id, part}, acc_state)
         new_state
       end)
@@ -120,7 +128,12 @@ defmodule Teiserver.Account.AccoladeBotServer do
     if not User.is_bot?(userid) do
       case AccoladeLib.cast_accolade_chat(userid, {:user_message, message}) do
         nil ->
-          User.send_direct_message(state.userid, userid, "I'm not currently awaiting feedback for a player")
+          User.send_direct_message(
+            state.userid,
+            userid,
+            "I'm not currently awaiting feedback for a player"
+          )
+
         _ ->
           :ok
       end
@@ -130,7 +143,12 @@ defmodule Teiserver.Account.AccoladeBotServer do
   end
 
   def handle_info({:new_accolade, userid}, state) do
-    User.send_direct_message(state.userid, userid, "You have been awarded a new accolade send $whoami to myself to see your collection.")
+    User.send_direct_message(
+      state.userid,
+      userid,
+      "You have been awarded a new accolade send $whoami to myself to see your collection."
+    )
+
     {:noreply, state}
   end
 
@@ -142,36 +160,44 @@ defmodule Teiserver.Account.AccoladeBotServer do
 
   # Catchall handle_info
   def handle_info(msg, state) do
-    Logger.error("Accolade server handle_info error. No handler for msg of #{Kernel.inspect msg}")
+    Logger.error(
+      "Accolade server handle_info error. No handler for msg of #{Kernel.inspect(msg)}"
+    )
+
     {:noreply, state}
   end
 
   @spec get_accolade_account() :: Central.Account.User.t()
   def get_accolade_account() do
-    user = Account.get_user(nil, search: [
-      email: "accolades_bot@teiserver"
-    ])
+    user =
+      Account.get_user(nil,
+        search: [
+          email: "accolades_bot@teiserver"
+        ]
+      )
 
     case user do
       nil ->
         # Make account
-        {:ok, account} = Account.create_user(%{
-          name: "AccoladesBot",
-          email: "accolades_bot@teiserver",
-          icon: "fa-solid #{Teiserver.Account.AccoladeLib.icon()}" |> String.replace(" far ", " "),
-          colour: "#0066AA",
-          admin_group_id: Teiserver.internal_group_id(),
-          password: Account.make_bot_password(),
-          data: %{
-            bot: true,
-            moderator: false,
-            verified: true,
-            lobby_client: "Teiserver Internal Process"
-          }
-        })
+        {:ok, account} =
+          Account.create_user(%{
+            name: "AccoladesBot",
+            email: "accolades_bot@teiserver",
+            icon:
+              "fa-solid #{Teiserver.Account.AccoladeLib.icon()}" |> String.replace(" far ", " "),
+            colour: "#0066AA",
+            admin_group_id: Teiserver.internal_group_id(),
+            password: Account.make_bot_password(),
+            data: %{
+              bot: true,
+              moderator: false,
+              verified: true,
+              lobby_client: "Teiserver Internal Process"
+            }
+          })
 
         Account.update_user_stat(account.id, %{
-          country_override: Application.get_env(:central, Teiserver)[:server_flag],
+          country_override: Application.get_env(:central, Teiserver)[:server_flag]
         })
 
         Account.create_group_membership(%{

@@ -11,15 +11,16 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
     days = Application.get_env(:central, Teiserver)[:retention][:account_unverified]
 
     # Find all unverified users who registered over 14 days ago
-    id_list = Account.list_users(
-      search: [
-        verified: "Unverified",
-        inserted_before: Timex.shift(Timex.now(), days: -days),
-      ],
-      select: [:id],
-      limit: :infinity
-    )
-    |> Enum.map(fn %{id: userid} -> userid end)
+    id_list =
+      Account.list_users(
+        search: [
+          verified: "Unverified",
+          inserted_before: Timex.shift(Timex.now(), days: -days)
+        ],
+        select: [:id],
+        limit: :infinity
+      )
+      |> Enum.map(fn %{id: userid} -> userid end)
 
     do_deletion(id_list)
 
@@ -34,11 +35,13 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
   @spec do_deletion([T.userid()]) :: {:ok, map()} | {:error, map()}
   def do_deletion(id_list) do
     id_list
-      |> Enum.each(&Account.decache_user/1)
+    |> Enum.each(&Account.decache_user/1)
 
     # Some mass deletion first
-    sql_id_list = id_list
+    sql_id_list =
+      id_list
       |> Enum.join(",")
+
     sql_id_list = "(#{sql_id_list})"
 
     # Clan memberships
@@ -46,7 +49,9 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
     Ecto.Adapters.SQL.query(Repo, query, [])
 
     # Accolades
-    query = "DELETE FROM teiserver_account_accolades WHERE recipient_id IN #{sql_id_list} OR giver_id IN #{sql_id_list}"
+    query =
+      "DELETE FROM teiserver_account_accolades WHERE recipient_id IN #{sql_id_list} OR giver_id IN #{sql_id_list}"
+
     Ecto.Adapters.SQL.query(Repo, query, [])
 
     # Events/Properties

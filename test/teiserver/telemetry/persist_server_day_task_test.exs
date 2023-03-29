@@ -18,10 +18,12 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTaskTest do
   end
 
   defp create_minute_data() do
-    all_ids = Account.list_users()
+    all_ids =
+      Account.list_users()
       |> Enum.map(fn u -> u.id end)
 
-    user_ids = all_ids
+    user_ids =
+      all_ids
       |> User.list_users()
       |> Enum.filter(fn u -> u.bot == false end)
       |> Enum.map(fn u -> u.id end)

@@ -44,10 +44,12 @@ defmodule Central.Helpers.InputHelper do
     label_opts = [class: "control-label"]
     input_opts = [class: "form-control"]
 
-    input_opts = input_opts ++ case opts[:using] do
-      :checkbox -> [class: "form-check-input"]
-      _ -> []
-    end
+    input_opts =
+      input_opts ++
+        case opts[:using] do
+          :checkbox -> [class: "form-check-input"]
+          _ -> []
+        end
 
     # A bit messy but the best way I can think of doing it
     input_opts = input_opts ++ if opts[:autofocus], do: [autofocus: "autofocus"], else: []
@@ -97,10 +99,11 @@ defmodule Central.Helpers.InputHelper do
   end
 
   def textarea_array(form, field, _opts \\ []) do
-    raw_value = cond do
-      is_list(input_value(form, field)) -> input_value(form, field)
-      true -> [input_value(form, field)]
-    end
+    raw_value =
+      cond do
+        is_list(input_value(form, field)) -> input_value(form, field)
+        true -> [input_value(form, field)]
+      end
 
     value = raw_value |> Enum.join("\n")
 
@@ -109,13 +112,13 @@ defmodule Central.Helpers.InputHelper do
     field_name = "#{form.name}[#{field}]"
 
     {:safe,
-      [
-        "<textarea name='",
-        field_name,
-        "' class='form-control' rows='#{row_count}'>",
-        value,
-        "</textarea>"
-      ]}
+     [
+       "<textarea name='",
+       field_name,
+       "' class='form-control' rows='#{row_count}'>",
+       value,
+       "</textarea>"
+     ]}
   end
 
   def datetime_picker(form, field, _opts \\ []) do

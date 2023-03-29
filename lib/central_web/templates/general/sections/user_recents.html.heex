@@ -1,7 +1,4 @@
-<%
-  recents = Central.Account.RecentlyUsedCache.get_recently(@conn)
-%>
-
+<% recents = Central.Account.RecentlyUsedCache.get_recently(@conn) %>
 
 <%= if recents != [] do %>
   <div class="nav-item dropdown mx-2">
@@ -15,9 +12,10 @@
     >
       <i class="fa-solid fa-clock fa-fw fa-lg"></i>
     </a>
-    <div class="dropdown-menu dropdown-menu-end"
-        aria-labelledby="user-recents-link"
-        style="min-width: 300px; max-width: 500px;"
+    <div
+      class="dropdown-menu dropdown-menu-end"
+      aria-labelledby="user-recents-link"
+      style="min-width: 300px; max-width: 500px;"
     >
       <span class="dropdown-header" style="font-weight: bold;">
         Recent items
@@ -32,11 +30,9 @@
           <% else %>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <% end %>
-          &nbsp;
-          <%= r.item_label %>
+          &nbsp; <%= r.item_label %>
         </a>
       <% end %>
-
     </div>
   </div>
 <% end %>

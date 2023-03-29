@@ -66,6 +66,7 @@ defmodule CentralWeb.Account.ForgottenPasswordControllerTest do
         )
 
       assert redirected_to(conn) == "/"
+
       # assert conn.private[:phoenix_flash]["success"] == "Existing password reset already sent out"
       # assert conn.private[:phoenix_flash]["danger"] == nil
       # assert conn.private[:phoenix_flash]["info"] == nil

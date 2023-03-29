@@ -21,38 +21,50 @@ defmodule Teiserver.Account.AccoladeReport do
         params["end_date"]
       )
 
-    badge_types = Account.list_badge_types()
+    badge_types =
+      Account.list_badge_types()
       |> Map.new(fn bt -> {bt.id, bt} end)
       |> Map.put(nil, BadgeTypeLib.nil_badge_type())
 
-    accolades = Account.list_accolades(search: [
-      inserted_after: start_date |> Timex.to_datetime,
-      inserted_before: end_date |> Timex.to_datetime,
-    ],
-    limit: :infinity)
+    accolades =
+      Account.list_accolades(
+        search: [
+          inserted_after: start_date |> Timex.to_datetime(),
+          inserted_before: end_date |> Timex.to_datetime()
+        ],
+        limit: :infinity
+      )
 
-    counts = accolades
-    |> Enum.group_by(fn a ->
-      a.badge_type_id
-    end, fn _ ->
-      1
-    end)
-    |> Map.new(fn {k, v} -> {k, Enum.count(v)} end)
+    counts =
+      accolades
+      |> Enum.group_by(
+        fn a ->
+          a.badge_type_id
+        end,
+        fn _ ->
+          1
+        end
+      )
+      |> Map.new(fn {k, v} -> {k, Enum.count(v)} end)
 
-    giver_leaderboard = get_giver_leaderboard(accolades, 3)
-    |> Map.drop([nil])
+    giver_leaderboard =
+      get_giver_leaderboard(accolades, 3)
+      |> Map.drop([nil])
 
-    recipient_leaderboard = get_recipient_leaderboard(accolades, 3)
-    |> Map.drop([nil])
+    recipient_leaderboard =
+      get_recipient_leaderboard(accolades, 3)
+      |> Map.drop([nil])
 
-    giver_ids = giver_leaderboard
+    giver_ids =
+      giver_leaderboard
       |> Enum.map(fn {_, leaders} ->
         leaders
         |> Enum.map(fn {userid, _} -> userid end)
       end)
       |> List.flatten()
 
-    recipient_ids = recipient_leaderboard
+    recipient_ids =
+      recipient_leaderboard
       |> Enum.map(fn {_, leaders} ->
         leaders
         |> Enum.map(fn {userid, _} -> userid end)
@@ -60,19 +72,23 @@ defmodule Teiserver.Account.AccoladeReport do
       |> List.flatten()
 
     give_take_ratios = get_give_take_ratios(accolades)
-    top_takers = give_take_ratios
+
+    top_takers =
+      give_take_ratios
       |> Enum.sort_by(fn {_, _, got, ratio} -> {ratio, got} end, &>=/2)
       |> Enum.take(10)
 
-    top_givers = give_take_ratios
+    top_givers =
+      give_take_ratios
       |> Enum.sort_by(fn {_, gave, _, ratio} -> {-ratio, gave} end, &>=/2)
       |> Enum.take(10)
 
     taker_userids = top_takers |> Enum.map(fn {userid, _, _, _} -> userid end)
     giver_userids = top_givers |> Enum.map(fn {userid, _, _, _} -> userid end)
 
-    users = (giver_ids ++ recipient_ids ++ taker_userids ++ giver_userids)
-      |> Enum.uniq
+    users =
+      (giver_ids ++ recipient_ids ++ taker_userids ++ giver_userids)
+      |> Enum.uniq()
       |> Map.new(fn userid -> {userid, User.get_user_by_id(userid)} end)
 
     assigns = %{
@@ -88,18 +104,21 @@ defmodule Teiserver.Account.AccoladeReport do
     }
 
     {%{
-      start_date: start_date,
-      end_date: end_date
-    }, assigns}
+       start_date: start_date,
+       end_date: end_date
+     }, assigns}
   end
 
   defp apply_defaults(params) do
-    Map.merge(%{
-      "date_preset" => "This month",
-      "start_date" => "",
-      "end_date" => "",
-      "mode" => ""
-    }, Map.get(params, "report", %{}))
+    Map.merge(
+      %{
+        "date_preset" => "This month",
+        "start_date" => "",
+        "end_date" => "",
+        "mode" => ""
+      },
+      Map.get(params, "report", %{})
+    )
   end
 
   defp get_giver_leaderboard(accolades, positions) do
@@ -131,21 +150,20 @@ defmodule Teiserver.Account.AccoladeReport do
   end
 
   defp get_give_take_ratios(accolades) do
-    given = accolades
+    given =
+      accolades
       |> Enum.group_by(fn a -> a.giver_id end, fn _ -> :ok end)
       |> Map.new(fn {userid, accs} -> {userid, Enum.count(accs)} end)
 
-    received = accolades
+    received =
+      accolades
       |> Enum.group_by(fn a -> a.recipient_id end, fn _ -> :ok end)
       |> Map.new(fn {userid, accs} -> {userid, Enum.count(accs)} end)
 
     Enum.uniq(Map.keys(given) ++ Map.keys(received))
     |> Enum.map(fn userid ->
-      {userid,
-        Map.get(given, userid, 0),
-        Map.get(received, userid, 0),
-        Map.get(received, userid, 0)/Map.get(given, userid, 1)
-      }
+      {userid, Map.get(given, userid, 0), Map.get(received, userid, 0),
+       Map.get(received, userid, 0) / Map.get(given, userid, 1)}
     end)
   end
 end

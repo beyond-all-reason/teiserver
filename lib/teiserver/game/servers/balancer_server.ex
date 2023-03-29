@@ -15,16 +15,18 @@ defmodule Teiserver.Game.BalancerServer do
   @impl true
   # http://planetspads.free.fr/spads/doc/spadsPluginApiDoc.html#balanceBattle-self-players-bots-clanMode-nbTeams-teamSize
   def handle_call({:make_balance, team_count, call_opts}, _from, state) do
-    opts = call_opts ++ [
-      algorithm: state.algorithm,
-      max_deviation: state.max_deviation,
-      rating_lower_boundary: state.rating_lower_boundary,
-      rating_upper_boundary: state.rating_upper_boundary,
-      mean_diff_max: state.mean_diff_max,
-      stddev_diff_max: state.stddev_diff_max,
-      fuzz_multiplier: state.fuzz_multiplier,
-      shuffle_first_pick: state.shuffle_first_pick
-    ]
+    opts =
+      call_opts ++
+        [
+          algorithm: state.algorithm,
+          max_deviation: state.max_deviation,
+          rating_lower_boundary: state.rating_lower_boundary,
+          rating_upper_boundary: state.rating_upper_boundary,
+          mean_diff_max: state.mean_diff_max,
+          stddev_diff_max: state.stddev_diff_max,
+          fuzz_multiplier: state.fuzz_multiplier,
+          shuffle_first_pick: state.shuffle_first_pick
+        ]
 
     {balance, new_state} = make_balance(team_count, state, opts)
     {:reply, balance, new_state}
@@ -71,17 +73,19 @@ defmodule Teiserver.Game.BalancerServer do
   end
 
   def handle_cast({:set, key, value}, state) do
-    valid_keys = ~w(max_deviation rating_lower_boundary rating_upper_boundary mean_diff_max stddev_diff_max fuzz_multiplier shuffle_first_pick)a
+    valid_keys =
+      ~w(max_deviation rating_lower_boundary rating_upper_boundary mean_diff_max stddev_diff_max fuzz_multiplier shuffle_first_pick)a
 
-    new_state = case Enum.member?(valid_keys, key) do
-      true ->
-        state
+    new_state =
+      case Enum.member?(valid_keys, key) do
+        true ->
+          state
           |> Map.put(key, value)
           |> Map.put(:hashes, %{})
 
-      false ->
-        state
-    end
+        false ->
+          state
+      end
 
     {:noreply, new_state}
   end
@@ -119,7 +123,8 @@ defmodule Teiserver.Game.BalancerServer do
   #   {:noreply, state}
   # end
 
-  @spec make_balance(non_neg_integer(), T.balance_server_state(), list()) :: {map(), T.balance_server_state()}
+  @spec make_balance(non_neg_integer(), T.balance_server_state(), list()) ::
+          {map(), T.balance_server_state()}
   defp make_balance(team_count, state, opts) do
     players = Battle.list_lobby_players(state.lobby_id)
     hash = make_player_hash(team_count, players, opts)
@@ -127,49 +132,59 @@ defmodule Teiserver.Game.BalancerServer do
     if Map.has_key?(state.hashes, hash) do
       result = state.hashes[hash]
 
-      {result, %{state |
-        last_balance_hash: hash
-      }}
+      {result, %{state | last_balance_hash: hash}}
     else
-      result = do_make_balance(team_count, players, opts)
+      result =
+        do_make_balance(team_count, players, opts)
         |> Map.put(:hash, hash)
 
       new_hashes = Map.put(state.hashes, hash, result)
-      {result, %{state |
-        last_balance_hash: hash,
-        hashes: new_hashes
-      }}
+      {result, %{state | last_balance_hash: hash, hashes: new_hashes}}
     end
   end
 
   @spec make_player_hash(non_neg_integer(), [T.client()], list()) :: String.t()
   defp make_player_hash(team_count, players, opts) do
-    client_string = players
+    client_string =
+      players
       |> Enum.sort_by(fn c -> c.userid end)
       |> Enum.map_join(",", fn c -> "#{c.userid}:#{c.party_id}" end)
 
     opts_string = Kernel.inspect(opts)
 
     :crypto.hash(:md5, "#{team_count}--#{client_string}--#{opts_string}")
-      |> Base.encode64()
+    |> Base.encode64()
   end
 
   @spec do_make_balance(non_neg_integer(), [T.client()], List.t()) :: map()
   defp do_make_balance(team_count, players, opts) do
     player_count = Enum.count(players)
 
-    rating_type = cond do
-      player_count == 2 -> "Duel"
-      team_count > 2 ->
-        if player_count > team_count, do: "Team", else: "FFA"
-      true -> "Team"
-    end
+    rating_type =
+      cond do
+        player_count == 2 ->
+          "Duel"
+
+        team_count > 2 ->
+          if player_count > team_count, do: "Team", else: "FFA"
+
+        true ->
+          "Team"
+      end
 
     if opts[:allow_groups] do
       party_result = make_grouped_balance(team_count, players, rating_type, opts)
 
       if party_result.deviation > opts[:max_deviation] do
-        make_solo_balance(team_count, players, rating_type, ["Tried grouped mode, got a deviation of #{party_result.deviation} and reverted to solo mode"], opts)
+        make_solo_balance(
+          team_count,
+          players,
+          rating_type,
+          [
+            "Tried grouped mode, got a deviation of #{party_result.deviation} and reverted to solo mode"
+          ],
+          opts
+        )
       else
         party_result
       end
@@ -181,40 +196,54 @@ defmodule Teiserver.Game.BalancerServer do
   @spec make_grouped_balance(non_neg_integer(), [T.client()], String.t(), list()) :: map()
   defp make_grouped_balance(team_count, players, rating_type, opts) do
     # Group players into parties
-    partied_players = players
+    partied_players =
+      players
       |> Enum.group_by(fn p -> p.party_id end, fn p -> p.userid end)
 
-    groups = partied_players
+    groups =
+      partied_players
       |> Enum.map(fn
         # The nil group is players without a party, they need to
         # be broken out of the party
         {nil, player_id_list} ->
           player_id_list
-            |> Enum.map(fn userid ->
-              %{userid => BalanceLib.get_user_balance_rating_value(userid, rating_type) |> fuzz_rating(opts[:fuzz_multiplier])}
-            end)
+          |> Enum.map(fn userid ->
+            %{
+              userid =>
+                BalanceLib.get_user_balance_rating_value(userid, rating_type)
+                |> fuzz_rating(opts[:fuzz_multiplier])
+            }
+          end)
 
         {_party_id, player_id_list} ->
           player_id_list
-            |> Map.new(fn userid ->
-              {userid, BalanceLib.get_user_balance_rating_value(userid, rating_type) |> fuzz_rating(opts[:fuzz_multiplier])}
-            end)
+          |> Map.new(fn userid ->
+            {userid,
+             BalanceLib.get_user_balance_rating_value(userid, rating_type)
+             |> fuzz_rating(opts[:fuzz_multiplier])}
+          end)
       end)
-      |> List.flatten
+      |> List.flatten()
 
     BalanceLib.create_balance(groups, team_count, opts)
-      |> Map.put(:balance_mode, :grouped)
+    |> Map.put(:balance_mode, :grouped)
   end
 
-  @spec make_solo_balance(non_neg_integer(), [T.client()], String.t(), [String.t()], list()) :: map()
+  @spec make_solo_balance(non_neg_integer(), [T.client()], String.t(), [String.t()], list()) ::
+          map()
   defp make_solo_balance(team_count, players, rating_type, initial_logs, opts) do
-    groups = players
+    groups =
+      players
       |> Enum.map(fn %{userid: userid} ->
-        %{userid => BalanceLib.get_user_balance_rating_value(userid, rating_type) |> fuzz_rating(opts[:fuzz_multiplier])}
+        %{
+          userid =>
+            BalanceLib.get_user_balance_rating_value(userid, rating_type)
+            |> fuzz_rating(opts[:fuzz_multiplier])
+        }
       end)
 
     result = BalanceLib.create_balance(groups, team_count, opts)
-    new_logs = [initial_logs | result.logs] |> List.flatten
+    new_logs = [initial_logs | result.logs] |> List.flatten()
 
     Map.merge(result, %{
       logs: new_logs,
@@ -224,11 +253,11 @@ defmodule Teiserver.Game.BalancerServer do
 
   defp fuzz_rating(rating, multiplier) do
     # Generate something between -1 and 1
-    modifier = 1 - (:rand.uniform() * 2)
-    rating + (modifier * multiplier)
+    modifier = 1 - :rand.uniform() * 2
+    rating + modifier * multiplier
   end
 
-  @spec empty_state(T.lobby_id) :: T.balance_server_state()
+  @spec empty_state(T.lobby_id()) :: T.balance_server_state()
   defp empty_state(lobby_id) do
     # it's possible the lobby is nil before we even get to start this up (tests in particular)
     # hence this defensive methodology
@@ -240,9 +269,7 @@ defmodule Teiserver.Game.BalancerServer do
       coordinator_id: Coordinator.get_coordinator_userid(),
       lobby_id: lobby_id,
       host_id: founder_id,
-
       hashes: %{},
-
       algorithm: :loser_picks,
       last_balance_hash: nil
     })
@@ -252,7 +279,7 @@ defmodule Teiserver.Game.BalancerServer do
   @spec init(Map.t()) :: {:ok, T.balance_server_state()}
   def init(opts) do
     lobby_id = opts[:lobby_id]
-    Logger.metadata([request_id: "BalancerServer##{opts.lobby_id}"])
+    Logger.metadata(request_id: "BalancerServer##{opts.lobby_id}")
 
     # These were never actually used
     # :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")

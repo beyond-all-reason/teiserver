@@ -5,6 +5,13 @@ defmodule Teiserver.Tachyon.Handlers.System.NoCommandErrorRequest do
 
   # @command_id "system/error"
 
+  @spec dispatch_handlers :: map()
+  def dispatch_handlers() do
+    %{
+      "no_command" => &execute/3
+    }
+  end
+
   def execute(conn, _object, %{"command" => command} = _meta) do
     response = %{
       "reason" => "No command of '#{command}'"

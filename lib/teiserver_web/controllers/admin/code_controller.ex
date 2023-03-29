@@ -60,9 +60,10 @@ defmodule TeiserverWeb.Admin.CodeController do
 
   @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def create(conn, %{"code" => code_params}) do
-    code_params = Map.merge(code_params, %{
-      "user_id" => conn.current_user.id
-    })
+    code_params =
+      Map.merge(code_params, %{
+        "user_id" => conn.current_user.id
+      })
 
     case Account.create_code(code_params) do
       {:ok, _code} ->
@@ -81,12 +82,14 @@ defmodule TeiserverWeb.Admin.CodeController do
   @spec extend(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def extend(conn, %{"id" => id, "hours" => hours}) do
     code = Account.get_code!(nil, search: [id: id])
-    new_expires = if Timex.compare(Timex.now(), code.expires) == 1 do
-      # If it's 1 then the code is currently expired
-      Timex.shift(Timex.now(), hours: hours |> String.to_integer)
-    else
-      Timex.shift(code.expires, hours: hours |> String.to_integer)
-    end
+
+    new_expires =
+      if Timex.compare(Timex.now(), code.expires) == 1 do
+        # If it's 1 then the code is currently expired
+        Timex.shift(Timex.now(), hours: hours |> String.to_integer())
+      else
+        Timex.shift(code.expires, hours: hours |> String.to_integer())
+      end
 
     case Account.update_code(code, %{"expires" => new_expires}) do
       {:ok, _code} ->

@@ -1,30 +1,34 @@
-<%
-  bsname = view_colour()
-%>
+<% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "reports"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <div class="btn btn-primary2 float-end" onclick="$('.help-box, .help-box-large').toggle();">
-          <i class='fa-fw fa-solid fa-circle-info'></i>
-          &nbsp;
+        <div
+          class="btn btn-primary2 float-end"
+          onclick="$('.help-box, .help-box-large').toggle();"
+        >
+          <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
           Show/Hide help
         </div>
-        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Report.ReportView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "records"
           })
-        %>
+        ) %>
         <br /><br />
 
-        <div class="help-box-large">
-
-        </div>
-
+        <div class="help-box-large"></div>
 
         <table class="table">
           <thead>
@@ -42,17 +46,16 @@
             <%= for {key, rows} <- @records do %>
               <tr>
                 <td><%= key %></td>
-                <td><%= format_number @today[key] %></td>
+                <td><%= format_number(@today[key]) %></td>
 
                 <%= for [date, value] <- rows do %>
-                  <td><%= format_number value %></td>
+                  <td><%= format_number(value) %></td>
                   <td><%= date_to_str(date, format: :ymd) %></td>
                 <% end %>
               </tr>
             <% end %>
           </tbody>
         </table>
-
       </div>
     </div>
   </div>

@@ -6,9 +6,12 @@ defmodule TeiserverWeb.Components.PlayerListComponent do
   def preload(list_of_assigns) do
     assigns = hd(list_of_assigns)
 
-    [Map.merge(%{
-
-    }, assigns)]
+    [
+      Map.merge(
+        %{},
+        assigns
+      )
+    ]
   end
 
   @impl true
@@ -18,24 +21,28 @@ defmodule TeiserverWeb.Components.PlayerListComponent do
 
   @impl true
   def update(assigns, socket) do
-    clients = assigns[:clients]
-      |> Map.values
+    clients =
+      assigns[:clients]
+      |> Map.values()
       |> Enum.group_by(fn v -> v.player end)
 
-    teams = clients
-      |> Map.get(:true, [])
+    teams =
+      clients
+      |> Map.get(true, [])
       |> Enum.group_by(fn v -> v.team_number end)
       |> Enum.map(fn {team, players} ->
-        {team, players
-          |> Enum.sort_by(fn c -> c.name end, &<=/2)
-        }
+        {team,
+         players
+         |> Enum.sort_by(fn c -> c.name end, &<=/2)}
       end)
 
-    spectators = clients
-      |> Map.get(:false, [])
+    spectators =
+      clients
+      |> Map.get(false, [])
       |> Enum.sort_by(fn c -> c.name end, &<=/2)
 
-    socket = socket
+    socket =
+      socket
       |> assign(:current_user, assigns[:current_user])
       |> assign(:teams, teams)
       |> assign(:spectators, spectators)

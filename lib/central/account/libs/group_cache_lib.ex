@@ -89,7 +89,7 @@ defmodule Central.Account.GroupCacheLib do
     |> prepend_to_list(super_group)
     |> Enum.each(fn sg ->
       new_cache =
-        ([the_group.id | sg.children_cache ++ the_group.children_cache])
+        [the_group.id | sg.children_cache ++ the_group.children_cache]
         |> Enum.uniq()
 
       sg
@@ -100,7 +100,7 @@ defmodule Central.Account.GroupCacheLib do
     # the_group needs to enuser it has it's super_group_id
     # and it's super_group supers_cache as it's own supers_cache
     new_cache =
-      ([super_group.id | super_group.supers_cache])
+      [super_group.id | super_group.supers_cache]
       |> Enum.uniq()
 
     the_group

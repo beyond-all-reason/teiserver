@@ -1,9 +1,11 @@
-<%
-  bsname = @view_colour
-  moderator = allow?(@current_user, "teiserver.staff.moderator")
-%>
+<% bsname = @view_colour
+moderator = allow?(@current_user, "teiserver.staff.moderator") %>
 
-<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "battle_lobbies", conn: @socket}) %>
+<%= render(
+  TeiserverWeb.Battle.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "battle_lobbies", conn: @socket})
+) %>
 
 <style type="text/css">
   .chat-row {
@@ -37,12 +39,17 @@
   <div class="col-md-10">
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
-
         <div class="float-end">
-          <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, @lobby.id), class: "btn btn-#{bsname}" %>
+          <%= live_redirect("Show",
+            to: Routes.ts_battle_lobby_show_path(@socket, :show, @lobby.id),
+            class: "btn btn-#{bsname}"
+          ) %>
 
           <%= if moderator do %>
-            <a href={Routes.ts_admin_lobby_path(@socket, :lobby_chat, @lobby.uuid)} class={"btn btn-#{bsname}"}>
+            <a
+              href={Routes.ts_admin_lobby_path(@socket, :lobby_chat, @lobby.uuid)}
+              class={"btn btn-#{bsname}"}
+            >
               Full chat
             </a>
           <% end %>
@@ -52,26 +59,25 @@
 
         <%= if @lobby.in_progress do %>
           <h4>
-            Match in progress -
-            <%= Central.Helpers.TimexHelper.duration_to_str_short(System.system_time(:second) - (@lobby.started_at || 1652282031)) %> -
-            <%= extra %>
+            Match in progress - <%= Central.Helpers.TimexHelper.duration_to_str_short(
+              System.system_time(:second) - (@lobby.started_at || 1_652_282_031)
+            ) %> - <%= extra %>
           </h4>
         <% else %>
           <h4>Pre-game lobby - <%= extra %></h4>
         <% end %>
 
         <div id="chat" class="mt-4">
-          <% messages = @messages |> Enum.reverse %>
+          <% messages = @messages |> Enum.reverse() %>
           <%= for {{userid, message}, i} <- Enum.with_index(messages) do %>
-            <%
-              last_msg = Enum.at(messages, i-1)
+            <% last_msg = Enum.at(messages, i - 1)
 
-              different_user = cond do
+            different_user =
+              cond do
                 i == 0 -> true
                 elem(last_msg, 0) != userid -> true
                 true -> false
-              end
-            %>
+              end %>
             <%= if different_user do %>
               <div class="new-author"></div>
             <% end %>
@@ -82,21 +88,44 @@
                 <div class="chat-author">&nbsp;</div>
               <% end %>
 
-              <%
-                class = cond do
-                  Enum.member?(["!y", "!yes", "!vote y", "!vote yes", "g: !vote y"], message) -> "text-success"
-                  Enum.member?(["!n", "!no", "!vote n", "!vote no", "g: !vote n"], message) -> "text-danger"
-                  Enum.member?(["!b", "!abstain", "!vote b", "!vote abstain", "g: !vote b"], message) -> "text-info"
-                  String.starts_with?(message, "!") -> "text-primary2"
-                  String.starts_with?(message, "$") -> "text-primary2"
-                  String.starts_with?(message, "s:") -> "text-warning2"
-                  String.starts_with?(message, "a:") -> "text-success"
-                  String.starts_with?(message, "web:") -> "text-info2"
-                  String.starts_with?(message, "system:") -> "text-system"
-                  String.starts_with?(message, "g:") -> ""
-                  true -> ""
-                end
-              %>
+              <% class =
+                cond do
+                  Enum.member?(["!y", "!yes", "!vote y", "!vote yes", "g: !vote y"], message) ->
+                    "text-success"
+
+                  Enum.member?(["!n", "!no", "!vote n", "!vote no", "g: !vote n"], message) ->
+                    "text-danger"
+
+                  Enum.member?(
+                    ["!b", "!abstain", "!vote b", "!vote abstain", "g: !vote b"],
+                    message
+                  ) ->
+                    "text-info"
+
+                  String.starts_with?(message, "!") ->
+                    "text-primary2"
+
+                  String.starts_with?(message, "$") ->
+                    "text-primary2"
+
+                  String.starts_with?(message, "s:") ->
+                    "text-warning2"
+
+                  String.starts_with?(message, "a:") ->
+                    "text-success"
+
+                  String.starts_with?(message, "web:") ->
+                    "text-info2"
+
+                  String.starts_with?(message, "system:") ->
+                    "text-system"
+
+                  String.starts_with?(message, "g:") ->
+                    ""
+
+                  true ->
+                    ""
+                end %>
 
               <div class={"chat-message #{class}"}><%= message %></div>
             </div>
@@ -107,16 +136,19 @@
           <.form :let={f} for={@message_changeset} phx-submit="send-message" class="mt-2">
             <div class="row">
               <div class="col-md-10">
-                <%= text_input f, :content, class: "form-control", autofocus: "autofocus", autocomplete: "off" %>
+                <%= text_input(f, :content,
+                  class: "form-control",
+                  autofocus: "autofocus",
+                  autocomplete: "off"
+                ) %>
               </div>
 
               <div class="col-md-2">
-                <%= submit "Send", class: "btn btn-primary btn-block" %>
+                <%= submit("Send", class: "btn btn-primary btn-block") %>
               </div>
             </div>
           </.form>
         <% end %>
-
       </div>
     </div>
   </div>

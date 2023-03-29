@@ -27,6 +27,7 @@ defmodule Central do
       {:cluster_hooks, :delete, Node.self(), table, keys}
     )
   end
+
   def cache_delete(table, key), do: cache_delete(table, [key])
 
   @doc """
@@ -70,7 +71,6 @@ defmodule Central do
       {:cluster_hooks, :update, Node.self(), table, key, func}
     )
   end
-
 
   # Stores
   @spec store_get(atom, any) :: any

@@ -1,17 +1,18 @@
 <% bsname = @view_colour %>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", %{active: "users", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
+<%= render(TeiserverWeb.Admin.GeneralView, "sub_menu.html", %{
+  active: "users",
+  conn: Map.put(@socket, :permissions, @current_user.permissions)
+}) %>
 
 <div class="row">
   <div class="col-md-12">
     <div class="card">
       <div class="card-body">
-
         <div class="float-end">
           <%= if Enum.member?(@filters, "people") do %>
             <span class={"btn btn-#{bsname} active"} phx-click="remove-filter:people">
-              <i class='fa-fw far fa-check'></i>
-              &nbsp;
+              <i class="fa-fw far fa-check"></i> &nbsp;
               People only
             </span>
           <% else %>
@@ -19,13 +20,10 @@
               People only
             </span>
           <% end %>
-
           &nbsp;
-
           <%= if Enum.member?(@filters, "normal") do %>
             <span class={"btn btn-#{bsname} active"} phx-click="remove-filter:normal">
-              <i class='fa-fw far fa-check'></i>
-              &nbsp;
+              <i class="fa-fw far fa-check"></i> &nbsp;
               Non-mods
             </span>
           <% else %>
@@ -59,22 +57,23 @@
           <tbody id="clients">
             <%= for userid <- @client_ids do %>
               <%= if Enum.member?(@client_ids, userid) do %>
-                <%
-                  user = @users[userid]
-                  client = @clients[userid]
-                %>
+                <% user = @users[userid]
+                client = @clients[userid] %>
                 <%= if client != nil do %>
                   <tr>
                     <td><%= client.name %></td>
                     <td><%= client.party_id %></td>
                     <td>
                       <%= if client.lobby_id do %>
-                        <%= live_redirect "Show #{client.lobby_id}", to: Routes.ts_battle_lobby_show_path(@socket, :show, client.lobby_id), class: "btn btn-sm btn-#{Teiserver.Battle.LobbyLib.colours}" %>
+                        <%= live_redirect("Show #{client.lobby_id}",
+                          to: Routes.ts_battle_lobby_show_path(@socket, :show, client.lobby_id),
+                          class: "btn btn-sm btn-#{Teiserver.Battle.LobbyLib.colours()}"
+                        ) %>
                       <% end %>
                     </td>
                     <td>
                       <%= if user.hw_hash != nil and user.hw_hash != "" do %>
-                        <i class='fa-fw far fa-check'></i>
+                        <i class="fa-fw far fa-check"></i>
                       <% else %>
                         &nbsp;
                       <% end %>
@@ -82,7 +81,7 @@
 
                     <td>
                       <%= if user.chobby_hash != nil and user.chobby_hash != "" do %>
-                        <i class='fa-fw far fa-check'></i>
+                        <i class="fa-fw far fa-check"></i>
                       <% else %>
                         &nbsp;
                       <% end %>
@@ -92,13 +91,10 @@
                       <%= cond do %>
                         <% client.in_game == true and client.player == true -> %>
                           Player
-
                         <% client.in_game == true -> %>
                           Spectator
-
                         <% client.lobby_id != nil -> %>
                           Lobby
-
                         <% true -> %>
                           Menu
                       <% end %>
@@ -108,7 +104,10 @@
 
                     <td>
                       <span>
-                        <%= live_redirect "Show", to: Routes.ts_admin_client_show_path(@socket, :show, client.userid), class: "btn btn-sm btn-#{bsname}" %>
+                        <%= live_redirect("Show",
+                          to: Routes.ts_admin_client_show_path(@socket, :show, client.userid),
+                          class: "btn btn-sm btn-#{bsname}"
+                        ) %>
                       </span>
                     </td>
                   </tr>
@@ -117,8 +116,6 @@
             <% end %>
           </tbody>
         </table>
-
-
       </div>
     </div>
   </div>

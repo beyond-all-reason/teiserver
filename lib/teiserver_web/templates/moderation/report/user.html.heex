@@ -10,91 +10,102 @@
   });
 </script>
 
-<%= render TeiserverWeb.Moderation.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+<%= render(
+  TeiserverWeb.Moderation.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "reports"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Moderation.ReportView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Moderation.ReportView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             show_search: false,
             active: "user"
-        }) %>
-
-        <div class="float-end">
-          <a class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"} href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@user.id}_"}>
-            <%= central_component "icon", icon: Teiserver.Moderation.ActionLib.icon(), class: "fa-solid" %>
-            &nbsp;
-            Action user
-          </a>
-        </div>
+          })
+        ) %>
         <hr />
 
         <div class="float-end">
-          <a class={"btn btn-outline-#{bsname}"} href={Routes.moderation_report_form_path(@conn, :index, @user.id)}>
-            <%= central_component "icon", icon: icon(), class: "fa-solid" %>
-            &nbsp;
+          <a
+            class={"btn btn-outline-#{bsname}"}
+            href={Routes.moderation_report_form_path(@conn, :index, @user.id)}
+          >
+            <%= central_component("icon", icon: icon(), class: "fa-solid") %> &nbsp;
             Report form
           </a>
 
           <%= if allow?(@conn, "teiserver.staff.moderator") do %>
-            <a class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"} href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@user.id}_"}>
-              <%= central_component "icon", icon: Teiserver.Moderation.ActionLib.icon(), class: "fa-solid" %>
-              &nbsp;
+            <a
+              class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
+              href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@user.id}_"}
+            >
+              <%= central_component("icon",
+                icon: Teiserver.Moderation.ActionLib.icon(),
+                class: "fa-solid"
+              ) %> &nbsp;
               Action user
             </a>
           <% end %>
 
           <%= if allow?(@conn, "teiserver.staff.moderator") do %>
-            <a class={"btn btn-outline-#{bsname}"} href={~p"/teiserver/admin/user/#{@user}"}>View user</a>
+            <a class={"btn btn-outline-#{bsname}"} href={~p"/teiserver/admin/user/#{@user}"}>
+              View user
+            </a>
           <% end %>
         </div>
 
         <h3 style={"color: #{@user.colour}"}>
-          <%= @user.name %>
-          &nbsp;
-          <%= central_component "icon", icon: @user.icon, icon_class: "fa-solid" %>
+          <%= @user.name %> &nbsp; <%= central_component("icon",
+            icon: @user.icon,
+            icon_class: "fa-solid"
+          ) %>
         </h3>
 
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item" role="presentation">
             <a href="#overview_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component "icon", icon: "fa-solid fa-bullseye-pointer" %>
-              Reports against (<%= Enum.count(@reports_against) %>)
+              <%= central_component("icon", icon: "fa-solid fa-bullseye-pointer") %> Reports against (<%= Enum.count(
+                @reports_against
+              ) %>)
             </a>
           </li>
 
           <li class="nav-item" role="presentation">
             <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component "icon", icon: "fa-solid fa-share-from-square" %>
-              Reports made (<%= Enum.count(@reports_made) %>)
+              <%= central_component("icon", icon: "fa-solid fa-share-from-square") %> Reports made (<%= Enum.count(
+                @reports_made
+              ) %>)
             </a>
           </li>
 
           <li class="nav-item" role="presentation">
             <a href="#actions_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component "icon", icon: Teiserver.Moderation.ActionLib.icon(), class: "fa-solid" %>
-              Actions (<%= Enum.count(@actions) %>)
+              <%= central_component("icon",
+                icon: Teiserver.Moderation.ActionLib.icon(),
+                class: "fa-solid"
+              ) %> Actions (<%= Enum.count(@actions) %>)
             </a>
           </li>
         </ul>
 
         <div class="tab-content">
           <div class="tab-pane" id="overview_tab" style="padding:5px;">
-            <%= render "tab_against.html", assigns %>
+            <%= render("tab_against.html", assigns) %>
           </div>
 
           <div class="tab-pane" id="details_tab" style="padding:5px;">
-            <%= render "tab_from.html", assigns %>
+            <%= render("tab_from.html", assigns) %>
           </div>
 
           <div class="tab-pane" id="actions_tab" style="padding:5px;">
-            <%= render "tab_actions.html", assigns %>
+            <%= render("tab_actions.html", assigns) %>
           </div>
         </div>
-        <%# END OF TABS %>
-
-
       </div>
     </div>
   </div>

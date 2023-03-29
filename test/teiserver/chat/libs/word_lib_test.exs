@@ -3,6 +3,7 @@ defmodule Teiserver.Chat.WordLibTest do
   alias Teiserver.Chat.WordLib
   alias Teiserver.{Coordinator, Room, User}
   alias Teiserver.Battle.LobbyChat
+
   import Teiserver.TeiserverTestLib,
     only: [new_user: 0]
 
@@ -25,6 +26,7 @@ defmodule Teiserver.Chat.WordLibTest do
       "teifion",
       "Llama"
     ]
+
     disallowed = [
       "llLl1iI"
     ]

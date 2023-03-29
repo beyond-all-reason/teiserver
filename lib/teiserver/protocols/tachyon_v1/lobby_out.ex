@@ -91,7 +91,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
       "lobby_id" => lobby_id,
       "joiner_id" => joiner_id,
       "client" => Tachyon.convert_object(client, :client),
-      "user" => Tachyon.convert_object(user, :user),
+      "user" => Tachyon.convert_object(user, :user)
     }
   end
 
@@ -124,6 +124,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
   # General Updates
   def do_reply(:updated, {lobby_id, _data}) do
     lobby = Lobby.get_lobby(lobby_id)
+
     %{
       "cmd" => "s.lobby.updated",
       "lobby" => Tachyon.convert_object(lobby, :lobby)
@@ -201,23 +202,27 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
 
   def do_reply(:force_join_lobby, {lobby_id, script_password}) do
     case Battle.get_combined_lobby_state(lobby_id) do
-      nil -> nil
+      nil ->
+        nil
+
       result ->
-        member_list = result.member_list
-          |> Enum.uniq
+        member_list =
+          result.member_list
+          |> Enum.uniq()
           |> Enum.map(fn userid ->
             client = Account.get_client_by_id(userid)
             Tachyon.convert_object(client, :client)
           end)
 
         send(self(), {:action, {:join_lobby, lobby_id}})
+
         %{
           "cmd" => "s.lobby.force_join",
           "lobby" => Tachyon.convert_object(result.lobby, :lobby),
           "script_password" => script_password,
           "modoptions" => result.modoptions,
           "bots" => result.bots,
-          "member_list" => member_list,
+          "member_list" => member_list
         }
     end
   end
@@ -265,23 +270,27 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
 
   def do_reply(:joined, {lobby_id, script_password}) do
     case Battle.get_combined_lobby_state(lobby_id) do
-      nil -> nil
+      nil ->
+        nil
+
       result ->
-        member_list = result.member_list
-          |> Enum.uniq
+        member_list =
+          result.member_list
+          |> Enum.uniq()
           |> Enum.map(fn userid ->
             client = Account.get_client_by_id(userid)
             Tachyon.convert_object(client, :client)
           end)
 
         send(self(), {:action, {:join_lobby, lobby_id}})
+
         %{
           "cmd" => "s.lobby.joined",
           "lobby" => Tachyon.convert_object(result.lobby, :lobby),
           "script_password" => script_password,
           "modoptions" => result.modoptions,
           "bots" => result.bots,
-          "member_list" => member_list,
+          "member_list" => member_list
         }
     end
   end

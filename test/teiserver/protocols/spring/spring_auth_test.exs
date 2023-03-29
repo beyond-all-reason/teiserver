@@ -77,7 +77,9 @@ defmodule Teiserver.SpringAuthTest do
     # And now we try for a bad mystatus command
     _send_raw(socket, "MYSTATUS\n")
     reply = _recv_raw(socket)
-    assert reply == "SERVERMSG No incomming match for MYSTATUS with data '\"\"'. Userid #{user.id}\n"
+
+    assert reply ==
+             "SERVERMSG No incomming match for MYSTATUS with data '\"\"'. Userid #{user.id}\n"
 
     # Now change the password - incorrectly
     _send_raw(socket, "CHANGEPASSWORD wrong_pass new_pass\n")
@@ -97,7 +99,9 @@ defmodule Teiserver.SpringAuthTest do
     # Test no match
     _send_raw(socket, "CHANGEPASSWORD nomatchname\n")
     reply = _recv_raw(socket)
-    assert reply == "SERVERMSG No incomming match for CHANGEPASSWORD with data '\"nomatchname\"'. Userid #{user.id}\n"
+
+    assert reply ==
+             "SERVERMSG No incomming match for CHANGEPASSWORD with data '\"nomatchname\"'. Userid #{user.id}\n"
 
     # Now test spamming it, this was only added to test a warning showed up for the
     # status flood protection code
@@ -378,7 +382,10 @@ CLIENTS test_room #{user.name}\n"
     # Add a different bot
     _send_raw(socket2, "ADDBOT Raptor:Normal(1) 4195458 0 Raptor: Normal\n")
     reply = _recv_raw(socket2)
-    [_, botid] = Regex.run(~r/ADDBOT (\d+) Raptor:Normal\(1\) #{user2.name} 4195458 0 Raptor: Normal/, reply)
+
+    [_, botid] =
+      Regex.run(~r/ADDBOT (\d+) Raptor:Normal\(1\) #{user2.name} 4195458 0 Raptor: Normal/, reply)
+
     botid = int_parse(botid)
     assert reply == "ADDBOT #{botid} Raptor:Normal(1) #{user2.name} 4195458 0 Raptor: Normal\n"
 
@@ -421,7 +428,7 @@ CLIENTS test_room #{user.name}\n"
     _send_raw(socket2, "RING #{user1.name}\n")
     _ = _recv_raw(socket2)
 
-   reply = _recv_raw(socket1)
+    reply = _recv_raw(socket1)
     assert reply == "RING #{user2.name}\n"
   end
 
@@ -516,7 +523,9 @@ CLIENTS test_room #{user.name}\n"
 
     # Check they logged back in and got re-added with the correct name
     wreply = _recv_raw(watcher)
-    assert wreply == "ADDUSER test_user_rename ?? #{user.id} LuaLobby Chobby\nCLIENTSTATUS test_user_rename 0\n"
+
+    assert wreply ==
+             "ADDUSER test_user_rename ?? #{user.id} LuaLobby Chobby\nCLIENTSTATUS test_user_rename 0\n"
 
     # Next up, what if they update their status?
     _send_raw(socket, "MYSTATUS 127\n")
@@ -567,14 +576,14 @@ CLIENTS test_room #{user.name}\n"
     reply = _recv_raw(socket)
 
     assert reply ==
-             "SERVERMSG A new bot account test_bot_account has been created, with the same password as #{
-               user.name
-             }\n"
+             "SERVERMSG A new bot account test_bot_account has been created, with the same password as #{user.name}\n"
 
     # Test no match
     _send_raw(socket, "CREATEBOTACCOUNT nomatchname\n")
     reply = _recv_raw(socket)
-    assert reply == "SERVERMSG No incomming match for CREATEBOTACCOUNT with data '\"nomatchname\"'. Userid #{user.id}\n"
+
+    assert reply ==
+             "SERVERMSG No incomming match for CREATEBOTACCOUNT with data '\"nomatchname\"'. Userid #{user.id}\n"
   end
 
   # test "c.moderation.report", %{socket: socket, user: user} do
@@ -634,7 +643,12 @@ CLIENTS test_room #{user.name}\n"
 
   test "Bad id ADDUSER", %{user: user, socket: socket} do
     {:ok, bad_user} =
-      User.user_register_params_with_md5("test_user_bad_id", "test_user_bad_id@email.com", "X03MO1qnZdYdgyfeuILPmQ==", %{admin_group_id: Teiserver.user_group_id()})
+      User.user_register_params_with_md5(
+        "test_user_bad_id",
+        "test_user_bad_id@email.com",
+        "X03MO1qnZdYdgyfeuILPmQ==",
+        %{admin_group_id: Teiserver.user_group_id()}
+      )
       |> Central.Account.create_user()
 
     Central.Account.create_group_membership(%{
@@ -643,9 +657,9 @@ CLIENTS test_room #{user.name}\n"
     })
 
     bad_user
-      |> UserCache.convert_user()
-      |> UserCache.add_user()
-      |> User.verify_user()
+    |> UserCache.convert_user()
+    |> UserCache.add_user()
+    |> User.verify_user()
 
     # Need to add it as a client for the :add_user command to work
     Client.login(User.get_user_by_id(bad_user.id), :spring, "127.0.0.1")
@@ -654,7 +668,10 @@ CLIENTS test_room #{user.name}\n"
     pid = Client.get_client_by_id(user.id).tcp_pid
     send(pid, {:user_logged_in, bad_user.id})
     reply = _recv_raw(socket)
-    assert reply == "ADDUSER test_user_bad_id ?? #{bad_user.id} \nCLIENTSTATUS test_user_bad_id 0\n"
+
+    assert reply ==
+             "ADDUSER test_user_bad_id ?? #{bad_user.id} \nCLIENTSTATUS test_user_bad_id 0\n"
+
     Client.disconnect(bad_user.id)
   end
 

@@ -10,21 +10,22 @@ defmodule Teiserver.Account.SmurfKeyLib do
   def colours, do: :info
 
   # Queries
-  @spec query_smurf_keys() :: Ecto.Query.t
+  @spec query_smurf_keys() :: Ecto.Query.t()
   def query_smurf_keys do
-    from smurf_keys in SmurfKey
+    from(smurf_keys in SmurfKey)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -52,9 +53,7 @@ defmodule Teiserver.Account.SmurfKeyLib do
     value_like = "%" <> String.replace(value, "*", "%") <> "%"
 
     from smurf_keys in query,
-      where: (
-        ilike(smurf_keys.value, ^value_like)
-      )
+      where: ilike(smurf_keys.value, ^value_like)
   end
 
   def _search(query, :type_id, type_id) do
@@ -87,9 +86,9 @@ defmodule Teiserver.Account.SmurfKeyLib do
       where: smurf_keys.user_id not in ^user_id_list
   end
 
-
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Oldest first") do
     from smurf_keys in query,
       order_by: [asc: smurf_keys.last_updated]
@@ -110,22 +109,23 @@ defmodule Teiserver.Account.SmurfKeyLib do
       order_by: [asc: smurf_keys.id]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :type in preloads, do: _preload_type(query), else: query
     query = if :user in preloads, do: _preload_user(query), else: query
     query
   end
 
-  @spec _preload_type(Ecto.Query.t) :: Ecto.Query.t
+  @spec _preload_type(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_type(query) do
     from smurf_keys in query,
       left_join: types in assoc(smurf_keys, :type),
       preload: [type: types]
   end
 
-  @spec _preload_user(Ecto.Query.t) :: Ecto.Query.t
+  @spec _preload_user(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_user(query) do
     from smurf_keys in query,
       left_join: users in assoc(smurf_keys, :user),

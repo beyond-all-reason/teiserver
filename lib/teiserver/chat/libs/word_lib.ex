@@ -16,9 +16,10 @@ defmodule Teiserver.Chat.WordLib do
   """
   @spec flagged_words(String.t()) :: non_neg_integer()
   def flagged_words(text) when is_list(text), do: flagged_words(text |> Enum.join("\n"))
+
   def flagged_words(text) do
     Regex.scan(@flagged_regex, text)
-    |> Enum.count
+    |> Enum.count()
   end
 
   # def plurals(words) when is_list(words), do: Enum.map(words, &plurals/1)
@@ -31,9 +32,9 @@ defmodule Teiserver.Chat.WordLib do
   # end
 
   # Curse words in group A are very bad and treated worse, C are casual and scored less harshly
-  @curse_words_a ~w(nigger) |> StringHelper.plurals |> List.flatten
-  @curse_words_b ~w(cunt retard tards) |> StringHelper.plurals |> List.flatten
-  @curse_words_c ~w(shit fuck faggot) |> StringHelper.plurals |> List.flatten
+  @curse_words_a ~w(nigger) |> StringHelper.plurals() |> List.flatten()
+  @curse_words_b ~w(cunt retard tards) |> StringHelper.plurals() |> List.flatten()
+  @curse_words_c ~w(shit fuck faggot) |> StringHelper.plurals() |> List.flatten()
 
   @spec curse_score(String.t()) :: non_neg_integer()
   def curse_score(string) do
@@ -41,12 +42,13 @@ defmodule Teiserver.Chat.WordLib do
     b_score = Config.get_site_config_cache("teiserver.Curse word score B")
     c_score = Config.get_site_config_cache("teiserver.Curse word score C")
 
-    words = string
+    words =
+      string
       |> String.downcase()
       |> String.split(" ")
 
     words
-    |> Enum.reduce(0, fn (word, score) ->
+    |> Enum.reduce(0, fn word, score ->
       cond do
         Enum.member?(@curse_words_a, word) -> score + a_score
         Enum.member?(@curse_words_b, word) -> score + b_score
@@ -88,9 +90,10 @@ defmodule Teiserver.Chat.WordLib do
   def blacklisted_phrase?(text) do
     @blacklisted_regexs
     |> Enum.reduce(false, fn
-      (_, true) ->
+      _, true ->
         true
-      (r, false) ->
+
+      r, false ->
         Regex.match?(r, text)
     end)
   end

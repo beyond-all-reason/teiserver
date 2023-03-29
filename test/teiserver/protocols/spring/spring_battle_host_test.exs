@@ -31,7 +31,8 @@ defmodule Teiserver.SpringBattleHostTest do
     )
 
     # Find battle
-    battle = Lobby.list_lobbies
+    battle =
+      Lobby.list_lobbies()
       |> Enum.filter(fn b -> b.founder_id == user.id end)
       |> hd
 
@@ -50,10 +51,11 @@ defmodule Teiserver.SpringBattleHostTest do
     )
 
     # Find battle ID
-    lobby_id = Lobby.list_lobbies
-    |> Enum.filter(fn b -> b.founder_id == host_user.id end)
-    |> hd
-    |> Map.get(:id)
+    lobby_id =
+      Lobby.list_lobbies()
+      |> Enum.filter(fn b -> b.founder_id == host_user.id end)
+      |> hd
+      |> Map.get(:id)
 
     # Clear watcher
     _ = _recv_until(watcher_socket)
@@ -72,7 +74,9 @@ defmodule Teiserver.SpringBattleHostTest do
 
     # Accept has happened, should see stuff
     reply = _recv_raw(watcher_socket)
-    assert reply == "JOINEDBATTLE #{lobby_id} #{p1_user.name}\nJOINEDBATTLE #{lobby_id} #{p2_user.name}\n"
+
+    assert reply ==
+             "JOINEDBATTLE #{lobby_id} #{p1_user.name}\nJOINEDBATTLE #{lobby_id} #{p2_user.name}\n"
 
     # Now have the host leave
     _send_raw(host_socket, "LEAVEBATTLE\n")
@@ -256,6 +260,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195328 600\n"
 
     status = Spring.parse_battle_status("4195330")
+
     assert status == %{
              ready: true,
              handicap: 0,
@@ -267,6 +272,7 @@ defmodule Teiserver.SpringBattleHostTest do
            }
 
     status = Spring.parse_battle_status("4195328")
+
     assert status == %{
              ready: false,
              handicap: 0,
@@ -374,7 +380,9 @@ defmodule Teiserver.SpringBattleHostTest do
     _send_raw(socket, "c.battle.update_lobby_title NewName 123\n")
     :timer.sleep(1000)
     reply = _recv_until(socket)
-    assert reply =~ "OK cmd=c.battle.update_lobby_title\ns.battle.update_lobby_title #{lobby_id}\tNewName 123\n"
+
+    assert reply =~
+             "OK cmd=c.battle.update_lobby_title\ns.battle.update_lobby_title #{lobby_id}\tNewName 123\n"
 
     # Update the host settings
     state = Coordinator.call_consul(lobby_id, :get_all)

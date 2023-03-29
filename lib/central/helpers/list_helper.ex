@@ -1,5 +1,4 @@
 defmodule Central.Helpers.ListHelper do
-
   @doc """
   Given two lists will return:
     :asub - a is a subset of b
@@ -12,13 +11,15 @@ defmodule Central.Helpers.ListHelper do
     lista = Enum.sort(lista)
     listb = Enum.sort(listb)
 
-    suba = lista
+    suba =
+      lista
       |> Enum.map(fn item -> Enum.member?(listb, item) end)
-      |> Enum.all?
+      |> Enum.all?()
 
-    subb = listb
+    subb =
+      listb
       |> Enum.map(fn item -> Enum.member?(lista, item) end)
-      |> Enum.all?
+      |> Enum.all?()
 
     cond do
       lista == listb -> :eq

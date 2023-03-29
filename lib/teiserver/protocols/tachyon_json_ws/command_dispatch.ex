@@ -5,16 +5,60 @@ defmodule Teiserver.Tachyon.CommandDispatch do
 
   alias Teiserver.Tachyon.Handlers
 
-  def dispatch(conn, object, meta) do
-    handler_module = get_handler(meta["command"])
+  @modules [
+    Handlers.Account.WhoamiRequest,
+    Handlers.System.DisconnectRequest,
+    Handlers.System.ForceErrorRequest
+  ]
 
-    handler_module.execute(conn, object, meta)
+  def dispatch(conn, object, meta) do
+    handler = get_dispatch_handler(meta["command"])
+
+    handler.(conn, object, meta)
   end
 
-  @spec get_handler(String.t()) :: module
-  defp get_handler("account/who_am_i/request"), do: Handlers.Account.WhoamiRequest
+  defp get_dispatch_handler(command) do
+    # If we are allowing hailstorm lets ensure we've got the latest dispatches loaded
+    if Application.get_env(:central, Teiserver)[:enable_hailstorm] do
+      build_dispatch_cache()
+    end
 
-  defp get_handler("disconnect"), do: Handlers.System.DisconnectRequest
-  defp get_handler("force_error"), do: Handlers.System.ForceErrorRequest
-  defp get_handler(_), do: Handlers.System.NoCommandErrorRequest
+    # Get the relevant handler, if none found the no_command fallback will handle it
+    Central.store_get(:tachyon_dispatches, command) ||
+      Central.store_get(:tachyon_dispatches, "no_command")
+  end
+
+  @spec build_dispatch_cache :: :ok
+  def build_dispatch_cache do
+    lookup =
+      @modules
+      |> Enum.reduce(%{}, fn module, acc ->
+        Map.merge(acc, module.dispatch_handlers())
+      end)
+
+    old = Central.store_get(:tachyon_dispatches, "all") || []
+
+    # Store all keys, we'll use it later for removing old ones
+    Central.store_put(:tachyon_dispatches, "all", Map.keys(lookup))
+
+    # Now store our lookups
+    lookup
+    |> Enum.each(fn {key, func} ->
+      Central.store_put(:tachyon_dispatches, key, func)
+    end)
+
+    no_command_func = &Handlers.System.NoCommandErrorRequest.execute/3
+    Central.store_put(:tachyon_dispatches, "no_command", no_command_func)
+
+    # Delete out-dated keys
+    old
+    |> Enum.reject(fn old_key ->
+      Map.has_key?(lookup, old_key)
+    end)
+    |> Enum.each(fn old_key ->
+      Central.store_delete(:tachyon_dispatches, old_key)
+    end)
+
+    :ok
+  end
 end

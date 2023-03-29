@@ -1,4 +1,8 @@
-<div class="nav-item dropdown mx-2" id="communication-notifications-wrapper" data-user-id={@current_user.id}>
+<div
+  class="nav-item dropdown mx-2"
+  id="communication-notifications-wrapper"
+  data-user-id={@current_user.id}
+>
   <a
     class="dropdown-toggle dropdown-toggle-icon-only"
     href="#"
@@ -9,7 +13,10 @@
   >
     <%= if @user_notifications_unread_count > 0 do %>
       <i class="fa-solid fa-bell" id="communication-notifications-icon"></i>
-      <span class="badge rounded-pill badge-notification bg-warning text-light" id="communication-notifications-badge">
+      <span
+        class="badge rounded-pill badge-notification bg-warning text-light"
+        id="communication-notifications-badge"
+      >
         <%= @user_notifications_unread_count %>
       </span>
     <% else %>
@@ -22,15 +29,20 @@
   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownNotificationsLink">
     <%= if Enum.count(@user_notifications) == 0 do %>
       <li>
-        <a href="#" class="dropdown-item" id="communication-notifications-empty-marker">You have no unread notifications</a>
+        <a href="#" class="dropdown-item" id="communication-notifications-empty-marker">
+          You have no unread notifications
+        </a>
       </li>
     <% end %>
 
     <%= if Enum.count(@user_notifications) > 15 do %>
       <li>
-        <a href={~p"/communication/notifications"} class="dropdown-item" style="padding-top: 5px; padding-bottom: 3px;">
-          <i class='far fa-fw fa-bars'></i>
-          &nbsp;
+        <a
+          href={~p"/communication/notifications"}
+          class="dropdown-item"
+          style="padding-top: 5px; padding-bottom: 3px;"
+        >
+          <i class="far fa-fw fa-bars"></i> &nbsp;
           Showing first 15 notifications, click here to view all notifications
         </a>
       </li>
@@ -38,9 +50,13 @@
 
     <%= for n <- Enum.take(@user_notifications, 15) do %>
       <li>
-        <a class="dropdown-item" id={"communication-notifications-li-#{n.id}"} href={Central.Communication.notification_url n}>
+        <a
+          class="dropdown-item"
+          id={"communication-notifications-li-#{n.id}"}
+          href={Central.Communication.notification_url(n)}
+        >
           <i class={"fa-fw #{n.icon}"} style={"color: #{n.colour}"}></i>
-          <strong style={"color:#{n.colour}"}><%= n.title %></strong><br />
+          <strong style={"color:#{n.colour}"}><%= n.title %></strong> <br />
 
           <%= n.body %>
         </a>
@@ -49,9 +65,12 @@
 
     <%= if Enum.count(@user_notifications) <= 15 do %>
       <li>
-        <a href={~p"/communication/notifications"} class="dropdown-item" style="padding-top: 5px; padding-bottom: 3px;">
-          <i class='far fa-fw fa-bars'></i>
-          &nbsp;
+        <a
+          href={~p"/communication/notifications"}
+          class="dropdown-item"
+          style="padding-top: 5px; padding-bottom: 3px;"
+        >
+          <i class="far fa-fw fa-bars"></i> &nbsp;
           View all notifications
         </a>
       </li>

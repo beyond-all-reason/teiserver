@@ -30,12 +30,17 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body" style="padding: 0 15px;" id="sub-menu-panel-body">
-
         <div class="row">
           <div class="col-6 col-sm-4 col-md-3 col-lg-2 col-xl-2 sub-menu-icon">
-            <a href={Routes.user_config_path(@conn, :index)} class="block-link" id="sub-menu-user_configs">
-              <%= central_component "icon", icon: Central.Config.UserConfigLib.icon(), class: "fa-2x" %><br />
-              Preferences
+            <a
+              href={Routes.user_config_path(@conn, :index)}
+              class="block-link"
+              id="sub-menu-user_configs"
+            >
+              <%= central_component("icon",
+                icon: Central.Config.UserConfigLib.icon(),
+                class: "fa-2x"
+              ) %><br /> Preferences
             </a>
           </div>
         </div>

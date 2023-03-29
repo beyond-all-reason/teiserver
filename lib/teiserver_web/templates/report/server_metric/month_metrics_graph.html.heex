@@ -1,9 +1,11 @@
 <% bsname = view_colour() %>
 
-<script src={Routes.static_path(@conn, "/js/d3.js")}></script>
-<script src={Routes.static_path(@conn, "/js/c3.min.js")}></script>
+<script src={Routes.static_path(@conn, "/js/d3.js")}>
+</script>
+<script src={Routes.static_path(@conn, "/js/c3.min.js")}>
+</script>
 
-<link href="/css/c3.min.css" rel="stylesheet">
+<link href="/css/c3.min.css" rel="stylesheet" />
 
 <script>
   $(function() {
@@ -21,80 +23,100 @@
           }
         },
         y: {
-          min: 0
+          min: 0,
+          padding: {
+            top: 15,
+            bottom: 0
+          }
         }
       }
     });
   });
 </script>
 
-<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "server_metrics"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "server_metrics"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Report.ServerMetricView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Report.ServerMetricView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "month_graph"
           })
-        %>
-        
-        <a href={Routes.ts_reports_match_metric_path(@conn, :month_metrics_graph)} class={"btn float-end btn-outline-#{TeiserverWeb.Report.MatchMetricView.view_colour}"}>
-          <%= central_component "icon", icon: TeiserverWeb.Report.MatchMetricView.icon %>
-          &nbsp;
+        ) %>
+
+        <a
+          href={Routes.ts_reports_match_metric_path(@conn, :month_metrics_graph)}
+          class={"btn float-end btn-outline-#{TeiserverWeb.Report.MatchMetricView.view_colour}"}
+        >
+          <%= central_component("icon", icon: TeiserverWeb.Report.MatchMetricView.icon()) %> &nbsp;
           Match data
         </a>
         <br /><br />
 
-<div class="row">
-  <div class="col-md-12">
-    <form action={Routes.ts_reports_server_metric_path(@conn, :month_metrics_graph)} method='post' class=''>
-      <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
-      <div class='row'>
-        <div class='col-xl-4 col-lg-6 col-md-12'>
-          <label for='fields' class='control-label'>Fields</label>
-          <%= central_component "icon_dropdown",
-            name: "fields",
-            id: "fields",
-            enumerable: [
-              %{id: "unique_users", name: "Unique users"},
-              %{id: "peak_users", name: "Peak users"},
-              %{id: "days", name: "Days (combined time)"},
-              # %{id: "battles", name: "Battles"},
-            ],
-            selected: Map.get(@params, "fields")
-          %>
-        </div>
-        
-        <div class='col-xl-4 col-lg-6 col-md-12'>
-          <label for='months' class='control-label'>Months</label>
-          <input type='text' name='months' id='months' value={@params["months"]} class='form-control' />
-        </div>
-        
-        <div class='col-md-12'>
-          <button type='submit' class={"btn btn-#{bsname} float-end"}>
-            Submit
-          </button>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
+        <div class="row">
+          <div class="col-md-12">
+            <form
+              action={Routes.ts_reports_server_metric_path(@conn, :month_metrics_graph)}
+              method="post"
+              class=""
+            >
+              <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+              <div class="row">
+                <div class="col-xl-4 col-lg-6 col-md-12">
+                  <label for="fields" class="control-label">Fields</label>
+                  <%= central_component("icon_dropdown",
+                    name: "fields",
+                    id: "fields",
+                    enumerable: [
+                      %{id: "unique_users", name: "Unique users"},
+                      %{id: "peak_users", name: "Peak users"},
+                      %{id: "days", name: "Days (combined time)"}
+                      # %{id: "battles", name: "Battles"},
+                    ],
+                    selected: Map.get(@params, "fields")
+                  ) %>
+                </div>
 
-<div class="row">
-  <div class="col-md-12">
-    <div class={"card border-#{bsname} page-card"}>
-      <div class="card-body">
-        <div id="chart" class='with-transitions' style="height: 400px;">
+                <div class="col-xl-4 col-lg-6 col-md-12">
+                  <label for="months" class="control-label">Months</label>
+                  <input
+                    type="text"
+                    name="months"
+                    id="months"
+                    value={@params["months"]}
+                    class="form-control"
+                  />
+                </div>
+
+                <div class="col-md-12">
+                  <button type="submit" class={"btn btn-#{bsname} float-end"}>
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
 
-
+        <div class="row">
+          <div class="col-md-12">
+            <div class={"card border-#{bsname} page-card"}>
+              <div class="card-body">
+                <div id="chart" class="with-transitions" style="height: 400px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

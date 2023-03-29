@@ -15,12 +15,10 @@ defmodule Teiserver.Account.RecordsReport do
     records = [
       {"Peak users", get_top(~w(aggregates stats peak_user_counts total))},
       {"Peak players", get_top(~w(aggregates stats peak_user_counts player))},
-
       {"Unique users", get_top(~w(aggregates stats unique_users))},
       {"Unique players", get_top(~w(aggregates stats unique_players))},
-
       {"Player time (days)", get_top(~w(aggregates minutes player)) |> minutes_to_days},
-      {"Total time (days)", get_top(~w(aggregates minutes total)) |> minutes_to_days},
+      {"Total time (days)", get_top(~w(aggregates minutes total)) |> minutes_to_days}
     ]
 
     # force_recache = (Map.get(params, "recache", false) == "true")
@@ -32,8 +30,9 @@ defmodule Teiserver.Account.RecordsReport do
       "Peak players" => today["aggregates"]["stats"]["peak_user_counts"]["player"],
       "Unique users" => today["aggregates"]["stats"]["unique_users"],
       "Unique players" => today["aggregates"]["stats"]["unique_players"],
-      "Player time (days)" => (today["aggregates"]["minutes"]["player"] |> Kernel.div(1440) |> round),
-      "Total time (days)" => (today["aggregates"]["minutes"]["total"] |> Kernel.div(1440) |> round),
+      "Player time (days)" =>
+        today["aggregates"]["minutes"]["player"] |> Kernel.div(1440) |> round,
+      "Total time (days)" => today["aggregates"]["minutes"]["total"] |> Kernel.div(1440) |> round
     }
 
     %{
@@ -44,7 +43,8 @@ defmodule Teiserver.Account.RecordsReport do
   end
 
   defp get_top(fields) do
-    path = fields
+    path =
+      fields
       |> Enum.map_join(" -> ", fn f -> "'#{f}'" end)
 
     query = """
@@ -69,6 +69,7 @@ defmodule Teiserver.Account.RecordsReport do
   defp minutes_to_days_cell([key, minutes]) do
     [key, round(minutes / 1440)]
   end
+
   defp minutes_to_days(rows) do
     rows
     |> Enum.map(fn row ->

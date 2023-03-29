@@ -10,21 +10,22 @@ defmodule Teiserver.Telemetry.ClientGameEventLib do
   def icon(), do: "fa-regular fa-sliders-up"
 
   # Queries
-  @spec query_client_game_events() :: Ecto.Query.t
+  @spec query_client_game_events() :: Ecto.Query.t()
   def query_client_game_events do
-    from client_game_events in ClientGameEvent
+    from(client_game_events in ClientGameEvent)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -62,13 +63,12 @@ defmodule Teiserver.Telemetry.ClientGameEventLib do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from client_game_events in query,
-      where: (
-            ilike(client_game_events.name, ^ref_like)
-        )
+      where: ilike(client_game_events.name, ^ref_like)
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Name (A-Z)") do
     from client_game_events in query,
       order_by: [asc: client_game_events.name]
@@ -89,8 +89,9 @@ defmodule Teiserver.Telemetry.ClientGameEventLib do
       order_by: [asc: client_game_events.inserted_at]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :game_event_type in preloads, do: _preload_game_event_types(query), else: query
     query = if :user in preloads, do: _preload_users(query), else: query

@@ -1,55 +1,85 @@
-<%
-  {_fg, _bg, bsname} = view_colour() |> colours()
-  user_moderator = allow?(@current_user, "teiserver.staff.moderator")
+<% {_fg, _bg, bsname} = view_colour() |> colours()
+user_moderator = allow?(@current_user, "teiserver.staff.moderator")
 
-  value_types = [
-    "Leaderboard rating",
-    "Game rating",
-    "Skill value"
-  ]
-%>
+value_types = [
+  "Leaderboard rating",
+  "Game rating",
+  "Skill value"
+] %>
 
-<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "reports"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <div class="btn btn-primary2 float-end" onclick="$('.help-box, .help-box-large').toggle();">
-          <i class='fa-fw fa-solid fa-circle-info'></i>
-          &nbsp;
+        <div
+          class="btn btn-primary2 float-end"
+          onclick="$('.help-box, .help-box-large').toggle();"
+        >
+          <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
           Show/Hide help
         </div>
-        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Report.ReportView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "tournament"
           })
-        %>
+        ) %>
         <br /><br />
 
-        <form action={Routes.ts_reports_report_path(@conn, :show, "tournament")} method="post" class="form-horizontal mb-4">
+        <form
+          action={Routes.ts_reports_report_path(@conn, :show, "tournament")}
+          method="post"
+          class="form-horizontal mb-4"
+        >
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
           <div class="row">
             <div class="col-md-8 col-lg-6 col-xl-4 my-2">
-              <label for="report_names" class="control-label">Player names (commas and/or newlines to separate names): </label>
-              <textarea name="report[names]" id="report_names" rows="3" cols="40" class="form-control"><%= @params["names"] %></textarea>
+              <label for="report_names" class="control-label">
+                Player names (commas and/or newlines to separate names):
+              </label>
+              <textarea
+                name="report[names]"
+                id="report_names"
+                rows="3"
+                cols="40"
+                class="form-control"
+              ><%= @params["names"] %></textarea>
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_limit" class="control-label">Game type: </label>
-              <%= select :report, :game_type, @game_types, class: "form-control", selected: @params["game_type"] %>
+              <%= select(:report, :game_type, @game_types,
+                class: "form-control",
+                selected: @params["game_type"]
+              ) %>
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_value_type" class="control-label">Value: </label>
-              <%= select :report, :value_type, value_types, class: "form-control", selected: @params["value_type"] %>
+              <%= select(:report, :value_type, value_types,
+                class: "form-control",
+                selected: @params["value_type"]
+              ) %>
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               &nbsp;<br />
-              <input type="submit" value="Update report" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+              <input
+                type="submit"
+                value="Update report"
+                name="form.submitted"
+                class={"btn btn-#{bsname} btn-block"}
+              />
             </div>
           </div>
         </form>
@@ -58,82 +88,84 @@
           Win rate and game count both use the "Days since last active" value as a time period.
         </div>
 
-<div class="row">
-  <div class="col">
-    <h5>CSV data</h5>
-    <textarea rows="3" class="form-control" style="font-family: monospace;"><%= @csv_data %></textarea>
-  </div>
+        <div class="row">
+          <div class="col">
+            <h5>CSV data</h5>
+            <textarea rows="3" class="form-control" style="font-family: monospace;"><%= @csv_data %></textarea>
+          </div>
 
-  <div class="col">
-    <h5>Missing names</h5>
-    <textarea rows="3" class="form-control" style="font-family: monospace;"><%=
+          <div class="col">
+            <h5>Missing names</h5>
+            <textarea rows="3" class="form-control" style="font-family: monospace;"><%=
       @name_to_id_map
         |> Enum.filter(fn {_, id} -> id == nil end)
         |> Enum.map(fn {name, _} -> name end)
         |> Enum.join("\n")
     %></textarea>
-  </div>
+          </div>
 
-  <div class="col">
-    <h5>User but no rating</h5>
-    <textarea rows="3" class="form-control" style="font-family: monospace;"><%=
+          <div class="col">
+            <h5>User but no rating</h5>
+            <textarea rows="3" class="form-control" style="font-family: monospace;"><%=
       @no_ratings
         |> Enum.join("\n")
     %></textarea>
-  </div>
-</div>
+          </div>
+        </div>
 
-<div class="row mt-2">
-  <div class="col">
-    <h5>Found <%= Enum.count(@ratings) %> of <%= Enum.count(@name_to_id_map) %> players</h5>
-    <table class="table table-sm">
-      <thead>
-        <tr>
-          <th>&nbsp;</th>
-          <th colspan="2">Player</th>
+        <div class="row mt-2">
+          <div class="col">
+            <h5>
+              Found <%= Enum.count(@ratings) %> of <%= Enum.count(@name_to_id_map) %> players
+            </h5>
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>&nbsp;</th>
+                  <th colspan="2">Player</th>
 
-          <th><%= @params["value_type"] %></th>
+                  <th><%= @params["value_type"] %></th>
 
-          <%= if user_moderator do %>
-            <th>&nbsp;</th>
-          <% end %>
-      </tr>
-      </thead>
-      <tbody>
-        <%= for {rating, pos} <- Enum.with_index(@ratings) do %>
-          <tr style={"background-color: #{rgba_css rating.user.colour};"}>
-            <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
-              #<%= pos + 1 %>
-            </td>
-            <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
-              <%= central_component "icon", icon: rating.user.icon %>
-            </td>
-            <td><%= rating.user.name %></td>
+                  <%= if user_moderator do %>
+                    <th>&nbsp;</th>
+                  <% end %>
+                </tr>
+              </thead>
+              <tbody>
+                <%= for {rating, pos} <- Enum.with_index(@ratings) do %>
+                  <tr style={"background-color: #{rgba_css rating.user.colour};"}>
+                    <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
+                      #<%= pos + 1 %>
+                    </td>
+                    <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
+                      <%= central_component("icon", icon: rating.user.icon) %>
+                    </td>
+                    <td><%= rating.user.name %></td>
 
-            <td>
-              <%=
-                case @params["value_type"] do
-                  "Leaderboard rating" -> rating.leaderboard_rating |> round(2)
-                  "Game rating" -> rating.rating_value |> round(2)
-                  "Skill value" -> rating.skill |> round(2)
-                end
-              %>
-            </td>
+                    <td>
+                      <%= case @params["value_type"] do
+                        "Leaderboard rating" -> rating.leaderboard_rating |> round(2)
+                        "Game rating" -> rating.rating_value |> round(2)
+                        "Skill value" -> rating.skill |> round(2)
+                      end %>
+                    </td>
 
-            <%= if user_moderator do %>
-              <td>
-                <a href={Routes.ts_admin_user_path(@conn, :ratings, rating.user_id) <> "?filter=#{@params["game_type"]}"} class="btn btn-sm btn-secondary">
-                  Show
-                </a>
-              </td>
-            <% end %>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
-</div>
-
+                    <%= if user_moderator do %>
+                      <td>
+                        <a
+                          href={Routes.ts_admin_user_path(@conn, :ratings, rating.user_id) <> "?filter=#{@params["game_type"]}"}
+                          class="btn btn-sm btn-secondary"
+                        >
+                          Show
+                        </a>
+                      </td>
+                    <% end %>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>

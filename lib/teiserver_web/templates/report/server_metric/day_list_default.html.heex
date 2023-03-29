@@ -18,33 +18,43 @@
     </tr>
   </thead>
   <tbody>
-<%= for log <- @logs do %>
+    <%= for log <- @logs do %>
+      <tr>
+        <td><%= Timex.format!(log.date, "{0D}/{0M}/{YYYY} {WDshort}") %></td>
 
-    <tr>
-      <td><%= Timex.format!(log.date, "{0D}/{0M}/{YYYY} {WDshort}") %></td>
+        <td><%= format_number(log.data["aggregates"]["stats"]["unique_users"]) %></td>
+        <td><%= format_number(log.data["aggregates"]["stats"]["unique_players"]) %></td>
+        <td>
+          <%= format_number(log.data["aggregates"]["stats"]["peak_user_counts"]["total"]) %>
+        </td>
+        <td>
+          <%= format_number(log.data["aggregates"]["stats"]["peak_user_counts"]["player"]) %>
+        </td>
 
-      <td><%= format_number log.data["aggregates"]["stats"]["unique_users"] %></td>
-      <td><%= format_number log.data["aggregates"]["stats"]["unique_players"] %></td>
-      <td><%= format_number log.data["aggregates"]["stats"]["peak_user_counts"]["total"] %></td>
-      <td><%= format_number log.data["aggregates"]["stats"]["peak_user_counts"]["player"] %></td>
+        <td><%= represent_minutes(log.data["aggregates"]["minutes"]["player"]) %></td>
 
-      <td><%= represent_minutes log.data["aggregates"]["minutes"]["player"] %></td>
+        <td><%= format_number(log.data["aggregates"]["stats"]["accounts_created"]) %></td>
 
-      <td><%= format_number log.data["aggregates"]["stats"]["accounts_created"] %></td>
+        <td>
+          <%= link("Show",
+            to:
+              Routes.ts_reports_server_metric_path(
+                @conn,
+                :day_metrics_show,
+                date_to_str(log.date, format: :ymd)
+              ),
+            class: "btn btn-secondary btn-sm"
+          ) %>
+        </td>
+      </tr>
 
-      <td>
-        <%= link "Show", to: Routes.ts_reports_server_metric_path(@conn, :day_metrics_show, date_to_str(log.date, format: :ymd)), class: "btn btn-secondary btn-sm" %>
-      </td>
-    </tr>
-
-  <%= if log.date.day == 1 do %>
-    <tr>
-      <td colspan="9" style={"background-color: #{bg}"}>
-        <div style="height: 5px;">&nbsp;</div>
-      </td>
-    </tr>
-  <% end %>
-
-<% end %>
+      <%= if log.date.day == 1 do %>
+        <tr>
+          <td colspan="9" style={"background-color: #{bg}"}>
+            <div style="height: 5px;">&nbsp;</div>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
   </tbody>
 </table>

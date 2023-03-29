@@ -1,15 +1,37 @@
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "tools"}) %>
+<%= render(
+  TeiserverWeb.Admin.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "tools"})
+) %>
 
 <div class="row page-row">
   <%= if allow?(@conn, "teiserver.admin") do %>
-    <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: Teiserver.Account.BadgeTypeLib.icon(), text: "Badge types", link: Routes.ts_admin_badge_type_path(@conn, :index) %>
+    <%= central_component("menu_card",
+      icon_class: "fa-solid",
+      name: "",
+      icon: Teiserver.Account.BadgeTypeLib.icon(),
+      text: "Badge types",
+      link: Routes.ts_admin_badge_type_path(@conn, :index)
+    ) %>
   <% end %>
 
   <%= if Application.get_env(:central, Teiserver)[:enable_agent_mode] do %>
-    <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: Teiserver.Agents.AgentLib.icon(), text: "Agent mode", link: Routes.ts_admin_agent_index_path(@conn, :index) %>
+    <%= central_component("menu_card",
+      icon_class: "fa-solid",
+      name: "",
+      icon: Teiserver.Agents.AgentLib.icon(),
+      text: "Agent mode",
+      link: Routes.ts_admin_agent_index_path(@conn, :index)
+    ) %>
   <% end %>
 </div>
 
 <div class="row page-row">
-  <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: StylingHelper.icon(:back), text: "Back", link: ~p"/teiserver/admin" %>
+  <%= central_component("menu_card",
+    icon_class: "fa-solid",
+    name: "",
+    icon: StylingHelper.icon(:back),
+    text: "Back",
+    link: ~p"/teiserver/admin"
+  ) %>
 </div>

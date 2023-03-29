@@ -1,4 +1,8 @@
-<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "exports"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "exports"})
+) %>
 
 <div class="row mt-2">
   <div class="col-md-12">
@@ -6,14 +10,12 @@
   </div>
 
   <%= if allow?(@current_user, Teiserver.Game.MatchRatingsExport.permissions()) do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Game.MatchRatingsExport.icon(),
       name: "match_ratings",
       text: "Match ratings",
       link: Routes.ts_reports_exports_path(@conn, :show, "match_ratings")
-    %>
+    ) %>
   <% end %>
-
 </div>

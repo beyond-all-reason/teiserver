@@ -8,8 +8,16 @@ defmodule Teiserver.ModerationTest do
   describe "reports" do
     alias Teiserver.Moderation.Report
 
-    @valid_attrs %{"type" => "some type", "sub_type" => "sub some type", "extra_text" => "some extra text"}
-    @update_attrs %{"type" => "some updated type", "sub_type" => "some updated sub_type", "extra_text" => "some updated extra text"}
+    @valid_attrs %{
+      "type" => "some type",
+      "sub_type" => "sub some type",
+      "extra_text" => "some extra text"
+    }
+    @update_attrs %{
+      "type" => "some updated type",
+      "sub_type" => "some updated sub_type",
+      "extra_text" => "some updated extra text"
+    }
     @invalid_attrs %{"type" => nil, "sub_type" => nil, "extra_text" => nil}
 
     test "list_reports/0 returns reports" do
@@ -23,10 +31,14 @@ defmodule Teiserver.ModerationTest do
     end
 
     test "create_report/1 with valid data creates a report" do
-      assert {:ok, %Report{} = report} = Moderation.create_report(Map.merge(@valid_attrs, %{
-        "reporter_id" => GeneralTestLib.make_user().id,
-        "target_id" => GeneralTestLib.make_user().id,
-      }))
+      assert {:ok, %Report{} = report} =
+               Moderation.create_report(
+                 Map.merge(@valid_attrs, %{
+                   "reporter_id" => GeneralTestLib.make_user().id,
+                   "target_id" => GeneralTestLib.make_user().id
+                 })
+               )
+
       assert report.type == "some type"
     end
 
@@ -61,8 +73,18 @@ defmodule Teiserver.ModerationTest do
   describe "actions" do
     alias Teiserver.Moderation.Action
 
-    @valid_attrs %{"reason" => "some reason", "restrictions" => ["r1", "r2"], "score_modifier" => "1000", "expires" => Timex.now()}
-    @update_attrs %{"reason" => "some updated reason", "restrictions" => ["u1", "u2"], "score_modifier" => "1500", "expires" => Timex.now()}
+    @valid_attrs %{
+      "reason" => "some reason",
+      "restrictions" => ["r1", "r2"],
+      "score_modifier" => "1000",
+      "expires" => Timex.now()
+    }
+    @update_attrs %{
+      "reason" => "some updated reason",
+      "restrictions" => ["u1", "u2"],
+      "score_modifier" => "1500",
+      "expires" => Timex.now()
+    }
     @invalid_attrs %{"reason" => nil}
 
     test "list_actions/0 returns actions" do
@@ -76,9 +98,13 @@ defmodule Teiserver.ModerationTest do
     end
 
     test "create_action/1 with valid data creates a action" do
-      assert {:ok, %Action{} = action} = Moderation.create_action(Map.merge(@valid_attrs, %{
-        "target_id" => GeneralTestLib.make_user().id,
-      }))
+      assert {:ok, %Action{} = action} =
+               Moderation.create_action(
+                 Map.merge(@valid_attrs, %{
+                   "target_id" => GeneralTestLib.make_user().id
+                 })
+               )
+
       assert action.reason == "some reason"
     end
 
@@ -114,7 +140,11 @@ defmodule Teiserver.ModerationTest do
     alias Teiserver.Moderation.Ban
 
     @valid_attrs %{"reason" => "some reason", "enabled" => true, "key_values" => ["k1", "k2"]}
-    @update_attrs %{"reason" => "some updated reason", "enabled" => true, "key_values" => ["k0", "k3"]}
+    @update_attrs %{
+      "reason" => "some updated reason",
+      "enabled" => true,
+      "key_values" => ["k0", "k3"]
+    }
     @invalid_attrs %{"reason" => nil, "enabled" => nil, "key_values" => nil}
 
     test "list_bans/0 returns bans" do
@@ -128,10 +158,14 @@ defmodule Teiserver.ModerationTest do
     end
 
     test "create_ban/1 with valid data creates a ban" do
-      assert {:ok, %Ban{} = ban} = Moderation.create_ban(Map.merge(@valid_attrs, %{
-        "source_id" => GeneralTestLib.make_user().id,
-        "added_by_id" => GeneralTestLib.make_user().id,
-      }))
+      assert {:ok, %Ban{} = ban} =
+               Moderation.create_ban(
+                 Map.merge(@valid_attrs, %{
+                   "source_id" => GeneralTestLib.make_user().id,
+                   "added_by_id" => GeneralTestLib.make_user().id
+                 })
+               )
+
       assert ban.reason == "some reason"
     end
 
@@ -166,8 +200,22 @@ defmodule Teiserver.ModerationTest do
   describe "proposals" do
     alias Teiserver.Moderation.{Proposal, ProposalVote}
 
-    @valid_attrs %{"reason" => "some reason", "restrictions" => ["r1", "r2"], "duration" => "5 days", "votes_for" => 1, "votes_against" => 0, "votes_abstain" => 0}
-    @update_attrs %{"reason" => "some updated reason", "restrictions" => ["u1", "u2"], "duration" => "5 days", "votes_for" => 1, "votes_against" => 0, "votes_abstain" => 0}
+    @valid_attrs %{
+      "reason" => "some reason",
+      "restrictions" => ["r1", "r2"],
+      "duration" => "5 days",
+      "votes_for" => 1,
+      "votes_against" => 0,
+      "votes_abstain" => 0
+    }
+    @update_attrs %{
+      "reason" => "some updated reason",
+      "restrictions" => ["u1", "u2"],
+      "duration" => "5 days",
+      "votes_for" => 1,
+      "votes_against" => 0,
+      "votes_abstain" => 0
+    }
     @invalid_attrs %{"reason" => nil}
 
     test "list_proposals/0 returns proposals" do
@@ -181,10 +229,14 @@ defmodule Teiserver.ModerationTest do
     end
 
     test "create_proposal/1 with valid data creates a proposal" do
-      assert {:ok, %Proposal{} = proposal} = Moderation.create_proposal(Map.merge(@valid_attrs, %{
-        "proposer_id" => GeneralTestLib.make_user().id,
-        "target_id" => GeneralTestLib.make_user().id,
-      }))
+      assert {:ok, %Proposal{} = proposal} =
+               Moderation.create_proposal(
+                 Map.merge(@valid_attrs, %{
+                   "proposer_id" => GeneralTestLib.make_user().id,
+                   "target_id" => GeneralTestLib.make_user().id
+                 })
+               )
+
       assert proposal.reason == "some reason"
     end
 
@@ -216,5 +268,4 @@ defmodule Teiserver.ModerationTest do
       assert %Ecto.Changeset{} = Moderation.change_proposal(proposal)
     end
   end
-
 end

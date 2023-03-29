@@ -30,15 +30,17 @@ defmodule Teiserver.Telemetry.ServerMonthLogLib do
 
   def _search(query, :date, {year, month}) do
     from logs in query,
-      where: logs.year == ^year
-        and logs.month == ^month
+      where:
+        logs.year == ^year and
+          logs.month == ^month
   end
 
   def _search(query, :start_date, {year, month}) do
     from logs in query,
-      where: (logs.year == ^year
-        and logs.month >= ^month)
-        or logs.year > ^year
+      where:
+        (logs.year == ^year and
+           logs.month >= ^month) or
+          logs.year > ^year
   end
 
   def _search(query, :start_date, date) do
@@ -47,9 +49,10 @@ defmodule Teiserver.Telemetry.ServerMonthLogLib do
 
   def _search(query, :end_date, {year, month}) do
     from logs in query,
-      where: (logs.year == ^year
-        and logs.month <= ^month)
-        or logs.year < ^year
+      where:
+        (logs.year == ^year and
+           logs.month <= ^month) or
+          logs.year < ^year
   end
 
   def _search(query, :end_date, date) do

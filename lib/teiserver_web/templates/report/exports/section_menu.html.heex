@@ -1,12 +1,12 @@
 <% bsname = view_colour() %>
 
 <%= if allow?(@current_user, Teiserver.Game.MatchRatingsExport.permissions()) do %>
-  <%= central_component "section_menu_button",
+  <%= central_component("section_menu_button",
     name: "match_ratings",
     label: "Match ratings",
     active: @active,
     icon: Teiserver.Game.MatchRatingsExport.icon(),
     bsname: bsname,
     url: Routes.ts_reports_exports_path(@conn, :show, "match_ratings")
-  %>
+  ) %>
 <% end %>

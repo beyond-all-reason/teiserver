@@ -1,8 +1,8 @@
-<%
-  is_active = assigns[:active] == @name
-  icon = if is_atom(@icon), do: Central.Helpers.StylingHelper.icon(@icon), else: @icon
+<% is_active = assigns[:active] == @name
+icon = if is_atom(@icon), do: Central.Helpers.StylingHelper.icon(@icon), else: @icon
 
-  icon = if is_active do
+icon =
+  if is_active do
     icon
     |> String.replace("far ", "fa-solid ")
     |> String.replace("fa-regular ", "fa-solid ")
@@ -13,13 +13,11 @@
     icon
   end
 
-  active_class = if is_active, do: "active"
-%>
+active_class = if is_active, do: "active" %>
 
 <a href={@url} class={"btn btn-outline-#{@bsname} #{active_class}"} id={"section-menu-#{@name}"}>
   <%= if @icon != "" do %>
-    <%= central_component "icon", icon: icon %>
-    &nbsp;
+    <%= central_component("icon", icon: icon) %> &nbsp;
   <% end %>
   <%= @label %>
 </a>

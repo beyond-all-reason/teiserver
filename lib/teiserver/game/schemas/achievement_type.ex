@@ -17,12 +17,13 @@ defmodule Teiserver.Game.AchievementType do
   """
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
-    params = params
+    params =
+      params
       |> trim_strings(~w(name grouping icon description)a)
 
     struct
-      |> cast(params, ~w(name grouping icon colour description rarity)a)
-      |> validate_required(~w(name grouping icon colour description rarity)a)
+    |> cast(params, ~w(name grouping icon colour description rarity)a)
+    |> validate_required(~w(name grouping icon colour description rarity)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

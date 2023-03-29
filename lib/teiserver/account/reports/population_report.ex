@@ -27,22 +27,28 @@ defmodule Teiserver.Account.PopulationReport do
   end
 
   defp registration_date_where("All time"), do: nil
+
   defp registration_date_where(date_string) do
-    start_date = case DatePresets.parse(date_string) do
-      {d, _end} -> d
-      d -> d
-    end
+    start_date =
+      case DatePresets.parse(date_string) do
+        {d, _end} -> d
+        d -> d
+      end
+
     "users.inserted_at >= '#{start_date}'"
   end
 
   defp last_login_where("All time"), do: nil
-  defp last_login_where(date_string) do
-    start_date = case DatePresets.parse(date_string) do
-      {d, _end} -> d
-      d -> d
-    end
 
-    start_date_secs = start_date
+  defp last_login_where(date_string) do
+    start_date =
+      case DatePresets.parse(date_string) do
+        {d, _end} -> d
+        d -> d
+      end
+
+    start_date_secs =
+      start_date
       |> Timex.to_unix()
       |> Kernel.div(60)
 
@@ -52,16 +58,18 @@ defmodule Teiserver.Account.PopulationReport do
   defp exclude_bots_where("true") do
     "NOT users.data -> 'roles' @> '\"Bot\"'"
   end
+
   defp exclude_bots_where(_), do: nil
 
   # Get the ids of the users we want to query stuff about
   @spec get_userids(map()) :: String.t()
   defp get_userids(params) do
-    wheres = [
-      registration_date_where(params["registered"]),
-      last_login_where(params["last_login"]),
-      exclude_bots_where(params["exclude_bots"]),
-    ]
+    wheres =
+      [
+        registration_date_where(params["registered"]),
+        last_login_where(params["last_login"]),
+        exclude_bots_where(params["exclude_bots"])
+      ]
       |> Enum.reject(&(&1 == nil))
       |> Enum.join("\nAND ")
 
@@ -77,27 +85,35 @@ defmodule Teiserver.Account.PopulationReport do
   defp get_data(params) do
     subquery = get_userids(params)
 
-    {table, metric} = case params["metric"] do
-      "Client name" ->
-        {"account_users", "data ->> 'lobby_client'"}
-      "Country code" ->
-        {"account_users", "data ->> 'country'"}
-      "Operating system" ->
-        {"teiserver_account_user_stats", "data ->> 'hardware:osinfo'"}
-      "GPU manufacturer" ->
-        {"teiserver_account_user_stats", "data ->> 'hardware:gpuinfo'"}
-      "CPU manufacturer" ->
-        {"teiserver_account_user_stats", "data ->> 'hardware:cpuinfo'"}
-      "Display size" ->
-        {"teiserver_account_user_stats", "data ->> 'hardware:displaymax'"}
-      "Spring rank" ->
-        {"account_users", "data ->> 'rank'"}
-    end
+    {table, metric} =
+      case params["metric"] do
+        "Client name" ->
+          {"account_users", "data ->> 'lobby_client'"}
 
-    userid_field = case table do
-      "account_users" -> "id"
-      "teiserver_account_user_stats" -> "user_id"
-    end
+        "Country code" ->
+          {"account_users", "data ->> 'country'"}
+
+        "Operating system" ->
+          {"teiserver_account_user_stats", "data ->> 'hardware:osinfo'"}
+
+        "GPU manufacturer" ->
+          {"teiserver_account_user_stats", "data ->> 'hardware:gpuinfo'"}
+
+        "CPU manufacturer" ->
+          {"teiserver_account_user_stats", "data ->> 'hardware:cpuinfo'"}
+
+        "Display size" ->
+          {"teiserver_account_user_stats", "data ->> 'hardware:displaymax'"}
+
+        "Spring rank" ->
+          {"account_users", "data ->> 'rank'"}
+      end
+
+    userid_field =
+      case table do
+        "account_users" -> "id"
+        "teiserver_account_user_stats" -> "user_id"
+      end
 
     query = """
     SELECT
@@ -120,39 +136,46 @@ defmodule Teiserver.Account.PopulationReport do
   end
 
   defp add_csv_headings(output, value_type) do
-    headings = [[
-      value_type,
-      "Count"
-    ]]
+    headings = [
+      [
+        value_type,
+        "Count"
+      ]
+    ]
+
     headings ++ output
   end
+
   defp make_csv_data(data, value_type) do
     data
-      |> Enum.map(fn [key, value] ->
-        [
-          key,
-          value
-        ]
-      end)
-      |> add_csv_headings(value_type)
-      |> CSV.encode(separator: ?\t)
-      |> Enum.to_list
+    |> Enum.map(fn [key, value] ->
+      [
+        key,
+        value
+      ]
+    end)
+    |> add_csv_headings(value_type)
+    |> CSV.encode(separator: ?\t)
+    |> Enum.to_list()
   end
 
   @spec stat_data(map()) :: map()
   defp stat_data(data) do
     %{
-      groups: data |> Enum.count,
-      total: data |> Enum.map(fn [_, v] -> v end) |> Enum.sum
+      groups: data |> Enum.count(),
+      total: data |> Enum.map(fn [_, v] -> v end) |> Enum.sum()
     }
   end
 
   defp apply_defaults(params) do
-    Map.merge(%{
-      "metric" => "Client name",
-      "last_login" => "This week",
-      "registered" => "All time",
-      "exclude_bots" => "true"
-    }, Map.get(params, "report", %{}))
+    Map.merge(
+      %{
+        "metric" => "Client name",
+        "last_login" => "This week",
+        "registered" => "All time",
+        "exclude_bots" => "true"
+      },
+      Map.get(params, "report", %{})
+    )
   end
 end

@@ -12,6 +12,7 @@ defmodule Central.General.CacheClusterServer do
     if from_node != Node.self() do
       ConCache.insert_new(table, key, value)
     end
+
     {:noreply, state}
   end
 
@@ -22,6 +23,7 @@ defmodule Central.General.CacheClusterServer do
         ConCache.delete(table, key)
       end)
     end
+
     {:noreply, state}
   end
 
@@ -29,6 +31,7 @@ defmodule Central.General.CacheClusterServer do
     if from_node != Node.self() do
       ConCache.put(table, key, value)
     end
+
     {:noreply, state}
   end
 
@@ -36,6 +39,7 @@ defmodule Central.General.CacheClusterServer do
     if from_node != Node.self() do
       ConCache.update(table, key, func)
     end
+
     {:noreply, state}
   end
 

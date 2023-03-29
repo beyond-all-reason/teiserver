@@ -6,7 +6,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMinuteTaskTest do
   test "perform task" do
     # Run the task
     assert :ok == PersistServerMinuteTask.perform(%{})
-    now = Timex.now() |> Timex.set([microsecond: 0])
+    now = Timex.now() |> Timex.set(microsecond: 0)
 
     # Now ensure it ran
     log = Telemetry.get_server_minute_log(now)

@@ -16,65 +16,74 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
     menu: 0,
     lobby: 0,
     spectator: 0,
-    player: 0,
+    player: 0
   }
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    start_date = Timex.now()
+    start_date =
+      Timex.now()
       |> Timex.shift(hours: -26)
-      |> Timex.to_unix
+      |> Timex.to_unix()
 
-    start_date = round(start_date/60)
+    start_date = round(start_date / 60)
 
-    user_ids = Account.list_users(
-      search: [
-        data_greater_than: {"last_login", start_date |> to_string},
-        data_equal: {"bot", "false"}
-      ],
-      limit: :infinity,
-      select: [:id]
-    ) |> Enum.map(fn %{id: id} -> id end)
+    user_ids =
+      Account.list_users(
+        search: [
+          data_greater_than: {"last_login", start_date |> to_string},
+          data_equal: {"bot", "false"}
+        ],
+        limit: :infinity,
+        select: [:id]
+      )
+      |> Enum.map(fn %{id: id} -> id end)
 
-    query = from logs in ServerDayLog
+    query = from(logs in ServerDayLog)
 
     stream = Repo.stream(query, max_rows: 50)
-    {:ok, _result} = Repo.transaction(fn() ->
-      stream
-      |> Enum.map(&convert_to_user_log/1)
-      |> List.flatten
-      |> Enum.group_by(fn {userid, _} ->
-        userid
-      end, fn {_, user_data} ->
-        user_data
-      end)
-      |> Enum.filter(fn {userid, _} ->
-        if Enum.member?(user_ids, userid) do
-          username = User.get_username(userid)
-          username != nil
-        end
-      end)
-      |> Enum.each(fn {userid, data_rows} ->
-        data = data_rows
-        |> Enum.reduce(@empty_row, fn (row, acc) ->
-          combine_row(row, acc)
+
+    {:ok, _result} =
+      Repo.transaction(fn ->
+        stream
+        |> Enum.map(&convert_to_user_log/1)
+        |> List.flatten()
+        |> Enum.group_by(
+          fn {userid, _} ->
+            userid
+          end,
+          fn {_, user_data} ->
+            user_data
+          end
+        )
+        |> Enum.filter(fn {userid, _} ->
+          if Enum.member?(user_ids, userid) do
+            username = User.get_username(userid)
+            username != nil
+          end
         end)
+        |> Enum.each(fn {userid, data_rows} ->
+          data =
+            data_rows
+            |> Enum.reduce(@empty_row, fn row, acc ->
+              combine_row(row, acc)
+            end)
 
-        Account.update_user_stat(userid, %{
-          menu_minutes: data.menu,
-          lobby_minutes: data.lobby,
-          spectator_minutes: data.spectator,
-          player_minutes: data.player,
-          total_minutes: data.menu + data.lobby + data.spectator + data.player
-        })
+          Account.update_user_stat(userid, %{
+            menu_minutes: data.menu,
+            lobby_minutes: data.lobby,
+            spectator_minutes: data.spectator,
+            player_minutes: data.player,
+            total_minutes: data.menu + data.lobby + data.spectator + data.player
+          })
 
-        user = User.get_user_by_id(userid)
-        User.update_user(%{user | rank: User.calculate_rank(user.id)}, persist: true)
+          user = User.get_user_by_id(userid)
+          User.update_user(%{user | rank: User.calculate_rank(user.id)}, persist: true)
 
-        Account.update_user_roles(Account.get_user!(userid))
+          Account.update_user_roles(Account.get_user!(userid))
+        end)
       end)
-    end)
 
     :ok
   end
@@ -104,7 +113,7 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
       menu: row.menu + acc.menu,
       lobby: row.lobby + acc.lobby,
       player: row.player + acc.player,
-      spectator: row.spectator + acc.spectator,
+      spectator: row.spectator + acc.spectator
     }
   end
 end

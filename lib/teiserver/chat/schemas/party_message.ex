@@ -13,8 +13,9 @@ defmodule Teiserver.Chat.PartyMessage do
   """
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
-    params = params
-    |> trim_strings(~w(content party_id)a)
+    params =
+      params
+      |> trim_strings(~w(content party_id)a)
 
     struct
     |> cast(params, ~w(content party_id inserted_at user_id)a)

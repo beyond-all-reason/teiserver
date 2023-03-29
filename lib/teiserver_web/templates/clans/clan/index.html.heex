@@ -1,16 +1,17 @@
-<%
-  bsname = view_colour()
-  
-  light_mode = case get_user_config_cache(@current_user, "general.Colour scheme") do
+<% bsname = view_colour()
+
+light_mode =
+  case get_user_config_cache(@current_user, "general.Colour scheme") do
     "Site default" -> get_site_config_cache("user.Default light mode")
     "Light" -> true
     "Dark" -> false
-  end
-  
-  
-%>
+  end %>
 
-<%= render TeiserverWeb.Clans.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "clans"}) %>
+<%= render(
+  TeiserverWeb.Clans.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "clans"})
+) %>
 
 <style type="text/css">
   .clan-box {
@@ -39,7 +40,7 @@
     background-color: rgba(255, 255, 255, 0.03);
   }
 </style>
-  
+
 <%= if light_mode do %>
   <style type="text/css">
     .clan-member {
@@ -56,37 +57,33 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
+        <%= if allow?(@conn, "teiserver.staff.clan") do %>
+          <div class="float-end">
+            <a href={Routes.ts_admin_clan_path(@conn, :index)} class={"btn btn-outline-#{bsname}"}>
+              Admin view
+            </a>
+          </div>
+        <% end %>
 
-<%= if allow?(@conn, "teiserver.staff.clan") do %>
-  <div class="float-end">
-    <a href={Routes.ts_admin_clan_path(@conn, :index)} class={"btn btn-outline-#{bsname}"}>
-      Admin view
-    </a>
-  </div>
-<% end %>
-
-<%= for clan <- @clans do %>
-  <%
-    member = Enum.member?(@memberships, clan.id)
-    selected = @current_user.clan_id == clan.id
-  %>
-  <a
-    href={Routes.ts_clans_clan_path(@conn, :show, clan.name)}
-    class={"clan-box #{if member, do: "clan-member"} #{if selected, do: "clan-selected"}"}
-    style={"color: #{clan.colour};"}
-  >
-    <div class="clan-name">
-      <%= clan.name %>
-    </div>
-    <br />
-    <i class={"fa-fw #{clan.icon} fa-6x"}></i>
-    <br /><br />
-    <div class="clan-tag">
-      [<%= clan.tag %>]
-    </div>
-  </a>
-<% end %>
-
+        <%= for clan <- @clans do %>
+          <% member = Enum.member?(@memberships, clan.id)
+          selected = @current_user.clan_id == clan.id %>
+          <a
+            href={Routes.ts_clans_clan_path(@conn, :show, clan.name)}
+            class={"clan-box #{if member, do: "clan-member"} #{if selected, do: "clan-selected"}"}
+            style={"color: #{clan.colour};"}
+          >
+            <div class="clan-name">
+              <%= clan.name %>
+            </div>
+            <br />
+            <i class={"fa-fw #{clan.icon} fa-6x"}></i>
+            <br /><br />
+            <div class="clan-tag">
+              [<%= clan.tag %>]
+            </div>
+          </a>
+        <% end %>
       </div>
     </div>
   </div>

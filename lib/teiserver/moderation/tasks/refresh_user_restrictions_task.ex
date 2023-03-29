@@ -12,7 +12,7 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
   @spec perform(any) :: :ok
   def perform(_job) do
     if Central.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") == true do
-      now_as_string = Timex.now() |> Jason.encode! |> Jason.decode!
+      now_as_string = Timex.now() |> Jason.encode!() |> Jason.decode!()
 
       # Find all users who are muted or banned
       # we have these anti-nil things to handle if the job
@@ -20,7 +20,7 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
       Account.list_users(
         search: [
           # data_not: {"restricted_until", nil},
-          data_less_than: {"restricted_until", now_as_string},
+          data_less_than: {"restricted_until", now_as_string}
         ],
         select: [:id]
       )
@@ -34,14 +34,15 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
 
   @spec refresh_user(T.userid()) :: :ok
   def refresh_user(user_id) do
-    actions = Moderation.list_actions(
-      search: [
-        target_id: user_id,
-        expiry: "All active"
-      ],
-      select: [:restrictions, :expires],
-      limit: :infinity
-    )
+    actions =
+      Moderation.list_actions(
+        search: [
+          target_id: user_id,
+          expiry: "All active"
+        ],
+        select: [:restrictions, :expires],
+        limit: :infinity
+      )
 
     if Enum.empty?(actions) do
       Logger.info("Lifted remaining restrictions for user##{user_id}")
@@ -51,24 +52,28 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
         restricted_until: nil
       })
     else
-      new_restrictions = actions
+      new_restrictions =
+        actions
         |> Enum.map(fn a -> a.restrictions end)
-        |> List.flatten
-        |> Enum.uniq
+        |> List.flatten()
+        |> Enum.uniq()
 
-      new_restricted_until = actions
+      new_restricted_until =
+        actions
         |> Enum.map(fn a -> a.expires end)
-        |> List.flatten
-        |> Enum.min
+        |> List.flatten()
+        |> Enum.min()
 
-      expires_as_string = new_restricted_until |> Jason.encode! |> Jason.decode!
+      expires_as_string = new_restricted_until |> Jason.encode!() |> Jason.decode!()
 
       Account.update_cache_user(user_id, %{
         restrictions: new_restrictions,
         restricted_until: expires_as_string
       })
 
-      Logger.info("Update restrictions for user##{user_id} to #{Kernel.inspect new_restrictions} to expire at #{expires_as_string}")
+      Logger.info(
+        "Update restrictions for user##{user_id} to #{Kernel.inspect(new_restrictions)} to expire at #{expires_as_string}"
+      )
 
       client = Account.get_client_by_id(user_id)
 
@@ -89,9 +94,11 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
       Enum.member?(new_restrictions, "Login") ->
         Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
         Teiserver.Client.disconnect(client.userid, "Banned")
+
       Enum.member?(new_restrictions, "All lobbies") ->
         Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
         Teiserver.Client.disconnect(client.userid, "Removed from lobbies")
+
       true ->
         pid = Coordinator.get_coordinator_pid()
         send(pid, {:do_client_inout, :login, client.userid})

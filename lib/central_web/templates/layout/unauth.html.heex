@@ -1,15 +1,23 @@
 <div id="flash-messages">
   <%= if Phoenix.Flash.get(@flash, :danger) do %>
-    <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger"><%= Phoenix.Flash.get(@flash, :danger) %></p>
+    <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger">
+      <%= Phoenix.Flash.get(@flash, :danger) %>
+    </p>
   <% end %>
   <%= if Phoenix.Flash.get(@flash, :warning) do %>
-    <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning"><%= Phoenix.Flash.get(@flash, :warning) %></p>
+    <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning">
+      <%= Phoenix.Flash.get(@flash, :warning) %>
+    </p>
   <% end %>
   <%= if Phoenix.Flash.get(@flash, :info) do %>
-    <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info"><%= Phoenix.Flash.get(@flash, :info) %></p>
+    <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info">
+      <%= Phoenix.Flash.get(@flash, :info) %>
+    </p>
   <% end %>
   <%= if Phoenix.Flash.get(@flash, :success) do %>
-    <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success"><%= Phoenix.Flash.get(@flash, :success) %></p>
+    <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success">
+      <%= Phoenix.Flash.get(@flash, :success) %>
+    </p>
   <% end %>
 </div>
 
@@ -18,16 +26,11 @@
 </div>
 
 <%= if false do %>
-<!-- Footer Section -->
-<footer>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-
-      <%#
-      <span class=""><strong>Email: </strong>info&#64;tjsoft<span class="displaynone">null</span>ware.co.uk</span>
-      %>
-    </div>
-  </nav>
-</footer>
-<!-- / Footer Section -->
+  <!-- Footer Section -->
+  <footer>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container"></div>
+    </nav>
+  </footer>
+  <!-- / Footer Section -->
 <% end %>

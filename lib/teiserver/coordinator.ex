@@ -7,10 +7,10 @@ defmodule Teiserver.Coordinator do
   @spec do_start() :: :ok | :already_started
   defp do_start() do
     # Start the supervisor server
-    result = DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
+    result =
+      DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
         Teiserver.Coordinator.CoordinatorServer,
-        name: Teiserver.Coordinator.CoordinatorServer,
-        data: %{}
+        name: Teiserver.Coordinator.CoordinatorServer, data: %{}
       })
 
     case result do
@@ -40,6 +40,7 @@ defmodule Teiserver.Coordinator do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "CoordinatorServer") do
       [{pid, _}] ->
         pid
+
       _ ->
         nil
     end
@@ -67,6 +68,7 @@ defmodule Teiserver.Coordinator do
     case Horde.Registry.lookup(Teiserver.ConsulRegistry, lobby_id) do
       [{pid, _}] ->
         pid
+
       _ ->
         nil
     end
@@ -75,12 +77,12 @@ defmodule Teiserver.Coordinator do
   @spec start_all_consuls() :: :ok
   def start_all_consuls() do
     Battle.list_lobby_ids()
-      |> Enum.each(fn id ->
-        case get_consul_pid(id) do
-          nil -> start_consul(id)
-          _ -> :ok
-        end
-      end)
+    |> Enum.each(fn id ->
+      case get_consul_pid(id) do
+        nil -> start_consul(id)
+        _ -> :ok
+      end
+    end)
   end
 
   @spec start_consul(T.lobby_id()) :: pid()
@@ -90,7 +92,7 @@ defmodule Teiserver.Coordinator do
         Teiserver.Coordinator.ConsulServer,
         name: "consul_#{lobby_id}",
         data: %{
-          lobby_id: lobby_id,
+          lobby_id: lobby_id
         }
       })
 
@@ -99,6 +101,7 @@ defmodule Teiserver.Coordinator do
 
   @spec cast_consul(T.lobby_id(), any) :: any
   def cast_consul(nil, _), do: :ok
+
   def cast_consul(lobby_id, msg) when is_integer(lobby_id) do
     case get_consul_pid(lobby_id) do
       nil -> nil
@@ -108,6 +111,7 @@ defmodule Teiserver.Coordinator do
 
   @spec send_consul(T.lobby_id(), any) :: any
   def send_consul(nil, _), do: :ok
+
   def send_consul(lobby_id, msg) when is_integer(lobby_id) do
     case get_consul_pid(lobby_id) do
       nil -> nil
@@ -118,7 +122,9 @@ defmodule Teiserver.Coordinator do
   @spec call_consul(pid() | T.lobby_id(), any) :: any
   def call_consul(lobby_id, msg) when is_integer(lobby_id) do
     case get_consul_pid(lobby_id) do
-      nil -> nil
+      nil ->
+        nil
+
       pid ->
         try do
           GenServer.call(pid, msg)
@@ -137,6 +143,7 @@ defmodule Teiserver.Coordinator do
     case Horde.Registry.lookup(Teiserver.BalancerRegistry, lobby_id) do
       [{pid, _}] ->
         pid
+
       _ ->
         nil
     end
@@ -145,12 +152,12 @@ defmodule Teiserver.Coordinator do
   @spec start_all_balancers() :: :ok
   def start_all_balancers() do
     Battle.list_lobby_ids()
-      |> Enum.each(fn id ->
-        case get_balancer_pid(id) do
-          nil -> start_balancer(id)
-          _ -> :ok
-        end
-      end)
+    |> Enum.each(fn id ->
+      case get_balancer_pid(id) do
+        nil -> start_balancer(id)
+        _ -> :ok
+      end
+    end)
   end
 
   @spec start_balancer(T.lobby_id()) :: pid()
@@ -160,7 +167,7 @@ defmodule Teiserver.Coordinator do
         Teiserver.Game.BalancerServer,
         name: "balancer_#{lobby_id}",
         data: %{
-          lobby_id: lobby_id,
+          lobby_id: lobby_id
         }
       })
 
@@ -169,6 +176,7 @@ defmodule Teiserver.Coordinator do
 
   @spec cast_balancer(T.lobby_id(), any) :: any
   def cast_balancer(nil, _), do: :ok
+
   def cast_balancer(lobby_id, msg) when is_integer(lobby_id) do
     case get_balancer_pid(lobby_id) do
       nil -> nil
@@ -178,6 +186,7 @@ defmodule Teiserver.Coordinator do
 
   @spec send_balancer(T.lobby_id(), any) :: any
   def send_balancer(nil, _), do: :ok
+
   def send_balancer(lobby_id, msg) when is_integer(lobby_id) do
     case get_balancer_pid(lobby_id) do
       nil -> nil
@@ -188,7 +197,9 @@ defmodule Teiserver.Coordinator do
   @spec call_balancer(pid() | T.lobby_id(), any) :: any
   def call_balancer(lobby_id, msg) when is_integer(lobby_id) do
     case get_balancer_pid(lobby_id) do
-      nil -> nil
+      nil ->
+        nil
+
       pid ->
         try do
           GenServer.call(pid, msg)
@@ -210,13 +221,17 @@ defmodule Teiserver.Coordinator do
   @spec close_lobby(T.lobby_id()) :: :ok
   def close_lobby(lobby_id) do
     case get_consul_pid(lobby_id) do
-      nil -> nil
+      nil ->
+        nil
+
       p ->
         DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, p)
     end
 
     case get_balancer_pid(lobby_id) do
-      nil -> nil
+      nil ->
+        nil
+
       p ->
         DynamicSupervisor.terminate_child(Teiserver.Coordinator.BalancerDynamicSupervisor, p)
     end
@@ -225,19 +240,24 @@ defmodule Teiserver.Coordinator do
     :ok
   end
 
-  @spec create_report(T.report) :: :ok
+  @spec create_report(T.report()) :: :ok
   def create_report(report) do
     cast_coordinator({:new_report, report.id})
   end
 
-  @spec update_report(T.report, atom) :: :ok
+  @spec update_report(T.report(), atom) :: :ok
   def update_report(report, :respond) do
     case report.response_action do
       "Warn" ->
-        send_to_user(report.target_id, "You have just received a formal warning, reason: #{report.response_text}.")
+        send_to_user(
+          report.target_id,
+          "You have just received a formal warning, reason: #{report.response_text}."
+        )
+
       _ ->
         nil
     end
+
     :ok
   end
 
@@ -248,17 +268,21 @@ defmodule Teiserver.Coordinator do
   # Commands for the coordinator account to perform
   @spec send_to_host(T.userid(), String.t()) :: :ok
   def send_to_host(nil, _), do: :ok
+
   def send_to_host(lobby_id, msg) do
     send_to_host(get_coordinator_userid(), lobby_id, msg)
   end
 
   @spec send_to_host(T.userid(), T.userid(), String.t()) :: :ok
   def send_to_host(nil, _, _), do: :ok
+
   def send_to_host(from_id, lobby_id, msg) do
     lobby = Battle.get_lobby(lobby_id)
+
     if lobby do
       User.send_direct_message(from_id, lobby.founder_id, msg)
     end
+
     :ok
   end
 

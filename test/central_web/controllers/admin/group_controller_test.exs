@@ -216,6 +216,7 @@ defmodule CentralWeb.Admin.GroupControllerTest do
 
       conn = get(conn, Routes.admin_group_path(conn, :edit, group))
       assert redirected_to(conn) == Routes.admin_group_path(conn, :show, group)
+
       # assert conn.private[:phoenix_flash]["danger"] == "You do not have edit access to that group"
     end
   end
@@ -289,6 +290,7 @@ defmodule CentralWeb.Admin.GroupControllerTest do
 
       conn = put(conn, Routes.admin_group_path(conn, :update, group), group: %{})
       assert redirected_to(conn) == Routes.admin_group_path(conn, :show, group)
+
       # assert conn.private[:phoenix_flash]["danger"] == "You do not have edit access to that group"
     end
   end
@@ -350,7 +352,7 @@ defmodule CentralWeb.Admin.GroupControllerTest do
       assert redirected_to(conn) == Routes.admin_group_path(conn, :show, group) <> "#members"
 
       # assert conn.private[:phoenix_flash]["danger"] ==
-               "You do not have the access to add that user to this group."
+      "You do not have the access to add that user to this group."
     end
 
     test "remove with no access", %{conn: conn} do
@@ -360,7 +362,7 @@ defmodule CentralWeb.Admin.GroupControllerTest do
       assert redirected_to(conn) == Routes.admin_group_path(conn, :show, group) <> "#members"
 
       # assert conn.private[:phoenix_flash]["danger"] ==
-               "You do not have the access to remove that user from this group."
+      "You do not have the access to remove that user from this group."
     end
   end
 end
