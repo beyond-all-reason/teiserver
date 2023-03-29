@@ -51,9 +51,10 @@ config :central, CentralWeb.Endpoint,
 config :logger, level: :warning
 
 config :central, Oban,
-  queues: false,
-  plugins: false,
-  crontab: false
+  testing: :manual
+  # queues: false,
+  # plugins: false,
+  # crontab: false
 
 config :central, Central.Mailer,
   adapter: Bamboo.TestAdapter,

@@ -51,6 +51,7 @@ config :central, Teiserver,
   ],
   enable_benchmark: false,
   enable_hooks: true,
+  tachyon_schema_path: "priv/tachyon/v1.json",
 
   # Heatbeat interval is ms
   heartbeat_interval: 30_000,
