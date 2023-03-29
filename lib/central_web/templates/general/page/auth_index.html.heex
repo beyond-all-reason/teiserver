@@ -1,7 +1,3 @@
-<a href="/recache" title="recache" class="float-end">
-  <i class="fa-regular fa-fw fa-sync"></i>
-</a>
-
 <div style="height: 15px;">&nbsp;</div>
 
 <%= if @current_user == nil do %>
@@ -13,7 +9,9 @@
     ) %>
   </div>
 <% end %>
+
 &nbsp;
+
 <div class="row">
   <%= if Application.get_env(:central, Central)[:enable_blog] do %>
     <%= if allow?(@current_user, "communication.blog") do %>

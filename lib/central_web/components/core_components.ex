@@ -10,6 +10,7 @@ defmodule CentralWeb.CoreComponents do
   use Phoenix.Component
   alias Phoenix.LiveView.JS
   import CentralWeb.Gettext
+  alias Fontawesome
 
   @doc """
   Renders a modal.
@@ -124,7 +125,7 @@ defmodule CentralWeb.CoreComponents do
   attr :id, :string, default: "flash", doc: "the optional id of flash container"
   attr :flash, :map, default: %{}, doc: "the map of flash messages to display"
   attr :title, :string, default: nil
-  attr :kind, :atom, values: [:info, :error], doc: "used for styling and flash lookup"
+  attr :kind, :atom, values: [:info, :warning, :error], doc: "used for styling and flash lookup"
   attr :autoshow, :boolean, default: true, doc: "whether to auto show the flash on mount"
   attr :close, :boolean, default: true, doc: "whether the flash can be closed"
   attr :rest, :global, doc: "the arbitrary HTML attributes to add to the flash container"
@@ -146,8 +147,8 @@ defmodule CentralWeb.CoreComponents do
       {@rest}
     >
       <p :if={@title} class="flex items-center gap-1.5 text-[0.8125rem] font-semibold leading-6">
-        <Heroicons.information_circle :if={@kind == :info} mini class="h-4 w-4" />
-        <Heroicons.exclamation_circle :if={@kind == :error} mini class="h-4 w-4" />
+        <Fontawesome.icon icon="circle-info" style="regular" :if={@kind == :info} />
+        <Fontawesome.icon icon="circle-exclamation" style="regular" :if={@kind == :error} />
         <%= @title %>
       </p>
       <p class="mt-2 text-[0.8125rem] leading-5"><%= msg %></p>
@@ -157,7 +158,7 @@ defmodule CentralWeb.CoreComponents do
         class="group absolute top-2 right-1 p-2"
         aria-label={gettext("close")}
       >
-        <Heroicons.x_mark solid class="h-5 w-5 stroke-current opacity-40 group-hover:opacity-70" />
+        <Fontawesome.icon icon="xmark" style="solid" />
       </button>
     </div>
     """
@@ -184,7 +185,7 @@ defmodule CentralWeb.CoreComponents do
       phx-disconnected={show("#disconnected")}
       phx-connected={hide("#disconnected")}
     >
-      Attempting to reconnect <Heroicons.arrow_path class="ml-1 w-3 h-3 inline animate-spin" />
+      Attempting to reconnect <Fontawesome.icon icon="sync" class="fa-spin" />
     </.flash>
     """
   end
@@ -399,7 +400,7 @@ defmodule CentralWeb.CoreComponents do
   def error(assigns) do
     ~H"""
     <p class="phx-no-feedback:hidden mt-3 flex gap-3 text-sm leading-6 text-rose-600">
-      <Heroicons.exclamation_circle mini class="mt-0.5 h-5 w-5 flex-none fill-rose-500" />
+      <Fontawesome.icon icon="circle-exclamation" style="regular" />
       <%= render_slot(@inner_block) %>
     </p>
     """
@@ -543,7 +544,7 @@ defmodule CentralWeb.CoreComponents do
         navigate={@navigate}
         class="text-sm font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
       >
-        <Heroicons.arrow_left solid class="w-3 h-3 stroke-current inline" />
+        <Fontawesome.icon icon="arrow-left" style="regular" />
         <%= render_slot(@inner_block) %>
       </.link>
     </div>
