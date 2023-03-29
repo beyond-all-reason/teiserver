@@ -66,10 +66,8 @@
   </button>
 
   <div class="navbar-collapse collapse" id="collapsingNavbar">
-    
     <ul class="navbar-nav ml-auto" phx-update="ignore" id="navbar">
       <%= if @current_user do %>
-        
         <%= render(
           CentralWeb.General.SectionsView,
           "user_recents.html",

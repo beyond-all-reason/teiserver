@@ -814,14 +814,14 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec server_full?() :: boolean()
-  defp server_full?() do
+  @spec remaining_capacity() :: non_neg_integer()
+  defp remaining_capacity() do
     client_count =
       (Central.cache_get(:application_temp_cache, :telemetry_data) || %{})
       |> Map.get(:client, %{})
       |> Map.get(:total, 0)
 
-    client_count >= Config.get_site_config_cache("system.User limit")
+    Config.get_site_config_cache("system.User limit") - client_count
   end
 
   @spec ip_to_string(String.t() | tuple()) :: Tuple.t()
@@ -859,8 +859,11 @@ defmodule Teiserver.User do
         {:error, "Banned, please see Discord for details"}
 
       not is_bot?(user) and not is_moderator?(user) and
-        not has_any_role?(user, ["VIP", "Contributor"]) and server_full?() ->
+        not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity() <= 0 ->
         {:error, "The server is currently full, please try again in a minute or two."}
+
+      # not remaining_capacity() <= 100 and user.behaviour_score < 5000 ->
+      #   {:error, "The server is currently full, please try later."}
 
       not is_verified?(user) ->
         Account.update_user_stat(user.id, %{
@@ -915,8 +918,11 @@ defmodule Teiserver.User do
             {:error, "Banned, please see Discord for details"}
 
           not is_bot?(user) and not is_moderator?(user) and
-            not has_any_role?(user, ["VIP", "Contributor"]) and server_full?() ->
+            not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity() <= 0 ->
             {:error, "The server is currently full, please try again in a minute or two."}
+
+          # not remaining_capacity() <= 100 and user.behaviour_score < 5000 ->
+          #   {:error, "The server is currently full, please try later."}
 
           not is_verified?(user) ->
             Account.update_user_stat(user.id, %{
@@ -976,8 +982,11 @@ defmodule Teiserver.User do
             {:error, "Banned, please see Discord for details"}
 
           not is_bot?(user) and not is_moderator?(user) and
-            not has_any_role?(user, ["VIP", "Contributor"]) and server_full?() ->
+            not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity() <= 0 ->
             {:error, "The server is currently full, please try again in a minute or two."}
+
+          # not remaining_capacity() <= 100 and user.behaviour_score < 5000 ->
+          #   {:error, "The server is currently full, please try later."}
 
           not is_verified?(user) ->
             # Log them in to save some details we'd not otherwise get

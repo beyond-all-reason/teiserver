@@ -29,27 +29,49 @@ defmodule Teiserver.Moderation.ActivityReport do
     reports = get_reports(start_date, end_date)
     actions = get_actions(start_date, end_date)
 
-    dates = TimexHelper.make_date_series(:days, start_date, end_date)
+    dates =
+      TimexHelper.make_date_series(:days, start_date, end_date)
       |> Enum.map(&Timex.to_date/1)
 
-    date_strs = dates
+    date_strs =
+      dates
       |> Enum.map(fn d ->
         TimexHelper.date_to_str(d, format: :ymd)
       end)
 
     report_data = {
-      date_strs, [
+      date_strs,
+      [
         ["Total reports" | build_line(dates, reports, fn _ -> true end)],
         ["Actioned reports" | build_line(dates, reports, fn r -> r.result_id != nil end)]
       ]
     }
 
     action_data = {
-      date_strs, [
-        ["Warnings" | build_line(dates, actions, fn a -> Enum.member?(a.restrictions, "Warning reminder") end)],
-        ["Mutes" | build_line(dates, actions, fn a -> Enum.member?(a.restrictions, "All chat") end)],
-        ["Suspensions" | build_line(dates, actions, fn a -> Enum.member?(a.restrictions, "Login") and Timex.compare(a.expires, permanent) == -1 end)],
-        ["Bans" | build_line(dates, actions, fn a -> Enum.member?(a.restrictions, "Login") and Timex.compare(a.expires, permanent) == 1 end)]
+      date_strs,
+      [
+        [
+          "Warnings"
+          | build_line(dates, actions, fn a ->
+              Enum.member?(a.restrictions, "Warning reminder")
+            end)
+        ],
+        [
+          "Mutes"
+          | build_line(dates, actions, fn a -> Enum.member?(a.restrictions, "All chat") end)
+        ],
+        [
+          "Suspensions"
+          | build_line(dates, actions, fn a ->
+              Enum.member?(a.restrictions, "Login") and Timex.compare(a.expires, permanent) == -1
+            end)
+        ],
+        [
+          "Bans"
+          | build_line(dates, actions, fn a ->
+              Enum.member?(a.restrictions, "Login") and Timex.compare(a.expires, permanent) == 1
+            end)
+        ]
       ]
     }
 
@@ -110,9 +132,9 @@ defmodule Teiserver.Moderation.ActivityReport do
   @spec build_line(list, map, function()) :: list()
   def build_line(key_list, object_map, filter_func) do
     key_list
-      |> Enum.map(fn key ->
-        Map.get(object_map, key, [])
-        |> Enum.count(filter_func)
-      end)
+    |> Enum.map(fn key ->
+      Map.get(object_map, key, [])
+      |> Enum.count(filter_func)
+    end)
   end
 end

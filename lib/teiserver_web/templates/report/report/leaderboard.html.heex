@@ -148,7 +148,6 @@ user_moderator = allow?(@current_user, "teiserver.staff.moderator") %>
                 <td><%= age %></td>
 
                 <%= if @extra_data do %>
-                  
                   <%= if @extra_data[rating.user_id] do %>
                     <td><%= @extra_data[rating.user_id].count %></td>
                     <td>

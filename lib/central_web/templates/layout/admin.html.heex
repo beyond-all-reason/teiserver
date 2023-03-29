@@ -97,9 +97,7 @@
   </button>
 
   <div class="navbar-collapse collapse" id="collapsingNavbar">
-    
     <ul class="navbar-nav ml-auto">
-      
       <%= if @current_user do %>
         <%= render(CentralWeb.Communication.GeneralView, "notification_dropdown.html", assigns) %>
         <%= render(CentralWeb.General.SectionsView, "user_recents.html", assigns) %>

@@ -7,7 +7,6 @@ defmodule Teiserver.Tachyon.CommandDispatch do
 
   @modules [
     Handlers.Account.WhoamiRequest,
-
     Handlers.System.DisconnectRequest,
     Handlers.System.ForceErrorRequest
   ]
@@ -25,13 +24,15 @@ defmodule Teiserver.Tachyon.CommandDispatch do
     end
 
     # Get the relevant handler, if none found the no_command fallback will handle it
-    Central.store_get(:tachyon_dispatches, command) || Central.store_get(:tachyon_dispatches, "no_command")
+    Central.store_get(:tachyon_dispatches, command) ||
+      Central.store_get(:tachyon_dispatches, "no_command")
   end
 
   @spec build_dispatch_cache :: :ok
   def build_dispatch_cache do
-    lookup = @modules
-      |> Enum.reduce(%{}, fn (module, acc) ->
+    lookup =
+      @modules
+      |> Enum.reduce(%{}, fn module, acc ->
         Map.merge(acc, module.dispatch_handlers())
       end)
 

@@ -112,33 +112,32 @@
           </div>
         </form>
 
-<% col_class =
-  case String.trim(@params["columns"]) do
-    "6" -> "col-md-2"
-    "4" -> "col-md-3"
-    "3" -> "col-md-4"
-    "2" -> "col-md-6"
-    _ -> "col-md-12"
-  end
+        <% col_class =
+          case String.trim(@params["columns"]) do
+            "6" -> "col-md-2"
+            "4" -> "col-md-3"
+            "3" -> "col-md-4"
+            "2" -> "col-md-6"
+            _ -> "col-md-12"
+          end
 
-col_class = col_class <> " my-2" %>
+        col_class = col_class <> " my-2" %>
 
-<div class="row">
-  <div class={col_class}>
-    <div class={"card border-#{bsname} page-card"}>
-      <div class="card-body">
-        <div id="reports-chart" class="with-transitions" style="height: 400px;"></div>
-      </div>
-    </div>
-  </div>
+        <div class="row">
+          <div class={col_class}>
+            <div class={"card border-#{bsname} page-card"}>
+              <div class="card-body">
+                <div id="reports-chart" class="with-transitions" style="height: 400px;"></div>
+              </div>
+            </div>
+          </div>
 
-  <div class={"card border-#{bsname} page-card"}>
-    <div class="card-body">
-      <div id="actions-chart" class="with-transitions" style="height: 400px;"></div>
-    </div>
-  </div>
-</div>
-
+          <div class={"card border-#{bsname} page-card"}>
+            <div class="card-body">
+              <div id="actions-chart" class="with-transitions" style="height: 400px;"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
