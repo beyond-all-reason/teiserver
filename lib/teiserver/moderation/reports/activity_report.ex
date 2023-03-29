@@ -9,8 +9,6 @@ defmodule Teiserver.Moderation.ActivityReport do
   @spec permissions() :: String.t()
   def permissions(), do: "teiserver.staff.moderator"
 
-  @top_count 3
-
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, params) do
     params = apply_defaults(params)

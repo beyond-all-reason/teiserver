@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.UserController do
   use CentralWeb, :controller
 
-  alias Teiserver.{Account, Chat, Game, Moderation}
+  alias Teiserver.{Account, Chat, Game}
   alias Teiserver.Game.MatchRatingLib
   alias Central.Account.User
   alias Teiserver.Account.UserLib

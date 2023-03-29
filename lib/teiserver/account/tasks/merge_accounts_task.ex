@@ -1,5 +1,5 @@
 defmodule Teiserver.Account.MergeAccountsTask do
-  alias Teiserver.{User}
+  alias Teiserver.Account
   alias Central.Repo
   require Logger
   alias Teiserver.Data.Types, as: T
@@ -73,6 +73,6 @@ defmodule Teiserver.Account.MergeAccountsTask do
         Logger.error("Error merging #{deleting_id} into #{keeping_id}\n#{Kernel.inspect(error)}")
     end
 
-    User.delete_user(deleting_id)
+    Account.decache_user(deleting_id)
   end
 end

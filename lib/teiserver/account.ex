@@ -1491,9 +1491,6 @@ defmodule Teiserver.Account do
   @spec update_cache_user(T.userid(), map()) :: T.user()
   def update_cache_user(userid, user), do: UserCache.update_cache_user(userid, user)
 
-  @spec delete_user(T.userid()) :: :ok | :no_user
-  defdelegate delete_user(userid), to: UserCache
-
   @spec decache_user(T.userid()) :: :ok | :no_user
   defdelegate decache_user(userid), to: UserCache
 

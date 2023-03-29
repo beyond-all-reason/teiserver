@@ -6,7 +6,7 @@ defmodule Tachyon.TachyonSocket do
   alias Central.Config
   alias Teiserver.Account
   alias Teiserver.Tachyon.{CommandDispatch}
-  alias Teiserver.Data.Types, as: T
+  # alias Teiserver.Data.Types, as: T
 
   @type ws_state() :: map()
 
@@ -126,7 +126,7 @@ defmodule Tachyon.TachyonSocket do
     :ok
   end
 
-  defp login(%{user: user, expires: expires} = token, state) do
+  defp login(%{user: _user, expires: _expires} = token, state) do
     response = Teiserver.User.login_from_token(token, state)
 
     case response do
@@ -157,11 +157,5 @@ defmodule Tachyon.TachyonSocket do
       floot_rate_window_size:
         Config.get_site_config_cache("teiserver.Tachyon flood rate window size")
     }
-  end
-
-  defp inspect_object(object) do
-    object
-    |> Map.drop([:__unknown_fields__])
-    |> inspect
   end
 end

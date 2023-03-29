@@ -108,15 +108,6 @@ defmodule TeiserverWeb.API.SessionController do
     |> register_reply(result)
   end
 
-  @spec register(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def register(conn, params) do
-    IO.puts("")
-    IO.inspect(params)
-    IO.puts("")
-
-    raise "X"
-  end
-
   defp register_reply(conn, {:ok, user}) do
     conn
     |> put_status(200)

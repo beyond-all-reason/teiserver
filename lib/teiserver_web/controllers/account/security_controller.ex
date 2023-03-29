@@ -2,7 +2,6 @@ defmodule TeiserverWeb.Account.SecurityController do
   use CentralWeb, :controller
 
   alias Teiserver.Account
-  alias Teiserver.Account.UserLib
 
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Account', url: '/teiserver/account')
