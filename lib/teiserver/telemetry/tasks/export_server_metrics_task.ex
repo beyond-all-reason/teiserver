@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.ExportServerMetricsTask do
   alias Teiserver.Telemetry
-  alias Central.Helpers.{DatePresets}
+  alias Central.Helpers.{DatePresets, TimexHelper}
 
   def perform(params) do
     {start_date, end_date} =
@@ -24,7 +24,7 @@ defmodule Teiserver.Telemetry.ExportServerMetricsTask do
     |> do_output(params)
   end
 
-  defp do_output(data, _params) do
+  defp do_output(data, %{"format" => "json"} = _params) do
     data
     |> Stream.map(fn log ->
       log.data
@@ -33,5 +33,42 @@ defmodule Teiserver.Telemetry.ExportServerMetricsTask do
     end)
     |> Enum.to_list()
     |> Jason.encode!()
+  end
+
+  defp do_output(data, %{"format" => "csv"} = _params) do
+    data
+    |> Stream.map(fn log ->
+      [
+        log.date |> TimexHelper.date_to_str(format: :ymd),
+        get_in(log.data, ~w(aggregates stats unique_users)),
+        get_in(log.data, ~w(aggregates stats unique_players)),
+        get_in(log.data, ~w(aggregates stats peak_user_counts total)),
+        get_in(log.data, ~w(aggregates stats peak_user_counts player)),
+        get_in(log.data, ~w(aggregates minutes player)),
+        get_in(log.data, ~w(aggregates minutes total)),
+        get_in(log.data, ~w(aggregates stats accounts_created)),
+      ]
+    end)
+    |> Enum.to_list()
+    |> add_csv_headings
+    |> CSV.encode()
+    |> Enum.to_list()
+  end
+
+  defp add_csv_headings(output) do
+    headings = [
+      [
+        "Date",
+        "Unique users",
+        "Unique players",
+        "Peak users",
+        "Peak players",
+        "Play time",
+        "Total time",
+        "Registrations"
+      ]
+    ]
+
+    headings ++ output
   end
 end

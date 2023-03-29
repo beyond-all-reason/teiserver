@@ -29,7 +29,16 @@
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
           <div class="row">
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-3 col-xl-2 search-form-input">
+              <label for="report_format" class="control-label">Format:</label>
+              <%= select(:report, :format, ["json", "csv"],
+                class: "form-control",
+                selected: @params["format"]
+              ) %>
+            </div>
+
+
+            <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_date_preset" class="control-label">Date range:</label>
               <%= select(:report, :date_preset, @presets,
                 class: "form-control",
@@ -37,7 +46,7 @@
               ) %>
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_start_date" class="control-label">Start date:</label>
               <input
                 type="text"
@@ -48,7 +57,7 @@
               />
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_end_date" class="control-label">End date:</label>
               <input
                 type="text"
