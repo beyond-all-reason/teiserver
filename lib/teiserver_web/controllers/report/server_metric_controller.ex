@@ -93,10 +93,11 @@ defmodule TeiserverWeb.Report.ServerMetricController do
   def day_metrics_export_post(conn, %{"report" => params}) do
     data = ExportServerMetricsTask.perform(params)
 
-    {content_type, ext} = case params["format"] do
-      "json" -> {"application/json", "json"}
-      "csv" -> {"text/csv", "csv"}
-    end
+    {content_type, ext} =
+      case params["format"] do
+        "json" -> {"application/json", "json"}
+        "csv" -> {"text/csv", "csv"}
+      end
 
     conn
     |> put_resp_content_type(content_type)

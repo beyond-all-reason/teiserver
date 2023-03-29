@@ -147,8 +147,8 @@ defmodule CentralWeb.CoreComponents do
       {@rest}
     >
       <p :if={@title} class="flex items-center gap-1.5 text-[0.8125rem] font-semibold leading-6">
-        <Fontawesome.icon icon="circle-info" style="regular" :if={@kind == :info} />
-        <Fontawesome.icon icon="circle-exclamation" style="regular" :if={@kind == :error} />
+        <Fontawesome.icon :if={@kind == :info} icon="circle-info" style="regular" />
+        <Fontawesome.icon :if={@kind == :error} icon="circle-exclamation" style="regular" />
         <%= @title %>
       </p>
       <p class="mt-2 text-[0.8125rem] leading-5"><%= msg %></p>

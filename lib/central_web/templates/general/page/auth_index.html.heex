@@ -9,9 +9,7 @@
     ) %>
   </div>
 <% end %>
-
 &nbsp;
-
 <div class="row">
   <%= if Application.get_env(:central, Central)[:enable_blog] do %>
     <%= if allow?(@current_user, "communication.blog") do %>

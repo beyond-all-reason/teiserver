@@ -12,15 +12,17 @@ defmodule Fontawesome do
 
   @spec icon(map) :: Phoenix.LiveView.Rendered.t()
   def icon(assigns) do
-    style = case assigns[:style] do
-      "fa-" <> s -> s
-      s -> s
-    end
+    style =
+      case assigns[:style] do
+        "fa-" <> s -> s
+        s -> s
+      end
 
-    icon = case assigns[:icon] do
-      "fa-" <> ic -> ic
-      ic -> ic
-    end
+    icon =
+      case assigns[:icon] do
+        "fa-" <> ic -> ic
+        ic -> ic
+      end
 
     class = "fa-fw fa-#{style} fa-#{icon} #{assigns[:class]}"
     assigns = assign(assigns, :class, class)

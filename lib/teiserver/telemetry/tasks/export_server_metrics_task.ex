@@ -46,7 +46,7 @@ defmodule Teiserver.Telemetry.ExportServerMetricsTask do
         get_in(log.data, ~w(aggregates stats peak_user_counts player)),
         get_in(log.data, ~w(aggregates minutes player)),
         get_in(log.data, ~w(aggregates minutes total)),
-        get_in(log.data, ~w(aggregates stats accounts_created)),
+        get_in(log.data, ~w(aggregates stats accounts_created))
       ]
     end)
     |> Enum.to_list()
