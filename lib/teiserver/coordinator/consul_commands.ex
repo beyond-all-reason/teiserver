@@ -259,6 +259,21 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state
   end
 
+  def handle_command(%{command: "tournament", senderid: senderid} = cmd, state) do
+    if User.has_any_role?(senderid, ["Moderator", "Caster", "TourneyPlayer"]) do
+      send(self(), :recheck_membership)
+      state = %{state | tournament_lobby: true}
+      ConsulServer.say_command(cmd, state)
+    else
+      LobbyChat.sayprivateex(
+        state.coordinator_id,
+        senderid,
+        "Only casters, tournament players and moderators can set tournament mode.",
+        state.lobby_id
+      )
+    end
+  end
+
   def handle_command(%{command: "afks", senderid: senderid} = cmd, state) do
     min_diff_ms = 20_000
     max_diff_s = 300

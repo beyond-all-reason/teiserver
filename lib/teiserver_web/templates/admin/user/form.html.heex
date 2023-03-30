@@ -55,6 +55,13 @@
       ) %>
 
       <%= central_component("checkbox",
+        id: "user_tournament-player",
+        name: "user[tournament-player]",
+        label: "Tournament player",
+        checked: "Tournament player" in (@changeset.data.data["roles"] || [])
+      ) %>
+
+      <%= central_component("checkbox",
         id: "user_bot",
         name: "user[bot]",
         label: "Bot",

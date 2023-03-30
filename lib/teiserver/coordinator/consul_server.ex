@@ -18,7 +18,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   # Commands that are always forwarded to the coordinator itself, not the consul server
   @coordinator_bot ~w(whoami whois check discord help coc ignore mute ignore unmute unignore matchmaking website party modparty unparty)
 
-  @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? explain newlobby jazlobby)
+  @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? explain newlobby jazlobby tournament)
   @boss_commands ~w(gatekeeper welcome-message meme reset-approval rename password resetplaylevels minplaylevel maxplaylevel setplaylevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
 
@@ -106,6 +106,24 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, %{state | lobby_policy_id: new_id}}
   end
 
+  def handle_info(:recheck_membership, state) do
+    Battle.get_lobby_member_list(state.lobby_id)
+    |> Enum.each(fn userid ->
+      cond do
+        allow_join(userid, state) |> elem(0) == false ->
+          Lobby.kick_user_from_battle(userid, state.lobby_id)
+
+        user_allowed_to_play?(userid, state) == false ->
+          Lobby.force_change_client(state.coordinator_id, userid, %{player: false})
+
+        true ->
+          :ok
+      end
+    end)
+
+    {:noreply, state}
+  end
+
   def handle_info(:reinit, state) do
     new_state = Map.merge(empty_state(state.lobby_id), state)
 
@@ -128,6 +146,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
         name = Account.get_username_by_id(userid)
         Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{name}")
       end
+
+      send(self(), :recheck_membership)
     end)
 
     {:noreply, %{state | timeouts: %{}}}
@@ -248,7 +268,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
         # If the first splitter is still in this lobby, move them to a new one
         cond do
-          Enum.count(players_to_move) == 0 ->
+          Enum.empty?(players_to_move) ->
             LobbyChat.sayex(
               state.coordinator_id,
               "Split failed, nobody followed the split leader",
@@ -739,6 +759,15 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
+  @spec user_allowed_to_play?(T.userid(), map()) :: boolean()
+  defp user_allowed_to_play?(userid, state) do
+    user_allowed_to_play?(
+      Account.get_user_by_id(userid),
+      Account.get_client_by_id(userid),
+      state
+    )
+  end
+
   @spec user_allowed_to_play?(T.user(), T.client(), map()) :: boolean()
   defp user_allowed_to_play?(user, client, state) do
     {player_rating, player_uncertainty} =
@@ -843,15 +872,18 @@ defmodule Teiserver.Coordinator.ConsulServer do
       client.moderator ->
         {true, :override_approve}
 
-      Enum.member?(state.approved_users, userid) ->
-        {true, :override_approve}
-
       ban_state == :banned ->
         Logger.info("ConsulServer allow_join false for #{userid} for reason #{reason}")
         {false, reason}
 
       client.shadowbanned ->
         {false, "Err"}
+
+      state.tournament_lobby == true and not User.has_any_role?(userid, ["Caster", "TourneyPlayer"]) ->
+        {false, "Tournament game"}
+
+      Enum.member?(state.approved_users, userid) ->
+        {true, :override_approve}
 
       state.gatekeeper == "friends" ->
         if is_on_friendlist?(userid, state, :all) do
@@ -1189,6 +1221,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       lobby_id: lobby_id,
       host_id: founder_id,
       lobby_policy_id: nil,
+      tournament_lobby: false,
       gatekeeper: "default",
       minimum_rating_to_play: 0,
       maximum_rating_to_play: 1000,
