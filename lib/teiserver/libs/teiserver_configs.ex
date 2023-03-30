@@ -23,7 +23,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "boolean",
       permissions: ["teiserver.admin"],
       description: "When set to true matchmaking uses a ready check",
-      opts: [],
       default: true,
       value_label: "Require ready check"
     })
@@ -34,7 +33,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "string",
       permissions: ["teiserver.staff.server"],
       description: "Country code flag used by bots managed by the server",
-      opts: [],
       default: "GB",
       value_label: ""
     })
@@ -46,7 +44,6 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver.admin.account"],
       description:
         "When enabled, players will be offered the chance to bestow accolades to each other.",
-      opts: [],
       default: true
     })
 
@@ -56,7 +53,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "boolean",
       permissions: ["teiserver.admin.account"],
       description: "When set to true, players will be informed when they get a new accolade",
-      opts: [],
       default: false
     })
 
@@ -66,7 +62,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "boolean",
       permissions: ["admin.dev.developer"],
       description: "When enabled, users must verify their account via email",
-      opts: [],
       default: true
     })
 
@@ -76,7 +71,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "boolean",
       permissions: ["admin.dev.developer"],
       description: "Allows users to register",
-      opts: [],
       default: true
     })
 
@@ -86,7 +80,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "boolean",
       permissions: ["admin.dev.developer"],
       description: "Prevents users registering with anything other than Chobby",
-      opts: [],
       default: false
     })
 
@@ -96,7 +89,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["teiserver.admin"],
       description: "The maximum number of characters allowed in a username.",
-      opts: [],
       default: 20
     })
 
@@ -106,7 +98,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "boolean",
       permissions: ["admin.dev.developer"],
       description: "Prevents users logging in with anything other than Chobby",
-      opts: [],
       default: false
     })
 
@@ -116,7 +107,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["teiserver.admin"],
       description: "The default player limit for lobbies",
-      opts: [],
       default: 16
     })
 
@@ -127,7 +117,6 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver.admin"],
       description:
         "The maximum deviation in mixed party-solo balance before it reverts to purely solo balance",
-      opts: [],
       default: 10
     })
 
@@ -137,7 +126,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "boolean",
       permissions: ["teiserver.admin"],
       description: "Enable server-side balance for lobbies",
-      opts: [],
       default: true
     })
 
@@ -147,7 +135,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["teiserver.admin.account"],
       description: "Points for the harshest of curse words",
-      opts: [],
       default: 10
     })
 
@@ -157,7 +144,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["teiserver.admin.account"],
       description: "Points for the middlest of curse words",
-      opts: [],
       default: 4
     })
 
@@ -167,7 +153,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["teiserver.admin.account"],
       description: "Points for the lightest of curse words",
-      opts: [],
       default: 1
     })
   end
@@ -182,7 +167,6 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver"],
       description:
         "When checked the flag associated with your IP will be displayed. If unchecked your flag will be blank. This will take effect next time you login with your client.",
-      opts: [],
       default: true
     })
 
@@ -194,7 +178,6 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver"],
       description:
         "When checked you will receive discord messages from the Teiserver bridge bot for various in-lobby events. When disabled you will receive no notifications even if the others are enabled.",
-      opts: [],
       default: true
     })
 
@@ -205,7 +188,6 @@ defmodule Teiserver.TeiserverConfigs do
       visible: true,
       permissions: ["teiserver"],
       description: "You will be messaged when you move from being in the queue to being a player",
-      opts: [],
       default: true
     })
 
@@ -216,7 +198,6 @@ defmodule Teiserver.TeiserverConfigs do
       visible: true,
       permissions: ["teiserver"],
       description: "You will be messaged when a lobby you are a player in starts",
-      opts: [],
       default: true
     })
   end
@@ -228,7 +209,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "string",
       permissions: ["teiserver.admin.account"],
       description: "The string used to request acknowledgement of warnings",
-      opts: [],
       default: "Acknowledge this with 'I acknowledge this' to resume play"
     })
 
@@ -238,7 +218,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "string",
       permissions: ["teiserver.admin.account"],
       description: "The response string expected to acknowledge the warning",
-      opts: [],
       default: "I acknowledge this"
     })
 
@@ -248,7 +227,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["teiserver.admin"],
       description: "The delay in seconds after a user logs in for the automod to check on them.",
-      opts: [],
       default: 120
     })
 
@@ -258,7 +236,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "boolean",
       permissions: ["teiserver.admin"],
       description: "Prevents someone from being a player if they don't have a HW hash yet.",
-      opts: [],
       default: false
     })
 
@@ -268,7 +245,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "boolean",
       permissions: ["teiserver.admin"],
       description: "Prevents someone from being a player if they don't have a Chobby key yet.",
-      opts: [],
       default: false
     })
   end
@@ -280,7 +256,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["teiserver.admin"],
       description: "The number of commands required to trip flood protection for Spring",
-      opts: [],
       default: 20
     })
 
@@ -290,7 +265,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["teiserver.admin"],
       description: "The size of the window in seconds for flood protection to trip for Spring",
-      opts: [],
       default: 6
     })
 
@@ -300,7 +274,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["teiserver.admin"],
       description: "The number of commands required to trip flood protection for Tachyon",
-      opts: [],
       default: 20
     })
 
@@ -310,7 +283,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["teiserver.admin"],
       description: "The size of the window in seconds for flood protection to trip for Tachyon",
-      opts: [],
       default: 6
     })
 
@@ -320,7 +292,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["teiserver.admin"],
       description: "The number of rings required to trip flood protection",
-      opts: [],
       default: 5
     })
 
@@ -330,7 +301,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["teiserver.admin"],
       description: "The size of the window in seconds for flood protection to trip for rings",
-      opts: [],
       default: 10
     })
 
@@ -341,19 +311,26 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver.admin"],
       description:
         "The time in milliseconds to wait until doing something when a user logs in (e.g. sending a message)",
-      opts: [],
       default: 2500
     })
   end
 
   defp system_configs() do
     add_site_config_type(%{
+      key: "system.Redirect url",
+      section: "System",
+      type: "string",
+      permissions: ["teiserver.admin"],
+      description: "A redirect URL for those accessing the old server",
+      value_label: "The URL for the redirect"
+    })
+
+    add_site_config_type(%{
       key: "system.Process matches",
       section: "System",
       type: "boolean",
       permissions: ["teiserver.admin"],
       description: "Enable/disable post processing of matches",
-      opts: [],
       default: true,
       value_label: "Enable"
     })
@@ -364,7 +341,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "boolean",
       permissions: ["teiserver.admin"],
       description: "When enabled you will use geoip for country code lookups",
-      opts: [],
       default: true,
       value_label: ""
     })
@@ -375,7 +351,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["teiserver.admin"],
       description: "The cap for number of concurrent users, set to 0 to be infinite",
-      opts: [],
       default: 1000,
       value_label: ""
     })
@@ -386,7 +361,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "string",
       permissions: ["teiserver.admin"],
       description: "A message sent to all users when they login, leave empty for no message",
-      opts: [],
       default: "",
       value_label: ""
     })
@@ -399,7 +373,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "boolean",
       permissions: ["teiserver.staff.moderator"],
       description: "Enables bridging from discord to in-lobby channels",
-      opts: [],
       default: true
     })
 
@@ -409,7 +382,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "boolean",
       permissions: ["teiserver.staff.moderator"],
       description: "Enables bridging from in-lobby channels to discord",
-      opts: [],
       default: true
     })
 
@@ -419,8 +391,73 @@ defmodule Teiserver.TeiserverConfigs do
       type: "boolean",
       permissions: ["teiserver.admin"],
       description: "Enables bridging of channel names to discord",
-      opts: [],
       default: true
+    })
+
+
+
+    add_site_config_type(%{
+      key: "teiserver.Discord channel #main",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the channel to bridge with #main"
+    })
+    add_site_config_type(%{
+      key: "teiserver.Discord channel #newbies",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the channel to bridge with #newbies"
+    })
+    add_site_config_type(%{
+      key: "teiserver.Discord channel #promote",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the channel to bridge for promoting games"
+    })
+    add_site_config_type(%{
+      key: "teiserver.Discord channel #moderation-reports",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the channel to post moderation-reports"
+    })
+    add_site_config_type(%{
+      key: "teiserver.Discord channel #moderation-actions",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the channel to post moderation-actions"
+    })
+    add_site_config_type(%{
+      key: "teiserver.Discord channel #server-updates",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the channel to post server updates"
+    })
+    add_site_config_type(%{
+      key: "teiserver.Discord channel #telemetry-infologs",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the channel to post infologs"
+    })
+    add_site_config_type(%{
+      key: "teiserver.Discord forum #gdt-discussion",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the forum for starting GDT discussions"
+    })
+    add_site_config_type(%{
+      key: "teiserver.Discord forum #gdt-voting",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the forum for starting GDT voting"
     })
   end
 end
