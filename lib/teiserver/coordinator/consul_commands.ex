@@ -269,9 +269,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     if Config.get_site_config_cache("teiserver.Allow tournament command") do
       if User.has_any_role?(senderid, ["Moderator", "Caster", "TourneyPlayer"]) do
         if rem |> String.trim() |> String.downcase() == "off" do
+          Battle.update_lobby_values(state.lobby_id, %{tournament: false})
           state = %{state | tournament_lobby: false}
           ConsulServer.say_command(cmd, state)
         else
+          Battle.update_lobby_values(state.lobby_id, %{tournament: true})
           LobbyChat.say(senderid, "!preset tourney", state.lobby_id)
           send(self(), :recheck_membership)
           state = %{state | tournament_lobby: true}
@@ -287,6 +289,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         state
       end
     else
+      Battle.update_lobby_values(state.lobby_id, %{tournament: false})
       LobbyChat.sayprivateex(
         state.coordinator_id,
         senderid,

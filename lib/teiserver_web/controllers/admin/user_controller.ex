@@ -75,6 +75,7 @@ defmodule TeiserverWeb.Admin.UserController do
            contributor: params["contributor"],
            developer: params["developer"],
            vip: params["vip"],
+           caster: params["caster"],
            tournament_player: params["tournament-player"],
            ip: params["ip"],
            lobby_client: params["lobby_client"],
@@ -87,17 +88,11 @@ defmodule TeiserverWeb.Admin.UserController do
          Account.list_users(search: [id_in: id_list]))
       |> Enum.uniq()
 
-    # if Enum.count(users) == 1 do
-    #   conn
-    #   |> redirect(to: Routes.ts_admin_user_path(conn, :show, hd(users).id))
-    # else
     conn
     |> add_breadcrumb(name: "User search", url: conn.request_path)
     |> assign(:params, params)
     |> assign(:users, users)
     |> render("index.html")
-
-    # end
   end
 
   @spec data_search(Plug.Conn.t(), map) :: Plug.Conn.t()

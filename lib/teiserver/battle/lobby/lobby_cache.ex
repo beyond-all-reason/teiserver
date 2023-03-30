@@ -73,6 +73,29 @@ defmodule Teiserver.Battle.LobbyCache do
     |> Enum.filter(fn lobby -> lobby != nil end)
   end
 
+  @spec list_throttled_lobbies(atom) :: [T.lobby()]
+  def list_throttled_lobbies(type) do
+    throttle_pid = case Horde.Registry.lookup(Teiserver.ThrottleRegistry, "LobbyIndexThrottle") do
+      [{pid, _}] -> pid
+      _ -> nil
+    end
+
+    case throttle_pid do
+      nil ->
+        []
+
+      pid ->
+        try do
+          GenServer.call(pid, {:get_cache, type})
+
+          # If the process has somehow died, we just return an empty list
+        catch
+          :exit, _ ->
+            []
+        end
+    end
+  end
+
   @spec stream_lobbies() :: Stream.t()
   def stream_lobbies() do
     list_lobby_ids()

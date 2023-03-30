@@ -95,7 +95,8 @@ defmodule Teiserver.Account.ClientIndexThrottle do
     {:ok,
      %{
        new_clients: [],
-       removed_clients: []
+       removed_clients: [],
+       last_update: System.system_time(:second)
      }}
   end
 end

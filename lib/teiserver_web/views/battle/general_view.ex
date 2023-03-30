@@ -9,4 +9,5 @@ defmodule TeiserverWeb.Battle.GeneralView do
   def view_colour("ratings"), do: Teiserver.Account.RatingLib.colours()
   def view_colour("parties"), do: Teiserver.Account.PartyLib.colours()
   def view_colour("matchmaking"), do: Teiserver.Game.QueueLib.colours()
+  def view_colour("tournaments"), do: :primary
 end

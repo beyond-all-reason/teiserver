@@ -1,5 +1,4 @@
-<% bsname = @view_colour
-moderator = allow?(@current_user, "teiserver.staff.moderator") %>
+<% bsname = @view_colour %>
 
 <%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
   active: "battle_lobbies",
@@ -36,7 +35,7 @@ moderator = allow?(@current_user, "teiserver.staff.moderator") %>
 
               <th colspan="3"></th>
 
-              <%= if moderator do %>
+              <%= if @moderator do %>
                 <th>&nbsp;</th>
               <% end %>
             </tr>
@@ -69,52 +68,48 @@ moderator = allow?(@current_user, "teiserver.staff.moderator") %>
                   <td><%= lobby.player_count %></td>
                   <td><%= lobby.member_count - lobby.player_count %></td>
 
-                  <%= if moderator or (lobby.password == nil and lobby.locked == false) do %>
-                    <%= if @client do %>
-                      <td>
-                        <span
-                          class={"btn btn-sm btn-#{bsname}"}
-                          phx-click="join"
-                          phx-value-lobby_id={lobby.id}
-                        >
-                          Join
-                        </span>
-                      </td>
-                    <% else %>
-                      <td>&nbsp;</td>
-                    <% end %>
-
+                  <%= if @client do %>
                     <td>
-                      <span>
-                        <%= live_redirect("Show",
-                          to: Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id),
-                          class: "btn btn-sm btn-outline-#{bsname}"
-                        ) %>
+                      <span
+                        class={"btn btn-sm btn-#{bsname}"}
+                        phx-click="join"
+                        phx-value-lobby_id={lobby.id}
+                      >
+                        Join
                       </span>
                     </td>
-                    <td>
-                      <span>
-                        <%= live_redirect("Chat",
-                          to: Routes.ts_battle_lobby_chat_path(@socket, :chat, lobby.id),
-                          class: "btn btn-sm btn-outline-#{bsname}"
-                        ) %>
-                      </span>
-                    </td>
-
-                    <%= if moderator and Map.has_key?(lobby, :uuid) do %>
-                      <td>
-                        <a
-                          href={Routes.ts_admin_lobby_path(@socket, :lobby_chat, lobby.uuid)}
-                          class={"btn btn-sm btn-outline-#{bsname}"}
-                        >
-                          Full chat
-                        </a>
-                      </td>
-                    <% else %>
-                      <td>&nbsp;</td>
-                    <% end %>
                   <% else %>
-                    <td colspan="4">&nbsp;</td>
+                    <td>&nbsp;</td>
+                  <% end %>
+
+                  <td>
+                    <span>
+                      <%= live_redirect("Show",
+                        to: Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id),
+                        class: "btn btn-sm btn-outline-#{bsname}"
+                      ) %>
+                    </span>
+                  </td>
+                  <td>
+                    <span>
+                      <%= live_redirect("Chat",
+                        to: Routes.ts_battle_lobby_chat_path(@socket, :chat, lobby.id),
+                        class: "btn btn-sm btn-outline-#{bsname}"
+                      ) %>
+                    </span>
+                  </td>
+
+                  <%= if @moderator and Map.has_key?(lobby, :uuid) do %>
+                    <td>
+                      <a
+                        href={Routes.ts_admin_lobby_path(@socket, :lobby_chat, lobby.uuid)}
+                        class={"btn btn-sm btn-outline-#{bsname}"}
+                      >
+                        Full chat
+                      </a>
+                    </td>
+                  <% else %>
+                    <td>&nbsp;</td>
                   <% end %>
                 </tr>
               <% end %>

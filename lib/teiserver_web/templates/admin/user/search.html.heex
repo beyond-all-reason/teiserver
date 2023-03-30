@@ -66,7 +66,7 @@
         <%= central_component("icon_dropdown", %{
           name: "search[order]",
           id: "search_order",
-          selected: @params["order"] || "Newest first",
+          selected: @params["order"] || "Name (A-Z)",
           enumerable: [
             %{id: "Name (A-Z)", icon: "fa-solid fa-sort-numeric-down", colour: fg},
             %{id: "Name (Z-A)", icon: "fa-solid fa-sort-numeric-up", colour: fg},
@@ -170,6 +170,20 @@
             %{id: "Any", icon: "fa-solid fa-square", colour: fg},
             %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
             %{id: "Contributor", icon: "fa-solid fa-handshake", colour: fg}
+          ]
+        }) %>
+      </div>
+
+      <div class={search_col_class}>
+        <label for="search_caster" class="control-label">Caster: </label>
+        <%= central_component("icon_dropdown", %{
+          name: "search[caster]",
+          id: "search_caster",
+          selected: @params["caster"],
+          enumerable: [
+            %{id: "Any", icon: "fa-solid fa-square", colour: fg},
+            %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
+            %{id: "Caster", icon: "fa-solid fa-microphone", colour: fg}
           ]
         }) %>
       </div>
