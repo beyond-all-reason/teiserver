@@ -1,5 +1,6 @@
 defmodule Teiserver.Coordinator.ConsulCommands do
   require Logger
+  alias Central.Config
   alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
   alias Teiserver.{Account, Battle, Coordinator, User, Client}
   alias Teiserver.Battle.{Lobby, LobbyChat}
@@ -265,24 +266,34 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "tournament", senderid: senderid, remaining: rem} = cmd, state) do
-    if User.has_any_role?(senderid, ["Moderator", "Caster", "TourneyPlayer"]) do
-      if rem |> String.trim() |> String.downcase() == "off" do
-        state = %{state | tournament_lobby: false}
-        ConsulServer.say_command(cmd, state)
+    if Config.get_site_config_cache("teiserver.Allow tournament command") do
+      if User.has_any_role?(senderid, ["Moderator", "Caster", "TourneyPlayer"]) do
+        if rem |> String.trim() |> String.downcase() == "off" do
+          state = %{state | tournament_lobby: false}
+          ConsulServer.say_command(cmd, state)
+        else
+          LobbyChat.say(senderid, "!preset tourney", state.lobby_id)
+          send(self(), :recheck_membership)
+          state = %{state | tournament_lobby: true}
+          ConsulServer.say_command(cmd, state)
+        end
       else
-        LobbyChat.say(senderid, "!preset tourney", state.lobby_id)
-        send(self(), :recheck_membership)
-        state = %{state | tournament_lobby: true}
-        ConsulServer.say_command(cmd, state)
+        LobbyChat.sayprivateex(
+          state.coordinator_id,
+          senderid,
+          "Only casters, tournament players and moderators can set tournament mode.",
+          state.lobby_id
+        )
+        state
       end
     else
       LobbyChat.sayprivateex(
         state.coordinator_id,
         senderid,
-        "Only casters, tournament players and moderators can set tournament mode.",
+        "Tournament mode has been removed from this lobby.",
         state.lobby_id
       )
-      state
+      %{state | tournament_lobby: false}
     end
   end
 

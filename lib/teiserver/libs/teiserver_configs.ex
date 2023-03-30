@@ -13,6 +13,7 @@ defmodule Teiserver.TeiserverConfigs do
     legacy_protocol_configs()
     moderation_configs()
     discord_configs()
+    lobby_configs()
   end
 
   @spec site_configs :: any
@@ -99,61 +100,6 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["admin.dev.developer"],
       description: "Prevents users logging in with anything other than Chobby",
       default: false
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Default player limit",
-      section: "Lobbies",
-      type: "integer",
-      permissions: ["teiserver.admin"],
-      description: "The default player limit for lobbies",
-      default: 16
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Max deviation",
-      section: "Lobbies",
-      type: "integer",
-      permissions: ["teiserver.admin"],
-      description:
-        "The maximum deviation in mixed party-solo balance before it reverts to purely solo balance",
-      default: 10
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Enable server balance",
-      section: "Lobbies",
-      type: "boolean",
-      permissions: ["teiserver.admin"],
-      description: "Enable server-side balance for lobbies",
-      default: true
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Curse word score A",
-      section: "Lobbies",
-      type: "integer",
-      permissions: ["teiserver.admin.account"],
-      description: "Points for the harshest of curse words",
-      default: 10
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Curse word score B",
-      section: "Lobbies",
-      type: "integer",
-      permissions: ["teiserver.admin.account"],
-      description: "Points for the middlest of curse words",
-      default: 4
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Curse word score C",
-      section: "Lobbies",
-      type: "integer",
-      permissions: ["teiserver.admin.account"],
-      description: "Points for the lightest of curse words",
-      default: 1
     })
   end
 
@@ -363,6 +309,72 @@ defmodule Teiserver.TeiserverConfigs do
       description: "A message sent to all users when they login, leave empty for no message",
       default: "",
       value_label: ""
+    })
+  end
+
+  defp lobby_configs() do
+    add_site_config_type(%{
+      key: "teiserver.Allow tournament command",
+      section: "Lobbies",
+      type: "boolean",
+      permissions: ["teiserver.admin"],
+      description: "When set to true, the $tournament command will be able to be used. When disabled it can still be used but only to turn off tournament mode.",
+      default: false
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Default player limit",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The default player limit for lobbies",
+      default: 16
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Max deviation",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description:
+        "The maximum deviation in mixed party-solo balance before it reverts to purely solo balance",
+      default: 10
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Enable server balance",
+      section: "Lobbies",
+      type: "boolean",
+      permissions: ["teiserver.admin"],
+      description: "Enable server-side balance for lobbies",
+      default: true
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Curse word score A",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["teiserver.admin.account"],
+      description: "Points for the harshest of curse words",
+      default: 10
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Curse word score B",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["teiserver.admin.account"],
+      description: "Points for the middlest of curse words",
+      default: 4
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Curse word score C",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["teiserver.admin.account"],
+      description: "Points for the lightest of curse words",
+      default: 1
     })
   end
 
