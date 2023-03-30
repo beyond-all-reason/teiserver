@@ -186,7 +186,9 @@ defmodule Teiserver.Bridge.BridgeServer do
 
     case channels do
       [{channel_id, _}] ->
-        Api.create_message(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
+        if Config.get_site_config_cache("teiserver.Bridge from server") do
+          Api.create_message(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
+        end
 
       _ ->
         :ok
@@ -202,7 +204,9 @@ defmodule Teiserver.Bridge.BridgeServer do
 
     case channels do
       [{channel_id, _}] ->
-        Api.create_message(channel_id, "Teiserver shutdown for node #{Teiserver.node_name()}")
+        if Config.get_site_config_cache("teiserver.Bridge from server") do
+          Api.create_message(channel_id, "Teiserver shutdown for node #{Teiserver.node_name()}")
+        end
 
       _ ->
         :ok
