@@ -70,6 +70,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "Host bosses are: #{boss_names}"
       end
 
+    tourney_mode = if state.tournament_lobby do
+      "Tournament mode is enabled"
+    end
+
     # Party info
     parties =
       Battle.list_lobby_players(state.lobby_id)
@@ -142,6 +146,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         "Currently #{player_count} players",
         "Team size and count are: #{state.host_teamsize} and #{state.host_teamcount}",
         boss_string,
+        tourney_mode,
         "Maximum allowed number of players is #{max_player_count} (Host = #{state.host_teamsize * state.host_teamcount}, Coordinator = #{state.player_limit})",
         play_level_bounds,
         play_rank_bounds
@@ -259,11 +264,17 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state
   end
 
-  def handle_command(%{command: "tournament", senderid: senderid} = cmd, state) do
+  def handle_command(%{command: "tournament", senderid: senderid, remaining: rem} = cmd, state) do
     if User.has_any_role?(senderid, ["Moderator", "Caster", "TourneyPlayer"]) do
-      send(self(), :recheck_membership)
-      state = %{state | tournament_lobby: true}
-      ConsulServer.say_command(cmd, state)
+      if rem |> String.trim() |> String.downcase() == "off" do
+        state = %{state | tournament_lobby: false}
+        ConsulServer.say_command(cmd, state)
+      else
+        LobbyChat.say(senderid, "!preset tourney", state.lobby_id)
+        send(self(), :recheck_membership)
+        state = %{state | tournament_lobby: true}
+        ConsulServer.say_command(cmd, state)
+      end
     else
       LobbyChat.sayprivateex(
         state.coordinator_id,
@@ -271,6 +282,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         "Only casters, tournament players and moderators can set tournament mode.",
         state.lobby_id
       )
+      state
     end
   end
 
