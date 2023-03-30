@@ -75,7 +75,7 @@ defmodule TeiserverWeb.Admin.UserController do
            contributor: params["contributor"],
            developer: params["developer"],
            vip: params["vip"],
-           tournament_player: params["tournament_player"],
+           tournament_player: params["tournament-player"],
            ip: params["ip"],
            lobby_client: params["lobby_client"],
            previous_names: params["previous_names"],
