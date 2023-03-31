@@ -478,5 +478,38 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver.admin"],
       description: "The discord ID for the forum for starting GDT voting"
     })
+
+    # User number channels
+    add_site_config_type(%{
+      key: "teiserver.Discord counter clients",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the channel broadcasting client count"
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Discord counter players",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the channel broadcasting player count"
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Discord counter matches",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the channel broadcasting match count"
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Discord counter lobbies",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the channel broadcasting lobby count"
+    })
   end
 end

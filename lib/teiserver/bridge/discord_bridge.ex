@@ -331,14 +331,8 @@ defmodule Teiserver.Bridge.DiscordBridge do
   end
 
   defp bridge_channel_to_room(channel_id) do
-    result =
-      Application.get_env(:central, DiscordBridge)[:bridges]
-      |> Enum.filter(fn {chan, _room} -> chan == channel_id end)
-
-    case result do
-      [{_, room}] -> room
-      _ -> nil
-    end
+    bridge_pid = BridgeServer.get_bridge_pid()
+    GenServer.call(bridge_pid, {:lookup_room_from_channel, channel_id})
   end
 
   def start_link do
