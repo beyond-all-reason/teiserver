@@ -1221,7 +1221,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       lobby_id: lobby_id,
       host_id: founder_id,
       lobby_policy_id: nil,
-      tournament_lobby: true,
+      tournament_lobby: false,
       gatekeeper: "default",
       minimum_rating_to_play: 0,
       maximum_rating_to_play: 1000,
