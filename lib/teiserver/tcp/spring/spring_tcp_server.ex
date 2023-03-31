@@ -143,6 +143,7 @@ defmodule Teiserver.SpringTcpServer do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
 
     redirect_url = Config.get_site_config_cache("system.Redirect url")
+
     if redirect_url != nil do
       state.protocol_out.reply(:redirect, redirect_url, nil, state)
       send(self(), :terminate)

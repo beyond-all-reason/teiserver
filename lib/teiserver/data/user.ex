@@ -24,7 +24,8 @@ defmodule Teiserver.User do
 
   @spec role_list :: [String.t()]
   def role_list(),
-    do: ~w(Tester Streamer Donor Caster Contributor GDT Dev Moderator Admin Verified Bot VIP TournamentPlayer)
+    do:
+      ~w(Tester Streamer Donor Caster Contributor GDT Dev Moderator Admin Verified Bot VIP TournamentPlayer)
 
   @spec keys() :: [atom]
   def keys(),

@@ -879,7 +879,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
       client.shadowbanned ->
         {false, "Err"}
 
-      state.tournament_lobby == true and not User.has_any_role?(userid, ["Caster", "TourneyPlayer"]) ->
+      state.tournament_lobby == true and
+          not User.has_any_role?(userid, ["Caster", "TourneyPlayer"]) ->
         {false, "Tournament game"}
 
       Enum.member?(state.approved_users, userid) ->

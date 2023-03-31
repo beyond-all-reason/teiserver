@@ -165,8 +165,7 @@ defmodule TeiserverWeb.TournamentLive.Show do
   def handle_info({:battle_lobby_throttle, :closed}, socket) do
     {:noreply,
      socket
-     |> redirect(to: ~p"/tournament/lobbies")
-    }
+     |> redirect(to: ~p"/tournament/lobbies")}
   end
 
   def handle_info({:liveview_lobby_update, :consul_server_updated, _, _}, socket) do

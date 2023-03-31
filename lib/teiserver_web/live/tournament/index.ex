@@ -18,7 +18,13 @@ defmodule TeiserverWeb.TournamentLive.Index do
       |> NotificationPlug.live_call()
 
     client = Account.get_client_by_id(socket.assigns[:current_user].id)
-    can_join = Teiserver.User.has_any_role?(socket.assigns[:current_user].id, ["Moderator", "Caster", "TourneyPlayer"])
+
+    can_join =
+      Teiserver.User.has_any_role?(socket.assigns[:current_user].id, [
+        "Moderator",
+        "Caster",
+        "TourneyPlayer"
+      ])
 
     socket =
       socket
@@ -49,7 +55,6 @@ defmodule TeiserverWeb.TournamentLive.Index do
         },
         socket
       ) do
-
     {:noreply, socket |> get_lobbies}
   end
 
@@ -86,11 +91,12 @@ defmodule TeiserverWeb.TournamentLive.Index do
   end
 
   defp get_lobbies(socket) do
-    lobbies = Battle.list_throttled_lobbies(:tournament)
-    |> Enum.sort_by(
-      fn v -> v.name end,
-      &<=/2
-    )
+    lobbies =
+      Battle.list_throttled_lobbies(:tournament)
+      |> Enum.sort_by(
+        fn v -> v.name end,
+        &<=/2
+      )
 
     total_members = lobbies |> Enum.reduce(0, fn b, acc -> acc + b.member_count end)
     total_players = lobbies |> Enum.reduce(0, fn b, acc -> acc + b.player_count end)
@@ -103,8 +109,8 @@ defmodule TeiserverWeb.TournamentLive.Index do
     }
 
     socket
-      |> assign(:lobbies, lobbies)
-      |> assign(:stats, stats)
+    |> assign(:lobbies, lobbies)
+    |> assign(:stats, stats)
   end
 
   defp apply_action(socket, :index, _params) do

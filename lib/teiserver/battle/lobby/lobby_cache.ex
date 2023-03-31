@@ -75,10 +75,11 @@ defmodule Teiserver.Battle.LobbyCache do
 
   @spec list_throttled_lobbies(atom) :: [T.lobby()]
   def list_throttled_lobbies(type) do
-    throttle_pid = case Horde.Registry.lookup(Teiserver.ThrottleRegistry, "LobbyIndexThrottle") do
-      [{pid, _}] -> pid
-      _ -> nil
-    end
+    throttle_pid =
+      case Horde.Registry.lookup(Teiserver.ThrottleRegistry, "LobbyIndexThrottle") do
+        [{pid, _}] -> pid
+        _ -> nil
+      end
 
     case throttle_pid do
       nil ->

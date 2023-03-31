@@ -19,7 +19,8 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     client = Account.get_client_by_id(socket.assigns[:current_user].id)
     moderator = allow?(socket.assigns[:current_user], "teiserver.staff.moderator")
 
-    socket = socket
+    socket =
+      socket
       |> assign(:moderator, moderator)
 
     lobbies =
@@ -154,9 +155,9 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     else
       lobbies
       |> Enum.reject(fn lobby ->
-        lobby.locked
-        or lobby.passworded
-        or lobby.tournament
+        lobby.locked or
+          lobby.passworded or
+          lobby.tournament
       end)
     end
   end
