@@ -10,19 +10,25 @@ defmodule Teiserver.Battle.SeasonalUncertaintyResetTask do
     new_last_updated = Timex.now()
     {_skill, new_uncertainty} = Openskill.rating()
 
-    ratings_count = Account.list_ratings(limit: :infinity)
-    |> Enum.each(fn rating ->
-      reset_rating(rating, new_uncertainty, new_last_updated)
-    end)
-    |> Enum.count
+    ratings_count =
+      Account.list_ratings(limit: :infinity)
+      |> Enum.each(fn rating ->
+        reset_rating(rating, new_uncertainty, new_last_updated)
+      end)
+      |> Enum.count()
 
     time_taken = System.system_time(:millisecond) - start_time
-    Logger.info("SeasonalUncertaintyResetTask complete, took #{time_taken}ms to reset #{ratings_count} ratings")
+
+    Logger.info(
+      "SeasonalUncertaintyResetTask complete, took #{time_taken}ms to reset #{ratings_count} ratings"
+    )
   end
 
   defp reset_rating(existing, new_uncertainty, new_last_updated) do
     new_rating_value = BalanceLib.calculate_rating_value(existing.skill, new_uncertainty)
-    new_leaderboard_rating = BalanceLib.calculate_leaderboard_rating(existing.skill, new_uncertainty)
+
+    new_leaderboard_rating =
+      BalanceLib.calculate_leaderboard_rating(existing.skill, new_uncertainty)
 
     Account.update_rating(existing, %{
       rating_value: new_rating_value,

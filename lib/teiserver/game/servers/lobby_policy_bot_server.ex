@@ -144,9 +144,9 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     empty_lobby =
       Lobby.find_empty_lobby(fn l ->
         l.passworded == false and
-        l.locked == false and
-        l.tournament == false and
-        l.in_progress == false
+          l.locked == false and
+          l.tournament == false and
+          l.in_progress == false
       end)
 
     case empty_lobby do
@@ -415,6 +415,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     # In theory we should check to ensure they're senior but in the interest of
     # making sure there's no issue we just leave the lobby anyway
     sender = Account.get_user_by_id(senderid)
+
     if User.is_bot?(sender) and User.is_moderator?(sender) do
       send(self(), :leave_lobby)
     end

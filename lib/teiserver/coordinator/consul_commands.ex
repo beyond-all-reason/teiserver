@@ -71,9 +71,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "Host bosses are: #{boss_names}"
       end
 
-    tourney_mode = if state.tournament_lobby do
-      "Tournament mode is enabled"
-    end
+    tourney_mode =
+      if state.tournament_lobby do
+        "Tournament mode is enabled"
+      end
 
     # Party info
     parties =
@@ -286,16 +287,19 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "Only casters, tournament players and moderators can set tournament mode.",
           state.lobby_id
         )
+
         state
       end
     else
       Battle.update_lobby_values(state.lobby_id, %{tournament: false})
+
       LobbyChat.sayprivateex(
         state.coordinator_id,
         senderid,
         "Tournament mode has been removed from this lobby.",
         state.lobby_id
       )
+
       %{state | tournament_lobby: false}
     end
   end

@@ -318,7 +318,8 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Lobbies",
       type: "boolean",
       permissions: ["teiserver.admin"],
-      description: "When set to true, the $tournament command will be able to be used. When disabled it can still be used but only to turn off tournament mode.",
+      description:
+        "When set to true, the $tournament command will be able to be used. When disabled it can still be used but only to turn off tournament mode.",
       default: false
     })
 
@@ -406,8 +407,6 @@ defmodule Teiserver.TeiserverConfigs do
       default: true
     })
 
-
-
     add_site_config_type(%{
       key: "teiserver.Discord channel #main",
       section: "Discord",
@@ -415,6 +414,7 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver.admin"],
       description: "The discord ID for the channel to bridge with #main"
     })
+
     add_site_config_type(%{
       key: "teiserver.Discord channel #newbies",
       section: "Discord",
@@ -422,6 +422,7 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver.admin"],
       description: "The discord ID for the channel to bridge with #newbies"
     })
+
     add_site_config_type(%{
       key: "teiserver.Discord channel #promote",
       section: "Discord",
@@ -429,6 +430,7 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver.admin"],
       description: "The discord ID for the channel to bridge for promoting games"
     })
+
     add_site_config_type(%{
       key: "teiserver.Discord channel #moderation-reports",
       section: "Discord",
@@ -436,6 +438,7 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver.admin"],
       description: "The discord ID for the channel to post moderation-reports"
     })
+
     add_site_config_type(%{
       key: "teiserver.Discord channel #moderation-actions",
       section: "Discord",
@@ -443,6 +446,7 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver.admin"],
       description: "The discord ID for the channel to post moderation-actions"
     })
+
     add_site_config_type(%{
       key: "teiserver.Discord channel #server-updates",
       section: "Discord",
@@ -450,6 +454,7 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver.admin"],
       description: "The discord ID for the channel to post server updates"
     })
+
     add_site_config_type(%{
       key: "teiserver.Discord channel #telemetry-infologs",
       section: "Discord",
@@ -457,6 +462,7 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver.admin"],
       description: "The discord ID for the channel to post infologs"
     })
+
     add_site_config_type(%{
       key: "teiserver.Discord forum #gdt-discussion",
       section: "Discord",
@@ -464,6 +470,7 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver.admin"],
       description: "The discord ID for the forum for starting GDT discussions"
     })
+
     add_site_config_type(%{
       key: "teiserver.Discord forum #gdt-voting",
       section: "Discord",

@@ -39,7 +39,8 @@ defmodule TeiserverWeb.Account.GeneralController do
 
   @spec customisation_select(Plug.Conn.t(), map) :: Plug.Conn.t()
   def customisation_select(conn, %{"role" => role}) do
-    available = (UserLib.global_roles() ++ conn.current_user.data["roles"])
+    available =
+      (UserLib.global_roles() ++ conn.current_user.data["roles"])
       |> Enum.reject(fn role ->
         Enum.member?(["VIP", "Tournament player"], role)
       end)
