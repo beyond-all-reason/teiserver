@@ -10,6 +10,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
   """
   alias Central.Helpers.DatePresets
   alias Teiserver.{Battle}
+  alias Central.Helpers.TimexHelper
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-swords"
@@ -101,6 +102,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
       if valid_data?(members_data) do
         %{
           id: match.id,
+          date: match.started |> TimexHelper.date_to_str(format: :ymd),
           map: match.map,
           match_uuid: match.uuid,
           server_uuid: match.server_uuid,
