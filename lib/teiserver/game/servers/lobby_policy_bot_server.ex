@@ -95,6 +95,8 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
     PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
 
+    send_chat(state, "Lobby policy bot claiming the room")
+
     lobby = Battle.get_lobby(lobby_id)
     new_state = %{state | lobby_id: lobby_id, founder_id: lobby.founder_id}
 
@@ -122,14 +124,10 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
         %{channel: "teiserver_client_messages:" <> _, event: :received_direct_message} = e,
         state
       ) do
-    userid = e.sender_id
     content = e.message_content |> Enum.join("") |> String.trim()
+    new_state = handle_direct_message(e.sender_id, content, state)
 
-    if content == "$settings" do
-      send_dm(state, userid, "My maplist is: #{state.lobby_policy.map_list |> Enum.join(", ")}")
-    end
-
-    {:noreply, state}
+    {:noreply, new_state}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _} = _m, state) do
@@ -137,18 +135,18 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     {:noreply, state}
   end
 
+  def handle_info(:leave_lobby, state) do
+    {:noreply, leave_lobby(state)}
+  end
+
   # No lobby, need to find one!
   def handle_info(:tick, %{lobby_id: nil} = state) do
-    # TODO: Use the coordinator to request a new lobby be hosted by SPADS
     empty_lobby =
       Lobby.find_empty_lobby(fn l ->
-        # String.starts_with?(l.name, "EU - 1") or
-        # String.starts_with?(l.name, "EU - 3") or
-        (String.starts_with?(l.name, "EU - ") or
-           String.starts_with?(l.name, "US ") or
-           String.starts_with?(l.name, "BH ")) and
-          l.password == nil and
-          l.in_progress == false
+        l.passworded == false and
+        l.locked == false and
+        l.tournament == false and
+        l.in_progress == false
       end)
 
     case empty_lobby do
@@ -174,7 +172,6 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
           leave_lobby(state)
 
         lobby.name != correct_lobby_name ->
-          Logger.error("Found name: '#{lobby.name}', Generated: '#{correct_lobby_name}'")
           send_chat(state, "$rename #{correct_lobby_name}")
           state
 
@@ -264,25 +261,39 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   @spec handle_user_chat(T.userid(), String.t(), map()) :: map()
-  defp handle_user_chat(userid, "!boss" <> rem, state) do
+  defp handle_user_chat(senderid, "!boss" <> rem, state) do
     if String.trim(rem) != "" do
-      LobbyChat.say(userid, "!ev", state.lobby_id)
-      Lobby.kick_user_from_battle(userid, state.lobby_id)
+      LobbyChat.say(senderid, "!ev", state.lobby_id)
+      Lobby.kick_user_from_battle(senderid, state.lobby_id)
     end
 
     state
   end
 
-  defp handle_user_chat(userid, "!preset" <> rem, state) do
+  defp handle_user_chat(senderid, "!preset" <> rem, state) do
     if String.trim(rem) != state.lobby_policy.preset do
-      LobbyChat.say(userid, "!ev", state.lobby_id)
+      LobbyChat.say(senderid, "!ev", state.lobby_id)
     end
 
     state
   end
 
-  defp handle_user_chat(_userid, _message, state) do
-    # Logger.error("handle_user_chat - #{userid} - #{message}")
+  defp handle_user_chat(senderid, "Lobby policy bot claiming the room", state) do
+    sender = Account.get_user_by_id(senderid)
+
+    if User.is_bot?(sender) and User.is_moderator?(sender) do
+      if state.userid > senderid do
+        send_dm(state, senderid, "I am senior, leave the lobby")
+      else
+        send(self(), :leave_lobby)
+      end
+    end
+
+    state
+  end
+
+  defp handle_user_chat(_senderid, _message, state) do
+    # Logger.error("handle_user_chat - #{senderid} - #{message}")
     state
   end
 
@@ -399,6 +410,41 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     state
   end
 
+  # Handle direct messages
+  defp handle_direct_message(senderid, "I am senior, leave the lobby", state) do
+    # In theory we should check to ensure they're senior but in the interest of
+    # making sure there's no issue we just leave the lobby anyway
+    sender = Account.get_user_by_id(senderid)
+    if User.is_bot?(sender) and User.is_moderator?(sender) do
+      send(self(), :leave_lobby)
+    end
+
+    state
+  end
+
+  defp handle_direct_message(senderid, "$leave", state) do
+    if User.is_moderator?(senderid) do
+      send(self(), :leave_lobby)
+    end
+
+    state
+  end
+
+  defp handle_direct_message(senderid, "$settings", state) do
+    if Enum.empty?(state.lobby_policy.map_list) do
+      send_dm(state, senderid, "I have no maplist")
+    else
+      send_dm(state, senderid, "My maplist is: #{state.lobby_policy.map_list |> Enum.join(", ")}")
+    end
+
+    state
+  end
+
+  defp handle_direct_message(_senderid, _content, state) do
+    state
+  end
+
+  # Funcs to do stuff
   defp send_chat(state, msg) do
     LobbyChat.say(state.userid, msg, state.lobby_id)
   end
