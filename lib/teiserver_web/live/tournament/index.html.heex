@@ -1,0 +1,103 @@
+<% bsname = @view_colour
+moderator = allow?(@current_user, "teiserver.staff.moderator") %>
+
+<%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+  active: "tournaments",
+  conn: Map.put(@socket, :permissions, @current_user.permissions)
+}) %>
+
+<div class="row mt-3">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname} page-card"}>
+      <div class="card-body">
+        <h4>
+          <%= if @stats.lobby_count == 0 do %>
+            No tournament lobbies
+          <% else %>
+            Lobbies: <%= @stats.lobby_count %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            Total members: <%= @stats.total_members %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            Players: <%= @stats.total_players %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            Spectators: <%= @stats.total_spectators %>
+          <% end %>
+        </h4>
+
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Map</th>
+              <th colspan="3">Status</th>
+              <th>Members</th>
+              <th>Players</th>
+              <th>Spectators</th>
+
+              <th colspan="1"></th>
+
+              <%= if moderator do %>
+                <th>&nbsp;</th>
+              <% end %>
+            </tr>
+          </thead>
+          <tbody id="lobbies">
+            <%= for lobby <- @lobbies do %>
+              <%= if lobby != nil do %>
+                <tr id={"lobby-#{lobby.id}"}>
+                  <td><%= lobby.name %></td>
+                  <td><%= lobby.map_name %></td>
+                  <td>
+                    <%= if lobby.in_progress do %>
+                      <i class="fa-fw fa-solid fa-play"></i>
+                      &nbsp; <%= Central.Helpers.TimexHelper.duration_to_str_short(
+                        System.system_time(:second) - (lobby.started_at || 1_652_282_031)
+                      ) %>
+                    <% end %>
+                  </td>
+                  <td>
+                    <%= if lobby.locked do %>
+                      <i class="fa-fw fa-solid fa-lock"></i>
+                    <% end %>
+                  </td>
+                  <td>
+                    <%= if lobby.passworded do %>
+                      <i class="fa-fw fa-solid fa-key"></i>
+                    <% end %>
+                  </td>
+                  <td><%= lobby.member_count %></td>
+                  <td><%= lobby.player_count %></td>
+                  <td><%= lobby.member_count - lobby.player_count %></td>
+
+                  <%= if @can_join do %>
+                    <%= if @client != nil do %>
+                      <td>
+                        <span
+                          class={"btn btn-sm btn-#{bsname}"}
+                          phx-click="join"
+                          phx-value-lobby_id={lobby.id}
+                        >
+                          Join
+                        </span>
+                      </td>
+                    <% else %>
+                      <td></td>
+                    <% end %>
+
+                    <td>
+                      <span>
+                        <%= live_redirect("Show",
+                          to: ~p"/tournament/lobbies/show/#{lobby.id}",
+                          class: "btn btn-sm btn-outline-#{bsname}"
+                        ) %>
+                      </span>
+                    </td>
+                  <% else %>
+                    <td colspan="2">&nbsp;</td>
+                  <% end %>
+                </tr>
+              <% end %>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

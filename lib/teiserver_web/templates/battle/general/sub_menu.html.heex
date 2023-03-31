@@ -59,6 +59,14 @@
             url: Routes.ts_battle_ratings_path(@conn, :leaderboard),
             icon: Teiserver.Account.RatingLib.icon()
           ) %>
+
+          <%= central_component("sub_menu_icon",
+            name: "tournaments",
+            label: "Tournament",
+            active: @active,
+            url: ~p"/tournament/lobbies",
+            icon: "fa-regular fa-trophy"
+          ) %>
         </div>
       </div>
     </div>

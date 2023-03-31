@@ -73,6 +73,10 @@ defmodule Teiserver.Protocols.SpringOut do
     "TASSERVER 0.38-33-ga5f3b28 * 8201 0\n"
   end
 
+  defp do_reply(:redirect, url) do
+    "REDIRECT #{url} #{Application.get_env(:central, Teiserver)[:ports][:tcp]}\n"
+  end
+
   defp do_reply(:compflags, nil) do
     "COMPFLAGS #{@compflags}\n"
   end

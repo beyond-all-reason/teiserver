@@ -142,9 +142,16 @@ defmodule Teiserver.SpringTcpServer do
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
 
-    send(self(), {:action, {:welcome, nil}})
-    Process.send_after(self(), :init_timeout, @init_timeout)
-    :gen_server.enter_loop(__MODULE__, [], state)
+    redirect_url = Config.get_site_config_cache("system.Redirect url")
+    if redirect_url != nil do
+      state.protocol_out.reply(:redirect, redirect_url, nil, state)
+      send(self(), :terminate)
+      state
+    else
+      send(self(), {:action, {:welcome, nil}})
+      Process.send_after(self(), :init_timeout, @init_timeout)
+      :gen_server.enter_loop(__MODULE__, [], state)
+    end
   end
 
   @impl true

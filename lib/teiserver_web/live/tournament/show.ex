@@ -1,4 +1,5 @@
-defmodule TeiserverWeb.Battle.LobbyLive.Show do
+defmodule TeiserverWeb.TournamentLive.Show do
+  @moduledoc false
   use TeiserverWeb, :live_view
   alias Phoenix.PubSub
   require Logger
@@ -78,10 +79,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       lobby == nil ->
         index_redirect(socket)
 
-      lobby.tournament ->
-        index_redirect(socket)
-
-      (lobby.locked or lobby.passworded) and not allow?(socket, "teiserver.staff.moderator") ->
+      (lobby.locked or lobby.password != nil) and not allow?(socket, "teiserver.staff.moderator") ->
         index_redirect(socket)
 
       true ->
@@ -167,7 +165,8 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   def handle_info({:battle_lobby_throttle, :closed}, socket) do
     {:noreply,
      socket
-     |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
+     |> redirect(to: ~p"/tournament/lobbies")
+    }
   end
 
   def handle_info({:liveview_lobby_update, :consul_server_updated, _, _}, socket) do
@@ -217,7 +216,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   end
 
   def handle_info(%{channel: "teiserver_user_updates:" <> _}, %{assigns: %{id: id}} = socket) do
-    {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_show_path(socket, :show, id))}
+    {:noreply, socket |> redirect(to: ~p"/tournament/lobbies/show/#{id}")}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
@@ -332,6 +331,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   defp page_title(:show), do: "Show Battle"
 
   defp index_redirect(socket) do
-    {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
+    {:noreply, socket |> redirect(to: ~p"/tournament/lobbies")}
   end
 end

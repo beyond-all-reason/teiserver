@@ -390,8 +390,16 @@ defmodule Central.Config do
 
     default: Any, The default value used when the variable is not set,
   """
+  @config_defaults %{
+    opts: [],
+    value_label: "",
+    default: nil
+  }
+
   @spec add_site_config_type(map()) :: :ok
   def add_site_config_type(config) do
+    config = Map.merge(@config_defaults, config)
+
     all_config_types =
       (Central.store_get(:config_site_type_store, "all-config-types") || %{})
       |> Map.put(config.key, config)

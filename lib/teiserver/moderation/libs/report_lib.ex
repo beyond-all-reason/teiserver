@@ -133,6 +133,18 @@ defmodule Teiserver.Moderation.ReportLib do
       where: reports.id in ^id_list
   end
 
+  def _search(query, :state, "Any"), do: query
+
+  def _search(query, :state, "Unhandled") do
+    from reports in query,
+      where: is_nil(reports.result_id)
+  end
+
+  def _search(query, :state, "Actioned") do
+    from reports in query,
+      where: not is_nil(reports.result_id)
+  end
+
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
 

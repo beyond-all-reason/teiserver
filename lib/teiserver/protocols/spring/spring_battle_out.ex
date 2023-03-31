@@ -27,6 +27,7 @@ defmodule Teiserver.Protocols.Spring.BattleOut do
   def do_reply(:summary, _, _state), do: ""
 
   def do_reply(:queue_status, {nil, _}, _), do: ""
+  def do_reply(:queue_status, {_, nil}, _), do: ""
 
   def do_reply(:queue_status, {lobby_id, id_list}, %{app_status: :accepted}) do
     if Enum.empty?(id_list) do

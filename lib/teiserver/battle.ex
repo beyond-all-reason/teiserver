@@ -551,6 +551,9 @@ defmodule Teiserver.Battle do
   @spec list_lobbies() :: [T.lobby()]
   defdelegate list_lobbies(), to: LobbyCache
 
+  @spec list_throttled_lobbies(atom) :: [T.lobby()]
+  defdelegate list_throttled_lobbies(type), to: LobbyCache
+
   # Query
   @spec get_lobby(T.lobby_id() | nil) :: T.lobby() | nil
   defdelegate get_lobby(id), to: LobbyCache

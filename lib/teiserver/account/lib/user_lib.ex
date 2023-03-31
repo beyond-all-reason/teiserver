@@ -220,6 +220,26 @@ defmodule Teiserver.Account.UserLib do
       where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Developer\"")
   end
 
+  def _search(query, :caster, "Caster") do
+    from users in query,
+      where: fragment("? -> ? @> ?", users.data, "roles", "\"Caster\"")
+  end
+
+  def _search(query, :caster, "Normal") do
+    from users in query,
+      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Caster\"")
+  end
+
+  def _search(query, :tournament_player, "Player") do
+    from users in query,
+      where: fragment("? -> ? @> ?", users.data, "roles", "\"Tournament player\"")
+  end
+
+  def _search(query, :tournament_player, "Normal") do
+    from users in query,
+      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Tournament player\"")
+  end
+
   def _search(query, :vip, "VIP") do
     from users in query,
       where: fragment("? -> ? @> ?", users.data, "roles", "\"VIP\"")
@@ -298,6 +318,7 @@ defmodule Teiserver.Account.UserLib do
   def role_def("GDT"), do: {"#AA0000", "fa-duotone fa-pen-ruler"}
   def role_def("VIP"), do: {"#AA8833", "fa-duotone fa-sparkles"}
   def role_def("Contributor"), do: {"#00AA66", "fa-duotone fa-code-commit"}
+  def role_def("Tournament player"), do: {"#0000AA", "fa-duotone fa-trophy"}
 
   def role_def("Caster"), do: {"#660066", "fa-duotone fa-microphone-lines"}
   def role_def("Donor"), do: {"#0066AA", "fa-duotone fa-euro"}

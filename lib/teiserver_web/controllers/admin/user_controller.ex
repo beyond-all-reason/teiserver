@@ -75,6 +75,8 @@ defmodule TeiserverWeb.Admin.UserController do
            contributor: params["contributor"],
            developer: params["developer"],
            vip: params["vip"],
+           caster: params["caster"],
+           tournament_player: params["tournament-player"],
            ip: params["ip"],
            lobby_client: params["lobby_client"],
            previous_names: params["previous_names"],
@@ -86,17 +88,11 @@ defmodule TeiserverWeb.Admin.UserController do
          Account.list_users(search: [id_in: id_list]))
       |> Enum.uniq()
 
-    # if Enum.count(users) == 1 do
-    #   conn
-    #   |> redirect(to: Routes.ts_admin_user_path(conn, :show, hd(users).id))
-    # else
     conn
     |> add_breadcrumb(name: "User search", url: conn.request_path)
     |> assign(:params, params)
     |> assign(:users, users)
     |> render("index.html")
-
-    # end
   end
 
   @spec data_search(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -267,10 +263,15 @@ defmodule TeiserverWeb.Admin.UserController do
         {"caster", "Caster"},
         {"core", "Core team"},
         {"vip", "VIP"},
+        {"tournament-player", "Tournament player"},
         {"gdt", "GDT"}
       ]
       |> Enum.map(fn {k, v} -> if user_params[k] == "true", do: v end)
       |> Enum.reject(&(&1 == nil))
+
+    IO.puts ""
+    IO.inspect roles
+    IO.puts ""
 
     data =
       Map.merge(user.data || %{}, %{
@@ -362,7 +363,7 @@ defmodule TeiserverWeb.Admin.UserController do
           )
 
         games = Enum.count(logs) |> max(1)
-        wins = Enum.filter(logs, fn l -> l.match_membership.win end) |> Enum.count()
+        wins = Enum.count(logs, fn l -> l.match_membership.win end)
 
         stats =
           if Enum.empty?(logs) do

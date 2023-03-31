@@ -34,6 +34,25 @@ defmodule TeiserverWeb.Moderation.ReportController do
     conn
     |> assign(:target_id, params["target_id"])
     |> assign(:reports, reports)
+    |> assign(:params, params)
+    |> render("index.html")
+  end
+
+  @spec search(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def search(conn, %{"search" => params}) do
+    reports =
+      Moderation.list_reports(
+        search: [
+          state: params["state"]
+        ],
+        preload: [:target, :reporter],
+        order_by: params["order"]
+      )
+
+    conn
+    |> assign(:target_id, params["target_id"])
+    |> assign(:params, params)
+    |> assign(:reports, reports)
     |> render("index.html")
   end
 

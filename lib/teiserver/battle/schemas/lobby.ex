@@ -120,6 +120,7 @@ defmodule Teiserver.Battle.Lobby do
         lobby_policy_id: nil,
 
         # Meta data
+        tournament: false,
         silence: false,
         in_progress: false,
         started_at: nil

@@ -382,6 +382,13 @@ defmodule CentralWeb.Router do
     live("/lobbies/chat/:id", Chat, :chat)
   end
 
+  scope "/tournament", TeiserverWeb.TournamentLive, as: :tournament do
+    pipe_through([:browser, :standard_layout, :protected])
+
+    live("/lobbies", Index, :index)
+    live("/lobbies/show/:id", Show, :show)
+  end
+
   scope "/teiserver/matchmaking", TeiserverWeb.Matchmaking.QueueLive, as: :ts_game do
     pipe_through([:browser, :standard_layout, :protected])
 
@@ -539,6 +546,8 @@ defmodule CentralWeb.Router do
 
     get("/", GeneralController, :index)
 
+    get("/report/search", ReportController, :search)
+    post("/report/search", ReportController, :search)
     get("/report/user/:id", ReportController, :user)
     resources("/report", ReportController, only: [:index, :show, :delete])
 

@@ -17,6 +17,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       |> NotificationPlug.live_call()
 
     client = Account.get_client_by_id(socket.assigns[:current_user].id)
+    moderator = allow?(socket.assigns[:current_user], "teiserver.staff.moderator")
+
+    socket = socket
+      |> assign(:moderator, moderator)
 
     lobbies =
       Lobby.list_lobbies()
@@ -27,11 +31,11 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
           uuid: Battle.get_lobby_match_uuid(lobby.id)
         })
       end)
+      |> filter_lobbies(socket)
       |> sort_lobbies
 
     socket =
       socket
-      # |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/teiserver/battle/lobbies")
       |> assign(:client, client)
       |> assign(:site_menu_active, "lobbies")
@@ -62,6 +66,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       ) do
     lobbies =
       [lobby | socket.assigns[:lobbies]]
+      |> filter_lobbies(socket)
       |> sort_lobbies
 
     {:noreply, assign(socket, :lobbies, lobbies)}
@@ -78,6 +83,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     lobbies =
       socket.assigns[:lobbies]
       |> Enum.filter(fn b -> b.id != lobby_id end)
+      |> filter_lobbies(socket)
       |> sort_lobbies
 
     {:noreply, assign(socket, :lobbies, lobbies)}
@@ -101,6 +107,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
           l
         end
       end)
+      |> filter_lobbies(socket)
       |> sort_lobbies
 
     {:noreply, assign(socket, :lobbies, lobbies)}
@@ -132,20 +139,32 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     lobby_id = int_parse(lobby_id)
 
     if Battle.server_allows_join?(assigns.client.userid, lobby_id) == true do
-      Battle.add_user_to_lobby(
-        assigns.current_user.id,
-        lobby_id,
-        Teiserver.Battle.Lobby.new_script_password()
-      )
+      Battle.force_add_user_to_lobby(assigns.current_user.id, lobby_id)
     end
 
     {:noreply, socket}
   end
 
+  defp filter_lobbies(lobbies, %{assigns: %{moderator: moderator}} = socket) do
+    if moderator do
+      lobbies
+      |> Enum.reject(fn lobby ->
+        lobby.tournament
+      end)
+    else
+      lobbies
+      |> Enum.reject(fn lobby ->
+        lobby.locked
+        or lobby.passworded
+        or lobby.tournament
+      end)
+    end
+  end
+
   defp sort_lobbies(lobbies) do
     lobbies
     |> Enum.sort_by(
-      fn v -> {v.locked, v.password != nil, -v.member_count, v.name} end,
+      fn v -> {v.locked, v.passworded, -v.member_count, v.name} end,
       &<=/2
     )
   end

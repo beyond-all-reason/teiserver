@@ -197,7 +197,9 @@ defmodule Teiserver.Account do
       if("Tester" in (user.data["roles"] || []), do: "Tester"),
       if("Donor" in (user.data["roles"] || []), do: "Donor"),
       if("Contributor" in (user.data["roles"] || []), do: "Contributor"),
-      if("Developer" in (user.data["roles"] || []), do: "Developer")
+      if("Developer" in (user.data["roles"] || []), do: "Developer"),
+      if("VIP" in (user.data["roles"] || []), do: "VIP"),
+      if("TourneyPlayer" in (user.data["roles"] || []), do: "TourneyPlayer")
     ]
     |> Enum.filter(fn r -> r != nil end)
     |> Enum.map(fn r -> String.downcase(r) end)
