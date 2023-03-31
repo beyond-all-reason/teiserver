@@ -501,7 +501,7 @@ defmodule Teiserver.Battle.BalanceLib do
 
   @spec calculate_rating_value(float(), float()) :: float()
   def calculate_rating_value(skill, uncertainty) do
-    skill - uncertainty
+    max(skill - uncertainty, 0)
   end
 
   @doc """
@@ -673,7 +673,7 @@ defmodule Teiserver.Battle.BalanceLib do
 
   @spec calculate_leaderboard_rating(number(), number()) :: number()
   def calculate_leaderboard_rating(skill, uncertainty) do
-    skill - 3 * uncertainty
+    max(skill - 3 * uncertainty, 0)
   end
 
   @spec balance_group([T.userid()], String.t() | non_neg_integer()) :: number()
