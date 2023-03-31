@@ -1214,6 +1214,20 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         Lobby.rename_lobby(state.lobby_id, new_name, true)
         ConsulServer.say_command(cmd, state)
 
+        downcase_name = new_name |> String.downcase()
+        skill_name = [
+          String.contains?(downcase_name, "noobs"),
+          String.contains?(downcase_name, "newbie"),
+        ] |> Enum.any?
+
+        if skill_name do
+          Lobby.sayex(
+            state.coordinator_id,
+            "Don't forget you can set skill requirements using the setratinglevels command, use $help setratinglevels for more information.",
+            state.lobby_id
+          )
+        end
+
       lobby.consul_rename ->
         :ok
 
