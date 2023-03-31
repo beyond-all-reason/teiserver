@@ -980,6 +980,6 @@ defmodule Teiserver.Game do
   @spec list_cached_lobby_policies() :: list()
   defdelegate list_cached_lobby_policies(), to: LobbyPolicyLib
 
-  @spec get_cached_lobby_policy(non_neg_integer()) :: LobbyPolicy.t
+  @spec get_cached_lobby_policy(non_neg_integer()) :: LobbyPolicy.t()
   defdelegate get_cached_lobby_policy(id), to: LobbyPolicyLib
 end

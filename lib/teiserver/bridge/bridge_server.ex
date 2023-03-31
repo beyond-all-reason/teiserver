@@ -304,19 +304,21 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   defp build_local_caches(state) do
-    channel_lookup = [
-      "teiserver.Discord channel #main",
-      "teiserver.Discord channel #newbies",
-      "teiserver.Discord channel #promote",
-      "teiserver.Discord channel #moderation-reports",
-      "teiserver.Discord channel #moderation-actions",
-      "teiserver.Discord channel #server-updates",
-      "teiserver.Discord channel #telemetry-infologs",
-      "teiserver.Discord forum #gdt-discussion",
-      "teiserver.Discord forum #gdt-voting"
-    ]
+    channel_lookup =
+      [
+        "teiserver.Discord channel #main",
+        "teiserver.Discord channel #newbies",
+        "teiserver.Discord channel #promote",
+        "teiserver.Discord channel #moderation-reports",
+        "teiserver.Discord channel #moderation-actions",
+        "teiserver.Discord channel #server-updates",
+        "teiserver.Discord channel #telemetry-infologs",
+        "teiserver.Discord forum #gdt-discussion",
+        "teiserver.Discord forum #gdt-voting"
+      ]
       |> Enum.map(fn key ->
         channel_id = Config.get_site_config_cache(key)
+
         if channel_id do
           [_, room] = String.split(key, "#")
 
@@ -324,15 +326,17 @@ defmodule Teiserver.Bridge.BridgeServer do
         end
       end)
       |> Enum.reject(&(&1 == nil))
-      |> Map.new
+      |> Map.new()
 
-    room_lookup = [
-      "teiserver.Discord channel #main",
-      "teiserver.Discord channel #newbies",
-      "teiserver.Discord channel #promote"
-    ]
+    room_lookup =
+      [
+        "teiserver.Discord channel #main",
+        "teiserver.Discord channel #newbies",
+        "teiserver.Discord channel #promote"
+      ]
       |> Enum.map(fn key ->
         channel_id = Config.get_site_config_cache(key)
+
         if channel_id do
           [_, room] = String.split(key, "#")
 
@@ -340,7 +344,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         end
       end)
       |> Enum.reject(&(&1 == nil))
-      |> Map.new
+      |> Map.new()
 
     Map.values(room_lookup)
     |> Enum.each(fn room_name ->

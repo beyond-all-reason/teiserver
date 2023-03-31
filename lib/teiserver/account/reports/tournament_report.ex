@@ -29,7 +29,7 @@ defmodule Teiserver.Account.TournamentReport do
         limit: Enum.count(id_list)
       )
       |> Enum.each(fn user ->
-        new_roles = ["Tournament player" | (user.data["roles"] || [])] |> Enum.uniq
+        new_roles = ["Tournament player" | user.data["roles"] || []] |> Enum.uniq()
         new_data = user.data |> Map.put("roles", new_roles)
 
         Account.update_user(user, %{"data" => new_data})

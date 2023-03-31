@@ -10,7 +10,8 @@ defmodule Teiserver.Protocols.Spring.LobbyPolicyIn do
   def do_handle(_, _, _, %{userid: nil} = state), do: state
 
   def do_handle("list", new_name, msg_id, state) do
-    policies = Game.list_cached_lobby_policies()
+    policies =
+      Game.list_cached_lobby_policies()
       |> Enum.map(fn lp ->
         Map.take(lp, ~w(name preset icon colour enabled agent_name_list)a)
       end)

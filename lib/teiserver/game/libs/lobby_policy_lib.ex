@@ -273,7 +273,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
     end)
   end
 
-  @spec get_cached_lobby_policy(non_neg_integer()) :: LobbyPolicy.t
+  @spec get_cached_lobby_policy(non_neg_integer()) :: LobbyPolicy.t()
   def get_cached_lobby_policy(id) do
     Central.cache_get(:lobby_policies_cache, id)
   end

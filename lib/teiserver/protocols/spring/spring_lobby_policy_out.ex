@@ -6,7 +6,8 @@ defmodule Teiserver.Protocols.Spring.LobbyPolicyOut do
   def do_reply(_, _, %{userid: nil}), do: ""
 
   def do_reply(:list, policy_list, _state) do
-    policy_rows = policy_list
+    policy_rows =
+      policy_list
       |> Enum.map(fn lp ->
         json = Jason.encode!(lp)
         "s.lobby_policy.list entry\t#{json}\n"

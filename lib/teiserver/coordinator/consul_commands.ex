@@ -1198,6 +1198,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "That lobby name been rejected. Please be aware that misuse of the lobby naming system can cause your chat privileges to be revoked.",
           state.lobby_id
         )
+
         :ok
 
       state.lobby_policy_id != nil ->
