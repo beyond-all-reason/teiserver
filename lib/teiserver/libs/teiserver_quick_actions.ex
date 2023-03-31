@@ -147,7 +147,7 @@ defmodule Teiserver.TeiserverQuickActions do
       %{
         label: "New user funnel",
         icons: ["fa-regular #{Teiserver.Account.NewUserFunnelReport.icon()}"],
-        permissions: "teiserver.staff.moderator",
+        permissions: Teiserver.Account.NewUserFunnelReport.permissions(),
         url: "/teiserver/reports/show/new_user_funnel"
       },
       %{
@@ -155,6 +155,12 @@ defmodule Teiserver.TeiserverQuickActions do
         icons: ["fa-regular #{Teiserver.Account.AccoladeLib.icon()}"],
         permissions: "teiserver.staff.moderator",
         url: "/teiserver/reports/show/accolades"
+      },
+      %{
+        label: "Tournament",
+        icons: ["fa-regular #{Teiserver.Account.TournamentReport.icon()}"],
+        permissions: Teiserver.Account.TournamentReport.permissions(),
+        url: "/teiserver/reports/show/tournament"
       },
       %{
         label: "Mutes",
