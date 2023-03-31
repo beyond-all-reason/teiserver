@@ -67,6 +67,7 @@ defmodule Central.Application do
         # Stores - Tables where changes are not propagated across the cluster
         # Possible stores
         concache_perm_sup(:teiserver_queues),
+        concache_perm_sup(:lobby_policies_cache),
 
         # Telemetry
         concache_perm_sup(:teiserver_telemetry_event_types),
