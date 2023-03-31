@@ -11,9 +11,9 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
     if Lobby.allow?(state.userid, :update_lobby_title, state.lobby_id) do
       Lobby.rename_lobby(state.lobby_id, new_name)
       reply(:spring, :okay, "c.battle.update_lobby_title", msg_id, state)
+    else
+      state
     end
-
-    state
   end
 
   def do_handle("update_host", json_str, _msg_id, state) do
@@ -35,6 +35,20 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
 
     state
   end
+
+  def do_handle("queue_status", _, _msg_id, %{lobby_id: nil} = state), do: state
+  def do_handle("queue_status", _, _msg_id, %{lobby_id: lobby_id, app_status: :accepted} = state) do
+    id_list = Coordinator.call_consul(lobby_id, :queue_state)
+    reply(:battle, :queue_status, {lobby_id, id_list}, nil, state)
+  end
+  def do_handle("queue_status", _, _msg_id, state), do: state
+
+
+  # def do_handle("refresh_lobby", _, _msg_id, %{lobby_id: nil} = state), do: state
+  # def do_handle("refresh_lobby", _, _msg_id, %{lobby_id: lobby_id, app_status: :accepted} = state) do
+
+  # end
+  # def do_handle("refresh_lobby", _, _msg_id, state), do: state
 
   def do_handle(cmd, data, msg_id, state) do
     SpringIn._no_match(state, "c.battle." <> cmd, msg_id, data)
