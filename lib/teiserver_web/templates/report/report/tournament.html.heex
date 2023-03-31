@@ -72,13 +72,26 @@ value_types = [
               ) %>
             </div>
 
-            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+            <%= if not Enum.empty?(@ratings) do %>
+              <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+                <%= central_component("checkbox",
+                  name: "report[make_players]",
+                  id: "report_make_players",
+                  value: "true",
+                  label: "Make players",
+                  field: :see_group,
+                  checked: false
+                ) %>
+              </div>
+            <% end %>
+
+            <div class="col-md-12 my-2">
               &nbsp;<br />
               <input
                 type="submit"
                 value="Update report"
                 name="form.submitted"
-                class={"btn btn-#{bsname} btn-block"}
+                class={"btn btn-#{bsname} float-end"}
               />
             </div>
           </div>
@@ -126,6 +139,8 @@ value_types = [
 
                   <th><%= @params["value_type"] %></th>
 
+                  <th>Player role</th>
+
                   <%= if user_moderator do %>
                     <th>&nbsp;</th>
                   <% end %>
@@ -148,6 +163,12 @@ value_types = [
                         "Game rating" -> rating.rating_value |> round(2)
                         "Skill value" -> rating.skill |> round(2)
                       end %>
+                    </td>
+
+                    <td>
+                      <%= if Enum.member?(rating.user.data["roles"], "Tournament player") do %>
+                        <i class="fa-fw fa-solid fa-trophy"></i>
+                      <% end %>
                     </td>
 
                     <%= if user_moderator do %>

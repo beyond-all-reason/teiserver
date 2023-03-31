@@ -21,6 +21,24 @@ defmodule Teiserver.Account.TournamentReport do
         {String.trim(name), Account.get_userid_from_name(name)}
       end)
 
+    if params["make_players"] == "true" do
+      id_list = Map.values(name_to_id_map) |> Enum.reject(&(&1 == nil))
+
+      Account.list_users(
+        search: [id_in: id_list],
+        limit: Enum.count(id_list)
+      )
+      |> Enum.each(fn user ->
+        new_roles = ["Tournament player" | (user.data["roles"] || [])] |> Enum.uniq
+        new_data = user.data |> Map.put("roles", new_roles)
+
+        Account.update_user(user, %{"data" => new_data})
+        Account.recache_user(user.id)
+      end)
+
+      :timer.sleep(500)
+    end
+
     type_name = params["game_type"]
 
     {type_id, _type_name} =
