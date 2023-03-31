@@ -4,6 +4,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
   alias Teiserver.{Account, Battle, Coordinator, User, Client}
   alias Teiserver.Battle.{Lobby, LobbyChat}
+  alias Teiserver.Chat.WordLib
   alias Teiserver.Data.Types, as: T
   import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2]
 
@@ -1189,6 +1190,14 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     cond do
       new_name == "" ->
         Lobby.rename_lobby(state.lobby_id, lobby.name, false)
+        :ok
+
+      WordLib.flagged_words(new_name) > 0 ->
+        Lobby.sayex(
+          state.coordinator_id,
+          "That lobby name been rejected. Please be aware that misuse of the lobby naming system can cause your chat privileges to be revoked.",
+          state.lobby_id
+        )
         :ok
 
       state.lobby_policy_id != nil ->
