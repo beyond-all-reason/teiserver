@@ -444,6 +444,7 @@ defmodule Teiserver.Protocols.SpringIn do
         :ok
 
       {:error, reason} ->
+        Coordinator.send_to_user(state.userid, reason)
         reply(:servermsg, reason, msg_id, state)
     end
 
