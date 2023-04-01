@@ -485,11 +485,11 @@ defmodule CentralWeb.Router do
 
   scope "/teiserver/api/hailstorm", TeiserverWeb.API, as: :ts do
     pipe_through([:api])
-    post("/up", BeansController, :up)
-    post("/update_site_config", BeansController, :update_site_config)
-    post("/create_user", BeansController, :create_user)
-    post("/db_update_user", BeansController, :db_update_user)
-    post("/ts_update_user", BeansController, :ts_update_user)
+    post("/start", HailstormController, :start)
+    post("/update_site_config", HailstormController, :update_site_config)
+    post("/create_user", HailstormController, :create_user)
+    post("/db_update_user", HailstormController, :db_update_user)
+    post("/ts_update_user", HailstormController, :ts_update_user)
   end
 
   scope "/teiserver/api/spads", TeiserverWeb.API, as: :ts do
