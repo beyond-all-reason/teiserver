@@ -1218,7 +1218,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         skill_name =
           [
-            String.contains?(downcase_name, "noobs"),
+            String.contains?(downcase_name, "noob"),
             String.contains?(downcase_name, "newbie")
           ]
           |> Enum.any?()
