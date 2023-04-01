@@ -12,9 +12,9 @@
     Rename
   </a>
 
-  <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :full_chat, @user)}>
-    <%= central_component("icon", icon: Central.Communication.ChatRoomLib.icon()) %> &nbsp;
-    Full chat
+  <a class="dropdown-item" href={~p"/moderation/report_form/72344"}>
+    <%= central_component("icon", icon: Teiserver.Moderation.ReportLib.icon()) %> &nbsp;
+    Report form
   </a>
 
   <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :smurf_search, @user.id)}>
