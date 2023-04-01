@@ -16,10 +16,9 @@ defmodule CentralWeb.Endpoint do
     longpoll: false
   )
 
-  socket("/tachyon", Tachyon.TachyonSocket,
+  socket("/tachyon", Teiserver.Tachyon.TachyonSocket,
     websocket: [
       connect_info: [:peer_data, :x_headers, :user_agent]
-      # error_handler: {MySocket, :handle_error, []}
     ],
     longpoll: false
   )

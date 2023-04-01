@@ -3,6 +3,8 @@ defmodule Teiserver.Tachyon.Handlers.System.ForceErrorRequest do
 
   """
 
+  alias Teiserver.Data.Types, as: T
+
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do
     %{
@@ -10,13 +12,14 @@ defmodule Teiserver.Tachyon.Handlers.System.ForceErrorRequest do
     }
   end
 
+  @spec execute(T.tachyon_conn, map, map) :: {{T.tachyon_command, T.tachyon_object}, T.tachyon_conn}
   def execute(conn, %{"command" => command}, _meta) do
-    {command, %{}, conn}
+    {{command, %{}}, conn}
   end
 
   def execute(_conn, _object, _meta) do
     raise "Forced error"
 
-    {"force_error", %{}, %{}}
+    {{"force_error", %{}}, %{}}
   end
 end

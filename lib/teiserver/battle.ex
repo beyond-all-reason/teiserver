@@ -242,7 +242,7 @@ defmodule Teiserver.Battle do
   # end
 
   alias Teiserver.Battle.{MatchMonitorServer, MatchLib}
-  alias Teiserver.Battle.{LobbyChat, LobbyCache}
+  alias Teiserver.Battle.{Lobby, LobbyChat, LobbyCache}
   require Logger
 
   @spec start_match(nil | T.lobby_id()) :: :ok
@@ -532,6 +532,12 @@ defmodule Teiserver.Battle do
   end
 
   # LobbyServer process
+  @spec create_lobby(map) :: T.lobby() | nil
+  defdelegate create_lobby(lobby_id), to: Lobby
+
+  @spec add_lobby(T.lobby()) :: T.lobby() | nil
+  defdelegate add_lobby(lobby_id), to: Lobby
+
   @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
   defdelegate get_lobby_pid(lobby_id), to: LobbyCache
 

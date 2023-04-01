@@ -5,8 +5,6 @@ defmodule Teiserver.Tachyon.Schema do
 
   defp get_tachyon_schema_path do
     Application.get_env(:central, Teiserver)[:tachyon_schema_path]
-    # "/apps/central/lib/central-0.1.0/priv/tachyon/v1.json"
-    # "priv/tachyon/v1.json"
   end
 
   @spec load_schemas :: list

@@ -18,6 +18,10 @@ defmodule Teiserver.Data.Types do
   @type tachyon_tcp_state() :: map()
   @type tachyon_ws_state() :: map()
 
+  @type tachyon_conn() :: map()
+  @type tachyon_command() :: String.t()
+  @type tachyon_object() :: map()
+
   @type consul_state() :: map()
   @type balance_server_state() :: map()
 
