@@ -1215,10 +1215,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         ConsulServer.say_command(cmd, state)
 
         downcase_name = new_name |> String.downcase()
-        skill_name = [
-          String.contains?(downcase_name, "noobs"),
-          String.contains?(downcase_name, "newbie"),
-        ] |> Enum.any?
+
+        skill_name =
+          [
+            String.contains?(downcase_name, "noobs"),
+            String.contains?(downcase_name, "newbie")
+          ]
+          |> Enum.any?()
 
         if skill_name do
           Lobby.sayex(
