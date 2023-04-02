@@ -36,13 +36,13 @@ defmodule Teiserver.Logging.LoggingPlug do
   defp convert_from_x_real_ip(ip) do
     if String.contains?(ip, ":") do
       ip
-        |> String.split(":")
-        |> List.to_tuple()
+      |> String.split(":")
+      |> List.to_tuple()
     else
       ip
-        |> String.split(".")
-        |> Enum.map(&String.to_integer/1)
-        |> List.to_tuple()
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
+      |> List.to_tuple()
     end
   end
 

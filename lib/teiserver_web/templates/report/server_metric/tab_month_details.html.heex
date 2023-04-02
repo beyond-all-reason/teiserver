@@ -1,30 +1,30 @@
 <div class="row">
   <div class="col-md-6">
-    <%= central_component "detail_line",
+    <%= central_component("detail_line",
       label: "Unique users",
-      value: format_number @data["aggregates"]["stats"]["unique_users"]
-    %>
+      value: format_number(@data["aggregates"]["stats"]["unique_users"])
+    ) %>
 
-    <%= central_component "detail_line",
+    <%= central_component("detail_line",
       label: "Peak total users",
-      value: format_number @data["aggregates"]["stats"]["peak_users"]
-    %>
+      value: format_number(@data["aggregates"]["stats"]["peak_users"])
+    ) %>
 
-    <%= central_component "detail_line",
+    <%= central_component("detail_line",
       label: "User registrations",
-      value: format_number @data["aggregates"]["stats"]["accounts_created"]
-    %>
+      value: format_number(@data["aggregates"]["stats"]["accounts_created"])
+    ) %>
   </div>
   <div class="col-md-6">
-    <%= central_component "detail_line",
+    <%= central_component("detail_line",
       label: "Unique players",
-      value: format_number @data["aggregates"]["stats"]["unique_players"]
-    %>
+      value: format_number(@data["aggregates"]["stats"]["unique_players"])
+    ) %>
 
-    <%= central_component "detail_line",
+    <%= central_component("detail_line",
       label: "Peak players",
-      value: format_number @data["aggregates"]["stats"]["peak_players"]
-    %>
+      value: format_number(@data["aggregates"]["stats"]["peak_players"])
+    ) %>
   </div>
 </div>
 
@@ -32,36 +32,34 @@
 <div class="row">
   <div class="col-md-6">
     <h4>Time spent by state</h4>
-    <%= central_component "detail_line",
+    <%= central_component("detail_line",
       label: "Player",
       value: represent_minutes(@data["aggregates"]["minutes"]["player"])
-    %>
+    ) %>
 
-    <%= central_component "detail_line",
+    <%= central_component("detail_line",
       label: "Spectator",
       value: represent_minutes(@data["aggregates"]["minutes"]["spectator"])
-    %>
+    ) %>
 
-    <%= central_component "detail_line",
+    <%= central_component("detail_line",
       label: "Lobby",
       value: represent_minutes(@data["aggregates"]["minutes"]["lobby"])
-    %>
+    ) %>
 
-    <%= central_component "detail_line",
+    <%= central_component("detail_line",
       label: "Menu",
       value: represent_minutes(@data["aggregates"]["minutes"]["menu"])
-    %>
+    ) %>
 
-    <%= central_component "detail_line",
+    <%= central_component("detail_line",
       label: "Total",
       value: represent_minutes(@data["aggregates"]["minutes"]["total"])
-    %>
+    ) %>
   </div>
   <div class="col-md-6">
-    <%
-      event_keys = (@data["events"]["combined"] || %{}) |> Map.keys |> Enum.sort()
-    %>
-  
+    <% event_keys = (@data["events"]["combined"] || %{}) |> Map.keys() |> Enum.sort() %>
+
     <h4>Events</h4>
     <table class="table">
       <thead>
@@ -70,7 +68,7 @@
           <th>Auth</th>
           <th>Unauth</th>
           <th>Combined</th>
-       </tr>
+        </tr>
       </thead>
       <tbody>
         <%= for key <- event_keys do %>
@@ -86,22 +84,20 @@
   </div>
   <div class="col-md-6">
     <h4>Server Events</h4>
-    <%
-      event_keys = (@data["aggregates"]["events"]["server"] || %{}) |> Map.keys |> Enum.sort()
-    %>
+    <% event_keys = (@data["aggregates"]["events"]["server"] || %{}) |> Map.keys() |> Enum.sort() %>
 
     <table class="table">
       <thead>
         <tr>
           <th>Event</th>
           <th>Count</th>
-       </tr>
+        </tr>
       </thead>
       <tbody>
         <%= for key <- event_keys do %>
           <tr>
             <td><%= key %></td>
-            <td><%= format_number @data["aggregates"]["events"]["server"][key] || 0 %></td>
+            <td><%= format_number(@data["aggregates"]["events"]["server"][key] || 0) %></td>
           </tr>
         <% end %>
       </tbody>

@@ -141,6 +141,7 @@ defmodule Central.Account do
   end
 
   def broadcast_create_user(u), do: broadcast_create_user(u, :create)
+
   def broadcast_create_user({:ok, user}, reason) do
     PubSub.broadcast(
       Central.PubSub,
@@ -154,6 +155,7 @@ defmodule Central.Account do
   def broadcast_create_user(v, _), do: v
 
   def broadcast_update_user(u), do: broadcast_update_user(u, :update)
+
   def broadcast_update_user({:ok, user}, reason) do
     PubSub.broadcast(
       Central.PubSub,
@@ -193,18 +195,19 @@ defmodule Central.Account do
   end
 
   def create_throwaway_user(attrs \\ %{}) do
-    params = %{
+    params =
+      %{
         "name" => generate_throwaway_name(),
         "email" => "#{UUID.uuid1()}@throwaway",
-        "password" => UUID.uuid1(),
+        "password" => UUID.uuid1()
       }
       |> Central.Helpers.StylingHelper.random_styling()
       |> Map.merge(attrs)
 
     %User{}
-      |> User.changeset(params)
-      |> Repo.insert()
-      |> broadcast_create_user
+    |> User.changeset(params)
+    |> Repo.insert()
+    |> broadcast_create_user
   end
 
   def merge_default_params(user_params) do
@@ -710,8 +713,6 @@ defmodule Central.Account do
   def change_group_invite(%GroupInvite{} = group_invite) do
     GroupInvite.changeset(group_invite, %{})
   end
-
-
 
   @doc """
   Uses :application_metadata_cache store to generate a random username

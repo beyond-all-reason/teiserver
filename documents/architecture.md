@@ -27,7 +27,7 @@ Protocol is split into an In and an Out module. Their sole purpose is to transla
 - lib/data contains the main backend implementation and handling for logic. 
 
 ### Protocols
-A protocol (currently just the one) interfaces between the sever state logic and the client as shown above in the structure section. Protocols have a few common functions as defined in their MDoc property but loosely are:
+A protocol (currently just the one) interfaces between the server state logic and the client as shown above in the structure section. Protocols have a few common functions as defined in their MDoc property but loosely are:
 - **handle/3** When the server receives a message it will hand it to the handle function which will parse it and subsequently call do_handle
 - **do_handle/3** Handles a specific command, it may deal with subsequent parsing and sending messages back but will not directly update any global state or broadcast messages via PubSub.
 - **reply/3** Handles sending commands/information back to the client. The protocol will transform the data to suit the protocol as needed, it is not expected to be in a specific format already.

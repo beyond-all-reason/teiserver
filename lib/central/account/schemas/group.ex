@@ -114,5 +114,6 @@ defmodule Central.Account.Group do
   def authorize(_, conn, _) do
     allow?(conn, "admin.group")
   end
+
   # def authorize(_, _, _), do: false
 end

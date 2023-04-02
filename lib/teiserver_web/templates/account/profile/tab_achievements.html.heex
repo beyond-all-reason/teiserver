@@ -8,9 +8,7 @@ Want to see more achievements? Be sure to share your suggestions on <a href="htt
       <%= for a <- achievements do %>
         <% at = a.achievement_type %>
 
-        <%= central_component "icon", icon: at.icon, style: "color: #{at.colour}" %>
-        &nbsp;
-        <%= a.achievement_type.name %><br />
+        <%= central_component("icon", icon: at.icon, style: "color: #{at.colour}") %> &nbsp; <%= a.achievement_type.name %><br />
       <% end %>
     </div>
   <% end %>

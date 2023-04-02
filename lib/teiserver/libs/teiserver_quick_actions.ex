@@ -147,7 +147,7 @@ defmodule Teiserver.TeiserverQuickActions do
       %{
         label: "New user funnel",
         icons: ["fa-regular #{Teiserver.Account.NewUserFunnelReport.icon()}"],
-        permissions: "teiserver.staff.moderator",
+        permissions: Teiserver.Account.NewUserFunnelReport.permissions(),
         url: "/teiserver/reports/show/new_user_funnel"
       },
       %{
@@ -157,18 +157,35 @@ defmodule Teiserver.TeiserverQuickActions do
         url: "/teiserver/reports/show/accolades"
       },
       %{
+        label: "Tournament",
+        icons: ["fa-regular #{Teiserver.Account.TournamentReport.icon()}"],
+        permissions: Teiserver.Account.TournamentReport.permissions(),
+        url: "/teiserver/reports/show/tournament"
+      },
+      %{
         label: "Mutes",
         icons: ["fa-regular #{Teiserver.Account.MuteReport.icon()}"],
-        permissions: "teiserver.staff.moderator",
+        permissions: Teiserver.Account.MuteReport.permissions(),
         url: "/teiserver/reports/show/mutes"
       },
       %{
         label: "Review",
         icons: ["fa-regular #{Teiserver.Account.ReviewReport.icon()}"],
-        permissions: "teiserver.staff.moderator",
+        permissions: Teiserver.Account.ReviewReport.permissions(),
         url: "/teiserver/reports/show/review"
       },
-
+      %{
+        label: "Growth",
+        icons: ["fa-regular #{Teiserver.Account.GrowthReport.icon()}"],
+        permissions: Teiserver.Account.GrowthReport.permissions(),
+        url: "/teiserver/reports/show/growth"
+      },
+      %{
+        label: "Moderation activity",
+        icons: ["fa-regular #{Teiserver.Moderation.ActivityReport.icon()}"],
+        permissions: Teiserver.Moderation.ActivityReport.permissions(),
+        url: "/teiserver/reports/show/moderation_activity"
+      },
       %{
         label: "Teiserver infologs",
         icons: ["fa-regular #{Teiserver.Telemetry.InfologLib.icon()}", :list],
@@ -197,7 +214,10 @@ defmodule Teiserver.TeiserverQuickActions do
       },
       %{
         label: "Server metrics - Load report",
-        icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", "fa-regular fa-server"],
+        icons: [
+          "fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}",
+          "fa-regular fa-server"
+        ],
         url: "/teiserver/reports/server/day_metrics/load",
         permissions: "teiserver.staff.moderator"
       },

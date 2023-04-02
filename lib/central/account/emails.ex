@@ -1,7 +1,6 @@
 defmodule Central.Account.Emails do
   @moduledoc false
   alias Bamboo.Email
-  alias Central.Account
   alias Central.Helpers.TimexHelper
 
   def password_reset(user, code \\ nil) do
@@ -35,14 +34,13 @@ defmodule Central.Account.Emails do
     <p>If you did not request this password reset then please ignore it. The code will expire in 24 hours.</p>
     """
 
-    text_body =
-"""
-A request for a password reset has been requested for you. To reset your password follow the link below. If you did not request this reset please ignore the email.
+    text_body = """
+    A request for a password reset has been requested for you. To reset your password follow the link below. If you did not request this reset please ignore the email.
 
-#{url}
+    #{url}
 
-If you did not request this password reset then please ignore it. The code will expire in 24 hours.
-"""
+    If you did not request this password reset then please ignore it. The code will expire in 24 hours.
+    """
 
     date = TimexHelper.date_to_str(Timex.now(), format: :email_date)
     message_id = UUID.uuid1()
@@ -50,7 +48,10 @@ If you did not request this password reset then please ignore it. The code will 
 
     Email.new_email()
     |> Email.to({user.name, user.email})
-    |> Email.from({Application.get_env(:central, Central.Mailer)[:noreply_name], Central.Mailer.noreply_address()})
+    |> Email.from(
+      {Application.get_env(:central, Central.Mailer)[:noreply_name],
+       Central.Mailer.noreply_address()}
+    )
     |> Email.subject(subject)
     |> Email.put_header("Date", date)
     |> Email.put_header("Message-Id", message_id)

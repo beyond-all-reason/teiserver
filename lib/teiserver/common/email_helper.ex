@@ -9,6 +9,7 @@ defmodule Teiserver.EmailHelper do
     case Config.get_site_config_cache("teiserver.Require email verification") do
       true ->
         do_new_user(user)
+
       false ->
         :no_verify
     end
@@ -36,9 +37,7 @@ defmodule Teiserver.EmailHelper do
     html_body = """
     <p>Welcome to #{game_name}.</p>
 
-    <p>To verify your account you will need this code: <span style="font-family: monospace">#{
-      verification_code
-    }</span><p>
+    <p>To verify your account you will need this code: <span style="font-family: monospace">#{verification_code}</span><p>
 
     <p>To find out more about #{game_name} visit our <a href="#{website_url}">website</a> .<p>
 

@@ -4,7 +4,12 @@ defmodule Teiserver.Tachyon.Handlers.Account.WhoamiRequest do
   """
   alias Teiserver.Account
 
-  @command_id "account/who_am_i/response"
+  @spec dispatch_handlers :: map()
+  def dispatch_handlers() do
+    %{
+      "account/who_am_i/request" => &execute/3
+    }
+  end
 
   def execute(conn, _object, _meta) do
     user = Account.get_user_by_id(conn.userid)
@@ -17,7 +22,6 @@ defmodule Teiserver.Tachyon.Handlers.Account.WhoamiRequest do
       "clan_id" => user.clan_id,
       "icons" => %{},
       "roles" => [],
-
       "battle_status" => %{
         "in_game" => client.in_game,
         "away" => client.away,
@@ -33,17 +37,12 @@ defmodule Teiserver.Tachyon.Handlers.Account.WhoamiRequest do
         "clan_tag" => client.clan_tag,
         "muted" => client.muted
       },
-
       "permissions" => user.permissions,
       "friends" => user.friends,
       "friend_requests" => user.friend_requests,
       "ignores" => user.ignored
     }
 
-    {@command_id, response, conn}
-  end
-
-  def validate() do
-    schema = Central.store_get(:tachyon_schemas, @command_id)
+    {"account/who_am_i/response", response, conn}
   end
 end

@@ -10,21 +10,22 @@ defmodule Teiserver.Chat.PartyMessageLib do
   def colours, do: :default
 
   # Queries
-  @spec query_party_messages() :: Ecto.Query.t
+  @spec query_party_messages() :: Ecto.Query.t()
   def query_party_messages do
-    from party_messages in PartyMessage
+    from(party_messages in PartyMessage)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -67,18 +68,14 @@ defmodule Teiserver.Chat.PartyMessageLib do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from party_messages in query,
-      where: (
-            ilike(party_messages.name, ^ref_like)
-        )
+      where: ilike(party_messages.name, ^ref_like)
   end
 
   def _search(query, :term, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from party_messages in query,
-      where: (
-            ilike(party_messages.content, ^ref_like)
-        )
+      where: ilike(party_messages.content, ^ref_like)
   end
 
   def _search(query, :inserted_after, timestamp) do
@@ -91,8 +88,9 @@ defmodule Teiserver.Chat.PartyMessageLib do
       where: party_messages.inserted_at < ^timestamp
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Name (A-Z)") do
     from party_messages in query,
       order_by: [asc: party_messages.name]
@@ -113,8 +111,9 @@ defmodule Teiserver.Chat.PartyMessageLib do
       order_by: [asc: party_messages.inserted_at]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :user in preloads, do: _preload_users(query), else: query
     query

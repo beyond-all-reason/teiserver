@@ -47,6 +47,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "invalid attrs - short password", %{conn: conn} do
       update_config_setting("Allowed")
+
       conn =
         post(conn, Routes.account_registration_path(conn, :create),
           user: Map.merge(@valid_attrs, %{password: "1234", password_confirmation: "1234"})
@@ -59,6 +60,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "invalid attrs - mismatched password", %{conn: conn} do
       update_config_setting("Allowed")
+
       conn =
         post(conn, Routes.account_registration_path(conn, :create),
           user: Map.put(@valid_attrs, :password_confirmation, "long long password")
@@ -125,12 +127,14 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
     # Expired code
     test "render form - expired code", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Teiserver.Account.create_code(%{
-        value: UUID.uuid1(),
-        purpose: "user_registration",
-        expires: Timex.now() |> Timex.shift(hours: -6),
-        user_id: code_user.id
-      })
+
+      {:ok, code} =
+        Teiserver.Account.create_code(%{
+          value: UUID.uuid1(),
+          purpose: "user_registration",
+          expires: Timex.now() |> Timex.shift(hours: -6),
+          user_id: code_user.id
+        })
 
       update_config_setting("Link only")
       conn = get(conn, Routes.account_registration_path(conn, :new, code.value))
@@ -139,15 +143,22 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "valid attrs - expired code", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Teiserver.Account.create_code(%{
-        value: UUID.uuid1(),
-        purpose: "user_registration",
-        expires: Timex.now() |> Timex.shift(hours: -6),
-        user_id: code_user.id
-      })
+
+      {:ok, code} =
+        Teiserver.Account.create_code(%{
+          value: UUID.uuid1(),
+          purpose: "user_registration",
+          expires: Timex.now() |> Timex.shift(hours: -6),
+          user_id: code_user.id
+        })
 
       update_config_setting("Link only")
-      conn = post(conn, Routes.account_registration_path(conn, :create), user: Map.put(@valid_attrs, :code, code.value))
+
+      conn =
+        post(conn, Routes.account_registration_path(conn, :create),
+          user: Map.put(@valid_attrs, :code, code.value)
+        )
+
       assert html_response(conn, 200) =~ "This code has expired."
 
       new_user = Account.get_user(search: [name: "new user"])
@@ -156,15 +167,20 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "invalid attrs - no details - expired code", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Teiserver.Account.create_code(%{
-        value: UUID.uuid1(),
-        purpose: "user_registration",
-        expires: Timex.now() |> Timex.shift(hours: -6),
-        user_id: code_user.id
-      })
+
+      {:ok, code} =
+        Teiserver.Account.create_code(%{
+          value: UUID.uuid1(),
+          purpose: "user_registration",
+          expires: Timex.now() |> Timex.shift(hours: -6),
+          user_id: code_user.id
+        })
 
       update_config_setting("Link only")
-      conn = post(conn, Routes.account_registration_path(conn, :create), user: %{code: code.value})
+
+      conn =
+        post(conn, Routes.account_registration_path(conn, :create), user: %{code: code.value})
+
       assert html_response(conn, 200) =~ "This code has expired."
 
       new_user = Account.get_user(search: [name: "new user"])
@@ -180,7 +196,12 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "valid attrs - non-existant code", %{conn: conn} do
       update_config_setting("Link only")
-      conn = post(conn, Routes.account_registration_path(conn, :create), user: Map.put(@valid_attrs, :code, "xxxxx"))
+
+      conn =
+        post(conn, Routes.account_registration_path(conn, :create),
+          user: Map.put(@valid_attrs, :code, "xxxxx")
+        )
+
       assert html_response(conn, 200) =~ "That code does not exist."
 
       new_user = Account.get_user(search: [name: "new user"])
@@ -199,12 +220,14 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
     # Bad code type
     test "render form - bad code type", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Teiserver.Account.create_code(%{
-        value: UUID.uuid1(),
-        purpose: "not a code type",
-        expires: Timex.now() |> Timex.shift(hours: 6),
-        user_id: code_user.id
-      })
+
+      {:ok, code} =
+        Teiserver.Account.create_code(%{
+          value: UUID.uuid1(),
+          purpose: "not a code type",
+          expires: Timex.now() |> Timex.shift(hours: 6),
+          user_id: code_user.id
+        })
 
       update_config_setting("Link only")
       conn = get(conn, Routes.account_registration_path(conn, :new, code.value))
@@ -213,15 +236,22 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "valid attrs - bad code type", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Teiserver.Account.create_code(%{
-        value: UUID.uuid1(),
-        purpose: "not a code type",
-        expires: Timex.now() |> Timex.shift(hours: 6),
-        user_id: code_user.id
-      })
+
+      {:ok, code} =
+        Teiserver.Account.create_code(%{
+          value: UUID.uuid1(),
+          purpose: "not a code type",
+          expires: Timex.now() |> Timex.shift(hours: 6),
+          user_id: code_user.id
+        })
 
       update_config_setting("Link only")
-      conn = post(conn, Routes.account_registration_path(conn, :create), user: Map.put(@valid_attrs, :code, code.value))
+
+      conn =
+        post(conn, Routes.account_registration_path(conn, :create),
+          user: Map.put(@valid_attrs, :code, code.value)
+        )
+
       assert html_response(conn, 200) =~ "That code does not exist."
 
       new_user = Account.get_user(search: [name: "new user"])
@@ -230,15 +260,20 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "invalid attrs - no details - bad code type", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Teiserver.Account.create_code(%{
-        value: UUID.uuid1(),
-        purpose: "not a code type",
-        expires: Timex.now() |> Timex.shift(hours: 6),
-        user_id: code_user.id
-      })
+
+      {:ok, code} =
+        Teiserver.Account.create_code(%{
+          value: UUID.uuid1(),
+          purpose: "not a code type",
+          expires: Timex.now() |> Timex.shift(hours: 6),
+          user_id: code_user.id
+        })
 
       update_config_setting("Link only")
-      conn = post(conn, Routes.account_registration_path(conn, :create), user: %{code: code.value})
+
+      conn =
+        post(conn, Routes.account_registration_path(conn, :create), user: %{code: code.value})
+
       assert html_response(conn, 200) =~ "That code does not exist."
 
       new_user = Account.get_user(search: [name: "new user"])
@@ -248,12 +283,14 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
     # Valid code
     test "render form", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Teiserver.Account.create_code(%{
-        value: UUID.uuid1(),
-        purpose: "user_registration",
-        expires: Timex.now() |> Timex.shift(hours: 6),
-        user_id: code_user.id
-      })
+
+      {:ok, code} =
+        Teiserver.Account.create_code(%{
+          value: UUID.uuid1(),
+          purpose: "user_registration",
+          expires: Timex.now() |> Timex.shift(hours: 6),
+          user_id: code_user.id
+        })
 
       update_config_setting("Link only")
       conn = get(conn, Routes.account_registration_path(conn, :new, code.value))
@@ -262,15 +299,22 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "valid attrs", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Teiserver.Account.create_code(%{
-        value: UUID.uuid1(),
-        purpose: "user_registration",
-        expires: Timex.now() |> Timex.shift(hours: 6),
-        user_id: code_user.id
-      })
+
+      {:ok, code} =
+        Teiserver.Account.create_code(%{
+          value: UUID.uuid1(),
+          purpose: "user_registration",
+          expires: Timex.now() |> Timex.shift(hours: 6),
+          user_id: code_user.id
+        })
 
       update_config_setting("Link only")
-      conn = post(conn, Routes.account_registration_path(conn, :create), user: Map.put(@valid_attrs, :code, code.value))
+
+      conn =
+        post(conn, Routes.account_registration_path(conn, :create),
+          user: Map.put(@valid_attrs, :code, code.value)
+        )
+
       # assert conn.private[:phoenix_flash]["info"] == "User created successfully."
       assert redirected_to(conn) == "/"
       new_user = Account.get_user!(search: [name: "new user"])
@@ -280,15 +324,20 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "invalid attrs - no details", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Teiserver.Account.create_code(%{
-        value: UUID.uuid1(),
-        purpose: "user_registration",
-        expires: Timex.now() |> Timex.shift(hours: 6),
-        user_id: code_user.id
-      })
+
+      {:ok, code} =
+        Teiserver.Account.create_code(%{
+          value: UUID.uuid1(),
+          purpose: "user_registration",
+          expires: Timex.now() |> Timex.shift(hours: 6),
+          user_id: code_user.id
+        })
 
       update_config_setting("Link only")
-      conn = post(conn, Routes.account_registration_path(conn, :create), user: %{code: code.value})
+
+      conn =
+        post(conn, Routes.account_registration_path(conn, :create), user: %{code: code.value})
+
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
       new_user = Account.get_user(search: [name: "new user"])
       assert new_user == nil
@@ -296,21 +345,25 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "invalid attrs - short password", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Teiserver.Account.create_code(%{
-        value: UUID.uuid1(),
-        purpose: "user_registration",
-        expires: Timex.now() |> Timex.shift(hours: 6),
-        user_id: code_user.id
-      })
+
+      {:ok, code} =
+        Teiserver.Account.create_code(%{
+          value: UUID.uuid1(),
+          purpose: "user_registration",
+          expires: Timex.now() |> Timex.shift(hours: 6),
+          user_id: code_user.id
+        })
 
       update_config_setting("Link only")
+
       conn =
         post(conn, Routes.account_registration_path(conn, :create),
-          user: Map.merge(@valid_attrs, %{
-            password: "1234",
-            password_confirmation: "1234",
-            code: code.value
-          })
+          user:
+            Map.merge(@valid_attrs, %{
+              password: "1234",
+              password_confirmation: "1234",
+              code: code.value
+            })
         )
 
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
@@ -320,20 +373,24 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     test "invalid attrs - mismatched password", %{conn: conn} do
       code_user = GeneralTestLib.make_user()
-      {:ok, code} = Teiserver.Account.create_code(%{
-        value: UUID.uuid1(),
-        purpose: "user_registration",
-        expires: Timex.now() |> Timex.shift(hours: 6),
-        user_id: code_user.id
-      })
+
+      {:ok, code} =
+        Teiserver.Account.create_code(%{
+          value: UUID.uuid1(),
+          purpose: "user_registration",
+          expires: Timex.now() |> Timex.shift(hours: 6),
+          user_id: code_user.id
+        })
 
       update_config_setting("Link only")
+
       conn =
         post(conn, Routes.account_registration_path(conn, :create),
-          user: Map.merge(@valid_attrs, %{
-            password_confirmation: "long long password",
-            code: code.value
-          })
+          user:
+            Map.merge(@valid_attrs, %{
+              password_confirmation: "long long password",
+              code: code.value
+            })
         )
 
       assert html_response(conn, 200) =~ "Oops, something went wrong!"

@@ -16,6 +16,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
 
   def handle_info(:startup, state) do
     socket = AgentLib.get_socket()
+
     AgentLib.login(socket, %{
       name: "Battlehost_#{state.name}",
       email: "Battlehost_#{state.name}@agents",
@@ -30,60 +31,79 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   def handle_info(:tick, state) do
     battle = Lobby.get_lobby(state.lobby_id)
 
-    new_state = cond do
-      # Chance of doing nothing
-      :rand.uniform() <= state.inaction_chance ->
-        state
-
-      battle == nil ->
-        open_battle(state)
-        state
-
-      state.always_leave ->
-        leave_battle(state)
-
-      battle.player_count == 0 and battle.spectator_count == 0 ->
-        if :rand.uniform() <= state.leave_chance do
-          leave_battle(state)
-        else
+    new_state =
+      cond do
+        # Chance of doing nothing
+        :rand.uniform() <= state.inaction_chance ->
           state
-        end
 
-      # There are players in a battle, we do nothing
-      true ->
-        state
-    end
+        battle == nil ->
+          open_battle(state)
+          state
+
+        state.always_leave ->
+          leave_battle(state)
+
+        battle.player_count == 0 and battle.spectator_count == 0 ->
+          if :rand.uniform() <= state.leave_chance do
+            leave_battle(state)
+          else
+            state
+          end
+
+        # There are players in a battle, we do nothing
+        true ->
+          state
+      end
 
     {:noreply, new_state}
   end
 
   def handle_info({:ssl, _socket, data}, state) do
-    new_state = data
-    |> AgentLib.translate
-    |> Enum.reduce(state, fn data, acc ->
-      handle_msg(data, acc)
-    end)
+    new_state =
+      data
+      |> AgentLib.translate()
+      |> Enum.reduce(state, fn data, acc ->
+        handle_msg(data, acc)
+      end)
 
     {:noreply, new_state}
   end
 
   defp handle_msg(nil, state), do: state
-  defp handle_msg(%{"cmd" => "s.lobby_host.user_requests_to_join", "userid" => userid}, %{reject: true} = state) do
-    cmd = %{cmd: "c.lobby_host.respond_to_join_request", userid: userid, response: "reject", reason: "because"}
+
+  defp handle_msg(
+         %{"cmd" => "s.lobby_host.user_requests_to_join", "userid" => userid},
+         %{reject: true} = state
+       ) do
+    cmd = %{
+      cmd: "c.lobby_host.respond_to_join_request",
+      userid: userid,
+      response: "reject",
+      reason: "because"
+    }
+
     AgentLib._send(state.socket, cmd)
     state
   end
-  defp handle_msg(%{"cmd" => "s.lobby_host.user_requests_to_join", "userid" => userid}, %{reject: false} = state) do
+
+  defp handle_msg(
+         %{"cmd" => "s.lobby_host.user_requests_to_join", "userid" => userid},
+         %{reject: false} = state
+       ) do
     cmd = %{cmd: "c.lobby_host.respond_to_join_request", userid: userid, response: "approve"}
     AgentLib._send(state.socket, cmd)
     state
   end
+
   defp handle_msg(%{"cmd" => "s.lobby.leave", "result" => "success"}, state) do
     %{state | lobby_id: nil}
   end
+
   defp handle_msg(%{"cmd" => "s.lobby.create", "lobby" => %{"id" => lobby_id}}, state) do
     %{state | lobby_id: lobby_id}
   end
+
   defp handle_msg(%{"cmd" => "s.communication.received_direct_message"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.announce"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.say"}, state), do: state
@@ -119,6 +139,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
         }
       }
     }
+
     AgentLib._send(state.socket, cmd)
   end
 

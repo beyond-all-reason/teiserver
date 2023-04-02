@@ -31,6 +31,7 @@ defmodule Teiserver.Coordinator.MatchMonitorServerTest do
         max_players: 12
       }
     }
+
     data = %{cmd: "c.lobby.create", lobby: battle_data}
     _tachyon_send(hsocket, data)
     [reply] = _tachyon_recv(hsocket)
@@ -40,10 +41,11 @@ defmodule Teiserver.Coordinator.MatchMonitorServerTest do
     Lobby.force_add_user_to_lobby(player.id, lobby_id)
     :timer.sleep(100)
     player_client = Client.get_client_by_id(player.id)
-    Client.update(%{player_client |
-      player: true,
-      ready: true
-    }, :client_updated_battlestatus)
+
+    Client.update(
+      %{player_client | player: true, ready: true},
+      :client_updated_battlestatus
+    )
 
     # Add user message
     _tachyon_recv(hsocket)
@@ -67,6 +69,7 @@ defmodule Teiserver.Coordinator.MatchMonitorServerTest do
       "recipient_id" => monitor_user.id,
       "message" => "match-chat <#{player.name}> dallies: Allied chat message"
     })
+
     :timer.sleep(100)
 
     messages1 = Chat.list_lobby_messages(search: [user_id: host.id])
@@ -80,6 +83,7 @@ defmodule Teiserver.Coordinator.MatchMonitorServerTest do
       "recipient_id" => monitor_user.id,
       "message" => "match-chat <#{player.name}> d: Game chat message"
     })
+
     :timer.sleep(100)
 
     messages1 = Chat.list_lobby_messages(search: [user_id: host.id])
@@ -93,6 +97,7 @@ defmodule Teiserver.Coordinator.MatchMonitorServerTest do
       "recipient_id" => monitor_user.id,
       "message" => "match-chat <#{player.name}> dspectators: Spec chat message"
     })
+
     :timer.sleep(100)
 
     messages1 = Chat.list_lobby_messages(search: [user_id: host.id])
@@ -102,15 +107,23 @@ defmodule Teiserver.Coordinator.MatchMonitorServerTest do
     assert Enum.count(messages2) == 2
 
     [allied, spectator] = messages2
-    assert match?(%{
-      content: "a: Allied chat message"
-    }, allied)
+
+    assert match?(
+             %{
+               content: "a: Allied chat message"
+             },
+             allied
+           )
+
     # assert match?(%{
     #   content: "g: Game chat message"
     # }, game)
-    assert match?(%{
-      content: "s: Spec chat message"
-    }, spectator)
+    assert match?(
+             %{
+               content: "s: Spec chat message"
+             },
+             spectator
+           )
 
     # _tachyon_send(hsocket, %{
     #   "cmd" => "c.communication.send_direct_message",

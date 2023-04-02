@@ -12,17 +12,17 @@
   <div class="row">
     <div class="col-lg-6">
       <div class="form-group my-2">
-        <%= label f, :reason, class: "control-label" %>
-        <%= textarea f, :reason, class: "form-control", autofocus: :autofocus %>
-        <%= error_tag f, :reason %>
+        <%= label(f, :reason, class: "control-label") %>
+        <%= textarea(f, :reason, class: "form-control", autofocus: :autofocus) %>
+        <%= error_tag(f, :reason) %>
       </div>
     </div>
 
     <div class="col-lg-6">
       <div class="form-group my-2">
-        <%= label f, :duration, class: "control-label" %>
-        <%= text_input f, :duration, class: "form-control" %>
-        <%= error_tag f, :duration %>
+        <%= label(f, :duration, class: "control-label") %>
+        <%= text_input(f, :duration, class: "form-control") %>
+        <%= error_tag(f, :duration) %>
       </div>
     </div>
 
@@ -32,40 +32,52 @@
         <strong><%= section %></strong>
         <%= for r <- r_list do %>
           <% r_clean = String.replace(r, " ", "_") %>
-          <%= central_component "checkbox",
+          <%= central_component("checkbox",
             id: "proposal_restriction_#{r_clean}",
             name: "proposal[restrictions][#{r_clean}]",
             label: r,
             value: r,
-            checked: (Ecto.Changeset.get_field(@changeset, :restrictions) || [])
+            checked:
+              (Ecto.Changeset.get_field(@changeset, :restrictions) || [])
               |> Enum.member?(r)
-          %>
+          ) %>
         <% end %>
       </div>
     <% end %>
-    <%= error_tag f, :restrictions %>
+    <%= error_tag(f, :restrictions) %>
 
     <div class="col-md-10 mt-3">
-      <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
+      <div
+        class={"btn btn-outline-#{bsname} mx-2"}
+        onclick="
         $('#proposal_restriction_Warning_reminder').prop('checked', true);
-      ">
+      "
+      >
         Add warning
       </div>
 
-      <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
+      <div
+        class={"btn btn-outline-#{bsname} mx-2"}
+        onclick="
         $('#proposal_restriction_All_chat').prop('checked', true);
-      ">
+      "
+      >
         Add mute
       </div>
 
-      <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
+      <div
+        class={"btn btn-outline-#{bsname} mx-2"}
+        onclick="
         $('#proposal_restriction_Site').prop('checked', true);
         $('#proposal_restriction_Login').prop('checked', true);
-      ">
+      "
+      >
         Add ban
       </div>
 
-      <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
+      <div
+        class={"btn btn-outline-#{bsname} mx-2"}
+        onclick="
         $('#code_references').val('1.4');
         $('#code_references').trigger('change');
         $('#proposal_restriction_Singular_warning').prop('checked', true);
@@ -76,7 +88,8 @@
         $('#proposal_restriction_Community').prop('checked', true);
         $('#report_form_reason').val('Please rename to a name not in breach of the Code of Conduct and contact a moderator to have the restrictions lifted.');
         $('#report_expires').val('never');
-      ">
+      "
+      >
         Add rename
       </div>
     </div>

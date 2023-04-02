@@ -24,30 +24,34 @@ defmodule TeiserverWeb.Admin.LobbyController do
 
   @spec lobby_chat(Plug.Conn.t(), map) :: Plug.Conn.t()
   def lobby_chat(conn, params = %{"id" => lobby_guid}) do
-    {page, page_size} = if params["page"] == "all" do
-      {0, 10_000}
-    else
-      {Map.get(params, "page", 0)
-        |> int_parse
-        |> max(0), @page_size}
-    end
+    {page, page_size} =
+      if params["page"] == "all" do
+        {0, 10_000}
+      else
+        {Map.get(params, "page", 0)
+         |> int_parse
+         |> max(0), @page_size}
+      end
 
-    lobby_messages = Chat.list_lobby_messages(
-      search: [
-        lobby_guid: lobby_guid
-      ],
-      preload: [:user],
-      limit: page_size,
-      offset: page * page_size,
-      order_by: "Oldest first"
-    )
+    lobby_messages =
+      Chat.list_lobby_messages(
+        search: [
+          lobby_guid: lobby_guid
+        ],
+        preload: [:user],
+        limit: page_size,
+        offset: page * page_size,
+        order_by: "Oldest first"
+      )
 
-    match = case Battle.list_matches(search: [uuid: lobby_guid]) do
-      [match] ->
-        match
-      _ ->
-        nil
-    end
+    match =
+      case Battle.list_matches(search: [uuid: lobby_guid]) do
+        [match] ->
+          match
+
+        _ ->
+          nil
+      end
 
     lobby = Battle.get_lobby_by_match_uuid(lobby_guid)
 
@@ -57,102 +61,108 @@ defmodule TeiserverWeb.Admin.LobbyController do
     prev_match = Battle.get_prev_match(match)
 
     conn
-      |> assign(:page, page)
-      |> assign(:last_page, last_page)
-      |> assign(:match, match)
-      |> assign(:match_name, MatchLib.make_match_name(match))
-      |> assign(:next_match, next_match)
-      |> assign(:prev_match, prev_match)
-      |> assign(:lobby_messages, lobby_messages)
-      |> assign(:lobby_guid, lobby_guid)
-      |> assign(:lobby, lobby)
-      |> add_breadcrumb(name: "Show: #{lobby_guid}", url: conn.request_path)
-      |> render("lobby_chat.html")
+    |> assign(:page, page)
+    |> assign(:last_page, last_page)
+    |> assign(:match, match)
+    |> assign(:match_name, MatchLib.make_match_name(match))
+    |> assign(:next_match, next_match)
+    |> assign(:prev_match, prev_match)
+    |> assign(:lobby_messages, lobby_messages)
+    |> assign(:lobby_guid, lobby_guid)
+    |> assign(:lobby, lobby)
+    |> add_breadcrumb(name: "Show: #{lobby_guid}", url: conn.request_path)
+    |> render("lobby_chat.html")
   end
 
   @spec lobby_chat_download(Plug.Conn.t(), map) :: Plug.Conn.t()
   def lobby_chat_download(conn, %{"id" => lobby_guid}) do
-    file_contents = Chat.list_lobby_messages(
-      search: [
-        lobby_guid: lobby_guid
-      ],
-      preload: [:user],
-      limit: :infinity,
-      order_by: "Oldest first"
-    )
+    file_contents =
+      Chat.list_lobby_messages(
+        search: [
+          lobby_guid: lobby_guid
+        ],
+        preload: [:user],
+        limit: :infinity,
+        order_by: "Oldest first"
+      )
       |> Enum.map_join("\n", fn msg ->
         "#{msg.user.name}: #{msg.content}"
       end)
 
     conn
-      |> put_resp_content_type("text/plain")
-      |> put_resp_header("content-disposition", "attachment; filename=\"lobby_chat.txt\"")
-      |> send_resp(200, file_contents)
+    |> put_resp_content_type("text/plain")
+    |> put_resp_header("content-disposition", "attachment; filename=\"lobby_chat.txt\"")
+    |> send_resp(200, file_contents)
   end
 
   @spec server_chat(Plug.Conn.t(), map) :: Plug.Conn.t()
   def server_chat(conn, params = %{"id" => server_uuid}) do
-    uuids = Battle.list_matches(
-      search: [server_uuid: server_uuid],
-      select: [:uuid]
-    )
+    uuids =
+      Battle.list_matches(
+        search: [server_uuid: server_uuid],
+        select: [:uuid]
+      )
       |> Enum.map(fn %{uuid: uuid} -> uuid end)
 
-    {page, page_size} = if params["page"] == "all" do
-      {0, 10000}
-    else
-      {Map.get(params, "page", 0)
-        |> int_parse
-        |> max(0), @page_size}
-    end
+    {page, page_size} =
+      if params["page"] == "all" do
+        {0, 10000}
+      else
+        {Map.get(params, "page", 0)
+         |> int_parse
+         |> max(0), @page_size}
+      end
 
-    chat_messages = Chat.list_lobby_messages(
-      search: [
-        lobby_guid_in: uuids
-      ],
-      preload: [:user],
-      limit: page_size,
-      offset: page * page_size,
-      order_by: "Oldest first"
-    )
+    chat_messages =
+      Chat.list_lobby_messages(
+        search: [
+          lobby_guid_in: uuids
+        ],
+        preload: [:user],
+        limit: page_size,
+        offset: page * page_size,
+        order_by: "Oldest first"
+      )
 
     lobby = Battle.get_lobby_by_server_uuid(server_uuid)
 
     last_page = Enum.count(chat_messages) < page_size
 
     conn
-      |> assign(:page, page)
-      |> assign(:last_page, last_page)
-      |> assign(:chat_messages, chat_messages)
-      |> assign(:server_uuid, server_uuid)
-      |> assign(:lobby, lobby)
-      |> add_breadcrumb(name: "Show: #{server_uuid}", url: conn.request_path)
-      |> render("server_chat.html")
+    |> assign(:page, page)
+    |> assign(:last_page, last_page)
+    |> assign(:chat_messages, chat_messages)
+    |> assign(:server_uuid, server_uuid)
+    |> assign(:lobby, lobby)
+    |> add_breadcrumb(name: "Show: #{server_uuid}", url: conn.request_path)
+    |> render("server_chat.html")
   end
 
   @spec server_chat_download(Plug.Conn.t(), map) :: Plug.Conn.t()
   def server_chat_download(conn, %{"id" => server_uuid}) do
-    uuids = Battle.list_matches(
-      search: [server_uuid: server_uuid],
-      select: [:uuid]
-    )
+    uuids =
+      Battle.list_matches(
+        search: [server_uuid: server_uuid],
+        select: [:uuid]
+      )
       |> Enum.map(fn %{uuid: uuid} -> uuid end)
 
-    file_contents = Chat.list_lobby_messages(
-      search: [
-        lobby_guid_in: uuids
-      ],
-      preload: [:user],
-      limit: :infinity,
-      order_by: "Oldest first"
-    )
+    file_contents =
+      Chat.list_lobby_messages(
+        search: [
+          lobby_guid_in: uuids
+        ],
+        preload: [:user],
+        limit: :infinity,
+        order_by: "Oldest first"
+      )
       |> Enum.map_join("\n", fn msg ->
         "#{msg.lobby_guid} - #{msg.user.name}: #{msg.content}"
       end)
 
     conn
-      |> put_resp_content_type("text/plain")
-      |> put_resp_header("content-disposition", "attachment; filename=\"server_group_chat.txt\"")
-      |> send_resp(200, file_contents)
+    |> put_resp_content_type("text/plain")
+    |> put_resp_header("content-disposition", "attachment; filename=\"server_group_chat.txt\"")
+    |> send_resp(200, file_contents)
   end
 end

@@ -12,55 +12,66 @@
   });
 </script>
 
-<%= central_component "icon_dropdown_js", [] %>
+<%= central_component("icon_dropdown_js", []) %>
 
-<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
-<script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")} />
+<script src={Routes.static_path(@conn, "/js/select2.js")}>
+</script>
 
-<%= central_component "picker_script",
+<%= central_component("picker_script",
   module: Central.Account.UserLib,
   name: "account_user",
   title: "User search"
-%>
+) %>
 
 <div class="row">
   <div class="col-md-12">
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
         <div class={"btn btn-outline-#{bsname}"} onclick="show_search();" id="search-box-shower">
-          <i class="fa-regular fa-fw fa-search"></i>
-          Show search form
+          <i class="fa-regular fa-fw fa-search"></i> Show search form
         </div>
 
-        <form action={Routes.ts_admin_match_path(@conn, :search)} method="post" class="form-horizontal" id="search-box" style="display: none;">
+        <form
+          action={Routes.ts_admin_match_path(@conn, :search)}
+          method="post"
+          class="form-horizontal"
+          id="search-box"
+          style="display: none;"
+        >
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
           <div class="row">
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="central-user-search" class="control-label">User: </label>
-              <%= render CentralWeb.Account.UserView, "picker.html",
+              <%= render(CentralWeb.Account.UserView, "picker.html",
                 input_name: "search[account_user]",
                 value: @params["account_user"]
-              %>
+              ) %>
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="search_action" class="control-label">Queue: </label>
-              <%= central_component "icon_dropdown", %{
+              <%= central_component("icon_dropdown", %{
                 name: "search[queue]",
                 id: "search_queue",
-                insert_blank: %{id: "", name: "Any/All", icon: "fa-solid fa-square", colour: "#000000"},
+                insert_blank: %{
+                  id: "",
+                  name: "Any/All",
+                  icon: "fa-solid fa-square",
+                  colour: "#000000"
+                },
                 selected: @params["queue"] || "Any",
                 enumerable: [
                   %{id: "no_queue", name: "No queue", icon: "fa-solid fa-stop", colour: "#AA0000"}
                   | @queues
                 ]
-              } %>
+              }) %>
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="search_action" class="control-label">Game type: </label>
-              <%= central_component "icon_dropdown", %{
+              <%= central_component("icon_dropdown", %{
                 name: "search[game_type]",
                 id: "search_game_type",
                 selected: @params["game_type"] || "Any",
@@ -69,20 +80,34 @@
                   %{id: "Duel", name: "Duel", icon: "fa-solid fa-square", colour: "#AA0000"},
                   %{id: "Team", name: "Team", icon: "fa-solid fa-square", colour: "#AA0000"},
                   %{id: "FFA", name: "FFA", icon: "fa-solid fa-square", colour: "#AA0000"},
-                  %{id: "Scavengers", name: "Scavengers", icon: "fa-solid fa-square", colour: "#AA0000"},
-                  %{id: "Raptors", name: "Raptors", icon: "fa-solid fa-square", colour: "#AA0000"},
-                  %{id: "Bots", name: "Bots", icon: "fa-solid fa-square", colour: "#AA0000"},
+                  %{
+                    id: "Scavengers",
+                    name: "Scavengers",
+                    icon: "fa-solid fa-square",
+                    colour: "#AA0000"
+                  },
+                  %{
+                    id: "Raptors",
+                    name: "Raptors",
+                    icon: "fa-solid fa-square",
+                    colour: "#AA0000"
+                  },
+                  %{id: "Bots", name: "Bots", icon: "fa-solid fa-square", colour: "#AA0000"}
                 ]
-              } %>
+              }) %>
             </div>
 
             <div class="offset-md-8 col-md-4 offset-xl-10 col-xl-2">
               &nbsp;<br />
-              <input type="submit" value="Search" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+              <input
+                type="submit"
+                value="Search"
+                name="form.submitted"
+                class={"btn btn-#{bsname} btn-block"}
+              />
             </div>
           </div>
         </form>
-
       </div>
     </div>
   </div>

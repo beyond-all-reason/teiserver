@@ -7,6 +7,7 @@ defmodule Teiserver.Geoip do
 
   @spec get_flag(String.t(), String.t() | nil) :: String.t()
   def get_flag("127." <> _, _), do: "??"
+
   def get_flag(ip, default) do
     if Config.get_site_config_cache("system.Use geoip") do
       {result, 0} = System.cmd("geoiplookup", [ip])

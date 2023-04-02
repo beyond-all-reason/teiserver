@@ -11,6 +11,7 @@ defmodule Central.Repo.Migrations.AutomatedModerationCreation do
 
       timestamps()
     end
+
     create index(:moderation_actions, [:target_id])
 
     create table(:moderation_reports) do
@@ -27,6 +28,7 @@ defmodule Central.Repo.Migrations.AutomatedModerationCreation do
 
       timestamps()
     end
+
     create index(:moderation_reports, [:reporter_id])
     create index(:moderation_reports, [:target_id])
 
@@ -48,6 +50,7 @@ defmodule Central.Repo.Migrations.AutomatedModerationCreation do
 
       timestamps()
     end
+
     create index(:moderation_proposals, [:target_id])
 
     create table(:moderation_proposal_votes, primary_key: false) do
@@ -57,6 +60,7 @@ defmodule Central.Repo.Migrations.AutomatedModerationCreation do
 
       timestamps()
     end
+
     create index(:moderation_proposal_votes, [:proposal_id])
 
     create table(:moderation_bans) do

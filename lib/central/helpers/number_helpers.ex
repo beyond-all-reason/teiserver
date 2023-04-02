@@ -27,7 +27,9 @@ defmodule Central.Helpers.NumberHelper do
   def normalize(v) when is_integer(v), do: _normalize(v)
   def normalize(v), do: v
 
-  defp _normalize(v) when v > 1_000_000_000_000_000, do: "#{Float.round(v / 1_000_000_000_000_000, 2)}Q"
+  defp _normalize(v) when v > 1_000_000_000_000_000,
+    do: "#{Float.round(v / 1_000_000_000_000_000, 2)}Q"
+
   defp _normalize(v) when v > 1_000_000_000_000, do: "#{Float.round(v / 1_000_000_000_000, 2)}T"
   defp _normalize(v) when v > 1_000_000_000, do: "#{Float.round(v / 1_000_000_000, 2)}B"
   defp _normalize(v) when v > 1_000_000, do: "#{Float.round(v / 1_000_000, 2)}M"
@@ -40,25 +42,28 @@ defmodule Central.Helpers.NumberHelper do
   """
   @spec c_round(nil | number | Decimal.t()) :: integer
   def c_round(nil), do: 0
+
   def c_round(v) when Decimal.is_decimal(v) do
     v
-      |> Decimal.round()
-      |> Decimal.to_integer()
+    |> Decimal.round()
+    |> Decimal.to_integer()
   end
+
   def c_round(v), do: round(v)
 
   @spec c_round(nil | number | Decimal.t(), non_neg_integer()) :: integer | float()
   def c_round(nil, _), do: 0
+
   def c_round(v, decimal_places) when Decimal.is_decimal(v) do
     round(Decimal.to_float(v), decimal_places)
   end
-  def c_round(v, places), do: round(v, places)
 
+  def c_round(v, places), do: round(v, places)
 
   @spec round(number(), non_neg_integer()) :: integer() | float()
   def round(value, decimal_places) do
     dp_mult = :math.pow(10, decimal_places)
-    round(value * dp_mult)/dp_mult
+    round(value * dp_mult) / dp_mult
   end
 
   # def dec_parse(""), do: Decimal.new(0)

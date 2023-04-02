@@ -1,5 +1,3 @@
-<%# {_fg, _bg, _bsname} = Central.Communication.CommentLib.colours() |> colours() %>
-
 <table class="table">
   <thead>
     <tr>
@@ -11,25 +9,23 @@
   </thead>
   <tbody>
     <%= for c <- @post.comments do %>
-    <tr>
-      <td style={"background-color: #{c.poster.colour}; color: #FFF;"} width="22">
-        <i class={"fa-fw #{c.poster.icon}"}></i>
-      </td>
-      <td style={"background-color: #{rgba_css c.poster.colour};"}>
-        &nbsp;
-        <%= c.poster.name %>
-      </td>
+      <tr>
+        <td style={"background-color: #{c.poster.colour}; color: #FFF;"} width="22">
+          <i class={"fa-fw #{c.poster.icon}"}></i>
+        </td>
+        <td style={"background-color: #{rgba_css c.poster.colour};"}>
+          &nbsp; <%= c.poster.name %>
+        </td>
 
-      <td><%= c.content |> String.slice(0..40) %></td>
-      <td><%= date_to_str c.inserted_at, format: :hms_or_dmy, tz: @tz %></td>
+        <td><%= c.content |> String.slice(0..40) %></td>
+        <td><%= date_to_str(c.inserted_at, format: :hms_or_dmy, tz: @tz) %></td>
 
-      <td>
-        <a href={Routes.blog_comment_path(@conn, :show, c)} class="btn-sm btn btn-secondary">
-          <i class="fa-regular fa-fw fa-eye"></i>
-          Show
-        </a>
-      </td>
-    </tr>
+        <td>
+          <a href={Routes.blog_comment_path(@conn, :show, c)} class="btn-sm btn btn-secondary">
+            <i class="fa-regular fa-fw fa-eye"></i> Show
+          </a>
+        </td>
+      </tr>
     <% end %>
   </tbody>
 </table>

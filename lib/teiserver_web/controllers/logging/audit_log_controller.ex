@@ -22,17 +22,18 @@ defmodule TeiserverWeb.Logging.AuditLogController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
-    logs = Logging.list_audit_logs(
-      joins: [:user],
-      order_by: "Newest first"
-    )
+    logs =
+      Logging.list_audit_logs(
+        joins: [:user],
+        order_by: "Newest first"
+      )
 
     conn
-      |> assign(:show_search, Map.has_key?(params, "search"))
-      |> assign(:params, form_params())
-      |> assign(:actions, AuditLogLib.list_audit_types())
-      |> assign(:logs, logs)
-      |> render("index.html")
+    |> assign(:show_search, Map.has_key?(params, "search"))
+    |> assign(:params, form_params())
+    |> assign(:actions, AuditLogLib.list_audit_types())
+    |> assign(:logs, logs)
+    |> render("index.html")
   end
 
   @spec search(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
@@ -52,11 +53,11 @@ defmodule TeiserverWeb.Logging.AuditLogController do
       )
 
     conn
-      |> assign(:show_search, "hidden")
-      |> assign(:params, params)
-      |> assign(:actions, AuditLogLib.list_audit_types())
-      |> assign(:logs, logs)
-      |> render("index.html")
+    |> assign(:show_search, "hidden")
+    |> assign(:params, params)
+    |> assign(:actions, AuditLogLib.list_audit_types())
+    |> assign(:logs, logs)
+    |> render("index.html")
   end
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
@@ -64,8 +65,8 @@ defmodule TeiserverWeb.Logging.AuditLogController do
     log = Logging.get_audit_log!(id, joins: [:user, :group])
 
     conn
-      |> assign(:log, log)
-      |> render("show.html")
+    |> assign(:log, log)
+    |> render("show.html")
   end
 
   @spec form_params(Map.t()) :: Map.t()

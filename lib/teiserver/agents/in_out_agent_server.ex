@@ -14,31 +14,34 @@ defmodule Teiserver.Agents.InOutAgentServer do
   end
 
   def handle_info(:tick, %{logged_in: true} = state) do
-    state = if :rand.uniform() <= @logout_chance do
-      do_logout(state)
-    else
-      state
-    end
+    state =
+      if :rand.uniform() <= @logout_chance do
+        do_logout(state)
+      else
+        state
+      end
 
     {:noreply, state}
   end
 
   def handle_info(:tick, %{logged_in: false} = state) do
-    state = if :rand.uniform() <= @login_chance do
-      do_login(state)
-    else
-      state
-    end
+    state =
+      if :rand.uniform() <= @login_chance do
+        do_login(state)
+      else
+        state
+      end
 
     {:noreply, state}
   end
 
   def handle_info({:ssl, _socket, data}, state) do
-    new_state = data
-    |> AgentLib.translate
-    |> Enum.reduce(state, fn data, acc ->
-      handle_msg(data, acc)
-    end)
+    new_state =
+      data
+      |> AgentLib.translate()
+      |> Enum.reduce(state, fn data, acc ->
+        handle_msg(data, acc)
+      end)
 
     {:noreply, new_state}
   end
@@ -50,11 +53,12 @@ defmodule Teiserver.Agents.InOutAgentServer do
   defp do_login(state) do
     socket = AgentLib.get_socket()
 
-    {:success, user} = AgentLib.login(socket, %{
-      name: "InAndOut_#{state.number}",
-      email: "InAndOut_#{state.number}@agents",
-      extra_data: %{}
-    })
+    {:success, user} =
+      AgentLib.login(socket, %{
+        name: "InAndOut_#{state.number}",
+        email: "InAndOut_#{state.number}@agents",
+        extra_data: %{}
+      })
 
     # Reset flood protection
     Central.cache_put(:teiserver_login_count, user.id, 0)
@@ -68,6 +72,7 @@ defmodule Teiserver.Agents.InOutAgentServer do
   end
 
   defp handle_msg(nil, state), do: state
+
   defp handle_msg(%{"cmd" => "s.system.pong"}, state) do
     state
   end

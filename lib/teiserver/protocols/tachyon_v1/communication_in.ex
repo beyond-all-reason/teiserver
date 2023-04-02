@@ -7,7 +7,11 @@ defmodule Teiserver.Protocols.Tachyon.V1.CommunicationIn do
     state
   end
 
-  def do_handle("send_direct_message", %{"recipient_id" => recipient_id, "message" => message}, state) do
+  def do_handle(
+        "send_direct_message",
+        %{"recipient_id" => recipient_id, "message" => message},
+        state
+      ) do
     cond do
       not Account.client_exists?(recipient_id) ->
         reply(:communication, :send_direct_message, {:failure, "Recipient offline"}, state)

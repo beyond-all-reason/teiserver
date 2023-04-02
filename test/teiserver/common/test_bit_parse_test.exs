@@ -15,9 +15,7 @@ defmodule Teiserver.TestBitParse do
 
       assert expected == result,
         message:
-          "Input of #{string}, expected #{Kernel.inspect(expected)}, got: #{
-            Kernel.inspect(result)
-          }"
+          "Input of #{string}, expected #{Kernel.inspect(expected)}, got: #{Kernel.inspect(result)}"
     end
   end
 end

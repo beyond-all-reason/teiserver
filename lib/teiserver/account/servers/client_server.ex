@@ -38,6 +38,7 @@ defmodule Teiserver.Account.ClientServer do
             party_id: existing_id
           }
         )
+
         :ok
     end
 
@@ -81,6 +82,7 @@ defmodule Teiserver.Account.ClientServer do
   @impl true
   def handle_cast({:update_values, new_values}, state) do
     new_client = Map.merge(state.client, new_values)
+
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_client_messages:#{state.userid}",
@@ -90,11 +92,13 @@ defmodule Teiserver.Account.ClientServer do
         client: new_client
       }
     )
+
     {:noreply, %{state | client: new_client}}
   end
 
   def handle_cast({:merge_update_client, partial_client}, state) do
     new_client = Map.merge(state.client, partial_client)
+
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_client_messages:#{state.userid}",
@@ -104,21 +108,30 @@ defmodule Teiserver.Account.ClientServer do
         client: new_client
       }
     )
+
     {:noreply, %{state | client: new_client}}
   end
 
   def handle_cast({:update_client, new_client}, state) do
-    if state.client.player != new_client.player and not Application.get_env(:central, Teiserver)[:test_mode] do
+    if state.client.player != new_client.player and
+         not Application.get_env(:central, Teiserver)[:test_mode] do
       if state.client.lobby_id do
         if new_client.player do
-          LobbyChat.persist_system_message("#{state.client.name} became a player", state.client.lobby_id)
+          LobbyChat.persist_system_message(
+            "#{state.client.name} became a player",
+            state.client.lobby_id
+          )
         else
-          LobbyChat.persist_system_message("#{state.client.name} became a spectator", state.client.lobby_id)
+          LobbyChat.persist_system_message(
+            "#{state.client.name} became a spectator",
+            state.client.lobby_id
+          )
         end
       end
     end
 
     new_client = Map.merge(state.client, new_client)
+
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_client_messages:#{state.userid}",
@@ -128,11 +141,12 @@ defmodule Teiserver.Account.ClientServer do
         client: new_client
       }
     )
+
     {:noreply, %{state | client: new_client}}
   end
 
   def handle_cast({:add_to_queue, queue_id}, state) do
-    new_queues = [queue_id | state.client.queues] |> Enum.uniq
+    new_queues = [queue_id | state.client.queues] |> Enum.uniq()
     new_client = Map.merge(state.client, %{queues: new_queues})
     {:noreply, %{state | client: new_client}}
   end
@@ -156,7 +170,7 @@ defmodule Teiserver.Account.ClientServer do
   @impl true
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(%{client: %{userid: userid}} = state) do
-    Logger.metadata([request_id: "ClientServer##{userid}"])
+    Logger.metadata(request_id: "ClientServer##{userid}")
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
@@ -165,8 +179,9 @@ defmodule Teiserver.Account.ClientServer do
       state.client.lobby_client
     )
 
-    {:ok, Map.merge(state, %{
-      userid: userid
-    })}
+    {:ok,
+     Map.merge(state, %{
+       userid: userid
+     })}
   end
 end

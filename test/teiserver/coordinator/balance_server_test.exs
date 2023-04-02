@@ -8,7 +8,14 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
   alias Teiserver.Coordinator.ConsulServer
 
   import Teiserver.TeiserverTestLib,
-    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1, tachyon_auth_setup: 1, new_user: 1]
+    only: [
+      tachyon_auth_setup: 0,
+      _tachyon_send: 2,
+      _tachyon_recv: 1,
+      _tachyon_recv_until: 1,
+      tachyon_auth_setup: 1,
+      new_user: 1
+    ]
 
   setup do
     Coordinator.start_coordinator()
@@ -34,6 +41,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
         max_players: 16
       }
     }
+
     data = %{cmd: "c.lobby.create", lobby: lobby_data}
     _tachyon_send(hsocket, data)
     [reply] = _tachyon_recv(hsocket)
@@ -52,22 +60,34 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     # Battlestatus message
     _tachyon_recv_until(hsocket)
 
-    {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener}
+    {:ok,
+     hsocket: hsocket,
+     psocket: psocket,
+     host: host,
+     player: player,
+     lobby_id: lobby_id,
+     listener: listener}
   end
 
   defp make_rating(userid, rating_type_id, rating_value) do
-    {:ok, _} = Account.create_rating(%{
-      user_id: userid,
-      rating_type_id: rating_type_id,
-      rating_value: rating_value,
-      skill: rating_value,
-      uncertainty: 0,
-      leaderboard_rating: rating_value,
-      last_updated: Timex.now(),
-    })
+    {:ok, _} =
+      Account.create_rating(%{
+        user_id: userid,
+        rating_type_id: rating_type_id,
+        rating_value: rating_value,
+        skill: rating_value,
+        uncertainty: 0,
+        leaderboard_rating: rating_value,
+        last_updated: Timex.now()
+      })
   end
 
-  test "server balance - simple", %{lobby_id: lobby_id, host: _host, psocket: _psocket, player: player} do
+  test "server balance - simple", %{
+    lobby_id: lobby_id,
+    host: _host,
+    psocket: _psocket,
+    player: player
+  } do
     # We don't want to use the player we start with, we want to number our players specifically
     Lobby.remove_user_from_any_lobby(player.id)
 
@@ -85,7 +105,8 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     [ps1, ps2, ps3, ps4, ps5, ps6, ps7, ps8]
     |> Enum.each(fn %{user: user, socket: socket} ->
       Lobby.force_add_user_to_lobby(user.id, lobby_id)
-      :timer.sleep(50)# Need the sleep to ensure they all get added to the battle
+      # Need the sleep to ensure they all get added to the battle
+      :timer.sleep(50)
       _tachyon_send(socket, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
     end)
 
@@ -107,16 +128,20 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     max_player_count = ConsulServer.get_max_player_count(consul_state)
     assert max_player_count >= 8
 
-    assert (Battle.list_lobby_players(lobby_id) |> Enum.count) == 8
+    assert Battle.list_lobby_players(lobby_id) |> Enum.count() == 8
 
     opts = [
       fuzz_multiplier: 0
     ]
+
     team_count = 2
 
-    balance_result = Coordinator.call_balancer(lobby_id, {
-      :make_balance, team_count, opts
-    })
+    balance_result =
+      Coordinator.call_balancer(lobby_id, {
+        :make_balance,
+        team_count,
+        opts
+      })
 
     assert balance_result.team_players[1] == [u8.id, u5.id, u3.id, u2.id]
     assert balance_result.team_players[2] == [u7.id, u6.id, u4.id, u1.id]
@@ -126,8 +151,10 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
 
     # It caches so calling it with the same settings should result in the same value
     assert Coordinator.call_balancer(lobby_id, {
-      :make_balance, team_count, opts
-    }) == balance_result
+             :make_balance,
+             team_count,
+             opts
+           }) == balance_result
 
     # Now if we do it again but with groups allowed it should be the same results but
     # with grouped set to true
@@ -142,9 +169,13 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
       max_deviation: 10,
       fuzz_multiplier: 0
     ]
-    grouped_balance_result = Coordinator.call_balancer(lobby_id, {
-      :make_balance, team_count, opts
-    })
+
+    grouped_balance_result =
+      Coordinator.call_balancer(lobby_id, {
+        :make_balance,
+        team_count,
+        opts
+      })
 
     assert grouped_balance_result.team_players[1] == [u8.id, u5.id, u3.id, u2.id]
     assert grouped_balance_result.team_players[2] == [u7.id, u6.id, u4.id, u1.id]
@@ -160,9 +191,12 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     # Sleep so we don't get a cached list of players when calculating the balance
     :timer.sleep(520)
 
-    party_balance_result = Coordinator.call_balancer(lobby_id, {
-      :make_balance, team_count, opts
-    })
+    party_balance_result =
+      Coordinator.call_balancer(lobby_id, {
+        :make_balance,
+        team_count,
+        opts
+      })
 
     # First things first, it should be a different hash
     refute party_balance_result.hash == balance_result.hash
@@ -173,24 +207,25 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     assert party_balance_result.deviation == 9
     assert party_balance_result.balance_mode == :grouped
     assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
+
     assert party_balance_result.logs == [
-      "Group matching",
-      "> Grouped: Team_Garpike, Team_Hound",
-      "--- Rating sum: 97.0",
-      "--- Rating Mean: 48.5",
-      "--- Rating Stddev: 1.5",
-      "> Grouped: Team_Fury, Team_Destroyer",
-      "--- Rating sum: 73.0",
-      "--- Rating Mean: 36.5",
-      "--- Rating Stddev: 1.5",
-      "End of pairing",
-      "Group picked Team_Garpike, Team_Hound for team 1, adding 97.0 points for new total of 97.0",
-      "Group picked Team_Fury, Team_Destroyer for team 2, adding 73.0 points for new total of 73.0",
-      "Picked Team_Eagle for team 2, adding 36.0 points for new total of 109.0",
-      "Picked Team_Calamity for team 1, adding 30.0 points for new total of 127.0",
-      "Picked Team_Brute for team 2, adding 25.0 points for new total of 134.0",
-      "Picked Team_Arbiter for team 1, adding 20.0 points for new total of 147.0"
-    ]
+             "Group matching",
+             "> Grouped: Team_Garpike, Team_Hound",
+             "--- Rating sum: 97.0",
+             "--- Rating Mean: 48.5",
+             "--- Rating Stddev: 1.5",
+             "> Grouped: Team_Fury, Team_Destroyer",
+             "--- Rating sum: 73.0",
+             "--- Rating Mean: 36.5",
+             "--- Rating Stddev: 1.5",
+             "End of pairing",
+             "Group picked Team_Garpike, Team_Hound for team 1, adding 97.0 points for new total of 97.0",
+             "Group picked Team_Fury, Team_Destroyer for team 2, adding 73.0 points for new total of 73.0",
+             "Picked Team_Eagle for team 2, adding 36.0 points for new total of 109.0",
+             "Picked Team_Calamity for team 1, adding 30.0 points for new total of 127.0",
+             "Picked Team_Brute for team 2, adding 25.0 points for new total of 134.0",
+             "Picked Team_Arbiter for team 1, adding 20.0 points for new total of 147.0"
+           ]
 
     # Now make an unfair party
     Account.move_client_to_party(u6.id, high_party.id)
@@ -208,9 +243,12 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
       fuzz_multiplier: 0
     ]
 
-    party_balance_result = Coordinator.call_balancer(lobby_id, {
-      :make_balance, team_count, opts
-    })
+    party_balance_result =
+      Coordinator.call_balancer(lobby_id, {
+        :make_balance,
+        team_count,
+        opts
+      })
 
     # First things first, it should be a different hash
     refute party_balance_result.hash == balance_result.hash
@@ -222,17 +260,18 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     assert party_balance_result.team_players[2] == [u7.id, u6.id, u4.id, u1.id]
     assert party_balance_result.ratings == %{1 => 141.0, 2 => 140.0}
     assert party_balance_result.deviation == 1
+
     assert party_balance_result.logs == [
-      "Tried grouped mode, got a deviation of 36 and reverted to solo mode",
-      "Picked Team_Hound for team 1, adding 50.0 points for new total of 50.0",
-      "Picked Team_Garpike for team 2, adding 47.0 points for new total of 47.0",
-      "Picked Team_Fury for team 2, adding 38.0 points for new total of 85.0",
-      "Picked Team_Eagle for team 1, adding 36.0 points for new total of 86.0",
-      "Picked Team_Destroyer for team 2, adding 35.0 points for new total of 120.0",
-      "Picked Team_Calamity for team 1, adding 30.0 points for new total of 116.0",
-      "Picked Team_Brute for team 1, adding 25.0 points for new total of 141.0",
-      "Picked Team_Arbiter for team 2, adding 20.0 points for new total of 140.0",
-    ]
+             "Tried grouped mode, got a deviation of 36 and reverted to solo mode",
+             "Picked Team_Hound for team 1, adding 50.0 points for new total of 50.0",
+             "Picked Team_Garpike for team 2, adding 47.0 points for new total of 47.0",
+             "Picked Team_Fury for team 2, adding 38.0 points for new total of 85.0",
+             "Picked Team_Eagle for team 1, adding 36.0 points for new total of 86.0",
+             "Picked Team_Destroyer for team 2, adding 35.0 points for new total of 120.0",
+             "Picked Team_Calamity for team 1, adding 30.0 points for new total of 116.0",
+             "Picked Team_Brute for team 1, adding 25.0 points for new total of 141.0",
+             "Picked Team_Arbiter for team 2, adding 20.0 points for new total of 140.0"
+           ]
 
     # Now 8 more users to test some 8v8 stuff
     %{user: u9} = ps9 = new_user("Team_Incisor") |> tachyon_auth_setup()
@@ -247,7 +286,8 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     [ps9, ps10, ps11, ps12, ps13, ps14, ps15, ps16]
     |> Enum.each(fn %{user: user, socket: socket} ->
       Lobby.force_add_user_to_lobby(user.id, lobby_id)
-      :timer.sleep(50)# Need the sleep to ensure they all get added to the battle
+      # Need the sleep to ensure they all get added to the battle
+      :timer.sleep(50)
       _tachyon_send(socket, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
     end)
 
@@ -256,7 +296,8 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     query = "DELETE FROM teiserver_account_ratings WHERE user_id IN (#{old_ids})"
     query_result = Ecto.Adapters.SQL.query(Repo, query, [])
 
-    assert elem(query_result, 0) == :ok, message: "The delete query failed so new ratings could not be created"
+    assert elem(query_result, 0) == :ok,
+      message: "The delete query failed so new ratings could not be created"
 
     # higher numbered players have higher ratings
     make_rating(u1.id, rating_type_id, 12)
@@ -293,18 +334,44 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     # Assert we have no parties
     [u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12, u13, u14, u15, u16]
     |> Enum.map(fn %{id: userid} ->
-      assert Account.get_client_by_id(userid).party_id == nil, message: "One or more of the users are currently in a party. At this stage of the test there should be no parties."
+      assert Account.get_client_by_id(userid).party_id == nil,
+        message:
+          "One or more of the users are currently in a party. At this stage of the test there should be no parties."
     end)
 
     # Get some new balance
-    balance_result = Coordinator.call_balancer(lobby_id, {
-      :make_balance, team_count, opts
-    })
+    balance_result =
+      Coordinator.call_balancer(lobby_id, {
+        :make_balance,
+        team_count,
+        opts
+      })
 
     assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
     assert balance_result.balance_mode == :grouped
-    assert balance_result.team_players[1] == [u16.id, u13.id, u11.id, u10.id, u7.id, u6.id, u4.id, u1.id]
-    assert balance_result.team_players[2] == [u15.id, u14.id, u12.id, u9.id, u8.id, u5.id, u3.id, u2.id]
+
+    assert balance_result.team_players[1] == [
+             u16.id,
+             u13.id,
+             u11.id,
+             u10.id,
+             u7.id,
+             u6.id,
+             u4.id,
+             u1.id
+           ]
+
+    assert balance_result.team_players[2] == [
+             u15.id,
+             u14.id,
+             u12.id,
+             u9.id,
+             u8.id,
+             u5.id,
+             u3.id,
+             u2.id
+           ]
+
     assert balance_result.ratings == %{1 => 239.0, 2 => 239.0}
     assert balance_result.deviation == 0
 
@@ -319,16 +386,24 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
       fuzz_multiplier: 0.5
     ]
 
-    balance_result = Coordinator.call_balancer(lobby_id, {
-      :make_balance, team_count, opts
-    })
+    balance_result =
+      Coordinator.call_balancer(lobby_id, {
+        :make_balance,
+        team_count,
+        opts
+      })
 
     assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
     assert balance_result.balance_mode == :grouped
     refute balance_result.ratings == %{1 => 239.0, 2 => 239.0}
   end
 
-  test "server balance - ffa", %{lobby_id: lobby_id, host: _host, psocket: _psocket, player: player} do
+  test "server balance - ffa", %{
+    lobby_id: lobby_id,
+    host: _host,
+    psocket: _psocket,
+    player: player
+  } do
     # We don't want to use the player we start with, we want to number our players specifically
     Lobby.remove_user_from_any_lobby(player.id)
 
@@ -341,7 +416,8 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     [ps1, ps2, ps3]
     |> Enum.each(fn %{user: user, socket: socket} ->
       Lobby.force_add_user_to_lobby(user.id, lobby_id)
-      :timer.sleep(50)# Need the sleep to ensure they all get added to the battle
+      # Need the sleep to ensure they all get added to the battle
+      :timer.sleep(50)
       _tachyon_send(socket, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
     end)
 
@@ -358,16 +434,20 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     max_player_count = ConsulServer.get_max_player_count(consul_state)
     assert max_player_count >= 3
 
-    assert (Battle.list_lobby_players(lobby_id) |> Enum.count) == 3
+    assert Battle.list_lobby_players(lobby_id) |> Enum.count() == 3
 
     opts = [
       fuzz_multiplier: 0
     ]
+
     team_count = 3
 
-    balance_result = Coordinator.call_balancer(lobby_id, {
-      :make_balance, team_count, opts
-    })
+    balance_result =
+      Coordinator.call_balancer(lobby_id, {
+        :make_balance,
+        team_count,
+        opts
+      })
 
     assert balance_result.team_players[1] == [u3.id]
     assert balance_result.team_players[2] == [u2.id]
@@ -378,8 +458,10 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
 
     # Ensure cache works
     assert Coordinator.call_balancer(lobby_id, {
-      :make_balance, team_count, opts
-    }) == balance_result
+             :make_balance,
+             team_count,
+             opts
+           }) == balance_result
 
     # Ensure enabling groups won't break anything
     opts = [
@@ -391,14 +473,26 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
       max_deviation: 10,
       fuzz_multiplier: 0
     ]
-    grouped_balance_result = Coordinator.call_balancer(lobby_id, {
-      :make_balance, team_count, opts
-    })
-    assert Map.drop(grouped_balance_result, [:hash, :time_taken, :logs]) == Map.drop(balance_result, [:hash, :time_taken, :logs])
+
+    grouped_balance_result =
+      Coordinator.call_balancer(lobby_id, {
+        :make_balance,
+        team_count,
+        opts
+      })
+
+    assert Map.drop(grouped_balance_result, [:hash, :time_taken, :logs]) ==
+             Map.drop(balance_result, [:hash, :time_taken, :logs])
+
     assert grouped_balance_result.hash != balance_result.hash
   end
 
-  test "server balance - team ffa", %{lobby_id: lobby_id, host: _host, psocket: _psocket, player: player} do
+  test "server balance - team ffa", %{
+    lobby_id: lobby_id,
+    host: _host,
+    psocket: _psocket,
+    player: player
+  } do
     # We don't want to use the player we start with, we want to number our players specifically
     Lobby.remove_user_from_any_lobby(player.id)
 
@@ -417,7 +511,8 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     [ps1, ps2, ps3, ps4, ps5, ps6, ps7, ps8, ps9]
     |> Enum.each(fn %{user: user, socket: socket} ->
       Lobby.force_add_user_to_lobby(user.id, lobby_id)
-      :timer.sleep(50)# Need the sleep to ensure they all get added to the battle
+      # Need the sleep to ensure they all get added to the battle
+      :timer.sleep(50)
       _tachyon_send(socket, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
     end)
 
@@ -440,16 +535,20 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     max_player_count = ConsulServer.get_max_player_count(consul_state)
     assert max_player_count >= 9
 
-    assert (Battle.list_lobby_players(lobby_id) |> Enum.count) == 9
+    assert Battle.list_lobby_players(lobby_id) |> Enum.count() == 9
 
     opts = [
       fuzz_multiplier: 0
     ]
+
     team_count = 3
 
-    balance_result = Coordinator.call_balancer(lobby_id, {
-      :make_balance, team_count, opts
-    })
+    balance_result =
+      Coordinator.call_balancer(lobby_id, {
+        :make_balance,
+        team_count,
+        opts
+      })
 
     assert balance_result.team_players[1] == [u9.id, u4.id, u2.id]
     assert balance_result.team_players[2] == [u8.id, u5.id, u1.id]
@@ -469,10 +568,17 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
       max_deviation: 10,
       fuzz_multiplier: 0
     ]
-    grouped_balance_result = Coordinator.call_balancer(lobby_id, {
-      :make_balance, team_count, opts
-    })
-    assert Map.drop(grouped_balance_result, [:balance_mode, :hash, :time_taken, :logs]) == Map.drop(balance_result, [:balance_mode, :hash, :time_taken, :logs])
+
+    grouped_balance_result =
+      Coordinator.call_balancer(lobby_id, {
+        :make_balance,
+        team_count,
+        opts
+      })
+
+    assert Map.drop(grouped_balance_result, [:balance_mode, :hash, :time_taken, :logs]) ==
+             Map.drop(balance_result, [:balance_mode, :hash, :time_taken, :logs])
+
     assert grouped_balance_result.hash != balance_result.hash
 
     # Party time, we start with the two highest rated players being put on the same team
@@ -482,12 +588,17 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     # Sleep so we don't get a cached list of players when calculating the balance
     :timer.sleep(520)
 
-    party_balance_result = Coordinator.call_balancer(lobby_id, {
-      :make_balance, team_count, opts
-    })
+    party_balance_result =
+      Coordinator.call_balancer(lobby_id, {
+        :make_balance,
+        team_count,
+        opts
+      })
 
     # Balance should be mostly the same
-    assert Map.drop(grouped_balance_result, [:hash, :time_taken, :logs, :balance_mode]) == Map.drop(balance_result, [:hash, :time_taken, :logs, :balance_mode])
+    assert Map.drop(grouped_balance_result, [:hash, :time_taken, :logs, :balance_mode]) ==
+             Map.drop(balance_result, [:hash, :time_taken, :logs, :balance_mode])
+
     refute party_balance_result.hash == balance_result.hash
 
     # This time groups will work
@@ -500,9 +611,13 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
       max_deviation: 100,
       fuzz_multiplier: 0
     ]
-    grouped_balance_result = Coordinator.call_balancer(lobby_id, {
-      :make_balance, team_count, opts
-    })
+
+    grouped_balance_result =
+      Coordinator.call_balancer(lobby_id, {
+        :make_balance,
+        team_count,
+        opts
+      })
 
     assert grouped_balance_result.team_players[1] == [u7.id, u8.id, u1.id]
     assert grouped_balance_result.team_players[2] == [u6.id, u4.id, u5.id]

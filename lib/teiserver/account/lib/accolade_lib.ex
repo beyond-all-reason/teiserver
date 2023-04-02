@@ -22,33 +22,32 @@ defmodule Teiserver.Account.AccoladeLib do
     %{
       type_colour: StylingHelper.colours(colours()) |> elem(0),
       type_icon: icon(),
-
       item_id: accolade.id,
       item_type: "teiserver_account_accolade",
       item_colour: colours() |> elem(0),
       item_icon: Teiserver.Account.AccoladeLib.icon(),
       item_label: "#{accolade.name}",
-
       url: "/account/accolades/#{accolade.id}"
     }
   end
 
   # Queries
-  @spec query_accolades() :: Ecto.Query.t
+  @spec query_accolades() :: Ecto.Query.t()
   def query_accolades do
-    from accolades in Accolade
+    from(accolades in Accolade)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -71,9 +70,7 @@ defmodule Teiserver.Account.AccoladeLib do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from accolades in query,
-      where: (
-            ilike(accolades.name, ^ref_like)
-        )
+      where: ilike(accolades.name, ^ref_like)
   end
 
   def _search(query, :filter, "all"), do: query
@@ -106,7 +103,7 @@ defmodule Teiserver.Account.AccoladeLib do
 
   def _search(query, :user_id, user_id) do
     from accolades in query,
-      where: (accolades.giver_id == ^user_id or accolades.recipient_id == ^user_id)
+      where: accolades.giver_id == ^user_id or accolades.recipient_id == ^user_id
   end
 
   def _search(query, :giver_id, giver_id) do
@@ -144,8 +141,9 @@ defmodule Teiserver.Account.AccoladeLib do
       where: accolades.inserted_at < ^timestamp
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Name (A-Z)") do
     from accolades in query,
       order_by: [asc: accolades.name]
@@ -166,8 +164,9 @@ defmodule Teiserver.Account.AccoladeLib do
       order_by: [asc: accolades.inserted_at]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :badge_type in preloads, do: _preload_badge_type(query), else: query
     query = if :recipient in preloads, do: _preload_recipient(query), else: query
@@ -193,16 +192,15 @@ defmodule Teiserver.Account.AccoladeLib do
       preload: [giver: givers]
   end
 
-
   @spec do_start() :: :ok
   defp do_start() do
     # Start the supervisor server
     {:ok, _accolade_server_pid} =
       DynamicSupervisor.start_child(Teiserver.Account.AccoladeSupervisor, {
         AccoladeBotServer,
-        name: Teiserver.Account.AccoladeBotServer,
-        data: %{}
+        name: Teiserver.Account.AccoladeBotServer, data: %{}
       })
+
     :ok
   end
 
@@ -233,7 +231,9 @@ defmodule Teiserver.Account.AccoladeLib do
   @spec call_accolade_bot(any) :: any
   def call_accolade_bot(msg) do
     case get_accolade_bot_pid() do
-      nil -> nil
+      nil ->
+        nil
+
       pid ->
         try do
           GenServer.call(pid, msg)
@@ -253,9 +253,10 @@ defmodule Teiserver.Account.AccoladeLib do
 
   @spec get_accolade_bot_pid() :: pid() | nil
   def get_accolade_bot_pid() do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "AccoladeBotServer") do
+    case Horde.Registry.lookup(Teiserver.AccoladesRegistry, "AccoladeBotServer") do
       [{pid, _}] ->
         pid
+
       _ ->
         nil
     end
@@ -263,9 +264,10 @@ defmodule Teiserver.Account.AccoladeLib do
 
   @spec get_accolade_chat_pid(T.userid()) :: pid() | nil
   def get_accolade_chat_pid(userid) do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "AccoladeChatServer:#{userid}") do
+    case Horde.Registry.lookup(Teiserver.AccoladesRegistry, "AccoladeChatServer:#{userid}") do
       [{pid, _}] ->
         pid
+
       _ ->
         nil
     end
@@ -283,7 +285,8 @@ defmodule Teiserver.Account.AccoladeLib do
   def get_possible_ratings(userid, memberships) do
     their_membership = Enum.filter(memberships, fn m -> m.user_id == userid end) |> hd
 
-    teammate_ids = memberships
+    teammate_ids =
+      memberships
       |> Enum.filter(fn m -> m.team_id == their_membership.team_id and m.user_id != userid end)
       |> Enum.filter(fn m -> allow_accolades_for_user?(m.user_id) end)
       |> Enum.map(fn m -> m.user_id end)
@@ -291,8 +294,11 @@ defmodule Teiserver.Account.AccoladeLib do
     timestamp = Timex.now() |> Timex.shift(days: -5)
 
     # Get a list of everybody they reviewed recently
-    existing = Account.list_accolades(search: [giver_id: userid, recipient_id: teammate_ids, inserted_after: timestamp])
-    |> Enum.map(fn a -> a.recipient_id end)
+    existing =
+      Account.list_accolades(
+        search: [giver_id: userid, recipient_id: teammate_ids, inserted_after: timestamp]
+      )
+      |> Enum.map(fn a -> a.recipient_id end)
 
     # Now get a list of everybody from their team
     teammate_ids
@@ -323,7 +329,7 @@ defmodule Teiserver.Account.AccoladeLib do
         data: %{
           userid: userid,
           recipient_id: recipient_id,
-          match_id: match_id,
+          match_id: match_id
         }
       })
 
@@ -335,6 +341,7 @@ defmodule Teiserver.Account.AccoladeLib do
     case get_accolade_chat_pid(userid) do
       nil ->
         start_chat_server(userid, recipient_id, match_id)
+
       _pid ->
         :existing
     end
@@ -344,7 +351,7 @@ defmodule Teiserver.Account.AccoladeLib do
   def get_badge_types() do
     Central.cache_get_or_store(:application_temp_cache, "accolade_badges", fn ->
       Account.list_badge_types(search: [has_purpose: "Accolade"], order_by: "Name (A-Z)")
-      |> Enum.with_index
+      |> Enum.with_index()
       |> Enum.map(fn {bt, i} -> {i + 1, bt} end)
     end)
   end
@@ -362,30 +369,37 @@ defmodule Teiserver.Account.AccoladeLib do
     case get_accolade_bot_pid() do
       nil ->
         Logger.error("Error, no accolade bot pid")
+
       pid ->
         state = :sys.get_state(pid)
         children = DynamicSupervisor.which_children(Teiserver.Account.AccoladeSupervisor)
         child_count = Enum.count(children) - 1
 
         Logger.info("Accolade bot found, state is:")
-        Logger.info("#{Kernel.inspect state}")
+        Logger.info("#{Kernel.inspect(state)}")
         Logger.info("Accolade chat count: #{child_count}")
 
         if Enum.count(children) > 1 do
           Logger.info("Pinging all chat servers...")
 
-          pings = children
-          |> Parallel.filter(fn {_, _, _, [module]} -> module == Teiserver.Account.AccoladeChatServer end)
-          |> Parallel.map(fn {_, pid, _, _} ->
-            case GenServer.call(pid, :ping, 5000) do
-              :ok -> :ok
-              _ -> :not_okay
-            end
-          end)
-          |> Enum.filter(fn p -> p == :ok end)
+          pings =
+            children
+            |> Parallel.filter(fn {_, _, _, [module]} ->
+              module == Teiserver.Account.AccoladeChatServer
+            end)
+            |> Parallel.map(fn {_, pid, _, _} ->
+              case GenServer.call(pid, :ping, 5000) do
+                :ok -> :ok
+                _ -> :not_okay
+              end
+            end)
+            |> Enum.filter(fn p -> p == :ok end)
 
-          rate = ((Enum.count(pings))/child_count) * 100 |> round
-          Logger.info("Out of #{child_count} children, #{Enum.count(pings)} respond to ping (#{rate}%)")
+          rate = (Enum.count(pings) / child_count * 100) |> round
+
+          Logger.info(
+            "Out of #{child_count} children, #{Enum.count(pings)} respond to ping (#{rate}%)"
+          )
         end
     end
   end

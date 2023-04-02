@@ -14,81 +14,85 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg m-0 p-0" id="top-nav">
       <a class="navbar-brand mx-2" href={Routes.general_page_path(@conn, :index)}>
-        <img src={Routes.static_path(@conn, "/images/logo/square_logo.svg")} width="30" class="mr-2" alt="Landing Page">
+        <img
+          src={Routes.static_path(@conn, "/images/logo/square_logo.svg")}
+          width="30"
+          class="mr-2"
+          alt="Landing Page"
+        />
         <%= Application.get_env(:central, Central)[:site_title] %>
       </a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNavDropdown"
+        aria-controls="navbarNavDropdown"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav ml-auto">
           <%= if @current_user == nil do %>
-            <%= central_component "top_nav_item",
+            <%= central_component("top_nav_item",
               text: "Blog",
               icon: Central.Communication.BlogLib.icon(),
               route: ~p"/blog",
               active: @site_menu_active == "central_blog"
-            %>
+            ) %>
 
             <li class="nav-item">
               <a class="nav-link" href={~p"/login"}>
-                <i class="fa-solid fa-fw fa-sign-in-alt"></i>
-                Login
+                <i class="fa-solid fa-fw fa-sign-in-alt"></i> Login
               </a>
             </li>
           <% else %>
-            <%= central_component "top_nav_item",
+            <%= central_component("top_nav_item",
               text: "Blog",
               icon: Central.Communication.BlogLib.icon(),
               route: ~p"/blog",
               active: @site_menu_active == "central_blog"
-            %>
+            ) %>
 
             <%= if allow?(@conn, "communication.blog") do %>
               <li class="nav-item">
                 <a class="nav-link" href={Routes.blog_post_path(@conn, :new)}>
-                  <i class="fa-fw fas fa-plus"></i>
-                  New post
+                  <i class="fa-fw fas fa-plus"></i> New post
                 </a>
               </li>
 
               <li class="nav-item">
                 <a class="nav-link" href={~p"/blog_admin/posts"}>
-                  <i class={"fa-fw #{Central.Communication.PostLib.icon()}"}></i>
-                  Posts
+                  <i class={"fa-fw #{Central.Communication.PostLib.icon()}"}></i> Posts
                 </a>
               </li>
 
               <li class="nav-item">
                 <a class="nav-link" href={Routes.blog_category_path(@conn, :index)}>
-                  <i class={"fa-fw #{Central.Communication.CategoryLib.icon()}"}></i>
-                  Categories
+                  <i class={"fa-fw #{Central.Communication.CategoryLib.icon()}"}></i> Categories
                 </a>
               </li>
 
               <li class="nav-item">
                 <a class="nav-link" href={Routes.blog_file_path(@conn, :index)}>
-                  <i class={"fa-fw #{Central.Communication.BlogFileLib.icon()}"}></i>
-                  Files
+                  <i class={"fa-fw #{Central.Communication.BlogFileLib.icon()}"}></i> Files
                 </a>
               </li>
-
             <% else %>
               <li class="nav-item">
                 <a class="nav-link" href="/">
-                  <i class="fa-solid fa-fw fa-bars"></i>
-                  Menu screen
+                  <i class="fa-solid fa-fw fa-bars"></i> Menu screen
                 </a>
               </li>
             <% end %>
           <% end %>
         </ul>
-
       </div>
     </nav>
     <!-- / Navigation -->
   </div>
-
   <!-- Inner Wrapper -->
   <div class="inner-wrapper mt-auto mb-auto container">
     <div class="row">

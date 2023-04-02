@@ -45,40 +45,42 @@
   }
 </style>
 
-<%= render TeiserverWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "audit"}) %>
+<%= render(
+  TeiserverWeb.Logging.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "audit"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Logging.AuditLogView, "section_menu.html",
+        <%= render(TeiserverWeb.Logging.AuditLogView, "section_menu.html",
           conn: @conn,
           show_search: @show_search,
-          active: if @show_search, do: "search", else: "index"
-        %>
+          active: if(@show_search, do: "search", else: "index")
+        ) %>
 
         <div class="float-end">
           <span class={"btn btn-#{bsname} btn-outline"} onclick="hide_all();">
             Hide all
           </span>
-
           &nbsp;&nbsp;&nbsp;
-
           <span class={"btn btn-#{bsname} btn-outline"} onclick="show_all();">
             Show all
           </span>
         </div>
 
-<%= if @show_search do %>
-  <%= render TeiserverWeb.Logging.AuditLogView, "search.html",
-    conn: @conn,
-    params: @params,
-    actions: @actions,
-    permissions: @current_user.permissions
-  %>
-<% else %>
-  <br /><br />
-<% end %>
+        <%= if @show_search do %>
+          <%= render(TeiserverWeb.Logging.AuditLogView, "search.html",
+            conn: @conn,
+            params: @params,
+            actions: @actions,
+            permissions: @current_user.permissions
+          ) %>
+        <% else %>
+          <br /><br />
+        <% end %>
 
         <h4>
           Audit logs - Row count: <%= Enum.count(@logs) %>
@@ -95,34 +97,46 @@
             </tr>
           </thead>
           <tbody>
-        <%= for log <- @logs do %>
-            <tr>
-              <td><%= log.action %></td>
-              <td>
-                <div class={"btn btn-outline-#{bsname} btn-sm show-button"} id={"show-#{log.id}"} onclick={"show_details(#{log.id});"}>
-                  <i class="fa-regular fa-fw fa-plus"></i>
-                </div>
-                <div class={"btn btn-outline-#{bsname} btn-sm hide-button"} id={"hide-#{log.id}"} onclick={"hide_details(#{log.id});"} style="display: none;">
-                  <i class="fa-regular fa-fw fa-minus"></i>
-                </div>
+            <%= for log <- @logs do %>
+              <tr>
+                <td><%= log.action %></td>
+                <td>
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-sm show-button"}
+                    id={"show-#{log.id}"}
+                    onclick={"show_details(#{log.id});"}
+                  >
+                    <i class="fa-regular fa-fw fa-plus"></i>
+                  </div>
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-sm hide-button"}
+                    id={"hide-#{log.id}"}
+                    onclick={"hide_details(#{log.id});"}
+                    style="display: none;"
+                  >
+                    <i class="fa-regular fa-fw fa-minus"></i>
+                  </div>
 
-                <div class="json_details" id={"details-#{log.id}"}>
-                  <%= Jason.encode!(log.details) %>
-                </div>
-              </td>
-              <td><%= date_to_str log.inserted_at, format: :hms_or_dmy, tz: @tz %></td>
+                  <div class="json_details" id={"details-#{log.id}"}>
+                    <%= Jason.encode!(log.details) %>
+                  </div>
+                </td>
+                <td><%= date_to_str(log.inserted_at, format: :hms_or_dmy, tz: @tz) %></td>
 
-              <%= if Ecto.assoc_loaded?(log.user) and log.user != nil do %>
-                <td><%= log.user.name %>, <%= log.ip %></td>
-              <% else %>
-                <td>&nbsp;</td>
-              <% end %>
+                <%= if Ecto.assoc_loaded?(log.user) and log.user != nil do %>
+                  <td><%= log.user.name %>, <%= log.ip %></td>
+                <% else %>
+                  <td>&nbsp;</td>
+                <% end %>
 
-              <td class="text-right">
-                <%= link "Show", to: Routes.logging_audit_log_path(@conn, :show, log), class: "btn btn-secondary btn-sm" %>
-              </td>
-            </tr>
-        <% end %>
+                <td class="text-right">
+                  <%= link("Show",
+                    to: Routes.logging_audit_log_path(@conn, :show, log),
+                    class: "btn btn-secondary btn-sm"
+                  ) %>
+                </td>
+              </tr>
+            <% end %>
           </tbody>
         </table>
       </div>

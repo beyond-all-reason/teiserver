@@ -19,57 +19,55 @@
   <div class="col-md-12">
     <div class="card card-default">
       <div class="card-body" style="padding: 0 15px;" id="sub-menu-card">
-
         <div class="row">
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "home",
             label: "Account menu",
             active: @active,
             url: ~p"/teiserver/account",
             icon: "fa-solid fa-user"
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "profile",
             label: "Profile",
             active: @active,
             url: Routes.ts_account_profile_path(@conn, :show, @conn.current_user.id),
             icon: "fa-solid fa-user-circle"
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "relationships",
             label: "Relationships",
             active: @active,
             url: Routes.ts_account_relationships_path(@conn, :index),
             icon: Teiserver.icon(:relationship)
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "customisation",
             label: "Appearance",
             active: @active,
             url: Routes.ts_account_general_path(@conn, :customisation_form),
             icon: "fa-solid fa-icons"
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "clans",
             label: "Clans",
             active: @active,
             url: ~p"/teiserver/clans",
             icon: Teiserver.Clans.ClanLib.icon()
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "preferences",
             label: "Preferences",
             active: @active,
             url: Routes.ts_account_preferences_path(@conn, :index),
             icon: Central.Config.UserConfigLib.icon()
-          %>
+          ) %>
         </div>
-
       </div>
     </div>
   </div>

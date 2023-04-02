@@ -32,15 +32,18 @@ defmodule Teiserver.Telemetry.SpringTelemetryServer do
   def handle_info(data, state) do
     data_type = elem(data, 0)
 
-    event = case data_type do
-      :updated_client ->
-        case elem(data, 2) do
-          :silent -> nil
-          :client_updated_battlestatus -> :battlestatus
-          :client_updated_status -> :mystatus
-        end
-      e -> e
-    end
+    event =
+      case data_type do
+        :updated_client ->
+          case elem(data, 2) do
+            :silent -> nil
+            :client_updated_battlestatus -> :battlestatus
+            :client_updated_status -> :mystatus
+          end
+
+        e ->
+          e
+      end
 
     if event != nil do
       new_raw = Map.put(state.raw, event, Map.get(state.raw, event, 0) + 1)

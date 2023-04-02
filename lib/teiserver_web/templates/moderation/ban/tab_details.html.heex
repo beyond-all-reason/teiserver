@@ -1,19 +1,36 @@
 <div class="row">
   <div class="col">
     <label class="control-label" for="ban_value">Values:</label>
-    <textarea id="user_stats" rows={Enum.count(@ban.key_values) + 1} class="form-control monospace"><%= @ban.key_values |> Enum.join("\n") %></textarea>
+    <textarea
+      id="user_stats"
+      rows={Enum.count(@ban.key_values) + 1}
+      class="form-control monospace"
+    ><%= @ban.key_values |> Enum.join("\n") %></textarea>
   </div>
 
   <div class="col">
-    <%
-      user_object = @ban.source
-        |> Map.drop([:__meta__, :__struct__, :admin_group, :clan, :groups, :reports_against, :reports_made, :reports_responded, :user_configs, :user_stat, :password, :password_hash])
+    <% user_object =
+      @ban.source
+      |> Map.drop([
+        :__meta__,
+        :__struct__,
+        :admin_group,
+        :clan,
+        :groups,
+        :reports_against,
+        :reports_made,
+        :reports_responded,
+        :user_configs,
+        :user_stat,
+        :password,
+        :password_hash
+      ])
 
-      new_data = user_object.data
-        |> Map.drop(["password", "password_hash"])
+    new_data =
+      user_object.data
+      |> Map.drop(["password", "password_hash"])
 
-      user_object = Map.put(user_object, :data, new_data)
-    %>
+    user_object = Map.put(user_object, :data, new_data) %>
     <label class="control-label" for="user_stats">User object:</label>
     <textarea id="user_stats" rows="20" class="form-control monospace"><%= user_object |> Jason.encode!(pretty: true) %></textarea>
   </div>

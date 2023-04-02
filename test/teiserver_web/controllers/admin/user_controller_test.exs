@@ -128,9 +128,12 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
           "admin_group_id" => "#{main_group.id}",
           "data" => %{}
         })
+
       Teiserver.User.recache_user(user.id)
 
-      conn = put(conn, Routes.ts_admin_user_path(conn, :rename_post, user), new_name: "new_test_name")
+      conn =
+        put(conn, Routes.ts_admin_user_path(conn, :rename_post, user), new_name: "new_test_name")
+
       assert redirected_to(conn) == ~p"/teiserver/admin/user/#{user}"
 
       conn = get(conn, ~p"/teiserver/admin/user/#{user}")
@@ -144,10 +147,16 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
           "admin_group_id" => "#{main_group.id}",
           "data" => %{}
         })
+
       Teiserver.User.recache_user(user.id)
 
-      conn = put(conn, Routes.ts_admin_user_path(conn, :rename_post, user), new_name: "this_name_is_too_long_and_has_invalid_characters!")
+      conn =
+        put(conn, Routes.ts_admin_user_path(conn, :rename_post, user),
+          new_name: "this_name_is_too_long_and_has_invalid_characters!"
+        )
+
       assert html_response(conn, 200) =~ "New user name:"
+
       # assert conn.private[:phoenix_flash]["danger"] == "Error with rename: Max length 20 characters"
     end
   end

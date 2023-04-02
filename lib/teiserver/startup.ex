@@ -15,12 +15,15 @@ defmodule Teiserver.Startup do
     Teiserver.LobbyIdServer.start_lobby_id_server()
     Teiserver.SpringIdServer.start_spring_id_server()
 
+    Teiserver.Tachyon.CommandDispatch.build_dispatch_cache()
+    Teiserver.Tachyon.Schema.load_schemas()
+
     # Chat stuff
     Central.Account.UserLib.add_report_restriction_types("Chat", [
       "Bridging",
       "Game chat",
       "Room chat",
-      "All chat",
+      "All chat"
     ])
 
     # Lobby interaction
@@ -28,7 +31,7 @@ defmodule Teiserver.Startup do
       "Low priority",
       "All lobbies",
       "Login",
-      "Site",
+      "Site"
     ])
 
     Central.Account.UserLib.add_report_restriction_types("Other", [
@@ -39,7 +42,7 @@ defmodule Teiserver.Startup do
     ])
 
     Central.Account.UserLib.add_report_restriction_types("Warnings", [
-      "Warning reminder",
+      "Warning reminder"
     ])
 
     add_audit_types([
@@ -47,28 +50,35 @@ defmodule Teiserver.Startup do
       "Moderation:Ban disabled",
       "Moderation:Ban updated",
       "Moderation:Ban enacted",
-
       "Moderation:Action halted",
       "Moderation:Action updated",
       "Moderation:Action created",
-
       "Moderation:De-bridged user",
-
       "Teiserver:Updated automod action",
       "Teiserver:Automod action enacted",
-
       "Teiserver:De-bridged user",
       "Teiserver:Changed user rating",
-      "Teiserver:Smurf merge",
+      "Teiserver:Smurf merge"
     ])
 
     # Permissions setup
     add_permission_set("teiserver", "admin", ~w(account battle clan queue))
-    add_permission_set("teiserver", "staff", ~w(reviewer moderator admin communication clan telemetry server))
+
+    add_permission_set(
+      "teiserver",
+      "staff",
+      ~w(reviewer moderator admin communication clan telemetry server)
+    )
+
     add_permission_set("teiserver", "dev", ~w(infolog))
     add_permission_set("teiserver", "reports", ~w(client server match ratings infolog))
     add_permission_set("teiserver", "api", ~w(battle))
-    add_permission_set("teiserver", "player", ~w(account tester contributor dev streamer donor verified bot moderator))
+
+    add_permission_set(
+      "teiserver",
+      "player",
+      ~w(account tester contributor dev streamer donor verified bot moderator)
+    )
 
     add_group_type("Teiserver clan", %{fields: []})
 
@@ -78,10 +88,11 @@ defmodule Teiserver.Startup do
     Central.cache_put(:application_metadata_cache, "teiserver_user_group", player_group.id)
     Central.cache_put(:application_metadata_cache, "teiserver_internal_group", internal_group.id)
 
-    Central.store_put(:application_metadata_cache, "random_names_3",
-      ~w(tick pawn lazarus rocketeer crossbow mace centurion tumbleweed smuggler compass ghost sprinter butler webber platypus hound welder recluse archangel gunslinger sharpshooter umbrella fatboy marauder vanguard razorback titan)
-      ++
-      ~w(grunt graverobber aggravator trasher thug bedbug deceiver augur spectre fiend twitcher duck skuttle sumo arbiter manticore termite commando mammoth shiva karganeth catapult behemoth juggernaught)
+    Central.store_put(
+      :application_metadata_cache,
+      "random_names_3",
+      ~w(tick pawn lazarus rocketeer crossbow mace centurion tumbleweed smuggler compass ghost sprinter butler webber platypus hound welder recluse archangel gunslinger sharpshooter umbrella fatboy marauder vanguard razorback titan) ++
+        ~w(grunt graverobber aggravator trasher thug bedbug deceiver augur spectre fiend twitcher duck skuttle sumo arbiter manticore termite commando mammoth shiva karganeth catapult behemoth juggernaught)
     )
 
     Central.Account.GroupCacheLib.update_caches(player_group)
@@ -89,6 +100,7 @@ defmodule Teiserver.Startup do
     Central.Account.GroupCacheLib.update_caches(umbrella_group)
 
     Central.cache_put(:lists, :rooms, [])
+    Central.cache_put(:lists, :lobby_policies, [])
 
     Teiserver.Data.Matchmaking.pre_cache_queues()
     Teiserver.Game.pre_cache_policies()
@@ -132,6 +144,7 @@ defmodule Teiserver.Startup do
     # Give everything else a chance to have started up
     spawn(fn ->
       :timer.sleep(1000)
+
       PubSub.broadcast(
         Central.PubSub,
         "teiserver_server",

@@ -38,40 +38,46 @@ defmodule Teiserver.AccountTest do
 
     test "list_users with extra filters" do
       # We don't care about the actual results at this point, just that the filters are called
-      Account.list_users(search: [
-        data_equal: {"field", "value"},
-        data_greater_than: {"field", "123"},
-        data_less_than: {"field", "123"},
-        warn_mute_or_ban: nil,
+      Account.list_users(
+        search: [
+          data_equal: {"field", "value"},
+          data_greater_than: {"field", "123"},
+          data_less_than: {"field", "123"},
+          warn_mute_or_ban: nil,
 
-        # Tests the fallback to Central.UserQueries
-        name_like: ""
-      ],
-      joins: [:user_stat])
+          # Tests the fallback to Central.UserQueries
+          name_like: ""
+        ],
+        joins: [:user_stat]
+      )
 
       # Flag filters as true
-      Account.list_users(search: [
-        bot: "Robot",
-        moderator: "Moderator",
-        verified: "Verified",
-        tester: "Tester",
-        streamer: "Streamer",
-        donor: "Donor",
-        contributor: "Contributor",
-        developer: "Developer",
-      ])
+      Account.list_users(
+        search: [
+          bot: "Robot",
+          moderator: "Moderator",
+          verified: "Verified",
+          tester: "Tester",
+          streamer: "Streamer",
+          donor: "Donor",
+          contributor: "Contributor",
+          developer: "Developer"
+        ]
+      )
 
       # Flag filters as false
-      Account.list_users(search: [
-        bot: "Person",
-        moderator: "User",
-        verified: "Unverified",
-        tester: "Normal",
-        streamer: "Normal",
-        donor: "Normal",
-        contributor: "Normal",
-        developer: "Normal",
-      ])
+      Account.list_users(
+        search: [
+          bot: "Person",
+          moderator: "User",
+          verified: "Unverified",
+          tester: "Normal",
+          streamer: "Normal",
+          donor: "Normal",
+          contributor: "Normal",
+          developer: "Normal"
+        ]
+      )
 
       # Order by
       Account.list_users(order_by: {:data, "field", :asc})
@@ -127,7 +133,6 @@ defmodule Teiserver.AccountTest do
     end
   end
 
-
   # describe "accolades" do
   #   alias Teiserver.Account.Accolade
 
@@ -177,7 +182,6 @@ defmodule Teiserver.AccountTest do
   #     assert %Ecto.Changeset{} = Account.change_accolade(accolade)
   #   end
   # end
-
 
   # describe "badge_types" do
   #   alias Teiserver.Account.BadgeType
@@ -232,5 +236,4 @@ defmodule Teiserver.AccountTest do
   #     assert %Ecto.Changeset{} = Account.change_badge_type(badge_type)
   #   end
   # end
-
 end

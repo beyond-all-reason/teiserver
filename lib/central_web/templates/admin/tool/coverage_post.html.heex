@@ -22,13 +22,13 @@
     $(body_name).hide();
     $(shower_name).show();
   }
-  
+
   function drilldown(mname) {
     new_val = $('#file_path').val() + mname + "/"
     $('#file_path').val(new_val);
     $('#resub_form').submit();
   }
-  
+
   function up_level(mname) {
     // new_val = $('#file_path').val() + mname + "/"
     alert("Not implemented, manually remove the last folder");
@@ -40,37 +40,36 @@
 </script>
 
 <style type="text/css">
-  .module-row {
-    margin-bottom: 10px;
-    padding-bottom: 5px;
-    border-bottom: 1px dotted #AAA;
-  }
+    .module-row {
+      margin-bottom: 10px;
+      padding-bottom: 5px;
+      border-bottom: 1px dotted #AAA;
+    }
 
-  .module-body {
-    display: none;
-  }
+    .module-body {
+      display: none;
+    }
 
-  .module-button {
-/*width: 200px;*/
-  }
+    .module-button {
+  /*width: 200px;*/
+    }
 
-  .coverage-link {
-    display: none;
-    color: #34699e;
-  }
+    .coverage-link {
+      display: none;
+      color: #34699e;
+    }
 
-  .module-button {
-    min-width: 175px;
-  }
+    .module-button {
+      min-width: 175px;
+    }
 
-  .final-row, .final-row td {
-    font-weight: bold;
-    font-size: 1.05em;
-  }
+    .final-row, .final-row td {
+      font-weight: bold;
+      font-size: 1.05em;
+    }
 </style>
 
-<%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "tool"})
-%>
+<%= render(CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "tool"})) %>
 
 <div class="row mt-3">
   <div class="col-md-12 col-lg-6">
@@ -79,11 +78,13 @@
         <h4>
           Headline stats -
           <span style="font-size: 0.8em;">
-            Coverage: <%= ((@overall_stats.relevant-@overall_stats.missed)/max(@overall_stats.relevant, 1))*100 |> round %>%,
-            Files: <%= format_number @overall_stats.files %>,
-            Lines: <%= format_number @overall_stats.lines %>,
-            Relevant: <%= format_number @overall_stats.relevant %>,
-            Missed: <%= format_number @overall_stats.missed %>
+            Coverage: <%= ((@overall_stats.relevant - @overall_stats.missed) /
+                             max(@overall_stats.relevant, 1) * 100)
+            |> round %>%,
+            Files: <%= format_number(@overall_stats.files) %>,
+            Lines: <%= format_number(@overall_stats.lines) %>,
+            Relevant: <%= format_number(@overall_stats.relevant) %>,
+            Missed: <%= format_number(@overall_stats.missed) %>
           </span>
         </h4>
 
@@ -105,10 +106,8 @@
           </thead>
           <tbody>
             <%= for row <- @results[:headline] do %>
-              <%
-                {cfg, cbg, _cbsname} = Central.Admin.ToolLib.coverage_colours(row.coverage)
-                section_id = String.replace(row.section, "/", "__")
-              %>
+              <% {cfg, cbg, _cbsname} = Central.Admin.ToolLib.coverage_colours(row.coverage)
+              section_id = String.replace(row.section, "/", "__") %>
 
               <tr class={"cov-#{round(row.coverage)}"}>
                 <td style={"border-left: 10px solid #{cfg}; background-color: #{cbg};"}>
@@ -116,14 +115,20 @@
 
                   <%= if row.missed > 0 do %>
                     <div class="float-end">
-                      <a class="btn btn-sm btn-secondary" href={"#module-#{section_id}"} onclick={"show_module('#{section_id}')"}>
+                      <a
+                        class="btn btn-sm btn-secondary"
+                        href={"#module-#{section_id}"}
+                        onclick={"show_module('#{section_id}')"}
+                      >
                         Show
                       </a>
-                      
+
                       <%= if not String.ends_with?(row.section, ".ex") do %>
                         &nbsp;&nbsp;&nbsp;
-                      
-                        <span class="btn btn-sm btn-secondary" onclick={"drilldown('#{row.section}')"}>
+                        <span
+                          class="btn btn-sm btn-secondary"
+                          onclick={"drilldown('#{row.section}')"}
+                        >
                           Drilldown
                         </span>
                       <% end %>
@@ -131,29 +136,30 @@
                   <% end %>
                 </td>
                 <td style={"background-color: #{cbg};"}>
-                  <%= Float.round row.coverage, 2 %>%
+                  <%= Float.round(row.coverage, 2) %>%
                 </td>
-                <td><%= format_number row.files %></td>
-                <td><%= format_number row.lines %></td>
-                <td><%= format_number row.relevant %></td>
-                <td><%= format_number row.missed %></td>
+                <td><%= format_number(row.files) %></td>
+                <td><%= format_number(row.lines) %></td>
+                <td><%= format_number(row.relevant) %></td>
+                <td><%= format_number(row.missed) %></td>
               </tr>
             <% end %>
 
             <tr class="final-row">
-              <% {cfg, cbg, _cbsname} = Central.Admin.ToolLib.coverage_colours(@results[:project].coverage) %>
+              <% {cfg, cbg, _cbsname} =
+                Central.Admin.ToolLib.coverage_colours(@results[:project].coverage) %>
 
               <td style={"border-left: 10px solid #{cfg}; background-color: #{cbg};"}>
                 &nbsp;&nbsp;&nbsp;&nbsp;
                 Project
               </td>
               <td style={"background-color: #{cbg};"}>
-                <%= Float.round @results[:project].coverage, 2 %>%
+                <%= Float.round(@results[:project].coverage, 2) %>%
               </td>
-              <td><%= format_number @results[:project].files %></td>
-              <td><%= format_number @results[:project].lines %></td>
-              <td><%= format_number @results[:project].relevant %></td>
-              <td><%= format_number @results[:project].missed %></td>
+              <td><%= format_number(@results[:project].files) %></td>
+              <td><%= format_number(@results[:project].lines) %></td>
+              <td><%= format_number(@results[:project].relevant) %></td>
+              <td><%= format_number(@results[:project].missed) %></td>
             </tr>
           </tbody>
         </table>
@@ -170,37 +176,65 @@
 
         <div class="module-row row">
           <div class="col-md-12">
-            <div class="btn btn-secondary" onclick="
+            <div
+              class="btn btn-secondary"
+              onclick="
               $('.module-shower').hide();
               $('.module-body').show();
-            ">Show all</div>
-
+            "
+            >
+              Show all
+            </div>
             &nbsp;&nbsp;
-
-            <div class="btn btn-secondary" onclick="
+            <div
+              class="btn btn-secondary"
+              onclick="
               $('.module-shower').show();
               $('.module-body').hide();
-            ">Hide all</div>
-
+            "
+            >
+              Hide all
+            </div>
 
             <div class="btn btn-secondary float-end" onclick="up_level();">Up level</div>
           </div>
 
-          <form action={Routes.admin_tool_path(@conn, :coverage_post)} method="post"  style="width: 100%; margin-top: 10px" id="resub_form">
+          <form
+            action={Routes.admin_tool_path(@conn, :coverage_post)}
+            method="post"
+            style="width: 100%; margin-top: 10px"
+            id="resub_form"
+          >
             <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
             <div class="row mt-2">
               <div class="col-md-12">
-                <input type='text' name='file_path' id='file_path' value={@path} class='form-control' />
+                <input
+                  type="text"
+                  name="file_path"
+                  id="file_path"
+                  value={@path}
+                  class="form-control"
+                />
               </div>
             </div>
 
             <div class="row mt-2">
               <div class="col-md-10">
-                <textarea name="results" rows="1" class="form-control" style="font-family: monospace;"><%= @coverage_data %></textarea>
+                <textarea
+                  name="results"
+                  rows="1"
+                  class="form-control"
+                  style="font-family: monospace;"
+                ><%= @coverage_data %></textarea>
               </div>
               <div class="col-md-2">
-                <input type="submit" value="Submit" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+                <input
+                  type="submit"
+                  value="Submit"
+                  name="form.submitted"
+                  class={"btn btn-#{bsname} btn-block"}
+                />
               </div>
             </div>
           </form>
@@ -212,19 +246,21 @@
           <%= if m.worst_percentage != [] and not String.ends_with?(m.name, ".ex") do %>
             <div class="module-row row" id={"module-#{module_id}"}>
               <div class="col-md-12">
-
                 <div class="module-shower" id={"module-#{module_id}-shower"}>
-                  <div class="btn btn-primary module-button" onclick={"show_module('#{module_id}')"}>
-                    <i class="fa fa-eye fa-fw"></i>
-                    &nbsp;
-                    <%= m.name %>
+                  <div
+                    class="btn btn-primary module-button"
+                    onclick={"show_module('#{module_id}')"}
+                  >
+                    <i class="fa fa-eye fa-fw"></i> &nbsp; <%= m.name %>
                   </div>
                 </div>
 
                 <div class="module-body" id={"module-#{module_id}-body"}>
-                  <div class="btn btn-secondary module-button" onclick={"hide_module('#{module_id}')"}>
-                    <i class="fa fa-eye-slash fa-fw"></i>
-                    &nbsp;
+                  <div
+                    class="btn btn-secondary module-button"
+                    onclick={"hide_module('#{module_id}')"}
+                  >
+                    <i class="fa fa-eye-slash fa-fw"></i> &nbsp;
                     Hide <%= m.name %>
                   </div>
 
@@ -250,10 +286,8 @@
                         <% end %>
                       </ul>
                     </div>
-
                   </div>
                 </div>
-
               </div>
             </div>
           <% end %>

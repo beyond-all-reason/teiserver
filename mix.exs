@@ -97,16 +97,14 @@ defmodule Central.MixProject do
       {:ranch, "~> 1.8"},
       {:horde, "~> 0.8"},
       {:etop, "~> 0.7.0"},
-
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
-
-      {:ex_json_schema, "~> 0.9.2"},
+      {:json_xema, "~> 0.3"},
 
       # If you want to connect to discord in dev mode, use this
       # {:nostrum, "~> 0.6", runtime: Mix.env() != :test},
 
       # If you only want to connect to discord in prod, use this
-      {:nostrum, "~> 0.6", runtime: Mix.env() == :prod},
+      {:nostrum, "~> 0.6", runtime: Mix.env() == :prod}
     ]
   end
 

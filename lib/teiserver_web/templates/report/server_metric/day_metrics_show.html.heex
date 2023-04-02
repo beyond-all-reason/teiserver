@@ -14,107 +14,117 @@
   }
 </style>
 
-<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "server_metrics"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "server_metrics"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Report.ServerMetricView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Report.ServerMetricView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "today"
           })
-        %>
+        ) %>
 
         <hr />
 
-<div class="row page-row">
-  <div class="col-md-12">
-    <a href={Routes.ts_reports_match_metric_path(@conn, :day_metrics_show, date_to_str(@date, format: :ymd))} class={"btn float-end btn-outline-#{TeiserverWeb.Report.MatchMetricView.view_colour}"}>
-      <%= central_component "icon", icon: TeiserverWeb.Report.MatchMetricView.icon %>
-      &nbsp;
-      Match detail
-    </a>
-    <%= if @date == Timex.today() do %>
-      <h3>Day to day metric: Today so far</h3>
-    <% else %>
-      <h3>Day to day metric: <%= Timex.format!(@date, "{YYYY}-{0M}-{0D}, {WDfull}") %></h3>
-    <% end %>
-    <br /><br />
+        <div class="row page-row">
+          <div class="col-md-12">
+            <a
+              href={
+                Routes.ts_reports_match_metric_path(
+                  @conn,
+                  :day_metrics_show,
+                  date_to_str(@date, format: :ymd)
+                )
+              }
+              class={"btn float-end btn-outline-#{TeiserverWeb.Report.MatchMetricView.view_colour}"}
+            >
+              <%= central_component("icon", icon: TeiserverWeb.Report.MatchMetricView.icon()) %> &nbsp;
+              Match detail
+            </a>
+            <%= if @date == Timex.today() do %>
+              <h3>Day to day metric: Today so far</h3>
+            <% else %>
+              <h3>
+                Day to day metric: <%= Timex.format!(@date, "{YYYY}-{0M}-{0D}, {WDfull}") %>
+              </h3>
+            <% end %>
+            <br /><br />
 
-    <ul class="nav nav-tabs" role="tablist" id="the_tabs">
-      <li class="nav-item">
-        <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-          <%= central_component "icon", icon: icon() %>
-          Details
-        </a>
-      </li>
+            <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+              <li class="nav-item">
+                <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <%= central_component("icon", icon: icon()) %> Details
+                </a>
+              </li>
 
-      <li class="nav-item">
-        <a href="#hourly_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-          <i class="fa-regular fa-fw fa-hourglass"></i>
-          Hourly
-        </a>
-      </li>
+              <li class="nav-item">
+                <a href="#hourly_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <i class="fa-regular fa-fw fa-hourglass"></i> Hourly
+                </a>
+              </li>
 
-      <li class="nav-item">
-        <a href="#user_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-          <%= central_component "icon", icon: Central.Account.UserLib.icon() %>
-          Users
-        </a>
-      </li>
-      
-      <li class="nav-item">
-        <a href="#event_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-          <%= central_component "icon", icon: Teiserver.Telemetry.ClientEventLib.icon() %>
-          Events
-        </a>
-      </li>
+              <li class="nav-item">
+                <a href="#user_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <%= central_component("icon", icon: Central.Account.UserLib.icon()) %> Users
+                </a>
+              </li>
 
-      <li class="nav-item">
-        <a href="#raw_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-          <i class="fa-regular fa-fw fa-code"></i>
-          Raw data
-        </a>
-      </li>
+              <li class="nav-item">
+                <a href="#event_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <%= central_component("icon", icon: Teiserver.Telemetry.ClientEventLib.icon()) %> Events
+                </a>
+              </li>
 
-      <li class="nav-item">
-        <a href="#anon_raw_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-          <i class="fa-regular fa-fw fa-user-secret"></i>
-          Anon data
-        </a>
-      </li>
-    </ul>
+              <li class="nav-item">
+                <a href="#raw_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <i class="fa-regular fa-fw fa-code"></i> Raw data
+                </a>
+              </li>
 
-    <div class="tab-content">
-      <div class="tab-pane" id="details_tab" style="padding:5px;">
-        <%= render "tab_details.html", assigns %>
-      </div>
+              <li class="nav-item">
+                <a href="#anon_raw_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <i class="fa-regular fa-fw fa-user-secret"></i> Anon data
+                </a>
+              </li>
+            </ul>
 
-      <div class="tab-pane" id="hourly_tab" style="padding:5px;">
-        <%= render "tab_hourly.html", assigns %>
-      </div>
+            <div class="tab-content">
+              <div class="tab-pane" id="details_tab" style="padding:5px;">
+                <%= render("tab_details.html", assigns) %>
+              </div>
 
-      <div class="tab-pane" id="user_tab" style="padding:5px;">
-        <%= render "tab_user.html", assigns %>
-      </div>
+              <div class="tab-pane" id="hourly_tab" style="padding:5px;">
+                <%= render("tab_hourly.html", assigns) %>
+              </div>
 
-      <div class="tab-pane" id="event_tab" style="padding:5px;">
-        <%= render "tab_event.html", assigns %>
-      </div>
+              <div class="tab-pane" id="user_tab" style="padding:5px;">
+                <%= render("tab_user.html", assigns) %>
+              </div>
 
-      <div class="tab-pane" id="raw_tab" style="padding:5px;">
-        <%= render "tab_raw.html", assigns %>
-      </div>
+              <div class="tab-pane" id="event_tab" style="padding:5px;">
+                <%= render("tab_event.html", assigns) %>
+              </div>
 
-      <div class="tab-pane" id="anon_raw_tab" style="padding:5px;">
-        <%= render "tab_anon_raw.html", assigns %>
-      </div>
-    </div>
-  </div>
-</div>
+              <div class="tab-pane" id="raw_tab" style="padding:5px;">
+                <%= render("tab_raw.html", assigns) %>
+              </div>
 
+              <div class="tab-pane" id="anon_raw_tab" style="padding:5px;">
+                <%= render("tab_anon_raw.html", assigns) %>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

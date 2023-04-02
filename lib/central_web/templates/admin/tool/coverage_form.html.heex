@@ -1,7 +1,6 @@
 <% bsname = view_colour() %>
 
-<%= render CentralWeb.Admin.ToolView, "sub_menu.html", Map.merge(assigns, %{active: "coverage"})
-%>
+<%= render(CentralWeb.Admin.ToolView, "sub_menu.html", Map.merge(assigns, %{active: "coverage"})) %>
 
 <div class="row">
   <div class="col-md-12">
@@ -11,13 +10,29 @@
           Coverage parser
         </h4>
 
-        <form action={Routes.admin_tool_path(@conn, :coverage_post)} method="post" class="form-horizontal">
+        <form
+          action={Routes.admin_tool_path(@conn, :coverage_post)}
+          method="post"
+          class="form-horizontal"
+        >
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
-          <textarea name="results" rows="8" class="form-control" style="font-family: monospace;" autofocus=""></textarea>
+          <textarea
+            name="results"
+            rows="8"
+            class="form-control"
+            style="font-family: monospace;"
+            autofocus=""
+          >
+          </textarea>
           <br />
 
-          <input type="submit" value="Submit" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
+          <input
+            type="submit"
+            value="Submit"
+            name="form.submitted"
+            class={"btn btn-#{bsname} float-end"}
+          />
         </form>
       </div>
     </div>

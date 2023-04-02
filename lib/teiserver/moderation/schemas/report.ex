@@ -19,12 +19,16 @@ defmodule Teiserver.Moderation.Report do
 
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
-    params = params
+    params =
+      params
       |> trim_strings(~w(name)a)
 
     struct
-      |> cast(params, ~w(reporter_id target_id type sub_type extra_text match_id relationship result_id)a)
-      |> validate_required(~w(reporter_id target_id type sub_type)a)
+    |> cast(
+      params,
+      ~w(reporter_id target_id type sub_type extra_text match_id relationship result_id)a
+    )
+    |> validate_required(~w(reporter_id target_id type sub_type)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

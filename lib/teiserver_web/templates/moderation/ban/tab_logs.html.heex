@@ -1,4 +1,4 @@
-<table class='table table-sm'>
+<table class="table table-sm">
   <thead>
     <tr>
       <th>Action</th>
@@ -6,7 +6,7 @@
       <th>Actioner</th>
       <th>Date</th>
       <th colspan="1">&nbsp;</th>
-   </tr>
+    </tr>
   </thead>
   <tbody>
     <%= for log <- @logs do %>
@@ -20,11 +20,14 @@
         <% end %>
 
         <td><%= log.user.name %></td>
-        <td><%= date_to_str log.inserted_at, format: :hms_or_dmy %></td>
+        <td><%= date_to_str(log.inserted_at, format: :hms_or_dmy) %></td>
 
         <%= if log.details["target_user_id"] do %>
           <td>
-            <a href={Routes.ts_admin_user_path(@conn, :show, log.details["target_user_id"])} class="btn btn-success btn-sm">
+            <a
+              href={Routes.ts_admin_user_path(@conn, :show, log.details["target_user_id"])}
+              class="btn btn-success btn-sm"
+            >
               Show user
             </a>
           </td>

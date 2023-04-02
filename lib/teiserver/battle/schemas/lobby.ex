@@ -47,7 +47,6 @@ defmodule Teiserver.Battle.Lobby do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle.{LobbyChat, LobbyCache}
 
-
   # LobbyChat
   @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def say(userid, msg, lobby_id), do: LobbyChat.say(userid, msg, lobby_id)
@@ -55,8 +54,10 @@ defmodule Teiserver.Battle.Lobby do
   @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def sayex(userid, msg, lobby_id), do: LobbyChat.sayex(userid, msg, lobby_id)
 
-  @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
-  def sayprivateex(from_id, to_id, msg, lobby_id), do: LobbyChat.sayprivateex(from_id, to_id, msg, lobby_id)
+  @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) ::
+          :ok | {:error, any}
+  def sayprivateex(from_id, to_id, msg, lobby_id),
+    do: LobbyChat.sayprivateex(from_id, to_id, msg, lobby_id)
 
   def new_bot(data) do
     Map.merge(
@@ -70,7 +71,6 @@ defmodule Teiserver.Battle.Lobby do
       data
     )
   end
-
 
   @spec create_lobby(Map.t()) :: Map.t()
   def create_lobby(%{founder_id: _, founder_name: _, name: _} = lobby) do
@@ -90,7 +90,6 @@ defmodule Teiserver.Battle.Lobby do
         map_name: nil,
         game_name: nil,
         hash_code: nil,
-
         type: "normal",
         nattype: :none,
         max_players: 16,
@@ -99,17 +98,14 @@ defmodule Teiserver.Battle.Lobby do
         rank: 0,
         locked: false,
         engine_name: "spring",
-
         members: [],
         players: [],
 
         # When set to false updates to this lobby won't appear in global_battle updates
         public: true,
-
         member_count: 0,
         player_count: 0,
         spectator_count: 0,
-
         disabled_units: [],
         start_areas: %{},
 
@@ -121,9 +117,10 @@ defmodule Teiserver.Battle.Lobby do
         consul_rename: false,
 
         # Used to indicate the lobby is subject to a lobby policy
-        lobby_policy: nil,
+        lobby_policy_id: nil,
 
         # Meta data
+        tournament: false,
         silence: false,
         in_progress: false,
         started_at: nil
@@ -157,17 +154,22 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec start_battle_lobby_throttle(T.lobby_id()) :: pid()
   def start_battle_lobby_throttle(battle_lobby_id) do
-    Teiserver.Throttles.start_throttle(battle_lobby_id, Teiserver.Battle.LobbyThrottle, "battle_lobby_throttle_#{battle_lobby_id}")
+    Teiserver.Throttles.start_throttle(
+      battle_lobby_id,
+      Teiserver.Battle.LobbyThrottle,
+      "battle_lobby_throttle_#{battle_lobby_id}"
+    )
   end
 
   @spec stop_battle_lobby_throttle(T.lobby_id()) :: :ok
   def stop_battle_lobby_throttle(battle_lobby_id) do
     # We send this out because the throttle won't
-    :ok = PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_liveview_lobby_updates:#{battle_lobby_id}",
-      {:battle_lobby_throttle, :closed}
-    )
+    :ok =
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_liveview_lobby_updates:#{battle_lobby_id}",
+        {:battle_lobby_throttle, :closed}
+      )
 
     Teiserver.Throttles.stop_throttle("LobbyThrottle:#{battle_lobby_id}")
     :ok
@@ -176,6 +178,7 @@ defmodule Teiserver.Battle.Lobby do
   @spec force_add_user_to_lobby(T.userid(), T.lobby_id()) :: :ok | nil
   def force_add_user_to_lobby(userid, lobby_id) do
     client = Account.get_client_by_id(userid)
+
     if client != nil and client.lobby_id != lobby_id and Battle.lobby_exists?(lobby_id) do
       do_force_add_user_to_lobby(client, lobby_id)
     end
@@ -184,6 +187,7 @@ defmodule Teiserver.Battle.Lobby do
   # Used to send the user PID a join battle command
   @spec do_force_add_user_to_lobby(T.client(), T.lobby_id()) :: :ok | nil
   defp do_force_add_user_to_lobby(nil, _), do: nil
+
   defp do_force_add_user_to_lobby(client, lobby_id) do
     remove_user_from_any_lobby(client.userid)
     script_password = new_script_password()
@@ -301,6 +305,7 @@ defmodule Teiserver.Battle.Lobby do
   @spec kick_user_from_battle(T.userid(), T.lobby_id()) :: nil | :ok | {:error, any}
   def kick_user_from_battle(userid, lobby_id) do
     user = User.get_user_by_id(userid)
+
     if not User.is_moderator?(user) do
       case do_remove_user_from_lobby(userid, lobby_id) do
         :closed ->
@@ -346,7 +351,8 @@ defmodule Teiserver.Battle.Lobby do
   def remove_user_from_any_lobby(nil), do: []
 
   def remove_user_from_any_lobby(userid) do
-    lobby_ids = Battle.list_lobby_ids()
+    lobby_ids =
+      Battle.list_lobby_ids()
       |> Enum.map(fn lobby_id ->
         Battle.get_lobby(lobby_id)
       end)
@@ -366,7 +372,7 @@ defmodule Teiserver.Battle.Lobby do
   end
 
   @spec find_empty_lobby(function()) :: Map.t()
-  def find_empty_lobby(filter_func \\ (fn _ -> true end)) do
+  def find_empty_lobby(filter_func \\ fn _ -> true end) do
     empties =
       stream_lobbies()
       |> Stream.filter(fn lobby -> lobby.in_progress == false and Enum.empty?(lobby.players) end)
@@ -417,7 +423,9 @@ defmodule Teiserver.Battle.Lobby do
   @spec rename_lobby(T.lobby_id(), String.t(), boolean) :: :ok
   def rename_lobby(lobby_id, new_name, consul_rename \\ false) do
     case Battle.lobby_exists?(lobby_id) do
-      false -> nil
+      false ->
+        nil
+
       true ->
         Battle.update_lobby_values(lobby_id, %{
           name: new_name,
@@ -452,12 +460,15 @@ defmodule Teiserver.Battle.Lobby do
   def silence_lobby(lobby_id) when is_integer(lobby_id) do
     Battle.update_lobby_values(lobby_id, %{silence: true})
   end
+
   def silence_lobby(%{id: lobby_id}) do
     Battle.update_lobby_values(lobby_id, %{silence: true})
   end
 
   @spec unsilence_lobby(T.lobby() | T.lobby_id()) :: T.lobby()
-  def unsilence_lobby(lobby_id) when is_integer(lobby_id), do: unsilence_lobby(get_lobby(lobby_id))
+  def unsilence_lobby(lobby_id) when is_integer(lobby_id),
+    do: unsilence_lobby(get_lobby(lobby_id))
+
   def unsilence_lobby(lobby) do
     update_lobby(%{lobby | silence: false}, nil, :unsilence)
   end
@@ -469,8 +480,11 @@ defmodule Teiserver.Battle.Lobby do
     server_result = server_allows_join?(userid, lobby_id, password)
 
     if server_result == true do
-      script_password = if script_password == nil, do: new_script_password(), else: script_password
+      script_password =
+        if script_password == nil, do: new_script_password(), else: script_password
+
       lobby = get_lobby(lobby_id)
+
       if lobby != nil do
         case Account.get_client_by_id(lobby.founder_id) do
           nil ->
@@ -491,6 +505,7 @@ defmodule Teiserver.Battle.Lobby do
                 script_password: script_password
               }
             )
+
             {:waiting_on_host, script_password}
         end
       else
@@ -501,31 +516,40 @@ defmodule Teiserver.Battle.Lobby do
     end
   end
 
-  @spec server_allows_join?(Types.userid(), integer(), String.t() | nil) :: {:failure, String.t()} | true
+  @spec server_allows_join?(Types.userid(), integer(), String.t() | nil) ::
+          {:failure, String.t()} | true
   def server_allows_join?(userid, lobby_id, password \\ nil) do
     lobby = get_lobby(lobby_id)
     user = Account.get_user_by_id(userid)
 
     # In theory this would never happen but it's possible to see this at startup when
     # not everything is loaded and ready, hence the case statement
-    {consul_response, consul_reason} = case Coordinator.call_consul(lobby_id, {:request_user_join_lobby, userid}) do
-      {a, b} -> {a, b}
-      nil -> {true, nil}
-      v ->
-        Logger.error("ConsulServer can_join? error, response #{Kernel.inspect v}")
-        {false, "ConsulServer error on can_join? call"}
-    end
+    {consul_response, consul_reason} =
+      case Coordinator.call_consul(lobby_id, {:request_user_join_lobby, userid}) do
+        {a, b} ->
+          {a, b}
 
-    ignore_password = Enum.any?([
-      User.is_moderator?(user),
-      Enum.member?(user.roles, "Caster"),
-      consul_reason == :override_approve
-    ])
-    ignore_locked = Enum.any?([
-      User.is_moderator?(user),
-      Enum.member?(user.roles, "Caster"),
-      consul_reason == :override_approve
-    ])
+        nil ->
+          {true, nil}
+
+        v ->
+          Logger.error("ConsulServer can_join? error, response #{Kernel.inspect(v)}")
+          {false, "ConsulServer error on can_join? call"}
+      end
+
+    ignore_password =
+      Enum.any?([
+        User.is_moderator?(user),
+        Enum.member?(user.roles, "Caster"),
+        consul_reason == :override_approve
+      ])
+
+    ignore_locked =
+      Enum.any?([
+        User.is_moderator?(user),
+        Enum.member?(user.roles, "Caster"),
+        consul_reason == :override_approve
+      ])
 
     cond do
       user == nil ->
@@ -534,7 +558,7 @@ defmodule Teiserver.Battle.Lobby do
       lobby == nil ->
         {:failure, "No lobby found (type 1)"}
 
-       lobby.locked == true and ignore_locked == false ->
+      lobby.locked == true and ignore_locked == false ->
         {:failure, "Battle locked"}
 
       lobby.password != nil and password != lobby.password and not ignore_password ->
@@ -554,6 +578,7 @@ defmodule Teiserver.Battle.Lobby do
   @spec accept_join_request(T.userid(), T.lobby_id()) :: :ok
   def accept_join_request(userid, lobby_id) do
     client = Client.get_client_by_id(userid)
+
     if client do
       # TODO: Depreciate
       send(client.tcp_pid, {:join_battle_request_response, lobby_id, :accept, nil})
@@ -569,6 +594,7 @@ defmodule Teiserver.Battle.Lobby do
         response: :accept
       }
     )
+
     # TODO: Refactor this as per the TODO list, this should take place here and not in the client process
     # add_user_to_battle(userid, lobby_id)
 
@@ -590,10 +616,12 @@ defmodule Teiserver.Battle.Lobby do
     )
 
     client = Client.get_client_by_id(userid)
+
     if client do
       # TODO: Depreciate
       send(client.tcp_pid, {:join_battle_request_response, lobby_id, :deny, reason})
     end
+
     :ok
   end
 
@@ -604,11 +632,13 @@ defmodule Teiserver.Battle.Lobby do
     case Client.get_client_by_id(client_id) do
       nil ->
         nil
+
       client ->
         lobby = get_lobby(client.lobby_id)
         changer = Client.get_client_by_id(changer_id)
 
-        changed_values = new_values
+        changed_values =
+          new_values
           |> Enum.filter(fn {field, _} ->
             allow?(changer, field, lobby)
           end)
@@ -627,7 +657,7 @@ defmodule Teiserver.Battle.Lobby do
     Account.replace_update_client(new_client, :client_updated_battlestatus)
   end
 
-  @spec allow?(T.userid, atom, T.lobby_id()) :: boolean()
+  @spec allow?(T.userid(), atom, T.lobby_id()) :: boolean()
   def allow?(nil, _, _), do: false
   def allow?(_, nil, _), do: false
   def allow?(_, _, nil), do: false
@@ -643,8 +673,12 @@ defmodule Teiserver.Battle.Lobby do
   def allow?(changer_id, field, battle) when is_integer(changer_id),
     do: allow?(Client.get_client_by_id(changer_id), field, battle)
 
-  def allow?(changer, {:remove_bot, botname}, lobby), do: allow?(changer, {:bot_command, botname}, lobby)
-  def allow?(changer, {:update_bot, botname}, lobby), do: allow?(changer, {:bot_command, botname}, lobby)
+  def allow?(changer, {:remove_bot, botname}, lobby),
+    do: allow?(changer, {:bot_command, botname}, lobby)
+
+  def allow?(changer, {:update_bot, botname}, lobby),
+    do: allow?(changer, {:bot_command, botname}, lobby)
+
   def allow?(changer, {:bot_command, botname}, lobby) do
     bots = Battle.get_bots(lobby.id)
     bot = bots[botname]
@@ -730,6 +764,7 @@ defmodule Teiserver.Battle.Lobby do
   @spec allow_say?(T.userid(), T.lobby_id()) :: boolean()
   def allow_say?(userid, lobby_id) do
     lobby = get_lobby(lobby_id)
+
     cond do
       lobby == nil ->
         false
@@ -752,7 +787,6 @@ defmodule Teiserver.Battle.Lobby do
       true ->
         true
     end
-
   end
 
   @spec new_script_password() :: String.t()

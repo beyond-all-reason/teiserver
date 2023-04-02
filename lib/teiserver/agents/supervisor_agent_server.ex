@@ -7,8 +7,23 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
     AgentLib.post_agent_update(state.id, "Starting agents supervisor")
 
     add_servers("battlehost", 3)
-    add_servers("battlehost", 4, 4, %{name: "stable", number: 4, leave_chance: 0, inaction_chance: 0, password_chance: 0})
-    add_servers("battlehost", 5, 5, %{name: "unstable", number: 5, always_leave: true, leave_chance: 1, inaction_chance: 0})
+
+    add_servers("battlehost", 4, 4, %{
+      name: "stable",
+      number: 4,
+      leave_chance: 0,
+      inaction_chance: 0,
+      password_chance: 0
+    })
+
+    add_servers("battlehost", 5, 5, %{
+      name: "unstable",
+      number: 5,
+      always_leave: true,
+      leave_chance: 1,
+      inaction_chance: 0
+    })
+
     add_servers("battlehost", 6, 6, %{name: "reject", number: 6, leave_chance: 0, reject: true})
     add_servers("battlejoin", 15)
     add_servers("in_and_out", 3)
@@ -31,7 +46,8 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
   defp add_servers(type, count) do
     add_servers(
       type,
-      1, count,
+      1,
+      count,
       %{}
     )
   end
@@ -46,13 +62,17 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
         DynamicSupervisor.start_child(Agents.DynamicSupervisor, {
           module,
           name: AgentLib.via_tuple(module, i),
-          data: Map.merge(%{
-            number: i,
-            id: "#{type}-#{i}"
-          }, opts)
+          data:
+            Map.merge(
+              %{
+                number: i,
+                id: "#{type}-#{i}"
+              },
+              opts
+            )
         })
-
     end)
+
     :ok
   end
 
@@ -80,8 +100,9 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
   def init(_opts) do
     send(self(), :begin)
 
-    {:ok, %{
-      id: "agent_supervisor"
-    }}
+    {:ok,
+     %{
+       id: "agent_supervisor"
+     }}
   end
 end

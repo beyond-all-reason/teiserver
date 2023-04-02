@@ -1,4 +1,4 @@
-<%= render CentralWeb.Communication.BlogView, "sub_menu.html", assigns %>
+<%= render(CentralWeb.Communication.BlogView, "sub_menu.html", assigns) %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -51,46 +51,54 @@
 
 <div id="" class="py-4">
   <div class="container">
-
     <div class="card">
       <%= if @post.visible == false do %>
         <div class="card-header alert-warning">
-
           <%= if allow?(@current_user, "communications.post.create") do %>
             <div class="float-end">
-              <a href={"#{Routes.blog_path(@conn, :show, @post.url_slug)}?key=#{get_key @post.url_slug}"} class="btn btn-warning2 btn-sm" style="margin-top: -3px;">
-                <i class="fa-regular fa-fw fa-eye"></i>
-                &nbsp;
+              <a
+                href={"#{Routes.blog_path(@conn, :show, @post.url_slug)}?key=#{get_key @post.url_slug}"}
+                class="btn btn-warning2 btn-sm"
+                style="margin-top: -3px;"
+              >
+                <i class="fa-regular fa-fw fa-eye"></i> &nbsp;
                 Preview link
               </a>
-
               &nbsp;
-
-              <a href={Routes.blog_post_path(@conn, :edit, @post)} class="btn btn-warning2 btn-sm" style="margin-top: -3px;">
-                <i class="fa-regular fa-fw fa-wrench"></i>
-                &nbsp;
+              <a
+                href={Routes.blog_post_path(@conn, :edit, @post)}
+                class="btn btn-warning2 btn-sm"
+                style="margin-top: -3px;"
+              >
+                <i class="fa-regular fa-fw fa-wrench"></i> &nbsp;
                 Edit post
               </a>
             </div>
           <% end %>
-
           This post is not yet published
         </div>
       <% end %>
 
       <div class="card-body">
-        <a class="btn btn-sm float-end" style={"color: #FFF; background-color: #{@post.category.colour};"} href={Routes.blog_path(@conn, :category, @post.category.name)}>
+        <a
+          class="btn btn-sm float-end"
+          style={"color: #FFF; background-color: #{@post.category.colour};"}
+          href={Routes.blog_path(@conn, :category, @post.category.name)}
+        >
           <i class={"fa-fw #{@post.category.icon}"}></i>
           <%= @post.category.name %>
         </a>
 
         <h2 style="text-align: center;"><%= @post.title %></h2>
         <span class="post-author">
-          <%= @post.poster.name %>, <%= date_to_str @post.inserted_at, format: :dmy_text, tz: @tz %> in <a href={Routes.blog_path(@conn, :category, @post.category.name)}><%= @post.category.name %></a>
+          <%= @post.poster.name %>, <%= date_to_str(@post.inserted_at, format: :dmy_text, tz: @tz) %> in
+          <a href={Routes.blog_path(@conn, :category, @post.category.name)}>
+            <%= @post.category.name %>
+          </a>
         </span>
 
         <div class="post-content">
-          <%= raw @post.content %>
+          <%= raw(@post.content) %>
         </div>
 
         <br /><br />
@@ -109,7 +117,6 @@
 
         <%= cond do %>
           <% @post.allow_comments == false -> %>
-
           <% Enum.empty?(@post.comments) -> %>
             <h5>No comments</h5>
           <% Enum.count(@post.comments) == 1 -> %>
@@ -122,15 +129,14 @@
           <div class="post-comment" id={"comment-#{c.id}"}>
             <div class="post-comment-author" style={"color: #{c.poster.colour}"}>
               <i class={"fa-fw #{c.poster.icon}"}></i>
-              &nbsp;
-              <strong><%= c.poster.name %></strong>
+              &nbsp; <strong><%= c.poster.name %></strong>
               &nbsp;&nbsp;&nbsp;
               <a href={"#comment-#{c.id}"}>
-                <%= date_to_str c.inserted_at, format: :hm_or_dmy, tz: @tz %>
+                <%= date_to_str(c.inserted_at, format: :hm_or_dmy, tz: @tz) %>
               </a>
             </div>
             <div class="post-comment-content">
-              <%= format_comment c.content %>
+              <%= format_comment(c.content) %>
             </div>
           </div>
         <% end %>
@@ -144,10 +150,15 @@
               <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
               <div class="row">
                 <div class="col-sm-12">
-                  <textarea name="comment" id="comment_content" rows="8" class="form-control"></textarea>
+                  <textarea name="comment" id="comment_content" rows="8" class="form-control">
+                  </textarea>
                   <br />
 
-                  <button type="submit" class={"btn btn-#{Central.Communication.CommentLib.colours()} float-end"} style="padding-left: 40px; padding-right: 40px;">
+                  <button
+                    type="submit"
+                    class={"btn btn-#{Central.Communication.CommentLib.colours()} float-end"}
+                    style="padding-left: 40px; padding-right: 40px;"
+                  >
                     Add comment
                   </button>
                 </div>
@@ -161,7 +172,6 @@
         <% else %>
           <h5>Comments are disabled for this post</h5>
         <% end %>
-
       </div>
     </div>
   </div>

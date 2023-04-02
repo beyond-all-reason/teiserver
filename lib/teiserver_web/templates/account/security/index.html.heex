@@ -1,14 +1,18 @@
-<%= render TeiserverWeb.Account.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "security"}) %>
+<%= render(
+  TeiserverWeb.Account.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "security"})
+) %>
 
 <div class="row">
   <div class="col-md-12">
-
     <div class="card card-primary">
       <div class="card-body">
-
-        <a href={Routes.ts_account_security_path(@conn, :edit_password)} class="btn float-end btn-danger">
-          <i class="fa-fw fa-solid fa-lock"></i>
-          Change password
+        <a
+          href={Routes.ts_account_security_path(@conn, :edit_password)}
+          class="btn float-end btn-danger"
+        >
+          <i class="fa-fw fa-solid fa-lock"></i> Change password
         </a>
 
         <h4>User tokens</h4>
@@ -23,17 +27,29 @@
                 <strong>Last used:</strong> <%= date_to_str(token.last_used, format: :ymd_hms) %><br />
                 <strong>Expires:</strong> <%= date_to_str(token.expires, format: :ymd_hms) %><br />
                 <%= if allow?(@conn, "admin.dev") do %>
-                  <strong>Value:</strong> <input type="text" value={token.value} class="form-control" />
-                  <strong>Escaped:</strong> <input type="text" value={URI.encode_query(%{"qqq" => token.value}) |> String.replace("qqq=", "")} class="form-control" />
+                  <strong>Value:</strong>
+                  <input type="text" value={token.value} class="form-control" />
+                  <strong>Escaped:</strong>
+                  <input
+                    type="text"
+                    value={
+                      URI.encode_query(%{"qqq" => token.value}) |> String.replace("qqq=", "")
+                    }
+                    class="form-control"
+                  />
                 <% end %>
                 <br />
 
-                <%= link raw("Delete token"), to: Routes.ts_account_security_path(@conn, :delete_token, token), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger2" %>
+                <%= link(raw("Delete token"),
+                  to: Routes.ts_account_security_path(@conn, :delete_token, token),
+                  method: :delete,
+                  data: [confirm: "Are you sure?"],
+                  class: "btn btn-danger2"
+                ) %>
               </div>
             <% end %>
           </div>
         <% end %>
-
       </div>
     </div>
   </div>

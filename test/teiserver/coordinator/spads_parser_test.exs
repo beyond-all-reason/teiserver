@@ -27,13 +27,17 @@ defmodule Teiserver.Coordinator.SpadsParserTest do
     assert host_data.host_bosses == [user1.id]
 
     # Add a 2nd boss
-    result = SpadsParser.handle_in("Boss mode enabled for #{user2.name}", %{host_bosses: [user1.id]})
+    result =
+      SpadsParser.handle_in("Boss mode enabled for #{user2.name}", %{host_bosses: [user1.id]})
+
     assert result != nil
     {:host_update, host_data} = result
     assert host_data.host_bosses == [user2.id, user1.id]
 
     # Remove bosses
-    result = SpadsParser.handle_in("Boss mode disabled by #{user2.name}", %{host_bosses: [user1.id]})
+    result =
+      SpadsParser.handle_in("Boss mode disabled by #{user2.name}", %{host_bosses: [user1.id]})
+
     assert result != nil
     {:host_update, host_data} = result
     assert host_data.host_bosses == []

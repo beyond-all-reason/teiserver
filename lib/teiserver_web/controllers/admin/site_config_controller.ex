@@ -43,14 +43,15 @@ defmodule TeiserverWeb.Admin.SiteConfigController do
     value = Map.get(site_config_params, "value", "false")
     Config.update_site_config(key, value)
 
-    tab = Config.get_site_config_type(key)
+    tab =
+      Config.get_site_config_type(key)
       |> Map.get(:section)
       |> Central.Helpers.StringHelper.remove_spaces()
 
     add_audit_log(conn, "Site config:Update value", %{key: key, value: value})
 
     conn
-      |> put_flash(:info, "Your preferences have been updated.")
-      |> redirect(to: Routes.admin_site_config_path(conn, :index) <> "##{tab}")
+    |> put_flash(:info, "Your preferences have been updated.")
+    |> redirect(to: Routes.admin_site_config_path(conn, :index) <> "##{tab}")
   end
 end

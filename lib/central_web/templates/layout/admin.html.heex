@@ -57,49 +57,56 @@
   </style>
 <% end %>
 
-<nav class="navbar fixed-top navbar-expand-md mb-3" id="top-nav" style="padding-top: 0; padding-bottom: 0;">
-
+<nav
+  class="navbar fixed-top navbar-expand-md mb-3"
+  id="top-nav"
+  style="padding-top: 0; padding-bottom: 0;"
+>
   <div class="flex-row d-flex">
     <div class="navbar-brand hide-sm" href="#">
-      <i class={"fa-fw #{Application.get_env(:central, Central)[:site_icon]}"} style="margin: -4px 20px 0 0px;" class="d-inline align-top"></i>
+      <i
+        class={"fa-fw #{Application.get_env(:central, Central)[:site_icon]}"}
+        style="margin: -4px 20px 0 0px;"
+        class="d-inline align-top"
+      >
+      </i>
       <span id="page-title">
         <%= assigns[:page_title] || Application.get_env(:central, Central)[:site_title] %>
       </span>
     </div>
 
-    <div class="navbar-toggler-icon nav-link" style="margin-left: 20px; padding: 13px 15px; height: 100%;" onclick='$("#wrapper").toggleClass("toggled");'>
+    <div
+      class="navbar-toggler-icon nav-link"
+      style="margin-left: 20px; padding: 13px 15px; height: 100%;"
+      onclick='$("#wrapper").toggleClass("toggled");'
+    >
       <i class="fa-solid fa-fw fa-bars fa-lg"></i>
     </div>
   </div>
 
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsingNavbar" style="background-color: inherit;">
+  <button
+    class="navbar-toggler"
+    type="button"
+    data-toggle="collapse"
+    data-target="#collapsingNavbar"
+    style="background-color: inherit;"
+  >
     <span class="navbar-toggler-icon" style="padding-top: 3px;">
       <i class="fa-solid fa-fw fa-plus fa-lg"></i>
     </span>
   </button>
 
   <div class="navbar-collapse collapse" id="collapsingNavbar">
-    <%# Right side %>
     <ul class="navbar-nav ml-auto">
-      <%#
-        TODO
-          - Site search menu
-          - Error log count for dev
-          - Chat
-          - Tasks
-          - Documentation
-      %>
-
       <%= if @current_user do %>
-        <%= render CentralWeb.Communication.GeneralView, "notification_dropdown.html", assigns %>
-        <%= render CentralWeb.General.SectionsView, "user_recents.html", assigns %>
-        <%= render CentralWeb.General.SectionsView, "user_favourites.html", assigns %>
-        <%= render CentralWeb.General.SectionsView, "user_dropdown.html", assigns %>
+        <%= render(CentralWeb.Communication.GeneralView, "notification_dropdown.html", assigns) %>
+        <%= render(CentralWeb.General.SectionsView, "user_recents.html", assigns) %>
+        <%= render(CentralWeb.General.SectionsView, "user_favourites.html", assigns) %>
+        <%= render(CentralWeb.General.SectionsView, "user_dropdown.html", assigns) %>
       <% else %>
         <li class="nav-item">
           <a href={~p"/login"}>
-            <i class="fa fa-user fa-fw"></i>
-            Sign in
+            <i class="fa fa-user fa-fw"></i> Sign in
           </a>
         </li>
       <% end %>
@@ -111,28 +118,36 @@
 <div id="wrapper" class="toggled">
   <!-- Sidebar -->
   <div id="sidebar-wrapper">
-    <%= render CentralWeb.General.PageView, "side_menu.html", assigns %>
+    <%= render(CentralWeb.General.PageView, "side_menu.html", assigns) %>
   </div>
   <!-- /#sidebar-wrapper -->
 
   <!-- Page Content -->
   <div id="page-content-wrapper" style="margin: 0; padding: 0;">
     <%= if assigns[:breadcrumb_trails] do %>
-      <%= render CentralWeb.ComponentView, "breadcrumb.html", assigns %>
+      <%= render(CentralWeb.ComponentView, "breadcrumb.html", assigns) %>
     <% end %>
 
     <div id="flash-messages">
       <%= if Phoenix.Flash.get(@flash, :danger) do %>
-        <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger"><%= Phoenix.Flash.get(@flash, :danger) %></p>
+        <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger">
+          <%= Phoenix.Flash.get(@flash, :danger) %>
+        </p>
       <% end %>
       <%= if Phoenix.Flash.get(@flash, :warning) do %>
-        <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning"><%= Phoenix.Flash.get(@flash, :warning) %></p>
+        <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning">
+          <%= Phoenix.Flash.get(@flash, :warning) %>
+        </p>
       <% end %>
       <%= if Phoenix.Flash.get(@flash, :info) do %>
-        <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info"><%= Phoenix.Flash.get(@flash, :info) %></p>
+        <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info">
+          <%= Phoenix.Flash.get(@flash, :info) %>
+        </p>
       <% end %>
       <%= if Phoenix.Flash.get(@flash, :success) do %>
-        <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success"><%= Phoenix.Flash.get(@flash, :success) %></p>
+        <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success">
+          <%= Phoenix.Flash.get(@flash, :success) %>
+        </p>
       <% end %>
     </div>
 
@@ -152,10 +167,8 @@
     </footer>
   </div>
   <!-- /#page-content-wrapper -->
-
   <%= if get_user_config_cache(@conn, "module.Quick action") == true do %>
-    <%= render CentralWeb.General.QuickAction.HtmlView, "modal.html", assigns %>
+    <%= render(CentralWeb.General.QuickAction.HtmlView, "modal.html", assigns) %>
   <% end %>
-
 </div>
 <!-- /#wrapper -->

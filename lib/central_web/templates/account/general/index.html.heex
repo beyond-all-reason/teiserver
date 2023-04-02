@@ -1,44 +1,40 @@
 <div class="row mt-3">
   <%= if Central.Config.get_site_config_cache("user.Enable account group pages") do %>
-    <%=
-      central_component "menu_card",
+    <%= central_component("menu_card",
       icon: Central.Account.GroupLib.icon(),
       text: "Groups",
       icon_class: "fa-duotone",
       link: Routes.account_group_path(@conn, :index)
-    %>
+    ) %>
   <% end %>
 
-  <%=
-    central_component "menu_card",
+  <%= central_component("menu_card",
     icon: "fa-duotone fa-cog",
     text: "Preferences",
     icon_class: "fa-duotone",
     link: Routes.user_config_path(@conn, :index)
-  %>
+  ) %>
 
-  <%=
-    central_component "menu_card",
+  <%= central_component("menu_card",
     icon: Central.Account.icon(),
     text: "Account details",
     icon_class: "fa-duotone",
     link: Routes.account_registration_path(@conn, :edit_details)
-  %>
+  ) %>
 
-  <%=
-    central_component "menu_card",
+  <%= central_component("menu_card",
     icon: "fa-duotone fa-lock",
     text: "Password",
     icon_class: "fa-duotone",
     link: Routes.account_registration_path(@conn, :edit_password)
-  %>
+  ) %>
 </div>
 
 <div class="row mt-3">
-  <%= central_component "menu_card",
+  <%= central_component("menu_card",
     icon_class: "fa-solid",
     icon: StylingHelper.icon(:back),
     text: "Back",
     link: Routes.general_page_path(@conn, :index)
-  %>
+  ) %>
 </div>

@@ -1,11 +1,17 @@
 <% bsname = view_colour() %>
 
-<script src={Routes.static_path(@conn, "/js/d3.js")}></script>
-<script src={Routes.static_path(@conn, "/js/c3.min.js")}></script>
+<script src={Routes.static_path(@conn, "/js/d3.js")}>
+</script>
+<script src={Routes.static_path(@conn, "/js/c3.min.js")}>
+</script>
 
-<link href="/css/c3.min.css" rel="stylesheet">
+<link href="/css/c3.min.css" rel="stylesheet" />
 
-<%=  render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "reports"})
+) %>
 <script>
   $(function() {
     var chart = c3.generate({
@@ -28,57 +34,92 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Report.ReportView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "open_skill"
           })
-        %>
+        ) %>
         <br /><br />
 
-        <form action={Routes.ts_reports_report_path(@conn, :show, "open_skill")} method="post" class="form-horizontal">
+        <form
+          action={Routes.ts_reports_report_path(@conn, :show, "open_skill")}
+          method="post"
+          class="form-horizontal"
+        >
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
           <div class="row">
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_rating_type" class="control-label">Game type:</label>
-              <%= select :report, :rating_type, [
-                "Team",
-                "Partied Team",
-                "Duel",
-                "FFA",
-                "Team FFA"
-              ], class: "form-control", selected: @params["rating_type"] %>
+              <%= select(
+                :report,
+                :rating_type,
+                [
+                  "Team",
+                  "Partied Team",
+                  "Duel",
+                  "FFA",
+                  "Team FFA"
+                ],
+                class: "form-control",
+                selected: @params["rating_type"]
+              ) %>
             </div>
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_metric" class="control-label">Metric:</label>
-              <%= select :report, :metric, [
-                "Game Rating",
-                "Leaderboard Rating",
-                "Skill",
-                "Uncertainty",
-              ], class: "form-control", selected: @params["metric"] %>
+              <%= select(
+                :report,
+                :metric,
+                [
+                  "Game Rating",
+                  "Leaderboard Rating",
+                  "Skill",
+                  "Uncertainty"
+                ],
+                class: "form-control",
+                selected: @params["metric"]
+              ) %>
             </div>
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_last_active" class="control-label">Max last-active:</label>
-              <%= select :report, :last_active, [
-                "7 days",
-                "31 days",
-                "180 days",
-                "Forever"
-              ], class: "form-control", selected: @params["last_active"] %>
+              <%= select(
+                :report,
+                :last_active,
+                [
+                  "7 days",
+                  "31 days",
+                  "180 days",
+                  "Forever"
+                ],
+                class: "form-control",
+                selected: @params["last_active"]
+              ) %>
             </div>
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_uncertainty" class="control-label">Maximum uncertainty:</label>
-              <input type="text" name="report[uncertainty]" id="report_uncertainty" value={@params["uncertainty"]} class="form-control" />
+              <input
+                type="text"
+                name="report[uncertainty]"
+                id="report_uncertainty"
+                value={@params["uncertainty"]}
+                class="form-control"
+              />
             </div>
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               &nbsp;
-              <input type="submit" value="Update report" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+              <input
+                type="submit"
+                value="Update report"
+                name="form.submitted"
+                class={"btn btn-#{bsname} btn-block"}
+              />
             </div>
           </div>
         </form>
-        <div id="chart" class='with-transitions mt-3' style="height: 400px;">
-        </div>
+        <div id="chart" class="with-transitions mt-3" style="height: 400px;"></div>
       </div>
     </div>
   </div>

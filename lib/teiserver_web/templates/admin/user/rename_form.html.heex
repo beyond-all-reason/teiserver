@@ -1,32 +1,49 @@
 <% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
+<%= render(
+  TeiserverWeb.Admin.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "users"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Admin.UserView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "rename"
           })
-        %>
+        ) %>
 
         <hr />
 
         <div class="row mt-4">
           <div class="col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
-
             <h4>Chosen rename</h4>
-            <form action={Routes.ts_admin_user_path(@conn, :rename_post, @user)} method='post' class=''>
-              <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
+            <form
+              action={Routes.ts_admin_user_path(@conn, :rename_post, @user)}
+              method="post"
+              class=""
+            >
+              <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
               <input type="hidden" name="_method" value="PUT" />
 
-              <div class='row mt-2'>
-                <label for='new_name' class='col-sm-2 control-label'>New user name:</label>
-                <div class='col-sm-10'>
-                  <input type='text' name='new_name' id='new_name' value='' class='form-control' autofocus="autofocus" />
+              <div class="row mt-2">
+                <label for="new_name" class="col-sm-2 control-label">New user name:</label>
+                <div class="col-sm-10">
+                  <input
+                    type="text"
+                    name="new_name"
+                    id="new_name"
+                    value=""
+                    class="form-control"
+                    autofocus="autofocus"
+                  />
                 </div>
               </div>
 
@@ -37,7 +54,7 @@
                   </a>
                 </div>
                 <div class="col-md-6">
-                  <button type='submit' class={"btn btn-#{bsname} btn-block"}>
+                  <button type="submit" class={"btn btn-#{bsname} btn-block"}>
                     Perform rename
                   </button>
                 </div>
@@ -49,17 +66,20 @@
             <br />
 
             <h4>Random rename</h4>
-            <form action={Routes.ts_admin_user_path(@conn, :rename_post, @user)} method='post' class=''>
+            <form
+              action={Routes.ts_admin_user_path(@conn, :rename_post, @user)}
+              method="post"
+              class=""
+            >
               <% random_rename = "renamed#{:rand.uniform(899_999_999) + 100_000_000}" %>
-              <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
+              <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
               <input type="hidden" name="_method" value="PUT" />
               <input type="hidden" name="new_name" value={random_rename} />
 
-                <button type='submit' class={"btn btn-#{bsname}2 btn-block"}>
-                  Rename to <%= random_rename %>
-                </button>
+              <button type="submit" class={"btn btn-#{bsname}2 btn-block"}>
+                Rename to <%= random_rename %>
+              </button>
             </form>
-
           </div>
         </div>
       </div>

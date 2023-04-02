@@ -8,7 +8,6 @@ defmodule Teiserver.Account.ClientServerTest do
       userid: 1,
       name: "ClientServerTest User",
       country: "??",
-
       in_game: false,
       away: false,
       rank: 1,
@@ -50,7 +49,6 @@ defmodule Teiserver.Account.ClientServerTest do
     # Partial update with no client server
     r = ClientLib.merge_update_client(-1, %{team_number: 1})
     assert r == nil
-
 
     # Update client
     r = ClientLib.replace_update_client(Map.put(client, :side, 1), :client_updated_battlestatus)

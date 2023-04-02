@@ -9,7 +9,6 @@ defmodule CentralWeb.Admin.UserController do
   alias Central.Config
 
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  import Central.Helpers.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,
     policy: Central.Account.User,

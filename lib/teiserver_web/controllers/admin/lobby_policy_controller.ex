@@ -21,12 +21,13 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
-    lobby_policies = Game.list_lobby_policies(
-      search: [
-        basic_search: Map.get(params, "s", "") |> String.trim,
-      ],
-      order_by: "Name (A-Z)"
-    )
+    lobby_policies =
+      Game.list_lobby_policies(
+        search: [
+          basic_search: Map.get(params, "s", "") |> String.trim()
+        ],
+        order_by: "Name (A-Z)"
+      )
 
     conn
     |> assign(:lobby_policies, lobby_policies)
@@ -35,12 +36,13 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
-    lobby_policy = Game.get_lobby_policy!(id, [
-      joins: [],
-    ])
+    lobby_policy =
+      Game.get_lobby_policy!(id,
+        joins: []
+      )
 
     lobby_policy
-    |> LobbyPolicyLib.make_favourite
+    |> LobbyPolicyLib.make_favourite()
     |> insert_recently(conn)
 
     conn
@@ -51,10 +53,11 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
 
   @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def new(conn, _params) do
-    changeset = Game.change_lobby_policy(%Game.LobbyPolicy{
-      icon: "fa-solid fa-" <> StylingHelper.random_icon(),
-      colour: StylingHelper.random_colour()
-    })
+    changeset =
+      Game.change_lobby_policy(%Game.LobbyPolicy{
+        icon: "fa-solid fa-" <> StylingHelper.random_icon(),
+        colour: StylingHelper.random_colour()
+      })
 
     conn
     |> assign(:changeset, changeset)
@@ -64,14 +67,17 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
 
   @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def create(conn, %{"lobby_policy" => lobby_policy_params}) do
-    lobby_policy_params = Map.merge(lobby_policy_params, %{
-      "map_list" => (lobby_policy_params["map_list"] || "")
-        |> convert_textarea_to_array
-        |> Enum.sort,
-      "agent_name_list" => (lobby_policy_params["agent_name_list"] || "")
-        |> convert_textarea_to_array
-        |> Enum.sort,
-    })
+    lobby_policy_params =
+      Map.merge(lobby_policy_params, %{
+        "map_list" =>
+          (lobby_policy_params["map_list"] || "")
+          |> convert_textarea_to_array
+          |> Enum.sort(),
+        "agent_name_list" =>
+          (lobby_policy_params["agent_name_list"] || "")
+          |> convert_textarea_to_array
+          |> Enum.sort()
+      })
 
     case Game.create_lobby_policy(lobby_policy_params) do
       {:ok, lobby_policy} ->
@@ -103,14 +109,17 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
 
   @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "lobby_policy" => lobby_policy_params}) do
-    lobby_policy_params = Map.merge(lobby_policy_params, %{
-      "map_list" => (lobby_policy_params["map_list"] || "")
-        |> convert_textarea_to_array
-        |> Enum.sort,
-      "agent_name_list" => (lobby_policy_params["agent_name_list"] || "")
-        |> convert_textarea_to_array
-        |> Enum.sort,
-    })
+    lobby_policy_params =
+      Map.merge(lobby_policy_params, %{
+        "map_list" =>
+          (lobby_policy_params["map_list"] || "")
+          |> convert_textarea_to_array
+          |> Enum.sort(),
+        "agent_name_list" =>
+          (lobby_policy_params["agent_name_list"] || "")
+          |> convert_textarea_to_array
+          |> Enum.sort()
+      })
 
     lobby_policy = Game.get_lobby_policy!(id)
 
@@ -121,6 +130,7 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
         conn
         |> put_flash(:info, "Lobby policy updated successfully.")
         |> redirect(to: Routes.admin_lobby_policy_path(conn, :index))
+
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         |> assign(:lobby_policy, lobby_policy)
@@ -134,7 +144,7 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
     lobby_policy = Game.get_lobby_policy!(id)
 
     lobby_policy
-    |> LobbyPolicyLib.make_favourite
+    |> LobbyPolicyLib.make_favourite()
     |> remove_recently(conn)
 
     {:ok, _lobby_policy} = Game.delete_lobby_policy(lobby_policy)

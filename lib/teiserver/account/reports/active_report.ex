@@ -20,42 +20,48 @@ defmodule Teiserver.Account.ActiveReport do
         params["end_date"]
       )
 
-    player_counts = Telemetry.list_server_day_logs(
-      search: [
-        start_date: start_date,
-        end_date: end_date
-      ],
-      order: "Newest first",
-      limit: :infinity
-    )
-      |> Enum.reduce(%{}, fn (log, players_acc) ->
+    player_counts =
+      Telemetry.list_server_day_logs(
+        search: [
+          start_date: start_date,
+          end_date: end_date
+        ],
+        order: "Newest first",
+        limit: :infinity
+      )
+      |> Enum.reduce(%{}, fn log, players_acc ->
         log.data["minutes_per_user"]["player"]
-        |> Enum.reduce(players_acc, fn ({player_id, minutes}, acc) ->
+        |> Enum.reduce(players_acc, fn {player_id, minutes}, acc ->
           existing = Map.get(acc, player_id, 0)
           Map.put(acc, player_id, existing + minutes)
         end)
       end)
-      |> Enum.group_by(fn {_, v} ->
-        get_grouping(v)
-      end, fn {k, _} ->
-        k
-      end)
+      |> Enum.group_by(
+        fn {_, v} ->
+          get_grouping(v)
+        end,
+        fn {k, _} ->
+          k
+        end
+      )
       |> Enum.map(fn {group, players} ->
         {group, Enum.count(players)}
       end)
 
-    cumulative_player_counts = player_counts
-      |> Map.new
-      |> Map.keys
+    cumulative_player_counts =
+      player_counts
+      |> Map.new()
+      |> Map.keys()
       |> Enum.map(fn key ->
-        v = player_counts
-        |> Enum.filter(fn {k, _} -> k >= key end)
-        |> Enum.map(fn {_, v} -> v end)
-        |> Enum.sum
+        v =
+          player_counts
+          |> Enum.filter(fn {k, _} -> k >= key end)
+          |> Enum.map(fn {_, v} -> v end)
+          |> Enum.sum()
 
         {key, v}
       end)
-      |> Map.new
+      |> Map.new()
 
     assigns = %{
       params: params,
@@ -63,20 +69,23 @@ defmodule Teiserver.Account.ActiveReport do
     }
 
     {%{
-      player_counts: player_counts,
-      cumulative_player_counts: cumulative_player_counts,
-      start_date: start_date,
-      end_date: end_date
-    }, assigns}
+       player_counts: player_counts,
+       cumulative_player_counts: cumulative_player_counts,
+       start_date: start_date,
+       end_date: end_date
+     }, assigns}
   end
 
   defp apply_defaults(params) do
-    Map.merge(%{
-      "date_preset" => "This month",
-      "start_date" => "",
-      "end_date" => "",
-      "mode" => ""
-    }, Map.get(params, "report", %{}))
+    Map.merge(
+      %{
+        "date_preset" => "This month",
+        "start_date" => "",
+        "end_date" => "",
+        "mode" => ""
+      },
+      Map.get(params, "report", %{})
+    )
   end
 
   defp get_grouping(v) do

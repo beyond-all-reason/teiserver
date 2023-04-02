@@ -27,6 +27,7 @@ defmodule Teiserver.Coordinator.HostUpdateTest do
         max_players: 12
       }
     }
+
     data = %{cmd: "c.lobby.create", lobby: battle_data}
     _tachyon_send(hsocket, data)
     [reply] = _tachyon_recv(hsocket)
@@ -38,10 +39,11 @@ defmodule Teiserver.Coordinator.HostUpdateTest do
     Lobby.force_add_user_to_lobby(player.id, lobby_id)
     :timer.sleep(100)
     player_client = Client.get_client_by_id(player.id)
-    Client.update(%{player_client |
-      player: true,
-      ready: true
-    }, :client_updated_battlestatus)
+
+    Client.update(
+      %{player_client | player: true, ready: true},
+      :client_updated_battlestatus
+    )
 
     # Add user message
     _tachyon_recv(hsocket)
@@ -49,10 +51,20 @@ defmodule Teiserver.Coordinator.HostUpdateTest do
     # Battlestatus message
     _tachyon_recv(hsocket)
 
-    {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener}
+    {:ok,
+     hsocket: hsocket,
+     psocket: psocket,
+     host: host,
+     player: player,
+     lobby_id: lobby_id,
+     listener: listener}
   end
 
-  test "Update host data teamSize/teamCount", %{hsocket: hsocket, psocket: psocket, lobby_id: lobby_id} do
+  test "Update host data teamSize/teamCount", %{
+    hsocket: hsocket,
+    psocket: psocket,
+    lobby_id: lobby_id
+  } do
     # Host can change teamSize
     data = %{cmd: "c.lobby.message", message: "Global setting changed by marseel (teamSize=7)"}
     _tachyon_send(hsocket, data)

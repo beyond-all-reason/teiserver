@@ -13,12 +13,13 @@ defmodule Teiserver.Account.SmurfKey do
   """
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
-    params = params
+    params =
+      params
       |> trim_strings(~w(value)a)
 
     struct
-      |> cast(params, ~w(value type_id user_id last_updated)a)
-      |> validate_required(~w(value type_id user_id last_updated)a)
+    |> cast(params, ~w(value type_id user_id last_updated)a)
+    |> validate_required(~w(value type_id user_id last_updated)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

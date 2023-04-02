@@ -9,7 +9,20 @@ defmodule Teiserver.Account.RanksReport do
   @spec permissions() :: String.t()
   def permissions(), do: "teiserver.admin"
 
-  @keys ["0 days", "1 day", "2 days", "3 days", "1 week", "2 weeks", "3 weeks", "4 weeks", "3 months", "6 months", "1 year", "Older"]
+  @keys [
+    "0 days",
+    "1 day",
+    "2 days",
+    "3 days",
+    "1 week",
+    "2 weeks",
+    "3 weeks",
+    "4 weeks",
+    "3 months",
+    "6 months",
+    "1 year",
+    "Older"
+  ]
 
   @spec run(Plug.Conn.t(), map()) :: {list(), map()}
   def run(_conn, params) do
@@ -26,18 +39,19 @@ defmodule Teiserver.Account.RanksReport do
     start_date_str = start_date |> TimexHelper.date_to_str(format: :ymd_hms)
     end_date_str = end_date |> TimexHelper.date_to_str(format: :ymd_hms)
 
-    type_where = case params["game_type"] do
-      "Duel" -> "AND m.game_type = 'Duel'"
-      "Team" -> "AND m.game_type = 'Team'"
-      "FFA" -> "AND m.game_type = 'FFA'"
-      "Raptors" -> "AND m.game_type = 'Raptors'"
-      "Scavengers" -> "AND m.game_type = 'Scavengers'"
-      "Bots" -> "AND m.game_type = 'Bots'"
-      "PvP" -> "AND m.game_type IN ('Duel', 'Team', 'FFA')"
-      "PvE" -> "AND m.game_type IN ('Raptors', 'Scavengers')"
-      "Coop" -> "AND m.game_type IN ('Raptors', 'Scavengers', 'Bots')"
-      _any -> ""
-    end
+    type_where =
+      case params["game_type"] do
+        "Duel" -> "AND m.game_type = 'Duel'"
+        "Team" -> "AND m.game_type = 'Team'"
+        "FFA" -> "AND m.game_type = 'FFA'"
+        "Raptors" -> "AND m.game_type = 'Raptors'"
+        "Scavengers" -> "AND m.game_type = 'Scavengers'"
+        "Bots" -> "AND m.game_type = 'Bots'"
+        "PvP" -> "AND m.game_type IN ('Duel', 'Team', 'FFA')"
+        "PvE" -> "AND m.game_type IN ('Raptors', 'Scavengers')"
+        "Coop" -> "AND m.game_type IN ('Raptors', 'Scavengers', 'Bots')"
+        _any -> ""
+      end
 
     query = """
       SELECT DISTINCT mm.user_id
@@ -48,28 +62,32 @@ defmodule Teiserver.Account.RanksReport do
          #{type_where}
     """
 
-    user_ids = case Ecto.Adapters.SQL.query(Repo, query, []) do
-      {:ok, results} ->
-          results.rows |> List.flatten
+    user_ids =
+      case Ecto.Adapters.SQL.query(Repo, query, []) do
+        {:ok, results} ->
+          results.rows |> List.flatten()
 
         {a, b} ->
           raise "ERR: #{a}, #{b}"
-    end
+      end
 
-    users = Account.list_users(
-      search: [
-        id_in: user_ids
-      ],
-      limit: :infinity
-    )
+    users =
+      Account.list_users(
+        search: [
+          id_in: user_ids
+        ],
+        limit: :infinity
+      )
 
-    registration_age = users
+    registration_age =
+      users
       |> Enum.group_by(&get_registration_age/1)
       |> Map.new(fn {rank, users} -> {rank, Enum.count(users)} end)
 
-    {cumulative_registration_age, _} = @keys
-      |> Enum.reverse
-      |> Enum.map_reduce(0, fn (key, acc) ->
+    {cumulative_registration_age, _} =
+      @keys
+      |> Enum.reverse()
+      |> Enum.map_reduce(0, fn key, acc ->
         value = registration_age[key] || 0
 
         {{key, acc + value}, acc + value}
@@ -78,16 +96,18 @@ defmodule Teiserver.Account.RanksReport do
     cumulative_registration_age = Map.new(cumulative_registration_age)
 
     # Get ranks
-    rank_count = users
+    rank_count =
+      users
       |> Enum.group_by(fn user ->
         user.data["rank"]
       end)
       |> Map.new(fn {rank, users} -> {rank, Enum.count(users)} end)
 
-    {cumulative_rank_count, _} = rank_count
-      |> Map.keys
+    {cumulative_rank_count, _} =
+      rank_count
+      |> Map.keys()
       |> Enum.sort(&>=/2)
-      |> Enum.map_reduce(0, fn (key, acc) ->
+      |> Enum.map_reduce(0, fn key, acc ->
         value = rank_count[key] || 0
 
         {{key, acc + value}, acc + value}
@@ -95,7 +115,8 @@ defmodule Teiserver.Account.RanksReport do
 
     cumulative_rank_count = Map.new(cumulative_rank_count)
 
-    rank_hours = ([0] ++ User.get_rank_levels())
+    rank_hours =
+      ([0] ++ User.get_rank_levels())
       |> Enum.with_index()
       |> Map.new(fn {r, i} ->
         {i, r}
@@ -117,13 +138,16 @@ defmodule Teiserver.Account.RanksReport do
   end
 
   defp apply_defaults(params) do
-    Map.merge(%{
-      "date_preset" => "This month",
-      "start_date" => "",
-      "end_date" => "",
-      "mode" => "",
-      "game_type" => "Any"
-    }, Map.get(params, "report", %{}))
+    Map.merge(
+      %{
+        "date_preset" => "This month",
+        "start_date" => "",
+        "end_date" => "",
+        "mode" => "",
+        "game_type" => "Any"
+      },
+      Map.get(params, "report", %{})
+    )
   end
 
   defp get_registration_age(%{inserted_at: inserted_at}) do

@@ -29,90 +29,83 @@ defmodule TeiserverWeb.API.SessionController do
     user_params = Account.merge_default_params(user_params)
     config_setting = Central.Config.get_site_config_cache("user.Enable user registrations")
 
-    {allowed, reason} = cond do
-      config_setting == "Allowed" ->
-        {true, nil}
+    {allowed, reason} =
+      cond do
+        config_setting == "Allowed" ->
+          {true, nil}
 
-      config_setting == "Disabled" ->
-        {false, "disabled"}
+        config_setting == "Disabled" ->
+          {false, "disabled"}
 
-      config_setting == "Link only" ->
-        code = Teiserver.Account.get_code(user_params["code"] || "!no_code!")
+        config_setting == "Link only" ->
+          code = Teiserver.Account.get_code(user_params["code"] || "!no_code!")
 
-        cond do
-          user_params["code"] == nil ->
-            {false, "no_code"}
+          cond do
+            user_params["code"] == nil ->
+              {false, "no_code"}
 
-          code == nil ->
-            {false, "invalid_code"}
+            code == nil ->
+              {false, "invalid_code"}
 
-          code.purpose != "user_registration" ->
-            {false, "invalid_code"}
+            code.purpose != "user_registration" ->
+              {false, "invalid_code"}
 
-          Timex.compare(Timex.now(), code.expires) == 1 ->
-            {false, "expired_code"}
+            Timex.compare(Timex.now(), code.expires) == 1 ->
+              {false, "expired_code"}
 
-          true ->
-            {true, nil}
-        end
+            true ->
+              {true, nil}
+          end
 
-      true ->
-        {false, "disabled"}
-    end
+        true ->
+          {false, "disabled"}
+      end
 
     existing_user = Account.get_user_by_email(user_params["email"])
 
-    result = cond do
-      allowed == false ->
-        {:error, "Not allowed because #{reason}"}
+    result =
+      cond do
+        allowed == false ->
+          {:error, "Not allowed because #{reason}"}
 
-      existing_user != nil ->
-        {:ok, existing_user}
+        existing_user != nil ->
+          {:ok, existing_user}
 
-      user_params["name"] == nil ->
-        {:error, "Missing parameter 'name'"}
+        user_params["name"] == nil ->
+          {:error, "Missing parameter 'name'"}
 
-      user_params["email"] == nil ->
-        {:error, "Missing parameter 'email'"}
+        user_params["email"] == nil ->
+          {:error, "Missing parameter 'email'"}
 
-      user_params["password"] == nil ->
-        {:error, "Missing parameter 'password'"}
+        user_params["password"] == nil ->
+          {:error, "Missing parameter 'password'"}
 
-      true ->
-        case Account.self_create_user(user_params) do
-          {:ok, user} ->
-            case Teiserver.Account.get_code(user_params["code"]) do
-              nil ->
-                :ok
-              code ->
-                add_audit_log(conn, "Account:User registration", %{
-                  code_value: code.value,
-                  code_creator: code.user_id
-                })
-            end
+        true ->
+          case Account.self_create_user(user_params) do
+            {:ok, user} ->
+              case Teiserver.Account.get_code(user_params["code"]) do
+                nil ->
+                  :ok
 
-            {:ok, user}
+                code ->
+                  add_audit_log(conn, "Account:User registration", %{
+                    code_value: code.value,
+                    code_creator: code.user_id
+                  })
+              end
 
-          {:error, %Ecto.Changeset{} = changeset} ->
-            IO.puts ""
-            IO.inspect changeset
-            IO.puts ""
-            {:error, "Changeset error"}
-        end
-    end
+              {:ok, user}
 
+            {:error, %Ecto.Changeset{} = changeset} ->
+              IO.puts("")
+              IO.inspect(changeset)
+              IO.puts("")
+              {:error, "Changeset error"}
+          end
+      end
 
     conn
     |> register_reply(result)
-  end
-
-  @spec register(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def register(conn, params) do
-    IO.puts ""
-    IO.inspect params
-    IO.puts ""
-
-    raise "X"
   end
 
   defp register_reply(conn, {:ok, user}) do
@@ -129,52 +122,59 @@ defmodule TeiserverWeb.API.SessionController do
 
   @spec request_token(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def request_token(conn, %{"email" => email, "password" => raw_password} = params) do
-    expires = case Map.get(params, "ttl", nil) do
-      nil ->
-        nil
+    expires =
+      case Map.get(params, "ttl", nil) do
+        nil ->
+          nil
 
-      ttl_string ->
-        case Integer.parse(ttl_string) do
-          :error ->
-            nil
-          {value, _} ->
-            Timex.now() |> Timex.shift(seconds: value)
-        end
-    end
+        ttl_string ->
+          case Integer.parse(ttl_string) do
+            :error ->
+              nil
 
-    result = case User.get_user_by_email(email) do
-      nil ->
-        {:error, "Invalid email"}
-      user ->
-        # Are they an md5 conversion user?
-        case user.spring_password do
-          true ->
-            # Yes, we can test and update their password accordingly!
-            md5_password = User.spring_md5_password(raw_password)
+            {value, _} ->
+              Timex.now() |> Timex.shift(seconds: value)
+          end
+      end
 
-            case User.test_password(md5_password, user.password_hash) do
-              true ->
-                # Update the db user then the cached user
-                db_user = Account.get_user!(user.id)
-                Central.Account.update_user(db_user, %{"password" => raw_password})
-                User.recache_user(user.id)
-                User.update_user(%{user | spring_password: false}, persist: true)
+    result =
+      case User.get_user_by_email(email) do
+        nil ->
+          {:error, "Invalid email"}
 
-                make_token(conn, user, expires)
-              false ->
-                {:error, "Invalid credentials."}
-            end
+        user ->
+          # Are they an md5 conversion user?
+          case user.spring_password do
+            true ->
+              # Yes, we can test and update their password accordingly!
+              md5_password = User.spring_md5_password(raw_password)
 
-          false ->
-            db_user = Account.get_user!(user.id)
-            case Central.Account.User.verify_password(raw_password, db_user.password) do
-              true ->
-                make_token(conn, user, expires)
-              false ->
-                {:error, "Invalid credentials"}
-            end
-        end
-    end
+              case User.test_password(md5_password, user.password_hash) do
+                true ->
+                  # Update the db user then the cached user
+                  db_user = Account.get_user!(user.id)
+                  Central.Account.update_user(db_user, %{"password" => raw_password})
+                  User.recache_user(user.id)
+                  User.update_user(%{user | spring_password: false}, persist: true)
+
+                  make_token(conn, user, expires)
+
+                false ->
+                  {:error, "Invalid credentials."}
+              end
+
+            false ->
+              db_user = Account.get_user!(user.id)
+
+              case Central.Account.User.verify_password(raw_password, db_user.password) do
+                true ->
+                  make_token(conn, user, expires)
+
+                false ->
+                  {:error, "Invalid credentials"}
+              end
+          end
+      end
 
     conn
     |> token_reply(result)
@@ -191,23 +191,25 @@ defmodule TeiserverWeb.API.SessionController do
   end
 
   defp make_token(conn, user, expires) do
-    ip = Teiserver.Logging.LoggingPlug.get_ip_from_conn(conn)
+    ip =
+      Teiserver.Logging.LoggingPlug.get_ip_from_conn(conn)
       |> Tuple.to_list()
       |> Enum.join(".")
 
-    user_agent = conn.req_headers
+    user_agent =
+      conn.req_headers
       |> Map.new()
       |> Map.get("user-agent")
 
-    {:ok, token} = Teiserver.Account.create_user_token(%{
-      user_id: user.id,
-      value: Teiserver.Account.create_token_value(),
+    {:ok, token} =
+      Teiserver.Account.create_user_token(%{
+        user_id: user.id,
+        value: Teiserver.Account.create_token_value(),
+        ip: ip,
+        user_agent: user_agent,
+        expires: expires
+      })
 
-      ip: ip,
-      user_agent: user_agent,
-
-      expires: expires
-    })
     {:ok, token.value}
   end
 

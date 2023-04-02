@@ -18,15 +18,17 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{socket.assigns.user_id}")
 
-    admin_mode = cond do
-      not allow?(socket, "teiserver.staff.moderator") -> false
-      params["mode"] == "admin" -> true
-      true -> false
-    end
+    admin_mode =
+      cond do
+        not allow?(socket, "teiserver.staff.moderator") -> false
+        params["mode"] == "admin" -> true
+        true -> false
+      end
 
     mode = if admin_mode, do: "admin", else: "player"
 
-    socket = socket
+    socket =
+      socket
       # |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Parties", url: "/teiserver/account/parties")
       |> assign(:mode, mode)
@@ -58,22 +60,27 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
   @impl true
   def handle_info(%{channel: "teiserver_party:" <> party_id, event: :closed}, socket) do
     :ok = PubSub.unsubscribe(Central.PubSub, "teiserver_party:#{party_id}")
-    new_parties = socket.assigns.parties
+
+    new_parties =
+      socket.assigns.parties
       |> Enum.reject(fn p -> p.id == party_id end)
 
     {:noreply,
-      socket
-        |> assign(:parties, new_parties)
-        |> build_user_lookup
-    }
+     socket
+     |> assign(:parties, new_parties)
+     |> build_user_lookup}
   end
 
   def handle_info(%{channel: "teiserver_party:" <> _, event: :message}, socket) do
     {:noreply, socket}
   end
 
-  def handle_info(data = %{channel: "teiserver_party:" <> party_id, event: :updated_values}, socket) do
-    new_parties = socket.assigns.parties
+  def handle_info(
+        data = %{channel: "teiserver_party:" <> party_id, event: :updated_values},
+        socket
+      ) do
+    new_parties =
+      socket.assigns.parties
       |> Enum.map(fn p ->
         if p.id == party_id do
           Map.merge(p, data.new_values)
@@ -83,37 +90,37 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
       end)
 
     {:noreply,
-      socket
-        |> assign(:parties, new_parties)
-        |> build_user_lookup
-    }
+     socket
+     |> assign(:parties, new_parties)
+     |> build_user_lookup}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
     {:noreply,
-      socket
-        |> assign(:client, Account.get_client_by_id(socket.assigns.user_id))
-    }
+     socket
+     |> assign(:client, Account.get_client_by_id(socket.assigns.user_id))}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
     {:noreply,
-      socket
-        |> assign(:client, nil)
-    }
+     socket
+     |> assign(:client, nil)}
   end
 
-  def handle_info(data = %{channel: "teiserver_client_messages:" <> _, event: :party_invite}, socket) do
+  def handle_info(
+        data = %{channel: "teiserver_client_messages:" <> _, event: :party_invite},
+        socket
+      ) do
     party = Account.get_party(data.party_id)
 
-    new_parties = socket.assigns.parties
+    new_parties =
+      socket.assigns.parties
       |> Enum.reject(fn p -> p.id == party.id end)
 
     {:noreply,
-      socket
-        |> assign(:parties, [party | new_parties])
-        |> build_user_lookup()
-    }
+     socket
+     |> assign(:parties, [party | new_parties])
+     |> build_user_lookup()}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _}, socket) do
@@ -138,57 +145,59 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
     {:noreply, socket |> redirect(to: Routes.ts_game_party_show_path(socket, :show, party.id))}
   end
 
-
   @spec list_parties(map) :: map
   defp list_parties(%{assigns: %{mode: "admin"}} = socket) do
-    parties = Account.list_party_ids()
+    parties =
+      Account.list_party_ids()
       |> Account.list_parties()
 
     parties
-      |> Enum.each(fn party ->
-        :ok = PubSub.subscribe(Central.PubSub, "teiserver_party:#{party.id}")
-      end)
+    |> Enum.each(fn party ->
+      :ok = PubSub.subscribe(Central.PubSub, "teiserver_party:#{party.id}")
+    end)
 
     socket
-      |> assign(:parties, parties)
+    |> assign(:parties, parties)
   end
 
   defp list_parties(socket) do
-    parties = socket.assigns.user_id
-      |> Account.get_user_by_id
+    parties =
+      socket.assigns.user_id
+      |> Account.get_user_by_id()
       |> Map.get(:friends)
       |> Kernel.++([socket.assigns.user_id])
       |> Enum.map(fn user_id -> Account.get_client_by_id(user_id) end)
       |> Enum.reject(&(&1 == nil))
       |> Enum.map(fn c -> c.party_id end)
       |> Enum.reject(&(&1 == nil))
-      |> Enum.uniq
+      |> Enum.uniq()
       |> Account.list_parties()
       |> Enum.reject(&(&1 == nil))
 
     parties
-      |> Enum.each(fn party ->
-        :ok = PubSub.subscribe(Central.PubSub, "teiserver_party:#{party.id}")
-      end)
+    |> Enum.each(fn party ->
+      :ok = PubSub.subscribe(Central.PubSub, "teiserver_party:#{party.id}")
+    end)
 
     socket
-      |> assign(:parties, parties)
+    |> assign(:parties, parties)
   end
 
   @spec build_user_lookup(map) :: map
   def build_user_lookup(socket) do
     existing_user_ids = Map.keys(socket.assigns.user_lookup)
 
-    new_users = socket.assigns.parties
+    new_users =
+      socket.assigns.parties
       |> Enum.map(fn p -> p.members end)
-      |> List.flatten
+      |> List.flatten()
       |> Enum.reject(fn m -> Enum.member?(existing_user_ids, m) end)
-      |> Account.list_users_from_cache
+      |> Account.list_users_from_cache()
       |> Map.new(fn u -> {u.id, u} end)
 
     new_user_lookup = Map.merge(socket.assigns.user_lookup, new_users)
 
     socket
-      |> assign(:user_lookup, new_user_lookup)
+    |> assign(:user_lookup, new_user_lookup)
   end
 end

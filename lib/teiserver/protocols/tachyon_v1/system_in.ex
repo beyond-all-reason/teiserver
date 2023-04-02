@@ -14,14 +14,16 @@ defmodule Teiserver.Protocols.Tachyon.V1.SystemIn do
         user = Account.get_user_by_id(state.userid)
 
         user.friends
-          |> Enum.each(fn f ->
-            send(self(), {:action, {:watch_channel, "teiserver_client_watch:#{f}"}})
-          end)
+        |> Enum.each(fn f ->
+          send(self(), {:action, {:watch_channel, "teiserver_client_watch:#{f}"}})
+        end)
+
         reply(:system, :watch, {:ok, channel}, state)
 
       "friend:" <> f ->
         f_id = int_parse(f)
         user = Account.get_user_by_id(state.userid)
+
         if Enum.member?(user.friends, f_id) do
           send(self(), {:action, {:watch_channel, "teiserver_client_watch:#{f}"}})
           reply(:system, :watch, {:ok, channel}, state)
@@ -39,10 +41,12 @@ defmodule Teiserver.Protocols.Tachyon.V1.SystemIn do
 
       "lobby:" <> lobby_id ->
         lobby_id = int_parse(lobby_id)
+
         case Battle.lobby_exists?(lobby_id) do
           true ->
             send(self(), {:action, {:watch_channel, "teiserver_lobby_updates:#{lobby_id}"}})
             reply(:system, :watch, {:ok, channel}, state)
+
           false ->
             reply(:lobby, :watch, {:failure, "No lobby", lobby_id}, state)
         end
@@ -56,10 +60,12 @@ defmodule Teiserver.Protocols.Tachyon.V1.SystemIn do
     case channel do
       "friends" ->
         user = Account.get_user_by_id(state.userid)
+
         user.friends
-          |> Enum.each(fn f ->
-            send(self(), {:action, {:watch_channel, "teiserver_client_watch:#{f}"}})
-          end)
+        |> Enum.each(fn f ->
+          send(self(), {:action, {:watch_channel, "teiserver_client_watch:#{f}"}})
+        end)
+
         reply(:system, :unwatch, {:ok, channel}, state)
 
       "friend:" <> f ->

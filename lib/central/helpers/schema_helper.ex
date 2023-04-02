@@ -67,21 +67,27 @@ defmodule Central.Helpers.SchemaHelper do
       cond do
         Enum.member?(names, k) and is_map(v) ->
           {k, v}
+
         Enum.member?(names, k) and v == nil ->
           {k, v}
+
         Enum.member?(names, k) and String.trim(v) == "" ->
           {k, v}
+
         Enum.member?(names, k) ->
-          d = case String.length(v) do
-            8 -> Timex.parse!(v, "{0D}/{0M}/{YY}")
-            _ -> Timex.parse!(v, "{0D}/{0M}/{YYYY}")
-          end
+          d =
+            case String.length(v) do
+              8 -> Timex.parse!(v, "{0D}/{0M}/{YY}")
+              _ -> Timex.parse!(v, "{0D}/{0M}/{YYYY}")
+            end
+
           {k, make_date(d)}
+
         true ->
           {k, v}
       end
     end)
-    |> Map.new
+    |> Map.new()
   end
 
   # def parse_currency(params, names) do
@@ -151,15 +157,15 @@ defmodule Central.Helpers.SchemaHelper do
     value1 = params[field1] || ""
     value2 = params[field2] || ""
 
-    mapped_values = cond do
-      value1 == "" or value2 == "" -> %{}
-      value1 > value2 -> %{field1 => value2, field2 => value1}
-      true -> %{}
-    end
+    mapped_values =
+      cond do
+        value1 == "" or value2 == "" -> %{}
+        value1 > value2 -> %{field1 => value2, field2 => value1}
+        true -> %{}
+      end
 
     Map.merge(params, mapped_values)
   end
-
 
   @spec uniq_lists(Map.t(), List.t()) :: Map.t()
   def uniq_lists(params, names) do
@@ -199,9 +205,9 @@ defmodule Central.Helpers.SchemaHelper do
               {
                 k,
                 v
-                  |> String.replace(" ", "")
-                  |> String.replace("\t", "")
-                  |> String.replace("\n", "")
+                |> String.replace(" ", "")
+                |> String.replace("\t", "")
+                |> String.replace("\n", "")
               }
           end
 

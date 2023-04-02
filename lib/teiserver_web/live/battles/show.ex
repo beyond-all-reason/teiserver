@@ -20,22 +20,24 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   def mount(_params, session, socket) do
     socket =
       socket
-        |> AuthPlug.live_call(session)
-        |> TSAuthPlug.live_call(session)
-        |> NotificationPlug.live_call()
+      |> AuthPlug.live_call(session)
+      |> TSAuthPlug.live_call(session)
+      |> NotificationPlug.live_call()
 
     moderator = allow?(socket, "teiserver.staff.moderator")
     admin_dev = allow?(socket, "admin.dev.developer")
 
-    extra_content = if moderator do
-      @extra_menu_content
-    end
+    extra_content =
+      if moderator do
+        @extra_menu_content
+      end
 
     client = Account.get_client_by_id(socket.assigns[:current_user].id)
 
     :timer.send_interval(10_000, :tick)
 
-    socket = socket
+    socket =
+      socket
       |> Teiserver.ServerUserPlug.live_call()
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/teiserver/battle/lobbies")
@@ -65,13 +67,21 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_user_updates:#{current_user.id}")
     lobby = Battle.get_lobby(id)
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{socket.assigns[:current_user].id}")
+
+    :ok =
+      PubSub.subscribe(
+        Central.PubSub,
+        "teiserver_client_messages:#{socket.assigns[:current_user].id}"
+      )
 
     cond do
       lobby == nil ->
         index_redirect(socket)
 
-      (lobby.locked or lobby.password != nil) and not allow?(socket, "teiserver.staff.moderator") ->
+      lobby.tournament ->
+        index_redirect(socket)
+
+      (lobby.locked or lobby.passworded) and not allow?(socket, "teiserver.staff.moderator") ->
         index_redirect(socket)
 
       true ->
@@ -82,20 +92,19 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
         modoptions = Battle.get_modoptions(id)
 
         {:noreply,
-          socket
-            |> assign(:ratings, ratings)
-            |> assign(:bar_user, bar_user)
-            |> assign(:page_title, page_title(socket.assigns.live_action))
-            |> add_breadcrumb(name: lobby.name, url: "/teiserver/battles/lobbies/#{lobby.id}")
-            |> assign(:id, id)
-            |> assign(:lobby, lobby)
-            |> assign(:modoptions, modoptions)
-            |> get_consul_state
-            |> assign(:users, users)
-            |> assign(:clients, clients)
-            |> assign(:stats, stats)
-            |> assign(:parties, parties)
-        }
+         socket
+         |> assign(:ratings, ratings)
+         |> assign(:bar_user, bar_user)
+         |> assign(:page_title, page_title(socket.assigns.live_action))
+         |> add_breadcrumb(name: lobby.name, url: "/teiserver/battles/lobbies/#{lobby.id}")
+         |> assign(:id, id)
+         |> assign(:lobby, lobby)
+         |> assign(:modoptions, modoptions)
+         |> get_consul_state
+         |> assign(:users, users)
+         |> assign(:clients, clients)
+         |> assign(:stats, stats)
+         |> assign(:parties, parties)}
     end
   end
 
@@ -110,23 +119,26 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
     # Creates a map where the party_id refers to an integer
     # but only includes parties with 2 or more members
-    parties = clients
+    parties =
+      clients
       |> Enum.map(fn {_, c} -> c end)
       |> Enum.filter(fn c -> c.player end)
       |> Enum.group_by(fn m -> m.party_id end)
       |> Map.drop([nil])
       |> Map.filter(fn {_id, members} -> Enum.count(members) > 1 end)
       |> Map.keys()
-      |> Enum.zip(Central.Helpers.StylingHelper.bright_hex_colour_list)
-      |> Map.new
+      |> Enum.zip(Central.Helpers.StylingHelper.bright_hex_colour_list())
+      |> Map.new()
 
-    stats = users
+    stats =
+      users
       |> Map.keys()
       |> Map.new(fn id ->
         {id, Account.get_user_stat_data(id)}
       end)
 
-    ratings = users
+    ratings =
+      users
       |> Map.new(fn {userid, _} ->
         {userid, BalanceLib.get_user_rating_value_uncertainty_pair(userid, "Team")}
       end)
@@ -136,61 +148,70 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
   @impl true
   def handle_info(:tick, socket) do
-    socket = if socket.assigns.lobby.in_progress do
-      lobby = socket.assigns.id
-        |> Battle.get_lobby()
-        |> Map.put(:uuid, Battle.get_lobby_match_uuid(socket.assigns.id))
+    socket =
+      if socket.assigns.lobby.in_progress do
+        lobby =
+          socket.assigns.id
+          |> Battle.get_lobby()
+          |> Map.put(:uuid, Battle.get_lobby_match_uuid(socket.assigns.id))
 
-      socket
+        socket
         |> assign(:lobby, lobby)
-    else
-      socket
-    end
+      else
+        socket
+      end
 
     {:noreply, socket}
   end
 
   def handle_info({:battle_lobby_throttle, :closed}, socket) do
     {:noreply,
-      socket
-      |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
+     socket
+     |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
   end
 
   def handle_info({:liveview_lobby_update, :consul_server_updated, _, _}, socket) do
-    socket = socket
+    socket =
+      socket
       |> get_consul_state
 
     {:noreply, socket}
   end
 
-  def handle_info({:battle_lobby_throttle, _lobby_changes, player_changes}, %{assigns: assigns} = socket) do
+  def handle_info(
+        {:battle_lobby_throttle, _lobby_changes, player_changes},
+        %{assigns: assigns} = socket
+      ) do
     battle = Lobby.get_lobby(assigns.id)
     modoptions = Battle.get_modoptions(assigns.id)
 
-    socket = socket
+    socket =
+      socket
       |> assign(:battle, battle)
       |> assign(:modoptions, modoptions)
       |> get_consul_state
 
     # Players
     # TODO: This can likely be optimised somewhat
-    socket = case player_changes do
-      [] ->
-        socket
-      _ ->
-        players = Battle.get_lobby_member_list(assigns.id)
-        {users, clients, ratings, parties, stats} = get_user_and_clients(players)
+    socket =
+      case player_changes do
+        [] ->
+          socket
 
-        new_lobby = Map.put(assigns[:lobby], :players, players)
+        _ ->
+          players = Battle.get_lobby_member_list(assigns.id)
+          {users, clients, ratings, parties, stats} = get_user_and_clients(players)
 
-        socket
+          new_lobby = Map.put(assigns[:lobby], :players, players)
+
+          socket
           |> assign(:lobby, new_lobby)
           |> assign(:users, users)
           |> assign(:clients, clients)
           |> assign(:ratings, ratings)
           |> assign(:parties, parties)
           |> assign(:stats, stats)
-    end
+      end
 
     {:noreply, socket}
   end
@@ -201,16 +222,14 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
     {:noreply,
-      socket
-        |> assign(:client, Account.get_client_by_id(socket.assigns[:current_user].id))
-    }
+     socket
+     |> assign(:client, Account.get_client_by_id(socket.assigns[:current_user].id))}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
     {:noreply,
-      socket
-        |> assign(:client, nil)
-    }
+     socket
+     |> assign(:client, nil)}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _userid_str}, socket) do
@@ -242,15 +261,14 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     {users, clients, ratings, parties, stats} = get_user_and_clients(battle.players)
 
     {:noreply,
-      socket
-        |> assign(:battle, battle)
-        |> get_consul_state
-        |> assign(:users, users)
-        |> assign(:clients, clients)
-        |> assign(:ratings, ratings)
-        |> assign(:parties, parties)
-        |> assign(:stats, stats)
-    }
+     socket
+     |> assign(:battle, battle)
+     |> get_consul_state
+     |> assign(:users, users)
+     |> assign(:clients, clients)
+     |> assign(:ratings, ratings)
+     |> assign(:parties, parties)
+     |> assign(:stats, stats)}
   end
 
   def handle_event("reset-consul", _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
@@ -260,10 +278,15 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       vote: false,
       silent: true
     })
+
     {:noreply, socket}
   end
 
-  def handle_event("forcespec:" <> target_id, _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
+  def handle_event(
+        "forcespec:" <> target_id,
+        _event,
+        %{assigns: %{id: id, bar_user: bar_user}} = socket
+      ) do
     # Lobby.force_change_client(bar_user.id, int_parse(target_id), :player, false)
     Coordinator.cast_consul(id, %{
       command: "forcespec",
@@ -272,15 +295,24 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       vote: false,
       silent: true
     })
+
     {:noreply, socket}
   end
 
-  def handle_event("kick:" <> target_id, _event, %{assigns: %{id: id, bar_user: _bar_user}} = socket) do
+  def handle_event(
+        "kick:" <> target_id,
+        _event,
+        %{assigns: %{id: id, bar_user: _bar_user}} = socket
+      ) do
     Lobby.kick_user_from_battle(int_parse(target_id), id)
     {:noreply, socket}
   end
 
-  def handle_event("ban:" <> target_id, _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
+  def handle_event(
+        "ban:" <> target_id,
+        _event,
+        %{assigns: %{id: id, bar_user: bar_user}} = socket
+      ) do
     Coordinator.cast_consul(id, %{
       command: "lobbyban",
       remaining: int_parse(target_id),
@@ -288,15 +320,17 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       vote: false,
       silent: true
     })
+
     {:noreply, socket}
   end
 
   defp get_consul_state(%{assigns: %{id: id}} = socket) do
     socket
-      |> assign(:consul, Coordinator.call_consul(id, :get_all))
+    |> assign(:consul, Coordinator.call_consul(id, :get_all))
   end
 
   defp page_title(:show), do: "Show Battle"
+
   defp index_redirect(socket) do
     {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
   end

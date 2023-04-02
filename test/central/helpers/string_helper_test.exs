@@ -102,6 +102,15 @@ defmodule Central.General.StringHelpersTest do
     double_string = "astring astring bstring bstring"
     assert StringHelper.multisplit(double_string, 16) == ["astring astring ", "bstring bstring"]
 
-    assert StringHelper.multisplit(double_string, 4) == ["astr", "ing ", "astr", "ing ", "bstr", "ing ", "bstr", "ing"]
+    assert StringHelper.multisplit(double_string, 4) == [
+             "astr",
+             "ing ",
+             "astr",
+             "ing ",
+             "bstr",
+             "ing ",
+             "bstr",
+             "ing"
+           ]
   end
 end

@@ -10,21 +10,22 @@ defmodule Teiserver.Telemetry.UnauthGameEventLib do
   def icon(), do: "fa-regular fa-sliders-up"
 
   # Queries
-  @spec query_unauth_game_events() :: Ecto.Query.t
+  @spec query_unauth_game_events() :: Ecto.Query.t()
   def query_unauth_game_events do
-    from unauth_game_events in UnauthGameEvent
+    from(unauth_game_events in UnauthGameEvent)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -42,9 +43,7 @@ defmodule Teiserver.Telemetry.UnauthGameEventLib do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from unauth_game_events in query,
-      where: (
-            ilike(unauth_game_events.name, ^ref_like)
-        )
+      where: ilike(unauth_game_events.name, ^ref_like)
   end
 
   def _search(query, :game_event_type_id, game_event_type_id) do
@@ -57,8 +56,9 @@ defmodule Teiserver.Telemetry.UnauthGameEventLib do
       where: between(unauth_game_events.timestamp, ^start_date, ^end_date)
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Name (A-Z)") do
     from unauth_game_events in query,
       order_by: [asc: unauth_game_events.name]
@@ -79,8 +79,9 @@ defmodule Teiserver.Telemetry.UnauthGameEventLib do
       order_by: [asc: unauth_game_events.inserted_at]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :game_event_type in preloads, do: _preload_game_event_types(query), else: query
     query

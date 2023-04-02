@@ -111,31 +111,33 @@ defmodule Central.Helpers.StringHelper do
   @spec multisplit(String.t(), integer, [String.t()]) :: [String.t()]
   def multisplit(string, length, existing \\ []) do
     {p1, p2} = String.split_at(string, length)
+
     if String.length(p2) > length do
       multisplit(p2, length, existing ++ [p1])
     else
-      existing ++ [p1, p2]
+      (existing ++ [p1, p2])
       |> Enum.filter(fn s -> s != "" end)
     end
   end
 
   def plurals(words) when is_list(words), do: Enum.map(words, &plurals/1)
+
   def plurals(w) do
     [
       w,
       w <> "s",
       w <> "ed",
       w <> "er",
-      w <> "ers",
+      w <> "ers"
     ]
   end
 
   def breakup_long_words(string, max_length \\ 100) do
     string
-      |> String.split(" ")
-      |> Enum.map_join(" ", fn word ->
-        String.slice(word, 0..max_length)
-      end)
+    |> String.split(" ")
+    |> Enum.map_join(" ", fn word ->
+      String.slice(word, 0..max_length)
+    end)
   end
 
   def convert_textarea_to_array(str) do

@@ -6,12 +6,18 @@ defmodule TeiserverWeb.Moderation.ProposalControllerTest do
   alias Teiserver.Moderation.ModerationTestLib
 
   alias Central.Helpers.GeneralTestLib
+
   setup do
     GeneralTestLib.conn_setup(["teiserver.staff.reviewer", "teiserver.staff.moderator"])
     |> Teiserver.TeiserverTestLib.conn_setup()
   end
 
-  @create_attrs %{reason: "some name", restrictions: %{"Login" => "Login", "Site" => "Site"}, duration: "1 day", score_modifier: "10000"}
+  @create_attrs %{
+    reason: "some name",
+    restrictions: %{"Login" => "Login", "Site" => "Site"},
+    duration: "1 day",
+    score_modifier: "10000"
+  }
   @update_attrs %{reason: "some updated name", restrictions: %{"Warning" => "Warning"}}
   @invalid_attrs %{reason: nil, restrictions: %{}, target_id: 1}
 
@@ -30,7 +36,13 @@ defmodule TeiserverWeb.Moderation.ProposalControllerTest do
 
     test "renders form", %{conn: conn} do
       user = GeneralTestLib.make_user()
-      conn = get(conn, Routes.moderation_proposal_path(conn, :new_with_user) <> "?teiserver_user=%23#{user.id}")
+
+      conn =
+        get(
+          conn,
+          Routes.moderation_proposal_path(conn, :new_with_user) <> "?teiserver_user=%23#{user.id}"
+        )
+
       assert html_response(conn, 200) =~ "Adding proposal for action against"
     end
   end
@@ -38,9 +50,11 @@ defmodule TeiserverWeb.Moderation.ProposalControllerTest do
   describe "create proposal" do
     test "redirects to show when data is valid", %{conn: conn} do
       target = GeneralTestLib.make_user()
-      attrs = Map.merge(@create_attrs, %{
-        target_id: target.id
-      })
+
+      attrs =
+        Map.merge(@create_attrs, %{
+          target_id: target.id
+        })
 
       conn = post(conn, Routes.moderation_proposal_path(conn, :create), proposal: attrs)
       assert redirected_to(conn) == Routes.moderation_proposal_path(conn, :index)
@@ -121,7 +135,12 @@ defmodule TeiserverWeb.Moderation.ProposalControllerTest do
   describe "update proposal" do
     test "redirects when data is valid", %{conn: conn} do
       {proposal, _vote} = ModerationTestLib.proposal_fixture()
-      conn = put(conn, Routes.moderation_proposal_path(conn, :update, proposal), proposal: @update_attrs)
+
+      conn =
+        put(conn, Routes.moderation_proposal_path(conn, :update, proposal),
+          proposal: @update_attrs
+        )
+
       assert redirected_to(conn) == Routes.moderation_proposal_path(conn, :index)
 
       conn = get(conn, Routes.moderation_proposal_path(conn, :show, proposal))
@@ -131,7 +150,12 @@ defmodule TeiserverWeb.Moderation.ProposalControllerTest do
     test "renders errors when data is invalid", %{conn: conn, user: user} do
       # You can only edit a proposal if you are the proposer
       {proposal, _vote} = ModerationTestLib.proposal_fixture(%{proposer: user})
-      conn = put(conn, Routes.moderation_proposal_path(conn, :update, proposal), proposal: @invalid_attrs)
+
+      conn =
+        put(conn, Routes.moderation_proposal_path(conn, :update, proposal),
+          proposal: @invalid_attrs
+        )
+
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
     end
 

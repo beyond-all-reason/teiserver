@@ -1,44 +1,55 @@
 <% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "reports"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <div class="btn btn-primary2 float-end" onclick="$('.help-box, .help-box-large').toggle();">
-          <i class='fa-fw fa-solid fa-circle-info'></i>
-          &nbsp;
+        <div
+          class="btn btn-primary2 float-end"
+          onclick="$('.help-box, .help-box-large').toggle();"
+        >
+          <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
           Show/Hide help
         </div>
 
-        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Report.ReportView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "new_user_funnel"
           })
-        %>
+        ) %>
         <br /><br />
 
         <div class="help-box-large">
           Uses accounts from the last 14 days (after that unverified accounts are purged).
-          <br /><br />
-          
-          Single player (telemetry) uses <code>singleplayer:lone_other_skirmish</code> and <code>singleplayer:scenario_start</code> events.<br />
-          Played online (telemetry) uses <code>multiplayer:connecting</code> and <code>multiplayer:hostgame</code> events.<br />
+          <br /><br /> Single player (telemetry) uses
+          <code>singleplayer:lone_other_skirmish</code>
+          and <code>singleplayer:scenario_start</code>
+          events.<br /> Played online (telemetry) uses <code>multiplayer:connecting</code>
+          and <code>multiplayer:hostgame</code>
+          events.<br />
           Played online (match membership) uses rows of matchmembership from the database which is why there is a discrepancy between this and the telemetry version as matches that end before 5 minutes will be deleted.
         </div>
 
         <div class="row">
           <div class="col-md-12 col-lg-6 col-xl-4">
-            <table class='table'>
+            <table class="table">
               <thead>
                 <tr>
                   <th>Stage</th>
                   <th>Count</th>
                   <th>% of whole</th>
                   <th>% of previous</th>
-              </tr>
+                </tr>
               </thead>
               <tbody>
                 <tr>
@@ -50,20 +61,22 @@
                 <tr>
                   <td>Verified</td>
                   <td><%= @data.verified %></td>
-                  <td><%= percent @data.verified/@data.total_count %>%</td>
-                  <td><%= percent @data.verified/@data.total_count %>%</td>
+                  <td><%= percent(@data.verified / @data.total_count) %>%</td>
+                  <td><%= percent(@data.verified / @data.total_count) %>%</td>
                 </tr>
                 <tr>
                   <td>Played singleplayer (telemetry)</td>
                   <td><%= @data.single_player_telemetry %></td>
-                  <td><%= percent @data.single_player_telemetry/@data.total_count %>%</td>
-                  <td><%= percent @data.single_player_telemetry/@data.verified %>%</td>
+                  <td><%= percent(@data.single_player_telemetry / @data.total_count) %>%</td>
+                  <td><%= percent(@data.single_player_telemetry / @data.verified) %>%</td>
                 </tr>
                 <tr>
                   <td>Played online (telemetry)</td>
                   <td><%= @data.online_player_telemetry %></td>
-                  <td><%= percent @data.online_player_telemetry/@data.total_count %>%</td>
-                  <td><%= percent @data.online_player_telemetry/@data.single_player_telemetry %>%</td>
+                  <td><%= percent(@data.online_player_telemetry / @data.total_count) %>%</td>
+                  <td>
+                    <%= percent(@data.online_player_telemetry / @data.single_player_telemetry) %>%
+                  </td>
                 </tr>
 
                 <tr>
@@ -73,14 +86,12 @@
                 <tr>
                   <td>Played online (match membership)</td>
                   <td><%= @data.online_player_db %></td>
-                  <td><%= percent @data.online_player_db/@data.total_count %>%</td>
-                  
+                  <td><%= percent(@data.online_player_db / @data.total_count) %>%</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-
       </div>
     </div>
   </div>

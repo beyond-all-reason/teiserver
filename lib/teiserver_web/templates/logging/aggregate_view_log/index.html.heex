@@ -1,17 +1,20 @@
 <% {_fg, bg, bsname} = colours(view_colour()) %>
 
-<%= render TeiserverWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "aggregate"})
-%>
+<%= render(
+  TeiserverWeb.Logging.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "aggregate"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Logging.AggregateViewLogView, "section_menu.html",
+        <%= render(TeiserverWeb.Logging.AggregateViewLogView, "section_menu.html",
           conn: @conn,
           permissions: @current_user.permissions,
           active: "index"
-        %>
+        ) %>
         <br /><br />
 
         <h4>
@@ -40,35 +43,47 @@
             </tr>
           </thead>
           <tbody>
-        <%= for log <- @logs do %>
+            <%= for log <- @logs do %>
+              <tr>
+                <td><%= Timex.format!(log.date, "{0D}/{0M}/{YYYY} {WDshort}") %></td>
 
-            <tr>
-              <td><%= Timex.format!(log.date, "{0D}/{0M}/{YYYY} {WDshort}") %></td>
+                <td><%= format_number(log.total_views) %></td>
+                <td><%= format_number(log.total_uniques) %></td>
 
-              <td><%= format_number log.total_views %></td>
-              <td><%= format_number log.total_uniques %></td>
+                <td><%= convert_load_time(log.average_load_time) %></td>
+                <td class="d-lg-none d-xl-table-cell">
+                  <%= convert_load_time(log.percentile_load_time_95) %>
+                </td>
+                <td class="d-lg-none d-xl-table-cell">
+                  <%= convert_load_time(log.percentile_load_time_99) %>
+                </td>
+                <td class="d-lg-none d-xl-table-cell">
+                  <%= convert_load_time(log.max_load_time) %>
+                </td>
 
-              <td><%= convert_load_time log.average_load_time %></td>
-              <td class="d-lg-none d-xl-table-cell"><%= convert_load_time log.percentile_load_time_95 %></td>
-              <td class="d-lg-none d-xl-table-cell"><%= convert_load_time log.percentile_load_time_99 %></td>
-              <td class="d-lg-none d-xl-table-cell"><%= convert_load_time log.max_load_time %></td>
+                <td><%= format_number(log.guest_view_count) %></td>
 
-              <td><%= format_number log.guest_view_count %></td>
+                <td>
+                  <%= link("Show",
+                    to:
+                      Routes.logging_aggregate_view_log_path(
+                        @conn,
+                        :show,
+                        date_to_str(log.date, format: :ymd, tz: @tz)
+                      ),
+                    class: "btn btn-secondary btn-sm"
+                  ) %>
+                </td>
+              </tr>
 
-              <td>
-                <%= link "Show", to: Routes.logging_aggregate_view_log_path(@conn, :show, date_to_str(log.date, format: :ymd, tz: @tz)), class: "btn btn-secondary btn-sm" %>
-              </td>
-            </tr>
-
-          <%= if log.date.day == 1 do %>
-            <tr>
-              <td colspan="9" style={"background-color: #{bg}"}>
-                <div style="height: 5px;">&nbsp;</div>
-              </td>
-            </tr>
-          <% end %>
-
-        <% end %>
+              <%= if log.date.day == 1 do %>
+                <tr>
+                  <td colspan="9" style={"background-color: #{bg}"}>
+                    <div style="height: 5px;">&nbsp;</div>
+                  </td>
+                </tr>
+              <% end %>
+            <% end %>
           </tbody>
         </table>
       </div>

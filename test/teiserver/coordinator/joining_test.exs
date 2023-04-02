@@ -32,6 +32,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
         max_players: 12
       }
     }
+
     data = %{cmd: "c.lobby.create", lobby: battle_data}
     _tachyon_send(socket, data)
     [reply] = _tachyon_recv(socket)
@@ -50,10 +51,14 @@ defmodule Teiserver.Coordinator.JoiningTest do
     _tachyon_send(socket, data)
 
     messages = PubsubListener.get(listener)
+
     assert messages == [
-      {:battle_updated, lobby_id, {Coordinator.get_coordinator_userid(), "New welcome message set to: This is the welcome message", lobby_id}, :sayex},
-      {:battle_updated, lobby_id, {user.id, "$welcome-message This is the welcome message", lobby_id}, :say}
-    ]
+             {:battle_updated, lobby_id,
+              {Coordinator.get_coordinator_userid(),
+               "New welcome message set to: This is the welcome message", lobby_id}, :sayex},
+             {:battle_updated, lobby_id,
+              {user.id, "$welcome-message This is the welcome message", lobby_id}, :say}
+           ]
 
     consul_state = Coordinator.call_consul(lobby_id, :get_all)
     assert consul_state.welcome_message == "This is the welcome message"
@@ -64,10 +69,11 @@ defmodule Teiserver.Coordinator.JoiningTest do
     _tachyon_send(socket2, data)
 
     [reply] = _tachyon_recv(socket2)
+
     assert reply == %{
-      "cmd" => "s.lobby.join",
-      "result" => "waiting_for_host"
-    }
+             "cmd" => "s.lobby.join",
+             "result" => "waiting_for_host"
+           }
 
     # Accept them
     data = %{cmd: "c.lobby_host.respond_to_join_request", userid: user2.id, response: "approve"}
@@ -79,11 +85,13 @@ defmodule Teiserver.Coordinator.JoiningTest do
 
     # Expect welcome message
     [reply] = _tachyon_recv(socket2)
+
     assert reply == %{
-      "cmd" => "s.communication.received_direct_message",
-      "message" => "########################################\nThis is the welcome message\n########################################",
-      "sender_id" => Coordinator.get_coordinator_userid()
-    }
+             "cmd" => "s.communication.received_direct_message",
+             "message" =>
+               "########################################\nThis is the welcome message\n########################################",
+             "sender_id" => Coordinator.get_coordinator_userid()
+           }
 
     # Send the battle status
     data = %{
@@ -98,30 +106,32 @@ defmodule Teiserver.Coordinator.JoiningTest do
         ready: true
       }
     }
+
     _tachyon_send(socket2, data)
 
     # We expect to hear about our new status
     [reply] = _tachyon_recv(socket2)
+
     assert reply == %{
-      "cmd" => "s.lobby.updated_client_battlestatus",
-      "client" => %{
-        "team_number" => 0,
-        "away" => false,
-        "in_game" => false,
-        "lobby_id" => lobby_id,
-        "ready" => false,
-        "team_colour" => "0",
-        "player_number" => 0,
-        "userid" => user2.id,
-        "player" => true,
-        "sync" => ["game", "map"],
-        "clan_tag" => nil,
-        "muted" => false,
-        "party_id" => nil
-      },
-      "lobby_id" => lobby_id,
-      "reason" => "client_updated_battlestatus"
-    }
+             "cmd" => "s.lobby.updated_client_battlestatus",
+             "client" => %{
+               "team_number" => 0,
+               "away" => false,
+               "in_game" => false,
+               "lobby_id" => lobby_id,
+               "ready" => false,
+               "team_colour" => "0",
+               "player_number" => 0,
+               "userid" => user2.id,
+               "player" => true,
+               "sync" => ["game", "map"],
+               "clan_tag" => nil,
+               "muted" => false,
+               "party_id" => nil
+             },
+             "lobby_id" => lobby_id,
+             "reason" => "client_updated_battlestatus"
+           }
 
     # No more messages
     reply = _tachyon_recv(socket2)

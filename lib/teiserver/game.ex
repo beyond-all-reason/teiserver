@@ -177,7 +177,7 @@ defmodule Teiserver.Game do
 
   @spec achievement_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def achievement_type_query(id, args) do
-    AchievementTypeLib.query_achievement_types
+    AchievementTypeLib.query_achievement_types()
     |> AchievementTypeLib.search(%{id: id})
     |> AchievementTypeLib.search(args[:search])
     |> AchievementTypeLib.preload(args[:preload])
@@ -198,7 +198,7 @@ defmodule Teiserver.Game do
   def list_achievement_types(args \\ []) do
     achievement_type_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -219,15 +219,17 @@ defmodule Teiserver.Game do
   @spec get_achievement_type!(Integer.t(), List.t()) :: AchievementType.t()
   def get_achievement_type!(id) when not is_list(id) do
     achievement_type_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_achievement_type!(args) do
     achievement_type_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_achievement_type!(id, args) do
     achievement_type_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -262,7 +264,8 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_achievement_type(Map.t()) :: {:ok, AchievementType.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_achievement_type(Map.t()) ::
+          {:ok, AchievementType.t()} | {:error, Ecto.Changeset.t()}
   def create_achievement_type(attrs \\ %{}) do
     %AchievementType{}
     |> AchievementType.changeset(attrs)
@@ -281,7 +284,8 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_achievement_type(AchievementType.t(), Map.t()) :: {:ok, AchievementType.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_achievement_type(AchievementType.t(), Map.t()) ::
+          {:ok, AchievementType.t()} | {:error, Ecto.Changeset.t()}
   def update_achievement_type(%AchievementType{} = achievement_type, attrs) do
     achievement_type
     |> AchievementType.changeset(attrs)
@@ -300,7 +304,8 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_achievement_type(AchievementType.t()) :: {:ok, AchievementType.t()} | {:error, Ecto.Changeset.t()}
+  @spec delete_achievement_type(AchievementType.t()) ::
+          {:ok, AchievementType.t()} | {:error, Ecto.Changeset.t()}
   def delete_achievement_type(%AchievementType{} = achievement_type) do
     Repo.delete(achievement_type)
   end
@@ -328,7 +333,7 @@ defmodule Teiserver.Game do
 
   @spec user_achievement_query(Integer.t(), Integer.t(), List.t()) :: Ecto.Query.t()
   def user_achievement_query(userid, type_id, args) do
-    UserAchievementLib.query_user_achievements
+    UserAchievementLib.query_user_achievements()
     |> UserAchievementLib.search(%{user_id: userid})
     |> UserAchievementLib.search(%{type_id: type_id})
     |> UserAchievementLib.search(args[:search])
@@ -350,7 +355,7 @@ defmodule Teiserver.Game do
   def list_user_achievements(args \\ []) do
     user_achievement_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -371,7 +376,7 @@ defmodule Teiserver.Game do
   @spec get_user_achievement!(Integer.t(), Integer.t(), List.t()) :: UserAchievement.t()
   def get_user_achievement!(userid, type_id, args \\ []) do
     user_achievement_query(userid, type_id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   @doc """
@@ -392,7 +397,7 @@ defmodule Teiserver.Game do
   @spec get_user_achievement(Integer.t(), Integer.t(), List.t()) :: UserAchievement.t()
   def get_user_achievement(userid, type_id, args \\ []) do
     user_achievement_query(userid, type_id, args)
-    |> Repo.one
+    |> Repo.one()
   end
 
   @doc """
@@ -407,7 +412,8 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_user_achievement(Map.t()) :: {:ok, UserAchievement.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_user_achievement(Map.t()) ::
+          {:ok, UserAchievement.t()} | {:error, Ecto.Changeset.t()}
   def create_user_achievement(attrs \\ %{}) do
     %UserAchievement{}
     |> UserAchievement.changeset(attrs)
@@ -426,7 +432,8 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_user_achievement(UserAchievement.t(), Map.t()) :: {:ok, UserAchievement.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_user_achievement(UserAchievement.t(), Map.t()) ::
+          {:ok, UserAchievement.t()} | {:error, Ecto.Changeset.t()}
   def update_user_achievement(%UserAchievement{} = user_achievement, attrs) do
     user_achievement
     |> UserAchievement.changeset(attrs)
@@ -445,7 +452,8 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_user_achievement(UserAchievement.t()) :: {:ok, UserAchievement.t()} | {:error, Ecto.Changeset.t()}
+  @spec delete_user_achievement(UserAchievement.t()) ::
+          {:ok, UserAchievement.t()} | {:error, Ecto.Changeset.t()}
   def delete_user_achievement(%UserAchievement{} = user_achievement) do
     Repo.delete(user_achievement)
   end
@@ -464,8 +472,6 @@ defmodule Teiserver.Game do
     UserAchievement.changeset(user_achievement, %{})
   end
 
-
-
   alias Teiserver.Game.{RatingType, RatingTypeLib}
 
   @spec rating_type_query(List.t()) :: Ecto.Query.t()
@@ -475,7 +481,7 @@ defmodule Teiserver.Game do
 
   @spec rating_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def rating_type_query(id, args) do
-    RatingTypeLib.query_rating_types
+    RatingTypeLib.query_rating_types()
     |> RatingTypeLib.search(%{id: id})
     |> RatingTypeLib.search(args[:search])
     |> RatingTypeLib.preload(args[:preload])
@@ -496,7 +502,7 @@ defmodule Teiserver.Game do
   def list_rating_types(args \\ []) do
     rating_type_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -517,15 +523,17 @@ defmodule Teiserver.Game do
   @spec get_rating_type!(Integer.t(), List.t()) :: RatingType.t()
   def get_rating_type!(id) when not is_list(id) do
     rating_type_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_rating_type!(args) do
     rating_type_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_rating_type!(id, args) do
     rating_type_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   @spec get_or_add_rating_type(String.t()) :: non_neg_integer()
@@ -535,7 +543,8 @@ defmodule Teiserver.Game do
     Central.cache_get_or_store(:teiserver_game_rating_types, name, fn ->
       case list_rating_types(search: [name: name], select: [:id], order_by: "ID (Lowest first)") do
         [] ->
-          {:ok, rating_type} = %RatingType{}
+          {:ok, rating_type} =
+            %RatingType{}
             |> RatingType.changeset(%{
               name: name,
               colour: "#777777",
@@ -544,6 +553,7 @@ defmodule Teiserver.Game do
             |> Repo.insert()
 
           rating_type.id
+
         [%{id: id} | _] ->
           id
       end
@@ -601,7 +611,8 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_rating_type(RatingType.t(), Map.t()) :: {:ok, RatingType.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_rating_type(RatingType.t(), Map.t()) ::
+          {:ok, RatingType.t()} | {:error, Ecto.Changeset.t()}
   def update_rating_type(%RatingType{} = rating_type, attrs) do
     rating_type
     |> RatingType.changeset(attrs)
@@ -648,7 +659,7 @@ defmodule Teiserver.Game do
 
   @spec rating_log_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def rating_log_query(id, args) do
-    RatingLogLib.query_rating_logs
+    RatingLogLib.query_rating_logs()
     |> RatingLogLib.search(%{id: id})
     |> RatingLogLib.search(args[:search])
     |> RatingLogLib.preload(args[:preload])
@@ -669,7 +680,7 @@ defmodule Teiserver.Game do
   def list_rating_logs(args \\ []) do
     rating_log_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -690,15 +701,17 @@ defmodule Teiserver.Game do
   @spec get_rating_log!(Integer.t(), List.t()) :: RatingLog.t()
   def get_rating_log!(id) when not is_list(id) do
     rating_log_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_rating_log!(args) do
     rating_log_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_rating_log!(id, args) do
     rating_log_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -752,7 +765,8 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_rating_log(RatingLog.t(), Map.t()) :: {:ok, RatingLog.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_rating_log(RatingLog.t(), Map.t()) ::
+          {:ok, RatingLog.t()} | {:error, Ecto.Changeset.t()}
   def update_rating_log(%RatingLog{} = rating_log, attrs) do
     rating_log
     |> RatingLog.changeset(attrs)
@@ -799,7 +813,7 @@ defmodule Teiserver.Game do
 
   @spec lobby_policy_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def lobby_policy_query(id, args) do
-    LobbyPolicyLib.query_lobby_policies
+    LobbyPolicyLib.query_lobby_policies()
     |> LobbyPolicyLib.search(%{id: id})
     |> LobbyPolicyLib.search(args[:search])
     |> LobbyPolicyLib.preload(args[:preload])
@@ -820,7 +834,7 @@ defmodule Teiserver.Game do
   def list_lobby_policies(args \\ []) do
     lobby_policy_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -841,15 +855,17 @@ defmodule Teiserver.Game do
   @spec get_lobby_policy!(Integer.t(), List.t()) :: LobbyPolicy.t()
   def get_lobby_policy!(id) when not is_list(id) do
     lobby_policy_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_lobby_policy!(args) do
     lobby_policy_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_lobby_policy!(id, args) do
     lobby_policy_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -903,7 +919,8 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_lobby_policy(LobbyPolicy.t(), Map.t()) :: {:ok, LobbyPolicy.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_lobby_policy(LobbyPolicy.t(), Map.t()) ::
+          {:ok, LobbyPolicy.t()} | {:error, Ecto.Changeset.t()}
   def update_lobby_policy(%LobbyPolicy{} = lobby_policy, attrs) do
     lobby_policy
     |> LobbyPolicy.changeset(attrs)
@@ -922,7 +939,8 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_lobby_policy(LobbyPolicy.t()) :: {:ok, LobbyPolicy.t()} | {:error, Ecto.Changeset.t()}
+  @spec delete_lobby_policy(LobbyPolicy.t()) ::
+          {:ok, LobbyPolicy.t()} | {:error, Ecto.Changeset.t()}
   def delete_lobby_policy(%LobbyPolicy{} = lobby_policy) do
     Repo.delete(lobby_policy)
   end
@@ -958,4 +976,10 @@ defmodule Teiserver.Game do
 
   @spec cast_lobby_organiser(T.lobby_policy_id(), any) :: any | nil
   defdelegate cast_lobby_organiser(lobby_policy_id, msg), to: LobbyPolicyLib
+
+  @spec list_cached_lobby_policies() :: list()
+  defdelegate list_cached_lobby_policies(), to: LobbyPolicyLib
+
+  @spec get_cached_lobby_policy(non_neg_integer()) :: LobbyPolicy.t()
+  defdelegate get_cached_lobby_policy(id), to: LobbyPolicyLib
 end

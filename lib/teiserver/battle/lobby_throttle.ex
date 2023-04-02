@@ -11,11 +11,13 @@ defmodule Teiserver.Battle.LobbyThrottle do
 
   # Lobby closed
   def handle_info({:lobby_update, :closed, _id, _reason}, state) do
-    :ok = PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
-      {:battle_lobby_throttle, :closed}
-    )
+    :ok =
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
+        {:battle_lobby_throttle, :closed}
+      )
+
     {:noreply, state}
   end
 
@@ -50,7 +52,7 @@ defmodule Teiserver.Battle.LobbyThrottle do
 
   def handle_info({:lobby_update, :update_values, _lobby_id, changes}, state) do
     keys = Map.keys(changes)
-    {:noreply, %{state | lobby_changes: (keys ++ state.lobby_changes) |> Enum.uniq}}
+    {:noreply, %{state | lobby_changes: (keys ++ state.lobby_changes) |> Enum.uniq()}}
   end
 
   def handle_info({:lobby_update, :add_start_area, _lobby_id, _new_opts}, state) do
@@ -79,7 +81,10 @@ defmodule Teiserver.Battle.LobbyThrottle do
   end
 
   # Client
-  def handle_info({:lobby_update, :updated_client_battlestatus, _lobby_id, {userid, _reason}}, state) do
+  def handle_info(
+        {:lobby_update, :updated_client_battlestatus, _lobby_id, {userid, _reason}},
+        state
+      ) do
     {:noreply, %{state | player_changes: [userid | state.player_changes]}}
   end
 
@@ -93,24 +98,29 @@ defmodule Teiserver.Battle.LobbyThrottle do
   end
 
   def handle_info(:tick, %{lobby_changes: [], player_changes: []} = state), do: {:noreply, state}
+
   def handle_info(:tick, state) do
     {:noreply, broadcast(state)}
   end
 
   def terminate(_reason, state) do
-    :ok = PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
-      {:battle_lobby_throttle, :closed}
-    )
+    :ok =
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
+        {:battle_lobby_throttle, :closed}
+      )
   end
 
   defp broadcast(state) do
-    :ok = PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
-      {:battle_lobby_throttle, state.lobby_changes |> Enum.uniq, state.player_changes |> Enum.uniq}
-    )
+    :ok =
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
+        {:battle_lobby_throttle, state.lobby_changes |> Enum.uniq(),
+         state.player_changes |> Enum.uniq()}
+      )
+
     %{state | lobby_changes: [], player_changes: []}
   end
 
@@ -129,17 +139,18 @@ defmodule Teiserver.Battle.LobbyThrottle do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{battle_lobby_id}")
 
     Horde.Registry.register(
-      Teiserver.ServerRegistry,
+      Teiserver.ThrottleRegistry,
       "LobbyThrottle:#{battle_lobby_id}",
       battle_lobby_id
     )
 
-    {:ok, %{
-      battle: nil,
-      battle_lobby_id: battle_lobby_id,
-      lobby_changes: [],
-      player_changes: [],
-      last_update: System.system_time(:second)
-    }}
+    {:ok,
+     %{
+       battle: nil,
+       battle_lobby_id: battle_lobby_id,
+       lobby_changes: [],
+       player_changes: [],
+       last_update: System.system_time(:second)
+     }}
   end
 end

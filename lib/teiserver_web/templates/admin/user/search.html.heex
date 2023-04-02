@@ -12,175 +12,225 @@
   });
 </script>
 
-<%= central_component "icon_dropdown_js", [] %>
+<%= central_component("icon_dropdown_js", []) %>
 
-<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
-<script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+<% search_col_class = "col-md-4 col-lg-3 col-xl-2 col-xxl-1 my-2" %>
+
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")} />
+<script src={Routes.static_path(@conn, "/js/select2.js")}>
+</script>
 
 <div class="search-row pt-3">
   <div class={"btn btn-outline-#{bsname}"} onclick="show_search();" id="search-box-shower">
-    <i class="fa-regular fa-fw fa-search"></i>
-    Show search form
+    <i class="fa-regular fa-fw fa-search"></i> Show search form
   </div>
 
-  <form action={~p"/teiserver/admin/users/search"} method="post" class="form-horizontal" id="search-box" style="display: none;">
+  <form
+    action={~p"/teiserver/admin/users/search"}
+    method="post"
+    class="form-horizontal"
+    id="search-box"
+    style="display: none;"
+  >
     <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
     <div class="row">
-      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <div class={search_col_class}>
         <label for="search_name" class="control-label">Name/Email: </label>
-        <input type="text" name="search[name]" id="search_name" value={@params["name"]} placeholder="" class="form-control" />
+        <input
+          type="text"
+          name="search[name]"
+          id="search_name"
+          value={@params["name"]}
+          placeholder=""
+          class="form-control"
+        />
       </div>
 
-      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <div class={search_col_class}>
         <label for="search_limit" class="control-label">Limit: </label>
-        <input type="text" name="search[limit]" id="search_limit" value={@params["limit"]} placeholder="" class="form-control" />
+        <input
+          type="text"
+          name="search[limit]"
+          id="search_limit"
+          value={@params["limit"]}
+          placeholder=""
+          class="form-control"
+        />
       </div>
 
-      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <div class={search_col_class}>
         <label for="search_order" class="control-label">Order by: </label>
-        <%= central_component "icon_dropdown", %{
+        <%= central_component("icon_dropdown", %{
           name: "search[order]",
           id: "search_order",
-          selected: @params["order"] || "Newest first",
+          selected: @params["order"] || "Name (A-Z)",
           enumerable: [
             %{id: "Name (A-Z)", icon: "fa-solid fa-sort-numeric-down", colour: fg},
             %{id: "Name (Z-A)", icon: "fa-solid fa-sort-numeric-up", colour: fg},
             %{id: "Newest first", icon: "fa-solid fa-sort-numeric-down", colour: fg},
-            %{id: "Oldest first", icon: "fa-solid fa-sort-numeric-up", colour: fg},
+            %{id: "Oldest first", icon: "fa-solid fa-sort-numeric-up", colour: fg}
           ]
-        } %>
+        }) %>
       </div>
 
-      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <div class={search_col_class}>
         <label for="search_verified" class="control-label">Verified: </label>
-        <%= central_component "icon_dropdown", %{
+        <%= central_component("icon_dropdown", %{
           name: "search[verified]",
           id: "search_verified",
           selected: @params["verified"],
           enumerable: [
             %{id: "Any", icon: "fa-solid fa-square", colour: fg},
             %{id: "Verified", icon: "fa-solid fa-check", colour: fg},
-            %{id: "Unverified", icon: "fa-solid fa-times", colour: fg},
+            %{id: "Unverified", icon: "fa-solid fa-times", colour: fg}
           ]
-        } %>
+        }) %>
       </div>
 
-      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <div class={search_col_class}>
         <label for="search_bot" class="control-label">Bot: </label>
-        <%= central_component "icon_dropdown", %{
+        <%= central_component("icon_dropdown", %{
           name: "search[bot]",
           id: "search_bot",
           selected: @params["bot"],
           enumerable: [
             %{id: "Any", icon: "fa-solid fa-square", colour: fg},
             %{id: "Person", icon: "fa-solid fa-user", colour: fg},
-            %{id: "Robot", icon: "fa-solid fa-robot", colour: fg},
+            %{id: "Robot", icon: "fa-solid fa-robot", colour: fg}
           ]
-        } %>
+        }) %>
       </div>
 
-      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <div class={search_col_class}>
         <label for="search_moderator" class="control-label">Moderator: </label>
-        <%= central_component "icon_dropdown", %{
+        <%= central_component("icon_dropdown", %{
           name: "search[moderator]",
           id: "search_moderator",
           selected: @params["moderator"],
           enumerable: [
             %{id: "Any", icon: "fa-solid fa-square", colour: fg},
             %{id: "User", icon: "fa-solid fa-user", colour: fg},
-            %{id: "Moderator", icon: "fa-solid fa-gavel", colour: fg},
+            %{id: "Moderator", icon: "fa-solid fa-gavel", colour: fg}
           ]
-        } %>
+        }) %>
       </div>
 
-      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <div class={search_col_class}>
         <label for="search_tester" class="control-label">Tester: </label>
-        <%= central_component "icon_dropdown", %{
+        <%= central_component("icon_dropdown", %{
           name: "search[tester]",
           id: "search_tester",
           selected: @params["tester"],
           enumerable: [
             %{id: "Any", icon: "fa-solid fa-square", colour: fg},
             %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
-            %{id: "Tester", icon: "fa-solid fa-vial", colour: fg},
+            %{id: "Tester", icon: "fa-solid fa-vial", colour: fg}
           ]
-        } %>
+        }) %>
       </div>
 
-      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <div class={search_col_class}>
         <label for="search_streamer" class="control-label">Streamer: </label>
-        <%= central_component "icon_dropdown", %{
+        <%= central_component("icon_dropdown", %{
           name: "search[streamer]",
           id: "search_streamer",
           selected: @params["streamer"],
           enumerable: [
             %{id: "Any", icon: "fa-solid fa-square", colour: fg},
             %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
-            %{id: "Streamer", icon: "fa-brands fa-twitch", colour: fg},
+            %{id: "Streamer", icon: "fa-brands fa-twitch", colour: fg}
           ]
-        } %>
+        }) %>
       </div>
 
-      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <div class={search_col_class}>
         <label for="search_donor" class="control-label">Donor: </label>
-        <%= central_component "icon_dropdown", %{
+        <%= central_component("icon_dropdown", %{
           name: "search[donor]",
           id: "search_donor",
           selected: @params["donor"],
           enumerable: [
             %{id: "Any", icon: "fa-solid fa-square", colour: fg},
             %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
-            %{id: "Donor", icon: "fa-solid fa-euro-sign", colour: fg},
+            %{id: "Donor", icon: "fa-solid fa-euro-sign", colour: fg}
           ]
-        } %>
+        }) %>
       </div>
 
-      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <div class={search_col_class}>
         <label for="search_contributor" class="control-label">Contributor: </label>
-        <%= central_component "icon_dropdown", %{
+        <%= central_component("icon_dropdown", %{
           name: "search[contributor]",
           id: "search_contributor",
           selected: @params["contributor"],
           enumerable: [
             %{id: "Any", icon: "fa-solid fa-square", colour: fg},
             %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
-            %{id: "Contributor", icon: "fa-solid fa-handshake", colour: fg},
+            %{id: "Contributor", icon: "fa-solid fa-handshake", colour: fg}
           ]
-        } %>
+        }) %>
       </div>
 
-      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <div class={search_col_class}>
+        <label for="search_caster" class="control-label">Caster: </label>
+        <%= central_component("icon_dropdown", %{
+          name: "search[caster]",
+          id: "search_caster",
+          selected: @params["caster"],
+          enumerable: [
+            %{id: "Any", icon: "fa-solid fa-square", colour: fg},
+            %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
+            %{id: "Caster", icon: "fa-solid fa-microphone", colour: fg}
+          ]
+        }) %>
+      </div>
+
+      <div class={search_col_class}>
         <label for="search_vip" class="control-label">VIP: </label>
-        <%= central_component "icon_dropdown", %{
+        <%= central_component("icon_dropdown", %{
           name: "search[vip]",
           id: "search_vip",
           selected: @params["vip"],
           enumerable: [
             %{id: "Any", icon: "fa-solid fa-square", colour: fg},
             %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
-            %{id: "VIP", icon: "fa-solid fa-sparkles", colour: fg},
+            %{id: "VIP", icon: "fa-solid fa-sparkles", colour: fg}
           ]
-        } %>
+        }) %>
       </div>
 
-      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <div class={search_col_class}>
+        <label for="search_tournament-player" class="control-label">Tournament player: </label>
+        <%= central_component("icon_dropdown", %{
+          name: "search[tournament-player]",
+          id: "search_tournament-player",
+          selected: @params["tournament-player"],
+          enumerable: [
+            %{id: "Any", icon: "fa-solid fa-square", colour: fg},
+            %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
+            %{id: "Player", icon: "fa-solid fa-trophy", colour: fg}
+          ]
+        }) %>
+      </div>
+
+      <div class={search_col_class}>
         <label for="search_developer" class="control-label">Developer: </label>
-        <%= central_component "icon_dropdown", %{
+        <%= central_component("icon_dropdown", %{
           name: "search[developer]",
           id: "search_developer",
           selected: @params["developer"],
           enumerable: [
             %{id: "Any", icon: "fa-solid fa-square", colour: fg},
             %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
-            %{id: "Developer", icon: "fa-solid fa-code", colour: fg},
+            %{id: "Developer", icon: "fa-solid fa-code", colour: fg}
           ]
-        } %>
+        }) %>
       </div>
 
-      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <div class={search_col_class}>
         <label for="search_mod_action" class="control-label">Mod action: </label>
-        <%= central_component "icon_dropdown", %{
+        <%= central_component("icon_dropdown", %{
           name: "search[mod_action]",
           id: "search_mod_action",
           selected: @params["mod_action"],
@@ -189,26 +239,51 @@
             %{id: "Banned", icon: Teiserver.Moderation.ActionLib.action_icon("Ban"), colour: fg},
             %{id: "Muted", icon: Teiserver.Moderation.ActionLib.action_icon("Mute"), colour: fg},
             %{id: "Warned", icon: Teiserver.Moderation.ActionLib.action_icon("Warn"), colour: fg},
-            %{id: "Shadowbanned", icon: Teiserver.Moderation.ActionLib.action_icon("Ban"), colour: fg},
+            %{
+              id: "Shadowbanned",
+              icon: Teiserver.Moderation.ActionLib.action_icon("Ban"),
+              colour: fg
+            }
           ]
-        } %>
+        }) %>
       </div>
 
-      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <div class={search_col_class}>
         <label for="search_lobby_client" class="control-label">Lobby: </label>
-        <input type="text" name="search[lobby_client]" id="search_lobby_client" value={@params["lobby_client"]} placeholder="" class="form-control" />
+        <input
+          type="text"
+          name="search[lobby_client]"
+          id="search_lobby_client"
+          value={@params["lobby_client"]}
+          placeholder=""
+          class="form-control"
+        />
       </div>
 
-      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
-        <label for="search_previous_names" class="control-label">Current/Previons names: (case sensitive)</label>
-        <input type="text" name="search[previous_names]" id="search_previous_names" value={@params["previous_names"]} placeholder="" class="form-control" />
+      <div class={search_col_class}>
+        <label for="search_previous_names" class="control-label">
+          Current/Previons names: (case sensitive)
+        </label>
+        <input
+          type="text"
+          name="search[previous_names]"
+          id="search_previous_names"
+          value={@params["previous_names"]}
+          placeholder=""
+          class="form-control"
+        />
       </div>
     </div>
 
     <div class="row">
       <div class="offset-md-8 col-md-4 offset-xl-10 col-xl-2">
         &nbsp;<br />
-        <input type="submit" value="Search" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+        <input
+          type="submit"
+          value="Search"
+          name="form.submitted"
+          class={"btn btn-#{bsname} btn-block"}
+        />
       </div>
     </div>
   </form>

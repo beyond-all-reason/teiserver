@@ -20,12 +20,13 @@ defmodule TeiserverWeb.Admin.AchievementController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
-    achievement_types = Game.list_achievement_types(
-      search: [
-        basic_search: Map.get(params, "s", "") |> String.trim,
-      ],
-      order_by: "Name (A-Z)"
-    )
+    achievement_types =
+      Game.list_achievement_types(
+        search: [
+          basic_search: Map.get(params, "s", "") |> String.trim()
+        ],
+        order_by: "Name (A-Z)"
+      )
 
     conn
     |> assign(:achievement_types, achievement_types)
@@ -34,12 +35,13 @@ defmodule TeiserverWeb.Admin.AchievementController do
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
-    achievement_type = Game.get_achievement_type!(id, [
-      joins: [],
-    ])
+    achievement_type =
+      Game.get_achievement_type!(id,
+        joins: []
+      )
 
     achievement_type
-    |> AchievementTypeLib.make_favourite
+    |> AchievementTypeLib.make_favourite()
     |> insert_recently(conn)
 
     conn
@@ -50,10 +52,11 @@ defmodule TeiserverWeb.Admin.AchievementController do
 
   @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def new(conn, _params) do
-    changeset = Game.change_achievement_type(%AchievementType{
-      icon: "fa-solid fa-" <> StylingHelper.random_icon(),
-      colour: StylingHelper.random_colour()
-    })
+    changeset =
+      Game.change_achievement_type(%AchievementType{
+        icon: "fa-solid fa-" <> StylingHelper.random_icon(),
+        colour: StylingHelper.random_colour()
+      })
 
     conn
     |> assign(:changeset, changeset)
@@ -98,6 +101,7 @@ defmodule TeiserverWeb.Admin.AchievementController do
         conn
         |> put_flash(:info, "AchievementType updated successfully.")
         |> redirect(to: Routes.ts_admin_achievement_path(conn, :index))
+
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         |> assign(:achievement_type, achievement_type)
@@ -111,7 +115,7 @@ defmodule TeiserverWeb.Admin.AchievementController do
     achievement_type = Game.get_achievement_type!(id)
 
     achievement_type
-    |> AchievementTypeLib.make_favourite
+    |> AchievementTypeLib.make_favourite()
     |> remove_recently(conn)
 
     {:ok, _achievement_type} = Game.delete_achievement_type(achievement_type)

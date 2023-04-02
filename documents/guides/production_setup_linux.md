@@ -14,7 +14,7 @@ Before you start I suggest setting up the DNS to point towards your server. It'l
 ### Fresh install time
 ```bash
 apt-get update
-apt-get -y install htop git-core ca-certificates vim sudo curl vnstat sysstat procinfo build-essential net-tools geoip-bin libtinfo-dev aptitude lsb-release grc neofetch tcpdump
+apt-get -y install htop git-core ca-certificates vim sudo curl vnstat sysstat procinfo build-essential net-tools geoip-bin libtinfo-dev aptitude lsb-release grc neofetch tcpdump glances
 apt-get -y upgrade
 apt-get -y autoremove
 
@@ -145,12 +145,12 @@ sudo vi /etc/nginx/sites-enabled/central
 
 
 ### Postgres
-This is written with postgres 14 as the intended version. If you need this guide to tell you how to install postgres you probably don't care if there's a newer version available.
+This is written with postgres 15 as the intended version. If you need this guide to tell you how to install postgres you probably don't care if there's a newer version available.
 ```bash
 sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 sudo aptitude update
-sudo aptitude -y install postgresql-14
+sudo aptitude -y install postgresql-15
 ```
 
 #### Setup teiserver_prod database
@@ -170,7 +170,7 @@ EOF
 #### pg_stat_statements (optional)
 Following the guide at [pganalyze.com](https://pganalyze.com/docs/install/01_enabling_pg_stat_statements) we want to enable `pg_stat_statements` for our LiveDashboard. If we don't then that's okay but we won't get the full gamut of stats in the dashboard.
 ```bash
-sudo vi /etc/postgresql/14/main/postgresql.conf
+sudo vi /etc/postgresql/15/main/postgresql.conf
 ```
 
 Add the following at various points:
@@ -188,7 +188,7 @@ pg_stat_statements.track = all
 I've found it useful in the past to be able to access my postgres installation without having to put the password in. You may wish to update your pg_hba.conf to enable the same.
 
 ```bash
-sudo vi /etc/postgresql/14/main/pg_hba.conf
+sudo vi /etc/postgresql/15/main/pg_hba.conf
 ```
 
 Alter the bottom part to look like this, the specific change is we are using "trust" as the method for all local/host connections:
@@ -203,7 +203,7 @@ host    all             all             ::1/128                 trust
 If you are using clustering or hosting your postgres on a different box you will need to also enable external connections to your postgres install. You will need to perform additional edits to your pg_hba.conf
 
 ```bash
-sudo vi /etc/postgresql/14/main/postgresql.conf
+sudo vi /etc/postgresql/15/main/postgresql.conf
 ```
 
 Add in the line
@@ -212,7 +212,7 @@ listen_addresses = '*'
 ```
 
 ```bash
-sudo vi /etc/postgresql/14/main/pg_hba.conf
+sudo vi /etc/postgresql/15/main/pg_hba.conf
 ```
 
 ```
@@ -402,7 +402,7 @@ sudo journalctl -u central.server
 - `curl http://localhost:4000` should produce a web page
 - `curl https://localhost:4000` should produce `curl: (35) error:1408F10B:SSL routines:ssl3_get_record:wrong version number`
 
-- `curl curl http://localhost:443` should give a 400 result
+- `curl http://localhost:443` should give a 400 result
 
 - `openssl s_client localhost:443` should give an SSL certificate info, this is nginx
 - `openssl s_client localhost:8888` should give the same info, this is the Phoenix application

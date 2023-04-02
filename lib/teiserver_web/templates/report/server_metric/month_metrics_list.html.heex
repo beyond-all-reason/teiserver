@@ -1,21 +1,30 @@
 <% {_fg, bg, bsname} = view_colour() |> colours() %>
 
-<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "server_metrics"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "server_metrics"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Report.ServerMetricView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Report.ServerMetricView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "month_metrics"
           })
-        %>
+        ) %>
 
-        <a href={Routes.ts_reports_match_metric_path(@conn, :month_metrics_list)} class={"btn float-end btn-outline-#{TeiserverWeb.Report.MatchMetricView.view_colour}"}>
-          <%= central_component "icon", icon: TeiserverWeb.Report.MatchMetricView.icon %>
-          &nbsp;
+        <a
+          href={Routes.ts_reports_match_metric_path(@conn, :month_metrics_list)}
+          class={"btn float-end btn-outline-#{TeiserverWeb.Report.MatchMetricView.view_colour}"}
+        >
+          <%= central_component("icon", icon: TeiserverWeb.Report.MatchMetricView.icon()) %> &nbsp;
           Match data
         </a>
         <br /><br />
@@ -46,35 +55,42 @@
             </tr>
           </thead>
           <tbody>
-        <%= for log <- @logs do %>
+            <%= for log <- @logs do %>
+              <tr>
+                <td><%= log.year %></td>
+                <td><%= log.month %></td>
 
-            <tr>
-              <td><%= log.year %></td>
-              <td><%= log.month %></td>
+                <td><%= format_number(log.data["aggregates"]["stats"]["unique_users"]) %></td>
+                <td><%= format_number(log.data["aggregates"]["stats"]["unique_players"]) %></td>
+                <td><%= format_number(log.data["aggregates"]["stats"]["peak_users"]) %></td>
+                <td><%= format_number(log.data["aggregates"]["stats"]["peak_players"]) %></td>
 
-              <td><%= format_number log.data["aggregates"]["stats"]["unique_users"] %></td>
-              <td><%= format_number log.data["aggregates"]["stats"]["unique_players"] %></td>
-              <td><%= format_number log.data["aggregates"]["stats"]["peak_users"] %></td>
-              <td><%= format_number log.data["aggregates"]["stats"]["peak_players"] %></td>
+                <td><%= represent_minutes(log.data["aggregates"]["minutes"]["player"]) %></td>
 
-              <td><%= represent_minutes log.data["aggregates"]["minutes"]["player"] %></td>
+                <td><%= format_number(log.data["aggregates"]["stats"]["accounts_created"]) %></td>
 
-              <td><%= format_number log.data["aggregates"]["stats"]["accounts_created"] %></td>
+                <td>
+                  <%= link("Show",
+                    to:
+                      Routes.ts_reports_server_metric_path(
+                        @conn,
+                        :month_metrics_show,
+                        log.year,
+                        log.month
+                      ),
+                    class: "btn btn-secondary btn-sm"
+                  ) %>
+                </td>
+              </tr>
 
-              <td>
-                <%= link "Show", to: Routes.ts_reports_server_metric_path(@conn, :month_metrics_show, log.year, log.month), class: "btn btn-secondary btn-sm" %>
-              </td>
-            </tr>
-
-          <%= if log.month == 1 do %>
-            <tr>
-              <td colspan="9" style={"background-color: #{bg}"}>
-                <div style="height: 5px;">&nbsp;</div>
-              </td>
-            </tr>
-          <% end %>
-
-        <% end %>
+              <%= if log.month == 1 do %>
+                <tr>
+                  <td colspan="9" style={"background-color: #{bg}"}>
+                    <div style="height: 5px;">&nbsp;</div>
+                  </td>
+                </tr>
+              <% end %>
+            <% end %>
           </tbody>
         </table>
       </div>

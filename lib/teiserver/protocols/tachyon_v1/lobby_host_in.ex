@@ -6,8 +6,12 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyHostIn do
   alias Teiserver.Data.Types, as: T
 
   @spec do_handle(String.t(), Map.t(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
-  def do_handle("update_host_status", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)
-  def do_handle("update_host_status", _, %{lobby_id: nil} = state), do: reply(:system, :nolobby, nil, state)
+  def do_handle("update_host_status", _, %{userid: nil} = state),
+    do: reply(:system, :nouser, nil, state)
+
+  def do_handle("update_host_status", _, %{lobby_id: nil} = state),
+    do: reply(:system, :nolobby, nil, state)
+
   def do_handle("update_host_status", new_status, state) do
     host_data =
       new_status
@@ -17,6 +21,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyHostIn do
     if Lobby.allow?(state.userid, :update_host_status, state.lobby_id) do
       Coordinator.cast_consul(state.lobby_id, {:host_update, state.userid, host_data})
     end
+
     state
   end
 
@@ -31,8 +36,17 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyHostIn do
         Lobby.deny_join_request(userid, lobby_id, data["reason"])
 
       r ->
-        reply(:system, :error, %{error: "invalid response type, no handler for '#{r}'", location: "c.lobby_host.respond_to_join_request"}, state)
+        reply(
+          :system,
+          :error,
+          %{
+            error: "invalid response type, no handler for '#{r}'",
+            location: "c.lobby_host.respond_to_join_request"
+          },
+          state
+        )
     end
+
     state
   end
 end

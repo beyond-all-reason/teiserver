@@ -5,6 +5,7 @@ defmodule TeiserverWeb.Moderation.ReportFormControllerTest do
   alias Teiserver.Moderation
 
   alias Central.Helpers.GeneralTestLib
+
   setup do
     GeneralTestLib.conn_setup(["teiserver"])
     |> Teiserver.TeiserverTestLib.conn_setup()

@@ -33,7 +33,8 @@ defmodule Teiserver.Battle.LobbyCache do
 
   @spec get_lobby_by_match_uuid(String.t()) :: T.lobby() | nil
   def get_lobby_by_match_uuid(uuid) do
-    lobby_list = list_lobby_ids()
+    lobby_list =
+      list_lobby_ids()
       |> Stream.map(fn lobby_id -> {lobby_id, get_lobby_match_uuid(lobby_id)} end)
       |> Stream.filter(fn {_lobby_id, lobby_uuid} -> lobby_uuid == uuid end)
       |> Enum.take(1)
@@ -47,7 +48,8 @@ defmodule Teiserver.Battle.LobbyCache do
 
   @spec get_lobby_by_server_uuid(String.t()) :: T.lobby() | nil
   def get_lobby_by_server_uuid(uuid) do
-    lobby_list = list_lobby_ids()
+    lobby_list =
+      list_lobby_ids()
       |> Stream.map(fn lobby_id -> {lobby_id, get_lobby_server_uuid(lobby_id)} end)
       |> Stream.filter(fn {_lobby_id, server_uuid} -> server_uuid == uuid end)
       |> Enum.take(1)
@@ -67,16 +69,40 @@ defmodule Teiserver.Battle.LobbyCache do
   @spec list_lobbies() :: [T.lobby()]
   def list_lobbies() do
     list_lobby_ids()
-      |> Enum.map(fn lobby_id -> get_lobby(lobby_id) end)
-      |> Enum.filter(fn lobby -> lobby != nil end)
+    |> Enum.map(fn lobby_id -> get_lobby(lobby_id) end)
+    |> Enum.filter(fn lobby -> lobby != nil end)
+  end
+
+  @spec list_throttled_lobbies(atom) :: [T.lobby()]
+  def list_throttled_lobbies(type) do
+    throttle_pid =
+      case Horde.Registry.lookup(Teiserver.ThrottleRegistry, "LobbyIndexThrottle") do
+        [{pid, _}] -> pid
+        _ -> nil
+      end
+
+    case throttle_pid do
+      nil ->
+        []
+
+      pid ->
+        try do
+          GenServer.call(pid, {:get_cache, type})
+
+          # If the process has somehow died, we just return an empty list
+        catch
+          :exit, _ ->
+            []
+        end
+    end
   end
 
   @spec stream_lobbies() :: Stream.t()
   def stream_lobbies() do
     list_lobby_ids()
-      |> Enum.shuffle()
-      |> Stream.map(fn lobby_id -> get_lobby(lobby_id) end)
-      |> Stream.filter(fn lobby -> lobby != nil end)
+    |> Enum.shuffle()
+    |> Stream.map(fn lobby_id -> get_lobby(lobby_id) end)
+    |> Stream.filter(fn lobby -> lobby != nil end)
   end
 
   @spec update_lobby_values(T.lobby_id(), map()) :: :ok | nil
@@ -151,13 +177,18 @@ defmodule Teiserver.Battle.LobbyCache do
   @spec add_start_rectangle(T.lobby_id(), non_neg_integer(), list()) :: :ok | nil
   def add_start_rectangle(lobby_id, area_id, [a, b, c, d]) do
     area_id = int_parse(area_id)
-    cast_lobby(lobby_id, {:add_start_area, area_id, %{
-      shape: "rectangle",
-      x1: a,
-      y1: b,
-      x2: c,
-      y2: d
-    }})
+
+    cast_lobby(
+      lobby_id,
+      {:add_start_area, area_id,
+       %{
+         shape: "rectangle",
+         x1: a,
+         y1: b,
+         x2: c,
+         y2: d
+       }}
+    )
   end
 
   @spec add_start_area(T.lobby_id(), non_neg_integer(), list()) :: :ok | nil
@@ -200,7 +231,8 @@ defmodule Teiserver.Battle.LobbyCache do
   @spec update_bot(T.lobby_id(), String.t(), map()) :: nil | :ok
   def update_bot(lobby_id, bot_name, "0"), do: remove_bot(lobby_id, bot_name)
 
-  def update_bot(lobby_id, bot_name, new_data), do: cast_lobby(lobby_id, {:update_bot, bot_name, new_data})
+  def update_bot(lobby_id, bot_name, new_data),
+    do: cast_lobby(lobby_id, {:update_bot, bot_name, new_data})
 
   @spec remove_bot(T.lobby_id(), String.t()) :: :ok | nil
   def remove_bot(lobby_id, bot_name), do: cast_lobby(lobby_id, {:remove_bot, bot_name})
@@ -267,21 +299,23 @@ defmodule Teiserver.Battle.LobbyCache do
     _consul_pid = Coordinator.start_consul(lobby.id)
     _balance_pid = Coordinator.start_balancer(lobby.id)
 
-    :ok = PubSub.broadcast(
-      Central.PubSub,
-      "legacy_all_battle_updates",
-      {:global_battle_updated, lobby.id, :battle_opened}
-    )
+    :ok =
+      PubSub.broadcast(
+        Central.PubSub,
+        "legacy_all_battle_updates",
+        {:global_battle_updated, lobby.id, :battle_opened}
+      )
 
-    :ok = PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_global_lobby_updates",
-      %{
-        channel: "teiserver_global_lobby_updates",
-        event: :opened,
-        lobby: lobby
-      }
-    )
+    :ok =
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_global_lobby_updates",
+        %{
+          channel: "teiserver_global_lobby_updates",
+          event: :opened,
+          lobby: lobby
+        }
+      )
 
     lobby
   end
@@ -322,7 +356,9 @@ defmodule Teiserver.Battle.LobbyCache do
   @spec cast_lobby(T.lobby_id(), any) :: :ok | nil
   def cast_lobby(lobby_id, message) when is_integer(lobby_id) do
     case get_lobby_pid(lobby_id) do
-      nil -> nil
+      nil ->
+        nil
+
       pid ->
         GenServer.cast(pid, message)
         :ok
@@ -335,7 +371,9 @@ defmodule Teiserver.Battle.LobbyCache do
   @spec call_lobby(T.lobby_id(), any) :: any | nil
   def call_lobby(lobby_id, message) when is_integer(lobby_id) do
     case get_lobby_pid(lobby_id) do
-      nil -> nil
+      nil ->
+        nil
+
       pid ->
         try do
           GenServer.call(pid, message)
@@ -351,7 +389,9 @@ defmodule Teiserver.Battle.LobbyCache do
   @spec stop_lobby_server(T.lobby_id()) :: :ok | nil
   def stop_lobby_server(lobby_id) when is_integer(lobby_id) do
     case get_lobby_pid(lobby_id) do
-      nil -> nil
+      nil ->
+        nil
+
       p ->
         DynamicSupervisor.terminate_child(Teiserver.LobbySupervisor, p)
         :ok
@@ -381,22 +421,23 @@ defmodule Teiserver.Battle.LobbyCache do
       {:global_battle_updated, lobby_id, :battle_closed}
     )
 
-    :ok = PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_global_lobby_updates",
-      %{
-        channel: "teiserver_global_lobby_updates",
-        event: :closed,
-        lobby_id: lobby_id
-      }
-    )
+    :ok =
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_global_lobby_updates",
+        %{
+          channel: "teiserver_global_lobby_updates",
+          event: :closed,
+          lobby_id: lobby_id
+        }
+      )
 
-
-    :ok = PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_lobby_updates:#{battle.id}",
-      {:lobby_update, :closed, battle.id, reason}
-    )
+    :ok =
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_lobby_updates:#{battle.id}",
+        {:lobby_update, :closed, battle.id, reason}
+      )
 
     Lobby.stop_battle_lobby_throttle(lobby_id)
   end

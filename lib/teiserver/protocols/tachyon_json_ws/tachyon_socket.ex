@@ -6,21 +6,9 @@ defmodule Tachyon.TachyonSocket do
   alias Central.Config
   alias Teiserver.Account
   alias Teiserver.Tachyon.{CommandDispatch}
-  alias Teiserver.Data.Types, as: T
+  # alias Teiserver.Data.Types, as: T
 
   @type ws_state() :: map()
-
-  def validate_schemas() do
-    (
-      "priv/tachyon/v1.json"
-      |> File.read!
-      |> Jason.decode!
-      |> Enum.each(fn json_def ->
-        schema = ExJsonSchema.Schema.resolve(json_def)
-        Central.store_put(:tachyon_schemas, json_def["$id"], schema)
-      end)
-    )
-  end
 
   @spec child_spec(any) :: any()
   def child_spec(_opts) do
@@ -29,7 +17,9 @@ defmodule Tachyon.TachyonSocket do
   end
 
   @spec connect(ws_state()) :: {:ok, ws_state()}
-  def connect(%{params: %{"token" => token_value, "client_hash" => _, "client_name" => _}} = state) do
+  def connect(
+        %{params: %{"token" => token_value, "client_hash" => _, "client_name" => _}} = state
+      ) do
     case Account.get_user_token_by_value(token_value) do
       nil ->
         :error
@@ -38,12 +28,16 @@ defmodule Tachyon.TachyonSocket do
         case login(token, state) do
           {:ok, conn} ->
             {:ok, Map.put(state, :conn, conn)}
+
           _ ->
             :error
         end
 
       value ->
-        Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line} - No handler for value of #{inspect value}")
+        Logger.error(
+          "Error at: #{__ENV__.file}:#{__ENV__.line} - No handler for value of #{inspect(value)}"
+        )
+
         :error
     end
   end
@@ -65,17 +59,16 @@ defmodule Tachyon.TachyonSocket do
   # @spec handle_in({atom, any}, ws_state()) :: {:ok, ws_state()} | {:reply, :ok, {:text, String.t()}, ws_state()}
   def handle_in({text, _opts}, %{conn: conn} = state) do
     with {:ok, raw_json} <- decompress_message(text, conn),
-      {:ok, wrapped_object} <- decode_message(raw_json, conn),
-      {:ok, resp, new_conn} <- handle_command(wrapped_object, conn)
-      do
-        if resp != nil do
-          {:reply, :ok, {:text, resp |> Jason.encode!()}, %{state | conn: new_conn}}
-        else
-          {:ok, state}
-        end
+         {:ok, wrapped_object} <- decode_message(raw_json, conn),
+         {:ok, resp, new_conn} <- handle_command(wrapped_object, conn) do
+      if resp != nil do
+        {:reply, :ok, {:text, resp |> Jason.encode!()}, %{state | conn: new_conn}}
       else
-        {:json_error, error_message} ->
-          {:reply, :ok, {:text, %{error: error_message} |> Jason.encode!()}, state}
+        {:ok, state}
+      end
+    else
+      {:json_error, error_message} ->
+        {:reply, :ok, {:text, %{error: error_message} |> Jason.encode!()}, state}
     end
   end
 
@@ -86,7 +79,7 @@ defmodule Tachyon.TachyonSocket do
   defp decode_message(text, _conn) do
     case Jason.decode(text) do
       {:ok, msg} -> {:ok, msg}
-      {:error, err} -> {:json_error, "Decode error: #{inspect err}"}
+      {:error, err} -> {:json_error, "Decode error: #{inspect(err)}"}
     end
   end
 
@@ -101,20 +94,20 @@ defmodule Tachyon.TachyonSocket do
       "data" => data
     }
 
+    Teiserver.Tachyon.Schema.validate!(response)
+
     {:ok, response, new_conn}
   end
-
 
   @spec handle_info(any, ws_state()) :: {:reply, :ok, {:binary, binary}, ws_state()}
   def handle_info(:disconnect, state) do
     {:stop, :disconnected, state}
   end
 
-
   def handle_info(msg, state) do
-    IO.puts ""
-    IO.inspect msg, label: "ws handle_info"
-    IO.puts ""
+    IO.puts("")
+    IO.inspect(msg, label: "ws handle_info")
+    IO.puts("")
 
     # Use this to not send anything
     {:ok, state}
@@ -133,12 +126,13 @@ defmodule Tachyon.TachyonSocket do
     :ok
   end
 
-  defp login(%{user: user, expires: expires} = token, state) do
+  defp login(%{user: _user, expires: _expires} = token, state) do
     response = Teiserver.User.login_from_token(token, state)
 
     case response do
       {:ok, logged_in_user} ->
         {:ok, new_conn(logged_in_user)}
+
       {:error, reason} ->
         {:error, reason}
     end
@@ -158,14 +152,10 @@ defmodule Tachyon.TachyonSocket do
       cmd_timestamps: [],
 
       # Caching app configs
-      flood_rate_limit_count: Config.get_site_config_cache("teiserver.Tachyon flood rate limit count"),
-      floot_rate_window_size: Config.get_site_config_cache("teiserver.Tachyon flood rate window size")
+      flood_rate_limit_count:
+        Config.get_site_config_cache("teiserver.Tachyon flood rate limit count"),
+      floot_rate_window_size:
+        Config.get_site_config_cache("teiserver.Tachyon flood rate window size")
     }
-  end
-
-  defp inspect_object(object) do
-    object
-      |> Map.drop([:__unknown_fields__])
-      |> inspect
   end
 end

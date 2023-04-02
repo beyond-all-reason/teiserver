@@ -36,7 +36,8 @@ defmodule Teiserver.TachyonTcpServer do
       :ranch_ssl,
       ssl_opts ++
         [
-          {:port, Application.get_env(:central, Teiserver)[:ports][:tachyon]}
+          max_connections: :infinity,
+          port: Application.get_env(:central, Teiserver)[:ports][:tachyon]
         ],
       __MODULE__,
       []
@@ -77,8 +78,10 @@ defmodule Teiserver.TachyonTcpServer do
       transport: transport,
       ip: ip,
       protocol: Application.get_env(:central, Teiserver)[:default_tachyon_protocol],
-      protocol_in: Application.get_env(:central, Teiserver)[:default_tachyon_protocol].protocol_in(),
-      protocol_out: Application.get_env(:central, Teiserver)[:default_tachyon_protocol].protocol_out(),
+      protocol_in:
+        Application.get_env(:central, Teiserver)[:default_tachyon_protocol].protocol_in(),
+      protocol_out:
+        Application.get_env(:central, Teiserver)[:default_tachyon_protocol].protocol_out(),
 
       # Client state
       userid: nil,
@@ -98,8 +101,10 @@ defmodule Teiserver.TachyonTcpServer do
       cmd_timestamps: [],
 
       # Caching app configs
-      flood_rate_limit_count: Config.get_site_config_cache("teiserver.Tachyon flood rate limit count"),
-      flood_rate_window_size: Config.get_site_config_cache("teiserver.Tachyon flood rate window size"),
+      flood_rate_limit_count:
+        Config.get_site_config_cache("teiserver.Tachyon flood rate limit count"),
+      flood_rate_window_size:
+        Config.get_site_config_cache("teiserver.Tachyon flood rate window size"),
       server_messages: 0,
       server_batches: 0,
       client_messages: 0
@@ -136,6 +141,7 @@ defmodule Teiserver.TachyonTcpServer do
       state.server_batches,
       state.client_messages
     })
+
     {:noreply, %{state | server_messages: 0, client_messages: 0, server_batches: 0}}
   end
 
@@ -148,44 +154,45 @@ defmodule Teiserver.TachyonTcpServer do
 
   # Instructions to update the state of the connection
   def handle_info({:action, {action_type, data}}, state) do
-    new_state = case {action_type, data} do
-      {:login_accepted, user_data} ->
-        state.protocol.do_action(:login_accepted, user_data, state)
+    new_state =
+      case {action_type, data} do
+        {:login_accepted, user_data} ->
+          state.protocol.do_action(:login_accepted, user_data, state)
 
-      {:host_lobby, lobby_id} ->
-        state.protocol.do_action(:host_lobby, lobby_id, state)
+        {:host_lobby, lobby_id} ->
+          state.protocol.do_action(:host_lobby, lobby_id, state)
 
-      {:join_lobby, lobby_id} ->
-        state.protocol.do_action(:join_lobby, lobby_id, state)
+        {:join_lobby, lobby_id} ->
+          state.protocol.do_action(:join_lobby, lobby_id, state)
 
-      {:leave_lobby, lobby_id} ->
-        state.protocol.do_action(:leave_lobby, lobby_id, state)
+        {:leave_lobby, lobby_id} ->
+          state.protocol.do_action(:leave_lobby, lobby_id, state)
 
-      {:watch_channel, channel} ->
-        state.protocol.do_action(:watch_channel, channel, state)
+        {:watch_channel, channel} ->
+          state.protocol.do_action(:watch_channel, channel, state)
 
-      {:unwatch_channel, channel} ->
-        state.protocol.do_action(:unwatch_channel, channel, state)
+        {:unwatch_channel, channel} ->
+          state.protocol.do_action(:unwatch_channel, channel, state)
 
-      {:lead_party, party_id} ->
-        state.protocol.do_action(:lead_party, party_id, state)
+        {:lead_party, party_id} ->
+          state.protocol.do_action(:lead_party, party_id, state)
 
-      {:join_party, party_id} ->
-        state.protocol.do_action(:join_party, party_id, state)
+        {:join_party, party_id} ->
+          state.protocol.do_action(:join_party, party_id, state)
 
-      {:leave_party, party_id} ->
-        state.protocol.do_action(:leave_party, party_id, state)
+        {:leave_party, party_id} ->
+          state.protocol.do_action(:leave_party, party_id, state)
 
-      {:set_script_password, new_script_password} ->
-        %{state | script_password: new_script_password}
+        {:set_script_password, new_script_password} ->
+          %{state | script_password: new_script_password}
 
-      # Matchmaking
-      {:joined_queue, queue_id} ->
-        state.protocol.do_action(:joined_queue, queue_id, state)
+        # Matchmaking
+        {:joined_queue, queue_id} ->
+          state.protocol.do_action(:joined_queue, queue_id, state)
 
-      {:left_queue, queue_id} ->
-        state.protocol.do_action(:left_queue, queue_id, state)
-    end
+        {:left_queue, queue_id} ->
+          state.protocol.do_action(:left_queue, queue_id, state)
+      end
 
     {:noreply, new_state}
   end
@@ -197,6 +204,7 @@ defmodule Teiserver.TachyonTcpServer do
     case flood_protect?(data, state) do
       {true, state} ->
         engage_flood_protection(state)
+
       {false, state} ->
         new_state = state.protocol_in.data_in(to_string(data), state)
         {:noreply, new_state}
@@ -216,6 +224,7 @@ defmodule Teiserver.TachyonTcpServer do
       if state.username do
         Logger.info("Heartbeat timeout for #{state.username}")
       end
+
       {:stop, :normal, state}
     else
       {:noreply, state}
@@ -238,7 +247,9 @@ defmodule Teiserver.TachyonTcpServer do
         state.protocol_out.reply(:user, :friend_removed, data.friend_id, state)
 
       _ ->
-        Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}")
+        Logger.error(
+          "Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}"
+        )
     end
 
     {:noreply, state}
@@ -272,32 +283,51 @@ defmodule Teiserver.TachyonTcpServer do
         state
 
       _ ->
-        Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}")
+        Logger.error(
+          "Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}"
+        )
     end
 
     {:noreply, state}
   end
 
-  def handle_info(data = %{channel: "teiserver_lobby_host_message:" <> lobby_id, event: event}, state) do
+  def handle_info(
+        data = %{channel: "teiserver_lobby_host_message:" <> lobby_id, event: event},
+        state
+      ) do
     lobby_id = int_parse(lobby_id)
 
-    new_state = if state.lobby_host == true and state.lobby_id == lobby_id do
-      case event do
-        :user_requests_to_join ->
-          state.protocol_out.reply(:lobby_host, data.event, {data.userid, data.script_password}, state)
+    new_state =
+      if state.lobby_host == true and state.lobby_id == lobby_id do
+        case event do
+          :user_requests_to_join ->
+            state.protocol_out.reply(
+              :lobby_host,
+              data.event,
+              {data.userid, data.script_password},
+              state
+            )
 
-        _ ->
-          Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}")
+          _ ->
+            Logger.error(
+              "Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}"
+            )
+        end
+      else
+        state
       end
-    else
-      state
-    end
 
     {:noreply, new_state}
   end
 
   def handle_info(event = %{channel: "teiserver_lobby_chat:" <> _}, state) do
-    {:noreply, state.protocol_out.reply(:lobby_chat, event.event, {event.lobby_id, event.userid, event.message}, state)}
+    {:noreply,
+     state.protocol_out.reply(
+       :lobby_chat,
+       event.event,
+       {event.lobby_id, event.userid, event.message},
+       state
+     )}
   end
 
   def handle_info({:lobby_update, event, lobby_id, data}, state) do
@@ -305,24 +335,32 @@ defmodule Teiserver.TachyonTcpServer do
   end
 
   def handle_info(data = %{channel: "teiserver_global_lobby_updates"}, state) do
-    new_state = case data.event do
-      :opened ->
-        state.protocol_out.reply(:lobby, :opened, data.lobby, state)
+    new_state =
+      case data.event do
+        :opened ->
+          state.protocol_out.reply(:lobby, :opened, data.lobby, state)
 
-      :closed ->
-        state.protocol_out.reply(:lobby, :closed, data.lobby_id, state)
+        :closed ->
+          state.protocol_out.reply(:lobby, :closed, data.lobby_id, state)
 
-      :updated_values ->
-        state.protocol_out.reply(:lobby, :update_values, {data.lobby_id, data.new_values}, state)
+        :updated_values ->
+          state.protocol_out.reply(
+            :lobby,
+            :update_values,
+            {data.lobby_id, data.new_values},
+            state
+          )
 
-      _ ->
-        Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for teiserver_global_lobby_updates.event = #{data.event}")
-        state
-    end
+        _ ->
+          Logger.error(
+            "Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for teiserver_global_lobby_updates.event = #{data.event}"
+          )
+
+          state
+      end
 
     {:noreply, new_state}
   end
-
 
   def handle_info(data = %{channel: "teiserver_client_watch:" <> userid_str}, state) do
     userid = int_parse(userid_str)
@@ -348,7 +386,10 @@ defmodule Teiserver.TachyonTcpServer do
           state.protocol_out.reply(:client, :left_lobby, {userid, data.lobby_id}, state)
 
         _ ->
-          Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for teiserver_global_lobby_updates.event = #{data.event}")
+          Logger.error(
+            "Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for teiserver_global_lobby_updates.event = #{data.event}"
+          )
+
           state
       end
     end
@@ -366,25 +407,48 @@ defmodule Teiserver.TachyonTcpServer do
             :accept ->
               # state.protocol_out.reply(:lobby, data.event, {data.lobby_id, :accept, state.script_password}, state)
               send(self(), {:action, {:join_lobby, data.lobby_id}})
+
               # state.protocol_out.reply(:lobby, :joined, {data.lobby_id, state.script_password}, state)
               state
+
             :deny ->
-              state.protocol_out.reply(:lobby, data.event, {data.lobby_id, :deny, data.reason}, state)
+              state.protocol_out.reply(
+                :lobby,
+                data.event,
+                {data.lobby_id, :deny, data.reason},
+                state
+              )
           end
 
         :force_join_lobby ->
           send(self(), {:action, {:join_lobby, data.lobby_id}})
-          state.protocol_out.reply(:lobby, data.event, {data.lobby_id, data.script_password}, state)
+
+          state.protocol_out.reply(
+            :lobby,
+            data.event,
+            {data.lobby_id, data.script_password},
+            state
+          )
 
         :added_to_lobby ->
           send(self(), {:action, {:join_lobby, data.lobby_id}})
           state.protocol_out.reply(:lobby, :joined, {data.lobby_id, data.script_password}, state)
 
         :received_direct_message ->
-          state.protocol_out.reply(:communication, data.event, {data.sender_id, data.message_content}, state)
+          state.protocol_out.reply(
+            :communication,
+            data.event,
+            {data.sender_id, data.message_content},
+            state
+          )
 
         :lobby_direct_announce ->
-          state.protocol_out.reply(:lobby, :received_lobby_direct_announce, {data.sender_id, data.message_content}, state)
+          state.protocol_out.reply(
+            :lobby,
+            :received_lobby_direct_announce,
+            {data.sender_id, data.message_content},
+            state
+          )
 
         :matchmaking ->
           case data.sub_event do
@@ -397,9 +461,13 @@ defmodule Teiserver.TachyonTcpServer do
               state
 
             _ ->
-              state.protocol_out.reply(:matchmaking, data.sub_event, {data.queue_id, data.match_id}, state)
+              state.protocol_out.reply(
+                :matchmaking,
+                data.sub_event,
+                {data.queue_id, data.match_id},
+                state
+              )
           end
-
 
         :party_invite ->
           state.protocol_out.reply(:party, :invite, data.party_id, state)
@@ -420,7 +488,10 @@ defmodule Teiserver.TachyonTcpServer do
           state
 
         _ ->
-          Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}\nFull data: #{Kernel.inspect data}")
+          Logger.error(
+            "Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}\nFull data: #{Kernel.inspect(data)}"
+          )
+
           state
       end
     end
@@ -453,16 +524,18 @@ defmodule Teiserver.TachyonTcpServer do
   # Internal functions
   @spec flood_protect?(String.t(), map()) :: {boolean, map()}
   defp flood_protect?(_, %{exempt_from_cmd_throttle: true} = state), do: {false, state}
-  defp flood_protect?(data, state) do
-    cmd_timestamps = if String.contains?(data, "\n") do
-      now = System.system_time(:second)
-      limiter = now - state.flood_rate_window_size
 
-      [now | state.cmd_timestamps]
-      |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
-    else
-      state.cmd_timestamps
-    end
+  defp flood_protect?(data, state) do
+    cmd_timestamps =
+      if String.contains?(data, "\n") do
+        now = System.system_time(:second)
+        limiter = now - state.flood_rate_window_size
+
+        [now | state.cmd_timestamps]
+        |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
+      else
+        state.cmd_timestamps
+      end
 
     if Enum.count(cmd_timestamps) > state.flood_rate_limit_count do
       {true, %{state | cmd_timestamps: cmd_timestamps}}
@@ -475,7 +548,11 @@ defmodule Teiserver.TachyonTcpServer do
     state.protocol_out.reply(:disconnect, "Flood protection", nil, state)
     User.set_flood_level(state.userid, 10)
     Client.disconnect(state.userid, "TachyonTCPServer.flood_protection")
-    Logger.error("Tachyon command overflow from #{state.username}/#{state.userid} with #{Enum.count(state.cmd_timestamps)} commands. Disconnected and flood protection engaged.")
+
+    Logger.error(
+      "Tachyon command overflow from #{state.username}/#{state.userid} with #{Enum.count(state.cmd_timestamps)} commands. Disconnected and flood protection engaged."
+    )
+
     {:stop, "Flood protection", state}
   end
 end

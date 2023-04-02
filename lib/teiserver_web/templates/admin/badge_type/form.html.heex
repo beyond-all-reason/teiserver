@@ -1,7 +1,8 @@
 <% bsname = view_colour() %>
 
-<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
-<script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")} />
+<script src={Routes.static_path(@conn, "/js/select2.js")}>
+</script>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -20,32 +21,36 @@
 
   <div class="form-group row">
     <div class="col-lg-6">
-      <%= label f, :name, class: "control-label" %>
-      <%= text_input f, :name, class: "form-control", autofocus: :autofocus %>
-      <%= error_tag f, :name %>
+      <%= label(f, :name, class: "control-label") %>
+      <%= text_input(f, :name, class: "form-control", autofocus: :autofocus) %>
+      <%= error_tag(f, :name) %>
     </div>
   </div>
 
   <div class="form-group">
-    <%= input_with_type f, :colour, "color" %>
+    <%= input_with_type(f, :colour, "color") %>
   </div>
 
   <div class="form-group">
-    <%= central_component "fa5_icon_picker", %{form: f, field: :icon} %>
+    <%= central_component("fa5_icon_picker", %{form: f, field: :icon}) %>
   </div>
 
   <div class="form-group">
-    <%= input_with_type f, :description, "text" %>
+    <%= input_with_type(f, :description, "text") %>
   </div>
-  
-  <%
-    changeset_purposes = Ecto.Changeset.get_field(@changeset, :purposes)
-  %>
+
+  <% changeset_purposes = Ecto.Changeset.get_field(@changeset, :purposes) %>
   <div class="form-group">
     <label class="control-label" for="badge_type_purposes">Purposes</label>
-    <select class="form-control list-builder-select" multiple="multiple" name="badge_type[purposes][]" id="badge_type_purposes">
+    <select
+      class="form-control list-builder-select"
+      multiple="multiple"
+      name="badge_type[purposes][]"
+      id="badge_type_purposes"
+    >
       <%= for purpose <- purpose_list() do %>
-        <% selected = if Enum.member?(changeset_purposes, purpose), do: [selected: "selected"], else: [] %>
+        <% selected =
+          if Enum.member?(changeset_purposes, purpose), do: [selected: "selected"], else: [] %>
         <option value={purpose} {selected}><%= purpose %></option>
       <% end %>
     </select>
@@ -53,13 +58,26 @@
 
   <div class="form-group">
     <%= if @changeset.data.id do %>
-      <a href={Routes.ts_admin_badge_type_path(@conn, :show, @badge_type)} class="btn btn-secondary btn-outline">
+      <a
+        href={Routes.ts_admin_badge_type_path(@conn, :show, @badge_type)}
+        class="btn btn-secondary btn-outline"
+      >
         Cancel
       </a>
 
-      <input type="submit" value="Save changes" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
+      <input
+        type="submit"
+        value="Save changes"
+        name="form.submitted"
+        class={"btn btn-#{bsname} float-end"}
+      />
     <% else %>
-      <input type="submit" value="Create" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
+      <input
+        type="submit"
+        value="Create"
+        name="form.submitted"
+        class={"btn btn-#{bsname} float-end"}
+      />
     <% end %>
   </div>
 <% end %>

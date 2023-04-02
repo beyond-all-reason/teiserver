@@ -26,7 +26,8 @@ defmodule Teiserver.Logging.Helpers do
     attrs = %{
       action: action,
       user_id: if(conn.assigns[:current_user], do: conn.assigns[:current_user].id, else: nil),
-      group_id: if(conn.assigns[:current_user], do: conn.assigns[:current_user].admin_group_id, else: nil),
+      group_id:
+        if(conn.assigns[:current_user], do: conn.assigns[:current_user].admin_group_id, else: nil),
       details: details,
       ip: conn.remote_ip |> Tuple.to_list() |> Enum.join(".")
     }
@@ -42,7 +43,11 @@ defmodule Teiserver.Logging.Helpers do
       Logging.create_audit_log(%{
         action: action,
         user_id: if(conn.assigns[:current_user], do: conn.assigns[:current_user].id, else: nil),
-        group_id: if(conn.assigns[:current_user], do: conn.assigns[:current_user].admin_group_id, else: nil),
+        group_id:
+          if(conn.assigns[:current_user],
+            do: conn.assigns[:current_user].admin_group_id,
+            else: nil
+          ),
         details: details,
         ip: conn.remote_ip |> Tuple.to_list() |> Enum.join(".")
       })
@@ -50,7 +55,8 @@ defmodule Teiserver.Logging.Helpers do
     the_log
   end
 
-  @spec add_audit_log(non_neg_integer(), String.t(), String.t(), Map.t()) :: Teiserver.Logging.AuditLog.t()
+  @spec add_audit_log(non_neg_integer(), String.t(), String.t(), Map.t()) ::
+          Teiserver.Logging.AuditLog.t()
   def add_audit_log(userid, ip, action, details) when is_integer(userid) do
     {:ok, the_log} =
       Logging.create_audit_log(%{

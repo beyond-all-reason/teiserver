@@ -182,7 +182,6 @@ defmodule CentralWeb.Communication.BlogFileController do
               |> put_flash(:danger, msg)
               |> render("new.html")
           end
-
         else
           conn
           |> put_flash(:info, "File updated successfully.")

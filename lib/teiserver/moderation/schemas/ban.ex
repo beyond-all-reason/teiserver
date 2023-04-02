@@ -15,12 +15,13 @@ defmodule Teiserver.Moderation.Ban do
 
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
-    params = params
+    params =
+      params
       |> trim_strings(~w(reason)a)
 
     struct
-      |> cast(params, ~w(source_id added_by_id key_values enabled reason)a)
-      |> validate_required(~w(source_id added_by_id key_values enabled reason)a)
+    |> cast(params, ~w(source_id added_by_id key_values enabled reason)a)
+    |> validate_required(~w(source_id added_by_id key_values enabled reason)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

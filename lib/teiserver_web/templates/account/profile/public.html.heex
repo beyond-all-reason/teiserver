@@ -8,30 +8,30 @@
   });
 </script>
 
-<%= render TeiserverWeb.Account.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "profile"}) %>
+<%= render(
+  TeiserverWeb.Account.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "profile"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
+        <h1><%= @user.name %></h1>
+        <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+          <li class="nav-item" role="presentation">
+            <a href="#achievements_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <%= central_component("icon", icon: Teiserver.Game.AchievementTypeLib.icon()) %> Achievements
+            </a>
+          </li>
+        </ul>
 
-<h1><%= @user.name %></h1>
-<ul class="nav nav-tabs" role="tablist" id="the_tabs">
-  <li class="nav-item" role="presentation">
-    <a href="#achievements_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-      <%= central_component "icon", icon: Teiserver.Game.AchievementTypeLib.icon() %>
-      Achievements
-    </a>
-  </li>
-</ul>
-
-<div class="tab-content">
-  <div class="tab-pane" id="achievements_tab" style="padding:5px;">
-    <%= render "tab_achievements.html", assigns %>
-  </div>
-</div>
-<%# END OF TABS %>
-
+        <div class="tab-content">
+          <div class="tab-pane" id="achievements_tab" style="padding:5px;">
+            <%= render("tab_achievements.html", assigns) %>
+          </div>
+        </div>
       </div>
     </div>
   </div>
