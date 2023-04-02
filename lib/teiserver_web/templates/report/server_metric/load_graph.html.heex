@@ -220,6 +220,30 @@ col_class = col_class <> " my-2" %>
         }
       }
     });
+
+    c3.generate({
+      bindto: '#chart_beam_processes',
+      data: {
+        x: 'x',
+        xFormat: '%Y-%m-%d %H:%M:%S',
+        columns: <%= raw Jason.encode!([["x" | @axis_key] | @beam_process_counts]) %>
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%d %H:%M:%S'
+          }
+        },
+        y: {
+          min: 0,
+          padding: {
+            top: 15,
+            bottom: 0
+          }
+        }
+      }
+    });
   });
 </script>
 
@@ -350,6 +374,9 @@ col_class = col_class <> " my-2" %>
                     </div>
                     <div class={col_class}>
                       <div id="chart_system_processes" class="with-transitions chart-div"></div>
+                    </div>
+                    <div class={col_class}>
+                      <div id="chart_beam_processes" class="with-transitions chart-div"></div>
                     </div>
                   </div>
                 </div>
