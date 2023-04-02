@@ -117,13 +117,13 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
       "message" => String.trim("""
----------------------------
-You are #{user.name}
-Playtime: 0 hours (0 h playing, 0 h spectating)
-Profile link: https://localhost/teiserver/profile/#{user.id}
-Skill ratings:
-You currently have no accolades
-"""),
+        ---------------------------
+        You are #{user.name}
+        Playtime: 0 hours (0 h playing, 0 h spectating)
+        Profile link: https://localhost/teiserver/profile/#{user.id}
+        Skill ratings:
+        You currently have no accolades
+        """),
       "sender_id" => coordinator_userid
     }
   end

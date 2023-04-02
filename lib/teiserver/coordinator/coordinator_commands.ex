@@ -186,7 +186,8 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       end)
       |> Enum.sort()
 
-    msg = [
+    msg =
+    [
       @splitter,
       "You are #{sender.name}",
       "Playtime: #{total_hours} hours (#{player_hours} h playing, #{spectator_hours} h spectating)",
