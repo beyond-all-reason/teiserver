@@ -119,7 +119,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
       "message" => String.trim("""
 ---------------------------
 You are #{user.name}
-Your total time in BAR (playing, spectating, menu, lobby) is 0 hours of which you played for 0 hours and spectated for 0 hours
+Playtime: 0 hours (0 h playing, 0 h spectating)
 Profile link: https://localhost/teiserver/profile/#{user.id}
 Skill ratings:
 You currently have no accolades

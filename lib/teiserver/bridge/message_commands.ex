@@ -193,7 +193,7 @@ defmodule Teiserver.Bridge.MessageCommands do
     msg = [
       "You are #{user.name}",
       "Profile link: #{profile_link}",
-      "Your total time in BAR (playing, spectating, menu, lobby) is #{total_hours} hours of which you played for #{player_hours} hours and spectated for #{spectator_hours} hours",
+      "Playtime: #{total_hours} hours (#{player_hours} h playing, #{spectator_hours} h spectating)",
       accolades_string
     ]
     |> List.flatten
