@@ -31,6 +31,13 @@ defmodule TeiserverWeb.API.SpadsController do
     {rating_value, uncertainty} =
       BalanceLib.get_user_rating_value_uncertainty_pair(target_id, actual_type)
 
+    max_uncertainty = Config.get_site_config_cache("teiserver.Uncertainty required to show rating")
+    rating_value = if uncertainty > max_uncertainty do
+      0
+    else
+      rating_value
+    end
+
     conn
     |> put_status(200)
     |> assign(:rating_value, rating_value)
