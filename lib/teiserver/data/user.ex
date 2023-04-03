@@ -1228,6 +1228,9 @@ defmodule Teiserver.User do
   def is_restricted?(userid, restriction) when is_integer(userid),
     do: is_restricted?(get_user_by_id(userid), restriction)
 
+  def is_restricted?(user_restrictions, restriction) when is_list(user_restrictions),
+    do: is_restricted?(%{restrictions: user_restrictions}, restriction)
+
   def is_restricted?(%{restrictions: restrictions}, restriction_list)
       when is_list(restriction_list) do
     restriction_list

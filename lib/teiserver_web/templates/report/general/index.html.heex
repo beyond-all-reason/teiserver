@@ -185,6 +185,16 @@
     ) %>
   <% end %>
 
+  <%= if allow?(@current_user, Teiserver.Account.BanEvasionReport.permissions()) do %>
+    <%= central_component("menu_card",
+      size: :small,
+      icon: Teiserver.Account.BanEvasionReport.icon(),
+      name: "ban_evasion",
+      text: "Ban evasion",
+      link: Routes.ts_reports_report_path(@conn, :show, "ban_evasion")
+    ) %>
+  <% end %>
+
   <%= if allow?(@current_user, Teiserver.Account.GrowthReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
