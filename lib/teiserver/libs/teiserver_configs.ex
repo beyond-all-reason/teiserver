@@ -314,6 +314,15 @@ defmodule Teiserver.TeiserverConfigs do
 
   defp lobby_configs() do
     add_site_config_type(%{
+      key: "teiserver.Uncertainty required to show rating",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The maximum value uncertainty can be before in-game rating is shown ",
+      default: 10
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Allow tournament command",
       section: "Lobbies",
       type: "boolean",
