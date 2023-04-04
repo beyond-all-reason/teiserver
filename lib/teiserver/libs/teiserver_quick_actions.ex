@@ -4,7 +4,7 @@ defmodule Teiserver.TeiserverQuickActions do
 
   @spec teiserver_quick_actions :: any
   def teiserver_quick_actions do
-    QuickAction.add_items([
+    items = [
       # Global page
       %{
         label: "Live lobbies",
@@ -75,12 +75,6 @@ defmodule Teiserver.TeiserverQuickActions do
         url: ~p"/teiserver/admin/chat",
         permissions: "teiserver.staff.moderator"
       },
-      # %{
-      #   label: "Clan admin",
-      #   icons: [Teiserver.Clans.ClanLib.icon(), :list],
-      #   url: ~p"/teiserver/admin/clans",
-      #   permissions: "teiserver.staff.moderator"
-      # },
 
       # Admin pages
       %{
@@ -108,7 +102,75 @@ defmodule Teiserver.TeiserverQuickActions do
         permissions: "teiserver.staff.moderator"
       },
 
-      # Specific report
+      # Dev/Admin
+      %{
+        label: "Teiserver live metrics",
+        icons: ["fa-regular fa-tachometer-alt", :list],
+        url: ~p"/teiserver/admin/metrics",
+        permissions: "logging.live"
+      }
+    ] ++ moderation_actions() ++ report_actions() ++ specific_report_actions()
+
+    QuickAction.add_items(items)
+  end
+
+  defp report_actions() do
+    [
+      # Match metrics
+      %{
+        label: "Match metrics - Daily",
+        icons: ["fa-regular #{Teiserver.Battle.MatchLib.icon()}", :day],
+        url: ~p"/teiserver/reports/match/day_metrics",
+        permissions: "teiserver.staff.moderator"
+      },
+      %{
+        label: "Match metrics - Monthly",
+        icons: ["fa-regular #{Teiserver.Battle.MatchLib.icon()}", :month],
+        url: ~p"/teiserver/reports/match/month_metrics",
+        permissions: "teiserver.staff.moderator"
+      },
+
+      # Server metrics
+      %{
+        label: "Server metrics - Daily",
+        icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", :day],
+        url: ~p"/teiserver/reports/server/day_metrics",
+        permissions: "teiserver.staff.moderator"
+      },
+      %{
+        label: "Server metrics - Monthly",
+        icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", :month],
+        url: ~p"/teiserver/reports/server/month_metrics",
+        permissions: "teiserver.staff.moderator"
+      },
+      %{
+        label: "Server metrics - Now report",
+        icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", "fa-regular fa-clock"],
+        url: ~p"/teiserver/reports/server/day_metrics/now",
+        permissions: "teiserver.staff.moderator"
+      },
+      %{
+        label: "Server metrics - Load report",
+        icons: [
+          "fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}",
+          "fa-regular fa-server"
+        ],
+        url: ~p"/teiserver/reports/server/day_metrics/load",
+        permissions: "teiserver.staff.moderator"
+      },
+
+      # Other
+      %{
+        label: "Teiserver infologs",
+        icons: ["fa-regular #{Teiserver.Telemetry.InfologLib.icon()}", :list],
+        url: ~p"/teiserver/reports/infolog",
+        permissions: "teiserver.staff.telemetry"
+      },
+    ]
+  end
+
+  defp specific_report_actions() do
+    [
       %{
         label: "Active",
         icons: ["fa-regular #{Teiserver.Account.ActiveReport.icon()}"],
@@ -187,63 +249,35 @@ defmodule Teiserver.TeiserverQuickActions do
         permissions: Teiserver.Moderation.ActivityReport.permissions(),
         url: ~p"/teiserver/reports/show/moderation_activity"
       },
-      %{
-        label: "Teiserver infologs",
-        icons: ["fa-regular #{Teiserver.Telemetry.InfologLib.icon()}", :list],
-        url: ~p"/teiserver/reports/infolog",
-        permissions: "teiserver.staff.telemetry"
-      },
+    ]
+  end
 
-      # Server metrics
+  defp moderation_actions() do
+    [
       %{
-        label: "Server metrics - Daily",
-        icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", :day],
-        url: ~p"/teiserver/reports/server/day_metrics",
-        permissions: "teiserver.staff.moderator"
+        label: "Moderation reports",
+        icons: [Teiserver.Moderation.ReportLib.icon(), :list],
+        url: ~p"/moderation/report",
+        permissions: "teiserver.staff.reviewer"
       },
       %{
-        label: "Server metrics - Monthly",
-        icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", :month],
-        url: ~p"/teiserver/reports/server/month_metrics",
-        permissions: "teiserver.staff.moderator"
+        label: "Moderation actions",
+        icons: [Teiserver.Moderation.ActionLib.icon(), :list],
+        url: ~p"/moderation/action",
+        permissions: "teiserver.staff.reviewer"
       },
       %{
-        label: "Server metrics - Now report",
-        icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", "fa-regular fa-clock"],
-        url: ~p"/teiserver/reports/server/day_metrics/now",
-        permissions: "teiserver.staff.moderator"
+        label: "Moderation proposals",
+        icons: [Teiserver.Moderation.ProposalLib.icon(), :list],
+        url: ~p"/moderation/proposal",
+        permissions: "teiserver.staff.reviewer"
       },
       %{
-        label: "Server metrics - Load report",
-        icons: [
-          "fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}",
-          "fa-regular fa-server"
-        ],
-        url: ~p"/teiserver/reports/server/day_metrics/load",
-        permissions: "teiserver.staff.moderator"
-      },
-
-      # Match metrics
-      %{
-        label: "Match metrics - Daily",
-        icons: ["fa-regular #{Teiserver.Battle.MatchLib.icon()}", :day],
-        url: ~p"/teiserver/reports/match/day_metrics",
-        permissions: "teiserver.staff.moderator"
-      },
-      %{
-        label: "Match metrics - Monthly",
-        icons: ["fa-regular #{Teiserver.Battle.MatchLib.icon()}", :month],
-        url: ~p"/teiserver/reports/match/month_metrics",
-        permissions: "teiserver.staff.moderator"
-      },
-
-      # Dev/Admin
-      %{
-        label: "Teiserver live metrics",
-        icons: ["fa-regular fa-tachometer-alt", :list],
-        url: ~p"/teiserver/admin/metrics",
-        permissions: "logging.live"
+        label: "Moderation bans",
+        icons: [Teiserver.Moderation.BanLib.icon(), :list],
+        url: ~p"/moderation/ban",
+        permissions: "teiserver.staff.reviewer"
       }
-    ])
+    ]
   end
 end
