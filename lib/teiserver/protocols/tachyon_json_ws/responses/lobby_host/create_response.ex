@@ -1,4 +1,4 @@
-defmodule Teiserver.Tachyon.Responses.LobbyHost.CreateResponse do
+defmodule Teiserver.Tachyon.LobbyHost.CreateResponse do
   @moduledoc """
   Updated status response - https://github.com/beyond-all-reason/tachyon/blob/master/src/schema/lobby_host.ts
   """
