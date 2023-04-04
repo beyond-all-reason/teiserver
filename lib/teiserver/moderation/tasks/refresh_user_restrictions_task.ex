@@ -19,7 +19,6 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
       # runs just after startup the users may not be in the cache
       Account.list_users(
         search: [
-          # data_not: {"restricted_until", nil},
           data_less_than: {"restricted_until", now_as_string}
         ],
         select: [:id]
