@@ -17,8 +17,8 @@ defmodule Teiserver.Account.RecordsReport do
       {"Peak players", get_top(~w(aggregates stats peak_user_counts player))},
       {"Unique users", get_top(~w(aggregates stats unique_users))},
       {"Unique players", get_top(~w(aggregates stats unique_players))},
-      {"Player time (days)", get_top(~w(aggregates minutes player)) |> minutes_to_days},
-      {"Total time (days)", get_top(~w(aggregates minutes total)) |> minutes_to_days}
+      {"Total time (days)", get_top(~w(aggregates minutes total)) |> minutes_to_days},
+      {"Player time (days)", get_top(~w(aggregates minutes player)) |> minutes_to_days}
     ]
 
     # force_recache = (Map.get(params, "recache", false) == "true")
@@ -30,9 +30,9 @@ defmodule Teiserver.Account.RecordsReport do
       "Peak players" => today["aggregates"]["stats"]["peak_user_counts"]["player"],
       "Unique users" => today["aggregates"]["stats"]["unique_users"],
       "Unique players" => today["aggregates"]["stats"]["unique_players"],
+      "Total time (days)" => today["aggregates"]["minutes"]["total"] |> Kernel.div(1440) |> round,
       "Player time (days)" =>
-        today["aggregates"]["minutes"]["player"] |> Kernel.div(1440) |> round,
-      "Total time (days)" => today["aggregates"]["minutes"]["total"] |> Kernel.div(1440) |> round
+        today["aggregates"]["minutes"]["player"] |> Kernel.div(1440) |> round
     }
 
     %{
