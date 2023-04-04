@@ -68,10 +68,19 @@
 
                 <td>
                   <a
-                    href={Routes.moderation_action_path(@conn, :show, action.id)}
+                    href={~p"/moderation/action/#{action.id}"}
                     class="btn btn-secondary btn-sm"
                   >
                     Show
+                  </a>
+                </td>
+
+                <td>
+                  <a
+                    href={~p"/teiserver/admin/user/#{action.target_id}"}
+                    class="btn btn-secondary btn-sm"
+                  >
+                    User
                   </a>
                 </td>
               </tr>

@@ -108,6 +108,7 @@ bsname = view_colour() %>
                 <%= error_tag(f, :restrictions) %>
 
                 <div class="col-md-3 col-lg-2 mt-3">
+                  <h4>Generics</h4>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
@@ -135,7 +136,10 @@ bsname = view_colour() %>
                   >
                     Add ban
                   </div>
+                </div>
 
+                <div class="col-md-3 col-lg-2 mt-3">
+                  <h4>Specifics</h4>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
@@ -178,13 +182,36 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_restriction_Site').prop('checked', true);
-        $('#action_restriction_Login').prop('checked', true);
-        $('#action_reason').val('Disrupting an event after being asked/warned not to.');
-        $('#action_expires').val('1 hour');
+        $('#action_restriction_Warning_reminder').prop('checked', true);
+        $('#action_reason').val('Evading moderation by creating new accounts is not okay. If you do it again we will increase the duration of the sentence.');
+        $('#action_expires').val('1 day');
       "
                   >
-                    Add event disruption
+                    Moderation evasion warning
+                  </div>
+
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
+        $('#action_restriction_Site').prop('checked', true);
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('Account used to evade moderation. If you think there has been an error please use the #open-ticket discord channel to talk to the moderation team. The discord can be accessed at #{discord_link}');
+        $('#action_expires').val('1000 years');
+      "
+                  >
+                    Moderation evasion ban
+                  </div>
+
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick={"
+        $('#action_restriction_Site').prop('checked', true);
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('Smurf accounts are not allowed, if you need an exemption or you think there has been an error please use the #open-ticket discord channel to talk to the moderation team. The discord can be accessed at #{discord_link}');
+        $('#action_expires').val('1000 years');
+      "}
+                  >
+                    Moderation evasion ban
                   </div>
 
                   <div

@@ -100,9 +100,18 @@ defmodule Teiserver.Moderation.ActionLib do
       where: actions.expires > ^Timex.now()
   end
 
-  def _search(query, :expiry, "Permanent only") do
+  def _search(query, :expiry, "Unexpired not permanent") do
+    years = Timex.now |> Timex.shift(years: 100)
+
     from actions in query,
-      where: is_nil(actions.expires)
+      where: actions.expires > ^Timex.now() and actions.expires < ^years
+  end
+
+  def _search(query, :expiry, "Permanent only") do
+    years = Timex.now |> Timex.shift(years: 100)
+
+    from actions in query,
+      where: actions.expires > ^years
   end
 
   def _search(query, :expiry, "All active") do
