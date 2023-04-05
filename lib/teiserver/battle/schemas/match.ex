@@ -24,6 +24,8 @@ defmodule Teiserver.Battle.Match do
     # TODO: Tourney support?
 
     belongs_to :queue, Teiserver.Game.Queue
+    belongs_to :rating_type, Teiserver.Game.RatingType
+    belongs_to :lobby_policy, Teiserver.Game.LobbyPolicy
 
     field :started, :utc_datetime
     field :finished, :utc_datetime
@@ -43,7 +45,7 @@ defmodule Teiserver.Battle.Match do
     struct
     |> cast(
       params,
-      ~w(server_uuid uuid map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id game_duration)a
+      ~w(server_uuid uuid map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id rating_type_id lobby_policy_id game_duration)a
     )
     |> validate_required(
       ~w(server_uuid uuid map tags team_count team_size passworded game_type founder_id bots started)a
