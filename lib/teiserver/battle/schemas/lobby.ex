@@ -111,6 +111,7 @@ defmodule Teiserver.Battle.Lobby do
 
         # To tie it into matchmaking
         queue_id: nil,
+        match_id: nil,
 
         # Rename flags
         # consul rename means it was renamed by a player and overrides spads

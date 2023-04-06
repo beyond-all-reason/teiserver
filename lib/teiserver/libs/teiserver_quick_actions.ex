@@ -146,7 +146,7 @@ defmodule Teiserver.TeiserverQuickActions do
       %{
         label: "Server metrics - Now report",
         icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", "fa-regular fa-clock"],
-        url: ~p"/teiserver/reports/server/day_metrics/now",
+        url: ~p"/reports/server/now",
         permissions: "teiserver.staff.moderator"
       },
       %{
@@ -155,7 +155,7 @@ defmodule Teiserver.TeiserverQuickActions do
           "fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}",
           "fa-regular fa-server"
         ],
-        url: ~p"/teiserver/reports/server/day_metrics/load",
+        url: ~p"/reports/server/load",
         permissions: "teiserver.staff.moderator"
       },
 

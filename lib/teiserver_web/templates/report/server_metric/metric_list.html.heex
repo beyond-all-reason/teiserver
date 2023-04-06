@@ -1,0 +1,147 @@
+<% bsname = view_colour() %>
+
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "server_metrics"})
+) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render(
+          TeiserverWeb.Report.ServerMetricView,
+          "section_menu.html",
+          Map.merge(assigns, %{
+            active: "#{@unit}_list"
+          })
+        ) %>
+        <br /><br />
+
+        <%= central_component("section_menu_button",
+          name: "filter-default",
+          label: "Data list",
+          active: "filter-#{@filter}",
+          icon: StylingHelper.icon(:list),
+          bsname: bsname,
+          url: "?filter=default"
+        ) %>
+
+        <%= if @unit == "day" do %>
+          &nbsp;&nbsp;
+
+          <%= central_component("section_menu_button",
+            name: "filter-hourly-users",
+            label: "Users",
+            active: "filter-#{@filter}",
+            icon: "fa-regular fa-grid-4",
+            bsname: bsname,
+            url: "?filter=hourly-users"
+          ) %>
+
+          <%= central_component("section_menu_button",
+            name: "filter-hourly-players",
+            label: "Players",
+            active: "filter-#{@filter}",
+            icon: "fa-regular fa-grid-4",
+            bsname: bsname,
+            url: "?filter=hourly-players"
+          ) %>
+
+          <%= central_component("section_menu_button",
+            name: "filter-hourly-battles",
+            label: "Battles",
+            active: "filter-#{@filter}",
+            icon: "fa-regular fa-grid-4",
+            bsname: bsname,
+            url: "?filter=hourly-battles"
+          ) %>
+        <% end %>
+
+        &nbsp;&nbsp;
+
+        <%= central_component("section_menu_button",
+          name: "filter-graph-unique-users",
+          label: "Unique users",
+          active: "filter-#{@filter}",
+          icon: StylingHelper.icon(:chart),
+          bsname: bsname,
+          url: "?filter=graph-unique-users"
+        ) %>
+
+        <%= central_component("section_menu_button",
+          name: "filter-graph-peak-users",
+          label: "Peak users",
+          active: "filter-#{@filter}",
+          icon: StylingHelper.icon(:chart),
+          bsname: bsname,
+          url: "?filter=graph-peak-users"
+        ) %>
+
+        <%= central_component("section_menu_button",
+          name: "filter-graph-time",
+          label: "Time",
+          active: "filter-#{@filter}",
+          icon: StylingHelper.icon(:chart),
+          bsname: bsname,
+          url: "?filter=graph-time"
+        ) %>
+
+        <%= central_component("section_menu_button",
+          name: "filter-graph-client-events",
+          label: "Client events",
+          active: "filter-#{@filter}",
+          icon: StylingHelper.icon(:chart),
+          bsname: bsname,
+          url: "?filter=graph-client-events"
+        ) %>
+
+        <%= central_component("section_menu_button",
+          name: "filter-graph-server-events",
+          label: "Server events",
+          active: "filter-#{@filter}",
+          icon: StylingHelper.icon(:chart),
+          bsname: bsname,
+          url: "?filter=graph-server-events"
+        ) %>
+
+        <%= if String.starts_with?(@filter, "hourly-") do %>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+
+          <span class={"btn btn-#{bsname}"} onclick='$(".hourly-view-span").show();'>
+            <i class="fa-fw fa-regular fa-eye"></i>
+            Show numbers
+          </span>
+
+          <span class={"btn btn-#{bsname}"} onclick='$(".hourly-view-span").hide();'>
+            <i class="fa-fw fa-regular fa-eye-slash"></i>
+            Hide numbers
+          </span>
+        <% end %>
+
+        <a
+          href={Routes.ts_reports_match_metric_path(@conn, :day_metrics_list)}
+          class={"btn float-end btn-outline-#{TeiserverWeb.Report.MatchMetricView.view_colour}"}
+        >
+          <%= central_component("icon", icon: TeiserverWeb.Report.MatchMetricView.icon()) %> &nbsp;
+          Match data
+        </a>
+        <br /><br />
+
+        <%= case @filter do %>
+          <% "hourly-users" -> %>
+            <%= render("heatmap_list.html", Map.put(assigns, :path, ~w(average_user_counts total))) %>
+          <% "hourly-players" -> %>
+            <%= render("heatmap_list.html", Map.put(assigns, :path, ~w(average_user_counts player))) %>
+          <% "hourly-battles" -> %>
+            <%= render("heatmap_list.html", Map.put(assigns, :path, ~w(battles in_progress))) %>
+          <% "graph-" <> _ -> %>
+            <%= render("metric_graph.html", assigns) %>
+          <% _ -> %>
+            <%= render("metric_list_data.html", assigns) %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

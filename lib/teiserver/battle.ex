@@ -535,8 +535,8 @@ defmodule Teiserver.Battle do
   @spec create_lobby(map) :: T.lobby() | nil
   defdelegate create_lobby(lobby_id), to: Lobby
 
-  @spec add_lobby(T.lobby()) :: T.lobby() | nil
-  defdelegate add_lobby(lobby_id), to: Lobby
+  @spec add_lobby(T.lobby()) :: T.lobby()
+  defdelegate add_lobby(lobby), to: LobbyCache
 
   @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
   defdelegate get_lobby_pid(lobby_id), to: LobbyCache
@@ -607,9 +607,6 @@ defmodule Teiserver.Battle do
 
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
   defdelegate update_lobby(lobby, data, reason), to: LobbyCache
-
-  @spec add_lobby(T.lobby()) :: T.lobby()
-  defdelegate add_lobby(lobby), to: LobbyCache
 
   @spec set_lobby_password(T.lobby_id(), String.t() | nil) :: :ok | nil
   defdelegate set_lobby_password(lobby_id, new_password), to: LobbyCache

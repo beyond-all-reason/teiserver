@@ -28,7 +28,7 @@ defmodule Teiserver.Account.ReviewReport do
         ],
         limit: :infinity
       )
-      |> Teiserver.Telemetry.Tasks.PersistServerMonthTask.run()
+      |> Teiserver.Telemetry.ServerDayLogLib.aggregate_day_logs()
       |> Jason.encode!()
       |> Jason.decode!()
 
@@ -44,7 +44,7 @@ defmodule Teiserver.Account.ReviewReport do
         ],
         limit: :infinity
       )
-      |> Teiserver.Telemetry.Tasks.PersistServerMonthTask.run()
+      |> Teiserver.Telemetry.ServerDayLogLib.aggregate_day_logs()
       |> Jason.encode!()
       |> Jason.decode!()
 

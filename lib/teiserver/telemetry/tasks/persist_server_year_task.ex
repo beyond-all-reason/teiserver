@@ -1,5 +1,5 @@
-defmodule Teiserver.Telemetry.Tasks.PersistServerWeekTask do
-  @moduledoc false
+defmodule Teiserver.Telemetry.Tasks.PersistServerYearTask do
+    @moduledoc false
   use Oban.Worker, queue: :teiserver
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.ServerDayLogLib
@@ -9,7 +9,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerWeekTask do
   @spec perform(any) :: :ok
   def perform(_) do
     log =
-      case Telemetry.get_last_server_week_log() do
+      case Telemetry.get_last_server_year_log() do
         nil ->
           perform_first_time()
 
@@ -19,7 +19,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerWeekTask do
 
     if log != nil do
       %{}
-      |> Teiserver.Telemetry.Tasks.PersistServerWeekTask.new()
+      |> Teiserver.Telemetry.Tasks.PersistServerYearTask.new()
       |> Oban.insert()
     end
 
@@ -27,7 +27,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerWeekTask do
   end
 
   # For when there are no existing logs
-  # we need to ensure the earliest log is from last week, not this week
+  # we need to ensure the earliest log is from last year, not this year
   defp perform_first_time() do
     first_logs =
       Telemetry.list_server_day_logs(
@@ -37,24 +37,22 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerWeekTask do
 
     case first_logs do
       [log] ->
-        {today_year, today_week} = Timex.today() |> Timex.iso_week()
-        {log_year, log_week} = log.date |> Timex.iso_week()
+        log_year = log.date.year
 
-        if log_year < today_year or log_week < today_week do
+        if log_year < Timex.today().year do
           logs =
             Telemetry.list_server_day_logs(
               search: [
-                start_date: Timex.beginning_of_week(log.date),
-                end_date: Timex.end_of_week(log.date)
+                start_date: Timex.beginning_of_year(log.date),
+                end_date: Timex.end_of_year(log.date)
               ]
             )
 
           data = ServerDayLogLib.aggregate_day_logs(logs)
 
-          {:ok, _} = Telemetry.create_server_week_log(%{
+          {:ok, _} = Telemetry.create_server_year_log(%{
             year: log_year,
-            week: log_week,
-            date: Timex.beginning_of_week(log.date),
+            date: Timex.beginning_of_year(log.date),
             data: data
           })
         end
@@ -66,25 +64,23 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerWeekTask do
 
   # For when we have an existing log
   defp perform_standard(log_date) do
-    new_date = Timex.shift(log_date, days: 7)
+    new_date = Timex.shift(log_date, years: 1)
 
-    {new_year, new_week} = new_date |> Timex.iso_week()
-    {today_year, today_week} = Timex.today() |> Timex.iso_week()
+    today_year = Timex.today().year
 
-    if new_year < today_year or new_week < today_week do
+    if new_date.year < today_year do
       logs =
         Telemetry.list_server_day_logs(
           search: [
-            start_date: Timex.beginning_of_week(new_date),
-            end_date: Timex.end_of_week(new_date)
+            start_date: Timex.beginning_of_year(new_date),
+            end_date: Timex.end_of_year(new_date)
           ]
         )
 
       data = ServerDayLogLib.aggregate_day_logs(logs)
 
-      {:ok, _} = Telemetry.create_server_week_log(%{
-        year: new_year,
-        week: new_week,
+      {:ok, _} = Telemetry.create_server_year_log(%{
+        year: new_date.year,
         date: new_date,
         data: data
       })
@@ -93,13 +89,13 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerWeekTask do
     end
   end
 
-  @spec week_so_far() :: map()
-  def week_so_far() do
+  @spec year_so_far() :: map()
+  def year_so_far() do
     now = Timex.now()
 
     Telemetry.list_server_day_logs(
       search: [
-        start_date: Timex.beginning_of_week(now)
+        start_date: Timex.beginning_of_year(now)
       ]
     )
     |> ServerDayLogLib.aggregate_day_logs

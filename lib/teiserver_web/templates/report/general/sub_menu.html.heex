@@ -33,7 +33,7 @@
               name: "server_metrics",
               label: "Server metrics",
               active: @active,
-              url: Routes.ts_reports_server_metric_path(@conn, :day_metrics_list),
+              url: ~p"/reports/server/list",
               icon: Teiserver.Telemetry.ServerDayLogLib.icon()
             ) %>
 

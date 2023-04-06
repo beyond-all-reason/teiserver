@@ -16,11 +16,12 @@ defmodule Teiserver.Account.GrowthReport do
   def run(_conn, params) do
     params = apply_defaults(params)
 
-    days =
-      params["days"]
+    limit =
+      params["limit"]
       |> int_parse
 
-    server_data = get_server_metrics(days)
+    server_data = get_server_logs(params["time_unit"], limit)
+      |> get_server_metrics()
 
     assigns =
       %{
@@ -34,21 +35,15 @@ defmodule Teiserver.Account.GrowthReport do
   defp apply_defaults(params) do
     Map.merge(
       %{
-        "days" => "31",
-        "columns" => "1"
+        "limit" => "31",
+        "columns" => "1",
+        "time_unit" => "Day"
       },
       Map.get(params, "report", %{})
     )
   end
 
-  defp get_server_metrics(days) do
-    logs =
-      Telemetry.list_server_day_logs(
-        order: "Newest first",
-        limit: days
-      )
-      |> Enum.reverse()
-
+  defp get_server_metrics(logs) do
     # Unique counts
     field_list = [
       {"Unique users", "aggregates.stats.unique_users"},
@@ -80,8 +75,8 @@ defmodule Teiserver.Account.GrowthReport do
 
     # Time counts
     field_list = [
-      {"Player days", "aggregates.minutes.player"},
-      {"Total days", "aggregates.minutes.total"}
+      {"Player limit", "aggregates.minutes.player"},
+      {"Total limit", "aggregates.minutes.total"}
     ]
 
     columns =
@@ -153,5 +148,41 @@ defmodule Teiserver.Account.GrowthReport do
       pve_counts: pve_counts,
       singleplayer_counts: singleplayer_counts
     }
+  end
+
+  defp get_server_logs(time_unit, limit) do
+    logs = case time_unit do
+        "Day" ->
+          Telemetry.list_server_day_logs(
+            order: "Newest first",
+            limit: limit
+          )
+
+        "Week" ->
+          Telemetry.list_server_week_logs(
+            order: "Newest first",
+            limit: limit
+          )
+
+        "Month" ->
+          Telemetry.list_server_month_logs(
+            order: "Newest first",
+            limit: limit
+          )
+
+        "Quarter" ->
+          Telemetry.list_server_quarter_logs(
+            order: "Newest first",
+            limit: limit
+          )
+
+        "Year" ->
+          Telemetry.list_server_year_logs(
+            order: "Newest first",
+            limit: limit
+          )
+      end
+
+    Enum.reverse(logs)
   end
 end

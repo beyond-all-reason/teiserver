@@ -520,6 +520,7 @@ defmodule TeiserverWeb.Admin.UserController do
         result =
           case action do
             "recache" ->
+              Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user.id)
               Teiserver.User.recache_user(user.id)
               {:ok, ""}
 

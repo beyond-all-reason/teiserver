@@ -5,7 +5,7 @@ defmodule Teiserver.Telemetry.ServerWeekLog do
   schema "teiserver_server_week_logs" do
     field :year, :integer, primary_key: true
     field :week, :integer, primary_key: true
-    field :week_start, :date
+    field :date, :date
     field :data, :map
   end
 
@@ -15,8 +15,8 @@ defmodule Teiserver.Telemetry.ServerWeekLog do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, ~w(year week week_start data)a)
-    |> validate_required(~w(year week week_start data)a)
+    |> cast(params, ~w(year week date data)a)
+    |> validate_required(~w(year week date data)a)
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean

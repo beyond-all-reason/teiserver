@@ -405,14 +405,25 @@ defmodule CentralWeb.Router do
   end
 
   # REPORTING
+  scope "/reports/server", TeiserverWeb.Report do
+    pipe_through([:browser, :standard_layout, :protected])
+
+    # Server metric specifics
+    get("/now", ServerMetricController, :now)
+    get("/load", ServerMetricController, :load)
+
+    get("/list", ServerMetricController, :metric_list)
+    get("/list/:unit", ServerMetricController, :metric_list)
+    get("/show/:unit/today", ServerMetricController, :metric_show_today)
+    get("/show/:unit/:date", ServerMetricController, :metric_show)
+  end
+
   scope "/teiserver/reports", TeiserverWeb.Report, as: :ts_reports do
     pipe_through([:browser, :standard_layout, :protected])
 
     get("/", GeneralController, :index)
 
-    # Server metrics
-    get("/server/day_metrics/now", ServerMetricController, :now)
-    get("/server/day_metrics/load", ServerMetricController, :load)
+    # Server metric generics
     get("/server/day_metrics/today", ServerMetricController, :day_metrics_today)
     get("/server/day_metrics/show/:date", ServerMetricController, :day_metrics_show)
     get("/server/day_metrics/export_form", ServerMetricController, :day_metrics_export_form)
@@ -422,12 +433,26 @@ defmodule CentralWeb.Router do
     get("/server/day_metrics", ServerMetricController, :day_metrics_list)
     post("/server/day_metrics", ServerMetricController, :day_metrics_list)
 
+    get("/server/week_metrics/today", ServerMetricController, :week_metrics_today)
+    get("/server/week_metrics/show/:year/:week", ServerMetricController, :week_metrics_show)
+    get("/server/week_metrics/graph", ServerMetricController, :week_metrics_graph)
+    post("/server/week_metrics/graph", ServerMetricController, :week_metrics_graph)
+    get("/server/week_metrics", ServerMetricController, :week_metrics_list)
+    post("/server/week_metrics", ServerMetricController, :week_metrics_list)
+
     get("/server/month_metrics/today", ServerMetricController, :month_metrics_today)
     get("/server/month_metrics/show/:year/:month", ServerMetricController, :month_metrics_show)
     get("/server/month_metrics/graph", ServerMetricController, :month_metrics_graph)
     post("/server/month_metrics/graph", ServerMetricController, :month_metrics_graph)
     get("/server/month_metrics", ServerMetricController, :month_metrics_list)
     post("/server/month_metrics", ServerMetricController, :month_metrics_list)
+
+    get("/server/quarter_metrics/today", ServerMetricController, :quarter_metrics_today)
+    get("/server/quarter_metrics/show/:year/:quarter", ServerMetricController, :quarter_metrics_show)
+    get("/server/quarter_metrics/graph", ServerMetricController, :quarter_metrics_graph)
+    post("/server/quarter_metrics/graph", ServerMetricController, :quarter_metrics_graph)
+    get("/server/quarter_metrics", ServerMetricController, :quarter_metrics_list)
+    post("/server/quarter_metrics", ServerMetricController, :quarter_metrics_list)
 
     # Match metrics
     get("/match/day_metrics/today", MatchMetricController, :day_metrics_today)

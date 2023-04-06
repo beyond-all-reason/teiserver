@@ -274,7 +274,7 @@ col_class = col_class <> " my-2" %>
               <div class="card-body">
                 <div class="row">
                   <form
-                    action={Routes.ts_reports_server_metric_path(@conn, :load)}
+                    action={~p"/reports/server/load"}
                     method="get"
                     class=""
                   >

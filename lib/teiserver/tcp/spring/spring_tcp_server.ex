@@ -6,7 +6,7 @@ defmodule Teiserver.SpringTcpServer do
   alias Phoenix.PubSub
   alias Central.Config
   alias Teiserver.{User, Client}
-  alias Teiserver.Data.Types, as: T
+  # alias Teiserver.Data.Types, as: T
 
   @send_interval 100
   @init_timeout 60_000
@@ -994,46 +994,46 @@ defmodule Teiserver.SpringTcpServer do
     User.set_flood_level(state.userid, 10)
     Client.disconnect(state.userid, "SpringTCPServer.flood_protection")
 
-    Logger.error(
+    Logger.info(
       "Spring command overflow from #{state.username}/#{state.userid} with #{Enum.count(state.cmd_timestamps)} commands. Disconnected and flood protection engaged."
     )
 
     {:stop, "Flood protection", state}
   end
 
-  @spec introduce_user(T.client() | T.userid() | nil, map()) :: map()
-  defp introduce_user(nil, state), do: state
+  # @spec introduce_user(T.client() | T.userid() | nil, map()) :: map()
+  # defp introduce_user(nil, state), do: state
 
-  defp introduce_user(userid, state) when is_integer(userid) do
-    client = Client.get_client_by_id(userid)
-    forget_user(client, state)
-  end
+  # defp introduce_user(userid, state) when is_integer(userid) do
+  #   client = Client.get_client_by_id(userid)
+  #   forget_user(client, state)
+  # end
 
-  defp introduce_user(client, state) do
-    state.protocol_out.reply(:user_logged_in, client, nil, state)
-    new_known = Map.put(state.known_users, client.userid, _blank_user(client.userid))
-    %{state | known_users: new_known}
-  end
+  # defp introduce_user(client, state) do
+  #   state.protocol_out.reply(:user_logged_in, client, nil, state)
+  #   new_known = Map.put(state.known_users, client.userid, _blank_user(client.userid))
+  #   %{state | known_users: new_known}
+  # end
 
-  @spec forget_user(T.client() | T.userid() | nil, map()) :: map()
-  defp forget_user(nil, state), do: state
+  # @spec forget_user(T.client() | T.userid() | nil, map()) :: map()
+  # defp forget_user(nil, state), do: state
 
-  defp forget_user(userid, state) when is_integer(userid) do
-    client = Client.get_client_by_id(userid)
-    forget_user(client, state)
-  end
+  # defp forget_user(userid, state) when is_integer(userid) do
+  #   client = Client.get_client_by_id(userid)
+  #   forget_user(client, state)
+  # end
 
-  defp forget_user(client, state) do
-    case state.known_users[client.userid] do
-      nil ->
-        state
+  # defp forget_user(client, state) do
+  #   case state.known_users[client.userid] do
+  #     nil ->
+  #       state
 
-      _ ->
-        state.protocol_out.reply(:user_logged_out, {client.userid, client.name}, nil, state)
-        new_known = Map.delete(state.known_users, client.userid)
-        %{state | known_users: new_known}
-    end
-  end
+  #     _ ->
+  #       state.protocol_out.reply(:user_logged_out, {client.userid, client.name}, nil, state)
+  #       new_known = Map.delete(state.known_users, client.userid)
+  #       %{state | known_users: new_known}
+  #   end
+  # end
 
   # Example of how gen-smtp handles upgrading the connection
   # https://github.com/gen-smtp/gen_smtp/blob/master/src/gen_smtp_server_session.erl#L683-L720

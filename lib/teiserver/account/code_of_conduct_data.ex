@@ -1,5 +1,5 @@
 defmodule Teiserver.Account.CodeOfConductData do
-  alias Central.NestedMaps
+  @moduledoc false
 
   @spec data() :: %{String.t() => %{String.t() => String.t()}}
   def data do
@@ -75,7 +75,7 @@ defmodule Teiserver.Account.CodeOfConductData do
   def get_point(key) do
     case String.split(key, ".") do
       [p1, p2] ->
-        NestedMaps.get(data(), [p1, p2])
+        get_in(data(), [p1, p2])
 
       _ ->
         nil

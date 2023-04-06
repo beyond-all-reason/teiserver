@@ -5,6 +5,7 @@ defmodule Teiserver.Telemetry.ServerMonthLog do
   schema "teiserver_server_month_logs" do
     field :year, :integer, primary_key: true
     field :month, :integer, primary_key: true
+    field :date, :date
     field :data, :map
   end
 
@@ -14,8 +15,8 @@ defmodule Teiserver.Telemetry.ServerMonthLog do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:year, :month, :data])
-    |> validate_required([:year, :month, :data])
+    |> cast(params, ~w(year month date data)a)
+    |> validate_required(~w(year month date data)a)
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean

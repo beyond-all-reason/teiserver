@@ -1,5 +1,9 @@
 <% {_fg, bg, _bsname} = view_colour() |> colours() %>
 
+<h4>
+  Server metrics by <%= @unit %>
+</h4>
+
 <table class="table table-sm">
   <thead>
     <tr>
@@ -19,8 +23,19 @@
   </thead>
   <tbody>
     <%= for log <- @logs do %>
+      <%
+        date_string = case @unit do
+          "day" -> Timex.format!(log.date, "{YYYY}-{0M}-{0D} {WDshort}")
+          "week" ->
+            {_, week} = Timex.iso_week(log.date)
+            Timex.format!(log.date, "{YYYY}-{0M}-{0D}") <> " ##{week}"
+          "month" -> Timex.format!(log.date, "{YYYY}-{0M}")
+          "quarter" -> Timex.format!(log.date, "{YYYY}-{0M}")
+          "year" -> log.date.year
+        end
+      %>
       <tr>
-        <td><%= Timex.format!(log.date, "{0D}/{0M}/{YYYY} {WDshort}") %></td>
+        <td><%= date_string %></td>
 
         <td><%= format_number(log.data["aggregates"]["stats"]["unique_users"]) %></td>
         <td><%= format_number(log.data["aggregates"]["stats"]["unique_players"]) %></td>
@@ -37,18 +52,23 @@
 
         <td>
           <%= link("Show",
-            to:
-              Routes.ts_reports_server_metric_path(
-                @conn,
-                :day_metrics_show,
-                date_to_str(log.date, format: :ymd)
-              ),
+            to: ~p"/reports/server/show/#{@unit}/#{log.date |> date_to_str(format: :ymd)}",
             class: "btn btn-secondary btn-sm"
           ) %>
         </td>
       </tr>
 
-      <%= if log.date.day == 1 do %>
+      <%
+        break = case @unit do
+          "day" -> log.date.day == 1
+          "week" -> log.week == 1
+          "month" -> log.month == 1
+          "quarter" -> log.quarter == 1
+          _ -> false
+        end
+      %>
+
+      <%= if break do %>
         <tr>
           <td colspan="9" style={"background-color: #{bg}"}>
             <div style="height: 5px;">&nbsp;</div>

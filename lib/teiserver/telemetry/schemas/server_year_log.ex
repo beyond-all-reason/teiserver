@@ -1,10 +1,9 @@
-defmodule Teiserver.Telemetry.ServerQuarterLog do
+defmodule Teiserver.Telemetry.ServerYearLog do
   use CentralWeb, :schema
 
   @primary_key false
-  schema "teiserver_server_quarter_logs" do
+  schema "teiserver_server_year_logs" do
     field :year, :integer, primary_key: true
-    field :quarter, :integer, primary_key: true
     field :date, :date
     field :data, :map
   end
@@ -15,8 +14,8 @@ defmodule Teiserver.Telemetry.ServerQuarterLog do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, ~w(year quarter date data)a)
-    |> validate_required(~w(year quarter date data)a)
+    |> cast(params, ~w(year date data)a)
+    |> validate_required(~w(year date data)a)
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean
