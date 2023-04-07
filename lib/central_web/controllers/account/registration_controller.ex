@@ -13,36 +13,37 @@ defmodule CentralWeb.Account.RegistrationController do
   def new(conn, params) do
     config_setting = Central.Config.get_site_config_cache("user.Enable user registrations")
 
-    {allowed, reason} = cond do
-      config_setting == "Allowed" ->
-        {true, nil}
+    {allowed, reason} =
+      cond do
+        config_setting == "Allowed" ->
+          {true, nil}
 
-      config_setting == "Disabled" ->
-        {false, "disabled"}
+        config_setting == "Disabled" ->
+          {false, "disabled"}
 
-      config_setting == "Link only" ->
-        code = Account.get_code(params["code"] || "!no_code!")
+        config_setting == "Link only" ->
+          code = Teiserver.Account.get_code(params["code"] || "!no_code!")
 
-        cond do
-          params["code"] == nil ->
-            {false, "no_code"}
+          cond do
+            params["code"] == nil ->
+              {false, "no_code"}
 
-          code == nil ->
-            {false, "invalid_code"}
+            code == nil ->
+              {false, "invalid_code"}
 
-          code.purpose != "user_registration" ->
-            {false, "invalid_code"}
+            code.purpose != "user_registration" ->
+              {false, "invalid_code"}
 
-          Timex.compare(Timex.now(), code.expires) == 1 ->
-            {false, "expired_code"}
+            Timex.compare(Timex.now(), code.expires) == 1 ->
+              {false, "expired_code"}
 
-          true ->
-            {true, nil}
-        end
+            true ->
+              {true, nil}
+          end
 
-      true ->
-        {false, "disabled"}
-    end
+        true ->
+          {false, "disabled"}
+      end
 
     if allowed do
       changeset = Account.change_user(%User{})
@@ -65,43 +66,45 @@ defmodule CentralWeb.Account.RegistrationController do
     user_params = Account.merge_default_params(user_params)
     config_setting = Central.Config.get_site_config_cache("user.Enable user registrations")
 
-    {allowed, reason} = cond do
-      config_setting == "Allowed" ->
-        {true, nil}
+    {allowed, reason} =
+      cond do
+        config_setting == "Allowed" ->
+          {true, nil}
 
-      config_setting == "Disabled" ->
-        {false, "disabled"}
+        config_setting == "Disabled" ->
+          {false, "disabled"}
 
-      config_setting == "Link only" ->
-        code = Account.get_code(user_params["code"] || "!no_code!")
+        config_setting == "Link only" ->
+          code = Teiserver.Account.get_code(user_params["code"] || "!no_code!")
 
-        cond do
-          user_params["code"] == nil ->
-            {false, "no_code"}
+          cond do
+            user_params["code"] == nil ->
+              {false, "no_code"}
 
-          code == nil ->
-            {false, "invalid_code"}
+            code == nil ->
+              {false, "invalid_code"}
 
-          code.purpose != "user_registration" ->
-            {false, "invalid_code"}
+            code.purpose != "user_registration" ->
+              {false, "invalid_code"}
 
-          Timex.compare(Timex.now(), code.expires) == 1 ->
-            {false, "expired_code"}
+            Timex.compare(Timex.now(), code.expires) == 1 ->
+              {false, "expired_code"}
 
-          true ->
-            {true, nil}
-        end
+            true ->
+              {true, nil}
+          end
 
-      true ->
-        {false, "disabled"}
-    end
+        true ->
+          {false, "disabled"}
+      end
 
     if allowed do
       case Account.self_create_user(user_params) do
         {:ok, _user} ->
-          case Account.get_code(user_params["code"]) do
+          case Teiserver.Account.get_code(user_params["code"]) do
             nil ->
               :ok
+
             code ->
               add_audit_log(conn, "Account:User registration", %{
                 code_value: code.value,
@@ -155,11 +158,12 @@ defmodule CentralWeb.Account.RegistrationController do
     user = Account.get_user!(conn.user_id)
     user_params = Map.put(user_params, "password", user_params["password_confirmation"])
 
-    user_params = if Central.Config.get_site_config_cache("user.Enable renames") do
-      user_params
-    else
-      Map.drop(user_params, ["name"])
-    end
+    user_params =
+      if Central.Config.get_site_config_cache("user.Enable renames") do
+        user_params
+      else
+        Map.drop(user_params, ["name"])
+      end
 
     case Account.update_user(user, user_params, :user_form) do
       {:ok, _user} ->

@@ -1,0 +1,74 @@
+<% {_fg, bg, _bsname} = view_colour() |> colours() %>
+
+<style type="text/css">
+  .hourly-view-date {
+    /*
+    font-size: 0.9em;
+    */
+  }
+
+  .hourly-view-cell {
+    color: #FFF;
+    text-shadow: 0px 0px #000;
+    font-weight: bold;
+    font-size: 0.9em;
+  }
+</style>
+
+<% maximum =
+  @logs
+  |> Enum.reduce(0, fn log, current_max ->
+    this_max = Enum.reduce(get_in(log.data, @path), 0, &max/2)
+    max(this_max, current_max)
+  end) %>
+
+<table class="table table-sm" class="heatmap-table">
+  <thead>
+    <tr>
+      <th>Date</th>
+
+      <%= for i <- 0..23 do %>
+        <th><%= i %></th>
+      <% end %>
+
+      <th colspan="1"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for log <- @logs do %>
+      <tr>
+        <td class="hourly-view-date">
+          <%= Timex.format!(log.date, "{YYYY}-{0M}-{0D}") %>
+        </td>
+        <%= for i <- 0..23 do %>
+          <%
+            value = Enum.fetch!(get_in(log.data, @path), i)
+          %>
+          <td
+            class="hourly-view-cell"
+            style={"background-color: ##{heatmap(value, maximum, "black-red")};"}
+          >
+            <span class="hourly-view-span">
+              <%= value |> round() |> format_number %>
+            </span>
+          </td>
+        <% end %>
+
+        <td>
+          <%= link("Show",
+            to: ~p"/reports/server/show/day/#{date_to_str(log.date, format: :ymd)}",
+            class: "btn btn-secondary btn-sm"
+          ) %>
+        </td>
+      </tr>
+
+      <%= if log.date.day == 1 do %>
+        <tr>
+          <td colspan="25" style={"background-color: #{bg}"}>
+            <div style="height: 5px;">&nbsp;</div>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>

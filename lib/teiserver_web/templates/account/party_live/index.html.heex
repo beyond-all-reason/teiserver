@@ -1,28 +1,24 @@
-<%
-  bsname = @view_colour
-  moderator = allow?(@current_user, "teiserver.staff.moderator")
-%>
+<% bsname = @view_colour
+moderator = allow?(@current_user, "teiserver.staff.moderator") %>
 
-<%=
-  render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "parties", conn: Map.put(@socket, :permissions, @current_user.permissions)}
-%>
+<%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+  active: "parties",
+  conn: Map.put(@socket, :permissions, @current_user.permissions)
+}) %>
 
 <div class="row mt-3" id="main-content">
   <div class="col-md-12">
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
-
         <div class="float-end">
           <%= if @client do %>
             <span class={"btn btn-#{bsname}"} phx-click="create_party">
-              <i class="fa-fw fa-regular fa-plus"></i>
-              &nbsp;
+              <i class="fa-fw fa-regular fa-plus"></i> &nbsp;
               Create party
             </span>
           <% else %>
             <span class="btn btn-secondary disabled">
-              <i class="fa-fw fa-regular fa-wifi-exclamation"></i>
-              &nbsp;
+              <i class="fa-fw fa-regular fa-wifi-exclamation"></i> &nbsp;
               Connect with client to enable functionality
             </span>
           <% end %>
@@ -30,105 +26,116 @@
           <%= if moderator do %>
             &nbsp;&nbsp;&nbsp;
             <%= if @mode == "admin" do %>
-              <a href={Routes.ts_game_party_index_path(@socket, :index, "player")} class={"btn btn-outline-#{bsname}"}>
+              <a
+                href={Routes.ts_game_party_index_path(@socket, :index, "player")}
+                class={"btn btn-outline-#{bsname}"}
+              >
                 Player view
               </a>
             <% else %>
-              <a href={Routes.ts_game_party_index_path(@socket, :index, "admin")} class={"btn btn-outline-#{bsname}"}>
+              <a
+                href={Routes.ts_game_party_index_path(@socket, :index, "admin")}
+                class={"btn btn-outline-#{bsname}"}
+              >
                 Admin view
               </a>
             <% end %>
           <% end %>
         </div>
 
-<table class="table table-sm">
-  <thead>
-    <tr>
-      <th></th>
-      <th></th>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th></th>
+              <th></th>
 
-      <%= if @client do %>
-        <th colspan="2"></th>
-      <% end %>
+              <%= if @client do %>
+                <th colspan="2"></th>
+              <% end %>
 
-      <%= if @mode == "admin" do %>
-        <th></th>
-      <% end %>
-    </tr>
-  </thead>
-  <tbody>
-    <%= for party <- @parties do %>
-      <%
-        non_leader_members = List.delete(party.members, party.leader)
-        status = cond do
-          @client == nil -> "disconnected"
-          Enum.member?(party.members, @user_id) -> "member"
-          Enum.member?(party.pending_invites, @user_id) -> "invited"
-          true -> nil
-        end
-      %>
-      <tr>
-        <td style={"background-color: #{@user_lookup[party.leader].colour}"}>
-          <div class="badge rounded-pill bg-primary">
-            <%= @user_lookup[party.leader].name %>
-          </div>
-        </td>
-        <td>
-          <%= for member_id <- non_leader_members do %>
-            <div class="badge rounded-pill bg-secondary">
-              <%= @user_lookup[member_id].name %>
-            </div>
-          <% end %>
-        </td>
+              <%= if @mode == "admin" do %>
+                <th></th>
+              <% end %>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for party <- @parties do %>
+              <% non_leader_members = List.delete(party.members, party.leader)
 
-        <%= case status do %>
-          <% "disconnected" -> %>
+              status =
+                cond do
+                  @client == nil -> "disconnected"
+                  Enum.member?(party.members, @user_id) -> "member"
+                  Enum.member?(party.pending_invites, @user_id) -> "invited"
+                  true -> nil
+                end %>
+              <tr>
+                <td style={"background-color: #{@user_lookup[party.leader].colour}"}>
+                  <div class="badge rounded-pill bg-primary">
+                    <%= @user_lookup[party.leader].name %>
+                  </div>
+                </td>
+                <td>
+                  <%= for member_id <- non_leader_members do %>
+                    <div class="badge rounded-pill bg-secondary">
+                      <%= @user_lookup[member_id].name %>
+                    </div>
+                  <% end %>
+                </td>
 
-          <% "member" -> %>
-            <td>
-              <a href={Routes.ts_game_party_show_path(@socket, :show, party.id)} class={"btn btn-sm btn-outline-#{bsname} btn-block"}>
-                Details
-              </a>
-            </td>
+                <%= case status do %>
+                  <% "disconnected" -> %>
+                  <% "member" -> %>
+                    <td>
+                      <a
+                        href={Routes.ts_game_party_show_path(@socket, :show, party.id)}
+                        class={"btn btn-sm btn-outline-#{bsname} btn-block"}
+                      >
+                        Details
+                      </a>
+                    </td>
 
-            <td>
+                    <td></td>
+                  <% "invited" -> %>
+                    <td>
+                      <span
+                        phx-click="invite:accept"
+                        phx-value-party_id={party.id}
+                        class="btn btn-sm btn-success btn-block"
+                      >
+                        <i class="fa-fw fa-regular fa-check"></i> &nbsp;
+                        Accept invite
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        phx-click="invite:decline"
+                        phx-value-party_id={party.id}
+                        class="btn btn-sm btn-warning btn-block"
+                      >
+                        <i class="fa-fw fa-regular fa-times"></i> &nbsp;
+                        Decline invite
+                      </span>
+                    </td>
+                  <% _ -> %>
+                    <td colspan="2"></td>
+                <% end %>
 
-            </td>
-
-          <% "invited" -> %>
-            <td>
-              <span phx-click="invite:accept" phx-value-party_id={party.id} class="btn btn-sm btn-success btn-block">
-                <i class="fa-fw fa-regular fa-check"></i>
-                &nbsp;
-                Accept invite
-              </span>
-            </td>
-            <td>
-              <span phx-click="invite:decline" phx-value-party_id={party.id} class="btn btn-sm btn-warning btn-block">
-                <i class="fa-fw fa-regular fa-times"></i>
-                &nbsp;
-                Decline invite
-              </span>
-            </td>
-
-          <% _ -> %>
-            <td colspan="2"></td>
-        <% end %>
-
-        <%= if @mode == "admin" do %>
-          <td>
-            <a href={Routes.ts_game_party_show_path(@socket, :show, party.id)} class={"btn btn-sm btn-secondary"}>
-              <i class="fa-fw fa-regular fa-power-off"></i>
-              &nbsp;
-              Show as admin
-            </a>
-          </td>
-        <% end %>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
+                <%= if @mode == "admin" do %>
+                  <td>
+                    <a
+                      href={Routes.ts_game_party_show_path(@socket, :show, party.id)}
+                      class="btn btn-sm btn-secondary"
+                    >
+                      <i class="fa-fw fa-regular fa-power-off"></i> &nbsp;
+                      Show as admin
+                    </a>
+                  </td>
+                <% end %>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

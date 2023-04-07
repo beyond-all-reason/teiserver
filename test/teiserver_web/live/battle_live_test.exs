@@ -21,18 +21,20 @@ defmodule TeiserverWeb.Live.BattleTest do
       assert html =~ "No lobbies found"
 
       # Lets create a battle
-      battle1 = TeiserverTestLib.make_battle(%{
-        name: "LiveBattleName"
-      })
+      battle1 =
+        TeiserverTestLib.make_battle(%{
+          name: "LiveBattleName"
+        })
 
       html = render(view)
       assert html =~ "Lobbies: 1"
       assert html =~ "LiveBattleName"
 
       # Another
-      battle2 = TeiserverTestLib.make_battle(%{
-        name: "SecondLiveBattle"
-      })
+      battle2 =
+        TeiserverTestLib.make_battle(%{
+          name: "SecondLiveBattle"
+        })
 
       html = render(view)
       assert html =~ "Lobbies: 2"
@@ -78,6 +80,7 @@ defmodule TeiserverWeb.Live.BattleTest do
     test "show - valid battle", %{conn: conn} do
       # Lets create a battle
       %{socket: host_socket, user: _host_user} = TeiserverTestLib.auth_setup()
+
       _send_raw(
         host_socket,
         "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tSpeed metal\tLiveBattleShow\tgameName\n"
@@ -146,12 +149,14 @@ defmodule TeiserverWeb.Live.BattleTest do
     end
 
     test "show - no battle", %{conn: conn} do
-      assert {:error, {:redirect, %{to: "/teiserver/battle/lobbies"}}} = live(conn, "/teiserver/battle/lobbies/show/0")
+      assert {:error, {:redirect, %{to: "/teiserver/battle/lobbies"}}} =
+               live(conn, "/teiserver/battle/lobbies/show/0")
     end
 
     test "chat - valid battle", %{conn: conn} do
       # Lets create a battle
       %{socket: host_socket, user: _host_user} = TeiserverTestLib.auth_setup()
+
       _send_raw(
         host_socket,
         "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tSpeed metal\tLiveBattleShow\tgameName\n"
@@ -217,7 +222,8 @@ defmodule TeiserverWeb.Live.BattleTest do
     end
 
     test "chat - no battle", %{conn: conn} do
-      assert {:error, {:redirect, %{to: "/teiserver/battle/lobbies"}}} = live(conn, "/teiserver/battle/lobbies/chat/0")
+      assert {:error, {:redirect, %{to: "/teiserver/battle/lobbies"}}} =
+               live(conn, "/teiserver/battle/lobbies/chat/0")
     end
   end
 end

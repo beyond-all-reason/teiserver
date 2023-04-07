@@ -7,7 +7,7 @@ defmodule CentralWeb.Admin.ToolView do
   def uptime() do
     System.cmd("uptime", [])
     |> elem(0)
-    |> String.trim
+    |> String.trim()
   end
 
   def view_colour(_), do: Central.Admin.ToolLib.colours()

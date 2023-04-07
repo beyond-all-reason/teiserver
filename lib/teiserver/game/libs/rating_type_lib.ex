@@ -14,33 +14,32 @@ defmodule Teiserver.Game.RatingTypeLib do
     %{
       type_colour: colour(),
       type_icon: icon(),
-
       item_id: rating_type.id,
       item_type: "teiserver_game_rating_type",
       item_colour: rating_type.colour,
       item_icon: rating_type.icon,
       item_label: "#{rating_type.name}",
-
       url: "/game/rating_types/#{rating_type.id}"
     }
   end
 
   # Queries
-  @spec query_rating_types() :: Ecto.Query.t
+  @spec query_rating_types() :: Ecto.Query.t()
   def query_rating_types do
-    from rating_types in RatingType
+    from(rating_types in RatingType)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -63,13 +62,12 @@ defmodule Teiserver.Game.RatingTypeLib do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from rating_types in query,
-      where: (
-            ilike(rating_types.name, ^ref_like)
-        )
+      where: ilike(rating_types.name, ^ref_like)
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Name (A-Z)") do
     from rating_types in query,
       order_by: [asc: rating_types.name]
@@ -100,8 +98,9 @@ defmodule Teiserver.Game.RatingTypeLib do
       order_by: [desc: rating_types.id]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, _preloads) do
     query
   end

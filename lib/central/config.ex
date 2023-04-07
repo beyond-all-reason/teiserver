@@ -207,7 +207,6 @@ defmodule Central.Config do
     end)
   end
 
-
   @doc """
   Expects a map with the following fields:
 
@@ -238,10 +237,14 @@ defmodule Central.Config do
 
   @spec add_user_config_type(map()) :: :ok
   def add_user_config_type(config) do
-    config = Map.merge(%{
-      value_label: "Value",
-      description: "",
-    }, config)
+    config =
+      Map.merge(
+        %{
+          value_label: "Value",
+          description: ""
+        },
+        config
+      )
 
     all_config_types =
       (Central.store_get(:config_user_type_store, "all-config-types") || %{})
@@ -254,7 +257,7 @@ defmodule Central.Config do
   @spec get_user_config_default(String.t()) :: any
   def get_user_config_default(key) do
     case get_user_config_type(key) do
-      nil -> throw "Invalid config key of #{key}"
+      nil -> throw("Invalid config key of #{key}")
       v -> Map.get(v, :default)
     end
   end
@@ -271,7 +274,6 @@ defmodule Central.Config do
     end
   end
 
-
   alias Central.Config.SiteConfig
 
   @spec get_site_config_cache(String.t()) :: any
@@ -281,6 +283,7 @@ defmodule Central.Config do
         nil ->
           default = get_site_config_default(key)
           cast_site_config_value(key, default)
+
         config ->
           cast_site_config_value(key, config.value)
       end
@@ -343,7 +346,6 @@ defmodule Central.Config do
     Central.cache_delete(:config_site_cache, key)
   end
 
-
   # Site Config Types
   @spec get_site_config_types :: list()
   def get_site_config_types() do
@@ -367,7 +369,6 @@ defmodule Central.Config do
     end)
   end
 
-
   @doc """
   Expects a map with the following fields:
 
@@ -389,8 +390,16 @@ defmodule Central.Config do
 
     default: Any, The default value used when the variable is not set,
   """
+  @config_defaults %{
+    opts: [],
+    value_label: "",
+    default: nil
+  }
+
   @spec add_site_config_type(map()) :: :ok
   def add_site_config_type(config) do
+    config = Map.merge(@config_defaults, config)
+
     all_config_types =
       (Central.store_get(:config_site_type_store, "all-config-types") || %{})
       |> Map.put(config.key, config)
@@ -402,7 +411,7 @@ defmodule Central.Config do
   @spec get_site_config_default(String.t()) :: any
   def get_site_config_default(key) do
     case get_site_config_type(key) do
-      nil -> throw "Invalid config key of #{key}"
+      nil -> throw("Invalid config key of #{key}")
       v -> Map.get(v, :default)
     end
   end

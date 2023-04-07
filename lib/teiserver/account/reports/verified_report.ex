@@ -22,27 +22,32 @@ defmodule Teiserver.Account.VerifiedReport do
 
     start_date = Timex.to_datetime(start_date)
 
-    data = Account.list_users(
-      search: [
-        inserted_after: start_date,
-      ],
-      limit: :infinity
-    )
-    |> Enum.group_by(fn user ->
-      cond do
-        user.data["last_login"] == nil -> :never_logged_in
-        user.data["verified"] == false -> :unverified
-        true -> :verified
-      end
-    end, fn user ->
-      user.id
-    end)
-    |> Map.new(fn {k, v} -> {k, Enum.count(v)} end)
+    data =
+      Account.list_users(
+        search: [
+          inserted_after: start_date
+        ],
+        limit: :infinity
+      )
+      |> Enum.group_by(
+        fn user ->
+          cond do
+            user.data["last_login"] == nil -> :never_logged_in
+            user.data["verified"] == false -> :unverified
+            true -> :verified
+          end
+        end,
+        fn user ->
+          user.id
+        end
+      )
+      |> Map.new(fn {k, v} -> {k, Enum.count(v)} end)
 
-    total = data
-    |> Enum.reduce(0, fn ({_, count}, acc) ->
-      acc + count
-    end)
+    total =
+      data
+      |> Enum.reduce(0, fn {_, count}, acc ->
+        acc + count
+      end)
 
     assigns = %{
       params: params,
@@ -50,16 +55,19 @@ defmodule Teiserver.Account.VerifiedReport do
     }
 
     {%{
-      rows: data,
-      total: total
-    }, assigns}
+       rows: data,
+       total: total
+     }, assigns}
   end
 
   defp apply_defaults(params) do
-    Map.merge(%{
-      "date_preset" => "This month",
-      "start_date" => "",
-      "end_date" => "",
-    }, Map.get(params, "report", %{}))
+    Map.merge(
+      %{
+        "date_preset" => "This month",
+        "start_date" => "",
+        "end_date" => ""
+      },
+      Map.get(params, "report", %{})
+    )
   end
 end

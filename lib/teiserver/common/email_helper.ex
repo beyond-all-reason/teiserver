@@ -1,19 +1,28 @@
 defmodule Teiserver.EmailHelper do
   @moduledoc false
-  alias Central.Account
-  alias Central.Mailer
+  alias Central.{Mailer, Config}
   alias Bamboo.Email
   alias Central.Helpers.TimexHelper
   require Logger
 
   def new_user(user) do
+    case Config.get_site_config_cache("teiserver.Require email verification") do
+      true ->
+        do_new_user(user)
+
+      false ->
+        :no_verify
+    end
+  end
+
+  def do_new_user(user) do
     stats = Teiserver.Account.get_user_stat_data(user.id)
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
     website_url = "https://#{host}"
     verification_code = stats["verification_code"]
 
     {:ok, _code} =
-      Account.create_code(%{
+      Teiserver.Account.create_code(%{
         value: UUID.uuid4(),
         purpose: "reset_password",
         expires: Timex.now() |> Timex.shift(hours: 24),
@@ -28,9 +37,7 @@ defmodule Teiserver.EmailHelper do
     html_body = """
     <p>Welcome to #{game_name}.</p>
 
-    <p>To verify your account you will need this code: <span style="font-family: monospace">#{
-      verification_code
-    }</span><p>
+    <p>To verify your account you will need this code: <span style="font-family: monospace">#{verification_code}</span><p>
 
     <p>To find out more about #{game_name} visit our <a href="#{website_url}">website</a> .<p>
 

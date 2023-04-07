@@ -14,18 +14,22 @@ defmodule Teiserver.Battle.MatchLib do
   @spec game_type(T.lobby(), map()) :: <<_::24, _::_*8>>
   def game_type(lobby, teams) do
     bots = Battle.get_bots(lobby.id)
-    bot_names = bots
-      |> Map.keys
+
+    bot_names =
+      bots
+      |> Map.keys()
       |> Enum.join(" ")
 
     # It is possible for it to be purely bots v bots which will make it appear to be empty teams
     # this would cause an error with Enum.max, hence the case statement
-    max_team_size = case Enum.map(teams, fn {_, team} -> Enum.count(team) end) do
-      [] ->
-        0
-      counts ->
-        Enum.max(counts)
-    end
+    max_team_size =
+      case Enum.map(teams, fn {_, team} -> Enum.count(team) end) do
+        [] ->
+          0
+
+        counts ->
+          Enum.max(counts)
+      end
 
     cond do
       String.contains?(bot_names, "Scavenger") -> "Scavengers"
@@ -52,7 +56,8 @@ defmodule Teiserver.Battle.MatchLib do
       queue_id: queue_id
     } = Battle.get_combined_lobby_state(lobby_id)
 
-    teams = member_list
+    teams =
+      member_list
       |> Account.list_clients()
       |> Enum.filter(fn c -> c.player == true end)
       |> Enum.group_by(fn c -> c.team_number end)
@@ -66,22 +71,19 @@ defmodule Teiserver.Battle.MatchLib do
         map: lobby.map_name,
         data: nil,
         tags: modoptions,
-
         team_count: Enum.count(teams),
         team_size: Enum.max(Enum.map(teams, fn {_, t} -> Enum.count(t) end)),
         passworded: lobby.passworded,
         game_type: the_game_type,
-
         founder_id: lobby.founder_id,
         bots: bots,
-
         queue_id: queue_id,
-
         started: Timex.now(),
         finished: nil
       }
 
-      members = member_list
+      members =
+        member_list
         |> Account.list_clients()
         |> Enum.filter(fn c -> c.player == true end)
         |> Enum.map(fn client ->
@@ -94,7 +96,7 @@ defmodule Teiserver.Battle.MatchLib do
 
       {match, members}
     else
-      Logger.error("EmptyTeamsMatch Lobby: #{lobby_id}\nMembers: #{Kernel.inspect member_list}")
+      Logger.error("EmptyTeamsMatch Lobby: #{lobby_id}\nMembers: #{Kernel.inspect(member_list)}")
 
       nil
     end
@@ -107,12 +109,14 @@ defmodule Teiserver.Battle.MatchLib do
 
     Battle.remove_modoptions(lobby_id, ["server/match/queue_id"])
 
-    {tag, %{
-      finished: Timex.now()
-    }}
+    {tag,
+     %{
+       finished: Timex.now()
+     }}
   end
 
   def make_match_name(nil), do: "Unnamed match"
+
   def make_match_name(match) do
     case match.game_type do
       "Duel" -> "Duel on #{match.map}"
@@ -127,34 +131,33 @@ defmodule Teiserver.Battle.MatchLib do
     %{
       type_colour: StylingHelper.colours(colours()) |> elem(0),
       type_icon: icon(),
-
       item_id: match.id,
       item_type: "teiserver_battle_match",
       # TODO: Make this colour/icon based on type of match
       item_colour: StylingHelper.colours(colours()) |> elem(0),
       item_icon: Teiserver.Battle.MatchLib.icon(),
       item_label: make_match_name(match),
-
       url: "/teiserver/battle/matches/#{match.id}"
     }
   end
 
   # Queries
-  @spec query_matches() :: Ecto.Query.t
+  @spec query_matches() :: Ecto.Query.t()
   def query_matches do
-    from matches in Match
+    from(matches in Match)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -233,6 +236,7 @@ defmodule Teiserver.Battle.MatchLib do
     from matches in query,
       where: is_nil(matches.queue_id)
   end
+
   def _search(query, :queue_id, queue_id) do
     from matches in query,
       where: matches.queue_id == ^queue_id
@@ -281,9 +285,7 @@ defmodule Teiserver.Battle.MatchLib do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from matches in query,
-      where: (
-            ilike(matches.name, ^ref_like)
-        )
+      where: ilike(matches.name, ^ref_like)
   end
 
   def _search(query, :never_finished, _) do
@@ -336,8 +338,9 @@ defmodule Teiserver.Battle.MatchLib do
       where: matches.finished < ^timestamp
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Name (A-Z)") do
     from matches in query,
       order_by: [asc: matches.name]
@@ -358,8 +361,9 @@ defmodule Teiserver.Battle.MatchLib do
       order_by: [asc: matches.started]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :members in preloads, do: _preload_members(query), else: query
     query = if :members_and_users in preloads, do: _preload_members_and_users(query), else: query
@@ -370,14 +374,14 @@ defmodule Teiserver.Battle.MatchLib do
     query
   end
 
-  @spec _preload_members(Ecto.Query.t) :: Ecto.Query.t
+  @spec _preload_members(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_members(query) do
     from matches in query,
       left_join: members in assoc(matches, :members),
       preload: [members: members]
   end
 
-  @spec _preload_members_and_users(Ecto.Query.t) :: Ecto.Query.t
+  @spec _preload_members_and_users(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_members_and_users(query) do
     from matches in query,
       left_join: memberships in assoc(matches, :members),
@@ -386,14 +390,14 @@ defmodule Teiserver.Battle.MatchLib do
       preload: [members: {memberships, user: users}]
   end
 
-  @spec _preload_ratings(Ecto.Query.t) :: Ecto.Query.t
+  @spec _preload_ratings(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_ratings(query) do
     from matches in query,
       left_join: ratings in assoc(matches, :ratings),
       preload: [ratings: ratings]
   end
 
-  @spec _preload_queue(Ecto.Query.t) :: Ecto.Query.t
+  @spec _preload_queue(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_queue(query) do
     from matches in query,
       left_join: queues in assoc(matches, :queue),
@@ -403,6 +407,7 @@ defmodule Teiserver.Battle.MatchLib do
   @spec calculate_exit_status(integer(), integer()) :: :stayed | :early | :abandoned | :noshow
   def calculate_exit_status(nil, _), do: :stayed
   def calculate_exit_status(_, nil), do: :stayed
+
   def calculate_exit_status(left_after, game_duration) do
     diff = game_duration - left_after
     left_percentage = left_after / game_duration
@@ -413,11 +418,8 @@ defmodule Teiserver.Battle.MatchLib do
       left_after > game_duration -> :stayed
       left_percentage >= 0.99 -> :stayed
       diff < 60 -> :stayed
-
       left_percentage >= 0.9 -> :early
-
       left_after < 60 -> :noshow
-
       true -> :abandoned
     end
   end

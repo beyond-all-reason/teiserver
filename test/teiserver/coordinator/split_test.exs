@@ -35,6 +35,7 @@ defmodule Teiserver.Coordinator.SplitTest do
         max_players: 12
       }
     }
+
     data = %{cmd: "c.lobby.create", lobby: lobby_data}
     _tachyon_send(hsocket, data)
     [reply] = _tachyon_recv(hsocket)
@@ -58,6 +59,7 @@ defmodule Teiserver.Coordinator.SplitTest do
         max_players: 12
       }
     }
+
     data = %{cmd: "c.lobby.create", lobby: lobby_data}
     _tachyon_send(hsocket_empty, data)
     [reply] = _tachyon_recv(hsocket_empty)
@@ -66,9 +68,11 @@ defmodule Teiserver.Coordinator.SplitTest do
     # Player needs to be added to the battle
     Lobby.add_user_to_battle(player.id, lobby_id, "script_password")
     player_client = Client.get_client_by_id(player.id)
-    Client.update(%{player_client |
-      player: true
-    }, :client_updated_battlestatus)
+
+    Client.update(
+      %{player_client | player: true},
+      :client_updated_battlestatus
+    )
 
     # Add user message
     _tachyon_recv(hsocket)
@@ -76,11 +80,24 @@ defmodule Teiserver.Coordinator.SplitTest do
     # Battlestatus message
     _tachyon_recv(hsocket)
 
-    {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener, empty_lobby_id: empty_lobby_id}
+    {:ok,
+     hsocket: hsocket,
+     psocket: psocket,
+     host: host,
+     player: player,
+     lobby_id: lobby_id,
+     listener: listener,
+     empty_lobby_id: empty_lobby_id}
   end
 
-
-  test "basic split test", %{host: _host, player: player1, psocket: psocket1, lobby_id: lobby_id, listener: listener, empty_lobby_id: empty_lobby_id} do
+  test "basic split test", %{
+    host: _host,
+    player: player1,
+    psocket: psocket1,
+    lobby_id: lobby_id,
+    listener: listener,
+    empty_lobby_id: empty_lobby_id
+  } do
     %{user: player2, socket: psocket2} = tachyon_auth_setup()
     %{user: player3, socket: psocket3} = tachyon_auth_setup()
     %{user: player4, socket: psocket4} = tachyon_auth_setup()
@@ -107,9 +124,25 @@ defmodule Teiserver.Coordinator.SplitTest do
 
     # Check what got sent
     messages = PubsubListener.get(listener)
-    assert Enum.member?(messages, %{channel: "teiserver_lobby_chat:#{lobby_id}", event: :announce, lobby_id: lobby_id, message: "Split lobby sequence started ($y to move, $n to cancel, $follow <name> to follow user)", userid: Coordinator.get_coordinator_userid()}), message: inspect(messages)
 
-    assert Enum.member?(messages, %{channel: "teiserver_lobby_chat:#{lobby_id}", event: :say, lobby_id: lobby_id, message: "$splitlobby", userid: player1.id}), message: inspect(messages)
+    assert Enum.member?(messages, %{
+             channel: "teiserver_lobby_chat:#{lobby_id}",
+             event: :announce,
+             lobby_id: lobby_id,
+             message:
+               "Split lobby sequence started ($y to move, $n to cancel, $follow <name> to follow user)",
+             userid: Coordinator.get_coordinator_userid()
+           }),
+           message: inspect(messages)
+
+    assert Enum.member?(messages, %{
+             channel: "teiserver_lobby_chat:#{lobby_id}",
+             event: :say,
+             lobby_id: lobby_id,
+             message: "$splitlobby",
+             userid: player1.id
+           }),
+           message: inspect(messages)
 
     # Check state
     split = Coordinator.call_consul(lobby_id, {:get, :split})
@@ -135,14 +168,15 @@ defmodule Teiserver.Coordinator.SplitTest do
     # Check state
     split = Coordinator.call_consul(lobby_id, {:get, :split})
     assert split.first_splitter_id == player1.id
+
     assert split.splitters == %{
-      player1.id => true,
-      player2.id => true,
-      player3.id => true,
-      player4.id => player2.id,
-      player5.id => player4.id,
-      player6.id => true
-    }
+             player1.id => true,
+             player2.id => true,
+             player3.id => true,
+             player4.id => player2.id,
+             player5.id => player4.id,
+             player6.id => true
+           }
 
     # Now update choices
     _tachyon_send(psocket1, %{cmd: "c.lobby.message", message: "$n"})
@@ -150,12 +184,13 @@ defmodule Teiserver.Coordinator.SplitTest do
 
     split = Coordinator.call_consul(lobby_id, {:get, :split})
     assert split.first_splitter_id == player1.id
+
     assert split.splitters == %{
-      player2.id => true,
-      player4.id => player2.id,
-      player5.id => player4.id,
-      player6.id => true
-    }
+             player2.id => true,
+             player4.id => player2.id,
+             player5.id => player4.id,
+             player6.id => true
+           }
 
     # Time to resolve
     _tachyon_send(psocket1, %{cmd: "c.lobby.message", message: "$dosplit"})
@@ -169,7 +204,14 @@ defmodule Teiserver.Coordinator.SplitTest do
     assert Client.get_client_by_id(player6.id).lobby_id == empty_lobby_id
   end
 
-  test "test split with different engine version", %{host: _host, player: player1, psocket: psocket1, lobby_id: lobby_id, listener: listener, empty_lobby_id: empty_lobby_id} do
+  test "test split with different engine version", %{
+    host: _host,
+    player: player1,
+    psocket: psocket1,
+    lobby_id: lobby_id,
+    listener: listener,
+    empty_lobby_id: empty_lobby_id
+  } do
     %{user: player2, socket: psocket2} = tachyon_auth_setup()
     %{user: player3, socket: psocket3} = tachyon_auth_setup()
     %{user: player4, socket: _psocket4} = tachyon_auth_setup()
@@ -210,6 +252,7 @@ defmodule Teiserver.Coordinator.SplitTest do
         max_players: 12
       }
     }
+
     %{socket: hsocket_empty} = tachyon_auth_setup()
     data = %{cmd: "c.lobby.create", lobby: lobby_data}
     _tachyon_send(hsocket_empty, data)
@@ -221,9 +264,25 @@ defmodule Teiserver.Coordinator.SplitTest do
 
     # Check what got sent
     messages = PubsubListener.get(listener)
-    assert Enum.member?(messages, %{channel: "teiserver_lobby_chat:#{lobby_id}", event: :announce, lobby_id: lobby_id, message: "Split lobby sequence started ($y to move, $n to cancel, $follow <name> to follow user)", userid: Coordinator.get_coordinator_userid()}), message: inspect(messages)
 
-    assert Enum.member?(messages, %{channel: "teiserver_lobby_chat:#{lobby_id}", event: :say, lobby_id: lobby_id, message: "$splitlobby", userid: player1.id}), message: inspect(messages)
+    assert Enum.member?(messages, %{
+             channel: "teiserver_lobby_chat:#{lobby_id}",
+             event: :announce,
+             lobby_id: lobby_id,
+             message:
+               "Split lobby sequence started ($y to move, $n to cancel, $follow <name> to follow user)",
+             userid: Coordinator.get_coordinator_userid()
+           }),
+           message: inspect(messages)
+
+    assert Enum.member?(messages, %{
+             channel: "teiserver_lobby_chat:#{lobby_id}",
+             event: :say,
+             lobby_id: lobby_id,
+             message: "$splitlobby",
+             userid: player1.id
+           }),
+           message: inspect(messages)
 
     # Check state
     _tachyon_send(psocket1, %{cmd: "c.lobby.message", message: "$y"})
@@ -246,89 +305,109 @@ defmodule Teiserver.Coordinator.SplitTest do
 
   test "test split resolving" do
     # Basic test
-    result = CoordinatorLib.resolve_split(%{
-      1 => true,
-      2 => true,
-    })
+    result =
+      CoordinatorLib.resolve_split(%{
+        1 => true,
+        2 => true
+      })
+
     assert result == %{
-      1 => true,
-      2 => true,
-    }
+             1 => true,
+             2 => true
+           }
 
     # Add a nil entry
-    result = CoordinatorLib.resolve_split(%{
-      1 => true,
-      2 => true,
-      3 => nil,
-    })
+    result =
+      CoordinatorLib.resolve_split(%{
+        1 => true,
+        2 => true,
+        3 => nil
+      })
+
     assert result == %{
-      1 => true,
-      2 => true,
-    }
+             1 => true,
+             2 => true
+           }
 
     # Swap it for a false, just to see
-    result = CoordinatorLib.resolve_split(%{
-      1 => true,
-      2 => true,
-      3 => false,
-    })
+    result =
+      CoordinatorLib.resolve_split(%{
+        1 => true,
+        2 => true,
+        3 => false
+      })
+
     assert result == %{
-      1 => true,
-      2 => true,
-    }
+             1 => true,
+             2 => true
+           }
 
     # Add a follow
-    result = CoordinatorLib.resolve_split(%{
-      1 => true,
-      2 => true,
-      3 => nil,
-      4 => 1,
-    })
+    result =
+      CoordinatorLib.resolve_split(%{
+        1 => true,
+        2 => true,
+        3 => nil,
+        4 => 1
+      })
+
     assert result == %{
-      1 => true,
-      2 => true,
-      4 => true,
-    }
+             1 => true,
+             2 => true,
+             4 => true
+           }
 
     # Add a follow of a follow and a negative follow
-    result = CoordinatorLib.resolve_split(%{
-      1 => true,
-      2 => true,
-      3 => nil,
-      4 => 1,
-      5 => 4,
-      6 => 3,
-    })
+    result =
+      CoordinatorLib.resolve_split(%{
+        1 => true,
+        2 => true,
+        3 => nil,
+        4 => 1,
+        5 => 4,
+        6 => 3
+      })
+
     assert result == %{
-      1 => true,
-      2 => true,
-      4 => true,
-      5 => true,
-    }
+             1 => true,
+             2 => true,
+             4 => true,
+             5 => true
+           }
 
     # Endless loop
-    result = CoordinatorLib.resolve_split(%{
-      1 => 2,
-      2 => 3,
-      3 => 4,
-      4 => 1,
-    })
+    result =
+      CoordinatorLib.resolve_split(%{
+        1 => 2,
+        2 => 3,
+        3 => 4,
+        4 => 1
+      })
+
     assert result == %{}
 
     # Endless loop with something true
-    result = CoordinatorLib.resolve_split(%{
-      1 => 2,
-      2 => 3,
-      3 => 4,
-      4 => 1,
-      5 => true
-    })
+    result =
+      CoordinatorLib.resolve_split(%{
+        1 => 2,
+        2 => 3,
+        3 => 4,
+        4 => 1,
+        5 => true
+      })
+
     assert result == %{
-      5 => true,
-    }
+             5 => true
+           }
   end
 
-  test "test minimum player split", %{host: _host, player: player1, psocket: psocket1, lobby_id: lobby_id, empty_lobby_id: empty_lobby_id} do
+  test "test minimum player split", %{
+    host: _host,
+    player: player1,
+    psocket: psocket1,
+    lobby_id: lobby_id,
+    empty_lobby_id: empty_lobby_id
+  } do
     %{user: player2, socket: psocket2} = tachyon_auth_setup()
     %{user: player3, socket: psocket3} = tachyon_auth_setup()
     %{user: player4, socket: psocket4} = tachyon_auth_setup()
@@ -380,7 +459,6 @@ defmodule Teiserver.Coordinator.SplitTest do
     split = Coordinator.call_consul(lobby_id, {:get, :split})
     assert split.first_splitter_id == player1.id
     assert split.splitters == %{}
-
 
     _tachyon_send(psocket1, %{cmd: "c.lobby.message", message: "$y"})
     _tachyon_send(psocket2, %{cmd: "c.lobby.message", message: "$y"})

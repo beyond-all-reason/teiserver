@@ -29,13 +29,11 @@ import topbar from "../vendor/topbar"
 // Local files
 import socket from "./socket"
 import LiveSearch from "./live_search"
-import ChatApp from "./chat"
 import CommunicationNotification from "./communication_notification"
 import FP from "./fp"
 
 $(function () {
   LiveSearch.init(socket);
-  ChatApp.init(socket);
   CommunicationNotification.init(socket);
   FP.init(socket);
 });

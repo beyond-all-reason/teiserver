@@ -24,10 +24,12 @@ defmodule Teiserver do
   def user_group_id(), do: ConCache.get(:application_metadata_cache, "teiserver_user_group")
 
   @spec umbrella_group_id() :: integer()
-  def umbrella_group_id(), do: ConCache.get(:application_metadata_cache, "teiserver_umbrella_group")
+  def umbrella_group_id(),
+    do: ConCache.get(:application_metadata_cache, "teiserver_umbrella_group")
 
   @spec internal_group_id() :: integer()
-  def internal_group_id(), do: ConCache.get(:application_metadata_cache, "teiserver_internal_group")
+  def internal_group_id(),
+    do: ConCache.get(:application_metadata_cache, "teiserver_internal_group")
 
   # Designed for debugging help
   @spec tachyon(String.t() | :timeout) :: {:ok, List.t() | Map.t()} | {:error, :bad_json}
@@ -51,4 +53,7 @@ defmodule Teiserver do
   def node_name() do
     Application.get_env(:central, Teiserver)[:node_name] || to_string(Node.self())
   end
+
+  # Delegate some stuff
+  defdelegate rate_match(match), to: Teiserver.Game.MatchRatingLib
 end

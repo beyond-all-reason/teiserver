@@ -38,13 +38,14 @@ defmodule CentralWeb.Account.SessionController do
 
   @spec one_time_login(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def one_time_login(conn, %{"value" => value}) do
-    ip = conn
-      |> LoggingPlug.get_ip_from_conn
+    ip =
+      conn
+      |> LoggingPlug.get_ip_from_conn()
       |> Tuple.to_list()
       |> Enum.join(".")
 
     code =
-      Account.get_code(nil,
+      Teiserver.Account.get_code(nil,
         search: [
           value: value,
           purpose: "one_time_login",
@@ -55,22 +56,25 @@ defmodule CentralWeb.Account.SessionController do
     cond do
       code == nil ->
         Logger.debug("SessionController.one_time_login No code")
+
         conn
-          |> redirect(to: "/")
+        |> redirect(to: "/")
 
       code.metadata["ip"] != ip ->
         Logger.debug("SessionController.one_time_login Bad IP")
+
         conn
-          |> redirect(to: "/")
+        |> redirect(to: "/")
 
       Config.get_site_config_cache("user.Enable one time links") == false ->
         Logger.debug("SessionController.one_time_login Enable one time links is false")
+
         conn
-          |> redirect(to: "/")
+        |> redirect(to: "/")
 
       true ->
         Logger.debug("SessionController.one_time_login success")
-        Account.delete_code(code)
+        Teiserver.Account.delete_code(code)
 
         user = Account.get_user!(code.user_id)
 
@@ -81,24 +85,24 @@ defmodule CentralWeb.Account.SessionController do
   @spec logout(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def logout(conn, _) do
     conn
-      |> Guardian.Plug.sign_out(clear_remember_me: true)
-      |> redirect(to: "/login")
+    |> Guardian.Plug.sign_out(clear_remember_me: true)
+    |> redirect(to: "/login")
   end
 
   defp login_reply({:ok, user}, conn, redirect_route) do
     conn
-      |> put_flash(:info, "Welcome back!")
-      |> Guardian.Plug.sign_in(user)
-      |> Guardian.Plug.remember_me(user)
-      |> redirect(to: redirect_route || "/")
+    |> put_flash(:info, "Welcome back!")
+    |> Guardian.Plug.sign_in(user)
+    |> Guardian.Plug.remember_me(user)
+    |> redirect(to: redirect_route || "/")
   end
 
   defp login_reply({:ok, user}, conn) do
     conn
-      |> put_flash(:info, "Welcome back!")
-      |> Guardian.Plug.sign_in(user)
-      |> Guardian.Plug.remember_me(user)
-      |> redirect(to: "/")
+    |> put_flash(:info, "Welcome back!")
+    |> Guardian.Plug.sign_in(user)
+    |> Guardian.Plug.remember_me(user)
+    |> redirect(to: "/")
   end
 
   defp login_reply({:error, reason}, conn) do
@@ -125,16 +129,18 @@ defmodule CentralWeb.Account.SessionController do
     # We use the || %{} to allow for the user not existing
     # If we let user be nil it messes up the existing_resets
     # query
-    user = if email == "" do
-      %{id: -1}
-    else
-      Account.get_user_by_email(email) || %{id: -1}
-    end
+    user =
+      if email == "" do
+        %{id: -1}
+      else
+        Account.get_user_by_email(email) || %{id: -1}
+      end
+
     key = params["key"]
     expected_value = Central.cache_get(:codes, key)
 
     existing_resets =
-      Account.list_codes(
+      Teiserver.Account.list_codes(
         search: [
           user_id: user.id,
           purpose: "reset_password",
@@ -197,7 +203,7 @@ defmodule CentralWeb.Account.SessionController do
 
   @spec password_reset_form(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def password_reset_form(conn, %{"value" => value}) do
-    code = Account.get_code(value, preload: [:user])
+    code = Teiserver.Account.get_code(value, preload: [:user])
 
     cond do
       code == nil ->
@@ -224,7 +230,7 @@ defmodule CentralWeb.Account.SessionController do
 
   @spec password_reset_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def password_reset_post(conn, %{"value" => value, "pass1" => pass1, "pass2" => pass2}) do
-    code = Account.get_code(value, preload: [:user])
+    code = Teiserver.Account.get_code(value, preload: [:user])
 
     cond do
       code == nil ->
@@ -257,6 +263,7 @@ defmodule CentralWeb.Account.SessionController do
           {:ok, user} ->
             # User password reset successfully
             Teiserver.User.set_new_spring_password(user.id, pass1)
+
             Teiserver.Logging.Helpers.add_anonymous_audit_log(
               conn,
               "Account:User password reset",
@@ -267,7 +274,7 @@ defmodule CentralWeb.Account.SessionController do
             )
 
             # Now delete the code, it's been used
-            Account.delete_code(code)
+            Teiserver.Account.delete_code(code)
 
             conn
             |> put_flash(:success, "Your password has been reset.")

@@ -1,20 +1,19 @@
 <% bsname = view_colour() %>
 
-
-<%= central_component "section_menu_button",
+<%= central_component("section_menu_button",
   name: "index",
   label: "List",
   active: @active,
   icon: Central.Helpers.StylingHelper.icon(:list),
   bsname: bsname,
   url: Routes.ts_reports_infolog_path(@conn, :index)
-%>
+) %>
 
-<%= central_component "section_menu_button",
+<%= central_component("section_menu_button",
   name: "search",
   label: "Search",
   active: @active,
   icon: Central.Helpers.StylingHelper.icon(:search),
   bsname: bsname,
   url: Routes.ts_reports_infolog_path(@conn, :index) <> "?search=true"
-%>
+) %>

@@ -1,0 +1,57 @@
+<div class="my-2">
+  <%= live_redirect("Main dashboard", to: ~p"/admin/dashboard", class: "btn btn-outline-primary") %>
+
+  <div class="float-end">
+    <a href={~p"/admin/lobby_policies/#{@id}"} class="btn btn-outline-primary">
+      <i class="fa-fw fa-solid fa-eye"></i> &nbsp;
+      Show policy
+    </a>
+
+    <div class="btn btn-warning" phx-click="disconnect-all-bots">
+      Disconnect all bots
+    </div>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Lobby</th>
+        <th>Members</th>
+        <th>Status</th>
+        <th colspan="2">&nbsp;</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%= for {name, bot} <- @bots || [] do %>
+        <tr>
+          <td><%= name %></td>
+          <%= if bot.status.lobby_id do %>
+            <td>
+              <%= live_redirect("Show lobby #{bot.status.lobby_id}",
+                to: ~p"/teiserver/battle/lobbies/show/#{bot.status.lobby_id}",
+                class: "btn btn-sm btn-outline-primary"
+              ) %>
+            </td>
+            <td>
+              <%= bot.status.member_count %>
+            </td>
+            <td>
+              <%= if bot.status.in_progress do %>
+                <i class="fa-fw fa-solid fa-play"></i>
+              <% end %>
+            </td>
+          <% else %>
+            <td colspan="3">&nbsp;</td>
+          <% end %>
+          <td>
+            <%= live_redirect("Show client",
+              to: ~p"/teiserver/admin/client/#{bot.status.userid}",
+              class: "btn btn-sm btn-outline-success"
+            ) %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

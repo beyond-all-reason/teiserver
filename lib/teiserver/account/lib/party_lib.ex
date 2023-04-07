@@ -27,6 +27,7 @@ defmodule Teiserver.Account.PartyLib do
     case get_party(party_id) do
       nil ->
         nil
+
       %{leader: leader} ->
         Account.get_username(leader)
     end
@@ -36,6 +37,7 @@ defmodule Teiserver.Account.PartyLib do
   @spec get_party(nil) :: nil
   @spec get_party(T.party_id()) :: nil | T.party()
   def get_party(nil), do: nil
+
   def get_party(party_id) do
     call_party(party_id, :get_party)
   end
@@ -56,18 +58,19 @@ defmodule Teiserver.Account.PartyLib do
   @spec list_parties() :: [T.party()]
   def list_parties() do
     list_party_ids()
-      |> list_parties()
+    |> list_parties()
   end
 
   @spec list_parties([T.party_id()]) :: [T.party()]
   def list_parties(id_list) do
     id_list
-      |> Enum.map(fn c -> get_party(c) end)
+    |> Enum.map(fn c -> get_party(c) end)
   end
 
   # Create
   @spec create_party(T.userid()) :: T.party()
   def create_party(nil), do: nil
+
   def create_party(leader_id) do
     party = %Party{
       id: ExULID.ULID.generate(),
@@ -76,6 +79,7 @@ defmodule Teiserver.Account.PartyLib do
       pending_invites: [],
       queues: []
     }
+
     start_party_server(party)
     party
   end
@@ -139,7 +143,9 @@ defmodule Teiserver.Account.PartyLib do
   @spec stop_party_server(T.party_id()) :: :ok | nil
   def stop_party_server(id) do
     case get_party_pid(id) do
-      nil -> nil
+      nil ->
+        nil
+
       p ->
         DynamicSupervisor.terminate_child(Teiserver.PartySupervisor, p)
         :ok
@@ -165,7 +171,9 @@ defmodule Teiserver.Account.PartyLib do
   @spec call_party(T.party_id(), any) :: any | nil
   def call_party(party_id, message) do
     case get_party_pid(party_id) do
-      nil -> nil
+      nil ->
+        nil
+
       pid ->
         try do
           GenServer.call(pid, message)
@@ -177,7 +185,6 @@ defmodule Teiserver.Account.PartyLib do
         end
     end
   end
-
 
   @spec say(T.userid(), T.party_id(), String.t()) :: :ok | nil
   def say(userid, party_id, msg) do
@@ -192,10 +199,11 @@ defmodule Teiserver.Account.PartyLib do
     msg = trim_message(msg)
     user = User.get_user_by_id(userid)
 
-    allowed = cond do
-      User.is_restricted?(user, ["All chat"]) -> false
-      true -> true
-    end
+    allowed =
+      cond do
+        User.is_restricted?(user, ["All chat"]) -> false
+        true -> true
+      end
 
     if allowed do
       persist_message(userid, msg, party_id)
@@ -224,13 +232,14 @@ defmodule Teiserver.Account.PartyLib do
       content: msg,
       party_id: party_id,
       inserted_at: Timex.now(),
-      user_id: userid,
+      user_id: userid
     })
   end
 
   defp trim_message(msg) when is_list(msg) do
     Enum.join(msg, "\n") |> trim_message
   end
+
   defp trim_message(msg) do
     String.trim(msg)
   end

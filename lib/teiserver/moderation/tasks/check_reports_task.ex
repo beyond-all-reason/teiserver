@@ -10,14 +10,15 @@ defmodule Teiserver.Moderation.CheckReportsTask do
   def perform(%{args: %{user_id: user_id}} = _job) do
     time_boundary = Timex.now() |> Timex.shift(days: -30)
 
-    report_list = Moderation.list_reports(
-      search: [
-        target_id: user_id,
-        no_result: true,
-        inserted_after: time_boundary
-      ],
-      preload: [:reporter]
-    )
+    report_list =
+      Moderation.list_reports(
+        search: [
+          target_id: user_id,
+          no_result: true,
+          inserted_after: time_boundary
+        ],
+        preload: [:reporter]
+      )
 
     analyse_reports(user_id, report_list)
 
@@ -27,19 +28,22 @@ defmodule Teiserver.Moderation.CheckReportsTask do
   @spec new_report(any) :: {:error, any} | {:ok, Oban.Job.t()}
   def new_report(user_id) do
     %{user_id: user_id}
-      |> Teiserver.Moderation.CheckReportsTask.new()
-      |> Oban.insert()
+    |> Teiserver.Moderation.CheckReportsTask.new()
+    |> Oban.insert()
   end
 
   defp analyse_reports(user_id, report_list) do
-    types = report_list
+    types =
+      report_list
       |> Enum.group_by(fn r ->
         r.type
       end)
 
-    type_scores = types
+    type_scores =
+      types
       |> Map.new(fn {type, reports} ->
-        score = reports
+        score =
+          reports
           |> Enum.map(&score_report/1)
           |> combine_report_scores
 
@@ -48,24 +52,25 @@ defmodule Teiserver.Moderation.CheckReportsTask do
 
     user = Account.get_user!(user_id)
 
-    action = cond do
-      enact_ban?(user, type_scores, report_list) -> perform_ban(user)
-      enact_suspension?(user, type_scores, report_list) -> perform_suspension(user)
-      enact_complete_mute?(user, type_scores, report_list) -> perform_complete_mute(user)
-      enact_game_mute?(user, type_scores, report_list) -> perform_game_mute(user)
-      enact_repeated_warn?(user, type_scores, report_list) -> perform_repeated_warn(user)
-      enact_one_off_warn?(user, type_scores, report_list) -> perform_one_off_warn(user)
-      true -> nil
-    end
+    action =
+      cond do
+        enact_ban?(user, type_scores, report_list) -> perform_ban(user)
+        enact_suspension?(user, type_scores, report_list) -> perform_suspension(user)
+        enact_complete_mute?(user, type_scores, report_list) -> perform_complete_mute(user)
+        enact_game_mute?(user, type_scores, report_list) -> perform_game_mute(user)
+        enact_repeated_warn?(user, type_scores, report_list) -> perform_repeated_warn(user)
+        enact_one_off_warn?(user, type_scores, report_list) -> perform_one_off_warn(user)
+        true -> nil
+      end
 
     # If an action was performed then all those reports need updating
     if action do
       report_list
-        |> Enum.each(fn report ->
-          Moderation.update_report(report, %{
-            result_id: action.id
-          })
-        end)
+      |> Enum.each(fn report ->
+        Moderation.update_report(report, %{
+          result_id: action.id
+        })
+      end)
     end
   end
 
@@ -84,7 +89,7 @@ defmodule Teiserver.Moderation.CheckReportsTask do
     sum = Enum.sum(scores)
     count = Enum.count(scores)
 
-    sum * (1 + count/10)
+    sum * (1 + count / 10)
   end
 
   # Enact functions
@@ -122,7 +127,6 @@ defmodule Teiserver.Moderation.CheckReportsTask do
   def enact_trust_drop?(user, _type_scores, _report_list) do
     if user == 1, do: true, else: false
   end
-
 
   # Perform functions
   @spec perform_ban(map()) :: Moderation.Action.t()

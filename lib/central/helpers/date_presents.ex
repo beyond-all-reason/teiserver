@@ -176,7 +176,8 @@ defmodule Central.Helpers.DatePresets do
   end
 
   def _parse_named_period("Last quarter") do
-    start = Timex.now()
+    start =
+      Timex.now()
       |> Timex.shift(months: -3)
       |> Timex.beginning_of_quarter()
 

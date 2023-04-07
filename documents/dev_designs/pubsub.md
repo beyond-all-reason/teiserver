@@ -51,6 +51,14 @@ Used for internal communication around lobby_policies where something needs to b
 }
 ```
 
+#### lobby_policy_updates:#{lobby_policy_id}
+Used by the bots to send updates to anything listening for them (organiser and liveviews).
+```elixir
+%{
+  event: :disconnect
+}
+```
+
 #### teiserver_public_stats
 Similar to the `teiserver_telemetry` channel but specifically limited to be public info.
 ```elixir
@@ -168,34 +176,43 @@ Valid events:
 #### teiserver_liveview_client:#{client_id}
 Updates for clients using the liveview to help prevent doubling up on certain other ones.
 ```elixir
-  # Lobby
-  %{
-    event: :joined_lobby,
-    lobby_id: lobby_id
-  }
+# Lobby
+%{
+  event: :joined_lobby,
+  lobby_id: lobby_id
+}
 
-  %{
-    event: :left_lobby,
-    lobby_id: lobby_id
-  }
+%{
+  event: :left_lobby,
+  lobby_id: lobby_id
+}
 ```
 
 #### teiserver_lobby_chat:#{battle_lobby_id}
 Information specific to the chat in a battle lobby, state changes to the battle are not sent via this channel.
 ```elixir
-  %{
-    event: :say,
-    lobby_id: lobby_id,
-    userid: user_id,
-    message: message
-  }
-  
-  %{
-    event: :announce,
-    lobby_id: lobby_id,
-    userid: user_id,
-    message: message
-  }
+%{
+  event: :say,
+  lobby_id: lobby_id,
+  userid: user_id,
+  message: message
+}
+
+%{
+  event: :announce,
+  lobby_id: lobby_id,
+  userid: user_id,
+  message: message
+}
+```
+
+#### teiserver_liveview_lobby_index_updates
+Sent out to inform there is fresh data available in the lobby index throttle.
+
+```elixir
+%{
+  event: :updated_data
+}
 ```
 
 #### teiserver_liveview_lobby_updates:#{battle_lobby_id}

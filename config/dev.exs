@@ -64,7 +64,6 @@ config :central, Teiserver,
   enable_discord_bridge: false,
   enable_agent_mode: true,
   enable_hailstorm: true,
-  use_geoip: true,
   accept_all_emails: true
 
 # Watch static and templates for browser reloading.
@@ -74,7 +73,7 @@ config :central, CentralWeb.Endpoint,
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
       ~r"lib/central_web/(controllers|live|components|views|templates)/.*(ex|heex)$",
-      ~r"lib/teiserver_web/(controllers|live|components|views|templates)/.*(ex|heex)$",
+      ~r"lib/teiserver_web/(controllers|live|components|views|templates)/.*(ex|heex)$"
     ]
   ]
 

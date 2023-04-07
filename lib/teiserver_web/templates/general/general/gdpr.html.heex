@@ -4,76 +4,104 @@
       <div class="card card-default" style="background-color: transparent;">
         <div class="card-header" style="background-color: transparent;">
           <h3 class="card-title">
-            <img src={Routes.static_path(@conn, "/images/logo/logo_favicon.png")}
-            height="42" style="margin-right: 5px;" class="d-inline align-top"
-          />
-
-            Data collection and privacy policy
+            <img
+              src={Routes.static_path(@conn, "/images/logo/logo_favicon.png")}
+              height="42"
+              style="margin-right: 5px;"
+              class="d-inline align-top"
+            /> Data collection and privacy policy
           </h3>
         </div>
         <div class="card-body">
+          <p>
+            This Statement of Privacy applies to the official <%= @game_name %> (<%= @game_name_short %>) lobby server as hosted under <%= @website_url %>. Under the GDPR, we're required to notify you about the legal basis on which we process User Personal Information. When registering an account and playing <%= @game_name %>, some identifying information is stored on the server database. This document serves as a notice about what data is collected, what part of it is public/visible to admins and how it is handled.
+          </p>
 
-<p>This Statement of Privacy applies to the official <%= @game_name %> (<%= @game_name_short %>) lobby server as hosted under <%= @website_url %>. Under the GDPR, we're required to notify you about the legal basis on which we process User Personal Information. When registering an account and playing <%= @game_name %>, some identifying information is stored on the server database. This document serves as a notice about what data is collected, what part of it is public/visible to admins and how it is handled.</p>
+          <h4>Consent</h4>
+          <p>
+            By registering an account you hereby consent to the terms stated in this Privacy Policy. If you have any concerns about how <%= @game_name_short %> is handling your User Personal Information, please let us know immediately at <a href={"mailto:#{@privacy_email}"}><%= @privacy_email %></a>.
+          </p>
 
-<h4>Consent</h4>
-<p>By registering an account you hereby consent to the terms stated in this Privacy Policy. If you have any concerns about how <%= @game_name_short %> is handling your User Personal Information, please let us know immediately at <a href={"mailto:#{@privacy_email}"}><%= @privacy_email %></a>.</p>
+          <h4>Information we collect</h4>
+          <h5>Visible publicly:</h5>
+          <ul>
+            <li>Username</li>
+            <li>Client hardware specification</li>
+            <li>User aliases used in the past on official battlerooms (history of renames)</li>
+            <li>Country flag (based on IP address, possible to be hidden optionally)</li>
+            <li>
+              TrueSkill rating (<a href="https://en.wikipedia.org/wiki/TrueSkill">Wikipedia</a>)
+            </li>
+            <li>Player rank/level based on in-game time</li>
+            <li>Chat logs from public lobby chat channels</li>
+            <li>
+              History of game matches played online in non-private battlerooms (including the full setup, results, in-game actions over time, and chat including in-game messages)
+            </li>
+          </ul>
 
-<h4>Information we collect</h4>
-<h5>Visible publicly:</h5>
-<ul>
-  <li>Username</li>
-  <li>Client hardware specification</li>
-  <li>User aliases used in the past on official battlerooms (history of renames)</li>
-  <li>Country flag (based on IP address, possible to be hidden optionally)</li>
-  <li>TrueSkill rating (<a href="https://en.wikipedia.org/wiki/TrueSkill">Wikipedia</a>)</li>
-  <li>Player rank/level based on in-game time</li>
-  <li>Chat logs from public lobby chat channels</li>
-  <li>History of game matches played online in non-private battlerooms (including the full setup, results, in-game actions over time, and chat including in-game messages)</li>
-</ul>
+          <h5>Non-public data, visible to accounts with sufficient privilages (admin):</h5>
+          <ul>
+            <li>Email address</li>
+            <li>IP address</li>
+            <li>Game lobby client used</li>
+            <li>Login dates and a log of actions taken while being online</li>
+            <li>History of moderator/administrator action concerning the account</li>
+            <li>History of abuse reports (both filed and received by the user)</li>
+            <li>
+              Website logs (containing browser User-Agent strings, IP addresses and pages visited)
+            </li>
+          </ul>
 
-<h5>Non-public data, visible to accounts with sufficient privilages (admin):</h5>
-<ul>
-  <li>Email address</li>
-  <li>IP address</li>
-  <li>Game lobby client used</li>
-  <li>Login dates and a log of actions taken while being online</li>
-  <li>History of moderator/administrator action concerning the account</li>
-  <li>History of abuse reports (both filed and received by the user)</li>
-  <li>Website logs (containing browser User-Agent strings, IP addresses and pages visited)</li>
-</ul>
+          <h5>Not visible to anyone (stored as a one-way hashed representation):</h5>
+          <ul>
+            <li>Password</li>
+          </ul>
+          <!-- p>Additional disclaimer about sharing/passing the data to live services? I reckon they are stored on other servers?</p -->
+          <h4>How we use your information</h4>
+          <p>
+            The information we collect is necessary for the functionality of the following services:
+          </p>
+          <ul>
+            <li>In-game lobby client with all its functionality</li>
+            <li>
+              Replay browser as seen at
+              <a href={"#{@main_website}replays"}><%= @main_website %>/replays</a>
+            </li>
+            <li>
+              Active battles viewer as seen at
+              <a href={"#{@main_website}active-battles"}><%= @main_website %>/active-battles</a>
+            </li>
+            <li>
+              Leaderboards as seen at
+              <a href={"#{@main_website}leaderboards"}><%= @main_website %>/leaderboards</a>
+            </li>
+          </ul>
+          <p>
+            The collected information is also used for moderation and analytical purposes, supporting the game development and tuning.
+          </p>
 
-<h5>Not visible to anyone (stored as a one-way hashed representation):</h5>
-<ul>
-  <li>Password</li>
-</ul>
+          <h4>Deleting your information</h4>
+          <p>
+            You can request the deletion of your Personal Information by contacting us at <a href={"mailto:#{@privacy_email}"}><%= @privacy_email %></a>.
+          </p>
 
-<!-- p>Additional disclaimer about sharing/passing the data to live services? I reckon they are stored on other servers?</p -->
+          <h4>Children Data Protection</h4>
+          <p>
+            We care about protection for children on the internet. We encourage parents and guardians to observe, participate in, and/or monitor and guide their online activity.
+          </p>
 
-<h4>How we use your information</h4>
-<p>The information we collect is necessary for the functionality of the following services:</p>
-<ul>
-  <li>In-game lobby client with all its functionality</li>
-  <li>Replay browser as seen at <a href={"#{@main_website}replays"}><%= @main_website %>/replays</a></li>
-  <li>Active battles viewer as seen at <a href={"#{@main_website}active-battles"}><%= @main_website %>/active-battles</a></li>
-  <li>Leaderboards as seen at <a href={"#{@main_website}leaderboards"}><%= @main_website %>/leaderboards</a></li>
-</ul>
-<p>The collected information is also used for moderation and analytical purposes, supporting the game development and tuning.</p>
+          <p>
+            <%= @game_name %> does not knowingly collect any Personal Identifiable Information from children under the age of 13. If you think that your child provided this kind of information on our website or servers, we strongly encourage you to contact us immediately and we will do our best efforts to promptly remove such information from our records.
+          </p>
 
-<h4>Deleting your information</h4>
-<p>You can request the deletion of your Personal Information by contacting us at <a href={"mailto:#{@privacy_email}"}><%= @privacy_email %></a>.</p>
+          <h4>Open source</h4>
+          <p>
+            The entire source code for this server is <a href={@github_repo}>available on Github</a>.
+          </p>
 
-<h4>Children Data Protection</h4>
-<p>We care about protection for children on the internet. We encourage parents and guardians to observe, participate in, and/or monitor and guide their online activity.</p>
-
-<p><%= @game_name %> does not knowingly collect any Personal Identifiable Information from children under the age of 13. If you think that your child provided this kind of information on our website or servers, we strongly encourage you to contact us immediately and we will do our best efforts to promptly remove such information from our records.</p>
-
-<h4>Open source</h4>
-<p>The entire source code for this server is <a href={@github_repo}>available on Github</a>.</p>
-
-<a href="/" class="btn btn-primary">
-  Back to homepage
-</a>
-
+          <a href="/" class="btn btn-primary">
+            Back to homepage
+          </a>
         </div>
       </div>
     </div>

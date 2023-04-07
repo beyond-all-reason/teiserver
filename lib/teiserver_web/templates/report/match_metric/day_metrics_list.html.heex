@@ -1,23 +1,25 @@
 <% {_fg, bg, bsname} = view_colour() |> colours() %>
 
-<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "match_metrics"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "match_metrics"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Report.MatchMetricView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Report.MatchMetricView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "day_metrics"
           })
-        %>
+        ) %>
 
-        <a href={Routes.ts_reports_server_metric_path(@conn, :day_metrics_list)} class={"btn float-end btn-outline-#{TeiserverWeb.Report.ServerMetricView.view_colour}"}>
-          <%= central_component "icon", icon: TeiserverWeb.Report.ServerMetricView.icon %>
-          &nbsp;
-          Server data
-        </a>
         <br /><br />
 
         <h4>
@@ -32,7 +34,9 @@
             <tr>
               <th>Date</th>
 
-              <th>Total</th>
+              <th>Raw Total</th>
+              <th>Weighted Total</th>
+
               <th>Duel</th>
               <th>Team</th>
               <th>FFA</th>
@@ -45,33 +49,44 @@
             </tr>
           </thead>
           <tbody>
-        <%= for log <- @logs do %>
-          <tr>
-            <td><%= Timex.format!(log.date, "{0D}/{0M}/{YYYY} {WDshort}") %></td>
+            <%= for log <- @logs do %>
+              <tr>
+                <td><%= Timex.format!(log.date, "{0D}/{0M}/{YYYY} {WDshort}") %></td>
 
-            <td><%= format_number log.data["totals"]["aggregate"]["total_count"] %></td>
-            <td><%= format_number log.data["duel"]["aggregate"]["total_count"] %></td>
-            <td><%= format_number log.data["team"]["aggregate"]["total_count"] %></td>
-            <td><%= format_number log.data["ffa"]["aggregate"]["total_count"] %></td>
-            <td><%= format_number log.data["scavengers"]["aggregate"]["total_count"] %></td>
-            <td><%= format_number log.data["raptors"]["aggregate"]["total_count"] %></td>
+                <td><%= format_number(log.data["totals"]["aggregate"]["total_count"]) %></td>
+                <td><%= format_number(log.data["totals"]["aggregate"]["weighted_count"]) %></td>
 
-            <td><%= represent_seconds log.data["totals"]["aggregate"]["total_duration_seconds"] %></td>
+                <td><%= format_number(log.data["duel"]["aggregate"]["total_count"]) %></td>
+                <td><%= format_number(log.data["team"]["aggregate"]["total_count"]) %></td>
+                <td><%= format_number(log.data["ffa"]["aggregate"]["total_count"]) %></td>
+                <td><%= format_number(log.data["scavengers"]["aggregate"]["total_count"]) %></td>
+                <td><%= format_number(log.data["raptors"]["aggregate"]["total_count"]) %></td>
 
-            <td>
-              <%= link "Show", to: Routes.ts_reports_match_metric_path(@conn, :day_metrics_show, date_to_str(log.date, format: :ymd)), class: "btn btn-secondary btn-sm" %>
-            </td>
-          </tr>
+                <td>
+                  <%= represent_seconds(log.data["totals"]["aggregate"]["total_duration_seconds"]) %>
+                </td>
 
-          <%= if log.date.day == 1 do %>
-            <tr>
-              <td colspan="9" style={"background-color: #{bg}"}>
-                <div style="height: 5px;">&nbsp;</div>
-              </td>
-            </tr>
-          <% end %>
+                <td>
+                  <%= link("Show",
+                    to:
+                      Routes.ts_reports_match_metric_path(
+                        @conn,
+                        :day_metrics_show,
+                        date_to_str(log.date, format: :ymd)
+                      ),
+                    class: "btn btn-secondary btn-sm"
+                  ) %>
+                </td>
+              </tr>
 
-        <% end %>
+              <%= if log.date.day == 1 do %>
+                <tr>
+                  <td colspan="9" style={"background-color: #{bg}"}>
+                    <div style="height: 5px;">&nbsp;</div>
+                  </td>
+                </tr>
+              <% end %>
+            <% end %>
           </tbody>
         </table>
       </div>

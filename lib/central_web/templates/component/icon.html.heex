@@ -1,5 +1,5 @@
-<%
-  icon_class = if assigns[:icon_class] do
+<% icon_class =
+  if assigns[:icon_class] do
     assigns[:icon]
     |> String.replace("fa-thin ", "#{assigns[:icon_class]} ")
     |> String.replace("fal ", "#{assigns[:icon_class]} ")
@@ -12,8 +12,7 @@
     |> String.replace("fa-duotone ", "#{assigns[:icon_class]} ")
   else
     assigns[:icon]
-  end
-%>
+  end %>
 
 <%= if is_list(@icon) do %>
   <%= for i <- @icon do %>

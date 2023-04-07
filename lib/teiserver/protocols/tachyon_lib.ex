@@ -23,27 +23,32 @@ defmodule Teiserver.Protocols.TachyonLib do
     case Jason.encode(data) do
       {:ok, encoded_data} ->
         encoded_data
-          |> :zlib.gzip()
-          |> Base.encode64()
+        |> :zlib.gzip()
+        |> Base.encode64()
+
       {:error, err} ->
-        Logger.error("Tachyon encode error: #{Kernel.inspect err}\ndata: #{Kernel.inspect data}")
+        Logger.error(
+          "Tachyon encode error: #{Kernel.inspect(err)}\ndata: #{Kernel.inspect(data)}"
+        )
 
         %{
           result: "s.system.server_protocol_error",
           error: "JSON encode"
         }
+
         ""
-          |> Jason.encode!
-          |> :zlib.gzip()
-          |> Base.encode64()
+        |> Jason.encode!()
+        |> :zlib.gzip()
+        |> Base.encode64()
     end
   end
 
   @spec decode(String.t() | :timeout) :: {:ok, List.t() | Map.t()} | {:error, :bad_json}
   def decode(:timeout), do: {:ok, nil}
   def decode(""), do: {:ok, nil}
+
   def decode(data) do
-    with {:ok, decoded64} <- Base.decode64(data |> String.trim),
+    with {:ok, decoded64} <- Base.decode64(data |> String.trim()),
          {:ok, unzipped} <- unzip(decoded64),
          {:ok, object} <- Jason.decode(unzipped) do
       {:ok, object}
@@ -53,10 +58,13 @@ defmodule Teiserver.Protocols.TachyonLib do
         # it was still in Spring mode
         Logger.warn("Base64 error, given '#{data}'")
         {:error, :base64_decode}
+
       {:error, :gzip_decompress} ->
         Logger.warn("Gzip error, given '#{data}'")
         {:error, :gzip_decompress}
-      {:error, %Jason.DecodeError{}} -> {:error, :bad_json}
+
+      {:error, %Jason.DecodeError{}} ->
+        {:error, :bad_json}
     end
   end
 
@@ -73,16 +81,18 @@ defmodule Teiserver.Protocols.TachyonLib do
   @spec decode!(String.t() | :timeout) :: List.t() | Map.t()
   def decode!(data) do
     case decode(data) do
-      {:ok, result} -> result
+      {:ok, result} ->
+        result
+
       {:error, reason} ->
         raise "Tachyon decode! error: #{reason}, data: #{data}"
     end
   end
 
-
   @spec query(List.t(), atom | nil, any) :: List.t()
   def query(list, nil, _), do: list
   def query(list, _, nil), do: list
+
   def query(list, field, value) when is_atom(field) do
     list
     |> Enum.filter(fn item -> Map.get(item, field) == value end)
@@ -91,6 +101,7 @@ defmodule Teiserver.Protocols.TachyonLib do
   @spec query_in(List.t(), atom | nil, List.t()) :: List.t()
   def query_in(list, nil, _), do: list
   def query_in(list, _, nil), do: list
+
   def query_in(list, field, value) when is_atom(field) do
     list
     |> Enum.filter(fn item -> Enum.member?(value, Map.get(item, field)) end)

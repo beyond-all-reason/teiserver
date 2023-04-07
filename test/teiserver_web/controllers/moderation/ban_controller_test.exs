@@ -6,6 +6,7 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
   alias Teiserver.Moderation.ModerationTestLib
 
   alias Central.Helpers.GeneralTestLib
+
   setup do
     GeneralTestLib.conn_setup(["teiserver.staff.reviewer", "teiserver.staff.moderator"])
     |> Teiserver.TeiserverTestLib.conn_setup()
@@ -29,7 +30,13 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
 
     test "renders creation form", %{conn: conn} do
       user = GeneralTestLib.make_user()
-      conn = get(conn, Routes.moderation_ban_path(conn, :new_with_user) <> "?teiserver_user=%23#{user.id}")
+
+      conn =
+        get(
+          conn,
+          Routes.moderation_ban_path(conn, :new_with_user) <> "?teiserver_user=%23#{user.id}"
+        )
+
       assert html_response(conn, 200) =~ "Adding ban based on"
     end
   end
@@ -37,9 +44,15 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
   describe "create ban" do
     test "redirects to show when data is valid", %{conn: conn} do
       user = GeneralTestLib.make_user()
-      conn = post(conn, Routes.moderation_ban_path(conn, :create), ban: Map.merge(@create_attrs, %{
-        source_id: user.id
-      }))
+
+      conn =
+        post(conn, Routes.moderation_ban_path(conn, :create),
+          ban:
+            Map.merge(@create_attrs, %{
+              source_id: user.id
+            })
+        )
+
       assert redirected_to(conn) == Routes.moderation_ban_path(conn, :index)
 
       new_ban = Moderation.list_bans(search: [source_id: user.id])
@@ -48,7 +61,12 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
 
     test "renders errors when data is invalid", %{conn: conn} do
       user = GeneralTestLib.make_user()
-      conn = post(conn, Routes.moderation_ban_path(conn, :create), ban: Map.merge(@invalid_attrs, %{source_id: user.id}))
+
+      conn =
+        post(conn, Routes.moderation_ban_path(conn, :create),
+          ban: Map.merge(@invalid_attrs, %{source_id: user.id})
+        )
+
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
     end
   end

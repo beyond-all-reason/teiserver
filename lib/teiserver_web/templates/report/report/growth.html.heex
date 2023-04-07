@@ -1,11 +1,17 @@
 <% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "reports"})
+) %>
 
-<script src={Routes.static_path(@conn, "/js/d3.js")}></script>
-<script src={Routes.static_path(@conn, "/js/c3.min.js")}></script>
+<script src={Routes.static_path(@conn, "/js/d3.js")}>
+</script>
+<script src={Routes.static_path(@conn, "/js/c3.min.js")}>
+</script>
 
-<link href="/css/c3.min.css" rel="stylesheet">
+<link href="/css/c3.min.css" rel="stylesheet" />
 
 <script>
   function generate_chart (elem_id, json) {
@@ -23,7 +29,11 @@
           }
         },
         y: {
-          min: 0
+          min: 0,
+          padding: {
+            top: 15,
+            bottom: 0
+          }
         }
       }
     });
@@ -43,41 +53,85 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Report.ReportView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "growth"
           })
-        %>
+        ) %>
 
-        <span onclick="
+        <span
+          onclick="
           $('.sub-menu').hide();
           $('#top-nav').hide();
           $('#breadcrumb-wrapper').hide();
           $('#growth-report-form').hide();
-        " class={"btn btn-#{bsname} float-end"}>
-          <i class="fa-fw fa-solid fa-camera"></i>
-          &nbsp;
+        "
+          class={"btn btn-#{bsname} float-end"}
+        >
+          <i class="fa-fw fa-solid fa-camera"></i> &nbsp;
           Screenshot mode
         </span>
 
-        <form action={Routes.ts_reports_report_path(@conn, :show, "growth")} method="post" class="form-horizontal mb-4">
+        <form
+          action={Routes.ts_reports_report_path(@conn, :show, "growth")}
+          method="post"
+          class="form-horizontal mb-4"
+        >
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
           <div class="row">
+
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
-              <label for="report_days" class="control-label">Time period (days): </label>
-              <input type="text" name="report[days]" id="report_days" value={@params["days"]} class="form-control" />
+              <label for="report_time_unit" class="control-label">Time unit: </label>
+              <%= select(
+                :report,
+                :time_unit,
+                [
+                  "Day",
+                  "Week",
+                  "Month",
+                  "Quarter",
+                  "Year"
+                ],
+                class: "form-control",
+                selected: @params["time_unit"]
+              ) %>
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="report_limit" class="control-label">Log count: </label>
+              <input
+                type="text"
+                name="report[limit]"
+                id="report_limit"
+                value={@params["limit"]}
+                class="form-control"
+              />
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_columns" class="control-label">Columns: </label>
-              <input type="text" name="report[columns]" id="report_columns" value={@params["columns"]} class="form-control" />
+              <input
+                type="text"
+                name="report[columns]"
+                id="report_columns"
+                value={@params["columns"]}
+                class="form-control"
+              />
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               &nbsp;<br />
-              <input type="submit" value="Update report" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+              <input
+                type="submit"
+                value="Update report"
+                name="form.submitted"
+                class={"btn btn-#{bsname} btn-block"}
+              />
             </div>
           </div>
         </form>
@@ -86,22 +140,22 @@
   </div>
 </div>
 
-<%
-  col_class = case String.trim(@params["columns"]) do
+<% col_class =
+  case String.trim(@params["columns"]) do
+    "6" -> "col-md-2"
     "4" -> "col-md-3"
     "3" -> "col-md-4"
     "2" -> "col-md-6"
     _ -> "col-md-12"
   end
-  col_class = col_class <> " my-2"
-%>
+
+col_class = col_class <> " my-2" %>
 
 <div class="row">
   <div class={col_class}>
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
-        <div id="unique-counts" class='with-transitions' style="height: 400px;">
-        </div>
+        <div id="unique-counts" class="with-transitions" style="height: 400px;"></div>
       </div>
     </div>
   </div>
@@ -109,8 +163,7 @@
   <div class={col_class}>
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
-        <div id="peak-counts" class='with-transitions' style="height: 400px;">
-        </div>
+        <div id="peak-counts" class="with-transitions" style="height: 400px;"></div>
       </div>
     </div>
   </div>
@@ -118,8 +171,7 @@
   <div class={col_class}>
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
-        <div id="time-counts" class='with-transitions' style="height: 400px;">
-        </div>
+        <div id="time-counts" class="with-transitions" style="height: 400px;"></div>
       </div>
     </div>
   </div>
@@ -127,8 +179,7 @@
   <div class={col_class}>
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
-        <div id="pvp-counts" class='with-transitions' style="height: 400px;">
-        </div>
+        <div id="pvp-counts" class="with-transitions" style="height: 400px;"></div>
       </div>
     </div>
   </div>
@@ -136,8 +187,7 @@
   <div class={col_class}>
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
-        <div id="pve-counts" class='with-transitions' style="height: 400px;">
-        </div>
+        <div id="pve-counts" class="with-transitions" style="height: 400px;"></div>
       </div>
     </div>
   </div>
@@ -145,8 +195,7 @@
   <div class={col_class}>
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
-        <div id="singleplayer-counts" class='with-transitions' style="height: 400px;">
-        </div>
+        <div id="singleplayer-counts" class="with-transitions" style="height: 400px;"></div>
       </div>
     </div>
   </div>

@@ -7,6 +7,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.NewsIn do
     case Communication.get_category_id(category_name) do
       nil ->
         reply(:news, :get_latest_game_news, nil, state)
+
       category_id ->
         latest_post = Communication.get_latest_post(category_id)
         reply(:news, :get_latest_game_news, latest_post, state)

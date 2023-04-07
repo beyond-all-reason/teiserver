@@ -6,6 +6,7 @@ defmodule Teiserver.Chat.LobbyMessage do
     field :lobby_guid, :string
     field :inserted_at, :utc_datetime
     belongs_to :user, Central.Account.User
+    belongs_to :match, Teiserver.Battle.Match
   end
 
   @doc """
@@ -13,12 +14,13 @@ defmodule Teiserver.Chat.LobbyMessage do
   """
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
-    params = params
-    |> trim_strings([:content, :lobby_guid])
+    params =
+      params
+      |> trim_strings([:content, :lobby_guid])
 
     struct
-    |> cast(params, [:content, :lobby_guid, :inserted_at, :user_id])
-    |> validate_required([:content, :lobby_guid, :inserted_at, :user_id])
+    |> cast(params, ~w(content lobby_guid inserted_at match_id user_id)a)
+    |> validate_required(~w(content lobby_guid inserted_at user_id)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

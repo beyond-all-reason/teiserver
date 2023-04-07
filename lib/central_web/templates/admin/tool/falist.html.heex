@@ -1,22 +1,7 @@
-<%#
-Extraction method:
-cd fa/svgs/solid
-ls -l > /tmp/fa_s.txt
-code /tmp/fa_s.txt
+<%= render(CentralWeb.Admin.ToolView, "sub_menu.html", Map.merge(assigns, %{active: "falist"})) %>
 
-cd ../brands
-ls -l > /tmp/fa_b.txt
-code /tmp/fa_b.txt
-
-Use column editing and Alt + F3 to remove cruft
-%>
-
-<%= render CentralWeb.Admin.ToolView, "sub_menu.html", Map.merge(assigns, %{active: "falist"}) %>
-
-<%
-  brand = Central.Helpers.Fa5Helper.brand_icons()
-  standard = Central.Helpers.Fa5Helper.standard_icons()
-%>
+<% brand = Central.Helpers.Fa5Helper.brand_icons()
+standard = Central.Helpers.Fa5Helper.standard_icons() %>
 
 <style type="text/css">
   .icon-row {

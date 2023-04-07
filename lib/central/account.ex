@@ -141,6 +141,7 @@ defmodule Central.Account do
   end
 
   def broadcast_create_user(u), do: broadcast_create_user(u, :create)
+
   def broadcast_create_user({:ok, user}, reason) do
     PubSub.broadcast(
       Central.PubSub,
@@ -154,6 +155,7 @@ defmodule Central.Account do
   def broadcast_create_user(v, _), do: v
 
   def broadcast_update_user(u), do: broadcast_update_user(u, :update)
+
   def broadcast_update_user({:ok, user}, reason) do
     PubSub.broadcast(
       Central.PubSub,
@@ -193,18 +195,19 @@ defmodule Central.Account do
   end
 
   def create_throwaway_user(attrs \\ %{}) do
-    params = %{
+    params =
+      %{
         "name" => generate_throwaway_name(),
         "email" => "#{UUID.uuid1()}@throwaway",
-        "password" => UUID.uuid1(),
+        "password" => UUID.uuid1()
       }
       |> Central.Helpers.StylingHelper.random_styling()
       |> Map.merge(attrs)
 
     %User{}
-      |> User.changeset(params)
-      |> Repo.insert()
-      |> broadcast_create_user
+    |> User.changeset(params)
+    |> Repo.insert()
+    |> broadcast_create_user
   end
 
   def merge_default_params(user_params) do
@@ -709,308 +712,6 @@ defmodule Central.Account do
   """
   def change_group_invite(%GroupInvite{} = group_invite) do
     GroupInvite.changeset(group_invite, %{})
-  end
-
-  alias Central.Account.{Code, CodeLib}
-
-  def code_query(args) do
-    code_query(nil, args)
-  end
-
-  def code_query(value, args) do
-    CodeLib.query_codes()
-    |> CodeLib.search(%{value: value})
-    |> CodeLib.search(args[:search])
-    |> CodeLib.preload(args[:preload])
-    |> CodeLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
-  end
-
-  @doc """
-  Returns the list of codes.
-
-  ## Examples
-
-      iex> list_codes()
-      [%Code{}, ...]
-
-  """
-  def list_codes(args \\ []) do
-    code_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all()
-  end
-
-  @doc """
-  Gets a single code.
-
-  Raises `Ecto.NoResultsError` if the Code does not exist.
-
-  ## Examples
-
-      iex> get_code!(123)
-      %Code{}
-
-      iex> get_code!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_code(value, args \\ []) do
-    code_query(value, args)
-    |> QueryHelpers.limit_query(args[:limit] || 1)
-    |> Repo.one()
-  end
-
-  def get_code!(value, args \\ []) do
-    code_query(value, args)
-    |> QueryHelpers.limit_query(args[:limit] || 1)
-    |> Repo.one!()
-  end
-
-  # Uncomment this if needed, default files do not need this function
-  # @doc """
-  # Gets a single code.
-
-  # Returns `nil` if the Code does not exist.
-
-  # ## Examples
-
-  #     iex> get_code(123)
-  #     %Code{}
-
-  #     iex> get_code(456)
-  #     nil
-
-  # """
-  # def get_code(id, args \\ []) when not is_list(id) do
-  #   code_query(id, args)
-  #   |> Repo.one
-  # end
-
-  @doc """
-  Creates a code.
-
-  ## Examples
-
-      iex> create_code(%{field: value})
-      {:ok, %Code{}}
-
-      iex> create_code(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_code(attrs \\ %{}) do
-    %Code{}
-    |> Code.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a code.
-
-  ## Examples
-
-      iex> update_code(code, %{field: new_value})
-      {:ok, %Code{}}
-
-      iex> update_code(code, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_code(%Code{} = code, attrs) do
-    code
-    |> Code.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a Code.
-
-  ## Examples
-
-      iex> delete_code(code)
-      {:ok, %Code{}}
-
-      iex> delete_code(code)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_code(%Code{} = code) do
-    Repo.delete(code)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking code changes.
-
-  ## Examples
-
-      iex> change_code(code)
-      %Ecto.Changeset{source: %Code{}}
-
-  """
-  def change_code(%Code{} = code) do
-    Code.changeset(code, %{})
-  end
-
-  alias Central.Account.{UserToken, UserTokenLib}
-
-  def user_token_query(args) do
-    user_token_query(nil, args)
-  end
-
-  def user_token_query(id, args) do
-    UserTokenLib.query_user_tokens()
-    |> UserTokenLib.search(%{id: id})
-    |> UserTokenLib.search(args[:search])
-    |> UserTokenLib.preload(args[:preload])
-    |> UserTokenLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
-  end
-
-  @doc """
-  Returns the list of user_tokens.
-
-  ## Examples
-
-      iex> list_user_tokens()
-      [%UserToken{}, ...]
-
-  """
-  def list_user_tokens(args \\ []) do
-    user_token_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all()
-  end
-
-  @doc """
-  Gets a single user_token.
-
-  Raises `Ecto.NoResultsError` if the UserToken does not exist.
-
-  ## Examples
-
-      iex> get_user_token!(123)
-      %UserToken{}
-
-      iex> get_user_token!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_user_token(id, args \\ []) do
-    user_token_query(id, args)
-    |> QueryHelpers.limit_query(args[:limit] || 1)
-    |> Repo.one()
-  end
-
-  def get_user_token!(id, args \\ []) do
-    user_token_query(id, args)
-    |> QueryHelpers.limit_query(args[:limit] || 1)
-    |> Repo.one!()
-  end
-
-  @spec get_user_token_by_value(String.t()) :: UserToken.t() | nil
-  def get_user_token_by_value(value) do
-    user_token_query(nil,
-      search: [
-        value: value
-      ],
-      preload: [
-        :user
-      ]
-    )
-    |> QueryHelpers.limit_query(1)
-    |> Repo.one()
-  end
-
-  # Uncomment this if needed, default files do not need this function
-  # @doc """
-  # Gets a single user_token.
-
-  # Returns `nil` if the UserToken does not exist.
-
-  # ## Examples
-
-  #     iex> get_user_token(123)
-  #     %UserToken{}
-
-  #     iex> get_user_token(456)
-  #     nil
-
-  # """
-  # def get_user_token(id, args \\ []) when not is_list(id) do
-  #   user_token_query(id, args)
-  #   |> Repo.one
-  # end
-
-  @doc """
-  Creates a user_token.
-
-  ## Examples
-
-      iex> create_user_token(%{field: value})
-      {:ok, %UserToken{}}
-
-      iex> create_user_token(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_user_token(attrs \\ %{}) do
-    %UserToken{}
-    |> UserToken.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a user_token.
-
-  ## Examples
-
-      iex> update_user_token(user_token, %{field: new_value})
-      {:ok, %UserToken{}}
-
-      iex> update_user_token(user_token, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_user_token(%UserToken{} = user_token, attrs) do
-    user_token
-    |> UserToken.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a UserToken.
-
-  ## Examples
-
-      iex> delete_user_token(user_token)
-      {:ok, %UserToken{}}
-
-      iex> delete_user_token(user_token)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_user_token(%UserToken{} = user_token) do
-    Repo.delete(user_token)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking user_token changes.
-
-  ## Examples
-
-      iex> change_user_token(user_token)
-      %Ecto.Changeset{source: %UserToken{}}
-
-  """
-  def change_user_token(%UserToken{} = user_token) do
-    UserToken.changeset(user_token, %{})
-  end
-
-  def create_token_value(length \\ 128) do
-    :crypto.strong_rand_bytes(length)
-      |> Base.encode64(padding: false)
-      |> binary_part(0, length)
   end
 
   @doc """

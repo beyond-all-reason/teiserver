@@ -44,7 +44,6 @@ defmodule Teiserver.Battle.LobbyServerTest do
     r = LobbyCache.update_lobby_values(-1, %{map_name: "new map name"})
     assert r == nil
 
-
     # Update lobby
     r = LobbyCache.update_lobby(Map.put(lobby, :engine_name, "new engie"), nil, :reason)
     assert r != nil

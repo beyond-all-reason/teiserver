@@ -25,18 +25,21 @@ defmodule Teiserver.Telemetry.TelemetryServer do
       # reset when the reset command is sent
       completed: 0
     },
-    matchmaking: %{
-
-    },
+    matchmaking: %{},
     server: %{
       users_connected: 0,
       users_disconnected: 0,
-
       bots_connected: 0,
       bots_disconnected: 0,
-
-      load: 0,
-    }
+      load: 0
+    },
+    total_clients_connected: 0,
+    spring_server_messages_sent: 0,
+    spring_server_batches_sent: 0,
+    spring_client_messages_sent: 0,
+    tachyon_server_messages_sent: 0,
+    tachyon_server_batches_sent: 0,
+    tachyon_client_messages_sent: 0
   }
 
   @impl true
@@ -54,6 +57,30 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   end
 
   @impl true
+  def handle_cast(
+        {:spring_messages_sent, _userid, server_count, _batch_count, client_count},
+        state
+      ) do
+    {:noreply,
+     %{
+       state
+       | spring_server_messages_sent: state.spring_server_messages_sent + server_count,
+         spring_client_messages_sent: state.spring_client_messages_sent + client_count
+     }}
+  end
+
+  def handle_cast(
+        {:tachyon_messages_sent, _userid, server_count, _batch_count, client_count},
+        state
+      ) do
+    {:noreply,
+     %{
+       state
+       | tachyon_server_messages_sent: state.tachyon_server_messages_sent + server_count,
+         tachyon_client_messages_sent: state.tachyon_client_messages_sent + client_count
+     }}
+  end
+
   def handle_cast({:matchmaking_update, queue_id, data}, %{matchmaking: matchmaking} = state) do
     new_matchmaking = Map.put(matchmaking, queue_id, data)
     {:noreply, %{state | matchmaking: new_matchmaking}}
@@ -66,20 +93,21 @@ defmodule Teiserver.Telemetry.TelemetryServer do
 
   @spec report_telemetry(Map.t()) :: :ok
   defp report_telemetry(state) do
-    client = @client_states
-    |> Map.new(fn cstate ->
-      {cstate, state.client[cstate] |> Enum.count}
-    end)
+    client =
+      @client_states
+      |> Map.new(fn cstate ->
+        {cstate, state.client[cstate] |> Enum.count()}
+      end)
 
     :telemetry.execute([:teiserver, :client], client, %{})
     :telemetry.execute([:teiserver, :battle], state.battle, %{})
 
     data = %{
       client: client,
-      battle: state.battle
+      battle: state.battle,
+      total_clients_connected: state.total_clients_connected
     }
 
-    # TODO: Is there a way to hook into the above data for our liveviews?
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_telemetry",
@@ -101,6 +129,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
           player_count: client.player,
           lobby_count: state.battle.total,
           in_progress_lobby_count: state.battle.in_progress,
+          total_clients_connected: state.total_clients_connected
         }
       }
     )
@@ -110,34 +139,38 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   defp get_totals(state) do
     battles = Lobby.list_lobbies()
     client_ids = Client.list_client_ids()
-    clients = client_ids
+
+    clients =
+      client_ids
       |> Map.new(fn c -> {c, Client.get_client_by_id(c)} end)
 
     # Battle stats
     total_battles = Enum.count(battles)
-    battles_in_progress = battles
-    |> Enum.filter(fn battle ->
+
+    battles_in_progress =
+      battles
+      |> Enum.filter(fn battle ->
         # If the host is in-game, the battle is in progress!
         host = clients[battle.founder_id]
         host != nil and host.in_game
       end)
 
     # Client stats
-    {player_ids, spectator_ids, lobby_ids, menu_ids} = clients
-      |> Enum.reduce({[], [], [], []}, fn ({userid, client}, {player, spectator, lobby, menu}) ->
-        add_to = cond do
-          client == nil -> nil
-          client.bot == true -> nil
-          client.lobby_id == nil -> :menu
-
-          # Client is involved in a battle in some way
-          # In this case they are not in a game, they are in a battle lobby
-          client.in_game == false -> :lobby
-
-          # User is in a game, are they a player or a spectator?
-          client.player == false -> :spectator
-          client.player == true -> :player
-        end
+    {player_ids, spectator_ids, lobby_ids, menu_ids} =
+      clients
+      |> Enum.reduce({[], [], [], []}, fn {userid, client}, {player, spectator, lobby, menu} ->
+        add_to =
+          cond do
+            client == nil -> nil
+            client.bot == true -> nil
+            client.lobby_id == nil -> :menu
+            # Client is involved in a battle in some way
+            # In this case they are not in a game, they are in a battle lobby
+            client.in_game == false -> :lobby
+            # User is in a game, are they a player or a spectator?
+            client.player == false -> :spectator
+            client.player == true -> :player
+          end
 
         case add_to do
           nil -> {player, spectator, lobby, menu}
@@ -148,10 +181,14 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         end
       end)
 
-    lobby_memberships = clients
-      |> Map.values
-      |> Enum.reject(fn %{lobby_id: lobby_id} -> lobby_id == nil end)
-      |> Enum.reduce(%{}, fn (client, memberships) ->
+    lobby_memberships =
+      clients
+      |> Map.values()
+      |> Enum.reject(fn
+        %{lobby_id: lobby_id} -> lobby_id == nil
+        _ -> true
+      end)
+      |> Enum.reduce(%{}, fn client, memberships ->
         new_lobby_membership = [client.userid | Map.get(memberships, client.lobby_id, [])]
         Map.put(memberships, client.lobby_id, new_lobby_membership)
       end)
@@ -172,18 +209,22 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         lobby: total_battles - Enum.count(battles_in_progress),
         in_progress: Enum.count(battles_in_progress),
         started: counters.matches_started,
-        stopped: counters.matches_stopped,
+        stopped: counters.matches_stopped
       },
-      matchmaking: %{
-
-      },
+      matchmaking: %{},
       server: %{
         users_connected: counters.users_connected,
         users_disconnected: counters.users_disconnected,
-
         bots_connected: counters.bots_connected,
         bots_disconnected: counters.bots_disconnected
       },
+      total_clients_connected: Enum.count(clients),
+      spring_server_messages_sent: state.spring_server_messages_sent,
+      spring_server_batches_sent: state.spring_server_batches_sent,
+      spring_client_messages_sent: state.spring_client_messages_sent,
+      tachyon_server_messages_sent: state.tachyon_server_messages_sent,
+      tachyon_server_batches_sent: state.tachyon_server_batches_sent,
+      tachyon_client_messages_sent: state.tachyon_client_messages_sent,
       os_mon: get_os_mon_data()
     }
   end
@@ -204,6 +245,10 @@ defmodule Teiserver.Telemetry.TelemetryServer do
 
     process_counts = %{
       system_servers: Horde.Registry.count(Teiserver.ServerRegistry),
+      throttle_servers: Horde.Registry.count(Teiserver.ThrottleRegistry),
+      accolade_servers: Horde.Registry.count(Teiserver.AccoladesRegistry),
+      consul_servers: Horde.Registry.count(Teiserver.ConsulRegistry),
+      balancer_servers: Horde.Registry.count(Teiserver.BalancerRegistry),
       lobby_servers: Horde.Registry.count(Teiserver.LobbyRegistry),
       client_servers: Horde.Registry.count(Teiserver.ClientRegistry),
       party_servers: Horde.Registry.count(Teiserver.PartyRegistry),
@@ -212,10 +257,11 @@ defmodule Teiserver.Telemetry.TelemetryServer do
       managed_lobby_servers: Horde.Registry.count(Teiserver.LobbyPolicyRegistry)
     }
 
-    process_counts = Map.merge(process_counts, %{
-      beam_total: Process.list() |> Enum.count(),
-      teiserver_total: process_counts |> Map.values |> Enum.sum
-    })
+    process_counts =
+      Map.merge(process_counts, %{
+        beam_total: Process.list() |> Enum.count(),
+        teiserver_total: process_counts |> Map.values() |> Enum.sum()
+      })
 
     %{
       cpu_avg1: :cpu_sup.avg1(),

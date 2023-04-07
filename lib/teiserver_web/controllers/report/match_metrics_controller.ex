@@ -39,17 +39,17 @@ defmodule TeiserverWeb.Report.MatchMetricController do
   def day_metrics_show(conn, %{"date" => date_str}) do
     date = TimexHelper.parse_ymd(date_str)
 
-    if (date |> Timex.to_date) == Timex.today() do
+    if date |> Timex.to_date() == Timex.today() do
       conn
-        |> redirect(to: Routes.ts_reports_match_metric_path(conn, :day_metrics_today))
+      |> redirect(to: Routes.ts_reports_match_metric_path(conn, :day_metrics_today))
     else
       log = Telemetry.get_match_day_log(date)
 
       conn
-        |> assign(:date, date)
-        |> assign(:data, log.data)
-        |> add_breadcrumb(name: "Daily - #{date_str}", url: conn.request_path)
-        |> render("day_metrics_show.html")
+      |> assign(:date, date)
+      |> assign(:data, log.data)
+      |> add_breadcrumb(name: "Daily - #{date_str}", url: conn.request_path)
+      |> render("day_metrics_show.html")
     end
   end
 
@@ -58,10 +58,10 @@ defmodule TeiserverWeb.Report.MatchMetricController do
     data = Telemetry.get_todays_match_log()
 
     conn
-      |> assign(:date, Timex.today())
-      |> assign(:data, data)
-      |> add_breadcrumb(name: "Daily - Today (partial)", url: conn.request_path)
-      |> render("day_metrics_show.html")
+    |> assign(:date, Timex.today())
+    |> assign(:data, data)
+    |> add_breadcrumb(name: "Daily - Today (partial)", url: conn.request_path)
+    |> render("day_metrics_show.html")
   end
 
   @spec export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -70,7 +70,7 @@ defmodule TeiserverWeb.Report.MatchMetricController do
     |> assign(:params, %{
       "date_preset" => "All time"
     })
-    |> assign(:presets, DatePresets.long_ranges)
+    |> assign(:presets, DatePresets.long_ranges())
     |> render("export_form.html")
   end
 
@@ -86,9 +86,10 @@ defmodule TeiserverWeb.Report.MatchMetricController do
 
   @spec day_metrics_graph(Plug.Conn.t(), map) :: Plug.Conn.t()
   def day_metrics_graph(conn, params) do
-    params = Map.merge(params, %{
-      "days" => Map.get(params, "days", 31) |> int_parse
-    })
+    params =
+      Map.merge(params, %{
+        "days" => Map.get(params, "days", 31) |> int_parse
+      })
 
     logs =
       Telemetry.list_match_day_logs(
@@ -101,15 +102,16 @@ defmodule TeiserverWeb.Report.MatchMetricController do
     fields = Map.get(params, "fields", "split")
     columns = MatchGraphLogsTask.perform(logs, fields, key)
 
-    key = logs
-    |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
+    key =
+      logs
+      |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
 
     conn
-      |> assign(:params, params)
-      |> assign(:columns, columns)
-      |> assign(:key, key)
-      |> add_breadcrumb(name: "Daily - Graph", url: conn.request_path)
-      |> render("day_metrics_graph.html")
+    |> assign(:params, params)
+    |> assign(:columns, columns)
+    |> assign(:key, key)
+    |> add_breadcrumb(name: "Daily - Graph", url: conn.request_path)
+    |> render("day_metrics_graph.html")
   end
 
   # MONTHLY METRICS
@@ -135,7 +137,7 @@ defmodule TeiserverWeb.Report.MatchMetricController do
 
     if today == "#{month}/#{year}" do
       conn
-        |> redirect(to: Routes.ts_reports_match_metric_path(conn, :month_metrics_today))
+      |> redirect(to: Routes.ts_reports_match_metric_path(conn, :month_metrics_today))
     else
       log = Telemetry.get_match_month_log({year, month})
 
@@ -150,34 +152,37 @@ defmodule TeiserverWeb.Report.MatchMetricController do
 
   @spec month_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()
   def month_metrics_today(conn, params) do
-    force_recache = (Map.get(params, "recache", false) == "true")
+    force_recache = Map.get(params, "recache", false) == "true"
     data = Telemetry.get_this_months_match_metrics_log(force_recache)
 
-    {lyear, lmonth} = if Timex.today().month == 1 do
-      {Timex.today().year - 1, 12}
-    else
-      {Timex.today().year, Timex.today().month - 1}
-    end
+    {lyear, lmonth} =
+      if Timex.today().month == 1 do
+        {Timex.today().year - 1, 12}
+      else
+        {Timex.today().year, Timex.today().month - 1}
+      end
+
     last_month = Telemetry.get_match_month_log({lyear, lmonth}).data
 
     days_in_month = Timex.days_in_month(Timex.now())
-    progress = round(Timex.today().day/days_in_month * 100)
+    progress = round(Timex.today().day / days_in_month * 100)
 
     conn
-      |> assign(:year, Timex.today().year)
-      |> assign(:month, Timex.today().month)
-      |> assign(:data, data)
-      |> assign(:last_month, last_month)
-      |> assign(:progress, progress)
-      |> add_breadcrumb(name: "Monthly - This month (partial)", url: conn.request_path)
-      |> render("month_metrics_today_show.html")
+    |> assign(:year, Timex.today().year)
+    |> assign(:month, Timex.today().month)
+    |> assign(:data, data)
+    |> assign(:last_month, last_month)
+    |> assign(:progress, progress)
+    |> add_breadcrumb(name: "Monthly - This month (partial)", url: conn.request_path)
+    |> render("month_metrics_today_show.html")
   end
 
   @spec month_metrics_graph(Plug.Conn.t(), map) :: Plug.Conn.t()
   def month_metrics_graph(conn, params) do
-    params = Map.merge(params, %{
-      "months" => Map.get(params, "months", 13) |> int_parse
-    })
+    params =
+      Map.merge(params, %{
+        "months" => Map.get(params, "months", 13) |> int_parse
+      })
 
     logs =
       Telemetry.list_match_month_logs(
@@ -186,19 +191,19 @@ defmodule TeiserverWeb.Report.MatchMetricController do
       )
       |> Enum.reverse()
 
-
     key = Map.get(params, "type", "total_count")
     fields = Map.get(params, "fields", "split")
     columns = MatchGraphLogsTask.perform(logs, fields, key)
 
-    key = logs
-    |> Enum.map(fn log -> {log.year,log.month, 1} |> TimexHelper.date_to_str(format: :ymd) end)
+    key =
+      logs
+      |> Enum.map(fn log -> {log.year, log.month, 1} |> TimexHelper.date_to_str(format: :ymd) end)
 
     conn
-      |> assign(:params, params)
-      |> assign(:columns, columns)
-      |> assign(:key, key)
-      |> add_breadcrumb(name: "Monthly - Graph", url: conn.request_path)
-      |> render("month_metrics_graph.html")
+    |> assign(:params, params)
+    |> assign(:columns, columns)
+    |> assign(:key, key)
+    |> add_breadcrumb(name: "Monthly - Graph", url: conn.request_path)
+    |> render("month_metrics_graph.html")
   end
 end

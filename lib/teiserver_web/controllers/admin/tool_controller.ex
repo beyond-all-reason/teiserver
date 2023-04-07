@@ -21,27 +21,6 @@ defmodule TeiserverWeb.Admin.ToolController do
     render(conn, "index.html")
   end
 
-  @spec convert_form(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def convert_form(conn, _params) do
-    render(conn, "convert_form.html")
-  end
-
-  @spec convert_post(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def convert_post(conn, %{"file_upload" => file_upload}) do
-    {:ok, _job} =
-      case File.read(file_upload.path) do
-        {:ok, body} ->
-          %{body: body}
-          |> Teiserver.UberserverConvert.new()
-          |> Oban.insert()
-
-        error ->
-          throw(error)
-      end
-
-    render(conn, "convert_post.html")
-  end
-
   @spec day_metrics_list(Plug.Conn.t(), map) :: Plug.Conn.t()
   def day_metrics_list(conn, _params) do
     logs =

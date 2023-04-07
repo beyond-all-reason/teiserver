@@ -30,9 +30,10 @@ defmodule Teiserver.Account.ClientLib do
 
   @spec get_clients([T.userid()]) :: List.t()
   def get_clients([]), do: []
+
   def get_clients(id_list) do
     id_list
-      |> list_clients
+    |> list_clients
   end
 
   @spec list_client_ids() :: [T.userid()]
@@ -43,14 +44,16 @@ defmodule Teiserver.Account.ClientLib do
   @spec list_clients() :: [T.client()]
   def list_clients() do
     list_client_ids()
-      |> list_clients()
+    |> list_clients()
   end
 
   @spec list_clients([T.userid()]) :: [T.client()]
+  def list_clients(nil), do: []
+
   def list_clients(id_list) do
     id_list
-      |> Enum.map(fn c -> get_client_by_id(c) end)
-      |> Enum.reject(&(&1 == nil))
+    |> Enum.map(fn c -> get_client_by_id(c) end)
+    |> Enum.reject(&(&1 == nil))
   end
 
   # Party
@@ -86,7 +89,10 @@ defmodule Teiserver.Account.ClientLib do
     cast_client(userid, {:merge_update_client, partial_client})
   end
 
-  @spec replace_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: Map.t()
+  @spec replace_update_client(
+          Map.t(),
+          :silent | :client_updated_status | :client_updated_battlestatus
+        ) :: Map.t()
   def replace_update_client(%{userid: userid} = client, :silent) do
     # Update the process with it
     cast_client(userid, {:update_client, client})
@@ -100,7 +106,11 @@ defmodule Teiserver.Account.ClientLib do
     # PubSub.broadcast(Central.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
 
     if client.lobby_id do
-      PubSub.broadcast(Central.PubSub, "legacy_battle_updates:#{client.lobby_id}", {:updated_client, client, reason})
+      PubSub.broadcast(
+        Central.PubSub,
+        "legacy_battle_updates:#{client.lobby_id}",
+        {:updated_client, client, reason}
+      )
 
       PubSub.broadcast(
         Central.PubSub,
@@ -110,21 +120,19 @@ defmodule Teiserver.Account.ClientLib do
 
       if client.lobby_host do
         case Battle.get_lobby(client.lobby_id) do
-          nil -> :ok
+          nil ->
+            :ok
+
           lobby ->
             case {lobby.in_progress, client.in_game} do
               {true, false} ->
-                new_lobby = %{lobby |
-                  in_progress: false,
-                  started_at: nil
-                }
+                new_lobby = %{lobby | in_progress: false, started_at: nil}
                 Battle.update_lobby(new_lobby, nil, :host_updated_clientstatus)
+
               {false, true} ->
-                new_lobby = %{lobby |
-                  in_progress: true,
-                  started_at: System.system_time(:second)
-                }
+                new_lobby = %{lobby | in_progress: true, started_at: System.system_time(:second)}
                 Battle.update_lobby(new_lobby, nil, :host_updated_clientstatus)
+
               _ ->
                 :ok
             end
@@ -139,7 +147,11 @@ defmodule Teiserver.Account.ClientLib do
     # Update the process with it
     cast_client(userid, {:update_client, client})
 
-    PubSub.broadcast(Central.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
+    PubSub.broadcast(
+      Central.PubSub,
+      "legacy_all_client_updates",
+      {:updated_client, client, reason}
+    )
 
     if client.lobby_id do
       PubSub.broadcast(
@@ -150,21 +162,19 @@ defmodule Teiserver.Account.ClientLib do
 
       if client.lobby_host do
         case Battle.get_lobby(client.lobby_id) do
-          nil -> :ok
+          nil ->
+            :ok
+
           lobby ->
             case {lobby.in_progress, client.in_game} do
               {true, false} ->
-                new_lobby = %{lobby |
-                  in_progress: false,
-                  started_at: nil
-                }
+                new_lobby = %{lobby | in_progress: false, started_at: nil}
                 Battle.update_lobby(new_lobby, nil, :host_updated_clientstatus)
+
               {false, true} ->
-                new_lobby = %{lobby |
-                  in_progress: true,
-                  started_at: System.system_time(:second)
-                }
+                new_lobby = %{lobby | in_progress: true, started_at: System.system_time(:second)}
                 Battle.update_lobby(new_lobby, nil, :host_updated_clientstatus)
+
               _ ->
                 :ok
             end
@@ -209,7 +219,9 @@ defmodule Teiserver.Account.ClientLib do
   @spec cast_client(T.userid(), any) :: any | nil
   def cast_client(userid, msg) do
     case get_client_pid(userid) do
-      nil -> nil
+      nil ->
+        nil
+
       pid ->
         GenServer.cast(pid, msg)
         :ok
@@ -219,12 +231,14 @@ defmodule Teiserver.Account.ClientLib do
   @spec call_client(T.userid(), any) :: any | nil
   def call_client(userid, message) when is_integer(userid) do
     case get_client_pid(userid) do
-      nil -> nil
+      nil ->
+        nil
+
       pid ->
         try do
           GenServer.call(pid, message)
 
-        # If the process has somehow died, we just return nil
+          # If the process has somehow died, we just return nil
         catch
           :exit, _ ->
             nil
@@ -235,14 +249,14 @@ defmodule Teiserver.Account.ClientLib do
   @spec stop_client_server(T.userid()) :: :ok | nil
   def stop_client_server(userid) do
     case get_client_pid(userid) do
-      nil -> nil
+      nil ->
+        nil
+
       p ->
         DynamicSupervisor.terminate_child(Teiserver.ClientSupervisor, p)
         :ok
     end
   end
-
-
 
   # Used in tests to update a client based on user data
   # not intended to be used as part of standard operation
@@ -252,15 +266,17 @@ defmodule Teiserver.Account.ClientLib do
     stats = Account.get_user_stat_data(user.id)
 
     client = get_client_by_id(userid)
-    new_client = %{client |
-      userid: user.id,
-      name: user.name,
-      rank: user.rank,
-      moderator: Teiserver.User.is_moderator?(user),
-      bot: Teiserver.User.is_bot?(user),
-      ip: stats["last_ip"],
-      country: stats["country"],
-      lobby_client: stats["lobby_client"]
+
+    new_client = %{
+      client
+      | userid: user.id,
+        name: user.name,
+        rank: user.rank,
+        moderator: Teiserver.User.is_moderator?(user),
+        bot: Teiserver.User.is_bot?(user),
+        ip: stats["last_ip"],
+        country: stats["country"],
+        lobby_client: stats["lobby_client"]
     }
 
     replace_update_client(new_client, :silent)

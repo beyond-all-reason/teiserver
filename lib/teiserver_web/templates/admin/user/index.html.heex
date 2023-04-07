@@ -1,7 +1,5 @@
-<%
-  bsname = view_colour()
-  is_admin = allow?(@conn, "teiserver.admin.account")
-%>
+<% bsname = view_colour()
+is_admin = allow?(@conn, "teiserver.admin.account") %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -16,144 +14,169 @@
   }
 </script>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
+<%= render(
+  TeiserverWeb.Admin.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "users"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Admin.UserView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             show_search: false,
-            active: (cond do
-              @conn.params["search"] != nil -> "advanced_search"
-              assigns[:data_search] != nil -> "data_search"
-              # @filter != nil -> @filter
-              true -> "list"
-            end)
-        }) %>
+            active:
+              cond do
+                @conn.params["search"] != nil -> "advanced_search"
+                assigns[:data_search] != nil -> "data_search"
+                # @filter != nil -> @filter
+                true -> "list"
+              end
+          })
+        ) %>
 
-<%= if @conn.params["search"] != nil do %>
-  <%= render TeiserverWeb.Admin.UserView, "search.html", assigns %>
-<% else %>
-  <%= if assigns[:data_search] != nil do %>
-    <%= render TeiserverWeb.Admin.UserView, "data_search.html", assigns %>
-  <% else %>
-    <br /><br />
-  <% end %>
-<% end %>
-
-<h4>Listing Users</h4>
-
-<table class="table table-sm">
-  <thead>
-    <tr>
-      <th colspan="2">Name</th>
-      <%= if is_admin do %><th>Email</th><% end %>
-      <th>Client</th>
-      <th>Status</th>
-      <%= if is_admin do %>
-        <th>HW</th>
-        <th>CHB</th>
-      <% end %>
-      <th>Trusted</th>
-      <th>Contributor</th>
-      <th>Moderator</th>
-      <th>Registered</th>
-
-      <%= if is_admin do %>
-        <th colspan="2">&nbsp;</th>
-      <% else %>
-        <th>&nbsp;</th>
-      <% end %>
-    </tr>
-  </thead>
-  <tbody>
-<%= for user <- @users do %>
-    <tr>
-      <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
-        <%= central_component "icon", icon: user.icon %>
-      </td>
-      <td><%= user.name %></td>
-      <%= if is_admin do %><td><%= user.email %></td><% end %>
-      <td><%= user.data["lobby_client"] %></td>
-
-      <td>
-        <%
-          unverified = user.data["verified"] != true
-          user_r = %{restrictions: user.data["restrictions"] || []}
-
-          banned = Teiserver.User.is_restricted?(user_r, ["Login"])
-          muted = Teiserver.User.is_restricted?(user_r, ["All chat", "Room chat", "Direct chat", "Lobby chat", "Battle chat"])
-          warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"])
-        %>
-
-        <%= if banned do %>
-          <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}></i>
-        <% end %>
-
-        <%= if muted do %>
-          <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Mute")}"}></i>
-        <% end %>
-
-        <%= if warned do %>
-          <i class={"fa-fw text-warning #{Teiserver.Moderation.ActionLib.action_icon("Warn")}"}></i>
-        <% end %>
-
-        <%= if unverified do %>
-          <i class='fa-fw text-info fas fa-square-question'></i>
-        <% end %>
-      </td>
-
-      <%= if is_admin do %>
-        <td>
-          <%= if user.data["hw_hash"] != "" and user.data["hw_hash"] != nil do %>
-            <i class='fa-fw far fa-check'></i>
+        <%= if @conn.params["search"] != nil do %>
+          <%= render(TeiserverWeb.Admin.UserView, "search.html", assigns) %>
+        <% else %>
+          <%= if assigns[:data_search] != nil do %>
+            <%= render(TeiserverWeb.Admin.UserView, "data_search.html", assigns) %>
           <% else %>
-            &nbsp;
+            <br /><br />
           <% end %>
-        </td>
+        <% end %>
 
-        <td>
-          <%= if user.data["chobby_hash"] != "" and user.data["chobby_hash"] != nil do %>
-            <i class='fa-fw far fa-check'></i>
-          <% else %>
-            &nbsp;
-          <% end %>
-        </td>
-      <% end %>
+        <h4>Listing Users</h4>
 
-      <td>
-        <%= if Enum.member?(user.data["roles"] || [], "Trusted"), do: "Trusted" %>
-      </td>
-      <td>
-        <%= if Enum.member?(user.data["roles"] || [], "Contributor"), do: "Contributor" %>
-      </td>
-      <td>
-        <%= if Enum.member?(user.data["roles"] || [], "Moderator"), do: "Moderator" %>
-      </td>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th colspan="2">Name</th>
+              <%= if is_admin do %>
+                <th>Email</th>
+              <% end %>
+              <th>Client</th>
+              <th>Status</th>
+              <%= if is_admin do %>
+                <th>HW</th>
+                <th>CHB</th>
+              <% end %>
+              <th>Trusted</th>
+              <th>Contributor</th>
+              <th>Moderator</th>
+              <th>Registered</th>
 
-      <td>
-        <%= date_to_str(user.inserted_at, format: :dmy) %>
-      </td>
+              <%= if is_admin do %>
+                <th colspan="2">&nbsp;</th>
+              <% else %>
+                <th>&nbsp;</th>
+              <% end %>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for user <- @users do %>
+              <tr>
+                <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
+                  <%= central_component("icon", icon: user.icon) %>
+                </td>
+                <td><%= user.name %></td>
+                <%= if is_admin do %>
+                  <td><%= user.email %></td>
+                <% end %>
+                <td><%= user.data["lobby_client"] %></td>
 
-      <td>
-        <a href={~p"/teiserver/admin/user/#{user.id}"} class="btn btn-secondary btn-sm">
-          Show
-        </a>
-      </td>
+                <td>
+                  <% unverified = user.data["verified"] != true
+                  user_r = %{restrictions: user.data["restrictions"] || []}
 
-      <%= if is_admin do %>
-        <td>
-          <a href={~p"/teiserver/admin/user/#{user.id}/edit"} class="btn btn-secondary btn-sm">
-            Edit
-          </a>
-        </td>
-      <% end %>
-    </tr>
-<% end %>
-  </tbody>
-</table>
+                  banned = Teiserver.User.is_restricted?(user_r, ["Login"])
 
+                  muted =
+                    Teiserver.User.is_restricted?(user_r, [
+                      "All chat",
+                      "Room chat",
+                      "Direct chat",
+                      "Lobby chat",
+                      "Battle chat"
+                    ])
+
+                  warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"]) %>
+
+                  <%= if banned do %>
+                    <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}>
+                    </i>
+                  <% end %>
+
+                  <%= if muted do %>
+                    <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Mute")}"}>
+                    </i>
+                  <% end %>
+
+                  <%= if warned do %>
+                    <i class={"fa-fw text-warning #{Teiserver.Moderation.ActionLib.action_icon("Warn")}"}>
+                    </i>
+                  <% end %>
+
+                  <%= if unverified do %>
+                    <i class="fa-fw text-info fas fa-square-question"></i>
+                  <% end %>
+                </td>
+
+                <%= if is_admin do %>
+                  <td>
+                    <%= if user.data["hw_hash"] != "" and user.data["hw_hash"] != nil do %>
+                      <i class="fa-fw far fa-check"></i>
+                    <% else %>
+                      &nbsp;
+                    <% end %>
+                  </td>
+
+                  <td>
+                    <%= if user.data["chobby_hash"] != "" and user.data["chobby_hash"] != nil do %>
+                      <i class="fa-fw far fa-check"></i>
+                    <% else %>
+                      &nbsp;
+                    <% end %>
+                  </td>
+                <% end %>
+
+                <td>
+                  <%= if Enum.member?(user.data["roles"] || [], "Trusted"), do: "Trusted" %>
+                </td>
+                <td>
+                  <%= if Enum.member?(user.data["roles"] || [], "Contributor"), do: "Contributor" %>
+                </td>
+                <td>
+                  <%= if Enum.member?(user.data["roles"] || [], "Moderator"), do: "Moderator" %>
+                </td>
+
+                <td>
+                  <%= date_to_str(user.inserted_at, format: :dmy) %>
+                </td>
+
+                <td>
+                  <a href={~p"/teiserver/admin/user/#{user.id}"} class="btn btn-secondary btn-sm">
+                    Show
+                  </a>
+                </td>
+
+                <%= if is_admin do %>
+                  <td>
+                    <a
+                      href={~p"/teiserver/admin/user/#{user.id}/edit"}
+                      class="btn btn-secondary btn-sm"
+                    >
+                      Edit
+                    </a>
+                  </td>
+                <% end %>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

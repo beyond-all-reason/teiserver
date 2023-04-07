@@ -139,7 +139,9 @@ defmodule CentralWeb.Router do
   scope "/config", CentralWeb.Config do
     pipe_through([:browser, :protected, :standard_layout])
 
-    resources("/user", UserConfigController, only: [:index, :edit, :update, :new, :create, :delete])
+    resources("/user", UserConfigController,
+      only: [:index, :edit, :update, :new, :create, :delete]
+    )
   end
 
   scope "/account", CentralWeb.Account, as: :account do
@@ -169,7 +171,6 @@ defmodule CentralWeb.Router do
     post("/page_views/report", PageViewLogController, :report)
     get("/page_views/search", PageViewLogController, :index)
     post("/page_views/search", PageViewLogController, :search)
-    get("/page_views/latest_users", PageViewLogController, :latest_users)
     resources("/page_views", PageViewLogController, only: [:index, :show, :delete])
 
     # Aggregate
@@ -182,11 +183,6 @@ defmodule CentralWeb.Router do
     get("/error_logs/delete_all", ErrorLogController, :delete_all_form)
     post("/error_logs/delete_all", ErrorLogController, :delete_all_post)
     resources("/error_logs", ErrorLogController, only: [:index, :show, :delete])
-
-    # Reporting
-    get("/reports", ReportController, :index)
-    get("/reports/show/:name", ReportController, :show)
-    post("/reports/show/:name", ReportController, :show)
   end
 
   scope "/communication", CentralWeb.Communication, as: :communication do
@@ -242,7 +238,6 @@ defmodule CentralWeb.Router do
     get("/users/config/delete/:user_id/:key", UserController, :config_delete)
 
     # Users
-    get("/users/latest", GeneralController, :latest_users)
     get("/users/permissions/:id", UserController, :edit_permissions)
     post("/users/permissions/:id", UserController, :update_permissions)
     post("/users/copy_permissions/:id", UserController, :copy_permissions)
@@ -265,14 +260,6 @@ defmodule CentralWeb.Router do
 
     get("/groups/delete_check/:id", GroupController, :delete_check)
     resources("/groups", GroupController)
-
-    # Codes
-    resources("/codes", CodeController)
-    put("/codes/extend/:id/:hours", CodeController, :extend)
-
-
-    # Config
-    resources("/site", SiteConfigController, only: [:index, :edit, :update, :delete])
 
     # Tools
     get("/tools", ToolController, :index)
@@ -325,9 +312,7 @@ defmodule CentralWeb.Router do
     put("/relationships/update/:action/:target", RelationshipsController, :update)
     delete("/relationships/delete/:action/:target", RelationshipsController, :delete)
 
-    resources("/preferences", PreferencesController,
-      only: [:index, :edit, :update, :new, :create]
-    )
+    resources("/preferences", PreferencesController, only: [:index, :edit, :update, :new, :create])
 
     get("/", GeneralController, :index)
     get("/customisation_form", GeneralController, :customisation_form)
@@ -385,6 +370,7 @@ defmodule CentralWeb.Router do
     get("/ratings/leaderboard/:type", RatingsController, :leaderboard)
 
     get("/matches/ratings", MatchController, :ratings)
+    get("/matches/ratings_graph", MatchController, :ratings_graph)
     resources("/matches", MatchController, only: [:index, :show, :delete])
   end
 
@@ -394,6 +380,13 @@ defmodule CentralWeb.Router do
     live("/lobbies", Index, :index)
     live("/lobbies/show/:id", Show, :show)
     live("/lobbies/chat/:id", Chat, :chat)
+  end
+
+  scope "/tournament", TeiserverWeb.TournamentLive, as: :tournament do
+    pipe_through([:browser, :standard_layout, :protected])
+
+    live("/lobbies", Index, :index)
+    live("/lobbies/show/:id", Show, :show)
   end
 
   scope "/teiserver/matchmaking", TeiserverWeb.Matchmaking.QueueLive, as: :ts_game do
@@ -411,31 +404,24 @@ defmodule CentralWeb.Router do
     live("/parties/show/:id", Show, :show)
   end
 
-
   # REPORTING
+  scope "/reports/server", TeiserverWeb.Report do
+    pipe_through([:browser, :standard_layout, :protected])
+
+    # Server metric specifics
+    get("/now", ServerMetricController, :now)
+    get("/load", ServerMetricController, :load)
+
+    get("/list", ServerMetricController, :metric_list)
+    get("/list/:unit", ServerMetricController, :metric_list)
+    get("/show/:unit/today", ServerMetricController, :metric_show_today)
+    get("/show/:unit/:date", ServerMetricController, :metric_show)
+  end
+
   scope "/teiserver/reports", TeiserverWeb.Report, as: :ts_reports do
     pipe_through([:browser, :standard_layout, :protected])
 
     get("/", GeneralController, :index)
-
-    # Server metrics
-    get("/server/day_metrics/now", ServerMetricController, :now)
-    get("/server/day_metrics/load", ServerMetricController, :load)
-    get("/server/day_metrics/today", ServerMetricController, :day_metrics_today)
-    get("/server/day_metrics/show/:date", ServerMetricController, :day_metrics_show)
-    get("/server/day_metrics/export_form", ServerMetricController, :day_metrics_export_form)
-    post("/server/day_metrics/export_post", ServerMetricController, :day_metrics_export_post)
-    get("/server/day_metrics/graph", ServerMetricController, :day_metrics_graph)
-    post("/server/day_metrics/graph", ServerMetricController, :day_metrics_graph)
-    get("/server/day_metrics", ServerMetricController, :day_metrics_list)
-    post("/server/day_metrics", ServerMetricController, :day_metrics_list)
-
-    get("/server/month_metrics/today", ServerMetricController, :month_metrics_today)
-    get("/server/month_metrics/show/:year/:month", ServerMetricController, :month_metrics_show)
-    get("/server/month_metrics/graph", ServerMetricController, :month_metrics_graph)
-    post("/server/month_metrics/graph", ServerMetricController, :month_metrics_graph)
-    get("/server/month_metrics", ServerMetricController, :month_metrics_list)
-    post("/server/month_metrics", ServerMetricController, :month_metrics_list)
 
     # Match metrics
     get("/match/day_metrics/today", MatchMetricController, :day_metrics_today)
@@ -486,17 +472,18 @@ defmodule CentralWeb.Router do
   scope "/teiserver/api", TeiserverWeb.API do
     pipe_through :api
     post "/login", SessionController, :login
+    post "/register", SessionController, :register
     post "/request_token", SessionController, :request_token
     get "/request_token", SessionController, :request_token_get
   end
 
   scope "/teiserver/api/hailstorm", TeiserverWeb.API, as: :ts do
     pipe_through([:api])
-    post("/up", BeansController, :up)
-    post("/update_site_config", BeansController, :update_site_config)
-    post("/create_user", BeansController, :create_user)
-    post("/db_update_user", BeansController, :db_update_user)
-    post("/ts_update_user", BeansController, :ts_update_user)
+    post("/start", HailstormController, :start)
+    post("/update_site_config", HailstormController, :update_site_config)
+    post("/create_user", HailstormController, :create_user)
+    post("/db_update_user", HailstormController, :db_update_user)
+    post("/ts_update_user", HailstormController, :ts_update_user)
   end
 
   scope "/teiserver/api/spads", TeiserverWeb.API, as: :ts do
@@ -520,10 +507,11 @@ defmodule CentralWeb.Router do
   end
 
   # ADMIN
-  scope "/teiserver/admin", TeiserverWeb.AdminDashLive, as: :ts do
+  scope "/admin", TeiserverWeb.AdminDashLive, as: :ts do
     pipe_through([:browser, :standard_layout, :protected])
 
     live("/dashboard", Index, :index)
+    live("/dashboard/policy/:id", Policy, :policy)
   end
 
   scope "/teiserver/admin", TeiserverWeb.ClientLive, as: :ts_admin do
@@ -552,6 +540,8 @@ defmodule CentralWeb.Router do
 
     get("/", GeneralController, :index)
 
+    get("/report/search", ReportController, :search)
+    post("/report/search", ReportController, :search)
     get("/report/user/:id", ReportController, :user)
     resources("/report", ReportController, only: [:index, :show, :delete])
 
@@ -563,7 +553,10 @@ defmodule CentralWeb.Router do
 
     get("/proposal/new_with_user", ProposalController, :new_with_user)
     put("/proposal/vote/:proposal_id/:direction", ProposalController, :vote)
-    resources("/proposal", ProposalController, only: [:index, :show, :new, :create, :edit, :update])
+
+    resources("/proposal", ProposalController,
+      only: [:index, :show, :new, :create, :edit, :update]
+    )
 
     put("/ban/:id/disable", BanController, :disable)
     put("/ban/:id/enable", BanController, :enable)
@@ -577,7 +570,21 @@ defmodule CentralWeb.Router do
 
   scope "/admin", TeiserverWeb.Admin, as: :admin do
     pipe_through([:browser, :standard_layout, :protected])
-    resources("/lobby_policies", LobbyPolicyController, only: [:index, :new, :create, :show, :edit, :update, :delete])
+
+    resources("/lobby_policies", LobbyPolicyController,
+      only: [:index, :new, :create, :show, :edit, :update, :delete]
+    )
+  end
+
+  scope "/teiserver/admin", TeiserverWeb.Admin, as: :admin do
+    pipe_through([:browser, :standard_layout, :protected])
+
+    # Codes
+    resources("/codes", CodeController)
+    put("/codes/extend/:id/:hours", CodeController, :extend)
+
+    # Config
+    resources("/site", SiteConfigController, only: [:index, :edit, :update, :delete])
   end
 
   scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do

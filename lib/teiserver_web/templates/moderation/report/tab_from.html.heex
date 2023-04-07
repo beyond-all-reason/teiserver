@@ -18,38 +18,50 @@
         <td><%= report.target.name %></td>
         <td><%= report.type %> / <%= report.sub_type %></td>
         <td><%= report.extra_text %></td>
-        
+
         <%= if report.match_id do %>
           <td><%= report.relationship %></td>
           <td>
-            <a href={Routes.ts_admin_match_path(@conn, :show, report.match_id)} class="btn btn-secondary btn-sm">
+            <a
+              href={Routes.ts_admin_match_path(@conn, :show, report.match_id)}
+              class="btn btn-secondary btn-sm"
+            >
               Match
             </a>
           </td>
           <td>
-            <a href={Routes.ts_admin_match_path(@conn, :chat, report.match_id)} class="btn btn-secondary btn-sm">
+            <a
+              href={Routes.ts_admin_match_path(@conn, :chat, report.match_id)}
+              class="btn btn-secondary btn-sm"
+            >
               Chat
             </a>
           </td>
         <% else %>
           <td colspan="3"></td>
         <% end %>
-        
+
         <td><%= date_to_str(report.inserted_at, format: :hms_or_ymd) %></td>
-        
+
         <td>
           <%= if report.result_id do %>
-            <a href={Routes.moderation_action_path(@conn, :show, report.result_id)} class={"btn btn-sm btn-#{Teiserver.Moderation.ActionLib.colour()} btn-block"}>
-              <%= central_component "icon",
+            <a
+              href={Routes.moderation_action_path(@conn, :show, report.result_id)}
+              class={"btn btn-sm btn-#{Teiserver.Moderation.ActionLib.colour()} btn-block"}
+            >
+              <%= central_component("icon",
                 icon: Teiserver.Moderation.ActionLib.icon(),
                 class: "fa-solid"
-              %>
+              ) %>
             </a>
           <% end %>
         </td>
 
         <td>
-          <a href={Routes.moderation_report_path(@conn, :show, report.id)} class="btn btn-secondary btn-sm btn-block">
+          <a
+            href={Routes.moderation_report_path(@conn, :show, report.id)}
+            class="btn btn-secondary btn-sm btn-block"
+          >
             <i class="fa-fw fas fa-eye"></i>
           </a>
         </td>

@@ -64,14 +64,16 @@ defmodule CentralWeb.Telemetry do
       summary("vm.total_run_queue_lengths.total"),
       summary("vm.total_run_queue_lengths.cpu"),
       summary("vm.total_run_queue_lengths.io")
-    ]
-    ++ Teiserver.Telemetry.metrics()
+    ] ++
+      Teiserver.Telemetry.metrics()
+
     # Metrics end
   end
 
   defp periodic_measurements do
-    []
-    ++ Teiserver.Telemetry.periodic_measurements()
+    [] ++
+      Teiserver.Telemetry.periodic_measurements()
+
     # Periodic measurements end
   end
 end

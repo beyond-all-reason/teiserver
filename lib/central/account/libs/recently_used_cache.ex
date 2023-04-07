@@ -6,7 +6,8 @@ defmodule Central.Account.RecentlyUsedCache do
 
   @spec insert_recently(map()) :: map()
   def insert_recently(%{user_id: user_id} = item) do
-    new_items = user_id
+    new_items =
+      user_id
       |> get_recently
       |> Enum.filter(fn r ->
         r.item_id != item.item_id or r.item_type != item.item_type
@@ -21,10 +22,10 @@ defmodule Central.Account.RecentlyUsedCache do
   @spec insert_recently(map(), Plug.Conn.t()) :: map()
   def insert_recently(item, conn) do
     item
-      |> Map.merge(%{
-        user_id: conn.assigns[:current_user].id
-      })
-      |> insert_recently
+    |> Map.merge(%{
+      user_id: conn.assigns[:current_user].id
+    })
+    |> insert_recently
   end
 
   @spec get_recently(Plug.Conn.t() | T.user_id()) :: [map()]
@@ -36,10 +37,10 @@ defmodule Central.Account.RecentlyUsedCache do
     Central.cache_get(:recently_used_cache, user_id) || []
   end
 
-
   @spec remove_recently(map()) :: :ok
   def remove_recently(%{user_id: user_id} = item) do
-    new_items = user_id
+    new_items =
+      user_id
       |> get_recently()
       |> Enum.filter(fn r ->
         r.item_id != item.item_id or r.item_type != item.item_type
@@ -53,9 +54,9 @@ defmodule Central.Account.RecentlyUsedCache do
   @spec remove_recently(map(), Plug.Conn.t()) :: :ok
   def remove_recently(item, conn) do
     item
-      |> Map.merge(%{
-        user_id: conn.assigns[:current_user].id
-      })
-      |> remove_recently
+    |> Map.merge(%{
+      user_id: conn.assigns[:current_user].id
+    })
+    |> remove_recently
   end
 end

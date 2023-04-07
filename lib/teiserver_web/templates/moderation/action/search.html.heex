@@ -12,20 +12,26 @@
   });
 </script>
 
-<%= central_component "icon_dropdown_js", [] %>
+<%= central_component("icon_dropdown_js", []) %>
 
-<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
-<script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")} />
+<script src={Routes.static_path(@conn, "/js/select2.js")}>
+</script>
 
 <div class="search-row">
-  <form action={Routes.moderation_action_path(@conn, :search)} method="post" class="form-horizontal" id="search-box">
+  <form
+    action={Routes.moderation_action_path(@conn, :search)}
+    method="post"
+    class="form-horizontal"
+    id="search-box"
+  >
     <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
     <input type="hidden" name="search" value="true" />
 
     <div class="row">
       <div class="col-md-4 col-xl-2 search-form-input">
         <label for="search_order" class="control-label">Expiry: </label>
-        <%= central_component "icon_dropdown", %{
+        <%= central_component("icon_dropdown", %{
           name: "search[expiry]",
           id: "search_expiry",
           selected: @params["expiry"] || "All",
@@ -33,15 +39,16 @@
             %{id: "All", icon: "fa-regular fa-th", colour: fg},
             %{id: "Completed only", icon: "fa-regular fa-check", colour: fg},
             %{id: "Unexpired only", icon: "fa-regular fa-play", colour: fg},
+            %{id: "Unexpired not permanent", icon: "fa-regular fa-clock", colour: fg},
             %{id: "Permanent only", icon: "fa-regular fa-infinity", colour: fg},
-            %{id: "All active", icon: "fa-regular fa-clock", colour: fg},
+            %{id: "All active", icon: "fa-regular fa-clock", colour: fg}
           ]
-        } %>
+        }) %>
       </div>
 
       <div class="col-md-4 col-xl-2 search-form-input">
         <label for="search_order" class="control-label">Order by: </label>
-        <%= central_component "icon_dropdown", %{
+        <%= central_component("icon_dropdown", %{
           name: "search[order]",
           id: "search_order",
           selected: @params["order"] || "Newest first",
@@ -49,16 +56,21 @@
             %{id: "Most recently inserted first", icon: "fas fa-sort-numeric-down", colour: fg},
             %{id: "Oldest inserted first", icon: "fas fa-sort-numeric-up", colour: fg},
             %{id: "Earliest expiry first", icon: "fas fa-sort-numeric-down", colour: fg},
-            %{id: "Latest expiry first", icon: "fas fa-sort-numeric-up", colour: fg},
+            %{id: "Latest expiry first", icon: "fas fa-sort-numeric-up", colour: fg}
           ]
-        } %>
+        }) %>
       </div>
     </div>
 
     <div class="row">
       <div class="offset-md-8 col-md-4 offset-xl-10 col-xl-2">
         &nbsp;<br />
-        <input type="submit" value="Search" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+        <input
+          type="submit"
+          value="Search"
+          name="form.submitted"
+          class={"btn btn-#{bsname} btn-block"}
+        />
       </div>
     </div>
   </form>

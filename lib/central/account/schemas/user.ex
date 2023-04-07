@@ -41,7 +41,8 @@ defmodule Central.Account.User do
 
   @doc false
   def changeset(user, attrs \\ %{}) do
-    attrs = attrs
+    attrs =
+      attrs
       |> remove_whitespace([:email])
       |> uniq_lists([:permissions])
 
@@ -75,7 +76,8 @@ defmodule Central.Account.User do
   end
 
   def changeset(user, attrs, :script) do
-    attrs = attrs
+    attrs =
+      attrs
       |> remove_whitespace([:email])
       |> uniq_lists([:permissions])
 
@@ -104,7 +106,8 @@ defmodule Central.Account.User do
   end
 
   def changeset(user, attrs, :self_create) do
-    attrs = attrs
+    attrs =
+      attrs
       |> remove_whitespace([:email])
 
     user
@@ -115,7 +118,8 @@ defmodule Central.Account.User do
   end
 
   def changeset(user, attrs, :limited) do
-    attrs = attrs
+    attrs =
+      attrs
       |> remove_whitespace([:email])
 
     user
@@ -125,7 +129,8 @@ defmodule Central.Account.User do
   end
 
   def changeset(user, attrs, :limited_with_data) do
-    attrs = attrs
+    attrs =
+      attrs
       |> remove_whitespace([:email])
 
     user
@@ -135,7 +140,8 @@ defmodule Central.Account.User do
   end
 
   def changeset(user, attrs, :user_form) do
-    attrs = attrs
+    attrs =
+      attrs
       |> remove_whitespace([:email])
 
     cond do

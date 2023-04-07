@@ -10,13 +10,15 @@ defmodule Teiserver.Telemetry.InfologCleanupTask do
   def perform(_) do
     days = Application.get_env(:central, Teiserver)[:retention][:telemetry_infolog]
 
-    before_timestamp = Timex.shift(Timex.now(), days: -days)
+    before_timestamp =
+      Timex.shift(Timex.now(), days: -days)
       |> date_to_str(format: :ymd_hms)
 
     query = """
-      DELETE FROM teiserver_telemetry_infologs
-      WHERE timestamp < '#{before_timestamp}'
-"""
+          DELETE FROM teiserver_telemetry_infologs
+          WHERE timestamp < '#{before_timestamp}'
+    """
+
     Ecto.Adapters.SQL.query(Repo, query, [])
 
     :ok

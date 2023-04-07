@@ -8,7 +8,8 @@ defmodule TeiserverWeb.Report.ReportView do
   def icon(), do: Central.Helpers.StylingHelper.icon(:report)
 
   def mins_to_hours(nil), do: 0
+
   def mins_to_hours(t) do
-    round(t/60)
+    round(t / 60)
   end
 end

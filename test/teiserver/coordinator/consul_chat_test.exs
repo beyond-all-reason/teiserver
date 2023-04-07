@@ -32,6 +32,7 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
         max_players: 12
       }
     }
+
     data = %{cmd: "c.lobby.create", lobby: lobby_data}
     _tachyon_send(hsocket, data)
     [reply] = _tachyon_recv(hsocket)
@@ -42,9 +43,11 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
     # Player needs to be added to the battle
     Lobby.force_add_user_to_lobby(player.id, lobby_id)
     player_client = Client.get_client_by_id(player.id)
-    Client.update(%{player_client |
-      player: true
-    }, :client_updated_battlestatus)
+
+    Client.update(
+      %{player_client | player: true},
+      :client_updated_battlestatus
+    )
 
     # Add user message
     _tachyon_recv(hsocket)
@@ -54,12 +57,21 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
 
     # We set a welcome message because if the consul crashes it will reset the welcome-message
     # also, if a function doesn't return a map then the state will no longer be a map
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$welcome-message This is the welcome message"})
+    _tachyon_send(hsocket, %{
+      cmd: "c.lobby.message",
+      message: "$welcome-message This is the welcome message"
+    })
 
     message = Coordinator.call_consul(lobby_id, {:get, :welcome_message})
     assert message == "This is the welcome message"
 
-    {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener}
+    {:ok,
+     hsocket: hsocket,
+     psocket: psocket,
+     host: host,
+     player: player,
+     lobby_id: lobby_id,
+     listener: listener}
   end
 
   test "standard messages", %{lobby_id: lobby_id, psocket: psocket} do

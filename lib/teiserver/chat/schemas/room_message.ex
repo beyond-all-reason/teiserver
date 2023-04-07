@@ -13,8 +13,9 @@ defmodule Teiserver.Chat.RoomMessage do
   """
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
-    params = params
-    |> trim_strings([:content, :chat_room])
+    params =
+      params
+      |> trim_strings([:content, :chat_room])
 
     struct
     |> cast(params, [:content, :chat_room, :inserted_at, :user_id])

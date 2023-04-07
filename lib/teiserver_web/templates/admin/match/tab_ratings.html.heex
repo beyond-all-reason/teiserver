@@ -1,5 +1,5 @@
 <%= if @rating_logs != %{} do %>
-  <table class='table table-sm'>
+  <table class="table table-sm">
     <thead>
       <tr>
         <th colspan="4">&nbsp;</th>
@@ -36,7 +36,7 @@
             <% end %>
           </td>
           <td style={"background-color: #{m.user.colour}; color: #FFF;"} width="22">
-            <%= central_component "icon", icon: m.user.icon %>
+            <%= central_component("icon", icon: m.user.icon) %>
           </td>
           <td style={"background-color: #{rgba_css m.user.colour};"}><%= m.user.name %></td>
           <td><%= m.team_id + 1 %></td>

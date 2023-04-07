@@ -89,7 +89,7 @@ defmodule Central.MixProject do
       {:ex_ulid, "~> 0.1.0"},
 
       # Teiserver libs
-      {:openskill, "~> 1.0.1"},
+      {:openskill, git: "git@github.com:Teifion/openskill.ex.git", branch: "master"},
       {:cowboy, "~> 2.9"},
       {:statistics, "~> 0.6.2"},
       {:csv, "~> 2.4"},
@@ -97,21 +97,14 @@ defmodule Central.MixProject do
       {:ranch, "~> 1.8"},
       {:horde, "~> 0.8"},
       {:etop, "~> 0.7.0"},
-
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
-
-      {:protobuf, "~> 0.11.0"},
-      {:google_protos, "~> 0.1"},
+      {:json_xema, "~> 0.3"},
 
       # If you want to connect to discord in dev mode, use this
       # {:nostrum, "~> 0.6", runtime: Mix.env() != :test},
 
       # If you only want to connect to discord in prod, use this
-      {:nostrum, "~> 0.6", runtime: Mix.env() == :prod},
-
-      # These were used as part of the grpc experiment
-      # {:grpc, git:  "https://github.com/elixir-grpc/grpc"},
-      # {:gun, "~> 2.0", hex: :remedy_gun, override: true},
+      {:nostrum, "~> 0.6", runtime: Mix.env() == :prod}
     ]
   end
 

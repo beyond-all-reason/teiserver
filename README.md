@@ -1,23 +1,17 @@
 # Teiserver
-An Elixir centralised/middleware game server. Originally an alternate implementation of [Uberserver](https://github.com/spring/uberserver) as used by Spring RTS games. Currently implementing the Spring protocol but with work being done on a new protocol [Tachyon](/documents/tachyon).
-
-It takes full advantage of Elixir/OTP for a fully concurrent application with very low demand on system resources. Work is currently being undertaken to make it suitable for a clustered deployment.
+An Elixir middleware server for game management; primarily used by [Beyond all Reason](https://www.beyondallreason.info/). Currently implementing the Spring protocol but with work being done on a new protocol [Tachyon](https://github.com/beyond-all-reason/tachyon).
 
 ## Documentation
 - [Architecture](/documents/architecture.md)
 - [Local setup](/documents/guides/local_setup.md)
 - [Prod setup linux](/documents/guides/production_setup_linux.md)/[Prod setup windows](/documents/guides/production_setup_windows.md)
 - [Testing](/documents/guides/testing.md)
-- [Uberserver, conversion process and differences](/documents/guides/uberserver.md)
-
-These are just the highlights, full documentation can be found in the documentation folder.
 
 ### Feature documentation
 - [Metrics](/documents/planned_designs/metrics.md)
 - [Discord bot](/documents/guides/discord_bot.md)
 
 ### In progress features
-- [Tachyon](/documents/tachyon)
 - [Clustering](/documents/planned_designs/clustering.md)
 - [Matchmaking](/documents/spring/matchmaking.md)
 - [Reputation/Reporting system](/documents/planned_designs/reputation.md)

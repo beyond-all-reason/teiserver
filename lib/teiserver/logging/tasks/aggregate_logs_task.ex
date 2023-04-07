@@ -109,9 +109,9 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
 
   defp get_average_load_time(logs) do
     logs
-      |> select([l], avg(l.load_time))
-      |> Repo.one()
-      |> c_round
+    |> select([l], avg(l.load_time))
+    |> Repo.one()
+    |> c_round
   end
 
   defp get_guest_view_count(logs) do
@@ -261,5 +261,4 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
   end
 
   # Getting some issues where it can be a float or a decimal
-
 end

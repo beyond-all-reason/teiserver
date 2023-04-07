@@ -1,7 +1,5 @@
-<%
-  client_event_keys = (@data["events"]["combined"] || %{}) |> Map.keys |> Enum.sort()
-  server_event_keys = (@data["events"]["server"] || %{}) |> Map.keys |> Enum.sort()
-%>
+<% client_event_keys = (@data["events"]["combined"] || %{}) |> Map.keys() |> Enum.sort()
+server_event_keys = (@data["events"]["server"] || %{}) |> Map.keys() |> Enum.sort() %>
 
 <div class="row">
   <div class="col-md-8">
@@ -13,7 +11,7 @@
           <th>Auth</th>
           <th>Unauth</th>
           <th>Combined</th>
-       </tr>
+        </tr>
       </thead>
       <tbody>
         <%= for key <- client_event_keys do %>
@@ -27,7 +25,7 @@
       </tbody>
     </table>
   </div>
-  
+
   <div class="col-md-4">
     <h4>Server Events</h4>
     <table class="table">
@@ -35,7 +33,7 @@
         <tr>
           <th>Event</th>
           <th>Count</th>
-       </tr>
+        </tr>
       </thead>
       <tbody>
         <%= for key <- server_event_keys do %>

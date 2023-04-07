@@ -1,49 +1,72 @@
 <% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "reports"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <div class="btn btn-primary2 float-end" onclick="$('.help-box, .help-box-large').toggle();">
-          <i class='fa-fw fa-solid fa-circle-info'></i>
-          &nbsp;
+        <div
+          class="btn btn-primary2 float-end"
+          onclick="$('.help-box, .help-box-large').toggle();"
+        >
+          <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
           Show/Hide help
         </div>
-        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Report.ReportView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "mutes"
           })
-        %>
+        ) %>
         <br /><br />
 
-        <form action={Routes.ts_reports_report_path(@conn, :show, "mutes")} method="post" class="form-horizontal mb-4">
+        <form
+          action={Routes.ts_reports_report_path(@conn, :show, "mutes")}
+          method="post"
+          class="form-horizontal mb-4"
+        >
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
           <div class="row">
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_days" class="control-label">Active in the last X days: </label>
-              <input type="text" name="report[days]" id="report_days" value={@params["days"]} class="form-control" />
+              <input
+                type="text"
+                name="report[days]"
+                id="report_days"
+                value={@params["days"]}
+                class="form-control"
+              />
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_limit" class="control-label">Exclude banned users</label>
-              <%= central_component "checkbox",
+              <%= central_component("checkbox",
                 name: "report[exclude_banned]",
                 id: "report_exclude_banned",
                 value: "true",
                 label: "",
                 checked: @params["exclude_banned"] == "true",
-
                 description: "exclude banned users from all queries"
-              %>
+              ) %>
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               &nbsp;<br />
-              <input type="submit" value="Update report" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+              <input
+                type="submit"
+                value="Update report"
+                name="form.submitted"
+                class={"btn btn-#{bsname} btn-block"}
+              />
             </div>
           </div>
         </form>
@@ -52,20 +75,23 @@
           Lists users sorted by number of mutes
         </div>
 
-        <table class='table mt-3'>
+        <table class="table mt-3">
           <thead>
             <tr>
               <th>&nbsp;</th>
               <th>Ignore count</th>
               <th>Ignored by</th>
-          </tr>
+            </tr>
           </thead>
           <tbody>
             <%= for {userid, ignore_count} <- @data do %>
               <tr>
                 <td><%= @usernames[userid] %></td>
                 <td><%= ignore_count %></td>
-                <td><%= Enum.map(@ignored_by_lists[userid], fn u -> @usernames[u] end) |> Enum.join(", ") %></td>
+                <td>
+                  <%= Enum.map(@ignored_by_lists[userid], fn u -> @usernames[u] end)
+                  |> Enum.join(", ") %>
+                </td>
               </tr>
             <% end %>
           </tbody>

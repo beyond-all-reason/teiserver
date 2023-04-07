@@ -9,25 +9,28 @@
 
   <div class="form-group row">
     <div class="col-xl-4 col-lg-4">
-      <%= label f, :name, class: "control-label" %>
-      <%= text_input f, :name, class: "form-control", disabled: "disabled" %>
-      <%= error_tag f, :name %>
+      <%= label(f, :name, class: "control-label") %>
+      <%= text_input(f, :name, class: "form-control", disabled: "disabled") %>
+      <%= error_tag(f, :name) %>
     </div>
 
     <%= if allow?(@conn, "teiserver.admin.account") do %>
       <div class="col-xl-4 col-lg-4">
-        <%= label f, :email, class: "control-label" %>
-        <%= text_input f, :email, class: "form-control" %>
-        <%= error_tag f, :email %>
+        <%= label(f, :email, class: "control-label") %>
+        <%= text_input(f, :email, class: "form-control") %>
+        <%= error_tag(f, :email) %>
       </div>
     <% end %>
 
     <%= if allow?(@conn, "admin.user") do %>
       <div class="col-xl-4 col-lg-4">
         &nbsp;<br />
-        <a href={Routes.admin_user_path(@conn, :edit, @user)} class={"btn btn-outline-primary float-end"} id="section-menu-new">
-          <i class="fa-regular fa-power-off"></i>
-          &nbsp;
+        <a
+          href={Routes.admin_user_path(@conn, :edit, @user)}
+          class="btn btn-outline-primary float-end"
+          id="section-menu-new"
+        >
+          <i class="fa-regular fa-power-off"></i> &nbsp;
           Admin edit
         </a>
       </div>
@@ -37,103 +40,117 @@
   <div class="form-group row px-3 py-1">
     <div class="col-xxl-1 col-xl-2 col-lg-3 col-md-4">
       <h5>Authority</h5>
-      <%= central_component "checkbox",
+      <%= central_component("checkbox",
         id: "user_verified",
         name: "user[verified]",
         label: "Verified",
         checked: @changeset.data.data["verified"]
-      %>
+      ) %>
 
-      <%= central_component "checkbox",
+      <%= central_component("checkbox",
+        id: "user_vip",
+        name: "user[vip]",
+        label: "VIP",
+        checked: "VIP" in (@changeset.data.data["roles"] || [])
+      ) %>
+
+      <%= central_component("checkbox",
+        id: "user_tournament-player",
+        name: "user[tournament-player]",
+        label: "Tournament player",
+        checked: "Tournament player" in (@changeset.data.data["roles"] || [])
+      ) %>
+
+      <%= central_component("checkbox",
         id: "user_bot",
         name: "user[bot]",
         label: "Bot",
         checked: @changeset.data.data["bot"]
-      %>
+      ) %>
 
-      <%= central_component "checkbox",
+      <%= central_component("checkbox",
         id: "user_trusted",
         name: "user[trusted]",
         label: "Trusted",
-        checked: ("Trusted" in (@changeset.data.data["roles"] || []))
-      %>
+        checked: "Trusted" in (@changeset.data.data["roles"] || [])
+      ) %>
 
-      <%= central_component "checkbox",
+      <%= central_component("checkbox",
         id: "user_moderator",
         name: "user[moderator]",
         label: "Moderator",
         checked: @changeset.data.data["moderator"]
-      %>
+      ) %>
 
-      <%= central_component "checkbox",
+      <%= central_component("checkbox",
         id: "user_admin",
         name: "user[admin]",
         label: "Admin",
-        checked: ("Admin" in (@changeset.data.data["roles"] || []))
-      %>
+        checked: "Admin" in (@changeset.data.data["roles"] || [])
+      ) %>
     </div>
 
     <div class="col-xxl-1 col-xl-2 col-lg-3 col-md-4">
       <h5>Role</h5>
-      <%= central_component "checkbox",
+      <%= central_component("checkbox",
         id: "user_contributor",
         name: "user[contributor]",
         label: "Contributor",
-        checked: ("Contributor" in (@changeset.data.data["roles"] || []))
-      %>
+        checked: "Contributor" in (@changeset.data.data["roles"] || [])
+      ) %>
 
-      <%= central_component "checkbox",
+      <%= central_component("checkbox",
         id: "user_gdt",
         name: "user[gdt]",
         label: "GDT",
-        checked: ("GDT" in (@changeset.data.data["roles"] || []))
-      %>
+        checked: "GDT" in (@changeset.data.data["roles"] || [])
+      ) %>
 
-      <%= central_component "checkbox",
+      <%= central_component("checkbox",
         id: "user_core",
         name: "user[core]",
         label: "Core team",
-        checked: ("Core team" in (@changeset.data.data["roles"] || []))
-      %>
+        checked: "Core team" in (@changeset.data.data["roles"] || [])
+      ) %>
 
-      <%= central_component "checkbox",
+      <%= central_component("checkbox",
         id: "user_streamer",
         name: "user[streamer]",
         label: "Streamer",
-        checked: ("Streamer" in (@changeset.data.data["roles"] || []))
-      %>
+        checked: "Streamer" in (@changeset.data.data["roles"] || [])
+      ) %>
 
-      <%= central_component "checkbox",
+      <%= central_component("checkbox",
         id: "user_caster",
         name: "user[caster]",
         label: "Caster",
-        checked: ("Caster" in (@changeset.data.data["roles"] || []))
-      %>
+        checked: "Caster" in (@changeset.data.data["roles"] || [])
+      ) %>
 
-      <%= central_component "checkbox",
+      <%= central_component("checkbox",
         id: "user_donor",
         name: "user[donor]",
         label: "Donor",
-        checked: ("Donor" in (@changeset.data.data["roles"] || []))
-      %>
+        checked: "Donor" in (@changeset.data.data["roles"] || [])
+      ) %>
 
-      <%= central_component "checkbox",
+      <%= central_component("checkbox",
         id: "user_tester",
         name: "user[tester]",
         label: "Tester",
-        checked: ("Tester" in (@changeset.data.data["roles"] || []))
-      %>
+        checked: "Tester" in (@changeset.data.data["roles"] || [])
+      ) %>
     </div>
   </div>
 
   <hr />
 
   <div class="form-group m-2">
-    <%= input_with_type f, :colour, "color" %>
+    <%= input_with_type(f, :colour, "color") %>
   </div>
 
   <div class="form-group m-2">
-    <%= central_component "fa5_icon_picker", %{form: f, field: :icon} %>
+    <%= central_component("fa5_icon_picker", %{form: f, field: :icon}) %>
   </div>
 
   <div class="form-group m-2 my-4">
@@ -143,6 +160,11 @@
       </a>
     <% end %>
 
-    <input type="submit" value="Save changes" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
+    <input
+      type="submit"
+      value="Save changes"
+      name="form.submitted"
+      class={"btn btn-#{bsname} float-end"}
+    />
   </div>
 <% end %>

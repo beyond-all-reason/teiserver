@@ -18,118 +18,115 @@
   }
 </style>
 
-<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "match_metrics"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "match_metrics"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Report.MatchMetricView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Report.MatchMetricView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "today"
           })
-        %>
+        ) %>
 
         <hr />
 
-<div class="row page-row">
-  <div class="col-md-12">
-    <a href={Routes.ts_reports_server_metric_path(@conn, :day_metrics_show, date_to_str(@date, format: :ymd))} class={"btn float-end btn-outline-#{TeiserverWeb.Report.ServerMetricView.view_colour}"}>
-      <%= central_component "icon", icon: TeiserverWeb.Report.ServerMetricView.icon %>
-      &nbsp;
-      Server detail
-    </a>
-    <%= if @date == Timex.today() do %>
-      <h3>Day to day metric: Today so far</h3>
-    <% else %>
-      <h3>Day to day metric: <%= Timex.format!(@date, "{YYYY}-{0M}-{0D}, {WDfull}") %></h3>
-    <% end %>
-    <br /><br />
+        <div class="row page-row">
+          <div class="col-md-12">
 
-    <ul class="nav nav-tabs" role="tablist" id="the_tabs">
-      <li class="nav-item">
-        <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-          <%= central_component "icon", icon: icon() %>
-          Details
-        </a>
-      </li>
+            <%= if @date == Timex.today() do %>
+              <h3>Day to day metric: Today so far</h3>
+            <% else %>
+              <h3>
+                Day to day metric: <%= Timex.format!(@date, "{YYYY}-{0M}-{0D}, {WDfull}") %>
+              </h3>
+            <% end %>
+            <br /><br />
 
-      <li class="nav-item">
-        <a href="#duel_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-          <i class="fa-regular fa-fw fa-dice-d4"></i>
-          Duel
-        </a>
-      </li>
+            <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+              <li class="nav-item">
+                <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <%= central_component("icon", icon: icon()) %> Details
+                </a>
+              </li>
 
-      <li class="nav-item">
-        <a href="#team_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-          <i class="fa-regular fa-fw fa-dice-d20"></i>
-          Team
-        </a>
-      </li>
+              <li class="nav-item">
+                <a href="#duel_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <i class="fa-regular fa-fw fa-dice-d4"></i> Duel
+                </a>
+              </li>
 
-      <li class="nav-item">
-        <a href="#ffa_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-          <i class="fa-regular fa-fw fa-recycle"></i>
-          FFA
-        </a>
-      </li>
+              <li class="nav-item">
+                <a href="#team_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <i class="fa-regular fa-fw fa-dice-d20"></i> Team
+                </a>
+              </li>
 
-      <li class="nav-item">
-        <a href="#bots_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-          <i class="fa-regular fa-fw fa-user-robot"></i>
-          Bots
-        </a>
-      </li>
+              <li class="nav-item">
+                <a href="#ffa_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <i class="fa-regular fa-fw fa-recycle"></i> FFA
+                </a>
+              </li>
 
-      <li class="nav-item">
-        <a href="#scavengers_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-          <i class="fa-regular fa-fw fa-user-robot"></i>
-          Scavengers
-        </a>
-      </li>
+              <li class="nav-item">
+                <a href="#bots_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <i class="fa-regular fa-fw fa-user-robot"></i> Bots
+                </a>
+              </li>
 
-      <li class="nav-item">
-        <a href="#raptors_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-          <i class="fa-regular fa-fw fa-drumstick"></i>
-          Raptors
-        </a>
-      </li>
-    </ul>
+              <li class="nav-item">
+                <a href="#scavengers_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <i class="fa-regular fa-fw fa-user-robot"></i> Scavengers
+                </a>
+              </li>
 
-    <div class="tab-content">
-      <div class="tab-pane" id="details_tab" style="padding:5px;">
-        <%= render "tab_details.html", %{data: @data} %>
-      </div>
+              <li class="nav-item">
+                <a href="#raptors_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <i class="fa-regular fa-fw fa-drumstick"></i> Raptors
+                </a>
+              </li>
+            </ul>
 
-      <div class="tab-pane" id="duel_tab" style="padding:5px;">
-        <%= render "tab_duel.html", %{data: @data["duel"]} %>
-      </div>
+            <div class="tab-content">
+              <div class="tab-pane" id="details_tab" style="padding:5px;">
+                <%= render("tab_details.html", %{data: @data}) %>
+              </div>
 
-      <div class="tab-pane" id="team_tab" style="padding:5px;">
-        <%= render "tab_team.html", %{data: @data["team"]} %>
-      </div>
+              <div class="tab-pane" id="duel_tab" style="padding:5px;">
+                <%= render("tab_duel.html", %{data: @data["duel"]}) %>
+              </div>
 
-      <div class="tab-pane" id="ffa_tab" style="padding:5px;">
-        <%= render "tab_ffa.html", %{data: @data["ffa"]} %>
-      </div>
+              <div class="tab-pane" id="team_tab" style="padding:5px;">
+                <%= render("tab_team.html", %{data: @data["team"]}) %>
+              </div>
 
-      <div class="tab-pane" id="bots_tab" style="padding:5px;">
-        <%= render "tab_bots.html", %{data: @data["bots"]} %>
-      </div>
+              <div class="tab-pane" id="ffa_tab" style="padding:5px;">
+                <%= render("tab_ffa.html", %{data: @data["ffa"]}) %>
+              </div>
 
-      <div class="tab-pane" id="scavengers_tab" style="padding:5px;">
-        <%= render "tab_scavengers.html", %{data: @data["scavengers"]} %>
-      </div>
+              <div class="tab-pane" id="bots_tab" style="padding:5px;">
+                <%= render("tab_bots.html", %{data: @data["bots"]}) %>
+              </div>
 
-      <div class="tab-pane" id="raptors_tab" style="padding:5px;">
-        <%= render "tab_raptors.html", %{data: @data["raptors"]} %>
-      </div>
-    </div>
-  </div>
-</div>
+              <div class="tab-pane" id="scavengers_tab" style="padding:5px;">
+                <%= render("tab_scavengers.html", %{data: @data["scavengers"]}) %>
+              </div>
 
+              <div class="tab-pane" id="raptors_tab" style="padding:5px;">
+                <%= render("tab_raptors.html", %{data: @data["raptors"]}) %>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

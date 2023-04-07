@@ -8,7 +8,11 @@
   });
 </script>
 
-<%= render TeiserverWeb.Clans.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "clans"}) %>
+<%= render(
+  TeiserverWeb.Clans.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "clans"})
+) %>
 
 <style type="text/css">
   .clan-colour {
@@ -22,86 +26,90 @@
       <div class="card-body" id="main-card">
         <div class="float-end">
           <%= if allow?(@conn, "teiserver.staff.clan") do %>
-            <a href={Routes.ts_admin_clan_path(@conn, :show, @clan.id)} class={"btn btn-outline-#{bsname}"}>
+            <a
+              href={Routes.ts_admin_clan_path(@conn, :show, @clan.id)}
+              class={"btn btn-outline-#{bsname}"}
+            >
               Admin view
             </a>
           <% end %>
-        
+
           <%= if @current_user.clan_id != @clan.id and @membership != nil do %>
-            <a href={Routes.ts_clans_clan_path(@conn, :set_default, @clan.id)} class={"btn btn-#{bsname}"}>
+            <a
+              href={Routes.ts_clans_clan_path(@conn, :set_default, @clan.id)}
+              class={"btn btn-#{bsname}"}
+            >
               Set as preferred Clan
             </a>
           <% end %>
 
           <%= if @membership != nil do %>
-            <%= link "Leave clan", to: Routes.ts_clans_clan_path(@conn, :leave_clan, @clan.id), class: "btn btn-danger2", method: "put", data: [confirm: "Are you sure?"] %>
+            <%= link("Leave clan",
+              to: Routes.ts_clans_clan_path(@conn, :leave_clan, @clan.id),
+              class: "btn btn-danger2",
+              method: "put",
+              data: [confirm: "Are you sure?"]
+            ) %>
           <% end %>
         </div>
 
-      <h3 style="display: inline-block; padding: 5px;" class="clan-colour">
-        <%= @clan.name %> [<%= @clan.tag %>]
-        &nbsp;
-        <%= central_component "icon", icon: @clan.icon %>
-      </h3>
-      <br />
+        <h3 style="display: inline-block; padding: 5px;" class="clan-colour">
+          <%= @clan.name %> [<%= @clan.tag %>]
+          &nbsp; <%= central_component("icon", icon: @clan.icon) %>
+        </h3>
+        <br />
 
-      <ul class="nav nav-tabs" role="tablist" id="the_tabs">
-        <li class="nav-item">
-          <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-            <%= central_component "icon", icon: "fa-solid fa-file-alt" %>
-            Details
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a href="#members_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-            <%= central_component "icon", icon: "fa-solid fa-users" %>
-            Members
-          </a>
-        </li>
-
-        <%= if @membership do %>
+        <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item">
-            <a href="#invites_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component "icon", icon: "fa-solid fa-envelope" %>
-              Invites
+            <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <%= central_component("icon", icon: "fa-solid fa-file-alt") %> Details
             </a>
           </li>
 
-          <%= if @membership.role == "Admin" do %>
+          <li class="nav-item">
+            <a href="#members_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <%= central_component("icon", icon: "fa-solid fa-users") %> Members
+            </a>
+          </li>
+
+          <%= if @membership do %>
             <li class="nav-item">
-              <a href="#admin_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                <%= central_component "icon", icon: Central.Helpers.StylingHelper.icon(:admin) %>
-                Admin
+              <a href="#invites_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                <%= central_component("icon", icon: "fa-solid fa-envelope") %> Invites
               </a>
             </li>
+
+            <%= if @membership.role == "Admin" do %>
+              <li class="nav-item">
+                <a href="#admin_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <%= central_component("icon", icon: Central.Helpers.StylingHelper.icon(:admin)) %> Admin
+                </a>
+              </li>
+            <% end %>
           <% end %>
-        <% end %>
-      </ul>
+        </ul>
 
-      <div class="tab-content">
-        <div class="tab-pane" id="details_tab" style="padding:5px;">
-          <%= render "tab_details.html", assigns %>
-        </div>
-
-        <div class="tab-pane" id="members_tab" style="padding:5px;">
-          <%= render "tab_members.html", assigns %>
-        </div>
-
-        <%= if @membership do %>
-          <div class="tab-pane" id="invites_tab" style="padding:5px;">
-            <%= render "tab_invites.html", assigns %>
+        <div class="tab-content">
+          <div class="tab-pane" id="details_tab" style="padding:5px;">
+            <%= render("tab_details.html", assigns) %>
           </div>
 
-          <%= if @membership.role == "Admin" do %>
-            <div class="tab-pane" id="admin_tab" style="padding:5px;">
-              <%= render "tab_admin.html", assigns %>
-            </div>
-          <% end %>
-        <% end %>
-      </div>
-      <%# END OF TABS %>
+          <div class="tab-pane" id="members_tab" style="padding:5px;">
+            <%= render("tab_members.html", assigns) %>
+          </div>
 
+          <%= if @membership do %>
+            <div class="tab-pane" id="invites_tab" style="padding:5px;">
+              <%= render("tab_invites.html", assigns) %>
+            </div>
+
+            <%= if @membership.role == "Admin" do %>
+              <div class="tab-pane" id="admin_tab" style="padding:5px;">
+                <%= render("tab_admin.html", assigns) %>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
       </div>
     </div>
   </div>

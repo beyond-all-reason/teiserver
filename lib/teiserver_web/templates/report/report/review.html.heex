@@ -1,9 +1,11 @@
-<%
-bsname = view_colour()
-show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0
-%>
+<% bsname = view_colour()
+show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0 %>
 
-<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "reports"})
+) %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -17,48 +19,76 @@ show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Report.ReportView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "review"
           })
-        %>
+        ) %>
         <br /><br />
 
-        <form action={Routes.ts_reports_report_path(@conn, :show, "review")} method="post" class="form-horizontal">
+        <form
+          action={Routes.ts_reports_report_path(@conn, :show, "review")}
+          method="post"
+          class="form-horizontal"
+        >
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
           <div class="row">
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="report_date_preset" class="control-label">Date range:</label>
-              <%= select :report, :date_preset, [
-                "Last month",
-                "Last quarter",
-                "Last year",
-
-                "This month",
-                "This quarter",
-                "This year",
-
-                "All time",
-              ], class: "form-control", selected: @params["date_preset"] %>
+              <%= select(
+                :report,
+                :date_preset,
+                [
+                  "Last month",
+                  "Last quarter",
+                  "Last year",
+                  "This month",
+                  "This quarter",
+                  "This year",
+                  "All time"
+                ],
+                class: "form-control",
+                selected: @params["date_preset"]
+              ) %>
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="report_start_date" class="control-label">Start date:</label>
-              <input type="text" id="report_start_date" name="report[start_date]" value={@params["start_date"]} class="form-control datepicker" />
+              <input
+                type="text"
+                id="report_start_date"
+                name="report[start_date]"
+                value={@params["start_date"]}
+                class="form-control datepicker"
+              />
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="report_end_date" class="control-label">End date:</label>
-              <input type="text" id="report_end_date" name="report[end_date]" value={@params["end_date"]} class="form-control datepicker" />
+              <input
+                type="text"
+                id="report_end_date"
+                name="report[end_date]"
+                value={@params["end_date"]}
+                class="form-control datepicker"
+              />
             </div>
           </div>
 
           <div class="row">
             <div class="offset-md-8 col-md-4 offset-xl-9 col-xl-3">
               &nbsp;<br />
-              <input type="submit" value="Update report" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+              <input
+                type="submit"
+                value="Update report"
+                name="form.submitted"
+                class={"btn btn-#{bsname} btn-block"}
+              />
             </div>
           </div>
         </form>
@@ -68,36 +98,49 @@ show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0
             <%= case @params["date_preset"] do %>
               <% "All time" -> %>
                 <h4>All time</h4>
-
               <% _ -> %>
-                <h4><%= date_to_str @params["Start date"], format: :ymd %> -> <%= date_to_str @params["End date"], format: :ymd %> (<%= Timex.diff(@params["End date"], @params["Start date"], :days) %> days)</h4>
+                <h4>
+                  <%= date_to_str(@params["Start date"], format: :ymd) %> -> <%= date_to_str(
+                    @params["End date"],
+                    format: :ymd
+                  ) %> (<%= Timex.diff(@params["End date"], @params["Start date"], :days) %> days)
+                </h4>
             <% end %>
           </div>
         </div>
 
         <div class="row">
           <div class="col-md-12">
-
             <ul class="nav nav-tabs" role="tablist" id="the_tabs">
               <li class="nav-item">
                 <a href="#server_details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                  <%= central_component "icon", icon: Teiserver.Telemetry.ServerDayLogLib.icon() %>
-                  This timeframe
+                  <%= central_component("icon", icon: Teiserver.Telemetry.ServerDayLogLib.icon()) %> This timeframe
                 </a>
               </li>
-              
+
               <li class="nav-item">
-                <a href="#past_server_details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                  <%= central_component "icon", icon: Teiserver.Telemetry.ServerDayLogLib.icon() %>
-                  Past timeframe (<%= date_to_str @data.past_start_date, format: :ymd %> - <%= date_to_str @data.past_end_date, format: :ymd %>)
+                <a
+                  href="#past_server_details_tab"
+                  role="tab"
+                  class="nav-link"
+                  data-bs-toggle="tab"
+                >
+                  <%= central_component("icon", icon: Teiserver.Telemetry.ServerDayLogLib.icon()) %> Past timeframe (<%= date_to_str(
+                    @data.past_start_date,
+                    format: :ymd
+                  ) %> - <%= date_to_str(@data.past_end_date, format: :ymd) %>)
                 </a>
               </li>
-              
+
               <%= if show_compare do %>
                 <li class="nav-item">
-                  <a href="#compare_server_details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                    <%= central_component "icon", icon: Teiserver.Telemetry.ServerDayLogLib.icon() %>
-                    Compare
+                  <a
+                    href="#compare_server_details_tab"
+                    role="tab"
+                    class="nav-link"
+                    data-bs-toggle="tab"
+                  >
+                    <%= central_component("icon", icon: Teiserver.Telemetry.ServerDayLogLib.icon()) %> Compare
                   </a>
                 </li>
               <% end %>
@@ -105,47 +148,71 @@ show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0
 
             <div class="tab-content">
               <div class="tab-pane" id="server_details_tab" style="padding:5px;">
-                <%= render TeiserverWeb.Report.ServerMetricView, "tab_month_details.html", data: @data.server %>
+                <%= render(TeiserverWeb.Report.ServerMetricView, "tab_month_details.html",
+                  data: @data.server
+                ) %>
               </div>
-              
+
               <div class="tab-pane" id="past_server_details_tab" style="padding:5px;">
-                <%= render TeiserverWeb.Report.ServerMetricView, "tab_month_details.html", data: @data.past_server %>
+                <%= render(TeiserverWeb.Report.ServerMetricView, "tab_month_details.html",
+                  data: @data.past_server
+                ) %>
               </div>
-              
+
               <%= if show_compare do %>
                 <div class="tab-pane" id="compare_server_details_tab" style="padding:5px;">
                   <div class="row">
                     <div class="col-md-6">
-                      <%= central_component "detail_line",
+                      <%= central_component("detail_line",
                         label: "Unique users",
-                        value: percent(@data.server["aggregates"]["stats"]["unique_users"]/@data.past_server["aggregates"]["stats"]["unique_users"]),
+                        value:
+                          percent(
+                            @data.server["aggregates"]["stats"]["unique_users"] /
+                              @data.past_server["aggregates"]["stats"]["unique_users"]
+                          ),
                         append: "%"
-                      %>
+                      ) %>
 
-                      <%= central_component "detail_line",
+                      <%= central_component("detail_line",
                         label: "Peak total users",
-                        value: percent(@data.server["aggregates"]["stats"]["peak_users"]/@data.past_server["aggregates"]["stats"]["peak_users"]),
+                        value:
+                          percent(
+                            @data.server["aggregates"]["stats"]["peak_users"] /
+                              @data.past_server["aggregates"]["stats"]["peak_users"]
+                          ),
                         append: "%"
-                      %>
+                      ) %>
 
-                      <%= central_component "detail_line",
+                      <%= central_component("detail_line",
                         label: "User registrations",
-                        value: percent(@data.server["aggregates"]["stats"]["accounts_created"]/@data.past_server["aggregates"]["stats"]["accounts_created"]),
+                        value:
+                          percent(
+                            @data.server["aggregates"]["stats"]["accounts_created"] /
+                              @data.past_server["aggregates"]["stats"]["accounts_created"]
+                          ),
                         append: "%"
-                      %>
+                      ) %>
                     </div>
                     <div class="col-md-6">
-                      <%= central_component "detail_line",
+                      <%= central_component("detail_line",
                         label: "Unique players",
-                        value: percent(@data.server["aggregates"]["stats"]["unique_players"]/@data.past_server["aggregates"]["stats"]["unique_players"]),
+                        value:
+                          percent(
+                            @data.server["aggregates"]["stats"]["unique_players"] /
+                              @data.past_server["aggregates"]["stats"]["unique_players"]
+                          ),
                         append: "%"
-                      %>
+                      ) %>
 
-                      <%= central_component "detail_line",
+                      <%= central_component("detail_line",
                         label: "Peak players",
-                        value: percent(@data.server["aggregates"]["stats"]["peak_players"]/@data.past_server["aggregates"]["stats"]["peak_players"]),
+                        value:
+                          percent(
+                            @data.server["aggregates"]["stats"]["peak_players"] /
+                              @data.past_server["aggregates"]["stats"]["peak_players"]
+                          ),
                         append: "%"
-                      %>
+                      ) %>
                     </div>
                   </div>
 
@@ -153,47 +220,63 @@ show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0
                   <h4>Time spent by state</h4>
                   <div class="row">
                     <div class="col-md-6">
-                      <%= central_component "detail_line",
+                      <%= central_component("detail_line",
                         label: "Player",
-                        value: percent(@data.server["aggregates"]["minutes"]["player"]/@data.past_server["aggregates"]["minutes"]["player"]),
+                        value:
+                          percent(
+                            @data.server["aggregates"]["minutes"]["player"] /
+                              @data.past_server["aggregates"]["minutes"]["player"]
+                          ),
                         append: "%"
-                      %>
+                      ) %>
 
-                      <%= central_component "detail_line",
+                      <%= central_component("detail_line",
                         label: "Spectator",
-                        value: percent(@data.server["aggregates"]["minutes"]["spectator"]/@data.past_server["aggregates"]["minutes"]["spectator"]),
+                        value:
+                          percent(
+                            @data.server["aggregates"]["minutes"]["spectator"] /
+                              @data.past_server["aggregates"]["minutes"]["spectator"]
+                          ),
                         append: "%"
-                      %>
+                      ) %>
 
-                      <%= central_component "detail_line",
+                      <%= central_component("detail_line",
                         label: "Lobby",
-                        value: percent(@data.server["aggregates"]["minutes"]["lobby"]/@data.past_server["aggregates"]["minutes"]["lobby"]),
+                        value:
+                          percent(
+                            @data.server["aggregates"]["minutes"]["lobby"] /
+                              @data.past_server["aggregates"]["minutes"]["lobby"]
+                          ),
                         append: "%"
-                      %>
+                      ) %>
 
-                      <%= central_component "detail_line",
+                      <%= central_component("detail_line",
                         label: "Menu",
-                        value: percent(@data.server["aggregates"]["minutes"]["menu"]/@data.past_server["aggregates"]["minutes"]["menu"]),
+                        value:
+                          percent(
+                            @data.server["aggregates"]["minutes"]["menu"] /
+                              @data.past_server["aggregates"]["minutes"]["menu"]
+                          ),
                         append: "%"
-                      %>
+                      ) %>
 
-                      <%= central_component "detail_line",
+                      <%= central_component("detail_line",
                         label: "Total",
-                        value: percent(@data.server["aggregates"]["minutes"]["total"]/@data.past_server["aggregates"]["minutes"]["total"]),
+                        value:
+                          percent(
+                            @data.server["aggregates"]["minutes"]["total"] /
+                              @data.past_server["aggregates"]["minutes"]["total"]
+                          ),
                         append: "%"
-                      %>
+                      ) %>
                     </div>
-                    <div class="col-md-6">
-
-                    </div>
+                    <div class="col-md-6"></div>
                   </div>
                 </div>
               <% end %>
             </div>
-
           </div>
         </div>
-        
       </div>
     </div>
   </div>

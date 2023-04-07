@@ -27,6 +27,7 @@ defmodule CentralWeb.ConnCase do
       alias CentralWeb.Router.Helpers, as: Routes
 
       # The default endpoint for testing
+      unquote(CentralWeb.verified_routes())
       @endpoint CentralWeb.Endpoint
     end
   end

@@ -18,36 +18,38 @@ defmodule TeiserverWeb.Report.InfologController do
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
-    infologs = Telemetry.list_infologs(
-      search: [],
-      preload: [:user],
-      select: ~w(id user_hash user_id log_type timestamp metadata size)a,
-      order_by: "Newest first"
-    )
+    infologs =
+      Telemetry.list_infologs(
+        search: [],
+        preload: [:user],
+        select: ~w(id user_hash user_id log_type timestamp metadata size)a,
+        order_by: "Newest first"
+      )
 
     conn
-      |> assign(:infologs, infologs)
-      |> assign(:params, params)
-      |> render("index.html")
+    |> assign(:infologs, infologs)
+    |> assign(:params, params)
+    |> render("index.html")
   end
 
   @spec search(Plug.Conn.t(), map) :: Plug.Conn.t()
   def search(conn, %{"search" => params}) do
-    infologs = Telemetry.list_infologs(
-      search: [
-        log_type: params["type"],
-        engine: params["engine"],
-        game: params["game"],
-      ],
-      preload: [:user],
-      select: ~w(id user_hash user_id log_type timestamp metadata size)a,
-      order_by: params["order"]
-    )
+    infologs =
+      Telemetry.list_infologs(
+        search: [
+          log_type: params["type"],
+          engine: params["engine"],
+          game: params["game"]
+        ],
+        preload: [:user],
+        select: ~w(id user_hash user_id log_type timestamp metadata size)a,
+        order_by: params["order"]
+      )
 
     conn
-      |> assign(:params, params)
-      |> assign(:infologs, infologs)
-      |> render("index.html")
+    |> assign(:params, params)
+    |> assign(:infologs, infologs)
+    |> render("index.html")
   end
 
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -65,7 +67,10 @@ defmodule TeiserverWeb.Report.InfologController do
 
     conn
     |> put_resp_content_type("text/plain")
-    |> put_resp_header("content-disposition", "attachment; filename=\"infolog_#{infolog.id}.log\"")
+    |> put_resp_header(
+      "content-disposition",
+      "attachment; filename=\"infolog_#{infolog.id}.log\""
+    )
     |> send_resp(200, infolog.contents)
   end
 
@@ -76,7 +81,7 @@ defmodule TeiserverWeb.Report.InfologController do
     {:ok, _clan} = Telemetry.delete_infolog(infolog)
 
     conn
-      |> put_flash(:info, "Infolog deleted successfully.")
-      |> redirect(to: Routes.ts_reports_infolog_path(conn, :index))
+    |> put_flash(:info, "Infolog deleted successfully.")
+    |> redirect(to: Routes.ts_reports_infolog_path(conn, :index))
   end
 end

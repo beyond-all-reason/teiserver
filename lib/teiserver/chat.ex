@@ -12,7 +12,7 @@ defmodule Teiserver.Chat do
 
   @spec room_message_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def room_message_query(id, args) do
-    RoomMessageLib.query_room_messages
+    RoomMessageLib.query_room_messages()
     |> RoomMessageLib.search(%{id: id})
     |> RoomMessageLib.search(args[:search])
     |> RoomMessageLib.preload(args[:preload])
@@ -34,7 +34,7 @@ defmodule Teiserver.Chat do
   @spec list_room_messages(List.t()) :: List.t()
   def list_room_messages(args \\ []) do
     room_message_query(args)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -55,15 +55,17 @@ defmodule Teiserver.Chat do
   @spec get_room_message!(Integer.t(), List.t()) :: RoomMessage.t()
   def get_room_message!(id) when not is_list(id) do
     room_message_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_room_message!(args) do
     room_message_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_room_message!(id, args) do
     room_message_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -117,7 +119,8 @@ defmodule Teiserver.Chat do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_room_message(RoomMessage.t(), Map.t()) :: {:ok, RoomMessage.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_room_message(RoomMessage.t(), Map.t()) ::
+          {:ok, RoomMessage.t()} | {:error, Ecto.Changeset.t()}
   def update_room_message(%RoomMessage{} = room_message, attrs) do
     room_message
     |> RoomMessage.changeset(attrs)
@@ -136,7 +139,8 @@ defmodule Teiserver.Chat do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_room_message(RoomMessage.t()) :: {:ok, RoomMessage.t()} | {:error, Ecto.Changeset.t()}
+  @spec delete_room_message(RoomMessage.t()) ::
+          {:ok, RoomMessage.t()} | {:error, Ecto.Changeset.t()}
   def delete_room_message(%RoomMessage{} = room_message) do
     Repo.delete(room_message)
   end
@@ -164,7 +168,7 @@ defmodule Teiserver.Chat do
 
   @spec lobby_message_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def lobby_message_query(id, args) do
-    LobbyMessageLib.query_lobby_messages
+    LobbyMessageLib.query_lobby_messages()
     |> LobbyMessageLib.search(%{id: id})
     |> LobbyMessageLib.search(args[:search])
     |> LobbyMessageLib.preload(args[:preload])
@@ -186,7 +190,7 @@ defmodule Teiserver.Chat do
   @spec list_lobby_messages(List.t()) :: List.t()
   def list_lobby_messages(args \\ []) do
     lobby_message_query(args)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -207,15 +211,17 @@ defmodule Teiserver.Chat do
   @spec get_lobby_message!(Integer.t(), List.t()) :: LobbyMessage.t()
   def get_lobby_message!(id) when not is_list(id) do
     lobby_message_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_lobby_message!(args) do
     lobby_message_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_lobby_message!(id, args) do
     lobby_message_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -269,7 +275,8 @@ defmodule Teiserver.Chat do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_lobby_message(LobbyMessage.t(), Map.t()) :: {:ok, LobbyMessage.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_lobby_message(LobbyMessage.t(), Map.t()) ::
+          {:ok, LobbyMessage.t()} | {:error, Ecto.Changeset.t()}
   def update_lobby_message(%LobbyMessage{} = lobby_message, attrs) do
     lobby_message
     |> LobbyMessage.changeset(attrs)
@@ -288,7 +295,8 @@ defmodule Teiserver.Chat do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_lobby_message(LobbyMessage.t()) :: {:ok, LobbyMessage.t()} | {:error, Ecto.Changeset.t()}
+  @spec delete_lobby_message(LobbyMessage.t()) ::
+          {:ok, LobbyMessage.t()} | {:error, Ecto.Changeset.t()}
   def delete_lobby_message(%LobbyMessage{} = lobby_message) do
     Repo.delete(lobby_message)
   end
@@ -316,14 +324,14 @@ defmodule Teiserver.Chat do
 
   @spec party_message_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def party_message_query(id, args) do
-    PartyMessageLib.query_party_messages
-      |> PartyMessageLib.search(%{id: id})
-      |> PartyMessageLib.search(args[:search])
-      |> PartyMessageLib.preload(args[:preload])
-      |> PartyMessageLib.order_by(args[:order_by])
-      |> QueryHelpers.select(args[:select])
-      |> QueryHelpers.limit_query(args[:limit] || 50)
-      |> QueryHelpers.offset_query(args[:offset] || 0)
+    PartyMessageLib.query_party_messages()
+    |> PartyMessageLib.search(%{id: id})
+    |> PartyMessageLib.search(args[:search])
+    |> PartyMessageLib.preload(args[:preload])
+    |> PartyMessageLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> QueryHelpers.offset_query(args[:offset] || 0)
   end
 
   @doc """
@@ -338,7 +346,7 @@ defmodule Teiserver.Chat do
   @spec list_party_messages(List.t()) :: List.t()
   def list_party_messages(args \\ []) do
     party_message_query(args)
-      |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -359,15 +367,17 @@ defmodule Teiserver.Chat do
   @spec get_party_message!(Integer.t(), List.t()) :: PartyMessage.t()
   def get_party_message!(id) when not is_list(id) do
     party_message_query(id, [])
-      |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_party_message!(args) do
     party_message_query(nil, args)
-      |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_party_message!(id, args) do
     party_message_query(id, args)
-      |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -405,8 +415,8 @@ defmodule Teiserver.Chat do
   @spec create_party_message(Map.t()) :: {:ok, PartyMessage.t()} | {:error, Ecto.Changeset.t()}
   def create_party_message(attrs \\ %{}) do
     %PartyMessage{}
-      |> PartyMessage.changeset(attrs)
-      |> Repo.insert()
+    |> PartyMessage.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """
@@ -421,11 +431,12 @@ defmodule Teiserver.Chat do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_party_message(PartyMessage.t(), Map.t()) :: {:ok, PartyMessage.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_party_message(PartyMessage.t(), Map.t()) ::
+          {:ok, PartyMessage.t()} | {:error, Ecto.Changeset.t()}
   def update_party_message(%PartyMessage{} = party_message, attrs) do
     party_message
-      |> PartyMessage.changeset(attrs)
-      |> Repo.update()
+    |> PartyMessage.changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """
@@ -440,7 +451,8 @@ defmodule Teiserver.Chat do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_party_message(PartyMessage.t()) :: {:ok, PartyMessage.t()} | {:error, Ecto.Changeset.t()}
+  @spec delete_party_message(PartyMessage.t()) ::
+          {:ok, PartyMessage.t()} | {:error, Ecto.Changeset.t()}
   def delete_party_message(%PartyMessage{} = party_message) do
     Repo.delete(party_message)
   end

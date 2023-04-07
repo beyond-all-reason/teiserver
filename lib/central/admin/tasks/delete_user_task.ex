@@ -7,12 +7,16 @@ defmodule Central.Admin.DeleteUserTask do
   """
   @spec delete_users([non_neg_integer()]) :: {:ok, map} | {:error, map}
   def delete_users(id_list) do
-    sql_id_list = id_list
+    sql_id_list =
+      id_list
       |> Enum.join(",")
+
     sql_id_list = "(#{sql_id_list})"
 
     # Reports
-    query = "DELETE FROM account_reports WHERE reporter_id IN #{sql_id_list} OR target_id IN #{sql_id_list} OR responder_id IN #{sql_id_list}"
+    query =
+      "DELETE FROM account_reports WHERE reporter_id IN #{sql_id_list} OR target_id IN #{sql_id_list} OR responder_id IN #{sql_id_list}"
+
     Ecto.Adapters.SQL.query(Repo, query, [])
 
     # Codes

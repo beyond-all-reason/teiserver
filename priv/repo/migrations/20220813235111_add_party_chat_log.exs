@@ -8,6 +8,7 @@ defmodule Central.Repo.Migrations.AddPartyChatLog do
       add :party_id, :string
       add :inserted_at, :utc_datetime
     end
+
     create index(:teiserver_party_messages, [:user_id])
   end
 end

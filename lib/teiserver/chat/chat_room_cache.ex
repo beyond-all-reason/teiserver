@@ -46,6 +46,7 @@ defmodule Teiserver.Room do
   def can_join_room?(userid, room_name) do
     room = get_or_make_room(room_name, userid)
     user = User.get_user_by_id(userid)
+
     cond do
       user == nil ->
         {false, "No user"}
@@ -132,9 +133,10 @@ defmodule Teiserver.Room do
 
   @spec clan_room_name(String.t()) :: String.t()
   def clan_room_name(clan_name) do
-    safe_name = clan_name
-    |> String.replace(" ", "")
-    |> String.replace("-", "")
+    safe_name =
+      clan_name
+      |> String.replace(" ", "")
+      |> String.replace("-", "")
 
     "clan_#{safe_name}"
   end
@@ -144,7 +146,7 @@ defmodule Teiserver.Room do
 
     Central.cache_update(:lists, :rooms, fn value ->
       new_value =
-        ([room.name | value])
+        [room.name | value]
         |> Enum.uniq()
 
       {:ok, new_value}
@@ -165,11 +167,12 @@ defmodule Teiserver.Room do
 
   def send_message(from_id, room_name, msg) do
     user = User.get_user_by_id(from_id)
+
     if User.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
-    blacklisted = (User.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg))
+    blacklisted = User.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
 
     if blacklisted do
       User.shadowban_user(user.id)
@@ -187,9 +190,9 @@ defmodule Teiserver.Room do
                 content: msg,
                 chat_room: room_name,
                 inserted_at: Timex.now(),
-                user_id: from_id,
+                user_id: from_id
               })
-              end
+            end
 
             PubSub.broadcast(
               Central.PubSub,
@@ -204,11 +207,12 @@ defmodule Teiserver.Room do
   @spec send_message_ex(T.userid(), String.t(), String.t()) :: nil | :ok
   def send_message_ex(from_id, room_name, msg) do
     user = User.get_user_by_id(from_id)
+
     if User.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
-    blacklisted = (User.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg))
+    blacklisted = User.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
 
     if blacklisted do
       User.shadowban_user(user.id)
@@ -226,7 +230,7 @@ defmodule Teiserver.Room do
                 content: msg,
                 chat_room: room_name,
                 inserted_at: Timex.now(),
-                user_id: from_id,
+                user_id: from_id
               })
             end
 

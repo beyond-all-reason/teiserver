@@ -3,30 +3,38 @@
 <% end %>
 
 <%= if Phoenix.Flash.get(@flash, :danger) do %>
-  <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger"><%= Phoenix.Flash.get(@flash, :danger) %></p>
+  <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger">
+    <%= Phoenix.Flash.get(@flash, :danger) %>
+  </p>
 <% end %>
 <%= if Phoenix.Flash.get(@flash, :warning) do %>
-  <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning"><%= Phoenix.Flash.get(@flash, :warning) %></p>
+  <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning">
+    <%= Phoenix.Flash.get(@flash, :warning) %>
+  </p>
 <% end %>
 <%= if Phoenix.Flash.get(@flash, :info) do %>
-  <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info"><%= Phoenix.Flash.get(@flash, :info) %></p>
+  <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info">
+    <%= Phoenix.Flash.get(@flash, :info) %>
+  </p>
 <% end %>
 <%= if Phoenix.Flash.get(@flash, :success) do %>
-  <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success"><%= Phoenix.Flash.get(@flash, :success) %></p>
+  <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success">
+    <%= Phoenix.Flash.get(@flash, :success) %>
+  </p>
 <% end %>
 
 <div class="main-content-container container-fluid">
   <%= @inner_content %>
 
   <%= if get_user_config_cache(@conn, "module.Quick action") == true do %>
-    <%= render CentralWeb.General.QuickAction.HtmlView, "modal.html", assigns %>
+    <%= render(CentralWeb.General.QuickAction.HtmlView, "modal.html", assigns) %>
   <% end %>
 </div>
 
 <%= if false do %>
-<footer class="main-footer d-flex p-2 px-3 border-top">
-  <span class="float-end">
-    Created by <%= Application.get_env(:central, Central)[:credit] %>
-  </span>
-</footer>
+  <footer class="main-footer d-flex p-2 px-3 border-top">
+    <span class="float-end">
+      Created by <%= Application.get_env(:central, Central)[:credit] %>
+    </span>
+  </footer>
 <% end %>

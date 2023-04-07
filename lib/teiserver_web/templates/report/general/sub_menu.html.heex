@@ -19,71 +19,61 @@
   <div class="col-md-12">
     <div class="card card-default">
       <div class="card-body" style="padding: 0 15px;">
-
         <div class="row">
           <%= if allow?(@conn, "teiserver.admin") do %>
-            <%= central_component "sub_menu_icon",
+            <%= central_component("sub_menu_icon",
               name: "client_events",
               label: "Client events",
               active: @active,
               url: Routes.ts_reports_client_event_path(@conn, :summary),
               icon: Teiserver.Telemetry.ClientEventLib.icon()
-            %>
+            ) %>
 
-            <%= central_component "sub_menu_icon",
+            <%= central_component("sub_menu_icon",
               name: "server_metrics",
               label: "Server metrics",
               active: @active,
-              url: Routes.ts_reports_server_metric_path(@conn, :day_metrics_list),
+              url: ~p"/reports/server/list",
               icon: Teiserver.Telemetry.ServerDayLogLib.icon()
-            %>
+            ) %>
 
-            <%= central_component "sub_menu_icon",
+            <%= central_component("sub_menu_icon",
               name: "match_metrics",
               label: "Match metrics",
               active: @active,
               url: Routes.ts_reports_match_metric_path(@conn, :day_metrics_list),
               icon: Teiserver.Battle.MatchLib.icon()
-            %>
+            ) %>
 
-            <%= central_component "sub_menu_icon",
+            <%= central_component("sub_menu_icon",
               name: "exports",
               label: "Exports",
               active: @active,
               url: Routes.ts_reports_exports_path(@conn, :index),
               icon: "fa-regular fa-download"
-            %>
-
-            <%#= central_component "sub_menu_icon",
-              name: "ratings",
-              label: "Ratings",
-              active: @active,
-              url: Routes.ts_reports_rating_path(@conn, :distribution_table),
-              icon: Teiserver.Account.RatingLib.icon()
-            %>
+            ) %>
           <% end %>
 
           <%= if allow?(@conn, "teiserver.staff.telemetry") do %>
-            <%= central_component "sub_menu_icon",
+            <%= central_component("sub_menu_icon",
               name: "infologs",
               label: "Infologs",
               active: @active,
               url: Routes.ts_reports_infolog_path(@conn, :index),
               icon: Teiserver.Telemetry.InfologLib.icon()
-            %>
+            ) %>
           <% end %>
 
           <%= if allow_any?(@conn, ~w(teiserver.reports teiserver.staff)) do %>
-            <%= central_component "sub_menu_icon",
+            <%= central_component("sub_menu_icon",
               name: "reports",
               label: "Reports",
               active: @active,
               url: ~p"/teiserver/reports",
               icon: Central.Helpers.StylingHelper.icon(:report)
-            %>
+            ) %>
           <% end %>
         </div>
-
       </div>
     </div>
   </div>

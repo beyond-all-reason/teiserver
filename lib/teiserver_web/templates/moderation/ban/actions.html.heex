@@ -1,7 +1,15 @@
 <div class="dropdown-menu">
   <%= if @ban.enabled do %>
-    <%= link "Disable", to: Routes.moderation_ban_path(@conn, :disable, @ban), class: "dropdown-item", method: "put" %>
+    <%= link("Disable",
+      to: Routes.moderation_ban_path(@conn, :disable, @ban),
+      class: "dropdown-item",
+      method: "put"
+    ) %>
   <% else %>
-    <%= link "Enable", to: Routes.moderation_ban_path(@conn, :enable, @ban), class: "dropdown-item", method: "put" %>
+    <%= link("Enable",
+      to: Routes.moderation_ban_path(@conn, :enable, @ban),
+      class: "dropdown-item",
+      method: "put"
+    ) %>
   <% end %>
 </div>

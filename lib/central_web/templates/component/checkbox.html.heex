@@ -1,21 +1,5 @@
-<%# 
-  Intended to be called like so:
-  <%= central_component "checkbox",
-    name: "group[see_group]",
-    id: "group_see_group",
-    value: "true",
-    label: "See group",
-    field: :see_group,
-    changeset: @changeset,
-    
-    description: ""
-  % >
-  
-  Optionally you can manually set the checked attribute as true/false instead of changeset and field
-  if you do this then the changeset data will be ignored
-%>
-<%
-  checked = if Map.has_key?(assigns, :checked) do
+<% checked =
+  if Map.has_key?(assigns, :checked) do
     case @checked do
       true -> [checked: "checked"]
       _ -> []
@@ -27,14 +11,13 @@
       _ -> []
     end
   end
-  
-  value = assigns[:value] || "true"
-  row_class = "form-check " <> (assigns[:row_class] || "m-1")
-%>
+
+value = assigns[:value] || "true"
+row_class = "form-check " <> (assigns[:row_class] || "m-1") %>
 
 <div class={row_class}>
-  <input name={@name} type="hidden" value="false">
-  <input name={@name} id={@id} class="form-check-input" type="checkbox" value={value} {checked}>
+  <input name={@name} type="hidden" value="false" />
+  <input name={@name} id={@id} class="form-check-input" type="checkbox" value={value} {checked} />
   <label class="form-check-label" for={@id}>
     <strong><%= @label %></strong><%= assigns[:text] %>
     <%= if assigns[:description] do %>

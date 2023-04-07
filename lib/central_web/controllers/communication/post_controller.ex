@@ -74,13 +74,13 @@ defmodule CentralWeb.Communication.PostController do
 
     if Enum.empty?(categories) do
       conn
-        |> put_flash(:info, "Please create a category before creating any posts")
-        |> redirect(to: Routes.blog_category_path(conn, :new))
+      |> put_flash(:info, "Please create a category before creating any posts")
+      |> redirect(to: Routes.blog_category_path(conn, :new))
     else
       conn
-        |> assign(:changeset, changeset)
-        |> assign(:categories, categories)
-        |> render("new.html")
+      |> assign(:changeset, changeset)
+      |> assign(:categories, categories)
+      |> render("new.html")
     end
   end
 

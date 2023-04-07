@@ -1,9 +1,11 @@
 <% bsname = view_colour() %>
 
-<script src={Routes.static_path(@conn, "/js/d3.js")}></script>
-<script src={Routes.static_path(@conn, "/js/c3.min.js")}></script>
+<script src={Routes.static_path(@conn, "/js/d3.js")}>
+</script>
+<script src={Routes.static_path(@conn, "/js/c3.min.js")}>
+</script>
 
-<link href="/css/c3.min.css" rel="stylesheet">
+<link href="/css/c3.min.css" rel="stylesheet" />
 
 <style>
   .chart-div {
@@ -13,6 +15,17 @@
     border-bottom: 1px solid #555;
   }
 </style>
+
+<% col_class =
+  case String.trim(@params["columns"] || "2") do
+    "6" -> "col-md-2"
+    "4" -> "col-md-3"
+    "3" -> "col-md-4"
+    "2" -> "col-md-6"
+    _ -> "col-md-12"
+  end
+
+col_class = col_class <> " my-2" %>
 
 <script>
   $(function() {
@@ -31,7 +44,11 @@
           }
         },
         y: {
-          min: 0
+          min: 0,
+          padding: {
+            top: 15,
+            bottom: 0
+          }
         }
       }
     });
@@ -51,7 +68,11 @@
           }
         },
         y: {
-          min: 0
+          min: 0,
+          padding: {
+            top: 15,
+            bottom: 0
+          }
         }
       }
     });
@@ -71,7 +92,11 @@
           }
         },
         y: {
-          min: 0
+          min: 0,
+          padding: {
+            top: 15,
+            bottom: 0
+          }
         }
       }
     });
@@ -91,96 +116,274 @@
           }
         },
         y: {
-          min: 0
+          min: 0,
+          padding: {
+            top: 15,
+            bottom: 0
+          }
+        }
+      }
+    });
+
+    c3.generate({
+      bindto: '#chart_spring_server_messages',
+      data: {
+        x: 'x',
+        xFormat: '%Y-%m-%d %H:%M:%S',
+        columns: <%= raw Jason.encode!([["x" | @axis_key] | @server_messages]) %>
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%d %H:%M:%S'
+          }
+        },
+        y: {
+          min: 0,
+          padding: {
+            top: 15,
+            bottom: 0
+          }
+        }
+      }
+    });
+
+    c3.generate({
+      bindto: '#chart_spring_client_messages',
+      data: {
+        x: 'x',
+        xFormat: '%Y-%m-%d %H:%M:%S',
+        columns: <%= raw Jason.encode!([["x" | @axis_key] | @client_messages]) %>
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%d %H:%M:%S'
+          }
+        },
+        y: {
+          min: 0,
+          padding: {
+            top: 15,
+            bottom: 0
+          }
+        }
+      }
+    });
+
+    c3.generate({
+      bindto: '#chart_user_processes',
+      data: {
+        x: 'x',
+        xFormat: '%Y-%m-%d %H:%M:%S',
+        columns: <%= raw Jason.encode!([["x" | @axis_key] | @user_process_counts]) %>
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%d %H:%M:%S'
+          }
+        },
+        y: {
+          min: 0,
+          padding: {
+            top: 15,
+            bottom: 0
+          }
+        }
+      }
+    });
+
+    c3.generate({
+      bindto: '#chart_system_processes',
+      data: {
+        x: 'x',
+        xFormat: '%Y-%m-%d %H:%M:%S',
+        columns: <%= raw Jason.encode!([["x" | @axis_key] | @system_process_counts]) %>
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%d %H:%M:%S'
+          }
+        },
+        y: {
+          min: 0,
+          padding: {
+            top: 15,
+            bottom: 0
+          }
+        }
+      }
+    });
+
+    c3.generate({
+      bindto: '#chart_beam_processes',
+      data: {
+        x: 'x',
+        xFormat: '%Y-%m-%d %H:%M:%S',
+        columns: <%= raw Jason.encode!([["x" | @axis_key] | @beam_process_counts]) %>
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%d %H:%M:%S'
+          }
+        },
+        y: {
+          min: 0,
+          padding: {
+            top: 15,
+            bottom: 0
+          }
         }
       }
     });
   });
 </script>
 
-<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "server_metrics"}) %>
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "server_metrics"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Report.ServerMetricView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Report.ServerMetricView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
             active: "load"
           })
-        %>
+        ) %>
         <br /><br />
 
-<div class="row">
-  <div class="col-md-12">
-    <div class={"card border-#{bsname} page-card"}>
-      <div class="card-body">
         <div class="row">
-          <form action={Routes.ts_reports_server_metric_path(@conn, :load)} method='get' class=''>
-            <div class='row'>
-              <div class='col-xl-4 col-lg-6 col-md-12 my-3'>
-                <label for='hours' class='control-label'>Hours</label>
-                <%= central_component "icon_dropdown",
-                  name: "hours",
-                  id: "hours",
-                  enumerable: [
-                    %{id: "1", name: "1"},
-                    %{id: "6", name: "6"},
-                    %{id: "24", name: "24"},
-                    %{id: "48", name: "48 (2 days)"},
-                    %{id: "168", name: "168 (7 days)"},
-                    %{id: "504", name: "504 (21 days)"}
-                  ],
-                  selected: Map.get(@params, "hours", "24")
-                %>
-              </div>
+          <div class="col-md-12">
+            <div class={"card border-#{bsname} page-card"}>
+              <div class="card-body">
+                <div class="row">
+                  <form
+                    action={~p"/reports/server/load"}
+                    method="get"
+                    class=""
+                  >
+                    <div class="row">
+                      <div class="col-xl-3 col-lg-4 col-md-6 my-2">
+                        <label for="hours" class="control-label">Hours</label>
+                        <%= central_component("icon_dropdown",
+                          name: "hours",
+                          id: "hours",
+                          enumerable: [
+                            %{id: "1", name: "1"},
+                            %{id: "6", name: "6"},
+                            %{id: "24", name: "24"},
+                            %{id: "48", name: "48 (2 days)"},
+                            %{id: "168", name: "168 (7 days)"},
+                            %{id: "504", name: "504 (21 days)"}
+                          ],
+                          selected: Map.get(@params, "hours", "24")
+                        ) %>
+                      </div>
 
-              <div class='col-xl-4 col-lg-6 col-md-12 my-3'>
-                <label for='resolution' class='control-label'>Resolution (minutes per point)</label>
-                <%= central_component "icon_dropdown",
-                  name: "resolution",
-                  id: "resolution",
-                  enumerable: [
-                    %{id: "1", name: "1"},
-                    %{id: "5", name: "5"},
-                    %{id: "30", name: "30"},
-                    %{id: "60", name: "60"},
-                    %{id: "360", name: "360 (6 hours)"}
-                  ],
-                  selected: Map.get(@params, "resolution", "5")
-                %>
-              </div>
+                      <div class="col-xl-3 col-lg-4 col-md-6 my-2">
+                        <label for="resolution" class="control-label">
+                          Resolution (minutes per point)
+                        </label>
+                        <%= central_component("icon_dropdown",
+                          name: "resolution",
+                          id: "resolution",
+                          enumerable: [
+                            %{id: "1", name: "1"},
+                            %{id: "5", name: "5"},
+                            %{id: "30", name: "30"},
+                            %{id: "60", name: "60"},
+                            %{id: "360", name: "360 (6 hours)"}
+                          ],
+                          selected: Map.get(@params, "resolution", "5")
+                        ) %>
+                      </div>
 
-              <div class='col-xl-4 col-lg-6 col-md-12 my-3'>
-                <label for='hours' class='control-label'>Hours offset</label>
-                <input type="text" name="offset" id="offset" value={@params["offset"]} class="form-control" />
-              </div>
+                      <div class="col-xl-3 col-lg-4 col-md-6 my-2">
+                        <label for="report_columns" class="control-label">Columns: </label>
+                        <input
+                          type="text"
+                          name="columns"
+                          id="report_columns"
+                          value={@params["columns"] || "2"}
+                          class="form-control"
+                        />
+                      </div>
 
-              <div class='col-md-12 my-3'>
-                <button type='submit' class={"btn btn-#{bsname} float-end"}>
-                  Submit
-                </button>
+                      <div class="col-xl-3 col-lg-4 col-md-6 my-2">
+                        <label for="hours" class="control-label">Hours offset</label>
+                        <input
+                          type="text"
+                          name="offset"
+                          id="offset"
+                          value={@params["offset"]}
+                          class="form-control"
+                        />
+                      </div>
+
+                      <div class="col-md-12 my-2">
+                        <button type="submit" class={"btn btn-#{bsname} float-end"}>
+                          Submit
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+
+                  <div class="row">
+                    <div class={col_class}>
+                      <div id="chart_players" class="with-transitions chart-div"></div>
+                    </div>
+                    <div class={col_class}>
+                      <div id="chart_combined_connections" class="with-transitions chart-div">
+                      </div>
+                    </div>
+
+                    <div class={col_class}>
+                      <div id="chart_spring_server_messages" class="with-transitions chart-div">
+                      </div>
+                    </div>
+                    <div class={col_class}>
+                      <div id="chart_spring_client_messages" class="with-transitions chart-div">
+                      </div>
+                    </div>
+
+                    <div class={col_class}>
+                      <div id="chart_memory" class="with-transitions chart-div"></div>
+                    </div>
+                    <div class={col_class}>
+                      <div id="chart_cpu_load" class="with-transitions chart-div"></div>
+                    </div>
+
+                    <div class={col_class}>
+                      <div id="chart_user_processes" class="with-transitions chart-div"></div>
+                    </div>
+                    <div class={col_class}>
+                      <div id="chart_system_processes" class="with-transitions chart-div"></div>
+                    </div>
+                    <div class={col_class}>
+                      <div id="chart_beam_processes" class="with-transitions chart-div"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </form>
-
-          <div class="col-md-12 col-lg-6">
-            <div id="chart_players" class='with-transitions chart-div'></div>
-            <div id="chart_memory" class='with-transitions chart-div'></div>
-          </div>
-
-          <div class="col-md-12 col-lg-6">
-            <div id="chart_combined_connections" class='with-transitions chart-div'></div>
-            <div id="chart_cpu_load" class='with-transitions chart-div'></div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
       </div>
     </div>
   </div>

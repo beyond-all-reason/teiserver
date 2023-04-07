@@ -1,16 +1,20 @@
 <% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Account.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "preferences"}) %>
+<%= render(
+  TeiserverWeb.Account.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "preferences"})
+) %>
 
 <div class="row">
   <div class="col-md-12">
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
-
-<%= render "form.html", Map.put(assigns, :action, Routes.ts_account_preferences_path(@conn, :create)) %>
-
+        <%= render(
+          "form.html",
+          Map.put(assigns, :action, Routes.ts_account_preferences_path(@conn, :create))
+        ) %>
       </div>
     </div>
-
   </div>
 </div>

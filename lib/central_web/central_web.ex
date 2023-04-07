@@ -44,6 +44,7 @@ defmodule CentralWeb do
       alias CentralWeb.Router.Helpers, as: Routes
 
       unquote(verified_routes())
+
       import Central.Account.RecentlyUsedCache,
         only: [remove_recently: 2, insert_recently: 2, insert_recently: 1, get_recently: 1]
     end
@@ -76,7 +77,8 @@ defmodule CentralWeb do
 
       import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
 
-      import Central.Helpers.NumberHelper, only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
+      import Central.Helpers.NumberHelper,
+        only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
 
       import CentralWeb.CoreComponents
       unquote(verified_routes())
@@ -93,6 +95,7 @@ defmodule CentralWeb do
       # Import convenience functions from controllers
       import Phoenix.Controller,
         only: [get_csrf_token: 0, view_module: 1, view_template: 1]
+
       # Include general helpers for rendering HTML
       unquote(html_helpers())
     end
@@ -224,7 +227,6 @@ defmodule CentralWeb do
       unquote(verified_routes())
     end
   end
-
 
   def verified_routes do
     quote do

@@ -8,14 +8,17 @@
   </thead>
   <tbody>
     <%= for m <- @clan.invites do %>
-      <%
-        u = m.user
-      %>
+      <% u = m.user %>
       <tr>
         <td><%= u.name %></td>
         <td><%= m.response %></td>
         <td>
-          <%= link "Remove", to: Routes.ts_admin_clan_path(@conn, :delete_invite, @clan.id, u.id), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-sm" %>
+          <%= link("Remove",
+            to: Routes.ts_admin_clan_path(@conn, :delete_invite, @clan.id, u.id),
+            method: :delete,
+            data: [confirm: "Are you sure?"],
+            class: "btn btn-danger btn-sm"
+          ) %>
         </td>
       </tr>
     <% end %>

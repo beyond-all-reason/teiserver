@@ -14,7 +14,7 @@ Before you start I suggest setting up the DNS to point towards your server. It'l
 ### Fresh install time
 ```bash
 apt-get update
-apt-get -y install htop git-core ca-certificates vim sudo curl vnstat sysstat procinfo build-essential net-tools geoip-bin libtinfo-dev aptitude lsb-release grc neofetch tcpdump
+apt-get -y install htop git-core ca-certificates vim sudo curl vnstat sysstat procinfo build-essential net-tools geoip-bin libtinfo-dev aptitude lsb-release grc neofetch tcpdump glances
 apt-get -y upgrade
 apt-get -y autoremove
 
@@ -72,7 +72,7 @@ ssh -i ~/.ssh/identity deploy@yourdomain.com
 
 From now on we will be proceeding under the assumption you are logged in as the deploy user.
 
-### Nginx (optional)
+### Nginx
 Nginx is a webserver we'll be using to facilitate the webinterface portion of Teiserver. If you don't want to make use of the web interface you can skip this portion of the setup process. You will need to have your DNS setup ahead of this step or it will fail when you try to setup the SSL part.
 
 ```bash
@@ -93,7 +93,24 @@ sudo rm /etc/nginx/nginx.conf
 sudo vi /etc/nginx/nginx.conf
 ```
 
-#### SSL time
+#### Process limits for nginx
+```
+sudo mkdir -p /etc/systemd/system/nginx.service.d
+sudo vi /etc/systemd/system/nginx.service.d/override.conf
+
+# Put this in the file
+[Service]
+LimitNOFILE=65536
+
+# Run this to reload and restart it
+sudo systemctl daemon-reload
+sudo systemctl restart nginx
+
+# Use this to verify the limit has been increased
+cat /proc/<nginx-pid>/limits
+```
+
+### SSL time
 We'll be using [letsencrypt](https://letsencrypt.org/) to get a free SSL certificate.
 ```bash
 # This is a Debian version specific command, be sure to check the letsencrypt documentation
@@ -128,12 +145,12 @@ sudo vi /etc/nginx/sites-enabled/central
 
 
 ### Postgres
-This is written with postgres 14 as the intended version. If you need this guide to tell you how to install postgres you probably don't care if there's a newer version available.
+This is written with postgres 15 as the intended version. If you need this guide to tell you how to install postgres you probably don't care if there's a newer version available.
 ```bash
 sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 sudo aptitude update
-sudo aptitude -y install postgresql-14
+sudo aptitude -y install postgresql-15
 ```
 
 #### Setup teiserver_prod database
@@ -153,7 +170,7 @@ EOF
 #### pg_stat_statements (optional)
 Following the guide at [pganalyze.com](https://pganalyze.com/docs/install/01_enabling_pg_stat_statements) we want to enable `pg_stat_statements` for our LiveDashboard. If we don't then that's okay but we won't get the full gamut of stats in the dashboard.
 ```bash
-sudo vi /etc/postgresql/14/main/postgresql.conf
+sudo vi /etc/postgresql/15/main/postgresql.conf
 ```
 
 Add the following at various points:
@@ -171,7 +188,7 @@ pg_stat_statements.track = all
 I've found it useful in the past to be able to access my postgres installation without having to put the password in. You may wish to update your pg_hba.conf to enable the same.
 
 ```bash
-sudo vi /etc/postgresql/14/main/pg_hba.conf
+sudo vi /etc/postgresql/15/main/pg_hba.conf
 ```
 
 Alter the bottom part to look like this, the specific change is we are using "trust" as the method for all local/host connections:
@@ -186,7 +203,7 @@ host    all             all             ::1/128                 trust
 If you are using clustering or hosting your postgres on a different box you will need to also enable external connections to your postgres install. You will need to perform additional edits to your pg_hba.conf
 
 ```bash
-sudo vi /etc/postgresql/14/main/postgresql.conf
+sudo vi /etc/postgresql/15/main/postgresql.conf
 ```
 
 Add in the line
@@ -195,7 +212,7 @@ listen_addresses = '*'
 ```
 
 ```bash
-sudo vi /etc/postgresql/14/main/pg_hba.conf
+sudo vi /etc/postgresql/15/main/pg_hba.conf
 ```
 
 ```
@@ -357,6 +374,20 @@ ENDSSH
 ```
 
 ## Debugging a bad setup
+#### Need more swap
+```bash
+#- Make the swap file: 1 minute, creates 8GB swap
+cd /var
+sudo touch swap.img
+sudo chmod 600 swap.img
+sudo dd if=/dev/zero of=/var/swap.img bs=1024k count=8000
+sudo mkswap /var/swap.img
+sudo swapon /var/swap.img
+sudo su -c "echo '/var/swap.img swap swap defaults 0 0' >> /etc/fstab"
+sudo sysctl vm.swappiness=10
+sudo su -c "echo 'vm.swappiness=10' >> /etc/sysctl.conf"
+```
+
 #### Website not working
 Ensure the service is running, the logs should be empty
 ```
@@ -371,7 +402,7 @@ sudo journalctl -u central.server
 - `curl http://localhost:4000` should produce a web page
 - `curl https://localhost:4000` should produce `curl: (35) error:1408F10B:SSL routines:ssl3_get_record:wrong version number`
 
-- `curl curl http://localhost:443` should give a 400 result
+- `curl http://localhost:443` should give a 400 result
 
 - `openssl s_client localhost:443` should give an SSL certificate info, this is nginx
 - `openssl s_client localhost:8888` should give the same info, this is the Phoenix application

@@ -2,7 +2,6 @@ defmodule TeiserverWeb.Account.SecurityController do
   use CentralWeb, :controller
 
   alias Teiserver.Account
-  alias Teiserver.Account.UserLib
 
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Account', url: '/teiserver/account')
@@ -15,12 +14,13 @@ defmodule TeiserverWeb.Account.SecurityController do
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, _params) do
-    user_tokens = Central.Account.list_user_tokens(
-      search: [
-        user_id: conn.user_id
-      ],
-      order_by: "Most recently used"
-    )
+    user_tokens =
+      Account.list_user_tokens(
+        search: [
+          user_id: conn.user_id
+        ],
+        order_by: "Most recently used"
+      )
 
     conn
     |> assign(:user_tokens, user_tokens)
@@ -60,13 +60,13 @@ defmodule TeiserverWeb.Account.SecurityController do
   @spec delete_token(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def delete_token(conn, %{"id" => id}) do
     token =
-      Central.Account.get_user_token(id,
+      Account.get_user_token(id,
         search: [
           user_id: conn.user_id
         ]
       )
 
-    {:ok, _code} = Central.Account.delete_user_token(token)
+    {:ok, _code} = Account.delete_user_token(token)
 
     conn
     |> put_flash(:info, "Token deleted successfully.")

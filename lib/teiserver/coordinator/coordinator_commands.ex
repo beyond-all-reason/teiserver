@@ -15,13 +15,25 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     client = Client.get_client_by_id(senderid)
 
     cond do
-      client == nil -> false
-      Enum.member?(@forward_to_consul, cmd.command) -> true
-      Enum.member?(@always_allow, cmd.command) -> true
-      client.moderator == true -> true
+      client == nil ->
+        false
+
+      Enum.member?(@forward_to_consul, cmd.command) ->
+        true
+
+      Enum.member?(@always_allow, cmd.command) ->
+        true
+
+      client.moderator == true ->
+        true
 
       not Enum.member?(@always_allow ++ @forward_to_consul, cmd.command) ->
-        User.send_direct_message(state.userid, cmd.senderid, "No command of name '#{cmd.command}'")
+        User.send_direct_message(
+          state.userid,
+          cmd.senderid,
+          "No command of name '#{cmd.command}'"
+        )
+
         false
 
       true ->
@@ -34,10 +46,12 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     cond do
       Enum.member?(@forward_to_consul, cmd.command) ->
         client = Client.get_client_by_id(cmd.senderid)
+
         if client.lobby_id do
           consul_pid = Coordinator.get_consul_pid(client.lobby_id)
           send(consul_pid, cmd)
         end
+
         state
 
       allow_command?(cmd, state) == true ->
@@ -54,8 +68,9 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     user = User.get_user_by_id(senderid)
     host_id = Map.get(cmd, :host_id, nil)
 
-    messages = CoordinatorLib.help(user, host_id == senderid, remaining)
-    |> String.split("\n")
+    messages =
+      CoordinatorLib.help(user, host_id == senderid, remaining)
+      |> String.split("\n")
 
     say_command(cmd)
     Coordinator.send_to_user(senderid, messages)
@@ -64,16 +79,18 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
   defp do_handle(%{command: "party", senderid: senderid} = _cmd, state) do
     client = Account.get_client_by_id(senderid)
-    {:ok, code} = Account.create_code(%{
-      value: UUID.uuid1(),
-      purpose: "one_time_login",
-      expires: Timex.now() |> Timex.shift(minutes: 5),
-      user_id: senderid,
-      metadata: %{
-        ip: client.ip,
-        redirect: "/teiserver/account/parties",
-      }
-    })
+
+    {:ok, code} =
+      Account.create_code(%{
+        value: ExULID.ULID.generate(),
+        purpose: "one_time_login",
+        expires: Timex.now() |> Timex.shift(minutes: 5),
+        user_id: senderid,
+        metadata: %{
+          ip: client.ip,
+          redirect: "/teiserver/account/parties"
+        }
+      })
 
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
@@ -89,25 +106,28 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
   defp do_handle(%{command: "matchmaking", senderid: senderid} = _cmd, state) do
     client = Account.get_client_by_id(senderid)
-    {:ok, code} = Account.create_code(%{
-      value: UUID.uuid1(),
-      purpose: "one_time_login",
-      expires: Timex.now() |> Timex.shift(minutes: 5),
-      user_id: senderid,
-      metadata: %{
-        ip: client.ip,
-        redirect: "/teiserver/matchmaking/queues",
-      }
-    })
+
+    {:ok, code} =
+      Account.create_code(%{
+        value: ExULID.ULID.generate(),
+        purpose: "one_time_login",
+        expires: Timex.now() |> Timex.shift(minutes: 5),
+        user_id: senderid,
+        metadata: %{
+          ip: client.ip,
+          redirect: "/teiserver/matchmaking/queues"
+        }
+      })
 
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
 
-    msg = [
-      "Matchmaking is still in development so please report any bugs in it to Teifion (I'm the one creating it) in the discord.",
-      "To join/leave queues you will need to use the website, you can access it with this link - #{url}"
-    ]
-    |> List.flatten()
+    msg =
+      [
+        "Matchmaking is still in development so please report any bugs in it to Teifion (I'm the one creating it) in the discord.",
+        "To join/leave queues you will need to use the website, you can access it with this link - #{url}"
+      ]
+      |> List.flatten()
 
     User.send_direct_message(state.userid, senderid, msg)
 
@@ -116,53 +136,61 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
   defp do_handle(%{command: "whoami", senderid: senderid} = _cmd, state) do
     sender = User.get_user_by_id(senderid)
-    # stats = Account.get_user_stat_data(senderid)
+    stats = Account.get_user_stat_data(senderid)
 
-    # player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
-    # spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
-    # rank_time = User.rank_time(senderid)
+    total_hours = Map.get(stats, "total_minutes", 0) / 60 |> round
+    player_hours = Map.get(stats, "player_minutes", 0) / 60 |> round
+    spectator_hours = Map.get(stats, "spectator_minutes", 0) / 60 |> round
 
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
     profile_link = "https://#{host}/teiserver/profile/#{senderid}"
 
     accolades = AccoladeLib.get_player_accolades(senderid)
-    accolades_string = if Config.get_site_config_cache("teiserver.Enable accolades") do
-      case Map.keys(accolades) do
-        [] ->
-          "You currently have no accolades"
 
-        _ ->
-          badge_types = Account.list_badge_types(search: [id_list: Map.keys(accolades)])
-          |> Map.new(fn bt -> {bt.id, bt} end)
+    accolades_string =
+      if Config.get_site_config_cache("teiserver.Enable accolades") do
+        case Map.keys(accolades) do
+          [] ->
+            "You currently have no accolades"
 
-          ["Your accolades are as follows:"] ++
-            (accolades
-            |> Enum.map(fn {bt_id, count} ->
-              ">> #{count}x #{badge_types[bt_id].name}"
-            end))
+          _ ->
+            badge_types =
+              Account.list_badge_types(search: [id_list: Map.keys(accolades)])
+              |> Map.new(fn bt -> {bt.id, bt} end)
+
+            ["Your accolades are as follows:"] ++
+              (accolades
+               |> Enum.map(fn {bt_id, count} ->
+                 ">> #{count}x #{badge_types[bt_id].name}"
+               end))
+        end
       end
-    end
 
-    ratings = Account.list_ratings(
-      search: [
-        user_id: sender.id
-      ],
-      preload: [:rating_type]
-    )
+    ratings =
+      Account.list_ratings(
+        search: [
+          user_id: sender.id
+        ],
+        preload: [:rating_type]
+      )
       |> Enum.map(fn rating ->
-        rating_score = rating.rating_value
+        rating_score =
+          rating.rating_value
           |> NumberHelper.round(2)
 
-        leaderboard_rating = rating.leaderboard_rating
+        leaderboard_rating =
+          rating.leaderboard_rating
           |> NumberHelper.round(2)
 
         "#{rating.rating_type.name} > Game: #{rating_score}, Leaderboard: #{leaderboard_rating}"
       end)
-      |> Enum.sort
+      |> Enum.sort()
 
-    msg = [
+    msg =
+    [
       @splitter,
       "You are #{sender.name}",
+      "Playtime: #{total_hours} hours (#{player_hours} h playing, #{spectator_hours} h spectating)",
       "Profile link: #{profile_link}",
       "Skill ratings:",
       ratings,
@@ -179,129 +207,152 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     case User.get_user_by_name(remaining) do
       nil ->
         User.send_direct_message(state.userid, senderid, "Unable to find a user with that name")
+
       user ->
         sender = User.get_user_by_id(senderid)
         stats = Account.get_user_stat_data(user.id)
 
-        previous_names = (stats["previous_names"] || [])
+        previous_names =
+          (stats["previous_names"] || [])
           |> Enum.join(", ")
 
-        actions = Moderation.list_actions(
-          search: [
-            target_id: user.id,
-            expiry: "All active"
-          ]
-        )
+        actions =
+          Moderation.list_actions(
+            search: [
+              target_id: user.id,
+              expiry: "All active"
+            ]
+          )
           |> Enum.reject(fn action ->
             action.restrictions == ["Bridging"]
           end)
 
-        moderation_data = if Enum.empty?(actions) do
-          ["No moderation restrictions applied."]
-        else
-          action_text = actions
-            |> Enum.map(fn a -> String.split(a.reason, "\n") end)
+        moderation_data =
+          if Enum.empty?(actions) do
+            ["No moderation restrictions applied."]
+          else
+            action_text =
+              actions
+              |> Enum.map(fn a -> String.split(a.reason, "\n") end)
 
-          ["This user currently has one or more restrictions applied to their account because:",  action_text]
-        end
+            [
+              "This user currently has one or more restrictions applied to their account because:",
+              action_text
+            ]
+          end
 
         host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
         profile_link = "https://#{host}/teiserver/profile/#{user.id}"
 
-        ratings = Account.list_ratings(
-          search: [
-            user_id: user.id
-          ],
-          preload: [:rating_type]
-        )
+        ratings =
+          Account.list_ratings(
+            search: [
+              user_id: user.id
+            ],
+            preload: [:rating_type]
+          )
           |> Enum.map(fn rating ->
-            rating_score = rating.rating_value
+            rating_score =
+              rating.rating_value
               |> NumberHelper.round(2)
 
-            leaderboard_rating = rating.leaderboard_rating
+            leaderboard_rating =
+              rating.leaderboard_rating
               |> NumberHelper.round(2)
 
             "#{rating.rating_type.name} > Game: #{rating_score}, Leaderboard: #{leaderboard_rating}"
           end)
-          |> Enum.sort
+          |> Enum.sort()
 
         standard_parts = [
           @splitter,
           "Found #{user.name}",
-          (if previous_names != "", do: "Previous names: #{previous_names}"),
+          if(previous_names != "", do: "Previous names: #{previous_names}"),
           "Profile link: #{profile_link}",
           ["Ratings:" | ratings],
           moderation_data,
           @splitter
         ]
 
-        mod_parts = if User.is_moderator?(sender) do
-          # player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
-          # spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
-          # rank_time = User.rank_time(user.id)
+        mod_parts =
+          if User.is_moderator?(sender) do
+            # player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
+            # spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
+            # rank_time = User.rank_time(user.id)
 
-          smurfs = Account.smurf_search(user)
-            |> Enum.map(fn {_key, users} -> users end)
-            |> List.flatten
-            |> Enum.map(fn %{user: user} -> user end)
-            |> Enum.reject(fn %{id: id} -> id == user.id end)
-            |> Enum.uniq
-            |> Enum.map(fn %{name: name} -> name end)
+            smurfs =
+              Account.smurf_search(user)
+              |> Enum.map(fn {_key, users} -> users end)
+              |> List.flatten()
+              |> Enum.map(fn %{user: user} -> user end)
+              |> Enum.reject(fn %{id: id} -> id == user.id end)
+              |> Enum.uniq()
+              |> Enum.map(fn %{name: name} -> name end)
 
-          smurf_string = case smurfs do
-            [] -> "No smurfs found"
-            _ -> "Found smurfs named: #{Enum.join(smurfs, ", ")}"
+            smurf_string =
+              case smurfs do
+                [] -> "No smurfs found"
+                _ -> "Found smurfs named: #{Enum.join(smurfs, ", ")}"
+              end
+
+            accolades_string =
+              if Config.get_site_config_cache("teiserver.Enable accolades") do
+                accolades = AccoladeLib.get_player_accolades(user.id)
+
+                case Map.keys(accolades) do
+                  [] ->
+                    "They currently have no accolades"
+
+                  _ ->
+                    badge_types =
+                      Account.list_badge_types(search: [id_list: Map.keys(accolades)])
+                      |> Map.new(fn bt -> {bt.id, bt} end)
+
+                    ["Accolades as follows:"] ++
+                      (accolades
+                       |> Enum.map(fn {bt_id, count} ->
+                         ">> #{count}x #{badge_types[bt_id].name}"
+                       end))
+                end
+              end
+
+            [
+              # "Rank: #{user.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
+              smurf_string,
+              accolades_string
+            ]
+          else
+            []
           end
 
-          accolades_string = if Config.get_site_config_cache("teiserver.Enable accolades") do
-            accolades = AccoladeLib.get_player_accolades(user.id)
-            case Map.keys(accolades) do
-              [] ->
-                "They currently have no accolades"
+        # End of moderation if-statement
 
-              _ ->
-                badge_types = Account.list_badge_types(search: [id_list: Map.keys(accolades)])
-                |> Map.new(fn bt -> {bt.id, bt} end)
-
-                ["Accolades as follows:"] ++
-                  (accolades
-                  |> Enum.map(fn {bt_id, count} ->
-                    ">> #{count}x #{badge_types[bt_id].name}"
-                  end))
-            end
-          end
-
-          [
-            # "Rank: #{user.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
-            smurf_string,
-            accolades_string
-          ]
-        else
-          []
-        end# End of moderation if-statement
-
-        msg = (standard_parts ++ mod_parts)
-          |> List.flatten
+        msg =
+          (standard_parts ++ mod_parts)
+          |> List.flatten()
           |> Enum.reject(fn l -> l == nil end)
 
         User.send_direct_message(state.userid, senderid, msg)
     end
+
     state
   end
 
   # Code of Conduct search
   defp do_handle(%{command: "coc", remaining: remaining, senderid: senderid} = _cmd, state) do
-    search_term = remaining
-      |> String.trim
+    search_term =
+      remaining
+      |> String.trim()
       |> String.downcase()
 
-    messages = CodeOfConductData.flat_data()
-    |> Enum.filter(fn {_key, value} ->
-      String.contains?(value |> String.downcase, search_term)
-    end)
-    |> Enum.map(fn {key, value} ->
-      "#{key} - #{value}"
-    end)
+    messages =
+      CodeOfConductData.flat_data()
+      |> Enum.filter(fn {_key, value} ->
+        String.contains?(value |> String.downcase(), search_term)
+      end)
+      |> Enum.map(fn {key, value} ->
+        "#{key} - #{value}"
+      end)
 
     if Enum.empty?(messages) do
       User.send_direct_message(state.userid, senderid, "No matches for '#{remaining}'")
@@ -316,9 +367,13 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     sender = User.get_user_by_id(senderid)
 
     if sender.discord_id != nil do
-      User.send_direct_message(state.userid, senderid, "You already have a discord account linked; the discord link is: #{Application.get_env(:central, Teiserver)[:discord]}")
+      User.send_direct_message(
+        state.userid,
+        senderid,
+        "You already have a discord account linked; the discord link is: #{Application.get_env(:central, Teiserver)[:discord]}"
+      )
     else
-      code = :rand.uniform(899999) + 100000 |> to_string
+      code = (:rand.uniform(899_999) + 100_000) |> to_string
       Central.cache_put(:discord_bridge_account_codes, senderid, code)
 
       User.send_direct_message(state.userid, senderid, [
@@ -333,50 +388,70 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     state
   end
 
-  defp do_handle(%{command: "ignore"} = cmd, state), do: do_handle(%{cmd | command: "mute"}, state)
+  defp do_handle(%{command: "ignore"} = cmd, state),
+    do: do_handle(%{cmd | command: "mute"}, state)
+
   defp do_handle(%{command: "mute", senderid: senderid, remaining: remaining} = _cmd, state) do
     case User.get_user_by_name(remaining) do
       nil ->
-        Coordinator.send_to_user(senderid, "I am unable to find a user by the name of '#{remaining}'")
+        Coordinator.send_to_user(
+          senderid,
+          "I am unable to find a user by the name of '#{remaining}'"
+        )
+
       user ->
         if User.is_moderator?(user) do
           Coordinator.send_to_user(senderid, "You cannot block moderators.")
         else
           User.ignore_user(senderid, user.id)
-          Coordinator.send_to_user(senderid, "#{user.name} is now ignored, you can unmute them with the $unignore command or via the account section of the server website.")
+
+          Coordinator.send_to_user(
+            senderid,
+            "#{user.name} is now ignored, you can unmute them with the $unignore command or via the account section of the server website."
+          )
         end
     end
+
     state
   end
 
-  defp do_handle(%{command: "unignore"} = cmd, state), do: do_handle(%{cmd | command: "unmute"}, state)
+  defp do_handle(%{command: "unignore"} = cmd, state),
+    do: do_handle(%{cmd | command: "unmute"}, state)
+
   defp do_handle(%{command: "unmute", senderid: senderid, remaining: remaining} = _cmd, state) do
     case User.get_user_by_name(remaining) do
       nil ->
-        Coordinator.send_to_user(senderid, "I am unable to find a user by the name of '#{remaining}'")
+        Coordinator.send_to_user(
+          senderid,
+          "I am unable to find a user by the name of '#{remaining}'"
+        )
+
       user ->
         User.unignore_user(senderid, user.id)
         Coordinator.send_to_user(senderid, "#{user.name} is now un-ignored.")
     end
+
     state
   end
 
   defp do_handle(%{command: "modparty", senderid: senderid, remaining: targets} = _cmd, state) do
     targets
-      |> String.split(" ")
-      |> Enum.map(fn name ->
-        name
-          |> String.trim()
-          |> String.downcase()
-      end)
-      |> Enum.uniq
-      |> Enum.reduce(nil, fn (target, party_id) ->
-        case User.get_userid(target) do
-          nil ->
-            User.send_direct_message(state.userid, senderid, "Unable to find a user '#{target}'")
-            party_id
-          target_id ->
-            party_id = if party_id do
+    |> String.split(" ")
+    |> Enum.map(fn name ->
+      name
+      |> String.trim()
+      |> String.downcase()
+    end)
+    |> Enum.uniq()
+    |> Enum.reduce(nil, fn target, party_id ->
+      case User.get_userid(target) do
+        nil ->
+          User.send_direct_message(state.userid, senderid, "Unable to find a user '#{target}'")
+          party_id
+
+        target_id ->
+          party_id =
+            if party_id do
               Account.create_party_invite(party_id, target_id)
               Account.accept_party_invite(party_id, target_id)
               # Account.move_client_to_party(target_id, party_id)
@@ -385,60 +460,74 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
               party = Account.create_party(target_id)
               party.id
             end
-            :timer.sleep(50)
 
-            party_id
-        end
-      end)
+          :timer.sleep(50)
+
+          party_id
+      end
+    end)
 
     state
   end
 
   defp do_handle(%{command: "unparty", remaining: targets} = _cmd, state) do
     targets
-      |> String.split(" ")
-      |> Enum.map(fn name ->
-        name
-          |> String.trim()
-          |> String.downcase()
-      end)
-      |> Enum.uniq
-      |> Enum.reduce(nil, fn (target, _) ->
-        case User.get_userid(target) do
-          nil ->
-            :ok
-          target_id ->
-            client = Account.get_client_by_id(target_id)
+    |> String.split(" ")
+    |> Enum.map(fn name ->
+      name
+      |> String.trim()
+      |> String.downcase()
+    end)
+    |> Enum.uniq()
+    |> Enum.reduce(nil, fn target, _ ->
+      case User.get_userid(target) do
+        nil ->
+          :ok
 
-            if client.party_id do
-              Account.leave_party(client.party_id, target_id)
-              Account.move_client_to_party(target_id, nil)
-            end
-        end
-      end)
+        target_id ->
+          client = Account.get_client_by_id(target_id)
+
+          if client.party_id do
+            Account.leave_party(client.party_id, target_id)
+            Account.move_client_to_party(target_id, nil)
+          end
+      end
+    end)
 
     state
   end
 
   defp do_handle(%{command: "website", senderid: senderid} = _cmd, state) do
     client = Client.get_client_by_id(senderid)
-    {:ok, code} = Central.Account.create_code(%{
-        value: UUID.uuid1(),
+
+    {:ok, code} =
+      Account.create_code(%{
+        value: ExULID.ULID.generate(),
         purpose: "one_time_login",
         expires: Timex.now() |> Timex.shift(minutes: 5),
         user_id: senderid,
         metadata: %{ip: client.ip}
       })
+
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
 
-    Coordinator.send_to_user(senderid, "Your one-time login link is #{url} it will expire in 5 minutes and must be accessed from the same IP you are accessing the game.")
+    Coordinator.send_to_user(
+      senderid,
+      "Your one-time login link is #{url} it will expire in 5 minutes and must be accessed from the same IP you are accessing the game."
+    )
+
     state
   end
 
   # Moderator commands
   defp do_handle(%{command: command, senderid: senderid} = _cmd, state) do
-    User.send_direct_message(state.userid, senderid, "I don't have a handler for the command '#{command}'")
+    User.send_direct_message(
+      state.userid,
+      senderid,
+      "I don't have a handler for the command '#{command}'"
+    )
+
     state
   end
 
@@ -448,13 +537,15 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     error = if Map.get(cmd, :error), do: " Error: #{cmd.error}", else: ""
 
     "#{cmd.command}#{remaining}#{error}"
-      |> String.trim
+    |> String.trim()
   end
 
   defp say_command(%{lobby_id: nil}), do: :ok
+
   defp say_command(%{lobby_id: lobby_id, senderid: senderid} = cmd) do
     message = "$ " <> command_as_message(cmd)
     Lobby.say(senderid, message, lobby_id)
   end
+
   defp say_command(_), do: :ok
 end

@@ -162,13 +162,14 @@ defmodule Teiserver.Account do
 
   @spec smurf_search(User.t()) :: [{{String.t(), String.t()}, [SmurfKey.t()]}]
   def smurf_search(user) do
-    values = list_smurf_keys(
-      search: [
-        user_id: user.id
-      ],
-      limit: :infinity,
-      select: [:value]
-    )
+    values =
+      list_smurf_keys(
+        search: [
+          user_id: user.id
+        ],
+        limit: :infinity,
+        select: [:value]
+      )
       |> Enum.map(fn %{value: value} -> value end)
 
     list_smurf_keys(
@@ -179,25 +180,26 @@ defmodule Teiserver.Account do
       preload: [:user, :type],
       limit: :infinity
     )
-      |> Enum.group_by(fn sk -> {sk.type.name, sk.value} end)
-      |> Enum.sort_by(fn {key, _value} -> key end, &<=/2)
+    |> Enum.group_by(fn sk -> {sk.type.name, sk.value} end)
+    |> Enum.sort_by(fn {key, _value} -> key end, &<=/2)
   end
 
   # Gets the the roles for the user based on their flags/data
   @spec get_roles(User.t()) :: [String.t()]
   def get_roles(user) do
     [
-      (if user.data["moderator"] == true, do: "Moderator"),
-      (if user.data["bot"] == true, do: "Bot"),
-      (if user.data["verified"] == true, do: "Verified"),
-
-      (if "Non-bridged" in (user.data["roles"] || []), do: "Non-bridged"),
-      (if "Trusted" in (user.data["roles"] || []), do: "Trusted"),
-      (if "Streamer" in (user.data["roles"] || []), do: "Streamer"),
-      (if "Tester" in (user.data["roles"] || []), do: "Tester"),
-      (if "Donor" in (user.data["roles"] || []), do: "Donor"),
-      (if "Contributor" in (user.data["roles"] || []), do: "Contributor"),
-      (if "Developer" in (user.data["roles"] || []), do: "Developer"),
+      if(user.data["moderator"] == true, do: "Moderator"),
+      if(user.data["bot"] == true, do: "Bot"),
+      if(user.data["verified"] == true, do: "Verified"),
+      if("Non-bridged" in (user.data["roles"] || []), do: "Non-bridged"),
+      if("Trusted" in (user.data["roles"] || []), do: "Trusted"),
+      if("Streamer" in (user.data["roles"] || []), do: "Streamer"),
+      if("Tester" in (user.data["roles"] || []), do: "Tester"),
+      if("Donor" in (user.data["roles"] || []), do: "Donor"),
+      if("Contributor" in (user.data["roles"] || []), do: "Contributor"),
+      if("Developer" in (user.data["roles"] || []), do: "Developer"),
+      if("VIP" in (user.data["roles"] || []), do: "VIP"),
+      if("TourneyPlayer" in (user.data["roles"] || []), do: "TourneyPlayer")
     ]
     |> Enum.filter(fn r -> r != nil end)
     |> Enum.map(fn r -> String.downcase(r) end)
@@ -205,15 +207,18 @@ defmodule Teiserver.Account do
 
   def update_user_roles(user) do
     # First we remove all these permissions
-    remove_permissions = Teiserver.User.role_list()
-    |> Enum.map(fn r -> "teiserver.player.#{r}" end)
+    remove_permissions =
+      Teiserver.User.role_list()
+      |> Enum.map(fn r -> "teiserver.player.#{r}" end)
 
-    base_permissions = user.permissions
-    |> Enum.filter(fn r -> not Enum.member?(remove_permissions, r) end)
+    base_permissions =
+      user.permissions
+      |> Enum.filter(fn r -> not Enum.member?(remove_permissions, r) end)
 
     # Then we add back in the ones we want this person to have
-    add_permissions = user.data["roles"]
-    |> Enum.map(fn r -> "teiserver.player.#{String.downcase(r)}" end)
+    add_permissions =
+      user.data["roles"]
+      |> Enum.map(fn r -> "teiserver.player.#{String.downcase(r)}" end)
 
     permissions = base_permissions ++ add_permissions
 
@@ -224,7 +229,8 @@ defmodule Teiserver.Account do
   def create_group_membership(params),
     do: Central.Account.create_group_membership(params)
 
-  @spec spring_auth_check(Plug.Conn.t(), User.t, String.t()) :: {:ok, User.t} | {:error, String.t()}
+  @spec spring_auth_check(Plug.Conn.t(), User.t(), String.t()) ::
+          {:ok, User.t()} | {:error, String.t()}
   def spring_auth_check(conn, user, plain_text_password) do
     tei_user = get_user_by_id(user.id)
     md5_password = Teiserver.User.spring_md5_password(plain_text_password)
@@ -291,7 +297,7 @@ defmodule Teiserver.Account do
   # """
   def get_user_stat(id, args \\ []) when not is_list(id) do
     user_stat_query(id, args)
-    |> Repo.one
+    |> Repo.one()
   end
 
   @spec get_user_stat_data(integer()) :: Map.t()
@@ -300,6 +306,7 @@ defmodule Teiserver.Account do
       case get_user_stat(userid) do
         nil ->
           %{}
+
         user_stat ->
           user_stat.data
       end
@@ -322,14 +329,16 @@ defmodule Teiserver.Account do
 
   """
   def update_user_stat(userid, data) when is_integer(userid) do
-    data = data
-    |> Enum.map(fn {k, v} -> {to_string(k), v} end)
-    |> Enum.filter(fn {_, v} -> v != nil end)
-    |> Map.new
+    data =
+      data
+      |> Enum.map(fn {k, v} -> {to_string(k), v} end)
+      |> Enum.filter(fn {_, v} -> v != nil end)
+      |> Map.new()
 
     case get_user_stat(userid) do
       nil ->
         create_user_stat(%{user_id: userid, data: data})
+
       user_stat ->
         Central.cache_delete(:teiserver_user_stat_cache, userid)
         new_data = Map.merge(user_stat.data, data)
@@ -348,6 +357,7 @@ defmodule Teiserver.Account do
     case get_user_stat(userid) do
       nil ->
         :ok
+
       user_stat ->
         Central.cache_delete(:teiserver_user_stat_cache, userid)
         new_data = Map.drop(user_stat.data, keys)
@@ -370,7 +380,7 @@ defmodule Teiserver.Account do
 
   @spec badge_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def badge_type_query(id, args) do
-    BadgeTypeLib.query_badge_types
+    BadgeTypeLib.query_badge_types()
     |> BadgeTypeLib.search(%{id: id})
     |> BadgeTypeLib.search(args[:search])
     |> BadgeTypeLib.preload(args[:preload])
@@ -391,7 +401,7 @@ defmodule Teiserver.Account do
   def list_badge_types(args \\ []) do
     badge_type_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -412,15 +422,17 @@ defmodule Teiserver.Account do
   @spec get_badge_type!(Integer.t(), List.t()) :: BadgeType.t()
   def get_badge_type!(id) when not is_list(id) do
     badge_type_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_badge_type!(args) do
     badge_type_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_badge_type!(id, args) do
     badge_type_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -474,7 +486,8 @@ defmodule Teiserver.Account do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_badge_type(BadgeType.t(), Map.t()) :: {:ok, BadgeType.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_badge_type(BadgeType.t(), Map.t()) ::
+          {:ok, BadgeType.t()} | {:error, Ecto.Changeset.t()}
   def update_badge_type(%BadgeType{} = badge_type, attrs) do
     badge_type
     |> BadgeType.changeset(attrs)
@@ -522,7 +535,7 @@ defmodule Teiserver.Account do
 
   @spec accolade_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def accolade_query(id, args) do
-    AccoladeLib.query_accolades
+    AccoladeLib.query_accolades()
     |> AccoladeLib.search(%{id: id})
     |> AccoladeLib.search(args[:search])
     |> AccoladeLib.preload(args[:preload])
@@ -543,7 +556,7 @@ defmodule Teiserver.Account do
   def list_accolades(args \\ []) do
     accolade_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -564,15 +577,17 @@ defmodule Teiserver.Account do
   @spec get_accolade!(Integer.t(), List.t()) :: Accolade.t()
   def get_accolade!(id) when not is_list(id) do
     accolade_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_accolade!(args) do
     accolade_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_accolade!(id, args) do
     accolade_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -626,7 +641,8 @@ defmodule Teiserver.Account do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_accolade(Accolade.t(), Map.t()) :: {:ok, Accolade.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_accolade(Accolade.t(), Map.t()) ::
+          {:ok, Accolade.t()} | {:error, Ecto.Changeset.t()}
   def update_accolade(%Accolade{} = accolade, attrs) do
     accolade
     |> Accolade.changeset(attrs)
@@ -664,7 +680,6 @@ defmodule Teiserver.Account do
     Accolade.changeset(accolade, %{})
   end
 
-
   alias Teiserver.Account.SmurfKey
   alias Teiserver.Account.SmurfKeyLib
 
@@ -675,12 +690,12 @@ defmodule Teiserver.Account do
 
   @spec smurf_key_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def smurf_key_query(id, args) do
-    SmurfKeyLib.query_smurf_keys
-      |> SmurfKeyLib.search(%{id: id})
-      |> SmurfKeyLib.search(args[:search])
-      |> SmurfKeyLib.preload(args[:preload])
-      |> SmurfKeyLib.order_by(args[:order_by])
-      |> QueryHelpers.select(args[:select])
+    SmurfKeyLib.query_smurf_keys()
+    |> SmurfKeyLib.search(%{id: id})
+    |> SmurfKeyLib.search(args[:search])
+    |> SmurfKeyLib.preload(args[:preload])
+    |> SmurfKeyLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
   end
 
   @doc """
@@ -695,8 +710,8 @@ defmodule Teiserver.Account do
   @spec list_smurf_keys(List.t()) :: List.t()
   def list_smurf_keys(args \\ []) do
     smurf_key_query(args)
-      |> QueryHelpers.limit_query(args[:limit] || 50)
-      |> Repo.all
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
   end
 
   @doc """
@@ -717,15 +732,17 @@ defmodule Teiserver.Account do
   @spec get_smurf_key!(Integer.t(), List.t()) :: SmurfKey.t()
   def get_smurf_key!(id) when not is_list(id) do
     smurf_key_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_smurf_key!(args) do
     smurf_key_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_smurf_key!(id, args) do
     smurf_key_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   @doc """
@@ -746,25 +763,29 @@ defmodule Teiserver.Account do
   @spec get_smurf_key(Integer.t(), List.t()) :: SmurfKey.t()
   def get_smurf_key(id) when not is_list(id) do
     smurf_key_query(id, [])
-    |> Repo.one
-  end
-  def get_smurf_key(args) do
-    smurf_key_query(nil, args)
-    |> Repo.one
-  end
-  def get_smurf_key(id, args) do
-    smurf_key_query(id, args)
-    |> Repo.one
+    |> Repo.one()
   end
 
-  @spec get_smurf_key(T.user_id, non_neg_integer(), String.t()) :: list()
+  def get_smurf_key(args) do
+    smurf_key_query(nil, args)
+    |> Repo.one()
+  end
+
+  def get_smurf_key(id, args) do
+    smurf_key_query(id, args)
+    |> Repo.one()
+  end
+
+  @spec get_smurf_key(T.user_id(), non_neg_integer(), String.t()) :: list()
   def get_smurf_key(user_id, type_id, value) do
-    smurf_key_query(nil, search: [
-      user_id: user_id,
-      type_id: type_id,
-      value: value
-    ])
-    |> Repo.all
+    smurf_key_query(nil,
+      search: [
+        user_id: user_id,
+        type_id: type_id,
+        value: value
+      ]
+    )
+    |> Repo.all()
   end
 
   @doc """
@@ -779,20 +800,31 @@ defmodule Teiserver.Account do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_smurf_key(non_neg_integer(), String.t(), String.t()) :: {:ok, SmurfKey.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_smurf_key(non_neg_integer(), String.t(), String.t()) ::
+          {:ok, SmurfKey.t()} | {:error, Ecto.Changeset.t()}
   def create_smurf_key(user_id, type_name, value) do
     type_id = get_or_add_smurf_key_type(type_name)
 
     case get_smurf_key(user_id, type_id, value) do
       [] ->
         %SmurfKey{}
-          |> SmurfKey.changeset(%{user_id: user_id, value: value, type_id: type_id, last_updated: Timex.now()})
-          |> Repo.insert()
+        |> SmurfKey.changeset(%{
+          user_id: user_id,
+          value: value,
+          type_id: type_id,
+          last_updated: Timex.now()
+        })
+        |> Repo.insert()
+
       [existing] ->
         update_smurf_key(existing, %{last_updated: Timex.now()})
         {:ok, existing}
+
       [existing | _] ->
-        Logger.error("#{__MODULE__}.create_smurf_key found user with two identical keys: #{user_id}, #{type_id}, #{value}")
+        Logger.error(
+          "#{__MODULE__}.create_smurf_key found user with two identical keys: #{user_id}, #{type_id}, #{value}"
+        )
+
         {:ok, existing}
     end
   end
@@ -809,7 +841,8 @@ defmodule Teiserver.Account do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_smurf_key(SmurfKey.t(), Map.t()) :: {:ok, SmurfKey.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_smurf_key(SmurfKey.t(), Map.t()) ::
+          {:ok, SmurfKey.t()} | {:error, Ecto.Changeset.t()}
   def update_smurf_key(%SmurfKey{} = smurf_key, attrs) do
     smurf_key
     |> SmurfKey.changeset(attrs)
@@ -857,12 +890,12 @@ defmodule Teiserver.Account do
 
   @spec smurf_key_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def smurf_key_type_query(id, args) do
-    SmurfKeyTypeLib.query_smurf_key_types
-      |> SmurfKeyTypeLib.search(%{id: id})
-      |> SmurfKeyTypeLib.search(args[:search])
-      |> SmurfKeyTypeLib.preload(args[:preload])
-      |> SmurfKeyTypeLib.order_by(args[:order_by])
-      |> QueryHelpers.select(args[:select])
+    SmurfKeyTypeLib.query_smurf_key_types()
+    |> SmurfKeyTypeLib.search(%{id: id})
+    |> SmurfKeyTypeLib.search(args[:search])
+    |> SmurfKeyTypeLib.preload(args[:preload])
+    |> SmurfKeyTypeLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
   end
 
   @doc """
@@ -877,8 +910,8 @@ defmodule Teiserver.Account do
   @spec list_smurf_key_types(List.t()) :: List.t()
   def list_smurf_key_types(args \\ []) do
     smurf_key_type_query(args)
-      |> QueryHelpers.limit_query(args[:limit] || 50)
-      |> Repo.all
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
   end
 
   @doc """
@@ -899,15 +932,17 @@ defmodule Teiserver.Account do
   @spec get_smurf_key_type(Integer.t(), List.t()) :: SmurfKeyType.t()
   def get_smurf_key_type(id) when not is_list(id) do
     smurf_key_type_query(id, [])
-      |> Repo.one
+    |> Repo.one()
   end
+
   def get_smurf_key_type(args) do
     smurf_key_type_query(nil, args)
-      |> Repo.one
+    |> Repo.one()
   end
+
   def get_smurf_key_type(id, args) do
     smurf_key_type_query(id, args)
-      |> Repo.one
+    |> Repo.one()
   end
 
   @doc """
@@ -925,8 +960,8 @@ defmodule Teiserver.Account do
   @spec create_smurf_key_type(Map.t()) :: {:ok, SmurfKeyType.t()} | {:error, Ecto.Changeset.t()}
   def create_smurf_key_type(attrs \\ %{}) do
     %SmurfKeyType{}
-      |> SmurfKeyType.changeset(attrs)
-      |> Repo.insert()
+    |> SmurfKeyType.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """
@@ -941,7 +976,8 @@ defmodule Teiserver.Account do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_smurf_key_type(SmurfKeyType.t()) :: {:ok, SmurfKeyType.t()} | {:error, Ecto.Changeset.t()}
+  @spec delete_smurf_key_type(SmurfKeyType.t()) ::
+          {:ok, SmurfKeyType.t()} | {:error, Ecto.Changeset.t()}
   def delete_smurf_key_type(%SmurfKeyType{} = smurf_key_type) do
     Repo.delete(smurf_key_type)
   end
@@ -950,13 +986,19 @@ defmodule Teiserver.Account do
     name = String.trim(name)
 
     Central.cache_get_or_store(:teiserver_account_smurf_key_types, name, fn ->
-      case list_smurf_key_types(search: [name: name], select: [:id], order_by: "ID (Lowest first)") do
+      case list_smurf_key_types(
+             search: [name: name],
+             select: [:id],
+             order_by: "ID (Lowest first)"
+           ) do
         [] ->
-          {:ok, key_type} = %SmurfKeyType{}
+          {:ok, key_type} =
+            %SmurfKeyType{}
             |> SmurfKeyType.changeset(%{name: name})
             |> Repo.insert()
 
           key_type.id
+
         [%{id: id} | _] ->
           id
       end
@@ -967,12 +1009,12 @@ defmodule Teiserver.Account do
 
   @spec rating_query(List.t()) :: Ecto.Query.t()
   def rating_query(args) do
-    RatingLib.query_ratings
-      |> RatingLib.search(args[:search])
-      |> RatingLib.preload(args[:preload])
-      |> RatingLib.order_by(args[:order_by])
-      |> QueryHelpers.select(args[:select])
-      |> QueryHelpers.limit_query(args[:limit] || 50)
+    RatingLib.query_ratings()
+    |> RatingLib.search(args[:search])
+    |> RatingLib.preload(args[:preload])
+    |> RatingLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.limit_query(args[:limit] || 50)
   end
 
   @doc """
@@ -987,7 +1029,7 @@ defmodule Teiserver.Account do
   @spec list_ratings(List.t()) :: List.t()
   def list_ratings(args \\ []) do
     rating_query(args)
-      |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -1008,30 +1050,35 @@ defmodule Teiserver.Account do
   @spec get_rating(Integer.t(), List.t()) :: Rating.t()
   def get_rating(args) do
     rating_query(args)
-      |> Repo.one
+    |> Repo.one()
   end
 
-  def get_rating(user_id, rating_type_id) when is_integer(user_id) and is_integer(rating_type_id) do
+  def get_rating(user_id, rating_type_id)
+      when is_integer(user_id) and is_integer(rating_type_id) do
     Central.cache_get_or_store(:teiserver_user_ratings, {user_id, rating_type_id}, fn ->
-      rating_query(search: [
-        user_id: user_id,
-        rating_type_id: rating_type_id
-      ], limit: 1)
-        |> Repo.one
+      rating_query(
+        search: [
+          user_id: user_id,
+          rating_type_id: rating_type_id
+        ],
+        limit: 1
+      )
+      |> Repo.one()
     end)
   end
 
   @spec get_player_highest_leaderboard_rating(T.userid()) :: number()
   def get_player_highest_leaderboard_rating(user_id) do
-    result = rating_query(
-      search: [
-        user_id: user_id,
-      ],
-      select: [:leaderboard_rating],
-      order_by: "Leaderboard rating high to low",
-      limit: 1
-    )
-      |> Repo.one
+    result =
+      rating_query(
+        search: [
+          user_id: user_id
+        ],
+        select: [:leaderboard_rating],
+        order_by: "Leaderboard rating high to low",
+        limit: 1
+      )
+      |> Repo.one()
 
     if result do
       result.leaderboard_rating
@@ -1055,8 +1102,8 @@ defmodule Teiserver.Account do
   @spec create_rating(Map.t()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
   def create_rating(attrs \\ %{}) do
     %Rating{}
-      |> Rating.changeset(attrs)
-      |> Repo.insert()
+    |> Rating.changeset(attrs)
+    |> Repo.insert()
   end
 
   @spec update_rating(Rating.t(), map()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
@@ -1064,8 +1111,8 @@ defmodule Teiserver.Account do
     Central.cache_delete(:teiserver_user_ratings, {rating.user_id, rating.rating_type_id})
 
     rating
-      |> Rating.changeset(attrs)
-      |> Repo.update()
+    |> Rating.changeset(attrs)
+    |> Repo.update()
   end
 
   @spec create_or_update_rating(Map.t()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
@@ -1073,6 +1120,7 @@ defmodule Teiserver.Account do
     case get_rating(attrs.user_id, attrs.rating_type_id) do
       nil ->
         create_rating(attrs)
+
       existing ->
         update_rating(existing, attrs)
     end
@@ -1096,10 +1144,8 @@ defmodule Teiserver.Account do
     Repo.delete(rating)
   end
 
-
-
   # Codes
-  alias Central.Account.{Code, CodeLib}
+  alias Teiserver.Account.{Code, CodeLib}
 
   def code_query(args) do
     code_query(nil, args)
@@ -1107,11 +1153,11 @@ defmodule Teiserver.Account do
 
   def code_query(value, args) do
     CodeLib.query_codes()
-      |> CodeLib.search(%{value: value})
-      |> CodeLib.search(args[:search])
-      |> CodeLib.preload(args[:preload])
-      |> CodeLib.order_by(args[:order_by])
-      |> QueryHelpers.select(args[:select])
+    |> CodeLib.search(%{value: value})
+    |> CodeLib.search(args[:search])
+    |> CodeLib.preload(args[:preload])
+    |> CodeLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
   end
 
   @doc """
@@ -1125,8 +1171,8 @@ defmodule Teiserver.Account do
   """
   def list_codes(args \\ []) do
     code_query(args)
-      |> QueryHelpers.limit_query(args[:limit] || 50)
-      |> Repo.all()
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
   end
 
   @doc """
@@ -1145,14 +1191,14 @@ defmodule Teiserver.Account do
   """
   def get_code(value, args \\ []) do
     code_query(value, args)
-      |> QueryHelpers.limit_query(args[:limit] || 1)
-      |> Repo.one()
+    |> QueryHelpers.limit_query(args[:limit] || 1)
+    |> Repo.one()
   end
 
   def get_code!(value, args \\ []) do
     code_query(value, args)
-      |> QueryHelpers.limit_query(args[:limit] || 1)
-      |> Repo.one!()
+    |> QueryHelpers.limit_query(args[:limit] || 1)
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -1190,8 +1236,8 @@ defmodule Teiserver.Account do
   @spec create_code(map) :: {:ok, Code.t()} | {:error, Ecto.Changeset.t()}
   def create_code(attrs \\ %{}) do
     %Code{}
-      |> Code.changeset(attrs)
-      |> Repo.insert()
+    |> Code.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """
@@ -1208,8 +1254,8 @@ defmodule Teiserver.Account do
   """
   def update_code(%Code{} = code, attrs) do
     code
-      |> Code.changeset(attrs)
-      |> Repo.update()
+    |> Code.changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """
@@ -1239,6 +1285,167 @@ defmodule Teiserver.Account do
   """
   def change_code(%Code{} = code) do
     Code.changeset(code, %{})
+  end
+
+  alias Teiserver.Account.{UserToken, UserTokenLib}
+
+  def user_token_query(args) do
+    user_token_query(nil, args)
+  end
+
+  def user_token_query(id, args) do
+    UserTokenLib.query_user_tokens()
+    |> UserTokenLib.search(%{id: id})
+    |> UserTokenLib.search(args[:search])
+    |> UserTokenLib.preload(args[:preload])
+    |> UserTokenLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of user_tokens.
+
+  ## Examples
+
+      iex> list_user_tokens()
+      [%UserToken{}, ...]
+
+  """
+  def list_user_tokens(args \\ []) do
+    user_token_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single user_token.
+
+  Raises `Ecto.NoResultsError` if the UserToken does not exist.
+
+  ## Examples
+
+      iex> get_user_token!(123)
+      %UserToken{}
+
+      iex> get_user_token!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_user_token(id, args \\ []) do
+    user_token_query(id, args)
+    |> QueryHelpers.limit_query(args[:limit] || 1)
+    |> Repo.one()
+  end
+
+  def get_user_token!(id, args \\ []) do
+    user_token_query(id, args)
+    |> QueryHelpers.limit_query(args[:limit] || 1)
+    |> Repo.one!()
+  end
+
+  @spec get_user_token_by_value(String.t()) :: UserToken.t() | nil
+  def get_user_token_by_value(value) do
+    user_token_query(nil,
+      search: [
+        value: value
+      ],
+      preload: [
+        :user
+      ]
+    )
+    |> QueryHelpers.limit_query(1)
+    |> Repo.one()
+  end
+
+  # Uncomment this if needed, default files do not need this function
+  # @doc """
+  # Gets a single user_token.
+
+  # Returns `nil` if the UserToken does not exist.
+
+  # ## Examples
+
+  #     iex> get_user_token(123)
+  #     %UserToken{}
+
+  #     iex> get_user_token(456)
+  #     nil
+
+  # """
+  # def get_user_token(id, args \\ []) when not is_list(id) do
+  #   user_token_query(id, args)
+  #   |> Repo.one
+  # end
+
+  @doc """
+  Creates a user_token.
+
+  ## Examples
+
+      iex> create_user_token(%{field: value})
+      {:ok, %UserToken{}}
+
+      iex> create_user_token(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_user_token(attrs \\ %{}) do
+    %UserToken{}
+    |> UserToken.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a user_token.
+
+  ## Examples
+
+      iex> update_user_token(user_token, %{field: new_value})
+      {:ok, %UserToken{}}
+
+      iex> update_user_token(user_token, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user_token(%UserToken{} = user_token, attrs) do
+    user_token
+    |> UserToken.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a UserToken.
+
+  ## Examples
+
+      iex> delete_user_token(user_token)
+      {:ok, %UserToken{}}
+
+      iex> delete_user_token(user_token)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_user_token(%UserToken{} = user_token) do
+    Repo.delete(user_token)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking user_token changes.
+
+  ## Examples
+
+      iex> change_user_token(user_token)
+      %Ecto.Changeset{source: %UserToken{}}
+
+  """
+  def change_user_token(%UserToken{} = user_token) do
+    UserToken.changeset(user_token, %{})
+  end
+
+  def create_token_value(length \\ 128) do
+    :crypto.strong_rand_bytes(length)
+    |> Base.encode64(padding: false)
+    |> binary_part(0, length)
   end
 
   # User functions
@@ -1286,9 +1493,6 @@ defmodule Teiserver.Account do
   @spec update_cache_user(T.userid(), map()) :: T.user()
   def update_cache_user(userid, user), do: UserCache.update_cache_user(userid, user)
 
-  @spec delete_user(T.userid()) :: :ok | :no_user
-  defdelegate delete_user(userid), to: UserCache
-
   @spec decache_user(T.userid()) :: :ok | :no_user
   defdelegate decache_user(userid), to: UserCache
 
@@ -1331,7 +1535,10 @@ defmodule Teiserver.Account do
   @spec merge_update_client(T.userid(), Map.t()) :: :ok
   defdelegate merge_update_client(userid, client), to: ClientLib
 
-  @spec replace_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: T.client()
+  @spec replace_update_client(
+          Map.t(),
+          :silent | :client_updated_status | :client_updated_battlestatus
+        ) :: T.client()
   defdelegate replace_update_client(client, reason), to: ClientLib
 
   @spec move_client_to_party(T.userid(), T.party_id()) :: :ok | nil

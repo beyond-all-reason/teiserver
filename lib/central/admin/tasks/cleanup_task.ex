@@ -2,7 +2,7 @@ defmodule Central.Admin.CleanupTask do
   @moduledoc false
   use Oban.Worker, queue: :cleanup
 
-  alias Central.Account
+  alias Teiserver.Account
 
   @impl Oban.Worker
   @spec perform(any) :: :ok

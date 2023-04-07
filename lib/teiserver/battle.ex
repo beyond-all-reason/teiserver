@@ -23,13 +23,13 @@ defmodule Teiserver.Battle do
 
   @spec match_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def match_query(id, args) do
-    MatchLib.query_matches
-      |> MatchLib.search(%{id: id})
-      |> MatchLib.search(args[:search])
-      |> MatchLib.preload(args[:preload])
-      |> MatchLib.order_by(args[:order_by])
-      |> QueryHelpers.select(args[:select])
-      |> QueryHelpers.limit_query(args[:limit])
+    MatchLib.query_matches()
+    |> MatchLib.search(%{id: id})
+    |> MatchLib.search(args[:search])
+    |> MatchLib.preload(args[:preload])
+    |> MatchLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.limit_query(args[:limit])
   end
 
   @doc """
@@ -44,8 +44,8 @@ defmodule Teiserver.Battle do
   @spec list_matches(List.t()) :: List.t()
   def list_matches(args \\ []) do
     match_query(args)
-      |> QueryHelpers.limit_query(args[:limit] || 50)
-      |> Repo.all
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
   end
 
   @doc """
@@ -66,15 +66,17 @@ defmodule Teiserver.Battle do
   @spec get_match!(Integer.t(), List.t()) :: Match.t()
   def get_match!(id) when not is_list(id) do
     match_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_match!(args) do
     match_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_match!(id, args) do
     match_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   @doc """
@@ -95,23 +97,25 @@ defmodule Teiserver.Battle do
   @spec get_match(Integer.t(), List.t()) :: Match.t()
   def get_match(id) when not is_list(id) do
     match_query(id, [])
-    |> Repo.one
+    |> Repo.one()
   end
+
   def get_match(args) do
     match_query(nil, args)
-    |> Repo.one
+    |> Repo.one()
   end
+
   def get_match(id, args) do
     match_query(id, args)
-    |> Repo.one
+    |> Repo.one()
   end
 
-
   def get_next_match(nil), do: nil
+
   def get_next_match(match_id) when is_integer(match_id) do
     match_id
-      |> get_match()
-      |> get_next_match()
+    |> get_match()
+    |> get_next_match()
   end
 
   def get_next_match(%{server_uuid: server_uuid, id: match_id}) do
@@ -123,14 +127,15 @@ defmodule Teiserver.Battle do
       order_by: "Oldest first",
       limit: 1
     )
-    |> Repo.one
+    |> Repo.one()
   end
 
   def get_prev_match(nil), do: nil
+
   def get_prev_match(match_id) when is_integer(match_id) do
     match_id
-      |> get_match()
-      |> get_prev_match()
+    |> get_match()
+    |> get_prev_match()
   end
 
   def get_prev_match(%{server_uuid: server_uuid, id: match_id}) do
@@ -142,7 +147,7 @@ defmodule Teiserver.Battle do
       order_by: "Newest first",
       limit: 1
     )
-    |> Repo.one
+    |> Repo.one()
   end
 
   @doc """
@@ -233,7 +238,6 @@ defmodule Teiserver.Battle do
     Match.changeset(match, %{})
   end
 
-
   alias Teiserver.Battle.Lobby
 
   # Not to be confused with protocol related adding, this
@@ -257,7 +261,7 @@ defmodule Teiserver.Battle do
   # end
 
   alias Teiserver.Battle.{MatchMonitorServer, MatchLib}
-  alias Teiserver.Battle.{LobbyChat, LobbyCache}
+  alias Teiserver.Battle.{Lobby, LobbyChat, LobbyCache}
   require Logger
 
   @spec start_match(nil | T.lobby_id()) :: :ok
@@ -301,6 +305,7 @@ defmodule Teiserver.Battle do
   #   :ok
   # end
 
+
   def start_match(lobby_id) do
     empty_match = get_lobby_match_id(lobby_id)
       |> get_match!()
@@ -320,20 +325,26 @@ defmodule Teiserver.Battle do
               # membership or it will mess with records, if no balance mode
               # listed then it defaults to grouped
               if current_balance == nil or current_balance.balance_mode == :grouped do
-                create_match_membership(Map.merge(m, %{
-                  match_id: match.id
-                }))
+                create_match_membership(
+                  Map.merge(m, %{
+                    match_id: match.id
+                  })
+                )
               else
-                create_match_membership(Map.merge(m, %{
-                  party_id: nil,
-                  match_id: match.id
-                }))
+                create_match_membership(
+                  Map.merge(m, %{
+                    party_id: nil,
+                    match_id: match.id
+                  })
+                )
               end
             end)
+
           error ->
-            Logger.error("Error inserting match: #{Kernel.inspect error}")
+            Logger.error("Error inserting match: #{Kernel.inspect(error)}")
             :ok
         end
+
       nil ->
         # No human players, we're not going to create a match with that!
         :ok
@@ -345,17 +356,20 @@ defmodule Teiserver.Battle do
 
   @spec stop_match(nil | T.lobby_id()) :: :ok
   def stop_match(nil), do: :ok
+
   def stop_match(lobby_id) do
     founder_id = get_lobby_founder_id(lobby_id)
     uuid = get_lobby_match_uuid(lobby_id)
 
     match_by_founder = find_open_match_by_founder_id(founder_id)
+
     if match_by_founder do
       do_stop_match(match_by_founder, lobby_id)
     else
       case list_matches(search: [uuid: uuid]) do
         [match] ->
           do_stop_match(match, lobby_id)
+
         _ ->
           :ok
       end
@@ -372,6 +386,7 @@ defmodule Teiserver.Battle do
     LobbyCache.cast_lobby(lobby_id, :stop_match)
 
     update_match(match, params)
+
     PubSub.broadcast(
       Central.PubSub,
       "global_match_updates",
@@ -386,15 +401,20 @@ defmodule Teiserver.Battle do
   defp find_open_match_by_founder_id(founder_id) do
     started_after = Timex.now() |> Timex.shift(hours: -2)
 
-    matches = list_matches(search: [
-      founder_id: founder_id,
-      never_finished: true,
-      started_after: started_after
-    ], limit: 1)
+    matches =
+      list_matches(
+        search: [
+          founder_id: founder_id,
+          never_finished: true,
+          started_after: started_after
+        ],
+        limit: 1
+      )
 
     case matches do
       [m] ->
         m
+
       _ ->
         nil
     end
@@ -403,10 +423,11 @@ defmodule Teiserver.Battle do
   @spec generate_lobby_uuid :: String.t()
   @spec generate_lobby_uuid([T.lobby_id()]) :: String.t()
   def generate_lobby_uuid(skip_ids \\ []) do
-    uuid = UUID.uuid4()
+    uuid = ExULID.ULID.generate()
 
     # Check if this uuid is present in the current set of lobbies
-    existing_uuid = list_lobby_ids()
+    existing_uuid =
+      list_lobby_ids()
       |> Enum.filter(fn id -> not Enum.member?(skip_ids, id) end)
       |> Enum.map(fn lobby_id -> get_modoptions(lobby_id) end)
       |> Enum.filter(fn modoptions ->
@@ -422,6 +443,7 @@ defmodule Teiserver.Battle do
         case list_matches(search: [uuid: uuid]) do
           [] ->
             uuid
+
           _ ->
             generate_lobby_uuid()
         end
@@ -434,6 +456,7 @@ defmodule Teiserver.Battle do
       {:error, reason} ->
         Logger.error("save_match_stats error #{reason}")
         {:error, reason}
+
       {:ok, json_string} ->
         case Jason.decode(json_string) do
           {:ok, data} ->
@@ -443,10 +466,11 @@ defmodule Teiserver.Battle do
 
             case list_matches(search: [uuid: uuid]) do
               [match] ->
-                filtered_data = data
-                |> Map.drop(~w(battleContext bots))
+                filtered_data =
+                  data
+                  |> Map.drop(~w(battleContext bots))
 
-                new_data = Map.put((match.data || %{}), "export_data", filtered_data)
+                new_data = Map.put(match.data || %{}, "export_data", filtered_data)
                 update_match(match, %{data: new_data})
 
                 # "Got match export data for #{uuid} of: #{json_string}"
@@ -455,10 +479,15 @@ defmodule Teiserver.Battle do
                 #   Logger.info("'#{part}'")
                 # end)
                 :success
+
               match_list ->
-                Logger.error("Error finding match uuid of #{uuid} (got #{Enum.count(match_list)})")
+                Logger.error(
+                  "Error finding match uuid of #{uuid} (got #{Enum.count(match_list)})"
+                )
+
                 {:error, "No match found"}
             end
+
           _ ->
             Logger.error("Error with json decode of save_match_stats")
             {:error, "JSON decode"}
@@ -482,11 +511,11 @@ defmodule Teiserver.Battle do
 
   def list_match_memberships(args) do
     MatchMembershipLib.get_match_memberships()
-      |> MatchMembershipLib.search(args[:search])
-      |> MatchMembershipLib.preload(args[:joins])
-      |> QueryHelpers.select(args[:select])
-      # |> QueryHelpers.limit_query(50)
-      |> Repo.all()
+    |> MatchMembershipLib.search(args[:search])
+    |> MatchMembershipLib.preload(args[:joins])
+    |> QueryHelpers.select(args[:select])
+    # |> QueryHelpers.limit_query(50)
+    |> Repo.all()
   end
 
   @doc """
@@ -503,6 +532,7 @@ defmodule Teiserver.Battle do
       ** (Ecto.NoResultsError)
 
   """
+
   # def get_match_membership!(user_id, match_id) do
   #   MatchMembershipLib.get_match_memberships()
   #   |> MatchMembershipLib.search(user_id: user_id, match_id: match_id)
@@ -562,8 +592,13 @@ defmodule Teiserver.Battle do
     MatchMembership.changeset(match_membership, %{})
   end
 
-
   # LobbyServer process
+  @spec create_lobby(map) :: T.lobby() | nil
+  defdelegate create_lobby(lobby_id), to: Lobby
+
+  @spec add_lobby(T.lobby()) :: T.lobby()
+  defdelegate add_lobby(lobby), to: LobbyCache
+
   @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
   defdelegate get_lobby_pid(lobby_id), to: LobbyCache
 
@@ -582,6 +617,9 @@ defmodule Teiserver.Battle do
 
   @spec list_lobbies() :: [T.lobby()]
   defdelegate list_lobbies(), to: LobbyCache
+
+  @spec list_throttled_lobbies(atom) :: [T.lobby()]
+  defdelegate list_throttled_lobbies(type), to: LobbyCache
 
   # Query
   @spec get_lobby(T.lobby_id() | nil) :: T.lobby() | nil
@@ -634,14 +672,12 @@ defmodule Teiserver.Battle do
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
   defdelegate update_lobby(lobby, data, reason), to: LobbyCache
 
-  @spec add_lobby(T.lobby()) :: T.lobby()
-  defdelegate add_lobby(lobby), to: LobbyCache
-
   @spec set_lobby_password(T.lobby_id(), String.t() | nil) :: :ok | nil
   defdelegate set_lobby_password(lobby_id, new_password), to: LobbyCache
 
   # Requests
-  @spec server_allows_join?(T.userid(), T.lobby_id(), String.t() | nil) :: {:failure, String.t()} | true
+  @spec server_allows_join?(T.userid(), T.lobby_id(), String.t() | nil) ::
+          {:failure, String.t()} | true
   defdelegate server_allows_join?(userid, lobby_id, password \\ nil), to: Lobby
 
   # Bots
@@ -714,7 +750,8 @@ defmodule Teiserver.Battle do
   @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   defdelegate sayex(userid, msg, lobby_id), to: LobbyChat
 
-  @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
+  @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) ::
+          :ok | {:error, any}
   defdelegate sayprivateex(from_id, to_id, msg, lobby_id), to: LobbyChat
 
   @spec say_to_all_lobbies(String.t()) :: :ok
@@ -722,8 +759,8 @@ defmodule Teiserver.Battle do
     coordinator_id = Coordinator.get_coordinator_userid()
 
     list_lobby_ids()
-      |> Enum.each(fn lobby_id ->
-        Lobby.say(coordinator_id, msg, lobby_id)
-      end)
+    |> Enum.each(fn lobby_id ->
+      Lobby.say(coordinator_id, msg, lobby_id)
+    end)
   end
 end

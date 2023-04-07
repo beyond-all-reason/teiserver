@@ -16,17 +16,17 @@ defmodule Teiserver.Bridge.DiscordBridge do
     "😒" => ":s",
     "😦" => ":(",
     "😛" => ":p",
-    "😄" => ":D",
+    "😄" => ":D"
   }
 
   @extra_text_emoticons %{
     ":S" => "😒",
-    ":P" => "😛",
+    ":P" => "😛"
   }
 
   @text_to_emoticon_map @emoticon_map
-    |> Map.new(fn {k, v} -> {v, k} end)
-    |> Map.merge(@extra_text_emoticons)
+                        |> Map.new(fn {k, v} -> {v, k} end)
+                        |> Map.merge(@extra_text_emoticons)
 
   # GuildId of nil = DM
   def handle_event({:MESSAGE_CREATE, %{content: "$" <> _, guild_id: nil} = message, _ws}) do
@@ -38,7 +38,11 @@ defmodule Teiserver.Bridge.DiscordBridge do
     ChatCommands.handle(message)
   end
 
-  def handle_event({:MESSAGE_CREATE, %{author: author, channel_id: channel_id, attachments: [], content: content} = message, _ws}) do
+  def handle_event(
+        {:MESSAGE_CREATE,
+         %{author: author, channel_id: channel_id, attachments: [], content: content} = message,
+         _ws}
+      ) do
     room = bridge_channel_to_room(channel_id)
     dm_sender = Central.cache_get(:discord_bridge_dm_cache, to_string(channel_id))
 
@@ -134,36 +138,43 @@ defmodule Teiserver.Bridge.DiscordBridge do
         Logger.info("Discord DM Channel #{dm_channel.id} set to #{recipient["id"]}")
         nil
 
-      _ -> nil
+      _ ->
+        nil
     end
+
     :ok
   end
 
   @spec new_infolog(Teiserver.Telemetry.Infolog.t()) :: any
   def new_infolog(infolog) do
-    chan_result = Application.get_env(:central, DiscordBridge)[:bridges]
+    chan_result =
+      Application.get_env(:central, DiscordBridge)[:bridges]
       |> Enum.filter(fn {_chan, room} -> room == "telemetry-infologs" end)
 
-    channel = case chan_result do
-      [{chan, _}] -> chan
-      _ -> nil
-    end
+    channel =
+      case chan_result do
+        [{chan, _}] -> chan
+        _ -> nil
+      end
 
-    post_to_discord = cond do
-      infolog.metadata["shorterror"] == "Errorlog" -> false
-      infolog.metadata["private"]    == true       -> false
-      true -> true
-    end
+    post_to_discord =
+      cond do
+        infolog.metadata["shorterror"] == "Errorlog" -> false
+        infolog.metadata["private"] == true -> false
+        true -> true
+      end
 
     if post_to_discord do
       host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
       url = "https://#{host}/teiserver/reports/infolog/#{infolog.id}"
 
-      message = [
-        "New infolog uploaded: #{infolog.metadata["errortype"]} `#{infolog.metadata["filename"]}`",
-        "`#{infolog.metadata["shorterror"]}`",
-        "Link: #{url}",
-      ] |> Enum.join("\n")
+      message =
+        [
+          "New infolog uploaded: #{infolog.metadata["errortype"]} `#{infolog.metadata["filename"]}`",
+          "`#{infolog.metadata["shorterror"]}`",
+          "Link: #{url}"
+        ]
+        |> Enum.join("\n")
 
       Api.create_message(channel, message)
     end
@@ -171,13 +182,15 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
   @spec new_report(Moderation.Report.t()) :: any
   def new_report(report) do
-    chan_result = Application.get_env(:central, DiscordBridge)[:bridges]
+    chan_result =
+      Application.get_env(:central, DiscordBridge)[:bridges]
       |> Enum.filter(fn {_chan, room} -> room == "moderation-reports" end)
 
-    channel = case chan_result do
-      [{chan, _}] -> chan
-      _ -> nil
-    end
+    channel =
+      case chan_result do
+        [{chan, _}] -> chan
+        _ -> nil
+      end
 
     if channel do
       report = Moderation.get_report!(report.id, preload: [:reporter, :target])
@@ -185,12 +198,14 @@ defmodule Teiserver.Bridge.DiscordBridge do
       host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
       url = "https://#{host}/moderation/report?target_id=#{report.target_id}"
 
-      match_icon = cond do
-        report.match_id == nil -> ""
-        true -> ":crossed_swords:"
-      end
+      match_icon =
+        cond do
+          report.match_id == nil -> ""
+          true -> ":crossed_swords:"
+        end
 
-      msg = "#{report.target.name} was reported by #{report.reporter.name} because #{report.type}/#{report.sub_type} #{match_icon} - #{report.extra_text} - #{url}"
+      msg =
+        "#{report.target.name} was reported by #{report.reporter.name} because #{report.type}/#{report.sub_type} #{match_icon} - #{report.extra_text} - #{url}"
 
       Api.create_message(channel, "Moderation report: #{msg}")
     end
@@ -200,42 +215,49 @@ defmodule Teiserver.Bridge.DiscordBridge do
   def new_action(action) do
     action = Moderation.get_action!(action.id, preload: [:target])
 
-    result = Application.get_env(:central, DiscordBridge)[:bridges]
+    result =
+      Application.get_env(:central, DiscordBridge)[:bridges]
       |> Enum.filter(fn {_chan, room} -> room == "moderation-actions" end)
 
-    channel = case result do
-      [{chan, _}] -> chan
-      _ -> nil
-    end
-
-    post_to_discord = cond do
-      action.restrictions == ["Bridging"] -> false
-      action.reason == "Banned (Automod)" -> false
-      channel == nil -> false
-      true -> true
-    end
-
-    if post_to_discord do
-      until = if action.expires do
-        "Until: " <> TimexHelper.date_to_str(action.expires, format: :ymd_hms) <> " (UTC)"
-      else
-        "Permanent"
+    channel =
+      case result do
+        [{chan, _}] -> chan
+        _ -> nil
       end
 
-      restriction_string = action.restrictions
+    post_to_discord =
+      cond do
+        action.restrictions == ["Bridging"] -> false
+        action.reason == "Banned (Automod)" -> false
+        channel == nil -> false
+        true -> true
+      end
+
+    if post_to_discord do
+      until =
+        if action.expires do
+          "Until: " <> TimexHelper.date_to_str(action.expires, format: :ymd_hms) <> " (UTC)"
+        else
+          "Permanent"
+        end
+
+      restriction_string =
+        action.restrictions
         |> Enum.join(", ")
 
-      formatted_reason = Regex.replace(~r/https:\/\/discord.gg\/\S+/, action.reason, "--discord-link--")
+      formatted_reason =
+        Regex.replace(~r/https:\/\/discord.gg\/\S+/, action.reason, "--discord-link--")
 
-      message = [
-        "----------------------",
-        "#{action.target.name} has been moderated.",
-        "Reason: #{formatted_reason}",
-        "Restriction(s): #{restriction_string}",
-        until,
-        "----------------------"
-      ]
-        |> List.flatten
+      message =
+        [
+          "----------------------",
+          "#{action.target.name} has been moderated.",
+          "Reason: #{formatted_reason}",
+          "Restriction(s): #{restriction_string}",
+          until,
+          "----------------------"
+        ]
+        |> List.flatten()
         |> Enum.join("\n")
         |> String.replace("\n\n", "\n")
 
@@ -257,15 +279,21 @@ defmodule Teiserver.Bridge.DiscordBridge do
     })
   end
 
-  defp do_reply(%Nostrum.Struct.Message{author: author, content: content, channel_id: channel_id, mentions: mentions}) do
+  defp do_reply(%Nostrum.Struct.Message{
+         author: author,
+         content: content,
+         channel_id: channel_id,
+         mentions: mentions
+       }) do
     # Mentions come through encoded in a way we don't want to preserve, this substitutes them
-    new_content = mentions
-    |> Enum.reduce(content, fn (m, acc) ->
-      String.replace(acc, "<@!#{m.id}>", m.username)
-    end)
-    |> String.replace(~r/<#[0-9]+> ?/, "")
-    |> convert_emoticons
-    |> String.split("\n")
+    new_content =
+      mentions
+      |> Enum.reduce(content, fn m, acc ->
+        String.replace(acc, "<@!#{m.id}>", m.username)
+      end)
+      |> String.replace(~r/<#[0-9]+> ?/, "")
+      |> convert_emoticons
+      |> String.split("\n")
 
     bridge_user_id = BridgeServer.get_bridge_userid()
     from_id = bridge_user_id
@@ -283,14 +311,15 @@ defmodule Teiserver.Bridge.DiscordBridge do
     #     end
     # end
 
-    message = if from_id == bridge_user_id do
-      new_content
-      |> Enum.map(fn row ->
-        "#{author.username}: #{row}"
-      end)
-    else
-      new_content
-    end
+    message =
+      if from_id == bridge_user_id do
+        new_content
+        |> Enum.map(fn row ->
+          "#{author.username}: #{row}"
+        end)
+      else
+        new_content
+      end
 
     room = bridge_channel_to_room(channel_id)
     Room.send_message(from_id, room, message)
@@ -302,13 +331,8 @@ defmodule Teiserver.Bridge.DiscordBridge do
   end
 
   defp bridge_channel_to_room(channel_id) do
-    result = Application.get_env(:central, DiscordBridge)[:bridges]
-    |> Enum.filter(fn {chan, _room} -> chan == channel_id end)
-
-    case result do
-      [{_, room}] -> room
-      _ -> nil
-    end
+    bridge_pid = BridgeServer.get_bridge_pid()
+    GenServer.call(bridge_pid, {:lookup_room_from_channel, channel_id})
   end
 
   def start_link do

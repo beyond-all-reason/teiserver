@@ -1,20 +1,18 @@
 <% bsname = view_colour() %>
 
-<%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "user"}) %>
+<%= render(CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "user"})) %>
 
 <div class="row mt-3">
   <div class="col-md-12">
-
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render CentralWeb.Admin.UserView, "section_menu.html",
+        <%= render(CentralWeb.Admin.UserView, "section_menu.html",
           conn: @conn,
           permissions: @current_user.permissions,
           show_search: false,
           quick_search: @conn.params["s"],
           active: "index"
-        %>
-
+        ) %>
       </div>
     </div>
   </div>
@@ -25,7 +23,10 @@
     <div class={"card page-card border-#{bsname}"}>
       <div class="card-body">
         <h4>General user</h4>
-        <%= render "form.html", Map.put(assigns, :action, Routes.admin_user_path(@conn, :update, @user)) %>
+        <%= render(
+          "form.html",
+          Map.put(assigns, :action, Routes.admin_user_path(@conn, :update, @user))
+        ) %>
       </div>
     </div>
   </div>
@@ -45,17 +46,19 @@
           <tbody>
             <%= for c <- @user.user_configs do %>
               <%= if Enum.member?(@visible_configs, c.key) do %>
-              <tr>
-                <td><%= c.key %></td>
-                <td><%= c.value %></td>
-                <td>
-                  <a href={Routes.admin_user_path(@conn, :config_delete, c.user_id, c.key)} class="btn btn-danger btn-block btn-sm">
-                    <i class="fa-regular fa-fw fa-trash"></i>
-                    &nbsp;
-                    Delete
-                  </a>
-                </td>
-              </tr>
+                <tr>
+                  <td><%= c.key %></td>
+                  <td><%= c.value %></td>
+                  <td>
+                    <a
+                      href={Routes.admin_user_path(@conn, :config_delete, c.user_id, c.key)}
+                      class="btn btn-danger btn-block btn-sm"
+                    >
+                      <i class="fa-regular fa-fw fa-trash"></i> &nbsp;
+                      Delete
+                    </a>
+                  </td>
+                </tr>
               <% end %>
             <% end %>
 
@@ -64,7 +67,7 @@
               <input type="hidden" name="config[user_id]" value={@user.id} />
 
               <td>
-                <%= select :config, :key, @user_config_names, class: "form-control select2" %>
+                <%= select(:config, :key, @user_config_names, class: "form-control select2") %>
               </td>
 
               <td>
@@ -72,13 +75,16 @@
               </td>
 
               <td>
-                <input type="submit" value="Add config" name="form.submitted" class={"btn btn-#{Central.Config.UserConfigLib.colours()} bbtn-sm btn-block"} />
+                <input
+                  type="submit"
+                  value="Add config"
+                  name="form.submitted"
+                  class={"btn btn-#{Central.Config.UserConfigLib.colours()} bbtn-sm btn-block"}
+                />
               </td>
             </form>
-
           </tbody>
         </table>
-
       </div>
     </div>
   </div>
@@ -88,12 +94,10 @@
       <div class="card-body">
         <h4>Security</h4>
         <a href={Routes.admin_user_path(@conn, :reset_password, @user.id)} class="btn btn-danger">
-          <i class="fa-regular fa-fw fa-undo"></i>
-          &nbsp;
+          <i class="fa-regular fa-fw fa-undo"></i> &nbsp;
           Reset password
         </a>
       </div>
     </div>
   </div>
-
 </div>

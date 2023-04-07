@@ -18,26 +18,29 @@ defmodule Teiserver.Battle.LobbyServer do
 
   @impl true
   def handle_call(:get_lobby_state, _from, state) do
-    result = Map.merge(state.lobby, %{
-      members: state.member_list,
-      players: state.member_list
-    })
+    result =
+      Map.merge(state.lobby, %{
+        members: state.member_list,
+        players: state.member_list
+      })
+
     {:reply, result, state}
   end
 
   def handle_call(:get_combined_state, _from, state) do
     {player_list, new_state} = get_player_list(state)
 
-    {:reply, %{
-      match_uuid: state.match_uuid,
-      server_uuid: state.server_uuid,
-      lobby: state.lobby,
-      bots: state.bots,
-      modoptions: state.modoptions,
-      member_list: state.member_list,
-      player_list: player_list,
-      queue_id: state.queue_id,
-    }, new_state}
+    {:reply,
+     %{
+       match_uuid: state.match_uuid,
+       server_uuid: state.server_uuid,
+       lobby: state.lobby,
+       bots: state.bots,
+       modoptions: state.modoptions,
+       member_list: state.member_list,
+       player_list: player_list,
+       queue_id: state.queue_id
+     }, new_state}
   end
 
 
@@ -90,19 +93,20 @@ defmodule Teiserver.Battle.LobbyServer do
 
   @impl true
   def handle_cast(:start_match, state) do
-    player_list = state.member_list
+    player_list =
+      state.member_list
       |> Account.list_clients()
       |> Enum.reject(&(&1 == nil))
       |> Enum.filter(fn client -> client.player == true and client.lobby_id == state.id end)
 
     player_list
-      |> Enum.each(fn %{userid: userid} ->
-        if Config.get_user_config_cache(userid, "teiserver.Discord notifications") do
-          if Config.get_user_config_cache(userid, "teiserver.Notify - Game start") do
-            BridgeServer.send_direct_message(userid, "The game you are a player of is starting.")
-          end
+    |> Enum.each(fn %{userid: userid} ->
+      if Config.get_user_config_cache(userid, "teiserver.Discord notifications") do
+        if Config.get_user_config_cache(userid, "teiserver.Notify - Game start") do
+          BridgeServer.send_direct_message(userid, "The game you are a player of is starting.")
         end
-      end)
+      end
+    end)
 
     {:noreply, %{state | player_list: player_list, state: :in_progress}}
   end
@@ -136,7 +140,7 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   def handle_cast({:add_user, userid, _script_password}, state) do
-    new_members = [userid | state.member_list] |> Enum.uniq
+    new_members = [userid | state.member_list] |> Enum.uniq()
     {:noreply, %{state | member_list: new_members}}
   end
 
@@ -146,10 +150,11 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   def handle_cast({:set_password, nil}, state) do
-    new_lobby = Map.merge(state.lobby, %{
-      password: nil,
-      passworded: false
-    })
+    new_lobby =
+      Map.merge(state.lobby, %{
+        password: nil,
+        passworded: false
+      })
 
     PubSub.broadcast(
       Central.PubSub,
@@ -159,11 +164,13 @@ defmodule Teiserver.Battle.LobbyServer do
 
     {:noreply, %{state | lobby: new_lobby}}
   end
+
   def handle_cast({:set_password, new_password}, state) do
-    new_lobby = Map.merge(state.lobby, %{
-      password: new_password,
-      passworded: true
-    })
+    new_lobby =
+      Map.merge(state.lobby, %{
+        password: new_password,
+        passworded: true
+      })
 
     PubSub.broadcast(
       Central.PubSub,
@@ -176,13 +183,16 @@ defmodule Teiserver.Battle.LobbyServer do
 
   # Generic updates
   def handle_cast({:update_values, new_values}, state) do
-    new_values = new_values
+    new_values =
+      new_values
       |> Map.filter(fn {k, v} ->
         Map.has_key?(state.lobby, k) and v != Map.get(state.lobby, k)
       end)
+
     new_lobby = Map.merge(state.lobby, new_values)
 
-    broadcast_values = new_values
+    broadcast_values =
+      new_values
       |> Map.filter(fn {k, _} ->
         Enum.member?(@broadcast_update_keys, k)
       end)
@@ -206,9 +216,12 @@ defmodule Teiserver.Battle.LobbyServer do
       )
 
       # Spring specific stuff
-      not_update_battle_info = broadcast_values
+      not_update_battle_info =
+        broadcast_values
         |> Map.keys()
-        |> Enum.filter(fn k -> Enum.member?(~w(spectator_count locked map_hash map_name name)a, k) end)
+        |> Enum.filter(fn k ->
+          Enum.member?(~w(spectator_count locked map_hash map_name name)a, k)
+        end)
         |> Enum.empty?()
 
       update_battle_info = not not_update_battle_info
@@ -230,7 +243,9 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   # Enable/Disable units
-  def handle_cast(:enable_all_units, %{lobby: %{disabled_units: []}} = state), do: {:noreply, state}
+  def handle_cast(:enable_all_units, %{lobby: %{disabled_units: []}} = state),
+    do: {:noreply, state}
+
   def handle_cast(:enable_all_units, state) do
     new_lobby = %{state.lobby | disabled_units: []}
 
@@ -241,7 +256,7 @@ defmodule Teiserver.Battle.LobbyServer do
     )
 
     PubSub.broadcast(
-        Central.PubSub,
+      Central.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       {:lobby_update, :update_values, state.id, %{disabled_units: []}}
     )
@@ -249,8 +264,11 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, %{state | lobby: new_lobby}}
   end
 
-  def handle_cast({:enable_units, _}, %{lobby: %{disabled_units: []}} = state), do: {:noreply, state}
+  def handle_cast({:enable_units, _}, %{lobby: %{disabled_units: []}} = state),
+    do: {:noreply, state}
+
   def handle_cast({:enable_units, []}, state), do: {:noreply, state}
+
   def handle_cast({:enable_units, units}, state) do
     new_units =
       Enum.filter(state.lobby.disabled_units, fn u ->
@@ -266,7 +284,7 @@ defmodule Teiserver.Battle.LobbyServer do
     )
 
     PubSub.broadcast(
-        Central.PubSub,
+      Central.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       {:lobby_update, :update_values, state.id, %{disabled_units: new_units}}
     )
@@ -295,7 +313,8 @@ defmodule Teiserver.Battle.LobbyServer do
 
   # Start areas
   def handle_cast({:add_start_area, area_id, structure}, state) do
-    new_areas = state.lobby
+    new_areas =
+      state.lobby
       |> Map.get(:start_areas, %{})
       |> Map.put(area_id, structure)
 
@@ -317,7 +336,8 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   def handle_cast({:remove_start_area, area_id}, state) do
-    new_areas = state.lobby
+    new_areas =
+      state.lobby
       |> Map.get(:start_areas, %{})
       |> Map.drop([area_id])
 
@@ -334,7 +354,6 @@ defmodule Teiserver.Battle.LobbyServer do
       "legacy_battle_updates:#{state.id}",
       {:battle_updated, state.id, area_id, :remove_start_rectangle}
     )
-
 
     {:noreply, %{state | lobby: new_lobby}}
   end
@@ -375,7 +394,8 @@ defmodule Teiserver.Battle.LobbyServer do
   def handle_cast({:remove_modoptions, keys}, %{modoptions: modoptions} = state) do
     existing_keys = Map.keys(modoptions)
 
-    keys_removed = keys
+    keys_removed =
+      keys
       |> Enum.filter(fn k -> Enum.member?(existing_keys, k) end)
 
     PubSub.broadcast(
@@ -432,6 +452,7 @@ defmodule Teiserver.Battle.LobbyServer do
           "teiserver_lobby_updates:#{id}",
           {:lobby_update, :update_bot, id, new_bot}
         )
+
         {:noreply, %{state | bots: new_bots}}
     end
   end
@@ -465,16 +486,23 @@ defmodule Teiserver.Battle.LobbyServer do
     cache_age = System.system_time(:millisecond) - state.player_list_last_updated
 
     if cache_age > @player_list_cache_age_max do
-      player_list = state.member_list
+      player_list =
+        state.member_list
         |> Account.list_clients()
         |> Enum.reject(&(&1 == nil))
         |> Enum.filter(fn client -> client.player == true and client.lobby_id == state.id end)
 
-      {player_list, %{state | player_list: player_list, player_list_last_updated: System.system_time(:millisecond)}}
+      {player_list,
+       %{
+         state
+         | player_list: player_list,
+           player_list_last_updated: System.system_time(:millisecond)
+       }}
     else
       {state.player_list, state}
     end
   end
+
   defp get_player_list(state) do
     {state.player_list, state}
   end
@@ -494,7 +522,7 @@ defmodule Teiserver.Battle.LobbyServer do
       id
     )
 
-    Logger.metadata([request_id: "LobbyServer##{id}"])
+    Logger.metadata(request_id: "LobbyServer##{id}")
 
     :timer.send_interval(2_000, :tick)
     match_uuid = Battle.generate_lobby_uuid([id])
@@ -510,7 +538,7 @@ defmodule Teiserver.Battle.LobbyServer do
       modoptions: %{
         "server/match/uuid" => match_uuid
       },
-      server_uuid: UUID.uuid1(),
+      server_uuid: ExULID.ULID.generate(),
       match_uuid: match_uuid,
       match_id: match.id,
       queue_id: nil,

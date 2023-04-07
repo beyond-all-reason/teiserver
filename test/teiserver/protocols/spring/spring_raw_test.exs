@@ -27,7 +27,9 @@ defmodule Teiserver.SpringRawTest do
     # Failure first - bad name
     _send_raw(socket, "REGISTER bad-name password raw_register_email@email.com\n")
     reply = _recv_raw(socket)
-    assert reply =~ "REGISTRATIONDENIED Invalid characters in name (only a-z, A-Z, 0-9, [, ] and _ allowed)\n"
+
+    assert reply =~
+             "REGISTRATIONDENIED Invalid characters in name (only a-z, A-Z, 0-9, [, ] and _ allowed)\n"
 
     # Failure first - existing name
     _send_raw(socket, "REGISTER #{existing.name} password raw_register_email@email.com\n")
@@ -74,6 +76,7 @@ defmodule Teiserver.SpringRawTest do
       socket,
       "LOGIN #{String.upcase(username)} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
     )
+
     reply = _recv_raw(socket)
     assert reply == "DENIED Username is case sensitive, try 'test_user_raw'\n"
 
@@ -88,9 +91,7 @@ defmodule Teiserver.SpringRawTest do
 
     assert accepted == "ACCEPTED #{username}",
       message:
-        "Bad password, gave X03MO1qnZdYdgyfeuILPmQ== but needed #{user.password_hash}. Accepted message is #{
-          accepted
-        }"
+        "Bad password, gave X03MO1qnZdYdgyfeuILPmQ== but needed #{user.password_hash}. Accepted message is #{accepted}"
 
     commands =
       remainder
@@ -114,7 +115,8 @@ defmodule Teiserver.SpringRawTest do
                "CLIENTSTATUS",
                "LOGININFOEND",
                ""
-             ], message: "Got: #{inspect commands}"
+             ],
+           message: "Got: #{inspect(commands)}"
 
     _send_raw(socket, "EXIT\n")
     _ = _recv_raw(socket)
@@ -134,7 +136,11 @@ defmodule Teiserver.SpringRawTest do
     _ = _recv_raw(socket)
 
     # If we try to login as them we should get a specific failure
-    _send_raw(socket, "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n")
+    _send_raw(
+      socket,
+      "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
+    )
+
     reply = _recv_raw(socket)
     assert reply =~ "AGREEMENT User agreement goes here.\nAGREEMENT \nAGREEMENTEND\n"
 

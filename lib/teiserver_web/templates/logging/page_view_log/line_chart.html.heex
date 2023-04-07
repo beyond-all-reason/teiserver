@@ -10,9 +10,11 @@
   });
 </script>
 
-<script src="/js/d3_v3.js"></script>
-<script src="/js/nvd3.js"></script>
-<link href="/css/nvd3.css" rel="stylesheet">
+<script src="/js/d3_v3.js">
+</script>
+<script src="/js/nvd3.js">
+</script>
+<link href="/css/nvd3.css" rel="stylesheet" />
 
 <style>
   text {
@@ -45,84 +47,84 @@
   .nvd3 .nv-y .nv-axis .tick.zero line {
     stroke: #000;
   }
-
 </style>
 
 <script>
-$(function() {
-  nv.addGraph(function() {
-    var chart = nv.models.lineChart()
-      // .interactive(true)
-      // .useInteractiveGuideline(true)
-      .duration(350)
-      // .showLegend(false)
-      .showYAxis(true)
-      .showXAxis(true)
-      .x(function(d,i) {return i})
-      .y(function(d,i) {return d[1]})
-    ;
+  $(function() {
+    nv.addGraph(function() {
+      var chart = nv.models.lineChart()
+        // .interactive(true)
+        // .useInteractiveGuideline(true)
+        .duration(350)
+        // .showLegend(false)
+        .showYAxis(true)
+        .showXAxis(true)
+        .x(function(d,i) {return i})
+        .y(function(d,i) {return d[1]})
+      ;
 
-    data = <%= raw Jason.encode! @data %>;
+      data = <%= raw Jason.encode! @data %>;
 
-    chart.xAxis
-      .axisLabel('Date')
-    ;
+      chart.xAxis
+        .axisLabel('Date')
+      ;
 
-    chart.xAxis.tickFormat(function(d) {
-      var dx = data[0].values[d] && data[0].values[d][0] || '';
-      return dx;
+      chart.xAxis.tickFormat(function(d) {
+        var dx = data[0].values[d] && data[0].values[d][0] || '';
+        return dx;
+      });
+
+      chart.yAxis
+        .axisLabel('Views')
+        .tickFormat(d3.format('f'));
+
+      // Forces it to start from 0
+      chart.forceY([0]);
+
+      d3.select('#total_views svg')
+        .datum(data)
+        .call(chart);
+
+      // Update the chart when window resizes.
+      nv.utils.windowResize(function() { chart.update() });
+      return chart;
     });
-
-    chart.yAxis
-      .axisLabel('Views')
-      .tickFormat(d3.format('f'));
-
-    // Forces it to start from 0
-    chart.forceY([0]);
-
-    d3.select('#total_views svg')
-      .datum(data)
-      .call(chart);
-
-    // Update the chart when window resizes.
-    nv.utils.windowResize(function() { chart.update() });
-    return chart;
   });
-});
 </script>
-
 <!--
-<pre><%#= raw Jason.encode! (hd @data).values %></pre>
+<pre></pre>
 -->
-
-<%= render TeiserverWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "page_view"})
-%>
+<%= render(
+  TeiserverWeb.Logging.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "page_view"})
+) %>
 
 <div class="row mt-3">
   <div class="col-md-12">
     <div class="card card-<= bsname >">
       <div class="card-body">
-        <%= render Teiserver.Logging.PageViewLogView, "section_menu.html",
+        <%= render(Teiserver.Logging.PageViewLogView, "section_menu.html",
           conn: @conn,
           permissions: @current_user.permissions,
           active: "report"
-        %>
+        ) %>
       </div>
     </div>
   </div>
 </div>
 
-<%= render Teiserver.Logging.PageViewLogView, "search_report.html",
+<%= render(Teiserver.Logging.PageViewLogView, "search_report.html",
   conn: @conn,
   params: @params,
   permissions: @current_user.permissions
-%>
+) %>
 
 <div class="row">
   <div class="col-md-12">
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
-        <div id="total_views" class='with-transitions'>
+        <div id="total_views" class="with-transitions">
           <svg style="height: 400px;"></svg>
         </div>
       </div>

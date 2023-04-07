@@ -22,24 +22,28 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
 
   def do_match_processed_duel(userid) do
     filter_type_id = MatchRatingLib.rating_type_name_lookup()["Duel"]
-    logs = Game.list_rating_logs(
-      search: [
-        user_id: userid,
-        rating_type_id: filter_type_id,
-        inserted_after: Timex.now() |> Timex.shift(days: -31)
-      ],
-      order_by: "Newest first",
-      limit: 50,
-      preload: [:match, :match_membership]
-    )
 
-    win_count = logs
+    logs =
+      Game.list_rating_logs(
+        search: [
+          user_id: userid,
+          rating_type_id: filter_type_id,
+          inserted_after: Timex.now() |> Timex.shift(days: -31)
+        ],
+        order_by: "Newest first",
+        limit: 50,
+        preload: [:match, :match_membership]
+      )
+
+    win_count =
+      logs
       |> Enum.filter(fn log -> log.match_membership.win end)
-      |> Enum.count
+      |> Enum.count()
 
-    loss_count = logs
+    loss_count =
+      logs
       |> Enum.reject(fn log -> log.match_membership.win end)
-      |> Enum.count
+      |> Enum.count()
 
     total = Enum.count(logs)
 
@@ -59,24 +63,28 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
 
   def do_match_processed_ffa(userid) do
     filter_type_id = MatchRatingLib.rating_type_name_lookup()["FFA"]
-    logs = Game.list_rating_logs(
-      search: [
-        user_id: userid,
-        rating_type_id: filter_type_id,
-        inserted_after: Timex.now() |> Timex.shift(days: -31)
-      ],
-      order_by: "Newest first",
-      limit: 50,
-      preload: [:match, :match_membership]
-    )
 
-    win_count = logs
+    logs =
+      Game.list_rating_logs(
+        search: [
+          user_id: userid,
+          rating_type_id: filter_type_id,
+          inserted_after: Timex.now() |> Timex.shift(days: -31)
+        ],
+        order_by: "Newest first",
+        limit: 50,
+        preload: [:match, :match_membership]
+      )
+
+    win_count =
+      logs
       |> Enum.filter(fn log -> log.match_membership.win end)
-      |> Enum.count
+      |> Enum.count()
 
-    loss_count = logs
+    loss_count =
+      logs
       |> Enum.reject(fn log -> log.match_membership.win end)
-      |> Enum.count
+      |> Enum.count()
 
     total = Enum.count(logs)
 
@@ -96,31 +104,39 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
 
   def do_match_processed_team(userid) do
     filter_type_id = MatchRatingLib.rating_type_name_lookup()["Team"]
-    logs = Game.list_rating_logs(
-      search: [
-        user_id: userid,
-        rating_type_id: filter_type_id,
-        inserted_after: Timex.now() |> Timex.shift(days: -31)
-      ],
-      order_by: "Newest first",
-      limit: 50,
-      preload: [:match, :match_membership]
-    )
 
-    win_count = logs
+    logs =
+      Game.list_rating_logs(
+        search: [
+          user_id: userid,
+          rating_type_id: filter_type_id,
+          inserted_after: Timex.now() |> Timex.shift(days: -31)
+        ],
+        order_by: "Newest first",
+        limit: 50,
+        preload: [:match, :match_membership]
+      )
+
+    win_count =
+      logs
       |> Enum.filter(fn log -> log.match_membership.win end)
-      |> Enum.count
+      |> Enum.count()
 
-    loss_count = logs
+    loss_count =
+      logs
       |> Enum.reject(fn log -> log.match_membership.win end)
-      |> Enum.count
+      |> Enum.count()
 
-    statuses = logs
-      |> Enum.group_by(fn log ->
-        MatchLib.calculate_exit_status(log.match_membership.left_after, log.match.game_duration)
-      end, fn _ ->
-        1
-      end)
+    statuses =
+      logs
+      |> Enum.group_by(
+        fn log ->
+          MatchLib.calculate_exit_status(log.match_membership.left_after, log.match.game_duration)
+        end,
+        fn _ ->
+          1
+        end
+      )
       |> Map.new(fn {k, v} ->
         {k, Enum.count(v)}
       end)
@@ -132,10 +148,10 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
 
       Account.update_user_stat(userid, %{
         "exit_status.team.count" => total,
-        "exit_status.team.stayed" => (statuses[:stayed] || 0) / total |> percent(1),
-        "exit_status.team.early" => (statuses[:early] || 0) / total |> percent(1),
-        "exit_status.team.abandoned" => (statuses[:abandoned] || 0) / total |> percent(1),
-        "exit_status.team.noshow" => (statuses[:noshow] || 0) / total |> percent(1),
+        "exit_status.team.stayed" => ((statuses[:stayed] || 0) / total) |> percent(1),
+        "exit_status.team.early" => ((statuses[:early] || 0) / total) |> percent(1),
+        "exit_status.team.abandoned" => ((statuses[:abandoned] || 0) / total) |> percent(1),
+        "exit_status.team.noshow" => ((statuses[:noshow] || 0) / total) |> percent(1),
         "recent_count.team" => total,
         "win_count.team" => win_count,
         "loss_count.team" => loss_count,
@@ -151,31 +167,39 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
 
   def do_match_processed_team_recent(userid) do
     filter_type_id = MatchRatingLib.rating_type_name_lookup()["Team"]
-    logs = Game.list_rating_logs(
-      search: [
-        user_id: userid,
-        rating_type_id: filter_type_id,
-        inserted_after: Timex.now() |> Timex.shift(days: -7)
-      ],
-      order_by: "Newest first",
-      limit: 15,
-      preload: [:match, :match_membership]
-    )
 
-    win_count = logs
+    logs =
+      Game.list_rating_logs(
+        search: [
+          user_id: userid,
+          rating_type_id: filter_type_id,
+          inserted_after: Timex.now() |> Timex.shift(days: -7)
+        ],
+        order_by: "Newest first",
+        limit: 15,
+        preload: [:match, :match_membership]
+      )
+
+    win_count =
+      logs
       |> Enum.filter(fn log -> log.match_membership.win end)
-      |> Enum.count
+      |> Enum.count()
 
-    loss_count = logs
+    loss_count =
+      logs
       |> Enum.reject(fn log -> log.match_membership.win end)
-      |> Enum.count
+      |> Enum.count()
 
-    statuses = logs
-      |> Enum.group_by(fn log ->
-        MatchLib.calculate_exit_status(log.match_membership.left_after, log.match.game_duration)
-      end, fn _ ->
-        1
-      end)
+    statuses =
+      logs
+      |> Enum.group_by(
+        fn log ->
+          MatchLib.calculate_exit_status(log.match_membership.left_after, log.match.game_duration)
+        end,
+        fn _ ->
+          1
+        end
+      )
       |> Map.new(fn {k, v} ->
         {k, Enum.count(v)}
       end)
@@ -187,10 +211,11 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
 
       Account.update_user_stat(userid, %{
         "exit_status.team_recent.count" => total,
-        "exit_status.team_recent.stayed" => (statuses[:stayed] || 0) / total |> percent(1),
-        "exit_status.team_recent.early" => (statuses[:early] || 0) / total |> percent(1),
-        "exit_status.team_recent.abandoned" => (statuses[:abandoned] || 0) / total |> percent(1),
-        "exit_status.team_recent.noshow" => (statuses[:noshow] || 0) / total |> percent(1),
+        "exit_status.team_recent.stayed" => ((statuses[:stayed] || 0) / total) |> percent(1),
+        "exit_status.team_recent.early" => ((statuses[:early] || 0) / total) |> percent(1),
+        "exit_status.team_recent.abandoned" =>
+          ((statuses[:abandoned] || 0) / total) |> percent(1),
+        "exit_status.team_recent.noshow" => ((statuses[:noshow] || 0) / total) |> percent(1),
         "recent_count.team_recent" => total,
         "win_count.team_recent" => win_count,
         "loss_count.team_recent" => loss_count,

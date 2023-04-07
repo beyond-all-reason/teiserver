@@ -22,19 +22,16 @@ end
 defmodule Teiserver.Data.QueueGroup do
   @moduledoc false
   @enforce_keys ~w(id members rating avoid count join_time wait_time)a
-  defstruct [
-    id: nil,
-    members: [],
-    rating: nil,
-    avoid: [],
-    count: nil,
-    join_time: nil,
-    wait_time: nil,
-
-    bucket: nil,
-    search_distance: 0,
-    max_distance: 0
-  ]
+  defstruct id: nil,
+            members: [],
+            rating: nil,
+            avoid: [],
+            count: nil,
+            join_time: nil,
+            wait_time: nil,
+            bucket: nil,
+            search_distance: 0,
+            max_distance: 0
 end
 
 defmodule Teiserver.Data.Matchmaking do
@@ -56,6 +53,7 @@ defmodule Teiserver.Data.Matchmaking do
     case Horde.Registry.lookup(Teiserver.QueueWaitRegistry, id) do
       [{pid, _}] ->
         pid
+
       _ ->
         nil
     end
@@ -64,7 +62,9 @@ defmodule Teiserver.Data.Matchmaking do
   @spec call_queue_wait(T.queue_id(), any) :: any | nil
   def call_queue_wait(queue_id, message) when is_integer(queue_id) do
     case get_queue_wait_pid(queue_id) do
-      nil -> nil
+      nil ->
+        nil
+
       pid ->
         try do
           GenServer.call(pid, message)
@@ -90,6 +90,7 @@ defmodule Teiserver.Data.Matchmaking do
     case Horde.Registry.lookup(Teiserver.QueueMatchRegistry, id) do
       [{pid, _}] ->
         pid
+
       _ ->
         nil
     end
@@ -98,7 +99,9 @@ defmodule Teiserver.Data.Matchmaking do
   @spec call_queue_match(T.queue_id(), any) :: any | nil
   def call_queue_match(queue_id, message) when is_integer(queue_id) do
     case get_queue_match_pid(queue_id) do
-      nil -> nil
+      nil ->
+        nil
+
       pid ->
         try do
           GenServer.call(pid, message)
@@ -138,14 +141,15 @@ defmodule Teiserver.Data.Matchmaking do
   def add_match_server(queue_id, group_list) do
     match_id = UUID.uuid1()
 
-    {:ok, pid} = DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
-      QueueMatchServer,
-      data: %{
-        match_id: match_id,
-        queue_id: queue_id,
-        group_list: group_list
-      }
-    })
+    {:ok, pid} =
+      DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
+        QueueMatchServer,
+        data: %{
+          match_id: match_id,
+          queue_id: queue_id,
+          group_list: group_list
+        }
+      })
 
     {pid, match_id}
   end
@@ -169,10 +173,11 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec add_queue(QueueStruct.t()) :: :ok | {:error, any}
   def add_queue(nil), do: {:error, "no queue"}
+
   def add_queue(queue) do
     Central.cache_update(:lists, :queues, fn value ->
       new_value =
-        ([queue.id | value])
+        [queue.id | value]
         |> Enum.uniq()
 
       {:ok, new_value}
@@ -183,14 +188,20 @@ defmodule Teiserver.Data.Matchmaking do
     if get_queue_wait_pid(queue.id) do
       :exists
     else
-      result = DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
-        QueueWaitServer,
-        data: %{queue: queue}
-      })
+      result =
+        DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
+          QueueWaitServer,
+          data: %{queue: queue}
+        })
+
       case result do
         {:error, err} ->
-          Logger.error("Error starting QueueWaitServer: #{__ENV__.file}:#{__ENV__.line}\n#{inspect err}")
+          Logger.error(
+            "Error starting QueueWaitServer: #{__ENV__.file}:#{__ENV__.line}\n#{inspect(err)}"
+          )
+
           {:error, err}
+
         {:ok, _pid} ->
           :ok
       end
@@ -210,30 +221,32 @@ defmodule Teiserver.Data.Matchmaking do
   @spec list_queues :: [QueueStruct.t() | nil]
   def list_queues() do
     list_queue_ids()
-      |> Enum.map(fn queue_id -> Central.cache_get(:teiserver_queues, queue_id) end)
+    |> Enum.map(fn queue_id -> Central.cache_get(:teiserver_queues, queue_id) end)
   end
 
   @spec list_queues([Integer.t()]) :: [QueueStruct.t() | nil]
   def list_queues(id_list) do
     id_list
-      |> Enum.map(fn queue_id ->
-        Central.cache_get(:teiserver_queues, queue_id)
-      end)
+    |> Enum.map(fn queue_id ->
+      Central.cache_get(:teiserver_queues, queue_id)
+    end)
   end
 
   @spec get_queue_by_name(String.t()) :: QueueStruct.t() | nil
   def get_queue_by_name(name) do
-    search_name = name
+    search_name =
+      name
       |> String.trim()
       |> String.downcase()
 
     list_queues()
-      |> Enum.find(fn %{name: queue_name} ->
-        String.downcase(queue_name) == search_name
-      end)
+    |> Enum.find(fn %{name: queue_name} ->
+      String.downcase(queue_name) == search_name
+    end)
   end
 
-  @spec add_user_to_queue(T.queue_id(), T.userid()) :: :ok | :not_party_leader | :duplicate | :failed | :missing | :moderated | :no_queue
+  @spec add_user_to_queue(T.queue_id(), T.userid()) ::
+          :ok | :not_party_leader | :duplicate | :failed | :missing | :moderated | :no_queue
   def add_user_to_queue(queue_id, userid) do
     queue = get_queue(queue_id)
     client = Account.get_client_by_id(userid)
@@ -246,18 +259,19 @@ defmodule Teiserver.Data.Matchmaking do
           party = Account.get_party(client.party_id)
 
           if party.leader == userid do
-            any_moderated = party.members
+            any_moderated =
+              party.members
               |> Stream.map(fn member_id ->
                 User.is_restricted?(member_id, "Matchmaking")
               end)
-              |> Enum.any?
+              |> Enum.any?()
 
             if any_moderated do
               :moderated
             else
               party
-                |> make_group_from_party(queue)
-                |> do_add_group_to_queue(queue_id)
+              |> make_group_from_party(queue)
+              |> do_add_group_to_queue(queue_id)
             end
           else
             :not_party_leader
@@ -268,13 +282,14 @@ defmodule Teiserver.Data.Matchmaking do
 
         true ->
           userid
-            |> make_group_from_userid(queue)
-            |> do_add_group_to_queue(queue_id)
+          |> make_group_from_userid(queue)
+          |> do_add_group_to_queue(queue_id)
       end
     end
   end
 
-  @spec do_add_group_to_queue(T.userid(), T.queue_id()) :: :ok | :duplicate | :failed | :missing | :moderated
+  @spec do_add_group_to_queue(T.userid(), T.queue_id()) ::
+          :ok | :duplicate | :failed | :missing | :moderated
   defp do_add_group_to_queue(queue_group, queue_id) do
     case get_queue_wait_pid(queue_id) do
       nil ->
@@ -287,16 +302,17 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec get_user_rating_for_queue(T.userid(), T.queue_id()) :: float()
   defp get_user_rating_for_queue(userid, queue) do
-    rating_type = cond do
-      queue.settings["rating_type"] != nil -> queue.settings["rating_type"]
-      queue.team_size == 1 -> "Duel"
-      true -> "Team"
-    end
+    rating_type =
+      cond do
+        queue.settings["rating_type"] != nil -> queue.settings["rating_type"]
+        queue.team_size == 1 -> "Duel"
+        true -> "Team"
+      end
 
     BalanceLib.get_user_rating_value(userid, rating_type)
   end
 
-  @spec make_group_from_userid(T.userid, T.queue()) :: QueueGroup.t()
+  @spec make_group_from_userid(T.userid(), T.queue()) :: QueueGroup.t()
   def make_group_from_userid(userid, queue) when is_integer(userid) do
     rating_value = get_user_rating_for_queue(userid, queue)
 
@@ -308,7 +324,6 @@ defmodule Teiserver.Data.Matchmaking do
       count: 1,
       wait_time: 0,
       join_time: System.system_time(:second),
-
       bucket: nil,
       search_distance: 0,
       max_distance: nil
@@ -317,11 +332,12 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec make_group_from_party(T.party(), T.queue()) :: QueueGroup.t()
   def make_group_from_party(party, queue) do
-    rating_value = party.members
+    rating_value =
+      party.members
       |> Enum.map(fn userid ->
         get_user_rating_for_queue(userid, queue)
       end)
-      |> Enum.max
+      |> Enum.max()
 
     %QueueGroup{
       id: party.id,
@@ -331,7 +347,6 @@ defmodule Teiserver.Data.Matchmaking do
       count: Enum.count(party.members),
       wait_time: 0,
       join_time: System.system_time(:second),
-
       bucket: nil,
       search_distance: 0,
       max_distance: nil
@@ -344,6 +359,7 @@ defmodule Teiserver.Data.Matchmaking do
 
     if client != nil and client.party_id do
       party = Account.get_party(client.party_id)
+
       if party.leader == userid do
         do_remove_group_from_queue(party.id, queue_id)
       else
@@ -404,8 +420,8 @@ defmodule Teiserver.Data.Matchmaking do
   @spec add_queue_from_db(Map.t()) :: :ok
   def add_queue_from_db(queue) do
     queue
-      |> convert_queue()
-      |> add_queue()
+    |> convert_queue()
+    |> add_queue()
   end
 
   def refresh_queue_from_db(queue) do

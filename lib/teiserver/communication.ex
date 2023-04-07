@@ -13,14 +13,16 @@ defmodule Teiserver.Communication do
   end
 
   def get_latest_post(nil), do: nil
+
   def get_latest_post(category_id) do
     Central.cache_get_or_store(:teiserver_blog_posts, :latest, fn ->
-      posts = Communication.list_posts(
-        search: [category_id: category_id],
-        joins: [],
-        order_by: "Newest first",
-        limit: 1
-      )
+      posts =
+        Communication.list_posts(
+          search: [category_id: category_id],
+          joins: [],
+          order_by: "Newest first",
+          limit: 1
+        )
 
       case posts do
         [] -> nil

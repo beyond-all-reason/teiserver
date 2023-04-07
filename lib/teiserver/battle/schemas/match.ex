@@ -5,7 +5,8 @@ defmodule Teiserver.Battle.Match do
     field :server_uuid, :string
     field :uuid, :string
     field :map, :string
-    field :data, :map, default: %{} # The end of match data to be provided by clients
+    # The end of match data to be provided by clients
+    field :data, :map, default: %{}
     field :tags, :map
 
     field :winning_team, :integer
@@ -13,7 +14,8 @@ defmodule Teiserver.Battle.Match do
     field :team_size, :integer
     field :passworded, :boolean
     field :processed, :boolean, default: false
-    field :game_type, :string # Scavengers, Raptors, Bots, Duel, Team, FFA, Team FFA
+    # Scavengers, Raptors, Bots, Duel, Team, FFA, Team FFA
+    field :game_type, :string
 
     belongs_to :founder, Central.Account.User
     field :bots, :map
@@ -22,6 +24,8 @@ defmodule Teiserver.Battle.Match do
     # TODO: Tourney support?
 
     belongs_to :queue, Teiserver.Game.Queue
+    belongs_to :rating_type, Teiserver.Game.RatingType
+    belongs_to :lobby_policy, Teiserver.Game.LobbyPolicy
 
     field :started, :utc_datetime
     field :finished, :utc_datetime
@@ -39,8 +43,13 @@ defmodule Teiserver.Battle.Match do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-      |> cast(params, ~w(server_uuid uuid map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id game_duration)a)
-      |> validate_required(~w(server_uuid uuid map tags team_count team_size passworded game_type founder_id bots started)a)
+    |> cast(
+      params,
+      ~w(server_uuid uuid map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id rating_type_id lobby_policy_id game_duration)a
+    )
+    |> validate_required(
+      ~w(server_uuid uuid map tags team_count team_size passworded game_type founder_id bots started)a
+    )
   end
 
   @spec initial_changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()

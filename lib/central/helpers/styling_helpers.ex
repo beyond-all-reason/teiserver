@@ -79,10 +79,15 @@ defmodule Central.Helpers.StylingHelper do
 
   def icon(:filter, fa_type), do: "fa-#{fa_type} fa-filter"
 
-  def icon(:day, fa_type), do: "fa-#{fa_type} fa-calendar-day"
-  def icon(:month, fa_type), do: "fa-#{fa_type} fa-calendar-days"
-
   def icon(:summary, fa_type), do: "fa-#{fa_type} fa-user-chart"
+
+  def icon(:chart, fa_type), do: "fa-#{fa_type} fa-chart-line"
+
+  def icon(:day, fa_type), do: "fa-#{fa_type} fa-calendar-day"
+  def icon(:week, fa_type), do: "fa-#{fa_type} fa-calendar-week"
+  def icon(:month, fa_type), do: "fa-#{fa_type} fa-calendar-range"
+  def icon(:quarter, fa_type), do: "fa-#{fa_type} fa-calendar"
+  def icon(:year, fa_type), do: "fa-#{fa_type} fa-circle-calendar"
 
   # defp split_colour(c) do
   #   {r, _} = c |> String.slice(1, 2) |> Integer.parse(16)

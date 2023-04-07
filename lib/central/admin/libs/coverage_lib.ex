@@ -85,7 +85,8 @@ defmodule Central.Admin.CoverageLib do
             f["section"] == s and f["cov"] != "100.0" and f["missed"] != "0"
           end)
           |> Enum.map(fn f ->
-            {f["file"] |> String.replace(file_path <> f["section"] <> "/", ""), String.to_float(f["cov"]), String.to_integer(f["missed"])}
+            {f["file"] |> String.replace(file_path <> f["section"] <> "/", ""),
+             String.to_float(f["cov"]), String.to_integer(f["missed"])}
           end)
 
         wp =

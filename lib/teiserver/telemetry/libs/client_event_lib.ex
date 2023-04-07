@@ -10,21 +10,22 @@ defmodule Teiserver.Telemetry.ClientEventLib do
   def icon(), do: "fa-regular fa-sliders-up"
 
   # Queries
-  @spec query_client_events() :: Ecto.Query.t
+  @spec query_client_events() :: Ecto.Query.t()
   def query_client_events do
-    from client_events in ClientEvent
+    from(client_events in ClientEvent)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -58,8 +59,9 @@ defmodule Teiserver.Telemetry.ClientEventLib do
       where: client_events.event_type_id in ^event_type_ids
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Name (A-Z)") do
     from client_events in query,
       order_by: [asc: client_events.name]
@@ -80,22 +82,23 @@ defmodule Teiserver.Telemetry.ClientEventLib do
       order_by: [asc: client_events.inserted_at]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :event_type in preloads, do: _preload_event_types(query), else: query
     query = if :user in preloads, do: _preload_users(query), else: query
     query
   end
 
-  @spec _preload_event_types(Ecto.Query.t) :: Ecto.Query.t
+  @spec _preload_event_types(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_event_types(query) do
     from client_events in query,
       left_join: event_types in assoc(client_events, :event_type),
       preload: [event_type: event_types]
   end
 
-  @spec _preload_users(Ecto.Query.t) :: Ecto.Query.t
+  @spec _preload_users(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_users(query) do
     from client_events in query,
       left_join: users in assoc(client_events, :user),

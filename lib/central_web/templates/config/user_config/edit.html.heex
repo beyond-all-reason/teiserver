@@ -1,17 +1,22 @@
 <% bsname = view_colour() %>
 
-<%= render CentralWeb.Account.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "user_configs"}) %>
+<%= render(
+  CentralWeb.Account.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "user_configs"})
+) %>
 
 <div class="row">
   <div class="col-md-12 mt-3">
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
-        <h4>Edit setting: <%= config_name @config_info.key %></h4>
+        <h4>Edit setting: <%= config_name(@config_info.key) %></h4>
 
-<%= render "form.html", Map.put(assigns, :action, Routes.user_config_path(@conn, :update, @user_config)) %>
-
+        <%= render(
+          "form.html",
+          Map.put(assigns, :action, Routes.user_config_path(@conn, :update, @user_config))
+        ) %>
       </div>
     </div>
-
   </div>
 </div>

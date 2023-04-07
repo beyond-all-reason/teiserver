@@ -1,22 +1,28 @@
 <% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
+<%= render(
+  TeiserverWeb.Admin.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "users"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
-          quick_search: "",
-          show_search: false,
-          active: "new"
-        })
-        %>
+        <%= render(
+          TeiserverWeb.Admin.UserView,
+          "section_menu.html",
+          Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "new"
+          })
+        ) %>
 
         <hr />
 
-<%= render "form.html", Map.put(assigns, :action, ~p"/teiserver/admin/user") %>
-
+        <%= render("form.html", Map.put(assigns, :action, ~p"/teiserver/admin/user")) %>
       </div>
     </div>
   </div>

@@ -12,6 +12,7 @@ defmodule Central.Account.GroupTypeLib do
 
   @spec get_group_type(nil | String.t()) :: map()
   def get_group_type(nil), do: blank_type()
+
   def get_group_type(key) do
     r = Central.store_get(:group_type_store, key)
     if r, do: r, else: blank_type()
@@ -32,7 +33,7 @@ defmodule Central.Account.GroupTypeLib do
       group_type
     end)
 
-    new_all = [group_type | (get_all_group_types() || [])]
+    new_all = [group_type | get_all_group_types() || []]
     Central.store_put(:group_type_store, "-all", new_all)
   end
 end

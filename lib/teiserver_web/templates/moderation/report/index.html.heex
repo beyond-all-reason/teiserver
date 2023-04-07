@@ -1,120 +1,146 @@
 <% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Moderation.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+<%= render(
+  TeiserverWeb.Moderation.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "reports"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Moderation.ReportView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Moderation.ReportView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             show_search: false,
-            active: (cond do
-              @conn.params["search"] != nil -> "search"
-              # @filter != nil -> @filter
-              true -> "list"
-            end)
-        }) %>
+            active:
+              cond do
+                @conn.params["search"] != nil -> "search"
+                # @filter != nil -> @filter
+                true -> "list"
+              end
+          })
+        ) %>
 
         <div class="float-end">
           <%= if @target_id do %>
-            <a class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"} href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@target_id}_"}>
-              <%= central_component "icon", icon: Teiserver.Moderation.ActionLib.icon(), class: "fa-solid" %>
-              &nbsp;
+            <a
+              class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
+              href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@target_id}_"}
+            >
+              <%= central_component("icon",
+                icon: Teiserver.Moderation.ActionLib.icon(),
+                class: "fa-solid"
+              ) %> &nbsp;
               Action user
             </a>
           <% end %>
         </div>
         <br /><br />
 
-<%= if @conn.params["search"] != nil do %>
-  <%#= render TeiserverWeb.Moderation.ReportView, "search.html", assigns %>
-<% end %>
-
-<h4>Listing Reports</h4>
-
-<table class="table table-sm">
-  <thead>
-    <tr>
-      <th>&nbsp;</th>
-      <th>Target</th>
-      <th>Type</th>
-      <th>Extra text</th>
-
-      <th>Reporter</th>
-      <th>Datetime</th>
-      <th colspan="3">&nbsp;</th>
-    </tr>
-  </thead>
-  <tbody>
-
-<%= for report <- @reports do %>
-    <tr>
-      <td style="width: 30px;">
-        <%= if report.result_id do %>
-          <a href={Routes.moderation_action_path(@conn, :show, report.result_id)} class={"btn btn-sm btn-#{Teiserver.Moderation.ActionLib.colour()}"}>
-            <%= central_component "icon",
-              icon: Teiserver.Moderation.ActionLib.icon(),
-              class: "fa-solid"
-            %>
-          </a>
+        <%= if @conn.params["search"] != nil do %>
+          <%= render(TeiserverWeb.Moderation.ReportView, "search.html", assigns) %>
         <% end %>
-      </td>
 
-      <td>
-        <a href={Routes.moderation_report_path(@conn, :user, report.target_id)} class={"btn btn-sm btn-#{Teiserver.Account.UserLib.colour()}"}>
-          <%= central_component "icon",
-            icon: Central.Helpers.StylingHelper.icon(:user),
-            class: "fa-solid"
-          %>
-        </a>
-        &nbsp;
-        <%= report.target.name %>
-      </td>
+        <h4>Listing Reports</h4>
 
-      <td><%= report.type %>/<%= report.sub_type %></td>
-      <td><%= report.extra_text %></td>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>&nbsp;</th>
+              <th>Target</th>
+              <th>Type</th>
+              <th>Extra text</th>
 
-      <td>
-        <a href={Routes.moderation_report_path(@conn, :user, report.reporter_id)} class={"btn btn-sm btn-#{Teiserver.Account.UserLib.colour()}"}>
-          <%= central_component "icon",
-            icon: Central.Helpers.StylingHelper.icon(:user),
-            class: "fa-solid"
-          %>
-        </a>
-        &nbsp;
-        <%= report.reporter.name %>
-      </td>
+              <th>Reporter</th>
+              <th>Datetime</th>
+              <th colspan="3">&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for report <- @reports do %>
+              <tr>
+                <td style="width: 30px;">
+                  <%= if report.result_id do %>
+                    <a
+                      href={Routes.moderation_action_path(@conn, :show, report.result_id)}
+                      class={"btn btn-sm btn-#{Teiserver.Moderation.ActionLib.colour()}"}
+                    >
+                      <%= central_component("icon",
+                        icon: Teiserver.Moderation.ActionLib.icon(),
+                        class: "fa-solid"
+                      ) %>
+                    </a>
+                  <% end %>
+                </td>
 
-      <td><%= date_to_str(report.inserted_at, format: :hms_or_ymd) %></td>
+                <td>
+                  <a
+                    href={Routes.moderation_report_path(@conn, :user, report.target_id)}
+                    class={"btn btn-sm btn-#{Teiserver.Account.UserLib.colour()}"}
+                  >
+                    <%= central_component("icon",
+                      icon: Central.Helpers.StylingHelper.icon(:user),
+                      class: "fa-solid"
+                    ) %>
+                  </a>
+                  &nbsp; <%= report.target.name %>
+                </td>
 
-      <td>
-        <a href={Routes.moderation_report_path(@conn, :show, report.id)} class="btn btn-secondary btn-sm">
-          Details
-        </a>
-      </td>
+                <td><%= report.type %>/<%= report.sub_type %></td>
+                <td><%= report.extra_text %></td>
 
+                <td>
+                  <a
+                    href={Routes.moderation_report_path(@conn, :user, report.reporter_id)}
+                    class={"btn btn-sm btn-#{Teiserver.Account.UserLib.colour()}"}
+                  >
+                    <%= central_component("icon",
+                      icon: Central.Helpers.StylingHelper.icon(:user),
+                      class: "fa-solid"
+                    ) %>
+                  </a>
+                  &nbsp; <%= report.reporter.name %>
+                </td>
 
-      <%= if report.match_id do %>
-        <td>
-          <a href={Routes.ts_admin_match_path(@conn, :show, report.match_id)} class="btn btn-secondary btn-sm">
-            Match
-          </a>
-        </td>
-        <td>
-          <a href={Routes.ts_admin_match_path(@conn, :chat, report.match_id)} class="btn btn-secondary btn-sm">
-            Chat
-          </a>
-        </td>
-      <% else %>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-      <% end %>
-    </tr>
-<% end %>
+                <td><%= date_to_str(report.inserted_at, format: :hms_or_ymd) %></td>
 
-  </tbody>
-</table>
+                <td>
+                  <a
+                    href={Routes.moderation_report_path(@conn, :show, report.id)}
+                    class="btn btn-secondary btn-sm"
+                  >
+                    Details
+                  </a>
+                </td>
 
+                <%= if report.match_id do %>
+                  <td>
+                    <a
+                      href={Routes.ts_admin_match_path(@conn, :show, report.match_id)}
+                      class="btn btn-secondary btn-sm"
+                    >
+                      Match
+                    </a>
+                  </td>
+                  <td>
+                    <a
+                      href={Routes.ts_admin_match_path(@conn, :chat, report.match_id)}
+                      class="btn btn-secondary btn-sm"
+                    >
+                      Chat
+                    </a>
+                  </td>
+                <% else %>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                <% end %>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

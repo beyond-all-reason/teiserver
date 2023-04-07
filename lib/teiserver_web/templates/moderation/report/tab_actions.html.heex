@@ -35,10 +35,12 @@
         <% end %>
 
         <td>
-          <a href={Routes.moderation_action_path(@conn, :show, action.id)} class="btn btn-secondary btn-sm">
+          <a
+            href={Routes.moderation_action_path(@conn, :show, action.id)}
+            class="btn btn-secondary btn-sm"
+          >
             Show
-            &nbsp;
-            <i class="fa-fw fas fa-eye"></i>
+            &nbsp; <i class="fa-fw fas fa-eye"></i>
           </a>
         </td>
       </tr>

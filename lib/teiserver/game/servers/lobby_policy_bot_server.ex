@@ -4,7 +4,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   """
 
   alias Phoenix.PubSub
-  alias Teiserver.{Game, User, Client, Battle, Account}
+  alias Teiserver.{Game, User, Client, Battle, Account, Coordinator}
   alias Teiserver.Battle.{Lobby, LobbyChat}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Data.Types, as: T
@@ -14,14 +14,53 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   @tick_interval 10_000
 
   @impl true
-  def handle_info(%{channel: "lobby_policy_internal:" <> _, event: :request_status_update}, state) do
-    :ok = Game.cast_lobby_organiser(state.lobby_policy.id, %{
-      event: :bot_status_update,
-      name: state.user.name,
-      status: %{
-        lobby_id: state.lobby_id
-      }
-    })
+  def handle_info(
+        %{channel: "lobby_policy_internal:" <> _, event: :request_status_update},
+        %{lobby_id: nil} = state
+      ) do
+    :ok =
+      Game.cast_lobby_organiser(state.lobby_policy.id, %{
+        event: :bot_status_update,
+        name: state.user.name,
+        status: %{
+          userid: state.userid,
+          lobby_id: nil
+        }
+      })
+
+    {:noreply, state}
+  end
+
+  def handle_info(
+        %{channel: "lobby_policy_internal:" <> _, event: :request_status_update},
+        %{lobby_id: lobby_id} = state
+      ) do
+    lobby = Battle.get_lobby(lobby_id)
+
+    :ok =
+      if lobby do
+        Game.cast_lobby_organiser(state.lobby_policy.id, %{
+          event: :bot_status_update,
+          name: state.user.name,
+          status: %{
+            userid: state.userid,
+            lobby_id: state.lobby_id,
+            in_progress: lobby.in_progress,
+            member_count: Enum.count(lobby.members)
+          }
+        })
+      else
+        Game.cast_lobby_organiser(state.lobby_policy.id, %{
+          event: :bot_status_update,
+          name: state.user.name,
+          status: %{
+            userid: state.userid,
+            lobby_id: state.lobby_id,
+            in_progress: false,
+            member_count: -1
+          }
+        })
+      end
 
     {:noreply, state}
   end
@@ -46,28 +85,29 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     {:noreply, state}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :added_to_lobby, lobby_id: lobby_id}, state) do
+  def handle_info(
+        %{channel: "teiserver_client_messages:" <> _, event: :added_to_lobby, lobby_id: lobby_id},
+        state
+      ) do
     PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
     PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
 
     PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
     PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
 
+    send_chat(state, "Lobby policy bot claiming the room")
+
     lobby = Battle.get_lobby(lobby_id)
-    new_state = %{state |
-      lobby_id: lobby_id,
-      founder_id: lobby.founder_id
-    }
+    new_state = %{state | lobby_id: lobby_id, founder_id: lobby.founder_id}
 
     lobby_name = generate_lobby_name(state)
     send_chat(new_state, "$rename #{lobby_name}")
 
-    welcome_message = generate_welcome_message(state)
-    send_chat(new_state, "$welcome-message #{welcome_message}")
-
     pick_random_map(new_state)
 
-    # TODO: set lobby.lobby_policy to my id
+    # Set lobby_policy_id for both lobby_server and consul_server
+    Coordinator.send_consul(lobby_id, {:set_lobby_policy_id, state.lobby_policy.id})
+    Battle.update_lobby_values(lobby_id, %{lobby_policy_id: state.lobby_policy.id})
 
     {:noreply, new_state}
   end
@@ -80,15 +120,14 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     {:noreply, state}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :received_direct_message} = e, state) do
-    userid = e.sender_id
+  def handle_info(
+        %{channel: "teiserver_client_messages:" <> _, event: :received_direct_message} = e,
+        state
+      ) do
     content = e.message_content |> Enum.join("") |> String.trim()
+    new_state = handle_direct_message(e.sender_id, content, state)
 
-    if content == "$settings" do
-      send_dm(state, userid, "My maplist is: #{state.lobby_policy.map_list |> Enum.join(", ")}")
-    end
-
-    {:noreply, state}
+    {:noreply, new_state}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _} = _m, state) do
@@ -96,20 +135,19 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     {:noreply, state}
   end
 
+  def handle_info(:leave_lobby, state) do
+    {:noreply, leave_lobby(state)}
+  end
+
   # No lobby, need to find one!
   def handle_info(:tick, %{lobby_id: nil} = state) do
-    # TODO: Use the coordinator to request a new lobby be hosted by SPADS
-    empty_lobby = Lobby.find_empty_lobby(fn l ->
-      (
-        # String.starts_with?(l.name, "EU ") or
-        String.starts_with?(l.name, "US ") or
-        String.starts_with?(l.name, "BH ")
-      )
-      and
-        l.password == nil
-      and
-        l.in_progress == false
-    end)
+    empty_lobby =
+      Lobby.find_empty_lobby(fn l ->
+        l.passworded == false and
+          l.locked == false and
+          l.tournament == false and
+          l.in_progress == false
+      end)
 
     case empty_lobby do
       nil ->
@@ -128,50 +166,70 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     lobby = Battle.get_lobby(state.lobby_id)
     correct_lobby_name = generate_lobby_name(state)
 
-    cond do
-      lobby == nil ->
-        :ok
+    new_state =
+      cond do
+        lobby == nil ->
+          leave_lobby(state)
 
-      lobby.name != correct_lobby_name ->
-        Logger.error("Found name: '#{lobby.name}', Generated: '#{correct_lobby_name}'")
-        send_chat(state, "$rename #{correct_lobby_name}")
+        lobby.name != correct_lobby_name ->
+          send_chat(state, "$rename #{correct_lobby_name}")
+          state
 
-      true ->
-        client = state.userid
-          |> Account.get_client_by_id()
-          |> Map.merge(%{sync: %{
-            bot: 1,
-            game: 1,
-            engine: 1,
-            map: 1
-          }})
+        true ->
+          check_consul_state(state)
 
-        Account.replace_update_client(client, :client_updated_battlestatus)
+          client =
+            state.userid
+            |> Account.get_client_by_id()
+            |> Map.merge(%{
+              sync: %{
+                bot: 1,
+                game: 1,
+                engine: 1,
+                map: 1
+              }
+            })
 
-        :ok
-    end
+          Account.replace_update_client(client, :client_updated_battlestatus)
+
+          state
+      end
+
+    {:noreply, new_state}
+  end
+
+  # Lobby updates
+  def handle_info({:lobby_update, :add_user, _lobby_id, userid}, state) do
+    generate_welcome_message(state)
+    |> Enum.each(fn line ->
+      User.send_direct_message(state.userid, userid, line)
+    end)
 
     {:noreply, state}
   end
 
-  # Lobby chat
   def handle_info({:lobby_update, _action, _lobby_id, _data}, state) do
     # IO.inspect {action, data}, label: "lobby_update"
     {:noreply, state}
   end
 
   # Lobby chat
-  def handle_info(%{channel: "teiserver_lobby_chat:" <> _, userid: userid, message: message}, state) do
-    new_state = cond do
-      userid == state.founder_id ->
-        handle_founder_chat(message, state)
-
-      userid == state.userid ->
+  def handle_info(
+        %{channel: "teiserver_lobby_chat:" <> _, userid: userid, message: message},
         state
+      ) do
+    new_state =
+      cond do
+        userid == state.founder_id ->
+          handle_founder_chat(message, state)
 
-      true ->
-        handle_user_chat(userid, message, state)
-    end
+        userid == state.userid ->
+          state
+
+        true ->
+          handle_user_chat(userid, message, state)
+      end
+
     {:noreply, new_state}
   end
 
@@ -179,16 +237,63 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     {:noreply, state}
   end
 
-  @spec handle_user_chat(T.userid(), String.t(), map()) :: map()
-  defp handle_user_chat(userid, "!boss" <> rem, state) do
-    if String.trim(rem) != "" do
-      Lobby.kick_user_from_battle(userid, state.lobby_id)
+  defp check_consul_state(%{lobby_policy: lp} = state) do
+    consul_state = Coordinator.call_consul(state.lobby_id, :get_consul_state)
+
+    expected_map = %{
+      minimum_rating_to_play: lp.min_rating || 0,
+      maximum_rating_to_play: lp.max_rating || 1000,
+      minimum_uncertainty_to_play: lp.min_uncertainty || 0,
+      maximum_uncertainty_to_play: lp.max_uncertainty || 1000,
+      minimum_rank_to_play: lp.min_rank || 0,
+      maximum_rank_to_play: lp.max_rank || 1000,
+      welcome_message: nil
+    }
+
+    found_map =
+      (consul_state || %{})
+      |> Map.take(Map.keys(expected_map))
+
+    if expected_map != found_map do
+      send_chat(state, "Incorrect settings detected, correcting.")
+      Coordinator.send_consul(state.lobby_id, {:merge, expected_map})
     end
+  end
+
+  @spec handle_user_chat(T.userid(), String.t(), map()) :: map()
+  defp handle_user_chat(senderid, "!boss" <> rem, state) do
+    if String.trim(rem) != "" do
+      LobbyChat.say(senderid, "!ev", state.lobby_id)
+      Lobby.kick_user_from_battle(senderid, state.lobby_id)
+    end
+
     state
   end
 
-  defp handle_user_chat(_userid, _message, state) do
-    # Logger.error("handle_user_chat - #{userid} - #{message}")
+  defp handle_user_chat(senderid, "!preset" <> rem, state) do
+    if String.trim(rem) != state.lobby_policy.preset do
+      LobbyChat.say(senderid, "!ev", state.lobby_id)
+    end
+
+    state
+  end
+
+  defp handle_user_chat(senderid, "Lobby policy bot claiming the room", state) do
+    sender = Account.get_user_by_id(senderid)
+
+    if User.is_bot?(sender) and User.is_moderator?(sender) do
+      if state.userid > senderid do
+        send_dm(state, senderid, "I am senior, leave the lobby")
+      else
+        send(self(), :leave_lobby)
+      end
+    end
+
+    state
+  end
+
+  defp handle_user_chat(_senderid, _message, state) do
+    # Logger.error("handle_user_chat - #{senderid} - #{message}")
     state
   end
 
@@ -196,49 +301,96 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   defp handle_founder_chat("* BarManager|" <> json_str, state) do
     case Jason.decode(json_str) do
       {:ok, %{"BattleStateChanged" => new_status}} ->
-        if new_status["locked"] != "unlocked", do: send_to_founder(state, "!unlock")
+        if new_status["locked"] != "unlocked" do
+          send_chat(state, "This lobby cannot be locked, unlocking")
+          send_to_founder(state, "!unlock")
+        end
+
         if new_status["preset"] != state.lobby_policy.preset do
+          send_chat(
+            state,
+            "Preset in this lobby must be #{state.lobby_policy.preset}, re-setting it"
+          )
+
           send_to_founder(state, "!preset #{state.lobby_policy.preset}")
           pick_random_map(state)
         end
 
         team_count = new_status["nbTeams"] |> int_parse
-        if team_count > state.lobby_policy.max_teamcount, do: send_to_founder(state, "!set teamcount #{state.lobby_policy.max_teamcount}")
 
-        team_size = new_status["teamSize"] |> int_parse
         cond do
-          team_size < state.lobby_policy.min_teamsize ->
-            send_to_founder(state, "!set teamsize #{state.lobby_policy.min_teamsize}")
+          team_count > state.lobby_policy.max_teamcount ->
+            send_chat(
+              state,
+              "Max team count in this lobby is #{state.lobby_policy.max_teamcount}, re-setting it"
+            )
 
-          team_size > state.lobby_policy.max_teamsize ->
-            send_to_founder(state, "!set teamsize #{state.lobby_policy.max_teamsize}")
+            send_to_founder(state, "!set teamcount #{state.lobby_policy.max_teamcount}")
 
           true ->
             :ok
         end
 
+        team_size = new_status["teamSize"] |> int_parse
+
+        cond do
+          team_size > state.lobby_policy.max_teamsize ->
+            send_chat(
+              state,
+              "Max team size in this lobby is #{state.lobby_policy.max_teamsize}, re-setting it"
+            )
+
+            send_to_founder(state, "!set teamsize #{state.lobby_policy.max_teamsize}")
+
+          team_size < state.lobby_policy.min_teamsize ->
+            send_chat(
+              state,
+              "Min team size in this lobby is #{state.lobby_policy.min_teamsize}, re-setting it"
+            )
+
+            send_to_founder(state, "!set teamsize #{state.lobby_policy.min_teamsize}")
+
+          true ->
+            :ok
+        end
+
+      {:ok, _json} ->
+        # Logger.error("BarManager unknown json object - #{json_str}\n#{inspect err}")
+        :ok
+
       err ->
-        Logger.error("BarManager bad json - #{json_str}\n#{inspect err}")
+        Logger.error("BarManager bad json - #{json_str}\n#{inspect(err)}")
         :ok
     end
+
     state
   end
 
   defp handle_founder_chat("* Map changed by " <> user_and_map, state) do
-    [_user | map_parts] = user_and_map
+    [_user | map_parts] =
+      user_and_map
       |> String.split(" ")
 
     current_map = Enum.join(map_parts, " ")
 
     if not is_map_allowed?(current_map, state) do
+      send_chat(
+        state,
+        "Sorry but that map isn't allowed in this lobby, picking a random one from the approved list"
+      )
+
       pick_random_map(state)
     end
 
     state
   end
 
-  defp handle_founder_chat("* Automatic random map rotation: next map is" <> map_and_quotes, state) do
-    current_map = map_and_quotes
+  defp handle_founder_chat(
+         "* Automatic random map rotation: next map is" <> map_and_quotes,
+         state
+       ) do
+    current_map =
+      map_and_quotes
       |> String.replace("\"", "")
       |> String.trim()
 
@@ -258,6 +410,42 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     state
   end
 
+  # Handle direct messages
+  defp handle_direct_message(senderid, "I am senior, leave the lobby", state) do
+    # In theory we should check to ensure they're senior but in the interest of
+    # making sure there's no issue we just leave the lobby anyway
+    sender = Account.get_user_by_id(senderid)
+
+    if User.is_bot?(sender) and User.is_moderator?(sender) do
+      send(self(), :leave_lobby)
+    end
+
+    state
+  end
+
+  defp handle_direct_message(senderid, "$leave", state) do
+    if User.is_moderator?(senderid) do
+      send(self(), :leave_lobby)
+    end
+
+    state
+  end
+
+  defp handle_direct_message(senderid, "$settings", state) do
+    if Enum.empty?(state.lobby_policy.map_list) do
+      send_dm(state, senderid, "I have no maplist")
+    else
+      send_dm(state, senderid, "My maplist is: #{state.lobby_policy.map_list |> Enum.join(", ")}")
+    end
+
+    state
+  end
+
+  defp handle_direct_message(_senderid, _content, state) do
+    state
+  end
+
+  # Funcs to do stuff
   defp send_chat(state, msg) do
     LobbyChat.say(state.userid, msg, state.lobby_id)
   end
@@ -270,54 +458,45 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     User.send_direct_message(state.userid, state.founder_id, msg)
   end
 
-  defp apply_policy_config(state) do
-    lp = state.lobby_policy
+  @spec leave_lobby(map()) :: map()
+  defp leave_lobby(%{lobby_id: nil} = state), do: state
 
-    # Rating levels
-    case {lp.min_rating, lp.max_rating} do
-      {nil, nil} -> send_chat(state, "$%resetratinglevels")
-      {r, nil} -> send_chat(state, "$%minratinglevel #{r}")
-      {nil, r} -> send_chat(state, "$%maxratinglevel #{r}")
-      {r1, r2} -> send_chat(state, "$%setratinglevels #{r1} #{r2}")
-    end
+  defp leave_lobby(state) do
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{state.lobby_id}")
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{state.lobby_id}")
 
-    # Rank
-    case {lp.min_rank, lp.max_rank} do
-      {nil, nil} -> send_chat(state, "$%resetranklevels")
-      {r, nil} -> send_chat(state, "$%minranklevel #{r}")
-      {nil, r} -> send_chat(state, "$%maxranklevel #{r}")
-      {r1, r2} -> send_chat(state, "$%setranklevels #{r1} #{r2}")
-    end
+    Lobby.remove_user_from_battle(state.userid, state.lobby_id)
 
-    # Uncertainty (not in use yet)
-    # case {lp.min_uncertainty, lp.max_uncertainty} do
-    #   {nil, nil} -> send_chat(state, "$%resetuncertaintylevels")
-    #   {r, nil} -> send_chat(state, "$%minuncertaintylevel #{r}")
-    #   {nil, r} -> send_chat(state, "$%maxuncertaintylevel #{r}")
-    #   {r1, r2} -> send_chat(state, "$%setuncertaintylevels #{r1} #{r2}")
-    # end
+    %{state | lobby_id: nil, founder_id: nil}
   end
 
   # Returns true if the name of the map sent to it is allowed
+  defp is_map_allowed?(_, %{lobby_policy: %{map_list: []}}), do: true
+
   defp is_map_allowed?(current_map, state) do
     if Enum.empty?(state.lobby_policy.map_list) do
+      Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line} - This shouldn't fire")
       true
     else
-      map_name = current_map
+      map_name =
+        current_map
         |> String.downcase()
         |> String.replace(" ", "_")
 
       state.lobby_policy.map_list
-        |> Enum.filter(fn allowed_map ->
-          allowed_name = allowed_map
-            |> String.downcase()
-            |> String.replace(" ", "_")
+      |> Enum.filter(fn allowed_map ->
+        allowed_name =
+          allowed_map
+          |> String.downcase()
+          |> String.replace(" ", "_")
 
-          String.contains?(map_name, allowed_name)
-        end)
-        |> Enum.any?
+        String.contains?(map_name, allowed_name)
+      end)
+      |> Enum.any?()
     end
   end
+
+  defp pick_random_map(%{lobby_policy: %{map_list: []}}), do: :ok
 
   defp pick_random_map(state) do
     picked_map = Enum.random(state.lobby_policy.map_list)
@@ -326,12 +505,15 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
 
   defp generate_lobby_name(state) do
     state.lobby_policy.lobby_name_format
-      |> String.replace("{agent}", state.base_name)
-      |> String.replace("{id}", "#{state.lobby_policy.id}")
+    |> String.replace("{agent}", state.base_name)
+    |> String.replace("{id}", "#{state.lobby_policy.id}")
   end
 
   defp generate_welcome_message(_state) do
-    "This is an experimental server-managed lobby. It is in a testing phase so please feel free to try and break it, report any issues to Teifion. Chat $settings to the bot to get the maplist."
+    [
+      "This is an experimental server-managed lobby. It is in a testing phase so please feel free to try and break it. Chat $settings to me to get the maplist and other information.",
+      "Feedback is welcome in the discord thread - https://discord.com/channels/549281623154229250/1085711899817152603"
+    ]
   end
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
@@ -353,22 +535,24 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
       id
     )
 
-    {user, _client} = case User.internal_client_login(data.userid) do
-      {:ok, user, client} -> {user, client}
-      :error -> raise "No user found"
-    end
+    {user, _client} =
+      case User.internal_client_login(data.userid) do
+        {:ok, user, client} -> {user, client}
+        :error -> raise "No user found"
+      end
 
     # Logger.metadata([request_id: "LobbyPolicyBotServer##{id}/#{user.name}"])
 
     :timer.send_interval(@tick_interval, :tick)
 
-    {:ok, %{
-      lobby_policy: data.lobby_policy,
-      lobby_id: nil,
-      founder_id: nil,
-      userid: user.id,
-      base_name: data.base_name,
-      user: user
-    }}
+    {:ok,
+     %{
+       lobby_policy: data.lobby_policy,
+       lobby_id: nil,
+       founder_id: nil,
+       userid: user.id,
+       base_name: data.base_name,
+       user: user
+     }}
   end
 end

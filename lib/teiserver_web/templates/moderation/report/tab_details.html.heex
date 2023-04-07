@@ -1,10 +1,12 @@
 <div class="row">
   <div class="col-md-12 col-lg-6">
-    <table class='table table-sm'>
+    <table class="table table-sm">
       <tbody>
         <tr>
           <td>Report by</td>
-          <td><%= @report.reporter.name %>, <%= date_to_str(@report.inserted_at, format: :hms_or_dmy) %></td>
+          <td>
+            <%= @report.reporter.name %>, <%= date_to_str(@report.inserted_at, format: :hms_or_dmy) %>
+          </td>
         </tr>
 
         <tr>
@@ -24,13 +26,17 @@
           <tr>
             <td>Match:</td>
             <td>
-              <a href={Routes.ts_admin_match_path(@conn, :show, @report.match_id)} class="btn btn-secondary btn-sm">
+              <a
+                href={Routes.ts_admin_match_path(@conn, :show, @report.match_id)}
+                class="btn btn-secondary btn-sm"
+              >
                 Details
               </a>
-              
               &nbsp;&nbsp;
-              
-              <a href={Routes.ts_admin_match_path(@conn, :chat, @report.match_id)} class="btn btn-secondary btn-sm">
+              <a
+                href={Routes.ts_admin_match_path(@conn, :chat, @report.match_id)}
+                class="btn btn-secondary btn-sm"
+              >
                 Chat
               </a>
             </td>
@@ -45,13 +51,15 @@
           <tr>
             <td>Result</td>
             <td>
-              <a href={Routes.moderation_action_path(@conn, :show, @report.result_id)} class="btn btn-secondary btn-sm">
+              <a
+                href={Routes.moderation_action_path(@conn, :show, @report.result_id)}
+                class="btn btn-secondary btn-sm"
+              >
                 View details
               </a>
             </td>
           </tr>
         <% end %>
-
       </tbody>
     </table>
   </div>

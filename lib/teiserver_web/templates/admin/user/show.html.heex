@@ -7,47 +7,66 @@
     $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
 
     page_quick_actions = [
-      {label: "Edit user", icon: "<%= icon() %>", url: <%= ~p"/teiserver/admin/user/#{@user}/edit" %>, keywords: ["edit", "user", "edit user"]},
+      {label: "Edit user", icon: "<%= icon() %>", url: "<%= ~p"/teiserver/admin/user/#{@user}/edit" %>", keywords: ["edit", "user", "edit user"]},
     ];
 
     setTimeout(function() {
       $("#flash-messages").show();
     }, 4001);
+
   });
 </script>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
+<%= render(
+  TeiserverWeb.Admin.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "users"})
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
+        <%= render(
+          TeiserverWeb.Admin.UserView,
+          "section_menu.html",
+          Map.merge(assigns, %{
             show_search: false,
             active: "show"
-        }) %>
+          })
+        ) %>
         <hr />
 
         <div class="float-end">
           <div class="dropdown" style="display: inline-block;">
-            <div class={"btn btn-#{bsname} dropdown-toggle"} data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <div
+              class={"btn btn-#{bsname} dropdown-toggle"}
+              data-bs-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
               Actions
             </div>
-            <%= render "actions.html", assigns %>
+            <%= render("actions.html", assigns) %>
           </div>
 
           <%= if allow?(@conn, "admin.user") do %>
-            <a href={Routes.admin_user_path(@conn, :show, @user)} class={"btn btn-outline-#{bsname}"} id="section-menu-new">
-              <i class="fa-regular fa-power-off"></i>
-              &nbsp;
+            <a
+              href={Routes.admin_user_path(@conn, :show, @user)}
+              class={"btn btn-outline-#{bsname}"}
+              id="section-menu-new"
+            >
+              <i class="fa-regular fa-power-off"></i> &nbsp;
               Admin show
             </a>
             &nbsp;&nbsp;
-
             <%= if @client != nil do %>
-              <a href={Routes.ts_admin_client_show_path(@conn, :show, @user.id)} class={"btn btn-outline-#{bsname}"} id="section-menu-new">
-                <%= central_component "icon", icon: Teiserver.Account.ClientLib.icon() %>
-                &nbsp;
+              <a
+                href={Routes.ts_admin_client_show_path(@conn, :show, @user.id)}
+                class={"btn btn-outline-#{bsname}"}
+                id="section-menu-new"
+              >
+                <%= central_component("icon", icon: Teiserver.Account.ClientLib.icon()) %> &nbsp;
                 Client view
               </a>
               &nbsp;&nbsp;
@@ -56,45 +75,44 @@
 
           <%= if allow?(@conn, "teiserver.staff.moderator") do %>
             <a href={~p"/teiserver/admin/user/#{@user}/edit"} class={"btn btn-outline-#{bsname}"}>
-              <i class="fa-regular fa-fw fa-wrench"></i>
-              Edit user
+              <i class="fa-regular fa-fw fa-wrench"></i> Edit user
             </a>
           <% end %>
         </div>
 
         <h3 style={"color: #{@user.colour}"}>
-          <%= @user.name %>
-          &nbsp;
-          <%= central_component "icon", icon: @user.icon, icon_class: "fa-solid" %>
+          <%= @user.name %> &nbsp; <%= central_component("icon",
+            icon: @user.icon,
+            icon_class: "fa-solid"
+          ) %>
         </h3>
 
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item" role="presentation">
             <a href="#overview_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component "icon", icon: Central.Helpers.StylingHelper.icon(:overview), class: "fa-solid" %>
-              Overview
+              <%= central_component("icon",
+                icon: Central.Helpers.StylingHelper.icon(:overview),
+                class: "fa-solid"
+              ) %> Overview
             </a>
           </li>
 
           <li class="nav-item" role="presentation">
             <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component "icon", icon: "fa-solid fa-file-alt" %>
-              Details
+              <%= central_component("icon", icon: "fa-solid fa-file-alt") %> Details
             </a>
           </li>
         </ul>
 
         <div class="tab-content">
           <div class="tab-pane" id="overview_tab" style="padding:5px;">
-            <%= render "tab_overview.html", assigns %>
+            <%= render("tab_overview.html", assigns) %>
           </div>
 
           <div class="tab-pane" id="details_tab" style="padding:5px;">
-            <%= render "tab_details.html", assigns %>
+            <%= render("tab_details.html", assigns) %>
           </div>
         </div>
-        <%# END OF TABS %>
-
       </div>
     </div>
   </div>

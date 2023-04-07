@@ -19,43 +19,41 @@
   <div class="col-md-12">
     <div class="card card-default">
       <div class="card-body" style="padding: 0 15px;">
-
         <div class="row">
           <%= if Central.Config.get_site_config_cache("user.Enable account group pages") do %>
-            <%= central_component "sub_menu_icon",
+            <%= central_component("sub_menu_icon",
               name: "groups",
               label: "Groups",
               active: @active,
               url: Routes.account_group_path(@conn, :index),
               icon: Central.Account.GroupLib.icon()
-            %>
+            ) %>
           <% end %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "user_configs",
             label: "Preferences",
             active: @active,
             url: Routes.user_config_path(@conn, :index),
             icon: Central.Config.UserConfigLib.icon()
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "details",
             label: "Account details",
             active: @active,
             url: Routes.account_registration_path(@conn, :edit_details),
             icon: Central.Account.icon()
-          %>
+          ) %>
 
-          <%= central_component "sub_menu_icon",
+          <%= central_component("sub_menu_icon",
             name: "password",
             label: "Password",
             active: @active,
             url: Routes.account_registration_path(@conn, :edit_password),
             icon: "fa-regular fa-lock"
-          %>
+          ) %>
         </div>
-
       </div>
     </div>
   </div>

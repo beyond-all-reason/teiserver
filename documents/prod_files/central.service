@@ -1,3 +1,4 @@
+# /etc/systemd/system/central.service
 [Unit]
 Description=Teiserver elixir app
 After=network.target
@@ -8,8 +9,10 @@ WorkingDirectory=/etc/central
 ExecStart=/apps/central/bin/central start
 ExecStop=/apps/central/bin/central stop
 Restart=on-failure
+LimitNOFILE=65536
 RemainAfterExit=yes
 RestartSec=5
+EnvironmentFile=/apps/ts.vars
 SyslogIdentifier=central
 
 [Install]

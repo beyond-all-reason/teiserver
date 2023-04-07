@@ -21,31 +21,42 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
                       user_hash: user_hash,
                       user_id: state.userid,
                       log_type: log_type,
-
                       timestamp: Timex.now(),
                       metadata: metadata,
                       contents: contents,
                       size: String.length(contents)
                     }
+
                     case Telemetry.create_infolog(params) do
                       {:ok, infolog} ->
                         if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
                           DiscordBridge.new_infolog(infolog)
                         end
+
                         reply(:spring, :okay, "upload_infolog - id:#{infolog.id}", msg_id, state)
+
                       {:error, _changeset} ->
                         reply(:spring, :no, "upload_infolog - db error", msg_id, state)
                     end
+
                   {:error, _} ->
                     reply(:spring, :no, "upload_infolog - infolog gzip error", msg_id, state)
                 end
+
               _ ->
-                reply(:spring, :no, "upload_infolog - infolog contents url_decode64 error", msg_id, state)
+                reply(
+                  :spring,
+                  :no,
+                  "upload_infolog - infolog contents url_decode64 error",
+                  msg_id,
+                  state
+                )
             end
 
           {:error, reason} ->
             reply(:spring, :no, "upload_infolog - metadata decode - #{reason}", msg_id, state)
         end
+
       nil ->
         reply(:spring, :no, "upload_infolog - no match", msg_id, state)
     end
@@ -93,10 +104,12 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
             {:ok, value} ->
               Telemetry.log_client_event(state.userid, event, value, hash)
               "success"
+
             {:error, reason} ->
               # Logger.error("log_client_event:#{reason} - #{data}")
               reason
           end
+
         nil ->
           # Logger.error("log_client_event:no match - #{data}")
           "no match"
@@ -121,6 +134,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
             # Logger.error("update_client_property:bad base64 value - #{data}")
             "bad base64 value"
           end
+
         nil ->
           # Logger.error("update_client_property:no match - #{data}")
           "no match"
@@ -138,10 +152,12 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
             {:ok, value} ->
               Telemetry.log_client_game_event(state.userid, event, value, hash)
               "success"
+
             {:error, reason} ->
               # Logger.error("log_client_event:#{reason} - #{data}")
               reason
           end
+
         nil ->
           # Logger.error("log_client_event:no match - #{data}")
           "no match"

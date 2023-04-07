@@ -43,16 +43,19 @@ defmodule Teiserver.Game.LobbyPolicy do
   def changeset(struct, params \\ %{}) do
     params =
       params
-      |> remove_whitespace(~w(name agent_name_format)a)
-      |> remove_characters(~w(name)a, [~r/[:]/])
+      |> remove_whitespace(~w(agent_name_format)a)
+      |> remove_characters(~w(agent_name_format)a, [~r/[:]/])
       |> min_and_max(~w(min_rating max_rating)a)
       |> min_and_max(~w(min_uncertainty max_uncertainty)a)
       |> min_and_max(~w(min_rank max_rank)a)
       |> min_and_max(~w(min_teamsize max_teamsize)a)
 
     struct
-      |> cast(params, ~w(name icon colour enabled map_list agent_name_list agent_name_format lobby_name_format min_rating max_rating min_uncertainty max_uncertainty min_rank max_rank max_teamcount min_teamsize max_teamsize preset)a)
-      |> validate_required(~w(name)a)
+    |> cast(
+      params,
+      ~w(name icon colour enabled map_list agent_name_list agent_name_format lobby_name_format min_rating max_rating min_uncertainty max_uncertainty min_rank max_rank max_teamcount min_teamsize max_teamsize preset)a
+    )
+    |> validate_required(~w(name)a)
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean

@@ -6,24 +6,31 @@
   });
 </script>
 
-<%= render TeiserverWeb.Moderation.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "actions"}) %>
+<%= render(
+  TeiserverWeb.Moderation.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "actions"})
+) %>
 
-<%= central_component "picker_script",
+<%= central_component("picker_script",
   module: Teiserver.Account.UserLib,
   name: "teiserver_user",
   title: "User search"
-%>
+) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Moderation.ActionView, "section_menu.html", Map.merge(assigns, %{
-          basic_search: "",
-          show_search: false,
-          active: "new"
-        })
-        %>
+        <%= render(
+          TeiserverWeb.Moderation.ActionView,
+          "section_menu.html",
+          Map.merge(assigns, %{
+            basic_search: "",
+            show_search: false,
+            active: "new"
+          })
+        ) %>
 
         <hr />
 
@@ -31,7 +38,7 @@
           <div class="row">
             <label for="control_id" class="col-md-2 control-label">Select user:</label>
             <div class="col-md-10">
-              <%= render TeiserverWeb.Account.GeneralView, "picker.html" %>
+              <%= render(TeiserverWeb.Account.GeneralView, "picker.html") %>
             </div>
           </div>
 
@@ -39,7 +46,6 @@
             Submit
           </button>
         </form>
-
       </div>
     </div>
   </div>

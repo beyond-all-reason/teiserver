@@ -1,86 +1,104 @@
 <% bsname = view_colour() %>
 
-<%= central_component "section_menu_button",
-  name: "day_metrics",
-  label: "Daily metrics",
+<%= central_component("section_menu_button",
+  name: "day_list",
+  label: "Daily",
   active: @active,
-  icon: "fa-regular fa-bars",
+  icon: StylingHelper.icon(:day),
   bsname: bsname,
-  url: Routes.ts_reports_server_metric_path(@conn, :day_metrics_list)
-%>
+  url: ~p"/reports/server/list/day"
+) %>
 
-<%= central_component "section_menu_button",
-  name: "today",
+<%= central_component("section_menu_button",
+  name: "week_list",
+  label: "Weekly",
+  active: @active,
+  icon: StylingHelper.icon(:week),
+  bsname: bsname,
+  url: ~p"/reports/server/list/week"
+) %>
+
+<%= central_component("section_menu_button",
+  name: "month_list",
+  label: "Monthly",
+  active: @active,
+  icon: StylingHelper.icon(:month),
+  bsname: bsname,
+  url: ~p"/reports/server/list/month"
+) %>
+
+<%= central_component("section_menu_button",
+  name: "quarter_list",
+  label: "Quarterly",
+  active: @active,
+  icon: StylingHelper.icon(:quarter),
+  bsname: bsname,
+  url: ~p"/reports/server/list/quarter"
+) %>
+
+<%= central_component("section_menu_button",
+  name: "year_list",
+  label: "Yearly",
+  active: @active,
+  icon: StylingHelper.icon(:year),
+  bsname: bsname,
+  url: ~p"/reports/server/list/year"
+) %>
+
+&nbsp;&nbsp;&nbsp;&nbsp;
+
+<%= central_component("section_menu_button",
+  name: "this_day",
   label: "Today",
   active: @active,
   icon: "fa-regular fa-waveform",
   bsname: bsname,
-  url: Routes.ts_reports_server_metric_path(@conn, :day_metrics_today)
-%>
+  url: ~p"/reports/server/show/day/today"
+) %>
 
-<%= central_component "section_menu_button",
-  name: "graph",
-  label: "Graph",
+<%= central_component("section_menu_button",
+  name: "this_week",
+  label: "This week",
   active: @active,
-  icon: "fa-regular fa-chart-line-up",
+  icon: "fa-regular fa-waveform",
   bsname: bsname,
-  url: Routes.ts_reports_server_metric_path(@conn, :day_metrics_graph)
-%>
+  url: ~p"/reports/server/show/week/today"
+) %>
 
-<%= central_component "section_menu_button",
-  name: "download",
-  label: "Download",
+<%= central_component("section_menu_button",
+  name: "this_month",
+  label: "This month",
   active: @active,
-  icon: "fa-regular fa-download",
+  icon: "fa-regular fa-waveform",
   bsname: bsname,
-  url: Routes.ts_reports_server_metric_path(@conn, :day_metrics_export_form)
-%>
+  url: ~p"/reports/server/show/month/today"
+) %>
 
-<%= central_component "section_menu_button",
+<%= central_component("section_menu_button",
+  name: "this_quarter",
+  label: "This quarter",
+  active: @active,
+  icon: "fa-regular fa-waveform",
+  bsname: bsname,
+  url: ~p"/reports/server/show/quarter/today"
+) %>
+
+&nbsp;&nbsp;&nbsp;&nbsp;
+
+<%= central_component("section_menu_button",
   name: "now",
   label: "Now",
   active: @active,
   icon: "fa-regular fa-clock",
   bsname: bsname,
-  url: Routes.ts_reports_server_metric_path(@conn, :now)
-%>
+  url: ~p"/reports/server/now"
+) %>
 
-<%= central_component "section_menu_button",
+<%= central_component("section_menu_button",
   name: "load",
   label: "Load",
   active: @active,
   icon: "fa-regular fa-server",
   bsname: bsname,
-  url: Routes.ts_reports_server_metric_path(@conn, :load)
-%>
-
-
-&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-<%= central_component "section_menu_button",
-  name: "month_metrics",
-  label: "Monthly metrics",
-  active: @active,
-  icon: "fa-regular fa-bars",
-  bsname: bsname,
-  url: Routes.ts_reports_server_metric_path(@conn, :month_metrics_list)
-%>
-
-<%= central_component "section_menu_button",
-  name: "this_month",
-  label: "Month to date",
-  active: @active,
-  icon: "fa-regular fa-waveform",
-  bsname: bsname,
-  url: Routes.ts_reports_server_metric_path(@conn, :month_metrics_today)
-%>
-
-<%= central_component "section_menu_button",
-  name: "month_graph",
-  label: "Graph",
-  active: @active,
-  icon: "fa-regular fa-chart-line-up",
-  bsname: bsname,
-  url: Routes.ts_reports_server_metric_path(@conn, :month_metrics_graph)
-%>
+  url: ~p"/reports/server/load"
+) %>

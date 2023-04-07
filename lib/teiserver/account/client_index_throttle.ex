@@ -44,31 +44,33 @@ defmodule Teiserver.Account.ClientIndexThrottle do
   end
 
   def handle_info(:tick, %{new_clients: [], removed_clients: []} = state), do: {:noreply, state}
+
   def handle_info(:tick, state) do
     {:noreply, broadcast(state)}
   end
 
   defp broadcast(state) do
-    new_clients_map = state.new_clients
-      |> Enum.uniq
+    new_clients_map =
+      state.new_clients
+      |> Enum.uniq()
       |> Client.get_clients()
       |> Enum.filter(&(&1 != nil))
       |> Map.new(fn c -> {c.userid, c} end)
 
-    removed_clients = state.removed_clients
-      |> Enum.uniq
+    removed_clients =
+      state.removed_clients
+      |> Enum.uniq()
       |> Enum.filter(fn c ->
         not Enum.member?(state.new_clients, c)
       end)
 
-    :ok = PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_liveview_client_index_updates",
-      {:client_index_throttle,
-        new_clients_map,
-        removed_clients
-      }
-    )
+    :ok =
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_liveview_client_index_updates",
+        {:client_index_throttle, new_clients_map, removed_clients}
+      )
+
     %{state | new_clients: [], removed_clients: []}
   end
 
@@ -85,14 +87,16 @@ defmodule Teiserver.Account.ClientIndexThrottle do
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
 
     Horde.Registry.register(
-      Teiserver.ServerRegistry,
+      Teiserver.ThrottleRegistry,
       "ClientIndexThrottle",
       :index
     )
 
-    {:ok, %{
-      new_clients: [],
-      removed_clients: []
-    }}
+    {:ok,
+     %{
+       new_clients: [],
+       removed_clients: [],
+       last_update: System.system_time(:second)
+     }}
   end
 end

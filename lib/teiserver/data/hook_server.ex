@@ -15,14 +15,17 @@ defmodule Teiserver.HookServer do
           Teiserver.Bridge.DiscordBridge.new_report(data.report)
         end
 
+      :updated_report ->
+        :ok
+
       :new_action ->
         if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
           Teiserver.Bridge.DiscordBridge.new_action(data.action)
         end
-        Teiserver.User.new_moderation_action(data.action)
+        Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(data.action.target_id)
 
       :updated_action ->
-        Teiserver.User.updated_moderation_action(data.action)
+        Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(data.action.target_id)
 
       :new_proposal ->
         :ok
@@ -34,7 +37,10 @@ defmodule Teiserver.HookServer do
         :ok
 
       event ->
-        Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line} - No handler for event '#{event}'")
+        Logger.error(
+          "Error at: #{__ENV__.file}:#{__ENV__.line} - No handler for event '#{event}'"
+        )
+
         :ok
     end
 
@@ -58,15 +64,9 @@ defmodule Teiserver.HookServer do
         Teiserver.User.recache_user(payload.id)
 
       :create_report ->
-        # Coordinator.create_report(payload)
-        # Teiserver.Bridge.DiscordBridge.create_report(payload)
-        # Teiserver.User.create_report(payload, reason)
         :ok
 
       :update_report ->
-        # Coordinator.update_report(payload, reason)
-        # Teiserver.Bridge.DiscordBridge.report_updated(payload, reason)
-        # Teiserver.User.update_report(payload, reason)
         :ok
 
       _ ->
@@ -94,6 +94,7 @@ defmodule Teiserver.HookServer do
             node: Node.self()
           }
         )
+
         :ok
 
       _ ->
@@ -111,6 +112,7 @@ defmodule Teiserver.HookServer do
       :ok = PubSub.subscribe(Central.PubSub, "global_moderation")
       :ok = PubSub.subscribe(Central.PubSub, "application")
     end
+
     {:ok, %{}}
   end
 end

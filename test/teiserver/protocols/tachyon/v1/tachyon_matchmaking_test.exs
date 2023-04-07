@@ -17,15 +17,16 @@ defmodule Teiserver.TachyonMatchmakingTest do
   end
 
   defp make_rating(userid, rating_type_id, rating_value) do
-    {:ok, _} = Account.create_rating(%{
-      user_id: userid,
-      rating_type_id: rating_type_id,
-      rating_value: rating_value,
-      skill: rating_value,
-      uncertainty: 0,
-      leaderboard_rating: rating_value,
-      last_updated: Timex.now(),
-    })
+    {:ok, _} =
+      Account.create_rating(%{
+        user_id: userid,
+        rating_type_id: rating_type_id,
+        rating_value: rating_value,
+        skill: rating_value,
+        uncertainty: 0,
+        leaderboard_rating: rating_value,
+        last_updated: Timex.now()
+      })
   end
 
   defp make_empty_lobby() do
@@ -50,6 +51,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
         max_players: 12
       }
     }
+
     data = %{cmd: "c.lobby.create", lobby: lobby_data}
     _tachyon_send(hsocket, data)
     [reply] = _tachyon_recv(hsocket)
@@ -91,11 +93,12 @@ defmodule Teiserver.TachyonMatchmakingTest do
     # Join the queue
     _tachyon_send(socket1, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
     [reply] = _tachyon_recv(socket1)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "queue_id" => queue.id,
-      "result" => "success"
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "queue_id" => queue.id,
+             "result" => "success"
+           }
 
     pid = Matchmaking.get_queue_wait_pid(queue.id)
     groups = :sys.get_state(pid) |> Map.get(:groups_map)
@@ -110,11 +113,12 @@ defmodule Teiserver.TachyonMatchmakingTest do
     # Now get the second user to join
     _tachyon_send(socket2, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
     [reply] = _tachyon_recv(socket2)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "queue_id" => queue.id,
-      "result" => "success"
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "queue_id" => queue.id,
+             "result" => "success"
+           }
 
     # Tick the wait server
     send(pid, :tick)
@@ -192,31 +196,34 @@ defmodule Teiserver.TachyonMatchmakingTest do
     _tachyon_send(socket, %{cmd: "c.matchmaking.get_queue_info", queue_id: queue1.id})
     [reply] = _tachyon_recv(socket)
     assert reply["cmd"] == "s.matchmaking.queue_info"
+
     assert reply["queue"] == %{
-      "mean_wait_time" => 0,
-      "name" => "test_queue_join_leave1",
-      "member_count" => 0,
-      "queue_id" => queue1.id
-    }
+             "mean_wait_time" => 0,
+             "name" => "test_queue_join_leave1",
+             "member_count" => 0,
+             "queue_id" => queue1.id
+           }
 
     # Join a queue that doesn't exist
     _tachyon_send(socket, %{cmd: "c.matchmaking.join_queue", queue_id: 0})
     [reply] = _tachyon_recv(socket)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "queue_id" => 0,
-      "reason" => "No queue found",
-      "result" => "failure"
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "queue_id" => 0,
+             "reason" => "No queue found",
+             "result" => "failure"
+           }
 
     # Join the queue (just the first player)
     _tachyon_send(socket, %{cmd: "c.matchmaking.join_queue", queue_id: queue1.id})
     [reply] = _tachyon_recv(socket)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "queue_id" => queue1.id,
-      "result" => "success"
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "queue_id" => queue1.id,
+             "result" => "success"
+           }
 
     # List my queues, should have this one queue
     _tachyon_send(socket, %{cmd: "c.matchmaking.list_my_queues"})
@@ -230,12 +237,13 @@ defmodule Teiserver.TachyonMatchmakingTest do
     _tachyon_send(socket, %{cmd: "c.matchmaking.get_queue_info", queue_id: queue1.id})
     [reply] = _tachyon_recv(socket)
     assert reply["cmd"] == "s.matchmaking.queue_info"
+
     assert reply["queue"] == %{
-      "mean_wait_time" => 0,
-      "name" => "test_queue_join_leave1",
-      "member_count" => 1,
-      "queue_id" => queue1.id
-    }
+             "mean_wait_time" => 0,
+             "name" => "test_queue_join_leave1",
+             "member_count" => 1,
+             "queue_id" => queue1.id
+           }
 
     # Leave the queue
     _tachyon_send(socket, %{cmd: "c.matchmaking.leave_queue", queue_id: queue1.id})
@@ -256,21 +264,23 @@ defmodule Teiserver.TachyonMatchmakingTest do
     _tachyon_send(socket, %{cmd: "c.matchmaking.get_queue_info", queue_id: queue1.id})
     [reply] = _tachyon_recv(socket)
     assert reply["cmd"] == "s.matchmaking.queue_info"
+
     assert reply["queue"] == %{
-      "mean_wait_time" => 0,
-      "name" => "test_queue_join_leave1",
-      "member_count" => 0,
-      "queue_id" => queue1.id
-    }
+             "mean_wait_time" => 0,
+             "name" => "test_queue_join_leave1",
+             "member_count" => 0,
+             "queue_id" => queue1.id
+           }
 
     # And rejoin
     _tachyon_send(socket, %{cmd: "c.matchmaking.join_queue", queue_id: queue1.id})
     [reply] = _tachyon_recv(socket)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "queue_id" => queue1.id,
-      "result" => "success"
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "queue_id" => queue1.id,
+             "result" => "success"
+           }
 
     user_queues = :sys.get_state(client_pid) |> Map.get(:queues)
     assert user_queues == [queue1.id]
@@ -288,11 +298,12 @@ defmodule Teiserver.TachyonMatchmakingTest do
     # Join queue 2
     _tachyon_send(socket, %{cmd: "c.matchmaking.join_queue", queue_id: queue2.id})
     [reply] = _tachyon_recv(socket)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "queue_id" => queue2.id,
-      "result" => "success"
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "queue_id" => queue2.id,
+             "result" => "success"
+           }
 
     user_queues = :sys.get_state(client_pid) |> Map.get(:queues)
     assert user_queues == [queue2.id, queue1.id]
@@ -317,7 +328,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
         "conditions" => %{},
         "settings" => %{
           "ready_wait_time" => 60_000,
-          "ready_tick_interval" => 60_000,
+          "ready_tick_interval" => 60_000
         }
       })
 
@@ -332,10 +343,14 @@ defmodule Teiserver.TachyonMatchmakingTest do
     extra_group_data = %{bucket: 17, search_distance: 3}
 
     # Create the match process
-    {match_pid, match_id} = Matchmaking.create_match([
-      Matchmaking.make_group_from_userid(user2.id, queue) |> Map.merge(extra_group_data),
-      Matchmaking.make_group_from_userid(user1.id, queue) |> Map.merge(extra_group_data)
-    ], queue.id)
+    {match_pid, match_id} =
+      Matchmaking.create_match(
+        [
+          Matchmaking.make_group_from_userid(user2.id, queue) |> Map.merge(extra_group_data),
+          Matchmaking.make_group_from_userid(user1.id, queue) |> Map.merge(extra_group_data)
+        ],
+        queue.id
+      )
 
     # Check server state
     state = :sys.get_state(match_pid)
@@ -347,17 +362,20 @@ defmodule Teiserver.TachyonMatchmakingTest do
     # Tick, we expect to be send a pair of ready checks
     send(match_pid, :tick)
     [reply] = _tachyon_recv(socket1)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.match_ready",
-      "match_id" => match_id,
-      "queue_id" => queue.id
-    }
+             "cmd" => "s.matchmaking.match_ready",
+             "match_id" => match_id,
+             "queue_id" => queue.id
+           }
+
     [reply] = _tachyon_recv(socket2)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.match_ready",
-      "match_id" => match_id,
-      "queue_id" => queue.id
-    }
+             "cmd" => "s.matchmaking.match_ready",
+             "match_id" => match_id,
+             "queue_id" => queue.id
+           }
 
     # Accept the first
     _tachyon_send(socket1, %{cmd: "c.matchmaking.accept", match_id: match_id})
@@ -416,10 +434,14 @@ defmodule Teiserver.TachyonMatchmakingTest do
     extra_group_data = %{bucket: 17, search_distance: 1}
 
     # Create the match process
-    {match_pid, match_id} = Matchmaking.create_match([
-      Matchmaking.make_group_from_userid(user2.id, queue) |> Map.merge(extra_group_data),
-      Matchmaking.make_group_from_userid(user1.id, queue) |> Map.merge(extra_group_data)
-    ], queue.id)
+    {match_pid, match_id} =
+      Matchmaking.create_match(
+        [
+          Matchmaking.make_group_from_userid(user2.id, queue) |> Map.merge(extra_group_data),
+          Matchmaking.make_group_from_userid(user1.id, queue) |> Map.merge(extra_group_data)
+        ],
+        queue.id
+      )
 
     # Check server states
     match_state = :sys.get_state(match_pid)
@@ -467,10 +489,14 @@ defmodule Teiserver.TachyonMatchmakingTest do
     extra_group_data = %{bucket: 17, search_distance: 1}
 
     # Create the match process
-    {match_pid, match_id} = Matchmaking.create_match([
-      Matchmaking.make_group_from_userid(user2.id, queue) |> Map.merge(extra_group_data),
-      Matchmaking.make_group_from_userid(user1.id, queue) |> Map.merge(extra_group_data)
-    ], queue.id)
+    {match_pid, match_id} =
+      Matchmaking.create_match(
+        [
+          Matchmaking.make_group_from_userid(user2.id, queue) |> Map.merge(extra_group_data),
+          Matchmaking.make_group_from_userid(user1.id, queue) |> Map.merge(extra_group_data)
+        ],
+        queue.id
+      )
 
     # Clear both sockets
     _tachyon_recv(socket1)
@@ -505,18 +531,20 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     # Users hear what?
     [reply] = _tachyon_recv(socket1)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.match_cancelled",
-      "match_id" => match_id,
-      "queue_id" => queue.id
-    }
+             "cmd" => "s.matchmaking.match_cancelled",
+             "match_id" => match_id,
+             "queue_id" => queue.id
+           }
 
     [reply] = _tachyon_recv(socket2)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.match_declined",
-      "match_id" => match_id,
-      "queue_id" => queue.id
-    }
+             "cmd" => "s.matchmaking.match_declined",
+             "match_id" => match_id,
+             "queue_id" => queue.id
+           }
   end
 
   test "they both accept", %{socket: socket1, user: user1} do
@@ -543,10 +571,14 @@ defmodule Teiserver.TachyonMatchmakingTest do
     extra_group_data = %{bucket: 17, search_distance: 1}
 
     # Create the match process
-    {match_pid, match_id} = Matchmaking.create_match([
-      Matchmaking.make_group_from_userid(user2.id, queue) |> Map.merge(extra_group_data),
-      Matchmaking.make_group_from_userid(user1.id, queue) |> Map.merge(extra_group_data)
-    ], queue.id)
+    {match_pid, match_id} =
+      Matchmaking.create_match(
+        [
+          Matchmaking.make_group_from_userid(user2.id, queue) |> Map.merge(extra_group_data),
+          Matchmaking.make_group_from_userid(user1.id, queue) |> Map.merge(extra_group_data)
+        ],
+        queue.id
+      )
 
     # Clear both sockets
     _tachyon_recv_until(socket1)
@@ -574,9 +606,9 @@ defmodule Teiserver.TachyonMatchmakingTest do
     :timer.sleep(100)
 
     [user1.id, user2.id]
-      |> Enum.each(fn userid ->
-        Account.merge_update_client(userid, %{sync: %{engine: 1, game: 1, map: 1}})
-      end)
+    |> Enum.each(fn userid ->
+      Account.merge_update_client(userid, %{sync: %{engine: 1, game: 1, map: 1}})
+    end)
 
     # Wait for kicks to take place
     :timer.sleep(1000)
@@ -654,15 +686,16 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     # Increase range a number of times, 1 more time than the max-distance
     0..(state.groups_map[user1.id].max_distance + 1)
-      |> Enum.each(fn _ ->
-        send(pid, :increase_range)
-      end)
+    |> Enum.each(fn _ ->
+      send(pid, :increase_range)
+    end)
 
     state = :sys.get_state(pid)
     assert Map.has_key?(state.groups_map, user1.id)
     assert state.groups_map[user1.id].members == [user1.id]
     # Easiest way to check if the right number of buckets are being filled
-    assert state.buckets |> Map.keys |> Enum.count == (state.groups_map[user1.id].max_distance * 2) + 1
+    assert state.buckets |> Map.keys() |> Enum.count() ==
+             state.groups_map[user1.id].max_distance * 2 + 1
   end
 
   test "Team queue with both party and solo members", %{socket: socket1, user: user1} do
@@ -722,29 +755,31 @@ defmodule Teiserver.TachyonMatchmakingTest do
     # Now try to join the queue as one of the members
     _tachyon_send(psocket2, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
     [reply] = _tachyon_recv(psocket2)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "reason" => "Not party leader",
-      "result" => "failure",
-      "queue_id" => queue.id
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "reason" => "Not party leader",
+             "result" => "failure",
+             "queue_id" => queue.id
+           }
 
     pid = Matchmaking.get_queue_wait_pid(queue.id)
     state = :sys.get_state(pid)
-    assert state.groups_map |> Map.keys == []
-    assert state.groups_map |> Map.keys == []
+    assert state.groups_map |> Map.keys() == []
+    assert state.groups_map |> Map.keys() == []
 
     # Now do it properly
     _tachyon_send(psocket1, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
     [reply] = _tachyon_recv(psocket1)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "result" => "success",
-      "queue_id" => queue.id
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "result" => "success",
+             "queue_id" => queue.id
+           }
 
     state = :sys.get_state(pid)
-    assert state.groups_map |> Map.keys == [party.id]
+    assert state.groups_map |> Map.keys() == [party.id]
     assert state.buckets == %{20 => [party.id]}
     assert state.groups_map[party.id].rating == 20.2
     assert state.groups_map[party.id].bucket == 20
@@ -760,32 +795,36 @@ defmodule Teiserver.TachyonMatchmakingTest do
     _tachyon_send(socket3, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
 
     [reply] = _tachyon_recv(socket1)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "result" => "success",
-      "queue_id" => queue.id
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "result" => "success",
+             "queue_id" => queue.id
+           }
 
     [reply] = _tachyon_recv(socket2)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "result" => "success",
-      "queue_id" => queue.id
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "result" => "success",
+             "queue_id" => queue.id
+           }
 
     [reply] = _tachyon_recv(socket3)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "result" => "success",
-      "queue_id" => queue.id
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "result" => "success",
+             "queue_id" => queue.id
+           }
 
     state = :sys.get_state(pid)
-    assert state.groups_map |> Map.keys == [user1.id, user2.id, user3.id, party.id]
+    assert state.groups_map |> Map.keys() == [user1.id, user2.id, user3.id, party.id]
+
     assert state.buckets == %{
-      25 => [user3.id, user2.id, user1.id],
-      20 => [party.id]
-    }
+             25 => [user3.id, user2.id, user1.id],
+             20 => [party.id]
+           }
 
     # Clear socket1
     _tachyon_recv_until(socket1)
@@ -794,11 +833,12 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     # Nothing should have happened
     state = :sys.get_state(pid)
-    assert state.groups_map |> Map.keys == [user1.id, user2.id, user3.id, party.id]
+    assert state.groups_map |> Map.keys() == [user1.id, user2.id, user3.id, party.id]
+
     assert state.buckets == %{
-      25 => [user3.id, user2.id, user1.id],
-      20 => [party.id]
-    }
+             25 => [user3.id, user2.id, user1.id],
+             20 => [party.id]
+           }
 
     # Okay, now increase the range 5 times
     send(pid, :increase_range)
@@ -816,22 +856,39 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     [reply] = _tachyon_recv(socket1)
     match_id = reply["match_id"]
+
     assert reply == %{
-      "cmd" => "s.matchmaking.match_ready",
-      "match_id" => match_id,
-      "queue_id" => queue.id
-    }
+             "cmd" => "s.matchmaking.match_ready",
+             "match_id" => match_id,
+             "queue_id" => queue.id
+           }
 
     pid = Matchmaking.get_queue_match_pid(match_id)
     state = :sys.get_state(pid)
-    team1 = state.balance.team_players[1] |> Enum.sort
-    team2 = state.balance.team_players[2] |> Enum.sort
+    team1 = state.balance.team_players[1] |> Enum.sort()
+    team2 = state.balance.team_players[2] |> Enum.sort()
 
     assert team1 == [user1.id, user2.id, user3.id]
     assert team2 == [puser1.id, puser2.id, puser3.id]
 
-    assert state.user_ids |> Enum.sort() == [user1.id, user2.id, user3.id, puser1.id, puser2.id, puser3.id]
-    assert state.pending_accepts |> Enum.sort() == [user1.id, user2.id, user3.id, puser1.id, puser2.id, puser3.id]
+    assert state.user_ids |> Enum.sort() == [
+             user1.id,
+             user2.id,
+             user3.id,
+             puser1.id,
+             puser2.id,
+             puser3.id
+           ]
+
+    assert state.pending_accepts |> Enum.sort() == [
+             user1.id,
+             user2.id,
+             user3.id,
+             puser1.id,
+             puser2.id,
+             puser3.id
+           ]
+
     assert state.accepted_users == []
     assert state.declined_users == []
 
@@ -866,13 +923,38 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     state = :sys.get_state(pid)
 
-    assert state.user_ids |> Enum.sort() == [user1.id, user2.id, user3.id, puser1.id, puser2.id, puser3.id]
+    assert state.user_ids |> Enum.sort() == [
+             user1.id,
+             user2.id,
+             user3.id,
+             puser1.id,
+             puser2.id,
+             puser3.id
+           ]
+
     assert state.pending_accepts == []
-    assert state.accepted_users |> Enum.sort() == [user1.id, user2.id, user3.id, puser1.id, puser2.id, puser3.id]
+
+    assert state.accepted_users |> Enum.sort() == [
+             user1.id,
+             user2.id,
+             user3.id,
+             puser1.id,
+             puser2.id,
+             puser3.id
+           ]
+
     assert state.declined_users == []
 
     lobby = Battle.get_lobby(lobby_id)
-    assert lobby.players |> Enum.sort() == [user1.id, user2.id, user3.id, puser1.id, puser2.id, puser3.id]
+
+    assert lobby.players |> Enum.sort() == [
+             user1.id,
+             user2.id,
+             user3.id,
+             puser1.id,
+             puser2.id,
+             puser3.id
+           ]
 
     assert Account.get_client_by_id(user1.id).team_number == 0
     assert Account.get_client_by_id(user2.id).team_number == 0
@@ -943,13 +1025,17 @@ defmodule Teiserver.TachyonMatchmakingTest do
     pid = Matchmaking.get_queue_wait_pid(queue.id)
     state = :sys.get_state(pid)
     assert Enum.count(state.buckets[17]) == 3
-    assert state.groups_map |> Map.keys |> Enum.sort == Enum.sort([party_id1, party_id2, party_id3])
+
+    assert state.groups_map |> Map.keys() |> Enum.sort() ==
+             Enum.sort([party_id1, party_id2, party_id3])
 
     send(pid, :tick)
 
     state = :sys.get_state(pid)
     assert Enum.count(state.buckets[17]) == 3
-    assert state.groups_map |> Map.keys |> Enum.sort == Enum.sort([party_id1, party_id2, party_id3])
+
+    assert state.groups_map |> Map.keys() |> Enum.sort() ==
+             Enum.sort([party_id1, party_id2, party_id3])
   end
 
   test "Group bigger than max teamsize", %{socket: socket1, user: _user1} do
@@ -988,15 +1074,19 @@ defmodule Teiserver.TachyonMatchmakingTest do
     refute state.groups_map |> Map.has_key?(party_id)
 
     [reply] = _tachyon_recv(socket1)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "queue_id" => queue.id,
-      "result" => "failure",
-      "reason" => "Group is larger than the queue team size"
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "queue_id" => queue.id,
+             "result" => "failure",
+             "reason" => "Group is larger than the queue team size"
+           }
   end
 
-  test "Test where there are multiple viable matches and it actually identifies the best one", %{socket: socket1, user: user1} do
+  test "Test where there are multiple viable matches and it actually identifies the best one", %{
+    socket: socket1,
+    user: user1
+  } do
     {:ok, queue} =
       Game.create_queue(%{
         "name" => "test_queue-1v1",
@@ -1025,21 +1115,24 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert state.groups_map == %{}
     assert state.buckets == %{}
 
-    group1 = user1.id
+    group1 =
+      user1.id
       |> Matchmaking.make_group_from_userid(queue)
       |> Map.merge(%{
         bucket: 30,
         search_distance: 5
       })
 
-    group2 = user2.id
+    group2 =
+      user2.id
       |> Matchmaking.make_group_from_userid(queue)
       |> Map.merge(%{
         bucket: 25,
         search_distance: 0
       })
 
-    group3 = user3.id
+    group3 =
+      user3.id
       |> Matchmaking.make_group_from_userid(queue)
       |> Map.merge(%{
         bucket: 24,
@@ -1051,15 +1144,15 @@ defmodule Teiserver.TachyonMatchmakingTest do
     Matchmaking.cast_queue_wait(queue.id, {:re_add_group, group3})
 
     state = :sys.get_state(pid)
-    assert state.groups_map |> Map.keys |> Enum.sort == [user1.id, user2.id, user3.id]
-    assert state.buckets[25] |> Enum.sort == [user1.id, user2.id, user3.id]
+    assert state.groups_map |> Map.keys() |> Enum.sort() == [user1.id, user2.id, user3.id]
+    assert state.buckets[25] |> Enum.sort() == [user1.id, user2.id, user3.id]
 
     # Re-add group 1 to ensure we can't duplicate
     Matchmaking.cast_queue_wait(queue.id, {:re_add_group, group1})
 
     state = :sys.get_state(pid)
-    assert state.groups_map |> Map.keys |> Enum.sort == [user1.id, user2.id, user3.id]
-    assert state.buckets[25] |> Enum.sort == [user1.id, user2.id, user3.id]
+    assert state.groups_map |> Map.keys() |> Enum.sort() == [user1.id, user2.id, user3.id]
+    assert state.buckets[25] |> Enum.sort() == [user1.id, user2.id, user3.id]
 
     # Clear sockets
     _tachyon_recv_until(socket1)
@@ -1113,11 +1206,12 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert state.groups_map |> Map.has_key?(party_id)
 
     [reply] = _tachyon_recv(socket1)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "queue_id" => queue.id,
-      "result" => "success"
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "queue_id" => queue.id,
+             "result" => "success"
+           }
 
     # Ensure the queue is listed as part of the party
     party = Account.get_party(party_id)
@@ -1144,11 +1238,12 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert state.groups_map |> Map.has_key?(party_id)
 
     [reply] = _tachyon_recv(socket1)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "queue_id" => queue.id,
-      "result" => "success"
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "queue_id" => queue.id,
+             "result" => "success"
+           }
 
     _tachyon_send(socket1, %{"cmd" => "c.party.invite", "userid" => user2.id})
     _tachyon_send(socket2, %{"cmd" => "c.party.accept", "party_id" => party_id})
@@ -1166,7 +1261,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
     # There is a setting to not require an invite accept/decline, all
     # the other tests assume it to be set to true, we need to test when
     # it is set to false
-    flunk "Not done"
+    flunk("Not done")
   end
 
   test "joining two or more queues at once", %{socket: socket1, user: user1} do
@@ -1211,11 +1306,12 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert state.groups_map |> Map.has_key?(user1.id)
 
     [reply] = _tachyon_recv(socket1)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "queue_id" => queue1.id,
-      "result" => "success"
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "queue_id" => queue1.id,
+             "result" => "success"
+           }
 
     # Now join the second
     _tachyon_send(socket1, %{cmd: "c.matchmaking.join_queue", queue_id: queue2.id})
@@ -1225,14 +1321,15 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     pid2 = Matchmaking.get_queue_wait_pid(queue2.id)
     state = :sys.get_state(pid2)
-    assert state.groups_map |> Map.keys == [user1.id]
+    assert state.groups_map |> Map.keys() == [user1.id]
 
     [reply] = _tachyon_recv(socket1)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "queue_id" => queue2.id,
-      "result" => "success"
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "queue_id" => queue2.id,
+             "result" => "success"
+           }
 
     # Now get user 2 to join a queue
     %{socket: socket2, user: user2} = tachyon_auth_setup()
@@ -1249,21 +1346,21 @@ defmodule Teiserver.TachyonMatchmakingTest do
     _tachyon_recv(socket3)
 
     state = :sys.get_state(pid1)
-    assert state.groups_map |> Map.keys == [user1.id, user2.id, user3.id]
+    assert state.groups_map |> Map.keys() == [user1.id, user2.id, user3.id]
 
     # Tick so our groups have expanded, we can then ensure they are later added to the right buckets
     send(pid1, :tick)
 
     pre_match_state1 = :sys.get_state(pid1)
     # pre_match_state2 = :sys.get_state(pid2)
-    assert pre_match_state1.groups_map |> Map.keys == [user1.id, user2.id, user3.id]
+    assert pre_match_state1.groups_map |> Map.keys() == [user1.id, user2.id, user3.id]
 
     # Trigger the queue server to make the match get started
     send(pid1, :increase_range)
     send(pid1, :tick)
 
     during_match_state1 = :sys.get_state(pid1)
-    assert during_match_state1.groups_map |> Map.keys == [user3.id]
+    assert during_match_state1.groups_map |> Map.keys() == [user3.id]
 
     during_match_state2 = :sys.get_state(pid2)
     assert during_match_state2.groups_map == %{}
@@ -1278,19 +1375,22 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert client3.queues == [queue1.id]
 
     [reply1] = _tachyon_recv(socket1)
+
     assert reply1 == %{
-      "cmd" => "s.matchmaking.match_ready",
-      "queue_id" => queue1.id,
-      "match_id" => reply1["match_id"]
-    }
+             "cmd" => "s.matchmaking.match_ready",
+             "queue_id" => queue1.id,
+             "match_id" => reply1["match_id"]
+           }
+
     match_id = reply1["match_id"]
 
     [reply2] = _tachyon_recv(socket2)
+
     assert reply2 == %{
-      "cmd" => "s.matchmaking.match_ready",
-      "queue_id" => queue1.id,
-      "match_id" => reply2["match_id"]
-    }
+             "cmd" => "s.matchmaking.match_ready",
+             "queue_id" => queue1.id,
+             "match_id" => reply2["match_id"]
+           }
 
     assert match_id == reply2["match_id"], message: "#{match_id} vs #{reply2["match_id"]}"
 
@@ -1315,23 +1415,25 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     # Check wait state
     post_match_state1 = :sys.get_state(pid1)
-    assert post_match_state1.groups_map |> Map.keys == [user1.id, user3.id]
+    assert post_match_state1.groups_map |> Map.keys() == [user1.id, user3.id]
     assert post_match_state1.paused_groups_map == %{}
+
     assert post_match_state1.buckets == %{
-      0 => [user3.id],
-      1 => [user3.id],
-      2 => [user3.id],
-      20 => [user1.id],
-      21 => [user1.id],
-      22 => [user1.id]
-    }
+             0 => [user3.id],
+             1 => [user3.id],
+             2 => [user3.id],
+             20 => [user1.id],
+             21 => [user1.id],
+             22 => [user1.id]
+           }
 
     post_match_state2 = :sys.get_state(pid2)
-    assert post_match_state2.groups_map |> Map.keys == [user1.id]
+    assert post_match_state2.groups_map |> Map.keys() == [user1.id]
     assert post_match_state2.paused_groups_map == %{}
+
     assert post_match_state2.buckets == %{
-      21 => [user1.id],
-    }
+             21 => [user1.id]
+           }
 
     # Ensure the clients are updated
     client1 = Account.get_client_by_id(user1.id)
@@ -1345,18 +1447,20 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     # And finally, what do the user connections see?
     [reply1] = _tachyon_recv(socket1)
+
     assert reply1 == %{
-      "cmd" => "s.matchmaking.match_cancelled",
-      "queue_id" => queue1.id,
-      "match_id" => match_id
-    }
+             "cmd" => "s.matchmaking.match_cancelled",
+             "queue_id" => queue1.id,
+             "match_id" => match_id
+           }
 
     [reply2] = _tachyon_recv(socket2)
+
     assert reply2 == %{
-      "cmd" => "s.matchmaking.match_declined",
-      "queue_id" => queue1.id,
-      "match_id" => match_id
-    }
+             "cmd" => "s.matchmaking.match_declined",
+             "queue_id" => queue1.id,
+             "match_id" => match_id
+           }
   end
 
   test "Moderated players can't do matchmaking", %{socket: socket1, user: user1} do
@@ -1374,13 +1478,15 @@ defmodule Teiserver.TachyonMatchmakingTest do
         }
       })
 
-    {:ok, _action} = Moderation.create_action(%{
-      "reason" => "login_with_warning_test",
-      "target_id" => user1.id,
-      "restrictions" => ["Matchmaking"],
-      "score_modifier" => 0,
-      "expires" => Timex.now |> Timex.shift(days: 1)
-    })
+    {:ok, _action} =
+      Moderation.create_action(%{
+        "reason" => "login_with_warning_test",
+        "target_id" => user1.id,
+        "restrictions" => ["Matchmaking"],
+        "score_modifier" => 0,
+        "expires" => Timex.now() |> Timex.shift(days: 1)
+      })
+
     Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user1.id)
     assert User.is_restricted?(user1.id, "Matchmaking")
 
@@ -1392,12 +1498,13 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert state.groups_map == %{}
 
     [reply] = _tachyon_recv(socket1)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "queue_id" => queue.id,
-      "result" => "failure",
-      "reason" => "Moderation action"
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "queue_id" => queue.id,
+             "result" => "failure",
+             "reason" => "Moderation action"
+           }
 
     # Now try it as part of a party
     %{socket: socket2, user: _user2} = tachyon_auth_setup()
@@ -1422,11 +1529,12 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert state.groups_map == %{}
 
     [reply] = _tachyon_recv(socket2)
+
     assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "queue_id" => queue.id,
-      "result" => "failure",
-      "reason" => "Moderation action"
-    }
+             "cmd" => "s.matchmaking.join_queue",
+             "queue_id" => queue.id,
+             "result" => "failure",
+             "reason" => "Moderation action"
+           }
   end
 end

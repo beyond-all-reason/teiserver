@@ -23,14 +23,17 @@
 
 <br />
 
-<%= central_component "picker_script",
+<%= central_component("picker_script",
   module: Central.Account.UserLib,
   name: "account_user",
   title: "User search"
-%>
+) %>
 <div class="row">
   <div class="col-md-3">
-    <a href={Routes.admin_user_path(@conn, :edit_permissions, @user)} class={"btn btn-outline-#{bsname}"}>
+    <a
+      href={Routes.admin_user_path(@conn, :edit_permissions, @user)}
+      class={"btn btn-outline-#{bsname}"}
+    >
       Edit permissions
     </a>
   </div>
@@ -39,7 +42,7 @@
       <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
       <div class="row">
         <div class="col-md-9">
-          <%= render CentralWeb.Account.UserView, "picker.html" %>
+          <%= render(CentralWeb.Account.UserView, "picker.html") %>
         </div>
         <div class="col-md-3">
           <button type="submit" class={"btn btn-#{bsname} btn-block"}>
@@ -57,32 +60,32 @@
     <%= for {m, sections} <- @modules do %>
       <tr class="module-tr">
         <td class="module-td">
-          <%= m |> String.capitalize %>
+          <%= m |> String.capitalize() %>
         </td>
         <td>&nbsp;</td>
       </tr>
       <%= for {s, permissions} <- sections do %>
-        <%
-          labels = permissions
+        <% labels =
+          permissions
           |> Enum.filter(fn p ->
             allow?(@current_user, p)
           end)
           |> Enum.map(fn p ->
             String.replace(p, "#{m}.#{s}.", "")
-            |> String.capitalize
+            |> String.capitalize()
           end)
 
-          sel_count = permissions
+        sel_count =
+          permissions
           |> Enum.filter(fn p ->
             Enum.member?(@user.permissions, p)
           end)
-          |> Enum.count
-        %>
+          |> Enum.count() %>
 
         <%= if sel_count > 0 do %>
           <tr class={if labels == [], do: "hide-row"}>
             <td class="section-td">
-              <%= s |> String.capitalize %>
+              <%= s |> String.capitalize() %>
             </td>
             <td>
               <%= for {permission, label} <- Enum.zip([permissions, labels]) do %>
@@ -95,7 +98,6 @@
             </td>
           </tr>
         <% end %>
-
       <% end %>
     <% end %>
   </tbody>

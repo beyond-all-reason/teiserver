@@ -14,16 +14,18 @@ defmodule Teiserver.Battle.LobbyChat do
 
   def say(userid, "!clan" <> _, _lobby_id) do
     client = Account.get_client_by_id(userid)
-    {:ok, code} = Account.create_code(%{
-      value: UUID.uuid1(),
-      purpose: "one_time_login",
-      expires: Timex.now() |> Timex.shift(minutes: 5),
-      user_id: userid,
-      metadata: %{
-        ip: client.ip,
-        redirect: "/teiserver/account/parties",
-      }
-    })
+
+    {:ok, code} =
+      Account.create_code(%{
+        value: ExULID.ULID.generate(),
+        purpose: "one_time_login",
+        expires: Timex.now() |> Timex.shift(minutes: 5),
+        user_id: userid,
+        metadata: %{
+          ip: client.ip,
+          redirect: "/teiserver/account/parties"
+        }
+      })
 
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
@@ -46,29 +48,50 @@ defmodule Teiserver.Battle.LobbyChat do
 
   @spec do_say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def do_say(userid, "$ " <> msg, lobby_id), do: do_say(userid, "$#{msg}", lobby_id)
+
   def do_say(userid, msg, lobby_id) do
     msg = trim_message(msg)
     user = User.get_user_by_id(userid)
+
     if User.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    blacklisted = (User.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg))
+    blacklisted = User.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
 
     if blacklisted do
       User.shadowban_user(user.id)
     end
 
-    allowed = cond do
-      User.is_restricted?(user, ["All chat", "Lobby chat"]) -> false
-      String.slice(msg, 0..0) == "!" and User.is_restricted?(user, ["Host commands"]) -> false
-      blacklisted -> false
-      Enum.member?([
-        "!y", "!vote y", "!yes", "!vote yes",
-        "!n", "!vote n", "!no", "!vote no",
-        ], String.downcase(msg)) and User.is_restricted?(user, ["Voting"]) -> false
-      true -> true
-    end
+    allowed =
+      cond do
+        User.is_restricted?(user, ["All chat", "Lobby chat"]) ->
+          false
+
+        String.slice(msg, 0..0) == "!" and User.is_restricted?(user, ["Host commands"]) ->
+          false
+
+        blacklisted ->
+          false
+
+        Enum.member?(
+          [
+            "!y",
+            "!vote y",
+            "!yes",
+            "!vote yes",
+            "!n",
+            "!vote n",
+            "!no",
+            "!vote no"
+          ],
+          String.downcase(msg)
+        ) and User.is_restricted?(user, ["Voting"]) ->
+          false
+
+        true ->
+          true
+      end
 
     if allowed do
       persist_message(user, msg, lobby_id, :say)
@@ -101,26 +124,46 @@ defmodule Teiserver.Battle.LobbyChat do
   def sayex(userid, msg, lobby_id) do
     msg = trim_message(msg)
     user = User.get_user_by_id(userid)
+
     if User.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    blacklisted = (User.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg))
+    blacklisted = User.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
 
     if blacklisted do
       User.shadowban_user(user.id)
     end
 
-    allowed = cond do
-      User.is_restricted?(user, ["All chat", "Lobby chat", "Direct chat"]) -> false
-      String.starts_with?(msg, "!") and User.is_restricted?(user, ["Host commands"]) -> false
-      blacklisted -> false
-      Enum.member?([
-        "!y", "!vote y", "!yes", "!vote yes",
-        "!n", "!vote n", "!no", "!vote no",
-        ], String.downcase(msg)) and User.is_restricted?(user, ["Voting"]) -> false
-      true -> true
-    end
+    allowed =
+      cond do
+        User.is_restricted?(user, ["All chat", "Lobby chat", "Direct chat"]) ->
+          false
+
+        String.starts_with?(msg, "!") and User.is_restricted?(user, ["Host commands"]) ->
+          false
+
+        blacklisted ->
+          false
+
+        Enum.member?(
+          [
+            "!y",
+            "!vote y",
+            "!yes",
+            "!vote yes",
+            "!n",
+            "!vote n",
+            "!no",
+            "!vote no"
+          ],
+          String.downcase(msg)
+        ) and User.is_restricted?(user, ["Voting"]) ->
+          false
+
+        true ->
+          true
+      end
 
     if allowed do
       persist_message(user, msg, lobby_id, :sayex)
@@ -142,33 +185,54 @@ defmodule Teiserver.Battle.LobbyChat do
           message: msg
         }
       )
+
       :ok
     else
       {:error, "Permission denied"}
     end
   end
 
-  @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
+  @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) ::
+          :ok | {:error, any}
   def sayprivateex(from_id, to_id, msg, lobby_id) do
     msg = trim_message(msg)
     sender = User.get_user_by_id(from_id)
 
-    blacklisted = (User.is_bot?(from_id) == false and WordLib.blacklisted_phrase?(msg))
+    blacklisted = User.is_bot?(from_id) == false and WordLib.blacklisted_phrase?(msg)
 
     if blacklisted do
       User.shadowban_user(from_id)
     end
 
-    allowed = cond do
-      User.is_restricted?(sender, ["All chat", "Lobby chat", "Direct chat"]) -> false
-      String.starts_with?(msg, "!") and User.is_restricted?(sender, ["Host commands"]) -> false
-      blacklisted -> false
-      Enum.member?([
-        "!y", "!vote y", "!yes", "!vote yes",
-        "!n", "!vote n", "!no", "!vote no",
-        ], String.downcase(msg)) and User.is_restricted?(sender, ["Voting"]) -> false
-      true -> true
-    end
+    allowed =
+      cond do
+        User.is_restricted?(sender, ["All chat", "Lobby chat", "Direct chat"]) ->
+          false
+
+        String.starts_with?(msg, "!") and User.is_restricted?(sender, ["Host commands"]) ->
+          false
+
+        blacklisted ->
+          false
+
+        Enum.member?(
+          [
+            "!y",
+            "!vote y",
+            "!yes",
+            "!vote yes",
+            "!n",
+            "!vote n",
+            "!no",
+            "!vote no"
+          ],
+          String.downcase(msg)
+        ) and User.is_restricted?(sender, ["Voting"]) ->
+          false
+
+        true ->
+          true
+      end
 
     if allowed do
       PubSub.broadcast(
@@ -187,6 +251,7 @@ defmodule Teiserver.Battle.LobbyChat do
           message_content: msg
         }
       )
+
       :ok
     else
       {:error, "Permission denied"}
@@ -197,35 +262,39 @@ defmodule Teiserver.Battle.LobbyChat do
   def persist_message(user, msg, lobby_id, type) do
     lobby = Lobby.get_lobby(lobby_id)
 
-    persist = cond do
-      lobby == nil -> false
-      User.is_bot?(user) == true and String.slice(msg, 0..1) == "* " -> false
-      true -> true
-    end
-
-    {userid, content} = if User.is_bot?(user) do
-      case Regex.run(~r/^<(.*?)> (.+)$/u, msg) do
-        [_, username, remainder] ->
-          userid = User.get_userid(username) || user.id
-          {userid, "g: #{remainder}"}
-        _ ->
-          {user.id, msg}
+    persist =
+      cond do
+        lobby == nil -> false
+        User.is_bot?(user) == true and String.slice(msg, 0..1) == "* " -> false
+        true -> true
       end
-    else
-      {user.id, msg}
-    end
+
+    {userid, content} =
+      if User.is_bot?(user) do
+        case Regex.run(~r/^<(.*?)> (.+)$/u, msg) do
+          [_, username, remainder] ->
+            userid = User.get_userid(username) || user.id
+            {userid, "g: #{remainder}"}
+
+          _ ->
+            {user.id, msg}
+        end
+      else
+        {user.id, msg}
+      end
 
     if persist do
-      content = case type do
-        :sayex -> "sayex: #{content}"
-        _ -> content
-      end
+      content =
+        case type do
+          :sayex -> "sayex: #{content}"
+          _ -> content
+        end
 
       Chat.create_lobby_message(%{
         content: content,
         lobby_guid: Battle.get_lobby_match_uuid(lobby_id),
         inserted_at: Timex.now(),
-        user_id: userid,
+        user_id: userid
       })
     end
   end
@@ -235,13 +304,14 @@ defmodule Teiserver.Battle.LobbyChat do
       content: "system: #{content}",
       lobby_guid: Battle.get_lobby_match_uuid(lobby_id),
       inserted_at: Timex.now(),
-      user_id: Coordinator.get_coordinator_userid(),
+      user_id: Coordinator.get_coordinator_userid()
     })
   end
 
   defp trim_message(msg) when is_list(msg) do
     Enum.join(msg, "\n") |> trim_message
   end
+
   defp trim_message(msg) do
     String.trim(msg)
   end

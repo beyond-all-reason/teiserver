@@ -1,52 +1,52 @@
 <% bsname = view_colour() %>
 
-<%= central_component "section_menu_button",
+<%= central_component("section_menu_button",
   name: "list",
   label: "List",
   active: @active,
   icon: "fa-regular fa-bars",
   bsname: bsname,
   url: Routes.ts_admin_match_path(@conn, :index)
-%>
+) %>
 
-<%= central_component "section_menu_button",
+<%= central_component("section_menu_button",
   name: "advanced_search",
   label: "Advanced search",
   active: @active,
   icon: Central.Helpers.StylingHelper.icon(:search),
   bsname: bsname,
   url: Routes.ts_admin_match_path(@conn, :index) <> "?search=true"
-%>
+) %>
 
 <%= if @active == "user" do %>
-  <%= central_component "section_menu_button",
+  <%= central_component("section_menu_button",
     name: "user",
     label: "User",
     active: @active,
     icon: "fa-regular fa-user",
     bsname: bsname,
     url: @conn.request_path
-  %>
+  ) %>
 <% end %>
 
 <div class="float-end">
   <%= if assigns[:match] != nil do %>
-    <%= central_component "section_menu_button",
+    <%= central_component("section_menu_button",
       name: "user_view",
       label: "Standard view",
       active: @active,
       icon: Central.Account.UserLib.icon(),
       bsname: bsname,
       url: Routes.ts_battle_match_path(@conn, :show, @match.id)
-    %>
-    
-    <%= central_component "section_menu_button",
+    ) %>
+
+    <%= central_component("section_menu_button",
       name: "chat",
       label: "Chat",
       active: @active,
       icon: Teiserver.Chat.LobbyMessageLib.icon(),
       bsname: bsname,
       url: Routes.ts_admin_lobby_path(@conn, :lobby_chat, @match.uuid)
-    %>
+    ) %>
   <% end %>
 </div>

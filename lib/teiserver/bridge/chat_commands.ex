@@ -9,7 +9,13 @@ defmodule Teiserver.Bridge.ChatCommands do
   @always_allow ~w(whatwas unit)
 
   @spec handle(Nostrum.Struct.Message.t()) :: any
-  def handle(%Nostrum.Struct.Message{id: message_id, author: %{id: author_id}, channel_id: channel_id, content: "$" <> content, attachments: []}) do
+  def handle(%Nostrum.Struct.Message{
+        id: message_id,
+        author: %{id: author_id},
+        channel_id: channel_id,
+        content: "$" <> content,
+        attachments: []
+      }) do
     [cmd | remaining] = String.split(content, " ")
     remaining = Enum.join(remaining, " ")
     user = Account.get_user_by_discord_id(author_id)
@@ -29,13 +35,17 @@ defmodule Teiserver.Bridge.ChatCommands do
   end
 
   def handle_command({_user, _discord_id, message_id}, "gdt", _remaining, channel_id) do
-    gdt_forum = Application.get_env(:central, DiscordBridge)[:bridges]
+    gdt_forum =
+      Application.get_env(:central, DiscordBridge)[:bridges]
       |> Enum.filter(fn {_, name} -> name == "gdt-discussion" end)
 
     case gdt_forum do
       [{forum_id, _}] ->
         # Post message to channel
-        Api.create_message(channel_id, "Thank you for your suggestion, the game design team will be discussing it. Once they have finished discussing it they will vote on it and post an update to this thread.")
+        Api.create_message(
+          channel_id,
+          "Thank you for your suggestion, the game design team will be discussing it. Once they have finished discussing it they will vote on it and post an update to this thread."
+        )
 
         # Delete the message that was posted
         Api.delete_message(channel_id, message_id)
@@ -44,25 +54,30 @@ defmodule Teiserver.Bridge.ChatCommands do
         {:ok, channel} = Api.get_channel(channel_id)
 
         # Create new thread in gdt-discussion
-        {:ok, thread} = Api.start_thread(forum_id, %{
-          name: "Discussion for #{channel.name}",
-          message: %{
-            content: "Thread to discuss #{channel.name} - <##{channel_id}>",
-          },
-          type: 11
-        })
+        {:ok, thread} =
+          Api.start_thread(forum_id, %{
+            name: "Discussion for #{channel.name}",
+            message: %{
+              content: "Thread to discuss #{channel.name} - <##{channel_id}>"
+            },
+            type: 11
+          })
 
-        {:ok, message} = Api.create_message(thread.id, %{
-          content: "Thread to discuss #{channel.name} - <##{channel_id}>"
-        })
+        {:ok, message} =
+          Api.create_message(thread.id, %{
+            content: "Thread to discuss #{channel.name} - <##{channel_id}>"
+          })
 
         # Pin message
         Api.add_pinned_channel_message(thread.id, message.id)
 
         # Add GDTs to thread
-        Account.list_users(search: [
-          gdt_member: "GDT"
-        ], select: [:data])
+        Account.list_users(
+          search: [
+            gdt_member: "GDT"
+          ],
+          select: [:data]
+        )
         |> Enum.map(fn %{data: data} -> data["discord_id"] end)
         |> Enum.reject(&(&1 == nil))
         |> Enum.each(fn user_discord_id ->
@@ -77,7 +92,8 @@ defmodule Teiserver.Bridge.ChatCommands do
   end
 
   def handle_command({_user, _discord_id, _message_id}, "whatwas", remaining, channel) do
-    name = remaining
+    name =
+      remaining
       |> String.trim()
       |> String.downcase()
 
@@ -89,21 +105,31 @@ defmodule Teiserver.Bridge.ChatCommands do
         reply(channel, "#{name} is the internal name for #{actual_name |> String.capitalize()}")
 
       {:reused, {{_new_code, new_name}, {_old_code, old_name}}} ->
-        reply(channel, "#{name |> String.capitalize()} was renamed to #{new_name |> String.capitalize()} and #{old_name |> String.capitalize()} was renamed to #{name |> String.capitalize()}")
+        reply(
+          channel,
+          "#{name |> String.capitalize()} was renamed to #{new_name |> String.capitalize()} and #{old_name |> String.capitalize()} was renamed to #{name |> String.capitalize()}"
+        )
 
       {:unchanged, _} ->
         reply(channel, "#{name |> String.capitalize()} did not have a name change")
 
       {:found_old, {_code, new_name}} ->
-        reply(channel, "#{name |> String.capitalize()} is now called #{new_name |> String.capitalize()}")
+        reply(
+          channel,
+          "#{name |> String.capitalize()} is now called #{new_name |> String.capitalize()}"
+        )
 
       {:found_new, {_code, old_name}} ->
-        reply(channel, "#{name |> String.capitalize()} used to be called #{old_name |> String.capitalize()}")
+        reply(
+          channel,
+          "#{name |> String.capitalize()} used to be called #{old_name |> String.capitalize()}"
+        )
     end
   end
 
   def handle_command({_user, _discord_id, _message_id}, "unit", remaining, channel) do
-    name = remaining
+    name =
+      remaining
       |> String.trim()
       |> String.downcase()
 
@@ -121,9 +147,12 @@ defmodule Teiserver.Bridge.ChatCommands do
         reply(channel, "https://www.beyondallreason.info/unit/#{code}")
 
       {:found_old, {_code, new_name}} ->
-        reply(channel, "Can't find #{name |> String.capitalize()}, did you mean #{new_name |> String.capitalize()}?")
+        reply(
+          channel,
+          "Can't find #{name |> String.capitalize()}, did you mean #{new_name |> String.capitalize()}?"
+        )
 
-      {:found_new, {code ,_old_name}} ->
+      {:found_new, {code, _old_name}} ->
         reply(channel, "https://www.beyondallreason.info/unit/#{code}")
     end
   end
@@ -135,6 +164,7 @@ defmodule Teiserver.Bridge.ChatCommands do
   @spec allow?(String.t(), map()) :: boolean
   defp allow?("discord", _), do: true
   defp allow?("gdt", user), do: User.has_any_role?(user, ["Admin", "Moderator", "GDT"])
+
   defp allow?(cmd, user) do
     if Enum.member?(@always_allow, cmd) do
       true

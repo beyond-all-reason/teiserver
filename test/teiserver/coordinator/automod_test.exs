@@ -1,7 +1,7 @@
 defmodule Teiserver.Coordinator.AutomodTest do
   use Central.ServerCase, async: false
-  alias Central.{Config, Logging}
-  alias Teiserver.{Account, User, Client, Moderation}
+  alias Central.{Config}
+  alias Teiserver.{Account, User, Client, Moderation, Logging}
   alias Teiserver.Coordinator.{CoordinatorServer, AutomodServer}
   alias Teiserver.Account.CalculateSmurfKeyTask
 
@@ -20,15 +20,17 @@ defmodule Teiserver.Coordinator.AutomodTest do
   end
 
   test "hw_ban", %{banned_user: banned_user} do
-    {:ok, ban} = Moderation.create_ban(%{
-      enabled: true,
-      key_values: ["uOGXziwWC1mCePGsh0tTQg==", "some_other_value"],
-      added_by_id: banned_user.id,
-      source_id: banned_user.id,
-      reason: "hw-ban"
-    })
+    {:ok, ban} =
+      Moderation.create_ban(%{
+        enabled: true,
+        key_values: ["uOGXziwWC1mCePGsh0tTQg==", "some_other_value"],
+        added_by_id: banned_user.id,
+        source_id: banned_user.id,
+        reason: "hw-ban"
+      })
 
     good_user = new_user()
+
     good_stats = %{
       "hardware:cpuinfo" => "123",
       "hardware:gpuinfo" => "123",
@@ -45,6 +47,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
     :timer.sleep(100)
 
     bad_user = new_user()
+
     bad_stats = %{
       "hardware:cpuinfo" => "xyz",
       "hardware:gpuinfo" => "xyz",
@@ -68,13 +71,14 @@ defmodule Teiserver.Coordinator.AutomodTest do
   end
 
   test "chobby_hash_ban", %{banned_user: banned_user} do
-    {:ok, ban} = Moderation.create_ban(%{
-      enabled: true,
-      key_values: ["123456789 abcdefghij"],
-      added_by_id: banned_user.id,
-      source_id: banned_user.id,
-      reason: "hw-ban"
-    })
+    {:ok, ban} =
+      Moderation.create_ban(%{
+        enabled: true,
+        key_values: ["123456789 abcdefghij"],
+        added_by_id: banned_user.id,
+        source_id: banned_user.id,
+        reason: "hw-ban"
+      })
 
     good_user1 = new_user()
     Account.create_smurf_key(good_user1.id, "chobby_hash", "123456789")
@@ -108,13 +112,15 @@ defmodule Teiserver.Coordinator.AutomodTest do
     Account.create_smurf_key(bad_user1.id, "chobby_hash", "123456789")
     :timer.sleep(1_000)
 
-    {:ok, _ban} = Moderation.create_ban(%{
-      enabled: true,
-      key_values: ["123456789"],
-      added_by_id: banned_user.id,
-      source_id: banned_user.id,
-      reason: "hw-ban"
-    })
+    {:ok, _ban} =
+      Moderation.create_ban(%{
+        enabled: true,
+        key_values: ["123456789"],
+        added_by_id: banned_user.id,
+        source_id: banned_user.id,
+        reason: "hw-ban"
+      })
+
     :timer.sleep(1_000)
 
     bad_user2 = new_user()
@@ -130,13 +136,14 @@ defmodule Teiserver.Coordinator.AutomodTest do
   end
 
   test "delayed data", %{banned_user: banned_user} do
-    {:ok, _ban} = Moderation.create_ban(%{
-      enabled: true,
-      key_values: ["uOGXziwWC1mCePGsh0tTQg=="],
-      added_by_id: banned_user.id,
-      source_id: banned_user.id,
-      reason: "hw-ban"
-    })
+    {:ok, _ban} =
+      Moderation.create_ban(%{
+        enabled: true,
+        key_values: ["uOGXziwWC1mCePGsh0tTQg=="],
+        added_by_id: banned_user.id,
+        source_id: banned_user.id,
+        reason: "hw-ban"
+      })
 
     Teiserver.Battle.MatchMonitorServer.do_start()
 
@@ -156,23 +163,29 @@ defmodule Teiserver.Coordinator.AutomodTest do
     result = AutomodServer.check_user(delayed_user.id)
     assert result == "No action"
     stats = Account.get_user_stat_data(delayed_user.id)
-    assert match?(%{
-      "country" => "??",
-      "bot" => false,
-      "last_ip" => "127.0.0.1",
-      "lobby_hash" => "t1 t2",
-      "rank" => 0
-    }, stats)
+
+    assert match?(
+             %{
+               "country" => "??",
+               "bot" => false,
+               "last_ip" => "127.0.0.1",
+               "lobby_hash" => "t1 t2",
+               "rank" => 0
+             },
+             stats
+           )
+
     refute Map.has_key?(stats, "hardware:cpuinfo")
 
     # Now we send some data from the standard user
-    encoded = %{
-      "username" => delayed_user.name,
-      "CPU" => "xyz",
-      "GPU" => "xyz",
-      "OS" => "xyz",
-      "RAM" => "xyz"
-    }
+    encoded =
+      %{
+        "username" => delayed_user.name,
+        "CPU" => "xyz",
+        "GPU" => "xyz",
+        "OS" => "xyz",
+        "RAM" => "xyz"
+      }
       |> Jason.encode!()
       |> :zlib.compress()
       |> Base.url_encode64()
@@ -182,6 +195,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
       "recipient_id" => monitor_user.id,
       "message" => "user_info " <> encoded
     })
+
     :timer.sleep(200)
     assert Enum.count(Account.list_smurf_keys(search: [user_id: delayed_user.id])) == 1
 
@@ -198,6 +212,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
       "recipient_id" => monitor_user.id,
       "message" => "user_info " <> encoded
     })
+
     :timer.sleep(200)
 
     # Should now have smurf keys
@@ -208,14 +223,16 @@ defmodule Teiserver.Coordinator.AutomodTest do
     assert Map.has_key?(stats, "hardware:cpuinfo")
 
     # Should also have an automod report against them
-    [log] = Logging.list_audit_logs(search: [
-      actions: [
-          "Moderation:Ban enacted",
+    [log] =
+      Logging.list_audit_logs(
+        search: [
+          actions: [
+            "Moderation:Ban enacted"
+          ],
+          details_equal: {"target_user_id", delayed_user.id |> to_string}
         ],
-      details_equal: {"target_user_id", delayed_user.id |> to_string}
-      ],
-      order_by: "Newest first"
-    )
+        order_by: "Newest first"
+      )
 
     action_id = log.details["action_id"]
 

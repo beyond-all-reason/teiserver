@@ -14,7 +14,9 @@ defmodule Central.Repo.Migrations.ClientEvent do
       add :hash, :string, primary_key: true
       add :last_updated, :utc_datetime
 
-      add :property_type_id, references(:teiserver_telemetry_property_types, on_delete: :nothing), primary_key: true
+      add :property_type_id, references(:teiserver_telemetry_property_types, on_delete: :nothing),
+        primary_key: true
+
       add :value, :string
     end
 
@@ -22,7 +24,9 @@ defmodule Central.Repo.Migrations.ClientEvent do
       add :user_id, references(:account_users, on_delete: :nothing), primary_key: true
       add :last_updated, :utc_datetime
 
-      add :property_type_id, references(:teiserver_telemetry_property_types, on_delete: :nothing), primary_key: true
+      add :property_type_id, references(:teiserver_telemetry_property_types, on_delete: :nothing),
+        primary_key: true
+
       add :value, :string
     end
 

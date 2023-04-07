@@ -21,12 +21,13 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
-    badge_types = Account.list_badge_types(
-      search: [
-        basic_search: Map.get(params, "s", "") |> String.trim,
-      ],
-      order_by: "Name (A-Z)"
-    )
+    badge_types =
+      Account.list_badge_types(
+        search: [
+          basic_search: Map.get(params, "s", "") |> String.trim()
+        ],
+        order_by: "Name (A-Z)"
+      )
 
     conn
     |> assign(:badge_types, badge_types)
@@ -35,12 +36,13 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
-    badge_type = Account.get_badge_type!(id, [
-      joins: [],
-    ])
+    badge_type =
+      Account.get_badge_type!(id,
+        joins: []
+      )
 
     badge_type
-    |> BadgeTypeLib.make_favourite
+    |> BadgeTypeLib.make_favourite()
     |> insert_recently(conn)
 
     conn
@@ -51,10 +53,11 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
 
   @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def new(conn, _params) do
-    changeset = Account.change_badge_type(%BadgeType{
-      icon: "fa-solid fa-" <> StylingHelper.random_icon(),
-      colour: StylingHelper.random_colour()
-    })
+    changeset =
+      Account.change_badge_type(%BadgeType{
+        icon: "fa-solid fa-" <> StylingHelper.random_icon(),
+        colour: StylingHelper.random_colour()
+      })
 
     conn
     |> assign(:changeset, changeset)
@@ -99,6 +102,7 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
         conn
         |> put_flash(:info, "Badge Type updated successfully.")
         |> redirect(to: Routes.ts_admin_badge_type_path(conn, :index))
+
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         |> assign(:badge_type, badge_type)
@@ -112,7 +116,7 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
     badge_type = Account.get_badge_type!(id)
 
     badge_type
-    |> BadgeTypeLib.make_favourite
+    |> BadgeTypeLib.make_favourite()
     |> remove_recently(conn)
 
     {:ok, _badge_type} = Account.delete_badge_type(badge_type)

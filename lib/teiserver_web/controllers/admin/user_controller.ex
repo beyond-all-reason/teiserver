@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.UserController do
   use CentralWeb, :controller
 
-  alias Teiserver.{Account, Chat, Game, Moderation}
+  alias Teiserver.{Account, Chat, Game}
   alias Teiserver.Game.MatchRatingLib
   alias Central.Account.User
   alias Teiserver.Account.UserLib
@@ -51,68 +51,84 @@ defmodule TeiserverWeb.Admin.UserController do
   def search(conn, %{"search" => params}) do
     params = Map.merge(search_defaults(conn), params)
 
-    id_list = Account.list_user_stats(
-      search: [
-        data_contains: {"previous_names", params["previous_names"]}
-      ],
-      select: [:user_id]
-    )
-    |> Enum.map(fn s -> s.user_id end)
+    id_list =
+      Account.list_user_stats(
+        search: [
+          data_contains: {"previous_names", params["previous_names"]}
+        ],
+        select: [:user_id]
+      )
+      |> Enum.map(fn s -> s.user_id end)
 
     users =
-      Account.list_users(
-        search: [
-          admin_group: conn,
-          name_or_email: Map.get(params, "name", "") |> String.trim(),
-          bot: params["bot"],
-          moderator: params["moderator"],
-          verified: params["verified"],
-          trusted: params["trusted"],
-          tester: params["tester"],
-          streamer: params["streamer"],
-          donor: params["donor"],
-          contributor: params["contributor"],
-          developer: params["developer"],
-          ip: params["ip"],
-          lobby_client: params["lobby_client"],
-          previous_names: params["previous_names"],
-          mod_action: params["mod_action"]
-        ],
-        limit: params["limit"] || 50,
-        order_by: params["order"] || "Name (A-Z)"
-      )
-      ++ Account.list_users(search: [id_in: id_list])
-      |> Enum.uniq
+      (Account.list_users(
+         search: [
+           admin_group: conn,
+           name_or_email: Map.get(params, "name", "") |> String.trim(),
+           bot: params["bot"],
+           moderator: params["moderator"],
+           verified: params["verified"],
+           trusted: params["trusted"],
+           tester: params["tester"],
+           streamer: params["streamer"],
+           donor: params["donor"],
+           contributor: params["contributor"],
+           developer: params["developer"],
+           vip: params["vip"],
+           caster: params["caster"],
+           tournament_player: params["tournament-player"],
+           ip: params["ip"],
+           lobby_client: params["lobby_client"],
+           previous_names: params["previous_names"],
+           mod_action: params["mod_action"]
+         ],
+         limit: params["limit"] || 50,
+         order_by: params["order"] || "Name (A-Z)"
+       ) ++
+         Account.list_users(search: [id_in: id_list]))
+      |> Enum.uniq()
 
-    # if Enum.count(users) == 1 do
-    #   conn
-    #   |> redirect(to: Routes.ts_admin_user_path(conn, :show, hd(users).id))
-    # else
-      conn
-      |> add_breadcrumb(name: "User search", url: conn.request_path)
-      |> assign(:params, params)
-      |> assign(:users, users)
-      |> render("index.html")
-    # end
+    conn
+    |> add_breadcrumb(name: "User search", url: conn.request_path)
+    |> assign(:params, params)
+    |> assign(:users, users)
+    |> render("index.html")
   end
 
   @spec data_search(Plug.Conn.t(), map) :: Plug.Conn.t()
   def data_search(conn, params) do
-    users = if params["data_search"] == nil do
-      []
-    else
-      id_list = Teiserver.Account.list_user_stats(limit: :infinity)
-        |> Teiserver.Account.UserStatLib.field_contains("hardware:gpuinfo", params["data_search"]["gpu"])
-        |> Teiserver.Account.UserStatLib.field_contains("hardware:cpuinfo", params["data_search"]["cpu"])
-        |> Teiserver.Account.UserStatLib.field_contains("hardware:osinfo", params["data_search"]["os"])
-        |> Teiserver.Account.UserStatLib.field_contains("hardware:raminfo", params["data_search"]["ram"])
-        |> Teiserver.Account.UserStatLib.field_contains(params["data_search"]["custom_field"], params["data_search"]["custom_value"])
-        |> Stream.map(fn stats -> stats.user_id end)
-        |> Stream.take(50)
-        |> Enum.to_list
+    users =
+      if params["data_search"] == nil do
+        []
+      else
+        id_list =
+          Teiserver.Account.list_user_stats(limit: :infinity)
+          |> Teiserver.Account.UserStatLib.field_contains(
+            "hardware:gpuinfo",
+            params["data_search"]["gpu"]
+          )
+          |> Teiserver.Account.UserStatLib.field_contains(
+            "hardware:cpuinfo",
+            params["data_search"]["cpu"]
+          )
+          |> Teiserver.Account.UserStatLib.field_contains(
+            "hardware:osinfo",
+            params["data_search"]["os"]
+          )
+          |> Teiserver.Account.UserStatLib.field_contains(
+            "hardware:raminfo",
+            params["data_search"]["ram"]
+          )
+          |> Teiserver.Account.UserStatLib.field_contains(
+            params["data_search"]["custom_field"],
+            params["data_search"]["custom_value"]
+          )
+          |> Stream.map(fn stats -> stats.user_id end)
+          |> Stream.take(50)
+          |> Enum.to_list()
 
-      Account.list_users(search: [id_in: id_list])
-    end
+        Account.list_users(search: [id_in: id_list])
+      end
 
     conn
     |> add_breadcrumb(name: "Data search", url: conn.request_path)
@@ -128,31 +144,14 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        reports_made = Moderation.list_reports(
-          search: [
-            reporter_id: user.id
-          ]
-        )
-
-        reports_against = Moderation.list_reports(
-          search: [
-            target_id: user.id
-          ]
-        )
-
-        actions = Moderation.list_actions(
-          search: [
-            target_id: user.id
-          ]
-        )
-
         user
-          |> UserLib.make_favourite()
-          |> insert_recently(conn)
+        |> UserLib.make_favourite()
+        |> insert_recently(conn)
 
         user_stats = Account.get_user_stat_data(user.id)
 
-        roles = (user.data["roles"] || [])
+        roles =
+          (user.data["roles"] || [])
           |> Enum.map(fn r ->
             {r, UserLib.role_def(r)}
           end)
@@ -164,22 +163,19 @@ defmodule TeiserverWeb.Admin.UserController do
         client = Account.get_client_by_id(user.id)
 
         conn
-          |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
-          |> assign(:user, user)
-          |> assign(:client, client)
-          |> assign(:user_stats, user_stats)
-          |> assign(:roles, roles)
-          |> assign(:reports_made, reports_made)
-          |> assign(:reports_against, reports_against)
-          |> assign(:actions, actions)
-          |> assign(:section_menu_active, "show")
-          |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
-          |> render("show.html")
+        |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
+        |> assign(:user, user)
+        |> assign(:client, client)
+        |> assign(:user_stats, user_stats)
+        |> assign(:roles, roles)
+        |> assign(:section_menu_active, "show")
+        |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
+        |> render("show.html")
 
       _ ->
         conn
-          |> put_flash(:danger, "Unable to access this user")
-          |> redirect(to: ~p"/teiserver/admin/user")
+        |> put_flash(:danger, "Unable to access this user")
+        |> redirect(to: ~p"/teiserver/admin/user")
     end
   end
 
@@ -235,11 +231,11 @@ defmodule TeiserverWeb.Admin.UserController do
         changeset = Account.change_user(user)
 
         conn
-          |> assign(:user, user)
-          |> assign(:changeset, changeset)
-          |> assign(:groups, GroupLib.dropdown(conn))
-          |> add_breadcrumb(name: "Edit: #{user.name}", url: conn.request_path)
-          |> render("edit.html")
+        |> assign(:user, user)
+        |> assign(:changeset, changeset)
+        |> assign(:groups, GroupLib.dropdown(conn))
+        |> add_breadcrumb(name: "Edit: #{user.name}", url: conn.request_path)
+        |> render("edit.html")
 
       _ ->
         conn
@@ -252,23 +248,26 @@ defmodule TeiserverWeb.Admin.UserController do
   def update(conn, %{"id" => id, "user" => user_params}) do
     user = Account.get_user!(id)
 
-    roles = [
-      {"verified", "Verified"},
-      {"bot", "Bot"},
-      {"moderator", "Moderator"},
-      {"admin", "Admin"},
-      {"streamer", "Streamer"},
-      {"trusted", "Trusted"},
-      {"tester", "Tester"},
-      {"non-bridged", "Non-bridged"},
-      {"donor", "Donor"},
-      {"contributor", "Contributor"},
-      {"caster", "Caster"},
-      {"core", "Core team"},
-      {"gdt", "GDT"}
-    ]
-    |> Enum.map(fn {k, v} -> if user_params[k] == "true", do: v end)
-    |> Enum.reject(&(&1 == nil))
+    roles =
+      [
+        {"verified", "Verified"},
+        {"bot", "Bot"},
+        {"moderator", "Moderator"},
+        {"admin", "Admin"},
+        {"streamer", "Streamer"},
+        {"trusted", "Trusted"},
+        {"tester", "Tester"},
+        {"non-bridged", "Non-bridged"},
+        {"donor", "Donor"},
+        {"contributor", "Contributor"},
+        {"caster", "Caster"},
+        {"core", "Core team"},
+        {"vip", "VIP"},
+        {"tournament-player", "Tournament player"},
+        {"gdt", "GDT"}
+      ]
+      |> Enum.map(fn {k, v} -> if user_params[k] == "true", do: v end)
+      |> Enum.reject(&(&1 == nil))
 
     data =
       Map.merge(user.data || %{}, %{
@@ -337,55 +336,57 @@ defmodule TeiserverWeb.Admin.UserController do
         filter_type_id = MatchRatingLib.rating_type_name_lookup()[filter]
         limit = (params["limit"] || "50") |> int_parse
 
-        ratings = Account.list_ratings(
-          search: [
-            user_id: user.id
-          ],
-          preload: [:rating_type]
-        )
+        ratings =
+          Account.list_ratings(
+            search: [
+              user_id: user.id
+            ],
+            preload: [:rating_type]
+          )
           |> Map.new(fn rating ->
             {rating.rating_type.name, rating}
           end)
 
-        logs = Game.list_rating_logs(
-          search: [
-            user_id: user.id,
-            rating_type_id: filter_type_id
-          ],
-          order_by: "Newest first",
-          limit: limit,
-          preload: [:match, :match_membership]
-        )
+        logs =
+          Game.list_rating_logs(
+            search: [
+              user_id: user.id,
+              rating_type_id: filter_type_id
+            ],
+            order_by: "Newest first",
+            limit: limit,
+            preload: [:match, :match_membership]
+          )
 
         games = Enum.count(logs) |> max(1)
-        wins = Enum.filter(logs, fn l -> l.match_membership.win end) |> Enum.count
+        wins = Enum.count(logs, fn l -> l.match_membership.win end)
 
-        stats = if Enum.empty?(logs) do
-          %{first_log: nil}
-        else
-          %{
-            games: games,
-            winrate: wins/games,
-
-            first_log: logs |> Enum.reverse |> hd,
-          }
-        end
+        stats =
+          if Enum.empty?(logs) do
+            %{first_log: nil}
+          else
+            %{
+              games: games,
+              winrate: wins / games,
+              first_log: logs |> Enum.reverse() |> hd
+            }
+          end
 
         conn
-          |> assign(:filter, filter || "rating-all")
-          |> assign(:user, user)
-          |> assign(:ratings, ratings)
-          |> assign(:logs, logs)
-          |> assign(:rating_type_list, MatchRatingLib.rating_type_list())
-          |> assign(:rating_type_id_lookup, MatchRatingLib.rating_type_id_lookup())
-          |> assign(:stats, stats)
-          |> add_breadcrumb(name: "Ratings: #{user.name}", url: conn.request_path)
-          |> render("ratings.html")
+        |> assign(:filter, filter || "rating-all")
+        |> assign(:user, user)
+        |> assign(:ratings, ratings)
+        |> assign(:logs, logs)
+        |> assign(:rating_type_list, MatchRatingLib.rating_type_list())
+        |> assign(:rating_type_id_lookup, MatchRatingLib.rating_type_id_lookup())
+        |> assign(:stats, stats)
+        |> add_breadcrumb(name: "Ratings: #{user.name}", url: conn.request_path)
+        |> render("ratings.html")
 
       _ ->
         conn
-          |> put_flash(:danger, "Unable to access this user")
-          |> redirect(to: ~p"/teiserver/admin/user")
+        |> put_flash(:danger, "Unable to access this user")
+        |> redirect(to: ~p"/teiserver/admin/user")
     end
   end
 
@@ -395,28 +396,29 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        ratings = Account.list_ratings(
-          search: [
-            user_id: user.id
-          ],
-          preload: [:rating_type]
-        )
+        ratings =
+          Account.list_ratings(
+            search: [
+              user_id: user.id
+            ],
+            preload: [:rating_type]
+          )
           |> Map.new(fn rating ->
             {rating.rating_type.name, rating}
           end)
 
         conn
-          |> assign(:user, user)
-          |> assign(:ratings, ratings)
-          |> assign(:default_rating, BalanceLib.default_rating())
-          |> assign(:rating_type_list, MatchRatingLib.rating_type_list())
-          |> add_breadcrumb(name: "Ratings form: #{user.name}", url: conn.request_path)
-          |> render("ratings_form.html")
+        |> assign(:user, user)
+        |> assign(:ratings, ratings)
+        |> assign(:default_rating, BalanceLib.default_rating())
+        |> assign(:rating_type_list, MatchRatingLib.rating_type_list())
+        |> add_breadcrumb(name: "Ratings form: #{user.name}", url: conn.request_path)
+        |> render("ratings_form.html")
 
       _ ->
         conn
-          |> put_flash(:danger, "Unable to access this user")
-          |> redirect(to: ~p"/teiserver/admin/user")
+        |> put_flash(:danger, "Unable to access this user")
+        |> redirect(to: ~p"/teiserver/admin/user")
     end
   end
 
@@ -426,10 +428,12 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        changes = MatchRatingLib.rating_type_list()
+        changes =
+          MatchRatingLib.rating_type_list()
           |> Enum.map(fn r -> {r, params[r]} end)
           |> Enum.reject(fn {_r, changes} ->
-            changes["skill"] == changes["old_skill"] and changes["uncertainty"] == changes["old_uncertainty"]
+            changes["skill"] == changes["old_skill"] and
+              changes["uncertainty"] == changes["old_uncertainty"]
           end)
           |> Enum.map(fn {rating_type, changes} ->
             rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
@@ -439,45 +443,46 @@ defmodule TeiserverWeb.Admin.UserController do
             new_skill = changes["skill"] |> float_parse
             new_uncertainty = changes["uncertainty"] |> float_parse
             new_rating_value = BalanceLib.calculate_rating_value(new_skill, new_uncertainty)
-            new_leaderboard_rating = BalanceLib.calculate_leaderboard_rating(new_skill, new_uncertainty)
 
-            {:ok, new_rating} = case Account.get_rating(user.id, rating_type_id) do
-              nil ->
-                Account.create_rating(%{
-                  user_id: user.id,
-                  rating_type_id: rating_type_id,
-                  rating_value: new_rating_value,
-                  skill: new_skill,
-                  uncertainty: new_uncertainty,
-                  leaderboard_rating: new_leaderboard_rating,
-                  last_updated: Timex.now(),
-                })
-              existing ->
-                Account.update_rating(existing, %{
-                  rating_value: new_rating_value,
-                  skill: new_skill,
-                  uncertainty: new_uncertainty,
-                  leaderboard_rating: new_leaderboard_rating,
-                  last_updated: Timex.now()
-                })
-            end
+            new_leaderboard_rating =
+              BalanceLib.calculate_leaderboard_rating(new_skill, new_uncertainty)
+
+            {:ok, new_rating} =
+              case Account.get_rating(user.id, rating_type_id) do
+                nil ->
+                  Account.create_rating(%{
+                    user_id: user.id,
+                    rating_type_id: rating_type_id,
+                    rating_value: new_rating_value,
+                    skill: new_skill,
+                    uncertainty: new_uncertainty,
+                    leaderboard_rating: new_leaderboard_rating,
+                    last_updated: Timex.now()
+                  })
+
+                existing ->
+                  Account.update_rating(existing, %{
+                    rating_value: new_rating_value,
+                    skill: new_skill,
+                    uncertainty: new_uncertainty,
+                    leaderboard_rating: new_leaderboard_rating,
+                    last_updated: Timex.now()
+                  })
+              end
 
             log_params = %{
               user_id: user.id,
               rating_type_id: rating_type_id,
               match_id: nil,
               inserted_at: Timex.now(),
-
               value: %{
                 reason: "Manual adjustment",
-
                 rating_value: new_rating_value,
                 skill: new_skill,
                 uncertainty: new_uncertainty,
-
                 rating_value_change: new_rating_value - user_rating.rating_value,
                 skill_change: new_skill - user_rating.skill,
-                uncertainty_change: new_uncertainty - user_rating.uncertainty,
+                uncertainty_change: new_uncertainty - user_rating.uncertainty
               }
             }
 
@@ -486,7 +491,8 @@ defmodule TeiserverWeb.Admin.UserController do
             {new_rating, log}
           end)
 
-        log_ids = changes
+        log_ids =
+          changes
           |> Enum.map(fn {_, log} -> log.id end)
 
         add_audit_log(conn, "Teiserver:Changed user rating", %{
@@ -495,13 +501,13 @@ defmodule TeiserverWeb.Admin.UserController do
         })
 
         conn
-          |> put_flash(:success, "Ratings updated")
-          |> redirect(to: Routes.ts_admin_user_path(conn, :ratings_form, user))
+        |> put_flash(:success, "Ratings updated")
+        |> redirect(to: Routes.ts_admin_user_path(conn, :ratings_form, user))
 
       _ ->
         conn
-          |> put_flash(:danger, "Unable to access this user")
-          |> redirect(to: ~p"/teiserver/admin/user")
+        |> put_flash(:danger, "Unable to access this user")
+        |> redirect(to: ~p"/teiserver/admin/user")
     end
   end
 
@@ -514,6 +520,7 @@ defmodule TeiserverWeb.Admin.UserController do
         result =
           case action do
             "recache" ->
+              Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user.id)
               Teiserver.User.recache_user(user.id)
               {:ok, ""}
 
@@ -542,55 +549,65 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        all_keys = Account.list_smurf_keys(
-          search: [
-            user_id: user.id
-          ],
-          limit: :infinity,
-          preload: [:type],
-          order_by: "Newest first"
-        )
+        all_keys =
+          Account.list_smurf_keys(
+            search: [
+              user_id: user.id
+            ],
+            limit: :infinity,
+            preload: [:type],
+            order_by: "Newest first"
+          )
 
-        key_count_by_type_name = all_keys
+        key_count_by_type_name =
+          all_keys
           |> Enum.group_by(fn k -> k.type.name end, fn _ -> 1 end)
           |> Enum.map(fn {k, vs} -> {k, Enum.count(vs)} end)
           |> Enum.sort(&<=/2)
 
-        user_key_lookup = all_keys
+        user_key_lookup =
+          all_keys
           |> Map.new(fn k -> {k.value, k} end)
 
         matching_keys = Account.smurf_search(user)
 
-        key_types = matching_keys
+        key_types =
+          matching_keys
           |> Enum.map(fn {{type, _value}, _} -> type end)
-          |> Enum.uniq
-          |> Enum.sort
+          |> Enum.uniq()
+          |> Enum.sort()
 
-        users = matching_keys
+        users =
+          matching_keys
           |> Enum.map(fn {{_type, _value}, matches} ->
             matches
             |> Enum.map(fn m -> m.user end)
           end)
-          |> List.flatten
+          |> List.flatten()
           |> Map.new(fn user -> {user.id, user} end)
           |> Enum.map(fn {_, user} -> user end)
-          |> Enum.sort_by(fn user ->
-            user.data["last_login"]
-          end, &>=/2)
+          |> Enum.sort_by(
+            fn user ->
+              user.data["last_login"]
+            end,
+            &>=/2
+          )
 
         # Next we want to know the date of the key we matched against for that user
-        key_lookup = matching_keys
+        key_lookup =
+          matching_keys
           |> Enum.map(fn {{matched_type, _matched_value}, matches} ->
             matches
             |> Enum.map(fn match ->
               {{matched_type, match.user_id}, match}
             end)
           end)
-          |> List.flatten
+          |> List.flatten()
           |> Enum.sort_by(fn {_k, v} -> v.last_updated end, &<=/2)
-          |> Map.new
+          |> Map.new()
 
-        stats_map = users
+        stats_map =
+          users
           |> Map.new(fn %{id: id} ->
             {id, Account.get_user_stat_data(id)}
           end)
@@ -598,18 +615,18 @@ defmodule TeiserverWeb.Admin.UserController do
         stats = Account.get_user_stat_data(user.id)
 
         conn
-          |> add_breadcrumb(name: "List of possible smurf accounts", url: conn.request_path)
-          |> assign(:all_keys, all_keys)
-          |> assign(:key_count_by_type_name, key_count_by_type_name)
-          |> assign(:user, user)
-          |> assign(:stats, stats)
-          |> assign(:params, search_defaults(conn))
-          |> assign(:key_types, key_types)
-          |> assign(:users, users)
-          |> assign(:key_lookup, key_lookup)
-          |> assign(:user_key_lookup, user_key_lookup)
-          |> assign(:stats_map, stats_map)
-          |> render("smurf_list.html")
+        |> add_breadcrumb(name: "List of possible smurf accounts", url: conn.request_path)
+        |> assign(:all_keys, all_keys)
+        |> assign(:key_count_by_type_name, key_count_by_type_name)
+        |> assign(:user, user)
+        |> assign(:stats, stats)
+        |> assign(:params, search_defaults(conn))
+        |> assign(:key_types, key_types)
+        |> assign(:users, users)
+        |> assign(:key_lookup, key_lookup)
+        |> assign(:user_key_lookup, user_key_lookup)
+        |> assign(:stats_map, stats_map)
+        |> render("smurf_list.html")
 
       _ ->
         conn
@@ -626,12 +643,12 @@ defmodule TeiserverWeb.Admin.UserController do
       Account.delete_smurf_key(key)
 
       conn
-        |> put_flash(:success, "Key deleted")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :smurf_search, key.user_id))
+      |> put_flash(:success, "Key deleted")
+      |> redirect(to: Routes.ts_admin_user_path(conn, :smurf_search, key.user_id))
     else
       conn
-        |> put_flash(:info, "Unable to find that key")
-        |> redirect(to: ~p"/teiserver/admin/user")
+      |> put_flash(:info, "Unable to find that key")
+      |> redirect(to: ~p"/teiserver/admin/user")
     end
   end
 
@@ -648,15 +665,15 @@ defmodule TeiserverWeb.Admin.UserController do
     case access do
       {{true, _}, {true, _}} ->
         conn
-          |> add_breadcrumb(name: "Smurf merge form", url: conn.request_path)
-          |> assign(:from_user, from_user)
-          |> assign(:to_user, to_user)
-          |> render("smurf_merge_form.html")
+        |> add_breadcrumb(name: "Smurf merge form", url: conn.request_path)
+        |> assign(:from_user, from_user)
+        |> assign(:to_user, to_user)
+        |> render("smurf_merge_form.html")
 
       _ ->
         conn
-          |> put_flash(:danger, "Unable to access at least one of these users")
-          |> redirect(to: ~p"/teiserver/admin/user")
+        |> put_flash(:danger, "Unable to access at least one of these users")
+        |> redirect(to: ~p"/teiserver/admin/user")
     end
   end
 
@@ -674,7 +691,8 @@ defmodule TeiserverWeb.Admin.UserController do
       {{true, _}, {true, _}} ->
         Teiserver.Account.SmurfMergeTask.perform(from_user.id, to_user.id, merge)
 
-        fields = merge
+        fields =
+          merge
           |> Enum.filter(fn {_k, v} -> v == "true" end)
           |> Enum.map(fn {k, _} -> k end)
 
@@ -685,71 +703,78 @@ defmodule TeiserverWeb.Admin.UserController do
         })
 
         conn
-          |> put_flash(:success, "Applied the changes")
-          |> redirect(to: ~p"/teiserver/admin/user/#{to_user.id}")
+        |> put_flash(:success, "Applied the changes")
+        |> redirect(to: ~p"/teiserver/admin/user/#{to_user.id}")
 
       _ ->
         conn
-          |> put_flash(:danger, "Unable to access at least one of these users")
-          |> redirect(to: ~p"/teiserver/admin/user")
+        |> put_flash(:danger, "Unable to access at least one of these users")
+        |> redirect(to: ~p"/teiserver/admin/user")
     end
   end
 
   @spec full_chat(Plug.Conn.t(), map) :: Plug.Conn.t()
   def full_chat(conn, %{"id" => id} = params) do
-    page = Map.get(params, "page", 0)
+    page =
+      Map.get(params, "page", 0)
       |> int_parse
       |> max(0)
 
     user = Account.get_user!(id)
 
-    mode = case params["mode"] do
-      "room" -> "room"
-      _ -> "lobby"
-    end
+    mode =
+      case params["mode"] do
+        "room" -> "room"
+        _ -> "lobby"
+      end
 
-    messages = case mode do
-      "lobby" ->
-        Chat.list_lobby_messages(
-          search: [
-            user_id: user.id
-          ],
-          limit: 250,
-          offset: page * 250,
-          order_by: "Newest first"
-        )
-      "room" ->
-        Chat.list_room_messages(
-          search: [
-            user_id: user.id
-          ],
-          limit: 250,
-          offset: page * 250,
-          order_by: "Newest first"
-        )
-    end
+    messages =
+      case mode do
+        "lobby" ->
+          Chat.list_lobby_messages(
+            search: [
+              user_id: user.id
+            ],
+            limit: 250,
+            offset: page * 250,
+            order_by: "Newest first"
+          )
+
+        "room" ->
+          Chat.list_room_messages(
+            search: [
+              user_id: user.id
+            ],
+            limit: 250,
+            offset: page * 250,
+            order_by: "Newest first"
+          )
+      end
 
     last_page = Enum.count(messages) < 250
 
     conn
-      |> assign(:last_page, last_page)
-      |> assign(:page, page)
-      |> assign(:user, user)
-      |> assign(:mode, mode)
-      |> assign(:messages, messages)
-      |> add_breadcrumb(name: "Show: #{user.name}", url: ~p"/teiserver/admin/user/#{id}")
-      |> add_breadcrumb(name: "Chat logs", url: conn.request_path)
-      |> render("full_chat.html")
+    |> assign(:last_page, last_page)
+    |> assign(:page, page)
+    |> assign(:user, user)
+    |> assign(:mode, mode)
+    |> assign(:messages, messages)
+    |> add_breadcrumb(name: "Show: #{user.name}", url: ~p"/teiserver/admin/user/#{id}")
+    |> add_breadcrumb(name: "Chat logs", url: conn.request_path)
+    |> render("full_chat.html")
   end
 
   @spec relationships(Plug.Conn.t(), map) :: Plug.Conn.t()
   def relationships(conn, %{"id" => id}) do
     user = Account.get_user!(id)
-    user_ids = (user.data["friends"] ++ user.data["friend_requests"] ++ user.data["ignored"])
-      |> Enum.uniq
 
-    lookup = Account.list_users(search: [id_in: user_ids])
-    |> Map.new(fn u -> {u.id, u} end)
+    user_ids =
+      (user.data["friends"] ++ user.data["friend_requests"] ++ user.data["ignored"])
+      |> Enum.uniq()
+
+    lookup =
+      Account.list_users(search: [id_in: user_ids])
+      |> Map.new(fn u -> {u.id, u} end)
 
     conn
     |> assign(:user, user)
@@ -780,10 +805,10 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-      conn
-          |> assign(:user, user)
-          |> add_breadcrumb(name: "Rename: #{user.name}", url: conn.request_path)
-          |> render("rename_form.html")
+        conn
+        |> assign(:user, user)
+        |> add_breadcrumb(name: "Rename: #{user.name}", url: conn.request_path)
+        |> render("rename_form.html")
 
       _ ->
         conn
@@ -801,15 +826,15 @@ defmodule TeiserverWeb.Admin.UserController do
         case Teiserver.User.rename_user(user.id, new_name, true) do
           :success ->
             conn
-              |> put_flash(:success, "User renamed")
-              |> redirect(to: ~p"/teiserver/admin/user/#{user.id}")
+            |> put_flash(:success, "User renamed")
+            |> redirect(to: ~p"/teiserver/admin/user/#{user.id}")
 
           {:error, reason} ->
             conn
-              |> assign(:user, user)
-              |> put_flash(:danger, "Error with rename: #{reason}")
-              |> add_breadcrumb(name: "Rename: #{user.name}", url: conn.request_path)
-              |> render("rename_form.html")
+            |> assign(:user, user)
+            |> put_flash(:danger, "Error with rename: #{reason}")
+            |> add_breadcrumb(name: "Rename: #{user.name}", url: conn.request_path)
+            |> render("rename_form.html")
         end
 
       _ ->
@@ -824,11 +849,12 @@ defmodule TeiserverWeb.Admin.UserController do
     # Gives stuff time to happen
     :timer.sleep(500)
 
-    tab = if params["tab"] do
-      "##{params["tab"]}"
-    else
-      ""
-    end
+    tab =
+      if params["tab"] do
+        "##{params["tab"]}"
+      else
+        ""
+      end
 
     conn
     |> redirect(to: ~p"/teiserver/admin/user/#{id}" <> tab)
