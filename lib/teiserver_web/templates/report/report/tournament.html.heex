@@ -139,6 +139,7 @@ value_types = [
 
                   <th><%= @params["value_type"] %></th>
 
+                  <th>Moderation status</th>
                   <th>Player role</th>
 
                   <%= if user_moderator do %>
@@ -163,6 +164,39 @@ value_types = [
                         "Game rating" -> rating.rating_value |> round(2)
                         "Skill value" -> rating.skill |> round(2)
                       end %>
+                    </td>
+
+                    <td>
+                      <%
+                      user_r = %{restrictions: rating.user.data["restrictions"] || []}
+
+                      banned = Teiserver.User.is_restricted?(user_r, ["Login"])
+
+                      muted =
+                        Teiserver.User.is_restricted?(user_r, [
+                          "All chat",
+                          "Room chat",
+                          "Direct chat",
+                          "Lobby chat",
+                          "Battle chat"
+                        ])
+
+                      warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"]) %>
+
+                      <%= if banned do %>
+                        <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}>
+                        </i>
+                      <% end %>
+
+                      <%= if muted do %>
+                        <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Mute")}"}>
+                        </i>
+                      <% end %>
+
+                      <%= if warned do %>
+                        <i class={"fa-fw text-warning #{Teiserver.Moderation.ActionLib.action_icon("Warn")}"}>
+                        </i>
+                      <% end %>
                     </td>
 
                     <td>

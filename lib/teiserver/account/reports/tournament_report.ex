@@ -95,6 +95,7 @@ defmodule Teiserver.Account.TournamentReport do
     headings = [
       [
         "Position",
+        "UserId",
         "Player",
         value_type
       ]
@@ -116,6 +117,7 @@ defmodule Teiserver.Account.TournamentReport do
 
       [
         index + 1,
+        rating.user.id,
         rating.user.name,
         value
       ]
