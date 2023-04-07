@@ -41,9 +41,7 @@
           <%= Timex.format!(log.date, "{YYYY}-{0M}-{0D}") %>
         </td>
         <%= for i <- 0..23 do %>
-          <%
-            value = Enum.fetch!(get_in(log.data, @path), i)
-          %>
+          <% value = Enum.fetch!(get_in(log.data, @path), i) %>
           <td
             class="hourly-view-cell"
             style={"background-color: ##{heatmap(value, maximum, "black-red")};"}

@@ -164,9 +164,9 @@ defmodule Teiserver.Bridge.MessageCommands do
   def handle_command({user, _}, "whoami", _remaining, channel) do
     stats = Account.get_user_stat_data(user.id)
 
-    total_hours = Map.get(stats, "total_minutes", 0) / 60 |> round
-    player_hours = Map.get(stats, "player_minutes", 0) / 60 |> round
-    spectator_hours = Map.get(stats, "spectator_minutes", 0) / 60 |> round
+    total_hours = (Map.get(stats, "total_minutes", 0) / 60) |> round
+    player_hours = (Map.get(stats, "player_minutes", 0) / 60) |> round
+    spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> round
 
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
     profile_link = "https://#{host}/teiserver/profile/#{user.id}"
@@ -190,13 +190,14 @@ defmodule Teiserver.Bridge.MessageCommands do
              end))
       end
 
-    msg = [
-      "You are #{user.name}",
-      "Profile link: #{profile_link}",
-      "Playtime: #{total_hours} hours (#{player_hours} h playing, #{spectator_hours} h spectating)",
-      accolades_string
-    ]
-    |> List.flatten
+    msg =
+      [
+        "You are #{user.name}",
+        "Profile link: #{profile_link}",
+        "Playtime: #{total_hours} hours (#{player_hours} h playing, #{spectator_hours} h spectating)",
+        accolades_string
+      ]
+      |> List.flatten()
 
     reply(channel, msg)
   end

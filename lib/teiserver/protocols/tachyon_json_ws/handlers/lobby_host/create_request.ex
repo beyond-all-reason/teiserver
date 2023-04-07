@@ -13,7 +13,8 @@ defmodule Teiserver.Tachyon.Handlers.LobbyHost.CreateRequest do
     }
   end
 
-  @spec execute(T.tachyon_conn, map, map) :: {{T.tachyon_command, T.tachyon_object}, T.tachyon_conn}
+  @spec execute(T.tachyon_conn(), map, map) ::
+          {{T.tachyon_command(), T.tachyon_object()}, T.tachyon_conn()}
   def execute(conn, object, _meta) do
     user = Account.get_user_by_id(conn.userid)
     client = Account.get_client_by_id(conn.userid)

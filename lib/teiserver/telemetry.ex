@@ -407,7 +407,6 @@ defmodule Teiserver.Telemetry do
     end
   end
 
-
   # Month logs
   alias Teiserver.Telemetry.{ServerMonthLog, ServerMonthLogLib}
 
@@ -736,7 +735,12 @@ defmodule Teiserver.Telemetry do
 
     if recache do
       data = Teiserver.Telemetry.Tasks.PersistServerQuarterTask.quarter_so_far()
-      Central.cache_put(:application_metadata_cache, "teiserver_quarter_quarter_metrics_cache", data)
+
+      Central.cache_put(
+        :application_metadata_cache,
+        "teiserver_quarter_quarter_metrics_cache",
+        data
+      )
 
       Central.cache_put(
         :application_metadata_cache,

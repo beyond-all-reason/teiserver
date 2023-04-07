@@ -16,21 +16,24 @@ defmodule Teiserver.Account.BanEvasionReport do
     params = apply_defaults(params)
     valid_types = get_valid_key_types()
 
-    moderated_users = Account.list_users(
-      search: [
-        mod_action: "Any action"
-      ],
-      limit: 1000,
-      order_by: "Newest first"
-    )
+    moderated_users =
+      Account.list_users(
+        search: [
+          mod_action: "Any action"
+        ],
+        limit: 1000,
+        order_by: "Newest first"
+      )
       |> Enum.reject(fn user ->
         user.data["restrictions"] == ["Bridging"]
       end)
 
-    moderated_user_ids = moderated_users
+    moderated_user_ids =
+      moderated_users
       |> Enum.map(fn %{id: id} -> id end)
 
-    moderated_keys = Account.list_smurf_keys(
+    moderated_keys =
+      Account.list_smurf_keys(
         search: [
           user_id_in: moderated_user_ids,
           type_id_in: valid_types
@@ -71,18 +74,25 @@ defmodule Teiserver.Account.BanEvasionReport do
       |> Enum.map(fn %{user_id: user_id} -> user_id end)
       |> Enum.uniq()
 
-    evaders = Account.list_users(
-      search: [
-        id_in: relevant_evader_ids
-      ],
-      limit: :infinity
-    )
+    evaders =
+      Account.list_users(
+        search: [
+          id_in: relevant_evader_ids
+        ],
+        limit: :infinity
+      )
 
     relevant_evaders =
       evaders
       |> Enum.filter(fn user -> Enum.member?(relevant_evader_ids, user.id) end)
       |> Enum.reject(fn user ->
-        User.is_restricted?(user.data["restrictions"], ["Login", "Site", "All chat", "Room chat", "All lobbies"])
+        User.is_restricted?(user.data["restrictions"], [
+          "Login",
+          "Site",
+          "All chat",
+          "Room chat",
+          "All lobbies"
+        ])
       end)
 
     user_stats =

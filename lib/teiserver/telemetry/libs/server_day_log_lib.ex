@@ -72,7 +72,6 @@ defmodule Teiserver.Telemetry.ServerDayLogLib do
       low_user_counts: @user_types |> Map.new(fn t -> {t, 0} end),
       battles: 0
     },
-
     events: %{
       server: %{},
       unauth: %{},
@@ -112,18 +111,23 @@ defmodule Teiserver.Telemetry.ServerDayLogLib do
       tmp_reduction: %{
         battles: existing.tmp_reduction.battles + get_in(data, ~w(aggregates stats battles)),
         unique_users:
-          existing.tmp_reduction.unique_users ++ Map.keys(get_in(data, ~w(minutes_per_user total))),
+          existing.tmp_reduction.unique_users ++
+            Map.keys(get_in(data, ~w(minutes_per_user total))),
         unique_players:
-          existing.tmp_reduction.unique_players ++ Map.keys(get_in(data, ~w(minutes_per_user player))),
+          existing.tmp_reduction.unique_players ++
+            Map.keys(get_in(data, ~w(minutes_per_user player))),
         accounts_created:
-          existing.tmp_reduction.accounts_created + get_in(data, ~w(aggregates stats accounts_created)),
-
-        peak_user_counts: @user_types |> Map.new(fn type ->
-          {type, max(
-            get_in(existing, [:tmp_reduction, :peak_user_counts, type]),
-            get_in(data, ["aggregates", "stats", "peak_user_counts", to_string(type)])
-          )}
-        end)
+          existing.tmp_reduction.accounts_created +
+            get_in(data, ~w(aggregates stats accounts_created)),
+        peak_user_counts:
+          @user_types
+          |> Map.new(fn type ->
+            {type,
+             max(
+               get_in(existing, [:tmp_reduction, :peak_user_counts, type]),
+               get_in(data, ["aggregates", "stats", "peak_user_counts", to_string(type)])
+             )}
+          end)
       },
 
       # Telemetry events
@@ -140,7 +144,8 @@ defmodule Teiserver.Telemetry.ServerDayLogLib do
 
         # Total number of minutes spent doing that across all players that month
         minutes: %{
-          player: existing.aggregates.minutes.player + get_in(data, ~w(aggregates minutes player)),
+          player:
+            existing.aggregates.minutes.player + get_in(data, ~w(aggregates minutes player)),
           spectator:
             existing.aggregates.minutes.spectator + get_in(data, ~w(aggregates minutes spectator)),
           lobby: existing.aggregates.minutes.lobby + get_in(data, ~w(aggregates minutes lobby)),

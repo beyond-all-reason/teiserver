@@ -167,8 +167,7 @@ value_types = [
                     </td>
 
                     <td>
-                      <%
-                      user_r = %{restrictions: rating.user.data["restrictions"] || []}
+                      <% user_r = %{restrictions: rating.user.data["restrictions"] || []}
 
                       banned = Teiserver.User.is_restricted?(user_r, ["Login"])
 

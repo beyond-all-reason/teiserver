@@ -21,7 +21,8 @@ defmodule TeiserverWeb.Admin.MatchController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
-    matches = Battle.list_matches(
+    matches =
+      Battle.list_matches(
         search: [
           has_started: true
         ],
@@ -42,18 +43,19 @@ defmodule TeiserverWeb.Admin.MatchController do
 
   @spec search(Plug.Conn.t(), map) :: Plug.Conn.t()
   def search(conn, %{"search" => params}) do
-    matches = Battle.list_matches(
-      search: [
-        user_id: Map.get(params, "account_user", "") |> get_hash_id,
-        queue_id: params["queue"],
-        game_type: params["game_type"],
-        has_started: true
-      ],
-      preload: [
-        :queue
-      ],
-      order_by: "Newest first"
-    )
+    matches =
+      Battle.list_matches(
+        search: [
+          user_id: Map.get(params, "account_user", "") |> get_hash_id,
+          queue_id: params["queue"],
+          game_type: params["game_type"],
+          has_started: true
+        ],
+        preload: [
+          :queue
+        ],
+        order_by: "Newest first"
+      )
 
     queues = Game.list_queues(order_by: "Name (A-Z)")
 

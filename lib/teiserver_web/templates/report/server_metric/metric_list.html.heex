@@ -29,9 +29,7 @@
         ) %>
 
         <%= if @unit == "day" do %>
-          &nbsp;&nbsp;
-
-          <%= central_component("section_menu_button",
+          &nbsp;&nbsp; <%= central_component("section_menu_button",
             name: "filter-hourly-users",
             label: "Users",
             active: "filter-#{@filter}",
@@ -58,10 +56,7 @@
             url: "?filter=hourly-battles"
           ) %>
         <% end %>
-
-        &nbsp;&nbsp;
-
-        <%= central_component("section_menu_button",
+        &nbsp;&nbsp; <%= central_component("section_menu_button",
           name: "filter-graph-unique-users",
           label: "Unique users",
           active: "filter-#{@filter}",
@@ -108,15 +103,12 @@
 
         <%= if String.starts_with?(@filter, "hourly-") do %>
           &nbsp;&nbsp;&nbsp;&nbsp;
-
           <span class={"btn btn-#{bsname}"} onclick='$(".hourly-view-span").show();'>
-            <i class="fa-fw fa-regular fa-eye"></i>
-            Show numbers
+            <i class="fa-fw fa-regular fa-eye"></i> Show numbers
           </span>
 
           <span class={"btn btn-#{bsname}"} onclick='$(".hourly-view-span").hide();'>
-            <i class="fa-fw fa-regular fa-eye-slash"></i>
-            Hide numbers
+            <i class="fa-fw fa-regular fa-eye-slash"></i> Hide numbers
           </span>
         <% end %>
 
@@ -131,9 +123,15 @@
 
         <%= case @filter do %>
           <% "hourly-users" -> %>
-            <%= render("heatmap_list.html", Map.put(assigns, :path, ~w(average_user_counts total))) %>
+            <%= render(
+              "heatmap_list.html",
+              Map.put(assigns, :path, ~w(average_user_counts total))
+            ) %>
           <% "hourly-players" -> %>
-            <%= render("heatmap_list.html", Map.put(assigns, :path, ~w(average_user_counts player))) %>
+            <%= render(
+              "heatmap_list.html",
+              Map.put(assigns, :path, ~w(average_user_counts player))
+            ) %>
           <% "hourly-battles" -> %>
             <%= render("heatmap_list.html", Map.put(assigns, :path, ~w(battles in_progress))) %>
           <% "graph-" <> _ -> %>

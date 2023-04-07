@@ -5,7 +5,7 @@ defmodule Teiserver.Tachyon.Responses.LobbyHost.CreateResponse do
 
   alias Teiserver.Data.Types, as: T
 
-  @spec execute(T.lobby()) :: {T.tachyon_command, T.tachyon_object}
+  @spec execute(T.lobby()) :: {T.tachyon_command(), T.tachyon_object()}
   def execute(lobby) do
     {"lobby_host/create/response", lobby}
   end

@@ -138,9 +138,9 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     sender = User.get_user_by_id(senderid)
     stats = Account.get_user_stat_data(senderid)
 
-    total_hours = Map.get(stats, "total_minutes", 0) / 60 |> round
-    player_hours = Map.get(stats, "player_minutes", 0) / 60 |> round
-    spectator_hours = Map.get(stats, "spectator_minutes", 0) / 60 |> round
+    total_hours = (Map.get(stats, "total_minutes", 0) / 60) |> round
+    player_hours = (Map.get(stats, "player_minutes", 0) / 60) |> round
+    spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> round
 
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
     profile_link = "https://#{host}/teiserver/profile/#{senderid}"
@@ -187,16 +187,16 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       |> Enum.sort()
 
     msg =
-    [
-      @splitter,
-      "You are #{sender.name}",
-      "Playtime: #{total_hours} hours (#{player_hours} h playing, #{spectator_hours} h spectating)",
-      "Profile link: #{profile_link}",
-      "Skill ratings:",
-      ratings,
-      accolades_string
-    ]
-      |> List.flatten
+      [
+        @splitter,
+        "You are #{sender.name}",
+        "Playtime: #{total_hours} hours (#{player_hours} h playing, #{spectator_hours} h spectating)",
+        "Profile link: #{profile_link}",
+        "Skill ratings:",
+        ratings,
+        accolades_string
+      ]
+      |> List.flatten()
       |> Enum.reject(fn l -> l == nil end)
 
     User.send_direct_message(state.userid, senderid, msg)

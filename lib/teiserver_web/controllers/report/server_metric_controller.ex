@@ -177,47 +177,46 @@ defmodule TeiserverWeb.Report.ServerMetricController do
       conn
       |> redirect(to: ~p"/reports/server/show/#{unit}/today")
     else
-      log = case unit do
-        "day" -> Telemetry.get_server_day_log(date)
-        "week" -> Telemetry.get_server_week_log(date)
-        "month" -> Telemetry.get_server_month_log(date)
-        "quarter" -> Telemetry.get_server_quarter_log(date)
-        "year" -> Telemetry.get_server_year_log(date)
-      end
+      log =
+        case unit do
+          "day" -> Telemetry.get_server_day_log(date)
+          "week" -> Telemetry.get_server_week_log(date)
+          "month" -> Telemetry.get_server_month_log(date)
+          "quarter" -> Telemetry.get_server_quarter_log(date)
+          "year" -> Telemetry.get_server_year_log(date)
+        end
 
       conn
-        |> assign(:date, date)
-        |> assign(:data, log.data)
-        |> assign(:unit, unit)
-        |> assign(:today, false)
-        |> add_breadcrumb(name: "Details - #{date_str}", url: conn.request_path)
-        |> render("metric_show.html")
+      |> assign(:date, date)
+      |> assign(:data, log.data)
+      |> assign(:unit, unit)
+      |> assign(:today, false)
+      |> add_breadcrumb(name: "Details - #{date_str}", url: conn.request_path)
+      |> render("metric_show.html")
     end
   end
 
   @spec metric_show_today(Plug.Conn.t(), map) :: Plug.Conn.t()
   def metric_show_today(conn, %{"unit" => unit} = params) do
     force_recache = Map.get(params, "recache", false) == "true"
-    data = case unit do
-      "day" -> Telemetry.get_todays_server_log(force_recache)
-      "week" -> Telemetry.get_this_weeks_server_metrics_log(force_recache)
-      "month" -> Telemetry.get_this_months_server_metrics_log(force_recache)
-      "quarter" -> Telemetry.get_this_quarters_server_metrics_log(force_recache)
-      "year" -> Telemetry.get_this_years_server_metrics_log(force_recache)
-    end
+
+    data =
+      case unit do
+        "day" -> Telemetry.get_todays_server_log(force_recache)
+        "week" -> Telemetry.get_this_weeks_server_metrics_log(force_recache)
+        "month" -> Telemetry.get_this_months_server_metrics_log(force_recache)
+        "quarter" -> Telemetry.get_this_quarters_server_metrics_log(force_recache)
+        "year" -> Telemetry.get_this_years_server_metrics_log(force_recache)
+      end
 
     conn
-      |> assign(:date, Timex.today())
-      |> assign(:data, data)
-      |> assign(:unit, unit)
-      |> assign(:today, true)
-      |> add_breadcrumb(name: "Details - Today", url: conn.request_path)
-      |> render("metric_show.html")
+    |> assign(:date, Timex.today())
+    |> assign(:data, data)
+    |> assign(:unit, unit)
+    |> assign(:today, true)
+    |> add_breadcrumb(name: "Details - Today", url: conn.request_path)
+    |> render("metric_show.html")
   end
-
-
-
-
 
   @spec day_metrics_export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def day_metrics_export_form(conn, _params) do

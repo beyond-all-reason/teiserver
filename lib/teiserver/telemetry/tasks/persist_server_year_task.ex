@@ -1,5 +1,5 @@
 defmodule Teiserver.Telemetry.Tasks.PersistServerYearTask do
-    @moduledoc false
+  @moduledoc false
   use Oban.Worker, queue: :teiserver
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.ServerDayLogLib
@@ -50,11 +50,12 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerYearTask do
 
           data = ServerDayLogLib.aggregate_day_logs(logs)
 
-          {:ok, _} = Telemetry.create_server_year_log(%{
-            year: log_year,
-            date: Timex.beginning_of_year(log.date),
-            data: data
-          })
+          {:ok, _} =
+            Telemetry.create_server_year_log(%{
+              year: log_year,
+              date: Timex.beginning_of_year(log.date),
+              data: data
+            })
         end
 
       _ ->
@@ -79,11 +80,12 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerYearTask do
 
       data = ServerDayLogLib.aggregate_day_logs(logs)
 
-      {:ok, _} = Telemetry.create_server_year_log(%{
-        year: new_date.year,
-        date: new_date,
-        data: data
-      })
+      {:ok, _} =
+        Telemetry.create_server_year_log(%{
+          year: new_date.year,
+          date: new_date,
+          data: data
+        })
     else
       nil
     end
@@ -98,7 +100,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerYearTask do
         start_date: Timex.beginning_of_year(now)
       ]
     )
-    |> ServerDayLogLib.aggregate_day_logs
+    |> ServerDayLogLib.aggregate_day_logs()
     |> Jason.encode!()
     |> Jason.decode!()
 

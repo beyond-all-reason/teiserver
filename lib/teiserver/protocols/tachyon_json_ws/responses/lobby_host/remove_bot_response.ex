@@ -5,7 +5,7 @@ defmodule Teiserver.Tachyon.Responses.LobbyHost.RemoveBotResponse do
 
   alias Teiserver.Data.Types, as: T
 
-  @spec execute() :: {T.tachyon_command, T.tachyon_object}
+  @spec execute() :: {T.tachyon_command(), T.tachyon_object()}
   def execute() do
     object = %{}
 

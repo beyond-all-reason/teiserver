@@ -20,7 +20,8 @@ defmodule Teiserver.Account.GrowthReport do
       params["limit"]
       |> int_parse
 
-    server_data = get_server_logs(params["time_unit"], limit)
+    server_data =
+      get_server_logs(params["time_unit"], limit)
       |> get_server_metrics()
 
     assigns =
@@ -151,7 +152,8 @@ defmodule Teiserver.Account.GrowthReport do
   end
 
   defp get_server_logs(time_unit, limit) do
-    logs = case time_unit do
+    logs =
+      case time_unit do
         "Day" ->
           Telemetry.list_server_day_logs(
             order: "Newest first",

@@ -43,7 +43,6 @@ defmodule Teiserver.Battle.LobbyServer do
      }, new_state}
   end
 
-
   def handle_call(:get_founder_id, _from, state) do
     {:reply, state.lobby.founder_id, state}
   end
@@ -131,12 +130,8 @@ defmodule Teiserver.Battle.LobbyServer do
       {:lobby_update, :set_modoption, state.id, {key, uuid}}
     )
 
-    {:noreply, %{state |
-      state: :lobby,
-      match_uuid: uuid,
-      match_id: new_match.id,
-      modoptions: modoptions
-    }}
+    {:noreply,
+     %{state | state: :lobby, match_uuid: uuid, match_id: new_match.id, modoptions: modoptions}}
   end
 
   def handle_cast({:add_user, userid, _script_password}, state) do
@@ -529,25 +524,24 @@ defmodule Teiserver.Battle.LobbyServer do
     match_uuid = Battle.generate_lobby_uuid([id])
     {:ok, match} = Battle.create_match_from_founder_id(data.lobby.founder_id)
 
-    {:ok, %{
-      id: id,
-      lobby: data.lobby,
-      founder_id: data.lobby.founder_id,
-      modoptions: %{
-        "server/match/uuid" => match_uuid
-      },
-      server_uuid: ExULID.ULID.generate(),
-      match_uuid: match_uuid,
-      match_id: match.id,
-      queue_id: nil,
-
-      bots: %{},
-      member_list: [],
-      player_list: [],
-      player_list_last_updated: 0,
-
-      balance_mode: :party,
-      state: :lobby
-    }}
+    {:ok,
+     %{
+       id: id,
+       lobby: data.lobby,
+       founder_id: data.lobby.founder_id,
+       modoptions: %{
+         "server/match/uuid" => match_uuid
+       },
+       server_uuid: ExULID.ULID.generate(),
+       match_uuid: match_uuid,
+       match_id: match.id,
+       queue_id: nil,
+       bots: %{},
+       member_list: [],
+       player_list: [],
+       player_list_last_updated: 0,
+       balance_mode: :party,
+       state: :lobby
+     }}
   end
 end

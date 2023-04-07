@@ -30,7 +30,7 @@
           Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
-            active: (if @today, do: "this_#{@unit}", else: "#{@unit}_list")
+            active: if(@today, do: "this_#{@unit}", else: "#{@unit}_list")
           })
         ) %>
 
@@ -55,13 +55,8 @@
 
               <%= if @today do %>
                 &nbsp;&nbsp;&nbsp;
-
-                <a
-                  href="?recache=true"
-                  class={"btn btn-outline-#{bsname}"}
-                >
-                  <i class="fa-fw fa-regular fa-sync"></i>
-                  &nbsp;
+                <a href="?recache=true" class={"btn btn-outline-#{bsname}"}>
+                  <i class="fa-fw fa-regular fa-sync"></i> &nbsp;
                   Force refresh
                 </a>
               <% end %>

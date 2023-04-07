@@ -23,9 +23,9 @@ defmodule Teiserver.Telemetry.ServerGraphDayLogsTask do
   defp build_line(logs, field_name, mapper_function, getter \\ nil) do
     getter = getter || String.split(field_name, ".")
 
-    IO.puts ""
-    IO.inspect getter
-    IO.puts ""
+    IO.puts("")
+    IO.inspect(getter)
+    IO.puts("")
 
     logs
     |> Enum.map(fn log ->

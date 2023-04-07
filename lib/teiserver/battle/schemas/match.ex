@@ -55,8 +55,11 @@ defmodule Teiserver.Battle.Match do
   @spec initial_changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def initial_changeset(struct, params \\ %{}) do
     struct
-      |> cast(params, ~w(server_uuid uuid map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id game_duration)a)
-      |> validate_required(~w(founder_id)a)
+    |> cast(
+      params,
+      ~w(server_uuid uuid map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id game_duration)a
+    )
+    |> validate_required(~w(founder_id)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

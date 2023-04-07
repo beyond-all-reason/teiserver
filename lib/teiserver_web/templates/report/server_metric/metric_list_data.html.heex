@@ -23,17 +23,24 @@
   </thead>
   <tbody>
     <%= for log <- @logs do %>
-      <%
-        date_string = case @unit do
-          "day" -> Timex.format!(log.date, "{YYYY}-{0M}-{0D} {WDshort}")
+      <% date_string =
+        case @unit do
+          "day" ->
+            Timex.format!(log.date, "{YYYY}-{0M}-{0D} {WDshort}")
+
           "week" ->
             {_, week} = Timex.iso_week(log.date)
             Timex.format!(log.date, "{YYYY}-{0M}-{0D}") <> " ##{week}"
-          "month" -> Timex.format!(log.date, "{YYYY}-{0M}")
-          "quarter" -> Timex.format!(log.date, "{YYYY}-{0M}")
-          "year" -> log.date.year
-        end
-      %>
+
+          "month" ->
+            Timex.format!(log.date, "{YYYY}-{0M}")
+
+          "quarter" ->
+            Timex.format!(log.date, "{YYYY}-{0M}")
+
+          "year" ->
+            log.date.year
+        end %>
       <tr>
         <td><%= date_string %></td>
 
@@ -58,15 +65,14 @@
         </td>
       </tr>
 
-      <%
-        break = case @unit do
+      <% break =
+        case @unit do
           "day" -> log.date.day == 1
           "week" -> log.week == 1
           "month" -> log.month == 1
           "quarter" -> log.quarter == 1
           _ -> false
-        end
-      %>
+        end %>
 
       <%= if break do %>
         <tr>

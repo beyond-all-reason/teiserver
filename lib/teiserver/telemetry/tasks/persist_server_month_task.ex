@@ -51,12 +51,13 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
 
           data = ServerDayLogLib.aggregate_day_logs(logs)
 
-          {:ok, _} = Telemetry.create_server_month_log(%{
-            year: log.date.year,
-            month: log.date.month,
-            date: Timex.Date.new!(log.date.year, log.date.month, 1),
-            data: data
-          })
+          {:ok, _} =
+            Telemetry.create_server_month_log(%{
+              year: log.date.year,
+              month: log.date.month,
+              date: Timex.Date.new!(log.date.year, log.date.month, 1),
+              data: data
+            })
         end
 
       _ ->
@@ -81,12 +82,13 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
 
       data = ServerDayLogLib.aggregate_day_logs(logs)
 
-      {:ok, _} = Telemetry.create_server_month_log(%{
-        year: year,
-        month: month,
-        date: now,
-        data: data
-      })
+      {:ok, _} =
+        Telemetry.create_server_month_log(%{
+          year: year,
+          month: month,
+          date: now,
+          data: data
+        })
     else
       nil
     end
@@ -101,7 +103,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
         start_date: Timex.beginning_of_month(now)
       ]
     )
-    |> ServerDayLogLib.aggregate_day_logs
+    |> ServerDayLogLib.aggregate_day_logs()
     |> Jason.encode!()
     |> Jason.decode!()
 

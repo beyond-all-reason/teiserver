@@ -181,7 +181,8 @@ defmodule Teiserver.Battle do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_match_from_founder_id(T.userid()) :: {:ok, Match.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_match_from_founder_id(T.userid()) ::
+          {:ok, Match.t()} | {:error, Ecto.Changeset.t()}
   def create_match_from_founder_id(founder_id) do
     %Match{}
     |> Match.initial_changeset(%{founder_id: founder_id, map: "Not started"})
@@ -266,8 +267,10 @@ defmodule Teiserver.Battle do
 
   @spec start_match(nil | T.lobby_id()) :: :ok
   def start_match(nil), do: :ok
+
   def start_match(lobby_id) do
-    empty_match = get_lobby_match_id(lobby_id)
+    empty_match =
+      get_lobby_match_id(lobby_id)
       |> get_match!()
 
     Telemetry.increment(:matches_started)

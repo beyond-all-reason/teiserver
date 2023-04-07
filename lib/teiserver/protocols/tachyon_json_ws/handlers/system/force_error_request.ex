@@ -12,7 +12,8 @@ defmodule Teiserver.Tachyon.Handlers.System.ForceErrorRequest do
     }
   end
 
-  @spec execute(T.tachyon_conn, map, map) :: {{T.tachyon_command, T.tachyon_object}, T.tachyon_conn}
+  @spec execute(T.tachyon_conn(), map, map) ::
+          {{T.tachyon_command(), T.tachyon_object()}, T.tachyon_conn()}
   def execute(conn, %{"command" => command}, _meta) do
     {{command, %{}}, conn}
   end

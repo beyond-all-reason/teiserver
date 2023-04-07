@@ -1,5 +1,5 @@
 defmodule Teiserver.Telemetry.Tasks.PersistServerQuarterTask do
-    @moduledoc false
+  @moduledoc false
   use Oban.Worker, queue: :teiserver
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.ServerDayLogLib
@@ -51,12 +51,13 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerQuarterTask do
 
           data = ServerDayLogLib.aggregate_day_logs(logs)
 
-          {:ok, _} = Telemetry.create_server_quarter_log(%{
-            year: log.date.year,
-            quarter: log_quarter,
-            date: Timex.beginning_of_quarter(log.date),
-            data: data
-          })
+          {:ok, _} =
+            Telemetry.create_server_quarter_log(%{
+              year: log.date.year,
+              quarter: log_quarter,
+              date: Timex.beginning_of_quarter(log.date),
+              data: data
+            })
         end
 
       _ ->
@@ -82,12 +83,13 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerQuarterTask do
 
       data = ServerDayLogLib.aggregate_day_logs(logs)
 
-      {:ok, _} = Telemetry.create_server_quarter_log(%{
-        year: new_date.year,
-        quarter: new_quarter,
-        date: new_date,
-        data: data
-      })
+      {:ok, _} =
+        Telemetry.create_server_quarter_log(%{
+          year: new_date.year,
+          quarter: new_quarter,
+          date: new_date,
+          data: data
+        })
     else
       nil
     end
@@ -102,7 +104,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerQuarterTask do
         start_date: Timex.beginning_of_quarter(now)
       ]
     )
-    |> ServerDayLogLib.aggregate_day_logs
+    |> ServerDayLogLib.aggregate_day_logs()
     |> Jason.encode!()
     |> Jason.decode!()
 

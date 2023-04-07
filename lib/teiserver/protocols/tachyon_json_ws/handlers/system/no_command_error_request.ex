@@ -13,7 +13,8 @@ defmodule Teiserver.Tachyon.Handlers.System.NoCommandErrorRequest do
     }
   end
 
-  @spec execute(T.tachyon_conn, map, map) :: {{T.tachyon_command, T.tachyon_object}, T.tachyon_conn}
+  @spec execute(T.tachyon_conn(), map, map) ::
+          {{T.tachyon_command(), T.tachyon_object()}, T.tachyon_conn()}
   def execute(conn, _object, %{"command" => command} = _meta) do
     response = ErrorResponse.execute("No command of '#{command}'")
 

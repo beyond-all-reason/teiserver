@@ -51,12 +51,13 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerWeekTask do
 
           data = ServerDayLogLib.aggregate_day_logs(logs)
 
-          {:ok, _} = Telemetry.create_server_week_log(%{
-            year: log_year,
-            week: log_week,
-            date: Timex.beginning_of_week(log.date),
-            data: data
-          })
+          {:ok, _} =
+            Telemetry.create_server_week_log(%{
+              year: log_year,
+              week: log_week,
+              date: Timex.beginning_of_week(log.date),
+              data: data
+            })
         end
 
       _ ->
@@ -82,12 +83,13 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerWeekTask do
 
       data = ServerDayLogLib.aggregate_day_logs(logs)
 
-      {:ok, _} = Telemetry.create_server_week_log(%{
-        year: new_year,
-        week: new_week,
-        date: new_date,
-        data: data
-      })
+      {:ok, _} =
+        Telemetry.create_server_week_log(%{
+          year: new_year,
+          week: new_week,
+          date: new_date,
+          data: data
+        })
     else
       nil
     end
@@ -102,7 +104,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerWeekTask do
         start_date: Timex.beginning_of_week(now)
       ]
     )
-    |> ServerDayLogLib.aggregate_day_logs
+    |> ServerDayLogLib.aggregate_day_logs()
     |> Jason.encode!()
     |> Jason.decode!()
 
