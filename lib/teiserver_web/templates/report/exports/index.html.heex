@@ -19,3 +19,18 @@
     ) %>
   <% end %>
 </div>
+
+<div class="row mt-2">
+  <div class="col-md-12">
+    <h4>Ratings</h4>
+  </div>
+  <%= if allow?(@current_user, Teiserver.Game.PlayerCountExport.permissions()) do %>
+    <%= central_component("menu_card",
+      size: :small,
+      icon: Teiserver.Game.PlayerCountExport.icon(),
+      name: "player_count",
+      text: "Player counts",
+      link: Routes.ts_reports_exports_path(@conn, :show, "player_count")
+    ) %>
+  <% end %>
+</div>

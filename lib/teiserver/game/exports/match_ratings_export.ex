@@ -65,7 +65,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
       |> List.flatten()
 
     content_type = "application/json"
-    path = "/tmp/match_ratings_export_123.json"
+    path = "/tmp/match_ratings_export.json"
     File.write(path, Jason.encode_to_iodata!(data))
     {:file, path, "match_ratings.json", content_type}
   end

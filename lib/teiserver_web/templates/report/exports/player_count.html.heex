@@ -1,0 +1,105 @@
+<% bsname = view_colour() %>
+
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "exports"})
+) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <div
+          class="btn btn-primary2 float-end"
+          onclick="$('.help-box, .help-box-large').toggle();"
+        >
+          <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
+          Show/Hide help
+        </div>
+        <%= render(
+          TeiserverWeb.Report.ExportsView,
+          "section_menu.html",
+          Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "player_count"
+          })
+        ) %>
+        <br /><br />
+
+        <form
+          action={Routes.ts_reports_exports_path(@conn, :show, "player_count")}
+          method="post"
+          class="form-horizontal"
+        >
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <div class="row">
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="report_format" class="control-label">Format:</label>
+              <%= select(
+                :report,
+                :format,
+                [
+                  "csv",
+                  "json"
+                ],
+                class: "form-control",
+                selected: @params["format"]
+              ) %>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_date_preset" class="control-label">Date range:</label>
+              <%= select(:report, :date_preset, @presets,
+                class: "form-control",
+                selected: @params["date_preset"]
+              ) %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_start_date" class="control-label">Start date:</label>
+              <input
+                type="text"
+                id="report_start_date"
+                name="report[start_date]"
+                value={@params["start_date"]}
+                class="form-control datepicker"
+              />
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_end_date" class="control-label">End date:</label>
+              <input
+                type="text"
+                id="report_end_date"
+                name="report[end_date]"
+                value={@params["end_date"]}
+                class="form-control datepicker"
+              />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="offset-md-8 col-md-4 offset-xl-9 col-xl-3">
+              &nbsp;<br />
+              <input
+                type="submit"
+                value="Generate export"
+                name="form.submitted"
+                class={"btn btn-#{bsname} btn-block"}
+              />
+            </div>
+          </div>
+        </form>
+
+        <div class="help-box-large">
+          Help text goes here
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -10,3 +10,15 @@
     url: Routes.ts_reports_exports_path(@conn, :show, "match_ratings")
   ) %>
 <% end %>
+
+
+<%= if allow?(@current_user, Teiserver.Game.PlayerCountExport.permissions()) do %>
+  <%= central_component("section_menu_button",
+    name: "player_count",
+    label: "Player counts",
+    active: @active,
+    icon: Teiserver.Game.PlayerCountExport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_exports_path(@conn, :show, "player_count")
+  ) %>
+<% end %>
