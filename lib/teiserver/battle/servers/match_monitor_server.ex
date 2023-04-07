@@ -209,40 +209,8 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     {:noreply, state}
   end
 
-  def handle_info({:direct_message, _from_id, "match-chat-noname " <> data}, state) do
-    # case Regex.run(~r/<(.*?)>:<(.*?)> (d|dallies|dspectators): (.+)$/, data) do
-    #   [_all, username, user_num, to, msg] ->
-    #     host = Client.get_client_by_id(from_id)
-    #     user = User.get_user_by_name(username)
-
-    #     Logger.info("[MatchMonitorServer] match-chat-name matched: #{username}/#{user_num} for lobby #{host.lobby_id}")
-
-    #     case to do
-    #       "d" ->
-    #         # We don't persist this as it's already persisted elsewhere
-    #         # LobbyChat.persist_message(user, "g: #{msg}", host.lobby_id, :say)
-    #         :ok
-    #       "dallies" ->
-    #         LobbyChat.persist_message(user, "a: #{msg}", host.lobby_id, :say)
-    #         PubSub.broadcast(
-    #           Central.PubSub,
-    #           "teiserver_liveview_lobby_chat:#{host.lobby_id}",
-    #           {:liveview_lobby_chat, :say, user.id, "a: #{msg}"}
-    #         )
-    #       "dspectators" ->
-    #         LobbyChat.persist_message(user, "s: #{msg}", host.lobby_id, :say)
-    #         PubSub.broadcast(
-    #           Central.PubSub,
-    #           "teiserver_liveview_lobby_chat:#{host.lobby_id}",
-    #           {:liveview_lobby_chat, :say, user.id, "s: #{msg}"}
-    #         )
-    #     end
-    #   _ ->
-    #     Logger.info("[MatchMonitorServer] match-chat-name nomatch from: #{from_id}: match-chat #{data}")
-    # end
-
-    Logger.warn("[MatchMonitorServer] match-chat-name-noname: match-chat [[#{data}]]")
-
+  def handle_info({:direct_message, _from_id, "match-chat-noname " <> _data}, state) do
+    # Ignore this
     {:noreply, state}
   end
 
