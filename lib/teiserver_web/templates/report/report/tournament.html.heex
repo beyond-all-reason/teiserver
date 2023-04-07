@@ -218,6 +218,24 @@ value_types = [
                 <% end %>
               </tbody>
             </table>
+
+            <%= if allow?(@conn, "admin.dev") do %>
+              <% id_list_str = @ratings
+                |> Enum.map(fn r -> r.user_id end)
+                |> Enum.join(", ")
+              %>
+              <h4>Mass set-player snippet</h4>
+              <textarea rows="8" class="form-control" style="font-family: monospace;">
+(
+  [<%= id_list_str %>]
+  |> Enum.each(fn userid ->
+    user = Teiserver.Account.get_user_by_id(userid)
+    new_roles = ["Tournament player" | user.roles] |> Enum.uniq
+    Teiserver.Account.update_cache_user(userid, %{roles: new_roles})
+  end)
+)
+              </textarea>
+            <% end %>
           </div>
         </div>
       </div>
