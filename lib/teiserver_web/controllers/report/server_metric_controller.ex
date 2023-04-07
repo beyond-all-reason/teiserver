@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Report.ServerMetricController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  alias Central.Helpers.{TimexHelper, DatePresets}
-  alias Teiserver.Telemetry.{ServerGraphDayLogsTask, ExportServerMetricsTask, GraphMinuteLogsTask}
+  alias Central.Helpers.TimexHelper
+  alias Teiserver.Telemetry.{ServerGraphDayLogsTask, GraphMinuteLogsTask}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
@@ -216,32 +216,6 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     |> assign(:today, true)
     |> add_breadcrumb(name: "Details - Today", url: conn.request_path)
     |> render("metric_show.html")
-  end
-
-  @spec day_metrics_export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_export_form(conn, _params) do
-    conn
-    |> assign(:params, %{
-      "date_preset" => "All time"
-    })
-    |> assign(:presets, DatePresets.long_ranges())
-    |> render("day_metrics_export_form.html")
-  end
-
-  @spec day_metrics_export_post(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_export_post(conn, %{"report" => params}) do
-    data = ExportServerMetricsTask.perform(params)
-
-    {content_type, ext} =
-      case params["format"] do
-        "json" -> {"application/json", "json"}
-        "csv" -> {"text/csv", "csv"}
-      end
-
-    conn
-    |> put_resp_content_type(content_type)
-    |> put_resp_header("content-disposition", "attachment; filename=\"server_metrics.#{ext}\"")
-    |> send_resp(200, data)
   end
 
   @spec now(Plug.Conn.t(), map) :: Plug.Conn.t()
