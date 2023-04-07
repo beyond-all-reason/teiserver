@@ -180,11 +180,11 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   end
 
   # Application start/stop
-  def handle_info(%{channel: "teiserver_server", event: "stop"}, state) do
-    Lobby.say(
+  def handle_info(%{channel: "teiserver_server", event: :prep_stop}, state) do
+    Room.send_message(
       state.userid,
-      "Teiserver update taking place, see discord for details/issues.",
-      state.lobby_id
+      "main",
+      "Teiserver update taking place, game rooms will reappear after the update has taken place."
     )
 
     {:noreply, state}

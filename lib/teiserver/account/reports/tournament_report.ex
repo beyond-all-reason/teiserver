@@ -1,6 +1,7 @@
 defmodule Teiserver.Account.TournamentReport do
   alias Teiserver.{Account}
   alias Teiserver.Game.MatchRatingLib
+  alias Central.Helpers.TimexHelper
 
   @spec icon() :: String.t()
   def icon(), do: Teiserver.Account.RatingLib.icon()
@@ -97,6 +98,7 @@ defmodule Teiserver.Account.TournamentReport do
         "Position",
         "UserId",
         "Player",
+        "Registration date",
         value_type
       ]
     ]
@@ -119,6 +121,7 @@ defmodule Teiserver.Account.TournamentReport do
         index + 1,
         rating.user.id,
         rating.user.name,
+        TimexHelper.date_to_str(rating.user.inserted_at, format: :ymd),
         value
       ]
     end)
