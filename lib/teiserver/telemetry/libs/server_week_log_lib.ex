@@ -35,6 +35,12 @@ defmodule Teiserver.Telemetry.ServerWeekLogLib do
           logs.week == ^week
   end
 
+  def _search(query, :date, date) do
+    from logs in query,
+      where:
+        logs.date == ^date
+  end
+
   def _search(query, :start_date, {year, week}) do
     from logs in query,
       where:

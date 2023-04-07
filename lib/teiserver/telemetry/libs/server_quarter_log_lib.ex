@@ -35,6 +35,12 @@ defmodule Teiserver.Telemetry.ServerQuarterLogLib do
           logs.quarter == ^quarter
   end
 
+  def _search(query, :date, date) do
+    from logs in query,
+      where:
+        logs.date == ^date
+  end
+
   def _search(query, :start_date, {year, quarter}) do
     from logs in query,
       where:

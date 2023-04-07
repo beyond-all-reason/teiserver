@@ -34,6 +34,12 @@ defmodule Teiserver.Telemetry.ServerYearLogLib do
         logs.year == ^year
   end
 
+  def _search(query, :date, date) do
+    from logs in query,
+      where:
+        logs.date == ^date
+  end
+
   def _search(query, :start_date, {year, year}) do
     from logs in query,
       where:
