@@ -229,6 +229,9 @@ defmodule Teiserver.Game.MatchRatingLib do
     |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
     |> Central.Repo.transaction()
 
+    # Update the match to track rating type
+    {:ok, _} = Battle.update_match(match, %{rating_type_id: rating_type_id})
+
     # If there is a balancer for this match we need to tell it to reset the hashes
     # because there are new values
     case Battle.get_lobby_by_server_uuid(match.server_uuid) do
@@ -438,6 +441,9 @@ defmodule Teiserver.Game.MatchRatingLib do
     Ecto.Multi.new()
     |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
     |> Central.Repo.transaction()
+
+    # Update the match to track rating type
+    {:ok, _} = Battle.update_match(match, %{rating_type_id: rating_type_id})
 
     # If there is a balancer for this match we need to tell it to reset the hashes
     # because there are new values
