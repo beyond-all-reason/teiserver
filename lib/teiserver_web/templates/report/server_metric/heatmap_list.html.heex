@@ -56,12 +56,7 @@
 
         <td>
           <%= link("Show",
-            to:
-              Routes.ts_reports_server_metric_path(
-                @conn,
-                :day_metrics_show,
-                date_to_str(log.date, format: :ymd)
-              ) <> "#hourly_tab",
+            to: ~p"/reports/server/show/day/#{date_to_str(log.date, format: :ymd)}",
             class: "btn btn-secondary btn-sm"
           ) %>
         </td>

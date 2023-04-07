@@ -134,13 +134,7 @@ defmodule Teiserver.TeiserverQuickActions do
       %{
         label: "Server metrics - Daily",
         icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", :day],
-        url: ~p"/teiserver/reports/server/day_metrics",
-        permissions: "teiserver.staff.moderator"
-      },
-      %{
-        label: "Server metrics - Monthly",
-        icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", :month],
-        url: ~p"/teiserver/reports/server/month_metrics",
+        url: ~p"/reports/server/list",
         permissions: "teiserver.staff.moderator"
       },
       %{

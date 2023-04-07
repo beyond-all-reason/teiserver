@@ -42,15 +42,6 @@
 
         <div class="row page-row">
           <div class="col-md-12">
-            <a
-              href={
-                Routes.ts_reports_server_metric_path(@conn, :month_metrics_show, @year, @month)
-              }
-              class={"btn float-end btn-outline-#{TeiserverWeb.Report.ServerMetricView.view_colour}"}
-            >
-              <%= central_component("icon", icon: TeiserverWeb.Report.ServerMetricView.icon()) %> &nbsp;
-              Server detail
-            </a>
             <h4>
               Headline stats - <%= @month %>/<%= @year %> month to date (<%= @progress %>% through this month)
             </h4>

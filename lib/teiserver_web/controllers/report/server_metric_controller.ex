@@ -182,7 +182,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
         "week" -> Telemetry.get_server_week_log(date)
         "month" -> Telemetry.get_server_month_log(date)
         "quarter" -> Telemetry.get_server_quarter_log(date)
-        "year" -> Telemetry.year_log(date)
+        "year" -> Telemetry.get_server_year_log(date)
       end
 
       conn
