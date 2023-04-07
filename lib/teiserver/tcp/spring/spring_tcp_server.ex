@@ -151,7 +151,9 @@ defmodule Teiserver.SpringTcpServer do
       state
     else
       send(self(), {:action, {:welcome, nil}})
-      Process.send_after(self(), :init_timeout, @init_timeout)
+      if Config.get_site_config_cache("system.Disconnect unauthenticated sockets") do
+        Process.send_after(self(), :init_timeout, @init_timeout)
+      end
       :gen_server.enter_loop(__MODULE__, [], state)
     end
   end

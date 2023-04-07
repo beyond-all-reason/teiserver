@@ -272,6 +272,16 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "system.Disconnect unauthenticated sockets",
+      section: "System",
+      type: "boolean",
+      default: false,
+      permissions: ["teiserver.admin"],
+      description: "When enabled sockets not authenticated after 60 seconds will be disconnected",
+      value_label: "Disconnect unauthenticated sockets"
+    })
+
+    add_site_config_type(%{
       key: "system.Process matches",
       section: "System",
       type: "boolean",
