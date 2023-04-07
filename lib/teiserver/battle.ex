@@ -266,46 +266,6 @@ defmodule Teiserver.Battle do
 
   @spec start_match(nil | T.lobby_id()) :: :ok
   def start_match(nil), do: :ok
-  # def start_match(lobby_id) do
-  #   Telemetry.increment(:matches_started)
-
-  #   LobbyCache.cast_lobby(lobby_id, :start_match)
-  #   current_balance = get_lobby_current_balance(lobby_id)
-
-  #   case MatchLib.match_from_lobby(lobby_id) do
-  #     {match_params, members} ->
-  #       case create_match(match_params) do
-  #         {:ok, match} ->
-  #           members
-  #           |> Enum.map(fn m ->
-  #             # If balance mode is solo we need to strip party_id from the
-  #             # membership or it will mess with records, if no balance mode
-  #             # listed then it defaults to grouped
-  #             if current_balance == nil or current_balance.balance_mode == :grouped do
-  #               create_match_membership(Map.merge(m, %{
-  #                 match_id: match.id
-  #               }))
-  #             else
-  #               create_match_membership(Map.merge(m, %{
-  #                 party_id: nil,
-  #                 match_id: match.id
-  #               }))
-  #             end
-  #           end)
-  #         error ->
-  #           Logger.error("Error inserting match: #{Kernel.inspect error}")
-  #           :ok
-  #       end
-  #     nil ->
-  #       # No human players, we're not going to create a match with that!
-  #       :ok
-  #   end
-
-  #   Coordinator.cast_consul(lobby_id, :match_start)
-  #   :ok
-  # end
-
-
   def start_match(lobby_id) do
     empty_match = get_lobby_match_id(lobby_id)
       |> get_match!()
@@ -320,7 +280,7 @@ defmodule Teiserver.Battle do
         case update_match(empty_match, match_params) do
           {:ok, match} ->
             members
-            |> Enum.map(fn m ->
+            |> Enum.each(fn m ->
               # If balance mode is solo we need to strip party_id from the
               # membership or it will mess with records, if no balance mode
               # listed then it defaults to grouped

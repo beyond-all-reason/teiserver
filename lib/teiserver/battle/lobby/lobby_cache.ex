@@ -1,6 +1,10 @@
 defmodule Teiserver.Battle.LobbyCache do
+  @moduledoc """
+
+  """
+
   alias Phoenix.PubSub
-  alias Teiserver.{Battle, Coordinator}
+  alias Teiserver.Coordinator
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Battle.Lobby
   alias Teiserver.Data.Types, as: T
