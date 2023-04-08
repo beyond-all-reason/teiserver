@@ -204,6 +204,18 @@ bsname = view_colour() %>
 
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick={"
+        ('#action_restriction_Site').prop('checked', true);
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('Account used to evade moderation. If you think there has been an error please use the #open-ticket discord channel to talk to the moderation team. The discord can be accessed at #{discord_link}');
+        $('#action_expires').val('1000 years');
+      "}
+                  >
+                    Moderation evasion ban
+                  </div>
+
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
         $('#action_restriction_Bridging').prop('checked', true);
         $('#action_reason').val('Manual unbridging.');
