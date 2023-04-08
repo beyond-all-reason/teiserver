@@ -7,6 +7,13 @@ defmodule Teiserver.Game.MatchRatingsExport do
     "rating_type" => "Team",
     "start_date" => ""
   })
+
+  Teiserver.Game.MatchRatingsExport.show_form(nil, %{
+    "date_preset" => "All time",
+    "end_date" => "",
+    "rating_type" => "Duel",
+    "start_date" => ""
+  })
   """
   alias Central.Helpers.DatePresets
   alias Teiserver.{Battle}

@@ -52,7 +52,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         index_redirect(socket)
 
       lobby.tournament and
-          not User.has_any_role?(current_user.id, ["Moderator", "Caster", "TourneyPlayer"]) ->
+          not User.has_any_role?(current_user.id, ["Moderator", "Caster", "TourneyPlayer", "Tournament player"]) ->
         index_redirect(socket)
 
       (lobby.locked or lobby.passworded) and not allow?(socket, "teiserver.staff.moderator") ->
