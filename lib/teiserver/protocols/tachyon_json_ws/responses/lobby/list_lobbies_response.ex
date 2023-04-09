@@ -1,4 +1,4 @@
-defmodule Teiserver.Tachyon.Responses.LobbyHost.CreateResponse do
+defmodule Teiserver.Tachyon.Responses.Lobby.ListLobbiesResponse do
   @moduledoc """
   Updated status response - https://github.com/beyond-all-reason/tachyon/blob/master/src/schema/lobby_host.ts
   """
@@ -13,7 +13,7 @@ defmodule Teiserver.Tachyon.Responses.LobbyHost.CreateResponse do
     }}
   end
 
-  def execute(lobby) do
-    {"lobby_host/create/response", lobby}
+  def execute(lobbies) do
+    {"lobby/list_lobbies/response", %{"lobbies" => lobbies}}
   end
 end
