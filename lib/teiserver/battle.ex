@@ -284,22 +284,29 @@ defmodule Teiserver.Battle do
           {:ok, match} ->
             members
             |> Enum.each(fn m ->
-              # If balance mode is solo we need to strip party_id from the
-              # membership or it will mess with records, if no balance mode
-              # listed then it defaults to grouped
-              if current_balance == nil or current_balance.balance_mode == :grouped do
-                create_match_membership(
-                  Map.merge(m, %{
-                    match_id: match.id
-                  })
-                )
+              # In some rare situations it is possible to get into a situation where
+              # the membership already exists and this can cause a cascading failure
+              existing_membership = get_match_membership(m.user_id, match.id)
+              if existing_membership do
+                Logger.error("Match membership already exists #{inspect match}, aborting membership insert")
               else
-                create_match_membership(
-                  Map.merge(m, %{
-                    party_id: nil,
-                    match_id: match.id
-                  })
-                )
+                # If balance mode is solo we need to strip party_id from the
+                # membership or it will mess with records, if no balance mode
+                # listed then it defaults to grouped
+                if current_balance == nil or current_balance.balance_mode == :grouped do
+                  create_match_membership(
+                    Map.merge(m, %{
+                      match_id: match.id
+                    })
+                  )
+                else
+                  create_match_membership(
+                    Map.merge(m, %{
+                      party_id: nil,
+                      match_id: match.id
+                    })
+                  )
+                end
               end
             end)
 
@@ -495,12 +502,17 @@ defmodule Teiserver.Battle do
       ** (Ecto.NoResultsError)
 
   """
-
   # def get_match_membership!(user_id, match_id) do
   #   MatchMembershipLib.get_match_memberships()
   #   |> MatchMembershipLib.search(user_id: user_id, match_id: match_id)
   #   |> Repo.one!()
   # end
+
+  def get_match_membership(user_id, match_id) do
+    MatchMembershipLib.get_match_memberships()
+    |> MatchMembershipLib.search(user_id: user_id, match_id: match_id)
+    |> Repo.one()
+  end
 
   def create_match_membership(attrs \\ %{}) do
     %MatchMembership{}
