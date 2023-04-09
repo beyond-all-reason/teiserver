@@ -47,6 +47,12 @@
               <%= central_component("icon", icon: Teiserver.Game.AchievementTypeLib.icon()) %> Achievements
             </a>
           </li>
+
+          <li class="nav-item" role="presentation">
+            <a href="#playtime_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <%= central_component("icon", icon: "fa-regular fa-timer") %> Playtime
+            </a>
+          </li>
         </ul>
 
         <div class="tab-content">
@@ -65,6 +71,10 @@
 
           <div class="tab-pane" id="achievements_tab" style="padding:5px;">
             <%= render("tab_achievements.html", assigns) %>
+          </div>
+
+          <div class="tab-pane" id="playtime_tab" style="padding:5px;">
+            <%= render("tab_playtime.html", assigns) %>
           </div>
         </div>
       </div>
