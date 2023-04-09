@@ -127,7 +127,8 @@ defmodule TeiserverWeb.Moderation.ActionController do
             search: [
               target_id: user.id,
               no_result: true,
-              inserted_after: Timex.shift(Timex.now(), days: -ReportLib.get_outstanding_report_max_days())
+              inserted_after:
+                Timex.shift(Timex.now(), days: -ReportLib.get_outstanding_report_max_days())
             ],
             preload: [:reporter],
             order_by: "Newest first",
@@ -200,7 +201,8 @@ defmodule TeiserverWeb.Moderation.ActionController do
             search: [
               target_id: user.id,
               no_result: true,
-              inserted_after: Timex.shift(Timex.now(), days: -ReportLib.get_outstanding_report_max_days())
+              inserted_after:
+                Timex.shift(Timex.now(), days: -ReportLib.get_outstanding_report_max_days())
             ],
             preload: [:reporter],
             order_by: "Newest first",

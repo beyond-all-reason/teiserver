@@ -269,7 +269,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "tournament", senderid: senderid, remaining: rem} = cmd, state) do
     if Config.get_site_config_cache("teiserver.Allow tournament command") do
-      if User.has_any_role?(senderid, ["Moderator", "Caster", "Tournament player", "TourneyPlayer"]) do
+      if User.has_any_role?(senderid, [
+           "Moderator",
+           "Caster",
+           "Tournament player",
+           "TourneyPlayer"
+         ]) do
         if rem |> String.trim() |> String.downcase() == "off" do
           Battle.update_lobby_values(state.lobby_id, %{tournament: false})
           state = %{state | tournament_lobby: false}

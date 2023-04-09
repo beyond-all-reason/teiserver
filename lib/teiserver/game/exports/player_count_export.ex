@@ -27,9 +27,12 @@ defmodule Teiserver.Game.PlayerCountExport do
   end
 
   defp get_defaults(params) do
-    Map.merge(%{
-      "format" => "csv"
-    }, params)
+    Map.merge(
+      %{
+        "format" => "csv"
+      },
+      params
+    )
   end
 
   def show_form(_conn, params) do
@@ -51,15 +54,16 @@ defmodule Teiserver.Game.PlayerCountExport do
         "csv" -> {"text/csv", "csv"}
       end
 
-    data = Telemetry.list_server_day_logs(
-      search: [
-        start_date: start_date,
-        end_date: end_date
-      ],
-      limit: :infinity,
-      order: "Oldest first"
-    )
-    |> do_output(params)
+    data =
+      Telemetry.list_server_day_logs(
+        search: [
+          start_date: start_date,
+          end_date: end_date
+        ],
+        limit: :infinity,
+        order: "Oldest first"
+      )
+      |> do_output(params)
 
     path = "/tmp/player_count_export.#{ext}"
     File.write(path, data)
@@ -97,7 +101,7 @@ defmodule Teiserver.Game.PlayerCountExport do
     |> Enum.to_list()
     |> add_csv_headings
     |> CSV.encode()
-    |> Enum.to_list
+    |> Enum.to_list()
   end
 
   defp add_csv_headings(output) do

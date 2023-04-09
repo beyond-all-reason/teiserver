@@ -141,41 +141,41 @@ is_admin = allow?(@conn, "teiserver.admin.account") %>
                   <td><%= @user.data["lobby_client"] %></td>
 
                   <td>
-                      <% unverified = @user.data["verified"] != true
-                      user_r = %{restrictions: @user.data["restrictions"] || []}
+                    <% unverified = @user.data["verified"] != true
+                    user_r = %{restrictions: @user.data["restrictions"] || []}
 
-                      banned = Teiserver.User.is_restricted?(user_r, ["Login"])
+                    banned = Teiserver.User.is_restricted?(user_r, ["Login"])
 
-                      muted =
-                        Teiserver.User.is_restricted?(user_r, [
-                          "All chat",
-                          "Room chat",
-                          "Direct chat",
-                          "Lobby chat",
-                          "Battle chat"
-                        ])
+                    muted =
+                      Teiserver.User.is_restricted?(user_r, [
+                        "All chat",
+                        "Room chat",
+                        "Direct chat",
+                        "Lobby chat",
+                        "Battle chat"
+                      ])
 
-                      warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"]) %>
+                    warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"]) %>
 
-                      <%= if banned do %>
-                        <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}>
-                        </i>
-                      <% end %>
+                    <%= if banned do %>
+                      <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}>
+                      </i>
+                    <% end %>
 
-                      <%= if muted do %>
-                        <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Mute")}"}>
-                        </i>
-                      <% end %>
+                    <%= if muted do %>
+                      <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Mute")}"}>
+                      </i>
+                    <% end %>
 
-                      <%= if warned do %>
-                        <i class={"fa-fw text-warning #{Teiserver.Moderation.ActionLib.action_icon("Warn")}"}>
-                        </i>
-                      <% end %>
+                    <%= if warned do %>
+                      <i class={"fa-fw text-warning #{Teiserver.Moderation.ActionLib.action_icon("Warn")}"}>
+                      </i>
+                    <% end %>
 
-                      <%= if unverified do %>
-                        <i class="fa-fw text-info fas fa-square-question"></i>
-                      <% end %>
-                    </td>
+                    <%= if unverified do %>
+                      <i class="fa-fw text-info fas fa-square-question"></i>
+                    <% end %>
+                  </td>
 
                   <td><%= @stats["win_rate.team"] %></td>
                   <td><%= @stats["recent_count.team"] %></td>

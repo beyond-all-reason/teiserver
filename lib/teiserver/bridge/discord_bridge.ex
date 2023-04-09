@@ -180,6 +180,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
     end
   end
 
+  # Teiserver.Moderation.get_report!(123) |> Teiserver.Bridge.DiscordBridge.new_report()
   @spec new_report(Moderation.Report.t()) :: any
   def new_report(report) do
     chan_result =
@@ -204,7 +205,8 @@ defmodule Teiserver.Bridge.DiscordBridge do
           true -> ":crossed_swords:"
         end
 
-      outstanding_count = Moderation.list_outstanding_reports(report.target_id)
+      outstanding_count =
+        Moderation.list_outstanding_reports(report.target_id)
         |> Enum.count()
 
       msg =
