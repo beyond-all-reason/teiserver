@@ -204,8 +204,11 @@ defmodule Teiserver.Bridge.DiscordBridge do
           true -> ":crossed_swords:"
         end
 
+      outstanding_count = Moderation.list_outstanding_reports(report.target_id)
+        |> Enum.count()
+
       msg =
-        "#{report.target.name} was reported by #{report.reporter.name} because #{report.type}/#{report.sub_type} #{match_icon} - #{report.extra_text} - #{url}"
+        "#{report.target.name} was reported by #{report.reporter.name} because #{report.type}/#{report.sub_type} #{match_icon} - #{report.extra_text} - #{url} (Outstanding count: #{outstanding_count})"
 
       Api.create_message(channel, "Moderation report: #{msg}")
     end

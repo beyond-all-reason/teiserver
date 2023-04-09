@@ -45,7 +45,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
   end
 
   @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def create(conn, %{"report" => report}) do
+  def create(conn, %{"report" => report} = params) do
     target_id = report["target_id"] |> int_parse
 
     {match_id, relationship} =
@@ -90,7 +90,11 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
       })
 
     case result do
-      {:ok, _report} ->
+      {:ok, report} ->
+        IO.puts ""
+        IO.inspect report
+        IO.puts ""
+
         conn
         |> redirect(to: Routes.moderation_report_form_path(conn, :success))
 

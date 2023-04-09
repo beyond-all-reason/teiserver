@@ -50,6 +50,25 @@ defmodule Teiserver.Moderation do
   end
 
   @doc """
+
+  """
+  @spec list_outstanding_reports(T.userid()) :: List.t()
+  @spec list_outstanding_reports(T.userid(), List.t()) :: List.t()
+  def list_outstanding_reports(userid, args \\ []) do
+    search = [
+      target_id: userid,
+      no_result: true,
+      inserted_after: Timex.shift(Timex.now(), days: -ReportLib.get_outstanding_report_max_days())
+    ]
+
+    args = Keyword.put(args, :search, search)
+
+    report_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
+  end
+
+  @doc """
   Gets a single report.
 
   Raises `Ecto.NoResultsError` if the Report does not exist.
