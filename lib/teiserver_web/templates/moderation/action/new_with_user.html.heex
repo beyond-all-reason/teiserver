@@ -169,12 +169,12 @@ bsname = view_colour() %>
 
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
-                    onclick="
+                    onclick={"
         $('#action_restriction_Site').prop('checked', true);
         $('#action_restriction_Login').prop('checked', true);
-        $('#action_reason').val('This account has been flagged as a smurf by the server. If this is in error please use #open-ticket on the discord to talk to the moderation team.');
+        $('#action_reason').val('This account has been flagged as a smurf by the server. If this is in error please use #open-ticket on the discord to talk to the moderation team. The discord can be accessed at #{discord_link}');
         $('#action_expires').val('1000 years');
-      "
+      "}
                   >
                     Add smurf ban
                   </div>
