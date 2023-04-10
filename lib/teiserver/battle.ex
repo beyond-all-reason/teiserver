@@ -572,8 +572,9 @@ defmodule Teiserver.Battle do
   end
 
   # LobbyServer process
-  @spec create_lobby(map) :: T.lobby() | nil
-  defdelegate create_lobby(lobby_id), to: Lobby
+  # TODO: Replace the create_lobby |> add_lobby combo with this
+  @spec create_new_lobby(map) :: T.lobby() | {:error, String.t()}
+  defdelegate create_new_lobby(data), to: LobbyCache
 
   @spec add_lobby(T.lobby()) :: T.lobby()
   defdelegate add_lobby(lobby), to: LobbyCache
@@ -655,6 +656,10 @@ defmodule Teiserver.Battle do
   defdelegate set_lobby_password(lobby_id, new_password), to: LobbyCache
 
   # Requests
+  @spec can_join?(T.userid(), T.lobby_id(), String.t() | nil) ::
+          {:failure, String.t()} | true
+  defdelegate can_join?(userid, lobby_id, password \\ nil), to: Lobby
+
   @spec server_allows_join?(T.userid(), T.lobby_id(), String.t() | nil) ::
           {:failure, String.t()} | true
   defdelegate server_allows_join?(userid, lobby_id, password \\ nil), to: Lobby

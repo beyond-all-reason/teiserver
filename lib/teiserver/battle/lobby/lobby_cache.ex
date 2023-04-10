@@ -124,6 +124,41 @@ defmodule Teiserver.Battle.LobbyCache do
     cast_lobby(lobby_id, {:set_password, password})
   end
 
+  @lobby_atom_keys ~w(founder_id founder_name name type nattype port game_hash map_hash password locked engine_name engine_version map_name game_name ip)a |> Map.new(fn k -> {k, to_string(k)} end)
+  @spec convert_lobby_string_map_to_atom_map(map) :: map
+  defp convert_lobby_string_map_to_atom_map(data) do
+    @lobby_atom_keys
+    |> Map.new(fn {atom_key, string_key} ->
+      {atom_key, data[string_key]}
+    end)
+  end
+
+  @spec create_new_lobby(map) :: {:ok, T.lobby()} | {:error, String.t()}
+  def create_new_lobby(data) do
+    data = convert_lobby_string_map_to_atom_map(data)
+
+    cond do
+      String.trim(data.name || "") == "" ->
+        {:error, "No lobby name supplied"}
+
+      not Enum.member?(["normal", "replay"], data.type) ->
+        {:error, "Invalid type '#{data.type}'"}
+
+      not Enum.member?(["none", "holepunch", "fixed"], data.nattype) ->
+        {:error, "Invalid nattype '#{data.nattype}'"}
+
+      not is_boolean(data.locked) ->
+        {:error, "Invalid type for 'locked' (should be boolean)"}
+
+      true ->
+        lobby = data
+        |> Teiserver.Battle.Lobby.create_lobby()
+        |> add_lobby()
+
+        {:ok, lobby}
+    end
+  end
+
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
   def update_lobby(%{id: lobby_id} = lobby, nil, :silent) do
     Logger.warn("update_lobby is still being called for :silent")

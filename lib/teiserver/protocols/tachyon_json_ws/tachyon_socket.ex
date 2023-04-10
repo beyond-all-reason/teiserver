@@ -5,7 +5,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   alias Phoenix.PubSub
   alias Central.Config
   alias Teiserver.Account
-  alias Teiserver.Tachyon.{CommandDispatch}
+  alias Teiserver.Tachyon.{CommandDispatch, MessageHandlers}
   # alias Teiserver.Data.Types, as: T
 
   @type ws_state() :: map()
@@ -16,7 +16,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     %{id: __MODULE__, start: {Task, :start_link, [fn -> :ok end]}, restart: :transient}
   end
 
-  @spec connect(ws_state()) :: {:ok, ws_state()}
+  @spec connect(ws_state()) :: {:ok, ws_state()} | :error
   def connect(
         %{params: %{"token" => token_value, "client_hash" => _, "client_name" => _}} = state
       ) do
@@ -101,6 +101,19 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   end
 
   @spec handle_info(any, ws_state()) :: {:reply, :ok, {:binary, binary}, ws_state()}
+  def handle_info(%{channel: "teiserver_lobby_host_message:" <> _} = msg, state) do
+    case MessageHandlers.LobbyHostMessageHandlers.handle(msg, state) do
+      nil ->
+        {:ok, state}
+
+      {:ok, new_state} ->
+        {:ok, new_state}
+
+      {:ok, resp, new_state} ->
+        {:reply, :ok, {:text, resp |> Jason.encode!()}, new_state}
+    end
+  end
+
   def handle_info(:disconnect, state) do
     {:stop, :disconnected, state}
   end
@@ -118,8 +131,13 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   end
 
   @spec terminate(any, any) :: :ok
-  def terminate(_reason, %{conn: conn} = _state) do
-    Teiserver.Client.disconnect(conn.userid, "ws_error terminate")
+  def terminate({:error, :closed}, %{conn: %{userid: userid}} = _state) do
+    Teiserver.Client.disconnect(userid, "connection closed by client")
+    :ok
+  end
+
+  def terminate(reason, %{conn: %{userid: userid}} = _state) do
+    Teiserver.Client.disconnect(userid, "ws terminate - reason: #{inspect reason}")
     :ok
   end
 
