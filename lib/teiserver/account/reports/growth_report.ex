@@ -76,8 +76,8 @@ defmodule Teiserver.Account.GrowthReport do
 
     # Time counts
     field_list = [
-      {"Player limit", "aggregates.minutes.player"},
-      {"Total limit", "aggregates.minutes.total"}
+      {"Player minutes", "aggregates.minutes.player"},
+      {"Total minutes", "aggregates.minutes.total"}
     ]
 
     columns =
