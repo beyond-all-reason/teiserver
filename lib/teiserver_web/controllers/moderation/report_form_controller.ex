@@ -45,7 +45,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
   end
 
   @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def create(conn, %{"report" => report} = params) do
+  def create(conn, %{"report" => report}) do
     target_id = report["target_id"] |> int_parse
 
     {match_id, relationship} =

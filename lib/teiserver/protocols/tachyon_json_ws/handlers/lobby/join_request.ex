@@ -3,6 +3,8 @@ defmodule Teiserver.Tachyon.Handlers.Lobby.JoinRequest do
 
   """
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Battle
+  alias Teiserver.Tachyon.Responses.Lobby.JoinResponse
 
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do
@@ -13,9 +15,11 @@ defmodule Teiserver.Tachyon.Handlers.Lobby.JoinRequest do
 
   @spec execute(T.tachyon_conn(), map, map) ::
           {{T.tachyon_command(), T.tachyon_object()}, T.tachyon_conn()}
-  def execute(conn, _object, _meta) do
-    response = %{}
+  def execute(conn, %{"lobby_id" => lobby_id} = object, _meta) do
+    result = Battle.can_join?(conn.userid, lobby_id, object["password"])
 
-    {"lobby/join/request", response, conn}
+    response = JoinResponse.execute(result)
+
+    {response, conn}
   end
 end

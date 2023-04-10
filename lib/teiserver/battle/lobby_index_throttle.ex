@@ -58,6 +58,7 @@ defmodule Teiserver.Battle.LobbyIndexThrottle do
           # uuid: Battle.get_lobby_match_uuid(lobby.id)
         })
       end)
+      |> Enum.reject(&(&1 == nil))
 
     public_list =
       complete_list

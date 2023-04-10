@@ -51,6 +51,7 @@ defmodule Teiserver.Startup do
       "Moderation:Ban updated",
       "Moderation:Ban enacted",
       "Moderation:Action halted",
+      "Moderation:Action re_posted",
       "Moderation:Action updated",
       "Moderation:Action created",
       "Moderation:De-bridged user",

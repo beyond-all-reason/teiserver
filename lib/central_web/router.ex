@@ -549,6 +549,7 @@ defmodule CentralWeb.Router do
     post("/action/search", ActionController, :search)
     get("/action/new_with_user", ActionController, :new_with_user)
     put("/action/halt/:id", ActionController, :halt)
+    put("/action/re-post/:id", ActionController, :re_post)
     resources("/action", ActionController, only: [:index, :show, :new, :create, :edit, :update])
 
     get("/proposal/new_with_user", ProposalController, :new_with_user)
