@@ -33,11 +33,8 @@
           method: :put,
           data: [confirm: "Are you sure?"],
           class: "btn btn-warning"
-        ) %>
-
-        &nbsp;&nbsp;&nbsp;
-
-        <%= link(raw("<i class='fa-solid fa-fw fa-octagon'></i>&nbsp; Halt action"),
+        ) %> &nbsp;&nbsp;&nbsp; <%= link(
+          raw("<i class='fa-solid fa-fw fa-octagon'></i>&nbsp; Halt action"),
           to: ~p"/moderation/action/halt/#{@action.id}",
           method: :put,
           data: [confirm: "Are you sure?"],

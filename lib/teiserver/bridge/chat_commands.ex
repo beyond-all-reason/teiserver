@@ -6,7 +6,7 @@ defmodule Teiserver.Bridge.ChatCommands do
   alias Nostrum.Api
   require Logger
 
-  @always_allow ~w(whatwas unit)
+  @always_allow ~w(whatwas unit define whatis)
 
   @spec handle(Nostrum.Struct.Message.t()) :: any
   def handle(%Nostrum.Struct.Message{
@@ -154,6 +154,47 @@ defmodule Teiserver.Bridge.ChatCommands do
 
       {:found_new, {code, _old_name}} ->
         reply(channel, "https://www.beyondallreason.info/unit/#{code}")
+    end
+  end
+
+  def handle_command(cmd, "define", remaining, channel) do
+    handle_command(cmd, "whatis", remaining, channel)
+  end
+
+  def handle_command({_user, _discord_id, _message_id}, "whatis", remaining, channel) do
+    name =
+      remaining
+      |> String.trim()
+      |> String.downcase()
+
+    description =
+      case name do
+        "tachyon" ->
+          """
+          Tachyon is a protocol used to define messaging between the server and clients. It is built in JSON though we use Typescript to build our JSON schema.
+          Tachyon is designed to allow us to scale beyond the limitations of our current legacy protocol (spring) as it has what is called an "O(n^2)" scaling problem where the number of messages (and thus work to do) grows multiple times faster than the number of users and thus putting a hard cap on how many people can play the game at once.
+          Tachyon is considered a hard "must have" for our Steam release.
+          You can get more involved with the development of it by checking out <#943582636679520256> (note: you may need to grab a dev role from the assign roles channel).
+          """
+
+        "teiserver" ->
+          """
+          Teiserver is the middleware server through which all clients communicate. Some of the items it handles are: Accounts/Authentication, Chat, Lobby coordination, Ratings and Moderation. If the server is working you likely won't even know it's there, if it stops working then so does everything else.
+          Teiserver is written in Elixir, has some documentation and is very open to new contributors.
+          You can get more involved with the development of it by checking out <#564591092360675328> (note: you may need to grab a dev role from the assign roles channel).
+          """
+
+        "spads" ->
+          """
+          SPADS is the software running the lobby rooms (battles). It's written in Perl, is very extensively documented and mature software. We are not expecting to make any notable changes to it.
+          You can ask questions about it in <#564591092360675328> (note: you may need to grab a dev role from the assign roles channel).
+          """
+      end
+
+    if description do
+      reply(channel, description)
+    else
+      :ignore
     end
   end
 
