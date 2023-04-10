@@ -272,6 +272,16 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "system.Login limit count",
+      section: "System",
+      type: "integer",
+      default: 3,
+      permissions: ["teiserver.admin"],
+      description: "How many times a user can attempt to login within the refresh window",
+      value_label: "Login limit count"
+    })
+
+    add_site_config_type(%{
       key: "system.Disconnect unauthenticated sockets",
       section: "System",
       type: "boolean",

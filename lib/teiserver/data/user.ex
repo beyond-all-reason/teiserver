@@ -792,8 +792,9 @@ defmodule Teiserver.User do
   @spec login_flood_check(T.userid()) :: :allow | :block
   def login_flood_check(userid) do
     login_count = Central.cache_get(:teiserver_login_count, userid) || 0
+    rate_limit = Config.get_site_config_cache("system.Login limit count")
 
-    if login_count > 3 do
+    if login_count > rate_limit do
       :block
     else
       Central.cache_put(:teiserver_login_count, userid, login_count + 1)
