@@ -136,11 +136,11 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
   defp do_handle(%{command: "whoami", senderid: senderid} = _cmd, state) do
     sender = User.get_user_by_id(senderid)
-    # stats = Account.get_user_stat_data(senderid)
+    stats = Account.get_user_stat_data(senderid)
 
-    # player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
-    # spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
-    # rank_time = User.rank_time(senderid)
+    total_hours = (Map.get(stats, "total_minutes", 0) / 60) |> round
+    player_hours = (Map.get(stats, "player_minutes", 0) / 60) |> round
+    spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> round
 
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
     profile_link = "https://#{host}/teiserver/profile/#{senderid}"
@@ -190,6 +190,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       [
         @splitter,
         "You are #{sender.name}",
+        "Playtime: #{total_hours} hours (#{player_hours} h playing, #{spectator_hours} h spectating)",
         "Profile link: #{profile_link}",
         "Skill ratings:",
         ratings,

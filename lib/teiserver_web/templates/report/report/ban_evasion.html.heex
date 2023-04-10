@@ -1,0 +1,157 @@
+<% bsname = view_colour() %>
+
+<%= render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "reports"})
+) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render(
+          TeiserverWeb.Report.ReportView,
+          "section_menu.html",
+          Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "ban_evasion"
+          })
+        ) %>
+
+        <form
+          action={Routes.ts_reports_report_path(@conn, :show, "ban_evasion")}
+          method="post"
+          class="form-horizontal mb-4"
+        >
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <div class="row">
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="report_age" class="control-label">Age (days): </label>
+              <input
+                type="text"
+                name="report[age]"
+                id="report_age"
+                value={@params["age"]}
+                class="form-control"
+              />
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="report_require_games" class="control-label">Require games</label>
+              <%= central_component("checkbox",
+                name: "report[require_games]",
+                id: "report_require_games",
+                value: "true",
+                label: "",
+                checked: @params["require_games"] == "true",
+                description: "Require 1 or more rated games"
+              ) %>
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              &nbsp;<br />
+              <input
+                type="submit"
+                value="Update report"
+                name="form.submitted"
+                class={"btn btn-#{bsname} btn-block"}
+              />
+            </div>
+          </div>
+        </form>
+
+        <table class="table table-sm mt-4">
+          <thead>
+            <tr>
+              <th>New user</th>
+              <th>Status</th>
+              <th>Last login</th>
+              <th>Registered</th>
+
+              <th>Duel</th>
+              <th>FFA</th>
+              <th>Team</th>
+
+              <th>&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for user <- @relevant_evaders do %>
+              <% user_r = %{restrictions: user.data["restrictions"] || []}
+              stats = @user_stats[user.id]
+
+              banned = Teiserver.User.is_restricted?(user_r, ["Login"])
+
+              muted =
+                Teiserver.User.is_restricted?(user_r, [
+                  "All chat",
+                  "Room chat",
+                  "Direct chat",
+                  "Lobby chat",
+                  "Battle chat"
+                ])
+
+              warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"]) %>
+
+              <tr>
+                <td><%= user.name %></td>
+                <td>
+                  <%= if banned do %>
+                    <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}>
+                    </i>
+                  <% end %>
+
+                  <%= if muted do %>
+                    <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Mute")}"}>
+                    </i>
+                  <% end %>
+
+                  <%= if warned do %>
+                    <i class={"fa-fw text-warning #{Teiserver.Moderation.ActionLib.action_icon("Warn")}"}>
+                    </i>
+                  <% end %>
+                </td>
+
+                <td>
+                  <%= date_to_str(((user.data["last_login"] || 0) * 60) |> Timex.from_unix(),
+                    format: :hms_or_ymd,
+                    tz: @tz
+                  ) %>
+                </td>
+                <td><%= date_to_str(user.inserted_at, format: :hms_or_dmy) %></td>
+
+                <td>
+                  <%= if stats["recent_count.duel"] do %>
+                    <%= stats["win_rate.duel"] %>% of <%= stats["recent_count.duel"] %>
+                  <% end %>
+                </td>
+                <td>
+                  <%= if stats["recent_count.ffa"] do %>
+                    <%= stats["win_rate.ffa"] %>% of <%= stats["recent_count.ffa"] %>
+                  <% end %>
+                </td>
+                <td>
+                  <%= if stats["recent_count.team"] do %>
+                    <%= stats["win_rate.team"] %>% of <%= stats["recent_count.team"] %>
+                  <% end %>
+                </td>
+
+                <td>
+                  <a
+                    href={Routes.ts_admin_user_path(@conn, :smurf_search, user.id)}
+                    class="btn btn-secondary btn-sm"
+                  >
+                    Show
+                  </a>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

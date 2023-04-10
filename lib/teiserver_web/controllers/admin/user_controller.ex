@@ -269,10 +269,6 @@ defmodule TeiserverWeb.Admin.UserController do
       |> Enum.map(fn {k, v} -> if user_params[k] == "true", do: v end)
       |> Enum.reject(&(&1 == nil))
 
-    IO.puts("")
-    IO.inspect(roles)
-    IO.puts("")
-
     data =
       Map.merge(user.data || %{}, %{
         "bot" => user_params["bot"] == "true",
@@ -524,6 +520,7 @@ defmodule TeiserverWeb.Admin.UserController do
         result =
           case action do
             "recache" ->
+              Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user.id)
               Teiserver.User.recache_user(user.id)
               {:ok, ""}
 

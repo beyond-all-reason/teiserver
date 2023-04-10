@@ -23,7 +23,8 @@ defmodule TeiserverWeb.TournamentLive.Index do
       Teiserver.User.has_any_role?(socket.assigns[:current_user].id, [
         "Moderator",
         "Caster",
-        "TourneyPlayer"
+        "TourneyPlayer",
+        "Tournament player"
       ])
 
     socket =

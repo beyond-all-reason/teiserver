@@ -135,12 +135,15 @@ config :central, Oban,
        # Every minute
        {"* * * * *", Teiserver.Battle.Tasks.PostMatchProcessTask},
 
-       # 2:07 am and 2:17 am
-       {"2 2 * * *", Teiserver.Telemetry.Tasks.PersistServerDayTask},
-       {"12 2 * * *", Teiserver.Telemetry.Tasks.PersistServerMonthTask},
-       {"7 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchDayTask},
-       {"17 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchMonthTask},
-       {"27 2 * * *", Teiserver.Telemetry.InfologCleanupTask},
+       # 2am
+       {"1 2 * * *", Teiserver.Telemetry.Tasks.PersistServerDayTask},
+       {"2 2 * * *", Teiserver.Telemetry.Tasks.PersistServerWeekTask},
+       {"3 2 * * *", Teiserver.Telemetry.Tasks.PersistServerMonthTask},
+       {"4 2 * * *", Teiserver.Telemetry.Tasks.PersistServerQuarterTask},
+       {"5 2 * * *", Teiserver.Telemetry.Tasks.PersistServerYearTask},
+       {"6 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchDayTask},
+       {"7 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchMonthTask},
+       {"8 2 * * *", Teiserver.Telemetry.InfologCleanupTask},
 
        # 2:43
        {"43 2 * * *", Teiserver.Game.AchievementCleanupTask},

@@ -203,10 +203,13 @@ defmodule Teiserver.Game.LobbyPolicyLib do
 
   def add_policy_from_db(%{enabled: false} = lobby_policy) do
     cast_lobby_organiser(lobby_policy.id, {:updated_policy, lobby_policy})
+    cache_updated_lobby_policy(lobby_policy)
     :exists
   end
 
   def add_policy_from_db(%{enabled: true} = lobby_policy) do
+    cache_updated_lobby_policy(lobby_policy)
+
     cond do
       Application.get_env(:central, Teiserver)[:enable_managed_lobbies] == false ->
         :disabled
@@ -239,6 +242,18 @@ defmodule Teiserver.Game.LobbyPolicyLib do
     end
   end
 
+  defp cache_updated_lobby_policy(lobby_policy) do
+    Central.cache_update(:lists, :lobby_policies, fn value ->
+      new_value =
+        [lobby_policy.id | value]
+        |> Enum.uniq()
+
+      {:ok, new_value}
+    end)
+
+    Central.cache_put(:lobby_policies_cache, lobby_policy.id, lobby_policy)
+  end
+
   @spec get_lobby_organiser_pid(T.lobby_policy_id()) :: pid() | nil
   def get_lobby_organiser_pid(lobby_policy_id) when is_integer(lobby_policy_id) do
     case Horde.Registry.lookup(
@@ -248,6 +263,19 @@ defmodule Teiserver.Game.LobbyPolicyLib do
       [{pid, _}] -> pid
       _ -> nil
     end
+  end
+
+  @spec list_cached_lobby_policies() :: list()
+  def list_cached_lobby_policies() do
+    Central.cache_get(:lists, :lobby_policies)
+    |> Enum.map(fn id ->
+      get_cached_lobby_policy(id)
+    end)
+  end
+
+  @spec get_cached_lobby_policy(non_neg_integer()) :: LobbyPolicy.t()
+  def get_cached_lobby_policy(id) do
+    Central.cache_get(:lobby_policies_cache, id)
   end
 
   @doc """

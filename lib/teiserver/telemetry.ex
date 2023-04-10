@@ -578,6 +578,524 @@ defmodule Teiserver.Telemetry do
     end
   end
 
+  # Quarter logs
+  alias Teiserver.Telemetry.{ServerQuarterLog, ServerQuarterLogLib}
+
+  defp server_quarter_log_query(args) do
+    server_quarter_log_query(nil, args)
+  end
+
+  defp server_quarter_log_query(date, args) do
+    ServerQuarterLogLib.get_server_quarter_logs()
+    |> ServerQuarterLogLib.search(%{date: date})
+    |> ServerQuarterLogLib.search(args[:search])
+    |> ServerQuarterLogLib.order_by(args[:order])
+    |> QueryHelpers.offset_query(args[:offset] || 0)
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of logging_logs.
+
+  ## Examples
+
+      iex> list_logging_logs()
+      [%ServerQuarterLog{}, ...]
+
+  """
+  def list_server_quarter_logs(args \\ []) do
+    server_quarter_log_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single log.
+
+  Raises `Ecto.NoResultsError` if the ServerQuarterLog does not exist.
+
+  ## Examples
+
+      iex> get_log!(123)
+      %ServerQuarterLog{}
+
+      iex> get_log!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_server_quarter_log(date) when not is_list(date) do
+    server_quarter_log_query(date, [])
+    |> Repo.one()
+  end
+
+  def get_server_quarter_log(args) do
+    server_quarter_log_query(nil, args)
+    |> Repo.one()
+  end
+
+  def get_server_quarter_log(date, args) do
+    server_quarter_log_query(date, args)
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a log.
+
+  ## Examples
+
+      iex> create_log(%{field: value})
+      {:ok, %ServerQuarterLog{}}
+
+      iex> create_log(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_server_quarter_log(attrs \\ %{}) do
+    %ServerQuarterLog{}
+    |> ServerQuarterLog.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a log.
+
+  ## Examples
+
+      iex> update_log(log, %{field: new_value})
+      {:ok, %ServerQuarterLog{}}
+
+      iex> update_log(log, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_server_quarter_log(%ServerQuarterLog{} = log, attrs) do
+    log
+    |> ServerQuarterLog.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a ServerQuarterLog.
+
+  ## Examples
+
+      iex> delete_log(log)
+      {:ok, %ServerQuarterLog{}}
+
+      iex> delete_log(log)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_server_quarter_log(%ServerQuarterLog{} = log) do
+    Repo.delete(log)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking log changes.
+
+  ## Examples
+
+      iex> change_log(log)
+      %Ecto.Changeset{source: %ServerQuarterLog{}}
+
+  """
+  def change_server_quarter_log(%ServerQuarterLog{} = log) do
+    ServerQuarterLog.changeset(log, %{})
+  end
+
+  @spec get_last_server_quarter_log() :: Date.t() | nil
+  def get_last_server_quarter_log() do
+    query =
+      from telemetry_logs in ServerQuarterLog,
+        order_by: [desc: telemetry_logs.year, desc: telemetry_logs.quarter],
+        select: [telemetry_logs.date],
+        limit: 1
+
+    case Repo.one(query) do
+      [date] ->
+        date
+
+      nil ->
+        nil
+    end
+  end
+
+  @spec get_this_quarters_server_metrics_log(boolean) :: map()
+  def get_this_quarters_server_metrics_log(force_recache \\ false) do
+    last_time =
+      Central.cache_get(:application_metadata_cache, "teiserver_quarter_server_metrics_last_time")
+
+    recache =
+      cond do
+        force_recache == true -> force_recache
+        last_time == nil -> true
+        Timex.compare(Timex.now() |> Timex.shift(days: -1), last_time) == 1 -> true
+        true -> false
+      end
+
+    if recache do
+      data = Teiserver.Telemetry.Tasks.PersistServerQuarterTask.quarter_so_far()
+
+      Central.cache_put(
+        :application_metadata_cache,
+        "teiserver_quarter_quarter_metrics_cache",
+        data
+      )
+
+      Central.cache_put(
+        :application_metadata_cache,
+        "teiserver_quarter_server_metrics_last_time",
+        Timex.now()
+      )
+
+      data
+    else
+      Central.cache_get(:application_metadata_cache, "teiserver_quarter_quarter_metrics_cache")
+    end
+  end
+
+  # Year logs
+  alias Teiserver.Telemetry.{ServerYearLog, ServerYearLogLib}
+
+  defp server_year_log_query(args) do
+    server_year_log_query(nil, args)
+  end
+
+  defp server_year_log_query(date, args) do
+    ServerYearLogLib.get_server_year_logs()
+    |> ServerYearLogLib.search(%{date: date})
+    |> ServerYearLogLib.search(args[:search])
+    |> ServerYearLogLib.order_by(args[:order])
+    |> QueryHelpers.offset_query(args[:offset] || 0)
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of logging_logs.
+
+  ## Examples
+
+      iex> list_logging_logs()
+      [%ServerYearLog{}, ...]
+
+  """
+  def list_server_year_logs(args \\ []) do
+    server_year_log_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single log.
+
+  Raises `Ecto.NoResultsError` if the ServerYearLog does not exist.
+
+  ## Examples
+
+      iex> get_log!(123)
+      %ServerYearLog{}
+
+      iex> get_log!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_server_year_log(date) when not is_list(date) do
+    server_year_log_query(date, [])
+    |> Repo.one()
+  end
+
+  def get_server_year_log(args) do
+    server_year_log_query(nil, args)
+    |> Repo.one()
+  end
+
+  def get_server_year_log(date, args) do
+    server_year_log_query(date, args)
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a log.
+
+  ## Examples
+
+      iex> create_log(%{field: value})
+      {:ok, %ServerYearLog{}}
+
+      iex> create_log(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_server_year_log(attrs \\ %{}) do
+    %ServerYearLog{}
+    |> ServerYearLog.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a log.
+
+  ## Examples
+
+      iex> update_log(log, %{field: new_value})
+      {:ok, %ServerYearLog{}}
+
+      iex> update_log(log, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_server_year_log(%ServerYearLog{} = log, attrs) do
+    log
+    |> ServerYearLog.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a ServerYearLog.
+
+  ## Examples
+
+      iex> delete_log(log)
+      {:ok, %ServerYearLog{}}
+
+      iex> delete_log(log)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_server_year_log(%ServerYearLog{} = log) do
+    Repo.delete(log)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking log changes.
+
+  ## Examples
+
+      iex> change_log(log)
+      %Ecto.Changeset{source: %ServerYearLog{}}
+
+  """
+  def change_server_year_log(%ServerYearLog{} = log) do
+    ServerYearLog.changeset(log, %{})
+  end
+
+  @spec get_last_server_year_log() :: Date.t() | nil
+  def get_last_server_year_log() do
+    query =
+      from telemetry_logs in ServerYearLog,
+        order_by: [desc: telemetry_logs.year, desc: telemetry_logs.year],
+        select: [telemetry_logs.date],
+        limit: 1
+
+    case Repo.one(query) do
+      [date] ->
+        date
+
+      nil ->
+        nil
+    end
+  end
+
+  @spec get_this_years_server_metrics_log(boolean) :: map()
+  def get_this_years_server_metrics_log(force_recache \\ false) do
+    last_time =
+      Central.cache_get(:application_metadata_cache, "teiserver_year_server_metrics_last_time")
+
+    recache =
+      cond do
+        force_recache == true -> force_recache
+        last_time == nil -> true
+        Timex.compare(Timex.now() |> Timex.shift(days: -1), last_time) == 1 -> true
+        true -> false
+      end
+
+    if recache do
+      data = Teiserver.Telemetry.Tasks.PersistServerYearTask.year_so_far()
+      Central.cache_put(:application_metadata_cache, "teiserver_year_year_metrics_cache", data)
+
+      Central.cache_put(
+        :application_metadata_cache,
+        "teiserver_year_server_metrics_last_time",
+        Timex.now()
+      )
+
+      data
+    else
+      Central.cache_get(:application_metadata_cache, "teiserver_year_year_metrics_cache")
+    end
+  end
+
+  # Week logs
+  alias Teiserver.Telemetry.{ServerWeekLog, ServerWeekLogLib}
+
+  defp server_week_log_query(args) do
+    server_week_log_query(nil, args)
+  end
+
+  defp server_week_log_query(date, args) do
+    ServerWeekLogLib.get_server_week_logs()
+    |> ServerWeekLogLib.search(%{date: date})
+    |> ServerWeekLogLib.search(args[:search])
+    |> ServerWeekLogLib.order_by(args[:order])
+    |> QueryHelpers.offset_query(args[:offset] || 0)
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of logging_logs.
+
+  ## Examples
+
+      iex> list_logging_logs()
+      [%ServerWeekLog{}, ...]
+
+  """
+  def list_server_week_logs(args \\ []) do
+    server_week_log_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single log.
+
+  Raises `Ecto.NoResultsError` if the ServerWeekLog does not exist.
+
+  ## Examples
+
+      iex> get_log!(123)
+      %ServerWeekLog{}
+
+      iex> get_log!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_server_week_log(date) when not is_list(date) do
+    server_week_log_query(date, [])
+    |> Repo.one()
+  end
+
+  def get_server_week_log(args) do
+    server_week_log_query(nil, args)
+    |> Repo.one()
+  end
+
+  def get_server_week_log(date, args) do
+    server_week_log_query(date, args)
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a log.
+
+  ## Examples
+
+      iex> create_log(%{field: value})
+      {:ok, %ServerWeekLog{}}
+
+      iex> create_log(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_server_week_log(attrs \\ %{}) do
+    %ServerWeekLog{}
+    |> ServerWeekLog.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a log.
+
+  ## Examples
+
+      iex> update_log(log, %{field: new_value})
+      {:ok, %ServerWeekLog{}}
+
+      iex> update_log(log, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_server_week_log(%ServerWeekLog{} = log, attrs) do
+    log
+    |> ServerWeekLog.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a ServerWeekLog.
+
+  ## Examples
+
+      iex> delete_log(log)
+      {:ok, %ServerWeekLog{}}
+
+      iex> delete_log(log)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_server_week_log(%ServerWeekLog{} = log) do
+    Repo.delete(log)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking log changes.
+
+  ## Examples
+
+      iex> change_log(log)
+      %Ecto.Changeset{source: %ServerWeekLog{}}
+
+  """
+  def change_server_week_log(%ServerWeekLog{} = log) do
+    ServerWeekLog.changeset(log, %{})
+  end
+
+  @spec get_last_server_week_log() :: Date.t() | nil
+  def get_last_server_week_log() do
+    query =
+      from telemetry_logs in ServerWeekLog,
+        order_by: [desc: telemetry_logs.year, desc: telemetry_logs.week],
+        select: [telemetry_logs.date],
+        limit: 1
+
+    case Repo.one(query) do
+      [date] ->
+        date
+
+      nil ->
+        nil
+    end
+  end
+
+  @spec get_this_weeks_server_metrics_log(boolean) :: map()
+  def get_this_weeks_server_metrics_log(force_recache \\ false) do
+    last_time =
+      Central.cache_get(:application_metadata_cache, "teiserver_week_server_metrics_last_time")
+
+    recache =
+      cond do
+        force_recache == true -> force_recache
+        last_time == nil -> true
+        Timex.compare(Timex.now() |> Timex.shift(days: -1), last_time) == 1 -> true
+        true -> false
+      end
+
+    if recache do
+      data = Teiserver.Telemetry.Tasks.PersistServerWeekTask.week_so_far()
+      Central.cache_put(:application_metadata_cache, "teiserver_week_week_metrics_cache", data)
+
+      Central.cache_put(
+        :application_metadata_cache,
+        "teiserver_week_server_metrics_last_time",
+        Timex.now()
+      )
+
+      data
+    else
+      Central.cache_get(:application_metadata_cache, "teiserver_week_week_metrics_cache")
+    end
+  end
+
   # Match logs
   # Day logs
   alias Teiserver.Telemetry.{MatchDayLog, MatchDayLogLib}

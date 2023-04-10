@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Report.ExportsController do
   use CentralWeb, :controller
+  alias Teiserver.Game
   import Central.Account.AuthLib, only: [allow?: 2]
 
   plug(AssignPlug,
@@ -78,7 +79,8 @@ defmodule TeiserverWeb.Report.ExportsController do
 
   defp get_module(name) do
     case name do
-      "match_ratings" -> Teiserver.Game.MatchRatingsExport
+      "match_ratings" -> Game.MatchRatingsExport
+      "player_count" -> Game.PlayerCountExport
     end
   end
 end

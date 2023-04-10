@@ -1,4 +1,4 @@
-defmodule Tachyon.TachyonSocket do
+defmodule Teiserver.Tachyon.TachyonSocket do
   @behaviour Phoenix.Socket.Transport
 
   require Logger
@@ -87,14 +87,15 @@ defmodule Tachyon.TachyonSocket do
     object = wrapper["data"]
     meta = Map.drop(wrapper, ["data"])
 
-    {command, data, new_conn} = CommandDispatch.dispatch(conn, object, meta)
+    {{command, data}, new_conn} = CommandDispatch.dispatch(conn, object, meta)
 
     response = %{
       "command" => command,
       "data" => data
     }
 
-    Teiserver.Tachyon.Schema.validate!(response)
+    # Currently not able to validate errors so leaving it out
+    # Teiserver.Tachyon.Schema.validate!(response)
 
     {:ok, response, new_conn}
   end

@@ -100,6 +100,7 @@ defmodule Teiserver.Startup do
     Central.Account.GroupCacheLib.update_caches(umbrella_group)
 
     Central.cache_put(:lists, :rooms, [])
+    Central.cache_put(:lists, :lobby_policies, [])
 
     Teiserver.Data.Matchmaking.pre_cache_queues()
     Teiserver.Game.pre_cache_policies()

@@ -105,6 +105,7 @@ is_admin = allow?(@conn, "teiserver.admin.account") %>
               <thead>
                 <tr>
                   <th colspan="3">Name/Domain</th>
+                  <th>Client</th>
                   <th>Status</th>
 
                   <th>Winrate</th>
@@ -137,9 +138,43 @@ is_admin = allow?(@conn, "teiserver.admin.account") %>
                   </td>
                   <td><%= @user.name %></td>
                   <td><%= email_domain %></td>
+                  <td><%= @user.data["lobby_client"] %></td>
 
                   <td>
-                    -
+                    <% unverified = @user.data["verified"] != true
+                    user_r = %{restrictions: @user.data["restrictions"] || []}
+
+                    banned = Teiserver.User.is_restricted?(user_r, ["Login"])
+
+                    muted =
+                      Teiserver.User.is_restricted?(user_r, [
+                        "All chat",
+                        "Room chat",
+                        "Direct chat",
+                        "Lobby chat",
+                        "Battle chat"
+                      ])
+
+                    warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"]) %>
+
+                    <%= if banned do %>
+                      <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}>
+                      </i>
+                    <% end %>
+
+                    <%= if muted do %>
+                      <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Mute")}"}>
+                      </i>
+                    <% end %>
+
+                    <%= if warned do %>
+                      <i class={"fa-fw text-warning #{Teiserver.Moderation.ActionLib.action_icon("Warn")}"}>
+                      </i>
+                    <% end %>
+
+                    <%= if unverified do %>
+                      <i class="fa-fw text-info fas fa-square-question"></i>
+                    <% end %>
                   </td>
 
                   <td><%= @stats["win_rate.team"] %></td>
@@ -191,6 +226,7 @@ is_admin = allow?(@conn, "teiserver.admin.account") %>
                     </td>
                     <td><%= user.name %></td>
                     <td><%= email_domain %></td>
+                    <td><%= user.data["lobby_client"] %></td>
 
                     <td>
                       <% unverified = user.data["verified"] != true

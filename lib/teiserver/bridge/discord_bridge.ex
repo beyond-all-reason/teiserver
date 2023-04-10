@@ -180,6 +180,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
     end
   end
 
+  # Teiserver.Moderation.get_report!(123) |> Teiserver.Bridge.DiscordBridge.new_report()
   @spec new_report(Moderation.Report.t()) :: any
   def new_report(report) do
     chan_result =
@@ -204,8 +205,12 @@ defmodule Teiserver.Bridge.DiscordBridge do
           true -> ":crossed_swords:"
         end
 
+      outstanding_count =
+        Moderation.list_outstanding_reports(report.target_id)
+        |> Enum.count()
+
       msg =
-        "#{report.target.name} was reported by #{report.reporter.name} because #{report.type}/#{report.sub_type} #{match_icon} - #{report.extra_text} - #{url}"
+        "#{report.target.name} was reported by #{report.reporter.name} because #{report.type}/#{report.sub_type} #{match_icon} - #{report.extra_text} - #{url} (Outstanding count: #{outstanding_count})"
 
       Api.create_message(channel, "Moderation report: #{msg}")
     end
@@ -331,14 +336,8 @@ defmodule Teiserver.Bridge.DiscordBridge do
   end
 
   defp bridge_channel_to_room(channel_id) do
-    result =
-      Application.get_env(:central, DiscordBridge)[:bridges]
-      |> Enum.filter(fn {chan, _room} -> chan == channel_id end)
-
-    case result do
-      [{_, room}] -> room
-      _ -> nil
-    end
+    bridge_pid = BridgeServer.get_bridge_pid()
+    GenServer.call(bridge_pid, {:lookup_room_from_channel, channel_id})
   end
 
   def start_link do

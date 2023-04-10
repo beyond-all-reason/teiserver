@@ -5,8 +5,6 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
   alias Teiserver.{Battle}
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]
 
-  @unfinished_days 5
-  @short_match_days 7
   @strip_data_days 35
 
   @impl Oban.Worker
@@ -23,10 +21,12 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
   end
 
   defp delete_unfinished_matches() do
+    days = Application.get_env(:central, Teiserver)[:retention][:lobby_chat]
+
     # If a match is never marked as finished after X days, we delete it
     Battle.list_matches(
       search: [
-        inserted_before: Timex.shift(Timex.now(), days: -@unfinished_days),
+        inserted_before: Timex.shift(Timex.now(), days: -days),
         never_finished: :ok
       ],
       select: [:id],
@@ -37,13 +37,15 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
   end
 
   defp delete_short_matches() do
+    days = Application.get_env(:central, Teiserver)[:retention][:lobby_chat]
+
     # Remove tags from matches as the tags take up a lot of space and we don't need them long term
     # only need them for X days since the game, we also don't want to have to search every single game
     matches_to_process =
       Battle.list_matches(
         search: [
-          inserted_before: Timex.shift(Timex.now(), days: -@short_match_days),
-          inserted_after: Timex.shift(Timex.now(), days: -(@short_match_days * 3))
+          inserted_before: Timex.shift(Timex.now(), days: -days),
+          inserted_after: Timex.shift(Timex.now(), days: -(days * 3))
         ],
         limit: :infinity
       )

@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
   alias Teiserver.Logging
   alias Teiserver.{Account, Moderation}
-  alias Teiserver.Moderation.{Action, ActionLib}
+  alias Teiserver.Moderation.{Action, ActionLib, ReportLib}
   import Teiserver.Logging.Helpers, only: [add_audit_log: 3]
   import Central.Helpers.StringHelper, only: [get_hash_id: 1]
 
@@ -127,7 +127,8 @@ defmodule TeiserverWeb.Moderation.ActionController do
             search: [
               target_id: user.id,
               no_result: true,
-              inserted_after: Timex.shift(Timex.now(), days: -31)
+              inserted_after:
+                Timex.shift(Timex.now(), days: -ReportLib.get_outstanding_report_max_days())
             ],
             preload: [:reporter],
             order_by: "Newest first",
@@ -200,7 +201,8 @@ defmodule TeiserverWeb.Moderation.ActionController do
             search: [
               target_id: user.id,
               no_result: true,
-              inserted_after: Timex.shift(Timex.now(), days: -31)
+              inserted_after:
+                Timex.shift(Timex.now(), days: -ReportLib.get_outstanding_report_max_days())
             ],
             preload: [:reporter],
             order_by: "Newest first",

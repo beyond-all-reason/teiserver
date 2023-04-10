@@ -3,6 +3,9 @@ defmodule Teiserver.Telemetry.ServerGraphDayLogsTask do
   def perform(logs, %{"field_list" => field_list} = _params, mapper_function) do
     field_list
     |> Enum.map(fn
+      {name, path, getter} ->
+        [name | build_line(logs, path, mapper_function, getter)]
+
       {name, path} ->
         [name | build_line(logs, path, mapper_function)]
 
@@ -17,8 +20,12 @@ defmodule Teiserver.Telemetry.ServerGraphDayLogsTask do
   end
 
   @spec build_line(list, String.t(), function()) :: list()
-  defp build_line(logs, field_name, mapper_function) do
-    getter = String.split(field_name, ".")
+  defp build_line(logs, field_name, mapper_function, getter \\ nil) do
+    getter = getter || String.split(field_name, ".")
+
+    IO.puts("")
+    IO.inspect(getter)
+    IO.puts("")
 
     logs
     |> Enum.map(fn log ->

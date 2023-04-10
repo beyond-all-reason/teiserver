@@ -405,29 +405,23 @@ defmodule CentralWeb.Router do
   end
 
   # REPORTING
+  scope "/reports/server", TeiserverWeb.Report do
+    pipe_through([:browser, :standard_layout, :protected])
+
+    # Server metric specifics
+    get("/now", ServerMetricController, :now)
+    get("/load", ServerMetricController, :load)
+
+    get("/list", ServerMetricController, :metric_list)
+    get("/list/:unit", ServerMetricController, :metric_list)
+    get("/show/:unit/today", ServerMetricController, :metric_show_today)
+    get("/show/:unit/:date", ServerMetricController, :metric_show)
+  end
+
   scope "/teiserver/reports", TeiserverWeb.Report, as: :ts_reports do
     pipe_through([:browser, :standard_layout, :protected])
 
     get("/", GeneralController, :index)
-
-    # Server metrics
-    get("/server/day_metrics/now", ServerMetricController, :now)
-    get("/server/day_metrics/load", ServerMetricController, :load)
-    get("/server/day_metrics/today", ServerMetricController, :day_metrics_today)
-    get("/server/day_metrics/show/:date", ServerMetricController, :day_metrics_show)
-    get("/server/day_metrics/export_form", ServerMetricController, :day_metrics_export_form)
-    post("/server/day_metrics/export_post", ServerMetricController, :day_metrics_export_post)
-    get("/server/day_metrics/graph", ServerMetricController, :day_metrics_graph)
-    post("/server/day_metrics/graph", ServerMetricController, :day_metrics_graph)
-    get("/server/day_metrics", ServerMetricController, :day_metrics_list)
-    post("/server/day_metrics", ServerMetricController, :day_metrics_list)
-
-    get("/server/month_metrics/today", ServerMetricController, :month_metrics_today)
-    get("/server/month_metrics/show/:year/:month", ServerMetricController, :month_metrics_show)
-    get("/server/month_metrics/graph", ServerMetricController, :month_metrics_graph)
-    post("/server/month_metrics/graph", ServerMetricController, :month_metrics_graph)
-    get("/server/month_metrics", ServerMetricController, :month_metrics_list)
-    post("/server/month_metrics", ServerMetricController, :month_metrics_list)
 
     # Match metrics
     get("/match/day_metrics/today", MatchMetricController, :day_metrics_today)
@@ -485,11 +479,11 @@ defmodule CentralWeb.Router do
 
   scope "/teiserver/api/hailstorm", TeiserverWeb.API, as: :ts do
     pipe_through([:api])
-    post("/up", BeansController, :up)
-    post("/update_site_config", BeansController, :update_site_config)
-    post("/create_user", BeansController, :create_user)
-    post("/db_update_user", BeansController, :db_update_user)
-    post("/ts_update_user", BeansController, :ts_update_user)
+    post("/start", HailstormController, :start)
+    post("/update_site_config", HailstormController, :update_site_config)
+    post("/create_user", HailstormController, :create_user)
+    post("/db_update_user", HailstormController, :db_update_user)
+    post("/ts_update_user", HailstormController, :ts_update_user)
   end
 
   scope "/teiserver/api/spads", TeiserverWeb.API, as: :ts do

@@ -45,6 +45,10 @@ defmodule Teiserver.Bridge.BridgeServer do
     {:reply, state.client, state}
   end
 
+  def handle_call({:lookup_room_from_channel, channel_id}, _from, state) do
+    {:reply, state.room_lookup[channel_id], state}
+  end
+
   @impl true
   def handle_cast({:update_client, new_client}, state) do
     {:noreply, %{state | client: new_client}}
@@ -72,11 +76,23 @@ defmodule Teiserver.Bridge.BridgeServer do
     {:noreply, state}
   end
 
+  def handle_info(:recache, state) do
+    Logger.info("Recaching")
+    {:noreply, build_local_caches(state)}
+  end
+
   # Metrics
   def handle_info({:update_stats, stat_name, value}, state) do
-    channel_id =
-      Application.get_env(:central, DiscordBridge)[:stat_channels]
-      |> Map.get(stat_name, "")
+    config_key =
+      case stat_name do
+        :client_count -> "teiserver.Discord counter clients"
+        :player_count -> "teiserver.Discord counter players"
+        :match_count -> "teiserver.Discord counter matches"
+        :lobby_count -> "teiserver.Discord counter lobbies"
+        _ -> ""
+      end
+
+    channel_id = Config.get_site_config_cache(config_key)
 
     new_name =
       case stat_name do
@@ -131,7 +147,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         # won't have updated by the time the execution gets here so we need to be certain
         nil
 
-      Map.has_key?(state.rooms, room_name) ->
+      Map.has_key?(state.channel_lookup, room_name) ->
         message = if is_list(message), do: Enum.join(message, "\n"), else: message
         message = clean_message(message)
 
@@ -145,10 +161,10 @@ defmodule Teiserver.Bridge.BridgeServer do
         # If they are a bot they're only allowed to post to the promotion channel
         if User.is_bot?(user) do
           if room_name == "promote" do
-            forward_to_discord(from_id, state.rooms[room_name], message, state)
+            forward_to_discord(from_id, state.channel_lookup[room_name], message, state)
           end
         else
-          forward_to_discord(from_id, state.rooms[room_name], message, state)
+          forward_to_discord(from_id, state.channel_lookup[room_name], message, state)
         end
 
       true ->
@@ -272,32 +288,77 @@ defmodule Teiserver.Bridge.BridgeServer do
     Central.cache_put(:application_metadata_cache, "teiserver_bridge_userid", account.id)
     {:ok, user, client} = User.internal_client_login(account.id)
 
-    rooms =
-      Application.get_env(:central, DiscordBridge)[:bridges]
-      |> Map.new(fn {chan, room} -> {room, chan} end)
-      |> Map.drop(["moderation-reports", "moderation-actions"])
-
     state = %{
       ip: "127.0.0.1",
       userid: user.id,
       username: user.name,
       lobby_host: false,
       user: user,
-      rooms: rooms,
       client: client
     }
-
-    Map.keys(rooms)
-    |> Enum.each(fn room_name ->
-      Room.get_or_make_room(room_name, user.id)
-      Room.add_user_to_room(user.id, room_name)
-      :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
-    end)
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
 
-    state
+    build_local_caches(state)
+  end
+
+  defp build_local_caches(state) do
+    channel_lookup =
+      [
+        "teiserver.Discord channel #main",
+        "teiserver.Discord channel #newbies",
+        "teiserver.Discord channel #promote",
+        "teiserver.Discord channel #moderation-reports",
+        "teiserver.Discord channel #moderation-actions",
+        "teiserver.Discord channel #server-updates",
+        "teiserver.Discord channel #telemetry-infologs",
+        "teiserver.Discord forum #gdt-discussion",
+        "teiserver.Discord forum #gdt-voting"
+      ]
+      |> Enum.map(fn key ->
+        channel_id = Config.get_site_config_cache(key)
+
+        if channel_id do
+          [_, room] = String.split(key, "#")
+
+          {room, channel_id}
+        end
+      end)
+      |> Enum.reject(&(&1 == nil))
+      |> Map.new()
+
+    room_lookup =
+      [
+        "teiserver.Discord channel #main",
+        "teiserver.Discord channel #newbies",
+        "teiserver.Discord channel #promote"
+      ]
+      |> Enum.map(fn key ->
+        channel_id = Config.get_site_config_cache(key)
+
+        if channel_id do
+          [_, room] = String.split(key, "#")
+
+          {channel_id, room}
+        end
+      end)
+      |> Enum.reject(&(&1 == nil))
+      |> Map.new()
+
+    Map.values(room_lookup)
+    |> Enum.each(fn room_name ->
+      Room.get_or_make_room(room_name, state.user.id)
+      Room.add_user_to_room(state.user.id, room_name)
+
+      :ok = PubSub.unsubscribe(Central.PubSub, "room:#{room_name}")
+      :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
+    end)
+
+    Map.merge(state, %{
+      channel_lookup: channel_lookup,
+      room_lookup: room_lookup
+    })
   end
 
   defp forward_to_discord(from_id, channel, message, _state) do
@@ -364,7 +425,8 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   @spec change_channel_name(String.t(), String.t()) :: boolean()
   def change_channel_name(_, ""), do: false
-  def change_channel_name("", _), do: false
+  def change_channel_name(nil, _), do: false
+  def change_channel_name(0, _), do: false
 
   def change_channel_name(channel_id, new_name) do
     Api.modify_channel(channel_id, %{
@@ -402,6 +464,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       send(self(), :begin)
     end
 
+    Logger.metadata(request_id: "BridgeServer")
     Central.cache_put(:application_metadata_cache, "teiserver_bridge_pid", self())
 
     Horde.Registry.register(

@@ -53,6 +53,6 @@ defmodule Teiserver.Battle.SeasonalUncertaintyResetTask do
       }
     }
 
-    {:ok, log} = Game.create_rating_log(log_params)
+    {:ok, _} = Game.create_rating_log(log_params)
   end
 end

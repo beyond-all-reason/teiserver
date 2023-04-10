@@ -176,6 +176,17 @@
   ) %>
 <% end %>
 
+<%= if allow?(@current_user, Teiserver.Account.BanEvasionReport.permissions()) do %>
+  <%= central_component("section_menu_button",
+    name: "ban_evasion",
+    label: "Ban evasion",
+    active: @active,
+    icon: Teiserver.Account.BanEvasionReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "ban_evasion")
+  ) %>
+<% end %>
+
 <%= if allow?(@current_user, Teiserver.Account.OpenSkillReport.permissions()) do %>
   <%= central_component("section_menu_button",
     name: "open_skill",

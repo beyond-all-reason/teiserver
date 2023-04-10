@@ -3,7 +3,8 @@ defmodule Teiserver.Tachyon.Handlers.System.NoCommandErrorRequest do
 
   """
 
-  # @command_id "system/error"
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Tachyon.Responses.System.ErrorResponse
 
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do
@@ -12,19 +13,17 @@ defmodule Teiserver.Tachyon.Handlers.System.NoCommandErrorRequest do
     }
   end
 
+  @spec execute(T.tachyon_conn(), map, map) ::
+          {{T.tachyon_command(), T.tachyon_object()}, T.tachyon_conn()}
   def execute(conn, _object, %{"command" => command} = _meta) do
-    response = %{
-      "reason" => "No command of '#{command}'"
-    }
+    response = ErrorResponse.execute("No command of '#{command}'")
 
-    {"error", response, conn}
+    {response, conn}
   end
 
   def execute(conn, _object, _meta) do
-    response = %{
-      "reason" => "No command supplied"
-    }
+    response = ErrorResponse.execute("No command supplied")
 
-    {"error", response, conn}
+    {response, conn}
   end
 end

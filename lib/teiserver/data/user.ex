@@ -5,7 +5,6 @@ defmodule Teiserver.User do
   alias Central.Config
   alias Teiserver.{Account, Client, Coordinator, Telemetry}
   alias Teiserver.EmailHelper
-  alias Teiserver.Battle.LobbyChat
   alias Teiserver.Account.{UserCache, RelationsLib}
   alias Teiserver.Chat.WordLib
   alias Teiserver.SpringIdServer
@@ -1098,116 +1097,6 @@ defmodule Teiserver.User do
     {:ok, user}
   end
 
-  @spec new_moderation_action(Teiserver.Moderation.Action.t()) :: :ok
-  def new_moderation_action(_action) do
-    :ok
-  end
-
-  @spec updated_moderation_action(Teiserver.Moderation.Action.t()) :: :ok
-  def updated_moderation_action(_action) do
-    :ok
-  end
-
-  @spec create_report(T.report(), atom) :: :ok
-  def create_report(report, reason) do
-    if report.response_text != nil do
-      update_report(report, reason)
-    end
-
-    :ok
-  end
-
-  @spec update_report(T.report(), atom) :: :ok
-  def update_report(report, _reason) do
-    user = get_user_by_id(report.target_id)
-
-    # If the report is being updated we'll need to update their restrictions
-    # and that won't take place correctly in some cases
-    # by making the expiry now we make it so the next check will mark them as clear
-    expires_as_string =
-      Timex.now()
-      |> Jason.encode!()
-      |> Jason.decode!()
-
-    # Get the new restrictions
-    new_restrictions =
-      (user.restrictions ++ Map.get(report.action_data || %{}, "restriction_list", []))
-      |> Enum.uniq()
-
-    changes = %{
-      restrictions: new_restrictions,
-      restricted_until: expires_as_string
-    }
-
-    # Save changes
-    Map.merge(user, changes)
-    |> update_user(persist: true)
-
-    # We recache because the json conversion process converts the date
-    # from a date to a string of the date
-    recache_user(user.id)
-
-    # Sleep to enable the ETS cache to update and they don't insta-login
-    :timer.sleep(50)
-
-    # Re-get the user, do we need to affect their currently-connected client?
-    user = get_user_by_id(user.id)
-    client = Client.get_client_by_id(user.id)
-
-    if client do
-      if is_restricted?(user, ["Login"]) do
-        # If they're in a battle we need to deal with that before disconnecting them
-        Logger.info("Kicking #{client.name} from battle as now banned")
-        Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
-
-        LobbyChat.say(
-          Coordinator.get_coordinator_userid(),
-          "#{client.name} kicked due to moderator action. See discord #moderation-bot for details",
-          client.lobby_id
-        )
-
-        Logger.info("Disconnecting #{user.name} from server as now banned")
-        Client.disconnect(user.id, "Banned")
-      else
-        # Kick?
-        if is_restricted?(user, ["All lobbies"]) do
-          Logger.info("Kicking #{client.name} from battle due to moderation action")
-          Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
-
-          LobbyChat.say(
-            Coordinator.get_coordinator_userid(),
-            "#{client.name} kicked due to moderator action. See discord #moderation-bot for details",
-            client.lobby_id
-          )
-        end
-
-        # Mute?
-        if is_restricted?(user, ["All chat", "Battle chat"]) do
-          Coordinator.send_to_host(client.lobby_id, "!mute #{client.name}")
-
-          LobbyChat.say(
-            Coordinator.get_coordinator_userid(),
-            "#{client.name} muted due to moderator action. See discord #moderation-bot for details",
-            client.lobby_id
-          )
-        end
-      end
-    end
-
-    PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_user_updates:#{user.id}",
-      %{
-        channel: "teiserver_user_updates:#{user.id}",
-        event: :update_report,
-        user_id: user.id,
-        report_id: report.id
-      }
-    )
-
-    :ok
-  end
-
   @spec restrict_user(T.userid() | T.user(), String.t()) :: any
   def restrict_user(userid, restriction) when is_integer(userid),
     do: restrict_user(get_user_by_id(userid), restriction)
@@ -1227,6 +1116,9 @@ defmodule Teiserver.User do
 
   def is_restricted?(userid, restriction) when is_integer(userid),
     do: is_restricted?(get_user_by_id(userid), restriction)
+
+  def is_restricted?(user_restrictions, restriction) when is_list(user_restrictions),
+    do: is_restricted?(%{restrictions: user_restrictions}, restriction)
 
   def is_restricted?(%{restrictions: restrictions}, restriction_list)
       when is_list(restriction_list) do

@@ -105,7 +105,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
       case data.event do
         :joined_lobby ->
           :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{data.lobby_id}")
-          lobby_user_ids = Battle.get_lobby_member_list(data.lobby_id)
+          lobby_user_ids = Battle.get_lobby_member_list(data.lobby_id) || []
 
           socket
           |> assign(:lobby_user_ids, lobby_user_ids)

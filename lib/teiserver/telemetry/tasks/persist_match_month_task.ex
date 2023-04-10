@@ -1,7 +1,6 @@
 defmodule Teiserver.Telemetry.Tasks.PersistMatchMonthTask do
   use Oban.Worker, queue: :teiserver
   alias Teiserver.Telemetry
-  alias Central.NestedMaps
   import Ecto.Query, warn: false
 
   @sections ~w(bots duel ffa raptors scavengers team totals)
@@ -175,7 +174,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistMatchMonthTask do
       |> round()
 
     data
-    |> NestedMaps.put(~w(aggregate mean_duration_seconds)a, mean_duration_seconds)
+    |> put_in(~w(aggregate mean_duration_seconds)a, mean_duration_seconds)
   end
 
   defp sum_maps(m1, m2) do

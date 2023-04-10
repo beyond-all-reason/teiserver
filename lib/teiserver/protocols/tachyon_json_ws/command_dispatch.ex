@@ -7,6 +7,10 @@ defmodule Teiserver.Tachyon.CommandDispatch do
 
   @modules [
     Handlers.Account.WhoamiRequest,
+    Handlers.Lobby.ListLobbiesRequest,
+    Handlers.Lobby.JoinRequest,
+    Handlers.Lobby.LeaveRequest,
+    Handlers.LobbyHost.CreateRequest,
     Handlers.System.DisconnectRequest,
     Handlers.System.ForceErrorRequest
   ]
@@ -18,11 +22,6 @@ defmodule Teiserver.Tachyon.CommandDispatch do
   end
 
   defp get_dispatch_handler(command) do
-    # If we are allowing hailstorm lets ensure we've got the latest dispatches loaded
-    if Application.get_env(:central, Teiserver)[:enable_hailstorm] do
-      build_dispatch_cache()
-    end
-
     # Get the relevant handler, if none found the no_command fallback will handle it
     Central.store_get(:tachyon_dispatches, command) ||
       Central.store_get(:tachyon_dispatches, "no_command")

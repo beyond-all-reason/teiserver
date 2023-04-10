@@ -19,7 +19,7 @@
       icon: Teiserver.Telemetry.ServerDayLogLib.icon(),
       name: "server_metric",
       text: "Server metrics",
-      link: Routes.ts_reports_server_metric_path(@conn, :day_metrics_list)
+      link: ~p"/reports/server/list"
     ) %>
   <% end %>
 
@@ -182,6 +182,16 @@
       name: "new_smurf",
       text: "New smurfs",
       link: Routes.ts_reports_report_path(@conn, :show, "new_smurf")
+    ) %>
+  <% end %>
+
+  <%= if allow?(@current_user, Teiserver.Account.BanEvasionReport.permissions()) do %>
+    <%= central_component("menu_card",
+      size: :small,
+      icon: Teiserver.Account.BanEvasionReport.icon(),
+      name: "ban_evasion",
+      text: "Ban evasion",
+      link: Routes.ts_reports_report_path(@conn, :show, "ban_evasion")
     ) %>
   <% end %>
 

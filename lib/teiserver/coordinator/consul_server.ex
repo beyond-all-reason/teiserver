@@ -880,7 +880,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         {false, "Err"}
 
       state.tournament_lobby == true and
-          not User.has_any_role?(userid, ["Caster", "TourneyPlayer"]) ->
+          not User.has_any_role?(userid, ["Caster", "TourneyPlayer", "Tournament player"]) ->
         {false, "Tournament game"}
 
       Enum.member?(state.approved_users, userid) ->

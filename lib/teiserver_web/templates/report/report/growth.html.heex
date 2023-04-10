@@ -85,12 +85,29 @@
 
           <div class="row">
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
-              <label for="report_days" class="control-label">Time period (days): </label>
+              <label for="report_time_unit" class="control-label">Time unit: </label>
+              <%= select(
+                :report,
+                :time_unit,
+                [
+                  "Day",
+                  "Week",
+                  "Month",
+                  "Quarter",
+                  "Year"
+                ],
+                class: "form-control",
+                selected: @params["time_unit"]
+              ) %>
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="report_limit" class="control-label">Log count: </label>
               <input
                 type="text"
-                name="report[days]"
-                id="report_days"
-                value={@params["days"]}
+                name="report[limit]"
+                id="report_limit"
+                value={@params["limit"]}
                 class="form-control"
               />
             </div>

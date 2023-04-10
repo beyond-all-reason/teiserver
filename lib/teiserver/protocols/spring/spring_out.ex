@@ -10,7 +10,7 @@ defmodule Teiserver.Protocols.SpringOut do
   alias Teiserver.{User, Client, Room, Battle, Coordinator}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.Spring
-  alias Teiserver.Protocols.Spring.{BattleOut}
+  alias Teiserver.Protocols.Spring.{BattleOut, LobbyPolicyOut}
   alias Teiserver.Data.Types, as: T
 
   @motd """
@@ -32,6 +32,7 @@ defmodule Teiserver.Protocols.SpringOut do
     msg =
       case namespace do
         :battle -> BattleOut.do_reply(reply_cmd, data, state)
+        :lobby_policy -> LobbyPolicyOut.do_reply(reply_cmd, data, state)
         :spring -> do_reply(reply_cmd, data)
       end
 
@@ -200,8 +201,10 @@ defmodule Teiserver.Protocols.SpringOut do
       end
 
     passworded = if battle.password == nil, do: 0, else: 1
+    max_players = 16
+    rank = 0
 
-    "BATTLEOPENED #{battle.id} #{type} #{nattype} #{battle.founder_name} #{battle.ip} #{battle.port} #{battle.max_players} #{passworded} #{battle.rank} #{battle.map_hash} #{battle.engine_name}\t#{battle.engine_version}\t#{battle.map_name}\t#{battle.name}\t#{battle.game_name}\n"
+    "BATTLEOPENED #{battle.id} #{type} #{nattype} #{battle.founder_name} #{battle.ip} #{battle.port} #{max_players} #{passworded} #{rank} #{battle.map_hash} #{battle.engine_name}\t#{battle.engine_version}\t#{battle.map_name}\t#{battle.name}\t#{battle.game_name}\n"
   end
 
   defp do_reply(:battle_opened, lobby_id) when is_integer(lobby_id) do

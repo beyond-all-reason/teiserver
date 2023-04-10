@@ -63,6 +63,9 @@ defmodule TeiserverWeb.Report.ReportController do
         "new_smurf" ->
           Teiserver.Account.NewSmurfReport
 
+        "ban_evasion" ->
+          Teiserver.Account.BanEvasionReport
+
         "growth" ->
           Teiserver.Account.GrowthReport
 

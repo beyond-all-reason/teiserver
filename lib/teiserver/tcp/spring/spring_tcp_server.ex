@@ -6,6 +6,7 @@ defmodule Teiserver.SpringTcpServer do
   alias Phoenix.PubSub
   alias Central.Config
   alias Teiserver.{User, Client}
+  # alias Teiserver.Data.Types, as: T
 
   @send_interval 100
   @init_timeout 60_000
@@ -150,7 +151,11 @@ defmodule Teiserver.SpringTcpServer do
       state
     else
       send(self(), {:action, {:welcome, nil}})
-      Process.send_after(self(), :init_timeout, @init_timeout)
+
+      if Config.get_site_config_cache("system.Disconnect unauthenticated sockets") do
+        Process.send_after(self(), :init_timeout, @init_timeout)
+      end
+
       :gen_server.enter_loop(__MODULE__, [], state)
     end
   end
@@ -996,15 +1001,15 @@ defmodule Teiserver.SpringTcpServer do
     User.set_flood_level(state.userid, 10)
     Client.disconnect(state.userid, "SpringTCPServer.flood_protection")
 
-    Logger.error(
+    Logger.info(
       "Spring command overflow from #{state.username}/#{state.userid} with #{Enum.count(state.cmd_timestamps)} commands. Disconnected and flood protection engaged."
     )
 
     {:stop, "Flood protection", state}
   end
 
-  # @spec introduce_user(T.client() | T.userid() | nil, map()) :: map()
-  # defp introduce_user(nil, state), do: state
+  # # @spec introduce_user(T.client() | T.userid() | nil, map()) :: map()
+  # # defp introduce_user(nil, state), do: state
   # defp introduce_user(userid, state) when is_integer(userid) do
   #   client = Client.get_client_by_id(userid)
   #   introduce_user(client, state)
@@ -1015,12 +1020,12 @@ defmodule Teiserver.SpringTcpServer do
   #   %{new_state | known_users: new_known}
   # end
 
-  # @spec forget_user(T.client() | T.userid() | nil, map()) :: map()
+  # # @spec forget_user(T.client() | T.userid() | nil, map()) :: map()
   # defp forget_user(nil, state), do: state
   # defp forget_user(userid, state) when is_integer(userid) do
-  #   client = Client.get_client_by_id(userid)
-  #   forget_user(client, state)
-  # end
+  # #   client = Client.get_client_by_id(userid)
+  # #   forget_user(client, state)
+  # # end
   # defp forget_user(client, state) do
   #   case state.known_users[client.userid] do
   #     nil ->

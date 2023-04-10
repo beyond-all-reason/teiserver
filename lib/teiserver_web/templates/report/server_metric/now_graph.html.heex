@@ -81,11 +81,7 @@
             <div class={"card border-#{bsname}"}>
               <div class="card-body">
                 <div class="row">
-                  <form
-                    action={Routes.ts_reports_server_metric_path(@conn, :now)}
-                    method="get"
-                    class=""
-                  >
+                  <form action={~p"/reports/server/now"} method="get" class="">
                     <div class="row">
                       <div class="col-lg-5 col-md-12 my-3">
                         <label for="minutes" class="control-label">Minutes</label>

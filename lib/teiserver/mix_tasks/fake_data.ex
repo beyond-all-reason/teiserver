@@ -39,7 +39,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         "\nFake data insertion complete. You can now login with the email 'root@localhost' and password 'password'\nA one-time link has been created: http://localhost:4000/one_time_login/fakedata_code\n"
       )
     else
-      Logger.error("Beans mode is not enabled, you cannot run the fakedata task")
+      Logger.error("Hailstorm mode is not enabled, you cannot run the fakedata task")
     end
   end
 

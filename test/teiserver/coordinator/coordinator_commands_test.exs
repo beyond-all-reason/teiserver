@@ -120,6 +120,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
                String.trim("""
                ---------------------------
                You are #{user.name}
+               Playtime: 0 hours (0 h playing, 0 h spectating)
                Profile link: https://localhost/teiserver/profile/#{user.id}
                Skill ratings:
                You currently have no accolades

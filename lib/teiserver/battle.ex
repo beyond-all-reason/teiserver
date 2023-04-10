@@ -170,6 +170,26 @@ defmodule Teiserver.Battle do
   end
 
   @doc """
+  Creates a match based on starting a lobby.
+
+  ## Examples
+
+      iex> create_match(%{field: value})
+      {:ok, %Match{}}
+
+      iex> create_match(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_match_from_founder_id(T.userid()) ::
+          {:ok, Match.t()} | {:error, Ecto.Changeset.t()}
+  def create_match_from_founder_id(founder_id) do
+    %Match{}
+    |> Match.initial_changeset(%{founder_id: founder_id, map: "Not started"})
+    |> Repo.insert()
+  end
+
+  @doc """
   Updates a match.
 
   ## Examples
@@ -242,13 +262,17 @@ defmodule Teiserver.Battle do
   # end
 
   alias Teiserver.Battle.{MatchMonitorServer, MatchLib}
-  alias Teiserver.Battle.{LobbyChat, LobbyCache}
+  alias Teiserver.Battle.{Lobby, LobbyChat, LobbyCache}
   require Logger
 
   @spec start_match(nil | T.lobby_id()) :: :ok
   def start_match(nil), do: :ok
 
   def start_match(lobby_id) do
+    empty_match =
+      get_lobby_match_id(lobby_id)
+      |> get_match!()
+
     Telemetry.increment(:matches_started)
 
     LobbyCache.cast_lobby(lobby_id, :start_match)
@@ -256,26 +280,36 @@ defmodule Teiserver.Battle do
 
     case MatchLib.match_from_lobby(lobby_id) do
       {match_params, members} ->
-        case create_match(match_params) do
+        case update_match(empty_match, match_params) do
           {:ok, match} ->
             members
-            |> Enum.map(fn m ->
-              # If balance mode is solo we need to strip party_id from the
-              # membership or it will mess with records, if no balance mode
-              # listed then it defaults to grouped
-              if current_balance == nil or current_balance.balance_mode == :grouped do
-                create_match_membership(
-                  Map.merge(m, %{
-                    match_id: match.id
-                  })
+            |> Enum.each(fn m ->
+              # In some rare situations it is possible to get into a situation where
+              # the membership already exists and this can cause a cascading failure
+              existing_membership = get_match_membership(m.user_id, match.id)
+
+              if existing_membership do
+                Logger.error(
+                  "Match membership already exists #{inspect(match)}, aborting membership insert"
                 )
               else
-                create_match_membership(
-                  Map.merge(m, %{
-                    party_id: nil,
-                    match_id: match.id
-                  })
-                )
+                # If balance mode is solo we need to strip party_id from the
+                # membership or it will mess with records, if no balance mode
+                # listed then it defaults to grouped
+                if current_balance == nil or current_balance.balance_mode == :grouped do
+                  create_match_membership(
+                    Map.merge(m, %{
+                      match_id: match.id
+                    })
+                  )
+                else
+                  create_match_membership(
+                    Map.merge(m, %{
+                      party_id: nil,
+                      match_id: match.id
+                    })
+                  )
+                end
               end
             end)
 
@@ -478,6 +512,12 @@ defmodule Teiserver.Battle do
   #   |> Repo.one!()
   # end
 
+  def get_match_membership(user_id, match_id) do
+    MatchMembershipLib.get_match_memberships()
+    |> MatchMembershipLib.search(user_id: user_id, match_id: match_id)
+    |> Repo.one()
+  end
+
   def create_match_membership(attrs \\ %{}) do
     %MatchMembership{}
     |> MatchMembership.changeset(attrs)
@@ -532,6 +572,12 @@ defmodule Teiserver.Battle do
   end
 
   # LobbyServer process
+  @spec create_lobby(map) :: T.lobby() | nil
+  defdelegate create_lobby(lobby_id), to: Lobby
+
+  @spec add_lobby(T.lobby()) :: T.lobby()
+  defdelegate add_lobby(lobby), to: LobbyCache
+
   @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
   defdelegate get_lobby_pid(lobby_id), to: LobbyCache
 
@@ -571,6 +617,9 @@ defmodule Teiserver.Battle do
   @spec get_lobby_match_uuid(T.lobby_id()) :: String.t() | nil
   defdelegate get_lobby_match_uuid(id), to: LobbyCache
 
+  @spec get_lobby_match_id(T.lobby_id()) :: T.match_id() | nil
+  defdelegate get_lobby_match_id(lobby_id), to: LobbyCache
+
   @spec get_lobby_server_uuid(T.lobby_id()) :: String.t() | nil
   defdelegate get_lobby_server_uuid(id), to: LobbyCache
 
@@ -601,9 +650,6 @@ defmodule Teiserver.Battle do
 
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
   defdelegate update_lobby(lobby, data, reason), to: LobbyCache
-
-  @spec add_lobby(T.lobby()) :: T.lobby()
-  defdelegate add_lobby(lobby), to: LobbyCache
 
   @spec set_lobby_password(T.lobby_id(), String.t() | nil) :: :ok | nil
   defdelegate set_lobby_password(lobby_id, new_password), to: LobbyCache

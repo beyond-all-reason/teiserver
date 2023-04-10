@@ -72,7 +72,7 @@ defmodule Teiserver.Battle.Lobby do
     )
   end
 
-  @spec create_lobby(Map.t()) :: Map.t()
+  @spec create_lobby(Map.t()) :: T.lobby()
   def create_lobby(%{founder_id: _, founder_name: _, name: _} = lobby) do
     passworded = Map.get(lobby, :password) != nil
 
@@ -111,6 +111,7 @@ defmodule Teiserver.Battle.Lobby do
 
         # To tie it into matchmaking
         queue_id: nil,
+        match_id: nil,
 
         # Rename flags
         # consul rename means it was renamed by a player and overrides spads

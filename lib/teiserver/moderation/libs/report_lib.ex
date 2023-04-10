@@ -10,6 +10,8 @@ defmodule Teiserver.Moderation.ReportLib do
   @spec colour :: atom
   def colour, do: :warning
 
+  def get_outstanding_report_max_days, do: 31
+
   @spec make_favourite(Map.t()) :: Map.t()
   def make_favourite(report) do
     %{

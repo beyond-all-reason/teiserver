@@ -42,19 +42,6 @@
 
         <div class="row page-row">
           <div class="col-md-12">
-            <a
-              href={
-                Routes.ts_reports_server_metric_path(
-                  @conn,
-                  :day_metrics_show,
-                  date_to_str(@date, format: :ymd)
-                )
-              }
-              class={"btn float-end btn-outline-#{TeiserverWeb.Report.ServerMetricView.view_colour}"}
-            >
-              <%= central_component("icon", icon: TeiserverWeb.Report.ServerMetricView.icon()) %> &nbsp;
-              Server detail
-            </a>
             <%= if @date == Timex.today() do %>
               <h3>Day to day metric: Today so far</h3>
             <% else %>

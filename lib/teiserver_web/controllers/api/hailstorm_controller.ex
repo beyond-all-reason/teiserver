@@ -1,16 +1,18 @@
-defmodule TeiserverWeb.API.BeansController do
+defmodule TeiserverWeb.API.HailstormController do
   use CentralWeb, :controller
   alias Central.Config
   alias Teiserver.{Account, User}
 
   plug(Bodyguard.Plug.Authorize,
-    policy: Teiserver.API.BeansAuth,
+    policy: Teiserver.API.HailstormAuth,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
   )
 
-  @spec up(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def up(conn, _params) do
+  @spec start(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def start(conn, _params) do
+    Teiserver.Tachyon.CommandDispatch.build_dispatch_cache()
+
     conn
     |> put_status(201)
     |> assign(:result, %{up: true})
@@ -127,7 +129,7 @@ defmodule TeiserverWeb.API.BeansController do
   end
 end
 
-defmodule Teiserver.API.BeansAuth do
+defmodule Teiserver.API.HailstormAuth do
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
   def authorize(_, _, _) do
     Application.get_env(:central, Teiserver)[:enable_hailstorm]

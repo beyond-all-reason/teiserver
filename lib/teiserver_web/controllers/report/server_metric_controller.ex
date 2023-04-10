@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Report.ServerMetricController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  alias Central.Helpers.{TimexHelper, DatePresets}
-  alias Teiserver.Telemetry.{ServerGraphDayLogsTask, ExportServerMetricsTask, GraphMinuteLogsTask}
+  alias Central.Helpers.TimexHelper
+  alias Teiserver.Telemetry.{ServerGraphDayLogsTask, GraphMinuteLogsTask}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
@@ -15,124 +15,59 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
-  plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Reports', url: '/teiserver/reports')
   plug(:add_breadcrumb, name: 'Server metrics', url: '/teiserver/reports/server/day_metrics')
 
-  # DAILY METRICS
-  @spec day_metrics_list(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_list(conn, params) do
+  @spec metric_list(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def metric_list(conn, %{"filter" => "graph-" <> graph} = params) do
+    unit = Map.get(params, "unit", "day")
+    limit = Map.get(params, "limit", "31") |> int_parse |> min(31)
+
     logs =
-      Telemetry.list_server_day_logs(
-        # search: [user_id: params["user_id"]],
-        # joins: [:user],
-        order: "Newest first",
-        limit: 31
-      )
+      case unit do
+        "day" ->
+          Telemetry.list_server_day_logs(
+            order: "Newest first",
+            limit: limit
+          )
 
-    filter = params["filter"] || "default"
+        "week" ->
+          Telemetry.list_server_week_logs(
+            order: "Newest first",
+            limit: limit
+          )
 
-    conn
-    |> assign(:logs, logs)
-    |> assign(:filter, filter)
-    |> add_breadcrumb(name: "Daily", url: conn.request_path)
-    |> render("day_metrics_list.html")
-  end
+        "month" ->
+          Telemetry.list_server_month_logs(
+            order: "Newest first",
+            limit: limit
+          )
 
-  @spec day_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_show(conn, %{"date" => date_str}) do
-    date = TimexHelper.parse_ymd(date_str)
+        "quarter" ->
+          Telemetry.list_server_quarter_logs(
+            order: "Newest first",
+            limit: limit
+          )
 
-    if date |> Timex.to_date() == Timex.today() do
-      conn
-      |> redirect(to: Routes.ts_reports_server_metric_path(conn, :day_metrics_today))
-    else
-      log = Telemetry.get_server_day_log(date)
-
-      users =
-        [log]
-        |> Telemetry.user_lookup()
-
-      conn
-      |> assign(:date, date)
-      |> assign(:data, log.data)
-      |> assign(:users, users)
-      |> add_breadcrumb(name: "Daily - #{date_str}", url: conn.request_path)
-      |> render("day_metrics_show.html")
-    end
-  end
-
-  @spec day_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_today(conn, params) do
-    force_recache = Map.get(params, "recache", false) == "true"
-    data = Telemetry.get_todays_server_log(force_recache)
-
-    users =
-      [%{data: data}]
-      |> Telemetry.user_lookup()
-
-    conn
-    |> assign(:date, Timex.today())
-    |> assign(:data, data)
-    |> assign(:users, users)
-    |> add_breadcrumb(name: "Daily - Today (partial)", url: conn.request_path)
-    |> render("day_metrics_show.html")
-  end
-
-  @spec day_metrics_export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_export_form(conn, _params) do
-    conn
-    |> assign(:params, %{
-      "date_preset" => "All time"
-    })
-    |> assign(:presets, DatePresets.long_ranges())
-    |> render("day_metrics_export_form.html")
-  end
-
-  @spec day_metrics_export_post(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_export_post(conn, %{"report" => params}) do
-    data = ExportServerMetricsTask.perform(params)
-
-    {content_type, ext} =
-      case params["format"] do
-        "json" -> {"application/json", "json"}
-        "csv" -> {"text/csv", "csv"}
+        "year" ->
+          Telemetry.list_server_year_logs(
+            order: "Newest first",
+            limit: limit
+          )
       end
 
-    conn
-    |> put_resp_content_type(content_type)
-    |> put_resp_header("content-disposition", "attachment; filename=\"server_metrics.#{ext}\"")
-    |> send_resp(200, data)
-  end
-
-  @spec day_metrics_graph(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_graph(conn, params) do
-    params =
-      Map.merge(params, %{
-        "days" => Map.get(params, "days", 31) |> int_parse
-      })
-
-    logs =
-      Telemetry.list_server_day_logs(
-        # search: [user_id: params["user_id"]],
-        # joins: [:user],
-        order: "Newest first",
-        limit: params["days"]
-      )
-      |> Enum.reverse()
-
     {field_list, f} =
-      case Map.get(params, "fields", "unique_users") do
-        "unique_users" ->
+      case graph do
+        "unique-users" ->
           {["aggregates.stats.unique_users", "aggregates.stats.unique_players"], fn x -> x end}
 
-        "peak_users" ->
+        "peak-users" ->
           {[
              "aggregates.stats.peak_user_counts.total",
              "aggregates.stats.peak_user_counts.player"
            ], fn x -> x end}
 
-        "days" ->
+        "time" ->
           {[
              "aggregates.minutes.player",
              "aggregates.minutes.spectator",
@@ -141,33 +76,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
              "aggregates.minutes.total"
            ], fn x -> round(x / 60 / 24) end}
 
-        "client_events" ->
-          keys =
-            logs
-            |> Enum.map(fn %{data: data} ->
-              # This is only because not all entries have events
-              (data["events"]["client"] || %{}) |> Map.keys()
-            end)
-            |> List.flatten()
-            |> Enum.uniq()
-            |> Enum.map(fn key -> "events.client.#{key}" end)
-
-          {keys, fn x -> x end}
-
-        "unauth_events" ->
-          keys =
-            logs
-            |> Enum.map(fn %{data: data} ->
-              # This is only because not all entries have events
-              (data["events"]["unauth"] || %{}) |> Map.keys()
-            end)
-            |> List.flatten()
-            |> Enum.uniq()
-            |> Enum.map(fn key -> "events.unauth.#{key}" end)
-
-          {keys, fn x -> x end}
-
-        "combined_events" ->
+        "client-events" ->
           keys =
             logs
             |> Enum.map(fn %{data: data} ->
@@ -180,7 +89,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
           {keys, fn x -> x end}
 
-        "server_events" ->
+        "server-events" ->
           keys =
             logs
             |> Enum.map(fn %{data: data} ->
@@ -189,7 +98,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> "events.server.#{key}" end)
+            |> Enum.map(fn key -> {key, "events.server.#{key}", ["events", "server", key]} end)
 
           {keys, fn x -> x end}
       end
@@ -203,124 +112,110 @@ defmodule TeiserverWeb.Report.ServerMetricController do
       |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
 
     conn
-    |> assign(:params, params)
+    |> assign(:logs, logs)
+    |> assign(:filter, params["filter"])
+    |> assign(:unit, unit)
     |> assign(:columns, columns)
     |> assign(:key, key)
-    |> add_breadcrumb(name: "Daily - Graph", url: conn.request_path)
-    |> render("day_metrics_graph.html")
+    |> assign(:params, params)
+    |> add_breadcrumb(name: "Metric graph", url: conn.request_path)
+    |> render("metric_list.html")
   end
 
-  # MONTHLY METRICS
-  @spec month_metrics_list(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def month_metrics_list(conn, _params) do
+  def metric_list(conn, params) do
+    unit = Map.get(params, "unit", "day")
+    limit = Map.get(params, "limit", "31") |> int_parse |> min(31)
+
     logs =
-      Telemetry.list_server_month_logs(
-        # search: [user_id: params["user_id"]],
-        # joins: [:user],
-        order: "Newest first",
-        limit: 36
-      )
+      case unit do
+        "day" ->
+          Telemetry.list_server_day_logs(
+            order: "Newest first",
+            limit: limit
+          )
+
+        "week" ->
+          Telemetry.list_server_week_logs(
+            order: "Newest first",
+            limit: limit
+          )
+
+        "month" ->
+          Telemetry.list_server_month_logs(
+            order: "Newest first",
+            limit: limit
+          )
+
+        "quarter" ->
+          Telemetry.list_server_quarter_logs(
+            order: "Newest first",
+            limit: limit
+          )
+
+        "year" ->
+          Telemetry.list_server_year_logs(
+            order: "Newest first",
+            limit: limit
+          )
+      end
+
+    filter = params["filter"] || "default"
 
     conn
     |> assign(:logs, logs)
-    |> add_breadcrumb(name: "Monthly", url: conn.request_path)
-    |> render("month_metrics_list.html")
+    |> assign(:filter, filter)
+    |> assign(:unit, unit)
+    |> add_breadcrumb(name: "Metric list", url: conn.request_path)
+    |> render("metric_list.html")
   end
 
-  @spec month_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def month_metrics_show(conn, %{"year" => year, "month" => month}) do
-    today = "#{Timex.now().month}/#{Timex.now().year}"
+  @spec metric_show(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def metric_show(conn, %{"unit" => unit, "date" => date_str}) do
+    date = TimexHelper.parse_ymd(date_str)
 
-    if today == "#{month}/#{year}" do
+    if date |> Timex.to_date() == Timex.today() do
       conn
-      |> redirect(to: Routes.ts_reports_server_metric_path(conn, :month_metrics_today))
+      |> redirect(to: ~p"/reports/server/show/#{unit}/today")
     else
-      log = Telemetry.get_server_month_log({year, month})
+      log =
+        case unit do
+          "day" -> Telemetry.get_server_day_log(date)
+          "week" -> Telemetry.get_server_week_log(date)
+          "month" -> Telemetry.get_server_month_log(date)
+          "quarter" -> Telemetry.get_server_quarter_log(date)
+          "year" -> Telemetry.get_server_year_log(date)
+        end
 
       conn
-      |> assign(:year, year)
-      |> assign(:month, month)
+      |> assign(:date, date)
       |> assign(:data, log.data)
-      |> add_breadcrumb(name: "Monthly - #{month}/#{year}", url: conn.request_path)
-      |> render("month_metrics_show.html")
+      |> assign(:unit, unit)
+      |> assign(:today, false)
+      |> add_breadcrumb(name: "Details - #{date_str}", url: conn.request_path)
+      |> render("metric_show.html")
     end
   end
 
-  @spec month_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def month_metrics_today(conn, params) do
+  @spec metric_show_today(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def metric_show_today(conn, %{"unit" => unit} = params) do
     force_recache = Map.get(params, "recache", false) == "true"
-    data = Telemetry.get_this_months_server_metrics_log(force_recache)
 
-    {lyear, lmonth} =
-      if Timex.today().month == 1 do
-        {Timex.today().year - 1, 12}
-      else
-        {Timex.today().year, Timex.today().month - 1}
+    data =
+      case unit do
+        "day" -> Telemetry.get_todays_server_log(force_recache)
+        "week" -> Telemetry.get_this_weeks_server_metrics_log(force_recache)
+        "month" -> Telemetry.get_this_months_server_metrics_log(force_recache)
+        "quarter" -> Telemetry.get_this_quarters_server_metrics_log(force_recache)
+        "year" -> Telemetry.get_this_years_server_metrics_log(force_recache)
       end
 
-    last_month = Telemetry.get_server_month_log({lyear, lmonth}).data
-
-    days_in_month = Timex.days_in_month(Timex.now())
-    progress = round(Timex.today().day / days_in_month * 100)
-
     conn
-    |> assign(:year, Timex.today().year)
-    |> assign(:month, Timex.today().month)
+    |> assign(:date, Timex.today())
     |> assign(:data, data)
-    |> assign(:last_month, last_month)
-    |> assign(:progress, progress)
-    |> add_breadcrumb(name: "Monthly - This month (partial)", url: conn.request_path)
-    |> render("month_metrics_today_show.html")
-  end
-
-  @spec month_metrics_graph(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def month_metrics_graph(conn, params) do
-    params =
-      Map.merge(params, %{
-        "months" => Map.get(params, "months", 12) |> int_parse
-      })
-
-    logs =
-      Telemetry.list_server_month_logs(
-        # search: [user_id: params["user_id"]],
-        # joins: [:user],
-        order: "Newest first",
-        limit: params["months"]
-      )
-      |> Enum.reverse()
-
-    {field_list, f} =
-      case Map.get(params, "fields", "unique_users") do
-        "unique_users" ->
-          {["aggregates.stats.unique_users", "aggregates.stats.unique_players"], fn x -> x end}
-
-        "peak_users" ->
-          {["aggregates.stats.peak_users", "aggregates.stats.peak_players"], fn x -> x end}
-
-        "days" ->
-          {[
-             "aggregates.minutes.player",
-             "aggregates.minutes.spectator",
-             "aggregates.minutes.lobby",
-             "aggregates.minutes.menu",
-             "aggregates.minutes.total"
-           ], fn x -> round(x / 60 / 24) end}
-      end
-
-    extra_params = %{"field_list" => field_list}
-
-    columns = ServerGraphDayLogsTask.perform(logs, Map.merge(params, extra_params), f)
-
-    key =
-      logs
-      |> Enum.map(fn log -> {log.year, log.month, 1} |> TimexHelper.date_to_str(format: :ymd) end)
-
-    conn
-    |> assign(:params, params)
-    |> assign(:columns, columns)
-    |> assign(:key, key)
-    |> add_breadcrumb(name: "Monthly - Graph", url: conn.request_path)
-    |> render("month_metrics_graph.html")
+    |> assign(:unit, unit)
+    |> assign(:today, true)
+    |> add_breadcrumb(name: "Details - Today", url: conn.request_path)
+    |> render("metric_show.html")
   end
 
   @spec now(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -386,7 +281,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
     system_process_counts = GraphMinuteLogsTask.perform_system_process_counts(logs, resolution)
     user_process_counts = GraphMinuteLogsTask.perform_user_process_counts(logs, resolution)
-    # beam_process_counts = GraphMinuteLogsTask.perform_beam_process_counts(logs, resolution)
+    beam_process_counts = GraphMinuteLogsTask.perform_beam_process_counts(logs, resolution)
 
     axis_key = GraphMinuteLogsTask.perform_axis_key(logs, resolution)
 
@@ -400,7 +295,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     |> assign(:client_messages, client_messages)
     |> assign(:user_process_counts, user_process_counts)
     |> assign(:system_process_counts, system_process_counts)
-    # |> assign(:beam_process_counts, beam_process_counts)
+    |> assign(:beam_process_counts, beam_process_counts)
     |> assign(:axis_key, axis_key)
     |> add_breadcrumb(name: "Load", url: conn.request_path)
     |> render("load_graph.html")

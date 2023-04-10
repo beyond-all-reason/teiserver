@@ -4,6 +4,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
   alias Teiserver.{Account, Battle, Coordinator, User, Client}
   alias Teiserver.Battle.{Lobby, LobbyChat}
+  alias Teiserver.Chat.WordLib
   alias Teiserver.Data.Types, as: T
   import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2]
 
@@ -268,7 +269,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "tournament", senderid: senderid, remaining: rem} = cmd, state) do
     if Config.get_site_config_cache("teiserver.Allow tournament command") do
-      if User.has_any_role?(senderid, ["Moderator", "Caster", "TourneyPlayer"]) do
+      if User.has_any_role?(senderid, [
+           "Moderator",
+           "Caster",
+           "Tournament player",
+           "TourneyPlayer"
+         ]) do
         if rem |> String.trim() |> String.downcase() == "off" do
           Battle.update_lobby_values(state.lobby_id, %{tournament: false})
           state = %{state | tournament_lobby: false}
@@ -1191,6 +1197,15 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         Lobby.rename_lobby(state.lobby_id, lobby.name, false)
         :ok
 
+      WordLib.flagged_words(new_name) > 0 ->
+        Lobby.sayex(
+          state.coordinator_id,
+          "That lobby name been rejected. Please be aware that misuse of the lobby naming system can cause your chat privileges to be revoked.",
+          state.lobby_id
+        )
+
+        :ok
+
       state.lobby_policy_id != nil ->
         Lobby.sayex(
           state.coordinator_id,
@@ -1203,6 +1218,23 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       senderid != lobby.founder_id ->
         Lobby.rename_lobby(state.lobby_id, new_name, true)
         ConsulServer.say_command(cmd, state)
+
+        downcase_name = new_name |> String.downcase()
+
+        skill_name =
+          [
+            String.contains?(downcase_name, "noob"),
+            String.contains?(downcase_name, "newbie")
+          ]
+          |> Enum.any?()
+
+        if skill_name do
+          Lobby.sayex(
+            state.coordinator_id,
+            "Don't forget you can set skill requirements using the setratinglevels command, use $help setratinglevels for more information.",
+            state.lobby_id
+          )
+        end
 
       lobby.consul_rename ->
         :ok

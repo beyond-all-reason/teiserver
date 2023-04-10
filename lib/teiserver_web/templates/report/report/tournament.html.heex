@@ -72,13 +72,26 @@ value_types = [
               ) %>
             </div>
 
-            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+            <%= if not Enum.empty?(@ratings) do %>
+              <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+                <%= central_component("checkbox",
+                  name: "report[make_players]",
+                  id: "report_make_players",
+                  value: "true",
+                  label: "Make players",
+                  field: :see_group,
+                  checked: false
+                ) %>
+              </div>
+            <% end %>
+
+            <div class="col-md-12 my-2">
               &nbsp;<br />
               <input
                 type="submit"
                 value="Update report"
                 name="form.submitted"
-                class={"btn btn-#{bsname} btn-block"}
+                class={"btn btn-#{bsname} float-end"}
               />
             </div>
           </div>
@@ -126,6 +139,9 @@ value_types = [
 
                   <th><%= @params["value_type"] %></th>
 
+                  <th>Moderation status</th>
+                  <th>Player role</th>
+
                   <%= if user_moderator do %>
                     <th>&nbsp;</th>
                   <% end %>
@@ -150,6 +166,44 @@ value_types = [
                       end %>
                     </td>
 
+                    <td>
+                      <% user_r = %{restrictions: rating.user.data["restrictions"] || []}
+
+                      banned = Teiserver.User.is_restricted?(user_r, ["Login"])
+
+                      muted =
+                        Teiserver.User.is_restricted?(user_r, [
+                          "All chat",
+                          "Room chat",
+                          "Direct chat",
+                          "Lobby chat",
+                          "Battle chat"
+                        ])
+
+                      warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"]) %>
+
+                      <%= if banned do %>
+                        <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}>
+                        </i>
+                      <% end %>
+
+                      <%= if muted do %>
+                        <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Mute")}"}>
+                        </i>
+                      <% end %>
+
+                      <%= if warned do %>
+                        <i class={"fa-fw text-warning #{Teiserver.Moderation.ActionLib.action_icon("Warn")}"}>
+                        </i>
+                      <% end %>
+                    </td>
+
+                    <td>
+                      <%= if Enum.member?(rating.user.data["roles"], "Tournament player") do %>
+                        <i class="fa-fw fa-solid fa-trophy"></i>
+                      <% end %>
+                    </td>
+
                     <%= if user_moderator do %>
                       <td>
                         <a
@@ -164,6 +218,24 @@ value_types = [
                 <% end %>
               </tbody>
             </table>
+
+            <%= if allow?(@conn, "admin.dev") do %>
+              <% id_list_str =
+                @ratings
+                |> Enum.map(fn r -> r.user_id end)
+                |> Enum.join(", ") %>
+              <h4>Mass set-player snippet</h4>
+              <textarea rows="8" class="form-control" style="font-family: monospace;">
+(
+  [<%= id_list_str %>]
+  |> Enum.each(fn userid ->
+    user = Teiserver.Account.get_user_by_id(userid)
+    new_roles = ["Tournament player" | user.roles] |> Enum.uniq
+    Teiserver.Account.update_cache_user(userid, %{roles: new_roles})
+  end)
+)
+              </textarea>
+            <% end %>
           </div>
         </div>
       </div>

@@ -146,7 +146,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     {:noreply, socket}
   end
 
-  defp filter_lobbies(lobbies, %{assigns: %{moderator: moderator}} = socket) do
+  defp filter_lobbies(lobbies, %{assigns: %{moderator: moderator}} = _socket) do
     if moderator do
       lobbies
       |> Enum.reject(fn lobby ->

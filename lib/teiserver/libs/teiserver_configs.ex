@@ -272,6 +272,16 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "system.Disconnect unauthenticated sockets",
+      section: "System",
+      type: "boolean",
+      default: false,
+      permissions: ["teiserver.admin"],
+      description: "When enabled sockets not authenticated after 60 seconds will be disconnected",
+      value_label: "Disconnect unauthenticated sockets"
+    })
+
+    add_site_config_type(%{
       key: "system.Process matches",
       section: "System",
       type: "boolean",
@@ -313,6 +323,15 @@ defmodule Teiserver.TeiserverConfigs do
   end
 
   defp lobby_configs() do
+    add_site_config_type(%{
+      key: "teiserver.Uncertainty required to show rating",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The maximum value uncertainty can be before in-game rating is shown ",
+      default: 10
+    })
+
     add_site_config_type(%{
       key: "teiserver.Allow tournament command",
       section: "Lobbies",
@@ -477,6 +496,39 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["teiserver.admin"],
       description: "The discord ID for the forum for starting GDT voting"
+    })
+
+    # User number channels
+    add_site_config_type(%{
+      key: "teiserver.Discord counter clients",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the channel broadcasting client count"
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Discord counter players",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the channel broadcasting player count"
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Discord counter matches",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the channel broadcasting match count"
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Discord counter lobbies",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the channel broadcasting lobby count"
     })
   end
 end

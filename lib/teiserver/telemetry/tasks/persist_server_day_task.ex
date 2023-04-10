@@ -1,7 +1,6 @@
 defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
   use Oban.Worker, queue: :teiserver
   alias Teiserver.{Telemetry, Battle}
-  alias Central.NestedMaps
   alias Central.Account
 
   alias Central.Repo
@@ -447,7 +446,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
       low_user_counts: low_user_counts
     }
 
-    NestedMaps.put(data, ~w(aggregates stats)a, aggregate_stats)
+    put_in(data, ~w(aggregates stats)a, aggregate_stats)
     |> Map.delete(:tmp_reduction)
   end
 
@@ -487,35 +486,35 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
   defp concatenate_lists(items, path) do
     items
     |> Enum.reduce([], fn row, acc ->
-      acc ++ (NestedMaps.get(row, path) || [])
+      acc ++ (get_in(row, path) || [])
     end)
   end
 
   defp min_counts(items, path) do
     items
     |> Enum.reduce(0, fn row, acc ->
-      min(acc, Enum.count(NestedMaps.get(row, path) || []))
+      min(acc, Enum.count(get_in(row, path) || []))
     end)
   end
 
   defp max_counts(items, path) do
     items
     |> Enum.reduce(0, fn row, acc ->
-      max(acc, Enum.count(NestedMaps.get(row, path) || []))
+      max(acc, Enum.count(get_in(row, path) || []))
     end)
   end
 
   defp sum_counts(items, path) do
     items
     |> Enum.reduce(0, fn row, acc ->
-      acc + Enum.count(NestedMaps.get(row, path) || [])
+      acc + Enum.count(get_in(row, path) || [])
     end)
   end
 
   defp sum_keys(items, path) do
     items
     |> Enum.reduce(0, fn row, acc ->
-      acc + (NestedMaps.get(row, path) || 0)
+      acc + (get_in(row, path) || 0)
     end)
   end
 
@@ -582,18 +581,18 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
       durations: %{
         total: Enum.sum(durations),
         average: round(Enum.sum(durations) / stats.counts[:total]),
-        above_5: Enum.filter(durations, fn d -> d >= 5 * 60 end) |> Enum.count(),
-        above_10: Enum.filter(durations, fn d -> d >= 10 * 60 end) |> Enum.count(),
-        above_15: Enum.filter(durations, fn d -> d >= 15 * 60 end) |> Enum.count(),
-        above_20: Enum.filter(durations, fn d -> d >= 20 * 60 end) |> Enum.count(),
-        above_25: Enum.filter(durations, fn d -> d >= 25 * 60 end) |> Enum.count(),
-        above_30: Enum.filter(durations, fn d -> d >= 30 * 60 end) |> Enum.count(),
-        above_35: Enum.filter(durations, fn d -> d >= 35 * 60 end) |> Enum.count(),
-        above_40: Enum.filter(durations, fn d -> d >= 40 * 60 end) |> Enum.count(),
-        above_45: Enum.filter(durations, fn d -> d >= 45 * 60 end) |> Enum.count(),
-        above_50: Enum.filter(durations, fn d -> d >= 50 * 60 end) |> Enum.count(),
-        above_55: Enum.filter(durations, fn d -> d >= 55 * 60 end) |> Enum.count(),
-        above_60: Enum.filter(durations, fn d -> d >= 60 * 60 end) |> Enum.count()
+        above_5: Enum.count(durations, fn d -> d >= 5 * 60 end),
+        above_10: Enum.count(durations, fn d -> d >= 10 * 60 end),
+        above_15: Enum.count(durations, fn d -> d >= 15 * 60 end),
+        above_20: Enum.count(durations, fn d -> d >= 20 * 60 end),
+        above_25: Enum.count(durations, fn d -> d >= 25 * 60 end),
+        above_30: Enum.count(durations, fn d -> d >= 30 * 60 end),
+        above_35: Enum.count(durations, fn d -> d >= 35 * 60 end),
+        above_40: Enum.count(durations, fn d -> d >= 40 * 60 end),
+        above_45: Enum.count(durations, fn d -> d >= 45 * 60 end),
+        above_50: Enum.count(durations, fn d -> d >= 50 * 60 end),
+        above_55: Enum.count(durations, fn d -> d >= 55 * 60 end),
+        above_60: Enum.count(durations, fn d -> d >= 60 * 60 end)
       }
     })
   end

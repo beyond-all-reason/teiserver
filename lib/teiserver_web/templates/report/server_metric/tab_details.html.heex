@@ -3,12 +3,12 @@
   <div class="col-md-6">
     <%= central_component("detail_line",
       label: "Unique users",
-      value: format_number(@data["aggregates"]["stats"]["unique_users"])
+      value: format_number(get_in(@data, ~w(aggregates stats unique_users)))
     ) %>
 
     <%= central_component("detail_line",
       label: "Peak total users",
-      value: format_number(@data["aggregates"]["stats"]["peak_user_counts"]["total"])
+      value: format_number(get_in(@data, ~w(aggregates stats peak_user_counts total)))
     ) %>
 
     <%= central_component("detail_line",
