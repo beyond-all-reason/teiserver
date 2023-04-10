@@ -94,8 +94,7 @@ defmodule Teiserver.Protocols.SpringOut do
     agreement_rows =
       Application.get_env(:central, Teiserver)[:user_agreement]
       |> String.split("\n")
-      |> Enum.map(fn s -> "AGREEMENT #{s}" end)
-      |> Enum.join("\n")
+      |> Enum.map_join("\n", fn s -> "AGREEMENT #{s}" end)
 
     [agreement_rows <> "\n"] ++
       [
@@ -801,6 +800,22 @@ defmodule Teiserver.Protocols.SpringOut do
       |> Enum.join(" ")
 
     reply(:channel_members, {members, room_name}, nil, state)
+  end
+
+  # Sends the message right now, may result in out of order messages
+  @spec send_now(String.t() | list() | nil, String.t(), map) :: map()
+  def send_now(message, msg_id, state) do
+    content =
+      if msg_id != "" and msg_id != nil do
+        message
+        |> String.trim()
+        |> String.split("\n")
+        |> Enum.map_join("", fn m -> "#{msg_id} #{m}\n" end)
+      else
+        message
+      end
+
+    state.transport.send(state.socket, content)
   end
 
   @spec prep_to_send(String.t() | list() | nil, String.t(), map) :: map()
