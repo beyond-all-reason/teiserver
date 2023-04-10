@@ -267,6 +267,20 @@ defmodule TeiserverWeb.Moderation.ActionController do
     end
   end
 
+  @spec re_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def re_post(conn, %{"id" => id}) do
+    action = Moderation.get_action!(id)
+
+    Teiserver.Bridge.DiscordBridge.new_action(action)
+
+    add_audit_log(conn, "Moderation:Action re_posted", %{action_id: action.id})
+    Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
+
+    conn
+    |> put_flash(:info, "Action re-posted.")
+    |> redirect(to: Routes.moderation_action_path(conn, :index))
+  end
+
   @spec halt(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def halt(conn, %{"id" => id}) do
     action = Moderation.get_action!(id)

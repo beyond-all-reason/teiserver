@@ -28,11 +28,20 @@
         ) %>
 
         <hr />
-        <%= link(raw("<i class='fa-solid fa-fw fa-octagon'></i> Halt action"),
-          to: Routes.moderation_action_path(@conn, :halt, @action),
+        <%= link(raw("<i class='fa-brands fa-fw fa-discord'></i>&nbsp; Re post to discord"),
+          to: ~p"/moderation/action/re-post/#{@action.id}",
           method: :put,
           data: [confirm: "Are you sure?"],
-          class: "btn btn-danger btn-outline"
+          class: "btn btn-warning"
+        ) %>
+
+        &nbsp;&nbsp;&nbsp;
+
+        <%= link(raw("<i class='fa-solid fa-fw fa-octagon'></i>&nbsp; Halt action"),
+          to: ~p"/moderation/action/halt/#{@action.id}",
+          method: :put,
+          data: [confirm: "Are you sure?"],
+          class: "btn btn-danger"
         ) %>
       </div>
     </div>
