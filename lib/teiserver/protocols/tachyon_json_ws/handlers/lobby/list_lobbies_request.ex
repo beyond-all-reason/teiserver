@@ -17,8 +17,9 @@ defmodule Teiserver.Tachyon.Handlers.Lobby.ListLobbiesRequest do
   @spec execute(T.tachyon_conn(), map, map) ::
           {{T.tachyon_command(), T.tachyon_object()}, T.tachyon_conn()}
   def execute(conn, _object, _meta) do
-    lobbies = Battle.list_lobbies()
-    |> Converters.convert(:lobby)
+    lobbies =
+      Battle.list_lobbies()
+      |> Converters.convert(:lobby)
 
     response = ListLobbiesResponse.execute(lobbies)
 

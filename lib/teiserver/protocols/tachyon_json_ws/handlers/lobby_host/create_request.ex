@@ -19,37 +19,38 @@ defmodule Teiserver.Tachyon.Handlers.LobbyHost.CreateRequest do
     user = Account.get_user_by_id(conn.userid)
     client = Account.get_client_by_id(conn.userid)
 
-    lobby = cond do
-      String.trim(object["name"] || "") == "" ->
-        {:error, "No lobby name supplied"}
+    lobby =
+      cond do
+        String.trim(object["name"] || "") == "" ->
+          {:error, "No lobby name supplied"}
 
-      not Enum.member?(["normal", "replay"], object["type"]) ->
-        {:error, "Invalid type '#{object["type"]}'"}
+        not Enum.member?(["normal", "replay"], object["type"]) ->
+          {:error, "Invalid type '#{object["type"]}'"}
 
-      not Enum.member?(["none", "holepunch", "fixed"], object["nattype"]) ->
-        {:error, "Invalid nattype '#{object["nattype"]}'"}
+        not Enum.member?(["none", "holepunch", "fixed"], object["nattype"]) ->
+          {:error, "Invalid nattype '#{object["nattype"]}'"}
 
-      true ->
-        %{
-          founder_id: conn.userid,
-          founder_name: user.name,
-          name: object["name"],
-          type: object["type"],
-          nattype: object["nattype"],
-          port: object["port"],
-          game_hash: object["game_hash"],
-          map_hash: object["map_hash"],
-          password: object["password"],
-          locked: false,
-          engine_name: object["engine_name"],
-          engine_version: object["engine_version"],
-          map_name: object["map_name"],
-          game_name: object["game_name"],
-          ip: client.ip
-        }
-        |> Battle.create_lobby()
-        |> Battle.add_lobby()
-    end
+        true ->
+          %{
+            founder_id: conn.userid,
+            founder_name: user.name,
+            name: object["name"],
+            type: object["type"],
+            nattype: object["nattype"],
+            port: object["port"],
+            game_hash: object["game_hash"],
+            map_hash: object["map_hash"],
+            password: object["password"],
+            locked: false,
+            engine_name: object["engine_name"],
+            engine_version: object["engine_version"],
+            map_name: object["map_name"],
+            game_name: object["game_name"],
+            ip: client.ip
+          }
+          |> Battle.create_lobby()
+          |> Battle.add_lobby()
+      end
 
     response = CreateResponse.execute(lobby)
 

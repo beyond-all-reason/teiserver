@@ -287,8 +287,11 @@ defmodule Teiserver.Battle do
               # In some rare situations it is possible to get into a situation where
               # the membership already exists and this can cause a cascading failure
               existing_membership = get_match_membership(m.user_id, match.id)
+
               if existing_membership do
-                Logger.error("Match membership already exists #{inspect match}, aborting membership insert")
+                Logger.error(
+                  "Match membership already exists #{inspect(match)}, aborting membership insert"
+                )
               else
                 # If balance mode is solo we need to strip party_id from the
                 # membership or it will mess with records, if no balance mode
@@ -502,6 +505,7 @@ defmodule Teiserver.Battle do
       ** (Ecto.NoResultsError)
 
   """
+
   # def get_match_membership!(user_id, match_id) do
   #   MatchMembershipLib.get_match_memberships()
   #   |> MatchMembershipLib.search(user_id: user_id, match_id: match_id)

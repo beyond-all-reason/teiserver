@@ -89,18 +89,17 @@ defmodule TeiserverWeb.Account.ProfileController do
          |> Enum.sort_by(fn a -> a.achievement_type.name end, &<=/2)}
       end)
 
-      stats = Account.get_user_stat_data(userid)
+    stats = Account.get_user_stat_data(userid)
 
-      total_hours = Map.get(stats, "total_minutes", 0) / 60 |> round
-      player_hours = Map.get(stats, "player_minutes", 0) / 60 |> round
-      spectator_hours = Map.get(stats, "spectator_minutes", 0) / 60 |> round
+    total_hours = (Map.get(stats, "total_minutes", 0) / 60) |> round
+    player_hours = (Map.get(stats, "player_minutes", 0) / 60) |> round
+    spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> round
 
-      playtime =
-        %{
-          total: total_hours,
-          playing: player_hours,
-          spectating: spectator_hours
-        }
+    playtime = %{
+      total: total_hours,
+      playing: player_hours,
+      spectating: spectator_hours
+    }
 
     conn
     |> assign(:accolades_given, accolades_given)
