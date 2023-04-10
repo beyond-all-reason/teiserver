@@ -403,7 +403,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     # If the client is muted, we need to tell the host
     if User.is_restricted?(user, ["All chat", "Battle chat"]) do
-      Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{user.name}")
+      spawn(fn ->
+        :timer.sleep(500)
+        Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{user.name}")
+      end)
     end
 
     {:noreply, state}
