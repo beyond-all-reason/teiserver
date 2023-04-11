@@ -7,7 +7,7 @@ defmodule Teiserver.SpringTcpServer do
   alias Central.Config
   alias Teiserver.{User, Client}
   alias Teiserver.Protocols.{SpringIn, SpringOut}
-  # alias Teiserver.Data.Types, as: T
+  alias Teiserver.Data.Types, as: T
 
   @send_interval 100
   @init_timeout 60_000
@@ -722,6 +722,7 @@ defmodule Teiserver.SpringTcpServer do
   # Depending on our current understanding of where the user is
   # we will send a selection of commands on the assumption this
   # genserver is incorrect and needs to alter its state accordingly
+  @spec user_join_battle(T.userid, T.lobby_id, String.t, T.spring_tcp_state) :: T.spring_tcp_state
   defp user_join_battle(userid, lobby_id, script_password, state) do
     script_password =
       cond do
@@ -793,7 +794,7 @@ defmodule Teiserver.SpringTcpServer do
 
       # User is known about and in this battle already, no change
       state.known_users[userid].lobby_id == lobby_id ->
-        state.known_users[userid]
+        state
     end
   end
 
