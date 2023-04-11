@@ -189,6 +189,9 @@ defmodule Teiserver.Bridge.ChatCommands do
           SPADS is the software running the lobby rooms (battles). It's written in Perl, is very extensively documented and mature software. We are not expecting to make any notable changes to it.
           You can ask questions about it in <#564591092360675328> (note: you may need to grab a dev role from the assign roles channel).
           """
+
+        "love" ->
+          "Baby don't hurt me"
       end
 
     if description do
