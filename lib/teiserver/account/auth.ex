@@ -46,6 +46,13 @@ defmodule Teiserver.Staff.Reviewer do
   def authorize(_, conn, _), do: allow?(conn, "teiserver.staff.reviewer")
 end
 
+defmodule Teiserver.Staff.MatchAdmin do
+  @behaviour Bodyguard.Policy
+  import Central.Account.AuthLib, only: [allow?: 2]
+  def authorize(:show, conn, _), do: allow?(conn, "teiserver.staff.overwatch")
+  def authorize(_, conn, _), do: allow?(conn, "teiserver.staff.moderator")
+end
+
 defmodule Teiserver.Staff do
   @behaviour Bodyguard.Policy
   import Central.Account.AuthLib, only: [allow?: 2]

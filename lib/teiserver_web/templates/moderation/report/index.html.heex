@@ -126,12 +126,14 @@
                     </a>
                   </td>
                   <td>
-                    <a
-                      href={Routes.ts_admin_match_path(@conn, :chat, report.match_id)}
-                      class="btn btn-secondary btn-sm"
-                    >
-                      Chat
-                    </a>
+                    <%= if allow?(@conn, "teisever.staff.reviewer") do %>
+                      <a
+                        href={Routes.ts_admin_match_path(@conn, :chat, report.match_id)}
+                        class="btn btn-secondary btn-sm"
+                      >
+                        Chat
+                      </a>
+                    <% end %>
                   </td>
                 <% else %>
                   <td>&nbsp;</td>

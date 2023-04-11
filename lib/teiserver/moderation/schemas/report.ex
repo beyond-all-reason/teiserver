@@ -32,9 +32,9 @@ defmodule Teiserver.Moderation.Report do
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
-  def authorize(:index, conn, _), do: allow?(conn, "teiserver.staff.reviewer")
-  def authorize(:search, conn, _), do: allow?(conn, "teiserver.staff.reviewer")
-  def authorize(:show, conn, _), do: allow?(conn, "teiserver.staff.reviewer")
-  def authorize(:user, conn, _), do: allow?(conn, "teiserver.staff.reviewer")
+  def authorize(:index, conn, _), do: allow?(conn, "teiserver.staff.overwatch")
+  def authorize(:search, conn, _), do: allow?(conn, "teiserver.staff.overwatch")
+  def authorize(:show, conn, _), do: allow?(conn, "teiserver.staff.overwatch")
+  def authorize(:user, conn, _), do: allow?(conn, "teiserver.staff.overwatch")
   def authorize(_, conn, _), do: allow?(conn, "teiserver.staff.moderator")
 end

@@ -323,6 +323,8 @@ defmodule Teiserver.Account.UserLib do
 
   def role_def("Admin"), do: {"#CE5C00", "fa-duotone fa-user-circle"}
   def role_def("Moderator"), do: {"#FFAA00", "fa-duotone fa-gavel"}
+  def role_def("Reviewer"), do: {"#AA7700", "fa-duotone fa-user-magnifying-glass"}
+  def role_def("Overwatch"), do: {"#AA7733", "fa-duotone fa-clipboard-list-check"}
   def role_def("Core team"), do: {"#008800", "fa-duotone fa-code-branch"}
   def role_def("GDT"), do: {"#AA0000", "fa-duotone fa-pen-ruler"}
   def role_def("VIP"), do: {"#AA8833", "fa-duotone fa-sparkles"}

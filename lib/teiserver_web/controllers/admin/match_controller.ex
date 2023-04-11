@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Admin.MatchController do
   import Central.Helpers.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Staff.Moderator,
+    policy: Teiserver.Staff.MatchAdmin,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 

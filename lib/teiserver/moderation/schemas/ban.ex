@@ -25,7 +25,7 @@ defmodule Teiserver.Moderation.Ban do
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
-  def authorize(:index, conn, _), do: allow?(conn, "teiserver.staff.reviewer")
+  def authorize(:index, conn, _), do: allow?(conn, "teiserver.staff.overwatch")
   def authorize(:show, conn, _), do: allow?(conn, "teiserver.staff.reviewer")
   def authorize(_, conn, _), do: allow?(conn, "teiserver.staff.moderator")
 end
