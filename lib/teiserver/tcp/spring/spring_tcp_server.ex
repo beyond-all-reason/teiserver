@@ -182,10 +182,6 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   def handle_info(:send_messages, %{pending_messages: pending_messages} = state) do
-    # IO.puts ""
-    # IO.inspect {state.userid, pending_messages}
-    # IO.puts ""
-
     SpringOut.send_prepared_messages(state, pending_messages)
 
     {:noreply,
@@ -560,6 +556,7 @@ defmodule Teiserver.SpringTcpServer do
       _ ->
         state
     end
+    # |> assert_is_conn_map
   end
 
   defp user_logged_out(userid, username, state) do
@@ -572,6 +569,7 @@ defmodule Teiserver.SpringTcpServer do
         new_known = Map.delete(new_state.known_users, userid)
         %{new_state | known_users: new_known}
     end
+    # |> assert_is_conn_map
   end
 
   defp user_updated(fields, state) do
@@ -595,6 +593,7 @@ defmodule Teiserver.SpringTcpServer do
           tmp_state
       end
     end)
+    # |> assert_is_conn_map
   end
 
   # Client updates
@@ -608,6 +607,7 @@ defmodule Teiserver.SpringTcpServer do
     else
       state
     end
+    # |> assert_is_conn_map
   end
 
   # Battle updates
@@ -659,6 +659,7 @@ defmodule Teiserver.SpringTcpServer do
         Logger.error("No handler in tcp_server:battle_update with reason #{reason}")
         state
     end
+    # |> assert_is_conn_map
   end
 
   defp global_battle_update(lobby_id, reason, state) do
@@ -688,6 +689,7 @@ defmodule Teiserver.SpringTcpServer do
         Logger.error("No handler in tcp_server:global_battle_update with reason #{reason}")
         state
     end
+    # |> assert_is_conn_map
   end
 
   # This is the server asking the host if a client can join the battle
@@ -710,6 +712,7 @@ defmodule Teiserver.SpringTcpServer do
       :deny ->
         SpringOut.reply(:join_battle_failure, reason, nil, state)
     end
+    # |> assert_is_conn_map
   end
 
   # This is the result of being forced to join a battle
@@ -717,6 +720,7 @@ defmodule Teiserver.SpringTcpServer do
     new_state = SpringOut.do_leave_battle(state, state.lobby_id)
     new_state = %{new_state | lobby_id: lobby_id, script_password: script_password}
     SpringOut.do_join_battle(new_state, lobby_id, script_password)
+    # |> assert_is_conn_map
   end
 
   # Depending on our current understanding of where the user is
@@ -736,6 +740,7 @@ defmodule Teiserver.SpringTcpServer do
         new_user = _blank_user(userid, %{lobby_id: lobby_id})
         new_knowns = Map.put(state.known_users, userid, new_user)
         %{state | known_users: new_knowns}
+        # |> assert_is_conn_map
 
       # User isn't known about so we say they've logged in
       # Then we add them to the battle
@@ -754,6 +759,7 @@ defmodule Teiserver.SpringTcpServer do
         new_user = _blank_user(userid, %{lobby_id: lobby_id})
         new_knowns = Map.put(new_state.known_users, userid, new_user)
         %{new_state | known_users: new_knowns}
+        # |> assert_is_conn_map
 
       # User is known about and not in a battle, this is the ideal
       # state
@@ -769,6 +775,7 @@ defmodule Teiserver.SpringTcpServer do
         new_user = %{new_state.known_users[userid] | lobby_id: lobby_id}
         new_knowns = Map.put(new_state.known_users, userid, new_user)
         %{new_state | known_users: new_knowns}
+        # |> assert_is_conn_map
 
       # User is known about but already in a battle
       state.known_users[userid].lobby_id != lobby_id ->
@@ -790,12 +797,17 @@ defmodule Teiserver.SpringTcpServer do
             state
           )
 
-        %{new_state.known_users[userid] | lobby_id: lobby_id}
+        new_user = %{new_state.known_users[userid] | lobby_id: lobby_id}
+        new_knowns = Map.put(new_state.known_users, userid, new_user)
+        %{new_state | known_users: new_knowns}
+        # |> assert_is_conn_map
 
       # User is known about and in this battle already, no change
       state.known_users[userid].lobby_id == lobby_id ->
         state
+        # |> assert_is_conn_map
     end
+    # |> assert_is_conn_map
   end
 
   defp user_leave_battle(userid, lobby_id, state) do
@@ -844,6 +856,7 @@ defmodule Teiserver.SpringTcpServer do
         new_knowns = Map.put(state.known_users, userid, new_user)
         %{new_state | known_users: new_knowns}
     end
+    # |> assert_is_conn_map
   end
 
   defp user_kicked_from_battle(userid, lobby_id, state) do
@@ -857,6 +870,7 @@ defmodule Teiserver.SpringTcpServer do
       end
 
     user_leave_battle(userid, lobby_id, state)
+    # |> assert_is_conn_map
   end
 
   # Chat
@@ -898,6 +912,7 @@ defmodule Teiserver.SpringTcpServer do
             )
         end
     end
+    # |> assert_is_conn_map
   end
 
   defp user_join_chat_room(userid, room_name, state) do
@@ -929,6 +944,7 @@ defmodule Teiserver.SpringTcpServer do
           %{state | room_member_cache: new_cache}
         end
     end
+    # |> assert_is_conn_map
   end
 
   defp user_leave_chat_room(userid, room_name, state) do
@@ -951,6 +967,7 @@ defmodule Teiserver.SpringTcpServer do
           %{state | room_member_cache: new_cache}
         end
     end
+    # |> assert_is_conn_map
   end
 
   # Actions
@@ -969,6 +986,7 @@ defmodule Teiserver.SpringTcpServer do
         Logger.error("No handler in tcp_server:do_action with action #{action_type}")
         state
     end
+    # |> assert_is_conn_map
   end
 
   @spec flood_protect?(String.t(), map()) :: {boolean, map()}
@@ -1063,6 +1081,13 @@ defmodule Teiserver.SpringTcpServer do
 
         state
     end
+  end
+
+  defp assert_is_conn_map(state) do
+    if not Map.has_key?(state, :print_client_messages) do
+      raise "Conn map is not a full map: #{inspect state}"
+    end
+    state
   end
 
   # Other functions

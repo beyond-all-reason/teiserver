@@ -267,9 +267,9 @@ defmodule Teiserver.Protocols.SpringIn do
           clan = Teiserver.Clans.get_clan!(user.clan_id)
           room_name = Room.clan_room_name(clan.tag)
           SpringOut.do_join_room(new_state, room_name)
+        else
+          new_state
         end
-
-        new_state
 
       {:error, "Banned" <> _} ->
         reply(
@@ -322,9 +322,9 @@ defmodule Teiserver.Protocols.SpringIn do
           clan = Teiserver.Clans.get_clan!(user.clan_id)
           room_name = Room.clan_room_name(clan.tag)
           SpringOut.do_join_room(new_state, room_name)
+        else
+          new_state
         end
-
-        new_state
 
       {:error, "Banned" <> _} ->
         reply(
@@ -335,7 +335,6 @@ defmodule Teiserver.Protocols.SpringIn do
         )
 
       {:error, reason} ->
-        Logger.debug("[command:login] denied with reason #{reason}")
         reply(:denied, reason, msg_id, state)
     end
   end
