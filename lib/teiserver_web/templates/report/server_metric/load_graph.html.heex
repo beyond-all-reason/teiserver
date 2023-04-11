@@ -16,6 +16,14 @@
   }
 </style>
 
+<%= if @params["all_charts"] != "true" do %>
+<style>
+  .all-chart {
+    display: none;
+  }
+</style>
+<% end %>
+
 <% col_class =
   case String.trim(@params["columns"] || "2") do
     "6" -> "col-md-2"
@@ -25,7 +33,9 @@
     _ -> "col-md-12"
   end
 
-col_class = col_class <> " my-2" %>
+col_class = col_class <> " my-2"
+all_col_class = col_class <> " all-chart"
+%>
 
 <script>
   $(function() {
@@ -172,7 +182,12 @@ col_class = col_class <> " my-2" %>
         }
       }
     });
+  });
+</script>
 
+<%= if @params["all_charts"] == "true" do %>
+<script>
+  $(function() {
     c3.generate({
       bindto: '#chart_user_processes',
       data: {
@@ -246,6 +261,7 @@ col_class = col_class <> " my-2" %>
     });
   });
 </script>
+<% end %>
 
 <%= render(
   TeiserverWeb.Report.GeneralView,
@@ -332,6 +348,17 @@ col_class = col_class <> " my-2" %>
                         />
                       </div>
 
+                      <div class="col-xl-3 col-lg-4 col-md-6 my-2">
+                        <br />
+                        <%= central_component("checkbox",
+                          id: "all_charts",
+                          name: "all_charts",
+                          label: "Show all charts",
+                          skip_hidden: true,
+                          checked: @params["all_charts"] == "true"
+                        ) %>
+                      </div>
+
                       <div class="col-md-12 my-2">
                         <button type="submit" class={"btn btn-#{bsname} float-end"}>
                           Submit
@@ -365,13 +392,13 @@ col_class = col_class <> " my-2" %>
                       <div id="chart_cpu_load" class="with-transitions chart-div"></div>
                     </div>
 
-                    <div class={col_class}>
+                    <div class={all_col_class}>
                       <div id="chart_user_processes" class="with-transitions chart-div"></div>
                     </div>
-                    <div class={col_class}>
+                    <div class={all_col_class}>
                       <div id="chart_system_processes" class="with-transitions chart-div"></div>
                     </div>
-                    <div class={col_class}>
+                    <div class={all_col_class}>
                       <div id="chart_beam_processes" class="with-transitions chart-div"></div>
                     </div>
                   </div>

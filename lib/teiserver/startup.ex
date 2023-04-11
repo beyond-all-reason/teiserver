@@ -68,7 +68,7 @@ defmodule Teiserver.Startup do
     add_permission_set(
       "teiserver",
       "staff",
-      ~w(reviewer moderator admin communication clan telemetry server)
+      ~w(overwatch reviewer moderator admin communication clan telemetry server)
     )
 
     add_permission_set("teiserver", "dev", ~w(infolog))

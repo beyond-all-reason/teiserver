@@ -76,7 +76,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
+  <%= if allow_any?(@conn, ~w(teiserver.staff.moderator teiserver.staff.reviewer teiserver.staff.overwatch)) do %>
     <%= central_component("menu_card",
       icon: Teiserver.Moderation.ReportLib.icon(),
       name: "moderation_admin",
@@ -86,7 +86,7 @@
     ) %>
   <% end %>
 
-  <%= if allow_any?(@conn, ~w(teiserver.reports teiserver.staff)) do %>
+  <%= if allow?(@conn, "teiserver.staff.moderator") do %>
     <%= central_component("menu_card",
       icon: Teiserver.Game.AchievementTypeLib.icon(),
       name: "achievements",

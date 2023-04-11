@@ -40,13 +40,15 @@
       url: Routes.ts_battle_match_path(@conn, :show, @match.id)
     ) %>
 
-    <%= central_component("section_menu_button",
-      name: "chat",
-      label: "Chat",
-      active: @active,
-      icon: Teiserver.Chat.LobbyMessageLib.icon(),
-      bsname: bsname,
-      url: Routes.ts_admin_lobby_path(@conn, :lobby_chat, @match.uuid)
-    ) %>
+    <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
+      <%= central_component("section_menu_button",
+        name: "chat",
+        label: "Chat",
+        active: @active,
+        icon: Teiserver.Chat.LobbyMessageLib.icon(),
+        bsname: bsname,
+        url: Routes.ts_admin_lobby_path(@conn, :lobby_chat, @match.uuid)
+      ) %>
+    <% end %>
   <% end %>
 </div>

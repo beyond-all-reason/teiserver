@@ -175,7 +175,9 @@ defmodule Central.Application do
     opts = [strategy: :one_for_one, name: Central.Supervisor]
     start_result = Supervisor.start_link(children, opts)
 
-    Logger.info("Central.Supervisor start result: #{Kernel.inspect(start_result)}")
+    # We use a logger.error to ensure something appears even on the error logs
+    # and we can be sure they're being written to
+    Logger.error("Central.Supervisor start result: #{Kernel.inspect(start_result)}")
 
     startup_sub_functions(start_result)
 

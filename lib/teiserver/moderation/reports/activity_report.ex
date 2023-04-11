@@ -7,7 +7,7 @@ defmodule Teiserver.Moderation.ActivityReport do
   def icon(), do: Teiserver.Moderation.BanLib.icon()
 
   @spec permissions() :: String.t()
-  def permissions(), do: "teiserver.staff.moderator"
+  def permissions(), do: "teiserver.staff.overwatch"
 
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, params) do

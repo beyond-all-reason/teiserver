@@ -1,18 +1,18 @@
 <div class="row page-row">
   <%= central_component("menu_card",
-    icon: Teiserver.Moderation.ActionLib.icon(),
-    name: "actions",
-    text: "Actions",
-    icon_class: "fa-duotone",
-    link: Routes.moderation_action_path(@conn, :index)
-  ) %>
-
-  <%= central_component("menu_card",
     icon: Teiserver.Moderation.ReportLib.icon(),
     name: "reports",
     text: "Reports",
     icon_class: "fa-duotone",
     link: Routes.moderation_report_path(@conn, :index)
+  ) %>
+
+  <%= central_component("menu_card",
+    icon: Teiserver.Moderation.ActionLib.icon(),
+    name: "actions",
+    text: "Actions",
+    icon_class: "fa-duotone",
+    link: Routes.moderation_action_path(@conn, :index)
   ) %>
 
   <%= central_component("menu_card",

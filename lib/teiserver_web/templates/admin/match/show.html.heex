@@ -58,7 +58,7 @@
             </a>
           </li>
 
-          <%= if @rating_logs != %{} do %>
+          <%= if @rating_logs != %{} and allow?(@conn, "teiserver.staff.reviewer") do %>
             <li class="nav-item">
               <a href="#ratings_tab" role="tab" class="nav-link" data-bs-toggle="tab">
                 <%= central_component("icon", icon: Teiserver.Account.RatingLib.icon()) %> Ratings
@@ -82,7 +82,7 @@
             <%= render("tab_players.html", assigns) %>
           </div>
 
-          <%= if @rating_logs != %{} do %>
+          <%= if @rating_logs != %{} and allow?(@conn, "teiserver.staff.reviewer") do %>
             <div class="tab-pane" id="ratings_tab" style="padding:5px;">
               <%= render("tab_ratings.html", assigns) %>
             </div>

@@ -48,20 +48,6 @@
       ) %>
 
       <%= central_component("checkbox",
-        id: "user_vip",
-        name: "user[vip]",
-        label: "VIP",
-        checked: "VIP" in (@changeset.data.data["roles"] || [])
-      ) %>
-
-      <%= central_component("checkbox",
-        id: "user_tournament-player",
-        name: "user[tournament-player]",
-        label: "Tournament player",
-        checked: "Tournament player" in (@changeset.data.data["roles"] || [])
-      ) %>
-
-      <%= central_component("checkbox",
         id: "user_bot",
         name: "user[bot]",
         label: "Bot",
@@ -91,7 +77,7 @@
     </div>
 
     <div class="col-xxl-1 col-xl-2 col-lg-3 col-md-4">
-      <h5>Role</h5>
+      <h5>Roles</h5>
       <%= central_component("checkbox",
         id: "user_contributor",
         name: "user[contributor]",
@@ -121,13 +107,6 @@
       ) %>
 
       <%= central_component("checkbox",
-        id: "user_caster",
-        name: "user[caster]",
-        label: "Caster",
-        checked: "Caster" in (@changeset.data.data["roles"] || [])
-      ) %>
-
-      <%= central_component("checkbox",
         id: "user_donor",
         name: "user[donor]",
         label: "Donor",
@@ -139,6 +118,44 @@
         name: "user[tester]",
         label: "Tester",
         checked: "Tester" in (@changeset.data.data["roles"] || [])
+      ) %>
+    </div>
+
+    <div class="col-xxl-1 col-xl-2 col-lg-3 col-md-4">
+      <h5>Privilaged roles</h5>
+      <%= central_component("checkbox",
+        id: "user_vip",
+        name: "user[vip]",
+        label: "VIP",
+        checked: "VIP" in (@changeset.data.data["roles"] || [])
+      ) %>
+
+      <%= central_component("checkbox",
+        id: "user_tournament-player",
+        name: "user[tournament-player]",
+        label: "Tournament player",
+        checked: "Tournament player" in (@changeset.data.data["roles"] || [])
+      ) %>
+
+      <%= central_component("checkbox",
+        id: "user_caster",
+        name: "user[caster]",
+        label: "Caster",
+        checked: "Caster" in (@changeset.data.data["roles"] || [])
+      ) %>
+
+      <%= central_component("checkbox",
+        id: "user_overwatch",
+        name: "user[overwatch]",
+        label: "Overwatch",
+        checked: "Overwatch" in (@changeset.data.data["roles"] || [])
+      ) %>
+
+      <%= central_component("checkbox",
+        id: "user_reviewer",
+        name: "user[reviewer]",
+        label: "Reviewer",
+        checked: "Reviewer" in (@changeset.data.data["roles"] || [])
       ) %>
     </div>
   </div>

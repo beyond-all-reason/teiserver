@@ -263,6 +263,8 @@ defmodule TeiserverWeb.Admin.UserController do
         {"caster", "Caster"},
         {"core", "Core team"},
         {"vip", "VIP"},
+        {"overwatch", "Overwatch"},
+        {"reviewer", "Reviewer"},
         {"tournament-player", "Tournament player"},
         {"gdt", "GDT"}
       ]

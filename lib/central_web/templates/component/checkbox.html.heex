@@ -13,10 +13,14 @@
   end
 
 value = assigns[:value] || "true"
-row_class = "form-check " <> (assigns[:row_class] || "m-1") %>
+row_class = "form-check " <> (assigns[:row_class] || "m-1")
+skip_hidden = assigns[:skip_hidden] || false
+%>
 
 <div class={row_class}>
-  <input name={@name} type="hidden" value="false" />
+  <%= if not skip_hidden do %>
+    <input name={@name} type="hidden" value="false" />
+  <% end %>
   <input name={@name} id={@id} class="form-check-input" type="checkbox" value={value} {checked} />
   <label class="form-check-label" for={@id}>
     <strong><%= @label %></strong><%= assigns[:text] %>
