@@ -285,10 +285,10 @@ defmodule Teiserver.TeiserverConfigs do
       key: "system.Post login delay",
       section: "System",
       type: "integer",
-      default: 1,
+      default: 1000,
       permissions: ["teiserver.admin"],
-      description: "How many times a user can attempt to login within the refresh window",
-      value_label: "Login limit count"
+      description: "The duration (ms) to pause the process after logging in",
+      value_label: "Post login delay (ms)"
     })
 
     add_site_config_type(%{

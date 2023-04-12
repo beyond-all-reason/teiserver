@@ -168,7 +168,7 @@ defmodule Teiserver.Client do
     end
 
     # Lets give everything a chance to propagate
-    :timer.sleep(Config.get_site_config_cache("system.Post login delay"))
+    :timer.sleep(150)
 
     Logger.info("Client connected: #{client.name} using #{client.lobby_client}")
 
