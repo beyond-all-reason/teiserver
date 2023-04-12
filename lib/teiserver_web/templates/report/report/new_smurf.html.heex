@@ -133,7 +133,7 @@
                     tz: @tz
                   ) %>
                 </td>
-                <td><%= date_to_str(user.inserted_at, format: :hms_or_dmy) %></td>
+                <td><%= date_to_str(user.inserted_at, format: :hms_or_ymd, tz: @tz) %></td>
 
                 <td>
                   <%= if stats["recent_count.duel"] do %>
