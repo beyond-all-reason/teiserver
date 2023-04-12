@@ -744,15 +744,15 @@ defmodule Teiserver.SpringTcpServer do
       end
 
     cond do
+      # Case 1, we are the user
       state.userid == userid ->
         new_user = _blank_user(userid, %{lobby_id: lobby_id})
         new_knowns = Map.put(state.known_users, userid, new_user)
         %{state | known_users: new_knowns}
 
-      # |> assert_is_conn_map
-
       # User isn't known about so we say they've logged in
       # Then we add them to the battle
+      # Case 2, we do not know about the user
       state.known_users[userid] == nil ->
         client = Client.get_client_by_id(userid)
         new_state = SpringOut.reply(:user_logged_in, client, nil, state)
@@ -769,10 +769,9 @@ defmodule Teiserver.SpringTcpServer do
         new_knowns = Map.put(new_state.known_users, userid, new_user)
         %{new_state | known_users: new_knowns}
 
-      # |> assert_is_conn_map
-
       # User is known about and not in a battle, this is the ideal
       # state
+      # Case 3, we know the user, they are not in a lobby
       state.known_users[userid].lobby_id == nil ->
         new_state =
           SpringOut.reply(
@@ -786,9 +785,8 @@ defmodule Teiserver.SpringTcpServer do
         new_knowns = Map.put(new_state.known_users, userid, new_user)
         %{new_state | known_users: new_knowns}
 
-      # |> assert_is_conn_map
-
       # User is known about but already in a battle
+      # Case 4, we know the user, they are in a different lobby
       state.known_users[userid].lobby_id != lobby_id ->
         # If we don't know about the battle we don't need to remove the user from it first
         if Enum.member?(state.known_battles, state.known_users[userid].lobby_id) do
@@ -812,15 +810,11 @@ defmodule Teiserver.SpringTcpServer do
         new_knowns = Map.put(new_state.known_users, userid, new_user)
         %{new_state | known_users: new_knowns}
 
-      # |> assert_is_conn_map
-
       # User is known about and in this battle already, no change
+      # Case 5, we know the user, they are in the correct lobby
       state.known_users[userid].lobby_id == lobby_id ->
         state
-        # |> assert_is_conn_map
     end
-
-    # |> assert_is_conn_map
   end
 
   defp user_leave_battle(userid, lobby_id, state) do
@@ -839,22 +833,23 @@ defmodule Teiserver.SpringTcpServer do
 
     # Now the user
     cond do
-      # User has already left, ignore it
+      # Case 1 - We think user has already left, ignore it
       Enum.member?(state.known_battles, lobby_id) == false ->
         state
 
-      # We don't even know who they are? Leave it too
+      # Case 2 - We don't even know who they are? Leave it too
       state.known_users[userid] == nil ->
         # client = Client.get_client_by_id(userid)
         # SpringOut.reply(:user_logged_in, client, nil, state)
         # _blank_user(userid)
         state
 
-      # We know them but not that they are in the lobby?
+      # Case 3 - We know them but not that they are in the lobby?
       # ignore it
       state.known_users[userid].lobby_id == nil ->
         state
 
+      # Case 4 -
       true ->
         # We don't care which battle we thought they are in, they're no longer in it
         new_state =
@@ -869,8 +864,6 @@ defmodule Teiserver.SpringTcpServer do
         new_knowns = Map.put(state.known_users, userid, new_user)
         %{new_state | known_users: new_knowns}
     end
-
-    # |> assert_is_conn_map
   end
 
   defp user_kicked_from_battle(userid, lobby_id, state) do
@@ -884,7 +877,6 @@ defmodule Teiserver.SpringTcpServer do
       end
 
     user_leave_battle(userid, lobby_id, state)
-    # |> assert_is_conn_map
   end
 
   # Chat
@@ -1112,7 +1104,6 @@ defmodule Teiserver.SpringTcpServer do
   def _blank_user(userid, defaults \\ %{}) do
     Map.merge(
       %{
-        userid: userid,
         lobby_id: nil
       },
       defaults

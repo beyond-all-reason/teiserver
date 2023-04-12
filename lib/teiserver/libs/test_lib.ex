@@ -214,7 +214,7 @@ defmodule Teiserver.TeiserverTestLib do
   def _recv_until(socket), do: _recv_until(socket, "")
 
   def _recv_until(socket = {:sslsocket, _, _}, acc) do
-    case :ssl.recv(socket, 0, 500) do
+    case :ssl.recv(socket, 0, 1000) do
       {:ok, reply} ->
         _recv_until(socket, acc <> to_string(reply))
 
@@ -224,7 +224,7 @@ defmodule Teiserver.TeiserverTestLib do
   end
 
   def _recv_until(socket, acc) do
-    case :gen_tcp.recv(socket, 0, 500) do
+    case :gen_tcp.recv(socket, 0, 1000) do
       {:ok, reply} ->
         _recv_until(socket, acc <> to_string(reply))
 
