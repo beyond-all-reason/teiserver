@@ -835,7 +835,10 @@ defmodule Teiserver.Protocols.SpringOut do
         message
       end
 
-    %{state | pending_messages: [content | state.pending_messages]}
+    # Enable batched messages by uncommenting this line and commenting the two that follow it
+    # %{state | pending_messages: [content | state.pending_messages]}
+    state.transport.send(state.socket, content)
+    state
   end
 
   @spec send_prepared_messages(map(), list) :: map()

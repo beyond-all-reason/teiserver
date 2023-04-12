@@ -94,7 +94,9 @@ defmodule Teiserver.SpringTcpServer do
     end
 
     :timer.send_interval(60_000, self(), :message_count)
-    :timer.send_interval(@send_interval, self(), :send_messages)
+
+    # Enable batched messages by uncommenting this line
+    # :timer.send_interval(@send_interval, self(), :send_messages)
 
     state = %{
       # Connection state
