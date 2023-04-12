@@ -537,7 +537,7 @@ defmodule Teiserver.SpringTcpServer do
 
           client ->
             new_state = SpringOut.reply(:user_logged_in, client, nil, state)
-            new_known = Map.put(new_state.known_users, userid, _blank_user(userid))
+            new_known = Map.put(new_state.known_users, userid, _blank_user())
             %{new_state | known_users: new_known}
         end
 
@@ -550,7 +550,7 @@ defmodule Teiserver.SpringTcpServer do
     case state.known_users[client.userid] do
       nil ->
         new_state = SpringOut.reply(:add_user, client, nil, state)
-        new_known = Map.put(new_state.known_users, client.userid, _blank_user(client.userid))
+        new_known = Map.put(new_state.known_users, client.userid, _blank_user())
         %{new_state | known_users: new_known}
 
       _ ->
@@ -746,7 +746,7 @@ defmodule Teiserver.SpringTcpServer do
     cond do
       # Case 1, we are the user
       state.userid == userid ->
-        new_user = _blank_user(userid, %{lobby_id: lobby_id})
+        new_user = _blank_user(lobby_id)
         new_knowns = Map.put(state.known_users, userid, new_user)
         %{state | known_users: new_knowns}
 
@@ -765,7 +765,7 @@ defmodule Teiserver.SpringTcpServer do
             new_state
           )
 
-        new_user = _blank_user(userid, %{lobby_id: lobby_id})
+        new_user = _blank_user(lobby_id)
         new_knowns = Map.put(new_state.known_users, userid, new_user)
         %{new_state | known_users: new_knowns}
 
@@ -891,7 +891,7 @@ defmodule Teiserver.SpringTcpServer do
         case Map.has_key?(state.known_users, from) do
           false ->
             state = SpringOut.reply(:user_logged_in, client, nil, state)
-            %{state | known_users: Map.put(state.known_users, from, _blank_user(from))}
+            %{state | known_users: Map.put(state.known_users, from, _blank_user())}
 
           true ->
             state
@@ -934,7 +934,7 @@ defmodule Teiserver.SpringTcpServer do
           case Map.has_key?(state.known_users, userid) do
             false ->
               state = SpringOut.reply(:user_logged_in, client, nil, state)
-              %{state | known_users: Map.put(state.known_users, userid, _blank_user(userid))}
+              %{state | known_users: Map.put(state.known_users, userid, _blank_user())}
 
             true ->
               state
@@ -1101,12 +1101,9 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # Other functions
-  def _blank_user(userid, defaults \\ %{}) do
-    Map.merge(
-      %{
-        lobby_id: nil
-      },
-      defaults
-    )
+  def _blank_user(lobby_id \\ nil) do
+    %{
+      lobby_id: lobby_id
+    }
   end
 end

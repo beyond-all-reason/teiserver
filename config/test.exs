@@ -29,7 +29,6 @@ config :central, Teiserver,
   enable_accolade_mode: false,
   enable_discord_bridge: false,
   enable_match_monitor: false,
-  post_login_delay: 0,
   spring_post_state_change_delay: 0,
   automod_delay: 1_000,
   user_agreement: "User agreement goes here."

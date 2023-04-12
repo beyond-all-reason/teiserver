@@ -7,6 +7,7 @@ defmodule Teiserver.Protocols.SpringOut do
   """
   require Logger
   alias Phoenix.PubSub
+  alias Central.Config
   alias Teiserver.{User, Client, Room, Battle, Coordinator}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.Spring
@@ -679,7 +680,7 @@ defmodule Teiserver.Protocols.SpringOut do
     end)
 
     if not state.exempt_from_cmd_throttle do
-      :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
+      :timer.sleep(Config.get_site_config_cache("system.Post login delay"))
     end
 
     # Battle entry commands
@@ -697,10 +698,6 @@ defmodule Teiserver.Protocols.SpringOut do
         |> Enum.each(fn player_id ->
           send(self(), {:add_user_to_battle, player_id, lobby_id, nil})
         end)
-
-        # if not state.exempt_from_cmd_throttle do
-        #   :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
-        # end
       end
     end)
 

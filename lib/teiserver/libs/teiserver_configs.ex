@@ -282,6 +282,36 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "system.Post login delay",
+      section: "System",
+      type: "integer",
+      default: 1,
+      permissions: ["teiserver.admin"],
+      description: "How many times a user can attempt to login within the refresh window",
+      value_label: "Login limit count"
+    })
+
+    add_site_config_type(%{
+      key: "system.Login rate throttle limit",
+      section: "System",
+      type: "integer",
+      default: 1,
+      permissions: ["teiserver.admin"],
+      description: "The number of users allowed to login each cycle of the login throttle",
+      value_label: "Login rate throttle limit"
+    })
+
+    add_site_config_type(%{
+      key: "system.Login rate throttle cycle speed",
+      section: "System",
+      type: "integer",
+      default: 200,
+      permissions: ["teiserver.admin"],
+      description: "How often a new wave of users are allowed to login (measured in ms)",
+      value_label: "Login rate throttle cycle speed (ms)"
+    })
+
+    add_site_config_type(%{
       key: "system.Disconnect unauthenticated sockets",
       section: "System",
       type: "boolean",

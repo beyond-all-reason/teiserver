@@ -39,7 +39,8 @@ defmodule Teiserver.Telemetry.TelemetryServer do
     spring_client_messages_sent: 0,
     tachyon_server_messages_sent: 0,
     tachyon_server_batches_sent: 0,
-    tachyon_client_messages_sent: 0
+    tachyon_client_messages_sent: 0,
+    login_queue_length: 0
   }
 
   @impl true
@@ -226,6 +227,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
       tachyon_server_messages_sent: state.tachyon_server_messages_sent,
       tachyon_server_batches_sent: state.tachyon_server_batches_sent,
       tachyon_client_messages_sent: state.tachyon_client_messages_sent,
+      login_queue_length: state.login_queue_length,
       os_mon: get_os_mon_data()
     }
   end

@@ -9,6 +9,7 @@
 defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
+  alias Central.Config
   alias Teiserver.{Room, User, Account, Telemetry, Clans}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Account.ClientLib
@@ -167,7 +168,7 @@ defmodule Teiserver.Client do
     end
 
     # Lets give everything a chance to propagate
-    :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
+    :timer.sleep(Config.get_site_config_cache("system.Post login delay"))
 
     Logger.info("Client connected: #{client.name} using #{client.lobby_client}")
 
