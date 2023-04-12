@@ -53,10 +53,10 @@ defmodule Teiserver.SpringTcpServer do
       :ranch.start_listener(
         make_ref(),
         :ranch_tcp,
-        [
+        %{
           max_connections: :infinity,
           port: Application.get_env(:central, Teiserver)[:ports][:tcp]
-        ],
+        },
         __MODULE__,
         []
       )
