@@ -211,9 +211,9 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
       outstanding_msg = cond do
         outstanding_count > 5 ->
-          "(Outstanding count: #{outstanding_count} :warning:)"
+          " (Outstanding count: #{outstanding_count} :warning:)"
         outstanding_count > 1 ->
-          "(Outstanding count: #{outstanding_count})"
+          " (Outstanding count: #{outstanding_count})"
         true ->
           ""
       end
@@ -346,10 +346,11 @@ defmodule Teiserver.Bridge.DiscordBridge do
   end
 
   defp bridge_channel_to_room(channel_id) do
-    bridge_pid = BridgeServer.get_bridge_pid()
-    GenServer.call(bridge_pid, {:lookup_room_from_channel, channel_id})
+    lookup_table = Central.store_get(:application_metadata_cache, :discord_room_lookup)
+    lookup_table[channel_id]
   end
 
+  @spec start_link :: :ignore | {:error, any} | {:ok, pid}
   def start_link do
     Consumer.start_link(__MODULE__)
   end
