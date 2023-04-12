@@ -14,8 +14,7 @@
 
 value = assigns[:value] || "true"
 row_class = "form-check " <> (assigns[:row_class] || "m-1")
-skip_hidden = assigns[:skip_hidden] || false
-%>
+skip_hidden = assigns[:skip_hidden] || false %>
 
 <div class={row_class}>
   <%= if not skip_hidden do %>

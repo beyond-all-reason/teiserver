@@ -58,13 +58,14 @@ defmodule Teiserver.Telemetry.TelemetryServer do
 
   @impl true
   def handle_cast(
-        {:spring_messages_sent, _userid, server_count, _batch_count, client_count},
+        {:spring_messages_sent, _userid, server_count, batch_count, client_count},
         state
       ) do
     {:noreply,
      %{
        state
        | spring_server_messages_sent: state.spring_server_messages_sent + server_count,
+         spring_server_batches_sent: state.spring_server_batches_sent + batch_count,
          spring_client_messages_sent: state.spring_client_messages_sent + client_count
      }}
   end

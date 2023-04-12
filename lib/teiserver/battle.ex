@@ -291,16 +291,17 @@ defmodule Teiserver.Battle do
               # If balance mode is solo we need to strip party_id from the
               # membership or it will mess with records, if no balance mode
               # listed then it defaults to grouped
-              params = if current_balance == nil or current_balance.balance_mode == :grouped do
-                Map.merge(m, %{
-                  match_id: match.id
-                })
-              else
-                Map.merge(m, %{
-                  party_id: nil,
-                  match_id: match.id
-                })
-              end
+              params =
+                if current_balance == nil or current_balance.balance_mode == :grouped do
+                  Map.merge(m, %{
+                    match_id: match.id
+                  })
+                else
+                  Map.merge(m, %{
+                    party_id: nil,
+                    match_id: match.id
+                  })
+                end
 
               if existing_membership == nil do
                 create_match_membership(params)

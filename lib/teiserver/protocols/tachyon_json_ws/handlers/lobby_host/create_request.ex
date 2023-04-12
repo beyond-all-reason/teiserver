@@ -19,11 +19,12 @@ defmodule Teiserver.Tachyon.Handlers.LobbyHost.CreateRequest do
     user = Account.get_user_by_id(conn.userid)
     client = Account.get_client_by_id(conn.userid)
 
-    object = Map.merge(object, %{
-      "founder_id" => conn.userid,
-      "founder_name" => user.name,
-      "ip" => client.ip
-    })
+    object =
+      Map.merge(object, %{
+        "founder_id" => conn.userid,
+        "founder_name" => user.name,
+        "ip" => client.ip
+      })
 
     lobby = Battle.create_new_lobby(object)
 

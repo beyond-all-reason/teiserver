@@ -27,8 +27,7 @@ defmodule Teiserver.User do
       ~w(Tester Streamer Donor Reviewer Overwatch Caster Contributor GDT Dev Moderator Admin Verified Bot VIP TournamentPlayer)
 
   def staff_role_list(),
-    do:
-      ~w(Reviewer Overwatch Moderator)
+    do: ~w(Reviewer Overwatch Moderator)
 
   @spec keys() :: [atom]
   def keys(),

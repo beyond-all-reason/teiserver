@@ -124,7 +124,8 @@ defmodule Teiserver.Battle.LobbyCache do
     cast_lobby(lobby_id, {:set_password, password})
   end
 
-  @lobby_atom_keys ~w(founder_id founder_name name type nattype port game_hash map_hash password locked engine_name engine_version map_name game_name ip)a |> Map.new(fn k -> {k, to_string(k)} end)
+  @lobby_atom_keys ~w(founder_id founder_name name type nattype port game_hash map_hash password locked engine_name engine_version map_name game_name ip)a
+                   |> Map.new(fn k -> {k, to_string(k)} end)
   @spec convert_lobby_string_map_to_atom_map(map) :: map
   defp convert_lobby_string_map_to_atom_map(data) do
     @lobby_atom_keys
@@ -151,9 +152,10 @@ defmodule Teiserver.Battle.LobbyCache do
         {:error, "Invalid type for 'locked' (should be boolean)"}
 
       true ->
-        lobby = data
-        |> Teiserver.Battle.Lobby.create_lobby()
-        |> add_lobby()
+        lobby =
+          data
+          |> Teiserver.Battle.Lobby.create_lobby()
+          |> add_lobby()
 
         {:ok, lobby}
     end
