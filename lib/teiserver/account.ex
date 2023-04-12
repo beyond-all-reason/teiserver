@@ -257,10 +257,6 @@ defmodule Teiserver.Account do
     # Do we need to give them staff roles?
     permissions = base_permissions ++ user_add_permissions ++ staff_add_permissions
 
-    IO.puts ""
-    IO.inspect permissions
-    IO.puts ""
-
     Central.Account.update_user(user, %{"permissions" => Enum.uniq(permissions)})
   end
 

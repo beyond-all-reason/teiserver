@@ -28,7 +28,7 @@ defmodule Teiserver.User do
 
   def staff_role_list(),
     do:
-      ~w(Reviewer Overwatch)
+      ~w(Reviewer Overwatch Moderator)
 
   @spec keys() :: [atom]
   def keys(),
