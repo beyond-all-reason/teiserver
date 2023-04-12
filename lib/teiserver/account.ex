@@ -218,7 +218,8 @@ defmodule Teiserver.Account do
       staff_roles
       |> Enum.map(fn r -> "teiserver.staff.#{String.downcase(r)}" end)
 
-    remove_permissions = user_remove_permissions ++ staff_remove_permissions ++ ["teiserver.staff"]
+    remove_permissions =
+      user_remove_permissions ++ staff_remove_permissions ++ ["teiserver.staff"]
 
     base_permissions =
       user.permissions
@@ -235,31 +236,34 @@ defmodule Teiserver.Account do
       |> Enum.map(fn r -> "teiserver.staff.#{String.downcase(r)}" end)
 
     # Might need to give them "teiserver.staff"
-    staff_add_permissions = if Enum.empty?(staff_add_permissions) do
-      []
-    else
-      ["teiserver.staff" | staff_add_permissions]
-    end
+    staff_add_permissions =
+      if Enum.empty?(staff_add_permissions) do
+        []
+      else
+        ["teiserver.staff" | staff_add_permissions]
+      end
 
     # Now certain ones are built on each other....
-    staff_add_permissions = if Enum.member?(staff_add_permissions, "teiserver.staff.moderator") do
-      ["teiserver.staff.reviewer" | staff_add_permissions]
-    else
-      staff_add_permissions
-    end
+    staff_add_permissions =
+      if Enum.member?(staff_add_permissions, "teiserver.staff.moderator") do
+        ["teiserver.staff.reviewer" | staff_add_permissions]
+      else
+        staff_add_permissions
+      end
 
-    staff_add_permissions = if Enum.member?(staff_add_permissions, "teiserver.staff.reviewer") do
-      ["teiserver.staff.overwatch" | staff_add_permissions]
-    else
-      staff_add_permissions
-    end
+    staff_add_permissions =
+      if Enum.member?(staff_add_permissions, "teiserver.staff.reviewer") do
+        ["teiserver.staff.overwatch" | staff_add_permissions]
+      else
+        staff_add_permissions
+      end
 
     # Do we need to give them staff roles?
     permissions = base_permissions ++ user_add_permissions ++ staff_add_permissions
 
-    IO.puts ""
-    IO.inspect permissions
-    IO.puts ""
+    IO.puts("")
+    IO.inspect(permissions)
+    IO.puts("")
 
     Central.Account.update_user(user, %{"permissions" => Enum.uniq(permissions)})
   end

@@ -261,9 +261,9 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     offset = Map.get(params, "offset", "0") |> int_parse()
     resolution = Map.get(params, "resolution", "5") |> int_parse()
 
-    IO.puts ""
-    IO.inspect params
-    IO.puts ""
+    IO.puts("")
+    IO.inspect(params)
+    IO.puts("")
 
     logs =
       Telemetry.list_server_minute_logs(
@@ -285,29 +285,33 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
     axis_key = GraphMinuteLogsTask.perform_axis_key(logs, resolution)
 
-    conn = conn
-    |> assign(:params, params)
-    |> assign(:columns_players, columns_players)
-    |> assign(:columns_combined_connections, columns_combined_connections)
-    |> assign(:columns_memory, columns_memory)
-    |> assign(:columns_cpu_load, columns_cpu_load)
-    |> assign(:server_messages, server_messages)
-    |> assign(:client_messages, client_messages)
-    |> assign(:axis_key, axis_key)
-    |> add_breadcrumb(name: "Load", url: conn.request_path)
-
-    conn = if params["all_charts"] == "true" do
-      system_process_counts = GraphMinuteLogsTask.perform_system_process_counts(logs, resolution)
-      user_process_counts = GraphMinuteLogsTask.perform_user_process_counts(logs, resolution)
-      beam_process_counts = GraphMinuteLogsTask.perform_beam_process_counts(logs, resolution)
-
+    conn =
       conn
-      |> assign(:user_process_counts, user_process_counts)
-      |> assign(:system_process_counts, system_process_counts)
-      |> assign(:beam_process_counts, beam_process_counts)
-    else
-      conn
-    end
+      |> assign(:params, params)
+      |> assign(:columns_players, columns_players)
+      |> assign(:columns_combined_connections, columns_combined_connections)
+      |> assign(:columns_memory, columns_memory)
+      |> assign(:columns_cpu_load, columns_cpu_load)
+      |> assign(:server_messages, server_messages)
+      |> assign(:client_messages, client_messages)
+      |> assign(:axis_key, axis_key)
+      |> add_breadcrumb(name: "Load", url: conn.request_path)
+
+    conn =
+      if params["all_charts"] == "true" do
+        system_process_counts =
+          GraphMinuteLogsTask.perform_system_process_counts(logs, resolution)
+
+        user_process_counts = GraphMinuteLogsTask.perform_user_process_counts(logs, resolution)
+        beam_process_counts = GraphMinuteLogsTask.perform_beam_process_counts(logs, resolution)
+
+        conn
+        |> assign(:user_process_counts, user_process_counts)
+        |> assign(:system_process_counts, system_process_counts)
+        |> assign(:beam_process_counts, beam_process_counts)
+      else
+        conn
+      end
 
     conn
     |> render("load_graph.html")

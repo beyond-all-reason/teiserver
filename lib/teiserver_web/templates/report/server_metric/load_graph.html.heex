@@ -17,11 +17,11 @@
 </style>
 
 <%= if @params["all_charts"] != "true" do %>
-<style>
-  .all-chart {
-    display: none;
-  }
-</style>
+  <style>
+    .all-chart {
+      display: none;
+    }
+  </style>
 <% end %>
 
 <% col_class =
@@ -34,8 +34,7 @@
   end
 
 col_class = col_class <> " my-2"
-all_col_class = col_class <> " all-chart"
-%>
+all_col_class = col_class <> " all-chart" %>
 
 <script>
   $(function() {
@@ -186,81 +185,81 @@ all_col_class = col_class <> " all-chart"
 </script>
 
 <%= if @params["all_charts"] == "true" do %>
-<script>
-  $(function() {
-    c3.generate({
-      bindto: '#chart_user_processes',
-      data: {
-        x: 'x',
-        xFormat: '%Y-%m-%d %H:%M:%S',
-        columns: <%= raw Jason.encode!([["x" | @axis_key] | @user_process_counts]) %>
-      },
-      axis: {
-        x: {
-          type: 'timeseries',
-          tick: {
-            format: '%d %H:%M:%S'
-          }
+  <script>
+    $(function() {
+      c3.generate({
+        bindto: '#chart_user_processes',
+        data: {
+          x: 'x',
+          xFormat: '%Y-%m-%d %H:%M:%S',
+          columns: <%= raw Jason.encode!([["x" | @axis_key] | @user_process_counts]) %>
         },
-        y: {
-          min: 0,
-          padding: {
-            top: 15,
-            bottom: 0
+        axis: {
+          x: {
+            type: 'timeseries',
+            tick: {
+              format: '%d %H:%M:%S'
+            }
+          },
+          y: {
+            min: 0,
+            padding: {
+              top: 15,
+              bottom: 0
+            }
           }
         }
-      }
-    });
+      });
 
-    c3.generate({
-      bindto: '#chart_system_processes',
-      data: {
-        x: 'x',
-        xFormat: '%Y-%m-%d %H:%M:%S',
-        columns: <%= raw Jason.encode!([["x" | @axis_key] | @system_process_counts]) %>
-      },
-      axis: {
-        x: {
-          type: 'timeseries',
-          tick: {
-            format: '%d %H:%M:%S'
-          }
+      c3.generate({
+        bindto: '#chart_system_processes',
+        data: {
+          x: 'x',
+          xFormat: '%Y-%m-%d %H:%M:%S',
+          columns: <%= raw Jason.encode!([["x" | @axis_key] | @system_process_counts]) %>
         },
-        y: {
-          min: 0,
-          padding: {
-            top: 15,
-            bottom: 0
+        axis: {
+          x: {
+            type: 'timeseries',
+            tick: {
+              format: '%d %H:%M:%S'
+            }
+          },
+          y: {
+            min: 0,
+            padding: {
+              top: 15,
+              bottom: 0
+            }
           }
         }
-      }
-    });
+      });
 
-    c3.generate({
-      bindto: '#chart_beam_processes',
-      data: {
-        x: 'x',
-        xFormat: '%Y-%m-%d %H:%M:%S',
-        columns: <%= raw Jason.encode!([["x" | @axis_key] | @beam_process_counts]) %>
-      },
-      axis: {
-        x: {
-          type: 'timeseries',
-          tick: {
-            format: '%d %H:%M:%S'
-          }
+      c3.generate({
+        bindto: '#chart_beam_processes',
+        data: {
+          x: 'x',
+          xFormat: '%Y-%m-%d %H:%M:%S',
+          columns: <%= raw Jason.encode!([["x" | @axis_key] | @beam_process_counts]) %>
         },
-        y: {
-          min: 0,
-          padding: {
-            top: 15,
-            bottom: 0
+        axis: {
+          x: {
+            type: 'timeseries',
+            tick: {
+              format: '%d %H:%M:%S'
+            }
+          },
+          y: {
+            min: 0,
+            padding: {
+              top: 15,
+              bottom: 0
+            }
           }
         }
-      }
+      });
     });
-  });
-</script>
+  </script>
 <% end %>
 
 <%= render(

@@ -209,14 +209,17 @@ defmodule Teiserver.Bridge.DiscordBridge do
         Moderation.list_outstanding_reports(report.target_id)
         |> Enum.count()
 
-      outstanding_msg = cond do
-        outstanding_count > 5 ->
-          "(Outstanding count: #{outstanding_count} :warning:)"
-        outstanding_count > 1 ->
-          "(Outstanding count: #{outstanding_count})"
-        true ->
-          ""
-      end
+      outstanding_msg =
+        cond do
+          outstanding_count > 5 ->
+            "(Outstanding count: #{outstanding_count} :warning:)"
+
+          outstanding_count > 1 ->
+            "(Outstanding count: #{outstanding_count})"
+
+          true ->
+            ""
+        end
 
       msg =
         "#{report.target.name} was reported by #{report.reporter.name} because #{report.type}/#{report.sub_type} #{match_icon} - #{report.extra_text} - #{url}#{outstanding_msg}"

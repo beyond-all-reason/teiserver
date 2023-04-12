@@ -137,7 +137,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   end
 
   def terminate(reason, %{conn: %{userid: userid}} = _state) do
-    Teiserver.Client.disconnect(userid, "ws terminate - reason: #{inspect reason}")
+    Teiserver.Client.disconnect(userid, "ws terminate - reason: #{inspect(reason)}")
     :ok
   end
 
