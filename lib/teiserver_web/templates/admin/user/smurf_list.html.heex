@@ -194,7 +194,7 @@ is_admin = allow?(@conn, "teiserver.admin.account") %>
                   </td>
 
                   <td>
-                    <%= date_to_str(@user.inserted_at, format: :ymd) %>
+                    <%= date_to_str(@user.inserted_at, format: :hms_or_ymd) %>
                   </td>
 
                   <td>
