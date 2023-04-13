@@ -763,9 +763,9 @@ defmodule Teiserver.SpringTcpServer do
         new_knowns = Map.put(state.known_users, userid, new_user)
         %{state | known_users: new_knowns}
 
+      # Case 2, we do not know about the user
       # User isn't known about so we say they've logged in
       # Then we add them to the battle
-      # Case 2, we do not know about the user
       state.known_users[userid] == nil ->
         new_state = SpringOut.reply(:user_logged_in, client, nil, state)
 
