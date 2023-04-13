@@ -460,7 +460,7 @@ defmodule Teiserver.Battle.LobbyServer do
       "teiserver_lobby_updates:#{state.id}",
       %{
         channel: "teiserver_lobby_updates:#{state.id}",
-        event: :set_modoptions,
+        event: :remove_modoptions,
         lobby_id: state.id,
         keys: keys_removed
       }

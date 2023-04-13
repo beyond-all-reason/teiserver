@@ -103,6 +103,10 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   defp handle_msg(%{"cmd" => "s.lobby.set_modoptions"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.update_values"}, state), do: state
 
+  defp handle_msg(%{"cmd" => "s.lobby.add_bot"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.update_bot"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.remove_bot"}, state), do: state
+
   defp update_battlestatus(state) do
     data =
       if :rand.uniform() <= 0.7 do

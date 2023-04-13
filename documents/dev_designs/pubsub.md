@@ -120,6 +120,8 @@ Limited information pertaining to the creation/deletion of battle lobbies.
 }
 ```
 
+#### teiserver_global_lobby_updates
+
 #### global_match_updates
 Used to communicate information to everybody regarding matches.
 ```elixir
@@ -179,11 +181,11 @@ Valid events:
   bot: botname
 }
 
-# Users (change to clients?)
 %{
   event: :add_user,
   lobby_id: lobby_id,
   client: client
+  script_password: script_password
 }
 
 %{
@@ -311,6 +313,7 @@ A message every time a user logs in or logs out. Unlike legacy all_user_updates 
 %{
   event: :login
   userid: userid
+  client: client
 }
 
 %{

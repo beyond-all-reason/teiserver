@@ -135,7 +135,8 @@ defmodule Teiserver.Client do
       %{
         channel: "client_inout",
         event: :login,
-        userid: user.id
+        userid: user.id,
+        client: client
       }
     )
 

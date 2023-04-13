@@ -260,7 +260,8 @@ defmodule Teiserver.Battle.Lobby do
           channel: "teiserver_lobby_updates:#{lobby_id}",
           event: :add_user,
           lobby_id: lobby_id,
-          client: client
+          client: client,
+          script_password: script_password
         }
       )
     end

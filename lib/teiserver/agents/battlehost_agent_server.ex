@@ -117,6 +117,10 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   defp handle_msg(%{"cmd" => "s.lobby.remove_modoptions"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.update_values"}, state), do: state
 
+  defp handle_msg(%{"cmd" => "s.lobby.add_bot"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.update_bot"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.remove_bot"}, state), do: state
+
   defp open_battle(state) do
     password = if :rand.uniform() <= state.password_chance, do: "password"
 

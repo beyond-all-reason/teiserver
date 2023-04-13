@@ -185,26 +185,26 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#BATTLEOPENED:server
-  defp do_reply(:battle_opened, battle) when is_map(battle) do
+  defp do_reply(:battle_opened, lobby) when is_map(lobby) do
     type =
-      case battle.type do
+      case lobby.type do
         "normal" -> 0
         "replay" -> 1
       end
 
     nattype =
-      case battle.nattype do
+      case lobby.nattype do
         "none" -> 0
         "holepunch" -> 1
         "fixed" -> 2
         _ -> 0
       end
 
-    passworded = if battle.password == nil, do: 0, else: 1
+    passworded = if lobby.passworded, do: 1, else: 0
     max_players = 16
     rank = 0
 
-    "BATTLEOPENED #{battle.id} #{type} #{nattype} #{battle.founder_name} #{battle.ip} #{battle.port} #{max_players} #{passworded} #{rank} #{battle.map_hash} #{battle.engine_name}\t#{battle.engine_version}\t#{battle.map_name}\t#{battle.name}\t#{battle.game_name}\n"
+    "BATTLEOPENED #{lobby.id} #{type} #{nattype} #{lobby.founder_name} #{lobby.ip} #{lobby.port} #{max_players} #{passworded} #{rank} #{lobby.map_hash} #{lobby.engine_name}\t#{lobby.engine_version}\t#{lobby.map_name}\t#{lobby.name}\t#{lobby.game_name}\n"
   end
 
   defp do_reply(:battle_opened, lobby_id) when is_integer(lobby_id) do
@@ -596,8 +596,8 @@ defmodule Teiserver.Protocols.SpringOut do
 
   @spec do_leave_battle(map(), T.lobby_id()) :: map()
   def do_leave_battle(state, lobby_id) do
-    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{lobby_id}")
     PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
     state
   end
 
@@ -607,11 +607,11 @@ defmodule Teiserver.Protocols.SpringOut do
 
     if lobby do
       Lobby.add_user_to_battle(state.userid, lobby.id, script_password)
-      PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{lobby.id}")
-      PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{lobby.id}")
-
       PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby.id}")
       PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby.id}")
+
+      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby.id}")
+      PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby.id}")
 
       state = reply(:join_battle_success, lobby, nil, state)
       state = reply(:add_user_to_battle, {state.userid, lobby.id, script_password}, nil, state)
@@ -688,15 +688,15 @@ defmodule Teiserver.Protocols.SpringOut do
     # need to send() to self a few dozen times
     Lobby.list_lobby_ids()
     |> Enum.each(fn lobby_id ->
-      send(self(), {:global_battle_updated, lobby_id, :battle_opened})
-      send(self(), {:global_battle_updated, lobby_id, :update_battle_info})
+      lobby = Lobby.get_lobby(lobby_id)
 
-      battle = Lobby.get_lobby(lobby_id)
+      send(self(), %{channel: "teiserver_global_lobby_updates", event: :opened, lobby: lobby})
+      send(self(), %{channel: "teiserver_global_lobby_updates", event: :updated_values, lobby_id: lobby.id, new_values: lobby})
 
-      if battle != nil and Map.has_key?(battle, :players) do
-        battle.players
+      if lobby != nil and Map.has_key?(lobby, :players) do
+        lobby.players
         |> Enum.each(fn player_id ->
-          send(self(), {:add_user_to_battle, player_id, lobby_id, nil})
+          send(self(), {:login_event, :add_user_to_battle, player_id, lobby_id})
         end)
       end
     end)
@@ -709,11 +709,12 @@ defmodule Teiserver.Protocols.SpringOut do
 
     send(self(), {:action, {:login_end, nil}})
 
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_user_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_inout")
+    # FIXME: Legacy pubsub
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
 
+    # FIXME: Legacy pubsub
     PubSub.unsubscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
     PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
 

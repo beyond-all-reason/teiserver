@@ -822,8 +822,11 @@ defmodule Teiserver.Protocols.SpringIn do
       {:success, battle} ->
         state = reply(:battle_opened, battle.id, msg_id, state)
         state = reply(:open_battle_success, battle.id, msg_id, state)
-        PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
-        PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
+        PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{battle.id}")
+        PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{battle.id}")
+
+        PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{battle.id}")
+        PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{battle.id}")
 
         state = reply(:join_battle_success, battle, msg_id, state)
 
@@ -889,7 +892,8 @@ defmodule Teiserver.Protocols.SpringIn do
       {:waiting_on_host, script_password} ->
         Lobby.remove_user_from_any_lobby(state.userid)
         |> Enum.each(fn b ->
-          PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{b}")
+          PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{b}")
+          PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{b}")
         end)
 
         %{state | script_password: script_password}
@@ -1205,7 +1209,8 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("LEAVEBATTLE", _, _msg_id, %{lobby_id: nil} = state) do
     Lobby.remove_user_from_any_lobby(state.userid)
     |> Enum.each(fn b ->
-      PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{b}")
+      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{b}")
+      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{b}")
     end)
 
     if not state.exempt_from_cmd_throttle do
@@ -1219,10 +1224,12 @@ defmodule Teiserver.Protocols.SpringIn do
     # Remove them from all the battles anyways, just in case
     Lobby.remove_user_from_any_lobby(state.userid)
     |> Enum.each(fn b ->
-      PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{b}")
+      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{b}")
+      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{b}")
     end)
 
-    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{state.lobby_id}")
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{state.lobby_id}")
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{state.lobby_id}")
     Lobby.remove_user_from_battle(state.userid, state.lobby_id)
 
     if not state.exempt_from_cmd_throttle do
