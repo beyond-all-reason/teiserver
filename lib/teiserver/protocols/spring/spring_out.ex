@@ -835,30 +835,31 @@ defmodule Teiserver.Protocols.SpringOut do
         message
       end
 
-    # Enable batched messages by uncommenting this line and commenting the two that follow it
-    # %{state | pending_messages: [content | state.pending_messages]}
+    # Enable batched messages by commenting this line
+    # and uncommenting the ones for sending prepared messages
     state.transport.send(state.socket, content)
-    state
+
+    %{state | pending_messages: [content | state.pending_messages]}
   end
 
   @spec send_prepared_messages(map(), list) :: map()
   def send_prepared_messages(%{mock: true} = state, messages) do
-    content =
-      messages
-      |> Enum.reverse()
-      |> Enum.join("")
+    # content =
+    #   messages
+    #   |> Enum.reverse()
+    #   |> Enum.join("")
 
-    send(state.test_pid, content)
+    # send(state.test_pid, content)
     state
   end
 
   def send_prepared_messages(state, messages) do
-    content =
-      messages
-      |> Enum.reverse()
-      |> Enum.join("")
+    # content =
+    #   messages
+    #   |> Enum.reverse()
+    #   |> Enum.join("")
 
-    state.transport.send(state.socket, content)
+    # state.transport.send(state.socket, content)
     state
   end
 end

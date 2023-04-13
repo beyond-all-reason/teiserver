@@ -96,7 +96,7 @@ defmodule Teiserver.SpringTcpServer do
     :timer.send_interval(60_000, self(), :message_count)
 
     # Enable batched messages by uncommenting this line
-    # :timer.send_interval(@send_interval, self(), :send_messages)
+    :timer.send_interval(@send_interval, self(), :send_messages)
 
     state = %{
       # Connection state
@@ -835,7 +835,7 @@ defmodule Teiserver.SpringTcpServer do
 
     # Now the user
     cond do
-      # Case 1 - We think user has already left, ignore it
+      # Case 1 - We don't know about the battle? Ignore it
       Enum.member?(state.known_battles, lobby_id) == false ->
         state
 
@@ -846,14 +846,14 @@ defmodule Teiserver.SpringTcpServer do
         # _blank_user(userid)
         state
 
-      # Case 3 - We know them but not that they are in the lobby?
+      # Case 3 - We know them but not that they were in the lobby?
       # ignore it
       state.known_users[userid].lobby_id == nil ->
         state
 
-      # Case 4 -
+      # Case 4 - We don't care which battle we thought they are in, they're no longer in it
       true ->
-        # We don't care which battle we thought they are in, they're no longer in it
+
         new_state =
           SpringOut.reply(
             :remove_user_from_battle,

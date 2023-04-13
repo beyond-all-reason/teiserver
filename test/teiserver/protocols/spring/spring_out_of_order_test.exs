@@ -82,22 +82,19 @@ defmodule Teiserver.SpringOutOfOrderTest do
     {:ok, socket: socket, user: user}
   end
 
-  @doc """
-  Still to do
-  handle_info({:action, {:ring, userid}}, state)
-  handle_info({:user_logged_in, userid}, state)
-  handle_info({:user_logged_out, userid, username}, state)
-  handle_info({:updated_client, new_client, reason}, state)
-  handle_info({:spring_add_user_from_login, client}, state)
-  handle_info({:direct_message, from, msg}, state)
-  handle_info({:new_message, from, room_name, msg}, state)
-  handle_info({:new_message_ex, from, room_name, msg}, state)
-  handle_info({:add_user_to_room, userid, room_name}, state)
-  handle_info({:remove_user_from_room, userid, room_name}, state)
-  handle_info({:request_user_join_lobby, userid}, state)
-
-  handle_info({:kick_user_from_battle, userid, lobby_id}, state)
-  """
+  # Still to do
+  # handle_info({:action, {:ring, userid}}, state)
+  # handle_info({:user_logged_in, userid}, state)
+  # handle_info({:user_logged_out, userid, username}, state)
+  # handle_info({:updated_client, new_client, reason}, state)
+  # handle_info({:spring_add_user_from_login, client}, state)
+  # handle_info({:direct_message, from, msg}, state)
+  # handle_info({:new_message, from, room_name, msg}, state)
+  # handle_info({:new_message_ex, from, room_name, msg}, state)
+  # handle_info({:add_user_to_room, userid, room_name}, state)
+  # handle_info({:remove_user_from_room, userid, room_name}, state)
+  # handle_info({:request_user_join_lobby, userid}, state)
+  # handle_info({:kick_user_from_battle, userid, lobby_id}, state)
 
   @doc """
   The issue we are seeing is in some situations the tcp server is not correctly inserting new instructions into the system. This test aims to be an exhaustive investigation
@@ -185,64 +182,56 @@ defmodule Teiserver.SpringOutOfOrderTest do
 
     # Clear everything from making the lobbies
     recv_until(socket)
-    wipe_known_users(pid)
 
     r = recv_until(socket)
     assert r == []
+
+    # Case 1 - We don't know about the battle? Ignore it (but open the battle)
+    wipe_known_users(pid)
+    set_known_battles(pid, [])
+
+    send(pid, {:remove_user_from_battle, user1.id, lobby1_id})
+
+    r = recv_until(socket)
+    assert Enum.count(r) == 1
+    assert r |> hd |> String.split(" ") |> hd == "BATTLEOPENED"
+
     assert get_known_users(pid) == %{}
 
-    # Case 1 - We think user has already left, ignore it
+    # Case 2 - We don't even know who they are? Leave it too
+    set_known_battles(pid, [lobby1_id])
+    wipe_known_users(pid)
+
     send(pid, {:remove_user_from_battle, user1.id, lobby1_id})
 
     r = recv_until(socket)
     assert r == []
 
+    assert get_known_users(pid) == %{}
+
+    # Case 3 - We know them but not that they are in the lobby?
+    set_known_users(pid, %{user1.id => %{lobby_id: nil}})
+
+    send(pid, {:remove_user_from_battle, user1.id, lobby1_id})
+
+    r = recv_until(socket)
+    assert r == []
+
+    assert get_known_users(pid) == %{user1.id => %{lobby_id: nil}}
+
+    # Case 4 - We don't care which battle we thought they are in, they're no longer in it
+    set_known_battles(pid, [lobby1_id])
+    set_known_users(pid, %{user1.id => %{lobby_id: lobby1_id + 1}})
+
+    send(pid, {:remove_user_from_battle, user1.id, lobby1_id})
+
+    r = recv_until(socket)
+    assert r == [
+      "LEFTBATTLE #{lobby1_id + 1} #{user1.name}"
+    ]
+
     assert get_known_users(pid) == %{
-      user.id => %{lobby_id: lobby1_id}
+      user1.id => %{lobby_id: nil}
     }
-
-    # # Case 2, we do not know about the user
-    # wipe_known_users(pid)
-
-    # send(pid, {:add_user_to_battle, user1.id, lobby1_id, "password"})
-
-    # r = recv_until(socket)
-    # assert r == [
-    #   "ADDUSER #{user1.name} ?? #{user1.id} LuaLobby Chobby",
-    #   "CLIENTSTATUS #{user1.name} 0",
-    #   "JOINEDBATTLE #{lobby1_id} #{user1.name}"
-    # ]
-
-    # assert get_known_users(pid) == %{
-    #   user1.id => %{lobby_id: lobby1_id}
-    # }
-
-    # # Case 3, we know the user, they are not in a lobby
-    # set_known_users(pid, %{user1.id => %{lobby_id: nil}})
-
-    # send(pid, {:add_user_to_battle, user1.id, lobby1_id, "password"})
-
-    # r = recv_until(socket)
-    # assert r == [
-    #   "JOINEDBATTLE #{lobby1_id} #{user1.name}"
-    # ]
-
-    # assert get_known_users(pid) == %{
-    #   user1.id => %{lobby_id: lobby1_id}
-    # }
-
-    # # Case 4, we know the user, they are in a different lobby
-    # set_known_users(pid, %{user1.id => %{lobby_id: lobby1_id + 1}})
-
-    # send(pid, {:add_user_to_battle, user1.id, lobby1_id, "password"})
-
-    # r = recv_until(socket)
-    # assert r == [
-    #   "JOINEDBATTLE #{lobby1_id} #{user1.name}"
-    # ]
-
-    # assert get_known_users(pid) == %{
-    #   user1.id => %{lobby_id: lobby1_id}
-    # }
   end
 end
