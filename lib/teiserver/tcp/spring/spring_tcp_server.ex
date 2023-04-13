@@ -750,7 +750,13 @@ defmodule Teiserver.SpringTcpServer do
         true -> nil
       end
 
+    client = Client.get_client_by_id(userid)
+
     cond do
+      # Case 0, they have no client
+      client == nil ->
+        state
+
       # Case 1, we are the user
       state.userid == userid ->
         new_user = _blank_user(lobby_id)
@@ -761,7 +767,6 @@ defmodule Teiserver.SpringTcpServer do
       # Then we add them to the battle
       # Case 2, we do not know about the user
       state.known_users[userid] == nil ->
-        client = Client.get_client_by_id(userid)
         new_state = SpringOut.reply(:user_logged_in, client, nil, state)
 
         new_state =
@@ -838,17 +843,20 @@ defmodule Teiserver.SpringTcpServer do
         SpringOut.reply(:battle_opened, lobby_id, nil, state)
       end
 
+    client = Client.get_client_by_id(userid)
+
     # Now the user
     cond do
+      # Case 0, they have no client
+      client == nil ->
+        state
+
       # Case 1 - We don't know about the battle? Ignore it
       Enum.member?(state.known_battles, lobby_id) == false ->
         state
 
       # Case 2 - We don't even know who they are? Leave it too
       state.known_users[userid] == nil ->
-        # client = Client.get_client_by_id(userid)
-        # SpringOut.reply(:user_logged_in, client, nil, state)
-        # _blank_user(userid)
         state
 
       # Case 3 - We know them but not that they were in the lobby?
@@ -1099,15 +1107,8 @@ defmodule Teiserver.SpringTcpServer do
     end
   end
 
-  defp assert_is_conn_map(state) do
-    if not Map.has_key?(state, :print_client_messages) do
-      raise "Conn map is not a full map: #{inspect(state)}"
-    end
-
-    state
-  end
-
   # Other functions
+  @spec _blank_user(T.lobby_id() | nil) :: %{lobby_id: T.lobby_id() | nil}
   def _blank_user(lobby_id \\ nil) do
     %{
       lobby_id: lobby_id
