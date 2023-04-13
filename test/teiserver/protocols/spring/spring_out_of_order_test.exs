@@ -183,9 +183,6 @@ defmodule Teiserver.SpringOutOfOrderTest do
     # Clear everything from making the lobbies
     recv_until(socket)
 
-    r = recv_until(socket)
-    assert r == []
-
     # Case 1 - We don't know about the battle? Ignore it (but open the battle)
     wipe_known_users(pid)
     set_known_battles(pid, [])
@@ -233,5 +230,32 @@ defmodule Teiserver.SpringOutOfOrderTest do
     assert get_known_users(pid) == %{
       user1.id => %{lobby_id: nil}
     }
+  end
+
+  test "CLIENTSTATUS", %{socket: socket, user: user} do
+    client = Account.get_client_by_id(user.id)
+    pid = client.tcp_pid
+
+    recv_until(socket)
+
+    client = %{
+      userid: user.id + 1000,
+      rank: 0,
+      in_game: false,
+      away: false,
+      moderator: false,
+      bot: false,
+      name: "FakeMcFakeson",
+      country: "??",
+      lobby_client: "client_app"
+    }
+
+    send(pid, {:updated_client, client, :client_updated_status})
+
+    r = recv_until(socket)
+    assert r == [
+      "ADDUSER FakeMcFakeson ?? #{user.id + 1000} client_app",
+      "CLIENTSTATUS FakeMcFakeson 0"
+    ]
   end
 end

@@ -602,8 +602,15 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # Client updates
-  defp client_status_update(new_client, state) do
-    SpringOut.reply(:client_status, new_client, nil, state)
+  defp client_status_update(%{userid: userid} = new_client, state) do
+    if state.known_users[userid] == nil do
+      state = SpringOut.reply(:user_logged_in, new_client, nil, state)
+      new_user = _blank_user()
+      new_knowns = Map.put(state.known_users, userid, new_user)
+      %{state | known_users: new_knowns}
+    else
+      SpringOut.reply(:client_status, new_client, nil, state)
+    end
   end
 
   defp client_battlestatus_update(new_client, state) do
@@ -612,8 +619,6 @@ defmodule Teiserver.SpringTcpServer do
     else
       state
     end
-
-    # |> assert_is_conn_map
   end
 
   # Battle updates
