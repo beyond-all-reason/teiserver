@@ -48,8 +48,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         client = Client.get_client_by_id(cmd.senderid)
 
         if client.lobby_id do
-          consul_pid = Coordinator.get_consul_pid(client.lobby_id)
-          send(consul_pid, cmd)
+          Coordinator.send_consul(client.lobby_id, cmd)
         end
 
         state
