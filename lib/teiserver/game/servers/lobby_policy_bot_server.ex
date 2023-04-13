@@ -199,17 +199,16 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   # Lobby updates
-  def handle_info({:lobby_update, :add_user, _lobby_id, userid}, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates:" <> _, event: :add_user, client: client}, state) do
     generate_welcome_message(state)
     |> Enum.each(fn line ->
-      User.send_direct_message(state.userid, userid, line)
+      User.send_direct_message(state.userid, client.userid, line)
     end)
 
     {:noreply, state}
   end
 
-  def handle_info({:lobby_update, _action, _lobby_id, _data}, state) do
-    # IO.inspect {action, data}, label: "lobby_update"
+  def handle_info(%{channel: "teiserver_lobby_updates:" <> _}, state) do
     {:noreply, state}
   end
 

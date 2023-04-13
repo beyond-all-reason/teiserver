@@ -414,12 +414,12 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # Lobbies
-  def handle_info({:lobby_update, :updated_queue, lobby_id, id_list}, state) do
-    new_state = SpringOut.reply(:battle, :queue_status, {lobby_id, id_list}, nil, state)
+  def handle_info(%{channel: "teiserver_lobby_updates:" <> _, event: :updated_queue} = msg, state) do
+    new_state = SpringOut.reply(:battle, :queue_status, {msg.lobby_id, msg.id_list}, nil, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:lobby_update, _event, _lobby_id, _data}, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates:" <> _}, state) do
     {:noreply, state}
   end
 

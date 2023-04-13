@@ -843,7 +843,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   @spec send_prepared_messages(map(), list) :: map()
-  def send_prepared_messages(%{mock: true} = state, messages) do
+  def send_prepared_messages(%{mock: true} = state, _messages) do
     # content =
     #   messages
     #   |> Enum.reverse()
@@ -853,7 +853,7 @@ defmodule Teiserver.Protocols.SpringOut do
     state
   end
 
-  def send_prepared_messages(state, messages) do
+  def send_prepared_messages(state, _messages) do
     # content =
     #   messages
     #   |> Enum.reverse()

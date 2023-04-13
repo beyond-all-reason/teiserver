@@ -9,7 +9,6 @@
 defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
-  alias Central.Config
   alias Teiserver.{Room, User, Account, Telemetry, Clans}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Account.ClientLib

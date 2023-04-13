@@ -105,24 +105,6 @@ defmodule Teiserver.Game.BalancerServer do
     {:noreply, state}
   end
 
-  # def handle_info({:lobby_update, :updated_client_battlestatus, _lobby_id, {_client, _reason}}, state) do
-  #   {:noreply, state}
-  # end
-
-  # def handle_info({:lobby_update, :add_user, _lobby_id, _userid}, state) do
-  #   {:noreply, state}
-  # end
-
-  # def handle_info({:lobby_update, _, _, _}, state), do: {:noreply, state}
-
-  # def handle_info({:host_update, _userid, _host_data}, state) do
-  #   {:noreply, state}
-  # end
-
-  # def handle_info(%{channel: "teiserver_server"}, state) do
-  #   {:noreply, state}
-  # end
-
   @spec make_balance(non_neg_integer(), T.balance_server_state(), list()) ::
           {map(), T.balance_server_state()}
   defp make_balance(team_count, state, opts) do

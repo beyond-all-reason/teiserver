@@ -337,16 +337,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info(
-        {:lobby_update, :updated_client_battlestatus, _lobby_id, {_client, _reason}},
+        %{channel: "teiserver_lobby_updates:" <> _, event: :updated_client_battlestatus},
         state
       ) do
     player_count_changed(state)
     {:noreply, state}
   end
 
-  def handle_info({:lobby_update, :add_user, _lobby_id, userid}, state) do
-    user = User.get_user_by_id(userid)
-
+  def handle_info(%{channel: "teiserver_lobby_updates:" <> _, event: :add_user, client: client}, state) do
     min_rate_play = state.minimum_rating_to_play
     max_rate_play = state.maximum_rating_to_play
 
@@ -398,21 +396,23 @@ defmodule Teiserver.Coordinator.ConsulServer do
       |> Enum.filter(fn s -> s != nil end)
 
     if not Enum.empty?(msg) do
-      Coordinator.send_to_user(userid, [@splitter] ++ msg ++ [@splitter])
+      Coordinator.send_to_user(client.userid, [@splitter] ++ msg ++ [@splitter])
     end
 
     # If the client is muted, we need to tell the host
-    if User.is_restricted?(user, ["All chat", "Battle chat"]) do
+    if User.is_restricted?(client.userid, ["All chat", "Battle chat"]) do
       spawn(fn ->
         :timer.sleep(500)
-        Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{user.name}")
+        Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{client.name}")
       end)
     end
 
     {:noreply, state}
   end
 
-  def handle_info({:lobby_update, _, _, _}, state), do: {:noreply, state}
+  def handle_info(%{channel: "teiserver_lobby_updates:" <> _}, state) do
+    {:noreply, state}
+  end
 
   def handle_info({:host_update, userid, host_data}, state) do
     if state.host_id == userid do
@@ -1102,7 +1102,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
       PubSub.broadcast(
         Central.PubSub,
         "teiserver_lobby_updates:#{state.lobby_id}",
-        {:lobby_update, :updated_queue, state.lobby_id, get_queue(state)}
+        %{
+          channel: "teiserver_lobby_updates:#{state.lobby_id}",
+          event: :updated_queue,
+          lobby_id: state.lobby_id,
+          id_list: get_queue(state)
+        }
       )
     end
 
