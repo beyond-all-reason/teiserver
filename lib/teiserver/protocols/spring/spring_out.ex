@@ -96,8 +96,7 @@ defmodule Teiserver.Protocols.SpringOut do
     agreement_rows =
       Application.get_env(:central, Teiserver)[:user_agreement]
       |> String.split("\n")
-      |> Enum.map(fn s -> "AGREEMENT #{s}" end)
-      |> Enum.join("\n")
+      |> Enum.map_join("\n", fn s -> "AGREEMENT #{s}" end)
 
     [agreement_rows <> "\n"] ++
       [
@@ -266,8 +265,7 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:add_script_tags, tags) do
     tags =
       tags
-      |> Enum.map(fn {key, value} -> "#{key}=#{value}" end)
-      |> Enum.join("\t")
+      |> Enum.map_join("\t", fn {key, value} -> "#{key}=#{value}" end)
 
     "SETSCRIPTTAGS " <> tags <> "\n"
   end
@@ -463,10 +461,9 @@ defmodule Teiserver.Protocols.SpringOut do
       from_name = User.get_username(from_id)
 
       messages
-      |> Enum.map(fn msg ->
+      |> Enum.map_join("", fn msg ->
         "SAID #{room_name} #{from_name} #{msg}\n"
       end)
-      |> Enum.join("")
     end
   end
 
@@ -483,10 +480,9 @@ defmodule Teiserver.Protocols.SpringOut do
       from_name = User.get_username(from_id)
 
       messages
-      |> Enum.map(fn msg ->
+      |> Enum.map_join("", fn msg ->
         "SAIDEX #{room_name} #{from_name} #{msg}\n"
       end)
-      |> Enum.join("")
     end
   end
 
@@ -781,10 +777,10 @@ defmodule Teiserver.Protocols.SpringOut do
           end
 
         new_members =
-          if not Enum.member?(new_state.room_member_cache[room_name] || [], member_id) do
-            [member_id | new_state.room_member_cache[room_name] || []]
-          else
+          if Enum.member?(new_state.room_member_cache[room_name] || [], member_id) do
             new_state.room_member_cache[room_name] || []
+          else
+            [member_id | new_state.room_member_cache[room_name] || []]
           end
 
         new_cache = Map.put(state.room_member_cache, room_name, new_members)

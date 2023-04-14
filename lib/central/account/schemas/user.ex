@@ -27,8 +27,8 @@ defmodule Central.Account.User do
     belongs_to :clan, Teiserver.Clans.Clan
     has_one :user_stat, Teiserver.Account.UserStat
 
-    field :behaviour_score, :integer
-    field :trust_score, :integer
+    field :behaviour_score, :integer, default: 10_000
+    field :trust_score, :integer, default: 10_000
 
     belongs_to :admin_group, Central.Account.Group
 

@@ -192,6 +192,9 @@ defmodule Teiserver.Bridge.ChatCommands do
 
         "love" ->
           "Baby don't hurt me"
+
+        _ ->
+          nil
       end
 
     if description do

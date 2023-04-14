@@ -257,13 +257,9 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
   @spec load(Plug.Conn.t(), map) :: Plug.Conn.t()
   def load(conn, params) do
-    hours = Map.get(params, "hours", "24") |> int_parse()
+    hours = Map.get(params, "hours", "3") |> int_parse()
     offset = Map.get(params, "offset", "0") |> int_parse()
-    resolution = Map.get(params, "resolution", "5") |> int_parse()
-
-    IO.puts("")
-    IO.inspect(params)
-    IO.puts("")
+    resolution = Map.get(params, "resolution", "1") |> int_parse()
 
     logs =
       Telemetry.list_server_minute_logs(

@@ -297,13 +297,14 @@ all_col_class = col_class <> " all-chart" %>
                           id: "hours",
                           enumerable: [
                             %{id: "1", name: "1"},
+                            %{id: "3", name: "3"},
                             %{id: "6", name: "6"},
                             %{id: "24", name: "24"},
                             %{id: "48", name: "48 (2 days)"},
                             %{id: "168", name: "168 (7 days)"},
                             %{id: "504", name: "504 (21 days)"}
                           ],
-                          selected: Map.get(@params, "hours", "24")
+                          selected: Map.get(@params, "hours", "3")
                         ) %>
                       </div>
 
@@ -321,7 +322,7 @@ all_col_class = col_class <> " all-chart" %>
                             %{id: "60", name: "60"},
                             %{id: "360", name: "360 (6 hours)"}
                           ],
-                          selected: Map.get(@params, "resolution", "5")
+                          selected: Map.get(@params, "resolution", "1")
                         ) %>
                       </div>
 

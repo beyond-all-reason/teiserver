@@ -288,28 +288,25 @@ defmodule Teiserver.Battle do
               # the membership already exists and this can cause a cascading failure
               existing_membership = get_match_membership(m.user_id, match.id)
 
-              if existing_membership do
-                Logger.error(
-                  "Match membership already exists #{inspect(match)}, aborting membership insert"
-                )
-              else
-                # If balance mode is solo we need to strip party_id from the
-                # membership or it will mess with records, if no balance mode
-                # listed then it defaults to grouped
+              # If balance mode is solo we need to strip party_id from the
+              # membership or it will mess with records, if no balance mode
+              # listed then it defaults to grouped
+              params =
                 if current_balance == nil or current_balance.balance_mode == :grouped do
-                  create_match_membership(
-                    Map.merge(m, %{
-                      match_id: match.id
-                    })
-                  )
+                  Map.merge(m, %{
+                    match_id: match.id
+                  })
                 else
-                  create_match_membership(
-                    Map.merge(m, %{
-                      party_id: nil,
-                      match_id: match.id
-                    })
-                  )
+                  Map.merge(m, %{
+                    party_id: nil,
+                    match_id: match.id
+                  })
                 end
+
+              if existing_membership == nil do
+                create_match_membership(params)
+              else
+                update_match_membership(existing_membership, params)
               end
             end)
 

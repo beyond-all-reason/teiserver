@@ -138,6 +138,9 @@ defmodule Central.Application do
         # Achievements
         {Teiserver.Game.AchievementServer, name: Teiserver.Game.AchievementServer},
 
+        # System throttle
+        {Teiserver.Account.LoginThrottleServer, name: Teiserver.Account.LoginThrottleServer},
+
         # Telemetry
         {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
         {Teiserver.Telemetry.SpringTelemetryServer,

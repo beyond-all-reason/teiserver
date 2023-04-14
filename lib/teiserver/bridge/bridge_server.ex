@@ -76,6 +76,8 @@ defmodule Teiserver.Bridge.BridgeServer do
     {:noreply, state}
   end
 
+  # bridge_pid = Teiserver.Bridge.BridgeServer.get_bridge_pid()
+  # send(bridge_pid, :recache)
   def handle_info(:recache, state) do
     Logger.info("Recaching")
     {:noreply, build_local_caches(state)}
@@ -354,6 +356,9 @@ defmodule Teiserver.Bridge.BridgeServer do
       :ok = PubSub.unsubscribe(Central.PubSub, "room:#{room_name}")
       :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
     end)
+
+    Central.store_put(:application_metadata_cache, :discord_room_lookup, room_lookup)
+    Central.store_put(:application_metadata_cache, :discord_channel_lookup, channel_lookup)
 
     Map.merge(state, %{
       channel_lookup: channel_lookup,

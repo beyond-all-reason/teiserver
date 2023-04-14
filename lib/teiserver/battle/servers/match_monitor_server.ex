@@ -67,6 +67,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
   def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
 
+  # Room messages
   def handle_info({:new_message, from_id, "autohosts", "* Launching game..."}, state) do
     client = Client.get_client_by_id(from_id)
     Battle.start_match(client.lobby_id)
@@ -108,6 +109,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     handle_info({:new_message, from_id, room_name, message}, state)
   end
 
+  # DMs
   def handle_info({:direct_message, from_id, parts}, state) when is_list(parts) do
     new_state =
       parts
@@ -117,6 +119,19 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       end)
 
     {:noreply, new_state}
+  end
+
+  def handle_info({:direct_message, from_id, "broken_connection " <> username}, state) do
+    if User.is_bot?(from_id) or User.is_moderator?(from_id) do
+      user = Account.get_user_by_name(username)
+
+      if user do
+        Telemetry.log_server_event(user.id, "spads.broken_connection", %{from_id: from_id})
+        Client.disconnect(user.id, "reported broken connection")
+      end
+    end
+
+    {:noreply, state}
   end
 
   def handle_info({:direct_message, _from_id, "endGameData " <> data}, state) do

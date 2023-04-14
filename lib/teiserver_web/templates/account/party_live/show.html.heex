@@ -86,7 +86,7 @@ leader = moderator or @party.leader == @user_id %>
             <% end %>
           </div>
 
-          <%= if not Enum.empty?(@lobby_user_ids) do %>
+          <%= if @lobby_user_ids != nil and not Enum.empty?(@lobby_user_ids) do %>
             <div class="col-md-6">
               <h5>Lobby</h5>
 

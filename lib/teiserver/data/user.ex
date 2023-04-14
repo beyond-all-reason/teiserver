@@ -27,7 +27,7 @@ defmodule Teiserver.User do
       ~w(Tester Streamer Donor Reviewer Overwatch Caster Contributor GDT Dev Moderator Admin Verified Bot VIP TournamentPlayer)
 
   def staff_role_list(),
-    do: ~w(Reviewer Overwatch)
+    do: ~w(Reviewer Overwatch Moderator)
 
   @spec keys() :: [atom]
   def keys(),
@@ -155,7 +155,10 @@ defmodule Teiserver.User do
       icon: @default_icon,
       admin_group_id: Teiserver.user_group_id(),
       permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
+      # TODO: Remove springid
       springid: SpringIdServer.get_next_id(),
+      behaviour_score: 10_000,
+      trust_score: 10_000,
       data:
         data
         |> Map.merge(%{
@@ -183,6 +186,8 @@ defmodule Teiserver.User do
       admin_group_id: Teiserver.user_group_id(),
       permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
       springid: SpringIdServer.get_next_id(),
+      behaviour_score: 10_000,
+      trust_score: 10_000,
       data:
         data
         |> Map.merge(%{
@@ -795,8 +800,9 @@ defmodule Teiserver.User do
   @spec login_flood_check(T.userid()) :: :allow | :block
   def login_flood_check(userid) do
     login_count = Central.cache_get(:teiserver_login_count, userid) || 0
+    rate_limit = Config.get_site_config_cache("system.Login limit count")
 
-    if login_count > 3 do
+    if login_count > rate_limit do
       :block
     else
       Central.cache_put(:teiserver_login_count, userid, login_count + 1)
@@ -817,14 +823,19 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec remaining_capacity() :: non_neg_integer()
-  defp remaining_capacity() do
+  @spec server_capacity() :: {non_neg_integer(), number()}
+  def server_capacity() do
     client_count =
       (Central.cache_get(:application_temp_cache, :telemetry_data) || %{})
       |> Map.get(:client, %{})
       |> Map.get(:total, 0)
 
-    Config.get_site_config_cache("system.User limit") - client_count
+    total = Config.get_site_config_cache("system.User limit")
+    remaining = total - client_count
+
+    usage = max(client_count, 1) / total
+
+    {remaining, usage}
   end
 
   @spec ip_to_string(String.t() | tuple()) :: Tuple.t()
@@ -847,6 +858,7 @@ defmodule Teiserver.User do
     wait_for_startup()
 
     user = get_user_by_id(token.user.id)
+    {remaining_capacity, current_usage} = server_capacity()
 
     cond do
       token.expires != nil and Timex.compare(token.expires, Timex.now()) == -1 ->
@@ -862,11 +874,11 @@ defmodule Teiserver.User do
         {:error, "Banned, please see Discord for details"}
 
       not is_bot?(user) and not is_moderator?(user) and
-        not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity() <= 0 ->
+        not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity <= 0 ->
         {:error, "The server is currently full, please try again in a minute or two."}
 
-      # not remaining_capacity() <= 100 and user.behaviour_score < 5000 ->
-      #   {:error, "The server is currently full, please try later."}
+      (remaining_capacity <= 100 or current_usage > 0.9) and user.behaviour_score < 5000 ->
+        {:error, "The server is currently full, please try later."}
 
       not is_verified?(user) ->
         Account.update_user_stat(user.id, %{
@@ -902,6 +914,7 @@ defmodule Teiserver.User do
           {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), T.userid()}
   def try_login(token, ip, lobby, lobby_hash) do
     wait_for_startup()
+    {remaining_capacity, current_usage} = server_capacity()
 
     case Guardian.resource_from_token(token) do
       {:error, _bad_token} ->
@@ -921,11 +934,11 @@ defmodule Teiserver.User do
             {:error, "Banned, please see Discord for details"}
 
           not is_bot?(user) and not is_moderator?(user) and
-            not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity() <= 0 ->
+            not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity <= 0 ->
             {:error, "The server is currently full, please try again in a minute or two."}
 
-          # not remaining_capacity() <= 100 and user.behaviour_score < 5000 ->
-          #   {:error, "The server is currently full, please try later."}
+          (remaining_capacity <= 100 or current_usage > 0.9) and user.behaviour_score < 5000 ->
+            {:error, "The server is currently full, please try later."}
 
           not is_verified?(user) ->
             Account.update_user_stat(user.id, %{
@@ -957,6 +970,7 @@ defmodule Teiserver.User do
           {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), Integer.t()}
   def try_md5_login(username, md5_password, ip, lobby, lobby_hash) do
     wait_for_startup()
+    {remaining_capacity, current_usage} = server_capacity()
 
     case get_user_by_name(username) do
       nil ->
@@ -985,11 +999,11 @@ defmodule Teiserver.User do
             {:error, "Banned, please see Discord for details"}
 
           not is_bot?(user) and not is_moderator?(user) and
-            not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity() <= 0 ->
+            not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity <= 0 ->
             {:error, "The server is currently full, please try again in a minute or two."}
 
-          # not remaining_capacity() <= 100 and user.behaviour_score < 5000 ->
-          #   {:error, "The server is currently full, please try later."}
+          (remaining_capacity <= 100 or current_usage > 0.9) and user.behaviour_score < 5000 ->
+            {:error, "The server is currently full, please try later."}
 
           not is_verified?(user) ->
             # Log them in to save some details we'd not otherwise get

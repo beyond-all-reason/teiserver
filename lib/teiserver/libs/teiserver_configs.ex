@@ -14,6 +14,7 @@ defmodule Teiserver.TeiserverConfigs do
     moderation_configs()
     discord_configs()
     lobby_configs()
+    debugging_configs()
   end
 
   @spec site_configs :: any
@@ -269,6 +270,46 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver.admin"],
       description: "A redirect URL for those accessing the old server",
       value_label: "The URL for the redirect"
+    })
+
+    add_site_config_type(%{
+      key: "system.Login limit count",
+      section: "System",
+      type: "integer",
+      default: 3,
+      permissions: ["teiserver.admin"],
+      description: "How many times a user can attempt to login within the refresh window",
+      value_label: "Login limit count"
+    })
+
+    add_site_config_type(%{
+      key: "system.Post login delay",
+      section: "System",
+      type: "integer",
+      default: 1000,
+      permissions: ["teiserver.admin"],
+      description: "The duration (ms) to pause the process after logging in",
+      value_label: "Post login delay (ms)"
+    })
+
+    add_site_config_type(%{
+      key: "system.Login rate throttle limit",
+      section: "System",
+      type: "integer",
+      default: 1,
+      permissions: ["teiserver.admin"],
+      description: "The number of users allowed to login each cycle of the login throttle",
+      value_label: "Login rate throttle limit"
+    })
+
+    add_site_config_type(%{
+      key: "system.Login rate throttle cycle speed",
+      section: "System",
+      type: "integer",
+      default: 200,
+      permissions: ["teiserver.admin"],
+      description: "How often a new wave of users are allowed to login (measured in ms)",
+      value_label: "Login rate throttle cycle speed (ms)"
     })
 
     add_site_config_type(%{
@@ -529,6 +570,27 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["teiserver.admin"],
       description: "The discord ID for the channel broadcasting lobby count"
+    })
+  end
+
+  @spec debugging_configs :: :ok
+  def debugging_configs() do
+    add_site_config_type(%{
+      key: "debug.Print outgoing messages",
+      section: "Debug",
+      type: "boolean",
+      default: false,
+      permissions: ["teiserver.admin"],
+      description: "Print all outgoing messages"
+    })
+
+    add_site_config_type(%{
+      key: "debug.Print incoming messages",
+      section: "Debug",
+      type: "boolean",
+      default: false,
+      permissions: ["teiserver.admin"],
+      description: "Print all incoming messages"
     })
   end
 end

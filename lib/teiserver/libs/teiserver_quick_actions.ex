@@ -215,6 +215,12 @@ defmodule Teiserver.TeiserverQuickActions do
         url: ~p"/teiserver/reports/show/accolades"
       },
       %{
+        label: "New smurfs",
+        icons: ["fa-regular #{Teiserver.Account.NewSmurfReport.icon()}"],
+        permissions: Teiserver.Account.NewSmurfReport.permissions(),
+        url: ~p"/teiserver/reports/show/new_smurf"
+      },
+      %{
         label: "Tournament",
         icons: ["fa-regular #{Teiserver.Account.TournamentReport.icon()}"],
         permissions: Teiserver.Account.TournamentReport.permissions(),
