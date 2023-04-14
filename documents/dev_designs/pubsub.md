@@ -120,6 +120,8 @@ Limited information pertaining to the creation/deletion of battle lobbies.
 }
 ```
 
+#### teiserver_global_lobby_updates
+
 #### global_match_updates
 Used to communicate information to everybody regarding matches.
 ```elixir
@@ -146,31 +148,106 @@ Valid events:
 Information affecting only those in this given lobby. Chat is not sent via this channel.
 Valid events:
 ```elixir
-  # Structure
-  {:lobby_update, _action, lobby_id, _data}
+# To be removed
+%{
+  event: :updated,
+  lobby_id: lobby_id,
+  reason: reason
+}
 
-  # BattleLobby
-  {:lobby_update, :updated, lobby_id, update_reason}
-  {:lobby_update, :closed, lobby_id, reason}
-  {:lobby_update, :add_bot, lobby_id, Bot}
-  {:lobby_update, :update_bot, lobby_id, Bot}
-  {:lobby_update, :remove_bot, lobby_id, botname}
-  {:lobby_update, :add_user, lobby_id, userid}
-  {:lobby_update, :remove_user, lobby_id, userid}
-  {:lobby_update, :kick_user, lobby_id, userid}
+# BattleLobby
+%{
+  event: :closed,
+  lobby_id: lobby_id,
+  reason: reason
+}
+
+# Bots
+%{
+  event: :add_bot,
+  lobby_id: lobby_id,
+  bot: bot
+}
+
+%{
+  event: :update_bot,
+  lobby_id: lobby_id,
+  bot: bot
+}
+
+%{
+  event: :remove_bot,
+  lobby_id: lobby_id,
+  bot: botname
+}
+
+%{
+  event: :add_user,
+  lobby_id: lobby_id,
+  client: client
+  script_password: script_password
+}
+
+%{
+  event: :remove_user,
+  lobby_id: lobby_id,
+  client: client
+}
+
+%{
+  event: :kick_user,
+  lobby_id: lobby_id,
+  client: client
+}
+
+# Modoptions
+%{
+  event: :set_modoptions,
+  lobby_id: lobby_id,
+  options: map()
+}
+
+%{
+  event: :remove_modoptions,
+  lobby_id: lobby_id,
+  keys: keys
+}
+
+# Start areas
+%{
+  event: :add_start_area,
+  lobby_id: lobby_id,
+  area_id: integer(),
+  area: map()
+}
+
+%{
+  event: :remove_start_area,
+  lobby_id: lobby_id,
+  area_id: integer()
+}
+
+# Partial lobby updates
+%{
+  event: :update_values,
+  lobby_id: lobby_id,
+  changes: map()
+}
+
+# Client
+%{
+  event: :updated_client_battlestatus,
+  lobby_id: lobby_id,
+  client: client,
+  reason: reason
+}
   
-  {:lobby_update, :set_modoption, lobby_id, {key, value}}
-  {:lobby_update, :set_modoptions, lobby_id, options}
-  {:lobby_update, :remove_modoptions, lobby_id, keys}
-
-  # Partial lobby updates
-  {:lobby_update, :update_value, lobby_id, {key, value}}
-
-  # Client
-  {:lobby_update, :updated_client_battlestatus, lobby_id, {Client, reason}}
-  
-  # Queue
-  {:lobby_update, :updated_queue, lobby_id, id_list}
+# Queue
+%{
+  event: :updated_client_battlestatus,
+  lobby_id: lobby_id,
+  id_list: id_list
+}
 ```
 
 #### teiserver_liveview_client:#{client_id}
@@ -236,6 +313,7 @@ A message every time a user logs in or logs out. Unlike legacy all_user_updates 
 %{
   event: :login
   userid: userid
+  client: client
 }
 
 %{

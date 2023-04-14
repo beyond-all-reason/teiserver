@@ -176,7 +176,12 @@ defmodule Teiserver.Battle.LobbyCache do
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_lobby_updates:#{lobby.id}",
-      {:lobby_update, :updated, lobby.id, reason}
+      %{
+        channel: "teiserver_lobby_updates:#{lobby.id}",
+        event: :updated,
+        lobby_id: lobby.id,
+        reason: reason
+      }
     )
 
     lobby
@@ -213,7 +218,12 @@ defmodule Teiserver.Battle.LobbyCache do
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_lobby_updates:#{lobby.id}",
-      {:lobby_update, :updated, lobby.id, reason}
+      %{
+        channel: "teiserver_lobby_updates:#{lobby.id}",
+        event: :updated,
+        lobby_id: lobby.id,
+        reason: reason
+      }
     )
 
     lobby
@@ -446,13 +456,13 @@ defmodule Teiserver.Battle.LobbyCache do
 
   @spec close_lobby(integer() | nil, atom) :: :ok
   def close_lobby(lobby_id, reason \\ :closed) when is_integer(lobby_id) do
-    battle = get_lobby(lobby_id)
+    lobby = get_lobby(lobby_id)
     Coordinator.close_lobby(lobby_id)
 
     # Kill lobby server process
     stop_lobby_server(lobby_id)
 
-    [battle.founder_id | battle.players]
+    [lobby.founder_id | lobby.players]
     |> Enum.each(fn userid ->
       PubSub.broadcast(
         Central.PubSub,
@@ -481,8 +491,13 @@ defmodule Teiserver.Battle.LobbyCache do
     :ok =
       PubSub.broadcast(
         Central.PubSub,
-        "teiserver_lobby_updates:#{battle.id}",
-        {:lobby_update, :closed, battle.id, reason}
+        "teiserver_lobby_updates:#{lobby.id}",
+        %{
+          channel: "teiserver_lobby_updates:#{lobby.id}",
+          event: :closed,
+          lobby_id: lobby_id,
+          reason: reason
+        }
       )
 
     Lobby.stop_battle_lobby_throttle(lobby_id)

@@ -224,6 +224,7 @@ defmodule Teiserver.Battle.Lobby do
     if not Enum.member?(members, userid) do
       Coordinator.cast_consul(lobby_id, {:user_joined, userid})
       Client.join_battle(userid, lobby_id, false)
+      client = Account.get_client_by_id(userid)
 
       PubSub.broadcast(
         Central.PubSub,
@@ -255,7 +256,13 @@ defmodule Teiserver.Battle.Lobby do
       PubSub.broadcast(
         Central.PubSub,
         "teiserver_lobby_updates:#{lobby_id}",
-        {:lobby_update, :add_user, lobby_id, userid}
+        %{
+          channel: "teiserver_lobby_updates:#{lobby_id}",
+          event: :add_user,
+          lobby_id: lobby_id,
+          client: client,
+          script_password: script_password
+        }
       )
     end
   end
@@ -278,6 +285,7 @@ defmodule Teiserver.Battle.Lobby do
 
       :removed ->
         Coordinator.cast_consul(lobby_id, {:user_left, userid})
+        client = Account.get_client_by_id(userid)
 
         PubSub.broadcast(
           Central.PubSub,
@@ -298,7 +306,12 @@ defmodule Teiserver.Battle.Lobby do
         PubSub.broadcast(
           Central.PubSub,
           "teiserver_lobby_updates:#{lobby_id}",
-          {:lobby_update, :remove_user, lobby_id, userid}
+          %{
+            channel: "teiserver_lobby_updates:#{lobby_id}",
+            event: :remove_user,
+            lobby_id: lobby_id,
+            client: client
+          }
         )
     end
   end
@@ -307,19 +320,22 @@ defmodule Teiserver.Battle.Lobby do
   def kick_user_from_battle(userid, lobby_id) do
     user = User.get_user_by_id(userid)
 
-    if not User.is_moderator?(user) do
+    if User.is_moderator?(user) do
+      :ok
+    else
       case do_remove_user_from_lobby(userid, lobby_id) do
         :closed ->
-          nil
+          :ok
 
         :not_member ->
-          nil
+          :ok
 
         :no_battle ->
-          nil
+          :ok
 
         :removed ->
           Coordinator.cast_consul(lobby_id, {:user_kicked, userid})
+          client = Account.get_client_by_id(userid)
 
           PubSub.broadcast(
             Central.PubSub,
@@ -340,11 +356,14 @@ defmodule Teiserver.Battle.Lobby do
           PubSub.broadcast(
             Central.PubSub,
             "teiserver_lobby_updates:#{lobby_id}",
-            {:lobby_update, :kick_user, lobby_id, userid}
+            %{
+              channel: "teiserver_lobby_updates:#{lobby_id}",
+              event: :kick_user,
+              lobby_id: lobby_id,
+              client: client
+            }
           )
       end
-    else
-      :ok
     end
   end
 

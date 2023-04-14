@@ -82,36 +82,35 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
 
   ###########
   # User Updates
-  def do_reply(:add_user, {lobby_id, joiner_id}) do
-    client = Account.get_client_by_id(joiner_id)
-    user = Account.get_user_by_id(joiner_id)
+  def do_reply(:add_user, {lobby_id, %{client: client}}) do
+    user = Account.get_user_by_id(client.userid)
 
     %{
       "cmd" => "s.lobby.add_user",
       "lobby_id" => lobby_id,
-      "joiner_id" => joiner_id,
+      "joiner_id" => client.userid,
       "client" => Tachyon.convert_object(client, :client),
       "user" => Tachyon.convert_object(user, :user)
     }
   end
 
-  def do_reply(:remove_user, {lobby_id, leaver_id}) do
+  def do_reply(:remove_user, {lobby_id, %{client: client}}) do
     %{
       "cmd" => "s.lobby.remove_user",
       "lobby_id" => lobby_id,
-      "leaver_id" => leaver_id
+      "leaver_id" => client.userid
     }
   end
 
-  def do_reply(:kick_user, {lobby_id, kicked_id}) do
+  def do_reply(:kick_user, {lobby_id, %{client: client}}) do
     %{
       "cmd" => "s.lobby.kick_user",
       "lobby_id" => lobby_id,
-      "kicked_id" => kicked_id
+      "kicked_id" => client.userid
     }
   end
 
-  def do_reply(:updated_client_battlestatus, {lobby_id, {client, reason}}) do
+  def do_reply(:updated_client_battlestatus, {lobby_id, %{client: client, reason: reason}}) do
     %{
       "cmd" => "s.lobby.updated_client_battlestatus",
       "lobby_id" => lobby_id,
