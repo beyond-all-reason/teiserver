@@ -877,7 +877,7 @@ defmodule Teiserver.User do
         not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity <= 0 ->
         {:error, "The server is currently full, please try again in a minute or two."}
 
-      (remaining_capacity <= 100 or current_usage > 0.9) and user.behaviour_score < 5000 ->
+      (remaining_capacity <= 10 or current_usage > 0.99) and user.behaviour_score < 5000 ->
         {:error, "The server is currently full, please try later."}
 
       not is_verified?(user) ->
@@ -937,7 +937,7 @@ defmodule Teiserver.User do
             not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity <= 0 ->
             {:error, "The server is currently full, please try again in a minute or two."}
 
-          (remaining_capacity <= 100 or current_usage > 0.9) and user.behaviour_score < 5000 ->
+          (remaining_capacity <= 10 or current_usage > 0.99) and user.behaviour_score < 5000 ->
             {:error, "The server is currently full, please try later."}
 
           not is_verified?(user) ->
@@ -1002,7 +1002,7 @@ defmodule Teiserver.User do
             not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity <= 0 ->
             {:error, "The server is currently full, please try again in a minute or two."}
 
-          (remaining_capacity <= 100 or current_usage > 0.9) and user.behaviour_score < 5000 ->
+          (remaining_capacity <= 10 or current_usage > 0.99) and user.behaviour_score < 5000 ->
             {:error, "The server is currently full, please try later."}
 
           not is_verified?(user) ->

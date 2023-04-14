@@ -2,6 +2,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   use GenServer
   alias Teiserver.Battle.Lobby
   alias Teiserver.Client
+  alias Teiserver.Account.LoginThrottleServer
   require Logger
   alias Phoenix.PubSub
 
@@ -194,6 +195,8 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         Map.put(memberships, client.lobby_id, new_lobby_membership)
       end)
 
+    login_queue_length = LoginThrottleServer.get_queue_length()
+
     counters = state.counters
 
     %{
@@ -226,7 +229,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
       tachyon_server_messages_sent: state.tachyon_server_messages_sent,
       tachyon_server_batches_sent: state.tachyon_server_batches_sent,
       tachyon_client_messages_sent: state.tachyon_client_messages_sent,
-      login_queue_length: state.login_queue_length,
+      login_queue_length: login_queue_length,
       os_mon: get_os_mon_data()
     }
   end

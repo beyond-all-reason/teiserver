@@ -134,6 +134,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:add_user, nil), do: ""
+  defp do_reply(:add_user, %{userid: nil}), do: ""
 
   defp do_reply(:add_user, client) do
     "ADDUSER #{client.name} #{client.country} #{client.userid} #{client.lobby_client}\n"

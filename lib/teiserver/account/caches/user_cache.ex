@@ -10,6 +10,7 @@ defmodule Teiserver.Account.UserCache do
 
   @spec get_username_by_id(T.userid() | nil) :: String.t() | nil
   def get_username_by_id(nil), do: nil
+  def get_username_by_id(""), do: nil
 
   def get_username_by_id(userid) do
     userid = int_parse(userid)
@@ -60,6 +61,8 @@ defmodule Teiserver.Account.UserCache do
   end
 
   @spec get_user_by_email(String.t()) :: T.user() | nil
+  def get_user_by_email(nil), do: nil
+  def get_user_by_email(""), do: nil
   def get_user_by_email(email) do
     cachename_email = cachename(email)
 
@@ -87,6 +90,8 @@ defmodule Teiserver.Account.UserCache do
   end
 
   @spec get_user_by_token(String.t()) :: T.user() | nil
+  def get_user_by_token(nil), do: nil
+  def get_user_by_token(""), do: nil
   def get_user_by_token(token) do
     case Guardian.resource_from_token(token) do
       {:error, _bad_token} ->
@@ -99,6 +104,7 @@ defmodule Teiserver.Account.UserCache do
 
   @spec get_user_by_id(T.userid() | nil) :: T.user() | nil
   def get_user_by_id(nil), do: nil
+  def get_user_by_id(""), do: nil
 
   def get_user_by_id(id) do
     id = int_parse(id)
@@ -136,6 +142,7 @@ defmodule Teiserver.Account.UserCache do
 
   @spec get_user_by_discord_id(String.t() | nil) :: T.user() | nil
   def get_user_by_discord_id(nil), do: nil
+  def get_user_by_discord_id(""), do: nil
 
   def get_user_by_discord_id(discord_id) do
     discord_id
