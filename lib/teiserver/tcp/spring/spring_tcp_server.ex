@@ -552,6 +552,18 @@ defmodule Teiserver.SpringTcpServer do
     {:stop, :normal, %{new_state | userid: nil}}
   end
 
+
+  # Infos to catch stuff that we need to replace
+  def handle_info({:battle_updated, _, _, _} = msg, state) do
+    Logger.error("No handler for #{inspect msg}")
+    {:noreply, state}
+  end
+
+  def handle_info({:battle_updated, _, _, _} = msg, state) do
+    Logger.error("No handler for #{inspect msg}")
+    {:noreply, state}
+  end
+
   @impl true
   def terminate(_reason, state) do
     Client.disconnect(state.userid, "tcp_server terminate")
