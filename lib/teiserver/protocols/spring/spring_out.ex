@@ -7,7 +7,7 @@ defmodule Teiserver.Protocols.SpringOut do
   """
   require Logger
   alias Phoenix.PubSub
-  alias Teiserver.{User, Client, Room, Battle, Coordinator}
+  alias Teiserver.{Account, User, Client, Room, Battle, Coordinator}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.Spring.{BattleOut, LobbyPolicyOut}
@@ -599,8 +599,8 @@ defmodule Teiserver.Protocols.SpringOut do
 
   @spec do_leave_battle(map(), T.lobby_id()) :: map()
   def do_leave_battle(state, lobby_id) do
-    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{lobby_id}")
     PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
     state
   end
 
@@ -610,11 +610,11 @@ defmodule Teiserver.Protocols.SpringOut do
 
     if lobby do
       Lobby.add_user_to_battle(state.userid, lobby.id, script_password)
-      PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{lobby.id}")
-      PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{lobby.id}")
-
       PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby.id}")
       PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby.id}")
+
+      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby.id}")
+      PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby.id}")
 
       reply(:join_battle_success, lobby, nil, state)
       reply(:add_user_to_battle, {state.userid, lobby.id, script_password}, nil, state)
@@ -688,20 +688,22 @@ defmodule Teiserver.Protocols.SpringOut do
     # need to send() to self a few dozen times
     Lobby.list_lobby_ids()
     |> Enum.each(fn lobby_id ->
-      send(self(), {:global_battle_updated, lobby_id, :battle_opened})
-      send(self(), {:global_battle_updated, lobby_id, :update_battle_info})
+      lobby = Lobby.get_lobby(lobby_id)
+      send(self(), %{channel: "teiserver_global_lobby_updates", event: :opened, lobby: lobby})
+      send(self(), %{channel: "teiserver_lobby_updates", event: :update_values, lobby_id: lobby_id, changes: lobby})
 
-      battle = Lobby.get_lobby(lobby_id)
-
-      if battle != nil and Map.has_key?(battle, :players) do
-        battle.players
+      if lobby != nil and Map.has_key?(lobby, :players) do
+        lobby.players
         |> Enum.each(fn player_id ->
-          send(self(), {:add_user_to_battle, player_id, lobby_id, nil})
+          msg = %{
+            channel: "teiserver_global_user_updates",
+            event: :joined_lobby,
+            lobby_id: lobby_id,
+            client: Account.get_client_by_id(player_id),
+            script_password: nil
+          }
+          send(self(), msg)
         end)
-
-        # if not state.exempt_from_cmd_throttle do
-        #   :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
-        # end
       end
     end)
 
@@ -714,9 +716,10 @@ defmodule Teiserver.Protocols.SpringOut do
     send(self(), {:action, {:login_end, nil}})
 
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_user_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
+
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_user_updates")
 
     PubSub.unsubscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
     PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")

@@ -74,8 +74,10 @@ defmodule Teiserver.Telemetry.SpringTelemetryServer do
     :timer.send_interval(@client_count_tick, self(), :client_count_tick)
 
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_user_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
+
+    # teiserver_global_lobby_updates
+    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
 
     client_count = Client.list_client_ids() |> Enum.count()
     state = %{@default_state | client_count: client_count}

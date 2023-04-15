@@ -177,7 +177,7 @@ defmodule Teiserver.Battle.LobbyCache do
       Central.PubSub,
       "teiserver_lobby_updates:#{lobby.id}",
       %{
-        channel: "teiserver_lobby_updates:#{lobby.id}",
+        channel: "teiserver_lobby_updates",
         event: :updated,
         lobby_id: lobby.id,
         reason: reason
@@ -194,12 +194,6 @@ defmodule Teiserver.Battle.LobbyCache do
     if Enum.member?([:update_battle_info], reason) do
       PubSub.broadcast(
         Central.PubSub,
-        "legacy_all_battle_updates",
-        {:global_battle_updated, lobby.id, reason}
-      )
-
-      PubSub.broadcast(
-        Central.PubSub,
         "teiserver_global_lobby_updates",
         %{
           channel: "teiserver_global_lobby_updates",
@@ -207,19 +201,13 @@ defmodule Teiserver.Battle.LobbyCache do
           new_values: data
         }
       )
-    else
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_battle_updates:#{lobby.id}",
-        {:battle_updated, lobby.id, data, reason}
-      )
     end
 
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_lobby_updates:#{lobby.id}",
       %{
-        channel: "teiserver_lobby_updates:#{lobby.id}",
+        channel: "teiserver_lobby_updates",
         event: :updated,
         lobby_id: lobby.id,
         reason: reason
@@ -358,13 +346,6 @@ defmodule Teiserver.Battle.LobbyCache do
     :ok =
       PubSub.broadcast(
         Central.PubSub,
-        "legacy_all_battle_updates",
-        {:global_battle_updated, lobby.id, :battle_opened}
-      )
-
-    :ok =
-      PubSub.broadcast(
-        Central.PubSub,
         "teiserver_global_lobby_updates",
         %{
           channel: "teiserver_global_lobby_updates",
@@ -462,21 +443,6 @@ defmodule Teiserver.Battle.LobbyCache do
     # Kill lobby server process
     stop_lobby_server(lobby_id)
 
-    [lobby.founder_id | lobby.players]
-    |> Enum.each(fn userid ->
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_battle_updates:#{lobby_id}",
-        {:remove_user_from_battle, userid, lobby_id}
-      )
-    end)
-
-    PubSub.broadcast(
-      Central.PubSub,
-      "legacy_all_battle_updates",
-      {:global_battle_updated, lobby_id, :battle_closed}
-    )
-
     :ok =
       PubSub.broadcast(
         Central.PubSub,
@@ -493,7 +459,7 @@ defmodule Teiserver.Battle.LobbyCache do
         Central.PubSub,
         "teiserver_lobby_updates:#{lobby.id}",
         %{
-          channel: "teiserver_lobby_updates:#{lobby.id}",
+          channel: "teiserver_lobby_updates",
           event: :closed,
           lobby_id: lobby_id,
           reason: reason

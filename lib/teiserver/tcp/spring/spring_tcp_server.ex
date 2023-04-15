@@ -5,9 +5,9 @@ defmodule Teiserver.SpringTcpServer do
 
   alias Phoenix.PubSub
   alias Central.Config
-  alias Teiserver.{User, Client}
+  alias Teiserver.{User, Client, Account}
   alias Teiserver.Protocols.{SpringIn, SpringOut}
-  # alias Teiserver.Data.Types, as: T
+  alias Teiserver.Data.Types, as: T
 
   @init_timeout 60_000
 
@@ -311,11 +311,32 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info(%{channel: "teiserver_global_lobby_updates"}, state) do
+  def handle_info(%{channel: "teiserver_global_lobby_updates", event: :opened} = msg, state) do
+    lobby_id = msg.lobby.id
+
+    state = if state.lobby_host == false or state.lobby_id != lobby_id do
+      new_known_battles = [lobby_id | state.known_battles]
+      new_state = %{state | known_battles: new_known_battles}
+      SpringOut.reply(:battle_opened, msg.lobby, nil, new_state)
+    else
+      state
+    end
     {:noreply, state}
   end
 
-  # teiserver_lobby_updates:#{lobby_id}
+  def handle_info(%{channel: "teiserver_global_lobby_updates", event: :closed} = msg, state) do
+    lobby_id = msg.lobby_id
+
+    state = if Enum.member?(state.known_battles, lobby_id) do
+      new_known_battles = List.delete(state.known_battles, lobby_id)
+      new_state = %{state | known_battles: new_known_battles}
+      SpringOut.reply(:battle_closed, lobby_id, nil, new_state)
+    else
+      state
+    end
+    {:noreply, state}
+  end
+
   def handle_info(:error_log, state) do
     new_state = SpringOut.reply(:error_log, :error_log, nil, state)
     {:noreply, new_state}
@@ -397,24 +418,44 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, new_state}
   end
 
-  # Lobbies
-  def handle_info({:lobby_update, :updated_queue, lobby_id, id_list}, state) do
-    SpringOut.reply(:battle, :queue_status, {lobby_id, id_list}, nil, state)
-    {:noreply, state}
-  end
-
-  def handle_info({:lobby_update, _event, _lobby_id, _data}, state) do
-    {:noreply, state}
-  end
-
-  # Battles - Legacy
-  def handle_info({:battle_updated, _lobby_id, data, reason}, state) do
-    new_state = battle_update(data, reason, state)
+  # Client in-out
+  def handle_info(%{channel: "client_inout", event: :login} = msg, state) do
+    new_state = user_logged_in(msg.client, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:global_battle_updated, lobby_id, reason}, state) do
-    new_state = global_battle_update(lobby_id, reason, state)
+  def handle_info(%{channel: "client_inout", event: :disconnect} = msg, state) do
+    if state.userid == msg.userid do
+      new_state = SpringOut.reply(:disconnect, "Logged out", nil, state)
+      {:stop, :normal, new_state}
+    else
+      username = Account.get_username(msg.userid)
+      new_state = user_logged_out(msg.userid, username, state)
+      {:noreply, new_state}
+    end
+  end
+
+  # Lobbies
+  def handle_info(%{channel: "teiserver_lobby_updates", event: :updated_queue} = msg, state) do
+    new_state = SpringOut.reply(:battle, :queue_status, {msg.lobby_id, msg.id_list}, nil, state)
+    {:noreply, new_state}
+  end
+
+  def handle_info(%{channel: "teiserver_lobby_updates"} = msg, state) do
+    new_state = battle_update(msg, state)
+    {:noreply, new_state}
+  end
+
+  # Lobby chat
+  def handle_info(%{channel: "teiserver_lobby_chat:" <> _, event: :say} = msg, state) do
+    new_data = {msg.userid, msg.message, msg.lobby_id, state.userid}
+    new_state = SpringOut.reply(:battle_message, new_data, nil, state)
+    {:noreply, new_state}
+  end
+
+  def handle_info(%{channel: "teiserver_lobby_chat:" <> _, event: :announce} = msg, state) do
+    new_data = {msg.userid, msg.message, msg.lobby_id, state.userid}
+    new_state = SpringOut.reply(:battle_message_ex, new_data, nil, state)
     {:noreply, new_state}
   end
 
@@ -433,26 +474,29 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:add_user_to_battle, userid, lobby_id, script_password}, state) do
-    script_password =
-      if userid == state.userid do
-        state.script_password
-      else
-        script_password
-      end
-
-    new_state = user_join_battle(userid, lobby_id, script_password, state)
+  def handle_info({:login_event, :add_user_to_battle, userid, lobby_id}, state) do
+    client = Account.get_client_by_id(userid)
+    new_state = user_join_battle(client, lobby_id, nil, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:remove_user_from_battle, userid, lobby_id}, state) do
-    new_state = user_leave_battle(userid, lobby_id, state)
+  def handle_info(%{channel: "teiserver_global_user_updates", event: :joined_lobby} = msg, state) do
+    new_state = user_join_battle(msg.client, msg.lobby_id, msg.script_password, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:kick_user_from_battle, userid, lobby_id}, state) do
-    new_state = user_kicked_from_battle(userid, lobby_id, state)
+  def handle_info(%{channel: "teiserver_global_user_updates", event: :left_lobby} = msg, state) do
+    new_state = user_leave_battle(msg.client, msg.lobby_id, state)
     {:noreply, new_state}
+  end
+
+  def handle_info(%{channel: "teiserver_global_user_updates", event: :kicked_from_lobby} = msg, state) do
+    new_state = user_kicked_from_battle(msg.client, msg.lobby_id, state)
+    {:noreply, new_state}
+  end
+
+  def handle_info(%{channel: "teiserver_global_user_updates"}, state) do
+    {:noreply, state}
   end
 
   # Timeout error
@@ -500,9 +544,23 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   def handle_info(:terminate, state) do
-    SpringOut.reply(:disconnect, "Terminate", nil, state)
-    Client.disconnect(state.userid, "tcp_server :terminate")
-    {:stop, :normal, %{state | userid: nil}}
+    new_state = SpringOut.reply(:disconnect, "Terminate", nil, state)
+    Client.disconnect(new_state.userid, "tcp_server :terminate")
+    {:stop, :normal, %{new_state | userid: nil}}
+  end
+
+
+  # Infos to catch stuff that we need to replace
+  def handle_info({:battle_updated, _, _} = msg, state) do
+    raise "X"
+    Logger.error("No handler for #{inspect msg}")
+    {:noreply, state}
+  end
+
+  def handle_info({:battle_updated, _, _, _} = msg, state) do
+    raise "Y"
+    Logger.error("No handler for #{inspect msg}")
+    {:noreply, state}
   end
 
   @impl true
@@ -607,81 +665,76 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # Battle updates
-  defp battle_update(data, reason, state) do
-    case reason do
-      :add_start_rectangle ->
-        SpringOut.reply(:add_start_rectangle, data, nil, state)
+  defp battle_update(%{event: :update_values} = msg, state) do
+    cond do
+      msg.changes == %{disabled_units: []} ->
+        SpringOut.reply(:enable_all_units, [], nil, state)
 
-      :remove_start_rectangle ->
-        SpringOut.reply(:remove_start_rectangle, data, nil, state)
+      Map.has_key?(msg.changes, :disabled_units) ->
+        SpringOut.reply(:enable_all_units, [], nil, state)
+        SpringOut.reply(:disable_units, msg.changes.disabled_units, nil, state)
 
-      :add_script_tags ->
-        SpringOut.reply(:add_script_tags, data, nil, state)
+      true ->
+        SpringOut.reply(:update_battle, msg.lobby_id, nil, state)
 
-      :remove_script_tags ->
-        SpringOut.reply(:remove_script_tags, data, nil, state)
-
-      :enable_all_units ->
-        SpringOut.reply(:enable_all_units, data, nil, state)
-
-      :enable_units ->
-        SpringOut.reply(:enable_units, data, nil, state)
-
-      :disable_units ->
-        SpringOut.reply(:disable_units, data, nil, state)
-
-      :say ->
-        {sender_id, messages, lobby_id} = data
-        new_data = {sender_id, messages, lobby_id, state.userid}
-        SpringOut.reply(:battle_message, new_data, nil, state)
-
-      :sayex ->
-        {sender_id, messages, lobby_id} = data
-        new_data = {sender_id, messages, lobby_id, state.userid}
-        SpringOut.reply(:battle_message_ex, new_data, nil, state)
-
-      # TODO: Check we can't get an out of sync server-client state
-      # with the bot commands
-      :add_bot_to_battle ->
-        SpringOut.reply(:add_bot_to_battle, data, nil, state)
-
-      :update_bot ->
-        SpringOut.reply(:update_bot, data, nil, state)
-
-      :remove_bot_from_battle ->
-        SpringOut.reply(:remove_bot_from_battle, data, nil, state)
-
-      _ ->
-        Logger.error("No handler in tcp_server:battle_update with reason #{reason}")
-        state
+      # true ->
+      #   raise "No handler in tcp_server:battle_update with msg #{inspect msg}"
+      #   Logger.error("No handler in tcp_server:battle_update with reason #{msg.event}")
+      #   state
     end
   end
 
-  defp global_battle_update(lobby_id, reason, state) do
-    case reason do
-      :update_battle_info ->
-        SpringOut.reply(:update_battle, lobby_id, nil, state)
+  defp battle_update(msg, state) do
+    case msg.event do
+      :add_start_area ->
+        SpringOut.reply(:add_start_rectangle, {msg.area_id, msg.area}, nil, state)
 
-      :battle_opened ->
-        if state.lobby_host == false or state.lobby_id != lobby_id do
-          new_known_battles = [lobby_id | state.known_battles]
-          new_state = %{state | known_battles: new_known_battles}
-          SpringOut.reply(:battle_opened, lobby_id, nil, new_state)
-        else
-          state
-        end
+      :remove_start_area ->
+        SpringOut.reply(:remove_start_rectangle, msg.area_id, nil, state)
 
-      :battle_closed ->
-        if Enum.member?(state.known_battles, lobby_id) do
-          new_known_battles = List.delete(state.known_battles, lobby_id)
-          new_state = %{state | known_battles: new_known_battles}
-          SpringOut.reply(:battle_closed, lobby_id, nil, new_state)
-        else
-          state
-        end
+      :set_modoptions ->
+        SpringOut.reply(:add_script_tags, msg.options, nil, state)
+
+      :remove_modoptions ->
+        SpringOut.reply(:remove_script_tags, msg.keys, nil, state)
+
+      :add_bot ->
+        SpringOut.reply(:add_bot_to_battle, {msg.lobby_id, msg.bot}, nil, state)
+
+      :update_bot ->
+        SpringOut.reply(:update_bot, {msg.lobby_id, msg.bot}, nil, state)
+
+      :remove_bot ->
+        SpringOut.reply(:remove_bot_from_battle, {msg.lobby_id, msg.bot}, nil, state)
+
+      :remove_user ->
+        user_leave_battle(msg.client, msg.lobby_id, state)
+
+      :kick_user ->
+        user_kicked_from_battle(msg.client, msg.lobby_id, state)
+
+      :add_user ->
+        script_password =
+          if msg.client.userid == state.userid do
+            state.script_password
+          else
+            msg.script_password
+          end
+
+        user_join_battle(msg.client, msg.lobby_id, script_password, state)
+
+      :updated_client_battlestatus ->
+        client_battlestatus_update(msg.client, state)
+
+      :closed ->
+        state
+
+      :updated ->
+        state
 
       _ ->
-        Logger.error("No handler in tcp_server:global_battle_update with reason #{reason}")
+        raise "No handler in tcp_server:battle_update with reason #{msg.event}"
+        Logger.error("No handler in tcp_server:battle_update with reason #{msg.event}")
         state
     end
   end
@@ -718,7 +771,11 @@ defmodule Teiserver.SpringTcpServer do
   # Depending on our current understanding of where the user is
   # we will send a selection of commands on the assumption this
   # genserver is incorrect and needs to alter its state accordingly
-  defp user_join_battle(userid, lobby_id, script_password, state) do
+  @spec user_join_battle(T.client(), T.lobby_id(), String.t(), T.spring_tcp_state()) ::
+          T.spring_tcp_state()
+  defp user_join_battle(client, lobby_id, script_password, state) do
+    userid = client.userid
+
     script_password =
       cond do
         state.lobby_host and state.lobby_id == lobby_id -> script_password
@@ -789,10 +846,11 @@ defmodule Teiserver.SpringTcpServer do
     %{state | known_users: new_knowns}
   end
 
-  defp user_leave_battle(userid, lobby_id, state) do
+  defp user_leave_battle(client, lobby_id, state) do
     # If they are kicked then it's possible they won't be unsubbed
+    userid = client.userid
     if userid == state.userid do
-      Phoenix.PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{lobby_id}")
+      Phoenix.PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
     end
 
     # Do they know about the battle?
@@ -812,7 +870,6 @@ defmodule Teiserver.SpringTcpServer do
 
         # Case 2 - We don't even know who they are? Leave it too
         state.known_users[userid] == nil ->
-          client = Client.get_client_by_id(userid)
           SpringOut.reply(:user_logged_in, client, nil, state)
           _blank_user(userid)
 
@@ -837,17 +894,17 @@ defmodule Teiserver.SpringTcpServer do
     %{state | known_users: new_knowns}
   end
 
-  defp user_kicked_from_battle(userid, lobby_id, state) do
+  defp user_kicked_from_battle(client, lobby_id, state) do
     # If it's the user, we need to tell them the bad news
     state =
-      if userid == state.userid do
+      if client.userid == state.userid do
         SpringOut.reply(:forcequit_battle, nil, nil, state)
         %{state | lobby_id: nil}
       else
         state
       end
 
-    user_leave_battle(userid, lobby_id, state)
+    user_leave_battle(client, lobby_id, state)
   end
 
   # Chat
@@ -913,11 +970,11 @@ defmodule Teiserver.SpringTcpServer do
           end
 
         new_members =
-          if not Enum.member?(state.room_member_cache[room_name] || [], userid) do
+          if Enum.member?(state.room_member_cache[room_name] || [], userid) do
+            state.room_member_cache[room_name] || []
+          else
             SpringOut.reply(:add_user_to_room, {userid, room_name}, nil, state)
             [userid | state.room_member_cache[room_name] || []]
-          else
-            state.room_member_cache[room_name] || []
           end
 
         new_cache = Map.put(state.room_member_cache, room_name, new_members)

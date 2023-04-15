@@ -330,7 +330,7 @@ defmodule Teiserver.TachyonTcpServer do
      )}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates:" <> _} = msg, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates"} = msg, state) do
     {:noreply, state.protocol_out.reply(:lobby, msg.event, {msg.lobby_id, msg}, state)}
   end
 

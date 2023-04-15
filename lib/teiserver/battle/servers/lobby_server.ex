@@ -120,15 +120,9 @@ defmodule Teiserver.Battle.LobbyServer do
     # Need to broadcast the new uuid
     PubSub.broadcast(
       Central.PubSub,
-      "legacy_battle_updates:#{state.id}",
-      {:battle_updated, state.id, %{key => uuid}, :add_script_tags}
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
-        channel: "teiserver_lobby_updates:#{state.id}",
+        channel: "teiserver_lobby_updates",
         event: :set_modoptions,
         lobby_id: state.id,
         options: %{key => uuid}
@@ -160,7 +154,7 @@ defmodule Teiserver.Battle.LobbyServer do
       Central.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
-        channel: "teiserver_lobby_updates:#{state.id}",
+        channel: "teiserver_lobby_updates",
         event: :update_values,
         lobby_id: state.id,
         changes: %{passworded: false}
@@ -181,7 +175,7 @@ defmodule Teiserver.Battle.LobbyServer do
       Central.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
-        channel: "teiserver_lobby_updates:#{state.id}",
+        channel: "teiserver_lobby_updates",
         event: :update_values,
         lobby_id: state.id,
         changes: %{passworded: true}
@@ -212,7 +206,7 @@ defmodule Teiserver.Battle.LobbyServer do
         Central.PubSub,
         "teiserver_lobby_updates:#{state.id}",
         %{
-          channel: "teiserver_lobby_updates:#{state.id}",
+          channel: "teiserver_lobby_updates",
           event: :update_values,
           lobby_id: state.id,
           changes: broadcast_values
@@ -238,16 +232,6 @@ defmodule Teiserver.Battle.LobbyServer do
           Enum.member?(~w(spectator_count locked map_hash map_name name)a, k)
         end)
         |> Enum.empty?()
-
-      update_battle_info = not not_update_battle_info
-
-      if update_battle_info do
-        PubSub.broadcast(
-          Central.PubSub,
-          "legacy_all_battle_updates",
-          {:global_battle_updated, state.id, :update_battle_info}
-        )
-      end
     end
 
     {:noreply, %{state | lobby: new_lobby}}
@@ -266,15 +250,9 @@ defmodule Teiserver.Battle.LobbyServer do
 
     PubSub.broadcast(
       Central.PubSub,
-      "legacy_battle_updates:#{state.id}",
-      {:battle_updated, state.id, [], :enable_all_units}
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
-        channel: "teiserver_lobby_updates:#{state.id}",
+        channel: "teiserver_lobby_updates",
         event: :update_values,
         lobby_id: state.id,
         changes: %{disabled_units: []}
@@ -299,15 +277,9 @@ defmodule Teiserver.Battle.LobbyServer do
 
     PubSub.broadcast(
       Central.PubSub,
-      "legacy_battle_updates:#{state.id}",
-      {:battle_updated, state.id, units, :enable_units}
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
-        channel: "teiserver_lobby_updates:#{state.id}",
+        channel: "teiserver_lobby_updates",
         event: :update_values,
         lobby_id: state.id,
         changes: %{disabled_units: new_units}
@@ -323,15 +295,9 @@ defmodule Teiserver.Battle.LobbyServer do
 
     PubSub.broadcast(
       Central.PubSub,
-      "legacy_battle_updates:#{state.id}",
-      {:battle_updated, state.id, units, :disable_units}
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
-        channel: "teiserver_lobby_updates:#{state.id}",
+        channel: "teiserver_lobby_updates",
         event: :update_values,
         lobby_id: state.id,
         changes: %{disabled_units: new_units}
@@ -354,18 +320,12 @@ defmodule Teiserver.Battle.LobbyServer do
       Central.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
-        channel: "teiserver_lobby_updates:#{state.id}",
+        channel: "teiserver_lobby_updates",
         event: :add_start_area,
         lobby_id: state.id,
         area_id: area_id,
         area: structure
       }
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
-      "legacy_battle_updates:#{state.id}",
-      {:battle_updated, state.id, {area_id, structure}, :add_start_rectangle}
     )
 
     {:noreply, %{state | lobby: new_lobby}}
@@ -383,17 +343,11 @@ defmodule Teiserver.Battle.LobbyServer do
       Central.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
-        channel: "teiserver_lobby_updates:#{state.id}",
+        channel: "teiserver_lobby_updates",
         event: :remove_start_area,
         lobby_id: state.id,
         area_id: area_id
       }
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
-      "legacy_battle_updates:#{state.id}",
-      {:battle_updated, state.id, area_id, :remove_start_rectangle}
     )
 
     {:noreply, %{state | lobby: new_lobby}}
@@ -403,15 +357,9 @@ defmodule Teiserver.Battle.LobbyServer do
   def handle_cast({:set_modoption, key, value}, %{modoptions: modoptions} = state) do
     PubSub.broadcast(
       Central.PubSub,
-      "legacy_battle_updates:#{state.id}",
-      {:battle_updated, state.id, %{key => value}, :add_script_tags}
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
-        channel: "teiserver_lobby_updates:#{state.id}",
+        channel: "teiserver_lobby_updates",
         event: :set_modoptions,
         lobby_id: state.id,
         options: %{key => value}
@@ -424,15 +372,9 @@ defmodule Teiserver.Battle.LobbyServer do
   def handle_cast({:set_modoptions, new_modoptions}, %{modoptions: modoptions} = state) do
     PubSub.broadcast(
       Central.PubSub,
-      "legacy_battle_updates:#{state.id}",
-      {:battle_updated, state.id, new_modoptions, :add_script_tags}
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
-        channel: "teiserver_lobby_updates:#{state.id}",
+        channel: "teiserver_lobby_updates",
         event: :set_modoptions,
         lobby_id: state.id,
         options: new_modoptions
@@ -451,15 +393,9 @@ defmodule Teiserver.Battle.LobbyServer do
 
     PubSub.broadcast(
       Central.PubSub,
-      "legacy_battle_updates:#{state.id}",
-      {:battle_updated, state.id, keys_removed, :remove_script_tags}
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
-        channel: "teiserver_lobby_updates:#{state.id}",
+        channel: "teiserver_lobby_updates",
         event: :remove_modoptions,
         lobby_id: state.id,
         keys: keys_removed
@@ -475,15 +411,9 @@ defmodule Teiserver.Battle.LobbyServer do
 
     PubSub.broadcast(
       Central.PubSub,
-      "legacy_battle_updates:#{id}",
-      {:battle_updated, id, {id, bot}, :add_bot_to_battle}
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
       "teiserver_lobby_updates:#{id}",
       %{
-        channel: "teiserver_lobby_updates:#{id}",
+        channel: "teiserver_lobby_updates",
         event: :add_bot,
         lobby_id: id,
         bot: bot
@@ -504,15 +434,9 @@ defmodule Teiserver.Battle.LobbyServer do
 
         PubSub.broadcast(
           Central.PubSub,
-          "legacy_battle_updates:#{id}",
-          {:battle_updated, id, {id, new_bot}, :update_bot}
-        )
-
-        PubSub.broadcast(
-          Central.PubSub,
           "teiserver_lobby_updates:#{id}",
           %{
-            channel: "teiserver_lobby_updates:#{id}",
+            channel: "teiserver_lobby_updates",
             event: :update_bot,
             lobby_id: id,
             bot: new_bot
@@ -528,15 +452,9 @@ defmodule Teiserver.Battle.LobbyServer do
 
     PubSub.broadcast(
       Central.PubSub,
-      "legacy_battle_updates:#{id}",
-      {:battle_updated, id, {id, botname}, :remove_bot_from_battle}
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
       "teiserver_lobby_updates:#{id}",
       %{
-        channel: "teiserver_lobby_updates:#{id}",
+        channel: "teiserver_lobby_updates",
         event: :remove_bot,
         lobby_id: id,
         bot: botname

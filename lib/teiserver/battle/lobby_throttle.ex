@@ -22,52 +22,52 @@ defmodule Teiserver.Battle.LobbyThrottle do
   end
 
   # BattleLobby
-  def handle_info(%{channel: "teiserver_lobby_updates:" <> _, event: :updated}, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates", event: :updated}, state) do
     {:noreply, %{state | lobby_changes: [:battle_lobby | state.lobby_changes]}}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates:" <> _, event: :add_bot}, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates", event: :add_bot}, state) do
     {:noreply, %{state | lobby_changes: [:bots | state.lobby_changes]}}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates:" <> _, event: :update_bot}, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates", event: :update_bot}, state) do
     {:noreply, %{state | lobby_changes: [:bots | state.lobby_changes]}}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates:" <> _, event: :remove_bot}, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates", event: :remove_bot}, state) do
     {:noreply, %{state | lobby_changes: [:bots | state.lobby_changes]}}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates:" <> _, event: :add_user, client: client}, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates", event: :add_user, client: client}, state) do
     {:noreply, %{state | player_changes: [client.userid | state.player_changes]}}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates:" <> _, event: :remove_user, client: client}, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates", event: :remove_user, client: client}, state) do
     {:noreply, %{state | player_changes: [client.userid | state.player_changes]}}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates:" <> _, event: :kick_user, client: client}, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates", event: :kick_user, client: client}, state) do
     {:noreply, %{state | player_changes: [client.userid | state.player_changes]}}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates:" <> _, event: :update_values, changes: changes}, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates", event: :update_values, changes: changes}, state) do
     keys = Map.keys(changes)
     {:noreply, %{state | lobby_changes: (keys ++ state.lobby_changes) |> Enum.uniq()}}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates:" <> _, event: :set_modoptions}, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates", event: :set_modoptions}, state) do
     {:noreply, state}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates:" <> _, event: :remove_modoptions}, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates", event: :remove_modoptions}, state) do
     {:noreply, state}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates:" <> _, event: :updated_client_battlestatus, client: client}, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates", event: :updated_client_battlestatus, client: client}, state) do
     {:noreply, %{state | player_changes: [client.userid | state.player_changes]}}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates:" <> _}, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates"}, state) do
     {:noreply, state}
   end
 

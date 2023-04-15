@@ -108,15 +108,9 @@ defmodule Teiserver.Account.ClientLib do
     if client.lobby_id do
       PubSub.broadcast(
         Central.PubSub,
-        "legacy_battle_updates:#{client.lobby_id}",
-        {:updated_client, client, reason}
-      )
-
-      PubSub.broadcast(
-        Central.PubSub,
         "teiserver_lobby_updates:#{client.lobby_id}",
         %{
-          channel: "teiserver_lobby_updates:#{client.lobby_id}",
+          channel: "teiserver_lobby_updates",
           event: :updated_client_battlestatus,
           lobby_id: client.lobby_id,
           client: client,
@@ -164,7 +158,7 @@ defmodule Teiserver.Account.ClientLib do
         Central.PubSub,
         "teiserver_lobby_updates:#{client.lobby_id}",
         %{
-          channel: "teiserver_lobby_updates:#{client.lobby_id}",
+          channel: "teiserver_lobby_updates",
           event: :updated_client_battlestatus,
           lobby_id: client.lobby_id,
           client: client,

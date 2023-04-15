@@ -337,14 +337,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info(
-        %{channel: "teiserver_lobby_updates:" <> _, event: :updated_client_battlestatus},
+        %{channel: "teiserver_lobby_updates", event: :updated_client_battlestatus},
         state
       ) do
     player_count_changed(state)
     {:noreply, state}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates:" <> _, event: :add_user, client: client}, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates", event: :add_user, client: client}, state) do
     min_rate_play = state.minimum_rating_to_play
     max_rate_play = state.maximum_rating_to_play
 
@@ -410,7 +410,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, state}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates:" <> _}, state) do
+  def handle_info(%{channel: "teiserver_lobby_updates"}, state) do
     {:noreply, state}
   end
 
@@ -1103,7 +1103,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         Central.PubSub,
         "teiserver_lobby_updates:#{state.lobby_id}",
         %{
-          channel: "teiserver_lobby_updates:#{state.lobby_id}",
+          channel: "teiserver_lobby_updates",
           event: :updated_queue,
           lobby_id: state.lobby_id,
           id_list: get_queue(state)

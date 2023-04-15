@@ -228,6 +228,18 @@ defmodule Teiserver.Battle.Lobby do
 
       PubSub.broadcast(
         Central.PubSub,
+        "teiserver_global_user_updates",
+        %{
+          channel: "teiserver_global_user_updates",
+          event: :joined_lobby,
+          lobby_id: lobby_id,
+          client: client,
+          script_password: script_password
+        }
+      )
+
+      PubSub.broadcast(
+        Central.PubSub,
         "teiserver_client_messages:#{userid}",
         %{
           channel: "teiserver_client_messages:#{userid}",
@@ -249,15 +261,9 @@ defmodule Teiserver.Battle.Lobby do
 
       PubSub.broadcast(
         Central.PubSub,
-        "legacy_all_battle_updates",
-        {:add_user_to_battle, userid, lobby_id, script_password}
-      )
-
-      PubSub.broadcast(
-        Central.PubSub,
         "teiserver_lobby_updates:#{lobby_id}",
         %{
-          channel: "teiserver_lobby_updates:#{lobby_id}",
+          channel: "teiserver_lobby_updates",
           event: :add_user,
           lobby_id: lobby_id,
           client: client,
@@ -289,6 +295,17 @@ defmodule Teiserver.Battle.Lobby do
 
         PubSub.broadcast(
           Central.PubSub,
+          "teiserver_global_user_updates",
+          %{
+            channel: "teiserver_global_user_updates",
+            event: :left_lobby,
+            lobby_id: lobby_id,
+            client: client
+          }
+        )
+
+        PubSub.broadcast(
+          Central.PubSub,
           "teiserver_client_watch:#{userid}",
           %{
             channel: "teiserver_client_watch:#{userid}",
@@ -299,15 +316,9 @@ defmodule Teiserver.Battle.Lobby do
 
         PubSub.broadcast(
           Central.PubSub,
-          "legacy_all_battle_updates",
-          {:remove_user_from_battle, userid, lobby_id}
-        )
-
-        PubSub.broadcast(
-          Central.PubSub,
           "teiserver_lobby_updates:#{lobby_id}",
           %{
-            channel: "teiserver_lobby_updates:#{lobby_id}",
+            channel: "teiserver_lobby_updates",
             event: :remove_user,
             lobby_id: lobby_id,
             client: client
@@ -339,6 +350,17 @@ defmodule Teiserver.Battle.Lobby do
 
           PubSub.broadcast(
             Central.PubSub,
+            "teiserver_global_user_updates",
+            %{
+              channel: "teiserver_global_user_updates",
+              event: :kicked_from_lobby,
+              lobby_id: lobby_id,
+              client: client
+            }
+          )
+
+          PubSub.broadcast(
+            Central.PubSub,
             "teiserver_client_watch:#{userid}",
             %{
               channel: "teiserver_client_watch:#{userid}",
@@ -349,15 +371,9 @@ defmodule Teiserver.Battle.Lobby do
 
           PubSub.broadcast(
             Central.PubSub,
-            "legacy_all_battle_updates",
-            {:kick_user_from_battle, userid, lobby_id}
-          )
-
-          PubSub.broadcast(
-            Central.PubSub,
             "teiserver_lobby_updates:#{lobby_id}",
             %{
-              channel: "teiserver_lobby_updates:#{lobby_id}",
+              channel: "teiserver_lobby_updates",
               event: :kick_user,
               lobby_id: lobby_id,
               client: client

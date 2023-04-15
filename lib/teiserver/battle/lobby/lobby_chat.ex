@@ -98,12 +98,6 @@ defmodule Teiserver.Battle.LobbyChat do
 
       PubSub.broadcast(
         Central.PubSub,
-        "legacy_battle_updates:#{lobby_id}",
-        {:battle_updated, lobby_id, {userid, msg, lobby_id}, :say}
-      )
-
-      PubSub.broadcast(
-        Central.PubSub,
         "teiserver_lobby_chat:#{lobby_id}",
         %{
           channel: "teiserver_lobby_chat:#{lobby_id}",
@@ -167,12 +161,6 @@ defmodule Teiserver.Battle.LobbyChat do
 
     if allowed do
       persist_message(user, msg, lobby_id, :sayex)
-
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_battle_updates:#{lobby_id}",
-        {:battle_updated, lobby_id, {userid, msg, lobby_id}, :sayex}
-      )
 
       PubSub.broadcast(
         Central.PubSub,

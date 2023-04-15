@@ -113,14 +113,13 @@ Limited information pertaining to the creation/deletion of battle lobbies.
   event: :closed,
   lobby_id: lobby_id
 }
+
 %{
   event: :updated_values,
   lobby_id: lobby_id,
   new_values: map
 }
 ```
-
-#### teiserver_global_lobby_updates
 
 #### global_match_updates
 Used to communicate information to everybody regarding matches.
@@ -321,7 +320,29 @@ A message every time a user logs in or logs out. Unlike legacy all_user_updates 
   userid: userid,
   reason: String
 }
+```
 
+#### teiserver_global_user_updates
+Used to provide global info on all users, intended only to be used while we transition the legacy protocol.
+```elixir
+%{
+  event: :joined_lobby,
+  client: client,
+  lobby_id: lobby_id,
+  script_password: script_password
+}
+
+%{
+  event: :left_lobby,
+  client: client,
+  lobby_id: lobby_id
+}
+
+%{
+  event: :kicked_from_lobby,
+  client: client,
+  lobby_id: lobby_id
+}
 ```
 
 #### teiserver_client_messages:#{userid}
@@ -671,13 +692,6 @@ Valid events
 ```
 
 ## Legacy
-#### legacy_all_battle_updates
-Information affecting all those not in a battle, such as a battle being created.
-
-#### legacy_battle_updates:#{battle_lobby_id}
-Information affecting only those in this given battle, such as a player joining.
-
-
 #### legacy_all_user_updates
 Information about all users, such as a user logging on/off
 
