@@ -172,13 +172,17 @@ defmodule Teiserver.TeiserverTestLib do
     receive do
       value ->
         cond do
+          value == :server_sent_message ->
+            _recv_lines(lines)
+
           is_tuple(value) ->
             _recv_lines(lines)
 
           true ->
             case lines do
               1 -> value
-              _ -> value <> _recv_lines(lines - 1)
+              _ ->
+                value <> _recv_lines(lines - 1)
             end
         end
     after

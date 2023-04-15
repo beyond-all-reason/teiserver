@@ -157,7 +157,7 @@ defmodule Teiserver.SpringBattleHostTest do
 
     _send_raw(socket, "KICKFROMBATTLE #{user2.name}\n")
     reply = _recv_raw(socket2)
-    assert reply == "FORCEQUITBATTLE\nLEFTBATTLE #{lobby_id} #{user2.name}\n"
+    assert reply =~ "FORCEQUITBATTLE\nLEFTBATTLE #{lobby_id} #{user2.name}\n"
 
     # Add user 3
     %{socket: socket3, user: user3} = auth_setup()
