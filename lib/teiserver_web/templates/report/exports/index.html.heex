@@ -22,15 +22,25 @@
 
 <div class="row mt-2">
   <div class="col-md-12">
-    <h4>Ratings</h4>
+    <h4>Population</h4>
   </div>
-  <%= if allow?(@current_user, Teiserver.Game.PlayerCountExport.permissions()) do %>
+  <%= if allow?(@current_user, Teiserver.Account.PlayerCountExport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Game.PlayerCountExport.icon(),
+      icon: Teiserver.Account.PlayerCountExport.icon(),
       name: "player_count",
       text: "Player counts",
       link: Routes.ts_reports_exports_path(@conn, :show, "player_count")
+    ) %>
+  <% end %>
+
+  <%= if allow?(@current_user, Teiserver.Account.RetentionRateExport.permissions()) do %>
+    <%= central_component("menu_card",
+      size: :small,
+      icon: Teiserver.Account.RetentionRateExport.icon(),
+      name: "retention_rate",
+      text: "Retention",
+      link: Routes.ts_reports_exports_path(@conn, :show, "retention_rate")
     ) %>
   <% end %>
 </div>

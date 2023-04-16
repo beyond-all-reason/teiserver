@@ -111,18 +111,21 @@ defmodule Central.Helpers.DatePresets do
 
   @spec parse(String.t(), String.t(), String.t()) :: {Date.t(), Date.t()}
   def parse(period_name, start_date, end_date) do
-    if start_date == "" or end_date == "" do
-      _parse_named_period(period_name)
-    else
-      today = Timex.today()
+    cond do
+      start_date == "" and end_date == "" ->
+        _parse_named_period(period_name)
 
-      {
-        if(start_date != "",
-          do: parse_time_input(start_date),
-          else: Timex.to_date({today.year, 1, 1})
-        ),
-        if(end_date != "", do: parse_time_input(end_date), else: Timex.shift(today, days: 1))
-      }
+      start_date == "" ->
+        {Timex.to_date({Timex.today().year, 1, 1}), parse_time_input(end_date)}
+
+      end_date == "" ->
+        {parse_time_input(start_date), Timex.shift(Timex.today(), days: 1)}
+
+      true ->
+        {
+          parse_time_input(start_date),
+          parse_time_input(end_date)
+        }
     end
   end
 

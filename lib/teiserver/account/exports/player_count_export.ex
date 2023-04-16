@@ -1,4 +1,4 @@
-defmodule Teiserver.Game.PlayerCountExport do
+defmodule Teiserver.Account.PlayerCountExport do
   @moduledoc """
   Can be manually run with:
   Teiserver.Game.MatchRatingsExport.show_form(nil, %{
