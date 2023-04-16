@@ -715,7 +715,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
     send(self(), {:action, {:login_end, nil}})
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_inout")
+    :ok = PubSub.subscribe(Central.PubSub, "client_inout")
 
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")

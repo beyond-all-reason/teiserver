@@ -73,7 +73,7 @@ defmodule Teiserver.Account.ClientIndexThrottle do
     :timer.send_interval(@update_interval, self(), :tick)
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_user_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_inout")
+    :ok = PubSub.subscribe(Central.PubSub, "client_inout")
 
     Horde.Registry.register(
       Teiserver.ThrottleRegistry,

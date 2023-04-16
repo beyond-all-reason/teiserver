@@ -306,7 +306,7 @@ Updates specifically for liveview chat interfaces, due to the way messages are p
 ```
 
 ### User/Client
-#### teiserver_client_inout
+#### client_inout
 A message every time a user logs in or logs out. Unlike legacy all_user_updates it does not give any status updates.
 ```elixir
 %{

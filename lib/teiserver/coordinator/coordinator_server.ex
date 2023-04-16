@@ -74,7 +74,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     end)
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_inout")
+    :ok = PubSub.subscribe(Central.PubSub, "client_inout")
     :ok = PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
 
     {:noreply, state}
