@@ -223,15 +223,6 @@ defmodule Teiserver.Battle.LobbyServer do
           new_values: broadcast_values
         }
       )
-
-      # Spring specific stuff
-      not_update_battle_info =
-        broadcast_values
-        |> Map.keys()
-        |> Enum.filter(fn k ->
-          Enum.member?(~w(spectator_count locked map_hash map_name name)a, k)
-        end)
-        |> Enum.empty?()
     end
 
     {:noreply, %{state | lobby: new_lobby}}

@@ -18,7 +18,7 @@ defmodule Teiserver.Account.ClientIndexThrottle do
     {:noreply, %{state | new_clients: [msg.userid | state.new_clients]}}
   end
 
-  def handle_info(%{channel: "client_inout"} = msg, state) do
+  def handle_info(%{channel: "client_inout"}, state) do
     {:noreply, state}
   end
 

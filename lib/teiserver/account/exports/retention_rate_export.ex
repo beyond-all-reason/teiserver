@@ -154,7 +154,7 @@ defmodule Teiserver.Account.RetentionRateExport do
   defp build_table(day_logs, accounts_by_insert_date) do
     accounts_by_insert_date
       |> Map.new(fn {date, userids} ->
-        data = build_data_row(date, userids, day_logs)
+        data = build_data_row(userids, day_logs)
           |> Map.merge(%{
               registration_count: Enum.count(userids)
             })
@@ -165,16 +165,16 @@ defmodule Teiserver.Account.RetentionRateExport do
 
   # Build the data for a single date (row) in the table
   # date refers to the date of registration for the users in this group
-  defp build_data_row(date, userids, day_logs) do
+  defp build_data_row(userids, day_logs) do
     day_logs
       |> Map.new(fn {date, log_data} ->
-        {date, build_data_cell(date, userids, log_data)}
+        {date, build_data_cell(userids, log_data)}
       end)
   end
 
   # This will be the cell data for users registered on reg_date
   # for the data in log_data from a given date
-  defp build_data_cell(reg_date, userids, log_data) do
+  defp build_data_cell(userids, log_data) do
     user_counts = @activity_types
       |> Map.new(fn activity ->
         result = log_data["minutes_per_user"][activity]

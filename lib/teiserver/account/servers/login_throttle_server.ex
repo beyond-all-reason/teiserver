@@ -92,7 +92,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   If there is a queue you get a false result
   """
   @spec can_login?(T.userid(), map()) :: boolean
-  defp can_login?(userid, state) do
+  def can_login?(userid, state) do
     case categorise_user(userid) do
       :instant -> true
       category ->
