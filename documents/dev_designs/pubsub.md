@@ -692,9 +692,6 @@ Valid events
 ```
 
 ## Legacy
-#### legacy_all_user_updates
-Information about all users, such as a user logging on/off
-
 #### legacy_user_updates:#{userid}
 Information about a specific user such as friend related stuff.
 

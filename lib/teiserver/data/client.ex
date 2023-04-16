@@ -125,12 +125,6 @@ defmodule Teiserver.Client do
 
     PubSub.broadcast(
       Central.PubSub,
-      "legacy_all_user_updates",
-      {:user_logged_in, user.id}
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
       "teiserver_client_inout",
       %{
         channel: "client_inout",
@@ -282,14 +276,6 @@ defmodule Teiserver.Client do
 
     # Kill lobby server process
     ClientLib.stop_client_server(client.userid)
-
-    # Typically we would only send the username but it is possible they just changed their username
-    # and as such we need to tell the system what username is logging out
-    PubSub.broadcast(
-      Central.PubSub,
-      "legacy_all_user_updates",
-      {:user_logged_out, client.userid, client.name}
-    )
 
     PubSub.broadcast(
       Central.PubSub,

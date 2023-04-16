@@ -9,34 +9,24 @@ defmodule Teiserver.Account.ClientIndexThrottle do
 
   @update_interval 2000
 
-  # Users
-  def handle_info({:user_logged_in, userid}, state) do
-    {:noreply, %{state | new_clients: [userid | state.new_clients]}}
-  end
-
-  def handle_info({:user_logged_out, userid, _name}, state) do
-    {:noreply, %{state | removed_clients: [userid | state.removed_clients]}}
-  end
-
   # Client
-  def handle_info({:updated_client, %{userid: userid}, _reason}, state) do
-    {:noreply, %{state | new_clients: [userid | state.new_clients]}}
+  def handle_info(%{channel: "client_inout", event: :login} = msg, state) do
+    {:noreply, %{state | new_clients: [msg.userid | state.new_clients]}}
+  end
+
+  def handle_info(%{channel: "client_inout", event: :disconnect} = msg, state) do
+    {:noreply, %{state | new_clients: [msg.userid | state.new_clients]}}
+  end
+
+  def handle_info(%{channel: "client_inout"} = msg, state) do
+    {:noreply, state}
   end
 
   # Battle
-  def handle_info({:add_user_to_battle, userid, _, _}, state) do
-    {:noreply, %{state | new_clients: [userid | state.new_clients]}}
+  def handle_info(%{channel: "teiserver_global_user_updates"} = msg, state) do
+    new_clients = [msg.client.userid | state.new_clients]
+    {:noreply, %{state | new_clients: new_clients}}
   end
-
-  def handle_info({:remove_user_from_battle, userid, _}, state) do
-    {:noreply, %{state | new_clients: [userid | state.new_clients]}}
-  end
-
-  def handle_info({:kick_user_from_battle, userid, _}, state) do
-    {:noreply, %{state | new_clients: [userid | state.new_clients]}}
-  end
-
-  def handle_info({:global_battle_updated, _, _}, state), do: {:noreply, state}
 
   # Doesn't do anything at this stage
   def handle_info(:startup, state) do
@@ -82,9 +72,8 @@ defmodule Teiserver.Account.ClientIndexThrottle do
     send(self(), :startup)
     :timer.send_interval(@update_interval, self(), :tick)
 
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_user_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_user_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_inout")
 
     Horde.Registry.register(
       Teiserver.ThrottleRegistry,

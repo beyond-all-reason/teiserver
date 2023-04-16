@@ -101,7 +101,6 @@ Note: This ties in with the "Per node process" item.
     - AutomodServer
   - Per cluster processes
     - TelemetryServer
-    - SpringTelemetryServer
     - AchievementServer
 - **Stage 2:** Convert these to use a Horde DynamicSupervisor
 - **Stage 3:** Have them all startup from Teiserver.Startup where they can check for existing PIDs

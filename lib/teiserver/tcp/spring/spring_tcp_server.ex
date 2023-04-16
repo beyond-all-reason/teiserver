@@ -343,23 +343,23 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # Client updates
-  def handle_info({:user_logged_in, nil}, state), do: {:noreply, state}
+  # def handle_info({:user_logged_in, nil}, state), do: {:noreply, state}
 
-  def handle_info({:user_logged_in, userid}, state) do
-    new_state = user_logged_in(userid, state)
-    {:noreply, new_state}
-  end
+  # def handle_info({:user_logged_in, userid}, state) do
+  #   new_state = user_logged_in(userid, state)
+  #   {:noreply, new_state}
+  # end
 
-  # Some logic because if we're the one logged out we need to disconnect
-  def handle_info({:user_logged_out, userid, username}, state) do
-    if state.userid == userid do
-      SpringOut.reply(:disconnect, "Logged out", nil, state)
-      {:stop, :normal, state}
-    else
-      new_state = user_logged_out(userid, username, state)
-      {:noreply, new_state}
-    end
-  end
+  # # Some logic because if we're the one logged out we need to disconnect
+  # def handle_info({:user_logged_out, userid, username}, state) do
+  #   if state.userid == userid do
+  #     SpringOut.reply(:disconnect, "Logged out", nil, state)
+  #     {:stop, :normal, state}
+  #   else
+  #     new_state = user_logged_out(userid, username, state)
+  #     {:noreply, new_state}
+  #   end
+  # end
 
   def handle_info({:updated_client, new_client, reason}, state) do
     new_state =
@@ -572,18 +572,12 @@ defmodule Teiserver.SpringTcpServer do
   # Internal functions
   # #############################
   # User updates
-  defp user_logged_in(userid, state) do
+  defp user_logged_in(client, state) do
     known_users =
-      case state.known_users[userid] do
+      case state.known_users[client.userid] do
         nil ->
-          case Client.get_client_by_id(userid) do
-            nil ->
-              state.known_users
-
-            client ->
-              SpringOut.reply(:user_logged_in, client, nil, state)
-              Map.put(state.known_users, userid, _blank_user(userid))
-          end
+          SpringOut.reply(:user_logged_in, client, nil, state)
+          Map.put(state.known_users, client.userid, _blank_user(client.userid))
 
         _ ->
           state.known_users
