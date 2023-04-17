@@ -665,10 +665,10 @@ defmodule Teiserver.SpringTcpServer do
   # Battle updates
   defp battle_update(%{event: :update_values} = msg, state) do
     cond do
-      msg.changes == %{disabled_units: []} ->
+      msg.changes == %{disabled_units: []} and state.lobby_id == msg.lobby_id ->
         SpringOut.reply(:enable_all_units, [], nil, state)
 
-      Map.has_key?(msg.changes, :disabled_units) ->
+      Map.has_key?(msg.changes, :disabled_units) and state.lobby_id == msg.lobby_id ->
         SpringOut.reply(:enable_all_units, [], nil, state)
         SpringOut.reply(:disable_units, msg.changes.disabled_units, nil, state)
 
