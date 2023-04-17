@@ -2,9 +2,8 @@ defmodule Teiserver.SpringAuthTest do
   use Central.ServerCase, async: false
   require Logger
   alias Teiserver.BitParse
-  alias Teiserver.User
+  alias Teiserver.{User, Account, Client}
   alias Teiserver.Account.UserCache
-  alias Teiserver.Client
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TeiserverTestLib,
@@ -665,7 +664,8 @@ CLIENTS test_room #{user.name}\n"
 
     # Now see what happens when we add user
     pid = Client.get_client_by_id(user.id).tcp_pid
-    send(pid, {:user_logged_in, bad_user.id})
+    bad_client = Account.get_client_by_id(bad_user.id)
+    send(pid, %{channel: "client_inout", event: :login, client: bad_client, userid: bad_user.id})
     reply = _recv_raw(socket)
 
     assert reply ==

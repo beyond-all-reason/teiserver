@@ -492,6 +492,14 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "teiserver.Discord channel #overwatch-reports",
+      section: "Discord",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The discord ID for the channel to post overwatch specific reports"
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Discord channel #moderation-reports",
       section: "Discord",
       type: "integer",
