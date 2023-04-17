@@ -454,13 +454,6 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
     end)
   end
 
-  defp min_counts(items, path) do
-    items
-    |> Enum.reduce(0, fn row, acc ->
-      min(acc, Enum.count(get_in(row, path) || []))
-    end)
-  end
-
   defp max_counts(items, path) do
     items
     |> Enum.reduce(0, fn row, acc ->
