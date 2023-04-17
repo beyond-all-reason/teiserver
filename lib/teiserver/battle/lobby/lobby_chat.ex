@@ -225,16 +225,11 @@ defmodule Teiserver.Battle.LobbyChat do
     if allowed do
       PubSub.broadcast(
         Central.PubSub,
-        "legacy_user_updates:#{to_id}",
-        {:battle_updated, lobby_id, {from_id, msg, lobby_id}, :sayex}
-      )
-
-      PubSub.broadcast(
-        Central.PubSub,
         "teiserver_client_messages:#{to_id}",
         %{
           channel: "teiserver_client_messages:#{to_id}",
           event: :lobby_direct_announce,
+          lobby_id: lobby_id,
           sender_id: from_id,
           message_content: msg
         }
