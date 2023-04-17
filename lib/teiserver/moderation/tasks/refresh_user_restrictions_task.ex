@@ -61,7 +61,12 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
         actions
         |> Enum.map(fn a -> a.expires end)
         |> List.flatten()
-        |> Enum.min()
+        |> Enum.reduce(nil, fn
+          (dt1, nil) ->
+            dt1
+          (dt1, dt2) ->
+            if Timex.compare(dt1, dt2) == -1, do: dt1, else: dt2
+        end)
 
       expires_as_string = new_restricted_until |> Jason.encode!() |> Jason.decode!()
 
