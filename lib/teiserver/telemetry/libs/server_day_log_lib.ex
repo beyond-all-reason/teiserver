@@ -69,7 +69,6 @@ defmodule Teiserver.Telemetry.ServerDayLogLib do
       unique_players: [],
       accounts_created: 0,
       peak_user_counts: @user_types |> Map.new(fn t -> {t, 0} end),
-      low_user_counts: @user_types |> Map.new(fn t -> {t, 0} end),
       battles: 0
     },
     events: %{

@@ -96,3 +96,12 @@
   bsname: bsname,
   url: ~p"/reports/server/load"
 ) %>
+
+<%= central_component("section_menu_button",
+  name: "load",
+  label: "24hr Load",
+  active: @active,
+  icon: "fa-regular fa-server",
+  bsname: bsname,
+  url: ~p"/reports/server/load?hours=24&resolution=5"
+) %>

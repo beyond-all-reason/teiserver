@@ -2565,4 +2565,130 @@ defmodule Teiserver.Telemetry do
   def delete_infolog(%Infolog{} = infolog) do
     Repo.delete(infolog)
   end
+
+
+  # User activity
+  alias Teiserver.Telemetry.{UserActivityLog, UserActivityLogLib}
+
+  defp user_activity_log_query(args) do
+    user_activity_log_query(nil, args)
+  end
+
+  defp user_activity_log_query(date, args) do
+    UserActivityLogLib.get_user_activity_logs()
+    |> UserActivityLogLib.search(%{date: date})
+    |> UserActivityLogLib.search(args[:search])
+    |> UserActivityLogLib.order_by(args[:order])
+    |> QueryHelpers.offset_query(args[:offset] || 0)
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of logging_logs.
+
+  ## Examples
+
+      iex> list_logging_logs()
+      [%UserActivityLog{}, ...]
+
+  """
+  def list_user_activity_logs(args \\ []) do
+    user_activity_log_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single log.
+
+  Raises `Ecto.NoResultsError` if the UserActivityLog does not exist.
+
+  ## Examples
+
+      iex> get_log!(123)
+      %UserActivityLog{}
+
+      iex> get_log!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_user_activity_log(date) when not is_list(date) do
+    user_activity_log_query(date, [])
+    |> Repo.one()
+  end
+
+  def get_user_activity_log(args) do
+    user_activity_log_query(nil, args)
+    |> Repo.one()
+  end
+
+  def get_user_activity_log(date, args) do
+    user_activity_log_query(date, args)
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a log.
+
+  ## Examples
+
+      iex> create_log(%{field: value})
+      {:ok, %UserActivityLog{}}
+
+      iex> create_log(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_user_activity_log(attrs \\ %{}) do
+    %UserActivityLog{}
+    |> UserActivityLog.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a log.
+
+  ## Examples
+
+      iex> update_log(log, %{field: new_value})
+      {:ok, %UserActivityLog{}}
+
+      iex> update_log(log, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user_activity_log(%UserActivityLog{} = log, attrs) do
+    log
+    |> UserActivityLog.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a UserActivityLog.
+
+  ## Examples
+
+      iex> delete_log(log)
+      {:ok, %UserActivityLog{}}
+
+      iex> delete_log(log)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_user_activity_log(%UserActivityLog{} = log) do
+    Repo.delete(log)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking log changes.
+
+  ## Examples
+
+      iex> change_log(log)
+      %Ecto.Changeset{source: %UserActivityLog{}}
+
+  """
+  def change_user_activity_log(%UserActivityLog{} = log) do
+    UserActivityLog.changeset(log, %{})
+  end
 end

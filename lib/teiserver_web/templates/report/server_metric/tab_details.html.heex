@@ -26,16 +26,6 @@
       label: "Unique players",
       value: format_number(@data["aggregates"]["stats"]["unique_players"])
     ) %>
-
-    <%= central_component("detail_line",
-      label: "Low total users",
-      value: format_number(@data["aggregates"]["stats"]["low_user_counts"]["total"])
-    ) %>
-
-    <%= central_component("detail_line",
-      label: "Low players",
-      value: format_number(@data["aggregates"]["stats"]["low_user_counts"]["player"])
-    ) %>
   </div>
 </div>
 
