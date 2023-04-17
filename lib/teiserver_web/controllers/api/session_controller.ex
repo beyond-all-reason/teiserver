@@ -128,7 +128,7 @@ defmodule TeiserverWeb.API.SessionController do
           nil
 
         ttl_string ->
-          case Integer.parse(ttl_string) do
+          case Integer.parse(to_string(ttl_string)) do
             :error ->
               nil
 
