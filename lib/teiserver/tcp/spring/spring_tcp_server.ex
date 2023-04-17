@@ -288,6 +288,11 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # Client channel messages
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :lobby_direct_announce} = msg, state) do
+    SpringOut.reply(:battle_message_ex, {msg.sender_id, msg.message_content, msg.lobby_id, state.userid}, nil, state)
+    {:noreply, state}
+  end
+
   def handle_info(%{channel: "teiserver_client_messages:" <> _userid_str}, state) do
     {:noreply, state}
   end
@@ -549,19 +554,18 @@ defmodule Teiserver.SpringTcpServer do
     {:stop, :normal, %{new_state | userid: nil}}
   end
 
+  # # Infos to catch stuff that we need to replace
+  # def handle_info({:battle_updated, _, _} = msg, state) do
+  #   raise "X"
+  #   Logger.error("No handler for #{inspect msg}")
+  #   {:noreply, state}
+  # end
 
-  # Infos to catch stuff that we need to replace
-  def handle_info({:battle_updated, _, _} = msg, state) do
-    raise "X"
-    Logger.error("No handler for #{inspect msg}")
-    {:noreply, state}
-  end
-
-  def handle_info({:battle_updated, _, _, _} = msg, state) do
-    raise "Y"
-    Logger.error("No handler for #{inspect msg}")
-    {:noreply, state}
-  end
+  # def handle_info({:battle_updated, _, _, _} = msg, state) do
+  #   raise "Y"
+  #   Logger.error("No handler for #{inspect msg}")
+  #   {:noreply, state}
+  # end
 
   @impl true
   def terminate(_reason, state) do

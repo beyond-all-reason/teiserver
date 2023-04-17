@@ -539,10 +539,9 @@ defmodule Teiserver.Protocols.SpringOut do
       username = User.get_username(sender_id)
 
       messages
-      |> Enum.map(fn msg ->
+      |> Enum.map_join("", fn msg ->
         "SAIDBATTLE #{username} #{msg}\n"
       end)
-      |> Enum.join("")
     end
   end
 
@@ -558,10 +557,9 @@ defmodule Teiserver.Protocols.SpringOut do
       username = User.get_username(sender_id)
 
       messages
-      |> Enum.map(fn msg ->
+      |> Enum.map_join("", fn msg ->
         "SAIDBATTLEEX #{username} #{msg}\n"
       end)
-      |> Enum.join("")
     end
   end
 
