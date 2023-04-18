@@ -1290,6 +1290,7 @@ defmodule Teiserver.Protocols.SpringIn do
     Lobby.remove_user_from_any_lobby(state.userid)
     |> Enum.each(fn b ->
       PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{b}")
+      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{b}")
     end)
 
     if not state.exempt_from_cmd_throttle do
@@ -1304,9 +1305,11 @@ defmodule Teiserver.Protocols.SpringIn do
     Lobby.remove_user_from_any_lobby(state.userid)
     |> Enum.each(fn b ->
       PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{b}")
+      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{b}")
     end)
 
     PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{state.lobby_id}")
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{state.lobby_id}")
     Lobby.remove_user_from_battle(state.userid, state.lobby_id)
 
     if not state.exempt_from_cmd_throttle do

@@ -706,7 +706,9 @@ defmodule Teiserver.SpringTcpServer do
         SpringOut.reply(:remove_bot_from_battle, {msg.lobby_id, msg.bot}, nil, state)
 
       :remove_user ->
-        user_leave_battle(msg.client, msg.lobby_id, state)
+        state = user_leave_battle(msg.client, msg.lobby_id, state)
+        SpringOut.reply(:update_battle, msg.lobby_id, nil, state)
+        state
 
       :kick_user ->
         user_kicked_from_battle(msg.client, msg.lobby_id, state)
@@ -719,7 +721,9 @@ defmodule Teiserver.SpringTcpServer do
             msg.script_password
           end
 
-        user_join_battle(msg.client, msg.lobby_id, script_password, state)
+        state = user_join_battle(msg.client, msg.lobby_id, script_password, state)
+        SpringOut.reply(:update_battle, msg.lobby_id, nil, state)
+        state
 
       :updated_client_battlestatus ->
         client_battlestatus_update(msg.client, state)
@@ -728,6 +732,7 @@ defmodule Teiserver.SpringTcpServer do
         state
 
       :updated ->
+        SpringOut.reply(:update_battle, msg.lobby_id, nil, state)
         state
 
       _ ->
@@ -771,9 +776,7 @@ defmodule Teiserver.SpringTcpServer do
   # genserver is incorrect and needs to alter its state accordingly
   @spec user_join_battle(T.client(), T.lobby_id(), String.t(), T.spring_tcp_state()) ::
           T.spring_tcp_state()
-  defp user_join_battle(client, lobby_id, script_password, state) do
-    userid = client.userid
-
+  defp user_join_battle(%{userid: userid} = client, lobby_id, script_password, state) do
     script_password =
       cond do
         state.lobby_host and state.lobby_id == lobby_id -> script_password
