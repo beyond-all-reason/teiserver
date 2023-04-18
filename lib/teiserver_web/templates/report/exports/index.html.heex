@@ -18,6 +18,16 @@
       link: Routes.ts_reports_exports_path(@conn, :show, "match_ratings")
     ) %>
   <% end %>
+
+  <%= if allow?(@current_user, Teiserver.Game.MatchDataTableExport.permissions()) do %>
+    <%= central_component("menu_card",
+      size: :small,
+      icon: Teiserver.Game.MatchDataTableExport.icon(),
+      name: "match_datatable",
+      text: "Match datatable",
+      link: Routes.ts_reports_exports_path(@conn, :show, "match_datatable")
+    ) %>
+  <% end %>
 </div>
 
 <div class="row mt-2">

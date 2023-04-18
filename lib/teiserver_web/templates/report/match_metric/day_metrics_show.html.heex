@@ -93,6 +93,12 @@
                   <i class="fa-regular fa-fw fa-drumstick"></i> Raptors
                 </a>
               </li>
+
+              <li class="nav-item">
+                <a href="#raw_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <i class="fa-regular fa-fw fa-code"></i> Raw data
+                </a>
+              </li>
             </ul>
 
             <div class="tab-content">
@@ -122,6 +128,10 @@
 
               <div class="tab-pane" id="raptors_tab" style="padding:5px;">
                 <%= render("tab_raptors.html", %{data: @data["raptors"]}) %>
+              </div>
+
+              <div class="tab-pane" id="raw_tab" style="padding:5px;">
+                <%= render("tab_raw.html", assigns) %>
               </div>
             </div>
           </div>

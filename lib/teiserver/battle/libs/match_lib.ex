@@ -272,6 +272,7 @@ defmodule Teiserver.Battle.MatchLib do
   def _search(query, :of_interest, true) do
     from matches in query,
       where: matches.processed == true,
+      where: not is_nil(matches.winning_team),
       where: not is_nil(matches.finished),
       where: not is_nil(matches.started)
   end

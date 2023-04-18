@@ -794,7 +794,6 @@ defmodule Teiserver.SpringTcpServer do
         # User isn't known about so we say they've logged in
         # Then we add them to the battle
         state.known_users[userid] == nil ->
-          client = Client.get_client_by_id(userid)
           SpringOut.reply(:user_logged_in, client, nil, state)
 
           SpringOut.reply(

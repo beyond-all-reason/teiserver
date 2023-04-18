@@ -79,6 +79,7 @@ defmodule TeiserverWeb.Report.ExportsController do
 
   defp get_module(name) do
     case name do
+      "match_datatable" -> Game.MatchDataTableExport
       "match_ratings" -> Game.MatchRatingsExport
       "player_count" -> Account.PlayerCountExport
       "retention_rate" -> Account.RetentionRateExport
