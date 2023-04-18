@@ -2568,17 +2568,17 @@ defmodule Teiserver.Telemetry do
 
 
   # User activity
-  alias Teiserver.Telemetry.{UserActivityLog, UserActivityLogLib}
+  alias Teiserver.Telemetry.{UserActivityDayLog, UserActivityDayLogLib}
 
   defp user_activity_log_query(args) do
     user_activity_log_query(nil, args)
   end
 
   defp user_activity_log_query(date, args) do
-    UserActivityLogLib.get_user_activity_logs()
-    |> UserActivityLogLib.search(%{date: date})
-    |> UserActivityLogLib.search(args[:search])
-    |> UserActivityLogLib.order_by(args[:order])
+    UserActivityDayLogLib.get_user_activity_logs()
+    |> UserActivityDayLogLib.search(%{date: date})
+    |> UserActivityDayLogLib.search(args[:search])
+    |> UserActivityDayLogLib.order_by(args[:order])
     |> QueryHelpers.offset_query(args[:offset] || 0)
     |> QueryHelpers.select(args[:select])
   end
@@ -2589,7 +2589,7 @@ defmodule Teiserver.Telemetry do
   ## Examples
 
       iex> list_logging_logs()
-      [%UserActivityLog{}, ...]
+      [%UserActivityDayLog{}, ...]
 
   """
   def list_user_activity_logs(args \\ []) do
@@ -2601,12 +2601,12 @@ defmodule Teiserver.Telemetry do
   @doc """
   Gets a single log.
 
-  Raises `Ecto.NoResultsError` if the UserActivityLog does not exist.
+  Raises `Ecto.NoResultsError` if the UserActivityDayLog does not exist.
 
   ## Examples
 
       iex> get_log!(123)
-      %UserActivityLog{}
+      %UserActivityDayLog{}
 
       iex> get_log!(456)
       ** (Ecto.NoResultsError)
@@ -2633,15 +2633,15 @@ defmodule Teiserver.Telemetry do
   ## Examples
 
       iex> create_log(%{field: value})
-      {:ok, %UserActivityLog{}}
+      {:ok, %UserActivityDayLog{}}
 
       iex> create_log(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
   def create_user_activity_log(attrs \\ %{}) do
-    %UserActivityLog{}
-    |> UserActivityLog.changeset(attrs)
+    %UserActivityDayLog{}
+    |> UserActivityDayLog.changeset(attrs)
     |> Repo.insert()
   end
 
@@ -2651,31 +2651,31 @@ defmodule Teiserver.Telemetry do
   ## Examples
 
       iex> update_log(log, %{field: new_value})
-      {:ok, %UserActivityLog{}}
+      {:ok, %UserActivityDayLog{}}
 
       iex> update_log(log, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_user_activity_log(%UserActivityLog{} = log, attrs) do
+  def update_user_activity_log(%UserActivityDayLog{} = log, attrs) do
     log
-    |> UserActivityLog.changeset(attrs)
+    |> UserActivityDayLog.changeset(attrs)
     |> Repo.update()
   end
 
   @doc """
-  Deletes a UserActivityLog.
+  Deletes a UserActivityDayLog.
 
   ## Examples
 
       iex> delete_log(log)
-      {:ok, %UserActivityLog{}}
+      {:ok, %UserActivityDayLog{}}
 
       iex> delete_log(log)
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_user_activity_log(%UserActivityLog{} = log) do
+  def delete_user_activity_log(%UserActivityDayLog{} = log) do
     Repo.delete(log)
   end
 
@@ -2685,10 +2685,10 @@ defmodule Teiserver.Telemetry do
   ## Examples
 
       iex> change_log(log)
-      %Ecto.Changeset{source: %UserActivityLog{}}
+      %Ecto.Changeset{source: %UserActivityDayLog{}}
 
   """
-  def change_user_activity_log(%UserActivityLog{} = log) do
-    UserActivityLog.changeset(log, %{})
+  def change_user_activity_log(%UserActivityDayLog{} = log) do
+    UserActivityDayLog.changeset(log, %{})
   end
 end

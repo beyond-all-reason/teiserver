@@ -1,8 +1,9 @@
-defmodule Teiserver.Telemetry.UserActivityLog do
+defmodule Teiserver.Telemetry.UserActivityDayLog do
+  @moduledoc false
   use CentralWeb, :schema
 
   @primary_key false
-  schema "telemetry_user_activity_logs" do
+  schema "telemetry_user_activity_day_logs" do
     field :date, :date, primary_key: true
     field :data, :map
   end

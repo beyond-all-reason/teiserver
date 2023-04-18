@@ -1,8 +1,8 @@
-defmodule Teiserver.Telemetry.UserActivityLogLib do
+defmodule Teiserver.Telemetry.UserActivityDayLogLib do
   @moduledoc false
   use CentralWeb, :library
 
-  alias Teiserver.Telemetry.UserActivityLog
+  alias Teiserver.Telemetry.UserActivityDayLog
 
   @spec colours :: atom
   def colours(), do: :warning
@@ -12,7 +12,7 @@ defmodule Teiserver.Telemetry.UserActivityLogLib do
 
   @spec get_user_activity_logs :: Ecto.Query.t()
   def get_user_activity_logs() do
-    from(logs in UserActivityLog)
+    from(logs in UserActivityDayLog)
   end
 
   @spec search(Ecto.Query.t(), map | nil) :: Ecto.Query.t()

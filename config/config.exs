@@ -144,6 +144,7 @@ config :central, Oban,
        {"6 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchDayTask},
        {"7 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchMonthTask},
        {"8 2 * * *", Teiserver.Telemetry.InfologCleanupTask},
+       {"1 2 * * *", Teiserver.Telemetry.Tasks.PersistUserActivityDayTask},
 
        # 2:43
        {"43 2 * * *", Teiserver.Game.AchievementCleanupTask},
