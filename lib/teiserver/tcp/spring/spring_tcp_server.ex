@@ -876,7 +876,7 @@ defmodule Teiserver.SpringTcpServer do
           # No change
           state.known_users[userid]
 
-        true ->
+        state.known_users[userid].lobby_id != nil ->
           # We don't care which battle we thought they are in, they're no longer in it
           SpringOut.reply(
             :remove_user_from_battle,
@@ -886,6 +886,10 @@ defmodule Teiserver.SpringTcpServer do
           )
 
           %{state.known_users[userid] | lobby_id: nil}
+
+        true ->
+          Logger.error("user_leave_battle default case #{inspect state.known_users[userid]}")
+          state.known_users[userid]
       end
 
     new_knowns = Map.put(state.known_users, userid, new_user)

@@ -575,6 +575,10 @@ defmodule CentralWeb.Router do
     resources("/lobby_policies", LobbyPolicyController,
       only: [:index, :new, :create, :show, :edit, :update, :delete]
     )
+
+    resources("/text_callbacks", TextCallbackController,
+      only: [:index, :new, :create, :show, :edit, :update, :delete]
+    )
   end
 
   scope "/teiserver/admin", TeiserverWeb.Admin, as: :admin do

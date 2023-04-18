@@ -72,7 +72,17 @@
       name: "lobby_policies",
       text: "Lobby policies",
       icon_class: "fa-duotone",
-      link: Routes.admin_lobby_policy_path(@conn, :index)
+      link: ~p"/admin/lobby_policies"
+    ) %>
+  <% end %>
+
+  <%= if allow?(@conn, "teiserver.staff.admin") do %>
+    <%= central_component("menu_card",
+      icon: Teiserver.Communication.TextCallbackLib.icon(),
+      name: "text_callbacks",
+      text: "Text callbacks",
+      icon_class: "fa-duotone",
+      link: ~p"/admin/text_callbacks"
     ) %>
   <% end %>
 
