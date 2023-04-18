@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_admin",
-    sub_menu_active: "lobby_policy"
+    sub_menu_active: "text_callback"
   )
 
   plug :add_breadcrumb, name: 'Admin', url: '/admin'
@@ -36,25 +36,25 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
-    lobby_policy =
-      Communication.get_lobby_policy!(id,
+    text_callback =
+      Communication.get_text_callback!(id,
         joins: []
       )
 
-    lobby_policy
+    text_callback
     |> TextCallbackLib.make_favourite()
     |> insert_recently(conn)
 
     conn
-    |> assign(:lobby_policy, lobby_policy)
-    |> add_breadcrumb(name: "Show: #{lobby_policy.name}", url: conn.request_path)
+    |> assign(:text_callback, text_callback)
+    |> add_breadcrumb(name: "Show: #{text_callback.name}", url: conn.request_path)
     |> render("show.html")
   end
 
   @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset =
-      Communication.change_lobby_policy(%Communication.TextCallback{
+      Communication.change_text_callback(%Communication.TextCallback{
         icon: "fa-solid fa-" <> StylingHelper.random_icon(),
         colour: StylingHelper.random_colour()
       })
@@ -66,26 +66,21 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
   end
 
   @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def create(conn, %{"lobby_policy" => lobby_policy_params}) do
-    lobby_policy_params =
-      Map.merge(lobby_policy_params, %{
-        "map_list" =>
-          (lobby_policy_params["map_list"] || "")
-          |> convert_textarea_to_array
-          |> Enum.sort(),
-        "agent_name_list" =>
-          (lobby_policy_params["agent_name_list"] || "")
+  def create(conn, %{"text_callback" => text_callback_params}) do
+    text_callback_params =
+      Map.merge(text_callback_params, %{
+        "triggers" =>
+          (text_callback_params["triggers"] || "")
+          |> String.downcase
           |> convert_textarea_to_array
           |> Enum.sort()
       })
 
-    case Communication.create_lobby_policy(lobby_policy_params) do
-      {:ok, lobby_policy} ->
-        Communication.add_policy_from_db(lobby_policy)
-
+    case Communication.create_text_callback(text_callback_params) do
+      {:ok, _text_callback} ->
         conn
         |> put_flash(:info, "Lobby policy created successfully.")
-        |> redirect(to: Routes.admin_lobby_policy_path(conn, :index))
+        |> redirect(to: ~p"/admin/text_callbacks/")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
@@ -96,44 +91,39 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
 
   @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
-    lobby_policy = Communication.get_lobby_policy!(id)
+    text_callback = Communication.get_text_callback!(id)
 
-    changeset = Communication.change_lobby_policy(lobby_policy)
+    changeset = Communication.change_text_callback(text_callback)
 
     conn
-    |> assign(:lobby_policy, lobby_policy)
+    |> assign(:text_callback, text_callback)
     |> assign(:changeset, changeset)
-    |> add_breadcrumb(name: "Edit: #{lobby_policy.name}", url: conn.request_path)
+    |> add_breadcrumb(name: "Edit: #{text_callback.name}", url: conn.request_path)
     |> render("edit.html")
   end
 
   @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def update(conn, %{"id" => id, "lobby_policy" => lobby_policy_params}) do
-    lobby_policy_params =
-      Map.merge(lobby_policy_params, %{
-        "map_list" =>
-          (lobby_policy_params["map_list"] || "")
-          |> convert_textarea_to_array
-          |> Enum.sort(),
-        "agent_name_list" =>
-          (lobby_policy_params["agent_name_list"] || "")
+  def update(conn, %{"id" => id, "text_callback" => text_callback_params}) do
+    text_callback_params =
+      Map.merge(text_callback_params, %{
+        "triggers" =>
+          (text_callback_params["triggers"] || "")
+          |> String.downcase
           |> convert_textarea_to_array
           |> Enum.sort()
       })
 
-    lobby_policy = Communication.get_lobby_policy!(id)
+    text_callback = Communication.get_text_callback!(id)
 
-    case Communication.update_lobby_policy(lobby_policy, lobby_policy_params) do
-      {:ok, lobby_policy} ->
-        Communication.add_policy_from_db(lobby_policy)
-
+    case Communication.update_text_callback(text_callback, text_callback_params) do
+      {:ok, _text_callback} ->
         conn
         |> put_flash(:info, "Lobby policy updated successfully.")
-        |> redirect(to: Routes.admin_lobby_policy_path(conn, :index))
+        |> redirect(to: ~p"/admin/text_callbacks")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
-        |> assign(:lobby_policy, lobby_policy)
+        |> assign(:text_callback, text_callback)
         |> assign(:changeset, changeset)
         |> render("edit.html")
     end
@@ -141,16 +131,16 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
 
   @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
-    lobby_policy = Communication.get_lobby_policy!(id)
+    text_callback = Communication.get_text_callback!(id)
 
-    lobby_policy
+    text_callback
     |> TextCallbackLib.make_favourite()
     |> remove_recently(conn)
 
-    {:ok, _lobby_policy} = Communication.delete_lobby_policy(lobby_policy)
+    {:ok, _text_callback} = Communication.delete_text_callback(text_callback)
 
     conn
     |> put_flash(:info, "Lobby policy deleted successfully.")
-    |> redirect(to: Routes.admin_lobby_policy_path(conn, :index))
+    |> redirect(to: ~p"/admin/text_callbacks")
   end
 end

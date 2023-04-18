@@ -11,7 +11,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Admin.LobbyPolicyView,
+          TeiserverWeb.Admin.TextCallbackView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",
@@ -24,12 +24,12 @@
 
         <%= render(
           "form.html",
-          Map.put(assigns, :action, Routes.admin_lobby_policy_path(@conn, :update, @lobby_policy))
+          Map.put(assigns, :action, ~p"/admin/text_callbacks/#{@text_callback}")
         ) %>
 
         <hr />
         <%= link(raw("<i class='far fa-fw fa-trash'></i> Delete"),
-          to: Routes.admin_lobby_policy_path(@conn, :delete, @lobby_policy),
+          to: ~p"/admin/text_callbacks/#{@text_callback}",
           method: :delete,
           data: [confirm: "Are you sure?"],
           class: "btn btn-danger btn-outline"

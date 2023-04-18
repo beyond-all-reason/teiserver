@@ -11,7 +11,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Admin.LobbyPolicyView,
+          TeiserverWeb.Admin.TextCallbackView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
@@ -43,17 +43,12 @@
           </thead>
           <tbody>
             <%= for text_callback <- @text_callbacks do %>
-              <% first_name =
-                case text_callback.agent_name_list do
-                  [n | _] -> n
-                  _ -> ""
-                end %>
               <tr>
                 <td style={"background-color: #{text_callback.colour}; color: #FFF;"} width="22">
                   <%= central_component("icon", icon: text_callback.icon) %>
                 </td>
                 <td style={"background-color: #{rgba_css text_callback.colour};"}>
-                  <%= text_callback.lobby_name_format %>
+                  <%= text_callback.name %>
                 </td>
 
                 <td>
@@ -64,25 +59,13 @@
                   <% end %>
                 </td>
 
-                <td><%= text_callback.agent_name_format %></td>
+                <td><%= Enum.join(text_callback.triggers, ", ") %></td>
 
-                <td><%= text_callback.preset %></td>
-
-                <td><%= "#{text_callback.min_teamsize} - #{text_callback.max_teamsize}" %></td>
-                <td><%= "#{text_callback.min_rank} - #{text_callback.max_rank}" %></td>
-                <td><%= "#{text_callback.min_rating} - #{text_callback.max_rating}" %></td>
-                <td>
-                  <%= "#{text_callback.min_uncertainty} - #{text_callback.max_uncertainty}" %>
-                </td>
-
-                <td><%= Enum.count(text_callback.map_list) %></td>
-                <td>
-                  <%= Enum.count(text_callback.agent_name_list) %> (<%= first_name %>)
-                </td>
+                <td><%= String.slice(text_callback.response, 0..100) %></td>
 
                 <td>
                   <a
-                    href={Routes.admin_text_callback_path(@conn, :show, text_callback.id)}
+                    href={~p"/admin/text_callbacks/#{text_callback.id}"}
                     class={"btn btn-outline-#{bsname} btn-sm"}
                   >
                     <i class="fa-fw fa-regular fa-eye"></i> Show
@@ -90,7 +73,7 @@
                 </td>
                 <td>
                   <a
-                    href={Routes.admin_text_callback_path(@conn, :edit, text_callback.id)}
+                    href={~p"/admin/text_callbacks/#{text_callback.id}/edit"}
                     class={"btn btn-outline-#{bsname} btn-sm"}
                   >
                     <i class="fa-fw fa-regular fa-wrench"></i> Edit

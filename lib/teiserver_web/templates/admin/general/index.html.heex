@@ -76,16 +76,6 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.staff.admin") do %>
-    <%= central_component("menu_card",
-      icon: Teiserver.Communication.TextCallbackLib.icon(),
-      name: "text_callbacks",
-      text: "Text callbacks",
-      icon_class: "fa-duotone",
-      link: ~p"/admin/text_callbacks"
-    ) %>
-  <% end %>
-
   <%= if allow_any?(@conn, ~w(teiserver.staff.moderator teiserver.staff.reviewer teiserver.staff.overwatch)) do %>
     <%= central_component("menu_card",
       icon: Teiserver.Moderation.ReportLib.icon(),
@@ -113,6 +103,16 @@
       icon: Teiserver.Account.BadgeTypeLib.icon(),
       text: "Badge types",
       link: Routes.ts_admin_badge_type_path(@conn, :index)
+    ) %>
+  <% end %>
+
+  <%= if allow?(@conn, "teiserver.staff.admin") do %>
+    <%= central_component("menu_card",
+      icon: Teiserver.Communication.TextCallbackLib.icon(),
+      name: "text_callbacks",
+      text: "Text callbacks",
+      icon_class: "fa-duotone",
+      link: ~p"/admin/text_callbacks"
     ) %>
   <% end %>
 </div>

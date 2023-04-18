@@ -7,7 +7,7 @@
     $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
 
     page_quick_actions = [
-      {label: "Edit badge_type", icon: "<%= icon() %>", url: "<%= Routes.admin_lobby_policy_path(@conn, :edit, @lobby_policy) %>", keywords: ["edit", "badge_type", "edit badge_type"]},
+      {label: "Edit badge_type", icon: "<%= icon() %>", url: "<%= Routes.admin_text_callback_path(@conn, :edit, @text_callback) %>", keywords: ["edit", "badge_type", "edit badge_type"]},
     ];
   });
 </script>
@@ -15,7 +15,7 @@
 <%= render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
-  Map.merge(assigns, %{active: "lobby_policies"})
+  Map.merge(assigns, %{active: "text_callbacks"})
 ) %>
 
 <div class="row section-menu">
@@ -23,7 +23,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Admin.LobbyPolicyView,
+          TeiserverWeb.Admin.TextCallbackView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
@@ -34,23 +34,16 @@
 
         <div class="float-end">
           <a
-            href={~p"/admin/dashboard/policy/#{@lobby_policy.id}"}
+            href={~p"/admin/text_callbacks/#{@text_callback}/edit"}
             class={"btn btn-outline-#{bsname}"}
           >
-            <i class="fa-solid fa-fw fa-gauge"></i> Live dashboard
-          </a>
-
-          <a
-            href={Routes.admin_lobby_policy_path(@conn, :edit, @lobby_policy)}
-            class={"btn btn-outline-#{bsname}"}
-          >
-            <i class="fa-regular fa-fw fa-wrench"></i> Edit Lobby policy
+            <i class="fa-regular fa-fw fa-wrench"></i> Edit Text callback
           </a>
         </div>
 
-        <h3 style={"color: #{@lobby_policy.colour}"}>
-          <%= @lobby_policy.name %> &nbsp;
-          <i class={"fa-regular fa-fw #{@lobby_policy.icon}"}></i>
+        <h3 style={"color: #{@text_callback.colour}"}>
+          <%= @text_callback.name %> &nbsp;
+          <i class={"fa-regular fa-fw #{@text_callback.icon}"}></i>
         </h3>
         <br />
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
