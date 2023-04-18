@@ -1,0 +1,106 @@
+<% bsname = view_colour() %>
+
+<%= render(
+  TeiserverWeb.Admin.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "text_callbacks"})
+) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render(
+          TeiserverWeb.Admin.LobbyPolicyView,
+          "section_menu.html",
+          Map.merge(assigns, %{
+            show_search: false,
+            active:
+              cond do
+                @conn.params["search"] != nil -> "search"
+                # @filter != nil -> @filter
+                true -> "index"
+              end
+          })
+        ) %>
+        <br /><br />
+
+        <h4>Listing Text callbacks</h4>
+
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th colspan="2">Callback</th>
+
+              <th>Enabled</th>
+
+              <th>Triggers</th>
+
+              <th>Response</th>
+
+              <th colspan="2">&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for text_callback <- @text_callbacks do %>
+              <% first_name =
+                case text_callback.agent_name_list do
+                  [n | _] -> n
+                  _ -> ""
+                end %>
+              <tr>
+                <td style={"background-color: #{text_callback.colour}; color: #FFF;"} width="22">
+                  <%= central_component("icon", icon: text_callback.icon) %>
+                </td>
+                <td style={"background-color: #{rgba_css text_callback.colour};"}>
+                  <%= text_callback.lobby_name_format %>
+                </td>
+
+                <td>
+                  <%= if text_callback.enabled do %>
+                    <i class="fa-fw fa-regular fa-check text-success"></i>
+                  <% else %>
+                    <i class="fa-fw fa-regular fa-times text-danger"></i>
+                  <% end %>
+                </td>
+
+                <td><%= text_callback.agent_name_format %></td>
+
+                <td><%= text_callback.preset %></td>
+
+                <td><%= "#{text_callback.min_teamsize} - #{text_callback.max_teamsize}" %></td>
+                <td><%= "#{text_callback.min_rank} - #{text_callback.max_rank}" %></td>
+                <td><%= "#{text_callback.min_rating} - #{text_callback.max_rating}" %></td>
+                <td>
+                  <%= "#{text_callback.min_uncertainty} - #{text_callback.max_uncertainty}" %>
+                </td>
+
+                <td><%= Enum.count(text_callback.map_list) %></td>
+                <td>
+                  <%= Enum.count(text_callback.agent_name_list) %> (<%= first_name %>)
+                </td>
+
+                <td>
+                  <a
+                    href={Routes.admin_text_callback_path(@conn, :show, text_callback.id)}
+                    class={"btn btn-outline-#{bsname} btn-sm"}
+                  >
+                    <i class="fa-fw fa-regular fa-eye"></i> Show
+                  </a>
+                </td>
+                <td>
+                  <a
+                    href={Routes.admin_text_callback_path(@conn, :edit, text_callback.id)}
+                    class={"btn btn-outline-#{bsname} btn-sm"}
+                  >
+                    <i class="fa-fw fa-regular fa-wrench"></i> Edit
+                  </a>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

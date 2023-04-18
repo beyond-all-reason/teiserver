@@ -1,7 +1,5 @@
 defmodule Teiserver.Game.LobbyPolicy do
-  @moduledoc """
-
-  """
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "lobby_policies" do

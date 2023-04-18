@@ -7,6 +7,7 @@ defmodule Teiserver.Communication.TextCallback do
 
     field :icon, :string
     field :colour, :string
+    field :enabled, :boolean
 
     field :triggers, {:array, :string}
 
@@ -26,7 +27,10 @@ defmodule Teiserver.Communication.TextCallback do
       |> trim_strings(~w(name)a)
 
     struct
-    |> cast(params, ~w(name icon colour triggers response rules)a)
+    |> cast(params, ~w(name icon colour triggers response enabled rules)a)
     |> validate_required(~w(name icon colour triggers response)a)
   end
+
+  @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean
+  def authorize(_action, conn, _params), do: allow?(conn, "teiserver.staff.admin")
 end

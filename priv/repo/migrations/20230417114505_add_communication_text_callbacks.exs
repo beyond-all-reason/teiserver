@@ -7,6 +7,7 @@ defmodule Central.Repo.Migrations.AddCommunicationTextCallbacks do
 
       add :icon, :string
       add :colour, :string
+      add :enabled, :boolean
 
       add :triggers, {:array, :string}
 

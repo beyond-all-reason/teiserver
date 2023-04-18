@@ -18,5 +18,6 @@ defmodule TeiserverWeb.Admin.GeneralView do
   def view_colour("lobby_policies"), do: Teiserver.Game.LobbyPolicyLib.colours()
   def view_colour("matches"), do: Teiserver.Battle.MatchLib.colours()
   def view_colour("badge_types"), do: Teiserver.Account.BadgeTypeLib.colours()
+  def view_colour("text_callbacks"), do: Teiserver.Communication.TextCallbackLib.colours()
   def view_colour("achievements"), do: Teiserver.Game.AchievementTypeLib.colour()
 end
