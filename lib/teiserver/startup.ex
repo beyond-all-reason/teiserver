@@ -12,6 +12,8 @@ defmodule Teiserver.Startup do
     Teiserver.TeiserverConfigs.teiserver_configs()
     Teiserver.TeiserverQuickActions.teiserver_quick_actions()
 
+    Teiserver.Communication.build_text_callback_cache()
+
     Teiserver.LobbyIdServer.start_lobby_id_server()
     Teiserver.SpringIdServer.start_spring_id_server()
 

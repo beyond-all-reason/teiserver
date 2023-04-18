@@ -189,46 +189,12 @@ defmodule Teiserver.Communication do
     TextCallback.changeset(text_callback, %{})
   end
 
-  def build_text_callback_cache do
-    list_text_callbacks(
-      limit: :infinity
-    )
-    |> Enum.each(fn text_callback ->
-      Central.store_put(:text_callback_store, text_callback.id, text_callback)
-
-      text_callback.triggers
-      |> Enum.each(fn trigger_text ->
-        Central.store_put(:text_callback_trigger_lookup, trigger_text, text_callback.id)
-      end)
-    end)
-  end
+  @spec build_text_callback_cache() :: :ok
+  defdelegate build_text_callback_cache, to: TextCallbackLib
 
   @spec update_text_callback_cache({:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}) :: {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
-  def update_text_callback_cache({:ok, text_callback} = args) do
-    Central.store_put(:text_callback_store, text_callback.id, text_callback)
-
-    text_callback.triggers
-    |> Enum.each(fn trigger_text ->
-      Central.store_put(:text_callback_trigger_lookup, trigger_text, text_callback.id)
-    end)
-
-    args
-  end
-  def update_text_callback_cache(args), do: args
+  defdelegate update_text_callback_cache(args), to: TextCallbackLib
 
   @spec lookup_text_callback_from_trigger(String.t()) :: TextCallback.t() | nil
-  def lookup_text_callback_from_trigger(trigger) do
-    trigger = trigger
-      |> String.trim()
-      |> String.downcase()
-
-    case Central.store_get(:text_callback_trigger_lookup, trigger) do
-      nil -> nil
-      id ->
-        case Central.store_get(:text_callback_store, id) do
-          nil -> nil
-          text_callback -> text_callback
-        end
-    end
-  end
+  defdelegate lookup_text_callback_from_trigger(trigger), to: TextCallbackLib
 end
