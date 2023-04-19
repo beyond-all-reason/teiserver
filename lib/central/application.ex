@@ -145,8 +145,8 @@ defmodule Central.Application do
         {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
 
         # Text callbacks
-        concache_sup(:text_callback_trigger_lookup),
-        concache_sup(:text_callback_store),
+        concache_perm_sup(:text_callback_trigger_lookup),
+        concache_perm_sup(:text_callback_store),
 
         # Ranch servers
         %{
