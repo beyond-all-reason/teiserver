@@ -781,7 +781,7 @@ defmodule Teiserver.User do
   end
 
   @spec wait_for_startup() :: :ok
-  defp wait_for_startup() do
+  def wait_for_startup() do
     if Central.cache_get(:application_metadata_cache, "teiserver_partial_startup_completed") !=
          true do
       :timer.sleep(@timer_sleep)

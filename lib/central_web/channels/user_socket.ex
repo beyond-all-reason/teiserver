@@ -8,7 +8,6 @@ defmodule CentralWeb.UserSocket do
 
   channel("fp*", TeiserverWeb.User.FpChannel)
   channel("live_search:*", CentralWeb.LiveSearch.Channel)
-  channel("chat:*", CentralWeb.Chat.Channel)
   channel("communication_notification:*", CentralWeb.Communication.NotificationChannel)
   channel("communication_reloads:*", CentralWeb.Communication.NotificationChannel)
 

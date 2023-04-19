@@ -3,7 +3,9 @@ defmodule Teiserver.Account.LoginThrottleServer do
   use GenServer
   require Logger
   alias Teiserver.{Account, User}
+  alias Central.Config
   alias Teiserver.Data.Types, as: T
+  alias Phoenix.PubSub
 
   # Order of the queues matters
   @queues ~w(moderator contributor vip standard toxic)a
@@ -15,7 +17,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     call_login_throttle_server(:queue_size)
   end
 
-  @spec attempt_login(T.userid()) :: :login | :queue
+  @spec attempt_login(T.userid()) :: boolean()
   def attempt_login(userid) do
     call_login_throttle_server({:attempt_login, userid})
   end
@@ -25,15 +27,20 @@ defmodule Teiserver.Account.LoginThrottleServer do
     call_login_throttle_server(:queue_size)
   end
 
-  # def send_login_throttle_server(msg) do
-  #   case get_login_throttle_server_pid() do
-  #     nil ->
-  #       nil
+  @spec startup :: any
+  def startup() do
+    send_login_throttle_server(:startup)
+  end
 
-  #     pid ->
-  #       send(pid, msg)
-  #   end
-  # end
+  def send_login_throttle_server(msg) do
+    case get_login_throttle_server_pid() do
+      nil ->
+        nil
+
+      pid ->
+        send(pid, msg)
+    end
+  end
 
   defp call_login_throttle_server(msg) do
     case get_login_throttle_server_pid() do
@@ -52,7 +59,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     end
   end
 
-  defp get_login_throttle_server_pid() do
+  def get_login_throttle_server_pid() do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "LoginThrottleServer") do
       [{pid, _}] ->
         pid
@@ -79,27 +86,78 @@ defmodule Teiserver.Account.LoginThrottleServer do
   end
 
   def handle_call({:attempt_login, userid}, _from, state) do
-    result = case can_login?(userid, state) do
-      true -> :login
-      false -> :queue
-    end
+    {new_state, result} = can_login?(userid, state)
 
-    {:reply, result, state}
+    {:reply, result, new_state}
+  end
+
+  @impl true
+  def handle_info(%{channel: "teiserver_telemetry", event: :data, data: data}, state) do
+    new_state = apply_server_capacity(state, data)
+    {:noreply, new_state}
+  end
+
+  def handle_info(:tick, state) do
+    {remaining_capacity, server_usage} = Teiserver.User.server_capacity()
+
+    {:noreply, %{state |
+      remaining_capacity: remaining_capacity,
+      server_usage: server_usage
+    }}
+  end
+
+  def handle_info(:startup, _) do
+    :timer.send_interval(@tick_interval, :tick)
+    telemetry_data = (Central.cache_get(:application_temp_cache, :telemetry_data) || %{})
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_telemetry")
+
+    state = %{
+       queues: @queues |> Map.new(fn q -> {q, []} end),
+       recent_logins: [],
+       heartbeats: %{},
+       remaining_capacity: 0,
+       server_usage: 0,
+       use_queues: true,
+     }
+     |> apply_server_capacity(telemetry_data)
+
+    {:noreply, state}
   end
 
   @doc """
   If the queues are empty you get a true result
   If there is a queue you get a false result
   """
-  @spec can_login?(T.userid(), map()) :: boolean
+  @spec can_login?(T.userid(), map()) :: {map(), boolean()}
   def can_login?(userid, state) do
-    case categorise_user(userid) do
-      :instant -> true
-      category ->
+    category = categorise_user(userid)
+
+    cond do
+      category == :instant ->
+        Logger.warn("instant")
+        new_state = accept_login(state)
+        {new_state, true}
+
+      state.remaining_capacity < 1 ->
+        Logger.warn("no capacity")
+        queue = Map.get(state.queues, category, [])
+        new_queue = [userid | queue]
+        new_queue_map = Map.put(state.queues, category, new_queue)
+        new_state = Map.put(state, :queues, new_queue_map)
+
+        {new_state, false}
+
+      true ->
+        IO.puts ""
+        IO.inspect state.remaining_capacity, label: "remaining_capacity"
+        IO.puts ""
+
+        Logger.warn("default")
+
         # Of the queues ahead of us, are any occupied?
         # this goes through every relevant queue and returns true
         # if all of them are empty
-        @queues
+        empty_queues = @queues
           |> Enum.take_while(fn queue -> queue != category end)
           |> Kernel.++([category])
           |> Enum.map(fn key ->
@@ -107,7 +165,26 @@ defmodule Teiserver.Account.LoginThrottleServer do
             Enum.empty?(queue)
           end)
           |> Enum.all?()
+
+        if empty_queues do
+          new_state = accept_login(state)
+          {new_state, true}
+        else
+          queue = Map.get(state.queues, category, [])
+          new_queue = [userid | queue]
+          new_queue_map = Map.put(state.queues, category, new_queue)
+          new_state = Map.put(state, :queues, new_queue_map)
+
+          {new_state, false}
+        end
     end
+  end
+
+  defp accept_login(%{recent_logins: recent_logins, remaining_capacity: remaining_capacity} = state) do
+    %{state |
+      recent_logins: [System.system_time(:microsecond) | recent_logins],
+      remaining_capacity: remaining_capacity - 1
+    }
   end
 
   defp categorise_user(userid) do
@@ -123,35 +200,27 @@ defmodule Teiserver.Account.LoginThrottleServer do
     end
   end
 
-  @impl true
-  def handle_info(:tick, state) do
-    {remaining_capacity, server_usage} = Teiserver.User.server_capacity()
+  @spec apply_server_capacity(Map.t(), Map.t()) :: {non_neg_integer(), number()}
+  defp apply_server_capacity(state, telemetry_data) do
+    total_limit = Config.get_site_config_cache("system.User limit")
 
-    {:noreply, %{state |
+    client_count =
+      telemetry_data
+      |> Map.get(:client, %{})
+      |> Map.get(:total, 0)
+
+    remaining_capacity = total_limit - client_count
+    server_usage = max(client_count, 1) / total_limit
+
+    IO.puts ""
+    IO.inspect {remaining_capacity, server_usage}
+    IO.puts ""
+
+    %{state |
       remaining_capacity: remaining_capacity,
       server_usage: server_usage
-    }}
+    }
   end
-
-  # def handle_info({:login_attempt, userid}, state) do
-  #   user = Account.get_user_by_id(userid)
-
-  #   queue_key =
-  #     cond do
-  #       User.has_all_roles?(user, ["Moderator"]) -> :moderator_queue
-  #       User.has_all_roles?(user, ["Contributor"]) -> :contributor_queue
-  #       User.has_all_roles?(user, ["VIP"]) -> :vip_queue
-  #       user.behaviour_score < 5000 -> :toxic_queue
-  #       true -> :standard_queue
-  #     end
-
-  #   # Insert them into the front of the queue list
-  #   queue = Map.get(state, queue_key, [])
-  #   new_queue = [userid | queue]
-  #   new_state = Map.put(state, queue_key, new_queue)
-
-  #   {:noreply, new_state}
-  # end
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -162,7 +231,6 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_) do
     Logger.metadata(request_id: "LoginThrottleServer")
-    :timer.send_interval(@tick_interval, :tick)
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
@@ -171,14 +239,6 @@ defmodule Teiserver.Account.LoginThrottleServer do
       "LoginThrottleServer"
     )
 
-    {:ok,
-     %{
-       queues: @queues |> Map.new(fn q -> {q, []} end),
-       recent_logins: [],
-       heartbeats: %{},
-       remaining_capacity: 0,
-       server_usage: 0,
-       use_queues: false
-     }}
+    {:ok, %{}}
   end
 end

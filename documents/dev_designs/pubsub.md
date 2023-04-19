@@ -24,6 +24,7 @@ Used for sending out global messages about server events.
 Used for broadcasting internal telemetry for consumers (such as admin dashboard)
 ```elixir
 %{
+  event: :data,
   data: %{
     client: map(),
     battle: map()

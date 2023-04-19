@@ -115,6 +115,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
       "teiserver_telemetry",
       %{
         channel: "teiserver_telemetry",
+        event: :data,
         data: data
       }
     )

@@ -28,7 +28,7 @@ defmodule Teiserver.Moderation.ReportLib do
 
   def sections() do
     [
-      {"Chat / Communication", "chat", Central.Communication.ChatRoomLib.icon()},
+      {"Chat / Communication", "chat", Teiserver.Chat.LobbyMessageLib.icon()},
       {"In game actions", "actions", Teiserver.Battle.MatchLib.icon()}
     ]
   end

@@ -23,10 +23,6 @@ defmodule Central.Admin.DeleteUserTask do
     query = "DELETE FROM account_codes WHERE user_id IN #{sql_id_list}"
     Ecto.Adapters.SQL.query(Repo, query, [])
 
-    # Chat
-    query = "DELETE FROM communication_chat_contents WHERE user_id IN #{sql_id_list}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
-
     # Group memberships
     query = "DELETE FROM account_group_memberships WHERE user_id IN #{sql_id_list}"
     Ecto.Adapters.SQL.query(Repo, query, [])
