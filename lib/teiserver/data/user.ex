@@ -4,6 +4,7 @@ defmodule Teiserver.User do
   """
   alias Central.Config
   alias Teiserver.{Account, Client, Coordinator, Telemetry}
+  alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.EmailHelper
   alias Teiserver.Account.{UserCache, RelationsLib}
   alias Teiserver.Chat.WordLib
@@ -961,7 +962,12 @@ defmodule Teiserver.User do
             end
 
           true ->
-            do_login(user, ip, lobby, lobby_hash)
+            # Check with login throttle here
+            # if LoginThrottleServer.attempt_login(self(), user.id) do
+              do_login(user, ip, lobby, lobby_hash)
+            # else
+            #   {:error, "Queued", lobby, lobby_hash}
+            # end
         end
     end
   end
@@ -1029,13 +1035,18 @@ defmodule Teiserver.User do
             end
 
           true ->
-            do_login(user, ip, lobby, lobby_hash)
+            # Check with login throttle here
+            # if LoginThrottleServer.attempt_login(self(), user.id) do
+              do_login(user, ip, lobby, lobby_hash)
+            # else
+            #   {:error, "Queued", lobby, lobby_hash}
+            # end
         end
     end
   end
 
   @spec do_login(T.user(), String.t(), String.t(), String.t()) :: {:ok, T.user()}
-  defp do_login(user, ip, lobby_client, lobby_hash) do
+  def do_login(user, ip, lobby_client, lobby_hash) do
     stats = Account.get_user_stat_data(user.id)
     ip = Map.get(stats, "ip_override", ip)
 

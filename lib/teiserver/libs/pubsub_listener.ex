@@ -1,6 +1,15 @@
 defmodule Teiserver.Common.PubsubListener do
   @moduledoc """
   A genserver whose sole purpose is to listen to one or more pubusbs and record what they get sent
+
+  Usage:
+  ```
+  # Create
+  listener = PubsubListener.new_listener(["channel1", "channel2"])
+
+  # Check mailbox
+  messages = PubsubListener.get(listener)
+  ```
   """
 
   use GenServer

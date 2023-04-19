@@ -13,7 +13,7 @@ defmodule Teiserver.Protocols.SpringIn do
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
   alias Teiserver.Protocols.{Spring, SpringOut}
-  alias Teiserver.Protocols.Spring.{TelemetryIn, BattleIn, LobbyPolicyIn}
+  alias Teiserver.Protocols.Spring.{AuthIn, TelemetryIn, BattleIn, LobbyPolicyIn}
 
   @unoptimised_lobbies ["SLTS Client d", "LuaLobby Chobby"]
 
@@ -86,6 +86,10 @@ defmodule Teiserver.Protocols.SpringIn do
   # Spring matchmaking disabled
   defp do_handle("c.matchmaking." <> _cmd, _data, _msg_id, state) do
     state
+  end
+
+  defp do_handle("c.auth." <> cmd, data, msg_id, state) do
+    AuthIn.do_handle(cmd, data, msg_id, state)
   end
 
   defp do_handle("c.telemetry." <> cmd, data, msg_id, state) do
@@ -329,6 +333,13 @@ defmodule Teiserver.Protocols.SpringIn do
       {:error, "Unverified", userid} ->
         reply(:agreement, nil, msg_id, state)
         Map.put(state, :unverified_id, userid)
+
+      {:error, "Queued", _userid, lobby, lobby_hash} ->
+        reply(:login_queued, nil, msg_id, state)
+        Map.merge(state, %{
+          lobby: lobby,
+          lobby_hash: lobby_hash,
+        })
 
       {:ok, user} ->
         new_state =

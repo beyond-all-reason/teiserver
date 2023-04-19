@@ -5,7 +5,7 @@ defmodule Teiserver.SpringTcpServer do
 
   alias Phoenix.PubSub
   alias Central.Config
-  alias Teiserver.{User, Client, Account}
+  alias Teiserver.{User, Client, Account, Room}
   alias Teiserver.Protocols.{SpringIn, SpringOut}
   alias Teiserver.Data.Types, as: T
 
@@ -344,6 +344,24 @@ defmodule Teiserver.SpringTcpServer do
 
   def handle_info(:error_log, state) do
     new_state = SpringOut.reply(:error_log, :error_log, nil, state)
+    {:noreply, new_state}
+  end
+
+  # We were not able to login right away, instead we had to queue for a bit!
+  def handle_info({:login_accepted, userid}, state) do
+    user = Account.get_user_by_id(userid)
+    new_state = SpringOut.do_login_accepted(state, user)
+
+    # Do we have a clan?
+    if user.clan_id do
+      :timer.sleep(200)
+      clan = Teiserver.Clans.get_clan!(user.clan_id)
+      room_name = Room.clan_room_name(clan.tag)
+      SpringOut.do_join_room(new_state, room_name)
+    end
+
+    {:ok, _user} = User.do_login(user, state.ip, state.lobby, state.lobby_hash)
+
     {:noreply, new_state}
   end
 

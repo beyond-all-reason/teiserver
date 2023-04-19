@@ -1,5 +1,12 @@
 defmodule Teiserver.Account.LoginThrottleServer do
-  @moduledoc false
+  @moduledoc """
+  Users attempt to login, if they validate the login process a final call is
+  made to this server.
+
+  They call `attempt_login(userid)`, a `true` response means they are good to login
+  while a `false` response means they are now in the queue
+
+  """
   use GenServer
   require Logger
   alias Teiserver.{Account, User}
@@ -11,20 +18,29 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @queues ~w(moderator contributor vip standard toxic)a
 
   @tick_interval 1_000
+  @release_interval 100
 
   @spec get_queue_length :: non_neg_integer()
   def get_queue_length() do
     call_login_throttle_server(:queue_size)
   end
 
-  @spec attempt_login(T.userid()) :: boolean()
-  def attempt_login(userid) do
-    call_login_throttle_server({:attempt_login, userid})
+  @doc """
+  This is the function call used as part of login attempts.
+  """
+  @spec attempt_login(pid(), T.userid()) :: boolean()
+  def attempt_login(pid, userid) do
+    call_login_throttle_server({:attempt_login, pid, userid})
   end
 
-  @spec heartbeat :: non_neg_integer()
-  def heartbeat() do
-    call_login_throttle_server(:queue_size)
+  @doc """
+  This refreshes the heartbeat timer for a given pid. A heartbeat here is
+  when a client tells the server they are still waiting to login.
+  If a client doesn't send heartbeats they get dropped from the queue
+  """
+  @spec heartbeat(pid(), T.userid()) :: :ok
+  def heartbeat(pid, userid) do
+    send_login_throttle_server({:heartbeat, pid, userid})
   end
 
   @spec startup :: any
@@ -81,12 +97,12 @@ defmodule Teiserver.Account.LoginThrottleServer do
     {:reply, result, state}
   end
 
-  def handle_call({:attempt_login, _userid}, _from, %{use_queues: false} = state) do
+  def handle_call({:attempt_login, _pid, _userid}, _from, %{use_queues: false} = state) do
     {:reply, :login, state}
   end
 
-  def handle_call({:attempt_login, userid}, _from, state) do
-    {new_state, result} = can_login?(userid, state)
+  def handle_call({:attempt_login, pid, userid}, _from, state) do
+    {new_state, result} = can_login?(pid, userid, state)
 
     {:reply, result, new_state}
   end
@@ -97,6 +113,20 @@ defmodule Teiserver.Account.LoginThrottleServer do
     {:noreply, new_state}
   end
 
+  def handle_info(:release, %{awaiting_release: []} = state) do
+    {:noreply, state}
+  end
+
+  # Releases the head of the awaiting release list
+  def handle_info(:release, state) do
+    [{pid, userid} | remaining] = state.awaiting_release
+
+    send(pid, {:login_accepted, userid})
+
+    {:noreply, %{state | awaiting_release: remaining}}
+  end
+
+  # Check stats, see if we can let anybody else login right now
   def handle_info(:tick, state) do
     {remaining_capacity, server_usage} = Teiserver.User.server_capacity()
 
@@ -106,8 +136,18 @@ defmodule Teiserver.Account.LoginThrottleServer do
     }}
   end
 
+  # Handle a heartbeat from a pid
+  def handle_info({:heartbeat, pid, userid}, state) do
+    new_heartbeats = Map.put(state.heartbeats, userid, {pid, System.system_time(:microsecond)})
+
+    {:noreply, %{state |
+      heartbeats: new_heartbeats
+    }}
+  end
+
   def handle_info(:startup, _) do
     :timer.send_interval(@tick_interval, :tick)
+    :timer.send_interval(@release_interval, :release)
     telemetry_data = (Central.cache_get(:application_temp_cache, :telemetry_data) || %{})
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_telemetry")
 
@@ -115,6 +155,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
        queues: @queues |> Map.new(fn q -> {q, []} end),
        recent_logins: [],
        heartbeats: %{},
+       awaiting_release: [],
        remaining_capacity: 0,
        server_usage: 0,
        use_queues: true,
@@ -128,32 +169,24 @@ defmodule Teiserver.Account.LoginThrottleServer do
   If the queues are empty you get a true result
   If there is a queue you get a false result
   """
-  @spec can_login?(T.userid(), map()) :: {map(), boolean()}
-  def can_login?(userid, state) do
+  @spec can_login?(pid(), T.userid(), map()) :: {map(), boolean()}
+  def can_login?(pid, userid, state) do
     category = categorise_user(userid)
 
     cond do
       category == :instant ->
-        Logger.warn("instant")
         new_state = accept_login(state)
         {new_state, true}
 
       state.remaining_capacity < 1 ->
-        Logger.warn("no capacity")
         queue = Map.get(state.queues, category, [])
-        new_queue = [userid | queue]
+        new_queue = queue ++ [userid]
         new_queue_map = Map.put(state.queues, category, new_queue)
         new_state = Map.put(state, :queues, new_queue_map)
 
         {new_state, false}
 
       true ->
-        IO.puts ""
-        IO.inspect state.remaining_capacity, label: "remaining_capacity"
-        IO.puts ""
-
-        Logger.warn("default")
-
         # Of the queues ahead of us, are any occupied?
         # this goes through every relevant queue and returns true
         # if all of them are empty
@@ -171,7 +204,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
           {new_state, true}
         else
           queue = Map.get(state.queues, category, [])
-          new_queue = [userid | queue]
+          new_queue = queue ++ [userid]
           new_queue_map = Map.put(state.queues, category, new_queue)
           new_state = Map.put(state, :queues, new_queue_map)
 
@@ -179,6 +212,37 @@ defmodule Teiserver.Account.LoginThrottleServer do
         end
     end
   end
+
+  # # This takes one user out of a queue at a time
+  # # starting with the most relevant queues
+  # defp dequeue_users(state, 0), do: state
+  # defp dequeue_users(state, empty_count) do
+  #   handled = @queues
+  #     |> Enum.reduce(false, fn
+  #       (_key, true) -> true
+  #       (key, false) ->
+  #         queue = Map.get(state.queues, key)
+  #         if Enum.empty?(queue) do
+  #           false
+  #         else
+  #           [userid | new_queue] = state.queues.moderator
+  #           new_queue_map = Map.put(state.queues, :moderator, new_queue)
+
+  #           accept_queued_login(state, userid)
+  #         end
+  #     end)
+
+  #   dequeue_users(new_state, empty_count - 1)
+  # end
+
+  # defp accept_queued_login(state, userid) do
+  #   # send stuff to user
+
+  #   %{state |
+  #     recent_logins: [System.system_time(:microsecond) | state.recent_logins],
+  #     remaining_capacity: state.remaining_capacity - 1
+  #   }
+  # end
 
   defp accept_login(%{recent_logins: recent_logins, remaining_capacity: remaining_capacity} = state) do
     %{state |
@@ -211,10 +275,6 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
     remaining_capacity = total_limit - client_count
     server_usage = max(client_count, 1) / total_limit
-
-    IO.puts ""
-    IO.inspect {remaining_capacity, server_usage}
-    IO.puts ""
 
     %{state |
       remaining_capacity: remaining_capacity,

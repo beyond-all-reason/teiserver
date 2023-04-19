@@ -62,6 +62,10 @@ defmodule Teiserver.Protocols.SpringOut do
     "ACCEPTED #{user}\n"
   end
 
+  defp do_reply(:login_queued, _) do
+    "QUEUED\n"
+  end
+
   defp do_reply(:denied, reason) do
     "DENIED #{reason}\n"
   end
