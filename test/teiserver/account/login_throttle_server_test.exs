@@ -72,33 +72,47 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     assert r == false
     assert PubsubListener.get(toxic_listener) == []
 
-    # state = :sys.get_state(pid)
-    # IO.puts ""
-    # IO.inspect state
-    # IO.puts ""
+    state = :sys.get_state(pid)
+    assert state.queues.moderator == [moderator.id]
+    assert state.queues.contributor == [contributor.id]
+    assert state.queues.vip == [vip.id]
+    assert state.queues.standard == [standard.id]
+    assert state.queues.toxic == [toxic.id]
 
-    # assert state.queues.moderator == [moderator.id]
-    # refute state.queues.contributor == [contributor.id]
-    # refute state.queues.vip == [vip.id]
-    # refute state.queues.standard == [standard.id]
-    # refute state.queues.toxic == [toxic.id]
+    # Now we alter the capacity and see what happens
+    send(pid, %{channel: "teiserver_telemetry", event: :data, data: %{
+      client: %{
+        total: 9
+      }
+    }})
+    send(pid, :tick)
 
-    # # Now we alter the capacity and see what happens
-    # send(pid, %{channel: "teiserver_telemetry", event: :data, data: %{
-    #   client: %{
-    #     total: 9
-    #   }
-    # }})
-    # send(pid, :tick)
+    # Give it a chance to dequeue
+    :timer.sleep(100)
 
-    # state = :sys.get_state(pid)
-    # IO.puts ""
-    # IO.inspect state
-    # IO.puts ""
-    # assert state.queues.moderator == []
-    # refute state.queues.contributor == [contributor.id]
-    # refute state.queues.vip == [vip.id]
-    # refute state.queues.standard == [standard.id]
-    # refute state.queues.toxic == [toxic.id]
+    state = :sys.get_state(pid)
+    assert PubsubListener.get(moderator_listener) == [{:login_accepted, moderator.id}]
+    assert PubsubListener.get(contributor_listener) == []
+    assert PubsubListener.get(vip_listener) == []
+    assert PubsubListener.get(standard_listener) == []
+    assert PubsubListener.get(toxic_listener) == []
+
+    assert state.queues.moderator == []
+    assert state.queues.contributor == [contributor.id]
+    assert state.queues.vip == [vip.id]
+    assert state.queues.standard == [standard.id]
+    assert state.queues.toxic == [toxic.id]
+
+    # Now approve the rest of them
+    # the toxic one will have to wait a bit longer though
+    send(pid, %{channel: "teiserver_telemetry", event: :data, data: %{
+      client: %{
+        total: 4
+      }
+    }})
+    send(pid, :tick)
+
+    # Give it a chance to dequeue
+    :timer.sleep(100)
   end
 end

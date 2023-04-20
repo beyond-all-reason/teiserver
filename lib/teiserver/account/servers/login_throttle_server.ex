@@ -15,10 +15,16 @@ defmodule Teiserver.Account.LoginThrottleServer do
   alias Phoenix.PubSub
 
   # Order of the queues matters
-  @queues ~w(moderator contributor vip standard toxic)a
+  @all_queues ~w(moderator contributor vip standard toxic)a
+
+  # Queues not impacted with special rules
+  @standard_queues ~w(moderator contributor vip standard)a
 
   @tick_interval 1_000
   @release_interval 100
+  @heartbeat_expiry 10_000
+
+  @toxic_min_wait 30_000
 
   @spec get_queue_length :: non_neg_integer()
   def get_queue_length() do
@@ -128,12 +134,36 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   # Check stats, see if we can let anybody else login right now
   def handle_info(:tick, state) do
-    {remaining_capacity, server_usage} = Teiserver.User.server_capacity()
+    # Strip out invalid heartbeats
+    min_age = System.system_time(:microsecond) - @heartbeat_expiry
 
+    dropped_users = state.heartbeats
+      |> Map.filter(fn {_key, {_pid, last_time}} ->
+        last_time < min_age
+      end)
+      |> Map.keys
+
+    new_queues = @all_queues
+      |> Map.new(fn key ->
+        existing_queue = Map.get(state.queues, key)
+        new_queue = existing_queue
+          |> Enum.reject(fn userid -> Enum.member?(dropped_users, userid) end)
+
+        {key, new_queue}
+      end)
+
+    new_heartbeats = Map.drop(state.heartbeats, dropped_users)
+
+    send(self(), :dequeue)
     {:noreply, %{state |
-      remaining_capacity: remaining_capacity,
-      server_usage: server_usage
+      heartbeats: new_heartbeats,
+      queues: new_queues
     }}
+  end
+
+  def handle_info(:dequeue, state) do
+    new_state = dequeue_users(state)
+    {:noreply, new_state}
   end
 
   # Handle a heartbeat from a pid
@@ -152,9 +182,10 @@ defmodule Teiserver.Account.LoginThrottleServer do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_telemetry")
 
     state = %{
-       queues: @queues |> Map.new(fn q -> {q, []} end),
+       queues: @all_queues |> Map.new(fn q -> {q, []} end),
        recent_logins: [],
        heartbeats: %{},
+       arrival_times: %{},
        awaiting_release: [],
        remaining_capacity: 0,
        server_usage: 0,
@@ -178,11 +209,17 @@ defmodule Teiserver.Account.LoginThrottleServer do
         new_state = accept_login(state)
         {new_state, true}
 
-      state.remaining_capacity < 1 ->
+      state.remaining_capacity < 1 and category != :toxic ->
         queue = Map.get(state.queues, category, [])
         new_queue = queue ++ [userid]
         new_queue_map = Map.put(state.queues, category, new_queue)
-        new_state = Map.put(state, :queues, new_queue_map)
+
+        new_heartbeats = Map.put(state.heartbeats, userid, {pid, System.system_time(:microsecond)})
+
+        new_state = Map.merge(state, %{
+          queues: new_queue_map,
+          heartbeats: new_heartbeats
+        })
 
         {new_state, false}
 
@@ -190,7 +227,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
         # Of the queues ahead of us, are any occupied?
         # this goes through every relevant queue and returns true
         # if all of them are empty
-        empty_queues = @queues
+        empty_queues = @all_queues
           |> Enum.take_while(fn queue -> queue != category end)
           |> Kernel.++([category])
           |> Enum.map(fn key ->
@@ -199,50 +236,107 @@ defmodule Teiserver.Account.LoginThrottleServer do
           end)
           |> Enum.all?()
 
-        if empty_queues do
+        if empty_queues and category != :toxic do
           new_state = accept_login(state)
           {new_state, true}
         else
           queue = Map.get(state.queues, category, [])
           new_queue = queue ++ [userid]
           new_queue_map = Map.put(state.queues, category, new_queue)
-          new_state = Map.put(state, :queues, new_queue_map)
+
+          new_heartbeats = Map.put(state.heartbeats, userid, {pid, System.system_time(:microsecond)})
+
+          new_state = Map.merge(state, %{
+            queues: new_queue_map,
+            heartbeats: new_heartbeats
+          })
 
           {new_state, false}
         end
     end
   end
 
-  # # This takes one user out of a queue at a time
-  # # starting with the most relevant queues
-  # defp dequeue_users(state, 0), do: state
-  # defp dequeue_users(state, empty_count) do
-  #   handled = @queues
-  #     |> Enum.reduce(false, fn
-  #       (_key, true) -> true
-  #       (key, false) ->
-  #         queue = Map.get(state.queues, key)
-  #         if Enum.empty?(queue) do
-  #           false
-  #         else
-  #           [userid | new_queue] = state.queues.moderator
-  #           new_queue_map = Map.put(state.queues, :moderator, new_queue)
+  # This takes one user out of a queue at a time
+  # starting with the most relevant queues
+  defp dequeue_users(state) do
+    dequeue_users(state, state.remaining_capacity)
+  end
 
-  #           accept_queued_login(state, userid)
-  #         end
-  #     end)
+  defp dequeue_users(state, 0), do: state
+  defp dequeue_users(state, empty_count) do
+    # For our first part, we try to find a user to dequeue
+    userid = @standard_queues
+      |> Enum.reduce(nil, fn
+        (key, nil) ->
+          queue = Map.get(state.queues, key)
 
-  #   dequeue_users(new_state, empty_count - 1)
-  # end
+          if Enum.empty?(queue) do
+            nil
+          else
+            hd(state.queues.moderator)
+          end
 
-  # defp accept_queued_login(state, userid) do
-  #   # send stuff to user
+        # A return of anything other than nil means
+        # we have found what we wanted
+        (_, r) ->
+          r
+      end)
 
-  #   %{state |
-  #     recent_logins: [System.system_time(:microsecond) | state.recent_logins],
-  #     remaining_capacity: state.remaining_capacity - 1
-  #   }
-  # end
+    if userid do
+      new_state = accept_queued_login(state, userid)
+      dequeue_users(new_state, empty_count - 1)
+    else
+      # No standard user found
+      dequeue_toxic_users(state, empty_count)
+    end
+  end
+
+  defp dequeue_toxic_users(state, empty_count) do
+    # Toxic users have to wait a certain length of time to be able to login
+    userids = state.queues.toxic
+      |> Enum.take(empty_count)
+      |> Enum.filter(fn userid ->
+        arrival_time = Map.get(state.arrival_times, userid, 99999999)
+        waited_for = System.system_time(:microsecond) - arrival_time
+
+        waited_for > @toxic_min_wait
+      end)
+
+    if Enum.empty?(userids) do
+      state
+    else
+      userids
+      |> Enum.reduce(state, fn (userid, acc_state) ->
+        accept_queued_login(acc_state, userid)
+      end)
+    end
+  end
+
+  defp accept_queued_login(state, userid) do
+    {pid, _hb} = state.heartbeats[userid]
+
+    # Remove this user from heartbeats and queues
+    new_queues = @all_queues
+      |> Map.new(fn key ->
+        existing_queue = Map.get(state.queues, key)
+        new_queue = existing_queue
+          |> Enum.reject(fn q_userid -> q_userid == userid end)
+
+        {key, new_queue}
+      end)
+
+    new_heartbeats = Map.drop(state.heartbeats, [userid])
+
+    # send stuff to user
+    send(pid, {:login_accepted, userid})
+
+    %{state |
+      recent_logins: [System.system_time(:microsecond) | state.recent_logins],
+      remaining_capacity: state.remaining_capacity - 1,
+      queues: new_queues,
+      heartbeats: new_heartbeats
+    }
+  end
 
   defp accept_login(%{recent_logins: recent_logins, remaining_capacity: remaining_capacity} = state) do
     %{state |

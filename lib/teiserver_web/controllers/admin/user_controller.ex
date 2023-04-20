@@ -825,7 +825,9 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        case Teiserver.User.rename_user(user.id, new_name, true) do
+        admin_action = Central.Account.AuthLib.allow?(conn, "admin.dev")
+
+        case Teiserver.User.rename_user(user.id, new_name, admin_action) do
           :success ->
             conn
             |> put_flash(:success, "User renamed")
