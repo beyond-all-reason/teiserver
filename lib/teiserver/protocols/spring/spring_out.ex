@@ -692,7 +692,13 @@ defmodule Teiserver.Protocols.SpringOut do
     |> Enum.each(fn lobby_id ->
       lobby = Lobby.get_lobby(lobby_id)
       send(self(), %{channel: "teiserver_global_lobby_updates", event: :opened, lobby: lobby})
-      send(self(), %{channel: "teiserver_lobby_updates", event: :update_values, lobby_id: lobby_id, changes: lobby})
+
+      send(self(), %{
+        channel: "teiserver_lobby_updates",
+        event: :update_values,
+        lobby_id: lobby_id,
+        changes: lobby
+      })
 
       if lobby != nil and Map.has_key?(lobby, :players) do
         lobby.players
@@ -704,6 +710,7 @@ defmodule Teiserver.Protocols.SpringOut do
             client: Account.get_client_by_id(player_id),
             script_password: nil
           }
+
           send(self(), msg)
         end)
       end

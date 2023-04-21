@@ -106,9 +106,7 @@ defmodule Teiserver.Communication.TextCallbackLib do
 
   @spec build_text_callback_cache() :: :ok
   def build_text_callback_cache do
-    Communication.list_text_callbacks(
-      limit: :infinity
-    )
+    Communication.list_text_callbacks(limit: :infinity)
     |> Enum.each(fn text_callback ->
       Central.store_put(:text_callback_store, text_callback.id, text_callback)
 
@@ -119,7 +117,8 @@ defmodule Teiserver.Communication.TextCallbackLib do
     end)
   end
 
-  @spec update_text_callback_cache({:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}) :: {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_text_callback_cache({:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}) ::
+          {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
   def update_text_callback_cache({:ok, text_callback} = args) do
     Central.store_put(:text_callback_store, text_callback.id, text_callback)
 
@@ -130,16 +129,20 @@ defmodule Teiserver.Communication.TextCallbackLib do
 
     args
   end
+
   def update_text_callback_cache(args), do: args
 
   @spec lookup_text_callback_from_trigger(String.t()) :: TextCallback.t() | nil
   def lookup_text_callback_from_trigger(trigger) do
-    trigger = trigger
+    trigger =
+      trigger
       |> String.trim()
       |> String.downcase()
 
     case Central.store_get(:text_callback_trigger_lookup, trigger) do
-      nil -> nil
+      nil ->
+        nil
+
       id ->
         case Central.store_get(:text_callback_store, id) do
           nil -> nil

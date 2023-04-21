@@ -71,7 +71,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
       Map.merge(text_callback_params, %{
         "triggers" =>
           (text_callback_params["triggers"] || "")
-          |> String.downcase
+          |> String.downcase()
           |> convert_textarea_to_array
           |> Enum.sort()
       })
@@ -108,7 +108,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
       Map.merge(text_callback_params, %{
         "triggers" =>
           (text_callback_params["triggers"] || "")
-          |> String.downcase
+          |> String.downcase()
           |> convert_textarea_to_array
           |> Enum.sort()
       })

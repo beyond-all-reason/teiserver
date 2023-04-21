@@ -163,7 +163,9 @@ defmodule Teiserver.Bridge.ChatCommands do
 
   def handle_command({_user, _discord_id, _message_id}, "text", remaining, channel) do
     case Communication.lookup_text_callback_from_trigger(remaining) do
-      nil -> :ignore
+      nil ->
+        :ignore
+
       text_callback ->
         reply(channel, text_callback.response)
     end

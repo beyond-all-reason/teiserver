@@ -336,9 +336,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
       {:error, "Queued", _userid, lobby, lobby_hash} ->
         reply(:login_queued, nil, msg_id, state)
+
         Map.merge(state, %{
           lobby: lobby,
-          lobby_hash: lobby_hash,
+          lobby_hash: lobby_hash
         })
 
       {:ok, user} ->

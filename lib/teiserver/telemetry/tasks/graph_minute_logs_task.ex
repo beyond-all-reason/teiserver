@@ -134,7 +134,10 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
   @spec perform_client_messages(list, non_neg_integer()) :: list()
   def perform_client_messages(logs, chunk_size) do
     [
-      ["Client messages received" | extract_value(logs, chunk_size, ~w(spring_client_messages_sent))]
+      [
+        "Client messages received"
+        | extract_value(logs, chunk_size, ~w(spring_client_messages_sent))
+      ]
     ]
   end
 

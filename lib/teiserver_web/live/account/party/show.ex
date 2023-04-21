@@ -153,7 +153,10 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
      |> build_user_lookup}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates", event: :remove_user, client: client}, socket) do
+  def handle_info(
+        %{channel: "teiserver_lobby_updates", event: :remove_user, client: client},
+        socket
+      ) do
     extra_ids = List.delete(socket.assigns.lobby_user_ids, client.userid)
 
     {:noreply,

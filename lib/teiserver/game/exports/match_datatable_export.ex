@@ -78,11 +78,11 @@ defmodule Teiserver.Game.MatchDataTableExport do
       match.passworded,
       match.game_type,
       match.founder_id,
-      (if match.bots == %{}, do: "false", else: "true"),
+      if(match.bots == %{}, do: "false", else: "true"),
       match.queue_id,
       match.rating_type_id,
       match.game_duration,
-      TimexHelper.date_to_str(match.started, format: :ymd_hms),
+      TimexHelper.date_to_str(match.started, format: :ymd_hms)
     ]
   end
 

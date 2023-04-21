@@ -192,7 +192,8 @@ defmodule Teiserver.Communication do
   @spec build_text_callback_cache() :: :ok
   defdelegate build_text_callback_cache, to: TextCallbackLib
 
-  @spec update_text_callback_cache({:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}) :: {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_text_callback_cache({:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}) ::
+          {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
   defdelegate update_text_callback_cache(args), to: TextCallbackLib
 
   @spec lookup_text_callback_from_trigger(String.t()) :: TextCallback.t() | nil

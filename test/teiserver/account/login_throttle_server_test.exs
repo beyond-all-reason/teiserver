@@ -6,9 +6,11 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   alias Teiserver.Account
   alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Common.PubsubListener
-  import Teiserver.TeiserverTestLib, only: [
-    new_user: 0
-  ]
+
+  import Teiserver.TeiserverTestLib,
+    only: [
+      new_user: 0
+    ]
 
   test "throttle test" do
     Teiserver.TeiserverConfigs.teiserver_configs()
@@ -39,11 +41,15 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     Account.update_cache_user(toxic.id, %{behaviour_score: 1})
     toxic_listener = PubsubListener.new_listener([])
 
-    send(pid, %{channel: "teiserver_telemetry", event: :data, data: %{
-      client: %{
-        total: 10
+    send(pid, %{
+      channel: "teiserver_telemetry",
+      event: :data,
+      data: %{
+        client: %{
+          total: 10
+        }
       }
-    }})
+    })
 
     # Bots should get in regardless of capacity, no messages for the listener
     r = LoginThrottleServer.attempt_login(bot_listener, bot.id)
@@ -86,11 +92,16 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     assert state.awaiting_release == []
 
     # Now we alter the capacity and see what happens
-    send(pid, %{channel: "teiserver_telemetry", event: :data, data: %{
-      client: %{
-        total: 9
+    send(pid, %{
+      channel: "teiserver_telemetry",
+      event: :data,
+      data: %{
+        client: %{
+          total: 9
+        }
       }
-    }})
+    })
+
     send(pid, :tick)
 
     # Give it a chance to dequeue
@@ -113,11 +124,16 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
 
     # Now approve the rest of them
     # the toxic one will have to wait a bit longer though
-    send(pid, %{channel: "teiserver_telemetry", event: :data, data: %{
-      client: %{
-        total: 4
+    send(pid, %{
+      channel: "teiserver_telemetry",
+      event: :data,
+      data: %{
+        client: %{
+          total: 4
+        }
       }
-    }})
+    })
+
     state = :sys.get_state(pid)
     assert state.remaining_capacity == 6
 

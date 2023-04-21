@@ -63,6 +63,7 @@ defmodule Teiserver.Account.UserCache do
   @spec get_user_by_email(String.t()) :: T.user() | nil
   def get_user_by_email(nil), do: nil
   def get_user_by_email(""), do: nil
+
   def get_user_by_email(email) do
     cachename_email = cachename(email)
 
@@ -92,6 +93,7 @@ defmodule Teiserver.Account.UserCache do
   @spec get_user_by_token(String.t()) :: T.user() | nil
   def get_user_by_token(nil), do: nil
   def get_user_by_token(""), do: nil
+
   def get_user_by_token(token) do
     case Guardian.resource_from_token(token) do
       {:error, _bad_token} ->

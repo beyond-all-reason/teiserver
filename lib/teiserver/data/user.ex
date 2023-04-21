@@ -963,11 +963,15 @@ defmodule Teiserver.User do
 
           true ->
             # Check with login throttle here
-            # if LoginThrottleServer.attempt_login(self(), user.id) do
+            if Config.get_site_config_cache("system.Use login throttle") do
+              if LoginThrottleServer.attempt_login(self(), user.id) do
+                do_login(user, ip, lobby, lobby_hash)
+              else
+                {:error, "Queued", lobby, lobby_hash}
+              end
+            else
               do_login(user, ip, lobby, lobby_hash)
-            # else
-            #   {:error, "Queued", lobby, lobby_hash}
-            # end
+            end
         end
     end
   end
@@ -1036,11 +1040,15 @@ defmodule Teiserver.User do
 
           true ->
             # Check with login throttle here
-            # if LoginThrottleServer.attempt_login(self(), user.id) do
+            if Config.get_site_config_cache("system.Use login throttle") do
+              if LoginThrottleServer.attempt_login(self(), user.id) do
+                do_login(user, ip, lobby, lobby_hash)
+              else
+                {:error, "Queued", lobby, lobby_hash}
+              end
+            else
               do_login(user, ip, lobby, lobby_hash)
-            # else
-            #   {:error, "Queued", lobby, lobby_hash}
-            # end
+            end
         end
     end
   end

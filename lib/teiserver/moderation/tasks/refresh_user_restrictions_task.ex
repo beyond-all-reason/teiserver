@@ -62,9 +62,10 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
         |> Enum.map(fn a -> a.expires end)
         |> List.flatten()
         |> Enum.reduce(nil, fn
-          (dt1, nil) ->
+          dt1, nil ->
             dt1
-          (dt1, dt2) ->
+
+          dt1, dt2 ->
             if Timex.compare(dt1, dt2) == -1, do: dt1, else: dt2
         end)
 

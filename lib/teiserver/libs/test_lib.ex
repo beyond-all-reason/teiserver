@@ -180,7 +180,9 @@ defmodule Teiserver.TeiserverTestLib do
 
           true ->
             case lines do
-              1 -> value
+              1 ->
+                value
+
               _ ->
                 value <> _recv_lines(lines - 1)
             end

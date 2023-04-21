@@ -2566,7 +2566,6 @@ defmodule Teiserver.Telemetry do
     Repo.delete(infolog)
   end
 
-
   # User activity
   alias Teiserver.Telemetry.{UserActivityDayLog, UserActivityDayLogLib}
 

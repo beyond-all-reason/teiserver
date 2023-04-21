@@ -293,23 +293,13 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "system.Login rate throttle limit",
+      key: "system.Use login throttle",
       section: "System",
-      type: "integer",
-      default: 1,
+      type: "boolean",
+      default: false,
       permissions: ["teiserver.admin"],
-      description: "The number of users allowed to login each cycle of the login throttle",
-      value_label: "Login rate throttle limit"
-    })
-
-    add_site_config_type(%{
-      key: "system.Login rate throttle cycle speed",
-      section: "System",
-      type: "integer",
-      default: 200,
-      permissions: ["teiserver.admin"],
-      description: "How often a new wave of users are allowed to login (measured in ms)",
-      value_label: "Login rate throttle cycle speed (ms)"
+      description: "When enabled all login attempts will pass through the login throttle server",
+      value_label: "Use login throttle"
     })
 
     add_site_config_type(%{

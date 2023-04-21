@@ -12,28 +12,28 @@ defmodule Teiserver.Telemetry.Tasks.PersistUserActivityDayTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-  #   last_date = Telemetry.get_last_server_day_log()
+    #   last_date = Telemetry.get_last_server_day_log()
 
-  #   date =
-  #     if last_date == nil do
-  #       Telemetry.get_first_telemetry_minute_datetime()
-  #       |> Timex.to_date()
-  #     else
-  #       last_date
-  #       |> Timex.shift(days: 1)
-  #     end
+    #   date =
+    #     if last_date == nil do
+    #       Telemetry.get_first_telemetry_minute_datetime()
+    #       |> Timex.to_date()
+    #     else
+    #       last_date
+    #       |> Timex.shift(days: 1)
+    #     end
 
-  #   if Timex.compare(date, Timex.today()) == -1 do
-  #     run(date, cleanup: true)
+    #   if Timex.compare(date, Timex.today()) == -1 do
+    #     run(date, cleanup: true)
 
-  #     new_date = Timex.shift(date, days: 1)
+    #     new_date = Timex.shift(date, days: 1)
 
-  #     if Timex.compare(new_date, Timex.today()) == -1 do
-  #       %{}
-  #       |> Teiserver.Telemetry.Tasks.PersistServerDayTask.new()
-  #       |> Oban.insert()
-  #     end
-  #   end
+    #     if Timex.compare(new_date, Timex.today()) == -1 do
+    #       %{}
+    #       |> Teiserver.Telemetry.Tasks.PersistServerDayTask.new()
+    #       |> Oban.insert()
+    #     end
+    #   end
 
     :ok
   end
@@ -84,7 +84,6 @@ defmodule Teiserver.Telemetry.Tasks.PersistUserActivityDayTask do
 
   #   # We encode and decode so it's the same format as in the database
   # end
-
 
   # @spec get_logs(Date.t(), integer()) :: list()
   # defp get_logs(date, segment_number) do

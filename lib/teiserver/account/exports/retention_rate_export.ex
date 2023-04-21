@@ -49,13 +49,14 @@ defmodule Teiserver.Account.RetentionRateExport do
 
     start_datetime = Timex.to_datetime(start_date)
     end_datetime = Timex.to_datetime(end_date)
-    today_datetime = Timex.today |> Timex.to_datetime
+    today_datetime = Timex.today() |> Timex.to_datetime()
 
-    end_datetime = if Timex.compare(today_datetime, end_datetime) == 1 do
-      end_datetime
-    else
-      today_datetime
-    end
+    end_datetime =
+      if Timex.compare(today_datetime, end_datetime) == 1 do
+        end_datetime
+      else
+        today_datetime
+      end
 
     day_logs =
       Telemetry.list_server_day_logs(
@@ -81,11 +82,14 @@ defmodule Teiserver.Account.RetentionRateExport do
         select: [:id, :inserted_at],
         limit: :infinity
       )
-      |> Enum.group_by(fn user ->
-        Timex.to_date(user.inserted_at)
-      end, fn user ->
-        to_string(user.id)
-      end)
+      |> Enum.group_by(
+        fn user ->
+          Timex.to_date(user.inserted_at)
+        end,
+        fn user ->
+          to_string(user.id)
+        end
+      )
 
     data = build_table(day_logs, accounts_by_insert_date)
 
@@ -96,8 +100,8 @@ defmodule Teiserver.Account.RetentionRateExport do
     headings = [
       [
         "Date",
-        "Registration count",
-      ] ++ (for d <- dates, do: TimexHelper.date_to_str(d, format: :ymd))
+        "Registration count"
+      ] ++ for(d <- dates, do: TimexHelper.date_to_str(d, format: :ymd))
     ]
 
     headings ++ output
@@ -110,11 +114,13 @@ defmodule Teiserver.Account.RetentionRateExport do
       case params["csv_value"] do
         "time_player" ->
           row[date].total_times["player"]
+
         "time_total" ->
           row[date].total_times["total"]
 
         "user_count_player" ->
           row[date].user_counts["player"]
+
         _user_count_total ->
           row[date].user_counts["total"]
       end
@@ -124,19 +130,20 @@ defmodule Teiserver.Account.RetentionRateExport do
   defp return_content(data, %{"format" => "csv"} = params) do
     dates = Map.keys(data) |> Enum.sort()
 
-    csv_output = dates
-    |> Stream.map(fn date ->
-      row = data[date]
+    csv_output =
+      dates
+      |> Stream.map(fn date ->
+        row = data[date]
 
-      [
-        TimexHelper.date_to_str(date, format: :ymd),
-        row.registration_count,
-      ] ++ (for d <- dates, do: make_csv_cell(d, row, params))
-    end)
-    |> Enum.to_list()
-    |> add_csv_headings(dates)
-    |> CSV.encode()
-    |> Enum.to_list()
+        [
+          TimexHelper.date_to_str(date, format: :ymd),
+          row.registration_count
+        ] ++ for d <- dates, do: make_csv_cell(d, row, params)
+      end)
+      |> Enum.to_list()
+      |> add_csv_headings(dates)
+      |> CSV.encode()
+      |> Enum.to_list()
 
     path = "/tmp/retention_rate.csv"
     File.write(path, csv_output)
@@ -153,46 +160,51 @@ defmodule Teiserver.Account.RetentionRateExport do
   # Build the table as a whole
   defp build_table(day_logs, accounts_by_insert_date) do
     accounts_by_insert_date
-      |> Map.new(fn {date, userids} ->
-        data = build_data_row(userids, day_logs)
-          |> Map.merge(%{
-              registration_count: Enum.count(userids)
-            })
+    |> Map.new(fn {date, userids} ->
+      data =
+        build_data_row(userids, day_logs)
+        |> Map.merge(%{
+          registration_count: Enum.count(userids)
+        })
 
-        {date, data}
-      end)
+      {date, data}
+    end)
   end
 
   # Build the data for a single date (row) in the table
   # date refers to the date of registration for the users in this group
   defp build_data_row(userids, day_logs) do
     day_logs
-      |> Map.new(fn {date, log_data} ->
-        {date, build_data_cell(userids, log_data)}
-      end)
+    |> Map.new(fn {date, log_data} ->
+      {date, build_data_cell(userids, log_data)}
+    end)
   end
 
   # This will be the cell data for users registered on reg_date
   # for the data in log_data from a given date
   defp build_data_cell(userids, log_data) do
-    user_counts = @activity_types
+    user_counts =
+      @activity_types
       |> Map.new(fn activity ->
-        result = log_data["minutes_per_user"][activity]
+        result =
+          log_data["minutes_per_user"][activity]
           |> Enum.map(fn {str_id, _mins} ->
             if Enum.member?(userids, str_id), do: 1, else: 0
           end)
-          |> Enum.sum
+          |> Enum.sum()
 
         {activity, result}
       end)
 
-    total_times = @activity_types
+    total_times =
+      @activity_types
       |> Map.new(fn activity ->
-        result = log_data["minutes_per_user"][activity]
+        result =
+          log_data["minutes_per_user"][activity]
           |> Enum.map(fn {str_id, mins} ->
             if Enum.member?(userids, str_id), do: mins, else: 0
           end)
-          |> Enum.sum
+          |> Enum.sum()
 
         {activity, result}
       end)

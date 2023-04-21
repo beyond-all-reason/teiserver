@@ -42,7 +42,10 @@ defmodule Teiserver.Battle.LobbyThrottle do
     {:noreply, %{state | player_changes: [client.userid | state.player_changes]}}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates", event: :remove_user, client: client}, state) do
+  def handle_info(
+        %{channel: "teiserver_lobby_updates", event: :remove_user, client: client},
+        state
+      ) do
     {:noreply, %{state | player_changes: [client.userid | state.player_changes]}}
   end
 
@@ -50,7 +53,10 @@ defmodule Teiserver.Battle.LobbyThrottle do
     {:noreply, %{state | player_changes: [client.userid | state.player_changes]}}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates", event: :update_values, changes: changes}, state) do
+  def handle_info(
+        %{channel: "teiserver_lobby_updates", event: :update_values, changes: changes},
+        state
+      ) do
     keys = Map.keys(changes)
     {:noreply, %{state | lobby_changes: (keys ++ state.lobby_changes) |> Enum.uniq()}}
   end
@@ -63,7 +69,14 @@ defmodule Teiserver.Battle.LobbyThrottle do
     {:noreply, state}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates", event: :updated_client_battlestatus, client: client}, state) do
+  def handle_info(
+        %{
+          channel: "teiserver_lobby_updates",
+          event: :updated_client_battlestatus,
+          client: client
+        },
+        state
+      ) do
     {:noreply, %{state | player_changes: [client.userid | state.player_changes]}}
   end
 
