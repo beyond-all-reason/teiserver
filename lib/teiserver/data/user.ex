@@ -967,7 +967,7 @@ defmodule Teiserver.User do
               if LoginThrottleServer.attempt_login(self(), user.id) do
                 do_login(user, ip, lobby, lobby_hash)
               else
-                {:error, "Queued", lobby, lobby_hash}
+                {:error, "Queued", user.id, lobby, lobby_hash}
               end
             else
               do_login(user, ip, lobby, lobby_hash)
@@ -1044,7 +1044,7 @@ defmodule Teiserver.User do
               if LoginThrottleServer.attempt_login(self(), user.id) do
                 do_login(user, ip, lobby, lobby_hash)
               else
-                {:error, "Queued", lobby, lobby_hash}
+                {:error, "Queued", user.id, lobby, lobby_hash}
               end
             else
               do_login(user, ip, lobby, lobby_hash)

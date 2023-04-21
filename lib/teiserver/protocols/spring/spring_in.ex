@@ -276,6 +276,15 @@ defmodule Teiserver.Protocols.SpringIn do
         reply(:agreement, nil, msg_id, state)
         Map.put(state, :unverified_id, userid)
 
+      {:error, "Queued", userid, lobby, lobby_hash} ->
+        reply(:login_queued, nil, msg_id, state)
+
+        Map.merge(state, %{
+          lobby: lobby,
+          lobby_hash: lobby_hash,
+          queued_userid: userid
+        })
+
       {:ok, user} ->
         new_state =
           if Enum.member?(@unoptimised_lobbies, user.lobby_client) do
@@ -334,12 +343,13 @@ defmodule Teiserver.Protocols.SpringIn do
         reply(:agreement, nil, msg_id, state)
         Map.put(state, :unverified_id, userid)
 
-      {:error, "Queued", _userid, lobby, lobby_hash} ->
+      {:error, "Queued", userid, lobby, lobby_hash} ->
         reply(:login_queued, nil, msg_id, state)
 
         Map.merge(state, %{
           lobby: lobby,
-          lobby_hash: lobby_hash
+          lobby_hash: lobby_hash,
+          queued_userid: userid
         })
 
       {:ok, user} ->

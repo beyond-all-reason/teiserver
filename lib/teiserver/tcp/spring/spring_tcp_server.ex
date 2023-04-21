@@ -114,6 +114,8 @@ defmodule Teiserver.SpringTcpServer do
       queues: [],
       ready_queue_id: nil,
 
+      queued_userid: nil,
+
       # Connection microstate
       msg_id: nil,
       lobby_id: nil,

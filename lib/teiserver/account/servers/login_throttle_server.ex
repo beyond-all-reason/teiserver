@@ -22,8 +22,8 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   @tick_interval 1_000
   @release_interval 100
-  @heartbeat_expiry 10_000
-  @toxic_min_wait 30_000
+  @heartbeat_expiry 5_000
+  @toxic_min_wait 15_000
 
   # login_recent_age_search is the distance (in time) we record logins
   # for the purposes of "recent" logins
@@ -321,7 +321,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     # Toxic users have to wait a certain length of time to be able to login
     userids =
       state.queues.toxic
-      |> Enum.take(empty_count)
+      |> Enum.slice(0..empty_count)
       |> Enum.filter(fn userid ->
         arrival_time = Map.get(state.arrival_times, userid, 99_999_999)
         waited_for = System.system_time(:millisecond) - arrival_time
@@ -406,7 +406,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     recent_count = Enum.count(state.recent_logins)
 
     # Remaining capacity is the lowest of server limit and login rate limit
-    remaining_capacity = min(total_limit - client_count, @max_login_rate - recent_count)
+    remaining_capacity = min(total_limit - client_count, @max_login_rate - recent_count) |> round()
     server_usage = max(client_count, 1) / total_limit
 
     %{state | remaining_capacity: remaining_capacity, server_usage: server_usage}
