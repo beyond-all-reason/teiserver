@@ -23,8 +23,16 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @tick_interval 1_000
   @release_interval 100
   @heartbeat_expiry 10_000
-
   @toxic_min_wait 30_000
+
+
+  # login_recent_age_search is the distance (in time) we record logins
+  # for the purposes of "recent" logins
+  @login_recent_age_search @tick_interval
+
+  # max login rate is the number of logins we can have as recent
+  @max_login_rate (@tick_interval / @release_interval) * 2
+
 
   @spec get_queue_length :: non_neg_integer()
   def get_queue_length() do
@@ -129,8 +137,10 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
     send(pid, {:login_accepted, userid})
 
-    new_state = %{state | awaiting_release: remaining}
-      |> accept_login
+    new_state = %{state |
+      awaiting_release: remaining,
+      remaining_capacity: state.remaining_capacity - 1
+    }
 
     {:noreply, new_state}
   end
@@ -138,11 +148,11 @@ defmodule Teiserver.Account.LoginThrottleServer do
   # Check stats, see if we can let anybody else login right now
   def handle_info(:tick, state) do
     # Strip out invalid heartbeats
-    min_age = System.system_time(:millisecond) - @heartbeat_expiry
+    max_age = System.system_time(:millisecond) - @heartbeat_expiry
 
     dropped_users = state.heartbeats
       |> Map.filter(fn {_key, {_pid, last_time}} ->
-        last_time < min_age
+        last_time < max_age
       end)
       |> Map.keys
 
@@ -157,10 +167,18 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
     new_heartbeats = Map.drop(state.heartbeats, dropped_users)
 
+    min_recent_age = System.system_time(:millisecond) - @login_recent_age_search
+
+    new_recent_logins = state.recent_logins
+      |> Enum.reject(fn t ->
+        t < min_recent_age
+      end)
+
     send(self(), :dequeue)
     {:noreply, %{state |
       heartbeats: new_heartbeats,
-      queues: new_queues
+      queues: new_queues,
+      recent_logins: new_recent_logins
     }}
   end
 
@@ -293,6 +311,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     end
   end
 
+  defp dequeue_toxic_users(%{queues: %{toxic: []}} = state, _), do: state
   defp dequeue_toxic_users(state, empty_count) do
     # Toxic users have to wait a certain length of time to be able to login
     userids = state.queues.toxic
@@ -371,7 +390,10 @@ defmodule Teiserver.Account.LoginThrottleServer do
       |> Map.get(:client, %{})
       |> Map.get(:total, 0)
 
-    remaining_capacity = total_limit - client_count
+    recent_count = Enum.count(state.recent_logins)
+
+    # Remaining capacity is the lowest of server limit and login rate limit
+    remaining_capacity = min(total_limit - client_count, @max_login_rate - recent_count)
     server_usage = max(client_count, 1) / total_limit
 
     %{state |

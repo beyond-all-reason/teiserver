@@ -9,7 +9,6 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   import Teiserver.TeiserverTestLib, only: [
     new_user: 0
   ]
-  require Logger
 
   test "throttle test" do
     Teiserver.TeiserverConfigs.teiserver_configs()
@@ -80,6 +79,8 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     assert state.queues.standard == [standard.id]
     assert state.queues.toxic == [toxic.id]
 
+    assert Enum.count(state.recent_logins) == 1
+
     # We let one through (the bot) even though we were at capacity
     assert state.remaining_capacity == -1
     assert state.awaiting_release == []
@@ -108,7 +109,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     assert state.queues.standard == [standard.id]
     assert state.queues.toxic == [toxic.id]
 
-    Logger.warn("Dropping client count")
+    assert Enum.count(state.recent_logins) == 2
 
     # Now approve the rest of them
     # the toxic one will have to wait a bit longer though
@@ -137,5 +138,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     assert state.queues.vip == []
     assert state.queues.standard == []
     assert state.queues.toxic == [toxic.id]
+
+    assert Enum.count(state.recent_logins) == 5
   end
 end
