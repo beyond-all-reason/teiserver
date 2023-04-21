@@ -860,7 +860,7 @@ defmodule Teiserver.Moderation do
           reason: "Automod detected flagged words",
           restrictions: ["Bridging"],
           score_modifier: 100,
-          expires: Timex.now() |> Timex.shift(years: 1000)
+          expires: Timex.now() |> Timex.shift(years: 1200)
         })
 
       Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user.id)

@@ -342,6 +342,19 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, state}
   end
 
+  def handle_info(%{channel: "teiserver_global_lobby_updates", event: :updated_values} = msg, state) do
+    lobby_id = msg.lobby_id
+
+    state = if Enum.member?(state.known_battles, lobby_id) do
+      new_known_battles = List.delete(state.known_battles, lobby_id)
+      new_state = %{state | known_battles: new_known_battles}
+      SpringOut.reply(:battle_closed, lobby_id, nil, new_state)
+    else
+      state
+    end
+    {:noreply, state}
+  end
+
   def handle_info(:error_log, state) do
     new_state = SpringOut.reply(:error_log, :error_log, nil, state)
     {:noreply, new_state}

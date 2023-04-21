@@ -129,13 +129,16 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
     send(pid, {:login_accepted, userid})
 
-    {:noreply, %{state | awaiting_release: remaining}}
+    new_state = %{state | awaiting_release: remaining}
+      |> accept_login
+
+    {:noreply, new_state}
   end
 
   # Check stats, see if we can let anybody else login right now
   def handle_info(:tick, state) do
     # Strip out invalid heartbeats
-    min_age = System.system_time(:microsecond) - @heartbeat_expiry
+    min_age = System.system_time(:millisecond) - @heartbeat_expiry
 
     dropped_users = state.heartbeats
       |> Map.filter(fn {_key, {_pid, last_time}} ->
@@ -168,7 +171,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   # Handle a heartbeat from a pid
   def handle_info({:heartbeat, pid, userid}, state) do
-    new_heartbeats = Map.put(state.heartbeats, userid, {pid, System.system_time(:microsecond)})
+    new_heartbeats = Map.put(state.heartbeats, userid, {pid, System.system_time(:millisecond)})
 
     {:noreply, %{state |
       heartbeats: new_heartbeats
@@ -210,17 +213,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
         {new_state, true}
 
       state.remaining_capacity < 1 and category != :toxic ->
-        queue = Map.get(state.queues, category, [])
-        new_queue = queue ++ [userid]
-        new_queue_map = Map.put(state.queues, category, new_queue)
-
-        new_heartbeats = Map.put(state.heartbeats, userid, {pid, System.system_time(:microsecond)})
-
-        new_state = Map.merge(state, %{
-          queues: new_queue_map,
-          heartbeats: new_heartbeats
-        })
-
+        new_state = add_user_to_queue(state, category, {pid, userid})
         {new_state, false}
 
       true ->
@@ -240,20 +233,29 @@ defmodule Teiserver.Account.LoginThrottleServer do
           new_state = accept_login(state)
           {new_state, true}
         else
-          queue = Map.get(state.queues, category, [])
-          new_queue = queue ++ [userid]
-          new_queue_map = Map.put(state.queues, category, new_queue)
-
-          new_heartbeats = Map.put(state.heartbeats, userid, {pid, System.system_time(:microsecond)})
-
-          new_state = Map.merge(state, %{
-            queues: new_queue_map,
-            heartbeats: new_heartbeats
-          })
-
+          new_state = add_user_to_queue(state, category, {pid, userid})
           {new_state, false}
         end
     end
+  end
+
+  # If a user isn't allowed to login right away they need to be queued up
+  # this function takes care of all the work around that
+  @spec add_user_to_queue(map(), atom, {pid, T.userid()}) :: map()
+  defp add_user_to_queue(state, category, {pid, userid}) do
+    queue = Map.get(state.queues, category, [])
+    new_queue = queue ++ [userid]
+    new_queue_map = Map.put(state.queues, category, new_queue)
+
+    new_heartbeats = Map.put(state.heartbeats, userid, {pid, System.system_time(:millisecond)})
+
+    new_arrivals = Map.put(state.arrival_times, userid, System.system_time(:millisecond))
+
+    Map.merge(state, %{
+      queues: new_queue_map,
+      heartbeats: new_heartbeats,
+      arrival_times: new_arrivals
+    })
   end
 
   # This takes one user out of a queue at a time
@@ -273,17 +275,17 @@ defmodule Teiserver.Account.LoginThrottleServer do
           if Enum.empty?(queue) do
             nil
           else
-            hd(state.queues.moderator)
+            hd(queue)
           end
 
         # A return of anything other than nil means
         # we have found what we wanted
-        (_, r) ->
-          r
+        (_key, userid) ->
+          userid
       end)
 
     if userid do
-      new_state = accept_queued_login(state, userid)
+      new_state = add_user_to_release_list(state, userid)
       dequeue_users(new_state, empty_count - 1)
     else
       # No standard user found
@@ -297,7 +299,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
       |> Enum.take(empty_count)
       |> Enum.filter(fn userid ->
         arrival_time = Map.get(state.arrival_times, userid, 99999999)
-        waited_for = System.system_time(:microsecond) - arrival_time
+        waited_for = System.system_time(:millisecond) - arrival_time
 
         waited_for > @toxic_min_wait
       end)
@@ -307,12 +309,12 @@ defmodule Teiserver.Account.LoginThrottleServer do
     else
       userids
       |> Enum.reduce(state, fn (userid, acc_state) ->
-        accept_queued_login(acc_state, userid)
+        add_user_to_release_list(acc_state, userid)
       end)
     end
   end
 
-  defp accept_queued_login(state, userid) do
+  defp add_user_to_release_list(state, userid) do
     {pid, _hb} = state.heartbeats[userid]
 
     # Remove this user from heartbeats and queues
@@ -327,24 +329,26 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
     new_heartbeats = Map.drop(state.heartbeats, [userid])
 
-    # send stuff to user
-    send(pid, {:login_accepted, userid})
+    new_awaiting_release = state.awaiting_release ++ [{pid, userid}]
 
     %{state |
-      recent_logins: [System.system_time(:microsecond) | state.recent_logins],
+      recent_logins: [System.system_time(:millisecond) | state.recent_logins],
       remaining_capacity: state.remaining_capacity - 1,
       queues: new_queues,
-      heartbeats: new_heartbeats
+      heartbeats: new_heartbeats,
+      awaiting_release: new_awaiting_release
     }
   end
 
+  # When a login is accepted and we want to update certain metrics right away
   defp accept_login(%{recent_logins: recent_logins, remaining_capacity: remaining_capacity} = state) do
     %{state |
-      recent_logins: [System.system_time(:microsecond) | recent_logins],
+      recent_logins: [System.system_time(:millisecond) | recent_logins],
       remaining_capacity: remaining_capacity - 1
     }
   end
 
+  @spec categorise_user(T.userid) :: atom
   defp categorise_user(userid) do
     user = Account.get_user_by_id(userid)
 
@@ -358,7 +362,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     end
   end
 
-  @spec apply_server_capacity(Map.t(), Map.t()) :: {non_neg_integer(), number()}
+  @spec apply_server_capacity(Map.t(), Map.t()) :: map()
   defp apply_server_capacity(state, telemetry_data) do
     total_limit = Config.get_site_config_cache("system.User limit")
 

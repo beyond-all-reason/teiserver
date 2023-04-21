@@ -12,8 +12,8 @@ defmodule Teiserver.Battle.LobbyServer do
   @broadcast_update_keys ~w(
     name type max_players game_name
     locked engine_name engine_version players spectators bots ip
-    settings map_name passworded spectator_count
-    map_hash tags in_progress started_at
+    settings passworded spectator_count
+    map_name map_hash tags in_progress started_at
   )a
 
   @impl true

@@ -161,7 +161,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
         reason: "Banned (Automod)",
         restrictions: ["Login", "Site"],
         score_modifier: 0,
-        expires: Timex.now() |> Timex.shift(years: 1000)
+        expires: Timex.now() |> Timex.shift(years: 1300)
       })
 
     Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)

@@ -9,6 +9,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   import Teiserver.TeiserverTestLib, only: [
     new_user: 0
   ]
+  require Logger
 
   test "throttle test" do
     Teiserver.TeiserverConfigs.teiserver_configs()
@@ -79,6 +80,10 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     assert state.queues.standard == [standard.id]
     assert state.queues.toxic == [toxic.id]
 
+    # We let one through (the bot) even though we were at capacity
+    assert state.remaining_capacity == -1
+    assert state.awaiting_release == []
+
     # Now we alter the capacity and see what happens
     send(pid, %{channel: "teiserver_telemetry", event: :data, data: %{
       client: %{
@@ -103,6 +108,8 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     assert state.queues.standard == [standard.id]
     assert state.queues.toxic == [toxic.id]
 
+    Logger.warn("Dropping client count")
+
     # Now approve the rest of them
     # the toxic one will have to wait a bit longer though
     send(pid, %{channel: "teiserver_telemetry", event: :data, data: %{
@@ -110,9 +117,25 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
         total: 4
       }
     }})
+    state = :sys.get_state(pid)
+    assert state.remaining_capacity == 6
+
     send(pid, :tick)
 
     # Give it a chance to dequeue
-    :timer.sleep(100)
+    :timer.sleep(400)
+
+    state = :sys.get_state(pid)
+    assert PubsubListener.get(moderator_listener) == []
+    assert PubsubListener.get(contributor_listener) == [{:login_accepted, contributor.id}]
+    assert PubsubListener.get(vip_listener) == [{:login_accepted, vip.id}]
+    assert PubsubListener.get(standard_listener) == [{:login_accepted, standard.id}]
+    assert PubsubListener.get(toxic_listener) == []
+
+    assert state.queues.moderator == []
+    assert state.queues.contributor == []
+    assert state.queues.vip == []
+    assert state.queues.standard == []
+    assert state.queues.toxic == [toxic.id]
   end
 end
