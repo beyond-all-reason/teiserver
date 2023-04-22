@@ -637,7 +637,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
         if player_count > 4 do
           if user.hw_hash == nil do
-            Logger.warn("[ConsulServer] hw hash block for #{Account.get_username(userid)}")
+            Logger.warn("hw hash block for #{Account.get_username(userid)}")
             %{new_client | player: false}
           else
             new_client
@@ -656,7 +656,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
         if player_count > 4 do
           if user.chobby_hash == nil do
-            Logger.warn("[ConsulServer] Chobby data block for #{Account.get_username(userid)}")
+            Logger.error("Chobby data block for #{Account.get_username(userid)}")
             %{new_client | player: false}
           else
             new_client
@@ -855,7 +855,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
         case user.hw_hash do
           "" ->
-            Logger.info(
+            Logger.error(
               "JOINBATTLE with empty hash - name: #{user.name}, client: #{user.lobby_client}"
             )
 

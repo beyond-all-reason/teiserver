@@ -321,7 +321,12 @@ defmodule Teiserver.SpringTcpServer do
       if Map.has_key?(new_values, :name) do
         SpringOut.reply(:battle, :lobby_rename, lobby_id, nil, state)
       else
-        state
+        keys = Map.keys(new_values)
+        if Enum.member?(keys, :locked) or Enum.member?(keys, :map_name) do
+          SpringOut.reply(:update_battle, lobby_id, nil, state)
+        else
+          state
+        end
       end
 
     {:noreply, new_state}

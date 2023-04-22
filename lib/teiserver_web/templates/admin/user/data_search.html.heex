@@ -58,6 +58,18 @@
     </div>
 
     <div class="col-md-4 col-xl-2 search-form-input my-2">
+      <label for="data_search_screen" class="control-label">Screen: </label>
+      <input
+        type="text"
+        name="data_search[screen]"
+        id="data_search_screen"
+        value={@params["screen"]}
+        placeholder=""
+        class="form-control"
+      />
+    </div>
+
+    <div class="col-md-4 col-xl-2 search-form-input my-2">
       <label for="data_search_os" class="control-label">Custom field: </label>
       <input
         type="text"

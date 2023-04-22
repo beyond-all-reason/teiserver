@@ -102,29 +102,19 @@ defmodule TeiserverWeb.Admin.UserController do
         []
       else
         id_list =
-          Teiserver.Account.list_user_stats(limit: :infinity)
-          |> Teiserver.Account.UserStatLib.field_contains(
-            "hardware:gpuinfo",
-            params["data_search"]["gpu"]
-          )
-          |> Teiserver.Account.UserStatLib.field_contains(
-            "hardware:cpuinfo",
-            params["data_search"]["cpu"]
-          )
-          |> Teiserver.Account.UserStatLib.field_contains(
-            "hardware:osinfo",
-            params["data_search"]["os"]
-          )
-          |> Teiserver.Account.UserStatLib.field_contains(
-            "hardware:raminfo",
-            params["data_search"]["ram"]
-          )
-          |> Teiserver.Account.UserStatLib.field_contains(
-            params["data_search"]["custom_field"],
-            params["data_search"]["custom_value"]
+          Teiserver.Account.list_user_stats(
+            search: [
+              data_equal: {"hardware:gpuinfo", params["data_search"]["gpu"]},
+              data_equal: {"hardware:cpuinfo", params["data_search"]["cpu"]},
+              data_equal: {"hardware:osinfo", params["data_search"]["os"]},
+              data_equal: {"hardware:raminfo", params["data_search"]["ram"]},
+              data_equal: {"hardware:displaymax", params["data_search"]["screen"]},
+              data_equal: {params["data_search"]["custom_field"], params["data_search"]["custom_value"]},
+            ],
+            select: [:user_id],
+            limit: :infinity
           )
           |> Stream.map(fn stats -> stats.user_id end)
-          |> Stream.take(50)
           |> Enum.to_list()
 
         Account.list_users(search: [id_in: id_list])

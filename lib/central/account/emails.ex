@@ -27,7 +27,7 @@ defmodule Central.Account.Emails do
     url = "https://#{host}/password_reset/#{code.value}"
 
     html_body = """
-    <p>A request for a password reset has been requested for you. To reset your password follow the link below. If you did not request this reset please ignore the email.</p>
+    <p>A password reset has been requested for your account. To reset your password follow the link below. If you did not request this reset please ignore this email. The code will expire in 24 hours.</p>
 
     <p><a href="#{url}">#{url}</a></p>
 
@@ -35,7 +35,7 @@ defmodule Central.Account.Emails do
     """
 
     text_body = """
-    A request for a password reset has been requested for you. To reset your password follow the link below. If you did not request this reset please ignore the email.
+    A password reset has been requested for your account. To reset your password follow the link below. If you did not request this reset please ignore this email. The code will expire in 24 hours.
 
     #{url}
 
@@ -44,7 +44,7 @@ defmodule Central.Account.Emails do
 
     date = TimexHelper.date_to_str(Timex.now(), format: :email_date)
     message_id = UUID.uuid1()
-    subject = Application.get_env(:central, Central)[:site_title] <> " - Password reset"
+    subject = Application.get_env(:central, Teiserver)[:game_name] <> " - Password reset"
 
     Email.new_email()
     |> Email.to({user.name, user.email})
