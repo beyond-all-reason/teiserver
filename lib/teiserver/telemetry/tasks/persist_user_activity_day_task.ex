@@ -12,62 +12,52 @@ defmodule Teiserver.Telemetry.Tasks.PersistUserActivityDayTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-  #   last_date = Telemetry.get_last_server_day_log()
+    last_date = Telemetry.get_last_user_activity_day_log()
 
-  #   date =
-  #     if last_date == nil do
-  #       Telemetry.get_first_telemetry_minute_datetime()
-  #       |> Timex.to_date()
-  #     else
-  #       last_date
-  #       |> Timex.shift(days: 1)
-  #     end
+    date =
+      if last_date == nil do
+        Telemetry.get_first_telemetry_minute_datetime()
+        |> Timex.to_date()
+      else
+        last_date
+        |> Timex.shift(days: 1)
+      end
 
-  #   if Timex.compare(date, Timex.today()) == -1 do
-  #     run(date, cleanup: true)
+    if Timex.compare(date, Timex.today()) == -1 do
+      run(date)
 
-  #     new_date = Timex.shift(date, days: 1)
+      new_date = Timex.shift(date, days: 1)
 
-  #     if Timex.compare(new_date, Timex.today()) == -1 do
-  #       %{}
-  #       |> Teiserver.Telemetry.Tasks.PersistServerDayTask.new()
-  #       |> Oban.insert()
-  #     end
-  #   end
+      if Timex.compare(new_date, Timex.today()) == -1 do
+        %{}
+        |> Teiserver.Telemetry.Tasks.PersistServerDayTask.new()
+        |> Oban.insert()
+      end
+    end
 
     :ok
   end
 
-  # @spec run(%Date{}, boolean()) :: :ok
-  # def run(date, cleanup) do
-  #   data =
-  #     0..@segment_count
-  #     |> Enum.reduce(@empty_log, fn segment_number, segment ->
-  #       logs = get_logs(date, segment_number)
-  #       extend_segment(segment, logs)
-  #     end)
-  #     |> calculate_day_statistics(date)
-  #     |> add_matches(date)
-  #     |> add_telemetry(date)
+  @spec run(%Date{}) :: :ok
+  def run(date) do
+    data = date
+      |> get_logs
+      |> sum_user_activity
 
-  #   if cleanup do
-  #     clean_up_logs(date)
-  #   end
+      # Delete old log if it exists
+    delete_query =
+      from logs in Teiserver.Telemetry.UserActivityDayLog,
+        where: logs.date == ^(date |> Timex.to_date())
 
-  #   # Delete old log if it exists
-  #   delete_query =
-  #     from logs in Teiserver.Telemetry.ServerDayLog,
-  #       where: logs.date == ^(date |> Timex.to_date())
+    Repo.delete_all(delete_query)
 
-  #   Repo.delete_all(delete_query)
+    Telemetry.create_user_activity_day_log(%{
+      date: date,
+      data: data
+    })
 
-  #   Telemetry.create_server_day_log(%{
-  #     date: date,
-  #     data: data
-  #   })
-
-  #   :ok
-  # end
+    :ok
+  end
 
   # def today_so_far() do
   #   date = Timex.today()
@@ -86,21 +76,55 @@ defmodule Teiserver.Telemetry.Tasks.PersistUserActivityDayTask do
   # end
 
 
-  # @spec get_logs(Date.t(), integer()) :: list()
-  # defp get_logs(date, segment_number) do
-  #   start_time =
-  #     Timex.shift(date |> Timex.to_datetime(), minutes: segment_number * @segment_length)
+  @spec get_logs(Date.t()) :: list()
+  defp get_logs(date) do
+    start_time = date |> Timex.to_datetime()
+    end_time = start_time |> Timex.shift(days: 1)
 
-  #   end_time =
-  #     Timex.shift(date |> Timex.to_datetime(), minutes: (segment_number + 1) * @segment_length)
+    Telemetry.list_server_minute_logs(
+      search: [
+        between: {start_time, end_time}
+      ],
+      select: [:data]
+    )
+    |> Enum.map(fn l -> l.data end)
+  end
 
-  #   Telemetry.list_server_minute_logs(
-  #     search: [
-  #       between: {start_time, end_time}
-  #     ],
-  #     select: [:data],
-  #     limit: @segment_length
-  #   )
-  #   |> Enum.map(fn l -> l.data end)
-  # end
+  defp sum_user_activity(logs) do
+    start_data = @client_states
+      |> Map.new(fn key -> {key, []} end)
+
+    result = logs
+    |> Enum.reduce(start_data, fn (log, acc) ->
+      %{
+        total: log["client"]["total"] ++ acc.total,
+        player: log["client"]["player"] ++ acc.player,
+        spectator: log["client"]["spectator"] ++ acc.spectator,
+        lobby: log["client"]["lobby"] ++ acc.lobby,
+        menu: log["client"]["menu"] ++ acc.menu
+      }
+    end)
+    |> Map.new(fn {key, userids} ->
+      result = userids
+        |> List.flatten
+        |> Enum.group_by(fn key ->
+          key
+        end, fn _ ->
+          1
+        end)
+        |> Map.new(fn {key, ones} ->
+          {key, Enum.count(ones)}
+        end)
+
+      {key, result}
+    end)
+
+    result
+  end
+
+  defp add_maps(m1, nil), do: m1
+
+  defp add_maps(m1, m2) do
+    Map.merge(m1, m2, fn _k, v1, v2 -> v1 + v2 end)
+  end
 end

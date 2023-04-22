@@ -2570,12 +2570,12 @@ defmodule Teiserver.Telemetry do
   # User activity
   alias Teiserver.Telemetry.{UserActivityDayLog, UserActivityDayLogLib}
 
-  defp user_activity_log_query(args) do
-    user_activity_log_query(nil, args)
+  defp user_activity_day_log_query(args) do
+    user_activity_day_log_query(nil, args)
   end
 
-  defp user_activity_log_query(date, args) do
-    UserActivityDayLogLib.get_user_activity_logs()
+  defp user_activity_day_log_query(date, args) do
+    UserActivityDayLogLib.get_user_activity_day_logs()
     |> UserActivityDayLogLib.search(%{date: date})
     |> UserActivityDayLogLib.search(args[:search])
     |> UserActivityDayLogLib.order_by(args[:order])
@@ -2592,8 +2592,8 @@ defmodule Teiserver.Telemetry do
       [%UserActivityDayLog{}, ...]
 
   """
-  def list_user_activity_logs(args \\ []) do
-    user_activity_log_query(args)
+  def list_user_activity_day_logs(args \\ []) do
+    user_activity_day_log_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
     |> Repo.all()
   end
@@ -2612,18 +2612,18 @@ defmodule Teiserver.Telemetry do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user_activity_log(date) when not is_list(date) do
-    user_activity_log_query(date, [])
+  def get_user_activity_day_log(date) when not is_list(date) do
+    user_activity_day_log_query(date, [])
     |> Repo.one()
   end
 
-  def get_user_activity_log(args) do
-    user_activity_log_query(nil, args)
+  def get_user_activity_day_log(args) do
+    user_activity_day_log_query(nil, args)
     |> Repo.one()
   end
 
-  def get_user_activity_log(date, args) do
-    user_activity_log_query(date, args)
+  def get_user_activity_day_log(date, args) do
+    user_activity_day_log_query(date, args)
     |> Repo.one()
   end
 
@@ -2639,7 +2639,7 @@ defmodule Teiserver.Telemetry do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_user_activity_log(attrs \\ %{}) do
+  def create_user_activity_day_log(attrs \\ %{}) do
     %UserActivityDayLog{}
     |> UserActivityDayLog.changeset(attrs)
     |> Repo.insert()
@@ -2657,7 +2657,7 @@ defmodule Teiserver.Telemetry do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_user_activity_log(%UserActivityDayLog{} = log, attrs) do
+  def update_user_activity_day_log(%UserActivityDayLog{} = log, attrs) do
     log
     |> UserActivityDayLog.changeset(attrs)
     |> Repo.update()
@@ -2675,7 +2675,7 @@ defmodule Teiserver.Telemetry do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_user_activity_log(%UserActivityDayLog{} = log) do
+  def delete_user_activity_day_log(%UserActivityDayLog{} = log) do
     Repo.delete(log)
   end
 
@@ -2688,7 +2688,18 @@ defmodule Teiserver.Telemetry do
       %Ecto.Changeset{source: %UserActivityDayLog{}}
 
   """
-  def change_user_activity_log(%UserActivityDayLog{} = log) do
+  def change_user_activity_day_log(%UserActivityDayLog{} = log) do
     UserActivityDayLog.changeset(log, %{})
+  end
+
+  @spec get_last_user_activity_day_log() :: Date.t() | nil
+  def get_last_user_activity_day_log() do
+    query =
+      from telemetry_logs in UserActivityDayLog,
+        order_by: [desc: telemetry_logs.date],
+        select: telemetry_logs.date,
+        limit: 1
+
+    Repo.one(query)
   end
 end

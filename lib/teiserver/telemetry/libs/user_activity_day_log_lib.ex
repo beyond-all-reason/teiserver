@@ -10,8 +10,8 @@ defmodule Teiserver.Telemetry.UserActivityDayLogLib do
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-wave-pulse"
 
-  @spec get_user_activity_logs :: Ecto.Query.t()
-  def get_user_activity_logs() do
+  @spec get_user_activity_day_logs :: Ecto.Query.t()
+  def get_user_activity_day_logs() do
     from(logs in UserActivityDayLog)
   end
 
