@@ -7,6 +7,10 @@ defmodule Teiserver.Protocols.Spring.AuthIn do
   require Logger
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
+  def do_handle("login_queue_heartbeat", _, _msg_id, %{queued_userid: nil} = state) do
+    state
+  end
+
   def do_handle("login_queue_heartbeat", _, msg_id, state) do
     LoginThrottleServer.heartbeat(self(), state.queued_userid)
     reply(:spring, :login_queued, nil, msg_id, state)

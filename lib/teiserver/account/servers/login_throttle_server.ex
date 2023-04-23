@@ -23,7 +23,10 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @tick_interval 1_000
   @release_interval 100
   @heartbeat_expiry 5_000
-  @toxic_min_wait 15_000
+
+  @all_must_wait true
+  @standard_min_wait 7_000
+  @toxic_min_wait 7_000
 
   # login_recent_age_search is the distance (in time) we record logins
   # for the purposes of "recent" logins
@@ -53,6 +56,12 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @spec heartbeat(pid(), T.userid()) :: :ok
   def heartbeat(pid, userid) do
     send_login_throttle_server({:heartbeat, pid, userid})
+  end
+
+
+  @spec set_value(atom, any) :: :ok
+  def set_value(key, value) do
+    send_login_throttle_server({:set_value, key, value})
   end
 
   @spec startup :: any
@@ -191,9 +200,23 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   # Handle a heartbeat from a pid
   def handle_info({:heartbeat, pid, userid}, state) do
-    new_heartbeats = Map.put(state.heartbeats, userid, {pid, System.system_time(:millisecond)})
+    new_heartbeats = if Map.has_key?(state.heartbeats, userid) do
+      Map.put(state.heartbeats, userid, {pid, System.system_time(:millisecond)})
+    else
+      state.heartbeats
+    end
 
     {:noreply, %{state | heartbeats: new_heartbeats}}
+  end
+
+  def handle_info({:set_value, key, value}, state) do
+    new_state = if Map.has_key?(state, key) do
+      Map.put(state, key, value)
+    else
+      state
+    end
+
+    {:noreply, new_state}
   end
 
   def handle_info(:startup, _) do
@@ -211,7 +234,11 @@ defmodule Teiserver.Account.LoginThrottleServer do
         awaiting_release: [],
         remaining_capacity: 0,
         server_usage: 0,
-        use_queues: true
+        use_queues: true,
+
+        all_must_wait: @all_must_wait,
+        standard_min_wait: @standard_min_wait,
+        toxic_min_wait: @toxic_min_wait
       }
       |> apply_server_capacity(telemetry_data)
 
@@ -231,7 +258,11 @@ defmodule Teiserver.Account.LoginThrottleServer do
         new_state = accept_login(state)
         {new_state, true}
 
-      state.remaining_capacity < 1 and category != :toxic ->
+      state.remaining_capacity < 1 ->
+        new_state = add_user_to_queue(state, category, {pid, userid})
+        {new_state, false}
+
+      state.all_must_wait == true ->
         new_state = add_user_to_queue(state, category, {pid, userid})
         {new_state, false}
 
@@ -297,7 +328,16 @@ defmodule Teiserver.Account.LoginThrottleServer do
           if Enum.empty?(queue) do
             nil
           else
-            hd(queue)
+            userid = hd(queue)
+
+            arrival_time = Map.get(state.arrival_times, userid, 91682272843772)
+            waited_for = System.system_time(:millisecond) - arrival_time
+
+            if waited_for > state.toxic_min_wait do
+              userid
+            else
+              nil
+            end
           end
 
         # A return of anything other than nil means
@@ -323,10 +363,10 @@ defmodule Teiserver.Account.LoginThrottleServer do
       state.queues.toxic
       |> Enum.slice(0..empty_count)
       |> Enum.filter(fn userid ->
-        arrival_time = Map.get(state.arrival_times, userid, 99_999_999)
+        arrival_time = Map.get(state.arrival_times, userid, 91682272843772)
         waited_for = System.system_time(:millisecond) - arrival_time
 
-        waited_for > @toxic_min_wait
+        waited_for > state.toxic_min_wait
       end)
 
     if Enum.empty?(userids) do

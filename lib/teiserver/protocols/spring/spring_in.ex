@@ -321,6 +321,9 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("LOGIN", data, msg_id, state) do
+    # This is in place to make it easier to copy-paste commands
+    data = String.replace(data, "    ", "\t")
+
     regex_result =
       case Regex.run(~r/^(\S+) (\S+) (0) ([0-9\.\*]+) ([^\t]+)?\t?([^\t]+)?\t?([^\t]+)?/, data) do
         nil -> nil
