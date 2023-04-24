@@ -1,4 +1,4 @@
-defmodule Teiserver.Moderation.Report do
+defmodule Teiserver.Moderation.Response do
   @moduledoc false
   use CentralWeb, :schema
 
