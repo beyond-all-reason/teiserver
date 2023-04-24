@@ -1,11 +1,9 @@
 defmodule Teiserver.Telemetry.Tasks.PersistUserActivityDayTask do
   use Oban.Worker, queue: :teiserver
-  alias Teiserver.{Telemetry, Battle}
-  alias Central.Account
+  alias Teiserver.{Telemetry}
 
   alias Central.Repo
   import Ecto.Query, warn: false
-  import Central.Helpers.TimexHelper, only: [date_to_str: 2]
 
   @client_states ~w(lobby menu player spectator total)a
 
@@ -119,11 +117,5 @@ defmodule Teiserver.Telemetry.Tasks.PersistUserActivityDayTask do
     end)
 
     result
-  end
-
-  defp add_maps(m1, nil), do: m1
-
-  defp add_maps(m1, m2) do
-    Map.merge(m1, m2, fn _k, v1, v2 -> v1 + v2 end)
   end
 end

@@ -1,6 +1,7 @@
 defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
   alias Teiserver.{User, Client, Account}
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
+  alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Data.Types, as: T
 
   @spec do_handle(String.t(), Map.t(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
@@ -66,6 +67,39 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
       {:ok, user} ->
         send(self(), {:action, {:login_accepted, user}})
         reply(:auth, :login, {:success, user}, state)
+
+      {:error, "Queued", userid, lobby, lobby_hash} ->
+        reply(:auth, :login_queued, nil, state)
+
+        if String.starts_with?(lobby, "BAR Lobby") do
+          my_pid = self()
+
+          spawn(fn ->
+            :timer.sleep(2000)
+            LoginThrottleServer.heartbeat(my_pid, userid)
+          end)
+
+          spawn(fn ->
+            :timer.sleep(4000)
+            LoginThrottleServer.heartbeat(my_pid, userid)
+          end)
+
+          spawn(fn ->
+            :timer.sleep(6000)
+            LoginThrottleServer.heartbeat(my_pid, userid)
+          end)
+
+          spawn(fn ->
+            :timer.sleep(8000)
+            LoginThrottleServer.heartbeat(my_pid, userid)
+          end)
+        end
+
+        Map.merge(state, %{
+          lobby: lobby,
+          lobby_hash: lobby_hash,
+          queued_userid: userid
+        })
 
       {:error, "Unverified", _userid} ->
         reply(:auth, :user_agreement, nil, state)

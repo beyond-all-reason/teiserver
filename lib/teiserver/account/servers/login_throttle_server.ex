@@ -23,6 +23,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @tick_interval 1_000
   @release_interval 100
   @heartbeat_expiry 5_000
+  @arrival_expiry 60_000
 
   @all_must_wait true
   @standard_min_wait 7_000
@@ -156,12 +157,12 @@ defmodule Teiserver.Account.LoginThrottleServer do
   # Check stats, see if we can let anybody else login right now
   def handle_info(:tick, state) do
     # Strip out invalid heartbeats
-    max_age = System.system_time(:millisecond) - @heartbeat_expiry
+    heartbeat_max_age = System.system_time(:millisecond) - @heartbeat_expiry
 
     dropped_users =
       state.heartbeats
       |> Map.filter(fn {_key, {_pid, last_time}} ->
-        last_time < max_age
+        last_time < heartbeat_max_age
       end)
       |> Map.keys()
 
@@ -187,10 +188,22 @@ defmodule Teiserver.Account.LoginThrottleServer do
         t < min_recent_age
       end)
 
+    # Cleanup arrivals
+    arrival_max_age = System.system_time(:millisecond) - @arrival_expiry
+    new_arrival_times = state.arrival_times
+      |> Map.filter(fn {_key, last_time} ->
+        last_time > arrival_max_age
+      end)
+
     send(self(), :dequeue)
 
     {:noreply,
-     %{state | heartbeats: new_heartbeats, queues: new_queues, recent_logins: new_recent_logins}}
+     %{state |
+      heartbeats: new_heartbeats,
+      queues: new_queues,
+      recent_logins: new_recent_logins,
+      arrival_times: new_arrival_times
+    }}
   end
 
   def handle_info(:dequeue, state) do

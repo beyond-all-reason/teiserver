@@ -6,7 +6,7 @@ defmodule Teiserver.TachyonTcpServer do
   alias Central.Config
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
-  alias Teiserver.{User, Client}
+  alias Teiserver.{User, Client, Account}
   alias Teiserver.Data.Types, as: T
 
   @behaviour :ranch_protocol
@@ -149,6 +149,14 @@ defmodule Teiserver.TachyonTcpServer do
   def handle_info({_, _socket, <<255, 244, 255, 253, 6>>}, state) do
     Client.disconnect(state.userid, "Terminal exit command")
     send(self(), :terminate)
+    {:noreply, state}
+  end
+
+  def handle_info({:login_accepted, userid}, state) do
+    user = Account.get_user_by_id(userid)
+    send(self(), {:action, {:login_accepted, user}})
+    Teiserver.Protocols.Tachyon.V1.TachyonOut.reply(:auth, :login, {:success, user}, state)
+
     {:noreply, state}
   end
 

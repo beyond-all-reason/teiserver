@@ -51,6 +51,13 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthOut do
 
   ###########
   # Login
+  def do_reply(:login_queued, _) do
+    %{
+      "cmd" => "s.auth.login",
+      "result" => "queued"
+    }
+  end
+
   def do_reply(:login, {:failure, reason}) do
     %{
       "cmd" => "s.auth.login",
