@@ -240,7 +240,7 @@ defmodule Teiserver.TachyonTcpServer do
   end
 
   # User updates
-  def handle_info(data = %{channel: "teiserver_user_updates:" <> _}, state) do
+  def handle_info(%{channel: "teiserver_user_updates:" <> _} = data, state) do
     case data.event do
       :update_report ->
         :ok
@@ -300,7 +300,7 @@ defmodule Teiserver.TachyonTcpServer do
   end
 
   def handle_info(
-        data = %{channel: "teiserver_lobby_host_message:" <> lobby_id, event: event},
+        %{channel: "teiserver_lobby_host_message:" <> lobby_id, event: event} = data,
         state
       ) do
     lobby_id = int_parse(lobby_id)
@@ -328,7 +328,7 @@ defmodule Teiserver.TachyonTcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info(event = %{channel: "teiserver_lobby_chat:" <> _}, state) do
+  def handle_info(%{channel: "teiserver_lobby_chat:" <> _} = event, state) do
     {:noreply,
      state.protocol_out.reply(
        :lobby_chat,
@@ -339,23 +339,23 @@ defmodule Teiserver.TachyonTcpServer do
   end
 
   def handle_info(%{channel: "teiserver_lobby_updates"} = msg, state) do
-    {:noreply, state.protocol_out.reply(:lobby, msg.event, {msg.lobby_id, msg}, state)}
+    {:noreply, state.protocol_out.reply(:lobby, msg.event, msg, state)}
   end
 
-  def handle_info(data = %{channel: "teiserver_global_lobby_updates"}, state) do
+  def handle_info(%{channel: "teiserver_global_lobby_updates"} = data, state) do
     new_state =
       case data.event do
         :opened ->
-          state.protocol_out.reply(:lobby, :opened, data.lobby, state)
+          state.protocol_out.reply(:lobby, :opened, data, state)
 
         :closed ->
-          state.protocol_out.reply(:lobby, :closed, data.lobby_id, state)
+          state.protocol_out.reply(:lobby, :closed, data, state)
 
         :updated_values ->
           state.protocol_out.reply(
             :lobby,
             :update_values,
-            {data.lobby_id, data.new_values},
+            data,
             state
           )
 
@@ -370,7 +370,7 @@ defmodule Teiserver.TachyonTcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info(data = %{channel: "teiserver_client_watch:" <> userid_str}, state) do
+  def handle_info(%{channel: "teiserver_client_watch:" <> userid_str} = data, state) do
     userid = int_parse(userid_str)
 
     if state.userid != userid do
@@ -405,7 +405,7 @@ defmodule Teiserver.TachyonTcpServer do
     {:noreply, state}
   end
 
-  def handle_info(data = %{channel: "teiserver_client_messages:" <> userid_str}, state) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> userid_str} = data, state) do
     userid = int_parse(userid_str)
 
     if state.userid == userid do
