@@ -59,7 +59,6 @@ defmodule Teiserver.Account.LoginThrottleServer do
     send_login_throttle_server({:heartbeat, pid, userid})
   end
 
-
   @spec set_value(atom, any) :: :ok
   def set_value(key, value) do
     send_login_throttle_server({:set_value, key, value})
@@ -190,7 +189,9 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
     # Cleanup arrivals
     arrival_max_age = System.system_time(:millisecond) - @arrival_expiry
-    new_arrival_times = state.arrival_times
+
+    new_arrival_times =
+      state.arrival_times
       |> Map.filter(fn {_key, last_time} ->
         last_time > arrival_max_age
       end)
@@ -198,12 +199,13 @@ defmodule Teiserver.Account.LoginThrottleServer do
     send(self(), :dequeue)
 
     {:noreply,
-     %{state |
-      heartbeats: new_heartbeats,
-      queues: new_queues,
-      recent_logins: new_recent_logins,
-      arrival_times: new_arrival_times
-    }}
+     %{
+       state
+       | heartbeats: new_heartbeats,
+         queues: new_queues,
+         recent_logins: new_recent_logins,
+         arrival_times: new_arrival_times
+     }}
   end
 
   def handle_info(:dequeue, state) do
@@ -213,21 +215,23 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   # Handle a heartbeat from a pid
   def handle_info({:heartbeat, pid, userid}, state) do
-    new_heartbeats = if Map.has_key?(state.heartbeats, userid) do
-      Map.put(state.heartbeats, userid, {pid, System.system_time(:millisecond)})
-    else
-      state.heartbeats
-    end
+    new_heartbeats =
+      if Map.has_key?(state.heartbeats, userid) do
+        Map.put(state.heartbeats, userid, {pid, System.system_time(:millisecond)})
+      else
+        state.heartbeats
+      end
 
     {:noreply, %{state | heartbeats: new_heartbeats}}
   end
 
   def handle_info({:set_value, key, value}, state) do
-    new_state = if Map.has_key?(state, key) do
-      Map.put(state, key, value)
-    else
-      state
-    end
+    new_state =
+      if Map.has_key?(state, key) do
+        Map.put(state, key, value)
+      else
+        state
+      end
 
     {:noreply, new_state}
   end
@@ -248,7 +252,6 @@ defmodule Teiserver.Account.LoginThrottleServer do
         remaining_capacity: 0,
         server_usage: 0,
         use_queues: true,
-
         all_must_wait: @all_must_wait,
         standard_min_wait: @standard_min_wait,
         toxic_min_wait: @toxic_min_wait
@@ -343,7 +346,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
           else
             userid = hd(queue)
 
-            arrival_time = Map.get(state.arrival_times, userid, 91682272843772)
+            arrival_time = Map.get(state.arrival_times, userid, 91_682_272_843_772)
             waited_for = System.system_time(:millisecond) - arrival_time
 
             if waited_for > state.toxic_min_wait do
@@ -376,7 +379,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
       state.queues.toxic
       |> Enum.slice(0..empty_count)
       |> Enum.filter(fn userid ->
-        arrival_time = Map.get(state.arrival_times, userid, 91682272843772)
+        arrival_time = Map.get(state.arrival_times, userid, 91_682_272_843_772)
         waited_for = System.system_time(:millisecond) - arrival_time
 
         waited_for > state.toxic_min_wait
@@ -459,7 +462,9 @@ defmodule Teiserver.Account.LoginThrottleServer do
     recent_count = Enum.count(state.recent_logins)
 
     # Remaining capacity is the lowest of server limit and login rate limit
-    remaining_capacity = min(total_limit - client_count, @max_login_rate - recent_count) |> round()
+    remaining_capacity =
+      min(total_limit - client_count, @max_login_rate - recent_count) |> round()
+
     server_usage = max(client_count, 1) / total_limit
 
     %{state | remaining_capacity: remaining_capacity, server_usage: server_usage}

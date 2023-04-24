@@ -109,7 +109,8 @@ defmodule TeiserverWeb.Admin.UserController do
               data_equal: {"hardware:osinfo", params["data_search"]["os"]},
               data_equal: {"hardware:raminfo", params["data_search"]["ram"]},
               data_equal: {"hardware:displaymax", params["data_search"]["screen"]},
-              data_equal: {params["data_search"]["custom_field"], params["data_search"]["custom_value"]},
+              data_equal:
+                {params["data_search"]["custom_field"], params["data_search"]["custom_value"]}
             ],
             select: [:user_id],
             limit: :infinity

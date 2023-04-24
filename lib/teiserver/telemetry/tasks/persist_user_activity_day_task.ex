@@ -38,11 +38,12 @@ defmodule Teiserver.Telemetry.Tasks.PersistUserActivityDayTask do
 
   @spec run(%Date{}) :: :ok
   def run(date) do
-    data = date
+    data =
+      date
       |> get_logs
       |> sum_user_activity
 
-      # Delete old log if it exists
+    # Delete old log if it exists
     delete_query =
       from logs in Teiserver.Telemetry.UserActivityDayLog,
         where: logs.date == ^(date |> Timex.to_date())
@@ -88,33 +89,39 @@ defmodule Teiserver.Telemetry.Tasks.PersistUserActivityDayTask do
   end
 
   defp sum_user_activity(logs) do
-    start_data = @client_states
+    start_data =
+      @client_states
       |> Map.new(fn key -> {key, []} end)
 
-    result = logs
-    |> Enum.reduce(start_data, fn (log, acc) ->
-      %{
-        total: log["client"]["total"] ++ acc.total,
-        player: log["client"]["player"] ++ acc.player,
-        spectator: log["client"]["spectator"] ++ acc.spectator,
-        lobby: log["client"]["lobby"] ++ acc.lobby,
-        menu: log["client"]["menu"] ++ acc.menu
-      }
-    end)
-    |> Map.new(fn {key, userids} ->
-      result = userids
-        |> List.flatten
-        |> Enum.group_by(fn key ->
-          key
-        end, fn _ ->
-          1
-        end)
-        |> Map.new(fn {key, ones} ->
-          {key, Enum.count(ones)}
-        end)
+    result =
+      logs
+      |> Enum.reduce(start_data, fn log, acc ->
+        %{
+          total: log["client"]["total"] ++ acc.total,
+          player: log["client"]["player"] ++ acc.player,
+          spectator: log["client"]["spectator"] ++ acc.spectator,
+          lobby: log["client"]["lobby"] ++ acc.lobby,
+          menu: log["client"]["menu"] ++ acc.menu
+        }
+      end)
+      |> Map.new(fn {key, userids} ->
+        result =
+          userids
+          |> List.flatten()
+          |> Enum.group_by(
+            fn key ->
+              key
+            end,
+            fn _ ->
+              1
+            end
+          )
+          |> Map.new(fn {key, ones} ->
+            {key, Enum.count(ones)}
+          end)
 
-      {key, result}
-    end)
+        {key, result}
+      end)
 
     result
   end

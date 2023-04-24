@@ -33,6 +33,7 @@ defmodule Teiserver.Account.UserStatLib do
 
   def _search(query, :data_equal, {"", _}), do: query
   def _search(query, :data_equal, {_, ""}), do: query
+
   def _search(query, :data_equal, {field, value}) do
     from user_stats in query,
       where: fragment("? ->> ? = ?", user_stats.data, ^field, ^value)
@@ -50,6 +51,7 @@ defmodule Teiserver.Account.UserStatLib do
 
   def _search(query, :data_contains, {"", _}), do: query
   def _search(query, :data_contains, {_, ""}), do: query
+
   def _search(query, :data_contains, {field, value}) do
     from user_stats in query,
       where: fragment("? -> ? @> ?", user_stats.data, ^field, ^value)

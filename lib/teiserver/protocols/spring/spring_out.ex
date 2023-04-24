@@ -661,11 +661,12 @@ defmodule Teiserver.Protocols.SpringOut do
 
   @spec do_login_accepted(map(), map()) :: map()
   def do_login_accepted(state, user) do
-    state = Map.merge(state, %{
-      lobby: nil,
-      lobby_hash: nil,
-      queued_userid: nil
-    })
+    state =
+      Map.merge(state, %{
+        lobby: nil,
+        lobby_hash: nil,
+        queued_userid: nil
+      })
 
     reply(:login_accepted, user.name, nil, state)
     reply(:motd, nil, nil, state)
