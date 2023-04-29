@@ -41,8 +41,10 @@ defmodule Teiserver.Coordinator.AutomodTest do
 
     hw1 = CalculateSmurfKeyTask.calculate_hw1_fingerprint(good_stats)
     hw2 = CalculateSmurfKeyTask.calculate_hw2_fingerprint(good_stats)
+    hw3 = CalculateSmurfKeyTask.calculate_hw2_fingerprint(good_stats)
     Account.create_smurf_key(good_user.id, "hw1", hw1)
     Account.create_smurf_key(good_user.id, "hw2", hw2)
+    Account.create_smurf_key(good_user.id, "hw3", hw3)
 
     :timer.sleep(100)
 
@@ -58,8 +60,10 @@ defmodule Teiserver.Coordinator.AutomodTest do
 
     hw1 = CalculateSmurfKeyTask.calculate_hw1_fingerprint(bad_stats)
     hw2 = CalculateSmurfKeyTask.calculate_hw2_fingerprint(bad_stats)
+    hw3 = CalculateSmurfKeyTask.calculate_hw3_fingerprint(bad_stats)
     Account.create_smurf_key(bad_user.id, "hw1", hw1)
     Account.create_smurf_key(bad_user.id, "hw2", hw2)
+    Account.create_smurf_key(bad_user.id, "hw3", hw3)
 
     result = AutomodServer.check_user(good_user.id)
     assert result == "No action"

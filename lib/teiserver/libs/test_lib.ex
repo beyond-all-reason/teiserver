@@ -568,6 +568,7 @@ defmodule Teiserver.TeiserverTestLib do
     Teiserver.Account.get_or_add_smurf_key_type("chobby_hash")
     Teiserver.Account.get_or_add_smurf_key_type("hw1")
     Teiserver.Account.get_or_add_smurf_key_type("hw2")
+    Teiserver.Account.get_or_add_smurf_key_type("hw3")
 
     Teiserver.Game.get_or_add_rating_type("Duel")
     Teiserver.Game.get_or_add_rating_type("Team")
