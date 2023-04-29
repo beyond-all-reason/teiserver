@@ -12,7 +12,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
       new_user: 0
     ]
 
-  test "throttle test" do
+  test "multiple queues" do
     Teiserver.TeiserverConfigs.teiserver_configs()
     pid = LoginThrottleServer.get_login_throttle_server_pid()
     Config.update_site_config("system.User limit", 10)
