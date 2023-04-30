@@ -257,6 +257,21 @@ defmodule Teiserver.Battle.MatchLib do
       where: matches.game_type not in ^game_types
   end
 
+  def _search(query, :rating_type_id, rating_type_id) do
+    from matches in query,
+      where: matches.rating_type_id == ^rating_type_id
+  end
+
+  def _search(query, :rating_type_id_in, rating_type_ids) do
+    from matches in query,
+      where: matches.rating_type_id in ^rating_type_ids
+  end
+
+  def _search(query, :rating_type_id_not_in, rating_type_ids) do
+    from matches in query,
+      where: matches.rating_type_id not in ^rating_type_ids
+  end
+
   def _search(query, :ready_for_post_process, _) do
     from matches in query,
       where: matches.processed == false,

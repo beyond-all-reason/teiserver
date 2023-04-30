@@ -15,9 +15,10 @@ defmodule Teiserver.Game.MatchRatingsExport do
     "start_date" => ""
   })
   """
-  alias Central.Helpers.DatePresets
+  alias Central.Helpers.{DatePresets, TimexHelper}
   alias Teiserver.{Battle}
-  alias Central.Helpers.TimexHelper
+  alias Teiserver.Game.MatchRatingLib
+  require Logger
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-swords"
@@ -34,6 +35,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
   end
 
   def show_form(_conn, params) do
+    start_time = System.system_time(:millisecond)
     {start_date, end_date} =
       DatePresets.parse(
         params["date_preset"],
@@ -41,18 +43,14 @@ defmodule Teiserver.Game.MatchRatingsExport do
         params["end_date"]
       )
 
-    game_type =
-      case params["rating_type"] do
-        "All" -> nil
-        t -> t
-      end
+    rating_type_id = MatchRatingLib.rating_type_name_lookup()[params["rating_type"]]
 
     game_ids =
       Battle.list_matches(
         search: [
           started_after: start_date |> Timex.to_datetime(),
           finished_before: end_date |> Timex.to_datetime(),
-          game_type: game_type,
+          rating_type_id: rating_type_id,
           of_interest: true
         ],
         limit: :infinity,
@@ -74,6 +72,11 @@ defmodule Teiserver.Game.MatchRatingsExport do
     content_type = "application/json"
     path = "/tmp/match_ratings_export.json"
     File.write(path, Jason.encode_to_iodata!(data))
+
+    # 438188ms - original
+    end_time = System.system_time(:millisecond)
+    Logger.info("Ran #{__MODULE__} export in #{end_time - start_time}ms")
+
     {:file, path, "match_ratings.json", content_type}
   end
 
@@ -85,7 +88,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
       limit: :infinity,
       preload: [:members, :ratings],
       select:
-        ~w(id map uuid server_uuid team_count team_size winning_team game_duration game_type)a
+        ~w(id map uuid server_uuid team_count team_size winning_team game_duration game_type started)a
     )
     |> Stream.filter(fn match ->
       cond do

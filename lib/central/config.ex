@@ -307,7 +307,7 @@ defmodule Central.Config do
         limit: 1
 
     # The key may or may not exist
-    case Repo.one(query) do
+    {:ok, _config} = case Repo.one(query) do
       nil ->
         %SiteConfig{}
         |> SiteConfig.changeset(%{
@@ -323,6 +323,12 @@ defmodule Central.Config do
     end
 
     cached_value = cast_site_config_value(key, value)
+
+    case get_site_config_type(key) do
+      nil -> :ok
+      %{update_callback: nil} -> :ok
+      %{update_callback: callback_func} -> callback_func.(cached_value)
+    end
     Central.cache_put(:config_site_cache, key, cached_value)
   end
 
@@ -369,6 +375,14 @@ defmodule Central.Config do
     end)
   end
 
+  @config_defaults %{
+    opts: [],
+    value_label: "",
+    default: nil,
+    update_callback: nil,
+    tags: []
+  }
+
   @doc """
   Expects a map with the following fields:
 
@@ -389,13 +403,9 @@ defmodule Central.Config do
       - If type is "select" then include a :choices key in your opts list
 
     default: Any, The default value used when the variable is not set,
-  """
-  @config_defaults %{
-    opts: [],
-    value_label: "",
-    default: nil
-  }
 
+    update_callback: A function of arity 1 which will be called on an updated value with the new value
+  """
   @spec add_site_config_type(map()) :: :ok
   def add_site_config_type(config) do
     config = Map.merge(@config_defaults, config)

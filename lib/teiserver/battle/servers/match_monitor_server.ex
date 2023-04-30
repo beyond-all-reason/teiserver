@@ -292,9 +292,11 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
           hw1 = CalculateSmurfKeyTask.calculate_hw1_fingerprint(stats)
           hw2 = CalculateSmurfKeyTask.calculate_hw2_fingerprint(stats)
+          hw3 = CalculateSmurfKeyTask.calculate_hw3_fingerprint(stats)
 
           Account.create_smurf_key(user.id, "hw1", hw1)
           Account.create_smurf_key(user.id, "hw2", hw2)
+          Account.create_smurf_key(user.id, "hw3", hw3)
           Teiserver.Coordinator.AutomodServer.check_user(user.id)
         end
     end

@@ -10,6 +10,7 @@ defmodule Teiserver.TeiserverConfigs do
     # Site based configs
     site_configs()
     system_configs()
+    login_configs()
     legacy_protocol_configs()
     moderation_configs()
     discord_configs()
@@ -262,16 +263,7 @@ defmodule Teiserver.TeiserverConfigs do
     })
   end
 
-  defp system_configs() do
-    add_site_config_type(%{
-      key: "system.Redirect url",
-      section: "System",
-      type: "string",
-      permissions: ["teiserver.admin"],
-      description: "A redirect URL for those accessing the old server",
-      value_label: "The URL for the redirect"
-    })
-
+  defp login_configs() do
     add_site_config_type(%{
       key: "system.Login limit count",
       section: "System",
@@ -303,6 +295,37 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "system.User limit",
+      section: "System",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The cap for number of concurrent users, set to 0 to be infinite",
+      default: 1000,
+      value_label: ""
+    })
+
+    add_site_config_type(%{
+      key: "system.Login message",
+      section: "System",
+      type: "string",
+      permissions: ["teiserver.admin"],
+      description: "A message sent to all users when they login, leave empty for no message",
+      default: "",
+      value_label: ""
+    })
+  end
+
+  defp system_configs() do
+    add_site_config_type(%{
+      key: "system.Redirect url",
+      section: "System",
+      type: "string",
+      permissions: ["teiserver.admin"],
+      description: "A redirect URL for those accessing the old server",
+      value_label: "The URL for the redirect"
+    })
+
+    add_site_config_type(%{
       key: "system.Disconnect unauthenticated sockets",
       section: "System",
       type: "boolean",
@@ -329,26 +352,6 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver.admin"],
       description: "When enabled you will use geoip for country code lookups",
       default: true,
-      value_label: ""
-    })
-
-    add_site_config_type(%{
-      key: "system.User limit",
-      section: "System",
-      type: "integer",
-      permissions: ["teiserver.admin"],
-      description: "The cap for number of concurrent users, set to 0 to be infinite",
-      default: 1000,
-      value_label: ""
-    })
-
-    add_site_config_type(%{
-      key: "system.Login message",
-      section: "System",
-      type: "string",
-      permissions: ["teiserver.admin"],
-      description: "A message sent to all users when they login, leave empty for no message",
-      default: "",
       value_label: ""
     })
   end

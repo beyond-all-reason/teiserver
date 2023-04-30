@@ -384,4 +384,18 @@ defmodule Central.Helpers.TimexHelper do
     |> Stream.iterate(&Timex.shift(&1, days: 1))
     |> Stream.take_while(&(Timex.compare(&1, last) == -1))
   end
+
+  @doc """
+  Wraps Timex.compare, returns true if a > b
+  """
+  def greater_than(a, b) do
+    Timex.compare(a, b) == 1
+  end
+
+  @doc """
+  Wraps Timex.compare, returns true if a < b
+  """
+  def less_than(a, b) do
+    Timex.compare(a, b) == -1
+  end
 end

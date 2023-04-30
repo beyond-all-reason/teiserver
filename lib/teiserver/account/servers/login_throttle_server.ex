@@ -26,8 +26,8 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @arrival_expiry 60_000
 
   @all_must_wait true
-  @standard_min_wait 7_000
-  @toxic_min_wait 7_000
+  @standard_min_wait 1_000
+  @toxic_min_wait 1_000
 
   # login_recent_age_search is the distance (in time) we record logins
   # for the purposes of "recent" logins
@@ -349,7 +349,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
             arrival_time = Map.get(state.arrival_times, userid, 91_682_272_843_772)
             waited_for = System.system_time(:millisecond) - arrival_time
 
-            if waited_for > state.toxic_min_wait do
+            if waited_for > state.standard_min_wait do
               userid
             else
               nil
