@@ -3,6 +3,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   alias Central.Config
   import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
   alias Teiserver.{Account, User, Moderation, Coordinator, Client}
+  alias Central.Helpers.TimexHelper
   alias Phoenix.PubSub
   require Logger
   alias Teiserver.Data.Types, as: T
@@ -120,21 +121,44 @@ defmodule Teiserver.Coordinator.AutomodServer do
             "Trusted account"
 
           true ->
-            do_check(userid)
+            do_check(user)
         end
     end
   end
 
-  @spec do_check(T.userid()) :: String.t()
-  def do_check(userid) do
-    user = Account.get_user_by_id(userid)
+  @spec do_check(T.user() | T.userid()) :: String.t()
+  def do_check(userid) when is_integer(userid) do
+    do_check(Account.get_user_by_id(userid))
+  end
 
+  def do_check(user) do
     if User.is_restricted?(user, ["Login"]) do
       "Already banned"
     else
-      smurf_keys = Account.list_smurf_keys(search: [user_id: userid], select: [:type_id, :value])
+      smurf_keys = Account.list_smurf_keys(
+        search: [
+          user_id: user.id
+        ],
+        preload: [:type]
+      )
 
       value_list = smurf_keys |> Enum.map(fn %{value: value} -> value end)
+
+      # Fake chobby check
+      if user.lobby_client == "LuaLobby Chobby" do
+        max_age = Timex.now |> Timex.shift(days: -2)
+
+        chobby_keys = smurf_keys
+          |> Enum.filter(fn key ->
+            Enum.member?(["chobby_mac_hash"], key.type.name)
+            and
+            TimexHelper.greater_than(key.last_updated, max_age)
+          end)
+
+        if Enum.empty?(chobby_keys) do
+          Logger.error("Fake chobby user - #{user.id}/#{user.name}")
+        end
+      end
 
       Moderation.list_bans(
         search: [
@@ -144,7 +168,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
         ],
         limit: 1
       )
-      |> enact_ban(userid)
+      |> enact_ban(user.id)
     end
   end
 

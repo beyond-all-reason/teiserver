@@ -1266,7 +1266,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
       last_balance_hash: nil,
       last_queue_state: [],
       balance_result: nil,
-      player_limit: Config.get_site_config_cache("teiserver.Default player limit")
+      player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
+
+      balancemode: :standard,
+      showmatch: true,
     }
   end
 
