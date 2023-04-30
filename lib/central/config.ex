@@ -375,6 +375,14 @@ defmodule Central.Config do
     end)
   end
 
+  @config_defaults %{
+    opts: [],
+    value_label: "",
+    default: nil,
+    update_callback: nil,
+    tags: []
+  }
+
   @doc """
   Expects a map with the following fields:
 
@@ -398,13 +406,6 @@ defmodule Central.Config do
 
     update_callback: A function of arity 1 which will be called on an updated value with the new value
   """
-  @config_defaults %{
-    opts: [],
-    value_label: "",
-    default: nil,
-    update_callback: nil
-  }
-
   @spec add_site_config_type(map()) :: :ok
   def add_site_config_type(config) do
     config = Map.merge(@config_defaults, config)
