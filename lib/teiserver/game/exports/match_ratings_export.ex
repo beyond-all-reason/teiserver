@@ -35,7 +35,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
   end
 
   def show_form(_conn, params) do
-    start_time = System.system_time(:millisecond)
+    start_time = System.system_time(:second)
     {start_date, end_date} =
       DatePresets.parse(
         params["date_preset"],
@@ -60,6 +60,8 @@ defmodule Teiserver.Game.MatchRatingsExport do
       |> Stream.map(fn %{id: id} -> id end)
       |> Enum.to_list()
 
+    Logger.info("Found #{Enum.count(game_ids)} matches, #{start_date} - #{end_date}")
+
     data =
       game_ids
       |> Stream.chunk_every(100)
@@ -74,8 +76,9 @@ defmodule Teiserver.Game.MatchRatingsExport do
     File.write(path, Jason.encode_to_iodata!(data))
 
     # 438188ms - original
-    end_time = System.system_time(:millisecond)
-    Logger.info("Ran #{__MODULE__} export in #{end_time - start_time}ms")
+    end_time = System.system_time(:second)
+    time_taken = (end_time - start_time)
+    Logger.info("Ran #{__MODULE__} export in #{time_taken}s")
 
     {:file, path, "match_ratings.json", content_type}
   end
@@ -112,7 +115,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
       if valid_data?(members_data) do
         %{
           id: match.id,
-          date: match.started |> TimexHelper.date_to_str(format: :ymd),
+          date: match.started |> TimexHelper.date_to_str(format: :ymd_hms),
           map: match.map,
           match_uuid: match.uuid,
           server_uuid: match.server_uuid,
