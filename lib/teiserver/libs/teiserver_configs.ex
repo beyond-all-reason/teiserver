@@ -266,7 +266,7 @@ defmodule Teiserver.TeiserverConfigs do
   defp login_configs() do
     add_site_config_type(%{
       key: "system.Login limit count",
-      section: "System",
+      section: "Login",
       type: "integer",
       default: 3,
       permissions: ["teiserver.admin"],
@@ -276,7 +276,7 @@ defmodule Teiserver.TeiserverConfigs do
 
     add_site_config_type(%{
       key: "system.Post login delay",
-      section: "System",
+      section: "Login",
       type: "integer",
       default: 1000,
       permissions: ["teiserver.admin"],
@@ -286,7 +286,7 @@ defmodule Teiserver.TeiserverConfigs do
 
     add_site_config_type(%{
       key: "system.Use login throttle",
-      section: "System",
+      section: "Login",
       type: "boolean",
       default: false,
       permissions: ["teiserver.admin"],
@@ -295,8 +295,34 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "system.Login throttle standard wait",
+      section: "Login",
+      type: "integer",
+      default: 500,
+      permissions: ["teiserver.admin"],
+      description: "The wait time for standard users when logging in (ms)",
+      value_label: "Standard login wait time (ms)",
+      update_callback: (fn v ->
+        Teiserver.Account.LoginThrottleServer.set_value(:standard_min_wait, v)
+      end)
+    })
+
+    add_site_config_type(%{
+      key: "system.Login throttle toxic wait",
+      section: "Login",
+      type: "integer",
+      default: 5000,
+      permissions: ["teiserver.admin"],
+      description: "The wait time for toxic users when logging in (ms)",
+      value_label: "Toxic login wait time (ms)",
+      update_callback: (fn v ->
+        Teiserver.Account.LoginThrottleServer.set_value(:toxic_min_wait, v)
+      end)
+    })
+
+    add_site_config_type(%{
       key: "system.User limit",
-      section: "System",
+      section: "Login",
       type: "integer",
       permissions: ["teiserver.admin"],
       description: "The cap for number of concurrent users, set to 0 to be infinite",
@@ -306,7 +332,7 @@ defmodule Teiserver.TeiserverConfigs do
 
     add_site_config_type(%{
       key: "system.Login message",
-      section: "System",
+      section: "Login",
       type: "string",
       permissions: ["teiserver.admin"],
       description: "A message sent to all users when they login, leave empty for no message",

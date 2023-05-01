@@ -156,7 +156,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
           end)
 
         if Enum.empty?(chobby_keys) do
-          Logger.error("Fake chobby user - #{user.id}/#{user.name}")
+          Logger.error("Fake chobby user - #{user.id}/#{user.name} - #{user.lobby_hash}")
         end
       end
 

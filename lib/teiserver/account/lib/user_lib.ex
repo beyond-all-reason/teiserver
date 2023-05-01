@@ -73,6 +73,11 @@ defmodule Teiserver.Account.UserLib do
       where: fragment("? ->> ? @> ?", users.data, ^field, ^value)
   end
 
+  def _search(query, :data_not_contains, {field, value}) do
+    from users in query,
+      where: fragment("not ? ->> ? @> ?", users.data, ^field, ^value)
+  end
+
   def _search(query, :data_contains_key, field) do
     from users in query,
       where: fragment("? @> ?", users.data, ^field)

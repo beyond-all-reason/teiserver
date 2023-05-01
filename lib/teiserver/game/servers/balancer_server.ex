@@ -64,7 +64,7 @@ defmodule Teiserver.Game.BalancerServer do
   end
 
   def handle_cast({:set_algorithm, algorithm}, state) do
-    if Enum.member?(~w(loser_picks)a, algorithm) do
+    if Enum.member?(~w(loser_picks forceparty)a, algorithm) do
       {:noreply, %{state | algorithm: algorithm}}
     else
       Logger.error("No BalanceServer handler for algorithm of #{algorithm}")

@@ -26,8 +26,6 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @arrival_expiry 60_000
 
   @all_must_wait true
-  @standard_min_wait 1_000
-  @toxic_min_wait 1_000
 
   # login_recent_age_search is the distance (in time) we record logins
   # for the purposes of "recent" logins
@@ -253,8 +251,8 @@ defmodule Teiserver.Account.LoginThrottleServer do
         server_usage: 0,
         use_queues: true,
         all_must_wait: @all_must_wait,
-        standard_min_wait: @standard_min_wait,
-        toxic_min_wait: @toxic_min_wait
+        standard_min_wait: Config.get_site_config_cache("system.Login throttle standard wait"),
+        toxic_min_wait: Config.get_site_config_cache("system.Login throttle toxic wait")
       }
       |> apply_server_capacity(telemetry_data)
 
@@ -282,27 +280,33 @@ defmodule Teiserver.Account.LoginThrottleServer do
         new_state = add_user_to_queue(state, category, {pid, userid})
         {new_state, false}
 
+      # See below for comments on the bug
       true ->
-        # Of the queues ahead of us, are any occupied?
-        # this goes through every relevant queue and returns true
-        # if all of them are empty
-        empty_queues =
-          @all_queues
-          |> Enum.take_while(fn queue -> queue != category end)
-          |> Kernel.++([category])
-          |> Enum.map(fn key ->
-            queue = Map.get(state.queues, key)
-            Enum.empty?(queue)
-          end)
-          |> Enum.all?()
+        new_state = add_user_to_queue(state, category, {pid, userid})
+        {new_state, false}
 
-        if empty_queues and category != :toxic do
-          new_state = accept_login(state)
-          {new_state, true}
-        else
-          new_state = add_user_to_queue(state, category, {pid, userid})
-          {new_state, false}
-        end
+       # There is a bug where using this would cause some users to queue forever
+      # true ->
+      #   # Of the queues ahead of us, are any occupied?
+      #   # this goes through every relevant queue and returns true
+      #   # if all of them are empty
+      #   empty_queues =
+      #     @all_queues
+      #     |> Enum.take_while(fn queue -> queue != category end)
+      #     |> Kernel.++([category])
+      #     |> Enum.map(fn key ->
+      #       queue = Map.get(state.queues, key)
+      #       Enum.empty?(queue)
+      #     end)
+      #     |> Enum.all?()
+
+      #   if empty_queues and category != :toxic do
+      #     new_state = accept_login(state)
+      #     {new_state, true}
+      #   else
+      #     new_state = add_user_to_queue(state, category, {pid, userid})
+      #     {new_state, false}
+      #   end
     end
   end
 
@@ -334,6 +338,8 @@ defmodule Teiserver.Account.LoginThrottleServer do
   defp dequeue_users(state, 0), do: state
 
   defp dequeue_users(state, empty_count) do
+    now_ms = System.system_time(:millisecond)
+
     # For our first part, we try to find a user to dequeue
     userid =
       @standard_queues
@@ -347,7 +353,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
             userid = hd(queue)
 
             arrival_time = Map.get(state.arrival_times, userid, 91_682_272_843_772)
-            waited_for = System.system_time(:millisecond) - arrival_time
+            waited_for = now_ms - arrival_time
 
             if waited_for > state.standard_min_wait do
               userid
