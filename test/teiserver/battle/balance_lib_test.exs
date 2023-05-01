@@ -447,4 +447,8 @@ defmodule Teiserver.Battle.BalanceLibTest do
              stdevs: %{1 => 16.0312195418814, 2 => 15.074295174236173}
            }
   end
+
+  test "force party" do
+
+  end
 end

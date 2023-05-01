@@ -1268,7 +1268,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       balance_result: nil,
       player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
 
-      balancemode: :standard,
       showmatch: true,
     }
   end
