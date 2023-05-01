@@ -76,65 +76,50 @@ defmodule Teiserver.Account.RanksReport do
         search: [
           id_in: user_ids
         ],
+        select: [:inserted_at],
         limit: :infinity
       )
 
-    registration_age =
+    bucketed_registration_age =
       users
       |> Enum.group_by(&get_registration_age/1)
       |> Map.new(fn {rank, users} -> {rank, Enum.count(users)} end)
 
-    {cumulative_registration_age, _} =
+    {bucketed_cumulative_registration_age, _} =
       @keys
       |> Enum.reverse()
       |> Enum.map_reduce(0, fn key, acc ->
-        value = registration_age[key] || 0
+        value = bucketed_registration_age[key] || 0
 
         {{key, acc + value}, acc + value}
       end)
 
-    cumulative_registration_age = Map.new(cumulative_registration_age)
+    bucketed_cumulative_registration_age = Map.new(bucketed_cumulative_registration_age)
 
-    # Get ranks
-    rank_count =
+    # Now do raw CSV stuff
+    csv_output =
       users
-      |> Enum.group_by(fn user ->
-        user.data["rank"]
+      |> Enum.group_by(fn %{inserted_at: inserted_at} ->
+        Timex.diff(Timex.now(), inserted_at, :days)
+      end, fn _ ->
+        1
       end)
-      |> Map.new(fn {rank, users} -> {rank, Enum.count(users)} end)
+      |> Enum.map(fn {key, vs} -> [key, Enum.count(vs)] end)
+      |> Enum.sort(&<=/2)
+      |> add_csv_headings()
+      |> CSV.encode(separator: ?\t)
+      |> Enum.to_list()
 
-    {cumulative_rank_count, _} =
-      rank_count
-      |> Map.keys()
-      |> Enum.sort(&>=/2)
-      |> Enum.map_reduce(0, fn key, acc ->
-        value = rank_count[key] || 0
-
-        {{key, acc + value}, acc + value}
-      end)
-
-    cumulative_rank_count = Map.new(cumulative_rank_count)
-
-    rank_hours =
-      ([0] ++ User.get_rank_levels())
-      |> Enum.with_index()
-      |> Map.new(fn {r, i} ->
-        {i, r}
-      end)
-
-    assigns = %{
+    %{
       keys: @keys,
       params: params,
       presets: DatePresets.presets(),
       total: Enum.count(users),
-      rank_count: rank_count,
-      cumulative_rank_count: cumulative_rank_count,
-      registration_age: registration_age,
-      cumulative_registration_age: cumulative_registration_age,
-      rank_hours: rank_hours
+      start_date: start_date,
+      bucketed_registration_age: bucketed_registration_age,
+      bucketed_cumulative_registration_age: bucketed_cumulative_registration_age,
+      csv_output: csv_output
     }
-
-    {%{}, assigns}
   end
 
   defp apply_defaults(params) do
@@ -148,6 +133,17 @@ defmodule Teiserver.Account.RanksReport do
       },
       Map.get(params, "report", %{})
     )
+  end
+
+  defp add_csv_headings(output) do
+    headings = [
+      [
+        "Age (days)",
+        "Registration count"
+      ]
+    ]
+
+    headings ++ output
   end
 
   defp get_registration_age(%{inserted_at: inserted_at}) do
