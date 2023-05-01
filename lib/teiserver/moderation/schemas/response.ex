@@ -2,36 +2,26 @@ defmodule Teiserver.Moderation.Response do
   @moduledoc false
   use CentralWeb, :schema
 
-  schema "moderation_reports" do
-    belongs_to :reporter, Central.Account.User
-    belongs_to :target, Central.Account.User
+  schema "moderation_responses" do
+    belongs_to :report, Teiserver.Moderation.Report
+    belongs_to :user, Central.Account.User
 
-    field :type, :string
-    field :sub_type, :string
-    field :extra_text, :string
-
-    belongs_to :match, Teiserver.Battle.Match
-    field :relationship, :string
-    belongs_to :result, Teiserver.Moderation.Action
-    belongs_to :primary_response, Teiserver.Moderation.Response
-
-    has_many :responses, Teiserver.Moderation.Response
+    field :warn, :boolean, default: false
+    field :mute, :boolean, default: false
+    field :suspend, :boolean, default: false
+    field :accurate, :boolean, default: false
 
     timestamps()
   end
 
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
-    params =
-      params
-      |> trim_strings(~w(name)a)
-
     struct
     |> cast(
       params,
-      ~w(reporter_id target_id type sub_type extra_text match_id relationship result_id primary_response_id)a
+      ~w(report_id user_id warn mute suspend accurate)a
     )
-    |> validate_required(~w(reporter_id target_id type sub_type)a)
+    |> validate_required(~w(report_id user_id warn mute suspend accurate)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

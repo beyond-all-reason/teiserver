@@ -13,8 +13,8 @@ defmodule Teiserver.Moderation.Report do
     belongs_to :match, Teiserver.Battle.Match
     field :relationship, :string
     belongs_to :result, Teiserver.Moderation.Action
-    belongs_to :primary_response, Teiserver.Moderation.Response
 
+    belongs_to :primary_response, Teiserver.Moderation.Response
     has_many :responses, Teiserver.Moderation.Response
 
     timestamps()
