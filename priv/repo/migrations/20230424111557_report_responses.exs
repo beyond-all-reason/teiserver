@@ -15,7 +15,7 @@ defmodule Central.Repo.Migrations.ReportResponses do
     end
 
     alter table(:moderation_reports) do
-      add :primary_response_id, references(:moderation_reports, on_delete: :nothing)
+      add :closed, :boolean, default: false
     end
   end
 end

@@ -168,6 +168,8 @@ defmodule Teiserver.Moderation.ReportLib do
     query = if :target in preloads, do: _preload_target(query), else: query
     query = if :action in preloads, do: _preload_action(query), else: query
     query = if :match in preloads, do: _preload_match(query), else: query
+    query = if :responses in preloads, do: _preload_responses(query), else: query
+
     query
   end
 
@@ -195,7 +197,15 @@ defmodule Teiserver.Moderation.ReportLib do
   @spec _preload_match(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_match(query) do
     from reports in query,
-      left_join: matchs in assoc(reports, :match),
-      preload: [match: matchs]
+      left_join: matches in assoc(reports, :match),
+      preload: [match: matches]
   end
+
+  @spec _preload_responses(Ecto.Query.t()) :: Ecto.Query.t()
+  def _preload_responses(query) do
+    from reports in query,
+      left_join: responses in assoc(reports, :responses),
+      preload: [responses: responses]
+  end
+
 end

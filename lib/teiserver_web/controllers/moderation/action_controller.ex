@@ -135,10 +135,20 @@ defmodule TeiserverWeb.Moderation.ActionController do
             limit: :infinity
           )
 
+        past_actions =
+          Moderation.list_actions(
+            search: [
+              target_id: user.id
+            ],
+            preload: [:target],
+            order_by: "Most recently inserted first"
+          )
+
         conn
         |> assign(:user, user)
         |> assign(:changeset, changeset)
         |> assign(:reports, reports)
+        |> assign(:past_actions, past_actions)
         |> assign(:selected_report_ids, [])
         |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
         |> add_breadcrumb(name: "New action for #{user.name}", url: conn.request_path)

@@ -4,14 +4,7 @@ defmodule Teiserver.Account.RetentionRateExport do
   Teiserver.Account.RetentionRateExport.show_form(nil, %{
     "date_preset" => "All time",
     "end_date" => "",
-    "rating_type" => "Team",
-    "start_date" => ""
-  })
-
-  Teiserver.Account.RetentionRateExport.show_form(nil, %{
-    "date_preset" => "All time",
-    "end_date" => "",
-    "rating_type" => "Duel",
+    "rating_type" => "user_count_total",
     "start_date" => ""
   })
   """
@@ -19,6 +12,7 @@ defmodule Teiserver.Account.RetentionRateExport do
   alias Teiserver.{Account, Telemetry}
   alias Central.Helpers.TimexHelper
   alias Central.Helpers.TimexHelper
+  require Logger
 
   @activity_types ~w(total player)
 
@@ -37,6 +31,7 @@ defmodule Teiserver.Account.RetentionRateExport do
   end
 
   def show_form(_conn, params) do
+    start_time = System.system_time(:second)
     params = apply_defaults(params)
 
     # Date range
@@ -90,8 +85,14 @@ defmodule Teiserver.Account.RetentionRateExport do
           to_string(user.id)
         end
       )
+      |> Enum.map(fn {key, userids} -> {key, userids} end)
+      |> Enum.sort_by(fn {key, _} -> TimexHelper.date_to_str(key, format: :ymd) end, &<=/2)
 
     data = build_table(day_logs, accounts_by_insert_date)
+
+    end_time = System.system_time(:second)
+    time_taken = (end_time - start_time)
+    Logger.info("Ran #{__MODULE__} export in #{time_taken}s")
 
     return_content(data, params)
   end
@@ -128,7 +129,7 @@ defmodule Teiserver.Account.RetentionRateExport do
   end
 
   defp return_content(data, %{"format" => "csv"} = params) do
-    dates = Map.keys(data) |> Enum.sort()
+    dates = Map.keys(data) |> Enum.sort_by(fn key -> TimexHelper.date_to_str(key, format: :ymd) end, &<=/2)
 
     csv_output =
       dates
@@ -161,6 +162,8 @@ defmodule Teiserver.Account.RetentionRateExport do
   defp build_table(day_logs, accounts_by_insert_date) do
     accounts_by_insert_date
     |> Map.new(fn {date, userids} ->
+      Logger.debug("Building row for #{date}")
+
       data =
         build_data_row(userids, day_logs)
         |> Map.merge(%{

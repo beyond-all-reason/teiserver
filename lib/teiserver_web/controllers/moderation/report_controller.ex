@@ -60,7 +60,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
   def show(conn, %{"id" => id}) do
     report =
       Moderation.get_report!(id,
-        preload: [:target, :reporter]
+        preload: [:target, :reporter, :responses]
       )
 
     fav =
@@ -68,8 +68,16 @@ defmodule TeiserverWeb.Moderation.ReportController do
       |> ReportLib.make_favourite()
       |> insert_recently(conn)
 
+    your_response = report.responses
+      |> Enum.find(fn resp ->
+        resp.user_id == conn.assigns.current_user.id
+      end)
+
+    response_changeset = Moderation.change_report(%Response{})
+
     conn
     |> assign(:report, report)
+    |> assign(:your_response, your_response)
     |> add_breadcrumb(name: "Show: #{fav.item_label}", url: conn.request_path)
     |> render("show.html")
   end

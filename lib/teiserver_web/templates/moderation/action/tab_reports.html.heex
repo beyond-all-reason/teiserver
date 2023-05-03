@@ -39,7 +39,7 @@
         </td>
 
         <td>
-          <%= if report.match_id do %>
+          <%= if report.match_id != nil and allow?(@conn, "teiserver.staff.moderator") do %>
             <a
               href={Routes.ts_admin_match_path(@conn, :chat, report.match_id)}
               class="btn btn-secondary btn-sm"

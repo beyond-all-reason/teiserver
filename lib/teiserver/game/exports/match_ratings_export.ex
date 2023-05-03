@@ -75,7 +75,6 @@ defmodule Teiserver.Game.MatchRatingsExport do
     path = "/tmp/match_ratings_export.json"
     File.write(path, Jason.encode_to_iodata!(data))
 
-    # 438188ms - original
     end_time = System.system_time(:second)
     time_taken = (end_time - start_time)
     Logger.info("Ran #{__MODULE__} export in #{time_taken}s")

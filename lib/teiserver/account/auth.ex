@@ -25,6 +25,7 @@ defmodule Teiserver.Account.Auth do
   def authorize(:full_chat, conn, _), do: allow?(conn, "teiserver.staff.reviewer")
   def authorize(:update, conn, _), do: allow?(conn, "teiserver.staff.moderator")
   def authorize(:applying, conn, _), do: allow?(conn, "teiserver.staff.moderator")
+  def authorize(:data_search, conn, _), do: allow?(conn, "teiserver.staff.admin")
   def authorize(_, conn, _), do: allow?(conn, "admin.dev")
 end
 

@@ -73,12 +73,14 @@
                 </td>
 
                 <td>
-                  <a
-                    href={~p"/teiserver/admin/user/#{action.target_id}"}
-                    class="btn btn-secondary btn-sm"
-                  >
-                    User
-                  </a>
+                  <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+                    <a
+                      href={~p"/teiserver/admin/user/#{action.target_id}"}
+                      class="btn btn-secondary btn-sm"
+                    >
+                      User
+                    </a>
+                  <% end %>
                 </td>
               </tr>
             <% end %>

@@ -33,12 +33,14 @@
                 Details
               </a>
               &nbsp;&nbsp;
-              <a
-                href={Routes.ts_admin_match_path(@conn, :chat, @report.match_id)}
-                class="btn btn-secondary btn-sm"
-              >
-                Chat
-              </a>
+              <% if allow?(@conn, "teiserver.staff.moderator") do %>
+                <a
+                  href={Routes.ts_admin_match_path(@conn, :chat, @report.match_id)}
+                  class="btn btn-secondary btn-sm"
+                >
+                  Chat
+                </a>
+              <% end %>
             </td>
           </tr>
           <tr>
@@ -62,5 +64,13 @@
         <% end %>
       </tbody>
     </table>
+  </div>
+
+  <div class="col-md-12 col-lg-6">
+    <h4>Responses</h4>
+    <%= render(
+      "response_form.html",
+      Map.put(assigns, :action, ~p"/moderation/report/#{@report.id}/respond")
+    ) %>
   </div>
 </div>

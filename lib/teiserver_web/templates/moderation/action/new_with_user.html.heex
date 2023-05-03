@@ -276,6 +276,67 @@ bsname = view_colour() %>
               </div>
             <% end %>
           </div>
+
+          <div class="row mt-4" id="reports-row">
+            <div class="col">
+              <h4>Past Actions</h4>
+
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+
+                    <th>Reason</th>
+
+                    <th>Started</th>
+                    <th>Expires</th>
+                    <th>Duration</th>
+
+                    <th colspan="2">&nbsp;</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <%= for action <- @past_actions do %>
+                    <tr>
+                      <td><%= action.target.name %></td>
+                      <td><%= action.reason |> String.slice(0..100) %></td>
+
+                      <td><%= action.inserted_at |> date_to_str(format: :hms_or_ymd) %></td>
+                      <%= if action.expires do %>
+                        <%= if Timex.compare(Timex.now(), action.expires) == 1 do %>
+                          <td>Expired</td>
+                        <% else %>
+                          <td><%= action.expires |> date_to_str(format: :hms_or_ymd) %></td>
+                        <% end %>
+
+                        <td><%= duration_to_str(action.inserted_at, action.expires) %></td>
+                      <% else %>
+                        <td colspan="2" class="text-warning">
+                          Permanent
+                        </td>
+                      <% end %>
+
+                      <td>
+                        <a href={~p"/moderation/action/#{action.id}"} class="btn btn-secondary btn-sm">
+                          Show
+                        </a>
+                      </td>
+
+                      <td>
+                        <a
+                          href={~p"/teiserver/admin/user/#{action.target_id}"}
+                          class="btn btn-secondary btn-sm"
+                        >
+                          User
+                        </a>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

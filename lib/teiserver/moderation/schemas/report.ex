@@ -9,12 +9,12 @@ defmodule Teiserver.Moderation.Report do
     field :type, :string
     field :sub_type, :string
     field :extra_text, :string
+    field :closed, :boolean, default: false
 
     belongs_to :match, Teiserver.Battle.Match
     field :relationship, :string
     belongs_to :result, Teiserver.Moderation.Action
 
-    belongs_to :primary_response, Teiserver.Moderation.Response
     has_many :responses, Teiserver.Moderation.Response
 
     timestamps()
@@ -29,9 +29,9 @@ defmodule Teiserver.Moderation.Report do
     struct
     |> cast(
       params,
-      ~w(reporter_id target_id type sub_type extra_text match_id relationship result_id primary_response_id)a
+      ~w(reporter_id target_id type sub_type extra_text match_id relationship result_id closed)a
     )
-    |> validate_required(~w(reporter_id target_id type sub_type)a)
+    |> validate_required(~w(reporter_id target_id type sub_type closed)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
