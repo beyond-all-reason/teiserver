@@ -890,32 +890,36 @@ defmodule Teiserver.Protocols.SpringIn do
             end
 
           client = Client.get_client_by_id(state.userid)
-          password = if Enum.member?(["empty", "*"], password), do: nil, else: password
 
-          lobby =
-            %{
-              founder_id: state.userid,
-              founder_name: state.username,
-              name: name,
-              type: if(type == "0", do: "normal", else: "replay"),
-              nattype: nattype,
-              port: int_parse(port),
-              max_players: int_parse(max_players),
-              game_hash: game_hash,
-              map_hash: map_hash,
-              password: password,
-              rank: 0,
-              locked: false,
-              engine_name: engine_name,
-              engine_version: engine_version,
-              map_name: map_name,
-              game_name: game_name,
-              ip: client.ip
-            }
-            |> Lobby.create_lobby()
-            |> Lobby.add_lobby()
+          if client do
+            password = if Enum.member?(["empty", "*"], password), do: nil, else: password
+            lobby =
+              %{
+                founder_id: state.userid,
+                founder_name: state.username,
+                name: name,
+                type: if(type == "0", do: "normal", else: "replay"),
+                nattype: nattype,
+                port: int_parse(port),
+                max_players: int_parse(max_players),
+                game_hash: game_hash,
+                map_hash: map_hash,
+                password: password,
+                rank: 0,
+                locked: false,
+                engine_name: engine_name,
+                engine_version: engine_version,
+                map_name: map_name,
+                game_name: game_name,
+                ip: client.ip
+              }
+              |> Lobby.create_lobby()
+              |> Lobby.add_lobby()
 
-          {:success, lobby}
+            {:success, lobby}
+          else
+            {:failure, "No client"}
+          end
 
         nil ->
           _no_match(state, "OPENBATTLE", msg_id, data)
