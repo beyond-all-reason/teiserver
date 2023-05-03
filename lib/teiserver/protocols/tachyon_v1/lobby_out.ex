@@ -140,6 +140,15 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     }
   end
 
+  def do_reply(:updated_client_battlestatus, %{client: client, reason: reason, lobby_id: lobby_id}) do
+    %{
+      "cmd" => "s.lobby.updated_client_battlestatus",
+      "lobby_id" => lobby_id,
+      "client" => Tachyon.convert_object(client, :client),
+      "reason" => reason
+    }
+  end
+
   ###########
   # General Updates
   def do_reply(:updated, {_, %{lobby_id: lobby_id}}) do
