@@ -18,7 +18,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
   @spec connect(ws_state()) :: {:ok, ws_state()} | :error
   def connect(
-        %{params: %{"token" => token_value, "client_hash" => _, "client_name" => _}} = state
+        %{params: %{"token" => token_value, "application_hash" => _, "application_name" => _}} = state
       ) do
     case Account.get_user_token_by_value(token_value) do
       nil ->
