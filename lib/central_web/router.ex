@@ -560,6 +560,7 @@ defmodule CentralWeb.Router do
     resources("/proposal", ProposalController,
       only: [:index, :show, :new, :create, :edit, :update]
     )
+    post("/proposal/:id/conclude", ProposalController, :conclude)
 
     put("/ban/:id/disable", BanController, :disable)
     put("/ban/:id/enable", BanController, :enable)

@@ -33,7 +33,7 @@
         <hr />
 
         <div class="float-end">
-          <%= if @proposal.proposer_id == @current_user.id do %>
+          <%= if @proposal.proposer_id == @current_user.id and not @concluded do %>
             <a
               href={Routes.moderation_proposal_path(@conn, :edit, @proposal)}
               class={"btn btn-outline-#{bsname}"}
@@ -66,29 +66,31 @@
           </div>
         </div>
 
-        <div class="row mt-4">
-          <div class="col">
-            <%= link(raw("<i class='fa-solid fa-lg fa-fw fa-cancel'></i> Vote no"),
-              to: Routes.moderation_proposal_path(@conn, :vote, @proposal.id, "no"),
-              method: :put,
-              class: "btn btn-danger btn-block"
-            ) %>
+        <%= if not @concluded do %>
+          <div class="row mt-4">
+            <div class="col">
+              <%= link(raw("<i class='fa-solid fa-lg fa-fw fa-cancel'></i> Vote no"),
+                to: Routes.moderation_proposal_path(@conn, :vote, @proposal.id, "no"),
+                method: :put,
+                class: "btn btn-danger btn-block"
+              ) %>
+            </div>
+            <div class="col">
+              <%= link(raw("<i class='fa-solid fa-lg fa-fw fa-question'></i> Abstain"),
+                to: Routes.moderation_proposal_path(@conn, :vote, @proposal.id, "abstain"),
+                method: :put,
+                class: "btn btn-secondary btn-block"
+              ) %>
+            </div>
+            <div class="col">
+              <%= link(raw("<i class='fa-solid fa-lg fa-fw fa-check'></i> Vote yes"),
+                to: Routes.moderation_proposal_path(@conn, :vote, @proposal.id, "yes"),
+                method: :put,
+                class: "btn btn-success btn-block"
+              ) %>
+            </div>
           </div>
-          <div class="col">
-            <%= link(raw("<i class='fa-solid fa-lg fa-fw fa-question'></i> Abstain"),
-              to: Routes.moderation_proposal_path(@conn, :vote, @proposal.id, "abstain"),
-              method: :put,
-              class: "btn btn-secondary btn-block"
-            ) %>
-          </div>
-          <div class="col">
-            <%= link(raw("<i class='fa-solid fa-lg fa-fw fa-check'></i> Vote yes"),
-              to: Routes.moderation_proposal_path(@conn, :vote, @proposal.id, "yes"),
-              method: :put,
-              class: "btn btn-success btn-block"
-            ) %>
-          </div>
-        </div>
+        <% end %>
 
         <div class="row mt-4">
           <div class="col">
@@ -118,6 +120,29 @@
             <% end %>
           </div>
         </div>
+
+        <%= if not @concluded do %>
+          <div class="row mt-4">
+            <div class="col">
+              <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+                <form action={~p"/moderation/proposal/#{@proposal.id}/conclude"} method="post" class="">
+                  <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+                  <div class="row">
+                    <div class="col">
+                      <label for="conclude_comments" class="col-md-2 control-label">Comments</label><br />
+                      <input type="text" name="comments" id="conclude_comments" value="" class="form-control" />
+                    </div>
+                  </div>
+
+                  <button type="submit" class={"btn btn-#{bsname} float-end"}>
+                    Conclude
+                  </button>
+                </form>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
       </div>
     </div>
   </div>

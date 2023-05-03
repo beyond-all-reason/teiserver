@@ -49,6 +49,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
 
     conn
     |> assign(:proposal, proposal)
+    |> assign(:concluded, proposal.concluder_id != nil)
     |> add_breadcrumb(name: "Show: #{proposal.target.name}", url: conn.request_path)
     |> render("show.html")
   end
@@ -345,5 +346,28 @@ defmodule TeiserverWeb.Moderation.ProposalController do
     conn
     |> put_flash(:info, "Proposal deleted successfully.")
     |> redirect(to: Routes.moderation_proposal_path(conn, :index))
+  end
+
+  @spec conclude(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def conclude(conn, %{"id" => id, "comments" => ""}) do
+    conn
+      |> put_flash(:info, "Proposal cannot be concluded without comments")
+      |> redirect(to: ~p"/moderation/proposal/#{id}")
+  end
+
+  def conclude(conn, %{"id" => id, "comments" => comments}) do
+    proposal = Moderation.get_proposal!(id)
+
+    params = %{
+      concluder_id: conn.assigns.current_user.id,
+      conclusion_comments: comments
+    }
+
+    case Moderation.update_proposal(proposal, params) do
+      {:ok, _proposal} ->
+        conn
+        |> put_flash(:info, "Proposal concluded")
+        |> redirect(to: ~p"/moderation/proposal/#{id}")
+    end
   end
 end

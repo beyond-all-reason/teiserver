@@ -79,16 +79,19 @@
                 <td><%= proposal.proposer.name %></td>
 
                 <%= if proposal.concluder_id do %>
+                  <td>Concluded</td>
                 <% else %>
-                  <td>
-                    <a
-                      href={Routes.moderation_proposal_path(@conn, :show, proposal.id)}
-                      class="btn btn-secondary btn-sm"
-                    >
-                      Show
-                    </a>
-                  </td>
+                  <td>&nbsp;</td>
                 <% end %>
+
+                <td>
+                  <a
+                    href={Routes.moderation_proposal_path(@conn, :show, proposal.id)}
+                    class="btn btn-secondary btn-sm"
+                  >
+                    Show
+                  </a>
+                </td>
               </tr>
             <% end %>
           </tbody>
