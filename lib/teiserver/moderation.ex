@@ -222,6 +222,192 @@ defmodule Teiserver.Moderation do
     Report.changeset(report, %{})
   end
 
+  alias Teiserver.Moderation.{Response, ResponseLib}
+
+  @spec response_query(List.t()) :: Ecto.Query.t()
+  def response_query(args) do
+    response_query(nil, args)
+  end
+
+  @spec response_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def response_query(id, args) do
+    ResponseLib.query_responses()
+    |> ResponseLib.search(%{id: id})
+    |> ResponseLib.search(args[:search])
+    |> ResponseLib.preload(args[:preload])
+    |> ResponseLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of responses.
+
+  ## Examples
+
+      iex> list_responses()
+      [%Response{}, ...]
+
+  """
+  @spec list_responses(List.t()) :: List.t()
+  def list_responses(args \\ []) do
+    response_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single response.
+
+  Raises `Ecto.NoResultsError` if the Response does not exist.
+
+  ## Examples
+
+      iex> get_response!(123)
+      %Response{}
+
+      iex> get_response!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_response!(non_neg_integer(), T.userid()) :: Response.t()
+  def get_response!(report_id, user_id) do
+    response_query([
+      search: [
+        report_id: report_id,
+        user_id: user_id
+      ]
+    ])
+    |> Repo.one!()
+  end
+
+  @doc """
+  Gets a single response.
+
+  Returns `nil` if the Response does not exist.
+
+  ## Examples
+
+      iex> get_response(123)
+      %Response{}
+
+     iex> get_response(456)
+      nil
+
+  """
+  @spec get_response(non_neg_integer(), T.userid()) :: Response.t() | nil
+  def get_response(report_id, user_id) do
+    response_query([
+      search: [
+        report_id: report_id,
+        user_id: user_id
+      ]
+    ])
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a response.
+
+  ## Examples
+
+      iex> create_response(%{field: value})
+      {:ok, %Response{}}
+
+      iex> create_response(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_response(Map.t()) :: {:ok, Response.t()} | {:error, Ecto.Changeset.t()}
+  def create_response(attrs \\ %{}) do
+    %Response{}
+    |> Response.changeset(attrs)
+    |> Repo.insert()
+    |> broadcast_create_response
+  end
+
+  def broadcast_create_response({:ok, response}) do
+    PubSub.broadcast(
+      Central.PubSub,
+      "global_moderation",
+      %{
+        channel: "global_moderation",
+        event: :new_response,
+        response: response
+      }
+    )
+
+    {:ok, response}
+  end
+
+  def broadcast_create_response(v), do: v
+
+  @doc """
+  Updates a response.
+
+  ## Examples
+
+      iex> update_response(response, %{field: new_value})
+      {:ok, %Response{}}
+
+      iex> update_response(response, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_response(Response.t(), Map.t()) :: {:ok, Response.t()} | {:error, Ecto.Changeset.t()}
+  def update_response(%Response{} = response, attrs) do
+    response
+    |> Response.changeset(attrs)
+    |> Repo.update()
+    |> broadcast_update_response
+  end
+
+  def broadcast_update_response({:ok, response}) do
+    PubSub.broadcast(
+      Central.PubSub,
+      "global_moderation",
+      %{
+        channel: "global_moderation",
+        event: :updated_response,
+        response: response
+      }
+    )
+
+    {:ok, response}
+  end
+
+  def broadcast_update_response(v), do: v
+
+  @doc """
+  Deletes a Response.
+
+  ## Examples
+
+      iex> delete_response(response)
+      {:ok, %Response{}}
+
+      iex> delete_response(response)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_response(Response.t()) :: {:ok, Response.t()} | {:error, Ecto.Changeset.t()}
+  def delete_response(%Response{} = response) do
+    Repo.delete(response)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking response changes.
+
+  ## Examples
+
+      iex> change_response(response)
+      %Ecto.Changeset{source: %Response{}}
+
+  """
+  @spec change_response(Response.t()) :: Ecto.Changeset.t()
+  def change_response(%Response{} = response) do
+    Response.changeset(response, %{})
+  end
+
   alias Teiserver.Moderation.{Action, ActionLib}
 
   @spec action_query(List.t()) :: Ecto.Query.t()

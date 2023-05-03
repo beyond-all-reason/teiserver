@@ -17,6 +17,7 @@ defmodule Teiserver.Moderation.ActionLib do
   def action_icon("Warn"), do: "fa-solid fa-triangle-exclamation"
   def action_icon("Restrict"), do: "fa-solid fa-do-not-enter"
   def action_icon("Mute"), do: "fa-solid fa-microphone-slash"
+  def action_icon("Suspend"), do: "fa-solid fa-pause"
   def action_icon("Ban"), do: "fa-solid fa-ban"
 
   @spec make_favourite(Map.t()) :: Map.t()

@@ -39,5 +39,6 @@ defmodule Teiserver.Moderation.Report do
   def authorize(:search, conn, _), do: allow?(conn, "teiserver.staff.overwatch")
   def authorize(:show, conn, _), do: allow?(conn, "teiserver.staff.overwatch")
   def authorize(:user, conn, _), do: allow?(conn, "teiserver.staff.overwatch")
+  def authorize(:respond, conn, _), do: allow?(conn, "teiserver.staff.overwatch")
   def authorize(_, conn, _), do: allow?(conn, "teiserver.staff.moderator")
 end

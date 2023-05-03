@@ -10,6 +10,17 @@ defmodule Teiserver.Moderation.ResponseLib do
   @spec colour :: atom
   def colour, do: :info2
 
+  @spec list_actions() :: [{String.t(), String.t()}]
+  def list_actions() do
+    [
+      {"Ignore", "fa-solid fa-clock"},
+      {"Warn", Teiserver.Moderation.ActionLib.action_icon("Warn")},
+      {"Mute", Teiserver.Moderation.ActionLib.action_icon("Mute")},
+      {"Suspend", Teiserver.Moderation.ActionLib.action_icon("Suspend")},
+      {"Ban", Teiserver.Moderation.ActionLib.action_icon("Ban")}
+    ]
+  end
+
   # Queries
   @spec query_responses() :: Ecto.Query.t()
   def query_responses do
@@ -30,14 +41,14 @@ defmodule Teiserver.Moderation.ResponseLib do
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
-  def _search(query, :id, id) do
+  def _search(query, :user_id, user_id) do
     from responses in query,
-      where: responses.id == ^id
+      where: responses.user_id == ^user_id
   end
 
-  def _search(query, :id_in, id_list) do
+  def _search(query, :report_id, report_id) do
     from responses in query,
-      where: responses.id in ^id_list
+      where: responses.report_id == ^report_id
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()

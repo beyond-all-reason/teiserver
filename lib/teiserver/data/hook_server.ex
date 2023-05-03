@@ -28,6 +28,12 @@ defmodule Teiserver.HookServer do
       :updated_action ->
         Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(data.action.target_id)
 
+      :new_response ->
+        :ok
+
+      :updated_response ->
+        :ok
+
       :new_proposal ->
         :ok
 

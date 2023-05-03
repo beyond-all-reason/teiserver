@@ -2,13 +2,12 @@ defmodule Teiserver.Moderation.Response do
   @moduledoc false
   use CentralWeb, :schema
 
+  @primary_key false
   schema "moderation_responses" do
-    belongs_to :report, Teiserver.Moderation.Report
-    belongs_to :user, Central.Account.User
+    belongs_to :report, Teiserver.Moderation.Report, primary_key: true
+    belongs_to :user, Central.Account.User, primary_key: true
 
-    field :warn, :boolean, default: false
-    field :mute, :boolean, default: false
-    field :suspend, :boolean, default: false
+    field :action, :string, default: "Ignore"
     field :accurate, :boolean, default: false
 
     timestamps()
@@ -19,9 +18,9 @@ defmodule Teiserver.Moderation.Response do
     struct
     |> cast(
       params,
-      ~w(report_id user_id warn mute suspend accurate)a
+      ~w(report_id user_id action accurate)a
     )
-    |> validate_required(~w(report_id user_id warn mute suspend accurate)a)
+    |> validate_required(~w(report_id user_id action accurate)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

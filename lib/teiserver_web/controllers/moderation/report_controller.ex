@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
 
   alias Teiserver.{Moderation, Account}
   alias Teiserver.Account.UserLib
-  alias Teiserver.Moderation.{Report, ReportLib}
+  alias Teiserver.Moderation.{Report, ReportLib, Response}
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Moderation.Report,
@@ -68,16 +68,51 @@ defmodule TeiserverWeb.Moderation.ReportController do
       |> ReportLib.make_favourite()
       |> insert_recently(conn)
 
+    actions =
+      Moderation.list_actions(
+        search: [
+          target_id: report.target_id
+        ],
+        order_by: "Most recently inserted first",
+        limit: :infinity
+      )
+
     your_response = report.responses
       |> Enum.find(fn resp ->
         resp.user_id == conn.assigns.current_user.id
       end)
 
-    response_changeset = Moderation.change_report(%Response{})
+    response_changeset = if your_response do
+      Moderation.change_response(your_response)
+    else
+      Moderation.change_response(%Response{action: "Ignore"})
+    end
+
+    response_action_counts = report.responses
+      |> Enum.group_by(fn r ->
+          r.action
+        end, fn _ ->
+          1
+      end)
+      |> Map.new(fn {key, vs} -> {key, Enum.count(vs)} end)
+
+    accurate_count = report.responses
+      |> Enum.filter(fn r -> r.accurate == true end)
+      |> Enum.count
+
+    inaccurate_count = report.responses
+      |> Enum.filter(fn r -> r.accurate == false end)
+      |> Enum.count
+
+    accuracy = accurate_count / max(accurate_count + inaccurate_count, 1)
 
     conn
     |> assign(:report, report)
+    |> assign(:actions, actions)
+    |> assign(:accuracy, round(accuracy * 100))
     |> assign(:your_response, your_response)
+    |> assign(:response_changeset, response_changeset)
+    |> assign(:response_action_counts, response_action_counts)
     |> add_breadcrumb(name: "Show: #{fav.item_label}", url: conn.request_path)
     |> render("show.html")
   end
@@ -169,6 +204,45 @@ defmodule TeiserverWeb.Moderation.ReportController do
         conn
         |> assign(:changeset, changeset)
         |> render("new.html")
+    end
+  end
+
+  @spec respond(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def respond(conn, %{"id" => id, "response" => response_params}) do
+    # Ensure the report exists
+    Moderation.get_report!(id)
+
+    response_params = Map.merge(response_params, %{
+      "report_id" => id,
+      "user_id" => conn.assigns.current_user.id
+    })
+
+    case Moderation.get_response(id, conn.assigns.current_user.id) do
+      nil ->
+        case Moderation.create_response(response_params) do
+          {:ok, _response} ->
+            conn
+            |> put_flash(:info, "Response created successfully.")
+            |> redirect(to: Routes.moderation_report_path(conn, :show, id))
+
+          {:error, %Ecto.Changeset{} = _changeset} ->
+            conn
+            |> put_flash(:danger, "Error creating response.")
+            |> redirect(to: Routes.moderation_report_path(conn, :show, id))
+        end
+
+      response ->
+        case Moderation.update_response(response, response_params) do
+          {:ok, _response} ->
+            conn
+            |> put_flash(:info, "Response updated successfully.")
+            |> redirect(to: Routes.moderation_report_path(conn, :show, id))
+
+          {:error, %Ecto.Changeset{} = _changeset} ->
+            conn
+            |> put_flash(:danger, "Error updating response.")
+            |> redirect(to: Routes.moderation_report_path(conn, :show, id))
+        end
     end
   end
 

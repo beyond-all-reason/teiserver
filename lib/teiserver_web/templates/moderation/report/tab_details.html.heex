@@ -67,10 +67,36 @@
   </div>
 
   <div class="col-md-12 col-lg-6">
-    <h4>Responses</h4>
+    <h4>Your response</h4>
     <%= render(
       "response_form.html",
       Map.put(assigns, :action, ~p"/moderation/report/#{@report.id}/respond")
     ) %>
+
+    <h4>Responses</h4>
+    <h6>Accuracy: <%= @accuracy %>%</h6>
+
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for {action, icon} <- Teiserver.Moderation.ResponseLib.list_actions() do %>
+          <tr>
+            <td>
+              <i class={"fa-fw #{icon}"}></i>
+              <%= action %>
+            </td>
+            <td>
+              <%= @response_action_counts[action] || 0 %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
   </div>
 </div>

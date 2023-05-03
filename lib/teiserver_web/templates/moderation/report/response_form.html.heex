@@ -1,74 +1,68 @@
 <% bsname = view_colour() %>
 
-<%= form_for @changeset, @action, fn f -> %>
-  <%= if @changeset.action do %>
+<%= form_for @response_changeset, @action, fn _f -> %>
+  <%= if @response_changeset.action do %>
     <div class="alert alert-danger">
       <p>Oops, something went wrong! Please check the errors below.</p>
     </div>
   <% end %>
 
-  <div class="row">
-    <div class="col-lg-6">
-      <div class="form-group my-2">
-        <%= label(f, :reason, class: "control-label") %>
-        <%= textarea(f, :reason, class: "form-control", autofocus: :autofocus) %>
-        <%= error_tag(f, :reason) %>
+  <div class="row mt-2">
+    <%= for {action, icon} <- Teiserver.Moderation.ResponseLib.list_actions() do %>
+      <div class="col">
+        <%= central_component("radio",
+          name: "response[action]",
+          id: "response_#{action}",
+          value: action,
+          label: raw("<i class='fa-fw #{icon}'></i> #{action}"),
+          field: :action,
+          changeset: @response_changeset
+        ) %>
       </div>
+    <% end %>
+  </div>
+
+  <div class="row mt-2">
+    <div class="col">
+      <%= central_component("radio",
+        name: "response[accurate]",
+        id: "response_is_accurate",
+        value: "true",
+        label: raw("<i class='fa-fw fa-regular fa-check'></i> Accurate report"),
+        field: :accurate,
+        changeset: @response_changeset
+      ) %>
     </div>
 
-    <div class="col-lg-6">
-      <div class="form-group my-2">
-        <%= label(f, :duration, class: "control-label") %>
-        <%= text_input(f, :duration, class: "form-control") %>
-        <%= error_tag(f, :duration) %>
-      </div>
+    <div class="col">
+      <%= central_component("radio",
+        name: "response[accurate]",
+        id: "response_not_accurate",
+        value: "false",
+        label: raw("<i class='fa-fw fa-regular fa-times'></i> Inaccurate report"),
+        field: :accurate,
+        changeset: @response_changeset
+      ) %>
     </div>
   </div>
 
-  <div class="row mt-4">
-    <h5>Restrictions</h5>
-    <%= for {section, r_list} <- @restrictions_lists do %>
-      <div class="col-md-3 col-lg-2">
-        <strong><%= section %></strong>
-        <%= for r <- r_list do %>
-          <% r_clean = String.replace(r, " ", "_") %>
-          <%= central_component("checkbox",
-            id: "proposal_restriction_#{r_clean}",
-            name: "proposal[restrictions][#{r_clean}]",
-            label: r,
-            value: r,
-            checked:
-              (Ecto.Changeset.get_field(@changeset, :restrictions) || [])
-              |> Enum.member?(r)
-          ) %>
-        <% end %>
-      </div>
-    <% end %>
-    <%= error_tag(f, :restrictions) %>
-  </div>
-
-  <div class="form-group my-4">
-    <%= if @changeset.data.id do %>
-      <a
-        href={Routes.moderation_proposal_path(@conn, :show, @proposal)}
-        class="btn btn-secondary btn-outline"
-      >
-        Cancel
-      </a>
-
-      <input
-        type="submit"
-        value="Save changes"
-        name="form.submitted"
-        class={"btn btn-#{bsname} float-end"}
-      />
-    <% else %>
-      <input
-        type="submit"
-        value="Create"
-        name="form.submitted"
-        class={"btn btn-#{bsname} float-end"}
-      />
-    <% end %>
+  <div class="row my-3">
+    <div class="col">
+      <%= if @response_changeset.data.user_id do %>
+        <input
+          type="submit"
+          value="Save changes"
+          name="form.submitted"
+          class={"btn btn-#{bsname} float-end"}
+        />
+      <% else %>
+        <input
+          type="submit"
+          value="Create response"
+          name="form.submitted"
+          class={"btn btn-#{bsname} float-end"}
+        />
+      <% end %>
+    </div>
   </div>
 <% end %>

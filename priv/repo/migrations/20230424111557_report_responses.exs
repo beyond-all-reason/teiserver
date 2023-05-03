@@ -2,13 +2,11 @@ defmodule Central.Repo.Migrations.ReportResponses do
   use Ecto.Migration
 
   def change do
-    create table(:moderation_responses) do
-      add :report_id, references(:moderation_reports, on_delete: :nothing)
-      add :user_id, references(:account_users, on_delete: :nothing)
+    create table(:moderation_responses, primary_key: false) do
+      add :report_id, references(:moderation_reports, on_delete: :nothing), primary_key: true
+      add :user_id, references(:account_users, on_delete: :nothing), primary_key: true
 
-      add :warn, :boolean, default: false
-      add :mute, :boolean, default: false
-      add :suspend, :boolean, default: false
+      add :action, :string, default: "Ignore"
       add :accurate, :boolean, default: false
 
       timestamps()

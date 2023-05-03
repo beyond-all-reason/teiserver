@@ -5,9 +5,14 @@
       _ -> []
     end
   else
-    case Ecto.Changeset.get_field(@changeset, @field) do
-      true -> [checked: "checked"]
-      _ -> []
+    c_field = Ecto.Changeset.get_field(@changeset, @field)
+
+    cond do
+      # c_field == true -> [checked: "checked"]
+      c_field == @value -> [checked: "checked"]
+      c_field == true and @value == "true" -> [checked: "checked"]
+      c_field == false and @value == "false" -> [checked: "checked"]
+      true -> []
     end
   end
 
