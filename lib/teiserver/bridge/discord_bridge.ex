@@ -183,14 +183,12 @@ defmodule Teiserver.Bridge.DiscordBridge do
   # Teiserver.Moderation.get_report!(123) |> Teiserver.Bridge.DiscordBridge.new_report()
   @spec new_report(Moderation.Report.t()) :: any
   def new_report(report) do
-    chan_result =
-      Application.get_env(:central, DiscordBridge)[:bridges]
-      |> Enum.filter(fn {_chan, room} -> room == "moderation-reports" end)
-
     channel =
-      case chan_result do
-        [{chan, _}] -> chan
-        _ -> nil
+      cond do
+        report.type == "actions" ->
+          Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
+        true ->
+          Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
       end
 
     if channel do
