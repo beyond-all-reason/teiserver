@@ -71,7 +71,7 @@ defmodule Teiserver.Account.UserCache do
         user =
           Account.get_user(nil,
             search: [
-              email: email
+              email_lower: email
             ],
             select: [:id]
           )
