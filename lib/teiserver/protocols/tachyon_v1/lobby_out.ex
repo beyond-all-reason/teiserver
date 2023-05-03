@@ -177,6 +177,14 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     }
   end
 
+  def do_reply(:update_values, %{lobby_id: lobby_id, changes: new_values}) do
+    %{
+      "cmd" => "s.lobby.update_values",
+      "lobby_id" => lobby_id,
+      "new_values" => new_values
+    }
+  end
+
   def do_reply(:update_values, %{lobby_id: lobby_id, new_values: new_values}) do
     %{
       "cmd" => "s.lobby.update_values",
