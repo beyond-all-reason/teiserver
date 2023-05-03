@@ -125,7 +125,7 @@ defmodule Central.Account do
   @spec get_user_by_email(String.t()) :: User.t() | nil
   def get_user_by_email(email) do
     UserQueries.get_users()
-    |> UserQueries.search(%{email: String.trim(email)})
+    |> UserQueries.search(%{email_lower: String.trim(email)})
     |> Repo.one()
   end
 
@@ -280,9 +280,7 @@ defmodule Central.Account do
   end
 
   def authenticate_user(conn, email, plain_text_password) do
-    query = from u in User, where: u.email == ^email
-
-    case Repo.one(query) do
+    case get_user_by_email(email) do
       nil ->
         Argon2.no_user_verify()
         Argon2.no_user_verify()

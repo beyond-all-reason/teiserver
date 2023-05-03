@@ -12,7 +12,7 @@ defmodule Central.AccountTest do
       icon: "fa-regular fa-home",
       name: "some name",
       permissions: [],
-      email: "some email",
+      email: "AnEmailAddress@email.com",
       password: "some password"
     }
     @update_attrs %{
@@ -48,6 +48,19 @@ defmodule Central.AccountTest do
       assert user.name == "some name"
       assert user.permissions == []
       assert user.name == "some name"
+    end
+
+    test "get_user_by_email/1 returns the user with the given email" do
+      user = AccountTestLib.user_fixture()
+      assert Account.get_user_by_email(user.email) == user
+    end
+
+    test "get_user_by_email/1 returns the user with given email in a case-insenitive way" do
+      assert {:ok, %User{} = user} = Account.create_user(@valid_attrs)
+      assert user.email == "AnEmailAddress@email.com"
+      assert Account.get_user_by_email("anemailaddress@email.com") == user
+      assert Account.get_user_by_email("AnemailaddreSS@email.com") == user
+      assert Account.get_user_by_email("AnEmailAddress@email.com") == user
     end
 
     test "create_user/1 with invalid data returns error changeset" do
