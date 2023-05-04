@@ -61,6 +61,7 @@ defmodule Teiserver.Startup do
       "Teiserver:Automod action enacted",
       "Teiserver:De-bridged user",
       "Teiserver:Changed user rating",
+      "Teiserver:Changed user name",
       "Teiserver:Smurf merge"
     ])
 

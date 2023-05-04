@@ -820,6 +820,12 @@ defmodule TeiserverWeb.Admin.UserController do
 
         case Teiserver.User.rename_user(user.id, new_name, admin_action) do
           :success ->
+            add_audit_log(conn, "Teiserver:Changed user name", %{
+              user_id: user.id,
+              from: user.name,
+              to: new_name
+            })
+
             conn
             |> put_flash(:success, "User renamed")
             |> redirect(to: ~p"/teiserver/admin/user/#{user.id}")
