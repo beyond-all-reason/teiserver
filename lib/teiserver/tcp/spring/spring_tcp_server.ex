@@ -727,6 +727,9 @@ defmodule Teiserver.SpringTcpServer do
   # Battle updates
   defp battle_update(%{event: :update_values} = msg, state) do
     cond do
+      msg.changes == nil ->
+        SpringOut.reply(:update_battle, msg.lobby_id, nil, state)
+
       msg.changes == %{disabled_units: []} and state.lobby_id == msg.lobby_id ->
         SpringOut.reply(:enable_all_units, [], nil, state)
 
@@ -736,11 +739,6 @@ defmodule Teiserver.SpringTcpServer do
 
       true ->
         SpringOut.reply(:update_battle, msg.lobby_id, nil, state)
-
-        # true ->
-        #   raise "No handler in tcp_server:battle_update with msg #{inspect msg}"
-        #   Logger.error("No handler in tcp_server:battle_update with reason #{msg.event}")
-        #   state
     end
   end
 
