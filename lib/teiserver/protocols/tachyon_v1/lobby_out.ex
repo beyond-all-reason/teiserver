@@ -193,6 +193,14 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     }
   end
 
+  def do_reply(:updated_queue, %{lobby_id: lobby_id, id_list: id_list}) do
+    %{
+      "cmd" => "s.lobby.updated_queue",
+      "lobby_id" => lobby_id,
+      "queue" => id_list
+    }
+  end
+
   def do_reply(:updated_queue, {_, %{lobby_id: lobby_id, id_list: id_list}}) do
     %{
       "cmd" => "s.lobby.updated_queue",
