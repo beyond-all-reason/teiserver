@@ -33,9 +33,9 @@
                 Details
               </a>
               &nbsp;&nbsp;
-              <% if allow?(@conn, "teiserver.staff.moderator") do %>
+              <%= if allow?(@conn, "teiserver.staff.moderator") do %>
                 <a
-                  href={Routes.ts_admin_match_path(@conn, :chat, @report.match_id)}
+                  href={~p"/teiserver/admin/lobbies/#{@report.match_id}/lobby_chat"}
                   class="btn btn-secondary btn-sm"
                 >
                   Chat
@@ -97,6 +97,5 @@
         <% end %>
       </tbody>
     </table>
-
   </div>
 </div>

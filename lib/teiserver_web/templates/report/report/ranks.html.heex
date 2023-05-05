@@ -109,7 +109,11 @@
 
         <div class="row">
           <div class="col-lg-12 mb-3">
-            <h4>Found <%= format_number(@total) %> users, start date: <%= date_to_str(@start_date, format: :ymd) %></h4>
+            <h4>
+              Found <%= format_number(@total) %> users, start date: <%= date_to_str(@start_date,
+                format: :ymd
+              ) %>
+            </h4>
           </div>
 
           <div class="col-lg-4">
@@ -144,7 +148,6 @@
             <h5>Raw counts</h5>
             <textarea rows="8" cols="40" class="form-control monospace"><%= @csv_output %></textarea>
           </div>
-
         </div>
       </div>
     </div>

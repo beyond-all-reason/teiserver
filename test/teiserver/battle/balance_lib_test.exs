@@ -449,6 +449,5 @@ defmodule Teiserver.Battle.BalanceLibTest do
   end
 
   test "force party" do
-
   end
 end

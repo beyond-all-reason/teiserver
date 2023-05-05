@@ -77,7 +77,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         messages =
           Chat.list_lobby_messages(
             search: [
-              lobby_guid: Battle.get_lobby_match_uuid(id)
+              match_id: id
             ],
             limit: @message_count * 2,
             order_by: "Newest first"
@@ -310,7 +310,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   defp new_message_changeset() do
     %LobbyMessage{}
     |> LobbyMessage.changeset(%{
-      "lobby_guid" => "guid",
+      "match_id" => 1,
       "user_id" => 1,
       "inserted_at" => Timex.now(),
       "content" => ""

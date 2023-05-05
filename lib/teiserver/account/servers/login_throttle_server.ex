@@ -285,28 +285,28 @@ defmodule Teiserver.Account.LoginThrottleServer do
         new_state = add_user_to_queue(state, category, {pid, userid})
         {new_state, false}
 
-       # There is a bug where using this would cause some users to queue forever
-      # true ->
-      #   # Of the queues ahead of us, are any occupied?
-      #   # this goes through every relevant queue and returns true
-      #   # if all of them are empty
-      #   empty_queues =
-      #     @all_queues
-      #     |> Enum.take_while(fn queue -> queue != category end)
-      #     |> Kernel.++([category])
-      #     |> Enum.map(fn key ->
-      #       queue = Map.get(state.queues, key)
-      #       Enum.empty?(queue)
-      #     end)
-      #     |> Enum.all?()
+        # There is a bug where using this would cause some users to queue forever
+        # true ->
+        #   # Of the queues ahead of us, are any occupied?
+        #   # this goes through every relevant queue and returns true
+        #   # if all of them are empty
+        #   empty_queues =
+        #     @all_queues
+        #     |> Enum.take_while(fn queue -> queue != category end)
+        #     |> Kernel.++([category])
+        #     |> Enum.map(fn key ->
+        #       queue = Map.get(state.queues, key)
+        #       Enum.empty?(queue)
+        #     end)
+        #     |> Enum.all?()
 
-      #   if empty_queues and category != :toxic do
-      #     new_state = accept_login(state)
-      #     {new_state, true}
-      #   else
-      #     new_state = add_user_to_queue(state, category, {pid, userid})
-      #     {new_state, false}
-      #   end
+        #   if empty_queues and category != :toxic do
+        #     new_state = accept_login(state)
+        #     {new_state, true}
+        #   else
+        #     new_state = add_user_to_queue(state, category, {pid, userid})
+        #     {new_state, false}
+        #   end
     end
   end
 

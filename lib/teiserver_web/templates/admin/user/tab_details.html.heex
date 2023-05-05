@@ -104,14 +104,16 @@
         <input type="hidden" name="data_search[gpu]" value={@user_stats["hardware:gpuinfo"]} />
         <input type="hidden" name="data_search[ram]" value={@user_stats["hardware:raminfo"]} />
         <input type="hidden" name="data_search[os]" value={@user_stats["hardware:osinfo"]} />
-        <input type="hidden" name="data_search[screen]" value={@user_stats["hardware:displaymax"]} />
+        <input
+          type="hidden"
+          name="data_search[screen]"
+          value={@user_stats["hardware:displaymax"]}
+        />
 
         <button type="submit" class={"btn btn-#{bsname}"}>
-          <i class="fa-fw fa-regular fa-search"></i>
-          Data search
+          <i class="fa-fw fa-regular fa-search"></i> Data search
         </button>
       </form>
-
     </div>
   </div>
 <% end %>

@@ -49,14 +49,14 @@ defmodule Teiserver.Chat.LobbyMessageLib do
       where: lobby_messages.user_id not in ^id_list
   end
 
-  def _search(query, :lobby_guid, lobby_guid) do
+  def _search(query, :match_id, match_id) do
     from lobby_messages in query,
-      where: lobby_messages.lobby_guid == ^lobby_guid
+      where: lobby_messages.match_id == ^match_id
   end
 
-  def _search(query, :lobby_guid_in, lobby_guids) do
+  def _search(query, :match_id_in, match_ids) do
     from lobby_messages in query,
-      where: lobby_messages.lobby_guid in ^lobby_guids
+      where: lobby_messages.match_id in ^match_ids
   end
 
   def _search(query, :id_list, id_list) do
@@ -108,7 +108,7 @@ defmodule Teiserver.Chat.LobbyMessageLib do
 
   def order_by(query, "Oldest first") do
     from lobby_messages in query,
-      order_by: [asc: lobby_messages.inserted_at]
+      order_by: [asc: lobby_messages.inserted_at, asc: lobby_messages.id]
   end
 
   @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()

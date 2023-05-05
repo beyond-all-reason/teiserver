@@ -275,7 +275,6 @@ defmodule Teiserver.Battle.LobbyChat do
 
       Chat.create_lobby_message(%{
         content: content,
-        lobby_guid: Battle.get_lobby_match_uuid(lobby_id),
         match_id: Battle.get_lobby_match_id(lobby_id),
         inserted_at: Timex.now(),
         user_id: userid
@@ -286,7 +285,6 @@ defmodule Teiserver.Battle.LobbyChat do
   def persist_system_message(content, lobby_id) do
     Chat.create_lobby_message(%{
       content: "system: #{content}",
-      lobby_guid: Battle.get_lobby_match_uuid(lobby_id),
       match_id: Battle.get_lobby_match_id(lobby_id),
       inserted_at: Timex.now(),
       user_id: Coordinator.get_coordinator_userid()

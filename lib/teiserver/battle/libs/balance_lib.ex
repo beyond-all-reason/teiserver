@@ -135,6 +135,7 @@ defmodule Teiserver.Battle.BalanceLib do
       case opts[:algorithm] || :loser_picks do
         :loser_picks ->
           loser_picks(group_pairs ++ solo_players, teams, opts)
+
         :force_party ->
           force_party(group_pairs ++ solo_players, teams, opts)
       end
@@ -623,9 +624,9 @@ defmodule Teiserver.Battle.BalanceLib do
   """
   @spec force_party([expanded_group_or_pair()], map(), list()) :: {map(), list()}
   def force_party(groups, teams, opts) do
-    IO.puts ""
-    IO.inspect {groups, teams, opts}
-    IO.puts ""
+    IO.puts("")
+    IO.inspect({groups, teams, opts})
+    IO.puts("")
 
     # To prevent anything breaking while we debug this, return loser picks stuff
     loser_picks(groups, teams, opts)

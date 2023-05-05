@@ -1126,22 +1126,24 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   #################### Host and Moderator
   def handle_command(%{command: "balancemode", remaining: remaining, senderid: senderid}, state) do
-    new_mode = case remaining do
-      "forceparty" ->
-        :forceparty
+    new_mode =
+      case remaining do
+        "forceparty" ->
+          :forceparty
 
-      "loser_picks" ->
-        :loser_picks
+        "loser_picks" ->
+          :loser_picks
 
-      _ ->
-        Lobby.sayprivateex(
-          state.coordinator_id,
-          senderid,
-          "No balancemode of #{remaining}, options are: loser_picks, forceparty",
-          state.lobby_id
-        )
-        :loser_picks
-    end
+        _ ->
+          Lobby.sayprivateex(
+            state.coordinator_id,
+            senderid,
+            "No balancemode of #{remaining}, options are: loser_picks, forceparty",
+            state.lobby_id
+          )
+
+          :loser_picks
+      end
 
     LobbyChat.say(
       state.coordinator_id,

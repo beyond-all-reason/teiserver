@@ -37,6 +37,7 @@
               <th>Name</th>
 
               <th>Reason</th>
+              <th>Restrictions</th>
 
               <th>Started</th>
               <th>Expires</th>
@@ -50,6 +51,7 @@
               <tr>
                 <td><%= action.target.name %></td>
                 <td><%= action.reason |> String.slice(0..100) %></td>
+                <td><%= action.restrictions |> Enum.join(", ") %></td>
 
                 <td><%= action.inserted_at |> date_to_str(format: :hms_or_ymd) %></td>
                 <%= if action.expires do %>

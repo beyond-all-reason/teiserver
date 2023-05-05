@@ -100,11 +100,14 @@ defmodule Teiserver.Account.RanksReport do
     # Now do raw CSV stuff
     csv_output =
       users
-      |> Enum.group_by(fn %{inserted_at: inserted_at} ->
-        Timex.diff(Timex.now(), inserted_at, :days)
-      end, fn _ ->
-        1
-      end)
+      |> Enum.group_by(
+        fn %{inserted_at: inserted_at} ->
+          Timex.diff(Timex.now(), inserted_at, :days)
+        end,
+        fn _ ->
+          1
+        end
+      )
       |> Enum.map(fn {key, vs} -> [key, Enum.count(vs)] end)
       |> Enum.sort(&<=/2)
       |> add_csv_headings()

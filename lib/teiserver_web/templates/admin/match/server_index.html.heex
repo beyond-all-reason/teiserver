@@ -73,7 +73,7 @@
           <tbody>
             <%= for match <- @matches do %>
               <tr>
-                <td><%= match.uuid |> String.slice(0..7) %></td>
+                <td><%= match.id %></td>
 
                 <td><%= match.game_type %></td>
                 <td><%= match.map %></td>
@@ -88,7 +88,7 @@
 
                 <td>
                   <a
-                    href={Routes.ts_admin_match_path(@conn, :show, match.id)}
+                    href={~p"/teiserver/admin/matches/#{match.id}"}
                     class="btn btn-secondary btn-sm"
                   >
                     Show
@@ -97,7 +97,7 @@
 
                 <td>
                   <a
-                    href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, match.uuid)}
+                    href={~p"/teiserver/admin/lobbies/#{match.id}/lobby_chat"}
                     class="btn btn-secondary btn-sm"
                   >
                     Match chat

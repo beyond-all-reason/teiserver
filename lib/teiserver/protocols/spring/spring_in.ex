@@ -893,6 +893,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
           if client do
             password = if Enum.member?(["empty", "*"], password), do: nil, else: password
+
             lobby =
               %{
                 founder_id: state.userid,

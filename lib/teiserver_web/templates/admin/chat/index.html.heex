@@ -95,8 +95,8 @@
                 <%= for msg <- @messages do %>
                   <tr>
                     <td>
-                      <a href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, msg.lobby_guid)}>
-                        <%= msg.lobby_guid |> String.slice(0..7) %>
+                      <a href={~p"/teiserver/admin/matches/#{msg.match_id}"}>
+                        <%= msg.match_id %>
                       </a>
                     </td>
                     <td>

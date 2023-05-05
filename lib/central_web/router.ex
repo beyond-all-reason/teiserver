@@ -568,6 +568,7 @@ defmodule CentralWeb.Router do
     resources("/proposal", ProposalController,
       only: [:index, :show, :new, :create, :edit, :update]
     )
+
     post("/proposal/:id/conclude", ProposalController, :conclude)
 
     put("/ban/:id/disable", BanController, :disable)
@@ -651,7 +652,6 @@ defmodule CentralWeb.Router do
     get("/matches/search", MatchController, :index)
     post("/matches/search", MatchController, :search)
     get("/matches/user/:user_id", MatchController, :user_show)
-    get("/matches/chat/:id", MatchController, :chat)
     resources("/matches", MatchController, only: [:index, :show, :delete])
 
     resources("/chat", ChatController, only: [:index])

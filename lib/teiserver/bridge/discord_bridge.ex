@@ -187,6 +187,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
       cond do
         report.type == "actions" ->
           Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
+
         true ->
           Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
       end

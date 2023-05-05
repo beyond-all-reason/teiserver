@@ -56,6 +56,8 @@
 
               <th>Reporter</th>
               <th>Datetime</th>
+              <th>Responses</th>
+
               <th colspan="3">&nbsp;</th>
             </tr>
           </thead>
@@ -95,17 +97,14 @@
                 <td>
                   <a
                     href={Routes.moderation_report_path(@conn, :user, report.reporter_id)}
-                    class={"btn btn-sm btn-#{Teiserver.Account.UserLib.colour()}"}
                   >
-                    <%= central_component("icon",
-                      icon: Central.Helpers.StylingHelper.icon(:user),
-                      class: "fa-solid"
-                    ) %>
+                    <%= report.reporter.name %>
                   </a>
-                  &nbsp; <%= report.reporter.name %>
                 </td>
 
                 <td><%= date_to_str(report.inserted_at, format: :hms_or_ymd) %></td>
+
+                <td><%= Enum.count(report.responses) %></td>
 
                 <td>
                   <a
@@ -128,7 +127,7 @@
                   <td>
                     <%= if allow?(@conn, "teisever.staff.reviewer") do %>
                       <a
-                        href={Routes.ts_admin_match_path(@conn, :chat, report.match_id)}
+                        href={~p"/teiserver/admin/lobbies/#{report.match_id}/lobby_chat"}
                         class="btn btn-secondary btn-sm"
                       >
                         Chat

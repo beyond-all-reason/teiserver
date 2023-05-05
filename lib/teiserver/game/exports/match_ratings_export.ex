@@ -36,6 +36,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
 
   def show_form(_conn, params) do
     start_time = System.system_time(:second)
+
     {start_date, end_date} =
       DatePresets.parse(
         params["date_preset"],
@@ -76,7 +77,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
     File.write(path, Jason.encode_to_iodata!(data))
 
     end_time = System.system_time(:second)
-    time_taken = (end_time - start_time)
+    time_taken = end_time - start_time
     Logger.info("Ran #{__MODULE__} export in #{time_taken}s")
 
     {:file, path, "match_ratings.json", content_type}

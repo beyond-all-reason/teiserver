@@ -287,6 +287,7 @@ bsname = view_colour() %>
                     <th>Name</th>
 
                     <th>Reason</th>
+                    <th>Restrictions</th>
 
                     <th>Started</th>
                     <th>Expires</th>
@@ -300,6 +301,7 @@ bsname = view_colour() %>
                     <tr>
                       <td><%= action.target.name %></td>
                       <td><%= action.reason |> String.slice(0..100) %></td>
+                      <td><%= action.restrictions |> Enum.join(", ") %></td>
 
                       <td><%= action.inserted_at |> date_to_str(format: :hms_or_ymd) %></td>
                       <%= if action.expires do %>
@@ -317,7 +319,10 @@ bsname = view_colour() %>
                       <% end %>
 
                       <td>
-                        <a href={~p"/moderation/action/#{action.id}"} class="btn btn-secondary btn-sm">
+                        <a
+                          href={~p"/moderation/action/#{action.id}"}
+                          class="btn btn-secondary btn-sm"
+                        >
                           Show
                         </a>
                       </td>
@@ -336,7 +341,6 @@ bsname = view_colour() %>
               </table>
             </div>
           </div>
-
         </div>
       </div>
     </div>

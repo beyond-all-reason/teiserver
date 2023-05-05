@@ -40,14 +40,14 @@ defmodule Teiserver.Battle.LobbyCache do
     call_lobby(lobby_id, :get_server_uuid)
   end
 
-  @spec get_lobby_by_match_uuid(String.t()) :: T.lobby() | nil
-  def get_lobby_by_match_uuid(uuid) do
+  @spec get_lobby_by_match_id(String.t()) :: T.lobby() | nil
+  def get_lobby_by_match_id(uuid) do
     lobby_list =
       list_lobby_ids()
-      |> Stream.map(fn lobby_id -> {lobby_id, get_lobby_match_uuid(lobby_id)} end)
-      |> Stream.filter(fn {_lobby_id, lobby_uuid} -> lobby_uuid == uuid end)
+      |> Stream.map(fn lobby_id -> {lobby_id, get_lobby_match_id(lobby_id)} end)
+      |> Stream.filter(fn {_lobby_id, match_id} -> match_id == uuid end)
       |> Enum.take(1)
-      |> Enum.map(fn {lobby_id, _lobby_uuid} -> get_lobby(lobby_id) end)
+      |> Enum.map(fn {lobby_id, _match_id} -> get_lobby(lobby_id) end)
 
     case lobby_list do
       [] -> nil

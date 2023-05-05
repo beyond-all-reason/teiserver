@@ -27,7 +27,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
           target_id: params["target_id"],
           reporter_id: params["reporter_id"]
         ],
-        preload: [:target, :reporter],
+        preload: [:target, :reporter, :responses],
         order_by: "Newest first"
       )
 
@@ -77,32 +77,38 @@ defmodule TeiserverWeb.Moderation.ReportController do
         limit: :infinity
       )
 
-    your_response = report.responses
+    your_response =
+      report.responses
       |> Enum.find(fn resp ->
         resp.user_id == conn.assigns.current_user.id
       end)
 
-    response_changeset = if your_response do
-      Moderation.change_response(your_response)
-    else
-      Moderation.change_response(%Response{action: "Ignore"})
-    end
+    response_changeset =
+      if your_response do
+        Moderation.change_response(your_response)
+      else
+        Moderation.change_response(%Response{action: "Ignore"})
+      end
 
-    response_action_counts = report.responses
-      |> Enum.group_by(fn r ->
+    response_action_counts =
+      report.responses
+      |> Enum.group_by(
+        fn r ->
           r.action
-        end, fn _ ->
+        end,
+        fn _ ->
           1
-      end)
+        end
+      )
       |> Map.new(fn {key, vs} -> {key, Enum.count(vs)} end)
 
-    accurate_count = report.responses
-      |> Enum.filter(fn r -> r.accurate == true end)
-      |> Enum.count
+    accurate_count =
+      report.responses
+      |> Enum.count(fn r -> r.accurate == true end)
 
-    inaccurate_count = report.responses
-      |> Enum.filter(fn r -> r.accurate == false end)
-      |> Enum.count
+    inaccurate_count =
+      report.responses
+      |> Enum.count(fn r -> r.accurate == false end)
 
     accuracy = accurate_count / max(accurate_count + inaccurate_count, 1)
 
@@ -212,10 +218,11 @@ defmodule TeiserverWeb.Moderation.ReportController do
     # Ensure the report exists
     Moderation.get_report!(id)
 
-    response_params = Map.merge(response_params, %{
-      "report_id" => id,
-      "user_id" => conn.assigns.current_user.id
-    })
+    response_params =
+      Map.merge(response_params, %{
+        "report_id" => id,
+        "user_id" => conn.assigns.current_user.id
+      })
 
     case Moderation.get_response(id, conn.assigns.current_user.id) do
       nil ->

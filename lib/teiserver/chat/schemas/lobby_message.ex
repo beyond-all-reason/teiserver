@@ -3,7 +3,6 @@ defmodule Teiserver.Chat.LobbyMessage do
 
   schema "teiserver_lobby_messages" do
     field :content, :string
-    field :lobby_guid, :string
     field :inserted_at, :utc_datetime
     belongs_to :user, Central.Account.User
     belongs_to :match, Teiserver.Battle.Match
@@ -16,11 +15,11 @@ defmodule Teiserver.Chat.LobbyMessage do
   def changeset(struct, params \\ %{}) do
     params =
       params
-      |> trim_strings([:content, :lobby_guid])
+      |> trim_strings([:content])
 
     struct
-    |> cast(params, ~w(content lobby_guid inserted_at match_id user_id)a)
-    |> validate_required(~w(content lobby_guid inserted_at user_id)a)
+    |> cast(params, ~w(content inserted_at match_id user_id)a)
+    |> validate_required(~w(content inserted_at user_id)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

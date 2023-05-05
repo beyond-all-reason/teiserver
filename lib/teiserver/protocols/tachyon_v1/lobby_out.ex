@@ -237,7 +237,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     }
   end
 
-  def do_reply(:remove_start_area,  %{lobby_id: lobby_id, area_id: area_id}) do
+  def do_reply(:remove_start_area, %{lobby_id: lobby_id, area_id: area_id}) do
     %{
       "cmd" => "s.lobby.remove_start_area",
       "lobby_id" => lobby_id,

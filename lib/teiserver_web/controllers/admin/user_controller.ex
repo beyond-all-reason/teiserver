@@ -52,13 +52,17 @@ defmodule TeiserverWeb.Admin.UserController do
     params = Map.merge(search_defaults(conn), params)
 
     id_list =
-      Account.list_user_stats(
-        search: [
-          data_contains: {"previous_names", params["previous_names"]}
-        ],
-        select: [:user_id]
-      )
-      |> Enum.map(fn s -> s.user_id end)
+      if params["previous_names"] != nil and params["previous_names"] != "" do
+        Account.list_user_stats(
+          search: [
+            data_contains: {"previous_names", params["previous_names"]}
+          ],
+          select: [:user_id]
+        )
+        |> Enum.map(fn s -> s.user_id end)
+      else
+        []
+      end
 
     users =
       (Account.list_users(

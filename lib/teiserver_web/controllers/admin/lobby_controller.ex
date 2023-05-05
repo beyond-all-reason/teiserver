@@ -23,7 +23,9 @@ defmodule TeiserverWeb.Admin.LobbyController do
   @page_size 300
 
   @spec lobby_chat(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def lobby_chat(conn, params = %{"id" => lobby_guid}) do
+  def lobby_chat(conn, params = %{"id" => match_id}) do
+    match_id = int_parse(match_id)
+
     {page, page_size} =
       if params["page"] == "all" do
         {0, 10_000}
@@ -36,7 +38,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
     lobby_messages =
       Chat.list_lobby_messages(
         search: [
-          lobby_guid: lobby_guid
+          match_id: match_id
         ],
         preload: [:user],
         limit: page_size,
@@ -45,7 +47,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
       )
 
     match =
-      case Battle.list_matches(search: [uuid: lobby_guid]) do
+      case Battle.list_matches(search: [id: match_id]) do
         [match] ->
           match
 
@@ -53,7 +55,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
           nil
       end
 
-    lobby = Battle.get_lobby_by_match_uuid(lobby_guid)
+    lobby = Battle.get_lobby_by_match_id(match_id)
 
     last_page = Enum.count(lobby_messages) < page_size
 
@@ -68,18 +70,17 @@ defmodule TeiserverWeb.Admin.LobbyController do
     |> assign(:next_match, next_match)
     |> assign(:prev_match, prev_match)
     |> assign(:lobby_messages, lobby_messages)
-    |> assign(:lobby_guid, lobby_guid)
     |> assign(:lobby, lobby)
-    |> add_breadcrumb(name: "Show: #{lobby_guid}", url: conn.request_path)
+    |> add_breadcrumb(name: "Show: ##{match_id}", url: conn.request_path)
     |> render("lobby_chat.html")
   end
 
   @spec lobby_chat_download(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def lobby_chat_download(conn, %{"id" => lobby_guid}) do
+  def lobby_chat_download(conn, %{"id" => match_id}) do
     file_contents =
       Chat.list_lobby_messages(
         search: [
-          lobby_guid: lobby_guid
+          match_id: match_id
         ],
         preload: [:user],
         limit: :infinity,
@@ -97,12 +98,12 @@ defmodule TeiserverWeb.Admin.LobbyController do
 
   @spec server_chat(Plug.Conn.t(), map) :: Plug.Conn.t()
   def server_chat(conn, params = %{"id" => server_uuid}) do
-    uuids =
+    match_ids =
       Battle.list_matches(
         search: [server_uuid: server_uuid],
-        select: [:uuid]
+        select: [:id]
       )
-      |> Enum.map(fn %{uuid: uuid} -> uuid end)
+      |> Enum.map(fn %{id: id} -> id end)
 
     {page, page_size} =
       if params["page"] == "all" do
@@ -116,7 +117,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
     chat_messages =
       Chat.list_lobby_messages(
         search: [
-          lobby_guid_in: uuids
+          match_id_in: match_ids
         ],
         preload: [:user],
         limit: page_size,
@@ -140,24 +141,24 @@ defmodule TeiserverWeb.Admin.LobbyController do
 
   @spec server_chat_download(Plug.Conn.t(), map) :: Plug.Conn.t()
   def server_chat_download(conn, %{"id" => server_uuid}) do
-    uuids =
+    match_ids =
       Battle.list_matches(
         search: [server_uuid: server_uuid],
-        select: [:uuid]
+        select: [:id]
       )
-      |> Enum.map(fn %{uuid: uuid} -> uuid end)
+      |> Enum.map(fn %{id: id} -> id end)
 
     file_contents =
       Chat.list_lobby_messages(
         search: [
-          lobby_guid_in: uuids
+          match_id_in: match_ids
         ],
         preload: [:user],
         limit: :infinity,
         order_by: "Oldest first"
       )
       |> Enum.map_join("\n", fn msg ->
-        "#{msg.lobby_guid} - #{msg.user.name}: #{msg.content}"
+        "#{msg.match_id} - #{msg.user.name}: #{msg.content}"
       end)
 
     conn

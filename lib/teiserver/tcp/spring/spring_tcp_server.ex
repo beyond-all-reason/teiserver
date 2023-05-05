@@ -335,6 +335,7 @@ defmodule Teiserver.SpringTcpServer do
   def handle_info(%{channel: "teiserver_global_lobby_updates", event: :opened, lobby: nil}, state) do
     {:noreply, state}
   end
+
   def handle_info(%{channel: "teiserver_global_lobby_updates", event: :opened} = msg, state) do
     lobby_id = msg.lobby.id
 

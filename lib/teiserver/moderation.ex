@@ -271,12 +271,12 @@ defmodule Teiserver.Moderation do
   """
   @spec get_response!(non_neg_integer(), T.userid()) :: Response.t()
   def get_response!(report_id, user_id) do
-    response_query([
+    response_query(
       search: [
         report_id: report_id,
         user_id: user_id
       ]
-    ])
+    )
     |> Repo.one!()
   end
 
@@ -296,12 +296,12 @@ defmodule Teiserver.Moderation do
   """
   @spec get_response(non_neg_integer(), T.userid()) :: Response.t() | nil
   def get_response(report_id, user_id) do
-    response_query([
+    response_query(
       search: [
         report_id: report_id,
         user_id: user_id
       ]
-    ])
+    )
     |> Repo.one()
   end
 
@@ -353,7 +353,8 @@ defmodule Teiserver.Moderation do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_response(Response.t(), Map.t()) :: {:ok, Response.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_response(Response.t(), Map.t()) ::
+          {:ok, Response.t()} | {:error, Ecto.Changeset.t()}
   def update_response(%Response{} = response, attrs) do
     response
     |> Response.changeset(attrs)

@@ -207,5 +207,4 @@ defmodule Teiserver.Moderation.ReportLib do
       left_join: responses in assoc(reports, :responses),
       preload: [responses: responses]
   end
-
 end

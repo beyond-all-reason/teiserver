@@ -21,7 +21,8 @@ defmodule Teiserver.Battle.LobbyServer do
     result =
       Map.merge(state.lobby, %{
         members: state.member_list,
-        players: state.member_list
+        players: state.member_list,
+        match_id: state.match_id
       })
 
     {:reply, result, state}

@@ -99,10 +99,10 @@
                     </span>
                   </td>
 
-                  <%= if @moderator and Map.has_key?(lobby, :uuid) do %>
+                  <%= if @moderator and lobby.match_id != nil do %>
                     <td>
                       <a
-                        href={Routes.ts_admin_lobby_path(@socket, :lobby_chat, lobby.uuid)}
+                        href={~p"/teiserver/admin/lobbies/#{lobby.match_id}/lobby_chat"}
                         class={"btn btn-sm btn-outline-#{bsname}"}
                       >
                         Full chat

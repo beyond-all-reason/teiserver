@@ -91,7 +91,7 @@ defmodule Teiserver.Account.RetentionRateExport do
     data = build_table(day_logs, accounts_by_insert_date)
 
     end_time = System.system_time(:second)
-    time_taken = (end_time - start_time)
+    time_taken = end_time - start_time
     Logger.info("Ran #{__MODULE__} export in #{time_taken}s")
 
     return_content(data, params)
@@ -129,7 +129,9 @@ defmodule Teiserver.Account.RetentionRateExport do
   end
 
   defp return_content(data, %{"format" => "csv"} = params) do
-    dates = Map.keys(data) |> Enum.sort_by(fn key -> TimexHelper.date_to_str(key, format: :ymd) end, &<=/2)
+    dates =
+      Map.keys(data)
+      |> Enum.sort_by(fn key -> TimexHelper.date_to_str(key, format: :ymd) end, &<=/2)
 
     csv_output =
       dates

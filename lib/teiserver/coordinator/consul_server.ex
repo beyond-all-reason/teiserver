@@ -1267,8 +1267,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       last_queue_state: [],
       balance_result: nil,
       player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
-
-      showmatch: true,
+      showmatch: true
     }
   end
 

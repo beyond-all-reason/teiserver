@@ -307,20 +307,21 @@ defmodule Central.Config do
         limit: 1
 
     # The key may or may not exist
-    {:ok, _config} = case Repo.one(query) do
-      nil ->
-        %SiteConfig{}
-        |> SiteConfig.changeset(%{
-          key: key,
-          value: value
-        })
-        |> Repo.insert()
+    {:ok, _config} =
+      case Repo.one(query) do
+        nil ->
+          %SiteConfig{}
+          |> SiteConfig.changeset(%{
+            key: key,
+            value: value
+          })
+          |> Repo.insert()
 
-      site_config ->
-        site_config
-        |> SiteConfig.changeset(%{value: value})
-        |> Repo.update()
-    end
+        site_config ->
+          site_config
+          |> SiteConfig.changeset(%{value: value})
+          |> Repo.update()
+      end
 
     cached_value = cast_site_config_value(key, value)
 
@@ -329,6 +330,7 @@ defmodule Central.Config do
       %{update_callback: nil} -> :ok
       %{update_callback: callback_func} -> callback_func.(cached_value)
     end
+
     Central.cache_put(:config_site_cache, key, cached_value)
   end
 

@@ -4,6 +4,7 @@ defmodule TeiserverWeb.Admin.MatchController do
   alias Teiserver.{Battle, Game, Account}
   alias Teiserver.Battle.{MatchLib, BalanceLib}
   import Central.Helpers.StringHelper, only: [get_hash_id: 1]
+  require Logger
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Staff.MatchAdmin,
@@ -147,14 +148,6 @@ defmodule TeiserverWeb.Admin.MatchController do
     |> assign(:new_balance, new_balance)
     |> add_breadcrumb(name: "Show: #{match_name}", url: conn.request_path)
     |> render("show.html")
-  end
-
-  @spec chat(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def chat(conn, %{"id" => id}) do
-    match = Battle.get_match!(id, [])
-
-    conn
-    |> redirect(to: Routes.ts_admin_lobby_path(conn, :lobby_chat, match.uuid))
   end
 
   @spec user_show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

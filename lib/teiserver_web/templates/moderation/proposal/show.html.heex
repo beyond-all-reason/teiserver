@@ -125,12 +125,25 @@
           <div class="row mt-4">
             <div class="col">
               <%= if allow?(@conn, "teiserver.staff.moderator") do %>
-                <form action={~p"/moderation/proposal/#{@proposal.id}/conclude"} method="post" class="">
+                <form
+                  action={~p"/moderation/proposal/#{@proposal.id}/conclude"}
+                  method="post"
+                  class=""
+                >
                   <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
                   <div class="row">
                     <div class="col">
-                      <label for="conclude_comments" class="col-md-2 control-label">Comments</label><br />
-                      <input type="text" name="comments" id="conclude_comments" value="" class="form-control" />
+                      <label for="conclude_comments" class="col-md-2 control-label">
+                        Comments
+                      </label>
+                      <br />
+                      <input
+                        type="text"
+                        name="comments"
+                        id="conclude_comments"
+                        value=""
+                        class="form-control"
+                      />
                     </div>
                   </div>
 
@@ -142,7 +155,6 @@
             </div>
           </div>
         <% end %>
-
       </div>
     </div>
   </div>
