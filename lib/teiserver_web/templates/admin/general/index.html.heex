@@ -28,7 +28,7 @@
 
   <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
     <%= central_component("menu_card",
-      icon: Central.Communication.CommentLib.icon(),
+      icon: Teiserver.Chat.LobbyMessageLib.icon(),
       name: "chat",
       text: "Chat",
       icon_class: "fa-duotone",

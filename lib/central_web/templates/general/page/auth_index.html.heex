@@ -11,22 +11,6 @@
 <% end %>
 &nbsp;
 <div class="row">
-  <%= if Application.get_env(:central, Central)[:enable_blog] do %>
-    <%= if allow?(@current_user, "communication.blog") do %>
-      <%= central_component("menu_card",
-        icon: Central.Communication.BlogLib.icon(),
-        text: "Blog posts",
-        link: ~p"/blog_admin/posts"
-      ) %>
-    <% else %>
-      <%= central_component("menu_card",
-        icon: Central.Communication.BlogLib.icon(),
-        text: "Blog",
-        link: ~p"/blog"
-      ) %>
-    <% end %>
-  <% end %>
-
   <%= if allow?(@conn, "teiserver.staff") do %>
     <%= central_component("menu_card",
       icon: Teiserver.icon(),

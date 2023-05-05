@@ -5,8 +5,6 @@ config :central, Central,
   site_suffix: "",
   site_description: "",
   site_icon: "fa-duotone fa-robot",
-  enable_blog: false,
-  blog_title: "BAR Blog",
   credit: "Teifion Jordan"
 
 # Default configs
@@ -107,8 +105,6 @@ config :central, Central.Account.Guardian,
   issuer: "central",
   secret_key: "9vJcJOYwsjdIQ9IhfOI5F9GQMykuNjBW58FY9S/TqMsq6gRdKgY05jscQAFVKfwa",
   ttl: {30, :days}
-
-config :central, Central.Communication.BlogFile, save_path: "/etc/central/blog_files"
 
 config :central, Oban,
   repo: Central.Repo,

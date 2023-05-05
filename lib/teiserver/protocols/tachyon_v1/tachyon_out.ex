@@ -11,7 +11,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonOut do
     LobbyHostOut,
     LobbyOut,
     MatchmakingOut,
-    NewsOut,
     PartyOut,
     SystemOut,
     UserOut
@@ -49,9 +48,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonOut do
 
         :matchmaking ->
           MatchmakingOut.do_reply(reply_cmd, data)
-
-        :news ->
-          NewsOut.do_reply(reply_cmd, data)
 
         :party ->
           PartyOut.do_reply(reply_cmd, data)

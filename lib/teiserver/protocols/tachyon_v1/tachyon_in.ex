@@ -12,7 +12,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonIn do
     LobbyHostIn,
     LobbyIn,
     MatchmakingIn,
-    NewsIn,
     PartyIn,
     SystemIn,
     TelemetryIn,
@@ -113,9 +112,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonIn do
 
             "matchmaking" ->
               MatchmakingIn.do_handle(subcommand, data, state)
-
-            "news" ->
-              NewsIn.do_handle(subcommand, data, state)
 
             "party" ->
               PartyIn.do_handle(subcommand, data, state)

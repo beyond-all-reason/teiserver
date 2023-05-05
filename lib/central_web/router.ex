@@ -197,38 +197,6 @@ defmodule CentralWeb.Router do
     resources("/notifications", NotificationController, only: [:index, :delete])
   end
 
-  scope "/blog", CentralWeb.Communication do
-    pipe_through([:browser, :nomenu_layout])
-
-    get("/category/:category", BlogController, :category)
-    get("/tag/:tag", BlogController, :tag)
-    post("/comment/:id", BlogController, :add_comment)
-    get("/file/:url_name", BlogController, :show_file)
-
-    get("/", BlogController, :index)
-    get("/:id", BlogController, :show)
-  end
-
-  scope "/blog_admin", CentralWeb.Communication, as: :blog do
-    pipe_through([:browser, :protected, :standard_layout])
-
-    resources("/posts", PostController)
-    resources("/comments", CommentController)
-
-    resources("/categories", CategoryController,
-      only: [:index, :new, :create, :edit, :update, :delete]
-    )
-  end
-
-  # Extra block to stop it being blog_blog_files_path
-  scope "/blog_admin", CentralWeb.Communication do
-    pipe_through([:browser, :protected, :standard_layout])
-
-    # get "/blog_files/search", BlogFileController, :index
-    # post "/blog_files/search", BlogFileController, :search
-    resources("/files", BlogFileController)
-  end
-
   scope "/admin", CentralWeb.Admin, as: :admin do
     pipe_through([:browser, :protected, :standard_layout])
 

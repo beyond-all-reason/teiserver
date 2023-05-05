@@ -84,8 +84,6 @@ config :phoenix, :stacktrace_depth, 20
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
 
-config :central, Central.Communication.BlogFile, save_path: "/tmp/blog_files"
-
 # Comment the below block to allow background jobs to happen in dev
 config :central, Oban,
   queues: false,
