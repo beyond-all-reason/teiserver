@@ -72,7 +72,7 @@ defmodule Teiserver.TeiserverQuickActions do
         },
         %{
           label: "Chat logs",
-          icons: [Central.Communication.CommentLib.icon(), :list],
+          icons: [Teiserver.Chat.LobbyMessageLib.icon(), :list],
           url: ~p"/teiserver/admin/chat",
           permissions: "teiserver.staff.moderator"
         },

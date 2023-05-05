@@ -20,7 +20,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   """
   @spec convert_object(
           Map.t() | nil,
-          :user | :user_extended | :user_extended_icons | :client | :battle | :queue | :blog_post
+          :user | :user_extended | :user_extended_icons | :client | :battle | :queue
         ) :: Map.t() | nil
   def convert_object(nil, _), do: nil
 
@@ -86,9 +86,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
     do: Map.take(party, ~w(id leader members pending_invites)a)
 
   def convert_object(party, :party_public), do: Map.take(party, ~w(id leader members)a)
-
-  def convert_object(post, :blog_post),
-    do: Map.take(post, ~w(id short_content content url tags live_from)a)
 
   def convert_object(type, :user_config_type) do
     opts = type[:opts] |> Map.new()

@@ -11,7 +11,7 @@ defmodule Teiserver.Tachyon.Converters do
 
   @spec convert(
           Map.t() | nil,
-          :user | :user_extended | :user_extended_icons | :client | :battle | :queue | :blog_post
+          :user | :user_extended | :user_extended_icons | :client | :battle | :queue
         ) :: Map.t() | nil
   def convert(nil, _), do: nil
 
@@ -77,9 +77,6 @@ defmodule Teiserver.Tachyon.Converters do
     do: Map.take(party, ~w(id leader members pending_invites)a)
 
   def convert(party, :party_public), do: Map.take(party, ~w(id leader members)a)
-
-  def convert(post, :blog_post),
-    do: Map.take(post, ~w(id short_content content url tags live_from)a)
 
   def convert(type, :user_config_type) do
     opts = type[:opts] |> Map.new()

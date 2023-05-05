@@ -102,9 +102,6 @@ defmodule Central.Application do
         # Caches - Chat
         concache_perm_sup(:rooms),
 
-        # Caches - Blog - TODO: Is this actually needed? It's not in use
-        concache_sup(:teiserver_blog_posts),
-        concache_sup(:teiserver_blog_categories),
         {Teiserver.HookServer, name: Teiserver.HookServer},
 
         # Liveview throttles
@@ -244,7 +241,7 @@ defmodule Central.Application do
 
     :telemetry.attach_many("oban-logger", events, &Central.ObanLogger.handle_event/4, [])
 
-    ~w(General Config Account Admin Communication)
+    ~w(General Config Account Admin)
     |> Enum.each(&env_startup/1)
 
     Teiserver.Startup.startup()

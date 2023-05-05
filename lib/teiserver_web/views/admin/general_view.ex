@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Admin.GeneralView do
   def view_colour("queues"), do: Teiserver.Game.QueueLib.colours()
   def view_colour("telemetry"), do: Teiserver.Telemetry.TelemetryLib.colours()
   def view_colour("tools"), do: Central.Admin.ToolLib.colours()
-  def view_colour("chat"), do: Central.Communication.CommentLib.colours()
+  def view_colour("chat"), do: Teiserver.Chat.LobbyMessageLib.colours()
   def view_colour("accolades"), do: Teiserver.Account.AccoladeLib.colours()
   def view_colour("lobby_policies"), do: Teiserver.Game.LobbyPolicyLib.colours()
   def view_colour("matches"), do: Teiserver.Battle.MatchLib.colours()
