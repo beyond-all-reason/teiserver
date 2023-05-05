@@ -37,4 +37,23 @@ defmodule TeiserverWeb.Moderation.ReportFormControllerTest do
       assert Enum.count(Moderation.list_reports(search: [target_id: user.id])) == 1
     end
   end
+
+  describe "Submit matching reporter_id and target_id" do
+    test "Expect error code and response", %{conn: conn} do
+      user = GeneralTestLib.make_user()
+      assert Enum.empty?(Moderation.list_reports(search: [target_id: user.id]))
+
+      attrs = %{
+        "target_id" => user.id-1,
+        "type" => "type",
+        "sub_type" => "sub_type"
+      }
+
+      IO.inspect(attrs)
+
+      conn = post(conn, Routes.moderation_report_form_path(conn, :create), report: attrs)
+      assert json_response(conn, 422) == %{"error" => "Reporter and target may not be the same user."}
+      assert Enum.count(Moderation.list_reports(search: [target_id: user.id])) == 0
+    end
+  end
 end
