@@ -72,7 +72,7 @@ value_types = [
               ) %>
             </div>
 
-            <%= if not Enum.empty?(@ratings) do %>
+            <%= if false and not Enum.empty?(@ratings) do %>
               <div class="col-md-4 col-lg-3 col-xl-2 my-2">
                 <%= central_component("checkbox",
                   name: "report[make_players]",
@@ -221,13 +221,31 @@ value_types = [
 
             <%= if allow?(@conn, "admin.dev") do %>
               <% id_list_str =
-                @ratings
-                |> Enum.map(fn r -> r.user_id end)
+                @name_to_id_map
+                |> Map.values
+                |> Enum.reject(&(&1 == nil))
                 |> Enum.join(", ") %>
               <h4>Mass set-player snippet</h4>
               <textarea rows="8" class="form-control" style="font-family: monospace;">
+ids = [<%= id_list_str %>]
+
 (
-  [<%= id_list_str %>]
+  # Find existing players
+  Teiserver.Account.list_users(
+    search: [tournament_player: "Player"],
+    select: [:id],
+    limit: :infinity
+  )
+  |> Enum.reject(fn %{id: userid} -> Enum.member?(ids, userid) end)
+  |> Enum.each(fn %{id: userid} ->
+    user = Teiserver.Account.get_user_by_id(userid)
+    new_roles = List.delete(user.roles, "Tournament player")
+    Teiserver.Account.update_cache_user(userid, %{roles: new_roles})
+  end)
+)
+
+(
+  ids
   |> Enum.each(fn userid ->
     user = Teiserver.Account.get_user_by_id(userid)
     new_roles = ["Tournament player" | user.roles] |> Enum.uniq
