@@ -49,10 +49,8 @@ defmodule TeiserverWeb.Moderation.ReportFormControllerTest do
         "sub_type" => "sub_type"
       }
 
-      IO.inspect(attrs)
-
       conn = post(conn, Routes.moderation_report_form_path(conn, :create), report: attrs)
-      assert json_response(conn, 422) == %{"error" => "Reporter and target may not be the same user."}
+      assert html_response(conn, 422) =~ "Reporter and target may not be the same user."
       assert Enum.count(Moderation.list_reports(search: [target_id: user.id])) == 0
     end
   end
