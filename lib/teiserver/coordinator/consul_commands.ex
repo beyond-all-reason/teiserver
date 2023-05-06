@@ -281,7 +281,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           ConsulServer.say_command(cmd, state)
         else
           Battle.update_lobby_values(state.lobby_id, %{tournament: true})
-          LobbyChat.say(senderid, "!preset tourney", state.lobby_id)
+          # LobbyChat.say(senderid, "!preset tourney", state.lobby_id)
           send(self(), :recheck_membership)
           state = %{state | tournament_lobby: true}
           ConsulServer.say_command(cmd, state)
