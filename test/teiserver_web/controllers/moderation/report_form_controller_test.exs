@@ -50,7 +50,7 @@ defmodule TeiserverWeb.Moderation.ReportFormControllerTest do
       }
 
       conn = post(conn, Routes.moderation_report_form_path(conn, :create), report: attrs)
-      assert html_response(conn, 422) =~ "Reporter and target may not be the same user."
+      assert html_response(conn, 422) =~ "Self Report"
       assert Enum.count(Moderation.list_reports(search: [target_id: user.id])) == 0
     end
   end
