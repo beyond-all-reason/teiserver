@@ -18,6 +18,13 @@ defmodule Teiserver.Account.TournamentReport do
       |> String.trim()
       |> String.replace(",", "\n")
       |> String.split("\n")
+      |> Enum.filter(fn s ->
+        s = String.trim(s)
+        cond do
+          s == "" -> false
+          true -> true
+        end
+      end)
       |> Map.new(fn name ->
         {String.trim(name), Account.get_userid_from_name(name)}
       end)
