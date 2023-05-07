@@ -335,6 +335,7 @@ defmodule Teiserver.SpringTcpServer do
   def handle_info(%{channel: "teiserver_global_lobby_updates", event: :opened, lobby: nil}, state) do
     {:noreply, state}
   end
+
   def handle_info(%{channel: "teiserver_global_lobby_updates", event: :opened} = msg, state) do
     lobby_id = msg.lobby.id
 
@@ -836,6 +837,10 @@ defmodule Teiserver.SpringTcpServer do
   # genserver is incorrect and needs to alter its state accordingly
   @spec user_join_battle(T.client(), T.lobby_id(), String.t(), T.spring_tcp_state()) ::
           T.spring_tcp_state()
+  defp user_join_battle(nil, _, _, state) do
+    state
+  end
+
   defp user_join_battle(%{userid: userid} = client, lobby_id, script_password, state) do
     script_password =
       cond do
