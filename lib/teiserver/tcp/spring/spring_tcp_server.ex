@@ -837,6 +837,10 @@ defmodule Teiserver.SpringTcpServer do
   # genserver is incorrect and needs to alter its state accordingly
   @spec user_join_battle(T.client(), T.lobby_id(), String.t(), T.spring_tcp_state()) ::
           T.spring_tcp_state()
+  defp user_join_battle(nil, _, _, state) do
+    state
+  end
+
   defp user_join_battle(%{userid: userid} = client, lobby_id, script_password, state) do
     script_password =
       cond do
