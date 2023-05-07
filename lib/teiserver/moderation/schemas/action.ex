@@ -9,6 +9,8 @@ defmodule Teiserver.Moderation.Action do
     field :score_modifier, :integer
     field :expires, :naive_datetime
 
+    field :hidden, :boolean, default: false
+
     has_many :reports, Teiserver.Moderation.Report, foreign_key: :result_id
 
     timestamps()
@@ -22,7 +24,7 @@ defmodule Teiserver.Moderation.Action do
       |> parse_humantimes(~w(expires)a)
 
     struct
-    |> cast(params, ~w(target_id reason restrictions score_modifier expires)a)
+    |> cast(params, ~w(target_id reason restrictions score_modifier expires hidden)a)
     |> validate_required(~w(target_id reason restrictions expires score_modifier)a)
     |> validate_length(:restrictions, min: 1)
   end
