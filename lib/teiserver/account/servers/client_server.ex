@@ -162,6 +162,20 @@ defmodule Teiserver.Account.ClientServer do
     {:noreply, %{state | client: new_client}}
   end
 
+  @impl true
+  def handle_info(:heartbeat, %{client: client_state} = state) do
+    cond do
+      client_state.tcp_pid == nil ->
+        Logger.error("client_state.tcp_pid is nil")
+      Process.alive?(client_state.tcp_pid) == false ->
+        Logger.error("client_state.tcp_pid is not alive")
+      true ->
+        :ok
+    end
+
+    {:noreply, state}
+  end
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -171,6 +185,7 @@ defmodule Teiserver.Account.ClientServer do
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(%{client: %{userid: userid}} = state) do
     Logger.metadata(request_id: "ClientServer##{userid}")
+    :timer.send_interval(6_000, :heartbeat)
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
