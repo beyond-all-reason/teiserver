@@ -628,7 +628,7 @@ CLIENTS test_room #{user.name}\n"
   #   assert Enum.count(Account.list_reports(search: [filter: {"target", target_user.id}])) == 2
   # end
 
-  test "Ranks" do
+  test "User age" do
     user = new_user("test_user_rank_test", %{"rank" => 5})
     %{socket: socket} = auth_setup(user)
 

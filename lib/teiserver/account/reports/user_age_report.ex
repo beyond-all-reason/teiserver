@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.RanksReport do
+defmodule Teiserver.Account.UserAgeReport do
   @moduledoc false
   alias Central.Helpers.{DatePresets, TimexHelper}
   alias Teiserver.{Account}
@@ -19,9 +19,14 @@ defmodule Teiserver.Account.RanksReport do
     "2 weeks",
     "3 weeks",
     "4 weeks",
+    "2 months",
     "3 months",
+    "4 months",
+    "5 months",
     "6 months",
+    "9 months",
     "1 year",
+    "2 years",
     "Older"
   ]
 
@@ -162,9 +167,14 @@ defmodule Teiserver.Account.RanksReport do
       diff <= 14 -> "2 weeks"
       diff <= 21 -> "3 weeks"
       diff <= 28 -> "4 weeks"
+      diff <= 60 -> "2 months"
       diff <= 90 -> "3 months"
+      diff <= 120 -> "4 months"
+      diff <= 150 -> "5 months"
       diff <= 180 -> "6 months"
+      diff <= 270 -> "9 months"
       diff <= 365 -> "1 year"
+      diff <= 730 -> "2 years"
       true -> "Older"
     end
   end

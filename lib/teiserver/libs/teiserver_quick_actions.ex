@@ -179,10 +179,10 @@ defmodule Teiserver.TeiserverQuickActions do
         url: ~p"/teiserver/reports/show/time_spent"
       },
       %{
-        label: "Ranks",
-        icons: ["fa-regular #{Teiserver.Account.RanksReport.icon()}"],
+        label: "User age",
+        icons: ["fa-regular #{Teiserver.Account.UserAgeReport.icon()}"],
         permissions: "teiserver.staff.moderator",
-        url: ~p"/teiserver/reports/show/ranks"
+        url: ~p"/teiserver/reports/show/user_age"
       },
       %{
         label: "Verified",

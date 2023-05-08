@@ -30,8 +30,8 @@ defmodule TeiserverWeb.Report.ReportController do
         "active" ->
           Teiserver.Account.ActiveReport
 
-        "ranks" ->
-          Teiserver.Account.RanksReport
+        "user_age" ->
+          Teiserver.Account.UserAgeReport
 
         "verified" ->
           Teiserver.Account.VerifiedReport

@@ -33,14 +33,14 @@
   ) %>
 <% end %>
 
-<%= if allow?(@current_user, Teiserver.Account.RanksReport.permissions()) do %>
+<%= if allow?(@current_user, Teiserver.Account.UserAgeReport.permissions()) do %>
   <%= central_component("section_menu_button",
-    name: "ranks",
-    label: "Ranks",
+    name: "user_age",
+    label: "User age",
     active: @active,
-    icon: Teiserver.Account.RanksReport.icon(),
+    icon: Teiserver.Account.UserAgeReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "ranks")
+    url: Routes.ts_reports_report_path(@conn, :show, "user_age")
   ) %>
 <% end %>
 
