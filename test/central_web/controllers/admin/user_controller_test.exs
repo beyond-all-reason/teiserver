@@ -146,7 +146,7 @@ defmodule CentralWeb.Admin.UserControllerTest do
       assert redirected_to(resp) == Routes.admin_user_path(conn, :index)
     end
 
-    test "update permissions", %{conn: conn, main_group: main_group} do
+    test "update permissions", %{conn: conn} do
       user =
         GeneralTestLib.make_user(%{
           "email" => "user2@user2"
@@ -169,7 +169,7 @@ defmodule CentralWeb.Admin.UserControllerTest do
       assert redirected_to(resp) == Routes.admin_user_path(resp, :show, user) <> "#permissions"
     end
 
-    test "update permissions from source", %{conn: conn, main_group: main_group} do
+    test "update permissions from source", %{conn: conn} do
       target_user =
         GeneralTestLib.make_user(%{
           "email" => "user2@user2-target"
@@ -198,7 +198,7 @@ defmodule CentralWeb.Admin.UserControllerTest do
                Routes.admin_user_path(resp, :show, target_user) <> "#permissions"
     end
 
-    test "wipe", %{conn: conn, main_group: main_group} do
+    test "wipe", %{conn: conn} do
       user =
         GeneralTestLib.make_user(%{
           "email" => "user2@user2",
@@ -237,7 +237,7 @@ defmodule CentralWeb.Admin.UserControllerTest do
   end
 
   describe "update user" do
-    test "redirects when data is valid", %{conn: conn, main_group: main_group} do
+    test "redirects when data is valid", %{conn: conn} do
       user =
         GeneralTestLib.make_user(%{
           "email" => "user2@user2"

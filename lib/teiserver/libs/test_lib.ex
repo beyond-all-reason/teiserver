@@ -409,6 +409,11 @@ defmodule Teiserver.TeiserverTestLib do
     {:ok, data}
   end
 
+  @spec root_permissions() :: [String.t()]
+  def root_permissions do
+    admin_permissions() ++ ["admin.dev.developer"]
+  end
+
   @spec admin_permissions() :: [String.t()]
   def admin_permissions do
     permissions =
