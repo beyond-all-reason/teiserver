@@ -282,6 +282,13 @@ defmodule Teiserver.Account.UserLib do
   @spec order_by(Ecto.Query.t(), tuple() | String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
 
+  def order_by(query, "Last logged in") do
+    field = "last_login"
+
+    from users in query,
+      order_by: [asc: fragment("? -> ?", users.data, ^field)]
+  end
+
   def order_by(query, {:data, field, :asc}) do
     from users in query,
       order_by: [asc: fragment("? -> ?", users.data, ^field)]
