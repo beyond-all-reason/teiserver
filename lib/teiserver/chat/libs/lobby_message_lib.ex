@@ -7,7 +7,7 @@ defmodule Teiserver.Chat.LobbyMessageLib do
   def icon, do: "fa-regular fa-comment"
 
   @spec colours :: atom
-  def colours, do: :default
+  def colours, do: :primary2
 
   # Queries
   @spec query_lobby_messages() :: Ecto.Query.t()
