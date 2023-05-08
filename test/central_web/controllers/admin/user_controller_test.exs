@@ -44,8 +44,8 @@ defmodule CentralWeb.Admin.UserControllerTest do
     end
 
     test "lists all users - redirect", %{conn: conn} do
-      main_user = Central.Account.get_user_by_name("main user")
-      conn = get(conn, Routes.admin_user_path(conn, :index) <> "?s=main user")
+      main_user = Central.Account.get_user_by_name("dud user")
+      conn = get(conn, Routes.admin_user_path(conn, :index) <> "?s=dud user")
       assert redirected_to(conn) == Routes.admin_user_path(conn, :show, main_user.id)
     end
 
@@ -55,8 +55,8 @@ defmodule CentralWeb.Admin.UserControllerTest do
     end
 
     test "search with redirect", %{conn: conn} do
-      main_user = Central.Account.get_user_by_name("main user")
-      conn = post(conn, Routes.admin_user_path(conn, :search), search: %{"name" => "main user"})
+      main_user = Central.Account.get_user_by_name("dud user")
+      conn = post(conn, Routes.admin_user_path(conn, :search), search: %{"name" => "dud user"})
       assert redirected_to(conn) == Routes.admin_user_path(conn, :show, main_user.id)
     end
   end

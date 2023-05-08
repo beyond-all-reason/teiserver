@@ -7,8 +7,6 @@ defmodule CentralWeb.Admin.UserController do
   alias Central.Account.UserLib
   alias Central.Config
 
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
-
   plug Bodyguard.Plug.Authorize,
     policy: Central.Account.User,
     action: {Phoenix.Controller, :action_name},

@@ -8,6 +8,7 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
 
   setup do
     GeneralTestLib.conn_setup([
+      "teiserver",
       "teiserver.staff.overwatch",
       "teiserver.staff.reviewer",
       "teiserver.staff.moderator"

@@ -22,7 +22,7 @@
       </div>
     <% end %>
 
-    <%= if allow?(@conn, "admin.user") do %>
+    <%= if assigns[:user] != nil and allow?(@conn, "admin.user") do %>
       <div class="col-xl-4 col-lg-4">
         &nbsp;<br />
         <a
