@@ -45,7 +45,7 @@ defmodule Teiserver.AccountTest do
           data_less_than: {"field", "123"},
           warn_mute_or_ban: nil,
 
-          # Tests the fallback to Central.UserQueries
+          # Tests the fallback to Central.UserLib
           name_like: ""
         ],
         joins: [:user_stat]

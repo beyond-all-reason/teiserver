@@ -1,6 +1,5 @@
 defmodule Teiserver.Account.UserLib do
   use CentralWeb, :library
-  alias Central.Account.UserQueries
   require Logger
   alias Teiserver.Data.Types, as: T
 
@@ -30,7 +29,7 @@ defmodule Teiserver.Account.UserLib do
 
   # Queries
   @spec get_user() :: Ecto.Query.t()
-  def get_user, do: UserQueries.get_users()
+  def get_user, do: Central.Account.UserLib.get_users()
 
   @spec search(Ecto.Query.t(), map | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
@@ -277,7 +276,7 @@ defmodule Teiserver.Account.UserLib do
   end
 
   def _search(query, key, value) do
-    UserQueries._search(query, key, value)
+    Central.Account.UserLib._search(query, key, value)
   end
 
   @spec order_by(Ecto.Query.t(), tuple() | String.t() | nil) :: Ecto.Query.t()
@@ -293,13 +292,13 @@ defmodule Teiserver.Account.UserLib do
       order_by: [desc: fragment("? -> ?", users.data, ^field)]
   end
 
-  def order_by(query, key), do: UserQueries.order(query, key)
+  def order_by(query, key), do: Central.Account.UserLib.order(query, key)
 
   @spec preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
   def preload(query, preloads) do
-    query = UserQueries.preload(query, preloads)
+    query = Central.Account.UserLib.preload(query, preloads)
 
     query = if :user_stat in preloads, do: _preload_user_stat(query), else: query
 

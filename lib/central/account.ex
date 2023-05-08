@@ -12,7 +12,7 @@ defmodule Central.Account do
   alias Argon2
 
   alias Central.Account.User
-  alias Central.Account.UserQueries
+  alias Central.Account.UserLib
   import Teiserver.Logging.Helpers, only: [add_anonymous_audit_log: 3]
 
   @spec icon :: String.t()
@@ -23,11 +23,11 @@ defmodule Central.Account do
   end
 
   defp user_query(id, args) do
-    UserQueries.get_users()
-    |> UserQueries.search(%{id: id})
-    |> UserQueries.search(args[:search])
-    |> UserQueries.preload(args[:joins])
-    |> UserQueries.order(args[:order])
+    UserLib.get_users()
+    |> UserLib.search(%{id: id})
+    |> UserLib.search(args[:search])
+    |> UserLib.preload(args[:joins])
+    |> UserLib.order(args[:order])
     |> QueryHelpers.select(args[:select])
   end
 
@@ -117,15 +117,15 @@ defmodule Central.Account do
 
   @spec get_user_by_name(String.t()) :: User.t() | nil
   def get_user_by_name(name) do
-    UserQueries.get_users()
-    |> UserQueries.search(%{name: String.trim(name)})
+    UserLib.get_users()
+    |> UserLib.search(%{name: String.trim(name)})
     |> Repo.one()
   end
 
   @spec get_user_by_email(String.t()) :: User.t() | nil
   def get_user_by_email(email) do
-    UserQueries.get_users()
-    |> UserQueries.search(%{email_lower: String.trim(email)})
+    UserLib.get_users()
+    |> UserLib.search(%{email_lower: String.trim(email)})
     |> Repo.one()
   end
 
