@@ -102,7 +102,6 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       user =
         GeneralTestLib.make_user(%{
           "email" => "tsuser2@tsuser2",
-          "admin_group_id" => "#{main_group.id}",
           "data" => %{}
         })
 
@@ -125,7 +124,6 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       user =
         GeneralTestLib.make_user(%{
           "email" => "tsuser_rename@tsuser_rename",
-          "admin_group_id" => "#{main_group.id}",
           "data" => %{}
         })
 
@@ -144,7 +142,6 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       user =
         GeneralTestLib.make_user(%{
           "email" => "tsuser_rename_bad@tsuser_rename_bad",
-          "admin_group_id" => "#{main_group.id}",
           "data" => %{}
         })
 

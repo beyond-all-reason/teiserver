@@ -73,19 +73,6 @@
               }) %>
             </div>
 
-            <%= if allow?(@permissions, "admin.admin.full") do %>
-              <div class="col-md-4 col-xl-2 search-form-input">
-                <label for="search_admin_group" class="control-label">Admin group: </label>
-                <%= central_component("icon_dropdown", %{
-                  name: "search[admin_group_id]",
-                  id: "search_admin_group_id",
-                  insert_blank: %{id: "", name: "All groups", icon: "fa-solid fa-th", colour: fg},
-                  selected: @params["admin_group_id"],
-                  enumerable: @groups
-                }) %>
-              </div>
-            <% end %>
-
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="search_limit" class="control-label">Limit: </label>
               <%= select(

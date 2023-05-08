@@ -148,7 +148,6 @@ defmodule Teiserver.Game.LobbyPolicyLib do
               email: email_addr,
               icon: "fa-solid fa-solar-system",
               colour: "#0000AA",
-              admin_group_id: Teiserver.internal_group_id(),
               password: Account.make_bot_password(),
               data: %{
                 bot: true,
@@ -157,11 +156,6 @@ defmodule Teiserver.Game.LobbyPolicyLib do
                 lobby_client: "Teiserver Internal Process"
               }
             })
-
-          Account.create_group_membership(%{
-            user_id: user.id,
-            group_id: Teiserver.internal_group_id()
-          })
 
           Account.recache_user(user.id)
           user

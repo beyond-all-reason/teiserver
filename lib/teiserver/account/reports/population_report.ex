@@ -162,7 +162,6 @@ defmodule Teiserver.Account.PopulationReport do
   @spec stat_data(map()) :: map()
   defp stat_data(data) do
     %{
-      groups: data |> Enum.count(),
       total: data |> Enum.map(fn [_, v] -> v end) |> Enum.sum()
     }
   end

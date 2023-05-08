@@ -57,14 +57,10 @@ defmodule Teiserver.TeiserverTestLib do
             name,
             "#{name}@email.com",
             "X03MO1qnZdYdgyfeuILPmQ==",
-            Map.merge(%{admin_group_id: Teiserver.user_group_id()}, params)
+            params
           )
           |> Account.create_user()
 
-        Account.create_group_membership(%{
-          user_id: user.id,
-          group_id: Teiserver.user_group_id()
-        })
 
         Account.update_user_stat(user.id, %{
           "country" => "??",
@@ -410,11 +406,6 @@ defmodule Teiserver.TeiserverTestLib do
   def conn_setup({:ok, data}) do
     user = data[:user]
     User.recache_user(user.id)
-
-    Account.create_group_membership(%{
-      user_id: user.id,
-      group_id: Teiserver.user_group_id()
-    })
 
     {:ok, data}
   end

@@ -154,7 +154,6 @@ defmodule Teiserver.User do
       password: encrypted_password,
       colour: @default_colour,
       icon: @default_icon,
-      admin_group_id: Teiserver.user_group_id(),
       permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
       # TODO: Remove springid
       springid: SpringIdServer.get_next_id(),
@@ -184,7 +183,6 @@ defmodule Teiserver.User do
       password: encrypted_password,
       colour: @default_colour,
       icon: @default_icon,
-      admin_group_id: Teiserver.user_group_id(),
       permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
       springid: SpringIdServer.get_next_id(),
       behaviour_score: 10_000,
@@ -294,11 +292,6 @@ defmodule Teiserver.User do
 
     case Account.script_create_user(params) do
       {:ok, user} ->
-        Account.create_group_membership(%{
-          user_id: user.id,
-          group_id: Teiserver.user_group_id()
-        })
-
         Account.update_user_stat(user.id, %{
           "verification_code" => (:rand.uniform(899_999) + 100_000) |> to_string
         })
@@ -355,11 +348,6 @@ defmodule Teiserver.User do
 
     case Account.script_create_user(params) do
       {:ok, user} ->
-        Account.create_group_membership(%{
-          user_id: user.id,
-          group_id: Teiserver.user_group_id()
-        })
-
         Account.update_user_stat(user.id, %{
           "country" => Teiserver.Geoip.get_flag(ip),
           "verification_code" => (:rand.uniform(899_999) + 100_000) |> to_string
@@ -420,11 +408,6 @@ defmodule Teiserver.User do
 
         case Account.script_create_user(params) do
           {:ok, user} ->
-            Account.create_group_membership(%{
-              user_id: user.id,
-              group_id: Teiserver.user_group_id()
-            })
-
             # Now add them to the cache
             user
             |> convert_user

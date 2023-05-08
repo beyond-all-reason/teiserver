@@ -644,15 +644,9 @@ CLIENTS test_room #{user.name}\n"
       User.user_register_params_with_md5(
         "test_user_bad_id",
         "test_user_bad_id@email.com",
-        "X03MO1qnZdYdgyfeuILPmQ==",
-        %{admin_group_id: Teiserver.user_group_id()}
+        "X03MO1qnZdYdgyfeuILPmQ=="
       )
       |> Central.Account.create_user()
-
-    Central.Account.create_group_membership(%{
-      user_id: bad_user.id,
-      group_id: Teiserver.user_group_id()
-    })
 
     bad_user
     |> UserCache.convert_user()

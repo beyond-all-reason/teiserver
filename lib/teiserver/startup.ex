@@ -84,24 +84,12 @@ defmodule Teiserver.Startup do
       ~w(account tester contributor dev streamer donor verified bot moderator)
     )
 
-    add_group_type("Teiserver clan", %{fields: []})
-
-    {umbrella_group, player_group, internal_group} = create_groups()
-
-    Central.cache_put(:application_metadata_cache, "teiserver_umbrella_group", umbrella_group.id)
-    Central.cache_put(:application_metadata_cache, "teiserver_user_group", player_group.id)
-    Central.cache_put(:application_metadata_cache, "teiserver_internal_group", internal_group.id)
-
     Central.store_put(
       :application_metadata_cache,
       "random_names_3",
       ~w(tick pawn lazarus rocketeer crossbow mace centurion tumbleweed smuggler compass ghost sprinter butler webber platypus hound welder recluse archangel gunslinger sharpshooter umbrella fatboy marauder vanguard razorback titan) ++
         ~w(grunt graverobber aggravator trasher thug bedbug deceiver augur spectre fiend twitcher duck skuttle sumo arbiter manticore termite commando mammoth shiva karganeth catapult behemoth juggernaught)
     )
-
-    Central.Account.GroupCacheLib.update_caches(player_group)
-    Central.Account.GroupCacheLib.update_caches(internal_group)
-    Central.Account.GroupCacheLib.update_caches(umbrella_group)
 
     Central.cache_put(:lists, :rooms, [])
     Central.cache_put(:lists, :lobby_policies, [])
@@ -164,77 +152,5 @@ defmodule Teiserver.Startup do
 
     time_taken = System.system_time(:millisecond) - start_time
     Logger.info("Teiserver startup complete, took #{time_taken}ms")
-  end
-
-  def create_groups() do
-    umbrella_group =
-      case Central.Account.get_group(nil, search: [name: "Teiserver umbrella group"]) do
-        nil ->
-          {:ok, group} =
-            Central.Account.create_group(%{
-              "name" => "Teiserver umbrella group",
-              "active" => true,
-              "icon" => "fa-duotone fa-umbrella",
-              "colour" => "#00AA66",
-              "data" => %{},
-              "see_group" => false,
-              "see_members" => false,
-              "invite_members" => false,
-              "self_add_members" => false
-            })
-
-          group
-
-        group ->
-          group
-      end
-
-    player_group =
-      case Central.Account.get_group(nil, search: [name: "Teiserver Users"]) do
-        nil ->
-          {:ok, group} =
-            Central.Account.create_group(%{
-              "name" => "Teiserver Users",
-              "active" => true,
-              "icon" => "fa-duotone fa-robot",
-              "colour" => "#00AA00",
-              "data" => %{},
-              "super_group_id" => umbrella_group.id,
-              "see_group" => false,
-              "see_members" => false,
-              "invite_members" => false,
-              "self_add_members" => false
-            })
-
-          group
-
-        group ->
-          group
-      end
-
-    internal_group =
-      case Central.Account.get_group(nil, search: [name: "Teiserver Internal Processes"]) do
-        nil ->
-          {:ok, group} =
-            Central.Account.create_group(%{
-              "name" => "Teiserver Internal Processes",
-              "active" => true,
-              "icon" => "fa-duotone fa-microchip",
-              "colour" => "#660066",
-              "data" => %{},
-              "super_group_id" => umbrella_group.id,
-              "see_group" => false,
-              "see_members" => false,
-              "invite_members" => false,
-              "self_add_members" => false
-            })
-
-          group
-
-        group ->
-          group
-      end
-
-    {umbrella_group, player_group, internal_group}
   end
 end

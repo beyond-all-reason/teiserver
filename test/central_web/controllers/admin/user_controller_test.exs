@@ -72,7 +72,7 @@ defmodule CentralWeb.Admin.UserControllerTest do
     test "redirects to show when data is valid", %{conn: conn, child_group: child_group} do
       conn =
         post(conn, Routes.admin_user_path(conn, :create),
-          user: Map.put(@create_attrs, :admin_group_id, child_group.id)
+          user: @create_attr
         )
 
       # assert %{id: id} = redirected_params(conn)
@@ -114,7 +114,6 @@ defmodule CentralWeb.Admin.UserControllerTest do
       user2 =
         GeneralTestLib.make_user(%{
           "name" => "secured-user",
-          "admin_group_id" => "#{parent_group.id}"
         })
 
       resp = get(conn, Routes.admin_user_path(conn, :edit, user2))
@@ -142,7 +141,6 @@ defmodule CentralWeb.Admin.UserControllerTest do
       user2 =
         GeneralTestLib.make_user(%{
           "email" => "user2@user2",
-          "admin_group_id" => "#{parent_group.id}"
         })
 
       resp = get(conn, Routes.admin_user_path(conn, :edit_permissions, user2))
@@ -155,7 +153,6 @@ defmodule CentralWeb.Admin.UserControllerTest do
       user =
         GeneralTestLib.make_user(%{
           "email" => "user2@user2",
-          "admin_group_id" => "#{main_group.id}"
         })
 
       resp =
@@ -179,13 +176,11 @@ defmodule CentralWeb.Admin.UserControllerTest do
       target_user =
         GeneralTestLib.make_user(%{
           "email" => "user2@user2-target",
-          "admin_group_id" => "#{main_group.id}"
         })
 
       source_user =
         GeneralTestLib.make_user(%{
           "email" => "user2@user2-source",
-          "admin_group_id" => "#{main_group.id}",
           "permissions" => [
             "admin.user.show",
             "admin.user.create",
@@ -210,7 +205,6 @@ defmodule CentralWeb.Admin.UserControllerTest do
       user =
         GeneralTestLib.make_user(%{
           "email" => "user2@user2",
-          "admin_group_id" => "#{main_group.id}",
           "permissions" => ["xyz"]
         })
 
@@ -235,7 +229,6 @@ defmodule CentralWeb.Admin.UserControllerTest do
       user2 =
         GeneralTestLib.make_user(%{
           "email" => "user2@user2",
-          "admin_group_id" => "#{parent_group.id}"
         })
 
       resp =
@@ -251,7 +244,6 @@ defmodule CentralWeb.Admin.UserControllerTest do
       user =
         GeneralTestLib.make_user(%{
           "email" => "user2@user2",
-          "admin_group_id" => "#{main_group.id}"
         })
 
       conn = put(conn, Routes.admin_user_path(conn, :update, user), user: @update_attrs)

@@ -27,15 +27,6 @@ defmodule Central.General.Startup do
         permissions: "admin.admin.limited"
       },
       %{
-        label: "List groups",
-        icons: [Central.Account.GroupLib.icon(), :list],
-        input: "s",
-        method: "get",
-        placeholder: "Search name",
-        url: "/admin/groups",
-        permissions: "admin.admin.limited"
-      },
-      %{
         label: "Coverage",
         icons: ["fa-regular fa-percent"],
         url: "/admin/tools/coverage",

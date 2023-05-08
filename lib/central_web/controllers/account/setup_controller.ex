@@ -20,37 +20,15 @@ defmodule CentralWeb.Account.SetupController do
         users = Central.Account.list_users(search: [email: "root@localhost"])
 
         if users == [] do
-          {:ok, group} =
-            Account.create_group(%{
-              "name" => "Root group",
-              "colour" => "#AA0000",
-              "icon" => "fa-regular fa-info",
-              "active" => true,
-              "group_type" => nil,
-              "data" => %{},
-              "see_group" => false,
-              "see_members" => false,
-              "invite_members" => false,
-              "self_add_members" => false,
-              "super_group_id" => nil
-            })
-
-          {:ok, user} =
+          {:ok, _user} =
             Account.create_user(%{
               name: "root",
               email: "root@localhost",
               password: true_key,
               permissions: ["admin.dev.developer"],
-              admin_group_id: group.id,
               icon: "fa-solid fa-power-off",
               colour: "#00AA00"
             })
-
-          Account.create_group_membership(%{
-            "group_id" => group.id,
-            "user_id" => user.id,
-            "admin" => true
-          })
 
           conn
           |> put_flash(

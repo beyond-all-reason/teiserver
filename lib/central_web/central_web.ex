@@ -169,7 +169,6 @@ defmodule CentralWeb do
   def startup do
     quote do
       import Central.Account.AuthLib, only: [add_permission_set: 3]
-      import Central.Account.GroupTypeLib, only: [add_group_type: 2]
 
       import Central.Config, only: [add_user_config_type: 1, add_site_config_type: 1]
       import Teiserver.Logging.AuditLogLib, only: [add_audit_types: 1]

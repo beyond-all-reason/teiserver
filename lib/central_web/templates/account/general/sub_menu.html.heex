@@ -20,16 +20,6 @@
     <div class="card card-default">
       <div class="card-body" style="padding: 0 15px;">
         <div class="row">
-          <%= if Central.Config.get_site_config_cache("user.Enable account group pages") do %>
-            <%= central_component("sub_menu_icon",
-              name: "groups",
-              label: "Groups",
-              active: @active,
-              url: Routes.account_group_path(@conn, :index),
-              icon: Central.Account.GroupLib.icon()
-            ) %>
-          <% end %>
-
           <%= central_component("sub_menu_icon",
             name: "user_configs",
             label: "Preferences",

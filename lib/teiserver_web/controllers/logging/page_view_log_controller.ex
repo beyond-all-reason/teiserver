@@ -2,7 +2,6 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
   use CentralWeb, :controller
 
   alias Teiserver.Logging
-  alias Central.Account.GroupLib
   alias Central.Helpers.TimexHelper
   import Central.Helpers.StringHelper, only: [get_hash_id: 1]
 
@@ -91,7 +90,6 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
     %{
       "section" => Map.get(params, "section", "any"),
       "path" => Map.get(params, "path", ""),
-      "admin_group_id" => Map.get(params, "admin_group_id", ""),
       "order" => Map.get(params, "order", "Newest first"),
       "limit" => Map.get(params, "limit", "50"),
       "user_id" => Map.get(params, "account_user", "") |> get_hash_id,
@@ -104,6 +102,5 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
   @spec search_dropdowns(Plag.Conn.t()) :: Plug.Conn.t()
   def search_dropdowns(conn) do
     conn
-    |> assign(:groups, GroupLib.dropdown(conn))
   end
 end

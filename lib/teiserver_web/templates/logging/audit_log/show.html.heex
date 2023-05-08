@@ -41,28 +41,6 @@
           value: date_to_str(@log.inserted_at, format: :hms_or_dmy, tz: @tz)
         ) %>
 
-        <%= if @log.group_id do %>
-          <%= central_component("detail_line",
-            label: "Group",
-            icon: %{
-              colour: @log.group.colour,
-              icon: @log.group.icon
-            },
-            value: @log.group.name
-          )
-
-          # link: %{
-          #   path: Routes.party_team_path(@conn, :show, @log.team_id),
-          #   bsname: elem(Central.Account.GroupLib.colours() |> colours(), 2),
-          #   icon: Central.Account.GroupLib.icon(),
-          # } %>
-        <% else %>
-          <%= central_component("detail_line",
-            label: "Group",
-            value: "none"
-          ) %>
-        <% end %>
-
         <%= if @log.user_id do %>
           <%= central_component("detail_line",
             label: "User",

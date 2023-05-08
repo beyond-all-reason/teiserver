@@ -264,10 +264,6 @@ defmodule Teiserver.Account do
     Central.Account.update_user(user, %{"permissions" => Enum.uniq(permissions)})
   end
 
-  # Group stuff
-  def create_group_membership(params),
-    do: Central.Account.create_group_membership(params)
-
   @spec spring_auth_check(Plug.Conn.t(), User.t(), String.t()) ::
           {:ok, User.t()} | {:error, String.t()}
   def spring_auth_check(conn, user, plain_text_password) do

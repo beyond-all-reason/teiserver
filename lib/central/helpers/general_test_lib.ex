@@ -13,11 +13,6 @@ defmodule Central.Helpers.GeneralTestLib do
 
   alias Central.Account
   alias Central.Account.User
-  alias Central.Account.Group
-  # alias CentralWeb.General.GroupLib
-  alias Central.Account.GroupCacheLib
-  # alias CentralWeb.General.GroupType
-  # alias Central.Account.GroupMembership
 
   # alias CentralWeb.General.CombinatorLib
 
@@ -45,90 +40,29 @@ defmodule Central.Helpers.GeneralTestLib do
         "permissions" => permissions,
         "password" => params["password"] || "password",
         "password_confirmation" => params["password"] || "password",
-        "admin_group_id" => params["admin_group_id"] || nil,
         "data" => params["data"] || %{}
       })
 
     u
   end
 
-  def make_account_group(name, super_group_id \\ nil, data \\ %{}, params \\ %{}) do
-    {:ok, g} =
-      Account.create_group(%{
-        "name" => name,
-        "colour" => params["colour"] || "#AA0000",
-        "icon" => params["icon"] || "fa-regular fa-info",
-        "active" => params["active"] || true,
-        "group_type" => params["group_type"] || nil,
-        "data" => data,
-        "see_group" => params["see_group"] || false,
-        "see_members" => params["see_members"] || true,
-        "invite_members" => params["invite_members"] || true,
-        "self_add_members" => params["self_add_members"] || false,
-        "super_group_id" => super_group_id
-      })
-
-    if super_group_id do
-      GroupCacheLib.update_caches(g)
-      Account.get_group!(g.id)
-    else
-      g
-    end
-  end
-
-  def make_account_group_membership(group_id, user_id, data) do
-    {:ok, gm} =
-      Account.create_group_membership(%{
-        "group_id" => group_id,
-        "user_id" => user_id,
-        "admin" => data["admin"] || false
-      })
-
-    gm
-  end
-
   def seeded?() do
-    r = Repo.one(from g in Group, where: g.name == "unrelated group")
+    r = Repo.one(from c in Central.Config.SiteConfig, where: c.key == "test.seeded")
     r != nil
   end
 
   def seed() do
-    parent_group = make_account_group("parent group", nil)
-    main_group = make_account_group("main group", parent_group.id)
-    child_group = make_account_group("child group", main_group.id)
+    %Central.Config.SiteConfig{}
+    |> Central.Config.SiteConfig.changeset(%{
+      key: "test.seeded",
+      value: "true"
+    })
+    |> Repo.insert()
 
-    cousin_group =
-      make_account_group("cousin group", parent_group.id, %{}, %{"see_group" => true})
-
-    unrelated_group =
-      make_account_group("unrelated group", nil, %{}, %{
-        "see_group" => true,
-        "self_add_members" => true
-      })
-
-    groups = [
-      main_group,
-      child_group,
-      parent_group,
-      cousin_group,
-      unrelated_group
-    ]
-
-    users =
-      groups
-      |> Enum.map(fn g ->
-        gname = String.replace(g.name, " group", "")
-
-        make_user(%{
-          "name" => "#{gname} user",
-          "email" => "#{gname}@#{gname}.com",
-          "admin_group_id" => g.id
-        })
-      end)
+    users = []
 
     [
-      users: users,
-      groups: groups
+      users: users
     ]
     |> Teiserver.Logging.LoggingTestLib.seed()
   end
@@ -139,22 +73,16 @@ defmodule Central.Helpers.GeneralTestLib do
   end
 
   def data_setup(flags \\ []) do
-    parent_group = Repo.one(from u in Group, where: u.name == "parent group")
-    child_group = Repo.one(from u in Group, where: u.name == "child group")
-    main_group = Repo.one(from u in Group, where: u.name == "main group")
-
     user =
       if :user in flags do
         make_user(%{
           "name" => "Current user",
           "email" => "current_user@current_user.com",
-          "admin_group_id" => main_group.id,
           "permissions" => []
         })
       end
 
-    {:ok,
-     main_group: main_group, child_group: child_group, parent_group: parent_group, user: user}
+    {:ok, user: user}
   end
 
   # Used for those that need to create additional connections
@@ -169,11 +97,8 @@ defmodule Central.Helpers.GeneralTestLib do
 
   # @spec general_setup(list, ) :: tuple
   def conn_setup(permissions \\ [], flags \\ []) do
-    {:ok, data} = data_setup(flags)
+    {:ok, _data} = data_setup(flags)
 
-    parent_group = data[:parent_group]
-    child_group = data[:child_group]
-    main_group = data[:main_group]
     r = :rand.uniform(999_999_999)
 
     {user, jwt} =
@@ -184,12 +109,8 @@ defmodule Central.Helpers.GeneralTestLib do
           make_user(%{
             "name" => "Current user",
             "email" => "current_user#{r}@current_user#{r}.com",
-            "admin_group_id" => main_group.id,
             "permissions" => permissions
           })
-
-        # Now add the user to the main group
-        make_account_group_membership(main_group.id, user.id, %{"admin" => true})
 
         # Tokens
         {:ok, jwt, _} = Guardian.encode_and_sign(user)
@@ -232,9 +153,6 @@ defmodule Central.Helpers.GeneralTestLib do
       end
 
     {:ok,
-     main_group: main_group,
-     child_group: child_group,
-     parent_group: parent_group,
      r: r,
      user: user,
      jwt: jwt,
