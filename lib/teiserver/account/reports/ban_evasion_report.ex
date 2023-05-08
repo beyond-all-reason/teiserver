@@ -21,7 +21,7 @@ defmodule Teiserver.Account.BanEvasionReport do
         search: [
           mod_action: "Any action"
         ],
-        limit: 1000,
+        limit: :infinity,
         order_by: "Newest first"
       )
       |> Enum.reject(fn user ->
