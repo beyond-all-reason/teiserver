@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Logging.ErrorLogControllerTest do
   end
 
   defp create_test_error(conn) do
-    {:ok, log} =
+    {:ok, _log} =
       Logging.create_error_log(%{
         path: "path",
         method: "method",

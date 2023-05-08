@@ -59,7 +59,18 @@ defmodule Central.Helpers.GeneralTestLib do
     })
     |> Repo.insert()
 
-    users = []
+    users = [
+      make_user(%{
+        "name" => "dud user",
+        "email" => "dud_user@dud_user.com",
+        "permissions" => []
+      }),
+      make_user(%{
+        "name" => "other user",
+        "email" => "other_user@other_user.com",
+        "permissions" => []
+      })
+    ]
 
     [
       users: users
@@ -131,14 +142,9 @@ defmodule Central.Helpers.GeneralTestLib do
         login(build_conn(), user.email)
       end
 
-    child_user =
-      if flags[:child_user] do
-        Repo.one(from u in User, where: u.name == "child user")
-      end
-
-    parent_user =
-      if flags[:parent_user] do
-        Repo.one(from u in User, where: u.name == "parent user")
+    dud_user =
+      if flags[:dud_user] do
+        Repo.one(from u in User, where: u.name == "dud user")
       end
 
     socket =
@@ -153,13 +159,6 @@ defmodule Central.Helpers.GeneralTestLib do
       end
 
     {:ok,
-     r: r,
-     user: user,
-     jwt: jwt,
-     child_user: child_user,
-     parent_user: parent_user,
-     conn: conn,
-     user_token: jwt,
-     socket: socket}
+     r: r, user: user, jwt: jwt, conn: conn, dud_user: dud_user, user_token: jwt, socket: socket}
   end
 end

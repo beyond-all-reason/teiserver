@@ -8,7 +8,11 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
   alias Central.Helpers.GeneralTestLib
 
   setup do
-    GeneralTestLib.conn_setup(["teiserver.staff.reviewer", "teiserver.staff.moderator"])
+    GeneralTestLib.conn_setup([
+      "teiserver.staff.overwatch",
+      "teiserver.staff.reviewer",
+      "teiserver.staff.moderator"
+    ])
     |> Teiserver.TeiserverTestLib.conn_setup()
   end
 

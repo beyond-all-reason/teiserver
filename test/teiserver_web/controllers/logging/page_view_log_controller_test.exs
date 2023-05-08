@@ -7,20 +7,20 @@ defmodule TeiserverWeb.Logging.PageViewLogControllerTest do
   alias Teiserver.Logging.LoggingTestLib
 
   setup do
-    GeneralTestLib.conn_setup(~w(logging.page_view.show), child_user: true)
+    GeneralTestLib.conn_setup(~w(logging.page_view.show), dud_user: true)
     |> LoggingTestLib.logging_setup(page_view_logs: true)
   end
 
   test "lists all entries on index", %{conn: conn} do
     conn = get(conn, Routes.logging_page_view_log_path(conn, :index))
-    assert html_response(conn, 200) =~ "Page view logs - Row count: 31"
+    assert html_response(conn, 200) =~ "Page view logs - Row count: 13"
   end
 
-  test "search with values", %{conn: conn, child_user: child_user} do
+  test "search with values", %{conn: conn, dud_user: dud_user} do
     conn =
       post(conn, Routes.logging_page_view_log_path(conn, :search),
         search: %{
-          "account_user" => "##{child_user.id}",
+          "account_user" => "##{dud_user.id}",
           "order" => "Newest first"
         }
       )

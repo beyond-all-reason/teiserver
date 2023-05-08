@@ -79,17 +79,6 @@
             </div>
 
             <div class="col-md-4 col-xl-2 my-2">
-              <label for="report_mode" class="control-label">Group:</label>
-              <%= central_component("icon_dropdown", %{
-                name: "report[group]",
-                id: "report_group",
-                insert_blank: %{id: "", name: "All", icon: "fa-solid fa-th", colour: fg},
-                selected: @params["group"],
-                enumerable: @groups
-              }) %>
-            </div>
-
-            <div class="col-md-4 col-xl-2 my-2">
               <label for="report_metric" class="control-label">Section:</label>
               <%= central_component("icon_dropdown", %{
                 name: "report[section]",

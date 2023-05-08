@@ -90,11 +90,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
       })
 
     case result do
-      {:ok, report} ->
-        IO.puts("")
-        IO.inspect(report)
-        IO.puts("")
-
+      {:ok, _report} ->
         conn
         |> redirect(to: Routes.moderation_report_form_path(conn, :success))
 

@@ -222,7 +222,7 @@ value_types = [
             <%= if allow?(@conn, "admin.dev") do %>
               <% id_list_str =
                 @name_to_id_map
-                |> Map.values
+                |> Map.values()
                 |> Enum.reject(&(&1 == nil))
                 |> Enum.join(", ") %>
               <h4>Mass set-player snippet</h4>

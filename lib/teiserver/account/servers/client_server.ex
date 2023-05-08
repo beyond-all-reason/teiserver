@@ -167,8 +167,10 @@ defmodule Teiserver.Account.ClientServer do
     cond do
       client_state.tcp_pid == nil ->
         Logger.error("client_state.tcp_pid is nil")
+
       Process.alive?(client_state.tcp_pid) == false ->
         Logger.error("client_state.tcp_pid is not alive")
+
       true ->
         :ok
     end

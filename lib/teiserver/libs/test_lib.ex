@@ -61,7 +61,6 @@ defmodule Teiserver.TeiserverTestLib do
           )
           |> Account.create_user()
 
-
         Account.update_user_stat(user.id, %{
           "country" => "??",
           "lobby_client" => "LuaLobby Chobby"
