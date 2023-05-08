@@ -51,6 +51,9 @@ defmodule Teiserver.Account.RetentionReport do
         limit: :infinity
       )
       |> Enum.map(fn user ->
+        last_login_secs = user.data["last_login"] * 60
+        last_login = Timex.from_unix(last_login_secs)
+
         last_played =
           day_logs
           |> Enum.reduce(nil, fn log, acc ->
@@ -67,19 +70,38 @@ defmodule Teiserver.Account.RetentionReport do
             end
           end)
 
-        Map.merge(user, %{
-          last_played: last_played
-        })
+        if last_login != nil and last_played != nil do
+          %{
+            last_login: Timex.diff(user.inserted_at, last_login, :days) |> abs,
+            last_played: Timex.diff(user.inserted_at, last_played, :days) |> abs
+          }
+        end
       end)
-      |> Enum.filter(fn user -> user.last_played != nil end)
+      |> Enum.reject(&(&1 == nil))
 
-    # Grouping 1 - Last time played
+    # Grouping 1 - Last login
+    login_retention =
+      accounts
+      |> Enum.group_by(fn %{last_login: value} ->
+        value
+      end, fn _ -> 1 end)
+      |> Map.new(fn {days, userlist} -> {days, Enum.count(userlist)} end)
+
+      # Grouping 2 - Last time played
     play_retention_grouping =
       accounts
-      |> Enum.group_by(fn user ->
-        Timex.diff(user.inserted_at, user.last_played, :day) |> abs
-      end)
+      |> Enum.group_by(fn %{last_played: value} ->
+        value
+      end, fn _ -> 1 end)
       |> Map.new(fn {days, userlist} -> {days, Enum.count(userlist)} end)
+
+    # Skip0 ?
+    login_retention =
+      if skip0 do
+        login_retention |> Map.put(0, 0)
+      else
+        login_retention
+      end
 
     play_retention_grouping =
       if skip0 do
@@ -89,20 +111,18 @@ defmodule Teiserver.Account.RetentionReport do
       end
 
     graph_data = [
+      ["Login" | build_line(login_retention)],
       ["Play" | build_line(play_retention_grouping)]
     ]
 
-    assigns = %{
-      params: params,
-      presets: DatePresets.long_ranges()
-    }
-
-    {%{
+    %{
+       params: params,
+       presets: DatePresets.long_ranges(),
        user_count: Enum.count(accounts),
        play_retention_grouping: play_retention_grouping,
        max_key: @max_key,
        graph_data: graph_data
-     }, assigns}
+     }
   end
 
   @spec build_line(map()) :: list()

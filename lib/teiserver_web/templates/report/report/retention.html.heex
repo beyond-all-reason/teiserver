@@ -6,7 +6,7 @@
   Map.merge(assigns, %{active: "reports"})
 ) %>
 
-<%= if Map.has_key?(@data, :graph_data) do %>
+<%= if @graph_data do %>
   <script src={Routes.static_path(@conn, "/js/d3.js")}>
   </script>
   <script src={Routes.static_path(@conn, "/js/c3.min.js")}>
@@ -19,7 +19,7 @@
       var chart = c3.generate({
         bindto: '#chart',
         data: {
-          columns: <%= raw Jason.encode!(@data.graph_data) %>
+          columns: <%= raw Jason.encode!(@graph_data) %>
         }
       });
     });
@@ -127,7 +127,7 @@
         </form>
         <br /><br />
 
-        <%= if Map.has_key?(@data, :graph_data) do %>
+        <%= if @graph_data do %>
           <div class="card-body">
             <div id="chart" class="with-transitions" style="height: 400px;"></div>
           </div>
@@ -137,7 +137,7 @@
           <thead>
             <tr>
               <th>&nbsp;</th>
-              <%= for d <- Range.new(0, @data.max_key) do %>
+              <%= for d <- Range.new(1, @max_key) do %>
                 <th><%= d %></th>
               <% end %>
             </tr>
@@ -145,16 +145,16 @@
           <tbody>
             <tr>
               <td>Count</td>
-              <%= for d <- Range.new(0, @data.max_key) do %>
-                <td><%= Map.get(@data.play_retention_grouping, d, 0) %></td>
+              <%= for d <- Range.new(0, @max_key) do %>
+                <td><%= Map.get(@play_retention_grouping, d, 0) %></td>
               <% end %>
             </tr>
 
             <tr>
               <td>As %</td>
-              <%= for d <- Range.new(0, @data.max_key) do %>
+              <%= for d <- Range.new(0, @max_key) do %>
                 <td>
-                  <%= raw = Map.get(@data.play_retention_grouping, d, 0) / @data.user_count
+                  <%= raw = Map.get(@play_retention_grouping, d, 0) / @user_count
                   round(raw * 1000) / 10 %>
                 </td>
               <% end %>
