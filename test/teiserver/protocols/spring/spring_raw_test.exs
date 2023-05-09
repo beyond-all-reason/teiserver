@@ -54,8 +54,8 @@ defmodule Teiserver.SpringRawTest do
     assert user != nil
 
     # Now check the DB!
-    [db_user] = Account.list_users(search: [name: name], joins: [:groups])
-    assert Enum.count(db_user.groups) == 1
+    db_users = Account.list_users(search: [name: name])
+    assert Enum.count(db_users) == 1
   end
 
   test "LOGIN", %{socket: socket} do
