@@ -200,7 +200,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert reply["queue"] == %{
              "mean_wait_time" => 0,
              "name" => "test_queue_join_leave1",
-             "member_count" => 0,
+             "group_count" => 0,
              "queue_id" => queue1.id
            }
 
@@ -241,7 +241,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert reply["queue"] == %{
              "mean_wait_time" => 0,
              "name" => "test_queue_join_leave1",
-             "member_count" => 1,
+             "group_count" => 1,
              "queue_id" => queue1.id
            }
 
@@ -268,7 +268,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert reply["queue"] == %{
              "mean_wait_time" => 0,
              "name" => "test_queue_join_leave1",
-             "member_count" => 0,
+             "group_count" => 0,
              "queue_id" => queue1.id
            }
 

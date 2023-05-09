@@ -359,10 +359,10 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
   end
 
   test "party leader disconnects" do
-    %{socket: usocket, user: user, pid: _pid} = tachyon_auth_setup()
+    %{socket: _usocket, user: user, pid: _pid} = tachyon_auth_setup()
 
-    %{user: friend1, socket: fsocket1} = tachyon_auth_setup()
-    %{user: friend2, socket: fsocket2} = tachyon_auth_setup()
+    %{user: friend1, socket: _fsocket1} = tachyon_auth_setup()
+    %{user: friend2, socket: _fsocket2} = tachyon_auth_setup()
 
     %{id: party_id} = Account.create_party(user.id)
     Account.move_user_to_party(party_id, friend1.id)

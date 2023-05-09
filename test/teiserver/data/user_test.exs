@@ -28,7 +28,7 @@ defmodule Teiserver.Data.UserTest do
     assert result == {:error, "Username already taken"}
 
     result = User.register_user_with_md5("non_dupe_name", "DUPE@email.e", "md5_password", "ip")
-    assert result == {:error, "Email already attached to a user"}
+    assert result == {:error, "Email already attached to a user (DUPE@email.e)"}
   end
 
   # We will now be calculating ranks based on

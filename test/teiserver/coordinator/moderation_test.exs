@@ -29,7 +29,7 @@ defmodule Teiserver.Coordinator.ModerationTest do
         "expires" => Timex.now() |> Timex.shift(days: 1)
       })
 
-    User.new_moderation_action(action)
+    # User.new_moderation_action(action)
     RefreshUserRestrictionsTask.refresh_user(user.id)
 
     # Did it take?

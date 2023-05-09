@@ -1,7 +1,6 @@
 defmodule Teiserver.Coordinator.HostUpdateTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.Lobby
-  alias Teiserver.Common.PubsubListener
   alias Teiserver.{Client, Coordinator}
 
   import Teiserver.TeiserverTestLib,
@@ -33,8 +32,6 @@ defmodule Teiserver.Coordinator.HostUpdateTest do
     [reply] = _tachyon_recv(hsocket)
     lobby_id = reply["lobby"]["id"]
 
-    listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby_id}"])
-
     # Player needs to be added to the battle
     Lobby.force_add_user_to_lobby(player.id, lobby_id)
     :timer.sleep(100)
@@ -56,8 +53,7 @@ defmodule Teiserver.Coordinator.HostUpdateTest do
      psocket: psocket,
      host: host,
      player: player,
-     lobby_id: lobby_id,
-     listener: listener}
+     lobby_id: lobby_id}
   end
 
   test "Update host data teamSize/teamCount", %{

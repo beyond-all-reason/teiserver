@@ -72,7 +72,8 @@ defmodule Teiserver.Protocols.V1.TachyonSystemTest do
                "lobby_count" => 0,
                "player_count" => 0,
                "user_count" => 1
-             }
+             },
+             "total_clients_connected" => 2
            }
 
     _tachyon_send(socket, %{"cmd" => "c.system.unwatch", "channel" => "server_stats"})

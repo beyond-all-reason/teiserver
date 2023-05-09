@@ -1,8 +1,3 @@
-defmodule Teiserver.FakeTransport do
-  @moduledoc false
-  def send(_transport, _msg), do: nil
-end
-
 defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
   alias Teiserver.{Client, User, Account, SpringIdServer}
@@ -573,4 +568,9 @@ defmodule Teiserver.TeiserverTestLib do
 
     seed_badge_types()
   end
+end
+
+defmodule Teiserver.FakeTransport do
+  @moduledoc false
+  def send(_transport, _msg), do: nil
 end
