@@ -50,7 +50,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
     if conn.assigns.current_user.id == target_id do
       conn
       |> put_status(:unprocessable_entity)
-      |> render("self_report.html", message: "Reporter and target may not be the same user.")
+      |> render("self_report.html", message: "You cannot report yourself.")
     else
       {match_id, relationship} =
         case report["match_id"] do
