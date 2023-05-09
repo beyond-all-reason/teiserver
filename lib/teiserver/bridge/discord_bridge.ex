@@ -258,21 +258,22 @@ defmodule Teiserver.Bridge.DiscordBridge do
           "Permanent"
         end
 
-      restriction_string =
-        action.restrictions
-        |> Enum.join(", ")
+      restriction_list = action.restrictions |> Enum.join(", ")
+      restriction_string = if Enum.count(action.restrictions) > 1 do
+        "Restrictions: #{restriction_list}"
+      else
+        "Restriction: #{restriction_list}"
+      end
 
       formatted_reason =
         Regex.replace(~r/https:\/\/discord.gg\/\S+/, action.reason, "--discord-link--")
 
       message =
         [
-          "----------------------",
+          "--------------------------------------------",
           "#{action.target.name} has been moderated.",
-          "Reason: #{formatted_reason}",
-          "Restriction(s): #{restriction_string}",
-          until,
-          "----------------------"
+          "Reason: #{formatted_reason}, #{restriction_string}",
+          until
         ]
         |> List.flatten()
         |> Enum.join("\n")
