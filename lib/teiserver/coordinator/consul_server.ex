@@ -427,7 +427,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         |> Map.merge(host_data)
 
       # If they're not allowed to be a boss, unboss them?
-      host_data[:host_bosses]
+      (host_data[:host_bosses] || [])
         |> Enum.filter(fn userid ->
           User.is_restricted?(userid, ["Boss"])
         end)
