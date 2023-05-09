@@ -38,6 +38,7 @@ defmodule Teiserver.Startup do
 
     Central.Account.UserLib.add_report_restriction_types("Other", [
       "Accolades",
+      "Boss",
       "Reporting",
       "Renaming",
       "Matchmaking"

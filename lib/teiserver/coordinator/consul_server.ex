@@ -426,6 +426,17 @@ defmodule Teiserver.Coordinator.ConsulServer do
         state
         |> Map.merge(host_data)
 
+      # If they're not allowed to be a boss, unboss them?
+      host_data[:host_bosses]
+        |> Enum.filter(fn userid ->
+          User.is_restricted?(userid, ["Boss"])
+        end)
+        |> Enum.each(fn userid ->
+          username = Account.get_username_by_id(userid)
+          LobbyChat.say(state.coordinator_id, "#{username} is not allowed to be a boss", state.lobby_id)
+          LobbyChat.say(userid, "!boss", state.lobby_id)
+        end)
+
       player_count_changed(new_state)
       {:noreply, new_state}
     else
