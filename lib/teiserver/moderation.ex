@@ -1044,9 +1044,10 @@ defmodule Teiserver.Moderation do
       {:ok, _action} =
         create_action(%{
           target_id: user.id,
-          reason: "Automod detected flagged words",
+          reason: "Automod detected flagged words in '#{message}'",
           restrictions: ["Bridging"],
           score_modifier: 100,
+          hidden: true,
           expires: Timex.now() |> Timex.shift(years: 1200)
         })
 

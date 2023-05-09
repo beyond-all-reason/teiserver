@@ -169,6 +169,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
         reason: "Banned (Automod)",
         restrictions: ["Login", "Site"],
         score_modifier: 0,
+        hidden: true,
         expires: Timex.now() |> Timex.shift(years: 1300)
       })
 
