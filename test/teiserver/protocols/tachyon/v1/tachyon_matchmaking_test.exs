@@ -677,7 +677,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert state.buckets == %{17 => [user1.id]}
 
     # Increase range
-    send(pid, :increase_range)
+    send(pid, :force_increase_range)
 
     state = :sys.get_state(pid)
     assert Map.has_key?(state.groups_map, user1.id)
@@ -687,7 +687,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
     # Increase range a number of times, 1 more time than the max-distance
     0..(state.groups_map[user1.id].max_distance + 1)
     |> Enum.each(fn _ ->
-      send(pid, :increase_range)
+      send(pid, :force_increase_range)
     end)
 
     state = :sys.get_state(pid)
@@ -841,11 +841,11 @@ defmodule Teiserver.TachyonMatchmakingTest do
            }
 
     # Okay, now increase the range 5 times
-    send(pid, :increase_range)
-    send(pid, :increase_range)
-    send(pid, :increase_range)
-    send(pid, :increase_range)
-    send(pid, :increase_range)
+    send(pid, :force_increase_range)
+    send(pid, :force_increase_range)
+    send(pid, :force_increase_range)
+    send(pid, :force_increase_range)
+    send(pid, :force_increase_range)
 
     # And tick
     send(pid, :tick)
@@ -1356,7 +1356,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert pre_match_state1.groups_map |> Map.keys() == [user1.id, user2.id, user3.id]
 
     # Trigger the queue server to make the match get started
-    send(pid1, :increase_range)
+    send(pid1, :force_increase_range)
     send(pid1, :tick)
 
     during_match_state1 = :sys.get_state(pid1)
