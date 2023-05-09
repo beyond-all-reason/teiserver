@@ -80,13 +80,13 @@ config :central, Teiserver,
     "A verification code has been sent to your email address. Please read our terms of service at <<<site_url>>> and the code of conduct at <<<URL>>>. Then enter your six digit code below if you agree to the terms.",
   accept_all_emails: false,
   retention: %{
-    telemetry_infolog: 15,
+    telemetry_infolog: 14,
     telemetry_events: 90,
     battle_match_rated: 365,
     battle_match_unrated: 365,
     account_unverified: 14,
-    lobby_chat: 31,
-    room_chat: 31,
+    lobby_chat: 90,
+    room_chat: 90,
     battle_minimum_seconds: 120
   }
 
