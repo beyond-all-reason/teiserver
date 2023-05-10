@@ -38,125 +38,104 @@
   </div>
 
   <div class="form-group row px-3 py-1">
-    <div class="col-xxl-1 col-xl-2 col-lg-3 col-md-4">
-      <h5>Authority</h5>
-      <%= central_component("checkbox",
-        id: "user_verified",
-        name: "user[verified]",
-        label: "Verified",
-        checked: @changeset.data.data["verified"]
-      ) %>
-
-      <%= central_component("checkbox",
-        id: "user_bot",
-        name: "user[bot]",
-        label: "Bot",
-        checked: @changeset.data.data["bot"]
-      ) %>
-
-      <%= central_component("checkbox",
-        id: "user_trusted",
-        name: "user[trusted]",
-        label: "Trusted",
-        checked: "Trusted" in (@changeset.data.data["roles"] || [])
-      ) %>
-
-      <%= central_component("checkbox",
-        id: "user_moderator",
-        name: "user[moderator]",
-        label: "Moderator",
-        checked: @changeset.data.data["moderator"]
-      ) %>
-
-      <%= central_component("checkbox",
-        id: "user_admin",
-        name: "user[admin]",
-        label: "Admin",
-        checked: "Admin" in (@changeset.data.data["roles"] || [])
-      ) %>
+    <div class="col">
+      <h5>Management</h5>
+      <%= for r <- @management_roles do %>
+        <%
+          style = @role_styling_map[r]
+          label = if style do
+            raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> #{r}")
+          else
+            r
+          end
+        %>
+        <%= central_component("checkbox",
+          id: "user_#{r}",
+          name: "user[#{r}]",
+          label: label,
+          checked: r in (@changeset.data.data["roles"] || [])
+        ) %>
+      <% end %>
     </div>
 
-    <div class="col-xxl-1 col-xl-2 col-lg-3 col-md-4">
-      <h5>Roles</h5>
-      <%= central_component("checkbox",
-        id: "user_contributor",
-        name: "user[contributor]",
-        label: "Contributor",
-        checked: "Contributor" in (@changeset.data.data["roles"] || [])
-      ) %>
-
-      <%= central_component("checkbox",
-        id: "user_gdt",
-        name: "user[gdt]",
-        label: "GDT",
-        checked: "GDT" in (@changeset.data.data["roles"] || [])
-      ) %>
-
-      <%= central_component("checkbox",
-        id: "user_core",
-        name: "user[core]",
-        label: "Core team",
-        checked: "Core team" in (@changeset.data.data["roles"] || [])
-      ) %>
-
-      <%= central_component("checkbox",
-        id: "user_streamer",
-        name: "user[streamer]",
-        label: "Streamer",
-        checked: "Streamer" in (@changeset.data.data["roles"] || [])
-      ) %>
-
-      <%= central_component("checkbox",
-        id: "user_donor",
-        name: "user[donor]",
-        label: "Donor",
-        checked: "Donor" in (@changeset.data.data["roles"] || [])
-      ) %>
-
-      <%= central_component("checkbox",
-        id: "user_tester",
-        name: "user[tester]",
-        label: "Tester",
-        checked: "Tester" in (@changeset.data.data["roles"] || [])
-      ) %>
+    <div class="col">
+      <h5>Moderation</h5>
+      <%= for r <- @moderation_roles do %>
+        <%
+          style = @role_styling_map[r]
+          label = if style do
+            raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> #{r}")
+          else
+            r
+          end
+        %>
+        <%= central_component("checkbox",
+          id: "user_#{r}",
+          name: "user[#{r}]",
+          label: label,
+          checked: r in (@changeset.data.data["roles"] || [])
+        ) %>
+      <% end %>
     </div>
 
-    <div class="col-xxl-1 col-xl-2 col-lg-3 col-md-4">
-      <h5>Privilaged roles</h5>
-      <%= central_component("checkbox",
-        id: "user_vip",
-        name: "user[vip]",
-        label: "VIP",
-        checked: "VIP" in (@changeset.data.data["roles"] || [])
-      ) %>
+    <div class="col">
+      <h5>Staff</h5>
+      <%= for r <- @staff_roles do %>
+        <%
+          style = @role_styling_map[r]
+          label = if style do
+            raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> #{r}")
+          else
+            r
+          end
+        %>
+        <%= central_component("checkbox",
+          id: "user_#{r}",
+          name: "user[#{r}]",
+          label: label,
+          checked: r in (@changeset.data.data["roles"] || [])
+        ) %>
+      <% end %>
+    </div>
 
-      <%= central_component("checkbox",
-        id: "user_tournament-player",
-        name: "user[tournament-player]",
-        label: "Tournament player",
-        checked: "Tournament player" in (@changeset.data.data["roles"] || [])
-      ) %>
+    <div class="col">
+      <h5>Privileged</h5>
+      <%= for r <- @privileged_roles do %>
+        <%
+          style = @role_styling_map[r]
+          label = if style do
+            raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> #{r}")
+          else
+            r
+          end
+        %>
+        <%= central_component("checkbox",
+          id: "user_#{r}",
+          name: "user[#{r}]",
+          label: label,
+          checked: r in (@changeset.data.data["roles"] || [])
+        ) %>
+      <% end %>
+    </div>
 
-      <%= central_component("checkbox",
-        id: "user_caster",
-        name: "user[caster]",
-        label: "Caster",
-        checked: "Caster" in (@changeset.data.data["roles"] || [])
-      ) %>
-
-      <%= central_component("checkbox",
-        id: "user_overwatch",
-        name: "user[overwatch]",
-        label: "Overwatch",
-        checked: "Overwatch" in (@changeset.data.data["roles"] || [])
-      ) %>
-
-      <%= central_component("checkbox",
-        id: "user_reviewer",
-        name: "user[reviewer]",
-        label: "Reviewer",
-        checked: "Reviewer" in (@changeset.data.data["roles"] || [])
-      ) %>
+    <div class="col">
+      <h5>Property</h5>
+      <%= for r <- @property_roles do %>
+        <%
+          style = @role_styling_map[r]
+          label = if style do
+            raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> #{r}")
+          else
+            r
+          end
+        %>
+        <%= central_component("checkbox",
+          id: "user_#{r}",
+          name: "user[#{r}]",
+          label: label,
+          checked: r in (@changeset.data.data["roles"] || [])
+        ) %>
+      <% end %>
     </div>
   </div>
 

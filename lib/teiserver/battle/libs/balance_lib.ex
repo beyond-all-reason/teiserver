@@ -126,7 +126,7 @@ defmodule Teiserver.Battle.BalanceLib do
       |> Enum.sort_by(fn %{group_rating: rating} -> rating end, &>=/2)
 
     teams =
-      Range.new(1, team_count)
+      Range.new(1, team_count || 1)
       |> Map.new(fn i ->
         {i, []}
       end)

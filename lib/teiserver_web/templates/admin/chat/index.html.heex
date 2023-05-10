@@ -95,7 +95,7 @@
                 <%= for msg <- @messages do %>
                   <tr>
                     <td>
-                      <a href={~p"/teiserver/admin/matches/#{msg.match_id}"}>
+                      <a href={~p"/teiserver/admin/lobbies/#{msg.match_id}/lobby_chat"}>
                         <%= msg.match_id %>
                       </a>
                     </td>
