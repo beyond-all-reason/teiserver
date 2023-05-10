@@ -33,7 +33,8 @@ defmodule Teiserver.Startup do
       "Low priority",
       "All lobbies",
       "Login",
-      "Site"
+      "Site",
+      "Permanently banned"
     ])
 
     Central.Account.UserLib.add_report_restriction_types("Other", [
