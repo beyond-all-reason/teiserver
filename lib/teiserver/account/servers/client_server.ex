@@ -1,7 +1,6 @@
 defmodule Teiserver.Account.ClientServer do
   use GenServer
   require Logger
-  alias Teiserver.Client
   alias Teiserver.Battle.LobbyChat
   alias Phoenix.PubSub
 
@@ -168,10 +167,10 @@ defmodule Teiserver.Account.ClientServer do
     cond do
       client_state.tcp_pid == nil ->
         Logger.error("client_state.tcp_pid is nil - disconnecting")
-        Client.disconnect(state.userid)
+        DynamicSupervisor.terminate_child(Teiserver.ClientSupervisor, self())
       Process.alive?(client_state.tcp_pid) == false ->
         Logger.error("client_state.tcp_pid is not alive - disconnecting")
-        Client.disconnect(state.userid)
+        DynamicSupervisor.terminate_child(Teiserver.ClientSupervisor, self())
       true ->
         :ok
     end
