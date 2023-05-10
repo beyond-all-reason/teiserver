@@ -1,6 +1,7 @@
 defmodule Teiserver.Account.ClientServer do
   use GenServer
   require Logger
+  alias Teiserver.Client
   alias Teiserver.Battle.LobbyChat
   alias Phoenix.PubSub
 
@@ -166,9 +167,11 @@ defmodule Teiserver.Account.ClientServer do
   def handle_info(:heartbeat, %{client: client_state} = state) do
     cond do
       client_state.tcp_pid == nil ->
-        Logger.error("client_state.tcp_pid is nil")
+        Logger.error("client_state.tcp_pid is nil - disconnecting")
+        Client.disconnect(state.userid)
       Process.alive?(client_state.tcp_pid) == false ->
-        Logger.error("client_state.tcp_pid is not alive")
+        Logger.error("client_state.tcp_pid is not alive - disconnecting")
+        Client.disconnect(state.userid)
       true ->
         :ok
     end
