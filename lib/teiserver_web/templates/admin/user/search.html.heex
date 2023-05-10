@@ -230,6 +230,20 @@
       </div>
 
       <div class={search_col_class}>
+        <label for="search_overwatch" class="control-label">Overwatch: </label>
+        <%= central_component("icon_dropdown", %{
+          name: "search[overwatch]",
+          id: "search_overwatch",
+          selected: @params["overwatch"],
+          enumerable: [
+            %{id: "Any", icon: "fa-solid fa-square", colour: fg},
+            %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
+            %{id: "Overwatch", icon: "fa-solid fa-clipboard-list-check", colour: fg}
+          ]
+        }) %>
+      </div>
+
+      <div class={search_col_class}>
         <label for="search_mod_action" class="control-label">Mod action: </label>
         <%= central_component("icon_dropdown", %{
           name: "search[mod_action]",

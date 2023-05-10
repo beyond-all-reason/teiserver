@@ -75,6 +75,7 @@ defmodule TeiserverWeb.Admin.UserController do
            donor: params["donor"],
            contributor: params["contributor"],
            developer: params["developer"],
+           overwatch: params["overwatch"],
            vip: params["vip"],
            caster: params["caster"],
            tournament_player: params["tournament-player"],
