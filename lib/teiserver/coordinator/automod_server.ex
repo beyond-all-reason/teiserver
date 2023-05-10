@@ -167,7 +167,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
       Moderation.create_action(%{
         target_id: userid,
         reason: "Banned (Automod)",
-        restrictions: ["Login", "Site"],
+        restrictions: ["Login", "Site", "Permanently banned"],
         score_modifier: 0,
         hidden: true,
         expires: Timex.now() |> Timex.shift(years: 1300)

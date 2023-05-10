@@ -22,6 +22,8 @@ defmodule Teiserver.User do
   @default_colour "#666666"
   @default_icon "fa-solid fa-user"
 
+  @suspended_string "This account has been suspended. You can see the #moderation-bot on discord for more details; if you need to appeal anything please use the #open-ticket channel on the discord. Be aware, trying to evade moderation by creating new accounts will result in extending the suspension or even a permanent ban."
+
   @spec role_list :: [String.t()]
   def role_list(),
     do:
@@ -854,8 +856,11 @@ defmodule Teiserver.User do
       Enum.member?(["", "0", nil], client_hash) == true ->
         {:error, "Client hash missing in login"}
 
+      is_restricted?(user, ["Permanently banned"]) ->
+        {:error, "Banned account"}
+
       is_restricted?(user, ["Login"]) ->
-        {:error, "Banned, please see Discord for details"}
+        {:error, @suspended_string}
 
       not is_bot?(user) and not is_moderator?(user) and
         not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity <= 0 ->
@@ -914,8 +919,11 @@ defmodule Teiserver.User do
           Enum.member?(["", "0", nil], lobby_hash) == true and not is_bot?(user) ->
             {:error, "LobbyHash/UserID missing in login"}
 
+          is_restricted?(user, ["Permanently banned"]) ->
+            {:error, "Banned account"}
+
           is_restricted?(user, ["Login"]) ->
-            {:error, "Banned, please see Discord for details"}
+            {:error, @suspended_string}
 
           not is_bot?(user) and not is_moderator?(user) and
             not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity <= 0 ->
@@ -988,8 +996,11 @@ defmodule Teiserver.User do
               {:error, "Invalid password"}
             end
 
+          is_restricted?(user, ["Permanently banned"]) ->
+            {:error, "Banned account"}
+
           is_restricted?(user, ["Login"]) ->
-            {:error, "Banned, please see Discord for details"}
+            {:error, @suspended_string}
 
           not is_bot?(user) and not is_moderator?(user) and
             not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity <= 0 ->

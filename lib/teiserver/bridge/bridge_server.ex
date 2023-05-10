@@ -406,7 +406,8 @@ defmodule Teiserver.Bridge.BridgeServer do
               bot: true,
               moderator: false,
               verified: true,
-              lobby_client: "Teiserver Internal Process"
+              lobby_client: "Teiserver Internal Process",
+              roles: ["Bot", "Verified"]
             }
           })
 

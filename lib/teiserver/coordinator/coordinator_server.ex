@@ -329,7 +329,8 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
               bot: true,
               moderator: true,
               verified: true,
-              lobby_client: "Teiserver Internal Process"
+              lobby_client: "Teiserver Internal Process",
+              roles: ["Bot", "Verified"]
             }
           })
 

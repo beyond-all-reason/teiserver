@@ -225,6 +225,12 @@ defmodule TeiserverWeb.Admin.UserController do
         conn
         |> assign(:user, user)
         |> assign(:changeset, changeset)
+        |> assign(:management_roles, UserLib.management_roles())
+        |> assign(:moderation_roles, UserLib.moderation_roles())
+        |> assign(:staff_roles, UserLib.staff_roles())
+        |> assign(:privileged_roles, UserLib.privileged_roles())
+        |> assign(:property_roles, UserLib.property_roles())
+        |> assign(:role_styling_map, UserLib.role_styling_map())
         |> add_breadcrumb(name: "Edit: #{user.name}", url: conn.request_path)
         |> render("edit.html")
 
