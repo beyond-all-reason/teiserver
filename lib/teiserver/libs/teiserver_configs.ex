@@ -155,7 +155,7 @@ defmodule Teiserver.TeiserverConfigs do
       type: "string",
       permissions: ["teiserver.admin.account"],
       description: "The string used to request acknowledgement of warnings",
-      default: "Acknowledge this with 'I acknowledge this' to resume play"
+      default: "Acknowledge this by typing 'I acknowledge this' to resume play"
     })
 
     add_site_config_type(%{

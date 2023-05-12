@@ -51,7 +51,7 @@ defmodule Teiserver.Coordinator.ModerationTest do
                This is a reminder that you received one or more formal moderation actions as listed below:
                 - login_with_warning_test, expires #{expires}
                If you feel you have been the target of an erroneous or unjust moderation action please contact the head of moderation, Beherith
-               Acknowledge this with 'I acknowledge this' to resume play
+               Acknowledge this by typing 'I acknowledge this' to resume play
                """),
              "sender_id" => Coordinator.get_coordinator_userid()
            }
