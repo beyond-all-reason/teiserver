@@ -305,4 +305,26 @@ defmodule TeiserverWeb.Moderation.ActionController do
         |> redirect(to: Routes.moderation_action_path(conn, :index))
     end
   end
+
+  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def delete(conn, %{"id" => id}) do
+    action = Moderation.get_action!(id, preload: [:reports])
+
+    # Update any reports which were assigned to this
+    action.reports
+      |> Enum.each(fn report ->
+        Moderation.update_report(report, %{result_id: nil})
+      end)
+
+    Moderation.delete_action(action)
+
+    action_map = Map.take(action, ~w(target_id reason restrictions score_modifier expires hidden)a)
+
+    add_audit_log(conn, "Moderation:Action deleted", %{action: action_map})
+    Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
+
+    conn
+    |> put_flash(:info, "Action deleted.")
+    |> redirect(to: Routes.moderation_action_path(conn, :index))
+  end
 end
