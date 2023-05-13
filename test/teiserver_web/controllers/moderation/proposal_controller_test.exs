@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Moderation.ProposalControllerTest do
   alias Central.Helpers.GeneralTestLib
 
   setup do
-    GeneralTestLib.conn_setup(["teiserver.staff.reviewer", "teiserver.staff.moderator"])
+    GeneralTestLib.conn_setup(["Reviewer", "Moderator"])
     |> Teiserver.TeiserverTestLib.conn_setup()
   end
 

@@ -9,7 +9,7 @@
   url: Routes.ts_game_queue_path(@conn, :index)
 ) %>
 
-<%= if allow?(@conn, "teiserver.admin.queue") do %>
+<%= if allow?(@conn, "Server") do %>
   <%= central_component("section_menu_button",
     name: "new",
     label: "New",

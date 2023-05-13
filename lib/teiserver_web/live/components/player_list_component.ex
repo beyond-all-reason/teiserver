@@ -46,7 +46,7 @@ defmodule TeiserverWeb.Components.PlayerListComponent do
       |> assign(:current_user, assigns[:current_user])
       |> assign(:teams, teams)
       |> assign(:spectators, spectators)
-      |> assign(:admin, allow?(assigns[:current_user], "teiserver.admin"))
+      |> assign(:admin, allow?(assigns[:current_user], "Admin"))
 
     {:ok, socket}
   end

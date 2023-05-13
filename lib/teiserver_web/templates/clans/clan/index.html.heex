@@ -57,7 +57,7 @@ light_mode =
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= if allow?(@conn, "teiserver.staff.clan") do %>
+        <%= if allow?(@conn, "Admin") do %>
           <div class="float-end">
             <a href={Routes.ts_admin_clan_path(@conn, :index)} class={"btn btn-outline-#{bsname}"}>
               Admin view

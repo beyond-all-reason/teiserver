@@ -48,7 +48,7 @@
           ) %>
         </td>
 
-        <%= if allow?(@current_user, "teiserver.admin") do %>
+        <%= if allow?(@current_user, "Admin") do %>
           <td>
             <a href={~p"/teiserver/admin/user/#{u.id}"} class="btn btn-outline-secondary btn-sm">
               <i class="fa-regular fa-fw fa-user"></i> Show user

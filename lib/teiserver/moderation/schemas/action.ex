@@ -30,8 +30,8 @@ defmodule Teiserver.Moderation.Action do
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
-  def authorize(:index, conn, _), do: allow?(conn, "teiserver.staff.overwatch")
-  def authorize(:search, conn, _), do: allow?(conn, "teiserver.staff.overwatch")
-  def authorize(:show, conn, _), do: allow?(conn, "teiserver.staff.overwatch")
-  def authorize(_, conn, _), do: allow?(conn, "teiserver.staff.moderator")
+  def authorize(:index, conn, _), do: allow?(conn, "Overwatch")
+  def authorize(:search, conn, _), do: allow?(conn, "Overwatch")
+  def authorize(:show, conn, _), do: allow?(conn, "Overwatch")
+  def authorize(_, conn, _), do: allow?(conn, "Moderator")
 end

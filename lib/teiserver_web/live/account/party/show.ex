@@ -54,7 +54,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
 
     if party do
       if Enum.member?(party.members, socket.assigns.user_id) or
-           allow?(socket, "teiserver.staff.moderator") do
+           allow?(socket, "Moderator") do
         leader_name = Account.get_username(party.leader)
         :ok = PubSub.subscribe(Central.PubSub, "teiserver_party:#{party_id}")
 
@@ -237,7 +237,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
 
   @spec leader?(map()) :: boolean
   defp leader?(socket = %{assigns: %{user_id: user_id, party: %{leader: leader_id}}}) do
-    moderator = allow?(socket, "teiserver.staff.moderator")
+    moderator = allow?(socket, "Moderator")
     moderator or leader_id == user_id
   end
 end

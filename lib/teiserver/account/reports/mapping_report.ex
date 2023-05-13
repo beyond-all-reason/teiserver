@@ -6,7 +6,7 @@ defmodule Teiserver.Game.MappingReport do
   def icon(), do: "fa-regular fa-map"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "teiserver.admin"
+  def permissions(), do: "Admin"
 
   @threshold 10
 

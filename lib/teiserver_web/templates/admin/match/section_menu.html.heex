@@ -40,7 +40,7 @@
       url: Routes.ts_battle_match_path(@conn, :show, @match.id)
     ) %>
 
-    <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
+    <%= if allow?(@conn, "Reviewer") do %>
       <%= central_component("section_menu_button",
         name: "chat",
         label: "Chat",

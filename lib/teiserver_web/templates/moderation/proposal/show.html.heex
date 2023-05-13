@@ -124,7 +124,7 @@
         <%= if not @concluded do %>
           <div class="row mt-4">
             <div class="col">
-              <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+              <%= if allow?(@conn, "Moderator") do %>
                 <form
                   action={~p"/moderation/proposal/#{@proposal.id}/conclude"}
                   method="post"

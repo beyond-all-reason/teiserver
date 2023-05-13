@@ -11,7 +11,7 @@
 <% end %>
 &nbsp;
 <div class="row">
-  <%= if allow?(@conn, "teiserver.staff") do %>
+  <%= if allow_any?(@conn, ~w(Contributor Overwatch)) do %>
     <%= central_component("menu_card",
       icon: Teiserver.icon(),
       name: "tei_admin",
@@ -21,7 +21,7 @@
     ) %>
   <% end %>
 
-  <%= if allow_any?(@conn, ~w(teiserver.reports teiserver.staff)) do %>
+  <%= if allow_any?(@conn, ~w(Contributor Overwatch)) do %>
     <%= central_component("menu_card",
       icon: Central.Helpers.StylingHelper.icon(:summary),
       name: "reports",
@@ -57,7 +57,7 @@
     link: ~p"/teiserver/matchmaking/queues"
   ) %>
 
-  <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+  <%= if allow?(@conn, "Moderator") do %>
     <%= central_component("menu_card",
       icon: Teiserver.Account.ClientLib.icon(),
       name: "live_client",

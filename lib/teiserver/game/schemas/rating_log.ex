@@ -26,5 +26,5 @@ defmodule Teiserver.Game.RatingLog do
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
-  def authorize(_, conn, _), do: allow?(conn, "teiserver.admin")
+  def authorize(_, conn, _), do: allow?(conn, "Admin")
 end

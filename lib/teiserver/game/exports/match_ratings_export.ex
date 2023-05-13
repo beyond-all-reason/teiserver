@@ -24,7 +24,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
   def icon(), do: "fa-regular fa-swords"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "teiserver.admin"
+  def permissions(), do: "Admin"
 
   @spec show_form(Plug.Conn.t()) :: map()
   def show_form(_conn) do

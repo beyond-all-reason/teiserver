@@ -20,7 +20,7 @@
     <div class="card card-default">
       <div class="card-body" style="padding: 0 15px;">
         <div class="row">
-          <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+          <%= if allow?(@conn, "Moderator") do %>
             <%= central_component("sub_menu_icon",
               name: "users",
               label: "Users",
@@ -30,7 +30,7 @@
             ) %>
           <% end %>
 
-          <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
+          <%= if allow?(@conn, "Reviewer") do %>
             <%= central_component("sub_menu_icon",
               name: "matches",
               label: "Matches",
@@ -48,7 +48,7 @@
             ) %>
           <% end %>
 
-          <%= if allow?(@conn, "teiserver.staff.clans") do %>
+          <%= if allow?(@conn, "Admin") do %>
             <%= central_component("sub_menu_icon",
               name: "clans",
               label: "Clans",
@@ -58,7 +58,7 @@
             ) %>
           <% end %>
 
-          <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+          <%= if allow?(@conn, "Moderator") do %>
             <%= central_component("sub_menu_icon",
               name: "achievements",
               label: "Achievements",
@@ -68,7 +68,7 @@
             ) %>
           <% end %>
 
-          <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
+          <%= if allow?(@conn, "Reviewer") do %>
             <%= central_component("sub_menu_icon",
               name: "moderation",
               label: "Moderation",

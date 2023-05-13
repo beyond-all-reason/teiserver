@@ -20,7 +20,7 @@
       url: Routes.moderation_action_path(@conn, :index) <> "?search=true"
     ) %>
 
-    <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+    <%= if allow?(@conn, "Moderator") do %>
       <%= central_component("section_menu_button",
         name: "new",
         label: "New",

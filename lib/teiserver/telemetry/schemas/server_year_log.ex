@@ -19,5 +19,5 @@ defmodule Teiserver.Telemetry.ServerYearLog do
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean
-  def authorize(_action, conn, _params), do: allow?(conn, "teiserver.admin.telemetry")
+  def authorize(_action, conn, _params), do: allow?(conn, "Server")
 end

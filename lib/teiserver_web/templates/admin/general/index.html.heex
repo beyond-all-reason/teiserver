@@ -8,7 +8,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, "teiserver.staff.server") do %>
+  <%= if allow?(@current_user, "Server") do %>
     <%= central_component("menu_card",
       icon: Teiserver.Logging.icon(),
       text: "Logging",
@@ -16,7 +16,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+  <%= if allow?(@conn, "Moderator") do %>
     <%= central_component("menu_card",
       icon: "fa-regular fa-users",
       name: "user_admin",
@@ -26,7 +26,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
+  <%= if allow?(@conn, "Reviewer") do %>
     <%= central_component("menu_card",
       icon: Teiserver.Chat.LobbyMessageLib.icon(),
       name: "chat",
@@ -36,7 +36,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
+  <%= if allow?(@conn, "Reviewer") do %>
     <%= central_component("menu_card",
       icon: Teiserver.Battle.MatchLib.icon(),
       name: "matches",
@@ -46,7 +46,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.staff.clan") do %>
+  <%= if allow?(@conn, "Admin") do %>
     <%= central_component("menu_card",
       icon: Teiserver.Clans.ClanLib.icon(),
       name: "clan",
@@ -56,7 +56,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.staff.admin") do %>
+  <%= if allow?(@conn, "Server") do %>
     <%= central_component("menu_card",
       icon: Teiserver.Game.QueueLib.icon(),
       name: "matchmaking",
@@ -66,7 +66,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.staff.admin") do %>
+  <%= if allow?(@conn, "Server") do %>
     <%= central_component("menu_card",
       icon: Teiserver.Game.LobbyPolicyLib.icon(),
       name: "lobby_policies",
@@ -76,7 +76,7 @@
     ) %>
   <% end %>
 
-  <%= if allow_any?(@conn, ~w(teiserver.staff.moderator teiserver.staff.reviewer teiserver.staff.overwatch)) do %>
+  <%= if allow_any?(@conn, ~w(Moderator Reviewer Overwatch)) do %>
     <%= central_component("menu_card",
       icon: Teiserver.Moderation.ReportLib.icon(),
       name: "moderation_admin",
@@ -86,7 +86,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+  <%= if allow?(@conn, "Moderator") do %>
     <%= central_component("menu_card",
       icon: Teiserver.Game.AchievementTypeLib.icon(),
       name: "achievements",
@@ -96,7 +96,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.admin") do %>
+  <%= if allow?(@conn, "Admin") do %>
     <%= central_component("menu_card",
       icon_class: "fa-solid",
       name: "",
@@ -106,7 +106,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.staff.admin") do %>
+  <%= if allow?(@conn, "Server") do %>
     <%= central_component("menu_card",
       icon: Teiserver.Communication.TextCallbackLib.icon(),
       name: "text_callbacks",
@@ -118,7 +118,7 @@
 </div>
 
 <div class="row">
-  <%= if allow_any?(@conn, ~w(teiserver.reports teiserver.staff)) do %>
+  <%= if allow_any?(@conn, ~w(Contributor Overwatch)) do %>
     <%= central_component("menu_card",
       icon: Central.Helpers.StylingHelper.icon(:summary),
       name: "reports",

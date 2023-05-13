@@ -7,7 +7,7 @@ defmodule Teiserver.Account.AccoladeReport do
   def icon(), do: Teiserver.Account.AccoladeLib.icon()
 
   @spec permissions() :: String.t()
-  def permissions(), do: "teiserver.admin"
+  def permissions(), do: "Admin"
 
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, params) do

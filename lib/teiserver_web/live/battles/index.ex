@@ -17,7 +17,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       |> NotificationPlug.live_call()
 
     client = Account.get_client_by_id(socket.assigns[:current_user].id)
-    moderator = allow?(socket.assigns[:current_user], "teiserver.staff.moderator")
+    moderator = allow?(socket.assigns[:current_user], "Moderator")
 
     socket =
       socket

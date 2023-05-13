@@ -7,7 +7,7 @@ defmodule Teiserver.Account.TournamentReport do
   def icon(), do: Teiserver.Account.RatingLib.icon()
 
   @spec permissions() :: String.t()
-  def permissions(), do: "teiserver.staff.moderator"
+  def permissions(), do: "Moderator"
 
   @spec run(Plug.Conn.t(), map()) :: {nil, map()}
   def run(_conn, params) do

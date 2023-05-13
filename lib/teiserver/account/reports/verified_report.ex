@@ -6,7 +6,7 @@ defmodule Teiserver.Account.VerifiedReport do
   def icon(), do: "fa-regular fa-check"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "teiserver.admin"
+  def permissions(), do: "Admin"
 
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, params) do

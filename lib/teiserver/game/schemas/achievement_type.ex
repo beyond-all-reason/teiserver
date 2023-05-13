@@ -27,5 +27,5 @@ defmodule Teiserver.Game.AchievementType do
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
-  def authorize(_action, conn, _params), do: allow?(conn, "teiserver.admin")
+  def authorize(_action, conn, _params), do: allow?(conn, "Admin")
 end

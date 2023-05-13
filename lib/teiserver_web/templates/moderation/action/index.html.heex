@@ -75,7 +75,7 @@
                 </td>
 
                 <td>
-                  <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+                  <%= if allow?(@conn, "Moderator") do %>
                     <a
                       href={~p"/teiserver/admin/user/#{action.target_id}"}
                       class="btn btn-secondary btn-sm"

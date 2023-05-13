@@ -55,7 +55,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
         end
       end)
 
-    is_admin = allow?(socket.assigns[:current_user], "teiserver.staff.admin")
+    is_admin = allow?(socket.assigns[:current_user], "Admin")
 
     socket =
       socket

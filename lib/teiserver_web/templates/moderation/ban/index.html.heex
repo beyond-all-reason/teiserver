@@ -58,7 +58,7 @@
                 <td><%= ban.added_by.name %></td>
 
                 <td>
-                  <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
+                  <%= if allow?(@conn, "Reviewer") do %>
                     <a
                       href={Routes.moderation_ban_path(@conn, :show, ban.id)}
                       class="btn btn-secondary btn-sm"

@@ -32,7 +32,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
 
   @impl true
   def handle_params(params, _url, socket) do
-    case allow?(socket.assigns[:current_user], "teiserver.staff.server") do
+    case allow?(socket.assigns[:current_user], "Server") do
       true ->
         {:noreply, apply_action(socket, socket.assigns.live_action, params)}
 

@@ -39,7 +39,7 @@
 <% end %>
 
 <div class="float-end">
-  <%= if assigns[:match] != nil and allow?(@conn, "teiserver.staff.moderator") do %>
+  <%= if assigns[:match] != nil and allow?(@conn, "Moderator") do %>
     <%= central_component("section_menu_button",
       name: "admin",
       label: "Admin view",

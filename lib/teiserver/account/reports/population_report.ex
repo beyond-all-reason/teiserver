@@ -6,7 +6,7 @@ defmodule Teiserver.Account.PopulationReport do
   def icon(), do: "fa-regular fa-people-group"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "teiserver.admin"
+  def permissions(), do: "Admin"
 
   @doc """
 

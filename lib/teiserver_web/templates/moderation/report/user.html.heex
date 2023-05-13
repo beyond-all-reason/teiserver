@@ -39,7 +39,7 @@
             Report form
           </a>
 
-          <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+          <%= if allow?(@conn, "Moderator") do %>
             <a
               class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
               href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@user.id}_"}
@@ -52,7 +52,7 @@
             </a>
           <% end %>
 
-          <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+          <%= if allow?(@conn, "Moderator") do %>
             <a class={"btn btn-outline-#{bsname}"} href={~p"/teiserver/admin/user/#{@user}"}>
               View user
             </a>

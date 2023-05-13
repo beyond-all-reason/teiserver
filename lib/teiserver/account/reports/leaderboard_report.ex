@@ -11,7 +11,7 @@ defmodule Teiserver.Account.LeaderboardReport do
   def icon(), do: Teiserver.Account.RatingLib.icon()
 
   @spec permissions() :: String.t()
-  def permissions(), do: "teiserver.admin"
+  def permissions(), do: "Admin"
 
   @spec run(Plug.Conn.t(), map()) :: {list(), map()}
   def run(_conn, params) do

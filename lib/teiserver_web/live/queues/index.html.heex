@@ -25,7 +25,7 @@ accepted_app = @client == nil or @client.app_status == :accepted
         <% end %>
 
         <div class="float-end">
-          <%= if allow?(@current_user, "teiserver.staff.admin") do %>
+          <%= if allow?(@current_user, "Admin") do %>
             <a
               href={Routes.ts_game_queue_path(@socket, :index)}
               class={"btn btn-outline-#{bsname}"}

@@ -20,7 +20,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
 
     admin_mode =
       cond do
-        not allow?(socket, "teiserver.staff.moderator") -> false
+        not allow?(socket, "Moderator") -> false
         params["mode"] == "admin" -> true
         true -> false
       end

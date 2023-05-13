@@ -14,7 +14,7 @@
       <%= error_tag(f, :name) %>
     </div>
 
-    <%= if allow?(@conn, "teiserver.admin.account") do %>
+    <%= if allow?(@conn, "Admin") do %>
       <div class="col-xl-4 col-lg-4">
         <%= label(f, :email, class: "control-label") %>
         <%= text_input(f, :email, class: "form-control") %>

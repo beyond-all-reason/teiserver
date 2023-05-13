@@ -421,29 +421,17 @@ defmodule Teiserver.TeiserverTestLib do
 
   @spec admin_permissions() :: [String.t()]
   def admin_permissions do
-    permissions =
-      ~w(account battle clan queue)
-      |> Enum.map(fn p -> "teiserver.admin.#{p}" end)
-
-    permissions ++ staff_permissions()
+    ["Server", "Admin"] ++ staff_permissions()
   end
 
   @spec staff_permissions() :: [String.t()]
   def staff_permissions do
-    m_permissions =
-      ~w(account battle clan queue moderator reviewer telemetry)
-      |> Enum.map(fn p -> "teiserver.staff.#{p}" end)
-
-    permissions =
-      ~w(moderator communication)
-      |> Enum.map(fn p -> "teiserver.staff.#{p}" end)
-
-    permissions ++ m_permissions ++ player_permissions()
+    ["Core"] ++ player_permissions()
   end
 
   @spec player_permissions() :: [String.t()]
   def player_permissions do
-    ["teiserver.player.account"]
+    ["Verified"]
   end
 
   @spec make_clan(String.t(), Map.t()) :: Teiserver.Clans.Clan.t()

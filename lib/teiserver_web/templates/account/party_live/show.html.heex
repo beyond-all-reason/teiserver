@@ -1,5 +1,5 @@
 <% bsname = @view_colour
-moderator = allow?(@current_user, "teiserver.staff.moderator")
+moderator = allow?(@current_user, "Moderator")
 leader = moderator or @party.leader == @user_id %>
 
 <%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{

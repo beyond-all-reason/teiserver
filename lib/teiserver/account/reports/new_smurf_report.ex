@@ -7,7 +7,7 @@ defmodule Teiserver.Account.NewSmurfReport do
   def icon(), do: "fa-regular fa-face-angry-horns"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "teiserver.admin"
+  def permissions(), do: "Admin"
 
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, params) do

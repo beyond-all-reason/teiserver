@@ -7,7 +7,7 @@ defmodule Teiserver.Account.TimeCompareReport do
   def icon(), do: "fa-regular fa-code-compare"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "teiserver.admin"
+  def permissions(), do: "Admin"
 
   @user_count_max 4
 

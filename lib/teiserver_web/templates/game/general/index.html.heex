@@ -1,5 +1,5 @@
 <div class="row page-row">
-  <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+  <%= if allow?(@conn, "Moderator") do %>
     <%= central_component("menu_card",
       icon: "fa-regular fa-users",
       name: "user_admin",
@@ -9,7 +9,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.staff.clan") do %>
+  <%= if allow?(@conn, "Admin") do %>
     <%= central_component("menu_card",
       icon: Teiserver.Clans.ClanLib.icon(),
       name: "clan_admin",
@@ -19,7 +19,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+  <%= if allow?(@conn, "Moderator") do %>
     <%= central_component("menu_card",
       icon: Teiserver.Game.QueueLib.icon(),
       name: "queue",
@@ -29,7 +29,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.admin") do %>
+  <%= if allow?(@conn, "Admin") do %>
     <%= central_component("menu_card",
       icon: Central.Admin.ToolLib.icon(),
       name: "tools",

@@ -33,7 +33,7 @@
                 Details
               </a>
               &nbsp;&nbsp;
-              <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+              <%= if allow?(@conn, "Moderator") do %>
                 <a
                   href={~p"/teiserver/admin/lobbies/#{@report.match_id}/lobby_chat"}
                   class="btn btn-secondary btn-sm"

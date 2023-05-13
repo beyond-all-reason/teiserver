@@ -44,14 +44,12 @@ defmodule Teiserver.TeiserverQuickActions do
         %{
           label: "My match history",
           icons: [Teiserver.Battle.LobbyLib.icon(), :list],
-          url: ~p"/teiserver/battle/matches",
-          permissions: "teiserver"
+          url: ~p"/teiserver/battle/matches"
         },
         %{
           label: "Matchmaking",
           icons: [Teiserver.Game.QueueLib.icon()],
-          url: ~p"/teiserver/games/queues",
-          permissions: "teiserver.player.verified"
+          url: ~p"/teiserver/games/queues"
         },
 
         # Moderator pages
@@ -59,7 +57,7 @@ defmodule Teiserver.TeiserverQuickActions do
           label: "Live clients",
           icons: [Teiserver.Account.ClientLib.icon(), :list],
           url: ~p"/teiserver/admin/client",
-          permissions: "teiserver.staff.moderator"
+          permissions: "Moderator"
         },
         %{
           label: "Teiserver users",
@@ -68,13 +66,13 @@ defmodule Teiserver.TeiserverQuickActions do
           method: "get",
           placeholder: "Search username",
           url: ~p"/teiserver/admin/users/search",
-          permissions: "teiserver.staff.moderator"
+          permissions: "Moderator"
         },
         %{
           label: "Chat logs",
           icons: [Teiserver.Chat.LobbyMessageLib.icon(), :list],
           url: ~p"/teiserver/admin/chat",
-          permissions: "teiserver.staff.moderator"
+          permissions: "Moderator"
         },
 
         # Admin pages
@@ -88,19 +86,19 @@ defmodule Teiserver.TeiserverQuickActions do
           label: "Client events",
           icons: ["fa-regular #{Teiserver.Telemetry.ClientEventLib.icon()}", :list],
           url: ~p"/teiserver/reports/client_events/summary",
-          permissions: "teiserver.admin"
+          permissions: "Admin"
         },
         %{
           label: "Infologs",
           icons: ["fa-regular #{Teiserver.Telemetry.InfologLib.icon()}", :list],
           url: ~p"/teiserver/reports/client_events/summary",
-          permissions: "teiserver.staff.telemetry"
+          permissions: "Server"
         },
         %{
           label: "Match list",
           icons: [Teiserver.Battle.MatchLib.icon(), :list],
           url: ~p"/teiserver/admin/matches?search=true",
-          permissions: "teiserver.staff.moderator"
+          permissions: "Moderator"
         },
 
         # Dev/Admin
@@ -122,13 +120,13 @@ defmodule Teiserver.TeiserverQuickActions do
         label: "Match metrics - Daily",
         icons: ["fa-regular #{Teiserver.Battle.MatchLib.icon()}", :day],
         url: ~p"/teiserver/reports/match/day_metrics",
-        permissions: "teiserver.staff.moderator"
+        permissions: "Moderator"
       },
       %{
         label: "Match metrics - Monthly",
         icons: ["fa-regular #{Teiserver.Battle.MatchLib.icon()}", :month],
         url: ~p"/teiserver/reports/match/month_metrics",
-        permissions: "teiserver.staff.moderator"
+        permissions: "Moderator"
       },
 
       # Server metrics
@@ -136,13 +134,13 @@ defmodule Teiserver.TeiserverQuickActions do
         label: "Server metrics - Daily",
         icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", :day],
         url: ~p"/reports/server/list",
-        permissions: "teiserver.staff.moderator"
+        permissions: "Moderator"
       },
       %{
         label: "Server metrics - Now report",
         icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", "fa-regular fa-clock"],
         url: ~p"/reports/server/now",
-        permissions: "teiserver.staff.moderator"
+        permissions: "Moderator"
       },
       %{
         label: "Server metrics - Load report",
@@ -151,7 +149,7 @@ defmodule Teiserver.TeiserverQuickActions do
           "fa-regular fa-server"
         ],
         url: ~p"/reports/server/load",
-        permissions: "teiserver.staff.moderator"
+        permissions: "Moderator"
       },
 
       # Other
@@ -159,7 +157,7 @@ defmodule Teiserver.TeiserverQuickActions do
         label: "Teiserver infologs",
         icons: ["fa-regular #{Teiserver.Telemetry.InfologLib.icon()}", :list],
         url: ~p"/teiserver/reports/infolog",
-        permissions: "teiserver.staff.telemetry"
+        permissions: "Server"
       }
     ]
   end
@@ -169,31 +167,31 @@ defmodule Teiserver.TeiserverQuickActions do
       %{
         label: "Active",
         icons: ["fa-regular #{Teiserver.Account.ActiveReport.icon()}"],
-        permissions: "teiserver.staff.moderator",
+        permissions: "Moderator",
         url: ~p"/teiserver/reports/show/active"
       },
       %{
         label: "Time spent",
         icons: ["fa-regular #{Teiserver.Account.TimeSpentReport.icon()}"],
-        permissions: "teiserver.staff.moderator",
+        permissions: "Moderator",
         url: ~p"/teiserver/reports/show/time_spent"
       },
       %{
         label: "User age",
         icons: ["fa-regular #{Teiserver.Account.UserAgeReport.icon()}"],
-        permissions: "teiserver.staff.moderator",
+        permissions: "Moderator",
         url: ~p"/teiserver/reports/show/user_age"
       },
       %{
         label: "Verified",
         icons: ["fa-regular #{Teiserver.Account.VerifiedReport.icon()}"],
-        permissions: "teiserver.staff.moderator",
+        permissions: "Moderator",
         url: ~p"/teiserver/reports/show/verified"
       },
       %{
         label: "Retention",
         icons: ["fa-regular #{Teiserver.Account.RetentionReport.icon()}"],
-        permissions: "teiserver.staff.moderator",
+        permissions: "Moderator",
         url: ~p"/teiserver/reports/show/retention"
       },
       %{
@@ -211,7 +209,7 @@ defmodule Teiserver.TeiserverQuickActions do
       %{
         label: "Accolades",
         icons: ["fa-regular #{Teiserver.Account.AccoladeLib.icon()}"],
-        permissions: "teiserver.staff.moderator",
+        permissions: "Moderator",
         url: ~p"/teiserver/reports/show/accolades"
       },
       %{
@@ -259,25 +257,25 @@ defmodule Teiserver.TeiserverQuickActions do
         label: "Moderation reports",
         icons: [Teiserver.Moderation.ReportLib.icon(), :list],
         url: ~p"/moderation/report",
-        permissions: "teiserver.staff.reviewer"
+        permissions: "Reviewer"
       },
       %{
         label: "Moderation actions",
         icons: [Teiserver.Moderation.ActionLib.icon(), :list],
         url: ~p"/moderation/action",
-        permissions: "teiserver.staff.reviewer"
+        permissions: "Reviewer"
       },
       %{
         label: "Moderation proposals",
         icons: [Teiserver.Moderation.ProposalLib.icon(), :list],
         url: ~p"/moderation/proposal",
-        permissions: "teiserver.staff.reviewer"
+        permissions: "Reviewer"
       },
       %{
         label: "Moderation bans",
         icons: [Teiserver.Moderation.BanLib.icon(), :list],
         url: ~p"/moderation/ban",
-        permissions: "teiserver.staff.reviewer"
+        permissions: "Reviewer"
       }
     ]
   end

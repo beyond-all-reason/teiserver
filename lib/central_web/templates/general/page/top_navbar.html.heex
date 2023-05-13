@@ -84,7 +84,7 @@
           ) %>
         <% end %>
 
-        <%= if allow?(@current_user, "teiserver.staff") do %>
+        <%= if allow_any?(@current_user, ~w(Contributor Overwatch)) do %>
           <%= central_component("top_nav_item",
             text: "Reports",
             route: ~p"/teiserver/reports",
@@ -92,7 +92,7 @@
           ) %>
         <% end %>
 
-        <%= if allow?(@current_user, "teiserver.staff.moderator") do %>
+        <%= if allow?(@current_user, "Moderator") do %>
           <%= central_component("top_nav_item",
             text: "Users",
             route: ~p"/teiserver/admin/user",
@@ -100,7 +100,7 @@
           ) %>
         <% end %>
 
-        <%= if allow?(@current_user, "teiserver.staff.reviewer") do %>
+        <%= if allow?(@current_user, "Reviewer") do %>
           <%= central_component("top_nav_item",
             text: "Moderation",
             route: Routes.moderation_general_path(@conn, :index),
@@ -108,7 +108,7 @@
           ) %>
         <% end %>
 
-        <%= if allow?(@current_user, "teiserver.staff.reviewer") do %>
+        <%= if allow?(@current_user, "Reviewer") do %>
           <%= central_component("top_nav_item",
             text: "Chat",
             route: ~p"/teiserver/admin/chat",
@@ -116,7 +116,7 @@
           ) %>
         <% end %>
 
-        <%= if allow?(@current_user, "teiserver.staff") do %>
+        <%= if allow_any?(@conn, ~w(Contributor Overwatch)) do %>
           <%= central_component("top_nav_item",
             text: "Admin",
             route: ~p"/teiserver/admin",

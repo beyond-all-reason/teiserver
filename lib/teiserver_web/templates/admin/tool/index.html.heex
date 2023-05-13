@@ -5,7 +5,7 @@
 ) %>
 
 <div class="row page-row">
-  <%= if allow?(@conn, "teiserver.admin") do %>
+  <%= if allow?(@conn, "Admin") do %>
     <%= central_component("menu_card",
       icon_class: "fa-solid",
       name: "",

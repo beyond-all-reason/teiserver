@@ -9,7 +9,7 @@ defmodule Teiserver.Account.OpenSkillReport do
   def icon(), do: "fa-regular fa-chart-line"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "teiserver.admin"
+  def permissions(), do: "Admin"
 
   @spec run(Plug.Conn.t(), map()) :: {list(), map()}
   def run(_conn, params) do

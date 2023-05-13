@@ -42,5 +42,5 @@ defmodule Teiserver.Game.Queue do
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean
   def authorize(:index, _conn, _params), do: true
   def authorize(:show, _conn, _params), do: true
-  def authorize(_action, conn, _params), do: allow?(conn, "teiserver.admin.queue")
+  def authorize(_action, conn, _params), do: allow?(conn, "Server")
 end

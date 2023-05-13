@@ -39,7 +39,7 @@
         </td>
 
         <td>
-          <%= if report.match_id != nil and allow?(@conn, "teiserver.staff.moderator") do %>
+          <%= if report.match_id != nil and allow?(@conn, "Moderator") do %>
             <a
               href={~p"/teiserver/admin/lobbies/#{report.match_id}/lobby_chat"}
               class="btn btn-secondary btn-sm"

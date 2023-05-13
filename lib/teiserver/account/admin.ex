@@ -6,5 +6,5 @@ defmodule Teiserver.Account.Admin do
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
   def authorize(:convert_form, conn, _), do: allow?(conn, "admin.dev")
   def authorize(:convert_post, conn, _), do: allow?(conn, "admin.dev")
-  def authorize(_, conn, _), do: allow?(conn, "teiserver.admin")
+  def authorize(_, conn, _), do: allow?(conn, "Admin")
 end

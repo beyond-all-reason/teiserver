@@ -40,7 +40,7 @@
             View user
           </a>
 
-          <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+          <%= if allow?(@conn, "Moderator") do %>
             <div class="dropdown" style="display: inline-block;">
               <div
                 class={"btn btn-#{bsname} dropdown-toggle"}
@@ -64,7 +64,7 @@
         </h3>
         <br />
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
-          <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+          <%= if allow?(@conn, "Moderator") do %>
             <li class="nav-item">
               <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
                 <%= central_component("icon", icon: Central.Helpers.StylingHelper.icon(:detail)) %> Details
@@ -82,7 +82,7 @@
         </ul>
 
         <div class="tab-content">
-          <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+          <%= if allow?(@conn, "Moderator") do %>
             <div class="tab-pane" id="details_tab" style="padding:5px;">
               <%= render("tab_details.html", assigns) %>
             </div>

@@ -24,7 +24,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "matchmaking.Use ready check",
       section: "Matchmaking",
       type: "boolean",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "When set to true matchmaking uses a ready check",
       default: true,
       value_label: "Require ready check"
@@ -34,7 +34,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "bots.Flag",
       section: "Bots",
       type: "string",
-      permissions: ["teiserver.staff.server"],
+      permissions: ["Server"],
       description: "Country code flag used by bots managed by the server",
       default: "GB",
       value_label: ""
@@ -44,7 +44,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Enable accolades",
       section: "Accolades",
       type: "boolean",
-      permissions: ["teiserver.admin.account"],
+      permissions: ["Server"],
       description:
         "When enabled, players will be offered the chance to bestow accolades to each other.",
       default: true
@@ -54,7 +54,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Inform of new accolades",
       section: "Accolades",
       type: "boolean",
-      permissions: ["teiserver.admin.account"],
+      permissions: ["Server"],
       description: "When set to true, players will be informed when they get a new accolade",
       default: false
     })
@@ -90,7 +90,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Username max length",
       section: "Registrations",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The maximum number of characters allowed in a username.",
       default: 20
     })
@@ -155,7 +155,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Warning acknowledge prompt",
       section: "Moderation",
       type: "string",
-      permissions: ["teiserver.admin.account"],
+      permissions: ["Server"],
       description: "The string used to request acknowledgement of warnings",
       default: "Acknowledge this by typing 'I acknowledge this' to resume play"
     })
@@ -164,7 +164,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Warning acknowledge response",
       section: "Moderation",
       type: "string",
-      permissions: ["teiserver.admin.account"],
+      permissions: ["Server"],
       description: "The response string expected to acknowledge the warning",
       default: "I acknowledge this"
     })
@@ -173,7 +173,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Automod action delay",
       section: "Moderation",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The delay in seconds after a user logs in for the automod to check on them.",
       default: 120
     })
@@ -182,7 +182,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Require HW data to play",
       section: "Moderation",
       type: "boolean",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "Prevents someone from being a player if they don't have a HW hash yet.",
       default: false
     })
@@ -191,7 +191,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Require Chobby data to play",
       section: "Moderation",
       type: "boolean",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "Prevents someone from being a player if they don't have a Chobby key yet.",
       default: false
     })
@@ -202,7 +202,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Spring flood rate limit count",
       section: "Legacy protocol",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The number of commands required to trip flood protection for Spring",
       default: 20
     })
@@ -211,7 +211,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Spring flood rate window size",
       section: "Legacy protocol",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The size of the window in seconds for flood protection to trip for Spring",
       default: 6
     })
@@ -220,7 +220,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Tachyon flood rate limit count",
       section: "Legacy protocol",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The number of commands required to trip flood protection for Tachyon",
       default: 20
     })
@@ -229,7 +229,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Tachyon flood rate window size",
       section: "Legacy protocol",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The size of the window in seconds for flood protection to trip for Tachyon",
       default: 6
     })
@@ -238,7 +238,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Ring flood rate limit count",
       section: "Legacy protocol",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The number of rings required to trip flood protection",
       default: 5
     })
@@ -247,7 +247,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Ring flood rate window size",
       section: "Legacy protocol",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The size of the window in seconds for flood protection to trip for rings",
       default: 10
     })
@@ -256,7 +256,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Post login action delay",
       section: "Legacy protocol",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description:
         "The time in milliseconds to wait until doing something when a user logs in (e.g. sending a message)",
       default: 2500
@@ -269,7 +269,7 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Login",
       type: "integer",
       default: 3,
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "How many times a user can attempt to login within the refresh window",
       value_label: "Login limit count"
     })
@@ -279,7 +279,7 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Login",
       type: "integer",
       default: 1000,
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The duration (ms) to pause the process after logging in",
       value_label: "Post login delay (ms)"
     })
@@ -289,7 +289,7 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Login",
       type: "boolean",
       default: false,
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "When enabled all login attempts will pass through the login throttle server",
       value_label: "Use login throttle"
     })
@@ -299,7 +299,7 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Login",
       type: "integer",
       default: 500,
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The wait time for standard users when logging in (ms)",
       value_label: "Standard login wait time (ms)",
       update_callback: fn v ->
@@ -312,7 +312,7 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Login",
       type: "integer",
       default: 5000,
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The wait time for toxic users when logging in (ms)",
       value_label: "Toxic login wait time (ms)",
       update_callback: fn v ->
@@ -324,7 +324,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "system.User limit",
       section: "Login",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The cap for number of concurrent users, set to 0 to be infinite",
       default: 1000,
       value_label: ""
@@ -334,7 +334,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "system.Login message",
       section: "Login",
       type: "string",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "A message sent to all users when they login, leave empty for no message",
       default: "",
       value_label: ""
@@ -346,7 +346,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "system.Redirect url",
       section: "System",
       type: "string",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "A redirect URL for those accessing the old server",
       value_label: "The URL for the redirect"
     })
@@ -356,7 +356,7 @@ defmodule Teiserver.TeiserverConfigs do
       section: "System",
       type: "boolean",
       default: false,
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "When enabled sockets not authenticated after 60 seconds will be disconnected",
       value_label: "Disconnect unauthenticated sockets"
     })
@@ -365,7 +365,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "system.Process matches",
       section: "System",
       type: "boolean",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "Enable/disable post processing of matches",
       default: true,
       value_label: "Enable"
@@ -375,7 +375,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "system.Use geoip",
       section: "System",
       type: "boolean",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "When enabled you will use geoip for country code lookups",
       default: true,
       value_label: ""
@@ -387,7 +387,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Uncertainty required to show rating",
       section: "Lobbies",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The maximum value uncertainty can be before in-game rating is shown ",
       default: 10
     })
@@ -396,7 +396,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Allow tournament command",
       section: "Lobbies",
       type: "boolean",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description:
         "When set to true, the $tournament command will be able to be used. When disabled it can still be used but only to turn off tournament mode.",
       default: false
@@ -406,7 +406,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Default player limit",
       section: "Lobbies",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The default player limit for lobbies",
       default: 16
     })
@@ -415,7 +415,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Max deviation",
       section: "Lobbies",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description:
         "The maximum deviation in mixed party-solo balance before it reverts to purely solo balance",
       default: 10
@@ -425,7 +425,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Enable server balance",
       section: "Lobbies",
       type: "boolean",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "Enable server-side balance for lobbies",
       default: true
     })
@@ -434,7 +434,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Curse word score A",
       section: "Lobbies",
       type: "integer",
-      permissions: ["teiserver.admin.account"],
+      permissions: ["Server"],
       description: "Points for the harshest of curse words",
       default: 10
     })
@@ -443,7 +443,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Curse word score B",
       section: "Lobbies",
       type: "integer",
-      permissions: ["teiserver.admin.account"],
+      permissions: ["Server"],
       description: "Points for the middlest of curse words",
       default: 4
     })
@@ -452,7 +452,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Curse word score C",
       section: "Lobbies",
       type: "integer",
-      permissions: ["teiserver.admin.account"],
+      permissions: ["Server"],
       description: "Points for the lightest of curse words",
       default: 1
     })
@@ -463,7 +463,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Bridge from discord",
       section: "Discord",
       type: "boolean",
-      permissions: ["teiserver.staff.moderator"],
+      permissions: ["Moderator"],
       description: "Enables bridging from discord to in-lobby channels",
       default: true
     })
@@ -472,7 +472,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Bridge from server",
       section: "Discord",
       type: "boolean",
-      permissions: ["teiserver.staff.moderator"],
+      permissions: ["Moderator"],
       description: "Enables bridging from in-lobby channels to discord",
       default: true
     })
@@ -481,7 +481,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Bridge player numbers",
       section: "Discord",
       type: "boolean",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "Enables bridging of channel names to discord",
       default: true
     })
@@ -490,7 +490,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Discord channel #main",
       section: "Discord",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The discord ID for the channel to bridge with #main"
     })
 
@@ -498,7 +498,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Discord channel #newbies",
       section: "Discord",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The discord ID for the channel to bridge with #newbies"
     })
 
@@ -506,7 +506,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Discord channel #promote",
       section: "Discord",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The discord ID for the channel to bridge for promoting games"
     })
 
@@ -514,7 +514,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Discord channel #overwatch-reports",
       section: "Discord",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The discord ID for the channel to post overwatch specific reports"
     })
 
@@ -522,7 +522,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Discord channel #moderation-reports",
       section: "Discord",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The discord ID for the channel to post moderation-reports"
     })
 
@@ -530,7 +530,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Discord channel #moderation-actions",
       section: "Discord",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The discord ID for the channel to post moderation-actions"
     })
 
@@ -538,7 +538,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Discord channel #server-updates",
       section: "Discord",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The discord ID for the channel to post server updates"
     })
 
@@ -546,7 +546,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Discord channel #telemetry-infologs",
       section: "Discord",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The discord ID for the channel to post infologs"
     })
 
@@ -554,7 +554,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Discord forum #gdt-discussion",
       section: "Discord",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The discord ID for the forum for starting GDT discussions"
     })
 
@@ -562,7 +562,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Discord forum #gdt-voting",
       section: "Discord",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The discord ID for the forum for starting GDT voting"
     })
 
@@ -571,7 +571,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Discord counter clients",
       section: "Discord",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The discord ID for the channel broadcasting client count"
     })
 
@@ -579,7 +579,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Discord counter players",
       section: "Discord",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The discord ID for the channel broadcasting player count"
     })
 
@@ -587,7 +587,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Discord counter matches",
       section: "Discord",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The discord ID for the channel broadcasting match count"
     })
 
@@ -595,7 +595,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Discord counter lobbies",
       section: "Discord",
       type: "integer",
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "The discord ID for the channel broadcasting lobby count"
     })
   end
@@ -607,7 +607,7 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Debug",
       type: "boolean",
       default: false,
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "Print all outgoing messages"
     })
 
@@ -616,7 +616,7 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Debug",
       type: "boolean",
       default: false,
-      permissions: ["teiserver.admin"],
+      permissions: ["Admin"],
       description: "Print all incoming messages"
     })
   end

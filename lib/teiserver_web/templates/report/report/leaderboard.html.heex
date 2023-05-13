@@ -1,5 +1,5 @@
 <% {_fg, _bg, bsname} = view_colour() |> colours()
-user_moderator = allow?(@current_user, "teiserver.staff.moderator") %>
+user_moderator = allow?(@current_user, "Moderator") %>
 
 <%= render(
   TeiserverWeb.Report.GeneralView,

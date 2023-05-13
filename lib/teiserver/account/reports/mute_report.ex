@@ -7,7 +7,7 @@ defmodule Teiserver.Account.MuteReport do
   def icon(), do: "fa-regular fa-microphone-slash"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "teiserver.staff.reviewer"
+  def permissions(), do: "Reviewer"
 
   @spec run(Plug.Conn.t(), map()) :: {list(), map()}
   def run(_conn, params) do
