@@ -77,9 +77,6 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
             player_minutes: data.player,
             total_minutes: data.menu + data.lobby + data.spectator + data.player
           })
-
-          user = User.get_user_by_id(userid)
-          User.update_user(%{user | rank: User.calculate_rank(user.id)}, persist: true)
         end)
       end)
 
