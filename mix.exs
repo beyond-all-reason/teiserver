@@ -89,7 +89,7 @@ defmodule Central.MixProject do
       {:ex_ulid, "~> 0.1.0"},
 
       # Teiserver libs
-      {:openskill, git: "git@github.com:Teifion/openskill.ex.git", branch: "master"},
+      {:openskill, git: "https://github.com/Teifion/openskill.ex.git", branch: "master"},
       {:cowboy, "~> 2.9"},
       {:statistics, "~> 0.6.2"},
       {:csv, "~> 2.4"},
