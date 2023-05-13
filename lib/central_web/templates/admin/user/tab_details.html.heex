@@ -19,6 +19,11 @@
   value: @user.colour
 ) %>
 
+<%= central_component("detail_line",
+  label: "Permissions",
+  value: Enum.join(@user.permissions, ", ")
+) %>
+
 <%= if @user.admin_group do %>
   <%= central_component("detail_line",
     label: "Admin group",
