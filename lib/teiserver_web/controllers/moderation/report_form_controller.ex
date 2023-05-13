@@ -19,28 +19,36 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, %{"id" => id}) do
-    case Account.get_user(id) do
-      nil ->
-        render(conn, "no_user.html")
+    target_id = int_parse(id)
 
-      target ->
-        cutoff = Timex.now() |> Timex.shift(hours: -36)
+    if conn.assigns.current_user.id == target_id do
+      conn
+      |> put_status(:unprocessable_entity)
+      |> render("self_report.html")
+    else
+      case Account.get_user(target_id) do
+        nil ->
+          render(conn, "no_user.html")
 
-        matches =
-          Battle.list_matches(
-            search: [
-              finished_after: cutoff,
-              user_id: target.id
-            ],
-            order_by: "Newest first"
-          )
+        target ->
+          cutoff = Timex.now() |> Timex.shift(hours: -36)
 
-        conn
-        |> assign(:sections, ReportLib.sections())
-        |> assign(:sub_sections, ReportLib.sub_sections())
-        |> assign(:matches, matches)
-        |> assign(:target, target)
-        |> render("index.html")
+          matches =
+            Battle.list_matches(
+              search: [
+                finished_after: cutoff,
+                user_id: target.id
+              ],
+              order_by: "Newest first"
+            )
+
+          conn
+          |> assign(:sections, ReportLib.sections())
+          |> assign(:sub_sections, ReportLib.sub_sections())
+          |> assign(:matches, matches)
+          |> assign(:target, target)
+          |> render("index.html")
+      end
     end
   end
 
@@ -48,59 +56,63 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
   def create(conn, %{"report" => report}) do
     target_id = report["target_id"] |> int_parse
 
-    {match_id, relationship} =
-      case report["match_id"] do
-        "none" ->
-          {nil, nil}
+    if conn.assigns.current_user.id == target_id do
+      conn
+      |> put_status(:unprocessable_entity)
+      |> render("self_report.html")
+    else
+      {match_id, relationship} =
+        case report["match_id"] do
+          "none" ->
+            {nil, nil}
 
-        match_id_str ->
-          case Battle.get_match(match_id_str, preload: [:members]) do
-            nil ->
-              {nil, nil}
+          match_id_str ->
+            case Battle.get_match(match_id_str, preload: [:members]) do
+              nil ->
+                {nil, nil}
 
-            match ->
-              target_member =
-                match.members
-                |> Enum.find(fn member -> member.user_id == target_id end)
+              match ->
+                target_member =
+                  match.members
+                  |> Enum.find(fn member -> member.user_id == target_id end)
 
-              reporter_member =
-                match.members
-                |> Enum.find(fn member -> member.user_id == conn.assigns.current_user.id end)
+                reporter_member =
+                  match.members
+                  |> Enum.find(fn member -> member.user_id == conn.assigns.current_user.id end)
 
-              relationship =
-                cond do
-                  reporter_member == nil -> nil
-                  target_member.team_id == reporter_member.team_id -> "Allies"
-                  target_member.team_id != reporter_member.team_id -> "Opponents"
-                end
+                relationship =
+                  cond do
+                    reporter_member == nil -> nil
+                    target_member.team_id == reporter_member.team_id -> "Allies"
+                    target_member.team_id != reporter_member.team_id -> "Opponents"
+                  end
 
-              {match.id, relationship}
-          end
+                {match.id, relationship}
+            end
+        end
+      result =
+        Moderation.create_report(%{
+          reporter_id: conn.assigns.current_user.id,
+          target_id: report["target_id"],
+          type: report["type"],
+          sub_type: report["sub_type"],
+          extra_text: report["extra_text"],
+          match_id: match_id,
+          relationship: relationship
+        })
+
+      case result do
+        {:ok, _report} ->
+          conn
+          |> redirect(to: Routes.moderation_report_form_path(conn, :success))
+
+        {:error, changeset} ->
+          Logger.error(Kernel.inspect(changeset))
+          raise "Error submitting report"
+
+          conn
+          |> render("index.html")
       end
-
-    result =
-      Moderation.create_report(%{
-        reporter_id: conn.assigns.current_user.id,
-        target_id: report["target_id"],
-        type: report["type"],
-        sub_type: report["sub_type"],
-        extra_text: report["extra_text"],
-        match_id: match_id,
-        relationship: relationship
-      })
-
-    case result do
-      {:ok, _report} ->
-        conn
-        |> redirect(to: Routes.moderation_report_form_path(conn, :success))
-
-      {:error, changeset} ->
-        Logger.error(Kernel.inspect(changeset))
-        raise "Error submitting report"
-
-        conn
-        |> render("index.html")
-    end
   end
 
   @spec success(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

@@ -1247,8 +1247,7 @@ defmodule Teiserver.User do
     rating = Account.get_player_highest_leaderboard_rating(userid)
 
     @rank_levels
-    |> Enum.filter(fn r -> r <= rating end)
-    |> Enum.count()
+    |> Enum.count(fn r -> r <= rating end)
   end
 
   # Used to reset the spring password of the user when the site password is updated

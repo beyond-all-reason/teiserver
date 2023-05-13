@@ -18,3 +18,8 @@
   },
   value: @user.colour
 ) %>
+
+<%= central_component("detail_line",
+  label: "Permissions",
+  value: Enum.join(@user.permissions, ", ")
+) %>

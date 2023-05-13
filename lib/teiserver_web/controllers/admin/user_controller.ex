@@ -247,25 +247,25 @@ defmodule TeiserverWeb.Admin.UserController do
 
     roles =
       [
-        {"verified", "Verified"},
-        {"bot", "Bot"},
-        {"moderator", "Moderator"},
-        {"admin", "Admin"},
-        {"streamer", "Streamer"},
-        {"trusted", "Trusted"},
-        {"tester", "Tester"},
-        {"non-bridged", "Non-bridged"},
-        {"donor", "Donor"},
-        {"contributor", "Contributor"},
-        {"caster", "Caster"},
-        {"core", "Core team"},
-        {"vip", "VIP"},
-        {"overwatch", "Overwatch"},
-        {"reviewer", "Reviewer"},
-        {"tournament-player", "Tournament player"},
-        {"gdt", "GDT"}
+        "Verified",
+        "Bot",
+        "Moderator",
+        "Server",
+        "Admin",
+        "Streamer",
+        "Trusted",
+        "Tester",
+        "Donor",
+        "Contributor",
+        "Caster",
+        "Core",
+        "VIP",
+        "Overwatch",
+        "Reviewer",
+        "Tournament",
+        "GDT"
       ]
-      |> Enum.map(fn {k, v} -> if user_params[k] == "true", do: v end)
+      |> Enum.map(fn role -> if user_params[role] == "true", do: role end)
       |> Enum.reject(&(&1 == nil))
 
     data =

@@ -274,7 +274,7 @@ defmodule Teiserver.Game.QueueMatchServer do
     |> Enum.each(fn userid ->
       client = Account.get_client_by_id(userid)
 
-      if client.lobby_id do
+      if client != nil and client.lobby_id do
         Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
       end
     end)

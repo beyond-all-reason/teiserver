@@ -278,6 +278,18 @@ defmodule Central.Account do
     end
   end
 
+  def authenticate_user(_conn, "", _plain_text_password) do
+    Argon2.no_user_verify()
+    Argon2.no_user_verify()
+    {:error, "Invalid credentials"}
+  end
+
+  def authenticate_user(_conn, _, "") do
+    Argon2.no_user_verify()
+    Argon2.no_user_verify()
+    {:error, "Invalid credentials"}
+  end
+
   def authenticate_user(conn, email, plain_text_password) do
     case get_user_by_email(email) do
       nil ->

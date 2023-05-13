@@ -506,7 +506,7 @@ defmodule CentralWeb.Router do
     get("/action/new_with_user", ActionController, :new_with_user)
     put("/action/halt/:id", ActionController, :halt)
     put("/action/re-post/:id", ActionController, :re_post)
-    resources("/action", ActionController, only: [:index, :show, :new, :create, :edit, :update])
+    resources("/action", ActionController, only: [:index, :show, :new, :create, :edit, :update, :delete])
 
     get("/proposal/new_with_user", ProposalController, :new_with_user)
     put("/proposal/vote/:proposal_id/:direction", ProposalController, :vote)
