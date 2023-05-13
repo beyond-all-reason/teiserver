@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.{Account, Chat, Game}
   alias Teiserver.Game.MatchRatingLib
   alias Central.Account.User
-  alias Teiserver.Account.UserLib
+  alias Teiserver.Account.{UserLib, RoleLib}
   alias Teiserver.Battle.BalanceLib
   alias Central.Account.GroupLib
   import Central.Helpers.NumberHelper, only: [int_parse: 1, float_parse: 1]
@@ -146,24 +146,13 @@ defmodule TeiserverWeb.Admin.UserController do
 
         user_stats = Account.get_user_stat_data(user.id)
 
-        roles =
-          (user.data["roles"] || [])
-          |> Enum.map(fn r ->
-            {r, UserLib.role_def(r)}
-          end)
-          |> Enum.filter(fn {_, v} -> v != nil end)
-          |> Enum.map(fn {role, {colour, icon}} ->
-            {role, colour, icon}
-          end)
-
         client = Account.get_client_by_id(user.id)
 
         conn
-        |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
         |> assign(:user, user)
         |> assign(:client, client)
         |> assign(:user_stats, user_stats)
-        |> assign(:roles, roles)
+        |> assign(:role_data, RoleLib.role_data())
         |> assign(:section_menu_active, "show")
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
         |> render("show.html")
@@ -230,12 +219,12 @@ defmodule TeiserverWeb.Admin.UserController do
         |> assign(:user, user)
         |> assign(:changeset, changeset)
         |> assign(:groups, GroupLib.dropdown(conn))
-        |> assign(:management_roles, UserLib.management_roles())
-        |> assign(:moderation_roles, UserLib.moderation_roles())
-        |> assign(:staff_roles, UserLib.staff_roles())
-        |> assign(:privileged_roles, UserLib.privileged_roles())
-        |> assign(:property_roles, UserLib.property_roles())
-        |> assign(:role_styling_map, UserLib.role_styling_map())
+        |> assign(:management_roles, RoleLib.management_roles())
+        |> assign(:moderation_roles, RoleLib.moderation_roles())
+        |> assign(:staff_roles, RoleLib.staff_roles())
+        |> assign(:privileged_roles, RoleLib.privileged_roles())
+        |> assign(:property_roles, RoleLib.property_roles())
+        |> assign(:role_styling_map, RoleLib.role_data())
         |> add_breadcrumb(name: "Edit: #{user.name}", url: conn.request_path)
         |> render("edit.html")
 
@@ -247,48 +236,90 @@ defmodule TeiserverWeb.Admin.UserController do
   end
 
   @spec update(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def update(conn, %{"id" => id, "user" => user_params}) do
+  def update(conn, %{"id" => id, "user" => user_params} = params) do
+    current_user = conn.assigns.current_user
     user = Account.get_user!(id)
 
-    roles =
-      [
-        {"verified", "Verified"},
-        {"bot", "Bot"},
-        {"moderator", "Moderator"},
-        {"admin", "Admin"},
-        {"streamer", "Streamer"},
-        {"trusted", "Trusted"},
-        {"tester", "Tester"},
-        {"non-bridged", "Non-bridged"},
-        {"donor", "Donor"},
-        {"contributor", "Contributor"},
-        {"caster", "Caster"},
-        {"core", "Core team"},
-        {"vip", "VIP"},
-        {"overwatch", "Overwatch"},
-        {"reviewer", "Reviewer"},
-        {"tournament-player", "Tournament player"},
-        {"gdt", "GDT"}
-      ]
-      |> Enum.map(fn {k, v} -> if user_params[k] == "true", do: v end)
-      |> Enum.reject(&(&1 == nil))
+    changeable_roles = cond do
+      Enum.member?(current_user.data["roles"], "Server") -> RoleLib.allowed_role_management("Server")
+      Enum.member?(current_user.data["roles"], "Admin") -> RoleLib.allowed_role_management("Admin")
+      Enum.member?(current_user.data["roles"], "Moderator") -> RoleLib.allowed_role_management("Moderator")
+      true -> []
+    end
+
+    # First we remove all roles we're allowed to add
+    user_roles = changeable_roles
+      |> Enum.reduce(user.data["roles"], fn (role, user_roles) ->
+        selected = user_params[role] == "true"
+
+        if selected do
+          [role | user_roles]
+        else
+          List.delete(user_roles, role)
+        end
+      end)
+      |> Enum.uniq
+
+    IO.puts ""
+    IO.inspect user_params
+    IO.puts ""
+
+    IO.puts ""
+    IO.inspect user_roles
+    IO.inspect changeable_roles
+    IO.puts ""
+
+    # roles =
+    #   [
+    #     {"verified", "Verified"},
+    #     {"bot", "Bot"},
+    #     {"moderator", "Moderator"},
+    #     {"admin", "Admin"},
+    #     {"streamer", "Streamer"},
+    #     {"trusted", "Trusted"},
+    #     {"tester", "Tester"},
+    #     {"non-bridged", "Non-bridged"},
+    #     {"donor", "Donor"},
+    #     {"contributor", "Contributor"},
+    #     {"caster", "Caster"},
+    #     {"core", "Core team"},
+    #     {"vip", "VIP"},
+    #     {"overwatch", "Overwatch"},
+    #     {"reviewer", "Reviewer"},
+    #     {"tournament-player", "Tournament player"},
+    #     {"gdt", "GDT"}
+    #   ]
+    #   |> Enum.map(fn {k, v} -> if user_params[k] == "true", do: v end)
+    #   |> Enum.reject(&(&1 == nil))
 
     data =
       Map.merge(user.data || %{}, %{
         "bot" => user_params["bot"] == "true",
         "moderator" => user_params["moderator"] == "true",
         "verified" => user_params["verified"] == "true",
-        "roles" => roles
+        "roles" => user_roles
       })
 
-    user_params = Map.put(user_params, "data", data)
+    user_params = Map.merge(user_params, %{
+      "data" => data,
+      "permissions" => user_roles
+    })
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        case Account.update_user(user, user_params) do
-          {:ok, user} ->
-            Account.update_user_roles(user)
+        change_result = cond do
+          allow?(conn, "Server") ->
+            Account.server_update_user(user, user_params)
 
+          allow?(conn, "Admin") ->
+            Account.update_user(user, user_params)
+
+          allow?(conn, "Moderator") ->
+            Account.update_user(user, user_params)
+        end
+
+        case change_result do
+          {:ok, user} ->
             conn
             |> put_flash(:info, "User updated successfully.")
             # |> redirect(to: ~p"/teiserver/admin/user")
@@ -797,6 +828,9 @@ defmodule TeiserverWeb.Admin.UserController do
     else
       Account.update_user_stat(user.id, %{key => value})
     end
+
+    Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user.id)
+    Teiserver.User.recache_user(user.id)
 
     conn
     |> put_flash(:success, "stat #{key} updated")

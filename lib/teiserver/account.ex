@@ -6,7 +6,7 @@ defmodule Teiserver.Account do
 
   # Mostly a wrapper around Central.Account
   alias Central.Account.User
-  alias Teiserver.Account.UserLib
+  alias Teiserver.Account.{UserLib, RoleLib}
   alias Central.Helpers.QueryHelpers
 
   @doc """
@@ -101,6 +101,15 @@ defmodule Teiserver.Account do
 
     user
     |> User.changeset(attrs, :limited_with_data)
+    |> Repo.update()
+    |> Central.Account.broadcast_update_user()
+  end
+
+  def server_update_user(%User{} = user, attrs) do
+    Central.Account.recache_user(user.id)
+
+    user
+    |> User.changeset(attrs)
     |> Repo.update()
     |> Central.Account.broadcast_update_user()
   end
@@ -203,65 +212,6 @@ defmodule Teiserver.Account do
     ]
     |> Enum.filter(fn r -> r != nil end)
     |> Enum.map(fn r -> String.downcase(r) end)
-  end
-
-  @spec update_user_roles(Central.Account.User.t()) :: any
-  def update_user_roles(user) do
-    staff_roles = Teiserver.User.staff_role_list()
-
-    # First we remove all these permissions
-    user_remove_permissions =
-      Teiserver.User.role_list()
-      |> Enum.map(fn r -> "teiserver.player.#{String.downcase(r)}" end)
-
-    staff_remove_permissions =
-      staff_roles
-      |> Enum.map(fn r -> "teiserver.staff.#{String.downcase(r)}" end)
-
-    remove_permissions =
-      user_remove_permissions ++ staff_remove_permissions ++ ["teiserver.staff"]
-
-    base_permissions =
-      user.permissions
-      |> Enum.filter(fn r -> not Enum.member?(remove_permissions, r) end)
-
-    # Then we add back in the ones we want this person to have
-    user_add_permissions =
-      user.data["roles"]
-      |> Enum.map(fn r -> "teiserver.player.#{String.downcase(r)}" end)
-
-    staff_add_permissions =
-      user.data["roles"]
-      |> Enum.filter(fn r -> Enum.member?(staff_roles, r) end)
-      |> Enum.map(fn r -> "teiserver.staff.#{String.downcase(r)}" end)
-
-    # Might need to give them "teiserver.staff"
-    staff_add_permissions =
-      if Enum.empty?(staff_add_permissions) do
-        []
-      else
-        ["teiserver.staff" | staff_add_permissions]
-      end
-
-    # Now certain ones are built on each other....
-    staff_add_permissions =
-      if Enum.member?(staff_add_permissions, "teiserver.staff.moderator") do
-        ["teiserver.staff.reviewer" | staff_add_permissions]
-      else
-        staff_add_permissions
-      end
-
-    staff_add_permissions =
-      if Enum.member?(staff_add_permissions, "teiserver.staff.reviewer") do
-        ["teiserver.staff.overwatch" | staff_add_permissions]
-      else
-        staff_add_permissions
-      end
-
-    # Do we need to give them staff roles?
-    permissions = base_permissions ++ user_add_permissions ++ staff_add_permissions
-
-    Central.Account.update_user(user, %{"permissions" => Enum.uniq(permissions)})
   end
 
   # Group stuff

@@ -107,6 +107,9 @@ defmodule Central.Account.AuthLib do
       Enum.member?(permissions_held, "admin.dev.developer") && permission_required != "debug" ->
         true
 
+      Enum.member?(permissions_held, "Server") && permission_required != "debug" ->
+        true
+
       # Standard "do you have permission" response
       Enum.member?(permissions_held, permission_required) ->
         true

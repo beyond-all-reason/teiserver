@@ -42,6 +42,7 @@ defmodule CentralWeb do
       alias Bodyguard.Plug.Authorize
 
       alias CentralWeb.Router.Helpers, as: Routes
+      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
 
       unquote(verified_routes())
 

@@ -2,6 +2,7 @@ defmodule Teiserver.Account.UserLib do
   use CentralWeb, :library
   require Logger
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.RoleLib
 
   # Functions
   @spec icon :: String.t()
@@ -329,100 +330,13 @@ defmodule Teiserver.Account.UserLib do
       preload: [user_stat: user_stats]
   end
 
-  @spec global_roles :: [String.t()]
-  def global_roles() do
-    ~w(Default Armada Cortex Raptor Scavenger)
-  end
 
-  @spec management_roles :: [String.t()]
-  def management_roles() do
-    ~w(Bot Server Admin)
-  end
-
-  @spec moderation_roles :: [String.t()]
-  def moderation_roles() do
-    ~w(Moderator Reviewer Overwatch)
-  end
-
-  @spec staff_roles :: [String.t()]
-  def staff_roles() do
-    ~w(Core Contributor GDT Tester)
-  end
-
-  @spec privileged_roles :: [String.t()]
-  def privileged_roles() do
-    ~w(VIP Caster Donor Tournament Trusted)
-  end
-
-  @spec property_roles :: [String.t()]
-  def property_roles() do
-    ~w(Verified Streamer)
-  end
-
-  def role_styling_map() do
-    %{
-      # Global
-      "Default" => %{colour: "#666666", icon: "fa-solid fa-user"},
-      "Armada" => %{colour: "#000066", icon: "fa-solid fa-a"},
-      "Cortex" => %{colour: "#660000", icon: "fa-solid fa-c"},
-      "Legion" => %{colour: "#006600", icon: "fa-solid fa-l"},
-      "Raptor" => %{colour: "#AA6600", icon: "fa-solid fa-drumstick"},
-      "Scavenger" => %{colour: "#660066", icon: "fa-solid fa-user-robot"},
-
-      # Authority
-      "Bot" => %{colour: "#777777", icon: "fa-solid fa-user-robot"},
-      "Server" => %{colour: "#AA2088", icon: "fa-solid fa-user-gear"},
-      "Admin" => %{colour: "#204A88", icon: "fa-solid fa-user-tie"},
-      "Moderator" => %{colour: "#FFAA00", icon: "fa-duotone fa-gavel"},
-      "Reviewer" => %{colour: "#AA7700", icon: "fa-duotone fa-user-magnifying-glass"},
-      "Overwatch" => %{colour: "#AA7733", icon: "fa-duotone fa-clipboard-list-check"},
-
-      # Staff
-      "Core" => %{colour: "#008800", icon: "fa-duotone fa-code-branch"},
-      "Contributor" => %{colour: "#00AA66", icon: "fa-duotone fa-code-commit"},
-      "GDT" => %{colour: "#AA0000", icon: "fa-duotone fa-pen-ruler"},
-      "Tester" => %{colour: "#00AAAA", icon: "fa-duotone fa-vial"},
-
-      # Privileged
-      "VIP" => %{colour: "#AA8833", icon: "fa-duotone fa-sparkles"},
-      "Caster" => %{colour: "#660066", icon: "fa-duotone fa-microphone-lines"},
-      "Donor" => %{colour: "#0066AA", icon: "fa-duotone fa-euro"},
-      "Streamer" => %{colour: "#0066AA", icon: "fa-brands fa-twitch"},
-      "Tournament" => %{colour: "#0000AA", icon: "fa-duotone fa-trophy"},
-      "Trusted" => %{colour: "#000000", icon: "fa-duotone fa-check"},
-      "Verified" => %{colour: "#66AA66", icon: "fa-duotone fa-check"},
-    }
-  end
-
-  @spec role_def(String.t()) :: nil | {String.t(), String.t()}
-  def role_def("Default"), do: {"#666666", "fa-solid fa-user"}
-  def role_def("Armada"), do: {"#000066", "fa-solid fa-a"}
-  def role_def("Cortex"), do: {"#660000", "fa-solid fa-c"}
-  def role_def("Legion"), do: {"#006600", "fa-solid fa-l"}
-  def role_def("Raptor"), do: {"#AA6600", "fa-solid fa-drumstick"}
-  def role_def("Scavenger"), do: {"#660066", "fa-solid fa-user-robot"}
-
-  def role_def("Admin"), do: {"#CE5C00", "fa-duotone fa-user-circle"}
-  def role_def("Moderator"), do: {"#FFAA00", "fa-duotone fa-gavel"}
-  def role_def("Reviewer"), do: {"#AA7700", "fa-duotone fa-user-magnifying-glass"}
-  def role_def("Overwatch"), do: {"#AA7733", "fa-duotone fa-clipboard-list-check"}
-  def role_def("Core team"), do: {"#008800", "fa-duotone fa-code-branch"}
-  def role_def("GDT"), do: {"#AA0000", "fa-duotone fa-pen-ruler"}
-  def role_def("VIP"), do: {"#AA8833", "fa-duotone fa-sparkles"}
-  def role_def("Contributor"), do: {"#00AA66", "fa-duotone fa-code-commit"}
-  def role_def("Tournament player"), do: {"#0000AA", "fa-duotone fa-trophy"}
-
-  def role_def("Caster"), do: {"#660066", "fa-duotone fa-microphone-lines"}
-  def role_def("Donor"), do: {"#0066AA", "fa-duotone fa-euro"}
-  def role_def("Streamer"), do: {"#0066AA", "fa-brands fa-twitch"}
-
-  def role_def(_), do: nil
 
   @spec generate_user_icons(T.user()) :: map()
   def generate_user_icons(user) do
     role_icons =
       user.roles
-      |> Enum.filter(fn r -> role_def(r) != nil end)
+      |> Enum.filter(fn r -> RoleLib.role_def(r) != nil end)
       |> Map.new(fn r -> {r, 1} end)
 
     %{

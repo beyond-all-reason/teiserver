@@ -24,14 +24,6 @@ defmodule Teiserver.User do
 
   @suspended_string "This account has been suspended. You can see the #moderation-bot on discord for more details; if you need to appeal anything please use the #open-ticket channel on the discord. Be aware, trying to evade moderation by creating new accounts will result in extending the suspension or even a permanent ban."
 
-  @spec role_list :: [String.t()]
-  def role_list(),
-    do:
-      ~w(Tester Streamer Donor Reviewer Overwatch Caster Contributor GDT Dev Moderator Admin Verified Bot VIP TournamentPlayer)
-
-  def staff_role_list(),
-    do: ~w(Reviewer Overwatch Moderator)
-
   @spec keys() :: [atom]
   def keys(),
     do: [
@@ -1217,24 +1209,18 @@ defmodule Teiserver.User do
   @spec is_bot?(T.userid() | T.user()) :: boolean()
   def is_bot?(nil), do: true
   def is_bot?(userid) when is_integer(userid), do: is_bot?(get_user_by_id(userid))
-  # TODO: Remove this once the transition is complete
-  def is_bot?(%{bot: true}), do: true
   def is_bot?(%{roles: roles}), do: Enum.member?(roles, "Bot")
   def is_bot?(_), do: false
 
   @spec is_moderator?(T.userid() | T.user()) :: boolean()
   def is_moderator?(nil), do: true
   def is_moderator?(userid) when is_integer(userid), do: is_moderator?(get_user_by_id(userid))
-  # TODO: Remove this once the transition is complete
-  def is_moderator?(%{moderator: true}), do: true
   def is_moderator?(%{roles: roles}), do: Enum.member?(roles, "Moderator")
   def is_moderator?(_), do: false
 
   @spec is_verified?(T.userid() | T.user()) :: boolean()
   def is_verified?(nil), do: true
   def is_verified?(userid) when is_integer(userid), do: is_verified?(get_user_by_id(userid))
-  # TODO: Remove this once the transition is complete
-  def is_verified?(%{verified: true}), do: true
   def is_verified?(%{roles: roles}), do: Enum.member?(roles, "Verified")
   def is_verified?(_), do: false
 
@@ -1264,8 +1250,7 @@ defmodule Teiserver.User do
     rating = Account.get_player_highest_leaderboard_rating(userid)
 
     @rank_levels
-    |> Enum.filter(fn r -> r <= rating end)
-    |> Enum.count()
+    |> Enum.count(fn r -> r <= rating end)
   end
 
   # Used to reset the spring password of the user when the site password is updated
