@@ -19,38 +19,47 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, %{"id" => id}) do
-    case Account.get_user(id) do
-      nil ->
-        render(conn, "no_user.html")
+    target_id = int_parse(id)
 
-      target ->
-        cutoff = Timex.now() |> Timex.shift(hours: -36)
+    if conn.assigns.current_user.id == target_id do
+      conn
+      |> put_status(:unprocessable_entity)
+      |> render("self_report.html")
+    else
+      case Account.get_user(target_id) do
+        nil ->
+          render(conn, "no_user.html")
 
-        matches =
-          Battle.list_matches(
-            search: [
-              finished_after: cutoff,
-              user_id: target.id
-            ],
-            order_by: "Newest first"
-          )
+        target ->
+          cutoff = Timex.now() |> Timex.shift(hours: -36)
 
-        conn
-        |> assign(:sections, ReportLib.sections())
-        |> assign(:sub_sections, ReportLib.sub_sections())
-        |> assign(:matches, matches)
-        |> assign(:target, target)
-        |> render("index.html")
+          matches =
+            Battle.list_matches(
+              search: [
+                finished_after: cutoff,
+                user_id: target.id
+              ],
+              order_by: "Newest first"
+            )
+
+          conn
+          |> assign(:sections, ReportLib.sections())
+          |> assign(:sub_sections, ReportLib.sub_sections())
+          |> assign(:matches, matches)
+          |> assign(:target, target)
+          |> render("index.html")
+      end
     end
   end
 
   @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def create(conn, %{"report" => report}) do
     target_id = report["target_id"] |> int_parse
+
     if conn.assigns.current_user.id == target_id do
       conn
       |> put_status(:unprocessable_entity)
-      |> render("self_report.html", message: "You cannot report yourself.")
+      |> render("self_report.html")
     else
       {match_id, relationship} =
         case report["match_id"] do
@@ -93,7 +102,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
         })
 
       case result do
-        {:ok, report} ->
+        {:ok, _report} ->
           conn
           |> redirect(to: Routes.moderation_report_form_path(conn, :success))
 
