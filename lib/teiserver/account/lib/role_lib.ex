@@ -3,7 +3,7 @@ defmodule Teiserver.Account.RoleLib do
   A library with all the hard-coded data regarding user roles.
   """
 
-  @role_data %{
+  @raw_role_data %{
     # Global
     "Default" => %{colour: "#666666", icon: "fa-solid fa-user", contains: ~w(), badge: false},
     "Armada" => %{colour: "#000066", icon: "fa-solid fa-a", contains: ~w(), badge: false},
@@ -35,6 +35,21 @@ defmodule Teiserver.Account.RoleLib do
     "Trusted" => %{colour: "#000000", icon: "fa-duotone fa-check", contains: ~w()},
     "Verified" => %{colour: "#66AA66", icon: "fa-duotone fa-check", contains: ~w(), badge: false},
   }
+
+  # Given a role name it returns the list of roles (recursively) it contains
+  @spec build_contains_map(String.t()) :: [String.t()]
+  defp build_contains_map(name) do
+    @raw_role_data[name]
+      |> Map.get(:contains, [])
+      |> Enum.map(fn r -> build_contains_map(name) end)
+  end
+
+  @role_data @raw_role_data
+    |> Map.new(fn {name, role} ->
+      role = Map.merge(role, %{
+        contains: build_contains_map(name)
+      })
+    end)
 
   @spec role_data() :: map()
   def role_data() do
