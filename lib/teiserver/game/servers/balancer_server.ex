@@ -147,6 +147,7 @@ defmodule Teiserver.Game.BalancerServer do
   defp make_player_hash(team_count, players, opts) do
     client_string =
       players
+      |> Enum.reject(&(&1 == nil))
       |> Enum.sort_by(fn c -> c.userid end)
       |> Enum.map_join(",", fn c -> "#{c.userid}:#{c.party_id}" end)
 
