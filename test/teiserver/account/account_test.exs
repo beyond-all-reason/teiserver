@@ -3,6 +3,9 @@ defmodule Teiserver.AccountTest do
 
   alias Teiserver.Account
   alias Central.Account.AccountTestLib
+  alias Teiserver.Account.RelationsLib
+  alias Central.Communication
+  alias Central.Helpers.GeneralTestLib
 
   describe "users" do
     alias Central.Account.User
@@ -125,6 +128,39 @@ defmodule Teiserver.AccountTest do
       user = AccountTestLib.user_fixture()
       assert {:ok, %User{}} = Account.delete_user(user)
       assert_raise Ecto.NoResultsError, fn -> Account.get_user!(user.id) end
+    end
+
+    test "delete_user/1 removes friend references prior to delete" do
+      # Create a User
+      user = GeneralTestLib.make_user()
+      assert Account.get_user(user.id) == user
+
+      # Create a friend <3
+      friend = GeneralTestLib.make_user()
+      assert Account.get_user(friend.id) == friend
+      RelationsLib.create_friend_request(user.id, friend.id)
+      RelationsLib.accept_friend_request(user.id, friend.id)
+
+      # Mute/Ignore a friend </3
+      RelationsLib.ignore_user(friend.id, user.id)
+
+      # Cant delete a user with refs in the notifications table.
+      Communication.delete_all_notifications(user.id)
+      Communication.delete_all_notifications(friend.id)
+
+      # Delete User
+      assert {:ok, %User{}} = Account.delete_user(user)
+      assert_raise Ecto.NoResultsError, fn -> Account.get_user!(user.id) end
+      Account.decache_user(user.id)
+
+      # Assert user has no friends :(
+      friend_accnt = Account.get_user(friend.id)
+      friends_list = friend_accnt.data["friends"]
+      assert friends_list == []  # Currently Fails
+
+      # Assert user has no ignores
+      ignored_list = friend_accnt.data["ignored"]
+      assert ignored_list == [] # Currently Fails
     end
 
     test "change_user/1 returns a user changeset" do
