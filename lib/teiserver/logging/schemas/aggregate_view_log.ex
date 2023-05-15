@@ -21,7 +21,6 @@ defmodule Teiserver.Logging.AggregateViewLog do
     field :hourly_uniques, {:array, :integer}
     field :hourly_average_load_times, {:array, :integer}
 
-    field :user_data, :map
     field :section_data, :map
   end
 
@@ -41,7 +40,6 @@ defmodule Teiserver.Logging.AggregateViewLog do
       :hourly_views,
       :hourly_uniques,
       :hourly_average_load_times,
-      :user_data,
       :section_data
     ])
     |> validate_required([
@@ -57,7 +55,6 @@ defmodule Teiserver.Logging.AggregateViewLog do
       :hourly_views,
       :hourly_uniques,
       :hourly_average_load_times,
-      :user_data,
       :section_data
     ])
   end

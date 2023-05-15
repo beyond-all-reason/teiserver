@@ -42,13 +42,8 @@ defmodule TeiserverWeb.Logging.AggregateViewLogController do
 
     log = Logging.get_aggregate_view_log!(date)
 
-    users =
-      [log]
-      |> AggregateViewLogLib.user_lookup()
-
     conn
     |> assign(:log, log)
-    |> assign(:users, users)
     |> render("show.html")
   end
 
