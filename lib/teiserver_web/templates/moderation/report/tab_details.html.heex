@@ -35,7 +35,7 @@
               &nbsp;&nbsp;
               <%= if allow?(@conn, "Moderator") do %>
                 <a
-                  href={~p"/teiserver/admin/lobbies/#{@report.match_id}/lobby_chat"}
+                  href={~p"/teiserver/admin/lobbies/#{@report.match_id}/lobby_chat/all"}
                   class="btn btn-secondary btn-sm"
                 >
                   Chat
