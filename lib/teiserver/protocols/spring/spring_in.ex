@@ -1374,6 +1374,9 @@ defmodule Teiserver.Protocols.SpringIn do
 
             {false, _} ->
               Client.update(existing, :client_updated_battlestatus)
+
+            nil ->
+              :ok
           end
         end
 

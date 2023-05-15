@@ -23,6 +23,10 @@ defmodule Teiserver.Account.ClientIndexThrottle do
   end
 
   # Battle
+  def handle_info(%{channel: "teiserver_global_user_updates", client: nil}, state) do
+    {:noreply, state}
+  end
+
   def handle_info(%{channel: "teiserver_global_user_updates"} = msg, state) do
     new_clients = [msg.client.userid | state.new_clients]
     {:noreply, %{state | new_clients: new_clients}}

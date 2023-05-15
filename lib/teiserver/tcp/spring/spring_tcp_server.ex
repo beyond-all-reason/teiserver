@@ -911,6 +911,10 @@ defmodule Teiserver.SpringTcpServer do
     %{state | known_users: new_knowns}
   end
 
+  defp user_leave_battle(nil, _, state) do
+    state
+  end
+
   defp user_leave_battle(client, lobby_id, state) do
     # If they are kicked then it's possible they won't be unsubbed
     userid = client.userid

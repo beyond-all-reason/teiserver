@@ -177,7 +177,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
       _ ->
         Logger.warn(
-          "[MatchMonitorServer] match-chat nomatch from: #{from_id}: match-chat #{data}"
+          "match-chat nomatch from: #{from_id}: match-chat #{data}"
         )
     end
 
@@ -217,7 +217,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
       _ ->
         Logger.warn(
-          "[MatchMonitorServer] match-chat-name nomatch from: #{from_id}: match-chat [[#{data}]]"
+          "match-chat-name nomatch from: #{from_id}: match-chat [[#{data}]]"
         )
     end
 
@@ -242,18 +242,18 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
               _ ->
                 Logger.warn(
-                  "[MatchMonitorServer] AHM DM no catch, no json-decode - '#{contents_string}'"
+                  "AHM DM no catch, no json-decode - '#{contents_string}'"
                 )
             end
 
           _ ->
             Logger.warn(
-              "[MatchMonitorServer] AHM DM no catch, no decompress - '#{compressed_contents}'"
+              "AHM DM no catch, no decompress - '#{compressed_contents}'"
             )
         end
 
       _ ->
-        Logger.warn("[MatchMonitorServer] AHM DM no catch, no base64 - '#{message}'")
+        Logger.warn("AHM DM no catch, no base64 - '#{message}'")
     end
 
     {:noreply, state}
@@ -262,7 +262,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   # Catchall handle_info
   def handle_info(msg, state) do
     Logger.warn(
-      "[MatchMonitorServer] Match monitor Server handle_info error. No handler for msg of #{Kernel.inspect(msg)}"
+      "Match monitor Server handle_info error. No handler for msg of #{Kernel.inspect(msg)}"
     )
 
     {:noreply, state}
@@ -272,7 +272,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     case User.get_user_by_name(username) do
       nil ->
         Logger.warn(
-          "[MatchMonitorServer] No username on handle_json_msg: #{username} - #{Kernel.inspect(contents)}"
+          "No username on handle_json_msg: #{username} - #{Kernel.inspect(contents)}"
         )
 
         :ok
@@ -303,7 +303,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   defp handle_json_msg(contents, _from_id) do
-    Logger.warn("[MatchMonitorServer] No catch on handle_json_msg: #{Kernel.inspect(contents)}")
+    Logger.warn("No catch on handle_json_msg: #{Kernel.inspect(contents)}")
     :ok
   end
 
@@ -380,6 +380,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
     send(self(), :begin)
+    Logger.metadata(request_id: "MatchMonitorServer")
 
     {:ok, %{}}
   end
