@@ -43,7 +43,7 @@ defmodule Teiserver.Battle.Lobby do
   alias Phoenix.PubSub
   require Logger
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.{Account, User, Client, Battle, Coordinator, LobbyIdServer}
+  alias Teiserver.{Account, User, Client, Battle, Coordinator, LobbyIdServer, Telemetry}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle.{LobbyChat, LobbyCache}
 
@@ -344,6 +344,7 @@ defmodule Teiserver.Battle.Lobby do
         :removed ->
           Coordinator.cast_consul(lobby_id, {:user_kicked, userid})
           client = Account.get_client_by_id(userid)
+          Telemetry.log_server_event(userid, "lobby.kick_user", %{lobby_id: lobby_id})
 
           PubSub.broadcast(
             Central.PubSub,
@@ -460,6 +461,10 @@ defmodule Teiserver.Battle.Lobby do
         nil
 
       true ->
+        if consul_rename do
+          Telemetry.log_server_event(nil, "lobby.rename", %{lobby_id: lobby_id, name: new_name})
+        end
+
         Battle.update_lobby_values(lobby_id, %{
           name: new_name,
           consul_rename: consul_rename

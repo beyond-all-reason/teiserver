@@ -86,10 +86,14 @@ bsname = view_colour() %>
                     <%= error_tag(f, :score_modifier) %>
                   </div>
                 </div>
+              </div>
 
+              <div class="row">
+                <div class="col-md-12">
                 <h5>Restrictions</h5>
+                </div>
                 <%= for {section, r_list} <- @restrictions_lists do %>
-                  <div class="col-md-3 col-lg-2 restrictions-col">
+                  <div class="col restrictions-col">
                     <strong><%= section %></strong>
                     <%= for r <- r_list do %>
                       <% r_clean = String.replace(r, " ", "_") %>
@@ -106,8 +110,10 @@ bsname = view_colour() %>
                   </div>
                 <% end %>
                 <%= error_tag(f, :restrictions) %>
+              </div>
 
-                <div class="col-md-3 col-lg-2 mt-3">
+              <div class="row">
+                <div class="col mt-3">
                   <h4>Generics</h4>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
@@ -138,7 +144,107 @@ bsname = view_colour() %>
                   </div>
                 </div>
 
-                <div class="col-md-3 col-lg-2 mt-3">
+                <div class="col mt-3">
+                  <h4>Moderation evasion</h4>
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
+        $('#action_restriction_Warning_reminder').prop('checked', true);
+        $('#action_reason').val('Evading moderation by creating new accounts is not okay. If you do it again we suspend this account.');
+        $('#action_expires').val('1 day');
+      "
+                  >
+                    Moderation evasion - 1st offense
+                  </div>
+
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
+        $('#action_restriction_Site').prop('checked', true);
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('Evading moderation, 2nd offense.');
+        $('#action_expires').val('1 day');
+      "
+                  >
+                    Moderation evasion - 2nd offense
+                  </div>
+
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
+        $('#action_restriction_Site').prop('checked', true);
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('Evading moderation, 3rd offense. We may permanently ban the account if you do not stop trying to evade moderation.');
+        $('#action_expires').val('3 days');
+      "
+                  >
+                    Moderation evasion - 3rd offense
+                  </div>
+
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick={"
+        $('#action_restriction_Site').prop('checked', true);
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('Account used to evade moderation. If you think there has been an error please use the #open-ticket discord channel to talk to the moderation team. The discord can be accessed at #{discord_link}');
+        $('#action_expires').val('1100 years');
+      "}
+                  >
+                    Alt used for evasion
+                  </div>
+                </div>
+
+                <div class="col mt-3">
+                  <h4>Smurfing</h4>
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick={"
+        $('#action_restriction_Warning_reminder').prop('checked', true);
+        $('#action_reason').val('Smurf or alt-accounts are not allowed, if you need an exemption or you think there has been an error please use the #open-ticket discord channel to talk to the moderation team. The discord can be accessed at #{discord_link}');
+        $('#action_expires').val('1 day');
+      "}
+                  >
+                    Smurfing - 1st offense
+                  </div>
+
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick={"
+        $('#action_restriction_Site').prop('checked', true);
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('You are continuing to create smurf/alt-accounts. This is against the code of conduct.');
+        $('#action_expires').val('1 day');
+      "}
+                  >
+                    Smurfing - 2nd offense
+                  </div>
+
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick={"
+        $('#action_restriction_Site').prop('checked', true);
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('Smurfing/alt-accounting. 3rd offense, if you do it again we may permanently ban your account.');
+        $('#action_expires').val('3 days');
+      "}
+                  >
+                    Smurfing - 3rd offense
+                  </div>
+
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick={"
+        $('#action_restriction_Site').prop('checked', true);
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('This account has been flagged as a smurf or alt-account by the server. If this is in error please use #open-ticket on the discord to talk to the moderation team. The discord can be accessed at #{discord_link}');
+        $('#action_expires').val('1100 years');
+      "}
+                  >
+                    Smurf account
+                  </div>
+                </div>
+
+                <div class="col mt-3">
                   <h4>Specifics</h4>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
@@ -158,52 +264,6 @@ bsname = view_colour() %>
 
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
-                    onclick={"
-        $('#action_restriction_Warning_reminder').prop('checked', true);
-        $('#action_reason').val('Smurf or alt-accounts are not allowed, if you need an exemption or you think there has been an error please use the #open-ticket discord channel to talk to the moderation team. The discord can be accessed at #{discord_link}');
-        $('#action_expires').val('1 day');
-      "}
-                  >
-                    Add smurf warning
-                  </div>
-
-                  <div
-                    class={"btn btn-outline-#{bsname} btn-block"}
-                    onclick={"
-        $('#action_restriction_Site').prop('checked', true);
-        $('#action_restriction_Login').prop('checked', true);
-        $('#action_reason').val('This account has been flagged as a smurf or alt-account by the server. If this is in error please use #open-ticket on the discord to talk to the moderation team. The discord can be accessed at #{discord_link}');
-        $('#action_expires').val('1100 years');
-      "}
-                  >
-                    Add smurf ban
-                  </div>
-
-                  <div
-                    class={"btn btn-outline-#{bsname} btn-block"}
-                    onclick="
-        $('#action_restriction_Warning_reminder').prop('checked', true);
-        $('#action_reason').val('Evading moderation by creating new accounts is not okay. If you do it again we will increase the duration of the sentence.');
-        $('#action_expires').val('1 day');
-      "
-                  >
-                    Moderation evasion warning
-                  </div>
-
-                  <div
-                    class={"btn btn-outline-#{bsname} btn-block"}
-                    onclick={"
-        $('#action_restriction_Site').prop('checked', true);
-        $('#action_restriction_Login').prop('checked', true);
-        $('#action_reason').val('Account used to evade moderation. If you think there has been an error please use the #open-ticket discord channel to talk to the moderation team. The discord can be accessed at #{discord_link}');
-        $('#action_expires').val('1100 years');
-      "}
-                  >
-                    Moderation evasion ban
-                  </div>
-
-                  <div
-                    class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
         $('#action_restriction_Bridging').prop('checked', true);
         $('#action_reason').val('Manual unbridging.');
@@ -212,21 +272,19 @@ bsname = view_colour() %>
                   >
                     Unbridge
                   </div>
+                </div>
+              </div>
 
-                  <br />
+              <div class="row mt-4" id="reports-row">
+                <div class="col">
                   <div
-                    class={"btn btn-outline-#{bsname} btn-block"}
+                    class={"btn btn-outline-secondary"}
                     onclick="
         $('.restrictions-col .form-check-input').prop('checked', false);
       "
                   >
                     Clear all restrictions
                   </div>
-                </div>
-              </div>
-
-              <div class="row mt-4" id="reports-row">
-                <div class="col">
                   <div class="float-end">
                     <span class="btn btn-outline-secondary" onclick="select_all_reports()">
                       Select all reports
@@ -235,7 +293,8 @@ bsname = view_colour() %>
                       Clear all reports
                     </span>
                   </div>
-                  <h5>Which reports (if any) to link to this action?</h5>
+
+                  <h5 class="mt-2">Which reports (if any) to link to this action?</h5>
                   <table class="table table-sm">
                     <thead>
                       <tr>
