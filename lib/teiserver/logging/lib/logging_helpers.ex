@@ -26,8 +26,6 @@ defmodule Teiserver.Logging.Helpers do
     attrs = %{
       action: action,
       user_id: if(conn.assigns[:current_user], do: conn.assigns[:current_user].id, else: nil),
-      group_id:
-        if(conn.assigns[:current_user], do: conn.assigns[:current_user].admin_group_id, else: nil),
       details: details,
       ip: conn.remote_ip |> Tuple.to_list() |> Enum.join(".")
     }
@@ -43,11 +41,6 @@ defmodule Teiserver.Logging.Helpers do
       Logging.create_audit_log(%{
         action: action,
         user_id: if(conn.assigns[:current_user], do: conn.assigns[:current_user].id, else: nil),
-        group_id:
-          if(conn.assigns[:current_user],
-            do: conn.assigns[:current_user].admin_group_id,
-            else: nil
-          ),
         details: details,
         ip: conn.remote_ip |> Tuple.to_list() |> Enum.join(".")
       })

@@ -71,14 +71,6 @@
 
           <%= if @edit_access do %>
             <li class="nav-item">
-              <a href="#groups_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                <%= central_component("icon", icon: Central.Account.GroupLib.icon()) %> Groups (<%= Enum.count(
-                  @user.groups
-                ) %>)
-              </a>
-            </li>
-
-            <li class="nav-item">
               <a href="#permissions_tab" role="tab" class="nav-link" data-bs-toggle="tab">
                 <%= central_component("icon", icon: Central.Account.AuthLib.icon()) %> Permissions
               </a>
@@ -98,10 +90,6 @@
           </div>
 
           <%= if @edit_access do %>
-            <div class="tab-pane" id="groups_tab">
-              <%= render("tab_groups.html", assigns) %>
-            </div>
-
             <div class="tab-pane" id="permissions_tab">
               <%= render("tab_permissions.html", assigns) %>
             </div>

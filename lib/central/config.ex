@@ -313,13 +313,13 @@ defmodule Central.Config do
           %SiteConfig{}
           |> SiteConfig.changeset(%{
             key: key,
-            value: value
+            value: to_string(value)
           })
           |> Repo.insert()
 
         site_config ->
           site_config
-          |> SiteConfig.changeset(%{value: value})
+          |> SiteConfig.changeset(%{value: to_string(value)})
           |> Repo.update()
       end
 

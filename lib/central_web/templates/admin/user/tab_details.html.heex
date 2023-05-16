@@ -23,24 +23,3 @@
   label: "Permissions",
   value: Enum.join(@user.permissions, ", ")
 ) %>
-
-<%= if @user.admin_group do %>
-  <%= central_component("detail_line",
-    label: "Admin group",
-    icon: %{
-      colour: @user.admin_group.colour,
-      icon: @user.admin_group.icon
-    },
-    value: @user.admin_group.name,
-    link: %{
-      path: Routes.admin_group_path(@conn, :show, @user.admin_group),
-      bsname: elem(Central.Account.GroupLib.colours() |> colours(), 2),
-      icon: Central.Account.GroupLib.icon()
-    }
-  ) %>
-<% else %>
-  <%= central_component("detail_line",
-    label: "Admin group",
-    value: "None"
-  ) %>
-<% end %>

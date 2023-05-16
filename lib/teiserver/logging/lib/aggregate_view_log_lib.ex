@@ -2,7 +2,6 @@ defmodule Teiserver.Logging.AggregateViewLogLib do
   @moduledoc false
   use CentralWeb, :library
 
-  alias Central.Account.User
   alias Teiserver.Logging.AggregateViewLog
   alias Teiserver.Logging.PageViewLog
 
@@ -80,25 +79,5 @@ defmodule Teiserver.Logging.AggregateViewLogLib do
         limit: 1
 
     Repo.one(query)
-  end
-
-  @doc """
-    [AggregateViewLog] -> %{user_id: User}
-  """
-  def user_lookup(logs) do
-    user_ids =
-      logs
-      |> Enum.map(fn l -> Map.keys(l.user_data) end)
-      |> List.flatten()
-      |> Enum.uniq()
-
-    query =
-      from users in User,
-        where: users.id in ^user_ids
-
-    query
-    |> Repo.all()
-    |> Enum.map(fn u -> {u.id, u} end)
-    |> Map.new()
   end
 end

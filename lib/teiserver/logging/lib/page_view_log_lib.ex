@@ -60,12 +60,6 @@ defmodule Teiserver.Logging.PageViewLogLib do
       where: ilike(logs.path, ^path_like)
   end
 
-  def _search(query, :admin_group_id, admin_group_id) do
-    from logs in query,
-      join: users in assoc(logs, :user),
-      on: users.admin_group_id == ^admin_group_id
-  end
-
   def _search(query, :section, "any"), do: query
 
   def _search(query, :section, section) do
@@ -141,13 +135,6 @@ defmodule Teiserver.Logging.PageViewLogLib do
   # def preload_users(query, :inner) do
   #   from logs in query,
   #     join: users in assoc(logs, :user),
-  #     preload: [user: users]
-  # end
-
-  # def preload_users(query, admin_groups) do
-  #   from logs in query,
-  #     join: users in assoc(logs, :user),
-  #     where: users.admin_group_id in ^admin_groups,
   #     preload: [user: users]
   # end
 

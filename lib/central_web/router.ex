@@ -122,18 +122,6 @@ defmodule CentralWeb.Router do
     put("/edit/details", RegistrationController, :update_details)
     get("/edit/password", RegistrationController, :edit_password)
     put("/edit/password", RegistrationController, :update_password)
-
-    delete("/groups/delete_membership/:group_id/:user_id", GroupController, :delete_membership)
-    put("/groups/update_membership/:group_id/:user_id", GroupController, :update_membership)
-
-    post("/groups/create_membership", GroupController, :create_membership)
-    post("/groups/create_invite", GroupController, :create_invite)
-    delete("/groups/delete_invite/:group_id/:user_id", GroupController, :delete_invite)
-    put("/groups/respond_to_invite/:group_id/:response", GroupController, :respond_to_invite)
-    put("/groups/promote/:group_id/:user_id", GroupController, :promote)
-    put("/groups/demote/:group_id/:user_id", GroupController, :demote)
-
-    resources("/groups", GroupController, only: [:index, :show, :edit, :update])
   end
 
   scope "/config", CentralWeb.Config do
@@ -218,16 +206,6 @@ defmodule CentralWeb.Router do
     get("/users/reset_password/:id", UserController, :reset_password)
     get("/users/search", UserController, :index)
     post("/users/search", UserController, :search)
-
-    # Groups
-    post("/groups/create_membership", GroupController, :create_membership)
-    get("/groups/delete_membership/:group_id/:user_id", GroupController, :delete_membership)
-    get("/groups/update_membership/:group_id/:user_id", GroupController, :update_membership)
-    # get "/groups/search", GroupController, :index
-    post("/groups/search", GroupController, :search)
-
-    get("/groups/delete_check/:id", GroupController, :delete_check)
-    resources("/groups", GroupController)
 
     # Tools
     get("/tools", ToolController, :index)

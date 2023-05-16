@@ -30,12 +30,6 @@ defmodule Central.Account.User do
     field :behaviour_score, :integer, default: 10_000
     field :trust_score, :integer, default: 10_000
 
-    belongs_to :admin_group, Central.Account.Group
-
-    many_to_many :groups, Central.Account.Group,
-      join_through: "account_group_memberships",
-      join_keys: [user_id: :id, group_id: :id]
-
     timestamps()
   end
 
@@ -50,7 +44,7 @@ defmodule Central.Account.User do
       user
       |> cast(
         attrs,
-        [:name, :email, :icon, :colour, :permissions, :admin_group_id, :data] ++ @extra_fields
+        [:name, :email, :icon, :colour, :permissions, :data] ++ @extra_fields
       )
       |> validate_required([:name, :email, :permissions])
       |> unique_constraint(:email)
@@ -65,7 +59,6 @@ defmodule Central.Account.User do
           :icon,
           :colour,
           :permissions,
-          :admin_group_id,
           :data
         ] ++ @extra_fields
       )
@@ -91,7 +84,6 @@ defmodule Central.Account.User do
         :icon,
         :colour,
         :permissions,
-        :admin_group_id,
         :data
       ] ++ @extra_fields
     )

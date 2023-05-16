@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   alias Teiserver.Battle.{LobbyChat}
   alias Teiserver.Data.Types, as: T
 
-  @meme_list ~w(ticks nodefence greenfields poor rich hardt1 crazy undo)
+  @meme_list ~w(ticks nodefence greenfields poor rich hardt1 crazy undo deathmatch)
 
   @crazy_multiplier_opts ~w(0.3 0.5 0.7 1 1 1 1 1 1 1 1.5 2 4)
   @crazy_multiplier_opts_middler ~w(0.5 0.7 1 1 1 1 1 1 1 1.5 2)
@@ -36,6 +36,20 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     Battle.disable_units(lobby_id, ~w(armmex armamex armmoho cormex corexp cormexp cormoho))
 
     ["#{sender.name} has enabled the Greenfield meme. Metal extractors are disabled."]
+  end
+
+  def handle_meme("deathmatch", senderid, %{lobby_id: lobby_id} = _state) do
+    sender = User.get_user_by_id(senderid)
+
+    Battle.set_modoptions(lobby_id, %{
+      "game/modoptions/startmetal" => "35000",
+      "game/modoptions/startenergy" => "1000",
+      "game/modoptions/multiplier_maxvelocity" => "2",
+      "game/modoptions/multiplier_buildpower" => "2",
+      "game/modoptions/multiplier_maxdamage" => "2",
+    })
+
+    ["#{sender.name} has enabled the Deathmatch meme. You start with a 35k metal, 1k energy, everything builds fast, runs fast and hits hard. Good luck."]
   end
 
   def handle_meme("poor", senderid, %{lobby_id: lobby_id} = _state) do

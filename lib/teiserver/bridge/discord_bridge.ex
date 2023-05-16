@@ -229,6 +229,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
   # Teiserver.Moderation.get_action!(123) |> Teiserver.Bridge.DiscordBridge.new_action()
   @spec new_action(Moderation.Action.t()) :: any
+  def new_action(%{hidden: true}), do: nil
   def new_action(action) do
     action = Moderation.get_action!(action.id, preload: [:target])
 

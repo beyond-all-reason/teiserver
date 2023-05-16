@@ -7,7 +7,6 @@ defmodule Teiserver.Logging.AuditLog do
     field :details, :map
     field :ip, :string
 
-    belongs_to :group, Central.Account.Group
     belongs_to :user, Central.Account.User
 
     timestamps()
@@ -16,8 +15,8 @@ defmodule Teiserver.Logging.AuditLog do
   @doc false
   def changeset(struct, params) do
     struct
-    |> cast(params, [:action, :details, :ip, :user_id, :group_id])
-    |> validate_required([:action, :details, :ip])
+    |> cast(params, ~w(action details ip user_id)a)
+    |> validate_required(~w(action details ip)a)
   end
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean

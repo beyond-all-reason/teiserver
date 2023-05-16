@@ -2,7 +2,6 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.Lobby
   alias Teiserver.Account.ClientLib
-  alias Teiserver.Common.PubsubListener
   alias Teiserver.{User, Client, Coordinator}
 
   import Teiserver.TeiserverTestLib,
@@ -38,8 +37,6 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
     [reply] = _tachyon_recv(hsocket)
     lobby_id = reply["lobby"]["id"]
 
-    listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby_id}"])
-
     # Player needs to be added to the battle
     Lobby.force_add_user_to_lobby(player.id, lobby_id)
     player_client = Client.get_client_by_id(player.id)
@@ -70,8 +67,7 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
      psocket: psocket,
      host: host,
      player: player,
-     lobby_id: lobby_id,
-     listener: listener}
+     lobby_id: lobby_id}
   end
 
   test "standard messages", %{lobby_id: lobby_id, psocket: psocket} do

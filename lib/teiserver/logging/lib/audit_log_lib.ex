@@ -41,11 +41,6 @@ defmodule Teiserver.Logging.AuditLogLib do
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
-  def _search(query, :groups, groups) do
-    from logs in query,
-      where: logs.group_id in ^groups
-  end
-
   def _search(query, :id, id) do
     from logs in query,
       where: logs.id == ^id
@@ -103,7 +98,6 @@ defmodule Teiserver.Logging.AuditLogLib do
 
   def preload(query, preloads) do
     query = if :user in preloads, do: _preload_user(query), else: query
-    query = if :group in preloads, do: _preload_group(query), else: query
 
     query
   end
@@ -113,13 +107,6 @@ defmodule Teiserver.Logging.AuditLogLib do
     from logs in query,
       left_join: users in assoc(logs, :user),
       preload: [user: users]
-  end
-
-  @spec _preload_group(Ecto.Query.t()) :: Ecto.Query.t()
-  def _preload_group(query) do
-    from logs in query,
-      left_join: groups in assoc(logs, :group),
-      preload: [group: groups]
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()

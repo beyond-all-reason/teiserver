@@ -6,7 +6,6 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Central.Account.User
   alias Teiserver.Account.{UserLib, RoleLib}
   alias Teiserver.Battle.BalanceLib
-  alias Central.Account.GroupLib
   import Central.Helpers.NumberHelper, only: [int_parse: 1, float_parse: 1]
 
   plug(AssignPlug,
@@ -28,7 +27,6 @@ defmodule TeiserverWeb.Admin.UserController do
     users =
       Account.list_users(
         search: [
-          admin_group: conn,
           basic_search: Map.get(params, "s", "") |> String.trim()
         ],
         order_by: "Newest first",
@@ -67,7 +65,6 @@ defmodule TeiserverWeb.Admin.UserController do
     users =
       (Account.list_users(
          search: [
-           admin_group: conn,
            name_or_email: Map.get(params, "name", "") |> String.trim(),
            bot: params["bot"],
            moderator: params["moderator"],
@@ -182,7 +179,6 @@ defmodule TeiserverWeb.Admin.UserController do
   def create(conn, %{"user" => user_params}) do
     user_params =
       Map.merge(user_params, %{
-        "admin_group_id" => Teiserver.user_group_id(),
         "password" => "pass",
         "data" => %{
           "rank" => 1,
@@ -218,7 +214,6 @@ defmodule TeiserverWeb.Admin.UserController do
         conn
         |> assign(:user, user)
         |> assign(:changeset, changeset)
-        |> assign(:groups, GroupLib.dropdown(conn))
         |> assign(:management_roles, RoleLib.management_roles())
         |> assign(:moderation_roles, RoleLib.moderation_roles())
         |> assign(:staff_roles, RoleLib.staff_roles())

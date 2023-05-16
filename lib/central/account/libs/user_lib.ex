@@ -3,7 +3,6 @@ defmodule Central.Account.UserLib do
   use CentralWeb, :library
 
   alias Central.Account.User
-  alias Central.Account.GroupLib
 
   @spec colours :: atom
   def colours(), do: :primary
@@ -52,34 +51,6 @@ defmodule Central.Account.UserLib do
   def _search(query, :id_in, id_list) do
     from users in query,
       where: users.id in ^id_list
-  end
-
-  def _search(query, :admin_group, %{assigns: %{memberships: group_ids}}) do
-    _search(query, :admin_group, group_ids)
-  end
-
-  def _search(query, :admin_group, group_id) when not is_list(group_id) do
-    from users in query,
-      where: users.admin_group_id == ^group_id
-  end
-
-  def _search(query, :admin_group, group_ids) do
-    from users in query,
-      where:
-        users.admin_group_id in ^group_ids or
-          is_nil(users.admin_group_id)
-  end
-
-  def _search(query, :has_admin_group, "Either"), do: query
-
-  def _search(query, :has_admin_group, "Has group") do
-    from users in query,
-      where: not is_nil(users.admin_group_id)
-  end
-
-  def _search(query, :has_admin_group, "No group") do
-    from users in query,
-      where: is_nil(users.admin_group_id)
   end
 
   def _search(query, :name, name) do
@@ -158,9 +129,7 @@ defmodule Central.Account.UserLib do
   def preload(query, nil), do: query
 
   def preload(query, preloads) do
-    query = if :admin_group in preloads, do: _preload_admin_group(query), else: query
     query = if :user_configs in preloads, do: _preload_user_configs(query), else: query
-    query = if :groups in preloads, do: _preload_groups(query), else: query
     query = if :reports_against in preloads, do: _preload_reports_against(query), else: query
     query = if :reports_made in preloads, do: _preload_reports_made(query), else: query
     query = if :reports_responded in preloads, do: _preload_reports_responded(query), else: query
@@ -168,22 +137,10 @@ defmodule Central.Account.UserLib do
     query
   end
 
-  def _preload_admin_group(query) do
-    from users in query,
-      left_join: configs in assoc(users, :admin_group),
-      preload: [admin_group: configs]
-  end
-
   def _preload_user_configs(query) do
     from users in query,
       left_join: configs in assoc(users, :user_configs),
       preload: [user_configs: configs]
-  end
-
-  def _preload_groups(query) do
-    from users in query,
-      left_join: groups in assoc(users, :groups),
-      preload: [groups: groups]
   end
 
   def _preload_reports_against(query) do
@@ -227,41 +184,6 @@ defmodule Central.Account.UserLib do
   #     order_by: [asc: events.ordering]
   # end
 
-  @spec has_access(integer() | map(), Plug.Conn.t()) :: {boolean, nil | :not_found | :no_access}
-  def has_access(target_user_id, conn) when is_integer(target_user_id) do
-    if allow?(conn.permissions, "admin.admin.full") do
-      {true, nil}
-    else
-      query =
-        from target_users in User,
-          where: target_users.id == ^target_user_id,
-          select: target_users.admin_group_id
-
-      group_id = Repo.one(query)
-
-      has_access(%{group_id: group_id, admin_group_id: group_id}, conn)
-    end
-  end
-
-  def has_access(nil, _user), do: {false, :not_found}
-
-  def has_access(target_user, conn) do
-    if allow?(conn, "admin.admin.full") do
-      {true, nil}
-    else
-      case GroupLib.access?(conn, target_user.admin_group_id) do
-        true -> {true, nil}
-        false -> {false, :no_access}
-      end
-    end
-  end
-
-  @spec has_access!(integer() | map(), Plug.Conn.t()) :: boolean
-  def has_access!(target_user, conn) do
-    {result, _} = has_access(target_user, conn)
-    result
-  end
-
   @spec list_restrictions :: list
   def list_restrictions() do
     Central.store_get(:restriction_lookup_store, :categories)
@@ -278,5 +200,30 @@ defmodule Central.Account.UserLib do
     Central.store_put(:restriction_lookup_store, :categories, new_categories)
     Central.store_put(:restriction_lookup_store, key, items)
     :ok
+  end
+
+  @spec has_access(integer() | map(), Plug.Conn.t()) :: {boolean, nil | :not_found | :no_access}
+  def has_access(target_user_id, conn) when is_integer(target_user_id) do
+    if allow?(conn.permissions, "admin.admin.full") do
+      {true, nil}
+    else
+      {false, :no_access}
+    end
+  end
+
+  def has_access(nil, _user), do: {false, :not_found}
+
+  def has_access(_target_user, conn) do
+    if allow?(conn, "admin.admin.full") do
+      {true, nil}
+    else
+      {false, :no_access}
+    end
+  end
+
+  @spec has_access!(integer() | map(), Plug.Conn.t()) :: boolean
+  def has_access!(target_user, conn) do
+    {result, _} = has_access(target_user, conn)
+    result
   end
 end

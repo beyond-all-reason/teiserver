@@ -355,7 +355,6 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             email: "match_monitor@teiserver",
             icon: "fa-solid fa-camera-cctv",
             colour: "#00AA66",
-            admin_group_id: Teiserver.internal_group_id(),
             password: Account.make_bot_password(),
             data: %{
               bot: true,
@@ -367,11 +366,6 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
         Account.update_user_stat(account.id, %{
           country_override: Application.get_env(:central, Teiserver)[:server_flag]
-        })
-
-        Account.create_group_membership(%{
-          user_id: account.id,
-          group_id: Teiserver.internal_group_id()
         })
 
         User.recache_user(account.id)

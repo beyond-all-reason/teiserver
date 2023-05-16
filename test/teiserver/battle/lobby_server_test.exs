@@ -4,8 +4,12 @@ defmodule Teiserver.Battle.LobbyServerTest do
   alias Teiserver.Battle.LobbyCache
 
   test "server test" do
+    host = Teiserver.TeiserverTestLib.new_user()
+
     lobby = %{
       id: 123,
+      founder_id: host.id,
+      founder_name: host.name,
       cmd: "c.lobby.create",
       name: "ServerName",
       nattype: "none",

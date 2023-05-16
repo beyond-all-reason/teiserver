@@ -20,6 +20,7 @@ defmodule Teiserver.Account.TournamentReport do
       |> String.split("\n")
       |> Enum.filter(fn s ->
         s = String.trim(s)
+
         cond do
           s == "" -> false
           true -> true

@@ -338,7 +338,6 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
         email: "#{username}@email",
         password: md5_pass,
         permissions: [],
-        admin_group_id: Teiserver.user_group_id(),
         colour: "#AA0000",
         icon: "fa-solid fa-user",
         data: %{

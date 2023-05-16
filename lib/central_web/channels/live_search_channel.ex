@@ -33,10 +33,6 @@ defmodule CentralWeb.LiveSearch.Channel do
         Account.list_users(search: [basic_search: search_term], order: "Name (A-Z)")
         |> Account.user_as_json()
 
-      "account_group" ->
-        Account.list_groups(search: [basic_search: search_term], order: "Name (A-Z)")
-        |> Account.group_as_json()
-
       # Live search handle_search
       "teiserver_user" ->
         Teiserver.Account.list_users(search: [basic_search: search_term], order: "Name (A-Z)")

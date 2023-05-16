@@ -3,12 +3,9 @@ defmodule CentralWeb.Admin.UserController do
 
   alias Central.Account
   alias Central.Account.{User, AuthLib}
-  alias Central.Account.GroupLib
   alias Central.Helpers.StylingHelper
   alias Central.Account.UserLib
   alias Central.Config
-
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   plug Bodyguard.Plug.Authorize,
     policy: Central.Account.User,
@@ -28,10 +25,9 @@ defmodule CentralWeb.Admin.UserController do
     users =
       Account.list_users(
         search: [
-          admin_group: conn,
           basic_search: Map.get(params, "s", "") |> String.trim()
         ],
-        joins: [:admin_group],
+        joins: [],
         order: "Name (A-Z)"
       )
 
@@ -43,7 +39,6 @@ defmodule CentralWeb.Admin.UserController do
       |> add_breadcrumb(name: "List users", url: conn.request_path)
       |> assign(:users, users)
       |> assign(:params, search_defaults(conn))
-      |> assign(:groups, GroupLib.dropdown(conn))
       |> render("index.html")
     end
   end
@@ -55,13 +50,10 @@ defmodule CentralWeb.Admin.UserController do
     users =
       Account.list_users(
         search: [
-          admin_group: conn,
-          admin_group: params["admin_group_id"],
-          has_admin_group: params["has_admin_group"],
           basic_search: params["name"],
           permissions: params["permissions"]
         ],
-        joins: [:admin_group],
+        joins: [],
         limit: params["limit"] || 50,
         order: params["order"] || "Name (A-Z)"
       )
@@ -74,7 +66,6 @@ defmodule CentralWeb.Admin.UserController do
       |> add_breadcrumb(name: "User search", url: conn.request_path)
       |> assign(:params, params)
       |> assign(:users, users)
-      |> assign(:groups, GroupLib.dropdown(conn))
       |> render("index.html")
     end
   end
@@ -87,21 +78,13 @@ defmodule CentralWeb.Admin.UserController do
         colour: StylingHelper.random_colour()
       })
 
-    # teams = GroupLib.get_teams
-    # |> GroupLib.search(:user_membership, conn.assigns[:current_user].id)
-    # |> Repo.all
-    # |> Enum.map(fn g -> {g.name, g.id} end)
-
     conn
-    |> assign(:groups, GroupLib.dropdown(conn))
     |> add_breadcrumb(name: 'New user', url: '#')
     |> render("new.html", changeset: changeset)
   end
 
   @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def create(conn, %{"user" => user_params}) do
-    admin_group_id = user_params["admin_group_id"] |> int_parse
-
     data =
       case Jason.decode(user_params["data"] || "") do
         {:ok, v} -> v || %{}
@@ -110,7 +93,6 @@ defmodule CentralWeb.Admin.UserController do
 
     user_params =
       Map.merge(user_params, %{
-        "admin_group_id" => admin_group_id,
         "password" => "password",
         "paswsord_confirmation" => "password",
         "data" => data
@@ -129,14 +111,13 @@ defmodule CentralWeb.Admin.UserController do
       {:error, changeset} ->
         conn
         |> add_breadcrumb(name: 'New user', url: '#')
-        |> assign(:groups, GroupLib.dropdown(conn))
         |> render("new.html", changeset: changeset)
     end
   end
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
-    user = Account.get_user(id, joins: [:admin_group, :groups, :user_configs])
+    user = Account.get_user(id, joins: [:user_configs])
 
     case UserLib.has_access(user, conn) do
       {false, :not_found} ->
@@ -227,7 +208,6 @@ defmodule CentralWeb.Admin.UserController do
           |> Enum.map(fn {_, c} -> c.key end)
 
         conn
-        |> assign(:groups, GroupLib.dropdown(conn))
         |> assign(:visible_configs, visible_configs)
         |> assign(:user_config_names, user_config_names)
         |> assign(:user, user)
@@ -289,7 +269,6 @@ defmodule CentralWeb.Admin.UserController do
               |> Enum.map(fn {_, c} -> c.key end)
 
             conn
-            |> assign(:groups, GroupLib.dropdown(conn))
             |> assign(:visible_configs, visible_configs)
             |> assign(:user_config_names, user_config_names)
             |> assign(:user, user)

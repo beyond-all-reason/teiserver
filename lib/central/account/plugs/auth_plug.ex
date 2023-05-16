@@ -57,6 +57,5 @@ defmodule Central.Account.AuthPlug do
     socket
     |> Phoenix.LiveView.Utils.assign(:current_user, user)
     |> Phoenix.LiveView.Utils.assign(:user_id, user_id)
-    |> Phoenix.LiveView.Utils.assign(:memberships, Account.list_group_memberships_cache(user_id))
   end
 end

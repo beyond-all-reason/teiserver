@@ -2,7 +2,6 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.Lobby
   alias Teiserver.Account.ClientLib
-  alias Teiserver.Common.PubsubListener
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.{Account, Battle, User, Client, Coordinator}
   alias Teiserver.Coordinator.ConsulServer
@@ -47,8 +46,6 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     [reply] = _tachyon_recv(hsocket)
     lobby_id = reply["lobby"]["id"]
 
-    listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby_id}"])
-
     # Player needs to be added to the battle
     Lobby.add_user_to_battle(player.id, lobby_id, "script_password")
     player_client = Account.get_client_by_id(player.id)
@@ -65,8 +62,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
      psocket: psocket,
      host: host,
      player: player,
-     lobby_id: lobby_id,
-     listener: listener}
+     lobby_id: lobby_id}
   end
 
   defp make_rating(userid, rating_type_id, rating_value) do

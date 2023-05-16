@@ -1,4 +1,4 @@
-<% {fg, _bg, bsname} = view_colour() |> colours %>
+<% bsname = view_colour() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -44,33 +44,6 @@
           class="form-control"
         />
       </div>
-
-      <%= if allow?(@current_user, "admin.admin.full") do %>
-        <div class="col-md-4 col-xl-2 my-2">
-          <label for="search_admin_group" class="control-label">Admin group: </label>
-          <%= central_component("icon_dropdown", %{
-            name: "search[admin_group_id]",
-            id: "search_admin_group_id",
-            insert_blank: %{id: "", name: "All groups", icon: "fa-regular fa-th", colour: fg},
-            selected: @params["admin_group_id"],
-            enumerable: @groups
-          }) %>
-        </div>
-
-        <div class="col-md-4 col-xl-2 my-2">
-          <label for="search_has_admin_group" class="control-label">Has admin group: </label>
-          <%= central_component("icon_dropdown", %{
-            name: "search[has_admin_group]",
-            id: "search_has_admin_group",
-            selected: @params["has_admin_group"],
-            enumerable: [
-              %{id: "Either", icon: "fa-regular fa-th", colour: fg},
-              %{id: "Has group", icon: "fa-regular fa-check", colour: fg},
-              %{id: "No group", icon: "fa-regular fa-times", colour: fg}
-            ]
-          }) %>
-        </div>
-      <% end %>
 
       <div class="col-md-4 col-xl-2 my-2">
         <label for="search_limit" class="control-label">Limit: </label>

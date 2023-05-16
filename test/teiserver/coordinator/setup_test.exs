@@ -29,7 +29,7 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
       })
 
     lobby = Battle.get_lobby(lobby.id)
-    listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby.id}"])
+    listener = PubsubListener.new_listener(["teiserver_lobby_chat:#{lobby.id}"])
 
     # No command
     result = Lobby.say(user.id, "Test message", lobby.id)
@@ -37,7 +37,15 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
 
     :timer.sleep(@sleep)
     messages = PubsubListener.get(listener)
-    assert messages == [{:battle_updated, lobby.id, {user.id, "Test message", lobby.id}, :say}]
+    assert messages == [
+      %{
+        channel: "teiserver_lobby_chat:#{lobby.id}",
+        event: :say,
+        lobby_id: lobby.id,
+        message: "Test message",
+        userid: user.id
+      }
+    ]
 
     # Now command
     result = Lobby.say(user.id, "$settag tagname tagvalue", lobby.id)
@@ -48,11 +56,16 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
     assert reply == :timeout
 
     # Converted message should appear here
-    [m1, m2] = PubsubListener.get(listener)
+    messages = PubsubListener.get(listener)
 
-    assert m1 ==
-             {:battle_updated, lobby.id, {user.id, "$settag tagname tagvalue", lobby.id}, :say}
-
-    {:battle_updated, _lobby_id, %{"tagname" => "tagvalue"}, :add_script_tags} = m2
+    assert messages == [
+        %{
+        channel: "teiserver_lobby_chat:#{lobby.id}",
+        event: :say,
+        lobby_id: lobby.id,
+        message: "$settag tagname tagvalue",
+        userid: user.id
+      }
+    ]
   end
 end

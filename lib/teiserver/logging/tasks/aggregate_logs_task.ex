@@ -15,6 +15,7 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
 
   @log_keep_period 180
   # Oban.insert(Teiserver.Logging.AggregateViewLogsTask.new(%{}))
+  # Teiserver.Logging.AggregateViewLogsTask.run(Timex.today() |> Timex.shift(days: -1))
 
   @impl Oban.Worker
   def perform(_) do
@@ -61,7 +62,6 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
       "hourly_views" => get_hourly_views(logs),
       "hourly_uniques" => get_hourly_uniques(logs),
       "hourly_average_load_times" => get_hourly_average_load_times(logs),
-      "user_data" => get_user_data(logs),
       "section_data" => get_section_data(logs)
     }
 
@@ -121,11 +121,6 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
   end
 
   defp get_guest_unique_ip_count(logs) do
-    # x = logs
-    # |> where([l], is_nil(l.user_id))
-    # |> select([l], l.ip)
-    # |> Repo.all
-
     logs
     |> where([l], is_nil(l.user_id))
     |> select([l], l.ip)
@@ -144,8 +139,7 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
     logs =
       Repo.all(logs)
       |> Enum.filter(fn {h, c} -> h != nil and c > 0 end)
-      |> Enum.map(fn {h, c} -> {c_round(h), c} end)
-      |> Map.new()
+      |> Map.new(fn {h, c} -> {c_round(h), c} end)
 
     Enum.map(0..24, fn h -> logs[h] || 0 end)
   end
@@ -160,8 +154,7 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
     logs =
       Repo.all(logs)
       |> Enum.filter(fn {h, c} -> h != nil and c > 0 end)
-      |> Enum.map(fn {h, lt} -> {c_round(h), c_round(lt)} end)
-      |> Map.new()
+      |> Map.new(fn {h, lt} -> {c_round(h), c_round(lt)} end)
 
     Enum.map(0..24, fn h -> logs[h] || 0 end)
   end
@@ -176,8 +169,7 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
     logs =
       Repo.all(logs)
       |> Enum.filter(fn {h, c} -> h != nil and c > 0 end)
-      |> Enum.map(fn {h, users} -> {c_round(h), users |> Enum.uniq() |> Enum.count()} end)
-      |> Map.new()
+      |> Map.new(fn {h, users} -> {c_round(h), users |> Enum.uniq() |> Enum.count()} end)
 
     Enum.map(0..24, fn h -> logs[h] || 0 end)
   end
@@ -203,36 +195,9 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
     |> Repo.one()
   end
 
-  defp get_user_data(logs) do
-    logs =
-      from logs in logs,
-        where: not is_nil(logs.user_id),
-        select: {
-          logs.user_id,
-          count(logs.id),
-          avg(logs.load_time),
-          array_agg(logs.section),
-          array_agg(logs.ip)
-        },
-        group_by: [logs.user_id]
-
-    logs
-    |> Repo.all()
-    |> Enum.map(fn {user, count, load_time, sections, ips} ->
-      {user,
-       %{
-         count: count,
-         load_time: c_round(load_time),
-         sections: sections |> Enum.uniq() |> Enum.filter(fn s -> s != nil end),
-         ips: ips |> Enum.uniq()
-       }}
-    end)
-    |> Map.new()
-  end
-
-  defp get_section_data(logs) do
-    logs =
-      from logs in logs,
+  defp get_section_data(base_logs) do
+    grouped_logs =
+      from logs in base_logs,
         select: {
           logs.section,
           count(logs.id),
@@ -241,9 +206,9 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
         },
         group_by: [logs.section]
 
-    logs
+    grouped_logs
     |> Repo.all()
-    |> Enum.map(fn {section, count, load_time, users} ->
+    |> Map.new(fn {section, count, load_time, users} ->
       {section,
        %{
          count: count,
@@ -251,7 +216,6 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
          users: users |> Enum.uniq()
        }}
     end)
-    |> Map.new()
   end
 
   defp clean_up_logs(date) do
@@ -259,6 +223,4 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
     |> PageViewLogLib.search(end_date: Timex.shift(date, days: -@log_keep_period))
     |> Repo.delete_all()
   end
-
-  # Getting some issues where it can be a float or a decimal
 end

@@ -82,17 +82,23 @@ defmodule Teiserver.Account.RetentionReport do
     # Grouping 1 - Last login
     login_retention =
       accounts
-      |> Enum.group_by(fn %{last_login: value} ->
-        value
-      end, fn _ -> 1 end)
+      |> Enum.group_by(
+        fn %{last_login: value} ->
+          value
+        end,
+        fn _ -> 1 end
+      )
       |> Map.new(fn {days, userlist} -> {days, Enum.count(userlist)} end)
 
-      # Grouping 2 - Last time played
+    # Grouping 2 - Last time played
     play_retention_grouping =
       accounts
-      |> Enum.group_by(fn %{last_played: value} ->
-        value
-      end, fn _ -> 1 end)
+      |> Enum.group_by(
+        fn %{last_played: value} ->
+          value
+        end,
+        fn _ -> 1 end
+      )
       |> Map.new(fn {days, userlist} -> {days, Enum.count(userlist)} end)
 
     # Skip0 ?
@@ -116,13 +122,13 @@ defmodule Teiserver.Account.RetentionReport do
     ]
 
     %{
-       params: params,
-       presets: DatePresets.long_ranges(),
-       user_count: Enum.count(accounts),
-       play_retention_grouping: play_retention_grouping,
-       max_key: @max_key,
-       graph_data: graph_data
-     }
+      params: params,
+      presets: DatePresets.long_ranges(),
+      user_count: Enum.count(accounts),
+      play_retention_grouping: play_retention_grouping,
+      max_key: @max_key,
+      graph_data: graph_data
+    }
   end
 
   @spec build_line(map()) :: list()

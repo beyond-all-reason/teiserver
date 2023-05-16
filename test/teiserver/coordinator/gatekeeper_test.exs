@@ -2,7 +2,6 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.Lobby
   alias Teiserver.Account.ClientLib
-  alias Teiserver.Common.PubsubListener
   alias Teiserver.Account.UserCache
   alias Teiserver.{Client, Coordinator}
 
@@ -39,8 +38,6 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     [reply] = _tachyon_recv(hsocket)
     lobby_id = reply["lobby"]["id"]
 
-    listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby_id}"])
-
     # Player needs to be added to the battle
     Lobby.force_add_user_to_lobby(player.id, lobby_id)
     :timer.sleep(100)
@@ -62,8 +59,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
      psocket: psocket,
      host: host,
      player: player,
-     lobby_id: lobby_id,
-     listener: listener}
+     lobby_id: lobby_id}
   end
 
   test "friendsplay", %{player: player, hsocket: hsocket, psocket: psocket, lobby_id: lobby_id} do

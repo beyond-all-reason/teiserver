@@ -22,11 +22,11 @@
       </div>
     <% end %>
 
-    <%= if allow?(@conn, "admin.user") do %>
+    <%= if assigns[:user] != nil and allow?(@conn, "admin.user") do %>
       <div class="col-xl-4 col-lg-4">
         &nbsp;<br />
         <a
-          href={Routes.admin_user_path(@conn, :edit, @user)}
+          href={Routes.admin_user_path(@conn, :edit, @user.id)}
           class="btn btn-outline-primary float-end"
           id="section-menu-new"
         >

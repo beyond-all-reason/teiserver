@@ -101,7 +101,7 @@ defmodule Teiserver.Logging.LoggingTestLib do
   def logging_setup(existing, flags \\ []) do
     {:ok, existing} = existing
 
-    child_user = existing[:child_user]
+    dud_user = existing[:dud_user]
 
     aggregate_logs =
       if flags[:aggregate_logs] do
@@ -113,7 +113,7 @@ defmodule Teiserver.Logging.LoggingTestLib do
     page_view_logs =
       if flags[:page_view_logs] do
         PageViewLogLib.get_page_view_logs()
-        |> PageViewLogLib.search(user_id: child_user.id)
+        |> PageViewLogLib.search(user_id: dud_user.id)
         |> Repo.all()
       end
 

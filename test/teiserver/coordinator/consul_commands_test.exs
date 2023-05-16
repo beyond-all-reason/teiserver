@@ -40,7 +40,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     [reply] = _tachyon_recv(hsocket)
     lobby_id = reply["lobby"]["id"]
 
-    listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby_id}"])
+    listener = PubsubListener.new_listener(["teiserver_lobby_chat:#{lobby_id}"])
 
     # Player needs to be added to the battle
     Lobby.add_user_to_battle(player.id, lobby_id)

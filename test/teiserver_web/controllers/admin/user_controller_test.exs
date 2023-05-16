@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   # alias Teiserver.TeiserverTestLib
 
   setup do
-    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.staff_permissions())
+    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.root_permissions())
     |> Teiserver.TeiserverTestLib.conn_setup()
   end
 
@@ -34,8 +34,8 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     end
 
     test "lists all users - redirect", %{conn: conn} do
-      main_user = Central.Account.get_user_by_name("main user")
-      conn = get(conn, ~p"/teiserver/admin/user" <> "?s=main user")
+      main_user = Central.Account.get_user_by_name("dud user")
+      conn = get(conn, ~p"/teiserver/admin/user" <> "?s=dud user")
       assert redirected_to(conn) == ~p"/teiserver/admin/user/#{main_user.id}"
     end
 
@@ -48,7 +48,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   describe "show user" do
     test "renders form", %{conn: conn, user: user} do
       conn = get(conn, ~p"/teiserver/admin/user/#{user.id}")
-      assert html_response(conn, 200) =~ "Reports"
+      assert html_response(conn, 200) =~ "Smurf search"
     end
   end
 
@@ -98,11 +98,10 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   end
 
   describe "update user" do
-    test "redirects when data is valid", %{conn: conn, main_group: main_group} do
+    test "redirects when data is valid", %{conn: conn} do
       user =
         GeneralTestLib.make_user(%{
           "email" => "tsuser2@tsuser2",
-          "admin_group_id" => "#{main_group.id}",
           "data" => %{}
         })
 
@@ -121,11 +120,10 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   end
 
   describe "rename user" do
-    test "redirects when data is valid", %{conn: conn, main_group: main_group} do
+    test "redirects when data is valid", %{conn: conn} do
       user =
         GeneralTestLib.make_user(%{
           "email" => "tsuser_rename@tsuser_rename",
-          "admin_group_id" => "#{main_group.id}",
           "data" => %{}
         })
 
@@ -140,11 +138,10 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       assert html_response(conn, 200) =~ "new_test_name"
     end
 
-    test "renders errors when data is invalid", %{conn: conn, main_group: main_group} do
+    test "renders errors when data is invalid", %{conn: conn} do
       user =
         GeneralTestLib.make_user(%{
           "email" => "tsuser_rename_bad@tsuser_rename_bad",
-          "admin_group_id" => "#{main_group.id}",
           "data" => %{}
         })
 

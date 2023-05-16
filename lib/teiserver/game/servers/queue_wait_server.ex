@@ -249,6 +249,12 @@ defmodule Teiserver.Game.QueueWaitServer do
     {:noreply, new_state}
   end
 
+  # Use by some tests
+  def handle_info(:force_increase_range, state) do
+    new_state = do_increase_range(state)
+    {:noreply, new_state}
+  end
+
   def handle_info(:telemetry_tick, state) do
     member_count =
       if Enum.empty?(state.groups_map) do

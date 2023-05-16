@@ -101,7 +101,6 @@ defmodule Central.Application do
 
         # Caches - Chat
         concache_perm_sup(:rooms),
-
         {Teiserver.HookServer, name: Teiserver.HookServer},
 
         # Liveview throttles

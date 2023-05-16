@@ -97,10 +97,7 @@ defmodule TeiserverWeb.API.SessionController do
               {:ok, user}
 
             {:error, %Ecto.Changeset{} = changeset} ->
-              IO.puts("")
-              IO.inspect(changeset)
-              IO.puts("")
-              {:error, "Changeset error"}
+              {:error, "Changeset error #{inspect(changeset)}"}
           end
       end
 

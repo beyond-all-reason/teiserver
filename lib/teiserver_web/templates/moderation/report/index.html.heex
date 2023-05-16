@@ -105,9 +105,7 @@
                 <td><%= report.extra_text %></td>
 
                 <td>
-                  <a
-                    href={Routes.moderation_report_path(@conn, :user, report.reporter_id)}
-                  >
+                  <a href={Routes.moderation_report_path(@conn, :user, report.reporter_id)}>
                     <%= report.reporter.name %>
                   </a>
                 </td>

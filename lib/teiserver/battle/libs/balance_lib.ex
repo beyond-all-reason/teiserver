@@ -624,10 +624,6 @@ defmodule Teiserver.Battle.BalanceLib do
   """
   @spec force_party([expanded_group_or_pair()], map(), list()) :: {map(), list()}
   def force_party(groups, teams, opts) do
-    IO.puts("")
-    IO.inspect({groups, teams, opts})
-    IO.puts("")
-
     # To prevent anything breaking while we debug this, return loser picks stuff
     loser_picks(groups, teams, opts)
   end
