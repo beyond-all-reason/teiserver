@@ -644,8 +644,10 @@ defmodule Teiserver.Protocols.SpringOut do
 
       # Queue status
       id_list = Coordinator.call_consul(lobby.id, :queue_state)
-
       reply(:battle, :queue_status, {lobby.id, id_list}, nil, state)
+
+      data = Coordinator.call_consul(lobby_id, :get_chobby_extra_data)
+      reply(:battle, :extra_data, {lobby.id, data}, nil, state)
 
       %{state | lobby_id: lobby.id}
     else
