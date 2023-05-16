@@ -90,6 +90,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
                 {match.id, relationship}
             end
         end
+
       result =
         Moderation.create_report(%{
           reporter_id: conn.assigns.current_user.id,
@@ -113,6 +114,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
           conn
           |> render("index.html")
       end
+    end
   end
 
   @spec success(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

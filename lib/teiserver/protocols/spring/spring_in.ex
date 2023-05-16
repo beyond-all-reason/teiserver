@@ -716,7 +716,8 @@ defmodule Teiserver.Protocols.SpringIn do
 
             Coordinator.send_to_user(state.userid, [
               "To complete your report, please use the form on this link: #{url}",
-              "The link will expire in 5 minutes."
+              "The link will expire in 5 minutes.",
+              "If the link doesn't work, you can also view your matches at https://#{host}/teiserver/battle/matches and report players from the player tab of the relevant battle."
             ])
 
             reply(:okay, nil, msg_id, state)
