@@ -62,12 +62,7 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
     message = Coordinator.call_consul(lobby_id, {:get, :welcome_message})
     assert message == "This is the welcome message"
 
-    {:ok,
-     hsocket: hsocket,
-     psocket: psocket,
-     host: host,
-     player: player,
-     lobby_id: lobby_id}
+    {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id}
   end
 
   test "standard messages", %{lobby_id: lobby_id, psocket: psocket} do

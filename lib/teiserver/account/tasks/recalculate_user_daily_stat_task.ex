@@ -78,8 +78,6 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
             total_minutes: data.menu + data.lobby + data.spectator + data.player
           })
 
-          user = User.get_user_by_id(userid)
-
           Account.update_user_roles(Account.get_user!(userid))
         end)
       end)

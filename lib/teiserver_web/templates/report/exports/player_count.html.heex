@@ -52,7 +52,7 @@
           </div>
 
           <div class="row mt-4">
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_date_preset" class="control-label">Date range:</label>
               <%= select(:report, :date_preset, @presets,
                 class: "form-control",
@@ -60,7 +60,24 @@
               ) %>
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="report_table" class="control-label">Table:</label>
+              <%= select(
+                :report,
+                :table,
+                [
+                  "Daily",
+                  "Weekly",
+                  "Monthly",
+                  "Quarterly",
+                  "Yearly"
+                ],
+                class: "form-control",
+                selected: @params["table"]
+              ) %>
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_start_date" class="control-label">Start date:</label>
               <input
                 type="text"
@@ -71,7 +88,7 @@
               />
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_end_date" class="control-label">End date:</label>
               <input
                 type="text"

@@ -48,12 +48,7 @@ defmodule Teiserver.Coordinator.LockTest do
     # Battlestatus message
     _tachyon_recv(hsocket)
 
-    {:ok,
-     hsocket: hsocket,
-     psocket: psocket,
-     host: host,
-     player: player,
-     lobby_id: lobby_id}
+    {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id}
   end
 
   test "lock and unlock", %{hsocket: hsocket, lobby_id: lobby_id} do

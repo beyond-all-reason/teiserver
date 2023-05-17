@@ -90,7 +90,7 @@ bsname = view_colour() %>
 
               <div class="row">
                 <div class="col-md-12">
-                <h5>Restrictions</h5>
+                  <h5>Restrictions</h5>
                 </div>
                 <%= for {section, r_list} <- @restrictions_lists do %>
                   <div class="col restrictions-col">
@@ -209,24 +209,24 @@ bsname = view_colour() %>
 
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
-                    onclick={"
+                    onclick="
         $('#action_restriction_Site').prop('checked', true);
         $('#action_restriction_Login').prop('checked', true);
         $('#action_reason').val('You are continuing to create smurf/alt-accounts. This is against the code of conduct.');
         $('#action_expires').val('1 day');
-      "}
+      "
                   >
                     Smurfing - 2nd offense
                   </div>
 
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
-                    onclick={"
+                    onclick="
         $('#action_restriction_Site').prop('checked', true);
         $('#action_restriction_Login').prop('checked', true);
         $('#action_reason').val('Smurfing/alt-accounting. 3rd offense, if you do it again we may permanently ban your account.');
         $('#action_expires').val('3 days');
-      "}
+      "
                   >
                     Smurfing - 3rd offense
                   </div>
@@ -278,7 +278,7 @@ bsname = view_colour() %>
               <div class="row mt-4" id="reports-row">
                 <div class="col">
                   <div
-                    class={"btn btn-outline-secondary"}
+                    class="btn btn-outline-secondary"
                     onclick="
         $('.restrictions-col .form-check-input').prop('checked', false);
       "

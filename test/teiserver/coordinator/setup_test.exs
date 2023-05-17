@@ -37,15 +37,16 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
 
     :timer.sleep(@sleep)
     messages = PubsubListener.get(listener)
+
     assert messages == [
-      %{
-        channel: "teiserver_lobby_chat:#{lobby.id}",
-        event: :say,
-        lobby_id: lobby.id,
-        message: "Test message",
-        userid: user.id
-      }
-    ]
+             %{
+               channel: "teiserver_lobby_chat:#{lobby.id}",
+               event: :say,
+               lobby_id: lobby.id,
+               message: "Test message",
+               userid: user.id
+             }
+           ]
 
     # Now command
     result = Lobby.say(user.id, "$settag tagname tagvalue", lobby.id)
@@ -59,13 +60,13 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
     messages = PubsubListener.get(listener)
 
     assert messages == [
-        %{
-        channel: "teiserver_lobby_chat:#{lobby.id}",
-        event: :say,
-        lobby_id: lobby.id,
-        message: "$settag tagname tagvalue",
-        userid: user.id
-      }
-    ]
+             %{
+               channel: "teiserver_lobby_chat:#{lobby.id}",
+               event: :say,
+               lobby_id: lobby.id,
+               message: "$settag tagname tagvalue",
+               userid: user.id
+             }
+           ]
   end
 end

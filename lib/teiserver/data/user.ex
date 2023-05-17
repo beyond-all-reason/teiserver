@@ -1117,7 +1117,10 @@ defmodule Teiserver.User do
       last_ip: ip
     })
 
-    Telemetry.log_server_event(user.id, "account.user_login", %{lobby_client: lobby_client, ip: ip})
+    Telemetry.log_server_event(user.id, "account.user_login", %{
+      lobby_client: lobby_client,
+      ip: ip
+    })
 
     # TODO: Replace lobby_hash name with client_app_hash
     if not is_bot?(user) do

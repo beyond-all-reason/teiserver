@@ -46,10 +46,16 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/startenergy" => "1000",
       "game/modoptions/multiplier_maxvelocity" => "2",
       "game/modoptions/multiplier_buildpower" => "2",
-      "game/modoptions/multiplier_maxdamage" => "2",
+      "game/modoptions/multiplier_maxdamage" => "2"
     })
 
-    ["#{sender.name} has enabled the Deathmatch meme. You start with a 35k metal, 1k energy, everything builds fast, runs fast and hits hard. Good luck."]
+    antinukes = ~w(armamd corfmd armscab cormabm)
+
+    Battle.disable_units(lobby_id, antinukes)
+
+    [
+      "#{sender.name} has enabled the Deathmatch meme. You start with a 35k metal, 1k energy, everything builds fast, runs fast and hits hard. Beware, anti-nukes are disabled; Good luck Commander."
+    ]
   end
 
   def handle_meme("poor", senderid, %{lobby_id: lobby_id} = _state) do

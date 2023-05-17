@@ -390,7 +390,7 @@ defmodule Teiserver.Account.UserLib do
       "Streamer" => %{colour: "#0066AA", icon: "fa-brands fa-twitch"},
       "Tournament" => %{colour: "#0000AA", icon: "fa-duotone fa-trophy"},
       "Trusted" => %{colour: "#000000", icon: "fa-duotone fa-check"},
-      "Verified" => %{colour: "#66AA66", icon: "fa-duotone fa-check"},
+      "Verified" => %{colour: "#66AA66", icon: "fa-duotone fa-check"}
     }
   end
 

@@ -57,12 +57,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     # Battlestatus message
     _tachyon_recv_until(hsocket)
 
-    {:ok,
-     hsocket: hsocket,
-     psocket: psocket,
-     host: host,
-     player: player,
-     lobby_id: lobby_id}
+    {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id}
   end
 
   defp make_rating(userid, rating_type_id, rating_value) do

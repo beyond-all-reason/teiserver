@@ -45,7 +45,6 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
 
   def do_handle("queue_status", _, _msg_id, state), do: state
 
-
   def do_handle("extra_data", _, _msg_id, %{lobby_id: nil} = state), do: state
 
   def do_handle("extra_data", _, _msg_id, %{lobby_id: lobby_id, app_status: :accepted} = state) do

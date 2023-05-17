@@ -63,9 +63,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_call(:get_chobby_extra_data, _from, state) do
-    keys = ~w(lobby_policy_id tournament_lobby gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play minimum_uncertainty_to_play maximum_uncertainty_to_play minimum_skill_to_play maximum_skill_to_play welcome_message player_limit)a
+    keys =
+      ~w(lobby_policy_id tournament_lobby gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play minimum_uncertainty_to_play maximum_uncertainty_to_play minimum_skill_to_play maximum_skill_to_play welcome_message player_limit)a
 
-    result = state
+    result =
+      state
       |> Map.filter(fn {k, _} -> Enum.member?(keys, k) end)
 
     {:reply, result, state}
@@ -437,14 +439,20 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       # If they're not allowed to be a boss, unboss them?
       (host_data[:host_bosses] || [])
-        |> Enum.filter(fn userid ->
-          User.is_restricted?(userid, ["Boss"])
-        end)
-        |> Enum.each(fn userid ->
-          username = Account.get_username_by_id(userid)
-          LobbyChat.say(state.coordinator_id, "#{username} is not allowed to be a boss", state.lobby_id)
-          LobbyChat.say(userid, "!boss", state.lobby_id)
-        end)
+      |> Enum.filter(fn userid ->
+        User.is_restricted?(userid, ["Boss"])
+      end)
+      |> Enum.each(fn userid ->
+        username = Account.get_username_by_id(userid)
+
+        LobbyChat.say(
+          state.coordinator_id,
+          "#{username} is not allowed to be a boss",
+          state.lobby_id
+        )
+
+        LobbyChat.say(userid, "!boss", state.lobby_id)
+      end)
 
       player_count_changed(new_state)
       {:noreply, new_state}

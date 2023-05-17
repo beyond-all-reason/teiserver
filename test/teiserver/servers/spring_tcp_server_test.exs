@@ -205,7 +205,14 @@ defmodule Teiserver.SpringTcpServerTest do
     lobby_id = 111
     assert GenServer.call(tcp_pid, {:get, :known_battles}) == []
     # send(tcp_pid, {:add_user_to_battle, u1.id, lobby_id, "script_password"})
-    send(tcp_pid, %{channel: "teiserver_global_user_updates", event: :joined_lobby, client: u1_client, lobby_id: lobby_id, script_password: "script_password"})
+    send(tcp_pid, %{
+      channel: "teiserver_global_user_updates",
+      event: :joined_lobby,
+      client: u1_client,
+      lobby_id: lobby_id,
+      script_password: "script_password"
+    })
+
     r = _recv_raw(socket)
     assert r == "JOINEDBATTLE #{lobby_id} #{u1.name}\n"
 
@@ -218,7 +225,14 @@ defmodule Teiserver.SpringTcpServerTest do
            }
 
     # Duplicate user in battle
-    send(tcp_pid, %{channel: "teiserver_global_user_updates", event: :joined_lobby, client: u1_client, lobby_id: lobby_id, script_password: "script_password"})
+    send(tcp_pid, %{
+      channel: "teiserver_global_user_updates",
+      event: :joined_lobby,
+      client: u1_client,
+      lobby_id: lobby_id,
+      script_password: "script_password"
+    })
+
     r = _recv_raw(socket)
     assert r == :timeout
 
@@ -231,7 +245,14 @@ defmodule Teiserver.SpringTcpServerTest do
            }
 
     # User moves to a different battle (without leave command)
-    send(tcp_pid, %{channel: "teiserver_global_user_updates", event: :joined_lobby, client: u1_client, lobby_id: lobby_id + 1, script_password: "script_password"})
+    send(tcp_pid, %{
+      channel: "teiserver_global_user_updates",
+      event: :joined_lobby,
+      client: u1_client,
+      lobby_id: lobby_id + 1,
+      script_password: "script_password"
+    })
+
     :timer.sleep(250)
     r = _recv_raw(socket)
 
@@ -249,7 +270,14 @@ defmodule Teiserver.SpringTcpServerTest do
     # assert r == "LEFTBATTLE #{lobby_id} #{u1.name}\nJOINEDBATTLE #{lobby_id + 1} #{u1.name}\n"
 
     # Same battle again
-    send(tcp_pid, %{channel: "teiserver_global_user_updates", event: :joined_lobby, client: u1_client, lobby_id: lobby_id + 1, script_password: "script_password"})
+    send(tcp_pid, %{
+      channel: "teiserver_global_user_updates",
+      event: :joined_lobby,
+      client: u1_client,
+      lobby_id: lobby_id + 1,
+      script_password: "script_password"
+    })
+
     r = _recv_raw(socket)
     assert r == :timeout
 
@@ -259,7 +287,14 @@ defmodule Teiserver.SpringTcpServerTest do
     assert r == "REMOVEUSER #{u1.name}\n"
 
     # Now they join, should get a login and then a join battle command
-    send(tcp_pid, %{channel: "teiserver_global_user_updates", event: :joined_lobby, client: u1_client, lobby_id: lobby_id + 1, script_password: "script_password"})
+    send(tcp_pid, %{
+      channel: "teiserver_global_user_updates",
+      event: :joined_lobby,
+      client: u1_client,
+      lobby_id: lobby_id + 1,
+      script_password: "script_password"
+    })
+
     :timer.sleep(500)
     r = _recv_raw(socket)
 

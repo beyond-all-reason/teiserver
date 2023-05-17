@@ -48,12 +48,7 @@ defmodule Teiserver.Coordinator.HostUpdateTest do
     # Battlestatus message
     _tachyon_recv(hsocket)
 
-    {:ok,
-     hsocket: hsocket,
-     psocket: psocket,
-     host: host,
-     player: player,
-     lobby_id: lobby_id}
+    {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id}
   end
 
   test "Update host data teamSize/teamCount", %{

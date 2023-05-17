@@ -322,13 +322,14 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
     # Update any reports which were assigned to this
     action.reports
-      |> Enum.each(fn report ->
-        Moderation.update_report(report, %{result_id: nil})
-      end)
+    |> Enum.each(fn report ->
+      Moderation.update_report(report, %{result_id: nil})
+    end)
 
     Moderation.delete_action(action)
 
-    action_map = Map.take(action, ~w(target_id reason restrictions score_modifier expires hidden)a)
+    action_map =
+      Map.take(action, ~w(target_id reason restrictions score_modifier expires hidden)a)
 
     add_audit_log(conn, "Moderation:Action deleted", %{action: action_map})
     Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
