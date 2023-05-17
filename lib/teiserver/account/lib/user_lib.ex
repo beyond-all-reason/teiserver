@@ -330,8 +330,6 @@ defmodule Teiserver.Account.UserLib do
       preload: [user_stat: user_stats]
   end
 
-
-
   @spec generate_user_icons(T.user()) :: map()
   def generate_user_icons(user) do
     role_icons =

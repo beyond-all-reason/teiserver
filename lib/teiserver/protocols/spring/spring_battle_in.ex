@@ -45,6 +45,15 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
 
   def do_handle("queue_status", _, _msg_id, state), do: state
 
+  def do_handle("extra_data", _, _msg_id, %{lobby_id: nil} = state), do: state
+
+  def do_handle("extra_data", _, _msg_id, %{lobby_id: lobby_id, app_status: :accepted} = state) do
+    data = Coordinator.call_consul(lobby_id, :get_chobby_extra_data)
+    reply(:battle, :extra_data, {lobby_id, data}, nil, state)
+  end
+
+  def do_handle("extra_data", _, _msg_id, state), do: state
+
   # def do_handle("refresh_lobby", _, _msg_id, %{lobby_id: nil} = state), do: state
   # def do_handle("refresh_lobby", _, _msg_id, %{lobby_id: lobby_id, app_status: :accepted} = state) do
 

@@ -44,7 +44,7 @@ defmodule TeiserverWeb.Moderation.ReportFormControllerTest do
       assert Enum.empty?(Moderation.list_reports(search: [target_id: user.id]))
 
       attrs = %{
-        "target_id" => user.id-1,
+        "target_id" => user.id - 1,
         "type" => "type",
         "sub_type" => "sub_type"
       }

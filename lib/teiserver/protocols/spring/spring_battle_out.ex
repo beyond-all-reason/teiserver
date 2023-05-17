@@ -26,6 +26,7 @@ defmodule Teiserver.Protocols.Spring.BattleOut do
 
   def do_reply(:summary, _, _state), do: ""
 
+  def do_reply(:queue_status, nil, _), do: ""
   def do_reply(:queue_status, {nil, _}, _), do: ""
   def do_reply(:queue_status, {_, nil}, _), do: ""
 
@@ -44,4 +45,19 @@ defmodule Teiserver.Protocols.Spring.BattleOut do
   end
 
   def do_reply(:queue_status, _, _state), do: ""
+
+  def do_reply(:extra_data, nil, _), do: ""
+  def do_reply(:extra_data, {nil, _}, _), do: ""
+  def do_reply(:extra_data, {_, nil}, _), do: ""
+
+  def do_reply(:extra_data, {lobby_id, raw_data}, %{app_status: :accepted}) do
+    encoded_data =
+      raw_data
+      |> Jason.encode!()
+      |> Base.encode64(padding: false)
+
+    "s.battle.extra_data #{lobby_id}\t#{encoded_data}\n"
+  end
+
+  def do_reply(:extra_data, _, _state), do: ""
 end

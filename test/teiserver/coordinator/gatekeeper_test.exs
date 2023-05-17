@@ -54,12 +54,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     # Battlestatus message
     _tachyon_recv(hsocket)
 
-    {:ok,
-     hsocket: hsocket,
-     psocket: psocket,
-     host: host,
-     player: player,
-     lobby_id: lobby_id}
+    {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id}
   end
 
   test "friendsplay", %{player: player, hsocket: hsocket, psocket: psocket, lobby_id: lobby_id} do

@@ -29,7 +29,8 @@ defmodule Teiserver.Account.PlayerCountExport do
   defp get_defaults(params) do
     Map.merge(
       %{
-        "format" => "csv"
+        "format" => "csv",
+        "table" => "Daily"
       },
       params
     )
@@ -54,8 +55,17 @@ defmodule Teiserver.Account.PlayerCountExport do
         "csv" -> {"text/csv", "csv"}
       end
 
+    list_func =
+      case params["table"] do
+        "Daily" -> &Telemetry.list_server_day_logs/1
+        "Weekly" -> &Telemetry.list_server_week_logs/1
+        "Monthly" -> &Telemetry.list_server_month_logs/1
+        "Quarterly" -> &Telemetry.list_server_quarter_logs/1
+        "Yearly" -> &Telemetry.list_server_year_logs/1
+      end
+
     data =
-      Telemetry.list_server_day_logs(
+      list_func.(
         search: [
           start_date: start_date,
           end_date: end_date

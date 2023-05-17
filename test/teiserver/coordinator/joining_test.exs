@@ -53,9 +53,21 @@ defmodule Teiserver.Coordinator.JoiningTest do
     messages = PubsubListener.get(listener)
 
     assert messages == [
-      %{channel: "teiserver_lobby_chat:#{lobby_id}", event: :announce, lobby_id: lobby_id, message: "New welcome message set to: This is the welcome message", userid: Coordinator.get_coordinator_userid()},
-      %{channel: "teiserver_lobby_chat:#{lobby_id}", event: :say, lobby_id: lobby_id, message: "$welcome-message This is the welcome message", userid: user.id}
-    ]
+             %{
+               channel: "teiserver_lobby_chat:#{lobby_id}",
+               event: :announce,
+               lobby_id: lobby_id,
+               message: "New welcome message set to: This is the welcome message",
+               userid: Coordinator.get_coordinator_userid()
+             },
+             %{
+               channel: "teiserver_lobby_chat:#{lobby_id}",
+               event: :say,
+               lobby_id: lobby_id,
+               message: "$welcome-message This is the welcome message",
+               userid: user.id
+             }
+           ]
 
     consul_state = Coordinator.call_consul(lobby_id, :get_all)
     assert consul_state.welcome_message == "This is the welcome message"

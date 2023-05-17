@@ -12,7 +12,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]
   require Logger
 
-  @dispute_string "If you feel you have been the target of an erroneous or unjust moderation action please contact the head of moderation, Beherith"
+  @dispute_string "If you feel you have been the target of an erroneous or unjust moderation action please use the #open-ticket channel in our discord to appeal/dispute the action."
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
