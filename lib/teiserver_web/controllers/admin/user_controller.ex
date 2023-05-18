@@ -165,6 +165,11 @@ defmodule TeiserverWeb.Admin.UserController do
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
         |> render("show.html")
 
+      {false, :restricted_user} ->
+        conn
+        |> put_flash(:danger, "This is a restricted user")
+        |> redirect(to: ~p"/teiserver/admin/user")
+
       _ ->
         conn
         |> put_flash(:danger, "Unable to access this user")
