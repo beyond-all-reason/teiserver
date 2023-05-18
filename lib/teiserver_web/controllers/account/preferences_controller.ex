@@ -13,6 +13,7 @@ defmodule TeiserverWeb.Account.PreferencesController do
     sub_menu_active: "preferences"
   )
 
+  @spec index(Plug.Conn.t(), any) :: Plug.Conn.t()
   def index(conn, _params) do
     config_values =
       conn.user_id
@@ -26,6 +27,7 @@ defmodule TeiserverWeb.Account.PreferencesController do
     |> render("index.html")
   end
 
+  @spec new(Plug.Conn.t(), map) :: Plug.Conn.t()
   def new(conn, %{"key" => key}) do
     config_info = Config.get_user_config_type(key)
     changeset = UserConfig.creation_changeset(%UserConfig{}, config_info)
@@ -42,6 +44,7 @@ defmodule TeiserverWeb.Account.PreferencesController do
     |> render("new.html")
   end
 
+  @spec create(Plug.Conn.t(), any) :: Plug.Conn.t()
   def create(conn, %{"user_config" => user_config_params}) do
     value = Map.get(user_config_params, "value", "false")
 
@@ -51,24 +54,31 @@ defmodule TeiserverWeb.Account.PreferencesController do
         "value" => value
       })
 
+    tab =
+      Config.get_user_config_type(user_config_params["key"])
+      |> Map.get(:section)
+      |> Central.Helpers.StringHelper.remove_spaces()
+
     case Config.create_user_config(user_config_params) do
       {:ok, _user_config} ->
         conn
         |> put_flash(:info, "Your preferences have been updated.")
-        |> redirect(to: Routes.ts_account_preferences_path(conn, :index))
+        |> redirect(to: Routes.ts_account_preferences_path(conn, :index) <> "##{tab}")
 
       {:error, %Ecto.Changeset{} = _changeset} ->
         conn
         |> put_flash(:info, "Your preferences have been updated.")
-        |> redirect(to: Routes.ts_account_preferences_path(conn, :index))
+        |> redirect(to: Routes.ts_account_preferences_path(conn, :index) <> "##{tab}")
     end
   end
 
+  @spec show(Plug.Conn.t(), any) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     user_config = Config.get_user_config!(id)
     render(conn, "show.html", user_config: user_config)
   end
 
+  @spec edit(Plug.Conn.t(), any) :: Plug.Conn.t()
   def edit(conn, %{"id" => key}) do
     config_info = Config.get_user_config_type(key)
     user_config = Config.get_user_config!(conn.user_id, key)
@@ -83,6 +93,7 @@ defmodule TeiserverWeb.Account.PreferencesController do
     |> render("edit.html")
   end
 
+  @spec update(Plug.Conn.t(), any) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "user_config" => user_config_params}) do
     user_config = Config.get_user_config!(id)
 
@@ -94,11 +105,16 @@ defmodule TeiserverWeb.Account.PreferencesController do
         "value" => value
       })
 
+    tab =
+      Config.get_user_config_type(user_config_params["key"])
+      |> Map.get(:section)
+      |> Central.Helpers.StringHelper.remove_spaces()
+
     case Config.update_user_config(user_config, user_config_params) do
       {:ok, _user_config} ->
         conn
         |> put_flash(:info, "Your preferences have been updated.")
-        |> redirect(to: Routes.ts_account_preferences_path(conn, :index))
+        |> redirect(to: Routes.ts_account_preferences_path(conn, :index) <> "##{tab}")
 
       # If there's an error then it's because they have removed the value, we just delete the config
       {:error, %Ecto.Changeset{} = _changeset} ->
@@ -107,7 +123,7 @@ defmodule TeiserverWeb.Account.PreferencesController do
 
         conn
         |> put_flash(:info, "Your preferences have been updated.")
-        |> redirect(to: Routes.ts_account_preferences_path(conn, :index))
+        |> redirect(to: Routes.ts_account_preferences_path(conn, :index) <> "##{tab}")
     end
   end
 end

@@ -57,14 +57,14 @@
                       <td style="min-width:50px;" tal:condition="input_type == 'boolean'">
                         <%= if @config_values[the_config.key] do %>
                           <a
-                            href={Routes.user_config_path(@conn, :edit, the_config.key)}
+                            href={~p"/teiserver/account/preferences/#{the_config.key}/edit"}
                             class="btn btn-secondary btn-sm"
                           >
                             Edit
                           </a>
                         <% else %>
                           <a
-                            href={"#{Routes.user_config_path(@conn, :new)}?key=#{the_config.key}"}
+                            href={~p"/teiserver/account/preferences/new?key=#{the_config.key}"}
                             class="btn btn-secondary btn-sm"
                           >
                             Edit
