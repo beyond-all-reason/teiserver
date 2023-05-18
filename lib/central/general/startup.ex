@@ -132,7 +132,7 @@ defmodule Central.General.Startup do
       opts: [
         choices: zones
       ],
-      default: Application.get_env(:central, Central.Config)[:defaults].tz
+      default: Application.get_env(:central, Teiserver.Config)[:defaults].tz
     })
 
     add_user_config_type(%{

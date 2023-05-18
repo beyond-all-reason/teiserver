@@ -1,6 +1,6 @@
 defmodule Teiserver.Chat.WordLib do
   @moduledoc false
-  alias Central.Config
+  alias Teiserver.Config
   alias Central.Helpers.StringHelper
   require Logger
 

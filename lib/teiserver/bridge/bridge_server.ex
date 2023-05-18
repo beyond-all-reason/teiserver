@@ -6,7 +6,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   alias Teiserver.{Account, Room, User}
   alias Teiserver.Chat.WordLib
   alias Phoenix.PubSub
-  alias Central.Config
+  alias Teiserver.Config
   require Logger
   alias Teiserver.Data.Types, as: T
   alias Nostrum.Api

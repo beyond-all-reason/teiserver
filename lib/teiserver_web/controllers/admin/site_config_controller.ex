@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.SiteConfigController do
   use CentralWeb, :controller
 
-  alias Central.Config
+  alias Teiserver.Config
 
   plug Bodyguard.Plug.Authorize,
     policy: Central.Dev,

@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.V1.TachyonConfigTest do
-  alias Central.Config
+  alias Teiserver.Config
   alias Teiserver.Account
   use Central.ServerCase
 

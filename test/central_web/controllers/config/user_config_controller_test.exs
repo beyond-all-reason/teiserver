@@ -1,7 +1,7 @@
 defmodule CentralWeb.Config.UserConfigControllerTest do
   use CentralWeb.ConnCase
 
-  alias Central.Config
+  alias Teiserver.Config
   alias Central.Helpers.GeneralTestLib
 
   setup do

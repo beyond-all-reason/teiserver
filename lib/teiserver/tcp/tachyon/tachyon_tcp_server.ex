@@ -3,7 +3,7 @@ defmodule Teiserver.TachyonTcpServer do
   use GenServer
   require Logger
   alias Phoenix.PubSub
-  alias Central.Config
+  alias Teiserver.Config
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   alias Teiserver.{User, Client, Account}

@@ -35,7 +35,7 @@ defmodule Teiserver.TeiserverQuickActions do
         },
         %{
           label: "Teiserver preferences",
-          icons: [Central.Config.UserConfigLib.icon()],
+          icons: [Teiserver.Config.UserConfigLib.icon()],
           url: ~p"/teiserver/account/preferences",
           permissions: "teiserver"
         },

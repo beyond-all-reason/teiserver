@@ -1,6 +1,7 @@
 defmodule CentralWeb.Account.SessionController do
   use CentralWeb, :controller
-  alias Central.{Account, Config}
+  alias Central.Account
+  alias Teiserver.Config
   alias Teiserver.Logging.LoggingPlug
   alias Central.Account.{Guardian, User}
   require Logger

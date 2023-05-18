@@ -4,7 +4,7 @@ defmodule Teiserver.SpringTcpServer do
   require Logger
 
   alias Phoenix.PubSub
-  alias Central.Config
+  alias Teiserver.Config
   alias Teiserver.{User, Client, Account, Room}
   alias Teiserver.Protocols.{SpringIn, SpringOut}
   alias Teiserver.Data.Types, as: T

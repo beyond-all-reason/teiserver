@@ -215,10 +215,10 @@ defmodule Central.Account.UserLib do
 
   def has_access(target_user, conn) do
     cond do
-      allow?(conn, "admin.admin.full") ->
+      allow?(conn, "Server") ->
         {true, nil}
 
-      allow?(conn, "Server") and allow?(target_user, "teiserver.staff.moderator") ->
+      allow?(conn, "Server") and allow?(target_user, "Admin") ->
         {true, nil}
 
       allow?(target_user, "teiserver.staff.moderator") ->

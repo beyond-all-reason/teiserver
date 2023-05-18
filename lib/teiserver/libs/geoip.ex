@@ -1,6 +1,6 @@
 # To install: sudo apt-get install geoip-bin
 defmodule Teiserver.Geoip do
-  alias Central.Config
+  alias Teiserver.Config
 
   @spec get_flag(String.t()) :: String.t()
   def get_flag(ip), do: get_flag(ip, nil)

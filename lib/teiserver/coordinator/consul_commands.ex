@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.ConsulCommands do
   require Logger
-  alias Central.Config
+  alias Teiserver.Config
   alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
   alias Teiserver.{Account, Battle, Coordinator, User, Client}
   alias Teiserver.Battle.{Lobby, LobbyChat}

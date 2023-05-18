@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.API.SpadsController do
   use CentralWeb, :controller
-  alias Central.Config
+  alias Teiserver.Config
   alias Teiserver.{Account, Coordinator}
   alias Teiserver.Battle.BalanceLib
   import Central.Helpers.NumberHelper, only: [int_parse: 1]

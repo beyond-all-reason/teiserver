@@ -1,6 +1,6 @@
 defmodule Teiserver.TeiserverConfigs do
   @moduledoc false
-  import Central.Config, only: [add_site_config_type: 1, add_user_config_type: 1]
+  import Teiserver.Config, only: [add_site_config_type: 1, add_user_config_type: 1]
 
   @spec teiserver_configs :: any
   def teiserver_configs do

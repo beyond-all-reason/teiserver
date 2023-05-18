@@ -6,7 +6,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
 
   alias Teiserver.{Battle, User, Coordinator}
   alias Central.Helpers.NumberHelper
-  alias Central.Config
+  alias Teiserver.Config
   # alias Teiserver.Data.Types, as: T
 
   @impl Oban.Worker

@@ -3,7 +3,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   The accolade server is the interface point for the Accolade system.
   """
   use GenServer
-  alias Central.Config
+  alias Teiserver.Config
   alias Teiserver.{Account, User, Room, Battle, Coordinator}
   alias Teiserver.Coordinator.CoordinatorCommands
   alias Teiserver.Account.AccoladeLib

@@ -1,4 +1,4 @@
-defmodule Central.Config do
+defmodule Teiserver.Config do
   @moduledoc """
   The Config context.
   """
@@ -6,7 +6,7 @@ defmodule Central.Config do
   import Ecto.Query, warn: false
   alias Central.Repo
 
-  alias Central.Config.UserConfig
+  alias Teiserver.Config.UserConfig
 
   def get_user_config_cache(%{assigns: %{current_user: nil}}, key) do
     get_user_config_default(key)
@@ -274,7 +274,7 @@ defmodule Central.Config do
     end
   end
 
-  alias Central.Config.SiteConfig
+  alias Teiserver.Config.SiteConfig
 
   @spec get_site_config_cache(String.t()) :: any
   def get_site_config_cache(key) do

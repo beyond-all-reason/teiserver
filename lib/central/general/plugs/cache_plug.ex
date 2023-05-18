@@ -1,7 +1,7 @@
 defmodule Central.General.CachePlug do
   @moduledoc false
   import Plug.Conn
-  alias Central.Config
+  alias Teiserver.Config
 
   def init(_) do
   end
@@ -9,7 +9,7 @@ defmodule Central.General.CachePlug do
   def call(%{user_id: nil} = conn, _) do
     conn
     |> assign(:memberships, [])
-    |> assign(:tz, Application.get_env(:central, Central.Config)[:defaults].tz)
+    |> assign(:tz, Application.get_env(:central, Teiserver.Config)[:defaults].tz)
   end
 
   def call(conn, _) do

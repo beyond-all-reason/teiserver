@@ -7,6 +7,6 @@ defmodule CentralWeb.Config.UserConfigView do
     |> tl
   end
 
-  def view_colour(), do: Central.Config.UserConfigLib.colours()
-  def icon(), do: Central.Config.UserConfigLib.icon()
+  def view_colour(), do: Teiserver.Config.UserConfigLib.colours()
+  def icon(), do: Teiserver.Config.UserConfigLib.icon()
 end

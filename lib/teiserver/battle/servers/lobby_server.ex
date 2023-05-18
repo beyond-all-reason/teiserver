@@ -1,7 +1,7 @@
 defmodule Teiserver.Battle.LobbyServer do
   use GenServer
   require Logger
-  alias Central.Config
+  alias Teiserver.Config
   alias Teiserver.{Account, Battle}
   alias Teiserver.Bridge.BridgeServer
   alias Phoenix.PubSub

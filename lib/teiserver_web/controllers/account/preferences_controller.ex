@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Account.PreferencesController do
   use CentralWeb, :controller
 
-  alias Central.Config
-  alias Central.Config.UserConfig
+  alias Teiserver.Config
+  alias Teiserver.Config.UserConfig
 
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Account', url: '/teiserver/account')

@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.AutomodServer do
   use GenServer
-  alias Central.Config
+  alias Teiserver.Config
   import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
   alias Teiserver.{Account, User, Moderation, Coordinator, Client}
   alias Phoenix.PubSub

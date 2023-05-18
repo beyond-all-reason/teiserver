@@ -27,7 +27,7 @@ defmodule TeiserverWeb.API.SessionController do
   @spec register(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def register(conn, %{"user" => user_params}) do
     user_params = Account.merge_default_params(user_params)
-    config_setting = Central.Config.get_site_config_cache("user.Enable user registrations")
+    config_setting = Teiserver.Config.get_site_config_cache("user.Enable user registrations")
 
     {allowed, reason} =
       cond do

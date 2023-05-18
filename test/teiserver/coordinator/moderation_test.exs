@@ -14,7 +14,7 @@ defmodule Teiserver.Coordinator.ModerationTest do
   end
 
   test "login with warning", %{user: user} do
-    delay = Central.Config.get_site_config_cache("teiserver.Post login action delay")
+    delay = Teiserver.Config.get_site_config_cache("teiserver.Post login action delay")
 
     refute User.has_warning?(user.id)
     refute User.has_mute?(user.id)

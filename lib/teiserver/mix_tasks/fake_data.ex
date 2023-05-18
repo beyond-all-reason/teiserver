@@ -382,7 +382,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   defp make_one_time_code() do
     root_user = Account.get_user_by_email("root@localhost")
 
-    Central.Config.update_site_config("user.Enable one time links", "true")
+    Teiserver.Config.update_site_config("user.Enable one time links", "true")
 
     {:ok, _code} =
       Account.create_code(%{

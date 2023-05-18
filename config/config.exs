@@ -8,7 +8,7 @@ config :central, Central,
   credit: "Teifion Jordan"
 
 # Default configs
-config :central, Central.Config,
+config :central, Teiserver.Config,
   defaults: %{
     tz: "UTC"
   }

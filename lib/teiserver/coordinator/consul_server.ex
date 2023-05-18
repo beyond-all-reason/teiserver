@@ -8,7 +8,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.{Account, Coordinator, Client, User, Battle}
   alias Teiserver.Battle.{Lobby, LobbyChat}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Central.Config
+  alias Teiserver.Config
   alias Phoenix.PubSub
   alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Battle.BalanceLib

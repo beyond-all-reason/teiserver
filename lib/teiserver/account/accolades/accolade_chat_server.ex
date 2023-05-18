@@ -4,7 +4,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
   """
 
   use GenServer
-  alias Central.Config
+  alias Teiserver.Config
   alias Teiserver.{User, Account}
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Account.AccoladeBotServer

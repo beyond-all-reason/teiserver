@@ -5,7 +5,7 @@ defmodule CentralWeb.Admin.UserController do
   alias Central.Account.{User, AuthLib}
   alias Central.Helpers.StylingHelper
   alias Central.Account.UserLib
-  alias Central.Config
+  alias Teiserver.Config
 
   plug Bodyguard.Plug.Authorize,
     policy: Central.Account.User,

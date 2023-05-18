@@ -45,11 +45,11 @@ defmodule Teiserver.Account.RoleLib do
   end
 
   @role_data @raw_role_data
-    |> Map.new(fn {name, role} ->
-      role = Map.merge(role, %{
-        contains: build_contains_map(name)
-      })
-    end)
+    # |> Map.new(fn {name, role} ->
+    #   role = Map.merge(role, %{
+    #     contains: build_contains_map(name)
+    #   })
+    # end)
 
   @spec role_data() :: map()
   def role_data() do

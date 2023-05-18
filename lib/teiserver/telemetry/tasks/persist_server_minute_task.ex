@@ -3,7 +3,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMinuteTask do
 
   alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Telemetry
-  alias Central.Config
+  alias Teiserver.Config
 
   @impl Oban.Worker
   def perform(_) do

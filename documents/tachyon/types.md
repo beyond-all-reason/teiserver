@@ -209,7 +209,7 @@ A comment attached to a blog post
 * timestamp :: timestamp
 
 ## UserConfigType
-Built on top of the Central.Config data structures and used in `c.config._user*`
+Built on top of the Teiserver.Config data structures and used in `c.config._user*`
 
 * default :: string
 * description :: string

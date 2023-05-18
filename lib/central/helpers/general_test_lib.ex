@@ -47,13 +47,13 @@ defmodule Central.Helpers.GeneralTestLib do
   end
 
   def seeded?() do
-    r = Repo.one(from c in Central.Config.SiteConfig, where: c.key == "test.seeded")
+    r = Repo.one(from c in Teiserver.Config.SiteConfig, where: c.key == "test.seeded")
     r != nil
   end
 
   def seed() do
-    %Central.Config.SiteConfig{}
-    |> Central.Config.SiteConfig.changeset(%{
+    %Teiserver.Config.SiteConfig{}
+    |> Teiserver.Config.SiteConfig.changeset(%{
       key: "test.seeded",
       value: "true"
     })

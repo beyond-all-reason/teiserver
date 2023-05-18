@@ -11,7 +11,7 @@ defmodule CentralWeb.Account.RegistrationController do
 
   @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, params) do
-    config_setting = Central.Config.get_site_config_cache("user.Enable user registrations")
+    config_setting = Teiserver.Config.get_site_config_cache("user.Enable user registrations")
 
     {allowed, reason} =
       cond do
@@ -64,7 +64,7 @@ defmodule CentralWeb.Account.RegistrationController do
   @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(conn, %{"user" => user_params}) do
     user_params = Account.merge_default_params(user_params)
-    config_setting = Central.Config.get_site_config_cache("user.Enable user registrations")
+    config_setting = Teiserver.Config.get_site_config_cache("user.Enable user registrations")
 
     {allowed, reason} =
       cond do
@@ -159,7 +159,7 @@ defmodule CentralWeb.Account.RegistrationController do
     user_params = Map.put(user_params, "password", user_params["password_confirmation"])
 
     user_params =
-      if Central.Config.get_site_config_cache("user.Enable renames") do
+      if Teiserver.Config.get_site_config_cache("user.Enable renames") do
         user_params
       else
         Map.drop(user_params, ["name"])

@@ -3,7 +3,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
   require Logger
   alias Phoenix.PubSub
-  alias Central.Config
+  alias Teiserver.Config
   alias Teiserver.Account
   alias Teiserver.Tachyon.{CommandDispatch, MessageHandlers}
   # alias Teiserver.Data.Types, as: T

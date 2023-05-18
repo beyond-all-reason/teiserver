@@ -10,7 +10,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   use GenServer
   require Logger
   alias Teiserver.{Account, User}
-  alias Central.Config
+  alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Phoenix.PubSub
 

@@ -21,7 +21,7 @@ defmodule Central.Account.User do
 
     field :permissions, {:array, :string}, default: []
 
-    has_many :user_configs, Central.Config.UserConfig
+    has_many :user_configs, Teiserver.Config.UserConfig
 
     # Extra user.ex relations go here
     belongs_to :clan, Teiserver.Clans.Clan

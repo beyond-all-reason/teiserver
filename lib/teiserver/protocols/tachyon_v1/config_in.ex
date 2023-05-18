@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.V1.ConfigIn do
-  alias Central.Config
+  alias Teiserver.Config
   alias Teiserver.{Account}
   # alias Teiserver.Protocols.Tachyon.V1.Tachyon
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]

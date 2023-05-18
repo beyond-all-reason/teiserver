@@ -1,7 +1,7 @@
 defmodule Teiserver.Game.LobbyPolicyLib do
   @moduledoc false
   use CentralWeb, :library
-  alias Central.Config
+  alias Teiserver.Config
   alias Teiserver.{Game, Account}
   alias Teiserver.Game.{LobbyPolicy, LobbyPolicyOrganiserServer, LobbyPolicyBotServer}
   alias Teiserver.Data.Types, as: T

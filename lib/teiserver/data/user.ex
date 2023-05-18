@@ -2,7 +2,7 @@ defmodule Teiserver.User do
   @moduledoc """
   Users here are a combination of Central.Account.User and the data within. They are merged like this into a map as their expected use case is very different.
   """
-  alias Central.Config
+  alias Teiserver.Config
   alias Teiserver.{Account, Client, Coordinator, Telemetry}
   alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.EmailHelper
@@ -1047,7 +1047,7 @@ defmodule Teiserver.User do
     # If they don't want a flag shown, don't show it, otherwise check for an override before trying geoip
     country =
       cond do
-        Central.Config.get_user_config_cache(user.id, "teiserver.Show flag") == false ->
+        Teiserver.Config.get_user_config_cache(user.id, "teiserver.Show flag") == false ->
           "??"
 
         stats["country_override"] != nil ->

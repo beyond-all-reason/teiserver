@@ -41,7 +41,7 @@
             label: "Site config",
             active: @active,
             url: Routes.admin_site_config_path(@conn, :index),
-            icon: Central.Config.SiteConfigLib.icon()
+            icon: Teiserver.Config.SiteConfigLib.icon()
           ) %>
 
           <%= central_component("sub_menu_icon",

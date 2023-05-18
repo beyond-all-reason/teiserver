@@ -1,4 +1,4 @@
-defmodule Central.Config.SiteConfig do
+defmodule Teiserver.Config.SiteConfig do
   @moduledoc false
   use CentralWeb, :schema
 

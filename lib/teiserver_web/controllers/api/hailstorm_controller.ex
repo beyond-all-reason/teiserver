@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.API.HailstormController do
   use CentralWeb, :controller
-  alias Central.Config
+  alias Teiserver.Config
   alias Teiserver.{Account, User}
 
   plug(Bodyguard.Plug.Authorize,

@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Central.Helpers.NumberHelper
   alias Teiserver.Account.{AccoladeLib, CodeOfConductData}
   alias Teiserver.Coordinator.CoordinatorLib
-  alias Central.Config
+  alias Teiserver.Config
 
   @splitter "---------------------------"
   @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore matchmaking website party)

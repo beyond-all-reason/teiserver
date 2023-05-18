@@ -1,7 +1,7 @@
 defmodule CentralWeb.Admin.ToolController do
   use CentralWeb, :controller
 
-  alias Central.Config
+  alias Teiserver.Config
   alias Central.Admin.CoverageLib
   alias Central.Admin.ToolLib
 

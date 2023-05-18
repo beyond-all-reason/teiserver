@@ -140,7 +140,7 @@
   <%= if allow?(@current_user, "admin.dev") do %>
     <%= central_component("menu_card",
       icon_class: "fa-solid",
-      icon: Central.Config.SiteConfigLib.icon(),
+      icon: Teiserver.Config.SiteConfigLib.icon(),
       text: "Site config",
       link: Routes.admin_site_config_path(@conn, :index)
     ) %>

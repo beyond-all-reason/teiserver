@@ -1,4 +1,4 @@
-defmodule Central.Config.UserConfig do
+defmodule Teiserver.Config.UserConfig do
   @moduledoc false
   use Ecto.Schema
   import Ecto.Changeset

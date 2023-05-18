@@ -17,7 +17,7 @@ defmodule Teiserver.Battle.BalanceLib do
     - Whichever team with the lowest combined rating and is not full picks next
     - Said team always picks the highest rated group available
   """
-  alias Central.Config
+  alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Account
   alias Teiserver.Game.MatchRatingLib

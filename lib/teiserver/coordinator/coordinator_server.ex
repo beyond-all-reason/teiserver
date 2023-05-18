@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   performing their actions in the name of the coordinator
   """
   use GenServer
-  alias Central.Config
+  alias Teiserver.Config
   alias Teiserver.{Account, User, Clans, Room, Coordinator, Client, Moderation}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Coordinator.{CoordinatorCommands}
