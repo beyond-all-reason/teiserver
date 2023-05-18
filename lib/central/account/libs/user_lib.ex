@@ -213,11 +213,22 @@ defmodule Central.Account.UserLib do
 
   def has_access(nil, _user), do: {false, :not_found}
 
-  def has_access(_target_user, conn) do
-    if allow?(conn, "admin.admin.full") do
-      {true, nil}
-    else
-      {false, :no_access}
+  def has_access(target_user, conn) do
+    cond do
+      allow?(conn, "admin.admin.full") ->
+        {true, nil}
+
+      allow?(conn, "Server") and allow?(target_user, "teiserver.staff.moderator") ->
+        {true, nil}
+
+      allow?(target_user, "teiserver.staff.moderator") ->
+        {false, :restricted_user}
+
+      allow?(conn, "teiserver.staff.moderator") ->
+        {true, nil}
+
+      true ->
+        {false, :no_access}
     end
   end
 
