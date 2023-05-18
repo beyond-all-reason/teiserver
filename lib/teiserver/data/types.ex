@@ -20,6 +20,7 @@ defmodule Teiserver.Data.Types do
   @type tachyon_conn() :: map()
   @type tachyon_command() :: String.t()
   @type tachyon_object() :: map()
+  @type tachyon_status() :: :success | {:error, String.t()}
 
   @type consul_state() :: map()
   @type balance_server_state() :: map()

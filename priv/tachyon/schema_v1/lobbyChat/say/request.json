@@ -1,0 +1,26 @@
+{
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "data": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "message"
+            ],
+            "additionalProperties": false
+        },
+        "command": {
+            "type": "string",
+            "const": "lobbyChat/say/request"
+        }
+    },
+    "required": [
+        "command",
+        "data"
+    ]
+}

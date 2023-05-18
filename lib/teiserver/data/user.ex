@@ -838,8 +838,9 @@ defmodule Teiserver.User do
   def login_from_token(token, ws_state) do
     ip = get_in(ws_state, [:connect_info, :peer_data, :address]) |> ip_to_string
     _user_agent = get_in(ws_state, [:connect_info, :user_agent])
-    client_hash = ws_state.params["client_hash"]
-    client_name = ws_state.params["client_name"]
+    application_hash = ws_state.params["application_hash"]
+    application_name = ws_state.params["application_name"]
+    application_version = ws_state.params["application_version"]
 
     wait_for_startup()
 
@@ -853,8 +854,8 @@ defmodule Teiserver.User do
       not is_bot?(user) and login_flood_check(user.id) == :block ->
         {:error, "Flood protection - Please wait 20 seconds and try again"}
 
-      Enum.member?(["", "0", nil], client_hash) == true ->
-        {:error, "Client hash missing in login"}
+      Enum.member?(["", "0", nil], application_hash) == true ->
+        {:error, "Application hash missing in login"}
 
       is_restricted?(user, ["Permanently banned"]) ->
         {:error, "Banned account"}
@@ -871,8 +872,9 @@ defmodule Teiserver.User do
 
       not is_verified?(user) ->
         Account.update_user_stat(user.id, %{
-          client_name: client_name,
-          client_hash: client_hash,
+          application_name: application_name,
+          application_version: application_version,
+          application_hash: application_hash,
           last_ip: ip
         })
 
@@ -883,14 +885,14 @@ defmodule Teiserver.User do
 
         if is_bot?(user) do
           :timer.sleep(1000)
-          do_login(user, ip, client_name, client_hash)
+          do_login(user, ip, application_name, application_hash)
         else
           Central.cache_put(:teiserver_login_count, user.id, 10)
           {:error, "Existing session, please retry in 20 seconds to clear the cache"}
         end
 
       true ->
-        {:ok, user} = do_login(user, ip, client_name, client_hash)
+        {:ok, user} = do_login(user, ip, application_name, application_hash)
 
         _client = Client.login(user, :tachyon, ip)
         Logger.metadata(request_id: "TachyonWSServer##{user.id}")

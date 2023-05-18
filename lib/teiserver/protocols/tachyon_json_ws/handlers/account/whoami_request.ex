@@ -9,7 +9,7 @@ defmodule Teiserver.Tachyon.Handlers.Account.WhoamiRequest do
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do
     %{
-      "account/who_am_i/request" => &execute/3
+      "account/whoAmI/request" => &execute/3
     }
   end
 

@@ -1,0 +1,26 @@
+{
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "data": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "additionalProperties": false
+        },
+        "command": {
+            "type": "string",
+            "const": "init/test/request"
+        }
+    },
+    "required": [
+        "command",
+        "data"
+    ]
+}

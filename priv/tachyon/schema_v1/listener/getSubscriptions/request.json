@@ -1,0 +1,12 @@
+{
+    "type": "object",
+    "properties": {
+        "command": {
+            "type": "string",
+            "const": "listener/getSubscriptions/request"
+        }
+    },
+    "required": [
+        "command"
+    ]
+}

@@ -1,0 +1,137 @@
+{
+    "anyOf": [
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "const": "success"
+                },
+                "command": {
+                    "type": "string",
+                    "const": "auth/getToken/response"
+                }
+            },
+            "required": [
+                "command",
+                "status"
+            ]
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "const": "failed"
+                },
+                "reason": {
+                    "type": "string",
+                    "const": "no_account_with_email"
+                },
+                "command": {
+                    "type": "string",
+                    "const": "auth/getToken/response"
+                }
+            },
+            "required": [
+                "command",
+                "reason",
+                "status"
+            ]
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "const": "failed"
+                },
+                "reason": {
+                    "type": "string",
+                    "const": "no_account_with_username"
+                },
+                "command": {
+                    "type": "string",
+                    "const": "auth/getToken/response"
+                }
+            },
+            "required": [
+                "command",
+                "reason",
+                "status"
+            ]
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "const": "failed"
+                },
+                "reason": {
+                    "type": "string",
+                    "const": "invalid_password"
+                },
+                "command": {
+                    "type": "string",
+                    "const": "auth/getToken/response"
+                }
+            },
+            "required": [
+                "command",
+                "reason",
+                "status"
+            ]
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "const": "failed"
+                },
+                "reason": {
+                    "type": "string",
+                    "const": "max_attempts_reached"
+                },
+                "command": {
+                    "type": "string",
+                    "const": "auth/getToken/response"
+                }
+            },
+            "required": [
+                "command",
+                "reason",
+                "status"
+            ]
+        },
+        {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "const": "failed"
+                },
+                "reason": {
+                    "type": "string",
+                    "const": "account_banned"
+                },
+                "command": {
+                    "type": "string",
+                    "const": "auth/getToken/response"
+                }
+            },
+            "required": [
+                "command",
+                "reason",
+                "status"
+            ]
+        }
+    ]
+}

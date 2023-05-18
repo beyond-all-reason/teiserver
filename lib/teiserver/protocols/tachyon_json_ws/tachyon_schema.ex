@@ -3,34 +3,20 @@ defmodule Teiserver.Tachyon.Schema do
 
   """
 
-  defp get_tachyon_schema_path do
-    Application.get_env(:central, Teiserver)[:tachyon_schema_path]
-  end
-
   @spec load_schemas :: list
   def load_schemas() do
-    get_tachyon_schema_path()
-    |> File.read!()
-    |> Jason.decode!()
-    |> Map.get("properties")
-    |> Enum.map(fn {_section_key, section} ->
-      section
-      |> Map.get("properties")
-      |> Enum.map(fn {_cmd_name, cmd} ->
-        [
-          cmd["properties"]["request"],
-          cmd["properties"]["response"]
-        ]
-      end)
-    end)
-    |> List.flatten()
-    |> Enum.reject(&(&1 == nil))
-    |> Enum.map(fn json_def ->
-      schema = JsonXema.new(json_def)
-      command = get_in(json_def, ~w(properties command const))
+    Application.get_env(:central, Teiserver)[:tachyon_schema_path]
+    |> Path.wildcard
+    |> Enum.map(fn file_path ->
+      contents = file_path
+        |> File.read!()
+        |> Jason.decode!()
 
-      ConCache.put(:tachyon_schemas, command, schema)
-      json_def["$id"]
+      command = contents["properties"]["command"]["const"]
+      schema = JsonXema.new(contents)
+
+      Central.store_put(:tachyon_schemas, command, schema)
+      command
     end)
   end
 

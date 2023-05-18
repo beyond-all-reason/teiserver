@@ -1,0 +1,18 @@
+{
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "status": {
+            "type": "string",
+            "const": "success"
+        },
+        "command": {
+            "type": "string",
+            "const": "clan/getClan/response"
+        }
+    },
+    "required": [
+        "command",
+        "status"
+    ]
+}
