@@ -124,14 +124,6 @@ defmodule CentralWeb.Router do
     put("/edit/password", RegistrationController, :update_password)
   end
 
-  scope "/config", CentralWeb.Config do
-    pipe_through([:browser, :protected, :standard_layout])
-
-    resources("/user", UserConfigController,
-      only: [:index, :edit, :update, :new, :create, :delete]
-    )
-  end
-
   scope "/account", CentralWeb.Account, as: :account do
     pipe_through([:browser, :standard_layout])
 
