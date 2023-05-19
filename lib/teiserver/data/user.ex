@@ -821,7 +821,8 @@ defmodule Teiserver.User do
 
     usage = max(client_count, 1) / total
 
-    {remaining, usage}
+    # {remaining, usage}
+    {1000000, 0.1}
   end
 
   @spec ip_to_string(String.t() | tuple()) :: Tuple.t()
