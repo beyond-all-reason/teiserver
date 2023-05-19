@@ -1,8 +1,9 @@
 <% client_event_keys = (@data["events"]["combined"] || %{}) |> Map.keys() |> Enum.sort()
-server_event_keys = (@data["events"]["server"] || %{}) |> Map.keys() |> Enum.sort() %>
+server_event_keys = (@data["events"]["server"] || %{}) |> Map.keys() |> Enum.sort()
+match_event_keys = (@data["events"]["match"] || %{}) |> Map.keys() |> Enum.sort() %>
 
 <div class="row">
-  <div class="col-md-8">
+  <div class="col">
     <h4>Client/Unauth Events</h4>
     <table class="table">
       <thead>
@@ -17,16 +18,16 @@ server_event_keys = (@data["events"]["server"] || %{}) |> Map.keys() |> Enum.sor
         <%= for key <- client_event_keys do %>
           <tr>
             <td><%= key %></td>
-            <td><%= @data["events"]["client"][key] %></td>
-            <td><%= @data["events"]["unauth"][key] %></td>
-            <td><%= @data["events"]["combined"][key] %></td>
+            <td><%= @data["events"]["client"][key] |> format_number %></td>
+            <td><%= @data["events"]["unauth"][key] |> format_number %></td>
+            <td><%= @data["events"]["combined"][key] |> format_number %></td>
           </tr>
         <% end %>
       </tbody>
     </table>
   </div>
 
-  <div class="col-md-4">
+  <div class="col">
     <h4>Server Events</h4>
     <table class="table">
       <thead>
@@ -39,7 +40,27 @@ server_event_keys = (@data["events"]["server"] || %{}) |> Map.keys() |> Enum.sor
         <%= for key <- server_event_keys do %>
           <tr>
             <td><%= key %></td>
-            <td><%= @data["events"]["server"][key] %></td>
+            <td><%= @data["events"]["server"][key] |> format_number %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <h4>Match Events</h4>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for key <- match_event_keys do %>
+          <tr>
+            <td><%= key %></td>
+            <td><%= @data["events"]["match"][key] |> format_number %></td>
           </tr>
         <% end %>
       </tbody>
