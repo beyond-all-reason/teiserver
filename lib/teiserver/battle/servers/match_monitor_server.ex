@@ -139,7 +139,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     {:noreply, state}
   end
 
-  def handle_info({:direct_message, from_id, "match-event-" <> data}, state) do
+  def handle_info({:direct_message, _from_id, "match-event-" <> data}, state) do
     # [event | parts] = String.split(data, " ")
     # [_, frame, _ud, unit_team, attacker_team, unit_def_id] = String.split(parts, ":")
 

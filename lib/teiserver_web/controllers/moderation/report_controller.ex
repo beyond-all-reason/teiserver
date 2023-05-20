@@ -45,7 +45,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
         search: [
           state: params["state"]
         ],
-        preload: [:target, :reporter],
+        preload: [:target, :reporter, :responses],
         order_by: params["order"]
       )
 

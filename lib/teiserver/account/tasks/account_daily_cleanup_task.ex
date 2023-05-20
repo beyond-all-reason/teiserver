@@ -11,7 +11,7 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
     days = Application.get_env(:central, Teiserver)[:retention][:account_unverified]
 
     # Find all unverified users who registered over 14 days ago
-    id_list =
+    _id_list =
       Account.list_users(
         search: [
           verified: false,
