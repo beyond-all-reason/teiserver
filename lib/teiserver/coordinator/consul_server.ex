@@ -772,6 +772,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
       "default" ->
         ban_level
 
+      :default ->
+        ban_level
+
       # They are in the lobby, they can play
       :friends ->
         :player
