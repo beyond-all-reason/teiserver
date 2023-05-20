@@ -22,7 +22,7 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
       )
       |> Enum.map(fn %{id: userid} -> userid end)
 
-    do_deletion(id_list)
+    # do_deletion(id_list)
 
     :ok
   end
@@ -69,9 +69,6 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
 
     # Stats
     query = "DELETE FROM teiserver_account_user_stats WHERE user_id IN #{sql_id_list}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
-
-    query = "DELETE FROM teiserver_account_smurf_keys WHERE user_id IN #{sql_id_list}"
     Ecto.Adapters.SQL.query(Repo, query, [])
 
     # Chat
