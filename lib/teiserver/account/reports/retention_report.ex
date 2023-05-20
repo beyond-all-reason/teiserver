@@ -46,7 +46,7 @@ defmodule Teiserver.Account.RetentionReport do
         search: [
           inserted_after: start_datetime,
           data_greater_than: {"last_login", "0"},
-          data_equal: {"verified", "true"}
+          verified: true
         ],
         limit: :infinity
       )

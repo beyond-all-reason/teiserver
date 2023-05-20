@@ -22,7 +22,7 @@ defmodule Teiserver.Account.NewSmurfReport do
       Account.list_users(
         search: [
           inserted_after: Timex.now() |> Timex.shift(days: -max_age),
-          verified: "Verified"
+          verified: true
         ],
         limit: 1000,
         order_by: "Newest first"

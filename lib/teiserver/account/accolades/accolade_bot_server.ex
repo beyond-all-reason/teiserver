@@ -190,7 +190,6 @@ defmodule Teiserver.Account.AccoladeBotServer do
             data: %{
               bot: true,
               moderator: false,
-              verified: true,
               lobby_client: "Teiserver Internal Process",
               roles: ["Bot", "Verified"]
             }
