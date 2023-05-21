@@ -46,7 +46,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/startenergy" => "1000",
       "game/modoptions/multiplier_maxvelocity" => "1.5",
       "game/modoptions/multiplier_buildpower" => "1.5",
-      "game/modoptions/multiplier_maxdamage" => "2"
+      "game/modoptions/multiplier_weapondamage" => "1.5"
     })
 
     antinukes = ~w(armamd corfmd armscab cormabm armcarry corcarry)
