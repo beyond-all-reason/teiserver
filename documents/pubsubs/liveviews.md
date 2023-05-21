@@ -22,3 +22,20 @@ Updates specifically for liveview chat interfaces, due to the way messages are p
   # Coordinator
   {:liveview_lobby_chat, :say, lobby_id, reason}
 ```
+
+#### teiserver_liveview_login_throttle
+Updates specifically for the admin dashboard from the login throttle.
+```elixir
+  %{
+    event: :tick,
+    heartbeats: new_heartbeats,
+    queues: new_queues,
+    recent_logins: new_recent_logins,
+    arrival_times: new_arrival_times
+  }
+  
+  %{
+    event: add_to_release_list,
+    userid: userid
+  }
+```

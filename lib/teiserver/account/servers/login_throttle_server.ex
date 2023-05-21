@@ -62,6 +62,17 @@ defmodule Teiserver.Account.LoginThrottleServer do
     send_login_throttle_server({:set_value, key, value})
   end
 
+  @spec get_state :: any
+  def get_state() do
+    case get_login_throttle_server_pid() do
+      nil ->
+        nil
+
+      pid ->
+        :sys.get_state(pid)
+    end
+  end
+
   @spec startup :: any
   def startup() do
     send_login_throttle_server(:startup)
@@ -195,6 +206,19 @@ defmodule Teiserver.Account.LoginThrottleServer do
       end)
 
     send(self(), :dequeue)
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_liveview_login_throttle",
+      %{
+        channel: "teiserver_liveview_login_throttle",
+        event: :tick,
+        heartbeats: new_heartbeats,
+        queues: new_queues,
+        recent_logins: new_recent_logins,
+        arrival_times: new_arrival_times
+      }
+    )
 
     {:noreply,
      %{
@@ -420,6 +444,16 @@ defmodule Teiserver.Account.LoginThrottleServer do
     new_heartbeats = Map.drop(state.heartbeats, [userid])
 
     new_awaiting_release = state.awaiting_release ++ [{pid, userid}]
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_liveview_login_throttle",
+      %{
+        channel: "teiserver_liveview_login_throttle",
+        event: :add_to_release_list,
+        userid: userid,
+      }
+    )
 
     %{
       state

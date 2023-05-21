@@ -1,7 +1,6 @@
 defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
   use TeiserverWeb, :live_view
   alias Phoenix.PubSub
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   alias Teiserver
   alias Teiserver.{Game}
@@ -10,18 +9,22 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
 
   @impl true
   def mount(_params, session, socket) do
-    :ok = PubSub.subscribe(Central.PubSub, "login_throttle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_login_throttle")
 
     socket =
       socket
       |> AuthPlug.live_call(session)
       |> NotificationPlug.live_call()
-      |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
-      |> add_breadcrumb(name: "Dashboard", url: "/admin/dashboard")
-      |> add_breadcrumb(name: "Login throttle", url: "/admin/dashboard/login_throttle")
+      |> add_breadcrumb(name: "Admin", url: ~p"/teiserver/admin")
+      |> add_breadcrumb(name: "Dashboard", url: ~p"/admin/dashboard")
+      |> add_breadcrumb(name: "Login throttle", url: ~p"/admin/dashboard/login_throttle")
       |> assign(:site_menu_active, "teiserver_admin")
       |> assign(:view_colour, Central.Admin.AdminLib.colours())
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
+      |> assign(:heartbeats, nil)
+      |> assign(:queues, nil)
+      |> assign(:recent_logins, nil)
+      |> assign(:arrival_times, nil)
 
     :timer.send_interval(5_000, :tick)
 
@@ -49,10 +52,25 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
     }
   end
 
-  def handle_info(%{channel: "lobby_policy_updates:" <> _, event: :agent_status} = msg, state) do
+  def handle_info(%{channel: "teiserver_liveview_login_throttle", event: :tick} = msg, state) do
     {:noreply,
      state
-     |> assign(:bots, msg.agent_status)}
+      |> assign(:heartbeats, msg.heartbeats)
+      |> assign(:queues, msg.queues)
+      |> assign(:recent_logins, msg.recent_logins)
+      |> assign(:arrival_times, msg.arrival_times)
+    }
+  end
+
+  def handle_info(%{channel: "teiserver_liveview_login_throttle", event: :add_to_release_list} = msg, %{assigns: assigns} = state) do
+    new_heartbeats = Map.drop(assigns.heartbeats, msg.userid)
+    new_arrival_times = List.delete(assigns.arrival_times, msg.userid)
+
+    {:noreply,
+     state
+      |> assign(:heartbeats, new_heartbeats)
+      |> assign(:arrival_times, new_arrival_times)
+    }
   end
 
   @impl true
@@ -60,13 +78,5 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
     Game.cast_lobby_organiser(socket.assigns.id, :disconnect_all_bots)
 
     {:noreply, socket}
-  end
-
-  @spec get_policy_bots(Plug.Socket.t()) :: Plug.Socket.t()
-  defp get_policy_bots(socket) do
-    bots = Game.call_lobby_organiser(socket.assigns.id, :get_agent_status)
-
-    socket
-    |> assign(:bots, bots)
   end
 end
