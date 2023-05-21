@@ -23,10 +23,14 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     cortex =
       ~w(coraap coralab corap coravp corgant corhp corlab corvp corllt corfhp corsy corjuno corhllt corhlt)
 
+    Battle.set_modoptions(lobby_id, %{
+      "game/modoptions/map_waterislava" => "1",
+    })
+
     Battle.disable_units(lobby_id, labs ++ defences ++ units ++ cortex)
 
     [
-      "#{sender.name} has enabled the Ticks meme. In this game the only fighting unit you will be able to build will be ticks. It is highly inadvisable to play Cortex."
+      "#{sender.name} has enabled the Ticks meme. In this game the only fighting unit you will be able to build will be ticks."
     ]
   end
 
