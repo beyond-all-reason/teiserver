@@ -4,11 +4,19 @@
 
 <div class="row">
   <div class="col">
-    <h3>Heartbeats</h3>
-    <%= if @heartbeats do %>
-      <%= for {userid, {pid, timestamp}} <- @heartbeats do %>
-        <%= userid %>: <%= inspect pid %>, <%= timestamp %><br />
-      <% end %>
+    <h5>Remaining capacity: <%= @remaining_capacity %></h5>
+  </div>
+
+  <div class="col">
+    <h5>Server usage: <%= @server_usage %></h5>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col">
+    <h3>Heartbeats (<%= Enum.count(@heartbeats) %>)</h3>
+    <%= for {userid, {pid, timestamp}} <- @heartbeats do %>
+      <%= userid %>: <%= inspect pid %>, <%= timestamp %><br />
     <% end %>
   </div>
 
@@ -22,20 +30,16 @@
   </div>
 
   <div class="col">
-    <h3>Recent logins</h3>
-    <%= if @recent_logins do %>
-      <%= for userid <- @recent_logins do %>
-        <%= userid %><br />
-      <% end %>
+    <h3>Recent logins (<%= Enum.count(@recent_logins) %>)</h3>
+    <%= for userid <- @recent_logins do %>
+      <%= userid %><br />
     <% end %>
   </div>
 
   <div class="col">
-    <h3>Arrival times</h3>
-    <%= if @arrival_times do %>
-      <%= for {userid, v} <- @arrival_times do %>
-        <%= userid %>: <%= v %><br />
-      <% end %>
+    <h3>Arrival times (<%= Enum.count(@arrival_times) %>)</h3>
+    <%= for {userid, v} <- @arrival_times do %>
+      <%= userid %>: <%= v %><br />
     <% end %>
   </div>
 </div>

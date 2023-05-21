@@ -28,14 +28,33 @@ Updates specifically for the admin dashboard from the login throttle.
 ```elixir
   %{
     event: :tick,
-    heartbeats: new_heartbeats,
-    queues: new_queues,
-    recent_logins: new_recent_logins,
-    arrival_times: new_arrival_times
+    heartbeats: Map(userid => {pid, timestamp}),
+    queues: Map(atom => list(userid)),
+    recent_logins: list(timestamp),
+    arrival_times: Map(userid => timestamp)
   }
   
   %{
-    event: add_to_release_list,
+    event: :add_to_release_list,
     userid: userid
+  }
+  
+  %{
+    event: :release,
+    userid: userid,
+    remaining_capacity: Integer,
+    awaiting_release: List({pid, userid})
+  }
+  
+  %{
+    event: :updated_capacity,
+    remaining_capacity: Integer,
+    server_usage: number
+  }
+  
+  %{
+    event: :accept_login,
+    recent_logins: list(timestamp),
+    remaining_capacity: Integer
   }
 ```

@@ -44,12 +44,12 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     Battle.set_modoptions(lobby_id, %{
       "game/modoptions/startmetal" => "35000",
       "game/modoptions/startenergy" => "1000",
-      "game/modoptions/multiplier_maxvelocity" => "2",
-      "game/modoptions/multiplier_buildpower" => "2",
+      "game/modoptions/multiplier_maxvelocity" => "1.5",
+      "game/modoptions/multiplier_buildpower" => "1.5",
       "game/modoptions/multiplier_maxdamage" => "2"
     })
 
-    antinukes = ~w(armamd corfmd armscab cormabm)
+    antinukes = ~w(armamd corfmd armscab cormabm armcarry corcarry)
 
     Battle.disable_units(lobby_id, antinukes)
 
