@@ -29,7 +29,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   # login_recent_age_search is the distance (in time) we record logins
   # for the purposes of "recent" logins
-  @login_recent_age_search @tick_interval
+  @login_recent_age_search @tick_interval * 5
 
   # max login rate is the number of logins we can have as recent
   @max_login_rate @tick_interval / @release_interval * 2
@@ -60,6 +60,17 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @spec set_value(atom, any) :: :ok
   def set_value(key, value) do
     send_login_throttle_server({:set_value, key, value})
+  end
+
+  @spec get_state :: any
+  def get_state() do
+    case get_login_throttle_server_pid() do
+      nil ->
+        nil
+
+      pid ->
+        :sys.get_state(pid)
+    end
   end
 
   @spec startup :: any
@@ -142,10 +153,24 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
     send(pid, {:login_accepted, userid})
 
+    new_remaining_capacity = state.remaining_capacity - 1
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_liveview_login_throttle",
+      %{
+        channel: "teiserver_liveview_login_throttle",
+        event: :release,
+        userid: userid,
+        remaining_capacity: new_remaining_capacity,
+        awaiting_release: remaining
+      }
+    )
+
     new_state = %{
       state
       | awaiting_release: remaining,
-        remaining_capacity: state.remaining_capacity - 1
+        remaining_capacity: new_remaining_capacity
     }
 
     {:noreply, new_state}
@@ -195,6 +220,19 @@ defmodule Teiserver.Account.LoginThrottleServer do
       end)
 
     send(self(), :dequeue)
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_liveview_login_throttle",
+      %{
+        channel: "teiserver_liveview_login_throttle",
+        event: :tick,
+        heartbeats: new_heartbeats,
+        queues: new_queues,
+        recent_logins: new_recent_logins,
+        arrival_times: new_arrival_times
+      }
+    )
 
     {:noreply,
      %{
@@ -421,6 +459,16 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
     new_awaiting_release = state.awaiting_release ++ [{pid, userid}]
 
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_liveview_login_throttle",
+      %{
+        channel: "teiserver_liveview_login_throttle",
+        event: :add_to_release_list,
+        userid: userid,
+      }
+    )
+
     %{
       state
       | recent_logins: [System.system_time(:millisecond) | state.recent_logins],
@@ -435,10 +483,24 @@ defmodule Teiserver.Account.LoginThrottleServer do
   defp accept_login(
          %{recent_logins: recent_logins, remaining_capacity: remaining_capacity} = state
        ) do
+    new_recent_logins = [System.system_time(:millisecond) | recent_logins]
+    new_remaining_capacity = remaining_capacity - 1
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_liveview_login_throttle",
+      %{
+        channel: "teiserver_liveview_login_throttle",
+        event: :accept_login,
+        recent_logins: new_recent_logins,
+        remaining_capacity: new_remaining_capacity
+      }
+    )
+
     %{
       state
-      | recent_logins: [System.system_time(:millisecond) | recent_logins],
-        remaining_capacity: remaining_capacity - 1
+      | recent_logins: new_recent_logins,
+        remaining_capacity: new_remaining_capacity
     }
   end
 
@@ -472,6 +534,17 @@ defmodule Teiserver.Account.LoginThrottleServer do
       min(total_limit - client_count, @max_login_rate - recent_count) |> round()
 
     server_usage = max(client_count, 1) / total_limit
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_liveview_login_throttle",
+      %{
+        channel: "teiserver_liveview_login_throttle",
+        event: :updated_capacity,
+        remaining_capacity: remaining_capacity,
+        server_usage: server_usage
+      }
+    )
 
     %{state | remaining_capacity: remaining_capacity, server_usage: server_usage}
   end

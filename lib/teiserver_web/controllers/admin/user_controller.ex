@@ -190,9 +190,9 @@ defmodule TeiserverWeb.Admin.UserController do
           "friends" => [],
           "friend_requests" => [],
           "ignored" => [],
+          "roles" => ["Verified"],
           "bot" => user_params["bot"] == "true",
           "moderator" => user_params["moderator"] == "true",
-          "verified" => user_params["verified"] == "true",
           "password_hash" => "X03MO1qnZdYdgyfeuILPmQ=="
         }
       })

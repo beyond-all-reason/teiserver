@@ -457,6 +457,7 @@ defmodule CentralWeb.Router do
     pipe_through([:browser, :standard_layout, :protected])
 
     live("/dashboard", Index, :index)
+    live("/dashboard/login_throttle", LoginThrottle, :index)
     live("/dashboard/policy/:id", Policy, :policy)
   end
 

@@ -152,7 +152,6 @@ defmodule Teiserver.Game.LobbyPolicyLib do
               data: %{
                 bot: true,
                 moderator: true,
-                verified: true,
                 lobby_client: "Teiserver Internal Process",
                 roles: ["Bot", "Verified", "Moderator"]
               }

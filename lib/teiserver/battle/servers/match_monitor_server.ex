@@ -139,6 +139,19 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     {:noreply, state}
   end
 
+  def handle_info({:direct_message, _from_id, "match-event-" <> data}, state) do
+    # [event | parts] = String.split(data, " ")
+    # [_, frame, _ud, unit_team, attacker_team, unit_def_id] = String.split(parts, ":")
+
+    # l0gfl:16262:ud:0:0:1041
+
+    Logger.warn("match_event - #{data}")
+
+    # Create match-event here
+
+    {:noreply, state}
+  end
+
   # Examples of accepted format:
   # match-chat <Teifion> a: Message to allies
   # match-chat <Teifion> s: A message to the spectators
@@ -349,8 +362,8 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             data: %{
               bot: true,
               moderator: false,
-              verified: true,
-              lobby_client: "Teiserver Internal Process"
+              lobby_client: "Teiserver Internal Process",
+              roles: ["Verified", "Bot"]
             }
           })
 

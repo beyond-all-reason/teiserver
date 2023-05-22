@@ -28,7 +28,7 @@ defmodule Teiserver.Account.NewUserFunnelReport do
     # Verified
     verified_userids =
       accounts
-      |> Enum.filter(fn %{data: data} -> data["verified"] == true end)
+      |> Enum.filter(fn %{data: data} -> Enum.member?(data["roles"], "Verified") end)
       |> Enum.map(fn %{id: id} -> id end)
 
     verified = Enum.count(verified_userids)

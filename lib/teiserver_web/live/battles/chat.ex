@@ -77,7 +77,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         messages =
           Chat.list_lobby_messages(
             search: [
-              match_id: id
+              match_id: lobby.match_id
             ],
             limit: @message_count * 2,
             order_by: "Newest first"

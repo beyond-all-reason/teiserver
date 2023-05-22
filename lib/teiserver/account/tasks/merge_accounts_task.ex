@@ -17,6 +17,11 @@ defmodule Teiserver.Account.MergeAccountsTask do
     Ecto.Adapters.SQL.query(Repo, query, [])
 
     query =
+      "UPDATE teiserver_telemetry_match_events SET user_id = #{keeping_id} WHERE user_id = #{deleting_id}"
+
+    Ecto.Adapters.SQL.query(Repo, query, [])
+
+    query =
       "UPDATE teiserver_telemetry_client_properties SET user_id = #{keeping_id} WHERE user_id = #{deleting_id}"
 
     Ecto.Adapters.SQL.query(Repo, query, [])

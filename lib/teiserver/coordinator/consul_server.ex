@@ -682,9 +682,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
       if Config.get_site_config_cache("teiserver.Require Chobby data to play") do
         player_count = Battle.get_lobby_player_count(state.lobby_id)
 
-        if player_count > 4 do
+        if player_count >= 7 do
           if user.chobby_hash == nil do
-            Logger.error("Chobby data block for #{Account.get_username(userid)}")
             %{new_client | player: false}
           else
             new_client
@@ -771,6 +770,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     case state.gatekeeper do
       "default" ->
+        ban_level
+
+      :default ->
         ban_level
 
       # They are in the lobby, they can play

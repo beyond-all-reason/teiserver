@@ -2503,6 +2503,117 @@ defmodule Teiserver.Telemetry do
     end
   end
 
+  alias Teiserver.Telemetry.{MatchEvent, MatchEventLib}
+
+  @spec match_event_query(List.t()) :: Ecto.Query.t()
+  def match_event_query(args) do
+    match_event_query(nil, args)
+  end
+
+  @spec match_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def match_event_query(_id, args) do
+    MatchEventLib.query_match_events()
+    |> MatchEventLib.search(args[:search])
+    |> MatchEventLib.preload(args[:preload])
+    |> MatchEventLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of match_events.
+
+  ## Examples
+
+      iex> list_match_events()
+      [%MatchEvent{}, ...]
+
+  """
+  @spec list_match_events(List.t()) :: List.t()
+  def list_match_events(args \\ []) do
+    match_event_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
+  end
+
+  @doc """
+  Creates a match_event.
+
+  ## Examples
+
+      iex> create_match_event(%{field: value})
+      {:ok, %MatchEvent{}}
+
+      iex> create_match_event(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_match_event(Map.t()) :: {:ok, MatchEvent.t()} | {:error, Ecto.Changeset.t()}
+  def create_match_event(attrs \\ %{}) do
+    %MatchEvent{}
+    |> MatchEvent.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @spec delete_match_event(MatchEvent.t()) ::
+          {:ok, MatchEvent.t()} | {:error, Ecto.Changeset.t()}
+  def delete_match_event(%MatchEvent{} = match_event) do
+    Repo.delete(match_event)
+  end
+
+  def get_match_events_summary(args) do
+    query =
+      from match_events in MatchEvent,
+        join: event_types in assoc(match_events, :event_type),
+        group_by: event_types.name,
+        select: {event_types.name, count(match_events.event_type_id)}
+
+    query =
+      query
+      |> MatchEventLib.search(args)
+
+    Repo.all(query)
+    |> Map.new()
+  end
+
+  @spec log_match_event(T.match_id(), T.userid() | nil, String.t(), map()) ::
+          {:error, Ecto.Changeset.t()} | {:ok, MatchEvent.t()}
+  def log_match_event(match_id, userid, event_type_name, value) do
+    event_type_id = get_or_add_event_type(event_type_name)
+
+    result =
+      create_match_event(%{
+        event_type_id: event_type_id,
+        match_id: match_id,
+        user_id: userid,
+        value: value,
+        timestamp: Timex.now()
+      })
+
+    case result do
+      {:ok, _event} ->
+        if Enum.member?(@broadcast_event_types, event_type_name) do
+          if userid do
+            PubSub.broadcast(
+              Central.PubSub,
+              "teiserver_telemetry_match_events",
+              %{
+                channel: "teiserver_telemetry_match_events",
+                userid: userid,
+                match_id: match_id,
+                event_type_name: event_type_name,
+                value: value
+              }
+            )
+          end
+        end
+
+        result
+
+      _ ->
+        result
+    end
+  end
+
   alias Teiserver.Telemetry.{Infolog, InfologLib}
 
   @spec infolog_query(List.t()) :: Ecto.Query.t()
