@@ -23,15 +23,15 @@
         ) %>
         <br /><br /> Click a box below to change it.
         <div class="row">
-          <%= for {role, colour, icon} <- @options do %>
+          <%= for role <- @options do %>
             <%= central_component("menu_card",
               icon_class: "fa-duotone",
               name: "",
-              icon: icon,
-              text: role,
+              icon: role.icon,
+              text: role.name,
               class: "p-1",
-              style: "background-color: #{colour}; color: #FFFFFF;",
-              link: Routes.ts_account_general_path(@conn, :customisation_select, role)
+              style: "background-color: #{role.colour}; color: #FFFFFF;",
+              link: Routes.ts_account_general_path(@conn, :customisation_select, role.name)
             ) %>
           <% end %>
         </div>

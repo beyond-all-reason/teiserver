@@ -6,7 +6,7 @@ defmodule Teiserver.Account do
 
   # Mostly a wrapper around Central.Account
   alias Central.Account.User
-  alias Teiserver.Account.{UserLib, RoleLib}
+  alias Teiserver.Account.{UserLib}
   alias Central.Helpers.QueryHelpers
 
   @doc """
@@ -191,86 +191,6 @@ defmodule Teiserver.Account do
     )
     |> Enum.group_by(fn sk -> {sk.type.name, sk.value} end)
     |> Enum.sort_by(fn {key, _value} -> key end, &<=/2)
-  end
-
-  # Gets the the roles for the user based on their flags/data
-  @spec get_roles(User.t()) :: [String.t()]
-  def get_roles(user) do
-    [
-      if(user.data["moderator"] == true, do: "Moderator"),
-      if(user.data["bot"] == true, do: "Bot"),
-      if("Verified" in (user.data["roles"] || []), do: "Verified"),
-      if("Non-bridged" in (user.data["roles"] || []), do: "Non-bridged"),
-      if("Trusted" in (user.data["roles"] || []), do: "Trusted"),
-      if("Streamer" in (user.data["roles"] || []), do: "Streamer"),
-      if("Tester" in (user.data["roles"] || []), do: "Tester"),
-      if("Donor" in (user.data["roles"] || []), do: "Donor"),
-      if("Contributor" in (user.data["roles"] || []), do: "Contributor"),
-      if("Developer" in (user.data["roles"] || []), do: "Developer"),
-      if("VIP" in (user.data["roles"] || []), do: "VIP"),
-      if("TourneyPlayer" in (user.data["roles"] || []), do: "TourneyPlayer")
-    ]
-    |> Enum.filter(fn r -> r != nil end)
-    |> Enum.map(fn r -> String.downcase(r) end)
-  end
-
-  @spec update_user_roles(Central.Account.User.t()) :: any
-  def update_user_roles(user) do
-    staff_roles = Teiserver.User.staff_role_list()
-
-    # First we remove all these permissions
-    user_remove_permissions =
-      Teiserver.User.role_list()
-      |> Enum.map(fn r -> "teiserver.player.#{String.downcase(r)}" end)
-
-    staff_remove_permissions =
-      staff_roles
-      |> Enum.map(fn r -> "teiserver.staff.#{String.downcase(r)}" end)
-
-    remove_permissions =
-      user_remove_permissions ++ staff_remove_permissions ++ ["teiserver.staff"]
-
-    base_permissions =
-      user.permissions
-      |> Enum.filter(fn r -> not Enum.member?(remove_permissions, r) end)
-
-    # Then we add back in the ones we want this person to have
-    user_add_permissions =
-      user.data["roles"]
-      |> Enum.map(fn r -> "teiserver.player.#{String.downcase(r)}" end)
-
-    staff_add_permissions =
-      user.data["roles"]
-      |> Enum.filter(fn r -> Enum.member?(staff_roles, r) end)
-      |> Enum.map(fn r -> "teiserver.staff.#{String.downcase(r)}" end)
-
-    # Might need to give them "teiserver.staff"
-    staff_add_permissions =
-      if Enum.empty?(staff_add_permissions) do
-        []
-      else
-        ["teiserver.staff" | staff_add_permissions]
-      end
-
-    # Now certain ones are built on each other....
-    staff_add_permissions =
-      if Enum.member?(staff_add_permissions, "teiserver.staff.moderator") do
-        ["teiserver.staff.reviewer" | staff_add_permissions]
-      else
-        staff_add_permissions
-      end
-
-    staff_add_permissions =
-      if Enum.member?(staff_add_permissions, "teiserver.staff.reviewer") do
-        ["teiserver.staff.overwatch" | staff_add_permissions]
-      else
-        staff_add_permissions
-      end
-
-    # Do we need to give them staff roles?
-    permissions = base_permissions ++ user_add_permissions ++ staff_add_permissions
-
-    Central.Account.update_user(user, %{"permissions" => Enum.uniq(permissions)})
   end
 
   @spec spring_auth_check(Plug.Conn.t(), User.t(), String.t()) ::

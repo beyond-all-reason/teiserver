@@ -236,7 +236,7 @@ defmodule TeiserverWeb.Admin.UserController do
   end
 
   @spec update(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def update(conn, %{"id" => id, "user" => user_params} = params) do
+  def update(conn, %{"id" => id, "user" => user_params}) do
     current_user = conn.assigns.current_user
     user = Account.get_user!(id)
 

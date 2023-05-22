@@ -1,12 +1,5 @@
 <div class="row mt-3">
   <%= central_component("menu_card",
-    icon: "fa-duotone fa-cog",
-    text: "Preferences",
-    icon_class: "fa-duotone",
-    link: Routes.user_config_path(@conn, :index)
-  ) %>
-
-  <%= central_component("menu_card",
     icon: Central.Account.icon(),
     text: "Account details",
     icon_class: "fa-duotone",

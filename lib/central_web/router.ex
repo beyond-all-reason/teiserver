@@ -91,9 +91,7 @@ defmodule CentralWeb.Router do
     pipe_through([:browser, :nomenu_layout])
 
     get("/recache", PageController, :recache)
-    get("/browser_info", PageController, :browser_info)
     get("/", PageController, :index)
-    get("/faq", PageController, :faq)
   end
 
   scope "/", CentralWeb.Account, as: :account do

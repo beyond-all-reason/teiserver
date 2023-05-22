@@ -21,14 +21,6 @@
       <div class="card-body" style="padding: 0 15px;">
         <div class="row">
           <%= central_component("sub_menu_icon",
-            name: "user_configs",
-            label: "Preferences",
-            active: @active,
-            url: Routes.user_config_path(@conn, :index),
-            icon: Teiserver.Config.UserConfigLib.icon()
-          ) %>
-
-          <%= central_component("sub_menu_icon",
             name: "details",
             label: "Account details",
             active: @active,

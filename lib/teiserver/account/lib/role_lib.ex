@@ -111,28 +111,4 @@ defmodule Teiserver.Account.RoleLib do
   def roles_with_permissions() do
     management_roles() ++ moderation_roles() ++ staff_roles() ++ privileged_roles() ++ property_roles()
   end
-
-  @spec role_def(String.t()) :: nil | {String.t(), String.t()}
-  def role_def("Default"), do: {"#666666", "fa-solid fa-user"}
-  def role_def("Armada"), do: {"#000066", "fa-solid fa-a"}
-  def role_def("Cortex"), do: {"#660000", "fa-solid fa-c"}
-  def role_def("Legion"), do: {"#006600", "fa-solid fa-l"}
-  def role_def("Raptor"), do: {"#AA6600", "fa-solid fa-drumstick"}
-  def role_def("Scavenger"), do: {"#660066", "fa-solid fa-user-robot"}
-
-  def role_def("Admin"), do: {"#CE5C00", "fa-duotone fa-user-circle"}
-  def role_def("Moderator"), do: {"#FFAA00", "fa-duotone fa-gavel"}
-  def role_def("Reviewer"), do: {"#AA7700", "fa-duotone fa-user-magnifying-glass"}
-  def role_def("Overwatch"), do: {"#AA7733", "fa-duotone fa-clipboard-list-check"}
-  def role_def("Core team"), do: {"#008800", "fa-duotone fa-code-branch"}
-  def role_def("GDT"), do: {"#AA0000", "fa-duotone fa-pen-ruler"}
-  def role_def("VIP"), do: {"#AA8833", "fa-duotone fa-sparkles"}
-  def role_def("Contributor"), do: {"#00AA66", "fa-duotone fa-code-commit"}
-  def role_def("Tournament player"), do: {"#0000AA", "fa-duotone fa-trophy"}
-
-  def role_def("Caster"), do: {"#660066", "fa-duotone fa-microphone-lines"}
-  def role_def("Donor"), do: {"#0066AA", "fa-duotone fa-euro"}
-  def role_def("Streamer"), do: {"#0066AA", "fa-brands fa-twitch"}
-
-  def role_def(_), do: nil
 end

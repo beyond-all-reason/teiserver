@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Account.GeneralController do
   use CentralWeb, :controller
 
   alias Teiserver.Account
-  alias Teiserver.Account.UserLib
+  alias Teiserver.Account.{UserLib, RoleLib}
 
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Account', url: '/teiserver/account')
@@ -19,17 +19,18 @@ defmodule TeiserverWeb.Account.GeneralController do
 
   @spec customisation_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def customisation_form(conn, _params) do
+    my_perms = conn.assigns.current_user.permissions
+    role_data = RoleLib.role_data()
+
+    filtered_roles = RoleLib.staff_roles()
+      |> Enum.filter(fn role ->
+        Enum.member?(my_perms, role)
+      end)
+
     options =
-      (UserLib.global_roles() ++ conn.current_user.data["roles"])
-      |> Enum.reject(fn role ->
-        Enum.member?(["VIP", "Tournament player"], role)
-      end)
+      (RoleLib.global_roles() ++ filtered_roles)
       |> Enum.map(fn r ->
-        {r, UserLib.role_def(r)}
-      end)
-      |> Enum.filter(fn {_, v} -> v != nil end)
-      |> Enum.map(fn {role, {colour, icon}} ->
-        {role, colour, icon}
+        role_data[r]
       end)
 
     conn
