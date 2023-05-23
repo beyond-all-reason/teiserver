@@ -6,6 +6,9 @@ defmodule Teiserver.Battle.LobbyChat do
   alias Teiserver.Chat.WordLib
 
   @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
+  def say(nil, _, _), do: {:error, "No userid"}
+  def say(_, _, nil), do: {:error, "No lobby"}
+
   def say(userid, "!start" <> s, lobby_id), do: say(userid, "!cv start" <> s, lobby_id)
   def say(userid, "!joinas spec", lobby_id), do: say(userid, "!!joinas spec", lobby_id)
   def say(userid, "!joinas" <> s, lobby_id), do: say(userid, "!cv joinas" <> s, lobby_id)
