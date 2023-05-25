@@ -279,7 +279,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     cond do
       # They are exempt from capacity limits, we let them in right away!
       category == :instant ->
-        new_state = accept_login(state)
+        new_state = accept_login(state, userid)
         {new_state, true}
 
       # state.remaining_capacity < 1 ->
@@ -288,9 +288,6 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
       # There is capacity, we let them in
       true ->
-        # new_state = accept_login(state)
-        # {new_state, true}
-
         new_state = add_user_to_queue(state, category, {pid, userid})
         {new_state, false}
     end
@@ -333,45 +330,52 @@ defmodule Teiserver.Account.LoginThrottleServer do
           wait_time > @min_wait
         end)
 
-      # Remove this user from heartbeats and queues
-      new_queues =
-        @queues
-        |> Map.new(fn key ->
-          existing_queue = Map.get(state.queues, key)
+      if Enum.empty?(released_users) do
+        state
+      else
+        # Remove this user from heartbeats and queues
+        new_queues =
+          @queues
+          |> Map.new(fn key ->
+            existing_queue = Map.get(state.queues, key)
 
-          new_queue =
-            existing_queue
-            |> Enum.reject(fn userid -> Enum.member?(released_users, userid) end)
+            new_queue =
+              existing_queue
+              |> Enum.reject(fn userid -> Enum.member?(released_users, userid) end)
 
-          {key, new_queue}
+            {key, new_queue}
+          end)
+
+        # FIXME: Waited for counter can be here with the now_ms value
+        new_heartbeats = Map.drop(state.heartbeats, released_users)
+
+        released_users
+        |> Enum.each(fn userid ->
+          {pid, _timestamp} = state.heartbeats[userid]
+          send(pid, {:login_accepted, userid})
         end)
 
-      # FIXME: Waited for counter can be here with the now_ms value
-      new_heartbeats = Map.drop(state.heartbeats, released_users)
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_liveview_login_throttle",
+          %{
+            channel: "teiserver_liveview_login_throttle",
+            event: :released_users,
+            userids: released_users,
+          }
+        )
 
-      released_users
-      |> Enum.each(fn userid ->
-        {pid, _timestamp} = state.heartbeats[userid]
-        send(pid, {:login_accepted, userid})
-      end)
+        recent_login_timestamps = 1..Enum.count(released_users)
+          |> Enum.map(fn _ -> now_ms end)
 
-      PubSub.broadcast(
-        Central.PubSub,
-        "teiserver_liveview_login_throttle",
         %{
-          channel: "teiserver_liveview_login_throttle",
-          event: :released_users,
-          userids: released_users,
+          state
+          | recent_logins: recent_login_timestamps ++ state.recent_logins,
+            remaining_capacity: state.remaining_capacity - 1,
+            queues: new_queues,
+            heartbeats: new_heartbeats
         }
-      )
-
-      %{
-        state
-        | recent_logins: [System.system_time(:millisecond) | state.recent_logins],
-          remaining_capacity: state.remaining_capacity - 1,
-          queues: new_queues,
-          heartbeats: new_heartbeats
-      }
+      end
     else
       state
     end
@@ -379,7 +383,8 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   # When a login is accepted and we want to update certain metrics right away
   defp accept_login(
-         %{recent_logins: recent_logins, remaining_capacity: remaining_capacity} = state
+         %{recent_logins: recent_logins, remaining_capacity: remaining_capacity} = state,
+         userid
        ) do
     new_recent_logins = [System.system_time(:millisecond) | recent_logins]
     new_remaining_capacity = remaining_capacity - 1
