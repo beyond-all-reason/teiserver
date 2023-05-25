@@ -121,7 +121,7 @@ is_admin = allow?(@conn, "teiserver.admin.account") %>
                   <th>Registered</th>
 
                   <%= if is_admin do %>
-                    <th colspan="1">&nbsp;</th>
+                    <th colspan="2">&nbsp;</th>
                   <% else %>
                     <th>&nbsp;</th>
                   <% end %>
@@ -146,6 +146,7 @@ is_admin = allow?(@conn, "teiserver.admin.account") %>
                     <% unverified = @user.data["verified"] != true
                     user_r = %{restrictions: @user.data["restrictions"] || []}
 
+                    smurf = @user.smurf_of_id != nil
                     banned = Teiserver.User.is_restricted?(user_r, ["Login"])
 
                     muted =
@@ -158,6 +159,11 @@ is_admin = allow?(@conn, "teiserver.admin.account") %>
                       ])
 
                     warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"]) %>
+
+                    <%= if smurf do %>
+                      <i class={"fa-fw text-primary #{Teiserver.Moderation.ActionLib.action_icon("Smurf")}"}>
+                      </i>
+                    <% end %>
 
                     <%= if banned do %>
                       <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}>
@@ -234,6 +240,7 @@ is_admin = allow?(@conn, "teiserver.admin.account") %>
                       <% unverified = user.data["verified"] != true
                       user_r = %{restrictions: user.data["restrictions"] || []}
 
+                      smurf = user.smurf_of_id != nil
                       banned = Teiserver.User.is_restricted?(user_r, ["Login"])
 
                       muted =
@@ -246,6 +253,11 @@ is_admin = allow?(@conn, "teiserver.admin.account") %>
                         ])
 
                       warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"]) %>
+
+                      <%= if smurf do %>
+                        <i class={"fa-fw text-primary #{Teiserver.Moderation.ActionLib.action_icon("Smurf")}"}>
+                        </i>
+                      <% end %>
 
                       <%= if banned do %>
                         <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}>
@@ -311,17 +323,17 @@ is_admin = allow?(@conn, "teiserver.admin.account") %>
                       </a>
                     </td>
 
-                    <%= if false and is_admin do %>
+                    <%= if is_admin and user.smurf_of_id == nil and @user.smurf_of_id == nil do %>
                       <td>
-                        <a
-                          href={
-                            ~p"/teiserver/admin/users/smurf_merge_form/#{user.id}/#{@user.id}"
-                          }
-                          class={"btn btn-outline-#{bsname} btn-sm"}
-                        >
-                          Merge smurf
-                        </a>
+                        <%= link(raw("<i class='far fa-fw fa-link'></i> Smurf of #{user.name}"),
+                          to: ~p"/teiserver/admin/users/mark_as_smurf_of/#{@user.id}/#{user.id}",
+                          method: :put,
+                          #data: [confirm: "Are you sure?"],
+                          class: "btn btn-sm btn-warning"
+                        ) %>
                       </td>
+                    <% else %>
+                      <td></td>
                     <% end %>
                   </tr>
                 <% end %>

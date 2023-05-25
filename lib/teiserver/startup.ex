@@ -59,6 +59,7 @@ defmodule Teiserver.Startup do
       "Moderation:Action updated",
       "Moderation:Action created",
       "Moderation:De-bridged user",
+      "Moderation:Mark as smurf",
       "Teiserver:Updated automod action",
       "Teiserver:Automod action enacted",
       "Teiserver:De-bridged user",

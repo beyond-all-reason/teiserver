@@ -20,6 +20,8 @@ defmodule Teiserver.Moderation.ActionLib do
   def action_icon("Suspend"), do: "fa-solid fa-pause"
   def action_icon("Ban"), do: "fa-solid fa-ban"
 
+  def action_icon("Smurf"), do: "fa-solid fa-copy"
+
   @spec make_favourite(Map.t()) :: Map.t()
   def make_favourite(action) do
     %{
