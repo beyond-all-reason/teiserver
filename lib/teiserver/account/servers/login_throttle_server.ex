@@ -25,6 +25,8 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @heartbeat_expiry 5_000
   @login_recent_age_search 60_000
 
+  @min_wait 0
+
   @spec get_queue_length :: non_neg_integer()
   def get_queue_length() do
     call_login_throttle_server(:queue_size)
@@ -139,39 +141,6 @@ defmodule Teiserver.Account.LoginThrottleServer do
     {:noreply, new_state}
   end
 
-  # def handle_info(:release, %{awaiting_release: []} = state) do
-  #   {:noreply, state}
-  # end
-
-  # # Releases the head of the awaiting release list
-  # def handle_info(:release, state) do
-  #   [{pid, userid} | remaining] = state.awaiting_release
-
-  #   send(pid, {:login_accepted, userid})
-
-  #   new_remaining_capacity = state.remaining_capacity - 1
-
-  #   PubSub.broadcast(
-  #     Central.PubSub,
-  #     "teiserver_liveview_login_throttle",
-  #     %{
-  #       channel: "teiserver_liveview_login_throttle",
-  #       event: :release,
-  #       userid: userid,
-  #       remaining_capacity: new_remaining_capacity,
-  #       awaiting_release: remaining
-  #     }
-  #   )
-
-  #   new_state = %{
-  #     state
-  #     | awaiting_release: remaining,
-  #       remaining_capacity: new_remaining_capacity
-  #   }
-
-  #   {:noreply, new_state}
-  # end
-
   # Check stats, see if we can let anybody else login right now
   def handle_info(:tick, state) do
     # Strip out invalid heartbeats
@@ -221,6 +190,14 @@ defmodule Teiserver.Account.LoginThrottleServer do
         last_time > arrival_max_age
       end)
 
+    new_state = %{
+      state
+       | heartbeats: new_heartbeats,
+         queues: new_queues,
+         recent_logins: new_recent_logins,
+         arrival_times: new_arrival_times
+     }
+
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_liveview_login_throttle",
@@ -235,20 +212,8 @@ defmodule Teiserver.Account.LoginThrottleServer do
     )
 
     # Now we do the releases
-    new_state = dequeue_users(state)
+    new_state = dequeue_users(new_state)
 
-    {:noreply,
-     %{
-       new_state
-       | heartbeats: new_heartbeats,
-         queues: new_queues,
-         recent_logins: new_recent_logins,
-         arrival_times: new_arrival_times
-     }}
-  end
-
-  def handle_info(:dequeue, state) do
-    new_state = dequeue_users(state)
     {:noreply, new_state}
   end
 
@@ -317,14 +282,17 @@ defmodule Teiserver.Account.LoginThrottleServer do
         new_state = accept_login(state)
         {new_state, true}
 
-      state.remaining_capacity < 1 ->
-        new_state = add_user_to_queue(state, category, {pid, userid})
-        {new_state, false}
+      # state.remaining_capacity < 1 ->
+      #   new_state = add_user_to_queue(state, category, {pid, userid})
+      #   {new_state, false}
 
       # There is capacity, we let them in
       true ->
-        new_state = accept_login(state)
-        {new_state, true}
+        # new_state = accept_login(state)
+        # {new_state, true}
+
+        new_state = add_user_to_queue(state, category, {pid, userid})
+        {new_state, false}
     end
   end
 
@@ -347,61 +315,66 @@ defmodule Teiserver.Account.LoginThrottleServer do
   end
 
   # This takes users out of the queue
-  defp dequeue_users(%{remaining_capacity: 0} = state) do
-    state
-  end
-
   defp dequeue_users(state) do
-    now_ms = System.system_time(:millisecond)
+    if state.remaining_capacity > 0 do
+      now_ms = System.system_time(:millisecond)
 
-    free_spots = min(state.remaining_capacity, state.releases_per_tick)
+      free_spots = min(state.remaining_capacity, state.releases_per_tick)
 
-    released_users = @queues
-      |> Enum.map(fn q ->
-        state.queues[q]
+      released_users = @queues
+        |> Enum.map(fn q ->
+          state.queues[q]
+        end)
+        |> List.flatten
+        |> Enum.take(free_spots)
+        |> Enum.filter(fn userid ->
+          wait_time = now_ms - state.arrival_times[userid]
+
+          wait_time > @min_wait
+        end)
+
+      # Remove this user from heartbeats and queues
+      new_queues =
+        @queues
+        |> Map.new(fn key ->
+          existing_queue = Map.get(state.queues, key)
+
+          new_queue =
+            existing_queue
+            |> Enum.reject(fn userid -> Enum.member?(released_users, userid) end)
+
+          {key, new_queue}
+        end)
+
+      # FIXME: Waited for counter can be here with the now_ms value
+      new_heartbeats = Map.drop(state.heartbeats, released_users)
+
+      released_users
+      |> Enum.each(fn userid ->
+        {pid, _timestamp} = state.heartbeats[userid]
+        send(pid, {:login_accepted, userid})
       end)
-      |> List.flatten
-      |> Enum.take(free_spots)
 
-    # Remove this user from heartbeats and queues
-    new_queues =
-      @queues
-      |> Map.new(fn key ->
-        existing_queue = Map.get(state.queues, key)
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_liveview_login_throttle",
+        %{
+          channel: "teiserver_liveview_login_throttle",
+          event: :released_users,
+          userids: released_users,
+        }
+      )
 
-        new_queue =
-          existing_queue
-          |> Enum.reject(fn userid -> Enum.member?(released_users, userid) end)
-
-        {key, new_queue}
-      end)
-
-    # FIXME: Waited for counter can be here with the now_ms value
-    new_heartbeats = Map.drop(state.heartbeats, released_users)
-
-    released_users
-    |> Enum.each(fn userid ->
-      {pid, _timestamp} = state.heartbeats[userid]
-      send(pid, {:login_accepted, userid})
-    end)
-
-    PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_liveview_login_throttle",
       %{
-        channel: "teiserver_liveview_login_throttle",
-        event: :released_users,
-        userids: released_users,
+        state
+        | recent_logins: [System.system_time(:millisecond) | state.recent_logins],
+          remaining_capacity: state.remaining_capacity - 1,
+          queues: new_queues,
+          heartbeats: new_heartbeats
       }
-    )
-
-    %{
+    else
       state
-      | recent_logins: [System.system_time(:millisecond) | state.recent_logins],
-        remaining_capacity: state.remaining_capacity - 1,
-        queues: new_queues,
-        heartbeats: new_heartbeats
-    }
+    end
   end
 
   # When a login is accepted and we want to update certain metrics right away
