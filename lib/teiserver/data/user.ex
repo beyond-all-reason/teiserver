@@ -44,7 +44,8 @@ defmodule Teiserver.User do
       :colour,
       :icon,
       :behaviour_score,
-      :trust_score
+      :trust_score,
+      :smurf_of_id
     ]
 
   @data_keys [

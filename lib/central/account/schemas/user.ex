@@ -25,6 +25,7 @@ defmodule Central.Account.User do
 
     # Extra user.ex relations go here
     belongs_to :clan, Teiserver.Clans.Clan
+    belongs_to :smurf_of, Central.Account.User
     has_one :user_stat, Teiserver.Account.UserStat
 
     field :behaviour_score, :integer, default: 10_000
@@ -59,7 +60,8 @@ defmodule Central.Account.User do
           :icon,
           :colour,
           :permissions,
-          :data
+          :data,
+          :smurf_of_id
         ] ++ @extra_fields
       )
       |> validate_required([:name, :email, :password, :permissions])
@@ -84,7 +86,8 @@ defmodule Central.Account.User do
         :icon,
         :colour,
         :permissions,
-        :data
+        :data,
+        :smurf_of_id
       ] ++ @extra_fields
     )
     |> validate_required([:name, :email, :permissions])
