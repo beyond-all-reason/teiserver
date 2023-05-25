@@ -809,6 +809,16 @@ defmodule Teiserver.User do
     end
   end
 
+  @spec server_capacity() :: non_neg_integer()
+  def server_capacity() do
+    client_count =
+      (Central.cache_get(:application_temp_cache, :telemetry_data) || %{})
+      |> Map.get(:client, %{})
+      |> Map.get(:total, 0)
+
+    Config.get_site_config_cache("system.User limit") - client_count
+  end
+
   @spec ip_to_string(String.t() | tuple()) :: Tuple.t()
   defp ip_to_string({a, b, c, d}) do
     "#{a}.#{b}.#{c}.#{d}"
@@ -921,15 +931,23 @@ defmodule Teiserver.User do
             end
 
           true ->
-            # Check with login throttle here
-            if Config.get_site_config_cache("system.Use login throttle") do
-              if LoginThrottleServer.attempt_login(self(), user.id) do
+            # Okay, we're good, what's capacity looking like?
+            cond do
+              is_bot?(user) ->
                 do_login(user, ip, lobby, lobby_hash)
-              else
-                {:error, "Queued", user.id, lobby, lobby_hash}
-              end
-            else
-              do_login(user, ip, lobby, lobby_hash)
+
+              Config.get_site_config_cache("system.Use login throttle") ->
+                if LoginThrottleServer.attempt_login(self(), user.id) do
+                  do_login(user, ip, lobby, lobby_hash)
+                else
+                  {:error, "Queued", user.id, lobby, lobby_hash}
+                end
+
+              not has_any_role?(user, ["VIP", "Contributor"]) and server_capacity() <= 0 ->
+                {:error, "The server is currently full, please try again in a minute or two."}
+
+              true ->
+                do_login(user, ip, lobby, lobby_hash)
             end
         end
     end
@@ -993,15 +1011,23 @@ defmodule Teiserver.User do
             end
 
           true ->
-            # Check with login throttle here
-            if Config.get_site_config_cache("system.Use login throttle") do
-              if LoginThrottleServer.attempt_login(self(), user.id) do
+            # Okay, we're good, what's capacity looking like?
+            cond do
+              is_bot?(user) ->
                 do_login(user, ip, lobby, lobby_hash)
-              else
-                {:error, "Queued", user.id, lobby, lobby_hash}
-              end
-            else
-              do_login(user, ip, lobby, lobby_hash)
+
+              Config.get_site_config_cache("system.Use login throttle") ->
+                if LoginThrottleServer.attempt_login(self(), user.id) do
+                  do_login(user, ip, lobby, lobby_hash)
+                else
+                  {:error, "Queued", user.id, lobby, lobby_hash}
+                end
+
+              not has_any_role?(user, ["VIP", "Contributor"]) and server_capacity() <= 0 ->
+                {:error, "The server is currently full, please try again in a minute or two."}
+
+              true ->
+                do_login(user, ip, lobby, lobby_hash)
             end
         end
     end

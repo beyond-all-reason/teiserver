@@ -26,7 +26,6 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
       |> assign(:recent_logins, [])
       |> assign(:arrival_times, %{})
       |> assign(:remaining_capacity, 0)
-      |> assign(:server_usage, 0)
       |> assign(:awaiting_release, nil)
 
     :timer.send_interval(5_000, :tick)
@@ -65,14 +64,14 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
     }
   end
 
-  def handle_info(%{channel: "teiserver_liveview_login_throttle", event: :add_to_release_list} = msg, %{assigns: assigns} = state) do
-    new_heartbeats = Map.drop(assigns.heartbeats, [msg.userid])
-    new_arrival_times = Map.drop(assigns.arrival_times, [msg.userid])
+  def handle_info(%{channel: "teiserver_liveview_login_throttle", event: :released_users} = msg, %{assigns: assigns} = state) do
+    # new_heartbeats = Map.drop(assigns.heartbeats, [msg.userid])
+    # new_arrival_times = Map.drop(assigns.arrival_times, [msg.userid])
 
     {:noreply,
      state
-      |> assign(:heartbeats, new_heartbeats)
-      |> assign(:arrival_times, new_arrival_times)
+      # |> assign(:heartbeats, new_heartbeats)
+      # |> assign(:arrival_times, new_arrival_times)
     }
   end
 
@@ -80,7 +79,6 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
     {:noreply,
      state
       |> assign(:remaining_capacity, msg.remaining_capacity)
-      |> assign(:server_usage, msg.server_usage)
     }
   end
 

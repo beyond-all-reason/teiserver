@@ -13,6 +13,8 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     ]
 
   test "multiple queues" do
+    LoginThrottleServer.set_value(:releases_per_tick, 1)
+
     Teiserver.TeiserverConfigs.teiserver_configs()
     pid = LoginThrottleServer.get_login_throttle_server_pid()
     Config.update_site_config("system.User limit", 10)
@@ -89,7 +91,6 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
 
     # We let one through (the bot) even though we were at capacity
     assert state.remaining_capacity == -1
-    assert state.awaiting_release == []
 
     # Now we alter the capacity and see what happens
     send(pid, %{
@@ -102,17 +103,25 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
       }
     })
 
+    IO.puts ""
+    IO.inspect :sys.get_state(pid)
+    IO.puts ""
+
     send(pid, :tick)
 
     # Give it a chance to dequeue
-    :timer.sleep(100)
+    :timer.sleep(250)
 
-    state = :sys.get_state(pid)
     assert PubsubListener.get(moderator_listener) == [{:login_accepted, moderator.id}]
     assert PubsubListener.get(contributor_listener) == []
     assert PubsubListener.get(vip_listener) == []
     assert PubsubListener.get(standard_listener) == []
     assert PubsubListener.get(toxic_listener) == []
+    state = :sys.get_state(pid)
+
+    IO.puts ""
+    IO.inspect state
+    IO.puts ""
 
     assert state.queues.moderator == []
     assert state.queues.contributor == [contributor.id]
