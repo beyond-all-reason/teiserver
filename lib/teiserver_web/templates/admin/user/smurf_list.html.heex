@@ -328,7 +328,7 @@ is_admin = allow?(@conn, "teiserver.admin.account") %>
                         <%= link(raw("<i class='far fa-fw fa-link'></i> Smurf of #{user.name}"),
                           to: ~p"/teiserver/admin/users/mark_as_smurf_of/#{@user.id}/#{user.id}",
                           method: :put,
-                          #data: [confirm: "Are you sure?"],
+                          # data: [confirm: "Are you sure?"],
                           class: "btn btn-sm btn-warning"
                         ) %>
                       </td>

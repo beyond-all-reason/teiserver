@@ -154,26 +154,28 @@ defmodule Teiserver.Account.LoginThrottleServer do
       |> Map.keys()
 
     # Updated queues based on dropped users being removed
-    new_queues = if Enum.empty?(dropped_users) do
-      state.queues
-    else
-      @queues
-      |> Map.new(fn key ->
-        existing_queue = Map.get(state.queues, key)
+    new_queues =
+      if Enum.empty?(dropped_users) do
+        state.queues
+      else
+        @queues
+        |> Map.new(fn key ->
+          existing_queue = Map.get(state.queues, key)
 
-        new_queue =
-          existing_queue
-          |> Enum.reject(fn userid -> Enum.member?(dropped_users, userid) end)
+          new_queue =
+            existing_queue
+            |> Enum.reject(fn userid -> Enum.member?(dropped_users, userid) end)
 
-        {key, new_queue}
-      end)
-    end
+          {key, new_queue}
+        end)
+      end
 
     # Update the heartbeats
     new_heartbeats = Map.drop(state.heartbeats, dropped_users)
 
     # Update the recent logins
     min_recent_age = System.system_time(:millisecond) - @login_recent_age_search
+
     new_recent_logins =
       state.recent_logins
       |> Enum.reject(fn t ->
@@ -192,11 +194,11 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
     new_state = %{
       state
-       | heartbeats: new_heartbeats,
-         queues: new_queues,
-         recent_logins: new_recent_logins,
-         arrival_times: new_arrival_times
-     }
+      | heartbeats: new_heartbeats,
+        queues: new_queues,
+        recent_logins: new_recent_logins,
+        arrival_times: new_arrival_times
+    }
 
     PubSub.broadcast(
       Central.PubSub,
@@ -318,11 +320,12 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
       free_spots = min(state.remaining_capacity, state.releases_per_tick)
 
-      released_users = @queues
+      released_users =
+        @queues
         |> Enum.map(fn q ->
           state.queues[q]
         end)
-        |> List.flatten
+        |> List.flatten()
         |> Enum.take(free_spots)
         |> Enum.filter(fn userid ->
           wait_time = now_ms - state.arrival_times[userid]
@@ -361,11 +364,12 @@ defmodule Teiserver.Account.LoginThrottleServer do
           %{
             channel: "teiserver_liveview_login_throttle",
             event: :released_users,
-            userids: released_users,
+            userids: released_users
           }
         )
 
-        recent_login_timestamps = 1..Enum.count(released_users)
+        recent_login_timestamps =
+          1..Enum.count(released_users)
           |> Enum.map(fn _ -> now_ms end)
 
         %{

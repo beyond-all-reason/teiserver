@@ -842,11 +842,12 @@ defmodule Teiserver.User do
     user = get_user_by_id(token.user.id)
 
     # If they're a smurf, log them in as the smurf!
-    user = if user.smurf_of_id != nil do
-      get_user_by_id(user.smurf_of_id)
-    else
-      user
-    end
+    user =
+      if user.smurf_of_id != nil do
+        get_user_by_id(user.smurf_of_id)
+      else
+        user
+      end
 
     cond do
       token.expires != nil and Timex.compare(token.expires, Timex.now()) == -1 ->
@@ -898,6 +899,7 @@ defmodule Teiserver.User do
           {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), T.userid()}
   def try_login(token, ip, lobby, lobby_hash) do
     wait_for_startup()
+
     case Guardian.resource_from_token(token) do
       {:error, _bad_token} ->
         {:error, "token_login_failed"}
@@ -906,11 +908,12 @@ defmodule Teiserver.User do
         user = get_user_by_id(db_user.id)
 
         # If they're a smurf, log them in as the smurf!
-        user = if user.smurf_of_id != nil do
-          get_user_by_id(user.smurf_of_id)
-        else
-          user
-        end
+        user =
+          if user.smurf_of_id != nil do
+            get_user_by_id(user.smurf_of_id)
+          else
+            user
+          end
 
         cond do
           not is_bot?(user) and login_flood_check(user.id) == :block ->
@@ -979,13 +982,14 @@ defmodule Teiserver.User do
 
       user ->
         # If they're a smurf, log them in as the smurf!
-        {user, username} = if user.smurf_of_id != nil do
-          origin_user = get_user_by_id(user.smurf_of_id)
+        {user, username} =
+          if user.smurf_of_id != nil do
+            origin_user = get_user_by_id(user.smurf_of_id)
 
-          {origin_user, origin_user.name}
-        else
-          user
-        end
+            {origin_user, origin_user.name}
+          else
+            user
+          end
 
         cond do
           user.name != username ->
