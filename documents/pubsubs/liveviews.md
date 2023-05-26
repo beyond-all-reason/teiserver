@@ -35,8 +35,8 @@ Updates specifically for the admin dashboard from the login throttle.
   }
   
   %{
-    event: :add_to_release_list,
-    userid: userid
+    event: :released_users,
+    userids: list(userid)
   }
   
   %{

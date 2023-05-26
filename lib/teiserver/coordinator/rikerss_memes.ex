@@ -24,7 +24,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       ~w(coraap coralab corap coravp corgant corhp corlab corvp corllt corfhp corsy corjuno corhllt corhlt)
 
     Battle.set_modoptions(lobby_id, %{
-      "game/modoptions/map_waterislava" => "1",
+      "game/modoptions/map_waterislava" => "1"
     })
 
     Battle.disable_units(lobby_id, labs ++ defences ++ units ++ cortex)

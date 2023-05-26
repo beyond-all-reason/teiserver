@@ -121,6 +121,23 @@ defmodule Teiserver.Account.UserLib do
       where: fragment("? ->> ? = ?", users.data, "moderator", "true")
   end
 
+  def _search(query, :smurf_of, userid) when is_integer(userid) do
+    from users in query,
+      where: users.smurf_of_id == ^userid
+  end
+  def _search(query, :smurf_of, "Smurf"), do: _search(query, :smurf_of, true)
+  def _search(query, :smurf_of, "Non-smurf"), do: _search(query, :smurf_of, false)
+
+  def _search(query, :smurf_of, true) do
+    from users in query,
+      where: not is_nil(users.smurf_of_id)
+  end
+
+  def _search(query, :smurf_of, false) do
+    from users in query,
+      where: is_nil(users.smurf_of_id)
+  end
+
   def _search(query, :verified, "Verified"), do: _search(query, :verified, true)
   def _search(query, :verified, "Unverified"), do: _search(query, :verified, false)
 

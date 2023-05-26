@@ -6,17 +6,13 @@
   <div class="col">
     <h5>Remaining capacity: <%= @remaining_capacity %></h5>
   </div>
-
-  <div class="col">
-    <h5>Server usage: <%= @server_usage %></h5>
-  </div>
 </div>
 
 <div class="row">
   <div class="col">
     <h3>Heartbeats (<%= Enum.count(@heartbeats) %>)</h3>
     <%= for {userid, {pid, timestamp}} <- @heartbeats do %>
-      <%= userid %>: <%= inspect pid %>, <%= timestamp %><br />
+      <%= userid %>: <%= inspect(pid) %>, <%= timestamp %><br />
     <% end %>
   </div>
 
@@ -24,7 +20,7 @@
     <h3>Queues</h3>
     <%= if @queues do %>
       <%= for {name, contents} <- @queues do %>
-        <%= name %>: <%= inspect contents %><br />
+        <%= name %>: <%= inspect(contents) %><br />
       <% end %>
     <% end %>
   </div>

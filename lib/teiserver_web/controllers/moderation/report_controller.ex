@@ -168,6 +168,8 @@ defmodule TeiserverWeb.Moderation.ReportController do
     |> UserLib.make_favourite()
     |> insert_recently(conn)
 
+    stats = Account.get_user_stat_data(user.id)
+
     conn
     |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
     |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
@@ -175,6 +177,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
     |> assign(:reports_made, reports_made)
     |> assign(:reports_against, reports_against)
     |> assign(:actions, actions)
+    |> assign(:stats, stats)
     |> assign(:section_menu_active, "show")
     |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
     |> render("user.html")

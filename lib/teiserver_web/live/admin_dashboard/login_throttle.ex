@@ -26,7 +26,6 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
       |> assign(:recent_logins, [])
       |> assign(:arrival_times, %{})
       |> assign(:remaining_capacity, 0)
-      |> assign(:server_usage, 0)
       |> assign(:awaiting_release, nil)
 
     :timer.send_interval(5_000, :tick)
@@ -35,7 +34,7 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
   end
 
   @impl true
-  def handle_params(params, _url, socket) do
+  def handle_params(_params, _url, socket) do
     case allow?(socket.assigns[:current_user], "teiserver.staff.server") do
       true ->
         {:noreply, socket}
@@ -58,48 +57,51 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
   def handle_info(%{channel: "teiserver_liveview_login_throttle", event: :tick} = msg, state) do
     {:noreply,
      state
-      |> assign(:heartbeats, msg.heartbeats)
-      |> assign(:queues, msg.queues)
-      |> assign(:recent_logins, msg.recent_logins)
-      |> assign(:arrival_times, msg.arrival_times)
+     |> assign(:heartbeats, msg.heartbeats)
+     |> assign(:queues, msg.queues)
+     |> assign(:recent_logins, msg.recent_logins)
+     |> assign(:arrival_times, msg.arrival_times)}
+  end
+
+  def handle_info(
+        %{channel: "teiserver_liveview_login_throttle", event: :released_users} = _msg,
+        %{assigns: _assigns} = state
+      ) do
+    # new_heartbeats = Map.drop(assigns.heartbeats, [msg.userid])
+    # new_arrival_times = Map.drop(assigns.arrival_times, [msg.userid])
+
+    {
+      :noreply,
+      state
+      # |> assign(:heartbeats, new_heartbeats)
+      # |> assign(:arrival_times, new_arrival_times)
     }
   end
 
-  def handle_info(%{channel: "teiserver_liveview_login_throttle", event: :add_to_release_list} = msg, %{assigns: assigns} = state) do
-    new_heartbeats = Map.drop(assigns.heartbeats, [msg.userid])
-    new_arrival_times = Map.drop(assigns.arrival_times, [msg.userid])
-
+  def handle_info(
+        %{channel: "teiserver_liveview_login_throttle", event: :updated_capacity} = msg,
+        state
+      ) do
     {:noreply,
      state
-      |> assign(:heartbeats, new_heartbeats)
-      |> assign(:arrival_times, new_arrival_times)
-    }
-  end
-
-  def handle_info(%{channel: "teiserver_liveview_login_throttle", event: :updated_capacity} = msg, state) do
-    {:noreply,
-     state
-      |> assign(:remaining_capacity, msg.remaining_capacity)
-      |> assign(:server_usage, msg.server_usage)
-    }
+     |> assign(:remaining_capacity, msg.remaining_capacity)}
   end
 
   def handle_info(%{channel: "teiserver_liveview_login_throttle", event: :release} = msg, state) do
-
     {:noreply,
      state
-      |> assign(:remaining_capacity, msg.remaining_capacity)
-      |> assign(:awaiting_release, msg.awaiting_release)
-    }
+     |> assign(:remaining_capacity, msg.remaining_capacity)
+     |> assign(:awaiting_release, msg.awaiting_release)}
   end
 
-  def handle_info(%{channel: "teiserver_liveview_login_throttle", event: :accept_login} = msg, state) do
-
+  def handle_info(
+        %{channel: "teiserver_liveview_login_throttle", event: :accept_login} = msg,
+        state
+      ) do
     {:noreply,
      state
-      |> assign(:remaining_capacity, msg.remaining_capacity)
-      |> assign(:recent_logins, msg.recent_logins)
-    }
+     |> assign(:remaining_capacity, msg.remaining_capacity)
+     |> assign(:recent_logins, msg.recent_logins)}
   end
 
   @impl true

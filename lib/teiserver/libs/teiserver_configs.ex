@@ -295,32 +295,6 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "system.Login throttle standard wait",
-      section: "Login",
-      type: "integer",
-      default: 500,
-      permissions: ["Admin"],
-      description: "The wait time for standard users when logging in (ms)",
-      value_label: "Standard login wait time (ms)",
-      update_callback: fn v ->
-        Teiserver.Account.LoginThrottleServer.set_value(:standard_min_wait, v)
-      end
-    })
-
-    add_site_config_type(%{
-      key: "system.Login throttle toxic wait",
-      section: "Login",
-      type: "integer",
-      default: 5000,
-      permissions: ["Admin"],
-      description: "The wait time for toxic users when logging in (ms)",
-      value_label: "Toxic login wait time (ms)",
-      update_callback: fn v ->
-        Teiserver.Account.LoginThrottleServer.set_value(:toxic_min_wait, v)
-      end
-    })
-
-    add_site_config_type(%{
       key: "system.User limit",
       section: "Login",
       type: "integer",
