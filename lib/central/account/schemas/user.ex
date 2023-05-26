@@ -19,7 +19,17 @@ defmodule Central.Account.User do
 
     field :data, :map, default: %{}
 
+    field :roles, {:array, :string}, default: []
     field :permissions, {:array, :string}, default: []
+
+    field :restrictions, {:array, :string}, default: []
+    field :restricted_until, :utc_datetime
+
+    field :shadowbanned, :boolean, default: false
+    field :last_login, :utc_datetime
+
+    field :discord_id, :integer
+    field :steam_id, :integer
 
     has_many :user_configs, Teiserver.Config.UserConfig
 

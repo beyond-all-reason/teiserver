@@ -247,17 +247,30 @@ defmodule TeiserverWeb.Admin.UserController do
       true -> []
     end
 
-    # First we remove all roles we're allowed to add
-    user_roles = changeable_roles
-      |> Enum.reduce(user.data["roles"], fn (role, user_roles) ->
-        selected = user_params[role] == "true"
+    # Go through all roles, any we're not allowed to change
+    # we leave as they are, any we are we do stuff with
+    new_roles = RoleLib.all_role_names()
+      |> Enum.map(fn role_name ->
+        selected = if Enum.member?(changeable_roles, role_name) do
+          user_params[role_name] == "true"
+        else
+          Enum.member?(user.data["roles"], role_name)
+        end
 
         if selected do
-          [role | user_roles]
-        else
-          List.delete(user_roles, role)
+          role_name
+
         end
       end)
+      |> Enum.reject(&(&1 == nil))
+      |> Enum.uniq
+
+    permissions = new_roles
+      |> Enum.map(fn role_name ->
+        role_def = RoleLib.role_data(role_name)
+        [role_name | role_def.contains]
+      end)
+      |> List.flatten
       |> Enum.uniq
 
     IO.puts ""
@@ -265,44 +278,21 @@ defmodule TeiserverWeb.Admin.UserController do
     IO.puts ""
 
     IO.puts ""
-    IO.inspect user_roles
+    # IO.inspect user_roles
     IO.inspect changeable_roles
     IO.puts ""
-
-    # roles =
-    #   [
-    #     "Verified",
-    #     "Bot",
-    #     "Moderator",
-    #     "Server",
-    #     "Admin",
-    #     "Streamer",
-    #     "Trusted",
-    #     "Tester",
-    #     "Donor",
-    #     "Contributor",
-    #     "Caster",
-    #     "Core",
-    #     "VIP",
-    #     "Overwatch",
-    #     "Reviewer",
-    #     "Tournament",
-    #     "GDT"
-    #   ]
-    #   |> Enum.map(fn role -> if user_params[role] == "true", do: role end)
-    #   |> Enum.reject(&(&1 == nil))
 
     data =
       Map.merge(user.data || %{}, %{
         "bot" => user_params["bot"] == "true",
         "moderator" => user_params["moderator"] == "true",
         "verified" => user_params["verified"] == "true",
-        "roles" => user_roles
+        "roles" => new_roles
       })
 
     user_params = Map.merge(user_params, %{
       "data" => data,
-      "permissions" => user_roles
+      "permissions" => permissions
     })
 
     case Central.Account.UserLib.has_access(user, conn) do

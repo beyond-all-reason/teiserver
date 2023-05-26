@@ -4,6 +4,7 @@ defmodule Teiserver.Account.RoleLib do
   """
 
   # If Role A contains Role B, Role B needs to be listed first
+  @complete_staff_role_list ~w(Contributor Engine Mapping Infrastructure)
   @raw_role_data [
     # Global
     %{name: "Default", colour: "#666666", icon: "fa-solid fa-user", contains: ~w(), badge: false},
@@ -18,18 +19,23 @@ defmodule Teiserver.Account.RoleLib do
     %{name: "Bot", colour: "#777777", icon: "fa-solid fa-user-robot", contains: ~w()},
     %{name: "Verified", colour: "#66AA66", icon: "fa-duotone fa-check", contains: ~w(), badge: false},
 
-    # Authority
-    %{name: "Overwatch", colour: "#AA7733", icon: "fa-duotone fa-clipboard-list-check", contains: ~w()},
-    %{name: "Reviewer", colour: "#AA7700", icon: "fa-duotone fa-user-magnifying-glass", contains: ~w(Overwatch)},
-    %{name: "Moderator", colour: "#FFAA00", icon: "fa-duotone fa-gavel", contains: ~w(Reviewer)},
-    %{name: "Admin", colour: "#204A88", icon: "fa-solid fa-user-tie", contains: ~w(Moderator)},
-    %{name: "Server", colour: "#AA2088", icon: "fa-solid fa-user-gear", contains: ~w(Admin)},
-
     # Staff
     %{name: "Tester", colour: "#00AAAA", icon: "fa-duotone fa-vial", contains: ~w()},
     %{name: "GDT", colour: "#AA0000", icon: "fa-duotone fa-pen-ruler", contains: ~w()},
     %{name: "Contributor", colour: "#00AA66", icon: "fa-duotone fa-code-commit", contains: ~w(Trusted)},
-    %{name: "Core", colour: "#008800", icon: "fa-duotone fa-code-branch", contains: ~w(Contributor)},
+
+    %{name: "Engine", colour: "#008800", icon: "fa-duotone fa-engine", contains: ~w(Contributor)},
+    %{name: "Mapping", colour: "#008800", icon: "fa-duotone fa-map", contains: ~w(Contributor)},
+    %{name: "Infrastructure", colour: "#008800", icon: "fa-duotone fa-server", contains: ~w(Contributor)},
+
+    %{name: "Core", colour: "#008800", icon: "fa-duotone fa-code-branch", contains: @complete_staff_role_list},
+
+    # Authority
+    %{name: "Overwatch", colour: "#AA7733", icon: "fa-duotone fa-clipboard-list-check", contains: ~w()},
+    %{name: "Reviewer", colour: "#AA7700", icon: "fa-duotone fa-user-magnifying-glass", contains: ~w(Overwatch)},
+    %{name: "Moderator", colour: "#FFAA00", icon: "fa-duotone fa-gavel", contains: ~w(Reviewer)},
+    %{name: "Admin", colour: "#204A88", icon: "fa-solid fa-user-tie", contains: ~w(Moderator Core)},
+    %{name: "Server", colour: "#AA2088", icon: "fa-solid fa-user-gear", contains: ~w(Admin)},
 
     # Privileged
     %{name: "VIP", colour: "#AA8833", icon: "fa-duotone fa-sparkles", contains: ~w()},
@@ -55,9 +61,19 @@ defmodule Teiserver.Account.RoleLib do
     end)
     |> Map.new()
 
+  @spec all_role_names() :: list()
+  def all_role_names() do
+    Map.keys(@role_data)
+  end
+
   @spec role_data() :: map()
   def role_data() do
     @role_data
+  end
+
+  @spec role_data(String.t()) :: map()
+  def role_data(role_name) do
+    Map.get(@role_data, role_name, nil)
   end
 
   @spec global_roles :: [String.t()]
@@ -77,7 +93,7 @@ defmodule Teiserver.Account.RoleLib do
 
   @spec staff_roles :: [String.t()]
   def staff_roles() do
-    ~w(Core Contributor GDT Tester)
+    ~w(Core Contributor GDT Tester) ++ ~w(Engine Mapping Infrastructure)
   end
 
   @spec privileged_roles :: [String.t()]
@@ -92,11 +108,11 @@ defmodule Teiserver.Account.RoleLib do
 
   @spec allowed_role_management(String.t()) :: [String.t()]
   def allowed_role_management("Server") do
-    global_roles() ++ management_roles() ++ moderation_roles() ++ staff_roles() ++ privileged_roles() ++ property_roles()
+    management_roles() ++ allowed_role_management("Admin")
   end
 
   def allowed_role_management("Admin") do
-    global_roles() ++ moderation_roles() ++ staff_roles() ++ privileged_roles() ++ property_roles()
+    staff_roles() ++ allowed_role_management("Moderator")
   end
 
   def allowed_role_management("Moderator") do

@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Account.GeneralController do
   use CentralWeb, :controller
 
   alias Teiserver.Account
-  alias Teiserver.Account.{UserLib, RoleLib}
+  alias Teiserver.Account.{RoleLib}
 
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Account', url: '/teiserver/account')
@@ -39,36 +39,36 @@ defmodule TeiserverWeb.Account.GeneralController do
   end
 
   @spec customisation_select(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def customisation_select(conn, %{"role" => role}) do
+  def customisation_select(conn, %{"role" => role_name}) do
     available =
-      (UserLib.global_roles() ++ conn.current_user.data["roles"])
+      (RoleLib.global_roles() ++ conn.current_user.permissions)
       |> Enum.reject(fn role ->
         Enum.member?(["VIP", "Tournament player"], role)
       end)
 
-    {colour, icon} =
-      if Enum.member?(available, role) do
-        if UserLib.role_def(role) do
-          UserLib.role_def(role)
+    role_def =
+      if Enum.member?(available, role_name) do
+        if RoleLib.role_data(role_name) do
+          RoleLib.role_data(role_name)
         else
-          UserLib.role_def("Default")
+          RoleLib.role_data("Default")
         end
       else
-        UserLib.role_def("Default")
+        RoleLib.role_data("Default")
       end
 
     user = Account.get_user!(conn.current_user.id)
 
     {:ok, user} =
       Account.update_user(user, %{
-        colour: colour,
-        icon: icon
+        colour: role_def.colour,
+        icon: role_def.icon
       })
 
     options =
-      (UserLib.global_roles() ++ conn.current_user.data["roles"])
+      (RoleLib.global_roles() ++ conn.current_user.data["roles"])
       |> Enum.map(fn r ->
-        {r, UserLib.role_def(r)}
+        {r, RoleLib.role_data(r)}
       end)
       |> Enum.filter(fn {_, v} -> v != nil end)
       |> Enum.map(fn {role, {colour, icon}} ->

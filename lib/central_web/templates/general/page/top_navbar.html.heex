@@ -16,27 +16,19 @@
       </a>
       <!-- Left links -->
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <%= central_component("top_nav_item",
-          text: "Main menu",
-          route: "/",
-          active: @site_menu_active == "central_home"
-        ) %>
+        <TeiserverWeb.NavComponents.top_nav_item
+          text={"Main menu"}
+          active={@site_menu_active == "central_home"}
+          route={~p"/"}
+        />
 
-        <%= if Application.get_env(:central, Central)[:enable_blog] do %>
-          <%= central_component("top_nav_item",
-            text: "Blog",
-            route: ~p"/blog",
-            active: @site_menu_active == "central_blog"
-          ) %>
-        <% end %>
+        <TeiserverWeb.NavComponents.top_nav_item
+          text={"My account"}
+          active={@site_menu_active == "teiserver_account"}
+          route={~p"/teiserver/account"}
+        />
 
-        <%= central_component("top_nav_item",
-          text: "My account",
-          route: ~p"/teiserver/account",
-          active: @site_menu_active == "teiserver_account"
-        ) %>
-
-        <%= if allow?(@current_user, "admin") do %>
+        <%= if allow?(@current_user, "Server") do %>
           <%= central_component("top_nav_item",
             text: "C.Admin",
             route: ~p"/admin",
@@ -44,7 +36,7 @@
           ) %>
         <% end %>
 
-        <%= if allow?(@current_user, "logging") do %>
+        <%= if allow?(@current_user, "Server") do %>
           <%= central_component("top_nav_item",
             text: "Logging",
             route: ~p"/logging",
@@ -52,37 +44,35 @@
           ) %>
         <% end %>
 
-        <%= if allow?(@current_user, "teiserver") do %>
-          <%= central_component("top_nav_item",
-            text: "Lobbies",
-            route: ~p"/teiserver/battle/lobbies",
-            active: @site_menu_active == "lobbies"
-          ) %>
+        <%= central_component("top_nav_item",
+          text: "Lobbies",
+          route: ~p"/teiserver/battle/lobbies",
+          active: @site_menu_active == "lobbies"
+        ) %>
 
-          <%= central_component("top_nav_item",
-            text: "Matchmaking",
-            route: ~p"/teiserver/matchmaking/queues",
-            active: @site_menu_active == "matchmaking"
-          ) %>
+        <%= central_component("top_nav_item",
+          text: "Matchmaking",
+          route: ~p"/teiserver/matchmaking/queues",
+          active: @site_menu_active == "matchmaking"
+        ) %>
 
-          <%= central_component("top_nav_item",
-            text: "Parties",
-            route: ~p"/teiserver/account/parties",
-            active: @site_menu_active == "parties"
-          ) %>
+        <%= central_component("top_nav_item",
+          text: "Parties",
+          route: ~p"/teiserver/account/parties",
+          active: @site_menu_active == "parties"
+        ) %>
 
-          <%= central_component("top_nav_item",
-            text: "Matches",
-            route: ~p"/teiserver/battle/matches",
-            active: @site_menu_active == "match"
-          ) %>
+        <%= central_component("top_nav_item",
+          text: "Matches",
+          route: ~p"/teiserver/battle/matches",
+          active: @site_menu_active == "match"
+        ) %>
 
-          <%= central_component("top_nav_item",
-            text: "Leaderboard",
-            route: Routes.ts_battle_ratings_path(@conn, :leaderboard),
-            active: @site_menu_active == "leaderboard"
-          ) %>
-        <% end %>
+        <%= central_component("top_nav_item",
+          text: "Leaderboard",
+          route: Routes.ts_battle_ratings_path(@conn, :leaderboard),
+          active: @site_menu_active == "leaderboard"
+        ) %>
 
         <%= if allow_any?(@current_user, ~w(Contributor Overwatch)) do %>
           <%= central_component("top_nav_item",
@@ -100,7 +90,7 @@
           ) %>
         <% end %>
 
-        <%= if allow?(@current_user, "Reviewer") do %>
+        <%= if allow?(@current_user, "Overwatch") do %>
           <%= central_component("top_nav_item",
             text: "Moderation",
             route: Routes.moderation_general_path(@conn, :index),
@@ -116,7 +106,7 @@
           ) %>
         <% end %>
 
-        <%= if allow_any?(@conn, ~w(Contributor Overwatch)) do %>
+        <%= if allow_any?(@current_user, ~w(Contributor Overwatch)) do %>
           <%= central_component("top_nav_item",
             text: "Admin",
             route: ~p"/teiserver/admin",

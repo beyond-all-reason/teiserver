@@ -215,18 +215,18 @@ defmodule Central.Account.UserLib do
 
   def has_access(target_user, conn) do
     cond do
+      # Server can access anything
       allow?(conn, "Server") ->
         {true, nil}
 
-      allow?(conn, "Server") and allow?(target_user, "Admin") ->
-        {true, nil}
-
-      allow?(target_user, "teiserver.staff.moderator") ->
+      # Admin can access anything except Server
+      allow?(conn, "Admin") and allow?(target_user, "Server") ->
         {false, :restricted_user}
 
-      allow?(conn, "teiserver.staff.moderator") ->
+      allow?(conn, "Admin") ->
         {true, nil}
 
+      # By default, nobody can access other users
       true ->
         {false, :no_access}
     end

@@ -350,7 +350,7 @@ defmodule Teiserver.Account.UserLib do
   def generate_user_icons(user) do
     role_icons =
       user.roles
-      |> Enum.filter(fn r -> RoleLib.role_def(r) != nil end)
+      |> Enum.filter(fn r -> RoleLib.role_data(r) != nil end)
       |> Map.new(fn r -> {r, 1} end)
 
     %{
