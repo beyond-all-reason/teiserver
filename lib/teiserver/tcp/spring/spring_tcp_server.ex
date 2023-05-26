@@ -1085,6 +1085,8 @@ defmodule Teiserver.SpringTcpServer do
   @spec flood_protect?(String.t(), map()) :: {boolean, map()}
   defp flood_protect?(_, %{exempt_from_cmd_throttle: true} = state), do: {false, state}
 
+  defp flood_protect?("c.auth.login_queue_heartbeat" <> _, state), do: {false, state}
+
   defp flood_protect?(data, state) do
     cmd_timestamps =
       if String.contains?(data, "\n") do
