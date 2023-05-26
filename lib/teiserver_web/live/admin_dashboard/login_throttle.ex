@@ -34,7 +34,7 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
   end
 
   @impl true
-  def handle_params(params, _url, socket) do
+  def handle_params(_params, _url, socket) do
     case allow?(socket.assigns[:current_user], "teiserver.staff.server") do
       true ->
         {:noreply, socket}
@@ -64,8 +64,8 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
   end
 
   def handle_info(
-        %{channel: "teiserver_liveview_login_throttle", event: :released_users} = msg,
-        %{assigns: assigns} = state
+        %{channel: "teiserver_liveview_login_throttle", event: :released_users} = _msg,
+        %{assigns: _assigns} = state
       ) do
     # new_heartbeats = Map.drop(assigns.heartbeats, [msg.userid])
     # new_arrival_times = Map.drop(assigns.arrival_times, [msg.userid])

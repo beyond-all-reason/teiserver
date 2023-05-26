@@ -388,7 +388,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   # When a login is accepted and we want to update certain metrics right away
   defp accept_login(
          %{recent_logins: recent_logins, remaining_capacity: remaining_capacity} = state,
-         userid
+         _userid
        ) do
     new_recent_logins = [System.system_time(:millisecond) | recent_logins]
     new_remaining_capacity = remaining_capacity - 1
