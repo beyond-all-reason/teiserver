@@ -90,6 +90,7 @@ config :logger,
 config :logger,
   backends: [
     {LoggerFileBackend, :error_log},
+    {LoggerFileBackend, :notice_log},
     {LoggerFileBackend, :info_log},
     :console
   ]
@@ -99,6 +100,12 @@ config :logger, :error_log,
   format: "$date $time [$level] $metadata $message\n",
   metadata: [:request_id, :user_id],
   level: :error
+
+config :logger, :notice_log,
+  path: "/var/log/central/notice.log",
+  format: "$date $time [$level] $metadata $message\n",
+  metadata: [:request_id, :user_id],
+  level: :notice
 
 config :logger, :info_log,
   path: "/var/log/central/info.log",

@@ -3,7 +3,21 @@ queue_bsname = Teiserver.Game.QueueLib.colours()
 # policy_bsname = Teiserver.Game.LobbyPolicyLib.colours() %>
 
 <div class="row my-2">
-  <h4>Commands</h4>
+  <div class="col-md-12">
+    <h4>Links</h4>
+  </div>
+  <div class="col-md-4">
+    <%= live_redirect("Login throttle",
+      to: ~p"/admin/dashboard/login_throttle",
+      class: "btn btn-sm btn-outline-primary"
+    ) %>
+  </div>
+</div>
+
+<div class="row my-4">
+  <div class="col-md-12">
+    <h4>Commands</h4>
+  </div>
   <div class="col-md-4">
     <div class="btn btn-info mx-2" phx-click="reinit-consuls">Init consuls</div>
     &nbsp;

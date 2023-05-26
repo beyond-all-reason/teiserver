@@ -50,8 +50,7 @@ defmodule Teiserver.TeiserverQuickActions do
         %{
           label: "Matchmaking",
           icons: [Teiserver.Game.QueueLib.icon()],
-          url: ~p"/teiserver/games/queues",
-          permissions: "teiserver.player.verified"
+          url: ~p"/teiserver/games/queues"
         },
 
         # Moderator pages

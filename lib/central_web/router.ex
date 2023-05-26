@@ -465,6 +465,7 @@ defmodule CentralWeb.Router do
     pipe_through([:browser, :standard_layout, :protected])
 
     live("/dashboard", Index, :index)
+    live("/dashboard/login_throttle", LoginThrottle, :index)
     live("/dashboard/policy/:id", Policy, :policy)
   end
 
@@ -577,6 +578,10 @@ defmodule CentralWeb.Router do
     get("/users/action/:id/:action", UserController, :perform_action)
     put("/users/action/:id/:action", UserController, :perform_action)
     get("/users/smurf_search/:id", UserController, :smurf_search)
+
+    put("/users/mark_as_smurf_of/:smurf_id/:origin_id", UserController, :mark_as_smurf_of)
+    delete("/users/cancel_smurf_mark/:user_id", UserController, :cancel_smurf_mark)
+
     get("/users/smurf_merge_form/:from_id/:to_id", UserController, :smurf_merge_form)
     post("/users/smurf_merge_post/:from_id/:to_id", UserController, :smurf_merge_post)
     delete("/users/delete_smurf_key/:id", UserController, :delete_smurf_key)

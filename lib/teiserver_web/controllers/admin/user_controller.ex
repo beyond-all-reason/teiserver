@@ -165,6 +165,11 @@ defmodule TeiserverWeb.Admin.UserController do
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
         |> render("show.html")
 
+      {false, :restricted_user} ->
+        conn
+        |> put_flash(:danger, "This is a restricted user")
+        |> redirect(to: ~p"/teiserver/admin/user")
+
       _ ->
         conn
         |> put_flash(:danger, "Unable to access this user")
@@ -196,9 +201,9 @@ defmodule TeiserverWeb.Admin.UserController do
           "friends" => [],
           "friend_requests" => [],
           "ignored" => [],
+          "roles" => ["Verified"],
           "bot" => user_params["bot"] == "true",
           "moderator" => user_params["moderator"] == "true",
-          "verified" => user_params["verified"] == "true",
           "password_hash" => "X03MO1qnZdYdgyfeuILPmQ=="
         }
       })
@@ -648,6 +653,52 @@ defmodule TeiserverWeb.Admin.UserController do
       conn
       |> put_flash(:info, "Unable to find that key")
       |> redirect(to: ~p"/teiserver/admin/user")
+    end
+  end
+
+  @spec mark_as_smurf_of(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def mark_as_smurf_of(conn, %{"smurf_id" => smurf_id, "origin_id" => origin_id}) do
+    smurf_user = Account.get_user!(smurf_id)
+    origin_user = Account.get_user!(origin_id)
+
+    access = {
+      Central.Account.UserLib.has_access(smurf_user, conn),
+      Central.Account.UserLib.has_access(origin_user, conn)
+    }
+
+    case access do
+      {{true, _}, {true, _}} ->
+        # If the origin user has a smurf_id somehow then we just point to that
+        origin_id = origin_user.smurf_of_id || origin_user.id
+        {:ok, _} = Account.script_update_user(smurf_user, %{"smurf_of_id" => origin_id})
+
+        Account.recache_user(smurf_user.id)
+
+        add_audit_log(conn, "Moderation:Mark as smurf", %{
+          smurf_userid: smurf_user.id,
+          origin_id: origin_user.id
+        })
+
+        # Now we update stats for the origin
+        smurf_count = Account.list_users(
+          search: [
+            smurf_of: origin_user.id
+          ],
+          select: [:id]
+        )
+        |> Enum.count
+        Account.update_user_stat(origin_user.id, %{"smurf_count" => smurf_count})
+
+        Teiserver.Client.disconnect(smurf_user.id, "Marked as smurf")
+
+        conn
+        |> put_flash(:success, "Applied the changes")
+        |> redirect(to: ~p"/teiserver/admin/user/#{smurf_user.id}")
+
+      _ ->
+        conn
+        |> put_flash(:danger, "Unable to access at least one of these users")
+        |> redirect(to: ~p"/teiserver/admin/user")
     end
   end
 

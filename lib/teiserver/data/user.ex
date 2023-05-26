@@ -44,7 +44,8 @@ defmodule Teiserver.User do
       :colour,
       :icon,
       :behaviour_score,
-      :trust_score
+      :trust_score,
+      :smurf_of_id
     ]
 
   @data_keys [
@@ -809,19 +810,14 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec server_capacity() :: {non_neg_integer(), number()}
+  @spec server_capacity() :: non_neg_integer()
   def server_capacity() do
     client_count =
       (Central.cache_get(:application_temp_cache, :telemetry_data) || %{})
       |> Map.get(:client, %{})
       |> Map.get(:total, 0)
 
-    total = Config.get_site_config_cache("system.User limit")
-    remaining = total - client_count
-
-    usage = max(client_count, 1) / total
-
-    {remaining, usage}
+    Config.get_site_config_cache("system.User limit") - client_count
   end
 
   @spec ip_to_string(String.t() | tuple()) :: Tuple.t()
@@ -845,7 +841,14 @@ defmodule Teiserver.User do
     wait_for_startup()
 
     user = get_user_by_id(token.user.id)
-    {remaining_capacity, current_usage} = server_capacity()
+
+    # If they're a smurf, log them in as the smurf!
+    user =
+      if user.smurf_of_id != nil do
+        get_user_by_id(user.smurf_of_id)
+      else
+        user
+      end
 
     cond do
       token.expires != nil and Timex.compare(token.expires, Timex.now()) == -1 ->
@@ -862,13 +865,6 @@ defmodule Teiserver.User do
 
       is_restricted?(user, ["Login"]) ->
         {:error, @suspended_string}
-
-      not is_bot?(user) and not is_moderator?(user) and
-        not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity <= 0 ->
-        {:error, "The server is currently full, please try again in a minute or two."}
-
-      (remaining_capacity <= 10 or current_usage > 0.99) and user.behaviour_score < 5000 ->
-        {:error, "The server is currently full, please try later."}
 
       not is_verified?(user) ->
         Account.update_user_stat(user.id, %{
@@ -905,7 +901,6 @@ defmodule Teiserver.User do
           {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), T.userid()}
   def try_login(token, ip, lobby, lobby_hash) do
     wait_for_startup()
-    {remaining_capacity, current_usage} = server_capacity()
 
     case Guardian.resource_from_token(token) do
       {:error, _bad_token} ->
@@ -913,6 +908,14 @@ defmodule Teiserver.User do
 
       {:ok, db_user, _claims} ->
         user = get_user_by_id(db_user.id)
+
+        # If they're a smurf, log them in as the smurf!
+        user =
+          if user.smurf_of_id != nil do
+            get_user_by_id(user.smurf_of_id)
+          else
+            user
+          end
 
         cond do
           not is_bot?(user) and login_flood_check(user.id) == :block ->
@@ -926,13 +929,6 @@ defmodule Teiserver.User do
 
           is_restricted?(user, ["Login"]) ->
             {:error, @suspended_string}
-
-          not is_bot?(user) and not is_moderator?(user) and
-            not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity <= 0 ->
-            {:error, "The server is currently full, please try again in a minute or two."}
-
-          (remaining_capacity <= 10 or current_usage > 0.99) and user.behaviour_score < 5000 ->
-            {:error, "The server is currently full, please try later."}
 
           not is_verified?(user) ->
             Account.update_user_stat(user.id, %{
@@ -955,15 +951,23 @@ defmodule Teiserver.User do
             end
 
           true ->
-            # Check with login throttle here
-            if Config.get_site_config_cache("system.Use login throttle") do
-              if LoginThrottleServer.attempt_login(self(), user.id) do
+            # Okay, we're good, what's capacity looking like?
+            cond do
+              is_bot?(user) ->
                 do_login(user, ip, lobby, lobby_hash)
-              else
-                {:error, "Queued", user.id, lobby, lobby_hash}
-              end
-            else
-              do_login(user, ip, lobby, lobby_hash)
+
+              Config.get_site_config_cache("system.Use login throttle") ->
+                if LoginThrottleServer.attempt_login(self(), user.id) do
+                  do_login(user, ip, lobby, lobby_hash)
+                else
+                  {:error, "Queued", user.id, lobby, lobby_hash}
+                end
+
+              not has_any_role?(user, ["VIP", "Contributor"]) and server_capacity() <= 0 ->
+                {:error, "The server is currently full, please try again in a minute or two."}
+
+              true ->
+                do_login(user, ip, lobby, lobby_hash)
             end
         end
     end
@@ -973,13 +977,22 @@ defmodule Teiserver.User do
           {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), Integer.t()}
   def try_md5_login(username, md5_password, ip, lobby, lobby_hash) do
     wait_for_startup()
-    {remaining_capacity, current_usage} = server_capacity()
 
     case get_user_by_name(username) do
       nil ->
         {:error, "No user found for '#{username}'"}
 
       user ->
+        # If they're a smurf, log them in as the smurf!
+        {user, username} =
+          if user.smurf_of_id != nil do
+            origin_user = get_user_by_id(user.smurf_of_id)
+
+            {origin_user, origin_user.name}
+          else
+            {user, user.name}
+          end
+
         cond do
           user.name != username ->
             {:error, "Username is case sensitive, try '#{user.name}'"}
@@ -1003,13 +1016,6 @@ defmodule Teiserver.User do
 
           is_restricted?(user, ["Login"]) ->
             {:error, @suspended_string}
-
-          not is_bot?(user) and not is_moderator?(user) and
-            not has_any_role?(user, ["VIP", "Contributor"]) and remaining_capacity <= 0 ->
-            {:error, "The server is currently full, please try again in a minute or two."}
-
-          (remaining_capacity <= 10 or current_usage > 0.99) and user.behaviour_score < 5000 ->
-            {:error, "The server is currently full, please try later."}
 
           not is_verified?(user) ->
             # Log them in to save some details we'd not otherwise get
@@ -1035,15 +1041,23 @@ defmodule Teiserver.User do
             end
 
           true ->
-            # Check with login throttle here
-            if Config.get_site_config_cache("system.Use login throttle") do
-              if LoginThrottleServer.attempt_login(self(), user.id) do
+            # Okay, we're good, what's capacity looking like?
+            cond do
+              is_bot?(user) ->
                 do_login(user, ip, lobby, lobby_hash)
-              else
-                {:error, "Queued", user.id, lobby, lobby_hash}
-              end
-            else
-              do_login(user, ip, lobby, lobby_hash)
+
+              Config.get_site_config_cache("system.Use login throttle") ->
+                if LoginThrottleServer.attempt_login(self(), user.id) do
+                  do_login(user, ip, lobby, lobby_hash)
+                else
+                  {:error, "Queued", user.id, lobby, lobby_hash}
+                end
+
+              not has_any_role?(user, ["VIP", "Contributor"]) and server_capacity() <= 0 ->
+                {:error, "The server is currently full, please try again in a minute or two."}
+
+              true ->
+                do_login(user, ip, lobby, lobby_hash)
             end
         end
     end

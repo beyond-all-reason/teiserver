@@ -12,7 +12,10 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]
   require Logger
 
-  @dispute_string "If you feel you have been the target of an erroneous or unjust moderation action please use the #open-ticket channel in our discord to appeal/dispute the action."
+  @dispute_string [
+    "If you feel you have been the target of an erroneous or unjust moderation action please use the #open-ticket channel in our discord to appeal/dispute the action.",
+    "Attempting to circumvent this moderation with a new account is not okay and can lead to suspension or banning."
+  ]
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -269,7 +272,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         msg =
           cond do
             User.has_mute?(user) ->
-              msg ++ [@dispute_string]
+              msg ++ @dispute_string
 
             has_warning ->
               Lobby.remove_user_from_any_lobby(user.id)
@@ -281,7 +284,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
               msg ++ [@dispute_string, acknowledge_prompt]
 
             true ->
-              msg ++ [@dispute_string]
+              msg ++ @dispute_string
           end
 
         Coordinator.send_to_user(userid, msg)
@@ -328,7 +331,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
             data: %{
               bot: true,
               moderator: true,
-              verified: true,
               lobby_client: "Teiserver Internal Process",
               roles: ["Bot", "Verified"]
             }

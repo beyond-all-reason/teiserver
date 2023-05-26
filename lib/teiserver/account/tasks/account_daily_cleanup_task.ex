@@ -11,10 +11,10 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
     days = Application.get_env(:central, Teiserver)[:retention][:account_unverified]
 
     # Find all unverified users who registered over 14 days ago
-    id_list =
+    _id_list =
       Account.list_users(
         search: [
-          verified: "Unverified",
+          verified: false,
           inserted_before: Timex.shift(Timex.now(), days: -days)
         ],
         select: [:id],
@@ -22,7 +22,7 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
       )
       |> Enum.map(fn %{id: userid} -> userid end)
 
-    do_deletion(id_list)
+    # do_deletion(id_list)
 
     :ok
   end
@@ -64,11 +64,11 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
     query = "DELETE FROM teiserver_telemetry_server_events WHERE user_id IN #{sql_id_list}"
     Ecto.Adapters.SQL.query(Repo, query, [])
 
-    # Stats
-    query = "DELETE FROM teiserver_account_user_stats WHERE user_id IN #{sql_id_list}"
+    query = "DELETE FROM teiserver_telemetry_match_events WHERE user_id IN #{sql_id_list}"
     Ecto.Adapters.SQL.query(Repo, query, [])
 
-    query = "DELETE FROM teiserver_account_smurf_keys WHERE user_id IN #{sql_id_list}"
+    # Stats
+    query = "DELETE FROM teiserver_account_user_stats WHERE user_id IN #{sql_id_list}"
     Ecto.Adapters.SQL.query(Repo, query, [])
 
     # Chat

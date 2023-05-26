@@ -97,12 +97,6 @@
                   <i class="fa-regular fa-fw fa-code"></i> Raw data
                 </a>
               </li>
-
-              <li class="nav-item">
-                <a href="#anon_raw_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                  <i class="fa-regular fa-fw fa-user-secret"></i> Anon data
-                </a>
-              </li>
             </ul>
 
             <div class="tab-content">
@@ -122,10 +116,6 @@
 
               <div class="tab-pane" id="raw_tab" style="padding:5px;">
                 <%= render("tab_raw.html", assigns) %>
-              </div>
-
-              <div class="tab-pane" id="anon_raw_tab" style="padding:5px;">
-                <%= render("tab_anon_raw.html", assigns) %>
               </div>
             </div>
           </div>

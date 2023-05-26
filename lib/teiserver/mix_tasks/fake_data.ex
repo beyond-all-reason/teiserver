@@ -53,7 +53,6 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         icon: "fa-solid fa-power-off",
         colour: "#00AA00",
         data: %{
-          verified: true,
           lobby_client: "FakeData",
           password_hash:
             Teiserver.User.encrypt_password(Teiserver.User.spring_md5_password("password")),
@@ -84,7 +83,6 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
             trust_score: 10_000,
             behaviour_score: 10_000,
             data: %{
-              verified: true,
               lobby_client: "FakeData",
               roles: ["Verified"],
               bot: false,

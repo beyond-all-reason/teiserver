@@ -663,11 +663,29 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
           raise "ERR: #{a}, #{b}"
       end
 
+    match_event_query =
+      String.replace(
+        query,
+        "teiserver_telemetry_match_events",
+        "teiserver_telemetry_server_events"
+      )
+
+    match_event_data =
+      case Ecto.Adapters.SQL.query(Repo, match_event_query, []) do
+        {:ok, results} ->
+          results.rows
+          |> Map.new(fn [key, value] -> {key, value} end)
+
+        {a, b} ->
+          raise "ERR: #{a}, #{b}"
+      end
+
     Map.put(stats, :events, %{
       client: client_data,
       unauth: unauth_data,
       combined: add_maps(client_data, unauth_data),
-      server: server_data
+      server: server_data,
+      match: match_event_data
     })
   end
 end

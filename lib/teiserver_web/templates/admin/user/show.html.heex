@@ -50,6 +50,17 @@
             <%= render("actions.html", assigns) %>
           </div>
 
+          <%= if @user.smurf_of_id do %>
+            <a
+              href={~p"/teiserver/admin/user/#{@user.smurf_of_id}"}
+              class={"btn btn-outline-#{bsname}"}
+              id="section-menu-new"
+            >
+              <i class="fa-regular fa-copy"></i> &nbsp;
+              See origin
+            </a>
+          <% end %>
+
           <%= if allow?(@conn, "admin.user") do %>
             <a
               href={Routes.admin_user_path(@conn, :show, @user)}

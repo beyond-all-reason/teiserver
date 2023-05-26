@@ -70,7 +70,7 @@ defmodule Teiserver.Account.RetentionRateExport do
         search: [
           inserted_after: start_datetime,
           inserted_before: end_datetime,
-          data_equal: {"verified", "true"},
+          verified: true,
           data_greater_than: {"last_login", "0"},
           bot: "Person"
         ],
