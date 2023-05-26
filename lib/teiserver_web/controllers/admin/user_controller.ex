@@ -679,6 +679,8 @@ defmodule TeiserverWeb.Admin.UserController do
           origin_id: origin_user.id
         })
 
+        Teiserver.Client.disconnect(smurf_user.id, "Marked as smurf")
+
         conn
         |> put_flash(:success, "Applied the changes")
         |> redirect(to: ~p"/teiserver/admin/user/#{smurf_user.id}")

@@ -988,7 +988,7 @@ defmodule Teiserver.User do
 
             {origin_user, origin_user.name}
           else
-            user
+            {user, user.name}
           end
 
         cond do
