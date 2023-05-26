@@ -679,6 +679,16 @@ defmodule TeiserverWeb.Admin.UserController do
           origin_id: origin_user.id
         })
 
+        # Now we update stats for the origin
+        smurf_count = Account.list_users(
+          search: [
+            smurf_of: origin_user.id
+          ],
+          select: [:id]
+        )
+        |> Enum.count
+        Account.update_user_stat(origin_user.id, %{"smurf_count" => smurf_count})
+
         Teiserver.Client.disconnect(smurf_user.id, "Marked as smurf")
 
         conn

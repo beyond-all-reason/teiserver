@@ -51,6 +51,15 @@
       value: "#{hours} hours, #{mins} minutes",
       width: 200
     ) %>
+
+
+    <%= if (@user_stats["smurf_count"] || 0) > 0 do %>
+      <%= central_component("detail_line",
+        label: "Smurf count",
+        value: @user_stats["smurf_count"],
+        width: 200
+      ) %>
+    <% end %>
   </div>
 </div>
 
