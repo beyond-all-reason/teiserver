@@ -302,6 +302,8 @@ defmodule TeiserverWeb.Admin.UserController do
 
         case change_result do
           {:ok, user} ->
+            Account.decache_user(user.id)
+
             conn
             |> put_flash(:info, "User updated successfully.")
             # |> redirect(to: ~p"/teiserver/admin/user")
