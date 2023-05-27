@@ -9,49 +9,24 @@ defmodule TeiserverWeb.UserComponents do
   def status_icon(%{user: %{data: user_data}} = assigns) do
     restrictions = user_data["restrictions"] || []
 
-    cond do
-      assigns.user.smurf_of_id != nil -> _status_icon(%{icon: :smurf})
-      Enum.member?(restrictions, "Login") -> _status_icon(%{icon: :banned})
-      Enum.member?(restrictions, "All chat") -> _status_icon(%{icon: :muted})
-      Enum.member?(restrictions, "Warning reminder") -> _status_icon(%{icon: :warned})
-      not Enum.member?(user_data["roles"], "Verified") -> _status_icon(%{icon: :unverified})
-      true -> _status_icon(%{icon: nil})
-    end
+    icons = [
+      (if assigns.user.smurf_of_id != nil, do: {"primary", Teiserver.Moderation.ActionLib.action_icon("Smurf")}),
+      (if Enum.member?(restrictions, "Login"), do: {"danger", Teiserver.Moderation.ActionLib.action_icon("Ban")}),
+      (if Enum.member?(restrictions, "All chat"), do: {"danger", Teiserver.Moderation.ActionLib.action_icon("Mute")}),
+      (if Enum.member?(restrictions, "Warning reminder"), do: {"warning", Teiserver.Moderation.ActionLib.action_icon("Warn")}),
+      (if Enum.member?(user_data["roles"], "Trusted"), do: {"", "fa-solid fa-check"}),
+      (if not Enum.member?(user_data["roles"], "Verified"), do: {"info", "fa-solid fa-square-question"}),
+    ]
+    |> Enum.reject(&(&1 == nil))
+
+    status_icon_list(%{icons: icons})
   end
 
-  defp _status_icon(%{icon: :smurf} = assigns) do
+  defp status_icon_list(assigns) do
     ~H"""
-      <i class={"fa-fw text-primary #{Teiserver.Moderation.ActionLib.action_icon("Smurf")}"}></i>
-    """
-  end
-
-  defp _status_icon(%{icon: :banned} = assigns) do
-    ~H"""
-      <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}></i>
-    """
-  end
-
-  defp _status_icon(%{icon: :muted} = assigns) do
-    ~H"""
-      <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Mute")}"}></i>
-    """
-  end
-
-  defp _status_icon(%{icon: :warned} = assigns) do
-    ~H"""
-      <i class={"fa-fw text-warning #{Teiserver.Moderation.ActionLib.action_icon("Warn")}"}></i>
-    """
-  end
-
-  defp _status_icon(%{icon: :unverified} = assigns) do
-    ~H"""
-      <i class={"fa-fw text-info fa-solid fa-square-question"}></i>
-    """
-  end
-
-  defp _status_icon(%{icon: nil} = assigns) do
-    ~H"""
-      &nbsp;
+    <div :for={{colour, icon} <- @icons} class="d-inline-block">
+      <i class={"fa-fw text-#{colour} #{icon}"}></i>
+    </div>
     """
   end
 end
