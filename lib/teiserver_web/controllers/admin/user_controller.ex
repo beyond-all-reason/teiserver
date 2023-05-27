@@ -723,10 +723,13 @@ defmodule TeiserverWeb.Admin.UserController do
       {true, _} ->
          case Account.script_update_user(user, %{"smurf_of_id" => nil}) do
           {:ok, user} ->
-            Account.update_user_roles(user)
+            add_audit_log(conn, "Moderation:Cancel smurf mark", %{
+              smurf_userid: user.id,
+              origin_id: user.smurf_of_id
+            })
 
             conn
-            |> put_flash(:info, "User updated successfully.")
+            |> put_flash(:info, "Smurf link broken.")
             |> redirect(to: ~p"/teiserver/admin/user/#{user.id}")
 
           {:error, %Ecto.Changeset{} = changeset} ->
