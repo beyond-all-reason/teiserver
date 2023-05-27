@@ -313,7 +313,7 @@ defmodule Teiserver.Account.UserLib do
     field = "last_login"
 
     from users in query,
-      order_by: [asc: fragment("? -> ?", users.data, ^field)]
+      order_by: [desc: fragment("? -> ?", users.data, ^field)]
   end
 
   def order_by(query, {:data, field, :asc}) do
