@@ -13,7 +13,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, "Server") do %>
+  <%= if allow?(@current_user, "Admin") do %>
     <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Telemetry.ServerDayLogLib.icon(),
@@ -23,7 +23,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, "Server") do %>
+  <%= if allow?(@current_user, "Admin") do %>
     <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Battle.MatchLib.icon(),
@@ -43,7 +43,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, "Server") do %>
+  <%= if allow?(@current_user, "Engine") do %>
     <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Telemetry.InfologLib.icon(),

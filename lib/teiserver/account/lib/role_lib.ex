@@ -4,7 +4,6 @@ defmodule Teiserver.Account.RoleLib do
   """
 
   # If Role A contains Role B, Role B needs to be listed first
-  @complete_staff_role_list ~w(Contributor Engine Mapping Infrastructure)
   @raw_role_data [
     # Global
     %{name: "Default", colour: "#666666", icon: "fa-solid fa-user", contains: ~w(), badge: false},
@@ -19,16 +18,24 @@ defmodule Teiserver.Account.RoleLib do
     %{name: "Bot", colour: "#777777", icon: "fa-solid fa-user-robot", contains: ~w()},
     %{name: "Verified", colour: "#66AA66", icon: "fa-duotone fa-check", contains: ~w(), badge: false},
 
-    # Staff
-    %{name: "Tester", colour: "#00AAAA", icon: "fa-duotone fa-vial", contains: ~w()},
-    %{name: "GDT", colour: "#AA0000", icon: "fa-duotone fa-pen-ruler", contains: ~w()},
+    # Privileged
     %{name: "Contributor", colour: "#00AA66", icon: "fa-duotone fa-code-commit", contains: ~w(Trusted)},
+    %{name: "VIP", colour: "#AA8833", icon: "fa-duotone fa-sparkles", contains: ~w()},
+    %{name: "Streamer", colour: "#660066", icon: "fa-brands fa-twitch", contains: ~w()},
+    %{name: "Tournament", colour: "#0000AA", icon: "fa-duotone fa-trophy", contains: ~w()},
+    %{name: "Caster", colour: "#660066", icon: "fa-duotone fa-microphone-lines", contains: ~w(Streamer Tournament)},
+    %{name: "Donor", colour: "#0066AA", icon: "fa-duotone fa-euro", contains: ~w()},
 
-    %{name: "Engine", colour: "#008800", icon: "fa-duotone fa-engine", contains: ~w(Contributor)},
-    %{name: "Mapping", colour: "#008800", icon: "fa-duotone fa-map", contains: ~w(Contributor)},
+    # Sensitive staff
+    %{name: "Core", colour: "#008800", icon: "fa-duotone fa-code-branch", contains: ~w(Contributor)},
+    %{name: "Engine", colour: "#008800", icon: "fa-duotone fa-engine", contains: ~w(Core)},
+    %{name: "Mapping", colour: "#008800", icon: "fa-duotone fa-map", contains: ~w(Core)},
+    %{name: "Gameplay", colour: "#AA0000", icon: "fa-duotone fa-pen-ruler", contains: ~w(Core)},
     %{name: "Infrastructure", colour: "#008800", icon: "fa-duotone fa-server", contains: ~w(Contributor)},
-
-    %{name: "Core", colour: "#008800", icon: "fa-duotone fa-code-branch", contains: @complete_staff_role_list},
+    %{name: "ServerData", colour: "#008800", icon: "fa-duotone fa-server", contains: ~w(Core)},
+    %{name: "MatchData", colour: "#008800", icon: "fa-duotone fa-server", contains: ~w(Core)},
+    %{name: "Telemetry", colour: "#008800", icon: "fa-duotone fa-server", contains: ~w(Core)},
+    %{name: "Tester", colour: "#00AAAA", icon: "fa-duotone fa-vial", contains: ~w(Core)},
 
     # Authority
     %{name: "Overwatch", colour: "#AA7733", icon: "fa-duotone fa-clipboard-list-check", contains: ~w()},
@@ -36,13 +43,6 @@ defmodule Teiserver.Account.RoleLib do
     %{name: "Moderator", colour: "#FFAA00", icon: "fa-duotone fa-gavel", contains: ~w(Reviewer)},
     %{name: "Admin", colour: "#204A88", icon: "fa-solid fa-user-tie", contains: ~w(Moderator Core)},
     %{name: "Server", colour: "#AA2088", icon: "fa-solid fa-user-gear", contains: ~w(Admin)},
-
-    # Privileged
-    %{name: "VIP", colour: "#AA8833", icon: "fa-duotone fa-sparkles", contains: ~w()},
-    %{name: "Streamer", colour: "#0066AA", icon: "fa-brands fa-twitch", contains: ~w()},
-    %{name: "Tournament", colour: "#0000AA", icon: "fa-duotone fa-trophy", contains: ~w()},
-    %{name: "Caster", colour: "#660066", icon: "fa-duotone fa-microphone-lines", contains: ~w(Streamer Tournament)},
-    %{name: "Donor", colour: "#0066AA", icon: "fa-duotone fa-euro", contains: ~w()},
   ]
 
   @role_data @raw_role_data
@@ -93,12 +93,12 @@ defmodule Teiserver.Account.RoleLib do
 
   @spec staff_roles :: [String.t()]
   def staff_roles() do
-    ~w(Core Contributor GDT Tester) ++ ~w(Engine Mapping Infrastructure)
+    ~w(Core Engine Mapping Gameplay Infrastructure ServerData MatchData Telemetry Tester)
   end
 
   @spec privileged_roles :: [String.t()]
   def privileged_roles() do
-    ~w(VIP Caster Donor Tournament Trusted)
+    ~w(Contributor VIP Caster Donor Tournament Trusted)
   end
 
   @spec property_roles :: [String.t()]

@@ -90,7 +90,7 @@
       </div>
     <% end %>
 
-    <%= if allow?(@conn, "Moderator") do %>
+    <%= if allow?(@conn, "Admin") do %>
       <div class="col">
         <h5>Staff</h5>
         <%= for r <- @staff_roles do %>
