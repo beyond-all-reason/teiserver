@@ -287,6 +287,7 @@ defmodule TeiserverWeb.Admin.UserController do
       {true, _} ->
         case Account.update_user(user, user_params) do
           {:ok, user} ->
+            Account.decache_user(user.id)
             Account.update_user_roles(user)
 
             conn
