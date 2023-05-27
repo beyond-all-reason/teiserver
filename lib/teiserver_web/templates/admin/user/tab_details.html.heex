@@ -61,6 +61,22 @@
       ) %>
     <% end %>
   </div>
+
+  <%= if allow?(@conn, "Server") do %>
+    <div class="col-md-12">
+      <%= central_component("detail_line",
+        label: "Roles",
+        value: Enum.join(@user.roles || [], ", "),
+        width: 200
+      ) %>
+
+      <%= central_component("detail_line",
+        label: "Permissions",
+        value: Enum.join(@user.permissions, ", "),
+        width: 200
+      ) %>
+    </div>
+  <% end %>
 </div>
 
 <%= if allow?(@conn, "Server") do %>

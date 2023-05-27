@@ -273,15 +273,6 @@ defmodule TeiserverWeb.Admin.UserController do
       |> List.flatten
       |> Enum.uniq
 
-    IO.puts ""
-    IO.inspect user_params
-    IO.puts ""
-
-    IO.puts ""
-    # IO.inspect user_roles
-    IO.inspect changeable_roles
-    IO.puts ""
-
     data =
       Map.merge(user.data || %{}, %{
         "bot" => user_params["bot"] == "true",
@@ -292,7 +283,8 @@ defmodule TeiserverWeb.Admin.UserController do
 
     user_params = Map.merge(user_params, %{
       "data" => data,
-      "permissions" => permissions
+      "permissions" => permissions,
+      "roles" => new_roles
     })
 
     case Central.Account.UserLib.has_access(user, conn) do

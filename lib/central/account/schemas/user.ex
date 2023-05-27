@@ -49,13 +49,13 @@ defmodule Central.Account.User do
     attrs =
       attrs
       |> remove_whitespace([:email])
-      |> uniq_lists([:permissions])
+      |> uniq_lists(~w(permissions roles)a)
 
     if attrs["password"] == "" do
       user
       |> cast(
         attrs,
-        [:name, :email, :icon, :colour, :permissions, :data] ++ @extra_fields
+        ~w(name email icon colour data roles permissions restrictions restricted_until shadowbanned last_login discord_id steam_id smurf_of_id clan_id behaviour_score trust_score)a
       )
       |> validate_required([:name, :email, :permissions])
       |> unique_constraint(:email)
@@ -63,16 +63,7 @@ defmodule Central.Account.User do
       user
       |> cast(
         attrs,
-        [
-          :name,
-          :email,
-          :password,
-          :icon,
-          :colour,
-          :permissions,
-          :data,
-          :smurf_of_id
-        ] ++ @extra_fields
+        ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login discord_id steam_id smurf_of_id clan_id behaviour_score trust_score)a
       )
       |> validate_required([:name, :email, :password, :permissions])
       |> unique_constraint(:email)
@@ -84,21 +75,12 @@ defmodule Central.Account.User do
     attrs =
       attrs
       |> remove_whitespace([:email])
-      |> uniq_lists([:permissions])
+      |> uniq_lists(~w(permissions roles)a)
 
     user
     |> cast(
       attrs,
-      [
-        :name,
-        :email,
-        :password,
-        :icon,
-        :colour,
-        :permissions,
-        :data,
-        :smurf_of_id
-      ] ++ @extra_fields
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login discord_id steam_id smurf_of_id clan_id behaviour_score trust_score)a
     )
     |> validate_required([:name, :email, :permissions])
     |> unique_constraint(:email)
