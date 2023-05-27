@@ -128,7 +128,7 @@
 
                 <td>
                   <a
-                    href={Routes.ts_admin_user_path(@conn, :smurf_search, user.id)}
+                    href={~p"/teiserver/admin/users/smurf_search/#{user.id}"}
                     class="btn btn-secondary btn-sm"
                   >
                     Show

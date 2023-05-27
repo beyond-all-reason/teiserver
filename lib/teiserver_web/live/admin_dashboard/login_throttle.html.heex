@@ -20,7 +20,7 @@
     <h3>Queues</h3>
     <%= if @queues do %>
       <%= for {name, contents} <- @queues do %>
-        <%= name %>: <%= inspect(contents) %><br />
+        <%= name %> (<%= Enum.count(contents) %>): <%= inspect(contents) %><br />
       <% end %>
     <% end %>
   </div>

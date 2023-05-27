@@ -182,22 +182,11 @@ defmodule Teiserver.Account.LoginThrottleServer do
         t < min_recent_age
       end)
 
-    # Cleanup arrivals
-    # FIXME This should be tracking the average queue wait time for people
-    arrival_max_age = System.system_time(:millisecond) - 60_000
-
-    new_arrival_times =
-      state.arrival_times
-      |> Map.filter(fn {_key, last_time} ->
-        last_time > arrival_max_age
-      end)
-
     new_state = %{
       state
       | heartbeats: new_heartbeats,
         queues: new_queues,
-        recent_logins: new_recent_logins,
-        arrival_times: new_arrival_times
+        recent_logins: new_recent_logins
     }
 
     PubSub.broadcast(
@@ -208,8 +197,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
         event: :tick,
         heartbeats: new_heartbeats,
         queues: new_queues,
-        recent_logins: new_recent_logins,
-        arrival_times: new_arrival_times
+        recent_logins: new_recent_logins
       }
     )
 
@@ -328,7 +316,8 @@ defmodule Teiserver.Account.LoginThrottleServer do
         |> List.flatten()
         |> Enum.take(free_spots)
         |> Enum.filter(fn userid ->
-          wait_time = now_ms - state.arrival_times[userid]
+          # If no arrival time, they've probably been here long enough
+          wait_time = now_ms - Map.get(state.arrival_times, userid, 0)
 
           wait_time > @min_wait
         end)
@@ -358,13 +347,16 @@ defmodule Teiserver.Account.LoginThrottleServer do
           send(pid, {:login_accepted, userid})
         end)
 
+        new_arrival_times = Map.drop(state.arrival_times, released_users)
+
         PubSub.broadcast(
           Central.PubSub,
           "teiserver_liveview_login_throttle",
           %{
             channel: "teiserver_liveview_login_throttle",
             event: :released_users,
-            userids: released_users
+            userids: released_users,
+            new_arrival_times: new_arrival_times
           }
         )
 
@@ -377,7 +369,8 @@ defmodule Teiserver.Account.LoginThrottleServer do
           | recent_logins: recent_login_timestamps ++ state.recent_logins,
             remaining_capacity: state.remaining_capacity - 1,
             queues: new_queues,
-            heartbeats: new_heartbeats
+            heartbeats: new_heartbeats,
+            arrival_times: new_arrival_times
         }
       end
     else

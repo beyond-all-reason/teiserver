@@ -194,19 +194,17 @@ defmodule Teiserver.Account.TimeCompareReport do
 
     online_at_same_time =
       pairs
-      |> Enum.filter(fn
+      |> Enum.count(fn
         {@offline, _} -> false
         {_, @offline} -> false
         _ -> true
       end)
-      |> Enum.count()
 
     lobby_spec_at_same_time =
       pairs
-      |> Enum.filter(fn {u1, u2} ->
+      |> Enum.count(fn {u1, u2} ->
         u1 + u2 == @player + @spectator
       end)
-      |> Enum.count()
 
     %{
       count: Enum.count(pairs),
