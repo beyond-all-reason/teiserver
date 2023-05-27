@@ -22,19 +22,27 @@
       </div>
     <% end %>
 
-    <%= if assigns[:user] != nil and allow?(@conn, "admin.user") do %>
-      <div class="col-xl-4 col-lg-4">
-        &nbsp;<br />
+    <div class="col-xl-4 col-lg-4">
+      <%= if assigns[:user].smurf_of_id do %>
+        <%= link(raw("<i class='far fa-fw fa-link-slash'></i> Clear smurf link"),
+          to: ~p"/teiserver/admin/users/cancel_smurf_mark/#{@user.id}",
+          method: :delete,
+          class: "btn btn-outline-warning"
+        ) %>
+      <% end %>
+
+      <%= if assigns[:user] != nil and allow?(@conn, "admin.user") do %>
         <a
           href={Routes.admin_user_path(@conn, :edit, @user.id)}
-          class="btn btn-outline-primary float-end"
+          class="btn btn-outline-primary"
           id="section-menu-new"
         >
           <i class="fa-regular fa-power-off"></i> &nbsp;
           Admin edit
         </a>
-      </div>
-    <% end %>
+        &nbsp;<br />
+      <% end %>
+    </div>
   </div>
 
   <div class="form-group row px-3 py-1">

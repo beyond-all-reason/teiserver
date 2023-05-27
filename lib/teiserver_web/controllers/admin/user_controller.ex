@@ -715,6 +715,31 @@ defmodule TeiserverWeb.Admin.UserController do
     end
   end
 
+  @spec cancel_smurf_mark(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def cancel_smurf_mark(conn, %{"user_id" => id}) do
+    user = Account.get_user!(id)
+
+    case Central.Account.UserLib.has_access(user, conn) do
+      {true, _} ->
+         case Account.script_update_user(user, %{"smurf_of_id" => nil}) do
+          {:ok, user} ->
+            Account.update_user_roles(user)
+
+            conn
+            |> put_flash(:info, "User updated successfully.")
+            |> redirect(to: ~p"/teiserver/admin/user/#{user.id}")
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            render(conn, "edit.html", user: user, changeset: changeset)
+        end
+
+      _ ->
+        conn
+        |> put_flash(:danger, "Unable to access this user")
+        |> redirect(to: ~p"/teiserver/admin/user")
+    end
+  end
+
   @spec smurf_merge_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def smurf_merge_form(conn, %{"from_id" => from_id, "to_id" => to_id}) do
     from_user = Account.get_user!(from_id)
