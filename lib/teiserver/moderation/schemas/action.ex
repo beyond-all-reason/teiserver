@@ -33,11 +33,12 @@ defmodule Teiserver.Moderation.Action do
 
   defp adjust_restrictions(%Ecto.Changeset{} = struct) do
     years = Timex.now() |> Timex.shift(years: 10)
+    inbound_restrictions = Ecto.Changeset.get_field(struct, :restrictions, [])
 
-    new_restrictions = if TimexHelper.greater_than(struct.data.expires, years) and Enum.member?(struct.data.restrictions, "Login") do
-      ["Permanently banned" | struct.data.restrictions] |> Enum.uniq
+    new_restrictions = if TimexHelper.greater_than(struct.data.expires, years) and Enum.member?(inbound_restrictions, "Login") do
+      ["Permanently banned" | inbound_restrictions] |> Enum.uniq
     else
-      (struct.data.restrictions || []) |> List.delete("Permanently banned")
+      inbound_restrictions |> List.delete("Permanently banned")
     end
 
     Ecto.Changeset.put_change(struct, :restrictions, new_restrictions)
