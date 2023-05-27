@@ -37,7 +37,7 @@ defmodule Teiserver.Moderation.Action do
     new_restrictions = if TimexHelper.greater_than(struct.data.expires, years) and Enum.member?(struct.data.restrictions, "Login") do
       ["Permanently banned" | struct.data.restrictions] |> Enum.uniq
     else
-      struct.data.restrictions |> List.delete("Permanently banned")
+      (struct.data.restrictions || []) |> List.delete("Permanently banned")
     end
 
     Ecto.Changeset.put_change(struct, :restrictions, new_restrictions)
