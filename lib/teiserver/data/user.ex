@@ -30,7 +30,7 @@ defmodule Teiserver.User do
 
   # This is the version of keys with the extra fields we're going to be moving from data to the object itself
   # def keys(),
-  #   do: ~w(id name email inserted_at clan_id permissions colour icon behaviour_score trust_score smurf_of_id roles restrictions restricted_until shadowbanned last_login discord_id steam_id)a
+  #   do: ~w(id name email inserted_at clan_id permissions colour icon behaviour_score trust_score smurf_of_id roles restrictions restricted_until shadowbanned last_login discord_id steam_id last_match_id)a
 
   @data_keys [
     :rank,
@@ -141,7 +141,7 @@ defmodule Teiserver.User do
       password: encrypted_password,
       colour: @default_colour,
       icon: @default_icon,
-      permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
+      permissions: [],
       # TODO: Remove springid
       springid: SpringIdServer.get_next_id(),
       behaviour_score: 10_000,

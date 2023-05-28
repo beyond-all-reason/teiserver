@@ -351,7 +351,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
   @spec conclude(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def conclude(conn, %{"id" => id, "comments" => ""}) do
     conn
-    |> put_flash(:info, "Proposal cannot be concluded without comments")
+    |> put_flash(:danger, "Proposal cannot be concluded without comments")
     |> redirect(to: ~p"/moderation/proposal/#{id}")
   end
 
@@ -366,7 +366,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
     case Moderation.update_proposal(proposal, params) do
       {:ok, _proposal} ->
         conn
-        |> put_flash(:info, "Proposal concluded")
+        |> put_flash(:success, "Proposal concluded")
         |> redirect(to: ~p"/moderation/proposal/#{id}")
     end
   end

@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Admin.SiteConfigController do
   plug :add_breadcrumb, name: 'Site config', url: '/config/site'
 
   plug(AssignPlug,
-    site_menu_active: "central_admin",
+    site_menu_active: "teiserver_admin",
     sub_menu_active: "config"
   )
 

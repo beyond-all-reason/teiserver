@@ -73,7 +73,13 @@ defmodule Teiserver.Account.RoleLib do
 
   @spec role_data(String.t()) :: map()
   def role_data(role_name) do
-    Map.get(@role_data, role_name, nil)
+    @role_data[role_name]
+  end
+
+  @spec role_data!(String.t()) :: map()
+  def role_data!(role_name) do
+    r = @role_data[role_name]
+    if r, do: r, else: raise "No role by name #{role_name}"
   end
 
   @spec global_roles :: [String.t()]
@@ -98,12 +104,12 @@ defmodule Teiserver.Account.RoleLib do
 
   @spec privileged_roles :: [String.t()]
   def privileged_roles() do
-    ~w(Contributor VIP Caster Donor Tournament Trusted)
+    ~w(Bot Contributor VIP Caster Donor Tournament)
   end
 
   @spec property_roles :: [String.t()]
   def property_roles() do
-    ~w(Bot Verified Streamer)
+    ~w(Trusted Verified Streamer)
   end
 
   @spec allowed_role_management(String.t()) :: [String.t()]
@@ -112,11 +118,11 @@ defmodule Teiserver.Account.RoleLib do
   end
 
   def allowed_role_management("Admin") do
-    staff_roles() ++ allowed_role_management("Moderator")
+    staff_roles() ++ privileged_roles() ++ allowed_role_management("Moderator")
   end
 
   def allowed_role_management("Moderator") do
-    global_roles() ++ moderation_roles() ++ privileged_roles() ++ property_roles()
+    global_roles() ++ moderation_roles() ++ property_roles()
   end
 
   def allowed_role_management(_) do

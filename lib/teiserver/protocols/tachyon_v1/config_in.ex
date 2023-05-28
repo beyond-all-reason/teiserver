@@ -50,7 +50,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.ConfigIn do
     types =
       Config.get_user_config_types()
       |> Enum.filter(fn {_key, type} ->
-        type.permissions == [] or type.permissions == ["teiserver"]
+        type.permissions == [] or type.permissions == ["account"]
       end)
       |> Enum.map(fn {_key, type} -> type end)
 
@@ -65,7 +65,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.ConfigIn do
       cond do
         type == nil -> false
         type.permissions == [] -> true
-        type.permissions == ["teiserver"] -> true
+        type.permissions == ["account"] -> true
         true -> false
       end
     end)

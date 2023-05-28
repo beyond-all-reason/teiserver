@@ -11,7 +11,7 @@ defmodule Teiserver.TeiserverQuickActions do
           label: "Live lobbies",
           icons: [Teiserver.Battle.LobbyLib.icon()],
           url: ~p"/teiserver/battle/lobbies",
-          permissions: "teiserver"
+          permissions: "account"
         },
 
         # Profile/Account
@@ -19,25 +19,25 @@ defmodule Teiserver.TeiserverQuickActions do
           label: "My profile",
           icons: ["fa-solid fa-user-circle"],
           url: ~p"/teiserver/profile",
-          permissions: "teiserver"
+          permissions: "account"
         },
         %{
           label: "Friends/Mutes/Invites",
           icons: [Teiserver.icon(:relationship)],
           url: ~p"/teiserver/account/relationships",
-          permissions: "teiserver"
+          permissions: "account"
         },
         %{
           label: "Profile appearance",
           icons: ["fa-solid fa-icons"],
           url: ~p"/teiserver/account/customisation_form",
-          permissions: "teiserver"
+          permissions: "account"
         },
         %{
           label: "Teiserver preferences",
           icons: [Teiserver.Config.UserConfigLib.icon()],
           url: ~p"/teiserver/account/preferences",
-          permissions: "teiserver"
+          permissions: "account"
         },
 
         # Your stuff but not part of profile/account

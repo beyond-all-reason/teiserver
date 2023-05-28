@@ -61,6 +61,7 @@ defmodule Central.Account.AuthLib do
 
   # If you don't need permissions then lets not bother checking
   @spec allow?(Map.t() | Plug.Conn.t() | [String.t()], String.t() | [String.t()]) :: boolean
+  def allow?(nil, []), do: false
   def allow?(_, nil), do: true
   def allow?(_, ""), do: true
   def allow?(_, []), do: true
@@ -94,8 +95,12 @@ defmodule Central.Account.AuthLib do
     )
   end
 
+  def allow?(_, "account") do
+    true
+  end
+
   def allow?(permissions_held, permission_required) do
-    # Logger.debug("Permission test, has: #{Kernel.inspect permissions_held}, needs: #{Kernel.inspect permission_required}")
+    Logger.debug("Permission test, has: #{Kernel.inspect permissions_held}, needs: #{Kernel.inspect permission_required}")
 
     cond do
       # Enum.member?(Application.get_env(:central, CentralWeb)[:universal_permissions], permission_required) -> true

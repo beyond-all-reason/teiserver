@@ -204,7 +204,7 @@ defmodule Central.Account.UserLib do
 
   @spec has_access(integer() | map(), Plug.Conn.t()) :: {boolean, nil | :not_found | :no_access}
   def has_access(target_user_id, conn) when is_integer(target_user_id) do
-    if allow?(conn.permissions, "admin.admin.full") do
+    if allow?(conn.permissions, "Server") do
       {true, nil}
     else
       {false, :no_access}
@@ -220,10 +220,16 @@ defmodule Central.Account.UserLib do
         {true, nil}
 
       # Admin can access anything except Server
-      allow?(conn, "Admin") and allow?(target_user, "Server") ->
+      not allow?(conn, "Server") and allow?(target_user, "Server") ->
         {false, :restricted_user}
 
       allow?(conn, "Admin") ->
+        {true, nil}
+
+      not allow?(conn, "Admin") and allow?(target_user, "Admin") ->
+        {false, :restricted_user}
+
+      allow?(conn, "Moderator") ->
         {true, nil}
 
       # By default, nobody can access other users

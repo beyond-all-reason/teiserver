@@ -63,5 +63,5 @@ defmodule Teiserver.Battle.Match do
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
-  def authorize(_, conn, _), do: allow?(conn, "teiserver")
+  def authorize(_, conn, _), do: allow?(conn, "account")
 end

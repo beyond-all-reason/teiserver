@@ -110,27 +110,27 @@
           ) %>
         <% end %>
       </div>
+
+      <div class="col">
+        <h5>Privileged</h5>
+        <%= for r <- @privileged_roles do %>
+          <% style = @role_styling_map[r]
+
+          label =
+            if style do
+              raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> #{r}")
+            else
+              r
+            end %>
+          <%= central_component("checkbox",
+            id: "user_#{r}",
+            name: "user[#{r}]",
+            label: label,
+            checked: r in (@changeset.data.data["roles"] || [])
+          ) %>
+        <% end %>
+      </div>
     <% end %>
-
-    <div class="col">
-      <h5>Privileged</h5>
-      <%= for r <- @privileged_roles do %>
-        <% style = @role_styling_map[r]
-
-        label =
-          if style do
-            raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> #{r}")
-          else
-            r
-          end %>
-        <%= central_component("checkbox",
-          id: "user_#{r}",
-          name: "user[#{r}]",
-          label: label,
-          checked: r in (@changeset.data.data["roles"] || [])
-        ) %>
-      <% end %>
-    </div>
 
     <div class="col">
       <h5>Property</h5>

@@ -6,7 +6,7 @@ defmodule Teiserver.Account.RecordsReport do
   def icon(), do: "fa-solid fa-trophy"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Moderator"
+  def permissions(), do: "Admin"
 
   @top_count 3
 

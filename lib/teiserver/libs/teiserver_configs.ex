@@ -121,7 +121,7 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Teiserver account",
       type: "boolean",
       visible: true,
-      permissions: ["teiserver"],
+      permissions: ["account"],
       description:
         "When checked the flag associated with your IP will be displayed. If unchecked your flag will be blank. This will take effect next time you login with your client.",
       default: true
@@ -132,7 +132,7 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Teiserver account",
       type: "boolean",
       visible: true,
-      permissions: ["teiserver"],
+      permissions: ["account"],
       description:
         "When checked you will receive discord messages from the Teiserver bridge bot for various in-lobby events. When disabled you will receive no notifications even if the others are enabled.",
       default: true
@@ -143,7 +143,7 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Teiserver account",
       type: "boolean",
       visible: true,
-      permissions: ["teiserver"],
+      permissions: ["account"],
       description: "You will be messaged when you move from being in the queue to being a player",
       default: true
     })
@@ -153,7 +153,7 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Teiserver account",
       type: "boolean",
       visible: true,
-      permissions: ["teiserver"],
+      permissions: ["account"],
       description: "You will be messaged when a lobby you are a player in starts",
       default: true
     })

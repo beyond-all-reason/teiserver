@@ -410,6 +410,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
     cond do
       User.is_bot?(user) -> :instant
+      User.has_all_roles?(user, ["Server"]) -> :instant
       User.has_all_roles?(user, ["Moderator"]) -> :moderator
       User.has_all_roles?(user, ["Contributor"]) -> :contributor
       User.has_all_roles?(user, ["VIP"]) -> :vip
