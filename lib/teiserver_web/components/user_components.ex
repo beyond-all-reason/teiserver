@@ -17,7 +17,7 @@ defmodule TeiserverWeb.UserComponents do
 
     icons = [
       (if assigns.user.smurf_of_id != nil, do: {"primary", Teiserver.Moderation.ActionLib.action_icon("Smurf")}),
-      (if Enum.member?(user_data["roles"], "Smurfer"), do: {"primary2", "fa-solid fa-split"}),
+      (if Enum.member?(user_data["roles"], "Smurfer"), do: {"info2", "fa-solid fa-split"}),
 
       (if ban_status == "banned", do: {"danger2", Teiserver.Moderation.ActionLib.action_icon("Ban")}),
       (if ban_status == "suspended", do: {"danger", Teiserver.Moderation.ActionLib.action_icon("Suspend")}),
