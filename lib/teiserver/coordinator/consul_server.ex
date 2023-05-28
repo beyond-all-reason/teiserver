@@ -20,6 +20,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? explain newlobby jazlobby tournament)
   @boss_commands ~w(gatekeeper welcome-message meme reset-approval rename resetplaylevels minplaylevel maxplaylevel setplaylevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
+  @vip_boss_commands ~w(rotate)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
 
   @splitter "########################################"
@@ -953,9 +954,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec allow_command?(Map.t(), Map.t()) :: boolean()
   defp allow_command?(%{senderid: senderid} = cmd, state) do
     client = Client.get_client_by_id(senderid)
+    user = Account.get_user_by_id(senderid)
 
     is_host = senderid == state.host_id
     is_boss = Enum.member?(state.host_bosses, senderid)
+    is_vip = Enum.member?(user.roles, "VIP")
 
     cond do
       client == nil ->
@@ -972,6 +975,25 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       Enum.member?(@boss_commands, cmd.command) and (is_host or is_boss) ->
         true
+
+      Enum.member?(@vip_boss_commands, cmd.command) and (is_vip and is_boss) ->
+        true
+
+      Enum.member?(@host_commands, cmd.command) and not (is_vip and is_boss) ->
+        msg = if is_vip do
+          "You also need to be boss to call '#{cmd.command}'"
+        else
+          "No listed command of '#{cmd.command}'"
+        end
+
+        LobbyChat.sayprivateex(
+          state.coordinator_id,
+          cmd.senderid,
+          msg,
+          state.lobby_id
+        )
+
+        false
 
       Enum.member?(@host_commands, cmd.command) and not is_host ->
         LobbyChat.sayprivateex(
