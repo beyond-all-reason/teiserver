@@ -1,9 +1,10 @@
 <% bsname = view_colour() %>
 
-<table class="table" style="max-width: 600px;">
+<table class="table" style="max-width: 900px;">
   <thead>
     <tr>
       <th>Name</th>
+      <th>Last login</th>
       <th>&nbsp;</th>
     </tr>
   </thead>
@@ -13,6 +14,7 @@
       <%= if user do %>
         <tr>
           <td><%= user.name %></td>
+          <td><%= (user.last_login * 60) |> Timex.from_unix |> date_to_str %></td>
           <td>
             <%= link(raw("<i class='fas fa-fw fa-user-slash'></i> Remove"),
               to: Routes.ts_account_relationships_path(@conn, :delete, "friend", userid),

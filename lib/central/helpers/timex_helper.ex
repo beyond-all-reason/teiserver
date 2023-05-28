@@ -28,7 +28,7 @@ defmodule Central.Helpers.TimexHelper do
   def date_to_str(the_time, format: :dmy_text, tz: tz), do: dmy_text(the_time, tz)
 
   def date_to_str(the_time, args) do
-    format = args[:format] || :dmy
+    format = args[:format] || :ymd
     now = args[:now] || Timex.now()
     is_past = Timex.compare(now, the_time) == 1
 
