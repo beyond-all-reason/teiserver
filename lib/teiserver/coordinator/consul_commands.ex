@@ -1124,6 +1124,17 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
+  #################### VIP Streamer
+  def handle_command(%{command: "rotate", remaining: _remaining, senderid: senderid}, state) do
+    Lobby.sayprivateex(
+      state.coordinator_id,
+      senderid,
+      "Rotate is currently not implemented",
+      state.lobby_id
+    )
+    state
+  end
+
   #################### Host and Moderator
   def handle_command(%{command: "balancemode", remaining: remaining, senderid: senderid}, state) do
     new_mode =

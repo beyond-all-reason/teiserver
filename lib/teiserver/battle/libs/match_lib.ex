@@ -43,7 +43,7 @@ defmodule Teiserver.Battle.MatchLib do
     end
   end
 
-  @spec match_from_lobby(T.lobby_id()) :: {map(), list()} | nil
+  @spec match_from_lobby(T.lobby_id()) :: {map(), [map()]} | nil
   def match_from_lobby(lobby_id) do
     %{
       lobby: lobby,

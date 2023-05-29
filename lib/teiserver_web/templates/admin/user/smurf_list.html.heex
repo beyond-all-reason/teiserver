@@ -121,7 +121,7 @@ is_admin = allow?(@conn, "teiserver.admin.account") %>
                   <th>Registered</th>
 
                   <%= if is_admin do %>
-                    <th colspan="2">&nbsp;</th>
+                    <th colspan="3">&nbsp;</th>
                   <% else %>
                     <th>&nbsp;</th>
                   <% end %>
@@ -245,9 +245,18 @@ is_admin = allow?(@conn, "teiserver.admin.account") %>
                       </a>
                     </td>
 
+                    <td>
+                      <a
+                        href={~p"/teiserver/reports/show/time_compare?report[account_user1]=%23#{@user.id}&report[account_user2]=%23#{user.id}"}
+                        class="btn btn-secondary btn-sm"
+                      >
+                        Compare
+                      </a>
+                    </td>
+
                     <%= if is_admin and user.smurf_of_id == nil and @user.smurf_of_id == nil do %>
                       <td>
-                        <%= link(raw("<i class='far fa-fw fa-link'></i> Smurf of #{user.name}"),
+                        <%= link(raw("<i class='far fa-fw fa-link'></i> Smurf link"),
                           to: ~p"/teiserver/admin/users/mark_as_smurf_of/#{@user.id}/#{user.id}",
                           method: :put,
                           # data: [confirm: "Are you sure?"],

@@ -388,6 +388,8 @@ defmodule Central.Helpers.TimexHelper do
   @doc """
   Wraps Timex.compare, returns true if a > b
   """
+  def greater_than(nil, _), do: false
+  def greater_than(_, nil), do: true
   def greater_than(a, b) do
     Timex.compare(a, b) == 1
   end
@@ -395,6 +397,8 @@ defmodule Central.Helpers.TimexHelper do
   @doc """
   Wraps Timex.compare, returns true if a < b
   """
+  def less_than(nil, _), do: true
+  def less_than(_, nil), do: false
   def less_than(a, b) do
     Timex.compare(a, b) == -1
   end

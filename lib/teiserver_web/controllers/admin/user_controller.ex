@@ -287,6 +287,7 @@ defmodule TeiserverWeb.Admin.UserController do
       {true, _} ->
         case Account.update_user(user, user_params) do
           {:ok, user} ->
+            Account.decache_user(user.id)
             Account.update_user_roles(user)
 
             conn
@@ -687,6 +688,9 @@ defmodule TeiserverWeb.Admin.UserController do
           select: [:id]
         )
         |> Enum.count
+
+        # And give the origin the smurfer role
+        Teiserver.User.add_roles(origin_user.id, ["Smurfer"])
         Account.update_user_stat(origin_user.id, %{"smurf_count" => smurf_count})
 
         Teiserver.Client.disconnect(smurf_user.id, "Marked as smurf")
@@ -698,6 +702,47 @@ defmodule TeiserverWeb.Admin.UserController do
       _ ->
         conn
         |> put_flash(:danger, "Unable to access at least one of these users")
+        |> redirect(to: ~p"/teiserver/admin/user")
+    end
+  end
+
+  @spec cancel_smurf_mark(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def cancel_smurf_mark(conn, %{"user_id" => id}) do
+    user = Account.get_user!(id)
+    origin_user_id = user.smurf_of_id
+
+    case Central.Account.UserLib.has_access(user, conn) do
+      {true, _} ->
+         case Account.script_update_user(user, %{"smurf_of_id" => nil}) do
+          {:ok, user} ->
+            Account.update_user_roles(user)
+
+            # Now we update stats for the origin
+            smurf_count = Account.list_users(
+              search: [
+                smurf_of: origin_user_id
+              ],
+              select: [:id]
+            )
+            |> Enum.count
+
+            # And give the origin the smurfer role
+            if smurf_count == 0 do
+              Teiserver.User.remove_roles(origin_user_id, ["Smurfer"])
+            end
+            Account.update_user_stat(origin_user_id, %{"smurf_count" => smurf_count})
+
+            conn
+            |> put_flash(:info, "User updated successfully.")
+            |> redirect(to: ~p"/teiserver/admin/user/#{user.id}")
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            render(conn, "edit.html", user: user, changeset: changeset)
+        end
+
+      _ ->
+        conn
+        |> put_flash(:danger, "Unable to access this user")
         |> redirect(to: ~p"/teiserver/admin/user")
     end
   end

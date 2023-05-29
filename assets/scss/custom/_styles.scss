@@ -4,6 +4,11 @@
   margin: 0;
 }
 
+html, body {
+  min-height: 100%;
+  height: 100%;
+}
+
 body {
   overflow-x: hidden;
   margin: 0;
@@ -130,21 +135,21 @@ body {
 
 .menu-card a, .menu-card span {
   /*border: 1px solid #000;*/
-  
+
   display: block;
   text-align: center;
   padding-top: 20px;
   padding-bottom: 20px;
-  
+
   font-size: 1.6em;
   line-height: 2em;
-  
+
   color: $menu-card-link-colour;
-  
+
   text-decoration: none;
-  
+
   /*text-shadow: 2px 2px 2px rgba(0,0,0,0.05);*/
-  
+
   -webkit-transition: all 200ms linear;
   -moz-transition: all 200ms linear;
   -o-transition: all 200ms linear;
@@ -154,7 +159,7 @@ body {
 
 .menu-card a:hover, .menu-card span:hover {
   color: $menu-card-link-colour-hover;
-  
+
   cursor: pointer;
   text-shadow: 2px 2px 2px $shadow;
 }
@@ -176,7 +181,7 @@ body {
 
 .sub-menu-icon a {
   margin: 0 5px;
-  
+
   margin: 0;
   padding: 0;
 }
@@ -185,9 +190,9 @@ body {
   margin: 0;
   padding: 10px 0 5px 0;
   color: $sub-menu-icon-colour;
-  
+
   border-bottom: 5px solid $sub-menu-icon-border-colour;
-  
+
   -webkit-transition: all 200ms linear;
   -moz-transition: all 200ms linear;
   -o-transition: all 200ms linear;
@@ -207,11 +212,11 @@ body {
 .block-link {
   text-align: center;
   display: inline-block;
-  
+
   /*background-color: #AAA;*/
   width: 100%;
   /*height: 100%;*/
-  
+
   -webkit-transition: all 300ms linear;
   -moz-transition: all 300ms linear;
   -o-transition: all 300ms linear;
@@ -252,7 +257,7 @@ body {
   & {
     color: $button-outline-colour;
   }
-  
+
   &:hover {
     color: $button-outline-colour-hover;
     background-color: $color;
