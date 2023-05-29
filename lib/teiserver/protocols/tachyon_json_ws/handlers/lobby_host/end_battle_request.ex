@@ -7,7 +7,7 @@ defmodule Teiserver.Tachyon.Handlers.LobbyHost.EndBattleRequest do
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do
     %{
-      "lobby_host/create/request" => &execute/3
+      "lobbyHost/create/request" => &execute/3
     }
   end
 
@@ -16,6 +16,6 @@ defmodule Teiserver.Tachyon.Handlers.LobbyHost.EndBattleRequest do
   def execute(conn, _object, _meta) do
     response = %{}
 
-    {"lobby_host/create/request", response, conn}
+    {"lobbyHost/create/request", response, conn}
   end
 end

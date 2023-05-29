@@ -8,11 +8,7 @@ defmodule Teiserver.Tachyon.Responses.LobbyHost.CreateResponse do
 
   @spec execute({:error, String.t()} | T.lobby()) :: {T.tachyon_command(), T.tachyon_object()}
   def execute({:error, reason}) do
-    {"system/error/response",
-     %{
-       "command" => "lobby_host/create/request",
-       "reason" => reason
-     }}
+    {"lobbyHost/create/request", :error, reason}
   end
 
   def execute({:ok, lobby}) do
@@ -24,6 +20,6 @@ defmodule Teiserver.Tachyon.Responses.LobbyHost.CreateResponse do
     PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby.id}")
     PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby.id}")
 
-    {"lobby_host/create/response", lobby}
+    {"lobbyHost/create/response", :success, lobby}
   end
 end

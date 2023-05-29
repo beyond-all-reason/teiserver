@@ -107,6 +107,14 @@ defmodule Teiserver.Tachyon.TachyonSocket do
           "data" => data
         }
 
+      {command, :error, reason} ->
+        %{
+          "command" => command,
+          "status" => "failure",
+          "reason" => reason
+        }
+
+      # These two predate the latest error response method, remove them if no longer needed
       {command, {:error, reason}, nil} ->
         %{
           "command" => command,
