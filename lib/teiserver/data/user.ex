@@ -745,6 +745,19 @@ defmodule Teiserver.User do
     update_user(%{user | roles: new_roles}, persist: true)
   end
 
+  @spec remove_roles(T.user() | T.userid(), [String.t()]) :: nil | T.user()
+  def remove_roles(nil, _), do: nil
+  def remove_roles(_, []), do: nil
+
+  def remove_roles(userid, roles) when is_integer(userid),
+    do: remove_roles(get_user_by_id(userid), roles)
+
+  def remove_roles(user, removed_roles) do
+    new_roles = user.roles
+    |> Enum.reject(fn r -> Enum.member?(removed_roles, r) end)
+    update_user(%{user | roles: new_roles}, persist: true)
+  end
+
   @spec create_token(Central.Account.User.t()) :: String.t()
   def create_token(user) do
     {:ok, jwt, _} = Guardian.encode_and_sign(user)

@@ -6,8 +6,9 @@ defmodule Teiserver.Battle do
   import Ecto.Query, warn: false
   alias Central.Helpers.QueryHelpers
   alias Central.Repo
-  alias Teiserver.{Telemetry, Coordinator}
+  alias Teiserver.{Account, Telemetry, Coordinator}
   alias Teiserver.Battle.Lobby
+  alias Teiserver.Battle.{MatchMembership, MatchMembershipLib}
   alias Phoenix.PubSub
 
   alias Teiserver.Battle.Match
@@ -280,6 +281,17 @@ defmodule Teiserver.Battle do
 
     case MatchLib.match_from_lobby(lobby_id) do
       {match_params, members} ->
+        # We want to ensure any existing memberships for this match are removed
+        member_ids = Enum.map(members, fn %{user_id: user_id} -> user_id end)
+
+        # Delete existing memberships for this match
+        MatchMembershipLib.get_match_memberships()
+          |> MatchMembershipLib.search([
+            match_id: empty_match.id,
+            user_id_in: member_ids
+          ])
+          |> Repo.delete_all
+
         case update_match(empty_match, match_params) do
           {:ok, match} ->
             members
@@ -303,9 +315,12 @@ defmodule Teiserver.Battle do
                   })
                 end
 
+              Account.update_user_stat(m.user_id, %{"last_match_id" => match.id})
+
               if existing_membership == nil do
                 create_match_membership(params)
               else
+                Logger.error("Found existing match membership for a user despite deleting them")
                 update_match_membership(existing_membership, params)
               end
             end)
@@ -475,9 +490,6 @@ defmodule Teiserver.Battle do
         MatchMonitorServer.do_start()
     end
   end
-
-  alias Teiserver.Battle.MatchMembership
-  alias Teiserver.Battle.MatchMembershipLib
 
   def list_match_memberships(args) do
     MatchMembershipLib.get_match_memberships()
