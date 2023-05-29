@@ -5,10 +5,6 @@ defmodule Central.Account.User do
 
   alias Argon2
 
-  # import Central.Account.AuthLib, only: [allow?: 2]
-
-  @extra_fields ~w(clan_id behaviour_score trust_score)a
-
   schema "account_users" do
     field :name, :string
     field :email, :string
@@ -111,7 +107,7 @@ defmodule Central.Account.User do
       |> remove_whitespace([:email])
 
     user
-    |> cast(attrs, [:name, :email, :icon, :colour] ++ @extra_fields)
+    |> cast(attrs, ~w(name email icon colour clan_id behaviour_score trust_score)a)
     |> validate_required([:name, :email])
     |> unique_constraint(:email)
   end
@@ -122,7 +118,7 @@ defmodule Central.Account.User do
       |> remove_whitespace([:email])
 
     user
-    |> cast(attrs, [:name, :email, :icon, :colour, :data] ++ @extra_fields)
+    |> cast(attrs, ~w(name email icon colour data clan_id behaviour_score trust_score)a)
     |> validate_required([:name, :email])
     |> unique_constraint(:email)
   end
