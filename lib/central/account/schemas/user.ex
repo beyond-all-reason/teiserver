@@ -36,7 +36,6 @@ defmodule Central.Account.User do
     # Extra user.ex relations go here
     belongs_to :clan, Teiserver.Clans.Clan
     belongs_to :smurf_of, Central.Account.User
-    belongs_to :last_match, Teiserver.Battle.Match
 
     has_one :user_stat, Teiserver.Account.UserStat
 
@@ -57,7 +56,7 @@ defmodule Central.Account.User do
       user
       |> cast(
         attrs,
-        ~w(name email icon colour data roles permissions restrictions restricted_until shadowbanned last_login discord_id steam_id smurf_of_id clan_id behaviour_score trust_score last_match_id)a
+        ~w(name email icon colour data roles permissions restrictions restricted_until shadowbanned last_login discord_id steam_id smurf_of_id clan_id behaviour_score trust_score)a
       )
       |> validate_required([:name, :email, :permissions])
       |> unique_constraint(:email)
@@ -65,7 +64,7 @@ defmodule Central.Account.User do
       user
       |> cast(
         attrs,
-        ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login discord_id steam_id smurf_of_id clan_id behaviour_score trust_score last_match_id)a
+        ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login discord_id steam_id smurf_of_id clan_id behaviour_score trust_score)a
       )
       |> validate_required([:name, :email, :password, :permissions])
       |> unique_constraint(:email)
@@ -82,7 +81,7 @@ defmodule Central.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login discord_id steam_id smurf_of_id clan_id behaviour_score trust_score last_match_id)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login discord_id steam_id smurf_of_id clan_id behaviour_score trust_score)a
     )
     |> validate_required([:name, :email, :permissions])
     |> unique_constraint(:email)

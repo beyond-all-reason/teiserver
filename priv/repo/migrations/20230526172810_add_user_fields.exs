@@ -13,8 +13,6 @@ defmodule Central.Repo.Migrations.AddUserFields do
 
       add :discord_id, :integer
       add :steam_id, :integer
-
-      add :last_match_id, references(:teiserver_battle_matches, on_delete: :nothing)
     end
   end
 end
