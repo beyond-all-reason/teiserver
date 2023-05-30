@@ -5,7 +5,7 @@ defmodule Teiserver.Tachyon.Responses.Account.WhoamiResponse do
 
   alias Teiserver.Data.Types, as: T
 
-  @spec execute(T.user(), T.client()) :: {T.tachyon_command(), T.tachyon_object()}
+  @spec execute(T.user(), T.client()) :: {T.tachyon_command(), T.tachyon_status(), T.tachyon_object()}
   def execute(user, client) do
     object = %{
       "id" => user.id,
@@ -14,7 +14,12 @@ defmodule Teiserver.Tachyon.Responses.Account.WhoamiResponse do
       "clan_id" => user.clan_id,
       "icons" => %{},
       "roles" => [],
-      "battle_status" => %{
+      "permissions" => user.permissions,
+      "friends" => user.friends,
+      "friend_requests" => user.friend_requests,
+      "ignores" => user.ignored,
+
+      "status" => %{
         "in_game" => client.in_game,
         "away" => client.away,
         "ready" => client.ready,
@@ -28,13 +33,9 @@ defmodule Teiserver.Tachyon.Responses.Account.WhoamiResponse do
         "party_id" => client.party_id,
         "clan_tag" => client.clan_tag,
         "muted" => client.muted
-      },
-      "permissions" => user.permissions,
-      "friends" => user.friends,
-      "friend_requests" => user.friend_requests,
-      "ignores" => user.ignored
+      }
     }
 
-    {"account/who_am_i/response", object}
+    {"account/whoAmI/response", :success, object}
   end
 end

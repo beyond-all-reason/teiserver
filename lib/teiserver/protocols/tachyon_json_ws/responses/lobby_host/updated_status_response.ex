@@ -9,6 +9,6 @@ defmodule Teiserver.Tachyon.Responses.LobbyHost.UpdatedStatusResponse do
   def execute() do
     object = %{}
 
-    {"lobby_host/updated_status/response", object}
+    {"lobbyHost/updated_status/response", :success, object}
   end
 end

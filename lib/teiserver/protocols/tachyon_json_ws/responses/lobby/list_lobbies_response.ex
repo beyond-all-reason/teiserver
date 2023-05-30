@@ -7,14 +7,10 @@ defmodule Teiserver.Tachyon.Responses.Lobby.ListLobbiesResponse do
 
   @spec execute({:error, String.t()} | T.lobby()) :: {T.tachyon_command(), T.tachyon_object()}
   def execute({:error, reason}) do
-    {"system/error/response",
-     %{
-       "command" => "lobby_host/create/request",
-       "reason" => reason
-     }}
+    {"system/error/response", :error, reason}
   end
 
   def execute(lobbies) do
-    {"lobby/list_lobbies/response", %{"lobbies" => lobbies}}
+    {"lobby/list_lobbies/response", :success, %{"lobbies" => lobbies}}
   end
 end

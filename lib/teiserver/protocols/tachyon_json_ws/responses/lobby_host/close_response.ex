@@ -9,6 +9,6 @@ defmodule Teiserver.Tachyon.Responses.LobbyHost.CloseResponse do
   def execute() do
     object = %{}
 
-    {"lobby_host/close/response", object}
+    {"lobbyHost/close/response", :success, object}
   end
 end

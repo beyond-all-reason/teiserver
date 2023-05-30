@@ -11,6 +11,6 @@ defmodule Teiserver.Tachyon.Responses.System.DisconnectResponse do
       "result" => reason
     }
 
-    {"disconnect", object}
+    {"disconnect", :success, object}
   end
 end

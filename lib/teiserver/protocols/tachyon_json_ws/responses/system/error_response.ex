@@ -7,10 +7,6 @@ defmodule Teiserver.Tachyon.Responses.System.ErrorResponse do
 
   @spec execute(String.t()) :: {T.tachyon_command(), T.tachyon_object()}
   def execute(reason) do
-    object = %{
-      "reason" => reason
-    }
-
-    {"system/error/response", object}
+    {"system/error/response", :error, reason}
   end
 end

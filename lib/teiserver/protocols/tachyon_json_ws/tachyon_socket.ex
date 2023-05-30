@@ -18,20 +18,25 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
   @spec connect(ws_state()) :: {:ok, ws_state()} | :error
   def connect(
-        %{params: %{"token" => token_value, "application_hash" => _, "application_name" => _}} =
-          state
+        %{params: %{
+          "token" => token_value,
+          "application_hash" => _,
+          "application_name" => _,
+          "application_version" => _
+          }} = state
       ) do
     case Account.get_user_token_by_value(token_value) do
       nil ->
-        :error
+        {:error, :no_user}
 
       %{user: _user, expires: _expires} = token ->
         case login(token, state) do
           {:ok, conn} ->
             {:ok, Map.put(state, :conn, conn)}
 
-          _ ->
-            :error
+          v ->
+            Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line} - Login failure with token: #{inspect v}\n")
+            {:error, :failed_login}
         end
 
       value ->
@@ -39,12 +44,16 @@ defmodule Teiserver.Tachyon.TachyonSocket do
           "Error at: #{__ENV__.file}:#{__ENV__.line} - No handler for value of #{inspect(value)}"
         )
 
-        :error
+        {:error, :unexpected_value}
     end
   end
 
-  def connect(_state) do
-    :error
+  def connect(%{params: params}) do
+    missing = ~w(token application_hash application_name application_version)
+      |> Enum.reject(fn key -> Map.has_key?(params, key) end)
+      |> Enum.join(", ")
+
+    {:error, {:missing_params, missing}}
   end
 
   @spec init(ws_state()) :: {:ok, ws_state()}
@@ -55,7 +64,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   end
 
   # Example of a good whoami request
-  # {"command": "account/who_am_i/request", "data": {}}
+  # {"command": "account/whoAmI/request", "data": {}}
 
   # @spec handle_in({atom, any}, ws_state()) :: {:ok, ws_state()} | {:reply, :ok, {:text, String.t()}, ws_state()}
   def handle_in({text, _opts}, %{conn: conn} = state) do
@@ -88,12 +97,39 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     object = wrapper["data"]
     meta = Map.drop(wrapper, ["data"])
 
-    {{command, data}, new_conn} = CommandDispatch.dispatch(conn, object, meta)
+    {dispatch_response, new_conn} = CommandDispatch.dispatch(conn, object, meta)
 
-    response = %{
-      "command" => command,
-      "data" => data
-    }
+    response = case dispatch_response do
+      {command, :success, data} ->
+        %{
+          "command" => command,
+          "status" => "success",
+          "data" => data
+        }
+
+      {command, :error, reason} ->
+        %{
+          "command" => command,
+          "status" => "failure",
+          "reason" => reason
+        }
+
+      # These two predate the latest error response method, remove them if no longer needed
+      {command, {:error, reason}, nil} ->
+        %{
+          "command" => command,
+          "status" => "failure",
+          "reason" => reason
+        }
+
+      {command, {:error, reason}, data} ->
+        %{
+          "command" => command,
+          "status" => "failure",
+          "reason" => reason,
+          "data" => data
+        }
+    end
 
     # Currently not able to validate errors so leaving it out
     # Teiserver.Tachyon.Schema.validate!(response)
@@ -178,4 +214,11 @@ defmodule Teiserver.Tachyon.TachyonSocket do
         Config.get_site_config_cache("teiserver.Tachyon flood rate window size")
     }
   end
+
+  def handle_error(conn, {:missing_params, param}), do: Plug.Conn.send_resp(conn, 400, "Missing parameter(s): #{param}")
+  def handle_error(conn, :no_user), do: Plug.Conn.send_resp(conn, 401, "Unauthorized")
+  def handle_error(conn, :failed_login), do: Plug.Conn.send_resp(conn, 403, "Forbidden")
+  def handle_error(conn, :rate_limit), do: Plug.Conn.send_resp(conn, 429, "Too many requests")
+
+  def handle_error(conn, :unexpecded_value), do: Plug.Conn.send_resp(conn, 500, "Internal server error")
 end

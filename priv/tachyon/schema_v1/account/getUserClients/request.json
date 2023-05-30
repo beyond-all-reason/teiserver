@@ -1,0 +1,12 @@
+{
+    "type": "object",
+    "properties": {
+        "command": {
+            "type": "string",
+            "const": "account/getUserClients/request"
+        }
+    },
+    "required": [
+        "command"
+    ]
+}

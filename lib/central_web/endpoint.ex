@@ -18,7 +18,8 @@ defmodule CentralWeb.Endpoint do
 
   socket("/tachyon", Teiserver.Tachyon.TachyonSocket,
     websocket: [
-      connect_info: [:peer_data, :x_headers, :user_agent]
+      connect_info: [:peer_data, :x_headers, :user_agent],
+      error_handler: {Teiserver.Tachyon.TachyonSocket, :handle_error, []}
     ],
     longpoll: false
   )

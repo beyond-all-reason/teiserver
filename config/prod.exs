@@ -79,7 +79,7 @@ config :central, Teiserver,
   enable_agent_mode: false,
   node_name: "node-name",
   enable_managed_lobbies: true,
-  tachyon_schema_path: "/apps/central/lib/central-0.1.0/priv/tachyon/v1.json"
+  tachyon_schema_path: "/apps/central/lib/central-0.1.0/priv/tachyon/schema_v1/*/*/*.json"
 
 # Do not print debug messages in production
 config :logger,
