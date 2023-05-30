@@ -21,15 +21,22 @@
         <hr />
 
         <div class="float-end">
+          <a
+            href={~p"/teiserver/reports/infolog/download/#{@infolog.id}"}
+            class="btn btn-secondary"
+          >
+            <i class="fa-fw fa-solid fa-download"></i> Download
+          </a>
+
+          &nbsp;
+
           <%= if allow?(@conn, "admin.dev") do %>
-            <td>
-              <%= link("Delete",
-                to: Routes.ts_reports_infolog_path(@conn, :delete, @infolog.id),
-                class: "btn btn-danger",
-                method: "delete",
-                data: [confirm: "Are you sure?"]
-              ) %>
-            </td>
+            <%= link(raw("<i class='fa-solid fa-fw fa-trash'></i> Delete"),
+              to: Routes.ts_reports_infolog_path(@conn, :delete, @infolog.id),
+              class: "btn btn-danger",
+              method: "delete",
+              data: [confirm: "Are you sure?"]
+            ) %>
           <% end %>
         </div>
 
@@ -43,15 +50,25 @@
         <div class="row">
           <div class="col-md-12">
             <h5>Metadata</h5>
-            <textarea rows="30" class="form-control" style="font-family: monospace;"><%= Jason.encode! @infolog.metadata, pretty: true %></textarea>
+            <%
+              encoded_metadata = Jason.encode!(@infolog.metadata, pretty: true)
+
+              metadata_line_count = encoded_metadata
+                |> String.split("\n")
+                |> Enum.count
+            %>
+            <textarea rows={metadata_line_count + 1} class="form-control" style="font-family: monospace;"><%= encoded_metadata %></textarea>
           </div>
+
           <%= if @infolog.size < 3_000_000 do %>
             <div class="col-md-12">
               <h5>Contents</h5>
               <textarea rows="30" class="form-control" style="font-family: monospace;"><%= @infolog.contents %></textarea>
             </div>
           <% else %>
-            Given the size of this infolog we are not displaying it in the web page. You will need to download it.
+            <div class="col-md-12 mt-2">
+              Given the size of this infolog we are not displaying it in the web page. You will need to download it.
+            </div>
           <% end %>
         </div>
       </div>
