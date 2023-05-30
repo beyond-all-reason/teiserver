@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.API.SpadsController do
   use CentralWeb, :controller
   alias Central.Config
-  alias Teiserver.{Account, Coordinator}
+  alias Teiserver.{Account, Coordinator, Battle}
   alias Teiserver.Battle.BalanceLib
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   require Logger
@@ -27,9 +27,18 @@ defmodule TeiserverWeb.API.SpadsController do
       end
 
     target_id = int_parse(target_id_str)
+    host_ip = get_member_of_lobby_host_ip(target_id)
 
-    {rating_value, uncertainty} =
+    conn_ip = conn
+      |> Teiserver.Logging.LoggingPlug.get_ip_from_conn
+      |> Tuple.to_list()
+      |> Enum.join(".")
+
+    {rating_value, uncertainty} = if host_ip != conn_ip do
+      BalanceLib.get_user_rating_value_uncertainty_pair(-1, "Duel")
+    else
       BalanceLib.get_user_rating_value_uncertainty_pair(target_id, actual_type)
+    end
 
     max_uncertainty =
       Config.get_site_config_cache("teiserver.Uncertainty required to show rating")
@@ -75,6 +84,23 @@ defmodule TeiserverWeb.API.SpadsController do
         {:ok, data} -> data
         _ -> :error
       end
+
+    first_player_id = player_data
+      |> Map.keys()
+      |> hd
+      |> Account.get_userid_from_name
+
+    host_ip = get_member_of_lobby_host_ip(first_player_id)
+
+    conn_ip = conn
+      |> Teiserver.Logging.LoggingPlug.get_ip_from_conn
+      |> Tuple.to_list()
+      |> Enum.join(".")
+
+    # if host_ip != conn_ip do
+    #   Logger.error("balance_battle with no ip match (#{inspect conn_ip} != #{inspect host_ip} (id = #{first_player_id})), params: #{inspect params}")
+    #   # raise "Internal server error"
+    # end
 
     team_count = int_parse(params["nbTeams"])
 
@@ -183,6 +209,28 @@ defmodule TeiserverWeb.API.SpadsController do
         conn
         |> put_status(200)
         |> render("empty.json")
+    end
+  end
+
+  def get_member_of_lobby_host_ip(nil), do: nil
+  def get_member_of_lobby_host_ip(userid) do
+    case Account.get_client_by_id(userid) do
+      nil ->
+        nil
+      client ->
+        get_lobby_host_ip(client.lobby_id)
+    end
+  end
+
+  def get_lobby_host_ip(nil), do: nil
+  def get_lobby_host_ip(lobby_id) do
+    case Battle.get_lobby(lobby_id) do
+      nil ->
+        nil
+
+      lobby ->
+        host = Account.get_client_by_id(lobby.founder_id)
+        host.ip
     end
   end
 end
