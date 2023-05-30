@@ -1,34 +1,12 @@
 {
     "type": "object",
-    "additionalProperties": false,
     "properties": {
-        "data": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "email",
-                "username",
-                "password"
-            ],
-            "additionalProperties": false
-        },
         "command": {
             "type": "string",
             "const": "auth/register/request"
         }
     },
     "required": [
-        "command",
-        "data"
+        "command"
     ]
 }

@@ -1,18 +1,50 @@
 {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-        "status": {
-            "type": "string",
-            "const": "success"
+    "anyOf": [
+        {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "const": "success"
+                },
+                "data": {
+                    "type": "object",
+                    "additionalProperties": {
+                        
+                    }
+                },
+                "command": {
+                    "type": "string",
+                    "const": "lobbyHost/startBattle/response"
+                }
+            },
+            "required": [
+                "command",
+                "data",
+                "status"
+            ]
         },
-        "command": {
-            "type": "string",
-            "const": "lobbyHost/startBattle/response"
+        {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "const": "failed"
+                },
+                "reason": {
+                    "type": "string",
+                    "const": "internal_error"
+                },
+                "command": {
+                    "type": "string",
+                    "const": "lobbyHost/startBattle/response"
+                }
+            },
+            "required": [
+                "command",
+                "reason",
+                "status"
+            ]
         }
-    },
-    "required": [
-        "command",
-        "status"
     ]
 }

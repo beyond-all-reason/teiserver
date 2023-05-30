@@ -2,33 +2,16 @@
     "anyOf": [
         {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
                 "status": {
                     "type": "string",
                     "const": "success"
                 },
-                "command": {
-                    "type": "string",
-                    "const": "auth/register/response"
-                }
-            },
-            "required": [
-                "command",
-                "status"
-            ]
-        },
-        {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "status": {
-                    "type": "string",
-                    "const": "failed"
-                },
-                "reason": {
-                    "type": "string",
-                    "const": "email_taken"
+                "data": {
+                    "type": "object",
+                    "additionalProperties": {
+                        
+                    }
                 },
                 "command": {
                     "type": "string",
@@ -37,13 +20,12 @@
             },
             "required": [
                 "command",
-                "reason",
+                "data",
                 "status"
             ]
         },
         {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
                 "status": {
                     "type": "string",
@@ -51,76 +33,14 @@
                 },
                 "reason": {
                     "type": "string",
-                    "const": "username_taken"
-                },
-                "command": {
-                    "type": "string",
-                    "const": "auth/register/response"
-                }
-            },
-            "required": [
-                "command",
-                "reason",
-                "status"
-            ]
-        },
-        {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "status": {
-                    "type": "string",
-                    "const": "failed"
-                },
-                "reason": {
-                    "type": "string",
-                    "const": "invalid_email"
-                },
-                "command": {
-                    "type": "string",
-                    "const": "auth/register/response"
-                }
-            },
-            "required": [
-                "command",
-                "reason",
-                "status"
-            ]
-        },
-        {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "status": {
-                    "type": "string",
-                    "const": "failed"
-                },
-                "reason": {
-                    "type": "string",
-                    "const": "weak_password"
-                },
-                "command": {
-                    "type": "string",
-                    "const": "auth/register/response"
-                }
-            },
-            "required": [
-                "command",
-                "reason",
-                "status"
-            ]
-        },
-        {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "status": {
-                    "type": "string",
-                    "const": "failed"
-                },
-                "reason": {
-                    "type": "string",
-                    "const": "username_profanity"
+                    "enum": [
+                        "internal_error",
+                        "email_taken",
+                        "username_taken",
+                        "invalid_email",
+                        "weak_password",
+                        "username_profanity"
+                    ]
                 },
                 "command": {
                     "type": "string",

@@ -1,29 +1,12 @@
 {
     "type": "object",
-    "additionalProperties": false,
     "properties": {
-        "data": {
-            "type": "object",
-            "properties": {
-                "ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    }
-                }
-            },
-            "required": [
-                "ids"
-            ],
-            "additionalProperties": false
-        },
         "command": {
             "type": "string",
             "const": "account/getUserClients/request"
         }
     },
     "required": [
-        "command",
-        "data"
+        "command"
     ]
 }

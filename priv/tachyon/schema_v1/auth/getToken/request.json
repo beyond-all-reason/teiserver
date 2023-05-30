@@ -1,50 +1,12 @@
 {
     "type": "object",
-    "additionalProperties": false,
     "properties": {
-        "data": {
-            "anyOf": [
-                {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "password": {
-                            "type": "string"
-                        },
-                        "email": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "email",
-                        "password"
-                    ]
-                },
-                {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "password": {
-                            "type": "string"
-                        },
-                        "username": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "password",
-                        "username"
-                    ]
-                }
-            ]
-        },
         "command": {
             "type": "string",
             "const": "auth/getToken/request"
         }
     },
     "required": [
-        "command",
-        "data"
+        "command"
     ]
 }

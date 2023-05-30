@@ -1,31 +1,55 @@
 {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-        "status": {
-            "type": "string",
-            "const": "success"
-        },
-        "data": {
+    "anyOf": [
+        {
             "type": "object",
             "properties": {
-                "tachyonVersion": {
-                    "type": "string"
+                "status": {
+                    "type": "string",
+                    "const": "success"
+                },
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "tachyonVersion": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "tachyonVersion"
+                    ]
+                },
+                "command": {
+                    "type": "string",
+                    "const": "init/init/response"
                 }
             },
             "required": [
-                "tachyonVersion"
-            ],
-            "additionalProperties": false
+                "command",
+                "data",
+                "status"
+            ]
         },
-        "command": {
-            "type": "string",
-            "const": "init/init/response"
+        {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "const": "failed"
+                },
+                "reason": {
+                    "type": "string",
+                    "const": "internal_error"
+                },
+                "command": {
+                    "type": "string",
+                    "const": "init/init/response"
+                }
+            },
+            "required": [
+                "command",
+                "reason",
+                "status"
+            ]
         }
-    },
-    "required": [
-        "command",
-        "data",
-        "status"
     ]
 }

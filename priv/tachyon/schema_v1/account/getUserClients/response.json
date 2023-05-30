@@ -1,168 +1,189 @@
 {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-        "status": {
-            "type": "string",
-            "const": "success"
-        },
-        "data": {
+    "anyOf": [
+        {
             "type": "object",
             "properties": {
-                "userClients": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "id": {
-                                "type": "number"
-                            },
-                            "name": {
-                                "type": "string"
-                            },
-                            "isBot": {
-                                "type": "boolean"
-                            },
-                            "clanId": {
-                                "type": [
-                                    "number",
-                                    "null"
-                                ]
-                            },
-                            "icons": {
+                "status": {
+                    "type": "string",
+                    "const": "success"
+                },
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "userClients": {
+                            "type": "array",
+                            "items": {
                                 "type": "object",
-                                "additionalProperties": {
-                                    "type": "string"
-                                }
-                            },
-                            "roles": {
-                                "type": "array",
-                                "items": {
-                                    "type": "string"
-                                }
-                            },
-                            "battleStatus": {
-                                "anyOf": [
-                                    {
+                                "properties": {
+                                    "id": {
+                                        "type": "number"
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "isBot": {
+                                        "type": "boolean"
+                                    },
+                                    "clanId": {
+                                        "type": [
+                                            "number",
+                                            "null"
+                                        ]
+                                    },
+                                    "icons": {
                                         "type": "object",
-                                        "properties": {
-                                            "lobbyId": {
-                                                "type": [
-                                                    "number",
-                                                    "null"
-                                                ]
-                                            },
-                                            "inGame": {
-                                                "type": "boolean"
-                                            },
-                                            "away": {
-                                                "type": "boolean"
-                                            },
-                                            "ready": {
-                                                "type": "boolean"
-                                            },
-                                            "playerNumber": {
-                                                "type": [
-                                                    "number",
-                                                    "null"
-                                                ]
-                                            },
-                                            "teamColour": {
-                                                "type": [
-                                                    "string",
-                                                    "null"
-                                                ]
-                                            },
-                                            "isPlayer": {
-                                                "type": "boolean"
-                                            },
-                                            "bonus": {
-                                                "type": "number"
-                                            },
-                                            "sync": {
+                                        "additionalProperties": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "roles": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "battleStatus": {
+                                        "anyOf": [
+                                            {
                                                 "type": "object",
                                                 "properties": {
-                                                    "engine": {
+                                                    "lobbyId": {
+                                                        "type": [
+                                                            "number",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "inGame": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "away": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "ready": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "playerNumber": {
+                                                        "type": [
+                                                            "number",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "teamColour": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "isPlayer": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "bonus": {
                                                         "type": "number"
                                                     },
-                                                    "game": {
-                                                        "type": "number"
+                                                    "sync": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "engine": {
+                                                                "type": "number"
+                                                            },
+                                                            "game": {
+                                                                "type": "number"
+                                                            },
+                                                            "map": {
+                                                                "type": "number"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "engine",
+                                                            "game",
+                                                            "map"
+                                                        ]
                                                     },
-                                                    "map": {
-                                                        "type": "number"
+                                                    "partyId": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "clanTag": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "muted": {
+                                                        "type": "boolean"
                                                     }
                                                 },
                                                 "required": [
-                                                    "engine",
-                                                    "game",
-                                                    "map"
-                                                ],
-                                                "additionalProperties": false
-                                            },
-                                            "partyId": {
-                                                "type": [
-                                                    "string",
-                                                    "null"
+                                                    "lobbyId",
+                                                    "inGame",
+                                                    "away",
+                                                    "ready",
+                                                    "playerNumber",
+                                                    "teamColour",
+                                                    "isPlayer",
+                                                    "bonus",
+                                                    "sync",
+                                                    "partyId",
+                                                    "clanTag",
+                                                    "muted"
                                                 ]
                                             },
-                                            "clanTag": {
-                                                "type": [
-                                                    "string",
-                                                    "null"
-                                                ]
-                                            },
-                                            "muted": {
-                                                "type": "boolean"
+                                            {
+                                                "type": "null"
                                             }
-                                        },
-                                        "required": [
-                                            "lobbyId",
-                                            "inGame",
-                                            "away",
-                                            "ready",
-                                            "playerNumber",
-                                            "teamColour",
-                                            "isPlayer",
-                                            "bonus",
-                                            "sync",
-                                            "partyId",
-                                            "clanTag",
-                                            "muted"
-                                        ],
-                                        "additionalProperties": false
-                                    },
-                                    {
-                                        "type": "null"
+                                        ]
                                     }
+                                },
+                                "required": [
+                                    "id",
+                                    "name",
+                                    "isBot",
+                                    "clanId",
+                                    "icons",
+                                    "roles",
+                                    "battleStatus"
                                 ]
                             }
-                        },
-                        "required": [
-                            "id",
-                            "name",
-                            "isBot",
-                            "clanId",
-                            "icons",
-                            "roles",
-                            "battleStatus"
-                        ],
-                        "additionalProperties": false
-                    }
+                        }
+                    },
+                    "required": [
+                        "userClients"
+                    ]
+                },
+                "command": {
+                    "type": "string",
+                    "const": "account/getUserClients/response"
                 }
             },
             "required": [
-                "userClients"
-            ],
-            "additionalProperties": false
+                "command",
+                "data",
+                "status"
+            ]
         },
-        "command": {
-            "type": "string",
-            "const": "account/getUserClients/response"
+        {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "const": "failed"
+                },
+                "reason": {
+                    "type": "string",
+                    "const": "internal_error"
+                },
+                "command": {
+                    "type": "string",
+                    "const": "account/getUserClients/response"
+                }
+            },
+            "required": [
+                "command",
+                "reason",
+                "status"
+            ]
         }
-    },
-    "required": [
-        "command",
-        "data",
-        "status"
     ]
 }

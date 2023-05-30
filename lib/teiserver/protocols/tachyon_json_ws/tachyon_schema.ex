@@ -12,7 +12,14 @@ defmodule Teiserver.Tachyon.Schema do
         |> File.read!()
         |> Jason.decode!()
 
-      command = contents["properties"]["command"]["const"]
+      command = file_path
+        |> Path.split()
+        |> Enum.reverse
+        |> Enum.take(3)
+        |> Enum.reverse
+        |> Enum.join("/")
+        |> String.replace(".json", "")
+
       schema = JsonXema.new(contents)
 
       Central.store_put(:tachyon_schemas, command, schema)
