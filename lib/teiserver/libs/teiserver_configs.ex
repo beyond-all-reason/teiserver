@@ -21,6 +21,15 @@ defmodule Teiserver.TeiserverConfigs do
   @spec site_configs :: any
   defp site_configs do
     add_site_config_type(%{
+      key: "site.Footer credit text",
+      section: "Site",
+      type: "string",
+      permissions: ["Server"],
+      description: "The text shown at the bottom of the page.",
+      default: "Created by the Beyond all Reason team"
+    })
+
+    add_site_config_type(%{
       key: "matchmaking.Use ready check",
       section: "Matchmaking",
       type: "boolean",
