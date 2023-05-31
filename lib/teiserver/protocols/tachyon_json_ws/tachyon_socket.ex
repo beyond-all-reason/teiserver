@@ -220,5 +220,5 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   def handle_error(conn, :failed_login), do: Plug.Conn.send_resp(conn, 403, "Forbidden")
   def handle_error(conn, :rate_limit), do: Plug.Conn.send_resp(conn, 429, "Too many requests")
 
-  def handle_error(conn, :unexpecded_value), do: Plug.Conn.send_resp(conn, 500, "Internal server error")
+  def handle_error(conn, :unexpected_value), do: Plug.Conn.send_resp(conn, 500, "Internal server error")
 end
