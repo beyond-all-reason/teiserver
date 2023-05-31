@@ -403,7 +403,6 @@ defmodule Teiserver.SpringTcpServer do
     end
 
     if state.lobby_hash == nil do
-      Logger.error("do_login with nil hash, state = #{inspect state}")
       send(self(), :terminate)
     else
       {:ok, _user} = User.do_login(user, state.ip, state.lobby, state.lobby_hash)

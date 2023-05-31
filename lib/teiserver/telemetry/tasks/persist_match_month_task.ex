@@ -170,7 +170,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistMatchMonthTask do
 
   defp post_process_section(data) do
     mean_duration_seconds =
-      (data.aggregate.total_duration_seconds / data.aggregate.total_count)
+      (data.aggregate.total_duration_seconds / max(data.aggregate.total_count, 1))
       |> round()
 
     data
