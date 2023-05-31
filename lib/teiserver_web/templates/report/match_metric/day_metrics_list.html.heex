@@ -40,6 +40,7 @@
               <th>Duel</th>
               <th>Team</th>
               <th>FFA</th>
+              <th>Team FFA</th>
               <th>Scav</th>
               <th>Rapt</th>
 
@@ -59,6 +60,7 @@
                 <td><%= format_number(log.data["duel"]["aggregate"]["total_count"]) %></td>
                 <td><%= format_number(log.data["team"]["aggregate"]["total_count"]) %></td>
                 <td><%= format_number(log.data["ffa"]["aggregate"]["total_count"]) %></td>
+                <td><%= format_number(log.data["team_ffa"]["aggregate"]["total_count"]) %></td>
                 <td><%= format_number(log.data["scavengers"]["aggregate"]["total_count"]) %></td>
                 <td><%= format_number(log.data["raptors"]["aggregate"]["total_count"]) %></td>
 
@@ -81,7 +83,7 @@
 
               <%= if log.date.day == 1 do %>
                 <tr>
-                  <td colspan="9" style={"background-color: #{bg}"}>
+                  <td colspan="11" style={"background-color: #{bg}"}>
                     <div style="height: 5px;">&nbsp;</div>
                   </td>
                 </tr>

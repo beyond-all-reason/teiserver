@@ -47,9 +47,27 @@ defmodule Teiserver.Telemetry.Tasks.PersistMatchDayTask do
     end
   end
 
+
+  # To re-run yesterday's data
+  # Teiserver.Telemetry.Tasks.PersistMatchDayTask.run(Timex.today |> Timex.shift(days: -1))
+
   @spec run(%Date{}) :: :ok
   def run(date) do
     data = BreakdownMatchDataTask.perform(date)
+
+    # Check some numbers add up....
+    # combined_count = ~w(duel team ffa team_ffa scavengers raptors bots)a
+    #   |> Enum.reduce({0, 0}, fn (key, {tc, wc}) ->
+    #     tc = tc + get_in(data, [key, :aggregate, :total_count])
+    #     wc = wc + get_in(data, [key, :aggregate, :weighted_count])
+
+    #     {tc, wc}
+    #   end)
+
+    # IO.puts ""
+    # IO.inspect {data.totals.aggregate.total_count, data.totals.aggregate.weighted_count}
+    # IO.inspect combined_count
+    # IO.puts ""
 
     # Delete old log if it exists
     delete_query =
