@@ -304,9 +304,14 @@ defmodule Teiserver.Battle.MatchLib do
       where: ilike(matches.name, ^ref_like)
   end
 
-  def _search(query, :never_finished, _) do
+  def _search(query, :has_finished, false) do
     from matches in query,
       where: is_nil(matches.finished)
+  end
+
+  def _search(query, :has_finished, true) do
+    from matches in query,
+      where: not is_nil(matches.finished)
   end
 
   def _search(query, :team_size_less_than, size) do
@@ -329,9 +334,19 @@ defmodule Teiserver.Battle.MatchLib do
       where: matches.inserted_at < ^timestamp
   end
 
-  def _search(query, :has_started, _) do
+  def _search(query, :duration_less_than, value) do
+    from matches in query,
+      where: matches.game_duration < ^value
+  end
+
+  def _search(query, :has_started, true) do
     from matches in query,
       where: not is_nil(matches.started)
+  end
+
+  def _search(query, :has_started, false) do
+    from matches in query,
+      where: is_nil(matches.started)
   end
 
   def _search(query, :started_after, timestamp) do

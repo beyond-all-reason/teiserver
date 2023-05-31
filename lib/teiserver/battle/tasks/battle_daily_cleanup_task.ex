@@ -10,6 +10,7 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
+    delete_unstarted_matches()
     delete_unfinished_matches()
     delete_short_matches()
     strip_data_from_older_matches()
@@ -20,14 +21,17 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
     :ok
   end
 
-  defp delete_unfinished_matches() do
+  # Teiserver.Battle.Tasks.DailyCleanupTask.delete_unstarted_matches()
+  # Teiserver.Battle.Tasks.DailyCleanupTask.delete_unfinished_matches()
+
+  def delete_unstarted_matches() do
     days = Application.get_env(:central, Teiserver)[:retention][:lobby_chat]
 
     # If a match is never marked as finished after X days, we delete it
     Battle.list_matches(
       search: [
-        inserted_before: Timex.shift(Timex.now(), days: -days),
-        never_finished: :ok
+        inserted_after: Timex.shift(Timex.now(), days: -days),
+        has_started: false
       ],
       select: [:id],
       limit: :infinity
@@ -36,7 +40,24 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
     |> delete_matches()
   end
 
-  defp delete_short_matches() do
+  def delete_unfinished_matches() do
+    days = Application.get_env(:central, Teiserver)[:retention][:lobby_chat]
+
+    # If a match is never marked as finished after X days, we delete it
+    Battle.list_matches(
+      search: [
+        inserted_after: Timex.shift(Timex.now(), days: -days),
+        has_started: true,
+        has_finished: false
+      ],
+      select: [:id],
+      limit: :infinity
+    )
+    |> Enum.map_join(",", fn %{id: id} -> id end)
+    |> delete_matches()
+  end
+
+  def delete_short_matches() do
     days = Application.get_env(:central, Teiserver)[:retention][:lobby_chat]
 
     # Remove tags from matches as the tags take up a lot of space and we don't need them long term
@@ -45,7 +66,8 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
       Battle.list_matches(
         search: [
           inserted_before: Timex.shift(Timex.now(), days: -days),
-          inserted_after: Timex.shift(Timex.now(), days: -(days * 3))
+          inserted_after: Timex.shift(Timex.now(), days: -(days * 3)),
+          duration_less_than: 300
         ],
         limit: :infinity
       )
@@ -70,7 +92,7 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
     |> delete_matches()
   end
 
-  defp delete_old_matches() do
+  def delete_old_matches() do
     # Rated matches
     battle_match_rated_days =
       Application.get_env(:central, Teiserver)[:retention][:battle_match_rated]

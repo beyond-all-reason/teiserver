@@ -390,7 +390,7 @@ defmodule Teiserver.Battle do
       list_matches(
         search: [
           founder_id: founder_id,
-          never_finished: true,
+          has_finished: false,
           started_after: started_after
         ],
         limit: 1
