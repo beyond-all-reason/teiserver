@@ -7,10 +7,6 @@ defmodule Teiserver.Tachyon.Responses.System.DisconnectResponse do
 
   @spec execute(String.t()) :: {T.tachyon_command(), T.tachyon_object()}
   def execute(reason) do
-    object = %{
-      "result" => reason
-    }
-
-    {"disconnect", :success, object}
+    {"disconnect", :success, nil}
   end
 end

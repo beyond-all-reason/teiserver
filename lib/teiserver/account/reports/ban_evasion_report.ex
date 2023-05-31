@@ -88,7 +88,6 @@ defmodule Teiserver.Account.BanEvasionReport do
       |> Enum.reject(fn user ->
         User.is_restricted?(user.data["restrictions"], [
           "Login",
-          "Site",
           "All chat",
           "Room chat",
           "All lobbies"

@@ -107,7 +107,7 @@ defmodule TeiserverWeb.Moderation.BanController do
           |> Enum.uniq()
           |> Enum.map(fn userid -> Account.get_user_by_id(userid) end)
           |> Enum.reject(fn user ->
-            Teiserver.User.is_restricted?(user, ["Site", "Login"])
+            Teiserver.User.is_restricted?(user, ["Login"])
           end)
 
         all_keys =
@@ -177,7 +177,7 @@ defmodule TeiserverWeb.Moderation.BanController do
         Moderation.create_action(%{
           target_id: ban.source_id,
           reason: ban.reason,
-          restrictions: ["Login", "Site"],
+          restrictions: ["Login"],
           score_modifier: 0,
           expires: Timex.now() |> Timex.shift(years: 1000)
         })
@@ -199,7 +199,7 @@ defmodule TeiserverWeb.Moderation.BanController do
           |> Enum.uniq()
           |> Enum.map(fn userid -> Account.get_user_by_id(userid) end)
           |> Enum.reject(fn user ->
-            Teiserver.User.is_restricted?(user, ["Site", "Login"])
+            Teiserver.User.is_restricted?(user, ["Login"])
           end)
 
         all_keys =

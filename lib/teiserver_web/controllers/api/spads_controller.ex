@@ -85,17 +85,17 @@ defmodule TeiserverWeb.API.SpadsController do
         _ -> :error
       end
 
-    first_player_id = player_data
-      |> Map.keys()
-      |> hd
-      |> Account.get_userid_from_name
+    # first_player_id = player_data
+    #   |> Map.keys()
+    #   |> hd
+    #   |> Account.get_userid_from_name
 
-    host_ip = get_member_of_lobby_host_ip(first_player_id)
+    # host_ip = get_member_of_lobby_host_ip(first_player_id)
 
-    conn_ip = conn
-      |> Teiserver.Logging.LoggingPlug.get_ip_from_conn
-      |> Tuple.to_list()
-      |> Enum.join(".")
+    # conn_ip = conn
+    #   |> Teiserver.Logging.LoggingPlug.get_ip_from_conn
+    #   |> Tuple.to_list()
+    #   |> Enum.join(".")
 
     # if host_ip != conn_ip do
     #   Logger.error("balance_battle with no ip match (#{inspect conn_ip} != #{inspect host_ip} (id = #{first_player_id})), params: #{inspect params}")

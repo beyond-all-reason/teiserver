@@ -18,7 +18,7 @@ defmodule TeiserverWeb.Moderation.ProposalControllerTest do
 
   @create_attrs %{
     reason: "some name",
-    restrictions: %{"Login" => "Login", "Site" => "Site"},
+    restrictions: %{"Login" => "Login"},
     duration: "1 day",
     score_modifier: "10000"
   }

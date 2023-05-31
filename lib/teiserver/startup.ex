@@ -33,7 +33,6 @@ defmodule Teiserver.Startup do
       "Low priority",
       "All lobbies",
       "Login",
-      "Site",
       "Permanently banned"
     ])
 

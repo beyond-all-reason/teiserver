@@ -100,6 +100,9 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     {dispatch_response, new_conn} = CommandDispatch.dispatch(conn, object, meta)
 
     response = case dispatch_response do
+      {command, :success, nil} ->
+        nil
+
       {command, :success, data} ->
         %{
           "command" => command,
@@ -132,30 +135,28 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     end
 
     # Currently not able to validate errors so leaving it out
-    # Teiserver.Tachyon.Schema.validate!(response)
+    if response != nil do
+      Teiserver.Tachyon.Schema.validate!(response)
+    end
 
     {:ok, response, new_conn}
   end
 
   @spec handle_info(any, ws_state()) :: {:reply, :ok, {:binary, binary}, ws_state()}
-  def handle_info(%{channel: "teiserver_lobby_host_message:" <> _} = msg, state) do
-    case MessageHandlers.LobbyHostMessageHandlers.handle(msg, state) do
-      nil ->
-        {:ok, state}
+  # def handle_info(%{channel: "teiserver_lobby_host_message:" <> _} = msg, state) do
+  #   case MessageHandlers.LobbyHostMessageHandlers.handle(msg, state) do
+  #     nil ->
+  #       {:ok, state}
 
-      {:ok, new_state} ->
-        {:ok, new_state}
+  #     {:ok, new_state} ->
+  #       {:ok, new_state}
 
-      {:ok, resp, new_state} ->
-        {:reply, :ok, {:text, resp |> Jason.encode!()}, new_state}
-    end
-  end
+  #     {:ok, resp, new_state} ->
+  #       {:reply, :ok, {:text, resp |> Jason.encode!()}, new_state}
+  #   end
+  # end
 
-  def handle_info(:disconnect, state) do
-    {:stop, :disconnected, state}
-  end
-
-  def handle_info(msg, state) do
+  def handle_info(%{} = msg, state) do
     IO.puts("")
     IO.inspect(msg, label: "ws handle_info")
     IO.puts("")
@@ -165,6 +166,10 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
     # This will send stuff
     # {:reply, :ok, {:binary, <<111>>}, state}
+  end
+
+  def handle_info(:disconnect, state) do
+    {:stop, :disconnected, state}
   end
 
   @spec terminate(any, any) :: :ok
@@ -186,8 +191,8 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     response = Teiserver.User.login_from_token(token, state)
 
     case response do
-      {:ok, logged_in_user} ->
-        {:ok, new_conn(logged_in_user)}
+      {:ok, user} ->
+        {:ok, new_conn(user)}
 
       {:error, reason} ->
         {:error, reason}
@@ -196,6 +201,16 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
   @spec new_conn(Central.Account.User.t()) :: map()
   defp new_conn(user) do
+    # exempt_from_cmd_throttle = user.moderator == true or User.is_bot?(user) == true
+    exempt_from_cmd_throttle = true
+
+    Logger.metadata(request_id: "TachyonWSServer##{user.id}")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
+
+    IO.puts ""
+    IO.inspect "teiserver_client_messages:#{user.id}", label: "Subbing"
+    IO.puts ""
+
     %{
       # Client state
       userid: user.id,
@@ -204,7 +219,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
       lobby_id: nil,
       party_id: nil,
       party_role: nil,
-      exempt_from_cmd_throttle: true,
+      exempt_from_cmd_throttle: exempt_from_cmd_throttle,
       cmd_timestamps: [],
 
       # Caching app configs

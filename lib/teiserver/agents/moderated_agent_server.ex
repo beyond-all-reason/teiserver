@@ -135,7 +135,7 @@ defmodule Teiserver.Agents.ModeratedAgentServer do
       Moderation.create_action(%{
         target_id: user.id,
         reason: "Agent mode test",
-        restrictions: ["Login", "Site"],
+        restrictions: ["Login"],
         score_modifier: 0,
         expires: Timex.now() |> Timex.shift(years: 1000)
       })

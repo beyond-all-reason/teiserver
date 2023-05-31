@@ -640,6 +640,10 @@ defmodule Teiserver.User do
       shadowban_user(sender_id)
     end
 
+    IO.puts ""
+    IO.inspect {allowed, message_parts, sender_id, "teiserver_client_messages:#{to_id}"}, label: "Send DM"
+    IO.puts ""
+
     if allowed do
       if is_bot?(to_id) do
         message_parts
@@ -904,7 +908,6 @@ defmodule Teiserver.User do
         {:ok, user} = do_login(user, ip, application_name, application_hash)
 
         _client = Client.login(user, :tachyon, ip)
-        Logger.metadata(request_id: "TachyonWSServer##{user.id}")
 
         {:ok, user}
     end
