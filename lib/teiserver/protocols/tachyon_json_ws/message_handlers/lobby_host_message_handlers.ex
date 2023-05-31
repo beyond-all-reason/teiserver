@@ -6,7 +6,11 @@ defmodule Teiserver.Tachyon.MessageHandlers.LobbyHostMessageHandlers do
 
   @spec handle(map(), T.tachyon_ws_state()) ::
           {:ok, T.tachyon_ws_state()} | {:ok, map() | list(), T.tachyon_ws_state()}
-  def handle(%{} = _msg, state) do
+  def handle(%{} = msg, state) do
+    IO.puts "LobbyHostMessageHandlers"
+    IO.inspect msg
+    IO.puts ""
+
     {:ok, state}
   end
 end

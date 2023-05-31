@@ -20,7 +20,7 @@ defmodule Teiserver.Tachyon.Handlers.System.DisconnectRequest do
     send(self(), :disconnect)
     Teiserver.Client.disconnect(userid, "WS disconnect request")
 
-    response = DisconnectResponse.execute("disconnected")
+    response = DisconnectResponse.generate("disconnected")
 
     {response, conn}
   end

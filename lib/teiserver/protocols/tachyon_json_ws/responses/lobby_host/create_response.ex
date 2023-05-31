@@ -6,12 +6,12 @@ defmodule Teiserver.Tachyon.Responses.LobbyHost.CreateResponse do
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
 
-  @spec execute({:error, String.t()} | T.lobby()) :: {T.tachyon_command(), T.tachyon_object()}
-  def execute({:error, reason}) do
+  @spec generate({:error, String.t()} | T.lobby()) :: {T.tachyon_command(), T.tachyon_object()}
+  def generate({:error, reason}) do
     {"lobbyHost/create/request", :error, reason}
   end
 
-  def execute({:ok, lobby}) do
+  def generate({:ok, lobby}) do
     PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_host_message:#{lobby.id}")
     PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby.id}")
     PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby.id}")

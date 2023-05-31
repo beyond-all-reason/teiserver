@@ -18,7 +18,7 @@ defmodule Teiserver.Tachyon.Handlers.Communication.SendDirectMessageRequest do
   def execute(conn, object, _meta) do
     result = User.send_direct_message(conn.userid, object["to"], object["message"])
 
-    response = SendDirectMessageResponse.execute(result)
+    response = SendDirectMessageResponse.generate(result)
 
     {response, conn}
   end

@@ -5,8 +5,8 @@ defmodule Teiserver.Tachyon.Responses.Account.WhoamiResponse do
 
   alias Teiserver.Data.Types, as: T
 
-  @spec execute(T.user(), T.client()) :: {T.tachyon_command(), T.tachyon_status(), T.tachyon_object()}
-  def execute(user, client) do
+  @spec generate(T.user(), T.client()) :: {T.tachyon_command(), T.tachyon_status(), T.tachyon_object()}
+  def generate(user, client) do
     object = %{
       "id" => user.id,
       "name" => user.name,
