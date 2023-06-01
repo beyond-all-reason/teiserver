@@ -12,8 +12,9 @@ defmodule Teiserver.Battle.SeasonalUncertaintyResetTask do
 
     ratings_count =
       Account.list_ratings(limit: :infinity)
-      |> Enum.each(fn rating ->
+      |> Enum.map(fn rating ->
         reset_rating(rating, new_uncertainty, new_last_updated)
+        1
       end)
       |> Enum.count()
 
