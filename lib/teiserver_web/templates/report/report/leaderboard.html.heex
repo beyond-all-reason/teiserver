@@ -104,6 +104,7 @@ user_moderator = allow?(@current_user, "teiserver.staff.moderator") %>
             <tr>
               <th>&nbsp;</th>
               <th colspan="2">Player</th>
+              <th>&nbsp;</th>
 
               <th>Leaderboard rating</th>
               <th>Game rating</th>
@@ -138,6 +139,7 @@ user_moderator = allow?(@current_user, "teiserver.staff.moderator") %>
                 <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
                   <%= central_component("icon", icon: rating.user.icon) %>
                 </td>
+                <td><TeiserverWeb.UserComponents.status_icon user={rating.user} /></td>
                 <td><%= rating.user.name %></td>
 
                 <td><%= rating.leaderboard_rating |> round(2) %></td>

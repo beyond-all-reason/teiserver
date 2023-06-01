@@ -114,7 +114,7 @@ defmodule TeiserverWeb.Battle.MatchController do
       )
 
     games = Enum.count(logs) |> max(1)
-    wins = Enum.filter(logs, fn l -> l.match_membership.win end) |> Enum.count()
+    wins = Enum.count(logs, fn l -> l.match_membership.win end)
 
     first_log =
       case Enum.reverse(logs) do
