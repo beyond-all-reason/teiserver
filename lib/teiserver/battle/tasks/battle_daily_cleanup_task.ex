@@ -96,7 +96,7 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
   end
 
   def delete_matches([], _), do: :ok
-  def delete_matches(ids, logger_set) do
+  def delete_matches(ids, _logger_set) do
     ids = Enum.take(ids, @chunk_size * 100)
     {ids, remaining} = Enum.split(ids, @chunk_size)
 

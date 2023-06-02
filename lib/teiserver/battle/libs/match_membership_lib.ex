@@ -34,6 +34,11 @@ defmodule Teiserver.Battle.MatchMembershipLib do
       where: match_memberships.user_id in ^user_ids
   end
 
+  def _search(query, :user_id_not_in, user_ids) do
+    from match_memberships in query,
+      where: not (match_memberships.user_id in ^user_ids)
+  end
+
   def _search(query, :match_id, match_id) do
     from match_memberships in query,
       where: match_memberships.match_id == ^match_id
