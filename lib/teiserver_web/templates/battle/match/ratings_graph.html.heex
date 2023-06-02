@@ -13,13 +13,86 @@
 
 <link href="/css/c3.min.css" rel="stylesheet" />
 
+<style>
+.svg-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    vertical-align: top;
+}
+.svg-content-responsive {
+    display: inline-block;
+    position: absolute;
+    top: 10px;
+    left: 0;
+    bottom: 10px;
+}
+</style>
+
 <script>
+var margin = {top: 15, right: 30, bottom: 0, left: 60},
+    width = 460 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+var data = <%= raw Jason.encode!(@data) %>;
+
+console.log(data);
+// https://d3-graph-gallery.com/graph/line_confidence_interval.html
   $(function() {
-    var chart = c3.generate({
+    var svg = d3.select("#chart")
+      .classed("svg-container", true) //container class to make it responsive
+      .append("svg")
+      .attr("preserveAspectRatio", "xMinYMid meet")
+      .attr("viewBox", "0 0 800 400")
+      .classed("svg-content-responsive", true);
+
+
+    var dateFormat = d3.timeParse("%Y-%m-%d %H:%M:%S");
+
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime()
+      .domain(d3.extent(data, function(d) { return dateFormat(d.date); }))
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+      //.domain(d3.max(data, function(d) { return d.rating_value; }))
+      .domain([0, 50])
+      .range([ height, 0 ]);
+    svg.append("g")
+      .call(d3.axisLeft(y));
+
+    // Show confidence interval
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "#cce5df")
+      .attr("stroke", "none")
+      .attr("d", d3.area()
+        .x(function(d) { return x(dateFormat(d.date)) })
+        .y0(function(d) { return y(d.rating_value - d.uncertainty) })
+        .y1(function(d) { return y(d.rating_value + d.uncertainty) })
+        )
+
+    // Add the line
+    svg
+      .append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(dateFormat(d.date)) })
+        .y(function(d) { return y(d.rating_value) })
+        )
+
+    /*var chart = c3.generate({
       bindto: '#chart',
       data: {
         x: 'x',
-        columns: <%= raw Jason.encode!([["x" | @key] | @columns]) %>
+        columns:
       },
       axis: {
         x: {
@@ -36,7 +109,7 @@
           }
         }
       }
-    });
+    });*/
   });
 </script>
 
