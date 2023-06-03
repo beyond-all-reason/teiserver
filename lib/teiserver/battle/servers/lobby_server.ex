@@ -112,11 +112,14 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   def handle_cast(:stop_match, state) do
-    key = "server/match/uuid"
-    uuid = Battle.generate_lobby_uuid([state.id])
-    modoptions = state.modoptions |> Map.put(key, uuid)
-
     {:ok, new_match} = Battle.create_match_from_founder_id(state.founder_id)
+    uuid = Battle.generate_lobby_uuid([state.id])
+
+    options = %{
+      "server/match/uuid" => new_match.server_uuid,
+      "server/match/id" => new_match.id,
+    }
+    modoptions = state.modoptions |> Map.merge(options)
 
     # Need to broadcast the new uuid
     PubSub.broadcast(
@@ -126,7 +129,7 @@ defmodule Teiserver.Battle.LobbyServer do
         channel: "teiserver_lobby_updates",
         event: :set_modoptions,
         lobby_id: state.id,
-        options: %{key => uuid}
+        options: options
       }
     )
 
@@ -507,18 +510,23 @@ defmodule Teiserver.Battle.LobbyServer do
 
     :timer.send_interval(2_000, :tick)
 
-    match_uuid = Battle.generate_lobby_uuid([id])
     {:ok, match} = Battle.create_match_from_founder_id(data.lobby.founder_id)
+    match_uuid = Battle.generate_lobby_uuid([match.id])
+
+    server_uuid = ExULID.ULID.generate()
+
+    options = %{
+      "server/match/uuid" => match.server_uuid,
+      "server/match/id" => match.id,
+    }
 
     {:ok,
      %{
        id: id,
        lobby: data.lobby,
        founder_id: data.lobby.founder_id,
-       modoptions: %{
-         "server/match/uuid" => match_uuid
-       },
-       server_uuid: ExULID.ULID.generate(),
+       modoptions: options,
+       server_uuid: server_uuid,
        match_uuid: match_uuid,
        match_id: match.id,
        queue_id: nil,
