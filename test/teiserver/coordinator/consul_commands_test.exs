@@ -1126,4 +1126,86 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
     assert queue == [player1.id]
   end
+
+  test "shuffle", %{lobby_id: lobby_id, hsocket: hsocket, player: existing_player} do
+    # Limit player count to 4 (2v2)
+    _tachyon_send(hsocket, %{
+      cmd: "c.lobby_host.update_host_status",
+      boss: nil,
+      teamsize: 2,
+      teamcount: 2
+    })
+
+    Lobby.kick_user_from_battle(existing_player.id, lobby_id)
+
+    state = Coordinator.call_consul(lobby_id, :get_all)
+    max_player_count = ConsulServer.get_max_player_count(state)
+    assert max_player_count == 4
+
+    # Add the players
+    %{user: player1, socket: socket1} = tachyon_auth_setup()
+    User.add_roles(player1.id, ["VIP", "Streamer"])
+
+    %{user: player2, socket: socket2} = tachyon_auth_setup()
+    %{user: player3, socket: socket3} = tachyon_auth_setup()
+    %{user: player4, socket: socket4} = tachyon_auth_setup()
+    %{user: player5, socket: socket5} = tachyon_auth_setup()
+    %{user: player6, socket: socket6} = tachyon_auth_setup()
+    %{user: player7, socket: socket7} = tachyon_auth_setup()
+    %{user: player8, socket: socket8} = tachyon_auth_setup()
+    %{user: player9, socket: socket9} = tachyon_auth_setup()
+
+    Lobby.force_add_user_to_lobby(player1.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player2.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player3.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player4.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player5.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player6.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player7.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player8.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player9.id, lobby_id)
+    :timer.sleep(1000)
+
+    # All of them want to be players
+    _tachyon_send(socket1, %{cmd: "c.lobby.message", message: "$joinq"})
+    _tachyon_send(socket2, %{cmd: "c.lobby.message", message: "$joinq"})
+    _tachyon_send(socket3, %{cmd: "c.lobby.message", message: "$joinq"})
+    _tachyon_send(socket4, %{cmd: "c.lobby.message", message: "$joinq"})
+    _tachyon_send(socket5, %{cmd: "c.lobby.message", message: "$joinq"})
+    _tachyon_send(socket6, %{cmd: "c.lobby.message", message: "$joinq"})
+    _tachyon_send(socket7, %{cmd: "c.lobby.message", message: "$joinq"})
+    _tachyon_send(socket8, %{cmd: "c.lobby.message", message: "$joinq"})
+    _tachyon_send(socket9, %{cmd: "c.lobby.message", message: "$joinq"})
+    :timer.sleep(1000)
+
+    assert Account.get_client_by_id(player1.id).player == true
+    assert Account.get_client_by_id(player2.id).player == true
+    assert Account.get_client_by_id(player3.id).player == true
+    assert Account.get_client_by_id(player4.id).player == true
+
+    assert Account.get_client_by_id(player5.id).player == false
+    assert Account.get_client_by_id(player6.id).player == false
+    assert Account.get_client_by_id(player7.id).player == false
+    assert Account.get_client_by_id(player8.id).player == false
+    assert Account.get_client_by_id(player9.id).player == false
+
+    player_list = Teiserver.Coordinator.ConsulServer.list_players(%{lobby_id: lobby_id})
+      |> Enum.map(fn %{userid: userid} -> userid end)
+
+    IO.puts ""
+    IO.inspect player_list
+    IO.puts ""
+
+    # Queue should be empty at start
+    queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
+    assert queue == [player5.id, player6.id, player7.id, player8.id]
+
+    # # Player 1 now wants to join
+    # _tachyon_send(socket1, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
+
+    # # And added to the join queue
+    # assert Account.get_client_by_id(player1.id).player == false
+    # queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
+    # assert queue == [player1.id]
+  end
 end

@@ -20,7 +20,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? explain newlobby jazlobby tournament)
   @boss_commands ~w(gatekeeper welcome-message meme reset-approval rename resetplaylevels minplaylevel maxplaylevel setplaylevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
-  @vip_boss_commands ~w(rotate)
+  @vip_boss_commands ~w(shuffle)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
 
   @splitter "########################################"
