@@ -14,25 +14,30 @@
 <link href="/css/c3.min.css" rel="stylesheet" />
 
 <style>
-.svg-container {
-    position: relative;
+#chart {
     width: 100%;
-    height: 100%;
-    vertical-align: top;
+    height: 600px;
+    display: flex;
+
 }
-.svg-content-responsive {
-    display: inline-block;
-    position: absolute;
+
+#chart .svg {
     top: 10px;
-    left: 0;
-    bottom: 10px;
+    left: 20px;
 }
 </style>
 
 <script>
-var margin = {top: 15, right: 30, bottom: 0, left: 60},
-    width = 460 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
+var width = 800;
+var height = 400;
+var margin = {
+  'top'    : 5,
+  'right'  : 20,
+  'bottom' : 20,
+  'left'   : 20
+};
+
+var colors = {};
 
 var data = <%= raw Jason.encode!(@data) %>;
 
@@ -40,12 +45,12 @@ console.log(data);
 // https://d3-graph-gallery.com/graph/line_confidence_interval.html
   $(function() {
     var svg = d3.select("#chart")
-      .classed("svg-container", true) //container class to make it responsive
       .append("svg")
-      .attr("preserveAspectRatio", "xMinYMid meet")
-      .attr("viewBox", "0 0 800 400")
-      .classed("svg-content-responsive", true);
-
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
 
     var dateFormat = d3.timeParse("%Y-%m-%d %H:%M:%S");
 
@@ -53,16 +58,18 @@ console.log(data);
     var x = d3.scaleTime()
       .domain(d3.extent(data, function(d) { return dateFormat(d.date); }))
       .range([ 0, width ]);
-    svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
 
     // Add Y axis
     var y = d3.scaleLinear()
       //.domain(d3.max(data, function(d) { return d.rating_value; }))
       .domain([0, 50])
       .range([ height, 0 ]);
+
     svg.append("g")
+      .attr("transform", "translate(0," + y(0) + ")")
+      .call(d3.axisBottom(x));
+    svg.append("g")
+      .attr("transform", "translate(0, 0)")
       .call(d3.axisLeft(y));
 
     // Show confidence interval
@@ -143,7 +150,7 @@ console.log(data);
           </div>
         </div>
         <br /> Average ratings
-        <div id="chart" class="with-transitions" style="height: 400px;"></div>
+        <div id="chart" class="with-transitions"></div>
       </div>
     </div>
   </div>
