@@ -20,7 +20,7 @@ leader = moderator or @party.leader == @user_id %>
           <% end %>
         </div>
 
-        <h4>Leader: <%= @user_lookup[@party.leader].name %></h4>
+        <h4>Leader: <%= (@user_lookup[@party.leader] || %{name: ""}).name %></h4>
         <h5>Members:</h5>
         <table class="table">
           <tbody>

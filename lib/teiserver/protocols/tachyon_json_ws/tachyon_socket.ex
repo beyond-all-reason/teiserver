@@ -6,7 +6,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   alias Central.Config
   alias Teiserver.Account
   alias Teiserver.Tachyon.{CommandDispatch, MessageHandlers}
-  alias Teiserver.Tachyon.Socket.PubsubHandlers
+  # alias Teiserver.Tachyon.Socket.PubsubHandlers
   alias Teiserver.Data.Types, as: T
 
   @spec child_spec(any) :: any()
@@ -102,7 +102,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     {dispatch_response, new_conn} = CommandDispatch.dispatch(conn, object, meta)
 
     response = case dispatch_response do
-      {command, :success, nil} ->
+      {_command, :success, nil} ->
         nil
 
       {command, :success, data} ->
@@ -171,7 +171,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   end
 
   @spec terminate(any, any) :: :ok
-  def terminate({:error, :closed}, %{conn: %{userid: userid}} = state) do
+  def terminate({:error, :closed}, %{conn: %{userid: userid}} = _state) do
     Teiserver.Client.disconnect(userid, "connection closed by client")
     :ok
   end

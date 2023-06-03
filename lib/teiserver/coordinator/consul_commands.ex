@@ -1125,14 +1125,118 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   #################### VIP Streamer
-  def handle_command(%{command: "rotate", remaining: _remaining, senderid: senderid}, state) do
-    Lobby.sayprivateex(
+  def handle_command(%{command: "shuffle", remaining: remaining, senderid: senderid}, state) do
+    mode = case String.downcase(remaining) do
+      "party" -> "party"
+      "friends" -> "friends"
+      "contributor" -> "contributor"
+      "dev" -> "dev"
+      "admin" -> "admin"
+      "all" -> "all"
+      "default" -> "default"
+      _ ->
+        LobbyChat.sayprivateex(
+          state.coordinator_id,
+          senderid,
+          "Shuffle types are party, friends, contributor, dev, admin, all and default; using 'default'",
+          state.lobby_id
+        )
+        "default"
+    end
+
+    lobby = Lobby.get_lobby(state.lobby_id)
+
+    all_possible_clients = (lobby.players ++ state.join_queue)
+    |> Enum.map(fn player_id ->
+      Client.get_client_by_id(player_id)
+    end)
+    |> Enum.reject(&(&1 == nil))
+
+    # Generate a map of true and false, true are players and false is the queue
+    result = case mode do
+      "party" ->
+        sender_party = Client.get_client_by_id(senderid) |> Map.get(:party_id)
+
+        all_possible_clients
+        |> Enum.group_by(fn client ->
+          client.party_id == sender_party
+        end, fn %{userid: userid} ->
+          userid
+        end)
+
+      "friends" ->
+        sender_friends = [senderid | User.get_user_by_id(senderid) |> Map.get(:friends)]
+
+        all_possible_clients
+        |> Enum.group_by(fn %{userid: userid} ->
+          Enum.member?(sender_friends, userid)
+        end, fn %{userid: userid} ->
+          userid
+        end)
+
+      "contributor" ->
+        all_possible_clients
+        |> Enum.group_by(fn %{userid: userid} ->
+          User.has_any_role?(userid, "Contributor")
+        end, fn %{userid: userid} ->
+          userid
+        end)
+
+      "dev" ->
+        all_possible_clients
+        |> Enum.group_by(fn %{userid: userid} ->
+          User.has_any_role?(userid, "Core")
+        end, fn %{userid: userid} ->
+          userid
+        end)
+
+      "admin" ->
+        all_possible_clients
+        |> Enum.group_by(fn %{userid: userid} ->
+          User.has_any_role?(userid, "Admin")
+        end, fn %{userid: userid} ->
+          userid
+        end)
+
+      "all" ->
+        %{
+          false: (lobby.players ++ state.join_queue)
+        }
+
+      "default" ->
+        %{
+          true: [senderid],
+          false: List.delete((lobby.players ++ state.join_queue), senderid)
+        }
+    end
+
+    IO.puts ""
+    IO.inspect result
+    IO.puts ""
+
+    # Set this lot to be in the queue
+    (result[false] || [])
+      |> Enum.each(fn userid ->
+        Lobby.force_change_client(state.coordinator_id, userid, %{player: false})
+      end)
+
+    # And add them to the queue
+    new_queue = Enum.shuffle(result[false] || [])
+
+    # Set these lot to be players
+    (result[true] || [])
+      |> Enum.each(fn userid ->
+        Lobby.force_change_client(state.coordinator_id, userid, %{player: true})
+      end)
+
+    sender_name = Account.get_username_by_id(senderid)
+    LobbyChat.say(
       state.coordinator_id,
-      senderid,
-      "Rotate is currently not implemented",
+      "#{sender_name} shuffled the players using mode: #{mode}",
       state.lobby_id
     )
-    state
+
+    %{state | join_queue: new_queue}
   end
 
   #################### Host and Moderator

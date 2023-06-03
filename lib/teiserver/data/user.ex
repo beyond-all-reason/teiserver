@@ -640,10 +640,6 @@ defmodule Teiserver.User do
       shadowban_user(sender_id)
     end
 
-    IO.puts ""
-    IO.inspect {allowed, message_parts, sender_id, "teiserver_client_messages:#{to_id}"}, label: "Send DM"
-    IO.puts ""
-
     if allowed do
       if is_bot?(to_id) do
         message_parts

@@ -113,16 +113,19 @@ config :central, Oban,
     {Oban.Plugins.Cron,
      crontab: [
        # Every hour
-       {"0 * * * *", Central.Admin.CleanupTask},
+       {"0 * * * *", Central.Admin.HourlyCleanupTask},
 
        # Every day at 2am
+       {"0 * * * *", Central.Admin.DailyCleanupTask},
        {"0 2 * * *", Teiserver.Logging.AggregateViewLogsTask},
 
        # 1:07 am
        {"7 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
        {"12 1 * * *", Teiserver.Chat.Tasks.DailyCleanupTask},
-       {"17 1 * * *", Teiserver.Battle.Tasks.DailyCleanupTask},
        {"22 1 * * *", Teiserver.Telemetry.EventCleanupTask},
+
+      # At 17 minutes past every hour
+       {"17 * * * *", Teiserver.Battle.Tasks.DailyCleanupTask},
 
        # Every minute
        {"* * * * *", Teiserver.Telemetry.Tasks.PersistServerMinuteTask},
