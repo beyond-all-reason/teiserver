@@ -1162,9 +1162,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> Enum.reject(&(&1 == nil))
 
     all_possible_clients = players ++ queuers
-    |> Enum.map(fn player_id ->
-      Client.get_client_by_id(player_id)
-    end)
 
     # Generate a map of true and false, true are players and false is the queue
     result = case mode do
