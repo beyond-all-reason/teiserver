@@ -1146,11 +1146,25 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     lobby = Lobby.get_lobby(state.lobby_id)
 
-    all_possible_clients = (lobby.players ++ state.join_queue)
+    players = lobby.players
+      |> Enum.map(fn player_id ->
+        Client.get_client_by_id(player_id)
+      end)
+      |> Enum.reject(&(&1 == nil))
+      |> Enum.filter(fn client ->
+        client.player
+      end)
+
+    queuers = state.join_queue
+      |> Enum.map(fn player_id ->
+        Client.get_client_by_id(player_id)
+      end)
+      |> Enum.reject(&(&1 == nil))
+
+    all_possible_clients = players ++ queuers
     |> Enum.map(fn player_id ->
       Client.get_client_by_id(player_id)
     end)
-    |> Enum.reject(&(&1 == nil))
 
     # Generate a map of true and false, true are players and false is the queue
     result = case mode do
@@ -1209,10 +1223,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           false: List.delete((lobby.players ++ state.join_queue), senderid)
         }
     end
-
-    IO.puts ""
-    IO.inspect result
-    IO.puts ""
 
     # Set this lot to be in the queue
     (result[false] || [])
