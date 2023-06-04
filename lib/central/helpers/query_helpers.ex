@@ -73,7 +73,8 @@ defmodule Central.Helpers.QueryHelpers do
     Repo.aggregate(table, :count, :id)
   end
 
-  @spec offset_query(Ecto.Query.t(), Integer.t()) :: Ecto.Query.t()
+  @spec offset_query(Ecto.Query.t(), nil | Integer.t()) :: Ecto.Query.t()
+  def offset_query(query, nil), do: query
   def offset_query(query, amount) do
     query
     |> offset(^amount)

@@ -2629,6 +2629,7 @@ defmodule Teiserver.Telemetry do
     |> InfologLib.preload(args[:preload])
     |> InfologLib.order_by(args[:order_by])
     |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.offset_query(args[:offset])
   end
 
   @doc """

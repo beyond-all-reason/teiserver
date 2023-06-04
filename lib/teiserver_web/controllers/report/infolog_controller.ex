@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.Report.InfologController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
@@ -18,15 +19,21 @@ defmodule TeiserverWeb.Report.InfologController do
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
+    page = (params["page"] || "0") |> int_parse |> max(0)
+    limit = 50
+
     infologs =
       Telemetry.list_infologs(
         search: [],
         preload: [:user],
         select: ~w(id user_hash user_id log_type timestamp metadata size)a,
-        order_by: "Newest first"
+        order_by: "Newest first",
+        limit: limit,
+        offset: (page * limit)
       )
 
     conn
+    |> assign(:page, page)
     |> assign(:infologs, infologs)
     |> assign(:params, params)
     |> render("index.html")
