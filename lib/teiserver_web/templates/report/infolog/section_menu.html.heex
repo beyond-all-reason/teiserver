@@ -17,3 +17,17 @@
   bsname: bsname,
   url: Routes.ts_reports_infolog_path(@conn, :index) <> "?search=true"
 ) %>
+
+<%= case @active do %>
+  <% "index" -> %>
+    &nbsp;&nbsp;&nbsp;
+
+    <a href={~p"/teiserver/reports/infolog/?page=#{@page - 1}"} class="btn btn-secondary">
+      Prev
+    </a>
+
+    <a href={~p"/teiserver/reports/infolog/?page=#{@page + 1}"} class="btn btn-secondary">
+      Next
+    </a>
+  <% _ -> %>
+<% end %>
