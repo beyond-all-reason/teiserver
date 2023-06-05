@@ -481,8 +481,19 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     if balance do
       moderator_messages =
         if User.is_moderator?(senderid) do
+          time_taken = cond do
+            balance.time_taken < 1000 ->
+              "Time taken: #{balance.time_taken}us"
+            balance.time_taken < 1000_000 ->
+              t = round(balance.time_taken / 1000)
+              "Time taken: #{t}ms"
+            balance.time_taken < 1000_000_000 ->
+              t = round(balance.time_taken / 1000_000)
+              "Time taken: #{t}s"
+          end
+
           [
-            "Time taken: #{balance.time_taken}us"
+            time_taken
           ]
         else
           []
