@@ -46,6 +46,14 @@ defmodule TeiserverWeb.Account.GeneralController do
         Enum.member?(["VIP", "Tournament player"], role)
       end)
 
+    my_perms = conn.assigns.current_user.permissions
+    role_data = RoleLib.role_data()
+
+    filtered_roles = RoleLib.staff_roles()
+      |> Enum.filter(fn role ->
+        Enum.member?(my_perms, role)
+      end)
+
     role_def =
       if Enum.member?(available, role_name) do
         if RoleLib.role_data(role_name) do
@@ -66,13 +74,9 @@ defmodule TeiserverWeb.Account.GeneralController do
       })
 
     options =
-      (RoleLib.global_roles() ++ conn.current_user.data["roles"])
+      (RoleLib.global_roles() ++ filtered_roles)
       |> Enum.map(fn r ->
-        {r, RoleLib.role_data(r)}
-      end)
-      |> Enum.filter(fn {_, v} -> v != nil end)
-      |> Enum.map(fn {role, {colour, icon}} ->
-        {role, colour, icon}
+        role_data[r]
       end)
 
     conn
