@@ -133,9 +133,9 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
       |> date_to_str(:ymd_t_hms)
 
     query = """
-          UPDATE teiserver_battle_matches m SET tags = '{}'
+          UPDATE teiserver_battle_matches m SET tags = '{}' data = '{}'
           WHERE m.finished < #{finished_before}
-          AND m.finished < #{finished_after}
+          AND m.finished > #{finished_after}
     """
 
     Ecto.Adapters.SQL.query(Repo, query, [])
