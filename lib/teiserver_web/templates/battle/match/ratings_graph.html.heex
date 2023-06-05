@@ -6,10 +6,8 @@
   Map.merge(assigns, %{active: "matches"})
 ) %>
 
-<script src={Routes.static_path(@conn, "/js/d3.js")}>
-</script>
-<script src={Routes.static_path(@conn, "/js/c3.min.js")}>
-</script>
+<script src={Routes.static_path(@conn, "/js/d3.js")}></script>
+<!-- <script src={Routes.static_path(@conn, "/js/c3.min.js")}></script> -->
 
 <link href="/css/c3.min.css" rel="stylesheet" />
 
@@ -86,9 +84,11 @@ var colors = {};
 
 var data = <%= raw Jason.encode!(@data) %>;
 
-console.log(data);
+
 // https://d3-graph-gallery.com/graph/line_confidence_interval.html
 $(function() {
+  console.log('Rating Data:', data);
+
   var svg = d3.select("#chart")
     .append("svg")
     .attr("height", '100%')
