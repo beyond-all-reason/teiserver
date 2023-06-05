@@ -5,8 +5,8 @@ defmodule Teiserver.Tachyon.Responses.System.ErrorResponse do
 
   alias Teiserver.Data.Types, as: T
 
-  @spec execute(String.t()) :: {T.tachyon_command(), T.tachyon_object()}
-  def execute(reason) do
+  @spec generate(String.t()) :: {T.tachyon_command(), T.tachyon_object()}
+  def generate(reason) do
     {"system/error/response", :error, reason}
   end
 end

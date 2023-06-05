@@ -5,9 +5,11 @@ defmodule Teiserver.Telemetry.MatchGraphLogsTask do
       {"Duel", "duel.aggregate.#{key}"},
       {"Team", "team.aggregate.#{key}"},
       {"FFA", "ffa.aggregate.#{key}"},
+      {"Team FFA", "team_ffa.aggregate.#{key}"},
       {"Bot", "bots.aggregate.#{key}"},
       {"Raptors", "raptors.aggregate.#{key}"},
-      {"Scavengers", "scavengers.aggregate.#{key}"}
+      {"Scavengers", "scavengers.aggregate.#{key}"},
+      {"Total", "totals.aggregate.#{key}"}
     ]
     |> Enum.map(fn
       {name, path} ->
@@ -30,7 +32,8 @@ defmodule Teiserver.Telemetry.MatchGraphLogsTask do
         pvp =
           Map.get(l.data["duel"]["aggregate"], key, 0) +
             Map.get(l.data["ffa"]["aggregate"], key, 0) +
-            Map.get(l.data["team"]["aggregate"], key, 0)
+            Map.get(l.data["team"]["aggregate"], key, 0) +
+            Map.get(l.data["team_ffa"]["aggregate"], key, 0)
 
         pve =
           Map.get(l.data["raptors"]["aggregate"], key, 0) +

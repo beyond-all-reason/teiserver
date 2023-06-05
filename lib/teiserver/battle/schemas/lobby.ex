@@ -223,50 +223,52 @@ defmodule Teiserver.Battle.Lobby do
       Client.join_battle(userid, lobby_id, false)
       client = Account.get_client_by_id(userid)
 
-      PubSub.broadcast(
-        Central.PubSub,
-        "teiserver_global_user_updates",
-        %{
-          channel: "teiserver_global_user_updates",
-          event: :joined_lobby,
-          lobby_id: lobby_id,
-          client: client,
-          script_password: script_password
-        }
-      )
+      if client do
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_global_user_updates",
+          %{
+            channel: "teiserver_global_user_updates",
+            event: :joined_lobby,
+            lobby_id: lobby_id,
+            client: client,
+            script_password: script_password
+          }
+        )
 
-      PubSub.broadcast(
-        Central.PubSub,
-        "teiserver_client_messages:#{userid}",
-        %{
-          channel: "teiserver_client_messages:#{userid}",
-          event: :added_to_lobby,
-          lobby_id: lobby_id,
-          script_password: script_password
-        }
-      )
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_client_messages:#{userid}",
+          %{
+            channel: "teiserver_client_messages:#{userid}",
+            event: :added_to_lobby,
+            lobby_id: lobby_id,
+            script_password: script_password
+          }
+        )
 
-      PubSub.broadcast(
-        Central.PubSub,
-        "teiserver_client_watch:#{userid}",
-        %{
-          channel: "teiserver_client_watch:#{userid}",
-          event: :added_to_lobby,
-          lobby_id: lobby_id
-        }
-      )
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_client_watch:#{userid}",
+          %{
+            channel: "teiserver_client_watch:#{userid}",
+            event: :added_to_lobby,
+            lobby_id: lobby_id
+          }
+        )
 
-      PubSub.broadcast(
-        Central.PubSub,
-        "teiserver_lobby_updates:#{lobby_id}",
-        %{
-          channel: "teiserver_lobby_updates",
-          event: :add_user,
-          lobby_id: lobby_id,
-          client: client,
-          script_password: script_password
-        }
-      )
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_lobby_updates:#{lobby_id}",
+          %{
+            channel: "teiserver_lobby_updates",
+            event: :add_user,
+            lobby_id: lobby_id,
+            client: client,
+            script_password: script_password
+          }
+        )
+      end
     end
   end
 
@@ -290,37 +292,39 @@ defmodule Teiserver.Battle.Lobby do
         Coordinator.cast_consul(lobby_id, {:user_left, userid})
         client = Account.get_client_by_id(userid)
 
-        PubSub.broadcast(
-          Central.PubSub,
-          "teiserver_global_user_updates",
-          %{
-            channel: "teiserver_global_user_updates",
-            event: :left_lobby,
-            lobby_id: lobby_id,
-            client: client
-          }
-        )
+        if client do
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_global_user_updates",
+            %{
+              channel: "teiserver_global_user_updates",
+              event: :left_lobby,
+              lobby_id: lobby_id,
+              client: client
+            }
+          )
 
-        PubSub.broadcast(
-          Central.PubSub,
-          "teiserver_client_watch:#{userid}",
-          %{
-            channel: "teiserver_client_watch:#{userid}",
-            event: :left_lobby,
-            lobby_id: lobby_id
-          }
-        )
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_client_watch:#{userid}",
+            %{
+              channel: "teiserver_client_watch:#{userid}",
+              event: :left_lobby,
+              lobby_id: lobby_id
+            }
+          )
 
-        PubSub.broadcast(
-          Central.PubSub,
-          "teiserver_lobby_updates:#{lobby_id}",
-          %{
-            channel: "teiserver_lobby_updates",
-            event: :remove_user,
-            lobby_id: lobby_id,
-            client: client
-          }
-        )
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_lobby_updates:#{lobby_id}",
+            %{
+              channel: "teiserver_lobby_updates",
+              event: :remove_user,
+              lobby_id: lobby_id,
+              client: client
+            }
+          )
+        end
     end
   end
 
@@ -346,37 +350,39 @@ defmodule Teiserver.Battle.Lobby do
           client = Account.get_client_by_id(userid)
           Telemetry.log_server_event(userid, "lobby.kick_user", %{lobby_id: lobby_id})
 
-          PubSub.broadcast(
-            Central.PubSub,
-            "teiserver_global_user_updates",
-            %{
-              channel: "teiserver_global_user_updates",
-              event: :kicked_from_lobby,
-              lobby_id: lobby_id,
-              client: client
-            }
-          )
+          if client do
+            PubSub.broadcast(
+              Central.PubSub,
+              "teiserver_global_user_updates",
+              %{
+                channel: "teiserver_global_user_updates",
+                event: :kicked_from_lobby,
+                lobby_id: lobby_id,
+                client: client
+              }
+            )
 
-          PubSub.broadcast(
-            Central.PubSub,
-            "teiserver_client_watch:#{userid}",
-            %{
-              channel: "teiserver_client_watch:#{userid}",
-              event: :left_lobby,
-              lobby_id: lobby_id
-            }
-          )
+            PubSub.broadcast(
+              Central.PubSub,
+              "teiserver_client_watch:#{userid}",
+              %{
+                channel: "teiserver_client_watch:#{userid}",
+                event: :left_lobby,
+                lobby_id: lobby_id
+              }
+            )
 
-          PubSub.broadcast(
-            Central.PubSub,
-            "teiserver_lobby_updates:#{lobby_id}",
-            %{
-              channel: "teiserver_lobby_updates",
-              event: :kick_user,
-              lobby_id: lobby_id,
-              client: client
-            }
-          )
+            PubSub.broadcast(
+              Central.PubSub,
+              "teiserver_lobby_updates:#{lobby_id}",
+              %{
+                channel: "teiserver_lobby_updates",
+                event: :kick_user,
+                lobby_id: lobby_id,
+                client: client
+              }
+            )
+          end
       end
     end
   end

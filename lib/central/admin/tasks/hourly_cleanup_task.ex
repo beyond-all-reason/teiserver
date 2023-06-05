@@ -1,4 +1,4 @@
-defmodule Central.Admin.CleanupTask do
+defmodule Central.Admin.HourlyCleanupTask do
   @moduledoc false
   use Oban.Worker, queue: :cleanup
 

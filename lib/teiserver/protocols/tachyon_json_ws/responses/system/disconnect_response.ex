@@ -5,12 +5,8 @@ defmodule Teiserver.Tachyon.Responses.System.DisconnectResponse do
 
   alias Teiserver.Data.Types, as: T
 
-  @spec execute(String.t()) :: {T.tachyon_command(), T.tachyon_object()}
-  def execute(reason) do
-    object = %{
-      "result" => reason
-    }
-
-    {"disconnect", :success, object}
+  @spec generate(String.t()) :: {T.tachyon_command(), T.tachyon_object()}
+  def generate(_reason) do
+    {"disconnect", :success, nil}
   end
 end

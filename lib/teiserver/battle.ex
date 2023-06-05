@@ -295,6 +295,9 @@ defmodule Teiserver.Battle do
         case update_match(empty_match, match_params) do
           {:ok, match} ->
             members
+            |> Enum.filter(fn m ->
+              m.team_id != nil
+            end)
             |> Enum.each(fn m ->
               # In some rare situations it is possible to get into a situation where
               # the membership already exists and this can cause a cascading failure
@@ -390,7 +393,7 @@ defmodule Teiserver.Battle do
       list_matches(
         search: [
           founder_id: founder_id,
-          never_finished: true,
+          has_finished: false,
           started_after: started_after
         ],
         limit: 1

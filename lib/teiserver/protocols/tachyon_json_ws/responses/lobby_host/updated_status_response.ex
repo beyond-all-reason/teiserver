@@ -5,8 +5,8 @@ defmodule Teiserver.Tachyon.Responses.LobbyHost.UpdatedStatusResponse do
 
   alias Teiserver.Data.Types, as: T
 
-  @spec execute() :: {T.tachyon_command(), T.tachyon_object()}
-  def execute() do
+  @spec generate() :: {T.tachyon_command(), T.tachyon_object()}
+  def generate() do
     object = %{}
 
     {"lobbyHost/updated_status/response", :success, object}

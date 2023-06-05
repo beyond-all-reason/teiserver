@@ -56,4 +56,5 @@ defmodule Teiserver do
 
   # Delegate some stuff
   defdelegate rate_match(match), to: Teiserver.Game.MatchRatingLib
+  defdelegate rate_match(match, override), to: Teiserver.Game.MatchRatingLib
 end

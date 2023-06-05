@@ -19,6 +19,16 @@
     ) %>
   <% end %>
 
+  <%= if allow?(@current_user, Teiserver.Game.PlayerRatingsExport.permissions()) do %>
+    <%= central_component("menu_card",
+      size: :small,
+      icon: Teiserver.Game.PlayerRatingsExport.icon(),
+      name: "player_ratings",
+      text: "Player ratings",
+      link: Routes.ts_reports_exports_path(@conn, :show, "player_ratings")
+    ) %>
+  <% end %>
+
   <%= if allow?(@current_user, Teiserver.Game.MatchDataTableExport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,

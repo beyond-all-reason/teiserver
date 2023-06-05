@@ -19,7 +19,7 @@ defmodule Teiserver.Tachyon.Handlers.Account.WhoamiRequest do
     user = Account.get_user_by_id(conn.userid)
     client = Account.get_client_by_id(conn.userid)
 
-    response = WhoamiResponse.execute(user, client)
+    response = WhoamiResponse.generate(user, client)
 
     {response, conn}
   end

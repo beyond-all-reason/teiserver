@@ -402,7 +402,11 @@ defmodule Teiserver.SpringTcpServer do
       SpringOut.do_join_room(new_state, room_name)
     end
 
-    {:ok, _user} = User.do_login(user, state.ip, state.lobby, state.lobby_hash)
+    if state.lobby_hash == nil do
+      send(self(), :terminate)
+    else
+      {:ok, _user} = User.do_login(user, state.ip, state.lobby, state.lobby_hash)
+    end
 
     {:noreply, new_state}
   end

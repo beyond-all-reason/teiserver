@@ -7,6 +7,7 @@ defmodule Teiserver.Tachyon.CommandDispatch do
 
   @modules [
     Handlers.Account.WhoamiRequest,
+    Handlers.Communication.SendDirectMessageRequest,
     Handlers.Lobby.ListLobbiesRequest,
     Handlers.Lobby.JoinRequest,
     Handlers.Lobby.LeaveRequest,

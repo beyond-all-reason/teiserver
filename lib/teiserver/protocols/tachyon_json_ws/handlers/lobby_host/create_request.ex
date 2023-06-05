@@ -28,7 +28,7 @@ defmodule Teiserver.Tachyon.Handlers.LobbyHost.CreateRequest do
 
     lobby = Battle.create_new_lobby(object)
 
-    response = CreateResponse.execute(lobby)
+    response = CreateResponse.generate(lobby)
 
     {response, conn}
   end

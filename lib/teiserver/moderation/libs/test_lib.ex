@@ -32,7 +32,7 @@ defmodule Teiserver.Moderation.ModerationTestLib do
           %{
             target_id: GeneralTestLib.make_user().id,
             reason: "Reason",
-            restrictions: ["Site", "Login"],
+            restrictions: ["Login"],
             score_modifier: 1000,
             expires: Timex.shift(Timex.now(), days: 5)
           },

@@ -144,6 +144,10 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     {:noreply, socket}
   end
 
+  def handle_info(%{channel: "teiserver_lobby_updates", client: nil}, socket) do
+    {:noreply, socket}
+  end
+
   def handle_info(%{channel: "teiserver_lobby_updates", event: :add_user, client: client}, socket) do
     extra_ids = [client.userid | socket.assigns.lobby_user_ids]
 

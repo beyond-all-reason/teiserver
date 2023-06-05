@@ -21,7 +21,7 @@ defmodule Teiserver.Tachyon.Handlers.Lobby.ListLobbiesRequest do
       Battle.list_lobbies()
       |> Converters.convert(:lobby)
 
-    response = ListLobbiesResponse.execute(lobbies)
+    response = ListLobbiesResponse.generate(lobbies)
 
     {response, conn}
   end

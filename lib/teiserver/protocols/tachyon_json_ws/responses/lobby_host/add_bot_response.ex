@@ -5,8 +5,8 @@ defmodule Teiserver.Tachyon.Responses.LobbyHost.AddBotResponse do
 
   alias Teiserver.Data.Types, as: T
 
-  @spec execute() :: {T.tachyon_command(), T.tachyon_object()}
-  def execute() do
+  @spec generate() :: {T.tachyon_command(), T.tachyon_object()}
+  def generate() do
     object = %{}
 
     {"lobbyHost/add_bot/response", :success, object}

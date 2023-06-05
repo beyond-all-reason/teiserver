@@ -4,9 +4,11 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   """
   use Oban.Worker, queue: :teiserver
 
-  alias Teiserver.{Battle, User, Coordinator}
+  alias Teiserver.{Account, Battle, User, Coordinator}
+  alias Teiserver.Battle.MatchMembershipLib
   alias Central.Helpers.NumberHelper
   alias Teiserver.Config
+  alias Central.Repo
   # alias Teiserver.Data.Types, as: T
 
   @impl Oban.Worker
@@ -31,8 +33,8 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   @spec perform_reprocess(non_neg_integer()) :: :ok
   def perform_reprocess(match_id) do
     Battle.get_match(match_id,
-      preload: [:members],
-      limit: :infinity
+      preload: [],
+      limit: 1
     )
     |> post_process_match
 
@@ -40,7 +42,27 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   end
 
   defp post_process_match(match) do
-    new_data =
+    data_player_ids = match.data["export_data"]["teamStats"]
+      |> Map.keys
+      |> Enum.map(fn name ->
+        Account.get_userid_from_name(name)
+      end)
+
+    # Now delete match memberships from those not meant to be present
+    MatchMembershipLib.get_match_memberships()
+      |> MatchMembershipLib.search([
+        match_id: match.id,
+        user_id_not_in: data_player_ids
+      ])
+      |> Repo.delete_all
+
+    # Now re-get the match
+    match = Battle.get_match(match.id,
+      preload: [:members],
+      limit: 1
+    )
+
+    new_data = match.data
       Map.merge(match.data || %{}, %{
         "player_count" => Enum.count(match.members)
       })

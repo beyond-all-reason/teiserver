@@ -839,15 +839,18 @@ defmodule Teiserver.User do
 
     user = get_user_by_id(token.user.id)
 
-    # If they're a smurf, log them in as the smurf!
-    user =
-      if user.smurf_of_id != nil do
-        get_user_by_id(user.smurf_of_id)
-      else
-        user
-      end
+    # # If they're a smurf, log them in as the smurf!
+    # user =
+    #   if user.smurf_of_id != nil do
+    #     get_user_by_id(user.smurf_of_id)
+    #   else
+    #     user
+    #   end
 
     cond do
+      user.smurf_of_id != nil ->
+        {:error, "Smurf/alt account detected. We do not allow smurfing. Please login as your main account. Repeatedly creating smurfs can result in suspension or bans."}
+
       token.expires != nil and Timex.compare(token.expires, Timex.now()) == -1 ->
         {:error, "Token expired"}
 
@@ -888,7 +891,6 @@ defmodule Teiserver.User do
         {:ok, user} = do_login(user, ip, application_name, application_hash)
 
         _client = Client.login(user, :tachyon, ip)
-        Logger.metadata(request_id: "TachyonWSServer##{user.id}")
 
         {:ok, user}
     end
@@ -906,15 +908,18 @@ defmodule Teiserver.User do
       {:ok, db_user, _claims} ->
         user = get_user_by_id(db_user.id)
 
-        # If they're a smurf, log them in as the smurf!
-        user =
-          if user.smurf_of_id != nil do
-            get_user_by_id(user.smurf_of_id)
-          else
-            user
-          end
+        # # If they're a smurf, log them in as the smurf!
+        # user =
+        #   if user.smurf_of_id != nil do
+        #     get_user_by_id(user.smurf_of_id)
+        #   else
+        #     user
+        #   end
 
         cond do
+          user.smurf_of_id != nil ->
+            {:error, "Smurf/alt account detected. We do not allow smurfing. Please login as your main account. Repeatedly creating smurfs can result in suspension or bans."}
+
           not is_bot?(user) and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
@@ -980,17 +985,20 @@ defmodule Teiserver.User do
         {:error, "No user found for '#{username}'"}
 
       user ->
-        # If they're a smurf, log them in as the smurf!
-        {user, username} =
-          if user.smurf_of_id != nil do
-            origin_user = get_user_by_id(user.smurf_of_id)
+        # # If they're a smurf, log them in as the smurf!
+        # {user, username} =
+        #   if user.smurf_of_id != nil do
+        #     origin_user = get_user_by_id(user.smurf_of_id)
 
-            {origin_user, origin_user.name}
-          else
-            {user, user.name}
-          end
+        #     {origin_user, origin_user.name}
+        #   else
+        #     {user, user.name}
+        #   end
 
         cond do
+          user.smurf_of_id != nil ->
+            {:error, "Smurf/alt account detected. We do not allow smurfing. Please login as your main account. Repeatedly creating smurfs can result in suspension or bans."}
+
           user.name != username ->
             {:error, "Username is case sensitive, try '#{user.name}'"}
 

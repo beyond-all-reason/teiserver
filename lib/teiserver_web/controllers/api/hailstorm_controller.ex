@@ -31,6 +31,10 @@ defmodule TeiserverWeb.API.HailstormController do
             :success ->
               db_user = Account.get_user!(nil, search: [email: email])
               Central.Account.update_user(db_user, params["permissions"] || [], :permissions)
+
+              # Specific updates
+              User.add_roles(db_user.id, params["roles"])
+
               %{userid: db_user.id}
 
             {:error, reason} ->
