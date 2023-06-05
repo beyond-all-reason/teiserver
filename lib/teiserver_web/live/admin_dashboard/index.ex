@@ -163,7 +163,8 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     server_pids = [
       {"Lobby ID server", lobby_id_server_pid},
       {"Coordinator", Coordinator.get_coordinator_pid()},
-      {"Accolades", AccoladeLib.get_accolade_bot_pid()}
+      {"Accolades", AccoladeLib.get_accolade_bot_pid()},
+      {"Match Monitor", Teiserver.Battle.MatchMonitorServer.get_match_monitor_pid()}
     ]
 
     socket

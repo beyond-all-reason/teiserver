@@ -101,6 +101,7 @@ defmodule Teiserver.Battle do
     |> Repo.one()
   end
 
+  def get_match(nil), do: nil
   def get_match(args) do
     match_query(nil, args)
     |> Repo.one()
@@ -450,30 +451,23 @@ defmodule Teiserver.Battle do
           {:ok, data} ->
             # We have to get the UUID from the script tags sent
             # because the bot itself is in a new lobby since the last one finished
-            uuid = data["battleContext"]["scriptTags"]["server/match/uuid"]
+            id = data["battleContext"]["scriptTags"]["server/match/id"]
 
-            case list_matches(search: [uuid: uuid]) do
-              [match] ->
+            case get_match(id) do
+              nil ->
+                Logger.error(
+                  "Error finding match id of #{id}"
+                )
+
+                {:error, "No match found"}
+
+              match ->
                 filtered_data =
                   data
                   |> Map.drop(~w(battleContext bots))
 
                 new_data = Map.put(match.data || %{}, "export_data", filtered_data)
                 update_match(match, %{data: new_data})
-
-                # "Got match export data for #{uuid} of: #{json_string}"
-                # |> Central.Helpers.StringHelper.multisplit(800)
-                # |> Enum.map(fn part ->
-                #   Logger.info("'#{part}'")
-                # end)
-                :success
-
-              match_list ->
-                Logger.error(
-                  "Error finding match uuid of #{uuid} (got #{Enum.count(match_list)})"
-                )
-
-                {:error, "No match found"}
             end
 
           _ ->
