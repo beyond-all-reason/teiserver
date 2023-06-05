@@ -169,32 +169,25 @@ defmodule TeiserverWeb.Battle.MatchController do
         preload: [:match, :match_membership]
       )
 
-    data =
-      logs
-      |> Enum.map(fn rating -> %{
-        date: TimexHelper.date_to_str(rating.inserted_at, format: :ymd_hms),
-        rating_value: rating.value["rating_value"],
-        uncertainty: rating.value["uncertainty"],
-        # uncertainty: rating.value["uncertainty"],
-        # value: rating.value["rating_value"]
-      } end)
-
-      # |> List.foldl(%{}, fn rating, acc ->
-      #   Map.update(
-      #     acc,
-      #     TimexHelper.date_to_str(rating.inserted_at, format: :ymd),
-      #     {rating.value["rating_value"], 1},
-      #     fn {match_rating, count} ->
-      #       {match_rating + rating.value["rating_value"], count + 1}
-      #     end
-      #   )
-      # end)
-      # |> Enum.map(fn {date, {match_rating, count}} ->
-      #   {date, Float.round(match_rating / count, 2)}
-      # end)
-      # |> List.foldl({[], []}, fn {date, avg_rating}, {dates, avg_ratings} ->
-      #   {[date | dates], [avg_rating | avg_ratings]}
-      # end)
+    data = logs
+      |> List.foldl(%{}, fn rating, acc ->
+        Map.update(
+          acc,
+          TimexHelper.date_to_str(rating.inserted_at, format: :ymd),
+          {rating.value["rating_value"], rating.value["uncertainty"], 1},
+          fn {match_rating, uncertainty, count} ->
+            {match_rating + rating.value["rating_value"], uncertainty + rating.value["uncertainty"], count + 1}
+          end
+        )
+      end)
+      |> Enum.map(fn {date, {rating_value, uncertainty, count}} -> %{
+          date: date,
+          rating_value: Float.round(rating_value / count, 2),
+          uncertainty: Float.round(uncertainty / count, 2),
+          count: count,
+        }
+      end)
+      |> Enum.sort_by(fn rating -> rating.date end)
 
     conn
     |> assign(:filter, filter || "rating-all")

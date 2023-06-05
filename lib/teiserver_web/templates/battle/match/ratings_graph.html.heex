@@ -25,6 +25,51 @@
     top: 10px;
     left: 20px;
 }
+
+.wrapper {
+  position: relative;
+}
+
+.tooltip {
+  opacity: 0;
+  position: absolute;
+  top: -14px;
+  left: 0;
+  padding: 0.6em 1em;
+  background: #212529;
+  color: #3498db;
+  text-align: center;
+  line-height: 1.4em;
+  font-size: 0.9em;
+  border: 1px solid #495057;
+  z-index: 10;
+  transition: all 0.1s ease-out;
+  pointer-events: none;
+}
+
+.tooltip:before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: #212529;
+  border: 1px solid #212529;
+  border-top-color: transparent;
+  border-left-color: transparent;
+  transform: translate(-50%, 50%) rotate(45deg);
+  transform-origin: center center;
+  z-index: 10;
+}
+
+.tooltip-date {
+  margin-bottom: 0.2em;
+  font-weight: 600;
+  font-size: 1.1em;
+  line-height: 1.4em;
+}
+
 </style>
 
 <script>
@@ -43,81 +88,104 @@ var data = <%= raw Jason.encode!(@data) %>;
 
 console.log(data);
 // https://d3-graph-gallery.com/graph/line_confidence_interval.html
-  $(function() {
-    var svg = d3.select("#chart")
-      .append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-        .attr("transform",
-              "translate(" + margin.left + "," + margin.top + ")");
+$(function() {
+  var svg = d3.select("#chart")
+    .append("svg")
+    .attr("height", '100%')
+    .attr('viewBox', `0 0 ${ width + margin.left + margin.right } ${ height + margin.top + margin.bottom }`)
 
-    var dateFormat = d3.timeParse("%Y-%m-%d %H:%M:%S");
+  var g = svg.append("g")
+    .attr(
+      "transform",
+      "translate(" + margin.left + "," + margin.top + ")"
+    );
 
-    // Add X axis --> it is a date format
-    var x = d3.scaleTime()
-      .domain(d3.extent(data, function(d) { return dateFormat(d.date); }))
-      .range([ 0, width ]);
+  var dateFormat = d3.timeParse("%Y-%m-%d");
 
-    // Add Y axis
-    var y = d3.scaleLinear()
-      //.domain(d3.max(data, function(d) { return d.rating_value; }))
-      .domain([0, 50])
-      .range([ height, 0 ]);
+  // Add X axis --> it is a date format
+  var x = d3.scaleTime()
+    .domain(d3.extent(data, function(d) { return dateFormat(d.date); }))
+    .range([ 0, width ]);
 
-    svg.append("g")
-      .attr("transform", "translate(0," + y(0) + ")")
-      .call(d3.axisBottom(x));
-    svg.append("g")
-      .attr("transform", "translate(0, 0)")
-      .call(d3.axisLeft(y));
+  // Add Y axis
+  var y = d3.scaleLinear()
+    //.domain(d3.max(data, function(d) { return d.rating_value; }))
+    .domain([0, 50])
+    .range([ height, 0 ]);
 
-    // Show confidence interval
-    svg.append("path")
-      .datum(data)
-      .attr("fill", "#cce5df")
-      .attr("stroke", "none")
-      .attr("d", d3.area()
-        .x(function(d) { return x(dateFormat(d.date)) })
-        .y0(function(d) { return y(d.rating_value - d.uncertainty) })
-        .y1(function(d) { return y(d.rating_value + d.uncertainty) })
-        )
+  // Show confidence interval
+  g.append("path")
+    .datum(data)
+    .attr("fill", "#343a40")
+    .attr("stroke", "none")
+    .attr("d", d3.area()
+      .x(function(d) { return x(dateFormat(d.date)) })
+      .y0(function(d) { return y(d.rating_value - d.uncertainty) })
+      .y1(function(d) { return y(d.rating_value + d.uncertainty) })
+      .curve(d3.curveCardinal)
+      )
 
-    // Add the line
-    svg
-      .append("path")
-      .datum(data)
-      .attr("fill", "none")
-      .attr("stroke", "steelblue")
-      .attr("stroke-width", 1.5)
-      .attr("d", d3.line()
-        .x(function(d) { return x(dateFormat(d.date)) })
-        .y(function(d) { return y(d.rating_value) })
-        )
+  // Add the line
+  g
+    .append("path")
+    .datum(data)
+    .attr("fill", "none")
+    .attr("stroke", "#007C00")
+    .attr("stroke-width", 1.5)
+    .attr("d", d3.line()
+      .x(function(d) { return x(dateFormat(d.date)) })
+      .y(function(d) { return y(d.rating_value) })
+      .curve(d3.curveCardinal)
+      )
 
-    /*var chart = c3.generate({
-      bindto: '#chart',
-      data: {
-        x: 'x',
-        columns:
-      },
-      axis: {
-        x: {
-          type: 'timeseries',
-          tick: {
-            format: '%Y-%m-%d'
-          }
-        },
-        y: {
-          min: 0,
-          padding: {
-            top: 15,
-            bottom: 0
-          }
-        }
-      }
-    });*/
-  });
+
+  g.append("g")
+    .attr("transform", "translate(0," + y(0) + ")")
+    .call(d3.axisBottom(x));
+  g.append("g")
+    .attr("transform", "translate(0, 0)")
+    .call(d3.axisLeft(y));
+
+  const tooltip = d3.select("#tooltip");
+
+  svg
+    .on("mousemove", function (e) {
+      const mousePosition = d3.mouse(this);
+      const hoveredDate = x.invert(mousePosition[0] - margin.left);
+      const getDistanceFromHoveredDate = (d) => {
+        return Math.abs(x(dateFormat(d.date)) - x(hoveredDate));
+      };
+
+
+      const closestIndex = d3.scan(
+        data,
+        (a, b) => getDistanceFromHoveredDate(a) - getDistanceFromHoveredDate(b)
+      );
+      const closestDataPoint = data[closestIndex];
+      // console.log(hoveredDate);
+      // console.log(closestIndex, closestDataPoint.date, closestDataPoint);
+
+      tooltip.select("#date").text(closestDataPoint.date);
+      tooltip.select("#rating_value").text(closestDataPoint.rating_value);
+      tooltip.select("#uncertainty").text(closestDataPoint.uncertainty);
+      tooltip.select("#count").text(closestDataPoint.count);
+
+      svgDim = svg.node().getBoundingClientRect();
+      const xValue = (x(dateFormat(closestDataPoint.date)) + margin.left) * (svgDim.width / (width + margin.left + margin.right));
+      const yValue = (y(closestDataPoint.rating_value) + margin.top) * (svgDim.height / (height + margin.top + margin.bottom));
+
+      //Grab the x and y position of our closest point,
+      //shift our tooltip, and hide/show our tooltip appropriately
+      tooltip.style(
+        "transform",
+        `translate(` + `calc(-50% + ${xValue}px),` + `calc(-100% + ${yValue}px)`
+      );
+      tooltip.style("opacity", 1);
+
+    }).on("mouseleave", function (e) {
+      tooltip.style("opacity", 0);
+    })
+});
 </script>
 
 <div class="row section-menu">
@@ -149,8 +217,26 @@ console.log(data);
             <% end %>
           </div>
         </div>
-        <br /> Average ratings
-        <div id="chart" class="with-transitions"></div>
+        <br />
+        <div id="wrapper" class="wrapper">
+            <div id="tooltip" class="tooltip">
+                <div class="tooltip-date">
+                    <span id="date"></span>
+                </div>
+                <div class="tooltip-rating">
+                  <div>
+                    Games Played: <span id="count"></span>
+                  </div>
+                  <div>
+                    Average Rating: <span id="rating_value"></span>
+                  </div>
+                  <div>
+                    Uncertainty: <span id="uncertainty"></span>
+                  </div>
+                </div>
+            </div>
+            <div id="chart" class="with-transitions"></div>
+        </div>
       </div>
     </div>
   </div>
