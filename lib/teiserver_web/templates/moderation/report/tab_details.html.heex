@@ -47,8 +47,22 @@
             <td>Relationship:</td>
             <td><%= @report.relationship %></td>
           </tr>
-        <% end %>
 
+          <tr>
+            <td>Replay search:</td>
+            <td>
+              <a
+                href={"https://bar-rts.com/replays/?" <>
+                "&date=" <> date_to_str(@report.inserted_at, format: :ymd, tz: @tz) <>
+                "&players=" <> @report.target.name
+                }
+                class="btn btn-secondary btn-sm"
+              >
+                BAR Live Services
+              </a>
+            </td>
+          </tr>
+        <% end %>
         <%= if @report.result_id do %>
           <tr>
             <td>Result</td>
