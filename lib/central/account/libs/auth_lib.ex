@@ -100,7 +100,9 @@ defmodule Central.Account.AuthLib do
   end
 
   def allow?(permissions_held, permission_required) do
-    Logger.debug("Permission test, has: #{Kernel.inspect permissions_held}, needs: #{Kernel.inspect permission_required}")
+    Logger.debug(
+      "Permission test, has: #{Kernel.inspect(permissions_held)}, needs: #{Kernel.inspect(permission_required)}"
+    )
 
     cond do
       # Enum.member?(Application.get_env(:central, CentralWeb)[:universal_permissions], permission_required) -> true

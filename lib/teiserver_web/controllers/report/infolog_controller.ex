@@ -29,7 +29,7 @@ defmodule TeiserverWeb.Report.InfologController do
         select: ~w(id user_hash user_id log_type timestamp metadata size)a,
         order_by: "Newest first",
         limit: limit,
-        offset: (page * limit)
+        offset: page * limit
       )
 
     conn

@@ -50,14 +50,14 @@
       <div class="col">
         <h5>Management</h5>
         <%= for r <- @management_roles do %>
-          <%
-            style = @role_styling_map[r]
-            label = if style do
+          <% style = @role_styling_map[r]
+
+          label =
+            if style do
               raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> #{r}")
             else
               r
-            end
-          %>
+            end %>
           <%= central_component("checkbox",
             id: "user_#{r}",
             name: "user[#{r}]",
@@ -72,14 +72,14 @@
       <div class="col">
         <h5>Moderation</h5>
         <%= for r <- @moderation_roles do %>
-          <%
-            style = @role_styling_map[r]
-            label = if style do
+          <% style = @role_styling_map[r]
+
+          label =
+            if style do
               raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> #{r}")
             else
               r
-            end
-          %>
+            end %>
           <%= central_component("checkbox",
             id: "user_#{r}",
             name: "user[#{r}]",
@@ -94,14 +94,14 @@
       <div class="col">
         <h5>Staff</h5>
         <%= for r <- @staff_roles do %>
-          <%
-            style = @role_styling_map[r]
-            label = if style do
+          <% style = @role_styling_map[r]
+
+          label =
+            if style do
               raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> #{r}")
             else
               r
-            end
-          %>
+            end %>
           <%= central_component("checkbox",
             id: "user_#{r}",
             name: "user[#{r}]",

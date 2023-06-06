@@ -247,7 +247,9 @@ is_admin = allow?(@conn, "Admin") %>
 
                     <td>
                       <a
-                        href={~p"/teiserver/reports/show/time_compare?report[account_user1]=%23#{@user.id}&report[account_user2]=%23#{user.id}"}
+                        href={
+                          ~p"/teiserver/reports/show/time_compare?report[account_user1]=%23#{@user.id}&report[account_user2]=%23#{user.id}"
+                        }
                         class="btn btn-secondary btn-sm"
                       >
                         Compare

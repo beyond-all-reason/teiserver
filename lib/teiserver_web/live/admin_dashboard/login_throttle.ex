@@ -59,8 +59,7 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
      state
      |> assign(:heartbeats, msg.heartbeats)
      |> assign(:queues, msg.queues)
-     |> assign(:recent_logins, msg.recent_logins)
-     }
+     |> assign(:recent_logins, msg.recent_logins)}
   end
 
   def handle_info(

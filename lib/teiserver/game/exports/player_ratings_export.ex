@@ -42,11 +42,15 @@ defmodule Teiserver.Game.PlayerRatingsExport do
         search: [
           rating_type_id: rating_type_id
         ],
-        select: ~w(user_id rating_type_id rating_value skill uncertainty leaderboard_rating last_updated)a,
+        select:
+          ~w(user_id rating_type_id rating_value skill uncertainty leaderboard_rating last_updated)a,
         limit: :infinity
       )
       |> Enum.map(fn rating ->
-        Map.take(rating, ~w(user_id rating_type_id rating_value skill uncertainty leaderboard_rating last_updated)a)
+        Map.take(
+          rating,
+          ~w(user_id rating_type_id rating_value skill uncertainty leaderboard_rating last_updated)a
+        )
       end)
 
     Logger.info("Found #{Enum.count(ratings)} ratings")

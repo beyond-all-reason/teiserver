@@ -125,6 +125,7 @@ defmodule Teiserver.Account.UserLib do
     from users in query,
       where: users.smurf_of_id == ^userid
   end
+
   def _search(query, :smurf_of, "Smurf"), do: _search(query, :smurf_of, true)
   def _search(query, :smurf_of, "Non-smurf"), do: _search(query, :smurf_of, false)
 

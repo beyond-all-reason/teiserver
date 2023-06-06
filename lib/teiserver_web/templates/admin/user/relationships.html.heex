@@ -79,7 +79,9 @@
                       <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
                         <%= central_component("icon", icon: user.icon) %>
                       </td>
-                      <td style={"background-color: #{rgba_css user.colour};"}><%= user.name %></td>
+                      <td style={"background-color: #{rgba_css user.colour};"}>
+                        <%= user.name %>
+                      </td>
                       <td>&nbsp;</td>
                       <td>
                         <a

@@ -27,9 +27,7 @@
           >
             <i class="fa-fw fa-solid fa-download"></i> Download
           </a>
-
           &nbsp;
-
           <%= if allow?(@conn, "admin.dev") do %>
             <%= link(raw("<i class='fa-solid fa-fw fa-trash'></i> Delete"),
               to: Routes.ts_reports_infolog_path(@conn, :delete, @infolog.id),
@@ -50,14 +48,17 @@
         <div class="row">
           <div class="col-md-12">
             <h5>Metadata</h5>
-            <%
-              encoded_metadata = Jason.encode!(@infolog.metadata, pretty: true)
+            <% encoded_metadata = Jason.encode!(@infolog.metadata, pretty: true)
 
-              metadata_line_count = encoded_metadata
-                |> String.split("\n")
-                |> Enum.count
-            %>
-            <textarea rows={metadata_line_count + 1} class="form-control" style="font-family: monospace;"><%= encoded_metadata %></textarea>
+            metadata_line_count =
+              encoded_metadata
+              |> String.split("\n")
+              |> Enum.count() %>
+            <textarea
+              rows={metadata_line_count + 1}
+              class="form-control"
+              style="font-family: monospace;"
+            ><%= encoded_metadata %></textarea>
           </div>
 
           <%= if @infolog.size < 3_000_000 do %>

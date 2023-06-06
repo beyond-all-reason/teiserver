@@ -18,12 +18,14 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
   @spec connect(T.tachyon_ws_state()) :: {:ok, T.tachyon_ws_state()} | :error
   def connect(
-        %{params: %{
-          "token" => token_value,
-          "application_hash" => _,
-          "application_name" => _,
-          "application_version" => _
-          }} = state
+        %{
+          params: %{
+            "token" => token_value,
+            "application_hash" => _,
+            "application_name" => _,
+            "application_version" => _
+          }
+        } = state
       ) do
     case Account.get_user_token_by_value(token_value) do
       nil ->
@@ -35,7 +37,10 @@ defmodule Teiserver.Tachyon.TachyonSocket do
             {:ok, Map.put(state, :conn, conn)}
 
           v ->
-            Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line} - Login failure with token: #{inspect v}\n")
+            Logger.error(
+              "Error at: #{__ENV__.file}:#{__ENV__.line} - Login failure with token: #{inspect(v)}\n"
+            )
+
             {:error, :failed_login}
         end
 
@@ -49,7 +54,8 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   end
 
   def connect(%{params: params}) do
-    missing = ~w(token application_hash application_name application_version)
+    missing =
+      ~w(token application_hash application_name application_version)
       |> Enum.reject(fn key -> Map.has_key?(params, key) end)
       |> Enum.join(", ")
 
@@ -101,25 +107,26 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
     {dispatch_response, new_conn} = CommandDispatch.dispatch(conn, object, meta)
 
-    response = case dispatch_response do
-      {_command, :success, nil} ->
-        nil
+    response =
+      case dispatch_response do
+        {_command, :success, nil} ->
+          nil
 
-      {command, :success, data} ->
-        %{
-          "command" => command,
-          "status" => "success",
-          "data" => data
-        }
+        {command, :success, data} ->
+          %{
+            "command" => command,
+            "status" => "success",
+            "data" => data
+          }
 
-      {command, :error, reason} ->
-        %{
-          "command" => command,
-          "status" => "failure",
-          "reason" => reason,
-          "data" => %{}
-        }
-    end
+        {command, :error, reason} ->
+          %{
+            "command" => command,
+            "status" => "failure",
+            "reason" => reason,
+            "data" => %{}
+          }
+      end
 
     # Currently not able to validate errors so leaving it out
     # if response != nil do
@@ -129,18 +136,20 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     {:ok, response, new_conn}
   end
 
-  @spec handle_info(any, T.tachyon_ws_state()) :: {:reply, :ok, {:binary, binary}, T.tachyon_ws_state()}
+  @spec handle_info(any, T.tachyon_ws_state()) ::
+          {:reply, :ok, {:binary, binary}, T.tachyon_ws_state()}
   def handle_info(%{channel: channel} = msg, state) do
-    module = case channel do
-      "teiserver_lobby_host_message:" <> _ ->
-        MessageHandlers.LobbyHostMessageHandlers
+    module =
+      case channel do
+        "teiserver_lobby_host_message:" <> _ ->
+          MessageHandlers.LobbyHostMessageHandlers
 
-      "teiserver_client_messages:" <> _ ->
-        MessageHandlers.ClientMessageHandlers
+        "teiserver_client_messages:" <> _ ->
+          MessageHandlers.ClientMessageHandlers
 
-      _ ->
-        raise "No handler for messages to channel #{msg.channel}"
-    end
+        _ ->
+          raise "No handler for messages to channel #{msg.channel}"
+      end
 
     case module.handle(msg, state) do
       nil ->
@@ -222,10 +231,13 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     }
   end
 
-  def handle_error(conn, {:missing_params, param}), do: Plug.Conn.send_resp(conn, 400, "Missing parameter(s): #{param}")
+  def handle_error(conn, {:missing_params, param}),
+    do: Plug.Conn.send_resp(conn, 400, "Missing parameter(s): #{param}")
+
   def handle_error(conn, :no_user), do: Plug.Conn.send_resp(conn, 401, "Unauthorized")
   def handle_error(conn, :failed_login), do: Plug.Conn.send_resp(conn, 403, "Forbidden")
   def handle_error(conn, :rate_limit), do: Plug.Conn.send_resp(conn, 429, "Too many requests")
 
-  def handle_error(conn, :unexpected_value), do: Plug.Conn.send_resp(conn, 500, "Internal server error")
+  def handle_error(conn, :unexpected_value),
+    do: Plug.Conn.send_resp(conn, 500, "Internal server error")
 end

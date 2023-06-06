@@ -980,11 +980,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
         true
 
       Enum.member?(@host_commands, cmd.command) and not (is_vip and is_boss) ->
-        msg = if is_vip do
-          "You also need to be boss to call '#{cmd.command}'"
-        else
-          "No listed command of '#{cmd.command}'"
-        end
+        msg =
+          if is_vip do
+            "You also need to be boss to call '#{cmd.command}'"
+          else
+            "No listed command of '#{cmd.command}'"
+          end
 
         LobbyChat.sayprivateex(
           state.coordinator_id,

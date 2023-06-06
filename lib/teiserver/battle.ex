@@ -102,6 +102,7 @@ defmodule Teiserver.Battle do
   end
 
   def get_match(nil), do: nil
+
   def get_match(args) do
     match_query(nil, args)
     |> Repo.one()
@@ -287,11 +288,11 @@ defmodule Teiserver.Battle do
 
         # Delete existing memberships for this match
         MatchMembershipLib.get_match_memberships()
-          |> MatchMembershipLib.search([
-            match_id: empty_match.id,
-            user_id_in: member_ids
-          ])
-          |> Repo.delete_all
+        |> MatchMembershipLib.search(
+          match_id: empty_match.id,
+          user_id_in: member_ids
+        )
+        |> Repo.delete_all()
 
         case update_match(empty_match, match_params) do
           {:ok, match} ->
@@ -455,9 +456,7 @@ defmodule Teiserver.Battle do
 
             case get_match(id) do
               nil ->
-                Logger.error(
-                  "Error finding match id of #{id}"
-                )
+                Logger.error("Error finding match id of #{id}")
 
                 {:error, "No match found"}
 

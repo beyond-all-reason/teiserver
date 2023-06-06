@@ -117,8 +117,9 @@ defmodule Teiserver.Battle.LobbyServer do
 
     options = %{
       "server/match/uuid" => new_match.server_uuid,
-      "server/match/id" => new_match.id,
+      "server/match/id" => new_match.id
     }
+
     modoptions = state.modoptions |> Map.merge(options)
 
     # Need to broadcast the new uuid
@@ -517,7 +518,7 @@ defmodule Teiserver.Battle.LobbyServer do
 
     options = %{
       "server/match/uuid" => match.server_uuid,
-      "server/match/id" => match.id,
+      "server/match/id" => match.id
     }
 
     {:ok,

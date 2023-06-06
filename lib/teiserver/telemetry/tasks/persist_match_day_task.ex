@@ -47,7 +47,6 @@ defmodule Teiserver.Telemetry.Tasks.PersistMatchDayTask do
     end
   end
 
-
   # To re-run yesterday's data
   # Teiserver.Telemetry.Tasks.PersistMatchDayTask.run(Timex.today |> Timex.shift(days: -1))
 

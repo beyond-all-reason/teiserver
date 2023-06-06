@@ -505,6 +505,7 @@ defmodule Teiserver.Protocols.SpringOut do
     case Client.get_client_by_id(userid) do
       nil ->
         nil
+
       client ->
         "JOINBATTLEREQUEST #{client.name} #{client.ip}\n"
     end

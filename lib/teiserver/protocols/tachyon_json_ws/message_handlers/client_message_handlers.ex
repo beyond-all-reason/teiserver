@@ -15,6 +15,7 @@ defmodule Teiserver.Tachyon.MessageHandlers.ClientMessageHandlers do
           "status" => "success",
           "data" => data
         }
+
         {:ok, resp, state}
     end
   end

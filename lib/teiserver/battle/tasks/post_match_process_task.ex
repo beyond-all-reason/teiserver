@@ -1,5 +1,5 @@
 defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
-@moduledoc """
+  @moduledoc """
   Used to process data about a match after it has ended.
   """
   use Oban.Worker, queue: :teiserver
@@ -42,27 +42,30 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   end
 
   defp post_process_match(match) do
-    data_player_ids = (match.data["export_data"]["teamStats"] || %{})
-      |> Map.keys
+    data_player_ids =
+      (match.data["export_data"]["teamStats"] || %{})
+      |> Map.keys()
       |> Enum.map(fn name ->
         Account.get_userid_from_name(name)
       end)
 
     # Now delete match memberships from those not meant to be present
     MatchMembershipLib.get_match_memberships()
-      |> MatchMembershipLib.search([
-        match_id: match.id,
-        user_id_not_in: data_player_ids
-      ])
-      |> Repo.delete_all
+    |> MatchMembershipLib.search(
+      match_id: match.id,
+      user_id_not_in: data_player_ids
+    )
+    |> Repo.delete_all()
 
     # Now re-get the match
-    match = Battle.get_match(match.id,
-      preload: [:members],
-      limit: 1
-    )
+    match =
+      Battle.get_match(match.id,
+        preload: [:members],
+        limit: 1
+      )
 
-    new_data = Map.merge(match.data || %{}, %{
+    new_data =
+      Map.merge(match.data || %{}, %{
         "player_count" => Enum.count(match.members)
       })
 

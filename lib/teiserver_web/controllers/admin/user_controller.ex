@@ -240,38 +240,48 @@ defmodule TeiserverWeb.Admin.UserController do
     current_user = conn.assigns.current_user
     user = Account.get_user!(id)
 
-    changeable_roles = cond do
-      Enum.member?(current_user.data["roles"], "Server") -> RoleLib.allowed_role_management("Server")
-      Enum.member?(current_user.data["roles"], "Admin") -> RoleLib.allowed_role_management("Admin")
-      Enum.member?(current_user.data["roles"], "Moderator") -> RoleLib.allowed_role_management("Moderator")
-      true -> []
-    end
+    changeable_roles =
+      cond do
+        Enum.member?(current_user.data["roles"], "Server") ->
+          RoleLib.allowed_role_management("Server")
+
+        Enum.member?(current_user.data["roles"], "Admin") ->
+          RoleLib.allowed_role_management("Admin")
+
+        Enum.member?(current_user.data["roles"], "Moderator") ->
+          RoleLib.allowed_role_management("Moderator")
+
+        true ->
+          []
+      end
 
     # Go through all roles, any we're not allowed to change
     # we leave as they are, any we are we do stuff with
-    new_roles = RoleLib.all_role_names()
+    new_roles =
+      RoleLib.all_role_names()
       |> Enum.map(fn role_name ->
-        selected = if Enum.member?(changeable_roles, role_name) do
-          user_params[role_name] == "true"
-        else
-          Enum.member?(user.data["roles"], role_name)
-        end
+        selected =
+          if Enum.member?(changeable_roles, role_name) do
+            user_params[role_name] == "true"
+          else
+            Enum.member?(user.data["roles"], role_name)
+          end
 
         if selected do
           role_name
-
         end
       end)
       |> Enum.reject(&(&1 == nil))
-      |> Enum.uniq
+      |> Enum.uniq()
 
-    permissions = new_roles
+    permissions =
+      new_roles
       |> Enum.map(fn role_name ->
         role_def = RoleLib.role_data(role_name)
         [role_name | role_def.contains]
       end)
-      |> List.flatten
-      |> Enum.uniq
+      |> List.flatten()
+      |> Enum.uniq()
 
     data =
       Map.merge(user.data || %{}, %{
@@ -281,24 +291,26 @@ defmodule TeiserverWeb.Admin.UserController do
         "roles" => new_roles
       })
 
-    user_params = Map.merge(user_params, %{
-      "data" => data,
-      "permissions" => permissions,
-      "roles" => new_roles
-    })
+    user_params =
+      Map.merge(user_params, %{
+        "data" => data,
+        "permissions" => permissions,
+        "roles" => new_roles
+      })
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        change_result = cond do
-          allow?(conn, "Server") ->
-            Account.server_update_user(user, user_params)
+        change_result =
+          cond do
+            allow?(conn, "Server") ->
+              Account.server_update_user(user, user_params)
 
-          allow?(conn, "Admin") ->
-            Account.update_user(user, user_params)
+            allow?(conn, "Admin") ->
+              Account.update_user(user, user_params)
 
-          allow?(conn, "Moderator") ->
-            Account.update_user(user, user_params)
-        end
+            allow?(conn, "Moderator") ->
+              Account.update_user(user, user_params)
+          end
 
         case change_result do
           {:ok, user} ->
@@ -695,13 +707,14 @@ defmodule TeiserverWeb.Admin.UserController do
         })
 
         # Now we update stats for the origin
-        smurf_count = Account.list_users(
-          search: [
-            smurf_of: origin_user.id
-          ],
-          select: [:id]
-        )
-        |> Enum.count
+        smurf_count =
+          Account.list_users(
+            search: [
+              smurf_of: origin_user.id
+            ],
+            select: [:id]
+          )
+          |> Enum.count()
 
         # And give the origin the smurfer role
         Teiserver.User.add_roles(origin_user.id, ["Smurfer"])
@@ -727,7 +740,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-         case Account.script_update_user(user, %{"smurf_of_id" => nil}) do
+        case Account.script_update_user(user, %{"smurf_of_id" => nil}) do
           {:ok, user} ->
             add_audit_log(conn, "Moderation:Cancel smurf mark", %{
               smurf_userid: user.id,
@@ -735,18 +748,20 @@ defmodule TeiserverWeb.Admin.UserController do
             })
 
             # Now we update stats for the origin
-            smurf_count = Account.list_users(
-              search: [
-                smurf_of: origin_user_id
-              ],
-              select: [:id]
-            )
-            |> Enum.count
+            smurf_count =
+              Account.list_users(
+                search: [
+                  smurf_of: origin_user_id
+                ],
+                select: [:id]
+              )
+              |> Enum.count()
 
             # And give the origin the smurfer role
             if smurf_count == 0 do
               Teiserver.User.remove_roles(origin_user_id, ["Smurfer"])
             end
+
             Account.update_user_stat(origin_user_id, %{"smurf_count" => smurf_count})
 
             conn

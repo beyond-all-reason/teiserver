@@ -95,10 +95,7 @@
                 </td>
                 <td>
                   <%= if allow?(@conn, "Moderator") do %>
-                    <a
-                      href={~p"/teiserver/admin/user/#{userid}"}
-                      class="btn btn-secondary btn-sm"
-                    >
+                    <a href={~p"/teiserver/admin/user/#{userid}"} class="btn btn-secondary btn-sm">
                       Show
                     </a>
                   <% end %>

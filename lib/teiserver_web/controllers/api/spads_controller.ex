@@ -29,16 +29,18 @@ defmodule TeiserverWeb.API.SpadsController do
     target_id = int_parse(target_id_str)
     host_ip = get_member_of_lobby_host_ip(target_id)
 
-    conn_ip = conn
-      |> Teiserver.Logging.LoggingPlug.get_ip_from_conn
+    conn_ip =
+      conn
+      |> Teiserver.Logging.LoggingPlug.get_ip_from_conn()
       |> Tuple.to_list()
       |> Enum.join(".")
 
-    {rating_value, uncertainty} = if host_ip != conn_ip do
-      BalanceLib.get_user_rating_value_uncertainty_pair(-1, "Duel")
-    else
-      BalanceLib.get_user_rating_value_uncertainty_pair(target_id, actual_type)
-    end
+    {rating_value, uncertainty} =
+      if host_ip != conn_ip do
+        BalanceLib.get_user_rating_value_uncertainty_pair(-1, "Duel")
+      else
+        BalanceLib.get_user_rating_value_uncertainty_pair(target_id, actual_type)
+      end
 
     max_uncertainty =
       Config.get_site_config_cache("teiserver.Uncertainty required to show rating")
@@ -213,16 +215,19 @@ defmodule TeiserverWeb.API.SpadsController do
   end
 
   def get_member_of_lobby_host_ip(nil), do: nil
+
   def get_member_of_lobby_host_ip(userid) do
     case Account.get_client_by_id(userid) do
       nil ->
         nil
+
       client ->
         get_lobby_host_ip(client.lobby_id)
     end
   end
 
   def get_lobby_host_ip(nil), do: nil
+
   def get_lobby_host_ip(lobby_id) do
     case Battle.get_lobby(lobby_id) do
       nil ->

@@ -48,10 +48,10 @@
             </div>
 
             <div class="col-md-3">
-              Peak Rating: <%=
-                Enum.max_by(@logs, fn l -> l.value["rating_value"] end)
-                .value["rating_value"] |> round(2)
-                %>
+              Peak Rating: <%= Enum.max_by(@logs, fn l -> l.value["rating_value"] end).value[
+                "rating_value"
+              ]
+              |> round(2) %>
             </div>
 
             <div class="col-md-3">

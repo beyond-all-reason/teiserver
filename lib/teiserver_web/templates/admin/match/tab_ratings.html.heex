@@ -62,7 +62,10 @@
           <td><%= rating.value["uncertainty_change"] |> round(2) %></td>
 
           <td>
-            <span class="btn btn-secondary btn-sm" onclick={"$('#raw-row-#{m.user_id}').toggleClass('raw-row');"}>
+            <span
+              class="btn btn-secondary btn-sm"
+              onclick={"$('#raw-row-#{m.user_id}').toggleClass('raw-row');"}
+            >
               Show/Hide raw
             </span>
           </td>

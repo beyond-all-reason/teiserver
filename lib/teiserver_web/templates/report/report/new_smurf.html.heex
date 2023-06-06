@@ -92,9 +92,7 @@
           </thead>
           <tbody>
             <%= for user <- @relevant_new_users do %>
-              <%
-              stats = @user_stats[user.id]
-              %>
+              <% stats = @user_stats[user.id] %>
 
               <tr>
                 <td><%= user.name %></td>

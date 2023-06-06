@@ -6,17 +6,19 @@ defmodule Teiserver.Tachyon.Schema do
   @spec load_schemas :: list
   def load_schemas() do
     Application.get_env(:central, Teiserver)[:tachyon_schema_path]
-    |> Path.wildcard
+    |> Path.wildcard()
     |> Enum.map(fn file_path ->
-      contents = file_path
+      contents =
+        file_path
         |> File.read!()
         |> Jason.decode!()
 
-      command = file_path
+      command =
+        file_path
         |> Path.split()
-        |> Enum.reverse
+        |> Enum.reverse()
         |> Enum.take(3)
-        |> Enum.reverse
+        |> Enum.reverse()
         |> Enum.join("/")
         |> String.replace(".json", "")
 

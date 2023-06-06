@@ -5,7 +5,8 @@ defmodule Teiserver.Tachyon.Responses.Account.WhoamiResponse do
 
   alias Teiserver.Data.Types, as: T
 
-  @spec generate(T.user(), T.client()) :: {T.tachyon_command(), T.tachyon_status(), T.tachyon_object()}
+  @spec generate(T.user(), T.client()) ::
+          {T.tachyon_command(), T.tachyon_status(), T.tachyon_object()}
   def generate(user, client) do
     object = %{
       "id" => user.id,
@@ -18,7 +19,6 @@ defmodule Teiserver.Tachyon.Responses.Account.WhoamiResponse do
       "friends" => user.friends,
       "friend_requests" => user.friend_requests,
       "ignores" => user.ignored,
-
       "status" => %{
         "in_game" => client.in_game,
         "away" => client.away,

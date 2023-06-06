@@ -22,7 +22,8 @@ defmodule TeiserverWeb.Account.GeneralController do
     my_perms = conn.assigns.current_user.permissions
     role_data = RoleLib.role_data()
 
-    filtered_roles = RoleLib.staff_roles()
+    filtered_roles =
+      RoleLib.staff_roles()
       |> Enum.filter(fn role ->
         Enum.member?(my_perms, role)
       end)
@@ -49,7 +50,8 @@ defmodule TeiserverWeb.Account.GeneralController do
     my_perms = conn.assigns.current_user.permissions
     role_data = RoleLib.role_data()
 
-    filtered_roles = RoleLib.staff_roles()
+    filtered_roles =
+      RoleLib.staff_roles()
       |> Enum.filter(fn role ->
         Enum.member?(my_perms, role)
       end)

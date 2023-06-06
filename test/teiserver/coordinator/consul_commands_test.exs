@@ -1189,12 +1189,13 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert Account.get_client_by_id(player8.id).player == false
     assert Account.get_client_by_id(player9.id).player == false
 
-    player_list = Teiserver.Coordinator.ConsulServer.list_players(%{lobby_id: lobby_id})
+    player_list =
+      Teiserver.Coordinator.ConsulServer.list_players(%{lobby_id: lobby_id})
       |> Enum.map(fn %{userid: userid} -> userid end)
 
-    IO.puts ""
-    IO.inspect player_list
-    IO.puts ""
+    IO.puts("")
+    IO.inspect(player_list)
+    IO.puts("")
 
     # Queue should be empty at start
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})

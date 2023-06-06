@@ -9,7 +9,8 @@ defmodule TeiserverWeb.NavComponents do
   def top_nav_item(assigns) do
     active = if assigns[:active], do: "active", else: ""
 
-    assigns = assigns
+    assigns =
+      assigns
       |> assign(:active, active)
 
     ~H"""

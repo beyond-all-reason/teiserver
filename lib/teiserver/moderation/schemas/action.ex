@@ -36,14 +36,15 @@ defmodule Teiserver.Moderation.Action do
     expires = Ecto.Changeset.get_field(struct, :expires, [])
     inbound_restrictions = Ecto.Changeset.get_field(struct, :restrictions, [])
 
-    new_restrictions = if TimexHelper.greater_than(expires, years) and Enum.member?(inbound_restrictions, "Login") do
-      ["Permanently banned" | inbound_restrictions] |> Enum.uniq
-    else
-      (inbound_restrictions || []) |> List.delete("Permanently banned")
-    end
+    new_restrictions =
+      if TimexHelper.greater_than(expires, years) and Enum.member?(inbound_restrictions, "Login") do
+        ["Permanently banned" | inbound_restrictions] |> Enum.uniq()
+      else
+        (inbound_restrictions || []) |> List.delete("Permanently banned")
+      end
 
-    IO.inspect {expires, years, TimexHelper.greater_than(expires, years)}
-    IO.inspect new_restrictions
+    IO.inspect({expires, years, TimexHelper.greater_than(expires, years)})
+    IO.inspect(new_restrictions)
     # raise "X"
 
     Ecto.Changeset.put_change(struct, :restrictions, new_restrictions)

@@ -26,7 +26,8 @@ defmodule Teiserver.User do
 
   @spec keys() :: [atom]
   def keys(),
-    do: ~w(id name email inserted_at clan_id permissions colour icon behaviour_score trust_score smurf_of_id)a
+    do:
+      ~w(id name email inserted_at clan_id permissions colour icon behaviour_score trust_score smurf_of_id)a
 
   # This is the version of keys with the extra fields we're going to be moving from data to the object itself
   # def keys(),
@@ -753,8 +754,10 @@ defmodule Teiserver.User do
     do: remove_roles(get_user_by_id(userid), roles)
 
   def remove_roles(user, removed_roles) do
-    new_roles = user.roles
-    |> Enum.reject(fn r -> Enum.member?(removed_roles, r) end)
+    new_roles =
+      user.roles
+      |> Enum.reject(fn r -> Enum.member?(removed_roles, r) end)
+
     update_user(%{user | roles: new_roles}, persist: true)
   end
 
@@ -849,7 +852,8 @@ defmodule Teiserver.User do
 
     cond do
       user.smurf_of_id != nil ->
-        {:error, "Smurf/alt account detected. We do not allow smurfing. Please login as your main account. Repeatedly creating smurfs can result in suspension or bans."}
+        {:error,
+         "Smurf/alt account detected. We do not allow smurfing. Please login as your main account. Repeatedly creating smurfs can result in suspension or bans."}
 
       token.expires != nil and Timex.compare(token.expires, Timex.now()) == -1 ->
         {:error, "Token expired"}
@@ -918,7 +922,8 @@ defmodule Teiserver.User do
 
         cond do
           user.smurf_of_id != nil ->
-            {:error, "Smurf/alt account detected. We do not allow smurfing. Please login as your main account. Repeatedly creating smurfs can result in suspension or bans."}
+            {:error,
+             "Smurf/alt account detected. We do not allow smurfing. Please login as your main account. Repeatedly creating smurfs can result in suspension or bans."}
 
           not is_bot?(user) and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
@@ -997,7 +1002,8 @@ defmodule Teiserver.User do
 
         cond do
           user.smurf_of_id != nil ->
-            {:error, "Smurf/alt account detected. We do not allow smurfing. Please login as your main account. Repeatedly creating smurfs can result in suspension or bans."}
+            {:error,
+             "Smurf/alt account detected. We do not allow smurfing. Please login as your main account. Repeatedly creating smurfs can result in suspension or bans."}
 
           user.name != username ->
             {:error, "Username is case sensitive, try '#{user.name}'"}

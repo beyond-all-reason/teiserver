@@ -96,6 +96,7 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
   end
 
   def delete_matches([], _), do: :ok
+
   def delete_matches(ids, _logger_set) do
     ids = Enum.take(ids, @chunk_size * 100)
     {ids, remaining} = Enum.split(ids, @chunk_size)
@@ -103,19 +104,49 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
     id_str = Enum.join(ids, ",")
 
     # Tables we update
-    {:ok, _} = Ecto.Adapters.SQL.query(Repo, "UPDATE teiserver_account_accolades SET match_id = NULL WHERE match_id IN (#{id_str})", [])
+    {:ok, _} =
+      Ecto.Adapters.SQL.query(
+        Repo,
+        "UPDATE teiserver_account_accolades SET match_id = NULL WHERE match_id IN (#{id_str})",
+        []
+      )
 
-    {:ok, _} = Ecto.Adapters.SQL.query(Repo, "UPDATE moderation_reports SET match_id = NULL WHERE match_id IN (#{id_str})", [])
+    {:ok, _} =
+      Ecto.Adapters.SQL.query(
+        Repo,
+        "UPDATE moderation_reports SET match_id = NULL WHERE match_id IN (#{id_str})",
+        []
+      )
 
-    {:ok, _} = Ecto.Adapters.SQL.query(Repo, "UPDATE teiserver_telemetry_match_events SET match_id = NULL WHERE match_id IN (#{id_str})", [])
+    {:ok, _} =
+      Ecto.Adapters.SQL.query(
+        Repo,
+        "UPDATE teiserver_telemetry_match_events SET match_id = NULL WHERE match_id IN (#{id_str})",
+        []
+      )
 
     # Match specific things we want to delete
-    {:ok, _} = Ecto.Adapters.SQL.query(Repo, "DELETE FROM teiserver_lobby_messages WHERE match_id IN (#{id_str})", [])
+    {:ok, _} =
+      Ecto.Adapters.SQL.query(
+        Repo,
+        "DELETE FROM teiserver_lobby_messages WHERE match_id IN (#{id_str})",
+        []
+      )
 
-    {:ok, _} = Ecto.Adapters.SQL.query(Repo, "DELETE FROM teiserver_battle_match_memberships WHERE match_id IN (#{id_str})", [])
+    {:ok, _} =
+      Ecto.Adapters.SQL.query(
+        Repo,
+        "DELETE FROM teiserver_battle_match_memberships WHERE match_id IN (#{id_str})",
+        []
+      )
 
     # Now delete the matches themselves
-    {:ok, _} = Ecto.Adapters.SQL.query(Repo, "DELETE FROM teiserver_battle_matches WHERE id IN (#{id_str})", [])
+    {:ok, _} =
+      Ecto.Adapters.SQL.query(
+        Repo,
+        "DELETE FROM teiserver_battle_matches WHERE id IN (#{id_str})",
+        []
+      )
 
     :timer.sleep(500)
     delete_matches(remaining, nil)

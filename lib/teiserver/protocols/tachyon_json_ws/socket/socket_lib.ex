@@ -4,6 +4,5 @@ defmodule Teiserver.Tachyon.SocketLib do
   """
 
   def error_response() do
-
   end
 end
