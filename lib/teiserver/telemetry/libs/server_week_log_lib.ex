@@ -40,28 +40,14 @@ defmodule Teiserver.Telemetry.ServerWeekLogLib do
       where: logs.date == ^date
   end
 
-  def _search(query, :start_date, {year, week}) do
-    from logs in query,
-      where:
-        (logs.year == ^year and
-           logs.week >= ^week) or
-          logs.year > ^year
-  end
-
   def _search(query, :start_date, date) do
-    _search(query, :start_date, {date.year, date.week})
-  end
-
-  def _search(query, :end_date, {year, week}) do
     from logs in query,
-      where:
-        (logs.year == ^year and
-           logs.week <= ^week) or
-          logs.year < ^year
+      where: logs.date > ^date
   end
 
   def _search(query, :end_date, date) do
-    _search(query, :end_date, {date.year, date.week})
+    from logs in query,
+      where: logs.date <= ^date
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
