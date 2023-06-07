@@ -48,21 +48,19 @@
             <td><%= @report.relationship %></td>
           </tr>
 
-          <tr>
-            <td>Replay search:</td>
-            <td>
-              <a
-                href={"https://bar-rts.com/replays/?" <>
-                "&date=" <> date_to_str(@report.inserted_at, format: :ymd, tz: @tz) <>
-                "&players=" <> @report.target.name
-                }
-                class="btn btn-secondary btn-sm"
-              >
-                BAR Live Services
-              </a>
-            </td>
-          </tr>
         <% end %>
+        <tr>
+          <td>Replay search:</td>
+          <td>
+            <a
+              href={"https://bar-rts.com/replays/?players=#{@report.target.name}&date=#{date_to_str(@report.inserted_at, format: :ymd, tz: @tz)}"}
+              }
+              class="btn btn-secondary btn-sm"
+            >
+              BAR Live Services
+            </a>
+          </td>
+        </tr>
         <%= if @report.result_id do %>
           <tr>
             <td>Result</td>
