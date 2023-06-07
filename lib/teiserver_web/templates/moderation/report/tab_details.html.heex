@@ -53,8 +53,8 @@
           <td>Replay search:</td>
           <td>
             <a
-              href={"https://bar-rts.com/replays/?players=#{@report.target.name}&date=#{date_to_str((if @report.match, do: @report.match.started, else: @report.inserted_at), format: :ymd, tz: @tz)}"}
-              }
+              href={"https://bar-rts.com/replays/?players=#{@report.target.name}&date=#{date_to_str((if @report.match, do: @report.match.started, else: @report.inserted_at), format: :ymd, tz: @tz)}" <>
+              (if @report.match, do: "&maps=#{@report.match.map}", else: "") }
               class="btn btn-secondary btn-sm"
             >
               BAR Live Services
