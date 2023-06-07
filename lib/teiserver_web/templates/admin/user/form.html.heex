@@ -45,7 +45,7 @@
     </div>
   </div>
 
-  <div class="form-group row px-3 py-1">
+  <div class="form-group row px-3 py-2">
     <%= if allow?(@conn, "Server") do %>
       <div class="col">
         <h5>Management</h5>
@@ -54,7 +54,7 @@
 
           label =
             if style do
-              raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> #{r}")
+              raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> &nbsp;#{r}")
             else
               r
             end %>
@@ -76,7 +76,7 @@
 
           label =
             if style do
-              raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> #{r}")
+              raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> &nbsp;#{r}")
             else
               r
             end %>
@@ -98,7 +98,27 @@
 
           label =
             if style do
-              raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> #{r}")
+              raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> &nbsp;#{r}")
+            else
+              r
+            end %>
+          <%= central_component("checkbox",
+            id: "user_#{r}",
+            name: "user[#{r}]",
+            label: label,
+            checked: r in (@changeset.data.data["roles"] || [])
+          ) %>
+        <% end %>
+      </div>
+
+      <div class="col">
+        <h5>Community</h5>
+        <%= for r <- @community_roles do %>
+          <% style = @role_styling_map[r]
+
+          label =
+            if style do
+              raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> &nbsp;#{r}")
             else
               r
             end %>
@@ -118,7 +138,7 @@
 
           label =
             if style do
-              raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> #{r}")
+              raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> &nbsp;#{r}")
             else
               r
             end %>
@@ -139,7 +159,7 @@
 
         label =
           if style do
-            raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> #{r}")
+            raw("<i class='fa-fw #{style[:icon]}' style='color: #{style[:colour]}'></i> &nbsp;#{r}")
           else
             r
           end %>

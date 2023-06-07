@@ -26,7 +26,7 @@ defmodule Teiserver.Account.RoleLib do
     },
 
     # Property
-    %{name: "Trusted", colour: "#000000", icon: "fa-duotone fa-check", contains: ~w()},
+    %{name: "Trusted", colour: "#FFFFFF", icon: "fa-solid fa-check-square", contains: ~w()},
     %{name: "Bot", colour: "#777777", icon: "fa-solid fa-user-robot", contains: ~w()},
     %{
       name: "Verified",
@@ -36,13 +36,37 @@ defmodule Teiserver.Account.RoleLib do
       badge: false
     },
 
-    # Privileged
+    # Community team
     %{
-      name: "Contributor",
-      colour: "#00AA66",
-      icon: "fa-duotone fa-code-commit",
-      contains: ~w(Trusted)
+      name: "Community team",
+      colour: "#66AA66",
+      icon: "fa-duotone fa-thought-bubble",
+      contains: ~w(),
+      badge: false
     },
+    %{
+      name: "Mentor",
+      colour: "#66AA66",
+      icon: "fa-duotone fa-thought-bubble",
+      contains: ["Community team"],
+      badge: false
+    },
+    %{
+      name: "Academy manager",
+      colour: "#66AA66",
+      icon: "fa-duotone fa-thought-bubble",
+      contains: ["Community team"],
+      badge: false
+    },
+    %{
+      name: "Promo team",
+      colour: "#66AA66",
+      icon: "fa-duotone fa-thought-bubble",
+      contains: ["Community team"],
+      badge: false
+    },
+
+    # Privileged
     %{name: "VIP", colour: "#AA8833", icon: "fa-duotone fa-sparkles", contains: ~w()},
     %{name: "Streamer", colour: "#660066", icon: "fa-brands fa-twitch", contains: ~w()},
     %{name: "Tournament", colour: "#0000AA", icon: "fa-duotone fa-trophy", contains: ~w()},
@@ -54,26 +78,30 @@ defmodule Teiserver.Account.RoleLib do
     },
     %{name: "Donor", colour: "#0066AA", icon: "fa-duotone fa-euro", contains: ~w()},
 
-    # Sensitive staff
+    # Contributor/Staff
     %{
-      name: "Core",
-      colour: "#008800",
-      icon: "fa-duotone fa-code-branch",
-      contains: ~w(Contributor)
+      name: "Contributor",
+      colour: "#66AA66",
+      icon: "fa-duotone fa-code-commit",
+      contains: ~w(Trusted)
     },
-    %{name: "Engine", colour: "#008800", icon: "fa-duotone fa-engine", contains: ~w(Core)},
-    %{name: "Mapping", colour: "#008800", icon: "fa-duotone fa-map", contains: ~w(Core)},
-    %{name: "Gameplay", colour: "#AA0000", icon: "fa-duotone fa-pen-ruler", contains: ~w(Core)},
+    %{name: "Engine", colour: "#007700", icon: "fa-duotone fa-engine", contains: ~w(Contributor)},
+    %{name: "Mapping", colour: "#007700", icon: "fa-duotone fa-map", contains: ~w(Contributor)},
+    %{name: "Gameplay", colour: "#AA0000", icon: "fa-duotone fa-pen-ruler", contains: ~w(Contributor)},
     %{
       name: "Infrastructure",
-      colour: "#008800",
+      colour: "#007700",
       icon: "fa-duotone fa-server",
       contains: ~w(Contributor)
     },
-    %{name: "ServerData", colour: "#008800", icon: "fa-duotone fa-server", contains: ~w(Core)},
-    %{name: "MatchData", colour: "#008800", icon: "fa-duotone fa-server", contains: ~w(Core)},
-    %{name: "Telemetry", colour: "#008800", icon: "fa-duotone fa-server", contains: ~w(Core)},
-    %{name: "Tester", colour: "#00AAAA", icon: "fa-duotone fa-vial", contains: ~w(Core)},
+    %{name: "Data export", colour: "#007700", icon: "fa-duotone fa-download", contains: ~w(Contributor)},
+    %{name: "Tester", colour: "#00AAAA", icon: "fa-duotone fa-vial", contains: ~w(Contributor)},
+    %{
+      name: "Core",
+      colour: "#007700",
+      icon: "fa-duotone fa-code-branch",
+      contains: ~w(Contributor)
+    },
 
     # Authority
     %{
@@ -154,12 +182,17 @@ defmodule Teiserver.Account.RoleLib do
 
   @spec staff_roles :: [String.t()]
   def staff_roles() do
-    ~w(Core Engine Mapping Gameplay Infrastructure ServerData MatchData Telemetry Tester)
+    ["Core", "Engine", "Mapping", "Gameplay", "Infrastructure", "Data export", "Tester", "Contributor"]
+  end
+
+  @spec community_roles :: [String.t()]
+  def community_roles() do
+    ["Mentor", "Academy manager", "Promo team", "Community team"]
   end
 
   @spec privileged_roles :: [String.t()]
   def privileged_roles() do
-    ~w(Bot Contributor VIP Caster Donor Tournament)
+    ~w(Bot VIP Caster Donor Tournament)
   end
 
   @spec property_roles :: [String.t()]
