@@ -28,6 +28,8 @@ defmodule Teiserver.Bridge.DiscordBridge do
                         |> Map.new(fn {k, v} -> {v, k} end)
                         |> Map.merge(@extra_text_emoticons)
 
+  @max_message_length 100
+
   # GuildId of nil = DM
   def handle_event({:MESSAGE_CREATE, %{content: "$" <> _, guild_id: nil} = message, _ws}) do
     MessageCommands.handle(message)
@@ -63,6 +65,9 @@ defmodule Teiserver.Bridge.DiscordBridge do
         nil
 
       String.contains?(content, "https:") ->
+        nil
+
+      String.length(content) > @max_message_length ->
         nil
 
       Config.get_site_config_cache("teiserver.Bridge from discord") == false ->
