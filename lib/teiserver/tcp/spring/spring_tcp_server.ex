@@ -134,8 +134,9 @@ defmodule Teiserver.SpringTcpServer do
       # Caching app configs
       flood_rate_limit_count:
         Config.get_site_config_cache("teiserver.Spring flood rate limit count"),
-      floot_rate_window_size:
+      flood_rate_window_size:
         Config.get_site_config_cache("teiserver.Spring flood rate window size"),
+      last_action_timestamp: nil,
       server_messages: 0,
       server_batches: 0,
       client_messages: 0
@@ -1095,7 +1096,7 @@ defmodule Teiserver.SpringTcpServer do
     cmd_timestamps =
       if String.contains?(data, "\n") do
         now = System.system_time(:second)
-        limiter = now - state.floot_rate_window_size
+        limiter = now - state.flood_rate_window_size
 
         [now | state.cmd_timestamps]
         |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
