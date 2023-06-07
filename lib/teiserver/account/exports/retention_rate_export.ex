@@ -7,6 +7,13 @@ defmodule Teiserver.Account.RetentionRateExport do
     "rating_type" => "user_count_total",
     "start_date" => ""
   })
+
+  Teiserver.Account.RetentionRateExport.show_form(nil, %{
+    "date_preset" => "All time",
+    "end_date" => "",
+    "rating_type" => "user_count_total",
+    "start_date" => "2023-01-01"
+  })
   """
   alias Central.Helpers.DatePresets
   alias Teiserver.{Account, Telemetry}

@@ -14,7 +14,7 @@
       <%= if user do %>
         <tr>
           <td><%= user.name %></td>
-          <td><%= (user.last_login * 60) |> Timex.from_unix() |> date_to_str %></td>
+          <td><%= ((user.last_login || 0) * 60) |> Timex.from_unix() |> date_to_str %></td>
           <td>
             <%= link(raw("<i class='fas fa-fw fa-user-slash'></i> Remove"),
               to: Routes.ts_account_relationships_path(@conn, :delete, "friend", userid),
