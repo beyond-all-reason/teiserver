@@ -737,6 +737,7 @@ defmodule Teiserver.User do
   @spec add_roles(T.user() | T.userid(), [String.t()]) :: nil | T.user()
   def add_roles(nil, _), do: nil
   def add_roles(_, []), do: nil
+  def add_roles(_, nil), do: nil
 
   def add_roles(userid, roles) when is_integer(userid),
     do: add_roles(get_user_by_id(userid), roles)

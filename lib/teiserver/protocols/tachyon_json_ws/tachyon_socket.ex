@@ -203,6 +203,9 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
       {:error, reason} ->
         {:error, reason}
+
+      {:error, reason, _userid} ->
+        {:error, reason}
     end
   end
 
