@@ -20,6 +20,8 @@ defmodule Teiserver.Protocols.SpringIn do
   @status_3_window 1_000
   @status_10_window 60_000
 
+  @action_commands ~w(SAY SAYEX SAYPRIVATE SAYBATTLE SAYBATTLEPRIVATEEX JOINBATTLE LEAVEBATTLE)
+
   @spec data_in(String.t(), Map.t()) :: Map.t()
   def data_in(data, state) do
     if Application.get_env(:central, Teiserver)[:extra_logging] == true or
@@ -63,7 +65,13 @@ defmodule Teiserver.Protocols.SpringIn do
     state =
       case tuple do
         {command, data, msg_id} ->
-          do_handle(command, data, msg_id, state)
+          state = do_handle(command, data, msg_id, state)
+
+          if Enum.member?(@action_commands, command) do
+            Map.put(state, :last_action_timestamp, System.system_time(:second))
+          else
+            state
+          end
 
         nil ->
           Logger.debug("Bad match on command: '#{data}'")

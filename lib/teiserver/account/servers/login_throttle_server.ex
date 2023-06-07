@@ -20,7 +20,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @queues ~w(moderator contributor vip standard toxic)a
 
   @default_tick_period 500
-  @releases_per_tick 5
+  @releases_per_tick 3
 
   @heartbeat_expiry 5_000
   @login_recent_age_search 60_000
