@@ -53,7 +53,7 @@
           <td>Replay search:</td>
           <td>
             <a
-              href={"https://bar-rts.com/replays/?players=#{@report.target.name}&date=#{date_to_str(@report.inserted_at, format: :ymd, tz: @tz)}"}
+              href={"https://bar-rts.com/replays/?players=#{@report.target.name}&date=#{date_to_str((if @report.match, do: @report.match.started, else: @report.inserted_at), format: :ymd, tz: @tz)}"}
               }
               class="btn btn-secondary btn-sm"
             >
