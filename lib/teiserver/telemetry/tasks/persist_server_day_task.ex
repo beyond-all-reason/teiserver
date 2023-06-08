@@ -605,12 +605,12 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
     end_date =
       date |> Timex.shift(days: 1) |> Timex.to_datetime() |> date_to_str(format: :ymd_hms)
 
-    query = """
+    base_query = """
       SELECT
         t.name,
         COUNT(e)
       FROM
-        teiserver_telemetry_client_events e
+        --table_name-- e
       JOIN
         teiserver_telemetry_event_types t ON e.event_type_id = t.id
       WHERE
@@ -619,8 +619,15 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
         t.name
     """
 
+    client_query =
+      String.replace(
+        base_query,
+        "--table_name--",
+        "teiserver_telemetry_unauth_events"
+      )
+
     client_data =
-      case Ecto.Adapters.SQL.query(Repo, query, []) do
+      case Ecto.Adapters.SQL.query(Repo, client_query, []) do
         {:ok, results} ->
           results.rows
           |> Map.new(fn [key, value] -> {key, value} end)
@@ -631,8 +638,8 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
 
     unauth_query =
       String.replace(
-        query,
-        "teiserver_telemetry_client_events",
+        base_query,
+        "--table_name--",
         "teiserver_telemetry_unauth_events"
       )
 
@@ -648,8 +655,8 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
 
     server_query =
       String.replace(
-        query,
-        "teiserver_telemetry_client_events",
+        base_query,
+        "--table_name--",
         "teiserver_telemetry_server_events"
       )
 
@@ -665,9 +672,9 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
 
     match_event_query =
       String.replace(
-        query,
-        "teiserver_telemetry_match_events",
-        "teiserver_telemetry_server_events"
+        base_query,
+        "--table_name--",
+        "teiserver_telemetry_match_events"
       )
 
     match_event_data =
