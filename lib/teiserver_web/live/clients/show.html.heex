@@ -29,11 +29,19 @@
           <li>Verified: <%= @user.verified %></li>
           <li>
             Battle:
-            <%= if @client.lobby_id do %>
+            <%= if @client != nil and @client.lobby_id != nil do %>
               <%= live_redirect("Battle ##{@client.lobby_id}",
                 to: Routes.ts_battle_lobby_show_path(@socket, :show, @client.lobby_id),
                 class: ""
               ) %>
+
+              &nbsp;&nbsp;&nbsp;
+
+              <%= if @current_client do %>
+                <span phx-click="join-lobby" class={"btn btn-#{bsname} btn-sm"}>
+                  Join
+                </span>
+              <% end %>
             <% else %>
               nil
             <% end %>
@@ -85,7 +93,7 @@
             </span>
           <% end %>
 
-          <%= if @client.lobby_client == "LuaLobby Chobby" do %>
+          <%= if @client != nil and @client.lobby_client == "LuaLobby Chobby" do %>
             <span class="btn btn-warning mx-2" phx-click="force-error-log">
               Error log
             </span>
