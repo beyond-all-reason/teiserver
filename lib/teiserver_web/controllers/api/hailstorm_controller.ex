@@ -46,6 +46,9 @@ defmodule TeiserverWeb.API.HailstormController do
           end
 
         user ->
+          # Update the user
+          User.add_roles(user.id, params["roles"])
+
           User.set_flood_level(user.id, 0)
           %{userid: user.id}
       end

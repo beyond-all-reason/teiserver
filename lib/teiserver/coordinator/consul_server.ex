@@ -979,7 +979,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       Enum.member?(@vip_boss_commands, cmd.command) and (is_vip and is_boss) ->
         true
 
-      Enum.member?(@host_commands, cmd.command) and not (is_vip and is_boss) ->
+      Enum.member?(@vip_boss_commands, cmd.command) and not (is_vip and is_boss) ->
         msg =
           if is_vip do
             "You also need to be boss to call '#{cmd.command}'"
