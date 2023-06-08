@@ -60,7 +60,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
   def show(conn, %{"id" => id}) do
     report =
       Moderation.get_report!(id,
-        preload: [:target, :reporter, :responses]
+        preload: [:target, :reporter, :responses, :match]
       )
 
     fav =
