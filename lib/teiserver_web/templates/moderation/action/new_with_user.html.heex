@@ -180,18 +180,6 @@ bsname = view_colour() %>
                   >
                     Moderation evasion - 3rd offense
                   </div>
-
-                  <div
-                    class={"btn btn-outline-#{bsname} btn-block"}
-                    onclick={"
-        $('#action_restriction_Site').prop('checked', true);
-        $('#action_restriction_Login').prop('checked', true);
-        $('#action_reason').val('Account used to evade moderation. If you think there has been an error please use the #open-ticket discord channel to talk to the moderation team. The discord can be accessed at #{discord_link}');
-        $('#action_expires').val('1100 years');
-      "}
-                  >
-                    Alt used for evasion
-                  </div>
                 </div>
 
                 <div class="col mt-3">
@@ -229,18 +217,6 @@ bsname = view_colour() %>
       "
                   >
                     Smurfing - 3rd offense
-                  </div>
-
-                  <div
-                    class={"btn btn-outline-#{bsname} btn-block"}
-                    onclick={"
-        $('#action_restriction_Site').prop('checked', true);
-        $('#action_restriction_Login').prop('checked', true);
-        $('#action_reason').val('This account has been flagged as a smurf or alt-account by the server. If this is in error please use #open-ticket on the discord to talk to the moderation team. The discord can be accessed at #{discord_link}');
-        $('#action_expires').val('1100 years');
-      "}
-                  >
-                    Smurf account
                   </div>
                 </div>
 
