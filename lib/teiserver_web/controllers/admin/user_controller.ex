@@ -142,9 +142,11 @@ defmodule TeiserverWeb.Admin.UserController do
         |> insert_recently(conn)
 
         user_stats = Account.get_user_stat_data(user.id)
+        client = Account.get_client_by_id(user.id)
 
         conn
         |> assign(:user, user)
+        |> assign(:client, client)
         |> assign(:user_stats, user_stats)
         |> assign(:role_data, RoleLib.role_data())
         |> assign(:section_menu_active, "show")

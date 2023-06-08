@@ -71,9 +71,16 @@
               Admin show
             </a>
             &nbsp;&nbsp;
+            <%
+              class = if @client != nil do
+                "btn btn-#{bsname}"
+              else
+                "btn btn-outline-#{bsname}"
+              end
+            %>
             <a
               href={Routes.ts_admin_client_show_path(@conn, :show, @user.id)}
-              class={"btn btn-outline-#{bsname}"}
+              class={class}
               id="section-menu-new"
             >
               <%= central_component("icon", icon: Teiserver.Account.ClientLib.icon()) %> &nbsp;
