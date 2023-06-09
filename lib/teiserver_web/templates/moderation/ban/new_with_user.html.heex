@@ -78,6 +78,7 @@ type_icons = %{
                     u <- @matching_users,
                     do: u.name
                   )
+                  |> Enum.sort()
                   |> Enum.join(", ") %>. They exist prior to this ban and will not be affected.
                 </div>
             <% end %>
@@ -140,7 +141,7 @@ type_icons = %{
                               id: "ban_type_#{key.value}",
                               value: key.value,
                               label: "",
-                              checked: true
+                              checked: false
                             ) %>
                           </td>
                         </tr>
