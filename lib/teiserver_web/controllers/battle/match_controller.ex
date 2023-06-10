@@ -174,15 +174,16 @@ defmodule TeiserverWeb.Battle.MatchController do
         Map.update(
           acc,
           TimexHelper.date_to_str(rating.inserted_at, format: :ymd),
-          {rating.value["rating_value"], rating.value["uncertainty"], 1},
-          fn {match_rating, uncertainty, count} ->
-            {match_rating + rating.value["rating_value"], uncertainty + rating.value["uncertainty"], count + 1}
+          {rating.value["skill"], rating.value["uncertainty"], rating.value["rating_value"], 1},
+          fn {skill, uncertainty, rating_value, count} ->
+            {skill + rating.value["skill"], uncertainty + rating.value["uncertainty"], rating_value + rating.value["rating_value"], count + 1}
           end
         )
       end)
-      |> Enum.map(fn {date, {rating_value, uncertainty, count}} -> %{
+      |> Enum.map(fn {date, {skill, uncertainty, rating_value, count}} -> %{
           date: date,
           rating_value: Float.round(rating_value / count, 2),
+          skill: Float.round(skill / count, 2),
           uncertainty: Float.round(uncertainty / count, 2),
           count: count,
         }
