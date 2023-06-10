@@ -79,10 +79,22 @@ var margin = {
   'bottom' : 20,
   'left'   : 20
 };
+// The percentage of the range to show as an offset above and below the uncertainty bars
+var RANGE_OFFSET_PERCENTAGE = 0.35;
 
 var colors = {};
 
 var data = <%= raw Jason.encode!(@data) %>;
+
+var colors = {
+  pageBackground: '#303030',
+  graphBackground: '#303030',
+
+  confidenceIntervalTop: '#2E3E32',
+  skillValueLine: '#1C561E',
+  confidenceIntervalBottom: '#2B5533',
+  ratingValueLine: '#007C00',
+};
 
 
 // https://d3-graph-gallery.com/graph/line_confidence_interval.html
@@ -107,30 +119,60 @@ $(function() {
     .domain(d3.extent(data, function(d) { return dateFormat(d.date); }))
     .range([ 0, width ]);
 
+  var min = d3.min(data, function (d) { return d.skill - d.uncertainty });
+  var max = d3.max(data, function (d) { return d.skill + d.uncertainty });
+  var range = (max - min);
+  var graphBottom = Math.max(0, Math.floor(min - range * RANGE_OFFSET_PERCENTAGE));
+  var graphTop = Math.ceil(max + range * RANGE_OFFSET_PERCENTAGE);
+
   // Add Y axis
   var y = d3.scaleLinear()
-    //.domain(d3.max(data, function(d) { return d.rating_value; }))
-    .domain([0, 50])
+    .domain([graphBottom, graphTop])
     .range([ height, 0 ]);
 
-  // Show confidence interval
+  // Show top part of confidence interval
   g.append("path")
     .datum(data)
-    .attr("fill", "#343a40")
+    .attr("fill", colors.confidenceIntervalTop)
     .attr("stroke", "none")
     .attr("d", d3.area()
       .x(function(d) { return x(dateFormat(d.date)) })
-      .y0(function(d) { return y(d.rating_value - d.uncertainty) })
-      .y1(function(d) { return y(d.rating_value + d.uncertainty) })
+      .y0(function(d) { return y(d.skill) })
+      .y1(function(d) { return y(d.skill + d.uncertainty) })
       .curve(d3.curveCardinal)
       )
 
-  // Add the line
+  // Show bottom part of confidence interval
+  g.append("path")
+    .datum(data)
+    .attr("fill", colors.confidenceIntervalBottom)
+    .attr("stroke", "none")
+    .attr("d", d3.area()
+      .x(function(d) { return x(dateFormat(d.date)) })
+      .y0(function(d) { return y(d.skill - d.uncertainty) })
+      .y1(function(d) { return y(d.skill) })
+      .curve(d3.curveCardinal)
+      )
+
+  // Add skill value line (in middle of uncertainty)
   g
     .append("path")
     .datum(data)
     .attr("fill", "none")
-    .attr("stroke", "#007C00")
+    .attr("stroke", colors.skillValueLine)
+    .attr("stroke-width", 1.5)
+    .attr("d", d3.line()
+      .x(function(d) { return x(dateFormat(d.date)) })
+      .y(function(d) { return y(d.skill) })
+      .curve(d3.curveCardinal)
+      )
+
+  // Add skill value line (minimum of uncertainty)
+  g
+    .append("path")
+    .datum(data)
+    .attr("fill", "none")
+    .attr("stroke", colors.ratingValueLine)
     .attr("stroke-width", 1.5)
     .attr("d", d3.line()
       .x(function(d) { return x(dateFormat(d.date)) })
@@ -139,8 +181,9 @@ $(function() {
       )
 
 
+  // Add X and Y axis
   g.append("g")
-    .attr("transform", "translate(0," + y(0) + ")")
+    .attr("transform", "translate(0," + y(graphBottom) + ")")
     .call(d3.axisBottom(x));
   g.append("g")
     .attr("transform", "translate(0, 0)")
@@ -167,6 +210,7 @@ $(function() {
 
       tooltip.select("#date").text(closestDataPoint.date);
       tooltip.select("#rating_value").text(closestDataPoint.rating_value);
+      tooltip.select("#skill").text(closestDataPoint.skill);
       tooltip.select("#uncertainty").text(closestDataPoint.uncertainty);
       tooltip.select("#count").text(closestDataPoint.count);
 
@@ -228,10 +272,13 @@ $(function() {
                     Games Played: <span id="count"></span>
                   </div>
                   <div>
-                    Average Rating: <span id="rating_value"></span>
+                    Skill: <span id="skill"></span>
                   </div>
                   <div>
                     Uncertainty: <span id="uncertainty"></span>
+                  </div>
+                  <div>
+                    Rating Value: <span id="rating_value"></span>
                   </div>
                 </div>
             </div>
