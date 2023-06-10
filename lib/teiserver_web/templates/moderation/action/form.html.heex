@@ -18,6 +18,14 @@
 
     <div class="col-lg-6">
       <div class="form-group my-2">
+        <%= label(f, :notes, class: "control-label") %>
+        <%= textarea(f, :notes, class: "form-control") %>
+        <%= error_tag(f, :notes) %>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="form-group my-2">
         <%= label(f, :expires, class: "control-label") %>
         <%= text_input(f, :expires, class: "form-control") %>
         <%= error_tag(f, :expires) %>

@@ -66,10 +66,22 @@ bsname = view_colour() %>
                     <%= textarea(f, :reason,
                       class: "form-control",
                       autofocus: :autofocus,
-                      rows: 4,
+                      rows: 3,
                       required: "required"
                     ) %>
                     <%= error_tag(f, :reason) %>
+                  </div>
+                </div>
+
+                <div class="col-lg-6">
+                  <div class="form-group my-2">
+                    <%= label(f, :notes, class: "control-label") %>
+                    <%= textarea(f, :notes,
+                      class: "form-control",
+                      rows: 3,
+                      required: "required"
+                    ) %>
+                    <%= error_tag(f, :notes) %>
                   </div>
                 </div>
 
@@ -79,7 +91,9 @@ bsname = view_colour() %>
                     <%= text_input(f, :expires, class: "form-control", required: "required") %>
                     <%= error_tag(f, :expires) %>
                   </div>
+                </div>
 
+                <div class="col-lg-6">
                   <div class="form-group my-2">
                     <%= label(f, :score_modifier, class: "control-label") %>
                     <%= text_input(f, :score_modifier, class: "form-control") %>

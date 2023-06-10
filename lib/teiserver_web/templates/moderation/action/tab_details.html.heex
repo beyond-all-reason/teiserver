@@ -8,6 +8,11 @@
         </tr>
 
         <tr>
+          <td>Notes</td>
+          <td><pre><%= breakup_long_words(@action.notes) %></pre></td>
+        </tr>
+
+        <tr>
           <td>Started:</td>
           <td><%= date_to_str(@action.inserted_at, format: :hms_or_ymd) %></td>
         </tr>
