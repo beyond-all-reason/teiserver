@@ -6,6 +6,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   alias Teiserver.Config
   alias Teiserver.Account
   alias Teiserver.Tachyon.{CommandDispatch, MessageHandlers}
+  alias Teiserver.Tachyon.Responses.System.ErrorResponse
   # alias Teiserver.Tachyon.Socket.PubsubHandlers
   alias Teiserver.Data.Types, as: T
 
@@ -105,7 +106,22 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     object = wrapper["data"]
     meta = Map.drop(wrapper, ["data"])
 
-    {dispatch_response, new_conn} = CommandDispatch.dispatch(conn, object, meta)
+    {dispatch_response, new_conn} = try do
+      CommandDispatch.dispatch(conn, object, meta)
+    rescue
+      _e in FunctionClauseError ->
+        send(self(), :disconnect_on_error)
+        response = ErrorResponse.generate("Server FunctionClauseError for command #{meta["command"]}")
+        {response, conn}
+
+      # e in RuntimeError ->
+      #   raise e
+
+      _ ->
+        send(self(), :disconnect_on_error)
+        response = ErrorResponse.generate("Internal server error for command #{meta["command"]}")
+        {response, conn}
+    end
 
     response =
       case dispatch_response do
@@ -123,8 +139,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
           %{
             "command" => command,
             "status" => "failure",
-            "reason" => reason,
-            "data" => %{}
+            "reason" => reason
           }
       end
 
@@ -173,6 +188,11 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
     # This will send stuff
     # {:reply, :ok, {:binary, <<111>>}, state}
+  end
+
+  # We have disconnect on error so we can later more easily make it so people can stay connected on error if needed for some reason
+  def handle_info(:disconnect_on_error, state) do
+    {:stop, :disconnected, state}
   end
 
   def handle_info(:disconnect, state) do

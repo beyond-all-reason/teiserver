@@ -11,6 +11,8 @@ defmodule Teiserver.Tachyon.CommandDispatch do
     Handlers.Lobby.ListLobbiesRequest,
     Handlers.Lobby.JoinRequest,
     Handlers.Lobby.LeaveRequest,
+    Handlers.Telemetry.EventRequest,
+    Handlers.Telemetry.PropertyRequest,
     Handlers.LobbyHost.CreateRequest,
     Handlers.System.DisconnectRequest,
     Handlers.System.ForceErrorRequest

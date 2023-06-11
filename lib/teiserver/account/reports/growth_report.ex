@@ -135,12 +135,6 @@ defmodule Teiserver.Account.GrowthReport do
 
     singleplayer_counts = {key, columns}
 
-    # data = hd(logs).data["events"]["combined"]
-    # IO.puts ""
-    # IO.inspect data
-    # IO.inspect data |> Map.keys
-    # IO.puts ""
-
     %{
       unique_counts: unique_counts,
       peak_counts: peak_counts,

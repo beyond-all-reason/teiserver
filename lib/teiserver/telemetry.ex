@@ -2163,6 +2163,10 @@ defmodule Teiserver.Telemetry do
     |> Map.new()
   end
 
+  def log_client_event(userid, event_type_name, value) when is_integer(userid) do
+    log_client_event(userid, event_type_name, value, nil)
+  end
+
   def log_client_event(nil, event_type_name, value, hash) do
     event_type_id = get_or_add_event_type(event_type_name)
 
@@ -2206,7 +2210,6 @@ defmodule Teiserver.Telemetry do
         result
     end
   end
-
   def log_client_property(nil, value_name, value, hash) do
     property_type_id = get_or_add_property_type(value_name)
 
