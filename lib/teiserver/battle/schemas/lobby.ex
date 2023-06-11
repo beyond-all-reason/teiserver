@@ -553,7 +553,7 @@ defmodule Teiserver.Battle.Lobby do
             {:waiting_on_host, script_password}
         end
       else
-        {:failure, "No lobby found (type 2)"}
+        {:failure, "No lobby found (type 2, lobby is nil at can_join?)"}
       end
     else
       server_result
@@ -600,7 +600,7 @@ defmodule Teiserver.Battle.Lobby do
         {:failure, "You are not a user"}
 
       lobby == nil ->
-        {:failure, "No lobby found (type 1)"}
+        {:failure, "No lobby found (type 1, lobby is nil for server_allows_join?)"}
 
       lobby.locked == true and ignore_locked == false ->
         {:failure, "Battle locked"}
