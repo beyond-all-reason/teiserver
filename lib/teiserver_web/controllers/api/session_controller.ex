@@ -143,11 +143,6 @@ defmodule TeiserverWeb.API.SessionController do
           # Are they an md5 conversion user?
           case user.spring_password do
             true ->
-              IO.puts "spring password"
-              IO.inspect user.spring_password
-              IO.inspect User.spring_md5_password(raw_password)
-              IO.puts ""
-
               # Yes, we can test and update their password accordingly!
               md5_password = User.spring_md5_password(raw_password)
 
