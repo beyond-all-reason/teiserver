@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
   )
 
   plug(Bodyguard.Plug.Authorize,
-    policy: Teiserver.Staff.Moderator,
+    policy: Teiserver.Staff.Reviewer,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
   )
