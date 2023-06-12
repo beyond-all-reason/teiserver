@@ -24,8 +24,18 @@
       size: :small,
       icon: Teiserver.Game.PlayerRatingsExport.icon(),
       name: "player_ratings",
-      text: "Player ratings",
+      text: "Current ratings",
       link: Routes.ts_reports_exports_path(@conn, :show, "player_ratings")
+    ) %>
+  <% end %>
+
+  <%= if allow?(@current_user, Teiserver.Game.RatingLogsExport.permissions()) do %>
+    <%= central_component("menu_card",
+      size: :small,
+      icon: Teiserver.Game.RatingLogsExport.icon(),
+      name: "player_ratings",
+      text: "Rating logs",
+      link: Routes.ts_reports_exports_path(@conn, :show, "rating_logs")
     ) %>
   <% end %>
 

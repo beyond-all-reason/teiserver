@@ -23,13 +23,13 @@
           Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
-            active: "player_ratings"
+            active: "rating_logs"
           })
         ) %>
         <br /><br />
 
         <form
-          action={Routes.ts_reports_exports_path(@conn, :show, "player_ratings")}
+          action={Routes.ts_reports_exports_path(@conn, :show, "rating_logs")}
           method="post"
           class="form-horizontal"
         >
@@ -54,6 +54,38 @@
             </div>
           </div>
 
+          <div class="row mt-4">
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_date_preset" class="control-label">Date range:</label>
+              <%= select(:report, :date_preset, @presets,
+                class: "form-control",
+                selected: @params["date_preset"]
+              ) %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_start_date" class="control-label">Start date:</label>
+              <input
+                type="text"
+                id="report_start_date"
+                name="report[start_date]"
+                value={@params["start_date"]}
+                class="form-control datepicker"
+              />
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_end_date" class="control-label">End date:</label>
+              <input
+                type="text"
+                id="report_end_date"
+                name="report[end_date]"
+                value={@params["end_date"]}
+                class="form-control datepicker"
+              />
+            </div>
+          </div>
+
           <div class="row">
             <div class="offset-md-8 col-md-4 offset-xl-9 col-xl-3">
               &nbsp;<br />
@@ -68,7 +100,7 @@
         </form>
 
         <div class="help-box-large">
-          This exports player's current ratings
+          This exports rating logs into JSON
         </div>
       </div>
     </div>

@@ -148,7 +148,7 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
         []
       )
 
-    :timer.sleep(500)
+    :timer.sleep(1000)
     delete_matches(remaining, nil)
   end
 
