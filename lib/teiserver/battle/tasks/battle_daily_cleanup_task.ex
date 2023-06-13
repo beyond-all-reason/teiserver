@@ -1,4 +1,4 @@
-defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
+defmodule Teiserver.Battle.Tasks.CleanupTask do
   use Oban.Worker, queue: :cleanup
 
   alias Central.Repo

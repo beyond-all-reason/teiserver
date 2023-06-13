@@ -124,7 +124,7 @@ config :central, Oban,
        {"22 1 * * *", Teiserver.Telemetry.EventCleanupTask},
 
        # At 17 minutes past every hour
-       {"17 * * * *", Teiserver.Battle.Tasks.DailyCleanupTask},
+       {"17 * * * *", Teiserver.Battle.Tasks.CleanupTask},
 
        # Every minute
        {"* * * * *", Teiserver.Telemetry.Tasks.PersistServerMinuteTask},
