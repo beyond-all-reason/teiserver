@@ -1,4 +1,4 @@
-defmodule Central.Admin.DailyCleanupTask do
+defmodule Teiserver.Admin.DailyCleanupTask do
   @moduledoc false
   use Oban.Worker, queue: :cleanup
 
