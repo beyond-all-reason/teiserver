@@ -8,6 +8,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Data.Types, as: T
+  alias Central.Helpers.TimexHelper
   import Central.Helpers.NumberHelper, only: [percent: 2]
 
   @spec match_processed(map(), T.userid()) :: :ok
@@ -32,18 +33,16 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         ],
         order_by: "Newest first",
         limit: 50,
-        preload: [:match, :match_membership]
+        preload: [:match_membership]
       )
 
     win_count =
       logs
-      |> Enum.filter(fn log -> log.match_membership.win end)
-      |> Enum.count()
+      |> Enum.count(fn log -> log.match_membership.win end)
 
     loss_count =
       logs
-      |> Enum.reject(fn log -> log.match_membership.win end)
-      |> Enum.count()
+      |> Enum.count(fn log -> not log.match_membership.win end)
 
     total = Enum.count(logs)
 
@@ -73,18 +72,16 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         ],
         order_by: "Newest first",
         limit: 50,
-        preload: [:match, :match_membership]
+        preload: [:match_membership]
       )
 
     win_count =
       logs
-      |> Enum.filter(fn log -> log.match_membership.win end)
-      |> Enum.count()
+      |> Enum.count(fn log -> log.match_membership.win end)
 
     loss_count =
       logs
-      |> Enum.reject(fn log -> log.match_membership.win end)
-      |> Enum.count()
+      |> Enum.count(fn log -> not log.match_membership.win end)
 
     total = Enum.count(logs)
 
@@ -119,13 +116,11 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
 
     win_count =
       logs
-      |> Enum.filter(fn log -> log.match_membership.win end)
-      |> Enum.count()
+      |> Enum.count(fn log -> log.match_membership.win end)
 
     loss_count =
       logs
-      |> Enum.reject(fn log -> log.match_membership.win end)
-      |> Enum.count()
+      |> Enum.count(fn log -> not log.match_membership.win end)
 
     statuses =
       logs
@@ -161,34 +156,27 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
 
     # For team we also look at their really recent games as that's where we'd expect
     # smurfs to be most active right now
-    do_match_processed_team_recent(userid)
+    do_match_processed_team_recent(userid, logs)
     :ok
   end
 
-  def do_match_processed_team_recent(userid) do
-    filter_type_id = MatchRatingLib.rating_type_name_lookup()["Team"]
+  def do_match_processed_team_recent(userid, logs) do
+    # Filter down to just the recent ones rather than re-running the query
+    timestamp_after = Timex.now() |> Timex.shift(days: -7)
 
-    logs =
-      Game.list_rating_logs(
-        search: [
-          user_id: userid,
-          rating_type_id: filter_type_id,
-          inserted_after: Timex.now() |> Timex.shift(days: -7)
-        ],
-        order_by: "Newest first",
-        limit: 15,
-        preload: [:match, :match_membership]
-      )
+    logs = logs
+      |> Enum.filter(fn log ->
+        TimexHelper.greater_than(log.inserted_at, timestamp_after)
+      end)
+      |> Enum.take(15)
 
     win_count =
       logs
-      |> Enum.filter(fn log -> log.match_membership.win end)
-      |> Enum.count()
+      |> Enum.count(fn log -> log.match_membership.win end)
 
     loss_count =
       logs
-      |> Enum.reject(fn log -> log.match_membership.win end)
-      |> Enum.count()
+      |> Enum.count(fn log -> not log.match_membership.win end)
 
     statuses =
       logs
