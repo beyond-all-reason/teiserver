@@ -115,8 +115,10 @@ config :central, Oban,
        # Every hour
        {"0 * * * *", Teiserver.Admin.HourlyCleanupTask},
 
+       # Every day at 1am
+       {"0 1 * * *", Teiserver.Admin.DailyCleanupTask},
+
        # Every day at 2am
-       {"0 * * * *", Teiserver.Admin.DailyCleanupTask},
        {"0 2 * * *", Teiserver.Logging.AggregateViewLogsTask},
 
        # 1:07 am
