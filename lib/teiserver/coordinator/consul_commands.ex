@@ -1687,6 +1687,22 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
+  def handle_command(%{command: "forceparty"}, state) do
+    # Forces parties to always be used where possible
+    [
+      {:max_deviation, 1000},
+      {:rating_lower_boundary, 1000},
+      {:rating_upper_boundary, 1000},
+      {:mean_diff_max, 1000},
+      {:stddev_diff_max, 1000}
+    ]
+    |> Enum.each(fn {key, value} ->
+      Coordinator.cast_balancer(state.lobby_id, {:set, key, value})
+    end)
+
+    state
+  end
+
   # ----------------- Moderation commands
   def handle_command(%{command: "speclock", remaining: target} = cmd, state) do
     case ConsulServer.get_user(target, state) do

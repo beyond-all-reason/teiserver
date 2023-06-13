@@ -16,7 +16,15 @@ defmodule Teiserver.Telemetry do
 
   @spec get_totals_and_reset :: map()
   def get_totals_and_reset() do
-    GenServer.call(TelemetryServer, :get_totals_and_reset)
+    try do
+      GenServer.call(TelemetryServer, :get_totals_and_reset)
+      # In certain situations (e.g. just after startup) it can be
+      # the process hasn't started up so we need to handle that
+      # without dying
+    catch
+      :exit, _ ->
+        nil
+    end
   end
 
   @spec increment(any) :: :ok
