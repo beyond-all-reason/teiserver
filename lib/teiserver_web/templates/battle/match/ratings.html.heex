@@ -68,9 +68,9 @@
               <th>Map name</th>
               <th>Players</th>
               <th>Type</th>
-              <th colspan="2">Skill Rating</th>
+              <th colspan="2">Skill value</th>
+              <th colspan="2">Game rating<br /> (Skill - Uncertainty, non-negative)</th>
               <th colspan="2">Leaderboard rating<br /> (Skill - 3 x Uncertainty)</th>
-              <th colspan="2">Balance rating<br /> (Skill - Uncertainty, non-negative)</th>
               <th>Date</th>
               <th>&nbsp;</th>
             </tr>
@@ -98,17 +98,18 @@
                   <%= round(log.value["skill_change"], 2) %>
                 </td>
 
-                <td><%= round(log.value["skill"] - 3 * log.value["uncertainty"], 2) %></td>
-                <td class={text_class}>
-                  <i class={"fa-fw fa-solid fa-#{icon}"}></i>
-
-                  <%= round(log.value["skill_change"] - 3 * log.value["uncertainty_change"], 2) %>
-                </td>
                 <td><%= round(log.value["rating_value"], 2) %></td>
                 <td class={text_class}>
                   <i class={"fa-fw fa-solid fa-#{icon}"}></i>
 
                   <%= round(log.value["rating_value_change"], 2) %>
+                </td>
+
+                <td><%= round(log.value["skill"] - 3 * log.value["uncertainty"], 2) %></td>
+                <td class={text_class}>
+                  <i class={"fa-fw fa-solid fa-#{icon}"}></i>
+
+                  <%= round(log.value["skill_change"] - 3 * log.value["uncertainty_change"], 2) %>
                 </td>
 
                 <td><%= date_to_str(log.inserted_at, format: :hms_or_dmy) %></td>
