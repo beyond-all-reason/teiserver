@@ -75,7 +75,7 @@ defmodule Central.MixProject do
       {:argon2_elixir, "~> 3.0"},
       {:bodyguard, "~> 2.4"},
       {:human_time, "~> 0.3.0"},
-      {:oban, "~> 2.14"},
+      {:oban, "~> 2.15"},
       {:parallel, "~> 0.0"},
       {:con_cache, "~> 1.0"},
       {:phoenix_pubsub, "~> 2.0"},
