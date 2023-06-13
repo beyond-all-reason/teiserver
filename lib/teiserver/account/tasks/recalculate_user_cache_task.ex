@@ -11,6 +11,9 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
   alias Central.Helpers.TimexHelper
   import Central.Helpers.NumberHelper, only: [percent: 2]
 
+  @match_cache_recent_days 7
+  @match_cache_max_days 31
+
   @spec match_processed(map(), T.userid()) :: :ok
   def match_processed(match, userid) do
     case match.game_type do
@@ -29,7 +32,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         search: [
           user_id: userid,
           rating_type_id: filter_type_id,
-          inserted_after: Timex.now() |> Timex.shift(days: -31)
+          inserted_after: Timex.now() |> Timex.shift(days: -@match_cache_max_days)
         ],
         order_by: "Newest first",
         limit: 50,
@@ -68,7 +71,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         search: [
           user_id: userid,
           rating_type_id: filter_type_id,
-          inserted_after: Timex.now() |> Timex.shift(days: -31)
+          inserted_after: Timex.now() |> Timex.shift(days: -@match_cache_max_days)
         ],
         order_by: "Newest first",
         limit: 50,
@@ -107,7 +110,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         search: [
           user_id: userid,
           rating_type_id: filter_type_id,
-          inserted_after: Timex.now() |> Timex.shift(days: -31)
+          inserted_after: Timex.now() |> Timex.shift(days: -@match_cache_max_days)
         ],
         order_by: "Newest first",
         limit: 50,
@@ -162,7 +165,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
 
   def do_match_processed_team_recent(userid, logs) do
     # Filter down to just the recent ones rather than re-running the query
-    timestamp_after = Timex.now() |> Timex.shift(days: -7)
+    timestamp_after = Timex.now() |> Timex.shift(days: -@match_cache_recent_days)
 
     logs = logs
       |> Enum.filter(fn log ->

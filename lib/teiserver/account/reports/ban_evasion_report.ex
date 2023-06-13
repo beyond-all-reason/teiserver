@@ -2,7 +2,7 @@ defmodule Teiserver.Account.BanEvasionReport do
   @moduledoc """
 
   """
-  alias Teiserver.{Account, User}
+  alias Teiserver.{Account}
   require Logger
 
   @spec icon() :: String.t()

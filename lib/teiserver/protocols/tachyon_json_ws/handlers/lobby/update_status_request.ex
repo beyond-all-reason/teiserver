@@ -3,8 +3,8 @@ defmodule Teiserver.Tachyon.Handlers.Lobby.UpdateStatusRequest do
 
   """
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Tachyon.Responses.Lobby.UpdateStatusResponse
-  alias Teiserver.{Account}
+  # alias Teiserver.Tachyon.Responses.Lobby.UpdateStatusResponse
+  # alias Teiserver.{Account}
 
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do
