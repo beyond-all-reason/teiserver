@@ -22,7 +22,7 @@ defmodule Teiserver.Moderation.Action do
   def changeset(struct, params \\ %{}) do
     params =
       params
-      |> trim_strings(~w(reason)a)
+      |> trim_strings(~w(reason notes)a)
       |> parse_humantimes(~w(expires)a)
 
     struct

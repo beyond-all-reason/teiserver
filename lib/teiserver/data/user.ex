@@ -24,6 +24,8 @@ defmodule Teiserver.User do
 
   @suspended_string "This account has been suspended. You can see the #moderation-bot on discord for more details; if you need to appeal anything please use the #open-ticket channel on the discord. Be aware, trying to evade moderation by creating new accounts will result in extending the suspension or even a permanent ban."
 
+  @smurf_string "Smurf/alt account detected. We do not allow smurfing. Please login as your main account. Repeatedly creating smurfs can result in suspension or bans. If you think this account was flagged incorrectly please open a ticket on our discord and explain why."
+
   @spec keys() :: [atom]
   def keys(),
     do:
@@ -853,8 +855,10 @@ defmodule Teiserver.User do
 
     cond do
       user.smurf_of_id != nil ->
-        {:error,
-         "Smurf/alt account detected. We do not allow smurfing. Please login as your main account. Repeatedly creating smurfs can result in suspension or bans. If you think this account was flagged incorrectly please open a ticket on our discord and explain why."}
+        Telemetry.log_server_event(user.id, "Banned login", %{
+          error: "Smurf"
+        })
+        {:error, @smurf_string}
 
       token.expires != nil and Timex.compare(token.expires, Timex.now()) == -1 ->
         {:error, "Token expired"}
@@ -866,9 +870,15 @@ defmodule Teiserver.User do
         {:error, "Application hash missing in login"}
 
       is_restricted?(user, ["Permanently banned"]) ->
+        Telemetry.log_server_event(user.id, "Banned login", %{
+          error: "Permanently banned"
+        })
         {:error, "Banned account"}
 
       is_restricted?(user, ["Login"]) ->
+        Telemetry.log_server_event(user.id, "Banned login", %{
+          error: "Suspended"
+        })
         {:error, @suspended_string}
 
       not is_verified?(user) ->
@@ -923,8 +933,10 @@ defmodule Teiserver.User do
 
         cond do
           user.smurf_of_id != nil ->
-            {:error,
-             "Smurf/alt account detected. We do not allow smurfing. Please login as your main account. Repeatedly creating smurfs can result in suspension or bans. If you think this account was flagged incorrectly please open a ticket on our discord and explain why."}
+            Telemetry.log_server_event(user.id, "Banned login", %{
+              error: "Smurf"
+            })
+            {:error, @smurf_string}
 
           not is_bot?(user) and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
@@ -933,9 +945,15 @@ defmodule Teiserver.User do
             {:error, "LobbyHash/UserID missing in login"}
 
           is_restricted?(user, ["Permanently banned"]) ->
+            Telemetry.log_server_event(user.id, "Banned login", %{
+              error: "Permanently banned"
+            })
             {:error, "Banned account"}
 
           is_restricted?(user, ["Login"]) ->
+            Telemetry.log_server_event(user.id, "Banned login", %{
+              error: "Suspended"
+            })
             {:error, @suspended_string}
 
           not is_verified?(user) ->
@@ -1003,8 +1021,10 @@ defmodule Teiserver.User do
 
         cond do
           user.smurf_of_id != nil ->
-            {:error,
-             "Smurf/alt account detected. We do not allow smurfing. Please login as your main account. Repeatedly creating smurfs can result in suspension or bans. If you think this account was flagged incorrectly please open a ticket on our discord and explain why."}
+            Telemetry.log_server_event(user.id, "Banned login", %{
+              error: "Smurf"
+            })
+            {:error, @smurf_string}
 
           user.name != username ->
             {:error, "Username is case sensitive, try '#{user.name}'"}
@@ -1024,9 +1044,15 @@ defmodule Teiserver.User do
             end
 
           is_restricted?(user, ["Permanently banned"]) ->
+            Telemetry.log_server_event(user.id, "Banned login", %{
+              error: "Permanently banned"
+            })
             {:error, "Banned account"}
 
           is_restricted?(user, ["Login"]) ->
+            Telemetry.log_server_event(user.id, "Banned login", %{
+              error: "Suspended"
+            })
             {:error, @suspended_string}
 
           not is_verified?(user) ->

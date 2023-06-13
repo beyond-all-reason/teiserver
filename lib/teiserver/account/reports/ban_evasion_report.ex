@@ -16,20 +16,15 @@ defmodule Teiserver.Account.BanEvasionReport do
     params = apply_defaults(params)
     valid_types = get_valid_key_types()
 
-    moderated_users =
+    moderated_user_ids =
       Account.list_users(
         search: [
-          mod_action: "Any action"
+          mod_action: "Muted or banned"
         ],
+        select: [:id],
         limit: :infinity,
         order_by: "Newest first"
       )
-      |> Enum.reject(fn user ->
-        user.data["restrictions"] == ["Bridging"]
-      end)
-
-    moderated_user_ids =
-      moderated_users
       |> Enum.map(fn %{id: id} -> id end)
 
     moderated_keys =
@@ -46,9 +41,10 @@ defmodule Teiserver.Account.BanEvasionReport do
     moderated_key_values =
       moderated_keys
       |> Enum.map(fn %{value: value} -> value end)
+      |> Enum.uniq
 
     # Now search for keys of existing users
-    evader_keys =
+    evader_values =
       Account.list_smurf_keys(
         search: [
           value_in: moderated_key_values,
@@ -58,13 +54,6 @@ defmodule Teiserver.Account.BanEvasionReport do
         select: [:value, :user_id],
         limit: :infinity
       )
-      |> Enum.filter(fn %{user_id: userid} ->
-        User.is_verified?(userid)
-      end)
-
-    # Extract the evader values
-    evader_values =
-      evader_keys
       |> Enum.map(fn %{value: value} -> value end)
 
     # Now run through the new_keys and keep only those with a match
@@ -74,25 +63,14 @@ defmodule Teiserver.Account.BanEvasionReport do
       |> Enum.map(fn %{user_id: user_id} -> user_id end)
       |> Enum.uniq()
 
-    evaders =
+    relevant_evaders =
       Account.list_users(
         search: [
-          id_in: relevant_evader_ids
+          id_in: relevant_evader_ids,
+          mod_action: "not muted or banned"
         ],
         limit: :infinity
       )
-
-    relevant_evaders =
-      evaders
-      |> Enum.filter(fn user -> Enum.member?(relevant_evader_ids, user.id) end)
-      |> Enum.reject(fn user ->
-        User.is_restricted?(user.data["restrictions"], [
-          "Login",
-          "All chat",
-          "Room chat",
-          "All lobbies"
-        ])
-      end)
 
     user_stats =
       relevant_evaders
