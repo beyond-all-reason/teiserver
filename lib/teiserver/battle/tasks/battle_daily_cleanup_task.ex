@@ -160,13 +160,13 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
 
     finished_after =
       Timex.now()
-      |> Timex.shift(days: -(@strip_data_days * 2))
+      |> Timex.shift(days: -(@strip_data_days + 3))
       |> date_to_str(:ymd_t_hms)
 
     query = """
-          UPDATE teiserver_battle_matches m SET tags = '{}' data = '{}'
-          WHERE m.finished < #{finished_before}
-          AND m.finished > #{finished_after}
+          UPDATE teiserver_battle_matches SET tags = '{}', data = '{}'
+          WHERE finished < #{finished_before}
+          AND finished > #{finished_after}
     """
 
     Ecto.Adapters.SQL.query(Repo, query, [])
