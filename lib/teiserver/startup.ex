@@ -154,6 +154,10 @@ defmodule Teiserver.Startup do
     end)
 
     time_taken = System.system_time(:millisecond) - start_time
+    Teiserver.Telemetry.log_server_event(nil, "Server startup", %{
+      time_taken_ms: time_taken
+    })
+
     Logger.info("Teiserver startup complete, took #{time_taken}ms")
   end
 end
