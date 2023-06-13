@@ -81,6 +81,11 @@ config :central, Teiserver,
   enable_managed_lobbies: true,
   tachyon_schema_path: "/apps/central/lib/central-0.1.0/priv/tachyon/schema_v1/*/*/*.json"
 
+config :central, Central.Repo,
+  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "40"),
+  timeout: 120_000,
+  queue_interval: 2000
+
 # Do not print debug messages in production
 config :logger,
   format: "$date $time [$level] $metadata $message\n",
