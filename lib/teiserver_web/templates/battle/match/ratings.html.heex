@@ -48,14 +48,14 @@
             </div>
 
             <div class="col-md-3">
-              Peak Rating: <%= Enum.max_by(@logs, fn l -> l.value["rating_value"] end).value[
+              Peak balance rating: <%= Enum.max_by(@logs, fn l -> l.value["rating_value"] end).value[
                 "rating_value"
               ]
               |> round(2) %>
             </div>
 
             <div class="col-md-3">
-              Game rating change: <%= (@ratings[@filter].rating_value -
+              Balance rating change: <%= (@ratings[@filter].rating_value -
                                          @stats.first_log.value["rating_value"])
               |> round(2) %>
             </div>
@@ -65,11 +65,12 @@
         <table class="table table-sm mt-3">
           <thead>
             <tr>
-              <th>Game</th>
+              <th>Map name</th>
               <th>Players</th>
               <th>Type</th>
-              <th>Leaderboard rating</th>
-              <th colspan="2">Balance Rating</th>
+              <th colspan="2">Skill Rating</th>
+              <th colspan="2">Leaderboard rating<br /> (Skill - 3 x Uncertainty)</th>
+              <th colspan="2">Balance rating<br /> (Skill - Uncertainty, non-negative)</th>
               <th>Date</th>
               <th>&nbsp;</th>
             </tr>
@@ -77,7 +78,7 @@
           <tbody>
             <%= for log <- @logs do %>
               <% {text_class, icon} =
-                if log.value["rating_value_change"] > 0 do
+                if log.value["skill_change"] > 0 do
                   {"text-success", "up"}
                 else
                   {"text-danger", "down"}
@@ -90,9 +91,19 @@
                   <td colspan="2"><%= log.value["reason"] || "No match" %></td>
                 <% end %>
                 <td><%= @rating_type_id_lookup[log.rating_type_id] %></td>
+                <td><%= round(log.value["skill"], 2) %></td>
+                <td class={text_class}>
+                  <i class={"fa-fw fa-solid fa-#{icon}"}></i>
 
-                <td><%= round(log.value["skill"] - log.value["uncertainty"] * 3, 2) %></td>
+                  <%= round(log.value["skill_change"], 2) %>
+                </td>
 
+                <td><%= round(log.value["skill"] - 3 * log.value["uncertainty"], 2) %></td>
+                <td class={text_class}>
+                  <i class={"fa-fw fa-solid fa-#{icon}"}></i>
+
+                  <%= round(log.value["skill_change"] - 3 * log.value["uncertainty_change"], 2) %>
+                </td>
                 <td><%= round(log.value["rating_value"], 2) %></td>
                 <td class={text_class}>
                   <i class={"fa-fw fa-solid fa-#{icon}"}></i>
