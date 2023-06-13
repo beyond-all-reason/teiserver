@@ -20,7 +20,6 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
           search: [
             ready_for_post_process: true
           ],
-          preload: [:members],
           limit: :infinity
         )
         |> Enum.each(&post_process_match/1)
