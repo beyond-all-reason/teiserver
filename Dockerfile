@@ -39,7 +39,7 @@ FROM dev as prod-build
 ENV MIX_ENV=dev
 RUN --mount=type=cache,target=/build/tmp cd tmp && \
     if [ ! -f fa.zip ]; then \
-      curl -LSs https://use.fontawesome.com/releases/v${FA_RELEASE}/fontawesome-free-${FA_RELEASE}-web.zip -o tmp/fa.zip; \
+      curl -LSs https://use.fontawesome.com/releases/v${FA_RELEASE}/fontawesome-free-${FA_RELEASE}-web.zip -o fa.zip; \
       unzip fa.zip; \
     fi && \
     cp fontawesome-*/css/all.min.css ../priv/static/css/fontawesome.css && \
