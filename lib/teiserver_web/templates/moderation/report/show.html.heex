@@ -31,6 +31,25 @@
         <hr />
 
         <div class="float-end">
+          <%= if allow?(@conn, "Moderator") do %>
+            <%= if @report.closed do %>
+              <%= link(raw("<i class='fa-solid fa-fw fa-folder-open'></i> Open"),
+                to: ~p"/moderation/report/#{@report.id}/open",
+                method: :put,
+                class: "btn btn-outline-#{bsname}"
+              ) %>
+            <% else %>
+              <%= if @report.result_id == nil do %>
+                <%= link(raw("<i class='fa-solid fa-fw fa-folder-closed'></i> Close"),
+                  to: ~p"/moderation/report/#{@report.id}/close",
+                  method: :put,
+                  class: "btn btn-outline-#{bsname}"
+                ) %>
+              <% end %>
+            <% end %>
+          <% end %>
+
+
           <a
             class="btn btn-outline-warning"
             href={"#{Routes.moderation_report_path(@conn, :index)}?target_id=#{@report.target_id}"}
@@ -70,16 +89,18 @@
               View user
             </a>
 
-            <a
-              class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
-              href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@report.target_id}_"}
-            >
-              <%= central_component("icon",
-                icon: Teiserver.Moderation.ActionLib.icon(),
-                class: "fa-solid"
-              ) %> &nbsp;
-              Action user
-            </a>
+            <%= if not @report.closed do %>
+              <a
+                class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
+                href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@report.target_id}_"}
+              >
+                <%= central_component("icon",
+                  icon: Teiserver.Moderation.ActionLib.icon(),
+                  class: "fa-solid"
+                ) %> &nbsp;
+                Action user
+              </a>
+            <% end %>
           <% end %>
         </div>
 
@@ -91,6 +112,10 @@
               icon: Teiserver.Moderation.ActionLib.icon(),
               class: "text-danger fa-solid"
             ) %>
+          <% end %>
+
+          <%= if @report.closed do %>
+            - Closed
           <% end %>
         </h3>
         <br />

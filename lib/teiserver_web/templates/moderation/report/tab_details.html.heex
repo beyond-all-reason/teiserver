@@ -78,6 +78,7 @@
     </table>
   </div>
 
+<%= if not @report.closed do %>
   <div class="col-md-12 col-lg-6">
     <h4>Your response</h4>
     <%= render(
@@ -110,4 +111,5 @@
       </tbody>
     </table>
   </div>
+<% end %>
 </div>
