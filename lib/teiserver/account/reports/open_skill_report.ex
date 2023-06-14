@@ -46,18 +46,18 @@ defmodule Teiserver.Account.OpenSkillReport do
     FROM
       teiserver_account_ratings
     WHERE
-      rating_type_id = #{rating_type_id}
+      rating_type_id = $1
     AND
-      last_updated >= $1
+      last_updated >= $2
     AND
-      uncertainty <= $2
+      uncertainty <= $3
     GROUP BY
       #{metric_column_name}_rounded
     ORDER BY
       #{metric_column_name}_rounded
     """
 
-    case Ecto.Adapters.SQL.query(Repo, query, [last_active, uncertainty]) do
+    case Ecto.Adapters.SQL.query(Repo, query, [rating_type_id, last_active, uncertainty]) do
       {:ok, results} ->
         [results.columns | results.rows]
 

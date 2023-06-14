@@ -4,7 +4,6 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
   alias Central.Repo
   alias Teiserver.{Battle}
   alias Central.Helpers.StringHelper
-  import Central.Helpers.TimexHelper, only: [date_to_str: 2]
   require Logger
 
   @strip_data_days 35
@@ -101,52 +100,44 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
     ids = Enum.take(ids, @chunk_size * 100)
     {ids, remaining} = Enum.split(ids, @chunk_size)
 
-    id_str = Enum.join(ids, ",")
-
     # Tables we update
-    {:ok, _} =
-      Ecto.Adapters.SQL.query(
-        Repo,
-        "UPDATE teiserver_account_accolades SET match_id = NULL WHERE match_id IN (#{id_str})",
-        []
-      )
+    Ecto.Adapters.SQL.query!(
+      Repo,
+      "UPDATE teiserver_account_accolades SET match_id = NULL WHERE match_id = ANY($1)",
+      [ids]
+    )
 
-    {:ok, _} =
-      Ecto.Adapters.SQL.query(
-        Repo,
-        "UPDATE moderation_reports SET match_id = NULL WHERE match_id IN (#{id_str})",
-        []
-      )
+    Ecto.Adapters.SQL.query!(
+      Repo,
+      "UPDATE moderation_reports SET match_id = NULL WHERE match_id = ANY($1)",
+      [ids]
+    )
 
-    {:ok, _} =
-      Ecto.Adapters.SQL.query(
-        Repo,
-        "UPDATE teiserver_telemetry_match_events SET match_id = NULL WHERE match_id IN (#{id_str})",
-        []
-      )
+    Ecto.Adapters.SQL.query!(
+      Repo,
+      "UPDATE teiserver_telemetry_match_events SET match_id = NULL WHERE match_id = ANY($1)",
+      [ids]
+    )
 
     # Match specific things we want to delete
-    {:ok, _} =
-      Ecto.Adapters.SQL.query(
-        Repo,
-        "DELETE FROM teiserver_lobby_messages WHERE match_id IN (#{id_str})",
-        []
-      )
+    Ecto.Adapters.SQL.query!(
+      Repo,
+      "DELETE FROM teiserver_lobby_messages WHERE match_id = ANY($1)",
+      [ids]
+    )
 
-    {:ok, _} =
-      Ecto.Adapters.SQL.query(
-        Repo,
-        "DELETE FROM teiserver_battle_match_memberships WHERE match_id IN (#{id_str})",
-        []
-      )
+    Ecto.Adapters.SQL.query!(
+      Repo,
+      "DELETE FROM teiserver_battle_match_memberships WHERE match_id = ANY($1)",
+      [ids]
+    )
 
     # Now delete the matches themselves
-    {:ok, _} =
-      Ecto.Adapters.SQL.query(
-        Repo,
-        "DELETE FROM teiserver_battle_matches WHERE id IN (#{id_str})",
-        []
-      )
+    Ecto.Adapters.SQL.query!(
+      Repo,
+      "DELETE FROM teiserver_battle_matches WHERE id = ANY($1)",
+      [ids]
+    )
 
     :timer.sleep(1000)
     delete_matches(remaining, nil)
@@ -156,19 +147,17 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
     finished_before =
       Timex.now()
       |> Timex.shift(days: -@strip_data_days)
-      |> date_to_str(:ymd_t_hms)
 
     finished_after =
       Timex.now()
       |> Timex.shift(days: -(@strip_data_days + 3))
-      |> date_to_str(:ymd_t_hms)
 
     query = """
           UPDATE teiserver_battle_matches SET tags = '{}', data = '{}'
-          WHERE finished < #{finished_before}
-          AND finished > #{finished_after}
+          WHERE finished < $1
+          AND finished > $2
     """
 
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    Ecto.Adapters.SQL.query!(Repo, query, [finished_before, finished_after])
   end
 end

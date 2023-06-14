@@ -54,10 +54,10 @@ defmodule Teiserver.Account.RecordsReport do
       FROM teiserver_server_day_logs logs
       ORDER BY
         (logs.data -> #{path}) DESC
-      LIMIT #{@top_count}
+      LIMIT $1
     """
 
-    case Ecto.Adapters.SQL.query(Repo, query, []) do
+    case Ecto.Adapters.SQL.query(Repo, query, [@top_count]) do
       {:ok, results} ->
         results.rows
 

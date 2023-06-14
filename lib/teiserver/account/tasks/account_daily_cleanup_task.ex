@@ -37,61 +37,54 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
     id_list
     |> Enum.each(&Account.decache_user/1)
 
-    # Some mass deletion first
-    sql_id_list =
-      id_list
-      |> Enum.join(",")
-
-    sql_id_list = "(#{sql_id_list})"
-
     # Clan memberships
-    query = "DELETE FROM teiserver_clan_memberships WHERE user_id IN #{sql_id_list}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    query = "DELETE FROM teiserver_clan_memberships WHERE user_id = ANY($1)"
+    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
     # Accolades
     query =
-      "DELETE FROM teiserver_account_accolades WHERE recipient_id IN #{sql_id_list} OR giver_id IN #{sql_id_list}"
+      "DELETE FROM teiserver_account_accolades WHERE recipient_id = ANY($1) OR giver_id = ANY($1)"
 
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
     # Events/Properties
-    query = "DELETE FROM teiserver_telemetry_client_events WHERE user_id IN #{sql_id_list}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    query = "DELETE FROM teiserver_telemetry_client_events WHERE user_id = ANY($1)"
+    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
-    query = "DELETE FROM teiserver_telemetry_client_properties WHERE user_id IN #{sql_id_list}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    query = "DELETE FROM teiserver_telemetry_client_properties WHERE user_id = ANY($1)"
+    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
-    query = "DELETE FROM teiserver_telemetry_server_events WHERE user_id IN #{sql_id_list}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    query = "DELETE FROM teiserver_telemetry_server_events WHERE user_id = ANY($1)"
+    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
-    query = "DELETE FROM teiserver_telemetry_match_events WHERE user_id IN #{sql_id_list}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    query = "DELETE FROM teiserver_telemetry_match_events WHERE user_id = ANY($1)"
+    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
     # Stats
-    query = "DELETE FROM teiserver_account_user_stats WHERE user_id IN #{sql_id_list}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    query = "DELETE FROM teiserver_account_user_stats WHERE user_id = ANY($1)"
+    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
     # Chat
-    query = "DELETE FROM teiserver_lobby_messages WHERE user_id IN #{sql_id_list}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    query = "DELETE FROM teiserver_lobby_messages WHERE user_id = ANY($1)"
+    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
-    query = "DELETE FROM teiserver_room_messages WHERE user_id IN #{sql_id_list}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    query = "DELETE FROM teiserver_room_messages WHERE user_id = ANY($1)"
+    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
     # Match memberships (how are they a member of a match if unverified?
-    query = "DELETE FROM teiserver_battle_match_memberships WHERE user_id IN #{sql_id_list}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    query = "DELETE FROM teiserver_battle_match_memberships WHERE user_id = ANY($1)"
+    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
     # Ratings too
-    query = "DELETE FROM teiserver_account_ratings WHERE user_id IN #{sql_id_list}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    query = "DELETE FROM teiserver_account_ratings WHERE user_id = ANY($1)"
+    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
-    query = "DELETE FROM teiserver_game_rating_logs WHERE user_id IN #{sql_id_list}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    query = "DELETE FROM teiserver_game_rating_logs WHERE user_id = ANY($1)"
+    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
     # Smurf keys
-    query = "DELETE FROM teiserver_account_smurf_keys WHERE user_id IN #{sql_id_list}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    query = "DELETE FROM teiserver_account_smurf_keys WHERE user_id = ANY($1)"
+    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
     # Delete our cache of them
     id_list

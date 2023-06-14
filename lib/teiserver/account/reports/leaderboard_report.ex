@@ -141,9 +141,6 @@ defmodule Teiserver.Account.LeaderboardReport do
   end
 
   defp get_extra_data(userids, after_date, type_name) do
-    id_str = Enum.join(userids, ", ")
-    date_str = TimexHelper.date_to_str(after_date, format: :ymd_hms)
-
     query = """
       SELECT
         memberships.user_id,
@@ -156,14 +153,14 @@ defmodule Teiserver.Account.LeaderboardReport do
       JOIN teiserver_game_rating_logs rating_logs
         ON matches.id = rating_logs.match_id AND rating_logs.user_id = memberships.user_id
       WHERE
-        memberships.user_id IN (#{id_str})
-        AND matches.started > '#{date_str}'
-        AND matches.game_type = '#{type_name}'
+        memberships.user_id = ANY($1)
+        AND matches.started > $2
+        AND matches.game_type = $3
       GROUP BY
         memberships.user_id
     """
 
-    case Ecto.Adapters.SQL.query(Repo, query, []) do
+    case Ecto.Adapters.SQL.query(Repo, query, [userids, after_date, type_name]) do
       {:ok, results} ->
         results.rows
         |> Map.new(fn [userid, count, wins] ->

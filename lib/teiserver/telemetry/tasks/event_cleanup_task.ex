@@ -12,21 +12,20 @@ defmodule Teiserver.Telemetry.EventCleanupTask do
 
     before_timestamp =
       Timex.shift(Timex.now(), days: -days)
-      |> date_to_str(format: :ymd_hms)
 
     query = """
           DELETE FROM teiserver_telemetry_client_events
-          WHERE timestamp < '#{before_timestamp}'
+          WHERE timestamp < $1
     """
 
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    Ecto.Adapters.SQL.query!(Repo, query, [before_timestamp])
 
     query = """
           DELETE FROM teiserver_telemetry_unauth_events
-          WHERE timestamp < '#{before_timestamp}'
+          WHERE timestamp < $1
     """
 
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    Ecto.Adapters.SQL.query!(Repo, query, [before_timestamp])
 
     :ok
   end

@@ -64,12 +64,12 @@ defmodule Teiserver.Account.UserAgeReport do
       FROM teiserver_battle_match_memberships mm
       JOIN teiserver_battle_matches m
          ON m.id = mm.match_id
-      WHERE m.finished BETWEEN '#{start_date_str}' AND '#{end_date_str}'
+      WHERE m.finished BETWEEN $1 AND $2
          #{type_where}
     """
 
     user_ids =
-      case Ecto.Adapters.SQL.query(Repo, query, []) do
+      case Ecto.Adapters.SQL.query(Repo, query, [start_date_str, end_date_str]) do
         {:ok, results} ->
           results.rows |> List.flatten()
 

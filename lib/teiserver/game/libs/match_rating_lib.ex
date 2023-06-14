@@ -590,8 +590,8 @@ defmodule Teiserver.Game.MatchRatingLib do
   @spec reset_player_ratings() :: :ok
   def reset_player_ratings do
     # Delete all ratings and rating logs
-    Ecto.Adapters.SQL.query(Repo, "DELETE FROM teiserver_game_rating_logs", [])
-    Ecto.Adapters.SQL.query(Repo, "DELETE FROM teiserver_account_ratings", [])
+    Ecto.Adapters.SQL.query!(Repo, "DELETE FROM teiserver_game_rating_logs", [])
+    Ecto.Adapters.SQL.query!(Repo, "DELETE FROM teiserver_account_ratings", [])
 
     :ok
   end
@@ -599,16 +599,16 @@ defmodule Teiserver.Game.MatchRatingLib do
   @spec reset_player_ratings(Integer.t()) :: :ok
   def reset_player_ratings(rating_type_id) when is_integer(rating_type_id) do
     # Delete all ratings and rating logs
-    Ecto.Adapters.SQL.query(
+    Ecto.Adapters.SQL.query!(
       Repo,
-      "DELETE FROM teiserver_game_rating_logs WHERE rating_type_id = #{rating_type_id}",
-      []
+      "DELETE FROM teiserver_game_rating_logs WHERE rating_type_id = $1",
+      [rating_type_id]
     )
 
-    Ecto.Adapters.SQL.query(
+    Ecto.Adapters.SQL.query!(
       Repo,
-      "DELETE FROM teiserver_account_ratings WHERE rating_type_id = #{rating_type_id}",
-      []
+      "DELETE FROM teiserver_account_ratings WHERE rating_type_id = $1",
+      [rating_type_id]
     )
 
     :ok

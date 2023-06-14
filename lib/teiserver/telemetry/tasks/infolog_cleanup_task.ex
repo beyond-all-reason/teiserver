@@ -16,10 +16,10 @@ defmodule Teiserver.Telemetry.InfologCleanupTask do
 
     query = """
           DELETE FROM teiserver_telemetry_infologs
-          WHERE timestamp < '#{before_timestamp}'
+          WHERE timestamp < $1
     """
 
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    Ecto.Adapters.SQL.query!(Repo, query, [before_timestamp])
 
     :ok
   end

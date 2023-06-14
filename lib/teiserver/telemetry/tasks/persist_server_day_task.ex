@@ -438,13 +438,12 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
     before_timestamp =
       Timex.shift(date, days: -@log_keep_days)
       |> Timex.to_datetime()
-      |> date_to_str(format: :ymd_hms)
 
     query = """
-          DELETE FROM teiserver_server_minute_logs WHERE timestamp < '#{before_timestamp}'
+          DELETE FROM teiserver_server_minute_logs WHERE timestamp < $1
     """
 
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    Ecto.Adapters.SQL.query!(Repo, query, [before_timestamp])
   end
 
   defp concatenate_lists(items, path) do
