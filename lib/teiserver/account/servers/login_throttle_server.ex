@@ -17,7 +17,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   alias Phoenix.PubSub
 
   # Order of the queues matters
-  @queues ~w(moderator contributor vip standard toxic)a
+  @queues ~w(moderator core contributor vip volunteer standard toxic)a
 
   @default_tick_period 500
   @releases_per_tick 3
@@ -115,8 +115,10 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   @impl true
   def handle_call(:queue_size, _from, state) do
-    result =
-      ~w(standard_queue vip_queue contributor_queue moderator_queue toxic_queue)a
+    result = @queues
+      |> Enum.map(fn q ->
+        String.to_atom("#{q}_queue")
+      end)
       |> Enum.map(fn key ->
         Map.get(state, key, []) |> Enum.count()
       end)
@@ -410,10 +412,12 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
     cond do
       User.is_bot?(user) -> :instant
-      User.has_all_roles?(user, ["Server"]) -> :instant
-      User.has_all_roles?(user, ["Moderator"]) -> :moderator
-      User.has_all_roles?(user, ["Contributor"]) -> :contributor
-      User.has_all_roles?(user, ["VIP"]) -> :vip
+      User.has_any_role?(user, ["Server"]) -> :instant
+      User.has_any_role?(user, ["Moderator"]) -> :moderator
+      User.has_any_role?(user, ["Core"]) -> :core
+      User.has_any_role?(user, ["Contributor"]) -> :contributor
+      User.has_any_role?(user, ["Overwatch", "Reviewer"]) -> :volunteer
+      User.has_any_role?(user, ["VIP"]) -> :vip
       user.behaviour_score < 5000 -> :toxic
       true -> :standard
     end
