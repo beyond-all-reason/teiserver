@@ -3,7 +3,6 @@ defmodule Teiserver.Telemetry.EventCleanupTask do
   use Oban.Worker, queue: :cleanup
 
   alias Central.Repo
-  import Central.Helpers.TimexHelper, only: [date_to_str: 2]
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
