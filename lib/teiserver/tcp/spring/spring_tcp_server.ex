@@ -698,7 +698,19 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # Client updates
-  defp client_status_update(%{userid: userid} = new_client, state) do
+  defp client_status_update(new_client, %{optimise_protocol: true} = state) do
+    if state.lobby_id != nil and new_client.lobby_id == state.lobby_id do
+      do_client_status_update(new_client, state)
+    else
+      state
+    end
+  end
+
+  defp client_status_update(new_client, state) do
+    do_client_status_update(new_client, state)
+  end
+
+  defp do_client_status_update(%{userid: userid} = new_client, state) do
     if state.known_users[userid] == nil do
       state = SpringOut.reply(:user_logged_in, new_client, nil, state)
       new_user = _blank_user(userid)
@@ -834,6 +846,12 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   defp user_join_battle(%{userid: userid} = client, lobby_id, script_password, state) do
+    state = if state.optimise_protocol do
+      do_client_status_update(client, state)
+    else
+      state
+    end
+
     script_password =
       cond do
         state.lobby_host and state.lobby_id == lobby_id -> script_password
