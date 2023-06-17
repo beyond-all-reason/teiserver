@@ -30,8 +30,8 @@ ACCOUNT_GUARD_KEY=$(head /dev/urandom -c 64 | basenc --base64 | head -c 64)
 EOF
 
 mkdir -p $runtimeDir/tls
-echo "Generating dhparams.. This may take some time..."
-openssl dhparam -out $runtimeDir/tls/dhparam.pem 4096 2>&1 >/dev/null
+echo "Fetching standard dhparams.."
+curl -Lfs https://ssl-config.mozilla.org/ffdhe4096.txt > $runtimeDir/tls/dhparam.pem
 
 if [[ ! -f $runtimeDir/tls/privkey.pem || ! -f $runtimeDir/tls/cert.pem || ! -f $runtimeDir/tls/fullchain.pem ]]; then
   echo \

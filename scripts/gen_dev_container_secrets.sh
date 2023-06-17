@@ -41,5 +41,5 @@ if [[ ! -f $runtimeDir/tls/privkey.pem || ! -f $runtimeDir/tls/cert.pem  || ! -f
 
   cp cert.pem fullchain.pem
 
-  openssl dhparam -out dhparam.pem 4096
+  curl -Lfs https://ssl-config.mozilla.org/ffdhe4096.txt > $runtimeDir/tls/dhparam.pem
 fi
