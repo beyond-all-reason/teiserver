@@ -29,7 +29,6 @@ central-*.tar
 *.session.sql
 .elixir_ls/*
 .tool-versions
-.idea
 
 # Temporary files for e.g. tests
 /tmp
@@ -37,7 +36,6 @@ central-*.tar
 
 # Secrets
 /config/*.secret.exs
-runtime/
 
 # Static
 /assets/static
