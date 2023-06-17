@@ -29,9 +29,6 @@ defmodule Teiserver.SpringTcpServer do
     ]
   end
 
-  # socket = Teiserver.Account.get_client_by_id(3) |> Map.get(:tcp_pid) |> :sys.get_state |> Map.get(:socket)
-  # :inet.getopts(socket, [:nodelay, :delay_send])
-
   def get_standard_tcp_opts() do
     [
       max_connections: :infinity,
@@ -102,6 +99,9 @@ defmodule Teiserver.SpringTcpServer do
     end
 
     :timer.send_interval(60_000, self(), :message_count)
+
+    # Set nodelay and delay_send values as the opts above don't always seem to do it
+    :inet.setopts(socket, [{:nodelay, false}, {:delay_send, true}])
 
     state = %{
       # Connection state
