@@ -5,9 +5,7 @@ FROM elixir:1.14 as build
 ARG MIX_ENV
 ARG FA_RELEASE
 ENV MIX_ENV=${MIX_ENV} \
-    FA_RELEASE=${FA_RELEASE} \
-    LANG=en_US.UTF-8 \
-    TERM=xterm
+    FA_RELEASE=${FA_RELEASE}
 RUN mkdir /build
 WORKDIR /build
 COPY mix.exs mix.lock ./
