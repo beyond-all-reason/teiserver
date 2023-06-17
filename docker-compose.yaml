@@ -1,6 +1,6 @@
 services:
   nginx:
-    image: nginx:1
+    image: nginx:1.24
     ports:
       - target: 80
         published: 80
@@ -60,6 +60,7 @@ services:
     healthcheck:
       test: curl http://localhost:8080 || exit 1
       start_period: 1m # database migrations, dev mode, etc..
+      interval: 5s
 
   postgres:
     image: postgres:15
@@ -71,6 +72,8 @@ services:
     healthcheck:
       # $$ escapes the $ so it's parsed as the variable in the container, not outside of the container
       test: psql -U $$POSTGRES_USER -c '\q' || exit 1
+      start_period: 1m
+      interval: 5s
     networks:
       - backend
     expose:
