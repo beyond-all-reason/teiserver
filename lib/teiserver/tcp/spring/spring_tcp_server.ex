@@ -29,6 +29,14 @@ defmodule Teiserver.SpringTcpServer do
     ]
   end
 
+  def get_standard_tcp_opts() do
+    [
+      max_connections: :infinity,
+      nodelay: false,
+      delay_send: true
+    ]
+  end
+
   # Called at startup
   def start_link(opts) do
     mode = if opts[:ssl], do: :ranch_ssl, else: :ranch_tcp
@@ -40,9 +48,8 @@ defmodule Teiserver.SpringTcpServer do
       :ranch.start_listener(
         make_ref(),
         :ranch_ssl,
-        ssl_opts ++
+        ssl_opts ++ get_standard_tcp_opts() ++
           [
-            max_connections: :infinity,
             port: Application.get_env(:central, Teiserver)[:ports][:tls]
           ],
         __MODULE__,
@@ -52,8 +59,7 @@ defmodule Teiserver.SpringTcpServer do
       :ranch.start_listener(
         make_ref(),
         :ranch_tcp,
-        [
-          max_connections: :infinity,
+        get_standard_tcp_opts() ++ [
           port: Application.get_env(:central, Teiserver)[:ports][:tcp]
         ],
         __MODULE__,
@@ -93,6 +99,9 @@ defmodule Teiserver.SpringTcpServer do
     end
 
     :timer.send_interval(60_000, self(), :message_count)
+
+    # Set nodelay and delay_send values as the opts above don't always seem to do it
+    :inet.setopts(socket, [{:nodelay, false}, {:delay_send, true}])
 
     state = %{
       # Connection state
