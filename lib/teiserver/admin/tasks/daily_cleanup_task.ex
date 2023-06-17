@@ -8,6 +8,8 @@ defmodule Teiserver.Admin.DailyCleanupTask do
   @spec perform(any) :: :ok
   def perform(_) do
     Ecto.Adapters.SQL.query!(Repo, "VACUUM FULL;", [])
+    :timer.sleep(1000)
+
     Ecto.Adapters.SQL.query!(Repo, "VACUUM ANALYZE;", [])
 
     :ok
