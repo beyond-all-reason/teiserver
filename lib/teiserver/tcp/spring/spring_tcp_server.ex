@@ -742,7 +742,14 @@ defmodule Teiserver.SpringTcpServer do
 
   # Client updates
   defp client_status_update(new_client, %{optimise_protocol: true} = state) do
-    if state.lobby_id != nil and new_client.lobby_id == state.lobby_id do
+    send_status = [
+      (state.lobby_id != nil and new_client.lobby_id == state.lobby_id),
+      new_client.bot == true,
+      new_client.moderator == true,
+    ]
+    |> Enum.any?
+
+    if send_status do
       do_client_status_update(new_client, state)
     else
       state
