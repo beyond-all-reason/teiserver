@@ -141,6 +141,13 @@ defmodule Teiserver.Tachyon.TachyonSocket do
             "status" => "failure",
             "reason" => reason
           }
+
+        {command, {:error, reason}} ->
+          %{
+            "command" => command,
+            "status" => "failure",
+            "reason" => reason
+          }
       end
 
     # Currently not able to validate errors so leaving it out
@@ -178,7 +185,17 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     end
   end
 
+  # We have disconnect on error so we can later more easily make it so people can stay connected on error if needed for some reason
+  def handle_info(:disconnect_on_error, state) do
+    {:stop, :disconnected, state}
+  end
+
+  def handle_info(:disconnect, state) do
+    {:stop, :disconnected, state}
+  end
+
   def handle_info(%{} = msg, state) do
+    raise msg
     IO.puts("")
     IO.inspect(msg, label: "ws handle_info")
     IO.puts("")
@@ -188,15 +205,6 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
     # This will send stuff
     # {:reply, :ok, {:binary, <<111>>}, state}
-  end
-
-  # We have disconnect on error so we can later more easily make it so people can stay connected on error if needed for some reason
-  def handle_info(:disconnect_on_error, state) do
-    {:stop, :disconnected, state}
-  end
-
-  def handle_info(:disconnect, state) do
-    {:stop, :disconnected, state}
   end
 
   @spec terminate(any, any) :: :ok

@@ -30,6 +30,14 @@ defmodule Teiserver.Tachyon.Handlers.LobbyHost.CreateRequest do
 
     response = CreateResponse.generate(lobby)
 
-    {response, conn}
+    new_conn = case lobby do
+      {:ok, %{id: lobby_id}} ->
+        %{conn | lobby_id: lobby_id}
+
+      _ ->
+        conn
+    end
+
+    {response, new_conn}
   end
 end
