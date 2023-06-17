@@ -16,11 +16,6 @@ RUN mix local.rebar --force && \
 RUN mix deps.get
 RUN mix deps.compile
 
-## This is certaintly a shim, because I don't know where to properly in the build pipeline inject unit testing...
-## So we just do them after we'e built a release image :eyes:
-FROM build as test
-RUN mix test
-
 ## Expecting docker compose to mount a lot of directories for this target
 FROM build as dev
 ARG MIX_ENV
