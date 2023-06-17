@@ -190,6 +190,10 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, state}
   end
 
+  def handle_info(:post_auth_check, state) do
+    {:noreply, state}
+  end
+
   def handle_info(:message_count, state) do
     Teiserver.Telemetry.cast_to_server({
       :spring_messages_sent,
@@ -559,13 +563,43 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, new_state}
   end
 
+  def handle_info(%{channel: "teiserver_global_user_updates", event: :joined_lobby} = msg, %{optimise_protocol: true} = state) do
+    new_state = if state.lobby_id != nil and msg.lobby_id == state.lobby_id do
+      user_join_battle(msg.client, msg.lobby_id, msg.script_password, state)
+    else
+      state
+    end
+    {:noreply, new_state}
+  end
+
   def handle_info(%{channel: "teiserver_global_user_updates", event: :joined_lobby} = msg, state) do
     new_state = user_join_battle(msg.client, msg.lobby_id, msg.script_password, state)
     {:noreply, new_state}
   end
 
+  def handle_info(%{channel: "teiserver_global_user_updates", event: :left_lobby} = msg, %{optimise_protocol: true} = state) do
+    new_state = if state.lobby_id != nil and msg.lobby_id == state.lobby_id do
+      user_leave_battle(msg.client, msg.lobby_id, state)
+    else
+      state
+    end
+    {:noreply, new_state}
+  end
+
   def handle_info(%{channel: "teiserver_global_user_updates", event: :left_lobby} = msg, state) do
     new_state = user_leave_battle(msg.client, msg.lobby_id, state)
+    {:noreply, new_state}
+  end
+
+  def handle_info(
+        %{channel: "teiserver_global_user_updates", event: :kicked_from_lobby} = msg,
+        %{optimise_protocol: true} = state
+      ) do
+    new_state = if state.lobby_id != nil and msg.lobby_id == state.lobby_id do
+      user_kicked_from_battle(msg.client, msg.lobby_id, state)
+    else
+      state
+    end
     {:noreply, new_state}
   end
 
