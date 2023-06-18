@@ -622,7 +622,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
       String.replace(
         base_query,
         "--table_name--",
-        "teiserver_telemetry_unauth_events"
+        "teiserver_telemetry_client_events"
       )
 
     client_data =
