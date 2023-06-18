@@ -20,18 +20,9 @@ defmodule Teiserver.Tachyon.MessageHandlers.LobbyHostMessageHandlers do
     end
   end
 
-  # def handle(%{event: :join_lobby_request_response} = msg, state) do
-  #   case ReceivedDirectMessageResponse.generate(msg) do
-  #     {command, :success, data} ->
-  #       resp = %{
-  #         "command" => command,
-  #         "status" => "success",
-  #         "data" => data
-  #       }
-
-  #       {:ok, resp, state}
-  #   end
-  # end
+  def handle(%{event: :add_user} = msg, state) do
+    raise inspect(msg)
+  end
 
   def handle(msg, state) do
     raise "No handler for msg of #{msg.event} in LobbyHostMessageHandlers"

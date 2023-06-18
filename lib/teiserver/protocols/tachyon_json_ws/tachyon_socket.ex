@@ -163,11 +163,14 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   def handle_info(%{channel: channel} = msg, state) do
     module =
       case channel do
-        "teiserver_lobby_host_message:" <> _ ->
+        "teiserver_lobby_host_message" <> _ ->
           MessageHandlers.LobbyHostMessageHandlers
 
-        "teiserver_client_messages:" <> _ ->
+        "teiserver_client_messages" <> _ ->
           MessageHandlers.ClientMessageHandlers
+
+        "teiserver_lobby_updates" <> _ ->
+          MessageHandlers.LobbyUpdateMessageHandlers
 
         _ ->
           raise "No handler for messages to channel #{msg.channel}"

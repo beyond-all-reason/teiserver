@@ -623,8 +623,8 @@ defmodule Teiserver.Battle.Lobby do
   def accept_join_request(userid, lobby_id) do
     client = Client.get_client_by_id(userid)
 
-    if client do
-      # TODO: Depreciate
+    if client != nil and client.protocol == :spring do
+      # TODO: SpringLegacy depreciation
       send(client.tcp_pid, {:join_battle_request_response, lobby_id, :accept, nil})
     end
 
@@ -639,8 +639,9 @@ defmodule Teiserver.Battle.Lobby do
       }
     )
 
-    # TODO: Refactor this as per the TODO list, this should take place here and not in the client process
-    # add_user_to_battle(userid, lobby_id)
+    if client != nil and client.protocol != :spring do
+      add_user_to_battle(userid, lobby_id)
+    end
 
     :ok
   end
