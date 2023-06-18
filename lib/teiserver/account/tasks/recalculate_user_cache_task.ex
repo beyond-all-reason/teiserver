@@ -22,6 +22,9 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
       "Team" -> do_match_processed_team(userid)
       _ -> :ok
     end
+
+    # And now update the last_played timestamp
+    Account.update_cache_user(userid, %{last_played: match.started})
   end
 
   def do_match_processed_duel(userid) do
