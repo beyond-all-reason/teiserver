@@ -309,6 +309,9 @@ defmodule Teiserver.Protocols.SpringIn do
           SpringOut.do_join_room(new_state, room_name)
         end
 
+        # Post login checks
+        Process.send_after(self(), :post_auth_check, 60_000)
+
         new_state
 
       {:error, "Banned" <> _} ->

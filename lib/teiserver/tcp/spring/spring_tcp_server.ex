@@ -190,6 +190,10 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, state}
   end
 
+  def handle_info(:post_auth_check, state) do
+    {:noreply, state}
+  end
+
   def handle_info(:message_count, state) do
     Teiserver.Telemetry.cast_to_server({
       :spring_messages_sent,
