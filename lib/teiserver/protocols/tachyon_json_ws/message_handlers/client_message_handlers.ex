@@ -34,7 +34,7 @@ defmodule Teiserver.Tachyon.MessageHandlers.ClientMessageHandlers do
     end
   end
 
-  def handle(%{event: :client_updated} = msg, state) do
+  def handle(%{event: :client_updated} = msg, _state) do
     raise inspect(msg)
   end
 

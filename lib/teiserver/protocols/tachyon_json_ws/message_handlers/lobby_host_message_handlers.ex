@@ -20,7 +20,7 @@ defmodule Teiserver.Tachyon.MessageHandlers.LobbyHostMessageHandlers do
     end
   end
 
-  def handle(%{event: :add_user} = msg, state) do
+  def handle(%{event: :add_user} = msg, _state) do
     raise inspect(msg)
   end
 

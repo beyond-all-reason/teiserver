@@ -50,6 +50,8 @@ defmodule Teiserver.User do
     :email_change_code,
     :last_login,
     :last_login_mins,
+    :last_played,
+    :last_logout,
     :restrictions,
     :restricted_until,
     :shadowbanned,
