@@ -660,19 +660,14 @@ defmodule Teiserver.Protocols.SpringOut do
     end
   end
 
-  @spec do_optimised_login_accepted(map(), map()) :: map()
-  def do_optimised_login_accepted(state, user) do
-    do_login_accepted(state, user)
-    |> Map.put(:optimise_protocol, true)
-  end
-
-  @spec do_login_accepted(map(), map()) :: map()
-  def do_login_accepted(state, user) do
+  @spec do_login_accepted(map(), map(), atom) :: map()
+  def do_login_accepted(state, user, optimisation_level) do
     state =
       Map.merge(state, %{
         lobby: nil,
         lobby_hash: nil,
-        queued_userid: nil
+        queued_userid: nil,
+        protocol_optimisation: optimisation_level
       })
 
     reply(:login_accepted, user.name, nil, state)
@@ -760,8 +755,7 @@ defmodule Teiserver.Protocols.SpringOut do
       | user: user,
         username: user.name,
         userid: user.id,
-        exempt_from_cmd_throttle: exempt_from_cmd_throttle,
-        optimise_protocol: false
+        exempt_from_cmd_throttle: exempt_from_cmd_throttle
     }
   end
 

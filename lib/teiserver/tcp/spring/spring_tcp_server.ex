@@ -137,7 +137,7 @@ defmodule Teiserver.SpringTcpServer do
       cmd_timestamps: [],
       status_timestamps: [],
       app_status: nil,
-      optimise_protocol: false,
+      protocol_optimisation: :full,
       pending_messages: [],
 
       # Caching app configs
@@ -190,7 +190,26 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, state}
   end
 
-  def handle_info(:post_auth_check, state) do
+  # Anybody can have full optimisation
+  def handle_info(:post_auth_check, %{protocol_optimisation: :full} = state) do
+    {:noreply, state}
+  end
+
+  # Only chobby is allowed to have partial optimisation
+  def handle_info(:post_auth_check, %{protocol_optimisation: :partial} = state) do
+    if state.app_status != :accepted do
+      user = Account.get_user_by_id(state.userid)
+      Logger.error("post_auth_check :partial - user is not accepted: #{user.id}/#{user.name}")
+    end
+    {:noreply, state}
+  end
+
+  # Only bots are allowed to have no optimisation
+  def handle_info(:post_auth_check, %{protocol_optimisation: :none} = state) do
+    user = Account.get_user_by_id(state.userid)
+    if not user.bot do
+      Logger.error("post_auth_check :full - user is not bot: #{user.id}/#{user.name}")
+    end
     {:noreply, state}
   end
 
@@ -563,7 +582,7 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info(%{channel: "teiserver_global_user_updates", event: :joined_lobby} = msg, %{optimise_protocol: true} = state) do
+  def handle_info(%{channel: "teiserver_global_user_updates", event: :joined_lobby} = msg, %{protocol_optimisation: :full} = state) do
     new_state = if state.lobby_id != nil and msg.lobby_id == state.lobby_id do
       user_join_battle(msg.client, msg.lobby_id, msg.script_password, state)
     else
@@ -572,17 +591,27 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, new_state}
   end
 
+  def handle_info(%{channel: "teiserver_global_user_updates", event: :joined_lobby} = msg, %{protocol_optimisation: :partial} = state) do
+    new_state = user_join_battle(msg.client, msg.lobby_id, msg.script_password, state)
+    {:noreply, new_state}
+  end
+
   def handle_info(%{channel: "teiserver_global_user_updates", event: :joined_lobby} = msg, state) do
     new_state = user_join_battle(msg.client, msg.lobby_id, msg.script_password, state)
     {:noreply, new_state}
   end
 
-  def handle_info(%{channel: "teiserver_global_user_updates", event: :left_lobby} = msg, %{optimise_protocol: true} = state) do
+  def handle_info(%{channel: "teiserver_global_user_updates", event: :left_lobby} = msg, %{protocol_optimisation: :full} = state) do
     new_state = if state.lobby_id != nil and msg.lobby_id == state.lobby_id do
       user_leave_battle(msg.client, msg.lobby_id, state)
     else
       state
     end
+    {:noreply, new_state}
+  end
+
+  def handle_info(%{channel: "teiserver_global_user_updates", event: :left_lobby} = msg, %{protocol_optimisation: :partial} = state) do
+    new_state = user_leave_battle(msg.client, msg.lobby_id, state)
     {:noreply, new_state}
   end
 
@@ -593,13 +622,21 @@ defmodule Teiserver.SpringTcpServer do
 
   def handle_info(
         %{channel: "teiserver_global_user_updates", event: :kicked_from_lobby} = msg,
-        %{optimise_protocol: true} = state
+        %{protocol_optimisation: :full} = state
       ) do
     new_state = if state.lobby_id != nil and msg.lobby_id == state.lobby_id do
       user_kicked_from_battle(msg.client, msg.lobby_id, state)
     else
       state
     end
+    {:noreply, new_state}
+  end
+
+  def handle_info(
+        %{channel: "teiserver_global_user_updates", event: :kicked_from_lobby} = msg,
+        %{protocol_optimisation: :partial} = state
+      ) do
+    new_state = user_kicked_from_battle(msg.client, msg.lobby_id, state)
     {:noreply, new_state}
   end
 
@@ -741,7 +778,7 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # Client updates
-  defp client_status_update(new_client, %{optimise_protocol: true} = state) do
+  defp client_status_update(new_client, %{protocol_optimisation: :full} = state) do
     send_status = [
       (state.lobby_id != nil and new_client.lobby_id == state.lobby_id),
       new_client.bot == true,
@@ -754,6 +791,10 @@ defmodule Teiserver.SpringTcpServer do
     else
       state
     end
+  end
+
+  defp client_status_update(new_client, %{protocol_optimisation: :partial} = state) do
+    do_client_status_update(new_client, state)
   end
 
   defp client_status_update(new_client, state) do
@@ -896,11 +937,8 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   defp user_join_battle(%{userid: userid} = client, lobby_id, script_password, state) do
-    state = if state.optimise_protocol do
-      do_client_status_update(client, state)
-    else
-      state
-    end
+    # If someone joins the battle, update their status for ourselves
+    state = do_client_status_update(client, state)
 
     script_password =
       cond do

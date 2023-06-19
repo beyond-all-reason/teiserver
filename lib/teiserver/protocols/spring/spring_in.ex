@@ -15,6 +15,11 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Protocols.{Spring, SpringOut}
   alias Teiserver.Protocols.Spring.{AuthIn, TelemetryIn, BattleIn, LobbyPolicyIn}
 
+  @optimisation_level %{
+    "LuaLobby Chobby" => :partial,
+    "SLTS Client d" => :none
+  }
+
   @unoptimised_lobbies ["SLTS Client d", "LuaLobby Chobby"]
 
   @status_3_window 1_000
@@ -294,12 +299,8 @@ defmodule Teiserver.Protocols.SpringIn do
         })
 
       {:ok, user} ->
-        new_state =
-          if Enum.member?(@unoptimised_lobbies, user.lobby_client) do
-            SpringOut.do_login_accepted(state, user)
-          else
-            SpringOut.do_optimised_login_accepted(state, user)
-          end
+        optimisation_level = Map.get(@optimisation_level, user.lobby_client, :full)
+        new_state = SpringOut.do_login_accepted(state, user, optimisation_level)
 
         # Do we have a clan?
         if user.clan_id do
