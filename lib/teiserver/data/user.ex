@@ -26,14 +26,15 @@ defmodule Teiserver.User do
 
   @smurf_string "Smurf/alt account detected. We do not allow smurfing. Please login as your main account. Repeatedly creating smurfs can result in suspension or bans. If you think this account was flagged incorrectly please open a ticket on our discord and explain why."
 
+  # Keys kept from the raw user and merged into the memory user
   @spec keys() :: [atom]
   def keys(),
     do:
-      ~w(id name email inserted_at clan_id permissions colour icon behaviour_score trust_score smurf_of_id)a
+      ~w(id name email inserted_at clan_id permissions colour icon behaviour_score trust_score smurf_of_id last_played last_logout)a
 
   # This is the version of keys with the extra fields we're going to be moving from data to the object itself
   # def keys(),
-  #   do: ~w(id name email inserted_at clan_id permissions colour icon behaviour_score trust_score smurf_of_id roles restrictions restricted_until shadowbanned last_login discord_id steam_id)a
+  #   do: ~w(id name email inserted_at clan_id permissions colour icon behaviour_score trust_score smurf_of_id roles restrictions restricted_until shadowbanned last_login last_played last_logout discord_id steam_id)a
 
   @data_keys [
     :rank,
@@ -48,6 +49,7 @@ defmodule Teiserver.User do
     :verified,
     :email_change_code,
     :last_login,
+    :last_login_mins,
     :restrictions,
     :restricted_until,
     :shadowbanned,
@@ -1151,6 +1153,7 @@ defmodule Teiserver.User do
     user = %{
       user
       | last_login: round(System.system_time(:second) / 60),
+        last_login_mins: round(System.system_time(:second) / 60),
         country: country,
         rank: rank,
         springid: user.id,
@@ -1164,7 +1167,6 @@ defmodule Teiserver.User do
     Account.update_user_stat(user.id, %{
       bot: user.bot,
       country: country,
-      last_login: System.system_time(:second),
       rank: rank,
       lobby_client: lobby_client,
       lobby_hash: lobby_hash,

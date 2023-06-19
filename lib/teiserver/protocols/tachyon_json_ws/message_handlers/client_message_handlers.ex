@@ -34,6 +34,10 @@ defmodule Teiserver.Tachyon.MessageHandlers.ClientMessageHandlers do
     end
   end
 
+  def handle(%{event: :client_updated} = msg, state) do
+    raise inspect(msg)
+  end
+
   def handle(msg, state) do
     raise "No handler for msg of #{msg.event} in ClientMessageHandlers"
     {:ok, [], state}

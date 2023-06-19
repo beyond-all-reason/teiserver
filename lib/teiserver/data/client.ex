@@ -268,6 +268,8 @@ defmodule Teiserver.Client do
     # If they are part of a party, lets leave it
     Account.leave_party(client.party_id, client.userid)
 
+    Account.update_cache_user(client.userid, %{last_logout: Timex.now()})
+
     if client.bot do
       Telemetry.increment(:bots_disconnected)
     else

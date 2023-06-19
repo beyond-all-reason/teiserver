@@ -24,6 +24,10 @@ defmodule Central.Account.User do
     field :shadowbanned, :boolean, default: false
     field :last_login, :utc_datetime
 
+    # Start time of their last match
+    field :last_played, :utc_datetime
+    field :last_logout, :utc_datetime
+
     field :discord_id, :integer
     field :steam_id, :integer
 
@@ -52,7 +56,7 @@ defmodule Central.Account.User do
       user
       |> cast(
         attrs,
-        ~w(name email icon colour data roles permissions restrictions restricted_until shadowbanned last_login discord_id steam_id smurf_of_id clan_id behaviour_score trust_score)a
+        ~w(name email icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id steam_id smurf_of_id clan_id behaviour_score trust_score)a
       )
       |> validate_required([:name, :email, :permissions])
       |> unique_constraint(:email)
@@ -60,7 +64,7 @@ defmodule Central.Account.User do
       user
       |> cast(
         attrs,
-        ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login discord_id steam_id smurf_of_id clan_id behaviour_score trust_score)a
+        ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id steam_id smurf_of_id clan_id behaviour_score trust_score)a
       )
       |> validate_required([:name, :email, :password, :permissions])
       |> unique_constraint(:email)
@@ -77,7 +81,7 @@ defmodule Central.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login discord_id steam_id smurf_of_id clan_id behaviour_score trust_score)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id steam_id smurf_of_id clan_id behaviour_score trust_score)a
     )
     |> validate_required([:name, :email, :permissions])
     |> unique_constraint(:email)
