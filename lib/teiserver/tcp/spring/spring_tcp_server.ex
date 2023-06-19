@@ -425,7 +425,7 @@ defmodule Teiserver.SpringTcpServer do
   # We were not able to login right away, instead we had to queue for a bit!
   def handle_info({:login_accepted, userid}, state) do
     user = Account.get_user_by_id(userid)
-    new_state = SpringOut.do_login_accepted(state, user)
+    new_state = SpringOut.do_login_accepted(state, user, state.lobby)
 
     # Do we have a clan?
     if user.clan_id do

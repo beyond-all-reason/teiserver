@@ -20,8 +20,6 @@ defmodule Teiserver.Protocols.SpringIn do
     "SLTS Client d" => :none
   }
 
-  @unoptimised_lobbies ["SLTS Client d", "LuaLobby Chobby"]
-
   @status_3_window 1_000
   @status_10_window 60_000
 
@@ -368,12 +366,8 @@ defmodule Teiserver.Protocols.SpringIn do
         })
 
       {:ok, user} ->
-        new_state =
-          if Enum.member?(@unoptimised_lobbies, user.lobby_client) do
-            SpringOut.do_login_accepted(state, user)
-          else
-            SpringOut.do_optimised_login_accepted(state, user)
-          end
+        optimisation_level = Map.get(@optimisation_level, user.lobby_client, :full)
+        new_state = SpringOut.do_login_accepted(state, user, optimisation_level)
 
         # Do we have a clan?
         if user.clan_id do
@@ -433,11 +427,8 @@ defmodule Teiserver.Protocols.SpringIn do
           true ->
             User.verify_user(user)
 
-            if Enum.member?(@unoptimised_lobbies, user.lobby_client) do
-              SpringOut.do_login_accepted(state, user)
-            else
-              SpringOut.do_optimised_login_accepted(state, user)
-            end
+            optimisation_level = Map.get(@optimisation_level, user.lobby_client, :full)
+            SpringOut.do_login_accepted(state, user, optimisation_level)
 
           false ->
             reply(:denied, "Incorrect code", msg_id, state)
