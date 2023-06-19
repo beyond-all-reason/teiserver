@@ -21,7 +21,7 @@ defmodule Teiserver.Account.NewSmurfReport do
     new_users =
       Account.list_users(
         search: [
-          inserted_after: Timex.now() |> Timex.shift(days: -max_age),
+          last_played_after: Timex.now() |> Timex.shift(days: -max_age),
           smurf_of: false,
           verified: true
         ],
@@ -101,23 +101,6 @@ defmodule Teiserver.Account.NewSmurfReport do
         {u.id, Account.get_user_stat_data(u.id)}
       end)
 
-    # Now apply filters that require us to have their stats
-    relevant_new_users =
-      relevant_new_users
-      |> Enum.reject(fn user ->
-        if params["require_games"] == "true" do
-          stats = user_stats[user.id]
-
-          total =
-            ~w(recent_count.duel recent_count.ffa recent_count.team)
-            |> Enum.reduce(0, fn key, acc ->
-              Map.get(stats, key, 0) + acc
-            end)
-
-          total == 0
-        end
-      end)
-
     assigns = %{
       relevant_new_users: relevant_new_users,
       user_stats: user_stats,
@@ -130,7 +113,6 @@ defmodule Teiserver.Account.NewSmurfReport do
   defp apply_defaults(params) do
     Map.merge(
       %{
-        "require_games" => "true",
         "ignore_banned" => "true",
         "age" => "31"
       },
