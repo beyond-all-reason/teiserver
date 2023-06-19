@@ -58,6 +58,7 @@ defmodule Teiserver.Moderation do
     search = [
       target_id: userid,
       no_result: true,
+      closed: false,
       inserted_after: Timex.shift(Timex.now(), days: -ReportLib.get_outstanding_report_max_days())
     ]
 
