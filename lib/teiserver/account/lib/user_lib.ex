@@ -319,6 +319,16 @@ defmodule Teiserver.Account.UserLib do
       where: ilike(users.name, ^uname)
   end
 
+  def _search(query, :last_played_after, timestamp) do
+    from users in query,
+      where: users.last_played >= ^timestamp
+  end
+
+  def _search(query, :last_played_before, timestamp) do
+    from users in query,
+      where: users.last_played < ^timestamp
+  end
+
   def _search(query, key, value) do
     Central.Account.UserLib._search(query, key, value)
   end

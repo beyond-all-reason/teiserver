@@ -17,7 +17,25 @@
     <%= central_component("detail_line",
       label: "Last login",
       value:
-        date_to_str((@user_stats["last_login"] || 0) |> Timex.from_unix(),
+        date_to_str(@user.last_login,
+          format: :hms_dmy,
+          tz: @tz
+        )
+    ) %>
+
+    <%= central_component("detail_line",
+      label: "Last played",
+      value:
+        date_to_str(@user.last_played,
+          format: :hms_dmy,
+          tz: @tz
+        )
+    ) %>
+
+    <%= central_component("detail_line",
+      label: "Last logout",
+      value:
+        date_to_str(@user.last_logout,
           format: :hms_dmy,
           tz: @tz
         )
