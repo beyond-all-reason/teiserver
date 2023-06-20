@@ -20,6 +20,8 @@ defmodule Teiserver.Protocols.SpringIn do
     "SLTS Client d" => :none
   }
 
+  @partial_override_users ~w([teh]cluster1 [teh]clusterEU2 [teh]clusterEU3 [teh]clusterEU4 [teh]clusterEU5 [teh]clusterAU [teh]clusterUS [teh]clusterUS2 [teh]clusterUS3 [teh]clusterUS4)
+
   @status_3_window 1_000
   @status_10_window 60_000
 
@@ -297,7 +299,13 @@ defmodule Teiserver.Protocols.SpringIn do
         })
 
       {:ok, user} ->
-        optimisation_level = Map.get(@optimisation_level, user.lobby_client, :full)
+        optimisation_level = cond do
+          Enum.member?(@partial_override_users, user.name) ->
+            :partial
+          true ->
+            Map.get(@optimisation_level, user.lobby_client, :full)
+        end
+
         new_state = SpringOut.do_login_accepted(state, user, optimisation_level)
 
         # Do we have a clan?
