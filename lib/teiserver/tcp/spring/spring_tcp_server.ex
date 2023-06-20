@@ -199,7 +199,9 @@ defmodule Teiserver.SpringTcpServer do
   def handle_info(:post_auth_check, %{protocol_optimisation: :partial} = state) do
     if state.app_status != :accepted do
       user = Account.get_user_by_id(state.userid)
-      Logger.error("post_auth_check :partial - user is not accepted: #{user.id}/#{user.name}")
+      if not user.bot do
+        Logger.error("post_auth_check :partial - user is not accepted: #{user.id}/#{user.name}")
+      end
     end
     {:noreply, state}
   end
