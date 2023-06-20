@@ -3,6 +3,7 @@ defmodule Teiserver.Account.BanEvasionReport do
 
   """
   alias Teiserver.{Account}
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
   require Logger
 
   @spec icon() :: String.t()
@@ -44,31 +45,36 @@ defmodule Teiserver.Account.BanEvasionReport do
       |> Enum.uniq
 
     # Now search for keys of existing users
-    evader_values =
+    relevant_evader_ids =
       Account.list_smurf_keys(
         search: [
           value_in: moderated_key_values,
           not_user_id_in: moderated_user_ids,
           type_id_in: valid_types
         ],
-        select: [:value, :user_id],
+        select: [:user_id],
         limit: :infinity
       )
-      |> Enum.map(fn %{value: value} -> value end)
-
-    # Now run through the new_keys and keep only those with a match
-    relevant_evader_ids =
-      moderated_keys
-      |> Enum.filter(fn %{value: value} -> Enum.member?(evader_values, value) end)
       |> Enum.map(fn %{user_id: user_id} -> user_id end)
-      |> Enum.uniq()
+
+    max_play_age =
+      params["max_play_age"]
+      |> int_parse
+
+    max_account_age =
+      params["max_account_age"]
+      |> int_parse
 
     relevant_evaders =
       Account.list_users(
         search: [
           id_in: relevant_evader_ids,
-          mod_action: "not muted or banned"
+          mod_action: "not muted or banned",
+          last_played_after: Timex.now() |> Timex.shift(days: -max_play_age),
+          inserted_after: Timex.now() |> Timex.shift(days: -max_account_age),
+          smurf_of: "Non-smurf"
         ],
+        order_by: "Last played",
         limit: :infinity
       )
 
@@ -77,24 +83,6 @@ defmodule Teiserver.Account.BanEvasionReport do
       |> Map.new(fn u ->
         {u.id, Account.get_user_stat_data(u.id)}
       end)
-
-    # Now apply filters that require us to have their stats
-    relevant_evaders =
-      relevant_evaders
-      |> Enum.reject(fn user ->
-        if params["require_games"] == "true" do
-          stats = user_stats[user.id]
-
-          total =
-            ~w(recent_count.duel recent_count.ffa recent_count.team)
-            |> Enum.reduce(0, fn key, acc ->
-              Map.get(stats, key, 0) + acc
-            end)
-
-          total == 0
-        end
-      end)
-      > Enum.sort_by(fn user -> user.data["last_login_mins"] end, &>=/2)
 
     %{
       relevant_evaders: relevant_evaders,
@@ -117,7 +105,8 @@ defmodule Teiserver.Account.BanEvasionReport do
     Map.merge(
       %{
         "require_games" => "false",
-        "age" => "31"
+        "max_account_age" => "90",
+        "max_played_age" => "7"
       },
       Map.get(params, "report", %{})
     )

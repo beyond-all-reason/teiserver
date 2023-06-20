@@ -1,7 +1,6 @@
 defmodule Teiserver.Account.PopulationReport do
   alias Central.Helpers.DatePresets
   alias Central.Repo
-  alias Central.Helpers.TimexHelper
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-people-group"

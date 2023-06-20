@@ -2,7 +2,6 @@ defmodule Teiserver.Account.MuteReport do
   @moduledoc false
   alias Teiserver.{Account, User}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Central.Helpers.TimexHelper
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-microphone-slash"
