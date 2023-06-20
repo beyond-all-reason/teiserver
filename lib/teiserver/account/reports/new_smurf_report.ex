@@ -13,20 +13,25 @@ defmodule Teiserver.Account.NewSmurfReport do
   def run(_conn, params) do
     params = apply_defaults(params)
 
-    max_age =
-      params["age"]
+    max_play_age =
+      params["max_play_age"]
       |> int_parse
 
-    # Get new users first
+    max_account_age =
+      params["max_account_age"]
+      |> int_parse
+
+    # Get users who have played recently
     new_users =
       Account.list_users(
         search: [
-          last_played_after: Timex.now() |> Timex.shift(days: -max_age),
+          last_played_after: Timex.now() |> Timex.shift(days: -max_play_age),
+          inserted_after: Timex.now() |> Timex.shift(days: -max_account_age),
           smurf_of: false,
           verified: true
         ],
         limit: 1000,
-        order_by: "Newest first"
+        order_by: "Last played"
       )
 
     # Extract list of ids
@@ -101,6 +106,17 @@ defmodule Teiserver.Account.NewSmurfReport do
         {u.id, Account.get_user_stat_data(u.id)}
       end)
 
+    # Now trim them down that little bit more
+    relevant_new_users = relevant_new_users
+      |> Enum.filter(fn u ->
+        stats = user_stats[u.id]
+
+        cond do
+          (stats["smurf_count"] || 0) > 0 -> false
+          true -> true
+        end
+      end)
+
     assigns = %{
       relevant_new_users: relevant_new_users,
       user_stats: user_stats,
@@ -114,7 +130,8 @@ defmodule Teiserver.Account.NewSmurfReport do
     Map.merge(
       %{
         "ignore_banned" => "true",
-        "age" => "31"
+        "max_play_age" => "5",
+        "max_account_age" => "90"
       },
       Map.get(params, "report", %{})
     )

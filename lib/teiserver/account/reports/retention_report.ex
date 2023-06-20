@@ -45,7 +45,7 @@ defmodule Teiserver.Account.RetentionReport do
       Account.list_users(
         search: [
           inserted_after: start_datetime,
-          data_greater_than: {"last_login", "0"},
+          data_greater_than: {"last_login_mins", "0"},
           verified: true
         ],
         limit: :infinity

@@ -1,6 +1,7 @@
 defmodule Teiserver.Account.PopulationReport do
   alias Central.Helpers.DatePresets
   alias Central.Repo
+  alias Central.Helpers.TimexHelper
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-people-group"
@@ -47,12 +48,12 @@ defmodule Teiserver.Account.PopulationReport do
         d -> d
       end
 
-    start_date_secs =
+    start_date_mins =
       start_date
       |> Timex.to_unix()
       |> Kernel.div(60)
 
-    "users.data ->> 'last_login' >= '#{start_date_secs}'"
+    "users.data ->> 'last_login_mins' >= '#{start_date_mins}'"
   end
 
   defp exclude_bots_where("true") do

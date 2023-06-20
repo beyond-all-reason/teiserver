@@ -1,5 +1,8 @@
 import Config
 
+config :iex,
+  ansi_enabled: true
+
 config :central, Central,
   site_title: "BAR",
   site_suffix: "",

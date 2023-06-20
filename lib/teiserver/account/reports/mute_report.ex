@@ -2,6 +2,7 @@ defmodule Teiserver.Account.MuteReport do
   @moduledoc false
   alias Teiserver.{Account, User}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  alias Central.Helpers.TimexHelper
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-microphone-slash"
@@ -34,7 +35,7 @@ defmodule Teiserver.Account.MuteReport do
         search:
           [
             data_not: {"ignored", "[]"},
-            data_greater_than: {"last_login", to_string(start_date)}
+            data_greater_than: {"last_login_mins", to_string(start_date)}
           ] ++ searches,
         select: [:id, :data],
         limit: :infinity
@@ -57,8 +58,8 @@ defmodule Teiserver.Account.MuteReport do
         cond do
           params["exclude_banned"] == "true" and User.is_restricted?(user1, ["Login"]) -> true
           params["exclude_banned"] == "true" and User.is_restricted?(user2, ["Login"]) -> true
-          user1.last_login < start_date -> true
-          user2.last_login < start_date -> true
+          user1.last_login_mins < start_date -> true
+          user2.last_login_mins < start_date -> true
           true -> false
         end
       end)

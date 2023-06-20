@@ -329,6 +329,16 @@ defmodule Teiserver.Account.UserLib do
       where: users.last_played < ^timestamp
   end
 
+  def _search(query, :last_login_after, timestamp) do
+    from users in query,
+      where: users.last_login >= ^timestamp
+  end
+
+  def _search(query, :last_login_before, timestamp) do
+    from users in query,
+      where: users.last_login < ^timestamp
+  end
+
   def _search(query, key, value) do
     Central.Account.UserLib._search(query, key, value)
   end
@@ -341,6 +351,21 @@ defmodule Teiserver.Account.UserLib do
 
     from users in query,
       order_by: [desc: fragment("? -> ?", users.data, ^field)]
+  end
+
+  # def order_by(query, "Last logged in") do
+  #   from users in query,
+  #     order_by: [desc: users.last_login]
+  # end
+
+  def order_by(query, "Last played") do
+    from users in query,
+      order_by: [desc: users.last_played]
+  end
+
+  def order_by(query, "Last logged out") do
+    from users in query,
+      order_by: [desc: users.last_logout]
   end
 
   def order_by(query, {:data, field, :asc}) do

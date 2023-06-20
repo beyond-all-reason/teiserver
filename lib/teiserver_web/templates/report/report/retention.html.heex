@@ -154,7 +154,7 @@
               <td>As %</td>
               <%= for d <- Range.new(0, @max_key) do %>
                 <td>
-                  <%= raw = Map.get(@play_retention_grouping, d, 0) / @user_count
+                  <%= raw = Map.get(@play_retention_grouping, d, 0) / max(@user_count, 1)
                   round(raw * 1000) / 10 %>
                 </td>
               <% end %>

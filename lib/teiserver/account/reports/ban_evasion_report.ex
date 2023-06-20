@@ -94,7 +94,7 @@ defmodule Teiserver.Account.BanEvasionReport do
           total == 0
         end
       end)
-      |> Enum.sort_by(fn user -> user.data["last_login"] end, &>=/2)
+      > Enum.sort_by(fn user -> user.data["last_login_mins"] end, &>=/2)
 
     %{
       relevant_evaders: relevant_evaders,
