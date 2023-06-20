@@ -22,7 +22,7 @@ defmodule TeiserverWeb.API.SpadsController do
       }) do
     actual_type =
       case type do
-        "TeamFFA" -> "FFA"
+        "TeamFFA" -> "Team"
         v -> v
       end
 
