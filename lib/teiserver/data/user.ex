@@ -81,6 +81,7 @@ defmodule Teiserver.User do
     verified: false,
     email_change_code: nil,
     last_login: nil,
+    last_login_mins: nil,
     restrictions: [],
     restricted_until: nil,
     shadowbanned: false,

@@ -154,15 +154,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
     case converted_message do
       ^warning_response ->
-        client = Client.get_client_by_id(userid)
-
-        last_login =
-          Account.get_user_stat_data(userid)
-          |> Map.get("last_login")
-
-        time_diff = System.system_time(:second) - last_login
-        Logger.info("Acknowledge time of #{time_diff} seconds for #{userid}:#{client.name}")
-
         Client.clear_awaiting_warn_ack(userid)
         User.send_direct_message(state.userid, userid, "Thank you")
 
