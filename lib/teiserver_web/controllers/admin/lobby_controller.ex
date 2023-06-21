@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
   )
 
   plug(Bodyguard.Plug.Authorize,
-    policy: Teiserver.Staff.Reviewer,
+    policy: Teiserver.Staff.Overwatch,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
   )
@@ -20,7 +20,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
   plug(:add_breadcrumb, name: 'Users', url: '/teiserver/admin/user')
 
-  @page_size 300
+  @page_size 500
 
   @spec lobby_chat(Plug.Conn.t(), map) :: Plug.Conn.t()
   def lobby_chat(conn, params = %{"id" => match_id}) do

@@ -1,22 +1,24 @@
 <% bsname = view_colour() %>
 
-<%= central_component("section_menu_button",
-  name: "list",
-  label: "List",
-  active: @active,
-  icon: "fa-regular fa-bars",
-  bsname: bsname,
-  url: Routes.ts_admin_match_path(@conn, :index)
-) %>
+<%= if allow?(@conn, "Reviewer") do %>
+  <%= central_component("section_menu_button",
+    name: "list",
+    label: "List",
+    active: @active,
+    icon: "fa-regular fa-bars",
+    bsname: bsname,
+    url: Routes.ts_admin_match_path(@conn, :index)
+  ) %>
 
-<%= central_component("section_menu_button",
-  name: "advanced_search",
-  label: "Advanced search",
-  active: @active,
-  icon: Central.Helpers.StylingHelper.icon(:search),
-  bsname: bsname,
-  url: Routes.ts_admin_match_path(@conn, :index) <> "?search=true"
-) %>
+  <%= central_component("section_menu_button",
+    name: "advanced_search",
+    label: "Advanced search",
+    active: @active,
+    icon: Central.Helpers.StylingHelper.icon(:search),
+    bsname: bsname,
+    url: Routes.ts_admin_match_path(@conn, :index) <> "?search=true"
+  ) %>
+<% end %>
 
 <%= if @active == "user" do %>
   <%= central_component("section_menu_button",
@@ -40,7 +42,7 @@
       url: Routes.ts_battle_match_path(@conn, :show, @match.id)
     ) %>
 
-    <%= if allow?(@conn, "Reviewer") do %>
+    <%= if allow?(@conn, "Overwatch") do %>
       <%= central_component("section_menu_button",
         name: "chat",
         label: "Chat",

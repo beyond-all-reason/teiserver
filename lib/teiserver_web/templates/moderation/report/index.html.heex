@@ -142,14 +142,12 @@
                     </a>
                   </td>
                   <td>
-                    <%= if allow?(@conn, "teisever.staff.reviewer") do %>
-                      <a
-                        href={~p"/teiserver/admin/lobbies/#{report.match_id}/lobby_chat/all"}
-                        class="btn btn-secondary btn-sm"
-                      >
-                        Chat
-                      </a>
-                    <% end %>
+                    <a
+                      href={~p"/teiserver/admin/lobbies/#{report.match_id}/lobby_chat/all"}
+                      class="btn btn-secondary btn-sm"
+                    >
+                      Chat
+                    </a>
                   </td>
                 <% else %>
                   <td>&nbsp;</td>

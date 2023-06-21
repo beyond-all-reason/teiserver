@@ -92,9 +92,13 @@
             <%= for msg <- @lobby_messages do %>
               <tr>
                 <td>
-                  <a href={~p"/teiserver/admin/user/#{msg.user_id}"}>
+                  <%= if allow?(@conn, "Moderator") do %>
+                    <a href={~p"/teiserver/admin/user/#{msg.user_id}"}>
+                      <%= msg.user.name %>
+                    </a>
+                  <% else %>
                     <%= msg.user.name %>
-                  </a>
+                  <% end %>
                 </td>
                 <td class="message">
                   <%= msg.content %>
