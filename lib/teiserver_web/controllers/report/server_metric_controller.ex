@@ -312,4 +312,45 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     conn
     |> render("load_graph.html")
   end
+
+  @spec user_cost(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def user_cost(conn, params) do
+    hours = Map.get(params, "hours", "3") |> int_parse()
+    offset = Map.get(params, "offset", "0") |> int_parse()
+    resolution = Map.get(params, "resolution", "1") |> int_parse()
+    divisor = Map.get(params, "divisor", "Total")
+
+    logs =
+      Telemetry.list_server_minute_logs(
+        order: "Newest first",
+        limit: hours * 60,
+        offset: offset * 60
+      )
+      |> Enum.reverse()
+
+    combined_player_counts = GraphMinuteLogsTask.get_raw_player_count(logs, 1)
+    player_counts = Map.get(combined_player_counts, divisor, combined_player_counts["Total"])
+
+    # Filter
+    columns_players = [[divisor | player_counts]]
+
+    # Costs
+    columns_cpu_cost = GraphMinuteLogsTask.perform_cpu_cost(logs, resolution, player_counts)
+    columns_memory_cost = GraphMinuteLogsTask.perform_memory_cost(logs, resolution, player_counts)
+    server_messages_cost = GraphMinuteLogsTask.perform_server_messages_cost(logs, resolution, player_counts)
+    client_messages_cost = GraphMinuteLogsTask.perform_client_messages_cost(logs, resolution, player_counts)
+
+    axis_key = GraphMinuteLogsTask.perform_axis_key(logs, resolution)
+
+    conn
+      |> assign(:params, params)
+      |> assign(:columns_players, columns_players)
+      |> assign(:columns_cpu_cost, columns_cpu_cost)
+      |> assign(:columns_memory_cost, columns_memory_cost)
+      |> assign(:server_messages_cost, server_messages_cost)
+      |> assign(:client_messages_cost, client_messages_cost)
+      |> assign(:axis_key, axis_key)
+      |> add_breadcrumb(name: "Load", url: conn.request_path)
+      |> render("user_cost_graph.html")
+  end
 end

@@ -347,6 +347,7 @@ defmodule CentralWeb.Router do
     # Server metric specifics
     get("/now", ServerMetricController, :now)
     get("/load", ServerMetricController, :load)
+    get("/user_cost", ServerMetricController, :user_cost)
 
     get("/list", ServerMetricController, :metric_list)
     get("/list/:unit", ServerMetricController, :metric_list)
