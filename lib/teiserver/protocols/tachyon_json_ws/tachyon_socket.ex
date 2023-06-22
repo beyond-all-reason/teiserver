@@ -176,15 +176,15 @@ defmodule Teiserver.Tachyon.TachyonSocket do
           raise "No handler for messages to channel #{msg.channel}"
       end
 
-    case module.handle(msg, state) do
+    case module.handle(msg, state.conn) do
       nil ->
         {:ok, state}
 
-      {:ok, new_state} ->
-        {:ok, new_state}
+      {:ok, new_conn} ->
+        {:ok, %{state | conn: new_conn}}
 
-      {:ok, resp, new_state} ->
-        {:reply, :ok, {:text, resp |> Jason.encode!()}, new_state}
+      {:ok, resp, new_conn} ->
+        {:reply, :ok, {:text, resp |> Jason.encode!()}, %{state | conn: new_conn}}
     end
   end
 

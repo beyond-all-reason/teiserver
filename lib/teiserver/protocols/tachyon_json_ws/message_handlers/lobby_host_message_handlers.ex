@@ -5,9 +5,9 @@ defmodule Teiserver.Tachyon.MessageHandlers.LobbyHostMessageHandlers do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Tachyon.Responses.LobbyHost.JoinRequestReponse
 
-  @spec handle(map(), T.tachyon_ws_state()) ::
-          {:ok, T.tachyon_ws_state()} | {:ok, map() | list(), T.tachyon_ws_state()}
-  def handle(%{event: :user_requests_to_join} = msg, state) do
+  @spec handle(map(), T.tachyon_conn()) ::
+          {:ok, T.tachyon_conn()} | {:ok, map() | list(), T.tachyon_conn()}
+  def handle(%{event: :user_requests_to_join} = msg, conn) do
     case JoinRequestReponse.generate(msg.userid, msg.lobby_id) do
       {command, :success, data} ->
         resp = %{
@@ -16,16 +16,16 @@ defmodule Teiserver.Tachyon.MessageHandlers.LobbyHostMessageHandlers do
           "data" => data
         }
 
-        {:ok, resp, state}
+        {:ok, resp, conn}
     end
   end
 
-  def handle(%{event: :add_user} = msg, _state) do
+  def handle(%{event: :add_user} = msg, _conn) do
     raise inspect(msg)
   end
 
-  def handle(msg, state) do
+  def handle(msg, conn) do
     raise "No handler for msg of #{msg.event} in LobbyHostMessageHandlers"
-    {:ok, [], state}
+    {:ok, [], conn}
   end
 end
