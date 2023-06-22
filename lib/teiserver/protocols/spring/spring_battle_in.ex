@@ -9,7 +9,7 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
   def do_handle("update_lobby_title", new_name, msg_id, state) do
     if Lobby.allow?(state.userid, :update_lobby_title, state.lobby_id) do
-      Lobby.rename_lobby(state.lobby_id, new_name)
+      Lobby.rename_lobby(state.lobby_id, new_name, false)
       reply(:spring, :okay, "c.battle.update_lobby_title", msg_id, state)
     else
       state

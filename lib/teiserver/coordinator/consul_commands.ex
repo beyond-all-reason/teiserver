@@ -718,51 +718,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     ConsulServer.say_command(cmd, new_state)
   end
 
-  # TODO: depreciate these
-  def handle_command(%{command: "resetplaylevels", senderid: senderid} = cmd, state) do
-    LobbyChat.sayprivateex(
-      state.coordinator_id,
-      senderid,
-      "This command is being depreciated in favour of resetratinglevels, it will stop working soon",
-      state.lobby_id
-    )
-
-    handle_command(Map.put(cmd, :command, "resetratinglevels"), state)
-  end
-
-  def handle_command(%{command: "minplaylevel", senderid: senderid} = cmd, state) do
-    LobbyChat.sayprivateex(
-      state.coordinator_id,
-      senderid,
-      "This command is being depreciated in favour of minratinglevel, it will stop working soon",
-      state.lobby_id
-    )
-
-    handle_command(Map.put(cmd, :command, "minratinglevel"), state)
-  end
-
-  def handle_command(%{command: "maxplaylevel", senderid: senderid} = cmd, state) do
-    LobbyChat.sayprivateex(
-      state.coordinator_id,
-      senderid,
-      "This command is being depreciated in favour of maxratinglevel, it will stop working soon",
-      state.lobby_id
-    )
-
-    handle_command(Map.put(cmd, :command, "maxratinglevel"), state)
-  end
-
-  def handle_command(%{command: "setplaylevels", senderid: senderid} = cmd, state) do
-    LobbyChat.sayprivateex(
-      state.coordinator_id,
-      senderid,
-      "This command is being depreciated in favour of setratinglevels, it will stop working soon",
-      state.lobby_id
-    )
-
-    handle_command(Map.put(cmd, :command, "setratinglevels"), state)
-  end
-
   def handle_command(%{command: "resetratinglevels", remaining: ""} = cmd, state) do
     ConsulServer.say_command(cmd, state)
     %{state | minimum_rating_to_play: 0, maximum_rating_to_play: 1000}
@@ -1391,13 +1346,17 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "rename", remaining: new_name, senderid: senderid} = cmd, state) do
     new_name = String.trim(new_name)
+    stripped_name = case Regex.run(~r/^[a-zA-Z0-9_\-\[\] ]+$/, new_name) do
+      [s] -> s
+      _ -> ""
+    end
 
     lobby = Lobby.get_lobby(state.lobby_id)
 
     cond do
       new_name == "" ->
         Lobby.rename_lobby(state.lobby_id, lobby.name, false)
-        :ok
+        state
 
       WordLib.flagged_words(new_name) > 0 ->
         Lobby.sayex(
@@ -1405,8 +1364,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "That lobby name been rejected. Please be aware that misuse of the lobby naming system can cause your chat privileges to be revoked.",
           state.lobby_id
         )
-
-        :ok
+        state
 
       state.lobby_policy_id != nil ->
         Lobby.sayex(
@@ -1414,11 +1372,26 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "This is a server managed lobby, you cannot rename it",
           state.lobby_id
         )
+        state
 
-        :ok
+      String.length(new_name) > 20 ->
+        Lobby.sayex(
+          state.coordinator_id,
+          "That name is too long",
+          state.lobby_id
+        )
+        state
+
+      new_name != stripped_name ->
+        Lobby.sayex(
+          state.coordinator_id,
+          "That name contains one or more invalid characters (alphanumeric, spaces and some special characters allowed)",
+          state.lobby_id
+        )
+        state
 
       senderid != lobby.founder_id ->
-        Lobby.rename_lobby(state.lobby_id, new_name, true)
+        Lobby.rename_lobby(state.lobby_id, new_name, state)
         ConsulServer.say_command(cmd, state)
 
         downcase_name = new_name |> String.downcase()
@@ -1437,15 +1410,15 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             state.lobby_id
           )
         end
+        %{state | rename_string: ""}
 
       lobby.consul_rename ->
-        :ok
+        state
 
       true ->
         Lobby.rename_lobby(state.lobby_id, new_name, false)
+        state
     end
-
-    state
   end
 
   #################### Moderator only
