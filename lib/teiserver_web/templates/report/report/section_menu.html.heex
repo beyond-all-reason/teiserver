@@ -165,6 +165,17 @@
   ) %>
 <% end %>
 
+<%= if allow?(@current_user, Teiserver.Account.WeekOnWeekReport.permissions()) do %>
+  <%= central_component("section_menu_button",
+    name: "week_on_week",
+    label: "Week on Week",
+    active: @active,
+    icon: Teiserver.Account.WeekOnWeekReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "week_on_week")
+  ) %>
+<% end %>
+
 <%= if allow?(@current_user, Teiserver.Account.NewSmurfReport.permissions()) do %>
   <%= central_component("section_menu_button",
     name: "new_smurf",

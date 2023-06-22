@@ -69,6 +69,9 @@ defmodule TeiserverWeb.Report.ReportController do
         "growth" ->
           Teiserver.Account.GrowthReport
 
+        "week_on_week" ->
+          Teiserver.Account.WeekOnWeekReport
+
         "records" ->
           Teiserver.Account.RecordsReport
 

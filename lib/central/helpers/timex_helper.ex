@@ -404,4 +404,18 @@ defmodule Central.Helpers.TimexHelper do
   def less_than(a, b) do
     Timex.compare(a, b) == -1
   end
+
+  def represent_minutes(nil), do: ""
+  def represent_minutes(s) do
+    now = Timex.now()
+    until = Timex.shift(now, minutes: s)
+    time_until(until, now)
+  end
+
+  def represent_seconds(nil), do: ""
+  def represent_seconds(s) do
+    now = Timex.now()
+    until = Timex.shift(now, seconds: s)
+    time_until(until, now)
+  end
 end

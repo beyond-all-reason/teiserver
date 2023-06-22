@@ -11,20 +11,4 @@ defmodule TeiserverWeb.Report.ServerMetricView do
   def heatmap(value, maximum, colour) do
     TeiserverWeb.Logging.AggregateViewLogView.heatmap(value, maximum, colour)
   end
-
-  def represent_minutes(nil), do: ""
-
-  def represent_minutes(s) do
-    now = Timex.now()
-    until = Timex.shift(now, minutes: s)
-    time_until(until, now)
-  end
-
-  def represent_seconds(nil), do: ""
-
-  def represent_seconds(s) do
-    now = Timex.now()
-    until = Timex.shift(now, seconds: s)
-    time_until(until, now)
-  end
 end

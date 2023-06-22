@@ -204,6 +204,16 @@
       link: Routes.ts_reports_report_path(@conn, :show, "growth")
     ) %>
   <% end %>
+
+  <%= if allow?(@current_user, Teiserver.Account.WeekOnWeekReport.permissions()) do %>
+    <%= central_component("menu_card",
+      size: :small,
+      icon: Teiserver.Account.WeekOnWeekReport.icon(),
+      name: "week_on_week",
+      text: "Week on Week",
+      link: Routes.ts_reports_report_path(@conn, :show, "week_on_week")
+    ) %>
+  <% end %>
 </div>
 
 <div class="row mt-2">
