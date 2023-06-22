@@ -68,6 +68,7 @@
               <th>New user</th>
               <th>Status</th>
               <th>Last login</th>
+              <th>Last played</th>
               <th>Registered</th>
 
               <th>Duel</th>
@@ -115,12 +116,18 @@
                 </td>
 
                 <td>
-                  <%= date_to_str(((user.data["last_login"] || 0) * 60) |> Timex.from_unix(),
+                  <%= date_to_str(((user.data["last_login_mins"] || 0) * 60) |> Timex.from_unix(),
                     format: :hms_or_ymd,
                     tz: @tz
                   ) %>
                 </td>
-                <td><%= date_to_str(user.inserted_at, format: :hms_or_dmy) %></td>
+                <td>
+                  <%= date_to_str(user.last_played,
+                    format: :hms_or_ymd,
+                    tz: @tz
+                  ) %>
+                </td>
+                <td><%= date_to_str(user.inserted_at, format: :hms_or_ymd) %></td>
 
                 <td>
                   <%= if stats["recent_count.duel"] do %>

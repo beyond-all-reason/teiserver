@@ -346,6 +346,13 @@ defmodule Teiserver.Account.UserLib do
   @spec order_by(Ecto.Query.t(), tuple() | String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
 
+  def order_by(query, orders) when is_list(orders) do
+    orders
+    |> Enum.reduce(query, fn order_value, query_acc ->
+      Teiserver.Account.UserLib.order_by(query_acc, order_value)
+    end)
+  end
+
   def order_by(query, "Last logged in") do
     field = "last_login"
 

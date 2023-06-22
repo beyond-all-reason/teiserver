@@ -70,11 +70,11 @@ defmodule Teiserver.Account.BanEvasionReport do
         search: [
           id_in: relevant_evader_ids,
           mod_action: "not muted or banned",
-          last_played_after: Timex.now() |> Timex.shift(days: -max_play_age),
+          # last_played_after: Timex.now() |> Timex.shift(days: -max_play_age),
           inserted_after: Timex.now() |> Timex.shift(days: -max_account_age),
           smurf_of: "Non-smurf"
         ],
-        order_by: "Last played",
+        order_by: ["Last played", "Last logged in"],
         limit: :infinity
       )
 
@@ -82,6 +82,17 @@ defmodule Teiserver.Account.BanEvasionReport do
       relevant_evaders
       |> Map.new(fn u ->
         {u.id, Account.get_user_stat_data(u.id)}
+      end)
+
+    # Now filter out smurf origins
+    relevant_evaders = relevant_evaders
+      |> Enum.filter(fn u ->
+        stats = user_stats[u.id]
+
+        cond do
+          (stats["smurf_count"] || 0) > 0 -> false
+          true -> true
+        end
       end)
 
     %{

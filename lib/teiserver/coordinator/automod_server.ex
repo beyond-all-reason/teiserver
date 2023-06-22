@@ -159,34 +159,19 @@ defmodule Teiserver.Coordinator.AutomodServer do
   def enact_ban([], _), do: "No action"
 
   def enact_ban([ban | _], userid) do
-    Account.update_user_stat(userid, %{"autoban_id" => ban.id})
-
-    coordinator_user_id = Coordinator.get_coordinator_userid()
-
-    {:ok, action} =
-      Moderation.create_action(%{
-        target_id: userid,
-        reason: "Banned (Automod)",
-        restrictions: ["Login", "Permanently banned"],
-        score_modifier: 0,
-        hidden: true,
-        expires: Timex.now() |> Timex.shift(years: 1300)
-      })
-
-    Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
+    {:ok, _} = Account.script_update_user(userid, %{"smurf_of_id" => ban.source_id})
 
     add_audit_log(
-      coordinator_user_id,
+      Coordinator.get_coordinator_userid(),
       "127.0.0.0",
       "Moderation:Ban enacted",
       %{
-        "action_id" => action.id,
         "target_user_id" => userid,
         "ban_id" => ban.id
       }
     )
 
-    Client.disconnect(userid, "Banned")
+    Client.kick_disconnect(userid, "Banned")
 
     "Banned user"
   end

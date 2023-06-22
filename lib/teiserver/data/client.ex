@@ -9,7 +9,7 @@
 defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
-  alias Teiserver.{Room, User, Account, Telemetry, Clans}
+  alias Teiserver.{Room, User, Account, Telemetry, Clans, Coordinator}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Account.ClientLib
   # alias Central.Helpers.TimexHelper
@@ -254,12 +254,24 @@ defmodule Teiserver.Client do
   def disconnect(userid, reason \\ nil) do
     case get_client_by_id(userid) do
       nil -> nil
-      client -> do_disconnect(client, reason)
+      client -> do_disconnect(client, reason, false)
+    end
+  end
+
+  @spec kick_disconnect(T.userid(), nil | String.t()) :: nil | :ok | {:error, any}
+  def kick_disconnect(userid, reason \\ nil) do
+    case get_client_by_id(userid) do
+      nil -> nil
+      client -> do_disconnect(client, reason, true)
     end
   end
 
   # If it's a test user, don't worry about actually disconnecting it
-  defp do_disconnect(client, reason) do
+  defp do_disconnect(client, reason, kick) do
+    if kick do
+      Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
+    end
+
     Logger.info("#{client.name}/##{client.userid} disconnected because #{reason}")
     Lobby.remove_user_from_any_lobby(client.userid)
     Room.remove_user_from_any_room(client.userid)
