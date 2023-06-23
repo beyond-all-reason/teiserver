@@ -27,7 +27,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @spec do_start() :: :ok
   defp do_start() do
-    {:ok, _coordinator_pid} =
+    {:ok, _automod_pid} =
       DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
         Teiserver.Coordinator.AutomodServer,
         name: Teiserver.Coordinator.AutomodServer, data: %{}
@@ -159,7 +159,8 @@ defmodule Teiserver.Coordinator.AutomodServer do
   def enact_ban([], _), do: "No action"
 
   def enact_ban([ban | _], userid) do
-    {:ok, _} = Account.script_update_user(userid, %{"smurf_of_id" => ban.source_id})
+    user = Account.get_user!(userid)
+    {:ok, _} = Account.server_update_user(user, %{"smurf_of_id" => ban.source_id})
 
     add_audit_log(
       Coordinator.get_coordinator_userid(),
@@ -174,5 +175,16 @@ defmodule Teiserver.Coordinator.AutomodServer do
     Client.kick_disconnect(userid, "Banned")
 
     "Banned user"
+  end
+
+  @spec get_automod_pid() :: pid() | nil
+  def get_automod_pid() do
+    case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
+      [{pid, _}] ->
+        pid
+
+      _ ->
+        nil
+    end
   end
 end

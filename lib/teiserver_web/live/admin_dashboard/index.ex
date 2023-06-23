@@ -164,7 +164,8 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       {"Lobby ID server", lobby_id_server_pid},
       {"Coordinator", Coordinator.get_coordinator_pid()},
       {"Accolades", AccoladeLib.get_accolade_bot_pid()},
-      {"Match Monitor", Teiserver.Battle.MatchMonitorServer.get_match_monitor_pid()}
+      {"Match Monitor", Teiserver.Battle.MatchMonitorServer.get_match_monitor_pid()},
+      {"Automod", Teiserver.Coordinator.AutomodServer.get_automod_pid()}
     ]
 
     socket
