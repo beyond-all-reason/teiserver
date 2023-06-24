@@ -115,7 +115,7 @@
           <tbody>
             <%= for log <- @logs do %>
               <% {text_class, icon} =
-                if log.value["rating_value_change"] > 0 do
+                if log.value["skill_change"] > 0 do
                   {"text-success", "up"}
                 else
                   {"text-danger", "down"}

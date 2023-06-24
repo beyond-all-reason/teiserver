@@ -57,7 +57,7 @@ defmodule Teiserver.Account.BanEvasionReport do
       )
       |> Enum.map(fn %{user_id: user_id} -> user_id end)
 
-    max_play_age =
+    _max_play_age =
       params["max_play_age"]
       |> int_parse
 
