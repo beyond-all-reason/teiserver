@@ -13,7 +13,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Report.ClientEventView,
+          TeiserverWeb.Telemetry.ClientEventView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",

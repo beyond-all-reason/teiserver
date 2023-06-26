@@ -14,6 +14,12 @@
       text: "Logging",
       link: ~p"/logging"
     ) %>
+    
+    <%= central_component("menu_card",
+      icon: Teiserver.Telemetry.TelemetryLib.icon(),
+      text: "Telemetry",
+      link: ~p"/telemetry"
+    ) %>
   <% end %>
 
   <%= if allow?(@conn, "Moderator") do %>

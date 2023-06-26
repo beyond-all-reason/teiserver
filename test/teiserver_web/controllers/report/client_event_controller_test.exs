@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Report.ClientEventControllerTest do
   end
 
   test "index", %{conn: conn} do
-    conn = get(conn, Routes.ts_reports_client_event_path(conn, :summary))
+    conn = get(conn, ~p"/telemetry/client/summary")
 
     assert html_response(conn, 200)
   end

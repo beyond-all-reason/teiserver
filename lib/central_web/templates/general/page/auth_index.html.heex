@@ -21,6 +21,16 @@
     ) %>
   <% end %>
 
+  <%= if allow_any?(@conn, ~w(Server)) do %>
+    <%= central_component("menu_card",
+      icon: Teiserver.Telemetry.TelemetryLib.icon(),
+      name: "telemetry",
+      text: "Telemetry",
+      icon_class: "fa-duotone",
+      link: ~p"/telemetry"
+    ) %>
+  <% end %>
+
   <%= if allow_any?(@conn, ~w(Contributor Overwatch)) do %>
     <%= central_component("menu_card",
       icon: Central.Helpers.StylingHelper.icon(:summary),

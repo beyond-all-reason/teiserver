@@ -4,10 +4,10 @@ defmodule Teiserver.Telemetry.PropertyTypeLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-???"
+  def icon, do: "fa-regular fa-tags"
 
   @spec colours :: atom
-  def colours, do: :default
+  def colours, do: :info2
 
   # Queries
   @spec query_property_types() :: Ecto.Query.t()

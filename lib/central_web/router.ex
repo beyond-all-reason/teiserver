@@ -355,6 +355,22 @@ defmodule CentralWeb.Router do
     get("/show/:unit/:date", ServerMetricController, :metric_show)
   end
 
+  scope "/telemetry", TeiserverWeb.Telemetry do
+    pipe_through([:browser, :standard_layout, :protected])
+
+    get("/", GeneralController, :index)
+
+    # Properties
+    get("/properties/summary", PropertyController, :summary)
+    get("/properties/:property_name/detail", PropertyController, :detail)
+
+    # Client events
+    get("/client_events/export/form", ClientEventController, :export_form)
+    post("/client_events/export/post", ClientEventController, :export_post)
+    get("/client_events/summary", ClientEventController, :summary)
+    get("/client_events/event/:event_name/detail", ClientEventController, :detail)
+  end
+
   scope "/teiserver/reports", TeiserverWeb.Report, as: :ts_reports do
     pipe_through([:browser, :standard_layout, :protected])
 
@@ -376,13 +392,6 @@ defmodule CentralWeb.Router do
     post("/match/month_metrics/graph", MatchMetricController, :month_metrics_graph)
     get("/match/month_metrics", MatchMetricController, :month_metrics_list)
     post("/match/month_metrics", MatchMetricController, :month_metrics_list)
-
-    # Client events
-    get("/client_events/export/form", ClientEventController, :export_form)
-    post("/client_events/export/post", ClientEventController, :export_post)
-    get("/client_events/summary", ClientEventController, :summary)
-    get("/client_events/property/:property_name/detail", ClientEventController, :property_detail)
-    get("/client_events/event/:event_name/detail", ClientEventController, :event_detail)
 
     get("/infolog/download/:id", InfologController, :download)
     get("/infolog/search", InfologController, :index)

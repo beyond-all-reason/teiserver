@@ -30,17 +30,15 @@
 
         <%= if allow?(@current_user, "Server") do %>
           <%= central_component("top_nav_item",
-            text: "C.Admin",
-            route: ~p"/admin",
-            active: @site_menu_active == "central_admin"
-          ) %>
-        <% end %>
-
-        <%= if allow?(@current_user, "Server") do %>
-          <%= central_component("top_nav_item",
             text: "Logging",
             route: ~p"/logging",
             active: @site_menu_active == "central_logging"
+          ) %>
+          
+          <%= central_component("top_nav_item",
+            text: "Telemetry",
+            route: ~p"/telemetry",
+            active: @site_menu_active == "telemetry"
           ) %>
         <% end %>
 

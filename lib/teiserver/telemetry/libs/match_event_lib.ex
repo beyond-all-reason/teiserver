@@ -7,7 +7,7 @@ defmodule Teiserver.Telemetry.MatchEventLib do
   def colour(), do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-match"
+  def icon(), do: "fa-regular fa-scanner-touchscreen"
 
   # Queries
   @spec query_match_events() :: Ecto.Query.t()

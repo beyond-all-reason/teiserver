@@ -4,7 +4,7 @@ defmodule Teiserver.Telemetry.EventTypeLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-???"
+  def icon, do: "fa-regular fa-square-quarters"
 
   @spec colours :: atom
   def colours, do: :default
