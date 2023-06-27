@@ -12,6 +12,11 @@ defmodule Central.Application do
     # List all child processes to be supervised
     children =
       [
+        # Migrations
+        {Ecto.Migrator,
+          repos: Application.fetch_env!(:central, :ecto_repos),
+          skip: System.get_env("SKIP_MIGRATIONS") == "true"},
+
         # Start phoenix pubsub
         {Phoenix.PubSub, name: Central.PubSub},
         CentralWeb.Telemetry,
@@ -225,10 +230,6 @@ defmodule Central.Application do
 
   def startup_sub_functions(_) do
     :timer.sleep(100)
-
-    # Do migrations as part of startup
-    path = Application.app_dir(:central, "priv/repo/migrations")
-    Ecto.Migrator.run(Teiserver.Repo, path, :up, all: true)
 
     # Oban logging
     events = [
