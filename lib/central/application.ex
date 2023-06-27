@@ -19,7 +19,7 @@ defmodule Central.Application do
 
         # Start phoenix pubsub
         {Phoenix.PubSub, name: Central.PubSub},
-        CentralWeb.Telemetry,
+        TeiserverWeb.Telemetry,
 
         # Start the Ecto repository
         Teiserver.Repo,

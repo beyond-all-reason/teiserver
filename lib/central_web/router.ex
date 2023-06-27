@@ -171,11 +171,11 @@ defmodule CentralWeb.Router do
   # Live dashboard
   import Phoenix.LiveDashboard.Router
 
-  scope "/logging/live", CentralWeb, as: :logging_live do
+  scope "/logging/live", TeiserverWeb, as: :logging_live do
     pipe_through([:browser, :protected, :standard_layout, :logging_live_auth])
 
     live_dashboard("/dashboard",
-      metrics: CentralWeb.Telemetry,
+      metrics: TeiserverWeb.Telemetry,
       ecto_repos: [Teiserver.Repo],
       additional_pages: [
         # live_dashboard_additional_pages

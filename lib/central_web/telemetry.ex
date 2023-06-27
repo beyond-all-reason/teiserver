@@ -1,4 +1,4 @@
-defmodule CentralWeb.Telemetry do
+defmodule TeiserverWeb.Telemetry do
   @moduledoc false
   use Supervisor
   import Telemetry.Metrics
