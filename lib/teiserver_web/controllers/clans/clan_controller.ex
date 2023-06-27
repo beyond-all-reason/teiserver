@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Clans.ClanController do
   use CentralWeb, :controller
 
-  alias Central.Communication
+  alias Teiserver.Communication
   alias Teiserver.Account
   alias Teiserver.Clans
   alias Teiserver.Clans.ClanLib

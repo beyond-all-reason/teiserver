@@ -2,7 +2,7 @@ defmodule Teiserver.Logging.LoggingPlug do
   @moduledoc false
   alias Plug.Conn
   alias Teiserver.Logging.PageViewLog
-  alias Central.Repo
+  alias Teiserver.Repo
 
   @behaviour Plug
 

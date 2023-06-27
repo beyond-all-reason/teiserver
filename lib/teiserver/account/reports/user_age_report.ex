@@ -2,7 +2,7 @@ defmodule Teiserver.Account.UserAgeReport do
   @moduledoc false
   alias Central.Helpers.{DatePresets, TimexHelper}
   alias Teiserver.{Account}
-  alias Central.Repo
+  alias Teiserver.Repo
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-chevrons-up"

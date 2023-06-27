@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.MergeAccountsTask do
   alias Teiserver.Account
-  alias Central.Repo
+  alias Teiserver.Repo
   require Logger
   alias Teiserver.Data.Types, as: T
 

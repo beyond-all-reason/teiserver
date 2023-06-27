@@ -6,7 +6,7 @@ defmodule Teiserver.Game.MatchRatingLib do
 
   alias Teiserver.{Account, Coordinator, Game, Battle}
   alias Teiserver.Data.Types, as: T
-  alias Central.Repo
+  alias Teiserver.Repo
   alias Teiserver.Battle.{BalanceLib, MatchLib}
   require Logger
 
@@ -227,7 +227,7 @@ defmodule Teiserver.Game.MatchRatingLib do
 
     Ecto.Multi.new()
     |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
-    |> Central.Repo.transaction()
+    |> Teiserver.Repo.transaction()
 
     # Update the match to track rating type
     {:ok, _} = Battle.update_match(match, %{rating_type_id: rating_type_id})
@@ -440,7 +440,7 @@ defmodule Teiserver.Game.MatchRatingLib do
 
     Ecto.Multi.new()
     |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
-    |> Central.Repo.transaction()
+    |> Teiserver.Repo.transaction()
 
     # Update the match to track rating type
     {:ok, _} = Battle.update_match(match, %{rating_type_id: rating_type_id})

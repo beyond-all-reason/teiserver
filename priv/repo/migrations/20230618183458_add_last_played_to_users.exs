@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.AddLastPlayedToUsers do
+defmodule Teiserver.Repo.Migrations.AddLastPlayedToUsers do
   use Ecto.Migration
 
   def change do

@@ -20,7 +20,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Dashboard", url: "/admin/dashboard")
       |> add_breadcrumb(name: "Policy #{id}", url: "/admin/dashboard/policy/#{id}")
-      |> assign(:site_menu_active, "teiserver_admin")
+      |> assign(:site_menu_active, "admin")
       |> assign(:view_colour, Central.Admin.AdminLib.colours())
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
       |> get_policy_bots

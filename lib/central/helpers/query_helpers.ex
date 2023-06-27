@@ -1,6 +1,6 @@
 defmodule Central.Helpers.QueryHelpers do
   @moduledoc false
-  alias Central.Repo
+  alias Teiserver.Repo
   import Ecto.Query, warn: false
 
   defmacro lower(field) do

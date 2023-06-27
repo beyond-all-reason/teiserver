@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.RemovalOfUserPreCacheField do
+defmodule Teiserver.Repo.Migrations.RemovalOfUserPreCacheField do
   use Ecto.Migration
 
   def change do

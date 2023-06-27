@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.AddNotesToActions do
+defmodule Teiserver.Repo.Migrations.AddNotesToActions do
   use Ecto.Migration
 
   def change do

@@ -53,11 +53,11 @@ defmodule CentralWeb.Telemetry do
       ),
 
       # Database Time Metrics
-      summary("central.repo.query.total_time", unit: {:native, :millisecond}),
-      summary("central.repo.query.decode_time", unit: {:native, :millisecond}),
-      summary("central.repo.query.query_time", unit: {:native, :millisecond}),
-      summary("central.repo.query.queue_time", unit: {:native, :millisecond}),
-      summary("central.repo.query.idle_time", unit: {:native, :millisecond}),
+      summary("Teiserver.Repo.query.total_time", unit: {:native, :millisecond}),
+      summary("Teiserver.Repo.query.decode_time", unit: {:native, :millisecond}),
+      summary("Teiserver.Repo.query.query_time", unit: {:native, :millisecond}),
+      summary("Teiserver.Repo.query.queue_time", unit: {:native, :millisecond}),
+      summary("Teiserver.Repo.query.idle_time", unit: {:native, :millisecond}),
 
       # VM Metrics
       summary("vm.memory.total", unit: {:byte, :kilobyte}),

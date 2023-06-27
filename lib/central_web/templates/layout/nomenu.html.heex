@@ -25,10 +25,6 @@
 
 <div class="main-content-container container-fluid">
   <%= @inner_content %>
-
-  <%= if get_user_config_cache(@conn, "module.Quick action") == true do %>
-    <%= render(CentralWeb.General.QuickAction.HtmlView, "modal.html", assigns) %>
-  <% end %>
 </div>
 
 <%= if false do %>

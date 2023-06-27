@@ -3,7 +3,7 @@ defmodule Teiserver.Account.SmurfMergeTask do
   alias Teiserver.Battle.BalanceLib
   require Logger
   alias Teiserver.Data.Types, as: T
-  # alias Central.Repo
+  # alias Teiserver.Repo
 
   @spec perform(T.userid(), T.userid(), map()) :: :ok
   def perform(from_id, to_id, settings) do

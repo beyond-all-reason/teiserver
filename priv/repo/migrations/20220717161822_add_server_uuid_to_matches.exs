@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.AddServerUuidToMatches do
+defmodule Teiserver.Repo.Migrations.AddServerUuidToMatches do
   use Ecto.Migration
 
   def change do

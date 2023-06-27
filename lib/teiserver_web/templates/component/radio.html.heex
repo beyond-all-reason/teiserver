@@ -1,0 +1,29 @@
+<% checked =
+  if Map.has_key?(assigns, :checked) do
+    case @checked do
+      true -> [checked: "checked"]
+      _ -> []
+    end
+  else
+    c_field = Ecto.Changeset.get_field(@changeset, @field)
+
+    cond do
+      # c_field == true -> [checked: "checked"]
+      c_field == @value -> [checked: "checked"]
+      c_field == true and @value == "true" -> [checked: "checked"]
+      c_field == false and @value == "false" -> [checked: "checked"]
+      true -> []
+    end
+  end
+
+row_class = "form-check " <> (assigns[:row_class] || "m-1") %>
+
+<div class={row_class}>
+  <input name={@name} id={@id} class="form-check-input" type="radio" value={@value} {checked} />
+  <label class="form-check-label" for={@id}>
+    <strong><%= @label %></strong><%= assigns[:text] %>
+    <%= if assigns[:description] do %>
+      &nbsp;<%= assigns[:description] %>
+    <% end %>
+  </label>
+</div>

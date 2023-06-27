@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.ExpandReportObjects do
+defmodule Teiserver.Repo.Migrations.ExpandReportObjects do
   use Ecto.Migration
 
   def change do

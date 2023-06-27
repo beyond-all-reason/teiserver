@@ -99,10 +99,9 @@
   <div class="navbar-collapse collapse" id="collapsingNavbar">
     <ul class="navbar-nav ml-auto">
       <%= if @current_user do %>
-        <%= render(CentralWeb.Communication.GeneralView, "notification_dropdown.html", assigns) %>
-        <%= render(CentralWeb.General.SectionsView, "user_recents.html", assigns) %>
-        <%= render(CentralWeb.General.SectionsView, "user_favourites.html", assigns) %>
-        <%= render(CentralWeb.General.SectionsView, "user_dropdown.html", assigns) %>
+        <%= render(TeiserverWeb.Communication.GeneralView, "notification_dropdown.html", assigns) %>
+        <%= render(TeiserverWeb.General.SectionsView, "user_recents.html", assigns) %>
+        <%= render(TeiserverWeb.General.SectionsView, "user_dropdown.html", assigns) %>
       <% else %>
         <li class="nav-item">
           <a href={~p"/login"}>
@@ -118,7 +117,7 @@
 <div id="wrapper" class="toggled">
   <!-- Sidebar -->
   <div id="sidebar-wrapper">
-    <%= render(CentralWeb.General.PageView, "side_menu.html", assigns) %>
+    <%= render(TeiserverWeb.General.PageView, "side_menu.html", assigns) %>
   </div>
   <!-- /#sidebar-wrapper -->
 
@@ -166,9 +165,5 @@
       </span>
     </footer>
   </div>
-  <!-- /#page-content-wrapper -->
-  <%= if get_user_config_cache(@conn, "module.Quick action") == true do %>
-    <%= render(CentralWeb.General.QuickAction.HtmlView, "modal.html", assigns) %>
-  <% end %>
 </div>
 <!-- /#wrapper -->

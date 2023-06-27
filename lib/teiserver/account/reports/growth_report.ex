@@ -1,9 +1,9 @@
 defmodule Teiserver.Account.GrowthReport do
   @moduledoc false
-  alias Teiserver.{Telemetry}
+  alias Teiserver.{Logging}
   alias Central.Helpers.{TimexHelper}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Telemetry.ServerGraphDayLogsTask
+  alias Teiserver.Logging.ServerGraphDayLogsTask
   require Logger
 
   @spec icon() :: String.t()
@@ -149,31 +149,31 @@ defmodule Teiserver.Account.GrowthReport do
     logs =
       case time_unit do
         "Day" ->
-          Telemetry.list_server_day_logs(
+          Logging.list_server_day_logs(
             order: "Newest first",
             limit: limit
           )
 
         "Week" ->
-          Telemetry.list_server_week_logs(
+          Logging.list_server_week_logs(
             order: "Newest first",
             limit: limit
           )
 
         "Month" ->
-          Telemetry.list_server_month_logs(
+          Logging.list_server_month_logs(
             order: "Newest first",
             limit: limit
           )
 
         "Quarter" ->
-          Telemetry.list_server_quarter_logs(
+          Logging.list_server_quarter_logs(
             order: "Newest first",
             limit: limit
           )
 
         "Year" ->
-          Telemetry.list_server_year_logs(
+          Logging.list_server_year_logs(
             order: "Newest first",
             limit: limit
           )

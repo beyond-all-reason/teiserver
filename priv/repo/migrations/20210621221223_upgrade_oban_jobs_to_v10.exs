@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.UpdateObanJobsToV10 do
+defmodule Teiserver.Repo.Migrations.UpdateObanJobsToV10 do
   use Ecto.Migration
 
   def up do

@@ -1,8 +1,11 @@
 defmodule Teiserver.Account do
   import Ecto.Query, warn: false
-  alias Central.Repo
+  alias Teiserver.Repo
   require Logger
   alias Teiserver.Data.Types, as: T
+
+  @spec icon :: String.t()
+  def icon, do: "fa-duotone fa-user-alt"
 
   # Mostly a wrapper around Central.Account
   alias Central.Account.User

@@ -1,10 +1,8 @@
 defmodule TeiserverWeb.Admin.ToolController do
   use CentralWeb, :controller
-  alias Teiserver.Telemetry
-  alias Central.Helpers.TimexHelper
 
   plug(AssignPlug,
-    site_menu_active: "teiserver_admin",
+    site_menu_active: "admin",
     sub_menu_active: "tool"
   )
 
@@ -13,68 +11,59 @@ defmodule TeiserverWeb.Admin.ToolController do
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
-  plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
-  plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
+  plug(:add_breadcrumb, name: "Admin", url: "/teiserver/admin")
+  plug(:add_breadcrumb, name: "Tools", url: "/teiserver/admin/tools")
 
-  @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do
-    render(conn, "index.html")
+    conn
+    |> render("index.html")
   end
 
-  @spec day_metrics_list(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_list(conn, _params) do
-    logs =
-      Telemetry.list_server_day_logs(
-        # search: [user_id: params["user_id"]],
-        # joins: [:user],
-        order: "Newest first",
-        limit: 31
-      )
+  @spec test_page(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def test_page(conn, params) do
+    layout =
+      case params["layout"] do
+        "unauth" -> "unauth.html"
+        "empty" -> "empty.html"
+        "nomenu" -> "nomenu.html"
+        "nomenu_live" -> "nomenu_live.html"
+        "admin_live" -> "admin_live.html"
+        "admin" -> "admin.html"
+        _ -> "standard.html"
+      end
+
+    conn =
+      if params["flash"] do
+        # This is for the live pages
+        flash = %{
+          success: "Example flash message success",
+          info: "Example flash message info",
+          danger: "Example flash message danger"
+        }
+
+        conn
+        |> put_flash(:success, "Example flash message success")
+        |> put_flash(:info, "Example flash message info")
+        |> put_flash(:danger, "Example flash message danger")
+        |> assign(:flash, flash)
+      else
+        conn
+        |> assign(:flash, %{})
+      end
 
     conn
-    |> assign(:logs, logs)
-    |> render("day_metrics_list.html")
+    |> add_breadcrumb(name: "Test page", url: conn.request_path)
+    |> assign(:socket, conn)
+    |> assign(:layout_value, layout)
+    |> put_layout(layout)
+    |> render("test_page.html")
   end
 
-  @spec day_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_show(conn, %{"date" => date_str}) do
-    date = TimexHelper.parse_ymd(date_str)
-    log = Telemetry.get_server_day_log(date)
-
-    users =
-      [log]
-      |> Telemetry.user_lookup()
-
+  # List of font awesome icons
+  @spec falist(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def falist(conn, _params) do
     conn
-    |> assign(:date, date)
-    |> assign(:data, log.data)
-    |> assign(:users, users)
-    |> render("day_metrics_show.html")
-  end
-
-  @spec day_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_today(conn, _params) do
-    data = Telemetry.get_todays_server_log()
-
-    users =
-      [%{data: data}]
-      |> Telemetry.user_lookup()
-
-    conn
-    |> assign(:date, Timex.today())
-    |> assign(:data, data)
-    |> assign(:users, users)
-    |> render("day_metrics_show.html")
-  end
-
-  @spec day_metrics_export(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_export(conn, _params = %{"date" => _date}) do
-    # anonymous = params["anonymous"]
-
-    # log = date
-    #   |> TimexHelper.parse_ymd
-    #   |> Telemetry.get_server_day_log
-
-    conn
+    |> render("falist.html")
   end
 end

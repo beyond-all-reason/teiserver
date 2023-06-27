@@ -27,7 +27,7 @@ defmodule CentralWeb.Router do
     plug(Central.Account.AuthPlug)
     plug(Teiserver.Account.TSAuthPlug)
     plug(Central.General.CachePlug)
-    plug(Central.Communication.NotificationPlug)
+    plug(Teiserver.Communication.NotificationPlug)
   end
 
   pipeline :admin_layout do
@@ -87,14 +87,14 @@ defmodule CentralWeb.Router do
     plug(Guardian.Plug.EnsureAuthenticated)
   end
 
-  scope "/", CentralWeb.General, as: :general do
+  scope "/", TeiserverWeb.General, as: :general do
     pipe_through([:browser, :nomenu_layout])
 
     get("/recache", PageController, :recache)
     get("/", PageController, :index)
   end
 
-  scope "/", CentralWeb.Account, as: :account do
+  scope "/", TeiserverWeb.Account, as: :account do
     pipe_through([:browser, :nomenu_layout])
 
     get("/login", SessionController, :new)
@@ -109,31 +109,6 @@ defmodule CentralWeb.Router do
     get("/one_time_login/:value", SessionController, :one_time_login)
 
     get("/initial_setup/:key", SetupController, :setup)
-  end
-
-  scope "/account", CentralWeb.Account, as: :account do
-    pipe_through([:browser, :protected, :standard_layout])
-
-    get("/", GeneralController, :index)
-
-    get("/edit/details", RegistrationController, :edit_details)
-    put("/edit/details", RegistrationController, :update_details)
-    get("/edit/password", RegistrationController, :edit_password)
-    put("/edit/password", RegistrationController, :update_password)
-  end
-
-  scope "/account", CentralWeb.Account, as: :account do
-    pipe_through([:browser, :standard_layout])
-
-    get("/registrations/new/:code", RegistrationController, :new)
-    get("/registrations/new", RegistrationController, :new)
-    post("/registrations/create", RegistrationController, :create)
-  end
-
-  scope "/quick", CentralWeb.General.QuickAction, as: :quick_action do
-    pipe_through([:protected_api])
-
-    get("/ajax", AjaxController, :index)
   end
 
   scope "/logging", TeiserverWeb.Logging, as: :logging do
@@ -157,56 +132,40 @@ defmodule CentralWeb.Router do
     get("/aggregate_views/perform", AggregateViewLogController, :perform_form)
     post("/aggregate_views/perform", AggregateViewLogController, :perform_post)
 
-    # Errors
-    get("/error_logs/delete_all", ErrorLogController, :delete_all_form)
-    post("/error_logs/delete_all", ErrorLogController, :delete_all_post)
-    resources("/error_logs", ErrorLogController, only: [:index, :show, :delete])
+    # Game server logs
+    get("/server/now", ServerLogController, :now)
+    get("/server/load", ServerLogController, :load)
+    get("/server/user_cost", ServerLogController, :user_cost)
+
+    get("/server", ServerLogController, :metric_list)
+    get("/server/:unit", ServerLogController, :metric_list)
+    get("/server/show/:unit/today", ServerLogController, :metric_show_today)
+    get("/server/show/:unit/:date", ServerLogController, :metric_show)
+
+    # Match logs
+    get("/match/day_metrics/today", MatchLogController, :day_metrics_today)
+    get("/match/day_metrics/show/:date", MatchLogController, :day_metrics_show)
+    get("/match/day_metrics/graph", MatchLogController, :day_metrics_graph)
+    post("/match/day_metrics/graph", MatchLogController, :day_metrics_graph)
+    get("/match/day_metrics", MatchLogController, :day_metrics_list)
+    post("/match/day_metrics", MatchLogController, :day_metrics_list)
+    get("/match/export_form", MatchLogController, :export_form)
+    post("/match/export_post", MatchLogController, :export_post)
+
+    get("/match/month_metrics/today", MatchLogController, :month_metrics_today)
+    get("/match/month_metrics/show/:year/:month", MatchLogController, :month_metrics_show)
+    get("/match/month_metrics/graph", MatchLogController, :month_metrics_graph)
+    post("/match/month_metrics/graph", MatchLogController, :month_metrics_graph)
+    get("/match/month_metrics", MatchLogController, :month_metrics_list)
+    post("/match/month_metrics", MatchLogController, :month_metrics_list)
   end
 
-  scope "/communication", CentralWeb.Communication, as: :communication do
+  scope "/communication", TeiserverWeb.Communication, as: :communication do
     pipe_through([:browser, :protected, :standard_layout])
-
-    get("/notifications/handle_test/", NotificationController, :handle_test)
-    post("/notifications/quick_new", NotificationController, :quick_new)
-    get("/notifications/admin", NotificationController, :admin)
 
     get("/notifications/delete_all", NotificationController, :delete_all)
     get("/notifications/mark_all", NotificationController, :mark_all)
     resources("/notifications", NotificationController, only: [:index, :delete])
-  end
-
-  scope "/admin", CentralWeb.Admin, as: :admin do
-    pipe_through([:browser, :protected, :standard_layout])
-
-    get("/", GeneralController, :index)
-
-    post("/users/config/create", UserController, :config_create)
-    get("/users/config/delete/:user_id/:key", UserController, :config_delete)
-
-    # Users
-    get("/users/permissions/:id", UserController, :edit_permissions)
-    post("/users/permissions/:id", UserController, :update_permissions)
-    post("/users/copy_permissions/:id", UserController, :copy_permissions)
-    get("/users/delete_check/:id", UserController, :delete_check)
-
-    resources("/users", UserController,
-      only: [:index, :new, :create, :show, :edit, :update, :delete]
-    )
-
-    get("/users/reset_password/:id", UserController, :reset_password)
-    get("/users/search", UserController, :index)
-    post("/users/search", UserController, :search)
-
-    # Tools
-    get("/tools", ToolController, :index)
-    get("/tools/falist", ToolController, :falist)
-    get("/tools/test_error", ToolController, :test_error)
-    get("/tools/test_page", ToolController, :test_page)
-    get("/tools/coverage", ToolController, :coverage_form)
-    post("/tools/coverage", ToolController, :coverage_post)
-    get("/tools/oban", ToolController, :oban_dashboard)
-    get("/tools/oban/action", ToolController, :oban_action)
-    get("/tools/conn_params", ToolController, :conn_params)
   end
 
   # Live dashboard
@@ -217,7 +176,7 @@ defmodule CentralWeb.Router do
 
     live_dashboard("/dashboard",
       metrics: CentralWeb.Telemetry,
-      ecto_repos: [Central.Repo],
+      ecto_repos: [Teiserver.Repo],
       additional_pages: [
         # live_dashboard_additional_pages
       ]
@@ -340,21 +299,6 @@ defmodule CentralWeb.Router do
     live("/parties/show/:id", Show, :show)
   end
 
-  # REPORTING
-  scope "/reports/server", TeiserverWeb.Report do
-    pipe_through([:browser, :standard_layout, :protected])
-
-    # Server metric specifics
-    get("/now", ServerMetricController, :now)
-    get("/load", ServerMetricController, :load)
-    get("/user_cost", ServerMetricController, :user_cost)
-
-    get("/list", ServerMetricController, :metric_list)
-    get("/list/:unit", ServerMetricController, :metric_list)
-    get("/show/:unit/today", ServerMetricController, :metric_show_today)
-    get("/show/:unit/:date", ServerMetricController, :metric_show)
-  end
-
   scope "/telemetry", TeiserverWeb.Telemetry do
     pipe_through([:browser, :standard_layout, :protected])
 
@@ -370,30 +314,13 @@ defmodule CentralWeb.Router do
     get("/client_events/export/form", ClientEventController, :export_form)
     post("/client_events/export/post", ClientEventController, :export_post)
     get("/client_events/summary", ClientEventController, :summary)
-    get("/client_events/event/:event_name/detail", ClientEventController, :detail)
+    get("/client_events/:event_name/detail", ClientEventController, :detail)
   end
 
   scope "/teiserver/reports", TeiserverWeb.Report, as: :ts_reports do
     pipe_through([:browser, :standard_layout, :protected])
 
     get("/", GeneralController, :index)
-
-    # Match metrics
-    get("/match/day_metrics/today", MatchMetricController, :day_metrics_today)
-    get("/match/day_metrics/show/:date", MatchMetricController, :day_metrics_show)
-    get("/match/day_metrics/graph", MatchMetricController, :day_metrics_graph)
-    post("/match/day_metrics/graph", MatchMetricController, :day_metrics_graph)
-    get("/match/day_metrics", MatchMetricController, :day_metrics_list)
-    post("/match/day_metrics", MatchMetricController, :day_metrics_list)
-    get("/match/export_form", MatchMetricController, :export_form)
-    post("/match/export_post", MatchMetricController, :export_post)
-
-    get("/match/month_metrics/today", MatchMetricController, :month_metrics_today)
-    get("/match/month_metrics/show/:year/:month", MatchMetricController, :month_metrics_show)
-    get("/match/month_metrics/graph", MatchMetricController, :month_metrics_graph)
-    post("/match/month_metrics/graph", MatchMetricController, :month_metrics_graph)
-    get("/match/month_metrics", MatchMetricController, :month_metrics_list)
-    post("/match/month_metrics", MatchMetricController, :month_metrics_list)
 
     get("/infolog/download/:id", InfologController, :download)
     get("/infolog/search", InfologController, :index)
@@ -565,8 +492,9 @@ defmodule CentralWeb.Router do
     get("/metrics", GeneralController, :metrics)
 
     get("/tools", ToolController, :index)
-    get("/tools/convert", ToolController, :convert_form)
-    post("/tools/convert_post", ToolController, :convert_post)
+    get("/tools/falist", ToolController, :falist)
+    get("/tools/test_page", ToolController, :test_page)
+
 
     post("/clans/create_membership", ClanController, :create_membership)
     delete("/clans/delete_membership/:clan_id/:user_id", ClanController, :delete_membership)

@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.UserPreCacheFlag do
+defmodule Teiserver.Repo.Migrations.UserPreCacheFlag do
   use Ecto.Migration
 
   def change do

@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.AutomatedModerationCreation do
+defmodule Teiserver.Repo.Migrations.AutomatedModerationCreation do
   use Ecto.Migration
 
   def change do

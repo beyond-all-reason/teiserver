@@ -2,7 +2,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
   @moduledoc """
   Used to recalculate certain user stats after various events
   """
-  # alias Central.Repo
+  # alias Teiserver.Repo
   # import Ecto.Query, warn: false
   alias Teiserver.{Account, Game}
   alias Teiserver.Game.MatchRatingLib

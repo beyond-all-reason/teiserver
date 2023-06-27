@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.AddPartyIdToMatches do
+defmodule Teiserver.Repo.Migrations.AddPartyIdToMatches do
   use Ecto.Migration
 
   def change do

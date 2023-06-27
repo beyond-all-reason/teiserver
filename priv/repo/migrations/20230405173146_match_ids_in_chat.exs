@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.MatchIdsInChat do
+defmodule Teiserver.Repo.Migrations.MatchIdsInChat do
   use Ecto.Migration
 
   def change do

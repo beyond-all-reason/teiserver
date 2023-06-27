@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.CreateCommunication.Chat do
+defmodule Teiserver.Repo.Migrations.CreateCommunication.Chat do
   use Ecto.Migration
 
   def change do

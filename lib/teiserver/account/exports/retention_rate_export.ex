@@ -16,7 +16,7 @@ defmodule Teiserver.Account.RetentionRateExport do
   })
   """
   alias Central.Helpers.DatePresets
-  alias Teiserver.{Account, Telemetry}
+  alias Teiserver.{Account, Logging}
   alias Central.Helpers.TimexHelper
   alias Central.Helpers.TimexHelper
   require Logger
@@ -61,7 +61,7 @@ defmodule Teiserver.Account.RetentionRateExport do
       end
 
     day_logs =
-      Telemetry.list_server_day_logs(
+      Logging.list_server_day_logs(
         search: [start_date: start_date],
         order: "Newest first",
         limit: :infinity

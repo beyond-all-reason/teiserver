@@ -4,7 +4,7 @@ defmodule Teiserver.Account.LeaderboardReport do
   alias Teiserver.Game.MatchRatingLib
   # alias Teiserver.Battle.BalanceLib
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Central.Repo
+  alias Teiserver.Repo
 
   @spec icon() :: String.t()
   def icon(), do: Teiserver.Account.RatingLib.icon()

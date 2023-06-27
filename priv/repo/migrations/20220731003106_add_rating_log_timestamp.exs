@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.AddRatingLogTimestamp do
+defmodule Teiserver.Repo.Migrations.AddRatingLogTimestamp do
   use Ecto.Migration
 
   def change do

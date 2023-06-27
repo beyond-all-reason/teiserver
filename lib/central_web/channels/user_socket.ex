@@ -8,8 +8,8 @@ defmodule CentralWeb.UserSocket do
 
   channel("fp*", TeiserverWeb.User.FpChannel)
   channel("live_search:*", CentralWeb.LiveSearch.Channel)
-  channel("communication_notification:*", CentralWeb.Communication.NotificationChannel)
-  channel("communication_reloads:*", CentralWeb.Communication.NotificationChannel)
+  channel("communication_notification:*", TeiserverWeb.Communication.NotificationChannel)
+  channel("communication_reloads:*", TeiserverWeb.Communication.NotificationChannel)
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After

@@ -1,7 +1,7 @@
 defmodule Teiserver.Battle.Tasks.CleanupTask do
   use Oban.Worker, queue: :cleanup
 
-  alias Central.Repo
+  alias Teiserver.Repo
   alias Teiserver.{Battle}
   alias Central.Helpers.StringHelper
   require Logger

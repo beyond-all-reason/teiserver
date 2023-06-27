@@ -1,0 +1,45 @@
+<div class="nav-item dropdown mx-2">
+  <a
+    class="dropdown-toggle dropdown-toggle-icon-only"
+    href="#"
+    data-bs-toggle="dropdown"
+    aria-haspopup="true"
+    aria-expanded="false"
+    id="user-dropdown-link"
+  >
+    <i class="fa-solid fa-user fa-fw fa-lg"></i>
+  </a>
+  <div
+    class="dropdown-menu dropdown-menu-end"
+    aria-labelledby="user-dropdown-link"
+    style="min-width: 300px; max-width: 500px;"
+  >
+    <a class="dropdown-item" href={~p"/teiserver/account"}>
+      <i class={"fa-fw #{Teiserver.Account.icon()}"}></i> &nbsp;
+      Account
+    </a>
+
+    <a class="dropdown-item" href={Routes.general_page_path(@conn, :recache)}>
+      <i class="fa-regular fa-sync fa-fw"></i> &nbsp;
+      Refresh session cache
+    </a>
+
+    <hr style="margin: 0;" />
+
+    <form action={~p"/logout"} method="post" class="link" id="signout-form" style="margin: 0;">
+      <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+      <a
+        class="dropdown-item"
+        data-submit="parent"
+        href="#"
+        rel="nofollow"
+        onclick="$('#signout-form').submit();"
+        id="signout-link"
+      >
+        <i class="fa-regular fa-sign-out fa-fw"></i> &nbsp;
+        Sign out <%= @current_user.name %>
+      </a>
+    </form>
+  </div>
+</div>

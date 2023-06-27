@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.AddMetadataToCodes do
+defmodule Teiserver.Repo.Migrations.AddMetadataToCodes do
   use Ecto.Migration
 
   def change do

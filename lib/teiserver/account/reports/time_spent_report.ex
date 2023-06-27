@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.TimeSpentReport do
   alias Central.Helpers.DatePresets
-  alias Teiserver.{Telemetry}
+  alias Teiserver.{Logging}
   alias Central.Helpers.TimexHelper
   import Central.Helpers.StringHelper, only: [get_hash_id: 1]
 
@@ -40,7 +40,7 @@ defmodule Teiserver.Account.TimeSpentReport do
     userid = get_hash_id(params["account_user"]) |> to_string
 
     columns =
-      Telemetry.list_server_day_logs(
+      Logging.list_server_day_logs(
         search: [
           start_date: start_date,
           end_date: end_date

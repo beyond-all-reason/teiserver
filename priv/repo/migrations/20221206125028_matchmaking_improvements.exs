@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.MatchmakingImprovements do
+defmodule Teiserver.Repo.Migrations.MatchmakingImprovements do
   use Ecto.Migration
 
   def change do

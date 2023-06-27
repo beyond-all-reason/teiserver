@@ -29,10 +29,10 @@ defmodule CentralWeb.ChannelCase do
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Central.Repo)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Teiserver.Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Central.Repo, {:shared, self()})
+      Ecto.Adapters.SQL.Sandbox.mode(Teiserver.Repo, {:shared, self()})
     end
 
     :ok

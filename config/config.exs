@@ -17,7 +17,7 @@ config :central, Teiserver.Config,
   }
 
 config :central,
-  ecto_repos: [Central.Repo]
+  ecto_repos: [Teiserver.Repo]
 
 # Configures the endpoint
 config :central, CentralWeb.Endpoint,
@@ -110,7 +110,7 @@ config :central, Central.Account.Guardian,
   ttl: {30, :days}
 
 config :central, Oban,
-  repo: Central.Repo,
+  repo: Teiserver.Repo,
   plugins: [
     {Oban.Plugins.Pruner, max_age: 3600},
     {Oban.Plugins.Cron,
@@ -132,22 +132,22 @@ config :central, Oban,
        {"17 * * * *", Teiserver.Battle.Tasks.CleanupTask},
 
        # Every minute
-       {"* * * * *", Teiserver.Telemetry.Tasks.PersistServerMinuteTask},
+       {"* * * * *", Teiserver.Logging.Tasks.PersistServerMinuteTask},
        {"* * * * *", Teiserver.Moderation.RefreshUserRestrictionsTask},
 
        # Every minute
        {"* * * * *", Teiserver.Battle.Tasks.PostMatchProcessTask},
 
        # 2am
-       {"1 2 * * *", Teiserver.Telemetry.Tasks.PersistServerDayTask},
-       {"2 2 * * *", Teiserver.Telemetry.Tasks.PersistServerWeekTask},
-       {"3 2 * * *", Teiserver.Telemetry.Tasks.PersistServerMonthTask},
-       {"4 2 * * *", Teiserver.Telemetry.Tasks.PersistServerQuarterTask},
-       {"5 2 * * *", Teiserver.Telemetry.Tasks.PersistServerYearTask},
-       {"6 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchDayTask},
-       {"7 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchMonthTask},
+       {"1 2 * * *", Teiserver.Logging.Tasks.PersistServerDayTask},
+       {"2 2 * * *", Teiserver.Logging.Tasks.PersistServerWeekTask},
+       {"3 2 * * *", Teiserver.Logging.Tasks.PersistServerMonthTask},
+       {"4 2 * * *", Teiserver.Logging.Tasks.PersistServerQuarterTask},
+       {"5 2 * * *", Teiserver.Logging.Tasks.PersistServerYearTask},
+       {"6 2 * * *", Teiserver.Logging.Tasks.PersistMatchDayTask},
+       {"7 2 * * *", Teiserver.Logging.Tasks.PersistMatchMonthTask},
        {"8 2 * * *", Teiserver.Telemetry.InfologCleanupTask},
-       {"1 2 * * *", Teiserver.Telemetry.Tasks.PersistUserActivityDayTask},
+       {"9 2 * * *", Teiserver.Logging.Tasks.PersistUserActivityDayTask},
 
        # 2:43
        {"43 2 * * *", Teiserver.Game.AchievementCleanupTask},

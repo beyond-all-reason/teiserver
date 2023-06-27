@@ -1,4 +1,4 @@
-defmodule CentralWeb.General.PageControllerTest do
+defmodule TeiserverWeb.General.PageControllerTest do
   use CentralWeb.ConnCase, async: true
 
   test "GET /", %{conn: conn} do

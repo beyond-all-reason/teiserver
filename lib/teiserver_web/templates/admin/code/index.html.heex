@@ -1,6 +1,6 @@
 <% bsname = view_colour() %>
 
-<%= render(CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "codes"})) %>
+<%= render(TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "codes"})) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -43,9 +43,6 @@
                   "reset_password" ->
                     Routes.account_session_path(@conn, :password_reset_form, code.value)
 
-                  "user_registration" ->
-                    Routes.account_registration_path(@conn, :new, code.value)
-
                   _ ->
                     ""
                 end %>
@@ -85,7 +82,7 @@
 
                 <td>
                   <a
-                    href={Routes.admin_user_path(@conn, :show, code.user_id)}
+                    href={~p"/teiserver/admin/user/#{code.user_id}"}
                     class="btn btn-secondary btn-sm"
                   >
                     <i class="fa fa-eye"></i> Show user

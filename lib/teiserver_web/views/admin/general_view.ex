@@ -22,4 +22,5 @@ defmodule TeiserverWeb.Admin.GeneralView do
   def view_colour("achievements"), do: Teiserver.Game.AchievementTypeLib.colour()
   def view_colour("config"), do: Teiserver.Config.SiteConfigLib.colours()
   def view_colour("tool"), do: Central.Admin.ToolLib.colours()
+  def view_colour("codes"), do: Teiserver.Account.CodeLib.colours()
 end

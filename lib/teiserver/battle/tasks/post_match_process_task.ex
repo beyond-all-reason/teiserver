@@ -8,7 +8,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   alias Teiserver.Battle.MatchMembershipLib
   alias Central.Helpers.NumberHelper
   alias Teiserver.Config
-  alias Central.Repo
+  alias Teiserver.Repo
   # alias Teiserver.Data.Types, as: T
 
   @impl Oban.Worker

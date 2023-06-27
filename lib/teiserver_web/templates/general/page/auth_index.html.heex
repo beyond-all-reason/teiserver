@@ -1,0 +1,134 @@
+<div style="height: 15px;">&nbsp;</div>
+
+<%= if @current_user == nil do %>
+  <div class="row">
+    <%= central_component("menu_card",
+      icon: "fa-solid fa-sign-in-alt",
+      text: "Sign in",
+      link: ~p"/login"
+    ) %>
+  </div>
+<% end %>
+&nbsp;
+<div class="row">
+  <%= if allow_any?(@conn, ~w(Contributor Overwatch)) do %>
+    <%= central_component("menu_card",
+      icon: Teiserver.icon(),
+      name: "tei_admin",
+      text: "Administration",
+      icon_class: "fa-duotone",
+      link: ~p"/teiserver/admin"
+    ) %>
+  <% end %>
+
+  <%= if allow_any?(@conn, ~w(Server)) do %>
+    <%= central_component("menu_card",
+      icon: Teiserver.Telemetry.TelemetryLib.icon(),
+      name: "telemetry",
+      text: "Telemetry",
+      icon_class: "fa-duotone",
+      link: ~p"/telemetry"
+    ) %>
+  <% end %>
+
+  <%= if allow_any?(@conn, ~w(Contributor Overwatch)) do %>
+    <%= central_component("menu_card",
+      icon: Central.Helpers.StylingHelper.icon(:summary),
+      name: "reports",
+      text: "Reports",
+      icon_class: "fa-duotone",
+      link: ~p"/teiserver/reports"
+    ) %>
+  <% end %>
+</div>
+
+<div class="row">
+  <%= central_component("menu_card",
+    icon: Teiserver.Battle.LobbyLib.icon(),
+    name: "battle_lobbies",
+    text: "Live lobbies",
+    icon_class: "fa-duotone",
+    link: ~p"/teiserver/battle/lobbies"
+  ) %>
+
+  <%= central_component("menu_card",
+    icon: Teiserver.Account.PartyLib.icon(),
+    name: "parties",
+    text: "Parties",
+    icon_class: "fa-duotone",
+    link: ~p"/teiserver/account/parties"
+  ) %>
+
+  <%= central_component("menu_card",
+    icon: Teiserver.Game.QueueLib.icon(),
+    name: "queue",
+    text: "Matchmaking",
+    icon_class: "fa-duotone",
+    link: ~p"/teiserver/matchmaking/queues"
+  ) %>
+
+  <%= if allow?(@conn, "Moderator") do %>
+    <%= central_component("menu_card",
+      icon: Teiserver.Account.ClientLib.icon(),
+      name: "live_client",
+      text: "Live clients",
+      icon_class: "fa-duotone",
+      link: ~p"/teiserver/admin/client"
+    ) %>
+  <% end %>
+
+  <%= if @current_user do %>
+    <%= central_component("menu_card",
+      icon: "fa-regular fa-user",
+      name: "account",
+      text: "Account",
+      icon_class: "fa-duotone",
+      link: ~p"/teiserver/account"
+    ) %>
+
+    <%= central_component("menu_card",
+      icon: Teiserver.Battle.MatchLib.icon(),
+      name: "matches",
+      text: "My matches",
+      icon_class: "fa-duotone",
+      link: ~p"/teiserver/battle/matches"
+    ) %>
+  <% end %>
+</div>
+
+<%= if @current_user do %>
+  <div class="row">
+    <% notification_icon =
+      if @user_notifications_unread_count > 0 do
+        Teiserver.Communication.NotificationLib.icon_full()
+      else
+        Teiserver.Communication.NotificationLib.icon_empty()
+      end %>
+
+    <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
+      <a href={~p"/communication/notifications"}>
+        <%= central_component("icon", icon: notification_icon, class: "fa-4x") %>
+        <%= if @user_notifications_unread_count > 0 do %>
+          <div
+            class={"badge rounded-pill bg-#{Teiserver.Communication.NotificationLib.colours()}"}
+            id="communication-notifications-badge"
+            style="width: 65px; margin-left:-60px; font-size: 1em;"
+          >
+            <%= @user_notifications_unread_count %>
+          </div>
+        <% end %>
+        <br /> Notifications
+      </a>
+    </div>
+
+    <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
+      <form action={~p"/logout"} method="post" class="link" id="signout-form">
+        <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+        <a data-submit="parent" href="#" rel="nofollow" onclick="$('#signout-form').submit();">
+          <i class="fa-duotone fa-sign-out-alt fa-fw fa-4x"></i> <br /> Sign out
+        </a>
+      </form>
+    </div>
+  </div>
+<% end %>

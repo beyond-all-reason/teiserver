@@ -1,4 +1,4 @@
-defmodule CentralWeb.Communication.NotificationControllerTest do
+defmodule TeiserverWeb.Communication.NotificationControllerTest do
   use CentralWeb.ConnCase
 
   alias Central.Helpers.GeneralTestLib
@@ -7,7 +7,7 @@ defmodule CentralWeb.Communication.NotificationControllerTest do
     GeneralTestLib.conn_setup()
   end
 
-  alias Central.Communication
+  alias Teiserver.Communication
 
   # @valid_attrs %{body: "some content", data: %{}, expires: %{day: 17, hour: 14, min: 0, month: 4, sec: 0, year: 2010}, icon: "some content", colour: "some content", redirect: "some content", read: true, title: "some content", user_id: 42, expired: false}
   # @invalid_attrs %{}

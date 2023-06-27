@@ -36,11 +36,11 @@
   </style>
 <% end %>
 
-<%= render(CentralWeb.General.PageView, "top_navbar.html", assigns) %>
+<%= render(TeiserverWeb.General.PageView, "top_navbar.html", assigns) %>
 
 <main>
   <%= if assigns[:breadcrumb_trails] do %>
-    <%= render(CentralWeb.ComponentView, "breadcrumb.html", assigns) %>
+    <%= render(TeiserverWeb.ComponentView, "breadcrumb.html", assigns) %>
   <% end %>
 
   <div id="flash-messages">
@@ -82,10 +82,6 @@
   <div class="px-3 my-0">
     <%= @inner_content %>
   </div>
-
-  <%= if get_user_config_cache(@conn, "module.Quick action") == true do %>
-    <%= render(CentralWeb.General.QuickAction.HtmlView, "modal.html", assigns) %>
-  <% end %>
 </main>
 
 <footer class="footer mt-auto pt-2 pb-1 px-2">

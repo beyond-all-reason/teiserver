@@ -18,7 +18,7 @@ defmodule Central.ServerCase do
 
   using do
     quote do
-      alias Central.Repo
+      alias Teiserver.Repo
 
       import Ecto
       import Ecto.Changeset
@@ -28,10 +28,10 @@ defmodule Central.ServerCase do
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Central.Repo)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Teiserver.Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Central.Repo, {:shared, self()})
+      Ecto.Adapters.SQL.Sandbox.mode(Teiserver.Repo, {:shared, self()})
     end
 
     :ok

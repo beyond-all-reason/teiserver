@@ -17,7 +17,7 @@ defmodule TeiserverWeb.Logging.AggregateViewLogController do
   plug :add_breadcrumb, name: 'Aggregate', url: '/logging/aggregate_views'
 
   plug(AssignPlug,
-    site_menu_active: "central_logging",
+    site_menu_active: "logging",
     sub_menu_active: "aggregate"
   )
 

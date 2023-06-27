@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.Logging do
+defmodule Teiserver.Repo.Migrations.Logging do
   use Ecto.Migration
 
   def change do
@@ -47,19 +47,5 @@ defmodule Central.Repo.Migrations.Logging do
       add :user_data, :jsonb
       add :section_data, :jsonb
     end
-
-    create table(:error_logs) do
-      add :path, :string
-      add :method, :string
-      add :reason, :text
-      add :traceback, :text
-      add :hidden, :boolean, default: false, null: false
-      add :data, :jsonb
-      add :user_id, references(:account_users, on_delete: :nothing)
-
-      timestamps()
-    end
-
-    create index(:error_logs, [:user_id])
   end
 end

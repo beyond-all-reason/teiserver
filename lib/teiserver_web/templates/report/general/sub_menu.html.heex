@@ -25,15 +25,15 @@
               name: "server_metrics",
               label: "Server metrics",
               active: @active,
-              url: ~p"/reports/server/list",
-              icon: Teiserver.Telemetry.ServerDayLogLib.icon()
+              url: ~p"/logging/server/list",
+              icon: Teiserver.Logging.ServerDayLogLib.icon()
             ) %>
 
             <%= central_component("sub_menu_icon",
               name: "match_metrics",
               label: "Match metrics",
               active: @active,
-              url: Routes.ts_reports_match_metric_path(@conn, :day_metrics_list),
+              url: Routes.logging_match_log_path(@conn, :day_metrics_list),
               icon: Teiserver.Battle.MatchLib.icon()
             ) %>
 

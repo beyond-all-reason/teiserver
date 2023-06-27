@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Admin.ClanController do
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin/clans')
 
   plug(AssignPlug,
-    site_menu_active: "teiserver_admin",
+    site_menu_active: "admin",
     sub_menu_active: "clan"
   )
 

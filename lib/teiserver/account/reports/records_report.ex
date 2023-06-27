@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.RecordsReport do
-  alias Central.Repo
-  alias Teiserver.Telemetry
+  alias Teiserver.Repo
+  alias Teiserver.Logging
 
   @spec icon() :: String.t()
   def icon(), do: "fa-solid fa-trophy"
@@ -23,7 +23,7 @@ defmodule Teiserver.Account.RecordsReport do
 
     # force_recache = (Map.get(params, "recache", false) == "true")
     force_recache = false
-    today = Telemetry.get_todays_server_log(force_recache)
+    today = Logging.get_todays_server_log(force_recache)
 
     today_data = %{
       "Peak users" => today["aggregates"]["stats"]["peak_user_counts"]["total"],

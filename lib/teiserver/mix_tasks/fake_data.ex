@@ -5,7 +5,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   use Mix.Task
 
-  alias Teiserver.{Account, Telemetry, Battle, Moderation}
+  alias Teiserver.{Account, Logging, Battle, Moderation}
   alias Central.Helpers.StylingHelper
   require Logger
 
@@ -97,7 +97,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
     Ecto.Multi.new()
     |> Ecto.Multi.insert_all(:insert_all, Central.Account.User, new_users)
-    |> Central.Repo.transaction()
+    |> Teiserver.Repo.transaction()
   end
 
   defp make_telemetry() do
@@ -181,15 +181,15 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         end)
 
       Ecto.Multi.new()
-      |> Ecto.Multi.insert_all(:insert_all, Teiserver.Telemetry.ServerMinuteLog, logs)
-      |> Central.Repo.transaction()
+      |> Ecto.Multi.insert_all(:insert_all, Teiserver.Logging.ServerMinuteLog, logs)
+      |> Teiserver.Repo.transaction()
     end)
 
     # Now persist day values
     Range.new(0, @settings.days)
     |> Enum.each(fn _day ->
-      Telemetry.Tasks.PersistServerDayTask.perform(%{})
-      Telemetry.Tasks.PersistMatchDayTask.perform(%{})
+      Logging.Tasks.PersistServerDayTask.perform(%{})
+      Logging.Tasks.PersistMatchDayTask.perform(%{})
     end)
 
     # And monthly
@@ -197,8 +197,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
     Range.new(0, months)
     |> Enum.each(fn _day ->
-      Telemetry.Tasks.PersistServerMonthTask.perform(%{})
-      Telemetry.Tasks.PersistMatchMonthTask.perform(%{})
+      Logging.Tasks.PersistServerMonthTask.perform(%{})
+      Logging.Tasks.PersistMatchMonthTask.perform(%{})
     end)
   end
 
@@ -274,7 +274,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
       Ecto.Multi.new()
       |> Ecto.Multi.insert_all(:insert_all, Moderation.Report, basic_reports ++ match_reports)
-      |> Central.Repo.transaction()
+      |> Teiserver.Repo.transaction()
     end)
   end
 
@@ -370,7 +370,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
           Battle.MatchMembership,
           memberships1 ++ memberships2
         )
-        |> Central.Repo.transaction()
+        |> Teiserver.Repo.transaction()
       end)
     end)
 

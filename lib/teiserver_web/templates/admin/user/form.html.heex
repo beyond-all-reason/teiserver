@@ -30,18 +30,6 @@
           class: "btn btn-outline-warning"
         ) %>
       <% end %>
-
-      <%= if assigns[:user] != nil and allow?(@conn, "admin.user") do %>
-        <a
-          href={Routes.admin_user_path(@conn, :edit, @user.id)}
-          class="btn btn-outline-primary"
-          id="section-menu-new"
-        >
-          <i class="fa-regular fa-power-off"></i> &nbsp;
-          Admin edit
-        </a>
-        &nbsp;<br />
-      <% end %>
     </div>
   </div>
 

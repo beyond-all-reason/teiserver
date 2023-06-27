@@ -1,6 +1,6 @@
 defmodule Teiserver.Moderation do
   import Ecto.Query, warn: false
-  alias Central.Repo
+  alias Teiserver.Repo
   # require Logger
 
   alias Phoenix.PubSub

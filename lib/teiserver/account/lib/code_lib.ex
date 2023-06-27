@@ -16,7 +16,7 @@ defmodule Teiserver.Account.CodeLib do
   def code_types() do
     ~w(
       one_time_login
-      user_registration
+      reset_password
     )
   end
 

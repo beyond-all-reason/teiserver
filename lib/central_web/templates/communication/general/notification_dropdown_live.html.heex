@@ -65,7 +65,7 @@
       <a
         class="dropdown-item"
         id={"communication-notifications-li-#{n.id}"}
-        href={Central.Communication.notification_url(n)}
+        href={Teiserver.Communication.notification_url(n)}
       >
         <i class={"fa-fw #{n.icon}"} style={"color: #{n.colour}"}></i>
         <strong style={"color:#{n.colour}"}><%= n.title %></strong> <br />

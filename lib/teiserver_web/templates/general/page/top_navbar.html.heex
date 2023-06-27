@@ -1,0 +1,137 @@
+<nav class="navbar navbar-expand-lg m-0 p-0" id="top-nav">
+  <!-- Container wrapper -->
+  <div class="container-fluid">
+    <!-- Collapsible wrapper -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <!-- Navbar brand -->
+      <a class="navbar-brand mt-2 mt-lg-0" href="/">
+        <i
+          class={"fa-fw #{Application.get_env(:central, Central)[:site_icon]}"}
+          style="margin: -4px 20px 0 0px;"
+        >
+        </i>
+        <span id="page-title">
+          <%= Application.get_env(:central, Central)[:site_title] %>
+        </span>
+      </a>
+      <!-- Left links -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <TeiserverWeb.NavComponents.top_nav_item
+          text="Home"
+          active={@site_menu_active == "central_home"}
+          route={~p"/"}
+        />
+
+        <TeiserverWeb.NavComponents.top_nav_item
+          text="My account"
+          active={@site_menu_active == "teiserver_account"}
+          route={~p"/teiserver/account"}
+        />
+
+        <%= if allow?(@current_user, "Server") do %>
+          <%= central_component("top_nav_item",
+            text: "Logging",
+            route: ~p"/logging",
+            active: @site_menu_active == "logging"
+          ) %>
+          
+          <%= central_component("top_nav_item",
+            text: "Telemetry",
+            route: ~p"/telemetry",
+            active: @site_menu_active == "telemetry"
+          ) %>
+        <% end %>
+
+        <%= central_component("top_nav_item",
+          text: "Lobbies",
+          route: ~p"/teiserver/battle/lobbies",
+          active: @site_menu_active == "lobbies"
+        ) %>
+
+        <%= central_component("top_nav_item",
+          text: "Matchmaking",
+          route: ~p"/teiserver/matchmaking/queues",
+          active: @site_menu_active == "matchmaking"
+        ) %>
+
+        <%= central_component("top_nav_item",
+          text: "Parties",
+          route: ~p"/teiserver/account/parties",
+          active: @site_menu_active == "parties"
+        ) %>
+
+        <%= central_component("top_nav_item",
+          text: "Matches",
+          route: ~p"/teiserver/battle/matches",
+          active: @site_menu_active == "match"
+        ) %>
+
+        <%= central_component("top_nav_item",
+          text: "Leaderboard",
+          route: Routes.ts_battle_ratings_path(@conn, :leaderboard),
+          active: @site_menu_active == "leaderboard"
+        ) %>
+
+        <%= if allow_any?(@current_user, ~w(Contributor Overwatch)) do %>
+          <%= central_component("top_nav_item",
+            text: "Reports",
+            route: ~p"/teiserver/reports",
+            active: @site_menu_active == "teiserver_report"
+          ) %>
+        <% end %>
+
+        <%= if allow?(@current_user, "Moderator") do %>
+          <%= central_component("top_nav_item",
+            text: "Users",
+            route: ~p"/teiserver/admin/user",
+            active: @site_menu_active == "teiserver_user"
+          ) %>
+        <% end %>
+
+        <%= if allow?(@current_user, "Overwatch") do %>
+          <%= central_component("top_nav_item",
+            text: "Moderation",
+            route: Routes.moderation_general_path(@conn, :index),
+            active: @site_menu_active == "moderation"
+          ) %>
+        <% end %>
+
+        <%= if allow?(@current_user, "Reviewer") do %>
+          <%= central_component("top_nav_item",
+            text: "Chat",
+            route: ~p"/teiserver/admin/chat",
+            active: @site_menu_active == "chat"
+          ) %>
+        <% end %>
+
+        <%= if allow_any?(@current_user, ~w(Contributor Overwatch)) do %>
+          <%= central_component("top_nav_item",
+            text: "Admin",
+            route: ~p"/teiserver/admin",
+            active: @site_menu_active == "admin"
+          ) %>
+        <% end %>
+      </ul>
+      <!-- Left links -->
+    </div>
+    <!-- Collapsible wrapper -->
+
+    <!-- Right elements -->
+    <div class="d-flex align-items-center">
+      <%= if @current_user do %>
+        <%= render(TeiserverWeb.Communication.GeneralView, "notification_dropdown.html", assigns) %>
+        <%= render(TeiserverWeb.General.SectionsView, "user_recents.html", assigns) %>
+        <%= render(TeiserverWeb.General.SectionsView, "user_dropdown.html", assigns) %>
+        <div style="width: 300px; display: inline-block;"></div>
+      <% else %>
+        <%= central_component("top_nav_button",
+          text: "Sign in",
+          route: ~p"/login",
+          style: "button",
+          active: false
+        ) %>
+      <% end %>
+    </div>
+    <!-- Right elements -->
+  </div>
+</nav>

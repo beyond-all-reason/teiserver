@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.TrackMatchExitTime do
+defmodule Teiserver.Repo.Migrations.TrackMatchExitTime do
   use Ecto.Migration
 
   def change do

@@ -1,0 +1,64 @@
+<% brand = Central.Helpers.Fa5Helper.brand_icons()
+standard = Central.Helpers.Fa5Helper.standard_icons() %>
+
+<style type="text/css">
+  .icon-row {
+    margin-bottom: 30px;
+  }
+
+  .icons {
+    letter-spacing: 2em;
+    display: inline-block;
+  }
+
+  .icon-name {
+    padding-left: 15px;
+    font-size: 30px;
+  }
+</style>
+
+<div class="row mt-3">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-body">
+        <h4>Standard</h4>
+        <%= for _ <- 1..11 do %>
+          <% the_icon = Enum.random(standard) %>
+          <div class="icon-row">
+            <div class="icons">
+              <i class={"fa-thin fa-fw fa-3x fa-#{the_icon}"}></i>
+              <i class={"fa-light fa-fw fa-3x fa-#{the_icon}"}></i>
+              <i class={"fa-regular fa-fw fa-3x fa-#{the_icon}"}></i>
+              <i class={"fa-solid fa-fw fa-3x fa-#{the_icon}"}></i>
+              <i class={"fa-duotone fa-fw fa-3x fa-#{the_icon}"}></i>
+            </div>
+            <span class="icon-name">
+              <%= the_icon %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <h4>Brand</h4>
+        <%= for _ <- 1..11 do %>
+          <% the_icon = Enum.random(brand) %>
+          <div class="icon-row">
+            <i class={"fa-brands fa-fw fa-3x fa-#{the_icon}"}></i>
+            <span class="icon-name">
+              <%= the_icon %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<br />
+<a href={~p"/teiserver/admin/tools"} class="btn btn-secondary">
+  <i class={"fa #{StylingHelper.icon(:back)}"}></i>&nbsp;&nbsp;Back
+</a>

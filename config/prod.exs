@@ -81,7 +81,7 @@ config :central, Teiserver,
   enable_managed_lobbies: true,
   tachyon_schema_path: "/apps/central/lib/central-0.1.0/priv/tachyon/schema_v1/*/*/*.json"
 
-config :central, Central.Repo,
+config :central, Teiserver.Repo,
   pool_size: String.to_integer(System.get_env("POOL_SIZE") || "40"),
   timeout: 120_000,
   queue_interval: 2000

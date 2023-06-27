@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.Clans do
+defmodule Teiserver.Repo.Migrations.Clans do
   use Ecto.Migration
 
   def change do

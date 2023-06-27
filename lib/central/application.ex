@@ -17,7 +17,7 @@ defmodule Central.Application do
         CentralWeb.Telemetry,
 
         # Start the Ecto repository
-        Central.Repo,
+        Teiserver.Repo,
         # Start the endpoint when the application starts
         CentralWeb.Endpoint,
         CentralWeb.Presence,
@@ -228,7 +228,7 @@ defmodule Central.Application do
 
     # Do migrations as part of startup
     path = Application.app_dir(:central, "priv/repo/migrations")
-    Ecto.Migrator.run(Central.Repo, path, :up, all: true)
+    Ecto.Migrator.run(Teiserver.Repo, path, :up, all: true)
 
     # Oban logging
     events = [

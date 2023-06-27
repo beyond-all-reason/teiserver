@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.RemoveChatGuid do
+defmodule Teiserver.Repo.Migrations.RemoveChatGuid do
   use Ecto.Migration
 
   def change do

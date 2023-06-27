@@ -1,8 +1,28 @@
 <div class="row mt-2">
   <%= if allow?(@current_user, "Server") do %>
     <div class="col-md-12">
-      <h4>Exports</h4>
+      <h4>Metrics</h4>
     </div>
+
+    <%= if allow?(@current_user, "Admin") do %>
+      <%= central_component("menu_card",
+        size: :small,
+        icon: Teiserver.Account.RatingLib.icon(),
+        name: "ratings",
+        text: "Ratings",
+        link: Routes.ts_reports_rating_path(@conn, :distribution_table)
+      ) %>
+    <% end %>
+
+    <%= if allow?(@current_user, "Engine") do %>
+      <%= central_component("menu_card",
+        size: :small,
+        icon: Teiserver.Telemetry.InfologLib.icon(),
+        name: "infolog",
+        text: "Infologs",
+        link: Routes.ts_reports_infolog_path(@conn, :index)
+      ) %>
+    <% end %>
 
     <%= central_component("menu_card",
       size: :small,

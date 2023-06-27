@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.RetentionReport do
   alias Central.Helpers.DatePresets
-  alias Teiserver.{Account, Telemetry}
+  alias Teiserver.{Account, Logging}
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-campground"
@@ -34,7 +34,7 @@ defmodule Teiserver.Account.RetentionReport do
     start_datetime = Timex.to_datetime(start_date)
 
     day_logs =
-      Telemetry.list_server_day_logs(
+      Logging.list_server_day_logs(
         search: [start_date: start_date],
         order: "Newest first",
         limit: :infinity

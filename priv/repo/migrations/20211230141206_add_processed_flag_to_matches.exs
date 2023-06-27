@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.AddProcessedFlagToMatches do
+defmodule Teiserver.Repo.Migrations.AddProcessedFlagToMatches do
   use Ecto.Migration
 
   def change do

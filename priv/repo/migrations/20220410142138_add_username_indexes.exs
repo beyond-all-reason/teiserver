@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.AddUsernameIndexes do
+defmodule Teiserver.Repo.Migrations.AddUsernameIndexes do
   use Ecto.Migration
 
   def change do

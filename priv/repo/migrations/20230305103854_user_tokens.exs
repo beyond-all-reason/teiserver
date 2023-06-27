@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.UserTokens do
+defmodule Teiserver.Repo.Migrations.UserTokens do
   use Ecto.Migration
 
   def change do

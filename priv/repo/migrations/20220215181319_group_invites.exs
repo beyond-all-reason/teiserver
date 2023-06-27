@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.GroupInvites do
+defmodule Teiserver.Repo.Migrations.GroupInvites do
   use Ecto.Migration
 
   def change do

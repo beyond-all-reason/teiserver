@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Logging.GeneralController do
   plug :add_breadcrumb, name: 'Logging', url: '/logging'
 
   plug(AssignPlug,
-    site_menu_active: "central_logging",
+    site_menu_active: "logging",
     sub_menu_active: "general"
   )
 

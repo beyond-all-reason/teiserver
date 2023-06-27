@@ -5,31 +5,24 @@
 ) %>
 
 <div class="row page-row">
-  <%= if allow?(@conn, "Admin") do %>
-    <%= central_component("menu_card",
-      icon_class: "fa-solid",
-      name: "",
-      icon: Teiserver.Account.BadgeTypeLib.icon(),
-      text: "Badge types",
-      link: Routes.ts_admin_badge_type_path(@conn, :index)
-    ) %>
-  <% end %>
-
-  <%= if Application.get_env(:central, Teiserver)[:enable_agent_mode] do %>
-    <%= central_component("menu_card",
-      icon_class: "fa-solid",
-      name: "",
-      icon: Teiserver.Agents.AgentLib.icon(),
-      text: "Agent mode",
-      link: Routes.ts_admin_agent_index_path(@conn, :index)
-    ) %>
-  <% end %>
+  <%= central_component("menu_card",
+    icon_class: "fa-solid",
+    icon: "fa-regular fa-map-marker-question",
+    text: "Test page",
+    link: ~p"/teiserver/admin/tools/test_page"
+  ) %>
+  
+  <%= central_component("menu_card",
+    icon_class: "fa-solid",
+    icon: "fa-brands fa-font-awesome",
+    text: "FA List",
+    link: ~p"/teiserver/admin/tools/falist"
+  ) %>
 </div>
 
 <div class="row page-row">
   <%= central_component("menu_card",
     icon_class: "fa-solid",
-    name: "",
     icon: StylingHelper.icon(:back),
     text: "Back",
     link: ~p"/teiserver/admin"

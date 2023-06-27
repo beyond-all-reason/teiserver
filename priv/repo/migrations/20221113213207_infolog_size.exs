@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.InfologSize do
+defmodule Teiserver.Repo.Migrations.InfologSize do
   use Ecto.Migration
 
   def change do

@@ -32,7 +32,7 @@ config :central, Teiserver,
     cacertfile: "/etc/letsencrypt/live/yourdomain.com/fullchain.pem"
   ]
 
-config :central, Central.Repo,
+config :central, Teiserver.Repo,
   username: "teiserver_prod",
   password: "mix phx.gen.secret",
   database: "teiserver_prod",

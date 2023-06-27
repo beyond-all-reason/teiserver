@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.AddUserFields do
+defmodule Teiserver.Repo.Migrations.AddUserFields do
   use Ecto.Migration
 
   def change do

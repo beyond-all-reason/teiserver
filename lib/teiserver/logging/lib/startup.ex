@@ -17,12 +17,6 @@ defmodule Teiserver.Logging.Startup do
         permissions: "logging.live"
       },
       %{
-        label: "Error logs",
-        icons: [Teiserver.Logging.ErrorLogLib.icon(), :list],
-        url: "/logging/error_logs",
-        permissions: "logging.error"
-      },
-      %{
         label: "Audit logs",
         icons: [Teiserver.Logging.AuditLogLib.icon(), :list],
         url: "/logging/audit",

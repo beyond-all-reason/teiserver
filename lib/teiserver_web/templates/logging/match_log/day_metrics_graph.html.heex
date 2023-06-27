@@ -1,0 +1,128 @@
+<% bsname = view_colour() %>
+
+<script src={Routes.static_path(@conn, "/js/d3.js")}>
+</script>
+<script src={Routes.static_path(@conn, "/js/c3.min.js")}>
+</script>
+
+<link href="/css/c3.min.css" rel="stylesheet" />
+
+<script>
+  $(function() {
+    var chart = c3.generate({
+      bindto: '#chart',
+      data: {
+        x: 'x',
+        columns: <%= raw Jason.encode!([["x" | @key] | @columns]) %>
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%Y-%m-%d'
+          }
+        },
+        y: {
+          min: 0,
+          padding: {
+            top: 15,
+            bottom: 0
+          }
+        }
+      }
+    });
+  });
+</script>
+
+<%= render(
+  TeiserverWeb.Logging.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "match"})
+) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render(
+          TeiserverWeb.Logging.MatchLogView,
+          "section_menu.html",
+          Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "graph"
+          })
+        ) %>
+
+        <br /><br />
+
+        <div class="row">
+          <div class="col-md-12">
+            <form
+              action={Routes.logging_match_log_path(@conn, :day_metrics_graph)}
+              method="post"
+              class=""
+            >
+              <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+              <div class="row">
+                <div class="col-xl-3 col-lg-4 col-md-12 my-3">
+                  <label for="fields" class="control-label">Fields</label>
+                  <%= central_component("icon_dropdown",
+                    name: "fields",
+                    id: "fields",
+                    enumerable: [
+                      %{id: "split", name: "Split"},
+                      %{id: "grouped1", name: "Grouped (PvP, PvE, Bots)"},
+                      %{id: "grouped2", name: "Grouped (PvP, Co-op)"}
+                    ],
+                    selected: Map.get(@params, "fields", "split")
+                  ) %>
+                </div>
+
+                <div class="col-xl-3 col-lg-4 col-md-12 my-3">
+                  <label for="type" class="control-label">Type</label>
+                  <%= central_component("icon_dropdown",
+                    name: "type",
+                    id: "type",
+                    enumerable: [
+                      %{id: "total_count", name: "Raw"},
+                      %{id: "weighted_count", name: "Weighted"}
+                    ],
+                    selected: Map.get(@params, "type", "total_count")
+                  ) %>
+                </div>
+
+                <div class="col-xl-3 col-lg-4 col-md-12 my-3">
+                  <label for="days" class="control-label">Days</label>
+                  <input
+                    type="text"
+                    name="days"
+                    id="days"
+                    value={@params["days"]}
+                    class="form-control"
+                  />
+                </div>
+
+                <div class="col-md-12 my-3">
+                  <button type="submit" class={"btn btn-#{bsname} float-end"}>
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12">
+            <div class={"card border-#{bsname} page-card"}>
+              <div class="card-body">
+                <div id="chart" class="with-transitions" style="height: 400px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

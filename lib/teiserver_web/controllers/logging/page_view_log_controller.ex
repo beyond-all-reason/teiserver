@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
   plug :add_breadcrumb, name: 'Page views', url: '/logging/page_views'
 
   plug(AssignPlug,
-    site_menu_active: "central_logging",
+    site_menu_active: "logging",
     sub_menu_active: "page_view"
   )
 

@@ -1,5 +1,5 @@
 defmodule Teiserver.Account.WeekOnWeekReport do
-  alias Teiserver.{Telemetry}
+  alias Teiserver.{Logging}
   alias Central.Helpers.{TimexHelper, NumberHelper}
 
   @spec icon() :: String.t()
@@ -16,7 +16,7 @@ defmodule Teiserver.Account.WeekOnWeekReport do
       |> Timex.beginning_of_week()
       |> Timex.shift(weeks: -5)
 
-    logs = Telemetry.list_server_day_logs(
+    logs = Logging.list_server_day_logs(
       search: [
         start_date: start_date
       ],
@@ -56,7 +56,7 @@ defmodule Teiserver.Account.WeekOnWeekReport do
       |> Enum.sort_by(fn v -> v end, &>=/2)
       |> Enum.take(5)
 
-    week_data = Telemetry.list_server_week_logs(
+    week_data = Logging.list_server_week_logs(
       search: [
         start_date: start_date |> Timex.shift(weeks: -2)
       ]

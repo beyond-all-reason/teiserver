@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.AddLobbyPolicies do
+defmodule Teiserver.Repo.Migrations.AddLobbyPolicies do
   use Ecto.Migration
 
   def change do

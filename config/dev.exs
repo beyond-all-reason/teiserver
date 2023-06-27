@@ -3,7 +3,7 @@ import Config
 config :central, Central.Setup, key: "dev_key"
 
 # Configure your database
-config :central, Central.Repo,
+config :central, Teiserver.Repo,
   username: "teiserver_dev",
   password: "123456789",
   database: "teiserver_dev",

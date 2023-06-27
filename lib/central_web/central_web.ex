@@ -120,7 +120,7 @@ defmodule CentralWeb do
       use Breadcrumble
       alias Central.Account.AuthPlug
       import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
-      alias Central.Communication.NotificationPlug
+      alias Teiserver.Communication.NotificationPlug
       unquote(verified_routes())
 
       unquote(view_helpers())
@@ -143,7 +143,7 @@ defmodule CentralWeb do
 
   def library do
     quote do
-      alias Central.Repo
+      alias Teiserver.Repo
       import Ecto.Query, warn: false
       alias Ecto.Multi
 
@@ -155,7 +155,7 @@ defmodule CentralWeb do
 
   def report do
     quote do
-      alias Central.Repo
+      alias Teiserver.Repo
       import Ecto.Query, warn: false
       alias Ecto.Multi
 

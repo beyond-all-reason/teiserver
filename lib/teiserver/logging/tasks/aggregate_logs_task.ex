@@ -7,7 +7,7 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
   alias Teiserver.Logging.AggregateViewLog
   alias Teiserver.Logging.PageViewLogLib
 
-  alias Central.Repo
+  alias Teiserver.Repo
   import Ecto.Query, warn: false
   import Central.Helpers.QueryHelpers
   import Central.Helpers.NumberHelper, only: [c_round: 1]

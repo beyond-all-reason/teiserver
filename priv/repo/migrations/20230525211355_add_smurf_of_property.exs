@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.AddSmurfOfProperty do
+defmodule Teiserver.Repo.Migrations.AddSmurfOfProperty do
   use Ecto.Migration
 
   def change do

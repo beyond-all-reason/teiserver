@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Game.QueueController do
     user: {Central.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
-    site_menu_active: "teiserver_admin",
+    site_menu_active: "admin",
     sub_menu_active: "queue"
   )
 

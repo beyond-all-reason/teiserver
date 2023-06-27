@@ -1,8 +1,6 @@
 defmodule CentralWeb.ErrorView do
   use CentralWeb, :view
 
-  import Teiserver.Logging.Helpers, only: [add_error_log: 1]
-
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-exclamation-triangle"
 
@@ -52,20 +50,7 @@ defmodule CentralWeb.ErrorView do
         )
 
       _ ->
-        db_username =
-          Application.get_env(:central, Central.Repo)
-          |> Keyword.get(:username)
-
-        # If in test mode we don't want to actually log errors since
-        # there is an issue with converting the params into a map
-        error_log =
-          if db_username =~ "_test" do
-            %{}
-          else
-            add_error_log(error)
-          end
-
-        render("500_internal.html", Map.merge(error, %{error_log: error_log, error: error}))
+        render("500_internal.html", Map.merge(error, %{error: error}))
     end
   end
 

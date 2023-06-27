@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.ReviewReport do
   alias Central.Helpers.DatePresets
-  alias Teiserver.{Telemetry}
+  alias Teiserver.{Logging}
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-champagne-glasses"
@@ -21,14 +21,14 @@ defmodule Teiserver.Account.ReviewReport do
       )
 
     server_data =
-      Telemetry.list_server_day_logs(
+      Logging.list_server_day_logs(
         search: [
           start_date: start_date,
           end_date: end_date
         ],
         limit: :infinity
       )
-      |> Teiserver.Telemetry.ServerDayLogLib.aggregate_day_logs()
+      |> Teiserver.Logging.ServerDayLogLib.aggregate_day_logs()
       |> Jason.encode!()
       |> Jason.decode!()
 
@@ -37,14 +37,14 @@ defmodule Teiserver.Account.ReviewReport do
     past_start_date = Timex.shift(past_end_date, days: -days)
 
     past_server_data =
-      Telemetry.list_server_day_logs(
+      Logging.list_server_day_logs(
         search: [
           start_date: past_start_date,
           end_date: past_end_date
         ],
         limit: :infinity
       )
-      |> Teiserver.Telemetry.ServerDayLogLib.aggregate_day_logs()
+      |> Teiserver.Logging.ServerDayLogLib.aggregate_day_logs()
       |> Jason.encode!()
       |> Jason.decode!()
 

@@ -1,6 +1,6 @@
 defmodule Central.Admin.DeleteUserTask do
   @moduledoc false
-  alias Central.Repo
+  alias Teiserver.Repo
 
   @doc """
   Expects a list of user ids, returns the results of the query

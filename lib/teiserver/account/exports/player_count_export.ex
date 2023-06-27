@@ -9,7 +9,7 @@ defmodule Teiserver.Account.PlayerCountExport do
   })
   """
   alias Central.Helpers.DatePresets
-  alias Teiserver.{Telemetry}
+  alias Teiserver.Logging
   alias Central.Helpers.TimexHelper
 
   @spec icon() :: String.t()
@@ -57,11 +57,11 @@ defmodule Teiserver.Account.PlayerCountExport do
 
     list_func =
       case params["table"] do
-        "Daily" -> &Telemetry.list_server_day_logs/1
-        "Weekly" -> &Telemetry.list_server_week_logs/1
-        "Monthly" -> &Telemetry.list_server_month_logs/1
-        "Quarterly" -> &Telemetry.list_server_quarter_logs/1
-        "Yearly" -> &Telemetry.list_server_year_logs/1
+        "Daily" -> &Logging.list_server_day_logs/1
+        "Weekly" -> &Logging.list_server_week_logs/1
+        "Monthly" -> &Logging.list_server_month_logs/1
+        "Quarterly" -> &Logging.list_server_quarter_logs/1
+        "Yearly" -> &Logging.list_server_year_logs/1
       end
 
     data =

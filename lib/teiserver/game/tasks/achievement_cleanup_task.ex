@@ -98,6 +98,6 @@ defmodule Teiserver.Game.AchievementCleanupTask do
     # Now add them!
     Ecto.Multi.new()
     |> Ecto.Multi.insert_all(:insert_all, Game.UserAchievement, normals_to_add)
-    |> Central.Repo.transaction()
+    |> Teiserver.Repo.transaction()
   end
 end

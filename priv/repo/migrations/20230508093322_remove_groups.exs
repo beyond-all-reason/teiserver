@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.RemoveGroups do
+defmodule Teiserver.Repo.Migrations.RemoveGroups do
   use Ecto.Migration
 
   def change do

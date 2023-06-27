@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.AddingQueueFlagToMatches do
+defmodule Teiserver.Repo.Migrations.AddingQueueFlagToMatches do
   use Ecto.Migration
 
   def change do

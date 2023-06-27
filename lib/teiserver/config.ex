@@ -4,7 +4,7 @@ defmodule Teiserver.Config do
   """
 
   import Ecto.Query, warn: false
-  alias Central.Repo
+  alias Teiserver.Repo
 
   alias Teiserver.Config.UserConfig
 

@@ -69,17 +69,12 @@
     <ul class="navbar-nav ml-auto" phx-update="ignore" id="navbar">
       <%= if @current_user do %>
         <%= render(
-          CentralWeb.General.SectionsView,
+          TeiserverWeb.General.SectionsView,
           "user_recents.html",
           Map.put(assigns, :conn, @socket)
         ) %>
         <%= render(
-          CentralWeb.General.SectionsView,
-          "user_favourites.html",
-          Map.put(assigns, :conn, @socket)
-        ) %>
-        <%= render(
-          CentralWeb.General.SectionsView,
+          TeiserverWeb.General.SectionsView,
           "user_dropdown.html",
           Map.put(assigns, :conn, @socket)
         ) %>
@@ -98,7 +93,7 @@
 <div id="wrapper" class="toggled">
   <!-- Sidebar -->
   <div id="sidebar-wrapper">
-    <%= render(CentralWeb.General.PageView, "side_menu.html", Map.put(assigns, :conn, @socket)) %>
+    <%= render(TeiserverWeb.General.PageView, "side_menu.html", Map.put(assigns, :conn, @socket)) %>
   </div>
   <!-- /#sidebar-wrapper -->
 

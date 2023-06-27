@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.SiteConfig do
+defmodule Teiserver.Repo.Migrations.SiteConfig do
   use Ecto.Migration
 
   def change do

@@ -20,27 +20,47 @@
     <div class="card card-default">
       <div class="card-body" style="padding: 0 15px;">
         <div class="row">
-          <%= if allow?(@current_user, "logging.page_view") do %>
+          <%= if allow?(@current_user, "Admin") do %>
+            <%= central_component("sub_menu_icon",
+              icon: Teiserver.Logging.ServerDayLogLib.icon(),
+              name: "server",
+              label: "Server",
+              active: @active,
+              url: ~p"/logging/server"
+            ) %>
+          <% end %>
+
+          <%= if allow?(@current_user, "Admin") do %>
+            <%= central_component("sub_menu_icon",
+              icon: Teiserver.Battle.MatchLib.icon(),
+              name: "match",
+              label: "Match",
+              active: @active,
+              url: ~p"/logging/match/day_metrics"
+            ) %>
+          <% end %>
+        
+          <%= if allow?(@current_user, "Server") do %>
             <%= central_component("sub_menu_icon",
               name: "page_view",
-              label: "Page view",
+              label: "Web",
               active: @active,
               url: Routes.logging_page_view_log_path(@conn, :index),
               icon: Teiserver.Logging.PageViewLogLib.icon()
             ) %>
           <% end %>
 
-          <%= if allow?(@current_user, "logging.aggregate") do %>
+          <%= if allow?(@current_user, "Server") do %>
             <%= central_component("sub_menu_icon",
               name: "aggregate",
-              label: "Aggregate",
+              label: "Aggregate web",
               active: @active,
               url: Routes.logging_aggregate_view_log_path(@conn, :index),
               icon: Teiserver.Logging.AggregateViewLogLib.icon()
             ) %>
           <% end %>
 
-          <%= if allow?(@current_user, "logging.audit") do %>
+          <%= if allow?(@current_user, "Server") do %>
             <%= central_component("sub_menu_icon",
               name: "audit",
               label: "Audit",
@@ -50,17 +70,7 @@
             ) %>
           <% end %>
 
-          <%= if allow?(@current_user, "logging.error") do %>
-            <%= central_component("sub_menu_icon",
-              name: "error",
-              label: "Error",
-              active: @active,
-              url: Routes.logging_error_log_path(@conn, :index),
-              icon: Teiserver.Logging.ErrorLogLib.icon()
-            ) %>
-          <% end %>
-
-          <%= if allow?(@current_user, "logging.live") do %>
+          <%= if allow?(@current_user, "Server") do %>
             <%= central_component("sub_menu_icon",
               name: "live_dashboard",
               label: "Live dashboard",

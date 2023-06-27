@@ -134,7 +134,7 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, "admin.dev") do %>
+  <%= if allow?(@current_user, "Server") do %>
     <%= central_component("menu_card",
       icon_class: "fa-solid",
       icon: Teiserver.Account.CodeLib.icon(),
@@ -143,12 +143,21 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, "admin.dev") do %>
+  <%= if allow?(@current_user, "Server") do %>
     <%= central_component("menu_card",
       icon_class: "fa-solid",
       icon: Teiserver.Config.SiteConfigLib.icon(),
       text: "Site config",
       link: Routes.admin_site_config_path(@conn, :index)
+    ) %>
+  <% end %>
+
+  <%= if allow?(@current_user, "Server") do %>
+    <%= central_component("menu_card",
+      icon_class: "fa-solid",
+      icon: "fa-fw fa-solid fa-tools",
+      text: "Tools",
+      link: ~p"/teiserver/admin/tools"
     ) %>
   <% end %>
 </div>

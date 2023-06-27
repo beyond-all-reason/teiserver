@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.TrimWebPageLogs do
+defmodule Teiserver.Repo.Migrations.TrimWebPageLogs do
   use Ecto.Migration
 
   def change do

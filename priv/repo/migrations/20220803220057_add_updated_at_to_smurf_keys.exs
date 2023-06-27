@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.AddUpdatedAtToSmurfKeys do
+defmodule Teiserver.Repo.Migrations.AddUpdatedAtToSmurfKeys do
   use Ecto.Migration
 
   def change do

@@ -5,7 +5,7 @@ defmodule Teiserver.Game do
 
   import Ecto.Query, warn: false
   alias Central.Helpers.QueryHelpers
-  alias Central.Repo
+  alias Teiserver.Repo
 
   alias Teiserver.Game.{Queue, QueueLib}
 

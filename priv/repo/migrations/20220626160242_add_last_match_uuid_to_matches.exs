@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.AddLastMatchUuidToMatches do
+defmodule Teiserver.Repo.Migrations.AddLastMatchUuidToMatches do
   use Ecto.Migration
 
   def change do

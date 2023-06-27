@@ -37,25 +37,25 @@ defmodule TeiserverWeb.API.SessionController do
         config_setting == "Disabled" ->
           {false, "disabled"}
 
-        config_setting == "Link only" ->
-          code = Teiserver.Account.get_code(user_params["code"] || "!no_code!")
+        # config_setting == "Link only" ->
+        #   code = Teiserver.Account.get_code(user_params["code"] || "!no_code!")
 
-          cond do
-            user_params["code"] == nil ->
-              {false, "no_code"}
+        #   cond do
+        #     user_params["code"] == nil ->
+        #       {false, "no_code"}
 
-            code == nil ->
-              {false, "invalid_code"}
+        #     code == nil ->
+        #       {false, "invalid_code"}
 
-            code.purpose != "user_registration" ->
-              {false, "invalid_code"}
+        #     code.purpose != "user_registration" ->
+        #       {false, "invalid_code"}
 
-            Timex.compare(Timex.now(), code.expires) == 1 ->
-              {false, "expired_code"}
+        #     Timex.compare(Timex.now(), code.expires) == 1 ->
+        #       {false, "expired_code"}
 
-            true ->
-              {true, nil}
-          end
+        #     true ->
+        #       {true, nil}
+        #   end
 
         true ->
           {false, "disabled"}

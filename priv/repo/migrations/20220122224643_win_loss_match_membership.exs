@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.WinLossMatchMembership do
+defmodule Teiserver.Repo.Migrations.WinLossMatchMembership do
   use Ecto.Migration
 
   def change do

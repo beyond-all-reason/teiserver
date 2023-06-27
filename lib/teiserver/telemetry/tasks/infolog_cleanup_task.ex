@@ -2,7 +2,7 @@ defmodule Teiserver.Telemetry.InfologCleanupTask do
   @moduledoc false
   use Oban.Worker, queue: :cleanup
 
-  alias Central.Repo
+  alias Teiserver.Repo
 
   @impl Oban.Worker
   @spec perform(any) :: :ok

@@ -3,7 +3,7 @@ defmodule Central.Helpers.GeneralTestLib do
   import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
 
   import Ecto.Query
-  alias Central.Repo
+  alias Teiserver.Repo
   import Phoenix.ChannelTest
   # use Phoenix.ConnTest
 
@@ -14,7 +14,7 @@ defmodule Central.Helpers.GeneralTestLib do
   alias Central.Account
   alias Central.Account.User
 
-  # alias CentralWeb.General.CombinatorLib
+  # alias TeiserverWeb.General.CombinatorLib
 
   alias CentralWeb.UserSocket
 

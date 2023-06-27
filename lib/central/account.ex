@@ -6,7 +6,7 @@ defmodule Central.Account do
   import Ecto.Query, warn: false
   alias Central.Helpers.QueryHelpers
   alias Phoenix.PubSub
-  alias Central.Repo
+  alias Teiserver.Repo
 
   alias Argon2
 

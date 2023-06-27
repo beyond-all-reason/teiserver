@@ -2,7 +2,7 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
   use Oban.Worker, queue: :cleanup
   alias Teiserver.Data.Types, as: T
 
-  alias Central.Repo
+  alias Teiserver.Repo
   alias Teiserver.{User, Account}
 
   @impl Oban.Worker

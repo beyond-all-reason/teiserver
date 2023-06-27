@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.AccoladeMatchId do
+defmodule Teiserver.Repo.Migrations.AccoladeMatchId do
   use Ecto.Migration
 
   def change do

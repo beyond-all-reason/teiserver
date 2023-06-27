@@ -50,7 +50,7 @@
             },
             value: @log.user.name,
             link: %{
-              path: Routes.admin_user_path(@conn, :show, @log.user_id),
+              path: ~p"/teiserver/admin/user/#{@log.user_id}",
               bsname: elem(Central.Account.UserLib.colours() |> colours(), 2),
               icon: Central.Account.UserLib.icon()
             }

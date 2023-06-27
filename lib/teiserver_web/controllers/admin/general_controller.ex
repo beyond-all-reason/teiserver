@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Admin.GeneralController do
   use CentralWeb, :controller
 
   plug(AssignPlug,
-    site_menu_active: "teiserver_admin",
+    site_menu_active: "admin",
     sub_menu_active: ""
   )
 

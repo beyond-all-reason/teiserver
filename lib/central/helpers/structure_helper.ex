@@ -3,7 +3,7 @@ defmodule Central.Helpers.StructureHelper do
   A module to make import/export of JSON objects easier. Currently only tested with a single parent object and multiple sets of child objects.
   Designed to not take the IDs with it as they are liable to change based on the database they go into.
   """
-  alias Central.Repo
+  alias Teiserver.Repo
   import Ecto.Query, warn: false
 
   @skip_export_fields [:__meta__, :inserted_at, :updated_at]

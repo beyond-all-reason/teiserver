@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.ActiveReport do
   alias Central.Helpers.DatePresets
-  alias Teiserver.{Telemetry}
+  alias Teiserver.{Logging}
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-satellite-dish"
@@ -21,7 +21,7 @@ defmodule Teiserver.Account.ActiveReport do
       )
 
     player_counts =
-      Telemetry.list_server_day_logs(
+      Logging.list_server_day_logs(
         search: [
           start_date: start_date,
           end_date: end_date

@@ -5,7 +5,7 @@ defmodule Teiserver.Battle do
 
   import Ecto.Query, warn: false
   alias Central.Helpers.QueryHelpers
-  alias Central.Repo
+  alias Teiserver.Repo
   alias Teiserver.{Account, Telemetry, Coordinator}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Battle.{MatchMembership, MatchMembershipLib}

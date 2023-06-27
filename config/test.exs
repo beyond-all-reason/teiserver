@@ -1,7 +1,7 @@
 import Config
 
 # Configure your database
-config :central, Central.Repo,
+config :central, Teiserver.Repo,
   username: "teiserver_test",
   password: "123456789",
   database: "teiserver_test",

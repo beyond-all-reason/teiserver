@@ -29,7 +29,7 @@
   </style>
 <% end %>
 
-<%= render(CentralWeb.General.PageView, "top_navbar.html", Map.put(assigns, :conn, @socket)) %>
+<%= render(TeiserverWeb.General.PageView, "top_navbar.html", Map.put(assigns, :conn, @socket)) %>
 
 <main>
   <%= if assigns[:breadcrumb_trails] do %>

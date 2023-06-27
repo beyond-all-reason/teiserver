@@ -1,0 +1,98 @@
+<% {_fg, bg, bsname} = view_colour() |> colours() %>
+
+<%= render(
+  TeiserverWeb.Logging.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "match"})
+) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render(
+          TeiserverWeb.Logging.MatchLogView,
+          "section_menu.html",
+          Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "month_metrics"
+          })
+        ) %>
+
+        <br /><br />
+
+        <h4>
+          <%= if Enum.empty?(@logs) do %>
+            No month by month metric logs found
+          <% else %>
+            Month by month logs - Row count: <%= Enum.count(@logs) %>
+          <% end %>
+        </h4>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Month</th>
+
+              <th>Raw total</th>
+              <th>Weighted total</th>
+
+              <th>Duel</th>
+              <th>Team</th>
+              <th>FFA</th>
+              <th>Scav</th>
+              <th>Chic</th>
+
+              <th>Total time</th>
+
+              <th colspan="1"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for log <- @logs do %>
+              <tr>
+                <td><%= log.year %></td>
+                <td><%= log.month %></td>
+
+                <td><%= format_number(log.data["totals"]["aggregate"]["total_count"]) %></td>
+                <td><%= format_number(log.data["totals"]["aggregate"]["weighted_count"]) %></td>
+
+                <td><%= format_number(log.data["duel"]["aggregate"]["total_count"]) %></td>
+                <td><%= format_number(log.data["team"]["aggregate"]["total_count"]) %></td>
+                <td><%= format_number(log.data["ffa"]["aggregate"]["total_count"]) %></td>
+                <td><%= format_number(log.data["scavengers"]["aggregate"]["total_count"]) %></td>
+                <td><%= format_number(log.data["raptors"]["aggregate"]["total_count"]) %></td>
+
+                <td>
+                  <%= represent_seconds(log.data["totals"]["aggregate"]["total_duration_seconds"]) %>
+                </td>
+
+                <td>
+                  <%= link("Show",
+                    to:
+                      Routes.logging_match_log_path(
+                        @conn,
+                        :month_metrics_show,
+                        log.year,
+                        log.month
+                      ),
+                    class: "btn btn-secondary btn-sm"
+                  ) %>
+                </td>
+              </tr>
+
+              <%= if log.month == 1 do %>
+                <tr>
+                  <td colspan="10" style={"background-color: #{bg}"}>
+                    <div style="height: 5px;">&nbsp;</div>
+                  </td>
+                </tr>
+              <% end %>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

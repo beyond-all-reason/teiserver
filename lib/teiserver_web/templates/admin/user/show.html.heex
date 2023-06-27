@@ -61,16 +61,7 @@
             </a>
           <% end %>
 
-          <%= if allow?(@conn, "admin.user") do %>
-            <a
-              href={Routes.admin_user_path(@conn, :show, @user)}
-              class={"btn btn-outline-#{bsname}"}
-              id="section-menu-new"
-            >
-              <i class="fa-regular fa-power-off"></i> &nbsp;
-              Admin show
-            </a>
-            &nbsp;&nbsp;
+          <%= if allow?(@conn, "Admin") do %>
             <%
               class = if @client != nil do
                 "btn btn-#{bsname}"

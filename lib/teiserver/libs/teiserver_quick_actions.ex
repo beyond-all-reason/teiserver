@@ -1,4 +1,6 @@
 defmodule Teiserver.TeiserverQuickActions do
+  @moduledoc false
+
   use CentralWeb, :verified_routes
   alias Central.General.QuickAction
 
@@ -75,6 +77,44 @@ defmodule Teiserver.TeiserverQuickActions do
           permissions: "Moderator"
         },
 
+        # Logging
+        # Match metrics
+        %{
+          label: "Match metrics - Daily",
+          icons: ["fa-regular #{Teiserver.Battle.MatchLib.icon()}", :day],
+          url: ~p"/logging/match/day_metrics",
+          permissions: "Moderator"
+        },
+        %{
+          label: "Match metrics - Monthly",
+          icons: ["fa-regular #{Teiserver.Battle.MatchLib.icon()}", :month],
+          url: ~p"/logging/match/month_metrics",
+          permissions: "Moderator"
+        },
+
+        # Server metrics
+        %{
+          label: "Server metrics - Daily",
+          icons: ["fa-regular #{Teiserver.Logging.ServerDayLogLib.icon()}", :day],
+          url: ~p"/logging/server/list",
+          permissions: "Moderator"
+        },
+        %{
+          label: "Server metrics - Now report",
+          icons: ["fa-regular #{Teiserver.Logging.ServerDayLogLib.icon()}", "fa-regular fa-clock"],
+          url: ~p"/logging/server/now",
+          permissions: "Moderator"
+        },
+        %{
+          label: "Server metrics - Load report",
+          icons: [
+            "fa-regular #{Teiserver.Logging.ServerDayLogLib.icon()}",
+            "fa-regular fa-server"
+          ],
+          url: ~p"/logging/server/load",
+          permissions: "Moderator"
+        },
+
         # Admin pages
         %{
           label: "Teiserver dashboard",
@@ -121,43 +161,6 @@ defmodule Teiserver.TeiserverQuickActions do
 
   defp report_actions() do
     [
-      # Match metrics
-      %{
-        label: "Match metrics - Daily",
-        icons: ["fa-regular #{Teiserver.Battle.MatchLib.icon()}", :day],
-        url: ~p"/teiserver/reports/match/day_metrics",
-        permissions: "Moderator"
-      },
-      %{
-        label: "Match metrics - Monthly",
-        icons: ["fa-regular #{Teiserver.Battle.MatchLib.icon()}", :month],
-        url: ~p"/teiserver/reports/match/month_metrics",
-        permissions: "Moderator"
-      },
-
-      # Server metrics
-      %{
-        label: "Server metrics - Daily",
-        icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", :day],
-        url: ~p"/reports/server/list",
-        permissions: "Moderator"
-      },
-      %{
-        label: "Server metrics - Now report",
-        icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", "fa-regular fa-clock"],
-        url: ~p"/reports/server/now",
-        permissions: "Moderator"
-      },
-      %{
-        label: "Server metrics - Load report",
-        icons: [
-          "fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}",
-          "fa-regular fa-server"
-        ],
-        url: ~p"/reports/server/load",
-        permissions: "Moderator"
-      },
-
       # Other
       %{
         label: "Teiserver infologs",

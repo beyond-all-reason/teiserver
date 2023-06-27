@@ -11,6 +11,6 @@ defmodule TeiserverWeb.Logging.GeneralView do
   def view_colour("page_view"), do: Teiserver.Logging.PageViewLogLib.colours()
   def view_colour("aggregate"), do: Teiserver.Logging.AggregateViewLogLib.colours()
   def view_colour("audit"), do: Teiserver.Logging.AuditLogLib.colours()
-  def view_colour("error"), do: Teiserver.Logging.ErrorLogLib.colours()
-  def view_colour("report"), do: :danger
+  def view_colour("server"), do: Teiserver.Logging.ServerDayLogLib.colours()
+  def view_colour("match"), do: Teiserver.Battle.MatchLib.colours()
 end

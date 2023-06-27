@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
   alias Teiserver.Battle.MatchLib
 
   plug(AssignPlug,
-    site_menu_active: "teiserver_admin",
+    site_menu_active: "admin",
     sub_menu_active: "match"
   )
 

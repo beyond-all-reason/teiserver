@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.CreateConfigUser do
+defmodule Teiserver.Repo.Migrations.CreateConfigUser do
   use Ecto.Migration
 
   def change do

@@ -1,4 +1,4 @@
-defmodule CentralWeb.Communication.NotificationChannel do
+defmodule TeiserverWeb.Communication.NotificationChannel do
   @moduledoc false
   use Phoenix.Channel
 
