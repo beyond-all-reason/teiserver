@@ -83,15 +83,21 @@ defmodule Teiserver.TeiserverQuickActions do
           permissions: "logging.live.show"
         },
         %{
-          label: "Client events",
+          label: "Properties telemetry",
+          icons: ["fa-regular #{Teiserver.Telemetry.PropertyTypeLib.icon()}", :list],
+          url: ~p"/telemetry/properties/summary",
+          permissions: "Admin"
+        },
+        %{
+          label: "Client event telemetry",
           icons: ["fa-regular #{Teiserver.Telemetry.ClientEventLib.icon()}", :list],
-          url: ~p"/teiserver/reports/client_events/summary",
+          url: ~p"/telemetry/client_events/summary",
           permissions: "Admin"
         },
         %{
           label: "Infologs",
           icons: ["fa-regular #{Teiserver.Telemetry.InfologLib.icon()}", :list],
-          url: ~p"/teiserver/reports/client_events/summary",
+          url: ~p"/teiserver/reports/infolog",
           permissions: "Server"
         },
         %{

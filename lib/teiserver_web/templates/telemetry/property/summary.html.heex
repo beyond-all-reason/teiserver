@@ -31,7 +31,7 @@
         </div>
 
         <%= render(
-          TeiserverWeb.Telemetry.ClientEventView,
+          TeiserverWeb.Telemetry.PropertyView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",
@@ -68,7 +68,7 @@
                     </td>
                     <td>
                       <a
-                        href={~p"/telemetry/property/detail/#{property_type}"}
+                        href={~p"/telemetry/properties/#{property_type}/detail"}
                         class={"btn btn-#{bsname} btn-sm"}
                       >
                         <i class={"fa-fw far #{Central.Helpers.StylingHelper.icon(:overview)}"}>

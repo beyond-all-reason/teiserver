@@ -47,8 +47,8 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
     |> render("summary.html")
   end
 
-  @spec property_detail(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def property_detail(conn, %{"property_name" => property_name} = _params) do
+  @spec detail(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def detail(conn, %{"property_name" => property_name} = _params) do
     property_type_id = Telemetry.get_or_add_property_type(property_name)
 
     client_counts =
@@ -71,7 +71,7 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
     |> assign(:client_counts, client_counts)
     |> assign(:unauth_counts, unauth_counts)
     |> assign(:combined_values, combined_values)
-    |> render("property_detail.html")
+    |> render("detail.html")
   end
 
   @spec export_form(Plug.Conn.t(), map) :: Plug.Conn.t()

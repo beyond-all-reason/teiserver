@@ -1,7 +1,9 @@
 <% bsname = view_colour() %>
 
+<% timeframes = ["Today", "Yesterday", "7 days", "14 days", "31 days"] %>
+
 <%= render(
-  TeiserverWeb.Report.GeneralView,
+  TeiserverWeb.Telemetry.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "client_events"})
 ) %>
@@ -16,13 +18,39 @@
           Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
-            active: "property_detail"
+            active: "event_detail"
           })
         ) %>
         <br /><br />
 
-        <h4>Value counts for <%= @property_name %></h4>
-        <table class="table">
+        <%= for key <- @schema_keys do %>
+          <%= central_component("section_menu_button",
+            name: "key-#{key}",
+            label: key,
+            active: "key-#{@key}",
+            bsname: bsname,
+            icon: "",
+            url: "?key=#{key}&tf=#{@tf}"
+          ) %>
+        <% end %>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <%= for tf <- timeframes do %>
+          <%= central_component("section_menu_button",
+            name: "tf-#{tf}",
+            label: tf,
+            active: "tf-#{@tf}",
+            bsname: bsname,
+            icon: "",
+            url: "?key=#{@key}&tf=#{tf}"
+          ) %>
+        <% end %>
+
+        <br /><br />
+
+        <h4>Value counts for <%= @event_name %></h4>
+        <table class="table table-sm">
           <thead>
             <tr>
               <th>Value</th>

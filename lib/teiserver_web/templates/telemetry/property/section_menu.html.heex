@@ -6,7 +6,7 @@
   active: @active,
   icon: Central.Helpers.StylingHelper.icon(:summary),
   bsname: bsname,
-  url: ~p"/telemetry/client/summary"
+  url: ~p"/telemetry/properties/summary"
 ) %>
 
 <%= central_component("section_menu_button",
@@ -15,7 +15,7 @@
   active: @active,
   icon: Central.Helpers.StylingHelper.icon(:export),
   bsname: bsname,
-  url: ~p"/telemetry/client/export/form"
+  url: ~p"/telemetry/properties/export/form"
 ) %>
 
 <%= if @active == "property_detail" do %>

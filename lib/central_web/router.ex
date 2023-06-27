@@ -361,6 +361,8 @@ defmodule CentralWeb.Router do
     get("/", GeneralController, :index)
 
     # Properties
+    get("/properties/export/form", PropertyController, :export_form)
+    post("/properties/export/post", PropertyController, :export_post)
     get("/properties/summary", PropertyController, :summary)
     get("/properties/:property_name/detail", PropertyController, :detail)
 
@@ -368,7 +370,7 @@ defmodule CentralWeb.Router do
     get("/client_events/export/form", ClientEventController, :export_form)
     post("/client_events/export/post", ClientEventController, :export_post)
     get("/client_events/summary", ClientEventController, :summary)
-    get("/client_events/event/:event_name/detail", ClientEventController, :detail)
+    get("/client_events/:event_name/detail", ClientEventController, :detail)
   end
 
   scope "/teiserver/reports", TeiserverWeb.Report, as: :ts_reports do

@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Telemetry.ClientEventController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.{ExportEventsTask, ExportPropertiesTask}
+  alias Teiserver.Telemetry.ExportEventsTask
   require Logger
 
   plug(AssignPlug,
@@ -57,35 +57,8 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> render("summary.html")
   end
 
-  @spec property_detail(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def property_detail(conn, %{"property_name" => property_name} = _params) do
-    property_type_id = Telemetry.get_or_add_property_type(property_name)
-
-    client_counts =
-      Telemetry.list_client_properties(search: [property_type_id: property_type_id])
-      |> Enum.group_by(fn p -> p.value end)
-      |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
-
-    unauth_counts =
-      Telemetry.list_unauth_properties(search: [property_type_id: property_type_id])
-      |> Enum.group_by(fn p -> p.value end)
-      |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
-
-    combined_values =
-      (Map.keys(client_counts) ++ Map.keys(unauth_counts))
-      |> Enum.uniq()
-      |> Enum.sort()
-
-    conn
-    |> assign(:property_name, property_name)
-    |> assign(:client_counts, client_counts)
-    |> assign(:unauth_counts, unauth_counts)
-    |> assign(:combined_values, combined_values)
-    |> render("property_detail.html")
-  end
-
-  @spec event_detail(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def event_detail(conn, %{"event_name" => event_name} = params) do
+  @spec detail(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def detail(conn, %{"event_name" => event_name} = params) do
     event_type_id = Telemetry.get_or_add_event_type(event_name)
     tf = Map.get(params, "tf", "7 days")
 
@@ -151,7 +124,7 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> assign(:unauth_counts, unauth_counts)
     |> assign(:schema_keys, schema_keys)
     |> assign(:combined_values, combined_values)
-    |> render("event_detail.html")
+    |> render("detail.html")
   end
 
   @spec export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -162,25 +135,7 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> render("export_form.html")
   end
 
-  @spec export_post(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def export_post(conn, %{"table_name" => "properties"} = params) do
-    start_time = System.system_time(:millisecond)
-
-    data = ExportPropertiesTask.perform(params)
-
-    time_taken = System.system_time(:millisecond) - start_time
-
-    Logger.info(
-      "ClientEventController property export of #{Kernel.inspect(params)}, took #{time_taken}ms"
-    )
-
-    conn
-    |> put_resp_content_type("text/csv")
-    |> put_resp_header("content-disposition", "attachment; filename=\"properties.csv\"")
-    |> send_resp(200, data)
-  end
-
-  def export_post(conn, %{"table_name" => "events"} = params) do
+  def export_post(conn, params) do
     start_time = System.system_time(:millisecond)
 
     data = ExportEventsTask.perform(params)

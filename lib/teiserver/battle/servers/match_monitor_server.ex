@@ -4,7 +4,6 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   """
   use GenServer
   alias Teiserver.{Account, Room, Client, User, Battle, Telemetry}
-  alias Teiserver.Protocols.Spring
   alias Teiserver.Battle.LobbyChat
   alias Phoenix.PubSub
   alias Teiserver.Account.CalculateSmurfKeyTask
@@ -141,24 +140,21 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   # Examples of accepted format:
-  # match-event blob64
-  # blob64 is a base64 encoded json object, e.g.
-  # {'event':'action:dgun','player':'Beherith','data':{'damage_dealt':4688}}
-  # eydldmVudCc6J2FjdGlvbjpkZ3VuJywncGxheWVyJzonQmVoZXJpdGgnLCdkYXRhJzp7J2RhbWFnZV9kZWFsdCc6NDY4OH19
-  def handle_info({:direct_message, from_id, "match-event " <> data64}, state) do
-    case Spring.decode_value(data64) do
-      {:ok, %{"player" => playername, "event" => event_type_name, "data" => data}} ->
-        userid = Account.get_userid_from_name(playername)
+  # match-event <playerName> <eventType> <gameTime>
+  # match-event <Beherith> <commands:FirstLineMove> <67>
+  def handle_info({:direct_message, from_id, "match-event " <> data}, state) do
+    case Regex.run(~r/<(.*?)> <(.*?)> <(.*?)>$/, String.trim(data)) do
+      [_all, username, event_type_name, game_time] ->
+        userid = Account.get_userid_from_name(username)
 
         host = Client.get_client_by_id(from_id)
         match_id = host.lobby_id
 
         if userid do
-          Telemetry.log_match_event(match_id, userid, event_type_name, data)
+          Telemetry.log_match_event(match_id, userid, event_type_name, game_time)
         end
-
-      {:error, reason} ->
-        Logger.warn("match_event error #{reason}")
+      _ ->
+        Logger.error("match_event bad_match error on '#{data}'")
     end
 
     {:noreply, state}

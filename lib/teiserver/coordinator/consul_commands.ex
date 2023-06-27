@@ -1374,13 +1374,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         )
         state
 
-      String.length(new_name) > 20 ->
-        Lobby.sayex(
-          state.coordinator_id,
-          "That name is too long",
-          state.lobby_id
-        )
-        state
+      # String.length(new_name) > 20 ->
+      #   Lobby.sayex(
+      #     state.coordinator_id,
+      #     "That name (#{new_name}) is too long",
+      #     state.lobby_id
+      #   )
+      #   state
 
       new_name != stripped_name ->
         Lobby.sayex(

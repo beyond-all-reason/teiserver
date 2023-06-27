@@ -2586,9 +2586,9 @@ defmodule Teiserver.Telemetry do
     |> Map.new()
   end
 
-  @spec log_match_event(T.match_id(), T.userid() | nil, String.t(), map()) ::
+  @spec log_match_event(T.match_id(), T.userid() | nil, String.t(), integer()) ::
           {:error, Ecto.Changeset.t()} | {:ok, MatchEvent.t()}
-  def log_match_event(match_id, userid, event_type_name, value) do
+  def log_match_event(match_id, userid, event_type_name, game_time) do
     event_type_id = get_or_add_event_type(event_type_name)
 
     result =
@@ -2596,8 +2596,7 @@ defmodule Teiserver.Telemetry do
         event_type_id: event_type_id,
         match_id: match_id,
         user_id: userid,
-        value: value,
-        timestamp: Timex.now()
+        game_time: game_time
       })
 
     case result do
@@ -2612,7 +2611,7 @@ defmodule Teiserver.Telemetry do
                 userid: userid,
                 match_id: match_id,
                 event_type_name: event_type_name,
-                value: value
+                game_time: game_time
               }
             )
           end
