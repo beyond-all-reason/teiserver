@@ -80,14 +80,4 @@
       link: Routes.ts_reports_infolog_path(@conn, :index)
     ) %>
   <% end %>
-
-  <%= if allow?(@current_user, "Server") do %>
-    <%= central_component("menu_card",
-      size: :small,
-      icon: "fa-regular fa-download",
-      name: "exports",
-      text: "Data exports",
-      link: Routes.ts_reports_exports_path(@conn, :index)
-    ) %>
-  <% end %>
 </div>

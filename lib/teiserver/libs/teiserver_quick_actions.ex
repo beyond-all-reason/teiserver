@@ -249,6 +249,12 @@ defmodule Teiserver.TeiserverQuickActions do
         url: ~p"/teiserver/reports/show/growth"
       },
       %{
+        label: "Week on week",
+        icons: ["fa-regular #{Teiserver.Account.WeekOnWeekReport.icon()}"],
+        permissions: Teiserver.Account.WeekOnWeekReport.permissions(),
+        url: ~p"/teiserver/reports/show/week_on_week"
+      },
+      %{
         label: "Moderation activity",
         icons: ["fa-regular #{Teiserver.Moderation.ActivityReport.icon()}"],
         permissions: Teiserver.Moderation.ActivityReport.permissions(),

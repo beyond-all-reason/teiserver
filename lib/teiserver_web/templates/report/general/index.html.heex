@@ -1,4 +1,18 @@
 <div class="row mt-2">
+  <%= if allow?(@current_user, "Server") do %>
+    <div class="col-md-12">
+      <h4>Exports</h4>
+    </div>
+
+    <%= central_component("menu_card",
+      size: :small,
+      icon: "fa-regular fa-download",
+      name: "exports",
+      text: "Data exports",
+      link: Routes.ts_reports_exports_path(@conn, :index)
+    ) %>
+  <% end %>
+
   <div class="col-md-12">
     <h4>Individual users</h4>
   </div>

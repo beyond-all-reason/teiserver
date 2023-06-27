@@ -277,7 +277,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
         conn
         |> put_flash(:info, "Action updated successfully.")
-        |> redirect(to: Routes.moderation_action_path(conn, :index))
+        |> redirect(to: Routes.moderation_action_path(conn, :show, action.id))
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
