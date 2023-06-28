@@ -3,6 +3,7 @@ defmodule Teiserver.Tachyon.MessageHandlers.ClientMessageHandlers do
 
   """
   alias Teiserver.Data.Types, as: T
+  alias Phoenix.PubSub
   alias Teiserver.Tachyon.Responses.Communication.ReceivedDirectMessageResponse
   alias Teiserver.Tachyon.Responses.Lobby.{ReceivedJoinRequestResponseResponse, JoinedResponse}
   alias Teiserver.Tachyon.Responses.User.UpdateStatusResponse
@@ -48,16 +49,22 @@ defmodule Teiserver.Tachyon.MessageHandlers.ClientMessageHandlers do
     end
   end
 
-  def handle(%{event: :added_to_lobby} = msg, conn) do
-    case JoinedResponse.generate(msg.lobby_id, msg.script_password) do
+  def handle(%{event: :added_to_lobby, lobby_id: lobby_id} = msg, conn) when is_integer(lobby_id) do
+    case JoinedResponse.generate(lobby_id, msg.script_password) do
       {command, :success, data} ->
+        PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+        PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+
+        PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+        PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+
         resp = %{
           "command" => command,
           "status" => "success",
           "data" => data
         }
 
-        {:ok, resp, %{conn | lobby_id: msg.lobby_id}}
+        {:ok, resp, %{conn | lobby_id: lobby_id}}
     end
   end
 

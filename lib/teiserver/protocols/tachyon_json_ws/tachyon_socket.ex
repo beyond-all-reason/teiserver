@@ -17,7 +17,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     :ignore
   end
 
-  @spec connect(T.tachyon_ws_state()) :: {:ok, T.tachyon_ws_state()} | :error
+  @spec connect(map()) :: {:ok, T.tachyon_ws_state()} | {:error, atom} | {:error, {atom, String.t()}}
   def connect(
         %{
           params: %{
@@ -91,10 +91,13 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     end
   end
 
+  # We currently don't have compression but if/when we do it will be tracked in the conn
+  # so it goes here
   defp decompress_message(text, _conn) do
     {:ok, text}
   end
 
+  @spec decode_message(String.t(), T.tachyon_conn()) :: {:ok, map()} | {:json_error, String.t()}
   defp decode_message(text, _conn) do
     case Jason.decode(text) do
       {:ok, msg} -> {:ok, msg}
@@ -109,7 +112,8 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     {dispatch_response, new_conn} = try do
       CommandDispatch.dispatch(conn, object, meta)
     rescue
-      _e in FunctionClauseError ->
+      e in FunctionClauseError ->
+        Logger.error(e)
         send(self(), :disconnect_on_error)
         response = ErrorResponse.generate("Server FunctionClauseError for command #{meta["command"]}")
         {response, conn}
@@ -117,7 +121,8 @@ defmodule Teiserver.Tachyon.TachyonSocket do
       # e in RuntimeError ->
       #   raise e
 
-      _ ->
+      e ->
+        Logger.error(e)
         send(self(), :disconnect_on_error)
         response = ErrorResponse.generate("Internal server error for command #{meta["command"]}")
         {response, conn}
@@ -161,6 +166,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   @spec handle_info(any, T.tachyon_ws_state()) ::
           {:reply, :ok, {:binary, binary}, T.tachyon_ws_state()}
   def handle_info(%{channel: channel} = msg, state) do
+    # First we find the module to handle this message, we have one module per channel
     module =
       case channel do
         "teiserver_lobby_host_message" <> _ ->
@@ -172,19 +178,38 @@ defmodule Teiserver.Tachyon.TachyonSocket do
         "teiserver_lobby_updates" <> _ ->
           MessageHandlers.LobbyUpdateMessageHandlers
 
+        "teiserver_lobby_chat" <> _ ->
+          MessageHandlers.LobbyChatMessageHandlers
+
         _ ->
           raise "No handler for messages to channel #{msg.channel}"
       end
 
-    case module.handle(msg, state.conn) do
-      nil ->
-        {:ok, state}
+    # Now we get the module to try and handle it
+    try do
+      case module.handle(msg, state.conn) do
+        nil ->
+          {:ok, state}
 
-      {:ok, new_conn} ->
-        {:ok, %{state | conn: new_conn}}
+        {:ok, new_conn} ->
+          {:ok, %{state | conn: new_conn}}
 
-      {:ok, resp, new_conn} ->
-        {:reply, :ok, {:text, resp |> Jason.encode!()}, %{state | conn: new_conn}}
+        {:ok, resp, new_conn} ->
+          {:reply, :ok, {:text, resp |> Jason.encode!()}, %{state | conn: new_conn}}
+      end
+    rescue
+      e ->
+        Logger.error(e)
+
+        send(self(), :disconnect_on_error)
+        {command, _, reason} = ErrorResponse.generate("Internal server error for internal channel #{channel}")
+        response = %{
+          "command" => command,
+          "status" => "failure",
+          "reason" => reason
+        }
+
+        {:reply, :ok, {:text, response |> Jason.encode!()}, state}
     end
   end
 

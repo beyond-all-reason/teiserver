@@ -101,7 +101,19 @@ defmodule Teiserver.SpringTcpServer do
     :timer.send_interval(60_000, self(), :message_count)
 
     # Set nodelay and delay_send values as the opts above don't always seem to do it
-    :inet.setopts(socket, [{:nodelay, false}, {:delay_send, true}])
+    if Application.get_env(:central, Teiserver)[:enable_hailstorm] do
+      case socket do
+        {:sslsocket, {:gen_tcp, port, _, _}, _} ->
+          :inet.setopts(port, [{:nodelay, false}, {:delay_send, true}])
+
+        _ ->
+          :inet.setopts(socket, [{:nodelay, false}, {:delay_send, true}])
+      end
+    else
+      :inet.setopts(socket, [{:nodelay, false}, {:delay_send, true}])
+    end
+
+
 
     state = %{
       # Connection state
