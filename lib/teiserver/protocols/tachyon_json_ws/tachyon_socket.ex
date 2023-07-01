@@ -274,9 +274,9 @@ defmodule Teiserver.Tachyon.TachyonSocket do
       # Client state
       userid: user.id,
       username: user.name,
-      lobby_host: false,
       queues: [],
       lobby_id: nil,
+      lobby_host: false,
       party_id: nil,
       party_role: nil,
       exempt_from_cmd_throttle: exempt_from_cmd_throttle,
