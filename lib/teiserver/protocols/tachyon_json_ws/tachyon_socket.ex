@@ -122,7 +122,10 @@ defmodule Teiserver.Tachyon.TachyonSocket do
       #   raise e
 
       e ->
-        Logger.error(e)
+        st = __STACKTRACE__
+        spawn(fn ->
+          reraise e, st
+        end)
         send(self(), :disconnect_on_error)
         response = ErrorResponse.generate("Internal server error for command #{meta["command"]}")
         {response, conn}
@@ -199,7 +202,10 @@ defmodule Teiserver.Tachyon.TachyonSocket do
       end
     rescue
       e ->
-        Logger.error(e)
+        st = __STACKTRACE__
+        spawn(fn ->
+          reraise e, st
+        end)
 
         send(self(), :disconnect_on_error)
         {command, _, reason} = ErrorResponse.generate("Internal server error for internal channel #{channel}")

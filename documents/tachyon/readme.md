@@ -31,6 +31,8 @@ defmodule Teiserver.Tachyon.Handlers.{Section}.{Action}Request do
 end
 ```
 
+You will then need to add a reference to it in `Teiserver.Tachyon.CommandDispatch`
+
 ## Response generators
 For creating protocol responses
 

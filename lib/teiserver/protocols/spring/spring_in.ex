@@ -378,7 +378,15 @@ defmodule Teiserver.Protocols.SpringIn do
         })
 
       {:ok, user} ->
-        optimisation_level = Map.get(@optimisation_level, user.lobby_client, :full)
+        optimisation_level = cond do
+          Enum.member?(@none_override_users, user.name) ->
+            :none
+          Enum.member?(@partial_override_users, user.name) ->
+            :partial
+          true ->
+            Map.get(@optimisation_level, user.lobby_client, :full)
+        end
+
         new_state = SpringOut.do_login_accepted(state, user, optimisation_level)
 
         # Do we have a clan?
@@ -742,43 +750,6 @@ defmodule Teiserver.Protocols.SpringIn do
         reply(:no, {"c.moderation.report_user", "bad command format"}, msg_id, state)
     end
   end
-
-  # This is the old function, it is being left as a comment to make rollback much easier if needed
-  # defp do_handle("c.moderation.report_user", data, msg_id, state) do
-  #   case String.split(data, "\t") do
-  #     [target_name, location_type, location_id, reason] ->
-  #       user = User.get_user_by_id(state.userid)
-  #       target_id = User.get_userid(target_name)
-
-  #       cond do
-  #         Enum.member?(user.friends, target_id) ->
-  #           User.send_direct_message(Coordinator.get_coordinator_userid(), state.userid, "Your report has not been submitted, you can't report a friend.")
-  #           reply(:no, {"c.moderation.report_user", "reporting friend"}, msg_id, state)
-
-  #         String.trim(reason) == "" or String.trim(reason) == "None Given" ->
-  #           User.send_direct_message(Coordinator.get_coordinator_userid(), state.userid, "Your report has not been submitted as no reason for the report was given.")
-  #           reply(:no, {"c.moderation.report_user", "no reason given"}, msg_id, state)
-
-  #         User.is_restricted?(state.userid, ["Community", "Reporting"]) ->
-  #           reply(:no, {"c.moderation.report_user", "permission denied"}, msg_id, state)
-
-  #         true ->
-  #           location_id = if location_id == "nil", do: nil, else: location_id
-  #           result = Account.create_report(state.userid, target_id, location_type, location_id, reason)
-
-  #           case result do
-  #             {:ok, _} ->
-  #               reply(:okay, nil, msg_id, state)
-
-  #             {:error, reason} ->
-  #               reply(:no, {"c.moderation.report_user", reason}, msg_id, state)
-  #           end
-  #       end
-
-  #     _ ->
-  #       reply(:no, {"c.moderation.report_user", "bad command format"}, msg_id, state)
-  #   end
-  # end
 
   # Chat related
   defp do_handle("JOIN", data, msg_id, state) do

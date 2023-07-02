@@ -11,6 +11,7 @@ defmodule Teiserver.Tachyon.CommandDispatch do
     Handlers.Lobby.ListLobbiesRequest,
     Handlers.Lobby.JoinRequest,
     Handlers.Lobby.LeaveRequest,
+    Handlers.Lobby.UpdateStatusRequest,
     Handlers.LobbyChat.SayRequest,
     Handlers.LobbyHost.CreateRequest,
     Handlers.LobbyHost.RespondToJoinRequestRequest,

@@ -367,6 +367,8 @@ defmodule CentralWeb.Router do
     post("/create_user", HailstormController, :create_user)
     post("/db_update_user", HailstormController, :db_update_user)
     post("/ts_update_user", HailstormController, :ts_update_user)
+    post("/update_user_rating", HailstormController, :update_user_rating)
+    post("/get_server_state", HailstormController, :get_server_state)
   end
 
   scope "/teiserver/api/spads", TeiserverWeb.API, as: :ts do

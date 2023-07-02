@@ -36,7 +36,7 @@ defmodule Teiserver.Tachyon.Converters do
 
   def convert(client, :client) do
     sync_list =
-      case client.sync do
+      case Map.get(client, :sync, nil) do
         true -> ["game", "map"]
         1 -> ["game", "map"]
         false -> []

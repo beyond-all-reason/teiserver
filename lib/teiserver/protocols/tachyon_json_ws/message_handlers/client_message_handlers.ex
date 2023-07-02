@@ -6,7 +6,7 @@ defmodule Teiserver.Tachyon.MessageHandlers.ClientMessageHandlers do
   alias Phoenix.PubSub
   alias Teiserver.Tachyon.Responses.Communication.ReceivedDirectMessageResponse
   alias Teiserver.Tachyon.Responses.Lobby.{ReceivedJoinRequestResponseResponse, JoinedResponse}
-  alias Teiserver.Tachyon.Responses.User.UpdateStatusResponse
+  alias Teiserver.Tachyon.Responses.User.UpdatedUserClientResponse
 
   @spec handle(map(), T.tachyon_conn()) ::
           {:ok, T.tachyon_conn()} | {:ok, map() | list(), T.tachyon_conn()}
@@ -37,7 +37,7 @@ defmodule Teiserver.Tachyon.MessageHandlers.ClientMessageHandlers do
   end
 
   def handle(%{event: :client_updated} = msg, conn) do
-    case UpdateStatusResponse.generate(msg.client) do
+    case UpdatedUserClientResponse.generate(msg.client) do
       {command, :success, data} ->
         resp = %{
           "command" => command,

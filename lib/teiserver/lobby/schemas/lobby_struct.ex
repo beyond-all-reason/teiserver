@@ -76,7 +76,6 @@ defmodule Teiserver.Lobby.LobbyStruct do
     afk_check_at: nil,
     last_seen_map: %{},
 
-    last_balance_hash: nil,
     last_queue_state: [], # Used to tell if there has been a change to the queue state and should it be broadcast
     balance_result: nil,
     showmatch: true,

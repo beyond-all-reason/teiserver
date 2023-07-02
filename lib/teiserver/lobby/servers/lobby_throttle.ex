@@ -73,11 +73,11 @@ defmodule Teiserver.Battle.LobbyThrottle do
         %{
           channel: "teiserver_lobby_updates",
           event: :updated_client_battlestatus,
-          client: client
+          userid: userid
         },
         state
       ) do
-    {:noreply, %{state | player_changes: [client.userid | state.player_changes]}}
+    {:noreply, %{state | player_changes: [userid | state.player_changes]}}
   end
 
   def handle_info(%{channel: "teiserver_lobby_updates"}, state) do

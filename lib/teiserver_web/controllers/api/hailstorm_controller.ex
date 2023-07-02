@@ -1,7 +1,9 @@
 defmodule TeiserverWeb.API.HailstormController do
   use CentralWeb, :controller
-  alias Teiserver.Config
-  alias Teiserver.{Account, User}
+  alias Teiserver.{Account, User, Config, Coordinator, Lobby}
+  alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Battle.BalanceLib
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   plug(Bodyguard.Plug.Authorize,
     policy: Teiserver.API.HailstormAuth,
@@ -128,6 +130,61 @@ defmodule TeiserverWeb.API.HailstormController do
           Account.update_cache_user(user.id, new_user)
           %{"result" => "success"}
       end
+
+    conn
+    |> put_status(201)
+    |> assign(:result, result)
+    |> render("result.json")
+  end
+
+  @spec update_user_rating(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def update_user_rating(conn, params) do
+    rating_type_id = MatchRatingLib.rating_type_name_lookup()[params["rating_type"]]
+    skill = int_parse(params["skill"])
+    uncertainty = int_parse(params["uncertainty"])
+
+    rating_value = BalanceLib.calculate_rating_value(skill, uncertainty)
+    leaderboard_rating = BalanceLib.calculate_leaderboard_rating(skill, uncertainty)
+
+    {:ok, rating} = Account.create_or_update_rating(%{
+      user_id: params["userid"],
+      rating_type_id: rating_type_id,
+      rating_value: rating_value,
+      skill: skill,
+      uncertainty: uncertainty,
+      leaderboard_rating: leaderboard_rating,
+      last_updated: Timex.now()
+    })
+
+    conn
+    |> put_status(201)
+    |> assign(:result, rating)
+    |> render("result.json")
+  end
+
+  @spec get_server_state(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def get_server_state(conn, %{"server" => server, "id" => id_str}) do
+    id = int_parse(id_str)
+
+    result = case server do
+      "client" ->
+        client = Account.get_client_by_id(id)
+        user = Account.get_user_by_id(id)
+        Map.put(client, :user, user)
+
+      "lobby" ->
+        Lobby.get_lobby(id)
+
+      "balance" ->
+        pid = Coordinator.get_balancer_pid(id)
+        state = :sys.get_state(pid)
+
+        current_balance = Map.get(state.hashes, state.last_balance_hash, nil)
+        Map.put(state, "current_balance", current_balance)
+
+      _ ->
+        raise "No server of type #{server}"
+    end
 
     conn
     |> put_status(201)

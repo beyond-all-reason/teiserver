@@ -81,12 +81,17 @@ defmodule Teiserver.Account.ClientLib do
   # Updates
   @spec merge_update_client(Map.t()) :: nil | :ok
   def merge_update_client(%{userid: userid} = partial_client) do
-    cast_client(userid, {:merge_update_client, partial_client})
+    cast_client(userid, {:update_values, partial_client})
   end
 
   @spec merge_update_client(T.userid(), Map.t()) :: nil | :ok
   def merge_update_client(userid, partial_client) do
-    cast_client(userid, {:merge_update_client, partial_client})
+    cast_client(userid, {:update_values, partial_client})
+  end
+
+  @spec update_client(T.userid(), Map.t()) :: nil | :ok
+  def update_client(userid, partial_client) do
+    cast_client(userid, {:update_values, partial_client})
   end
 
   @spec replace_update_client(
@@ -99,7 +104,7 @@ defmodule Teiserver.Account.ClientLib do
     client
   end
 
-  def replace_update_client(%{userid: userid} = client, reason = :client_updated_battlestatus) do
+  def replace_update_client(%{userid: userid} = client, :client_updated_battlestatus = reason) do
     # Update the process with it
     cast_client(userid, {:update_client, client})
 
@@ -112,6 +117,7 @@ defmodule Teiserver.Account.ClientLib do
         %{
           channel: "teiserver_lobby_updates",
           event: :updated_client_battlestatus,
+          userid: client.userid,
           lobby_id: client.lobby_id,
           client: client,
           reason: reason
@@ -160,6 +166,7 @@ defmodule Teiserver.Account.ClientLib do
         %{
           channel: "teiserver_lobby_updates",
           event: :updated_client_battlestatus,
+          userid: client.userid,
           lobby_id: client.lobby_id,
           client: client,
           reason: reason
