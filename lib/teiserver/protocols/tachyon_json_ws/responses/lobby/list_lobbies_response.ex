@@ -5,7 +5,7 @@ defmodule Teiserver.Tachyon.Responses.Lobby.ListLobbiesResponse do
 
   alias Teiserver.Data.Types, as: T
 
-  @spec generate({:error, String.t()} | T.lobby()) :: {T.tachyon_command(), T.tachyon_object()}
+  @spec generate({:error, String.t()} | T.lobby()) :: T.tachyon_response()
   def generate({:error, reason}) do
     {"system/error/response", :error, reason}
   end

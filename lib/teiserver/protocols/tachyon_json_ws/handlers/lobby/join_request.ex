@@ -13,8 +13,7 @@ defmodule Teiserver.Tachyon.Handlers.Lobby.JoinRequest do
     }
   end
 
-  @spec execute(T.tachyon_conn(), map, map) ::
-          {{T.tachyon_command(), T.tachyon_object()}, T.tachyon_conn()}
+  @spec execute(T.tachyon_conn(), T.tachyon_object(), map) :: {T.tachyon_response(), T.tachyon_conn()}
   def execute(conn, %{"lobby_id" => lobby_id} = object, _meta) do
     result = Battle.can_join?(conn.userid, lobby_id, object["password"])
 

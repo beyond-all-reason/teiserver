@@ -13,8 +13,7 @@ defmodule Teiserver.Tachyon.Handlers.LobbyChat.SayRequest do
     }
   end
 
-  @spec execute(T.tachyon_conn(), map, map) ::
-          {{T.tachyon_command(), T.tachyon_object()}, T.tachyon_conn()}
+  @spec execute(T.tachyon_conn(), T.tachyon_object(), map) :: {T.tachyon_response(), T.tachyon_conn()}
   def execute(%{lobby_id: nil} = conn, _, _meta) do
     response = SayResponse.generate(:no_lobby)
     {response, conn}

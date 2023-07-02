@@ -5,7 +5,7 @@ defmodule Teiserver.Tachyon.Responses.Lobby.LeaveResponse do
 
   alias Teiserver.Data.Types, as: T
 
-  @spec generate(:ok) :: {T.tachyon_command, :success, T.tachyon_object} | {T.tachyon_command, T.error_pair}
+  @spec generate(:ok) :: T.tachyon_response()
   def generate(:ok) do
     {"lobby/leave/response", :success, %{
 
