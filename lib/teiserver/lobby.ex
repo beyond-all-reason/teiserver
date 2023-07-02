@@ -174,7 +174,14 @@ defmodule Teiserver.Lobby do
     )
 
     # TODO: Depreciate this
-    send(client.tcp_pid, {:force_join_battle, lobby_id, script_password})
+    if client != nil and client.protocol == :spring do
+      send(client.tcp_pid, {:force_join_battle, lobby_id, script_password})
+    end
+
+    if client != nil and client.protocol != :spring do
+      add_user_to_battle(client.userid, lobby_id)
+    end
+
     :ok
   end
 

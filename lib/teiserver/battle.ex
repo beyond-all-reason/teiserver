@@ -264,7 +264,7 @@ defmodule Teiserver.Battle do
   # end
 
   alias Teiserver.Battle.{MatchMonitorServer, MatchLib}
-  alias Teiserver.Lobby.{ChatLib, LobbyLib}
+  alias Teiserver.Lobby.{LobbyLib}
 
   @spec start_match(nil | T.lobby_id()) :: :ok
   def start_match(nil), do: :ok
@@ -575,22 +575,6 @@ defmodule Teiserver.Battle do
   end
 
   # LobbyServer process
-  # TODO: Replace the create_lobby |> add_lobby combo with this
-  @spec create_new_lobby(map) :: T.lobby() | {:error, String.t()}
-  defdelegate create_new_lobby(data), to: LobbyLib
-
-  @spec add_lobby(T.lobby()) :: T.lobby()
-  defdelegate add_lobby(lobby), to: LobbyLib
-
-  @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
-  defdelegate get_lobby_pid(lobby_id), to: LobbyLib
-
-  @spec call_lobby(T.lobby_id(), any) :: any | nil
-  defdelegate call_lobby(lobby_id, msg), to: LobbyLib
-
-  @spec cast_lobby(T.lobby_id(), any) :: any | nil
-  defdelegate cast_lobby(lobby_id, msg), to: LobbyLib
-
   @spec lobby_exists?(T.lobby_id()) :: boolean()
   defdelegate lobby_exists?(lobby_id), to: LobbyLib
 
@@ -655,9 +639,6 @@ defmodule Teiserver.Battle do
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
   defdelegate update_lobby(lobby, data, reason), to: LobbyLib
 
-  @spec set_lobby_password(T.lobby_id(), String.t() | nil) :: :ok | nil
-  defdelegate set_lobby_password(lobby_id, new_password), to: LobbyLib
-
   # Requests
   @spec can_join?(T.userid(), T.lobby_id(), String.t() | nil) ::
           {:failure, String.t()} | true
@@ -679,13 +660,6 @@ defmodule Teiserver.Battle do
 
   @spec remove_bot(T.lobby_id(), String.t()) :: :ok | nil
   defdelegate remove_bot(lobby_id, bot_name), to: LobbyLib
-
-  # Start areas
-  @spec add_start_area(T.lobby_id(), non_neg_integer(), list()) :: :ok | nil
-  defdelegate add_start_area(lobby_id, area_id, structure), to: LobbyLib
-
-  @spec remove_start_area(T.lobby_id(), non_neg_integer()) :: :ok | nil
-  defdelegate remove_start_area(lobby_id, area_id), to: LobbyLib
 
   # Disabled units
   @spec enable_all_units(T.lobby_id()) :: :ok | nil
@@ -711,9 +685,6 @@ defmodule Teiserver.Battle do
   defdelegate remove_modoptions(lobby_id, keys), to: LobbyLib
 
   # Actions
-  @spec close_lobby(integer() | nil, atom) :: :ok
-  defdelegate close_lobby(lobby_id, reason \\ :closed), to: LobbyLib
-
   @spec add_user_to_lobby(T.userid(), T.lobby_id(), String.t()) :: :ok
   defdelegate add_user_to_lobby(userid, lobby_id, script_password), to: LobbyLib
 
@@ -729,25 +700,4 @@ defmodule Teiserver.Battle do
 
   @spec get_lobby_balance_mode(T.lobby_id()) :: :solo | :grouped
   defdelegate get_lobby_balance_mode(lobby_id), to: LobbyLib
-
-  # Chat
-  @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
-  defdelegate say(userid, msg, lobby_id), to: ChatLib
-
-  @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
-  defdelegate sayex(userid, msg, lobby_id), to: ChatLib
-
-  @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) ::
-          :ok | {:error, any}
-  defdelegate sayprivateex(from_id, to_id, msg, lobby_id), to: ChatLib
-
-  @spec say_to_all_lobbies(String.t()) :: :ok
-  def say_to_all_lobbies(msg) do
-    coordinator_id = Coordinator.get_coordinator_userid()
-
-    list_lobby_ids()
-    |> Enum.each(fn lobby_id ->
-      Lobby.say(coordinator_id, msg, lobby_id)
-    end)
-  end
 end
