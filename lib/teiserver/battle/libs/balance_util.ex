@@ -3,7 +3,7 @@ defmodule Teiserver.Battle.BalanceUtil do
   Documentation for BalanceUtil.
   """
 
-  alias Central.Config
+  alias Teiserver.Config
 
   # Upper boundary is how far above the group value the members can be, lower is how far below it
   # these values are in general used for group pairing where we look at making temporary groups on
