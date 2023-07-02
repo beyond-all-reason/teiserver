@@ -1391,7 +1391,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       #   state
 
       senderid != lobby.founder_id ->
-        Lobby.rename_lobby(state.lobby_id, new_name, state)
+        Lobby.rename_lobby(state.lobby_id, new_name, true)
         ConsulServer.say_command(cmd, state)
 
         downcase_name = new_name |> String.downcase()
