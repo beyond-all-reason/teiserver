@@ -4,7 +4,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   """
   use GenServer
   alias Teiserver.{Account, Room, Client, User, Battle, Telemetry}
-  alias Teiserver.Battle.LobbyChat
+  alias Teiserver.Lobby.ChatLib
   alias Phoenix.PubSub
   alias Teiserver.Account.CalculateSmurfKeyTask
   require Logger
@@ -174,11 +174,11 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         case to do
           "d" ->
             # We don't persist this as it's already persisted elsewhere
-            # LobbyChat.persist_message(user, "g: #{msg}", host.lobby_id, :say)
+            # ChatLib.persist_message(user, "g: #{msg}", host.lobby_id, :say)
             :ok
 
           "dallies" ->
-            LobbyChat.persist_message(user, "a: #{msg}", host.lobby_id, :say)
+            ChatLib.persist_message(user, "a: #{msg}", host.lobby_id, :say)
 
             PubSub.broadcast(
               Central.PubSub,
@@ -187,7 +187,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             )
 
           "dspectators" ->
-            LobbyChat.persist_message(user, "s: #{msg}", host.lobby_id, :say)
+            ChatLib.persist_message(user, "s: #{msg}", host.lobby_id, :say)
 
             PubSub.broadcast(
               Central.PubSub,
@@ -212,11 +212,11 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         case to do
           "d" ->
             # We don't persist this as it's already persisted elsewhere
-            # LobbyChat.persist_message(user, "g: #{msg}", host.lobby_id, :say)
+            # ChatLib.persist_message(user, "g: #{msg}", host.lobby_id, :say)
             :ok
 
           "dallies" ->
-            LobbyChat.persist_message(user, "a: #{msg}", host.lobby_id, :say)
+            ChatLib.persist_message(user, "a: #{msg}", host.lobby_id, :say)
 
             PubSub.broadcast(
               Central.PubSub,
@@ -225,7 +225,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             )
 
           "dspectators" ->
-            LobbyChat.persist_message(user, "s: #{msg}", host.lobby_id, :say)
+            ChatLib.persist_message(user, "s: #{msg}", host.lobby_id, :say)
 
             PubSub.broadcast(
               Central.PubSub,

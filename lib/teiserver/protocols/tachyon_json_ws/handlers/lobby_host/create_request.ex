@@ -4,7 +4,7 @@ defmodule Teiserver.Tachyon.Handlers.LobbyHost.CreateRequest do
   """
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Tachyon.Responses.LobbyHost.CreateResponse
-  alias Teiserver.{Battle, Account}
+  alias Teiserver.{Lobby, Account}
 
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do
@@ -26,7 +26,7 @@ defmodule Teiserver.Tachyon.Handlers.LobbyHost.CreateRequest do
         "ip" => client.ip
       })
 
-    lobby = Battle.create_new_lobby(object)
+    lobby = Lobby.create_new_lobby(object)
 
     response = CreateResponse.generate(lobby)
 

@@ -6,7 +6,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   use GenServer
   require Logger
   alias Teiserver.{Account, Coordinator, Client, User, Lobby, Battle}
-  alias Teiserver.Battle.{LobbyChat}
+  alias Teiserver.Lobby.{ChatLib}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Config
   alias Phoenix.PubSub
@@ -184,7 +184,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     new_approved = [userid | state.approved_users] |> Enum.uniq()
 
     username = Account.get_username(userid)
-    LobbyChat.persist_system_message("#{username} joined the lobby", state.lobby_id)
+    ChatLib.persist_system_message("#{username} joined the lobby", state.lobby_id)
 
     {:noreply,
      %{
@@ -196,7 +196,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info({:user_left, userid}, state) do
     username = Account.get_username(userid)
-    LobbyChat.persist_system_message("#{username} left the lobby", state.lobby_id)
+    ChatLib.persist_system_message("#{username} left the lobby", state.lobby_id)
 
     player_count_changed(state)
 
@@ -212,7 +212,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info({:user_kicked, userid}, state) do
     username = Account.get_username(userid)
-    LobbyChat.persist_system_message("#{username} kicked from the lobby", state.lobby_id)
+    ChatLib.persist_system_message("#{username} kicked from the lobby", state.lobby_id)
 
     player_count_changed(state)
 
@@ -281,21 +281,21 @@ defmodule Teiserver.Coordinator.ConsulServer do
         # If the first splitter is still in this lobby, move them to a new one
         cond do
           Enum.empty?(players_to_move) ->
-            LobbyChat.sayex(
+            ChatLib.sayex(
               state.coordinator_id,
               "Split failed, nobody followed the split leader",
               state.lobby_id
             )
 
           Enum.count(players_to_move) < split.min_players ->
-            LobbyChat.sayex(
+            ChatLib.sayex(
               state.coordinator_id,
               "Split failed, not enough players agreed to split (#{Enum.count(players_to_move) + 1}/#{split.min_players})",
               state.lobby_id
             )
 
           new_lobby == nil ->
-            LobbyChat.sayex(
+            ChatLib.sayex(
               state.coordinator_id,
               "Split failed, unable to find empty lobby",
               state.lobby_id
@@ -317,7 +317,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
               Lobby.force_add_user_to_lobby(userid, lobby_id)
             end)
 
-            LobbyChat.sayex(state.coordinator_id, "Split completed.", state.lobby_id)
+            ChatLib.sayex(state.coordinator_id, "Split completed.", state.lobby_id)
         end
 
         %{state | split: nil}
@@ -446,13 +446,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
       |> Enum.each(fn userid ->
         username = Account.get_username_by_id(userid)
 
-        LobbyChat.say(
+        ChatLib.say(
           state.coordinator_id,
           "#{username} is not allowed to be a boss",
           state.lobby_id
         )
 
-        LobbyChat.say(userid, "!boss", state.lobby_id)
+        ChatLib.say(userid, "!boss", state.lobby_id)
       end)
 
       player_count_changed(new_state)
@@ -520,7 +520,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       Enum.count(new_user_times) >= state.ring_limit_count - 1 ->
         User.ring(userid, state.coordinator_id)
 
-        LobbyChat.sayprivateex(
+        ChatLib.sayprivateex(
           state.coordinator_id,
           userid,
           "Attention #{user.name}, you are ringing a lot of people very fast, please pause for a bit",
@@ -546,7 +546,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         "Setting tweakdefs requires boss privileges"
       )
 
-      LobbyChat.say(userid, "!ev", state.lobby_id)
+      ChatLib.say(userid, "!ev", state.lobby_id)
     end
 
     state
@@ -562,7 +562,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         "Setting tweakunits requires boss privileges"
       )
 
-      LobbyChat.say(userid, "!ev", state.lobby_id)
+      ChatLib.say(userid, "!ev", state.lobby_id)
     end
 
     state
@@ -598,7 +598,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
           if not is_boss and not is_moderator do
             spawn(fn ->
               :timer.sleep(300)
-              LobbyChat.say(userid, "!ev", state.lobby_id)
+              ChatLib.say(userid, "!ev", state.lobby_id)
             end)
           end
         end
@@ -653,7 +653,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     new_client =
       if existing.player == false and new_client.player == true and
            get_player_count(state) >= get_max_player_count(state) do
-        LobbyChat.say(userid, "$joinq", state.lobby_id)
+        ChatLib.say(userid, "$joinq", state.lobby_id)
         %{new_client | player: false}
       else
         new_client
@@ -740,9 +740,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
         Enum.empty?(get_queue(state)) ->
           {change, new_client}
 
-        # Made redundant from the LobbyChat.say("$joinq") above
+        # Made redundant from the ChatLib.say("$joinq") above
         # hd(get_queue(state)) != userid and new_client.player == true and existing.player == false ->
-        #   LobbyChat.sayprivateex(state.coordinator_id, userid, "You are not part of the join queue so cannot become a player. Add yourself to the queue by chatting $joinq", state.lobby_id)
+        #   ChatLib.sayprivateex(state.coordinator_id, userid, "You are not part of the join queue so cannot become a player. Add yourself to the queue by chatting $joinq", state.lobby_id)
         #   {false, nil}
 
         true ->
@@ -753,7 +753,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     if change do
       if existing.player == true and new_client.player == false do
         if Enum.member?(get_queue(state), existing.userid) do
-          LobbyChat.say(userid, "$leaveq", state.lobby_id)
+          ChatLib.say(userid, "$leaveq", state.lobby_id)
         end
 
         send(self(), :tick)
@@ -987,7 +987,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
             "No listed command of '#{cmd.command}'"
           end
 
-        LobbyChat.sayprivateex(
+        ChatLib.sayprivateex(
           state.coordinator_id,
           cmd.senderid,
           msg,
@@ -997,7 +997,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         false
 
       Enum.member?(@host_commands, cmd.command) and not is_host ->
-        LobbyChat.sayprivateex(
+        ChatLib.sayprivateex(
           state.coordinator_id,
           cmd.senderid,
           "You are not allowed to use the '#{cmd.command}' command (host only)",
@@ -1007,7 +1007,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         false
 
       Enum.member?(@boss_commands, cmd.command) and not (is_host or is_boss) ->
-        LobbyChat.sayprivateex(
+        ChatLib.sayprivateex(
           state.coordinator_id,
           cmd.senderid,
           "You are not allowed to use the '#{cmd.command}' command (boss only)",
@@ -1017,7 +1017,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         false
 
       not Enum.member?(@host_commands ++ @boss_commands, cmd.command) ->
-        LobbyChat.sayprivateex(
+        ChatLib.sayprivateex(
           state.coordinator_id,
           cmd.senderid,
           "No command of name '#{cmd.command}'",
@@ -1124,7 +1124,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
           # Sometimes people get added and SPADS thinks they need to go, this delay might help
           :timer.sleep(100)
 
-          LobbyChat.sayprivateex(
+          ChatLib.sayprivateex(
             state.coordinator_id,
             userid,
             "#{new_client.name} You were at the front of the queue, you are now a player.",
@@ -1257,7 +1257,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def log_command(cmd, state) do
     message = "$ " <> command_as_message(cmd)
     sender = User.get_user_by_id(cmd.senderid)
-    LobbyChat.persist_message(sender, message, state.lobby_id, :say)
+    ChatLib.persist_message(sender, message, state.lobby_id, :say)
     state
   end
 

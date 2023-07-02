@@ -5,7 +5,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
 
   alias Phoenix.PubSub
   alias Teiserver.{Game, User, Client, Battle, Account, Lobby, Coordinator}
-  alias Teiserver.Battle.{LobbyChat}
+  alias Teiserver.Lobby.{ChatLib}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Data.Types, as: T
   use GenServer
@@ -262,7 +262,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   @spec handle_user_chat(T.userid(), String.t(), map()) :: map()
   defp handle_user_chat(senderid, "!boss" <> rem, state) do
     if String.trim(rem) != "" do
-      LobbyChat.say(senderid, "!ev", state.lobby_id)
+      ChatLib.say(senderid, "!ev", state.lobby_id)
       Lobby.kick_user_from_battle(senderid, state.lobby_id)
     end
 
@@ -271,7 +271,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
 
   defp handle_user_chat(senderid, "!preset" <> rem, state) do
     if String.trim(rem) != state.lobby_policy.preset do
-      LobbyChat.say(senderid, "!ev", state.lobby_id)
+      ChatLib.say(senderid, "!ev", state.lobby_id)
     end
 
     state
@@ -446,7 +446,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
 
   # Funcs to do stuff
   defp send_chat(state, msg) do
-    LobbyChat.say(state.userid, msg, state.lobby_id)
+    ChatLib.say(state.userid, msg, state.lobby_id)
   end
 
   defp send_dm(state, userid, msg) do

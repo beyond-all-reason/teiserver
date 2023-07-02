@@ -1,4 +1,4 @@
-defmodule Teiserver.Battle.LobbyChat do
+defmodule Teiserver.Lobby.ChatLib do
   @moduledoc false
   alias Teiserver.{Account, User, Chat, Battle, Coordinator, Moderation, Lobby}
   alias Phoenix.PubSub

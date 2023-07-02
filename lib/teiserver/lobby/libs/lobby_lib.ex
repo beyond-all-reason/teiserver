@@ -1,4 +1,4 @@
-defmodule Teiserver.Battle.LobbyCache do
+defmodule Teiserver.Lobby.LobbyLib do
   @moduledoc """
 
   """
@@ -138,6 +138,19 @@ defmodule Teiserver.Battle.LobbyCache do
   def create_new_lobby(data) do
     data = convert_lobby_string_map_to_atom_map(data)
 
+    case validate_new_lobby(data) do
+      {:error, reason} ->
+        {:error, reason}
+
+      true ->
+        lobby = do_create_new_lobby(data)
+
+        {:ok, lobby}
+    end
+  end
+
+  @spec validate_new_lobby(map) :: true | {:error, String.t()}
+  def validate_new_lobby(data) do
     cond do
       String.trim(data.name || "") == "" ->
         {:error, "No lobby name supplied"}
@@ -152,13 +165,15 @@ defmodule Teiserver.Battle.LobbyCache do
         {:error, "Invalid type for 'locked' (should be boolean)"}
 
       true ->
-        lobby =
-          data
-          |> Teiserver.Lobby.create_lobby()
-          |> add_lobby()
-
-        {:ok, lobby}
+        true
     end
+  end
+
+  @spec do_create_new_lobby(map) :: T.lobby()
+  defp do_create_new_lobby(data) do
+    data
+      |> Teiserver.Lobby.create_lobby()
+      |> add_lobby()
   end
 
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()

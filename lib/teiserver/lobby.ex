@@ -8,7 +8,7 @@ defmodule Teiserver.Lobby do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.{Account, User, Client, Battle, Coordinator, LobbyIdServer, Telemetry}
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Battle.{LobbyChat, LobbyCache}
+  alias Teiserver.Lobby.{ChatLib, LobbyLib}
 
   @spec icon :: String.t()
   def icon, do: "fa-regular fa-sword"
@@ -16,17 +16,15 @@ defmodule Teiserver.Lobby do
   @spec colours :: atom
   def colours, do: :primary2
 
-  # LobbyChat
-  @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
-  def say(userid, msg, lobby_id), do: LobbyChat.say(userid, msg, lobby_id)
+  # ChatLib
+  @spec say(T.userid(), String.t(), T.lobby_id()) :: :ok | {:error, any}
+  defdelegate say(userid, msg, lobby_id), to: ChatLib
 
-  @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
-  def sayex(userid, msg, lobby_id), do: LobbyChat.sayex(userid, msg, lobby_id)
+  @spec sayex(T.userid(), String.t(), T.lobby_id()) :: :ok | {:error, any}
+  defdelegate sayex(userid, msg, lobby_id), to: ChatLib
 
-  @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) ::
-          :ok | {:error, any}
-  def sayprivateex(from_id, to_id, msg, lobby_id),
-    do: LobbyChat.sayprivateex(from_id, to_id, msg, lobby_id)
+  @spec sayprivateex(T.userid(), T.userid(), String.t(), T.lobby_id()) :: :ok | {:error, any}
+  defdelegate sayprivateex(from_id, to_id, msg, lobby_id), to: ChatLib
 
   def new_bot(data) do
     Map.merge(
@@ -101,23 +99,26 @@ defmodule Teiserver.Lobby do
 
   # Cache functions
   @spec list_lobby_ids :: [T.lobby_id()]
-  defdelegate list_lobby_ids(), to: LobbyCache
+  defdelegate list_lobby_ids(), to: LobbyLib
 
   @spec list_lobbies() :: [T.lobby()]
-  defdelegate list_lobbies(), to: LobbyCache
+  defdelegate list_lobbies(), to: LobbyLib
 
   @spec stream_lobbies() :: Stream.t()
-  defdelegate stream_lobbies(), to: LobbyCache
+  defdelegate stream_lobbies(), to: LobbyLib
 
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
-  defdelegate update_lobby(lobby, data, reason), to: LobbyCache
+  defdelegate update_lobby(lobby, data, reason), to: LobbyLib
 
   @spec get_lobby(T.lobby_id() | nil) :: T.lobby() | nil
-  defdelegate get_lobby(id), to: LobbyCache
+  defdelegate get_lobby(id), to: LobbyLib
 
-  defdelegate list_lobby_players!(id), to: LobbyCache
-  defdelegate add_lobby(lobby), to: LobbyCache
-  defdelegate close_lobby(lobby_id, reason \\ :closed), to: LobbyCache
+  defdelegate list_lobby_players!(id), to: LobbyLib
+  defdelegate add_lobby(lobby), to: LobbyLib
+  defdelegate close_lobby(lobby_id, reason \\ :closed), to: LobbyLib
+
+  @spec create_new_lobby(map) :: T.lobby() | {:error, String.t()}
+  defdelegate create_new_lobby(data), to: LobbyLib
 
   @spec start_battle_lobby_throttle(T.lobby_id()) :: pid()
   def start_battle_lobby_throttle(battle_lobby_id) do
@@ -452,11 +453,11 @@ defmodule Teiserver.Lobby do
   # Start rects
   def add_start_rectangle(lobby_id, [team, a, b, c, d]) do
     [team, a, b, c, d] = int_parse([team, a, b, c, d])
-    LobbyCache.add_start_rectangle(lobby_id, team, [a, b, c, d])
+    LobbyLib.add_start_rectangle(lobby_id, team, [a, b, c, d])
   end
 
   def remove_start_rectangle(lobby_id, team_id) do
-    LobbyCache.remove_start_area(lobby_id, team_id)
+    LobbyLib.remove_start_area(lobby_id, team_id)
   end
 
   @spec lock_lobby(T.lobby_id()) :: :ok | nil
@@ -486,7 +487,7 @@ defmodule Teiserver.Lobby do
     update_lobby(%{lobby | silence: false}, nil, :unsilence)
   end
 
-  @spec can_join?(Types.userid(), integer(), String.t() | nil, String.t() | nil) ::
+  @spec can_join?(T.userid(), integer(), String.t() | nil, String.t() | nil) ::
           {:failure, String.t()} | {:waiting_on_host, String.t()}
   def can_join?(userid, lobby_id, password \\ nil, script_password \\ nil) do
     lobby_id = int_parse(lobby_id)
@@ -529,7 +530,7 @@ defmodule Teiserver.Lobby do
     end
   end
 
-  @spec server_allows_join?(Types.userid(), integer(), String.t() | nil) ::
+  @spec server_allows_join?(T.userid(), integer(), String.t() | nil) ::
           {:failure, String.t()} | true
   def server_allows_join?(userid, lobby_id, password \\ nil) do
     lobby = get_lobby(lobby_id)

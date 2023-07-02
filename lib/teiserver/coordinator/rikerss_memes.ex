@@ -1,7 +1,7 @@
 defmodule Teiserver.Coordinator.RikerssMemes do
   @moduledoc false
   alias Teiserver.{User, Battle}
-  alias Teiserver.Battle.{LobbyChat}
+  alias Teiserver.Lobby.{ChatLib}
   alias Teiserver.Data.Types, as: T
 
   @meme_list ~w(ticks nodefence greenfields poor rich hardt1 crazy undo deathmatch)
@@ -187,7 +187,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   end
 
   def handle_meme(_meme, senderid, state) do
-    LobbyChat.sayprivateex(
+    ChatLib.sayprivateex(
       state.coordinator_id,
       senderid,
       "That's not a valid meme. The memes are #{Enum.join(@meme_list, ", ")}",

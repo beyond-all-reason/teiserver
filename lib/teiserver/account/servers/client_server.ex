@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.ClientServer do
   use GenServer
   require Logger
-  alias Teiserver.Battle.LobbyChat
+  alias Teiserver.Lobby.ChatLib
   alias Phoenix.PubSub
 
   @impl true
@@ -117,12 +117,12 @@ defmodule Teiserver.Account.ClientServer do
          not Application.get_env(:central, Teiserver)[:test_mode] do
       if state.client.lobby_id do
         if new_client.player do
-          LobbyChat.persist_system_message(
+          ChatLib.persist_system_message(
             "#{state.client.name} became a player",
             state.client.lobby_id
           )
         else
-          LobbyChat.persist_system_message(
+          ChatLib.persist_system_message(
             "#{state.client.name} became a spectator",
             state.client.lobby_id
           )

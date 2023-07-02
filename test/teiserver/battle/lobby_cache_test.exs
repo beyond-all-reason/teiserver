@@ -1,4 +1,4 @@
-defmodule Teiserver.Battle.LobbyCacheTest do
+defmodule Teiserver.Lobby.LobbyLibTest do
   use Central.ServerCase, async: false
   alias Teiserver.{Account}
   alias Teiserver.Battle.Lobby

@@ -264,7 +264,7 @@ defmodule Teiserver.Battle do
   # end
 
   alias Teiserver.Battle.{MatchMonitorServer, MatchLib}
-  alias Teiserver.Battle.{LobbyChat, LobbyCache}
+  alias Teiserver.Lobby.{ChatLib, LobbyLib}
 
   @spec start_match(nil | T.lobby_id()) :: :ok
   def start_match(nil), do: :ok
@@ -276,7 +276,7 @@ defmodule Teiserver.Battle do
 
     Telemetry.increment(:matches_started)
 
-    LobbyCache.cast_lobby(lobby_id, :start_match)
+    LobbyLib.cast_lobby(lobby_id, :start_match)
     current_balance = get_lobby_current_balance(lobby_id)
 
     case MatchLib.match_from_lobby(lobby_id) do
@@ -371,7 +371,7 @@ defmodule Teiserver.Battle do
     {_uuid, params} = MatchLib.stop_match(lobby_id)
     Telemetry.increment(:matches_stopped)
 
-    LobbyCache.cast_lobby(lobby_id, :stop_match)
+    LobbyLib.cast_lobby(lobby_id, :stop_match)
 
     update_match(match, params)
 
@@ -577,86 +577,86 @@ defmodule Teiserver.Battle do
   # LobbyServer process
   # TODO: Replace the create_lobby |> add_lobby combo with this
   @spec create_new_lobby(map) :: T.lobby() | {:error, String.t()}
-  defdelegate create_new_lobby(data), to: LobbyCache
+  defdelegate create_new_lobby(data), to: LobbyLib
 
   @spec add_lobby(T.lobby()) :: T.lobby()
-  defdelegate add_lobby(lobby), to: LobbyCache
+  defdelegate add_lobby(lobby), to: LobbyLib
 
   @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
-  defdelegate get_lobby_pid(lobby_id), to: LobbyCache
+  defdelegate get_lobby_pid(lobby_id), to: LobbyLib
 
   @spec call_lobby(T.lobby_id(), any) :: any | nil
-  defdelegate call_lobby(lobby_id, msg), to: LobbyCache
+  defdelegate call_lobby(lobby_id, msg), to: LobbyLib
 
   @spec cast_lobby(T.lobby_id(), any) :: any | nil
-  defdelegate cast_lobby(lobby_id, msg), to: LobbyCache
+  defdelegate cast_lobby(lobby_id, msg), to: LobbyLib
 
   @spec lobby_exists?(T.lobby_id()) :: boolean()
-  defdelegate lobby_exists?(lobby_id), to: LobbyCache
+  defdelegate lobby_exists?(lobby_id), to: LobbyLib
 
   # Registry
   @spec list_lobby_ids :: [T.lobby_id()]
-  defdelegate list_lobby_ids(), to: LobbyCache
+  defdelegate list_lobby_ids(), to: LobbyLib
 
   @spec list_lobbies() :: [T.lobby()]
-  defdelegate list_lobbies(), to: LobbyCache
+  defdelegate list_lobbies(), to: LobbyLib
 
   @spec list_throttled_lobbies(atom) :: [T.lobby()]
-  defdelegate list_throttled_lobbies(type), to: LobbyCache
+  defdelegate list_throttled_lobbies(type), to: LobbyLib
 
   # Query
   @spec get_lobby(T.lobby_id() | nil) :: T.lobby() | nil
-  defdelegate get_lobby(id), to: LobbyCache
+  defdelegate get_lobby(id), to: LobbyLib
 
   @doc """
   Returns a map with the following keys
     match_uuid, server_uuid, lobby, bots, modoptions, member_list, player_list, queue_id
   """
   @spec get_combined_lobby_state(T.lobby_id()) :: map() | nil
-  defdelegate get_combined_lobby_state(id), to: LobbyCache
+  defdelegate get_combined_lobby_state(id), to: LobbyLib
 
   @spec get_lobby_founder_id(T.lobby_id()) :: T.userid() | nil
-  defdelegate get_lobby_founder_id(id), to: LobbyCache
+  defdelegate get_lobby_founder_id(id), to: LobbyLib
 
   @spec get_lobby_match_uuid(T.lobby_id()) :: String.t() | nil
-  defdelegate get_lobby_match_uuid(id), to: LobbyCache
+  defdelegate get_lobby_match_uuid(id), to: LobbyLib
 
   @spec get_lobby_match_id(T.lobby_id()) :: T.match_id() | nil
-  defdelegate get_lobby_match_id(lobby_id), to: LobbyCache
+  defdelegate get_lobby_match_id(lobby_id), to: LobbyLib
 
   @spec get_lobby_server_uuid(T.lobby_id()) :: String.t() | nil
-  defdelegate get_lobby_server_uuid(id), to: LobbyCache
+  defdelegate get_lobby_server_uuid(id), to: LobbyLib
 
   @spec get_lobby_by_match_id(String.t()) :: T.lobby() | nil
-  defdelegate get_lobby_by_match_id(uuid), to: LobbyCache
+  defdelegate get_lobby_by_match_id(uuid), to: LobbyLib
 
   @spec get_lobby_by_server_uuid(String.t()) :: T.lobby() | nil
-  defdelegate get_lobby_by_server_uuid(uuid), to: LobbyCache
+  defdelegate get_lobby_by_server_uuid(uuid), to: LobbyLib
 
   @spec get_lobby_member_list(T.lobby_id()) :: [T.userid()] | nil
-  defdelegate get_lobby_member_list(id), to: LobbyCache
+  defdelegate get_lobby_member_list(id), to: LobbyLib
 
   @spec list_lobby_players(T.lobby_id()) :: [T.client()] | nil
-  defdelegate list_lobby_players(id), to: LobbyCache
+  defdelegate list_lobby_players(id), to: LobbyLib
 
   @spec get_lobby_member_count(T.lobby_id()) :: integer() | :lobby
-  defdelegate get_lobby_member_count(lobby_id), to: LobbyCache
+  defdelegate get_lobby_member_count(lobby_id), to: LobbyLib
 
   @spec get_lobby_spectator_count(T.lobby_id()) :: integer()
-  defdelegate get_lobby_spectator_count(lobby_id), to: LobbyCache
+  defdelegate get_lobby_spectator_count(lobby_id), to: LobbyLib
 
   @spec get_lobby_player_count(T.lobby_id()) :: integer() | :lobby
-  defdelegate get_lobby_player_count(lobby_id), to: LobbyCache
+  defdelegate get_lobby_player_count(lobby_id), to: LobbyLib
 
   # Update
   @spec update_lobby_values(T.lobby_id(), map()) :: :ok | nil
-  defdelegate update_lobby_values(lobby_id, new_values), to: LobbyCache
+  defdelegate update_lobby_values(lobby_id, new_values), to: LobbyLib
 
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
-  defdelegate update_lobby(lobby, data, reason), to: LobbyCache
+  defdelegate update_lobby(lobby, data, reason), to: LobbyLib
 
   @spec set_lobby_password(T.lobby_id(), String.t() | nil) :: :ok | nil
-  defdelegate set_lobby_password(lobby_id, new_password), to: LobbyCache
+  defdelegate set_lobby_password(lobby_id, new_password), to: LobbyLib
 
   # Requests
   @spec can_join?(T.userid(), T.lobby_id(), String.t() | nil) ::
@@ -669,77 +669,77 @@ defmodule Teiserver.Battle do
 
   # Bots
   @spec get_bots(T.lobby_id()) :: map() | nil
-  defdelegate get_bots(lobby_id), to: LobbyCache
+  defdelegate get_bots(lobby_id), to: LobbyLib
 
   @spec add_bot_to_lobby(T.lobby_id(), map()) :: :ok | nil
-  defdelegate add_bot_to_lobby(lobby_id, bot), to: LobbyCache
+  defdelegate add_bot_to_lobby(lobby_id, bot), to: LobbyLib
 
   @spec update_bot(T.lobby_id(), String.t(), map()) :: nil | :ok
-  defdelegate update_bot(lobby_id, bot_name, bot), to: LobbyCache
+  defdelegate update_bot(lobby_id, bot_name, bot), to: LobbyLib
 
   @spec remove_bot(T.lobby_id(), String.t()) :: :ok | nil
-  defdelegate remove_bot(lobby_id, bot_name), to: LobbyCache
+  defdelegate remove_bot(lobby_id, bot_name), to: LobbyLib
 
   # Start areas
   @spec add_start_area(T.lobby_id(), non_neg_integer(), list()) :: :ok | nil
-  defdelegate add_start_area(lobby_id, area_id, structure), to: LobbyCache
+  defdelegate add_start_area(lobby_id, area_id, structure), to: LobbyLib
 
   @spec remove_start_area(T.lobby_id(), non_neg_integer()) :: :ok | nil
-  defdelegate remove_start_area(lobby_id, area_id), to: LobbyCache
+  defdelegate remove_start_area(lobby_id, area_id), to: LobbyLib
 
   # Disabled units
   @spec enable_all_units(T.lobby_id()) :: :ok | nil
-  defdelegate enable_all_units(lobby_id), to: LobbyCache
+  defdelegate enable_all_units(lobby_id), to: LobbyLib
 
   @spec enable_units(T.lobby_id(), [String.t()]) :: :ok | nil
-  defdelegate enable_units(lobby_id, units), to: LobbyCache
+  defdelegate enable_units(lobby_id, units), to: LobbyLib
 
   @spec disable_units(T.lobby_id(), [String.t()]) :: :ok | nil
-  defdelegate disable_units(lobby_id, units), to: LobbyCache
+  defdelegate disable_units(lobby_id, units), to: LobbyLib
 
   # Modoptions
   @spec get_modoptions(T.lobby_id()) :: map() | nil
-  defdelegate get_modoptions(lobby_id), to: LobbyCache
+  defdelegate get_modoptions(lobby_id), to: LobbyLib
 
   @spec set_modoption(T.lobby_id(), String.t(), String.t()) :: :ok | nil
-  defdelegate set_modoption(lobby_id, key, value), to: LobbyCache
+  defdelegate set_modoption(lobby_id, key, value), to: LobbyLib
 
   @spec set_modoptions(T.lobby_id(), map()) :: :ok | nil
-  defdelegate set_modoptions(lobby_id, options), to: LobbyCache
+  defdelegate set_modoptions(lobby_id, options), to: LobbyLib
 
   @spec remove_modoptions(T.lobby_id(), [String.t()]) :: :ok | nil
-  defdelegate remove_modoptions(lobby_id, keys), to: LobbyCache
+  defdelegate remove_modoptions(lobby_id, keys), to: LobbyLib
 
   # Actions
   @spec close_lobby(integer() | nil, atom) :: :ok
-  defdelegate close_lobby(lobby_id, reason \\ :closed), to: LobbyCache
+  defdelegate close_lobby(lobby_id, reason \\ :closed), to: LobbyLib
 
   @spec add_user_to_lobby(T.userid(), T.lobby_id(), String.t()) :: :ok
-  defdelegate add_user_to_lobby(userid, lobby_id, script_password), to: LobbyCache
+  defdelegate add_user_to_lobby(userid, lobby_id, script_password), to: LobbyLib
 
   @spec remove_user_from_lobby(T.userid(), T.lobby_id()) :: :ok
-  defdelegate remove_user_from_lobby(userid, lobby_id), to: LobbyCache
+  defdelegate remove_user_from_lobby(userid, lobby_id), to: LobbyLib
 
   @spec force_add_user_to_lobby(T.userid(), T.lobby_id()) :: :ok | nil
   defdelegate force_add_user_to_lobby(userid, lobby_id), to: Lobby
 
   # Balance
   @spec get_lobby_current_balance(T.lobby_id()) :: map() | nil
-  defdelegate get_lobby_current_balance(lobby_id), to: LobbyCache
+  defdelegate get_lobby_current_balance(lobby_id), to: LobbyLib
 
   @spec get_lobby_balance_mode(T.lobby_id()) :: :solo | :grouped
-  defdelegate get_lobby_balance_mode(lobby_id), to: LobbyCache
+  defdelegate get_lobby_balance_mode(lobby_id), to: LobbyLib
 
   # Chat
   @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
-  defdelegate say(userid, msg, lobby_id), to: LobbyChat
+  defdelegate say(userid, msg, lobby_id), to: ChatLib
 
   @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
-  defdelegate sayex(userid, msg, lobby_id), to: LobbyChat
+  defdelegate sayex(userid, msg, lobby_id), to: ChatLib
 
   @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) ::
           :ok | {:error, any}
-  defdelegate sayprivateex(from_id, to_id, msg, lobby_id), to: LobbyChat
+  defdelegate sayprivateex(from_id, to_id, msg, lobby_id), to: ChatLib
 
   @spec say_to_all_lobbies(String.t()) :: :ok
   def say_to_all_lobbies(msg) do

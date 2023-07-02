@@ -1,8 +1,8 @@
 defmodule Teiserver.Data.Battle.LobbyChatTest do
   use Central.DataCase, async: false
-  alias Teiserver.{User, Battle}
+  alias Teiserver.{User, Battle, Lobby}
   import Teiserver.TeiserverTestLib, only: [new_user: 0]
-  alias Teiserver.Battle.{Lobby, LobbyChat}
+  alias Teiserver.Lobby.{LobbyChat}
 
   test "test lobby chat as bot" do
     bot_user = new_user()

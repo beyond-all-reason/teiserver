@@ -2,7 +2,7 @@ defmodule Teiserver.Chat.WordLibTest do
   use Central.DataCase
   alias Teiserver.Chat.WordLib
   alias Teiserver.{Coordinator, Room, User}
-  alias Teiserver.Battle.LobbyChat
+  alias Teiserver.Lobby.ChatLib
 
   import Teiserver.TeiserverTestLib,
     only: [new_user: 0]
@@ -76,11 +76,11 @@ defmodule Teiserver.Chat.WordLibTest do
     chatty_user = User.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == []
 
-    LobbyChat.say(chatty_user.id, "harmless message", 1)
+    ChatLib.say(chatty_user.id, "harmless message", 1)
     chatty_user = User.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == []
 
-    LobbyChat.say(chatty_user.id, "night night tards", 1)
+    ChatLib.say(chatty_user.id, "night night tards", 1)
     chatty_user = User.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == ["Bridging"]
   end
@@ -91,11 +91,11 @@ defmodule Teiserver.Chat.WordLibTest do
     chatty_user = User.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == []
 
-    LobbyChat.sayex(chatty_user.id, "harmless message", 1)
+    ChatLib.sayex(chatty_user.id, "harmless message", 1)
     chatty_user = User.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == []
 
-    LobbyChat.sayex(chatty_user.id, "night night tards", 1)
+    ChatLib.sayex(chatty_user.id, "night night tards", 1)
     chatty_user = User.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == ["Bridging"]
   end

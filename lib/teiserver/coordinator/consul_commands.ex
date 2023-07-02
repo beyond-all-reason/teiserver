@@ -3,7 +3,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Config
   alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
   alias Teiserver.{Account, Battle, Lobby, Coordinator, User, Client}
-  alias Teiserver.Battle.{LobbyChat}
+  alias Teiserver.Lobby.{ChatLib}
   alias Teiserver.Chat.WordLib
   alias Teiserver.Data.Types, as: T
   import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2]
@@ -193,7 +193,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           |> Enum.map(fn _ -> :rand.uniform(s_dice) end)
           |> Enum.sum()
 
-        LobbyChat.say(
+        ChatLib.say(
           state.coordinator_id,
           "#{username} rolled #{n_dice}D#{s_dice} and got a result of: #{result}",
           state.lobby_id
@@ -206,13 +206,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         if nmax > 0 do
           result = :rand.uniform(nmax)
 
-          LobbyChat.say(
+          ChatLib.say(
             state.coordinator_id,
             "#{username} rolled for a number between 1 and #{nmax}, they got: #{result}",
             state.lobby_id
           )
         else
-          LobbyChat.sayprivateex(
+          ChatLib.sayprivateex(
             state.coordinator_id,
             senderid,
             "Format not recognised, please consult the help for this command for more information.",
@@ -228,13 +228,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         if nmax > nmin and nmin > 0 do
           result = nmin + :rand.uniform(nmax - nmin)
 
-          LobbyChat.say(
+          ChatLib.say(
             state.coordinator_id,
             "#{username} rolled for a number between #{nmin} and #{nmax}, they got: #{result}",
             state.lobby_id
           )
         else
-          LobbyChat.sayprivateex(
+          ChatLib.sayprivateex(
             state.coordinator_id,
             senderid,
             "Format not recognised, please consult the help for this command for more information.",
@@ -243,7 +243,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         end
 
       true ->
-        LobbyChat.sayprivateex(
+        ChatLib.sayprivateex(
           state.coordinator_id,
           senderid,
           "Format not recognised, please consult the help for this command for more information.",
@@ -258,7 +258,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     do: handle_command(Map.put(cmd, :command, "jazlobby"), state)
 
   def handle_command(%{command: "jazlobby", senderid: senderid}, state) do
-    LobbyChat.say(
+    ChatLib.say(
       senderid,
       "You can test out the new client at https://github.com/beyond-all-reason/bar-lobby/releases/latest",
       state.lobby_id
@@ -281,13 +281,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           ConsulServer.say_command(cmd, state)
         else
           Battle.update_lobby_values(state.lobby_id, %{tournament: true})
-          # LobbyChat.say(senderid, "!preset tourney", state.lobby_id)
+          # ChatLib.say(senderid, "!preset tourney", state.lobby_id)
           send(self(), :recheck_membership)
           state = %{state | tournament_lobby: true}
           ConsulServer.say_command(cmd, state)
         end
       else
-        LobbyChat.sayprivateex(
+        ChatLib.sayprivateex(
           state.coordinator_id,
           senderid,
           "Only casters, tournament players and moderators can set tournament mode.",
@@ -299,7 +299,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     else
       Battle.update_lobby_values(state.lobby_id, %{tournament: false})
 
-      LobbyChat.sayprivateex(
+      ChatLib.sayprivateex(
         state.coordinator_id,
         senderid,
         "Tournament mode has been removed from this lobby.",
@@ -378,7 +378,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           |> max(1)
       end
 
-    LobbyChat.sayex(
+    ChatLib.sayex(
       state.coordinator_id,
       "Split lobby sequence started ($y to move, $n to cancel, $follow <name> to follow user)",
       state.lobby_id
@@ -418,7 +418,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "splitlobby", senderid: senderid} = _cmd, state) do
-    LobbyChat.sayprivateex(
+    ChatLib.sayprivateex(
       state.coordinator_id,
       senderid,
       "A split is already underway, you cannot start a new one yet",
@@ -549,7 +549,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         state
 
       User.is_restricted?(senderid, ["Game queue"]) ->
-        LobbyChat.sayprivateex(
+        ChatLib.sayprivateex(
           state.coordinator_id,
           senderid,
           "You are restricted from joining from joining the queue",
@@ -559,7 +559,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         state
 
       client.player ->
-        LobbyChat.sayprivateex(
+        ChatLib.sayprivateex(
           state.coordinator_id,
           senderid,
           "You are already a player, you can't join the queue!",
@@ -571,7 +571,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       Enum.member?(get_queue(state), senderid) ->
         pos = get_queue_position(get_queue(state), senderid) + 1
 
-        LobbyChat.sayprivateex(
+        ChatLib.sayprivateex(
           state.coordinator_id,
           senderid,
           "You were already in the join-queue at position #{pos}. Use $status to check on the queue and $leaveq to leave it.",
@@ -596,14 +596,14 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         pos = get_queue_position(new_queue, senderid) + 1
 
         if User.is_restricted?(senderid, ["Low priority"]) do
-          LobbyChat.sayprivateex(
+          ChatLib.sayprivateex(
             state.coordinator_id,
             senderid,
             "You are now in the low priority join-queue at position #{pos}, this means you will be added to the game after normal-priority members. Use $status to check on the queue.",
             state.lobby_id
           )
         else
-          LobbyChat.sayprivateex(
+          ChatLib.sayprivateex(
             state.coordinator_id,
             senderid,
             "You are now in the join-queue at position #{pos}. Use $status to check on the queue.",
@@ -617,7 +617,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "leaveq", senderid: senderid}, state) do
     if Enum.member?(get_queue(state), senderid) do
-      LobbyChat.sayprivateex(
+      ChatLib.sayprivateex(
         state.coordinator_id,
         senderid,
         "You have been removed from the join queue",
@@ -638,7 +638,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   def handle_command(%{command: "password?", senderid: senderid}, state) do
     case Battle.get_lobby(state.lobby_id) do
       %{passworded: false} ->
-        LobbyChat.sayprivateex(
+        ChatLib.sayprivateex(
           state.coordinator_id,
           senderid,
           "This lobby has no password set",
@@ -646,7 +646,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         )
 
       %{password: password} ->
-        LobbyChat.sayprivateex(
+        ChatLib.sayprivateex(
           state.coordinator_id,
           senderid,
           "The lobby password is currently: #{password}",
@@ -662,7 +662,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state =
       case mode do
         "friends" ->
-          LobbyChat.say(
+          ChatLib.say(
             state.coordinator_id,
             "Gatekeeper mode set to friends, only friends of a player can join the lobby",
             state.lobby_id
@@ -671,7 +671,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           %{state | gatekeeper: :friends}
 
         "friendsplay" ->
-          LobbyChat.say(
+          ChatLib.say(
             state.coordinator_id,
             "Gatekeeper mode set to friendsplay, only friends of a player can play in the lobby (anybody can join)",
             state.lobby_id
@@ -680,11 +680,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           %{state | gatekeeper: :friendsplay}
 
         "default" ->
-          LobbyChat.say(state.coordinator_id, "Gatekeeper reset", state.lobby_id)
+          ChatLib.say(state.coordinator_id, "Gatekeeper reset", state.lobby_id)
           %{state | gatekeeper: :default}
 
         _ ->
-          LobbyChat.sayprivateex(
+          ChatLib.sayprivateex(
             state.coordinator_id,
             senderid,
             "No gatekeeper of that type (accepted types are: friends, friendsplay)",
@@ -1119,7 +1119,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "default"
 
         _ ->
-          LobbyChat.sayprivateex(
+          ChatLib.sayprivateex(
             state.coordinator_id,
             senderid,
             "Shuffle types are party, friends, contributor, dev, admin, all and default; using 'default'",
@@ -1241,7 +1241,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     sender_name = Account.get_username_by_id(senderid)
 
-    LobbyChat.say(
+    ChatLib.say(
       state.coordinator_id,
       "#{sender_name} shuffled the players using mode: #{mode}",
       state.lobby_id
@@ -1271,7 +1271,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           :loser_picks
       end
 
-    LobbyChat.say(
+    ChatLib.say(
       state.coordinator_id,
       "Balance mode set to #{new_mode}",
       state.lobby_id
@@ -1433,7 +1433,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{state | player_limit: abs(new_limit)}
 
       _ ->
-        LobbyChat.sayprivateex(
+        ChatLib.sayprivateex(
           state.coordinator_id,
           senderid,
           "Unable to convert #{value_str} into an integer",
@@ -1856,8 +1856,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{senderid: senderid} = cmd, state) do
     if Map.has_key?(cmd, :raw) do
-      # LobbyChat.do_say(cmd.senderid, cmd.raw, state.lobby_id)
-      LobbyChat.sayprivateex(
+      # ChatLib.do_say(cmd.senderid, cmd.raw, state.lobby_id)
+      ChatLib.sayprivateex(
         state.coordinator_id,
         senderid,
         "No command of name '#{cmd.command}'",
