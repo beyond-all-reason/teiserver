@@ -4,8 +4,8 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   """
 
   alias Phoenix.PubSub
-  alias Teiserver.{Game, User, Client, Battle, Account, Coordinator}
-  alias Teiserver.Battle.{Lobby, LobbyChat}
+  alias Teiserver.{Game, User, Client, Battle, Account, Lobby, Coordinator}
+  alias Teiserver.Battle.{LobbyChat}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Data.Types, as: T
   use GenServer

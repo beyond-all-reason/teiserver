@@ -1,12 +1,15 @@
 defmodule Teiserver.Data.Types do
   # alias Teiserver.Data.Types, as: T
+
   @type userid() :: non_neg_integer()
   @type party_id() :: String.t()
   @type lobby_id() :: non_neg_integer()
+  @type lobby_struct() :: Teiserver.Lobby.LobbyStruct.t()
+
   @type clan_id() :: non_neg_integer
   @type match_id() :: non_neg_integer
-
   @type queue_id() :: non_neg_integer
+
   @type mm_match_id() :: String.t()
 
   @type lobby() :: map()
@@ -22,6 +25,7 @@ defmodule Teiserver.Data.Types do
   @type tachyon_object() :: map()
   @type error_pair() :: {:error, String.t()}
 
+  @type lobby_server_state() :: map()
   @type consul_state() :: map()
   @type balance_server_state() :: map()
 

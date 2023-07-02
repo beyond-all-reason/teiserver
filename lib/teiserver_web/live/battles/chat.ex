@@ -3,8 +3,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{Battle, User, Chat, Client}
-  alias Teiserver.Battle.{Lobby, LobbyLib}
+  alias Teiserver.{Battle, User, Chat, Lobby, Client}
   alias Teiserver.Chat.LobbyMessage
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
@@ -27,7 +26,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       |> add_breadcrumb(name: "Battles", url: "/teiserver/battle/lobbies")
       |> assign(:site_menu_active, "teiserver_lobbies")
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
-      |> assign(:view_colour, LobbyLib.colours())
+      |> assign(:view_colour, Lobby.colours())
 
     {:ok, socket}
   end
@@ -101,7 +100,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
          |> assign(:messages, messages)
          |> assign(:user_map, %{})
          |> assign(:clients, clients)
-         |> assign(:view_colour, Teiserver.Battle.LobbyLib.colours())
+         |> assign(:view_colour, Teiserver.Lobby.colours())
          |> update_user_map}
     end
   end

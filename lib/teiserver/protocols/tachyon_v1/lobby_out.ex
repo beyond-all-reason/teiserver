@@ -1,6 +1,6 @@
 defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
   alias Teiserver.{Account, Battle}
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.Lobby
   alias Teiserver.Protocols.Tachyon.V1.Tachyon
 
   @spec do_reply(atom(), any) :: Map.t() | nil

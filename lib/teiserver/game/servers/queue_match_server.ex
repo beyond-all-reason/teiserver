@@ -7,8 +7,8 @@ defmodule Teiserver.Game.QueueMatchServer do
 
   use GenServer
   require Logger
-  alias Teiserver.Config
-  alias Teiserver.Battle.{Lobby, BalanceLib}
+  alias Teiserver.{Lobby, Config}
+  alias Teiserver.Battle.{BalanceLib}
   alias Teiserver.Data.{Matchmaking, QueueGroup}
   alias Phoenix.PubSub
   alias Teiserver.{Account, Coordinator, Battle}

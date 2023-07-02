@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.Lobby
   alias Teiserver.{Account, Battle, Client, Coordinator}
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
   alias Teiserver.Protocols.Tachyon.V1.Tachyon

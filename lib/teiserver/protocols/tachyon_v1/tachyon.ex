@@ -143,7 +143,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   end
 
   def do_action(:join_lobby, lobby_id, state) do
-    Teiserver.Battle.Lobby.add_user_to_battle(state.userid, lobby_id, state.script_password)
+    Teiserver.Lobby.add_user_to_battle(state.userid, lobby_id, state.script_password)
 
     PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
     PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")

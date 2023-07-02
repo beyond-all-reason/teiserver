@@ -3,7 +3,7 @@ defmodule Teiserver.Tachyon.Handlers.Lobby.LeaveRequest do
 
   """
   alias Phoenix.PubSub
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.Lobby
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Tachyon.Responses.Lobby.LeaveResponse
 

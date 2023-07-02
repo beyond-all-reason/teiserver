@@ -4,8 +4,7 @@ defmodule TeiserverWeb.TournamentLive.Index do
   alias Phoenix.PubSub
 
   alias Teiserver
-  alias Teiserver.{Battle, Account}
-  alias Teiserver.Battle.{LobbyLib}
+  alias Teiserver.{Battle, Account, Lobby}
 
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
@@ -33,7 +32,7 @@ defmodule TeiserverWeb.TournamentLive.Index do
       |> assign(:client, client)
       |> assign(:can_join, can_join)
       |> assign(:site_menu_active, "tournaments")
-      |> assign(:view_colour, LobbyLib.colours())
+      |> assign(:view_colour, Lobby.colours())
       |> get_lobbies()
 
     {:ok, socket, layout: {CentralWeb.LayoutView, :standard_live}}

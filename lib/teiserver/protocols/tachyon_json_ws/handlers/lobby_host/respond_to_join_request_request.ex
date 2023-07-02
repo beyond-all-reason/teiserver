@@ -3,7 +3,7 @@ defmodule Teiserver.Tachyon.Handlers.LobbyHost.RespondToJoinRequestRequest do
 
   """
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.Lobby
   alias Teiserver.Tachyon.Responses.LobbyHost.RespondToJoinRequestResponse
 
   @spec dispatch_handlers :: map()

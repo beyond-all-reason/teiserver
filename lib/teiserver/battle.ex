@@ -7,7 +7,7 @@ defmodule Teiserver.Battle do
   alias Central.Helpers.QueryHelpers
   alias Teiserver.Repo
   alias Teiserver.{Account, Telemetry, Coordinator}
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.Lobby
   alias Teiserver.Battle.{MatchMembership, MatchMembershipLib}
   alias Phoenix.PubSub
 
@@ -16,6 +16,7 @@ defmodule Teiserver.Battle do
   alias Teiserver.Data.Types, as: T
 
   alias Teiserver.Protocols.Spring
+  require Logger
 
   @spec match_query(List.t()) :: Ecto.Query.t()
   def match_query(args) do
@@ -242,8 +243,6 @@ defmodule Teiserver.Battle do
     Match.changeset(match, %{})
   end
 
-  alias Teiserver.Battle.Lobby
-
   # Not to be confused with protocol related adding, this
   # tells the battle lobby to proceed as if the user was just accepted into
   # the battle. It should never be called directly from a protocol
@@ -259,14 +258,13 @@ defmodule Teiserver.Battle do
   #         false ->
   #           {:error, "no battle"}
   #         true ->
-  #           Teiserver.Battle.Lobby.accept_join_request(userid, lobby_id)
+  #           Teiserver.Lobby.accept_join_request(userid, lobby_id)
   #       end
   #   end
   # end
 
   alias Teiserver.Battle.{MatchMonitorServer, MatchLib}
-  alias Teiserver.Battle.{Lobby, LobbyChat, LobbyCache}
-  require Logger
+  alias Teiserver.Battle.{LobbyChat, LobbyCache}
 
   @spec start_match(nil | T.lobby_id()) :: :ok
   def start_match(nil), do: :ok

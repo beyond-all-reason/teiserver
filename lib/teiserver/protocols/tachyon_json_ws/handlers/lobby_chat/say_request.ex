@@ -3,7 +3,7 @@ defmodule Teiserver.Tachyon.Handlers.LobbyChat.SayRequest do
 
   """
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.Lobby
   alias Teiserver.Tachyon.Responses.LobbyChat.SayResponse
 
   @spec dispatch_handlers :: map()

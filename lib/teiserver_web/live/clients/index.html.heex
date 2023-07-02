@@ -67,7 +67,7 @@
                       <%= if client.lobby_id do %>
                         <%= live_redirect("Show #{client.lobby_id}",
                           to: Routes.ts_battle_lobby_show_path(@socket, :show, client.lobby_id),
-                          class: "btn btn-sm btn-#{Teiserver.Battle.LobbyLib.colours()}"
+                          class: "btn btn-sm btn-#{Teiserver.Lobby.colours()}"
                         ) %>
                       <% end %>
                     </td>

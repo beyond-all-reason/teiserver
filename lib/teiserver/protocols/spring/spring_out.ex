@@ -8,7 +8,7 @@ defmodule Teiserver.Protocols.SpringOut do
   require Logger
   alias Phoenix.PubSub
   alias Teiserver.{Account, User, Client, Room, Battle, Coordinator}
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.Lobby
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.Spring.{BattleOut, LobbyPolicyOut}
   alias Teiserver.Data.Types, as: T

@@ -2,8 +2,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   require Logger
   alias Teiserver.Config
   alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
-  alias Teiserver.{Account, Battle, Coordinator, User, Client}
-  alias Teiserver.Battle.{Lobby, LobbyChat}
+  alias Teiserver.{Account, Battle, Lobby, Coordinator, User, Client}
+  alias Teiserver.Battle.{LobbyChat}
   alias Teiserver.Chat.WordLib
   alias Teiserver.Data.Types, as: T
   import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2]

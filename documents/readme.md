@@ -6,5 +6,7 @@
 - [dev_designs](dev_designs): Documentation of the designs of systems within Teiserver
 - [planned_designs](planned_designs): Designs currently planned within Teiserver
 - [tachyon](tachyon): Spec and documentation on the Tachyon protocol
+
+## Depreciated/depreciating
 - [spring](spring): Extensions and alterations to the base Spring protocol
 - [clustering](clustering): Scripts and documentation to try clustering out

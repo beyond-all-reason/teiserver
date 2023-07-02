@@ -1,7 +1,7 @@
 defmodule Teiserver.Agents.BattlehostAgentServer do
   use GenServer
   alias Teiserver.Agents.AgentLib
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.Lobby
   require Logger
 
   @tick_period 5000

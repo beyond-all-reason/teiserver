@@ -1,7 +1,7 @@
 defmodule Teiserver.Agents.BattlejoinAgentServer do
   use GenServer
   alias Teiserver.Agents.AgentLib
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.Lobby
   alias Teiserver.Battle
   require Logger
 

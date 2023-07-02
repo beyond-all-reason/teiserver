@@ -6,7 +6,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   use GenServer
   alias Teiserver.Config
   alias Teiserver.{Account, User, Clans, Room, Coordinator, Client, Moderation}
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.Lobby
   alias Teiserver.Coordinator.{CoordinatorCommands}
   alias Phoenix.PubSub
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]

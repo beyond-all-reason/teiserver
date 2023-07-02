@@ -10,7 +10,7 @@ defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.{Room, User, Account, Telemetry, Clans, Coordinator}
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.Lobby
   alias Teiserver.Account.ClientLib
   # alias Central.Helpers.TimexHelper
   require Logger

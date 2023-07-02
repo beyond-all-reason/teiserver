@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.V1.LobbyHostIn do
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.Lobby
   alias Teiserver.{Coordinator}
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]

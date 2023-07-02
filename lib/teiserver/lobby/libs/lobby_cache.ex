@@ -6,7 +6,7 @@ defmodule Teiserver.Battle.LobbyCache do
   alias Phoenix.PubSub
   alias Teiserver.Coordinator
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.Lobby
   alias Teiserver.Data.Types, as: T
   require Logger
 
@@ -154,7 +154,7 @@ defmodule Teiserver.Battle.LobbyCache do
       true ->
         lobby =
           data
-          |> Teiserver.Battle.Lobby.create_lobby()
+          |> Teiserver.Lobby.create_lobby()
           |> add_lobby()
 
         {:ok, lobby}

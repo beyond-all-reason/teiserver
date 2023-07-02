@@ -502,8 +502,8 @@ defmodule Teiserver.TeiserverTestLib do
       ip: "127.0.0.1"
     }
     |> Map.merge(params)
-    |> Teiserver.Battle.Lobby.create_lobby()
-    |> Teiserver.Battle.Lobby.add_lobby()
+    |> Teiserver.Lobby.create_lobby()
+    |> Teiserver.Lobby.add_lobby()
   end
 
   defp seed_badge_types() do

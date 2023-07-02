@@ -1,44 +1,7 @@
-defmodule Teiserver.Battle.Lobby do
-  # @enforce_keys [:id, :name, :team_size, :icon, :colour, :settings, :conditions, :map_list]
-  # defstruct [
-  #   id: LobbyIdServer.get_next_id(),
-
-  #   # Expected to be overridden
-  #   ip: nil,
-  #   port: nil,
-  #   engine_version: nil,
-  #   map_hash: nil,
-  #   map_name: nil,
-  #   game_name: nil,
-  #   hash_code: nil,
-
-  #   type: "normal",
-  #   nattype: :none,
-  #   max_players: 16,
-  #   password: nil,
-  #   rank: 0,
-  #   locked: false,
-  #   engine_name: "spring",
-  #   players: [],
-
-  #   member_count: 0,
-  #   player_count: 0,
-  #   spectator_count: 0,
-
-  #   disabled_units: [],
-  #   start_areas: %{},
-
-  #   # To tie it into matchmaking
-  #   queue_id: nil,
-
-  #   # Consul flags
-  #   consul_rename: false,
-
-  #   # Meta data
-  #   silence: false,
-  #   in_progress: false,
-  #   started_at: nil
-  # ]
+defmodule Teiserver.Lobby do
+  @moduledoc """
+  For handling the in-memory instances of lobbies
+  """
 
   alias Phoenix.PubSub
   require Logger
@@ -46,6 +9,12 @@ defmodule Teiserver.Battle.Lobby do
   alias Teiserver.{Account, User, Client, Battle, Coordinator, LobbyIdServer, Telemetry}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle.{LobbyChat, LobbyCache}
+
+  @spec icon :: String.t()
+  def icon, do: "fa-regular fa-sword"
+
+  @spec colours :: atom
+  def colours, do: :primary2
 
   # LobbyChat
   @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}

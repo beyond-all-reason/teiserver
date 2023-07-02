@@ -4,8 +4,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   require Logger
 
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.{Account, Battle, Coordinator, User}
-  alias Teiserver.Battle.{Lobby, LobbyLib}
+  alias Teiserver.{Account, Battle, Coordinator, Lobby, User}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   @extra_menu_content """
@@ -44,7 +43,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> assign(:ratings, %{})
       |> assign(:client, client)
       |> assign(:site_menu_active, "teiserver_lobbies")
-      |> assign(:view_colour, LobbyLib.colours())
+      |> assign(:view_colour, Lobby.colours())
       |> assign(:messages, [])
       |> assign(:extra_menu_content, extra_content)
       |> assign(:consul_command, "")

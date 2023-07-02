@@ -5,8 +5,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
   """
   use GenServer
   require Logger
-  alias Teiserver.{Account, Coordinator, Client, User, Battle}
-  alias Teiserver.Battle.{Lobby, LobbyChat}
+  alias Teiserver.{Account, Coordinator, Client, User, Lobby, Battle}
+  alias Teiserver.Battle.{LobbyChat}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Config
   alias Phoenix.PubSub
