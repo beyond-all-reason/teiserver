@@ -27,7 +27,6 @@ defmodule Teiserver.Tachyon.Handlers.LobbyChat.SayRequest do
       false
     end
 
-
     response = SayResponse.generate(result)
 
     {response, conn}

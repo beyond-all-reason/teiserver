@@ -330,7 +330,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, new_state}
   end
 
-  def handle_info(cmd = %{command: command}, state) do
+  def handle_info(%{command: command} = cmd, state) do
     cond do
       Enum.member?(@coordinator_bot, command) ->
         Coordinator.cast_coordinator(

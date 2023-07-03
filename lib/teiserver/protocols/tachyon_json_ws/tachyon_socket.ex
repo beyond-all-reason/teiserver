@@ -113,7 +113,8 @@ defmodule Teiserver.Tachyon.TachyonSocket do
       CommandDispatch.dispatch(conn, object, meta)
     rescue
       e in FunctionClauseError ->
-        Logger.error(e)
+        handle_error(e, __STACKTRACE__, conn)
+
         send(self(), :disconnect_on_error)
         response = ErrorResponse.generate("Server FunctionClauseError for command #{meta["command"]}")
         {response, conn}
@@ -122,10 +123,8 @@ defmodule Teiserver.Tachyon.TachyonSocket do
       #   raise e
 
       e ->
-        st = __STACKTRACE__
-        spawn(fn ->
-          reraise e, st
-        end)
+        handle_error(e, __STACKTRACE__, conn)
+
         send(self(), :disconnect_on_error)
         response = ErrorResponse.generate("Internal server error for command #{meta["command"]}")
         {response, conn}
@@ -202,10 +201,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
       end
     rescue
       e ->
-        st = __STACKTRACE__
-        spawn(fn ->
-          reraise e, st
-        end)
+        handle_error(e, __STACKTRACE__, state.conn)
 
         send(self(), :disconnect_on_error)
         {command, _, reason} = ErrorResponse.generate("Internal server error for internal channel #{channel}")
@@ -239,6 +235,15 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
     # This will send stuff
     # {:reply, :ok, {:binary, <<111>>}, state}
+  end
+
+  defp handle_error(error, stacktrace, _conn) do
+    spawn(fn ->
+      reraise error, stacktrace
+    end)
+    # Logger.error("EEEEE")
+
+    # reraise error, stacktrace
   end
 
   @spec terminate(any, any) :: :ok
@@ -287,6 +292,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
       party_role: nil,
       exempt_from_cmd_throttle: exempt_from_cmd_throttle,
       cmd_timestamps: [],
+      error_handle: :raise,
 
       # Caching app configs
       flood_rate_limit_count:
