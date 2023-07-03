@@ -97,12 +97,14 @@
                   </a>
                 </td>
                 <td>
-                  <a
-                    href={Routes.admin_lobby_policy_path(@conn, :edit, lobby_policy.id)}
-                    class={"btn btn-outline-#{bsname} btn-sm"}
-                  >
-                    <i class="fa-fw fa-regular fa-wrench"></i> Edit
-                  </a>
+                  <%= if allow?(@conn, "Server") do %>
+                    <a
+                      href={Routes.admin_lobby_policy_path(@conn, :edit, lobby_policy.id)}
+                      class={"btn btn-outline-#{bsname} btn-sm"}
+                    >
+                      <i class="fa-fw fa-regular fa-wrench"></i> Edit
+                    </a>
+                  <% end %>
                 </td>
               </tr>
             <% end %>

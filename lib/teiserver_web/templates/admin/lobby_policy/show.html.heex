@@ -33,19 +33,21 @@
         <hr />
 
         <div class="float-end">
-          <a
-            href={~p"/admin/dashboard/policy/#{@lobby_policy.id}"}
-            class={"btn btn-outline-#{bsname}"}
-          >
-            <i class="fa-solid fa-fw fa-gauge"></i> Live dashboard
-          </a>
+          <%= if allow?(@conn, "Server") do %>
+            <a
+              href={~p"/admin/dashboard/policy/#{@lobby_policy.id}"}
+              class={"btn btn-outline-#{bsname}"}
+            >
+              <i class="fa-solid fa-fw fa-gauge"></i> Live dashboard
+            </a>
 
-          <a
-            href={Routes.admin_lobby_policy_path(@conn, :edit, @lobby_policy)}
-            class={"btn btn-outline-#{bsname}"}
-          >
-            <i class="fa-regular fa-fw fa-wrench"></i> Edit Lobby policy
-          </a>
+            <a
+              href={Routes.admin_lobby_policy_path(@conn, :edit, @lobby_policy)}
+              class={"btn btn-outline-#{bsname}"}
+            >
+              <i class="fa-regular fa-fw fa-wrench"></i> Edit Lobby policy
+            </a>
+          <% end %>
         </div>
 
         <h3 style={"color: #{@lobby_policy.colour}"}>

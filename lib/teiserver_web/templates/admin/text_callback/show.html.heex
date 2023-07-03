@@ -33,12 +33,14 @@
         <hr />
 
         <div class="float-end">
-          <a
-            href={~p"/admin/text_callbacks/#{@text_callback}/edit"}
-            class={"btn btn-outline-#{bsname}"}
-          >
-            <i class="fa-regular fa-fw fa-wrench"></i> Edit Text callback
-          </a>
+          <%= if allow?(@conn, "Server") do %>
+            <a
+              href={~p"/admin/text_callbacks/#{@text_callback}/edit"}
+              class={"btn btn-outline-#{bsname}"}
+            >
+              <i class="fa-regular fa-fw fa-wrench"></i> Edit Text callback
+            </a>
+          <% end %>
         </div>
 
         <h3 style={"color: #{@text_callback.colour}"}>

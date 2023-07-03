@@ -9,11 +9,13 @@
   url: ~p"/admin/text_callbacks"
 ) %>
 
-<%= central_component("section_menu_button",
-  name: "new",
-  label: "New",
-  active: @active,
-  icon: "fa-regular fa-plus",
-  bsname: bsname,
-  url: ~p"/admin/text_callbacks/new"
-) %>
+<%= if allow?(@conn, "Server") do %>
+  <%= central_component("section_menu_button",
+    name: "new",
+    label: "New",
+    active: @active,
+    icon: "fa-regular fa-plus",
+    bsname: bsname,
+    url: ~p"/admin/text_callbacks/new"
+  ) %>
+<% end %>
