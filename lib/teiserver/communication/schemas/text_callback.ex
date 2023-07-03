@@ -35,5 +35,5 @@ defmodule Teiserver.Communication.TextCallback do
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean
   def authorize(:index, conn, _params), do: allow_any?(conn, ["Overwatch", "Contributor"])
   def authorize(:show, conn, _params), do: allow_any?(conn, ["Overwatch", "Contributor"])
-  def authorize(_action, conn, _params), do: allow?(conn, "Server")
+  def authorize(_action, conn, _params), do: allow?(conn, "Admin")
 end

@@ -33,7 +33,7 @@
         <hr />
 
         <div class="float-end">
-          <%= if allow?(@conn, "Server") do %>
+          <%= if allow?(@conn, "Admin") do %>
             <a
               href={~p"/admin/text_callbacks/#{@text_callback}/edit"}
               class={"btn btn-outline-#{bsname}"}

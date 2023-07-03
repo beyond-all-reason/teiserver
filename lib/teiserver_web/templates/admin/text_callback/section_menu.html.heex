@@ -9,7 +9,7 @@
   url: ~p"/admin/text_callbacks"
 ) %>
 
-<%= if allow?(@conn, "Server") do %>
+<%= if allow?(@conn, "Admin") do %>
   <%= central_component("section_menu_button",
     name: "new",
     label: "New",

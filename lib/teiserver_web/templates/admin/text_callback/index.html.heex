@@ -72,7 +72,7 @@
                   </a>
                 </td>
                 <td>
-                  <%= if allow?(@conn, "Server") do %>
+                  <%= if allow?(@conn, "Admin") do %>
                     <a
                       href={~p"/admin/text_callbacks/#{text_callback.id}/edit"}
                       class={"btn btn-outline-#{bsname} btn-sm"}
