@@ -156,9 +156,11 @@ defmodule TeiserverWeb.API.HailstormController do
       last_updated: Timex.now()
     })
 
+    result = Map.take(rating, ~w(user_id rating_type_id rating_value skill uncertainty leaderboard_rating last_updated)a)
+
     conn
     |> put_status(201)
-    |> assign(:result, rating)
+    |> assign(:result, result)
     |> render("result.json")
   end
 
