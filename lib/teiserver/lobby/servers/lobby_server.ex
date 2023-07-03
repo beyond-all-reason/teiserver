@@ -1,4 +1,5 @@
 defmodule Teiserver.Battle.LobbyServer do
+  @moduledoc false
   use GenServer
   require Logger
   alias Teiserver.Config
@@ -6,7 +7,7 @@ defmodule Teiserver.Battle.LobbyServer do
   alias Teiserver.Bridge.BridgeServer
   alias Phoenix.PubSub
 
-  @player_list_cache_age_max 500
+  @player_list_cache_age_max 200
 
   # List of keys that can be broadcast when updated
   @broadcast_update_keys ~w(
