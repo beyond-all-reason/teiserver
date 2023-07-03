@@ -457,7 +457,7 @@ defmodule CentralWeb.Router do
     put("/ban/:id/disable", BanController, :disable)
     put("/ban/:id/enable", BanController, :enable)
     get("/ban/new_with_user", BanController, :new_with_user)
-    resources("/ban", BanController, only: [:index, :show, :new, :create])
+    resources("/ban", BanController, only: [:index, :show, :new, :create, :edit, :update])
 
     get("/report_form/success", ReportFormController, :success)
     post("/report_form", ReportFormController, :create)

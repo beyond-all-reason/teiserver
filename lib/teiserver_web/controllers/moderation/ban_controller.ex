@@ -244,14 +244,25 @@ defmodule TeiserverWeb.Moderation.BanController do
 
   @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
-    ban = Moderation.get_ban!(id)
+    ban = Moderation.get_ban!(id, preload: [:source])
 
     changeset = Moderation.change_ban(ban)
 
+    all_keys =
+      Account.list_smurf_keys(
+        search: [
+          user_id: ban.source_id
+        ],
+        limit: :infinity,
+        preload: [:type],
+        order_by: "Newest first"
+      )
+
     conn
     |> assign(:ban, ban)
+    |> assign(:all_keys, all_keys)
     |> assign(:changeset, changeset)
-    |> add_breadcrumb(name: "Edit: #{ban.name}", url: conn.request_path)
+    |> add_breadcrumb(name: "Edit: #{ban.source.name}", url: conn.request_path)
     |> render("edit.html")
   end
 
@@ -259,11 +270,20 @@ defmodule TeiserverWeb.Moderation.BanController do
   def update(conn, %{"id" => id, "ban" => ban_params}) do
     ban = Moderation.get_ban!(id)
 
+    key_values =
+      ban_params["key_values"]
+      |> Enum.reject(fn r -> r == "false" end)
+
+    ban_params =
+      Map.merge(ban_params, %{
+        "key_values" => key_values
+      })
+
     case Moderation.update_ban(ban, ban_params) do
       {:ok, _ban} ->
         conn
         |> put_flash(:info, "Ban updated successfully.")
-        |> redirect(to: Routes.moderation_ban_path(conn, :index))
+        |> redirect(to: ~p"/moderation/ban/#{ban.id}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
