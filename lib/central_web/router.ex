@@ -315,6 +315,18 @@ defmodule CentralWeb.Router do
     post("/client_events/export/post", ClientEventController, :export_post)
     get("/client_events/summary", ClientEventController, :summary)
     get("/client_events/:event_name/detail", ClientEventController, :detail)
+
+    # Server events
+    get("/server_events/export/form", ServerEventController, :export_form)
+    post("/server_events/export/post", ServerEventController, :export_post)
+    get("/server_events/summary", ServerEventController, :summary)
+    get("/server_events/:event_name/detail", ServerEventController, :detail)
+
+    # Match events
+    get("/match_events/export/form", MatchEventController, :export_form)
+    post("/match_events/export/post", MatchEventController, :export_post)
+    get("/match_events/summary", MatchEventController, :summary)
+    get("/match_events/:event_name/detail", MatchEventController, :detail)
   end
 
   scope "/teiserver/reports", TeiserverWeb.Report, as: :ts_reports do
