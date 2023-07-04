@@ -40,7 +40,7 @@ defmodule Teiserver.Account.TimeSpentReport do
     userid = get_hash_id(params["account_user"]) |> to_string
 
     columns =
-      Logging.list_server_day_logs(
+      Logging.list_user_activity_day_logs(
         search: [
           start_date: start_date,
           end_date: end_date
@@ -51,11 +51,11 @@ defmodule Teiserver.Account.TimeSpentReport do
       |> Enum.map(fn log ->
         %{
           "key" => log.date,
-          "Total" => Map.get(log.data["minutes_per_user"]["total"], userid, 0),
-          "Player" => Map.get(log.data["minutes_per_user"]["player"], userid, 0),
-          "Spectator" => Map.get(log.data["minutes_per_user"]["spectator"], userid, 0),
-          "Lobby" => Map.get(log.data["minutes_per_user"]["lobby"], userid, 0),
-          "Menu" => Map.get(log.data["minutes_per_user"]["menu"], userid, 0)
+          "Total" => Map.get(log.data["total"], userid, 0),
+          "Player" => Map.get(log.data["player"], userid, 0),
+          "Spectator" => Map.get(log.data["spectator"], userid, 0),
+          "Lobby" => Map.get(log.data["lobby"], userid, 0),
+          "Menu" => Map.get(log.data["menu"], userid, 0)
         }
       end)
 

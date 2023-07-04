@@ -21,7 +21,7 @@ defmodule Teiserver.Account.ActiveReport do
       )
 
     player_counts =
-      Logging.list_server_day_logs(
+      Logging.list_user_activity_day_logs(
         search: [
           start_date: start_date,
           end_date: end_date
@@ -30,7 +30,7 @@ defmodule Teiserver.Account.ActiveReport do
         limit: :infinity
       )
       |> Enum.reduce(%{}, fn log, players_acc ->
-        log.data["minutes_per_user"]["player"]
+        log.data["player"]
         |> Enum.reduce(players_acc, fn {player_id, minutes}, acc ->
           existing = Map.get(acc, player_id, 0)
           Map.put(acc, player_id, existing + minutes)

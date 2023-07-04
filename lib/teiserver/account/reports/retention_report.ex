@@ -34,7 +34,7 @@ defmodule Teiserver.Account.RetentionReport do
     start_datetime = Timex.to_datetime(start_date)
 
     day_logs =
-      Logging.list_server_day_logs(
+      Logging.list_user_activity_day_logs(
         search: [start_date: start_date],
         order: "Newest first",
         limit: :infinity
@@ -59,7 +59,7 @@ defmodule Teiserver.Account.RetentionReport do
           |> Enum.reduce(nil, fn log, acc ->
             case acc do
               nil ->
-                if log.data["minutes_per_user"]["player"][to_string(user.id)] do
+                if log.data["player"][to_string(user.id)] do
                   log.date
                 else
                   nil

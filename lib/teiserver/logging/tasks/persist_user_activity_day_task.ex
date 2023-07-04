@@ -1,4 +1,5 @@
 defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
+  @moduledoc false
   use Oban.Worker, queue: :teiserver
   alias Teiserver.{Logging}
 
@@ -28,7 +29,7 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
 
       if Timex.compare(new_date, Timex.today()) == -1 do
         %{}
-        |> Teiserver.Logging.Tasks.PersistServerDayTask.new()
+        |> Teiserver.Logging.Tasks.PersistUserActivityDayTask.new()
         |> Oban.insert()
       end
     end
@@ -50,29 +51,13 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
 
     Repo.delete_all(delete_query)
 
-    Logging.create_user_activity_day_log(%{
+    {:ok, _} = Logging.create_user_activity_day_log(%{
       date: date,
       data: data
     })
 
     :ok
   end
-
-  # def today_so_far() do
-  #   date = Timex.today()
-
-  #   0..@segment_count
-  #   |> Enum.reduce(@empty_log, fn segment_number, segment ->
-  #     logs = get_logs(date, segment_number)
-  #     extend_segment(segment, logs)
-  #   end)
-  #   |> calculate_day_statistics(date)
-  #   |> add_telemetry(date)
-  #   |> Jason.encode!()
-  #   |> Jason.decode!()
-
-  #   # We encode and decode so it's the same format as in the database
-  # end
 
   @spec get_logs(Date.t()) :: list()
   defp get_logs(date) do
@@ -81,8 +66,9 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
 
     Logging.list_server_minute_logs(
       search: [
-        between: {start_time, end_time}
+        between: {start_time, end_time},
       ],
+      limit: :infinity,
       select: [:data]
     )
     |> Enum.map(fn l -> l.data end)

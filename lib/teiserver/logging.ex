@@ -281,22 +281,22 @@ defmodule Teiserver.Logging do
     Repo.one(query)
   end
 
-  def user_lookup(logs) do
-    user_ids =
-      logs
-      |> Enum.map(fn l -> Map.keys(l.data["minutes_per_user"]["total"]) end)
-      |> List.flatten()
-      |> Enum.uniq()
+  # def user_lookup(logs) do
+  #   user_ids =
+  #     logs
+  #     |> Enum.map(fn l -> Map.keys(l.data["minutes_per_user"]["total"]) end)
+  #     |> List.flatten()
+  #     |> Enum.uniq()
 
-    query =
-      from users in Central.Account.User,
-        where: users.id in ^user_ids
+  #   query =
+  #     from users in Central.Account.User,
+  #       where: users.id in ^user_ids
 
-    query
-    |> Repo.all()
-    |> Enum.map(fn u -> {u.id, u} end)
-    |> Map.new()
-  end
+  #   query
+  #   |> Repo.all()
+  #   |> Enum.map(fn u -> {u.id, u} end)
+  #   |> Map.new()
+  # end
 
   def get_todays_server_log(recache \\ false) do
     last_time =

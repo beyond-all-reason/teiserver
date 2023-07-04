@@ -61,7 +61,7 @@ defmodule Teiserver.Account.RetentionRateExport do
       end
 
     day_logs =
-      Logging.list_server_day_logs(
+      Logging.list_user_activity_day_logs(
         search: [start_date: start_date],
         order: "Newest first",
         limit: :infinity
@@ -199,7 +199,7 @@ defmodule Teiserver.Account.RetentionRateExport do
       @activity_types
       |> Map.new(fn activity ->
         result =
-          log_data["minutes_per_user"][activity]
+          log_data[activity]
           |> Enum.map(fn {str_id, _mins} ->
             if Enum.member?(userids, str_id), do: 1, else: 0
           end)
@@ -212,7 +212,7 @@ defmodule Teiserver.Account.RetentionRateExport do
       @activity_types
       |> Map.new(fn activity ->
         result =
-          log_data["minutes_per_user"][activity]
+          log_data[activity]
           |> Enum.map(fn {str_id, mins} ->
             if Enum.member?(userids, str_id), do: mins, else: 0
           end)

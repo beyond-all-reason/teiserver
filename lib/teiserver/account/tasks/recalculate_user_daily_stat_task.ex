@@ -8,7 +8,7 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
   alias Teiserver.Repo
   import Ecto.Query, warn: false
   alias Teiserver.{User, Account}
-  alias alias Teiserver.Logging.ServerDayLog
+  alias alias Teiserver.Logging.UserActivityDayLog
 
   # Teiserver.Account.RecalculateUserDailyStatTask.perform(nil)
 
@@ -40,7 +40,7 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
       )
       |> Enum.map(fn %{id: id} -> id end)
 
-    query = from(logs in ServerDayLog)
+    query = from(logs in UserActivityDayLog)
 
     stream = Repo.stream(query, max_rows: 50)
 
@@ -85,9 +85,7 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
 
   # Take the log of the day and extract the user related data we actually
   # want to aggregate
-  defp convert_to_user_log(%{data: data}) do
-    user_data = data["minutes_per_user"]
-
+  defp convert_to_user_log(%{data: user_data}) do
     Map.keys(user_data["total"])
     |> Enum.map(fn userid_str ->
       userid = String.to_integer(userid_str)
