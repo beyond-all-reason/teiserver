@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
 
   plug(AssignPlug,
     site_menu_active: "telemetry",
-    sub_menu_active: "client_event"
+    sub_menu_active: "match_event"
   )
 
   plug Bodyguard.Plug.Authorize,
@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
     user: {Central.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
-  plug(:add_breadcrumb, name: 'Match events', url: '/teiserver/telemetry/client_events/summary')
+  plug(:add_breadcrumb, name: 'Match events', url: '/telemetry/match_events/summary')
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
   def summary(conn, params) do
@@ -31,29 +31,15 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
       between: between
     ]
 
-    client_properties = Telemetry.get_client_properties_summary(args)
-    unauth_properties = Telemetry.get_unauth_properties_summary(args)
-    client_events = Telemetry.get_client_events_summary(args)
-    unauth_events = Telemetry.get_unauth_events_summary(args)
+    match_events = Telemetry.get_match_events_summary(args)
 
-    property_types =
-      (Map.keys(client_properties) ++ Map.keys(unauth_properties))
-      |> Enum.uniq()
-      |> Enum.sort()
-
-    event_types =
-      (Map.keys(client_events) ++ Map.keys(unauth_events))
-      |> Enum.uniq()
+    event_types = Map.keys(match_events)
       |> Enum.sort()
 
     conn
     |> assign(:timeframe, timeframe)
-    |> assign(:property_types, property_types)
     |> assign(:event_types, event_types)
-    |> assign(:client_properties, client_properties)
-    |> assign(:unauth_properties, unauth_properties)
-    |> assign(:client_events, client_events)
-    |> assign(:unauth_events, unauth_events)
+    |> assign(:match_events, match_events)
     |> render("summary.html")
   end
 
@@ -72,58 +58,37 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
         _ -> Timex.now() |> Timex.shift(days: -7)
       end
 
-    client_data =
-      Telemetry.list_client_events(
+    match_data =
+      Telemetry.list_match_events(
         search: [
           event_type_id: event_type_id,
           between: {start_date, Timex.now()}
         ],
-        limit: 500
-      )
-
-    unauth_data =
-      Telemetry.list_client_events(
-        search: [
-          event_type_id: event_type_id,
-          between: {start_date, Timex.now()}
-        ],
-        limit: 500
+        limit: 5000
       )
 
     schema_keys =
-      (client_data ++ unauth_data)
+      match_data
       |> Stream.map(fn event -> Map.keys(event.value) end)
       |> Enum.to_list()
       |> List.flatten()
       |> Stream.uniq()
       |> Enum.sort()
 
-    key = Map.get(params, "key", hd(schema_keys))
+    key = Map.get(params, "key", hd(schema_keys ++ [nil]))
 
-    client_counts =
-      client_data
+    match_counts =
+      match_data
       |> Enum.group_by(fn event -> Map.get(event.value, key, nil) end)
       |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
-
-    unauth_counts =
-      unauth_data
-      |> Enum.group_by(fn event -> Map.get(event.value, key, nil) end)
-      |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
-
-    combined_values =
-      (Map.keys(client_counts) ++ Map.keys(unauth_counts))
-      |> Enum.uniq()
-      |> Enum.sort()
 
     conn
     |> assign(:schema_keys, schema_keys)
     |> assign(:key, key)
     |> assign(:tf, tf)
     |> assign(:event_name, event_name)
-    |> assign(:client_counts, client_counts)
-    |> assign(:unauth_counts, unauth_counts)
+    |> assign(:match_counts, match_counts)
     |> assign(:schema_keys, schema_keys)
-    |> assign(:combined_values, combined_values)
     |> render("detail.html")
   end
 

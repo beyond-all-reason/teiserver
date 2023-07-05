@@ -20,8 +20,7 @@
   <% end %>
   
   <%= if allow?(@current_user, "Server") do %>
-    Server events here
-    <%#= central_component("menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Telemetry.ServerEventLib.icon(),
       name: "server_events",
@@ -31,8 +30,7 @@
   <% end %>
   
   <%= if allow?(@current_user, "Server") do %>
-    Match events here
-    <%#= central_component("menu_card",
+    <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Telemetry.MatchEventLib.icon(),
       name: "match_events",
