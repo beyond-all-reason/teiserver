@@ -25,7 +25,8 @@ defmodule TeiserverWeb.Account.SetupController do
               name: "root",
               email: "root@localhost",
               password: true_key,
-              permissions: ["admin.dev.developer"],
+              permissions: ["Server", "Admin"],
+              roles: ["Server", "Admin"],
               icon: "fa-solid fa-power-off",
               colour: "#00AA00"
             })

@@ -114,6 +114,8 @@ config :logger, :info_log,
 try do
   import_config "dev.secret.exs"
 rescue
-  _ ->
+  _ in File.Error ->
     nil
+  error ->
+    reraise error, __STACKTRACE__
 end
