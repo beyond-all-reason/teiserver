@@ -265,6 +265,22 @@ sudo chmod -R o+wr /releases
 #### grc
 I use grc for my log colours so the aliases in .bashrc use it. If you don't want to use grc you'll need to update these. If you do want to use it you will also need to place the contents of [documents/prod_files/grc_log_colours](/documents/prod_files/grc_log_colours) in `/usr/share/grc/elixir.log`.
 
+### geoip update (optional)
+First find the appropriate release file in https://github.com/maxmind/geoipupdate/releases
+```bash
+wget https://github.com/maxmind/geoipupdate/releases/download/v5.1.1/geoipupdate_5.1.1_linux_amd64.deb
+sudo dpkg -i geoipupdate_5.1.1_linux_amd64.deb
+```
+
+This will install the tool to `/usr/bin/geoipupdate` and running it should produce:
+```
+geoipupdate
+error loading configuration file /etc/GeoIP.conf: invalid account ID format: strconv.Atoi: parsing "YOUR_ACCOUNT_ID_HERE": invalid syntax
+```
+
+You should then create an account on maxmind.com and follow the instructions to make use of the key and use the updater.
+
+
 #### bashrc
 Append to `~/.bashrc` the contents of [documents/prod_files/bashrc.sh](/documents/prod_files/bashrc.sh). This contains a bunch of commands to make life easier for you; especially if like me you can't always recall exactly where logs and the like are!
 
