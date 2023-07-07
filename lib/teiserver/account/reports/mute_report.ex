@@ -15,7 +15,10 @@ defmodule Teiserver.Account.MuteReport do
 
     searches =
       if params["exclude_banned"] == "true" do
-        [mod_action: "Not banned"]
+        [
+          mod_action: "Not banned",
+          smurf_of: "Non-smurf"
+        ]
       else
         []
       end

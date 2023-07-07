@@ -9,19 +9,13 @@ now = Timex.local() %>
           Notifications
         </h4>
 
-        <a href={Routes.communication_notification_path(@conn, :mark_all)} class="btn btn-info">
+        <a href={~p"/communication/notifications/mark_all"} class="btn btn-info">
           <i class="fa fa-eye fa-fw"></i> Mark all as read
         </a>
 
-        <%= if allow?(@current_user, "admin.dev.developer") do %>
-          <a href={Routes.communication_notification_path(@conn, :admin)} class="btn btn-danger2">
-            <i class="fa fa-user fa-fw"></i> Admin section
-          </a>
-        <% end %>
-
         <div class="float-end">
           <a
-            href={Routes.communication_notification_path(@conn, :delete_all)}
+            href={~p"/communication/notifications/delete_all"}
             class="btn btn-danger"
           >
             <i class="fa fa-trash fa-fw"></i> Delete all notifications
