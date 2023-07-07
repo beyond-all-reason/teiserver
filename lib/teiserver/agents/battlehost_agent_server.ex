@@ -17,7 +17,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   def handle_info(:startup, state) do
     socket = AgentLib.get_socket()
 
-    AgentLib.login(socket, %{
+    {:success, _user} = AgentLib.login(socket, %{
       name: "Battlehost_#{state.name}",
       email: "Battlehost_#{state.name}@agents",
       bot: true
@@ -71,6 +71,10 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   end
 
   defp handle_msg(nil, state), do: state
+
+  defp handle_msg(%{"error" => "not logged in"}, state) do
+    state
+  end
 
   defp handle_msg(
          %{"cmd" => "s.lobby_host.user_requests_to_join", "userid" => userid},

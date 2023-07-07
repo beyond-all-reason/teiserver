@@ -39,7 +39,7 @@ config :central, CentralWeb.Endpoint,
   ]
 
 config :dart_sass,
-  version: "1.49.0",
+  version: "1.61.0",
   light: [
     args: ~w(scss/light.scss ../priv/static/assets/light.css),
     cd: Path.expand("../assets", __DIR__)

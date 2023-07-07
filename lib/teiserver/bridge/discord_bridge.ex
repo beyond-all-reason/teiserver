@@ -362,8 +362,8 @@ defmodule Teiserver.Bridge.DiscordBridge do
     lookup_table[channel_id]
   end
 
-  @spec start_link :: :ignore | {:error, any} | {:ok, pid}
-  def start_link do
-    Consumer.start_link(__MODULE__)
-  end
+  # @spec start_link :: :ignore | {:error, any} | {:ok, pid}
+  # def start_link do
+  #   Consumer.start_link(__MODULE__)
+  # end
 end

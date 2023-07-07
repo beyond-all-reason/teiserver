@@ -215,7 +215,7 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec list_queue_ids :: [non_neg_integer()]
   def list_queue_ids() do
-    Central.cache_get(:lists, :queues)
+    Central.cache_get(:lists, :queues) || []
   end
 
   @spec list_queues :: [QueueStruct.t() | nil]

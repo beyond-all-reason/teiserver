@@ -7,9 +7,22 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Data.Matchmaking
 
+  @empty_telemetry_data %{
+    client: %{
+      total: 0,
+      player: 0,
+      spectator: 0
+    },
+    battle: %{
+      total: 0,
+      in_progress: 0
+    },
+    total_clients_connected: 0
+  }
+
   @impl true
   def mount(_params, session, socket) do
-    telemetry_data = Central.cache_get(:application_temp_cache, :telemetry_data)
+    telemetry_data = Central.cache_get(:application_temp_cache, :telemetry_data) || @empty_telemetry_data
 
     socket =
       socket

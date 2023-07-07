@@ -83,7 +83,7 @@ defmodule Central.MixProject do
       {:excoveralls, "~> 0.15.3", only: :test},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev], runtime: false},
-      {:dart_sass, "~> 0.3", only: [:dev]},
+      {:dart_sass, "~> 0.6", only: [:dev]},
       {:libcluster, "~> 3.3"},
       {:tzdata, "~> 1.1"},
       {:ex_ulid, "~> 0.1.0"},

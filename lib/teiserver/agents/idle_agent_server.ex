@@ -35,7 +35,7 @@ defmodule Teiserver.Agents.IdleAgentServer do
   end
 
   def handle_info(:info, state) do
-    AgentLib._send(state.socket, %{cmd: "c.news.get_latest_game_news", category: "Game news"})
+    # AgentLib._send(state.socket, %{cmd: "c.news.get_latest_game_news", category: "Game news"})
     {:noreply, state}
   end
 
@@ -53,10 +53,6 @@ defmodule Teiserver.Agents.IdleAgentServer do
   defp handle_msg(nil, state), do: state
 
   defp handle_msg(%{"cmd" => "s.system.pong"}, state) do
-    state
-  end
-
-  defp handle_msg(%{"cmd" => "s.news.get_latest_game_news", "post" => _post}, state) do
     state
   end
 
