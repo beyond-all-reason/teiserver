@@ -1,12 +1,8 @@
 defmodule CentralWeb.CoreComponents do
   @moduledoc """
   Provides core UI components.
-  The components in this module use Tailwind CSS, a utility-first CSS framework.
-  See the [Tailwind CSS documentation](https://tailwindcss.com) to learn how to
-  customize the generated components in this module.
-  Icons are provided by [heroicons](https://heroicons.com), using the
-  [heroicons_elixir](https://github.com/mveytsman/heroicons_elixir) project.
   """
+
   use Phoenix.Component
   alias Phoenix.LiveView.JS
   import CentralWeb.Gettext
@@ -72,7 +68,7 @@ defmodule CentralWeb.CoreComponents do
                   class="-m-3 flex-none p-3 opacity-20 hover:opacity-40"
                   aria-label={gettext("close")}
                 >
-                  <i class="fa-fw fa-regular fa-times"></i>
+                  <Fontawesome.icon icon="times" />
                 </button>
               </div>
               <div id={"#{@id}-content"}>
