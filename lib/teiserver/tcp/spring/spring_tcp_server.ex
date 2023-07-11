@@ -822,12 +822,15 @@ defmodule Teiserver.SpringTcpServer do
     end
   end
 
-  defp client_battlestatus_update(new_client, state) do
+  defp client_battlestatus_update(%{lobby_id: _} = new_client, state) do
     if state.lobby_id != nil and state.lobby_id == new_client.lobby_id do
       SpringOut.reply(:client_battlestatus, new_client, nil, state)
     else
       state
     end
+  end
+  defp client_battlestatus_update(_, state) do
+    state
   end
 
   # Battle updates
