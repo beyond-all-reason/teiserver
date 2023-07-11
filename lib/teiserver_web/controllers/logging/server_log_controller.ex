@@ -337,20 +337,24 @@ defmodule TeiserverWeb.Logging.ServerLogController do
     # Costs
     columns_cpu_cost = GraphMinuteLogsTask.perform_cpu_cost(logs, resolution, player_counts)
     columns_memory_cost = GraphMinuteLogsTask.perform_memory_cost(logs, resolution, player_counts)
-    server_messages_cost = GraphMinuteLogsTask.perform_server_messages_cost(logs, resolution, player_counts)
-    client_messages_cost = GraphMinuteLogsTask.perform_client_messages_cost(logs, resolution, player_counts)
+
+    server_messages_cost =
+      GraphMinuteLogsTask.perform_server_messages_cost(logs, resolution, player_counts)
+
+    client_messages_cost =
+      GraphMinuteLogsTask.perform_client_messages_cost(logs, resolution, player_counts)
 
     axis_key = GraphMinuteLogsTask.perform_axis_key(logs, resolution)
 
     conn
-      |> assign(:params, params)
-      |> assign(:columns_players, columns_players)
-      |> assign(:columns_cpu_cost, columns_cpu_cost)
-      |> assign(:columns_memory_cost, columns_memory_cost)
-      |> assign(:server_messages_cost, server_messages_cost)
-      |> assign(:client_messages_cost, client_messages_cost)
-      |> assign(:axis_key, axis_key)
-      |> add_breadcrumb(name: "Load", url: conn.request_path)
-      |> render("user_cost_graph.html")
+    |> assign(:params, params)
+    |> assign(:columns_players, columns_players)
+    |> assign(:columns_cpu_cost, columns_cpu_cost)
+    |> assign(:columns_memory_cost, columns_memory_cost)
+    |> assign(:server_messages_cost, server_messages_cost)
+    |> assign(:client_messages_cost, client_messages_cost)
+    |> assign(:axis_key, axis_key)
+    |> add_breadcrumb(name: "Load", url: conn.request_path)
+    |> render("user_cost_graph.html")
   end
 end

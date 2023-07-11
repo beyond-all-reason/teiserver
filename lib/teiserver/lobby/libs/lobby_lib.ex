@@ -172,8 +172,8 @@ defmodule Teiserver.Lobby.LobbyLib do
   @spec do_create_new_lobby(map) :: T.lobby()
   defp do_create_new_lobby(data) do
     data
-      |> Teiserver.Lobby.create_lobby()
-      |> add_lobby()
+    |> Teiserver.Lobby.create_lobby()
+    |> add_lobby()
   end
 
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()

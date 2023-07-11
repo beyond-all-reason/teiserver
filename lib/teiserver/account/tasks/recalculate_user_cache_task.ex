@@ -170,7 +170,8 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
     # Filter down to just the recent ones rather than re-running the query
     timestamp_after = Timex.now() |> Timex.shift(days: -@match_cache_recent_days)
 
-    logs = logs
+    logs =
+      logs
       |> Enum.filter(fn log ->
         TimexHelper.greater_than(log.inserted_at, timestamp_after)
       end)

@@ -4,37 +4,37 @@
       size: :small,
       icon: Teiserver.Telemetry.PropertyTypeLib.icon(),
       name: "properties",
-      text: "Properties", 
+      text: "Properties",
       link: ~p"/telemetry/properties/summary"
     ) %>
   <% end %>
-  
+
   <%= if allow?(@current_user, "Server") do %>
     <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Telemetry.ClientEventLib.icon(),
       name: "client_events",
-      text: "Client events", 
+      text: "Client events",
       link: ~p"/telemetry/client_events/summary"
     ) %>
   <% end %>
-  
+
   <%= if allow?(@current_user, "Server") do %>
     <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Telemetry.ServerEventLib.icon(),
       name: "server_events",
-      text: "Server events", 
+      text: "Server events",
       link: ~p"/telemetry/server_events/summary"
     ) %>
   <% end %>
-  
+
   <%= if allow?(@current_user, "Server") do %>
     <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Telemetry.MatchEventLib.icon(),
       name: "match_events",
-      text: "Match events", 
+      text: "Match events",
       link: ~p"/telemetry/match_events/summary"
     ) %>
   <% end %>

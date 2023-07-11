@@ -228,7 +228,8 @@ defmodule Teiserver.Account.UserCache do
       User.data_keys()
       |> Map.new(fn k -> {to_string(k), Map.get(user, k, User.default_data()[k])} end)
 
-    obj_attrs = User.keys()
+    obj_attrs =
+      User.keys()
       |> Map.new(fn k -> {to_string(k), Map.get(user, k, User.default_data()[k])} end)
 
     Account.script_update_user(db_user, Map.put(obj_attrs, "data", data))

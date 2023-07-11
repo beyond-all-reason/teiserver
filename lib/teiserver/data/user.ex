@@ -861,6 +861,7 @@ defmodule Teiserver.User do
         Telemetry.log_server_event(user.id, "Banned login", %{
           error: "Smurf"
         })
+
         {:error, @smurf_string}
 
       token.expires != nil and Timex.compare(token.expires, Timex.now()) == -1 ->
@@ -876,12 +877,14 @@ defmodule Teiserver.User do
         Telemetry.log_server_event(user.id, "Banned login", %{
           error: "Permanently banned"
         })
+
         {:error, "Banned account"}
 
       is_restricted?(user, ["Login"]) ->
         Telemetry.log_server_event(user.id, "Banned login", %{
           error: "Suspended"
         })
+
         {:error, @suspended_string}
 
       not is_verified?(user) ->
@@ -939,6 +942,7 @@ defmodule Teiserver.User do
             Telemetry.log_server_event(user.id, "Banned login", %{
               error: "Smurf"
             })
+
             {:error, @smurf_string}
 
           not is_bot?(user) and login_flood_check(user.id) == :block ->
@@ -951,12 +955,14 @@ defmodule Teiserver.User do
             Telemetry.log_server_event(user.id, "Banned login", %{
               error: "Permanently banned"
             })
+
             {:error, "Banned account"}
 
           is_restricted?(user, ["Login"]) ->
             Telemetry.log_server_event(user.id, "Banned login", %{
               error: "Suspended"
             })
+
             {:error, @suspended_string}
 
           not is_verified?(user) ->
@@ -1027,6 +1033,7 @@ defmodule Teiserver.User do
             Telemetry.log_server_event(user.id, "Banned login", %{
               error: "Smurf"
             })
+
             {:error, @smurf_string}
 
           user.name != username ->
@@ -1050,12 +1057,14 @@ defmodule Teiserver.User do
             Telemetry.log_server_event(user.id, "Banned login", %{
               error: "Permanently banned"
             })
+
             {:error, "Banned account"}
 
           is_restricted?(user, ["Login"]) ->
             Telemetry.log_server_event(user.id, "Banned login", %{
               error: "Suspended"
             })
+
             {:error, @suspended_string}
 
           not is_verified?(user) ->

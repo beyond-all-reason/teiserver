@@ -14,8 +14,8 @@ defmodule Central.Application do
       [
         # Migrations
         {Ecto.Migrator,
-          repos: Application.fetch_env!(:central, :ecto_repos),
-          skip: System.get_env("SKIP_MIGRATIONS") == "true"},
+         repos: Application.fetch_env!(:central, :ecto_repos),
+         skip: System.get_env("SKIP_MIGRATIONS") == "true"},
 
         # Start phoenix pubsub
         {Phoenix.PubSub, name: Central.PubSub},

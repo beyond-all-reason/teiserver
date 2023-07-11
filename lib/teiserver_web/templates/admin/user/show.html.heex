@@ -62,13 +62,12 @@
           <% end %>
 
           <%= if allow?(@conn, "Admin") do %>
-            <%
-              class = if @client != nil do
+            <% class =
+              if @client != nil do
                 "btn btn-#{bsname}"
               else
                 "btn btn-outline-#{bsname}"
-              end
-            %>
+              end %>
             <a
               href={Routes.ts_admin_client_show_path(@conn, :show, @user.id)}
               class={class}

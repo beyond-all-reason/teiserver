@@ -13,19 +13,21 @@ defmodule Teiserver.Tachyon.Handlers.LobbyChat.SayRequest do
     }
   end
 
-  @spec execute(T.tachyon_conn(), T.tachyon_object(), map) :: {T.tachyon_response(), T.tachyon_conn()}
+  @spec execute(T.tachyon_conn(), T.tachyon_object(), map) ::
+          {T.tachyon_response(), T.tachyon_conn()}
   def execute(%{lobby_id: nil} = conn, _, _meta) do
     response = SayResponse.generate(:no_lobby)
     {response, conn}
   end
 
   def execute(conn, %{"message" => message}, _meta) do
-    result = if Lobby.allow?(conn.userid, :saybattle, conn.lobby_id) do
-      Lobby.say(conn.userid, message, conn.lobby_id)
-      true
-    else
-      false
-    end
+    result =
+      if Lobby.allow?(conn.userid, :saybattle, conn.lobby_id) do
+        Lobby.say(conn.userid, message, conn.lobby_id)
+        true
+      else
+        false
+      end
 
     response = SayResponse.generate(result)
 

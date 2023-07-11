@@ -12,18 +12,21 @@ defmodule Teiserver.Account.WeekOnWeekReport do
   def run(_conn, params) do
     params = apply_defaults(params)
 
-    start_date = Timex.now()
+    start_date =
+      Timex.now()
       |> Timex.beginning_of_week()
       |> Timex.shift(weeks: -5)
 
-    logs = Logging.list_server_day_logs(
-      search: [
-        start_date: start_date
-      ],
-      order_by: "Oldest first"
-    )
+    logs =
+      Logging.list_server_day_logs(
+        search: [
+          start_date: start_date
+        ],
+        order_by: "Oldest first"
+      )
 
-    data_map = logs
+    data_map =
+      logs
       |> Map.new(fn log ->
         {_, week} = Timex.iso_week(log.date)
         weekday = Timex.weekday(log.date)
@@ -34,7 +37,8 @@ defmodule Teiserver.Account.WeekOnWeekReport do
         {key, value}
       end)
 
-    delta_map = data_map
+    delta_map =
+      data_map
       |> Map.new(fn {{week, weekday} = key, this_value} ->
         previous_key = {week - 1, weekday}
         previous_value = data_map[previous_key]
@@ -48,19 +52,21 @@ defmodule Teiserver.Account.WeekOnWeekReport do
         end
       end)
 
-    weeks = Map.keys(data_map)
+    weeks =
+      Map.keys(data_map)
       |> Enum.map(fn {week, _day} ->
         week
       end)
-      |> Enum.uniq
+      |> Enum.uniq()
       |> Enum.sort_by(fn v -> v end, &>=/2)
       |> Enum.take(5)
 
-    week_data = Logging.list_server_week_logs(
-      search: [
-        start_date: start_date |> Timex.shift(weeks: -2)
-      ]
-    )
+    week_data =
+      Logging.list_server_week_logs(
+        search: [
+          start_date: start_date |> Timex.shift(weeks: -2)
+        ]
+      )
       |> Map.new(fn log ->
         key = log.week
         value = get_metric(log.data, params["metric"])
@@ -68,7 +74,8 @@ defmodule Teiserver.Account.WeekOnWeekReport do
         {key, value}
       end)
 
-    week_deltas = week_data
+    week_deltas =
+      week_data
       |> Map.new(fn {key, this_value} ->
         previous_key = key - 1
         previous_value = week_data[previous_key]
@@ -82,13 +89,15 @@ defmodule Teiserver.Account.WeekOnWeekReport do
         end
       end)
 
-    formatter = case params["metric"] do
-      "Total time" -> &TimexHelper.represent_minutes/1
-      "Play time" -> &TimexHelper.represent_minutes/1
-      _ -> (fn x -> x end)
-    end
+    formatter =
+      case params["metric"] do
+        "Total time" -> &TimexHelper.represent_minutes/1
+        "Play time" -> &TimexHelper.represent_minutes/1
+        _ -> fn x -> x end
+      end
 
-    data_map = data_map
+    data_map =
+      data_map
       |> Map.new(fn {k, v} ->
         {k, formatter.(v)}
       end)
@@ -111,8 +120,13 @@ defmodule Teiserver.Account.WeekOnWeekReport do
 
   defp get_metric(data, "Unique users"), do: data["aggregates"]["stats"]["unique_users"]
   defp get_metric(data, "Unique players"), do: data["aggregates"]["stats"]["unique_players"]
-  defp get_metric(data, "Peak users"), do: data["aggregates"]["stats"]["peak_user_counts"]["total"]
-  defp get_metric(data, "Peak players"), do: data["aggregates"]["stats"]["peak_user_counts"]["player"]
+
+  defp get_metric(data, "Peak users"),
+    do: data["aggregates"]["stats"]["peak_user_counts"]["total"]
+
+  defp get_metric(data, "Peak players"),
+    do: data["aggregates"]["stats"]["peak_user_counts"]["player"]
+
   defp get_metric(data, "Total time"), do: data["aggregates"]["minutes"]["total"]
   defp get_metric(data, "Play time"), do: data["aggregates"]["minutes"]["player"]
   defp get_metric(data, "Registrations"), do: data["aggregates"]["stats"]["accounts_created"]

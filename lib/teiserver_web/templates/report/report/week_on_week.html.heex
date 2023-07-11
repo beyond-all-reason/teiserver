@@ -35,7 +35,7 @@
           })
         ) %>
         <br /><br />
-        
+
         <form
           action={~p"/teiserver/reports/show/week_on_week"}
           method="post"
@@ -62,7 +62,7 @@
                 selected: @params["metric"]
               ) %>
             </div>
-            
+
             <div class="col-md-4 col-lg-3 col-xl-2">
               &nbsp;
               <input
@@ -81,7 +81,7 @@
               <thead>
                 <tr>
                   <th>Week number</th>
-                  
+
                   <th>Monday</th>
                   <th>Tuesday</th>
                   <th>Wednesday</th>
@@ -89,7 +89,7 @@
                   <th>Friday</th>
                   <th>Saturady</th>
                   <th>Sunday</th>
-                  
+
                   <th>Week metric</th>
                 </tr>
               </thead>
@@ -97,26 +97,22 @@
                 <%= for week <- @weeks do %>
                   <tr>
                     <td><%= week %></td>
-                    
+
                     <%= for day <- 1..7 do %>
                       <td>
-                        <%
-                          delta = @delta_map[{week, day}]
-                        %>
-                      
-                        <%= format_number @data_map[{week, day}] %>
+                        <% delta = @delta_map[{week, day}] %>
+
+                        <%= format_number(@data_map[{week, day}]) %>
                         <%= if delta do %>
                           &nbsp;&nbsp;&nbsp;
                           <%= cond do %>
                             <% delta > 0 -> %>
                               <span class="text-success">
-                                <%= delta %>%
-                                <i class="fa-fw fa-solid fa-up"></i>
+                                <%= delta %>% <i class="fa-fw fa-solid fa-up"></i>
                               </span>
                             <% delta < 0 -> %>
                               <span class="text-danger">
-                                <%= delta %>%
-                                <i class="fa-fw fa-solid fa-down"></i>
+                                <%= delta %>% <i class="fa-fw fa-solid fa-down"></i>
                               </span>
                             <% true -> %>
                               <span class="text-secondary">
@@ -127,25 +123,21 @@
                         <% end %>
                       </td>
                     <% end %>
-                    
+
                     <td>
-                      <%
-                        delta = @week_deltas[week]
-                      %>
-                    
-                      <%= format_number @week_data[week] %>
+                      <% delta = @week_deltas[week] %>
+
+                      <%= format_number(@week_data[week]) %>
                       <%= if delta do %>
                         &nbsp;&nbsp;&nbsp;
                         <%= cond do %>
                           <% delta > 0 -> %>
                             <span class="text-success">
-                              <%= delta %>%
-                              <i class="fa-fw fa-solid fa-up"></i>
+                              <%= delta %>% <i class="fa-fw fa-solid fa-up"></i>
                             </span>
                           <% delta < 0 -> %>
                             <span class="text-danger">
-                              <%= delta %>%
-                              <i class="fa-fw fa-solid fa-down"></i>
+                              <%= delta %>% <i class="fa-fw fa-solid fa-down"></i>
                             </span>
                           <% true -> %>
                             <span class="text-secondary">
@@ -155,12 +147,10 @@
                         <% end %>
                       <% end %>
                     </td>
-                    
                   </tr>
                 <% end %>
               </tbody>
             </table>
-
           </div>
         </div>
       </div>

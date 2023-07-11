@@ -17,8 +17,7 @@ defmodule Teiserver.Admin.HourlyCleanupTask do
   defp chat_log_cleanup() do
     days = Application.get_env(:central, Teiserver)[:retention][:room_chat]
 
-    before_timestamp =
-      Timex.shift(Timex.now(), days: -days)
+    before_timestamp = Timex.shift(Timex.now(), days: -days)
 
     query = """
           DELETE FROM teiserver_room_messages
@@ -29,8 +28,7 @@ defmodule Teiserver.Admin.HourlyCleanupTask do
 
     days = Application.get_env(:central, Teiserver)[:retention][:lobby_chat]
 
-    before_timestamp =
-      Timex.shift(Timex.now(), days: -days)
+    before_timestamp = Timex.shift(Timex.now(), days: -days)
 
     query = """
           DELETE FROM teiserver_lobby_messages

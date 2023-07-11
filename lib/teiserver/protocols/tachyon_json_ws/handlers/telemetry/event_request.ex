@@ -13,7 +13,8 @@ defmodule Teiserver.Tachyon.Handlers.Telemetry.EventRequest do
     }
   end
 
-  @spec execute(T.tachyon_conn(), T.tachyon_object(), map) :: {T.tachyon_response(), T.tachyon_conn()}
+  @spec execute(T.tachyon_conn(), T.tachyon_object(), map) ::
+          {T.tachyon_response(), T.tachyon_conn()}
   def execute(conn, %{"type" => event_type, "value" => value}, _meta) do
     Telemetry.log_client_event(conn.userid, event_type, value)
 

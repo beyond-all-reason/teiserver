@@ -33,7 +33,8 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
 
     match_events = Telemetry.get_match_events_summary(args)
 
-    event_types = Map.keys(match_events)
+    event_types =
+      Map.keys(match_events)
       |> Enum.sort()
 
     conn

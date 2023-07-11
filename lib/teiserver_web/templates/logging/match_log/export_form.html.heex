@@ -27,11 +27,7 @@
         ) %>
         <br /><br />
 
-        <form
-          action={Routes.logging_match_log_path(@conn, :export_post)}
-          method="post"
-          class=""
-        >
+        <form action={Routes.logging_match_log_path(@conn, :export_post)} method="post" class="">
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
           <div class="row">

@@ -14,6 +14,7 @@ defmodule Central.Admin.DeleteUserTask do
       OR target_id = ANY($1)
       OR responder_id = ANY($1)
     """
+
     Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
     # Codes

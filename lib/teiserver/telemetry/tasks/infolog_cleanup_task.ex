@@ -9,8 +9,7 @@ defmodule Teiserver.Telemetry.InfologCleanupTask do
   def perform(_) do
     days = Application.get_env(:central, Teiserver)[:retention][:telemetry_infolog]
 
-    before_timestamp =
-      Timex.shift(Timex.now(), days: -days)
+    before_timestamp = Timex.shift(Timex.now(), days: -days)
 
     query = """
           DELETE FROM teiserver_telemetry_infologs

@@ -31,7 +31,8 @@ defmodule TeiserverWeb.ClientLive.Show do
         "teiserver_client_messages:#{socket.assigns[:current_user].id}"
       )
 
-    socket = socket
+    socket =
+      socket
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Clients", url: "/teiserver/admin/client")
@@ -70,14 +71,14 @@ defmodule TeiserverWeb.ClientLive.Show do
         client_debug_messages = Map.get(connection_state, :print_client_messages, false)
 
         {:noreply,
-          socket
-          |> assign(:page_title, page_title(socket.assigns.live_action))
-          |> add_breadcrumb(name: user.name, url: "/teiserver/admin/clients/#{id}")
-          |> assign(:id, id)
-          |> assign(:client, client)
-          |> assign(:user, user)
-          |> assign(:client_debug_messages, client_debug_messages)
-          |> assign(:server_debug_messages, server_debug_messages)}
+         socket
+         |> assign(:page_title, page_title(socket.assigns.live_action))
+         |> add_breadcrumb(name: user.name, url: "/teiserver/admin/clients/#{id}")
+         |> assign(:id, id)
+         |> assign(:client, client)
+         |> assign(:user, user)
+         |> assign(:client_debug_messages, client_debug_messages)
+         |> assign(:server_debug_messages, server_debug_messages)}
 
       false ->
         {:noreply,
@@ -99,33 +100,32 @@ defmodule TeiserverWeb.ClientLive.Show do
   # Watched client
   def handle_info(%{channel: "teiserver_client_watch:" <> _, event: :connected}, socket) do
     client = Account.get_client_by_id(socket.assigns.id)
+
     {:noreply,
-    socket
-    |> assign(:client, client)
-    }
+     socket
+     |> assign(:client, client)}
   end
 
   def handle_info(%{channel: "teiserver_client_watch:" <> _, event: :disconnected}, socket) do
     {:noreply,
-    socket
-    |> assign(:client, nil)
-    }
+     socket
+     |> assign(:client, nil)}
   end
 
   def handle_info(%{channel: "teiserver_client_watch:" <> _, event: :added_to_lobby}, socket) do
     client = Account.get_client_by_id(socket.assigns.id)
+
     {:noreply,
-    socket
-    |> assign(:client, client)
-    }
+     socket
+     |> assign(:client, client)}
   end
 
   def handle_info(%{channel: "teiserver_client_watch:" <> _, event: :left_lobby}, socket) do
     client = Account.get_client_by_id(socket.assigns.id)
+
     {:noreply,
-    socket
-    |> assign(:client, client)
-    }
+     socket
+     |> assign(:client, client)}
   end
 
   def handle_info(%{channel: "teiserver_client_watch:" <> _}, socket) do
@@ -134,15 +134,15 @@ defmodule TeiserverWeb.ClientLive.Show do
 
   # Our client
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
-  {:noreply,
-    socket
-    |> assign(:current_client, Account.get_client_by_id(socket.assigns.current_user.id))}
+    {:noreply,
+     socket
+     |> assign(:current_client, Account.get_client_by_id(socket.assigns.current_user.id))}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
     {:noreply,
-    socket
-    |> assign(:current_client, nil)}
+     socket
+     |> assign(:current_client, nil)}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _}, socket) do

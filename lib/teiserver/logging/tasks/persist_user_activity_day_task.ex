@@ -51,10 +51,11 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
 
     Repo.delete_all(delete_query)
 
-    {:ok, _} = Logging.create_user_activity_day_log(%{
-      date: date,
-      data: data
-    })
+    {:ok, _} =
+      Logging.create_user_activity_day_log(%{
+        date: date,
+        data: data
+      })
 
     :ok
   end
@@ -66,7 +67,7 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
 
     Logging.list_server_minute_logs(
       search: [
-        between: {start_time, end_time},
+        between: {start_time, end_time}
       ],
       limit: :infinity,
       select: [:data]

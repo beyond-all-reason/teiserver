@@ -45,7 +45,6 @@
             <td>Relationship:</td>
             <td><%= @report.relationship %></td>
           </tr>
-
         <% end %>
         <tr>
           <td>Replay search:</td>
@@ -76,38 +75,38 @@
     </table>
   </div>
 
-<%= if not @report.closed do %>
-  <div class="col-md-12 col-lg-6">
-    <h4>Your response</h4>
-    <%= render(
-      "response_form.html",
-      Map.put(assigns, :action, ~p"/moderation/report/#{@report.id}/respond")
-    ) %>
+  <%= if not @report.closed do %>
+    <div class="col-md-12 col-lg-6">
+      <h4>Your response</h4>
+      <%= render(
+        "response_form.html",
+        Map.put(assigns, :action, ~p"/moderation/report/#{@report.id}/respond")
+      ) %>
 
-    <h4>Responses</h4>
-    <h6>Accuracy: <%= @accuracy %>%</h6>
+      <h4>Responses</h4>
+      <h6>Accuracy: <%= @accuracy %>%</h6>
 
-    <table class="table table-sm">
-      <thead>
-        <tr>
-          <th></th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <%= for {action, icon} <- Teiserver.Moderation.ResponseLib.list_actions() do %>
+      <table class="table table-sm">
+        <thead>
           <tr>
-            <td>
-              <i class={"fa-fw #{icon}"}></i>
-              <%= action %>
-            </td>
-            <td>
-              <%= @response_action_counts[action] || 0 %>
-            </td>
+            <th></th>
+            <th></th>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
-<% end %>
+        </thead>
+        <tbody>
+          <%= for {action, icon} <- Teiserver.Moderation.ResponseLib.list_actions() do %>
+            <tr>
+              <td>
+                <i class={"fa-fw #{icon}"}></i>
+                <%= action %>
+              </td>
+              <td>
+                <%= @response_action_counts[action] || 0 %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
 </div>

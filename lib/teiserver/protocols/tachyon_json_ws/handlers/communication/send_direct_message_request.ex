@@ -13,7 +13,8 @@ defmodule Teiserver.Tachyon.Handlers.Communication.SendDirectMessageRequest do
     }
   end
 
-  @spec execute(T.tachyon_conn(), T.tachyon_object(), map) :: {T.tachyon_response(), T.tachyon_conn()}
+  @spec execute(T.tachyon_conn(), T.tachyon_object(), map) ::
+          {T.tachyon_response(), T.tachyon_conn()}
   def execute(conn, object, _meta) do
     result = User.send_direct_message(conn.userid, object["to"], object["message"])
 

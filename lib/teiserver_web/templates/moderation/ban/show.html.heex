@@ -41,14 +41,10 @@
           </a>
 
           <%= if allow?(@conn, "Moderator") do %>
-            <a
-              class={"btn btn-outline-#{bsname}"}
-              href={~p"/moderation/ban/#{@ban.id}/edit"}
-            >
-              <Fontawesome.icon icon="wrench" style="regular" />
-              Edit
+            <a class={"btn btn-outline-#{bsname}"} href={~p"/moderation/ban/#{@ban.id}/edit"}>
+              <Fontawesome.icon icon="wrench" style="regular" /> Edit
             </a>
-          
+
             <div class="dropdown" style="display: inline-block;">
               <div
                 class={"btn btn-#{bsname} dropdown-toggle"}

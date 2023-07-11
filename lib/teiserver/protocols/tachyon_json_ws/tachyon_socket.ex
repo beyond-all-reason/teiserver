@@ -17,7 +17,8 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     :ignore
   end
 
-  @spec connect(map()) :: {:ok, T.tachyon_ws_state()} | {:error, atom} | {:error, {atom, String.t()}}
+  @spec connect(map()) ::
+          {:ok, T.tachyon_ws_state()} | {:error, atom} | {:error, {atom, String.t()}}
   def connect(
         %{
           params: %{
@@ -109,26 +110,33 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     object = wrapper["data"]
     meta = Map.drop(wrapper, ["data"])
 
-    {dispatch_response, new_conn} = try do
-      CommandDispatch.dispatch(conn, object, meta)
-    rescue
-      e in FunctionClauseError ->
-        handle_error(e, __STACKTRACE__, conn)
+    {dispatch_response, new_conn} =
+      try do
+        CommandDispatch.dispatch(conn, object, meta)
+      rescue
+        e in FunctionClauseError ->
+          handle_error(e, __STACKTRACE__, conn)
 
-        send(self(), :disconnect_on_error)
-        response = ErrorResponse.generate("Server FunctionClauseError for command #{meta["command"]}")
-        {response, conn}
+          send(self(), :disconnect_on_error)
 
-      # e in RuntimeError ->
-      #   raise e
+          response =
+            ErrorResponse.generate("Server FunctionClauseError for command #{meta["command"]}")
 
-      e ->
-        handle_error(e, __STACKTRACE__, conn)
+          {response, conn}
 
-        send(self(), :disconnect_on_error)
-        response = ErrorResponse.generate("Internal server error for command #{meta["command"]}")
-        {response, conn}
-    end
+        # e in RuntimeError ->
+        #   raise e
+
+        e ->
+          handle_error(e, __STACKTRACE__, conn)
+
+          send(self(), :disconnect_on_error)
+
+          response =
+            ErrorResponse.generate("Internal server error for command #{meta["command"]}")
+
+          {response, conn}
+      end
 
     response =
       case dispatch_response do
@@ -204,7 +212,10 @@ defmodule Teiserver.Tachyon.TachyonSocket do
         handle_error(e, __STACKTRACE__, state.conn)
 
         send(self(), :disconnect_on_error)
-        {command, _, reason} = ErrorResponse.generate("Internal server error for internal channel #{channel}")
+
+        {command, _, reason} =
+          ErrorResponse.generate("Internal server error for internal channel #{channel}")
+
         response = %{
           "command" => command,
           "status" => "failure",
@@ -241,6 +252,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     spawn(fn ->
       reraise error, stacktrace
     end)
+
     # Logger.error("EEEEE")
 
     # reraise error, stacktrace

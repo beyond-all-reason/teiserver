@@ -188,7 +188,10 @@ defmodule Teiserver.Logging.GraphMinuteLogsTask do
   @spec perform_server_messages_cost(list, non_neg_integer(), list) :: list()
   def perform_server_messages_cost(logs, chunk_size, divisors) do
     [
-      ["Server messages sent" | extract_cost(logs, chunk_size, ~w(spring_server_messages_sent), divisors)]
+      [
+        "Server messages sent"
+        | extract_cost(logs, chunk_size, ~w(spring_server_messages_sent), divisors)
+      ]
     ]
   end
 
@@ -246,7 +249,6 @@ defmodule Teiserver.Logging.GraphMinuteLogsTask do
     |> Enum.chunk_every(chunk_size)
     |> Enum.map(fn [log | _] -> log.timestamp |> TimexHelper.date_to_str(format: :ymd_hms) end)
   end
-
 
   def get_raw_player_count(logs, chunk_size) do
     %{

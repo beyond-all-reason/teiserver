@@ -53,8 +53,7 @@ defmodule Teiserver.Game.RatingLogsExport do
           inserted_after: Timex.to_datetime(start_date),
           inserted_before: Timex.to_datetime(end_date)
         ],
-        select:
-          ~w(user_id rating_type_id match_id party_id value inserted_at)a,
+        select: ~w(user_id rating_type_id match_id party_id value inserted_at)a,
         limit: :infinity
       )
       |> Enum.map(fn rating ->

@@ -142,6 +142,7 @@ defmodule TeiserverWeb.API.SessionController do
         user ->
           # First, try to do it without using the spring password
           db_user = Account.get_user!(user.id)
+
           case Central.Account.User.verify_password(raw_password, db_user.password) do
             true ->
               make_token(conn, user, expires)

@@ -121,7 +121,9 @@ spectators =
                   No boss
                 <% else %>
                   <%= @consul.host_bosses
-                  |> Enum.map_join(", ", fn userid -> Map.get(@users, userid, %{name: "NoUserFound"}).name end) %>
+                  |> Enum.map_join(", ", fn userid ->
+                    Map.get(@users, userid, %{name: "NoUserFound"}).name
+                  end) %>
                 <% end %>
               </li>
               <li>Host team-count: <%= @consul.host_teamcount %></li>

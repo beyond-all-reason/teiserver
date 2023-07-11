@@ -5,7 +5,9 @@ defmodule Teiserver.Tachyon.Responses.Lobby.JoinResponse do
 
   alias Teiserver.Data.Types, as: T
 
-  @spec generate({:error, String.t()} | T.lobby()) :: {T.tachyon_command, :success, T.tachyon_object} | {T.tachyon_command, T.error_pair}
+  @spec generate({:error, String.t()} | T.lobby()) ::
+          {T.tachyon_command(), :success, T.tachyon_object()}
+          | {T.tachyon_command(), T.error_pair()}
   def generate({:error, reason}) do
     {"system/error/response", {:error, reason}}
   end

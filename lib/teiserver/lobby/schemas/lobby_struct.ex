@@ -14,21 +14,23 @@ defmodule Teiserver.Lobby.LobbyStruct do
     engine_version: nil,
     game_name: nil,
     game_hash: nil,
-    lobby_type: "normal",# Normal, Replay
+    # Normal, Replay
+    lobby_type: "normal",
 
     # Values built from components
     display_name: nil,
 
     # Membership stuff
-    members: [], # userid list
+    # userid list
+    members: [],
     member_count: 0,
-    players: [], # userid list
+    # userid list
+    players: [],
     spectator_count: 0,
 
     # Basic variables
     base_name: nil,
     rename_type: nil,
-
     password: nil,
     locked: nil,
     silence: false,
@@ -36,8 +38,8 @@ defmodule Teiserver.Lobby.LobbyStruct do
     map_hash: nil,
     start_areas: %{},
     disabled_units: [],
-
-    max_players: 0,#Config.get_site_config_cache("teiserver.Default player limit"),
+    # Config.get_site_config_cache("teiserver.Default player limit"),
+    max_players: 0,
 
     # Variables used to record/cache things about the lobby
     started_at: nil,
@@ -70,19 +72,20 @@ defmodule Teiserver.Lobby.LobbyStruct do
     host_teamsize: 8,
     host_teamcount: 2,
     ring_timestamps: %{},
-    ring_limit_count: 0,#Config.get_site_config_cache("teiserver.Ring flood rate limit count"),
-    ring_window_size: 0,#Config.get_site_config_cache("teiserver.Ring flood rate window size"),
+    # Config.get_site_config_cache("teiserver.Ring flood rate limit count"),
+    ring_limit_count: 0,
+    # Config.get_site_config_cache("teiserver.Ring flood rate window size"),
+    ring_window_size: 0,
     afk_check_list: [],
     afk_check_at: nil,
     last_seen_map: %{},
-
-    last_queue_state: [], # Used to tell if there has been a change to the queue state and should it be broadcast
+    # Used to tell if there has been a change to the queue state and should it be broadcast
+    last_queue_state: [],
     balance_result: nil,
     showmatch: true,
 
     # Stuff from the consul that needs to move out of the lobby state itself
     split: nil,
-    welcome_message: nil,
-
+    welcome_message: nil
   ]
 end

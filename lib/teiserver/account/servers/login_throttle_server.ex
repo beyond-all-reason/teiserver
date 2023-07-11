@@ -115,7 +115,8 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   @impl true
   def handle_call(:queue_size, _from, state) do
-    result = @queues
+    result =
+      @queues
       |> Enum.map(fn q ->
         String.to_atom("#{q}_queue")
       end)

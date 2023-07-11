@@ -10,23 +10,25 @@ defmodule Teiserver.Tachyon.Responses.User.UpdatedUserClientResponse do
   def generate(client) do
     object = %{
       "userid" => client.userid,
-      "status" => Converters.convert(client, :client),
+      "status" => Converters.convert(client, :client)
     }
 
-    {"user/UpdatedUserClient/response", :success, %{
-      "userClient" => object
-    }}
+    {"user/UpdatedUserClient/response", :success,
+     %{
+       "userClient" => object
+     }}
   end
 
-  @spec generate(T.userid, map()) :: {T.tachyon_command(), T.tachyon_object()}
+  @spec generate(T.userid(), map()) :: {T.tachyon_command(), T.tachyon_object()}
   def generate(userid, partial_client) do
     object = %{
       "userid" => userid,
-      "status" => Converters.convert(partial_client, :client),
+      "status" => Converters.convert(partial_client, :client)
     }
 
-    {"user/UpdatedUserClient/response", :success, %{
-      "userClient" => object
-    }}
+    {"user/UpdatedUserClient/response", :success,
+     %{
+       "userClient" => object
+     }}
   end
 end

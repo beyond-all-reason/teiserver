@@ -509,7 +509,6 @@ defmodule CentralWeb.Router do
     get("/tools/falist", ToolController, :falist)
     get("/tools/test_page", ToolController, :test_page)
 
-
     post("/clans/create_membership", ClanController, :create_membership)
     delete("/clans/delete_membership/:clan_id/:user_id", ClanController, :delete_membership)
     delete("/clans/delete_invite/:clan_id/:user_id", ClanController, :delete_invite)

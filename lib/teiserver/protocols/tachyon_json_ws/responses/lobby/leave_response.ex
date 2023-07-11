@@ -7,8 +7,6 @@ defmodule Teiserver.Tachyon.Responses.Lobby.LeaveResponse do
 
   @spec generate(:ok) :: T.tachyon_response()
   def generate(:ok) do
-    {"lobby/leave/response", :success, %{
-
-    }}
+    {"lobby/leave/response", :success, %{}}
   end
 end

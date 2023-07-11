@@ -33,10 +33,7 @@
               <%= live_redirect("Battle ##{@client.lobby_id}",
                 to: Routes.ts_battle_lobby_show_path(@socket, :show, @client.lobby_id),
                 class: ""
-              ) %>
-
-              &nbsp;&nbsp;&nbsp;
-
+              ) %> &nbsp;&nbsp;&nbsp;
               <%= if @current_client do %>
                 <span phx-click="join-lobby" class={"btn btn-#{bsname} btn-sm"}>
                   Join

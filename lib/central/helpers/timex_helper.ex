@@ -406,6 +406,7 @@ defmodule Central.Helpers.TimexHelper do
   end
 
   def represent_minutes(nil), do: ""
+
   def represent_minutes(s) do
     now = Timex.now()
     until = Timex.shift(now, minutes: s)
@@ -413,6 +414,7 @@ defmodule Central.Helpers.TimexHelper do
   end
 
   def represent_seconds(nil), do: ""
+
   def represent_seconds(s) do
     now = Timex.now()
     until = Timex.shift(now, seconds: s)

@@ -13,7 +13,8 @@ defmodule Teiserver.Tachyon.Handlers.Telemetry.PropertyRequest do
     }
   end
 
-  @spec execute(T.tachyon_conn(), T.tachyon_object(), map) :: {T.tachyon_response(), T.tachyon_conn()}
+  @spec execute(T.tachyon_conn(), T.tachyon_object(), map) ::
+          {T.tachyon_response(), T.tachyon_conn()}
   def execute(conn, %{"type" => property_type, "value" => value, "hash" => hash}, _meta) do
     Telemetry.log_client_property(conn.userid, property_type, value, hash)
 

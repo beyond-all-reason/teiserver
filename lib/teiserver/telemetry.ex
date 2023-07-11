@@ -91,10 +91,6 @@ defmodule Teiserver.Telemetry do
     ]
   end
 
-
-
-
-
   alias Teiserver.Telemetry.EventType
   alias Teiserver.Telemetry.EventTypeLib
 
@@ -644,6 +640,7 @@ defmodule Teiserver.Telemetry do
         result
     end
   end
+
   def log_client_property(nil, value_name, value, hash) do
     property_type_id = get_or_add_property_type(value_name)
 

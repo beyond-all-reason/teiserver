@@ -56,7 +56,7 @@
 
             <div class="col-md-3">
               Balance rating change: <%= (@ratings[@filter].rating_value -
-                                         @stats.first_log.value["rating_value"])
+                                            @stats.first_log.value["rating_value"])
               |> round(2) %>
             </div>
           </div>
@@ -69,8 +69,13 @@
               <th>Players</th>
               <th>Type</th>
               <th colspan="2">Skill</th>
-              <th colspan="2">Match Rating <small class="text-secondary">(Skill - Uncertainty, non-negative only)</small></th>
-              <th colspan="2">Leaderboard Rating <small class="text-secondary">(Skill - 3 x Uncertainty)</small></th>
+              <th colspan="2">
+                Match Rating
+                <small class="text-secondary">(Skill - Uncertainty, non-negative only)</small>
+              </th>
+              <th colspan="2">
+                Leaderboard Rating <small class="text-secondary">(Skill - 3 x Uncertainty)</small>
+              </th>
               <th>Date</th>
               <th>&nbsp;</th>
             </tr>

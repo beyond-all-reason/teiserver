@@ -42,7 +42,7 @@ defmodule Teiserver.Account.BanEvasionReport do
     moderated_key_values =
       moderated_keys
       |> Enum.map(fn %{value: value} -> value end)
-      |> Enum.uniq
+      |> Enum.uniq()
 
     # Now search for keys of existing users
     relevant_evader_ids =
@@ -85,7 +85,8 @@ defmodule Teiserver.Account.BanEvasionReport do
       end)
 
     # Now filter out smurf origins
-    relevant_evaders = relevant_evaders
+    relevant_evaders =
+      relevant_evaders
       |> Enum.filter(fn u ->
         stats = user_stats[u.id]
 

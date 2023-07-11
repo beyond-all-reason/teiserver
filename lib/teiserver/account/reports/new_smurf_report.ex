@@ -107,7 +107,8 @@ defmodule Teiserver.Account.NewSmurfReport do
       end)
 
     # Now trim them down that little bit more
-    relevant_new_users = relevant_new_users
+    relevant_new_users =
+      relevant_new_users
       |> Enum.filter(fn u ->
         stats = user_stats[u.id]
 

@@ -17,11 +17,12 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   def handle_info(:startup, state) do
     socket = AgentLib.get_socket()
 
-    {:success, _user} = AgentLib.login(socket, %{
-      name: "Battlehost_#{state.name}",
-      email: "Battlehost_#{state.name}@agents",
-      bot: true
-    })
+    {:success, _user} =
+      AgentLib.login(socket, %{
+        name: "Battlehost_#{state.name}",
+        email: "Battlehost_#{state.name}@agents",
+        bot: true
+      })
 
     :timer.send_interval(@tick_period, self(), :tick)
 

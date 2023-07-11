@@ -14,7 +14,8 @@ defmodule Teiserver.Tachyon.Handlers.System.DisconnectRequest do
     }
   end
 
-  @spec execute(T.tachyon_conn(), T.tachyon_object(), map) :: {T.tachyon_response(), T.tachyon_conn()}
+  @spec execute(T.tachyon_conn(), T.tachyon_object(), map) ::
+          {T.tachyon_response(), T.tachyon_conn()}
   def execute(%{userid: userid} = conn, _object, _meta) do
     send(self(), :disconnect)
     Teiserver.Client.disconnect(userid, "WS disconnect request")

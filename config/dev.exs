@@ -116,6 +116,7 @@ try do
 rescue
   _ in File.Error ->
     nil
+
   error ->
     reraise error, __STACKTRACE__
 end

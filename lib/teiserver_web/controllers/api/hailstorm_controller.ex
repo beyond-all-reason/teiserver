@@ -146,17 +146,22 @@ defmodule TeiserverWeb.API.HailstormController do
     rating_value = BalanceLib.calculate_rating_value(skill, uncertainty)
     leaderboard_rating = BalanceLib.calculate_leaderboard_rating(skill, uncertainty)
 
-    {:ok, rating} = Account.create_or_update_rating(%{
-      user_id: params["userid"],
-      rating_type_id: rating_type_id,
-      rating_value: rating_value,
-      skill: skill,
-      uncertainty: uncertainty,
-      leaderboard_rating: leaderboard_rating,
-      last_updated: Timex.now()
-    })
+    {:ok, rating} =
+      Account.create_or_update_rating(%{
+        user_id: params["userid"],
+        rating_type_id: rating_type_id,
+        rating_value: rating_value,
+        skill: skill,
+        uncertainty: uncertainty,
+        leaderboard_rating: leaderboard_rating,
+        last_updated: Timex.now()
+      })
 
-    result = Map.take(rating, ~w(user_id rating_type_id rating_value skill uncertainty leaderboard_rating last_updated)a)
+    result =
+      Map.take(
+        rating,
+        ~w(user_id rating_type_id rating_value skill uncertainty leaderboard_rating last_updated)a
+      )
 
     conn
     |> put_status(201)
@@ -168,25 +173,26 @@ defmodule TeiserverWeb.API.HailstormController do
   def get_server_state(conn, %{"server" => server, "id" => id_str}) do
     id = int_parse(id_str)
 
-    result = case server do
-      "client" ->
-        client = Account.get_client_by_id(id)
-        user = Account.get_user_by_id(id)
-        Map.put(client, :user, user)
+    result =
+      case server do
+        "client" ->
+          client = Account.get_client_by_id(id)
+          user = Account.get_user_by_id(id)
+          Map.put(client, :user, user)
 
-      "lobby" ->
-        Lobby.get_lobby(id)
+        "lobby" ->
+          Lobby.get_lobby(id)
 
-      "balance" ->
-        pid = Coordinator.get_balancer_pid(id)
-        state = :sys.get_state(pid)
+        "balance" ->
+          pid = Coordinator.get_balancer_pid(id)
+          state = :sys.get_state(pid)
 
-        current_balance = Map.get(state.hashes, state.last_balance_hash, nil)
-        Map.put(state, "current_balance", current_balance)
+          current_balance = Map.get(state.hashes, state.last_balance_hash, nil)
+          Map.put(state, "current_balance", current_balance)
 
-      _ ->
-        raise "No server of type #{server}"
-    end
+        _ ->
+          raise "No server of type #{server}"
+      end
 
     conn
     |> put_status(201)

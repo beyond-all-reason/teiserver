@@ -153,6 +153,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         if userid do
           Telemetry.log_match_event(match_id, userid, event_type_name, game_time)
         end
+
       _ ->
         Logger.error("match_event bad_match error on '#{data}'")
     end

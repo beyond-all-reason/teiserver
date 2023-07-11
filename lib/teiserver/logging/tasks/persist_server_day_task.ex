@@ -600,8 +600,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
   defp add_telemetry(stats, date) do
     start_date = date |> Timex.to_datetime()
 
-    end_date =
-      date |> Timex.shift(days: 1) |> Timex.to_datetime()
+    end_date = date |> Timex.shift(days: 1) |> Timex.to_datetime()
 
     base_query = """
       SELECT

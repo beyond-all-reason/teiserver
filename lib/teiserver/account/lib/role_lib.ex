@@ -87,14 +87,24 @@ defmodule Teiserver.Account.RoleLib do
     },
     %{name: "Engine", colour: "#007700", icon: "fa-duotone fa-engine", contains: ~w(Contributor)},
     %{name: "Mapping", colour: "#007700", icon: "fa-duotone fa-map", contains: ~w(Contributor)},
-    %{name: "Gameplay", colour: "#AA0000", icon: "fa-duotone fa-pen-ruler", contains: ~w(Contributor)},
+    %{
+      name: "Gameplay",
+      colour: "#AA0000",
+      icon: "fa-duotone fa-pen-ruler",
+      contains: ~w(Contributor)
+    },
     %{
       name: "Infrastructure",
       colour: "#007700",
       icon: "fa-duotone fa-server",
       contains: ~w(Contributor)
     },
-    %{name: "Data export", colour: "#007700", icon: "fa-duotone fa-download", contains: ~w(Contributor)},
+    %{
+      name: "Data export",
+      colour: "#007700",
+      icon: "fa-duotone fa-download",
+      contains: ~w(Contributor)
+    },
     %{name: "Tester", colour: "#00AAAA", icon: "fa-duotone fa-vial", contains: ~w(Contributor)},
     %{
       name: "Core",
@@ -182,7 +192,16 @@ defmodule Teiserver.Account.RoleLib do
 
   @spec staff_roles :: [String.t()]
   def staff_roles() do
-    ["Core", "Engine", "Mapping", "Gameplay", "Infrastructure", "Data export", "Tester", "Contributor"]
+    [
+      "Core",
+      "Engine",
+      "Mapping",
+      "Gameplay",
+      "Infrastructure",
+      "Data export",
+      "Tester",
+      "Contributor"
+    ]
   end
 
   @spec community_roles :: [String.t()]

@@ -11,7 +11,8 @@ defmodule Teiserver.Tachyon.Handlers.LobbyHost.RespondToJoinRequestRequest do
     }
   end
 
-  @spec execute(T.tachyon_conn(), T.tachyon_object(), map) :: {T.tachyon_response(), T.tachyon_conn()}
+  @spec execute(T.tachyon_conn(), T.tachyon_object(), map) ::
+          {T.tachyon_response(), T.tachyon_conn()}
   def execute(conn, %{"response" => "accept"} = object, _meta) do
     Lobby.accept_join_request(object["userid"], conn.lobby_id)
 

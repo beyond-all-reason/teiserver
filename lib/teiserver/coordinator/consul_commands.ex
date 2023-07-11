@@ -1335,6 +1335,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       2,
       []
     })
+
     ConsulServer.say_command(cmd, state)
 
     state
@@ -1376,6 +1377,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "That lobby name been rejected. Please be aware that misuse of the lobby naming system can cause your chat privileges to be revoked.",
           state.lobby_id
         )
+
         state
 
       state.lobby_policy_id != nil ->
@@ -1384,6 +1386,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "This is a server managed lobby, you cannot rename it",
           state.lobby_id
         )
+
         state
 
       # String.length(new_name) > 20 ->
@@ -1422,6 +1425,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             state.lobby_id
           )
         end
+
         %{state | rename_string: ""}
 
       lobby.consul_rename ->

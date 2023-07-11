@@ -33,11 +33,7 @@
         ) %>
         <br /><br />
 
-        <form
-          action={~p"/telemetry/client_events/export/post"}
-          method="post"
-          class=""
-        >
+        <form action={~p"/telemetry/client_events/export/post"} method="post" class="">
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
           <div class="row">
             <div class="col-xl-4 col-lg-6 col-md-12 my-2">

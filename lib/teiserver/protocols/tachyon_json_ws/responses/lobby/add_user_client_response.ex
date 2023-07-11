@@ -5,7 +5,9 @@ defmodule Teiserver.Tachyon.Responses.Lobby.AddUserClientResponse do
 
   alias Teiserver.Data.Types, as: T
 
-  @spec generate(T.client(), T.lobby_id()) :: {T.tachyon_command, :success, T.tachyon_object} | {T.tachyon_command, T.error_pair}
+  @spec generate(T.client(), T.lobby_id()) ::
+          {T.tachyon_command(), :success, T.tachyon_object()}
+          | {T.tachyon_command(), T.error_pair()}
   def generate(client, lobby_id) do
     object = %{
       "id" => client.userid,
@@ -27,9 +29,10 @@ defmodule Teiserver.Tachyon.Responses.Lobby.AddUserClientResponse do
       }
     }
 
-    {"lobby/addUserClient/response", :success, %{
-      "lobby_id" => lobby_id,
-      "UserClient" => object
-    }}
+    {"lobby/addUserClient/response", :success,
+     %{
+       "lobby_id" => lobby_id,
+       "UserClient" => object
+     }}
   end
 end

@@ -49,7 +49,8 @@ defmodule Teiserver.Tachyon.MessageHandlers.ClientMessageHandlers do
     end
   end
 
-  def handle(%{event: :added_to_lobby, lobby_id: lobby_id} = msg, conn) when is_integer(lobby_id) do
+  def handle(%{event: :added_to_lobby, lobby_id: lobby_id} = msg, conn)
+      when is_integer(lobby_id) do
     case JoinedResponse.generate(lobby_id, msg.script_password) do
       {command, :success, data} ->
         PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")

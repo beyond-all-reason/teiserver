@@ -33,7 +33,8 @@ defmodule TeiserverWeb.Telemetry.ServerEventController do
 
     server_events = Telemetry.get_server_events_summary(args)
 
-    event_types = Map.keys(server_events)
+    event_types =
+      Map.keys(server_events)
       |> Enum.sort()
 
     conn

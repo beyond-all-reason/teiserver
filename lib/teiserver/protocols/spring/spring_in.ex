@@ -301,14 +301,17 @@ defmodule Teiserver.Protocols.SpringIn do
         })
 
       {:ok, user} ->
-        optimisation_level = cond do
-          Enum.member?(@none_override_users, user.name) ->
-            :none
-          Enum.member?(@partial_override_users, user.name) ->
-            :partial
-          true ->
-            Map.get(@optimisation_level, user.lobby_client, :full)
-        end
+        optimisation_level =
+          cond do
+            Enum.member?(@none_override_users, user.name) ->
+              :none
+
+            Enum.member?(@partial_override_users, user.name) ->
+              :partial
+
+            true ->
+              Map.get(@optimisation_level, user.lobby_client, :full)
+          end
 
         new_state = SpringOut.do_login_accepted(state, user, optimisation_level)
 
@@ -378,14 +381,17 @@ defmodule Teiserver.Protocols.SpringIn do
         })
 
       {:ok, user} ->
-        optimisation_level = cond do
-          Enum.member?(@none_override_users, user.name) ->
-            :none
-          Enum.member?(@partial_override_users, user.name) ->
-            :partial
-          true ->
-            Map.get(@optimisation_level, user.lobby_client, :full)
-        end
+        optimisation_level =
+          cond do
+            Enum.member?(@none_override_users, user.name) ->
+              :none
+
+            Enum.member?(@partial_override_users, user.name) ->
+              :partial
+
+            true ->
+              Map.get(@optimisation_level, user.lobby_client, :full)
+          end
 
         new_state = SpringOut.do_login_accepted(state, user, optimisation_level)
 
