@@ -28,10 +28,9 @@ defmodule Teiserver.Communication.NotificationPlug do
 
     unread_count =
       notifications
-      |> Enum.filter(fn n ->
+      |> Enum.count(fn n ->
         not n.read
       end)
-      |> Enum.count()
 
     socket
     |> Phoenix.LiveView.Utils.assign(:user_notifications, notifications)
@@ -50,10 +49,9 @@ defmodule Teiserver.Communication.NotificationPlug do
 
     unread_count =
       notifications
-      |> Enum.filter(fn n ->
+      |> Enum.count(fn n ->
         not n.read
       end)
-      |> Enum.count()
 
     conn
     |> assign(:user_notifications, notifications)

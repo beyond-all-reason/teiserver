@@ -25,11 +25,9 @@ config :central, CentralWeb.Endpoint,
   secret_key_base: "6FN12Jv4ZITAK1fq7ehD0MTRvbLsXYWj+wLY3ifkzzlcUIcpUJK7aG/ptrJSemAy",
   live_view: [signing_salt: "wZVVigZo"],
   render_errors: [
-    # render_errors: [view: CentralWeb.ErrorView, accepts: ~w(html json), layout: false],
     formats: [html: CentralWeb.ErrorHTML, json: CentralWeb.ErrorJSON],
     layout: false
   ],
-  # render_errors: [view: CentralWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: Central.PubSub
 
 config :esbuild,

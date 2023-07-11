@@ -32,7 +32,6 @@ defmodule CentralWeb.Endpoint do
     at: "/",
     from: :central,
     gzip: true,
-    # only: ~w(css js assets webfonts fonts images favicon.ico robots.txt),
     only: CentralWeb.static_paths()
   )
 
