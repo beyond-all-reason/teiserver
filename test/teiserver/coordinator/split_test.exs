@@ -303,6 +303,104 @@ defmodule Teiserver.Coordinator.SplitTest do
     assert Client.get_client_by_id(player6.id).lobby_id == lobby_id
   end
 
+  test "test split with passworded lobby", %{
+    host: _host,
+    player: player1,
+    psocket: psocket1,
+    lobby_id: lobby_id,
+    listener: listener,
+    empty_lobby_id: empty_lobby_id
+  } do
+    %{user: player2, socket: psocket2} = tachyon_auth_setup()
+    %{user: player3, socket: psocket3} = tachyon_auth_setup()
+    %{user: player4, socket: _psocket4} = tachyon_auth_setup()
+    %{user: player5, socket: _psocket5} = tachyon_auth_setup()
+    %{user: player6, socket: _psocket6} = tachyon_auth_setup()
+
+    # Add players to the lobby
+    Lobby.add_user_to_battle(player2.id, lobby_id, "script_password")
+    Lobby.add_user_to_battle(player3.id, lobby_id, "script_password")
+    Lobby.add_user_to_battle(player4.id, lobby_id, "script_password")
+    Lobby.add_user_to_battle(player5.id, lobby_id, "script_password")
+    Lobby.add_user_to_battle(player6.id, lobby_id, "script_password")
+
+    # Normally the player joins through the standard means but we're doing a test so it's a bit janky atm
+    send(Client.get_client_by_id(player1.id).tcp_pid, {:put, :lobby_id, lobby_id})
+    send(Client.get_client_by_id(player2.id).tcp_pid, {:put, :lobby_id, lobby_id})
+    send(Client.get_client_by_id(player3.id).tcp_pid, {:put, :lobby_id, lobby_id})
+    send(Client.get_client_by_id(player4.id).tcp_pid, {:put, :lobby_id, lobby_id})
+    send(Client.get_client_by_id(player5.id).tcp_pid, {:put, :lobby_id, lobby_id})
+    send(Client.get_client_by_id(player6.id).tcp_pid, {:put, :lobby_id, lobby_id})
+
+    # Remove empty lobby with matching engine version
+    Lobby.close_lobby(empty_lobby_id)
+
+    # Add an empty passworded lobby
+    lobby_data = %{
+      cmd: "c.lobby.create",
+      name: "Empty battle - #{:rand.uniform(999_999_999)}",
+      nattype: "none",
+      port: 1234,
+      game_hash: "string_of_characters",
+      map_hash: "string_of_characters",
+      map_name: "empty valley",
+      game_name: "BAR",
+      passworded: true,
+      settings: %{
+        max_players: 12
+      }
+    }
+
+    %{socket: hsocket_empty} = tachyon_auth_setup()
+    data = %{cmd: "c.lobby.create", lobby: lobby_data}
+    _tachyon_send(hsocket_empty, data)
+    [reply] = _tachyon_recv(hsocket_empty)
+    _empty_lobby_id = reply["lobby"]["id"]
+
+    data = %{cmd: "c.lobby.message", message: "$splitlobby"}
+    _tachyon_send(psocket1, data)
+
+    # Check what got sent
+    messages = PubsubListener.get(listener)
+
+    assert Enum.member?(messages, %{
+             channel: "teiserver_lobby_chat:#{lobby_id}",
+             event: :announce,
+             lobby_id: lobby_id,
+             message:
+               "Split lobby sequence started ($y to move, $n to cancel, $follow <name> to follow user)",
+             userid: Coordinator.get_coordinator_userid()
+           }),
+           message: inspect(messages)
+
+    assert Enum.member?(messages, %{
+             channel: "teiserver_lobby_chat:#{lobby_id}",
+             event: :say,
+             lobby_id: lobby_id,
+             message: "$splitlobby",
+             userid: player1.id
+           }),
+           message: inspect(messages)
+
+    # Check state
+    _tachyon_send(psocket1, %{cmd: "c.lobby.message", message: "$y"})
+    _tachyon_send(psocket2, %{cmd: "c.lobby.message", message: "$y"})
+    _tachyon_send(psocket3, %{cmd: "c.lobby.message", message: "$y"})
+    :timer.sleep(200)
+
+    # Time to resolve
+    _tachyon_send(psocket1, %{cmd: "c.lobby.message", message: "$dosplit"})
+    :timer.sleep(200)
+
+    # Split should fail because there are no empty lobbies without passwords
+    assert Client.get_client_by_id(player1.id).lobby_id == lobby_id
+    assert Client.get_client_by_id(player2.id).lobby_id == lobby_id
+    assert Client.get_client_by_id(player3.id).lobby_id == lobby_id
+    assert Client.get_client_by_id(player4.id).lobby_id == lobby_id
+    assert Client.get_client_by_id(player5.id).lobby_id == lobby_id
+    assert Client.get_client_by_id(player6.id).lobby_id == lobby_id
+  end
+
   test "test split resolving" do
     # Basic test
     result =
