@@ -24,7 +24,7 @@ defmodule Teiserver.User do
 
   @suspended_string "This account has been suspended. You can see the #moderation-bot on discord for more details; if you need to appeal anything please use the #open-ticket channel on the discord. Be aware, trying to evade moderation by creating new accounts will result in extending the suspension or even a permanent ban."
 
-  @smurf_string "Smurf/alt account detected. We do not allow smurfing. Please login as your main account. Repeatedly creating smurfs can result in suspension or bans. If you think this account was flagged incorrectly please open a ticket on our discord and explain why."
+  @smurf_string "Alt account detected. We do not allow alt accounts. Please login as your main account. Repeatedly creating alts can result in suspension or bans. If you think this account was flagged incorrectly please open a ticket on our discord and explain why."
 
   # Keys kept from the raw user and merged into the memory user
   @spec keys() :: [atom]
