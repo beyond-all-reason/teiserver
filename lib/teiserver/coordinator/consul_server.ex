@@ -273,7 +273,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
           if client.lobby_id == state.lobby_id or client.lobby_id == nil do
             # If the first splitter is still in this lobby, move them to a new one
             # with the same engine version as the starting lobby
-            Lobby.find_empty_lobby(fn a -> a.engine_version == old_lobby.engine_version end)
+            Lobby.find_empty_lobby(fn a ->
+              a.engine_version == old_lobby.engine_version and
+              a.passworded == false
+            end)
           else
             %{id: client.lobby_id}
           end
