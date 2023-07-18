@@ -84,39 +84,12 @@
           </thead>
           <tbody>
             <%= for user <- @relevant_evaders do %>
-              <% user_r = %{restrictions: user.data["restrictions"] || []}
-              stats = @user_stats[user.id]
-
-              banned = Teiserver.User.is_restricted?(user_r, ["Login"])
-
-              muted =
-                Teiserver.User.is_restricted?(user_r, [
-                  "All chat",
-                  "Room chat",
-                  "Direct chat",
-                  "Lobby chat",
-                  "Battle chat"
-                ])
-
-              warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"]) %>
+              <% stats = @user_stats[user.id] %>
 
               <tr>
                 <td><%= user.name %></td>
                 <td>
-                  <%= if banned do %>
-                    <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}>
-                    </i>
-                  <% end %>
-
-                  <%= if muted do %>
-                    <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Mute")}"}>
-                    </i>
-                  <% end %>
-
-                  <%= if warned do %>
-                    <i class={"fa-fw text-warning #{Teiserver.Moderation.ActionLib.action_icon("Warn")}"}>
-                    </i>
-                  <% end %>
+                  <TeiserverWeb.UserComponents.status_icon user={user} />
                 </td>
 
                 <td>
