@@ -1,4 +1,5 @@
 defmodule Teiserver.Coordinator.ConsulCommands do
+  @moduledoc false
   require Logger
   alias Teiserver.Config
   alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
@@ -1359,10 +1360,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "rename", remaining: new_name, senderid: senderid} = cmd, state) do
     new_name = String.trim(new_name)
-    # stripped_name = case Regex.run(~r/^[a-zA-Z0-9_\-\[\] ]+$/, new_name) do
-    #   [s] -> s
-    #   _ -> ""
-    # end
+    stripped_name = case Regex.run(~r/^[a-zA-Z0-9_\-\[\] \<\>\+\|:]+$/, new_name) do
+      [s] -> s
+      _ -> ""
+    end
 
     lobby = Lobby.get_lobby(state.lobby_id)
 
@@ -1397,13 +1398,14 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       #   )
       #   state
 
-      # new_name != stripped_name ->
-      #   Lobby.sayex(
-      #     state.coordinator_id,
-      #     "That name contains one or more invalid characters (alphanumeric, spaces and some special characters allowed)",
-      #     state.lobby_id
-      #   )
-      #   state
+      new_name != stripped_name ->
+        Logger.error("LobbyRename not allowed '#{new_name}' vs '#{stripped_name}'")
+        Lobby.sayex(
+          state.coordinator_id,
+          "That name contains one or more invalid characters (alphanumeric, spaces and some special characters allowed)",
+          state.lobby_id
+        )
+        state
 
       senderid != lobby.founder_id ->
         Lobby.rename_lobby(state.lobby_id, new_name, true)
