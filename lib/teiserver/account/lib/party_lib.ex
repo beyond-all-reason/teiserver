@@ -20,7 +20,7 @@ defmodule Teiserver.Account.PartyLib do
   def colours, do: :primary2
 
   @spec icon() :: String.t()
-  def icon, do: "fa-solid fa-people-group"
+  def icon, do: "fa-solid fa-user-group"
 
   @spec leader_name(T.party_id()) :: nil | String.t()
   def leader_name(party_id) do

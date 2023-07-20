@@ -23,9 +23,9 @@ defmodule TeiserverWeb.Account.GeneralController do
     role_data = RoleLib.role_data()
 
     filtered_roles =
-      RoleLib.staff_roles()
-      |> Enum.filter(fn role ->
-        Enum.member?(my_perms, role)
+      RoleLib.all_role_names()
+      |> Enum.filter(fn role_name ->
+        Enum.member?(my_perms, role_name) and RoleLib.role_data(role_name).badge
       end)
 
     options =
@@ -51,9 +51,9 @@ defmodule TeiserverWeb.Account.GeneralController do
     role_data = RoleLib.role_data()
 
     filtered_roles =
-      RoleLib.staff_roles()
-      |> Enum.filter(fn role ->
-        Enum.member?(my_perms, role)
+      RoleLib.all_role_names()
+      |> Enum.filter(fn role_name ->
+        Enum.member?(my_perms, role_name) and RoleLib.role_data(role_name).badge
       end)
 
     role_def =
