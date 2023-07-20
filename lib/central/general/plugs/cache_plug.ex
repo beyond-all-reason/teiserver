@@ -21,7 +21,7 @@ defmodule Central.General.CachePlug do
     socket
     |> Phoenix.LiveView.Utils.assign(
       :tz,
-      Config.get_user_config_cache(socket.assigns.user_id, "general.Timezone")
+      Config.get_user_config_cache(socket.assigns.current_user.id, "general.Timezone")
     )
   end
 end

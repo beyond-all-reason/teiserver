@@ -128,6 +128,58 @@ defmodule Central.Account.AuthLib do
     end
   end
 
+  @doc """
+  Allows us to perform an auth check and force a redirect
+  """
+  @spec mount_require_all(Plug.Conn.t() | Phoenix.LiveView.Socket.t(), String.t() | [String.t()]) :: Phoenix.LiveView.Socket
+  def mount_require_all(obj, requirements) do
+    if do_require(obj, List.flatten([requirements]), :all) do
+      obj
+    else
+      obj
+      |> Phoenix.LiveView.put_flash(:warning, "You do not have permission to view this page.")
+      |> Phoenix.LiveView.redirect(to: "/")
+    end
+  end
+
+  @spec mount_require_any(Map.t() | Plug.Conn.t() | Phoenix.LiveView.Socket.t(), String.t() | [String.t()]) :: Phoenix.LiveView.Socket
+  def mount_require_any(obj, requirements) do
+    if do_require(obj, List.flatten([requirements]), :any) do
+      obj
+    else
+      obj
+      |> Phoenix.LiveView.put_flash(:warning, "You do not have permission to view this page.")
+      |> Phoenix.LiveView.redirect(to: "/")
+    end
+  end
+
+  defp do_require(%Plug.Conn{} = conn, requirements, all_or_any) do
+    do_require(conn.assigns[:current_user].permissions, requirements, all_or_any)
+  end
+
+  # Socket
+  defp do_require(%Phoenix.LiveView.Socket{} = socket, requirements, all_or_any) do
+    do_require(socket.assigns[:current_user].permissions, requirements, all_or_any)
+  end
+
+  defp do_require(permissions_held, requirements, :all) do
+    Enum.all?(
+      requirements,
+      fn p ->
+        allow?(permissions_held, p)
+      end
+    )
+  end
+
+  defp do_require(permissions_held, requirements, :any) do
+    Enum.any?(
+      requirements,
+      fn p ->
+        allow?(permissions_held, p)
+      end
+    )
+  end
+
   # This is used as part of the permission system getting the current user
   @spec current_user(Plug.Conn.t()) :: User.t() | nil
   def current_user(conn) do

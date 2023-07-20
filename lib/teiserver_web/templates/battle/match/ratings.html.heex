@@ -83,11 +83,12 @@
           <tbody>
             <%= for log <- @logs do %>
               <% {text_class, icon} =
-                if log.value["skill_change"] > 0 do
-                  {"text-success", "up"}
-                else
-                  {"text-danger", "down"}
-                end %>
+                cond do
+                  log.value["skill_change"] > 0 -> {"text-success", "up"}
+                  log.value["skill_change"] < 0 -> {"text-danger", "down"}
+                  true -> {"text-warning", "pause"}
+                end
+                 %>
               <tr>
                 <%= if log.match do %>
                   <td><%= log.match.map %></td>

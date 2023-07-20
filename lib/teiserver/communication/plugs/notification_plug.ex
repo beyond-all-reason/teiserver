@@ -23,7 +23,7 @@ defmodule Teiserver.Communication.NotificationPlug do
 
   def live_call(socket) do
     notifications =
-      socket.assigns.user_id
+      socket.assigns.current_user.id
       |> Communication.list_user_notifications(:unread)
 
     unread_count =
@@ -56,5 +56,21 @@ defmodule Teiserver.Communication.NotificationPlug do
     conn
     |> assign(:user_notifications, notifications)
     |> assign(:user_notifications_unread_count, unread_count)
+  end
+
+  def on_mount(:load_notifications, _params, _session, socket) do
+    notifications =
+      socket.assigns.current_user.id
+      |> Communication.list_user_notifications(:unread)
+
+    unread_count =
+      notifications
+      |> Enum.count(fn n ->
+        not n.read
+      end)
+
+    {:cont, socket
+    |> Phoenix.Component.assign(:user_notifications, notifications)
+    |> Phoenix.Component.assign(:user_notifications_unread_count, unread_count)}
   end
 end

@@ -8,27 +8,20 @@ defmodule Fontawesome do
 
   attr :icon, :string, required: true
   attr :class, :string, default: ""
+  attr :size, :string, default: nil
+  attr :weight, :string, default: "regular"
   attr :style, :string, default: "regular"
 
   @spec icon(map) :: Phoenix.LiveView.Rendered.t()
   def icon(assigns) do
-    style =
-      case assigns[:style] do
-        "fa-" <> s -> s
-        s -> s
-      end
-
-    icon =
-      case assigns[:icon] do
-        "fa-" <> ic -> ic
-        ic -> ic
-      end
-
-    class = "fa-fw fa-#{style} fa-#{icon} #{assigns[:class]}"
-    assigns = assign(assigns, :class, class)
+    assigns = assign(assigns, :class, "fa-fw #{fa_prefix(assigns[:style])} #{fa_prefix(assigns[:size])} #{fa_prefix(assigns[:weight])} #{fa_prefix(assigns[:icon])} #{assigns[:class]}")
 
     ~H"""
     <i class={@class}></i>
     """
   end
+
+  defp fa_prefix("fa-" <> s), do: "fa-" <> s
+  defp fa_prefix(nil), do: ""
+  defp fa_prefix(s), do: "fa-" <> s
 end

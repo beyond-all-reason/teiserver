@@ -37,25 +37,15 @@ body {
 /* Alerts and form errors used by phx.new */
 .alert {
   padding: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   border: 1px solid transparent;
+  border-radius: 0px;
+}
+
+.alert-rounded {
   border-radius: 4px;
 }
-.alert-info {
-  color: $body-color;
-  background-color: $info;
-  border-color: $info-dark;
-}
-.alert-danger {
-  color: $body-color;
-  background-color: $danger;
-  border-color: $danger-dark;
-}
-.alert-success {
-  color: $body-color;
-  background-color: $success;
-  border-color: $success-dark;
-}
+
 .alert p {
   margin-bottom: 0;
 }
@@ -352,4 +342,8 @@ input[type="color"] {
 
 .monospace {
   font-family: monospace;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }

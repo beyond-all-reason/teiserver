@@ -82,6 +82,7 @@ defmodule CentralWeb do
         only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
 
       import CentralWeb.CoreComponents
+      import TeiserverWeb.NavComponents
       unquote(verified_routes())
 
       import Phoenix.LiveView
@@ -119,17 +120,24 @@ defmodule CentralWeb do
 
       use Breadcrumble
       alias Central.Account.AuthPlug
-      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2, mount_require_all: 2, mount_require_any: 2]
+      import Central.Helpers.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
+      import Central.Helpers.NumberHelper,
+        only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
       alias Teiserver.Communication.NotificationPlug
-      unquote(verified_routes())
+      import Central.Helpers.TimexHelper
 
+      unquote(verified_routes())
       unquote(view_helpers())
+      unquote(html_helpers())
     end
   end
 
   def live_view do
     quote do
       use CentralWeb, :live_view_structure
+
+      unquote(html_helpers())
     end
   end
 
@@ -138,6 +146,7 @@ defmodule CentralWeb do
       use Phoenix.LiveComponent
 
       unquote(view_helpers())
+      unquote(html_helpers())
     end
   end
 
@@ -207,6 +216,7 @@ defmodule CentralWeb do
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
       import CentralWeb.CoreComponents
+      import TeiserverWeb.NavComponents
 
       import CentralWeb.ErrorHelpers
       import CentralWeb.Gettext
@@ -220,6 +230,7 @@ defmodule CentralWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import CentralWeb.CoreComponents
+      import TeiserverWeb.NavComponents
       import CentralWeb.Gettext
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

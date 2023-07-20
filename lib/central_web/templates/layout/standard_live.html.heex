@@ -37,21 +37,7 @@
   <% end %>
 
   <div id="flash-messages">
-    <%= if live_flash(@flash, :danger) do %>
-      <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger">
-        <%= live_flash(@flash, :danger) %>
-      </p>
-    <% end %>
-    <%= if live_flash(@flash, :info) do %>
-      <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info">
-        <%= live_flash(@flash, :info) %>
-      </p>
-    <% end %>
-    <%= if live_flash(@flash, :success) do %>
-      <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success">
-        <%= live_flash(@flash, :success) %>
-      </p>
-    <% end %>
+    <.flash_group flash={@flash} />
   </div>
 
   <div class="px-3 my-0">
@@ -59,10 +45,8 @@
   </div>
 </main>
 
-<%= if false do %>
-  <footer class="footer mt-auto pt-2 pb-1 px-2">
-    <div class="container" style="text-align: right;">
-      <%= Teiserver.Config.get_site_config_cache("site.Footer credit text") %>
-    </div>
-  </footer>
-<% end %>
+<footer class="footer mt-auto pt-2 pb-1 px-2">
+  <div style="text-align: right;">
+    <%= Teiserver.Config.get_site_config_cache("site.Footer credit text") %>
+  </div>
+</footer>

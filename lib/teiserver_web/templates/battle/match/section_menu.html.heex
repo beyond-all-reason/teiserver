@@ -1,31 +1,22 @@
 <% bsname = view_colour() %>
 
-<%= central_component("section_menu_button",
-  name: "index",
-  label: "List",
-  active: @active,
-  icon: "fa-regular fa-bars",
-  bsname: bsname,
-  url: ~p"/teiserver/battle/matches"
-) %>
+<.section_menu_button
+  bsname={bsname}
+  icon={StylingHelper.icon(:list)}
+  active={@active == "index"}
+  url={~p"/teiserver/battle/matches"}
+>
+  List
+</.section_menu_button>
 
-<%= central_component("section_menu_button",
-  name: "ratings",
-  label: "Ratings",
-  active: @active,
-  icon: Teiserver.Account.RatingLib.icon(),
-  bsname: bsname,
-  url: Routes.ts_battle_match_path(@conn, :ratings)
-) %>
-
-<%= central_component("section_menu_button",
-  name: "ratings_graph",
-  label: "Progression",
-  active: @active,
-  icon: Teiserver.Account.RatingLib.icon(),
-  bsname: bsname,
-  url: Routes.ts_battle_match_path(@conn, :ratings_graph)
-) %>
+<.section_menu_button
+  bsname={bsname}
+  icon={Teiserver.Account.RatingLib.icon()}
+  active={@active == "ratings"}
+  url={~p"/teiserver/battle/matches/ratings"}
+>
+  Ratings
+</.section_menu_button>
 
 <%= if @active == "show" do %>
   <%= central_component("section_menu_button",
@@ -39,14 +30,14 @@
 <% end %>
 
 <div class="float-end">
-  <%= if assigns[:match] != nil and allow?(@conn, "Moderator") do %>
+  <%= if assigns[:match] != nil and allow?(@current_user, "Moderator") do %>
     <%= central_component("section_menu_button",
       name: "admin",
       label: "Admin view",
       active: @active,
       icon: Central.Admin.AdminLib.icon(),
       bsname: bsname,
-      url: Routes.ts_admin_match_path(@conn, :show, @match.id)
+      url: ~p"/teiserver/admin/matches/#{@match.id}"
     ) %>
   <% end %>
 </div>

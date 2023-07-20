@@ -266,7 +266,20 @@ defmodule CentralWeb.Router do
 
     get("/matches/ratings", MatchController, :ratings)
     get("/matches/ratings_graph", MatchController, :ratings_graph)
-    resources("/matches", MatchController, only: [:index, :show, :delete])
+    # resources("/matches", MatchController, only: [:index, :show])
+
+    live_session :board_view,
+      on_mount: [
+        {Central.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Communication.NotificationPlug, :load_notifications}
+      ] do
+        live "/matches", MatchLive.Index, :index
+        live "/matches/:id", MatchLive.Show, :overview
+        live "/matches/:id/overview", MatchLive.Show, :overview
+        live "/matches/:id/players", MatchLive.Show, :players
+        live "/matches/:id/ratings", MatchLive.Show, :ratings
+        live "/matches/:id/balance", MatchLive.Show, :balance
+    end
   end
 
   scope "/teiserver/battle", TeiserverWeb.Battle.LobbyLive, as: :ts_battle do

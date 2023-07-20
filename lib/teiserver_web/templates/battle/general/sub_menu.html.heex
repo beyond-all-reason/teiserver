@@ -56,7 +56,7 @@
             name: "ratings",
             label: "Leaderboard",
             active: @active,
-            url: Routes.ts_battle_ratings_path(@conn, :leaderboard),
+            url: ~p"/teiserver/battle/ratings/leaderboard",
             icon: Teiserver.Account.RatingLib.icon()
           ) %>
 

@@ -24,4 +24,42 @@ defmodule TeiserverWeb.NavComponents do
     </li>
     """
   end
+
+  @doc """
+  <.tab_header>
+    <.tab_nav tab="h1">Header 1</.tab_nav>
+    <.tab_nav tab="h2">Header 2</.tab_nav>
+    <.tab_nav tab="h3">Header 3</.tab_nav>
+  </.tab_header>
+  """
+  # attr :selected, :string, required: :true
+  slot :inner_block, required: true
+
+  def tab_header(assigns) do
+    ~H"""
+      <ul class="nav nav-tabs" role="tablist">
+        <%= render_slot(@inner_block) %>
+      </ul>
+    """
+  end
+
+  attr :selected, :boolean, required: :true
+  attr :url, :string, required: :true
+  slot :inner_block, required: true
+
+  def tab_nav(assigns) do
+    assigns = assigns
+      |> assign(:active_class, (if assigns[:selected], do: "active"))
+
+    ~H"""
+      <li class="nav-item">
+        <.link
+          patch={@url}
+          class={"nav-link #{@active_class}"}
+        >
+          <%= render_slot(@inner_block) %>
+        </.link>
+      </li>
+    """
+  end
 end

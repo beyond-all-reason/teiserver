@@ -121,7 +121,7 @@ defmodule CentralWeb.CoreComponents do
   attr :id, :string, default: "flash", doc: "the optional id of flash container"
   attr :flash, :map, default: %{}, doc: "the map of flash messages to display"
   attr :title, :string, default: nil
-  attr :kind, :atom, values: [:info, :warning, :error], doc: "used for styling and flash lookup"
+  attr :kind, :atom, values: [:info, :success, :warning, :error], doc: "used for styling and flash lookup"
   attr :autoshow, :boolean, default: true, doc: "whether to auto show the flash on mount"
   attr :close, :boolean, default: true, doc: "whether the flash can be closed"
   attr :rest, :global, doc: "the arbitrary HTML attributes to add to the flash container"
@@ -136,26 +136,30 @@ defmodule CentralWeb.CoreComponents do
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
       class={[
-        "fixed hidden top-2 right-2 w-80 sm:w-96 z-50 rounded-lg p-3 shadow-md shadow-zinc-900/5 ring-1",
-        @kind == :info && "bg-emerald-50 text-emerald-800 ring-emerald-500 fill-cyan-900",
-        @kind == :error && "bg-rose-50 p-3 text-rose-900 shadow-md ring-rose-500 fill-rose-900"
+        "fixed hidden alert",
+        @kind == :info && "alert-info",
+        @kind == :success && "alert-success",
+        @kind == :warning && "alert-warning",
+        @kind == :error && "alert-danger"
       ]}
       {@rest}
     >
-      <p :if={@title} class="flex items-center gap-1.5 text-[0.8125rem] font-semibold leading-6">
-        <Fontawesome.icon :if={@kind == :info} icon="circle-info" style="regular" />
-        <Fontawesome.icon :if={@kind == :error} icon="circle-exclamation" style="regular" />
-        <%= @title %>
-      </p>
-      <p class="mt-2 text-[0.8125rem] leading-5"><%= msg %></p>
       <button
         :if={@close}
         type="button"
-        class="group absolute top-2 right-1 p-2"
+        class="btn btn-secondary float-end px-2"
         aria-label={gettext("close")}
       >
         <Fontawesome.icon icon="xmark" style="solid" />
       </button>
+      <p :if={@title} class="flex items-center gap-1.5 text-[0.8125rem] font-semibold leading-6">
+        <Fontawesome.icon :if={@kind == :info} icon="circle-info" style="solid" />
+        <Fontawesome.icon :if={@kind == :success} icon="circle-check" style="solid" />
+        <Fontawesome.icon :if={@kind == :warning} icon="triangle-exclamation" style="solid" />
+        <Fontawesome.icon :if={@kind == :error} icon="ban" style="solid" />
+        <%= @title %>
+      </p>
+      <p class="mt-2 text-[0.8125rem] leading-5"><%= msg %></p>
     </div>
     """
   end
@@ -169,13 +173,14 @@ defmodule CentralWeb.CoreComponents do
 
   def flash_group(assigns) do
     ~H"""
-    <.flash kind={:info} title="Success!" role="alert" flash={@flash} />
-    <.flash kind={:warning} title="Warning" role="alert" flash={@flash} />
+    <.flash kind={:info} title="Information" role="alert" flash={@flash} />
+    <.flash kind={:success} title="Success!" role="alert" flash={@flash} />
+    <.flash kind={:warning} title="Warning!" role="alert" flash={@flash} />
     <.flash kind={:error} title="Error!" role="alert" flash={@flash} />
     <.flash
       id="disconnected"
       kind={:error}
-      title="We can't find the internet"
+      title="Reconnecting to the server"
       close={false}
       autoshow={false}
       phx-disconnected={show("#disconnected")}
@@ -318,7 +323,7 @@ defmodule CentralWeb.CoreComponents do
       <select
         id={@id}
         name={@name}
-        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-zinc-500 focus:border-zinc-500 sm:text-sm"
+        class="form-control"
         multiple={@multiple}
         {@rest}
       >
@@ -361,11 +366,8 @@ defmodule CentralWeb.CoreComponents do
         id={@id || @name}
         value={Phoenix.HTML.Form.normalize_value(@type, @value)}
         class={[
-          "mt-2 block w-full rounded-lg border-zinc-300 py-[7px] px-[11px]",
-          "text-zinc-900 focus:outline-none focus:ring-4 sm:text-sm sm:leading-6",
-          "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
-          "border-zinc-300 focus:border-zinc-400 focus:ring-zinc-800/5",
-          @errors != [] && "border-rose-400 focus:border-rose-400 focus:ring-rose-400/10"
+          "form-control",
+          @errors != [] && "border-danger"
         ]}
         {@rest}
       />
@@ -439,6 +441,8 @@ defmodule CentralWeb.CoreComponents do
   attr :row_id, :any, default: nil, doc: "the function for generating the row id"
   attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
 
+  attr :table_class, :string, default: ""
+
   attr :row_item, :any,
     default: &Function.identity/1,
     doc: "the function for mapping each row before calling the :col and :action slots"
@@ -456,38 +460,32 @@ defmodule CentralWeb.CoreComponents do
       end
 
     ~H"""
-    <div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
-      <table class="mt-11 w-[40rem] sm:w-full">
-        <thead class="text-left text-[0.8125rem] leading-6 text-zinc-500">
+    <div class="">
+      <table class={"table #{@table_class}"}>
+        <thead class="">
           <tr>
-            <th :for={col <- @col} class="p-0 pb-4 pr-6 font-normal"><%= col[:label] %></th>
-            <th class="relative p-0 pb-4"><span class="sr-only"><%= gettext("Actions") %></span></th>
+            <th :for={col <- @col} class=""><%= col[:label] %></th>
+            <th class=""><span class="visually-hidden"><%= gettext("Actions") %></span></th>
           </tr>
         </thead>
         <tbody
           id={@id}
           phx-update={match?(%Phoenix.LiveView.LiveStream{}, @rows) && "stream"}
-          class="relative divide-y divide-zinc-100 border-t border-zinc-200 text-sm leading-6 text-zinc-700"
+          class=""
         >
-          <tr :for={row <- @rows} id={@row_id && @row_id.(row)} class="group hover:bg-zinc-50">
+          <tr :for={row <- @rows} id={@row_id && @row_id.(row)} class="">
             <td
-              :for={{col, i} <- Enum.with_index(@col)}
+              :for={{col, _i} <- Enum.with_index(@col)}
               phx-click={@row_click && @row_click.(row)}
-              class={["relative p-0", @row_click && "hover:cursor-pointer"]}
+              class={["", @row_click && "cursor-pointer"]}
             >
-              <div class="block py-4 pr-6">
-                <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-l-xl" />
-                <span class={["relative", i == 0 && "font-semibold text-zinc-900"]}>
-                  <%= render_slot(col, @row_item.(row)) %>
-                </span>
-              </div>
+              <%= render_slot(col, @row_item.(row)) %>
             </td>
-            <td :if={@action != []} class="relative p-0 w-14">
-              <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
-                <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-zinc-50 sm:rounded-r-xl" />
+            <td :if={@action != []} class="p-0">
+              <div class="">
                 <span
                   :for={action <- @action}
-                  class="relative ml-4 font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
+                  class=""
                 >
                   <%= render_slot(action, @row_item.(row)) %>
                 </span>
@@ -626,5 +624,23 @@ defmodule CentralWeb.CoreComponents do
   """
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
+  end
+
+
+  @doc """
+  <.section_menu_button bsname={bsname} icon={lib} active={true/false} url={url}>
+    Text goes here
+  </.section_menu_button>
+  """
+  def section_menu_button(assigns) do
+    assigns = assigns
+    |> assign(:active_class, (if assigns[:active], do: "active"))
+
+    ~H"""
+    <a href={@url} class={"btn btn-outline-#{@bsname} #{@active_class}"}>
+      <Fontawesome.icon icon={@icon} style={if @active, do: "solid", else: "regular"} :if={@icon != ""} />
+      <%= render_slot(@inner_block) %>
+    </a>
+    """
   end
 end

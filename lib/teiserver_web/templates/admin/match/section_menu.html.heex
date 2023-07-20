@@ -39,7 +39,7 @@
       active: @active,
       icon: Central.Account.UserLib.icon(),
       bsname: bsname,
-      url: Routes.ts_battle_match_path(@conn, :show, @match.id)
+      url: ~p"/teiserver/battle/matches/#{@match.id}"
     ) %>
 
     <%= if allow?(@conn, "Overwatch") do %>

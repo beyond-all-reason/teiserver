@@ -1,7 +1,8 @@
 defmodule Teiserver.Battle.MatchLib do
+  @moduledoc false
   use CentralWeb, :library
   alias Teiserver.{Battle, Account}
-  alias Teiserver.Battle.Match
+  alias Teiserver.Battle.{Match, MatchMembership}
   alias Teiserver.Data.Types, as: T
   require Logger
 
@@ -41,6 +42,20 @@ defmodule Teiserver.Battle.MatchLib do
       max_team_size == 1 -> "FFA"
       true -> "Team FFA"
     end
+  end
+
+  def list_game_types() do
+    [
+      "Duel",
+      "Team",
+      "FFA",
+      "Raptors",
+      "Scavengers",
+      "Bots",
+      "PvP",
+      "PvE",
+      "Coop"
+    ]
   end
 
   @spec match_from_lobby(T.lobby_id()) :: {map(), [map()]} | nil
@@ -242,6 +257,10 @@ defmodule Teiserver.Battle.MatchLib do
       where: matches.queue_id == ^queue_id
   end
 
+  def _search(query, :game_type, "Any type") do
+    query
+  end
+
   def _search(query, :game_type, game_type) do
     from matches in query,
       where: matches.game_type == ^game_type
@@ -377,6 +396,38 @@ defmodule Teiserver.Battle.MatchLib do
   def _search(query, :finished_before, timestamp) do
     from matches in query,
       where: matches.finished < ^timestamp
+  end
+
+  def _search(query, :ally_opponent, {userid, nil, nil}) do
+    from matches in query,
+      join: user_m in MatchMembership,
+        on: user_m.match_id == matches.id and user_m.user_id == ^userid
+  end
+
+  def _search(query, :ally_opponent, {userid, nil, opponent_id}) do
+    from matches in query,
+      join: user_m in MatchMembership,
+        on: user_m.match_id == matches.id and user_m.user_id == ^userid,
+      join: opp_m in MatchMembership,
+        on: opp_m.match_id == matches.id and opp_m .user_id == ^opponent_id and opp_m.team_id != user_m.team_id
+  end
+
+  def _search(query, :ally_opponent, {userid, ally_id, nil}) do
+    from matches in query,
+      join: user_m in MatchMembership,
+        on: user_m.match_id == matches.id and user_m.user_id == ^userid,
+      join: ally_m in MatchMembership,
+        on: ally_m.match_id == matches.id and ally_m .user_id == ^ally_id and ally_m.team_id == user_m.team_id
+  end
+
+  def _search(query, :ally_opponent, {userid, ally_id, opponent_id}) do
+    from matches in query,
+      join: user_m in MatchMembership,
+        on: user_m.match_id == matches.id and user_m.user_id == ^userid,
+      join: ally_m in MatchMembership,
+        on: ally_m.match_id == matches.id and ally_m .user_id == ^ally_id and ally_m.team_id == user_m.team_id,
+      join: opp_m in MatchMembership,
+        on: opp_m.match_id == matches.id and opp_m .user_id == ^opponent_id and opp_m.team_id != user_m.team_id
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
