@@ -10,6 +10,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Index do
       |> assign(:site_menu_active, "match")
       |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
       |> assign(:game_types, game_types)
+      |> add_breadcrumb(name: "Matches", url: "/teiserver/battle/matches")
       |> default_filters()
       |> update_match_list()
 

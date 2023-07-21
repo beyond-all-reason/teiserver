@@ -264,6 +264,8 @@ defmodule CentralWeb.Router do
     get("/ratings/leaderboard", RatingsController, :leaderboard)
     get("/ratings/leaderboard/:type", RatingsController, :leaderboard)
 
+    get("/progression", MatchController, :ratings_graph)
+
     live_session :board_view,
       on_mount: [
         {Central.Account.AuthPlug, :ensure_authenticated},
@@ -278,9 +280,6 @@ defmodule CentralWeb.Router do
 
         live "/ratings", MatchLive.Ratings, :index
         live "/ratings/:rating_type", MatchLive.Ratings, :index
-
-        live "/progression", MatchLive.Progression, :index
-        live "/progression/:rating_type", MatchLive.Progression, :index
     end
   end
 

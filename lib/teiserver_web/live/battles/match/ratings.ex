@@ -26,6 +26,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
       |> assign(:rating_type, Map.get(params, "rating_type", "Team"))
       |> assign(:rating_type_list, MatchRatingLib.rating_type_list())
       |> assign(:rating_type_id_lookup, MatchRatingLib.rating_type_id_lookup())
+      |> add_breadcrumb(name: "Matches", url: "/teiserver/battle/matches")
+      |> add_breadcrumb(name: "Ratings", url: "/teiserver/battle/ratings")
       |> default_filters()
       |> update_match_list()
 
