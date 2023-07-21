@@ -1,4 +1,5 @@
 defmodule TeiserverWeb.UserComponents do
+  @moduledoc false
   use Phoenix.Component
   # alias Phoenix.LiveView.JS
   # import CentralWeb.Gettext

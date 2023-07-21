@@ -264,10 +264,6 @@ defmodule CentralWeb.Router do
     get("/ratings/leaderboard", RatingsController, :leaderboard)
     get("/ratings/leaderboard/:type", RatingsController, :leaderboard)
 
-    get("/matches/ratings", MatchController, :ratings)
-    get("/matches/ratings_graph", MatchController, :ratings_graph)
-    # resources("/matches", MatchController, only: [:index, :show])
-
     live_session :board_view,
       on_mount: [
         {Central.Account.AuthPlug, :ensure_authenticated},
@@ -279,6 +275,12 @@ defmodule CentralWeb.Router do
         live "/matches/:id/players", MatchLive.Show, :players
         live "/matches/:id/ratings", MatchLive.Show, :ratings
         live "/matches/:id/balance", MatchLive.Show, :balance
+
+        live "/ratings", MatchLive.Ratings, :index
+        live "/ratings/:rating_type", MatchLive.Ratings, :index
+
+        live "/progression", MatchLive.Progression, :index
+        live "/progression/:rating_type", MatchLive.Progression, :index
     end
   end
 

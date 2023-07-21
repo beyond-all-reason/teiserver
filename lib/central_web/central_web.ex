@@ -150,6 +150,19 @@ defmodule CentralWeb do
     end
   end
 
+  def component do
+    quote do
+      use Phoenix.Component
+      alias Phoenix.LiveView.JS
+      import CentralWeb.Gettext
+
+      alias Central.Helpers.StylingHelper
+      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+
+      unquote(verified_routes())
+    end
+  end
+
   def library do
     quote do
       alias Teiserver.Repo
@@ -211,7 +224,6 @@ defmodule CentralWeb do
 
       # Import LiveView helpers (live_render, live_component, live_patch, etc)
       import Phoenix.LiveView.Helpers
-      import CentralWeb.LiveHelpers
 
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View

@@ -1,0 +1,133 @@
+<%= render(
+  TeiserverWeb.Battle.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "matches"})
+) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <TeiserverWeb.Battle.MatchComponents.section_menu
+      active="ratings"
+      view_colour={@view_colour}
+      current_user={@current_user}
+    />
+    <br /><br />
+
+    <div class="row">
+      <div class="col-md-12">
+        <%= for rt <- @rating_type_list do %>
+          <%= if @user_ratings[rt] != nil do %>
+            <.section_menu_button_patch
+              bsname={@view_colour}
+              active={@rating_type == rt}
+              url={~p"/teiserver/battle/ratings/#{rt}"}
+            >
+              <%= rt %> &nbsp;&nbsp;&nbsp; <%= @user_ratings[rt].rating_value |> round(2) %>
+            </.section_menu_button_patch>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
+    <%= if @stats.first_log != nil and @user_ratings[@rating_type] != nil do %>
+      <div class="row m-2 mt-3">
+        <div class="col-md-3">
+          Games: <%= @stats.games %>
+        </div>
+
+        <div class="col-md-3">
+          Winrate: <%= (@stats.winrate * 100) |> round %>%
+        </div>
+
+        <div class="col-md-3">
+          Peak balance rating: <%= Enum.max_by(@logs, fn l -> l.value["rating_value"] end).value[
+            "rating_value"
+          ]
+          |> round(2) %>
+        </div>
+
+        <div class="col-md-3">
+          Balance rating change: <%= (@user_ratings[@rating_type].rating_value -
+                                        @stats.first_log.value["rating_value"])
+          |> round(2) %>
+        </div>
+      </div>
+    <% end %>
+
+    <table class="table table-sm table-hover mt-3 cursor-pointer">
+      <thead>
+        <tr class="">
+          <th>Map name</th>
+          <th>Players</th>
+          <th>Type</th>
+          <th colspan="2">Skill</th>
+          <th colspan="2">
+            Match Rating
+            <small class="text-secondary">(Skill - Uncertainty, non-negative only)</small>
+          </th>
+          <th colspan="2">
+            Leaderboard Rating <small class="text-secondary">(Skill - 3 x Uncertainty)</small>
+          </th>
+          <th>Date</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for log <- @logs do %>
+          <% {text_class, icon} =
+            cond do
+              log.value["skill_change"] > 0 -> {"text-success", "up"}
+              log.value["skill_change"] < 0 -> {"text-danger", "down"}
+              true -> {"text-warning", "pause"}
+            end
+              %>
+          <tr phx-click={"[[\"navigate\",{\"href\":\"/teiserver/battle/matches/#{log.match_id}\",\"replace\":false}]]"}>
+            <%= if log.match do %>
+              <td><%= log.match.map %></td>
+              <td><%= log.match.team_size * log.match.team_count %></td>
+            <% else %>
+              <td colspan="2"><%= log.value["reason"] || "No match" %></td>
+            <% end %>
+            <td><%= @rating_type_id_lookup[log.rating_type_id] %></td>
+            <td><%= round(log.value["skill"], 2) %></td>
+            <td class={text_class}>
+              <i class={"fa-fw fa-solid fa-#{icon}"}></i>
+
+              <%= round(log.value["skill_change"], 2) %>
+            </td>
+
+            <td><%= round(log.value["rating_value"], 2) %></td>
+            <td class={text_class}>
+              <i class={"fa-fw fa-solid fa-#{icon}"}></i>
+
+              <%= round(log.value["rating_value_change"], 2) %>
+            </td>
+
+            <td><%= round(log.value["skill"] - 3 * log.value["uncertainty"], 2) %></td>
+            <td class={text_class}>
+              <i class={"fa-fw fa-solid fa-#{icon}"}></i>
+
+              <%= round(log.value["skill_change"] - 3 * log.value["uncertainty_change"], 2) %>
+            </td>
+
+            <td><%= date_to_str(log.inserted_at, format: :hms_or_dmy) %></td>
+
+            <%= if log.match do %>
+              <td>
+                <div class="visually-hidden">
+                  <.link
+                    navigate={~p"/teiserver/battle/matches/#{log.match_id}"}>
+                      Show
+                  </.link>
+                </div>
+              </td>
+            <% else %>
+              <td>&nbsp;</td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+

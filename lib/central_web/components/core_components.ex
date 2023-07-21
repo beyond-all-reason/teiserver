@@ -473,10 +473,14 @@ defmodule CentralWeb.CoreComponents do
           phx-update={match?(%Phoenix.LiveView.LiveStream{}, @rows) && "stream"}
           class=""
         >
-          <tr :for={row <- @rows} id={@row_id && @row_id.(row)} class="">
+          <tr
+            :for={row <- @rows}
+            id={@row_id && @row_id.(row)}
+            phx-click={@row_click && @row_click.(row)}
+            class=""
+          >
             <td
               :for={{col, _i} <- Enum.with_index(@col)}
-              phx-click={@row_click && @row_click.(row)}
               class={["", @row_click && "cursor-pointer"]}
             >
               <%= render_slot(col, @row_item.(row)) %>
@@ -632,15 +636,50 @@ defmodule CentralWeb.CoreComponents do
     Text goes here
   </.section_menu_button>
   """
+  attr :icon, :string, default: nil
+  attr :url, :string, required: true
+  attr :bsname, :string, default: "secondary"
+  attr :active, :boolean, default: false
+  slot :inner_block, required: true
+
   def section_menu_button(assigns) do
     assigns = assigns
     |> assign(:active_class, (if assigns[:active], do: "active"))
 
     ~H"""
-    <a href={@url} class={"btn btn-outline-#{@bsname} #{@active_class}"}>
-      <Fontawesome.icon icon={@icon} style={if @active, do: "solid", else: "regular"} :if={@icon != ""} />
+    <.link
+      navigate={@url}
+      class={"btn btn-outline-#{@bsname} #{@active_class}"}
+    >
+      <Fontawesome.icon icon={@icon} style={if @active, do: "solid", else: "regular"} :if={@icon} />
       <%= render_slot(@inner_block) %>
-    </a>
+    </.link>
+    """
+  end
+
+  @doc """
+  <.section_menu_button bsname={bsname} icon={lib} active={true/false} url={url}>
+    Text goes here
+  </.section_menu_button>
+  """
+  attr :icon, :string, default: nil
+  attr :url, :string, required: true
+  attr :bsname, :string, default: "secondary"
+  attr :active, :boolean, default: false
+  slot :inner_block, required: true
+
+  def section_menu_button_patch(assigns) do
+    assigns = assigns
+    |> assign(:active_class, (if assigns[:active], do: "active"))
+
+    ~H"""
+    <.link
+      patch={@url}
+      class={"btn btn-outline-#{@bsname} #{@active_class}"}
+    >
+      <Fontawesome.icon icon={@icon} style={if @active, do: "solid", else: "regular"} :if={@icon} />
+      <%= render_slot(@inner_block) %>
+    </.link>
     """
   end
 end

@@ -58,6 +58,14 @@ defmodule Teiserver.Battle.MatchLib do
     ]
   end
 
+  def list_rated_game_types() do
+    [
+      "Duel",
+      "Team",
+      "FFA"
+    ]
+  end
+
   @spec match_from_lobby(T.lobby_id()) :: {map(), [map()]} | nil
   def match_from_lobby(lobby_id) do
     %{

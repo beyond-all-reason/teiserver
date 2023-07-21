@@ -6,14 +6,11 @@
 
 <div class="row section-menu">
   <div class="col-md-12">
-    <%= render(
-      TeiserverWeb.Battle.MatchView,
-      "section_menu.html",
-      Map.merge(assigns, %{
-        show_search: false,
-        active: "index"
-      })
-    ) %>
+    <TeiserverWeb.Battle.MatchComponents.section_menu
+      active="index"
+      view_colour={@view_colour}
+      current_user={@current_user}
+    />
     <br /><br />
 
     <form method="post" class="">
@@ -49,6 +46,7 @@
         <% end %>
       </div>
     </form>
+    <hr />
     
     <div class="row mt-2">
       <div class="col">
