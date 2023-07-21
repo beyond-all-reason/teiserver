@@ -409,7 +409,8 @@ defmodule Teiserver.Battle.MatchLib do
   def _search(query, :ally_opponent, {userid, nil, nil}) do
     from matches in query,
       join: user_m in MatchMembership,
-        on: user_m.match_id == matches.id and user_m.user_id == ^userid
+        on: user_m.match_id == matches.id and user_m.user_id == ^userid,
+      preload: [members: user_m]
   end
 
   def _search(query, :ally_opponent, {userid, nil, opponent_id}) do
@@ -417,7 +418,8 @@ defmodule Teiserver.Battle.MatchLib do
       join: user_m in MatchMembership,
         on: user_m.match_id == matches.id and user_m.user_id == ^userid,
       join: opp_m in MatchMembership,
-        on: opp_m.match_id == matches.id and opp_m .user_id == ^opponent_id and opp_m.team_id != user_m.team_id
+        on: opp_m.match_id == matches.id and opp_m .user_id == ^opponent_id and opp_m.team_id != user_m.team_id,
+      preload: [members: user_m]
   end
 
   def _search(query, :ally_opponent, {userid, ally_id, nil}) do
@@ -425,7 +427,8 @@ defmodule Teiserver.Battle.MatchLib do
       join: user_m in MatchMembership,
         on: user_m.match_id == matches.id and user_m.user_id == ^userid,
       join: ally_m in MatchMembership,
-        on: ally_m.match_id == matches.id and ally_m .user_id == ^ally_id and ally_m.team_id == user_m.team_id
+        on: ally_m.match_id == matches.id and ally_m .user_id == ^ally_id and ally_m.team_id == user_m.team_id,
+      preload: [members: user_m]
   end
 
   def _search(query, :ally_opponent, {userid, ally_id, opponent_id}) do
@@ -435,7 +438,8 @@ defmodule Teiserver.Battle.MatchLib do
       join: ally_m in MatchMembership,
         on: ally_m.match_id == matches.id and ally_m .user_id == ^ally_id and ally_m.team_id == user_m.team_id,
       join: opp_m in MatchMembership,
-        on: opp_m.match_id == matches.id and opp_m .user_id == ^opponent_id and opp_m.team_id != user_m.team_id
+        on: opp_m.match_id == matches.id and opp_m .user_id == ^opponent_id and opp_m.team_id != user_m.team_id,
+      preload: [members: user_m]
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()

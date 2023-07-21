@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Progression do
   use TeiserverWeb, :live_view
   alias Teiserver.{Account, Battle, Game}
   alias Teiserver.Game.MatchRatingLib
+  alias Central.Helpers.TimexHelper
 
   @impl true
   def mount(params, _ession, socket) do
@@ -41,29 +42,6 @@ defmodule TeiserverWeb.Battle.MatchLive.Progression do
     {:noreply, socket}
   end
 
-  # defp apply_action(socket, :edit, %{"id" => id}) do
-  #   socket
-  #   |> assign(:page_title, "Edit Category")
-  #   |> assign(:category, Board.get_category!(id))
-  # end
-
-  # defp apply_action(socket, :new, _params) do
-  #   socket
-  #   |> assign(:page_title, "New Category")
-  #   |> assign(:category, %Category{})
-  # end
-
-  # defp apply_action(socket, :index, _params) do
-  #   socket
-  #   |> assign(:page_title, "Listing Categories")
-  #   |> assign(:category, nil)
-  # end
-
-  # @impl true
-  # def handle_info({TeiserverWeb.CategoryLive.FormComponent, {:saved, category}}, socket) do
-  #   {:noreply, stream_insert(socket, :categories, category)}
-  # end
-
   @impl true
   def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
     [key] = event["_target"]
@@ -80,23 +58,17 @@ defmodule TeiserverWeb.Battle.MatchLive.Progression do
 
   defp update_match_list(%{assigns: %{rating_type: rating_type, filters: filters, current_user: current_user}} = socket) do
     if connected?(socket) do
-      changes = run_match_query(filters, rating_type, current_user)
+      data = run_match_query(filters, rating_type, current_user)
 
-      if changes != nil do
+      if data != nil do
         socket
-        |> assign(:logs, changes.logs)
-        |> assign(:stats, changes.stats)
+        |> assign(:data, data)
       else
         socket
       end
     else
       socket
-      |> assign(:logs, [])
-      |> assign(:stats, %{
-        games: [],
-        winrate: 0,
-        first_log: nil
-      })
+      |> assign(:data, [])
     end
   end
 
@@ -144,25 +116,31 @@ defmodule TeiserverWeb.Battle.MatchLive.Progression do
         preload: [:match, :match_membership]
       )
 
-    games = Enum.count(logs) |> max(1)
-    wins = Enum.count(logs, fn l -> l.match_membership.win end)
+    data =
+      logs
+      |> List.foldl(%{}, fn rating, acc ->
+        Map.update(
+          acc,
+          TimexHelper.date_to_str(rating.inserted_at, format: :ymd),
+          {rating.value["skill"], rating.value["uncertainty"], rating.value["rating_value"], 1},
+          fn {skill, uncertainty, rating_value, count} ->
+            {skill + rating.value["skill"], uncertainty + rating.value["uncertainty"],
+             rating_value + rating.value["rating_value"], count + 1}
+          end
+        )
+      end)
+      |> Enum.map(fn {date, {skill, uncertainty, rating_value, count}} ->
+        %{
+          date: date,
+          rating_value: Float.round(rating_value / count, 2),
+          skill: Float.round(skill / count, 2),
+          uncertainty: Float.round(uncertainty / count, 2),
+          count: count
+        }
+      end)
+      |> Enum.sort_by(fn rating -> rating.date end)
 
-    first_log =
-      case Enum.reverse(logs) do
-        [l | _] -> l
-        _ -> nil
-      end
-
-    stats = %{
-      games: games,
-      winrate: wins / games,
-      first_log: first_log
-    }
-
-    %{
-      logs: logs,
-      stats: stats
-    }
+    data
   end
 
   defp default_filters(socket) do

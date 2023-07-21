@@ -1,0 +1,17 @@
+<%= render(
+  TeiserverWeb.Battle.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "matches"})
+) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <TeiserverWeb.Battle.MatchComponents.section_menu
+      active="progression"
+      view_colour={@view_colour}
+      current_user={@current_user}
+    />
+    <br /><br />
+    
+  </div>
+</div>

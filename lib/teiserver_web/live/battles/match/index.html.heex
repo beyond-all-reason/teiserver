@@ -59,6 +59,15 @@
         >
           <:col :let={match} label="Type"><%= match.game_type %></:col>
           <:col :let={match} label="Map"><%= match.map %></:col>
+          <:col :let={match} label="Outcome">
+            <%= if hd(match.members).win do %>
+              <Fontawesome.icon icon="trophy" style="solid" class="text-success" />
+              &nbsp;
+              Win
+            <% else %>
+              Loss
+            <% end %>
+          </:col>
           <:col :let={match} label="Team count"><%= match.team_count %></:col>
           <:col :let={match} label="Team size"><%= match.team_size %></:col>
           <:col :let={match} label="Duration"><%= if match.finished, do: duration_to_str_short(match.game_duration) %></:col>

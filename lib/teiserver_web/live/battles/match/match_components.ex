@@ -31,9 +31,18 @@ defmodule TeiserverWeb.Battle.MatchComponents do
     </.section_menu_button>
 
     <.section_menu_button
+      bsname={@view_colour}
+      icon={StylingHelper.icon(:chart)}
+      active={@active == "progression"}
+      url={~p"/teiserver/battle/progression"}
+    >
+      Progression
+    </.section_menu_button>
+
+    <.section_menu_button
       :if={@active == "show"}
       bsname={@view_colour}
-      icon={Central.Helpers.StylingHelper.icon(:detail)}
+      icon={StylingHelper.icon(:detail)}
       active={true}
       url="#"
     >
@@ -44,7 +53,7 @@ defmodule TeiserverWeb.Battle.MatchComponents do
       <.section_menu_button
         :if={@match_id != nil and allow?(@current_user, "Moderator")}
         bsname={@view_colour}
-        icon={Central.Helpers.StylingHelper.icon(:admin)}
+        icon={StylingHelper.icon(:admin)}
         active={false}
         url={~p"/teiserver/admin/matches/#{@match_id}"}
       >
