@@ -69,8 +69,16 @@ defmodule Teiserver.Tachyon.MessageHandlers.ClientMessageHandlers do
     end
   end
 
+  def handle(%{event: :connected} = _msg, conn) do
+    {:ok, [], conn}
+  end
+
+  def handle(%{event: :disconnected} = _msg, conn) do
+    {:ok, [], conn}
+  end
+
   def handle(msg, conn) do
-    raise "No handler for msg of #{msg.event} in ClientMessageHandlers"
+    raise "No handler for msg of '#{inspect msg.event}' in ClientMessageHandlers"
     {:ok, [], conn}
   end
 end
