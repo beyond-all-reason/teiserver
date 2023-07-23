@@ -3,7 +3,7 @@ defmodule Teiserver.User do
   Users here are a combination of Central.Account.User and the data within. They are merged like this into a map as their expected use case is very different.
   """
   alias Teiserver.Config
-  alias Teiserver.{Account, Client, Coordinator, Telemetry}
+  alias Teiserver.{Account, Client, Coordinator, Telemetry, Chat}
   alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.EmailHelper
   alias Teiserver.Account.{UserCache, RelationsLib}
@@ -648,6 +648,14 @@ defmodule Teiserver.User do
           end
         end)
       end
+
+      # Persist
+      Chat.create_direct_message(%{
+        to_id: to_id,
+        from_id: sender_id,
+        content: msg_str,
+        inserted_at: Timex.now()
+      })
 
       PubSub.broadcast(
         Central.PubSub,

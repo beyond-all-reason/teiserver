@@ -1,4 +1,5 @@
 defmodule Teiserver.Chat do
+  @moduledoc false
   import Ecto.Query, warn: false
   alias Central.Helpers.QueryHelpers
   alias Teiserver.Repo
@@ -469,5 +470,112 @@ defmodule Teiserver.Chat do
   @spec change_party_message(PartyMessage.t()) :: Ecto.Changeset.t()
   def change_party_message(%PartyMessage{} = party_message) do
     PartyMessage.changeset(party_message, %{})
+  end
+
+  alias Teiserver.Chat.{DirectMessage, DirectMessageLib}
+
+  @doc """
+  Returns the list of direct_messages.
+
+  ## Examples
+
+      iex> list_direct_messages()
+      [%DirectMessage{}, ...]
+
+  """
+  @spec list_direct_messages(list) :: list
+  def list_direct_messages(args \\ []) do
+    args
+    |> DirectMessageLib.query_direct_messages()
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single direct_message.
+
+  Raises `Ecto.NoResultsError` if the DirectMessage does not exist.
+
+  ## Examples
+
+      iex> get_direct_message!(123)
+      %DirectMessage{}
+
+      iex> get_direct_message!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_direct_message!(id), do: Repo.get!(DirectMessage, id)
+
+  def get_direct_message!(id, args) do
+    args = args ++ [id: id]
+
+    args
+    |> DirectMessageLib.query_direct_messages()
+    |> Repo.one!()
+  end
+
+  @doc """
+  Creates a direct_message.
+
+  ## Examples
+
+      iex> create_direct_message(%{field: value})
+      {:ok, %DirectMessage{}}
+
+      iex> create_direct_message(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_direct_message(attrs \\ %{}) do
+    %DirectMessage{}
+    |> DirectMessage.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a direct_message.
+
+  ## Examples
+
+      iex> update_direct_message(direct_message, %{field: new_value})
+      {:ok, %DirectMessage{}}
+
+      iex> update_direct_message(direct_message, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_direct_message(%DirectMessage{} = direct_message, attrs) do
+    direct_message
+    |> DirectMessage.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a direct_message.
+
+  ## Examples
+
+      iex> delete_direct_message(direct_message)
+      {:ok, %DirectMessage{}}
+
+      iex> delete_direct_message(direct_message)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_direct_message(%DirectMessage{} = direct_message) do
+    Repo.delete(direct_message)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking direct_message changes.
+
+  ## Examples
+
+      iex> change_direct_message(direct_message)
+      %Ecto.Changeset{data: %DirectMessage{}}
+
+  """
+  def change_direct_message(%DirectMessage{} = direct_message, attrs \\ %{}) do
+    DirectMessage.changeset(direct_message, attrs)
   end
 end
