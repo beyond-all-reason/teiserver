@@ -649,13 +649,15 @@ defmodule Teiserver.User do
         end)
       end
 
-      # Persist
-      Chat.create_direct_message(%{
-        to_id: to_id,
-        from_id: sender_id,
-        content: msg_str,
-        inserted_at: Timex.now()
-      })
+      # Persist but only if no bots are involved
+      if not is_bot?(to_id) and not is_bot?(sender_id) do
+        Chat.create_direct_message(%{
+          to_id: to_id,
+          from_id: sender_id,
+          content: msg_str,
+          inserted_at: Timex.now()
+        })
+        end
 
       PubSub.broadcast(
         Central.PubSub,

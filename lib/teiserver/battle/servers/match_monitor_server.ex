@@ -368,11 +368,11 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             icon: "fa-solid fa-camera-cctv",
             colour: "#00AA66",
             password: Account.make_bot_password(),
+            roles: ["Verified", "Bot"],
             data: %{
               bot: true,
               moderator: false,
-              lobby_client: "Teiserver Internal Process",
-              roles: ["Verified", "Bot"]
+              lobby_client: "Teiserver Internal Process"
             }
           })
 

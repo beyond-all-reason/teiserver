@@ -7,7 +7,7 @@ defmodule TeiserverWeb.UserComponents do
   @doc """
   <TeiserverWeb.UserComponents.status_icon user={user} />
   """
-  def status_icon(%{user: %{data: user_data}} = assigns) do
+  def status_icon(%{user: %{data: user_data} = user} = assigns) do
     restrictions = user_data["restrictions"] || []
 
     ban_status =
@@ -22,7 +22,7 @@ defmodule TeiserverWeb.UserComponents do
         if(assigns.user.smurf_of_id != nil,
           do: {"primary", Teiserver.Moderation.ActionLib.action_icon("Smurf")}
         ),
-        if(Enum.member?(user_data["roles"], "Smurfer"), do: {"info2", "fa-solid fa-split"}),
+        if(Enum.member?(user.roles, "Smurfer"), do: {"info2", "fa-solid fa-split"}),
         if(ban_status == "banned",
           do: {"danger2", Teiserver.Moderation.ActionLib.action_icon("Ban")}
         ),
@@ -35,8 +35,8 @@ defmodule TeiserverWeb.UserComponents do
         if(Enum.member?(restrictions, "Warning reminder"),
           do: {"warning", Teiserver.Moderation.ActionLib.action_icon("Warn")}
         ),
-        if(Enum.member?(user_data["roles"], "Trusted"), do: {"", "fa-solid fa-check"}),
-        if(not Enum.member?(user_data["roles"], "Verified"),
+        if(Enum.member?(user.roles, "Trusted"), do: {"", "fa-solid fa-check"}),
+        if(not Enum.member?(user.roles, "Verified"),
           do: {"info", "fa-solid fa-square-question"}
         )
       ]

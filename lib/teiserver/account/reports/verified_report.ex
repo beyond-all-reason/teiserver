@@ -33,7 +33,7 @@ defmodule Teiserver.Account.VerifiedReport do
         fn user ->
           cond do
             user.data["last_login"] == nil -> :never_logged_in
-            Enum.member?(user.data["roles"], "Verified") == false -> :unverified
+            Enum.member?(user.roles, "Verified") == false -> :unverified
             true -> :verified
           end
         end,

@@ -313,17 +313,17 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       nil ->
         # Make account
         {:ok, account} =
-          Account.create_user(%{
+          Account.script_create_user(%{
             name: "Coordinator",
             email: "coordinator@teiserver",
             icon: "fa-solid fa-sitemap",
             colour: "#AA00AA",
             password: Account.make_bot_password(),
+            roles: ["Bot", "Verified"],
             data: %{
               bot: true,
               moderator: true,
-              lobby_client: "Teiserver Internal Process",
-              roles: ["Bot", "Verified"]
+              lobby_client: "Teiserver Internal Process"
             }
           })
 

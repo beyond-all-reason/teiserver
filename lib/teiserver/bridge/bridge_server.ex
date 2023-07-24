@@ -396,18 +396,18 @@ defmodule Teiserver.Bridge.BridgeServer do
       nil ->
         # Make account
         {:ok, account} =
-          Account.create_user(%{
+          Account.script_create_user(%{
             name: "DiscordBridge",
             email: "bridge@teiserver",
             icon: "fa-brands fa-discord",
             colour: "#0066AA",
             password: Account.make_bot_password(),
+            roles: ["Bot", "Verified"],
             data: %{
               bot: true,
               moderator: false,
               verified: true,
-              lobby_client: "Teiserver Internal Process",
-              roles: ["Bot", "Verified"]
+              lobby_client: "Teiserver Internal Process"
             }
           })
 

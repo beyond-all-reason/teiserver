@@ -11,7 +11,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   @settings %{
     # days: 365,
-    days: 45,
+    days: 5,
     memory: 1024 * 1024 * 1024,
     maps: ["Koom valley", "Comet catcher", "Tabula"]
   }
@@ -45,18 +45,18 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   defp add_root_user() do
     {:ok, user} =
-      Account.create_user(%{
+      Account.script_create_user(%{
         name: "root",
         email: "root@localhost",
         password: "password",
-        permissions: ["admin.dev.developer"],
+        roles: ["Server", "Verified"],
+        permissions: ["admin.dev.developer", "Server"],
         icon: "fa-solid fa-power-off",
         colour: "#00AA00",
         data: %{
           lobby_client: "FakeData",
           password_hash:
-            Teiserver.User.encrypt_password(Teiserver.User.spring_md5_password("password")),
-          roles: ["Verified"]
+            Teiserver.User.encrypt_password(Teiserver.User.spring_md5_password("password"))
         }
       })
 
@@ -82,9 +82,9 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
             colour: StylingHelper.random_colour(),
             trust_score: 10_000,
             behaviour_score: 10_000,
+            roles: ["Verified"],
             data: %{
               lobby_client: "FakeData",
-              roles: ["Verified"],
               bot: false,
               password_hash: root_user.data.password_hash
             },
@@ -110,7 +110,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         Account.list_users(
           search: [
             inserted_after: Timex.to_datetime(date),
-            bot: "Person"
+            not_has_role: "Bot"
           ],
           select: [:id]
         )
@@ -136,8 +136,14 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
           total = [menu, lobby, player, spectator] |> List.flatten()
 
+          timestamp = date
+            |> Timex.to_datetime()
+            |> Timex.shift(minutes: m)
+            |> Timex.to_unix()
+            |> Timex.from_unix()
+
           %{
-            timestamp: Timex.shift(date |> Timex.to_datetime(), minutes: m),
+            timestamp: timestamp,
             data: %{
               battle: %{
                 lobby: :rand.uniform(lobby_count),
@@ -211,7 +217,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         Account.list_users(
           search: [
             inserted_after: Timex.to_datetime(date),
-            bot: "Person"
+            not_has_role: "Bot"
           ],
           select: [:id, :name]
         )
@@ -222,23 +228,26 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       basic_reports =
         Range.new(0, report_count)
         |> Enum.map(fn _ ->
-          [{reporter_id, _}, {target_id, _} | _] = Enum.shuffle(users) |> Enum.take(2)
+          if Enum.count(users) > 1 do
+            [{reporter_id, _}, {target_id, _} | _] = Enum.shuffle(users) |> Enum.take(2)
 
-          report_time =
-            date
-            |> Timex.to_datetime()
-            |> Timex.shift(minutes: 10 + :rand.uniform(1000))
-            |> time_convert
+            report_time =
+              date
+              |> Timex.to_datetime()
+              |> Timex.shift(minutes: 10 + :rand.uniform(1000))
+              |> time_convert
 
-          %{
-            reporter_id: reporter_id,
-            target_id: target_id,
-            type: "Chat",
-            sub_type: Enum.random(~w(any spam bullying abusive)),
-            inserted_at: report_time,
-            updated_at: report_time
-          }
+            %{
+              reporter_id: reporter_id,
+              target_id: target_id,
+              type: "Chat",
+              sub_type: Enum.random(~w(any spam bullying abusive)),
+              inserted_at: report_time,
+              updated_at: report_time
+            }
+          end
         end)
+        |> Enum.reject(&(&1 == nil))
 
       match_reports =
         Battle.list_matches(
@@ -287,7 +296,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         Account.list_users(
           search: [
             inserted_after: Timex.to_datetime(date),
-            bot: "Person"
+            not_has_role: "Bot"
           ],
           select: [:id, :name]
         )

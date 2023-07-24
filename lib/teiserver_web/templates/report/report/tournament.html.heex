@@ -199,7 +199,7 @@ value_types = [
                     </td>
 
                     <td>
-                      <%= if Enum.member?(rating.user.data["roles"], "Tournament player") do %>
+                      <%= if Enum.member?(rating.user.roles, "Tournament") do %>
                         <i class="fa-fw fa-solid fa-trophy"></i>
                       <% end %>
                     </td>
