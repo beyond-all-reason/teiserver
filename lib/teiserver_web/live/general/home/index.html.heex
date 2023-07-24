@@ -1,0 +1,107 @@
+<div class="row">
+  <div :if={allow?(@current_user, "Server")} class="col-md-12 mb-4 col-lg-6 col-xxl-4">
+    Server
+  </div>
+
+  <div :if={allow?(@current_user, "Overwatch")} class="col-md-12 mb-4 col-lg-6 col-xxl-4">
+    Overwatch block
+  </div>
+</div>
+
+<div style="height: 15px;">&nbsp;</div>
+
+<div class="row">
+  <.menu_card
+    :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
+    icon={Teiserver.icon()}
+    icon_class="fa-duotone"
+    url={~p"/teiserver/admin"}
+  >
+    Administration
+  </.menu_card>
+  
+  <.menu_card
+    :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
+    icon={StylingHelper.icon(:summary)}
+    icon_class="fa-duotone"
+    url={~p"/teiserver/reports"}
+  >
+    Reports
+  </.menu_card>
+</div>
+
+<div class="row">
+  <.menu_card
+    icon={Teiserver.Lobby.icon()}
+    icon_class="fa-duotone"
+    url={~p"/teiserver/battle/lobbies"}
+  >
+    Lobbies
+  </.menu_card>
+  
+  <.menu_card
+    icon={Teiserver.Account.PartyLib.icon()}
+    icon_class="fa-duotone"
+    url={~p"/teiserver/account/parties"}
+  >
+    Parties
+  </.menu_card>
+  
+  <.menu_card
+    icon={Teiserver.Game.QueueLib.icon()}
+    icon_class="fa-duotone"
+    url={~p"/teiserver/matchmaking/queues"}
+  >
+    Matchmaking
+  </.menu_card>
+  
+  <.menu_card
+    icon={Teiserver.Account.UserLib.icon()}
+    icon_class="fa-duotone"
+    url={~p"/teiserver/account"}
+  >
+    Account
+  </.menu_card>
+  
+  <.menu_card
+    icon={Teiserver.Battle.MatchLib.icon()}
+    icon_class="fa-duotone"
+    url={~p"/teiserver/battle/matches"}
+  >
+    Matches
+  </.menu_card>
+</div>
+
+
+<div class="row">
+  <%!-- Notification stuff --%>
+  <.menu_card
+    :if={@user_notifications_unread_count > 0}
+    icon={Teiserver.Communication.NotificationLib.icon_full()}
+    icon_class="fa-duotone"
+    url={~p"/communication/notifications"}
+  >
+    Notifications (<%= @user_notifications_unread_count %>)
+  </.menu_card>
+
+  <.menu_card
+    :if={@user_notifications_unread_count == 0}
+    icon={Teiserver.Communication.NotificationLib.icon_empty()}
+    icon_class="fa-duotone"
+    url={~p"/communication/notifications"}
+  >
+    Notifications
+  </.menu_card>
+
+  <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
+    <.link
+      href={~p"/logout"}
+      method="post"
+      class="link"
+    >
+      <Fontawesome.icon icon="sign-out-alt" style="duotone" size="4x" />
+      <br />
+      Logout
+    </.link>
+  </div>
+</div>

@@ -13,11 +13,10 @@
     </div>
   </div>
 </div>
+
 <!-- /#page-content-wrapper -->
-<%= if false do %>
-  <footer class="main-footer d-flex p-2 px-3 border-top">
-    <span class="float-end">
-      <%= Teiserver.Config.get_site_config_cache("site.Footer credit text") %>
-    </span>
-  </footer>
-<% end %>
+<footer class="footer mt-auto pt-2 pb-1 px-2">
+  <span class="float-end">
+    <%= Teiserver.Config.get_site_config_cache("site.Footer credit text") %>
+  </span>
+</footer>

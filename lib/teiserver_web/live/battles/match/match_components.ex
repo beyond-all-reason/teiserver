@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Battle.MatchComponents do
   @moduledoc false
   use CentralWeb, :component
-  import CentralWeb.CoreComponents, only: [section_menu_button: 1]
+  import TeiserverWeb.NavComponents, only: [section_menu_button: 1]
 
   @doc """
   <TeiserverWeb.Battle.MatchComponents.section_menu active={active} bsname={} />

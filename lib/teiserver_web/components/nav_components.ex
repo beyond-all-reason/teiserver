@@ -63,4 +63,115 @@ defmodule TeiserverWeb.NavComponents do
       </li>
     """
   end
+
+
+  @doc """
+  <.menu_card
+    icon="icon"
+    size={:auto | :small | :medium | :large | nil}
+  >
+    Text here
+  </.menu_card>
+  """
+  attr :url, :string, required: true
+  attr :icon, :string, required: true
+  attr :icon_class, :string, default: "duotone"
+  attr :size, :atom, default: nil
+  slot :inner_block, required: true
+
+  def menu_card(assigns) do
+    style =
+      cond do
+        assigns[:disabled] -> "color: #888; cursor: default;"
+        assigns[:style] -> assigns[:style]
+        true -> ""
+      end
+
+    extra_classes = assigns[:class] || ""
+
+    col_classes =
+      case assigns[:size] do
+        :auto -> "col"
+        :small -> "col-sm-6 col-md-4 col-lg-2 col-xl-1 col-xxl-1"
+        :medium -> "col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1"
+        :large -> "col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-2"
+        nil -> assigns[:col_classes] || "col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1"
+      end
+
+    icon_size =
+      case assigns[:size] do
+        :small -> "fa-3x"
+        :auto -> "fa-4x"
+        :medium -> "fa-4x"
+        :large -> "fa-6x"
+        nil -> assigns[:col_classes] || "fa-4x"
+      end
+
+    assigns = assigns
+      |> assign(:col_classes, col_classes)
+      |> assign(:extra_classes, extra_classes)
+      |> assign(:icon_size, icon_size)
+      |> assign(:style, style)
+
+    ~H"""
+    <div class={"#{@col_classes} menu-card #{@extra_classes}"}>
+      <a href={@url} class="block-link" style={@style}>
+        <Fontawesome.icon icon={@icon} style="duotone" size={@icon_size} /><br />
+        <%= render_slot(@inner_block) %>
+      </a>
+    </div>
+    """
+  end
+
+  @doc """
+  <.section_menu_button bsname={bsname} icon={lib} active={true/false} url={url}>
+    Text goes here
+  </.section_menu_button>
+  """
+  attr :icon, :string, default: nil
+  attr :url, :string, required: true
+  attr :bsname, :string, default: "secondary"
+  attr :active, :boolean, default: false
+  slot :inner_block, required: true
+
+  def section_menu_button(assigns) do
+    assigns = assigns
+    |> assign(:active_class, (if assigns[:active], do: "active"))
+
+    ~H"""
+    <.link
+      navigate={@url}
+      class={"btn btn-outline-#{@bsname} #{@active_class}"}
+    >
+      <Fontawesome.icon icon={@icon} style={if @active, do: "solid", else: "regular"} :if={@icon} />
+      <%= render_slot(@inner_block) %>
+    </.link>
+    """
+  end
+
+  @doc """
+  <.section_menu_button bsname={bsname} icon={lib} active={true/false} url={url}>
+    Text goes here
+  </.section_menu_button>
+  """
+  attr :icon, :string, default: nil
+  attr :url, :string, required: true
+  attr :bsname, :string, default: "secondary"
+  attr :active, :boolean, default: false
+  slot :inner_block, required: true
+
+  def section_menu_button_patch(assigns) do
+    assigns = assigns
+    |> assign(:active_class, (if assigns[:active], do: "active"))
+
+    ~H"""
+    <.link
+      patch={@url}
+      class={"btn btn-outline-#{@bsname} #{@active_class}"}
+    >
+      <Fontawesome.icon icon={@icon} style={if @active, do: "solid", else: "regular"} :if={@icon} />
+      <%= render_slot(@inner_block) %>
+    </.link>
+    """
+  end
 end

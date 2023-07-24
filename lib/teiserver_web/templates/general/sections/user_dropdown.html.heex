@@ -19,11 +19,6 @@
       Account
     </a>
 
-    <a class="dropdown-item" href={Routes.general_page_path(@conn, :recache)}>
-      <i class="fa-regular fa-sync fa-fw"></i> &nbsp;
-      Refresh session cache
-    </a>
-
     <hr style="margin: 0;" />
 
     <form action={~p"/logout"} method="post" class="link" id="signout-form" style="margin: 0;">

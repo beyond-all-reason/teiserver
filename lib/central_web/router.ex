@@ -50,6 +50,11 @@ defmodule CentralWeb.Router do
     plug(:put_layout, {CentralWeb.LayoutView, "nomenu.html"})
   end
 
+  pipeline :nomenu_live_layout do
+    plug :put_root_layout, {CentralWeb.LayoutView, :root}
+    plug(:put_layout, {CentralWeb.LayoutView, :nomenu_live})
+  end
+
   pipeline :empty_layout do
     plug :put_root_layout, {CentralWeb.LayoutView, :root}
     plug(:put_layout, {CentralWeb.LayoutView, "empty.html"})
@@ -87,12 +92,49 @@ defmodule CentralWeb.Router do
     plug(Guardian.Plug.EnsureAuthenticated)
   end
 
-  scope "/", TeiserverWeb.General, as: :general do
-    pipe_through([:browser, :nomenu_layout])
+  # scope "/", TeiserverWeb.General, as: :general do
+  #   pipe_through([:browser, :nomenu_layout])
 
-    get("/recache", PageController, :recache)
-    get("/", PageController, :index)
+  #   get("/recache", PageController, :recache)
+  #   get("/", PageController, :index)
+  # end
+
+  scope "/", TeiserverWeb.General do
+    pipe_through([:browser, :nomenu_live_layout])
+
+    live_session :general_index,
+      on_mount: [
+        {Central.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Communication.NotificationPlug, :load_notifications}
+      ] do
+        live "/", HomeLive.Index, :index
+    end
   end
+
+  # scope "/", ApolloWeb do
+  #   pipe_through [:browser, :require_authenticated_user]
+
+  #   live_session :require_authenticated_user,
+  #     on_mount: [{ApolloWeb.UserAuth, :ensure_authenticated}] do
+  #     live "/users/settings", UserSettingsLive, :edit
+  #     live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+  #   end
+  # end
+
+
+  # scope "/", ApolloWeb do
+  #   pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+  #   live_session :redirect_if_user_is_authenticated,
+  #     on_mount: [{ApolloWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+  #     live "/users/register", UserRegistrationLive, :new
+  #     live "/users/log_in", UserLoginLive, :new
+  #     live "/users/reset_password", UserForgotPasswordLive, :new
+  #     live "/users/reset_password/:token", UserResetPasswordLive, :edit
+  #   end
+
+  #   post "/users/log_in", UserSessionController, :create
+  # end
 
   scope "/", TeiserverWeb.Account, as: :account do
     pipe_through([:browser, :nomenu_layout])

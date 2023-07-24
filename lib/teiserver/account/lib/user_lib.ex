@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.UserLib do
+  @moduledoc false
   use CentralWeb, :library
   require Logger
   alias Teiserver.Data.Types, as: T
@@ -6,7 +7,7 @@ defmodule Teiserver.Account.UserLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-user-robot"
+  def icon(), do: "fa-regular fa-user"
 
   @spec colours :: atom
   def colours, do: :success

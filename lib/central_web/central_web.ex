@@ -126,6 +126,7 @@ defmodule CentralWeb do
         only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
       alias Teiserver.Communication.NotificationPlug
       import Central.Helpers.TimexHelper
+      alias Central.Helpers.StylingHelper
 
       unquote(verified_routes())
       unquote(view_helpers())
