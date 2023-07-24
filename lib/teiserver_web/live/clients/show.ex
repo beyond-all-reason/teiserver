@@ -83,7 +83,7 @@ defmodule TeiserverWeb.ClientLive.Show do
       false ->
         {:noreply,
          socket
-         |> redirect(to: Routes.general_page_path(socket, :index))}
+         |> redirect(to: ~p"/")}
     end
   end
 

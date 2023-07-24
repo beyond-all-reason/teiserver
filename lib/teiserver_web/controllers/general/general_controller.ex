@@ -12,7 +12,7 @@ defmodule TeiserverWeb.General.GeneralController do
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do
     conn
-    |> redirect(to: Routes.general_page_path(conn, :index))
+    |> redirect(to: ~p"/")
   end
 
   @spec gdpr(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

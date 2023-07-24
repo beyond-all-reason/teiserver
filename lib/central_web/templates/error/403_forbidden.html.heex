@@ -67,7 +67,7 @@
               <div class="card-body">
                 <%= if assigns[:current_user] do %>
                   <a
-                    href={Routes.general_page_path(@conn, :index)}
+                    href={~p"/"}
                     class="btn btn-secondary float-end"
                   >
                     <i class="fa-regular fa-fw fa-home"></i> Home page

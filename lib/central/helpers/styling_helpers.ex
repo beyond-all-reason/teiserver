@@ -59,7 +59,7 @@ defmodule Central.Helpers.StylingHelper do
   def icon(:up, fa_type), do: "fa-#{fa_type} fa-level-up"
   def icon(:back, fa_type), do: "fa-#{fa_type} fa-arrow-left"
 
-  def icon(:list, fa_type), do: "fa-bars"
+  def icon(:list, _fa_type), do: "fa-bars"
   def icon(:show, fa_type), do: "fa-#{fa_type} fa-eye"
   def icon(:search, fa_type), do: "fa-#{fa_type} fa-search"
   def icon(:new, fa_type), do: "fa-#{fa_type} fa-plus"

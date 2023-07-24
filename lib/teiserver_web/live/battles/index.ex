@@ -48,7 +48,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
 
   @impl true
   def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
-    {:noreply, socket |> redirect(to: Routes.general_page_path(socket, :index))}
+    {:noreply, socket |> redirect(to: ~p"/")}
   end
 
   def handle_params(params, _url, socket) do

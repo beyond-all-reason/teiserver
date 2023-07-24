@@ -30,14 +30,9 @@ defmodule CentralWeb.Router do
     plug(Teiserver.Communication.NotificationPlug)
   end
 
-  pipeline :admin_layout do
-    plug :put_root_layout, {CentralWeb.LayoutView, :root}
-    plug(:put_layout, {CentralWeb.LayoutView, "admin.html"})
-  end
-
   pipeline :standard_layout do
     plug :put_root_layout, {CentralWeb.LayoutView, :root}
-    plug(:put_layout, {CentralWeb.LayoutView, "standard.html"})
+    plug(:put_layout, {CentralWeb.LayoutView, :standard})
   end
 
   pipeline :standard_live_layout do
@@ -47,17 +42,12 @@ defmodule CentralWeb.Router do
 
   pipeline :nomenu_layout do
     plug :put_root_layout, {CentralWeb.LayoutView, :root}
-    plug(:put_layout, {CentralWeb.LayoutView, "nomenu.html"})
+    plug(:put_layout, {CentralWeb.LayoutView, :nomenu})
   end
 
   pipeline :nomenu_live_layout do
     plug :put_root_layout, {CentralWeb.LayoutView, :root}
     plug(:put_layout, {CentralWeb.LayoutView, :nomenu_live})
-  end
-
-  pipeline :empty_layout do
-    plug :put_root_layout, {CentralWeb.LayoutView, :root}
-    plug(:put_layout, {CentralWeb.LayoutView, "empty.html"})
   end
 
   pipeline :protected do
