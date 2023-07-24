@@ -1,4 +1,5 @@
 defmodule Teiserver.Moderation do
+  @moduledoc false
   import Ecto.Query, warn: false
   alias Teiserver.Repo
   # require Logger

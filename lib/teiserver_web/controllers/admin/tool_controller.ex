@@ -45,11 +45,10 @@ defmodule TeiserverWeb.Admin.ToolController do
         conn
         |> put_flash(:success, "Example flash message success")
         |> put_flash(:info, "Example flash message info")
+        |> put_flash(:warning, "Example flash message warning")
         |> put_flash(:danger, "Example flash message danger")
-        |> assign(:flash, flash)
       else
         conn
-        |> assign(:flash, %{})
       end
 
     conn

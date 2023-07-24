@@ -41,7 +41,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       |> assign(:site_menu_active, "lobbies")
       |> assign(:view_colour, Lobby.colours())
       |> assign(:lobbies, lobbies)
-      |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
 
     {:ok, socket, layout: {CentralWeb.LayoutView, :standard_live}}
   end

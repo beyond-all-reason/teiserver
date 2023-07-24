@@ -6,7 +6,6 @@ defmodule CentralWeb.UserSocket do
   ## Channels
   # channel "room:*", CentralWeb.RoomChannel
 
-  channel("fp*", TeiserverWeb.User.FpChannel)
   channel("live_search:*", CentralWeb.LiveSearch.Channel)
   channel("communication_notification:*", TeiserverWeb.Communication.NotificationChannel)
   channel("communication_reloads:*", TeiserverWeb.Communication.NotificationChannel)

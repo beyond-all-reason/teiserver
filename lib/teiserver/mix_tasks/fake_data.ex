@@ -45,7 +45,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   defp add_root_user() do
     {:ok, user} =
-      Account.script_create_user(%{
+      Account.create_user(%{
         name: "root",
         email: "root@localhost",
         password: "password",

@@ -19,6 +19,7 @@ defmodule CentralWeb.Router do
     plug(:accepts, ["html"])
     plug(:fetch_session)
     plug(:fetch_live_flash)
+    plug :put_root_layout, {CentralWeb.LayoutView, :root}
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
     plug(Central.Account.DefaultsPlug)
@@ -30,23 +31,36 @@ defmodule CentralWeb.Router do
     plug(Teiserver.Communication.NotificationPlug)
   end
 
+  pipeline :live_browser do
+    plug(:accepts, ["html"])
+    plug(:fetch_session)
+    plug(:fetch_live_flash)
+    plug :put_root_layout, {CentralWeb.Layouts, :root}
+    plug(:protect_from_forgery)
+    plug(:put_secure_browser_headers)
+    plug(Central.Account.DefaultsPlug)
+    plug(Central.Account.AuthPipeline)
+    plug(Central.Account.AuthPlug)
+    plug(Teiserver.Account.TSAuthPlug)
+    plug(Central.General.CachePlug)
+    plug(Teiserver.Communication.NotificationPlug)
+  end
+
+  # layout: {CentralWeb.LayoutView, :standard_live}
+
   pipeline :standard_layout do
-    plug :put_root_layout, {CentralWeb.LayoutView, :root}
     plug(:put_layout, {CentralWeb.LayoutView, :standard})
   end
 
   pipeline :standard_live_layout do
-    plug :put_root_layout, {CentralWeb.LayoutView, :root}
-    plug(:put_layout, {CentralWeb.LayoutView, :standard_live})
+    plug :put_layout, {CentralWeb.LayoutView, :standard_live}
   end
 
   pipeline :nomenu_layout do
-    plug :put_root_layout, {CentralWeb.LayoutView, :root}
     plug(:put_layout, {CentralWeb.LayoutView, :nomenu})
   end
 
   pipeline :nomenu_live_layout do
-    plug :put_root_layout, {CentralWeb.LayoutView, :root}
     plug(:put_layout, {CentralWeb.LayoutView, :nomenu_live})
   end
 
@@ -82,15 +96,10 @@ defmodule CentralWeb.Router do
     plug(Guardian.Plug.EnsureAuthenticated)
   end
 
-  # scope "/", TeiserverWeb.General, as: :general do
-  #   pipe_through([:browser, :nomenu_layout])
-
-  #   get("/recache", PageController, :recache)
-  #   get("/", PageController, :index)
-  # end
+  # Phoenix.Router.route_info(CentralWeb.Router, "GET", "/", "myhost")
 
   scope "/", TeiserverWeb.General do
-    pipe_through([:browser, :nomenu_live_layout])
+    pipe_through([:live_browser, :nomenu_live_layout])
 
     live_session :general_index,
       on_mount: [
@@ -221,12 +230,6 @@ defmodule CentralWeb.Router do
     get("/code_of_conduct", GeneralController, :code_of_conduct)
     get("/privacy_policy", GeneralController, :gdpr)
     get("/gdpr", GeneralController, :gdpr)
-  end
-
-  scope "/teiserver", TeiserverWeb.General, as: :ts_general do
-    pipe_through([:browser, :standard_layout, :protected])
-
-    get("/", GeneralController, :index)
   end
 
   # ts_account_X_path
@@ -477,6 +480,18 @@ defmodule CentralWeb.Router do
 
     live("/agent", Index, :index)
     # live("/agent/:id", Show, :show)
+  end
+
+  scope "/moderation", TeiserverWeb.Moderation do
+    pipe_through([:browser, :standard_live_layout])
+
+    live_session :overwatch,
+      on_mount: [
+        {Central.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Communication.NotificationPlug, :load_notifications}
+      ] do
+        live "/overwatch", OverwatchLive.Index, :index
+    end
   end
 
   scope "/moderation", TeiserverWeb.Moderation, as: :moderation do

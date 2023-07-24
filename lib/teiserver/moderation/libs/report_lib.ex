@@ -169,47 +169,47 @@ defmodule Teiserver.Moderation.ReportLib do
   def preload(query, nil), do: query
 
   def preload(query, preloads) do
-    query = if :reporter in preloads, do: _preload_reporter(query), else: query
-    query = if :target in preloads, do: _preload_target(query), else: query
-    query = if :action in preloads, do: _preload_action(query), else: query
-    query = if :match in preloads, do: _preload_match(query), else: query
-    query = if :responses in preloads, do: _preload_responses(query), else: query
-
-    query
+    preloads
+    |> Enum.reduce(query, fn key, query_acc ->
+      _preload(query_acc, key)
+    end)
   end
 
-  @spec _preload_reporter(Ecto.Query.t()) :: Ecto.Query.t()
-  def _preload_reporter(query) do
+  @spec _preload(Ecto.Query.t(), atom) :: Ecto.Query.t()
+  def _preload(query, :reporter) do
     from reports in query,
       left_join: reporters in assoc(reports, :reporter),
       preload: [reporter: reporters]
   end
 
-  @spec _preload_target(Ecto.Query.t()) :: Ecto.Query.t()
-  def _preload_target(query) do
+  def _preload(query, :target) do
     from reports in query,
       left_join: targets in assoc(reports, :target),
       preload: [target: targets]
   end
 
-  @spec _preload_action(Ecto.Query.t()) :: Ecto.Query.t()
-  def _preload_action(query) do
+  def _preload(query, :action) do
     from reports in query,
       left_join: actions in assoc(reports, :action),
       preload: [action: actions]
   end
 
-  @spec _preload_match(Ecto.Query.t()) :: Ecto.Query.t()
-  def _preload_match(query) do
+  def _preload(query, :match) do
     from reports in query,
       left_join: matches in assoc(reports, :match),
       preload: [match: matches]
   end
 
-  @spec _preload_responses(Ecto.Query.t()) :: Ecto.Query.t()
-  def _preload_responses(query) do
+  def _preload(query, :responses) do
     from reports in query,
       left_join: responses in assoc(reports, :responses),
+      preload: [responses: responses]
+  end
+
+  def _preload(query, {:user_response, userid}) do
+    from reports in query,
+      left_join: responses in assoc(reports, :responses),
+      on: responses.user_id == ^userid,
       preload: [responses: responses]
   end
 end

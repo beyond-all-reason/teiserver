@@ -32,10 +32,12 @@
     $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
 
     // They'll get hidden by the main theme but this will re-show them
+    /*
     setTimeout(function() {
       $("#flash-messages").show();
     }, 4200);
-
+    */
+    
     do_icons();
   });
 
@@ -425,12 +427,6 @@
               Standard
             </a>
             <a
-              href="?layout=empty#layouts_tab"
-              class={"btn btn-#{if @layout_value == "empty.html", do: "", else: "outline-"}secondary"}
-            >
-              Empty
-            </a>
-            <a
               href="?layout=unauth#layouts_tab"
               class={"btn btn-#{if @layout_value == "unauth.html", do: "", else: "outline-"}secondary"}
             >
@@ -463,6 +459,22 @@
               class={"btn btn-#{if @layout_value == "nomenu_live.html", do: "", else: "outline-"}secondary"}
             >
               No menu live
+            </a>
+            
+            <br /><br />
+            
+            <a
+              href={"?layout=#{@layout_value}&flash=true#layouts_tab"}
+              class="btn btn-secondary"
+            >
+              With flash
+            </a>
+            
+            <a
+              href={"?layout=#{@layout_value}#layouts_tab"}
+              class="btn btn-secondary"
+            >
+              Without flash
             </a>
           </div>
 

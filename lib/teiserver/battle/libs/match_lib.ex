@@ -49,12 +49,10 @@ defmodule Teiserver.Battle.MatchLib do
       "Duel",
       "Team",
       "FFA",
+      "Team FFA",
       "Raptors",
       "Scavengers",
-      "Bots",
-      "PvP",
-      "PvE",
-      "Coop"
+      "Bots"
     ]
   end
 
@@ -62,7 +60,8 @@ defmodule Teiserver.Battle.MatchLib do
     [
       "Duel",
       "Team",
-      "FFA"
+      "FFA",
+      "Team FFA"
     ]
   end
 

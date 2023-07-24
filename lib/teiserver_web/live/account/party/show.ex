@@ -65,7 +65,6 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
            url: "/teiserver/account/parties"
          )
          |> assign(:site_menu_active, "parties")
-         |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
          |> assign(:view_colour, PartyLib.colours())
          |> assign(:user_lookup, %{})
          |> assign(:party_id, party_id)

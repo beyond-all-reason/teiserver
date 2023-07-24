@@ -66,7 +66,6 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
       |> assign(:site_menu_active, "matchmaking")
       |> assign(:db_queues, db_queues)
       |> assign(:queue_info, queue_info)
-      |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
       |> assign(:match_id, nil)
       |> assign(:is_admin, is_admin)
 

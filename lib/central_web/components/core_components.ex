@@ -215,7 +215,7 @@ defmodule CentralWeb.CoreComponents do
   def simple_form(assigns) do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
-      <div class="space-y-8 bg-white mt-10">
+      <div class="">
         <%= render_slot(@inner_block, f) %>
         <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-6">
           <%= render_slot(action, f) %>
@@ -241,8 +241,7 @@ defmodule CentralWeb.CoreComponents do
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3",
-        "text-sm font-semibold leading-6 text-white active:text-white/80",
+        "phx-submit-loading:opacity-75 btn",
         @class
       ]}
       {@rest}
@@ -297,21 +296,15 @@ defmodule CentralWeb.CoreComponents do
       assign_new(assigns, :checked, fn -> Phoenix.HTML.Form.normalize_value("checkbox", value) end)
 
     ~H"""
-    <div phx-feedback-for={@name}>
-      <label class="flex items-center gap-4 text-sm leading-6 text-zinc-600">
-        <input type="hidden" name={@name} value="false" />
-        <input
-          type="checkbox"
-          id={@id || @name}
-          name={@name}
-          value="true"
-          checked={@checked}
-          class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900"
-          {@rest}
-        />
-        <%= @label %>
+    <div class="form-check">
+      <input name={@name} type="hidden" value="false" />
+      <input name={@name} id={@id} class="form-check-input" type="checkbox" value="true" checked={@checked} />
+      <label class="form-check-label" for={@id}>
+        <strong><%= @label %></strong><%= assigns[:text] %>
+        <%= if assigns[:description] do %>
+          &nbsp;<%= assigns[:description] %>
+        <% end %>
       </label>
-      <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """
   end
@@ -384,7 +377,7 @@ defmodule CentralWeb.CoreComponents do
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class="block text-sm font-semibold leading-6 text-zinc-800">
+    <label for={@for} class="control-label">
       <%= render_slot(@inner_block) %>
     </label>
     """

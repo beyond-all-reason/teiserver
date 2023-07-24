@@ -1,4 +1,4 @@
-<% recents = Central.Account.RecentlyUsedCache.get_recently(@conn) %>
+<% recents = Central.Account.RecentlyUsedCache.get_recently(@current_user) %>
 
 <%= if recents != [] do %>
   <div class="nav-item dropdown mx-2">

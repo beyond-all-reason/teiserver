@@ -20,7 +20,6 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
       |> add_breadcrumb(name: "Login throttle", url: ~p"/admin/dashboard/login_throttle")
       |> assign(:site_menu_active, "admin")
       |> assign(:view_colour, Central.Admin.AdminLib.colours())
-      |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
       |> assign(:heartbeats, %{})
       |> assign(:queues, nil)
       |> assign(:recent_logins, [])

@@ -9,7 +9,7 @@ defmodule TeiserverWeb.General.GeneralControllerTest do
   end
 
   test "index", %{conn: conn} do
-    conn = get(conn, Routes.ts_general_general_path(conn, :index))
+    conn = get(conn, "/")
 
     # assert html_response(conn, 200) =~ "Account"
     assert redirected_to(conn) == Routes.general_page_path(conn, :index)

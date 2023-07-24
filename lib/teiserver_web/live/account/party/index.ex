@@ -34,7 +34,6 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
       |> assign(:mode, mode)
       |> assign(:client, client)
       |> assign(:site_menu_active, "parties")
-      |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
       |> assign(:view_colour, PartyLib.colours())
       |> assign(:user_lookup, %{})
       |> list_parties()

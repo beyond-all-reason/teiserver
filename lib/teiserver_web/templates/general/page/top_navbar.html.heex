@@ -29,17 +29,17 @@
         />
 
         <%= if allow?(@current_user, "Server") do %>
-          <%= central_component("top_nav_item",
-            text: "Logging",
-            route: ~p"/logging",
-            active: @site_menu_active == "logging"
-          ) %>
-
-          <%= central_component("top_nav_item",
-            text: "Telemetry",
-            route: ~p"/telemetry",
-            active: @site_menu_active == "telemetry"
-          ) %>
+          <TeiserverWeb.NavComponents.top_nav_item
+            text="Logging"
+            active={@site_menu_active == "logging"}
+            route={~p"/logging"}
+          />
+          
+          <TeiserverWeb.NavComponents.top_nav_item
+            text="Telemetry"
+            active={@site_menu_active == "telemetry"}
+            route={~p"/telemetry"}
+          />
         <% end %>
 
         <%= central_component("top_nav_item",
@@ -68,7 +68,7 @@
 
         <%= central_component("top_nav_item",
           text: "Leaderboard",
-          route: Routes.ts_battle_ratings_path(@conn, :leaderboard),
+          route: ~p"/teiserver/battle/ratings/leaderboard",
           active: @site_menu_active == "leaderboard"
         ) %>
 
@@ -91,7 +91,7 @@
         <%= if allow?(@current_user, "Overwatch") do %>
           <%= central_component("top_nav_item",
             text: "Moderation",
-            route: Routes.moderation_general_path(@conn, :index),
+            route: ~p"/moderation",
             active: @site_menu_active == "moderation"
           ) %>
         <% end %>

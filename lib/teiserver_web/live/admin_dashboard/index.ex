@@ -33,7 +33,6 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> add_breadcrumb(name: "Dashboard", url: "/admin/dashboard")
       |> assign(:site_menu_active, "admin")
       |> assign(:view_colour, Central.Admin.AdminLib.colours())
-      |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
       |> assign(:telemetry_client, telemetry_data.client)
       |> assign(:telemetry_battle, telemetry_data.battle)
       |> assign(:total_connected_clients, telemetry_data.total_clients_connected)

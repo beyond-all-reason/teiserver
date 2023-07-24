@@ -18,7 +18,7 @@ defmodule Teiserver.Communication.NotificationPlug do
       Communication.mark_notification_as_read(conn.assigns[:current_user].id, conn.params["anid"])
     end
 
-    assign_notificiations(conn, conn.assigns[:current_user])
+    assign_notifications(conn, conn.assigns[:current_user])
   end
 
   def live_call(socket) do
@@ -37,12 +37,12 @@ defmodule Teiserver.Communication.NotificationPlug do
     |> Phoenix.LiveView.Utils.assign(:user_notifications_unread_count, unread_count)
   end
 
-  defp assign_notificiations(conn, nil) do
+  defp assign_notifications(conn, nil) do
     conn
     |> assign(:user_notifications, [])
   end
 
-  defp assign_notificiations(conn, the_user) do
+  defp assign_notifications(conn, the_user) do
     notifications =
       the_user.id
       |> Communication.list_user_notifications(:unread)

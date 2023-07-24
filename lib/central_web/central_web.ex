@@ -115,7 +115,8 @@ defmodule CentralWeb do
 
   def live_view_structure do
     quote do
-      use Phoenix.LiveView
+      use Phoenix.LiveView,
+        layout: {CentralWeb.Layouts, :app}
 
       use Breadcrumble
       alias Central.Account.AuthPlug

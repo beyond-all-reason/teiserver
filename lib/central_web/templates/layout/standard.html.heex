@@ -40,43 +40,14 @@
 
 <main>
   <%= if assigns[:breadcrumb_trails] do %>
-    <%= render(TeiserverWeb.ComponentView, "breadcrumb.html", assigns) %>
+    <.breadcrumb_trail trails={assigns[:breadcrumb_trails]} />
   <% end %>
 
   <div id="flash-messages">
-    <%= if Phoenix.Flash.get(@flash, :danger) do %>
-      <p
-        class="alert alert-danger alert-no-margin alert-dismissible fade show"
-        role="alert"
-        id="app-flash-danger"
-      >
-        <%= Phoenix.Flash.get(@flash, :danger) %>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-        </button>
-      </p>
-    <% end %>
-    <%= if Phoenix.Flash.get(@flash, :info) do %>
-      <p
-        class="alert alert-info alert-no-margin alert-dismissible fade show"
-        role="alert"
-        id="app-flash-info"
-      >
-        <%= Phoenix.Flash.get(@flash, :info) %>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-        </button>
-      </p>
-    <% end %>
-    <%= if Phoenix.Flash.get(@flash, :success) do %>
-      <p
-        class="alert alert-success alert-no-margin alert-dismissible fade show"
-        role="alert"
-        id="app-flash-success"
-      >
-        <%= Phoenix.Flash.get(@flash, :success) %>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-        </button>
-      </p>
-    <% end %>
+    <.flash kind={:info} title="Information" role="alert" flash={@flash} />
+    <.flash kind={:success} title="Success!" role="alert" flash={@flash} />
+    <.flash kind={:warning} title="Warning!" role="alert" flash={@flash} />
+    <.flash kind={:error} title="Error!" role="alert" flash={@flash} />
   </div>
 
   <div class="px-3 my-0">
@@ -86,7 +57,6 @@
 
 <footer class="footer mt-auto pt-2 pb-1 px-2">
   <div style="text-align: right;">
-    STD
     <%= Teiserver.Config.get_site_config_cache("site.Footer credit text") %>
   </div>
 </footer>
