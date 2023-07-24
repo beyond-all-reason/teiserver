@@ -189,7 +189,7 @@ log_min_duration_statement = 5000
 
 Now you will need to enable them
 ```bash
-psql -U teisever_prod <<EOF
+psql -U teiserver_prod <<EOF
 CREATE EXTENSION pg_stat_statements;
 EOF
 ```
