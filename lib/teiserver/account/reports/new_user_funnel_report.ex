@@ -20,6 +20,7 @@ defmodule Teiserver.Account.NewUserFunnelReport do
         search: [
           inserted_after: start_date
         ],
+        select: [:roles, :id],
         limit: :infinity
       )
 
@@ -28,7 +29,7 @@ defmodule Teiserver.Account.NewUserFunnelReport do
     # Verified
     verified_userids =
       accounts
-      |> Enum.filter(fn %{data: data} -> Enum.member?(data["roles"], "Verified") end)
+      |> Enum.filter(fn user -> Enum.member?(user.roles, "Verified") end)
       |> Enum.map(fn %{id: id} -> id end)
 
     verified = Enum.count(verified_userids)

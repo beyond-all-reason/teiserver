@@ -242,13 +242,13 @@ defmodule TeiserverWeb.Admin.UserController do
 
     changeable_roles =
       cond do
-        Enum.member?(current_user.data["roles"], "Server") ->
+        Enum.member?(current_user.roles, "Server") ->
           RoleLib.allowed_role_management("Server")
 
-        Enum.member?(current_user.data["roles"], "Admin") ->
+        Enum.member?(current_user.roles, "Admin") ->
           RoleLib.allowed_role_management("Admin")
 
-        Enum.member?(current_user.data["roles"], "Moderator") ->
+        Enum.member?(current_user.roles, "Moderator") ->
           RoleLib.allowed_role_management("Moderator")
 
         true ->
@@ -264,7 +264,7 @@ defmodule TeiserverWeb.Admin.UserController do
           if Enum.member?(changeable_roles, role_name) do
             user_params[role_name] == "true"
           else
-            Enum.member?(user.data["roles"], role_name)
+            Enum.member?(user.roles, role_name)
           end
 
         if selected do

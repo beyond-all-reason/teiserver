@@ -89,6 +89,16 @@ defmodule Teiserver.Account.UserLib do
       where: fragment("(? ->> ?)::jsonb @> ?::jsonb", users.data, ^field, ^value)
   end
 
+  def _search(query, :has_role, role_name) do
+    from users in query,
+      where: ^role_name in users.roles
+  end
+
+  def _search(query, :not_has_role, role_name) do
+    from users in query,
+      where: ^role_name not in users.roles
+  end
+
   def _search(query, :bot, "Person") do
     Logger.error("user.data['bot'] is being queried, this property is due to be depreciated")
 

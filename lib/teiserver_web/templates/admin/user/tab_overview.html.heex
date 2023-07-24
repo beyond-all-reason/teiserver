@@ -10,7 +10,7 @@
 <div class="row">
   <div class="col-md-12 col-lg-6">
     <h4>Status</h4>
-    <%= for role <- @user.data["roles"] do %>
+    <%= for role <- @user.roles do %>
       <% data = @role_data[role] %>
       <%= if data != nil and Map.get(data, :badge) != false do %>
         <div class="role-badge">

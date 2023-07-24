@@ -180,18 +180,18 @@ defmodule Teiserver.Account.AccoladeBotServer do
       nil ->
         # Make account
         {:ok, account} =
-          Account.create_user(%{
+          Account.script_create_user(%{
             name: "AccoladesBot",
             email: "accolades_bot@teiserver",
             icon:
               "fa-solid #{Teiserver.Account.AccoladeLib.icon()}" |> String.replace(" far ", " "),
             colour: "#0066AA",
             password: Account.make_bot_password(),
+            roles: ["Bot", "Verified"],
             data: %{
               bot: true,
               moderator: false,
-              lobby_client: "Teiserver Internal Process",
-              roles: ["Bot", "Verified"]
+              lobby_client: "Teiserver Internal Process"
             }
           })
 

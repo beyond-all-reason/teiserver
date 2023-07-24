@@ -52,7 +52,7 @@
             id: "user_#{r}",
             name: "user[#{r}]",
             label: label,
-            checked: r in (@changeset.data.data["roles"] || [])
+            checked: r in (@changeset.data.roles || [])
           ) %>
         <% end %>
       </div>
@@ -76,7 +76,7 @@
             id: "user_#{r}",
             name: "user[#{r}]",
             label: label,
-            checked: r in (@changeset.data.data["roles"] || [])
+            checked: r in (@changeset.data.roles || [])
           ) %>
         <% end %>
       </div>
@@ -100,7 +100,7 @@
             id: "user_#{r}",
             name: "user[#{r}]",
             label: label,
-            checked: r in (@changeset.data.data["roles"] || [])
+            checked: r in (@changeset.data.roles || [])
           ) %>
         <% end %>
       </div>
@@ -122,7 +122,7 @@
             id: "user_#{r}",
             name: "user[#{r}]",
             label: label,
-            checked: r in (@changeset.data.data["roles"] || [])
+            checked: r in (@changeset.data.roles || [])
           ) %>
         <% end %>
       </div>
@@ -144,7 +144,7 @@
             id: "user_#{r}",
             name: "user[#{r}]",
             label: label,
-            checked: r in (@changeset.data.data["roles"] || [])
+            checked: r in (@changeset.data.roles || [])
           ) %>
         <% end %>
       </div>
@@ -167,7 +167,7 @@
           id: "user_#{r}",
           name: "user[#{r}]",
           label: label,
-          checked: r in (@changeset.data.data["roles"] || [])
+          checked: r in (@changeset.data.roles || [])
         ) %>
       <% end %>
     </div>
