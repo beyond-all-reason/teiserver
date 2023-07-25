@@ -147,11 +147,13 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       [_all, username, event_type_name, game_time] ->
         userid = Account.get_userid_from_name(username)
 
-        host = Client.get_client_by_id(from_id)
-        match_id = host.lobby_id
-
         if userid do
-          Telemetry.log_match_event(match_id, userid, event_type_name, game_time)
+          host = Client.get_client_by_id(from_id)
+          match_id = Battle.get_lobby_match_id(host.lobby_id)
+
+          if match_id do
+            Teiserver.Telemetry.log_match_event(match_id, userid, event_type_name, game_time)
+          end
         end
 
       _ ->
