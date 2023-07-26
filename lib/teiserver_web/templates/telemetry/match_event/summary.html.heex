@@ -31,7 +31,7 @@
         </div>
 
         <%= render(
-          TeiserverWeb.Telemetry.ClientEventView,
+          TeiserverWeb.Telemetry.MatchEventView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",
@@ -48,9 +48,7 @@
               <thead>
                 <tr>
                   <th>Type</th>
-                  <th>Auth</th>
-                  <th>Unauth</th>
-                  <th>Total</th>
+                  <th>Count</th>
                   <th>&nbsp;</th>
                 </tr>
               </thead>
@@ -59,13 +57,6 @@
                   <tr>
                     <td><%= event_type %></td>
                     <td><%= format_number(@match_events[event_type]) %></td>
-                    <td><%= format_number(@unauth_events[event_type]) %></td>
-                    <td>
-                      <%= format_number(
-                        Map.get(@match_events, event_type, 0) +
-                          Map.get(@unauth_events, event_type, 0)
-                      ) %>
-                    </td>
                     <td>
                       <a
                         href={~p"/telemetry/match_events/#{event_type}/detail"}

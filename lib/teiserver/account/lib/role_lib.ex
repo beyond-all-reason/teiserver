@@ -260,4 +260,14 @@ defmodule Teiserver.Account.RoleLib do
     management_roles() ++
       moderation_roles() ++ staff_roles() ++ privileged_roles() ++ property_roles()
   end
+
+  def calculate_permissions(roles) do
+    roles
+      |> Enum.map(fn role_name ->
+        role_def = role_data(role_name)
+        [role_name | role_def.contains]
+      end)
+      |> List.flatten()
+      |> Enum.uniq()
+  end
 end

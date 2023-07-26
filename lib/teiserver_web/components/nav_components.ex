@@ -64,7 +64,6 @@ defmodule TeiserverWeb.NavComponents do
     """
   end
 
-
   @doc """
   <.menu_card
     icon="icon"

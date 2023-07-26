@@ -1,4 +1,5 @@
 defmodule Teiserver.Telemetry.EventType do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "teiserver_telemetry_event_types" do
