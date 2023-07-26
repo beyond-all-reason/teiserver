@@ -46,7 +46,8 @@ defmodule Teiserver.Telemetry.MatchEventLib do
 
   def _search(query, :between, {start_date, end_date}) do
     from match_events in query,
-      where: between(match_events.timestamp, ^start_date, ^end_date)
+      left_join: matches in assoc(match_events, :match),
+      where: between(matches.started, ^start_date, ^end_date)
   end
 
   def _search(query, :event_type_id, event_type_id) do
@@ -86,28 +87,26 @@ defmodule Teiserver.Telemetry.MatchEventLib do
   def preload(query, nil), do: query
 
   def preload(query, preloads) do
-    query = if :event_type in preloads, do: _preload_event_types(query), else: query
-    query = if :user in preloads, do: _preload_users(query), else: query
-    query = if :match in preloads, do: _preload_matches(query), else: query
-    query
+    preloads
+    |> Enum.reduce(query, fn key, query_acc ->
+      _preload(query_acc, key)
+    end)
   end
 
-  @spec _preload_event_types(Ecto.Query.t()) :: Ecto.Query.t()
-  def _preload_event_types(query) do
+  @spec _preload(Ecto.Query.t(), atom) :: Ecto.Query.t()
+  defp _preload(query, :event_types) do
     from match_events in query,
       left_join: event_types in assoc(match_events, :event_type),
       preload: [event_type: event_types]
   end
 
-  @spec _preload_users(Ecto.Query.t()) :: Ecto.Query.t()
-  def _preload_users(query) do
+  defp _preload(query, :users) do
     from match_events in query,
       left_join: users in assoc(match_events, :user),
       preload: [user: users]
   end
 
-  @spec _preload_matches(Ecto.Query.t()) :: Ecto.Query.t()
-  def _preload_matches(query) do
+  defp _preload(query, :matches) do
     from match_events in query,
       left_join: matches in assoc(match_events, :match),
       preload: [match: matches]

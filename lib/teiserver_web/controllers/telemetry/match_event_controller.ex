@@ -59,37 +59,33 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
         _ -> Timex.now() |> Timex.shift(days: -7)
       end
 
-    match_data =
+    match_event_data =
       Telemetry.list_match_events(
         search: [
           event_type_id: event_type_id,
           between: {start_date, Timex.now()}
         ],
+        preload: [:users],
         limit: 5000
       )
 
-    schema_keys =
-      match_data
-      |> Stream.map(fn event -> Map.keys(event.value) end)
-      |> Enum.to_list()
-      |> List.flatten()
-      |> Stream.uniq()
-      |> Enum.sort()
+    match_event_counts_by_user =
+      match_event_data
+      |> Enum.group_by(fn event -> {event.user_id, event.user.name} end, fn _ -> 1 end)
+      |> Enum.map(fn {value, items} -> {value, Enum.count(items)} end)
+      |> Enum.sort_by(fn {_, i} -> i end, &<=/2)
 
-    key = Map.get(params, "key", hd(schema_keys ++ [nil]))
-
-    match_counts =
-      match_data
-      |> Enum.group_by(fn event -> Map.get(event.value, key, nil) end)
-      |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
+    match_event_counts_by_match =
+      match_event_data
+      |> Enum.group_by(fn event -> event.match_id end, fn _ -> 1 end)
+      |> Enum.map(fn {value, items} -> {value, Enum.count(items)} end)
+      |> Enum.sort_by(fn {_, i} -> i end, &<=/2)
 
     conn
-    |> assign(:schema_keys, schema_keys)
-    |> assign(:key, key)
+    |> assign(:match_event_counts_by_user, match_event_counts_by_user)
+    |> assign(:match_event_counts_by_match, match_event_counts_by_match)
     |> assign(:tf, tf)
     |> assign(:event_name, event_name)
-    |> assign(:match_counts, match_counts)
-    |> assign(:schema_keys, schema_keys)
     |> render("detail.html")
   end
 
