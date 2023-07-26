@@ -1,4 +1,11 @@
 <div class="row page-row">
+  <.menu_card
+    icon={Teiserver.Moderation.overwatch_icon()}
+    url={~p"/moderation/overwatch"}
+  >
+    Overwatch
+  </.menu_card>
+
   <%= central_component("menu_card",
     icon: Teiserver.Moderation.ReportLib.icon(),
     name: "reports",
@@ -13,14 +20,6 @@
     text: "Actions",
     icon_class: "fa-duotone",
     link: Routes.moderation_action_path(@conn, :index)
-  ) %>
-
-  <%= central_component("menu_card",
-    icon: Teiserver.Moderation.ProposalLib.icon(),
-    name: "proposals",
-    text: "Proposals",
-    icon_class: "fa-duotone",
-    link: Routes.moderation_proposal_path(@conn, :index)
   ) %>
 
   <%= central_component("menu_card",

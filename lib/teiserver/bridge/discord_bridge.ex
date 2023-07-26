@@ -210,7 +210,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
         end
 
       outstanding_count =
-        Moderation.list_outstanding_reports(report.target_id)
+        Moderation.list_outstanding_reports_against_user(report.target_id)
         |> Enum.count()
 
       outstanding_msg =

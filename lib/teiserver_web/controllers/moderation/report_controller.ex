@@ -134,8 +134,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
         ],
         preload: [
           :reporter,
-          :target,
-          :responder
+          :target
         ],
         order_by: "Newest first",
         limit: :infinity
@@ -148,8 +147,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
         ],
         preload: [
           :reporter,
-          :target,
-          :responder
+          :target
         ],
         order_by: "Newest first",
         limit: :infinity

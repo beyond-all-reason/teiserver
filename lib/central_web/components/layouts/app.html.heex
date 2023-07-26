@@ -1,34 +1,45 @@
 <div>
-  <%= if assigns[:view_colour] do %>
-    <% {fg, bg, _bsname} = Central.Helpers.StylingHelper.colours(@view_colour) %>
-    <style type="text/css">
-      @media print {
-        #menu, #header, #navigation {
-          display: none;
-        }
+  <% {fg, bg, _bsname} = Central.Helpers.StylingHelper.colours(assigns[:view_colour] || :primary) %>
+  <style type="text/css">
+    @media print {
+      #menu, #header, #navigation {
+        display: none;
       }
+    }
 
-      #breadcrumb-wrapper {
-        border-bottom: 1px solid <%= fg %> !important;
-        background-color: <%= bg %> !important;
-      }
-      #breadcrumb {
-        background-color: <%= bg %> !important;
-      }
+    #breadcrumb-wrapper {
+      border-bottom: 1px solid <%= fg %> !important;
+      background-color: <%= bg %> !important;
+    }
+    #breadcrumb {
+      background-color: <%= bg %> !important;
+    }
 
-      .nav-tabs .nav-item .active {
-        color: <%= fg %> !important;
-        border-bottom-color: <%= fg %> !important;
-      }
+    .nav-tabs .nav-item .active {
+      color: <%= fg %> !important;
+      border-bottom-color: <%= fg %> !important;
+    }
 
-      .line-card a {
-        color: <%= fg %> !important;
-      }
-      .line-card a:hover {
-        background-color: <%= bg %> !important;
-      }
-    </style>
-  <% end %>
+    .line-card a {
+      color: <%= fg %> !important;
+    }
+    .line-card a:hover {
+      background-color: <%= bg %> !important;
+    }
+    
+    .sub-menu-icon a:hover {
+      border-bottom: 5px solid <%= fg %>;
+      color: <%= fg %>;
+    }
+
+    .sub-menu-icon .active {
+      border-bottom-color: <%= fg %>;
+    }
+
+    .sub-menu .active, .sub-menu .active:hover {
+      color: <%= fg %>;
+    }
+  </style>
 
   <%= if assigns[:site_menu_active], do: Phoenix.View.render(TeiserverWeb.General.PageView, "top_navbar.html", assigns) %>
 

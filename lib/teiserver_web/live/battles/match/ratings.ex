@@ -83,7 +83,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
     socket
   end
 
-  defp run_match_query(filters, rating_type, user) do
+  defp run_match_query(_filters, rating_type, user) do
     filter_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type] || 1
 
     logs =

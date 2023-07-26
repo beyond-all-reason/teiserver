@@ -19,6 +19,8 @@ defmodule Teiserver.Moderation do
   @spec colour :: atom
   defdelegate colour(), to: ReportLib
 
+  def overwatch_icon(), do: "eye"
+
   @spec report_query(List.t()) :: Ecto.Query.t()
   def report_query(args) do
     report_query(nil, args)
@@ -53,9 +55,9 @@ defmodule Teiserver.Moderation do
   @doc """
 
   """
-  @spec list_outstanding_reports(T.userid()) :: List.t()
-  @spec list_outstanding_reports(T.userid(), List.t()) :: List.t()
-  def list_outstanding_reports(userid, args \\ []) do
+  @spec list_outstanding_reports_against_user(T.userid()) :: List.t()
+  @spec list_outstanding_reports_against_user(T.userid(), List.t()) :: List.t()
+  def list_outstanding_reports_against_user(userid, args \\ []) do
     search = [
       target_id: userid,
       no_result: true,

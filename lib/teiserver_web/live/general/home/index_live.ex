@@ -5,7 +5,6 @@ defmodule TeiserverWeb.General.HomeLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     socket = socket
-      |> add_breadcrumb(name: "Teiserver", url: ~p"/")
       |> get_server_data()
       |> get_overwatch_data()
       |> get_moderation_data()

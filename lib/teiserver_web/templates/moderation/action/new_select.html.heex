@@ -6,11 +6,8 @@
   });
 </script>
 
-<%= render(
-  TeiserverWeb.Moderation.GeneralView,
-  "sub_menu.html",
-  Map.merge(assigns, %{active: "actions"})
-) %>
+<TeiserverWeb.Moderation.ModerationComponents.sub_menu active={"actions"} view_colour={view_colour()} />
+
 
 <%= central_component("picker_script",
   module: Teiserver.Account.UserLib,

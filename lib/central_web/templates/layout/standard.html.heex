@@ -33,6 +33,19 @@
     .line-card a:hover {
       background-color: <%= bg %> !important;
     }
+    
+    .sub-menu-icon a:hover {
+      border-bottom: 5px solid <%= fg %>;
+      color: <%= fg %>;
+    }
+
+    .sub-menu-icon .active {
+      border-bottom-color: <%= fg %>;
+    }
+
+    .sub-menu .active, .sub-menu .active:hover {
+      color: <%= fg %>;
+    }
   </style>
 <% end %>
 

@@ -1,64 +1,53 @@
 defmodule TeiserverWeb.Moderation.ModerationComponents do
   @moduledoc false
   use CentralWeb, :component
-  import TeiserverWeb.NavComponents, only: [section_menu_button: 1]
+  import TeiserverWeb.NavComponents, only: [sub_menu_button: 1]
 
   @doc """
-  <TeiserverWeb.Moderation.ModerationComponents.section_menu active={active} bsname={} />
+  <TeiserverWeb.Moderation.ModerationComponents.sub_menu active={active} view_colour={@view_colour} />
   """
   attr :view_colour, :string, required: true
   attr :active, :string, required: true
-  attr :current_user, :map, required: true
+  # attr :current_user, :map, required: true
   attr :match_id, :integer, default: nil
-  def section_menu(assigns) do
+  def sub_menu(assigns) do
     ~H"""
-    <.section_menu_button
-      bsname={@view_colour}
-      icon={StylingHelper.icon(:list)}
-      active={@active == "index"}
-      url={~p"/teiserver/battle/matches"}
-    >
-      List
-    </.section_menu_button>
-
-    <.section_menu_button
-      bsname={@view_colour}
-      icon={Teiserver.Account.RatingLib.icon()}
-      active={@active == "ratings"}
-      url={~p"/teiserver/battle/ratings"}
-    >
-      Ratings
-    </.section_menu_button>
-
-    <.section_menu_button
-      bsname={@view_colour}
-      icon={StylingHelper.icon(:chart)}
-      active={@active == "progression"}
-      url={~p"/teiserver/battle/progression"}
-    >
-      Progression
-    </.section_menu_button>
-
-    <.section_menu_button
-      :if={@active == "show"}
-      bsname={@view_colour}
-      icon={StylingHelper.icon(:detail)}
-      active={true}
-      url="#"
-    >
-      Match details
-    </.section_menu_button>
-
-    <div class="float-end">
-      <.section_menu_button
-        :if={@match_id != nil and allow?(@current_user, "Moderator")}
+    <div class="row sub-menu">
+      <.sub_menu_button
         bsname={@view_colour}
-        icon={StylingHelper.icon(:admin)}
-        active={false}
-        url={~p"/teiserver/admin/matches/#{@match_id}"}
+        icon={Teiserver.Moderation.overwatch_icon()}
+        active={@active == "overwatch"}
+        url={~p"/moderation/overwatch"}
       >
-        Admin view
-      </.section_menu_button>
+        Overwatch
+      </.sub_menu_button>
+
+      <.sub_menu_button
+        bsname={@view_colour}
+        icon={Teiserver.Moderation.ReportLib.icon()}
+        active={@active == "reports"}
+        url={~p"/moderation/report"}
+      >
+        Reports
+      </.sub_menu_button>
+
+      <.sub_menu_button
+        bsname={@view_colour}
+        icon={Teiserver.Moderation.ActionLib.icon()}
+        active={@active == "actions"}
+        url={~p"/moderation/action"}
+      >
+        Actions
+      </.sub_menu_button>
+
+      <.sub_menu_button
+        bsname={@view_colour}
+        icon={Teiserver.Moderation.BanLib.icon()}
+        active={@active == "bans"}
+        url={~p"/moderation/ban"}
+      >
+        Bans
+      </.sub_menu_button>
     </div>
     """
   end

@@ -128,6 +128,7 @@ defmodule CentralWeb do
       import Central.Helpers.TimexHelper
       alias Central.Helpers.StylingHelper
 
+      defguard is_connected?(socket) when socket.transport_pid != nil
       unquote(verified_routes())
       unquote(view_helpers())
       unquote(html_helpers())

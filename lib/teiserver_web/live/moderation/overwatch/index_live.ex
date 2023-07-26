@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
   use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Moderation}
+  alias Teiserver.{Moderation}
+  alias Teiserver.Moderation.ReportLib
 
   @impl true
   def mount(_params, _ession, socket) do
@@ -9,6 +10,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
       |> assign(:view_colour, Teiserver.Moderation.colour())
       |> assign(:outstanding_reports, 0)
       |> assign(:reports, nil)
+      |> default_filters()
       |> add_breadcrumb(name: "Moderation", url: ~p"/moderation")
       |> add_breadcrumb(name: "Overwatch", url: ~p"/moderation/overwatch")
 
@@ -22,19 +24,19 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
     {:ok, socket}
   end
 
-  # @impl true
-  # def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
-  #   [key] = event["_target"]
-  #   value = event[key]
+  @impl true
+  def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
+    [key] = event["_target"]
+    value = event[key]
 
-  #   new_filters = Map.put(filters, key, value)
+    new_filters = Map.put(filters, key, value)
 
-  #   socket = socket
-  #     |> assign(:filters, new_filters)
-  #     |> update_match_list
+    socket = socket
+      |> assign(:filters, new_filters)
+      |> recalculate_outstanding_reports
 
-  #   {:noreply, socket}
-  # end
+    {:noreply, socket}
+  end
 
   # defp update_match_list(%{assigns: %{filters: filters, current_user: current_user}} = socket) do
   #   if connected?(socket) do
@@ -85,24 +87,31 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
   #   matches
   # end
 
-  # defp default_filters(socket) do
-  #   socket
-  #   |> assign(:filters, %{
-  #     "game-type" => "Any type",
-  #     "opponent" => "",
-  #     "ally" => ""
-  #   })
-  # end
+  defp default_filters(socket) do
+    socket
+    |> assign(:filters, %{
+      "outstanding-state" => "Awaiting overwatch input"
+    })
+  end
 
-  defp recalculate_outstanding_reports(%{assigns: %{current_user: current_user}} = socket) do
-    reports = Moderation.list_outstanding_reports(current_user.id,
+  defp recalculate_outstanding_reports(%{assigns: %{current_user: current_user, filters: filters}} = socket) do
+    outstanding_filter = case filters["outstanding-state"] do
+      "Awaiting overwatch input" -> true
+      "Actioned or Closed" -> false
+      _ -> nil
+    end
+
+    reports = Moderation.list_reports(
+      search: [
+        outstanding: outstanding_filter,
+        inserted_after: Timex.shift(Timex.now(), days: -ReportLib.get_outstanding_report_max_days())
+      ],
+      order_by: "Newest first",
+      limit: 50,
       preload: [:target, :reporter, {:user_response, current_user.id}]
     )
 
-    outstanding_reports = Enum.count(reports)
-
     socket
     |> assign(:reports, reports)
-    |> assign(:outstanding_reports, outstanding_reports)
   end
 end

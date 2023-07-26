@@ -1,8 +1,7 @@
 defmodule TeiserverWeb.Battle.MatchLive.Show do
   use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Battle, Game}
+  alias Teiserver.{Battle, Game}
   alias Teiserver.Battle.MatchLib
-  import Central.Account.RecentlyUsedCache, only: [insert_recently: 2]
 
   @impl true
   def mount(_params, _ession, socket) do
@@ -68,16 +67,12 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   #   {:noreply, assign(socket, :tab, tab)}
   # end
 
-  defp get_match(%{assigns: %{id: id, current_user: current_user}} = socket) do
+  defp get_match(%{assigns: %{id: id, current_user: _current_user}} = socket) do
     if connected?(socket) do
       match =
         Battle.get_match!(id,
           preload: [:members_and_users]
         )
-
-      # match
-      #   |> MatchLib.make_favourite()
-      #   |> insert_recently(socket)
 
       match_name = MatchLib.make_match_name(match)
 

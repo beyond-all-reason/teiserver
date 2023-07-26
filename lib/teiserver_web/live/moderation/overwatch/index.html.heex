@@ -1,24 +1,49 @@
-<%#= render(
-  TeiserverWeb.Moderation.GeneralView,
-  "sub_menu.html",
-  Map.merge(assigns, %{active: "reports"})
-) %>
+<TeiserverWeb.Moderation.ModerationComponents.sub_menu active="overwatch" view_colour={@view_colour} />
 
 <div class="row section-menu">
   <div class="col-md-12">
-    <TeiserverWeb.Battle.MatchComponents.section_menu
+    <TeiserverWeb.Moderation.OverwatchComponents.section_menu
       active="index"
       view_colour={@view_colour}
       current_user={@current_user}
     />
     <br /><br />
     
-  </div>
-</div>
+    <form method="post" class="">
+      <div class="row">
+        <div class="col">
+          <.input type="select"
+            label="Outstanding"
+            options={["Awaiting overwatch input", "Actioned or Closed", "All"]}
+            name="outstanding-state"
+            value={@filters["outstanding-state"]}
+            phx-change="filter-update"
+          />
+        </div>
 
-<div class="row">
-  <div class="col">
-    Outstanding reports: <%= @outstanding_reports %>
+        <%= if false do %>
+          <div class="col">
+            <.input type="text"
+              label="Ally"
+              name="ally"
+              value={@filters["ally"]}
+              phx-change="filter-update" phx-debounce="400"
+            />
+          </div>
+          
+          <div class="col">
+            <.input type="text"
+              label="Opponent"
+              name="opponent"
+              value={@filters["opponent"]}
+              phx-change="filter-update" phx-debounce="400"
+            />
+          </div>
+        <% end %>
+      </div>
+    </form>
+    <hr />
+    
   </div>
 </div>
 
@@ -32,7 +57,7 @@
 
       <th>Reporter</th>
       <th>Datetime</th>
-      <th colspan="2">Response</th>
+      <th colspan="2">Your response</th>
 
       <th colspan="3">&nbsp;</th>
     </tr>
@@ -49,7 +74,7 @@
         <td style="width: 30px;">
           <%= if report.result_id do %>
             <a
-              href={Routes.moderation_action_path(@conn, :show, report.result_id)}
+              href={~p"/moderation/action/#{report.result_id}"}
               class={"btn btn-sm btn-#{Teiserver.Moderation.ActionLib.colour()}"}
             >
               <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />

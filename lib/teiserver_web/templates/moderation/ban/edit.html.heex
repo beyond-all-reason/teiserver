@@ -1,10 +1,6 @@
 <% bsname = view_colour() %>
 
-<%= render(
-  TeiserverWeb.Moderation.GeneralView,
-  "sub_menu.html",
-  Map.merge(assigns, %{active: "bans"})
-) %>
+<TeiserverWeb.Moderation.ModerationComponents.sub_menu active={"bans"} view_colour={view_colour()} />
 
 <div class="row">
   <div class="col-md-12">

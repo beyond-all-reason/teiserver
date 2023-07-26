@@ -67,6 +67,7 @@ defmodule TeiserverWeb.NavComponents do
   @doc """
   <.menu_card
     icon="icon"
+    url={~p""}
     size={:auto | :small | :medium | :large | nil}
   >
     Text here
@@ -116,6 +117,30 @@ defmodule TeiserverWeb.NavComponents do
     <div class={"#{@col_classes} menu-card #{@extra_classes}"}>
       <a href={@url} class="block-link" style={@style}>
         <Fontawesome.icon icon={@icon} style="duotone" size={@icon_size} /><br />
+        <%= render_slot(@inner_block) %>
+      </a>
+    </div>
+    """
+  end
+
+    @doc """
+  <.sub_menu_button bsname={bsname} icon={lib} active={true/false} url={url}>
+    Text goes here
+  </.sub_menu_button>
+  """
+  attr :icon, :string, default: nil
+  attr :url, :string, required: true
+  attr :bsname, :string, default: "secondary"
+  attr :active, :boolean, default: false
+  slot :inner_block, required: true
+  def sub_menu_button(assigns) do
+    assigns = assigns
+      |> assign(:active_class, (if assigns[:active], do: "active"))
+
+    ~H"""
+    <div class="col sub-menu-icon">
+      <a href={@url} class={"block-link #{@active_class}"}>
+        <Fontawesome.icon icon={@icon} style={if @active, do: "solid", else: "regular"} size="2x" :if={@icon} /><br />
         <%= render_slot(@inner_block) %>
       </a>
     </div>

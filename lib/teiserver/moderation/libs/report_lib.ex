@@ -85,6 +85,17 @@ defmodule Teiserver.Moderation.ReportLib do
       where: reports.closed == ^value
   end
 
+  def _search(query, :outstanding, true) do
+    from reports in query,
+      where: reports.closed == false,
+      where: is_nil(reports.result_id)
+  end
+
+  def _search(query, :outstanding, false) do
+    from reports in query,
+      where: reports.closed == true or not is_nil(reports.result_id)
+  end
+
   def _search(query, :target_id, target_id) do
     from reports in query,
       where: reports.target_id == ^target_id

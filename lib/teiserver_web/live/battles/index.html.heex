@@ -7,116 +7,112 @@
 
 <div class="row mt-3">
   <div class="col-md-12">
-    <div class={"card border-#{bsname} page-card"}>
-      <div class="card-body">
-        <h4>
-          <% member_count = @lobbies |> Enum.reduce(0, fn b, acc -> acc + b.member_count end)
-          player_count = @lobbies |> Enum.reduce(0, fn b, acc -> acc + b.player_count end)
-          spectator_count = member_count - player_count %>
-          <%= if Enum.empty?(@lobbies) do %>
-            No lobbies found
-          <% else %>
-            Lobbies: <%= Enum.count(@lobbies) %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            Total members: <%= member_count %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            Players: <%= player_count %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            Spectators: <%= spectator_count %>
+    <h4>
+      <% member_count = @lobbies |> Enum.reduce(0, fn b, acc -> acc + b.member_count end)
+      player_count = @lobbies |> Enum.reduce(0, fn b, acc -> acc + b.player_count end)
+      spectator_count = member_count - player_count %>
+      <%= if Enum.empty?(@lobbies) do %>
+        No lobbies found
+      <% else %>
+        Lobbies: <%= Enum.count(@lobbies) %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Total members: <%= member_count %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Players: <%= player_count %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Spectators: <%= spectator_count %>
+      <% end %>
+    </h4>
+
+    <table class="table table-sm table-hover">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Map</th>
+          <th colspan="3">Status</th>
+          <th>Members</th>
+          <th>Players</th>
+          <th>Spectators</th>
+
+          <th colspan="3"></th>
+
+          <%= if @moderator do %>
+            <th>&nbsp;</th>
           <% end %>
-        </h4>
+        </tr>
+      </thead>
+      <tbody id="lobbies">
+        <%= for lobby <- @lobbies do %>
+          <%= if lobby != nil do %>
+            <tr id={"lobby-#{lobby.id}"}>
+              <td><%= lobby.name %></td>
+              <td><%= lobby.map_name %></td>
+              <td>
+                <%= if lobby.in_progress do %>
+                  <i class="fa-fw fa-solid fa-play"></i>
+                  &nbsp; <%= Central.Helpers.TimexHelper.duration_to_str_short(
+                    System.system_time(:second) - (lobby.started_at || 1_652_282_031)
+                  ) %>
+                <% end %>
+              </td>
+              <td>
+                <%= if lobby.locked do %>
+                  <i class="fa-fw fa-solid fa-lock"></i>
+                <% end %>
+              </td>
+              <td>
+                <%= if lobby.password != nil do %>
+                  <i class="fa-fw fa-solid fa-key"></i>
+                <% end %>
+              </td>
+              <td><%= lobby.member_count %></td>
+              <td><%= lobby.player_count %></td>
+              <td><%= lobby.member_count - lobby.player_count %></td>
 
-        <table class="table table-sm table-hover">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Map</th>
-              <th colspan="3">Status</th>
-              <th>Members</th>
-              <th>Players</th>
-              <th>Spectators</th>
+              <%= if @client do %>
+                <td>
+                  <span
+                    class={"btn btn-sm btn-#{bsname}"}
+                    phx-click="join"
+                    phx-value-lobby_id={lobby.id}
+                  >
+                    Join
+                  </span>
+                </td>
+              <% else %>
+                <td>&nbsp;</td>
+              <% end %>
 
-              <th colspan="3"></th>
+              <td>
+                <span>
+                  <%= live_redirect("Show",
+                    to: Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id),
+                    class: "btn btn-sm btn-outline-#{bsname}"
+                  ) %>
+                </span>
+              </td>
+              <td>
+                <span>
+                  <%= live_redirect("Chat",
+                    to: Routes.ts_battle_lobby_chat_path(@socket, :chat, lobby.id),
+                    class: "btn btn-sm btn-outline-#{bsname}"
+                  ) %>
+                </span>
+              </td>
 
-              <%= if @moderator do %>
-                <th>&nbsp;</th>
+              <%= if @moderator and lobby.match_id != nil do %>
+                <td>
+                  <a
+                    href={~p"/teiserver/admin/lobbies/#{lobby.match_id}/lobby_chat"}
+                    class={"btn btn-sm btn-outline-#{bsname}"}
+                  >
+                    Full chat
+                  </a>
+                </td>
+              <% else %>
+                <td>&nbsp;</td>
               <% end %>
             </tr>
-          </thead>
-          <tbody id="lobbies">
-            <%= for lobby <- @lobbies do %>
-              <%= if lobby != nil do %>
-                <tr id={"lobby-#{lobby.id}"}>
-                  <td><%= lobby.name %></td>
-                  <td><%= lobby.map_name %></td>
-                  <td>
-                    <%= if lobby.in_progress do %>
-                      <i class="fa-fw fa-solid fa-play"></i>
-                      &nbsp; <%= Central.Helpers.TimexHelper.duration_to_str_short(
-                        System.system_time(:second) - (lobby.started_at || 1_652_282_031)
-                      ) %>
-                    <% end %>
-                  </td>
-                  <td>
-                    <%= if lobby.locked do %>
-                      <i class="fa-fw fa-solid fa-lock"></i>
-                    <% end %>
-                  </td>
-                  <td>
-                    <%= if lobby.password != nil do %>
-                      <i class="fa-fw fa-solid fa-key"></i>
-                    <% end %>
-                  </td>
-                  <td><%= lobby.member_count %></td>
-                  <td><%= lobby.player_count %></td>
-                  <td><%= lobby.member_count - lobby.player_count %></td>
-
-                  <%= if @client do %>
-                    <td>
-                      <span
-                        class={"btn btn-sm btn-#{bsname}"}
-                        phx-click="join"
-                        phx-value-lobby_id={lobby.id}
-                      >
-                        Join
-                      </span>
-                    </td>
-                  <% else %>
-                    <td>&nbsp;</td>
-                  <% end %>
-
-                  <td>
-                    <span>
-                      <%= live_redirect("Show",
-                        to: Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id),
-                        class: "btn btn-sm btn-outline-#{bsname}"
-                      ) %>
-                    </span>
-                  </td>
-                  <td>
-                    <span>
-                      <%= live_redirect("Chat",
-                        to: Routes.ts_battle_lobby_chat_path(@socket, :chat, lobby.id),
-                        class: "btn btn-sm btn-outline-#{bsname}"
-                      ) %>
-                    </span>
-                  </td>
-
-                  <%= if @moderator and lobby.match_id != nil do %>
-                    <td>
-                      <a
-                        href={~p"/teiserver/admin/lobbies/#{lobby.match_id}/lobby_chat"}
-                        class={"btn btn-sm btn-outline-#{bsname}"}
-                      >
-                        Full chat
-                      </a>
-                    </td>
-                  <% else %>
-                    <td>&nbsp;</td>
-                  <% end %>
-                </tr>
-              <% end %>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-    </div>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
   </div>
 </div>
