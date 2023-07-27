@@ -76,7 +76,6 @@ config :central, Teiserver,
     cacertfile: "/var/www/tls/fullchain.pem"
   ],
   enable_benchmark: false,
-  enable_agent_mode: false,
   node_name: "node-name",
   enable_managed_lobbies: true,
   tachyon_schema_path: "/apps/central/lib/central-0.1.0/priv/tachyon/schema_v1/*/*/*.json"

@@ -32,7 +32,7 @@ defmodule Teiserver.Account.RoleLib do
     # Property
     %{name: "Trusted", colour: "#FFFFFF", icon: "fa-solid fa-check-square", contains: ~w()},
     %{name: "BAR+", colour: "#0066AA", icon: "fa-solid fa-hexagon-plus", contains: ~w(),
-      badge: true},
+      badge: false},
     %{name: "Bot", colour: "#777777", icon: "fa-solid fa-user-robot", contains: ~w()},
     %{
       name: "Verified",

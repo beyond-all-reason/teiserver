@@ -125,14 +125,6 @@ defmodule Teiserver.Startup do
       end)
     end
 
-    # We want this to start up later than the coordinator
-    if Application.get_env(:central, Teiserver)[:enable_agent_mode] do
-      spawn(fn ->
-        :timer.sleep(650)
-        Teiserver.agent_mode()
-      end)
-    end
-
     Central.cache_put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
     Central.cache_put(:application_metadata_cache, "teiserver_full_startup_completed", true)
 
