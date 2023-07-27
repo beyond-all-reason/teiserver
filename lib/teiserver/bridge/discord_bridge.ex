@@ -152,18 +152,11 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
   @spec new_infolog(Teiserver.Telemetry.Infolog.t()) :: any
   def new_infolog(infolog) do
-    chan_result =
-      Application.get_env(:central, DiscordBridge)[:bridges]
-      |> Enum.filter(fn {_chan, room} -> room == "telemetry-infologs" end)
-
-    channel =
-      case chan_result do
-        [{chan, _}] -> chan
-        _ -> nil
-      end
+    channel_id = Config.get_site_config_cache("teiserver.Discord channel #telemetry-infologs")
 
     post_to_discord =
       cond do
+        channel_id == nil -> false
         infolog.metadata["shorterror"] == "Errorlog" -> false
         infolog.metadata["private"] == true -> false
         true -> true
@@ -181,7 +174,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
         ]
         |> Enum.join("\n")
 
-      Api.create_message(channel, message)
+      Api.create_message(channel_id, message)
     end
   end
 
@@ -239,21 +232,13 @@ defmodule Teiserver.Bridge.DiscordBridge do
   def new_action(action) do
     action = Moderation.get_action!(action.id, preload: [:target])
 
-    result =
-      Application.get_env(:central, DiscordBridge)[:bridges]
-      |> Enum.filter(fn {_chan, room} -> room == "moderation-actions" end)
-
-    channel =
-      case result do
-        [{chan, _}] -> chan
-        _ -> nil
-      end
+    channel_id = Config.get_site_config_cache("teiserver.Discord channel #moderation-actions")
 
     post_to_discord =
       cond do
+        channel_id == nil -> false
         action.restrictions == ["Bridging"] -> false
         action.reason == "Banned (Automod)" -> false
-        channel == nil -> false
         true -> true
       end
 
@@ -288,7 +273,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
         |> Enum.join("\n")
         |> String.replace("\n\n", "\n")
 
-      Api.create_message(channel, message)
+      Api.create_message(channel_id, message)
     end
   end
 

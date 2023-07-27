@@ -198,36 +198,29 @@ defmodule Teiserver.Bridge.BridgeServer do
   def handle_info(%{channel: "teiserver_client_messages:" <> _}, state), do: {:noreply, state}
 
   def handle_info(%{channel: "teiserver_server", event: :started}, state) do
-    channels =
-      Application.get_env(:central, DiscordBridge)[:bridges]
-      |> Enum.filter(fn {_, name} -> name == "server-updates" end)
+    if Config.get_site_config_cache("teiserver.Bridge from server") do
+      # Main
+      channel_id = Config.get_site_config_cache("teiserver.Discord channel #main")
+      if channel_id do
+        Api.create_message(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
+      end
 
-    case channels do
-      [{channel_id, _}] ->
-        if Config.get_site_config_cache("teiserver.Bridge from server") do
-          Api.create_message(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
-        end
-
-      _ ->
-        :ok
+      # Server
+      channel_id = Config.get_site_config_cache("teiserver.Discord channel #server-updates")
+      if channel_id do
+        Api.create_message(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
+      end
     end
 
     {:noreply, state}
   end
 
   def handle_info(%{channel: "teiserver_server", event: :prep_stop}, state) do
-    channels =
-      Application.get_env(:central, DiscordBridge)[:bridges]
-      |> Enum.filter(fn {_, name} -> name == "server-updates" end)
-
-    case channels do
-      [{channel_id, _}] ->
-        if Config.get_site_config_cache("teiserver.Bridge from server") do
-          Api.create_message(channel_id, "Teiserver shutdown for node #{Teiserver.node_name()}")
-        end
-
-      _ ->
-        :ok
+    if Config.get_site_config_cache("teiserver.Bridge from server") do
+      channel_id = Config.get_site_config_cache("teiserver.Discord channel #server-updates")
+      if channel_id do
+        Api.create_message(channel_id, "Teiserver shutdown for node #{Teiserver.node_name()}")
+      end
     end
 
     {:noreply, state}
