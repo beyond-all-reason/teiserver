@@ -2,7 +2,7 @@ defmodule Teiserver.Repo.Migrations.ClientEvent do
   use Ecto.Migration
 
   def change do
-    create table(:teiserver_telemetry_property_types) do
+    create table(:teiserver_telemetry_property_types_cache) do
       add :name, :string
     end
 
@@ -14,7 +14,7 @@ defmodule Teiserver.Repo.Migrations.ClientEvent do
       add :hash, :string, primary_key: true
       add :last_updated, :utc_datetime
 
-      add :property_type_id, references(:teiserver_telemetry_property_types, on_delete: :nothing),
+      add :property_type_id, references(:teiserver_telemetry_property_types_cache, on_delete: :nothing),
         primary_key: true
 
       add :value, :string
@@ -24,7 +24,7 @@ defmodule Teiserver.Repo.Migrations.ClientEvent do
       add :user_id, references(:account_users, on_delete: :nothing), primary_key: true
       add :last_updated, :utc_datetime
 
-      add :property_type_id, references(:teiserver_telemetry_property_types, on_delete: :nothing),
+      add :property_type_id, references(:teiserver_telemetry_property_types_cache, on_delete: :nothing),
         primary_key: true
 
       add :value, :string

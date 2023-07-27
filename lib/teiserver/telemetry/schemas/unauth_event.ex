@@ -4,7 +4,7 @@ defmodule Teiserver.Telemetry.UnauthEvent do
 
   schema "teiserver_telemetry_unauth_events" do
     field :hash, :string
-    belongs_to :event_type, Teiserver.Telemetry.EventType
+    belongs_to :event_type, Teiserver.Telemetry.ClientEventType
 
     field :timestamp, :utc_datetime
     field :value, :map

@@ -50,7 +50,7 @@ defmodule Fontawesome do
   def icon_lookup(:export), do: "fa-download"
   def icon_lookup(:structure), do: "fa-cubes"
   def icon_lookup(:documentation), do: "fa-book"
-  def icon_lookup(:live_view, _fa_type), do: "fa-brands fa-phoenix-framework"
+  def icon_lookup(:live_view), do: "fa-brands fa-phoenix-framework"
 
   def icon_lookup(:admin), do: "fa-user-crown"
   def icon_lookup(:moderation), do: "fa-gavel"

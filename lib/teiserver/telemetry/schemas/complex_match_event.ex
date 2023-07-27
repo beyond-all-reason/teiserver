@@ -5,7 +5,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEvent do
   schema "telemetry_complex_match_events" do
     belongs_to :user, Central.Account.User
     belongs_to :match, Teiserver.Battle.Match
-    belongs_to :event_type, Teiserver.Telemetry.EventType
+    belongs_to :event_type, Teiserver.Telemetry.ClientEventType
 
     field :value, :map
     field :game_time, :integer

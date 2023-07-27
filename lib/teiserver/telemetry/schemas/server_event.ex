@@ -4,7 +4,7 @@ defmodule Teiserver.Telemetry.ServerEvent do
 
   schema "teiserver_telemetry_server_events" do
     belongs_to :user, Central.Account.User
-    belongs_to :event_type, Teiserver.Telemetry.EventType
+    belongs_to :event_type, Teiserver.Telemetry.ClientEventType
 
     field :timestamp, :utc_datetime
     field :value, :map

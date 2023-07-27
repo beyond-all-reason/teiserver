@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.NewUserFunnelReport do
+  @moduledoc false
   alias Teiserver.{Account, Telemetry, Battle}
 
   @spec icon() :: String.t()
@@ -36,8 +37,8 @@ defmodule Teiserver.Account.NewUserFunnelReport do
 
     # Singleplayer
     event_type_ids = [
-      Telemetry.get_or_add_event_type("game_start:singleplayer:lone_other_skirmish"),
-      Telemetry.get_or_add_event_type("game_start:singleplayer:scenario_start")
+      Telemetry.ClientEventTypeLib.get_or_add_client_event_type("game_start:singleplayer:lone_other_skirmish"),
+      Telemetry.ClientEventTypeLib.get_or_add_client_event_type("game_start:singleplayer:scenario_start")
     ]
 
     events =
@@ -56,8 +57,8 @@ defmodule Teiserver.Account.NewUserFunnelReport do
 
     # Online
     event_type_ids = [
-      Telemetry.get_or_add_event_type("game_start:multiplayer:connecting"),
-      Telemetry.get_or_add_event_type("lobby:multiplayer:hostgame")
+      Telemetry.ClientEventTypeLib.get_or_add_client_event_type("game_start:multiplayer:connecting"),
+      Telemetry.ClientEventTypeLib.get_or_add_client_event_type("lobby:multiplayer:hostgame")
     ]
 
     events =

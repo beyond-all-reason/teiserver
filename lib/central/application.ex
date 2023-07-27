@@ -75,9 +75,7 @@ defmodule Central.Application do
         concache_perm_sup(:lobby_policies_cache),
 
         # Telemetry
-        concache_perm_sup(:teiserver_telemetry_event_types),
-        concache_perm_sup(:teiserver_telemetry_property_types),
-
+        concache_perm_sup(:teiserver_telemetry_property_types_cache),
         concache_perm_sup(:telemetry_client_event_types_cache),
         concache_perm_sup(:telemetry_match_event_types_cache),
         concache_perm_sup(:telemetry_server_event_types_cache),

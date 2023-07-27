@@ -35,13 +35,6 @@ defmodule TeiserverWeb.Admin.ToolController do
 
     conn =
       if params["flash"] do
-        # This is for the live pages
-        flash = %{
-          success: "Example flash message success",
-          info: "Example flash message info",
-          danger: "Example flash message danger"
-        }
-
         conn
         |> put_flash(:success, "Example flash message success")
         |> put_flash(:info, "Example flash message info")

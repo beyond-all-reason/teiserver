@@ -77,7 +77,7 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
   @spec export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def export_form(conn, _params) do
     conn
-    |> assign(:event_types, Telemetry.list_event_types(order_by: "Name (A-Z)"))
+    |> assign(:event_types, Telemetry.list_client_event_types(order_by: "Name (A-Z)"))
     |> assign(:property_types, Telemetry.list_property_types())
     |> render("export_form.html")
   end

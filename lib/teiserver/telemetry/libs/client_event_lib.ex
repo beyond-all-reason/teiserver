@@ -1,6 +1,10 @@
 defmodule Teiserver.Telemetry.ClientEventLib do
+  @moduledoc false
   use CentralWeb, :library
-  alias Teiserver.Telemetry.ClientEvent
+  alias Teiserver.Telemetry.{ClientEvent, UnauthEvent, ClientEventTypeLib}
+  alias Phoenix.PubSub
+
+  @broadcast_event_types ~w(game_start:singleplayer:scenario_end)
 
   # Functions
   @spec colour :: atom
@@ -8,6 +12,71 @@ defmodule Teiserver.Telemetry.ClientEventLib do
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-sliders-up"
+
+  # Helpers
+  @spec log_client_event(integer | nil, String, map()) :: {:error, Ecto.Changeset} | {:ok, ClientEvent} | {:ok, UnauthEvent}
+  def log_client_event(userid, event_type_name, value) when is_integer(userid) do
+    log_client_event(userid, event_type_name, value, nil)
+  end
+
+  @spec log_client_event(integer | nil, String, map(), String | nil) :: {:error, Ecto.Changeset} | {:ok, ClientEvent} | {:ok, UnauthEvent}
+  def log_client_event(nil, event_type_name, value, hash) do
+    event_type_id = ClientEventTypeLib.get_or_add_client_event_type(event_type_name)
+
+    Teiserver.Telemetry.create_unauth_event(%{
+      event_type_id: event_type_id,
+      hash: hash,
+      value: value,
+      timestamp: Timex.now()
+    })
+  end
+
+  def log_client_event(userid, event_type_name, value, _hash) do
+    event_type_id = ClientEventTypeLib.get_or_add_client_event_type(event_type_name)
+
+    result =
+      Teiserver.Telemetry.create_client_event(%{
+        event_type_id: event_type_id,
+        user_id: userid,
+        value: value,
+        timestamp: Timex.now()
+      })
+
+    case result do
+      {:ok, _event} ->
+        if Enum.member?(@broadcast_event_types, event_type_name) do
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_telemetry_client_events",
+            %{
+              channel: "teiserver_telemetry_client_events",
+              userid: userid,
+              event_type_name: event_type_name,
+              event_value: value
+            }
+          )
+        end
+
+        result
+
+      _ ->
+        result
+    end
+  end
+
+  @spec get_client_events_summary(list) :: map
+  def get_client_events_summary(args) do
+    query =
+      from client_events in ClientEvent,
+        join: event_types in assoc(client_events, :event_type),
+        group_by: event_types.name,
+        select: {event_types.name, count(client_events.event_type_id)}
+
+    query
+    |> search(args)
+    |> Repo.all()
+    |> Map.new()
+  end
 
   # Queries
   @spec query_client_events() :: Ecto.Query.t()

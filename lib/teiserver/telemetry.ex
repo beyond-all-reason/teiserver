@@ -11,7 +11,6 @@ defmodule Teiserver.Telemetry do
 
   alias Teiserver.Data.Types, as: T
 
-  @broadcast_event_types ~w(game_start:singleplayer:scenario_end)
   @broadcast_property_types ~w()
 
   @spec get_totals_and_reset :: map()
@@ -91,105 +90,111 @@ defmodule Teiserver.Telemetry do
     ]
   end
 
-  alias Teiserver.Telemetry.EventType
-  alias Teiserver.Telemetry.EventTypeLib
-
-  @spec event_type_query(List.t()) :: Ecto.Query.t()
-  def event_type_query(args) do
-    event_type_query(nil, args)
-  end
-
-  @spec event_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
-  def event_type_query(id, args) do
-    EventTypeLib.query_event_types()
-    |> EventTypeLib.search(%{id: id})
-    |> EventTypeLib.search(args[:search])
-    |> EventTypeLib.preload(args[:preload])
-    |> EventTypeLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
-  end
+  alias Teiserver.Telemetry.{ClientEventType, ClientEventTypeLib}
 
   @doc """
-  Returns the list of event_types.
+  Returns the list of client_event_types.
 
   ## Examples
 
-      iex> list_event_types()
-      [%EventType{}, ...]
+      iex> list_client_event_types()
+      [%ClientEventType{}, ...]
 
   """
-  @spec list_event_types(List.t()) :: List.t()
-  def list_event_types(args \\ []) do
-    event_type_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
+  @spec list_client_event_types(list) :: list
+  def list_client_event_types(args \\ []) do
+    args
+    |> ClientEventTypeLib.query_client_event_types()
     |> Repo.all()
   end
 
   @doc """
-  Gets a single event_type.
+  Gets a single client_event_type.
 
-  Raises `Ecto.NoResultsError` if the EventType does not exist.
+  Raises `Ecto.NoResultsError` if the ClientEventType does not exist.
 
   ## Examples
 
-      iex> get_event_type(123)
-      %EventType{}
+      iex> get_client_event_type!(123)
+      %ClientEventType{}
 
-      iex> get_event_type(456)
+      iex> get_client_event_type!(456)
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_event_type(Integer.t() | List.t()) :: EventType.t()
-  @spec get_event_type(Integer.t(), List.t()) :: EventType.t()
-  def get_event_type(id) when not is_list(id) do
-    event_type_query(id, [])
-    |> Repo.one()
-  end
+  def get_client_event_type!(id), do: Repo.get!(ClientEventType, id)
 
-  def get_event_type(args) do
-    event_type_query(nil, args)
-    |> Repo.one()
-  end
+  def get_client_event_type!(id, args) do
+    args = args ++ [id: id]
 
-  def get_event_type(id, args) do
-    event_type_query(id, args)
-    |> Repo.one()
+    args
+    |> ClientEventTypeLib.query_client_event_types()
+    |> Repo.one!()
   end
 
   @doc """
-  Creates a event_type.
+  Creates a client_event_type.
 
   ## Examples
 
-      iex> create_event_type(%{field: value})
-      {:ok, %EventType{}}
+      iex> create_client_event_type(%{field: value})
+      {:ok, %ClientEventType{}}
 
-      iex> create_event_type(%{field: bad_value})
+      iex> create_client_event_type(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_event_type(Map.t()) :: {:ok, EventType.t()} | {:error, Ecto.Changeset.t()}
-  def create_event_type(attrs \\ %{}) do
-    %EventType{}
-    |> EventType.changeset(attrs)
+  def create_client_event_type(attrs \\ %{}) do
+    %ClientEventType{}
+    |> ClientEventType.changeset(attrs)
     |> Repo.insert()
   end
 
   @doc """
-  Deletes a EventType.
+  Updates a client_event_type.
 
   ## Examples
 
-      iex> delete_event_type(event_type)
-      {:ok, %EventType{}}
+      iex> update_client_event_type(client_event_type, %{field: new_value})
+      {:ok, %ClientEventType{}}
 
-      iex> delete_event_type(event_type)
+      iex> update_client_event_type(client_event_type, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_event_type(EventType.t()) :: {:ok, EventType.t()} | {:error, Ecto.Changeset.t()}
-  def delete_event_type(%EventType{} = event_type) do
-    Repo.delete(event_type)
+  def update_client_event_type(%ClientEventType{} = client_event_type, attrs) do
+    client_event_type
+    |> ClientEventType.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a client_event_type.
+
+  ## Examples
+
+      iex> delete_client_event_type(client_event_type)
+      {:ok, %ClientEventType{}}
+
+      iex> delete_client_event_type(client_event_type)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_client_event_type(%ClientEventType{} = client_event_type) do
+    Repo.delete(client_event_type)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking client_event_type changes.
+
+  ## Examples
+
+      iex> change_client_event_type(client_event_type)
+      %Ecto.Changeset{data: %ClientEventType{}}
+
+  """
+  def change_client_event_type(%ClientEventType{} = client_event_type, attrs \\ %{}) do
+    ClientEventType.changeset(client_event_type, attrs)
   end
 
   alias Teiserver.Telemetry.{MatchEventType, MatchEventTypeLib}
@@ -794,68 +799,14 @@ defmodule Teiserver.Telemetry do
     Repo.delete(client_event)
   end
 
-  def get_client_events_summary(args) do
-    query =
-      from client_events in ClientEvent,
-        join: event_types in assoc(client_events, :event_type),
-        group_by: event_types.name,
-        select: {event_types.name, count(client_events.event_type_id)}
+  @spec get_client_events_summary(list) :: map
+  defdelegate get_client_events_summary(args), to: ClientEventLib
 
-    query =
-      query
-      |> UnauthEventLib.search(args)
+  @spec log_client_event(integer | nil, String, map()) :: {:error, Ecto.Changeset} | {:ok, ClientEvent}
+  defdelegate log_client_event(userid, event_type_name, value), to: ClientEventLib
 
-    Repo.all(query)
-    |> Map.new()
-  end
-
-  def log_client_event(userid, event_type_name, value) when is_integer(userid) do
-    log_client_event(userid, event_type_name, value, nil)
-  end
-
-  def log_client_event(nil, event_type_name, value, hash) do
-    event_type_id = get_or_add_event_type(event_type_name)
-
-    create_unauth_event(%{
-      event_type_id: event_type_id,
-      hash: hash,
-      value: value,
-      timestamp: Timex.now()
-    })
-  end
-
-  def log_client_event(userid, event_type_name, value, _hash) do
-    event_type_id = get_or_add_event_type(event_type_name)
-
-    result =
-      create_client_event(%{
-        event_type_id: event_type_id,
-        user_id: userid,
-        value: value,
-        timestamp: Timex.now()
-      })
-
-    case result do
-      {:ok, _event} ->
-        if Enum.member?(@broadcast_event_types, event_type_name) do
-          PubSub.broadcast(
-            Central.PubSub,
-            "teiserver_telemetry_client_events",
-            %{
-              channel: "teiserver_telemetry_client_events",
-              userid: userid,
-              event_type_name: event_type_name,
-              event_value: value
-            }
-          )
-        end
-
-        result
-
-      _ ->
-        result
-    end
-  end
+  @spec log_client_event(integer | nil, String, map(), String | nil) :: {:error, Ecto.Changeset} | {:ok, ClientEvent}
+  defdelegate log_client_event(userid, event_type_name, value, hash), to: ClientEventLib
 
   def log_client_property(nil, value_name, value, hash) do
     property_type_id = get_or_add_property_type(value_name)
@@ -954,7 +905,7 @@ defmodule Teiserver.Telemetry do
   def get_or_add_property_type(name) do
     name = String.trim(name)
 
-    Central.cache_get_or_store(:teiserver_telemetry_property_types, name, fn ->
+    Central.cache_get_or_store(:teiserver_telemetry_property_types_cache, name, fn ->
       case list_property_types(search: [name: name], select: [:id], order_by: "ID (Lowest first)") do
         [] ->
           {:ok, property} =
@@ -963,26 +914,6 @@ defmodule Teiserver.Telemetry do
             |> Repo.insert()
 
           property.id
-
-        [%{id: id} | _] ->
-          id
-      end
-    end)
-  end
-
-  @spec get_or_add_event_type(String.t()) :: non_neg_integer()
-  def get_or_add_event_type(name) do
-    name = String.trim(name)
-
-    Central.cache_get_or_store(:teiserver_telemetry_event_types, name, fn ->
-      case list_event_types(search: [name: name], select: [:id], order_by: "ID (Lowest first)") do
-        [] ->
-          {:ok, event} =
-            %EventType{}
-            |> EventType.changeset(%{name: name})
-            |> Repo.insert()
-
-          event.id
 
         [%{id: id} | _] ->
           id
