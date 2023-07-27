@@ -1,4 +1,5 @@
 defmodule Teiserver.Telemetry.Infolog do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "teiserver_telemetry_infologs" do

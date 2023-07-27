@@ -1,4 +1,5 @@
 defmodule Teiserver.Telemetry.ClientEvent do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "teiserver_telemetry_client_events" do

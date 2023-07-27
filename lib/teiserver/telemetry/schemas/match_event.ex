@@ -1,4 +1,5 @@
 defmodule Teiserver.Telemetry.MatchEvent do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "teiserver_telemetry_match_events" do

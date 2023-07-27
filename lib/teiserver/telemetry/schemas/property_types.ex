@@ -1,4 +1,5 @@
 defmodule Teiserver.Telemetry.PropertyType do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "teiserver_telemetry_property_types" do

@@ -1,4 +1,5 @@
 defmodule Teiserver.Telemetry.ClientProperty do
+  @moduledoc false
   use CentralWeb, :schema
 
   @primary_key false

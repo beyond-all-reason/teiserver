@@ -1,13 +1,14 @@
-defmodule Teiserver.Telemetry.ServerEvent do
+defmodule Teiserver.Telemetry.ComplexMatchEvent do
   @moduledoc false
   use CentralWeb, :schema
 
-  schema "teiserver_telemetry_server_events" do
+  schema "telemetry_complex_match_events" do
     belongs_to :user, Central.Account.User
+    belongs_to :match, Teiserver.Battle.Match
     belongs_to :event_type, Teiserver.Telemetry.EventType
 
-    field :timestamp, :utc_datetime
     field :value, :map
+    field :game_time, :integer
   end
 
   @doc """
@@ -16,8 +17,8 @@ defmodule Teiserver.Telemetry.ServerEvent do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:user_id, :event_type_id, :timestamp, :value])
-    |> validate_required([:event_type_id, :timestamp, :value])
+    |> cast(params, ~w(user_id match_id event_type_id value game_time)a)
+    |> validate_required(~w(match_id event_type_id value game_time)a)
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean
