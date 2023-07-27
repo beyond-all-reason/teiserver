@@ -36,7 +36,7 @@ defmodule Fontawesome do
   defp fa_prefix(nil), do: ""
   defp fa_prefix(s), do: "fa-" <> s
 
-  @spec icon_lookup(atom, String.t()) :: String.t()
+  @spec icon_lookup(atom) :: String.t()
   def icon_lookup(:report), do: "fa-signal"
   def icon_lookup(:up), do: "fa-level-up"
   def icon_lookup(:back), do: "fa-arrow-left"
