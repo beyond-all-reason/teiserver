@@ -163,18 +163,6 @@ defmodule Central.Application do
         }
       ] ++ discord_start()
 
-    # Agent mode stuff, should not be enabled in prod
-    children =
-      if Application.get_env(:central, Teiserver)[:enable_agent_mode] do
-        children ++
-          [
-            {Registry, keys: :unique, name: Teiserver.Agents.ServerRegistry},
-            {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Agents.DynamicSupervisor}
-          ]
-      else
-        children
-      end
-
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Central.Supervisor]

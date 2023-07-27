@@ -106,8 +106,7 @@ If you want to do things like have a discord bot in development you don't want t
 import Config
 
 config :central, Teiserver,
-  enable_discord_bridge: true,
-  enable_agent_mode: true
+  enable_discord_bridge: true
 
 config :central, DiscordBridge,
   token: "------",
@@ -136,8 +135,6 @@ Will generate a large amount of fake data and setup a root account for you. The 
 
 ### Resetting your user password
 When running locally it's likely you won't want to connect the server to an email account, as such password resets need to be done a little differently.
-
-I suggest turning off agent mode in `config/dev.secret.exs` with `enable_agent_mode: false` as while agent mode is running you will be getting a lot of terminal output which can make it harder to perform.
 
 Run your server with `iex -S mix phx.server` and then once it has started up use the following code to update your password.
 

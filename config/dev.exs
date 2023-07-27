@@ -62,7 +62,6 @@ config :central, Teiserver,
   heartbeat_interval: nil,
   heartbeat_timeout: nil,
   enable_discord_bridge: false,
-  enable_agent_mode: true,
   enable_hailstorm: true,
   accept_all_emails: true
 
