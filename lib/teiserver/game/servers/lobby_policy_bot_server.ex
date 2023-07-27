@@ -143,6 +143,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   def handle_info(:tick, %{lobby_id: nil} = state) do
     empty_lobby =
       Lobby.find_empty_lobby(fn l ->
+        String.contains?(l.name, "ENGINE TEST") == false and
         l.passworded == false and
           l.locked == false and
           l.tournament == false and
