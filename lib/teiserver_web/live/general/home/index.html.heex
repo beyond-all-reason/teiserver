@@ -2,12 +2,12 @@
 
 <div class="row">
   <.menu_card
-    :if={allow?(@current_user, "Moderator")}
+    :if={false and allow?(@current_user, "Moderator")}
     icon={"question"}
     icon_class="fa-duotone"
     url={~p"/teiserver/admin"}
   >
-    Appeals: <%= @outstanding_appeals %>
+    Appeals
   </.menu_card>
 
   <.menu_card
@@ -16,7 +16,7 @@
     icon_class="fa-duotone"
     url={~p"/moderation/overwatch"}
   >
-    Reports: <%= @outstanding_reports %>
+    Overwatch
   </.menu_card>
 
   <.menu_card
