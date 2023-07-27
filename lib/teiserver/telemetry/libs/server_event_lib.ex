@@ -1,6 +1,9 @@
 defmodule Teiserver.Telemetry.ServerEventLib do
   use CentralWeb, :library
-  alias Teiserver.Telemetry.ServerEvent
+  alias Teiserver.Telemetry.{ServerEvent, ServerEventTypeLib}
+  alias Phoenix.PubSub
+
+  @broadcast_event_types ~w()
 
   # Functions
   @spec colour :: atom
@@ -8,6 +11,58 @@ defmodule Teiserver.Telemetry.ServerEventLib do
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-server"
+
+  # Helpers
+  @spec log_server_event(T.userid() | nil, String.t(), map()) ::
+          {:error, Ecto.Changeset.t()} | {:ok, ServerEvent.t()}
+  def log_server_event(userid, event_type_name, value) do
+    event_type_id = ServerEventTypeLib.get_or_add_server_event_type(event_type_name)
+
+    result =
+      Teiserver.Telemetry.create_server_event(%{
+        event_type_id: event_type_id,
+        user_id: userid,
+        value: value,
+        timestamp: Timex.now()
+      })
+
+    case result do
+      {:ok, _event} ->
+        if Enum.member?(@broadcast_event_types, event_type_name) do
+          if userid do
+            PubSub.broadcast(
+              Central.PubSub,
+              "teiserver_telemetry_server_events",
+              %{
+                channel: "teiserver_telemetry_server_events",
+                userid: userid,
+                event_type_name: event_type_name,
+                value: value
+              }
+            )
+          end
+        end
+
+        result
+
+      _ ->
+        result
+    end
+  end
+
+  @spec get_server_events_summary(list) :: map()
+  def get_server_events_summary(args) do
+    query =
+      from server_events in ServerEvent,
+        join: event_types in assoc(server_events, :event_type),
+        group_by: event_types.name,
+        select: {event_types.name, count(server_events.event_type_id)}
+
+    query
+    |> search(args)
+    |> Repo.all()
+    |> Map.new()
+  end
 
   # Queries
   @spec query_server_events() :: Ecto.Query.t()

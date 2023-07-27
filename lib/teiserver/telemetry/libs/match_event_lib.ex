@@ -1,6 +1,9 @@
 defmodule Teiserver.Telemetry.MatchEventLib do
   use CentralWeb, :library
-  alias Teiserver.Telemetry.MatchEvent
+  alias Teiserver.Telemetry.{MatchEvent, MatchEventTypeLib}
+  alias Phoenix.PubSub
+
+  @broadcast_event_types ~w()
 
   # Functions
   @spec colour :: atom
@@ -8,6 +11,59 @@ defmodule Teiserver.Telemetry.MatchEventLib do
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-scanner-touchscreen"
+
+  # Helpers
+  @spec log_match_event(T.match_id(), T.userid() | nil, String.t(), integer()) ::
+          {:error, Ecto.Changeset.t()} | {:ok, MatchEvent.t()}
+  def log_match_event(match_id, userid, event_type_name, game_time) do
+    event_type_id = MatchEventTypeLib.get_or_add_match_event_type(event_type_name)
+
+    result =
+      Teiserver.Telemetry.create_match_event(%{
+        event_type_id: event_type_id,
+        match_id: match_id,
+        user_id: userid,
+        game_time: game_time
+      })
+
+    case result do
+      {:ok, _event} ->
+        if Enum.member?(@broadcast_event_types, event_type_name) do
+          if userid do
+            PubSub.broadcast(
+              Central.PubSub,
+              "teiserver_telemetry_match_events",
+              %{
+                channel: "teiserver_telemetry_match_events",
+                userid: userid,
+                match_id: match_id,
+                event_type_name: event_type_name,
+                game_time: game_time
+              }
+            )
+          end
+        end
+
+        result
+
+      _ ->
+        result
+    end
+  end
+
+  @spec get_match_events_summary(list) :: map()
+  def get_match_events_summary(args) do
+    query =
+      from match_events in MatchEvent,
+        join: event_types in assoc(match_events, :event_type),
+        group_by: event_types.name,
+        select: {event_types.name, count(match_events.event_type_id)}
+
+    query
+    |> search(args)
+    |> Repo.all()
+    |> Map.new()
+  end
 
   # Queries
   @spec query_match_events() :: Ecto.Query.t()

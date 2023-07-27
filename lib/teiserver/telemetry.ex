@@ -192,6 +192,222 @@ defmodule Teiserver.Telemetry do
     Repo.delete(event_type)
   end
 
+  alias Teiserver.Telemetry.{MatchEventType, MatchEventTypeLib}
+
+  @doc """
+  Returns the list of match_event_types.
+
+  ## Examples
+
+      iex> list_match_event_types()
+      [%MatchEventType{}, ...]
+
+  """
+  @spec list_match_event_types(list) :: list
+  def list_match_event_types(args \\ []) do
+    args
+    |> MatchEventTypeLib.query_match_event_types()
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single match_event_type.
+
+  Raises `Ecto.NoResultsError` if the MatchEventType does not exist.
+
+  ## Examples
+
+      iex> get_match_event_type!(123)
+      %MatchEventType{}
+
+      iex> get_match_event_type!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_match_event_type!(id), do: Repo.get!(MatchEventType, id)
+
+  def get_match_event_type!(id, args) do
+    args = args ++ [id: id]
+
+    args
+    |> MatchEventTypeLib.query_match_event_types()
+    |> Repo.one!()
+  end
+
+  @doc """
+  Creates a match_event_type.
+
+  ## Examples
+
+      iex> create_match_event_type(%{field: value})
+      {:ok, %MatchEventType{}}
+
+      iex> create_match_event_type(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_match_event_type(attrs \\ %{}) do
+    %MatchEventType{}
+    |> MatchEventType.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a match_event_type.
+
+  ## Examples
+
+      iex> update_match_event_type(match_event_type, %{field: new_value})
+      {:ok, %MatchEventType{}}
+
+      iex> update_match_event_type(match_event_type, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_match_event_type(%MatchEventType{} = match_event_type, attrs) do
+    match_event_type
+    |> MatchEventType.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a match_event_type.
+
+  ## Examples
+
+      iex> delete_match_event_type(match_event_type)
+      {:ok, %MatchEventType{}}
+
+      iex> delete_match_event_type(match_event_type)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_match_event_type(%MatchEventType{} = match_event_type) do
+    Repo.delete(match_event_type)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking match_event_type changes.
+
+  ## Examples
+
+      iex> change_match_event_type(match_event_type)
+      %Ecto.Changeset{data: %MatchEventType{}}
+
+  """
+  def change_match_event_type(%MatchEventType{} = match_event_type, attrs \\ %{}) do
+    MatchEventType.changeset(match_event_type, attrs)
+  end
+
+  alias Teiserver.Telemetry.{ServerEventType, ServerEventTypeLib}
+
+  @doc """
+  Returns the list of server_event_types.
+
+  ## Examples
+
+      iex> list_server_event_types()
+      [%ServerEventType{}, ...]
+
+  """
+  @spec list_server_event_types(list) :: list
+  def list_server_event_types(args \\ []) do
+    args
+    |> ServerEventTypeLib.query_server_event_types()
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single server_event_type.
+
+  Raises `Ecto.NoResultsError` if the ServerEventType does not exist.
+
+  ## Examples
+
+      iex> get_server_event_type!(123)
+      %ServerEventType{}
+
+      iex> get_server_event_type!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_server_event_type!(id), do: Repo.get!(ServerEventType, id)
+
+  def get_server_event_type!(id, args) do
+    args = args ++ [id: id]
+
+    args
+    |> ServerEventTypeLib.query_server_event_types()
+    |> Repo.one!()
+  end
+
+  @doc """
+  Creates a server_event_type.
+
+  ## Examples
+
+      iex> create_server_event_type(%{field: value})
+      {:ok, %ServerEventType{}}
+
+      iex> create_server_event_type(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_server_event_type(attrs \\ %{}) do
+    %ServerEventType{}
+    |> ServerEventType.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a server_event_type.
+
+  ## Examples
+
+      iex> update_server_event_type(server_event_type, %{field: new_value})
+      {:ok, %ServerEventType{}}
+
+      iex> update_server_event_type(server_event_type, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_server_event_type(%ServerEventType{} = server_event_type, attrs) do
+    server_event_type
+    |> ServerEventType.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a server_event_type.
+
+  ## Examples
+
+      iex> delete_server_event_type(server_event_type)
+      {:ok, %ServerEventType{}}
+
+      iex> delete_server_event_type(server_event_type)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_server_event_type(%ServerEventType{} = server_event_type) do
+    Repo.delete(server_event_type)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking server_event_type changes.
+
+  ## Examples
+
+      iex> change_server_event_type(server_event_type)
+      %Ecto.Changeset{data: %ServerEventType{}}
+
+  """
+  def change_server_event_type(%ServerEventType{} = server_event_type, attrs \\ %{}) do
+    ServerEventType.changeset(server_event_type, attrs)
+  end
+
+
+
   alias Teiserver.Telemetry.PropertyType
   alias Teiserver.Telemetry.PropertyTypeLib
 
@@ -831,57 +1047,12 @@ defmodule Teiserver.Telemetry do
     Repo.delete(server_event)
   end
 
-  def get_server_events_summary(args) do
-    query =
-      from server_events in ServerEvent,
-        join: event_types in assoc(server_events, :event_type),
-        group_by: event_types.name,
-        select: {event_types.name, count(server_events.event_type_id)}
-
-    query =
-      query
-      |> ServerEventLib.search(args)
-
-    Repo.all(query)
-    |> Map.new()
-  end
+  @spec get_server_events_summary(list) :: map()
+  defdelegate get_server_events_summary(args), to: ServerEventLib
 
   @spec log_server_event(T.userid() | nil, String.t(), map()) ::
           {:error, Ecto.Changeset.t()} | {:ok, ServerEvent.t()}
-  def log_server_event(userid, event_type_name, value) do
-    event_type_id = get_or_add_event_type(event_type_name)
-
-    result =
-      create_server_event(%{
-        event_type_id: event_type_id,
-        user_id: userid,
-        value: value,
-        timestamp: Timex.now()
-      })
-
-    case result do
-      {:ok, _event} ->
-        if Enum.member?(@broadcast_event_types, event_type_name) do
-          if userid do
-            PubSub.broadcast(
-              Central.PubSub,
-              "teiserver_telemetry_server_events",
-              %{
-                channel: "teiserver_telemetry_server_events",
-                userid: userid,
-                event_type_name: event_type_name,
-                value: value
-              }
-            )
-          end
-        end
-
-        result
-
-      _ ->
-        result
-    end
-  end
+  defdelegate log_server_event(userid, event_type_name, value), to: ServerEventLib
 
   alias Teiserver.Telemetry.{MatchEvent, MatchEventLib}
 
@@ -940,58 +1111,13 @@ defmodule Teiserver.Telemetry do
     Repo.delete(match_event)
   end
 
-  def get_match_events_summary(args) do
-    query =
-      from match_events in MatchEvent,
-        join: event_types in assoc(match_events, :event_type),
-        group_by: event_types.name,
-        select: {event_types.name, count(match_events.event_type_id)}
-
-    query =
-      query
-      |> MatchEventLib.search(args)
-
-    Repo.all(query)
-    |> Map.new()
-  end
+  @spec get_match_events_summary(list) :: map()
+  defdelegate get_match_events_summary(args), to: MatchEventLib
 
   @spec log_match_event(T.match_id(), T.userid() | nil, String.t(), integer()) ::
           {:error, Ecto.Changeset.t()} | {:ok, MatchEvent.t()}
-  def log_match_event(match_id, userid, event_type_name, game_time) do
-    event_type_id = get_or_add_event_type(event_type_name)
+  defdelegate log_match_event(match_id, userid, event_type_name, game_time), to: MatchEventLib
 
-    result =
-      create_match_event(%{
-        event_type_id: event_type_id,
-        match_id: match_id,
-        user_id: userid,
-        game_time: game_time
-      })
-
-    case result do
-      {:ok, _event} ->
-        if Enum.member?(@broadcast_event_types, event_type_name) do
-          if userid do
-            PubSub.broadcast(
-              Central.PubSub,
-              "teiserver_telemetry_match_events",
-              %{
-                channel: "teiserver_telemetry_match_events",
-                userid: userid,
-                match_id: match_id,
-                event_type_name: event_type_name,
-                game_time: game_time
-              }
-            )
-          end
-        end
-
-        result
-
-      _ ->
-        result
-    end
-  end
 
   alias Teiserver.Telemetry.{Infolog, InfologLib}
 
