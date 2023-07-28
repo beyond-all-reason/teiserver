@@ -20,7 +20,7 @@
             <.section_menu_button_patch
               bsname={@view_colour}
               active={@rating_type == rt}
-              url={~p"/teiserver/battle/ratings/#{rt}"}
+              url={~p"/battle/ratings/#{rt}"}
             >
               <%= rt %> &nbsp;&nbsp;&nbsp; <%= @user_ratings[rt].rating_value |> round(2) %>
             </.section_menu_button_patch>
@@ -81,7 +81,7 @@
               true -> {"text-warning", "pause"}
             end
               %>
-          <tr phx-click={"[[\"navigate\",{\"href\":\"/teiserver/battle/matches/#{log.match_id}\",\"replace\":false}]]"}>
+          <tr phx-click={"[[\"navigate\",{\"href\":\"/battle/#{log.match_id}\",\"replace\":false}]]"}>
             <%= if log.match do %>
               <td><%= log.match.map %></td>
               <td><%= log.match.team_size * log.match.team_count %></td>
@@ -116,7 +116,7 @@
               <td>
                 <div class="visually-hidden">
                   <.link
-                    navigate={~p"/teiserver/battle/matches/#{log.match_id}"}>
+                    navigate={~p"/battle/#{log.match_id}"}>
                       Show
                   </.link>
                 </div>

@@ -1,6 +1,5 @@
 defmodule TeiserverWeb.General.GeneralController do
   use CentralWeb, :controller
-  plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
 
   plug(AssignPlug,
     site_menu_active: "teiserver",

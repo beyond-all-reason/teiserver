@@ -9,5 +9,5 @@ defmodule Central.Admin.AdminLib do
   def icon(), do: "fa-solid fa-user-circle"
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
-  def authorize(_, conn, _), do: Central.Account.AuthLib.allow?(conn, "admin")
+  def authorize(_, conn, _), do: Central.Account.AuthLib.allow?(conn, "Admin")
 end

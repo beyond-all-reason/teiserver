@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   alias Teiserver.Battle.MatchLib
 
   @impl true
-  def mount(_params, _ession, socket) do
+  def mount(_params, _session, socket) do
     socket = socket
       |> assign(:site_menu_active, "match")
       |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
@@ -44,23 +44,6 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
     |> mount_require_any(["Reviewer"])
     |> assign(:page_title, "#{match_name} - Balance")
   end
-
-  # defp apply_action(socket, :new, _params) do
-  #   socket
-  #   |> assign(:page_title, "New Category")
-  #   |> assign(:category, %Category{})
-  # end
-
-  # defp apply_action(socket, :index, _params) do
-  #   socket
-  #   |> assign(:page_title, "Listing Categories")
-  #   |> assign(:category, nil)
-  # end
-
-  # @impl true
-  # def handle_info({TeiserverWeb.CategoryLive.FormComponent, {:saved, category}}, socket) do
-  #   {:noreply, stream_insert(socket, :categories, category)}
-  # end
 
   # @impl true
   # def handle_event("tab-select", %{"tab" => tab}, socket) do

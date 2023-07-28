@@ -8,7 +8,6 @@ defmodule TeiserverWeb.Clans.ClanController do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   import Central.Helpers.StringHelper, only: [get_hash_id: 1]
 
-  plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Clans', url: '/teiserver/clans')
 
   plug(AssignPlug,

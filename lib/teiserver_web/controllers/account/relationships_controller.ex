@@ -3,7 +3,6 @@ defmodule TeiserverWeb.Account.RelationshipsController do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.{Clans, User}
 
-  plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Account', url: '/teiserver/account')
   plug(:add_breadcrumb, name: 'Relationships', url: '/teiserver/account/relationships')
 

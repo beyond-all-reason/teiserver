@@ -55,7 +55,7 @@
           id="matches"
           rows={@matches}
           table_class="table-sm table-hover"
-          row_click={fn match -> JS.navigate(~p"/teiserver/battle/matches/#{match.id}") end}
+          row_click={fn match -> JS.navigate(~p"/battle/#{match.id}") end}
         >
           <:col :let={match} label="Type"><%= match.game_type %></:col>
           <:col :let={match} label="Map"><%= match.map %></:col>
@@ -76,7 +76,7 @@
           <:action :let={match}>
             <div class="visually-hidden">
               <.link
-                navigate={~p"/teiserver/battle/matches/#{match.id}"}>
+                navigate={~p"/battle/#{match.id}"}>
                   Show
               </.link>
             </div>

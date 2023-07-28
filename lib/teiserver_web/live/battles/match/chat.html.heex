@@ -1,0 +1,54 @@
+<%= render(
+  TeiserverWeb.Battle.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "matches"})
+) %>
+
+<div class="row section-menu" :if={@match}>
+  <div class="col-md-12">
+    <TeiserverWeb.Battle.MatchComponents.section_menu
+      active="chat"
+      view_colour={@view_colour}
+      current_user={@current_user}
+      match_id={@match.id}
+    />
+    <hr />
+
+    <div class="float-end">
+      &nbsp;
+    </div>
+
+    <h3>
+      <%= @match_name %> &nbsp;&nbsp;&nbsp;&nbsp;
+      <%= if @match.winning_team != nil do %>
+        Team <%= @match.winning_team + 1 %> won
+        &nbsp;&nbsp;&nbsp;&nbsp;
+      <% end %>
+      Duration: <%= duration_to_str_short(@match.game_duration) %>
+    </h3>
+    <br />
+    
+    <h4>Lobby chat</h4>
+    <table class="table table-sm table-hover" :if={assigns[:messages]}>
+      <thead>
+        <tr>
+          <th>Sender</th>
+          <th>Message</th>
+          <th>When</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for msg <- @messages do %>
+          <tr>
+            <td><%= msg.user.name %></td>
+            <td class="message"><%= msg.content %></td>
+            <td><%= date_to_str(msg.inserted_at, :hms) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+

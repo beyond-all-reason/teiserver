@@ -159,7 +159,7 @@ defmodule Teiserver.Battle.MatchLib do
       item_colour: StylingHelper.colours(colours()) |> elem(0),
       item_icon: Teiserver.Battle.MatchLib.icon(),
       item_label: make_match_name(match),
-      url: "/teiserver/battle/matches/#{match.id}"
+      url: "/battle/#{match.id}"
     }
   end
 

@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Battle.MatchController do
     sub_menu_active: "match"
   )
 
-  plug :add_breadcrumb, name: 'Matches', url: '/teiserver/battle/matches'
+  plug :add_breadcrumb, name: 'Matches', url: '/battle'
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do
@@ -198,7 +198,7 @@ defmodule TeiserverWeb.Battle.MatchController do
     |> assign(:rating_type_list, MatchRatingLib.rating_type_list())
     |> assign(:ratings, ratings)
     |> assign(:data, data)
-    |> add_breadcrumb(name: "Progression", url: "/teiserver/battle/progression")
+    |> add_breadcrumb(name: "Progression", url: "/battle/progression")
     |> render("ratings_graph.html")
   end
 end

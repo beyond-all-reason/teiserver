@@ -52,6 +52,8 @@ defmodule Fontawesome do
   def icon_lookup(:documentation), do: "fa-book"
   def icon_lookup(:live_view), do: "fa-brands fa-phoenix-framework"
 
+  def icon_lookup(:chat), do: "fa-comment"
+
   def icon_lookup(:admin), do: "fa-user-crown"
   def icon_lookup(:moderation), do: "fa-gavel"
 

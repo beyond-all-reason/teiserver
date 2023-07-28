@@ -27,9 +27,10 @@
         <tr>
           <td><%= name %></td>
           <%= if bot.status.lobby_id do %>
+          
             <td>
               <%= live_redirect("Show lobby #{bot.status.lobby_id}",
-                to: ~p"/teiserver/battle/lobbies/show/#{bot.status.lobby_id}",
+                to: ~p"/battle/lobbies/show/#{bot.status.lobby_id}",
                 class: "btn btn-sm btn-outline-primary"
               ) %>
             </td>

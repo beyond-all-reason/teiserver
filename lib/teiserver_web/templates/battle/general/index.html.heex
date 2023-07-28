@@ -4,7 +4,7 @@
     name: "lobbies",
     text: "Lobbies",
     icon_class: "fa-duotone",
-    link: ~p"/teiserver/battle/lobbies"
+    link: ~p"/battle/lobbies"
   ) %>
 
   <%= if allow?(@conn, "admin.dev") do %>
@@ -13,7 +13,7 @@
       name: "battle_logs",
       text: "Battle logs",
       icon_class: "fa-duotone",
-      link: ~p"/teiserver/battle/matches"
+      link: ~p"/battle"
     ) %>
   <% end %>
 </div>

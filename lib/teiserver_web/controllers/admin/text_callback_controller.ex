@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
     sub_menu_active: "text_callback"
   )
 
-  plug :add_breadcrumb, name: 'Admin', url: '/admin'
+  plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
   plug :add_breadcrumb, name: 'Lobby policies', url: '/admin/text_callbacks'
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

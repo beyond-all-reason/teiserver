@@ -4,7 +4,6 @@ defmodule TeiserverWeb.Account.PreferencesController do
   alias Teiserver.Config
   alias Teiserver.Config.UserConfig
 
-  plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Account', url: '/teiserver/account')
   plug(:add_breadcrumb, name: 'Preferences', url: '/teiserver/account/preferences')
 

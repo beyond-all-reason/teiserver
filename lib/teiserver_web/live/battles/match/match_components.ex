@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Battle.MatchComponents do
       bsname={@view_colour}
       icon={StylingHelper.icon(:list)}
       active={@active == "index"}
-      url={~p"/teiserver/battle/matches"}
+      url={~p"/battle"}
     >
       List
     </.section_menu_button>
@@ -25,7 +25,7 @@ defmodule TeiserverWeb.Battle.MatchComponents do
       bsname={@view_colour}
       icon={Teiserver.Account.RatingLib.icon()}
       active={@active == "ratings"}
-      url={~p"/teiserver/battle/ratings"}
+      url={~p"/battle/ratings"}
     >
       Ratings
     </.section_menu_button>
@@ -34,20 +34,31 @@ defmodule TeiserverWeb.Battle.MatchComponents do
       bsname={@view_colour}
       icon={StylingHelper.icon(:chart)}
       active={@active == "progression"}
-      url={~p"/teiserver/battle/progression"}
+      url={~p"/battle/progression"}
     >
       Progression
     </.section_menu_button>
 
-    <.section_menu_button
-      :if={@active == "show"}
-      bsname={@view_colour}
-      icon={StylingHelper.icon(:detail)}
-      active={true}
-      url="#"
-    >
-      Match details
-    </.section_menu_button>
+    <%= if @match_id do %>
+      <.section_menu_button
+        bsname={@view_colour}
+        icon={StylingHelper.icon(:detail)}
+        active={@active == "show"}
+        url={~p"/battle/#{@match_id}"}
+      >
+        Match details
+      </.section_menu_button>
+
+      <.section_menu_button
+        :if={allow?(@current_user, "Reviewer")}
+        bsname={@view_colour}
+        icon={StylingHelper.icon(:chat)}
+        active={@active == "chat"}
+        url={~p"/battle/chat/#{@match_id}"}
+      >
+        Chat
+      </.section_menu_button>
+    <% end %>
 
     <div class="float-end">
       <.section_menu_button

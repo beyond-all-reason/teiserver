@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
     sub_menu_active: "lobby_policy"
   )
 
-  plug :add_breadcrumb, name: 'Admin', url: '/admin'
+  plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
   plug :add_breadcrumb, name: 'Lobby policies', url: '/admin/lobby_policies'
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

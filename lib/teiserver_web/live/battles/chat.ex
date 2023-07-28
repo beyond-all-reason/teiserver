@@ -23,7 +23,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     socket =
       socket
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
-      |> add_breadcrumb(name: "Battles", url: "/teiserver/battle/lobbies")
+      |> add_breadcrumb(name: "Battles", url: "/battle/lobbies")
       |> assign(:site_menu_active, "teiserver_lobbies")
       |> assign(:view_colour, Lobby.colours())
 
@@ -93,7 +93,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
          |> assign(:message_changeset, new_message_changeset())
          |> assign(:bar_user, bar_user)
          |> assign(:page_title, "Show lobby - Chat")
-         |> add_breadcrumb(name: lobby.name, url: "/teiserver/battles/lobbies/#{lobby.id}")
+         |> add_breadcrumb(name: lobby.name, url: "/battles/lobbies/#{lobby.id}")
          |> assign(:id, int_parse(id))
          |> assign(:lobby, lobby)
          |> assign(:messages, messages)

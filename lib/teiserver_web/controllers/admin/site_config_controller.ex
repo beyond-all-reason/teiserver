@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Admin.SiteConfigController do
     user: {Central.Account.AuthLib, :current_user}
 
   # plug :add_breadcrumb, name: 'Alacrity', url: '/'
-  plug :add_breadcrumb, name: 'Admin', url: '/admin'
+  plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
   plug :add_breadcrumb, name: 'Site config', url: '/config/site'
 
   plug(AssignPlug,

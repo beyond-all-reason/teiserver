@@ -12,7 +12,7 @@ defmodule Teiserver.TeiserverQuickActions do
         %{
           label: "Live lobbies",
           icons: [Teiserver.Lobby.icon()],
-          url: ~p"/teiserver/battle/lobbies",
+          url: ~p"/battle/lobbies",
           permissions: "account"
         },
 
@@ -43,11 +43,6 @@ defmodule Teiserver.TeiserverQuickActions do
         },
 
         # Your stuff but not part of profile/account
-        %{
-          label: "My match history",
-          icons: [Teiserver.Lobby.icon(), :list],
-          url: ~p"/teiserver/battle/matches"
-        },
         %{
           label: "Matchmaking",
           icons: [Teiserver.Game.QueueLib.icon()],
