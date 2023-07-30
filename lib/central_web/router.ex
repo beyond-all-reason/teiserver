@@ -312,6 +312,7 @@ defmodule CentralWeb.Router do
         live "/ratings/:rating_type", MatchLive.Ratings, :index
 
         live "/chat/:id", MatchLive.Chat, :index
+        live "/chat/:id/*userids", MatchLive.Chat, :index
 
         live "/", MatchLive.Index, :index
         live "/:id", MatchLive.Show, :overview

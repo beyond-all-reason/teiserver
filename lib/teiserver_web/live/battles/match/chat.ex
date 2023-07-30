@@ -1,16 +1,20 @@
 defmodule TeiserverWeb.Battle.MatchLive.Chat do
+  @moduledoc false
   use TeiserverWeb, :live_view
-  alias Teiserver.{Battle, Game, Chat}
+  alias Teiserver.{Account, Battle, Chat}
   alias Teiserver.Battle.MatchLib
 
   @impl true
-  def mount(_params, _ession, socket) do
+  def mount(params, _session, socket) do
     socket = socket
       |> mount_require_all(["Reviewer"])
       |> assign(:site_menu_active, "match")
       |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
       |> assign(:tab, "details")
-      |> default_filters
+      |> assign(:raw_text, false)
+      |> assign(:highlight_map, %{})
+      |> default_filters(params)
+      |> update_highlight_map_at_mount
 
     {:ok, socket}
   end
@@ -31,20 +35,65 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
   #   {:noreply, stream_insert(socket, :categories, category)}
   # end
 
-  # @impl true
-  # def handle_event("tab-select", %{"tab" => tab}, socket) do
-  #   {:noreply, assign(socket, :tab, tab)}
-  # end
+  @impl true
+  def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
+    [key] = event["_target"]
+    value = event[key]
+
+    new_filters = Map.put(filters, key, value)
+
+    socket = socket
+      |> assign(:filters, new_filters)
+      |> get_messages
+
+    {:noreply, socket}
+  end
+
+  def handle_event("change-user-highlight", event, socket) do
+    [key] = event["_target"]
+    value = event[key]
+
+    highlight_map = String.trim(value || "")
+      |> String.split(",")
+      |> Enum.map(fn username ->
+        Account.get_userid_from_name(username)
+      end)
+      |> Enum.reject(&(&1 == nil))
+      |> Enum.with_index()
+      |> Map.new
+
+    {:noreply, socket |> assign(:highlight_map, highlight_map)}
+  end
 
   defp get_messages(%{assigns: %{id: match_id, filters: filters}} = socket) do
+    user_id_list = String.trim(filters["user-raw-filter"] || "")
+      |> String.split(",")
+      |> Enum.map(fn username ->
+        Account.get_userid_from_name(username)
+      end)
+      |> Enum.reject(&(&1 == nil))
+
+    contains_filter = filters["message-contains"]
+      |> String.trim()
+
     messages = Chat.list_lobby_messages(
       search: [
-        match_id: match_id
+        match_id: match_id,
+        user_id_in: user_id_list
       ],
       preload: [:user],
       limit: 1_000,
       order_by: filters["order_by"]
     )
+    |> Enum.filter(fn %{content: content} ->
+      # I was thinking to do this via the DB but it is really slow even though
+      # we use match_id first
+      if contains_filter != "" do
+        String.contains?(content, contains_filter)
+      else
+        true
+      end
+    end)
 
     socket
       |> assign(:messages, messages)
@@ -69,9 +118,33 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
     end
   end
 
-  defp default_filters(socket) do
+  defp update_highlight_map_at_mount(%{assigns: %{filters: filters}} = socket) do
+    highlight_map = String.trim(filters["user-raw-highlight"] || "")
+      |> String.split(",")
+      |> Enum.map(fn username ->
+        Account.get_userid_from_name(username)
+      end)
+      |> Enum.reject(&(&1 == nil))
+      |> Enum.with_index()
+      |> Map.new
+
+    socket |> assign(:highlight_map, highlight_map)
+  end
+
+  defp default_filters(socket, params) do
+    highlight_names = params["userids"]
+      |> Enum.map(fn userid_str ->
+        Account.get_username_by_id(userid_str)
+      end)
+      |> Enum.reject(&(&1 == nil))
+      |> Enum.join(", ")
+
     socket
     |> assign(:filters, %{
+      "bot-messages" => "Include bot messages",
+      "user-raw-filter" => "",
+      "user-raw-highlight" => highlight_names,
+      "message-contains" => "",
       "order_by" => "Oldest first",
     })
   end

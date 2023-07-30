@@ -292,9 +292,9 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
   # Takes the message and strips off assignment stuff plus commands
   defp strip_message(msg) do
-    msg
-    |> String.trim()
-    |> String.slice(0..128)
+    msg = msg
+      |> String.trim()
+      |> String.slice(0..128)
 
     cond do
       String.starts_with?(msg, "w:") -> strip_message(msg |> String.replace("w:", ""))
