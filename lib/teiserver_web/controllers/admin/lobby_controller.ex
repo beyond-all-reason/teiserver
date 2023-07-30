@@ -16,7 +16,6 @@ defmodule TeiserverWeb.Admin.LobbyController do
     user: {Central.Account.AuthLib, :current_user}
   )
 
-  plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
   plug(:add_breadcrumb, name: 'Users', url: '/teiserver/admin/user')
 

@@ -16,7 +16,6 @@ defmodule TeiserverWeb.Logging.MatchLogController do
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
-  plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Reports', url: '/teiserver/reports')
   plug(:add_breadcrumb, name: 'Match metrics', url: '/teiserver/reports/match/day_metrics')
 

@@ -39,7 +39,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       socket
       |> Teiserver.ServerUserPlug.live_call()
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
-      |> add_breadcrumb(name: "Battles", url: "/teiserver/battle/lobbies")
+      |> add_breadcrumb(name: "Battles", url: "/battle/lobbies")
       |> assign(:ratings, %{})
       |> assign(:client, client)
       |> assign(:site_menu_active, "teiserver_lobbies")
@@ -95,7 +95,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
          |> assign(:ratings, ratings)
          |> assign(:bar_user, bar_user)
          |> assign(:page_title, page_title(socket.assigns.live_action))
-         |> add_breadcrumb(name: lobby.name, url: "/teiserver/battles/lobbies/#{lobby.id}")
+         |> add_breadcrumb(name: lobby.name, url: "/battles/lobbies/show/#{lobby.id}")
          |> assign(:id, id)
          |> assign(:lobby, lobby)
          |> assign(:modoptions, modoptions)

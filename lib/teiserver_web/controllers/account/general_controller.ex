@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Account.GeneralController do
+  @moduledoc false
   use CentralWeb, :controller
 
   alias Teiserver.Account
   alias Teiserver.Account.{RoleLib}
 
-  plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Account', url: '/teiserver/account')
 
   plug(AssignPlug,

@@ -924,6 +924,18 @@ defmodule TeiserverWeb.Admin.UserController do
     Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user.id)
     Teiserver.User.recache_user(user.id)
 
+    # Now we update stats for the origin
+    smurf_count =
+      Account.list_users(
+        search: [
+          smurf_of: userid
+        ],
+        select: [:id]
+      )
+      |> Enum.count()
+
+    Teiserver.Account.update_user_stat(userid, %{"smurf_count" => smurf_count})
+
     conn
     |> put_flash(:success, "stat #{key} updated")
     |> redirect(to: ~p"/teiserver/admin/user/#{user.id}" <> "#details_tab")

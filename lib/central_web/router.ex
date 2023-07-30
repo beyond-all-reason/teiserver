@@ -287,13 +287,15 @@ defmodule CentralWeb.Router do
     resources("/queues", QueueController)
   end
 
-  scope "/teiserver/battle", TeiserverWeb.Battle, as: :ts_battle do
+  scope "/battle", TeiserverWeb.Battle.LobbyLive, as: :ts_battle do
     pipe_through([:browser, :standard_layout, :protected])
 
-    get("/", GeneralController, :index)
+    live("/lobbies", Index, :index)
+    live("/lobbies/show/:id", Show, :show)
+    live("/lobbies/chat/:id", Chat, :chat)
   end
 
-  scope "/teiserver/battle", TeiserverWeb.Battle, as: :ts_battle do
+  scope "/battle", TeiserverWeb.Battle, as: :ts_battle do
     pipe_through([:browser, :standard_layout, :protected])
 
     get("/ratings/leaderboard", RatingsController, :leaderboard)
@@ -306,24 +308,19 @@ defmodule CentralWeb.Router do
         {Central.Account.AuthPlug, :ensure_authenticated},
         {Teiserver.Communication.NotificationPlug, :load_notifications}
       ] do
-        live "/matches", MatchLive.Index, :index
-        live "/matches/:id", MatchLive.Show, :overview
-        live "/matches/:id/overview", MatchLive.Show, :overview
-        live "/matches/:id/players", MatchLive.Show, :players
-        live "/matches/:id/ratings", MatchLive.Show, :ratings
-        live "/matches/:id/balance", MatchLive.Show, :balance
-
         live "/ratings", MatchLive.Ratings, :index
         live "/ratings/:rating_type", MatchLive.Ratings, :index
+
+        live "/chat/:id", MatchLive.Chat, :index
+        live "/chat/:id/*userids", MatchLive.Chat, :index
+
+        live "/", MatchLive.Index, :index
+        live "/:id", MatchLive.Show, :overview
+        live "/:id/overview", MatchLive.Show, :overview
+        live "/:id/players", MatchLive.Show, :players
+        live "/:id/ratings", MatchLive.Show, :ratings
+        live "/:id/balance", MatchLive.Show, :balance
     end
-  end
-
-  scope "/teiserver/battle", TeiserverWeb.Battle.LobbyLive, as: :ts_battle do
-    pipe_through([:browser, :standard_layout, :protected])
-
-    live("/lobbies", Index, :index)
-    live("/lobbies/show/:id", Show, :show)
-    live("/lobbies/chat/:id", Chat, :chat)
   end
 
   scope "/tournament", TeiserverWeb.TournamentLive, as: :tournament do

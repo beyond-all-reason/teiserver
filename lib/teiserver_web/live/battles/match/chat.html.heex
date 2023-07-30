@@ -1,0 +1,134 @@
+<%= render(
+  TeiserverWeb.Battle.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "matches"})
+) %>
+
+<style type="text/css">
+ .uh-0 td {background-color: rgba(255, 0, 0, 0.1);}
+ .uh-1 td {background-color: rgba(0, 255, 0, 0.1);}
+ .uh-2 td {background-color: rgba(0, 0, 255, 0.1);}
+ .uh-3 td {background-color: rgba(255, 255, 0, 0.1);}
+ .uh-4 td {background-color: rgba(255, 0, 255, 0.1);}
+ .uh-5 td {background-color: rgba(0, 255, 255, 0.1);}
+ .uh-6 td {background-color: rgba(255, 255, 255, 0.1);}
+ .uh-7 td {background-color: rgba(255, 255, 255, 0.1);}
+ .uh-8 td {background-color: rgba(255, 255, 255, 0.1);}
+ .uh-9 td {background-color: rgba(255, 255, 255, 0.1);}
+</style>
+
+<div class="row section-menu" :if={@match}>
+  <div class="col-md-12">
+    <TeiserverWeb.Battle.MatchComponents.section_menu
+      active="chat"
+      view_colour={@view_colour}
+      current_user={@current_user}
+      match_id={@match.id}
+    />
+    <hr />
+
+    <div class="float-end">
+      &nbsp;
+    </div>
+
+    <h3>
+      <%= @match_name %> &nbsp;&nbsp;&nbsp;&nbsp;
+      <%= if @match.winning_team != nil do %>
+        Team <%= @match.winning_team + 1 %> won
+        &nbsp;&nbsp;&nbsp;&nbsp;
+      <% end %>
+      Duration: <%= duration_to_str_short(@match.game_duration) %>
+    </h3>
+    
+    <form method="post" class="">
+      <div class="row">
+        <div class="col d-none">
+          <.input type="select"
+            label="Bots"
+            options={["Include bot messages", "Exclude bot messages"]}
+            name="bot-messages"
+            value={@filters["bot-messages"]}
+            phx-change="filter-update"
+          />
+        </div>
+        
+        <div class="col">
+          <.input type="select"
+            label="Format"
+            options={["Table", "Raw", "Discord"]}
+            name="message-format"
+            value={@filters["message-format"]}
+            phx-change="format-update"
+          />
+        </div>
+
+        <div class="col">
+          <.input type="text"
+            label="Message contains"
+            name="message-contains"
+            value={@filters["message-contains"]}
+            phx-change="filter-update" phx-debounce="400"
+          />
+        </div>
+        
+        <div class="col">
+          <.input type="text"
+            label="User filter (split with commas)"
+            name="user-raw-filter"
+            value={@filters["user-raw-filter"]}
+            phx-change="filter-update" phx-debounce="400"
+          />
+        </div>
+        
+        <div class="col" :if={@filters["message-format"] == "Table"}>
+          <.input type="text"
+            label="User highlight (split with commas)"
+            name="user-raw-highlight"
+            value={@filters["user-raw-highlight"]}
+            phx-change="change-user-highlight" phx-debounce="400"
+          />
+        </div>
+      </div>
+    </form>
+    <br />
+    
+    <h4>Lobby chat</h4>
+    <div :if={assigns[:messages]}>
+      <table class="table table-sm table-hover" :if={@filters["message-format"] == "Table"} id="rich-text-block">
+        <thead>
+          <tr>
+            <th>Sender</th>
+            <th>Message</th>
+            <th>When</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= for msg <- @messages do %>
+            <% highlighted = "uh-#{Map.get(@highlight_map, msg.user_id, "x")}" %>
+            <tr class={"#{highlighted}"}>
+              <td><%= msg.user.name %></td>
+              <td class="message"><%= msg.content %></td>
+              <td><%= date_to_str(msg.inserted_at, :hms) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <div class="row" :if={@filters["message-format"] == "Raw"} id="raw-text-block">
+        <div class="col-md-12">
+          <textarea rows="30" cols="40" class="form-control"><%= for msg <- @messages do %>
+  <%= msg.user.name %>: <%= msg.content %><% end %></textarea>
+        </div>
+      </div>
+      
+      <div class="row" :if={@filters["message-format"] == "Discord"} id="discord-text-block">
+        <div class="col-md-12">
+          <textarea rows="30" cols="40" class="form-control"><%= for msg <- @messages do %>
+  **<%= msg.user.name %>**: <%= msg.content %><% end %></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+

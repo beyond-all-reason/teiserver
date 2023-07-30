@@ -30,7 +30,7 @@
     
     <.tab_header>
       <.tab_nav
-        url={~p"/teiserver/battle/matches/#{@match.id}/overview"}
+        url={~p"/battle/#{@match.id}/overview"}
         selected={@tab == :overview}
       >
         <Fontawesome.icon icon="file-alt" style="solid" />
@@ -38,7 +38,7 @@
       </.tab_nav>
       
       <.tab_nav
-        url={~p"/teiserver/battle/matches/#{@match.id}/players"}
+        url={~p"/battle/#{@match.id}/players"}
         selected={@tab == :players}
       >
         <Fontawesome.icon icon="users" style="solid" />
@@ -47,7 +47,7 @@
       
       <%= if @rating_logs != %{} and allow?(@current_user, "Reviewer") do %>
         <.tab_nav
-          url={~p"/teiserver/battle/matches/#{@match.id}/ratings"}
+          url={~p"/battle/#{@match.id}/ratings"}
           selected={@tab == :ratings}
         >
           <Fontawesome.icon icon={Teiserver.Account.RatingLib.icon()} style="solid" />

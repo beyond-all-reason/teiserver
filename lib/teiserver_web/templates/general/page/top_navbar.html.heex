@@ -44,7 +44,7 @@
 
         <%= central_component("top_nav_item",
           text: "Lobbies",
-          route: ~p"/teiserver/battle/lobbies",
+          route: ~p"/battle/lobbies",
           active: @site_menu_active == "lobbies"
         ) %>
 
@@ -62,13 +62,13 @@
 
         <%= central_component("top_nav_item",
           text: "Matches",
-          route: ~p"/teiserver/battle/matches",
+          route: ~p"/battle",
           active: @site_menu_active == "match"
         ) %>
 
         <%= central_component("top_nav_item",
           text: "Leaderboard",
-          route: ~p"/teiserver/battle/ratings/leaderboard",
+          route: ~p"/battle/ratings/leaderboard",
           active: @site_menu_active == "leaderboard"
         ) %>
 

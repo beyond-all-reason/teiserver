@@ -68,6 +68,7 @@ defmodule Central.Helpers.StylingHelper do
   def icon(:export, fa_type), do: "fa-#{fa_type} fa-download"
   def icon(:structure, fa_type), do: "fa-#{fa_type} fa-cubes"
   def icon(:documentation, fa_type), do: "fa-#{fa_type} fa-book"
+  def icon(:chat, fa_type), do: "fa-#{fa_type} fa-comment"
   def icon(:live_view, _fa_type), do: "fa-brands fa-phoenix-framework"
 
   def icon(:admin, fa_type), do: "fa-#{fa_type} fa-user-crown"

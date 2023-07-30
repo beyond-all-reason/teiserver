@@ -4,7 +4,6 @@ defmodule TeiserverWeb.Account.ProfileController do
   alias Teiserver.{User, Account, Game}
   alias Central.Helpers.NumberHelper
 
-  plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Account', url: '/teiserver/account')
   plug(:add_breadcrumb, name: 'Profile', url: '/teiserver/account/profile')
 

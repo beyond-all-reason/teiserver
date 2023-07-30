@@ -39,6 +39,7 @@ defmodule Teiserver.Chat.LobbyMessageLib do
       where: lobby_messages.user_id == ^user_id
   end
 
+  def _search(query, :user_id_in, []), do: query
   def _search(query, :user_id_in, id_list) do
     from lobby_messages in query,
       where: lobby_messages.user_id in ^id_list
@@ -62,13 +63,6 @@ defmodule Teiserver.Chat.LobbyMessageLib do
   def _search(query, :id_list, id_list) do
     from lobby_messages in query,
       where: lobby_messages.id in ^id_list
-  end
-
-  def _search(query, :basic_search, ref) do
-    ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
-
-    from lobby_messages in query,
-      where: ilike(lobby_messages.name, ^ref_like)
   end
 
   def _search(query, :term, ref) do

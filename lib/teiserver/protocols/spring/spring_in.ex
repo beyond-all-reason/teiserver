@@ -746,7 +746,7 @@ defmodule Teiserver.Protocols.SpringIn do
             Coordinator.send_to_user(state.userid, [
               "To complete your report, please use the form on this link: #{url}",
               "The link will expire in 5 minutes.",
-              "If the link doesn't work, you can also view your matches at https://#{host}/teiserver/battle/matches and report players from the player tab of the relevant battle."
+              "If the link doesn't work, you can also view your matches at https://#{host}/battle and report players from the player tab of the relevant battle."
             ])
 
             reply(:okay, nil, msg_id, state)
@@ -811,6 +811,10 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("SAY", data, msg_id, state) do
     case Regex.run(~r/(\w+) (.+)/u, data) do
       [_, room_name, msg] ->
+        msg = msg
+          |> String.trim()
+          |> String.slice(0..128)
+
         Room.send_message(state.userid, room_name, msg)
 
       _ ->
@@ -823,6 +827,10 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("SAYEX", data, msg_id, state) do
     case Regex.run(~r/(\w+) (.+)/u, data) do
       [_, room_name, msg] ->
+        msg = msg
+          |> String.trim()
+          |> String.slice(0..128)
+
         Room.send_message_ex(state.userid, room_name, msg)
 
       _ ->
@@ -1263,6 +1271,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("SAYBATTLE", msg, _msg_id, state) do
     if Lobby.allow?(state.userid, :saybattle, state.lobby_id) do
+      msg = msg
+        |> String.trim()
+        |> String.slice(0..128)
+
       Lobby.say(state.userid, msg, state.lobby_id)
     end
 
@@ -1271,6 +1283,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("SAYBATTLEEX", msg, _msg_id, state) do
     if Lobby.allow?(state.userid, :saybattleex, state.lobby_id) do
+      msg = msg
+        |> String.trim()
+        |> String.slice(0..128)
+
       Lobby.sayex(state.userid, msg, state.lobby_id)
     end
 
@@ -1284,6 +1300,10 @@ defmodule Teiserver.Protocols.SpringIn do
         to_id = User.get_userid(to_name)
 
         if Lobby.allow?(state.userid, :saybattleprivateex, state.lobby_id) do
+          msg = msg
+            |> String.trim()
+            |> String.slice(0..128)
+
           Lobby.sayprivateex(state.userid, to_id, msg, state.lobby_id)
         end
 
