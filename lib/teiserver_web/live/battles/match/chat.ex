@@ -11,7 +11,6 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
       |> assign(:site_menu_active, "match")
       |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
       |> assign(:tab, "details")
-      |> assign(:raw_text, false)
       |> assign(:highlight_map, %{})
       |> default_filters(params)
       |> update_highlight_map_at_mount
@@ -53,6 +52,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
     [key] = event["_target"]
     value = event[key]
 
+    new_filters = Map.put(socket.assigns.filters, key, value)
+
     highlight_map = String.trim(value || "")
       |> String.split(",")
       |> Enum.map(fn username ->
@@ -62,7 +63,23 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
       |> Enum.with_index()
       |> Map.new
 
-    {:noreply, socket |> assign(:highlight_map, highlight_map)}
+    {:noreply,
+      socket
+        |> assign(:highlight_map, highlight_map)
+        |> assign(:filters, new_filters)
+    }
+  end
+
+  def handle_event("format-update", event, socket) do
+    [key] = event["_target"]
+    value = event[key]
+
+    new_filters = Map.put(socket.assigns.filters, key, value)
+
+    {:noreply,
+      socket
+        |> assign(:filters, new_filters)
+    }
   end
 
   defp get_messages(%{assigns: %{id: match_id, filters: filters}} = socket) do
@@ -142,6 +159,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
     socket
     |> assign(:filters, %{
       "bot-messages" => "Include bot messages",
+      "message-format" => "Table",
       "user-raw-filter" => "",
       "user-raw-highlight" => highlight_names,
       "message-contains" => "",
