@@ -813,7 +813,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, room_name, msg] ->
         msg = msg
           |> String.trim()
-          |> String.slice(0..128)
+          |> String.slice(0..256)
 
         Room.send_message(state.userid, room_name, msg)
 
@@ -829,7 +829,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, room_name, msg] ->
         msg = msg
           |> String.trim()
-          |> String.slice(0..128)
+          |> String.slice(0..256)
 
         Room.send_message_ex(state.userid, room_name, msg)
 
@@ -1273,7 +1273,7 @@ defmodule Teiserver.Protocols.SpringIn do
     if Lobby.allow?(state.userid, :saybattle, state.lobby_id) do
       msg = msg
         |> String.trim()
-        |> String.slice(0..128)
+        |> String.slice(0..256)
 
       Lobby.say(state.userid, msg, state.lobby_id)
     end
@@ -1285,7 +1285,7 @@ defmodule Teiserver.Protocols.SpringIn do
     if Lobby.allow?(state.userid, :saybattleex, state.lobby_id) do
       msg = msg
         |> String.trim()
-        |> String.slice(0..128)
+        |> String.slice(0..256)
 
       Lobby.sayex(state.userid, msg, state.lobby_id)
     end
@@ -1302,7 +1302,7 @@ defmodule Teiserver.Protocols.SpringIn do
         if Lobby.allow?(state.userid, :saybattleprivateex, state.lobby_id) do
           msg = msg
             |> String.trim()
-            |> String.slice(0..128)
+            |> String.slice(0..256)
 
           Lobby.sayprivateex(state.userid, to_id, msg, state.lobby_id)
         end
