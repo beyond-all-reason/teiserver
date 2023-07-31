@@ -1,4 +1,5 @@
 defmodule TeiserverWeb.Battle.MatchLive.Show do
+  @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.{Battle, Game}
   alias Teiserver.Battle.MatchLib
@@ -54,7 +55,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
     if connected?(socket) do
       match =
         Battle.get_match!(id,
-          preload: [:members_and_users]
+          preload: [:members_and_users, :founder]
         )
 
       match_name = MatchLib.make_match_name(match)

@@ -22,9 +22,7 @@
       <%= @match_name %> &nbsp;&nbsp;&nbsp;&nbsp;
       <%= if @match.winning_team != nil do %>
         Team <%= @match.winning_team + 1 %> won
-        &nbsp;&nbsp;&nbsp;&nbsp;
       <% end %>
-      Duration: <%= duration_to_str_short(@match.game_duration) %>
     </h3>
     <br />
     
@@ -59,29 +57,44 @@
     <div :if={@tab == :overview} class="p-4">
       <div class="row">
         <div class="col">
-          Team count: <%= @match.team_count %>
+          <strong>Team count:</strong> <%= @match.team_count %>
         </div>
 
         <div class="col">
-          Team size: <%= @match.team_size %>
+          <strong>Team size:</strong> <%= @match.team_size %>
         </div>
 
         <div class="col">
-          Started: <%= date_to_str(@match.started, format: :ymd_hms, tz: @tz) %>
+          <strong>Started:</strong> <%= date_to_str(@match.started, format: :ymd_hms, tz: @tz) %>
         </div>
 
         <div class="col">
-          Finished: <%= date_to_str(@match.finished, format: :ymd_hms, tz: @tz) %>
+          <strong>Finished:</strong> <%= date_to_str(@match.finished, format: :ymd_hms, tz: @tz) %>
         </div>
 
         <%= if allow?(@current_user, "admin.dev") do %>
           <div class="col">
-            Tag count: <%= Map.keys(@match.tags) |> Enum.count() %>
+            <strong>Tag count:</strong> <%= Map.keys(@match.tags) |> Enum.count() %>
           </div>
         <% end %>
       </div>
 
+      <div class="row mt-2">
+        <div class="col">
+          <strong>Host:</strong> <%= @match.founder.name %>
+        </div>
+        
+        <div class="col">
+          <strong>Duration:</strong> <%= duration_to_str_short(@match.game_duration) %>
+        </div>
+        
+        <div class="col">
+          <strong>Bot count:</strong> <%= Enum.count(@match.bots) %>
+        </div>
+      </div>
       <hr />
+      
+      
       <%= if allow?(@current_user, "Moderator") do %>
         Match data <textarea class="form-control" style="font-family: monospace" rows="20"><%= Jason.encode!(@match.data, pretty: true) %></textarea> Match bots <textarea
           class="form-control"
