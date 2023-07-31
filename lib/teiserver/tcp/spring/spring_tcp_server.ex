@@ -369,7 +369,7 @@ defmodule Teiserver.SpringTcpServer do
       else
         keys = Map.keys(new_values)
 
-        if Enum.member?(keys, :locked) or Enum.member?(keys, :map_name) do
+        if Enum.member?(keys, :locked) or Enum.member?(keys, :map_name) or Enum.member?(keys, :spectator_count) do
           SpringOut.reply(:update_battle, lobby_id, nil, state)
         else
           state
@@ -870,8 +870,7 @@ defmodule Teiserver.SpringTcpServer do
         SpringOut.reply(:enable_all_units, [], nil, state)
         SpringOut.reply(:disable_units, msg.changes.disabled_units, nil, state)
 
-      true ->
-        SpringOut.reply(:update_battle, msg.lobby_id, nil, state)
+      true -> state
     end
   end
 
