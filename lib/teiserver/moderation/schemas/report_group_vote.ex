@@ -1,22 +1,13 @@
-defmodule Teiserver.Moderation.Report do
+defmodule Teiserver.Moderation.ReportGroupVote do
   @moduledoc false
   use CentralWeb, :schema
 
-  schema "moderation_reports" do
-    belongs_to :reporter, Central.Account.User
-    belongs_to :target, Central.Account.User
-
-    field :type, :string
-    field :sub_type, :string
-    field :extra_text, :string
-    field :closed, :boolean, default: false
-
-    belongs_to :match, Teiserver.Battle.Match
-    field :relationship, :string
-    belongs_to :result, Teiserver.Moderation.Action
+  schema "moderation_report_group_votes" do
     belongs_to :report_group, Teiserver.Moderation.ReportGroup
+    belongs_to :user, Central.Account.User
 
-    has_many :responses, Teiserver.Moderation.Response
+    field :action, :string
+    field :accuracy, :string
 
     timestamps()
   end
@@ -25,14 +16,14 @@ defmodule Teiserver.Moderation.Report do
   def changeset(struct, params \\ %{}) do
     params =
       params
-      |> trim_strings(~w(name)a)
+      |> trim_strings(~w(action accuracy)a)
 
     struct
     |> cast(
       params,
-      ~w(reporter_id target_id type sub_type extra_text match_id relationship result_id closed report_group_id)a
+      ~w(report_group_id user_id action accuracy)a
     )
-    |> validate_required(~w(reporter_id target_id type sub_type closed)a)
+    |> validate_required(~w(report_group_id user_id action accuracy)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
