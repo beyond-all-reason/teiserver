@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Battle.MatchLive.Chat do
-  @moduledoc false
+@moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.{Account, Battle, Chat}
   alias Teiserver.Battle.MatchLib
@@ -149,7 +149,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
   end
 
   defp default_filters(socket, params) do
-    highlight_names = params["userids"]
+    highlight_names = Map.get(params, "userids", [])
       |> Enum.map(fn userid_str ->
         Account.get_username_by_id(userid_str)
       end)
