@@ -1,4 +1,5 @@
 defmodule TeiserverWeb.Admin.UserController do
+  @moduledoc false
   use CentralWeb, :controller
 
   alias Teiserver.{Account, Chat, Game}
@@ -928,13 +929,13 @@ defmodule TeiserverWeb.Admin.UserController do
     smurf_count =
       Account.list_users(
         search: [
-          smurf_of: userid
+          smurf_of: user.id
         ],
         select: [:id]
       )
       |> Enum.count()
 
-    Teiserver.Account.update_user_stat(userid, %{"smurf_count" => smurf_count})
+    Teiserver.Account.update_user_stat(user.id, %{"smurf_count" => smurf_count})
 
     conn
     |> put_flash(:success, "stat #{key} updated")
