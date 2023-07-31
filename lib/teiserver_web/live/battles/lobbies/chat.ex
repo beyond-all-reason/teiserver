@@ -294,7 +294,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   defp strip_message(msg) do
     msg = msg
       |> String.trim()
-      |> String.slice(0..128)
+      |> String.slice(0..256)
 
     cond do
       String.starts_with?(msg, "w:") -> strip_message(msg |> String.replace("w:", ""))

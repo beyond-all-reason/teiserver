@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.ClientServer do
+  @moduledoc false
   use GenServer
   require Logger
   alias Teiserver.Lobby.ChatLib
@@ -192,6 +193,11 @@ defmodule Teiserver.Account.ClientServer do
 
   def handle_cast(:remove_from_all_queues, state) do
     new_client = Map.merge(state.client, %{queues: []})
+    {:noreply, %{state | client: new_client}}
+  end
+
+  def handle_cast({:update_tcp_pid, new_pid}, state) do
+    new_client = Map.merge(state.client, %{tcp_pid: new_pid})
     {:noreply, %{state | client: new_client}}
   end
 

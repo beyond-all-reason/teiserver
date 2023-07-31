@@ -221,7 +221,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     new_state =
       cond do
         userid == state.founder_id ->
-          handle_founder_chat(message, state)
+          handle_founder_chat(message, userid, state)
 
         userid == state.userid ->
           state
@@ -297,8 +297,8 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     state
   end
 
-  @spec handle_founder_chat(String.t(), map()) :: map()
-  defp handle_founder_chat("* BarManager|" <> json_str, state) do
+  @spec handle_founder_chat(String.t(), T.userid(), map()) :: map()
+  defp handle_founder_chat("* BarManager|" <> json_str, userid, state) do
     case Jason.decode(json_str) do
       {:ok, %{"BattleStateChanged" => new_status}} ->
         if new_status["locked"] != "unlocked" do
@@ -359,14 +359,14 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
         :ok
 
       err ->
-        Logger.error("BarManager bad json - #{json_str}\n#{inspect(err)}")
+        Logger.error("BarManager bad json from #{userid} - #{json_str}\n#{inspect(err)}")
         :ok
     end
 
     state
   end
 
-  defp handle_founder_chat("* Map changed by " <> user_and_map, state) do
+  defp handle_founder_chat("* Map changed by " <> user_and_map, _userid, state) do
     [_user | map_parts] =
       user_and_map
       |> String.split(" ")
@@ -386,7 +386,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   defp handle_founder_chat(
-         "* Automatic random map rotation: next map is" <> map_and_quotes,
+         "* Automatic random map rotation: next map is" <> map_and_quotes, _userid,
          state
        ) do
     current_map =
@@ -401,12 +401,12 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     state
   end
 
-  defp handle_founder_chat("* Boss mode enabled for " <> _boss_name, state) do
+  defp handle_founder_chat("* Boss mode enabled for " <> _boss_name, _userid, state) do
     send_to_founder(state, "!boss")
     state
   end
 
-  defp handle_founder_chat(_, state) do
+  defp handle_founder_chat(_, _userid, state) do
     state
   end
 

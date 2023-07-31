@@ -10,7 +10,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   # alias Teiserver.Tachyon.Socket.PubsubHandlers
   alias Teiserver.Data.Types, as: T
 
-  @spec child_spec(any) :: any()
+  @spec child_spec(any) :: :ignore
   def child_spec(_opts) do
     # We won't spawn any process, so let's return a dummy task
     # %{id: __MODULE__, start: {Task, :start_link, [fn -> :ok end]}, restart: :transient}
@@ -18,7 +18,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   end
 
   @spec connect(map()) ::
-          {:ok, T.tachyon_ws_state()} | {:error, atom} | {:error, {atom, String.t()}}
+          {:ok, T.tachyon_ws_state()} | {:error, atom | String.t()}
   def connect(
         %{
           params: %{
@@ -61,11 +61,13 @@ defmodule Teiserver.Tachyon.TachyonSocket do
       |> Enum.reject(fn key -> Map.has_key?(params, key) end)
       |> Enum.join(", ")
 
-    {:error, {:missing_params, missing}}
+    {:error, "missing_params: #{missing}"}
   end
 
   @spec init(T.tachyon_ws_state()) :: {:ok, T.tachyon_ws_state()}
   def init(%{conn: %{userid: userid}} = state) do
+    :timer.send_after(1500, :connect_to_client)
+
     Logger.metadata(request_id: "TachyonWSServer##{userid}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{userid}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
@@ -175,6 +177,11 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
   @spec handle_info(any, T.tachyon_ws_state()) ::
           {:reply, :ok, {:binary, binary}, T.tachyon_ws_state()}
+  def handle_info(:connect_to_client, state) do
+    Account.cast_client(state.conn.userid, {:update_tcp_pid, self()})
+    {:ok, state}
+  end
+
   def handle_info(%{channel: channel} = msg, state) do
     # First we find the module to handle this message, we have one module per channel
     module =
