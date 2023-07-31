@@ -7,7 +7,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
   @impl true
   def mount(params, _session, socket) do
     socket = socket
-      |> mount_require_all(["Reviewer"])
+      |> mount_require_all(["Overwatch"])
       |> assign(:site_menu_active, "match")
       |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
       |> assign(:tab, "details")
