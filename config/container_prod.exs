@@ -48,7 +48,7 @@ config :central, Teiserver,
     cacertfile: "/run/secrets/fullchain.pem"
   ]
 
-config :central, Central.Repo,
+config :central, Teiserver.Repo,
   username: dbUser,
   password: dbPassword,
   database: dbDB,
