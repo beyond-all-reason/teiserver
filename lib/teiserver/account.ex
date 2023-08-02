@@ -1415,6 +1415,135 @@ defmodule Teiserver.Account do
     |> binary_part(0, length)
   end
 
+  alias Teiserver.Account.{Relationship, RelationshipLib}
+
+  @doc """
+  Returns the list of relationships.
+
+  ## Examples
+
+      iex> list_relationships()
+      [%Relationship{}, ...]
+
+  """
+  @spec list_relationships(list) :: list
+  def list_relationships(args \\ []) do
+    args
+    |> RelationshipLib.query_relationships()
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single relationship.
+
+  Raises `Ecto.NoResultsError` if the Relationship does not exist.
+
+  ## Examples
+
+      iex> get_relationship!(123)
+      %Relationship{}
+
+      iex> get_relationship!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_relationship!(from_id, to_id), do: get_relationship!(from_id, to_id, [])
+
+  def get_relationship!(from_id, to_id, args) do
+    args = args ++ [from_user_id: from_id, to_user_id: to_id]
+
+    args
+    |> RelationshipLib.query_relationships()
+    |> Repo.one!()
+  end
+
+  @doc """
+  Gets a single relationship, returns nil if the relationship doesn't exist
+
+  ## Examples
+
+      iex> get_relationship(123)
+      %Relationship{}
+
+      iex> get_relationship(456)
+      nil
+
+  """
+  def get_relationship(from_id, to_id), do: get_relationship!(from_id, to_id, [])
+
+  def get_relationship(from_id, to_id, args) do
+    args = args ++ [from_user_id: from_id, to_user_id: to_id]
+
+    args
+    |> RelationshipLib.query_relationships()
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a relationship.
+
+  ## Examples
+
+      iex> create_relationship(%{field: value})
+      {:ok, %Relationship{}}
+
+      iex> create_relationship(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_relationship(attrs \\ %{}) do
+    %Relationship{}
+    |> Relationship.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a relationship.
+
+  ## Examples
+
+      iex> update_relationship(relationship, %{field: new_value})
+      {:ok, %Relationship{}}
+
+      iex> update_relationship(relationship, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_relationship(%Relationship{} = relationship, attrs) do
+    relationship
+    |> Relationship.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a relationship.
+
+  ## Examples
+
+      iex> delete_relationship(relationship)
+      {:ok, %Relationship{}}
+
+      iex> delete_relationship(relationship)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_relationship(%Relationship{} = relationship) do
+    Repo.delete(relationship)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking relationship changes.
+
+  ## Examples
+
+      iex> change_relationship(relationship)
+      %Ecto.Changeset{data: %Relationship{}}
+
+  """
+  def change_relationship(%Relationship{} = relationship, attrs \\ %{}) do
+    Relationship.changeset(relationship, attrs)
+  end
+
   # User functions
   alias alias Teiserver.Account.UserCache
 
