@@ -1,4 +1,4 @@
-defmodule Central.Account.AuthLib do
+defmodule Teiserver.Account.AuthLib do
   @moduledoc false
   require Logger
 

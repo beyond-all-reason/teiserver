@@ -7,7 +7,7 @@ defmodule TeiserverWeb.Admin.ChatController do
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Chat.LobbyMessage,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "chat",

@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Logging.AuditLogController do
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Logging.AuditLog,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "logging",

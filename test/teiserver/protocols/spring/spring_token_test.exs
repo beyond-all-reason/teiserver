@@ -67,8 +67,8 @@ defmodule Teiserver.SpringTokenTest do
 
     # Token 1 and 2 will almost certainly be different, instead we
     # check to ensure they pull back the same user
-    {:ok, user1, _claims} = Central.Account.Guardian.resource_from_token(token)
-    {:ok, user2, _claims} = Central.Account.Guardian.resource_from_token(token)
+    {:ok, user1, _claims} = Teiserver.Account.Guardian.resource_from_token(token)
+    {:ok, user2, _claims} = Teiserver.Account.Guardian.resource_from_token(token)
 
     assert user1.id == user.id
     assert user2.id == user.id

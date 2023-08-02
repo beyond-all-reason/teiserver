@@ -5,14 +5,14 @@ defmodule CentralWeb.Router do
     plug Bodyguard.Plug.Authorize,
       policy: Central.Dev,
       action: :dev_auth,
-      user: {Central.Account.AuthLib, :current_user}
+      user: {Teiserver.Account.AuthLib, :current_user}
   end
 
   pipeline :logging_live_auth do
     plug Bodyguard.Plug.Authorize,
       policy: Teiserver.Logging.LiveLib,
       action: :live,
-      user: {Central.Account.AuthLib, :current_user}
+      user: {Teiserver.Account.AuthLib, :current_user}
   end
 
   pipeline :browser do
@@ -22,10 +22,10 @@ defmodule CentralWeb.Router do
     plug :put_root_layout, {CentralWeb.LayoutView, :root}
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
-    plug(Central.Account.DefaultsPlug)
+    plug(Teiserver.Account.DefaultsPlug)
     plug(Teiserver.Logging.LoggingPlug)
-    plug(Central.Account.AuthPipeline)
-    plug(Central.Account.AuthPlug)
+    plug(Teiserver.Account.AuthPipeline)
+    plug(Teiserver.Account.AuthPlug)
     plug(Teiserver.Account.TSAuthPlug)
     plug(Central.General.CachePlug)
     plug(Teiserver.Communication.NotificationPlug)
@@ -38,9 +38,9 @@ defmodule CentralWeb.Router do
     plug :put_root_layout, {CentralWeb.Layouts, :root}
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
-    plug(Central.Account.DefaultsPlug)
-    plug(Central.Account.AuthPipeline)
-    plug(Central.Account.AuthPlug)
+    plug(Teiserver.Account.DefaultsPlug)
+    plug(Teiserver.Account.AuthPipeline)
+    plug(Teiserver.Account.AuthPlug)
     plug(Teiserver.Account.TSAuthPlug)
     plug(Central.General.CachePlug)
     plug(Teiserver.Communication.NotificationPlug)
@@ -76,8 +76,8 @@ defmodule CentralWeb.Router do
     plug(:accepts, ["json"])
     plug(:put_secure_browser_headers)
     plug(Teiserver.Logging.LoggingPlug)
-    plug(Central.Account.AuthPipeline)
-    plug(Central.Account.AuthPlug)
+    plug(Teiserver.Account.AuthPipeline)
+    plug(Teiserver.Account.AuthPlug)
     plug(Teiserver.Account.TSAuthPlug)
     plug(Central.General.CachePlug)
     plug(Guardian.Plug.EnsureAuthenticated)
@@ -89,8 +89,8 @@ defmodule CentralWeb.Router do
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
     plug(Teiserver.Logging.LoggingPlug)
-    plug(Central.Account.AuthPipeline)
-    plug(Central.Account.AuthPlug)
+    plug(Teiserver.Account.AuthPipeline)
+    plug(Teiserver.Account.AuthPlug)
     plug(Teiserver.Account.TSAuthPlug)
     plug(Central.General.CachePlug)
     plug(Guardian.Plug.EnsureAuthenticated)
@@ -103,7 +103,7 @@ defmodule CentralWeb.Router do
 
     live_session :general_index,
       on_mount: [
-        {Central.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
         {Teiserver.Communication.NotificationPlug, :load_notifications}
       ] do
         live "/", HomeLive.Index, :index
@@ -305,7 +305,7 @@ defmodule CentralWeb.Router do
 
     live_session :board_view,
       on_mount: [
-        {Central.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
         {Teiserver.Communication.NotificationPlug, :load_notifications}
       ] do
         live "/ratings", MatchLive.Ratings, :index
@@ -484,7 +484,7 @@ defmodule CentralWeb.Router do
 
     live_session :overwatch,
       on_mount: [
-        {Central.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
         {Teiserver.Communication.NotificationPlug, :load_notifications}
       ] do
         live "/overwatch", OverwatchLive.Index, :index

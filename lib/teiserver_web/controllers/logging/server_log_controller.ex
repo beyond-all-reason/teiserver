@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Logging.ServerLogController do
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Staff.Moderator,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: "Logging", url: "/logging")
   plug(:add_breadcrumb, name: "Server", url: "/logging/server")

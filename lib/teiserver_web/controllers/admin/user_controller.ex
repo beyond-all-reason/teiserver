@@ -17,7 +17,7 @@ defmodule TeiserverWeb.Admin.UserController do
   plug(Bodyguard.Plug.Authorize,
     policy: Teiserver.Account.Auth,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
   )
 
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
@@ -349,7 +349,7 @@ defmodule TeiserverWeb.Admin.UserController do
         |> redirect(to: ~p"/teiserver/admin/user")
 
       {true, _} ->
-        Central.Account.Emails.password_reset(user)
+        Teiserver.Account.Emails.password_reset(user)
         |> Central.Mailer.deliver_now()
 
         conn
@@ -966,7 +966,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        admin_action = Central.Account.AuthLib.allow?(conn, "admin.dev")
+        admin_action = Teiserver.Account.AuthLib.allow?(conn, "admin.dev")
 
         case Teiserver.User.rename_user(user.id, new_name, admin_action) do
           :success ->

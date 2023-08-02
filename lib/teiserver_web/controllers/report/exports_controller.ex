@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Report.ExportsController do
   use CentralWeb, :controller
   alias Teiserver.{Game, Account}
-  import Central.Account.AuthLib, only: [allow?: 2]
+  import Teiserver.Account.AuthLib, only: [allow?: 2]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Report.ExportsController do
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Telemetry.Infolog,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: "Teiserver", url: "/teiserver")
   plug(:add_breadcrumb, name: "Reports", url: "/teiserver/reports")

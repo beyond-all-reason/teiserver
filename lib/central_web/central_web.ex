@@ -42,11 +42,11 @@ defmodule CentralWeb do
       alias Bodyguard.Plug.Authorize
 
       alias CentralWeb.Router.Helpers, as: Routes
-      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
 
       unquote(verified_routes())
 
-      import Central.Account.RecentlyUsedCache,
+      import Teiserver.Account.RecentlyUsedCache,
         only: [remove_recently: 2, insert_recently: 2, insert_recently: 1, get_recently: 1]
     end
   end
@@ -76,7 +76,7 @@ defmodule CentralWeb do
       import CentralWeb.Gettext
       alias CentralWeb.Router.Helpers, as: Routes
 
-      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
 
       import Teiserver.Helper.NumberHelper,
         only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
@@ -119,8 +119,8 @@ defmodule CentralWeb do
         layout: {CentralWeb.Layouts, :app}
 
       use Breadcrumble
-      alias Central.Account.AuthPlug
-      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2, mount_require_all: 2, mount_require_any: 2]
+      alias Teiserver.Account.AuthPlug
+      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, mount_require_all: 2, mount_require_any: 2]
       import Teiserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
       import Teiserver.Helper.NumberHelper,
         only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
@@ -159,7 +159,7 @@ defmodule CentralWeb do
       import CentralWeb.Gettext
 
       alias Teiserver.Helper.StylingHelper
-      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
 
       unquote(verified_routes())
     end
@@ -172,7 +172,7 @@ defmodule CentralWeb do
       alias Ecto.Multi
 
       import Teiserver.Helper.QueryHelpers
-      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
       alias Teiserver.Helper.StylingHelper
     end
   end
@@ -192,7 +192,7 @@ defmodule CentralWeb do
 
   def startup do
     quote do
-      import Central.Account.AuthLib, only: [add_permission_set: 3]
+      import Teiserver.Account.AuthLib, only: [add_permission_set: 3]
 
       import Teiserver.Config, only: [add_user_config_type: 1, add_site_config_type: 1]
       import Teiserver.Logging.AuditLogLib, only: [add_audit_types: 1]
@@ -204,7 +204,7 @@ defmodule CentralWeb do
     quote do
       use Ecto.Schema
       import Ecto.Changeset
-      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
       import Teiserver.Helper.SchemaHelper
     end
   end

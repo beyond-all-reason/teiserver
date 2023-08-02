@@ -5,7 +5,7 @@ defmodule TeiserverWeb.API.BattleController do
   plug(Bodyguard.Plug.Authorize,
     policy: Teiserver.Battle.ApiAuth,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
   )
 
   def create(conn, _battle = %{"outcome" => "completed"}) do

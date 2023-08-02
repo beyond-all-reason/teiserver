@@ -1,4 +1,4 @@
-defmodule Central.Account.Emails do
+defmodule Teiserver.Account.Emails do
   @moduledoc false
   alias Bamboo.Email
   alias Teiserver.Helper.TimexHelper

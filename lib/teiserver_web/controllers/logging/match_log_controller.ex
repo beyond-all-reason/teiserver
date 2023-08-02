@@ -14,7 +14,7 @@ defmodule TeiserverWeb.Logging.MatchLogController do
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Staff.Moderator,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Reports', url: '/teiserver/reports')
   plug(:add_breadcrumb, name: 'Match metrics', url: '/teiserver/reports/match/day_metrics')

@@ -1,7 +1,7 @@
 defmodule CentralWeb.UserSocket do
   use Phoenix.Socket
 
-  alias Central.Account.Guardian
+  alias Teiserver.Account.Guardian
 
   ## Channels
   # channel "room:*", CentralWeb.RoomChannel

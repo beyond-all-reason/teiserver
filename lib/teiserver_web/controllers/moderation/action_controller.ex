@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Moderation.Action,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "moderation",

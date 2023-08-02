@@ -1,9 +1,9 @@
-defmodule Central.Account.AuthPlug do
+defmodule Teiserver.Account.AuthPlug do
   @moduledoc false
   import Plug.Conn
 
   alias Central.Account
-  alias Central.Account.Guardian
+  alias Teiserver.Account.Guardian
   require Logger
   use CentralWeb, :verified_routes
 

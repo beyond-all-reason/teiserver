@@ -140,7 +140,7 @@ defmodule CentralWeb.Account.ForgottenPasswordControllerTest do
         )
         |> hd
 
-      expected_email = Central.Account.Emails.password_reset(dummy, code)
+      expected_email = Teiserver.Account.Emails.password_reset(dummy, code)
       Central.Mailer.deliver_now(expected_email)
       assert_delivered_email(expected_email)
     end

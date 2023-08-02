@@ -8,7 +8,7 @@ defmodule TeiserverWeb.API.HailstormController do
   plug(Bodyguard.Plug.Authorize,
     policy: Teiserver.API.HailstormAuth,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
   )
 
   @spec start(Plug.Conn.t(), map()) :: Plug.Conn.t()

@@ -1,4 +1,4 @@
-defmodule Central.Account.RecentlyUsedCache do
+defmodule Teiserver.Account.RecentlyUsedCache do
   @moduledoc false
   alias Central.Types, as: T
 

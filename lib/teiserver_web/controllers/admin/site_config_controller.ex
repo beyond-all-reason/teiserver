@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Admin.SiteConfigController do
   plug Bodyguard.Plug.Authorize,
     policy: Central.Dev,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
 
   # plug :add_breadcrumb, name: 'Alacrity', url: '/'
   plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
