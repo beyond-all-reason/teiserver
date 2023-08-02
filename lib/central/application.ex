@@ -18,14 +18,14 @@ defmodule Central.Application do
          skip: System.get_env("SKIP_MIGRATIONS") == "true"},
 
         # Start phoenix pubsub
-        {Phoenix.PubSub, name: Central.PubSub},
+        {Phoenix.PubSub, name: Teiserver.PubSub},
         TeiserverWeb.Telemetry,
 
         # Start the Ecto repository
         Teiserver.Repo,
         # Start the endpoint when the application starts
-        CentralWeb.Endpoint,
-        CentralWeb.Presence,
+        TeiserverWeb.Endpoint,
+        TeiserverWeb.Presence,
         {Central.General.CacheClusterServer, name: Central.General.CacheClusterServer},
         concache_sup(:codes),
         concache_sup(:account_user_cache),
@@ -250,7 +250,7 @@ defmodule Central.Application do
   # whenever the application is updated.
   @impl true
   def config_change(changed, _new, removed) do
-    CentralWeb.Endpoint.config_change(changed, removed)
+    TeiserverWeb.Endpoint.config_change(changed, removed)
     :ok
   end
 
@@ -258,7 +258,7 @@ defmodule Central.Application do
   @spec prep_stop(map()) :: map()
   def prep_stop(state) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "application",
       %{
         channel: "application",

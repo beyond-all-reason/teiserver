@@ -7,7 +7,7 @@ defmodule Central.Helpers.GeneralTestLib do
   import Phoenix.ChannelTest
   # use Phoenix.ConnTest
 
-  @endpoint CentralWeb.Endpoint
+  @endpoint TeiserverWeb.Endpoint
 
   alias Teiserver.Account.AuthLib
 

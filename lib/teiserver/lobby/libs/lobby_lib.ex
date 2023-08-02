@@ -189,7 +189,7 @@ defmodule Teiserver.Lobby.LobbyLib do
     cast_lobby(lobby_id, {:update_lobby, lobby})
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_lobby_updates:#{lobby.id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -208,7 +208,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
     if Enum.member?([:update_battle_info], reason) do
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_global_lobby_updates",
         %{
           channel: "teiserver_global_lobby_updates",
@@ -219,7 +219,7 @@ defmodule Teiserver.Lobby.LobbyLib do
     end
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_lobby_updates:#{lobby.id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -360,7 +360,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
     :ok =
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_global_lobby_updates",
         %{
           channel: "teiserver_global_lobby_updates",
@@ -460,7 +460,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
     :ok =
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_global_lobby_updates",
         %{
           channel: "teiserver_global_lobby_updates",
@@ -471,7 +471,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
     :ok =
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_lobby_updates:#{lobby.id}",
         %{
           channel: "teiserver_lobby_updates",

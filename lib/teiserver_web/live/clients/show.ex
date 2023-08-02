@@ -27,7 +27,7 @@ defmodule TeiserverWeb.ClientLive.Show do
 
     :ok =
       PubSub.subscribe(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_client_messages:#{socket.assigns[:current_user].id}"
       )
 
@@ -49,7 +49,7 @@ defmodule TeiserverWeb.ClientLive.Show do
     case allow?(socket.assigns[:current_user], "Moderator") do
       true ->
         id = int_parse(id)
-        PubSub.subscribe(Central.PubSub, "teiserver_client_watch:#{id}")
+        PubSub.subscribe(Teiserver.PubSub, "teiserver_client_watch:#{id}")
         client = Account.get_client_by_id(id)
         user = User.get_user_by_id(id)
 

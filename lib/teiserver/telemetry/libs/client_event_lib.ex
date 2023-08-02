@@ -46,7 +46,7 @@ defmodule Teiserver.Telemetry.ClientEventLib do
       {:ok, _event} ->
         if Enum.member?(@broadcast_event_types, event_type_name) do
           PubSub.broadcast(
-            Central.PubSub,
+            Teiserver.PubSub,
             "teiserver_telemetry_client_events",
             %{
               channel: "teiserver_telemetry_client_events",

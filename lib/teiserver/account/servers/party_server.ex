@@ -48,7 +48,7 @@ defmodule Teiserver.Account.PartyServer do
           new_invites = [userid | party.pending_invites] |> Enum.uniq()
 
           PubSub.broadcast(
-            Central.PubSub,
+            Teiserver.PubSub,
             "teiserver_party:#{party.id}",
             %{
               channel: "teiserver_party:#{party.id}",
@@ -59,7 +59,7 @@ defmodule Teiserver.Account.PartyServer do
           )
 
           PubSub.broadcast(
-            Central.PubSub,
+            Teiserver.PubSub,
             "teiserver_client_messages:#{userid}",
             %{
               channel: "teiserver_client_messages:#{userid}",
@@ -83,7 +83,7 @@ defmodule Teiserver.Account.PartyServer do
           new_invites = List.delete(party.pending_invites, userid)
 
           PubSub.broadcast(
-            Central.PubSub,
+            Teiserver.PubSub,
             "teiserver_party:#{party.id}",
             %{
               channel: "teiserver_party:#{party.id}",
@@ -115,7 +115,7 @@ defmodule Teiserver.Account.PartyServer do
           Logger.debug("Member left #{userid}, last member, stopping party")
 
           PubSub.broadcast(
-            Central.PubSub,
+            Teiserver.PubSub,
             "teiserver_party:#{party.id}",
             %{
               channel: "teiserver_party:#{party.id}",
@@ -162,7 +162,7 @@ defmodule Teiserver.Account.PartyServer do
 
         true ->
           PubSub.broadcast(
-            Central.PubSub,
+            Teiserver.PubSub,
             "teiserver_party:#{party.id}",
             %{
               channel: "teiserver_party:#{party.id}",
@@ -206,7 +206,7 @@ defmodule Teiserver.Account.PartyServer do
     new_members = [userid | party.members] |> Enum.uniq()
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_party:#{party.id}",
       %{
         channel: "teiserver_party:#{party.id}",
@@ -216,8 +216,8 @@ defmodule Teiserver.Account.PartyServer do
       }
     )
 
-    PubSub.unsubscribe(Central.PubSub, "teiserver_client_messages:#{userid}")
-    PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{userid}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_client_messages:#{userid}")
+    PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{userid}")
 
     Account.move_client_to_party(userid, party.id)
 
@@ -235,7 +235,7 @@ defmodule Teiserver.Account.PartyServer do
     new_members = List.delete(party.members, userid)
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_party:#{party.id}",
       %{
         channel: "teiserver_party:#{party.id}",
@@ -253,7 +253,7 @@ defmodule Teiserver.Account.PartyServer do
       end
 
     # We grab the longest serving member for the new leader
-    PubSub.unsubscribe(Central.PubSub, "teiserver_client_messages:#{userid}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_client_messages:#{userid}")
     Account.move_client_to_party(userid, nil)
 
     if Enum.empty?(new_members) do
@@ -283,7 +283,7 @@ defmodule Teiserver.Account.PartyServer do
       id
     )
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{party.leader}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{party.leader}")
 
     Account.move_client_to_party(party.leader, party.id)
     Logger.metadata(request_id: "PartyServer##{id}")

@@ -64,13 +64,13 @@ defmodule TeiserverWeb.TournamentLive.Show do
     id = int_parse(id)
     current_user = socket.assigns[:current_user]
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_user_updates:#{current_user.id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_lobby_updates:#{id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_user_updates:#{current_user.id}")
     lobby = Battle.get_lobby(id)
 
     :ok =
       PubSub.subscribe(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_client_messages:#{socket.assigns[:current_user].id}"
       )
 

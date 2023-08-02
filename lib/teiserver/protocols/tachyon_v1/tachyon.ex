@@ -107,11 +107,11 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
     # Login the client
     _client = Client.login(user, :tachyon, state.ip)
 
-    PubSub.unsubscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
-    PubSub.unsubscribe(Central.PubSub, "teiserver_user_updates:#{user.id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_client_messages:#{user.id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_user_updates:#{user.id}")
 
-    PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
-    PubSub.subscribe(Central.PubSub, "teiserver_user_updates:#{user.id}")
+    PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{user.id}")
+    PubSub.subscribe(Teiserver.PubSub, "teiserver_user_updates:#{user.id}")
 
     Logger.metadata(request_id: "TachyonTcpServer##{user.id}")
 
@@ -126,37 +126,37 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   end
 
   def do_action(:host_lobby, lobby_id, state) do
-    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_host_message:#{lobby_id}")
-    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_host_message:#{lobby_id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
 
-    PubSub.subscribe(Central.PubSub, "teiserver_lobby_host_message:#{lobby_id}")
-    PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-    PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+    PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_host_message:#{lobby_id}")
+    PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
     %{state | lobby_id: lobby_id, lobby_host: true}
   end
 
   def do_action(:leave_lobby, lobby_id, state) do
-    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
     %{state | lobby_id: nil, lobby_host: false}
   end
 
   def do_action(:join_lobby, lobby_id, state) do
     Teiserver.Lobby.add_user_to_battle(state.userid, lobby_id, state.script_password)
 
-    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
 
-    PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-    PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+    PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
 
     %{state | lobby_id: lobby_id}
   end
 
   def do_action(:lead_party, party_id, state) do
-    PubSub.unsubscribe(Central.PubSub, "teiserver_party:#{party_id}")
-    PubSub.subscribe(Central.PubSub, "teiserver_party:#{party_id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
+    PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
 
     %{state | party_id: party_id, party_role: :leader}
   end
@@ -164,8 +164,8 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   def do_action(:join_party, party_id, state) do
     # We need this check so we don't overwrite our leader status
     if state.party_id != party_id do
-      PubSub.unsubscribe(Central.PubSub, "teiserver_party:#{party_id}")
-      PubSub.subscribe(Central.PubSub, "teiserver_party:#{party_id}")
+      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
+      PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
 
       %{state | party_id: party_id, party_role: :member}
     else
@@ -174,7 +174,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   end
 
   def do_action(:leave_party, party_id, state) do
-    PubSub.unsubscribe(Central.PubSub, "teiserver_party:#{party_id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
 
     if state.party_id == party_id do
       %{state | party_id: nil, party_role: nil}
@@ -192,14 +192,14 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   end
 
   def do_action(:watch_channel, name, state) do
-    PubSub.unsubscribe(Central.PubSub, name)
-    PubSub.subscribe(Central.PubSub, name)
+    PubSub.unsubscribe(Teiserver.PubSub, name)
+    PubSub.subscribe(Teiserver.PubSub, name)
 
     state
   end
 
   def do_action(:unwatch_channel, name, state) do
-    PubSub.unsubscribe(Central.PubSub, name)
+    PubSub.unsubscribe(Teiserver.PubSub, name)
 
     state
   end

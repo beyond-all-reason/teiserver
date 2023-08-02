@@ -18,7 +18,7 @@ config :central, Teiserver.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
-config :central, CentralWeb.Endpoint,
+config :central, TeiserverWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4000],
   debug_errors: true,
   code_reloader: true,
@@ -66,7 +66,7 @@ config :central, Teiserver,
   accept_all_emails: true
 
 # Watch static and templates for browser reloading.
-config :central, CentralWeb.Endpoint,
+config :central, TeiserverWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",

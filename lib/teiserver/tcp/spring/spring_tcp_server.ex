@@ -159,7 +159,7 @@ defmodule Teiserver.SpringTcpServer do
       client_messages: 0
     }
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
 
     redirect_url = Config.get_site_config_cache("system.Redirect url")
 
@@ -1055,7 +1055,7 @@ defmodule Teiserver.SpringTcpServer do
     userid = client.userid
 
     if userid == state.userid do
-      Phoenix.PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+      Phoenix.PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
     end
 
     # Do they know about the battle?

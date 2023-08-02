@@ -29,7 +29,7 @@ defmodule Teiserver.Lobby.ChatLib do
         }
       })
 
-    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
 
     Coordinator.send_to_user(userid, [
@@ -99,7 +99,7 @@ defmodule Teiserver.Lobby.ChatLib do
       persist_message(user, msg, lobby_id, :say)
 
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_lobby_chat:#{lobby_id}",
         %{
           channel: "teiserver_lobby_chat:#{lobby_id}",
@@ -165,7 +165,7 @@ defmodule Teiserver.Lobby.ChatLib do
       persist_message(user, msg, lobby_id, :sayex)
 
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_lobby_chat:#{lobby_id}",
         %{
           channel: "teiserver_lobby_chat:#{lobby_id}",
@@ -226,7 +226,7 @@ defmodule Teiserver.Lobby.ChatLib do
 
     if allowed do
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_client_messages:#{to_id}",
         %{
           channel: "teiserver_client_messages:#{to_id}",

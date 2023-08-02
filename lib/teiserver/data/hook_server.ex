@@ -93,7 +93,7 @@ defmodule Teiserver.HookServer do
         # later want to tell each client everything is stopping for a
         # minute or two
         PubSub.broadcast(
-          Central.PubSub,
+          Teiserver.PubSub,
           "teiserver_server",
           %{
             channel: "teiserver_server",
@@ -115,9 +115,9 @@ defmodule Teiserver.HookServer do
   @spec init(any) :: {:ok, %{}}
   def init(_) do
     if Application.get_env(:central, Teiserver)[:enable_hooks] do
-      :ok = PubSub.subscribe(Central.PubSub, "account_hooks")
-      :ok = PubSub.subscribe(Central.PubSub, "global_moderation")
-      :ok = PubSub.subscribe(Central.PubSub, "application")
+      :ok = PubSub.subscribe(Teiserver.PubSub, "account_hooks")
+      :ok = PubSub.subscribe(Teiserver.PubSub, "global_moderation")
+      :ok = PubSub.subscribe(Teiserver.PubSub, "application")
     end
 
     {:ok, %{}}

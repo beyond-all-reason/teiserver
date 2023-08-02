@@ -53,11 +53,11 @@ defmodule Teiserver.Tachyon.MessageHandlers.ClientMessageHandlers do
       when is_integer(lobby_id) do
     case JoinedResponse.generate(lobby_id, msg.script_password) do
       {command, :success, data} ->
-        PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-        PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+        PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+        PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
 
-        PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-        PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+        PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+        PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
 
         resp = %{
           "command" => command,

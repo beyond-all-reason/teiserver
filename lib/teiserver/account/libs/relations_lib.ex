@@ -71,19 +71,19 @@ defmodule Teiserver.Account.RelationsLib do
 
       # Now push out the updates
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "legacy_user_updates:#{requester_id}",
         {:this_user_updated, [:friends]}
       )
 
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "legacy_user_updates:#{accepter_id}",
         {:this_user_updated, [:friends, :friend_requests]}
       )
 
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_user_updates:#{requester_id}",
         %{
           channel: "teiserver_user_updates:#{requester_id}",
@@ -94,7 +94,7 @@ defmodule Teiserver.Account.RelationsLib do
       )
 
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_user_updates:#{accepter_id}",
         %{
           channel: "teiserver_user_updates:#{accepter_id}",
@@ -149,7 +149,7 @@ defmodule Teiserver.Account.RelationsLib do
 
       # Now push out the updates
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "legacy_user_updates:#{decliner_id}",
         {:this_user_updated, [:friend_requests]}
       )
@@ -192,13 +192,13 @@ defmodule Teiserver.Account.RelationsLib do
 
       # Now push out the updates
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "legacy_user_updates:#{potential_id}",
         {:this_user_updated, [:friend_requests]}
       )
 
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_user_updates:#{potential_id}",
         %{
           channel: "teiserver_user_updates:#{potential_id}",
@@ -232,7 +232,7 @@ defmodule Teiserver.Account.RelationsLib do
 
       # Now push out the updates
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "legacy_user_updates:#{blocker_id}",
         {:this_user_updated, [:blockd]}
       )
@@ -261,7 +261,7 @@ defmodule Teiserver.Account.RelationsLib do
 
       # Now push out the updates
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "legacy_user_updates:#{unblocker_id}",
         {:this_user_updated, [:blockd]}
       )
@@ -290,7 +290,7 @@ defmodule Teiserver.Account.RelationsLib do
 
       # Now push out the updates
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "legacy_user_updates:#{ignorer_id}",
         {:this_user_updated, [:ignored]}
       )
@@ -319,7 +319,7 @@ defmodule Teiserver.Account.RelationsLib do
 
       # Now push out the updates
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "legacy_user_updates:#{unignorer_id}",
         {:this_user_updated, [:ignored]}
       )
@@ -356,19 +356,19 @@ defmodule Teiserver.Account.RelationsLib do
 
       # Now push out the updates
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "legacy_user_updates:#{remover_id}",
         {:this_user_updated, [:friends]}
       )
 
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "legacy_user_updates:#{removed_id}",
         {:this_user_updated, [:friends]}
       )
 
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_user_updates:#{removed_id}",
         %{
           channel: "teiserver_user_updates:#{removed_id}",
@@ -379,7 +379,7 @@ defmodule Teiserver.Account.RelationsLib do
       )
 
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_user_updates:#{removed_id}",
         %{
           channel: "teiserver_user_updates:#{removed_id}",

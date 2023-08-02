@@ -660,13 +660,13 @@ defmodule Teiserver.User do
         end
 
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "legacy_user_updates:#{to_id}",
         {:direct_message, sender_id, message_parts}
       )
 
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_client_messages:#{to_id}",
         %{
           channel: "teiserver_client_messages:#{to_id}",
@@ -684,7 +684,7 @@ defmodule Teiserver.User do
 
   def send_direct_message(from_id, to_id, message) do
     if String.starts_with?(message, "!clan") do
-      host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+      host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
       website_url = "https://#{host}"
 
       Coordinator.send_to_user(
@@ -717,13 +717,13 @@ defmodule Teiserver.User do
   @spec ring(T.userid(), T.userid()) :: :ok
   def ring(ringee_id, ringer_id) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "legacy_user_updates:#{ringee_id}",
       {:action, {:ring, ringer_id}}
     )
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "client_application:#{ringee_id}",
       %{
         channel: "client_application:#{ringee_id}",

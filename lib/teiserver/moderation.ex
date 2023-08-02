@@ -145,7 +145,7 @@ defmodule Teiserver.Moderation do
 
   def broadcast_create_report({:ok, report}) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "global_moderation",
       %{
         channel: "global_moderation",
@@ -181,7 +181,7 @@ defmodule Teiserver.Moderation do
 
   def broadcast_update_report({:ok, report}) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "global_moderation",
       %{
         channel: "global_moderation",
@@ -438,7 +438,7 @@ defmodule Teiserver.Moderation do
 
   def broadcast_create_response({:ok, response}) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "global_moderation",
       %{
         channel: "global_moderation",
@@ -475,7 +475,7 @@ defmodule Teiserver.Moderation do
 
   def broadcast_update_response({:ok, response}) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "global_moderation",
       %{
         channel: "global_moderation",
@@ -626,7 +626,7 @@ defmodule Teiserver.Moderation do
 
   def broadcast_create_action({:ok, action}) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "global_moderation",
       %{
         channel: "global_moderation",
@@ -662,7 +662,7 @@ defmodule Teiserver.Moderation do
 
   def broadcast_update_action({:ok, action}) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "global_moderation",
       %{
         channel: "global_moderation",
@@ -813,7 +813,7 @@ defmodule Teiserver.Moderation do
 
   def broadcast_create_proposal({:ok, proposal}) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "global_moderation",
       %{
         channel: "global_moderation",
@@ -850,7 +850,7 @@ defmodule Teiserver.Moderation do
 
   def broadcast_update_proposal({:ok, proposal}) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "global_moderation",
       %{
         channel: "global_moderation",
@@ -1077,7 +1077,7 @@ defmodule Teiserver.Moderation do
 
   def broadcast_create_ban({:ok, ban}) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "global_moderation",
       %{
         channel: "global_moderation",

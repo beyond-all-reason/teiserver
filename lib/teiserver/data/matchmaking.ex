@@ -125,7 +125,7 @@ defmodule Teiserver.Data.Matchmaking do
   @spec create_match([QueueGroup.t()], T.queue_id()) :: {pid, String.t()}
   def create_match(group_list, queue_id) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_global_matchmaking",
       %{
         channel: "teiserver_global_matchmaking",
