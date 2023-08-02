@@ -15,7 +15,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
     "start_date" => ""
   })
   """
-  alias Central.Helpers.{DatePresets, TimexHelper}
+  alias Teiserver.Helper.{DatePresets, TimexHelper}
   alias Teiserver.{Battle}
   alias Teiserver.Game.MatchRatingLib
   require Logger

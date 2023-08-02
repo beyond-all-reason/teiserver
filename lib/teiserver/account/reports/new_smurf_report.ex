@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.NewSmurfReport do
   alias Teiserver.{Account, User}
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
   @spec icon() :: String.t()

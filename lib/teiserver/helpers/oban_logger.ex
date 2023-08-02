@@ -1,4 +1,4 @@
-defmodule Central.ObanLogger do
+defmodule Teiserver.Helper.ObanLogger do
   @moduledoc false
   require Logger
 

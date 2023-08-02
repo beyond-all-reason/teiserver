@@ -1,5 +1,5 @@
 <% is_active = assigns[:active] == @name
-icon = if is_atom(@icon), do: Central.Helpers.StylingHelper.icon(@icon), else: @icon
+icon = if is_atom(@icon), do: Teiserver.Helper.StylingHelper.icon(@icon), else: @icon
 
 icon =
   if is_active do

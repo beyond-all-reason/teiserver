@@ -1,7 +1,7 @@
 defmodule Central.General.StylingHelpersTest do
   use Central.DataCase, async: true
 
-  alias Central.Helpers.StylingHelper
+  alias Teiserver.Helper.StylingHelper
 
   test "colours" do
     params = [

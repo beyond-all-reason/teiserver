@@ -1,7 +1,7 @@
-defmodule Central.Helpers.ColourHelper do
+defmodule Teiserver.Helper.ColourHelper do
   @moduledoc false
 
-  alias Central.Helpers.ColourHelper
+  alias Teiserver.Helper.ColourHelper
 
   defstruct red: 0,
             green: 0,

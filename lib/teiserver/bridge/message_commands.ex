@@ -2,7 +2,7 @@ defmodule Teiserver.Bridge.MessageCommands do
   @moduledoc false
   alias Teiserver.{User, Account}
   alias Teiserver.Account.AccoladeLib
-  alias Central.Helpers.NumberHelper
+  alias Teiserver.Helper.NumberHelper
   alias alias Teiserver.Bridge.UnitNames
   alias Nostrum.Api
   require Logger

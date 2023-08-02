@@ -4,7 +4,7 @@ defmodule Teiserver.SpringBattleHostTest do
   alias Teiserver.{Coordinator, Battle}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.Spring
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TeiserverTestLib,
     only: [auth_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1]

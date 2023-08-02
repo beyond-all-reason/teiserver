@@ -3,12 +3,12 @@ defmodule TeiserverWeb.API.HailstormController do
   alias Teiserver.{Account, User, Config, Coordinator, Lobby}
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Battle.BalanceLib
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   plug(Bodyguard.Plug.Authorize,
     policy: Teiserver.API.HailstormAuth,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
   )
 
   @spec start(Plug.Conn.t(), map()) :: Plug.Conn.t()

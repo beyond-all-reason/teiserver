@@ -1,7 +1,7 @@
 defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.{User, Account, Client, Coordinator, Moderation}
   alias Teiserver.Lobby
-  alias Central.Helpers.NumberHelper
+  alias Teiserver.Helper.NumberHelper
   alias Teiserver.Account.{AccoladeLib, CodeOfConductData}
   alias Teiserver.Coordinator.CoordinatorLib
   alias Teiserver.Config

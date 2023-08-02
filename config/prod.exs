@@ -118,7 +118,7 @@ config :logger, :info_log,
   level: :info
 
 # Overwritten in secret
-config :central, Central.Account.Guardian,
+config :central, Teiserver.Account.Guardian,
   secret_key: "yix2DcXsA9MzAI8WldmYiJ38j2GyyXf5beWGAOJHl0FKNH04n1VACYbepqutma27"
 
 import_config "prod.secret.exs"

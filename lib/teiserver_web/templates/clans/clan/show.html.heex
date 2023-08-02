@@ -82,7 +82,7 @@
             <%= if @membership.role == "Admin" do %>
               <li class="nav-item">
                 <a href="#admin_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                  <%= central_component("icon", icon: Central.Helpers.StylingHelper.icon(:admin)) %> Admin
+                  <%= central_component("icon", icon: Teiserver.Helper.StylingHelper.icon(:admin)) %> Admin
                 </a>
               </li>
             <% end %>

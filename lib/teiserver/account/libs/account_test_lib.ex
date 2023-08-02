@@ -1,4 +1,4 @@
-defmodule Central.Account.AccountTestLib do
+defmodule Teiserver.Account.AccountTestLib do
   @moduledoc false
   use CentralWeb, :library
 

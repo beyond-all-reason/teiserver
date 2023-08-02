@@ -9,8 +9,8 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Lobby
   alias Teiserver.{Account, Coordinator, Battle, Room, User, Client}
   alias Phoenix.PubSub
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  import Central.Helpers.TimexHelper, only: [date_to_str: 2]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
   alias Teiserver.Protocols.{Spring, SpringOut}
   alias Teiserver.Protocols.Spring.{AuthIn, TelemetryIn, BattleIn, LobbyPolicyIn}

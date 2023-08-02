@@ -4,7 +4,7 @@
   name: "index",
   label: "List",
   active: @active,
-  icon: Central.Helpers.StylingHelper.icon(:list),
+  icon: Teiserver.Helper.StylingHelper.icon(:list),
   bsname: bsname,
   url: Routes.ts_reports_infolog_path(@conn, :index)
 ) %>
@@ -13,7 +13,7 @@
   name: "search",
   label: "Search",
   active: @active,
-  icon: Central.Helpers.StylingHelper.icon(:search),
+  icon: Teiserver.Helper.StylingHelper.icon(:search),
   bsname: bsname,
   url: Routes.ts_reports_infolog_path(@conn, :index) <> "?search=true"
 ) %>

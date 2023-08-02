@@ -2,7 +2,7 @@ defmodule Teiserver.SpringRegressionTest do
   use Central.ServerCase, async: false
   require Logger
   alias Teiserver.Battle.Lobby
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Common.PubsubListener
 
   import Teiserver.TeiserverTestLib,

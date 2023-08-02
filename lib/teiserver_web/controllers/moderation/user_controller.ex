@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Moderation.UserController do
   plug(Bodyguard.Plug.Authorize,
     policy: Teiserver.Account.Auth,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
   )
 
   plug(:add_breadcrumb, name: 'Moderation', url: '/moderation')

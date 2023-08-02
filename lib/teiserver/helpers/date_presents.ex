@@ -1,7 +1,7 @@
-defmodule Central.Helpers.DatePresets do
+defmodule Teiserver.Helper.DatePresets do
   @moduledoc false
 
-  import Central.Helpers.TimexHelper
+  import Teiserver.Helper.TimexHelper
 
   @presets [
     "This week",

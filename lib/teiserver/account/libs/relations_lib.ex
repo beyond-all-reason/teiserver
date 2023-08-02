@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.RelationsLib do
   alias Teiserver.Communication
-  alias Central.Helpers.StylingHelper
+  alias Teiserver.Helper.StylingHelper
   alias Phoenix.PubSub
   alias Teiserver.User
   alias Teiserver.Data.Types, as: T

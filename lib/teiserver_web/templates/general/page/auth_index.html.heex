@@ -33,7 +33,7 @@
 
   <%= if allow_any?(@conn, ~w(Contributor Overwatch)) do %>
     <%= central_component("menu_card",
-      icon: Central.Helpers.StylingHelper.icon(:summary),
+      icon: Teiserver.Helper.StylingHelper.icon(:summary),
       name: "reports",
       text: "Reports",
       icon_class: "fa-duotone",

@@ -5,8 +5,8 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
 
   alias Teiserver.{Account, Battle}
   alias Teiserver.Account.PartyLib
-  import Central.Helpers.StringHelper, only: [possessive: 1]
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.StringHelper, only: [possessive: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @impl true
   def mount(_params, session, socket) do

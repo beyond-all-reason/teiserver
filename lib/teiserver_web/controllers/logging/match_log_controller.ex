@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Logging.MatchLogController do
   use CentralWeb, :controller
   alias Teiserver.Logging
-  alias Central.Helpers.{TimexHelper, DatePresets}
+  alias Teiserver.Helper.{TimexHelper, DatePresets}
   alias Teiserver.Battle.{ExportRawMatchMetricsTask}
   alias Teiserver.Logging.{MatchGraphLogsTask}
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
@@ -14,7 +14,7 @@ defmodule TeiserverWeb.Logging.MatchLogController do
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Staff.Moderator,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Reports', url: '/teiserver/reports')
   plug(:add_breadcrumb, name: 'Match metrics', url: '/teiserver/reports/match/day_metrics')

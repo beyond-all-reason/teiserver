@@ -3,13 +3,13 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
 
   alias Teiserver.{Communication}
   alias Teiserver.Communication.TextCallbackLib
-  import Central.Helpers.StringHelper, only: [convert_textarea_to_array: 1]
-  alias Central.Helpers.StylingHelper
+  import Teiserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
+  alias Teiserver.Helper.StylingHelper
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Communication.TextCallback,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "admin",

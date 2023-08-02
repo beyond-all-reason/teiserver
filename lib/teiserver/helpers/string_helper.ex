@@ -1,4 +1,4 @@
-defmodule Central.Helpers.StringHelper do
+defmodule Teiserver.Helper.StringHelper do
   @moduledoc false
 
   @spec remove_spaces(String.t()) :: String.t()

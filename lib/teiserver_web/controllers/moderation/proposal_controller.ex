@@ -4,12 +4,12 @@ defmodule TeiserverWeb.Moderation.ProposalController do
 
   alias Teiserver.{Account, Moderation}
   alias Teiserver.Moderation.{Proposal, ProposalLib}
-  import Central.Helpers.StringHelper, only: [get_hash_id: 1]
+  import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Moderation.Proposal,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "moderation",

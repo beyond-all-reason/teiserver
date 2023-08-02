@@ -5,10 +5,10 @@ defmodule TeiserverWeb.Admin.ClanController do
   alias Teiserver.Clans
   alias Teiserver.Clans.Clan
   alias Teiserver.Clans.ClanLib
-  alias Central.Helpers.StylingHelper
+  alias Teiserver.Helper.StylingHelper
 
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  import Central.Helpers.StringHelper, only: [get_hash_id: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin/clans')
@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Admin.ClanController do
   plug(Bodyguard.Plug.Authorize,
     policy: Teiserver.Staff.Moderator,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
   )
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()

@@ -59,7 +59,7 @@ moderator = allow?(@current_user, "Moderator") %>
 
         <%= if @lobby.in_progress do %>
           <h4>
-            Match in progress - <%= Central.Helpers.TimexHelper.duration_to_str_short(
+            Match in progress - <%= Teiserver.Helper.TimexHelper.duration_to_str_short(
               System.system_time(:second) - (@lobby.started_at || 1_652_282_031)
             ) %> - <%= extra %>
           </h4>

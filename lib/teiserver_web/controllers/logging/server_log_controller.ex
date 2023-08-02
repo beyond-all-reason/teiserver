@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Logging.ServerLogController do
   use CentralWeb, :controller
   alias Teiserver.Logging
-  alias Central.Helpers.TimexHelper
+  alias Teiserver.Helper.TimexHelper
   alias Teiserver.Logging.{ServerGraphDayLogsTask, GraphMinuteLogsTask}
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
     site_menu_active: "logging",
@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Logging.ServerLogController do
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Staff.Moderator,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: "Logging", url: "/logging")
   plug(:add_breadcrumb, name: "Server", url: "/logging/server")

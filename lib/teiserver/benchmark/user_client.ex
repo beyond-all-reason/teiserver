@@ -4,7 +4,7 @@ defmodule Teiserver.Benchmark.UserClient do
   noise on the server. This one though will report on it's
   ping and the like.
   """
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
   use GenServer
 

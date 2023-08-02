@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Report.ReportView do
   def view_colour(), do: :danger
 
   @spec icon() :: String.t()
-  def icon(), do: Central.Helpers.StylingHelper.icon(:report)
+  def icon(), do: Teiserver.Helper.StylingHelper.icon(:report)
 
   def mins_to_hours(nil), do: 0
 

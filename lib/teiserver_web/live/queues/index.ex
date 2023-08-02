@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   alias Teiserver.{Game, Client}
   alias Teiserver.Game.{QueueLib}
 
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @impl true
   def mount(_params, session, socket) do

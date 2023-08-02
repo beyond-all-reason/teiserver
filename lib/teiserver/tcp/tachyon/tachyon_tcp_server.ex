@@ -4,7 +4,7 @@ defmodule Teiserver.TachyonTcpServer do
   require Logger
   alias Phoenix.PubSub
   alias Teiserver.Config
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   alias Teiserver.{User, Client, Account}
   alias Teiserver.Data.Types, as: T

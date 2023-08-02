@@ -68,14 +68,14 @@
           <%= if allow?(@conn, "Moderator") do %>
             <li class="nav-item">
               <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                <%= central_component("icon", icon: Central.Helpers.StylingHelper.icon(:detail)) %> Details
+                <%= central_component("icon", icon: Teiserver.Helper.StylingHelper.icon(:detail)) %> Details
               </a>
             </li>
           <% end %>
 
           <li class="nav-item">
             <a href="#logs_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component("icon", icon: Central.Helpers.StylingHelper.icon(:list)) %> Logs (<%= Enum.count(
+              <%= central_component("icon", icon: Teiserver.Helper.StylingHelper.icon(:list)) %> Logs (<%= Enum.count(
                 @logs
               ) %>)
             </a>

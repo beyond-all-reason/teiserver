@@ -6,7 +6,7 @@ defmodule Teiserver.Moderation do
 
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
-  alias Central.Helpers.QueryHelpers
+  alias Teiserver.Helper.QueryHelpers
 
   alias Teiserver.{Account}
   import Teiserver.Logging.Helpers, only: [add_audit_log: 4]

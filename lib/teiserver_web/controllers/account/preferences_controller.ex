@@ -56,7 +56,7 @@ defmodule TeiserverWeb.Account.PreferencesController do
     tab =
       Config.get_user_config_type(user_config_params["key"])
       |> Map.get(:section)
-      |> Central.Helpers.StringHelper.remove_spaces()
+      |> Teiserver.Helper.StringHelper.remove_spaces()
 
     case Config.create_user_config(user_config_params) do
       {:ok, _user_config} ->
@@ -107,7 +107,7 @@ defmodule TeiserverWeb.Account.PreferencesController do
     tab =
       Config.get_user_config_type(user_config_params["key"])
       |> Map.get(:section)
-      |> Central.Helpers.StringHelper.remove_spaces()
+      |> Teiserver.Helper.StringHelper.remove_spaces()
 
     case Config.update_user_config(user_config, user_config_params) do
       {:ok, _user_config} ->

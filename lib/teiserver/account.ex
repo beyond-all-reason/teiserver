@@ -10,7 +10,7 @@ defmodule Teiserver.Account do
   # Mostly a wrapper around Central.Account
   alias Central.Account.User
   alias Teiserver.Account.{UserLib}
-  alias Central.Helpers.QueryHelpers
+  alias Teiserver.Helper.QueryHelpers
 
   @doc """
   Returns the list of user.

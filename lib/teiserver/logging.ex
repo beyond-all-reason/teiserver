@@ -7,7 +7,7 @@ defmodule Teiserver.Logging do
   def icon(), do: "fa-solid fa-bars"
 
   import Ecto.Query, warn: false
-  alias Central.Helpers.QueryHelpers
+  alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
 
   alias Teiserver.Logging.{ServerMinuteLog, ServerMinuteLogLib}

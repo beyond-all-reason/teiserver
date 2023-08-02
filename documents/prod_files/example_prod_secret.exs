@@ -43,7 +43,7 @@ config :central, CentralWeb.Endpoint,
   http: [:inet6, port: String.to_integer(System.get_env("PORT") || "4000")],
   secret_key_base: secret_key_base
 
-config :central, Central.Account.Guardian,
+config :central, Teiserver.Account.Guardian,
   issuer: "central",
   secret_key: "mix phx.gen.secret"
 
