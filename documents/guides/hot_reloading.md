@@ -13,7 +13,7 @@ I highly recommend you read [A guide to hot code reloading in Elixir](https://bl
 ```python
 #!/usr/bin/env python3
 # Example usage:
-# hot_reload Central.Helpers.TimexHelper Teiserver.Coordinator.ConsulCommands
+# hot_reload Teiserver.Helper.TimexHelper Teiserver.Coordinator.ConsulCommands
 
 import os, sys
 

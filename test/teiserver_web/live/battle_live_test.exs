@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Live.BattleTest do
   alias Teiserver.{Battle, TeiserverTestLib}
   import Teiserver.TeiserverTestLib, only: [_send_raw: 2, _recv_until: 1, _tachyon_send: 2]
   alias Teiserver.Battle.Lobby
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @throttle_wait 500 + 100
 

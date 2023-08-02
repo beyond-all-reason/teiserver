@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Components.PlayerListComponent do
   @moduledoc false
   use CentralWeb, :live_component
-  import Central.Account.AuthLib, only: [allow?: 2]
+  import Teiserver.Account.AuthLib, only: [allow?: 2]
 
   @impl true
   def preload(list_of_assigns) do

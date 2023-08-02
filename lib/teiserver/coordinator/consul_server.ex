@@ -7,7 +7,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   require Logger
   alias Teiserver.{Account, Coordinator, Client, User, Lobby, Battle}
   alias Teiserver.Lobby.{ChatLib}
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Config
   alias Phoenix.PubSub
   alias Teiserver.Bridge.BridgeServer

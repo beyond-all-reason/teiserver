@@ -2,7 +2,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonIn do
   require Logger
   alias Teiserver.Protocols.TachyonLib
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   alias Teiserver.Protocols.Tachyon.V1.{
     AuthIn,

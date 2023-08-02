@@ -21,7 +21,7 @@ defmodule Teiserver.Battle.BalanceLib do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Account
   alias Teiserver.Game.MatchRatingLib
-  import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
 
   # These are default values and can be overridden as part of the call to create_balance()
 

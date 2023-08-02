@@ -7,7 +7,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
   alias Teiserver.{Room, Moderation}
   alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands}
   alias Teiserver.{Config}
-  alias Central.Helpers.TimexHelper
+  alias Teiserver.Helper.TimexHelper
   alias Nostrum.Api
   require Logger
 

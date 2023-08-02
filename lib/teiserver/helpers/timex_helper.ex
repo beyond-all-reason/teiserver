@@ -1,4 +1,4 @@
-defmodule Central.Helpers.TimexHelper do
+defmodule Teiserver.Helper.TimexHelper do
   @moduledoc false
 
   alias Timex.{Timezone, Timezone.Local}

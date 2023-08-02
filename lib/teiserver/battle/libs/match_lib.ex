@@ -468,6 +468,7 @@ defmodule Teiserver.Battle.MatchLib do
   def preload(query, nil), do: query
 
   def preload(query, preloads) do
+    query = if :founder in preloads, do: _preload_founders(query), else: query
     query = if :members in preloads, do: _preload_members(query), else: query
     query = if :members_and_users in preloads, do: _preload_members_and_users(query), else: query
 
@@ -475,6 +476,13 @@ defmodule Teiserver.Battle.MatchLib do
 
     query = if :queue in preloads, do: _preload_queue(query), else: query
     query
+  end
+
+  @spec _preload_founders(Ecto.Query.t()) :: Ecto.Query.t()
+  def _preload_founders(query) do
+    from matches in query,
+      left_join: founders in assoc(matches, :founder),
+      preload: [founder: founders]
   end
 
   @spec _preload_members(Ecto.Query.t()) :: Ecto.Query.t()

@@ -1,7 +1,7 @@
 defmodule Teiserver.Chat.WordLib do
   @moduledoc false
   alias Teiserver.Config
-  alias Central.Helpers.StringHelper
+  alias Teiserver.Helper.StringHelper
   require Logger
 
   @flagged_regex ~r/(n[i1l]gg(:?[e3]r|a)|cun[t7][s5]?|\b(r[e3])?[t7]ards?\b)/iu

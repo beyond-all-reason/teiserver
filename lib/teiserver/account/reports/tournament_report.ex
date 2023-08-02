@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.TournamentReport do
   alias Teiserver.{Account}
   alias Teiserver.Game.MatchRatingLib
-  alias Central.Helpers.TimexHelper
+  alias Teiserver.Helper.TimexHelper
 
   @spec icon() :: String.t()
   def icon(), do: Teiserver.Account.RatingLib.icon()

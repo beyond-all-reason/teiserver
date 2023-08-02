@@ -1,4 +1,4 @@
-defmodule Central.Account.ErrorHandler do
+defmodule Teiserver.Account.ErrorHandler do
   @moduledoc false
   import Plug.Conn
 

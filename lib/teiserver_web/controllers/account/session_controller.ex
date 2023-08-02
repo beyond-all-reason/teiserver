@@ -3,7 +3,8 @@ defmodule TeiserverWeb.Account.SessionController do
   alias Central.Account
   alias Teiserver.Config
   alias Teiserver.Logging.LoggingPlug
-  alias Central.Account.{Guardian, User}
+  alias Teiserver.Account.Guardian
+  alias Central.Account.User
   require Logger
 
   @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
@@ -193,7 +194,7 @@ defmodule TeiserverWeb.Account.SessionController do
         |> render("forgot_password.html")
 
       true ->
-        Central.Account.Emails.password_reset(user)
+        Teiserver.Account.Emails.password_reset(user)
         |> Central.Mailer.deliver_now()
 
         conn

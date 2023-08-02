@@ -61,7 +61,7 @@ defmodule Teiserver.SpringIdServer do
 
     springids =
       Account.list_users(order_by: "Newest first", limit: 5, select: [:data])
-      |> Enum.map(fn u -> Central.Helpers.NumberHelper.int_parse(u.data["springid"]) end)
+      |> Enum.map(fn u -> Teiserver.Helper.NumberHelper.int_parse(u.data["springid"]) end)
 
     current_springid = Enum.max([0] ++ springids)
 

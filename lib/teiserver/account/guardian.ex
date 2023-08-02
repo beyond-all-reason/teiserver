@@ -1,4 +1,4 @@
-defmodule Central.Account.Guardian do
+defmodule Teiserver.Account.Guardian do
   @moduledoc false
   use Guardian, otp_app: :central
 

@@ -6,7 +6,7 @@ defmodule TeiserverWeb.TournamentLive.Index do
   alias Teiserver
   alias Teiserver.{Battle, Account, Lobby}
 
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @impl true
   def mount(_params, session, socket) do

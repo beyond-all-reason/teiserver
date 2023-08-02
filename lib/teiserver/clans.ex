@@ -4,7 +4,7 @@ defmodule Teiserver.Clans do
   """
 
   import Ecto.Query, warn: false
-  alias Central.Helpers.QueryHelpers
+  alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
 
   alias Teiserver.Clans.Clan

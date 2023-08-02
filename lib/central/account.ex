@@ -4,7 +4,7 @@ defmodule Central.Account do
   """
 
   import Ecto.Query, warn: false
-  alias Central.Helpers.QueryHelpers
+  alias Teiserver.Helper.QueryHelpers
   alias Phoenix.PubSub
   alias Teiserver.Repo
 
@@ -200,7 +200,7 @@ defmodule Central.Account do
         "email" => "#{UUID.uuid1()}@throwaway",
         "password" => UUID.uuid1()
       }
-      |> Central.Helpers.StylingHelper.random_styling()
+      |> Teiserver.Helper.StylingHelper.random_styling()
       |> Map.merge(attrs)
 
     %User{}
@@ -212,8 +212,8 @@ defmodule Central.Account do
   def merge_default_params(user_params) do
     Map.merge(
       %{
-        "icon" => "fa-solid fa-" <> Central.Helpers.StylingHelper.random_icon(),
-        "colour" => Central.Helpers.StylingHelper.random_colour()
+        "icon" => "fa-solid fa-" <> Teiserver.Helper.StylingHelper.random_icon(),
+        "colour" => Teiserver.Helper.StylingHelper.random_colour()
       },
       user_params
     )

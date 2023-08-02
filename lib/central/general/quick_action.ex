@@ -1,6 +1,6 @@
 defmodule Central.General.QuickAction do
   @moduledoc false
-  alias Central.Helpers.StylingHelper
+  alias Teiserver.Helper.StylingHelper
 
   @doc """
   Each action is a map such as the below:

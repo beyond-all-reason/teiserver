@@ -2,7 +2,7 @@ defmodule Central.AccountTest do
   use Central.DataCase
 
   alias Central.Account
-  alias Central.Account.AccountTestLib
+  alias Teiserver.Account.AccountTestLib
 
   describe "users" do
     alias Central.Account.User

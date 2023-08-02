@@ -1,4 +1,5 @@
 defmodule TeiserverWeb.Battle.MatchLive.Show do
+  @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.{Battle, Game}
   alias Teiserver.Battle.MatchLib
@@ -54,7 +55,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
     if connected?(socket) do
       match =
         Battle.get_match!(id,
-          preload: [:members_and_users]
+          preload: [:members_and_users, :founder]
         )
 
       match_name = MatchLib.make_match_name(match)
@@ -85,7 +86,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         |> Map.drop([nil])
         |> Map.filter(fn {_id, members} -> Enum.count(members) > 1 end)
         |> Map.keys()
-        |> Enum.zip(Central.Helpers.StylingHelper.bright_hex_colour_list())
+        |> Enum.zip(Teiserver.Helper.StylingHelper.bright_hex_colour_list())
         |> Enum.zip(~w(dice-one dice-two dice-three dice-four dice-five dice-six))
         |> Enum.map(fn {{party_id, colour}, idx} ->
           {party_id, {colour, idx}}

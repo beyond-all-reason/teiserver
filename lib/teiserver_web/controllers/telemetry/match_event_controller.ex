@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Auth.Server,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
   plug(:add_breadcrumb, name: 'Match events', url: '/telemetry/match_events/summary')

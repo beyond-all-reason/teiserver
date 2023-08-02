@@ -7,7 +7,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Lobby.{ChatLib}
   alias Teiserver.Chat.WordLib
   alias Teiserver.Data.Types, as: T
-  import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
 
   @doc """
     Command has structure:

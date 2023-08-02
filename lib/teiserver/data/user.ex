@@ -10,9 +10,9 @@ defmodule Teiserver.User do
   alias Teiserver.Chat.WordLib
   alias Teiserver.SpringIdServer
   alias Argon2
-  alias Central.Account.Guardian
+  alias Teiserver.Account.Guardian
   alias Teiserver.Data.Types, as: T
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   require Logger
   alias Phoenix.PubSub
@@ -518,7 +518,7 @@ defmodule Teiserver.User do
   def request_password_reset(user) do
     db_user = Account.get_user!(user.id)
 
-    Central.Account.Emails.password_reset(db_user)
+    Teiserver.Account.Emails.password_reset(db_user)
     |> Central.Mailer.deliver_now()
   end
 

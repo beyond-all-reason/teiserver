@@ -15,7 +15,7 @@
       name: "list",
       label: "List",
       active: @active,
-      icon: Central.Helpers.StylingHelper.icon(:list),
+      icon: Teiserver.Helper.StylingHelper.icon(:list),
       bsname: bsname,
       url: ~p"/teiserver/admin/user"
     ) %>
@@ -24,7 +24,7 @@
       name: "advanced_search",
       label: "Advanced search",
       active: @active,
-      icon: Central.Helpers.StylingHelper.icon(:search),
+      icon: Teiserver.Helper.StylingHelper.icon(:search),
       bsname: bsname,
       url: ~p"/teiserver/admin/user" <> "?search=true"
     ) %>
@@ -45,7 +45,7 @@
         name: "show",
         label: "Show",
         active: @active,
-        icon: Central.Helpers.StylingHelper.icon(:detail),
+        icon: Teiserver.Helper.StylingHelper.icon(:detail),
         bsname: bsname,
         url: "#"
       ) %>
@@ -56,7 +56,7 @@
         name: "edit",
         label: "Edit",
         active: @active,
-        icon: Central.Helpers.StylingHelper.icon(:edit),
+        icon: Teiserver.Helper.StylingHelper.icon(:edit),
         bsname: bsname,
         url: "#"
       ) %>

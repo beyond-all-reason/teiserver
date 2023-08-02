@@ -47,7 +47,7 @@
               <td>
                 <%= if lobby.in_progress do %>
                   <i class="fa-fw fa-solid fa-play"></i>
-                  &nbsp; <%= Central.Helpers.TimexHelper.duration_to_str_short(
+                  &nbsp; <%= Teiserver.Helper.TimexHelper.duration_to_str_short(
                     System.system_time(:second) - (lobby.started_at || 1_652_282_031)
                   ) %>
                 <% end %>

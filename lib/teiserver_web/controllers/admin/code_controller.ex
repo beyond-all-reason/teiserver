@@ -7,7 +7,7 @@ defmodule TeiserverWeb.Admin.CodeController do
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Account.Code,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "central_admin",

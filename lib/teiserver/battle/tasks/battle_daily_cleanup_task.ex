@@ -3,7 +3,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
 
   alias Teiserver.Repo
   alias Teiserver.{Battle}
-  alias Central.Helpers.StringHelper
+  alias Teiserver.Helper.StringHelper
   require Logger
 
   @strip_data_days 35

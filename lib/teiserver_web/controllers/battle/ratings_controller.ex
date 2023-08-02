@@ -7,7 +7,7 @@ defmodule TeiserverWeb.Battle.RatingsController do
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Battle.Match,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "leaderboard",

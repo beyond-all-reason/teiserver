@@ -1,4 +1,4 @@
-defmodule Central.Account.DefaultsPlug do
+defmodule Teiserver.Account.DefaultsPlug do
   @moduledoc false
   import Plug.Conn
 

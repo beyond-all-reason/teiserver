@@ -1,7 +1,7 @@
-defmodule Central.Helpers.SchemaHelper do
+defmodule Teiserver.Helper.SchemaHelper do
   @moduledoc false
 
-  # import Central.Helpers.NumberHelper, only: [dec_parse: 1]
+  # import Teiserver.Helper.NumberHelper, only: [dec_parse: 1]
   import Ecto.Changeset, only: [get_field: 2]
 
   defp make_date(d) do

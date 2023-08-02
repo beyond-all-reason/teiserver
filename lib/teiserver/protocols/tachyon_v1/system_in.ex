@@ -1,7 +1,7 @@
 defmodule Teiserver.Protocols.Tachyon.V1.SystemIn do
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
   alias Teiserver.{Account, Battle}
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
   def do_handle("ping", cmd, state) do

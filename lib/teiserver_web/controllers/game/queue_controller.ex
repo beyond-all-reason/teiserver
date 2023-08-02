@@ -5,12 +5,12 @@ defmodule TeiserverWeb.Game.QueueController do
   alias Teiserver.Game.Queue
   alias Teiserver.Game.QueueLib
   alias Teiserver.Data.Matchmaking
-  alias Central.Helpers.StylingHelper
+  alias Teiserver.Helper.StylingHelper
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Game.Queue,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "admin",

@@ -4,7 +4,7 @@ defmodule Teiserver.Battle do
   """
 
   import Ecto.Query, warn: false
-  alias Central.Helpers.QueryHelpers
+  alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
   alias Teiserver.{Account, Telemetry, Coordinator}
   alias Teiserver.Lobby

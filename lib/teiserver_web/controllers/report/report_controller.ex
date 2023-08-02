@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Report.ReportController do
   use CentralWeb, :controller
-  import Central.Account.AuthLib, only: [allow?: 2]
+  import Teiserver.Account.AuthLib, only: [allow?: 2]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Report.ReportController do
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Staff,
     action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Reports', url: '/teiserver/reports')
 

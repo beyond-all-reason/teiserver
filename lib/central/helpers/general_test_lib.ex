@@ -9,7 +9,7 @@ defmodule Central.Helpers.GeneralTestLib do
 
   @endpoint CentralWeb.Endpoint
 
-  alias Central.Account.AuthLib
+  alias Teiserver.Account.AuthLib
 
   alias Central.Account
   alias Central.Account.User
@@ -18,7 +18,7 @@ defmodule Central.Helpers.GeneralTestLib do
 
   alias CentralWeb.UserSocket
 
-  alias Central.Account.Guardian
+  alias Teiserver.Account.Guardian
 
   # def make_combos(data), do: CombinatorLib.make_combos(data)
 

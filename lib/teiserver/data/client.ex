@@ -12,7 +12,7 @@ defmodule Teiserver.Client do
   alias Teiserver.{Room, User, Account, Telemetry, Clans, Coordinator}
   alias Teiserver.Lobby
   alias Teiserver.Account.ClientLib
-  # alias Central.Helpers.TimexHelper
+  # alias Teiserver.Helper.TimexHelper
   require Logger
 
   alias Teiserver.Data.Types, as: T

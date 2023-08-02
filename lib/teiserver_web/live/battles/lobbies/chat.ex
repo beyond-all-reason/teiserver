@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
   alias Teiserver.{Battle, User, Chat, Lobby, Client}
   alias Teiserver.Chat.LobbyMessage
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @message_count 25
 

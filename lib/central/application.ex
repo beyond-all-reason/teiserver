@@ -229,7 +229,7 @@ defmodule Central.Application do
       [:oban, :circuit, :trip]
     ]
 
-    :telemetry.attach_many("oban-logger", events, &Central.ObanLogger.handle_event/4, [])
+    :telemetry.attach_many("oban-logger", events, &Teiserver.Helper.ObanLogger.handle_event/4, [])
 
     ~w(General Account Admin)
     |> Enum.each(&env_startup/1)

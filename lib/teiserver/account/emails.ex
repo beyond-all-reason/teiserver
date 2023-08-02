@@ -1,7 +1,7 @@
-defmodule Central.Account.Emails do
+defmodule Teiserver.Account.Emails do
   @moduledoc false
   alias Bamboo.Email
-  alias Central.Helpers.TimexHelper
+  alias Teiserver.Helper.TimexHelper
 
   def password_reset(user, code \\ nil) do
     # We need this to enable recreating the email if we know it

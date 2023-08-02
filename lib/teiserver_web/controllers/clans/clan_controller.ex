@@ -5,8 +5,8 @@ defmodule TeiserverWeb.Clans.ClanController do
   alias Teiserver.Account
   alias Teiserver.Clans
   alias Teiserver.Clans.ClanLib
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  import Central.Helpers.StringHelper, only: [get_hash_id: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug(:add_breadcrumb, name: 'Clans', url: '/teiserver/clans')
 
