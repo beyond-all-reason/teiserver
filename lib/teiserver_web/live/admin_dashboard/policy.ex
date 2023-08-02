@@ -10,7 +10,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
 
   @impl true
   def mount(%{"id" => id}, session, socket) do
-    :ok = PubSub.subscribe(Central.PubSub, "lobby_policy_updates:#{id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "lobby_policy_updates:#{id}")
 
     socket =
       socket

@@ -114,11 +114,11 @@ defmodule TeiserverWeb.TournamentLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_index_updates")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_lobby_index_updates")
 
     :ok =
       PubSub.subscribe(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_client_messages:#{socket.assigns[:current_user].id}"
       )
 

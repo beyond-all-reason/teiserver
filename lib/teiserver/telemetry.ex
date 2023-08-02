@@ -883,7 +883,7 @@ defmodule Teiserver.Telemetry do
       {:ok, _event} ->
         if Enum.member?(@broadcast_property_types, property_name) do
           PubSub.broadcast(
-            Central.PubSub,
+            Teiserver.PubSub,
             "teiserver_telemetry_client_properties",
             %{
               channel: "teiserver_telemetry_client_properties",

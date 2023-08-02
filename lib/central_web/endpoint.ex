@@ -1,4 +1,4 @@
-defmodule CentralWeb.Endpoint do
+defmodule TeiserverWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :central
 
   @session_options [
@@ -11,7 +11,7 @@ defmodule CentralWeb.Endpoint do
 
   socket("/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]])
 
-  socket("/socket", CentralWeb.UserSocket,
+  socket("/socket", TeiserverWeb.UserSocket,
     websocket: true,
     longpoll: false
   )
@@ -66,5 +66,5 @@ defmodule CentralWeb.Endpoint do
   # Set :encryption_salt if you would also like to encrypt it.
   plug(Plug.Session, @session_options)
 
-  plug(CentralWeb.Router)
+  plug(TeiserverWeb.Router)
 end

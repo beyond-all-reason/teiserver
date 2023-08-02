@@ -23,7 +23,7 @@ defmodule Teiserver.Account.Emails do
         code
       end
 
-    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/password_reset/#{code.value}"
 
     html_body = """

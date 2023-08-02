@@ -64,7 +64,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     |> Enum.each(fn room_name ->
       Room.get_or_make_room(room_name, user.id)
       Room.add_user_to_room(user.id, room_name)
-      :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
+      :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
     end)
 
     # Now join the clan channels
@@ -73,12 +73,12 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       room_name = Room.clan_room_name(clan.tag)
       Room.get_or_make_room(room_name, user.id, clan.id)
       Room.add_user_to_room(user.id, room_name)
-      :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
+      :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
     end)
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
-    :ok = PubSub.subscribe(Central.PubSub, "client_inout")
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "client_inout")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "legacy_user_updates:#{user.id}")
 
     {:noreply, state}
   end

@@ -204,7 +204,7 @@ defmodule Teiserver.Communication do
       |> Repo.insert!()
     end)
     |> Enum.map(fn data ->
-      CentralWeb.Endpoint.broadcast(
+      TeiserverWeb.Endpoint.broadcast(
         "communication_notification:#{data.user_id}",
         "new communication notifictation",
         %{

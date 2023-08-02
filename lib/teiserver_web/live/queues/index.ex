@@ -19,7 +19,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
 
     client = Client.get_client_by_id(socket.assigns[:current_user].id)
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_all_queues")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_all_queues")
 
     db_queues =
       Game.list_queues()
@@ -270,7 +270,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   defp apply_action(socket, :index, _params) do
     :ok =
       PubSub.subscribe(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_client_messages:#{socket.assigns[:current_user].id}"
       )
 

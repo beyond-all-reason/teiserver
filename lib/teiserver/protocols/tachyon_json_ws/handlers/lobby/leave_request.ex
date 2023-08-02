@@ -20,8 +20,8 @@ defmodule Teiserver.Tachyon.Handlers.Lobby.LeaveRequest do
     # Remove them from all the battles anyways, just in case
     Lobby.remove_user_from_any_lobby(conn.userid)
     |> Enum.each(fn lobby_id ->
-      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
     end)
 
     response = LeaveResponse.generate(:ok)

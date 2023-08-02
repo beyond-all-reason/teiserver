@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
 
     client = Account.get_client_by_id(socket.assigns.user_id)
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{socket.assigns.user_id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{socket.assigns.user_id}")
 
     admin_mode =
       cond do
@@ -58,7 +58,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
 
   @impl true
   def handle_info(%{channel: "teiserver_party:" <> party_id, event: :closed}, socket) do
-    :ok = PubSub.unsubscribe(Central.PubSub, "teiserver_party:#{party_id}")
+    :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
 
     new_parties =
       socket.assigns.parties
@@ -152,7 +152,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
 
     parties
     |> Enum.each(fn party ->
-      :ok = PubSub.subscribe(Central.PubSub, "teiserver_party:#{party.id}")
+      :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party.id}")
     end)
 
     socket
@@ -175,7 +175,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
 
     parties
     |> Enum.each(fn party ->
-      :ok = PubSub.subscribe(Central.PubSub, "teiserver_party:#{party.id}")
+      :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party.id}")
     end)
 
     socket

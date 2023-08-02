@@ -144,7 +144,7 @@ defmodule Teiserver.Game.QueueMatchServer do
     user_ids
     |> Enum.map(fn userid ->
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_client_messages:#{userid}",
         %{
           channel: "teiserver_client_messages:#{userid}",
@@ -177,7 +177,7 @@ defmodule Teiserver.Game.QueueMatchServer do
     |> List.flatten()
     |> Enum.each(fn userid ->
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_client_messages:#{userid}",
         %{
           channel: "teiserver_client_messages:#{userid}",
@@ -198,7 +198,7 @@ defmodule Teiserver.Game.QueueMatchServer do
       Account.remove_client_from_all_queues(userid)
 
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_client_messages:#{userid}",
         %{
           channel: "teiserver_client_messages:#{userid}",
@@ -212,7 +212,7 @@ defmodule Teiserver.Game.QueueMatchServer do
 
     # Now message the QueueWaitServers to let them know what's up
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_global_matchmaking",
       %{
         channel: "teiserver_global_matchmaking",
@@ -229,7 +229,7 @@ defmodule Teiserver.Game.QueueMatchServer do
       end)
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_global_matchmaking",
       %{
         channel: "teiserver_global_matchmaking",
@@ -296,7 +296,7 @@ defmodule Teiserver.Game.QueueMatchServer do
       |> Enum.map(fn group -> group.id end)
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_global_matchmaking",
       %{
         channel: "teiserver_global_matchmaking",
@@ -429,7 +429,7 @@ defmodule Teiserver.Game.QueueMatchServer do
         all_clients
         |> Enum.each(fn %{userid: userid} ->
           PubSub.broadcast(
-            Central.PubSub,
+            Teiserver.PubSub,
             "teiserver_client_messages:#{userid}",
             %{
               channel: "teiserver_client_messages:#{userid}",
@@ -442,7 +442,7 @@ defmodule Teiserver.Game.QueueMatchServer do
         end)
 
         PubSub.broadcast(
-          Central.PubSub,
+          Teiserver.PubSub,
           "teiserver_queue:#{state.queue_id}",
           %{
             channel: "teiserver_queue:#{state.queue_id}",
@@ -506,7 +506,7 @@ defmodule Teiserver.Game.QueueMatchServer do
     )
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_queue:#{opts.queue_id}",
       %{
         channel: "teiserver_queue:#{opts.queue_id}",

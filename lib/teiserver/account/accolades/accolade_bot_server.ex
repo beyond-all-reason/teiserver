@@ -57,15 +57,15 @@ defmodule Teiserver.Account.AccoladeBotServer do
     |> Enum.each(fn room_name ->
       Room.get_or_make_room(room_name, user.id)
       Room.add_user_to_room(user.id, room_name)
-      :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
+      :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
     end)
 
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "legacy_user_updates:#{user.id}")
 
     # We only subscribe to this if we're not in test, if we are it'll generate a bunch of SQL errors
     # without actually breaking anything
     if not Application.get_env(:central, Teiserver)[:test_mode] do
-      :ok = PubSub.subscribe(Central.PubSub, "global_match_updates")
+      :ok = PubSub.subscribe(Teiserver.PubSub, "global_match_updates")
     end
 
     {:noreply, state}

@@ -1,4 +1,4 @@
-defmodule CentralWeb.Presence do
+defmodule TeiserverWeb.Presence do
   @moduledoc """
   Provides presence tracking to channels and processes.
 
@@ -70,5 +70,5 @@ defmodule CentralWeb.Presence do
   """
   use Phoenix.Presence,
     otp_app: :central,
-    pubsub_server: Central.PubSub
+    pubsub_server: Teiserver.PubSub
 end

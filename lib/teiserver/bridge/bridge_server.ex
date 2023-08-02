@@ -292,8 +292,8 @@ defmodule Teiserver.Bridge.BridgeServer do
       client: client
     }
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{user.id}")
 
     build_local_caches(state)
   end
@@ -346,8 +346,8 @@ defmodule Teiserver.Bridge.BridgeServer do
       Room.get_or_make_room(room_name, state.user.id)
       Room.add_user_to_room(state.user.id, room_name)
 
-      :ok = PubSub.unsubscribe(Central.PubSub, "room:#{room_name}")
-      :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
+      :ok = PubSub.unsubscribe(Teiserver.PubSub, "room:#{room_name}")
+      :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
     end)
 
     Central.store_put(:application_metadata_cache, :discord_room_lookup, room_lookup)

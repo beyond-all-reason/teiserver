@@ -1,4 +1,4 @@
-defmodule CentralWeb.Router do
+defmodule TeiserverWeb.Router do
   use CentralWeb, :router
 
   pipeline :dev_auth do
@@ -96,7 +96,7 @@ defmodule CentralWeb.Router do
     plug(Guardian.Plug.EnsureAuthenticated)
   end
 
-  # Phoenix.Router.route_info(CentralWeb.Router, "GET", "/", "myhost")
+  # Phoenix.Router.route_info(TeiserverWeb.Router, "GET", "/", "myhost")
 
   scope "/", TeiserverWeb.General do
     pipe_through([:live_browser, :nomenu_live_layout])

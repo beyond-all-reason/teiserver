@@ -148,7 +148,7 @@ defmodule TeiserverWeb.Admin.ClanController do
 
         Account.update_user(user, %{"clan_id" => clan_id})
 
-        CentralWeb.Endpoint.broadcast(
+        TeiserverWeb.Endpoint.broadcast(
           "recache:#{user_id}",
           "recache",
           %{}
@@ -176,7 +176,7 @@ defmodule TeiserverWeb.Admin.ClanController do
     if user.clan_id == clan_id do
       Account.update_user(user, %{"clan_id" => nil})
 
-      CentralWeb.Endpoint.broadcast(
+      TeiserverWeb.Endpoint.broadcast(
         "recache:#{user_id}",
         "recache",
         %{}

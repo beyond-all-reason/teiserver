@@ -606,8 +606,8 @@ defmodule Teiserver.Protocols.SpringOut do
 
   @spec do_leave_battle(map(), T.lobby_id()) :: map()
   def do_leave_battle(state, lobby_id) do
-    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
     state
   end
 
@@ -617,11 +617,11 @@ defmodule Teiserver.Protocols.SpringOut do
 
     if lobby do
       Lobby.add_user_to_battle(state.userid, lobby.id, script_password)
-      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby.id}")
-      PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby.id}")
+      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby.id}")
+      PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby.id}")
 
-      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby.id}")
-      PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby.id}")
+      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby.id}")
+      PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby.id}")
 
       reply(:join_battle_success, lobby, nil, state)
       reply(:add_user_to_battle, {state.userid, lobby.id, script_password}, nil, state)
@@ -733,18 +733,18 @@ defmodule Teiserver.Protocols.SpringOut do
 
     send(self(), {:action, {:login_end, nil}})
 
-    :ok = PubSub.subscribe(Central.PubSub, "client_inout")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "client_inout")
 
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "legacy_all_client_updates")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{user.id}")
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_user_updates")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_global_user_updates")
 
-    PubSub.unsubscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
-    PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "legacy_user_updates:#{user.id}")
+    PubSub.subscribe(Teiserver.PubSub, "legacy_user_updates:#{user.id}")
 
-    PubSub.unsubscribe(Central.PubSub, "teiserver_global_lobby_updates")
-    PubSub.subscribe(Central.PubSub, "teiserver_global_lobby_updates")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_global_lobby_updates")
+    PubSub.subscribe(Teiserver.PubSub, "teiserver_global_lobby_updates")
 
     Logger.metadata(request_id: "SpringTcpServer##{user.id}")
 
@@ -764,8 +764,8 @@ defmodule Teiserver.Protocols.SpringOut do
     room = Room.get_or_make_room(room_name, state.userid)
     Room.add_user_to_room(state.userid, room_name)
 
-    PubSub.unsubscribe(Central.PubSub, "room:#{room_name}")
-    :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
+    PubSub.unsubscribe(Teiserver.PubSub, "room:#{room_name}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
 
     reply(:join_success, room_name, nil, state)
     reply(:add_user_to_room, {state.userid, room_name}, nil, state)

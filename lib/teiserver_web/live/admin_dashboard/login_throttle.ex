@@ -9,7 +9,7 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
 
   @impl true
   def mount(_params, session, socket) do
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_login_throttle")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_login_throttle")
 
     socket =
       socket
