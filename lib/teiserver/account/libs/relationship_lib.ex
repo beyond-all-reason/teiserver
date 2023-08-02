@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.RelationshipLib do
   @moduledoc false
   use CentralWeb, :library
-  alias Central.Helpers.QueryHelpers
+  alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Account.Relationship
 
   # Queries
