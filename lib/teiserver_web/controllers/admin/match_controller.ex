@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Admin.MatchController do
 
   alias Teiserver.{Battle, Game, Account}
   alias Teiserver.Battle.{MatchLib, BalanceLib}
-  import Central.Helpers.StringHelper, only: [get_hash_id: 1]
+  import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
   require Logger
 
   plug Bodyguard.Plug.Authorize,
@@ -102,7 +102,7 @@ defmodule TeiserverWeb.Admin.MatchController do
       |> Map.drop([nil])
       |> Map.filter(fn {_id, members} -> Enum.count(members) > 1 end)
       |> Map.keys()
-      |> Enum.zip(Central.Helpers.StylingHelper.bright_hex_colour_list())
+      |> Enum.zip(Teiserver.Helper.StylingHelper.bright_hex_colour_list())
       |> Map.new()
 
     # Now for balance related stuff

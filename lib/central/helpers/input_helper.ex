@@ -4,7 +4,7 @@ defmodule Central.Helpers.InputHelper do
   use Phoenix.HTML
   alias Phoenix.HTML.Form
 
-  alias Central.Helpers.TimexHelper
+  alias Teiserver.Helper.TimexHelper
 
   @human_time_info {:safe,
                     [

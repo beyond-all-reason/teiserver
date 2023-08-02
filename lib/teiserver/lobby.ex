@@ -5,7 +5,7 @@ defmodule Teiserver.Lobby do
 
   alias Phoenix.PubSub
   require Logger
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Teiserver.{Account, User, Client, Battle, Coordinator, LobbyIdServer, Telemetry}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby.{ChatLib, LobbyLib}

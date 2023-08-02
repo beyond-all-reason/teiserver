@@ -1,5 +1,5 @@
 defmodule Teiserver.Game.MappingReport do
-  alias Central.Helpers.DatePresets
+  alias Teiserver.Helper.DatePresets
   alias Teiserver.{Battle}
 
   @spec icon() :: String.t()

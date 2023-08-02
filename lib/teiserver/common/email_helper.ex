@@ -3,7 +3,7 @@ defmodule Teiserver.EmailHelper do
   alias Central.{Mailer}
   alias Teiserver.Config
   alias Bamboo.Email
-  alias Central.Helpers.TimexHelper
+  alias Teiserver.Helper.TimexHelper
   require Logger
 
   def new_user(user) do

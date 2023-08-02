@@ -19,7 +19,7 @@ defmodule Central.Admin.ToolLib do
       value < 100 -> :info
       true -> :success
     end
-    |> Central.Helpers.StylingHelper.colours()
+    |> Teiserver.Helper.StylingHelper.colours()
   end
 
   @spec get_oban_jobs() :: list()

@@ -60,15 +60,15 @@ defmodule CentralWeb do
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
 
-      import Central.Helpers.StringHelper
-      alias Central.Helpers.StylingHelper
-      import Central.Helpers.StylingHelper, only: [colours: 1, colours: 2]
+      import Teiserver.Helper.StringHelper
+      alias Teiserver.Helper.StylingHelper
+      import Teiserver.Helper.StylingHelper, only: [colours: 1, colours: 2]
 
-      alias Central.Helpers.ColourHelper
-      import Central.Helpers.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
+      alias Teiserver.Helper.ColourHelper
+      import Teiserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
       import Central.Helpers.InputHelper
       import Central.Helpers.ComponentHelper
-      import Central.Helpers.TimexHelper
+      import Teiserver.Helper.TimexHelper
 
       import Teiserver.Config, only: [get_user_config_cache: 2, get_site_config_cache: 1]
 
@@ -78,7 +78,7 @@ defmodule CentralWeb do
 
       import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
 
-      import Central.Helpers.NumberHelper,
+      import Teiserver.Helper.NumberHelper,
         only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
 
       import CentralWeb.CoreComponents
@@ -121,12 +121,12 @@ defmodule CentralWeb do
       use Breadcrumble
       alias Central.Account.AuthPlug
       import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2, mount_require_all: 2, mount_require_any: 2]
-      import Central.Helpers.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
-      import Central.Helpers.NumberHelper,
+      import Teiserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
+      import Teiserver.Helper.NumberHelper,
         only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
       alias Teiserver.Communication.NotificationPlug
-      import Central.Helpers.TimexHelper
-      alias Central.Helpers.StylingHelper
+      import Teiserver.Helper.TimexHelper
+      alias Teiserver.Helper.StylingHelper
 
       defguard is_connected?(socket) when socket.transport_pid != nil
       unquote(verified_routes())
@@ -158,7 +158,7 @@ defmodule CentralWeb do
       alias Phoenix.LiveView.JS
       import CentralWeb.Gettext
 
-      alias Central.Helpers.StylingHelper
+      alias Teiserver.Helper.StylingHelper
       import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
 
       unquote(verified_routes())
@@ -171,9 +171,9 @@ defmodule CentralWeb do
       import Ecto.Query, warn: false
       alias Ecto.Multi
 
-      import Central.Helpers.QueryHelpers
+      import Teiserver.Helper.QueryHelpers
       import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
-      alias Central.Helpers.StylingHelper
+      alias Teiserver.Helper.StylingHelper
     end
   end
 
@@ -183,11 +183,10 @@ defmodule CentralWeb do
       import Ecto.Query, warn: false
       alias Ecto.Multi
 
-      import Central.Helpers.QueryHelpers
-      import Central.Helpers.ReportHelper
-      alias Central.Helpers.DatePresets
-      import Central.Helpers.TimexHelper, only: [date_to_str: 2]
-      import Central.Helpers.NumberHelper, only: [int_parse: 1]
+      import Teiserver.Helper.QueryHelpers
+      alias Teiserver.Helper.DatePresets
+      import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
+      import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
     end
   end
 
@@ -206,7 +205,7 @@ defmodule CentralWeb do
       use Ecto.Schema
       import Ecto.Changeset
       import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
-      import Central.Helpers.SchemaHelper
+      import Teiserver.Helper.SchemaHelper
     end
   end
 

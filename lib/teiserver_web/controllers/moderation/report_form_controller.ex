@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
 
   alias Teiserver.{Account, Battle, Moderation}
   alias Moderation.ReportLib
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
   plug(AssignPlug,

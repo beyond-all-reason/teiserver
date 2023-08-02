@@ -1,7 +1,7 @@
 defmodule Teiserver.Moderation.Action do
   @moduledoc false
   use CentralWeb, :schema
-  alias Central.Helpers.TimexHelper
+  alias Teiserver.Helper.TimexHelper
 
   schema "moderation_actions" do
     belongs_to :target, Central.Account.User

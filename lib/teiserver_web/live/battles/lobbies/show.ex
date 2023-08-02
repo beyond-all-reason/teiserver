@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.{Account, Battle, Coordinator, Lobby, User}
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @extra_menu_content """
     &nbsp;&nbsp;&nbsp;
@@ -126,7 +126,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> Map.drop([nil])
       |> Map.filter(fn {_id, members} -> Enum.count(members) > 1 end)
       |> Map.keys()
-      |> Enum.zip(Central.Helpers.StylingHelper.bright_hex_colour_list())
+      |> Enum.zip(Teiserver.Helper.StylingHelper.bright_hex_colour_list())
       |> Map.new()
 
     stats =

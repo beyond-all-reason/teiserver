@@ -46,7 +46,7 @@ defmodule TeiserverWeb.Admin.SiteConfigController do
     tab =
       Config.get_site_config_type(key)
       |> Map.get(:section)
-      |> Central.Helpers.StringHelper.remove_spaces()
+      |> Teiserver.Helper.StringHelper.remove_spaces()
 
     add_audit_log(conn, "Site config:Update value", %{key: key, value: value})
 

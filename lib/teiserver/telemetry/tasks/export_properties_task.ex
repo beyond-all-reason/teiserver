@@ -1,9 +1,9 @@
 defmodule Teiserver.Telemetry.ExportPropertiesTask do
-  alias Central.Helpers.{TimexHelper, DatePresets}
+  alias Teiserver.Helper.{TimexHelper, DatePresets}
   alias Teiserver.Telemetry.{ClientProperty, UnauthProperty}
   alias Teiserver.Repo
   import Ecto.Query, warn: false
-  import Central.Helpers.QueryHelpers
+  import Teiserver.Helper.QueryHelpers
 
   def perform(params) do
     do_query(params)

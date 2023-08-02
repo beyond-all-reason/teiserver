@@ -1,5 +1,5 @@
 defmodule Teiserver.Account.UserCache do
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Teiserver.{Account, User}
   alias Teiserver.Data.Types, as: T
   alias Central.Account.Guardian

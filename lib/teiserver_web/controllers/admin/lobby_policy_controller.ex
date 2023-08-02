@@ -3,8 +3,8 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
 
   alias Teiserver.{Game}
   alias Teiserver.Game.LobbyPolicyLib
-  import Central.Helpers.StringHelper, only: [convert_textarea_to_array: 1]
-  alias Central.Helpers.StylingHelper
+  import Teiserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
+  alias Teiserver.Helper.StylingHelper
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Game.LobbyPolicy,

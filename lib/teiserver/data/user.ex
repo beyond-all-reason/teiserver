@@ -12,7 +12,7 @@ defmodule Teiserver.User do
   alias Argon2
   alias Central.Account.Guardian
   alias Teiserver.Data.Types, as: T
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   require Logger
   alias Phoenix.PubSub

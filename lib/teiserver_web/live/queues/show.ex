@@ -7,7 +7,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
   alias Teiserver.Account
   alias Teiserver.Data.Matchmaking
   alias Teiserver.Game.QueueLib
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @extra_menu_content """
   &nbsp;&nbsp;&nbsp;

@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Admin.AchievementController do
 
   alias Teiserver.Game
   alias Teiserver.Game.{AchievementType, AchievementTypeLib}
-  alias Central.Helpers.StylingHelper
+  alias Teiserver.Helper.StylingHelper
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Staff.Moderator,

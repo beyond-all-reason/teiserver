@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Logging.ServerLogController do
   use CentralWeb, :controller
   alias Teiserver.Logging
-  alias Central.Helpers.TimexHelper
+  alias Teiserver.Helper.TimexHelper
   alias Teiserver.Logging.{ServerGraphDayLogsTask, GraphMinuteLogsTask}
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
     site_menu_active: "logging",

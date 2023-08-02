@@ -4,9 +4,9 @@ defmodule TeiserverWeb.Logging.AggregateViewLogController do
   alias Teiserver.Logging
   alias Teiserver.Logging.AggregateViewLogLib
   alias Teiserver.Logging.AggregateViewLogsTask
-  alias Central.Helpers.TimexHelper
+  alias Teiserver.Helper.TimexHelper
 
-  alias Central.Helpers.TimexHelper
+  alias Teiserver.Helper.TimexHelper
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Logging.AggregateViewLog,

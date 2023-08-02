@@ -4,7 +4,7 @@ defmodule TeiserverWeb.ClientLive.Show do
   require Logger
 
   alias Teiserver.{Account, Client, User, Battle}
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Account.UserLib
 
   @extra_menu_content """

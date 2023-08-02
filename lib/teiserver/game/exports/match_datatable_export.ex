@@ -15,9 +15,9 @@ defmodule Teiserver.Game.MatchDataTableExport do
     "start_date" => ""
   })
   """
-  alias Central.Helpers.DatePresets
+  alias Teiserver.Helper.DatePresets
   alias Teiserver.{Battle}
-  alias Central.Helpers.TimexHelper
+  alias Teiserver.Helper.TimexHelper
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-table"

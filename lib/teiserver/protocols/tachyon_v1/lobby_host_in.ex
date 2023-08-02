@@ -2,7 +2,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyHostIn do
   alias Teiserver.Lobby
   alias Teiserver.{Coordinator}
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Data.Types, as: T
 
   @spec do_handle(String.t(), Map.t(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()

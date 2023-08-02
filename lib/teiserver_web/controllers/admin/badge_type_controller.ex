@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
   alias Teiserver.Account
   alias Teiserver.Account.BadgeType
   alias Teiserver.Account.BadgeTypeLib
-  alias Central.Helpers.StylingHelper
+  alias Teiserver.Helper.StylingHelper
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Account.BadgeType,

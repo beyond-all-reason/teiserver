@@ -1,8 +1,8 @@
 defmodule Teiserver.Account.GrowthReport do
   @moduledoc false
   alias Teiserver.{Logging}
-  alias Central.Helpers.{TimexHelper}
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  alias Teiserver.Helper.TimexHelper
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Logging.ServerGraphDayLogsTask
   require Logger
 

@@ -1,6 +1,6 @@
 defmodule Central.Helpers.DatePresetTest do
   use Central.DataCase, async: true
-  alias Central.Helpers.DatePresets
+  alias Teiserver.Helper.DatePresets
 
   test "test basic presets" do
     DatePresets.presets()

@@ -1,7 +1,7 @@
 defmodule Teiserver.Telemetry.ClientEventTypeLib do
   @moduledoc false
   use CentralWeb, :library
-  alias Central.Helpers.QueryHelpers
+  alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Telemetry.ClientEventType
 
   # Helper function

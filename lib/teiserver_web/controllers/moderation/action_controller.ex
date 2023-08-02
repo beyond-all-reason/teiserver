@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
   alias Teiserver.{Account, Moderation}
   alias Teiserver.Moderation.{Action, ActionLib, ReportLib}
   import Teiserver.Logging.Helpers, only: [add_audit_log: 3]
-  import Central.Helpers.StringHelper, only: [get_hash_id: 1]
+  import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Moderation.Action,

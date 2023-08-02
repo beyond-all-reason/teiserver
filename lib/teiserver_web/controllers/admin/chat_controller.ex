@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Admin.ChatController do
   use CentralWeb, :controller
 
   alias Teiserver.{Coordinator, Chat}
-  import Central.Helpers.StringHelper, only: [get_hash_id: 1]
+  import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Chat.LobbyMessage,

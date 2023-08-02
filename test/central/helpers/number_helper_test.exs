@@ -1,7 +1,7 @@
 defmodule Central.General.NumberHelperTest do
   use Central.DataCase, async: true
 
-  alias Central.Helpers.NumberHelper
+  alias Teiserver.Helper.NumberHelper
   alias Decimal
 
   test "int_parse" do

@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Report.InfologController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",

@@ -6,7 +6,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   use Mix.Task
 
   alias Teiserver.{Account, Logging, Battle, Moderation}
-  alias Central.Helpers.StylingHelper
+  alias Teiserver.Helper.StylingHelper
   require Logger
 
   @settings %{

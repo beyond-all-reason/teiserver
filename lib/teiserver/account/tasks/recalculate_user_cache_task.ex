@@ -8,8 +8,8 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Data.Types, as: T
-  alias Central.Helpers.TimexHelper
-  import Central.Helpers.NumberHelper, only: [percent: 2]
+  alias Teiserver.Helper.TimexHelper
+  import Teiserver.Helper.NumberHelper, only: [percent: 2]
 
   @match_cache_recent_days 7
   @match_cache_max_days 31

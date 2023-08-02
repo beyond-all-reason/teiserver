@@ -1,4 +1,4 @@
-defmodule Central.Helpers.QueryHelpers do
+defmodule Teiserver.Helper.QueryHelpers do
   @moduledoc false
   alias Teiserver.Repo
   import Ecto.Query, warn: false

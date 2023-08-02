@@ -4,7 +4,7 @@ defmodule Teiserver.SpringAuthTest do
   alias Teiserver.BitParse
   alias Teiserver.{User, Account, Client}
   alias Teiserver.Account.UserCache
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TeiserverTestLib,
     only: [

@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Logging.AuditLogController do
   alias Teiserver.Logging
   alias Teiserver.Logging.AuditLogLib
 
-  import Central.Helpers.StringHelper, only: [get_hash_id: 1]
+  import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug :add_breadcrumb, name: 'Logging', url: '/logging'
   plug :add_breadcrumb, name: 'Audit', url: '/logging/audit'

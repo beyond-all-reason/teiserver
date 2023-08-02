@@ -73,7 +73,7 @@ spectators =
         <% extra = "#{@lobby.name} - #{@lobby.map_name}" %>
         <%= if @lobby.in_progress do %>
           <h4>
-            Match in progress - <%= Central.Helpers.TimexHelper.duration_to_str_short(
+            Match in progress - <%= Teiserver.Helper.TimexHelper.duration_to_str_short(
               System.system_time(:second) - (@lobby.started_at || 1_652_282_031)
             ) %> - <%= extra %>
           </h4>
@@ -178,9 +178,9 @@ spectators =
                     <td width="50">&nbsp;</td>
                   <% end %>
 
-                  <td><%= Central.Helpers.NumberHelper.round(rating_value, 2) %></td>
+                  <td><%= Teiserver.Helper.NumberHelper.round(rating_value, 2) %></td>
                   <%= if @moderator do %>
-                    <td><%= Central.Helpers.NumberHelper.round(uncertainty, 2) %></td>
+                    <td><%= Teiserver.Helper.NumberHelper.round(uncertainty, 2) %></td>
 
                     <td><%= @stats[user.id]["win_rate.team"] %></td>
                     <td><%= @stats[user.id]["recent_count.team"] %></td>
@@ -254,9 +254,9 @@ spectators =
                   </td>
                   <td><%= user.name %></td>
 
-                  <td><%= Central.Helpers.NumberHelper.round(rating_value, 2) %></td>
+                  <td><%= Teiserver.Helper.NumberHelper.round(rating_value, 2) %></td>
                   <%= if @moderator do %>
-                    <td><%= Central.Helpers.NumberHelper.round(uncertainty, 2) %></td>
+                    <td><%= Teiserver.Helper.NumberHelper.round(uncertainty, 2) %></td>
                   <% end %>
 
                   <%= if @moderator do %>

@@ -7,7 +7,7 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Central.Account.User
   alias Teiserver.Account.{UserLib, RoleLib}
   alias Teiserver.Battle.BalanceLib
-  import Central.Helpers.NumberHelper, only: [int_parse: 1, float_parse: 1]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1, float_parse: 1]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_user",

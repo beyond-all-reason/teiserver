@@ -267,7 +267,7 @@ defmodule Teiserver.Config do
     type = get_user_config_type(type_key)
 
     case type.type do
-      "integer" -> Central.Helpers.NumberHelper.int_parse(value)
+      "integer" -> Teiserver.Helper.NumberHelper.int_parse(value)
       "boolean" -> if value == "true", do: true, else: false
       "select" -> value
       "string" -> value
@@ -433,7 +433,7 @@ defmodule Teiserver.Config do
     type = get_site_config_type(type_key)
 
     case type.type do
-      "integer" -> Central.Helpers.NumberHelper.int_parse(value)
+      "integer" -> Teiserver.Helper.NumberHelper.int_parse(value)
       "boolean" -> if value == "true" or value == true, do: true, else: false
       "select" -> value
       "string" -> value

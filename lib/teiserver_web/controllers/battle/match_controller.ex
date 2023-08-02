@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Battle.MatchController do
   alias Teiserver.{Battle, Game, Account}
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Battle.MatchLib
-  alias Central.Helpers.TimexHelper
+  alias Teiserver.Helper.TimexHelper
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Battle.Match,
@@ -71,7 +71,7 @@ defmodule TeiserverWeb.Battle.MatchController do
       |> Map.drop([nil])
       |> Map.filter(fn {_id, members} -> Enum.count(members) > 1 end)
       |> Map.keys()
-      |> Enum.zip(Central.Helpers.StylingHelper.bright_hex_colour_list())
+      |> Enum.zip(Teiserver.Helper.StylingHelper.bright_hex_colour_list())
       |> Map.new()
 
     conn

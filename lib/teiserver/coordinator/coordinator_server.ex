@@ -9,7 +9,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   alias Teiserver.Lobby
   alias Teiserver.Coordinator.{CoordinatorCommands}
   alias Phoenix.PubSub
-  import Central.Helpers.TimexHelper, only: [date_to_str: 2]
+  import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
   require Logger
 
   @dispute_string [

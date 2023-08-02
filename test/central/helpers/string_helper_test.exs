@@ -1,7 +1,7 @@
 defmodule Central.General.StringHelpersTest do
   use Central.DataCase, async: true
 
-  alias Central.Helpers.StringHelper
+  alias Teiserver.Helper.StringHelper
 
   test "remove_spaces" do
     params = [

@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.API.SpadsView do
   use TeiserverWeb, :view
-  import Central.Helpers.NumberHelper, only: [round: 2]
+  import Teiserver.Helper.NumberHelper, only: [round: 2]
 
   def render("rating.json", assigns) do
     %{

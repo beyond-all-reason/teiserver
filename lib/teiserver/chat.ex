@@ -1,7 +1,7 @@
 defmodule Teiserver.Chat do
   @moduledoc false
   import Ecto.Query, warn: false
-  alias Central.Helpers.QueryHelpers
+  alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
 
   alias Teiserver.Chat.{RoomMessage, RoomMessageLib}

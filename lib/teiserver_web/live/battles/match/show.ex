@@ -86,7 +86,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         |> Map.drop([nil])
         |> Map.filter(fn {_id, members} -> Enum.count(members) > 1 end)
         |> Map.keys()
-        |> Enum.zip(Central.Helpers.StylingHelper.bright_hex_colour_list())
+        |> Enum.zip(Teiserver.Helper.StylingHelper.bright_hex_colour_list())
         |> Enum.zip(~w(dice-one dice-two dice-three dice-four dice-five dice-six))
         |> Enum.map(fn {{party_id, colour}, idx} ->
           {party_id, {colour, idx}}
