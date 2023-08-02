@@ -115,7 +115,7 @@ defmodule TeiserverWeb.ClientLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_client_index_updates")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_client_index_updates")
 
     socket
     |> assign(:page_title, "Listing Clients")

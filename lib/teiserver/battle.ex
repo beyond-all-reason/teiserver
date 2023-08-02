@@ -376,7 +376,7 @@ defmodule Teiserver.Battle do
     update_match(match, params)
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "global_match_updates",
       %{
         channel: "global_match_updates",

@@ -22,7 +22,7 @@ defmodule Central do
     end)
 
     Phoenix.PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "cluster_hooks",
       {:cluster_hooks, :delete, Node.self(), table, keys}
     )
@@ -38,7 +38,7 @@ defmodule Central do
     ConCache.put(table, key, value)
 
     Phoenix.PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "cluster_hooks",
       {:cluster_hooks, :put, Node.self(), table, key, value}
     )
@@ -52,7 +52,7 @@ defmodule Central do
     ConCache.insert_new(table, key, value)
 
     Phoenix.PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "cluster_hooks",
       {:cluster_hooks, :insert_new, Node.self(), table, key, value}
     )
@@ -66,7 +66,7 @@ defmodule Central do
     ConCache.update(table, key, func)
 
     Phoenix.PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "cluster_hooks",
       {:cluster_hooks, :update, Node.self(), table, key, func}
     )

@@ -60,7 +60,7 @@ defmodule Teiserver.Account.ClientIndexThrottle do
 
     :ok =
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_liveview_client_index_updates",
         {:client_index_throttle, new_clients_map, removed_clients}
       )
@@ -76,8 +76,8 @@ defmodule Teiserver.Account.ClientIndexThrottle do
     send(self(), :startup)
     :timer.send_interval(@update_interval, self(), :tick)
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_user_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "client_inout")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_global_user_updates")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "client_inout")
 
     Horde.Registry.register(
       Teiserver.ThrottleRegistry,

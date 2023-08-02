@@ -41,7 +41,7 @@ defmodule CentralWeb do
 
       alias Bodyguard.Plug.Authorize
 
-      alias CentralWeb.Router.Helpers, as: Routes
+      alias TeiserverWeb.Router.Helpers, as: Routes
       import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
 
       unquote(verified_routes())
@@ -74,7 +74,7 @@ defmodule CentralWeb do
 
       import CentralWeb.ErrorHelpers
       import CentralWeb.Gettext
-      alias CentralWeb.Router.Helpers, as: Routes
+      alias TeiserverWeb.Router.Helpers, as: Routes
 
       import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
 
@@ -233,7 +233,7 @@ defmodule CentralWeb do
 
       import CentralWeb.ErrorHelpers
       import CentralWeb.Gettext
-      alias CentralWeb.Router.Helpers, as: Routes
+      alias TeiserverWeb.Router.Helpers, as: Routes
     end
   end
 
@@ -255,8 +255,8 @@ defmodule CentralWeb do
   def verified_routes do
     quote do
       use Phoenix.VerifiedRoutes,
-        endpoint: CentralWeb.Endpoint,
-        router: CentralWeb.Router,
+        endpoint: TeiserverWeb.Endpoint,
+        router: TeiserverWeb.Router,
         statics: CentralWeb.static_paths()
     end
   end

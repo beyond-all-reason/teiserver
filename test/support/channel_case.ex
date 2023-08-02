@@ -24,7 +24,7 @@ defmodule CentralWeb.ChannelCase do
       import CentralWeb.ChannelCase
 
       # The default endpoint for testing
-      @endpoint CentralWeb.Endpoint
+      @endpoint TeiserverWeb.Endpoint
     end
   end
 

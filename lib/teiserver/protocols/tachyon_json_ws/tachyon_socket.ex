@@ -69,8 +69,8 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     :timer.send_after(1500, :connect_to_client)
 
     Logger.metadata(request_id: "TachyonWSServer##{userid}")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{userid}")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{userid}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
 
     {:ok, state}
   end

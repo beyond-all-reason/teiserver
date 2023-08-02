@@ -20,7 +20,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
 
     lobby_user_ids =
       if client != nil and client.lobby_id != nil do
-        :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{client.lobby_id}")
+        :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{client.lobby_id}")
         Battle.get_lobby_member_list(client.lobby_id)
       else
         []
@@ -28,8 +28,8 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
 
     user = Account.get_user_by_id(socket.assigns.user_id)
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{socket.assigns.user_id}")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_client:#{socket.assigns.user_id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{socket.assigns.user_id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_client:#{socket.assigns.user_id}")
 
     socket =
       socket
@@ -56,7 +56,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
       if Enum.member?(party.members, socket.assigns.user_id) or
            allow?(socket, "Moderator") do
         leader_name = Account.get_username(party.leader)
-        :ok = PubSub.subscribe(Central.PubSub, "teiserver_party:#{party_id}")
+        :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
 
         {:noreply,
          socket
@@ -103,7 +103,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     socket =
       case data.event do
         :joined_lobby ->
-          :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{data.lobby_id}")
+          :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{data.lobby_id}")
           lobby_user_ids = Battle.get_lobby_member_list(data.lobby_id) || []
 
           socket
@@ -111,7 +111,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
           |> build_user_lookup
 
         :left_lobby ->
-          :ok = PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{data.lobby_id}")
+          :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{data.lobby_id}")
 
           socket
           |> assign(:lobby_user_ids, [])

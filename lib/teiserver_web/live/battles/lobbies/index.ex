@@ -169,11 +169,11 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_lobby_updates")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_global_lobby_updates")
 
     :ok =
       PubSub.subscribe(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_client_messages:#{socket.assigns[:current_user].id}"
       )
 

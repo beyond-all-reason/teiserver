@@ -32,7 +32,7 @@ defmodule Teiserver.Telemetry.ServerEventLib do
         if Enum.member?(@broadcast_event_types, event_type_name) do
           if userid do
             PubSub.broadcast(
-              Central.PubSub,
+              Teiserver.PubSub,
               "teiserver_telemetry_server_events",
               %{
                 channel: "teiserver_telemetry_server_events",

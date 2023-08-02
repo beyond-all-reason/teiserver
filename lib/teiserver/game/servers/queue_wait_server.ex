@@ -49,7 +49,7 @@ defmodule Teiserver.Game.QueueWaitServer do
           end
 
           PubSub.broadcast(
-            Central.PubSub,
+            Teiserver.PubSub,
             "teiserver_queue:#{state.queue_id}",
             %{
               channel: "teiserver_queue:#{state.queue_id}",
@@ -64,7 +64,7 @@ defmodule Teiserver.Game.QueueWaitServer do
             Account.add_client_to_queue(userid, state.queue_id)
 
             PubSub.broadcast(
-              Central.PubSub,
+              Teiserver.PubSub,
               "teiserver_client_messages:#{userid}",
               %{
                 channel: "teiserver_client_messages:#{userid}",
@@ -88,7 +88,7 @@ defmodule Teiserver.Game.QueueWaitServer do
           new_state = remove_group(group_id, state)
 
           PubSub.broadcast(
-            Central.PubSub,
+            Teiserver.PubSub,
             "teiserver_queue:#{state.queue_id}",
             %{
               channel: "teiserver_queue:#{state.queue_id}",
@@ -104,7 +104,7 @@ defmodule Teiserver.Game.QueueWaitServer do
             Account.remove_client_from_queue(userid, state.queue_id)
 
             PubSub.broadcast(
-              Central.PubSub,
+              Teiserver.PubSub,
               "teiserver_client_messages:#{userid}",
               %{
                 channel: "teiserver_client_messages:#{userid}",
@@ -174,7 +174,7 @@ defmodule Teiserver.Game.QueueWaitServer do
           }
 
           PubSub.broadcast(
-            Central.PubSub,
+            Teiserver.PubSub,
             "teiserver_queue:#{state.queue_id}",
             %{
               channel: "teiserver_queue:#{state.queue_id}",
@@ -189,7 +189,7 @@ defmodule Teiserver.Game.QueueWaitServer do
             Account.add_client_to_queue(userid, state.queue_id)
 
             PubSub.broadcast(
-              Central.PubSub,
+              Teiserver.PubSub,
               "teiserver_client_messages:#{userid}",
               %{
                 channel: "teiserver_client_messages:#{userid}",
@@ -292,7 +292,7 @@ defmodule Teiserver.Game.QueueWaitServer do
     mean_wait_time = calculate_mean_wait_time(state)
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_all_queues",
       %{
         channel: "teiserver_all_queues",
@@ -304,7 +304,7 @@ defmodule Teiserver.Game.QueueWaitServer do
     )
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_queue:#{state.queue_id}",
       %{
         channel: "teiserver_queue:#{state.queue_id}",
@@ -690,7 +690,7 @@ defmodule Teiserver.Game.QueueWaitServer do
 
     Process.send(self(), :increase_range, [])
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_matchmaking")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_global_matchmaking")
     Logger.metadata(request_id: "QueueWaitServer##{opts.queue.id}")
 
     # Update the queue pids cache to point to this process

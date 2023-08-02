@@ -1,5 +1,5 @@
-defmodule CentralWeb.LiveSearch.Channel do
-  @moduledoc false
+defmodule TeiserverWeb.LiveSearch.Channel do
+@moduledoc false
   use Phoenix.Channel
 
   alias Central.Account
@@ -16,7 +16,7 @@ defmodule CentralWeb.LiveSearch.Channel do
       "search" ->
         results = handle_search(socket, params["dataset"], params["search_term"])
 
-        CentralWeb.Endpoint.broadcast(
+        TeiserverWeb.Endpoint.broadcast(
           "live_search:endpoints:#{uid}",
           "live_search results",
           %{results: results}

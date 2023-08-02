@@ -108,11 +108,11 @@ defmodule Teiserver.Account.ClientLib do
     # Update the process with it
     cast_client(userid, {:update_client, client})
 
-    # PubSub.broadcast(Central.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
+    # PubSub.broadcast(Teiserver.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
 
     if client.lobby_id do
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_lobby_updates:#{client.lobby_id}",
         %{
           channel: "teiserver_lobby_updates",
@@ -154,14 +154,14 @@ defmodule Teiserver.Account.ClientLib do
     cast_client(userid, {:update_client, client})
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "legacy_all_client_updates",
       {:updated_client, client, reason}
     )
 
     if client.lobby_id do
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_lobby_updates:#{client.lobby_id}",
         %{
           channel: "teiserver_lobby_updates",

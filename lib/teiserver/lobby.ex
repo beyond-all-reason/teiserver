@@ -134,7 +134,7 @@ defmodule Teiserver.Lobby do
     # We send this out because the throttle won't
     :ok =
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_liveview_lobby_updates:#{battle_lobby_id}",
         {:battle_lobby_throttle, :closed}
       )
@@ -163,7 +163,7 @@ defmodule Teiserver.Lobby do
     add_user_to_battle(client.userid, lobby_id, script_password)
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_client_messages:#{client.userid}",
       %{
         channel: "teiserver_client_messages:#{client.userid}",
@@ -202,7 +202,7 @@ defmodule Teiserver.Lobby do
 
       if client do
         PubSub.broadcast(
-          Central.PubSub,
+          Teiserver.PubSub,
           "teiserver_global_user_updates",
           %{
             channel: "teiserver_global_user_updates",
@@ -214,7 +214,7 @@ defmodule Teiserver.Lobby do
         )
 
         PubSub.broadcast(
-          Central.PubSub,
+          Teiserver.PubSub,
           "teiserver_client_messages:#{userid}",
           %{
             channel: "teiserver_client_messages:#{userid}",
@@ -225,7 +225,7 @@ defmodule Teiserver.Lobby do
         )
 
         PubSub.broadcast(
-          Central.PubSub,
+          Teiserver.PubSub,
           "teiserver_client_watch:#{userid}",
           %{
             channel: "teiserver_client_watch:#{userid}",
@@ -235,7 +235,7 @@ defmodule Teiserver.Lobby do
         )
 
         PubSub.broadcast(
-          Central.PubSub,
+          Teiserver.PubSub,
           "teiserver_lobby_updates:#{lobby_id}",
           %{
             channel: "teiserver_lobby_updates",
@@ -271,7 +271,7 @@ defmodule Teiserver.Lobby do
 
         if client do
           PubSub.broadcast(
-            Central.PubSub,
+            Teiserver.PubSub,
             "teiserver_global_user_updates",
             %{
               channel: "teiserver_global_user_updates",
@@ -282,7 +282,7 @@ defmodule Teiserver.Lobby do
           )
 
           PubSub.broadcast(
-            Central.PubSub,
+            Teiserver.PubSub,
             "teiserver_client_watch:#{userid}",
             %{
               channel: "teiserver_client_watch:#{userid}",
@@ -292,7 +292,7 @@ defmodule Teiserver.Lobby do
           )
 
           PubSub.broadcast(
-            Central.PubSub,
+            Teiserver.PubSub,
             "teiserver_lobby_updates:#{lobby_id}",
             %{
               channel: "teiserver_lobby_updates",
@@ -329,7 +329,7 @@ defmodule Teiserver.Lobby do
 
           if client do
             PubSub.broadcast(
-              Central.PubSub,
+              Teiserver.PubSub,
               "teiserver_global_user_updates",
               %{
                 channel: "teiserver_global_user_updates",
@@ -340,7 +340,7 @@ defmodule Teiserver.Lobby do
             )
 
             PubSub.broadcast(
-              Central.PubSub,
+              Teiserver.PubSub,
               "teiserver_client_watch:#{userid}",
               %{
                 channel: "teiserver_client_watch:#{userid}",
@@ -350,7 +350,7 @@ defmodule Teiserver.Lobby do
             )
 
             PubSub.broadcast(
-              Central.PubSub,
+              Teiserver.PubSub,
               "teiserver_lobby_updates:#{lobby_id}",
               %{
                 channel: "teiserver_lobby_updates",
@@ -516,7 +516,7 @@ defmodule Teiserver.Lobby do
             send(host_client.tcp_pid, {:request_user_join_lobby, userid})
 
             PubSub.broadcast(
-              Central.PubSub,
+              Teiserver.PubSub,
               "teiserver_lobby_host_message:#{lobby_id}",
               %{
                 channel: "teiserver_lobby_host_message:#{lobby_id}",
@@ -606,7 +606,7 @@ defmodule Teiserver.Lobby do
     end
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_client_messages:#{userid}",
       %{
         channel: "teiserver_client_messages:#{userid}",
@@ -626,7 +626,7 @@ defmodule Teiserver.Lobby do
   @spec deny_join_request(T.userid(), T.lobby_id(), String.t()) :: :ok
   def deny_join_request(userid, lobby_id, reason) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_client_messages:#{userid}",
       %{
         channel: "teiserver_client_messages:#{userid}",

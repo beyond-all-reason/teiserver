@@ -18,7 +18,7 @@ defmodule Teiserver.EmailHelper do
 
   def do_new_user(user) do
     stats = Teiserver.Account.get_user_stat_data(user.id)
-    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
     website_url = "https://#{host}"
     verification_code = stats["verification_code"]
 

@@ -12,13 +12,13 @@ defmodule Teiserver.Tachyon.Responses.LobbyHost.CreateResponse do
   end
 
   def generate({:ok, lobby}) do
-    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_host_message:#{lobby.id}")
-    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby.id}")
-    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby.id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_host_message:#{lobby.id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby.id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby.id}")
 
-    PubSub.subscribe(Central.PubSub, "teiserver_lobby_host_message:#{lobby.id}")
-    PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby.id}")
-    PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby.id}")
+    PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_host_message:#{lobby.id}")
+    PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby.id}")
+    PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby.id}")
 
     {"lobbyHost/create/response", :success, lobby}
   end

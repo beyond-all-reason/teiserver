@@ -209,7 +209,7 @@ defmodule Teiserver.Account.PartyLib do
       persist_message(userid, msg, party_id)
 
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_party:#{party_id}",
         %{
           channel: "teiserver_party:#{party_id}",

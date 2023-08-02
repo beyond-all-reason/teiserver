@@ -937,7 +937,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def broadcast_update(state, reason \\ nil) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_liveview_lobby_updates:#{state.lobby_id}",
       {:liveview_lobby_update, :consul_server_updated, state.lobby_id, reason}
     )
@@ -1156,7 +1156,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def queue_size_changed(state) do
     if state.join_queue != state.last_queue_state do
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_lobby_updates:#{state.lobby_id}",
         %{
           channel: "teiserver_lobby_updates",
@@ -1365,9 +1365,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def init(opts) do
     lobby_id = opts[:lobby_id]
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
     Logger.metadata(request_id: "ConsulServer##{lobby_id}")
 
     # Update the queue pids cache to point to this process
