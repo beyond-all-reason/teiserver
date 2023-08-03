@@ -56,7 +56,7 @@ defmodule Teiserver.Account.MergeAccountsTask do
 
     Ecto.Adapters.SQL.query!(Repo, query, [keeping_id, deleting_id])
 
-    result = Teiserver.Account.Tasks.DailyCleanupTask.do_deletion([deleting_id])
+    result = Teiserver.Admin.DeleteUserTask.delete_users([deleting_id])
 
     case result do
       {:ok, _} ->

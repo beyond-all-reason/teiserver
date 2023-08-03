@@ -46,7 +46,7 @@ defmodule Teiserver do
   @spec manually_delete_user(T.userid()) :: {:ok, map()} | {:error, map()}
   def manually_delete_user(id) do
     Application.put_env(:elixir, :ansi_enabled, true)
-    Teiserver.Account.Tasks.DailyCleanupTask.manually_delete_user(id)
+    Teiserver.Admin.DeleteUserTask.delete_users([id])
   end
 
   @spec node_name() :: String.t()
