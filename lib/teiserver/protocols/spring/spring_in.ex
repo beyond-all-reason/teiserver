@@ -1290,7 +1290,26 @@ defmodule Teiserver.Protocols.SpringIn do
     state
   end
 
-git push origin <branch-name> --force
+  defp do_handle("SAYBATTLEEX", msg, _msg_id, state) do
+    if Lobby.allow?(state.userid, :saybattleex, state.lobby_id) do
+      lowercase_msg = String.downcase(msg)
+
+      msg_sliced =
+        if String.starts_with?(lowercase_msg, "!bset tweakdefs") || String.starts_with?(lowercase_msg, "!bset tweakunits") do
+          msg
+          |> String.trim()
+          |> String.slice(0..8192)
+        else
+          msg
+          |> String.trim()
+          |> String.slice(0..256)
+        end
+
+      Lobby.sayex(state.userid, msg_sliced, state.lobby_id)
+    end
+
+    state
+  end
 
 
   # SAYBATTLEPRIVATEEX username
