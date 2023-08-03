@@ -1,0 +1,32 @@
+<TeiserverWeb.AccountComponents.sub_menu active={"relationship"} view_colour={@view_colour} />
+
+<div class="row section-menu">
+  <div class="col">
+    <h4>Friends</h4>
+    <.table id="friends-table" table_class="table-sm" rows={@friends}>
+      <:col :let={friend} label="id"><%= friend.to_user.id %></:col>
+      <:col :let={friend} label="username"><%= friend.to_user.name %></:col>
+    </.table>
+  </div>
+  <div class="col">
+    <h4>Ignores</h4>
+    <.table id="ignores-table" table_class="table-sm" rows={@ignores}>
+      <:col :let={ignore} label="id"><%= ignore.to_user.id %></:col>
+      <:col :let={ignore} label="username"><%= ignore.to_user.name %></:col>
+    </.table>
+  </div>
+  <div class="col">
+    <h4>Avoids</h4>
+    <.table id="avoids-table" table_class="table-sm" rows={@avoids}>
+      <:col :let={avoid} label="id"><%= avoid.to_user.id %></:col>
+      <:col :let={avoid} label="username"><%= avoid.to_user.name %></:col>
+    </.table>
+  </div>
+  <div class="col">
+    <h4>Blocks</h4>
+    <.table id="blocks-table" table_class="table-sm" rows={@blocks}>
+      <:col :let={block} label="id"><%= block.to_user.id %></:col>
+      <:col :let={block} label="username"><%= block.to_user.name %></:col>
+    </.table>
+  </div>
+</div>

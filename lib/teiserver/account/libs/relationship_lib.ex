@@ -4,6 +4,12 @@ defmodule Teiserver.Account.RelationshipLib do
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Account.Relationship
 
+  @spec colours :: atom
+  def colours(), do: :success
+
+  @spec icon :: String.t()
+  def icon(), do: "fa-users"
+
   # Queries
   @spec query_relationships(list) :: Ecto.Query.t()
   def query_relationships(args) do
@@ -46,6 +52,11 @@ defmodule Teiserver.Account.RelationshipLib do
     from relationships in query,
       where: relationships.from_user_id == ^from_id,
       where: relationships.to_user_id == ^to_id
+  end
+
+  defp _where(query, :state, state) do
+    from relationships in query,
+      where: relationships.state == ^state
   end
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()

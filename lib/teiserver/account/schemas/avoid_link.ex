@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.Relationship do
+defmodule Teiserver.Account.FriendLink do
   @moduledoc false
   use CentralWeb, :schema
 
@@ -7,11 +7,12 @@ defmodule Teiserver.Account.Relationship do
     belongs_to :from_user, Central.Account.User, primary_key: true
     belongs_to :to_user, Central.Account.User, primary_key: true
 
+    # Valid states: Avoid, Block, Ignore, None, Pending friend, Friend
     field :state, :string
     field :follow, :boolean, default: false
 
     field :notes, :string
-    field :tags, {:array, :string}
+    field :tags, {:array, :string}, default: []
 
     timestamps()
   end

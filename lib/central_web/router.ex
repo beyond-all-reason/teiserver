@@ -232,7 +232,18 @@ defmodule TeiserverWeb.Router do
     get("/gdpr", GeneralController, :gdpr)
   end
 
-  # ts_account_X_path
+  scope "/account", TeiserverWeb.Account do
+    pipe_through([:browser, :standard_live_layout, :protected])
+
+    live_session :relationships,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Communication.NotificationPlug, :load_notifications}
+      ] do
+        live "/relationship", RelationshipLive.Index, :index
+    end
+  end
+
   scope "/teiserver/account", TeiserverWeb.Account, as: :ts_account do
     pipe_through([:browser, :standard_layout, :protected])
 
