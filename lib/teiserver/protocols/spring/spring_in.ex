@@ -1290,17 +1290,8 @@ defmodule Teiserver.Protocols.SpringIn do
     state
   end
 
-  defp do_handle("SAYBATTLEEX", msg, _msg_id, state) do
-    if Lobby.allow?(state.userid, :saybattleex, state.lobby_id) do
-      msg = msg
-        |> String.trim()
-        |> String.slice(0..256)
+git push origin <branch-name> --force
 
-      Lobby.sayex(state.userid, msg, state.lobby_id)
-    end
-
-    state
-  end
 
   # SAYBATTLEPRIVATEEX username
   defp do_handle("SAYBATTLEPRIVATEEX", data, msg_id, state) do
