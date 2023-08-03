@@ -1270,13 +1270,22 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("SAYBATTLE", msg, _msg_id, state) do
-    if Lobby.allow?(state.userid, :saybattle, state.lobby_id) do
-      msg = msg
+  if Lobby.allow?(state.userid, :saybattle, state.lobby_id) do
+    lowercase_msg = String.downcase(msg)
+
+    msg_sliced =
+      if String.starts_with?(lowercase_msg, "!bset tweakdefs") || String.starts_with?(lowercase_msg, "!bset tweakunits") do
+        msg
+        |> String.trim()
+        |> String.slice(0..8192)
+      else
+        msg
         |> String.trim()
         |> String.slice(0..256)
+      end
 
-      Lobby.say(state.userid, msg, state.lobby_id)
-    end
+    Lobby.say(state.userid, msg_sliced, state.lobby_id)
+  end
 
     state
   end
