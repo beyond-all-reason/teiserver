@@ -135,7 +135,7 @@ defmodule Teiserver.Startup do
       :timer.sleep(1000)
 
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_server",
         %{
           channel: "teiserver_server",

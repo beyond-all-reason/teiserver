@@ -186,7 +186,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_telemetry")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_telemetry")
 
     socket
     |> assign(:page_title, "Admin dashboard")

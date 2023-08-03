@@ -21,7 +21,7 @@ defmodule Teiserver.Account.ClientServer do
 
       existing_id ->
         PubSub.broadcast(
-          Central.PubSub,
+          Teiserver.PubSub,
           "teiserver_client_messages:#{state.userid}",
           %{
             channel: "teiserver_client_messages:#{state.userid}",
@@ -31,7 +31,7 @@ defmodule Teiserver.Account.ClientServer do
         )
 
         PubSub.broadcast(
-          Central.PubSub,
+          Teiserver.PubSub,
           "teiserver_client_watch:#{state.userid}",
           %{
             channel: "teiserver_client_watch:#{state.userid}",
@@ -47,7 +47,7 @@ defmodule Teiserver.Account.ClientServer do
 
     if party_id != nil do
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_client_messages:#{state.userid}",
         %{
           channel: "teiserver_client_messages:#{state.userid}",
@@ -57,7 +57,7 @@ defmodule Teiserver.Account.ClientServer do
       )
 
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_client_watch:#{state.userid}",
         %{
           channel: "teiserver_client_watch:#{state.userid}",
@@ -68,7 +68,7 @@ defmodule Teiserver.Account.ClientServer do
     end
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_client_messages:#{state.userid}",
       %{
         channel: "teiserver_client_messages:#{state.userid}",
@@ -86,7 +86,7 @@ defmodule Teiserver.Account.ClientServer do
     new_client = Map.merge(state.client, partial_client)
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_client_messages:#{state.userid}",
       %{
         channel: "teiserver_client_messages:#{state.userid}",
@@ -98,7 +98,7 @@ defmodule Teiserver.Account.ClientServer do
 
     if state.client.lobby_id do
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_lobby_updates:#{state.client.lobby_id}",
         %{
           channel: "teiserver_lobby_updates",
@@ -118,7 +118,7 @@ defmodule Teiserver.Account.ClientServer do
     new_client = Map.merge(state.client, partial_client)
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_client_messages:#{state.userid}",
       %{
         channel: "teiserver_client_messages:#{state.userid}",
@@ -130,7 +130,7 @@ defmodule Teiserver.Account.ClientServer do
 
     if state.client.lobby_id do
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_lobby_updates:#{state.client.lobby_id}",
         %{
           channel: "teiserver_lobby_updates",
@@ -166,7 +166,7 @@ defmodule Teiserver.Account.ClientServer do
     new_client = Map.merge(state.client, new_client)
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_client_messages:#{state.userid}",
       %{
         channel: "teiserver_client_messages:#{state.userid}",

@@ -141,7 +141,7 @@ defmodule Teiserver.Agents.AgentLib do
   @spec post_agent_update(String.t(), String.t(), Map.t()) :: :ok
   def post_agent_update(from, msg, data \\ %{}) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "agent_updates",
       %{
         from: from,

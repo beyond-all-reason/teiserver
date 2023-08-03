@@ -11,7 +11,7 @@ config :central, Central.Setup,
 
 # This can be part of your standard prod.exs but I wanted it to
 # default to not going into a github repo
-config :central, CentralWeb.Endpoint,
+config :central, TeiserverWeb.Endpoint,
   url: [host: "yourdomain.com"],
   https: [
     keyfile: "/etc/letsencrypt/live/yourdomain.com/privkey.pem",
@@ -39,7 +39,7 @@ config :central, Teiserver.Repo,
   pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
   timeout: 30_000
 
-config :central, CentralWeb.Endpoint,
+config :central, TeiserverWeb.Endpoint,
   http: [:inet6, port: String.to_integer(System.get_env("PORT") || "4000")],
   secret_key_base: secret_key_base
 

@@ -40,10 +40,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     current_user = socket.assigns[:current_user]
     lobby = Battle.get_lobby(id)
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{id}")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_chat:#{id}")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_user_updates:#{current_user.id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_lobby_updates:#{id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_lobby_chat:#{id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_user_updates:#{current_user.id}")
 
     cond do
       lobby == nil ->

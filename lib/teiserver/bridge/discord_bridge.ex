@@ -163,7 +163,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
       end
 
     if post_to_discord do
-      host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+      host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
       url = "https://#{host}/teiserver/reports/infolog/#{infolog.id}"
 
       message =
@@ -193,7 +193,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
     if channel do
       report = Moderation.get_report!(report.id, preload: [:reporter, :target])
 
-      host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+      host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
       url = "https://#{host}/moderation/report?target_id=#{report.target_id}"
 
       match_icon =

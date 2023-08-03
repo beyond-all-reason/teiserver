@@ -90,7 +90,7 @@ defmodule TeiserverWeb.AgentLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Central.PubSub, "agent_updates")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "agent_updates")
 
     socket
     |> assign(:page_title, "Agents")

@@ -110,7 +110,7 @@ defmodule Teiserver.TachyonTcpServer do
       client_messages: 0
     }
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
 
     :gen_server.enter_loop(__MODULE__, [], state)
   end

@@ -184,7 +184,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             ChatLib.persist_message(user, "a: #{msg}", host.lobby_id, :say)
 
             PubSub.broadcast(
-              Central.PubSub,
+              Teiserver.PubSub,
               "teiserver_liveview_lobby_chat:#{host.lobby_id}",
               {:liveview_lobby_chat, :say, user.id, "a: #{msg}"}
             )
@@ -193,7 +193,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             ChatLib.persist_message(user, "s: #{msg}", host.lobby_id, :say)
 
             PubSub.broadcast(
-              Central.PubSub,
+              Teiserver.PubSub,
               "teiserver_liveview_lobby_chat:#{host.lobby_id}",
               {:liveview_lobby_chat, :say, user.id, "s: #{msg}"}
             )
@@ -222,7 +222,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             ChatLib.persist_message(user, "a: #{msg}", host.lobby_id, :say)
 
             PubSub.broadcast(
-              Central.PubSub,
+              Teiserver.PubSub,
               "teiserver_liveview_lobby_chat:#{host.lobby_id}",
               {:liveview_lobby_chat, :say, user.id, "a: #{msg}"}
             )
@@ -231,7 +231,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             ChatLib.persist_message(user, "s: #{msg}", host.lobby_id, :say)
 
             PubSub.broadcast(
-              Central.PubSub,
+              Teiserver.PubSub,
               "teiserver_liveview_lobby_chat:#{host.lobby_id}",
               {:liveview_lobby_chat, :say, user.id, "s: #{msg}"}
             )
@@ -343,10 +343,10 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     |> Enum.each(fn room_name ->
       Room.get_or_make_room(room_name, user.id)
       Room.add_user_to_room(user.id, room_name)
-      :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
+      :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
     end)
 
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "legacy_user_updates:#{user.id}")
 
     state
   end

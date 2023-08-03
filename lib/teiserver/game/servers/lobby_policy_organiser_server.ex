@@ -42,7 +42,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
 
         _ ->
           PubSub.broadcast(
-            Central.PubSub,
+            Teiserver.PubSub,
             "lobby_policy_internal:#{state.id}",
             %{
               channel: "lobby_policy_internal:#{state.id}",
@@ -92,7 +92,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
 
   def handle_info(:tick, state) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "lobby_policy_internal:#{state.id}",
       %{
         channel: "lobby_policy_internal:#{state.id}",
@@ -101,7 +101,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
     )
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "lobby_policy_updates:#{state.id}",
       %{
         channel: "lobby_policy_updates:#{state.id}",
@@ -144,7 +144,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
 
   defp disconnect_all_bots(state) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "lobby_policy_internal:#{state.id}",
       %{
         channel: "lobby_policy_internal:#{state.id}",
@@ -153,7 +153,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
     )
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "lobby_policy_updates:#{state.id}",
       %{
         channel: "lobby_policy_updates:#{state.id}",
@@ -177,7 +177,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
 
     Logger.metadata(request_id: "LobbyPolicyOrganiserServer##{id}/#{data.lobby_policy.name}")
 
-    :ok = PubSub.subscribe(Central.PubSub, "lobby_policy_internal:#{id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "lobby_policy_internal:#{id}")
 
     Horde.Registry.register(
       Teiserver.LobbyPolicyRegistry,

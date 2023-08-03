@@ -24,11 +24,11 @@ defmodule CentralWeb.ConnCase do
       import Phoenix.ConnTest
       import CentralWeb.ConnCase
 
-      alias CentralWeb.Router.Helpers, as: Routes
+      alias TeiserverWeb.Router.Helpers, as: Routes
 
       # The default endpoint for testing
       unquote(CentralWeb.verified_routes())
-      @endpoint CentralWeb.Endpoint
+      @endpoint TeiserverWeb.Endpoint
     end
   end
 

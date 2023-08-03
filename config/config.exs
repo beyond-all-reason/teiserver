@@ -20,7 +20,7 @@ config :central,
   ecto_repos: [Teiserver.Repo]
 
 # Configures the endpoint
-config :central, CentralWeb.Endpoint,
+config :central, TeiserverWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "6FN12Jv4ZITAK1fq7ehD0MTRvbLsXYWj+wLY3ifkzzlcUIcpUJK7aG/ptrJSemAy",
   live_view: [signing_salt: "wZVVigZo"],
@@ -28,7 +28,7 @@ config :central, CentralWeb.Endpoint,
     formats: [html: CentralWeb.ErrorHTML, json: CentralWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: Central.PubSub
+  pubsub_server: Teiserver.PubSub
 
 config :esbuild,
   version: "0.14.41",

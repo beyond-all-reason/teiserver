@@ -143,7 +143,7 @@ defmodule Central.Account do
 
   def broadcast_create_user({:ok, user}, reason) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "account_hooks",
       {:account_hooks, :create_user, user, reason}
     )
@@ -157,7 +157,7 @@ defmodule Central.Account do
 
   def broadcast_update_user({:ok, user}, reason) do
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "account_hooks",
       {:account_hooks, :update_user, user, reason}
     )

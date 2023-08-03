@@ -124,7 +124,7 @@ defmodule Teiserver.Client do
     ClientLib.start_client_server(client)
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "client_inout",
       %{
         channel: "client_inout",
@@ -135,7 +135,7 @@ defmodule Teiserver.Client do
     )
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_client_messages:#{user.id}",
       %{
         channel: "teiserver_client_messages:#{user.id}",
@@ -144,7 +144,7 @@ defmodule Teiserver.Client do
     )
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_client_watch:#{user.id}",
       %{
         channel: "teiserver_client_watch:#{user.id}",
@@ -292,7 +292,7 @@ defmodule Teiserver.Client do
     ClientLib.stop_client_server(client.userid)
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "client_inout",
       %{
         channel: "client_inout",
@@ -303,7 +303,7 @@ defmodule Teiserver.Client do
     )
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_client_messages:#{client.userid}",
       %{
         channel: "teiserver_client_messages:#{client.userid}",
@@ -312,7 +312,7 @@ defmodule Teiserver.Client do
     )
 
     PubSub.broadcast(
-      Central.PubSub,
+      Teiserver.PubSub,
       "teiserver_client_watch:#{client.userid}",
       %{
         channel: "teiserver_client_watch:#{client.userid}",

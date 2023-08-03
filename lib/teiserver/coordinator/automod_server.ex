@@ -42,7 +42,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   end
 
   def handle_info(:begin, state) do
-    :ok = PubSub.subscribe(Central.PubSub, "client_inout")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "client_inout")
     coordinator_id = Coordinator.get_coordinator_userid()
 
     if coordinator_id != nil do

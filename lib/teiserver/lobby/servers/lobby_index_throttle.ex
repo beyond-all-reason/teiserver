@@ -84,7 +84,7 @@ defmodule Teiserver.Battle.LobbyIndexThrottle do
   defp broadcast(_) do
     :ok =
       PubSub.broadcast(
-        Central.PubSub,
+        Teiserver.PubSub,
         "teiserver_liveview_lobby_index_updates",
         %{
           channel: "teiserver_liveview_lobby_index_updates",

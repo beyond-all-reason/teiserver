@@ -46,7 +46,7 @@ defmodule Central.General.CacheClusterServer do
   @impl true
   @spec init(any) :: {:ok, %{}}
   def init(_) do
-    :ok = PubSub.subscribe(Central.PubSub, "cluster_hooks")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "cluster_hooks")
     {:ok, %{}}
   end
 end

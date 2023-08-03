@@ -91,7 +91,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         }
       })
 
-    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
 
     Coordinator.send_to_user(senderid, [
@@ -118,7 +118,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         }
       })
 
-    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
 
     msg =
@@ -141,7 +141,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     player_hours = (Map.get(stats, "player_minutes", 0) / 60) |> round
     spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> round
 
-    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
     profile_link = "https://#{host}/teiserver/profile/#{senderid}"
 
     accolades = AccoladeLib.get_player_accolades(senderid)
@@ -240,7 +240,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
             ]
           end
 
-        host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+        host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
         profile_link = "https://#{host}/teiserver/profile/#{user.id}"
 
         ratings =
@@ -508,7 +508,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         metadata: %{ip: client.ip}
       })
 
-    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
 
     Coordinator.send_to_user(

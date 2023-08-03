@@ -506,7 +506,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("RESETPASSWORDREQUEST", _, msg_id, state) do
-    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/password_reset"
 
     reply(:okay, url, msg_id, state)
@@ -740,7 +740,7 @@ defmodule Teiserver.Protocols.SpringIn do
                 }
               })
 
-            host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+            host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
             url = "https://#{host}/one_time_login/#{code.value}"
 
             Coordinator.send_to_user(state.userid, [
@@ -793,7 +793,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("LEAVE", room_name, msg_id, state) do
-    PubSub.unsubscribe(Central.PubSub, "room:#{room_name}")
+    PubSub.unsubscribe(Teiserver.PubSub, "room:#{room_name}")
     reply(:left_room, {state.username, room_name}, msg_id, state)
     Room.remove_user_from_room(state.userid, room_name)
 
@@ -937,11 +937,11 @@ defmodule Teiserver.Protocols.SpringIn do
       {:success, battle} ->
         reply(:battle_opened, battle.id, msg_id, state)
         reply(:open_battle_success, battle.id, msg_id, state)
-        PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{battle.id}")
-        PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{battle.id}")
+        PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{battle.id}")
+        PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{battle.id}")
 
-        PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{battle.id}")
-        PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{battle.id}")
+        PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{battle.id}")
+        PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{battle.id}")
 
         reply(:join_battle_success, battle, msg_id, state)
 
@@ -1008,7 +1008,7 @@ defmodule Teiserver.Protocols.SpringIn do
       {:waiting_on_host, script_password} ->
         Lobby.remove_user_from_any_lobby(state.userid)
         |> Enum.each(fn b ->
-          PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{b}")
+          PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{b}")
         end)
 
         %{state | script_password: script_password}
@@ -1355,8 +1355,8 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("LEAVEBATTLE", _, _msg_id, %{lobby_id: nil} = state) do
     Lobby.remove_user_from_any_lobby(state.userid)
     |> Enum.each(fn b ->
-      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{b}")
-      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{b}")
+      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{b}")
+      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{b}")
     end)
 
     if not state.exempt_from_cmd_throttle do
@@ -1370,12 +1370,12 @@ defmodule Teiserver.Protocols.SpringIn do
     # Remove them from all the battles anyways, just in case
     Lobby.remove_user_from_any_lobby(state.userid)
     |> Enum.each(fn b ->
-      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{b}")
-      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{b}")
+      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{b}")
+      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{b}")
     end)
 
-    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{state.lobby_id}")
-    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{state.lobby_id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{state.lobby_id}")
+    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{state.lobby_id}")
     Lobby.remove_user_from_battle(state.userid, state.lobby_id)
 
     if not state.exempt_from_cmd_throttle do

@@ -16,7 +16,7 @@ defmodule TeiserverWeb.General.GeneralController do
 
   @spec gdpr(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def gdpr(conn, _params) do
-    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
     website_url = "https://#{host}"
 
     conn

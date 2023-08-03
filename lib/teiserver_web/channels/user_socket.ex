@@ -1,4 +1,4 @@
-defmodule CentralWeb.UserSocket do
+defmodule TeiserverWeb.UserSocket do
   use Phoenix.Socket
 
   alias Teiserver.Account.Guardian
@@ -6,7 +6,7 @@ defmodule CentralWeb.UserSocket do
   ## Channels
   # channel "room:*", CentralWeb.RoomChannel
 
-  channel("live_search:*", CentralWeb.LiveSearch.Channel)
+  channel("live_search:*", TeiserverWeb.LiveSearch.Channel)
   channel("communication_notification:*", TeiserverWeb.Communication.NotificationChannel)
   channel("communication_reloads:*", TeiserverWeb.Communication.NotificationChannel)
 
@@ -57,7 +57,7 @@ defmodule CentralWeb.UserSocket do
   # Would allow you to broadcast a "disconnect" event and terminate
   # all active sockets and channels for a given user:
   #
-  #     CentralWeb.Endpoint.broadcast("user_socket:#{user.id}", "disconnect", %{})
+  #     TeiserverWeb.Endpoint.broadcast("user_socket:#{user.id}", "disconnect", %{})
   #
   # Returning `nil` makes this socket anonymous.
   @impl true

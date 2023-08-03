@@ -443,7 +443,7 @@ journalctl -u nginx.server
 **Possible SSL related errors:**
 - Certbot files not existing
 - Certbot files not having the right permissions (try to `cat` them)
-- Certs not being referenced by the application (used `Application.get_env(:central, CentralWeb.Endpoint)[:https]` within the remote terminal to check the actual paths in the app) 
+- Certs not being referenced by the application (used `Application.get_env(:central, TeiserverWeb.Endpoint)[:https]` within the remote terminal to check the actual paths in the app) 
 
 #### What is "central"?
 I've a few different projects all of which rely on a common core of functionality (users, groups etc). This is stored as the "central" folder which makes it easier to share code and the like between them. It does mean the application launched is called "central" though. The main repo for Central is [https://github.com/Teifion/central](https://github.com/Teifion/central).
