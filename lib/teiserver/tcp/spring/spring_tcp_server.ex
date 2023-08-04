@@ -870,7 +870,8 @@ defmodule Teiserver.SpringTcpServer do
         SpringOut.reply(:enable_all_units, [], nil, state)
         SpringOut.reply(:disable_units, msg.changes.disabled_units, nil, state)
 
-      true -> state
+      true ->
+        SpringOut.reply(:update_battle, msg.lobby_id, nil, state)
     end
   end
 
