@@ -7,10 +7,23 @@ defmodule Teiserver.Repo.Migrations.CreateRelationshipsTable do
       add :to_user_id, references(:account_users, on_delete: :nothing, primary_key: true)
 
       add :state, :string
-      add :follow, :boolean, default: false
 
       add :notes, :string
       add :tags, {:array, :string}
+
+      timestamps()
+    end
+
+    create table(:account_friends, primary_key: false) do
+      add :user1_id, references(:account_users, on_delete: :nothing, primary_key: true)
+      add :user2_id, references(:account_users, on_delete: :nothing, primary_key: true)
+
+      timestamps()
+    end
+
+    create table(:account_friend_requests, primary_key: false) do
+      add :from_user_id, references(:account_users, on_delete: :nothing, primary_key: true)
+      add :to_user_id, references(:account_users, on_delete: :nothing, primary_key: true)
 
       timestamps()
     end

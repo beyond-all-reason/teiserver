@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.FriendLink do
+defmodule Teiserver.Account.Relationship do
   @moduledoc false
   use CentralWeb, :schema
 
@@ -7,9 +7,8 @@ defmodule Teiserver.Account.FriendLink do
     belongs_to :from_user, Central.Account.User, primary_key: true
     belongs_to :to_user, Central.Account.User, primary_key: true
 
-    # Valid states: Avoid, Block, Ignore, None, Pending friend, Friend
+    # Valid states: Avoid, Block, Ignore, None, Follow
     field :state, :string
-    field :follow, :boolean, default: false
 
     field :notes, :string
     field :tags, {:array, :string}, default: []

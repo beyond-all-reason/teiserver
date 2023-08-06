@@ -1,19 +1,19 @@
-defmodule Teiserver.Account.RelationshipLib do
+defmodule Teiserver.Account.FriendRequestLib do
   @moduledoc false
   use CentralWeb, :library
   alias Teiserver.Helper.QueryHelpers
-  alias Teiserver.Account.Relationship
+  alias Teiserver.Account.FriendRequest
 
   @spec colours :: atom
   def colours(), do: :success
 
   @spec icon :: String.t()
-  def icon(), do: "fa-users"
+  def icon(), do: "fa-user-plus"
 
   # Queries
-  @spec query_relationships(list) :: Ecto.Query.t()
-  def query_relationships(args) do
-    query = from(relationships in Relationship)
+  @spec query_friend_requests(list) :: Ecto.Query.t()
+  def query_friend_requests(args) do
+    query = from(friend_requests in FriendRequest)
 
     query
     |> do_where([from_user_id: args[:from_user_id]])
@@ -39,29 +39,19 @@ defmodule Teiserver.Account.RelationshipLib do
   defp _where(query, _, nil), do: query
 
   defp _where(query, :from_user_id, from_id) do
-    from relationships in query,
-      where: relationships.from_user_id == ^from_id
+    from friend_requests in query,
+      where: friend_requests.from_user_id == ^from_id
   end
 
   defp _where(query, :to_user_id, to_id) do
-    from relationships in query,
-      where: relationships.to_user_id == ^to_id
+    from friend_requests in query,
+      where: friend_requests.to_user_id == ^to_id
   end
 
   defp _where(query, :from_to_id, {from_id, to_id}) do
-    from relationships in query,
-      where: relationships.from_user_id == ^from_id,
-      where: relationships.to_user_id == ^to_id
-  end
-
-  defp _where(query, :state, state) do
-    from relationships in query,
-      where: relationships.state == ^state
-  end
-
-  defp _where(query, :state_in, states) do
-    from relationships in query,
-      where: relationships.state in ^states
+    from friend_requests in query,
+      where: friend_requests.from_user_id == ^from_id,
+      where: friend_requests.to_user_id == ^to_id
   end
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
@@ -76,13 +66,13 @@ defmodule Teiserver.Account.RelationshipLib do
   defp _order_by(query, nil), do: query
 
   defp _order_by(query, "Newest first") do
-    from relationships in query,
-      order_by: [desc: relationships.updated_at]
+    from friend_requests in query,
+      order_by: [desc: friend_requests.updated_at]
   end
 
   defp _order_by(query, "Oldest first") do
-    from relationships in query,
-      order_by: [asc: relationships.updated_at]
+    from friend_requests in query,
+      order_by: [asc: friend_requests.updated_at]
   end
 
   @spec do_preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
@@ -95,15 +85,15 @@ defmodule Teiserver.Account.RelationshipLib do
     end)
   end
 
-  defp _preload(query, :from_user) do
-    from relationships in query,
-      join: froms in assoc(relationships, :from_user),
-      preload: [from_user: froms]
+  defp _preload(query, :to_user) do
+    from friend_requests in query,
+      join: to_users in assoc(friend_requests, :to_user),
+      preload: [to_user: to_users]
   end
 
-  defp _preload(query, :to_user) do
-    from relationships in query,
-      join: tos in assoc(relationships, :to_user),
-      preload: [to_user: tos]
+  defp _preload(query, :from_user) do
+    from friend_requests in query,
+      join: from_users in assoc(friend_requests, :from_user),
+      preload: [from_user: from_users]
   end
 end

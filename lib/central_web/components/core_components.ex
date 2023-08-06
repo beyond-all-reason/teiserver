@@ -478,7 +478,7 @@ defmodule CentralWeb.CoreComponents do
             >
               <%= render_slot(col, @row_item.(row)) %>
             </td>
-            <td :if={@action != []} class="p-0">
+            <td :if={@action != []}>
               <div class="">
                 <span
                   :for={action <- @action}

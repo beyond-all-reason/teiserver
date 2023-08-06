@@ -1,13 +1,119 @@
 <TeiserverWeb.AccountComponents.sub_menu active={"relationship"} view_colour={@view_colour} />
 
-<div class="row section-menu">
+<div class="row">
+  <div class="col">
+    <.tab_header>
+      <.tab_nav
+        url={~p"/account/relationship/friend"}
+        selected={@tab == :friend}
+      >
+        <Fontawesome.icon icon="file-alt" style="solid" />
+        Friends
+      </.tab_nav>
+
+      <.tab_nav
+        url={~p"/account/relationship/follow"}
+        selected={@tab == :follow}
+      >
+        <Fontawesome.icon icon="file-alt" style="solid" />
+        Follows
+      </.tab_nav>
+
+      <.tab_nav
+        url={~p"/account/relationship/avoid"}
+        selected={@tab == :avoid}
+      >
+        <Fontawesome.icon icon="file-alt" style="solid" />
+        Avoids
+      </.tab_nav>
+
+      <.tab_nav
+        url={~p"/account/relationship/search"}
+        selected={@tab == :search}
+      >
+        <Fontawesome.icon icon="search" style="solid" />
+        Search users
+      </.tab_nav>
+    </.tab_header>
+  </div>
+</div>
+
+<div class="row mt-4" :if={@live_action == :friend}>
   <div class="col">
     <h4>Friends</h4>
-    <.table id="friends-table" table_class="table-sm" rows={@friends}>
-      <:col :let={friend} label="id"><%= friend.to_user.id %></:col>
-      <:col :let={friend} label="username"><%= friend.to_user.name %></:col>
+    <.table
+      id="friends-table"
+      table_class="table-sm"
+      rows={@friends}
+      row_click={fn friend -> JS.navigate(~p"/profile/id/#{friend.other_user.id}") end}
+    >
+      <:col :let={friend} label="Name"><%= friend.other_user.name %></:col>
+      <:col :let={friend} label="Last played"><%= friend.other_user.last_played |> date_to_str(:hms_or_ymd) %></:col>
+
+      <:action :let={friend}>
+        <div class="visually-hidden">
+          <.link
+            navigate={~p"/profile/id/#{friend.other_user.id}"}>
+              Show
+          </.link>
+        </div>
+      </:action>
+
     </.table>
   </div>
+
+  <div class="col">
+    <h4>Incoming requests</h4>
+    <.table id="incoming-request-table" table_class="table-sm" rows={@incoming_friend_requests}>
+      <:col :let={request} label="Name"><%= request.from_user.name %></:col>
+      
+      <:col :let={request} label="">
+        <.link
+          class="btn btn-secondary btn-sm"
+          navigate={~p"/profile/id/#{request.from_user.id}"}>
+            Profile
+        </.link>
+      </:col>
+      
+      <:col :let={request} label=""><%= request.from_user.name %></:col>
+      <:col :let={request} label=""><%= request.from_user.name %></:col>
+    </.table>
+  </div>
+  
+  <div class="col">
+    <h4>Outgoing requests</h4>
+    <.table id="incoming-request-table" table_class="table-sm" rows={@outgoing_friend_requests}>
+      <:col :let={request} label="Name"><%= request.to_user.name %></:col>
+    </.table>
+  </div>
+</div>
+
+<div class="row mt-4" :if={@live_action == :follow}>
+  <div class="col">
+    <h4>Follows</h4>
+    <.table
+      id="follows-table"
+      table_class="table-sm"
+      rows={@follows}
+      row_click={fn follow -> JS.navigate(~p"/profile/id/#{follow.to_user.id}") end}
+    >
+      <:col :let={follow} label="Name"><%= follow.to_user.name %></:col>
+      <:col :let={follow} label="Last played"><%= follow.to_user.last_played |> date_to_str(:hms_or_ymd) %></:col>
+      
+      <:action :let={follow}>
+        <div class="visually-hidden">
+          <.link
+            navigate={~p"/profile/id/#{follow.to_user.id}"}>
+              Show
+          </.link>
+        </div>
+      </:action>
+      
+    </.table>
+  </div>
+</div>
+
+<div class="row mt-4" :if={@live_action == :avoid}>
   <div class="col">
     <h4>Ignores</h4>
     <.table id="ignores-table" table_class="table-sm" rows={@ignores}>

@@ -1544,6 +1544,264 @@ defmodule Teiserver.Account do
     Relationship.changeset(relationship, attrs)
   end
 
+  alias Teiserver.Account.{Friend, FriendLib}
+
+  @doc """
+  Returns the list of friends.
+
+  ## Examples
+
+      iex> list_friends()
+      [%Friend{}, ...]
+
+  """
+  @spec list_friends(list) :: list
+  def list_friends(args \\ []) do
+    args
+    |> FriendLib.query_friends()
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single friend.
+
+  Raises `Ecto.NoResultsError` if the Friend does not exist.
+
+  ## Examples
+
+      iex> get_friend!(123)
+      %Friend{}
+
+      iex> get_friend!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_friend!(from_id, to_id), do: get_friend!(from_id, to_id, [])
+
+  def get_friend!(from_id, to_id, args) do
+    args = args ++ [from_user_id: from_id, to_user_id: to_id]
+
+    args
+    |> FriendLib.query_friends()
+    |> Repo.one!()
+  end
+
+  @doc """
+  Gets a single friend, returns nil if the friend doesn't exist
+
+  ## Examples
+
+      iex> get_friend(123)
+      %Friend{}
+
+      iex> get_friend(456)
+      nil
+
+  """
+  def get_friend(from_id, to_id), do: get_friend!(from_id, to_id, [])
+
+  def get_friend(from_id, to_id, args) do
+    args = args ++ [from_user_id: from_id, to_user_id: to_id]
+
+    args
+    |> FriendLib.query_friends()
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a friend.
+
+  ## Examples
+
+      iex> create_friend(%{field: value})
+      {:ok, %Friend{}}
+
+      iex> create_friend(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_friend(attrs \\ %{}) do
+    %Friend{}
+    |> Friend.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a friend.
+
+  ## Examples
+
+      iex> update_friend(friend, %{field: new_value})
+      {:ok, %Friend{}}
+
+      iex> update_friend(friend, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_friend(%Friend{} = friend, attrs) do
+    friend
+    |> Friend.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a friend.
+
+  ## Examples
+
+      iex> delete_friend(friend)
+      {:ok, %Friend{}}
+
+      iex> delete_friend(friend)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_friend(%Friend{} = friend) do
+    Repo.delete(friend)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking friend changes.
+
+  ## Examples
+
+      iex> change_friend(friend)
+      %Ecto.Changeset{data: %Friend{}}
+
+  """
+  def change_friend(%Friend{} = friend, attrs \\ %{}) do
+    Friend.changeset(friend, attrs)
+  end
+
+  alias Teiserver.Account.{FriendRequest, FriendRequestLib}
+
+  @doc """
+  Returns the list of friend_requests.
+
+  ## Examples
+
+      iex> list_friend_requests()
+      [%FriendRequest{}, ...]
+
+  """
+  @spec list_friend_requests(list) :: list
+  def list_friend_requests(args \\ []) do
+    args
+    |> FriendRequestLib.query_friend_requests()
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single friend_request.
+
+  Raises `Ecto.NoResultsError` if the FriendRequest does not exist.
+
+  ## Examples
+
+      iex> get_friend_request!(123)
+      %FriendRequest{}
+
+      iex> get_friend_request!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_friend_request!(from_id, to_id), do: get_friend_request!(from_id, to_id, [])
+
+  def get_friend_request!(from_id, to_id, args) do
+    args = args ++ [from_user_id: from_id, to_user_id: to_id]
+
+    args
+    |> FriendRequestLib.query_friend_requests()
+    |> Repo.one!()
+  end
+
+  @doc """
+  Gets a single friend_request, returns nil if the friend_request doesn't exist
+
+  ## Examples
+
+      iex> get_friend_request(123)
+      %FriendRequest{}
+
+      iex> get_friend_request(456)
+      nil
+
+  """
+  def get_friend_request(from_id, to_id), do: get_friend_request!(from_id, to_id, [])
+
+  def get_friend_request(from_id, to_id, args) do
+    args = args ++ [from_user_id: from_id, to_user_id: to_id]
+
+    args
+    |> FriendRequestLib.query_friend_requests()
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a friend_request.
+
+  ## Examples
+
+      iex> create_friend_request(%{field: value})
+      {:ok, %FriendRequest{}}
+
+      iex> create_friend_request(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_friend_request(attrs \\ %{}) do
+    %FriendRequest{}
+    |> FriendRequest.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a friend_request.
+
+  ## Examples
+
+      iex> update_friend_request(friend_request, %{field: new_value})
+      {:ok, %FriendRequest{}}
+
+      iex> update_friend_request(friend_request, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_friend_request(%FriendRequest{} = friend_request, attrs) do
+    friend_request
+    |> FriendRequest.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a friend_request.
+
+  ## Examples
+
+      iex> delete_friend_request(friend_request)
+      {:ok, %FriendRequest{}}
+
+      iex> delete_friend_request(friend_request)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_friend_request(%FriendRequest{} = friend_request) do
+    Repo.delete(friend_request)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking friend_request changes.
+
+  ## Examples
+
+      iex> change_friend_request(friend_request)
+      %Ecto.Changeset{data: %FriendRequest{}}
+
+  """
+  def change_friend_request(%FriendRequest{} = friend_request, attrs \\ %{}) do
+    FriendRequest.changeset(friend_request, attrs)
+  end
+
   # User functions
   alias alias Teiserver.Account.UserCache
 

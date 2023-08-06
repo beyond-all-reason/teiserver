@@ -240,7 +240,24 @@ defmodule TeiserverWeb.Router do
         {Teiserver.Account.AuthPlug, :ensure_authenticated},
         {Teiserver.Communication.NotificationPlug, :load_notifications}
       ] do
-        live "/relationship", RelationshipLive.Index, :index
+        live "/relationship", RelationshipLive.Index, :friend
+        live "/relationship/friend", RelationshipLive.Index, :friend
+        live "/relationship/follow", RelationshipLive.Index, :follow
+        live "/relationship/avoid", RelationshipLive.Index, :avoid
+        live "/relationship/search", RelationshipLive.Index, :search
+    end
+  end
+
+  scope "/profile", TeiserverWeb.Account do
+    pipe_through([:browser, :standard_live_layout, :protected])
+
+    live_session :profiles,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Communication.NotificationPlug, :load_notifications}
+      ] do
+        live "/id/:userid", ProfileLive.Index, :userid
+        live "/name/:username", ProfileLive.Index, :username
     end
   end
 

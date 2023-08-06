@@ -1,18 +1,11 @@
-defmodule Teiserver.Account.FriendLink do
+defmodule Teiserver.Account.FriendRequest do
   @moduledoc false
   use CentralWeb, :schema
 
   @primary_key false
-  schema "account_relationships" do
+  schema "account_friend_requests" do
     belongs_to :from_user, Central.Account.User, primary_key: true
     belongs_to :to_user, Central.Account.User, primary_key: true
-
-    # Valid states: Avoid, Block, Ignore, None, Pending friend, Friend
-    field :state, :string
-    field :follow, :boolean, default: false
-
-    field :notes, :string
-    field :tags, {:array, :string}, default: []
 
     timestamps()
   end
@@ -22,12 +15,8 @@ defmodule Teiserver.Account.FriendLink do
   """
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
-    params =
-      params
-      |> trim_strings(~w(state notes)a)
-
     struct
-    |> cast(params, ~w(from_user_id to_user_id state follow notes tags)a)
+    |> cast(params, ~w(from_user_id to_user_id)a)
     |> validate_required(~w(from_user_id to_user_id)a)
   end
 
