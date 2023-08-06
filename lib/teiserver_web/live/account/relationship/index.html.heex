@@ -1,6 +1,6 @@
 <TeiserverWeb.AccountComponents.sub_menu active={"relationship"} view_colour={@view_colour} />
 
-<div class="row">
+<div class="row mt-2">
   <div class="col">
     <.tab_header>
       <.tab_nav
@@ -38,7 +38,7 @@
   </div>
 </div>
 
-<div class="row mt-4" :if={@live_action == :friend}>
+<div class="row mt-2" :if={@live_action == :friend}>
   <div class="col">
     <h4>Friends</h4>
     <.table
@@ -88,7 +88,7 @@
   </div>
 </div>
 
-<div class="row mt-4" :if={@live_action == :follow}>
+<div class="row mt-2" :if={@live_action == :follow}>
   <div class="col">
     <h4>Follows</h4>
     <.table
@@ -113,7 +113,7 @@
   </div>
 </div>
 
-<div class="row mt-4" :if={@live_action == :avoid}>
+<div class="row mt-2" :if={@live_action == :avoid}>
   <div class="col">
     <h4>Ignores</h4>
     <.table id="ignores-table" table_class="table-sm" rows={@ignores}>
@@ -134,5 +134,37 @@
       <:col :let={block} label="id"><%= block.to_user.id %></:col>
       <:col :let={block} label="username"><%= block.to_user.name %></:col>
     </.table>
+  </div>
+</div>
+
+
+<div class="row mt-2" :if={@live_action == :search}>
+  <div class="col">
+    
+    <form method="post" class="">
+      <div class="row">
+        <div class="col">
+          <.input type="text"
+            label="Username"
+            name="username"
+            value={@search_terms["username"]}
+            phx-change="search-update" phx-debounce="400"
+          />
+        </div>
+      </div>
+    </form>
+    <br />
+    
+    <div :if={@found_user}>
+      <h4><%= @found_user.name %></h4>
+      
+      <.link
+        navigate={~p"/moderation/report_form/#{@found_user.id}"}
+        class="btn btn-lg btn-warning"
+      >
+        <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="regular" />
+        Report
+      </.link>
+    </div>
   </div>
 </div>

@@ -49,6 +49,40 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     socket
       |> assign(:page_title, "Relationships - Player search")
       |> assign(:tab, :search)
+      |> update_user_search
+  end
+
+  @impl true
+  def handle_event("search-update", event, %{assigns: %{search_terms: search_terms}} = socket) do
+    [key] = event["_target"]
+    value = event[key]
+
+    new_search = Map.put(search_terms, key, value)
+
+    socket = socket
+      |> assign(:search_terms, new_search)
+      |> update_user_search
+
+    {:noreply, socket}
+  end
+
+  defp update_user_search(%{assigns: %{live_action: :search, search_terms: terms} = assigns} = socket) do
+    found_user = if Map.get(terms, "username") do
+      Account.get_user(nil,
+        search: [
+          name_lower: Map.get(terms, "username")
+        ]
+      )
+    else
+      nil
+    end
+    socket
+      |> assign(:found_user, found_user)
+  end
+
+  defp update_user_search(socket) do
+    socket
+      |> assign(:found_user, nil)
   end
 
   defp put_empty_relationships(socket) do
@@ -60,6 +94,8 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       |> assign(:avoids, [])
       |> assign(:ignores, [])
       |> assign(:blocks, [])
+      |> assign(:search_terms, %{"username" => "teifion"})
+      |> assign(:found_user, nil)
   end
 
   defp get_friends(%{assigns: %{current_user: current_user}} = socket) do

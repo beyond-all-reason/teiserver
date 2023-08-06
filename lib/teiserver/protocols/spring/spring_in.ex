@@ -1271,8 +1271,6 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("SAYBATTLE", msg, _msg_id, state) do
   if Lobby.allow?(state.userid, :saybattle, state.lobby_id) do
-    lowercase_msg = String.downcase(msg)
-
     msg_sliced =
       if User.is_bot?(state.userid) do
         msg
