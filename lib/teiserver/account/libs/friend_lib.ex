@@ -16,8 +16,7 @@ defmodule Teiserver.Account.FriendLib do
     query = from(friends in Friend)
 
     query
-    |> do_where([user1_id: args[:user1_id]])
-    |> do_where([user2_id: args[:user2_id]])
+    |> do_where([users: args[:users]])
     |> do_where(args[:where])
     |> do_preload(args[:preload])
     |> do_order_by(args[:order_by])

@@ -54,6 +54,12 @@ defmodule Teiserver.Account.FriendRequestLib do
       where: friend_requests.to_user_id == ^to_id
   end
 
+  defp _where(query, :either_user_is, {u1, u2}) do
+    from friend_requests in query,
+      where: (friend_requests.from_user_id == ^u1 and friend_requests.to_user_id == ^u2)
+        or (friend_requests.from_user_id == ^u2 and friend_requests.to_user_id == ^u1)
+  end
+
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
   defp do_order_by(query, params) do

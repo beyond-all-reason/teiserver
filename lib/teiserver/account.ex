@@ -1469,7 +1469,7 @@ defmodule Teiserver.Account do
       nil
 
   """
-  def get_relationship(from_id, to_id), do: get_relationship!(from_id, to_id, [])
+  def get_relationship(from_id, to_id), do: get_relationship(from_id, to_id, [])
 
   def get_relationship(from_id, to_id, args) do
     args = args ++ [from_user_id: from_id, to_user_id: to_id]
@@ -1579,7 +1579,7 @@ defmodule Teiserver.Account do
   def get_friend!(from_id, to_id), do: get_friend!(from_id, to_id, [])
 
   def get_friend!(from_id, to_id, args) do
-    args = args ++ [from_user_id: from_id, to_user_id: to_id]
+    args = args ++ [users: [from_id, to_id]]
 
     args
     |> FriendLib.query_friends()
@@ -1598,10 +1598,10 @@ defmodule Teiserver.Account do
       nil
 
   """
-  def get_friend(from_id, to_id), do: get_friend!(from_id, to_id, [])
+  def get_friend(from_id, to_id), do: get_friend(from_id, to_id, [])
 
   def get_friend(from_id, to_id, args) do
-    args = args ++ [from_user_id: from_id, to_user_id: to_id]
+    args = args ++ [users: [from_id, to_id]]
 
     args
     |> FriendLib.query_friends()
@@ -1727,7 +1727,7 @@ defmodule Teiserver.Account do
       nil
 
   """
-  def get_friend_request(from_id, to_id), do: get_friend_request!(from_id, to_id, [])
+  def get_friend_request(from_id, to_id), do: get_friend_request(from_id, to_id, [])
 
   def get_friend_request(from_id, to_id, args) do
     args = args ++ [from_user_id: from_id, to_user_id: to_id]

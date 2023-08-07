@@ -158,6 +158,21 @@
     <div :if={@found_user}>
       <h4><%= @found_user.name %></h4>
       
+      <div :if={@found_relationship}>
+        <%= inspect @found_relationship %>
+      </div>
+      <br /><br />
+      
+      <div :if={@found_friendship_request}>
+        <%= inspect @found_friendship_request %>
+      </div>
+      <br /><br />
+      
+      <div :if={@found_friendship}>
+        <%= inspect @found_friendship %>
+      </div>
+      <br /><br />
+      
       <.link
         navigate={~p"/moderation/report_form/#{@found_user.id}"}
         class="btn btn-lg btn-warning"

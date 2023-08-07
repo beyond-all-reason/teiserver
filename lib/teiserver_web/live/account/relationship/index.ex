@@ -67,22 +67,41 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   end
 
   defp update_user_search(%{assigns: %{live_action: :search, search_terms: terms} = assigns} = socket) do
-    found_user = if Map.get(terms, "username") do
-      Account.get_user(nil,
+    if Map.get(terms, "username") do
+      found_user = Account.get_user(nil,
         search: [
           name_lower: Map.get(terms, "username")
         ]
       )
+
+      if found_user do
+        relationship = Account.get_relationship(assigns.current_user.id, found_user.id)
+        friendship = Account.get_friend(assigns.current_user.id, found_user.id)
+        friendship_request = Account.get_friend_request(nil, nil, [where: [either_user_is: {assigns.current_user.id, found_user.id}]])
+
+        socket
+          |> assign(:found_user, found_user)
+          |> assign(:found_relationship, relationship)
+          |> assign(:found_friendship, friendship)
+          |> assign(:found_friendship_request, friendship_request)
+      else
+        socket
+          |> assign(:found_user, nil)
+          |> assign(:found_relationship, nil)
+          |> assign(:found_friendship, nil)
+          |> assign(:found_friendship_request, nil)
+      end
     else
-      nil
+      socket
     end
-    socket
-      |> assign(:found_user, found_user)
   end
 
   defp update_user_search(socket) do
     socket
       |> assign(:found_user, nil)
+      |> assign(:found_relationship, nil)
+      |> assign(:found_friendship, nil)
+      |> assign(:found_friendship_request, nil)
   end
 
   defp put_empty_relationships(socket) do
@@ -94,8 +113,11 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       |> assign(:avoids, [])
       |> assign(:ignores, [])
       |> assign(:blocks, [])
-      |> assign(:search_terms, %{"username" => "teifion"})
+      |> assign(:search_terms, %{"username" => "JayMontano"})
       |> assign(:found_user, nil)
+      |> assign(:found_relationship, nil)
+      |> assign(:found_friendship, nil)
+      |> assign(:found_friendship_request, nil)
   end
 
   defp get_friends(%{assigns: %{current_user: current_user}} = socket) do
