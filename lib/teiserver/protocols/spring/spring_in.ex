@@ -1288,23 +1288,40 @@ defmodule Teiserver.Protocols.SpringIn do
     state
   end
 
-  defp do_handle("SAYBATTLEEX", msg, _msg_id, state) do
-    if Lobby.allow?(state.userid, :saybattleex, state.lobby_id) do
+defp do_handle("SAYBATTLEEX", msg, _msg_id, state) do
+  if Lobby.allow?(state.userid, :saybattleex, state.lobby_id) do
+    lowercase_msg = String.downcase(msg)
 
-      msg_sliced =
-        if User.is_bot?(state.userid) do
-          msg
-        else
+    msg_sliced =
+      if User.is_bot?(state.userid) do
+        msg
+        
+      else
+        if String.starts_with?(lowercase_msg, "!bset tweakdefs") || String.starts_with?(lowercase_msg, "!bset tweakunits") do
           msg
           |> String.trim()
-          |> String.slice(0..256)
+          |> String.slice(0..16384)
+        
+        else
+          if String.starts_with?(lowercase_msg, "$welcome-message") do
+            msg
+            |> String.trim()
+            |> String.slice(0..1024)
+          
+          else
+            msg
+            |> String.trim()
+            |> String.slice(0..256)
+          end
         end
+      end
 
-      Lobby.sayex(state.userid, msg_sliced, state.lobby_id)
-    end
-
-    state
+    Lobby.sayex(state.userid, msg_sliced, state.lobby_id)
   end
+
+  state
+end
+
 
 
   # SAYBATTLEPRIVATEEX username
