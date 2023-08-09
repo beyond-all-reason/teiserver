@@ -1274,10 +1274,8 @@ defmodule Teiserver.Protocols.SpringIn do
     lowercase_msg = String.downcase(msg)
 
     msg_sliced =
-      if String.starts_with?(lowercase_msg, "!bset tweakdefs") || String.starts_with?(lowercase_msg, "!bset tweakunits") do
+      if User.is_bot?(state.userid) do
         msg
-        |> String.trim()
-        |> String.slice(0..8192)
       else
         msg
         |> String.trim()
@@ -1292,13 +1290,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("SAYBATTLEEX", msg, _msg_id, state) do
     if Lobby.allow?(state.userid, :saybattleex, state.lobby_id) do
-      lowercase_msg = String.downcase(msg)
 
       msg_sliced =
-        if String.starts_with?(lowercase_msg, "!bset tweakdefs") || String.starts_with?(lowercase_msg, "!bset tweakunits") do
+        if User.is_bot?(state.userid) do
           msg
-          |> String.trim()
-          |> String.slice(0..8192)
         else
           msg
           |> String.trim()
@@ -1319,11 +1314,16 @@ defmodule Teiserver.Protocols.SpringIn do
         to_id = User.get_userid(to_name)
 
         if Lobby.allow?(state.userid, :saybattleprivateex, state.lobby_id) do
-          msg = msg
-            |> String.trim()
-            |> String.slice(0..256)
+          msg_sliced =
+            if User.is_bot?(state.userid) do
+              msg
+            else
+              msg
+              |> String.trim()
+              |> String.slice(0..256)
+            end
 
-          Lobby.sayprivateex(state.userid, to_id, msg, state.lobby_id)
+          Lobby.sayprivateex(state.userid, to_id, msg_sliced, state.lobby_id)
         end
 
       _ ->
