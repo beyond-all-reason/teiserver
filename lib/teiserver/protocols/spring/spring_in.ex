@@ -1271,14 +1271,21 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("SAYBATTLE", msg, _msg_id, state) do
   if Lobby.allow?(state.userid, :saybattle, state.lobby_id) do
-    msg_sliced =
-      if User.is_bot?(state.userid) do
+    lowercase_msg = String.downcase(msg)
+
+    msg_sliced = cond do
+      User.is_bot?(state.userid) ->
         msg
-      else
-        msg
-        |> String.trim()
-        |> String.slice(0..256)
-      end
+
+      String.starts_with?(lowercase_msg, "!bset tweakdefs") || String.starts_with?(lowercase_msg, "!bset tweakunits") ->
+        msg |> String.trim() |> String.slice(0..16384)
+
+      String.starts_with?(lowercase_msg, "$welcome-message") ->
+        msg |> String.trim() |> String.slice(0..1024)
+
+      true ->
+        msg |> String.trim() |> String.slice(0..256)
+    end
 
     Lobby.say(state.userid, msg_sliced, state.lobby_id)
   end
@@ -1288,20 +1295,30 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("SAYBATTLEEX", msg, _msg_id, state) do
     if Lobby.allow?(state.userid, :saybattleex, state.lobby_id) do
-      msg_sliced =
-        if User.is_bot?(state.userid) do
+      lowercase_msg = String.downcase(msg)
+
+      msg_sliced = cond do
+        User.is_bot?(state.userid) ->
           msg
-        else
-          msg
-          |> String.trim()
-          |> String.slice(0..256)
-        end
+
+        String.starts_with?(lowercase_msg, "!bset tweakdefs") || String.starts_with?(lowercase_msg, "!bset tweakunits") ->
+          msg |> String.trim() |> String.slice(0..16384)
+
+        String.starts_with?(lowercase_msg, "$welcome-message") ->
+          msg |> String.trim() |> String.slice(0..1024)
+
+        true ->
+          msg |> String.trim() |> String.slice(0..256)
+      end
 
       Lobby.sayex(state.userid, msg_sliced, state.lobby_id)
     end
 
     state
   end
+
+
+
 
   # SAYBATTLEPRIVATEEX username
   defp do_handle("SAYBATTLEPRIVATEEX", data, msg_id, state) do
