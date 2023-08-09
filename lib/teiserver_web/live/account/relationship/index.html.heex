@@ -75,8 +75,32 @@
         </.link>
       </:col>
       
-      <:col :let={request} label=""><%= request.from_user.name %></:col>
-      <:col :let={request} label=""><%= request.from_user.name %></:col>
+      <:col :let={request} label="">
+        <div
+          class="btn btn-success btn-sm"
+          phx-click="accept-friend"
+          phx-value-userid={request.from_user.id}>
+          Accept
+        </div>
+      </:col>
+      
+      <:col :let={request} label="">
+        <div
+          class="btn btn-warning btn-sm"
+          phx-click="decline-friend"
+          phx-value-userid={request.from_user.id}>
+          Decline
+        </div>
+      </:col>
+      
+      <:col :let={request} label="">
+        <div
+          class="btn btn-danger btn-sm"
+          phx-click="decline-friend-and-block"
+          phx-value-userid={request.from_user.id}>
+          Block
+        </div>
+      </:col>
     </.table>
   </div>
   
@@ -84,6 +108,15 @@
     <h4>Outgoing requests</h4>
     <.table id="incoming-request-table" table_class="table-sm" rows={@outgoing_friend_requests}>
       <:col :let={request} label="Name"><%= request.to_user.name %></:col>
+      
+      <:col :let={request} label="">
+        <div
+          class="btn btn-danger btn-sm"
+          phx-click="rescind-friend"
+          phx-value-userid={request.to_user.id}>
+          Rescind
+        </div>
+      </:col>
     </.table>
   </div>
 </div>
@@ -114,21 +147,21 @@
 </div>
 
 <div class="row mt-2" :if={@live_action == :avoid}>
-  <div class="col">
+  <div class="col" id="ignores-col">
     <h4>Ignores</h4>
     <.table id="ignores-table" table_class="table-sm" rows={@ignores}>
       <:col :let={ignore} label="id"><%= ignore.to_user.id %></:col>
       <:col :let={ignore} label="username"><%= ignore.to_user.name %></:col>
     </.table>
   </div>
-  <div class="col">
+  <div class="col" id="avoids-col">
     <h4>Avoids</h4>
     <.table id="avoids-table" table_class="table-sm" rows={@avoids}>
       <:col :let={avoid} label="id"><%= avoid.to_user.id %></:col>
       <:col :let={avoid} label="username"><%= avoid.to_user.name %></:col>
     </.table>
   </div>
-  <div class="col">
+  <div class="col" id="blocks-col">
     <h4>Blocks</h4>
     <.table id="blocks-table" table_class="table-sm" rows={@blocks}>
       <:col :let={block} label="id"><%= block.to_user.id %></:col>

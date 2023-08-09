@@ -26,7 +26,7 @@ defmodule Teiserver.Account.Relationship do
       |> trim_strings(~w(state notes)a)
 
     struct
-    |> cast(params, ~w(from_user_id to_user_id state follow notes tags)a)
+    |> cast(params, ~w(from_user_id to_user_id state notes tags)a)
     |> validate_required(~w(from_user_id to_user_id)a)
   end
 

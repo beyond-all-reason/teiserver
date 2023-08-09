@@ -3,6 +3,7 @@ defmodule Teiserver.Account.FriendRequestLib do
   use CentralWeb, :library
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Account.FriendRequest
+  alias Teiserver.Data.Types, as: T
 
   @spec colours :: atom
   def colours(), do: :success
@@ -101,5 +102,71 @@ defmodule Teiserver.Account.FriendRequestLib do
     from friend_requests in query,
       join: from_users in assoc(friend_requests, :from_user),
       preload: [from_user: from_users]
+  end
+
+  # Functions
+  @spec accept_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
+  def accept_friend_request(from_id, to_id) do
+    case Teiserver.Account.get_friend_request(from_id, to_id) do
+      nil ->
+        {:error, "no request"}
+      req ->
+        accept_friend_request(req)
+    end
+  end
+
+  @spec accept_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
+  def accept_friend_request(%FriendRequest{} = req) do
+    case Teiserver.Account.get_friend(req.from_user_id, req.to_user_id) do
+      nil ->
+        [uid1, uid2] = Enum.sort([req.from_user_id, req.to_user_id])
+
+        {:ok, _friend} = Teiserver.Account.create_friend(%{
+          user1_id: uid1,
+          user2_id: uid2,
+        })
+        Teiserver.Account.delete_friend_request(req)
+        :ok
+
+      _ ->
+        Teiserver.Account.delete_friend_request(req)
+        :ok
+    end
+  end
+
+  @spec decline_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
+  def decline_friend_request(from_id, to_id) do
+    case Teiserver.Account.get_friend_request(from_id, to_id) do
+      nil ->
+        {:error, "no request"}
+      req ->
+        decline_friend_request(req)
+    end
+  end
+
+  @spec decline_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
+  def decline_friend_request(%FriendRequest{} = req) do
+    Teiserver.Account.delete_friend_request(req)
+    :ok
+  end
+
+  @doc """
+  The same as declining for now but intended to be used where the person declining
+  is the sender
+  """
+  @spec rescind_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
+  def rescind_friend_request(from_id, to_id) do
+    case Teiserver.Account.get_friend_request(from_id, to_id) do
+      nil ->
+        {:error, "no request"}
+      req ->
+        rescind_friend_request(req)
+    end
+  end
+
+  @spec rescind_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
+  def rescind_friend_request(%FriendRequest{} = req) do
+    Teiserver.Account.delete_friend_request(req)
+    :ok
   end
 end

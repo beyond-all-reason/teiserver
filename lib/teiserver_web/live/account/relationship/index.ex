@@ -28,6 +28,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     socket
       |> assign(:page_title, "Relationships - Friends")
       |> assign(:tab, :friend)
+      |> put_empty_relationships
       |> get_friends()
   end
 
@@ -35,6 +36,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     socket
       |> assign(:page_title, "Relationships - Following")
       |> assign(:tab, :follow)
+      |> put_empty_relationships
       |> get_follows()
   end
 
@@ -42,6 +44,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     socket
       |> assign(:page_title, "Relationships - Avoids")
       |> assign(:tab, :avoid)
+      |> put_empty_relationships
       |> get_avoids()
   end
 
@@ -49,6 +52,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     socket
       |> assign(:page_title, "Relationships - Player search")
       |> assign(:tab, :search)
+      |> put_empty_relationships
       |> update_user_search
   end
 
@@ -62,6 +66,80 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     socket = socket
       |> assign(:search_terms, new_search)
       |> update_user_search
+
+    {:noreply, socket}
+  end
+
+  def handle_event("accept-friend", %{"userid" => userid_str}, socket) do
+    userid = String.to_integer(userid_str)
+
+    socket = case Account.accept_friend_request(userid, socket.assigns.current_user.id) do
+      :ok ->
+        socket
+          |> put_flash(:success, "Friend request accepted")
+          |> get_friends()
+      {:error, reason} ->
+        socket
+          |> put_flash(:warning, "There was an error accepting that friend request: '#{reason}'")
+          |> get_friends()
+    end
+
+    {:noreply, socket}
+  end
+
+  def handle_event("decline-friend", %{"userid" => userid_str}, socket) do
+    userid = String.to_integer(userid_str)
+
+    socket = case Account.decline_friend_request(userid, socket.assigns.current_user.id) do
+      :ok ->
+        socket
+          |> put_flash(:success, "Friend request declined")
+          |> get_friends()
+      {:error, reason} ->
+        socket
+          |> put_flash(:warning, "There was an error declining that friend request: '#{reason}'")
+          |> get_friends()
+    end
+
+    {:noreply, socket}
+  end
+
+  def handle_event("decline-friend-and-block", %{"userid" => userid_str}, socket) do
+    userid = String.to_integer(userid_str)
+
+    socket = case Account.decline_friend_request(userid, socket.assigns.current_user.id) do
+      :ok ->
+        Account.upsert_relationship(%{
+          from_user_id: socket.assigns.current_user.id,
+          to_user_id: userid,
+          state: "block"
+        })
+
+        socket
+          |> put_flash(:success, "Friend request declined, user blocked")
+          |> get_friends()
+      {:error, reason} ->
+        socket
+          |> put_flash(:warning, "There was an error declining and blocking that friend request: '#{reason}'")
+          |> get_friends()
+    end
+
+    {:noreply, socket}
+  end
+
+  def handle_event("rescind-friend", %{"userid" => userid_str}, socket) do
+    userid = String.to_integer(userid_str)
+
+    socket = case Account.rescind_friend_request(socket.assigns.current_user.id, userid) do
+      :ok ->
+        socket
+          |> put_flash(:success, "Friend request rescinded")
+          |> get_friends()
+      {:error, reason} ->
+        socket
+          |> put_flash(:warning, "There was an error rescinding that friend request: '#{reason}'")
+          |> get_friends()
+    end
 
     {:noreply, socket}
   end

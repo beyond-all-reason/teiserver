@@ -1,4 +1,5 @@
 defmodule Teiserver.Account do
+  @moduledoc false
   import Ecto.Query, warn: false
   alias Teiserver.Repo
   require Logger
@@ -1498,6 +1499,30 @@ defmodule Teiserver.Account do
   end
 
   @doc """
+  Updates or inserts a relationship.
+
+  ## Examples
+
+      iex> upsert(%{field: value})
+      {:ok, %Relationship{}}
+
+      iex> upsert(%{field: value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def upsert_relationship(attrs) do
+    %Relationship{}
+    |> Relationship.changeset(attrs)
+    |> Repo.insert(
+      on_conflict: [set: [
+        from_user_id: attrs["from_user_id"],
+        to_user_id: attrs["to_user_id"]
+      ]],
+      conflict_target: ~w(from_user_id to_user_id)a
+    )
+  end
+
+  @doc """
   Updates a relationship.
 
   ## Examples
@@ -1801,6 +1826,24 @@ defmodule Teiserver.Account do
   def change_friend_request(%FriendRequest{} = friend_request, attrs \\ %{}) do
     FriendRequest.changeset(friend_request, attrs)
   end
+
+  @spec accept_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
+  defdelegate accept_friend_request(from_userid, to_userid), to: FriendRequestLib
+
+  @spec accept_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
+  defdelegate accept_friend_request(req), to: FriendRequestLib
+
+  @spec decline_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
+  defdelegate decline_friend_request(from_userid, to_userid), to: FriendRequestLib
+
+  @spec decline_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
+  defdelegate decline_friend_request(req), to: FriendRequestLib
+
+  @spec rescind_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
+  defdelegate rescind_friend_request(from_userid, to_userid), to: FriendRequestLib
+
+  @spec rescind_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
+  defdelegate rescind_friend_request(req), to: FriendRequestLib
 
   # User functions
   alias alias Teiserver.Account.UserCache

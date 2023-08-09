@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.RelationsLib do
+  @moduledoc false
   alias Teiserver.Communication
   alias Teiserver.Helper.StylingHelper
   alias Phoenix.PubSub

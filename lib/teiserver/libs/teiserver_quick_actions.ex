@@ -26,7 +26,7 @@ defmodule Teiserver.TeiserverQuickActions do
         %{
           label: "Friends/Mutes/Invites",
           icons: [Teiserver.icon(:relationship)],
-          url: ~p"/teiserver/account/relationships",
+          url: ~p"/account/relationship",
           permissions: "account"
         },
         %{

@@ -264,12 +264,6 @@ defmodule TeiserverWeb.Router do
   scope "/teiserver/account", TeiserverWeb.Account, as: :ts_account do
     pipe_through([:browser, :standard_layout, :protected])
 
-    get("/relationships", RelationshipsController, :index)
-    post("/relationships/find/", RelationshipsController, :find)
-    post("/relationships/create/:action/:target", RelationshipsController, :create)
-    put("/relationships/update/:action/:target", RelationshipsController, :update)
-    delete("/relationships/delete/:action/:target", RelationshipsController, :delete)
-
     resources("/preferences", PreferencesController, only: [:index, :edit, :update, :new, :create])
 
     get("/", GeneralController, :index)
@@ -290,24 +284,6 @@ defmodule TeiserverWeb.Router do
 
     get("/profile/:id", ProfileController, :show)
     get("/profile", ProfileController, :index)
-  end
-
-  # ts_clans_X_path
-  scope "/teiserver/clans", TeiserverWeb.Clans, as: :ts_clans do
-    pipe_through([:browser, :standard_layout, :protected])
-
-    get("/", ClanController, :index)
-    get("/:name", ClanController, :show)
-    put("/update/:clan_id", ClanController, :update)
-
-    get("/set_default/:id", ClanController, :set_default)
-    post("/create_invite", ClanController, :create_invite)
-    delete("/delete_invite/:clan_id/:user_id", ClanController, :delete_invite)
-    put("/respond_to_invite/:clan_id/:response", ClanController, :respond_to_invite)
-    delete("/delete_membership/:clan_id/:user_id", ClanController, :delete_membership)
-    put("/promote/:clan_id/:user_id", ClanController, :promote)
-    put("/demote/:clan_id/:user_id", ClanController, :demote)
-    put("/leave_clan/:clan_id", ClanController, :leave_clan)
   end
 
   scope "/teiserver/games", TeiserverWeb.Game, as: :ts_game do

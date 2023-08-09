@@ -14,6 +14,8 @@ defmodule Teiserver.Repo.Migrations.CreateRelationshipsTable do
       timestamps()
     end
 
+    create(unique_index(:account_relationships, [:from_user_id, :to_user_id]))
+
     create table(:account_friends, primary_key: false) do
       add :user1_id, references(:account_users, on_delete: :nothing, primary_key: true)
       add :user2_id, references(:account_users, on_delete: :nothing, primary_key: true)
