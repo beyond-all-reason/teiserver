@@ -27,16 +27,25 @@ defmodule Central.Application do
         TeiserverWeb.Endpoint,
         TeiserverWeb.Presence,
         {Central.General.CacheClusterServer, name: Central.General.CacheClusterServer},
+        {Oban, oban_config()},
+
+        # Store refers to something that is typically only updated at startup
+        # and should not be clustered
+
         concache_sup(:codes),
         concache_sup(:account_user_cache),
         concache_sup(:account_user_cache_bang),
         concache_sup(:account_membership_cache),
 
-        # Store refers to something that is typically only updated at startup
-        # and should not be clustered
+        concache_sup(:account_friend_cache),
+        concache_sup(:account_incoming_friend_request_cache),
+
+        concache_sup(:account_ignore_cache),
+        concache_sup(:account_avoid_cache),
+        concache_sup(:account_block_cache),
+
         concache_perm_sup(:recently_used_cache),
         concache_perm_sup(:auth_group_store),
-        concache_perm_sup(:group_type_store),
         concache_perm_sup(:restriction_lookup_store),
         concache_perm_sup(:config_user_type_store),
         concache_perm_sup(:config_site_type_store),
@@ -44,8 +53,6 @@ defmodule Central.Application do
         concache_perm_sup(:application_metadata_cache),
         concache_sup(:application_temp_cache),
         concache_sup(:config_user_cache),
-        concache_sup(:communication_user_notifications),
-        {Oban, oban_config()},
 
         # Tachyon schemas
         concache_perm_sup(:tachyon_schemas),

@@ -637,8 +637,14 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("UNFRIEND", data, msg_id, state) do
     case String.split(data, "=") do
       [_, username] ->
-        new_user = User.remove_friend(state.userid, User.get_userid(username))
-        %{state | user: new_user}
+        target_userid = Account.get_userid_from_name(username)
+        case Account.get_friend(state.userid, target_userid) do
+          nil ->
+            state
+          friend_object ->
+            Account.delete_friend(friend_object)
+            state
+        end
 
       _ ->
         _no_match(state, "UNFRIEND", msg_id, data)
@@ -648,8 +654,9 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("ACCEPTFRIENDREQUEST", data, msg_id, state) do
     case String.split(data, "=") do
       [_, username] ->
-        new_user = User.accept_friend_request(User.get_userid(username), state.userid)
-        %{state | user: new_user}
+        target_userid = Account.get_userid_from_name(username)
+        Account.accept_friend_request(target_userid, state.userid)
+        state
 
       _ ->
         _no_match(state, "ACCEPTFRIENDREQUEST", msg_id, data)
@@ -659,8 +666,9 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("DECLINEFRIENDREQUEST", data, msg_id, state) do
     case String.split(data, "=") do
       [_, username] ->
-        new_user = User.decline_friend_request(User.get_userid(username), state.userid)
-        %{state | user: new_user}
+        target_userid = Account.get_userid_from_name(username)
+        Account.decline_friend_request(target_userid, state.userid)
+        state
 
       _ ->
         _no_match(state, "DECLINEFRIENDREQUEST", msg_id, data)
@@ -670,7 +678,11 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("FRIENDREQUEST", data, msg_id, state) do
     case String.split(data, "=") do
       [_, username] ->
-        User.create_friend_request(state.userid, User.get_userid(username))
+        target_userid = Account.get_userid_from_name(username)
+        Account.create_friend_request(%{
+          from_user_id: state.userid,
+          to_user_id: target_userid
+        })
         state
 
       _ ->
@@ -681,7 +693,12 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("IGNORE", data, _msg_id, state) do
     case String.split(data, "=") do
       [_, username] ->
-        User.ignore_user(state.userid, User.get_userid(username))
+        target_userid = Account.get_userid_from_name(username)
+        Account.upsert_relationship(%{
+          from_user_id: state.userid,
+          to_user_id: target_userid,
+          state: "ignore"
+        })
 
       _ ->
         :ok
@@ -693,7 +710,12 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("UNIGNORE", data, _msg_id, state) do
     case String.split(data, "=") do
       [_, username] ->
-        User.unignore_user(state.userid, User.get_userid(username))
+        target_userid = Account.get_userid_from_name(username)
+        Account.upsert_relationship(%{
+          from_user_id: state.userid,
+          to_user_id: target_userid,
+          state: nil
+        })
 
       _ ->
         :ok

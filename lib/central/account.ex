@@ -135,7 +135,6 @@ defmodule Central.Account do
     Central.cache_delete(:account_user_cache, id)
     Central.cache_delete(:account_user_cache_bang, id)
     Central.cache_delete(:account_membership_cache, id)
-    Central.cache_delete(:communication_user_notifications, id)
     Central.cache_delete(:config_user_cache, id)
   end
 
