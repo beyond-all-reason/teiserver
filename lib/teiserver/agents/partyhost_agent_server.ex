@@ -1,6 +1,7 @@
 defmodule Teiserver.Agents.PartyhostAgentServer do
+  @moduledoc false
   use GenServer
-  alias Teiserver.User
+  alias Teiserver.Account
   alias Teiserver.Agents.AgentLib
   require Logger
 
@@ -19,7 +20,7 @@ defmodule Teiserver.Agents.PartyhostAgentServer do
     # currently has a bug because it'll try to update several at once and it won't work
     0..10
     |> Enum.each(fn other_user_id ->
-      User.create_friendship(user.id, other_user_id)
+      Account.create_friend(user.id, other_user_id)
     end)
 
     :timer.sleep(:rand.uniform(1000))

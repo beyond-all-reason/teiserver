@@ -214,12 +214,13 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
 
   defp build_user_lookup(socket) do
     existing_user_ids = Map.keys(socket.assigns[:user_lookup] || %{})
+    friends = Account.list_friend_ids_of_user(socket.user.id)
 
     ids =
       [
         socket.assigns.party.members,
         socket.assigns.party.pending_invites,
-        socket.assigns.user.friends,
+        friends,
         socket.assigns.lobby_user_ids
       ]
       |> List.flatten()

@@ -146,11 +146,9 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:friendlist, nil), do: "FRIENDLISTBEGIN\FRIENDLISTEND\n"
 
-  defp do_reply(:friendlist, user) do
-
-
+  defp do_reply(:friendlist, userid) do
     friends =
-      user.friends
+      Account.list_friend_ids_of_user(userid)
       |> Enum.map(fn f ->
         name = User.get_username(f)
 
@@ -166,9 +164,9 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:friendlist_request, nil), do: "FRIENDLISTBEGIN\nFRIENDLISTEND\n"
 
-  defp do_reply(:friendlist_request, user) do
+  defp do_reply(:friendlist_request, userid) do
     requests =
-      user.friend_requests
+      Account.list_incoming_friend_requests_of_userid(userid)
       |> Enum.map(fn f ->
         name = User.get_username(f)
         "FRIENDREQUESTLIST userName=#{name}\n"
@@ -180,9 +178,9 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:ignorelist, nil), do: "IGNORELISTBEGIN\IGNORELISTEND\n"
 
-  defp do_reply(:ignorelist, user) do
+  defp do_reply(:ignorelist, userid) do
     ignored =
-      user.ignored
+      Account.list_userids_ignored_by_userid(userid)
       |> Enum.map(fn f ->
         name = User.get_username(f)
         "IGNORELIST userName=#{name}\n"

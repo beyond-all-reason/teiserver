@@ -629,10 +629,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
   # Friend list
   defp do_handle("FRIENDLIST", _, msg_id, state),
-    do: reply(:friendlist, state.user, msg_id, state)
+    do: reply(:friendlist, state.userid, msg_id, state)
 
   defp do_handle("FRIENDREQUESTLIST", _, msg_id, state),
-    do: reply(:friendlist_request, state.user, msg_id, state)
+    do: reply(:friendlist_request, state.userid, msg_id, state)
 
   defp do_handle("UNFRIEND", data, msg_id, state) do
     case String.split(data, "=") do
@@ -730,11 +730,11 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("c.moderation.report_user", data, msg_id, state) do
     case String.split(data, "\t") do
       [target_name, _location_type, _location_id, reason] ->
-        user = User.get_user_by_id(state.userid)
+        friend_list = Account.list_friend_ids_of_user(state.userid)
         target_id = User.get_userid(target_name)
 
         cond do
-          Enum.member?(user.friends, target_id) ->
+          Enum.member?(friend_list, target_id) ->
             User.send_direct_message(
               Coordinator.get_coordinator_userid(),
               state.userid,

@@ -1,7 +1,7 @@
 defmodule Teiserver.Agents.PartyjoinAgentServer do
   use GenServer
   alias Teiserver.Agents.AgentLib
-  alias Teiserver.{Account, User}
+  alias Teiserver.Account
   require Logger
 
   @tick_period 5_000
@@ -25,7 +25,7 @@ defmodule Teiserver.Agents.PartyjoinAgentServer do
       select: [:id]
     )
     |> Enum.each(fn host_user ->
-      User.create_friendship(user.id, host_user.id)
+      Account.create_friend(user.id, host_user.id)
     end)
 
     :timer.send_interval(@tick_period, self(), :tick)

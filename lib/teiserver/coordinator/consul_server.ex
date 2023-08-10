@@ -857,7 +857,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       _ ->
         players
-        |> User.list_combined_friendslist()
+        |> Enum.map(fn p_id ->
+          Account.list_friend_ids_of_user(p_id)
+        end)
+        |> List.flatten
         |> Enum.member?(userid)
     end
   end
@@ -873,7 +876,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
       _ ->
         battle
         |> Map.get(:players)
-        |> User.list_combined_friendslist()
+        |> Enum.map(fn p_id ->
+          Account.list_friend_ids_of_user(p_id)
+        end)
+        |> List.flatten
         |> Enum.member?(userid)
     end
   end

@@ -1673,6 +1673,8 @@ defmodule Teiserver.Account do
       {:error, %Ecto.Changeset{}}
 
   """
+  @spec create_friend() :: {:ok, Friend.t} | {:error, Ecto.Changeset.t}
+  @spec create_friend(map) :: {:ok, Friend.t} | {:error, Ecto.Changeset.t}
   def create_friend(attrs \\ %{}) do
     result = %Friend{}
     |> Friend.changeset(attrs)
@@ -1686,6 +1688,15 @@ defmodule Teiserver.Account do
         :ok
     end
     result
+  end
+
+  @spec create_friend(T.userid, T.userid) :: {:ok, Friend.t} | {:error, Ecto.Changeset.t}
+  def create_friend(uid1, uid2) do
+    [u1, u2] = Enum.sort([uid1, uid2])
+    create_friend(%{
+      user1_id: u1,
+      user2_id: u2,
+    })
   end
 
   @doc """
@@ -1722,6 +1733,15 @@ defmodule Teiserver.Account do
     Central.cache_delete(:account_friend_cache, friend.user1_id)
     Central.cache_delete(:account_friend_cache, friend.user2_id)
     Repo.delete(friend)
+  end
+
+  def delete_friend(u1, u2) do
+    case get_friend(u1, u2) do
+      nil ->
+        :ok
+      friend ->
+        delete_friend(friend)
+    end
   end
 
   @doc """
@@ -1828,6 +1848,13 @@ defmodule Teiserver.Account do
         :ok
     end
     result
+  end
+
+  def create_friend_request(from_user_id, to_user_id) do
+    create_friend_request(%{
+      from_user_id: from_user_id,
+      to_user_id: to_user_id
+    })
   end
 
   @doc """

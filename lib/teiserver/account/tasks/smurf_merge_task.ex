@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.SmurfMergeTask do
   @moduledoc false
-  alias Teiserver.{Account, Game, User}
+  alias Teiserver.{Account, Game}
   alias Teiserver.Battle.BalanceLib
   require Logger
   alias Teiserver.Data.Types, as: T
@@ -121,7 +121,11 @@ defmodule Teiserver.Account.SmurfMergeTask do
       limit: :infinity
     )
     |> Enum.each(fn %{id: ignorer_id} ->
-      User.ignore_user(ignorer_id, to_id)
+      Account.upsert_relationship(%{
+        from_user_id: ignorer_id,
+        to_user_id: to_id,
+        state: "ignore"
+      })
     end)
 
     :ok

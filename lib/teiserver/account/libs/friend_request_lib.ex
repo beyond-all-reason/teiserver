@@ -25,12 +25,7 @@ defmodule Teiserver.Account.FriendRequestLib do
   def accept_friend_request(%FriendRequest{} = req) do
     case Account.get_friend(req.from_user_id, req.to_user_id) do
       nil ->
-        [uid1, uid2] = Enum.sort([req.from_user_id, req.to_user_id])
-
-        {:ok, _friend} = Account.create_friend(%{
-          user1_id: uid1,
-          user2_id: uid2,
-        })
+        {:ok, _friend} = Account.create_friend(req.from_user_id, req.to_user_id)
         Account.delete_friend_request(req)
         :ok
 

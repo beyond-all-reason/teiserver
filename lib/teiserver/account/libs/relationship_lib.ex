@@ -8,6 +8,15 @@ defmodule Teiserver.Account.RelationshipLib do
   @spec icon :: String.t()
   def icon(), do: "fa-users"
 
+  @spec decache_relationships(T.userid) :: :ok
+  def decache_relationships(userid) do
+    Central.cache_delete(:account_follow_cache, userid)
+    Central.cache_delete(:account_avoid_cache, userid)
+    Central.cache_delete(:account_ignore_cache, userid)
+    Central.cache_delete(:account_block_cache, userid)
+    :ok
+  end
+
   @spec list_userids_followed_by_userid(T.userid) :: [T.userid]
   def list_userids_followed_by_userid(userid) do
     Central.cache_get_or_store(:account_follow_cache, userid, fn ->
