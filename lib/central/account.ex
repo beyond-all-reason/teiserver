@@ -27,7 +27,7 @@ defmodule Central.Account do
     |> UserLib.search(args[:search])
     |> UserLib.preload(args[:joins])
     |> UserLib.order(args[:order])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """

@@ -28,7 +28,7 @@ defmodule Teiserver.Account do
     |> UserLib.preload(args[:joins])
     |> UserLib.order_by(args[:order_by])
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
     |> Repo.all()
   end
 
@@ -231,7 +231,7 @@ defmodule Teiserver.Account do
     UserStatLib.query_user_stats()
     |> UserStatLib.search(%{user_id: id})
     |> UserStatLib.search(args[:search])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -353,7 +353,7 @@ defmodule Teiserver.Account do
     |> BadgeTypeLib.search(args[:search])
     |> BadgeTypeLib.preload(args[:preload])
     |> BadgeTypeLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -508,7 +508,7 @@ defmodule Teiserver.Account do
     |> AccoladeLib.search(args[:search])
     |> AccoladeLib.preload(args[:preload])
     |> AccoladeLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -663,7 +663,7 @@ defmodule Teiserver.Account do
     |> SmurfKeyLib.search(args[:search])
     |> SmurfKeyLib.preload(args[:preload])
     |> SmurfKeyLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -863,7 +863,7 @@ defmodule Teiserver.Account do
     |> SmurfKeyTypeLib.search(args[:search])
     |> SmurfKeyTypeLib.preload(args[:preload])
     |> SmurfKeyTypeLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -981,7 +981,7 @@ defmodule Teiserver.Account do
     |> RatingLib.search(args[:search])
     |> RatingLib.preload(args[:preload])
     |> RatingLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
     |> QueryHelpers.limit_query(args[:limit] || 50)
   end
 
@@ -1125,7 +1125,7 @@ defmodule Teiserver.Account do
     |> CodeLib.search(args[:search])
     |> CodeLib.preload(args[:preload])
     |> CodeLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -1267,7 +1267,7 @@ defmodule Teiserver.Account do
     |> UserTokenLib.search(args[:search])
     |> UserTokenLib.preload(args[:preload])
     |> UserTokenLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -1416,7 +1416,7 @@ defmodule Teiserver.Account do
     |> binary_part(0, length)
   end
 
-  alias Teiserver.Account.{Relationship, RelationshipLib}
+  alias Teiserver.Account.{Relationship, RelationshipLib, RelationshipQueries}
 
   @doc """
   Returns the list of relationships.
@@ -1430,7 +1430,7 @@ defmodule Teiserver.Account do
   @spec list_relationships(list) :: list
   def list_relationships(args \\ []) do
     args
-    |> RelationshipLib.query_relationships()
+    |> RelationshipQueries.query_relationships()
     |> Repo.all()
   end
 
@@ -1454,7 +1454,7 @@ defmodule Teiserver.Account do
     args = args ++ [from_user_id: from_id, to_user_id: to_id]
 
     args
-    |> RelationshipLib.query_relationships()
+    |> RelationshipQueries.query_relationships()
     |> Repo.one!()
   end
 
@@ -1476,7 +1476,7 @@ defmodule Teiserver.Account do
     args = args ++ [from_user_id: from_id, to_user_id: to_id]
 
     args
-    |> RelationshipLib.query_relationships()
+    |> RelationshipQueries.query_relationships()
     |> Repo.one()
   end
 
@@ -1569,7 +1569,35 @@ defmodule Teiserver.Account do
     Relationship.changeset(relationship, attrs)
   end
 
-  alias Teiserver.Account.{Friend, FriendLib}
+  @spec list_userids_avoiding_this_userid(T.userid) :: [T.userid]
+  defdelegate list_userids_avoiding_this_userid(userid), to: RelationshipLib
+
+  @spec list_userids_avoided_by_userid(T.userid) :: [T.userid]
+  defdelegate list_userids_avoided_by_userid(userid), to: RelationshipLib
+
+  @spec list_userids_blocked_by_userid(T.userid) :: [T.userid]
+  defdelegate list_userids_blocked_by_userid(userid), to: RelationshipLib
+
+  @spec list_userids_ignored_by_userid(T.userid) :: [T.userid]
+  defdelegate list_userids_ignored_by_userid(userid), to: RelationshipLib
+
+  @spec list_userids_followed_by_userid(T.userid) :: [T.userid]
+  defdelegate list_userids_followed_by_userid(userid), to: RelationshipLib
+
+  @spec does_a_follow_b?(T.userid, T.userid) :: boolean
+  defdelegate does_a_follow_b?(u1, u2), to: RelationshipLib
+
+  @spec does_a_ignore_b?(T.userid, T.userid) :: boolean
+  defdelegate does_a_ignore_b?(u1, u2), to: RelationshipLib
+
+  @spec does_a_block_b?(T.userid, T.userid) :: boolean
+  defdelegate does_a_block_b?(u1, u2), to: RelationshipLib
+
+  @spec does_a_avoid_b?(T.userid, T.userid) :: boolean
+  defdelegate does_a_avoid_b?(u1, u2), to: RelationshipLib
+
+
+  alias Teiserver.Account.{Friend, FriendLib, FriendQueries}
 
   @doc """
   Returns the list of friends.
@@ -1583,7 +1611,7 @@ defmodule Teiserver.Account do
   @spec list_friends(list) :: list
   def list_friends(args \\ []) do
     args
-    |> FriendLib.query_friends()
+    |> FriendQueries.query_friends()
     |> Repo.all()
   end
 
@@ -1607,7 +1635,7 @@ defmodule Teiserver.Account do
     args = args ++ [users: [from_id, to_id]]
 
     args
-    |> FriendLib.query_friends()
+    |> FriendQueries.query_friends()
     |> Repo.one!()
   end
 
@@ -1629,7 +1657,7 @@ defmodule Teiserver.Account do
     args = args ++ [users: [from_id, to_id]]
 
     args
-    |> FriendLib.query_friends()
+    |> FriendQueries.query_friends()
     |> Repo.one()
   end
 
@@ -1646,9 +1674,18 @@ defmodule Teiserver.Account do
 
   """
   def create_friend(attrs \\ %{}) do
-    %Friend{}
+    result = %Friend{}
     |> Friend.changeset(attrs)
     |> Repo.insert()
+
+    case result do
+      {:ok, friend} ->
+        Central.cache_delete(:account_friend_cache, friend.user1_id)
+        Central.cache_delete(:account_friend_cache, friend.user2_id)
+      _ ->
+        :ok
+    end
+    result
   end
 
   @doc """
@@ -1682,6 +1719,8 @@ defmodule Teiserver.Account do
 
   """
   def delete_friend(%Friend{} = friend) do
+    Central.cache_delete(:account_friend_cache, friend.user1_id)
+    Central.cache_delete(:account_friend_cache, friend.user2_id)
     Repo.delete(friend)
   end
 
@@ -1698,7 +1737,10 @@ defmodule Teiserver.Account do
     Friend.changeset(friend, attrs)
   end
 
-  alias Teiserver.Account.{FriendRequest, FriendRequestLib}
+  @spec list_friend_ids_of_user(T.userid) :: [T.userid]
+  defdelegate list_friend_ids_of_user(userid), to: FriendLib
+
+  alias Teiserver.Account.{FriendRequest, FriendRequestLib, FriendRequestQueries}
 
   @doc """
   Returns the list of friend_requests.
@@ -1712,7 +1754,7 @@ defmodule Teiserver.Account do
   @spec list_friend_requests(list) :: list
   def list_friend_requests(args \\ []) do
     args
-    |> FriendRequestLib.query_friend_requests()
+    |> FriendRequestQueries.query_friend_requests()
     |> Repo.all()
   end
 
@@ -1736,7 +1778,7 @@ defmodule Teiserver.Account do
     args = args ++ [from_user_id: from_id, to_user_id: to_id]
 
     args
-    |> FriendRequestLib.query_friend_requests()
+    |> FriendRequestQueries.query_friend_requests()
     |> Repo.one!()
   end
 
@@ -1758,7 +1800,7 @@ defmodule Teiserver.Account do
     args = args ++ [from_user_id: from_id, to_user_id: to_id]
 
     args
-    |> FriendRequestLib.query_friend_requests()
+    |> FriendRequestQueries.query_friend_requests()
     |> Repo.one()
   end
 
@@ -1775,9 +1817,17 @@ defmodule Teiserver.Account do
 
   """
   def create_friend_request(attrs \\ %{}) do
-    %FriendRequest{}
+    result = %FriendRequest{}
     |> FriendRequest.changeset(attrs)
     |> Repo.insert()
+
+    case result do
+      {:ok, friend_request} ->
+        Central.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
+      _ ->
+        :ok
+    end
+    result
   end
 
   @doc """
@@ -1811,6 +1861,7 @@ defmodule Teiserver.Account do
 
   """
   def delete_friend_request(%FriendRequest{} = friend_request) do
+    Central.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
     Repo.delete(friend_request)
   end
 
@@ -1826,6 +1877,9 @@ defmodule Teiserver.Account do
   def change_friend_request(%FriendRequest{} = friend_request, attrs \\ %{}) do
     FriendRequest.changeset(friend_request, attrs)
   end
+
+  @spec list_incoming_friend_requests_of_userid(T.userid) :: [T.userid]
+  defdelegate list_incoming_friend_requests_of_userid(userid), to: FriendRequestLib
 
   @spec accept_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
   defdelegate accept_friend_request(from_userid, to_userid), to: FriendRequestLib

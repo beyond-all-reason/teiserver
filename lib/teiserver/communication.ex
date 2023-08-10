@@ -270,7 +270,7 @@ defmodule Teiserver.Communication do
     |> TextCallbackLib.search(args[:search])
     |> TextCallbackLib.preload(args[:preload])
     |> TextCallbackLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """

@@ -1,8 +1,7 @@
 defmodule Teiserver.Account.FriendRequestLib do
   @moduledoc false
-  use CentralWeb, :library
-  alias Teiserver.Helper.QueryHelpers
-  alias Teiserver.Account.FriendRequest
+  alias Teiserver.Account
+  alias Account.FriendRequest
   alias Teiserver.Data.Types, as: T
 
   @spec colours :: atom
@@ -11,103 +10,10 @@ defmodule Teiserver.Account.FriendRequestLib do
   @spec icon :: String.t()
   def icon(), do: "fa-user-plus"
 
-  # Queries
-  @spec query_friend_requests(list) :: Ecto.Query.t()
-  def query_friend_requests(args) do
-    query = from(friend_requests in FriendRequest)
-
-    query
-    |> do_where([from_user_id: args[:from_user_id]])
-    |> do_where([to_user_id: args[:to_user_id]])
-    |> do_where(args[:where])
-    |> do_preload(args[:preload])
-    |> do_order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
-  end
-
-  @spec do_where(Ecto.Query.t(), list | map | nil) :: Ecto.Query.t()
-  defp do_where(query, nil), do: query
-
-  defp do_where(query, params) do
-    params
-    |> Enum.reduce(query, fn {key, value}, query_acc ->
-      _where(query_acc, key, value)
-    end)
-  end
-
-  @spec _where(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
-  defp _where(query, _, ""), do: query
-  defp _where(query, _, nil), do: query
-
-  defp _where(query, :from_user_id, from_id) do
-    from friend_requests in query,
-      where: friend_requests.from_user_id == ^from_id
-  end
-
-  defp _where(query, :to_user_id, to_id) do
-    from friend_requests in query,
-      where: friend_requests.to_user_id == ^to_id
-  end
-
-  defp _where(query, :from_to_id, {from_id, to_id}) do
-    from friend_requests in query,
-      where: friend_requests.from_user_id == ^from_id,
-      where: friend_requests.to_user_id == ^to_id
-  end
-
-  defp _where(query, :either_user_is, {u1, u2}) do
-    from friend_requests in query,
-      where: (friend_requests.from_user_id == ^u1 and friend_requests.to_user_id == ^u2)
-        or (friend_requests.from_user_id == ^u2 and friend_requests.to_user_id == ^u1)
-  end
-
-  @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
-  defp do_order_by(query, nil), do: query
-  defp do_order_by(query, params) do
-    params
-    |> Enum.reduce(query, fn key, query_acc ->
-      _order_by(query_acc, key)
-    end)
-  end
-
-  defp _order_by(query, nil), do: query
-
-  defp _order_by(query, "Newest first") do
-    from friend_requests in query,
-      order_by: [desc: friend_requests.updated_at]
-  end
-
-  defp _order_by(query, "Oldest first") do
-    from friend_requests in query,
-      order_by: [asc: friend_requests.updated_at]
-  end
-
-  @spec do_preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
-  defp do_preload(query, nil), do: query
-
-  defp do_preload(query, preloads) do
-    preloads
-    |> Enum.reduce(query, fn key, query_acc ->
-      _preload(query_acc, key)
-    end)
-  end
-
-  defp _preload(query, :to_user) do
-    from friend_requests in query,
-      join: to_users in assoc(friend_requests, :to_user),
-      preload: [to_user: to_users]
-  end
-
-  defp _preload(query, :from_user) do
-    from friend_requests in query,
-      join: from_users in assoc(friend_requests, :from_user),
-      preload: [from_user: from_users]
-  end
-
   # Functions
   @spec accept_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
   def accept_friend_request(from_id, to_id) do
-    case Teiserver.Account.get_friend_request(from_id, to_id) do
+    case Account.get_friend_request(from_id, to_id) do
       nil ->
         {:error, "no request"}
       req ->
@@ -117,26 +23,26 @@ defmodule Teiserver.Account.FriendRequestLib do
 
   @spec accept_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
   def accept_friend_request(%FriendRequest{} = req) do
-    case Teiserver.Account.get_friend(req.from_user_id, req.to_user_id) do
+    case Account.get_friend(req.from_user_id, req.to_user_id) do
       nil ->
         [uid1, uid2] = Enum.sort([req.from_user_id, req.to_user_id])
 
-        {:ok, _friend} = Teiserver.Account.create_friend(%{
+        {:ok, _friend} = Account.create_friend(%{
           user1_id: uid1,
           user2_id: uid2,
         })
-        Teiserver.Account.delete_friend_request(req)
+        Account.delete_friend_request(req)
         :ok
 
       _ ->
-        Teiserver.Account.delete_friend_request(req)
+        Account.delete_friend_request(req)
         :ok
     end
   end
 
   @spec decline_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
   def decline_friend_request(from_id, to_id) do
-    case Teiserver.Account.get_friend_request(from_id, to_id) do
+    case Account.get_friend_request(from_id, to_id) do
       nil ->
         {:error, "no request"}
       req ->
@@ -146,7 +52,7 @@ defmodule Teiserver.Account.FriendRequestLib do
 
   @spec decline_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
   def decline_friend_request(%FriendRequest{} = req) do
-    Teiserver.Account.delete_friend_request(req)
+    Account.delete_friend_request(req)
     :ok
   end
 
@@ -156,7 +62,7 @@ defmodule Teiserver.Account.FriendRequestLib do
   """
   @spec rescind_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
   def rescind_friend_request(from_id, to_id) do
-    case Teiserver.Account.get_friend_request(from_id, to_id) do
+    case Account.get_friend_request(from_id, to_id) do
       nil ->
         {:error, "no request"}
       req ->
@@ -166,7 +72,22 @@ defmodule Teiserver.Account.FriendRequestLib do
 
   @spec rescind_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
   def rescind_friend_request(%FriendRequest{} = req) do
-    Teiserver.Account.delete_friend_request(req)
+    Account.delete_friend_request(req)
     :ok
+  end
+
+  @spec list_incoming_friend_requests_of_userid(T.userid) :: [T.userid]
+  def list_incoming_friend_requests_of_userid(userid) do
+    Central.cache_get_or_store(:account_incoming_friend_request_cache, userid, fn ->
+      Account.list_friend_requests(
+        where: [
+          to_user_id: userid
+        ],
+        select: [:from_user_id]
+      )
+        |> Enum.map(fn %{from_user_id: from_user_id} ->
+          from_user_id
+        end)
+    end)
   end
 end

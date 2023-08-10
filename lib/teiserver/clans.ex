@@ -20,7 +20,7 @@ defmodule Teiserver.Clans do
     |> ClanLib.search(args[:search])
     |> ClanLib.preload(args[:preload])
     |> ClanLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -178,7 +178,7 @@ defmodule Teiserver.Clans do
     |> ClanInviteLib.search(args[:search])
     |> ClanInviteLib.preload(args[:joins])
     # |> ClanInviteLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
     |> Repo.all()
   end
 
@@ -188,7 +188,7 @@ defmodule Teiserver.Clans do
     |> ClanInviteLib.search(args[:search])
     |> ClanInviteLib.preload(args[:joins])
     # |> ClanInviteLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
     |> Repo.all()
   end
 
@@ -310,7 +310,7 @@ defmodule Teiserver.Clans do
     |> ClanMembershipLib.search(args[:search])
     |> ClanMembershipLib.preload(args[:joins])
     # |> ClanMembershipLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
     |> Repo.all()
   end
 
@@ -320,7 +320,7 @@ defmodule Teiserver.Clans do
     |> ClanMembershipLib.search(args[:search])
     |> ClanMembershipLib.preload(args[:joins])
     # |> ClanMembershipLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
     |> Repo.all()
   end
 

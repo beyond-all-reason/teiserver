@@ -22,7 +22,7 @@ defmodule Teiserver.Logging do
     |> ServerMinuteLogLib.search(args[:search])
     |> ServerMinuteLogLib.order_by(args[:order])
     |> QueryHelpers.offset_query(args[:offset] || 0)
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -147,7 +147,7 @@ defmodule Teiserver.Logging do
     |> ServerDayLogLib.search(args[:search])
     |> ServerDayLogLib.order_by(args[:order])
     |> QueryHelpers.offset_query(args[:offset] || 0)
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -347,7 +347,7 @@ defmodule Teiserver.Logging do
     |> ServerMonthLogLib.search(args[:search])
     |> ServerMonthLogLib.order_by(args[:order])
     |> QueryHelpers.offset_query(args[:offset] || 0)
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -518,7 +518,7 @@ defmodule Teiserver.Logging do
     |> ServerQuarterLogLib.search(args[:search])
     |> ServerQuarterLogLib.order_by(args[:order])
     |> QueryHelpers.offset_query(args[:offset] || 0)
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -694,7 +694,7 @@ defmodule Teiserver.Logging do
     |> ServerYearLogLib.search(args[:search])
     |> ServerYearLogLib.order_by(args[:order])
     |> QueryHelpers.offset_query(args[:offset] || 0)
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -865,7 +865,7 @@ defmodule Teiserver.Logging do
     |> ServerWeekLogLib.search(args[:search])
     |> ServerWeekLogLib.order_by(args[:order])
     |> QueryHelpers.offset_query(args[:offset] || 0)
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -1036,7 +1036,7 @@ defmodule Teiserver.Logging do
     |> MatchDayLogLib.search(%{date: date})
     |> MatchDayLogLib.search(args[:search])
     |> MatchDayLogLib.order_by(args[:order])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -1231,7 +1231,7 @@ defmodule Teiserver.Logging do
     |> MatchMonthLogLib.search(%{date: date})
     |> MatchMonthLogLib.search(args[:search])
     |> MatchMonthLogLib.order_by(args[:order])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -1372,7 +1372,7 @@ defmodule Teiserver.Logging do
     |> AuditLogLib.search(args[:search])
     |> AuditLogLib.preload(args[:joins])
     |> AuditLogLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
     |> QueryHelpers.limit_query(args[:limit] || 50)
   end
 
@@ -1660,7 +1660,7 @@ defmodule Teiserver.Logging do
     |> UserActivityDayLogLib.search(args[:search])
     |> UserActivityDayLogLib.order_by(args[:order])
     |> QueryHelpers.offset_query(args[:offset] || 0)
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """

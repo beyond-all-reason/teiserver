@@ -428,7 +428,7 @@ defmodule Teiserver.Telemetry do
     |> PropertyTypeLib.search(args[:search])
     |> PropertyTypeLib.preload(args[:preload])
     |> PropertyTypeLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -529,7 +529,7 @@ defmodule Teiserver.Telemetry do
     |> UnauthPropertyLib.search(args[:search])
     |> UnauthPropertyLib.preload(args[:preload])
     |> UnauthPropertyLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -615,7 +615,7 @@ defmodule Teiserver.Telemetry do
     |> ClientPropertyLib.search(args[:search])
     |> ClientPropertyLib.preload(args[:preload])
     |> ClientPropertyLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -689,7 +689,7 @@ defmodule Teiserver.Telemetry do
     |> UnauthEventLib.search(args[:search])
     |> UnauthEventLib.preload(args[:preload])
     |> UnauthEventLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -755,7 +755,7 @@ defmodule Teiserver.Telemetry do
     |> ClientEventLib.search(args[:search])
     |> ClientEventLib.preload(args[:preload])
     |> ClientEventLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -934,7 +934,7 @@ defmodule Teiserver.Telemetry do
     |> ServerEventLib.search(args[:search])
     |> ServerEventLib.preload(args[:preload])
     |> ServerEventLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -998,7 +998,7 @@ defmodule Teiserver.Telemetry do
     |> MatchEventLib.search(args[:search])
     |> MatchEventLib.preload(args[:preload])
     |> MatchEventLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -1064,7 +1064,7 @@ defmodule Teiserver.Telemetry do
     |> InfologLib.search(args[:search])
     |> InfologLib.preload(args[:preload])
     |> InfologLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
     |> QueryHelpers.offset_query(args[:offset])
   end
 

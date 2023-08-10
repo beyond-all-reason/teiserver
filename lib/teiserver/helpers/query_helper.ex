@@ -100,10 +100,10 @@ defmodule Teiserver.Helper.QueryHelpers do
     limit_query(query, min(amount |> String.to_integer(), max_amount))
   end
 
-  @spec select(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
-  def select(query, nil), do: query
+  @spec query_select(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
+  def query_select(query, nil), do: query
 
-  def select(query, fields) do
+  def query_select(query, fields) do
     from stat_grids in query,
       select: ^fields
   end

@@ -40,9 +40,11 @@ defmodule Central.Application do
         concache_sup(:account_friend_cache),
         concache_sup(:account_incoming_friend_request_cache),
 
+        concache_sup(:account_follow_cache),
         concache_sup(:account_ignore_cache),
         concache_sup(:account_avoid_cache),
         concache_sup(:account_block_cache),
+        concache_sup(:account_avoiding_this_cache),
 
         concache_perm_sup(:recently_used_cache),
         concache_perm_sup(:auth_group_store),

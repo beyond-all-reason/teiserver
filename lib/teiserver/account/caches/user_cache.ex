@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.UserCache do
+  @moduledoc false
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Teiserver.{Account, User}
   alias Teiserver.Data.Types, as: T
@@ -215,52 +216,6 @@ defmodule Teiserver.Account.UserCache do
     if user.discord_id do
       Central.cache_put(:users_lookup_id_with_discord, user.discord_id, user.id)
     end
-
-    # Friends
-    friends = Account.list_friends(
-      where: [either_user_is: user.id],
-      select: ~w(user1_id user2_id)a
-    )
-      |> Enum.map(fn %{user1_id: u1, user2_id: u2} ->
-        if u1 == user.id do
-          u2
-        else
-          u1
-        end
-      end)
-
-    Central.cache_put(:account_friend_cache, user.id, friends)
-
-    # Friend requests
-    incoming_friend_requests = Account.list_friend_requests(
-      where: [
-        to_user_id: user.id
-      ],
-      select: [:from_user_id]
-    )
-      |> Enum.map(fn %{from_user_id: from_user_id} ->
-        from_user_id
-      end)
-
-    Central.cache_put(:account_incoming_friend_request_cache, user.id, incoming_friend_requests)
-
-    # Relationships
-    relationships = Account.list_relationships(
-      where: [
-        from_user_id: user.id,
-        state_in: ~w(ignore avoid block),
-      ],
-      select: ~w(to_user_id state)a
-    )
-    |> Enum.group_by(fn r ->
-      r.state
-    end, fn r ->
-      r.to_user_id
-    end)
-
-    Central.cache_put(:account_ignore_cache, user.id, Map.get(relationships, "ignore", []))
-    Central.cache_put(:account_avoid_cache, user.id, Map.get(relationships, "avoid", []))
-    Central.cache_put(:account_block_cache, user.id, Map.get(relationships, "block", []))
 
     user
   end

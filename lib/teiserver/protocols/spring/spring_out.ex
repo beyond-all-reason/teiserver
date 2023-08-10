@@ -147,6 +147,8 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:friendlist, nil), do: "FRIENDLISTBEGIN\FRIENDLISTEND\n"
 
   defp do_reply(:friendlist, user) do
+
+
     friends =
       user.friends
       |> Enum.map(fn f ->
