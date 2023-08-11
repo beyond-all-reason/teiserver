@@ -8,6 +8,15 @@ defmodule Teiserver.Account.RelationshipLib do
   @spec icon :: String.t()
   def icon(), do: "fa-users"
 
+  @spec icon_ignore :: String.t()
+  def icon_ignore(), do: "fa-volume-slash"
+
+  @spec icon_avoid :: String.t()
+  def icon_avoid(), do: "fa-ban"
+
+  @spec icon_block :: String.t()
+  def icon_block(), do: "fa-octagon-exclamation"
+
   @spec decache_relationships(T.userid) :: :ok
   def decache_relationships(userid) do
     Central.cache_delete(:account_follow_cache, userid)
@@ -97,23 +106,25 @@ defmodule Teiserver.Account.RelationshipLib do
     end)
   end
 
-  @spec does_a_avoid_b?(T.userid, T.userid) :: boolean
-  def does_a_avoid_b?(u1, u2) do
-    Enum.member?(list_userids_avoided_by_userid(u1), u2)
+  @spec does_a_follow_b?(T.userid, T.userid) :: boolean
+  def does_a_follow_b?(u1, u2) do
+    Enum.member?(list_userids_followed_by_userid(u1), u2)
   end
 
   @spec does_a_ignore_b?(T.userid, T.userid) :: boolean
   def does_a_ignore_b?(u1, u2) do
     Enum.member?(list_userids_ignored_by_userid(u1), u2)
+    or does_a_avoid_b?(u1, u2)
+  end
+
+  @spec does_a_avoid_b?(T.userid, T.userid) :: boolean
+  def does_a_avoid_b?(u1, u2) do
+    Enum.member?(list_userids_avoided_by_userid(u1), u2)
+    or does_a_block_b?(u1, u2)
   end
 
   @spec does_a_block_b?(T.userid, T.userid) :: boolean
   def does_a_block_b?(u1, u2) do
     Enum.member?(list_userids_blocked_by_userid(u1), u2)
-  end
-
-  @spec does_a_follow_b?(T.userid, T.userid) :: boolean
-  def does_a_follow_b?(u1, u2) do
-    Enum.member?(list_userids_followed_by_userid(u1), u2)
   end
 end

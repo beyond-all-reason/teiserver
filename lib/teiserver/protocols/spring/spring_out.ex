@@ -349,11 +349,16 @@ defmodule Teiserver.Protocols.SpringOut do
 
   # Commands
   defp do_reply(:ring, {ringer_id, state_userid}) do
-    user = User.get_user_by_id(state_userid)
     ringer_user = User.get_user_by_id(ringer_id)
 
-    if ringer_id not in (user.ignored || []) or ringer_user.moderator == true or
-         User.is_bot?(ringer_user) == true do
+    do_ring = cond do
+      ringer_user.moderator == true -> true
+      User.is_bot?(ringer_user) == true -> true
+      Account.does_a_ignore_b?(state_userid, ringer_id) -> false
+      true -> true
+    end
+
+    if do_ring do
       ringer_name = User.get_username(ringer_id)
       "RING #{ringer_name}\n"
     end
@@ -442,7 +447,7 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:direct_message, {from_id, messages, state_user}) when is_list(messages) do
     from_user = User.get_user_by_id(from_id)
 
-    if from_id not in (state_user.ignored || []) or from_user.moderator == true do
+    if Account.does_a_ignore_b?(state_user.id, from_id) or from_user.moderator == true do
       from_name = User.get_username(from_id)
 
       messages
@@ -461,7 +466,7 @@ defmodule Teiserver.Protocols.SpringOut do
        when is_list(messages) do
     from_user = User.get_user_by_id(from_id)
 
-    if from_id not in (state_user.ignored || []) or from_user.moderator == true or
+    if Account.does_a_ignore_b?(state_user.id, from_id) or from_user.moderator == true or
          User.is_bot?(from_user) == true do
       from_name = User.get_username(from_id)
 
@@ -480,7 +485,7 @@ defmodule Teiserver.Protocols.SpringOut do
        when is_list(messages) do
     from_user = User.get_user_by_id(from_id)
 
-    if from_id not in (state_user.ignored || []) or from_user.moderator == true or
+    if Account.does_a_ignore_b?(state_user.id, from_id) or from_user.moderator == true or
          User.is_bot?(from_user) == true do
       from_name = User.get_username(from_id)
 
@@ -542,9 +547,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:battle_message, {sender_id, messages, _lobby_id, state_userid})
        when is_list(messages) do
-    user = User.get_user_by_id(state_userid)
-
-    if sender_id not in (user.ignored || []) do
+    if Account.does_a_ignore_b?(state_userid, sender_id) do
       username = User.get_username(sender_id)
 
       messages
@@ -560,9 +563,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:battle_message_ex, {sender_id, messages, _lobby_id, state_userid})
        when is_list(messages) do
-    user = User.get_user_by_id(state_userid)
-
-    if sender_id not in (user.ignored || []) do
+    if Account.does_a_ignore_b?(state_userid, sender_id) do
       username = User.get_username(sender_id)
 
       messages

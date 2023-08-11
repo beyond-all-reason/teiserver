@@ -8,7 +8,7 @@ defmodule Teiserver do
 
   @spec icon(:friend | :friend_request | :ignore | :relationship) :: String.t()
   def icon(:relationship), do: "fa-solid fa-users"
-  def icon(:friend), do: "fa-solid fa-user-friends"
+  def icon(:friend), do: "fa-solid fa-user-plus"
   def icon(:friend_request), do: "fa-solid fa-question"
   def icon(:ignore), do: "fa-solid fa-volume-mute"
 

@@ -8,7 +8,7 @@ defmodule Teiserver.Account.FriendRequestLib do
   def colours(), do: :success
 
   @spec icon :: String.t()
-  def icon(), do: "fa-user-plus"
+  def icon(), do: "fa-user-question"
 
   # Functions
   @spec accept_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
