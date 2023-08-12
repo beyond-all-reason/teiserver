@@ -1055,7 +1055,8 @@ defmodule Teiserver.SpringTcpServer do
     userid = client.userid
 
     if userid == state.userid do
-      Phoenix.PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
     end
 
     # Do they know about the battle?
