@@ -1,0 +1,62 @@
+<TeiserverWeb.Admin.AdminComponents.sub_menu active={"test_page"} view_colour={@view_colour} current_user={@current_user} />
+
+<div class="row mt-4">
+  <div class="col-md-12">
+    <.tab_header>
+      <.tab_nav
+        url={~p"/admin/test_page/icons"}
+        selected={@tab == "icons"}
+      >
+        Icons
+      </.tab_nav>
+      
+      <.tab_nav
+        url={~p"/admin/test_page/colours"}
+        selected={@tab == "colours"}
+      >
+        Colours
+      </.tab_nav>
+      
+      <.tab_nav
+        url={~p"/admin/test_page/alerts"}
+        selected={@tab == "alerts"}
+      >
+        Alerts
+      </.tab_nav>
+      
+    </.tab_header>
+    
+    <div :if={@tab == "icons"} class="p-4">
+    
+    </div>
+    
+    <div :if={@tab == "colours"} class="p-4">
+    
+    </div>
+    
+    <div :if={@tab == "alerts"} class="row p-4">
+      <div class="col-md-8">
+        <div :for={name <- ~w(success info warning danger)} class={"btn btn-#{name} mx-2"} phx-click="create-flash" phx-value-name={name}>
+          Flash <%= name %>
+        </div>
+        <br /><br />
+        
+        <div :for={name <- @limited_bsnames} class={"alert alert-#{name}"}>
+          <%= name %> alert
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        Quae eum aut officia doloribus neque et. Sunt eligendi dolor quam mollitia earum. Id adipisci et unde fugit laudantium. Aliquam velit molestiae commodi aliquam sequi. Similique ullam cupiditate consequatur. Dignissimos doloribus sit ut.
+
+        Doloremque vitae dolor alias assumenda sequi iste. Neque rerum nostrum magni voluptate fugiat necessitatibus. Vel explicabo et rem rerum sint. Ut ut veniam tempore facere commodi praesentium quis optio. Inventore explicabo suscipit odio. Ut et quis non aliquid itaque.
+
+        Voluptatem possimus voluptatibus qui pariatur reprehenderit a voluptatem est. Ab ducimus odit placeat atque sed dolore expedita. Sed veritatis sit fuga nostrum nostrum ex. Harum quia qui cupiditate laborum. Nihil rerum voluptate nihil fugit possimus recusandae nobis. Deserunt voluptatem qui vero repellendus fugiat laborum velit.
+
+        Eos et vero et sunt quis non unde iure. Iusto et sequi in. Quisquam facere molestiae qui non porro incidunt recusandae error.
+
+        Non et vero et vero occaecati in est tenetur. Tempora repellat accusamus facere ut laboriosam quisquam. Officiis eligendi deserunt omnis illo deleniti. Repellendus ipsa necessitatibus est. Repudiandae quis harum rerum illum adipisci quia ducimus. Itaque et cumque aliquam exercitationem placeat nihil ut facilis.
+      </div>
+    </div>
+  </div>
+</div>

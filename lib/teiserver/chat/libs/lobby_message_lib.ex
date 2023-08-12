@@ -1,4 +1,5 @@
 defmodule Teiserver.Chat.LobbyMessageLib do
+  @moduledoc false
   use CentralWeb, :library
   alias Teiserver.Chat.LobbyMessage
 

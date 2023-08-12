@@ -3,6 +3,7 @@ defmodule Fontawesome do
   Example usage:
 
   <Fontawesome.icon icon="arrow-left" style="regular" />
+  <Fontawesome.icon icon="arrow-left" style="regular" class="text-danger" />
   """
   use Phoenix.Component
 

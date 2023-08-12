@@ -1,4 +1,5 @@
 defmodule Teiserver.Chat.LobbyMessage do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "teiserver_lobby_messages" do

@@ -12,6 +12,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
       |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
       |> assign(:tab, "details")
       |> assign(:highlight_map, %{})
+      |> assign(:extra_url_parts, "")
       |> default_filters(params)
       |> update_highlight_map_at_mount
 
@@ -125,8 +126,13 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
 
       match_name = MatchLib.make_match_name(match)
 
+      next_match = Battle.get_next_match(match)
+      prev_match = Battle.get_prev_match(match)
+
       socket
         |> assign(:match, match)
+        |> assign(:next_match, next_match)
+        |> assign(:prev_match, prev_match)
         |> assign(:match_name, match_name)
     else
       socket
@@ -149,12 +155,16 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
   end
 
   defp default_filters(socket, params) do
-    highlight_names = Map.get(params, "userids", [])
+    highlight_names = params
+      |> Map.get("userids", [])
       |> Enum.map(fn userid_str ->
         Account.get_username_by_id(userid_str)
       end)
       |> Enum.reject(&(&1 == nil))
       |> Enum.join(", ")
+
+    extra_url_parts = params
+      |> Map.get("userids", [])
 
     socket
     |> assign(:filters, %{
@@ -165,5 +175,6 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
       "message-contains" => "",
       "order_by" => "Oldest first",
     })
+    |> assign(:extra_url_parts, extra_url_parts)
   end
 end
