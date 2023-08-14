@@ -7,7 +7,8 @@ defmodule Fontawesome do
   """
   use Phoenix.Component
 
-  attr :icon, :string, required: true
+  attr :icon, :string
+  attr :icon_atom, :atom
   attr :class, :string, default: ""
   attr :size, :string, default: nil
   attr :weight, :string, default: "regular"
@@ -20,7 +21,7 @@ defmodule Fontawesome do
     weight = fa_prefix(assigns[:weight])
 
     icon_name = if is_atom(assigns[:icon]) do
-      icon_lookup(assigns[:icon])
+      icon_lookup(assigns[:icon] || assigns[:icon_atom])
     else
       fa_prefix(assigns[:icon])
     end

@@ -1,0 +1,39 @@
+<TeiserverWeb.Account.ProfileComponents.profile_header
+  active="overview"
+  view_colour={@view_colour}
+  user={@user}
+  current_user={@current_user}
+/>
+  
+<div class="row mt-2 mb-3">
+  <div class="col">
+    <%!-- Actions --%>
+    <.section_menu_button
+      :if={@current_user && @current_user.id != @user.id}
+      bsname={Teiserver.Moderation.ReportLib.colour()}
+      icon={Teiserver.Moderation.ReportLib.icon()}
+      active={false}
+      url={~p"/moderation/report_form/#{@user.id}"}
+    >
+      Report user
+    </.section_menu_button>
+
+    <.section_menu_button
+      :if={@current_user && @current_user.id != @user.id}
+      bsname={Teiserver.Account.RelationshipLib.colour()}
+      icon={Teiserver.Account.RelationshipLib.icon_follow()}
+      active={false}
+      url={~p"/moderation/report_form/#{@user.id}"}
+    >
+      Follow
+    </.section_menu_button>
+  </div>
+</div>
+
+<div class="row mt-2 mb-3">
+  <div class="col">
+    <%!-- Overview stuff --%>
+    
+    Profile overview will go here
+  </div>
+</div>

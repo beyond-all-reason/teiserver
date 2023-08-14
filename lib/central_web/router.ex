@@ -249,15 +249,20 @@ defmodule TeiserverWeb.Router do
   end
 
   scope "/profile", TeiserverWeb.Account do
-    pipe_through([:browser, :standard_live_layout, :protected])
+    pipe_through([:browser, :standard_live_layout])
 
     live_session :profiles,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Account.AuthPlug, :mount_current_user},
         {Teiserver.Communication.NotificationPlug, :load_notifications}
       ] do
-        live "/id/:userid", ProfileLive.Index, :userid
-        live "/name/:username", ProfileLive.Index, :username
+        live "/", ProfileLive.Self, :index
+        live "/name/:username", ProfileLive.Username, :index
+
+        live "/:userid", ProfileLive.Overview, :overview
+        live "/:userid/overview", ProfileLive.Overview, :overview
+        live "/:userid/accolades", ProfileLive.Accolades, :accolades
+        live "/:userid/achievements", ProfileLive.Achievements, :achievements
     end
   end
 

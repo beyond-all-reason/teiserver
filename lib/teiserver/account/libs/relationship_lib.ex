@@ -2,8 +2,8 @@ defmodule Teiserver.Account.RelationshipLib do
   @moduledoc false
   alias Teiserver.Account
 
-  @spec colours :: atom
-  def colours(), do: :success
+  @spec colour :: atom
+  def colour(), do: :success
 
   @spec icon :: String.t()
   def icon(), do: "fa-users"

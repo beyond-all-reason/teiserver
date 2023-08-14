@@ -45,7 +45,7 @@
       id="friends-table"
       table_class="table-sm"
       rows={@friends}
-      row_click={fn friend -> JS.navigate(~p"/profile/id/#{friend.other_user.id}") end}
+      row_click={fn friend -> JS.navigate(~p"/profile/#{friend.other_user.id}") end}
     >
       <:col :let={friend} label="Name"><%= friend.other_user.name %></:col>
       <:col :let={friend} label="Last played"><%= friend.other_user.last_played |> date_to_str(:hms_or_ymd) %></:col>
@@ -53,7 +53,7 @@
       <:col :let={friend} label="">
         <.link
           class="btn btn-secondary btn-sm"
-          navigate={~p"/profile/id/#{friend.other_user.id}"}>
+          navigate={~p"/profile/#{friend.other_user.id}"}>
             Profile
         </.link>
       </:col>
@@ -69,7 +69,7 @@
       <:col :let={request} label="">
         <.link
           class="btn btn-secondary btn-sm"
-          navigate={~p"/profile/id/#{request.from_user.id}"}>
+          navigate={~p"/profile/#{request.from_user.id}"}>
             Profile
         </.link>
       </:col>
@@ -121,7 +121,7 @@
       id="follows-table"
       table_class="table-sm"
       rows={@follows}
-      row_click={fn follow -> JS.navigate(~p"/profile/id/#{follow.to_user.id}") end}
+      row_click={fn follow -> JS.navigate(~p"/profile/#{follow.to_user.id}") end}
     >
       <:col :let={follow} label="Name"><%= follow.to_user.name %></:col>
       <:col :let={follow} label="Last played"><%= follow.to_user.last_played |> date_to_str(:hms_or_ymd) %></:col>z
@@ -129,7 +129,7 @@
       <:col :let={follow} label="">
         <.link
           class="btn btn-secondary btn-sm"
-          navigate={~p"/profile/id/#{follow.to_user.id}"}>
+          navigate={~p"/profile/#{follow.to_user.id}"}>
             <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="regular" />
             Profile
         </.link>

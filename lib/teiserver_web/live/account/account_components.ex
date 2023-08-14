@@ -16,7 +16,7 @@ defmodule TeiserverWeb.AccountComponents do
         bsname={@view_colour}
         icon={Teiserver.AccountLib.icon()}
         active={@active == "profile"}
-        url={~p"/teiserver/profile"}
+        url={~p"/profile/"}
       >
         Profile
       </.sub_menu_button>

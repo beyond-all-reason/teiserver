@@ -7,17 +7,11 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     socket = socket
       |> assign(:tab, nil)
       |> assign(:site_menu_active, "account")
-      |> assign(:view_colour, Teiserver.Account.RelationshipLib.colours())
+      |> assign(:view_colour, Teiserver.Account.RelationshipLib.colour())
       |> put_empty_relationships
 
     {:ok, socket}
   end
-
-  # @impl true
-  # def handle_event(_cmd, _event, %{assigns: _assigns} = socket) do
-  #   {:noreply, socket}
-  # end
-
 
   @impl true
   def handle_params(params, _url, socket) do
