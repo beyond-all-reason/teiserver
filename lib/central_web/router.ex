@@ -561,6 +561,27 @@ defmodule TeiserverWeb.Router do
     resources("/site", SiteConfigController, only: [:index, :edit, :update, :delete])
   end
 
+  scope "/admin", TeiserverWeb.Admin do
+    pipe_through([:live_browser, :protected])
+
+    live_session :live_test_page_view,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Communication.NotificationPlug, :load_notifications}
+      ] do
+        live "/test_page", TestPageLive.Index, :index
+        live "/test_page/:tab", TestPageLive.Index, :index
+    end
+
+    live_session :chat_liveview,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Communication.NotificationPlug, :load_notifications}
+      ] do
+        live "/chat", ChatLive.Index, :index
+    end
+  end
+
   scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do
     pipe_through([:browser, :standard_layout, :protected])
 

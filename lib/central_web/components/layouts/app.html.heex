@@ -42,16 +42,14 @@
   </style>
 
   <%= if assigns[:site_menu_active], do: Phoenix.View.render(TeiserverWeb.General.PageView, "top_navbar.html", assigns) %>
+  
+  <.flash_group flash={@flash} />
 
   <main>
     <%= if assigns[:breadcrumb_trails] do %>
       <.breadcrumb_trail trails={assigns[:breadcrumb_trails]} />
     <% end %>
   
-    <div id="flash-messages">
-      <.flash_group flash={@flash} />
-    </div>
-
     <div class="px-3 my-0">
       <%= @inner_content %>
     </div>

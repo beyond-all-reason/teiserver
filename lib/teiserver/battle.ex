@@ -118,7 +118,7 @@ defmodule Teiserver.Battle do
 
   def get_next_match(match_id) when is_integer(match_id) do
     match_id
-    |> get_match()
+    |> get_match(select: [:id, :server_uuid])
     |> get_next_match()
   end
 
@@ -129,7 +129,8 @@ defmodule Teiserver.Battle do
         id_after: match_id
       ],
       order_by: "Oldest first",
-      limit: 1
+      limit: 1,
+      select: [:id]
     )
     |> Repo.one()
   end
@@ -138,7 +139,7 @@ defmodule Teiserver.Battle do
 
   def get_prev_match(match_id) when is_integer(match_id) do
     match_id
-    |> get_match()
+    |> get_match(select: [:id, :server_uuid])
     |> get_prev_match()
   end
 
@@ -149,7 +150,8 @@ defmodule Teiserver.Battle do
         id_before: match_id
       ],
       order_by: "Newest first",
-      limit: 1
+      limit: 1,
+      select: [:id]
     )
     |> Repo.one()
   end

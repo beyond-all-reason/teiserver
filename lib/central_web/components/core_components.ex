@@ -127,7 +127,55 @@ defmodule CentralWeb.CoreComponents do
   attr :rest, :global, doc: "the arbitrary HTML attributes to add to the flash container"
   slot :inner_block, doc: "the optional inner block that renders the flash message"
 
+  # def flash(assigns) do
+  #   ~H"""
+  #   <div
+  #     :if={msg = render_slot(@inner_block) || Phoenix.Flash.get(@flash, @kind)}
+  #     id={@id}
+  #     phx-mounted={@autoshow && show("##{@id}")}
+  #     phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
+  #     role="alert"
+  #     class={[
+  #       "fixed hidden alert",
+  #       @kind == :info && "alert-info",
+  #       @kind == :success && "alert-success",
+  #       @kind == :warning && "alert-warning",
+  #       @kind == :error && "alert-danger"
+  #     ]}
+  #     {@rest}
+  #   >
+  #     <button
+  #       :if={@close}
+  #       type="button"
+  #       class="btn btn-secondary float-end px-2"
+  #       aria-label={gettext("close")}
+  #     >
+  #       <Fontawesome.icon icon="xmark" style="solid" />
+  #     </button>
+  #     <p :if={@title} class="flex items-center gap-1.5 text-[0.8125rem] font-semibold leading-6">
+  #       <Fontawesome.icon :if={@kind == :info} icon="circle-info" style="solid" />
+  #       <Fontawesome.icon :if={@kind == :success} icon="circle-check" style="solid" />
+  #       <Fontawesome.icon :if={@kind == :warning} icon="triangle-exclamation" style="solid" />
+  #       <Fontawesome.icon :if={@kind == :error} icon="ban" style="solid" />
+  #       <%= @title %>
+  #     </p>
+  #     <p class="mt-2 text-[0.8125rem] leading-5"><%= msg %></p>
+  #   </div>
+  #   """
+  # end
+
   def flash(assigns) do
+    text_colour = case assigns[:kind] do
+      :info -> "info"
+      :success -> "success"
+      :warning -> "warning"
+      :error -> "danger"
+      _ -> ""
+    end
+
+    assigns = assigns
+      |> assign(:text_colour, text_colour)
+
     ~H"""
     <div
       :if={msg = render_slot(@inner_block) || Phoenix.Flash.get(@flash, @kind)}
@@ -135,8 +183,10 @@ defmodule CentralWeb.CoreComponents do
       phx-mounted={@autoshow && show("##{@id}")}
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
       class={[
-        "fixed hidden alert",
+        "toast align-items-center",
         @kind == :info && "alert-info",
         @kind == :success && "alert-success",
         @kind == :warning && "alert-warning",
@@ -144,25 +194,34 @@ defmodule CentralWeb.CoreComponents do
       ]}
       {@rest}
     >
-      <button
-        :if={@close}
-        type="button"
-        class="btn btn-secondary float-end px-2"
-        aria-label={gettext("close")}
-      >
-        <Fontawesome.icon icon="xmark" style="solid" />
-      </button>
-      <p :if={@title} class="flex items-center gap-1.5 text-[0.8125rem] font-semibold leading-6">
-        <Fontawesome.icon :if={@kind == :info} icon="circle-info" style="solid" />
-        <Fontawesome.icon :if={@kind == :success} icon="circle-check" style="solid" />
-        <Fontawesome.icon :if={@kind == :warning} icon="triangle-exclamation" style="solid" />
-        <Fontawesome.icon :if={@kind == :error} icon="ban" style="solid" />
-        <%= @title %>
-      </p>
-      <p class="mt-2 text-[0.8125rem] leading-5"><%= msg %></p>
+      <div class={"toast-header border-#{@text_colour}"}>
+        <Fontawesome.icon icon="stop" style="solid" class={"text-#{@text_colour}"} />
+        &nbsp;
+        <small class="text-body-secondary">just now</small>
+
+        <button
+          :if={@close}
+          type="button"
+          class="btn btn-close"
+          aria-label={gettext("close")}
+        ></button>
+      </div>
+      <div class="toast-body">
+        <%= msg %>
+      </div>
     </div>
     """
   end
+
+  # <div class="toast show fade toast-info" role="alert" aria-live="assertive" aria-atomic="true" data-mdb-color="info" data-mdb-autohide="false">
+  #   <div class="toast-header toast-info">
+  #     <i class="fas fa-info-circle fa-lg me-2"></i>
+  #     <strong class="me-auto">MDBootstrap</strong>
+  #     <small>11 mins ago</small>
+  #     <button type="button" class="btn-close" data-mdb-dismiss="toast" aria-label="Close"></button>
+  #   </div>
+  #   <div class="toast-body">Hello, world! This is a toast message.</div>
+  # </div>
 
   @doc """
   Shows the flash group with standard titles and content.
@@ -173,21 +232,25 @@ defmodule CentralWeb.CoreComponents do
 
   def flash_group(assigns) do
     ~H"""
-    <.flash kind={:info} title="Information" role="alert" flash={@flash} />
-    <.flash kind={:success} title="Success!" role="alert" flash={@flash} />
-    <.flash kind={:warning} title="Warning!" role="alert" flash={@flash} />
-    <.flash kind={:error} title="Error!" role="alert" flash={@flash} />
-    <.flash
-      id="disconnected"
-      kind={:error}
-      title="Reconnecting to the server"
-      close={false}
-      autoshow={false}
-      phx-disconnected={show("#disconnected")}
-      phx-connected={hide("#disconnected")}
-    >
-      Attempting to reconnect <Fontawesome.icon icon="sync" class="fa-spin" />
-    </.flash>
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+      <div class="toast-container top-0 end-0 p-3">
+        <.flash kind={:info} title="Information" role="alert" flash={@flash} />
+        <.flash kind={:success} title="Success!" role="alert" flash={@flash} />
+        <.flash kind={:warning} title="Warning!" role="alert" flash={@flash} />
+        <.flash kind={:error} title="Error!" role="alert" flash={@flash} />
+        <.flash
+          id="disconnected"
+          kind={:error}
+          title="Reconnecting to the server"
+          close={false}
+          autoshow={false}
+          phx-disconnected={show("#disconnected")}
+          phx-connected={hide("#disconnected")}
+        >
+          Attempting to reconnect <Fontawesome.icon icon="sync" class="fa-spin" />
+        </.flash>
+      </div>
+    </div>
     """
   end
 
