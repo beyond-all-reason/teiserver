@@ -1515,8 +1515,9 @@ defmodule Teiserver.Account do
     |> Relationship.changeset(attrs)
     |> Repo.insert(
       on_conflict: [set: [
-        from_user_id: attrs["from_user_id"],
-        to_user_id: attrs["to_user_id"]
+        state: Map.get(attrs, "state", Map.get(attrs, :state, nil)),
+        notes: Map.get(attrs, "notes", Map.get(attrs, :notes, nil)),
+        tags: Map.get(attrs, "tags", Map.get(attrs, :tags, nil))
       ]],
       conflict_target: ~w(from_user_id to_user_id)a
     )

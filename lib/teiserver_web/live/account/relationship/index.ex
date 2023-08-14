@@ -144,6 +144,96 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     {:noreply, socket}
   end
 
+  def handle_event("unfollow-user", %{"userid" => userid_str}, socket) do
+    userid = String.to_integer(userid_str)
+
+    Account.upsert_relationship(%{
+      from_user_id: socket.assigns.current_user.id,
+      to_user_id: userid,
+      state: nil
+    })
+
+    username = Account.get_username_by_id(userid)
+
+    socket = socket
+      |> put_flash(:success, "#{username} is no longer followed")
+      |> get_follows()
+
+    {:noreply, socket}
+  end
+
+  def handle_event("unignore-user", %{"userid" => userid_str}, socket) do
+    userid = String.to_integer(userid_str)
+
+    Account.upsert_relationship(%{
+      from_user_id: socket.assigns.current_user.id,
+      to_user_id: userid,
+      state: nil
+    })
+
+    username = Account.get_username_by_id(userid)
+
+    socket = socket
+      |> put_flash(:success, "#{username} is no longer ignored")
+      |> get_avoids()
+
+    {:noreply, socket}
+  end
+
+  def handle_event("ignore-user", %{"userid" => userid_str}, socket) do
+    userid = String.to_integer(userid_str)
+
+    Account.upsert_relationship(%{
+      from_user_id: socket.assigns.current_user.id,
+      to_user_id: userid,
+      state: "ignore"
+    })
+
+    username = Account.get_username_by_id(userid)
+
+    socket = socket
+      |> put_flash(:success, "#{username} is now ignored")
+      |> get_avoids()
+
+    {:noreply, socket}
+  end
+
+  def handle_event("avoid-user", %{"userid" => userid_str}, socket) do
+    userid = String.to_integer(userid_str)
+
+    Account.upsert_relationship(%{
+      from_user_id: socket.assigns.current_user.id,
+      to_user_id: userid,
+      state: "avoid"
+    })
+
+    username = Account.get_username_by_id(userid)
+
+    socket = socket
+      |> put_flash(:success, "#{username} is now avoided")
+      |> get_avoids()
+
+    {:noreply, socket}
+  end
+
+  def handle_event("block-user", %{"userid" => userid_str}, socket) do
+    userid = String.to_integer(userid_str)
+
+    Account.upsert_relationship(%{
+      from_user_id: socket.assigns.current_user.id,
+      to_user_id: userid,
+      state: "block"
+    })
+
+    username = Account.get_username_by_id(userid)
+
+    socket = socket
+      |> put_flash(:success, "#{username} is now blocked")
+      |> get_avoids()
+
+    {:noreply, socket}
+  end
+
   defp update_user_search(%{assigns: %{live_action: :search, search_terms: terms} = assigns} = socket) do
     if Map.get(terms, "username") do
       found_user = Account.get_user(nil,

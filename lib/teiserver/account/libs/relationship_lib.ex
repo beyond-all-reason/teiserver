@@ -8,6 +8,9 @@ defmodule Teiserver.Account.RelationshipLib do
   @spec icon :: String.t()
   def icon(), do: "fa-users"
 
+  @spec icon_follow :: String.t()
+  def icon_follow(), do: "fa-eyes"
+
   @spec icon_ignore :: String.t()
   def icon_ignore(), do: "fa-volume-slash"
 
