@@ -210,6 +210,15 @@
 </div>
 
 <div class="row mt-2 mb-3" :if={@live_action == :search}>
+  <style type="text/css">
+    .role-badge {
+      width: 150px;
+      display: inline-block;
+      text-align: center;
+      font-size: 1.5em;
+    }
+  </style>
+
   <div class="col">
     
     <form method="post" class="">
@@ -226,31 +235,133 @@
     </form>
     <br />
     
+    <div :if={@found_user == nil}>
+      No user found
+    </div>
+    
     <div :if={@found_user}>
-      <h4><%= @found_user.name %></h4>
+      <h3 class="mb-4 py-1" style={"background-color: #{@found_user.colour};"}>
+        <div class="d-inline-block px-2 py-1 mx-1">
+          <Fontawesome.icon icon={@found_user.icon} style="regular" size="sm" />
+        </div>
+        
+        <%= @found_user.name %>
+        
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="font-size: 0.7em;">
+          Chevron rank: <%= @found_user.data["rank"] || 0 %>
+        </span>
+      </h3>
       
-      <div :if={@found_relationship}>
-        <%= inspect @found_relationship %>
+      <div class="row">
+        <div class="col-md-12 col-lg-6">
+          <%!-- Relationship status --%>
+          <div :if={@found_friendship_request}>
+            <h4 :if={@found_friendship_request.from_user_id == @current_user.id} class="mb-4">
+              Status: <span class={"text-info"}>Outgoing friend request</span>
+              &nbsp;
+              <div
+                class="btn btn-danger btn-sm"
+                phx-click="rescind-friend"
+                phx-value-userid={@found_user.id}>
+                Rescind
+              </div>
+            </h4>
+            <h4 :if={@found_friendship_request.to_user_id == @current_user.id} class="mb-4">
+              Status: <span class={"text-info"}>Incoming friend request</span>
+              &nbsp;
+              <div
+                class="btn btn-success btn-sm"
+                phx-click="accept-friend"
+                phx-value-userid={@found_user.id}>
+                Accept
+              </div>
+              
+              <div
+                class="btn btn-warning btn-sm"
+                phx-click="decline-friend"
+                phx-value-userid={@found_user.id}>
+                Decline
+              </div>
+            </h4>
+          </div>
+
+          <h4 :if={@found_relationship && @found_relationship.state != nil} class="mb-4">
+            <%= case @found_relationship.state do %>
+              <% "follow" -> %>
+                Status: <span class={"text-info"}>Following</span>
+              <% "ignore" -> %>
+                Status: <span class={"text-warning"}>Ignoring</span>
+              <% "avoid" -> %>
+                Status: <span class={"text-danger"}>Avoiding</span>
+              <% "block" -> %>
+                Status: <span class={"text-danger"}>Blocked</span>
+            <% end %>
+          </h4>
+
+          <h4 :if={@found_friendship} class="mb-4">
+            Status: <span class={"text-#{Teiserver.Account.FriendLib.colours}"}>Friend</span>
+          </h4>
+          
+          <.link
+            :if={@found_user}
+            navigate={~p"/profile/#{@found_user.id}"}
+            class={"btn btn-lg btn-#{@view_colour} mx-1"}
+          >
+            <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" />
+            See profile
+          </.link>
+          
+          <.link
+            :if={@found_user.id != @current_user.id and @found_friendship == nil}
+            navigate={~p"/moderation/report_form/#{@found_user.id}"}
+            class={"btn btn-lg btn-#{Teiserver.Moderation.ReportLib.colour()} mx-1"}
+          >
+            <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="solid" />
+            Report user
+          </.link>
+        </div>
+        
+        <div class="col-md-12 col-lg-6">
+          <%= cond do %>
+            <% Enum.member?(@found_user.data["restrictions"], "Permanently banned") -> %>
+              <div class="role-badge">
+                <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.action_icon("Ban")} style="solid" size="2x" class="text-danger" />
+                <br />
+                Banned
+              </div>
+
+            <% Enum.member?(@found_user.data["restrictions"], "Login") -> %>
+              <div class="role-badge">
+                <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.action_icon("Suspend")} style="solid" size="2x" class="text-danger" />
+                <br />
+                Suspended
+              </div>
+
+            <% Enum.member?(@found_user.data["restrictions"], "All chat") -> %>
+              <div class="role-badge">
+                <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.action_icon("Mute")} style="solid" size="2x" class="text-danger" />
+                <br />
+                Muted
+              </div>
+
+            <% true -> %>
+              
+          <% end %>
+        
+          <%= for role <- @found_user.roles do %>
+            <% data = @role_data[role] %>
+            <%= if data != nil and Map.get(data, :badge) != false do %>
+              <div class="role-badge">
+                <i class={"fa-fw fa-2x #{data.icon}"} style={"color: #{data.colour}"} title={role}></i>
+                <br />
+                <%= role %>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
       </div>
-      <br /><br />
-      
-      <div :if={@found_friendship_request}>
-        <%= inspect @found_friendship_request %>
-      </div>
-      <br /><br />
-      
-      <div :if={@found_friendship}>
-        <%= inspect @found_friendship %>
-      </div>
-      <br /><br />
-      
-      <.link
-        navigate={~p"/moderation/report_form/#{@found_user.id}"}
-        class="btn btn-lg btn-warning"
-      >
-        <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="regular" />
-        Report
-      </.link>
+
     </div>
   </div>
 </div>

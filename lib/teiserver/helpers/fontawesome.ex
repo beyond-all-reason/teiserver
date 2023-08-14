@@ -13,6 +13,7 @@ defmodule Fontawesome do
   attr :size, :string, default: nil
   attr :weight, :string, default: "regular"
   attr :style, :string, default: "regular"
+  attr :css_style, :string, default: ""
 
   @spec icon(map) :: Phoenix.LiveView.Rendered.t()
   def icon(assigns) do
@@ -30,7 +31,7 @@ defmodule Fontawesome do
       |> assign(:class, "fa-fw #{style} #{size} #{weight} #{icon_name} #{assigns[:class]}")
 
     ~H"""
-    <i class={@class}></i>
+    <i class={@class} style={@css_style}></i>
     """
   end
 

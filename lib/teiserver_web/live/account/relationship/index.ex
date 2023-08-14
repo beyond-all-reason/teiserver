@@ -1,13 +1,13 @@
 defmodule TeiserverWeb.Account.RelationshipLive.Index do
   use TeiserverWeb, :live_view
-  alias Teiserver.{Account}
+  alias Teiserver.Account
 
   @impl true
   def mount(_params, _session, socket) do
     socket = socket
       |> assign(:tab, nil)
       |> assign(:site_menu_active, "account")
-      |> assign(:view_colour, Teiserver.Account.RelationshipLib.colour())
+      |> assign(:view_colour, Account.RelationshipLib.colour())
       |> put_empty_relationships
 
     {:ok, socket}
@@ -46,6 +46,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     socket
       |> assign(:page_title, "Relationships - Player search")
       |> assign(:tab, :search)
+      |> assign(:role_data, Account.RoleLib.role_data())
       |> put_empty_relationships
       |> update_user_search
   end
@@ -71,7 +72,9 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       :ok ->
         socket
           |> put_flash(:success, "Friend request accepted")
-          |> get_friends()
+          |> get_friends
+          |> update_user_search
+
       {:error, reason} ->
         socket
           |> put_flash(:warning, "There was an error accepting that friend request: '#{reason}'")
@@ -88,7 +91,9 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       :ok ->
         socket
           |> put_flash(:success, "Friend request declined")
-          |> get_friends()
+          |> get_friends
+          |> update_user_search
+
       {:error, reason} ->
         socket
           |> put_flash(:warning, "There was an error declining that friend request: '#{reason}'")
@@ -128,7 +133,8 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       :ok ->
         socket
           |> put_flash(:success, "Friend request rescinded")
-          |> get_friends()
+          |> get_friends
+          |> update_user_search
       {:error, reason} ->
         socket
           |> put_flash(:warning, "There was an error rescinding that friend request: '#{reason}'")
@@ -229,11 +235,18 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   end
 
   defp update_user_search(%{assigns: %{live_action: :search, search_terms: terms} = assigns} = socket) do
-    if Map.get(terms, "username") do
+    search_term = Map.get(terms, "username", "")
+      |> String.trim()
+
+    if Enum.member?(["", nil], search_term) do
+      socket
+    else
       found_user = Account.get_user(nil,
         search: [
-          name_lower: Map.get(terms, "username")
-        ]
+          name_lower: search_term,
+          not_has_role: "Bot"
+        ],
+        limit: 1
       )
 
       if found_user do
@@ -253,8 +266,6 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
           |> assign(:found_friendship, nil)
           |> assign(:found_friendship_request, nil)
       end
-    else
-      socket
     end
   end
 
@@ -275,7 +286,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       |> assign(:avoids, [])
       |> assign(:ignores, [])
       |> assign(:blocks, [])
-      |> assign(:search_terms, %{"username" => "JayMontano"})
+      |> assign(:search_terms, %{"username" => ""})
       |> assign(:found_user, nil)
       |> assign(:found_relationship, nil)
       |> assign(:found_friendship, nil)
