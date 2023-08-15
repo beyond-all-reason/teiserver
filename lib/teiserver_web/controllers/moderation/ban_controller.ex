@@ -91,14 +91,20 @@ defmodule TeiserverWeb.Moderation.BanController do
           nil
       end
 
-    case user do
-      nil ->
+    existing_ban = Moderation.get_ban(nil, search: [source_id: String.to_integer(user_str)])
+
+    cond do
+      user == nil ->
         conn
         |> add_breadcrumb(name: "New ban", url: conn.request_path)
         |> put_flash(:warning, "Unable to find that user")
         |> render("new_select.html")
 
-      user ->
+      existing_ban != nil ->
+        conn
+          |> redirect(to: Routes.moderation_ban_path(conn, :show, existing_ban.id))
+
+      true ->
         matching_users =
           Account.smurf_search(user)
           |> Enum.map(fn {_type, users} -> users end)

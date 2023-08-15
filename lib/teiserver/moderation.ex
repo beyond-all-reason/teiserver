@@ -1035,25 +1035,24 @@ defmodule Teiserver.Moderation do
     |> Repo.one!()
   end
 
-  # Uncomment this if needed, default files do not need this function
-  # @doc """
-  # Gets a single ban.
+  @doc """
+  Gets a single ban.
 
-  # Returns `nil` if the Ban does not exist.
+  Returns `nil` if the Ban does not exist.
 
-  # ## Examples
+  ## Examples
 
-  #     iex> get_ban(123)
-  #     %Ban{}
+      iex> get_ban(123)
+      %Ban{}
 
-  #     iex> get_ban(456)
-  #     nil
+      iex> get_ban(456)
+      nil
 
-  # """
-  # def get_ban(id, args \\ []) when not is_list(id) do
-  #   ban_query(id, args)
-  #   |> Repo.one
-  # end
+  """
+  def get_ban(id, args \\ []) when not is_list(id) do
+    ban_query(id, args)
+    |> Repo.one
+  end
 
   @doc """
   Creates a ban.

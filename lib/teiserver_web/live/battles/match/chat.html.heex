@@ -1,8 +1,4 @@
-<%= render(
-  TeiserverWeb.Battle.GeneralView,
-  "sub_menu.html",
-  Map.merge(assigns, %{active: "matches"})
-) %>
+<TeiserverWeb.Battle.BattleComponents.sub_menu active={"matches"} view_colour={@view_colour} />
 
 <style type="text/css">
  .uh-0 td {background-color: rgba(255, 0, 0, 0.1);}
@@ -25,6 +21,27 @@
       current_user={@current_user}
       match_id={@match.id}
     />
+
+    &nbsp;&nbsp;&nbsp;
+
+    <.link
+      :if={@prev_match}
+      patch={~p"/battle/chat/#{@prev_match.id}/#{@extra_url_parts}"}
+      class="btn btn-outline-secondary"
+    >
+      <Fontawesome.icon icon="arrow-left" style="regular" />
+      Prev match
+    </.link>
+
+    <.link
+      :if={@next_match}
+      patch={~p"/battle/chat/#{@next_match.id}/#{@extra_url_parts}"}
+      class="btn btn-outline-secondary"
+    >
+      <Fontawesome.icon icon="arrow-right" style="regular" />
+      Next match
+    </.link>
+
     <hr />
 
     <div class="float-end">
@@ -38,6 +55,10 @@
         &nbsp;&nbsp;&nbsp;&nbsp;
       <% end %>
       Duration: <%= duration_to_str_short(@match.game_duration) %>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      Started: <%= date_to_str(@match.started, format: :hms) %>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      Messages: <%= Teiserver.Helper.StringHelper.format_number Enum.count(@messages) %>
     </h3>
     
     <form method="post" class="">

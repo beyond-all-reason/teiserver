@@ -369,7 +369,7 @@ defmodule Teiserver.SpringTcpServer do
       else
         keys = Map.keys(new_values)
 
-        if Enum.member?(keys, :locked) or Enum.member?(keys, :map_name) do
+        if Enum.member?(keys, :locked) or Enum.member?(keys, :map_name) or Enum.member?(keys, :spectator_count) do
           SpringOut.reply(:update_battle, lobby_id, nil, state)
         else
           state
@@ -1055,7 +1055,8 @@ defmodule Teiserver.SpringTcpServer do
     userid = client.userid
 
     if userid == state.userid do
-      Phoenix.PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
     end
 
     # Do they know about the battle?
