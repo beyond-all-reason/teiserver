@@ -709,7 +709,7 @@ defmodule Teiserver.Lobby do
       bot == nil ->
         false
 
-      User.is_moderator?(changer) == true ->
+      User.is_moderator?(changer.userid) == true ->
         true
 
       lobby.founder_id == changer.userid ->
@@ -754,7 +754,7 @@ defmodule Teiserver.Lobby do
       )
 
     cond do
-      User.is_moderator?(changer) == true ->
+      User.is_moderator?(changer.userid) == true ->
         true
 
       # If the battle has been renamed by the consul then we'll keep it renamed as such
