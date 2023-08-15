@@ -239,6 +239,7 @@
           <.input type="text"
             label="Username"
             name="username"
+            autofocus="autofocus"
             value={@search_terms["username"]}
             phx-change="search-update" phx-debounce="400"
           />
@@ -323,7 +324,7 @@
             <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" />
             See profile
           </.link>
-          
+
           <.link
             :if={@found_user.id != @current_user.id and @found_friendship == nil}
             navigate={~p"/moderation/report_form/#{@found_user.id}"}
@@ -333,8 +334,9 @@
             Report user
           </.link>
         </div>
-        
+
         <div class="col-md-12 col-lg-6">
+          <div :if={false}>
           <%= cond do %>
             <% Enum.member?(@found_user.data["restrictions"], "Permanently banned") -> %>
               <div class="role-badge">
@@ -360,6 +362,7 @@
             <% true -> %>
               
           <% end %>
+          </div>
         
           <%= for role <- @found_user.roles do %>
             <% data = @role_data[role] %>

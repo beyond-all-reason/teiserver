@@ -23,6 +23,14 @@ defmodule TeiserverWeb.Account.ProfileComponents do
           </.tab_nav>
 
           <.tab_nav
+            url={~p"/profile/#{@userid}/matches"}
+            selected={@tab == "matches"}
+          >
+            <Fontawesome.icon icon={Teiserver.Battle.MatchLib.icon()} style="solid" />
+            Matches
+          </.tab_nav>
+
+          <.tab_nav
             url={~p"/profile/#{@userid}/accolades"}
             selected={@tab == "accolades"}
           >
@@ -37,6 +45,15 @@ defmodule TeiserverWeb.Account.ProfileComponents do
             <Fontawesome.icon icon={Teiserver.Game.AchievementTypeLib.icon()} style="solid" />
             Achievements
           </.tab_nav>
+
+          <.tab_nav
+            url={~p"/profile/#{@userid}/playtime"}
+            selected={@tab == "playtime"}
+          >
+            <Fontawesome.icon icon="fa-timer" style="solid" />
+            Playtime
+          </.tab_nav>
+
 
           <%= if @self do %>
             <%!-- Stuff here --%>
@@ -65,9 +82,20 @@ defmodule TeiserverWeb.Account.ProfileComponents do
     ~H"""
     <TeiserverWeb.AccountComponents.sub_menu active="profile" view_colour={@view_colour} />
 
-    <div class="row mt-2 mb-3">
+    <div class="row mt-2">
       <div class="col">
-        <h4><%= @user.name %></h4>
+        <h3 class="mb-4 py-1" style={"background-color: #{@user.colour};"}>
+          <div class="d-inline-block px-2 py-1 mx-1">
+            <Fontawesome.icon icon={@user.icon} style="regular" size="sm" />
+          </div>
+
+          <%= @user.name %>
+
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <span style="font-size: 0.7em;">
+            Chevron rank: <%= @user.rank || 0 %>
+          </span>
+        </h3>
       </div>
     </div>
 

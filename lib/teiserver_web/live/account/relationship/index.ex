@@ -1,4 +1,5 @@
 defmodule TeiserverWeb.Account.RelationshipLive.Index do
+  @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.Account
 
@@ -6,7 +7,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   def mount(_params, _session, socket) do
     socket = socket
       |> assign(:tab, nil)
-      |> assign(:site_menu_active, "account")
+      |> assign(:site_menu_active, "teiserver_account")
       |> assign(:view_colour, Account.RelationshipLib.colour())
       |> put_empty_relationships
 
@@ -23,7 +24,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       |> assign(:page_title, "Relationships - Friends")
       |> assign(:tab, :friend)
       |> put_empty_relationships
-      |> get_friends()
+      |> get_friends
   end
 
   defp apply_action(socket, :follow, _params) do
@@ -31,7 +32,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       |> assign(:page_title, "Relationships - Following")
       |> assign(:tab, :follow)
       |> put_empty_relationships
-      |> get_follows()
+      |> get_follows
   end
 
   defp apply_action(socket, :avoid, _params) do
@@ -39,7 +40,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       |> assign(:page_title, "Relationships - Avoids")
       |> assign(:tab, :avoid)
       |> put_empty_relationships
-      |> get_avoids()
+      |> get_avoids
   end
 
   defp apply_action(socket, :search, _params) do

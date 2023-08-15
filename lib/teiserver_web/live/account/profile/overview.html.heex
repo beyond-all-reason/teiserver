@@ -1,3 +1,12 @@
+<style type="text/css">
+  .role-badge {
+    width: 150px;
+    display: inline-block;
+    text-align: center;
+    font-size: 1.5em;
+  }
+</style>
+
 <TeiserverWeb.Account.ProfileComponents.profile_header
   active="overview"
   view_colour={@view_colour}
@@ -17,9 +26,9 @@
     >
       Report user
     </.section_menu_button>
-
+    &nbsp;
     <.section_menu_button
-      :if={@current_user && @current_user.id != @user.id}
+      :if={false && @current_user && @current_user.id != @user.id}
       bsname={Teiserver.Account.RelationshipLib.colour()}
       icon={Teiserver.Account.RelationshipLib.icon_follow()}
       active={false}
@@ -27,13 +36,43 @@
     >
       Follow
     </.section_menu_button>
+    &nbsp;
+    <.section_menu_button
+      :if={allow?(@current_user, "Moderator")}
+      bsname={Central.Admin.AdminLib.colours()}
+      icon={Central.Admin.AdminLib.icon()}
+      active={false}
+      url={~p"/teiserver/admin/user/#{@user.id}"}
+    >
+      Admin panel
+    </.section_menu_button>
   </div>
 </div>
 
 <div class="row mt-2 mb-3">
   <div class="col">
     <%!-- Overview stuff --%>
+
+    <%= for role <- @user.roles do %>
+      <% data = @role_data[role] %>
+      <%= if data != nil and Map.get(data, :badge) != false do %>
+        <div class="role-badge">
+          <i class={"fa-fw fa-2x #{data.icon}"} style={"color: #{data.colour}"} title={role}></i>
+          <br />
+          <%= role %>
+        </div>
+      <% end %>
+    <% end %>
+    <br /><br />
     
-    Profile overview will go here
+    Once we have some privacy controls we will be adding:
+    <ul>
+      <li>Recent matches</li>
+      <li>Accolades</li>
+      <li>Achievements</li>
+      <li>Playtime (maybe even in graph form)</li>
+      <li>Mutual friends</li>
+    </ul>
+    
   </div>
 </div>

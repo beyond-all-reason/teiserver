@@ -17,7 +17,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Accolades do
       true ->
         socket
           |> assign(:tab, nil)
-          |> assign(:site_menu_active, "account")
+          |> assign(:site_menu_active, "teiserver_account")
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
     end

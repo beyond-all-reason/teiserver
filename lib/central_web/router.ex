@@ -262,6 +262,8 @@ defmodule TeiserverWeb.Router do
         live "/:userid", ProfileLive.Overview, :overview
         live "/:userid/overview", ProfileLive.Overview, :overview
         live "/:userid/accolades", ProfileLive.Accolades, :accolades
+        live "/:userid/matches", ProfileLive.Matches, :matches
+        live "/:userid/playtime", ProfileLive.Playtime, :playtime
         live "/:userid/achievements", ProfileLive.Achievements, :achievements
     end
   end

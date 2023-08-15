@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Account.ProfileLive.Overview do
+defmodule TeiserverWeb.Account.ProfileLive.Matches do
   @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.Account
@@ -20,7 +20,6 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
           |> assign(:site_menu_active, "teiserver_account")
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
-          |> assign(:role_data, Account.RoleLib.role_data())
     end
 
     {:ok, socket}
@@ -31,19 +30,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  defp apply_action(%{assigns: %{user: user}} = socket, :overview, _params) do
+  defp apply_action(socket, _live_action, _params) do
     socket
-      |> assign(:page_title, "#{user.name} - Overview")
-  end
-
-  defp apply_action(%{assigns: %{user: user}} = socket, :accolades, _params) do
-    socket
-      |> assign(:page_title, "#{user.name} - Accolades")
-  end
-
-  defp apply_action(%{assigns: %{user: user}} = socket, :achievements, _params) do
-    socket
-      |> assign(:page_title, "#{user.name} - Achievements")
   end
 
   @impl true
