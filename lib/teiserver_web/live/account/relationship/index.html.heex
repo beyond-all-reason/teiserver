@@ -40,7 +40,11 @@
 
 <div class="row mt-2 mb-3" :if={@live_action == :friend}>
   <div class="col">
-    <h4>Friends</h4>
+    <h4 class="text-success">
+      Friends
+      &nbsp;
+      <Fontawesome.icon icon={Teiserver.Account.FriendLib.icon()} style="regular" />
+    </h4>
     <.table
       id="friends-table"
       table_class="table-sm"
@@ -62,7 +66,11 @@
   </div>
 
   <div class="col">
-    <h4>Incoming requests</h4>
+    <h4 class="text-info2">
+      Incoming requests
+      &nbsp;
+      <Fontawesome.icon icon="down-to-bracket" style="regular" />
+    </h4>
     <.table id="incoming-request-table" table_class="table-sm" rows={@incoming_friend_requests}>
       <:col :let={request} label="Name"><%= request.from_user.name %></:col>
       
@@ -95,7 +103,11 @@
   </div>
   
   <div class="col">
-    <h4>Outgoing requests</h4>
+    <h4 class="text-primary">
+      Outgoing requests
+      &nbsp;
+      <Fontawesome.icon icon="up-from-bracket" style="regular" />
+    </h4>
     <.table id="incoming-request-table" table_class="table-sm" rows={@outgoing_friend_requests}>
       <:col :let={request} label="Name"><%= request.to_user.name %></:col>
       <:col :let={request} label="">
@@ -112,7 +124,7 @@
 
 <div class="row mt-2 mb-3" :if={@live_action == :follow}>
   <div class="col" id="follows-col">
-    <h4>
+    <h4 class="text-info">
       Follows
       &nbsp;
       <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_follow()} style="regular" />
@@ -148,13 +160,13 @@
 
 <div class="row mt-2 mb-3" :if={@live_action == :avoid}>
   <div class="col" id="ignores-col">
-    <h4>
+    <h4 class="text-warning">
       Ignores
       &nbsp;
       <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="regular" />
     </h4>
     <.table id="ignores-table" table_class="table-sm" rows={@ignores}>
-      <:col :let={ignore} label="username"><%= ignore.to_user.name %></:col>
+      <:col :let={ignore} label="Name"><%= ignore.to_user.name %></:col>
       <:col :let={avoid} label="">
         <span phx-click="unignore-user" phx-value-userid={avoid.to_user.id} class="btn btn-secondary btn-sm">
           <Fontawesome.icon icon="arrow-left" style="regular" />
@@ -170,13 +182,13 @@
     </.table>
   </div>
   <div class="col" id="avoids-col">
-    <h4>
+    <h4 class="text-danger">
       Avoids
       &nbsp;
       <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="regular" />
     </h4>
     <.table id="avoids-table" table_class="table-sm" rows={@avoids}>
-      <:col :let={avoid} label="username"><%= avoid.to_user.name %></:col>
+      <:col :let={avoid} label="Name"><%= avoid.to_user.name %></:col>
       <:col :let={avoid} label="">
         <span phx-click="ignore-user" phx-value-userid={avoid.to_user.id} class="btn btn-secondary btn-sm">
           <Fontawesome.icon icon="arrow-left" style="regular" />
@@ -192,13 +204,13 @@
     </.table>
   </div>
   <div class="col" id="blocks-col">
-    <h4>
+    <h4 class="text-danger2">
       Blocks
       &nbsp;
       <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="regular" />
     </h4>
     <.table id="blocks-table" table_class="table-sm" rows={@blocks}>
-      <:col :let={block} label="username"><%= block.to_user.name %></:col>
+      <:col :let={block} label="Name"><%= block.to_user.name %></:col>
       <:col :let={block} label="">
         <span phx-click="avoid-user" phx-value-userid={block.to_user.id} class="btn btn-secondary btn-sm">
           <Fontawesome.icon icon="arrow-left" style="regular" />
