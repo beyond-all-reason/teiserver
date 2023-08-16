@@ -1,6 +1,5 @@
 defmodule TeiserverWeb.Admin.TestPageLive.Index do
   use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Battle}
 
   @default_tab "icons"
   @limited_bsnames ~w(primary success info warning danger)

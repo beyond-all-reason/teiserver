@@ -1,4 +1,5 @@
 defmodule Teiserver.Telemetry.MatchEventLib do
+  @moduledoc false
   use CentralWeb, :library
   alias Teiserver.Telemetry.{MatchEvent, MatchEventTypeLib}
   alias Phoenix.PubSub
