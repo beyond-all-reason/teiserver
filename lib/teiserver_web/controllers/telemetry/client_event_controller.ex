@@ -31,15 +31,8 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
       between: between
     ]
 
-    client_properties = Telemetry.get_client_properties_summary(args)
-    unauth_properties = Telemetry.get_unauth_properties_summary(args)
     client_events = Telemetry.get_client_events_summary(args)
     unauth_events = Telemetry.get_unauth_events_summary(args)
-
-    property_types =
-      (Map.keys(client_properties) ++ Map.keys(unauth_properties))
-      |> Enum.uniq()
-      |> Enum.sort()
 
     event_types =
       (Map.keys(client_events) ++ Map.keys(unauth_events))
@@ -48,10 +41,7 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
 
     conn
     |> assign(:timeframe, timeframe)
-    |> assign(:property_types, property_types)
     |> assign(:event_types, event_types)
-    |> assign(:client_properties, client_properties)
-    |> assign(:unauth_properties, unauth_properties)
     |> assign(:client_events, client_events)
     |> assign(:unauth_events, unauth_events)
     |> render("summary.html")

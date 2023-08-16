@@ -85,10 +85,8 @@ defmodule Teiserver.Telemetry.ComplexMatchEventQueries do
 
   defp _preload(query, :users) do
     from complex_match_events in query,
-      join: tos in assoc(complex_match_events, :to),
-      preload: [to: tos],
-      join: froms in assoc(complex_match_events, :from),
-      preload: [from: froms]
+      left_join: users in assoc(complex_match_events, :user),
+      preload: [user: users]
   end
 
   @spec get_complex_match_events_summary(list) :: map()

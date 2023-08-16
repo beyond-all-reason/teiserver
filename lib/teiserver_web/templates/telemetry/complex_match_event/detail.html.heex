@@ -9,87 +9,64 @@
 ) %>
 
 <div class="row section-menu">
-  <div class="col-md-12 mb-4">
-    <%= render(
-      TeiserverWeb.Telemetry.MatchEventView,
-      "section_menu.html",
-      Map.merge(assigns, %{
-        quick_search: "",
-        show_search: false,
-        active: "event_detail"
-      })
-    ) %>
-    <br /><br />
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render(
+          TeiserverWeb.Telemetry.ComplexMatchEventView,
+          "section_menu.html",
+          Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "event_detail"
+          })
+        ) %>
+        <br /><br />
 
-    <%= for tf <- timeframes do %>
-      <%= central_component("section_menu_button",
-        name: "tf-#{tf}",
-        label: tf,
-        active: "tf-#{@tf}",
-        bsname: bsname,
-        icon: "",
-        url: "?tf=#{tf}"
-      ) %>
-    <% end %>
-  </div>
-  
-  <div class="col-lg-6">
-    <h4>Count by user</h4>
-    <table class="table table-sm table-hover">
-      <thead>
-        <tr>
-          <th>Userid</th>
-          <th>Count</th>
-          <th>&nbsp;</th>
-        </tr>
-      </thead>
-      <tbody>
-        <%= for {{userid, username}, count} <- @complex_match_event_counts_by_user do %>
-          <tr>
-            <td><%= username %></td>
-            <td><%= format_number(count) %></td>
-            <td>
-              <.link
-                navigate={~p"/teiserver/admin/user/#{userid}"}
-                class={"btn btn-sm btn-secondary"}
-              >
-                <Fontawesome.icon icon={:show} style="solid" />
-                Show
-              </.link>
-            </td>
-          </tr>
+        <%= for key <- @schema_keys do %>
+          <%= central_component("section_menu_button",
+            name: "key-#{key}",
+            label: key,
+            active: "key-#{@key}",
+            bsname: bsname,
+            icon: "",
+            url: "?key=#{key}&tf=#{@tf}"
+          ) %>
         <% end %>
-      </tbody>
-    </table>
-  </div>
-  
-  <div class="col-lg-6">
-    <h4>Count by match</h4>
-    <table class="table table-sm table-hover">
-      <thead>
-        <tr>
-          <th>Match id</th>
-          <th>Count</th>
-          <th>&nbsp;</th>
-        </tr>
-      </thead>
-      <tbody>
-        <%= for {match_id, count} <- @complex_match_event_counts_by_match do %>
-          <tr>
-            <td><%= match_id %></td>
-            <td><%= format_number(count) %></td>
-            <td>
-              <.link
-                navigate={~p"/teiserver/admin/matches/#{match_id}"}
-                class={"btn btn-sm btn-secondary"}
-              >
-                <Fontawesome.icon icon={:show} style="solid" />
-                Show
-              </.link>
-            </td>
-          </tr>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <%= for tf <- timeframes do %>
+          <%= central_component("section_menu_button",
+            name: "tf-#{tf}",
+            label: tf,
+            active: "tf-#{@tf}",
+            bsname: bsname,
+            icon: "",
+            url: "?key=#{@key}&tf=#{tf}"
+          ) %>
         <% end %>
-      </tbody>
-    </table>
+
+        <br /><br />
+
+        <h4>Value counts for <%= @event_name %></h4>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Value</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for {k, v} <- @event_counts do %>
+              <tr>
+                <td><%= k %></td>
+                <td><%= v %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>

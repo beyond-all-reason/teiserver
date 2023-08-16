@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
-  plug(:add_breadcrumb, name: 'Match events', url: '/telemetry/complex_match_events/summary')
+  plug(:add_breadcrumb, name: 'Client events', url: '/teiserver/telemetry/complex_match_events/summary')
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
   def summary(conn, params) do
@@ -33,8 +33,9 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
 
     complex_match_events = Telemetry.get_complex_match_events_summary(args)
 
-    event_types =
-      Map.keys(complex_match_events)
+    event_types = complex_match_events
+      |> Map.keys()
+      |> Enum.uniq()
       |> Enum.sort()
 
     conn
@@ -59,40 +60,43 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
         _ -> Timex.now() |> Timex.shift(days: -7)
       end
 
-    complex_match_event_data =
+    client_data =
       Telemetry.list_complex_match_events(
         search: [
           event_type_id: event_type_id,
           between: {start_date, Timex.now()}
         ],
-        preload: [:users],
-        limit: 5000
+        limit: 500
       )
 
-    complex_match_event_counts_by_user =
-      complex_match_event_data
-      |> Enum.group_by(fn event -> {event.user_id, event.user.name} end, fn _ -> 1 end)
-      |> Enum.map(fn {value, items} -> {value, Enum.count(items)} end)
-      |> Enum.sort_by(fn {_, i} -> i end, &>=/2)
+    schema_keys = client_data
+      |> Stream.map(fn event -> Map.keys(event.value) end)
+      |> Enum.to_list()
+      |> List.flatten()
+      |> Stream.uniq()
+      |> Enum.sort()
 
-    complex_match_event_counts_by_match =
-      complex_match_event_data
-      |> Enum.group_by(fn event -> event.match_id end, fn _ -> 1 end)
-      |> Enum.map(fn {value, items} -> {value, Enum.count(items)} end)
-      |> Enum.sort_by(fn {_, i} -> i end, &>=/2)
+    key = Map.get(params, "key", hd(schema_keys))
+
+    event_counts =
+      client_data
+      |> Enum.group_by(fn event -> Map.get(event.value, key, nil) end)
+      |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
 
     conn
-    |> assign(:complex_match_event_counts_by_user, complex_match_event_counts_by_user)
-    |> assign(:complex_match_event_counts_by_match, complex_match_event_counts_by_match)
+    |> assign(:schema_keys, schema_keys)
+    |> assign(:key, key)
     |> assign(:tf, tf)
     |> assign(:event_name, event_name)
+    |> assign(:event_counts, event_counts)
+    |> assign(:schema_keys, schema_keys)
     |> render("detail.html")
   end
 
   @spec export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def export_form(conn, _params) do
     conn
-    |> assign(:event_types, Telemetry.list_client_event_types(order_by: "Name (A-Z)"))
+    |> assign(:event_types, Telemetry.list_complex_match_event_types(order_by: "Name (A-Z)"))
     |> assign(:property_types, Telemetry.list_property_types())
     |> render("export_form.html")
   end
@@ -105,7 +109,7 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
     time_taken = System.system_time(:millisecond) - start_time
 
     Logger.info(
-      "ComplexMatchEventController event export of #{Kernel.inspect(params)}, took #{time_taken}ms"
+      "ClientEventController event export of #{Kernel.inspect(params)}, took #{time_taken}ms"
     )
 
     conn
