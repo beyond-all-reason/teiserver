@@ -1,9 +1,6 @@
 defmodule Teiserver.Telemetry.ComplexMatchEventQueries do
   @moduledoc false
-  # use CentralWeb, :queries
-  alias Teiserver.Repo
-  import Ecto.Query, warn: false
-  # alias Ecto.Multi
+  use CentralWeb, :library
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Telemetry.ComplexMatchEvent
 
@@ -39,14 +36,20 @@ defmodule Teiserver.Telemetry.ComplexMatchEventQueries do
       where: complex_match_events.id == ^id
   end
 
-  defp _where(query, :members, {u1, u2}) when is_integer(u1) and is_integer(u2) do
+  defp _where(query, :between, {start_date, end_date}) do
     from complex_match_events in query,
-      where: (complex_match_events.to_id in [^u1, ^u2] or complex_match_events.from_id in [^u1, ^u2])
+      left_join: matches in assoc(complex_match_events, :match),
+      where: between(matches.started, ^start_date, ^end_date)
   end
 
-  defp _where(query, :id_in, id_list) do
+  defp _where(query, :event_type_id, event_type_id) do
     from complex_match_events in query,
-      where: complex_match_events.id in ^id_list
+      where: complex_match_events.event_type_id == ^event_type_id
+  end
+
+  defp _where(query, :event_type_id_in, event_type_ids) do
+    from complex_match_events in query,
+      where: complex_match_events.event_type_id in ^event_type_ids
   end
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
@@ -88,8 +91,8 @@ defmodule Teiserver.Telemetry.ComplexMatchEventQueries do
       preload: [from: froms]
   end
 
-  @spec get_match_events_summary(list) :: map()
-  def get_match_events_summary(args) do
+  @spec get_complex_match_events_summary(list) :: map()
+  def get_complex_match_events_summary(args) do
     query =
       from complex_match_events in ComplexMatchEvent,
         join: event_types in assoc(complex_match_events, :event_type),

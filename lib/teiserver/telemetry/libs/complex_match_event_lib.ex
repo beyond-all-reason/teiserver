@@ -11,7 +11,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEventLib do
   def colour(), do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-scanner-touchscreen"
+  def icon(), do: "fa-regular fa-scanner-keyboard"
 
   # Helpers
   @spec log_complex_match_event(T.match_id(), T.userid() | nil, String.t(), integer(), map()) ::

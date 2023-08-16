@@ -52,6 +52,14 @@
               url: ~p"/telemetry/match_events/summary",
               icon: Teiserver.Telemetry.MatchEventLib.icon()
             ) %>
+
+            <%= central_component("sub_menu_icon",
+              name: "complex_match_events",
+              label: "Complex match events",
+              active: @active,
+              url: ~p"/telemetry/complex_match_events/summary",
+              icon: Teiserver.Telemetry.ComplexMatchEventLib.icon()
+            ) %>
           <% end %>
         </div>
       </div>

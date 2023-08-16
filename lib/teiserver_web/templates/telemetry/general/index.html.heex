@@ -38,4 +38,14 @@
       link: ~p"/telemetry/match_events/summary"
     ) %>
   <% end %>
+
+  <%= if allow?(@current_user, "Server") do %>
+    <%= central_component("menu_card",
+      size: :small,
+      icon: Teiserver.Telemetry.ComplexMatchEventLib.icon(),
+      name: "complex_match_events",
+      text: "Complex match events",
+      link: ~p"/telemetry/complex_match_events/summary"
+    ) %>
+  <% end %>
 </div>

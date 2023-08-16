@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Telemetry.MatchEventController do
+defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.ExportEventsTask
@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
 
   plug(AssignPlug,
     site_menu_active: "telemetry",
-    sub_menu_active: "match_event"
+    sub_menu_active: "complex_match_event"
   )
 
   plug Bodyguard.Plug.Authorize,
@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
-  plug(:add_breadcrumb, name: 'Match events', url: '/telemetry/match_events/summary')
+  plug(:add_breadcrumb, name: 'Match events', url: '/telemetry/complex_match_events/summary')
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
   def summary(conn, params) do
@@ -31,22 +31,22 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
       between: between
     ]
 
-    match_events = Telemetry.get_match_events_summary(args)
+    complex_match_events = Telemetry.get_complex_match_events_summary(args)
 
     event_types =
-      Map.keys(match_events)
+      Map.keys(complex_match_events)
       |> Enum.sort()
 
     conn
     |> assign(:timeframe, timeframe)
     |> assign(:event_types, event_types)
-    |> assign(:match_events, match_events)
+    |> assign(:complex_match_events, complex_match_events)
     |> render("summary.html")
   end
 
   @spec detail(Plug.Conn.t(), map) :: Plug.Conn.t()
   def detail(conn, %{"event_name" => event_name} = params) do
-    event_type_id = Telemetry.MatchEventTypeLib.get_or_add_match_event_type(event_name)
+    event_type_id = Telemetry.ComplexMatchEventTypeLib.get_or_add_complex_match_event_type(event_name)
     tf = Map.get(params, "tf", "7 days")
 
     start_date =
@@ -59,8 +59,8 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
         _ -> Timex.now() |> Timex.shift(days: -7)
       end
 
-    match_event_data =
-      Telemetry.list_match_events(
+    complex_match_event_data =
+      Telemetry.list_complex_match_events(
         search: [
           event_type_id: event_type_id,
           between: {start_date, Timex.now()}
@@ -69,21 +69,21 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
         limit: 5000
       )
 
-    match_event_counts_by_user =
-      match_event_data
+    complex_match_event_counts_by_user =
+      complex_match_event_data
       |> Enum.group_by(fn event -> {event.user_id, event.user.name} end, fn _ -> 1 end)
       |> Enum.map(fn {value, items} -> {value, Enum.count(items)} end)
       |> Enum.sort_by(fn {_, i} -> i end, &>=/2)
 
-    match_event_counts_by_match =
-      match_event_data
+    complex_match_event_counts_by_match =
+      complex_match_event_data
       |> Enum.group_by(fn event -> event.match_id end, fn _ -> 1 end)
       |> Enum.map(fn {value, items} -> {value, Enum.count(items)} end)
       |> Enum.sort_by(fn {_, i} -> i end, &>=/2)
 
     conn
-    |> assign(:match_event_counts_by_user, match_event_counts_by_user)
-    |> assign(:match_event_counts_by_match, match_event_counts_by_match)
+    |> assign(:complex_match_event_counts_by_user, complex_match_event_counts_by_user)
+    |> assign(:complex_match_event_counts_by_match, complex_match_event_counts_by_match)
     |> assign(:tf, tf)
     |> assign(:event_name, event_name)
     |> render("detail.html")
@@ -105,7 +105,7 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
     time_taken = System.system_time(:millisecond) - start_time
 
     Logger.info(
-      "MatchEventController event export of #{Kernel.inspect(params)}, took #{time_taken}ms"
+      "ComplexMatchEventController event export of #{Kernel.inspect(params)}, took #{time_taken}ms"
     )
 
     conn
