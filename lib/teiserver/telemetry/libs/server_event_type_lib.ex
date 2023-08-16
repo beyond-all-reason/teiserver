@@ -24,9 +24,6 @@ defmodule Teiserver.Telemetry.ServerEventTypeLib do
           id
       end
     end)
-
-    # And now we've created the relevant server event type, we actually want to return client event type for now
-    Teiserver.Telemetry.ClientEventTypeLib.get_or_add_client_event_type(name)
   end
 
   # Queries
