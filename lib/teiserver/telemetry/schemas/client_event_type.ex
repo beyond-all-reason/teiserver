@@ -2,7 +2,7 @@ defmodule Teiserver.Telemetry.ClientEventType do
   @moduledoc false
   use CentralWeb, :schema
 
-  schema "teiserver_telemetry_event_types" do
+  schema "telemetry_client_event_types" do
     field :name, :string
   end
 

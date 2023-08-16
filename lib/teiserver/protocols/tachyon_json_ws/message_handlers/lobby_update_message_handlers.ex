@@ -3,7 +3,7 @@ defmodule Teiserver.Tachyon.MessageHandlers.LobbyUpdateMessageHandlers do
 
   """
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Tachyon.Responses.Lobby.{AddUserClientResponse, RemoveUserClientResponse}
+  alias Teiserver.Tachyon.Responses.Lobby.{AddUserClientResponse, RemoveUserClientResponse, ClosedResponse}
   alias Teiserver.Tachyon.Responses.User.UpdatedUserClientResponse
 
   @spec handle(map(), T.tachyon_conn()) ::
@@ -36,6 +36,19 @@ defmodule Teiserver.Tachyon.MessageHandlers.LobbyUpdateMessageHandlers do
 
   def handle(%{event: :updated_client_battlestatus} = msg, conn) do
     case UpdatedUserClientResponse.generate(msg.userid, msg.client) do
+      {command, :success, data} ->
+        resp = %{
+          "command" => command,
+          "status" => "success",
+          "data" => data
+        }
+
+        {:ok, resp, conn}
+    end
+  end
+
+  def handle(%{event: :closed} = msg, conn) do
+    case ClosedResponse.generate(msg.lobby_id) do
       {command, :success, data} ->
         resp = %{
           "command" => command,

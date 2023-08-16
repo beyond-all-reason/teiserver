@@ -330,4 +330,11 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
   def handle_error(conn, :unexpected_value),
     do: Plug.Conn.send_resp(conn, 500, "Internal server error")
+
+  # Uncomment when we have an error we need to print out
+  # def handle_error(conn, error) do
+  #   raise "Unexpected error of #{inspect(error)}"
+
+  #   Plug.Conn.send_resp(conn, 500, "Internal server error")
+  # end
 end
