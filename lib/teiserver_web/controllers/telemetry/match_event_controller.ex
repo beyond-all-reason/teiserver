@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Telemetry.MatchEventController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.ExportEventsTask
+  alias Teiserver.Telemetry.ExportMatchEventsTask
   require Logger
 
   plug(AssignPlug,
@@ -92,15 +92,15 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
   @spec export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def export_form(conn, _params) do
     conn
-    |> assign(:event_types, Telemetry.list_client_event_types(order_by: "Name (A-Z)"))
-    |> assign(:property_types, Telemetry.list_property_types())
+    |> assign(:event_types, Telemetry.list_match_event_types(order_by: ["Name (A-Z)"]))
     |> render("export_form.html")
   end
 
+  @spec export_post(Plug.Conn.t(), map) :: Plug.Conn.t()
   def export_post(conn, params) do
     start_time = System.system_time(:millisecond)
 
-    data = ExportEventsTask.perform(params)
+    data = ExportMatchEventsTask.perform(params)
 
     time_taken = System.system_time(:millisecond) - start_time
 
@@ -109,8 +109,8 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
     )
 
     conn
-    |> put_resp_content_type("application/json")
-    |> put_resp_header("content-disposition", "attachment; filename=\"events.json\"")
-    |> send_resp(200, Jason.encode!(data))
+    |> put_resp_content_type("text/csv")
+    |> put_resp_header("content-disposition", "attachment; filename=\"match_events.csv\"")
+    |> send_resp(200, data)
   end
 end

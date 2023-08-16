@@ -1,4 +1,5 @@
-defmodule Teiserver.Telemetry.ExportEventsTask do
+defmodule Teiserver.Telemetry.ExportClientEventsTask do
+  @moduledoc false
   alias Teiserver.Telemetry.{ClientEvent, UnauthEvent}
   alias Teiserver.Helper.{DatePresets}
   alias Teiserver.Repo
