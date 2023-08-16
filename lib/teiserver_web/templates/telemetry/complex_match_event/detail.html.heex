@@ -5,7 +5,7 @@
 <%= render(
   TeiserverWeb.Telemetry.GeneralView,
   "sub_menu.html",
-  Map.merge(assigns, %{active: "client_events"})
+  Map.merge(assigns, %{active: "complex_match_events"})
 ) %>
 
 <div class="row section-menu">
@@ -13,7 +13,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Telemetry.ClientEventView,
+          TeiserverWeb.Telemetry.ComplexMatchEventView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",
@@ -53,21 +53,15 @@
         <table class="table table-sm">
           <thead>
             <tr>
-              <th><%= @key %></th>
-              <th>Auth count</th>
-              <th>Unauth count</th>
-              <th>Total</th>
+              <th>Value</th>
+              <th>Count</th>
             </tr>
           </thead>
           <tbody>
-            <%= for value <- @combined_values do %>
+            <%= for {k, v} <- @event_counts do %>
               <tr>
-                <td><%= value %></td>
-                <td><%= @client_counts[value] %></td>
-                <td><%= @unauth_counts[value] %></td>
-                <td>
-                  <%= Map.get(@client_counts, value, 0) + Map.get(@unauth_counts, value, 0) %>
-                </td>
+                <td><%= k %></td>
+                <td><%= v %></td>
               </tr>
             <% end %>
           </tbody>

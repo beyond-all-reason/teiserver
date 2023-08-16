@@ -1,12 +1,12 @@
-defmodule TeiserverWeb.Telemetry.ClientEventController do
+defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.ExportClientEventsTask
+  alias Teiserver.Telemetry.ExportComplexMatchEventsTask
   require Logger
 
   plug(AssignPlug,
     site_menu_active: "telemetry",
-    sub_menu_active: "client_event"
+    sub_menu_active: "complex_match_event"
   )
 
   plug Bodyguard.Plug.Authorize,
@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
-  plug(:add_breadcrumb, name: 'Client events', url: '/teiserver/telemetry/client_events/summary')
+  plug(:add_breadcrumb, name: 'Client events', url: '/teiserver/telemetry/complex_match_events/summary')
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
   def summary(conn, params) do
@@ -31,25 +31,23 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
       between: between
     ]
 
-    client_events = Telemetry.get_client_events_summary(args)
-    unauth_events = Telemetry.get_unauth_events_summary(args)
+    complex_match_events = Telemetry.get_complex_match_events_summary(args)
 
-    event_types =
-      (Map.keys(client_events) ++ Map.keys(unauth_events))
+    event_types = complex_match_events
+      |> Map.keys()
       |> Enum.uniq()
       |> Enum.sort()
 
     conn
     |> assign(:timeframe, timeframe)
     |> assign(:event_types, event_types)
-    |> assign(:client_events, client_events)
-    |> assign(:unauth_events, unauth_events)
+    |> assign(:complex_match_events, complex_match_events)
     |> render("summary.html")
   end
 
   @spec detail(Plug.Conn.t(), map) :: Plug.Conn.t()
   def detail(conn, %{"event_name" => event_name} = params) do
-    event_type_id = Telemetry.ClientEventTypeLib.get_or_add_client_event_type(event_name)
+    event_type_id = Telemetry.ComplexMatchEventTypeLib.get_or_add_complex_match_event_type(event_name)
     tf = Map.get(params, "tf", "7 days")
 
     start_date =
@@ -63,7 +61,7 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
       end
 
     client_data =
-      Telemetry.list_client_events(
+      Telemetry.list_complex_match_events(
         search: [
           event_type_id: event_type_id,
           between: {start_date, Timex.now()}
@@ -71,17 +69,7 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
         limit: 500
       )
 
-    unauth_data =
-      Telemetry.list_client_events(
-        search: [
-          event_type_id: event_type_id,
-          between: {start_date, Timex.now()}
-        ],
-        limit: 500
-      )
-
-    schema_keys =
-      (client_data ++ unauth_data)
+    schema_keys = client_data
       |> Stream.map(fn event -> Map.keys(event.value) end)
       |> Enum.to_list()
       |> List.flatten()
@@ -90,44 +78,32 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
 
     key = Map.get(params, "key", hd(schema_keys))
 
-    client_counts =
+    event_counts =
       client_data
       |> Enum.group_by(fn event -> Map.get(event.value, key, nil) end)
       |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
-
-    unauth_counts =
-      unauth_data
-      |> Enum.group_by(fn event -> Map.get(event.value, key, nil) end)
-      |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
-
-    combined_values =
-      (Map.keys(client_counts) ++ Map.keys(unauth_counts))
-      |> Enum.uniq()
-      |> Enum.sort()
 
     conn
     |> assign(:schema_keys, schema_keys)
     |> assign(:key, key)
     |> assign(:tf, tf)
     |> assign(:event_name, event_name)
-    |> assign(:client_counts, client_counts)
-    |> assign(:unauth_counts, unauth_counts)
+    |> assign(:event_counts, event_counts)
     |> assign(:schema_keys, schema_keys)
-    |> assign(:combined_values, combined_values)
     |> render("detail.html")
   end
 
   @spec export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def export_form(conn, _params) do
     conn
-    |> assign(:event_types, Telemetry.list_client_event_types(order_by: ["Name (A-Z)"]))
+    |> assign(:event_types, Telemetry.list_complex_match_event_types(order_by: ["Name (A-Z)"]))
     |> render("export_form.html")
   end
 
   def export_post(conn, params) do
     start_time = System.system_time(:millisecond)
 
-    data = ExportClientEventsTask.perform(params)
+    data = ExportComplexMatchEventsTask.perform(params)
 
     time_taken = System.system_time(:millisecond) - start_time
 
@@ -137,7 +113,7 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
 
     conn
     |> put_resp_content_type("application/json")
-    |> put_resp_header("content-disposition", "attachment; filename=\"client_events.json\"")
+    |> put_resp_header("content-disposition", "attachment; filename=\"complex_match_events.json\"")
     |> send_resp(200, Jason.encode!(data))
   end
 end

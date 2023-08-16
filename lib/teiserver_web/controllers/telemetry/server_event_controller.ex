@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Telemetry.ServerEventController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.ExportEventsTask
+  alias Teiserver.Telemetry.ExportServerEventsTask
   require Logger
 
   plug(AssignPlug,
@@ -46,7 +46,7 @@ defmodule TeiserverWeb.Telemetry.ServerEventController do
 
   @spec detail(Plug.Conn.t(), map) :: Plug.Conn.t()
   def detail(conn, %{"event_name" => event_name} = params) do
-    event_type_id = Telemetry.ClientEventTypeLib.get_or_add_client_event_type(event_name)
+    event_type_id = Telemetry.ServerEventTypeLib.get_or_add_server_event_type(event_name)
     tf = Map.get(params, "tf", "7 days")
 
     start_date =
@@ -96,15 +96,14 @@ defmodule TeiserverWeb.Telemetry.ServerEventController do
   @spec export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def export_form(conn, _params) do
     conn
-    |> assign(:event_types, Telemetry.list_client_event_types(order_by: "Name (A-Z)"))
-    |> assign(:property_types, Telemetry.list_property_types())
+    |> assign(:event_types, Telemetry.list_server_event_types(order_by: ["Name (A-Z)"]))
     |> render("export_form.html")
   end
 
   def export_post(conn, params) do
     start_time = System.system_time(:millisecond)
 
-    data = ExportEventsTask.perform(params)
+    data = ExportServerEventsTask.perform(params)
 
     time_taken = System.system_time(:millisecond) - start_time
 
@@ -114,7 +113,7 @@ defmodule TeiserverWeb.Telemetry.ServerEventController do
 
     conn
     |> put_resp_content_type("application/json")
-    |> put_resp_header("content-disposition", "attachment; filename=\"events.json\"")
+    |> put_resp_header("content-disposition", "attachment; filename=\"server_events.json\"")
     |> send_resp(200, Jason.encode!(data))
   end
 end

@@ -1,4 +1,5 @@
 defmodule Teiserver.Protocols.Spring do
+  @moduledoc false
   alias Teiserver.BitParse
   alias Teiserver.Protocols.SpringIn
   alias Teiserver.Protocols.SpringOut

@@ -77,8 +77,7 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
   @spec export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def export_form(conn, _params) do
     conn
-    |> assign(:event_types, Telemetry.list_client_event_types(order_by: "Name (A-Z)"))
-    |> assign(:property_types, Telemetry.list_property_types())
+    |> assign(:property_types, Telemetry.list_property_types(order_by: "Name (A-Z)"))
     |> render("export_form.html")
   end
 
@@ -93,7 +92,6 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
     Logger.info(
       "ClientEventController property export of #{Kernel.inspect(params)}, took #{time_taken}ms"
     )
-
     conn
     |> put_resp_content_type("text/csv")
     |> put_resp_header("content-disposition", "attachment; filename=\"properties.csv\"")

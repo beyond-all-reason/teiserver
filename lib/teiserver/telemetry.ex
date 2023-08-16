@@ -304,6 +304,113 @@ defmodule Teiserver.Telemetry do
     MatchEventType.changeset(match_event_type, attrs)
   end
 
+  alias Teiserver.Telemetry.{ComplexMatchEventType, ComplexMatchEventTypeLib}
+
+  @doc """
+  Returns the list of complex_match_event_types.
+
+  ## Examples
+
+      iex> list_complex_match_event_types()
+      [%ComplexMatchEventType{}, ...]
+
+  """
+  @spec list_complex_match_event_types(list) :: list
+  def list_complex_match_event_types(args \\ []) do
+    args
+    |> ComplexMatchEventTypeLib.query_complex_match_event_types()
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single complex_match_event_type.
+
+  Raises `Ecto.NoResultsError` if the ComplexMatchEventType does not exist.
+
+  ## Examples
+
+      iex> get_complex_match_event_type!(123)
+      %ComplexMatchEventType{}
+
+      iex> get_complex_match_event_type!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_complex_match_event_type!(id), do: Repo.get!(ComplexMatchEventType, id)
+
+  def get_complex_match_event_type!(id, args) do
+    args = args ++ [id: id]
+
+    args
+    |> ComplexMatchEventTypeLib.query_complex_match_event_types()
+    |> Repo.one!()
+  end
+
+  @doc """
+  Creates a complex_match_event_type.
+
+  ## Examples
+
+      iex> create_complex_match_event_type(%{field: value})
+      {:ok, %ComplexMatchEventType{}}
+
+      iex> create_complex_match_event_type(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_complex_match_event_type(attrs \\ %{}) do
+    %ComplexMatchEventType{}
+    |> ComplexMatchEventType.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a complex_match_event_type.
+
+  ## Examples
+
+      iex> update_complex_match_event_type(complex_match_event_type, %{field: new_value})
+      {:ok, %ComplexMatchEventType{}}
+
+      iex> update_complex_match_event_type(complex_match_event_type, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_complex_match_event_type(%ComplexMatchEventType{} = complex_match_event_type, attrs) do
+    complex_match_event_type
+    |> ComplexMatchEventType.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a complex_match_event_type.
+
+  ## Examples
+
+      iex> delete_complex_match_event_type(complex_match_event_type)
+      {:ok, %ComplexMatchEventType{}}
+
+      iex> delete_complex_match_event_type(complex_match_event_type)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_complex_match_event_type(%ComplexMatchEventType{} = complex_match_event_type) do
+    Repo.delete(complex_match_event_type)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking complex_match_event_type changes.
+
+  ## Examples
+
+      iex> change_complex_match_event_type(complex_match_event_type)
+      %Ecto.Changeset{data: %ComplexMatchEventType{}}
+
+  """
+  def change_complex_match_event_type(%ComplexMatchEventType{} = complex_match_event_type, attrs \\ %{}) do
+    ComplexMatchEventType.changeset(complex_match_event_type, attrs)
+  end
+
   alias Teiserver.Telemetry.{ServerEventType, ServerEventTypeLib}
 
   @doc """
@@ -1048,6 +1155,120 @@ defmodule Teiserver.Telemetry do
   @spec log_match_event(T.match_id(), T.userid() | nil, String.t(), integer()) ::
           {:error, Ecto.Changeset.t()} | {:ok, MatchEvent.t()}
   defdelegate log_match_event(match_id, userid, event_type_name, game_time), to: MatchEventLib
+
+  alias Teiserver.Telemetry.{ComplexMatchEvent, ComplexMatchEventLib, ComplexMatchEventQueries}
+
+  @doc """
+  Returns the list of complex_match_events.
+
+  ## Examples
+
+      iex> list_complex_match_events()
+      [%ComplexMatchEvent{}, ...]
+
+  """
+  @spec list_complex_match_events(list) :: list
+  def list_complex_match_events(args \\ []) do
+    args
+    |> ComplexMatchEventQueries.query_complex_match_events()
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single complex_match_event.
+
+  Raises `Ecto.NoResultsError` if the ComplexMatchEvent does not exist.
+
+  ## Examples
+
+      iex> get_complex_match_event!(123)
+      %ComplexMatchEvent{}
+
+      iex> get_complex_match_event!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_complex_match_event!(id), do: Repo.get!(ComplexMatchEvent, id)
+
+  def get_complex_match_event!(id, args) do
+    args = args ++ [id: id]
+
+    args
+    |> ComplexMatchEventQueries.query_complex_match_events()
+    |> Repo.one!()
+  end
+
+  @doc """
+  Creates a complex_match_event.
+
+  ## Examples
+
+      iex> create_complex_match_event(%{field: value})
+      {:ok, %ComplexMatchEvent{}}
+
+      iex> create_complex_match_event(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_complex_match_event(attrs \\ %{}) do
+    %ComplexMatchEvent{}
+    |> ComplexMatchEvent.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a complex_match_event.
+
+  ## Examples
+
+      iex> update_complex_match_event(complex_match_event, %{field: new_value})
+      {:ok, %ComplexMatchEvent{}}
+
+      iex> update_complex_match_event(complex_match_event, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_complex_match_event(%ComplexMatchEvent{} = complex_match_event, attrs) do
+    complex_match_event
+    |> ComplexMatchEvent.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a complex_match_event.
+
+  ## Examples
+
+      iex> delete_complex_match_event(complex_match_event)
+      {:ok, %ComplexMatchEvent{}}
+
+      iex> delete_complex_match_event(complex_match_event)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_complex_match_event(%ComplexMatchEvent{} = complex_match_event) do
+    Repo.delete(complex_match_event)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking complex_match_event changes.
+
+  ## Examples
+
+      iex> change_complex_match_event(complex_match_event)
+      %Ecto.Changeset{data: %ComplexMatchEvent{}}
+
+  """
+  def change_complex_match_event(%ComplexMatchEvent{} = complex_match_event, attrs \\ %{}) do
+    ComplexMatchEvent.changeset(complex_match_event, attrs)
+  end
+
+  @spec get_complex_match_events_summary(list) :: map()
+  defdelegate get_complex_match_events_summary(args), to: ComplexMatchEventQueries
+
+  @spec log_complex_match_event(T.match_id(), T.userid() | nil, String.t(), integer(), map()) ::
+          {:error, Ecto.Changeset.t()} | {:ok, MatchEvent.t()}
+  defdelegate log_complex_match_event(match_id, userid, event_type_name, game_time, event_data), to: ComplexMatchEventLib
 
 
   alias Teiserver.Telemetry.{Infolog, InfologLib}

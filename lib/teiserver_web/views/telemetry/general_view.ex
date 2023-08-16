@@ -12,4 +12,5 @@ defmodule TeiserverWeb.Telemetry.GeneralView do
   def view_colour("client_events"), do: Teiserver.Telemetry.ClientEventLib.colour()
   def view_colour("server_events"), do: Teiserver.Telemetry.ServerEventLib.colour()
   def view_colour("match_events"), do: Teiserver.Telemetry.MatchEventLib.colour()
+  def view_colour("complex_match_events"), do: Teiserver.Telemetry.ComplexMatchEventLib.colour()
 end
