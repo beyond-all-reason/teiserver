@@ -11,18 +11,6 @@ defmodule Teiserver.Repo.Migrations.TelemetryRefactorStage1 do
   def change do
     # We already have property types
 
-    create table(:telemetry_client_event_types) do
-      add :name, :string
-    end
-
-    create table(:telemetry_server_event_types) do
-      add :name, :string
-    end
-
-    create table(:telemetry_match_event_types) do
-      add :name, :string
-    end
-
     create table(:telemetry_complex_match_event_types) do
       add :name, :string
     end
