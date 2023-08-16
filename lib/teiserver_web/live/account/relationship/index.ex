@@ -148,11 +148,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   def handle_event("unfollow-user", %{"userid" => userid_str}, socket) do
     userid = String.to_integer(userid_str)
 
-    Account.upsert_relationship(%{
-      from_user_id: socket.assigns.current_user.id,
-      to_user_id: userid,
-      state: nil
-    })
+    Account.reset_relationship_state(socket.assigns.current_user.id, userid)
 
     username = Account.get_username_by_id(userid)
 
@@ -166,11 +162,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   def handle_event("unignore-user", %{"userid" => userid_str}, socket) do
     userid = String.to_integer(userid_str)
 
-    Account.upsert_relationship(%{
-      from_user_id: socket.assigns.current_user.id,
-      to_user_id: userid,
-      state: nil
-    })
+    Account.reset_relationship_state(socket.assigns.current_user.id, userid)
 
     username = Account.get_username_by_id(userid)
 
@@ -184,11 +176,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   def handle_event("ignore-user", %{"userid" => userid_str}, socket) do
     userid = String.to_integer(userid_str)
 
-    Account.upsert_relationship(%{
-      from_user_id: socket.assigns.current_user.id,
-      to_user_id: userid,
-      state: "ignore"
-    })
+    Account.ignore_user(socket.assigns.current_user.id, userid)
 
     username = Account.get_username_by_id(userid)
 
@@ -202,11 +190,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   def handle_event("avoid-user", %{"userid" => userid_str}, socket) do
     userid = String.to_integer(userid_str)
 
-    Account.upsert_relationship(%{
-      from_user_id: socket.assigns.current_user.id,
-      to_user_id: userid,
-      state: "avoid"
-    })
+    Account.avoid_user(socket.assigns.current_user.id, userid)
 
     username = Account.get_username_by_id(userid)
 
@@ -220,11 +204,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   def handle_event("block-user", %{"userid" => userid_str}, socket) do
     userid = String.to_integer(userid_str)
 
-    Account.upsert_relationship(%{
-      from_user_id: socket.assigns.current_user.id,
-      to_user_id: userid,
-      state: "block"
-    })
+    Account.block_user(socket.assigns.current_user.id, userid)
 
     username = Account.get_username_by_id(userid)
 
@@ -358,16 +338,19 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       |> Enum.filter(fn r ->
         r.state == "ignore"
       end)
+      |> Enum.sort_by(fn r -> r.to_user.name end, &<=/2)
 
     avoids = relationships
       |> Enum.filter(fn r ->
         r.state == "avoid"
       end)
+      |> Enum.sort_by(fn r -> r.to_user.name end, &<=/2)
 
     blocks = relationships
       |> Enum.filter(fn r ->
         r.state == "block"
       end)
+      |> Enum.sort_by(fn r -> r.to_user.name end, &<=/2)
 
     socket
       |> assign(:avoids, avoids)

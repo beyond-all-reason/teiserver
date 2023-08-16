@@ -121,11 +121,7 @@ defmodule Teiserver.Account.SmurfMergeTask do
       limit: :infinity
     )
     |> Enum.each(fn %{id: ignorer_id} ->
-      Account.upsert_relationship(%{
-        from_user_id: ignorer_id,
-        to_user_id: to_id,
-        state: "ignore"
-      })
+      Account.ignore_user(ignorer_id, to_id)
     end)
 
     :ok

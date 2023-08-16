@@ -1570,6 +1570,30 @@ defmodule Teiserver.Account do
     Relationship.changeset(relationship, attrs)
   end
 
+  @spec verb_of_state(String.t | map) :: String.t
+  defdelegate verb_of_state(state), to: RelationshipLib
+
+  @spec past_tense_of_state(String.t | map) :: String.t
+  defdelegate past_tense_of_state(state), to: RelationshipLib
+
+  @spec follow_user(T.userid, T.userid) :: {:ok, Relationship.t}
+  defdelegate follow_user(from_user_id, to_user_id), to: RelationshipLib
+
+  @spec ignore_user(T.userid, T.userid) :: {:ok, Relationship.t}
+  defdelegate ignore_user(from_user_id, to_user_id), to: RelationshipLib
+
+  @spec avoid_user(T.userid, T.userid) :: {:ok, Relationship.t}
+  defdelegate avoid_user(from_user_id, to_user_id), to: RelationshipLib
+
+  @spec block_user(T.userid, T.userid) :: {:ok, Relationship.t}
+  defdelegate block_user(from_user_id, to_user_id), to: RelationshipLib
+
+  @spec reset_relationship_state(T.userid, T.userid) :: {:ok, Relationship.t}
+  defdelegate reset_relationship_state(from_user_id, to_user_id), to: RelationshipLib
+
+  @spec calculate_relationship_stats(T.userid) :: :ok
+  defdelegate calculate_relationship_stats(userid), to: RelationshipLib
+
   @spec list_userids_avoiding_this_userid(T.userid) :: [T.userid]
   defdelegate list_userids_avoiding_this_userid(userid), to: RelationshipLib
 

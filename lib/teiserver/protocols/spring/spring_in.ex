@@ -694,11 +694,7 @@ defmodule Teiserver.Protocols.SpringIn do
     case String.split(data, "=") do
       [_, username] ->
         target_userid = Account.get_userid_from_name(username)
-        Account.upsert_relationship(%{
-          from_user_id: state.userid,
-          to_user_id: target_userid,
-          state: "ignore"
-        })
+        Account.ignore_user(state.userid, target_userid)
 
       _ ->
         :ok
@@ -711,11 +707,7 @@ defmodule Teiserver.Protocols.SpringIn do
     case String.split(data, "=") do
       [_, username] ->
         target_userid = Account.get_userid_from_name(username)
-        Account.upsert_relationship(%{
-          from_user_id: state.userid,
-          to_user_id: target_userid,
-          state: nil
-        })
+        Account.reset_relationship_state(state.userid, target_userid)
 
       _ ->
         :ok
