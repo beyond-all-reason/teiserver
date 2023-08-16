@@ -78,6 +78,7 @@ defmodule Central.Application do
         concache_perm_sup(:teiserver_telemetry_property_types_cache),
         concache_perm_sup(:telemetry_client_event_types_cache),
         concache_perm_sup(:telemetry_match_event_types_cache),
+        concache_perm_sup(:telemetry_complex_match_event_types_cache),
         concache_perm_sup(:telemetry_server_event_types_cache),
 
         concache_perm_sup(:teiserver_account_smurf_key_types),
