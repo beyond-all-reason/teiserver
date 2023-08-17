@@ -149,10 +149,12 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
         if userid do
           host = Client.get_client_by_id(from_id)
-          match_id = Battle.get_lobby_match_id(host.lobby_id)
+          if host.lobby_id do
+            match_id = Battle.get_lobby_match_id(host.lobby_id)
 
-          if match_id do
-            Teiserver.Telemetry.log_match_event(match_id, userid, event_type_name, game_time)
+            if match_id do
+              Teiserver.Telemetry.log_match_event(match_id, userid, event_type_name, game_time)
+            end
           end
         end
 
@@ -175,10 +177,12 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
             if userid do
               host = Client.get_client_by_id(from_id)
-              match_id = Battle.get_lobby_match_id(host.lobby_id)
+              if host.lobby_id do
+                match_id = Battle.get_lobby_match_id(host.lobby_id)
 
-              if match_id do
-                Teiserver.Telemetry.log_complex_match_event(match_id, userid, event_type_name, game_time, json_data)
+                if match_id do
+                  Teiserver.Telemetry.log_complex_match_event(match_id, userid, event_type_name, game_time, json_data)
+                end
               end
             end
 
