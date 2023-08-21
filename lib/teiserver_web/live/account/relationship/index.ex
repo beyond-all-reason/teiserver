@@ -9,6 +9,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       |> assign(:tab, nil)
       |> assign(:site_menu_active, "teiserver_account")
       |> assign(:view_colour, Account.RelationshipLib.colour())
+      |> assign(:show_help, false)
       |> put_empty_relationships
 
     {:ok, socket}
@@ -53,6 +54,14 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   end
 
   @impl true
+  def handle_event("show-help", _, socket) do
+    {:noreply, socket |> assign(:show_help, true)}
+  end
+
+  def handle_event("hide-help", _, socket) do
+    {:noreply, socket |> assign(:show_help, false)}
+  end
+
   def handle_event("search-update", event, %{assigns: %{search_terms: search_terms}} = socket) do
     [key] = event["_target"]
     value = event[key]

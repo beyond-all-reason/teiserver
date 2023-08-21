@@ -2,6 +2,11 @@
 
 <div class="row mt-2 mb-3">
   <div class="col">
+    <div class="float-end">
+      <span :if={not @show_help} class="btn btn-secondary" phx-click="show-help">Show help</span>
+      <span :if={@show_help} class="btn btn-secondary" phx-click="hide-help">Hide help</span>
+    </div>
+  
     <.tab_header>
       <.tab_nav
         url={~p"/account/relationship/friend"}
@@ -129,6 +134,9 @@
       &nbsp;
       <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_follow()} style="regular" />
     </h4>
+    <div :if={@show_help} class="help-box">
+      While it currently doesn't do anything, following will be a way to keep track of those you want to without them having to accept you as a friend (e.g. streamers, devs or other figures of interest).
+    </div>
     <.table
       id="follows-table"
       table_class="table-sm"
@@ -165,6 +173,9 @@
       &nbsp;
       <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="regular" />
     </h4>
+    <div :if={@show_help} class="help-box">
+      If someone is ignored they cannot direct message you and you will not see their chat messages in the lobby. Muting ingame is currently a separate action and not linked to this.
+    </div>
     <.table id="ignores-table" table_class="table-sm" rows={@ignores}>
       <:col :let={ignore} label="Name"><%= ignore.to_user.name %></:col>
       <:col :let={avoid} label="">
@@ -187,6 +198,9 @@
       &nbsp;
       <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="regular" />
     </h4>
+    <div :if={@show_help} class="help-box">
+      In addition to the effects of ignoring; if enough players in a lobby are avoiding someone they will not be able to become a player themselves. They will still be able to spectate though.
+    </div>
     <.table id="avoids-table" table_class="table-sm" rows={@avoids}>
       <:col :let={avoid} label="Name"><%= avoid.to_user.name %></:col>
       <:col :let={avoid} label="">
@@ -209,6 +223,9 @@
       &nbsp;
       <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="regular" />
     </h4>
+    <div :if={@show_help} class="help-box">
+      In addition to the effects of avoiding; if enough members of a lobby are blocking someone they will not be able to join the lobby at all.
+    </div>
     <.table id="blocks-table" table_class="table-sm" rows={@blocks}>
       <:col :let={block} label="Name"><%= block.to_user.name %></:col>
       <:col :let={block} label="">

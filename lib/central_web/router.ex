@@ -233,7 +233,7 @@ defmodule TeiserverWeb.Router do
   end
 
   scope "/account", TeiserverWeb.Account do
-    pipe_through([:browser, :standard_live_layout, :protected])
+    pipe_through([:live_browser, :standard_live_layout, :protected])
 
     live_session :relationships,
       on_mount: [
