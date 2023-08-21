@@ -48,6 +48,12 @@
           <% end %>
         </div>
         <br /><br />
+        
+        <%= if @target && @target.smurf_of_id do %>
+          <div class="alert alert-primary">
+            <%= @target.name %> has been flagged as a smurf, these reports are not worth acting on.
+          </div>
+        <% end %>
 
         <%= if @conn.params["search"] != nil do %>
           <%= render(TeiserverWeb.Moderation.ReportView, "search.html", assigns) %>

@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.MatchController do
   use CentralWeb, :controller
 
-  alias Teiserver.{Battle, Game, Account}
+  alias Teiserver.{Battle, Game, Account, Telemetry}
   alias Teiserver.Battle.{MatchLib, BalanceLib}
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
   require Logger
@@ -138,6 +138,35 @@ defmodule TeiserverWeb.Admin.MatchController do
     # What about new balance?
     new_balance = generate_new_balance_data(match)
 
+    raw_events = Telemetry.list_match_events(search: [match_id: match.id], preload: [:event_types])
+
+    events_by_type = raw_events
+      |> Enum.group_by(fn e ->
+        e.event_type.name
+      end, fn _ ->
+        1
+      end)
+      |> Enum.map(fn {name, vs} ->
+        {name, Enum.count(vs)}
+      end)
+      |> Enum.sort_by(fn v -> v end, &<=/2)
+
+    team_lookup = members
+      |> Map.new(fn m ->
+        {m.user_id, m.team_id}
+      end)
+
+    events_by_team_and_type = raw_events
+      |> Enum.group_by(fn e ->
+        {team_lookup[e.user_id] || -1, e.event_type.name}
+      end, fn _ ->
+        1
+      end)
+      |> Enum.map(fn {key, vs} ->
+        {key, Enum.count(vs)}
+      end)
+      |> Enum.sort_by(fn v -> v end, &<=/2)
+
     conn
     |> assign(:match, match)
     |> assign(:match_name, match_name)
@@ -146,6 +175,8 @@ defmodule TeiserverWeb.Admin.MatchController do
     |> assign(:parties, parties)
     |> assign(:past_balance, past_balance)
     |> assign(:new_balance, new_balance)
+    |> assign(:events_by_type, events_by_type)
+    |> assign(:events_by_team_and_type, events_by_team_and_type)
     |> add_breadcrumb(name: "Show: #{match_name}", url: conn.request_path)
     |> render("show.html")
   end
