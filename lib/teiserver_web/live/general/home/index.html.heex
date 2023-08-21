@@ -2,6 +2,15 @@
 
 <div class="row">
   <.menu_card
+    :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
+    icon={Teiserver.icon()}
+    icon_class="fa-duotone"
+    url={~p"/teiserver/admin"}
+  >
+    Administration
+  </.menu_card>
+
+  <.menu_card
     :if={false and allow?(@current_user, "Moderator")}
     icon={"question"}
     icon_class="fa-duotone"
@@ -17,15 +26,6 @@
     url={~p"/moderation/overwatch"}
   >
     Overwatch
-  </.menu_card>
-
-  <.menu_card
-    :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
-    icon={Teiserver.icon()}
-    icon_class="fa-duotone"
-    url={~p"/teiserver/admin"}
-  >
-    Administration
   </.menu_card>
 
   <.menu_card
