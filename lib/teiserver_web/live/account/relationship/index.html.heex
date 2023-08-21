@@ -50,6 +50,9 @@
       &nbsp;
       <Fontawesome.icon icon={Teiserver.Account.FriendLib.icon()} style="regular" />
     </h4>
+    <div :if={@show_help} class="help-box">
+      Friends can instantly jump into the same lobby as each other and see additional information when looking at each other's profiles.
+    </div>
     <.table
       id="friends-table"
       table_class="table-sm"
@@ -76,6 +79,9 @@
       &nbsp;
       <Fontawesome.icon icon="down-to-bracket" style="regular" />
     </h4>
+    <div :if={@show_help} class="help-box">
+      These people are not your friends (yet) but they want to be!
+    </div>
     <.table id="incoming-request-table" table_class="table-sm" rows={@incoming_friend_requests}>
       <:col :let={request} label="Name"><%= request.from_user.name %></:col>
       
@@ -113,6 +119,9 @@
       &nbsp;
       <Fontawesome.icon icon="up-from-bracket" style="regular" />
     </h4>
+    <div :if={@show_help} class="help-box">
+      These are people you've asked to be friends, you're just waiting on their reply.
+    </div>
     <.table id="incoming-request-table" table_class="table-sm" rows={@outgoing_friend_requests}>
       <:col :let={request} label="Name"><%= request.to_user.name %></:col>
       <:col :let={request} label="">
