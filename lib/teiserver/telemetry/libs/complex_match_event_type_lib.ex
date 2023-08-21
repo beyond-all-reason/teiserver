@@ -1,7 +1,6 @@
 defmodule Teiserver.Telemetry.ComplexMatchEventTypeLib do
   @moduledoc false
   use CentralWeb, :library
-  alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Telemetry.ComplexMatchEventType
 
   # Helper function
@@ -36,7 +35,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTypeLib do
     |> do_where(args[:where])
     |> do_preload(args[:preload])
     |> do_order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> query_select(args[:select])
   end
 
   @spec do_where(Ecto.Query.t(), list | map | nil) :: Ecto.Query.t()

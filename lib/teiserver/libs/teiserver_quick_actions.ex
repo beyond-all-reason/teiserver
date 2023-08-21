@@ -20,7 +20,7 @@ defmodule Teiserver.TeiserverQuickActions do
         %{
           label: "My profile",
           icons: ["fa-solid fa-user-circle"],
-          url: ~p"/teiserver/profile",
+          url: ~p"/profile",
           permissions: "account"
         },
         %{

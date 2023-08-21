@@ -286,13 +286,6 @@ defmodule TeiserverWeb.Router do
     delete("/security/delete_token/:id", SecurityController, :delete_token)
   end
 
-  scope "/teiserver", TeiserverWeb.Account, as: :ts_account do
-    pipe_through([:browser, :standard_layout])
-
-    get("/profile/:id", ProfileController, :show)
-    get("/profile", ProfileController, :index)
-  end
-
   scope "/teiserver/games", TeiserverWeb.Game, as: :ts_game do
     pipe_through([:browser, :standard_layout, :protected])
     resources("/queues", QueueController)
