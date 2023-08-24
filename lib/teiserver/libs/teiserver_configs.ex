@@ -16,6 +16,7 @@ defmodule Teiserver.TeiserverConfigs do
     discord_configs()
     lobby_configs()
     debugging_configs()
+    profile_configs()
   end
 
   @spec site_configs :: any
@@ -601,6 +602,19 @@ defmodule Teiserver.TeiserverConfigs do
       default: false,
       permissions: ["Admin"],
       description: "Print all incoming messages"
+    })
+  end
+
+  @spec profile_configs() :: :ok
+  def profile_configs() do
+    add_site_config_type(%{
+      key: "profile.Rank method",
+      section: "Profiles",
+      type: "select",
+      default: "Leaderboard rating",
+      permissions: ["Admin"],
+      description: "The value used to assign rank icons at login",
+      opts: [choices: ["Leaderboard rating", "Rating value", "Playtime", "Role"]],
     })
   end
 end

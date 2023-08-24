@@ -1055,6 +1055,26 @@ defmodule Teiserver.Account do
     end
   end
 
+  @spec get_player_lowest_uncertainty(T.userid()) :: number()
+  def get_player_lowest_uncertainty(user_id) do
+    result =
+      rating_query(
+        search: [
+          user_id: user_id
+        ],
+        select: [:uncertainty],
+        order_by: "Uncertainty low to high",
+        limit: 1
+      )
+      |> Repo.one()
+
+    if result do
+      result.uncertainty
+    else
+      0
+    end
+  end
+
   @doc """
   Creates a rating.
 
