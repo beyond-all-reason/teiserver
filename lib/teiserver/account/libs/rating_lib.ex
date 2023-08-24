@@ -93,6 +93,16 @@ defmodule Teiserver.Account.RatingLib do
       order_by: [asc: ratings.skill]
   end
 
+  def order_by(query, "Uncertainty high to low") do
+    from ratings in query,
+      order_by: [desc: ratings.uncertainty]
+  end
+
+  def order_by(query, "Uncertainty low to high") do
+    from ratings in query,
+      order_by: [asc: ratings.uncertainty]
+  end
+
   @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
