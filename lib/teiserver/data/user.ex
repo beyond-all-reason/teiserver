@@ -1273,22 +1273,40 @@ defmodule Teiserver.User do
   end
 
   # Based on actual ingame time
-  @spec calculate_rank(T.userid()) :: non_neg_integer()
-  # Old method using ingame hours
-  # def calculate_rank(userid) do
-  #   ingame_hours = rank_time(userid)
+  @spec calculate_rank(T.userid(), atom) :: non_neg_integer()
+  def calculate_rank(userid, :playtime) do
+    ingame_hours = rank_time(userid)
 
-  #   @rank_levels
-  #     |> Enum.filter(fn r -> r <= ingame_hours end)
-  #     |> Enum.count()
-  # end
+    @rank_levels
+      |> Enum.count(fn r -> r <= ingame_hours end)
+  end
 
-  # New method using leaderboard rating
-  def calculate_rank(userid) do
+  # Using leaderboard rating
+  def calculate_rank(userid, :leaderboard) do
     rating = Account.get_player_highest_leaderboard_rating(userid)
 
     @rank_levels
     |> Enum.count(fn r -> r <= rating end)
+  end
+
+  # Using leaderboard rating
+  def calculate_rank(userid, :role) do
+    ingame_hours = rank_time(userid)
+
+    cond do
+      has_any_role?(userid, ~w(Core Contributor)) -> 6
+      has_any_role?(userid, ~w(Mentor Overwatch Caster)) -> 5
+      ingame_hours > 500 -> 4
+      ingame_hours > 100 -> 3
+      ingame_hours > 15 -> 2
+      ingame_hours > 5 -> 1
+      true -> 0
+    end
+  end
+
+  @spec calculate_rank(T.userid()) :: non_neg_integer()
+  def calculate_rank(userid) do
+    calculate_rank(userid, :role)
   end
 
   # Used to reset the spring password of the user when the site password is updated
