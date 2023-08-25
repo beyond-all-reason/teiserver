@@ -1641,6 +1641,9 @@ defmodule Teiserver.Account do
   @spec does_a_avoid_b?(T.userid, T.userid) :: boolean
   defdelegate does_a_avoid_b?(u1, u2), to: RelationshipLib
 
+  @spec profile_view_permissions(T.userid, T.userid, nil | Account.Relationship, nil | Account.Friend, nil | Account.FriendRequest) :: [atom]
+  defdelegate profile_view_permissions(u1, u2, relationship, friend, friendship_request), to: RelationshipLib
+
 
   alias Teiserver.Account.{Friend, FriendLib, FriendQueries}
 
@@ -2027,6 +2030,12 @@ defmodule Teiserver.Account do
 
   @spec system_change_user_name(T.userid(), String.t()) :: :ok
   defdelegate system_change_user_name(userid, new_name), to: Teiserver.User
+
+  @spec has_any_role?(T.userid() | T.user() | nil, String.t | [String.t]) :: boolean()
+  defdelegate has_any_role?(user_or_userid, roles), to: Teiserver.User
+
+  @spec has_all_roles?(T.userid() | T.user() | nil, String.t | [String.t]) :: boolean()
+  defdelegate has_all_roles?(user_or_userid, roles), to: Teiserver.User
 
   # Client stuff
   alias Teiserver.Account.ClientLib

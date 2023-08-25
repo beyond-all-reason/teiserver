@@ -1,6 +1,7 @@
 defmodule Teiserver.Account.RelationshipLib do
   @moduledoc false
   alias Teiserver.Account
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Data.Types, as: T
 
   @spec colour :: atom
@@ -213,5 +214,22 @@ defmodule Teiserver.Account.RelationshipLib do
   @spec does_a_block_b?(T.userid, T.userid) :: boolean
   def does_a_block_b?(u1, u2) do
     Enum.member?(list_userids_blocked_by_userid(u1), u2)
+  end
+
+  @spec profile_view_permissions(T.user, T.user, nil | Account.Relationship, nil | Account.Friend, nil | Account.FriendRequest) :: [atom]
+  def profile_view_permissions(viewer, profile_user, relationship, friend, friendship_request) do
+    [
+      (if profile_user.id == viewer.id, do: :self),
+      (if AuthLib.allow?(viewer, "Moderator"), do: :moderator),
+      (if AuthLib.allow?(viewer, "BAR+"), do: :bar_plus),
+      (if friend, do: :friend),
+      (if friendship_request && friendship_request.from_user_id == viewer.id, do: :request_sent),
+      (if friendship_request && friendship_request.from_user_id == profile_user, do: :request_received),
+      (if relationship && relationship.state == "ignore", do: :ignore),
+      (if relationship && relationship.state == "avoid", do: [:avoid, :ignore]),
+      (if relationship && relationship.state == "block", do: [:block, :avoid, :ignore]),
+    ]
+    |> List.flatten
+    |> Enum.reject(&(&1 == nil))
   end
 end

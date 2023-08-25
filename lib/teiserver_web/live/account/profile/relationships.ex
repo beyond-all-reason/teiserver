@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Account.ProfileLive.Playtime do
+defmodule TeiserverWeb.Account.ProfileLive.Relationships do
   @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.Account
@@ -21,7 +21,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Playtime do
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
           |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions
-          |> get_times
+          |> get_mutuals
+          |> check_page_permissions
     end
 
     {:ok, socket}
@@ -34,7 +35,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Playtime do
 
   defp apply_action(socket, _live_action, _params) do
     socket
-      |> assign(:page_title, "Playtime")
+      |> assign(:page_title, "Relationships")
   end
 
   @impl true
@@ -42,16 +43,32 @@ defmodule TeiserverWeb.Account.ProfileLive.Playtime do
     {:noreply, socket}
   end
 
-  defp get_times(socket) do
-    stats = Account.get_user_stat_data(socket.assigns.user.id)
+  def get_mutuals(socket) do
+    your_friends = Account.list_friend_ids_of_user(socket.assigns.current_user.id)
+    their_friends = Account.list_friend_ids_of_user(socket.assigns.user.id)
 
-    total_hours = Map.get(stats, "total_minutes", 0) * 60
-    player_hours = Map.get(stats, "player_minutes", 0) * 60
-    spectator_hours = Map.get(stats, "spectator_minutes", 0) * 60
+    mutual_friend_ids = your_friends
+    |> Enum.filter(fn friend_id ->
+      Enum.member?(their_friends, friend_id)
+    end)
+
+    mutual_friends = Account.list_users_from_cache(mutual_friend_ids)
+      |> Enum.sort_by(fn user -> user.name end, &<=/2)
 
     socket
-      |> assign(:total_hours, total_hours)
-      |> assign(:player_hours, player_hours)
-      |> assign(:spectator_hours, spectator_hours)
+      |> assign(:mutual_friends, mutual_friends)
+  end
+
+  defp check_page_permissions(%{assigns: assigns} = socket) do
+    allowed = (not Enum.member?(assigns.profile_permissions, :self)) and (
+                Enum.member?(assigns.profile_permissions, :friend)
+              )
+
+    if allowed do
+      socket
+    else
+      socket
+        |> redirect(to: ~p"/profile/#{assigns.user.id}")
+    end
   end
 end

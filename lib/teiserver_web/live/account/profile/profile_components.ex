@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Account.ProfileComponents do
   """
   attr :tab, :string, required: true
   attr :userid, :integer, required: true
-  attr :self, :boolean, default: false
+  attr :profile_permissions, :list, default: []
   def profile_tabs(assigns) do
     ~H"""
     <div class="row mt-2 mb-3">
@@ -54,10 +54,26 @@ defmodule TeiserverWeb.Account.ProfileComponents do
             Playtime
           </.tab_nav>
 
+          <.tab_nav
+            :if={
+              (not Enum.member?(@profile_permissions, :self)) and (
+                Enum.member?(@profile_permissions, :friend)
+              )}
+            url={~p"/profile/#{@userid}/relationships"}
+            selected={@tab == "relationships"}
+          >
+            <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon()} style="solid" />
+            Relationships
+          </.tab_nav>
 
-          <%= if @self do %>
-            <%!-- Stuff here --%>
-          <% end %>
+          <.tab_nav
+            :if={Enum.member?(@profile_permissions, :self)}
+            url={~p"/profile/#{@userid}/settings"}
+            selected={@tab == "settings"}
+          >
+            <Fontawesome.icon icon={Teiserver.Config.UserConfigLib.icon()} style="solid" />
+            Settings
+          </.tab_nav>
         </.tab_header>
       </div>
     </div>
@@ -77,6 +93,7 @@ defmodule TeiserverWeb.Account.ProfileComponents do
   attr :view_colour, :atom, required: true
   attr :user, :map, required: true
   attr :current_user, :map, default: nil
+  attr :profile_permissions, :list, default: []
 
   def profile_header(assigns) do
     ~H"""
@@ -99,7 +116,7 @@ defmodule TeiserverWeb.Account.ProfileComponents do
       </div>
     </div>
 
-    <TeiserverWeb.Account.ProfileComponents.profile_tabs tab={@active} userid={@user.id} self={@current_user && @current_user.id == @user.id} />
+    <TeiserverWeb.Account.ProfileComponents.profile_tabs tab={@active} userid={@user.id} profile_permissions={@profile_permissions} />
     """
   end
 end

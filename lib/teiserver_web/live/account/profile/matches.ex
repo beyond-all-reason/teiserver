@@ -20,6 +20,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Matches do
           |> assign(:site_menu_active, "teiserver_account")
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
+          |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions
     end
 
     {:ok, socket}

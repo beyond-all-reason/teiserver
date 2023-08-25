@@ -1359,32 +1359,36 @@ defmodule Teiserver.User do
   @doc """
   If a user possesses any of these roles it returns true
   """
-  @spec has_any_role?(T.userid() | T.user() | nil, String.t()[String.t()]) :: boolean()
+  @spec has_any_role?(T.userid() | T.user() | nil, String.t | [String.t]) :: boolean()
   def has_any_role?(nil, _), do: false
 
   def has_any_role?(userid, roles) when is_integer(userid),
     do: has_any_role?(get_user_by_id(userid), roles)
 
-  def has_any_role?(user, roles) do
+  def has_any_role?(user, roles) when is_list(roles) do
     roles
     |> Enum.map(fn role -> Enum.member?(user.roles, role) end)
     |> Enum.any?()
   end
 
+  def has_any_role?(user, role), do: has_any_role?(user, [role])
+
   @doc """
   If a user possesses all of these roles it returns true, if any are lacking it returns false
   """
-  @spec has_all_roles?(T.userid() | T.user() | nil, String.t()[String.t()]) :: boolean()
+  @spec has_all_roles?(T.userid() | T.user() | nil, String.t | [String.t]) :: boolean()
   def has_all_roles?(nil, _), do: false
 
   def has_all_roles?(userid, roles) when is_integer(userid),
     do: has_all_roles?(get_user_by_id(userid), roles)
 
-  def has_all_roles?(user, roles) do
+  def has_all_roles?(user, roles) when is_list(roles) do
     roles
     |> Enum.map(fn role -> Enum.member?(user.roles, role) end)
     |> Enum.all?()
   end
+
+  def has_all_roles?(user, role), do: has_all_roles?(user, [role])
 
   @spec valid_email?(String.t()) :: boolean
   def valid_email?(email) do

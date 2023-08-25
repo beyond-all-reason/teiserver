@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Account.ProfileLive.Playtime do
+defmodule TeiserverWeb.Account.ProfileLive.Settings do
   @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.Account
@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Playtime do
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
           |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions
-          |> get_times
+          |> check_page_permissions
     end
 
     {:ok, socket}
@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Playtime do
 
   defp apply_action(socket, _live_action, _params) do
     socket
-      |> assign(:page_title, "Playtime")
+      |> assign(:page_title, "Settings")
   end
 
   @impl true
@@ -42,16 +42,14 @@ defmodule TeiserverWeb.Account.ProfileLive.Playtime do
     {:noreply, socket}
   end
 
-  defp get_times(socket) do
-    stats = Account.get_user_stat_data(socket.assigns.user.id)
+  defp check_page_permissions(%{assigns: assigns} = socket) do
+    allowed = Enum.member?(assigns.profile_permissions, :self)
 
-    total_hours = Map.get(stats, "total_minutes", 0) * 60
-    player_hours = Map.get(stats, "player_minutes", 0) * 60
-    spectator_hours = Map.get(stats, "spectator_minutes", 0) * 60
-
-    socket
-      |> assign(:total_hours, total_hours)
-      |> assign(:player_hours, player_hours)
-      |> assign(:spectator_hours, spectator_hours)
+    if allowed do
+      socket
+    else
+      socket
+        |> redirect(to: ~p"/profile/#{assigns.user.id}")
+    end
   end
 end

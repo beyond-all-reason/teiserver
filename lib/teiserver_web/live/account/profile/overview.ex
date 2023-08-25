@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
           |> assign(:role_data, Account.RoleLib.role_data())
-          |> get_relationships
+          |> get_relationships_and_permissions
     end
 
     {:ok, socket}
@@ -53,7 +53,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
 
     socket = socket
       |> put_flash(:success, "You are now following #{user.name}")
-      |> get_relationships()
+      |> get_relationships_and_permissions()
 
     {:noreply, socket}
   end
@@ -63,7 +63,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
 
     socket = socket
       |> put_flash(:success, "You are now no longer following, ignoring, avoiding or blocking #{user.name}")
-      |> get_relationships()
+      |> get_relationships_and_permissions()
 
     {:noreply, socket}
   end
@@ -73,7 +73,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
 
     socket = socket
       |> put_flash(:success, "You are now ignoring #{user.name}")
-      |> get_relationships()
+      |> get_relationships_and_permissions()
 
     {:noreply, socket}
   end
@@ -83,7 +83,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
 
     socket = socket
       |> put_flash(:success, "You are now avoiding #{user.name}")
-      |> get_relationships()
+      |> get_relationships_and_permissions()
 
     {:noreply, socket}
   end
@@ -93,7 +93,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
 
     socket = socket
       |> put_flash(:success, "You are now blocking #{user.name}")
-      |> get_relationships()
+      |> get_relationships_and_permissions()
 
     {:noreply, socket}
   end
@@ -103,7 +103,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
 
     socket = socket
       |> put_flash(:success, "Request from #{user.name} declined")
-      |> get_relationships()
+      |> get_relationships_and_permissions()
 
     {:noreply, socket}
   end
@@ -113,7 +113,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
 
     socket = socket
       |> put_flash(:success, "Request accepted, you are now friends with #{user.name}")
-      |> get_relationships()
+      |> get_relationships_and_permissions()
 
     {:noreply, socket}
   end
@@ -123,7 +123,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
 
     socket = socket
       |> put_flash(:success, "Friend request rescinded")
-      |> get_relationships()
+      |> get_relationships_and_permissions()
 
     {:noreply, socket}
   end
@@ -133,19 +133,22 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
 
     socket = socket
       |> put_flash(:success, "Friend request sent")
-      |> get_relationships()
+      |> get_relationships_and_permissions()
 
     {:noreply, socket}
   end
 
-  defp get_relationships(%{assigns: %{current_user: current_user, user: user}} = socket) do
+  def get_relationships_and_permissions(%{assigns: %{current_user: current_user, user: user}} = socket) do
     relationship = Account.get_relationship(current_user.id, user.id)
     friendship = Account.get_friend(current_user.id, user.id)
     friendship_request = Account.get_friend_request(nil, nil, [where: [either_user_is: {current_user.id, user.id}]])
+
+    profile_permissions = Account.profile_view_permissions(current_user, user, relationship, friendship, friendship_request)
 
     socket
       |> assign(:relationship, relationship)
       |> assign(:friendship, friendship)
       |> assign(:friendship_request, friendship_request)
+      |> assign(:profile_permissions, profile_permissions)
   end
 end

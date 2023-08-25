@@ -12,6 +12,7 @@
   view_colour={@view_colour}
   user={@user}
   current_user={@current_user}
+  profile_permissions={@profile_permissions}
 />
 
 <div class="row my-3">
@@ -106,7 +107,7 @@
       </span>
       
       <span
-        :if={@friendship == nil && @relationship == nil || @relationship.state != "ignore"}
+        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.state != "ignore"}
         phx-click="ignore-user"
         class="btn btn-outline-warning mx-1"
       >
@@ -116,7 +117,7 @@
       </span>
       
       <span
-        :if={@friendship == nil && @relationship == nil || @relationship.state != "avoid"}
+        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.state != "avoid"}
         phx-click="avoid-user"
         class="btn btn-outline-danger mx-1"
       >
@@ -126,7 +127,7 @@
       </span>
       
       <span
-        :if={@friendship == nil && @relationship == nil || @relationship.state != "block"}
+        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.state != "block"}
         phx-click="block-user"
         class="btn btn-outline-danger2 mx-1"
       >
