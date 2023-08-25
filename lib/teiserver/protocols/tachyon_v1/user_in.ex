@@ -42,15 +42,14 @@ defmodule Teiserver.Protocols.Tachyon.V1.UserIn do
   end
 
   def do_handle("list_friend_ids", _, state) do
-    user = User.get_user_by_id(state.userid)
-    friend_list = user.friends
-    request_list = user.friend_requests
+    friend_list = Account.list_friend_ids_of_user(state.userid)
+    request_list = Account.list_incoming_friend_requests_of_userid(state.userid)
 
     reply(:user, :list_friend_ids, {friend_list, request_list}, state)
   end
 
   def do_handle("list_friend_users_and_clients", _, state) do
-    friend_list = User.get_user_by_id(state.userid).friends
+    friend_list = Account.list_friend_ids_of_user(state.userid)
 
     users =
       friend_list

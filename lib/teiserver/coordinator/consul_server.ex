@@ -842,45 +842,42 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def is_on_friendlist?(userid, state, :players) do
-    battle = Battle.get_lobby(state.lobby_id)
-
-    players =
-      battle.players
-      |> Enum.map(&Client.get_client_by_id/1)
-      |> Enum.filter(fn c -> c.player end)
-      |> Enum.map(fn c -> c.userid end)
+    player_ids = list_players(state)
+      |> Enum.map(fn %{userid: player_id} -> player_id end)
 
     # If battle has no players it'll succeed regardless
-    case players do
+    case player_ids do
       [] ->
         true
 
       _ ->
-        players
-        |> Enum.map(fn p_id ->
-          Account.list_friend_ids_of_user(p_id)
+        friend_ids = Account.list_friend_ids_of_user(userid)
+
+        player_ids
+        |> Enum.map(fn player_id ->
+          Enum.member?(friend_ids, player_id)
         end)
-        |> List.flatten
-        |> Enum.member?(userid)
+        |> Enum.any?
     end
   end
 
   def is_on_friendlist?(userid, state, :all) do
-    battle = Battle.get_lobby(state.lobby_id)
+    member_ids = Battle.get_lobby(state.lobby_id)
+      |> Map.get(:players, [])
 
-    # If battle has no members it'll succeed regardless
-    case battle do
-      %{players: []} ->
+    # If battle has no players it'll succeed regardless
+    case member_ids do
+      [] ->
         true
 
       _ ->
-        battle
-        |> Map.get(:players)
-        |> Enum.map(fn p_id ->
-          Account.list_friend_ids_of_user(p_id)
+        friend_ids = Account.list_friend_ids_of_user(userid)
+
+        member_ids
+        |> Enum.map(fn player_id ->
+          Enum.member?(friend_ids, player_id)
         end)
-        |> List.flatten
-        |> Enum.member?(userid)
+        |> Enum.any?
     end
   end
 
@@ -1239,11 +1236,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       userid ->
         userid
     end
-  end
-
-  @spec is_friend?(T.userid(), Map.t()) :: boolean()
-  def is_friend?(_userid, _state) do
-    true
   end
 
   # @spec say_message(T.userid(), String.t(), Map.t()) :: Map.t()
