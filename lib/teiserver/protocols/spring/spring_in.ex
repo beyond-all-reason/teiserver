@@ -13,7 +13,7 @@ defmodule Teiserver.Protocols.SpringIn do
   import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
   alias Teiserver.Protocols.{Spring, SpringOut}
-  alias Teiserver.Protocols.Spring.{AuthIn, TelemetryIn, BattleIn, LobbyPolicyIn}
+  alias Teiserver.Protocols.Spring.{AuthIn, TelemetryIn, BattleIn, LobbyPolicyIn, UserIn}
 
   @optimisation_level %{
     "LuaLobby Chobby" => :partial,
@@ -117,6 +117,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("c.lobby_policy." <> cmd, data, msg_id, state) do
     LobbyPolicyIn.do_handle(cmd, data, msg_id, state)
+  end
+
+  defp do_handle("c.user." <> cmd, data, msg_id, state) do
+    UserIn.do_handle(cmd, data, msg_id, state)
   end
 
   defp do_handle("STARTTLS", _, msg_id, state) do
