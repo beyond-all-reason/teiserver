@@ -147,7 +147,8 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
         l.passworded == false and
           l.locked == false and
           l.tournament == false and
-          l.in_progress == false
+          l.in_progress == false and
+          (not String.contains?(l.name, "ENGINE TEST"))
       end)
 
     case empty_lobby do

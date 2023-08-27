@@ -100,20 +100,6 @@ defmodule Teiserver.User do
 
   def default_data(), do: @default_data
 
-  # Time played ranks
-  # @rank_levels [
-  #   5,
-  #   15,
-  #   30,
-  #   100,
-  #   300,
-  #   1000,
-  #   3000
-  # ]
-
-  # Leaderboard rating ranks
-  @rank_levels [3, 7, 12, 21, 26, 35, 1000]
-
   def get_rank_levels(), do: @rank_levels
 
   @spec clean_name(String.t()) :: String.t()
@@ -1305,22 +1291,50 @@ defmodule Teiserver.User do
   end
 
   # Based on actual ingame time
-  @spec calculate_rank(T.userid()) :: non_neg_integer()
-  # Old method using ingame hours
-  # def calculate_rank(userid) do
-  #   ingame_hours = rank_time(userid)
+  @spec calculate_rank(T.userid(), String.t) :: non_neg_integer()
+  def calculate_rank(userid, "Playtime") do
+    ingame_hours = rank_time(userid)
 
-  #   @rank_levels
-  #     |> Enum.filter(fn r -> r <= ingame_hours end)
-  #     |> Enum.count()
-  # end
+    [5, 15, 30, 100, 300, 1000, 3000]
+      |> Enum.count(fn r -> r <= ingame_hours end)
+  end
 
-  # New method using leaderboard rating
-  def calculate_rank(userid) do
+  # Using leaderboard rating
+  def calculate_rank(userid, "Leaderboard rating") do
     rating = Account.get_player_highest_leaderboard_rating(userid)
 
-    @rank_levels
+    [3, 7, 12, 21, 26, 35, 1000]
     |> Enum.count(fn r -> r <= rating end)
+  end
+
+  def calculate_rank(userid, "Uncertainty") do
+    uncertainty = Account.get_player_lowest_uncertainty(userid)
+    |> :math.ceil()
+
+
+    8 - uncertainty
+    |> max(0)
+    |> max(7)
+  end
+
+  def calculate_rank(userid, "Role") do
+    ingame_hours = rank_time(userid)
+
+    cond do
+      has_any_role?(userid, ~w(Core Contributor)) -> 6
+      ingame_hours > 1000 -> 5
+      ingame_hours > 250 -> 4
+      ingame_hours > 100 -> 3
+      ingame_hours > 15 -> 2
+      ingame_hours > 5 -> 1
+      true -> 0
+    end
+  end
+
+  @spec calculate_rank(T.userid()) :: non_neg_integer()
+  def calculate_rank(userid) do
+    method = Config.get_site_config_cache("profile.Rank method")
+    calculate_rank(userid, method)
   end
 
   # Used to reset the spring password of the user when the site password is updated

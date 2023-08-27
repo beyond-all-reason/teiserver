@@ -31,7 +31,12 @@ defmodule TeiserverWeb.Moderation.ReportController do
         order_by: "Newest first"
       )
 
+    target = if params["target_id"] do
+      Account.get_user(params["target_id"])
+    end
+
     conn
+    |> assign(:target, target)
     |> assign(:target_id, params["target_id"])
     |> assign(:reports, reports)
     |> assign(:params, params)
@@ -49,7 +54,12 @@ defmodule TeiserverWeb.Moderation.ReportController do
         order_by: params["order"]
       )
 
+    target = if params["target_id"] do
+      Account.get_user(params["target_id"])
+    end
+
     conn
+    |> assign(:target, target)
     |> assign(:target_id, params["target_id"])
     |> assign(:params, params)
     |> assign(:reports, reports)

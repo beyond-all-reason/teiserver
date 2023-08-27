@@ -20,6 +20,7 @@ defmodule Teiserver.Repo.Migrations.TelemetryRefactorStage1 do
       add :event_type_id, references(:telemetry_complex_match_event_types, on_delete: :nothing)
       add :match_id, references(:teiserver_battle_matches, on_delete: :nothing)
 
+      add :game_time, :integer
       add :value, :jsonb
     end
   end

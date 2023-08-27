@@ -182,6 +182,11 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     {:ok, state}
   end
 
+  # Holdover from Spring stuff, discard message for now
+  def handle_info({:request_user_join_lobby, _}, state) do
+    {:ok, state}
+  end
+
   def handle_info(%{channel: channel} = msg, state) do
     # First we find the module to handle this message, we have one module per channel
     module =
@@ -322,6 +327,8 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   end
 
   def handle_error(conn, {:missing_params, param}),
+    do: Plug.Conn.send_resp(conn, 400, "Missing parameter(s): #{param}")
+  def handle_error(conn, "missing_params: " <> param),
     do: Plug.Conn.send_resp(conn, 400, "Missing parameter(s): #{param}")
 
   def handle_error(conn, :no_user), do: Plug.Conn.send_resp(conn, 401, "Unauthorized")

@@ -1,4 +1,5 @@
 defmodule Teiserver.Telemetry.MatchEventLib do
+  @moduledoc false
   use CentralWeb, :library
   alias Teiserver.Telemetry.{MatchEvent, MatchEventTypeLib}
   alias Phoenix.PubSub
@@ -93,6 +94,16 @@ defmodule Teiserver.Telemetry.MatchEventLib do
   def _search(query, :user_id_in, user_ids) do
     from match_events in query,
       where: match_events.user_id in ^user_ids
+  end
+
+  def _search(query, :match_id, match_id) do
+    from match_events in query,
+      where: match_events.match_id == ^match_id
+  end
+
+  def _search(query, :match_id_in, match_ids) do
+    from match_events in query,
+      where: match_events.match_id in ^match_ids
   end
 
   def _search(query, :id_list, id_list) do

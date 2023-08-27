@@ -149,15 +149,49 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
         if userid do
           host = Client.get_client_by_id(from_id)
-          match_id = Battle.get_lobby_match_id(host.lobby_id)
+          if host.lobby_id do
+            match_id = Battle.get_lobby_match_id(host.lobby_id)
 
-          if match_id do
-            Teiserver.Telemetry.log_match_event(match_id, userid, event_type_name, game_time)
+            if match_id do
+              Teiserver.Telemetry.log_match_event(match_id, userid, event_type_name, game_time)
+            end
           end
         end
 
       _ ->
         Logger.error("match_event bad_match error on '#{data}'")
+    end
+
+    {:noreply, state}
+  end
+
+  # Examples of accepted format:
+  # complex-match-event <playerName> <eventType> <gameTime> <base64data>
+  # complex-match-event <Beherith> <commands:FirstLineMove> <67> <eyJrZXkiOiJ2YWx1ZSJ9>
+  def handle_info({:direct_message, from_id, "complex-match-event " <> data}, state) do
+    case Regex.run(~r/<(.*?)> <(.*?)> <(.*?)> <(.*?)>$/, String.trim(data)) do
+      [_all, username, event_type_name, game_time, base64data] ->
+        case base64_and_json(base64data) do
+          {:ok, json_data} ->
+            userid = Account.get_userid_from_name(username)
+
+            if userid do
+              host = Client.get_client_by_id(from_id)
+              if host.lobby_id do
+                match_id = Battle.get_lobby_match_id(host.lobby_id)
+
+                if match_id do
+                  Teiserver.Telemetry.log_complex_match_event(match_id, userid, event_type_name, game_time, json_data)
+                end
+              end
+            end
+
+          {:error, error_message} ->
+            Logger.error("complex_match_event bad_decode error '#{error_message}' on '#{data}'")
+        end
+
+      _ ->
+        Logger.error("complex_match_event bad_match error on '#{data}'")
     end
 
     {:noreply, state}
@@ -413,6 +447,22 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
       _ ->
         nil
+    end
+  end
+
+  defp base64_and_json(raw_string) do
+    case Base.url_decode64(raw_string) do
+      {:ok, json_str} ->
+        case Jason.decode(json_str) do
+          {:ok, contents} ->
+            {:ok, contents}
+
+          {:error, _} ->
+            {:error, "json decode error"}
+        end
+
+      _ ->
+        {:error, "base64 decode error"}
     end
   end
 end

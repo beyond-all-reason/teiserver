@@ -373,6 +373,12 @@ defmodule TeiserverWeb.Router do
     post("/match_events/export/post", MatchEventController, :export_post)
     get("/match_events/summary", MatchEventController, :summary)
     get("/match_events/:event_name/detail", MatchEventController, :detail)
+
+    # Complex Match events
+    get("/complex_match_events/export/form", ComplexMatchEventController, :export_form)
+    post("/complex_match_events/export/post", ComplexMatchEventController, :export_post)
+    get("/complex_match_events/summary", ComplexMatchEventController, :summary)
+    get("/complex_match_events/:event_name/detail", ComplexMatchEventController, :detail)
   end
 
   scope "/teiserver/reports", TeiserverWeb.Report, as: :ts_reports do

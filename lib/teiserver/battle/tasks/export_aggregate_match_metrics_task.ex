@@ -28,7 +28,7 @@ defmodule Teiserver.Battle.ExportAggregateMatchMetricsTask do
     data
     |> Stream.map(fn log ->
       log.data
-      |> Map.drop(["minutes_per_user"])
+      |> Map.drop(["minutes_per_user", "old_minutes_per_user"])
       |> Map.put("date", log.date)
     end)
     |> Enum.to_list()

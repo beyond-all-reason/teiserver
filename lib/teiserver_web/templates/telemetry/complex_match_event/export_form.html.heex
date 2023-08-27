@@ -1,0 +1,82 @@
+<% bsname = view_colour() %>
+
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")} />
+<script src={Routes.static_path(@conn, "/js/select2.js")}>
+</script>
+
+<%= render(
+  TeiserverWeb.Telemetry.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "complex_match_events"})
+) %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $('.list-builder-select').select2({
+      width: "100%"
+    });
+  });
+</script>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render(
+          TeiserverWeb.Telemetry.ComplexMatchEventView,
+          "section_menu.html",
+          Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "export"
+          })
+        ) %>
+        <br /><br />
+
+        <form action={~p"/telemetry/complex_match_events/export/post"} method="post" class="">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+          <div class="row">
+            <div class="col-xl-4 col-lg-6 col-md-12 my-2">
+              <label for="event_types" class="control-label">Event types</label>
+              <select
+                class="form-control list-builder-select"
+                multiple="multiple"
+                name="event_types[]"
+                id="event_type"
+              >
+                <%= for event_type <- @event_types do %>
+                  <option value={event_type.id}><%= event_type.name %></option>
+                <% end %>
+              </select>
+            </div>
+
+            <div class="col-xl-4 col-lg-6 col-md-12 my-2">
+              <label for="auth-dropdown" class="control-label">Auth type</label>
+              <select class="form-control" name="auth" id="auth-dropdown">
+                <option value="combined">Combined</option>
+                <option value="auth">Authenticated</option>
+                <option value="unauth">Unauthenticated</option>
+              </select>
+            </div>
+
+            <div class="col-xl-4 col-lg-6 col-md-12 my-2">
+              <label for="timeframe" class="control-label">Timeframe</label>
+              <%= central_component("icon_dropdown",
+                name: "timeframe",
+                id: "timeframe",
+                enumerable:
+                  for(p <- Teiserver.Helper.DatePresets.short_ranges(), do: %{id: p, name: p})
+              ) %>
+            </div>
+          </div>
+
+          <div class="col-md-12 my-3">
+            <button type="submit" class={"btn btn-#{bsname} btn-block"}>
+              Export data
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
