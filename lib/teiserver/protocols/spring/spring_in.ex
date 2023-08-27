@@ -721,7 +721,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("IGNORELIST", _, msg_id, state),
-    do: reply(:ignorelist, state.user, msg_id, state)
+    do: reply(:ignorelist, state.userid, msg_id, state)
 
   defp do_handle("c.moderation.report_user", data, msg_id, state) do
     case String.split(data, "\t") do
