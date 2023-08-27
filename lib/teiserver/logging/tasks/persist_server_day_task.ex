@@ -67,7 +67,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
     },
 
     # Per user minute counts for the day as a whole
-    minutes_per_user: %{
+    old_minutes_per_user: %{
       total: %{},
       player: %{},
       spectator: %{},
@@ -127,7 +127,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
     },
 
     # Per user minute counts for the day as a whole
-    minutes_per_user: %{
+    old_minutes_per_user: %{
       total: %{},
       player: %{},
       spectator: %{},
@@ -268,13 +268,13 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       },
 
       # Per user minute counts for the day as a whole
-      minutes_per_user: %{
-        total: add_maps(segment.minutes_per_user.total, extend.minutes_per_user.total),
-        player: add_maps(segment.minutes_per_user.player, extend.minutes_per_user.player),
+      old_minutes_per_user: %{
+        total: add_maps(segment.old_minutes_per_user.total, extend.old_minutes_per_user.total),
+        player: add_maps(segment.old_minutes_per_user.player, extend.old_minutes_per_user.player),
         spectator:
-          add_maps(segment.minutes_per_user.spectator, extend.minutes_per_user.spectator),
-        lobby: add_maps(segment.minutes_per_user.lobby, extend.minutes_per_user.lobby),
-        menu: add_maps(segment.minutes_per_user.menu, extend.minutes_per_user.menu)
+          add_maps(segment.old_minutes_per_user.spectator, extend.old_minutes_per_user.spectator),
+        lobby: add_maps(segment.old_minutes_per_user.lobby, extend.old_minutes_per_user.lobby),
+        menu: add_maps(segment.old_minutes_per_user.menu, extend.old_minutes_per_user.menu)
       }
     }
   end
@@ -372,7 +372,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       },
 
       # Per user minute counts for the day as a whole
-      minutes_per_user: user_maps
+      old_minutes_per_user: user_maps
     }
   end
 
