@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Report.InfologController do
+defmodule TeiserverWeb.Telemetry.InfologController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
@@ -13,8 +13,8 @@ defmodule TeiserverWeb.Report.InfologController do
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
-  plug(:add_breadcrumb, name: 'Reports', url: '/teiserver/reports')
-  plug(:add_breadcrumb, name: 'Infologs', url: '/teiserver/reports/infolog')
+  plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
+  plug(:add_breadcrumb, name: 'Infologs', url: '/telemetry/infolog')
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
@@ -88,6 +88,6 @@ defmodule TeiserverWeb.Report.InfologController do
 
     conn
     |> put_flash(:info, "Infolog deleted successfully.")
-    |> redirect(to: Routes.ts_reports_infolog_path(conn, :index))
+    |> redirect(to: ~p"/telemetry/infolog")
   end
 end

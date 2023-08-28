@@ -31,7 +31,7 @@ defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
       between: between
     ]
 
-    match_events = SimpleMatchEventQueries.get_match_events_summary(args)
+    match_events = SimpleMatchEventQueries.get_simple_match_events_summary(args)
 
     event_types =
       Map.keys(match_events)

@@ -1,7 +1,7 @@
 <% bsname = view_colour() %>
 
 <%= render(
-  TeiserverWeb.Report.GeneralView,
+  TeiserverWeb.Telemetry.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "infologs"})
 ) %>
@@ -11,7 +11,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Report.InfologView,
+          TeiserverWeb.Telemetry.InfologView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
@@ -30,7 +30,7 @@
           &nbsp;
           <%= if allow?(@conn, "admin.dev") do %>
             <%= link(raw("<i class='fa-solid fa-fw fa-trash'></i> Delete"),
-              to: Routes.ts_reports_infolog_path(@conn, :delete, @infolog.id),
+              to: ~p"/telemetry/infolog/#{@infolog.id}",
               class: "btn btn-danger",
               method: "delete",
               data: [confirm: "Are you sure?"]

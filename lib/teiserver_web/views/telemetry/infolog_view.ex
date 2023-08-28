@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Report.InfologView do
+defmodule TeiserverWeb.Telemetry.InfologView do
   use TeiserverWeb, :view
 
   @spec view_colour :: atom

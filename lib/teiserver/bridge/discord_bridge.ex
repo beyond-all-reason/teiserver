@@ -164,7 +164,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
     if post_to_discord do
       host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
-      url = "https://#{host}/teiserver/reports/infolog/#{infolog.id}"
+      url = "https://#{host}/telemetry/infolog/#{infolog.id}"
 
       message =
         [

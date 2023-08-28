@@ -20,7 +20,7 @@
   </div>
 
   <form
-    action={Routes.ts_reports_infolog_path(@conn, :search)}
+    action={~p"/telemetry/infolog/search"}
     method="post"
     class="form-horizontal"
     id="search-box"
