@@ -11,7 +11,7 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventLib do
   def colour(), do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-sliders-up"
+  def icon(), do: "fa-people-group"
 
   @spec log_complex_lobby_event(T.userid, T.match_id, String, map()) :: {:error, Ecto.Changeset} | {:ok, ComplexLobbyEvent}
   def log_complex_lobby_event(userid, lobby_id, event_type_name, value) when is_integer(userid) do

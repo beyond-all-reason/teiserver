@@ -11,7 +11,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEventLib do
   def colour(), do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-sliders-up"
+  def icon(), do: "fa-scanner-keyboard"
 
   @spec log_complex_match_event(T.userid, T.match_id, String, non_neg_integer, map()) :: {:error, Ecto.Changeset} | {:ok, ComplexLobbyEvent}
   def log_complex_match_event(userid, match_id, event_type_name, game_time, value) when is_integer(userid) and is_integer(game_time) do

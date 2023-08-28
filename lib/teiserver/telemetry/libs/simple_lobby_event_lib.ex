@@ -11,7 +11,7 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventLib do
   def colour(), do: :info2
 
   @spec icon() :: String.t
-  def icon(), do: "fa-sliders-up"
+  def icon(), do: "fa-user-group"
 
   @spec log_simple_lobby_event(T.userid, T.match_id, String.t) :: {:error, Ecto.Changeset} | {:ok, SimpleLobbyEvent}
   def log_simple_lobby_event(userid, match_id, event_type_name) when is_integer(userid) do

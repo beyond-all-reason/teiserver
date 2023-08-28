@@ -10,8 +10,8 @@ defmodule Teiserver.Telemetry.ComplexClientEventLib do
   @spec colour :: atom
   def colour(), do: :info2
 
-  @spec icon() :: String.t
-  def icon(), do: "fa-sliders-up"
+  @spec icon() :: String.t()
+  def icon(), do: "fa-regular fa-sliders"
 
   @spec log_complex_client_event(integer, String.t, map) :: {:error, Ecto.Changeset} | {:ok, ComplexClientEvent}
   def log_complex_client_event(userid, event_type_name, value) when is_integer(userid) do

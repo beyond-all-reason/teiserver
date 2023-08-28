@@ -11,7 +11,7 @@ defmodule Teiserver.Telemetry.ComplexServerEventLib do
   def colour(), do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-sliders-up"
+  def icon(), do: "fa-database"
 
   @spec log_complex_server_event(T.userid | nil, String, map()) :: {:error, Ecto.Changeset} | {:ok, ComplexServerEvent}
   def log_complex_server_event(userid, event_type_name, value) do
