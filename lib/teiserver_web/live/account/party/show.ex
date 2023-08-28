@@ -214,7 +214,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
 
   defp build_user_lookup(socket) do
     existing_user_ids = Map.keys(socket.assigns[:user_lookup] || %{})
-    friends = Account.list_friend_ids_of_user(socket.user.id)
+    friends = Account.list_friend_ids_of_user(socket.assigns.current_user.id)
 
     ids =
       [
