@@ -1,5 +1,5 @@
 <% client_event_keys = (@data["events"]["combined"] || %{}) |> Map.keys() |> Enum.sort()
-server_event_keys = (@data["events"]["server"] || %{}) |> Map.keys() |> Enum.sort()
+complex_server_event_keys = (@data["events"]["server"] || %{}) |> Map.keys() |> Enum.sort()
 match_event_keys = (@data["events"]["match"] || %{}) |> Map.keys() |> Enum.sort() %>
 
 <div class="row">
@@ -37,7 +37,7 @@ match_event_keys = (@data["events"]["match"] || %{}) |> Map.keys() |> Enum.sort(
         </tr>
       </thead>
       <tbody>
-        <%= for key <- server_event_keys do %>
+        <%= for key <- complex_server_event_keys do %>
           <tr>
             <td><%= key %></td>
             <td><%= @data["events"]["server"][key] |> format_number %></td>

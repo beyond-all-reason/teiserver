@@ -12,7 +12,7 @@
   <%= if allow?(@current_user, "Server") do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Telemetry.ClientEventLib.icon(),
+      icon: Teiserver.Telemetry.ComplexClientEventLib.icon(),
       name: "client_events",
       text: "Client events",
       link: ~p"/telemetry/client_events/summary"
@@ -22,10 +22,10 @@
   <%= if allow?(@current_user, "Server") do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Telemetry.ServerEventLib.icon(),
-      name: "server_events",
-      text: "Server events",
-      link: ~p"/telemetry/server_events/summary"
+      icon: Teiserver.Telemetry.ComplexServerEventLib.icon(),
+      name: "complex_server_events",
+      text: "Complex server events",
+      link: ~p"/telemetry/complex_server_events/summary"
     ) %>
   <% end %>
 

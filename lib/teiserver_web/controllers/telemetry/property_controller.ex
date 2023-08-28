@@ -91,7 +91,7 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
     time_taken = System.system_time(:millisecond) - start_time
 
     Logger.info(
-      "ClientEventController property export of #{Kernel.inspect(params)}, took #{time_taken}ms"
+      "ComplexClientEventController property export of #{Kernel.inspect(params)}, took #{time_taken}ms"
     )
 
     conn

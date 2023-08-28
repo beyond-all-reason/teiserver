@@ -1,5 +1,6 @@
-defmodule Teiserver.Telemetry.ExportEventsTask do
-  alias Teiserver.Telemetry.{ClientEvent, UnauthEvent}
+defmodule Teiserver.Telemetry.ExportComplexClientEventsTask do
+  @moduledoc false
+  alias Teiserver.Telemetry.{ComplexClientEvent, ComplexAnonEvent}
   alias Teiserver.Helper.{DatePresets}
   alias Teiserver.Repo
   import Ecto.Query, warn: false
@@ -37,7 +38,7 @@ defmodule Teiserver.Telemetry.ExportEventsTask do
 
   defp query_client(event_types, start_date, end_date) do
     query =
-      from client_events in ClientEvent,
+      from client_events in ComplexClientEvent,
         where: client_events.event_type_id in ^event_types,
         where: between(client_events.timestamp, ^start_date, ^end_date),
         join: event_types in assoc(client_events, :event_type),
@@ -65,7 +66,7 @@ defmodule Teiserver.Telemetry.ExportEventsTask do
 
   defp query_unauth(event_types, start_date, end_date) do
     query =
-      from unauth_events in UnauthEvent,
+      from unauth_events in ComplexAnonEvent,
         where: unauth_events.event_type_id in ^event_types,
         where: between(unauth_events.timestamp, ^start_date, ^end_date),
         join: event_types in assoc(unauth_events, :event_type),

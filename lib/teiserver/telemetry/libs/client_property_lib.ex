@@ -9,6 +9,8 @@ defmodule Teiserver.Telemetry.ClientPropertyLib do
   @spec colours :: atom
   def colours, do: :default
 
+  In the process of making things into Queries and Libs, then refactoring telemetry.ex to make it tidier and more ordered.
+
   # Queries
   @spec query_client_properties() :: Ecto.Query.t()
   def query_client_properties do
