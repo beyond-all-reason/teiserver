@@ -93,16 +93,20 @@
           <thead>
             <tr>
               <th>Hours played</th>
-              <th>Player count</th>
-              <th>Cumulative Player count</th>
+              <th colspan="2">Player count</th>
+              <th colspan="2">Cumulative Player count</th>
             </tr>
           </thead>
           <tbody>
             <%= for {hours, count} <- @data.player_counts do %>
               <tr>
                 <td><%= hours %></td>
+                
                 <td><%= format_number(count) %></td>
+                <td><%= percent(count / @data.total_player_count, 1) %>%</td>
+                
                 <td><%= format_number(@data.cumulative_player_counts[hours]) %></td>
+                <td><%= percent(@data.cumulative_player_counts[hours] / @data.total_player_count, 1) %>%</td>
               </tr>
             <% end %>
           </tbody>

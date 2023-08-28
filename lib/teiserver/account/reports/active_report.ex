@@ -63,6 +63,8 @@ defmodule Teiserver.Account.ActiveReport do
       end)
       |> Map.new()
 
+    total_player_count = Map.values(cumulative_player_counts) |> Enum.max
+
     assigns = %{
       params: params,
       presets: DatePresets.long_ranges()
@@ -71,6 +73,7 @@ defmodule Teiserver.Account.ActiveReport do
     {%{
        player_counts: player_counts,
        cumulative_player_counts: cumulative_player_counts,
+       total_player_count: total_player_count,
        start_date: start_date,
        end_date: end_date
      }, assigns}
@@ -103,6 +106,7 @@ defmodule Teiserver.Account.ActiveReport do
       v < 250 -> 250
       v < 500 -> 500
       v < 1000 -> 1000
+      v < 3000 -> 3000
       true -> nil
     end
   end
