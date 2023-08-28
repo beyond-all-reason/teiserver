@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Report.GeneralView do
   def icon(), do: StylingHelper.icon(:primary)
 
   @spec view_colour(String.t()) :: atom
-  def view_colour("client_events"), do: Teiserver.Telemetry.ClientEventLib.colour()
+  def view_colour("client_events"), do: Teiserver.Telemetry.ComplexClientEventLib.colour()
   def view_colour("server_metrics"), do: Teiserver.Logging.ServerDayLogLib.colours()
   def view_colour("match_metrics"), do: Teiserver.Battle.MatchLib.colours()
   def view_colour("ratings"), do: Teiserver.Account.RatingLib.colours()

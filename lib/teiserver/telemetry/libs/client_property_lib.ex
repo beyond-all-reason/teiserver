@@ -1,6 +1,6 @@
-defmodule Teiserver.Telemetry.ClientPropertyLib do
+defmodule Teiserver.Telemetry.UserPropertyLib do
   use CentralWeb, :library
-  alias Teiserver.Telemetry.ClientProperty
+  alias Teiserver.Telemetry.UserProperty
 
   # Functions
   @spec icon :: String.t()
@@ -12,7 +12,7 @@ defmodule Teiserver.Telemetry.ClientPropertyLib do
   # Queries
   @spec query_client_properties() :: Ecto.Query.t()
   def query_client_properties do
-    from(client_properties in ClientProperty)
+    from(client_properties in UserProperty)
   end
 
   @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()

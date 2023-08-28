@@ -6,7 +6,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTest do
 
   test "match events" do
     # Start by removing all match events
-    query = "DELETE FROM teiserver_telemetry_complex_match_events;"
+    query = "DELETE FROM telemetry_complex_match_events;"
     Ecto.Adapters.SQL.query(Repo, query, [])
 
     user = TeiserverTestLib.new_user("complex_match_event_user")

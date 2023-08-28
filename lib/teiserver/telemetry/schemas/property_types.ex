@@ -2,7 +2,7 @@ defmodule Teiserver.Telemetry.PropertyType do
   @moduledoc false
   use CentralWeb, :schema
 
-  schema "teiserver_telemetry_property_types" do
+  schema "telemetry_property_types" do
     field :name, :string
   end
 
@@ -12,8 +12,8 @@ defmodule Teiserver.Telemetry.PropertyType do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:name])
-    |> validate_required([:name])
+    |> cast(params, ~w(name)a)
+    |> validate_required(~w(name)a)
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean

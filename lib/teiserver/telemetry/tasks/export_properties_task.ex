@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.ExportPropertiesTask do
   alias Teiserver.Helper.{TimexHelper, DatePresets}
-  alias Teiserver.Telemetry.{ClientProperty, UnauthProperty}
+  alias Teiserver.Telemetry.{UserProperty, UnauthProperty}
   alias Teiserver.Repo
   import Ecto.Query, warn: false
   import Teiserver.Helper.QueryHelpers
@@ -46,7 +46,7 @@ defmodule Teiserver.Telemetry.ExportPropertiesTask do
 
   defp query_client(property_types, start_date, end_date) do
     query =
-      from client_properties in ClientProperty,
+      from client_properties in UserProperty,
         where: client_properties.property_type_id in ^property_types,
         where: between(client_properties.last_updated, ^start_date, ^end_date),
         join: property_types in assoc(client_properties, :property_type),

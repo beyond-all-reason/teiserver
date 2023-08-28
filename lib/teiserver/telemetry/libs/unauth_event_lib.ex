@@ -1,6 +1,6 @@
-defmodule Teiserver.Telemetry.UnauthEventLib do
+defmodule Teiserver.Telemetry.ComplexAnonEventLib do
   use CentralWeb, :library
-  alias Teiserver.Telemetry.UnauthEvent
+  alias Teiserver.Telemetry.ComplexAnonEvent
 
   # Functions
   @spec colours :: atom
@@ -12,7 +12,7 @@ defmodule Teiserver.Telemetry.UnauthEventLib do
   # Queries
   @spec query_unauth_events() :: Ecto.Query.t()
   def query_unauth_events do
-    from(unauth_events in UnauthEvent)
+    from(unauth_events in ComplexAnonEvent)
   end
 
   @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()

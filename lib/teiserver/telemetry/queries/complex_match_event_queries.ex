@@ -65,12 +65,12 @@ defmodule Teiserver.Telemetry.ComplexMatchEventQueries do
 
   defp _order_by(query, "Newest first") do
     from complex_match_events in query,
-      order_by: [desc: complex_match_events.updated_at]
+      order_by: [desc: complex_match_events.timestamp]
   end
 
   defp _order_by(query, "Oldest first") do
     from complex_match_events in query,
-      order_by: [asc: complex_match_events.updated_at]
+      order_by: [asc: complex_match_events.timestamp]
   end
 
   @spec do_preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()

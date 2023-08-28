@@ -34,15 +34,15 @@
               label: "Client events",
               active: @active,
               url: ~p"/telemetry/client_events/summary",
-              icon: Teiserver.Telemetry.ClientEventLib.icon()
+              icon: Teiserver.Telemetry.ComplexClientEventLib.icon()
             ) %>
 
             <%= central_component("sub_menu_icon",
-              name: "server_events",
-              label: "Server events",
+              name: "complex_server_events",
+              label: "Complex server events",
               active: @active,
-              url: ~p"/telemetry/server_events/summary",
-              icon: Teiserver.Telemetry.ServerEventLib.icon()
+              url: ~p"/telemetry/complex_server_events/summary",
+              icon: Teiserver.Telemetry.ComplexServerEventLib.icon()
             ) %>
 
             <%= central_component("sub_menu_icon",
@@ -50,7 +50,7 @@
               label: "Match events",
               active: @active,
               url: ~p"/telemetry/match_events/summary",
-              icon: Teiserver.Telemetry.MatchEventLib.icon()
+              icon: Teiserver.Telemetry.SimpleMatchEventLib.icon()
             ) %>
 
             <%= central_component("sub_menu_icon",

@@ -325,7 +325,7 @@ defmodule Teiserver.Lobby do
         :removed ->
           Coordinator.cast_consul(lobby_id, {:user_kicked, userid})
           client = Account.get_client_by_id(userid)
-          Telemetry.log_server_event(userid, "lobby.kick_user", %{lobby_id: lobby_id})
+          Telemetry.log_complex_server_event(userid, "lobby.kick_user", %{lobby_id: lobby_id})
 
           if client do
             PubSub.broadcast(
@@ -445,7 +445,7 @@ defmodule Teiserver.Lobby do
 
       true ->
         if consul_rename do
-          Telemetry.log_server_event(nil, "lobby.rename", %{lobby_id: lobby_id, name: new_name})
+          Telemetry.log_complex_server_event(nil, "lobby.rename", %{lobby_id: lobby_id, name: new_name})
         end
 
         Battle.update_lobby_values(lobby_id, %{

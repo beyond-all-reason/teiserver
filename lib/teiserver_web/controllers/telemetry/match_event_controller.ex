@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.Telemetry.MatchEventController do
+defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.ExportMatchEventsTask
+  alias Teiserver.Telemetry.ExportSimpleMatchEventsTask
   require Logger
 
   plug(AssignPlug,
@@ -46,7 +46,7 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
 
   @spec detail(Plug.Conn.t(), map) :: Plug.Conn.t()
   def detail(conn, %{"event_name" => event_name} = params) do
-    event_type_id = Telemetry.MatchEventTypeLib.get_or_add_match_event_type(event_name)
+    event_type_id = Telemetry.SimpleMatchEventTypeLib.get_or_add_match_event_type(event_name)
     tf = Map.get(params, "tf", "7 days")
 
     start_date =
@@ -100,12 +100,12 @@ defmodule TeiserverWeb.Telemetry.MatchEventController do
   def export_post(conn, params) do
     start_time = System.system_time(:millisecond)
 
-    data = ExportMatchEventsTask.perform(params)
+    data = ExportSimpleMatchEventsTask.perform(params)
 
     time_taken = System.system_time(:millisecond) - start_time
 
     Logger.info(
-      "MatchEventController event export of #{Kernel.inspect(params)}, took #{time_taken}ms"
+      "SimpleMatchEventController event export of #{Kernel.inspect(params)}, took #{time_taken}ms"
     )
 
     conn

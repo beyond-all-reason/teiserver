@@ -81,7 +81,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     client = Client.get_client_by_id(from_id)
     Battle.stop_match(client.lobby_id)
 
-    Telemetry.log_server_event(nil, "lobby.match_stopped", %{})
+    Telemetry.log_complex_server_event(nil, "lobby.match_stopped", %{})
 
     {:noreply, state}
   end
@@ -95,9 +95,9 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     user = Account.get_user_by_name(username)
 
     if user do
-      Telemetry.log_server_event(nil, "lobby.manual_stop", %{stopper: user.id})
+      Telemetry.log_complex_server_event(nil, "lobby.manual_stop", %{stopper: user.id})
     else
-      Telemetry.log_server_event(nil, "lobby.manual_stop", %{stopper: nil})
+      Telemetry.log_complex_server_event(nil, "lobby.manual_stop", %{stopper: nil})
     end
 
     {:noreply, state}
@@ -126,7 +126,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       user = Account.get_user_by_name(username)
 
       if user do
-        Telemetry.log_server_event(user.id, "spads.broken_connection", %{from_id: from_id})
+        Telemetry.log_complex_server_event(user.id, "spads.broken_connection", %{from_id: from_id})
         Client.disconnect(user.id, "reported broken connection")
       end
     end

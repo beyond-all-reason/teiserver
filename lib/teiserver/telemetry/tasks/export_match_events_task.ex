@@ -1,6 +1,6 @@
-defmodule Teiserver.Telemetry.ExportMatchEventsTask do
+defmodule Teiserver.Telemetry.ExportSimpleMatchEventsTask do
   @moduledoc false
-  alias Teiserver.Telemetry.MatchEvent
+  alias Teiserver.Telemetry.SimpleMatchEvent
   alias Teiserver.Helper.{DatePresets}
   alias Teiserver.Repo
   import Ecto.Query, warn: false
@@ -37,7 +37,7 @@ defmodule Teiserver.Telemetry.ExportMatchEventsTask do
 
   defp query_client(event_types, start_date, end_date) do
     query =
-      from match_events in MatchEvent,
+      from match_events in SimpleMatchEvent,
         where: match_events.event_type_id in ^event_types,
         left_join: matches in assoc(match_events, :match),
         where: between(matches.started, ^start_date, ^end_date),

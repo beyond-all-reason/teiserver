@@ -100,8 +100,6 @@ defmodule Teiserver.User do
 
   def default_data(), do: @default_data
 
-  def get_rank_levels(), do: @rank_levels
-
   @spec clean_name(String.t()) :: String.t()
   def clean_name(name) do
     ~r/([^a-zA-Z0-9_\[\]\{\}]|\s)/
@@ -854,7 +852,7 @@ defmodule Teiserver.User do
 
     cond do
       user.smurf_of_id != nil ->
-        Telemetry.log_server_event(user.id, "Banned login", %{
+        Telemetry.log_complex_server_event(user.id, "Banned login", %{
           error: "Smurf"
         })
 
@@ -870,14 +868,14 @@ defmodule Teiserver.User do
         {:error, "Application hash missing in login"}
 
       is_restricted?(user, ["Permanently banned"]) ->
-        Telemetry.log_server_event(user.id, "Banned login", %{
+        Telemetry.log_complex_server_event(user.id, "Banned login", %{
           error: "Permanently banned"
         })
 
         {:error, "Banned account"}
 
       is_restricted?(user, ["Login"]) ->
-        Telemetry.log_server_event(user.id, "Banned login", %{
+        Telemetry.log_complex_server_event(user.id, "Banned login", %{
           error: "Suspended"
         })
 
@@ -935,7 +933,7 @@ defmodule Teiserver.User do
 
         cond do
           user.smurf_of_id != nil ->
-            Telemetry.log_server_event(user.id, "Banned login", %{
+            Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Smurf"
             })
 
@@ -948,14 +946,14 @@ defmodule Teiserver.User do
             {:error, "LobbyHash/UserID missing in login"}
 
           is_restricted?(user, ["Permanently banned"]) ->
-            Telemetry.log_server_event(user.id, "Banned login", %{
+            Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Permanently banned"
             })
 
             {:error, "Banned account"}
 
           is_restricted?(user, ["Login"]) ->
-            Telemetry.log_server_event(user.id, "Banned login", %{
+            Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Suspended"
             })
 
@@ -1026,7 +1024,7 @@ defmodule Teiserver.User do
 
         cond do
           user.smurf_of_id != nil ->
-            Telemetry.log_server_event(user.id, "Banned login", %{
+            Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Smurf"
             })
 
@@ -1050,14 +1048,14 @@ defmodule Teiserver.User do
             end
 
           is_restricted?(user, ["Permanently banned"]) ->
-            Telemetry.log_server_event(user.id, "Banned login", %{
+            Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Permanently banned"
             })
 
             {:error, "Banned account"}
 
           is_restricted?(user, ["Login"]) ->
-            Telemetry.log_server_event(user.id, "Banned login", %{
+            Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Suspended"
             })
 
@@ -1179,7 +1177,7 @@ defmodule Teiserver.User do
       last_ip: ip
     })
 
-    Telemetry.log_server_event(user.id, "account.user_login", %{
+    Telemetry.log_complex_server_event(user.id, "account.user_login", %{
       lobby_client: lobby_client,
       ip: ip
     })

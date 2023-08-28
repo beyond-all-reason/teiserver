@@ -125,7 +125,7 @@ defmodule Teiserver.TeiserverQuickActions do
         },
         %{
           label: "Client event telemetry",
-          icons: ["fa-regular #{Teiserver.Telemetry.ClientEventLib.icon()}", :list],
+          icons: ["fa-regular #{Teiserver.Telemetry.ComplexClientEventLib.icon()}", :list],
           url: ~p"/telemetry/client_events/summary",
           permissions: "Admin"
         },

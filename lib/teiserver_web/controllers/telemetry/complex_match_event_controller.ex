@@ -108,7 +108,7 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
     time_taken = System.system_time(:millisecond) - start_time
 
     Logger.info(
-      "ClientEventController event export of #{Kernel.inspect(params)}, took #{time_taken}ms"
+      "ComplexClientEventController event export of #{Kernel.inspect(params)}, took #{time_taken}ms"
     )
 
     conn

@@ -357,22 +357,22 @@ defmodule TeiserverWeb.Router do
     get("/properties/:property_name/detail", PropertyController, :detail)
 
     # Client events
-    get("/client_events/export/form", ClientEventController, :export_form)
-    post("/client_events/export/post", ClientEventController, :export_post)
-    get("/client_events/summary", ClientEventController, :summary)
-    get("/client_events/:event_name/detail", ClientEventController, :detail)
+    get("/client_events/export/form", ComplexClientEventController, :export_form)
+    post("/client_events/export/post", ComplexClientEventController, :export_post)
+    get("/client_events/summary", ComplexClientEventController, :summary)
+    get("/client_events/:event_name/detail", ComplexClientEventController, :detail)
 
     # Server events
-    get("/server_events/export/form", ServerEventController, :export_form)
-    post("/server_events/export/post", ServerEventController, :export_post)
-    get("/server_events/summary", ServerEventController, :summary)
-    get("/server_events/:event_name/detail", ServerEventController, :detail)
+    get("/complex_server_events/export/form", ComplexServerEventController, :export_form)
+    post("/complex_server_events/export/post", ComplexServerEventController, :export_post)
+    get("/complex_server_events/summary", ComplexServerEventController, :summary)
+    get("/complex_server_events/:event_name/detail", ComplexServerEventController, :detail)
 
     # Match events
-    get("/match_events/export/form", MatchEventController, :export_form)
-    post("/match_events/export/post", MatchEventController, :export_post)
-    get("/match_events/summary", MatchEventController, :summary)
-    get("/match_events/:event_name/detail", MatchEventController, :detail)
+    get("/match_events/export/form", SimpleMatchEventController, :export_form)
+    post("/match_events/export/post", SimpleMatchEventController, :export_post)
+    get("/match_events/summary", SimpleMatchEventController, :summary)
+    get("/match_events/:event_name/detail", SimpleMatchEventController, :detail)
 
     # Complex Match events
     get("/complex_match_events/export/form", ComplexMatchEventController, :export_form)
