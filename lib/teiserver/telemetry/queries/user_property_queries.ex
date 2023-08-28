@@ -4,9 +4,9 @@ defmodule Teiserver.Telemetry.UserPropertyQueries do
   alias Teiserver.Telemetry.UserProperty
 
   # Queries
-  @spec query_client_properties() :: Ecto.Query.t()
-  def query_client_properties do
-    from(client_properties in UserProperty)
+  @spec query_user_properties() :: Ecto.Query.t()
+  def query_user_properties do
+    from(user_properties in UserProperty)
   end
 
   @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
@@ -24,58 +24,58 @@ defmodule Teiserver.Telemetry.UserPropertyQueries do
   def _search(query, _, nil), do: query
 
   def _search(query, :user_id, user_id) do
-    from client_properties in query,
-      where: client_properties.user_id == ^user_id
+    from user_properties in query,
+      where: user_properties.user_id == ^user_id
   end
 
   def _search(query, :name, name) do
-    from client_properties in query,
-      where: client_properties.name == ^name
+    from user_properties in query,
+      where: user_properties.name == ^name
   end
 
   def _search(query, :id_list, id_list) do
-    from client_properties in query,
-      where: client_properties.id in ^id_list
+    from user_properties in query,
+      where: user_properties.id in ^id_list
   end
 
   def _search(query, :basic_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
-    from client_properties in query,
-      where: ilike(client_properties.name, ^ref_like)
+    from user_properties in query,
+      where: ilike(user_properties.name, ^ref_like)
   end
 
   def _search(query, :property_type_id, property_type_id) do
-    from client_properties in query,
-      where: client_properties.property_type_id == ^property_type_id
+    from user_properties in query,
+      where: user_properties.property_type_id == ^property_type_id
   end
 
   def _search(query, :between, {start_date, end_date}) do
-    from client_properties in query,
-      where: between(client_properties.last_updated, ^start_date, ^end_date)
+    from user_properties in query,
+      where: between(user_properties.last_updated, ^start_date, ^end_date)
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
 
   def order_by(query, "Name (A-Z)") do
-    from client_properties in query,
-      order_by: [asc: client_properties.name]
+    from user_properties in query,
+      order_by: [asc: user_properties.name]
   end
 
   def order_by(query, "Name (Z-A)") do
-    from client_properties in query,
-      order_by: [desc: client_properties.name]
+    from user_properties in query,
+      order_by: [desc: user_properties.name]
   end
 
   def order_by(query, "Newest first") do
-    from client_properties in query,
-      order_by: [desc: client_properties.inserted_at]
+    from user_properties in query,
+      order_by: [desc: user_properties.inserted_at]
   end
 
   def order_by(query, "Oldest first") do
-    from client_properties in query,
-      order_by: [asc: client_properties.inserted_at]
+    from user_properties in query,
+      order_by: [asc: user_properties.inserted_at]
   end
 
   @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
@@ -88,14 +88,14 @@ defmodule Teiserver.Telemetry.UserPropertyQueries do
   end
 
   def _preload_property_types(query) do
-    from client_properties in query,
-      left_join: property_types in assoc(client_properties, :property_type),
+    from user_properties in query,
+      left_join: property_types in assoc(user_properties, :property_type),
       preload: [property_type: property_types]
   end
 
   def _preload_users(query) do
-    from client_properties in query,
-      left_join: users in assoc(client_properties, :user),
+    from user_properties in query,
+      left_join: users in assoc(user_properties, :user),
       preload: [user: users]
   end
 end

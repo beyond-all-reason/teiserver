@@ -1,12 +1,12 @@
-defmodule Teiserver.Telemetry.SimpleLobbyEventTypeQueries do
+defmodule Teiserver.Telemetry.PropertyTypeQueries do
   @moduledoc false
   use CentralWeb, :queries
-  alias Teiserver.Telemetry.SimpleLobbyEventType
+  alias Teiserver.Telemetry.PropertyType
 
   # Queries
-  @spec query_simple_lobby_event_types(list) :: Ecto.Query.t()
-  def query_simple_lobby_event_types(args) do
-    query = from(simple_lobby_event_types in SimpleLobbyEventType)
+  @spec query_property_types(list) :: Ecto.Query.t()
+  def query_property_types(args) do
+    query = from(property_types in PropertyType)
 
     query
     |> do_where([id: args[:id]])
@@ -31,18 +31,18 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventTypeQueries do
   defp _where(query, _, nil), do: query
 
   defp _where(query, :id, id) do
-    from simple_lobby_event_types in query,
-      where: simple_lobby_event_types.id == ^id
+    from property_types in query,
+      where: property_types.id == ^id
   end
 
   defp _where(query, :id_in, id_list) do
-    from simple_lobby_event_types in query,
-      where: simple_lobby_event_types.id in ^id_list
+    from property_types in query,
+      where: property_types.id in ^id_list
   end
 
   defp _where(query, :name, name) do
-    from simple_lobby_event_types in query,
-      where: simple_lobby_event_types.name == ^name
+    from property_types in query,
+      where: property_types.name == ^name
   end
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
@@ -57,23 +57,23 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventTypeQueries do
   defp _order_by(query, nil), do: query
 
   defp _order_by(query, "Name (A-Z)") do
-    from simple_lobby_event_types in query,
-      order_by: [asc: simple_lobby_event_types.name]
+    from property_types in query,
+      order_by: [asc: property_types.name]
   end
 
   defp _order_by(query, "Name (Z-A)") do
-    from simple_lobby_event_types in query,
-      order_by: [desc: simple_lobby_event_types.name]
+    from property_types in query,
+      order_by: [desc: property_types.name]
   end
 
   defp _order_by(query, "ID (Lowest first)") do
-    from simple_lobby_event_types in query,
-      order_by: [asc: simple_lobby_event_types.id]
+    from property_types in query,
+      order_by: [asc: property_types.id]
   end
 
   defp _order_by(query, "ID (Highest first)") do
-    from simple_lobby_event_types in query,
-      order_by: [desc: simple_lobby_event_types.id]
+    from property_types in query,
+      order_by: [desc: property_types.id]
   end
 
   @spec do_preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
@@ -86,9 +86,9 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventTypeQueries do
     end)
   end
 
-  defp _preload(query, :simple_lobby_events) do
-    from simple_lobby_event_types in query,
-      join: simple_lobby_events in assoc(simple_lobby_event_types, :simple_lobby_events),
-      preload: [simple_lobby_events: simple_lobby_events]
+  defp _preload(query, :properties) do
+    from property_types in query,
+      join: properties in assoc(property_types, :properties),
+      preload: [properties: properties]
   end
 end

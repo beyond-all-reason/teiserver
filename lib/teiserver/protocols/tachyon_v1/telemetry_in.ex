@@ -12,7 +12,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.TelemetryIn do
   end
 
   def do_handle("log_event", %{"event" => event, "value" => value, "hash" => hash}, state) do
-    Telemetry.log_client_event(state.userid, event, value, hash)
+    Telemetry.log_complex_client_event(state.userid, event, value, hash)
     state
   end
 end

@@ -1,8 +1,7 @@
 defmodule Teiserver.Telemetry.SimpleMatchEventTypeLib do
   @moduledoc false
-  use CentralWeb, :library
-  alias Teiserver.Helper.QueryHelpers
-  alias Teiserver.Telemetry.SimpleMatchEventType
+  use CentralWeb, :library_newform
+  alias Teiserver.Telemetry.{SimpleMatchEventType, SimpleMatchEventTypeQueries}
 
   # Helper function
   @spec get_or_add_simple_match_event_type(String.t()) :: non_neg_integer()
@@ -10,7 +9,7 @@ defmodule Teiserver.Telemetry.SimpleMatchEventTypeLib do
     name = String.trim(name)
 
     Central.cache_get_or_store(:telemetry_simple_match_event_types_cache, name, fn ->
-      query = query_simple_match_event_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
+      query = SimpleMatchEventTypeQueries.query_simple_match_event_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
       case Repo.all(query) do
         [] ->
           {:ok, event_type} =
@@ -26,92 +25,117 @@ defmodule Teiserver.Telemetry.SimpleMatchEventTypeLib do
     end)
   end
 
-  # Queries
-  @spec query_simple_match_event_types(list) :: Ecto.Query.t()
-  def query_simple_match_event_types(args) do
-    query = from(simple_match_event_types in SimpleMatchEventType)
+  @doc """
+  Returns the list of simple_match_event_types.
 
-    query
-    |> do_where([id: args[:id]])
-    |> do_where(args[:where])
-    |> do_preload(args[:preload])
-    |> do_order_by(args[:order_by])
-    |> QueryHelpers.query_select(args[:select])
+  ## Examples
+
+      iex> list_simple_match_event_types()
+      [%SimpleMatchEventType{}, ...]
+
+  """
+  @spec list_simple_match_event_types() :: [SimpleMatchEventType]
+  @spec list_simple_match_event_types(list) :: [SimpleMatchEventType]
+  def list_simple_match_event_types(args \\ []) do
+    args
+    |> SimpleMatchEventTypeQueries.query_simple_match_event_types()
+    |> Repo.all()
   end
 
-  @spec do_where(Ecto.Query.t(), list | map | nil) :: Ecto.Query.t()
-  defp do_where(query, nil), do: query
+  @doc """
+  Gets a single simple_match_event_type.
 
-  defp do_where(query, params) do
-    params
-    |> Enum.reduce(query, fn {key, value}, query_acc ->
-      _where(query_acc, key, value)
-    end)
+  Raises `Ecto.NoResultsError` if the SimpleMatchEventType does not exist.
+
+  ## Examples
+
+      iex> get_simple_match_event_type!(123)
+      %SimpleMatchEventType{}
+
+      iex> get_simple_match_event_type!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_simple_match_event_type!(non_neg_integer) :: SimpleMatchEventType
+  @spec get_simple_match_event_type!(non_neg_integer, list) :: SimpleMatchEventType
+  def get_simple_match_event_type!(id), do: Repo.get!(SimpleMatchEventType, id)
+
+  def get_simple_match_event_type!(id, args) do
+    args = args ++ [id: id]
+
+    args
+    |> SimpleMatchEventTypeLib.query_simple_match_event_types()
+    |> Repo.one!()
   end
 
-  @spec _where(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
-  defp _where(query, _, ""), do: query
-  defp _where(query, _, nil), do: query
+  @doc """
+  Creates a simple_match_event_type.
 
-  defp _where(query, :id, id) do
-    from simple_match_event_types in query,
-      where: simple_match_event_types.id == ^id
+  ## Examples
+
+      iex> create_simple_match_event_type(%{field: value})
+      {:ok, %SimpleMatchEventType{}}
+
+      iex> create_simple_match_event_type(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_simple_match_event_type() :: {:ok, SimpleMatchEventType} | {:error, Ecto.Changeset}
+  @spec create_simple_match_event_type(map) :: {:ok, SimpleMatchEventType} | {:error, Ecto.Changeset}
+  def create_simple_match_event_type(attrs \\ %{}) do
+    %SimpleMatchEventType{}
+    |> SimpleMatchEventType.changeset(attrs)
+    |> Repo.insert()
   end
 
-  defp _where(query, :id_in, id_list) do
-    from simple_match_event_types in query,
-      where: simple_match_event_types.id in ^id_list
+  @doc """
+  Updates a simple_match_event_type.
+
+  ## Examples
+
+      iex> update_simple_match_event_type(simple_match_event_type, %{field: new_value})
+      {:ok, %SimpleMatchEventType{}}
+
+      iex> update_simple_match_event_type(simple_match_event_type, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_simple_match_event_type(SimpleMatchEventType, map) :: {:ok, SimpleMatchEventType} | {:error, Ecto.Changeset}
+  def update_simple_match_event_type(%SimpleMatchEventType{} = simple_match_event_type, attrs) do
+    simple_match_event_type
+    |> SimpleMatchEventType.changeset(attrs)
+    |> Repo.update()
   end
 
-  defp _where(query, :name, name) do
-    from simple_match_event_types in query,
-      where: simple_match_event_types.name == ^name
+  @doc """
+  Deletes a simple_match_event_type.
+
+  ## Examples
+
+      iex> delete_simple_match_event_type(simple_match_event_type)
+      {:ok, %SimpleMatchEventType{}}
+
+      iex> delete_simple_match_event_type(simple_match_event_type)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_simple_match_event_type(SimpleMatchEventType) :: {:ok, SimpleMatchEventType} | {:error, Ecto.Changeset}
+  def delete_simple_match_event_type(%SimpleMatchEventType{} = simple_match_event_type) do
+    Repo.delete(simple_match_event_type)
   end
 
-  @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
-  defp do_order_by(query, nil), do: query
-  defp do_order_by(query, params) do
-    params
-    |> Enum.reduce(query, fn key, query_acc ->
-      _order_by(query_acc, key)
-    end)
-  end
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking simple_match_event_type changes.
 
-  defp _order_by(query, nil), do: query
+  ## Examples
 
-  defp _order_by(query, "Name (A-Z)") do
-    from simple_match_event_types in query,
-      order_by: [asc: simple_match_event_types.name]
-  end
+      iex> change_simple_match_event_type(simple_match_event_type)
+      %Ecto.Changeset{data: %SimpleMatchEventType{}}
 
-  defp _order_by(query, "Name (Z-A)") do
-    from simple_match_event_types in query,
-      order_by: [desc: simple_match_event_types.name]
-  end
-
-  defp _order_by(query, "ID (Lowest first)") do
-    from simple_match_event_types in query,
-      order_by: [asc: simple_match_event_types.id]
-  end
-
-  defp _order_by(query, "ID (Highest first)") do
-    from simple_match_event_types in query,
-      order_by: [desc: simple_match_event_types.id]
-  end
-
-  @spec do_preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
-  defp do_preload(query, nil), do: query
-
-  defp do_preload(query, preloads) do
-    preloads
-    |> Enum.reduce(query, fn key, query_acc ->
-      _preload(query_acc, key)
-    end)
-  end
-
-  defp _preload(query, :simple_match_events) do
-    from simple_match_event_types in query,
-      join: simple_match_events in assoc(simple_match_event_types, :simple_match_events),
-      preload: [simple_match_events: simple_match_events]
+  """
+  @spec change_simple_match_event_type(SimpleMatchEventType) :: Ecto.Changeset
+  @spec change_simple_match_event_type(SimpleMatchEventType, map) :: Ecto.Changeset
+  def change_simple_match_event_type(%SimpleMatchEventType{} = simple_match_event_type, attrs \\ %{}) do
+    SimpleMatchEventType.changeset(simple_match_event_type, attrs)
   end
 end

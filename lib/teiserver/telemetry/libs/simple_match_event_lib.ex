@@ -1,48 +1,42 @@
 defmodule Teiserver.Telemetry.SimpleMatchEventLib do
   @moduledoc false
-  use CentralWeb, :library
-  alias Teiserver.Telemetry.{SimpleMatchEvent, SimpleMatchEventTypeLib}
+  use CentralWeb, :library_newform
+  alias Teiserver.Telemetry
+  alias Teiserver.Telemetry.{SimpleMatchEvent, SimpleMatchEventQueries}
   alias Phoenix.PubSub
 
   @broadcast_event_types ~w()
 
-  # Functions
   @spec colour :: atom
   def colour(), do: :info2
 
-  @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-scanner-touchscreen"
+  @spec icon() :: String.t
+  def icon(), do: "fa-sliders-up"
 
-  # Helpers
-  @spec log_simple_match_event(T.match_id(), T.userid() | nil, String.t(), integer()) ::
-          {:error, Ecto.Changeset.t()} | {:ok, SimpleMatchEvent.t()}
-  def log_simple_match_event(match_id, userid, event_type_name, game_time) do
-    event_type_id = SimpleMatchEventTypeLib.get_or_add_simple_match_event_type(event_type_name)
+  @spec log_simple_match_event(T.userid, T.match_id, String.t) :: {:error, Ecto.Changeset} | {:ok, SimpleMatchEvent}
+  def log_simple_match_event(userid, match_id, event_type_name) when is_integer(userid) do
+    event_type_id = Telemetry.get_or_add_simple_match_event_type(event_type_name)
 
-    result =
-      Teiserver.Telemetry.create_simple_match_event(%{
-        event_type_id: event_type_id,
-        match_id: match_id,
-        user_id: userid,
-        game_time: game_time
-      })
+    result = create_simple_match_event(%{
+      user_id: userid,
+      event_type_id: event_type_id,
+      match_id: match_id,
+      timestamp: Timex.now()
+    })
 
     case result do
       {:ok, _event} ->
         if Enum.member?(@broadcast_event_types, event_type_name) do
-          if userid do
-            PubSub.broadcast(
-              Teiserver.PubSub,
-              "teiserver_telemetry_simple_match_events",
-              %{
-                channel: "teiserver_telemetry_simple_match_events",
-                userid: userid,
-                match_id: match_id,
-                event_type_name: event_type_name,
-                game_time: game_time
-              }
-            )
-          end
+          PubSub.broadcast(
+            Teiserver.PubSub,
+            "telemetry_simple_match_events",
+            %{
+              channel: "telemetry_simple_match_events",
+              userid: userid,
+              match_id: match_id,
+              event_type_name: event_type_name
+            }
+          )
         end
 
         result
@@ -52,130 +46,108 @@ defmodule Teiserver.Telemetry.SimpleMatchEventLib do
     end
   end
 
-  @spec get_simple_match_events_summary(list) :: map()
-  def get_simple_match_events_summary(args) do
-    query =
-      from simple_match_events in SimpleMatchEvent,
-        join: event_types in assoc(simple_match_events, :event_type),
-        group_by: event_types.name,
-        select: {event_types.name, count(simple_match_events.event_type_id)}
+  @doc """
+  Returns the list of simple_match_events.
 
-    query
-    |> search(args)
+  ## Examples
+
+      iex> list_simple_match_events()
+      [%SimpleMatchEvent{}, ...]
+
+  """
+  @spec list_simple_match_events(list) :: list
+  def list_simple_match_events(args \\ []) do
+    args
+    |> SimpleMatchEventQueries.query_simple_match_events()
     |> Repo.all()
-    |> Map.new()
   end
 
-  # Queries
-  @spec query_simple_match_events() :: Ecto.Query.t()
-  def query_simple_match_events do
-    from(simple_match_events in SimpleMatchEvent)
+  @doc """
+  Gets a single simple_match_event.
+
+  Raises `Ecto.NoResultsError` if the SimpleMatchEvent does not exist.
+
+  ## Examples
+
+      iex> get_simple_match_event!(123)
+      %SimpleMatchEvent{}
+
+      iex> get_simple_match_event!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_simple_match_event!(id), do: Repo.get!(SimpleMatchEvent, id)
+
+  def get_simple_match_event!(id, args) do
+    args = args ++ [id: id]
+
+    args
+    |> SimpleMatchEventQueries.query_simple_match_events()
+    |> Repo.one!()
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
-  def search(query, nil), do: query
+  @doc """
+  Creates a simple_match_event.
 
-  def search(query, params) do
-    params
-    |> Enum.reduce(query, fn {key, value}, query_acc ->
-      _search(query_acc, key, value)
-    end)
+  ## Examples
+
+      iex> create_simple_match_event(%{field: value})
+      {:ok, %SimpleMatchEvent{}}
+
+      iex> create_simple_match_event(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_simple_match_event(attrs \\ %{}) do
+    %SimpleMatchEvent{}
+    |> SimpleMatchEvent.changeset(attrs)
+    |> Repo.insert()
   end
 
-  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
-  def _search(query, _, ""), do: query
-  def _search(query, _, nil), do: query
+  @doc """
+  Updates a simple_match_event.
 
-  def _search(query, :user_id, user_id) do
-    from simple_match_events in query,
-      where: simple_match_events.user_id == ^user_id
+  ## Examples
+
+      iex> update_simple_match_event(simple_match_event, %{field: new_value})
+      {:ok, %SimpleMatchEvent{}}
+
+      iex> update_simple_match_event(simple_match_event, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_simple_match_event(%SimpleMatchEvent{} = simple_match_event, attrs) do
+    simple_match_event
+    |> SimpleMatchEvent.changeset(attrs)
+    |> Repo.update()
   end
 
-  def _search(query, :user_id_in, user_ids) do
-    from simple_match_events in query,
-      where: simple_match_events.user_id in ^user_ids
+  @doc """
+  Deletes a simple_match_event.
+
+  ## Examples
+
+      iex> delete_simple_match_event(simple_match_event)
+      {:ok, %SimpleMatchEvent{}}
+
+      iex> delete_simple_match_event(simple_match_event)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_simple_match_event(%SimpleMatchEvent{} = simple_match_event) do
+    Repo.delete(simple_match_event)
   end
 
-  def _search(query, :match_id, match_id) do
-    from simple_match_events in query,
-      where: simple_match_events.match_id == ^match_id
-  end
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking simple_match_event changes.
 
-  def _search(query, :match_id_in, match_ids) do
-    from simple_match_events in query,
-      where: simple_match_events.match_id in ^match_ids
-  end
+  ## Examples
 
-  def _search(query, :id_list, id_list) do
-    from simple_match_events in query,
-      where: simple_match_events.id in ^id_list
-  end
+      iex> change_simple_match_event(simple_match_event)
+      %Ecto.Changeset{data: %SimpleMatchEvent{}}
 
-  def _search(query, :between, {start_date, end_date}) do
-    from simple_match_events in query,
-      left_join: matches in assoc(simple_match_events, :match),
-      where: between(matches.started, ^start_date, ^end_date)
-  end
-
-  def _search(query, :event_type_id, event_type_id) do
-    from simple_match_events in query,
-      where: simple_match_events.event_type_id == ^event_type_id
-  end
-
-  def _search(query, :event_type_id_in, event_type_ids) do
-    from simple_match_events in query,
-      where: simple_match_events.event_type_id in ^event_type_ids
-  end
-
-  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
-  def order_by(query, nil), do: query
-
-  def order_by(query, "Name (A-Z)") do
-    from simple_match_events in query,
-      order_by: [asc: simple_match_events.name]
-  end
-
-  def order_by(query, "Name (Z-A)") do
-    from simple_match_events in query,
-      order_by: [desc: simple_match_events.name]
-  end
-
-  def order_by(query, "Newest first") do
-    from simple_match_events in query,
-      order_by: [desc: simple_match_events.inserted_at]
-  end
-
-  def order_by(query, "Oldest first") do
-    from simple_match_events in query,
-      order_by: [asc: simple_match_events.inserted_at]
-  end
-
-  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
-  def preload(query, nil), do: query
-
-  def preload(query, preloads) do
-    preloads
-    |> Enum.reduce(query, fn key, query_acc ->
-      _preload(query_acc, key)
-    end)
-  end
-
-  @spec _preload(Ecto.Query.t(), atom) :: Ecto.Query.t()
-  defp _preload(query, :event_types) do
-    from simple_match_events in query,
-      left_join: event_types in assoc(simple_match_events, :event_type),
-      preload: [event_type: event_types]
-  end
-
-  defp _preload(query, :users) do
-    from simple_match_events in query,
-      left_join: users in assoc(simple_match_events, :user),
-      preload: [user: users]
-  end
-
-  defp _preload(query, :matches) do
-    from simple_match_events in query,
-      left_join: matches in assoc(simple_match_events, :match),
-      preload: [match: matches]
+  """
+  def change_simple_match_event(%SimpleMatchEvent{} = simple_match_event, attrs \\ %{}) do
+    SimpleMatchEvent.changeset(simple_match_event, attrs)
   end
 end

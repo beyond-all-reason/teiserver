@@ -1,1546 +1,755 @@
 defmodule Teiserver.Telemetry do
-  import Telemetry.Metrics
-
+  @moduledoc false
   import Ecto.Query, warn: false
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
   alias Phoenix.PubSub
-
-  alias Teiserver.Account
-  alias Teiserver.Telemetry.TelemetryServer
-
   alias Teiserver.Data.Types, as: T
 
-  @broadcast_property_types ~w()
 
-  @spec get_totals_and_reset :: map()
-  def get_totals_and_reset() do
-    try do
-      GenServer.call(TelemetryServer, :get_totals_and_reset)
-      # In certain situations (e.g. just after startup) it can be
-      # the process hasn't started up so we need to handle that
-      # without dying
-    catch
-      :exit, _ ->
-        nil
-    end
-  end
+  # Erlang telemetry stuff
+  alias Teiserver.Telemetry.{TelemetryServer, TelemetryLib}
+
+  @spec get_totals_and_reset() :: map()
+  defdelegate get_totals_and_reset(), to: TelemetryLib
 
   @spec increment(any) :: :ok
-  def increment(key) do
-    send(TelemetryServer, {:increment, key})
-    :ok
-  end
+  defdelegate increment(key), to: TelemetryLib
 
   @spec cast_to_server(any) :: :ok
-  def cast_to_server(msg) do
-    GenServer.cast(TelemetryServer, msg)
-  end
+  defdelegate cast_to_server(msg), to: TelemetryLib
 
   @spec metrics() :: List.t()
-  def metrics() do
-    [
-      last_value("teiserver.client.total"),
-      last_value("teiserver.client.menu"),
-      last_value("teiserver.client.lobby"),
-      last_value("teiserver.client.spectator"),
-      last_value("teiserver.client.player"),
-      last_value("teiserver.battle.total"),
-      last_value("teiserver.battle.lobby"),
-      last_value("teiserver.battle.in_progress"),
-
-      # Spring legacy pubsub trackers, multiplied by the number of users
-      # User
-      last_value("spring_mult.user_logged_in"),
-      last_value("spring_mult.user_logged_out"),
-
-      # Client
-      last_value("spring_mult.mystatus"),
-
-      # Battle
-      last_value("spring_mult.global_battle_updated"),
-      last_value("spring_mult.add_user_to_battle"),
-      last_value("spring_mult.remove_user_from_battle"),
-      last_value("spring_mult.kick_user_from_battle"),
-
-      # Spring legacy pubsub trackers, raw update count only
-      # User
-      last_value("spring_raw.user_logged_in"),
-      last_value("spring_raw.user_logged_out"),
-
-      # Client
-      last_value("spring_raw.mystatus"),
-
-      # Battle
-      last_value("spring_raw.global_battle_updated"),
-      last_value("spring_raw.add_user_to_battle"),
-      last_value("spring_raw.remove_user_from_battle"),
-      last_value("spring_raw.kick_user_from_battle")
-    ]
-  end
+  defdelegate metrics(), to: TelemetryLib
 
   @spec periodic_measurements() :: List.t()
-  def periodic_measurements() do
-    [
-      # {Teiserver.Telemetry, :measure_users, []},
-      # {:process_info,
-      #   event: [:teiserver, :ts],
-      #   name: Teiserver.Telemetry.TelemetryServer,
-      #   keys: [:message_queue_len, :memory]}
-    ]
-  end
+  defdelegate periodic_measurements(), to: TelemetryLib
 
-  alias Teiserver.Telemetry.{SimpleClientEventType, SimpleClientEventTypeLib}
+  # ------------------------
+  # ------------------------ Complex Event Types ------------------------
+  # ------------------------
 
-  @doc """
-  Returns the list of simple_client_event_types.
-
-  ## Examples
-
-      iex> list_simple_client_event_types()
-      [%SimpleClientEventType{}, ...]
-
-  """
-  @spec list_simple_client_event_types(list) :: list
-  def list_simple_client_event_types(args \\ []) do
-    args
-    |> SimpleClientEventTypeLib.query_simple_client_event_types()
-    |> Repo.all()
-  end
-
-  @doc """
-  Gets a single simple_client_event_type.
-
-  Raises `Ecto.NoResultsError` if the SimpleClientEventType does not exist.
-
-  ## Examples
-
-      iex> get_simple_client_event_type!(123)
-      %SimpleClientEventType{}
-
-      iex> get_simple_client_event_type!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_simple_client_event_type!(id), do: Repo.get!(SimpleClientEventType, id)
-
-  def get_simple_client_event_type!(id, args) do
-    args = args ++ [id: id]
-
-    args
-    |> SimpleClientEventTypeLib.query_simple_client_event_types()
-    |> Repo.one!()
-  end
-
-  @doc """
-  Creates a simple_client_event_type.
-
-  ## Examples
-
-      iex> create_simple_client_event_type(%{field: value})
-      {:ok, %SimpleClientEventType{}}
-
-      iex> create_simple_client_event_type(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_simple_client_event_type(attrs \\ %{}) do
-    %SimpleClientEventType{}
-    |> SimpleClientEventType.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a simple_client_event_type.
-
-  ## Examples
-
-      iex> update_simple_client_event_type(simple_client_event_type, %{field: new_value})
-      {:ok, %SimpleClientEventType{}}
-
-      iex> update_simple_client_event_type(simple_client_event_type, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_simple_client_event_type(%SimpleClientEventType{} = simple_client_event_type, attrs) do
-    simple_client_event_type
-    |> SimpleClientEventType.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a simple_client_event_type.
-
-  ## Examples
-
-      iex> delete_simple_client_event_type(simple_client_event_type)
-      {:ok, %SimpleClientEventType{}}
-
-      iex> delete_simple_client_event_type(simple_client_event_type)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_simple_client_event_type(%SimpleClientEventType{} = simple_client_event_type) do
-    Repo.delete(simple_client_event_type)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking simple_client_event_type changes.
-
-  ## Examples
-
-      iex> change_simple_client_event_type(simple_client_event_type)
-      %Ecto.Changeset{data: %SimpleClientEventType{}}
-
-  """
-  def change_simple_client_event_type(%SimpleClientEventType{} = simple_client_event_type, attrs \\ %{}) do
-    SimpleClientEventType.changeset(simple_client_event_type, attrs)
-  end
-
+  # Complex client event types
   alias Teiserver.Telemetry.{ComplexClientEventType, ComplexClientEventTypeLib}
 
-  @doc """
-  Returns the list of complex_client_event_types.
+  @spec get_or_add_complex_client_event_type(String.t()) :: non_neg_integer()
+  defdelegate get_or_add_complex_client_event_type(name), to: ComplexClientEventTypeLib
 
-  ## Examples
+  @spec list_complex_client_event_types() :: [ComplexServerEventType.t]
+  defdelegate list_complex_client_event_types(), to: ComplexClientEventTypeLib
 
-      iex> list_complex_client_event_types()
-      [%ComplexClientEventType{}, ...]
+  @spec list_complex_client_event_types(list) :: [ComplexServerEventType.t]
+  defdelegate list_complex_client_event_types(args), to: ComplexClientEventTypeLib
 
-  """
-  @spec list_complex_client_event_types(list) :: list
-  def list_complex_client_event_types(args \\ []) do
-    args
-    |> ComplexClientEventTypeLib.query_complex_client_event_types()
-    |> Repo.all()
-  end
+  @spec get_complex_client_event_type!(non_neg_integer) :: ComplexServerEventType.t
+  defdelegate get_complex_client_event_type!(id), to: ComplexClientEventTypeLib
 
-  @doc """
-  Gets a single complex_client_event_type.
+  @spec get_complex_client_event_type!(non_neg_integer, list) :: ComplexServerEventType.t
+  defdelegate get_complex_client_event_type!(id, args), to: ComplexClientEventTypeLib
 
-  Raises `Ecto.NoResultsError` if the ComplexClientEventType does not exist.
+  @spec create_complex_client_event_type() :: {:ok, ComplexServerEventType.t} | {:error, Ecto.Changeset}
+  defdelegate create_complex_client_event_type(), to: ComplexClientEventTypeLib
 
-  ## Examples
+  @spec create_complex_client_event_type(map) :: {:ok, ComplexServerEventType.t} | {:error, Ecto.Changeset}
+  defdelegate create_complex_client_event_type(attrs), to: ComplexClientEventTypeLib
 
-      iex> get_complex_client_event_type!(123)
-      %ComplexClientEventType{}
+  @spec update_complex_client_event_type(ComplexServerEventType.t, map) :: {:ok, ComplexServerEventType.t} | {:error, Ecto.Changeset}
+  defdelegate update_complex_client_event_type(complex_client_event_type, attrs), to: ComplexClientEventTypeLib
 
-      iex> get_complex_client_event_type!(456)
-      ** (Ecto.NoResultsError)
+  @spec delete_complex_client_event_type(ComplexServerEventType) :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  defdelegate delete_complex_client_event_type(complex_client_event_type), to: ComplexClientEventTypeLib
 
-  """
-  def get_complex_client_event_type!(id), do: Repo.get!(ComplexClientEventType, id)
+  @spec change_complex_client_event_type(ComplexServerEventType) :: Ecto.Changeset
+  defdelegate change_complex_client_event_type(complex_client_event_type), to: ComplexClientEventTypeLib
 
-  def get_complex_client_event_type!(id, args) do
-    args = args ++ [id: id]
+  @spec change_complex_client_event_type(ComplexServerEventType, map) :: Ecto.Changeset
+  defdelegate change_complex_client_event_type(complex_client_event_type, attrs), to: ComplexClientEventTypeLib
 
-    args
-    |> ComplexClientEventTypeLib.query_complex_client_event_types()
-    |> Repo.one!()
-  end
 
-  @doc """
-  Creates a complex_client_event_type.
+  # Complex lobby event types
+  alias Teiserver.Telemetry.{ComplexLobbyEventType, ComplexLobbyEventTypeLib}
 
-  ## Examples
+  @spec get_or_add_complex_lobby_event_type(String.t()) :: non_neg_integer()
+  defdelegate get_or_add_complex_lobby_event_type(name), to: ComplexLobbyEventTypeLib
 
-      iex> create_complex_client_event_type(%{field: value})
-      {:ok, %ComplexClientEventType{}}
+  @spec list_complex_lobby_event_types() :: [ComplexServerEventType]
+  defdelegate list_complex_lobby_event_types(), to: ComplexLobbyEventTypeLib
 
-      iex> create_complex_client_event_type(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+  @spec list_complex_lobby_event_types(list) :: [ComplexServerEventType]
+  defdelegate list_complex_lobby_event_types(args), to: ComplexLobbyEventTypeLib
 
-  """
-  def create_complex_client_event_type(attrs \\ %{}) do
-    %ComplexClientEventType{}
-    |> ComplexClientEventType.changeset(attrs)
-    |> Repo.insert()
-  end
+  @spec get_complex_lobby_event_type!(non_neg_integer) :: ComplexServerEventType
+  defdelegate get_complex_lobby_event_type!(id), to: ComplexLobbyEventTypeLib
 
-  @doc """
-  Updates a complex_client_event_type.
+  @spec get_complex_lobby_event_type!(non_neg_integer, list) :: ComplexServerEventType
+  defdelegate get_complex_lobby_event_type!(id, args), to: ComplexLobbyEventTypeLib
 
-  ## Examples
+  @spec create_complex_lobby_event_type() :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  defdelegate create_complex_lobby_event_type(), to: ComplexLobbyEventTypeLib
 
-      iex> update_complex_client_event_type(complex_client_event_type, %{field: new_value})
-      {:ok, %ComplexClientEventType{}}
+  @spec create_complex_lobby_event_type(map) :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  defdelegate create_complex_lobby_event_type(attrs), to: ComplexLobbyEventTypeLib
 
-      iex> update_complex_client_event_type(complex_client_event_type, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+  @spec update_complex_lobby_event_type(ComplexServerEventType, map) :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  defdelegate update_complex_lobby_event_type(complex_lobby_event_type, attrs), to: ComplexLobbyEventTypeLib
 
-  """
-  def update_complex_client_event_type(%ComplexClientEventType{} = complex_client_event_type, attrs) do
-    complex_client_event_type
-    |> ComplexClientEventType.changeset(attrs)
-    |> Repo.update()
-  end
+  @spec delete_complex_lobby_event_type(ComplexServerEventType) :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  defdelegate delete_complex_lobby_event_type(complex_lobby_event_type), to: ComplexLobbyEventTypeLib
 
-  @doc """
-  Deletes a complex_client_event_type.
+  @spec change_complex_lobby_event_type(ComplexServerEventType) :: Ecto.Changeset
+  defdelegate change_complex_lobby_event_type(complex_lobby_event_type), to: ComplexLobbyEventTypeLib
 
-  ## Examples
+  @spec change_complex_lobby_event_type(ComplexServerEventType, map) :: Ecto.Changeset
+  defdelegate change_complex_lobby_event_type(complex_lobby_event_type, attrs), to: ComplexLobbyEventTypeLib
 
-      iex> delete_complex_client_event_type(complex_client_event_type)
-      {:ok, %ComplexClientEventType{}}
 
-      iex> delete_complex_client_event_type(complex_client_event_type)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_complex_client_event_type(%ComplexClientEventType{} = complex_client_event_type) do
-    Repo.delete(complex_client_event_type)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking complex_client_event_type changes.
-
-  ## Examples
-
-      iex> change_complex_client_event_type(complex_client_event_type)
-      %Ecto.Changeset{data: %ComplexClientEventType{}}
-
-  """
-  def change_complex_client_event_type(%ComplexClientEventType{} = complex_client_event_type, attrs \\ %{}) do
-    ComplexClientEventType.changeset(complex_client_event_type, attrs)
-  end
-
-  alias Teiserver.Telemetry.{SimpleMatchEventType, SimpleMatchEventTypeLib}
-
-  @doc """
-  Returns the list of match_event_types.
-
-  ## Examples
-
-      iex> list_match_event_types()
-      [%SimpleMatchEventType{}, ...]
-
-  """
-  @spec list_match_event_types(list) :: list
-  def list_match_event_types(args \\ []) do
-    args
-    |> SimpleMatchEventTypeLib.query_match_event_types()
-    |> Repo.all()
-  end
-
-  @doc """
-  Gets a single match_event_type.
-
-  Raises `Ecto.NoResultsError` if the SimpleMatchEventType does not exist.
-
-  ## Examples
-
-      iex> get_match_event_type!(123)
-      %SimpleMatchEventType{}
-
-      iex> get_match_event_type!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_match_event_type!(id), do: Repo.get!(SimpleMatchEventType, id)
-
-  def get_match_event_type!(id, args) do
-    args = args ++ [id: id]
-
-    args
-    |> SimpleMatchEventTypeLib.query_match_event_types()
-    |> Repo.one!()
-  end
-
-  @doc """
-  Creates a match_event_type.
-
-  ## Examples
-
-      iex> create_match_event_type(%{field: value})
-      {:ok, %SimpleMatchEventType{}}
-
-      iex> create_match_event_type(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_match_event_type(attrs \\ %{}) do
-    %SimpleMatchEventType{}
-    |> SimpleMatchEventType.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a match_event_type.
-
-  ## Examples
-
-      iex> update_match_event_type(match_event_type, %{field: new_value})
-      {:ok, %SimpleMatchEventType{}}
-
-      iex> update_match_event_type(match_event_type, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_match_event_type(%SimpleMatchEventType{} = match_event_type, attrs) do
-    match_event_type
-    |> SimpleMatchEventType.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a match_event_type.
-
-  ## Examples
-
-      iex> delete_match_event_type(match_event_type)
-      {:ok, %SimpleMatchEventType{}}
-
-      iex> delete_match_event_type(match_event_type)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_match_event_type(%SimpleMatchEventType{} = match_event_type) do
-    Repo.delete(match_event_type)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking match_event_type changes.
-
-  ## Examples
-
-      iex> change_match_event_type(match_event_type)
-      %Ecto.Changeset{data: %SimpleMatchEventType{}}
-
-  """
-  def change_match_event_type(%SimpleMatchEventType{} = match_event_type, attrs \\ %{}) do
-    SimpleMatchEventType.changeset(match_event_type, attrs)
-  end
-
+  # Complex match event types
   alias Teiserver.Telemetry.{ComplexMatchEventType, ComplexMatchEventTypeLib}
 
-  @doc """
-  Returns the list of complex_match_event_types.
+  @spec get_or_add_complex_match_event_type(String.t()) :: non_neg_integer()
+  defdelegate get_or_add_complex_match_event_type(name), to: ComplexMatchEventTypeLib
 
-  ## Examples
+  @spec list_complex_match_event_types() :: [ComplexServerEventType]
+  defdelegate list_complex_match_event_types(), to: ComplexMatchEventTypeLib
 
-      iex> list_complex_match_event_types()
-      [%ComplexMatchEventType{}, ...]
+  @spec list_complex_match_event_types(list) :: [ComplexServerEventType]
+  defdelegate list_complex_match_event_types(args), to: ComplexMatchEventTypeLib
 
-  """
-  @spec list_complex_match_event_types(list) :: list
-  def list_complex_match_event_types(args \\ []) do
-    args
-    |> ComplexMatchEventTypeLib.query_complex_match_event_types()
-    |> Repo.all()
-  end
+  @spec get_complex_match_event_type!(non_neg_integer) :: ComplexServerEventType
+  defdelegate get_complex_match_event_type!(id), to: ComplexMatchEventTypeLib
 
-  @doc """
-  Gets a single complex_match_event_type.
+  @spec get_complex_match_event_type!(non_neg_integer, list) :: ComplexServerEventType
+  defdelegate get_complex_match_event_type!(id, args), to: ComplexMatchEventTypeLib
 
-  Raises `Ecto.NoResultsError` if the ComplexMatchEventType does not exist.
+  @spec create_complex_match_event_type() :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  defdelegate create_complex_match_event_type(), to: ComplexMatchEventTypeLib
 
-  ## Examples
+  @spec create_complex_match_event_type(map) :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  defdelegate create_complex_match_event_type(attrs), to: ComplexMatchEventTypeLib
 
-      iex> get_complex_match_event_type!(123)
-      %ComplexMatchEventType{}
+  @spec update_complex_match_event_type(ComplexServerEventType, map) :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  defdelegate update_complex_match_event_type(complex_match_event_type, attrs), to: ComplexMatchEventTypeLib
 
-      iex> get_complex_match_event_type!(456)
-      ** (Ecto.NoResultsError)
+  @spec delete_complex_match_event_type(ComplexServerEventType) :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  defdelegate delete_complex_match_event_type(complex_match_event_type), to: ComplexMatchEventTypeLib
 
-  """
-  def get_complex_match_event_type!(id), do: Repo.get!(ComplexMatchEventType, id)
+  @spec change_complex_match_event_type(ComplexServerEventType) :: Ecto.Changeset
+  defdelegate change_complex_match_event_type(complex_match_event_type), to: ComplexMatchEventTypeLib
 
-  def get_complex_match_event_type!(id, args) do
-    args = args ++ [id: id]
+  @spec change_complex_match_event_type(ComplexServerEventType, map) :: Ecto.Changeset
+  defdelegate change_complex_match_event_type(complex_match_event_type, attrs), to: ComplexMatchEventTypeLib
 
-    args
-    |> ComplexMatchEventTypeLib.query_complex_match_event_types()
-    |> Repo.one!()
-  end
 
-  @doc """
-  Creates a complex_match_event_type.
-
-  ## Examples
-
-      iex> create_complex_match_event_type(%{field: value})
-      {:ok, %ComplexMatchEventType{}}
-
-      iex> create_complex_match_event_type(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_complex_match_event_type(attrs \\ %{}) do
-    %ComplexMatchEventType{}
-    |> ComplexMatchEventType.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a complex_match_event_type.
-
-  ## Examples
-
-      iex> update_complex_match_event_type(complex_match_event_type, %{field: new_value})
-      {:ok, %ComplexMatchEventType{}}
-
-      iex> update_complex_match_event_type(complex_match_event_type, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_complex_match_event_type(%ComplexMatchEventType{} = complex_match_event_type, attrs) do
-    complex_match_event_type
-    |> ComplexMatchEventType.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a complex_match_event_type.
-
-  ## Examples
-
-      iex> delete_complex_match_event_type(complex_match_event_type)
-      {:ok, %ComplexMatchEventType{}}
-
-      iex> delete_complex_match_event_type(complex_match_event_type)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_complex_match_event_type(%ComplexMatchEventType{} = complex_match_event_type) do
-    Repo.delete(complex_match_event_type)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking complex_match_event_type changes.
-
-  ## Examples
-
-      iex> change_complex_match_event_type(complex_match_event_type)
-      %Ecto.Changeset{data: %ComplexMatchEventType{}}
-
-  """
-  def change_complex_match_event_type(%ComplexMatchEventType{} = complex_match_event_type, attrs \\ %{}) do
-    ComplexMatchEventType.changeset(complex_match_event_type, attrs)
-  end
-
-  alias Teiserver.Telemetry.{SimpleServerEventType, SimpleServerEventTypeLib}
-
-  @doc """
-  Returns the list of simple_server_event_types.
-
-  ## Examples
-
-      iex> list_simple_server_event_types()
-      [%SimpleServerEventType{}, ...]
-
-  """
-  @spec list_simple_server_event_types(list) :: list
-  def list_simple_server_event_types(args \\ []) do
-    args
-    |> SimpleServerEventTypeLib.query_simple_server_event_types()
-    |> Repo.all()
-  end
-
-  @doc """
-  Gets a single simple_server_event_type.
-
-  Raises `Ecto.NoResultsError` if the SimpleServerEventType does not exist.
-
-  ## Examples
-
-      iex> get_simple_server_event_type!(123)
-      %SimpleServerEventType{}
-
-      iex> get_simple_server_event_type!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_simple_server_event_type!(id), do: Repo.get!(SimpleServerEventType, id)
-
-  def get_simple_server_event_type!(id, args) do
-    args = args ++ [id: id]
-
-    args
-    |> SimpleServerEventTypeLib.query_simple_server_event_types()
-    |> Repo.one!()
-  end
-
-  @doc """
-  Creates a simple_server_event_type.
-
-  ## Examples
-
-      iex> create_simple_server_event_type(%{field: value})
-      {:ok, %SimpleServerEventType{}}
-
-      iex> create_simple_server_event_type(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_simple_server_event_type(attrs \\ %{}) do
-    %SimpleServerEventType{}
-    |> SimpleServerEventType.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a simple_server_event_type.
-
-  ## Examples
-
-      iex> update_simple_server_event_type(simple_server_event_type, %{field: new_value})
-      {:ok, %SimpleServerEventType{}}
-
-      iex> update_simple_server_event_type(simple_server_event_type, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_simple_server_event_type(%SimpleServerEventType{} = simple_server_event_type, attrs) do
-    simple_server_event_type
-    |> SimpleServerEventType.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a simple_server_event_type.
-
-  ## Examples
-
-      iex> delete_simple_server_event_type(simple_server_event_type)
-      {:ok, %SimpleServerEventType{}}
-
-      iex> delete_simple_server_event_type(simple_server_event_type)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_simple_server_event_type(%SimpleServerEventType{} = simple_server_event_type) do
-    Repo.delete(simple_server_event_type)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking simple_server_event_type changes.
-
-  ## Examples
-
-      iex> change_simple_server_event_type(simple_server_event_type)
-      %Ecto.Changeset{data: %SimpleServerEventType{}}
-
-  """
-  def change_simple_server_event_type(%SimpleServerEventType{} = simple_server_event_type, attrs \\ %{}) do
-    SimpleServerEventType.changeset(simple_server_event_type, attrs)
-  end
-
+  # Complex server event types
   alias Teiserver.Telemetry.{ComplexServerEventType, ComplexServerEventTypeLib}
 
-  @doc """
-  Returns the list of complex_server_event_types.
+  @spec get_or_add_complex_server_event_type(String.t()) :: non_neg_integer()
+  defdelegate get_or_add_complex_server_event_type(name), to: ComplexServerEventTypeLib
 
-  ## Examples
+  @spec list_complex_server_event_types() :: [ComplexServerEventType]
+  defdelegate list_complex_server_event_types(), to: ComplexServerEventTypeLib
 
-      iex> list_complex_server_event_types()
-      [%ComplexServerEventType{}, ...]
+  @spec list_complex_server_event_types(list) :: [ComplexServerEventType]
+  defdelegate list_complex_server_event_types(args), to: ComplexServerEventTypeLib
 
-  """
-  @spec list_complex_server_event_types(list) :: list
-  def list_complex_server_event_types(args \\ []) do
-    args
-    |> ComplexServerEventTypeLib.query_complex_server_event_types()
-    |> Repo.all()
-  end
+  @spec get_complex_server_event_type!(non_neg_integer) :: ComplexServerEventType
+  defdelegate get_complex_server_event_type!(id), to: ComplexServerEventTypeLib
 
-  @doc """
-  Gets a single complex_server_event_type.
+  @spec get_complex_server_event_type!(non_neg_integer, list) :: ComplexServerEventType
+  defdelegate get_complex_server_event_type!(id, args), to: ComplexServerEventTypeLib
 
-  Raises `Ecto.NoResultsError` if the ComplexServerEventType does not exist.
+  @spec create_complex_server_event_type() :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  defdelegate create_complex_server_event_type(), to: ComplexServerEventTypeLib
 
-  ## Examples
+  @spec create_complex_server_event_type(map) :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  defdelegate create_complex_server_event_type(attrs), to: ComplexServerEventTypeLib
 
-      iex> get_complex_server_event_type!(123)
-      %ComplexServerEventType{}
+  @spec update_complex_server_event_type(ComplexServerEventType, map) :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  defdelegate update_complex_server_event_type(complex_server_event_type, attrs), to: ComplexServerEventTypeLib
 
-      iex> get_complex_server_event_type!(456)
-      ** (Ecto.NoResultsError)
+  @spec delete_complex_server_event_type(ComplexServerEventType) :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  defdelegate delete_complex_server_event_type(complex_server_event_type), to: ComplexServerEventTypeLib
 
-  """
-  def get_complex_server_event_type!(id), do: Repo.get!(ComplexServerEventType, id)
+  @spec change_complex_server_event_type(ComplexServerEventType) :: Ecto.Changeset
+  defdelegate change_complex_server_event_type(complex_server_event_type), to: ComplexServerEventTypeLib
 
-  def get_complex_server_event_type!(id, args) do
-    args = args ++ [id: id]
+  @spec change_complex_server_event_type(ComplexServerEventType, map) :: Ecto.Changeset
+  defdelegate change_complex_server_event_type(complex_server_event_type, attrs), to: ComplexServerEventTypeLib
 
-    args
-    |> ComplexServerEventTypeLib.query_complex_server_event_types()
-    |> Repo.one!()
-  end
 
-  @doc """
-  Creates a complex_server_event_type.
+  # ------------------------
+  # ------------------------ Simple Event Types ------------------------
+  # ------------------------
 
-  ## Examples
+  # Simple client event types
+  alias Teiserver.Telemetry.{SimpleClientEventType, SimpleClientEventTypeLib}
 
-      iex> create_complex_server_event_type(%{field: value})
-      {:ok, %ComplexServerEventType{}}
+  @spec get_or_add_simple_client_event_type(String.t()) :: non_neg_integer()
+  defdelegate get_or_add_simple_client_event_type(name), to: SimpleClientEventTypeLib
 
-      iex> create_complex_server_event_type(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+  @spec list_simple_client_event_types() :: [SimpleServerEventType]
+  defdelegate list_simple_client_event_types(), to: SimpleClientEventTypeLib
 
-  """
-  def create_complex_server_event_type(attrs \\ %{}) do
-    %ComplexServerEventType{}
-    |> ComplexServerEventType.changeset(attrs)
-    |> Repo.insert()
-  end
+  @spec list_simple_client_event_types(list) :: [SimpleServerEventType]
+  defdelegate list_simple_client_event_types(args), to: SimpleClientEventTypeLib
 
-  @doc """
-  Updates a complex_server_event_type.
+  @spec get_simple_client_event_type!(non_neg_integer) :: SimpleServerEventType
+  defdelegate get_simple_client_event_type!(id), to: SimpleClientEventTypeLib
 
-  ## Examples
+  @spec get_simple_client_event_type!(non_neg_integer, list) :: SimpleServerEventType
+  defdelegate get_simple_client_event_type!(id, args), to: SimpleClientEventTypeLib
 
-      iex> update_complex_server_event_type(complex_server_event_type, %{field: new_value})
-      {:ok, %ComplexServerEventType{}}
+  @spec create_simple_client_event_type() :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  defdelegate create_simple_client_event_type(), to: SimpleClientEventTypeLib
 
-      iex> update_complex_server_event_type(complex_server_event_type, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+  @spec create_simple_client_event_type(map) :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  defdelegate create_simple_client_event_type(attrs), to: SimpleClientEventTypeLib
 
-  """
-  def update_complex_server_event_type(%ComplexServerEventType{} = complex_server_event_type, attrs) do
-    complex_server_event_type
-    |> ComplexServerEventType.changeset(attrs)
-    |> Repo.update()
-  end
+  @spec update_simple_client_event_type(SimpleServerEventType, map) :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  defdelegate update_simple_client_event_type(simple_client_event_type, attrs), to: SimpleClientEventTypeLib
 
-  @doc """
-  Deletes a complex_server_event_type.
+  @spec delete_simple_client_event_type(SimpleServerEventType) :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  defdelegate delete_simple_client_event_type(simple_client_event_type), to: SimpleClientEventTypeLib
 
-  ## Examples
+  @spec change_simple_client_event_type(SimpleServerEventType) :: Ecto.Changeset
+  defdelegate change_simple_client_event_type(simple_client_event_type), to: SimpleClientEventTypeLib
 
-      iex> delete_complex_server_event_type(complex_server_event_type)
-      {:ok, %ComplexServerEventType{}}
+  @spec change_simple_client_event_type(SimpleServerEventType, map) :: Ecto.Changeset
+  defdelegate change_simple_client_event_type(simple_client_event_type, attrs), to: SimpleClientEventTypeLib
 
-      iex> delete_complex_server_event_type(complex_server_event_type)
-      {:error, %Ecto.Changeset{}}
 
-  """
-  def delete_complex_server_event_type(%ComplexServerEventType{} = complex_server_event_type) do
-    Repo.delete(complex_server_event_type)
-  end
+  # Simple lobby event types
+  alias Teiserver.Telemetry.{SimpleLobbyEventType, SimpleLobbyEventTypeLib}
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking complex_server_event_type changes.
+  @spec get_or_add_simple_lobby_event_type(String.t()) :: non_neg_integer()
+  defdelegate get_or_add_simple_lobby_event_type(name), to: SimpleLobbyEventTypeLib
 
-  ## Examples
+  @spec list_simple_lobby_event_types() :: [SimpleServerEventType]
+  defdelegate list_simple_lobby_event_types(), to: SimpleLobbyEventTypeLib
 
-      iex> change_complex_server_event_type(complex_server_event_type)
-      %Ecto.Changeset{data: %ComplexServerEventType{}}
+  @spec list_simple_lobby_event_types(list) :: [SimpleServerEventType]
+  defdelegate list_simple_lobby_event_types(args), to: SimpleLobbyEventTypeLib
 
-  """
-  def change_complex_server_event_type(%ComplexServerEventType{} = complex_server_event_type, attrs \\ %{}) do
-    ComplexServerEventType.changeset(complex_server_event_type, attrs)
-  end
-
-  alias Teiserver.Telemetry.{SimpleServerEvent, SimpleServerEventLib}
-
-  @spec simple_server_event_query(List.t()) :: Ecto.Query.t()
-  def simple_server_event_query(args) do
-    simple_server_event_query(nil, args)
-  end
-
-  @spec simple_server_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
-  def simple_server_event_query(_id, args) do
-    SimpleServerEventLib.query_simple_server_events()
-    |> SimpleServerEventLib.search(args[:search])
-    |> SimpleServerEventLib.preload(args[:preload])
-    |> SimpleServerEventLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
-  end
-
-  @doc """
-  Returns the list of simple_server_events.
-
-  ## Examples
-
-      iex> list_simple_server_events()
-      [%SimpleServerEvent{}, ...]
-
-  """
-  @spec list_simple_server_events(List.t()) :: List.t()
-  def list_simple_server_events(args \\ []) do
-    simple_server_event_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all()
-  end
-
-  @doc """
-  Creates a simple_server_event.
-
-  ## Examples
-
-      iex> create_simple_server_event(%{field: value})
-      {:ok, %SimpleServerEvent{}}
-
-      iex> create_simple_server_event(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec create_simple_server_event(Map.t()) :: {:ok, SimpleServerEvent.t()} | {:error, Ecto.Changeset.t()}
-  def create_simple_server_event(attrs \\ %{}) do
-    %SimpleServerEvent{}
-    |> SimpleServerEvent.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @spec delete_simple_server_event(SimpleServerEvent.t()) ::
-          {:ok, SimpleServerEvent.t()} | {:error, Ecto.Changeset.t()}
-  def delete_simple_server_event(%SimpleServerEvent{} = simple_server_event) do
-    Repo.delete(simple_server_event)
-  end
-
-  @spec get_simple_server_events_summary(list) :: map()
-  defdelegate get_simple_server_events_summary(args), to: SimpleServerEventLib
-
-  @spec log_simple_server_event(T.userid() | nil, String.t()) ::
-          {:error, Ecto.Changeset.t()} | {:ok, SimpleServerEvent.t()}
-  defdelegate log_simple_server_event(userid, event_type_name), to: SimpleServerEventLib
-
-  alias Teiserver.Telemetry.{PropertyType, PropertyTypeLib}
-
-  @spec property_type_query(List.t()) :: Ecto.Query.t()
-  def property_type_query(args) do
-    property_type_query(nil, args)
-  end
-
-  @spec property_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
-  def property_type_query(id, args) do
-    PropertyTypeLib.query_property_types()
-    |> PropertyTypeLib.search(%{id: id})
-    |> PropertyTypeLib.search(args[:search])
-    |> PropertyTypeLib.preload(args[:preload])
-    |> PropertyTypeLib.order_by(args[:order_by])
-    |> QueryHelpers.query_select(args[:select])
-  end
-
-  @doc """
-  Returns the list of property_types.
-
-  ## Examples
-
-      iex> list_property_types()
-      [%PropertyType{}, ...]
-
-  """
-  @spec list_property_types(List.t()) :: List.t()
-  def list_property_types(args \\ []) do
-    property_type_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all()
-  end
-
-  @doc """
-  Gets a single property_type.
-
-  Raises `Ecto.NoResultsError` if the PropertyType does not exist.
-
-  ## Examples
-
-      iex> get_property_type!(123)
-      %PropertyType{}
-
-      iex> get_property_type!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  @spec get_property_type!(Integer.t() | List.t()) :: PropertyType.t()
-  @spec get_property_type!(Integer.t(), List.t()) :: PropertyType.t()
-  def get_property_type!(id) when not is_list(id) do
-    property_type_query(id, [])
-    |> Repo.one!()
-  end
-
-  def get_property_type!(args) do
-    property_type_query(nil, args)
-    |> Repo.one!()
-  end
-
-  def get_property_type!(id, args) do
-    property_type_query(id, args)
-    |> Repo.one!()
-  end
-
-  @doc """
-  Creates a property_type.
-
-  ## Examples
-
-      iex> create_property_type(%{field: value})
-      {:ok, %PropertyType{}}
-
-      iex> create_property_type(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec create_property_type(Map.t()) :: {:ok, PropertyType.t()} | {:error, Ecto.Changeset.t()}
-  def create_property_type(attrs \\ %{}) do
-    %PropertyType{}
-    |> PropertyType.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Deletes a PropertyType.
-
-  ## Examples
-
-      iex> delete_property_type(property_type)
-      {:ok, %PropertyType{}}
-
-      iex> delete_property_type(property_type)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec delete_property_type(PropertyType.t()) ::
-          {:ok, PropertyType.t()} | {:error, Ecto.Changeset.t()}
-  def delete_property_type(%PropertyType{} = property_type) do
-    Repo.delete(property_type)
-  end
-
-  alias Teiserver.Telemetry.{AnonProperty, AnonPropertyLib}
-
-  @spec anon_property_query(List.t()) :: Ecto.Query.t()
-  def anon_property_query(args) do
-    anon_property_query(nil, args)
-  end
-
-  @spec anon_property_query(Integer.t(), List.t()) :: Ecto.Query.t()
-  def anon_property_query(_id, args) do
-    AnonPropertyLib.query_anon_properties()
-    |> AnonPropertyLib.search(args[:search])
-    |> AnonPropertyLib.preload(args[:preload])
-    |> AnonPropertyLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
-  end
-
-  @doc """
-  Returns the list of anon_properties.
-
-  ## Examples
-
-      iex> list_anon_properties()
-      [%AnonProperty{}, ...]
-
-  """
-  @spec list_anon_properties(List.t()) :: List.t()
-  def list_anon_properties(args \\ []) do
-    anon_property_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all()
-  end
-
-  @doc """
-  Creates a anon_property.
-
-  ## Examples
-
-      iex> create_anon_property(%{field: value})
-      {:ok, %AnonProperty{}}
-
-      iex> create_anon_property(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec create_anon_property(Map.t()) ::
-          {:ok, AnonProperty.t()} | {:error, Ecto.Changeset.t()}
-  def create_anon_property(attrs \\ %{}) do
-    %AnonProperty{}
-    |> AnonProperty.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Deletes a AnonProperty.
-
-  ## Examples
-
-      iex> delete_anon_property(anon_property)
-      {:ok, %AnonProperty{}}
-
-      iex> delete_anon_property(anon_property)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec delete_anon_property(AnonProperty.t()) ::
-          {:ok, AnonProperty.t()} | {:error, Ecto.Changeset.t()}
-  def delete_anon_property(%AnonProperty{} = anon_property) do
-    Repo.delete(anon_property)
-  end
-
-  def get_anon_properties_summary(args) do
-    query =
-      from anon_properties in AnonProperty,
-        join: property_types in assoc(anon_properties, :property_type),
-        group_by: property_types.name,
-        select: {property_types.name, count(anon_properties.property_type_id)}
-
-    query =
-      query
-      |> AnonPropertyLib.search(args)
-
-    Repo.all(query)
-    |> Map.new()
-  end
-
-  alias Teiserver.Telemetry.{UserProperty, UserPropertyLib}
-
-  @spec client_property_query(List.t()) :: Ecto.Query.t()
-  def client_property_query(args) do
-    client_property_query(nil, args)
-  end
-
-  @spec client_property_query(Integer.t(), List.t()) :: Ecto.Query.t()
-  def client_property_query(_id, args) do
-    UserPropertyLib.query_client_properties()
-    |> UserPropertyLib.search(args[:search])
-    |> UserPropertyLib.preload(args[:preload])
-    |> UserPropertyLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
-  end
-
-  @doc """
-  Returns the list of client_properties.
-
-  ## Examples
-
-      iex> list_client_properties()
-      [%UserProperty{}, ...]
-
-  """
-  @spec list_client_properties(List.t()) :: List.t()
-  def list_client_properties(args \\ []) do
-    client_property_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all()
-  end
-
-  @doc """
-  Creates a client_property.
-
-  ## Examples
-
-      iex> create_client_property(%{field: value})
-      {:ok, %UserProperty{}}
-
-      iex> create_client_property(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec create_client_property(Map.t()) ::
-          {:ok, UserProperty.t()} | {:error, Ecto.Changeset.t()}
-  def create_client_property(attrs \\ %{}) do
-    %UserProperty{}
-    |> UserProperty.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  def get_client_properties_summary(args) do
-    query =
-      from client_properties in UserProperty,
-        join: property_types in assoc(client_properties, :property_type),
-        group_by: property_types.name,
-        select: {property_types.name, count(client_properties.property_type_id)}
-
-    query =
-      query
-      |> UserPropertyLib.search(args)
-
-    Repo.all(query)
-    |> Map.new()
-  end
-
-  @spec delete_client_property(UserProperty.t()) ::
-          {:ok, UserProperty.t()} | {:error, Ecto.Changeset.t()}
-  def delete_client_property(%UserProperty{} = client_property) do
-    Repo.delete(client_property)
-  end
-
-  alias Teiserver.Telemetry.{ComplexAnonEvent, ComplexAnonEventLib}
-
-  @spec complex_anon_event_query(List.t()) :: Ecto.Query.t()
-  def complex_anon_event_query(args) do
-    complex_anon_event_query(nil, args)
-  end
-
-  @spec complex_anon_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
-  def complex_anon_event_query(_id, args) do
-    ComplexAnonEventLib.query_complex_anon_events()
-    |> ComplexAnonEventLib.search(args[:search])
-    |> ComplexAnonEventLib.preload(args[:preload])
-    |> ComplexAnonEventLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
-  end
-
-  @doc """
-  Returns the list of complex_anon_events.
-
-  ## Examples
-
-      iex> list_complex_anon_events()
-      [%ComplexAnonEvent{}, ...]
-
-  """
-  @spec list_complex_anon_events(List.t()) :: List.t()
-  def list_complex_anon_events(args \\ []) do
-    complex_anon_event_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all()
-  end
-
-  @doc """
-  Creates a complex_anon_event.
-
-  ## Examples
-
-      iex> create_complex_anon_event(%{field: value})
-      {:ok, %ComplexAnonEvent{}}
-
-      iex> create_complex_anon_event(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec create_complex_anon_event(Map.t()) :: {:ok, ComplexAnonEvent.t()} | {:error, Ecto.Changeset.t()}
-  def create_complex_anon_event(attrs \\ %{}) do
-    %ComplexAnonEvent{}
-    |> ComplexAnonEvent.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  def get_complex_anon_events_summary(args) do
-    query =
-      from complex_anon_events in ComplexAnonEvent,
-        join: event_types in assoc(complex_anon_events, :event_type),
-        group_by: event_types.name,
-        select: {event_types.name, count(complex_anon_events.event_type_id)}
-
-    query =
-      query
-      |> ComplexAnonEventLib.search(args)
-
-    Repo.all(query)
-    |> Map.new()
-  end
+  @spec get_simple_lobby_event_type!(non_neg_integer) :: SimpleServerEventType
+  defdelegate get_simple_lobby_event_type!(id), to: SimpleLobbyEventTypeLib
 
+  @spec get_simple_lobby_event_type!(non_neg_integer, list) :: SimpleServerEventType
+  defdelegate get_simple_lobby_event_type!(id, args), to: SimpleLobbyEventTypeLib
+
+  @spec create_simple_lobby_event_type() :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  defdelegate create_simple_lobby_event_type(), to: SimpleLobbyEventTypeLib
+
+  @spec create_simple_lobby_event_type(map) :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  defdelegate create_simple_lobby_event_type(attrs), to: SimpleLobbyEventTypeLib
+
+  @spec update_simple_lobby_event_type(SimpleServerEventType, map) :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  defdelegate update_simple_lobby_event_type(simple_lobby_event_type, attrs), to: SimpleLobbyEventTypeLib
+
+  @spec delete_simple_lobby_event_type(SimpleServerEventType) :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  defdelegate delete_simple_lobby_event_type(simple_lobby_event_type), to: SimpleLobbyEventTypeLib
+
+  @spec change_simple_lobby_event_type(SimpleServerEventType) :: Ecto.Changeset
+  defdelegate change_simple_lobby_event_type(simple_lobby_event_type), to: SimpleLobbyEventTypeLib
+
+  @spec change_simple_lobby_event_type(SimpleServerEventType, map) :: Ecto.Changeset
+  defdelegate change_simple_lobby_event_type(simple_lobby_event_type, attrs), to: SimpleLobbyEventTypeLib
+
+
+  # Simple match event types
+  alias Teiserver.Telemetry.{SimpleMatchEventType, SimpleMatchEventTypeLib}
+
+  @spec get_or_add_simple_match_event_type(String.t()) :: non_neg_integer()
+  defdelegate get_or_add_simple_match_event_type(name), to: SimpleMatchEventTypeLib
+
+  @spec list_simple_match_event_types() :: [SimpleServerEventType]
+  defdelegate list_simple_match_event_types(), to: SimpleMatchEventTypeLib
+
+  @spec list_simple_match_event_types(list) :: [SimpleServerEventType]
+  defdelegate list_simple_match_event_types(args), to: SimpleMatchEventTypeLib
+
+  @spec get_simple_match_event_type!(non_neg_integer) :: SimpleServerEventType
+  defdelegate get_simple_match_event_type!(id), to: SimpleMatchEventTypeLib
+
+  @spec get_simple_match_event_type!(non_neg_integer, list) :: SimpleServerEventType
+  defdelegate get_simple_match_event_type!(id, args), to: SimpleMatchEventTypeLib
+
+  @spec create_simple_match_event_type() :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  defdelegate create_simple_match_event_type(), to: SimpleMatchEventTypeLib
+
+  @spec create_simple_match_event_type(map) :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  defdelegate create_simple_match_event_type(attrs), to: SimpleMatchEventTypeLib
+
+  @spec update_simple_match_event_type(SimpleServerEventType, map) :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  defdelegate update_simple_match_event_type(simple_match_event_type, attrs), to: SimpleMatchEventTypeLib
+
+  @spec delete_simple_match_event_type(SimpleServerEventType) :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  defdelegate delete_simple_match_event_type(simple_match_event_type), to: SimpleMatchEventTypeLib
+
+  @spec change_simple_match_event_type(SimpleServerEventType) :: Ecto.Changeset
+  defdelegate change_simple_match_event_type(simple_match_event_type), to: SimpleMatchEventTypeLib
+
+  @spec change_simple_match_event_type(SimpleServerEventType, map) :: Ecto.Changeset
+  defdelegate change_simple_match_event_type(simple_match_event_type, attrs), to: SimpleMatchEventTypeLib
+
+
+  # Simple server event types
+  alias Teiserver.Telemetry.{SimpleServerEventType, SimpleServerEventTypeLib}
+
+  @spec get_or_add_simple_server_event_type(String.t()) :: non_neg_integer()
+  defdelegate get_or_add_simple_server_event_type(name), to: SimpleServerEventTypeLib
+
+  @spec list_simple_server_event_types() :: [SimpleServerEventType]
+  defdelegate list_simple_server_event_types(), to: SimpleServerEventTypeLib
+
+  @spec list_simple_server_event_types(list) :: [SimpleServerEventType]
+  defdelegate list_simple_server_event_types(args), to: SimpleServerEventTypeLib
+
+  @spec get_simple_server_event_type!(non_neg_integer) :: SimpleServerEventType
+  defdelegate get_simple_server_event_type!(id), to: SimpleServerEventTypeLib
+
+  @spec get_simple_server_event_type!(non_neg_integer, list) :: SimpleServerEventType
+  defdelegate get_simple_server_event_type!(id, args), to: SimpleServerEventTypeLib
+
+  @spec create_simple_server_event_type() :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  defdelegate create_simple_server_event_type(), to: SimpleServerEventTypeLib
+
+  @spec create_simple_server_event_type(map) :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  defdelegate create_simple_server_event_type(attrs), to: SimpleServerEventTypeLib
+
+  @spec update_simple_server_event_type(SimpleServerEventType, map) :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  defdelegate update_simple_server_event_type(simple_server_event_type, attrs), to: SimpleServerEventTypeLib
+
+  @spec delete_simple_server_event_type(SimpleServerEventType) :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  defdelegate delete_simple_server_event_type(simple_server_event_type), to: SimpleServerEventTypeLib
+
+  @spec change_simple_server_event_type(SimpleServerEventType) :: Ecto.Changeset
+  defdelegate change_simple_server_event_type(simple_server_event_type), to: SimpleServerEventTypeLib
+
+  @spec change_simple_server_event_type(SimpleServerEventType, map) :: Ecto.Changeset
+  defdelegate change_simple_server_event_type(simple_server_event_type, attrs), to: SimpleServerEventTypeLib
+
+
+
+
+
+  # ------------------------
+  # ------------------------ Complex Events ------------------------
+  # ------------------------
+  # Complex client events
   alias Teiserver.Telemetry.{ComplexClientEvent, ComplexClientEventLib}
 
-  @spec complex_client_event_query(List.t()) :: Ecto.Query.t()
-  def complex_client_event_query(args) do
-    complex_client_event_query(nil, args)
-  end
-
-  @spec complex_client_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
-  def complex_client_event_query(_id, args) do
-    ComplexClientEventLib.query_complex_client_events()
-    |> ComplexClientEventLib.search(args[:search])
-    |> ComplexClientEventLib.preload(args[:preload])
-    |> ComplexClientEventLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
-  end
-
-  @doc """
-  Returns the list of complex_client_events.
-
-  ## Examples
-
-      iex> list_complex_client_events()
-      [%ComplexClientEvent{}, ...]
-
-  """
-  @spec list_complex_client_events(List.t()) :: List.t()
-  def list_complex_client_events(args \\ []) do
-    complex_client_event_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all()
-  end
-
-  @doc """
-  Creates a complex_client_event.
-
-  ## Examples
-
-      iex> create_complex_client_event(%{field: value})
-      {:ok, %ComplexClientEvent{}}
-
-      iex> create_complex_client_event(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec create_complex_client_event(Map.t()) :: {:ok, ComplexClientEvent.t()} | {:error, Ecto.Changeset.t()}
-  def create_complex_client_event(attrs \\ %{}) do
-    %ComplexClientEvent{}
-    |> ComplexClientEvent.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @spec delete_complex_client_event(ComplexClientEvent.t()) ::
-          {:ok, ComplexClientEvent.t()} | {:error, Ecto.Changeset.t()}
-  def delete_complex_client_event(%ComplexClientEvent{} = complex_client_event) do
-    Repo.delete(complex_client_event)
-  end
-
-  @spec get_complex_client_events_summary(list) :: map
-  defdelegate get_complex_client_events_summary(args), to: ComplexClientEventLib
-
-  @spec log_complex_client_event(integer | nil, String, map()) :: {:error, Ecto.Changeset} | {:ok, ComplexClientEvent}
+  @spec log_complex_client_event(T.userid, String.t, map) :: {:error, Ecto.Changeset} | {:ok, ComplexClientEvent}
   defdelegate log_complex_client_event(userid, event_type_name, value), to: ComplexClientEventLib
 
-  @spec log_complex_client_event(integer | nil, String, map(), String | nil) :: {:error, Ecto.Changeset} | {:ok, ComplexClientEvent}
-  defdelegate log_complex_client_event(userid, event_type_name, value, hash), to: ComplexClientEventLib
+  @spec list_complex_client_events() :: [ComplexServerEvent]
+  defdelegate list_complex_client_events(), to: ComplexClientEventLib
 
-  def log_client_property(nil, value_name, value, hash) do
-    property_type_id = get_or_add_property_type(value_name)
+  @spec list_complex_client_events(list) :: [ComplexServerEvent]
+  defdelegate list_complex_client_events(args), to: ComplexClientEventLib
 
-    # Delete existing ones first
-    query =
-      from properties in AnonProperty,
-        where:
-          properties.property_type_id == ^property_type_id and
-            properties.hash == ^hash
+  @spec get_complex_client_event!(non_neg_integer) :: ComplexServerEvent
+  defdelegate get_complex_client_event!(id), to: ComplexClientEventLib
 
-    property = Repo.one(query)
+  @spec get_complex_client_event!(non_neg_integer, list) :: ComplexServerEvent
+  defdelegate get_complex_client_event!(id, args), to: ComplexClientEventLib
 
-    if property do
-      Repo.delete(property)
-    end
+  @spec create_complex_client_event() :: {:ok, ComplexServerEvent} | {:error, Ecto.Changeset}
+  defdelegate create_complex_client_event(), to: ComplexClientEventLib
 
-    create_anon_property(%{
-      property_type_id: property_type_id,
-      value: value,
-      last_updated: Timex.now(),
-      hash: hash
-    })
-  end
+  @spec create_complex_client_event(map) :: {:ok, ComplexServerEvent} | {:error, Ecto.Changeset}
+  defdelegate create_complex_client_event(attrs), to: ComplexClientEventLib
 
-  def log_client_property(userid, property_name, value, hash) do
-    property_type_id = get_or_add_property_type(property_name)
+  @spec update_complex_client_event(ComplexServerEvent, map) :: {:ok, ComplexServerEvent} | {:error, Ecto.Changeset}
+  defdelegate update_complex_client_event(complex_client_event, attrs), to: ComplexClientEventLib
 
-    # Delete existing ones first
-    query =
-      from properties in UserProperty,
-        where:
-          properties.user_id == ^userid and
-            properties.property_type_id == ^property_type_id
+  @spec delete_complex_client_event(ComplexServerEvent) :: {:ok, ComplexServerEvent} | {:error, Ecto.Changeset}
+  defdelegate delete_complex_client_event(complex_client_event), to: ComplexClientEventLib
 
-    property = Repo.one(query)
+  @spec change_complex_client_event(ComplexServerEvent) :: Ecto.Changeset
+  defdelegate change_complex_client_event(complex_client_event), to: ComplexClientEventLib
 
-    if property do
-      Repo.delete(property)
-    end
+  @spec change_complex_client_event(ComplexServerEvent, map) :: Ecto.Changeset
+  defdelegate change_complex_client_event(complex_client_event_type, attrs), to: ComplexClientEventLib
 
-    result =
-      create_client_property(%{
-        property_type_id: property_type_id,
-        user_id: userid,
-        value: value,
-        last_updated: Timex.now()
-      })
 
-    case property_name do
-      "hardware:cpuinfo" ->
-        Account.merge_update_client(userid, %{app_status: :accepted})
-        client = Account.get_client_by_id(userid)
+  # Complex lobby events
+  alias Teiserver.Telemetry.{ComplexLobbyEvent, ComplexLobbyEventLib}
 
-        if client do
-          send(client.tcp_pid, {:put, :app_status, :accepted})
-          Teiserver.Account.create_smurf_key(userid, "chobby_hash", hash)
-          Teiserver.Account.update_cache_user(userid, %{chobby_hash: hash})
-        end
+  @spec log_complex_lobby_event(T.userid, T.match_id, String.t, map) :: {:error, Ecto.Changeset} | {:ok, ComplexLobbyEvent}
+  defdelegate log_complex_lobby_event(userid, match_id, event_type_name, value), to: ComplexLobbyEventLib
 
-      "hardware:macAddrHash" ->
-        Teiserver.Account.create_smurf_key(userid, "chobby_mac_hash", value)
-        Teiserver.Account.update_cache_user(userid, %{chobby_mac_hash: value})
+  @spec list_complex_lobby_events() :: [ComplexServerEvent]
+  defdelegate list_complex_lobby_events(), to: ComplexLobbyEventLib
 
-      "hardware:sysInfoHash" ->
-        Teiserver.Account.create_smurf_key(userid, "chobby_sysinfo_hash", value)
-        Teiserver.Account.update_cache_user(userid, %{chobby_sysinfo_hash: value})
+  @spec list_complex_lobby_events(list) :: [ComplexServerEvent]
+  defdelegate list_complex_lobby_events(args), to: ComplexLobbyEventLib
 
-      _ ->
-        :ok
-    end
+  @spec get_complex_lobby_event!(non_neg_integer) :: ComplexServerEvent
+  defdelegate get_complex_lobby_event!(id), to: ComplexLobbyEventLib
 
-    case result do
-      {:ok, _event} ->
-        if Enum.member?(@broadcast_property_types, property_name) do
-          PubSub.broadcast(
-            Teiserver.PubSub,
-            "teiserver_telemetry_client_properties",
-            %{
-              channel: "teiserver_telemetry_client_properties",
-              userid: userid,
-              property_name: property_name,
-              property_value: value
-            }
-          )
-        end
+  @spec get_complex_lobby_event!(non_neg_integer, list) :: ComplexServerEvent
+  defdelegate get_complex_lobby_event!(id, args), to: ComplexLobbyEventLib
 
-        result
+  @spec create_complex_lobby_event() :: {:ok, ComplexServerEvent} | {:error, Ecto.Changeset}
+  defdelegate create_complex_lobby_event(), to: ComplexLobbyEventLib
 
-      _ ->
-        result
-    end
-  end
+  @spec create_complex_lobby_event(map) :: {:ok, ComplexServerEvent} | {:error, Ecto.Changeset}
+  defdelegate create_complex_lobby_event(attrs), to: ComplexLobbyEventLib
 
-  @spec get_or_add_property_type(String.t()) :: non_neg_integer()
-  def get_or_add_property_type(name) do
-    name = String.trim(name)
+  @spec update_complex_lobby_event(ComplexServerEvent, map) :: {:ok, ComplexServerEvent} | {:error, Ecto.Changeset}
+  defdelegate update_complex_lobby_event(complex_lobby_event, attrs), to: ComplexLobbyEventLib
 
-    Central.cache_get_or_store(:telemetry_property_types_cache, name, fn ->
-      case list_property_types(search: [name: name], select: [:id], order_by: "ID (Lowest first)") do
-        [] ->
-          {:ok, property} =
-            %PropertyType{}
-            |> PropertyType.changeset(%{name: name})
-            |> Repo.insert()
+  @spec delete_complex_lobby_event(ComplexServerEvent) :: {:ok, ComplexServerEvent} | {:error, Ecto.Changeset}
+  defdelegate delete_complex_lobby_event(complex_lobby_event), to: ComplexLobbyEventLib
 
-          property.id
+  @spec change_complex_lobby_event(ComplexServerEvent) :: Ecto.Changeset
+  defdelegate change_complex_lobby_event(complex_lobby_event), to: ComplexLobbyEventLib
 
-        [%{id: id} | _] ->
-          id
-      end
-    end)
-  end
+  @spec change_complex_lobby_event(ComplexServerEvent, map) :: Ecto.Changeset
+  defdelegate change_complex_lobby_event(complex_lobby_event_type, attrs), to: ComplexLobbyEventLib
 
+
+  # Complex match events
+  alias Teiserver.Telemetry.{ComplexMatchEvent, ComplexMatchEventLib}
+
+  @spec log_complex_match_event(T.userid, T.match_id, String.t, map) :: {:error, Ecto.Changeset} | {:ok, ComplexMatchEvent}
+  defdelegate log_complex_match_event(userid, match_id, event_type_name, value), to: ComplexMatchEventLib
+
+  @spec list_complex_match_events() :: [ComplexServerEvent]
+  defdelegate list_complex_match_events(), to: ComplexMatchEventLib
+
+  @spec list_complex_match_events(list) :: [ComplexServerEvent]
+  defdelegate list_complex_match_events(args), to: ComplexMatchEventLib
+
+  @spec get_complex_match_event!(non_neg_integer) :: ComplexServerEvent
+  defdelegate get_complex_match_event!(id), to: ComplexMatchEventLib
+
+  @spec get_complex_match_event!(non_neg_integer, list) :: ComplexServerEvent
+  defdelegate get_complex_match_event!(id, args), to: ComplexMatchEventLib
+
+  @spec create_complex_match_event() :: {:ok, ComplexServerEvent} | {:error, Ecto.Changeset}
+  defdelegate create_complex_match_event(), to: ComplexMatchEventLib
+
+  @spec create_complex_match_event(map) :: {:ok, ComplexServerEvent} | {:error, Ecto.Changeset}
+  defdelegate create_complex_match_event(attrs), to: ComplexMatchEventLib
+
+  @spec update_complex_match_event(ComplexServerEvent, map) :: {:ok, ComplexServerEvent} | {:error, Ecto.Changeset}
+  defdelegate update_complex_match_event(complex_match_event, attrs), to: ComplexMatchEventLib
+
+  @spec delete_complex_match_event(ComplexServerEvent) :: {:ok, ComplexServerEvent} | {:error, Ecto.Changeset}
+  defdelegate delete_complex_match_event(complex_match_event), to: ComplexMatchEventLib
+
+  @spec change_complex_match_event(ComplexServerEvent) :: Ecto.Changeset
+  defdelegate change_complex_match_event(complex_match_event), to: ComplexMatchEventLib
+
+  @spec change_complex_match_event(ComplexServerEvent, map) :: Ecto.Changeset
+  defdelegate change_complex_match_event(complex_match_event_type, attrs), to: ComplexMatchEventLib
+
+
+  # Complex server events
   alias Teiserver.Telemetry.{ComplexServerEvent, ComplexServerEventLib}
 
-  @spec complex_server_event_query(List.t()) :: Ecto.Query.t()
-  def complex_server_event_query(args) do
-    complex_server_event_query(nil, args)
-  end
-
-  @spec complex_server_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
-  def complex_server_event_query(_id, args) do
-    ComplexServerEventLib.query_complex_server_events()
-    |> ComplexServerEventLib.search(args[:search])
-    |> ComplexServerEventLib.preload(args[:preload])
-    |> ComplexServerEventLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
-  end
-
-  @doc """
-  Returns the list of complex_server_events.
-
-  ## Examples
-
-      iex> list_complex_server_events()
-      [%ComplexServerEvent{}, ...]
-
-  """
-  @spec list_complex_server_events(List.t()) :: List.t()
-  def list_complex_server_events(args \\ []) do
-    complex_server_event_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all()
-  end
-
-  @doc """
-  Creates a complex_server_event.
-
-  ## Examples
-
-      iex> create_complex_server_event(%{field: value})
-      {:ok, %ComplexServerEvent{}}
-
-      iex> create_complex_server_event(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec create_complex_server_event(Map.t()) :: {:ok, ComplexServerEvent.t()} | {:error, Ecto.Changeset.t()}
-  def create_complex_server_event(attrs \\ %{}) do
-    %ComplexServerEvent{}
-    |> ComplexServerEvent.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @spec delete_complex_server_event(ComplexServerEvent.t()) ::
-          {:ok, ComplexServerEvent.t()} | {:error, Ecto.Changeset.t()}
-  def delete_complex_server_event(%ComplexServerEvent{} = complex_server_event) do
-    Repo.delete(complex_server_event)
-  end
-
-  @spec get_complex_server_events_summary(list) :: map()
-  defdelegate get_complex_server_events_summary(args), to: ComplexServerEventLib
-
-  @spec log_complex_server_event(T.userid() | nil, String.t(), map()) ::
-          {:error, Ecto.Changeset.t()} | {:ok, ComplexServerEvent.t()}
+  @spec log_complex_server_event(T.userid | nil, String.t, map) :: {:error, Ecto.Changeset} | {:ok, ComplexServerEvent}
   defdelegate log_complex_server_event(userid, event_type_name, value), to: ComplexServerEventLib
 
+  @spec list_complex_server_events() :: [ComplexServerEvent]
+  defdelegate list_complex_server_events(), to: ComplexServerEventLib
+
+  @spec list_complex_server_events(list) :: [ComplexServerEvent]
+  defdelegate list_complex_server_events(args), to: ComplexServerEventLib
+
+  @spec get_complex_server_event!(non_neg_integer) :: ComplexServerEvent
+  defdelegate get_complex_server_event!(id), to: ComplexServerEventLib
+
+  @spec get_complex_server_event!(non_neg_integer, list) :: ComplexServerEvent
+  defdelegate get_complex_server_event!(id, args), to: ComplexServerEventLib
+
+  @spec create_complex_server_event() :: {:ok, ComplexServerEvent} | {:error, Ecto.Changeset}
+  defdelegate create_complex_server_event(), to: ComplexServerEventLib
+
+  @spec create_complex_server_event(map) :: {:ok, ComplexServerEvent} | {:error, Ecto.Changeset}
+  defdelegate create_complex_server_event(attrs), to: ComplexServerEventLib
+
+  @spec update_complex_server_event(ComplexServerEvent, map) :: {:ok, ComplexServerEvent} | {:error, Ecto.Changeset}
+  defdelegate update_complex_server_event(complex_server_event, attrs), to: ComplexServerEventLib
+
+  @spec delete_complex_server_event(ComplexServerEvent) :: {:ok, ComplexServerEvent} | {:error, Ecto.Changeset}
+  defdelegate delete_complex_server_event(complex_server_event), to: ComplexServerEventLib
+
+  @spec change_complex_server_event(ComplexServerEvent) :: Ecto.Changeset
+  defdelegate change_complex_server_event(complex_server_event), to: ComplexServerEventLib
+
+  @spec change_complex_server_event(ComplexServerEvent, map) :: Ecto.Changeset
+  defdelegate change_complex_server_event(complex_server_event_type, attrs), to: ComplexServerEventLib
+
+  # ------------------------
+  # ------------------------ Simple Events ------------------------
+  # ------------------------
+  # Simple client events
+  alias Teiserver.Telemetry.{SimpleClientEvent, SimpleClientEventLib}
+
+  @spec log_simple_client_event(T.userid, String.t) :: {:error, Ecto.Changeset} | {:ok, SimpleClientEvent}
+  defdelegate log_simple_client_event(userid, event_type_name), to: SimpleClientEventLib
+
+  @spec list_simple_client_events() :: [SimpleServerEvent]
+  defdelegate list_simple_client_events(), to: SimpleClientEventLib
+
+  @spec list_simple_client_events(list) :: [SimpleServerEvent]
+  defdelegate list_simple_client_events(args), to: SimpleClientEventLib
+
+  @spec get_simple_client_event!(non_neg_integer) :: SimpleServerEvent
+  defdelegate get_simple_client_event!(id), to: SimpleClientEventLib
+
+  @spec get_simple_client_event!(non_neg_integer, list) :: SimpleServerEvent
+  defdelegate get_simple_client_event!(id, args), to: SimpleClientEventLib
+
+  @spec create_simple_client_event() :: {:ok, SimpleServerEvent} | {:error, Ecto.Changeset}
+  defdelegate create_simple_client_event(), to: SimpleClientEventLib
+
+  @spec create_simple_client_event(map) :: {:ok, SimpleServerEvent} | {:error, Ecto.Changeset}
+  defdelegate create_simple_client_event(attrs), to: SimpleClientEventLib
+
+  @spec update_simple_client_event(SimpleServerEvent, map) :: {:ok, SimpleServerEvent} | {:error, Ecto.Changeset}
+  defdelegate update_simple_client_event(simple_client_event, attrs), to: SimpleClientEventLib
+
+  @spec delete_simple_client_event(SimpleServerEvent) :: {:ok, SimpleServerEvent} | {:error, Ecto.Changeset}
+  defdelegate delete_simple_client_event(simple_client_event), to: SimpleClientEventLib
+
+  @spec change_simple_client_event(SimpleServerEvent) :: Ecto.Changeset
+  defdelegate change_simple_client_event(simple_client_event), to: SimpleClientEventLib
+
+  @spec change_simple_client_event(SimpleServerEvent, map) :: Ecto.Changeset
+  defdelegate change_simple_client_event(simple_client_event_type, attrs), to: SimpleClientEventLib
+
+
+  # Simple lobby events
+  alias Teiserver.Telemetry.{SimpleLobbyEvent, SimpleLobbyEventLib}
+
+  @spec log_simple_lobby_event(T.userid, T.match_id, String.t) :: {:error, Ecto.Changeset} | {:ok, SimpleLobbyEvent}
+  defdelegate log_simple_lobby_event(userid, match_id, event_type_name), to: SimpleLobbyEventLib
+
+  @spec list_simple_lobby_events() :: [SimpleServerEvent]
+  defdelegate list_simple_lobby_events(), to: SimpleLobbyEventLib
+
+  @spec list_simple_lobby_events(list) :: [SimpleServerEvent]
+  defdelegate list_simple_lobby_events(args), to: SimpleLobbyEventLib
+
+  @spec get_simple_lobby_event!(non_neg_integer) :: SimpleServerEvent
+  defdelegate get_simple_lobby_event!(id), to: SimpleLobbyEventLib
+
+  @spec get_simple_lobby_event!(non_neg_integer, list) :: SimpleServerEvent
+  defdelegate get_simple_lobby_event!(id, args), to: SimpleLobbyEventLib
+
+  @spec create_simple_lobby_event() :: {:ok, SimpleServerEvent} | {:error, Ecto.Changeset}
+  defdelegate create_simple_lobby_event(), to: SimpleLobbyEventLib
+
+  @spec create_simple_lobby_event(map) :: {:ok, SimpleServerEvent} | {:error, Ecto.Changeset}
+  defdelegate create_simple_lobby_event(attrs), to: SimpleLobbyEventLib
+
+  @spec update_simple_lobby_event(SimpleServerEvent, map) :: {:ok, SimpleServerEvent} | {:error, Ecto.Changeset}
+  defdelegate update_simple_lobby_event(simple_lobby_event, attrs), to: SimpleLobbyEventLib
+
+  @spec delete_simple_lobby_event(SimpleServerEvent) :: {:ok, SimpleServerEvent} | {:error, Ecto.Changeset}
+  defdelegate delete_simple_lobby_event(simple_lobby_event), to: SimpleLobbyEventLib
+
+  @spec change_simple_lobby_event(SimpleServerEvent) :: Ecto.Changeset
+  defdelegate change_simple_lobby_event(simple_lobby_event), to: SimpleLobbyEventLib
+
+  @spec change_simple_lobby_event(SimpleServerEvent, map) :: Ecto.Changeset
+  defdelegate change_simple_lobby_event(simple_lobby_event_type, attrs), to: SimpleLobbyEventLib
+
+
+  # Simple match events
   alias Teiserver.Telemetry.{SimpleMatchEvent, SimpleMatchEventLib}
 
-  @spec match_event_query(List.t()) :: Ecto.Query.t()
-  def match_event_query(args) do
-    match_event_query(nil, args)
-  end
+  @spec log_simple_match_event(T.userid, T.match_id, String.t) :: {:error, Ecto.Changeset} | {:ok, SimpleMatchEvent}
+  defdelegate log_simple_match_event(userid, match_id, event_type_name), to: SimpleMatchEventLib
 
-  @spec match_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
-  def match_event_query(_id, args) do
-    SimpleMatchEventLib.query_match_events()
-    |> SimpleMatchEventLib.search(args[:search])
-    |> SimpleMatchEventLib.preload(args[:preload])
-    |> SimpleMatchEventLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
-  end
+  @spec list_simple_match_events() :: [SimpleServerEvent]
+  defdelegate list_simple_match_events(), to: SimpleMatchEventLib
 
-  @doc """
-  Returns the list of match_events.
+  @spec list_simple_match_events(list) :: [SimpleServerEvent]
+  defdelegate list_simple_match_events(args), to: SimpleMatchEventLib
 
-  ## Examples
+  @spec get_simple_match_event!(non_neg_integer) :: SimpleServerEvent
+  defdelegate get_simple_match_event!(id), to: SimpleMatchEventLib
 
-      iex> list_match_events()
-      [%SimpleMatchEvent{}, ...]
+  @spec get_simple_match_event!(non_neg_integer, list) :: SimpleServerEvent
+  defdelegate get_simple_match_event!(id, args), to: SimpleMatchEventLib
 
-  """
-  @spec list_match_events(List.t()) :: List.t()
-  def list_match_events(args \\ []) do
-    match_event_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all()
-  end
+  @spec create_simple_match_event() :: {:ok, SimpleServerEvent} | {:error, Ecto.Changeset}
+  defdelegate create_simple_match_event(), to: SimpleMatchEventLib
 
-  @doc """
-  Creates a match_event.
+  @spec create_simple_match_event(map) :: {:ok, SimpleServerEvent} | {:error, Ecto.Changeset}
+  defdelegate create_simple_match_event(attrs), to: SimpleMatchEventLib
 
-  ## Examples
+  @spec update_simple_match_event(SimpleServerEvent, map) :: {:ok, SimpleServerEvent} | {:error, Ecto.Changeset}
+  defdelegate update_simple_match_event(simple_match_event, attrs), to: SimpleMatchEventLib
 
-      iex> create_match_event(%{field: value})
-      {:ok, %SimpleMatchEvent{}}
+  @spec delete_simple_match_event(SimpleServerEvent) :: {:ok, SimpleServerEvent} | {:error, Ecto.Changeset}
+  defdelegate delete_simple_match_event(simple_match_event), to: SimpleMatchEventLib
 
-      iex> create_match_event(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+  @spec change_simple_match_event(SimpleServerEvent) :: Ecto.Changeset
+  defdelegate change_simple_match_event(simple_match_event), to: SimpleMatchEventLib
 
-  """
-  @spec create_match_event(Map.t()) :: {:ok, SimpleMatchEvent.t()} | {:error, Ecto.Changeset.t()}
-  def create_match_event(attrs \\ %{}) do
-    %SimpleMatchEvent{}
-    |> SimpleMatchEvent.changeset(attrs)
-    |> Repo.insert()
-  end
+  @spec change_simple_match_event(SimpleServerEvent, map) :: Ecto.Changeset
+  defdelegate change_simple_match_event(simple_match_event_type, attrs), to: SimpleMatchEventLib
 
-  @spec delete_match_event(SimpleMatchEvent.t()) ::
-          {:ok, SimpleMatchEvent.t()} | {:error, Ecto.Changeset.t()}
-  def delete_match_event(%SimpleMatchEvent{} = match_event) do
-    Repo.delete(match_event)
-  end
 
-  @spec get_match_events_summary(list) :: map()
-  defdelegate get_match_events_summary(args), to: SimpleMatchEventLib
+  # Simple server events
+  alias Teiserver.Telemetry.{SimpleServerEvent, SimpleServerEventLib}
 
-  @spec log_match_event(T.match_id(), T.userid() | nil, String.t(), integer()) ::
-          {:error, Ecto.Changeset.t()} | {:ok, SimpleMatchEvent.t()}
-  defdelegate log_match_event(match_id, userid, event_type_name, game_time), to: SimpleMatchEventLib
+  @spec log_simple_server_event(T.userid, String.t) :: {:error, Ecto.Changeset} | {:ok, SimpleServerEvent}
+  defdelegate log_simple_server_event(userid, event_type_name), to: SimpleServerEventLib
 
-  alias Teiserver.Telemetry.{ComplexMatchEvent, ComplexMatchEventLib, ComplexMatchEventQueries}
+  @spec list_simple_server_events() :: [SimpleServerEvent]
+  defdelegate list_simple_server_events(), to: SimpleServerEventLib
 
-  @doc """
-  Returns the list of complex_match_events.
+  @spec list_simple_server_events(list) :: [SimpleServerEvent]
+  defdelegate list_simple_server_events(args), to: SimpleServerEventLib
 
-  ## Examples
+  @spec get_simple_server_event!(non_neg_integer) :: SimpleServerEvent
+  defdelegate get_simple_server_event!(id), to: SimpleServerEventLib
 
-      iex> list_complex_match_events()
-      [%ComplexMatchEvent{}, ...]
+  @spec get_simple_server_event!(non_neg_integer, list) :: SimpleServerEvent
+  defdelegate get_simple_server_event!(id, args), to: SimpleServerEventLib
 
-  """
-  @spec list_complex_match_events(list) :: list
-  def list_complex_match_events(args \\ []) do
-    args
-    |> ComplexMatchEventQueries.query_complex_match_events()
-    |> Repo.all()
-  end
+  @spec create_simple_server_event() :: {:ok, SimpleServerEvent} | {:error, Ecto.Changeset}
+  defdelegate create_simple_server_event(), to: SimpleServerEventLib
 
-  @doc """
-  Gets a single complex_match_event.
+  @spec create_simple_server_event(map) :: {:ok, SimpleServerEvent} | {:error, Ecto.Changeset}
+  defdelegate create_simple_server_event(attrs), to: SimpleServerEventLib
 
-  Raises `Ecto.NoResultsError` if the ComplexMatchEvent does not exist.
+  @spec update_simple_server_event(SimpleServerEvent, map) :: {:ok, SimpleServerEvent} | {:error, Ecto.Changeset}
+  defdelegate update_simple_server_event(simple_server_event, attrs), to: SimpleServerEventLib
 
-  ## Examples
+  @spec delete_simple_server_event(SimpleServerEvent) :: {:ok, SimpleServerEvent} | {:error, Ecto.Changeset}
+  defdelegate delete_simple_server_event(simple_server_event), to: SimpleServerEventLib
 
-      iex> get_complex_match_event!(123)
-      %ComplexMatchEvent{}
+  @spec change_simple_server_event(SimpleServerEvent) :: Ecto.Changeset
+  defdelegate change_simple_server_event(simple_server_event), to: SimpleServerEventLib
 
-      iex> get_complex_match_event!(456)
-      ** (Ecto.NoResultsError)
+  @spec change_simple_server_event(SimpleServerEvent, map) :: Ecto.Changeset
+  defdelegate change_simple_server_event(simple_server_event_type, attrs), to: SimpleServerEventLib
 
-  """
-  def get_complex_match_event!(id), do: Repo.get!(ComplexMatchEvent, id)
 
-  def get_complex_match_event!(id, args) do
-    args = args ++ [id: id]
+  # ------------------------
+  # ------------------------ Property types ------------------------
+  # ------------------------
+  alias Teiserver.Telemetry.{PropertyType, PropertyTypeLib}
 
-    args
-    |> ComplexMatchEventQueries.query_complex_match_events()
-    |> Repo.one!()
-  end
+  @spec get_or_add_property_type(String.t()) :: non_neg_integer()
+  defdelegate get_or_add_property_type(name), to: PropertyTypeLib
 
-  @doc """
-  Creates a complex_match_event.
+  @spec list_property_types() :: [PropertyType]
+  defdelegate list_property_types(), to: PropertyTypeLib
 
-  ## Examples
+  @spec list_property_types(list) :: [PropertyType]
+  defdelegate list_property_types(args), to: PropertyTypeLib
 
-      iex> create_complex_match_event(%{field: value})
-      {:ok, %ComplexMatchEvent{}}
+  @spec get_property_type!(non_neg_integer) :: PropertyType
+  defdelegate get_property_type!(id), to: PropertyTypeLib
 
-      iex> create_complex_match_event(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+  @spec get_property_type!(non_neg_integer, list) :: PropertyType
+  defdelegate get_property_type!(id, args), to: PropertyTypeLib
 
-  """
-  def create_complex_match_event(attrs \\ %{}) do
-    %ComplexMatchEvent{}
-    |> ComplexMatchEvent.changeset(attrs)
-    |> Repo.insert()
-  end
+  @spec create_property_type() :: {:ok, PropertyType} | {:error, Ecto.Changeset}
+  defdelegate create_property_type(), to: PropertyTypeLib
 
-  @doc """
-  Updates a complex_match_event.
+  @spec create_property_type(map) :: {:ok, PropertyType} | {:error, Ecto.Changeset}
+  defdelegate create_property_type(attrs), to: PropertyTypeLib
 
-  ## Examples
+  @spec update_property_type(PropertyType, map) :: {:ok, PropertyType} | {:error, Ecto.Changeset}
+  defdelegate update_property_type(property_type, attrs), to: PropertyTypeLib
 
-      iex> update_complex_match_event(complex_match_event, %{field: new_value})
-      {:ok, %ComplexMatchEvent{}}
+  @spec delete_property_type(PropertyType) :: {:ok, PropertyType} | {:error, Ecto.Changeset}
+  defdelegate delete_property_type(property_type), to: PropertyTypeLib
 
-      iex> update_complex_match_event(complex_match_event, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+  @spec change_property_type(PropertyType) :: Ecto.Changeset
+  defdelegate change_property_type(property_type), to: PropertyTypeLib
 
-  """
-  def update_complex_match_event(%ComplexMatchEvent{} = complex_match_event, attrs) do
-    complex_match_event
-    |> ComplexMatchEvent.changeset(attrs)
-    |> Repo.update()
-  end
+  @spec change_property_type(PropertyType, map) :: Ecto.Changeset
+  defdelegate change_property_type(property_type, attrs), to: PropertyTypeLib
 
-  @doc """
-  Deletes a complex_match_event.
 
-  ## Examples
+  # ------------------------
+  # ------------------------ Property instances (Anon and User) ------------------------
+  # ------------------------
+  alias Teiserver.Telemetry.{AnonProperty, AnonPropertyLib}
 
-      iex> delete_complex_match_event(complex_match_event)
-      {:ok, %ComplexMatchEvent{}}
+  @spec log_anon_property(String.t, String.t, map) :: {:error, Ecto.Changeset} | {:ok, AnonProperty}
+  defdelegate log_anon_property(hash, property_type_name, value), to: AnonPropertyLib
 
-      iex> delete_complex_match_event(complex_match_event)
-      {:error, %Ecto.Changeset{}}
+  @spec list_anon_properties() :: [ComplexServerProperty]
+  defdelegate list_anon_properties(), to: AnonPropertyLib
 
-  """
-  def delete_complex_match_event(%ComplexMatchEvent{} = complex_match_event) do
-    Repo.delete(complex_match_event)
-  end
+  @spec list_anon_properties(list) :: [ComplexServerProperty]
+  defdelegate list_anon_properties(args), to: AnonPropertyLib
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking complex_match_event changes.
+  @spec get_anon_property!(non_neg_integer) :: ComplexServerProperty
+  defdelegate get_anon_property!(id), to: AnonPropertyLib
 
-  ## Examples
+  @spec get_anon_property!(non_neg_integer, list) :: ComplexServerProperty
+  defdelegate get_anon_property!(id, args), to: AnonPropertyLib
 
-      iex> change_complex_match_event(complex_match_event)
-      %Ecto.Changeset{data: %ComplexMatchEvent{}}
+  @spec create_anon_property() :: {:ok, ComplexServerProperty} | {:error, Ecto.Changeset}
+  defdelegate create_anon_property(), to: AnonPropertyLib
 
-  """
-  def change_complex_match_event(%ComplexMatchEvent{} = complex_match_event, attrs \\ %{}) do
-    ComplexMatchEvent.changeset(complex_match_event, attrs)
-  end
+  @spec create_anon_property(map) :: {:ok, ComplexServerProperty} | {:error, Ecto.Changeset}
+  defdelegate create_anon_property(attrs), to: AnonPropertyLib
 
-  @spec get_complex_match_events_summary(list) :: map()
-  defdelegate get_complex_match_events_summary(args), to: ComplexMatchEventQueries
+  @spec update_anon_property(ComplexServerProperty, map) :: {:ok, ComplexServerProperty} | {:error, Ecto.Changeset}
+  defdelegate update_anon_property(anon_property, attrs), to: AnonPropertyLib
 
-  @spec log_complex_match_event(T.match_id(), T.userid() | nil, String.t(), integer(), map()) ::
-          {:error, Ecto.Changeset.t()} | {:ok, SimpleMatchEvent.t()}
-  defdelegate log_complex_match_event(match_id, userid, event_type_name, game_time, event_data), to: ComplexMatchEventLib
+  @spec delete_anon_property(ComplexServerProperty) :: {:ok, ComplexServerProperty} | {:error, Ecto.Changeset}
+  defdelegate delete_anon_property(anon_property), to: AnonPropertyLib
+
+  @spec change_anon_property(ComplexServerProperty) :: Ecto.Changeset
+  defdelegate change_anon_property(anon_property), to: AnonPropertyLib
+
+  @spec change_anon_property(ComplexServerProperty, map) :: Ecto.Changeset
+  defdelegate change_anon_property(anon_property_type, attrs), to: AnonPropertyLib
+
+  # User
+  alias Teiserver.Telemetry.{UserProperty, UserPropertyLib}
+
+  @spec log_user_property(T.userid, String.t, map) :: {:error, Ecto.Changeset} | {:ok, UserProperty}
+  defdelegate log_user_property(userid, property_type_name, value), to: UserPropertyLib
+
+  @spec list_user_properties() :: [ComplexServerProperty]
+  defdelegate list_user_properties(), to: UserPropertyLib
+
+  @spec list_user_properties(list) :: [ComplexServerProperty]
+  defdelegate list_user_properties(args), to: UserPropertyLib
+
+  @spec get_user_property!(non_neg_integer) :: ComplexServerProperty
+  defdelegate get_user_property!(id), to: UserPropertyLib
+
+  @spec get_user_property!(non_neg_integer, list) :: ComplexServerProperty
+  defdelegate get_user_property!(id, args), to: UserPropertyLib
+
+  @spec create_user_property() :: {:ok, ComplexServerProperty} | {:error, Ecto.Changeset}
+  defdelegate create_user_property(), to: UserPropertyLib
+
+  @spec create_user_property(map) :: {:ok, ComplexServerProperty} | {:error, Ecto.Changeset}
+  defdelegate create_user_property(attrs), to: UserPropertyLib
+
+  @spec update_user_property(ComplexServerProperty, map) :: {:ok, ComplexServerProperty} | {:error, Ecto.Changeset}
+  defdelegate update_user_property(user_property, attrs), to: UserPropertyLib
+
+  @spec delete_user_property(ComplexServerProperty) :: {:ok, ComplexServerProperty} | {:error, Ecto.Changeset}
+  defdelegate delete_user_property(user_property), to: UserPropertyLib
+
+  @spec change_user_property(ComplexServerProperty) :: Ecto.Changeset
+  defdelegate change_user_property(user_property), to: UserPropertyLib
+
+  @spec change_user_property(ComplexServerProperty, map) :: Ecto.Changeset
+  defdelegate change_user_property(user_property_type, attrs), to: UserPropertyLib
+
+
+
+
+
 
 
   alias Teiserver.Telemetry.{Infolog, InfologLib}

@@ -92,7 +92,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
         [_, event, value64, hash] ->
           case Spring.decode_value(value64) do
             {:ok, value} ->
-              Telemetry.log_client_event(state.userid, event, value, hash)
+              Telemetry.log_complex_client_event(state.userid, event, value, hash)
               "success"
 
             {:error, reason} ->

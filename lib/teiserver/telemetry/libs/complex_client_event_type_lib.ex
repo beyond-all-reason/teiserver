@@ -1,16 +1,15 @@
 defmodule Teiserver.Telemetry.ComplexClientEventTypeLib do
   @moduledoc false
-  use CentralWeb, :library
-  alias Teiserver.Helper.QueryHelpers
-  alias Teiserver.Telemetry.ComplexClientEventType
+  use CentralWeb, :library_newform
+  alias Teiserver.Telemetry.{ComplexClientEventType, ComplexClientEventTypeQueries}
 
   # Helper function
-  @spec get_or_add_client_event_type(String.t()) :: non_neg_integer()
-  def get_or_add_client_event_type(name) do
+  @spec get_or_add_complex_client_event_type(String.t()) :: non_neg_integer()
+  def get_or_add_complex_client_event_type(name) do
     name = String.trim(name)
 
     Central.cache_get_or_store(:telemetry_complex_client_event_types_cache, name, fn ->
-      query = query_client_event_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
+      query = ComplexClientEventTypeQueries.query_complex_client_event_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
       case Repo.all(query) do
         [] ->
           {:ok, event_type} =
@@ -26,92 +25,117 @@ defmodule Teiserver.Telemetry.ComplexClientEventTypeLib do
     end)
   end
 
-  # Queries
-  @spec query_client_event_types(list) :: Ecto.Query.t()
-  def query_client_event_types(args) do
-    query = from(client_event_types in ComplexClientEventType)
+  @doc """
+  Returns the list of complex_client_event_types.
 
-    query
-    |> do_where([id: args[:id]])
-    |> do_where(args[:where])
-    |> do_preload(args[:preload])
-    |> do_order_by(args[:order_by])
-    |> QueryHelpers.query_select(args[:select])
+  ## Examples
+
+      iex> list_complex_client_event_types()
+      [%ComplexClientEventType{}, ...]
+
+  """
+  @spec list_complex_client_event_types() :: [ComplexClientEventType]
+  @spec list_complex_client_event_types(list) :: [ComplexClientEventType]
+  def list_complex_client_event_types(args \\ []) do
+    args
+    |> ComplexClientEventTypeQueries.query_complex_client_event_types()
+    |> Repo.all()
   end
 
-  @spec do_where(Ecto.Query.t(), list | map | nil) :: Ecto.Query.t()
-  defp do_where(query, nil), do: query
+  @doc """
+  Gets a single complex_client_event_type.
 
-  defp do_where(query, params) do
-    params
-    |> Enum.reduce(query, fn {key, value}, query_acc ->
-      _where(query_acc, key, value)
-    end)
+  Raises `Ecto.NoResultsError` if the ComplexClientEventType does not exist.
+
+  ## Examples
+
+      iex> get_complex_client_event_type!(123)
+      %ComplexClientEventType{}
+
+      iex> get_complex_client_event_type!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_complex_client_event_type!(non_neg_integer) :: ComplexClientEventType
+  @spec get_complex_client_event_type!(non_neg_integer, list) :: ComplexClientEventType
+  def get_complex_client_event_type!(id), do: Repo.get!(ComplexClientEventType, id)
+
+  def get_complex_client_event_type!(id, args) do
+    args = args ++ [id: id]
+
+    args
+    |> ComplexClientEventTypeLib.query_complex_client_event_types()
+    |> Repo.one!()
   end
 
-  @spec _where(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
-  defp _where(query, _, ""), do: query
-  defp _where(query, _, nil), do: query
+  @doc """
+  Creates a complex_client_event_type.
 
-  defp _where(query, :id, id) do
-    from client_event_types in query,
-      where: client_event_types.id == ^id
+  ## Examples
+
+      iex> create_complex_client_event_type(%{field: value})
+      {:ok, %ComplexClientEventType{}}
+
+      iex> create_complex_client_event_type(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_complex_client_event_type() :: {:ok, ComplexClientEventType} | {:error, Ecto.Changeset}
+  @spec create_complex_client_event_type(map) :: {:ok, ComplexClientEventType} | {:error, Ecto.Changeset}
+  def create_complex_client_event_type(attrs \\ %{}) do
+    %ComplexClientEventType{}
+    |> ComplexClientEventType.changeset(attrs)
+    |> Repo.insert()
   end
 
-  defp _where(query, :id_in, id_list) do
-    from client_event_types in query,
-      where: client_event_types.id in ^id_list
+  @doc """
+  Updates a complex_client_event_type.
+
+  ## Examples
+
+      iex> update_complex_client_event_type(complex_client_event_type, %{field: new_value})
+      {:ok, %ComplexClientEventType{}}
+
+      iex> update_complex_client_event_type(complex_client_event_type, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_complex_client_event_type(ComplexClientEventType, map) :: {:ok, ComplexClientEventType} | {:error, Ecto.Changeset}
+  def update_complex_client_event_type(%ComplexClientEventType{} = complex_client_event_type, attrs) do
+    complex_client_event_type
+    |> ComplexClientEventType.changeset(attrs)
+    |> Repo.update()
   end
 
-  defp _where(query, :name, name) do
-    from client_event_types in query,
-      where: client_event_types.name == ^name
+  @doc """
+  Deletes a complex_client_event_type.
+
+  ## Examples
+
+      iex> delete_complex_client_event_type(complex_client_event_type)
+      {:ok, %ComplexClientEventType{}}
+
+      iex> delete_complex_client_event_type(complex_client_event_type)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_complex_client_event_type(ComplexClientEventType) :: {:ok, ComplexClientEventType} | {:error, Ecto.Changeset}
+  def delete_complex_client_event_type(%ComplexClientEventType{} = complex_client_event_type) do
+    Repo.delete(complex_client_event_type)
   end
 
-  @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
-  defp do_order_by(query, nil), do: query
-  defp do_order_by(query, params) do
-    params
-    |> Enum.reduce(query, fn key, query_acc ->
-      _order_by(query_acc, key)
-    end)
-  end
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking complex_client_event_type changes.
 
-  defp _order_by(query, nil), do: query
+  ## Examples
 
-  defp _order_by(query, "Name (A-Z)") do
-    from client_event_types in query,
-      order_by: [asc: client_event_types.name]
-  end
+      iex> change_complex_client_event_type(complex_client_event_type)
+      %Ecto.Changeset{data: %ComplexClientEventType{}}
 
-  defp _order_by(query, "Name (Z-A)") do
-    from client_event_types in query,
-      order_by: [desc: client_event_types.name]
-  end
-
-  defp _order_by(query, "ID (Lowest first)") do
-    from client_event_types in query,
-      order_by: [asc: client_event_types.id]
-  end
-
-  defp _order_by(query, "ID (Highest first)") do
-    from client_event_types in query,
-      order_by: [desc: client_event_types.id]
-  end
-
-  @spec do_preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
-  defp do_preload(query, nil), do: query
-
-  defp do_preload(query, preloads) do
-    preloads
-    |> Enum.reduce(query, fn key, query_acc ->
-      _preload(query_acc, key)
-    end)
-  end
-
-  defp _preload(query, :client_events) do
-    from client_event_types in query,
-      join: client_events in assoc(client_event_types, :client_events),
-      preload: [client_events: client_events]
+  """
+  @spec change_complex_client_event_type(ComplexClientEventType) :: Ecto.Changeset
+  @spec change_complex_client_event_type(ComplexClientEventType, map) :: Ecto.Changeset
+  def change_complex_client_event_type(%ComplexClientEventType{} = complex_client_event_type, attrs \\ %{}) do
+    ComplexClientEventType.changeset(complex_client_event_type, attrs)
   end
 end
