@@ -42,8 +42,8 @@ defmodule Teiserver.Account.UserAgeReport do
         params["end_date"]
       )
 
-    start_date_str = start_date |> TimexHelper.date_to_str(format: :ymd_hms)
-    end_date_str = end_date |> TimexHelper.date_to_str(format: :ymd_hms)
+    start_date = start_date |> Timex.to_datetime
+    end_date = end_date |> Timex.to_datetime
 
     type_where =
       case params["game_type"] do
@@ -69,7 +69,7 @@ defmodule Teiserver.Account.UserAgeReport do
     """
 
     user_ids =
-      case Ecto.Adapters.SQL.query(Repo, query, [start_date_str, end_date_str]) do
+      case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
         {:ok, results} ->
           results.rows |> List.flatten()
 
