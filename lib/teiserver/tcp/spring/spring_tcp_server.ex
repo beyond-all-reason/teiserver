@@ -793,13 +793,13 @@ defmodule Teiserver.SpringTcpServer do
     |> Enum.each(fn field ->
       case field do
         :friends ->
-          SpringOut.reply(:friendlist, new_user, nil, state)
+          SpringOut.reply(:friendlist, state.userid, nil, state)
 
         :friend_requests ->
-          SpringOut.reply(:friendlist_request, new_user, nil, state)
+          SpringOut.reply(:friendlist_request, state.userid, nil, state)
 
         :ignored ->
-          SpringOut.reply(:ignorelist, new_user, nil, state)
+          SpringOut.reply(:ignorelist, state.userid, nil, state)
 
         _ ->
           Logger.error("No handler in tcp_server:user_updated with field #{field}")

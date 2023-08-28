@@ -30,7 +30,7 @@ defmodule Teiserver.Battle do
     |> MatchLib.search(args[:search])
     |> MatchLib.preload(args[:preload])
     |> MatchLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
     |> QueryHelpers.limit_query(args[:limit])
   end
 
@@ -491,7 +491,7 @@ defmodule Teiserver.Battle do
     MatchMembershipLib.get_match_memberships()
     |> MatchMembershipLib.search(args[:search])
     |> MatchMembershipLib.preload(args[:joins])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
     # |> QueryHelpers.limit_query(50)
     |> Repo.all()
   end

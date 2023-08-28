@@ -27,7 +27,7 @@ defmodule Central.Account do
     |> UserLib.search(args[:search])
     |> UserLib.preload(args[:joins])
     |> UserLib.order(args[:order])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -135,7 +135,6 @@ defmodule Central.Account do
     Central.cache_delete(:account_user_cache, id)
     Central.cache_delete(:account_user_cache_bang, id)
     Central.cache_delete(:account_membership_cache, id)
-    Central.cache_delete(:communication_user_notifications, id)
     Central.cache_delete(:config_user_cache, id)
   end
 

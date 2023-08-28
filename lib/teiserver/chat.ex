@@ -18,7 +18,7 @@ defmodule Teiserver.Chat do
     |> RoomMessageLib.search(args[:search])
     |> RoomMessageLib.preload(args[:preload])
     |> RoomMessageLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
     |> QueryHelpers.limit_query(args[:limit] || 50)
     |> QueryHelpers.offset_query(args[:offset] || 0)
   end
@@ -174,7 +174,7 @@ defmodule Teiserver.Chat do
     |> LobbyMessageLib.search(args[:search])
     |> LobbyMessageLib.preload(args[:preload])
     |> LobbyMessageLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
     |> QueryHelpers.limit_query(args[:limit] || 50)
     |> QueryHelpers.offset_query(args[:offset] || 0)
   end
@@ -330,7 +330,7 @@ defmodule Teiserver.Chat do
     |> PartyMessageLib.search(args[:search])
     |> PartyMessageLib.preload(args[:preload])
     |> PartyMessageLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
     |> QueryHelpers.limit_query(args[:limit] || 50)
     |> QueryHelpers.offset_query(args[:offset] || 0)
   end

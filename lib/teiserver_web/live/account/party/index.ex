@@ -162,8 +162,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
   defp list_parties(socket) do
     parties =
       socket.assigns.user_id
-      |> Account.get_user_by_id()
-      |> Map.get(:friends)
+      |> Account.list_friend_ids_of_user()
       |> Kernel.++([socket.assigns.user_id])
       |> Enum.map(fn user_id -> Account.get_client_by_id(user_id) end)
       |> Enum.reject(&(&1 == nil))

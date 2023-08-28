@@ -88,7 +88,7 @@
     name: "profile",
     text: "Profile",
     icon_class: "fa-solid",
-    link: Routes.ts_account_profile_path(@conn, :show, @user.id)
+    link: ~p"/profile/#{@user.id}"
   ) %>
 
   <div class="col-md-12">

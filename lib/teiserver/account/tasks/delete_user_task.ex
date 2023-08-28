@@ -21,6 +21,10 @@ defmodule Teiserver.Admin.DeleteUserTask do
 
     Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
+    # Relationships
+    query = "DELETE FROM account_relationships WHERE to_user_id = ANY($1) OR from_user_id = ANY($1)"
+    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+
     # Events/Properties
     query = "DELETE FROM teiserver_telemetry_client_events WHERE user_id = ANY($1)"
     Ecto.Adapters.SQL.query!(Repo, query, [id_list])

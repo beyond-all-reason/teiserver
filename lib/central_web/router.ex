@@ -232,15 +232,46 @@ defmodule TeiserverWeb.Router do
     get("/gdpr", GeneralController, :gdpr)
   end
 
-  # ts_account_X_path
+  scope "/account", TeiserverWeb.Account do
+    pipe_through([:live_browser, :standard_live_layout, :protected])
+
+    live_session :relationships,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Communication.NotificationPlug, :load_notifications}
+      ] do
+        live "/relationship", RelationshipLive.Index, :friend
+        live "/relationship/friend", RelationshipLive.Index, :friend
+        live "/relationship/follow", RelationshipLive.Index, :follow
+        live "/relationship/avoid", RelationshipLive.Index, :avoid
+        live "/relationship/search", RelationshipLive.Index, :search
+    end
+  end
+
+  scope "/profile", TeiserverWeb.Account do
+    pipe_through([:browser, :standard_live_layout])
+
+    live_session :profiles,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :mount_current_user},
+        {Teiserver.Communication.NotificationPlug, :load_notifications}
+      ] do
+        live "/", ProfileLive.Self, :index
+        live "/name/:username", ProfileLive.Username, :index
+
+        live "/:userid", ProfileLive.Overview, :overview
+        live "/:userid/overview", ProfileLive.Overview, :overview
+        live "/:userid/accolades", ProfileLive.Accolades, :accolades
+        live "/:userid/matches", ProfileLive.Matches, :matches
+        live "/:userid/playtime", ProfileLive.Playtime, :playtime
+        live "/:userid/achievements", ProfileLive.Achievements, :achievements
+        live "/:userid/settings", ProfileLive.Settings, :settings
+        live "/:userid/relationships", ProfileLive.Relationships, :relationships
+    end
+  end
+
   scope "/teiserver/account", TeiserverWeb.Account, as: :ts_account do
     pipe_through([:browser, :standard_layout, :protected])
-
-    get("/relationships", RelationshipsController, :index)
-    post("/relationships/find/", RelationshipsController, :find)
-    post("/relationships/create/:action/:target", RelationshipsController, :create)
-    put("/relationships/update/:action/:target", RelationshipsController, :update)
-    delete("/relationships/delete/:action/:target", RelationshipsController, :delete)
 
     resources("/preferences", PreferencesController, only: [:index, :edit, :update, :new, :create])
 
@@ -255,31 +286,6 @@ defmodule TeiserverWeb.Router do
     get("/security/edit_password", SecurityController, :edit_password)
     put("/security/update_password", SecurityController, :update_password)
     delete("/security/delete_token/:id", SecurityController, :delete_token)
-  end
-
-  scope "/teiserver", TeiserverWeb.Account, as: :ts_account do
-    pipe_through([:browser, :standard_layout])
-
-    get("/profile/:id", ProfileController, :show)
-    get("/profile", ProfileController, :index)
-  end
-
-  # ts_clans_X_path
-  scope "/teiserver/clans", TeiserverWeb.Clans, as: :ts_clans do
-    pipe_through([:browser, :standard_layout, :protected])
-
-    get("/", ClanController, :index)
-    get("/:name", ClanController, :show)
-    put("/update/:clan_id", ClanController, :update)
-
-    get("/set_default/:id", ClanController, :set_default)
-    post("/create_invite", ClanController, :create_invite)
-    delete("/delete_invite/:clan_id/:user_id", ClanController, :delete_invite)
-    put("/respond_to_invite/:clan_id/:response", ClanController, :respond_to_invite)
-    delete("/delete_membership/:clan_id/:user_id", ClanController, :delete_membership)
-    put("/promote/:clan_id/:user_id", ClanController, :promote)
-    put("/demote/:clan_id/:user_id", ClanController, :demote)
-    put("/leave_clan/:clan_id", ClanController, :leave_clan)
   end
 
   scope "/teiserver/games", TeiserverWeb.Game, as: :ts_game do
@@ -593,13 +599,6 @@ defmodule TeiserverWeb.Router do
     get("/tools", ToolController, :index)
     get("/tools/falist", ToolController, :falist)
     get("/tools/test_page", ToolController, :test_page)
-
-    post("/clans/create_membership", ClanController, :create_membership)
-    delete("/clans/delete_membership/:clan_id/:user_id", ClanController, :delete_membership)
-    delete("/clans/delete_invite/:clan_id/:user_id", ClanController, :delete_invite)
-    put("/clans/promote/:clan_id/:user_id", ClanController, :promote)
-    put("/clans/demote/:clan_id/:user_id", ClanController, :demote)
-    resources("/clans", ClanController)
 
     get("/users/rename_form/:id", UserController, :rename_form)
     put("/users/rename_post/:id", UserController, :rename_post)

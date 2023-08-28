@@ -18,7 +18,8 @@ defmodule Teiserver.Tachyon.CommandDispatch do
     Handlers.System.DisconnectRequest,
     Handlers.System.ForceErrorRequest,
     Handlers.Telemetry.EventRequest,
-    Handlers.Telemetry.PropertyRequest
+    Handlers.Telemetry.PropertyRequest,
+    Handlers.System.PingRequest
   ]
 
   def dispatch(conn, object, meta) do

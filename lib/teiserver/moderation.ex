@@ -33,7 +33,7 @@ defmodule Teiserver.Moderation do
     |> ReportLib.search(args[:search])
     |> ReportLib.preload(args[:preload])
     |> ReportLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -240,7 +240,7 @@ defmodule Teiserver.Moderation do
     |> ResponseLib.search(args[:search])
     |> ResponseLib.preload(args[:preload])
     |> ResponseLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -427,7 +427,7 @@ defmodule Teiserver.Moderation do
     |> ActionLib.search(args[:search])
     |> ActionLib.preload(args[:preload])
     |> ActionLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -614,7 +614,7 @@ defmodule Teiserver.Moderation do
     |> ProposalLib.search(args[:search])
     |> ProposalLib.preload(args[:preload])
     |> ProposalLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -878,7 +878,7 @@ defmodule Teiserver.Moderation do
     |> BanLib.search(args[:search])
     |> BanLib.preload(args[:preload])
     |> BanLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """

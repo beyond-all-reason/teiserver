@@ -7,11 +7,13 @@ defmodule Fontawesome do
   """
   use Phoenix.Component
 
-  attr :icon, :string, required: true
+  attr :icon, :string
+  attr :icon_atom, :atom
   attr :class, :string, default: ""
   attr :size, :string, default: nil
   attr :weight, :string, default: "regular"
   attr :style, :string, default: "regular"
+  attr :css_style, :string, default: ""
 
   @spec icon(map) :: Phoenix.LiveView.Rendered.t()
   def icon(assigns) do
@@ -20,7 +22,7 @@ defmodule Fontawesome do
     weight = fa_prefix(assigns[:weight])
 
     icon_name = if is_atom(assigns[:icon]) do
-      icon_lookup(assigns[:icon])
+      icon_lookup(assigns[:icon] || assigns[:icon_atom])
     else
       fa_prefix(assigns[:icon])
     end
@@ -29,7 +31,7 @@ defmodule Fontawesome do
       |> assign(:class, "fa-fw #{style} #{size} #{weight} #{icon_name} #{assigns[:class]}")
 
     ~H"""
-    <i class={@class}></i>
+    <i class={@class} style={@css_style}></i>
     """
   end
 
