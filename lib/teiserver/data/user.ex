@@ -96,8 +96,6 @@ defmodule Teiserver.User do
 
   def default_data(), do: @default_data
 
-  def get_rank_levels(), do: @rank_levels
-
   @spec clean_name(String.t()) :: String.t()
   def clean_name(name) do
     ~r/([^a-zA-Z0-9_\[\]\{\}]|\s)/
