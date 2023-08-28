@@ -1,5 +1,6 @@
 defmodule Teiserver.Telemetry.AnonPropertyQueries do
-  use CentralWeb, :library
+  @moduledoc false
+  use CentralWeb, :queries
   alias Teiserver.Telemetry.AnonProperty
 
   # Queries

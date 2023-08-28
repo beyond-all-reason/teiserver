@@ -1,5 +1,6 @@
 defmodule Teiserver.Telemetry.UserPropertyQueries do
-  use CentralWeb, :library
+  @moduledoc false
+  use CentralWeb, :queries
   alias Teiserver.Telemetry.UserProperty
 
   # Queries
