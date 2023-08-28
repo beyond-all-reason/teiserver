@@ -70,7 +70,7 @@ defmodule Teiserver.Telemetry.PropertyTypeLib do
     args = args ++ [id: id]
 
     args
-    |> PropertyTypeLib.query_property_types()
+    |> PropertyTypeQueries.query_property_types()
     |> Repo.one!()
   end
 

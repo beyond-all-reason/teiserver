@@ -2,7 +2,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEventLib do
   @moduledoc false
   use CentralWeb, :library_newform
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.ComplexMatchEvent
+  alias Teiserver.Telemetry.{ComplexMatchEvent, ComplexMatchEventQueries}
   alias Phoenix.PubSub
 
   @broadcast_event_types ~w()
@@ -13,15 +13,16 @@ defmodule Teiserver.Telemetry.ComplexMatchEventLib do
   @spec icon() :: String.t()
   def icon(), do: "fa-sliders-up"
 
-  @spec log_complex_match_event(T.userid, T.match_id, String, map()) :: {:error, Ecto.Changeset} | {:ok, ComplexLobbyEvent}
-  def log_complex_match_event(userid, match_id, event_type_name, value) when is_integer(userid) do
+  @spec log_complex_match_event(T.userid, T.match_id, String, non_neg_integer, map()) :: {:error, Ecto.Changeset} | {:ok, ComplexLobbyEvent}
+  def log_complex_match_event(userid, match_id, event_type_name, game_time, value) when is_integer(userid) and is_integer(game_time) do
     event_type_id = Telemetry.get_or_add_complex_match_event_type(event_type_name)
 
     result = create_complex_match_event(%{
       user_id: userid,
       event_type_id: event_type_id,
-      value: value,
-      timestamp: Timex.now()
+      match_id: match_id,
+      game_time: game_time,
+      value: value
     })
 
     case result do
@@ -35,6 +36,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEventLib do
               match_id: match_id,
               userid: userid,
               event_type_name: event_type_name,
+              game_time: game_time,
               event_value: value
             }
           )

@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.ExportSimpleMatchEventsTask
+  alias Teiserver.Telemetry.{ExportSimpleMatchEventsTask, SimpleMatchEventQueries}
   require Logger
 
   plug(AssignPlug,
@@ -31,7 +31,7 @@ defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
       between: between
     ]
 
-    match_events = Telemetry.get_match_events_summary(args)
+    match_events = SimpleMatchEventQueries.get_match_events_summary(args)
 
     event_types =
       Map.keys(match_events)
@@ -46,7 +46,7 @@ defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
 
   @spec detail(Plug.Conn.t(), map) :: Plug.Conn.t()
   def detail(conn, %{"event_name" => event_name} = params) do
-    event_type_id = Telemetry.SimpleMatchEventTypeLib.get_or_add_match_event_type(event_name)
+    event_type_id = Telemetry.get_or_add_simple_match_event_type(event_name)
     tf = Map.get(params, "tf", "7 days")
 
     start_date =
@@ -60,7 +60,7 @@ defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
       end
 
     match_event_data =
-      Telemetry.list_match_events(
+      Telemetry.list_simple_match_events(
         search: [
           event_type_id: event_type_id,
           between: {start_date, Timex.now()}
@@ -92,7 +92,7 @@ defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
   @spec export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def export_form(conn, _params) do
     conn
-    |> assign(:event_types, Telemetry.list_match_event_types(order_by: ["Name (A-Z)"]))
+    |> assign(:event_types, Telemetry.list_simple_match_event_types(order_by: ["Name (A-Z)"]))
     |> render("export_form.html")
   end
 

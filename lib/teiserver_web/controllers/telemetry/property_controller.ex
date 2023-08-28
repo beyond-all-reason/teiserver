@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Telemetry.PropertyController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.ExportPropertiesTask
+  alias Teiserver.Telemetry.{AnonPropertyQueries, UserPropertyQueries, ExportPropertiesTask}
   require Logger
 
   plug(AssignPlug,
@@ -31,19 +31,19 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
       between: between
     ]
 
-    client_properties = Telemetry.get_client_properties_summary(args)
-    unauth_properties = Telemetry.get_unauth_properties_summary(args)
+    user_properties = UserPropertyQueries.get_user_properties_summary(args)
+    anon_properties = AnonPropertyQueries.get_anon_properties_summary(args)
 
     property_types =
-      (Map.keys(client_properties) ++ Map.keys(unauth_properties))
+      (Map.keys(user_properties) ++ Map.keys(anon_properties))
       |> Enum.uniq()
       |> Enum.sort()
 
     conn
     |> assign(:timeframe, timeframe)
     |> assign(:property_types, property_types)
-    |> assign(:client_properties, client_properties)
-    |> assign(:unauth_properties, unauth_properties)
+    |> assign(:user_properties, user_properties)
+    |> assign(:anon_properties, anon_properties)
     |> render("summary.html")
   end
 
@@ -51,25 +51,25 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
   def detail(conn, %{"property_name" => property_name} = _params) do
     property_type_id = Telemetry.get_or_add_property_type(property_name)
 
-    client_counts =
-      Telemetry.list_client_properties(search: [property_type_id: property_type_id])
+    user_counts =
+      Telemetry.list_user_properties(search: [property_type_id: property_type_id])
       |> Enum.group_by(fn p -> p.value end)
       |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
 
-    unauth_counts =
-      Telemetry.list_unauth_properties(search: [property_type_id: property_type_id])
+    anon_counts =
+      Telemetry.list_anon_properties(search: [property_type_id: property_type_id])
       |> Enum.group_by(fn p -> p.value end)
       |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
 
     combined_values =
-      (Map.keys(client_counts) ++ Map.keys(unauth_counts))
+      (Map.keys(user_counts) ++ Map.keys(anon_counts))
       |> Enum.uniq()
       |> Enum.sort()
 
     conn
     |> assign(:property_name, property_name)
-    |> assign(:client_counts, client_counts)
-    |> assign(:unauth_counts, unauth_counts)
+    |> assign(:user_counts, user_counts)
+    |> assign(:anon_counts, anon_counts)
     |> assign(:combined_values, combined_values)
     |> render("detail.html")
   end

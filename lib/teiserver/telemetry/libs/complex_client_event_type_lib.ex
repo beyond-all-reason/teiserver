@@ -64,7 +64,7 @@ defmodule Teiserver.Telemetry.ComplexClientEventTypeLib do
     args = args ++ [id: id]
 
     args
-    |> ComplexClientEventTypeLib.query_complex_client_event_types()
+    |> ComplexClientEventTypeQueries.query_complex_client_event_types()
     |> Repo.one!()
   end
 

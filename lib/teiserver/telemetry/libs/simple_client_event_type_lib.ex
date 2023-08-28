@@ -64,7 +64,7 @@ defmodule Teiserver.Telemetry.SimpleClientEventTypeLib do
     args = args ++ [id: id]
 
     args
-    |> SimpleClientEventTypeLib.query_simple_client_event_types()
+    |> SimpleClientEventTypeQueries.query_simple_client_event_types()
     |> Repo.one!()
   end
 

@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.ExportComplexMatchEventsTask
+  alias Teiserver.Telemetry.{ExportComplexMatchEventsTask, ComplexMatchEventQueries}
   require Logger
 
   plug(AssignPlug,
@@ -31,7 +31,7 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
       between: between
     ]
 
-    complex_match_events = Telemetry.get_complex_match_events_summary(args)
+    complex_match_events = ComplexMatchEventQueries.get_complex_match_events_summary(args)
 
     event_types = complex_match_events
       |> Map.keys()
@@ -47,7 +47,7 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
 
   @spec detail(Plug.Conn.t(), map) :: Plug.Conn.t()
   def detail(conn, %{"event_name" => event_name} = params) do
-    event_type_id = Telemetry.ComplexMatchEventTypeLib.get_or_add_complex_match_event_type(event_name)
+    event_type_id = Telemetry.get_or_add_complex_match_event_type(event_name)
     tf = Map.get(params, "tf", "7 days")
 
     start_date =

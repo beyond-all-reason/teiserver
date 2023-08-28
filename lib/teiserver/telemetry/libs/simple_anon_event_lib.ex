@@ -13,14 +13,13 @@ defmodule Teiserver.Telemetry.SimpleAnonEventLib do
   @spec icon() :: String.t
   def icon(), do: "fa-sliders-up"
 
-  @spec log_simple_anon_event(String.t, String.t, map) :: {:error, Ecto.Changeset} | {:ok, SimpleAnonEvent}
-  def log_simple_anon_event(hash, event_type_name, value) do
+  @spec log_simple_anon_event(String.t, String.t) :: {:error, Ecto.Changeset} | {:ok, SimpleAnonEvent}
+  def log_simple_anon_event(hash, event_type_name) do
     event_type_id = Telemetry.get_or_add_simple_client_event_type(event_type_name)
 
     result = create_simple_anon_event(%{
       hash: hash,
       event_type_id: event_type_id,
-      value: value,
       timestamp: Timex.now()
     })
 
@@ -33,8 +32,7 @@ defmodule Teiserver.Telemetry.SimpleAnonEventLib do
             %{
               channel: "telemetry_simple_anon_events",
               hash: hash,
-              event_type_name: event_type_name,
-              event_value: value
+              event_type_name: event_type_name
             }
           )
         end

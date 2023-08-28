@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.ExportComplexClientEventsTask
+  alias Teiserver.Telemetry.{ComplexClientEventQueries, ComplexAnonEventQueries, ExportComplexClientEventsTask}
   require Logger
 
   plug(AssignPlug,
@@ -31,11 +31,11 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
       between: between
     ]
 
-    client_events = Telemetry.get_client_events_summary(args)
-    unauth_events = Telemetry.get_unauth_events_summary(args)
+    client_events = ComplexClientEventQueries.get_complex_client_events_summary(args)
+    anon_events = ComplexAnonEventQueries.get_complex_anon_events_summary(args)
 
     event_types =
-      (Map.keys(client_events) ++ Map.keys(unauth_events))
+      (Map.keys(client_events) ++ Map.keys(anon_events))
       |> Enum.uniq()
       |> Enum.sort()
 
@@ -43,13 +43,13 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
     |> assign(:timeframe, timeframe)
     |> assign(:event_types, event_types)
     |> assign(:client_events, client_events)
-    |> assign(:unauth_events, unauth_events)
+    |> assign(:anon_events, anon_events)
     |> render("summary.html")
   end
 
   @spec detail(Plug.Conn.t(), map) :: Plug.Conn.t()
   def detail(conn, %{"event_name" => event_name} = params) do
-    event_type_id = Telemetry.ComplexClientEventTypeLib.get_or_add_client_event_type(event_name)
+    event_type_id = Telemetry.get_or_add_complex_client_event_type(event_name)
     tf = Map.get(params, "tf", "7 days")
 
     start_date =
@@ -63,7 +63,7 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
       end
 
     client_data =
-      Telemetry.list_client_events(
+      Telemetry.list_complex_client_events(
         search: [
           event_type_id: event_type_id,
           between: {start_date, Timex.now()}
@@ -71,8 +71,8 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
         limit: 500
       )
 
-    unauth_data =
-      Telemetry.list_client_events(
+    anon_data =
+      Telemetry.list_complex_client_events(
         search: [
           event_type_id: event_type_id,
           between: {start_date, Timex.now()}
@@ -81,7 +81,7 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
       )
 
     schema_keys =
-      (client_data ++ unauth_data)
+      (client_data ++ anon_data)
       |> Stream.map(fn event -> Map.keys(event.value) end)
       |> Enum.to_list()
       |> List.flatten()
@@ -95,13 +95,13 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
       |> Enum.group_by(fn event -> Map.get(event.value, key, nil) end)
       |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
 
-    unauth_counts =
-      unauth_data
+    anon_counts =
+      anon_data
       |> Enum.group_by(fn event -> Map.get(event.value, key, nil) end)
       |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
 
     combined_values =
-      (Map.keys(client_counts) ++ Map.keys(unauth_counts))
+      (Map.keys(client_counts) ++ Map.keys(anon_counts))
       |> Enum.uniq()
       |> Enum.sort()
 
@@ -111,7 +111,7 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
     |> assign(:tf, tf)
     |> assign(:event_name, event_name)
     |> assign(:client_counts, client_counts)
-    |> assign(:unauth_counts, unauth_counts)
+    |> assign(:anon_counts, anon_counts)
     |> assign(:schema_keys, schema_keys)
     |> assign(:combined_values, combined_values)
     |> render("detail.html")
@@ -120,7 +120,7 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
   @spec export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def export_form(conn, _params) do
     conn
-    |> assign(:event_types, Telemetry.list_client_event_types(order_by: ["Name (A-Z)"]))
+    |> assign(:event_types, Telemetry.list_complex_client_event_types(order_by: ["Name (A-Z)"]))
     |> render("export_form.html")
   end
 

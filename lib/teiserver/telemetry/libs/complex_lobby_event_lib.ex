@@ -2,7 +2,7 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventLib do
   @moduledoc false
   use CentralWeb, :library_newform
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.ComplexLobbyEvent
+  alias Teiserver.Telemetry.{ComplexLobbyEvent, ComplexLobbyEventQueries}
   alias Phoenix.PubSub
 
   @broadcast_event_types ~w()

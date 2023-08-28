@@ -4,9 +4,9 @@ defmodule Teiserver.Telemetry.SimpleMatchEventTypeQueries do
   alias Teiserver.Telemetry.SimpleMatchEventType
 
   # Queries
-  @spec query_complex_match_event_types(list) :: Ecto.Query.t()
-  def query_complex_match_event_types(args) do
-    query = from(complex_match_event_types in SimpleMatchEventType)
+  @spec query_simple_match_event_types(list) :: Ecto.Query.t()
+  def query_simple_match_event_types(args) do
+    query = from(simple_match_event_types in SimpleMatchEventType)
 
     query
     |> do_where([id: args[:id]])
@@ -31,18 +31,18 @@ defmodule Teiserver.Telemetry.SimpleMatchEventTypeQueries do
   defp _where(query, _, nil), do: query
 
   defp _where(query, :id, id) do
-    from complex_match_event_types in query,
-      where: complex_match_event_types.id == ^id
+    from simple_match_event_types in query,
+      where: simple_match_event_types.id == ^id
   end
 
   defp _where(query, :id_in, id_list) do
-    from complex_match_event_types in query,
-      where: complex_match_event_types.id in ^id_list
+    from simple_match_event_types in query,
+      where: simple_match_event_types.id in ^id_list
   end
 
   defp _where(query, :name, name) do
-    from complex_match_event_types in query,
-      where: complex_match_event_types.name == ^name
+    from simple_match_event_types in query,
+      where: simple_match_event_types.name == ^name
   end
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
@@ -57,23 +57,23 @@ defmodule Teiserver.Telemetry.SimpleMatchEventTypeQueries do
   defp _order_by(query, nil), do: query
 
   defp _order_by(query, "Name (A-Z)") do
-    from complex_match_event_types in query,
-      order_by: [asc: complex_match_event_types.name]
+    from simple_match_event_types in query,
+      order_by: [asc: simple_match_event_types.name]
   end
 
   defp _order_by(query, "Name (Z-A)") do
-    from complex_match_event_types in query,
-      order_by: [desc: complex_match_event_types.name]
+    from simple_match_event_types in query,
+      order_by: [desc: simple_match_event_types.name]
   end
 
   defp _order_by(query, "ID (Lowest first)") do
-    from complex_match_event_types in query,
-      order_by: [asc: complex_match_event_types.id]
+    from simple_match_event_types in query,
+      order_by: [asc: simple_match_event_types.id]
   end
 
   defp _order_by(query, "ID (Highest first)") do
-    from complex_match_event_types in query,
-      order_by: [desc: complex_match_event_types.id]
+    from simple_match_event_types in query,
+      order_by: [desc: simple_match_event_types.id]
   end
 
   @spec do_preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
@@ -86,9 +86,9 @@ defmodule Teiserver.Telemetry.SimpleMatchEventTypeQueries do
     end)
   end
 
-  defp _preload(query, :complex_match_events) do
-    from complex_match_event_types in query,
-      join: complex_match_events in assoc(complex_match_event_types, :complex_match_events),
-      preload: [complex_match_events: complex_match_events]
+  defp _preload(query, :simple_match_events) do
+    from simple_match_event_types in query,
+      join: simple_match_events in assoc(simple_match_event_types, :simple_match_events),
+      preload: [simple_match_events: simple_match_events]
   end
 end

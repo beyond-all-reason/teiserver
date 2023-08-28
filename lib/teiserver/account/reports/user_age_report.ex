@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.UserAgeReport do
   @moduledoc false
-  alias Teiserver.Helper.{DatePresets, TimexHelper}
+  alias Teiserver.Helper.DatePresets
   alias Teiserver.{Account}
   alias Teiserver.Repo
 

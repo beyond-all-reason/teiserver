@@ -1,4 +1,5 @@
 defmodule Teiserver.Startup do
+  @moduledoc false
   use CentralWeb, :startup
   require Logger
   alias Phoenix.PubSub

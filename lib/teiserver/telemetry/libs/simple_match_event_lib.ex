@@ -13,15 +13,15 @@ defmodule Teiserver.Telemetry.SimpleMatchEventLib do
   @spec icon() :: String.t
   def icon(), do: "fa-sliders-up"
 
-  @spec log_simple_match_event(T.userid, T.match_id, String.t) :: {:error, Ecto.Changeset} | {:ok, SimpleMatchEvent}
-  def log_simple_match_event(userid, match_id, event_type_name) when is_integer(userid) do
+  @spec log_simple_match_event(T.userid, T.match_id, String.t, non_neg_integer) :: {:error, Ecto.Changeset} | {:ok, SimpleMatchEvent}
+  def log_simple_match_event(userid, match_id, event_type_name, game_time) when is_integer(userid) and is_integer(game_time) do
     event_type_id = Telemetry.get_or_add_simple_match_event_type(event_type_name)
 
     result = create_simple_match_event(%{
       user_id: userid,
       event_type_id: event_type_id,
       match_id: match_id,
-      timestamp: Timex.now()
+      game_time: game_time
     })
 
     case result do
@@ -34,6 +34,7 @@ defmodule Teiserver.Telemetry.SimpleMatchEventLib do
               channel: "telemetry_simple_match_events",
               userid: userid,
               match_id: match_id,
+              game_time: game_time,
               event_type_name: event_type_name
             }
           )

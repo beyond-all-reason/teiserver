@@ -4,98 +4,106 @@ defmodule Teiserver.Telemetry.UserPropertyQueries do
   alias Teiserver.Telemetry.UserProperty
 
   # Queries
-  @spec query_user_properties() :: Ecto.Query.t()
-  def query_user_properties do
-    from(user_properties in UserProperty)
+  @spec query_user_properties(list) :: Ecto.Query.t()
+  def query_user_properties(args) do
+    query = from(user_properties in UserProperty)
+
+    query
+    |> do_where([id: args[:id]])
+    |> do_where(args[:where])
+    |> do_preload(args[:preload])
+    |> do_order_by(args[:order_by])
+    |> query_select(args[:select])
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
-  def search(query, nil), do: query
+  @spec do_where(Ecto.Query.t(), list | map | nil) :: Ecto.Query.t()
+  defp do_where(query, nil), do: query
 
-  def search(query, params) do
+  defp do_where(query, params) do
     params
     |> Enum.reduce(query, fn {key, value}, query_acc ->
-      _search(query_acc, key, value)
+      _where(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
-  def _search(query, _, ""), do: query
-  def _search(query, _, nil), do: query
+  @spec _where(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
+  defp _where(query, _, ""), do: query
+  defp _where(query, _, nil), do: query
 
-  def _search(query, :user_id, user_id) do
+  defp _where(query, :id, id) do
     from user_properties in query,
-      where: user_properties.user_id == ^user_id
+      where: user_properties.id == ^id
   end
 
-  def _search(query, :name, name) do
+  defp _where(query, :between, {start_date, end_date}) do
     from user_properties in query,
-      where: user_properties.name == ^name
+      where: between(user_properties.timestamp, ^start_date, ^end_date)
   end
 
-  def _search(query, :id_list, id_list) do
+  defp _where(query, :event_type_id, event_type_id) do
     from user_properties in query,
-      where: user_properties.id in ^id_list
+      where: user_properties.event_type_id == ^event_type_id
   end
 
-  def _search(query, :basic_search, ref) do
-    ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
-
+  defp _where(query, :event_type_id_in, event_type_ids) do
     from user_properties in query,
-      where: ilike(user_properties.name, ^ref_like)
+      where: user_properties.event_type_id in ^event_type_ids
   end
 
-  def _search(query, :property_type_id, property_type_id) do
+  @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
+  defp do_order_by(query, nil), do: query
+  defp do_order_by(query, params) do
+    params
+    |> Enum.reduce(query, fn key, query_acc ->
+      _order_by(query_acc, key)
+    end)
+  end
+
+  defp _order_by(query, nil), do: query
+
+  defp _order_by(query, "Newest first") do
     from user_properties in query,
-      where: user_properties.property_type_id == ^property_type_id
+      order_by: [desc: user_properties.timestamp]
   end
 
-  def _search(query, :between, {start_date, end_date}) do
+  defp _order_by(query, "Oldest first") do
     from user_properties in query,
-      where: between(user_properties.last_updated, ^start_date, ^end_date)
+      order_by: [asc: user_properties.timestamp]
   end
 
-  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
-  def order_by(query, nil), do: query
+  @spec do_preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  defp do_preload(query, nil), do: query
 
-  def order_by(query, "Name (A-Z)") do
-    from user_properties in query,
-      order_by: [asc: user_properties.name]
+  defp do_preload(query, preloads) do
+    preloads
+    |> Enum.reduce(query, fn key, query_acc ->
+      _preload(query_acc, key)
+    end)
   end
 
-  def order_by(query, "Name (Z-A)") do
-    from user_properties in query,
-      order_by: [desc: user_properties.name]
-  end
-
-  def order_by(query, "Newest first") do
-    from user_properties in query,
-      order_by: [desc: user_properties.inserted_at]
-  end
-
-  def order_by(query, "Oldest first") do
-    from user_properties in query,
-      order_by: [asc: user_properties.inserted_at]
-  end
-
-  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
-  def preload(query, nil), do: query
-
-  def preload(query, preloads) do
-    query = if :property_type in preloads, do: _preload_property_types(query), else: query
-    query = if :user in preloads, do: _preload_users(query), else: query
-    query
-  end
-
-  def _preload_property_types(query) do
+  def _preload(query, :property_type) do
     from user_properties in query,
       left_join: property_types in assoc(user_properties, :property_type),
       preload: [property_type: property_types]
   end
 
-  def _preload_users(query) do
+  def _preload(query, :users) do
     from user_properties in query,
       left_join: users in assoc(user_properties, :user),
       preload: [user: users]
+  end
+
+  @spec get_user_properties_summary(list) :: map()
+  def get_user_properties_summary(args) do
+    query =
+      from user_properties in UserProperty,
+        join: event_types in assoc(user_properties, :event_type),
+        group_by: event_types.name,
+        select: {event_types.name, count(user_properties.event_type_id)}
+
+    query
+    |> do_where(args)
+    |> Repo.all()
+    |> Map.new()
   end
 end
