@@ -20,13 +20,13 @@ defmodule Teiserver.TeiserverQuickActions do
         %{
           label: "My profile",
           icons: ["fa-solid fa-user-circle"],
-          url: ~p"/teiserver/profile",
+          url: ~p"/profile",
           permissions: "account"
         },
         %{
           label: "Friends/Mutes/Invites",
           icons: [Teiserver.icon(:relationship)],
-          url: ~p"/teiserver/account/relationships",
+          url: ~p"/account/relationship",
           permissions: "account"
         },
         %{

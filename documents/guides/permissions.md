@@ -5,9 +5,6 @@ Permissions are built from 3 parts e.g. `logging.audit.show`. If you have one pa
 
 Teiserver is built on the Central template and has thus already got the following permission groups `admin`, `communication` and `logging`. Teiserver adds an extra group `teiserver` where all Teiserver specific permissions will sit.
 
-## Groups
-Permissions control access to functionality groups control access to data. In this case the vast majority of the data is public but clans will make use of the group functionality to limit access to certain data specific to clans. Later Tournaments will be able to make use of the same functionality.
-
 In summary:
 - Permissions limit what you can do with data
 - Groups limit what data you can access
@@ -21,4 +18,4 @@ In summary:
 - API: Allows for access to the REST API, barely started and possibly to be discarded in the future depending on demand
 - Player: Used to mark an account as being a Teiserver account, may also be discontinued in the future
 
-Each of these sections subdivides further (e.g. admin has account, battle, clan and queue permissions).
+Each of these sections subdivides further (e.g. admin has account, battle and queue permissions).

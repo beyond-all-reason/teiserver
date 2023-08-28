@@ -1,4 +1,5 @@
 defmodule Teiserver.Account do
+  @moduledoc false
   import Ecto.Query, warn: false
   alias Teiserver.Repo
   require Logger
@@ -27,7 +28,7 @@ defmodule Teiserver.Account do
     |> UserLib.preload(args[:joins])
     |> UserLib.order_by(args[:order_by])
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
     |> Repo.all()
   end
 
@@ -230,7 +231,7 @@ defmodule Teiserver.Account do
     UserStatLib.query_user_stats()
     |> UserStatLib.search(%{user_id: id})
     |> UserStatLib.search(args[:search])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -352,7 +353,7 @@ defmodule Teiserver.Account do
     |> BadgeTypeLib.search(args[:search])
     |> BadgeTypeLib.preload(args[:preload])
     |> BadgeTypeLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -507,7 +508,7 @@ defmodule Teiserver.Account do
     |> AccoladeLib.search(args[:search])
     |> AccoladeLib.preload(args[:preload])
     |> AccoladeLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -662,7 +663,7 @@ defmodule Teiserver.Account do
     |> SmurfKeyLib.search(args[:search])
     |> SmurfKeyLib.preload(args[:preload])
     |> SmurfKeyLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -862,7 +863,7 @@ defmodule Teiserver.Account do
     |> SmurfKeyTypeLib.search(args[:search])
     |> SmurfKeyTypeLib.preload(args[:preload])
     |> SmurfKeyTypeLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -980,7 +981,7 @@ defmodule Teiserver.Account do
     |> RatingLib.search(args[:search])
     |> RatingLib.preload(args[:preload])
     |> RatingLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
     |> QueryHelpers.limit_query(args[:limit] || 50)
   end
 
@@ -1144,7 +1145,7 @@ defmodule Teiserver.Account do
     |> CodeLib.search(args[:search])
     |> CodeLib.preload(args[:preload])
     |> CodeLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -1286,7 +1287,7 @@ defmodule Teiserver.Account do
     |> UserTokenLib.search(args[:search])
     |> UserTokenLib.preload(args[:preload])
     |> UserTokenLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -1435,6 +1436,544 @@ defmodule Teiserver.Account do
     |> binary_part(0, length)
   end
 
+  alias Teiserver.Account.{Relationship, RelationshipLib, RelationshipQueries}
+
+  @doc """
+  Returns the list of relationships.
+
+  ## Examples
+
+      iex> list_relationships()
+      [%Relationship{}, ...]
+
+  """
+  @spec list_relationships(list) :: list
+  def list_relationships(args \\ []) do
+    args
+    |> RelationshipQueries.query_relationships()
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single relationship.
+
+  Raises `Ecto.NoResultsError` if the Relationship does not exist.
+
+  ## Examples
+
+      iex> get_relationship!(123)
+      %Relationship{}
+
+      iex> get_relationship!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_relationship!(from_id, to_id), do: get_relationship!(from_id, to_id, [])
+
+  def get_relationship!(from_id, to_id, args) do
+    args = args ++ [from_user_id: from_id, to_user_id: to_id]
+
+    args
+    |> RelationshipQueries.query_relationships()
+    |> Repo.one!()
+  end
+
+  @doc """
+  Gets a single relationship, returns nil if the relationship doesn't exist
+
+  ## Examples
+
+      iex> get_relationship(123)
+      %Relationship{}
+
+      iex> get_relationship(456)
+      nil
+
+  """
+  def get_relationship(from_id, to_id), do: get_relationship(from_id, to_id, [])
+
+  def get_relationship(from_id, to_id, args) do
+    args = args ++ [from_user_id: from_id, to_user_id: to_id]
+
+    args
+    |> RelationshipQueries.query_relationships()
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a relationship.
+
+  ## Examples
+
+      iex> create_relationship(%{field: value})
+      {:ok, %Relationship{}}
+
+      iex> create_relationship(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_relationship(attrs \\ %{}) do
+    %Relationship{}
+    |> Relationship.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates or inserts a relationship.
+
+  ## Examples
+
+      iex> upsert(%{field: value})
+      {:ok, %Relationship{}}
+
+      iex> upsert(%{field: value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def upsert_relationship(attrs) do
+    %Relationship{}
+    |> Relationship.changeset(attrs)
+    |> Repo.insert(
+      on_conflict: [set: [
+        state: Map.get(attrs, "state", Map.get(attrs, :state, nil)),
+        notes: Map.get(attrs, "notes", Map.get(attrs, :notes, nil)),
+        tags: Map.get(attrs, "tags", Map.get(attrs, :tags, nil))
+      ]],
+      conflict_target: ~w(from_user_id to_user_id)a
+    )
+  end
+
+  @doc """
+  Updates a relationship.
+
+  ## Examples
+
+      iex> update_relationship(relationship, %{field: new_value})
+      {:ok, %Relationship{}}
+
+      iex> update_relationship(relationship, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_relationship(%Relationship{} = relationship, attrs) do
+    relationship
+    |> Relationship.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a relationship.
+
+  ## Examples
+
+      iex> delete_relationship(relationship)
+      {:ok, %Relationship{}}
+
+      iex> delete_relationship(relationship)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_relationship(%Relationship{} = relationship) do
+    Repo.delete(relationship)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking relationship changes.
+
+  ## Examples
+
+      iex> change_relationship(relationship)
+      %Ecto.Changeset{data: %Relationship{}}
+
+  """
+  def change_relationship(%Relationship{} = relationship, attrs \\ %{}) do
+    Relationship.changeset(relationship, attrs)
+  end
+
+  @spec verb_of_state(String.t | map) :: String.t
+  defdelegate verb_of_state(state), to: RelationshipLib
+
+  @spec past_tense_of_state(String.t | map) :: String.t
+  defdelegate past_tense_of_state(state), to: RelationshipLib
+
+  @spec follow_user(T.userid, T.userid) :: {:ok, Relationship.t}
+  defdelegate follow_user(from_user_id, to_user_id), to: RelationshipLib
+
+  @spec ignore_user(T.userid, T.userid) :: {:ok, Relationship.t}
+  defdelegate ignore_user(from_user_id, to_user_id), to: RelationshipLib
+
+  @spec avoid_user(T.userid, T.userid) :: {:ok, Relationship.t}
+  defdelegate avoid_user(from_user_id, to_user_id), to: RelationshipLib
+
+  @spec block_user(T.userid, T.userid) :: {:ok, Relationship.t}
+  defdelegate block_user(from_user_id, to_user_id), to: RelationshipLib
+
+  @spec reset_relationship_state(T.userid, T.userid) :: {:ok, Relationship.t}
+  defdelegate reset_relationship_state(from_user_id, to_user_id), to: RelationshipLib
+
+  @spec calculate_relationship_stats(T.userid) :: :ok
+  defdelegate calculate_relationship_stats(userid), to: RelationshipLib
+
+  @spec list_userids_avoiding_this_userid(T.userid) :: [T.userid]
+  defdelegate list_userids_avoiding_this_userid(userid), to: RelationshipLib
+
+  @spec list_userids_avoided_by_userid(T.userid) :: [T.userid]
+  defdelegate list_userids_avoided_by_userid(userid), to: RelationshipLib
+
+  @spec list_userids_blocked_by_userid(T.userid) :: [T.userid]
+  defdelegate list_userids_blocked_by_userid(userid), to: RelationshipLib
+
+  @spec list_userids_ignored_by_userid(T.userid) :: [T.userid]
+  defdelegate list_userids_ignored_by_userid(userid), to: RelationshipLib
+
+  @spec list_userids_followed_by_userid(T.userid) :: [T.userid]
+  defdelegate list_userids_followed_by_userid(userid), to: RelationshipLib
+
+  @spec does_a_follow_b?(T.userid, T.userid) :: boolean
+  defdelegate does_a_follow_b?(u1, u2), to: RelationshipLib
+
+  @spec does_a_ignore_b?(T.userid, T.userid) :: boolean
+  defdelegate does_a_ignore_b?(u1, u2), to: RelationshipLib
+
+  @spec does_a_block_b?(T.userid, T.userid) :: boolean
+  defdelegate does_a_block_b?(u1, u2), to: RelationshipLib
+
+  @spec does_a_avoid_b?(T.userid, T.userid) :: boolean
+  defdelegate does_a_avoid_b?(u1, u2), to: RelationshipLib
+
+  @spec profile_view_permissions(T.userid, T.userid, nil | Account.Relationship, nil | Account.Friend, nil | Account.FriendRequest) :: [atom]
+  defdelegate profile_view_permissions(u1, u2, relationship, friend, friendship_request), to: RelationshipLib
+
+
+  alias Teiserver.Account.{Friend, FriendLib, FriendQueries}
+
+  @doc """
+  Returns the list of friends.
+
+  ## Examples
+
+      iex> list_friends()
+      [%Friend{}, ...]
+
+  """
+  @spec list_friends(list) :: list
+  def list_friends(args \\ []) do
+    args
+    |> FriendQueries.query_friends()
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single friend.
+
+  Raises `Ecto.NoResultsError` if the Friend does not exist.
+
+  ## Examples
+
+      iex> get_friend!(123)
+      %Friend{}
+
+      iex> get_friend!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_friend!(from_id, to_id), do: get_friend!(from_id, to_id, [])
+
+  def get_friend!(from_id, to_id, args) do
+    args = args ++ [users: [from_id, to_id]]
+
+    args
+    |> FriendQueries.query_friends()
+    |> Repo.one!()
+  end
+
+  @doc """
+  Gets a single friend, returns nil if the friend doesn't exist
+
+  ## Examples
+
+      iex> get_friend(123)
+      %Friend{}
+
+      iex> get_friend(456)
+      nil
+
+  """
+  def get_friend(from_id, to_id), do: get_friend(from_id, to_id, [])
+
+  def get_friend(from_id, to_id, args) do
+    args = args ++ [users: [from_id, to_id]]
+
+    args
+    |> FriendQueries.query_friends()
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a friend.
+
+  ## Examples
+
+      iex> create_friend(%{field: value})
+      {:ok, %Friend{}}
+
+      iex> create_friend(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_friend() :: {:ok, Friend.t} | {:error, Ecto.Changeset.t}
+  @spec create_friend(map) :: {:ok, Friend.t} | {:error, Ecto.Changeset.t}
+  def create_friend(attrs \\ %{}) do
+    result = %Friend{}
+    |> Friend.changeset(attrs)
+    |> Repo.insert()
+
+    case result do
+      {:ok, friend} ->
+        Central.cache_delete(:account_friend_cache, friend.user1_id)
+        Central.cache_delete(:account_friend_cache, friend.user2_id)
+      _ ->
+        :ok
+    end
+    result
+  end
+
+  @spec create_friend(T.userid, T.userid) :: {:ok, Friend.t} | {:error, Ecto.Changeset.t}
+  def create_friend(uid1, uid2) do
+    [u1, u2] = Enum.sort([uid1, uid2])
+    create_friend(%{
+      user1_id: u1,
+      user2_id: u2,
+    })
+  end
+
+  @doc """
+  Updates a friend.
+
+  ## Examples
+
+      iex> update_friend(friend, %{field: new_value})
+      {:ok, %Friend{}}
+
+      iex> update_friend(friend, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_friend(%Friend{} = friend, attrs) do
+    friend
+    |> Friend.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a friend.
+
+  ## Examples
+
+      iex> delete_friend(friend)
+      {:ok, %Friend{}}
+
+      iex> delete_friend(friend)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_friend(%Friend{} = friend) do
+    Central.cache_delete(:account_friend_cache, friend.user1_id)
+    Central.cache_delete(:account_friend_cache, friend.user2_id)
+    Repo.delete(friend)
+  end
+
+  def delete_friend(u1, u2) do
+    case get_friend(u1, u2) do
+      nil ->
+        :ok
+      friend ->
+        delete_friend(friend)
+    end
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking friend changes.
+
+  ## Examples
+
+      iex> change_friend(friend)
+      %Ecto.Changeset{data: %Friend{}}
+
+  """
+  def change_friend(%Friend{} = friend, attrs \\ %{}) do
+    Friend.changeset(friend, attrs)
+  end
+
+  @spec list_friend_ids_of_user(T.userid) :: [T.userid]
+  defdelegate list_friend_ids_of_user(userid), to: FriendLib
+
+  alias Teiserver.Account.{FriendRequest, FriendRequestLib, FriendRequestQueries}
+
+  @doc """
+  Returns the list of friend_requests.
+
+  ## Examples
+
+      iex> list_friend_requests()
+      [%FriendRequest{}, ...]
+
+  """
+  @spec list_friend_requests(list) :: list
+  def list_friend_requests(args \\ []) do
+    args
+    |> FriendRequestQueries.query_friend_requests()
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single friend_request.
+
+  Raises `Ecto.NoResultsError` if the FriendRequest does not exist.
+
+  ## Examples
+
+      iex> get_friend_request!(123)
+      %FriendRequest{}
+
+      iex> get_friend_request!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_friend_request!(from_id, to_id), do: get_friend_request!(from_id, to_id, [])
+
+  def get_friend_request!(from_id, to_id, args) do
+    args = args ++ [from_user_id: from_id, to_user_id: to_id]
+
+    args
+    |> FriendRequestQueries.query_friend_requests()
+    |> Repo.one!()
+  end
+
+  @doc """
+  Gets a single friend_request, returns nil if the friend_request doesn't exist
+
+  ## Examples
+
+      iex> get_friend_request(123)
+      %FriendRequest{}
+
+      iex> get_friend_request(456)
+      nil
+
+  """
+  def get_friend_request(from_id, to_id), do: get_friend_request(from_id, to_id, [])
+
+  def get_friend_request(from_id, to_id, args) do
+    args = args ++ [from_user_id: from_id, to_user_id: to_id]
+
+    args
+    |> FriendRequestQueries.query_friend_requests()
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a friend_request.
+
+  ## Examples
+
+      iex> create_friend_request(%{field: value})
+      {:ok, %FriendRequest{}}
+
+      iex> create_friend_request(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_friend_request(attrs \\ %{}) do
+    result = %FriendRequest{}
+    |> FriendRequest.changeset(attrs)
+    |> Repo.insert()
+
+    case result do
+      {:ok, friend_request} ->
+        Central.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
+      _ ->
+        :ok
+    end
+    result
+  end
+
+  def create_friend_request(from_user_id, to_user_id) do
+    create_friend_request(%{
+      from_user_id: from_user_id,
+      to_user_id: to_user_id
+    })
+  end
+
+  @doc """
+  Updates a friend_request.
+
+  ## Examples
+
+      iex> update_friend_request(friend_request, %{field: new_value})
+      {:ok, %FriendRequest{}}
+
+      iex> update_friend_request(friend_request, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_friend_request(%FriendRequest{} = friend_request, attrs) do
+    friend_request
+    |> FriendRequest.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a friend_request.
+
+  ## Examples
+
+      iex> delete_friend_request(friend_request)
+      {:ok, %FriendRequest{}}
+
+      iex> delete_friend_request(friend_request)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_friend_request(%FriendRequest{} = friend_request) do
+    Central.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
+    Repo.delete(friend_request)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking friend_request changes.
+
+  ## Examples
+
+      iex> change_friend_request(friend_request)
+      %Ecto.Changeset{data: %FriendRequest{}}
+
+  """
+  def change_friend_request(%FriendRequest{} = friend_request, attrs \\ %{}) do
+    FriendRequest.changeset(friend_request, attrs)
+  end
+
+  @spec list_incoming_friend_requests_of_userid(T.userid) :: [T.userid]
+  defdelegate list_incoming_friend_requests_of_userid(userid), to: FriendRequestLib
+
+  @spec accept_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
+  defdelegate accept_friend_request(from_userid, to_userid), to: FriendRequestLib
+
+  @spec accept_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
+  defdelegate accept_friend_request(req), to: FriendRequestLib
+
+  @spec decline_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
+  defdelegate decline_friend_request(from_userid, to_userid), to: FriendRequestLib
+
+  @spec decline_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
+  defdelegate decline_friend_request(req), to: FriendRequestLib
+
+  @spec rescind_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
+  defdelegate rescind_friend_request(from_userid, to_userid), to: FriendRequestLib
+
+  @spec rescind_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
+  defdelegate rescind_friend_request(req), to: FriendRequestLib
+
   # User functions
   alias alias Teiserver.Account.UserCache
 
@@ -1491,6 +2030,12 @@ defmodule Teiserver.Account do
 
   @spec system_change_user_name(T.userid(), String.t()) :: :ok
   defdelegate system_change_user_name(userid, new_name), to: Teiserver.User
+
+  @spec has_any_role?(T.userid() | T.user() | nil, String.t | [String.t]) :: boolean()
+  defdelegate has_any_role?(user_or_userid, roles), to: Teiserver.User
+
+  @spec has_all_roles?(T.userid() | T.user() | nil, String.t | [String.t]) :: boolean()
+  defdelegate has_all_roles?(user_or_userid, roles), to: Teiserver.User
 
   # Client stuff
   alias Teiserver.Account.ClientLib

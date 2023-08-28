@@ -47,7 +47,7 @@ is_admin = allow?(@conn, "Admin") %>
           })
         ) %>
 
-        <div class="help-box-large">
+        <div class="old-help-box-large">
           Lists all users <%= @user.name %> shares a matched key with. In the list of matches it will show the most recent match date as used by the user being matched with. This allows you to see how recently the matched player had that value vs when it was last used by <%= @user.name %>.
         </div>
 
@@ -57,7 +57,7 @@ is_admin = allow?(@conn, "Admin") %>
             Toggle dates
           </div>
 
-          <div class="btn btn-primary2" onclick="$('.help-box, .help-box-large').toggle();">
+          <div class="btn btn-primary2" onclick="$('.old-help-box, .old-help-box-large').toggle();">
             <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
             Show/Hide help
           </div>

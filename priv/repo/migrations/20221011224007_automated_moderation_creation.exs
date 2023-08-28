@@ -54,8 +54,8 @@ defmodule Teiserver.Repo.Migrations.AutomatedModerationCreation do
     create index(:moderation_proposals, [:target_id])
 
     create table(:moderation_proposal_votes, primary_key: false) do
-      add :user_id, references(:account_users, on_delete: :nothing, primary_key: true)
-      add :proposal_id, references(:moderation_proposals, on_delete: :nothing, primary_key: true)
+      add :user_id, references(:account_users, on_delete: :nothing), primary_key: true
+      add :proposal_id, references(:moderation_proposals, on_delete: :nothing), primary_key: true
       add :vote, :smallint
 
       timestamps()

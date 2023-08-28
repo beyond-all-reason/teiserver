@@ -4,7 +4,7 @@
     name: "profile",
     icon: "fa-solid fa-user-circle",
     text: "My profile",
-    link: Routes.ts_account_profile_path(@conn, :show, @conn.current_user.id)
+    link: ~p"/profile"
   ) %>
 
   <%= central_component("menu_card",
@@ -12,7 +12,7 @@
     name: "",
     icon: Teiserver.icon(:relationship),
     text: "Friends/Mutes/Invites",
-    link: Routes.ts_account_relationships_path(@conn, :index)
+    link: ~p"/account/relationship"
   ) %>
 
   <%= central_component("menu_card",

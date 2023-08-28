@@ -21,7 +21,7 @@ defmodule Teiserver.Game do
     |> QueueLib.search(args[:search])
     |> QueueLib.preload(args[:preload])
     |> QueueLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -182,7 +182,7 @@ defmodule Teiserver.Game do
     |> AchievementTypeLib.search(args[:search])
     |> AchievementTypeLib.preload(args[:preload])
     |> AchievementTypeLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -339,7 +339,7 @@ defmodule Teiserver.Game do
     |> UserAchievementLib.search(args[:search])
     |> UserAchievementLib.preload(args[:preload])
     |> UserAchievementLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -486,7 +486,7 @@ defmodule Teiserver.Game do
     |> RatingTypeLib.search(args[:search])
     |> RatingTypeLib.preload(args[:preload])
     |> RatingTypeLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -664,7 +664,7 @@ defmodule Teiserver.Game do
     |> RatingLogLib.search(args[:search])
     |> RatingLogLib.preload(args[:preload])
     |> RatingLogLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """
@@ -818,7 +818,7 @@ defmodule Teiserver.Game do
     |> LobbyPolicyLib.search(args[:search])
     |> LobbyPolicyLib.preload(args[:preload])
     |> LobbyPolicyLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.query_select(args[:select])
   end
 
   @doc """

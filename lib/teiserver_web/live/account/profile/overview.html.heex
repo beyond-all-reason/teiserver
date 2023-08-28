@@ -1,0 +1,188 @@
+<style type="text/css">
+  .role-badge {
+    width: 150px;
+    display: inline-block;
+    text-align: center;
+    font-size: 1.5em;
+  }
+</style>
+
+<TeiserverWeb.Account.ProfileComponents.profile_header
+  active="overview"
+  view_colour={@view_colour}
+  user={@user}
+  current_user={@current_user}
+  profile_permissions={@profile_permissions}
+/>
+
+<div class="row my-3">
+  <div class="col">
+    <%= cond do %>
+      <% @friendship -> %>
+        You are friends
+        <br /><br />
+
+      <% @friendship_request && @friendship_request.from_user_id == @current_user.id -> %>
+        You have sent <%= @user.name %> a friend request and are waiting for a response
+        <br /><br />
+
+      <% @friendship_request && @friendship_request.from_user_id != @current_user.id -> %>
+        They have sent you a friend request and are waiting for a response
+        <br /><br />
+
+      <% @relationship && @relationship.state == "follow" -> %>
+        You are following <%= @user.name %>
+        <br /><br />
+
+      <% @relationship && @relationship.state == "ignore" -> %>
+        You are ignoring <%= @user.name %>
+        <br /><br />
+
+      <% @relationship && @relationship.state == "avoid" -> %>
+        You are avoiding <%= @user.name %>
+        <br /><br />
+
+      <% @relationship && @relationship.state == "block" -> %>
+        You are blocking <%= @user.name %>
+        <br /><br />
+
+      <% true -> %>
+        
+    <% end %>
+    
+    <%!-- Actions --%>
+    <%= if @current_user && @current_user.id != @user.id do %>
+      <%!-- Friend stuff --%>
+      <span
+        :if={@friendship == nil && @friendship_request == nil}
+        phx-click="create-friend-request"
+        class="btn btn-outline-success mx-1"
+      >
+        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon()} style="regular" />
+        &nbsp;
+        Add friend
+      </span>
+      
+      <span
+        :if={@friendship == nil && @friendship_request && @friendship_request.to_user_id == @current_user.id}
+        phx-click="accept-friend-request"
+        class="btn btn-outline-success mx-1"
+      >
+        <Fontawesome.icon icon="check" style="regular" />
+        &nbsp;
+        Accept friend request
+      </span>
+      
+      <span
+        :if={@friendship == nil && @friendship_request && @friendship_request.to_user_id == @current_user.id}
+        phx-click="decline-friend-request"
+        class="btn btn-outline-danger mx-1"
+      >
+        <Fontawesome.icon icon="times" style="regular" />
+        &nbsp;
+        Decline friend request
+      </span>
+      
+      <span
+        :if={@friendship == nil && @friendship_request && @friendship_request.from_user_id == @current_user.id}
+        phx-click="rescind-friend-request"
+        class="btn btn-outline-danger mx-1"
+      >
+        <Fontawesome.icon icon="times" style="regular" />
+        &nbsp;
+        Rescind friend request
+      </span>
+      
+      
+      
+      
+      <span
+        :if={@relationship == nil || @relationship.state != "follow"}
+        phx-click="follow-user"
+        class="btn btn-outline-info mx-1"
+      >
+        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_follow()} style="regular" />
+        &nbsp;
+        Follow
+      </span>
+      
+      <span
+        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.state != "ignore"}
+        phx-click="ignore-user"
+        class="btn btn-outline-warning mx-1"
+      >
+        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="regular" />
+        &nbsp;
+        Ignore
+      </span>
+      
+      <span
+        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.state != "avoid"}
+        phx-click="avoid-user"
+        class="btn btn-outline-danger mx-1"
+      >
+        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="regular" />
+        &nbsp;
+        Avoid
+      </span>
+      
+      <span
+        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.state != "block"}
+        phx-click="block-user"
+        class="btn btn-outline-danger2 mx-1"
+      >
+        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="regular" />
+        &nbsp;
+        Block
+      </span>
+
+      <.link
+        :if={(@relationship == nil || @relationship.state != "follow") && @friendship == nil}
+        navigate={~p"/moderation/report_form/#{@user.id}"}
+        class={"btn btn-outline-#{Teiserver.Moderation.ReportLib.colour()} mx-1 ms-4"}
+      >
+        <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="regular" />
+        &nbsp;
+        Report user
+      </.link>
+    <% end %>
+    
+    <.link
+      :if={allow?(@current_user, "Moderator")}
+      navigate={~p"/teiserver/admin/user/#{@user.id}"}
+      class={"btn btn-outline-#{Central.Admin.AdminLib.colours()} mx-1 ms-4"}
+    >
+      <Fontawesome.icon icon={Central.Admin.AdminLib.icon()} style="regular" />
+      &nbsp;
+      Admin panel
+    </.link>
+  </div>
+</div>
+
+<div class="row my-4">
+  <div class="col">
+    <%!-- Overview stuff --%>
+
+    <%= for role <- @user.roles do %>
+      <% data = @role_data[role] %>
+      <%= if data != nil and Map.get(data, :badge) != false do %>
+        <div class="role-badge">
+          <i class={"fa-fw fa-2x #{data.icon}"} style={"color: #{data.colour}"} title={role}></i>
+          <br />
+          <%= role %>
+        </div>
+      <% end %>
+    <% end %>
+    <br /><br />
+    
+    Once we have some privacy controls we will be adding:
+    <ul>
+      <li>Recent matches</li>
+      <li>Accolades</li>
+      <li>Achievements</li>
+      <li>Play time (maybe even in graph form!)</li>
+      <li>Mutual friends</li>
+    </ul>
+    
+  </div>
+</div>

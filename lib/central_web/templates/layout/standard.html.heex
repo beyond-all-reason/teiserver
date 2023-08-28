@@ -57,10 +57,7 @@
   <% end %>
 
   <div id="flash-messages">
-    <.flash kind={:info} title="Information" role="alert" flash={@flash} />
-    <.flash kind={:success} title="Success!" role="alert" flash={@flash} />
-    <.flash kind={:warning} title="Warning!" role="alert" flash={@flash} />
-    <.flash kind={:error} title="Error!" role="alert" flash={@flash} />
+    <.flash_group flash={@flash} />
   </div>
 
   <div class="px-3 my-0">

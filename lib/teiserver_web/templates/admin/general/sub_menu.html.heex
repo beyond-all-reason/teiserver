@@ -48,16 +48,6 @@
             ) %>
           <% end %>
 
-          <%= if allow?(assigns[:current_user], "Admin") do %>
-            <%= central_component("sub_menu_icon",
-              name: "clans",
-              label: "Clans",
-              active: @active,
-              url: Routes.ts_admin_clan_path(@conn, :index),
-              icon: Teiserver.Clans.ClanLib.icon()
-            ) %>
-          <% end %>
-
           <%= if allow?(assigns[:current_user], "Moderator") do %>
             <%= central_component("sub_menu_icon",
               name: "achievements",

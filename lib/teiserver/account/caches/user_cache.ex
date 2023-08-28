@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.UserCache do
+  @moduledoc false
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Teiserver.{Account, User}
   alias Teiserver.Data.Types, as: T
@@ -162,6 +163,8 @@ defmodule Teiserver.Account.UserCache do
 
   @spec recache_user(T.userid() | User.t()) :: :ok
   def recache_user(id) when is_integer(id) do
+    Central.Account.recache_user(id)
+
     Account.get_user(id)
     |> convert_user
     |> add_user
@@ -170,6 +173,8 @@ defmodule Teiserver.Account.UserCache do
   end
 
   def recache_user(user) do
+    Central.Account.recache_user(user.id)
+
     user
     |> convert_user
     |> add_user

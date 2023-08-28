@@ -1,0 +1,408 @@
+<TeiserverWeb.AccountComponents.sub_menu active={"relationship"} view_colour={@view_colour} />
+
+<div class="row mt-2 mb-3">
+  <div class="col">
+    <div class="float-end">
+      <span :if={not @show_help} class="btn btn-secondary" phx-click="show-help">Show help</span>
+      <span :if={@show_help} class="btn btn-secondary" phx-click="hide-help">Hide help</span>
+    </div>
+  
+    <.tab_header>
+      <.tab_nav
+        url={~p"/account/relationship/friend"}
+        selected={@tab == :friend}
+      >
+        <Fontawesome.icon icon="file-alt" style="solid" />
+        Friends
+      </.tab_nav>
+
+      <.tab_nav
+        url={~p"/account/relationship/follow"}
+        selected={@tab == :follow}
+      >
+        <Fontawesome.icon icon="file-alt" style="solid" />
+        Follows
+      </.tab_nav>
+
+      <.tab_nav
+        url={~p"/account/relationship/avoid"}
+        selected={@tab == :avoid}
+      >
+        <Fontawesome.icon icon="file-alt" style="solid" />
+        Avoids
+      </.tab_nav>
+
+      <.tab_nav
+        url={~p"/account/relationship/search"}
+        selected={@tab == :search}
+      >
+        <Fontawesome.icon icon="search" style="solid" />
+        Search users
+      </.tab_nav>
+    </.tab_header>
+  </div>
+</div>
+
+<div class="row mt-2 mb-3" :if={@live_action == :friend}>
+  <div class="col">
+    <h4 class="text-success">
+      Friends
+      &nbsp;
+      <Fontawesome.icon icon={Teiserver.Account.FriendLib.icon()} style="regular" />
+    </h4>
+    <div :if={@show_help} class="help-box">
+      Friends can instantly jump into the same lobby as each other and see additional information when looking at each other's profiles.
+    </div>
+    <.table
+      id="friends-table"
+      table_class="table-sm"
+      rows={@friends}
+      row_click={fn friend -> JS.navigate(~p"/profile/#{friend.other_user.id}") end}
+    >
+      <:col :let={friend} label="Name"><%= friend.other_user.name %></:col>
+      <:col :let={friend} label="Last played"><%= friend.other_user.last_played |> date_to_str(:hms_or_ymd) %></:col>
+
+      <:col :let={friend} label="">
+        <.link
+          class="btn btn-secondary btn-sm"
+          navigate={~p"/profile/#{friend.other_user.id}"}>
+            Profile
+        </.link>
+      </:col>
+
+    </.table>
+  </div>
+
+  <div class="col">
+    <h4 class="text-info2">
+      Incoming requests
+      &nbsp;
+      <Fontawesome.icon icon="down-to-bracket" style="regular" />
+    </h4>
+    <div :if={@show_help} class="help-box">
+      These people are not your friends (yet) but they want to be!
+    </div>
+    <.table id="incoming-request-table" table_class="table-sm" rows={@incoming_friend_requests}>
+      <:col :let={request} label="Name"><%= request.from_user.name %></:col>
+      
+      <:col :let={request} label="">
+        <.link
+          class="btn btn-secondary btn-sm"
+          navigate={~p"/profile/#{request.from_user.id}"}>
+            Profile
+        </.link>
+      </:col>
+      
+      <:col :let={request} label="">
+        <div
+          class="btn btn-success btn-sm"
+          phx-click="accept-friend"
+          phx-value-userid={request.from_user.id}>
+          Accept
+        </div>
+      </:col>
+      
+      <:col :let={request} label="">
+        <div
+          class="btn btn-warning btn-sm"
+          phx-click="decline-friend"
+          phx-value-userid={request.from_user.id}>
+          Decline
+        </div>
+      </:col>
+    </.table>
+  </div>
+  
+  <div class="col">
+    <h4 class="text-primary">
+      Outgoing requests
+      &nbsp;
+      <Fontawesome.icon icon="up-from-bracket" style="regular" />
+    </h4>
+    <div :if={@show_help} class="help-box">
+      These are people you've asked to be friends, you're just waiting on their reply.
+    </div>
+    <.table id="incoming-request-table" table_class="table-sm" rows={@outgoing_friend_requests}>
+      <:col :let={request} label="Name"><%= request.to_user.name %></:col>
+      <:col :let={request} label="">
+        <div
+          class="btn btn-danger btn-sm"
+          phx-click="rescind-friend"
+          phx-value-userid={request.to_user.id}>
+          Rescind
+        </div>
+      </:col>
+    </.table>
+  </div>
+</div>
+
+<div class="row mt-2 mb-3" :if={@live_action == :follow}>
+  <div class="col" id="follows-col">
+    <h4 class="text-info">
+      Follows
+      &nbsp;
+      <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_follow()} style="regular" />
+    </h4>
+    <div :if={@show_help} class="help-box">
+      While it currently doesn't do anything, following will be a way to keep track of those you want to without them having to accept you as a friend (e.g. streamers, devs or other figures of interest).
+    </div>
+    <.table
+      id="follows-table"
+      table_class="table-sm"
+      rows={@follows}
+      row_click={fn follow -> JS.navigate(~p"/profile/#{follow.to_user.id}") end}
+    >
+      <:col :let={follow} label="Name"><%= follow.to_user.name %></:col>
+      <:col :let={follow} label="Last played"><%= follow.to_user.last_played |> date_to_str(:hms_or_ymd) %></:col>z
+      
+      <:col :let={follow} label="">
+        <.link
+          class="btn btn-secondary btn-sm"
+          navigate={~p"/profile/#{follow.to_user.id}"}>
+            <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="regular" />
+            Profile
+        </.link>
+      </:col>
+      
+      <:col :let={follow} label="">
+        <span phx-click="unfollow-user" phx-value-userid={follow.to_user.id} class="btn btn-secondary btn-sm">
+          <Fontawesome.icon icon="times" style="regular" />
+          Un-follow
+        </span>
+      </:col>
+      
+    </.table>
+  </div>
+</div>
+
+<div class="row mt-2 mb-3" :if={@live_action == :avoid}>
+  <div class="col" id="ignores-col">
+    <h4 class="text-warning">
+      Ignores
+      &nbsp;
+      <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="regular" />
+    </h4>
+    <div :if={@show_help} class="help-box">
+      If someone is ignored they cannot direct message you and you will not see their chat messages in the lobby. Muting ingame is currently a separate action and not linked to this.
+    </div>
+    <.table id="ignores-table" table_class="table-sm" rows={@ignores}>
+      <:col :let={ignore} label="Name"><%= ignore.to_user.name %></:col>
+      <:col :let={avoid} label="">
+        <span phx-click="unignore-user" phx-value-userid={avoid.to_user.id} class="btn btn-secondary btn-sm">
+          <Fontawesome.icon icon="arrow-left" style="regular" />
+          Un-ignore
+        </span>
+      </:col>
+      <:col :let={ignore} label="">
+        <span phx-click="avoid-user" phx-value-userid={ignore.to_user.id} class="btn btn-secondary btn-sm">
+          <Fontawesome.icon icon="arrow-right" style="regular" />
+          Avoid
+        </span>
+      </:col>
+    </.table>
+  </div>
+  <div class="col" id="avoids-col">
+    <h4 class="text-danger">
+      Avoids
+      &nbsp;
+      <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="regular" />
+    </h4>
+    <div :if={@show_help} class="help-box">
+      In addition to the effects of ignoring; if enough players in a lobby are avoiding someone they will not be able to become a player themselves. They will still be able to spectate though.
+    </div>
+    <.table id="avoids-table" table_class="table-sm" rows={@avoids}>
+      <:col :let={avoid} label="Name"><%= avoid.to_user.name %></:col>
+      <:col :let={avoid} label="">
+        <span phx-click="ignore-user" phx-value-userid={avoid.to_user.id} class="btn btn-secondary btn-sm">
+          <Fontawesome.icon icon="arrow-left" style="regular" />
+          Ignore
+        </span>
+      </:col>
+      <:col :let={avoid} label="">
+        <span phx-click="block-user" phx-value-userid={avoid.to_user.id} class="btn btn-secondary btn-sm">
+          <Fontawesome.icon icon="arrow-right" style="regular" />
+          Block
+        </span>
+      </:col>
+    </.table>
+  </div>
+  <div class="col" id="blocks-col">
+    <h4 class="text-danger2">
+      Blocks
+      &nbsp;
+      <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="regular" />
+    </h4>
+    <div :if={@show_help} class="help-box">
+      In addition to the effects of avoiding; if enough members of a lobby are blocking someone they will not be able to join the lobby at all.
+    </div>
+    <.table id="blocks-table" table_class="table-sm" rows={@blocks}>
+      <:col :let={block} label="Name"><%= block.to_user.name %></:col>
+      <:col :let={block} label="">
+        <span phx-click="avoid-user" phx-value-userid={block.to_user.id} class="btn btn-secondary btn-sm">
+          <Fontawesome.icon icon="arrow-left" style="regular" />
+          Avoid
+        </span>
+      </:col>
+    </.table>
+  </div>
+</div>
+
+<div class="row mt-2 mb-3" :if={@live_action == :search}>
+  <style type="text/css">
+    .role-badge {
+      width: 150px;
+      display: inline-block;
+      text-align: center;
+      font-size: 1.5em;
+    }
+  </style>
+
+  <div class="col">
+    
+    <form method="post" class="">
+      <div class="row">
+        <div class="col">
+          <.input type="text"
+            label="Username"
+            name="username"
+            autofocus="autofocus"
+            value={@search_terms["username"]}
+            phx-change="search-update" phx-debounce="400"
+          />
+        </div>
+      </div>
+    </form>
+    <br />
+    
+    <div :if={@found_user == nil}>
+      No user found
+    </div>
+    
+    <div :if={@found_user}>
+      <h3 class="mb-4 py-1" style={"background-color: #{@found_user.colour};"}>
+        <div class="d-inline-block px-2 py-1 mx-1">
+          <Fontawesome.icon icon={@found_user.icon} style="regular" size="sm" />
+        </div>
+        
+        <%= @found_user.name %>
+        
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="font-size: 0.7em;">
+          Chevron rank: <%= @found_user.data["rank"] || 0 %>
+        </span>
+      </h3>
+      
+      <div class="row">
+        <div class="col-md-12 col-lg-6">
+          <%!-- Relationship status --%>
+          <div :if={@found_friendship_request}>
+            <h4 :if={@found_friendship_request.from_user_id == @current_user.id} class="mb-4">
+              Status: <span class={"text-info"}>Outgoing friend request</span>
+              &nbsp;
+              <div
+                class="btn btn-danger btn-sm"
+                phx-click="rescind-friend"
+                phx-value-userid={@found_user.id}>
+                Rescind
+              </div>
+            </h4>
+            <h4 :if={@found_friendship_request.to_user_id == @current_user.id} class="mb-4">
+              Status: <span class={"text-info"}>Incoming friend request</span>
+              &nbsp;
+              <div
+                class="btn btn-success btn-sm"
+                phx-click="accept-friend"
+                phx-value-userid={@found_user.id}>
+                Accept
+              </div>
+              
+              <div
+                class="btn btn-warning btn-sm"
+                phx-click="decline-friend"
+                phx-value-userid={@found_user.id}>
+                Decline
+              </div>
+            </h4>
+          </div>
+
+          <h4 :if={@found_relationship && @found_relationship.state != nil} class="mb-4">
+            <%= case @found_relationship.state do %>
+              <% "follow" -> %>
+                Status: <span class={"text-info"}>Following</span>
+              <% "ignore" -> %>
+                Status: <span class={"text-warning"}>Ignoring</span>
+              <% "avoid" -> %>
+                Status: <span class={"text-danger"}>Avoiding</span>
+              <% "block" -> %>
+                Status: <span class={"text-danger"}>Blocked</span>
+            <% end %>
+          </h4>
+
+          <h4 :if={@found_friendship} class="mb-4">
+            Status: <span class={"text-#{Teiserver.Account.FriendLib.colours}"}>Friend</span>
+          </h4>
+          
+          <.link
+            :if={@found_user}
+            navigate={~p"/profile/#{@found_user.id}"}
+            class={"btn btn-lg btn-#{@view_colour} mx-1"}
+          >
+            <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" />
+            See profile
+          </.link>
+
+          <.link
+            :if={@found_user.id != @current_user.id and @found_friendship == nil}
+            navigate={~p"/moderation/report_form/#{@found_user.id}"}
+            class={"btn btn-lg btn-#{Teiserver.Moderation.ReportLib.colour()} mx-1"}
+          >
+            <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="solid" />
+            Report user
+          </.link>
+        </div>
+
+        <div class="col-md-12 col-lg-6">
+          <div :if={false}>
+          <%= cond do %>
+            <% Enum.member?(@found_user.data["restrictions"], "Permanently banned") -> %>
+              <div class="role-badge">
+                <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.action_icon("Ban")} style="solid" size="2x" class="text-danger" />
+                <br />
+                Banned
+              </div>
+
+            <% Enum.member?(@found_user.data["restrictions"], "Login") -> %>
+              <div class="role-badge">
+                <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.action_icon("Suspend")} style="solid" size="2x" class="text-danger" />
+                <br />
+                Suspended
+              </div>
+
+            <% Enum.member?(@found_user.data["restrictions"], "All chat") -> %>
+              <div class="role-badge">
+                <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.action_icon("Mute")} style="solid" size="2x" class="text-danger" />
+                <br />
+                Muted
+              </div>
+
+            <% true -> %>
+              
+          <% end %>
+          </div>
+        
+          <%= for role <- @found_user.roles do %>
+            <% data = @role_data[role] %>
+            <%= if data != nil and Map.get(data, :badge) != false do %>
+              <div class="role-badge">
+                <i class={"fa-fw fa-2x #{data.icon}"} style={"color: #{data.colour}"} title={role}></i>
+                <br />
+                <%= role %>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

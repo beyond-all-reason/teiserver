@@ -127,43 +127,6 @@ defmodule CentralWeb.CoreComponents do
   attr :rest, :global, doc: "the arbitrary HTML attributes to add to the flash container"
   slot :inner_block, doc: "the optional inner block that renders the flash message"
 
-  # def flash(assigns) do
-  #   ~H"""
-  #   <div
-  #     :if={msg = render_slot(@inner_block) || Phoenix.Flash.get(@flash, @kind)}
-  #     id={@id}
-  #     phx-mounted={@autoshow && show("##{@id}")}
-  #     phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
-  #     role="alert"
-  #     class={[
-  #       "fixed hidden alert",
-  #       @kind == :info && "alert-info",
-  #       @kind == :success && "alert-success",
-  #       @kind == :warning && "alert-warning",
-  #       @kind == :error && "alert-danger"
-  #     ]}
-  #     {@rest}
-  #   >
-  #     <button
-  #       :if={@close}
-  #       type="button"
-  #       class="btn btn-secondary float-end px-2"
-  #       aria-label={gettext("close")}
-  #     >
-  #       <Fontawesome.icon icon="xmark" style="solid" />
-  #     </button>
-  #     <p :if={@title} class="flex items-center gap-1.5 text-[0.8125rem] font-semibold leading-6">
-  #       <Fontawesome.icon :if={@kind == :info} icon="circle-info" style="solid" />
-  #       <Fontawesome.icon :if={@kind == :success} icon="circle-check" style="solid" />
-  #       <Fontawesome.icon :if={@kind == :warning} icon="triangle-exclamation" style="solid" />
-  #       <Fontawesome.icon :if={@kind == :error} icon="ban" style="solid" />
-  #       <%= @title %>
-  #     </p>
-  #     <p class="mt-2 text-[0.8125rem] leading-5"><%= msg %></p>
-  #   </div>
-  #   """
-  # end
-
   def flash(assigns) do
     text_colour = case assigns[:kind] do
       :info -> "info"
@@ -212,16 +175,6 @@ defmodule CentralWeb.CoreComponents do
     </div>
     """
   end
-
-  # <div class="toast show fade toast-info" role="alert" aria-live="assertive" aria-atomic="true" data-mdb-color="info" data-mdb-autohide="false">
-  #   <div class="toast-header toast-info">
-  #     <i class="fas fa-info-circle fa-lg me-2"></i>
-  #     <strong class="me-auto">MDBootstrap</strong>
-  #     <small>11 mins ago</small>
-  #     <button type="button" class="btn-close" data-mdb-dismiss="toast" aria-label="Close"></button>
-  #   </div>
-  #   <div class="toast-body">Hello, world! This is a toast message.</div>
-  # </div>
 
   @doc """
   Shows the flash group with standard titles and content.
@@ -521,7 +474,7 @@ defmodule CentralWeb.CoreComponents do
         <thead class="">
           <tr>
             <th :for={col <- @col} class=""><%= col[:label] %></th>
-            <th class=""><span class="visually-hidden"><%= gettext("Actions") %></span></th>
+            <th class="visually-hidden"><span><%= gettext("Actions") %></span></th>
           </tr>
         </thead>
         <tbody
@@ -541,7 +494,7 @@ defmodule CentralWeb.CoreComponents do
             >
               <%= render_slot(col, @row_item.(row)) %>
             </td>
-            <td :if={@action != []} class="p-0">
+            <td :if={@action != []}>
               <div class="">
                 <span
                   :for={action <- @action}

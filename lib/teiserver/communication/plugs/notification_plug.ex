@@ -59,9 +59,9 @@ defmodule Teiserver.Communication.NotificationPlug do
   end
 
   def on_mount(:load_notifications, _params, _session, socket) do
-    notifications =
-      socket.assigns.current_user.id
-      |> Communication.list_user_notifications(:unread)
+    userid = (Map.get(socket.assigns, :current_user) || %{id: nil}).id
+
+    notifications = Communication.list_user_notifications(userid, :unread)
 
     unread_count =
       notifications

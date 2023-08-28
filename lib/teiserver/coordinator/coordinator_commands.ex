@@ -402,7 +402,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         if User.is_moderator?(user) do
           Coordinator.send_to_user(senderid, "You cannot block moderators.")
         else
-          User.ignore_user(senderid, user.id)
+          Account.ignore_user(senderid, user.id)
 
           Coordinator.send_to_user(
             senderid,
@@ -426,7 +426,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         )
 
       user ->
-        User.unignore_user(senderid, user.id)
+        Account.reset_relationship_state(senderid, user.id)
         Coordinator.send_to_user(senderid, "#{user.name} is now un-ignored.")
     end
 

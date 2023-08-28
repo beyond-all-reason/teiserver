@@ -13,7 +13,7 @@ defmodule Teiserver.Protocols.SpringIn do
   import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
   alias Teiserver.Protocols.{Spring, SpringOut}
-  alias Teiserver.Protocols.Spring.{AuthIn, TelemetryIn, BattleIn, LobbyPolicyIn}
+  alias Teiserver.Protocols.Spring.{AuthIn, TelemetryIn, BattleIn, LobbyPolicyIn, UserIn}
 
   @optimisation_level %{
     "LuaLobby Chobby" => :partial,
@@ -117,6 +117,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("c.lobby_policy." <> cmd, data, msg_id, state) do
     LobbyPolicyIn.do_handle(cmd, data, msg_id, state)
+  end
+
+  defp do_handle("c.user." <> cmd, data, msg_id, state) do
+    UserIn.do_handle(cmd, data, msg_id, state)
   end
 
   defp do_handle("STARTTLS", _, msg_id, state) do
@@ -629,16 +633,22 @@ defmodule Teiserver.Protocols.SpringIn do
 
   # Friend list
   defp do_handle("FRIENDLIST", _, msg_id, state),
-    do: reply(:friendlist, state.user, msg_id, state)
+    do: reply(:friendlist, state.userid, msg_id, state)
 
   defp do_handle("FRIENDREQUESTLIST", _, msg_id, state),
-    do: reply(:friendlist_request, state.user, msg_id, state)
+    do: reply(:friendlist_request, state.userid, msg_id, state)
 
   defp do_handle("UNFRIEND", data, msg_id, state) do
     case String.split(data, "=") do
       [_, username] ->
-        new_user = User.remove_friend(state.userid, User.get_userid(username))
-        %{state | user: new_user}
+        target_userid = Account.get_userid_from_name(username)
+        case Account.get_friend(state.userid, target_userid) do
+          nil ->
+            state
+          friend_object ->
+            Account.delete_friend(friend_object)
+            state
+        end
 
       _ ->
         _no_match(state, "UNFRIEND", msg_id, data)
@@ -648,8 +658,9 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("ACCEPTFRIENDREQUEST", data, msg_id, state) do
     case String.split(data, "=") do
       [_, username] ->
-        new_user = User.accept_friend_request(User.get_userid(username), state.userid)
-        %{state | user: new_user}
+        target_userid = Account.get_userid_from_name(username)
+        Account.accept_friend_request(target_userid, state.userid)
+        state
 
       _ ->
         _no_match(state, "ACCEPTFRIENDREQUEST", msg_id, data)
@@ -659,8 +670,9 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("DECLINEFRIENDREQUEST", data, msg_id, state) do
     case String.split(data, "=") do
       [_, username] ->
-        new_user = User.decline_friend_request(User.get_userid(username), state.userid)
-        %{state | user: new_user}
+        target_userid = Account.get_userid_from_name(username)
+        Account.decline_friend_request(target_userid, state.userid)
+        state
 
       _ ->
         _no_match(state, "DECLINEFRIENDREQUEST", msg_id, data)
@@ -670,7 +682,11 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("FRIENDREQUEST", data, msg_id, state) do
     case String.split(data, "=") do
       [_, username] ->
-        User.create_friend_request(state.userid, User.get_userid(username))
+        target_userid = Account.get_userid_from_name(username)
+        Account.create_friend_request(%{
+          from_user_id: state.userid,
+          to_user_id: target_userid
+        })
         state
 
       _ ->
@@ -681,7 +697,8 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("IGNORE", data, _msg_id, state) do
     case String.split(data, "=") do
       [_, username] ->
-        User.ignore_user(state.userid, User.get_userid(username))
+        target_userid = Account.get_userid_from_name(username)
+        Account.ignore_user(state.userid, target_userid)
 
       _ ->
         :ok
@@ -693,7 +710,8 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("UNIGNORE", data, _msg_id, state) do
     case String.split(data, "=") do
       [_, username] ->
-        User.unignore_user(state.userid, User.get_userid(username))
+        target_userid = Account.get_userid_from_name(username)
+        Account.reset_relationship_state(state.userid, target_userid)
 
       _ ->
         :ok
@@ -703,16 +721,16 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("IGNORELIST", _, msg_id, state),
-    do: reply(:ignorelist, state.user, msg_id, state)
+    do: reply(:ignorelist, state.userid, msg_id, state)
 
   defp do_handle("c.moderation.report_user", data, msg_id, state) do
     case String.split(data, "\t") do
       [target_name, _location_type, _location_id, reason] ->
-        user = User.get_user_by_id(state.userid)
+        friend_list = Account.list_friend_ids_of_user(state.userid)
         target_id = User.get_userid(target_name)
 
         cond do
-          Enum.member?(user.friends, target_id) ->
+          Enum.member?(friend_list, target_id) ->
             User.send_direct_message(
               Coordinator.get_coordinator_userid(),
               state.userid,

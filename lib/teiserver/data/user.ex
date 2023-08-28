@@ -2,15 +2,11 @@ defmodule Teiserver.User do
   @moduledoc """
   Users here are a combination of Central.Account.User and the data within. They are merged like this into a map as their expected use case is very different.
   """
-  alias Teiserver.Config
-  alias Teiserver.{Account, Client, Coordinator, Telemetry, Chat}
-  alias Teiserver.Account.LoginThrottleServer
-  alias Teiserver.EmailHelper
-  alias Teiserver.Account.{UserCache, RelationsLib}
+  alias Teiserver.{Account, Config, Client, Coordinator, Telemetry, Chat, EmailHelper}
+  alias Teiserver.Account.{LoginThrottleServer, UserCache, Guardian}
   alias Teiserver.Chat.WordLib
   alias Teiserver.SpringIdServer
   alias Argon2
-  alias Teiserver.Account.Guardian
   alias Teiserver.Data.Types, as: T
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
@@ -99,8 +95,6 @@ defmodule Teiserver.User do
   }
 
   def default_data(), do: @default_data
-
-  def get_rank_levels(), do: @rank_levels
 
   @spec clean_name(String.t()) :: String.t()
   def clean_name(name) do
@@ -563,34 +557,6 @@ defmodule Teiserver.User do
 
   @spec decache_user(T.userid()) :: :ok | :no_user
   defdelegate decache_user(userid), to: UserCache
-
-  # Friend related
-  @spec create_friendship(T.userid(), T.userid()) :: nil
-  defdelegate create_friendship(userid1, userid2), to: RelationsLib
-
-  @spec accept_friend_request(T.userid() | nil, T.userid() | nil) :: T.user() | nil
-  defdelegate accept_friend_request(requester, accepter), to: RelationsLib
-
-  @spec decline_friend_request(T.userid() | nil, T.userid() | nil) :: T.user() | nil
-  defdelegate decline_friend_request(requester, accepter), to: RelationsLib
-
-  @spec create_friend_request(T.userid() | nil, T.userid() | nil) :: T.user() | nil
-  defdelegate create_friend_request(requester, accepter), to: RelationsLib
-
-  @spec rescind_friend_request(T.userid() | nil, T.userid() | nil) :: T.user() | nil
-  defdelegate rescind_friend_request(rescinder_id, requester_id), to: RelationsLib
-
-  @spec ignore_user(T.userid() | nil, T.userid() | nil) :: T.user() | nil
-  defdelegate ignore_user(ignorer_id, ignored_id), to: RelationsLib
-
-  @spec unignore_user(T.userid() | nil, T.userid() | nil) :: T.user() | nil
-  defdelegate unignore_user(unignorer_id, unignored_id), to: RelationsLib
-
-  @spec remove_friend(T.userid() | nil, T.userid() | nil) :: T.user() | nil
-  defdelegate remove_friend(remover_id, removed_id), to: RelationsLib
-
-  @spec list_combined_friendslist([T.userid()]) :: [T.user()]
-  defdelegate list_combined_friendslist(userids), to: RelationsLib
 
   @spec send_direct_message(T.userid(), T.userid(), String.t()) :: :ok
   def send_direct_message(from_id, to_id, "!start" <> s),
@@ -1377,32 +1343,36 @@ defmodule Teiserver.User do
   @doc """
   If a user possesses any of these roles it returns true
   """
-  @spec has_any_role?(T.userid() | T.user() | nil, String.t()[String.t()]) :: boolean()
+  @spec has_any_role?(T.userid() | T.user() | nil, String.t | [String.t]) :: boolean()
   def has_any_role?(nil, _), do: false
 
   def has_any_role?(userid, roles) when is_integer(userid),
     do: has_any_role?(get_user_by_id(userid), roles)
 
-  def has_any_role?(user, roles) do
+  def has_any_role?(user, roles) when is_list(roles) do
     roles
     |> Enum.map(fn role -> Enum.member?(user.roles, role) end)
     |> Enum.any?()
   end
 
+  def has_any_role?(user, role), do: has_any_role?(user, [role])
+
   @doc """
   If a user possesses all of these roles it returns true, if any are lacking it returns false
   """
-  @spec has_all_roles?(T.userid() | T.user() | nil, String.t()[String.t()]) :: boolean()
+  @spec has_all_roles?(T.userid() | T.user() | nil, String.t | [String.t]) :: boolean()
   def has_all_roles?(nil, _), do: false
 
   def has_all_roles?(userid, roles) when is_integer(userid),
     do: has_all_roles?(get_user_by_id(userid), roles)
 
-  def has_all_roles?(user, roles) do
+  def has_all_roles?(user, roles) when is_list(roles) do
     roles
     |> Enum.map(fn role -> Enum.member?(user.roles, role) end)
     |> Enum.all?()
   end
+
+  def has_all_roles?(user, role), do: has_all_roles?(user, [role])
 
   @spec valid_email?(String.t()) :: boolean
   def valid_email?(email) do
