@@ -6,7 +6,7 @@
   active: @active,
   icon: Teiserver.Helper.StylingHelper.icon(:summary),
   bsname: bsname,
-  url: ~p"/telemetry/match_events/summary"
+  url: ~p"/telemetry/simple_match_events/summary"
 ) %>
 
 <%= central_component("section_menu_button",
@@ -15,7 +15,7 @@
   active: @active,
   icon: Teiserver.Helper.StylingHelper.icon(:export),
   bsname: bsname,
-  url: ~p"/telemetry/match_events/export/form"
+  url: ~p"/telemetry/simple_match_events/export/form"
 ) %>
 
 <%= if @active == "property_detail" do %>

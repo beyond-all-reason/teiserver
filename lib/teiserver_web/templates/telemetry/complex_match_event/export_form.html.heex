@@ -4,11 +4,7 @@
 <script src={Routes.static_path(@conn, "/js/select2.js")}>
 </script>
 
-<%= render(
-  TeiserverWeb.Telemetry.GeneralView,
-  "sub_menu.html",
-  Map.merge(assigns, %{active: "complex_match_events"})
-) %>
+<TeiserverWeb.Telemetry.TelemetryComponents.sub_menu active={"complex_match_events"} view_colour={view_colour()} current_user={@current_user} />
 
 <script type="text/javascript" charset="utf-8">
   $(function() {

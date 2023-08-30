@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
   use CentralWeb, :controller
-  alias Teiserver.Telemetry
+  alias Teiserver.{Account, Telemetry}
   alias Teiserver.Telemetry.{ExportSimpleMatchEventsTask, SimpleMatchEventQueries}
   require Logger
 
@@ -47,10 +47,10 @@ defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
   @spec detail(Plug.Conn.t(), map) :: Plug.Conn.t()
   def detail(conn, %{"event_name" => event_name} = params) do
     event_type_id = Telemetry.get_or_add_simple_match_event_type(event_name)
-    tf = Map.get(params, "tf", "7 days")
+    timeframe = Map.get(params, "tf", "7 days")
 
-    start_date =
-      case tf do
+    start_datetime =
+      case timeframe do
         "Today" -> Timex.today() |> Timex.to_datetime()
         "Yesterday" -> Timex.today() |> Timex.to_datetime() |> Timex.shift(days: -1)
         "7 days" -> Timex.now() |> Timex.shift(days: -7)
@@ -59,32 +59,21 @@ defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
         _ -> Timex.now() |> Timex.shift(days: -7)
       end
 
-    match_event_data =
-      Telemetry.list_simple_match_events(
-        search: [
-          event_type_id: event_type_id,
-          between: {start_date, Timex.now()}
-        ],
-        preload: [:users],
-        limit: 5000
-      )
+    data_by_match_id = SimpleMatchEventQueries.get_aggregate_detail_by_match_id(event_type_id, start_datetime, Timex.now())
+      |> Enum.sort_by(fn {_match_id, value} -> value end, &>=/2)
+      |> Enum.take(500)
 
-    match_event_counts_by_user =
-      match_event_data
-      |> Enum.group_by(fn event -> {event.user_id, event.user.name} end, fn _ -> 1 end)
-      |> Enum.map(fn {value, items} -> {value, Enum.count(items)} end)
-      |> Enum.sort_by(fn {_, i} -> i end, &>=/2)
-
-    match_event_counts_by_match =
-      match_event_data
-      |> Enum.group_by(fn event -> event.match_id end, fn _ -> 1 end)
-      |> Enum.map(fn {value, items} -> {value, Enum.count(items)} end)
-      |> Enum.sort_by(fn {_, i} -> i end, &>=/2)
+    data_by_user_id = SimpleMatchEventQueries.get_aggregate_detail_by_user_id(event_type_id, start_datetime, Timex.now())
+      |> Enum.sort_by(fn {_userid, value} -> value end, &>=/2)
+      |> Enum.map(fn {userid, value} ->
+        {userid, Account.get_username_by_id(userid), value}
+      end)
+      |> Enum.take(500)
 
     conn
-    |> assign(:match_event_counts_by_user, match_event_counts_by_user)
-    |> assign(:match_event_counts_by_match, match_event_counts_by_match)
-    |> assign(:tf, tf)
+    |> assign(:data_by_match_id, data_by_match_id)
+    |> assign(:data_by_user_id, data_by_user_id)
+    |> assign(:timeframe, timeframe)
     |> assign(:event_name, event_name)
     |> render("detail.html")
   end

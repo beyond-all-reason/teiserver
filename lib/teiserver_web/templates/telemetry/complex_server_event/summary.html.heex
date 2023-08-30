@@ -1,10 +1,6 @@
 <% bsname = view_colour() %>
 
-<%= render(
-  TeiserverWeb.Telemetry.GeneralView,
-  "sub_menu.html",
-  Map.merge(assigns, %{active: "complex_server_events"})
-) %>
+<TeiserverWeb.Telemetry.TelemetryComponents.sub_menu active={"complex_server_events"} view_colour={view_colour()} current_user={@current_user} />
 
 <div class="row section-menu">
   <div class="col-md-12">

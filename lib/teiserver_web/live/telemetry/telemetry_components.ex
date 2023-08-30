@@ -40,14 +40,76 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       </.sub_menu_button>
 
 
+      <.sub_menu_button
+        :if={String.contains?(@active, "_client_events")}
+        bsname={@view_colour}
+        icon={Teiserver.Telemetry.SimpleClientEventLib.icon()}
+        active={@active == "simple_client_events"}
+        url={~p"/telemetry/simple_client_events/summary"}>
+        Simple client events
+      </.sub_menu_button>
 
       <.sub_menu_button
-        :if={@active == "complex_client_events"}
+        :if={String.contains?(@active, "_client_events")}
         bsname={@view_colour}
         icon={Teiserver.Telemetry.ComplexClientEventLib.icon()}
-        active={true}
+        active={@active == "complex_client_events"}
         url={~p"/telemetry/complex_client_events/summary"}>
         Complex client events
+      </.sub_menu_button>
+
+      <.sub_menu_button
+        :if={String.contains?(@active, "_server_events")}
+        bsname={@view_colour}
+        icon={Teiserver.Telemetry.SimpleServerEventLib.icon()}
+        active={@active == "simple_server_events"}
+        url={~p"/telemetry/simple_server_events/summary"}>
+        Simple server events
+      </.sub_menu_button>
+
+      <.sub_menu_button
+        :if={String.contains?(@active, "_server_events")}
+        bsname={@view_colour}
+        icon={Teiserver.Telemetry.ComplexServerEventLib.icon()}
+        active={@active == "complex_server_events"}
+        url={~p"/telemetry/complex_server_events/summary"}>
+        Complex client events
+      </.sub_menu_button>
+
+      <.sub_menu_button
+        :if={String.contains?(@active, "_match_events")}
+        bsname={@view_colour}
+        icon={Teiserver.Telemetry.SimpleMatchEventLib.icon()}
+        active={@active == "simple_match_events"}
+        url={~p"/telemetry/simple_match_events/summary"}>
+        Simple match events
+      </.sub_menu_button>
+
+      <.sub_menu_button
+        :if={String.contains?(@active, "_match_events")}
+        bsname={@view_colour}
+        icon={Teiserver.Telemetry.ComplexMatchEventLib.icon()}
+        active={@active == "complex_match_events"}
+        url={~p"/telemetry/complex_match_events/summary"}>
+        Complex match events
+      </.sub_menu_button>
+
+      <.sub_menu_button
+        :if={String.contains?(@active, "_lobby_events")}
+        bsname={@view_colour}
+        icon={Teiserver.Telemetry.SimpleLobbyEventLib.icon()}
+        active={@active == "simple_lobby_events"}
+        url={~p"/telemetry/simple_lobby_events/summary"}>
+        Simple lobby events
+      </.sub_menu_button>
+
+      <.sub_menu_button
+        :if={String.contains?(@active, "_lobby_events")}
+        bsname={@view_colour}
+        icon={Teiserver.Telemetry.ComplexLobbyEventLib.icon()}
+        active={@active == "complex_lobby_events"}
+        url={~p"/telemetry/complex_lobby_events/summary"}>
+        Complex lobby events
       </.sub_menu_button>
     </div>
     """

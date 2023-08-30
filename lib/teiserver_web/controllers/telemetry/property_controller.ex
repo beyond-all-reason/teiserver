@@ -48,28 +48,33 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
   end
 
   @spec detail(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def detail(conn, %{"property_name" => property_name} = _params) do
+  def detail(conn, %{"property_name" => property_name} = params) do
     property_type_id = Telemetry.get_or_add_property_type(property_name)
+    timeframe = Map.get(params, "tf", "7 days")
 
-    user_counts =
-      Telemetry.list_user_properties(search: [property_type_id: property_type_id])
-      |> Enum.group_by(fn p -> p.value end)
-      |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
+    start_datetime =
+      case timeframe do
+        "Today" -> Timex.today() |> Timex.to_datetime()
+        "Yesterday" -> Timex.today() |> Timex.to_datetime() |> Timex.shift(days: -1)
+        "7 days" -> Timex.now() |> Timex.shift(days: -7)
+        "14 days" -> Timex.now() |> Timex.shift(days: -14)
+        "31 days" -> Timex.now() |> Timex.shift(days: -31)
+        _ -> Timex.now() |> Timex.shift(days: -7)
+      end
 
-    anon_counts =
-      Telemetry.list_anon_properties(search: [property_type_id: property_type_id])
-      |> Enum.group_by(fn p -> p.value end)
-      |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
+    user_data = UserPropertyQueries.get_aggregate_detail(property_type_id, start_datetime, Timex.now())
+    anon_data = AnonPropertyQueries.get_aggregate_detail(property_type_id, start_datetime, Timex.now())
 
     combined_values =
-      (Map.keys(user_counts) ++ Map.keys(anon_counts))
+      (Map.keys(user_data) ++ Map.keys(anon_data))
       |> Enum.uniq()
       |> Enum.sort()
+      |> Enum.take(500)
 
     conn
     |> assign(:property_name, property_name)
-    |> assign(:user_counts, user_counts)
-    |> assign(:anon_counts, anon_counts)
+    |> assign(:user_data, user_data)
+    |> assign(:anon_data, anon_data)
     |> assign(:combined_values, combined_values)
     |> render("detail.html")
   end

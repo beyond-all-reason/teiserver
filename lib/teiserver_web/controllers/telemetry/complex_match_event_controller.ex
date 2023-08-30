@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.{ExportComplexMatchEventsTask, ComplexMatchEventQueries}
+  alias Teiserver.Telemetry.{ComplexMatchEventQueries, ExportComplexMatchEventsTask}
   require Logger
 
   plug(AssignPlug,
@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
-  plug(:add_breadcrumb, name: 'Client events', url: '/teiserver/telemetry/complex_match_events/summary')
+  plug(:add_breadcrumb, name: 'Match events', url: '/telemetry/complex_match_events/summary')
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
   def summary(conn, params) do
@@ -33,9 +33,8 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
 
     complex_match_events = ComplexMatchEventQueries.get_complex_match_events_summary(args)
 
-    event_types = complex_match_events
-      |> Map.keys()
-      |> Enum.uniq()
+    event_types =
+      Map.keys(complex_match_events)
       |> Enum.sort()
 
     conn
@@ -48,10 +47,10 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
   @spec detail(Plug.Conn.t(), map) :: Plug.Conn.t()
   def detail(conn, %{"event_name" => event_name} = params) do
     event_type_id = Telemetry.get_or_add_complex_match_event_type(event_name)
-    tf = Map.get(params, "tf", "7 days")
+    timeframe = Map.get(params, "tf", "7 days")
 
     start_date =
-      case tf do
+      case timeframe do
         "Today" -> Timex.today() |> Timex.to_datetime()
         "Yesterday" -> Timex.today() |> Timex.to_datetime() |> Timex.shift(days: -1)
         "7 days" -> Timex.now() |> Timex.shift(days: -7)
@@ -60,36 +59,32 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
         _ -> Timex.now() |> Timex.shift(days: -7)
       end
 
-    client_data =
-      Telemetry.list_complex_match_events(
-        search: [
-          event_type_id: event_type_id,
-          between: {start_date, Timex.now()}
-        ],
-        limit: 500
-      )
+    schema_keys = Telemetry.list_complex_match_events(
+      order_by: ["Newest first"],
+      where: [
+        event_type_id: event_type_id
+      ],
+      limit: 1,
+      select: [:value]
+    )
+    |> hd
+    |> Map.get(:value)
+    |> Map.keys
 
-    schema_keys = client_data
-      |> Stream.map(fn event -> Map.keys(event.value) end)
-      |> Enum.to_list()
-      |> List.flatten()
-      |> Stream.uniq()
-      |> Enum.sort()
+    default_key = schema_keys |> Enum.sort |> hd
 
-    key = Map.get(params, "key", hd(schema_keys))
+    key = Map.get(params, "key", default_key)
 
-    event_counts =
-      client_data
-      |> Enum.group_by(fn event -> Map.get(event.value, key, nil) end)
-      |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
+    match_data = ComplexMatchEventQueries.get_aggregate_detail(event_type_id, key, start_date, Timex.now())
+
+    key = Map.get(params, "key", hd(schema_keys ++ [nil]))
 
     conn
     |> assign(:schema_keys, schema_keys)
     |> assign(:key, key)
-    |> assign(:tf, tf)
+    |> assign(:timeframe, timeframe)
     |> assign(:event_name, event_name)
-    |> assign(:event_counts, event_counts)
-    |> assign(:schema_keys, schema_keys)
+    |> assign(:match_data, match_data)
     |> render("detail.html")
   end
 
@@ -108,7 +103,7 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
     time_taken = System.system_time(:millisecond) - start_time
 
     Logger.info(
-      "ComplexClientEventController event export of #{Kernel.inspect(params)}, took #{time_taken}ms"
+      "ComplexMatchEventController event export of #{Kernel.inspect(params)}, took #{time_taken}ms"
     )
 
     conn

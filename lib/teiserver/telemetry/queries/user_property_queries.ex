@@ -112,4 +112,24 @@ defmodule Teiserver.Telemetry.UserPropertyQueries do
     |> Repo.all()
     |> Map.new()
   end
+
+  def get_aggregate_detail(property_type_id, start_datetime, end_datetime) do
+    query = """
+    SELECT p.value AS value, COUNT(p.value)
+      FROM telemetry_user_properties p
+      WHERE p.property_type_id = $1
+      AND p.last_updated BETWEEN $2 AND $3
+      GROUP BY value
+    """
+    case Ecto.Adapters.SQL.query(Repo, query, [property_type_id, start_datetime, end_datetime]) do
+      {:ok, results} ->
+        results.rows
+          |> Map.new(fn [key, value] ->
+            {key, value}
+          end)
+
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
+  end
 end

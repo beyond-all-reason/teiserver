@@ -101,4 +101,48 @@ defmodule Teiserver.Telemetry.SimpleMatchEventQueries do
     |> Repo.all()
     |> Map.new()
   end
+
+  def get_aggregate_detail_by_match_id(event_type_id, start_datetime, end_datetime) do
+    query = """
+    SELECT e.match_id AS match_id, COUNT(e.match_id)
+      FROM telemetry_simple_match_events e
+      JOIN teiserver_battle_matches m
+        ON e.match_id = m.id
+      WHERE e.event_type_id = $1
+      AND m.started BETWEEN $2 AND $3
+      GROUP BY match_id
+    """
+    case Ecto.Adapters.SQL.query(Repo, query, [event_type_id, start_datetime, end_datetime]) do
+      {:ok, results} ->
+        results.rows
+          |> Map.new(fn [key, value] ->
+            {key, value}
+          end)
+
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
+  end
+
+  def get_aggregate_detail_by_user_id(event_type_id, start_datetime, end_datetime) do
+    query = """
+    SELECT e.user_id AS user_id, COUNT(e.match_id)
+      FROM telemetry_simple_match_events e
+      JOIN teiserver_battle_matches m
+        ON e.match_id = m.id
+      WHERE e.event_type_id = $1
+      AND m.started BETWEEN $2 AND $3
+      GROUP BY user_id
+    """
+    case Ecto.Adapters.SQL.query(Repo, query, [event_type_id, start_datetime, end_datetime]) do
+      {:ok, results} ->
+        results.rows
+          |> Map.new(fn [key, value] ->
+            {key, value}
+          end)
+
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
+  end
 end

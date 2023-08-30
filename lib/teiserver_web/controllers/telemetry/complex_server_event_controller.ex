@@ -47,10 +47,10 @@ defmodule TeiserverWeb.Telemetry.ComplexServerEventController do
   @spec detail(Plug.Conn.t(), map) :: Plug.Conn.t()
   def detail(conn, %{"event_name" => event_name} = params) do
     event_type_id = Telemetry.get_or_add_complex_server_event_type(event_name)
-    tf = Map.get(params, "tf", "7 days")
+    timeframe = Map.get(params, "tf", "7 days")
 
     start_date =
-      case tf do
+      case timeframe do
         "Today" -> Timex.today() |> Timex.to_datetime()
         "Yesterday" -> Timex.today() |> Timex.to_datetime() |> Timex.shift(days: -1)
         "7 days" -> Timex.now() |> Timex.shift(days: -7)
@@ -59,37 +59,32 @@ defmodule TeiserverWeb.Telemetry.ComplexServerEventController do
         _ -> Timex.now() |> Timex.shift(days: -7)
       end
 
-    server_data =
-      Telemetry.list_complex_server_events(
-        search: [
-          event_type_id: event_type_id,
-          between: {start_date, Timex.now()}
-        ],
-        limit: 5000
-      )
+    schema_keys = Telemetry.list_complex_server_events(
+      order_by: ["Newest first"],
+      where: [
+        event_type_id: event_type_id
+      ],
+      limit: 1,
+      select: [:value]
+    )
+    |> hd
+    |> Map.get(:value)
+    |> Map.keys
 
-    schema_keys =
-      server_data
-      |> Stream.map(fn event -> Map.keys(event.value) end)
-      |> Enum.to_list()
-      |> List.flatten()
-      |> Stream.uniq()
-      |> Enum.sort()
+    default_key = schema_keys |> Enum.sort |> hd
+
+    key = Map.get(params, "key", default_key)
+
+    server_data = ComplexServerEventQueries.get_aggregate_detail(event_type_id, key, start_date, Timex.now())
 
     key = Map.get(params, "key", hd(schema_keys ++ [nil]))
-
-    server_counts =
-      server_data
-      |> Enum.group_by(fn event -> Map.get(event.value, key, nil) end)
-      |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
 
     conn
     |> assign(:schema_keys, schema_keys)
     |> assign(:key, key)
-    |> assign(:tf, tf)
+    |> assign(:timeframe, timeframe)
     |> assign(:event_name, event_name)
-    |> assign(:server_counts, server_counts)
-    |> assign(:schema_keys, schema_keys)
+    |> assign(:server_data, server_data)
     |> render("detail.html")
   end
 
