@@ -13,7 +13,7 @@
   name: "search",
   label: "Search",
   active: @active,
-  icon: ~p"/telemetry/infolog/search",
+  icon: Teiserver.Helper.StylingHelper.icon(:search),
   bsname: bsname,
   url: ~p"/telemetry/infolog?search=true"
 ) %>
@@ -21,11 +21,11 @@
 <%= case @active do %>
   <% "index" -> %>
     &nbsp;&nbsp;&nbsp;
-    <a href={~p"/teiserver/reports/infolog/?page=#{@page - 1}"} class="btn btn-secondary">
+    <a href={~p"/telemetry/infolog/?page=#{@page - 1}"} class="btn btn-secondary">
       Prev
     </a>
 
-    <a href={~p"/teiserver/reports/infolog/?page=#{@page + 1}"} class="btn btn-secondary">
+    <a href={~p"/telemetry/infolog/?page=#{@page + 1}"} class="btn btn-secondary">
       Next
     </a>
   <% _ -> %>

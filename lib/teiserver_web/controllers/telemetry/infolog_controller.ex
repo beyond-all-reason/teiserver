@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Telemetry.InfologController do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
-    site_menu_active: "teiserver_report",
+    site_menu_active: "telemetry",
     sub_menu_active: "infolog"
   )
 
