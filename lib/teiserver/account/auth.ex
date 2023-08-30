@@ -66,6 +66,12 @@ defmodule Teiserver.Staff.MatchAdmin do
   def authorize(_, conn, _), do: allow?(conn, "Moderator")
 end
 
+defmodule Teiserver.Auth.Telemetry do
+  @behaviour Bodyguard.Policy
+  import Teiserver.Account.AuthLib, only: [allow_any?: 2]
+  def authorize(_, conn, _), do: allow_any?(conn, ~w(Server Engine))
+end
+
 defmodule Teiserver.Staff do
   @behaviour Bodyguard.Policy
   import Teiserver.Account.AuthLib, only: [allow_any?: 2]

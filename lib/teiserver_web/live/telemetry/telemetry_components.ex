@@ -23,6 +23,7 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       </.sub_menu_button>
 
       <.sub_menu_button
+        :if={allow?(@current_user, "Engine")}
         bsname={@view_colour}
         icon={Teiserver.Telemetry.InfologLib.icon()}
         active={@active == "infologs"}
@@ -32,6 +33,7 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       </.sub_menu_button>
 
       <.sub_menu_button
+        :if={allow?(@current_user, "Server")}
         bsname={@view_colour}
         icon={Teiserver.Telemetry.PropertyTypeLib.icon()}
         active={@active == "properties"}

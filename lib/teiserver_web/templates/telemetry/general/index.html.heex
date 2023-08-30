@@ -1,13 +1,15 @@
-<div class="row mt-2" :if={allow?(@current_user, "Server")}>
+<div class="row mt-2" >
   <.menu_card
+    :if={allow?(@current_user, "Engine")}
     icon={Teiserver.Telemetry.InfologLib.icon()}
     url={~p"/telemetry/infolog"}
     size={:small}
   >
     Infologs
   </.menu_card>
-  
+
   <.menu_card
+    :if={allow?(@current_user, "Server")}
     icon={Teiserver.Telemetry.PropertyTypeLib.icon()}
     url={~p"/telemetry/properties/summary"}
     size={:small}
