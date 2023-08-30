@@ -33,6 +33,7 @@ defmodule Teiserver.Telemetry.ComplexClientEventLib do
             %{
               channel: "telemetry_complex_client_events",
               userid: userid,
+              event_type_id: event_type_id,
               event_type_name: event_type_name,
               event_value: value
             }

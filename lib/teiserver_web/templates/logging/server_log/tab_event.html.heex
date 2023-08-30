@@ -1,35 +1,67 @@
-<% client_event_keys = (@data["events"]["combined"] || %{}) |> Map.keys() |> Enum.sort()
-complex_server_event_keys = (@data["events"]["server"] || %{}) |> Map.keys() |> Enum.sort()
-match_event_keys = (@data["events"]["match"] || %{}) |> Map.keys() |> Enum.sort() %>
+<%
+
+simple_client_keys = (@data["events"]["simple_client"] || %{}) |> Map.keys() |> Enum.sort()
+complex_client_keys = (@data["events"]["complex_client"] || %{}) |> Map.keys() |> Enum.sort()
+
+simple_server_data = (@data["events"]["simple_server"] || %{}) |> Enum.sort_by(fn {k, v} -> v end, &>=/2)
+complex_server_data = (@data["events"]["complex_server"] || %{}) |> Enum.sort_by(fn {k, v} -> v end, &>=/2)
+
+simple_match_data = (@data["events"]["simple_match"] || %{}) |> Enum.sort_by(fn {k, v} -> v end, &>=/2)
+complex_match_data = (@data["events"]["complex_match"] || %{}) |> Enum.sort_by(fn {k, v} -> v end, &>=/2)
+
+simple_lobby_data = (@data["events"]["simple_lobby"] || %{}) |> Enum.sort_by(fn {k, v} -> v end, &>=/2)
+complex_lobby_data = (@data["events"]["complex_lobby"] || %{}) |> Enum.sort_by(fn {k, v} -> v end, &>=/2)
+
+%>
 
 <div class="row">
-  <div class="col">
-    <h4>Client/Unauth Events</h4>
-    <table class="table">
+  <div class="col mt-3">
+    <h5>Simple Client/Anon</h5>
+    <table class="table table-sm table-hover">
       <thead>
         <tr>
           <th>Event</th>
           <th>Auth</th>
-          <th>Unauth</th>
-          <th>Combined</th>
+          <th>Anon</th>
         </tr>
       </thead>
       <tbody>
-        <%= for key <- client_event_keys do %>
+        <%= for key <- simple_client_keys do %>
           <tr>
             <td><%= key %></td>
-            <td><%= @data["events"]["client"][key] |> format_number %></td>
-            <td><%= @data["events"]["unauth"][key] |> format_number %></td>
-            <td><%= @data["events"]["combined"][key] |> format_number %></td>
+            <td><%= @data["events"]["simple_client"][key] |> format_number %></td>
+            <td><%= @data["events"]["simple_anon"][key] |> format_number %></td>
           </tr>
         <% end %>
       </tbody>
     </table>
   </div>
 
-  <div class="col">
-    <h4>Server Events</h4>
-    <table class="table">
+  <div class="col mt-3">
+    <h5>Complex Client/Anon</h5>
+    <table class="table table-sm table-hover">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Auth</th>
+          <th>Anon</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for key <- complex_client_keys do %>
+          <tr>
+            <td><%= key %></td>
+            <td><%= @data["events"]["complex_client"][key] |> format_number %></td>
+            <td><%= @data["events"]["complex_anon"][key] |> format_number %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="col mt-3">
+    <h5>Simple Server</h5>
+    <table class="table table-sm table-hover">
       <thead>
         <tr>
           <th>Event</th>
@@ -37,19 +69,19 @@ match_event_keys = (@data["events"]["match"] || %{}) |> Map.keys() |> Enum.sort(
         </tr>
       </thead>
       <tbody>
-        <%= for key <- complex_server_event_keys do %>
+        <%= for {key, value} <- simple_server_data do %>
           <tr>
             <td><%= key %></td>
-            <td><%= @data["events"]["server"][key] |> format_number %></td>
+            <td><%= value |> format_number %></td>
           </tr>
         <% end %>
       </tbody>
     </table>
   </div>
 
-  <div class="col">
-    <h4>Match Events</h4>
-    <table class="table">
+  <div class="col mt-3">
+    <h5>Complex Server</h5>
+    <table class="table table-sm table-hover">
       <thead>
         <tr>
           <th>Event</th>
@@ -57,10 +89,92 @@ match_event_keys = (@data["events"]["match"] || %{}) |> Map.keys() |> Enum.sort(
         </tr>
       </thead>
       <tbody>
-        <%= for key <- match_event_keys do %>
+        <%= for {key, value} <- complex_server_data do %>
           <tr>
             <td><%= key %></td>
-            <td><%= @data["events"]["match"][key] |> format_number %></td>
+            <td><%= value |> format_number %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col mt-3">
+    <h5>Simple Lobby</h5>
+    <table class="table table-sm table-hover">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for {key, value} <- simple_lobby_data do %>
+          <tr>
+            <td><%= key %></td>
+            <td><%= value |> format_number %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col mt-3">
+    <h5>Complex Lobby</h5>
+    <table class="table table-sm table-hover">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for {key, value} <- complex_lobby_data do %>
+          <tr>
+            <td><%= key %></td>
+            <td><%= value |> format_number %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="col mt-3">
+    <h5>Simple Match</h5>
+    <table class="table table-sm table-hover">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for {key, value} <- simple_match_data do %>
+          <tr>
+            <td><%= key %></td>
+            <td><%= value |> format_number %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col mt-3">
+    <h5>Complex Match</h5>
+    <table class="table table-sm table-hover">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for {key, value} <- complex_match_data do %>
+          <tr>
+            <td><%= key %></td>
+            <td><%= value |> format_number %></td>
           </tr>
         <% end %>
       </tbody>

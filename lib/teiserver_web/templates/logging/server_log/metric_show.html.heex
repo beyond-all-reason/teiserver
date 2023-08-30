@@ -111,7 +111,13 @@
               <% end %>
 
               <div class="tab-pane" id="event_tab" style="padding:5px;">
-                <%= render("tab_event.html", assigns) %>
+                <%= if Map.has_key?(@data["events"], "simple_server") do %>
+                  <%= render("tab_event.html", assigns) %>
+                <% end %>
+                
+                <%= if Map.has_key?(@data["events"], "server") do %>
+                  <%= render("tab_event_old.html", assigns) %>
+                <% end %>
               </div>
 
               <div class="tab-pane" id="raw_tab" style="padding:5px;">
