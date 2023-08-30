@@ -46,10 +46,21 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
               search: [
                 start_date: Timex.beginning_of_quarter(log.date),
                 end_date: Timex.end_of_quarter(log.date)
-              ]
+              ],
+              limit: 100
             )
 
-          data = ServerDayLogLib.aggregate_day_logs(logs)
+          user_activity_logs = Logging.list_user_activity_day_logs(
+            search: [
+                start_date: Timex.beginning_of_quarter(log.date),
+                end_date: Timex.end_of_quarter(log.date)
+            ],
+            limit: 100
+          )
+
+          data = logs
+          |> Enum.zip(user_activity_logs)
+          |> ServerDayLogLib.aggregate_day_logs()
 
           {:ok, _} =
             Logging.create_server_quarter_log(%{
@@ -78,10 +89,21 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
           search: [
             start_date: Timex.beginning_of_quarter(new_date),
             end_date: Timex.end_of_quarter(new_date)
-          ]
+          ],
+          limit: 100
         )
 
-      data = ServerDayLogLib.aggregate_day_logs(logs)
+      user_activity_logs = Logging.list_user_activity_day_logs(
+        search: [
+            start_date: Timex.beginning_of_quarter(new_date),
+            end_date: Timex.end_of_quarter(new_date)
+        ],
+        limit: 100
+      )
+
+      data = logs
+      |> Enum.zip(user_activity_logs)
+      |> ServerDayLogLib.aggregate_day_logs()
 
       {:ok, _} =
         Logging.create_server_quarter_log(%{
@@ -102,13 +124,15 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
     user_activity_logs = Logging.list_user_activity_day_logs(
       search: [
         start_date: Timex.beginning_of_quarter(now)
-      ]
+      ],
+      limit: 100
     )
 
     Logging.list_server_day_logs(
       search: [
         start_date: Timex.beginning_of_quarter(now)
-      ]
+      ],
+      limit: 100
     )
     |> Enum.zip(user_activity_logs)
     |> ServerDayLogLib.aggregate_day_logs()
