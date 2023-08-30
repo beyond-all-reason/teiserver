@@ -35,6 +35,7 @@ defmodule Teiserver.Telemetry.UserPropertyLib do
               channel: "telemetry_user_properties",
               event: :upserted_property,
               userid: userid,
+              property_type_id: property_type_id,
               property_type_name: property_type_name,
               value: value
             }
@@ -47,29 +48,6 @@ defmodule Teiserver.Telemetry.UserPropertyLib do
         result
     end
   end
-
-  # case property_name do
-  #     "hardware:cpuinfo" ->
-  #       Account.merge_update_client(userid, %{app_status: :accepted})
-  #       client = Account.get_client_by_id(userid)
-
-  #       if client do
-  #         send(client.tcp_pid, {:put, :app_status, :accepted})
-  #         Teiserver.Account.create_smurf_key(userid, "chobby_hash", hash)
-  #         Teiserver.Account.update_cache_user(userid, %{chobby_hash: hash})
-  #       end
-
-  #     "hardware:macAddrHash" ->
-  #       Teiserver.Account.create_smurf_key(userid, "chobby_mac_hash", value)
-  #       Teiserver.Account.update_cache_user(userid, %{chobby_mac_hash: value})
-
-  #     "hardware:sysInfoHash" ->
-  #       Teiserver.Account.create_smurf_key(userid, "chobby_sysinfo_hash", value)
-  #       Teiserver.Account.update_cache_user(userid, %{chobby_sysinfo_hash: value})
-
-  #     _ ->
-  #       :ok
-  #   end
 
   @doc """
   Returns the list of user_properties.
@@ -101,14 +79,29 @@ defmodule Teiserver.Telemetry.UserPropertyLib do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user_property!(id), do: Repo.get!(UserProperty, id)
-
-  def get_user_property!(id, args) do
-    args = args ++ [id: id]
-
-    args
+  @spec get_user_property!(T.userid, String.t() | non_neg_integer()) :: UserProperty.t
+  def get_user_property!(userid, property_type_id) when is_integer(property_type_id) do
+    [user_id: userid, property_type_id: property_type_id]
     |> UserPropertyQueries.query_user_properties()
     |> Repo.one!()
+  end
+
+  def get_user_property!(userid, property_type_name) do
+    property_type_id = Telemetry.get_or_add_property_type(property_type_name)
+    get_user_property!(userid, property_type_id)
+  end
+
+
+  @spec get_user_property(T.userid, String.t() | non_neg_integer()) :: UserProperty.t | nil
+  def get_user_property(userid, property_type_id) when is_integer(property_type_id) do
+    [user_id: userid, property_type_id: property_type_id]
+    |> UserPropertyQueries.query_user_properties()
+    |> Repo.one()
+  end
+
+  def get_user_property(userid, property_type_name) do
+    property_type_id = Telemetry.get_or_add_property_type(property_type_name)
+    get_user_property(userid, property_type_id)
   end
 
   @doc """

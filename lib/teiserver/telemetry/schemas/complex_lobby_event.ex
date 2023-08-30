@@ -2,7 +2,7 @@ defmodule Teiserver.Telemetry.ComplexLobbyEvent do
   @moduledoc false
   use CentralWeb, :schema
 
-  schema "telemetry_simple_lobby_events" do
+  schema "telemetry_complex_lobby_events" do
     belongs_to :user, Central.Account.User
     belongs_to :match, Teiserver.Battle.Match
     belongs_to :event_type, Teiserver.Telemetry.ComplexLobbyEventType

@@ -32,6 +32,14 @@ defmodule Teiserver.Repo.Migrations.SimpleAndComplexEvents do
       add :timestamp, :utc_datetime
     end
 
+    # Simple anon events
+    create table(:telemetry_simple_anon_events) do
+      add :hash, :string
+      add :timestamp, :utc_datetime
+
+      add :event_type_id, references(:telemetry_simple_client_event_types, on_delete: :nothing)
+    end
+
     # Add simple server events
     create table(:telemetry_simple_server_event_types) do
       add :name, :string

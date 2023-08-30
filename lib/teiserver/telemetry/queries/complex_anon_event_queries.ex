@@ -35,6 +35,11 @@ defmodule Teiserver.Telemetry.ComplexAnonEventQueries do
       where: complex_anon_events.id == ^id
   end
 
+  defp _where(query, :hash, hash) do
+    from complex_anon_events in query,
+      where: complex_anon_events.hash == ^hash
+  end
+
   defp _where(query, :between, {start_date, end_date}) do
     from complex_anon_events in query,
       where: between(complex_anon_events.timestamp, ^start_date, ^end_date)

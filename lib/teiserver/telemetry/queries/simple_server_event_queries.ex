@@ -1,12 +1,12 @@
 defmodule Teiserver.Telemetry.SimpleServerEventQueries do
   @moduledoc false
   use CentralWeb, :queries
-  alias Teiserver.Telemetry.SimpleLobbyEvent
+  alias Teiserver.Telemetry.SimpleServerEvent
 
   # Queries
   @spec query_simple_server_events(list) :: Ecto.Query.t()
   def query_simple_server_events(args) do
-    query = from(simple_server_events in SimpleLobbyEvent)
+    query = from(simple_server_events in SimpleServerEvent)
 
     query
     |> do_where([id: args[:id]])
@@ -90,7 +90,7 @@ defmodule Teiserver.Telemetry.SimpleServerEventQueries do
   @spec get_simple_server_events_summary(list) :: map()
   def get_simple_server_events_summary(args) do
     query =
-      from simple_server_events in SimpleLobbyEvent,
+      from simple_server_events in SimpleServerEvent,
         join: event_types in assoc(simple_server_events, :event_type),
         group_by: event_types.name,
         select: {event_types.name, count(simple_server_events.event_type_id)}

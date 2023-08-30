@@ -9,7 +9,8 @@ defmodule Teiserver.Telemetry.AnonPropertyQueries do
     query = from(anon_properties in AnonProperty)
 
     query
-    |> do_where([id: args[:id]])
+    |> do_where([hash: args[:hash]])
+    |> do_where([property_type_id: args[:property_type_id]])
     |> do_where(args[:where])
     |> do_preload(args[:preload])
     |> do_order_by(args[:order_by])
@@ -30,9 +31,14 @@ defmodule Teiserver.Telemetry.AnonPropertyQueries do
   defp _where(query, _, ""), do: query
   defp _where(query, _, nil), do: query
 
-  defp _where(query, :id, id) do
+  defp _where(query, :hash, hash) do
     from anon_properties in query,
-      where: anon_properties.id == ^id
+      where: anon_properties.hash == ^hash
+  end
+
+  defp _where(query, :property_type_id, property_type_id) do
+    from anon_properties in query,
+      where: anon_properties.property_type_id == ^property_type_id
   end
 
   defp _where(query, :between, {start_date, end_date}) do
@@ -85,12 +91,6 @@ defmodule Teiserver.Telemetry.AnonPropertyQueries do
     from anon_properties in query,
       left_join: property_types in assoc(anon_properties, :property_type),
       preload: [property_type: property_types]
-  end
-
-  def _preload(query, :users) do
-    from anon_properties in query,
-      left_join: users in assoc(anon_properties, :user),
-      preload: [user: users]
   end
 
   @spec get_anon_properties_summary(list) :: map()

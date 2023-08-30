@@ -35,6 +35,11 @@ defmodule Teiserver.Telemetry.SimpleAnonEventQueries do
       where: simple_anon_events.id == ^id
   end
 
+  defp _where(query, :hash, hash) do
+    from simple_anon_events in query,
+      where: simple_anon_events.hash == ^hash
+  end
+
   defp _where(query, :between, {start_date, end_date}) do
     from simple_anon_events in query,
       where: between(simple_anon_events.timestamp, ^start_date, ^end_date)

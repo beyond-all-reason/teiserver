@@ -1,5 +1,8 @@
 import Config
 
+# This makes anything in our tests involving user passwords (creating or logging in) much faster
+config :argon2_elixir, t_cost: 1, m_cost: 8
+
 # Configure your database
 config :central, Teiserver.Repo,
   username: "teiserver_test",

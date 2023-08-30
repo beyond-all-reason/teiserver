@@ -9,7 +9,8 @@ defmodule Teiserver.Telemetry.UserPropertyQueries do
     query = from(user_properties in UserProperty)
 
     query
-    |> do_where([id: args[:id]])
+    |> do_where([user_id: args[:user_id]])
+    |> do_where([property_type_id: args[:property_type_id]])
     |> do_where(args[:where])
     |> do_preload(args[:preload])
     |> do_order_by(args[:order_by])
@@ -30,9 +31,14 @@ defmodule Teiserver.Telemetry.UserPropertyQueries do
   defp _where(query, _, ""), do: query
   defp _where(query, _, nil), do: query
 
-  defp _where(query, :id, id) do
+  defp _where(query, :user_id, user_id) do
     from user_properties in query,
-      where: user_properties.id == ^id
+      where: user_properties.user_id == ^user_id
+  end
+
+  defp _where(query, :property_type_id, property_type_id) do
+    from user_properties in query,
+      where: user_properties.property_type_id == ^property_type_id
   end
 
   defp _where(query, :between, {start_date, end_date}) do
