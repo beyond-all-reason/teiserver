@@ -43,7 +43,7 @@ defmodule Teiserver.Telemetry.UserPropertyQueries do
 
   defp _where(query, :between, {start_date, end_date}) do
     from user_properties in query,
-      where: between(user_properties.timestamp, ^start_date, ^end_date)
+      where: between(user_properties.last_updated, ^start_date, ^end_date)
   end
 
   defp _where(query, :event_type_id, event_type_id) do
@@ -103,9 +103,9 @@ defmodule Teiserver.Telemetry.UserPropertyQueries do
   def get_user_properties_summary(args) do
     query =
       from user_properties in UserProperty,
-        join: event_types in assoc(user_properties, :event_type),
-        group_by: event_types.name,
-        select: {event_types.name, count(user_properties.event_type_id)}
+        join: property_types in assoc(user_properties, :property_type),
+        group_by: property_types.name,
+        select: {property_types.name, count(user_properties.property_type_id)}
 
     query
     |> do_where(args)

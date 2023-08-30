@@ -35,10 +35,10 @@
             <%= for value <- @combined_values do %>
               <tr>
                 <td><%= value %></td>
-                <td><%= @client_counts[value] %></td>
-                <td><%= @unauth_counts[value] %></td>
+                <td><%= @user_counts[value] %></td>
+                <td><%= @anon_counts[value] %></td>
                 <td>
-                  <%= Map.get(@client_counts, value, 0) + Map.get(@unauth_counts, value, 0) %>
+                  <%= Map.get(@user_counts, value, 0) + Map.get(@anon_counts, value, 0) %>
                 </td>
               </tr>
             <% end %>

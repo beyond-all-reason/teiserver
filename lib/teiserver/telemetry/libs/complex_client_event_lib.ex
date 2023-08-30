@@ -59,6 +59,7 @@ defmodule Teiserver.Telemetry.ComplexClientEventLib do
   def list_complex_client_events(args \\ []) do
     args
     |> ComplexClientEventQueries.query_complex_client_events()
+    |> QueryHelpers.limit_query(args[:limit] || 500)
     |> Repo.all()
   end
 

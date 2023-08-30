@@ -192,6 +192,7 @@ defmodule CentralWeb do
       alias Teiserver.Data.Types, as: T
       alias Teiserver.Repo
       import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+      alias Teiserver.Helper.QueryHelpers
     end
   end
 

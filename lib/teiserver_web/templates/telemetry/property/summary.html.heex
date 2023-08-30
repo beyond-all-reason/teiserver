@@ -58,12 +58,12 @@
                 <%= for property_type <- @property_types do %>
                   <tr>
                     <td><%= property_type %></td>
-                    <td><%= format_number(@client_properties[property_type]) %></td>
-                    <td><%= format_number(@unauth_properties[property_type]) %></td>
+                    <td><%= format_number(@user_properties[property_type]) %></td>
+                    <td><%= format_number(@anon_properties[property_type]) %></td>
                     <td>
                       <%= format_number(
-                        Map.get(@client_properties, property_type, 0) +
-                          Map.get(@unauth_properties, property_type, 0)
+                        Map.get(@user_properties, property_type, 0) +
+                          Map.get(@anon_properties, property_type, 0)
                       ) %>
                     </td>
                     <td>

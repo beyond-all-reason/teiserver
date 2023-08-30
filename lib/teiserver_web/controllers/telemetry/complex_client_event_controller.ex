@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
-  plug(:add_breadcrumb, name: 'Client events', url: '/teiserver/telemetry/client_events/summary')
+  plug(:add_breadcrumb, name: 'Client events', url: '/teiserver/telemetry/complex_client_events/summary')
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
   def summary(conn, params) do
@@ -50,10 +50,10 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
   @spec detail(Plug.Conn.t(), map) :: Plug.Conn.t()
   def detail(conn, %{"event_name" => event_name} = params) do
     event_type_id = Telemetry.get_or_add_complex_client_event_type(event_name)
-    tf = Map.get(params, "tf", "7 days")
+    timeframe = Map.get(params, "tf", "7 days")
 
     start_date =
-      case tf do
+      case timeframe do
         "Today" -> Timex.today() |> Timex.to_datetime()
         "Yesterday" -> Timex.today() |> Timex.to_datetime() |> Timex.shift(days: -1)
         "7 days" -> Timex.now() |> Timex.shift(days: -7)
@@ -62,57 +62,37 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
         _ -> Timex.now() |> Timex.shift(days: -7)
       end
 
-    client_data =
-      Telemetry.list_complex_client_events(
-        search: [
-          event_type_id: event_type_id,
-          between: {start_date, Timex.now()}
-        ],
-        limit: 500
-      )
+    schema_keys = Telemetry.list_complex_client_events(
+      order_by: ["Newest first"],
+      where: [
+        event_type_id: event_type_id
+      ],
+      limit: 1,
+      select: [:value]
+    )
+    |> hd
+    |> Map.get(:value)
+    |> Map.keys
 
-    anon_data =
-      Telemetry.list_complex_client_events(
-        search: [
-          event_type_id: event_type_id,
-          between: {start_date, Timex.now()}
-        ],
-        limit: 500
-      )
+    default_key = schema_keys |> Enum.sort |> hd
 
-    schema_keys =
-      (client_data ++ anon_data)
-      |> Stream.map(fn event -> Map.keys(event.value) end)
-      |> Enum.to_list()
-      |> List.flatten()
-      |> Stream.uniq()
-      |> Enum.sort()
+    key = Map.get(params, "key", default_key)
 
-    key = Map.get(params, "key", hd(schema_keys))
-
-    client_counts =
-      client_data
-      |> Enum.group_by(fn event -> Map.get(event.value, key, nil) end)
-      |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
-
-    anon_counts =
-      anon_data
-      |> Enum.group_by(fn event -> Map.get(event.value, key, nil) end)
-      |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
+    client_data = ComplexClientEventQueries.get_aggregate_detail(event_type_id, key, start_date, Timex.now())
+    anon_data = ComplexAnonEventQueries.get_aggregate_detail(event_type_id, key, start_date, Timex.now())
 
     combined_values =
-      (Map.keys(client_counts) ++ Map.keys(anon_counts))
+      (Map.keys(client_data) ++ Map.keys(anon_data))
       |> Enum.uniq()
       |> Enum.sort()
 
     conn
     |> assign(:schema_keys, schema_keys)
     |> assign(:key, key)
-    |> assign(:tf, tf)
+    |> assign(:timeframe, timeframe)
     |> assign(:event_name, event_name)
-    |> assign(:client_counts, client_counts)
-    |> assign(:anon_counts, anon_counts)
-    |> assign(:schema_keys, schema_keys)
+    |> assign(:client_data, client_data)
+    |> assign(:anon_data, anon_data)
     |> assign(:combined_values, combined_values)
     |> render("detail.html")
   end

@@ -43,7 +43,7 @@ defmodule Teiserver.Telemetry.AnonPropertyQueries do
 
   defp _where(query, :between, {start_date, end_date}) do
     from anon_properties in query,
-      where: between(anon_properties.timestamp, ^start_date, ^end_date)
+      where: between(anon_properties.last_updated, ^start_date, ^end_date)
   end
 
   defp _where(query, :event_type_id, event_type_id) do
@@ -97,9 +97,9 @@ defmodule Teiserver.Telemetry.AnonPropertyQueries do
   def get_anon_properties_summary(args) do
     query =
       from anon_properties in AnonProperty,
-        join: event_types in assoc(anon_properties, :event_type),
-        group_by: event_types.name,
-        select: {event_types.name, count(anon_properties.event_type_id)}
+        join: property_types in assoc(anon_properties, :property_type),
+        group_by: property_types.name,
+        select: {property_types.name, count(anon_properties.property_type_id)}
 
     query
     |> do_where(args)

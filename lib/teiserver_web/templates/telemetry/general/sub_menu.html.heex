@@ -1,19 +1,4 @@
-<% {fg, _bg, _bsname} = view_colour(@active) |> colours() %>
-
-<style>
-  .sub-menu-icon a:hover {
-    border-bottom: 5px solid <%= fg %>;
-    color: <%= fg %>;
-  }
-
-  .sub-menu-icon .active {
-    border-bottom-color: <%= fg %>;
-  }
-
-  .sub-menu .active, .sub-menu .active:hover {
-    color: <%= fg %>;
-  }
-</style>
+<% bsname = view_colour(@active) %>
 
 <div class="row sub-menu">
   <div class="col-md-12">
@@ -21,45 +6,31 @@
       <div class="card-body" style="padding: 0 15px;">
         <div class="row">
           <%= if allow?(@conn, "Server") do %>
-            <%= central_component("sub_menu_icon",
-              name: "properties",
-              label: "Properties",
-              active: @active,
-              url: ~p"/telemetry/properties/summary",
-              icon: Teiserver.Telemetry.PropertyTypeLib.icon()
-            ) %>
+            <.sub_menu_button
+              bsname={bsname}
+              icon={Teiserver.Telemetry.TelemetryLib.icon()}
+              active={@active == "telemetry"}
+              url={~p"/telemetry"}
+            >
+              Telemetry home
+            </.sub_menu_button>
 
-            <%= central_component("sub_menu_icon",
-              name: "client_events",
-              label: "Client events",
-              active: @active,
-              url: ~p"/telemetry/client_events/summary",
-              icon: Teiserver.Telemetry.ComplexClientEventLib.icon()
-            ) %>
+            <.sub_menu_button
+              bsname={bsname}
+              icon={Teiserver.Telemetry.InfologLib.icon()}
+              active={@active == "infologs"}
+              url={~p"/telemetry/infolog"}
+            >
+              Infologs
+            </.sub_menu_button>
 
-            <%= central_component("sub_menu_icon",
-              name: "complex_server_events",
-              label: "Complex server events",
-              active: @active,
-              url: ~p"/telemetry/complex_server_events/summary",
-              icon: Teiserver.Telemetry.ComplexServerEventLib.icon()
-            ) %>
-
-            <%= central_component("sub_menu_icon",
-              name: "match_events",
-              label: "Match events",
-              active: @active,
-              url: ~p"/telemetry/match_events/summary",
-              icon: Teiserver.Telemetry.SimpleMatchEventLib.icon()
-            ) %>
-
-            <%= central_component("sub_menu_icon",
-              name: "complex_match_events",
-              label: "Complex match events",
-              active: @active,
-              url: ~p"/telemetry/complex_match_events/summary",
-              icon: Teiserver.Telemetry.ComplexMatchEventLib.icon()
-            ) %>
+            <.sub_menu_button
+              bsname={bsname}
+              icon={Teiserver.Telemetry.PropertyTypeLib.icon()}
+              active={@active == "properties"}
+              url={~p"/telemetry/properties/summary"}>
+              Properties
+            </.sub_menu_button>
           <% end %>
         </div>
       </div>
