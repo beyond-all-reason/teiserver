@@ -132,7 +132,7 @@ defmodule Teiserver.TeiserverQuickActions do
         %{
           label: "Infologs",
           icons: ["fa-regular #{Teiserver.Telemetry.InfologLib.icon()}", :list],
-          url: ~p"/teiserver/reports/infolog",
+          url: ~p"/telemetry/infolog",
           permissions: "Server"
         },
         %{
@@ -160,7 +160,7 @@ defmodule Teiserver.TeiserverQuickActions do
       %{
         label: "Teiserver infologs",
         icons: ["fa-regular #{Teiserver.Telemetry.InfologLib.icon()}", :list],
-        url: ~p"/teiserver/reports/infolog",
+        url: ~p"/telemetry/infolog",
         permissions: "Server"
       }
     ]

@@ -3,14 +3,14 @@
 simple_client_keys = (@data["events"]["simple_client"] || %{}) |> Map.keys() |> Enum.sort()
 complex_client_keys = (@data["events"]["complex_client"] || %{}) |> Map.keys() |> Enum.sort()
 
-simple_server_data = (@data["events"]["simple_server"] || %{}) |> Enum.sort_by(fn {k, v} -> v end, &>=/2)
-complex_server_data = (@data["events"]["complex_server"] || %{}) |> Enum.sort_by(fn {k, v} -> v end, &>=/2)
+simple_server_data = (@data["events"]["simple_server"] || %{}) |> Enum.sort_by(fn {_k, v} -> v end, &>=/2)
+complex_server_data = (@data["events"]["complex_server"] || %{}) |> Enum.sort_by(fn {_k, v} -> v end, &>=/2)
 
-simple_match_data = (@data["events"]["simple_match"] || %{}) |> Enum.sort_by(fn {k, v} -> v end, &>=/2)
-complex_match_data = (@data["events"]["complex_match"] || %{}) |> Enum.sort_by(fn {k, v} -> v end, &>=/2)
+simple_match_data = (@data["events"]["simple_match"] || %{}) |> Enum.sort_by(fn {_k, v} -> v end, &>=/2)
+complex_match_data = (@data["events"]["complex_match"] || %{}) |> Enum.sort_by(fn {_k, v} -> v end, &>=/2)
 
-simple_lobby_data = (@data["events"]["simple_lobby"] || %{}) |> Enum.sort_by(fn {k, v} -> v end, &>=/2)
-complex_lobby_data = (@data["events"]["complex_lobby"] || %{}) |> Enum.sort_by(fn {k, v} -> v end, &>=/2)
+simple_lobby_data = (@data["events"]["simple_lobby"] || %{}) |> Enum.sort_by(fn {_k, v} -> v end, &>=/2)
+complex_lobby_data = (@data["events"]["complex_lobby"] || %{}) |> Enum.sort_by(fn {_k, v} -> v end, &>=/2)
 
 %>
 

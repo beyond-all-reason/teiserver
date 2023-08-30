@@ -650,15 +650,14 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
         "#{complexity}_#{section}"
       )
 
-    complex_client_data =
-      case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
-        {:ok, results} ->
-          results.rows
-          |> Map.new(fn [key, value] -> {key, value} end)
+    case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
+      {:ok, results} ->
+        results.rows
+        |> Map.new(fn [key, value] -> {key, value} end)
 
-        {a, b} ->
-          raise "ERR: #{a}, #{b}"
-      end
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
   end
 
   defp run_anon_event_query(complexity, start_date, end_date) do
@@ -680,15 +679,14 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
         complexity
       )
 
-    complex_client_data =
-      case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
-        {:ok, results} ->
-          results.rows
-          |> Map.new(fn [key, value] -> {key, value} end)
+    case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
+      {:ok, results} ->
+        results.rows
+        |> Map.new(fn [key, value] -> {key, value} end)
 
-        {a, b} ->
-          raise "ERR: #{a}, #{b}"
-      end
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
   end
 
   defp run_match_event_query(complexity, start_date, end_date) do
@@ -712,14 +710,13 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
         complexity
       )
 
-    complex_client_data =
-      case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
-        {:ok, results} ->
-          results.rows
-          |> Map.new(fn [key, value] -> {key, value} end)
+    case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
+      {:ok, results} ->
+        results.rows
+        |> Map.new(fn [key, value] -> {key, value} end)
 
-        {a, b} ->
-          raise "ERR: #{a}, #{b}"
-      end
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
   end
 end

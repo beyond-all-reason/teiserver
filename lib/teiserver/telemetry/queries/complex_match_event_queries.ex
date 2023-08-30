@@ -112,4 +112,26 @@ defmodule Teiserver.Telemetry.ComplexMatchEventQueries do
     |> Repo.all()
     |> Map.new()
   end
+
+  def get_aggregate_detail(event_type_id, key, start_datetime, end_datetime) do
+    query = """
+    SELECT (e.value ->> $1) AS key, COUNT(e.id)
+      FROM telemetry_complex_match_events e
+      JOIN teiserver_battle_matches m
+        ON e.match_id = m.id
+      WHERE e.event_type_id = $2
+      AND m.started BETWEEN $2 AND $3
+      GROUP BY key
+    """
+    case Ecto.Adapters.SQL.query(Repo, query, [key, event_type_id, start_datetime, end_datetime]) do
+      {:ok, results} ->
+        results.rows
+          |> Map.new(fn [key, value] ->
+            {key, value}
+          end)
+
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
+  end
 end
