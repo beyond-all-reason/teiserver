@@ -1614,6 +1614,9 @@ defmodule Teiserver.Account do
   @spec calculate_relationship_stats(T.userid) :: :ok
   defdelegate calculate_relationship_stats(userid), to: RelationshipLib
 
+  @spec decache_relationships(T.userid) :: :ok
+  defdelegate decache_relationships(userid), to: RelationshipLib
+
   @spec list_userids_avoiding_this_userid(T.userid) :: [T.userid]
   defdelegate list_userids_avoiding_this_userid(userid), to: RelationshipLib
 
