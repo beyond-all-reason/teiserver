@@ -164,6 +164,7 @@ defmodule Teiserver.Account.UserCache do
   @spec recache_user(T.userid() | User.t()) :: :ok
   def recache_user(id) when is_integer(id) do
     Central.Account.recache_user(id)
+    Teiserver.Account.decache_relationships(id)
 
     Account.get_user(id)
     |> convert_user

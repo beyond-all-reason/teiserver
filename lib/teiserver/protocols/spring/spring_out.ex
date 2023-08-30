@@ -114,6 +114,10 @@ defmodule Teiserver.Protocols.SpringOut do
     "s.user.user_token #{email}\t#{token}\n"
   end
 
+  defp do_reply(:okay, {cmd, msg}) do
+    "OK cmd=#{cmd}\t#{msg}\n"
+  end
+
   defp do_reply(:okay, cmd) do
     if cmd do
       "OK cmd=#{cmd}\n"
@@ -151,7 +155,7 @@ defmodule Teiserver.Protocols.SpringOut do
     friends =
       Account.list_friend_ids_of_user(userid)
       |> Enum.map(fn f ->
-        name = User.get_username(f)
+        name = Account.get_username_by_id(f)
 
         if name do
           "FRIENDLIST userName=#{name}\n"
@@ -169,7 +173,7 @@ defmodule Teiserver.Protocols.SpringOut do
     requests =
       Account.list_incoming_friend_requests_of_userid(userid)
       |> Enum.map(fn f ->
-        name = User.get_username(f)
+        name = Account.get_username_by_id(f)
         "FRIENDREQUESTLIST userName=#{name}\n"
       end)
 
@@ -183,7 +187,7 @@ defmodule Teiserver.Protocols.SpringOut do
     ignored =
       Account.list_userids_ignored_by_userid(userid)
       |> Enum.map(fn f ->
-        name = User.get_username(f)
+        name = Account.get_username_by_id(f)
         "IGNORELIST userName=#{name}\n"
       end)
 
@@ -360,7 +364,7 @@ defmodule Teiserver.Protocols.SpringOut do
     end
 
     if do_ring do
-      ringer_name = User.get_username(ringer_id)
+      ringer_name = Account.get_username_by_id(ringer_id)
       "RING #{ringer_name}\n"
     end
   end
@@ -441,7 +445,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:sent_direct_message, {to_id, msg}) do
-    to_name = User.get_username(to_id)
+    to_name = Account.get_username_by_id(to_id)
     "SAYPRIVATE #{to_name} #{msg}\n"
   end
 
@@ -449,7 +453,7 @@ defmodule Teiserver.Protocols.SpringOut do
     from_user = User.get_user_by_id(from_id)
 
     if not Account.does_a_ignore_b?(state_user.id, from_id) or from_user.moderator == true do
-      from_name = User.get_username(from_id)
+      from_name = Account.get_username_by_id(from_id)
 
       messages
       |> Enum.map_join("", fn msg ->
@@ -468,7 +472,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
     if not Account.does_a_ignore_b?(state_user.id, from_id) or from_user.moderator == true or
          User.is_bot?(from_user) == true do
-      from_name = User.get_username(from_id)
+      from_name = Account.get_username_by_id(from_id)
 
       messages
       |> Enum.map_join("", fn msg ->
@@ -487,7 +491,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
     if not Account.does_a_ignore_b?(state_user.id, from_id) or from_user.moderator == true or
          User.is_bot?(from_user) == true do
-      from_name = User.get_username(from_id)
+      from_name = Account.get_username_by_id(from_id)
 
       messages
       |> Enum.map_join("", fn msg ->
@@ -501,7 +505,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:add_user_to_room, {userid, room_name}) do
-    username = User.get_username(userid)
+    username = Account.get_username_by_id(userid)
     "JOINED #{room_name} #{username}\n"
   end
 
@@ -517,27 +521,27 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:remove_user_from_room, {userid, room_name}) do
-    username = User.get_username(userid)
+    username = Account.get_username_by_id(userid)
     "LEFT #{room_name} #{username}\n"
   end
 
   defp do_reply(:add_user_to_battle, {userid, lobby_id, nil}) do
-    username = User.get_username(userid)
+    username = Account.get_username_by_id(userid)
     "JOINEDBATTLE #{lobby_id} #{username}\n"
   end
 
   defp do_reply(:add_user_to_battle, {userid, lobby_id, script_password}) do
-    username = User.get_username(userid)
+    username = Account.get_username_by_id(userid)
     "JOINEDBATTLE #{lobby_id} #{username} #{script_password}\n"
   end
 
   defp do_reply(:remove_user_from_battle, {userid, lobby_id}) do
-    username = User.get_username(userid)
+    username = Account.get_username_by_id(userid)
     "LEFTBATTLE #{lobby_id} #{username}\n"
   end
 
   defp do_reply(:kick_user_from_battle, {userid, lobby_id}) do
-    username = User.get_username(userid)
+    username = Account.get_username_by_id(userid)
     "KICKFROMBATTLE #{lobby_id} #{username}\n"
   end
 
@@ -548,7 +552,7 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:battle_message, {sender_id, messages, _lobby_id, state_userid})
        when is_list(messages) do
     if not Account.does_a_ignore_b?(state_userid, sender_id) do
-      username = User.get_username(sender_id)
+      username = Account.get_username_by_id(sender_id)
 
       messages
       |> Enum.map_join("", fn msg ->
@@ -564,7 +568,7 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:battle_message_ex, {sender_id, messages, _lobby_id, state_userid})
        when is_list(messages) do
     if not Account.does_a_ignore_b?(state_userid, sender_id) do
-      username = User.get_username(sender_id)
+      username = Account.get_username_by_id(sender_id)
 
       messages
       |> Enum.map_join("", fn msg ->
@@ -771,7 +775,7 @@ defmodule Teiserver.Protocols.SpringOut do
     reply(:join_success, room_name, nil, state)
     reply(:add_user_to_room, {state.userid, room_name}, nil, state)
 
-    author_name = User.get_username(room.author_id)
+    author_name = Account.get_username_by_id(room.author_id)
     reply(:channel_topic, {room_name, author_name}, nil, state)
 
     # Check for known users

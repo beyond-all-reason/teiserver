@@ -10,7 +10,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     target_id = Account.get_userid_from_name(username)
     if target_id && target_id != state.userid do
       Account.reset_relationship_state(state.userid, target_id)
-      reply(:spring, :okay, "c.user.reset_relationship", msg_id, state)
+      reply(:spring, :okay, {"c.user.reset_relationship", "userName=#{username}"}, msg_id, state)
     else
       reply(:spring, :no, "c.user.reset_relationship", msg_id, state)
     end
@@ -20,7 +20,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     target_id = Account.get_userid_from_name(username)
     if target_id && target_id != state.userid do
       Account.ignore_user(state.userid, target_id)
-      reply(:spring, :okay, "c.user.ignore", msg_id, state)
+      reply(:spring, :okay, {"c.user.ignore", "userName=#{username}"}, msg_id, state)
     else
       reply(:spring, :no, "c.user.ignore", msg_id, state)
     end
@@ -30,7 +30,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     target_id = Account.get_userid_from_name(username)
     if target_id && target_id != state.userid do
       Account.block_user(state.userid, target_id)
-      reply(:spring, :okay, "c.user.block", msg_id, state)
+      reply(:spring, :okay, {"c.user.block", "userName=#{username}"}, msg_id, state)
     else
       reply(:spring, :no, "c.user.block", msg_id, state)
     end
@@ -40,7 +40,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     target_id = Account.get_userid_from_name(username)
     if target_id && target_id != state.userid do
       Account.avoid_user(state.userid, target_id)
-      reply(:spring, :okay, "c.user.avoid", msg_id, state)
+      reply(:spring, :okay, {"c.user.avoid", "userName=#{username}"}, msg_id, state)
     else
       reply(:spring, :no, "c.user.avoid", msg_id, state)
     end
