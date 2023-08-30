@@ -72,10 +72,16 @@ defmodule Teiserver.Logging.ServerDayLogLib do
       battles: 0
     },
     events: %{
-      server: %{},
-      unauth: %{},
-      client: %{},
-      combined: %{}
+      complex_client: %{},
+      simple_client: %{},
+      complex_anon: %{},
+      simple_anon: %{},
+      complex_server: %{},
+      simple_server: %{},
+      complex_lobby: %{},
+      simple_lobby: %{},
+      complex_match: %{},
+      simple_match: %{},
     },
 
     # Monthly totals
@@ -104,17 +110,17 @@ defmodule Teiserver.Logging.ServerDayLogLib do
   end
 
   # Given an existing segment and a batch of logs, calculate the segment and add them together
-  defp extend_segment(existing, %{data: data} = _log) do
+  defp extend_segment(existing, {%{data: data} = _server_log, %{data: activity} = _activity_log}) do
     %{
       # Used to make calculating the end of day stats easier, this will not appear in the final result
       tmp_reduction: %{
         battles: existing.tmp_reduction.battles + get_in(data, ~w(aggregates stats battles)),
         unique_users:
           existing.tmp_reduction.unique_users ++
-            Map.keys(get_in(data, ~w(minutes_per_user total))),
+            Map.keys(activity["total"]),
         unique_players:
           existing.tmp_reduction.unique_players ++
-            Map.keys(get_in(data, ~w(minutes_per_user player))),
+            Map.keys(activity["player"]),
         accounts_created:
           existing.tmp_reduction.accounts_created +
             get_in(data, ~w(aggregates stats accounts_created)),
@@ -131,10 +137,16 @@ defmodule Teiserver.Logging.ServerDayLogLib do
 
       # Telemetry events
       events: %{
-        client: add_maps(existing.events.client, get_in(data, ~w(events client))),
-        unauth: add_maps(existing.events.unauth, get_in(data, ~w(events unauth))),
-        server: add_maps(existing.events.server, get_in(data, ~w(events server))),
-        combined: add_maps(existing.events.combined, get_in(data, ~w(events combined)))
+        complex_client: add_maps(existing.events.complex_client, get_in(data, ~w(events complex_client))),
+        simple_client: add_maps(existing.events.simple_client, get_in(data, ~w(events simple_client))),
+        complex_anon: add_maps(existing.events.complex_anon, get_in(data, ~w(events complex_anon))),
+        simple_anon: add_maps(existing.events.simple_anon, get_in(data, ~w(events simple_anon))),
+        complex_server: add_maps(existing.events.complex_server, get_in(data, ~w(events complex_server))),
+        simple_server: add_maps(existing.events.simple_server, get_in(data, ~w(events simple_server))),
+        complex_lobby: add_maps(existing.events.complex_lobby, get_in(data, ~w(events complex_lobby))),
+        simple_lobby: add_maps(existing.events.simple_lobby, get_in(data, ~w(events simple_lobby))),
+        complex_match: add_maps(existing.events.complex_match, get_in(data, ~w(events complex_match))),
+        simple_match: add_maps(existing.events.simple_match, get_in(data, ~w(events simple_match)))
       },
 
       # Monthly totals
