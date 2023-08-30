@@ -39,8 +39,8 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventTest do
     assert result == :ok
 
     assert Telemetry.list_complex_lobby_events() |> Enum.count() == 1
-    assert Telemetry.list_complex_lobby_events(search: [user_id: user.id]) |> Enum.count() == 1
-    assert Telemetry.list_complex_lobby_events(search: [lobby_id: lobby.id]) |> Enum.count() == 1
+    assert Telemetry.list_complex_lobby_events(where: [user_id: user.id]) |> Enum.count() == 1
+    assert Telemetry.list_complex_lobby_events(where: [lobby_id: lobby.id]) |> Enum.count() == 1
 
     # Ensure the lobby event types exist too
     type_list = Telemetry.list_complex_lobby_event_types()

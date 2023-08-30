@@ -35,6 +35,11 @@ defmodule Teiserver.Telemetry.SimpleMatchEventQueries do
       where: simple_match_events.id == ^id
   end
 
+  defp _where(query, :match_id, match_id) do
+    from simple_server_events in query,
+      where: simple_server_events.match_id == ^match_id
+  end
+
   defp _where(query, :between, {start_date, end_date}) do
     from simple_match_events in query,
       left_join: matches in assoc(simple_match_events, :match),
@@ -86,6 +91,12 @@ defmodule Teiserver.Telemetry.SimpleMatchEventQueries do
     from simple_match_events in query,
       left_join: users in assoc(simple_match_events, :user),
       preload: [user: users]
+  end
+
+  defp _preload(query, :event_types) do
+    from simple_match_events in query,
+      left_join: event_types in assoc(simple_match_events, :event_type),
+      preload: [event_type: event_types]
   end
 
   @spec get_simple_match_events_summary(list) :: map()

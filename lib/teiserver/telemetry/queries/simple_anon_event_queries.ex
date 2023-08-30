@@ -86,10 +86,10 @@ defmodule Teiserver.Telemetry.SimpleAnonEventQueries do
     end)
   end
 
-  defp _preload(query, :users) do
+  defp _preload(query, :event_types) do
     from simple_anon_events in query,
-      left_join: users in assoc(simple_anon_events, :user),
-      preload: [user: users]
+      left_join: event_types in assoc(simple_anon_events, :event_type),
+      preload: [event_type: event_types]
   end
 
   @spec get_simple_anon_events_summary(list) :: map()

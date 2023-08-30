@@ -21,7 +21,7 @@ defmodule Teiserver.Telemetry.ComplexClientEventTest do
     assert result == :ok
 
     assert Telemetry.list_complex_client_events() |> Enum.count() == 1
-    assert Telemetry.list_complex_client_events(search: [user_id: user.id]) |> Enum.count() == 1
+    assert Telemetry.list_complex_client_events(where: [user_id: user.id]) |> Enum.count() == 1
 
     # Ensure the client event types exist too
     type_list = Telemetry.list_complex_client_event_types()

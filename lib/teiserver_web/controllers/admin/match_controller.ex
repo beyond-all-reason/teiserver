@@ -138,7 +138,7 @@ defmodule TeiserverWeb.Admin.MatchController do
     # What about new balance?
     new_balance = generate_new_balance_data(match)
 
-    raw_events = Telemetry.list_simple_match_events(search: [match_id: match.id], preload: [:event_types])
+    raw_events = Telemetry.list_simple_match_events(where: [match_id: match.id], preload: [:event_types])
 
     events_by_type = raw_events
       |> Enum.group_by(fn e ->

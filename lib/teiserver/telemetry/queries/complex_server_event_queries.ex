@@ -87,6 +87,12 @@ defmodule Teiserver.Telemetry.ComplexServerEventQueries do
       preload: [user: users]
   end
 
+  defp _preload(query, :event_types) do
+    from complex_server_events in query,
+      left_join: event_types in assoc(complex_server_events, :event_type),
+      preload: [event_type: event_types]
+  end
+
   @spec get_complex_server_events_summary(list) :: map()
   def get_complex_server_events_summary(args) do
     query =

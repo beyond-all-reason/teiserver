@@ -20,7 +20,7 @@ defmodule Teiserver.Telemetry.ComplexAnonEventTest do
     assert result == :ok
 
     assert Telemetry.list_complex_anon_events() |> Enum.count() == 1
-    assert Telemetry.list_complex_anon_events(search: [hash: hash]) |> Enum.count() == 1
+    assert Telemetry.list_complex_anon_events(where: [hash: hash]) |> Enum.count() == 1
 
     # Ensure the anon event types exist too
     type_list = Telemetry.list_complex_client_event_types()
