@@ -115,7 +115,25 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
 
     Ecto.Adapters.SQL.query!(
       Repo,
-      "UPDATE teiserver_telemetry_match_events SET match_id = NULL WHERE match_id = ANY($1)",
+      "UPDATE telemetry_simple_match_events SET match_id = NULL WHERE match_id = ANY($1)",
+      [ids]
+    )
+
+    Ecto.Adapters.SQL.query!(
+      Repo,
+      "UPDATE telemetry_complex_match_events SET match_id = NULL WHERE match_id = ANY($1)",
+      [ids]
+    )
+
+    Ecto.Adapters.SQL.query!(
+      Repo,
+      "UPDATE telemetry_simple_lobby_events SET match_id = NULL WHERE match_id = ANY($1)",
+      [ids]
+    )
+
+    Ecto.Adapters.SQL.query!(
+      Repo,
+      "UPDATE telemetry_complex_lobby_events SET match_id = NULL WHERE match_id = ANY($1)",
       [ids]
     )
 
