@@ -5,7 +5,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   """
   use GenServer
   require Logger
-  alias Teiserver.{Account, Coordinator, Client, User, Lobby, Battle}
+  alias Teiserver.{Account, Coordinator, Client, User, Lobby, Battle, Telemetry}
   alias Teiserver.Lobby.{ChatLib}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Config
@@ -123,6 +123,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     |> Enum.each(fn userid ->
       cond do
         allow_join(userid, state) |> elem(0) == false ->
+          Telemetry.log_simple_server_event(userid, "lobby.recheck_membership_kick")
           Lobby.kick_user_from_battle(userid, state.lobby_id)
 
         user_allowed_to_play?(userid, state) == false ->

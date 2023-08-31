@@ -5,7 +5,7 @@ defmodule TeiserverWeb.TournamentLive.Show do
   require Logger
 
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.{Account, Battle, Coordinator, Lobby, User}
+  alias Teiserver.{Account, Battle, Coordinator, Lobby, User, Telemetry}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @extra_menu_content """
@@ -302,6 +302,7 @@ defmodule TeiserverWeb.TournamentLive.Show do
         %{assigns: %{id: id, bar_user: _bar_user}} = socket
       ) do
     Lobby.kick_user_from_battle(int_parse(target_id), id)
+    Telemetry.log_simple_server_event(int_parse(target_id), "lobby.kicked_from_web_interface")
     {:noreply, socket}
   end
 

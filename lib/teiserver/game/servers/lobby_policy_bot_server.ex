@@ -4,7 +4,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   """
 
   alias Phoenix.PubSub
-  alias Teiserver.{Game, User, Client, Battle, Account, Lobby, Coordinator}
+  alias Teiserver.{Game, User, Client, Battle, Account, Lobby, Coordinator, Telemetry}
   alias Teiserver.Lobby.{ChatLib}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Data.Types, as: T
@@ -265,6 +265,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     if String.trim(rem) != "" do
       ChatLib.say(senderid, "!ev", state.lobby_id)
       Lobby.kick_user_from_battle(senderid, state.lobby_id)
+      Telemetry.log_simple_server_event(senderid, "lobby_policy.kicked_for_bossing")
     end
 
     state
