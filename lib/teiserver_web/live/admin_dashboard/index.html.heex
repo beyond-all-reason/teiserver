@@ -9,7 +9,17 @@ queue_bsname = Teiserver.Game.QueueLib.colours()
   <div class="col-md-4">
     <%= live_redirect("Login throttle",
       to: ~p"/admin/dashboard/login_throttle",
-      class: "btn btn-sm btn-outline-primary"
+      class: "btn btn-sm mx-1 btn-outline-primary"
+    ) %>
+    
+    <%= live_redirect("Server graphs",
+      to: ~p"/logging/server/now",
+      class: "btn btn-sm mx-1 btn-outline-warning"
+    ) %>
+    
+    <%= live_redirect("Load graphs",
+      to: ~p"/logging/server/load",
+      class: "btn btn-sm mx-1 btn-outline-warning"
     ) %>
   </div>
 </div>
