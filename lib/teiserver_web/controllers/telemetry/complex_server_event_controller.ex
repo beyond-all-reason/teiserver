@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Telemetry.ComplexServerEventController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
-  plug(:add_breadcrumb, name: 'Server events', url: '/telemetry/complex_server_events/summary')
+  plug(:add_breadcrumb, name: 'Complex Server events', url: '/telemetry/complex_server_events/summary')
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
   def summary(conn, params) do

@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
-  plug(:add_breadcrumb, name: 'Match events', url: '/telemetry/complex_match_events/summary')
+  plug(:add_breadcrumb, name: 'Complex Match events', url: '/telemetry/complex_match_events/summary')
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
   def summary(conn, params) do
