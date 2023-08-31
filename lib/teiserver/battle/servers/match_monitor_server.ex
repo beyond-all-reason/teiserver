@@ -8,6 +8,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   alias Phoenix.PubSub
   alias Teiserver.Account.CalculateSmurfKeyTask
   require Logger
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec do_start() :: :ok
   def do_start() do
@@ -153,6 +154,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             match_id = Battle.get_lobby_match_id(host.lobby_id)
 
             if match_id do
+              game_time = int_parse(game_time)
               Telemetry.log_simple_match_event(userid, match_id, event_type_name, game_time)
             end
           end
@@ -181,6 +183,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
                 match_id = Battle.get_lobby_match_id(host.lobby_id)
 
                 if match_id do
+                  game_time = int_parse(game_time)
                   Telemetry.log_complex_match_event(userid, match_id, event_type_name, game_time, json_data)
                 end
               end
