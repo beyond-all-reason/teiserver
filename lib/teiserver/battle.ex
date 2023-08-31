@@ -610,6 +610,9 @@ defmodule Teiserver.Battle do
   @spec get_lobby_match_id(T.lobby_id()) :: T.match_id() | nil
   defdelegate get_lobby_match_id(lobby_id), to: LobbyLib
 
+  @spec get_match_id_from_userid(T.userid()) :: T.match_id() | nil
+  defdelegate get_match_id_from_userid(userid), to: LobbyLib
+
   @spec get_lobby_server_uuid(T.lobby_id()) :: String.t() | nil
   defdelegate get_lobby_server_uuid(id), to: LobbyLib
 

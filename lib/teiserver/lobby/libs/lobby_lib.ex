@@ -4,9 +4,8 @@ defmodule Teiserver.Lobby.LobbyLib do
   """
 
   alias Phoenix.PubSub
-  alias Teiserver.Coordinator
+  alias Teiserver.{Coordinator, Account, Lobby}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Lobby
   alias Teiserver.Data.Types, as: T
   require Logger
 
@@ -28,6 +27,23 @@ defmodule Teiserver.Lobby.LobbyLib do
   @spec get_lobby_match_id(T.lobby_id()) :: String.t() | nil
   def get_lobby_match_id(lobby_id) do
     call_lobby(lobby_id, :get_match_id)
+  end
+
+  @spec get_match_id_from_userid(T.userid()) :: T.match_id() | nil
+  def get_match_id_from_userid(userid) do
+    case Account.get_client_by_id(userid) do
+      nil ->
+        nil
+
+      %{lobby_id: nil} ->
+        nil
+
+      %{lobby_id: lobby_id} ->
+        get_lobby_match_id(lobby_id)
+
+      _ ->
+       nil
+    end
   end
 
   @spec get_combined_lobby_state(T.lobby_id()) :: map() | nil
