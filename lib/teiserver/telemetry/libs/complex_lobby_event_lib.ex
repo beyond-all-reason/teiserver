@@ -14,7 +14,7 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventLib do
   def icon(), do: "fa-people-group"
 
   @spec log_complex_lobby_event(T.userid, T.match_id, String, map()) :: {:error, Ecto.Changeset} | {:ok, ComplexLobbyEvent}
-  def log_complex_lobby_event(userid, lobby_id, event_type_name, value) when is_integer(userid) do
+  def log_complex_lobby_event(userid, lobby_id, event_type_name, value) do
     event_type_id = Telemetry.get_or_add_complex_lobby_event_type(event_type_name)
 
     result = create_complex_lobby_event(%{

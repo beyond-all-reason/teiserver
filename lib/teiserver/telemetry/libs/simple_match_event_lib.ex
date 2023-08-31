@@ -14,7 +14,7 @@ defmodule Teiserver.Telemetry.SimpleMatchEventLib do
   def icon(), do: "fa-scanner-touchscreen"
 
   @spec log_simple_match_event(T.userid, T.match_id, String.t, non_neg_integer) :: {:error, Ecto.Changeset} | {:ok, SimpleMatchEvent}
-  def log_simple_match_event(userid, match_id, event_type_name, game_time) when is_integer(userid) and is_integer(game_time) do
+  def log_simple_match_event(userid, match_id, event_type_name, game_time) do
     event_type_id = Telemetry.get_or_add_simple_match_event_type(event_type_name)
 
     result = create_simple_match_event(%{

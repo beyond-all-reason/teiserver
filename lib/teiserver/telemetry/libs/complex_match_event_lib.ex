@@ -14,7 +14,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEventLib do
   def icon(), do: "fa-scanner-keyboard"
 
   @spec log_complex_match_event(T.userid, T.match_id, String, non_neg_integer, map()) :: {:error, Ecto.Changeset} | {:ok, ComplexLobbyEvent}
-  def log_complex_match_event(userid, match_id, event_type_name, game_time, value) when is_integer(userid) and is_integer(game_time) do
+  def log_complex_match_event(userid, match_id, event_type_name, game_time, value) do
     event_type_id = Telemetry.get_or_add_complex_match_event_type(event_type_name)
 
     result = create_complex_match_event(%{

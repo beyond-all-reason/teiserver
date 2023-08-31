@@ -14,7 +14,7 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventLib do
   def icon(), do: "fa-user-group"
 
   @spec log_simple_lobby_event(T.userid, T.match_id, String.t) :: {:error, Ecto.Changeset} | {:ok, SimpleLobbyEvent}
-  def log_simple_lobby_event(userid, match_id, event_type_name) when is_integer(userid) do
+  def log_simple_lobby_event(userid, match_id, event_type_name) do
     event_type_id = Telemetry.get_or_add_simple_lobby_event_type(event_type_name)
 
     result = create_simple_lobby_event(%{

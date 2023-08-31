@@ -553,8 +553,7 @@ defmodule Teiserver.TeiserverTestLib do
     Teiserver.Game.get_or_add_rating_type("FFA")
 
     Teiserver.Telemetry.get_or_add_complex_server_event_type("Server startup")
-    Teiserver.Telemetry.get_or_add_complex_server_event_type("account.user_login")
-    Teiserver.Telemetry.get_or_add_complex_client_event_type("account.user_login")
+    Teiserver.Telemetry.get_or_add_simple_server_event_type("account.user_login")
     Teiserver.Telemetry.get_or_add_complex_client_event_type("client.user_event")
 
     seed_badge_types()

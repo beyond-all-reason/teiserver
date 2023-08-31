@@ -6,8 +6,7 @@ defmodule Teiserver.Protocols.SpringIn do
   https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html
   """
   require Logger
-  alias Teiserver.Lobby
-  alias Teiserver.{Account, Coordinator, Battle, Room, User, Client}
+  alias Teiserver.{Account, Lobby, Coordinator, Battle, Room, User, Client}
   alias Phoenix.PubSub
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]

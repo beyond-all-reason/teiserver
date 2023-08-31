@@ -16,7 +16,7 @@ defmodule Teiserver.Telemetry.SimpleLobbyEvent do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, ~w(user_id event_type_id timestamp)a)
-    |> validate_required(~w(user_id event_type_id timestamp)a)
+    |> validate_required(~w(event_type_id timestamp)a)
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean
