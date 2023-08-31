@@ -106,4 +106,24 @@ defmodule Teiserver.Telemetry.SimpleClientEventQueries do
     |> Repo.all()
     |> Map.new()
   end
+
+  def get_aggregate_detail(event_type_id, start_datetime, end_datetime) do
+    query = """
+    SELECT e.user_id, COUNT(e.id)
+      FROM telemetry_lobby_lobby_events e
+      WHERE e.event_type_id = $1
+      AND e.timestamp BETWEEN $2 AND $3
+      GROUP BY e.user_id
+    """
+    case Ecto.Adapters.SQL.query(Repo, query, [event_type_id, start_datetime, end_datetime]) do
+      {:ok, results} ->
+        results.rows
+          |> Map.new(fn [key, value] ->
+            {key, value}
+          end)
+
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
+  end
 end
