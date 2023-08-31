@@ -363,39 +363,60 @@ defmodule TeiserverWeb.Router do
     get("/properties/:property_name/detail", PropertyController, :detail)
 
     # Client events
-    get("/client_events/export/form", ClientEventController, :export_form)
-    post("/client_events/export/post", ClientEventController, :export_post)
-    get("/client_events/summary", ClientEventController, :summary)
-    get("/client_events/:event_name/detail", ClientEventController, :detail)
+    get("/simple_client_events/export/form", SimpleClientEventController, :export_form)
+    post("/simple_client_events/export/post", SimpleClientEventController, :export_post)
+    get("/simple_client_events/summary", SimpleClientEventController, :summary)
+    get("/simple_client_events/:event_name/detail", SimpleClientEventController, :detail)
+
+    get("/complex_client_events/export/form", ComplexClientEventController, :export_form)
+    post("/complex_client_events/export/post", ComplexClientEventController, :export_post)
+    get("/complex_client_events/summary", ComplexClientEventController, :summary)
+    get("/complex_client_events/:event_name/detail", ComplexClientEventController, :detail)
 
     # Server events
-    get("/server_events/export/form", ServerEventController, :export_form)
-    post("/server_events/export/post", ServerEventController, :export_post)
-    get("/server_events/summary", ServerEventController, :summary)
-    get("/server_events/:event_name/detail", ServerEventController, :detail)
+    get("/simple_server_events/export/form", SimpleServerEventController, :export_form)
+    post("/simple_server_events/export/post", SimpleServerEventController, :export_post)
+    get("/simple_server_events/summary", SimpleServerEventController, :summary)
+    get("/simple_server_events/:event_name/detail", SimpleServerEventController, :detail)
+
+    get("/complex_server_events/export/form", ComplexServerEventController, :export_form)
+    post("/complex_server_events/export/post", ComplexServerEventController, :export_post)
+    get("/complex_server_events/summary", ComplexServerEventController, :summary)
+    get("/complex_server_events/:event_name/detail", ComplexServerEventController, :detail)
 
     # Match events
-    get("/match_events/export/form", MatchEventController, :export_form)
-    post("/match_events/export/post", MatchEventController, :export_post)
-    get("/match_events/summary", MatchEventController, :summary)
-    get("/match_events/:event_name/detail", MatchEventController, :detail)
+    get("/simple_match_events/export/form", SimpleMatchEventController, :export_form)
+    post("/simple_match_events/export/post", SimpleMatchEventController, :export_post)
+    get("/simple_match_events/summary", SimpleMatchEventController, :summary)
+    get("/simple_match_events/:event_name/detail", SimpleMatchEventController, :detail)
 
-    # Complex Match events
     get("/complex_match_events/export/form", ComplexMatchEventController, :export_form)
     post("/complex_match_events/export/post", ComplexMatchEventController, :export_post)
     get("/complex_match_events/summary", ComplexMatchEventController, :summary)
     get("/complex_match_events/:event_name/detail", ComplexMatchEventController, :detail)
+
+    # Lobby events
+    get("/simple_lobby_events/export/form", SimpleLobbyEventController, :export_form)
+    post("/simple_lobby_events/export/post", SimpleLobbyEventController, :export_post)
+    get("/simple_lobby_events/summary", SimpleLobbyEventController, :summary)
+    get("/simple_lobby_events/:event_name/detail", SimpleLobbyEventController, :detail)
+
+    get("/complex_lobby_events/export/form", ComplexLobbyEventController, :export_form)
+    post("/complex_lobby_events/export/post", ComplexLobbyEventController, :export_post)
+    get("/complex_lobby_events/summary", ComplexLobbyEventController, :summary)
+    get("/complex_lobby_events/:event_name/detail", ComplexLobbyEventController, :detail)
+
+    # Infologs
+    get("/infolog/download/:id", InfologController, :download)
+    get("/infolog/search", InfologController, :index)
+    post("/infolog/search", InfologController, :search)
+    resources("/infolog", InfologController, only: [:index, :show, :delete])
   end
 
   scope "/teiserver/reports", TeiserverWeb.Report, as: :ts_reports do
     pipe_through([:browser, :standard_layout, :protected])
 
     get("/", GeneralController, :index)
-
-    get("/infolog/download/:id", InfologController, :download)
-    get("/infolog/search", InfologController, :index)
-    post("/infolog/search", InfologController, :search)
-    resources("/infolog", InfologController, only: [:index, :show, :delete])
 
     post("/exports/:id", ExportsController, :download)
     resources("/exports", ExportsController, only: [:index, :show])

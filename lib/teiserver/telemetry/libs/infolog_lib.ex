@@ -1,4 +1,5 @@
 defmodule Teiserver.Telemetry.InfologLib do
+  @moduledoc false
   use CentralWeb, :library
   alias Teiserver.Telemetry.Infolog
 

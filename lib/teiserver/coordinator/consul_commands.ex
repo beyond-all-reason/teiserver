@@ -3,7 +3,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   require Logger
   alias Teiserver.Config
   alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
-  alias Teiserver.{Account, Battle, Lobby, Coordinator, User, Client}
+  alias Teiserver.{Account, Battle, Lobby, Coordinator, User, Client, Telemetry}
   alias Teiserver.Lobby.{ChatLib}
   alias Teiserver.Chat.WordLib
   alias Teiserver.Data.Types, as: T
@@ -1740,6 +1740,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         new_timeouts = Map.put(state.timeouts, target_id, timeout)
 
         Lobby.kick_user_from_battle(target_id, state.lobby_id)
+        match_id = Battle.get_lobby_match_id(state.lobby_id)
+        Telemetry.log_simple_lobby_event(target_id, match_id, "consul.timeout_command")
 
         ConsulServer.say_command(cmd, state)
 
@@ -1755,6 +1757,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
       target_id ->
         Lobby.kick_user_from_battle(target_id, state.lobby_id)
+        match_id = Battle.get_lobby_match_id(state.lobby_id)
+        Telemetry.log_simple_lobby_event(target_id, match_id, "consul.lobbykick_command")
 
         ConsulServer.say_command(cmd, state)
     end
@@ -1773,6 +1777,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         new_bans = Map.put(state.bans, target_id, ban)
 
         Lobby.kick_user_from_battle(target_id, state.lobby_id)
+        match_id = Battle.get_lobby_match_id(state.lobby_id)
+        Telemetry.log_simple_lobby_event(target_id, match_id, "consul.lobbyban_command")
 
         ConsulServer.say_command(cmd, state)
 
@@ -1789,6 +1795,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       end
 
     ConsulServer.say_command(cmd, state)
+    match_id = Battle.get_lobby_match_id(state.lobby_id)
 
     String.split(targets, " ")
     |> Enum.reduce(state, fn target, acc ->
@@ -1800,6 +1807,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           ban = new_ban(%{level: :banned, by: cmd.senderid, reason: reason}, acc)
           new_bans = Map.put(acc.bans, target_id, ban)
           Lobby.kick_user_from_battle(target_id, acc.lobby_id)
+          Telemetry.log_simple_lobby_event(target_id, match_id, "consul.lobbybanmult_command")
 
           %{acc | bans: new_bans}
           |> ConsulServer.broadcast_update("ban")

@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.ComplexMatchEventQueries do
   @moduledoc false
-  use CentralWeb, :library
+  use CentralWeb, :queries
   alias Teiserver.Telemetry.ComplexMatchEvent
 
   # Queries
@@ -35,6 +35,11 @@ defmodule Teiserver.Telemetry.ComplexMatchEventQueries do
       where: complex_match_events.id == ^id
   end
 
+  defp _where(query, :match_id, match_id) do
+    from simple_server_events in query,
+      where: simple_server_events.match_id == ^match_id
+  end
+
   defp _where(query, :between, {start_date, end_date}) do
     from complex_match_events in query,
       left_join: matches in assoc(complex_match_events, :match),
@@ -64,12 +69,12 @@ defmodule Teiserver.Telemetry.ComplexMatchEventQueries do
 
   defp _order_by(query, "Newest first") do
     from complex_match_events in query,
-      order_by: [desc: complex_match_events.updated_at]
+      order_by: [desc: complex_match_events.timestamp]
   end
 
   defp _order_by(query, "Oldest first") do
     from complex_match_events in query,
-      order_by: [asc: complex_match_events.updated_at]
+      order_by: [asc: complex_match_events.timestamp]
   end
 
   @spec do_preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
@@ -88,6 +93,12 @@ defmodule Teiserver.Telemetry.ComplexMatchEventQueries do
       preload: [user: users]
   end
 
+  defp _preload(query, :event_types) do
+    from complex_match_events in query,
+      left_join: event_types in assoc(complex_match_events, :event_type),
+      preload: [event_type: event_types]
+  end
+
   @spec get_complex_match_events_summary(list) :: map()
   def get_complex_match_events_summary(args) do
     query =
@@ -100,5 +111,27 @@ defmodule Teiserver.Telemetry.ComplexMatchEventQueries do
     |> do_where(args)
     |> Repo.all()
     |> Map.new()
+  end
+
+  def get_aggregate_detail(event_type_id, key, start_datetime, end_datetime) do
+    query = """
+    SELECT (e.value ->> $1) AS key, COUNT(e.id)
+      FROM telemetry_complex_match_events e
+      JOIN teiserver_battle_matches m
+        ON e.match_id = m.id
+      WHERE e.event_type_id = $2
+      AND m.started BETWEEN $2 AND $3
+      GROUP BY key
+    """
+    case Ecto.Adapters.SQL.query(Repo, query, [key, event_type_id, start_datetime, end_datetime]) do
+      {:ok, results} ->
+        results.rows
+          |> Map.new(fn [key, value] ->
+            {key, value}
+          end)
+
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
   end
 end

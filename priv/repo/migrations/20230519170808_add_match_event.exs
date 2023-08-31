@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.AddMatchEvent do
+defmodule Teiserver.Repo.Migrations.AddSimpleMatchEvent do
   use Ecto.Migration
 
   def change do

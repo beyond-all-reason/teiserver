@@ -1,6 +1,6 @@
-defmodule Teiserver.Telemetry.ExportServerEventsTask do
+defmodule Teiserver.Telemetry.ExportComplexServerEventsTask do
   @moduledoc false
-  alias Teiserver.Telemetry.ServerEvent
+  alias Teiserver.Telemetry.ComplexServerEvent
   alias Teiserver.Helper.{DatePresets}
   alias Teiserver.Repo
   import Ecto.Query, warn: false
@@ -22,12 +22,12 @@ defmodule Teiserver.Telemetry.ExportServerEventsTask do
 
   defp query_client(event_types, start_date, end_date) do
     query =
-      from server_events in ServerEvent,
-        where: server_events.event_type_id in ^event_types,
-        where: between(server_events.timestamp, ^start_date, ^end_date),
-        join: event_types in assoc(server_events, :event_type),
-        left_join: users in assoc(server_events, :user),
-        select: [users.name, event_types.name, server_events.timestamp, server_events.value]
+      from complex_server_events in ComplexServerEvent,
+        where: complex_server_events.event_type_id in ^event_types,
+        where: between(complex_server_events.timestamp, ^start_date, ^end_date),
+        join: event_types in assoc(complex_server_events, :event_type),
+        left_join: users in assoc(complex_server_events, :user),
+        select: [users.name, event_types.name, complex_server_events.timestamp, complex_server_events.value]
 
     stream = Repo.stream(query, max_rows: 500)
 

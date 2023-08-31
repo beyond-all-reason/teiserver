@@ -8,6 +8,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   alias Phoenix.PubSub
   alias Teiserver.Account.CalculateSmurfKeyTask
   require Logger
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec do_start() :: :ok
   def do_start() do
@@ -81,24 +82,22 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     client = Client.get_client_by_id(from_id)
     Battle.stop_match(client.lobby_id)
 
-    Telemetry.log_server_event(nil, "lobby.match_stopped", %{})
+    match_id = Battle.get_match_id_from_userid(from_id)
+    Telemetry.log_simple_lobby_event(nil, match_id, "lobby.match_stopped")
 
     {:noreply, state}
   end
 
   # Battle manually stopped
   def handle_info(
-        {:new_message, _from_id, "autohosts", "* Stopping server (by " <> username},
+        {:new_message, from_id, "autohosts", "* Stopping server (by " <> username},
         state
       ) do
     username = String.replace(username, ")", "")
-    user = Account.get_user_by_name(username)
+    userid = Account.get_userid_from_name(username)
+    match_id = Battle.get_match_id_from_userid(from_id)
 
-    if user do
-      Telemetry.log_server_event(nil, "lobby.manual_stop", %{stopper: user.id})
-    else
-      Telemetry.log_server_event(nil, "lobby.manual_stop", %{stopper: nil})
-    end
+    Telemetry.log_simple_lobby_event(userid, match_id, "lobby.manual_stop")
 
     {:noreply, state}
   end
@@ -126,7 +125,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       user = Account.get_user_by_name(username)
 
       if user do
-        Telemetry.log_server_event(user.id, "spads.broken_connection", %{from_id: from_id})
+        Telemetry.log_complex_server_event(user.id, "spads.broken_connection", %{from_id: from_id})
         Client.disconnect(user.id, "reported broken connection")
       end
     end
@@ -147,14 +146,11 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       [_all, username, event_type_name, game_time] ->
         userid = Account.get_userid_from_name(username)
 
-        if userid do
-          host = Client.get_client_by_id(from_id)
-          if host.lobby_id do
-            match_id = Battle.get_lobby_match_id(host.lobby_id)
-
-            if match_id do
-              Teiserver.Telemetry.log_match_event(match_id, userid, event_type_name, game_time)
-            end
+        if userid && User.is_bot?(userid) do
+          match_id = Battle.get_match_id_from_userid(from_id)
+          if match_id do
+            game_time = int_parse(game_time)
+            Telemetry.log_simple_match_event(userid, match_id, event_type_name, game_time)
           end
         end
 
@@ -175,14 +171,11 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           {:ok, json_data} ->
             userid = Account.get_userid_from_name(username)
 
-            if userid do
-              host = Client.get_client_by_id(from_id)
-              if host.lobby_id do
-                match_id = Battle.get_lobby_match_id(host.lobby_id)
-
-                if match_id do
-                  Teiserver.Telemetry.log_complex_match_event(match_id, userid, event_type_name, game_time, json_data)
-                end
+            if userid && User.is_bot?(userid) do
+              match_id = Battle.get_match_id_from_userid(from_id)
+              if match_id do
+                game_time = int_parse(game_time)
+                Telemetry.log_complex_match_event(userid, match_id, event_type_name, game_time, json_data)
               end
             end
 

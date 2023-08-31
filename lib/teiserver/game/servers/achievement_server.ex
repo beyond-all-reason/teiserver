@@ -34,7 +34,7 @@ defmodule Teiserver.Game.AchievementServer do
   @impl true
   def handle_info(
         %{
-          channel: "teiserver_telemetry_client_events",
+          channel: "telemetry_complex_client_events",
           userid: nil,
           event_type_name: "game_start:singleplayer:scenario_end"
         },
@@ -45,7 +45,7 @@ defmodule Teiserver.Game.AchievementServer do
 
   def handle_info(
         %{
-          channel: "teiserver_telemetry_client_events",
+          channel: "telemetry_complex_client_events",
           userid: userid,
           event_type_name: "game_start:singleplayer:scenario_end",
           event_value: %{
@@ -91,7 +91,7 @@ defmodule Teiserver.Game.AchievementServer do
 
   def handle_info(
         %{
-          channel: "teiserver_telemetry_client_events",
+          channel: "telemetry_complex_client_events",
           event_type_name: "game_start:singleplayer:scenario_end",
           event_value: %{
             "won" => false
@@ -104,7 +104,7 @@ defmodule Teiserver.Game.AchievementServer do
 
   def handle_info(
         %{
-          channel: "teiserver_telemetry_client_events",
+          channel: "telemetry_complex_client_events",
           event_type_name: event_type_name,
           event_value: event_value
         },
@@ -161,7 +161,7 @@ defmodule Teiserver.Game.AchievementServer do
       :timer.send_interval(300_000, :refresh_type_map)
     end
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_telemetry_client_events")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "telemetry_complex_client_events")
 
     {:ok,
      %{

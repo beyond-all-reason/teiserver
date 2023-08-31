@@ -1,90 +1,147 @@
 defmodule Teiserver.Telemetry.PropertyTypeLib do
-  use CentralWeb, :library
-  alias Teiserver.Telemetry.PropertyType
+  @moduledoc false
+  use CentralWeb, :library_newform
+  alias Teiserver.Telemetry.{PropertyType, PropertyTypeQueries}
 
-  # Functions
   @spec icon :: String.t()
   def icon, do: "fa-regular fa-tags"
 
   @spec colours :: atom
   def colours, do: :info2
 
-  # Queries
-  @spec query_property_types() :: Ecto.Query.t()
-  def query_property_types do
-    from(property_types in PropertyType)
-  end
+  # Helper function
+  @spec get_or_add_property_type(String.t()) :: non_neg_integer()
+  def get_or_add_property_type(name) do
+    name = String.trim(name)
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
-  def search(query, nil), do: query
+    Central.cache_get_or_store(:telemetry_property_types_cache, name, fn ->
+      query = PropertyTypeQueries.query_property_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
+      case Repo.all(query) do
+        [] ->
+          {:ok, event_type} =
+            %PropertyType{}
+            |> PropertyType.changeset(%{name: name})
+            |> Repo.insert()
 
-  def search(query, params) do
-    params
-    |> Enum.reduce(query, fn {key, value}, query_acc ->
-      _search(query_acc, key, value)
+          event_type.id
+
+        [%{id: id} | _] ->
+          id
+      end
     end)
   end
 
-  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
-  def _search(query, _, ""), do: query
-  def _search(query, _, nil), do: query
+  @doc """
+  Returns the list of property_types.
 
-  def _search(query, :id, id) do
-    from property_types in query,
-      where: property_types.id == ^id
+  ## Examples
+
+      iex> list_property_types()
+      [%PropertyType{}, ...]
+
+  """
+  @spec list_property_types() :: [PropertyType]
+  @spec list_property_types(list) :: [PropertyType]
+  def list_property_types(args \\ []) do
+    args
+    |> PropertyTypeQueries.query_property_types()
+    |> Repo.all()
   end
 
-  def _search(query, :name, name) do
-    from property_types in query,
-      where: property_types.name == ^name
+  @doc """
+  Gets a single property_type.
+
+  Raises `Ecto.NoResultsError` if the PropertyType does not exist.
+
+  ## Examples
+
+      iex> get_property_type!(123)
+      %PropertyType{}
+
+      iex> get_property_type!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_property_type!(non_neg_integer) :: PropertyType
+  @spec get_property_type!(non_neg_integer, list) :: PropertyType
+  def get_property_type!(id), do: Repo.get!(PropertyType, id)
+
+  def get_property_type!(id, args) do
+    args = args ++ [id: id]
+
+    args
+    |> PropertyTypeQueries.query_property_types()
+    |> Repo.one!()
   end
 
-  def _search(query, :id_list, id_list) do
-    from property_types in query,
-      where: property_types.id in ^id_list
+  @doc """
+  Creates a property_type.
+
+  ## Examples
+
+      iex> create_property_type(%{field: value})
+      {:ok, %PropertyType{}}
+
+      iex> create_property_type(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_property_type() :: {:ok, PropertyType} | {:error, Ecto.Changeset}
+  @spec create_property_type(map) :: {:ok, PropertyType} | {:error, Ecto.Changeset}
+  def create_property_type(attrs \\ %{}) do
+    %PropertyType{}
+    |> PropertyType.changeset(attrs)
+    |> Repo.insert()
   end
 
-  def _search(query, :basic_search, ref) do
-    ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
+  @doc """
+  Updates a property_type.
 
-    from property_types in query,
-      where: ilike(property_types.name, ^ref_like)
+  ## Examples
+
+      iex> update_property_type(property_type, %{field: new_value})
+      {:ok, %PropertyType{}}
+
+      iex> update_property_type(property_type, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_property_type(PropertyType, map) :: {:ok, PropertyType} | {:error, Ecto.Changeset}
+  def update_property_type(%PropertyType{} = property_type, attrs) do
+    property_type
+    |> PropertyType.changeset(attrs)
+    |> Repo.update()
   end
 
-  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
-  def order_by(query, nil), do: query
+  @doc """
+  Deletes a property_type.
 
-  def order_by(query, "Name (A-Z)") do
-    from property_types in query,
-      order_by: [asc: property_types.name]
+  ## Examples
+
+      iex> delete_property_type(property_type)
+      {:ok, %PropertyType{}}
+
+      iex> delete_property_type(property_type)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_property_type(PropertyType) :: {:ok, PropertyType} | {:error, Ecto.Changeset}
+  def delete_property_type(%PropertyType{} = property_type) do
+    Repo.delete(property_type)
   end
 
-  def order_by(query, "Name (Z-A)") do
-    from property_types in query,
-      order_by: [desc: property_types.name]
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking property_type changes.
+
+  ## Examples
+
+      iex> change_property_type(property_type)
+      %Ecto.Changeset{data: %PropertyType{}}
+
+  """
+  @spec change_property_type(PropertyType) :: Ecto.Changeset
+  @spec change_property_type(PropertyType, map) :: Ecto.Changeset
+  def change_property_type(%PropertyType{} = property_type, attrs \\ %{}) do
+    PropertyType.changeset(property_type, attrs)
   end
-
-  def order_by(query, "ID (Lowest first)") do
-    from property_types in query,
-      order_by: [asc: property_types.id]
-  end
-
-  def order_by(query, "ID (Highest first)") do
-    from property_types in query,
-      order_by: [desc: property_types.id]
-  end
-
-  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
-  def preload(query, nil), do: query
-
-  def preload(query, _preloads) do
-    # query = if :things in preloads, do: _preload_things(query), else: query
-    query
-  end
-
-  # def _preload_things(query) do
-  #   from property_types in query,
-  #     left_join: things in assoc(property_types, :things),
-  #     preload: [things: things]
-  # end
 end

@@ -170,6 +170,7 @@ defmodule CentralWeb do
       import Ecto.Query, warn: false
       import Teiserver.Helper.QueryHelpers
       alias Ecto.Multi
+      alias Teiserver.Repo
     end
   end
 
@@ -183,6 +184,15 @@ defmodule CentralWeb do
       import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
       alias Teiserver.Helper.StylingHelper
       alias Teiserver.Data.Types, as: T
+    end
+  end
+
+  def library_newform do
+    quote do
+      alias Teiserver.Data.Types, as: T
+      alias Teiserver.Repo
+      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+      alias Teiserver.Helper.QueryHelpers
     end
   end
 

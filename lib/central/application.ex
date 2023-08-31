@@ -84,11 +84,15 @@ defmodule Central.Application do
         concache_perm_sup(:lobby_policies_cache),
 
         # Telemetry
-        concache_perm_sup(:teiserver_telemetry_property_types_cache),
-        concache_perm_sup(:telemetry_client_event_types_cache),
-        concache_perm_sup(:telemetry_match_event_types_cache),
+        concache_perm_sup(:telemetry_property_types_cache),
+        concache_perm_sup(:telemetry_simple_client_event_types_cache),
+        concache_perm_sup(:telemetry_complex_client_event_types_cache),
+        concache_perm_sup(:telemetry_simple_lobby_event_types_cache),
+        concache_perm_sup(:telemetry_complex_lobby_event_types_cache),
+        concache_perm_sup(:telemetry_simple_match_event_types_cache),
         concache_perm_sup(:telemetry_complex_match_event_types_cache),
-        concache_perm_sup(:telemetry_server_event_types_cache),
+        concache_perm_sup(:telemetry_simple_server_event_types_cache),
+        concache_perm_sup(:telemetry_complex_server_event_types_cache),
 
         concache_perm_sup(:teiserver_account_smurf_key_types),
         concache_sup(:teiserver_user_ratings, global_ttl: 60_000),

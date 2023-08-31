@@ -157,6 +157,7 @@ defmodule Teiserver.Lobby do
   defp do_force_add_user_to_lobby(nil, _), do: nil
 
   defp do_force_add_user_to_lobby(client, lobby_id) do
+    Telemetry.log_simple_server_event(client.userid, "lobby.force_add_user_to_lobby")
     remove_user_from_any_lobby(client.userid)
     script_password = new_script_password()
 
@@ -269,6 +270,9 @@ defmodule Teiserver.Lobby do
         Coordinator.cast_consul(lobby_id, {:user_left, userid})
         client = Account.get_client_by_id(userid)
 
+        match_id = Battle.get_lobby_match_id(lobby_id)
+        Telemetry.log_simple_lobby_event(userid, match_id, "remove_user_from_lobby")
+
         if client do
           PubSub.broadcast(
             Teiserver.PubSub,
@@ -325,7 +329,8 @@ defmodule Teiserver.Lobby do
         :removed ->
           Coordinator.cast_consul(lobby_id, {:user_kicked, userid})
           client = Account.get_client_by_id(userid)
-          Telemetry.log_server_event(userid, "lobby.kick_user", %{lobby_id: lobby_id})
+          match_id = Battle.get_lobby_match_id(lobby_id)
+          Telemetry.log_simple_lobby_event(userid, match_id, "lobby.kick_user")
 
           if client do
             PubSub.broadcast(
@@ -445,7 +450,8 @@ defmodule Teiserver.Lobby do
 
       true ->
         if consul_rename do
-          Telemetry.log_server_event(nil, "lobby.rename", %{lobby_id: lobby_id, name: new_name})
+          match_id = Battle.get_lobby_match_id(lobby_id)
+          Telemetry.log_complex_lobby_event(nil, match_id, "lobby.rename", %{name: new_name})
         end
 
         Battle.update_lobby_values(lobby_id, %{

@@ -1,4 +1,5 @@
 defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
+  @moduledoc false
   use Oban.Worker, queue: :teiserver
   alias Teiserver.{Logging, Battle}
   alias Central.Account
@@ -599,83 +600,104 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
 
   defp add_telemetry(stats, date) do
     start_date = date |> Timex.to_datetime()
-
     end_date = date |> Timex.shift(days: 1) |> Timex.to_datetime()
 
-    base_query = """
+    complex_client_data = run_event_query("complex", "client", start_date, end_date)
+    simple_client_data = run_event_query("simple", "client", start_date, end_date)
+
+    complex_anon_data = run_anon_event_query("complex", start_date, end_date)
+    simple_anon_data = run_anon_event_query("simple", start_date, end_date)
+
+    complex_server_data = run_event_query("complex", "server", start_date, end_date)
+    simple_server_data = run_event_query("simple", "server", start_date, end_date)
+
+    complex_lobby_data = run_event_query("complex", "lobby", start_date, end_date)
+    simple_lobby_data = run_event_query("simple", "lobby", start_date, end_date)
+
+    complex_match_data = run_match_event_query("complex", start_date, end_date)
+    simple_match_data = run_match_event_query("simple", start_date, end_date)
+
+    Map.put(stats, :events, %{
+      complex_client: complex_client_data,
+      simple_client: simple_client_data,
+      complex_anon: complex_anon_data,
+      simple_anon: simple_anon_data,
+      complex_server: complex_server_data,
+      simple_server: simple_server_data,
+      complex_lobby: complex_lobby_data,
+      simple_lobby: simple_lobby_data,
+      complex_match: complex_match_data,
+      simple_match: simple_match_data
+    })
+  end
+
+  defp run_event_query(complexity, section, start_date, end_date) do
+    query = """
       SELECT
         t.name,
         COUNT(e)
       FROM
-        --table_name-- e
+        telemetry_{mode}_events e
       JOIN
-        teiserver_telemetry_event_types t ON e.event_type_id = t.id
+        telemetry_{mode}_event_types t ON e.event_type_id = t.id
       WHERE
         e.timestamp BETWEEN $1 AND $2
       GROUP BY
         t.name
     """
-
-    client_query =
-      String.replace(
-        base_query,
-        "--table_name--",
-        "teiserver_telemetry_client_events"
+    |> String.replace(
+        "{mode}",
+        "#{complexity}_#{section}"
       )
 
-    client_data =
-      case Ecto.Adapters.SQL.query(Repo, client_query, [start_date, end_date]) do
-        {:ok, results} ->
-          results.rows
-          |> Map.new(fn [key, value] -> {key, value} end)
+    case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
+      {:ok, results} ->
+        results.rows
+        |> Map.new(fn [key, value] -> {key, value} end)
 
-        {a, b} ->
-          raise "ERR: #{a}, #{b}"
-      end
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
+  end
 
-    unauth_query =
-      String.replace(
-        base_query,
-        "--table_name--",
-        "teiserver_telemetry_unauth_events"
-      )
-
-    unauth_data =
-      case Ecto.Adapters.SQL.query(Repo, unauth_query, [start_date, end_date]) do
-        {:ok, results} ->
-          results.rows
-          |> Map.new(fn [key, value] -> {key, value} end)
-
-        {a, b} ->
-          raise "ERR: #{a}, #{b}"
-      end
-
-    server_query =
-      String.replace(
-        base_query,
-        "--table_name--",
-        "teiserver_telemetry_server_events"
-      )
-
-    server_data =
-      case Ecto.Adapters.SQL.query(Repo, server_query, [start_date, end_date]) do
-        {:ok, results} ->
-          results.rows
-          |> Map.new(fn [key, value] -> {key, value} end)
-
-        {a, b} ->
-          raise "ERR: #{a}, #{b}"
-      end
-
-    # Match events don't have a timestamp so we need a different query for them
-    match_event_query = """
+  defp run_anon_event_query(complexity, start_date, end_date) do
+    query = """
       SELECT
         t.name,
         COUNT(e)
       FROM
-        teiserver_telemetry_match_events e
+        telemetry_{complexity}_anon_events e
       JOIN
-        teiserver_telemetry_event_types t ON e.event_type_id = t.id
+        telemetry_{complexity}_client_event_types t ON e.event_type_id = t.id
+      WHERE
+        e.timestamp BETWEEN $1 AND $2
+      GROUP BY
+        t.name
+    """
+    |> String.replace(
+        "{complexity}",
+        complexity
+      )
+
+    case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
+      {:ok, results} ->
+        results.rows
+        |> Map.new(fn [key, value] -> {key, value} end)
+
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
+  end
+
+  defp run_match_event_query(complexity, start_date, end_date) do
+    query = """
+      SELECT
+        t.name,
+        COUNT(e)
+      FROM
+        telemetry_{complexity}_match_events e
+      JOIN
+        telemetry_{complexity}_match_event_types t ON e.event_type_id = t.id
       JOIN
         teiserver_battle_matches m ON m.id = e.match_id
       WHERE
@@ -683,23 +705,18 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       GROUP BY
         t.name;
     """
+    |> String.replace(
+        "{complexity}",
+        complexity
+      )
 
-    match_event_data =
-      case Ecto.Adapters.SQL.query(Repo, match_event_query, [start_date, end_date]) do
-        {:ok, results} ->
-          results.rows
-          |> Map.new(fn [key, value] -> {key, value} end)
+    case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
+      {:ok, results} ->
+        results.rows
+        |> Map.new(fn [key, value] -> {key, value} end)
 
-        {a, b} ->
-          raise "ERR: #{a}, #{b}"
-      end
-
-    Map.put(stats, :events, %{
-      client: client_data,
-      unauth: unauth_data,
-      combined: add_maps(client_data, unauth_data),
-      server: server_data,
-      match: match_event_data
-    })
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
   end
 end

@@ -1,7 +1,7 @@
 defmodule Teiserver.Telemetry.ComplexMatchEventTypeLib do
   @moduledoc false
-  use CentralWeb, :library
-  alias Teiserver.Telemetry.ComplexMatchEventType
+  use CentralWeb, :library_newform
+  alias Teiserver.Telemetry.{ComplexMatchEventType, ComplexMatchEventTypeQueries}
 
   # Helper function
   @spec get_or_add_complex_match_event_type(String.t()) :: non_neg_integer()
@@ -9,7 +9,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTypeLib do
     name = String.trim(name)
 
     Central.cache_get_or_store(:telemetry_complex_match_event_types_cache, name, fn ->
-      query = query_complex_match_event_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
+      query = ComplexMatchEventTypeQueries.query_complex_match_event_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
       case Repo.all(query) do
         [] ->
           {:ok, event_type} =
@@ -25,92 +25,117 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTypeLib do
     end)
   end
 
-  # Queries
-  @spec query_complex_match_event_types(list) :: Ecto.Query.t()
-  def query_complex_match_event_types(args) do
-    query = from(complex_match_event_types in ComplexMatchEventType)
+  @doc """
+  Returns the list of complex_match_event_types.
 
-    query
-    |> do_where([id: args[:id]])
-    |> do_where(args[:where])
-    |> do_preload(args[:preload])
-    |> do_order_by(args[:order_by])
-    |> query_select(args[:select])
+  ## Examples
+
+      iex> list_complex_match_event_types()
+      [%ComplexMatchEventType{}, ...]
+
+  """
+  @spec list_complex_match_event_types() :: [ComplexMatchEventType]
+  @spec list_complex_match_event_types(list) :: [ComplexMatchEventType]
+  def list_complex_match_event_types(args \\ []) do
+    args
+    |> ComplexMatchEventTypeQueries.query_complex_match_event_types()
+    |> Repo.all()
   end
 
-  @spec do_where(Ecto.Query.t(), list | map | nil) :: Ecto.Query.t()
-  defp do_where(query, nil), do: query
+  @doc """
+  Gets a single complex_match_event_type.
 
-  defp do_where(query, params) do
-    params
-    |> Enum.reduce(query, fn {key, value}, query_acc ->
-      _where(query_acc, key, value)
-    end)
+  Raises `Ecto.NoResultsError` if the ComplexMatchEventType does not exist.
+
+  ## Examples
+
+      iex> get_complex_match_event_type!(123)
+      %ComplexMatchEventType{}
+
+      iex> get_complex_match_event_type!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_complex_match_event_type!(non_neg_integer) :: ComplexMatchEventType
+  @spec get_complex_match_event_type!(non_neg_integer, list) :: ComplexMatchEventType
+  def get_complex_match_event_type!(id), do: Repo.get!(ComplexMatchEventType, id)
+
+  def get_complex_match_event_type!(id, args) do
+    args = args ++ [id: id]
+
+    args
+    |> ComplexMatchEventTypeQueries.query_complex_match_event_types()
+    |> Repo.one!()
   end
 
-  @spec _where(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
-  defp _where(query, _, ""), do: query
-  defp _where(query, _, nil), do: query
+  @doc """
+  Creates a complex_match_event_type.
 
-  defp _where(query, :id, id) do
-    from complex_match_event_types in query,
-      where: complex_match_event_types.id == ^id
+  ## Examples
+
+      iex> create_complex_match_event_type(%{field: value})
+      {:ok, %ComplexMatchEventType{}}
+
+      iex> create_complex_match_event_type(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_complex_match_event_type() :: {:ok, ComplexMatchEventType} | {:error, Ecto.Changeset}
+  @spec create_complex_match_event_type(map) :: {:ok, ComplexMatchEventType} | {:error, Ecto.Changeset}
+  def create_complex_match_event_type(attrs \\ %{}) do
+    %ComplexMatchEventType{}
+    |> ComplexMatchEventType.changeset(attrs)
+    |> Repo.insert()
   end
 
-  defp _where(query, :id_in, id_list) do
-    from complex_match_event_types in query,
-      where: complex_match_event_types.id in ^id_list
+  @doc """
+  Updates a complex_match_event_type.
+
+  ## Examples
+
+      iex> update_complex_match_event_type(complex_match_event_type, %{field: new_value})
+      {:ok, %ComplexMatchEventType{}}
+
+      iex> update_complex_match_event_type(complex_match_event_type, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_complex_match_event_type(ComplexMatchEventType, map) :: {:ok, ComplexMatchEventType} | {:error, Ecto.Changeset}
+  def update_complex_match_event_type(%ComplexMatchEventType{} = complex_match_event_type, attrs) do
+    complex_match_event_type
+    |> ComplexMatchEventType.changeset(attrs)
+    |> Repo.update()
   end
 
-  defp _where(query, :name, name) do
-    from complex_match_event_types in query,
-      where: complex_match_event_types.name == ^name
+  @doc """
+  Deletes a complex_match_event_type.
+
+  ## Examples
+
+      iex> delete_complex_match_event_type(complex_match_event_type)
+      {:ok, %ComplexMatchEventType{}}
+
+      iex> delete_complex_match_event_type(complex_match_event_type)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_complex_match_event_type(ComplexMatchEventType) :: {:ok, ComplexMatchEventType} | {:error, Ecto.Changeset}
+  def delete_complex_match_event_type(%ComplexMatchEventType{} = complex_match_event_type) do
+    Repo.delete(complex_match_event_type)
   end
 
-  @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
-  defp do_order_by(query, nil), do: query
-  defp do_order_by(query, params) do
-    params
-    |> Enum.reduce(query, fn key, query_acc ->
-      _order_by(query_acc, key)
-    end)
-  end
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking complex_match_event_type changes.
 
-  defp _order_by(query, nil), do: query
+  ## Examples
 
-  defp _order_by(query, "Name (A-Z)") do
-    from complex_match_event_types in query,
-      order_by: [asc: complex_match_event_types.name]
-  end
+      iex> change_complex_match_event_type(complex_match_event_type)
+      %Ecto.Changeset{data: %ComplexMatchEventType{}}
 
-  defp _order_by(query, "Name (Z-A)") do
-    from complex_match_event_types in query,
-      order_by: [desc: complex_match_event_types.name]
-  end
-
-  defp _order_by(query, "ID (Lowest first)") do
-    from complex_match_event_types in query,
-      order_by: [asc: complex_match_event_types.id]
-  end
-
-  defp _order_by(query, "ID (Highest first)") do
-    from complex_match_event_types in query,
-      order_by: [desc: complex_match_event_types.id]
-  end
-
-  @spec do_preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
-  defp do_preload(query, nil), do: query
-
-  defp do_preload(query, preloads) do
-    preloads
-    |> Enum.reduce(query, fn key, query_acc ->
-      _preload(query_acc, key)
-    end)
-  end
-
-  defp _preload(query, :complex_match_events) do
-    from complex_match_event_types in query,
-      join: complex_match_events in assoc(complex_match_event_types, :complex_match_events),
-      preload: [complex_match_events: complex_match_events]
+  """
+  @spec change_complex_match_event_type(ComplexMatchEventType) :: Ecto.Changeset
+  @spec change_complex_match_event_type(ComplexMatchEventType, map) :: Ecto.Changeset
+  def change_complex_match_event_type(%ComplexMatchEventType{} = complex_match_event_type, attrs \\ %{}) do
+    ComplexMatchEventType.changeset(complex_match_event_type, attrs)
   end
 end

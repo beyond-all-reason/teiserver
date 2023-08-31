@@ -92,7 +92,11 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
         [_, event, value64, hash] ->
           case Spring.decode_value(value64) do
             {:ok, value} ->
-              Telemetry.log_client_event(state.userid, event, value, hash)
+              if state.userid do
+                Telemetry.log_complex_client_event(state.userid, event, value)
+              else
+                Telemetry.log_complex_anon_event(hash, event, value)
+              end
               "success"
 
             {:error, reason} ->
@@ -118,7 +122,11 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
           if value != :error do
             {:ok, value} = value
 
-            Telemetry.log_client_property(state.userid, event, value, hash)
+            if state.userid do
+              Telemetry.log_user_property(state.userid, event, value)
+            else
+              Telemetry.log_anon_property(hash, event, value)
+            end
             "success"
           else
             # Logger.error("update_client_property:bad base64 value - #{data}")

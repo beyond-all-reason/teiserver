@@ -40,6 +40,7 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec follow_user(T.userid, T.userid) :: {:ok, Account.Relationship.t}
   def follow_user(from_user_id, to_user_id) when is_integer(from_user_id) and is_integer(to_user_id) do
+    decache_relationships(from_user_id)
     Account.upsert_relationship(%{
       from_user_id: from_user_id,
       to_user_id: to_user_id,
@@ -49,6 +50,7 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec ignore_user(T.userid, T.userid) :: {:ok, Account.Relationship.t}
   def ignore_user(from_user_id, to_user_id) when is_integer(from_user_id) and is_integer(to_user_id) do
+    decache_relationships(from_user_id)
     Account.upsert_relationship(%{
       from_user_id: from_user_id,
       to_user_id: to_user_id,
@@ -58,6 +60,7 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec avoid_user(T.userid, T.userid) :: {:ok, Account.Relationship.t}
   def avoid_user(from_user_id, to_user_id) when is_integer(from_user_id) and is_integer(to_user_id) do
+    decache_relationships(from_user_id)
     Account.upsert_relationship(%{
       from_user_id: from_user_id,
       to_user_id: to_user_id,
@@ -67,6 +70,7 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec block_user(T.userid, T.userid) :: {:ok, Account.Relationship.t}
   def block_user(from_user_id, to_user_id) when is_integer(from_user_id) and is_integer(to_user_id) do
+    decache_relationships(from_user_id)
     Account.upsert_relationship(%{
       from_user_id: from_user_id,
       to_user_id: to_user_id,
@@ -76,6 +80,7 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec reset_relationship_state(T.userid, T.userid) :: {:ok, Account.Relationship.t}
   def reset_relationship_state(from_user_id, to_user_id) when is_integer(from_user_id) and is_integer(to_user_id) do
+    decache_relationships(from_user_id)
     Account.upsert_relationship(%{
       from_user_id: from_user_id,
       to_user_id: to_user_id,

@@ -49,7 +49,16 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTask do
               ]
             )
 
-          data = ServerDayLogLib.aggregate_day_logs(logs)
+          user_activity_logs = Logging.list_user_activity_day_logs(
+            search: [
+                start_date: Timex.beginning_of_month(log.date),
+                end_date: Timex.end_of_month(log.date)
+            ]
+          )
+
+          data = logs
+          |> Enum.zip(user_activity_logs)
+          |> ServerDayLogLib.aggregate_day_logs()
 
           {:ok, _} =
             Logging.create_server_month_log(%{
@@ -80,7 +89,16 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTask do
           ]
         )
 
-      data = ServerDayLogLib.aggregate_day_logs(logs)
+      user_activity_logs = Logging.list_user_activity_day_logs(
+        search: [
+          start_date: Timex.beginning_of_month(now),
+          end_date: Timex.end_of_month(now)
+        ]
+      )
+
+      data = logs
+      |> Enum.zip(user_activity_logs)
+      |> ServerDayLogLib.aggregate_day_logs()
 
       {:ok, _} =
         Logging.create_server_month_log(%{
@@ -98,11 +116,18 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTask do
   def month_so_far() do
     now = Timex.now()
 
+    user_activity_logs = Logging.list_user_activity_day_logs(
+      search: [
+        start_date: Timex.beginning_of_month(now)
+      ]
+    )
+
     Logging.list_server_day_logs(
       search: [
         start_date: Timex.beginning_of_month(now)
       ]
     )
+    |> Enum.zip(user_activity_logs)
     |> ServerDayLogLib.aggregate_day_logs()
     |> Jason.encode!()
     |> Jason.decode!()

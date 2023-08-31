@@ -5,7 +5,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   """
   use GenServer
   alias Teiserver.Config
-  alias Teiserver.{Account, User, Clans, Room, Coordinator, Client, Moderation}
+  alias Teiserver.{Account, User, Clans, Room, Coordinator, Client, Moderation, Telemetry}
   alias Teiserver.Lobby
   alias Teiserver.Coordinator.{CoordinatorCommands}
   alias Phoenix.PubSub
@@ -266,6 +266,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
               msg ++ @dispute_string
 
             has_warning ->
+              Telemetry.log_simple_server_event(user.id, "has_warning.remove_user_from_any_lobby")
               Lobby.remove_user_from_any_lobby(user.id)
               Client.set_awaiting_warn_ack(userid)
 

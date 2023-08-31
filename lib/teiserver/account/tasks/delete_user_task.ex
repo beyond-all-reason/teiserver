@@ -11,100 +11,69 @@ defmodule Teiserver.Admin.DeleteUserTask do
     id_list
     |> Enum.each(&Account.decache_user/1)
 
-    # Clan memberships
-    query = "DELETE FROM teiserver_clan_memberships WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+    [
+      # Clan memberships
+      "DELETE FROM teiserver_clan_memberships WHERE user_id = ANY($1)",
 
-    # Accolades
-    query =
-      "DELETE FROM teiserver_account_accolades WHERE recipient_id = ANY($1) OR giver_id = ANY($1)"
+      # Accolades
+      "DELETE FROM teiserver_account_accolades WHERE recipient_id = ANY($1) OR giver_id = ANY($1)",
 
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+      # Relationships
+      "DELETE FROM account_relationships WHERE to_user_id = ANY($1) OR from_user_id = ANY($1)",
+      "DELETE FROM account_friend_requests WHERE to_user_id = ANY($1) OR from_user_id = ANY($1)",
+      "DELETE FROM account_friends WHERE user1_id = ANY($1) OR user2_id = ANY($1)",
 
-    # Relationships
-    query = "DELETE FROM account_relationships WHERE to_user_id = ANY($1) OR from_user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+      # Telemetry
+      "DELETE FROM telemetry_complex_client_event_types WHERE user_id = ANY($1)",
+      "DELETE FROM telemetry_simple_client_event_types WHERE user_id = ANY($1)",
 
-    # Events/Properties
-    query = "DELETE FROM teiserver_telemetry_client_events WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+      "DELETE FROM telemetry_complex_match_event_types WHERE user_id = ANY($1)",
+      "DELETE FROM telemetry_simple_match_event_types WHERE user_id = ANY($1)",
 
-    query = "DELETE FROM teiserver_telemetry_client_properties WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+      "DELETE FROM telemetry_complex_lobby_event_types WHERE user_id = ANY($1)",
+      "DELETE FROM telemetry_simple_lobby_event_types WHERE user_id = ANY($1)",
 
-    query = "DELETE FROM teiserver_telemetry_server_events WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+      "DELETE FROM telemetry_complex_server_event_types WHERE user_id = ANY($1)",
+      "DELETE FROM telemetry_simple_server_event_types WHERE user_id = ANY($1)",
 
-    query = "DELETE FROM teiserver_telemetry_match_events WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+      "DELETE FROM telemetry_user_properties WHERE user_id = ANY($1)",
 
-    # Stats
-    query = "DELETE FROM teiserver_account_user_stats WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+      # User table extensions/stats
+      "DELETE FROM teiserver_account_user_stats WHERE user_id = ANY($1)",
+      "DELETE FROM teiserver_account_smurf_keys WHERE user_id = ANY($1)",
+      "DELETE FROM account_codes WHERE user_id = ANY($1)",
+      "DELETE FROM config_user WHERE user_id = ANY($1)",
+      "DELETE FROM communication_notifications WHERE user_id = ANY($1)",
 
-    # Chat
-    query = "DELETE FROM teiserver_lobby_messages WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+      # Logs
+      "DELETE FROM page_view_logs WHERE user_id = ANY($1)",
+      "DELETE FROM audit_logs WHERE user_id = ANY($1)",
 
-    query = "DELETE FROM teiserver_room_messages WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+      # Chat
+      "DELETE FROM teiserver_lobby_messages WHERE user_id = ANY($1)",
+      "DELETE FROM teiserver_room_messages WHERE user_id = ANY($1)",
+      "DELETE FROM direct_messages WHERE from_user_id = ANY($1) OR to_user_id = ANY($1)",
 
-    # Match memberships (how are they a member of a match if unverified?
-    query = "DELETE FROM teiserver_battle_match_memberships WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+      # Match stuff
+      "DELETE FROM teiserver_battle_match_memberships WHERE user_id = ANY($1)",
+      "DELETE FROM teiserver_account_ratings WHERE user_id = ANY($1)",
+      "DELETE FROM teiserver_game_rating_logs WHERE user_id = ANY($1)",
 
-    # Ratings too
-    query = "DELETE FROM teiserver_account_ratings WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+      # Moderation
+      "DELETE FROM moderation_reports WHERE reporter_id = ANY($1) OR target_id = ANY($1) OR responder_id = ANY($1)",
+      "DELETE FROM moderation_actions WHERE target_id = ANY($1)",
+    ]
+    |> Enum.each(fn query ->
+      Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+    end)
 
-    query = "DELETE FROM teiserver_game_rating_logs WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
-
-    # Smurf keys
-    query = "DELETE FROM teiserver_account_smurf_keys WHERE user_id = ANY($1)"
+    # And now the users
+    query = "DELETE FROM account_users WHERE id = ANY($1)"
     Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
     # Delete our cache of them
     id_list
     |> Enum.each(fn userid -> User.decache_user(userid) end)
-
-    # Reports
-    query = """
-      DELETE FROM moderation_reports
-      WHERE reporter_id = ANY($1)
-      OR target_id = ANY($1)
-      OR responder_id = ANY($1)
-    """
-
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
-
-    # Codes
-    query = "DELETE FROM account_codes WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
-
-    # Group memberships
-    query = "DELETE FROM account_group_memberships WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
-
-    # Next up, configs
-    query = "DELETE FROM config_user WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
-
-    # Notifications
-    query = "DELETE FROM communication_notifications WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
-
-    # Page view logs
-    query = "DELETE FROM page_view_logs WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
-
-    # Audit logs
-    query = "DELETE FROM audit_logs WHERE user_id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
-
-    # And now the users
-    query = "DELETE FROM account_users WHERE id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
 
     :ok
   end

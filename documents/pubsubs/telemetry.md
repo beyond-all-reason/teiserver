@@ -21,6 +21,17 @@ Similar to the `teiserver_telemetry` channel but specifically limited to be publ
 }
 ```
 
+#### telemetry_user_properties
+```elixir
+%{
+  event: :upserted_property,
+  userid: userid,
+  property_type_id: property_type_id,
+  property_type_name: property_type_name,
+  value: value
+}
+```
+
 #### teiserver_telemetry_client_events
 Used for broadcasting specific client telemetry events as defined in Teiserver.Telemetry. Does not broadcast anonymous events.
 ```elixir

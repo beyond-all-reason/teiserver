@@ -43,6 +43,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   def handle_info(:begin, state) do
     :ok = PubSub.subscribe(Teiserver.PubSub, "client_inout")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "telemetry_user_properties")
     coordinator_id = Coordinator.get_coordinator_userid()
 
     if coordinator_id != nil do
@@ -74,6 +75,27 @@ defmodule Teiserver.Coordinator.AutomodServer do
   end
 
   def handle_info(%{channel: "client_inout"}, state), do: {:noreply, state}
+
+  def handle_info(%{channel: "telemetry_user_properties", event: :upserted_property} = msg, state) do
+    case msg.property_type_name do
+      "hardware:cpuinfo" ->
+        Account.merge_update_client(msg.userid, %{app_status: :accepted})
+
+      "hardware:macAddrHash" ->
+        Account.create_smurf_key(msg.userid, "chobby_mac_hash", msg.value)
+        Account.update_cache_user(msg.userid, %{chobby_mac_hash: msg.value})
+
+      "hardware:sysInfoHash" ->
+        Account.create_smurf_key(msg.userid, "chobby_sysinfo_hash", msg.value)
+        Account.update_cache_user(msg.userid, %{chobby_sysinfo_hash: msg.value})
+      _ ->
+        :ok
+    end
+
+    {:noreply, state}
+  end
+
+  def handle_info(%{channel: "telemetry_user_properties"}, state), do: {:noreply, state}
 
   # Catchall handle_info
   def handle_info(msg, state) do

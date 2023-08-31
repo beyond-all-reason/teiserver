@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Telemetry.PropertyController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.ExportPropertiesTask
+  alias Teiserver.Telemetry.{AnonPropertyQueries, UserPropertyQueries, ExportPropertiesTask}
   require Logger
 
   plug(AssignPlug,
@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
-  plug(:add_breadcrumb, name: 'Client events', url: '/teiserver/telemetry/client_events/summary')
+  plug(:add_breadcrumb, name: 'Client events', url: '/teiserver/telemetry/complex_client_events/summary')
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
   def summary(conn, params) do
@@ -31,45 +31,50 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
       between: between
     ]
 
-    client_properties = Telemetry.get_client_properties_summary(args)
-    unauth_properties = Telemetry.get_unauth_properties_summary(args)
+    user_properties = UserPropertyQueries.get_user_properties_summary(args)
+    anon_properties = AnonPropertyQueries.get_anon_properties_summary(args)
 
     property_types =
-      (Map.keys(client_properties) ++ Map.keys(unauth_properties))
+      (Map.keys(user_properties) ++ Map.keys(anon_properties))
       |> Enum.uniq()
       |> Enum.sort()
 
     conn
     |> assign(:timeframe, timeframe)
     |> assign(:property_types, property_types)
-    |> assign(:client_properties, client_properties)
-    |> assign(:unauth_properties, unauth_properties)
+    |> assign(:user_properties, user_properties)
+    |> assign(:anon_properties, anon_properties)
     |> render("summary.html")
   end
 
   @spec detail(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def detail(conn, %{"property_name" => property_name} = _params) do
+  def detail(conn, %{"property_name" => property_name} = params) do
     property_type_id = Telemetry.get_or_add_property_type(property_name)
+    timeframe = Map.get(params, "tf", "7 days")
 
-    client_counts =
-      Telemetry.list_client_properties(search: [property_type_id: property_type_id])
-      |> Enum.group_by(fn p -> p.value end)
-      |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
+    start_datetime =
+      case timeframe do
+        "Today" -> Timex.today() |> Timex.to_datetime()
+        "Yesterday" -> Timex.today() |> Timex.to_datetime() |> Timex.shift(days: -1)
+        "7 days" -> Timex.now() |> Timex.shift(days: -7)
+        "14 days" -> Timex.now() |> Timex.shift(days: -14)
+        "31 days" -> Timex.now() |> Timex.shift(days: -31)
+        _ -> Timex.now() |> Timex.shift(days: -7)
+      end
 
-    unauth_counts =
-      Telemetry.list_unauth_properties(search: [property_type_id: property_type_id])
-      |> Enum.group_by(fn p -> p.value end)
-      |> Map.new(fn {value, items} -> {value, Enum.count(items)} end)
+    user_data = UserPropertyQueries.get_aggregate_detail(property_type_id, start_datetime, Timex.now())
+    anon_data = AnonPropertyQueries.get_aggregate_detail(property_type_id, start_datetime, Timex.now())
 
     combined_values =
-      (Map.keys(client_counts) ++ Map.keys(unauth_counts))
+      (Map.keys(user_data) ++ Map.keys(anon_data))
       |> Enum.uniq()
       |> Enum.sort()
+      |> Enum.take(500)
 
     conn
     |> assign(:property_name, property_name)
-    |> assign(:client_counts, client_counts)
-    |> assign(:unauth_counts, unauth_counts)
+    |> assign(:user_data, user_data)
+    |> assign(:anon_data, anon_data)
     |> assign(:combined_values, combined_values)
     |> render("detail.html")
   end
@@ -90,7 +95,7 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
     time_taken = System.system_time(:millisecond) - start_time
 
     Logger.info(
-      "ClientEventController property export of #{Kernel.inspect(params)}, took #{time_taken}ms"
+      "ComplexClientEventController property export of #{Kernel.inspect(params)}, took #{time_taken}ms"
     )
     conn
     |> put_resp_content_type("text/csv")

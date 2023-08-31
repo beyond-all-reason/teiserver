@@ -1,0 +1,91 @@
+<% bsname = view_colour() %>
+
+<% timeframes = ["Today", "Yesterday", "7 days", "14 days", "31 days"] %>
+
+<TeiserverWeb.Telemetry.TelemetryComponents.sub_menu active={"simple_match_events"} view_colour={view_colour()} current_user={@current_user} />
+
+<div class="row section-menu">
+  <div class="col-md-12 mb-4">
+    <%= render(
+      TeiserverWeb.Telemetry.SimpleMatchEventView,
+      "section_menu.html",
+      Map.merge(assigns, %{
+        quick_search: "",
+        show_search: false,
+        active: "event_detail"
+      })
+    ) %>
+    <br /><br />
+
+    <%= for tf <- timeframes do %>
+      <%= central_component("section_menu_button",
+        name: "tf-#{tf}",
+        label: tf,
+        active: "tf-#{@timeframe}",
+        bsname: bsname,
+        icon: "",
+        url: "?tf=#{tf}"
+      ) %>
+    <% end %>
+  </div>
+  
+  <div class="col-lg-6">
+    <h4>Count by user</h4>
+    <table class="table table-sm table-hover">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Count</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for {userid, username, count} <- @data_by_user_id do %>
+          <tr>
+            <td><%= username %></td>
+            <td><%= format_number(count) %></td>
+            <td>
+              <.link
+                navigate={~p"/teiserver/admin/user/#{userid}"}
+                class={"btn btn-sm btn-secondary"}
+              >
+                <Fontawesome.icon icon={:show} style="solid" />
+                Show
+              </.link>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="col-lg-6">
+    <h4>Count by match</h4>
+    <table class="table table-sm table-hover">
+      <thead>
+        <tr>
+          <th>Match id</th>
+          <th>Count</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for {match_id, count} <- @data_by_match_id do %>
+          <tr>
+            <td><%= match_id %></td>
+            <td><%= format_number(count) %></td>
+            <td>
+              <.link
+                navigate={~p"/teiserver/admin/matches/#{match_id}"}
+                class={"btn btn-sm btn-secondary"}
+              >
+                <Fontawesome.icon icon={:show} style="solid" />
+                Show
+              </.link>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

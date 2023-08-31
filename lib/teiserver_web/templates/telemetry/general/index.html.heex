@@ -1,51 +1,87 @@
-<div class="row mt-2">
-  <%= if allow?(@current_user, "Server") do %>
-    <%= central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Telemetry.PropertyTypeLib.icon(),
-      name: "properties",
-      text: "Properties",
-      link: ~p"/telemetry/properties/summary"
-    ) %>
-  <% end %>
+<div class="row mt-2" >
+  <.menu_card
+    :if={allow?(@current_user, "Engine")}
+    icon={Teiserver.Telemetry.InfologLib.icon()}
+    url={~p"/telemetry/infolog"}
+    size={:small}
+  >
+    Infologs
+  </.menu_card>
 
-  <%= if allow?(@current_user, "Server") do %>
-    <%= central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Telemetry.ClientEventLib.icon(),
-      name: "client_events",
-      text: "Client events",
-      link: ~p"/telemetry/client_events/summary"
-    ) %>
-  <% end %>
+  <.menu_card
+    :if={allow?(@current_user, "Server")}
+    icon={Teiserver.Telemetry.PropertyTypeLib.icon()}
+    url={~p"/telemetry/properties/summary"}
+    size={:small}
+  >
+    Properties
+  </.menu_card>  
+</div>
 
-  <%= if allow?(@current_user, "Server") do %>
-    <%= central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Telemetry.ServerEventLib.icon(),
-      name: "server_events",
-      text: "Server events",
-      link: ~p"/telemetry/server_events/summary"
-    ) %>
-  <% end %>
-
-  <%= if allow?(@current_user, "Server") do %>
-    <%= central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Telemetry.MatchEventLib.icon(),
-      name: "match_events",
-      text: "Match events",
-      link: ~p"/telemetry/match_events/summary"
-    ) %>
-  <% end %>
-
-  <%= if allow?(@current_user, "Server") do %>
-    <%= central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Telemetry.ComplexMatchEventLib.icon(),
-      name: "complex_match_events",
-      text: "Complex match events",
-      link: ~p"/telemetry/complex_match_events/summary"
-    ) %>
-  <% end %>
+<div class="row mt-2" :if={allow?(@current_user, "Server")}>
+  <.menu_card
+    icon={Teiserver.Telemetry.SimpleClientEventLib.icon()}
+    url={~p"/telemetry/simple_client_events/summary"}
+    size={:small}
+  >
+    Simple client
+  </.menu_card>
+  
+  <.menu_card
+    icon={Teiserver.Telemetry.ComplexClientEventLib.icon()}
+    url={~p"/telemetry/complex_client_events/summary"}
+    size={:small}
+  >
+    Complex client
+  </.menu_card>
+  
+  <.menu_card
+    icon={Teiserver.Telemetry.SimpleServerEventLib.icon()}
+    url={~p"/telemetry/simple_server_events/summary"}
+    size={:small}
+  >
+    Simple server
+  </.menu_card>
+  
+  <.menu_card
+    icon={Teiserver.Telemetry.ComplexServerEventLib.icon()}
+    url={~p"/telemetry/complex_server_events/summary"}
+    size={:small}
+  >
+    Complex server
+  </.menu_card>
+</div>
+  
+<div class="row mt-2" :if={allow?(@current_user, "Server")}>
+  <.menu_card
+    icon={Teiserver.Telemetry.SimpleLobbyEventLib.icon()}
+    url={~p"/telemetry/simple_lobby_events/summary"}
+    size={:small}
+  >
+    Simple lobby
+  </.menu_card>
+  
+  <.menu_card
+    icon={Teiserver.Telemetry.ComplexLobbyEventLib.icon()}
+    url={~p"/telemetry/complex_lobby_events/summary"}
+    size={:small}
+  >
+    Complex lobby
+  </.menu_card>
+  
+  <.menu_card
+    icon={Teiserver.Telemetry.SimpleMatchEventLib.icon()}
+    url={~p"/telemetry/simple_match_events/summary"}
+    size={:small}
+  >
+    Simple match
+  </.menu_card>
+  
+  <.menu_card
+    icon={Teiserver.Telemetry.ComplexMatchEventLib.icon()}
+    url={~p"/telemetry/complex_match_events/summary"}
+    size={:small}
+  >
+    Complex match
+  </.menu_card>
 </div>

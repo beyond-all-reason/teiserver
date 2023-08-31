@@ -125,14 +125,14 @@ defmodule Teiserver.TeiserverQuickActions do
         },
         %{
           label: "Client event telemetry",
-          icons: ["fa-regular #{Teiserver.Telemetry.ClientEventLib.icon()}", :list],
-          url: ~p"/telemetry/client_events/summary",
+          icons: ["fa-regular #{Teiserver.Telemetry.ComplexClientEventLib.icon()}", :list],
+          url: ~p"/telemetry/complex_client_events/summary",
           permissions: "Admin"
         },
         %{
           label: "Infologs",
           icons: ["fa-regular #{Teiserver.Telemetry.InfologLib.icon()}", :list],
-          url: ~p"/teiserver/reports/infolog",
+          url: ~p"/telemetry/infolog",
           permissions: "Server"
         },
         %{
@@ -160,7 +160,7 @@ defmodule Teiserver.TeiserverQuickActions do
       %{
         label: "Teiserver infologs",
         icons: ["fa-regular #{Teiserver.Telemetry.InfologLib.icon()}", :list],
-        url: ~p"/teiserver/reports/infolog",
+        url: ~p"/telemetry/infolog",
         permissions: "Server"
       }
     ]
