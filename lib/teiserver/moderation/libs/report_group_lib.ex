@@ -1,87 +1,138 @@
 defmodule Teiserver.Moderation.ReportGroupLib do
   @moduledoc false
-  use CentralWeb, :library
-  alias Central.Helpers.QueryHelpers
-  alias Teiserver.Moderation.ReportGroup
+  use CentralWeb, :library_newform
+  alias Teiserver.Moderation
+  alias Teiserver.Moderation.{ReportGroup, ReportGroupQueries}
+  alias Phoenix.PubSub
 
-  # Queries
-  @spec query_report_groups(list) :: Ecto.Query.t()
-  def query_report_groups(args) do
-    query = from(report_groups in ReportGroup)
+  @spec colour :: atom
+  def colour(), do: :default
 
-    query
-    |> do_where([id: args[:id]])
-    |> do_where(args[:where])
-    |> do_preload(args[:preload])
-    |> do_order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+  @spec icon() :: String.t()
+  def icon(), do: ""
+
+  @doc """
+  Returns the list of report_groups.
+
+  ## Examples
+
+      iex> list_report_groups()
+      [%ReportGroup{}, ...]
+
+  """
+  @spec list_report_groups(list) :: list
+  def list_report_groups(args \\ []) do
+    args
+    |> ReportGroupQueries.query_report_groups()
+    |> Repo.all()
   end
 
-  @spec do_where(Ecto.Query.t(), list | map | nil) :: Ecto.Query.t()
-  defp do_where(query, nil), do: query
+  @doc """
+  Gets a single report_group.
 
-  defp do_where(query, params) do
-    params
-    |> Enum.reduce(query, fn {key, value}, query_acc ->
-      _where(query_acc, key, value)
-    end)
+  Raises `Ecto.NoResultsError` if the ReportGroup does not exist.
+
+  ## Examples
+
+      iex> get_report_group!(123)
+      %ReportGroup{}
+
+      iex> get_report_group!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_report_group!(id), do: Repo.get!(ReportGroup, id)
+
+  def get_report_group!(id, args) do
+    args = args ++ [id: id]
+
+    args
+    |> ReportGroupQueries.query_report_groups()
+    |> Repo.one!()
   end
 
-  @spec _where(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
-  defp _where(query, _, ""), do: query
-  defp _where(query, _, nil), do: query
-
-  defp _where(query, :id, id) do
-    from report_groups in query,
-      where: report_groups.id == ^id
+  def get_report_group(user_id, match_id) do
+    ReportGroupQueries.query_report_groups(
+      where: [
+        user_id: user_id,
+        match_id: match_id
+      ]
+    )
+    |> Repo.one!()
   end
 
-  defp _where(query, :members, {u1, u2}) when is_integer(u1) and is_integer(u2) do
-    from report_groups in query,
-      where: (report_groups.to_id in [^u1, ^u2] or report_groups.from_id in [^u1, ^u2])
+  @doc """
+  Creates a report_group.
+
+  ## Examples
+
+      iex> create_report_group(%{field: value})
+      {:ok, %ReportGroup{}}
+
+      iex> create_report_group(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_report_group(attrs \\ %{}) do
+    %ReportGroup{}
+    |> ReportGroup.changeset(attrs)
+    |> Repo.insert()
   end
 
-  defp _where(query, :id_in, id_list) do
-    from report_groups in query,
-      where: report_groups.id in ^id_list
+  @doc """
+  Updates a report_group.
+
+  ## Examples
+
+      iex> update_report_group(report_group, %{field: new_value})
+      {:ok, %ReportGroup{}}
+
+      iex> update_report_group(report_group, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_report_group(%ReportGroup{} = report_group, attrs) do
+    report_group
+    |> ReportGroup.changeset(attrs)
+    |> Repo.update()
   end
 
-  @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
-  defp do_order_by(query, nil), do: query
-  defp do_order_by(query, params) do
-    params
-    |> Enum.reduce(query, fn key, query_acc ->
-      _order_by(query_acc, key)
-    end)
+  @doc """
+  Deletes a report_group.
+
+  ## Examples
+
+      iex> delete_report_group(report_group)
+      {:ok, %ReportGroup{}}
+
+      iex> delete_report_group(report_group)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_report_group(%ReportGroup{} = report_group) do
+    Repo.delete(report_group)
   end
 
-  defp _order_by(query, nil), do: query
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking report_group changes.
 
-  defp _order_by(query, "Newest first") do
-    from report_groups in query,
-      order_by: [desc: report_groups.updated_at]
+  ## Examples
+
+      iex> change_report_group(report_group)
+      %Ecto.Changeset{data: %ReportGroup{}}
+
+  """
+  def change_report_group(%ReportGroup{} = report_group, attrs \\ %{}) do
+    ReportGroup.changeset(report_group, attrs)
   end
 
-  defp _order_by(query, "Oldest first") do
-    from report_groups in query,
-      order_by: [asc: report_groups.updated_at]
-  end
-
-  @spec do_preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
-  defp do_preload(query, nil), do: query
-
-  defp do_preload(query, preloads) do
-    preloads
-    |> Enum.reduce(query, fn key, query_acc ->
-      _preload(query_acc, key)
-    end)
-  end
-
-  defp _preload(query, :users) do
-    from report_groups in query,
-      join: tos in assoc(report_groups, :to),
-      preload: [to: tos],
-      join: froms in assoc(report_groups, :from),
-      preload: [from: froms]
+  @spec get_or_make_report_group(T.userid, T.match_id | nil) :: ReportGroup.t
+  def get_or_make_report_group(target_id, match_id) do
+    case get_report_group(target_id, match_id) do
+      nil ->
+        create_report_group(%{target_id: target_id, match_id: match_id})
+      r ->
+        r
+    end
   end
 end

@@ -5,27 +5,37 @@ defmodule Teiserver.Repo.Migrations.OverwatchImprovements do
     (
       Teiserver.Moderation.list_reports(limit: :infinity)
       |> Enum.group_by(fn report ->
-        {report.target_id, report.match_id, report.action_id}
+        {report.target_id, report.match_id, report.result_id}
       end)
-      |> Enum.each(fn {{target_id, match_id, action_id}, reports} ->
+      |> Enum.each(fn {{target_id, match_id, result_id}, reports} ->
         {:ok, report_group} = Teiserver.Moderation.create_report_group(%{
           target_id: target_id,
           match_id: match_id,
-          action_id: action_id
+          action_id: result_id
         })
+
+        report_id_list = reports |> Enum.map(fn r -> r.id end)
 
         # Now update the timestamps
         first_report_datetime = reports
           |> Enum.map(fn report -> report.inserted_at end)
           |> Enum.min
 
-        query = """UPDATE moderation_report_groups
+        query = """
+        UPDATE moderation_report_groups
           SET inserted_at = $1, updated_at = $1
           WHERE id = $2
         """
-        Ecto.Adapters.SQL.query(Repo, query, [first_report_datetime, report_group.id])
+        Ecto.Adapters.SQL.query(Teiserver.Repo, query, [first_report_datetime, report_group.id])
+
+        # Now update the reports themselves to point to this group
+        query = """
+        UPDATE moderation_reports SET report_group_id = $1 WHERE id = ANY($2)
+        """
+        Ecto.Adapters.SQL.query(Teiserver.Repo, query, [report_group.id, report_id_list])
       end)
     )
+
   end
 
   def change do
