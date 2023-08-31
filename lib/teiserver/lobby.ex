@@ -157,6 +157,7 @@ defmodule Teiserver.Lobby do
   defp do_force_add_user_to_lobby(nil, _), do: nil
 
   defp do_force_add_user_to_lobby(client, lobby_id) do
+    Telemetry.log_simple_server_event(client.userid, "lobby.force_add_user_to_lobby")
     remove_user_from_any_lobby(client.userid)
     script_password = new_script_password()
 
@@ -268,6 +269,9 @@ defmodule Teiserver.Lobby do
       :removed ->
         Coordinator.cast_consul(lobby_id, {:user_left, userid})
         client = Account.get_client_by_id(userid)
+
+        match_id = Battle.get_lobby_match_id(lobby_id)
+        Telemetry.log_simple_lobby_event(userid, match_id, "remove_user_from_lobby")
 
         if client do
           PubSub.broadcast(
