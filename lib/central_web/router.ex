@@ -658,8 +658,8 @@ defmodule TeiserverWeb.Router do
     get("/matches/user/:user_id", MatchController, :user_show)
     resources("/matches", MatchController, only: [:index, :show, :delete])
 
-    resources("/chat", ChatController, only: [:index])
-    post("/chat", ChatController, :index)
+    # resources("/chat", ChatController, only: [:index])
+    # post("/chat", ChatController, :index)
 
     resources("/achievements", AchievementController)
 
