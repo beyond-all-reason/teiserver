@@ -99,7 +99,7 @@
         <%= if allow?(@current_user, "Reviewer") do %>
           <%= central_component("top_nav_item",
             text: "Chat",
-            route: ~p"/teiserver/admin/chat",
+            route: ~p"/admin/chat",
             active: @site_menu_active == "chat"
           ) %>
         <% end %>

@@ -20,7 +20,7 @@
 <script src={Routes.static_path(@conn, "/js/select2.js")}>
 </script>
 
-<form action={~p"/teiserver/admin/chat"} method="post" class="form-horizontal" id="search-box">
+<form action={~p"/admin/chat"} method="post" class="form-horizontal" id="search-box">
   <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
   <div class="row">
