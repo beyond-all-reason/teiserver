@@ -35,14 +35,34 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
       where: report_groups.id == ^id
   end
 
-  defp _where(query, :members, {u1, u2}) when is_integer(u1) and is_integer(u2) do
-    from report_groups in query,
-      where: (report_groups.to_id in [^u1, ^u2] or report_groups.from_id in [^u1, ^u2])
-  end
-
   defp _where(query, :id_in, id_list) do
     from report_groups in query,
       where: report_groups.id in ^id_list
+  end
+
+  defp _where(query, :target_id, target_id) do
+    from report_groups in query,
+      where: report_groups.target_id == ^target_id
+  end
+
+  defp _where(query, :match_id, false) do
+    from report_groups in query,
+      where: is_nil(report_groups.match_id)
+  end
+
+  defp _where(query, :match_id, match_id) do
+    from report_groups in query,
+      where: report_groups.match_id == ^match_id
+  end
+
+  defp _where(query, :action_id, false) do
+    from report_groups in query,
+      where: is_nil(report_groups.action_id)
+  end
+
+  defp _where(query, :action_id, action_id) do
+    from report_groups in query,
+      where: report_groups.action_id == ^action_id
   end
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()

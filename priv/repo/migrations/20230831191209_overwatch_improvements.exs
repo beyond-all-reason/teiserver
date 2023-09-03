@@ -4,15 +4,23 @@ defmodule Teiserver.Repo.Migrations.OverwatchImprovements do
   defp create_report_groups do
     (
       Teiserver.Moderation.list_reports(limit: :infinity)
+      |> Enum.filter(fn report ->
+        report.match_id != nil or report.result_id != nil
+      end)
       |> Enum.group_by(fn report ->
         {report.target_id, report.match_id, report.result_id}
       end)
       |> Enum.each(fn {{target_id, match_id, result_id}, reports} ->
-        {:ok, report_group} = Teiserver.Moderation.create_report_group(%{
-          target_id: target_id,
-          match_id: match_id,
-          action_id: result_id
-        })
+        report_group = Teiserver.Moderation.get_or_make_report_group(
+          target_id, match_id
+        )
+
+        report_group = if report_group.action_id == nil do
+          {:ok, rg} = Teiserver.Moderation.update_report_group(report_group, %{action_id: result_id})
+          rg
+        else
+          report_group
+        end
 
         report_id_list = reports |> Enum.map(fn r -> r.id end)
 

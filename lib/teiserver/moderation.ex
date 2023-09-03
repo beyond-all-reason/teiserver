@@ -226,112 +226,44 @@ defmodule Teiserver.Moderation do
     Report.changeset(report, %{})
   end
 
-    alias Teiserver.Moderation.{ReportGroup, ReportGroupLib}
 
-  @doc """
-  Returns the list of report_groups.
 
-  ## Examples
 
-      iex> list_report_groups()
-      [%ReportGroup{}, ...]
+  alias Teiserver.Moderation.ReportGroupLib
 
-  """
-  @spec list_report_groups(list) :: list
-  def list_report_groups(args \\ []) do
-    args
-    |> ReportGroupLib.query_report_groups()
-    |> Repo.all()
-  end
+  @spec list_report_groups() :: [ComplexServerEventType.t]
+  defdelegate list_report_groups(), to: ReportGroupLib
 
-  @doc """
-  Gets a single report_group.
+  @spec list_report_groups(list) :: [ComplexServerEventType.t]
+  defdelegate list_report_groups(args), to: ReportGroupLib
 
-  Raises `Ecto.NoResultsError` if the ReportGroup does not exist.
+  @spec get_report_group!(non_neg_integer) :: ComplexServerEventType.t
+  defdelegate get_report_group!(id), to: ReportGroupLib
 
-  ## Examples
+  @spec get_report_group!(non_neg_integer, list) :: ComplexServerEventType.t
+  defdelegate get_report_group!(id, args), to: ReportGroupLib
 
-      iex> get_report_group!(123)
-      %ReportGroup{}
+  @spec create_report_group() :: {:ok, ComplexServerEventType.t} | {:error, Ecto.Changeset}
+  defdelegate create_report_group(), to: ReportGroupLib
 
-      iex> get_report_group!(456)
-      ** (Ecto.NoResultsError)
+  @spec create_report_group(map) :: {:ok, ComplexServerEventType.t} | {:error, Ecto.Changeset}
+  defdelegate create_report_group(attrs), to: ReportGroupLib
 
-  """
-  def get_report_group!(id), do: Repo.get!(ReportGroup, id)
+  @spec update_report_group(ComplexServerEventType.t, map) :: {:ok, ComplexServerEventType.t} | {:error, Ecto.Changeset}
+  defdelegate update_report_group(report_group, attrs), to: ReportGroupLib
 
-  def get_report_group!(id, args) do
-    args = args ++ [id: id]
+  @spec delete_report_group(ComplexServerEventType) :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  defdelegate delete_report_group(report_group), to: ReportGroupLib
 
-    args
-    |> ReportGroupLib.query_report_groups()
-    |> Repo.one!()
-  end
+  @spec change_report_group(ComplexServerEventType) :: Ecto.Changeset
+  defdelegate change_report_group(report_group), to: ReportGroupLib
 
-  @doc """
-  Creates a report_group.
+  @spec change_report_group(ComplexServerEventType, map) :: Ecto.Changeset
+  defdelegate change_report_group(report_group, attrs), to: ReportGroupLib
 
-  ## Examples
+  @spec get_or_make_report_group(T.userid, T.match_id | nil) :: ReportGroup.t
+  defdelegate get_or_make_report_group(target_id, match_id), to: ReportGroupLib
 
-      iex> create_report_group(%{field: value})
-      {:ok, %ReportGroup{}}
-
-      iex> create_report_group(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_report_group(attrs \\ %{}) do
-    %ReportGroup{}
-    |> ReportGroup.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a report_group.
-
-  ## Examples
-
-      iex> update_report_group(report_group, %{field: new_value})
-      {:ok, %ReportGroup{}}
-
-      iex> update_report_group(report_group, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_report_group(%ReportGroup{} = report_group, attrs) do
-    report_group
-    |> ReportGroup.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a report_group.
-
-  ## Examples
-
-      iex> delete_report_group(report_group)
-      {:ok, %ReportGroup{}}
-
-      iex> delete_report_group(report_group)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_report_group(%ReportGroup{} = report_group) do
-    Repo.delete(report_group)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking report_group changes.
-
-  ## Examples
-
-      iex> change_report_group(report_group)
-      %Ecto.Changeset{data: %ReportGroup{}}
-
-  """
-  def change_report_group(%ReportGroup{} = report_group, attrs \\ %{}) do
-    ReportGroup.changeset(report_group, attrs)
-  end
 
   alias Teiserver.Moderation.{Response, ResponseLib}
 
