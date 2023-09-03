@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Admin.ChatController do
   )
 
   plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
-  plug :add_breadcrumb, name: 'Chat', url: '/teiserver/admin/chat'
+  plug :add_breadcrumb, name: 'Chat', url: '/admin/chat'
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, %{"search" => params}) do

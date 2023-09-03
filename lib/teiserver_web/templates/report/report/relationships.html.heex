@@ -23,13 +23,13 @@
           Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
-            active: "mutes"
+            active: "relationships"
           })
         ) %>
         <br /><br />
 
         <form
-          action={Routes.ts_reports_report_path(@conn, :show, "mutes")}
+          action={Routes.ts_reports_report_path(@conn, :show, "relationships")}
           method="post"
           class="form-horizontal mb-4"
         >
@@ -45,6 +45,15 @@
                 value={@params["days"]}
                 class="form-control"
               />
+            </div>
+            
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="report_state" class="control-label">State:</label>
+              <%= select(:report, :state,
+                ["Follow", "Ignore", "Avoid", "Block"],
+                class: "form-control",
+                selected: @params["state"]
+              ) %>
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
@@ -80,18 +89,17 @@
             <tr>
               <th>&nbsp;</th>
               <th>Ignore count</th>
-              <th>Ignored by</th>
+              <th><%= String.capitalize(@state_past_tense) %> by</th>
               <th>&nbsp;</th>
             </tr>
           </thead>
           <tbody>
-            <%= for {userid, ignore_count} <- @data do %>
+            <%= for [userid, username, state_count, from_names] <- @results do %>
               <tr>
-                <td><%= @usernames[userid] %></td>
-                <td><%= ignore_count %></td>
+                <td><%= username %></td>
+                <td><%= state_count %></td>
                 <td>
-                  <%= Enum.map(@ignored_by_lists[userid], fn u -> @usernames[u] end)
-                  |> Enum.join(", ") %>
+                  <%= from_names |> Enum.join(", ") %>
                 </td>
                 <td>
                   <%= if allow?(@conn, "Moderator") do %>

@@ -47,13 +47,13 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.MuteReport.permissions()) do %>
+  <%= if allow?(@current_user, Teiserver.Account.RelationshipReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.MuteReport.icon(),
-      name: "mutes",
-      text: "Mutes",
-      link: Routes.ts_reports_report_path(@conn, :show, "mutes")
+      icon: Teiserver.Account.RelationshipReport.icon(),
+      name: "relationships",
+      text: "Relationships",
+      link: Routes.ts_reports_report_path(@conn, :show, "relationships")
     ) %>
   <% end %>
 

@@ -68,7 +68,7 @@ defmodule Teiserver.TeiserverQuickActions do
         %{
           label: "Chat logs",
           icons: [Teiserver.Chat.LobbyMessageLib.icon(), :list],
-          url: ~p"/teiserver/admin/chat",
+          url: ~p"/admin/chat",
           permissions: "Moderator"
         },
 
@@ -230,8 +230,8 @@ defmodule Teiserver.TeiserverQuickActions do
       },
       %{
         label: "Mutes",
-        icons: ["fa-regular #{Teiserver.Account.MuteReport.icon()}"],
-        permissions: Teiserver.Account.MuteReport.permissions(),
+        icons: ["fa-regular #{Teiserver.Account.RelationshipReport.icon()}"],
+        permissions: Teiserver.Account.RelationshipReport.permissions(),
         url: ~p"/teiserver/reports/show/mutes"
       },
       %{

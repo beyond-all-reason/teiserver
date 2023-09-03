@@ -34,6 +34,11 @@ defmodule Teiserver.Chat.RoomMessageLib do
       where: room_messages.id == ^id
   end
 
+  def _search(query, :id_less_than, id) do
+    from room_messages in query,
+      where: room_messages.id < ^id
+  end
+
   def _search(query, :user_id, user_id) do
     from room_messages in query,
       where: room_messages.user_id == ^user_id
@@ -42,6 +47,11 @@ defmodule Teiserver.Chat.RoomMessageLib do
   def _search(query, :user_id_in, id_list) do
     from room_messages in query,
       where: room_messages.user_id in ^id_list
+  end
+
+  def _search(query, :chat_room, chat_room) do
+    from room_messages in query,
+      where: room_messages.chat_room == ^chat_room
   end
 
   def _search(query, :user_id_not_in, id_list) do

@@ -47,8 +47,8 @@ defmodule TeiserverWeb.Report.ReportController do
         "accolades" ->
           Teiserver.Account.AccoladeReport
 
-        "mutes" ->
-          Teiserver.Account.MuteReport
+        "relationships" ->
+          Teiserver.Account.RelationshipReport
 
         "mapping" ->
           Teiserver.Game.MappingReport

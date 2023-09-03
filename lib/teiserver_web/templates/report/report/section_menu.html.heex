@@ -99,14 +99,14 @@
   ) %>
 <% end %>
 
-<%= if allow?(@current_user, Teiserver.Account.MuteReport.permissions()) do %>
+<%= if allow?(@current_user, Teiserver.Account.RelationshipReport.permissions()) do %>
   <%= central_component("section_menu_button",
-    name: "mutes",
-    label: "Mutes",
+    name: "relationships",
+    label: "Relationships",
     active: @active,
-    icon: Teiserver.Account.MuteReport.icon(),
+    icon: Teiserver.Account.RelationshipReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "mutes")
+    url: Routes.ts_reports_report_path(@conn, :show, "relationships")
   ) %>
 <% end %>
 

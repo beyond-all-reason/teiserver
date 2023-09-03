@@ -127,6 +127,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
           Lobby.kick_user_from_battle(userid, state.lobby_id)
 
         user_allowed_to_play?(userid, state) == false ->
+          Telemetry.log_simple_server_event(userid, "lobby.recheck_membership_spectate")
           Lobby.force_change_client(state.coordinator_id, userid, %{player: false})
 
         true ->

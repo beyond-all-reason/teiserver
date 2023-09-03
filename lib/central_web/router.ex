@@ -505,13 +505,6 @@ defmodule TeiserverWeb.Router do
     live("/party/:id", Show, :show)
   end
 
-  scope "/teiserver/admin", TeiserverWeb.AgentLive, as: :ts_admin do
-    pipe_through([:browser, :standard_layout, :protected])
-
-    live("/agent", Index, :index)
-    # live("/agent/:id", Show, :show)
-  end
-
   scope "/moderation", TeiserverWeb.Moderation do
     pipe_through([:browser, :standard_live_layout])
 
@@ -590,6 +583,20 @@ defmodule TeiserverWeb.Router do
     resources("/site", SiteConfigController, only: [:index, :edit, :update, :delete])
   end
 
+  scope "/chat", TeiserverWeb.Communication do
+    pipe_through([:live_browser, :protected])
+
+    live_session :chat_liveview,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Communication.NotificationPlug, :load_notifications}
+      ] do
+        live "/", ChatLive.Index, :index
+        live "/room", ChatLive.Room, :index
+        live "/room/:room_name", ChatLive.Room, :index
+    end
+  end
+
   scope "/admin", TeiserverWeb.Admin do
     pipe_through([:live_browser, :protected])
 
@@ -602,7 +609,7 @@ defmodule TeiserverWeb.Router do
         live "/test_page/:tab", TestPageLive.Index, :index
     end
 
-    live_session :chat_liveview,
+    live_session :admin_chat_liveview,
       on_mount: [
         {Teiserver.Account.AuthPlug, :ensure_authenticated},
         {Teiserver.Communication.NotificationPlug, :load_notifications}
@@ -658,8 +665,8 @@ defmodule TeiserverWeb.Router do
     get("/matches/user/:user_id", MatchController, :user_show)
     resources("/matches", MatchController, only: [:index, :show, :delete])
 
-    resources("/chat", ChatController, only: [:index])
-    post("/chat", ChatController, :index)
+    # resources("/chat", ChatController, only: [:index])
+    # post("/chat", ChatController, :index)
 
     resources("/achievements", AchievementController)
 

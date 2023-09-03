@@ -1,4 +1,5 @@
 defmodule Teiserver.Coordinator.AutomodServer do
+  @moduledoc false
   use GenServer
   alias Teiserver.Config
   import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
@@ -80,6 +81,11 @@ defmodule Teiserver.Coordinator.AutomodServer do
     case msg.property_type_name do
       "hardware:cpuinfo" ->
         Account.merge_update_client(msg.userid, %{app_status: :accepted})
+
+        client = Account.get_client_by_id(msg.userid)
+        if client do
+          send(client.tcp_pid, {:put, :app_status, :accepted})
+        end
 
       "hardware:macAddrHash" ->
         Account.create_smurf_key(msg.userid, "chobby_mac_hash", msg.value)
