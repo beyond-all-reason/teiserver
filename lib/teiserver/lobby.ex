@@ -667,12 +667,16 @@ defmodule Teiserver.Lobby do
 
         changed_values =
           new_values
-          |> Enum.filter(fn {field, _} ->
+          |> Enum.filter(fn {field, new_value} ->
             allow?(changer, field, lobby)
+            and
+            new_value != Map.get(client, field)
           end)
           |> Map.new(fn {k, v} -> {k, v} end)
 
-        change_client_battle_status(client, changed_values)
+        if not Enum.empty?(changed_values) do
+          change_client_battle_status(client, changed_values)
+        end
     end
   end
 
