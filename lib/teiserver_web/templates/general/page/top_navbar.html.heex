@@ -27,6 +27,14 @@
           active={@site_menu_active == "teiserver_account"}
           route={~p"/teiserver/account"}
         />
+        
+        <%= if @current_user do %>
+          <%= central_component("top_nav_item",
+            text: "Chat",
+            route: ~p"/chat",
+            active: @site_menu_active == "chat"
+          ) %>
+        <% end %>
 
         <%= if allow?(@current_user, "Server") do %>
           <TeiserverWeb.NavComponents.top_nav_item
@@ -93,14 +101,6 @@
             text: "Moderation",
             route: ~p"/moderation",
             active: @site_menu_active == "moderation"
-          ) %>
-        <% end %>
-
-        <%= if allow?(@current_user, "Reviewer") do %>
-          <%= central_component("top_nav_item",
-            text: "Chat",
-            route: ~p"/chat",
-            active: @site_menu_active == "chat"
           ) %>
         <% end %>
 

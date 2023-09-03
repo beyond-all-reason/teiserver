@@ -16,6 +16,17 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     end
   end
 
+  def do_handle("follow", username, msg_id, state) do
+    target_id = Account.get_userid_from_name(username)
+    if target_id && target_id != state.userid do
+      Account.follow_user(state.userid, target_id)
+      reply(:spring, :okay, {"c.user.follow", "userName=#{username}"}, msg_id, state)
+    else
+      reply(:spring, :no, "c.user.follow", msg_id, state)
+    end
+  end
+
+
   def do_handle("ignore", username, msg_id, state) do
     target_id = Account.get_userid_from_name(username)
     if target_id && target_id != state.userid do

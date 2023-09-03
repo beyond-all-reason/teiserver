@@ -100,10 +100,7 @@ defmodule Teiserver.Room do
   def remove_user_from_room(userid, room_name) do
     Central.cache_update(:rooms, room_name, fn room_state ->
       new_state =
-        if not Enum.member?(room_state.members, userid) do
-          # No change takes place, they've already left the room
-          room_state
-        else
+        if Enum.member?(room_state.members, userid) do
           PubSub.broadcast(
             Teiserver.PubSub,
             "room:#{room_name}",
@@ -112,6 +109,9 @@ defmodule Teiserver.Room do
 
           new_members = Enum.filter(room_state.members, fn m -> m != userid end)
           Map.put(room_state, :members, new_members)
+        else
+          # No change takes place, they've already left the room
+          room_state
         end
 
       {:ok, new_state}
