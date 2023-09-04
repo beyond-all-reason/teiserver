@@ -65,11 +65,18 @@
     </form>
     <br />
     
+    <div :if={@searching}>
+      Searching
+      <Fontawesome.icon icon="spinner" style="regular" class="fa-spin-pulse" />
+    </div>
+    
     <div :if={not Enum.empty?(@messages)}>
       <div :if={@filters["mode"] == "Lobby"}>
         <table class="table table-sm table-hover" :if={@filters["message-format"] == "Table"} id="rich-text-block">
           <thead>
             <tr>
+              <th>Location</th>
+              <th>Sender</th>
               <th>Message</th>
               <th>When</th>
             </tr>
@@ -77,13 +84,21 @@
           <tbody>
             <%= for msg <- @messages do %>
               <tr>
+                <td :if={@filters["mode"] == "Lobby"}>
+                  <a href={~p"/battle/chat/#{msg.match_id}/#{msg.user_id}"}>
+                  <%= msg.match_id %>
+                  </a>
+                </td>
+                <td :if={@filters["mode"] == "Room"}>
+                  <%= msg.chat_room %>
+                </td>
                 <td>
                   <a href={~p"/teiserver/admin/user/#{msg.user_id}"}>
                     <%= @usernames[msg.user_id] %>
                   </a>
                 </td>
                 <td class="message"><%= msg.content %></td>
-                <td><%= date_to_str(msg.inserted_at, :hms) %></td>
+                <td><%= date_to_str(msg.inserted_at, :hms_or_hmsymd) %></td>
               </tr>
             <% end %>
           </tbody>
