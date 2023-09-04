@@ -78,7 +78,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
         inserted_after: Timex.now |> Timex.shift(days: -15)
       ],
       preload: [:user],
-      limit: 50,
+      limit: 20,
       order_by: "Newest first"
     )
 

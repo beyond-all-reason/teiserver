@@ -8,8 +8,8 @@
 <div class="row mt-3">
   <div class="col-md-12">
 
-    <div id={"room-#{@room.id}"}>
-      <TeiserverWeb.ChatComponents.message_list messages={@messages} />
+    <div id={"room-#{@room_name}"}>
+      <TeiserverWeb.ChatComponents.message_list messages={@streams.messages} />
       <!-- ... form for a new message -->
     </div>
       

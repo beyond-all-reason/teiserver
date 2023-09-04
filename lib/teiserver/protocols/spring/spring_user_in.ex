@@ -53,11 +53,11 @@ defmodule Teiserver.Protocols.Spring.UserIn do
   def do_handle("closeness", username, msg_id, state) do
     target_id = Account.get_userid_from_name(username)
     cond do
+      state.userid == nil ->
+        reply(:spring, :no, {"c.user.closeness", "userName=#{username} not logged in"}, msg_id, state)
+
       target_id == nil ->
         reply(:spring, :no, {"c.user.closeness", "userName=#{username} no user"}, msg_id, state)
-
-      state.userid ->
-        reply(:spring, :no, {"c.user.closeness", "userName=#{username} not logged in"}, msg_id, state)
 
       Account.does_a_follow_b?(state.userid, target_id) ->
         reply(:user, :closeness, {username, "follow"}, msg_id, state)
@@ -72,14 +72,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
         reply(:user, :closeness, {username, "avoid"}, msg_id, state)
 
       true ->
-        reply(:spring, :no, {"c.user.closeness", "userName=#{username} no user"}, msg_id, state)
-    end
-
-    if target_id && target_id != state.userid do
-      Account.follow_user(state.userid, target_id)
-      reply(:spring, :okay, {"c.user.follow", "userName=#{username}"}, msg_id, state)
-    else
-      reply(:spring, :no, {"c.user.follow", "userName=#{username}"}, msg_id, state)
+        reply(:spring, :no, {"c.user.closeness", "userName=#{username} no cond match"}, msg_id, state)
     end
   end
 
