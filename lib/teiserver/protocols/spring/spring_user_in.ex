@@ -24,19 +24,19 @@ defmodule Teiserver.Protocols.Spring.UserIn do
             case String.downcase(closeness) do
               "follow" ->
                 Account.follow_user(state.userid, target_id)
-                reply(:spring, :okay, {"c.user.relationship", "userName=#{username}"}, msg_id, state)
+                reply(:spring, :okay, {"c.user.relationship.follow", "userName=#{username}"}, msg_id, state)
 
               "ignore" ->
                 Account.ignore_user(state.userid, target_id)
-                reply(:spring, :okay, {"c.user.relationship", "userName=#{username}"}, msg_id, state)
+                reply(:spring, :okay, {"c.user.relationship.ignore", "userName=#{username}"}, msg_id, state)
 
               "block" ->
                 Account.block_user(state.userid, target_id)
-                reply(:spring, :okay, {"c.user.relationship", "userName=#{username}"}, msg_id, state)
+                reply(:spring, :okay, {"c.user.relationship.block", "userName=#{username}"}, msg_id, state)
 
               "avoid" ->
                 Account.avoid_user(state.userid, target_id)
-                reply(:spring, :okay, {"c.user.relationship", "userName=#{username}"}, msg_id, state)
+                reply(:spring, :okay, {"c.user.relationship.avoid", "userName=#{username}"}, msg_id, state)
 
               x ->
                 reply(:spring, :no, {"c.user.relationship", "userName=#{username} no mode of #{x}"}, msg_id, state)
