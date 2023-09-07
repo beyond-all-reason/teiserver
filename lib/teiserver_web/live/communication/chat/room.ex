@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
       |> assign(:room_name, room_name)
       |> get_messages()
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "room_chat:#{room_name}")
 
     {:noreply, socket}
   end
@@ -34,8 +34,14 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
   end
 
   @impl true
-  def handle_info({:new_message, from_id, room_name, msg}, socket) do
-    message = %{}
+  def handle_info(%{channel: "room_chat"} = event, socket) do
+    message = %{
+      id: event.id,
+      content: event.content,
+      user_id: event.user_id,
+      inserted_at: Timex.now()
+    }
+
     {:noreply, stream_insert(socket, :messages, message)}
   end
 
