@@ -79,7 +79,6 @@
             icon_class: "fa-solid"
           ) %>
         </h3>
-        Previous names: <%= Enum.join(@stats["previous_names"] || [], ", ") %>
 
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item" role="presentation">
@@ -106,6 +105,13 @@
               ) %> Actions (<%= Enum.count(@actions) %>)
             </a>
           </li>
+
+          <li class="nav-item" role="presentation">
+            <a href="#user_details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="regular" />
+              User details
+            </a>
+          </li>
         </ul>
 
         <div class="tab-content">
@@ -119,6 +125,10 @@
 
           <div class="tab-pane" id="actions_tab" style="padding:5px;">
             <%= render("tab_actions.html", assigns) %>
+          </div>
+
+          <div class="tab-pane" id="user_details_tab" style="padding:5px;">
+            <%= render("tab_user_details.html", assigns) %>
           </div>
         </div>
       </div>
