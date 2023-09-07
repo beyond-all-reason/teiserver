@@ -12,4 +12,8 @@ defmodule Teiserver.Protocols.Spring.UserOut do
 
     "s.user.list_relationships #{encoded_data}\n"
   end
+
+  def do_reply(:closeness, {username, closeness}, _state) do
+    "s.user.closeness userName=#{username}\t#{closeness}\n"
+  end
 end

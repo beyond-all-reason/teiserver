@@ -12,6 +12,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Chat", url: "/admin/chat")
       |> default_filters
+      |> assign(:searching, false)
       |> get_messages
 
     {:ok, socket}
@@ -38,6 +39,12 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
   # end
 
   @impl true
+  def handle_info(:do_get_messages, socket) do
+    socket = get_messages(socket)
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
     [key] = event["_target"]
     value = event[key]
@@ -46,7 +53,9 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
 
     socket = socket
       |> assign(:filters, new_filters)
-      |> get_messages
+      |> assign(:searching, true)
+
+    send(self(), :do_get_messages)
 
     {:noreply, socket}
   end
@@ -58,17 +67,17 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
       "mode" => "Lobby",
       "term" => "",
       "username" => "",
+      "order" => "Newest first",
       "message-format" => "Table"
     })
   end
 
   defp get_messages(%{assigns: %{filters: %{"term" => ""}}} = socket) do
     socket
+    |> assign(:searching, false)
   end
 
   defp get_messages(%{assigns: %{filters: filters}} = socket) do
-    IO.inspect "GETTING MESSAGES"
-
     mode = filters["mode"]
 
     inserted_after =
@@ -107,10 +116,10 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
         "Lobby" ->
           Chat.list_lobby_messages(
             search: [
-              term: filters["term"],
               user_id: userid,
+              user_id_not_in: excluded_ids,
               inserted_after: inserted_after,
-              user_id_not_in: excluded_ids
+              term: filters["term"]
             ],
             limit: 100,
             order_by: filters["order"]
@@ -119,10 +128,10 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
         "Room" ->
           Chat.list_room_messages(
             search: [
-              term: filters["term"],
               user_id: userid,
+              user_id_not_in: excluded_ids,
               inserted_after: inserted_after,
-              user_id_not_in: excluded_ids
+              term: filters["term"]
             ],
             limit: 100,
             order_by: filters["order"]
@@ -131,10 +140,10 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
         "Party" ->
           Chat.list_party_messages(
             search: [
-              term: filters["term"],
               user_id: userid,
+              user_id_not_in: excluded_ids,
               inserted_after: inserted_after,
-              user_id_not_in: excluded_ids
+              term: filters["term"]
             ],
             limit: 100,
             order_by: filters["order"]
@@ -155,5 +164,6 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
     socket
       |> assign(:usernames, new_usernames)
       |> assign(:messages, messages)
+      |> assign(:searching, false)
   end
 end

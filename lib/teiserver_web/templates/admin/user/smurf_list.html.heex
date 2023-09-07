@@ -1,5 +1,5 @@
 <% bsname = view_colour()
-is_admin = allow?(@conn, "Admin") %>
+is_moderator = allow?(@conn, "Moderator") %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -120,7 +120,7 @@ is_admin = allow?(@conn, "Admin") %>
                   <th>Last login</th>
                   <th>Registered</th>
 
-                  <%= if is_admin do %>
+                  <%= if is_moderator do %>
                     <th colspan="3">&nbsp;</th>
                   <% else %>
                     <th>&nbsp;</th>
@@ -256,7 +256,7 @@ is_admin = allow?(@conn, "Admin") %>
                       </a>
                     </td>
 
-                    <%= if is_admin and user.smurf_of_id == nil and @user.smurf_of_id == nil do %>
+                    <%= if is_moderator and user.smurf_of_id == nil and @user.smurf_of_id == nil do %>
                       <td>
                         <%= link(raw("<i class='far fa-fw fa-link'></i> Smurf link"),
                           to: ~p"/teiserver/admin/users/mark_as_smurf_of/#{@user.id}/#{user.id}",
