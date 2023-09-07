@@ -18,7 +18,7 @@ defmodule Teiserver.User do
   @default_colour "#666666"
   @default_icon "fa-solid fa-user"
 
-  @suspended_string "This account has been suspended. You can see the #moderation-bot on discord for more details; if you need to appeal anything please use the #open-ticket channel on the discord. Be aware, trying to evade moderation by creating new accounts will result in extending the suspension or even a permanent ban."
+  @suspended_string "This account is temporarily suspended. You can see the #moderation-bot on discord for more details; if you need to appeal anything please use the #open-ticket channel on the discord. Be aware, trying to evade moderation by creating new accounts will result in extending the suspension or even a permanent ban."
 
   @smurf_string "Alt account detected. We do not allow alt accounts. Please login as your main account. Repeatedly creating alts can result in suspension or bans. If you think this account was flagged incorrectly please open a ticket on our discord and explain why."
 
