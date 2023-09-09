@@ -12,7 +12,7 @@ defmodule Teiserver.Telemetry.InfologCleanupTask do
     before_timestamp = Timex.shift(Timex.now(), days: -days)
 
     query = """
-          DELETE FROM teiserver_telemetry_infologs
+          DELETE FROM telemetry_infologs
           WHERE timestamp < $1
     """
 

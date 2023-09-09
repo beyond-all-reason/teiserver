@@ -121,12 +121,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_info(:recheck_membership, state) do
     Battle.get_lobby_member_list(state.lobby_id)
     |> Enum.each(fn userid ->
+      client = Account.get_client_by_id(userid)
+
       cond do
         allow_join(userid, state) |> elem(0) == false ->
           Telemetry.log_simple_server_event(userid, "lobby.recheck_membership_kick")
           Lobby.kick_user_from_battle(userid, state.lobby_id)
 
-        user_allowed_to_play?(userid, state) == false ->
+        client.player && user_allowed_to_play?(userid, state) == false ->
           Telemetry.log_simple_server_event(userid, "lobby.recheck_membership_spectate")
           Lobby.force_change_client(state.coordinator_id, userid, %{player: false})
 
