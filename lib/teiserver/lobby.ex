@@ -504,42 +504,43 @@ defmodule Teiserver.Lobby do
           {:failure, String.t()} | {:waiting_on_host, String.t()}
   def can_join?(userid, lobby_id, password \\ nil, script_password \\ nil) do
     lobby_id = int_parse(lobby_id)
-    server_result = server_allows_join?(userid, lobby_id, password)
 
-    if server_result == true do
-      script_password =
-        if script_password == nil, do: new_script_password(), else: script_password
+    case server_allows_join?(userid, lobby_id, password) do
+      true ->
+        script_password =
+          if script_password == nil, do: new_script_password(), else: script_password
 
-      lobby = get_lobby(lobby_id)
+        lobby = get_lobby(lobby_id)
 
-      if lobby != nil do
-        case Account.get_client_by_id(lobby.founder_id) do
-          nil ->
-            {:failure, "Battle closed"}
+        if lobby != nil do
+          case Account.get_client_by_id(lobby.founder_id) do
+            nil ->
+              {:failure, "Battle closed"}
 
-          host_client ->
-            # TODO: Depreciate
-            send(host_client.tcp_pid, {:request_user_join_lobby, userid})
+            host_client ->
+              # TODO: Depreciate
+              send(host_client.tcp_pid, {:request_user_join_lobby, userid})
 
-            PubSub.broadcast(
-              Teiserver.PubSub,
-              "teiserver_lobby_host_message:#{lobby_id}",
-              %{
-                channel: "teiserver_lobby_host_message:#{lobby_id}",
-                event: :user_requests_to_join,
-                lobby_id: lobby_id,
-                userid: userid,
-                script_password: script_password
-              }
-            )
+              PubSub.broadcast(
+                Teiserver.PubSub,
+                "teiserver_lobby_host_message:#{lobby_id}",
+                %{
+                  channel: "teiserver_lobby_host_message:#{lobby_id}",
+                  event: :user_requests_to_join,
+                  lobby_id: lobby_id,
+                  userid: userid,
+                  script_password: script_password
+                }
+              )
 
-            {:waiting_on_host, script_password}
+              {:waiting_on_host, script_password}
+          end
+        else
+          {:failure, "No lobby found (type 2, lobby is nil at can_join?)"}
         end
-      else
-        {:failure, "No lobby found (type 2, lobby is nil at can_join?)"}
-      end
-    else
-      server_result
+
+      server_result ->
+        server_result
     end
   end
 

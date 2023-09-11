@@ -1,8 +1,8 @@
 defmodule Teiserver.Protocols.Spring.UserIn do
   @moduledoc false
-  alias Teiserver.Account
+  alias Teiserver.{Account, Room, User}
   alias Teiserver.Protocols.SpringIn
-  import Teiserver.Protocols.SpringOut, only: [reply: 5]
+  import Teiserver.Protocols.SpringOut, only: [reply: 5, do_join_room: 2, do_login_accepted: 3]
   require Logger
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
@@ -116,7 +116,6 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     end
   end
 
-  @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
   def do_handle("list_relationships", _, msg_id, state) do
     data = %{
       friends: Account.list_friend_ids_of_user(state.userid) |> Enum.map(&Account.get_username_by_id/1),
@@ -127,6 +126,132 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     }
 
     reply(:user, :list_relationships, data, msg_id, state)
+  end
+
+  def do_handle("get_token_by_email", _data, msg_id, %{transport: :ranch_tcp} = state) do
+    reply(
+      :spring,
+      :no,
+      {"c.user.get_token_by_email", "cannot get token over insecure connection"},
+      msg_id,
+      state
+    )
+  end
+
+  def do_handle("get_token_by_email", data, msg_id, state) do
+    case String.split(data, "\t") do
+      [email, plain_text_password] ->
+        user = Central.Account.get_user_by_email(email)
+
+        response =
+          if user do
+            Central.Account.User.verify_password(plain_text_password, user.password)
+          else
+            false
+          end
+
+        if response do
+          token = User.create_token(user)
+          reply(:spring, :user_token, {email, token}, msg_id, state)
+        else
+          reply(:spring, :no, {"c.user.get_token_by_email", "invalid credentials"}, msg_id, state)
+        end
+
+      _ ->
+        reply(:spring, :no, {"c.user.get_token_by_email", "bad format"}, msg_id, state)
+    end
+  end
+
+  def do_handle("get_token_by_name", _data, msg_id, %{transport: :ranch_tcp} = state) do
+    reply(
+      :spring, :no,
+      {"c.user.get_token_by_name", "cannot get token over insecure connection"},
+      msg_id,
+      state
+    )
+  end
+
+  def do_handle("get_token_by_name", data, msg_id, state) do
+    case String.split(data, "\t") do
+      [name, plain_text_password] ->
+        user = Central.Account.get_user_by_name(name)
+
+        response =
+          if user do
+            Central.Account.User.verify_password(plain_text_password, user.password)
+          else
+            false
+          end
+
+        if response do
+          token = User.create_token(user)
+          reply(:spring, :user_token, {name, token}, msg_id, state)
+        else
+          reply(:spring, :no, {"c.user.get_token_by_name", "invalid credentials"}, msg_id, state)
+        end
+
+      _ ->
+        reply(:spring, :no, {"c.user.get_token_by_name", "bad format"}, msg_id, state)
+    end
+  end
+
+  def do_handle("login", data, msg_id, state) do
+    # Flags are optional hence the weird case statement
+    [token, lobby, lobby_hash, _flags] =
+      case String.split(data, "\t") do
+        [token, lobby, lobby_hash, flags] -> [token, lobby, lobby_hash, String.split(flags, " ")]
+        [token, lobby | _] -> [token, lobby, "", ""]
+      end
+
+    # Now try to login using a token
+    response = User.try_login(token, state.ip, lobby, lobby_hash)
+
+    case response do
+      {:error, "Unverified", userid} ->
+        reply(:spring, :agreement, nil, msg_id, state)
+        Map.put(state, :unverified_id, userid)
+
+      {:error, "Queued", userid, lobby, lobby_hash} ->
+        reply(:spring, :login_queued, nil, msg_id, state)
+
+        Map.merge(state, %{
+          lobby: lobby,
+          lobby_hash: lobby_hash,
+          queued_userid: userid
+        })
+
+      {:ok, user} ->
+        optimisation_level = :full
+        new_state = do_login_accepted(state, user, optimisation_level)
+
+        # Do we have a clan?
+        if user.clan_id do
+          :timer.sleep(200)
+          clan = Teiserver.Clans.get_clan!(user.clan_id)
+          room_name = Room.clan_room_name(clan.tag)
+          do_join_room(new_state, room_name)
+        end
+
+        # Post login checks
+        Process.send_after(self(), :post_auth_check, 60_000)
+
+        new_state
+
+      {:error, "Banned" <> _} ->
+        reply(
+          :spring, :denied,
+          "Banned, please see the discord channel #moderation-bot for more details",
+          msg_id,
+          state
+        )
+
+        state
+
+      {:error, reason} ->
+        Logger.debug("[command:login] denied with reason #{reason}")
+        reply(:spring, :denied, reason, msg_id, state)
+        state
+    end
   end
 
   def do_handle(cmd, data, msg_id, state) do

@@ -5,10 +5,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
   """
   use GenServer
   require Logger
-  alias Teiserver.{Account, Coordinator, Client, User, Lobby, Battle, Telemetry}
+  alias Teiserver.{Account, Coordinator, Client, User, Lobby, Battle, Telemetry, Config}
   alias Teiserver.Lobby.{ChatLib}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Config
   alias Phoenix.PubSub
   alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Battle.BalanceLib
@@ -906,6 +905,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
       end
     end
 
+    # Blocking using relationships
+    member_list = Battle.get_lobby_member_list(state.lobby_id)
+    match_id = Battle.get_lobby_match_id(state.lobby_id)
+
+    block_status = Account.check_block_status(userid, member_list)
+
     cond do
       client == nil ->
         {false, "No client"}
@@ -936,6 +941,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
         else
           {false, "Friends only gatekeeper"}
         end
+
+      block_status == :blocking ->
+        Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.blocking")
+        {false, "You are blocking too many players in this lobby"}
+
+      block_status == :blocked ->
+        Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.blocked")
+        {false, "You are blocked by too many players in this lobby"}
 
       true ->
         {true, nil}
