@@ -9,10 +9,12 @@
             label="Term"
             name="term"
             value={@filters["term"]}
-            phx-change="filter-update" phx-debounce="400"
+            phx-change="filter-update"
+            phx-debounce="400"
+            autofocus={true}
           />
         </div>
-        
+
         <div class="col">
           <.input type="select"
             label="Timeframe"
@@ -22,7 +24,7 @@
             phx-change="filter-update"
           />
         </div>
-        
+
         <div class="col">
           <.input type="select"
             label="Mode"
