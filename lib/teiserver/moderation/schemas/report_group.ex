@@ -5,8 +5,13 @@ defmodule Teiserver.Moderation.ReportGroup do
   schema "moderation_report_groups" do
     belongs_to :target, Central.Account.User
     belongs_to :match, Teiserver.Battle.Match
-    belongs_to :action, Teiserver.Moderation.Action
 
+    field :closed, :boolean, default: false
+    field :report_count, :integer, default: 0
+    field :vote_count, :integer, default: 0
+    field :action_count, :integer, default: 0
+
+    has_many :actions, Teiserver.Moderation.Action
     has_many :reports, Teiserver.Moderation.Report
     has_many :report_group_votes, Teiserver.Moderation.ReportGroupVote
     has_many :report_group_messages, Teiserver.Moderation.ReportGroupMessage
@@ -19,7 +24,7 @@ defmodule Teiserver.Moderation.ReportGroup do
     struct
     |> cast(
       params,
-      ~w(target_id match_id action_id)a
+      ~w(target_id match_id report_count vote_count action_count closed)a
     )
     |> validate_required(~w(target_id)a)
   end

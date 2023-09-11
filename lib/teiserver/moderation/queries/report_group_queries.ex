@@ -14,6 +14,7 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
     |> do_preload(args[:preload])
     |> do_order_by(args[:order_by])
     |> query_select(args[:select])
+    |> limit_query(args[:limit] || 50)
   end
 
   @spec do_where(Ecto.Query.t(), list | map | nil) :: Ecto.Query.t()
@@ -55,24 +56,25 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
       where: report_groups.match_id == ^match_id
   end
 
-  defp _where(query, :action_id, false) do
+  defp _where(query, :closed, closed) do
     from report_groups in query,
-      where: is_nil(report_groups.action_id)
+      where: report_groups.closed == ^closed
   end
 
-  defp _where(query, :action_id, action_id) do
+  defp _where(query, :inserted_after, datetime) do
     from report_groups in query,
-      where: report_groups.action_id == ^action_id
+      where: report_groups.inserted_at >= ^datetime
   end
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
-  defp do_order_by(query, params) do
+  defp do_order_by(query, params) when is_list(params) do
     params
     |> Enum.reduce(query, fn key, query_acc ->
       _order_by(query_acc, key)
     end)
   end
+  defp do_order_by(query, params), do: do_order_by(query, [params])
 
   defp _order_by(query, nil), do: query
 
@@ -96,11 +98,23 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
     end)
   end
 
-  defp _preload(query, :users) do
+  defp _preload(query, :target) do
     from report_groups in query,
-      join: tos in assoc(report_groups, :to),
-      preload: [to: tos],
-      join: froms in assoc(report_groups, :from),
-      preload: [from: froms]
+      join: targets in assoc(report_groups, :target),
+      preload: [target: targets]
   end
+
+  defp _preload(query, :actions) do
+    from report_groups in query,
+      join: actions in assoc(report_groups, :actions),
+      preload: [actions: actions]
+  end
+
+  # defp _preload(query, :users) do
+  #   from report_groups in query,
+  #     join: tos in assoc(report_groups, :to),
+  #     preload: [to: tos],
+  #     join: froms in assoc(report_groups, :from),
+  #     preload: [from: froms]
+  # end
 end

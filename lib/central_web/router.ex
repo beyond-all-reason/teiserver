@@ -514,6 +514,7 @@ defmodule TeiserverWeb.Router do
         {Teiserver.Communication.NotificationPlug, :load_notifications}
       ] do
         live "/overwatch", OverwatchLive.Index, :index
+        live "/overwatch/report_group/:id", OverwatchLive.ReportGroup, :index
     end
   end
 

@@ -150,7 +150,7 @@ defmodule Teiserver.Moderation.ReportGroupLib do
       where: [
         target_id: target_id,
         match_id: false,
-        action_id: false
+        closed: false
       ]
     )
     case report_group do

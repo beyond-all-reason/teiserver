@@ -13,10 +13,20 @@
       <div class="row">
         <div class="col">
           <.input type="select"
-            label="Outstanding"
-            options={["Awaiting overwatch input", "Actioned or Closed", "All"]}
-            name="outstanding-state"
-            value={@filters["outstanding-state"]}
+            label="Outcome"
+            options={["Actioned", "Un-actioned", "All"]}
+            name="actioned-filter"
+            value={@filters["actioned-filter"]}
+            phx-change="filter-update"
+          />
+        </div>
+        
+        <div class="col">
+          <.input type="select"
+            label="Open/Closed"
+            options={["Open", "Closed", "All"]}
+            name="closed-filter"
+            value={@filters["closed-filter"]}
             phx-change="filter-update"
           />
         </div>
@@ -47,41 +57,31 @@
   </div>
 </div>
 
-<table class="table table-sm table-hover" :if={@reports}>
+<table class="table table-sm table-hover" :if={@report_groups}>
   <thead>
     <tr>
       <th>&nbsp;</th>
+      
+      
       <th>Target</th>
-      <th>Type</th>
-      <th>Extra text</th>
-
-      <th>Reporter</th>
-      <th>Datetime</th>
-      <th colspan="2">Your response</th>
+      <th>Vote count</th>
+      
+      <th>Created</th>
 
       <th colspan="3">&nbsp;</th>
     </tr>
   </thead>
   <tbody>
-    <%= for report <- @reports do %>
-      <%
-        response = case report.responses do
-          [r] -> r
-          _ -> nil
-        end
-      %>
+    <%= for report_group <- @report_groups do %>
       <tr>
-        <td style="width: 30px;">
-          <%= if report.result_id do %>
-            <a
-              href={~p"/moderation/action/#{report.result_id}"}
-              class={"btn btn-sm btn-#{Teiserver.Moderation.ActionLib.colour()}"}
-            >
+        <td style="width: 80px;">
+          <%= if report_group.action_count > 0 do %>
+            <span class={"text-#{Teiserver.Moderation.ActionLib.colour()}"}>
               <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />
-            </a>
+            </span>
           <% end %>
 
-          <%= if report.closed do %>
+          <%= if report_group.closed do %>
             <span class={"btn btn-sm btn-#{@view_colour}"}>
               <Fontawesome.icon icon="folder-closed" style="solid" />
             </span>
@@ -90,50 +90,33 @@
 
         <td>
           <a
-            href={~p"/moderation/report/user/#{report.target_id}"}
+            href={~p"/moderation/report/user/#{report_group.target_id}"}
             class={"btn btn-sm btn-#{Teiserver.Account.UserLib.colour()}"}
           >
             <Fontawesome.icon icon={Teiserver.Helper.StylingHelper.icon(:user)} style="solid" />
           </a>
-          &nbsp; <%= report.target.name %>
-        </td>
-
-        <td><%= report.type %>/<%= report.sub_type %></td>
-        <td><%= String.slice(report.extra_text || "", 0..40) %></td>
-
-        <td>
-          <a href={~p"/moderation/report/user/#{report.reporter_id}"}>
-            <%= report.reporter.name %>
-          </a>
-        </td>
-
-        <td><%= date_to_str(report.inserted_at, format: :hms_or_ymd) %></td>
-
-        <td :if={response == nil} colspan="2">
-          &nbsp;
+          &nbsp; <%= report_group.target.name %>
         </td>
         
-        <td :if={response != nil}>
-          <%= response.action %>
+        <td>
+          <%= report_group.vote_count %>
         </td>
-        <td :if={response != nil}>
-          <Fontawesome.icon icon="thumbs-up" style="solid" class="text-success" :if={response.accurate} />
-          <Fontawesome.icon icon="thumbs-down" style="solid" class="text-warning" :if={not response.accurate} />
-        </td>
+
+        <td><%= date_to_str(report_group.inserted_at, format: :hms_or_ymd) %></td>
 
         <td>
           <a
-            href={~p"/moderation/report/#{report.id}"}
+            href={~p"/moderation/overwatch/report_group/#{report_group.id}"}
             class="btn btn-secondary btn-sm"
           >
             Details
           </a>
         </td>
 
-        <%= if report.match_id do %>
+        <%= if report_group.match_id do %>
           <td>
             <a
-              href={~p"/teiserver/admin/matches/#{report.match_id}"}
+              href={~p"/teiserver/admin/matches/#{report_group.match_id}"}
               class="btn btn-secondary btn-sm"
             >
               Match
@@ -141,7 +124,7 @@
           </td>
           <td>
             <a
-              href={~p"/battle/chat/#{report.match_id}/#{report.target_id}/#{report.reporter_id}"}
+              href={~p"/battle/chat/#{report_group.match_id}/#{report_group.target_id}"}
               class="btn btn-secondary btn-sm"
             >
               Chat

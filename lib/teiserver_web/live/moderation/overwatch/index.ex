@@ -4,19 +4,19 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
   alias Teiserver.Moderation.ReportLib
 
   @impl true
-  def mount(_params, _ession, socket) do
+  def mount(_params, _session, socket) do
     socket = socket
       |> assign(:site_menu_active, "moderation")
       |> assign(:view_colour, Teiserver.Moderation.colour())
-      |> assign(:outstanding_reports, 0)
-      |> assign(:reports, nil)
+      |> assign(:outstanding_report_groups, 0)
+      |> assign(:report_groups, nil)
       |> default_filters()
       |> add_breadcrumb(name: "Moderation", url: ~p"/moderation")
       |> add_breadcrumb(name: "Overwatch", url: ~p"/moderation/overwatch")
 
     socket = if connected?(socket) do
       socket
-        |> recalculate_outstanding_reports
+        |> recalculate_outstanding_report_groups
     else
       socket
     end
@@ -33,7 +33,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
 
     socket = socket
       |> assign(:filters, new_filters)
-      |> recalculate_outstanding_reports
+      |> recalculate_outstanding_report_groups
 
     {:noreply, socket}
   end
@@ -90,28 +90,28 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
   defp default_filters(socket) do
     socket
     |> assign(:filters, %{
-      "outstanding-state" => "Awaiting overwatch input"
+      "closed-filter" => "Open"
     })
   end
 
-  defp recalculate_outstanding_reports(%{assigns: %{current_user: current_user, filters: filters}} = socket) do
-    outstanding_filter = case filters["outstanding-state"] do
-      "Awaiting overwatch input" -> true
-      "Actioned or Closed" -> false
+  defp recalculate_outstanding_report_groups(%{assigns: %{current_user: _current_user, filters: filters}} = socket) do
+    closed_filter = case filters["closed-filter"] do
+      "Open" -> false
+      "Closed" -> true
       _ -> nil
     end
 
-    reports = Moderation.list_reports(
-      search: [
-        outstanding: outstanding_filter,
+    report_groups = Moderation.list_report_groups(
+      where: [
+        closed: closed_filter,
         inserted_after: Timex.shift(Timex.now(), days: -ReportLib.get_outstanding_report_max_days())
       ],
-      order_by: "Newest first",
+      order_by: ["Newest first"],
       limit: 50,
-      preload: [:target, :reporter, {:user_response, current_user.id}]
+      preload: [:target]
     )
 
     socket
-    |> assign(:reports, reports)
+    |> assign(:report_groups, report_groups)
   end
 end
