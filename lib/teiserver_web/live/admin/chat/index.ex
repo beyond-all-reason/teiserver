@@ -51,6 +51,20 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
 
     new_filters = Map.put(filters, key, value)
 
+    new_filters = case key do
+      "user-raw-filter" ->
+        userids = value
+          |> String.split(",")
+          |> Enum.map(fn name ->
+            Account.get_userid_from_name(name)
+          end)
+          |> Enum.reject(&(&1 == nil))
+
+        Map.put(new_filters, "userids", userids)
+
+      _ -> new_filters
+    end
+
     socket = socket
       |> assign(:filters, new_filters)
       |> assign(:searching, true)
@@ -72,7 +86,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
     })
   end
 
-  defp get_messages(%{assigns: %{filters: %{"term" => ""}}} = socket) do
+  defp get_messages(%{assigns: %{filters: %{"term" => "", "userid" => nil}}} = socket) do
     socket
     |> assign(:searching, false)
   end
@@ -87,17 +101,6 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
         "7 days" -> Timex.now() |> Timex.shift(days: -7)
         _ -> nil
       end
-
-    {mode, userid} = if filters["username"] == "" do
-      {mode, nil}
-    else
-      uid = Account.get_userid_from_name(filters["username"])
-      if uid do
-        {mode, uid}
-      else
-        {nil, nil}
-      end
-    end
 
     excluded_ids =
       if filters["include_bots"] == "true" do
@@ -116,7 +119,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
         "Lobby" ->
           Chat.list_lobby_messages(
             search: [
-              user_id: userid,
+              user_id_in: filters["userids"],
               user_id_not_in: excluded_ids,
               inserted_after: inserted_after,
               term: filters["term"]
@@ -128,7 +131,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
         "Room" ->
           Chat.list_room_messages(
             search: [
-              user_id: userid,
+              user_id_in: filters["userids"],
               user_id_not_in: excluded_ids,
               inserted_after: inserted_after,
               term: filters["term"]
@@ -140,7 +143,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
         "Party" ->
           Chat.list_party_messages(
             search: [
-              user_id: userid,
+              user_id_in: filters["userids"],
               user_id_not_in: excluded_ids,
               inserted_after: inserted_after,
               term: filters["term"]
