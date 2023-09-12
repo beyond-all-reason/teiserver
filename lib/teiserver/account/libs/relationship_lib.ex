@@ -113,9 +113,12 @@ defmodule Teiserver.Account.RelationshipLib do
   @spec decache_relationships(T.userid) :: :ok
   def decache_relationships(userid) do
     Central.cache_delete(:account_follow_cache, userid)
-    Central.cache_delete(:account_avoid_cache, userid)
     Central.cache_delete(:account_ignore_cache, userid)
+    Central.cache_delete(:account_avoid_cache, userid)
     Central.cache_delete(:account_block_cache, userid)
+    Central.cache_delete(:account_avoiding_this_cache, userid)
+    Central.cache_delete(:account_blocking_this_cache, userid)
+
     :ok
   end
 

@@ -522,7 +522,9 @@ defmodule Teiserver.Protocols.SpringIn do
     case String.split(data, "=") do
       [_, username] ->
         target_userid = Account.get_userid_from_name(username)
-        Account.accept_friend_request(target_userid, state.userid)
+        if target_userid && state.userid do
+          Account.accept_friend_request(target_userid, state.userid)
+        end
         state
 
       _ ->
@@ -534,7 +536,9 @@ defmodule Teiserver.Protocols.SpringIn do
     case String.split(data, "=") do
       [_, username] ->
         target_userid = Account.get_userid_from_name(username)
-        Account.decline_friend_request(target_userid, state.userid)
+        if target_userid && state.userid do
+          Account.decline_friend_request(target_userid, state.userid)
+        end
         state
 
       _ ->
@@ -546,13 +550,15 @@ defmodule Teiserver.Protocols.SpringIn do
     case String.split(data, "=") do
       [_, username] ->
         target_userid = Account.get_userid_from_name(username)
-        existing_request = Account.get_friend_request(state.userid, target_userid)
-        if existing_request == nil do
-          Account.create_friend_request(%{
-            from_user_id: state.userid,
-            to_user_id: target_userid
-          })
+        if target_userid && state.userid do
+          existing_request = Account.get_friend_request(state.userid, target_userid)
+          if existing_request == nil do
+            Account.create_friend_request(%{
+              from_user_id: state.userid,
+              to_user_id: target_userid
+            })
           end
+        end
         state
 
       _ ->
@@ -564,7 +570,9 @@ defmodule Teiserver.Protocols.SpringIn do
     case String.split(data, "=") do
       [_, username] ->
         target_userid = Account.get_userid_from_name(username)
-        Account.ignore_user(state.userid, target_userid)
+        if target_userid && state.userid do
+          Account.ignore_user(state.userid, target_userid)
+        end
 
       _ ->
         :ok
@@ -577,7 +585,9 @@ defmodule Teiserver.Protocols.SpringIn do
     case String.split(data, "=") do
       [_, username] ->
         target_userid = Account.get_userid_from_name(username)
-        Account.reset_relationship_state(state.userid, target_userid)
+        if target_userid && state.userid do
+          Account.reset_relationship_state(state.userid, target_userid)
+        end
 
       _ ->
         :ok
