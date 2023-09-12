@@ -298,8 +298,8 @@ defmodule Teiserver.Account.RelationshipLib do
       |> list_userids_avoided_by_userid()
       |> Enum.count(fn uid -> Enum.member?(userid_list, uid) end)
 
-    being_avoided_percentage = being_avoided_count / userid_count
-    avoiding_percentage = avoiding_count / userid_count
+    being_avoided_percentage = (being_avoided_count / userid_count) * 100
+    avoiding_percentage = (avoiding_count / userid_count) * 100
 
     cond do
       # You are being avoided
