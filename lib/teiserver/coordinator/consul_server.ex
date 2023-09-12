@@ -911,6 +911,17 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     block_status = Account.check_block_status(userid, member_list)
 
+    # Temporary code while it is tested
+    case block_status do
+      :blocked ->
+        Logger.error("User is blocked")
+      :blocking ->
+        Logger.error("User is blocking")
+      _ ->
+        :ok
+    end
+    block_status = :ok
+
     cond do
       client == nil ->
         {false, "No client"}
