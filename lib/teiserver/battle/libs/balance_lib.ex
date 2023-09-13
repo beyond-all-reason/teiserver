@@ -41,7 +41,7 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
 
-  @spec algorithm_modules() :: [String.t]
+  @spec algorithm_modules() :: %{String.t => module}
   def algorithm_modules() do
     %{
       "loser_picks" => Teiserver.Battle.Balance.LoserPicks,

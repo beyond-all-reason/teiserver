@@ -660,6 +660,40 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   #################### Boss
+  def handle_command(%{command: "balancemode", remaining: remaining, senderid: senderid}, state) do
+    remaining = remaining
+      |> String.downcase
+      |> String.trim
+
+    allowed_choices = if User.is_moderator?(senderid) do
+      Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
+    else
+      ~w(loser_picks cheeky_switcher_smart)
+    end
+
+    if Enum.member?(allowed_choices, remaining) do
+      ChatLib.say(
+        state.coordinator_id,
+        "Balance mode set to #{remaining}",
+        state.lobby_id
+      )
+
+      Coordinator.cast_balancer(state.lobby_id, {:set_algorithm, remaining})
+      %{state | balance_algorithm: remaining}
+    else
+      Lobby.sayprivateex(
+        state.coordinator_id,
+        senderid,
+        "No balancemode of #{remaining}, options are: #{allowed_choices |> Enum.join(", ")}",
+        state.lobby_id
+      )
+
+      state
+    end
+  end
+
+
+
   def handle_command(%{command: "gatekeeper", remaining: mode, senderid: senderid} = cmd, state) do
     state =
       case mode do
@@ -1253,34 +1287,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   #################### Host and Moderator
-  def handle_command(%{command: "balancemode", remaining: remaining, senderid: senderid}, state) do
-    remaining = remaining
-      |> String.downcase
-      |> String.trim
-
-    allowed_choices = Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
-
-    if Enum.member?(allowed_choices, remaining) do
-      ChatLib.say(
-        state.coordinator_id,
-        "Balance mode set to #{remaining}",
-        state.lobby_id
-      )
-
-      Coordinator.cast_balancer(state.lobby_id, {:set_algorithm, remaining})
-      %{state | balance_algorithm: remaining}
-    else
-      Lobby.sayprivateex(
-        state.coordinator_id,
-        senderid,
-        "No balancemode of #{remaining}, options are: loser_picks, force_party and cheeky_switcher_smart",
-        state.lobby_id
-      )
-
-      state
-    end
-  end
-
   def handle_command(%{command: "lock", remaining: remaining, senderid: senderid} = cmd, state) do
     new_locks =
       case get_lock(remaining) do

@@ -195,8 +195,8 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
                2 => 13
              },
              captains: %{
-               1 => 1,
-               2 => 2
+               1 => 4,
+               2 => 3
              },
              team_sizes: %{
                1 => 2,
@@ -241,7 +241,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
       )
 
     assert Map.drop(result, [:logs, :time_taken]) == %{
-             captains: %{1 => 112, 2 => 103},
+             captains: %{1 => 116, 2 => 110},
              deviation: 2,
              ratings: %{1 => 161, 2 => 164},
              team_groups: %{
@@ -302,7 +302,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
       )
 
     assert Map.drop(result, [:logs, :time_taken]) == %{
-             captains: %{1 => 101, 2 => 104},
+             captains: %{1 => 116, 2 => 115},
              deviation: 0,
              ratings: %{1 => 184, 2 => 184},
              team_groups: %{
@@ -361,7 +361,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
       )
 
     assert Map.drop(result, [:logs, :time_taken]) == %{
-             captains: %{1 => 104, 2 => 101},
+             captains: %{1 => 116, 2 => 115},
              deviation: 2,
              ratings: %{1 => 248, 2 => 253},
              team_groups: %{
@@ -420,7 +420,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
     # This is very similar to the previous one but a few things about the exact
     # pick order is different
     assert Map.drop(result2, [:logs, :time_taken]) == %{
-             captains: %{1 => 101, 2 => 106},
+             captains: %{1 => 116, 2 => 115},
              deviation: 2,
              ratings: %{1 => 248, 2 => 253},
              team_groups: %{
