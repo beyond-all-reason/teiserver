@@ -1273,7 +1273,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       Lobby.sayprivateex(
         state.coordinator_id,
         senderid,
-        "No balancemode of #{remaining}, options are: loser_picks, forceparty and cheeky_switcher_smart",
+        "No balancemode of #{remaining}, options are: loser_picks, force_party and cheeky_switcher_smart",
         state.lobby_id
       )
 
@@ -1676,7 +1676,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  def handle_command(%{command: "forceparty"}, state) do
+  def handle_command(%{command: "force_party"}, state) do
     # Forces parties to always be used where possible
     [
       {:max_deviation, 1000},

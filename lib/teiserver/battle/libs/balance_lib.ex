@@ -45,7 +45,7 @@ defmodule Teiserver.Battle.BalanceLib do
   def algorithm_modules() do
     %{
       "loser_picks" => Teiserver.Battle.Balance.LoserPicks,
-      "forceparty" => Teiserver.Battle.Balance.ForceParty,
+      "force_party" => Teiserver.Battle.Balance.ForceParty,
       "cheeky_switcher_smart" => Teiserver.Battle.Balance.CheekySwitcherSmart
     }
   end
@@ -62,7 +62,7 @@ defmodule Teiserver.Battle.BalanceLib do
   team_groups: map of team_id => list of expanded_groups
 
   Options are:
-    mode
+    algorithm: String name of the algorithm
 
     rating_lower_boundary: the amount of rating points to search below a party
     rating_upper_boundary: the amount of rating points to search above a party
@@ -92,8 +92,16 @@ defmodule Teiserver.Battle.BalanceLib do
       end)
 
     # Now we pass this to the algorithm and it does the rest!
-    m = algorithm_modules()[opts[:algorithm] || "loser_picks"]
-    balance_result = m.perform(expanded_groups, team_count, opts)
+    balance_result = case algorithm_modules()[opts[:algorithm] || "loser_picks"] do
+      nil ->
+        raise "No balance module by the name of '#{opts[:algorithm] || "loser_picks"}'"
+      m ->
+        m.perform(expanded_groups, team_count, opts)
+    end
+
+    IO.puts ""
+    IO.inspect balance_result
+    IO.puts ""
 
     # Now expand the results and calculate stats
     balance_result

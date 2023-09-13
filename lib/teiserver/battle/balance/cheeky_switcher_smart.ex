@@ -32,8 +32,6 @@ defmodule Teiserver.Battle.Balance.CheekySwitcherSmart do
   @type team_map() :: %{T.team_id() => [BT.expanded_group]}
   @type group_list :: [BT.expanded_group_or_pair]
 
-  @max_switches 3
-
   @spec perform([BT.expanded_group_or_pair], non_neg_integer(), list()) :: BT.algorithm_result
   def perform(raw_groups, team_count, opts) do
     groups_with_names = raw_groups
@@ -42,7 +40,12 @@ defmodule Teiserver.Battle.Balance.CheekySwitcherSmart do
           Account.get_username_by_id(id)
         end))
       end)
-    do_cheeky_switcher(groups_with_names, team_count, opts, [])
+    {teams, logs} = do_cheeky_switcher(groups_with_names, team_count, opts, [])
+
+    %{
+      teams: teams,
+      logs: logs
+    }
   end
 
   def has_acceptable_diff (percentage_diff) do
@@ -71,7 +74,7 @@ defmodule Teiserver.Battle.Balance.CheekySwitcherSmart do
 
     parties_left = count_parties_in_teams(teams)
 
-    log = log ++ ["Current team ratings: #{team_ratings(teams) |> Enum.join(",", &round/1)}"]
+    log = log ++ ["Current team ratings: #{team_ratings(teams) |> Enum.map_join(",", &round/1)}"]
 
     if is_acceptable or parties_left <= 0 do
       {teams, log  ++ ["Acceptable rating difference of #{round(100 * rating_diff) / 100} (#{round(100 * percentage_diff) / 100} %)."]}
