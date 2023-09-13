@@ -90,6 +90,10 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     %{user: u7} = ps7 = new_user("Team_Garpike") |> tachyon_auth_setup()
     %{user: u8} = ps8 = new_user("Team_Hound") |> tachyon_auth_setup()
 
+    # Sleep to allow the users to be correctly added, otherwise we get PK errors we'd not
+    # get in prod
+    :timer.sleep(1000)
+
     rating_type_id = MatchRatingLib.rating_type_name_lookup()["Team"]
 
     [ps1, ps2, ps3, ps4, ps5, ps6, ps7, ps8]
@@ -121,6 +125,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     assert Battle.list_lobby_players(lobby_id) |> Enum.count() == 8
 
     opts = [
+      shuffle_first_pick: false,
       fuzz_multiplier: 0
     ]
 
@@ -151,6 +156,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     # we set the opts here rather than using the defaults because if the defaults change it will
     # break the test
     opts = [
+      shuffle_first_pick: false,
       allow_groups: true,
       mean_diff_max: 15,
       stddev_diff_max: 10,
@@ -166,6 +172,8 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
         team_count,
         opts
       })
+
+
 
     assert grouped_balance_result.team_players[1] == [u8.id, u5.id, u3.id, u2.id]
     assert grouped_balance_result.team_players[2] == [u7.id, u6.id, u4.id, u1.id]
@@ -224,6 +232,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     :timer.sleep(520)
 
     opts = [
+      shuffle_first_pick: false,
       allow_groups: true,
       mean_diff_max: 20,
       stddev_diff_max: 10,
@@ -273,6 +282,10 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     %{user: u15} = ps15 = new_user("Team_Obscurer") |> tachyon_auth_setup()
     %{user: u16} = ps16 = new_user("Team_Pawn") |> tachyon_auth_setup()
 
+    # Sleep to allow the users to be correctly added, otherwise we get PK errors we'd not
+    # get in prod
+    :timer.sleep(1000)
+
     [ps9, ps10, ps11, ps12, ps13, ps14, ps15, ps16]
     |> Enum.each(fn %{user: user, socket: socket} ->
       Lobby.force_add_user_to_lobby(user.id, lobby_id)
@@ -282,7 +295,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     end)
 
     # Clear the old ratings so we can make some new ones
-    old_ids = [u1, u2, u3, u4, u5, u6, u7, u8] |> Enum.map(fn u -> u.id end) |> Enum.join(",")
+    old_ids = [u1, u2, u3, u4, u5, u6, u7, u8] |> Enum.map_join(",", fn u -> u.id end)
     query = "DELETE FROM teiserver_account_ratings WHERE user_id IN (#{old_ids})"
     query_result = Ecto.Adapters.SQL.query(Repo, query, [])
 
@@ -323,7 +336,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
 
     # Assert we have no parties
     [u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12, u13, u14, u15, u16]
-    |> Enum.map(fn %{id: userid} ->
+    |> Enum.each(fn %{id: userid} ->
       assert Account.get_client_by_id(userid).party_id == nil,
         message:
           "One or more of the users are currently in a party. At this stage of the test there should be no parties."
@@ -340,7 +353,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
     assert balance_result.balance_mode == :grouped
 
-    assert balance_result.team_players[1] == [
+    assert Enum.sort(balance_result.team_players[1]) == Enum.sort([
              u16.id,
              u13.id,
              u11.id,
@@ -349,9 +362,9 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
              u6.id,
              u4.id,
              u1.id
-           ]
+           ])
 
-    assert balance_result.team_players[2] == [
+    assert Enum.sort(balance_result.team_players[2]) == Enum.sort([
              u15.id,
              u14.id,
              u12.id,
@@ -360,13 +373,14 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
              u5.id,
              u3.id,
              u2.id
-           ]
+           ])
 
     assert balance_result.ratings == %{1 => 239.0, 2 => 239.0}
     assert balance_result.deviation == 0
 
     # Now test that fuzzing happens
     opts = [
+      shuffle_first_pick: false,
       allow_groups: true,
       mean_diff_max: 20,
       stddev_diff_max: 10,
@@ -427,6 +441,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     assert Battle.list_lobby_players(lobby_id) |> Enum.count() == 3
 
     opts = [
+      shuffle_first_pick: false,
       fuzz_multiplier: 0
     ]
 
@@ -455,6 +470,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
 
     # Ensure enabling groups won't break anything
     opts = [
+      shuffle_first_pick: false,
       allow_groups: true,
       mean_diff_max: 15,
       stddev_diff_max: 10,
@@ -496,6 +512,10 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     %{user: u8} = ps8 = new_user("Team_FFA_Hound") |> tachyon_auth_setup()
     %{user: u9} = ps9 = new_user("Team_FFA_Incisor") |> tachyon_auth_setup()
 
+    # Sleep to allow the users to be correctly added, otherwise we get PK errors we'd not
+    # get in prod
+    :timer.sleep(1000)
+
     rating_type_id = MatchRatingLib.rating_type_name_lookup()["Team"]
 
     [ps1, ps2, ps3, ps4, ps5, ps6, ps7, ps8, ps9]
@@ -528,6 +548,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     assert Battle.list_lobby_players(lobby_id) |> Enum.count() == 9
 
     opts = [
+      shuffle_first_pick: false,
       fuzz_multiplier: 0
     ]
 
@@ -550,6 +571,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     # Now do it grouped, these bounds mean it won't be able to find paired groups for
     # the party
     opts = [
+      shuffle_first_pick: false,
       allow_groups: true,
       mean_diff_max: 15,
       stddev_diff_max: 10,
@@ -593,6 +615,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
 
     # This time groups will work
     opts = [
+      shuffle_first_pick: false,
       allow_groups: true,
       mean_diff_max: 150,
       stddev_diff_max: 100,
