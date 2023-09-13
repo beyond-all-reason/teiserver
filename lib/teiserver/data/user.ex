@@ -26,7 +26,7 @@ defmodule Teiserver.User do
   @spec keys() :: [atom]
   def keys(),
     do:
-      ~w(id name email inserted_at clan_id permissions colour icon behaviour_score trust_score smurf_of_id last_played last_logout roles)a
+      ~w(id name email inserted_at clan_id permissions colour icon behaviour_score trust_score  social_score smurf_of_id last_played last_logout roles)a
 
   # This is the version of keys with the extra fields we're going to be moving from data to the object itself
   # def keys(),
