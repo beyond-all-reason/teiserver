@@ -19,7 +19,7 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
   alias Teiserver.Account
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
+  import Teiserver.Helper.NumberHelper, only: [round: 2]
 
   @type algorithm_state :: %{
     teams: map,

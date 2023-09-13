@@ -1350,6 +1350,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       unready_can_play: false,
       last_queue_state: [],
       balance_result: nil,
+      balance_algorithm: "loser_picks",
       player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
       showmatch: true
     }

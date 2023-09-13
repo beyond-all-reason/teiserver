@@ -12,10 +12,7 @@ defmodule Teiserver.Battle.Balance.BalanceTypes do
         }
   @type expanded_group_or_pair() :: expanded_group() | {expanded_group(), expanded_group()}
 
-  @type algorithm_result :: %{
-    teams: map,
-    logs: list
-  }
+  @type algorithm_result :: map()
 
   @type balance_result :: %{
     teams: map,

@@ -41,6 +41,14 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
 
+  @spec algorithm_modules() :: [String.t]
+  def algorithm_modules() do
+    %{
+      "loser_picks" => Teiserver.Battle.Balance.LoserPicks,
+      "forceparty" => Teiserver.Battle.Balance.ForceParty,
+      "cheeky_switcher_smart" => Teiserver.Battle.Balance.CheekySwitcherSmart
+    }
+  end
 
   @doc """
   groups is a list of maps of %{userid => rating_value}
@@ -84,11 +92,8 @@ defmodule Teiserver.Battle.BalanceLib do
       end)
 
     # Now we pass this to the algorithm and it does the rest!
-    balance_result = case opts[:algorithm] do
-      _default ->
-        Teiserver.Battle.Balance.LoserPicks.perform(expanded_groups, team_count, opts)
-    end
-
+    m = algorithm_modules()[opts[:algorithm] || "loser_picks"]
+    balance_result = m.perform(expanded_groups, team_count, opts)
 
     # Now expand the results and calculate stats
     balance_result

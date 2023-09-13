@@ -149,6 +149,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         welcome_message,
         "Currently #{player_count} players",
         "Team size and count are: #{state.host_teamsize} and #{state.host_teamcount}",
+        "Balance algorithm is: #{state.balance_algorithm}",
         boss_string,
         tourney_mode,
         "Maximum allowed number of players is #{max_player_count} (Host = #{state.host_teamsize * state.host_teamcount}, Coordinator = #{state.player_limit})",
@@ -1253,34 +1254,31 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   #################### Host and Moderator
   def handle_command(%{command: "balancemode", remaining: remaining, senderid: senderid}, state) do
-    new_mode =
-      case remaining do
-        "forceparty" ->
-          :forceparty
+    remaining = remaining
+      |> String.downcase
+      |> String.trim
 
-        "loser_picks" ->
-          :loser_picks
+    allowed_choices = Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
 
-        _ ->
-          Lobby.sayprivateex(
-            state.coordinator_id,
-            senderid,
-            "No balancemode of #{remaining}, options are: loser_picks, forceparty",
-            state.lobby_id
-          )
+    if Enum.member?(allowed_choices, remaining) do
+      ChatLib.say(
+        state.coordinator_id,
+        "Balance mode set to #{remaining}",
+        state.lobby_id
+      )
 
-          :loser_picks
-      end
+      Coordinator.cast_balancer(state.lobby_id, {:set_algorithm, remaining})
+      %{state | balance_algorithm: remaining}
+    else
+      Lobby.sayprivateex(
+        state.coordinator_id,
+        senderid,
+        "No balancemode of #{remaining}, options are: loser_picks, forceparty and cheeky_switcher_smart",
+        state.lobby_id
+      )
 
-    ChatLib.say(
-      state.coordinator_id,
-      "Balance mode set to #{new_mode}",
-      state.lobby_id
-    )
-
-    Coordinator.cast_balancer(state.lobby_id, {:set_algorithm, new_mode})
-
-    state
+      state
+    end
   end
 
   def handle_command(%{command: "lock", remaining: remaining, senderid: senderid} = cmd, state) do
