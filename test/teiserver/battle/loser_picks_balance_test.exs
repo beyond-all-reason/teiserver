@@ -169,7 +169,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
           %{3 => 7}
         ],
         2,
-        algorithm: "@algorithm,
+        algorithm: @algorithm,
         rating_lower_boundary: 100,
         rating_upper_boundary: 100,
         mean_diff_max: 100,
@@ -233,7 +233,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
           %{116 => 8}
         ],
         2,
-        algorithm: "@algorithm,
+        algorithm: @algorithm,
         rating_lower_boundary: 5,
         rating_upper_boundary: 5,
         mean_diff_max: 5,
