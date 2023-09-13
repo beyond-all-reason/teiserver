@@ -1,9 +1,8 @@
 defmodule Teiserver.Coordinator.BalanceServerTest do
   use Central.ServerCase, async: false
-  alias Teiserver.Battle.Lobby
   alias Teiserver.Account.ClientLib
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.{Account, Battle, User, Client, Coordinator}
+  alias Teiserver.{Account, Lobby, Battle, User, Client, Coordinator}
   alias Teiserver.Coordinator.ConsulServer
 
   import Teiserver.TeiserverTestLib,

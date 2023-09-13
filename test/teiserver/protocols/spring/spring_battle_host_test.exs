@@ -1,8 +1,7 @@
 defmodule Teiserver.SpringBattleHostTest do
   use Central.ServerCase, async: false
   require Logger
-  alias Teiserver.{Coordinator, Battle}
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.{Coordinator, Battle, Lobby}
   alias Teiserver.Protocols.Spring
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
