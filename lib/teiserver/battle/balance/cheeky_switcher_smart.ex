@@ -42,8 +42,16 @@ defmodule Teiserver.Battle.Balance.CheekySwitcherSmart do
       end)
     {teams, logs} = do_cheeky_switcher(groups_with_names, team_count, opts, [])
 
+    new_teams = teams
+      |> Map.new(fn {k, members} ->
+        new_members = members
+          |> Enum.map(fn m -> Map.drop(m, [:names]) end)
+
+        {k, new_members}
+      end)
+
     %{
-      teams: teams,
+      teams: new_teams,
       logs: logs
     }
   end

@@ -99,10 +99,6 @@ defmodule Teiserver.Battle.BalanceLib do
         m.perform(expanded_groups, team_count, opts)
     end
 
-    IO.puts ""
-    IO.inspect balance_result
-    IO.puts ""
-
     # Now expand the results and calculate stats
     balance_result
       |> expand_balance_result()
@@ -344,25 +340,23 @@ defmodule Teiserver.Battle.BalanceLib do
         {k, sum_group_rating(groups)}
       end)
 
-    # The first group in the list will be the highest ranked
-    # we take the captain as the first member of that group
-    captains =
-      data.team_groups
-      |> Map.new(fn {k, groups} ->
-        case groups do
-          [] ->
-            {k, nil}
+    # The highest rated member of each team is the "captain" by default
+    captains = if Map.has_key?(data, :captains) do
+      data.captains
+    else
+      data.team_players
+        |> Map.new(fn {team_id, players} ->
+          top_player = players
+          |> Enum.map(fn userid ->
+            {ratings[userid], userid}
+          end)
+          |> Enum.sort_by(fn v -> v end, &>=/2)
+          |> hd
+          |> elem(1)
 
-          _ ->
-            captain =
-              groups
-              |> hd
-              |> Map.get(:members)
-              |> hd
-
-            {k, captain}
-        end
-      end)
+          {team_id, top_player}
+        end)
+    end
 
     team_sizes =
       data.team_players
