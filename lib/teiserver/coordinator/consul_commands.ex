@@ -1403,7 +1403,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       #   state
 
       new_name != stripped_name ->
-        Logger.error("LobbyRename not allowed '#{new_name}' vs '#{stripped_name}'")
         Lobby.sayex(
           state.coordinator_id,
           "That name contains one or more invalid characters (alphanumeric, spaces and some special characters allowed)",

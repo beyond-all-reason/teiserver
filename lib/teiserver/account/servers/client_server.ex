@@ -205,11 +205,9 @@ defmodule Teiserver.Account.ClientServer do
   def handle_info(:heartbeat, %{client: client_state} = state) do
     cond do
       client_state.tcp_pid == nil ->
-        Logger.error("client_state.tcp_pid is nil - disconnecting")
         DynamicSupervisor.terminate_child(Teiserver.ClientSupervisor, self())
 
       Process.alive?(client_state.tcp_pid) == false ->
-        Logger.error("client_state.tcp_pid is not alive - disconnecting")
         DynamicSupervisor.terminate_child(Teiserver.ClientSupervisor, self())
 
       true ->
