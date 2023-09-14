@@ -70,9 +70,24 @@ defmodule Teiserver.Battle.BalanceLib do
     mean_diff_max: the maximum difference in mean between the party and paired parties
     stddev_diff_max: the maximum difference in stddev between the party and paired parties
   """
-  @spec create_balance([BT.player_group], non_neg_integer) :: map
   @spec create_balance([BT.player_group], non_neg_integer, list) :: map
-  def create_balance(groups, team_count, opts \\ []) do
+  def create_balance([], _team_count, _opts) do
+    %{
+      logs: [],
+      time_taken: 0,
+      captains: %{},
+      deviation: 0,
+      ratings: %{},
+      team_groups: %{},
+      team_players: %{},
+      team_sizes: %{},
+      means: %{},
+      stdevs: %{}
+    }
+  end
+
+
+  def create_balance(groups, team_count, opts) do
     start_time = System.system_time(:microsecond)
 
     # We perform all our group calculations here and assign each group

@@ -1,6 +1,22 @@
 defmodule Teiserver.Battle.BalanceLibTest do
+  @moduledoc false
   use Central.DataCase, async: true
   alias Teiserver.Battle.BalanceLib
+
+  test "balance algorithms - no players" do
+    # We don't care about the result, just that they don't error
+    BalanceLib.algorithm_modules()
+      |> Map.keys()
+      |> Enum.each(fn algorithm_name ->
+        result = BalanceLib.create_balance(
+          [],
+          2,
+          algorithm: algorithm_name
+        )
+
+        assert result != nil
+      end)
+  end
 
   test "balance algorithms - 2v2" do
     # We don't care about the result, just that they don't error
