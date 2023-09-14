@@ -347,7 +347,11 @@ defmodule Teiserver.Battle.BalanceLib do
   @doc """
   Given a map from create_balance it will add in some stats
   """
-  @spec calculate_balance_stats(map()) :: map()
+  # @spec calculate_balance_stats(map()) :: map()
+  # def calculate_balance_stats(%{team_players: []}) do
+
+  # end
+
   def calculate_balance_stats(data) do
     ratings =
       data.team_groups
@@ -360,16 +364,20 @@ defmodule Teiserver.Battle.BalanceLib do
       data.captains
     else
       data.team_players
-        |> Map.new(fn {team_id, players} ->
-          top_player = players
-          |> Enum.map(fn userid ->
-            {ratings[userid], userid}
-          end)
-          |> Enum.sort_by(fn v -> v end, &>=/2)
-          |> hd
-          |> elem(1)
+        |> Map.new(fn
+          {team_id, []} ->
+            {team_id, nil}
 
-          {team_id, top_player}
+          {team_id, players} ->
+            top_player = players
+              |> Enum.map(fn userid ->
+                {ratings[userid], userid}
+              end)
+              |> Enum.sort_by(fn v -> v end, &>=/2)
+              |> hd
+              |> elem(1)
+
+            {team_id, top_player}
         end)
     end
 

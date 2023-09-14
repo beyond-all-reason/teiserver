@@ -161,6 +161,9 @@ defmodule Teiserver.Battle.Balance.CheekySwitcherSmart do
             lowest_team_combo
           ),
           log ++ ["Switched users #{lowest_team_members} from team #{lowest_team_id} with users #{highest_team_members} from team #{highest_team_id}"]}
+        _ ->
+          # Default case
+          {teams, log ++ ["No good switch options found."]}
       end
     end
   end

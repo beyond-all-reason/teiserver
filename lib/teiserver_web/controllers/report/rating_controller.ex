@@ -70,7 +70,9 @@ defmodule TeiserverWeb.Report.RatingController do
         {[userid], rating_lookup[userid]}
       end)
 
-    balance_result = BalanceLib.create_balance(groups, 2)
+    opts = []
+
+    balance_result = BalanceLib.create_balance(groups, 2, opts)
 
     user_lookup =
       lookup_result
