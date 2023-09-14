@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.RelationshipLib do
   @moduledoc false
-  alias Teiserver.Account
+  alias Teiserver.{Account, Config}
   alias Teiserver.Account.AuthLib
   alias Teiserver.Data.Types, as: T
 
@@ -113,9 +113,12 @@ defmodule Teiserver.Account.RelationshipLib do
   @spec decache_relationships(T.userid) :: :ok
   def decache_relationships(userid) do
     Central.cache_delete(:account_follow_cache, userid)
-    Central.cache_delete(:account_avoid_cache, userid)
     Central.cache_delete(:account_ignore_cache, userid)
+    Central.cache_delete(:account_avoid_cache, userid)
     Central.cache_delete(:account_block_cache, userid)
+    Central.cache_delete(:account_avoiding_this_cache, userid)
+    Central.cache_delete(:account_blocking_this_cache, userid)
+
     :ok
   end
 
@@ -183,6 +186,22 @@ defmodule Teiserver.Account.RelationshipLib do
     end)
   end
 
+  @spec list_userids_blocking_this_userid(T.userid) :: [T.userid]
+  def list_userids_blocking_this_userid(userid) do
+    Central.cache_get_or_store(:account_blocking_this_cache, userid, fn ->
+      Account.list_relationships(
+        where: [
+          to_user_id: userid,
+          state: "block",
+        ],
+        select: [:from_user_id]
+      )
+      |> Enum.map(fn r ->
+        r.from_user_id
+      end)
+    end)
+  end
+
   @spec list_userids_ignored_by_userid(T.userid) :: [T.userid]
   def list_userids_ignored_by_userid(userid) do
     Central.cache_get_or_store(:account_ignore_cache, userid, fn ->
@@ -236,5 +255,65 @@ defmodule Teiserver.Account.RelationshipLib do
     ]
     |> List.flatten
     |> Enum.reject(&(&1 == nil))
+  end
+
+  @spec check_block_status(T.userid, [T.userid]) :: :ok | :blocking | :blocked
+  def check_block_status(userid, userid_list) do
+    userid_count = Enum.count(userid_list) |> max(1)
+    block_count_needed = Config.get_site_config_cache("lobby.Block count to prevent join")
+    block_percentage_needed = Config.get_site_config_cache("lobby.Block percentage to prevent join")
+
+    being_blocked_count = userid
+      |> list_userids_blocking_this_userid()
+      |> Enum.count(fn uid -> Enum.member?(userid_list, uid) end)
+
+    blocking_count = userid
+      |> list_userids_blocked_by_userid()
+      |> Enum.count(fn uid -> Enum.member?(userid_list, uid) end)
+
+    being_blocked_percentage = being_blocked_count / userid_count
+    blocking_percentage = blocking_count / userid_count
+
+    cond do
+      # You are being blocked
+      being_blocked_percentage > block_percentage_needed -> :blocked
+      being_blocked_count > block_count_needed -> :blocked
+
+      # You are blocking
+      blocking_percentage > block_percentage_needed -> :blocking
+      blocking_count > block_count_needed -> :blocking
+
+      true -> :ok
+    end
+  end
+
+  @spec check_avoid_status(T.userid, [T.userid]) :: :ok | :avoiding | :avoided
+  def check_avoid_status(userid, userid_list) do
+    userid_count = Enum.count(userid_list) |> max(1)
+    avoid_count_needed = Config.get_site_config_cache("lobby.Avoid count to prevent playing")
+    avoid_percentage_needed = Config.get_site_config_cache("lobby.Avoid percentage to prevent playing")
+
+    being_avoided_count = userid
+      |> list_userids_avoiding_this_userid()
+      |> Enum.count(fn uid -> Enum.member?(userid_list, uid) end)
+
+    avoiding_count = userid
+      |> list_userids_avoided_by_userid()
+      |> Enum.count(fn uid -> Enum.member?(userid_list, uid) end)
+
+    being_avoided_percentage = (being_avoided_count / userid_count) * 100
+    avoiding_percentage = (avoiding_count / userid_count) * 100
+
+    cond do
+      # You are being avoided
+      being_avoided_percentage > avoid_percentage_needed -> :avoided
+      being_avoided_count > avoid_count_needed -> :avoided
+
+      # You are avoiding
+      avoiding_percentage > avoid_percentage_needed -> :avoiding
+      avoiding_count > avoid_count_needed -> :avoiding
+
+      true -> :ok
+    end
   end
 end

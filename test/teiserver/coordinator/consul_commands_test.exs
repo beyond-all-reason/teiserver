@@ -1,10 +1,9 @@
 defmodule Teiserver.Coordinator.ConsulCommandsTest do
   use Central.ServerCase, async: false
-  alias Teiserver.Battle.Lobby
   alias Teiserver.Account.ClientLib
   alias Teiserver.Common.PubsubListener
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.{Account, Battle, User, Client, Coordinator}
+  alias Teiserver.{Account, Battle, User, Client, Coordinator, Lobby}
   alias Teiserver.Coordinator.ConsulServer
 
   import Teiserver.TeiserverTestLib,

@@ -280,7 +280,11 @@ defmodule Teiserver.Client do
     # If they are part of a party, lets leave it
     Account.leave_party(client.party_id, client.userid)
 
-    Account.update_cache_user(client.userid, %{last_logout: Timex.now()})
+    # If a test goes wrong this can bork things and make it harder to
+    # identify what actually went wrong
+    if client.lobby_client != "ex" do
+      Account.update_cache_user(client.userid, %{last_logout: Timex.now()})
+    end
 
     if client.bot do
       Telemetry.increment(:bots_disconnected)

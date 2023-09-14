@@ -3,8 +3,7 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
   alias Teiserver.Account.ClientLib
   alias Teiserver.Account.UserCache
   alias Teiserver.TeiserverTestLib
-  alias Teiserver.Battle.Lobby
-  alias Teiserver.Battle
+  alias Teiserver.{Battle, Lobby}
   alias Teiserver.Common.PubsubListener
 
   import Teiserver.TeiserverTestLib,

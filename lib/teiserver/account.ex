@@ -1623,6 +1623,9 @@ defmodule Teiserver.Account do
   @spec list_userids_avoided_by_userid(T.userid) :: [T.userid]
   defdelegate list_userids_avoided_by_userid(userid), to: RelationshipLib
 
+  @spec list_userids_blocking_this_userid(T.userid) :: [T.userid]
+  defdelegate list_userids_blocking_this_userid(userid), to: RelationshipLib
+
   @spec list_userids_blocked_by_userid(T.userid) :: [T.userid]
   defdelegate list_userids_blocked_by_userid(userid), to: RelationshipLib
 
@@ -1643,6 +1646,12 @@ defmodule Teiserver.Account do
 
   @spec does_a_avoid_b?(T.userid, T.userid) :: boolean
   defdelegate does_a_avoid_b?(u1, u2), to: RelationshipLib
+
+  @spec check_block_status(T.userid, [T.userid]) :: :ok | :blocking | :blocked
+  defdelegate check_block_status(userid, userid_list), to: RelationshipLib
+
+  @spec check_avoid_status(T.userid, [T.userid]) :: :ok | :avoiding | :avoided
+  defdelegate check_avoid_status(userid, userid_list), to: RelationshipLib
 
   @spec profile_view_permissions(T.userid, T.userid, nil | Account.Relationship, nil | Account.Friend, nil | Account.FriendRequest) :: [atom]
   defdelegate profile_view_permissions(u1, u2, relationship, friend, friendship_request), to: RelationshipLib

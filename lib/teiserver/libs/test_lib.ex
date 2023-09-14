@@ -62,10 +62,10 @@ defmodule Teiserver.TeiserverTestLib do
         })
 
         user
-        |> User.convert_user()
-        |> Map.put(:springid, SpringIdServer.get_next_id())
-        |> User.add_user()
-        |> User.verify_user()
+          |> User.convert_user()
+          |> Map.put(:springid, SpringIdServer.get_next_id())
+          |> User.add_user()
+          |> User.verify_user()
 
       _ ->
         new_user()
@@ -554,7 +554,12 @@ defmodule Teiserver.TeiserverTestLib do
 
     Teiserver.Telemetry.get_or_add_complex_server_event_type("Server startup")
     Teiserver.Telemetry.get_or_add_simple_server_event_type("account.user_login")
+    Teiserver.Telemetry.get_or_add_simple_server_event_type("lobby.force_add_user_to_lobby")
     Teiserver.Telemetry.get_or_add_complex_client_event_type("client.user_event")
+    Teiserver.Telemetry.get_or_add_complex_client_event_type("client.user_event")
+
+    Teiserver.Telemetry.get_or_add_simple_lobby_event_type("remove_user_from_lobby")
+
 
     seed_badge_types()
   end

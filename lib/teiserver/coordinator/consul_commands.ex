@@ -149,6 +149,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         welcome_message,
         "Currently #{player_count} players",
         "Team size and count are: #{state.host_teamsize} and #{state.host_teamcount}",
+        "Balance algorithm is: #{state.balance_algorithm}",
         boss_string,
         tourney_mode,
         "Maximum allowed number of players is #{max_player_count} (Host = #{state.host_teamsize * state.host_teamcount}, Coordinator = #{state.player_limit})",
@@ -659,6 +660,40 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   #################### Boss
+  def handle_command(%{command: "balancemode", remaining: remaining, senderid: senderid}, state) do
+    remaining = remaining
+      |> String.downcase
+      |> String.trim
+
+    allowed_choices = if User.is_moderator?(senderid) do
+      Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
+    else
+      ~w(loser_picks cheeky_switcher_smart)
+    end
+
+    if Enum.member?(allowed_choices, remaining) do
+      ChatLib.say(
+        state.coordinator_id,
+        "Balance mode set to #{remaining}",
+        state.lobby_id
+      )
+
+      Coordinator.cast_balancer(state.lobby_id, {:set_algorithm, remaining})
+      %{state | balance_algorithm: remaining}
+    else
+      Lobby.sayprivateex(
+        state.coordinator_id,
+        senderid,
+        "No balancemode of #{remaining}, options are: #{allowed_choices |> Enum.join(", ")}",
+        state.lobby_id
+      )
+
+      state
+    end
+  end
+
+
+
   def handle_command(%{command: "gatekeeper", remaining: mode, senderid: senderid} = cmd, state) do
     state =
       case mode do
@@ -1252,37 +1287,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   #################### Host and Moderator
-  def handle_command(%{command: "balancemode", remaining: remaining, senderid: senderid}, state) do
-    new_mode =
-      case remaining do
-        "forceparty" ->
-          :forceparty
-
-        "loser_picks" ->
-          :loser_picks
-
-        _ ->
-          Lobby.sayprivateex(
-            state.coordinator_id,
-            senderid,
-            "No balancemode of #{remaining}, options are: loser_picks, forceparty",
-            state.lobby_id
-          )
-
-          :loser_picks
-      end
-
-    ChatLib.say(
-      state.coordinator_id,
-      "Balance mode set to #{new_mode}",
-      state.lobby_id
-    )
-
-    Coordinator.cast_balancer(state.lobby_id, {:set_algorithm, new_mode})
-
-    state
-  end
-
   def handle_command(%{command: "lock", remaining: remaining, senderid: senderid} = cmd, state) do
     new_locks =
       case get_lock(remaining) do
@@ -1399,7 +1403,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       #   state
 
       new_name != stripped_name ->
-        Logger.error("LobbyRename not allowed '#{new_name}' vs '#{stripped_name}'")
         Lobby.sayex(
           state.coordinator_id,
           "That name contains one or more invalid characters (alphanumeric, spaces and some special characters allowed)",
@@ -1678,7 +1681,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  def handle_command(%{command: "forceparty"}, state) do
+  def handle_command(%{command: "force_party"}, state) do
     # Forces parties to always be used where possible
     [
       {:max_deviation, 1000},

@@ -3,9 +3,8 @@ defmodule TeiserverWeb.Live.BattleTest do
   import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.{Battle, TeiserverTestLib}
+  alias Teiserver.{Battle, TeiserverTestLib, Lobby}
   import Teiserver.TeiserverTestLib, only: [_send_raw: 2, _recv_until: 1, _tachyon_send: 2]
-  alias Teiserver.Battle.Lobby
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @throttle_wait 500 + 100

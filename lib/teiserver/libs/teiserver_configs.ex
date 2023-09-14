@@ -440,6 +440,42 @@ defmodule Teiserver.TeiserverConfigs do
       description: "Points for the lightest of curse words",
       default: 1
     })
+
+    add_site_config_type(%{
+      key: "lobby.Block count to prevent join",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["Admin"],
+      description: "The raw number of users who would need to block someone to prevent them joining a lobby",
+      default: 8
+    })
+
+    add_site_config_type(%{
+      key: "lobby.Block percentage to prevent join",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["Admin"],
+      description: "The percentage of users who would need to block someone to prevent them joining a lobby",
+      default: 66
+    })
+
+    add_site_config_type(%{
+      key: "lobby.Avoid count to prevent playing",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["Admin"],
+      description: "The raw number of players who would need to avoid someone to prevent them becoming a player",
+      default: 4
+    })
+
+    add_site_config_type(%{
+      key: "lobby.Avoid percentage to prevent playing",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["Admin"],
+      description: "The percentage of players who would need to avoid someone to prevent them becoming a player",
+      default: 50
+    })
   end
 
   defp discord_configs() do

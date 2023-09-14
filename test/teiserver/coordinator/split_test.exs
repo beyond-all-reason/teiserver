@@ -1,9 +1,8 @@
 defmodule Teiserver.Coordinator.SplitTest do
   use Central.ServerCase, async: false
-  alias Teiserver.Battle.Lobby
   alias Teiserver.Account.ClientLib
   alias Teiserver.Common.PubsubListener
-  alias Teiserver.{User, Client, Coordinator}
+  alias Teiserver.{User, Client, Coordinator, Lobby}
   alias Teiserver.Coordinator.CoordinatorLib
 
   import Teiserver.TeiserverTestLib,

@@ -5,10 +5,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
   """
   use GenServer
   require Logger
-  alias Teiserver.{Account, Coordinator, Client, User, Lobby, Battle, Telemetry}
+  alias Teiserver.{Account, Coordinator, Client, User, Lobby, Battle, Telemetry, Config}
   alias Teiserver.Lobby.{ChatLib}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Config
   alias Phoenix.PubSub
   alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Battle.BalanceLib
@@ -19,7 +18,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @coordinator_bot ~w(whoami whois check discord help coc ignore mute ignore unmute unignore matchmaking website party modparty unparty)
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? explain newlobby jazlobby tournament)
-  @boss_commands ~w(gatekeeper welcome-message meme reset-approval rename resetratinglevels minratinglevel maxratinglevel setratinglevels)
+  @boss_commands ~w(balancemode gatekeeper welcome-message meme reset-approval rename resetratinglevels minratinglevel maxratinglevel setratinglevels)
   @vip_boss_commands ~w(shuffle)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock makebalance)
 
@@ -906,6 +905,23 @@ defmodule Teiserver.Coordinator.ConsulServer do
       end
     end
 
+    # Blocking using relationships
+    member_list = Battle.get_lobby_member_list(state.lobby_id)
+    match_id = Battle.get_lobby_match_id(state.lobby_id)
+
+    block_status = Account.check_block_status(userid, member_list)
+
+    # Temporary code while it is tested
+    case block_status do
+      :blocked ->
+        Logger.error("User is blocked")
+      :blocking ->
+        Logger.error("User is blocking")
+      _ ->
+        :ok
+    end
+    block_status = :ok
+
     cond do
       client == nil ->
         {false, "No client"}
@@ -936,6 +952,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
         else
           {false, "Friends only gatekeeper"}
         end
+
+      block_status == :blocking ->
+        Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.blocking")
+        {false, "You are blocking too many players in this lobby"}
+
+      block_status == :blocked ->
+        Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.blocked")
+        {false, "You are blocked by too many players in this lobby"}
 
       true ->
         {true, nil}
@@ -1326,6 +1350,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       unready_can_play: false,
       last_queue_state: [],
       balance_result: nil,
+      balance_algorithm: "loser_picks",
       player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
       showmatch: true
     }

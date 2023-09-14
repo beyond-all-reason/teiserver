@@ -1,9 +1,8 @@
 defmodule Teiserver.Coordinator.GatekeeperTest do
   use Central.ServerCase, async: false
-  alias Teiserver.Battle.Lobby
   alias Teiserver.Account.ClientLib
   alias Teiserver.Account.UserCache
-  alias Teiserver.{Client, Coordinator}
+  alias Teiserver.{Client, Coordinator, Lobby}
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]

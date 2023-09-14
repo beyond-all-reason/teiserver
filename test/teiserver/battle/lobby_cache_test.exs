@@ -1,7 +1,6 @@
 defmodule Teiserver.Lobby.LobbyLibTest do
   use Central.ServerCase, async: false
-  alias Teiserver.{Account}
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.{Account, Lobby}
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]

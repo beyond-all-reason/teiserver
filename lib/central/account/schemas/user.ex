@@ -41,6 +41,7 @@ defmodule Central.Account.User do
 
     field :behaviour_score, :integer, default: 10_000
     field :trust_score, :integer, default: 10_000
+    field :social_score, :integer, default: 0
 
     timestamps()
   end
