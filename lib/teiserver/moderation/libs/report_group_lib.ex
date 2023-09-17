@@ -1,15 +1,29 @@
 defmodule Teiserver.Moderation.ReportGroupLib do
   @moduledoc false
   use CentralWeb, :library_newform
-  alias Teiserver.Moderation
+  # alias Teiserver.Moderation
   alias Teiserver.Moderation.{ReportGroup, ReportGroupQueries}
-  alias Phoenix.PubSub
+  # alias Phoenix.PubSub
 
   @spec colour :: atom
-  def colour(), do: :default
+  def colour(), do: :warning
 
   @spec icon() :: String.t()
-  def icon(), do: ""
+  def icon(), do: "fa-house-flag"
+
+  @spec make_favourite(ReportGroup.t) :: Map.t
+  def make_favourite(report_group) do
+    %{
+      type_colour: Teiserver.Moderation.colour(),
+      type_icon: Teiserver.Moderation.icon(),
+      item_id: report_group.id,
+      item_type: "moderation_report_group",
+      item_colour: colour(),
+      item_icon: icon(),
+      item_label: "#{report_group.target.name}",
+      url: "/moderation/overwatch/report_group/#{report_group.id}"
+    }
+  end
 
   @doc """
   Returns the list of report_groups.

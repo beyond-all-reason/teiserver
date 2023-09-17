@@ -20,6 +20,16 @@ defmodule TeiserverWeb.Moderation.OverwatchComponents do
     >
       Reports
     </.section_menu_button>
+
+    <.section_menu_button
+      :if={@active == "show"}
+      bsname={@view_colour}
+      icon={StylingHelper.icon(:show)}
+      active={true}
+      url="#"
+    >
+      Report group detail
+    </.section_menu_button>
     """
   end
 end

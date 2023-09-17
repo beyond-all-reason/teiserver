@@ -20,17 +20,26 @@ defmodule Teiserver.Account.RecentlyUsedCache do
   end
 
   @spec insert_recently(map(), Plug.Conn.t()) :: map()
-  def insert_recently(item, conn) do
+  def insert_recently(item, %{assigns: %{current_user: %{id: id}}}) do
     item
     |> Map.merge(%{
-      user_id: conn.assigns[:current_user].id
+      user_id: id
     })
     |> insert_recently
+  end
+
+  # If we don't have the user yet we don't want to insert anything
+  def insert_recently(_item, _socket) do
+    %{}
   end
 
   @spec get_recently(Plug.Conn.t() | T.user_id()) :: [map()]
   def get_recently(%{assigns: %{current_user: current_user}}) do
     get_recently(current_user.id)
+  end
+
+  def get_recently(%{id: id}) do
+    get_recently(id)
   end
 
   def get_recently(user_id) do

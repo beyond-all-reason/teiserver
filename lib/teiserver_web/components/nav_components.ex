@@ -4,6 +4,13 @@ defmodule TeiserverWeb.NavComponents do
   # alias Phoenix.LiveView.JS
   # import CentralWeb.Gettext
 
+  import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+
+  use Phoenix.VerifiedRoutes,
+    endpoint: TeiserverWeb.Endpoint,
+    router: TeiserverWeb.Router,
+    statics: CentralWeb.static_paths()
+
   @doc """
   <TeiserverWeb.NavComponents.top_nav_item active={active} route={route} icon={icon} />
   """
@@ -23,6 +30,154 @@ defmodule TeiserverWeb.NavComponents do
         <%= @text %>
       </a>
     </li>
+    """
+  end
+
+  @doc """
+  <TeiserverWeb.NavComponents.top_navbar active={"string"} />
+  """
+  attr :current_user, :map, required: true
+  attr :active, :string, required: true
+  def top_navbar(assigns) do
+    ~H"""
+    <nav class="navbar navbar-expand-lg m-0 p-0" id="top-nav">
+      <!-- Container wrapper -->
+      <div class="container-fluid">
+        <!-- Collapsible wrapper -->
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <!-- Navbar brand -->
+          <a class="navbar-brand mt-2 mt-lg-0" href="/">
+            <i
+              class={"fa-fw #{Application.get_env(:central, Central)[:site_icon]}"}
+              style="margin: -4px 20px 0 0px;"
+            >
+            </i>
+            <span id="page-title">
+              <%= Application.get_env(:central, Central)[:site_title] %>
+            </span>
+          </a>
+          <!-- Left links -->
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <.top_nav_item
+              text="Home"
+              active={@active == "central_home"}
+              route={~p"/"}
+            />
+
+            <.top_nav_item
+              text="My account"
+              active={@active == "teiserver_account"}
+              route={~p"/teiserver/account"}
+            />
+
+            <.top_nav_item
+              :if={@current_user}
+              text="Chat"
+              active={@active == "chat"}
+              route={~p"/chat"}
+            />
+
+            <%= if allow?(@current_user, "Server") do %>
+              <.top_nav_item
+                text="Logging"
+                active={@active == "logging"}
+                route={~p"/logging"}
+              />
+
+              <.top_nav_item
+                text="Telemetry"
+                active={@active == "telemetry"}
+                route={~p"/telemetry"}
+              />
+            <% end %>
+
+            <.top_nav_item
+              text="Lobbies"
+              active={@active == "lobbies"}
+              route={~p"/battle/lobbies"}
+            />
+
+            <.top_nav_item
+              text="Matchmaking"
+              route={~p"/teiserver/matchmaking/queues"}
+              active={@active == "matchmaking"}
+            />
+
+            <.top_nav_item
+              text="Parties"
+              route={~p"/teiserver/account/parties"}
+              active={@active == "parties"}
+            />
+
+            <.top_nav_item
+              text="Matches"
+              route={~p"/battle"}
+              active={@active == "match"}
+            />
+
+            <.top_nav_item
+              text="Leaderboard"
+              route={~p"/battle/ratings/leaderboard"}
+              active={@active == "leaderboard"}
+            />
+
+            <%= if allow_any?(@current_user, ~w(Contributor Overwatch)) do %>
+              <.top_nav_item
+                text="Reports"
+                route={~p"/teiserver/reports"}
+                active={@active == "teiserver_report"}
+              />
+            <% end %>
+
+            <%= if allow?(@current_user, "Moderator") do %>
+              <.top_nav_item
+                text="Users"
+                route={~p"/teiserver/admin/user"}
+                active={@active == "teiserver_user"}
+              />
+            <% end %>
+
+            <%= if allow?(@current_user, "Overwatch") do %>
+              <.top_nav_item
+                text="Moderation"
+                route={~p"/moderation"}
+                active={@active == "moderation"}
+              />
+            <% end %>
+
+            <%= if allow_any?(@current_user, ~w(Contributor Overwatch)) do %>
+              <.top_nav_item
+                text="Admin"
+                route={~p"/teiserver/admin"}
+                active={@active == "admin"}
+              />
+            <% end %>
+          </ul>
+          <!-- Left links -->
+        </div>
+        <!-- Collapsible wrapper -->
+
+        <!-- Right elements -->
+        <div class="d-flex align-items-center">
+          <%= if @current_user do %>
+            <TeiserverWeb.UserComponents.recents_dropdown current_user={@current_user} />
+
+            <TeiserverWeb.UserComponents.account_dropdown current_user={@current_user} />
+
+            <%#= render(TeiserverWeb.Communication.GeneralView, "notification_dropdown.html", assigns) %>
+            <div style="width: 300px; display: inline-block;"></div>
+          <% else %>
+            <.top_nav_item
+              text="Sign in"
+              route={~p"/login"}
+              active={false}
+            />
+          <% end %>
+        </div>
+        <!-- Right elements -->
+      </div>
+    </nav>
+
     """
   end
 

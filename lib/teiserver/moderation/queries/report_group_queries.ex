@@ -106,7 +106,7 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
 
   defp _preload(query, :actions) do
     from report_groups in query,
-      join: actions in assoc(report_groups, :actions),
+      left_join: actions in assoc(report_groups, :actions),
       preload: [actions: actions]
   end
 

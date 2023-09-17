@@ -1,0 +1,109 @@
+<TeiserverWeb.Moderation.ModerationComponents.sub_menu active="overwatch" view_colour={@view_colour} />
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <TeiserverWeb.Moderation.OverwatchComponents.section_menu
+      active="show"
+      view_colour={@view_colour}
+      current_user={@current_user}
+    />
+    <br /><br />
+    
+    <div :if={@report_group}>
+      <div class="float-end">
+        <%= if allow?(@current_user, "Moderator") do %>
+          <%= if @report_group.closed do %>
+            <%= link(raw("<i class='fa-solid fa-fw fa-folder-open'></i> Open"),
+              to: ~p"/moderation/report/#{@report_group.id}/open",
+              method: :put,
+              class: "btn btn-outline-#{@view_colour}"
+            ) %>
+          <% else %>
+            <%= if @report_group.action_count == 0 do %>
+              <%= link(raw("<i class='fa-solid fa-fw fa-folder-closed'></i> Close"),
+                to: ~p"/moderation/report/#{@report_group.id}/close",
+                method: :put,
+                class: "btn btn-outline-#{@view_colour}"
+              ) %>
+            <% end %>
+          <% end %>
+        <% end %>
+
+        <a
+          class="btn btn-outline-warning"
+          href={~p"/moderation/overwatch/target/#{@report_group.target_id}"}
+        >
+          <Fontawesome.icon icon="fa-share-from-square" style="solid" />&nbsp;
+          Filter by target
+        </a>
+
+        <%= if allow?(@current_user, "Moderator") do %>
+          <a
+            class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
+            href={~p"/teiserver/admin/users/full_chat/#{@report_group.target_id}"}
+          >
+            <Fontawesome.icon icon={Teiserver.Chat.LobbyMessageLib.icon()} style="solid" />&nbsp;
+            User chat
+          </a>
+
+          <a
+            class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
+            href={~p"/teiserver/admin/user/#{@report_group.target_id}"}
+          >
+            <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" />&nbsp;
+            View user
+          </a>
+
+          <%= if not @report_group.closed do %>
+            <a
+              class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
+              href={"#{Routes.moderation_action_path(@socket, :new_with_user)}?teiserver_user=%23#{@report_group.target_id}_"}
+            >
+              <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />&nbsp;
+              Action user
+            </a>
+          <% end %>
+        <% end %>
+      </div>
+
+      <h3>
+        Report group for <%= @report_group.target.name %>
+
+        <%= if @report_group.action_count > 0 do %>
+          &nbsp;
+          <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" class="text-danger" />
+        <% end %>
+
+        <%= if @report_group.closed do %>
+          - Closed
+        <% end %>
+      </h3>
+      <br />
+      <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+        <li>
+          <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+            <Fontawesome.icon icon="fa-file-alt" style="solid" />
+            Details
+          </a>
+        </li>
+
+        <li class="nav-item" role="presentation">
+          <a href="#actions_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+            <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />
+            Actions (<%= @report_group.action_count %>)
+          </a>
+        </li>
+      </ul>
+
+      <div class="tab-content">
+        <div class="tab-pane" id="details_tab" style="padding:5px;">
+          DETAILS
+        </div>
+
+        <div class="tab-pane" id="actions_tab" style="padding:5px;">
+          ACTIONS
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

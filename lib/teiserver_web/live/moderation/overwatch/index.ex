@@ -90,6 +90,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
   defp default_filters(socket) do
     socket
     |> assign(:filters, %{
+      "actioned-filter" => "All",
       "closed-filter" => "Open"
     })
   end

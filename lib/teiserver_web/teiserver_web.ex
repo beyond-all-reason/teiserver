@@ -14,6 +14,9 @@ defmodule TeiserverWeb do
     quote do
       use CentralWeb, :live_view_structure
       alias Teiserver.Account.TSAuthPlug
+
+      import Teiserver.Account.RecentlyUsedCache,
+        only: [remove_recently: 2, insert_recently: 2, insert_recently: 1, get_recently: 1]
     end
   end
 

@@ -13,7 +13,7 @@
       <div class="row">
         <div class="col">
           <.input type="select"
-            label="Outcome"
+            label="Action status"
             options={["Actioned", "Un-actioned", "All"]}
             name="actioned-filter"
             value={@filters["actioned-filter"]}
@@ -30,26 +30,6 @@
             phx-change="filter-update"
           />
         </div>
-
-        <%= if false do %>
-          <div class="col">
-            <.input type="text"
-              label="Ally"
-              name="ally"
-              value={@filters["ally"]}
-              phx-change="filter-update" phx-debounce="400"
-            />
-          </div>
-          
-          <div class="col">
-            <.input type="text"
-              label="Opponent"
-              name="opponent"
-              value={@filters["opponent"]}
-              phx-change="filter-update" phx-debounce="400"
-            />
-          </div>
-        <% end %>
       </div>
     </form>
     <hr />
@@ -57,14 +37,69 @@
   </div>
 </div>
 
-<table class="table table-sm table-hover" :if={@report_groups}>
+
+<.table
+  :if={@report_groups}
+  id="report_groups-table"
+  table_class="table-sm table-hover"
+  rows={@report_groups}
+  row_click={fn report_group -> JS.navigate(~p"/moderation/overwatch/report_group/#{report_group.id}") end}
+>
+  <:col :let={report_group} label="">
+    <%= if report_group.action_count > 0 do %>
+      <span class={"text-#{Teiserver.Moderation.ActionLib.colour()}"}>
+        <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />
+      </span>
+    <% end %>
+
+    <%= if report_group.closed do %>
+      <span class={"btn btn-sm btn-#{@view_colour}"}>
+        <Fontawesome.icon icon="folder-closed" style="solid" />
+      </span>
+    <% end %>
+  </:col>
+  
+  <:col :let={report_group} label="Target"><%= report_group.target.name %></:col>
+  <:col :let={report_group} label="Reports"><%= report_group.report_count %></:col>
+  <:col :let={report_group} label="Votes"><%= report_group.vote_count %></:col>
+  <:col :let={report_group} label="Created"><%= report_group.inserted_at |> date_to_str(format: :hms_or_ymd) %></:col>
+
+  <:col :let={report_group} label="">
+    <.link
+      class="btn btn-secondary btn-sm"
+      navigate={~p"/moderation/overwatch/report_group/#{report_group.id}"}>
+        Details
+    </.link>
+  </:col>
+  
+  <:col :let={report_group} label="">
+    <.link
+      :if={report_group.match_id}
+      class="btn btn-secondary btn-sm"
+      navigate={~p"/teiserver/admin/matches/#{report_group.match_id}"}>
+        Match
+    </.link>
+  </:col>
+  
+  <:col :let={report_group} label="">
+    <.link
+      :if={report_group.match_id}
+      class="btn btn-secondary btn-sm"
+      navigate={~p"/battle/chat/#{report_group.match_id}/#{report_group.target_id}"}>
+        Chat
+    </.link>
+  </:col>
+</.table>
+
+
+<table class="table table-sm table-hover" :if={false}>
   <thead>
     <tr>
       <th>&nbsp;</th>
       
-      
       <th>Target</th>
-      <th>Vote count</th>
+      <th>Reports</th>
+      <th>Votes</th>
       
       <th>Created</th>
 
@@ -80,7 +115,7 @@
               <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />
             </span>
           <% end %>
-
+          
           <%= if report_group.closed do %>
             <span class={"btn btn-sm btn-#{@view_colour}"}>
               <Fontawesome.icon icon="folder-closed" style="solid" />
@@ -98,6 +133,10 @@
           &nbsp; <%= report_group.target.name %>
         </td>
         
+        <td>
+          <%= report_group.report_count %>
+        </td>
+
         <td>
           <%= report_group.vote_count %>
         </td>
