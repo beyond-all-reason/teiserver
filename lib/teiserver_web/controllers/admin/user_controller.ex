@@ -241,6 +241,9 @@ defmodule TeiserverWeb.Admin.UserController do
     current_user = conn.assigns.current_user
     user = Account.get_user!(id)
 
+    # We decache now and later to ensure we decache data as it stands too
+    Account.decache_user(user.id)
+
     changeable_roles =
       cond do
         Enum.member?(current_user.roles, "Server") ->
