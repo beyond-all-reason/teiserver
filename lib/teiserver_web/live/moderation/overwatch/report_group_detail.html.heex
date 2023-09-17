@@ -3,39 +3,35 @@
 <div class="row section-menu">
   <div class="col-md-12">
     <TeiserverWeb.Moderation.OverwatchComponents.section_menu
+      :if={@report_group}
       active="show"
       view_colour={@view_colour}
-      current_user={@current_user}
-    />
-    <br /><br />
-    
-    <div :if={@report_group}>
-      <div class="float-end">
-        <%= if allow?(@current_user, "Moderator") do %>
-          <%= if @report_group.closed do %>
-            <%= link(raw("<i class='fa-solid fa-fw fa-folder-open'></i> Open"),
-              to: ~p"/moderation/report/#{@report_group.id}/open",
-              method: :put,
-              class: "btn btn-outline-#{@view_colour}"
-            ) %>
-          <% else %>
-            <%= if @report_group.action_count == 0 do %>
-              <%= link(raw("<i class='fa-solid fa-fw fa-folder-closed'></i> Close"),
-                to: ~p"/moderation/report/#{@report_group.id}/close",
-                method: :put,
-                class: "btn btn-outline-#{@view_colour}"
-              ) %>
-            <% end %>
-          <% end %>
-        <% end %>
-
-        <a
+      current_user={@current_user}>
+        <a 
           class="btn btn-outline-warning"
           href={~p"/moderation/overwatch/target/#{@report_group.target_id}"}
         >
-          <Fontawesome.icon icon="fa-share-from-square" style="solid" />&nbsp;
-          Filter by target
+          <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" />&nbsp;
+          Other reports
         </a>
+
+        <%= if @report_group.match_id do %>
+          <a
+            href={~p"/teiserver/admin/matches/#{@report_group.match_id}"}
+            class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}
+          >
+            <Fontawesome.icon icon={Teiserver.Battle.MatchLib.icon()} style="solid" />
+            Match Details
+          </a>
+
+          <a
+            href={~p"/battle/chat/#{@report_group.match_id}/#{@report_group.target_id}"}
+            class={"btn btn-outline-#{Teiserver.Chat.LobbyMessageLib.colours()}"}
+          >
+            <Fontawesome.icon icon={Teiserver.Chat.LobbyMessageLib.icon()} style="solid" />
+            Match Chat
+          </a>
+        <% end %>
 
         <%= if allow?(@current_user, "Moderator") do %>
           <a
@@ -64,6 +60,29 @@
             </a>
           <% end %>
         <% end %>
+    
+      </TeiserverWeb.Moderation.OverwatchComponents.section_menu>
+    <br /><br />
+    
+    <div :if={@report_group}>
+      <div class="float-end">
+        <%= if allow?(@current_user, "Moderator") do %>
+          <%= if @report_group.closed do %>
+            <%= link(raw("<i class='fa-solid fa-fw fa-folder-open'></i> Open"),
+              to: ~p"/moderation/report/#{@report_group.id}/open",
+              method: :put,
+              class: "btn btn-outline-#{@view_colour}"
+            ) %>
+          <% else %>
+            <%= if @report_group.action_count == 0 do %>
+              <%= link(raw("<i class='fa-solid fa-fw fa-folder-closed'></i> Close"),
+                to: ~p"/moderation/report/#{@report_group.id}/close",
+                method: :put,
+                class: "btn btn-outline-#{@view_colour}"
+              ) %>
+            <% end %>
+          <% end %>
+        <% end %>
       </div>
 
       <h3>
@@ -79,31 +98,42 @@
         <% end %>
       </h3>
       <br />
-      <ul class="nav nav-tabs" role="tablist" id="the_tabs">
-        <li>
-          <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-            <Fontawesome.icon icon="fa-file-alt" style="solid" />
-            Details
-          </a>
-        </li>
 
-        <li class="nav-item" role="presentation">
-          <a href="#actions_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-            <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />
-            Actions (<%= @report_group.action_count %>)
-          </a>
-        </li>
-      </ul>
-
-      <div class="tab-content">
-        <div class="tab-pane" id="details_tab" style="padding:5px;">
-          DETAILS
+      <div class="row">
+        <div class="col-md-6">
+          <h4>
+            Reports
+            <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="solid" class={"text-#{Teiserver.Moderation.ReportLib.colour()}"} />
+          </h4>
+          <.table
+            id="reports-table"
+            rows={@report_group.reports}
+            table_class="table-sm table-hover"
+            row_click={fn report -> JS.navigate(~p"/moderation/report/#{report.id}") end}
+          >
+            <:col :let={report} label="Type"><%= report.type %>/<%= report.sub_type %></:col>
+            <:col :let={report} label="Type"><%= report.extra_text %></:col>
+            <:col :let={report} label="Type"><%= date_to_str(report.inserted_at, format: :hms_or_ymd) %></:col>
+          </.table>
         </div>
-
-        <div class="tab-pane" id="actions_tab" style="padding:5px;">
-          ACTIONS
+        <div class="col-md-6">
+          <h4>
+            Actions
+            <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" class={"text-#{Teiserver.Moderation.ActionLib.colour()}"} />
+          </h4>
+          <.table
+            id="actions-table"
+            rows={@report_group.actions}
+            table_class="table-sm table-hover"
+            row_click={fn action -> JS.navigate(~p"/moderation/action/#{action.id}") end}
+          >
+            <:col :let={action} label="Reason"><%= action.reason %></:col>
+            <:col :let={action} label="Restrictions"><%= action.restrictions |> Enum.join(", ") %></:col>
+          </.table>
         </div>
       </div>
+      
+      
     </div>
   </div>
 </div>

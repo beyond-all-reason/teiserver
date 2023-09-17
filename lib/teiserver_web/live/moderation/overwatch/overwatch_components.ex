@@ -10,6 +10,8 @@ defmodule TeiserverWeb.Moderation.OverwatchComponents do
   attr :active, :string, required: true
   attr :current_user, :map, required: true
   attr :match_id, :integer, default: nil
+  slot :inner_block
+
   def section_menu(assigns) do
     ~H"""
     <.section_menu_button
@@ -30,6 +32,8 @@ defmodule TeiserverWeb.Moderation.OverwatchComponents do
     >
       Report group detail
     </.section_menu_button>
+
+    <%= render_slot(@inner_block) %>
     """
   end
 end

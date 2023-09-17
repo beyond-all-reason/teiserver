@@ -111,5 +111,9 @@ defmodule Teiserver.Repo.Migrations.OverwatchImprovements do
 
       timestamps()
     end
+
+    alter table(:direct_messages) do
+      add :delivered, :boolean, default: false
+    end
   end
 end

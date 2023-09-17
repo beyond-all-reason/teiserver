@@ -5,6 +5,7 @@ defmodule Teiserver.Chat.DirectMessage do
   schema "direct_messages" do
     field :content, :string
     field :inserted_at, :utc_datetime
+    field :delivered, :boolean, default: false
     belongs_to :from, Central.Account.User
     belongs_to :to, Central.Account.User
   end
@@ -19,8 +20,8 @@ defmodule Teiserver.Chat.DirectMessage do
       |> trim_strings([:content])
 
     struct
-    |> cast(params, ~w(content inserted_at from_id to_id)a)
-    |> validate_required(~w(content inserted_at from_id to_id)a)
+    |> cast(params, ~w(content inserted_at from_id to_id delivered)a)
+    |> validate_required(~w(content inserted_at from_id to_id delivered)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

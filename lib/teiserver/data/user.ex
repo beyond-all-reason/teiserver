@@ -607,7 +607,8 @@ defmodule Teiserver.User do
           to_id: to_id,
           from_id: sender_id,
           content: msg_str,
-          inserted_at: Timex.now()
+          inserted_at: Timex.now(),
+          delivered: true
         })
         end
 

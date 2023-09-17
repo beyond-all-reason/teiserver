@@ -100,7 +100,7 @@
     name: "moderation",
     text: "Moderation",
     icon_class: "fa-solid",
-    link: Routes.moderation_report_path(@conn, :user, @user.id)
+    link: ~p"/moderation/overwatch/target/#{@user.id}"
   ) %>
 
   <%= central_component("menu_card",

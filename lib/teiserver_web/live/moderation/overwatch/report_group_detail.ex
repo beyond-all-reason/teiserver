@@ -6,9 +6,9 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
   @impl true
   def mount(%{"id" => id_str}, _session, socket) when is_connected?(socket) do
     id = String.to_integer(id_str)
-    socket = default_mount(socket, id)
+    socket = default_mount(socket)
 
-    report_group = Moderation.get_report_group!(id, preload: [:target, :actions])
+    report_group = Moderation.get_report_group!(id, preload: [:target, :actions, :reports])
 
     report_group
       |> ReportGroupLib.make_favourite()
@@ -16,23 +16,22 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
 
     socket = socket
       |> assign(:report_group, report_group)
+      |> add_breadcrumb(name: "Report group #{report_group.target.name}", url: ~p"/moderation/overwatch/report_group/#{id}")
 
     {:ok, socket}
   end
 
-  def mount(%{"id" => id_str}, _session, socket) do
-    id = String.to_integer(id_str)
-    {:ok, default_mount(socket, id)}
+  def mount(%{"id" => _id_str}, _session, socket) do
+    {:ok, default_mount(socket)}
   end
 
-  defp default_mount(socket, id) do
+  defp default_mount(socket) do
     socket
       |> assign(:site_menu_active, "moderation")
       |> assign(:view_colour, Teiserver.Moderation.colour())
       |> assign(:report_group, nil)
       |> add_breadcrumb(name: "Moderation", url: ~p"/moderation")
       |> add_breadcrumb(name: "Overwatch", url: ~p"/moderation/overwatch")
-      |> add_breadcrumb(name: "Report group ##{id}", url: ~p"/moderation/overwatch/report_group/#{id}")
   end
 
   @impl true

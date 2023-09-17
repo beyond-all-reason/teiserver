@@ -4,13 +4,13 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
   alias Teiserver.Moderation.ReportLib
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     socket = socket
       |> assign(:site_menu_active, "moderation")
       |> assign(:view_colour, Teiserver.Moderation.colour())
       |> assign(:outstanding_report_groups, 0)
       |> assign(:report_groups, nil)
-      |> default_filters()
+      |> default_filters(params)
       |> add_breadcrumb(name: "Moderation", url: ~p"/moderation")
       |> add_breadcrumb(name: "Overwatch", url: ~p"/moderation/overwatch")
 
@@ -23,6 +23,15 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
 
     {:ok, socket}
   end
+
+  # @impl true
+  # def handle_params(params, _url, socket) do
+  #   {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+  # end
+
+  # defp apply_action(socket, _live_action, _params) do
+  #   socket
+  # end
 
   @impl true
   def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
@@ -38,61 +47,15 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
     {:noreply, socket}
   end
 
-  # defp update_match_list(%{assigns: %{filters: filters, current_user: current_user}} = socket) do
-  #   if connected?(socket) do
-  #     matches = run_match_query(filters, current_user)
-
-  #     if matches != nil do
-  #       socket
-  #       |> assign(:matches, matches)
-  #     else
-  #       socket
-  #     end
-  #   else
-  #     socket
-  #     |> assign(:matches, [])
-  #   end
-  # end
-
-  # defp update_match_list(socket) do
-  #   socket
-  # end
-
-  # defp run_match_query(filters, user) do
-  #   opponent_id = if filters["opponent"] != "" do
-  #     Account.get_userid_from_name(filters["opponent"]) || -1
-  #   else
-  #     nil
-  #   end
-
-  #   ally_id = if filters["ally"] != "" do
-  #     Account.get_userid_from_name(filters["ally"]) || -1
-  #   else
-  #     nil
-  #   end
-
-  #   matches = Battle.list_matches(
-  #     search: [
-  #       has_started: true,
-  #       # user_id: user.id,
-  #       game_type: filters["game-type"],
-  #       ally_opponent: {user.id, ally_id, opponent_id}
-  #     ],
-  #     preload: [
-  #       :queue
-  #     ],
-  #     order_by: "Newest first"
-  #   )
-
-  #   matches
-  # end
-
-  defp default_filters(socket) do
-    socket
-    |> assign(:filters, %{
+  defp default_filters(socket, params) do
+    filters = Map.merge(%{
       "actioned-filter" => "All",
-      "closed-filter" => "Open"
-    })
+      "closed-filter" => "Open",
+      "target_id" => Map.get(params, "target_id")
+    }, socket.assigns[:filters] || %{})
+
+    socket
+      |> assign(:filters, filters)
   end
 
   defp recalculate_outstanding_report_groups(%{assigns: %{current_user: _current_user, filters: filters}} = socket) do
@@ -105,7 +68,8 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
     report_groups = Moderation.list_report_groups(
       where: [
         closed: closed_filter,
-        inserted_after: Timex.shift(Timex.now(), days: -ReportLib.get_outstanding_report_max_days())
+        inserted_after: Timex.shift(Timex.now(), days: -ReportLib.get_outstanding_report_max_days()),
+        target_id: filters["target_id"]
       ],
       order_by: ["Newest first"],
       limit: 50,
