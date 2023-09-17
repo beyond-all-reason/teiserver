@@ -279,7 +279,8 @@ defmodule TeiserverWeb.Account.SessionController do
             Teiserver.Account.delete_code(code)
 
             conn
-            |> put_flash(:success, "Your password has been reset.")
+            |> put_flash(:success, "Your password has been reset; please login using the new details")
+            |> Guardian.Plug.sign_out(clear_remember_me: true)
             |> redirect(to: "/")
 
           {:error, _changeset} ->
