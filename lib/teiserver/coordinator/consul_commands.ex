@@ -1384,11 +1384,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       _ -> ""
     end
 
-    # Used for matching against various things
-    testing_name = stripped_name
-      |> String.downcase
-      |> String.replace(" ", "")
-
     lobby = Lobby.get_lobby(state.lobby_id)
 
     not_all_welcome = cond do
@@ -1426,7 +1421,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       #   )
       #   state
 
-      not_all_welcome && String.contains?(testing_name, "allwelcome") ->
+      not_all_welcome && allwelcome_name?(stripped_name) ->
         Lobby.sayex(
           state.coordinator_id,
           "You cannot declare a lobby to be welcome to all if there is a rating limit",
@@ -1959,12 +1954,21 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     name = state.lobby_id
       |> Battle.get_lobby()
       |> Map.get(:name)
+
+    cond do
+      allwelcome_name?(name) -> false
+      true -> true
+    end
+  end
+
+  defp allwelcome_name?(name) do
+    name = name
       |> String.downcase
       |> String.replace(" ", "")
 
     cond do
-      String.contains?(name, "allwelcome") -> false
-      true -> true
+      String.contains?(name, "allwelcome") -> true
+      true -> false
     end
   end
 
