@@ -138,6 +138,22 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     {:noreply, socket}
   end
 
+  def get_relationships_and_permissions(%{assigns: %{current_user: nil}} = socket) do
+    socket
+      |> assign(:relationship, [])
+      |> assign(:friendship, [])
+      |> assign(:friendship_request, [])
+      |> assign(:profile_permissions, [])
+  end
+
+  def get_relationships_and_permissions(%{assigns: %{user: nil}} = socket) do
+    socket
+      |> assign(:relationship, [])
+      |> assign(:friendship, [])
+      |> assign(:friendship_request, [])
+      |> assign(:profile_permissions, [])
+  end
+
   def get_relationships_and_permissions(%{assigns: %{current_user: current_user, user: user}} = socket) do
     relationship = Account.get_relationship(current_user.id, user.id)
     friendship = Account.get_friend(current_user.id, user.id)
