@@ -82,7 +82,9 @@ defmodule Teiserver.Lobby do
 
         # Rename flags
         # consul rename means it was renamed by a player and overrides spads
-        consul_rename: false,
+        player_rename: false,
+        base_name: lobby.name,
+        display_name: lobby.name,
 
         # Used to indicate the lobby is subject to a lobby policy
         lobby_policy_id: nil,
@@ -443,20 +445,20 @@ defmodule Teiserver.Lobby do
 
   @spec rename_lobby(T.lobby_id(), String.t()) :: :ok
   @spec rename_lobby(T.lobby_id(), String.t(), boolean) :: :ok
-  def rename_lobby(lobby_id, new_name, consul_rename \\ false) do
+  def rename_lobby(lobby_id, new_name, player_rename \\ false) do
     case Battle.lobby_exists?(lobby_id) do
       false ->
         nil
 
       true ->
-        if consul_rename do
+        if player_rename do
           match_id = Battle.get_lobby_match_id(lobby_id)
           Telemetry.log_complex_lobby_event(nil, match_id, "lobby.rename", %{name: new_name})
         end
 
         Battle.update_lobby_values(lobby_id, %{
           name: new_name,
-          consul_rename: consul_rename
+          player_rename: player_rename
         })
     end
 
@@ -769,7 +771,7 @@ defmodule Teiserver.Lobby do
         true
 
       # If the battle has been renamed by the consul then we'll keep it renamed as such
-      battle.consul_rename == true and cmd == :update_lobby_title ->
+      battle.player_rename == true and cmd == :update_lobby_title ->
         false
 
       # Basic stuff
