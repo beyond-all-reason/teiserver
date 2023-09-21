@@ -644,6 +644,9 @@ defmodule Teiserver.Battle do
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
   defdelegate update_lobby(lobby, data, reason), to: LobbyLib
 
+  @spec rename_lobby(T.lobby_id, String.t, T.userid) :: :ok | nil
+  defdelegate rename_lobby(lobby_id, new_base_name, renamer_id), to: LobbyLib
+
   # Requests
   @spec can_join?(T.userid(), T.lobby_id(), String.t() | nil) ::
           {:failure, String.t()} | true

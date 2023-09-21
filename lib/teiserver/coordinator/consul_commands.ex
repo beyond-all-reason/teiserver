@@ -1405,7 +1405,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     cond do
       new_name == "" ->
-        Lobby.rename_lobby(state.lobby_id, lobby.name, false)
+        Lobby.rename_lobby(state.lobby_id, lobby.name, nil)
         state
 
       WordLib.flagged_words(new_name) > 0 ->
@@ -1449,7 +1449,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         state
 
       senderid != lobby.founder_id ->
-        Lobby.rename_lobby(state.lobby_id, new_name, true)
+        Lobby.rename_lobby(state.lobby_id, new_name, senderid)
         ConsulServer.say_command(cmd, state)
 
         downcase_name = new_name |> String.downcase()
@@ -1475,7 +1475,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         state
 
       true ->
-        Lobby.rename_lobby(state.lobby_id, new_name, false)
+        Lobby.rename_lobby(state.lobby_id, new_name, nil)
         state
     end
   end

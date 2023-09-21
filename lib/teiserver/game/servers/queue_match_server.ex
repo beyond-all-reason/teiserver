@@ -285,7 +285,7 @@ defmodule Teiserver.Game.QueueMatchServer do
 
     Lobby.silence_lobby(state.lobby_id)
     Lobby.lock_lobby(state.lobby_id)
-    Lobby.rename_lobby(state.lobby_id, "Matchmaking #{state.db_queue.name}", false)
+    Lobby.rename_lobby(state.lobby_id, "Matchmaking #{state.db_queue.name}", nil)
 
     # Wait for all the kicks to take place, then move people
     :timer.sleep(1000)

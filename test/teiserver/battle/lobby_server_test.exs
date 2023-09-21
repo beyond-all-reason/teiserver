@@ -110,5 +110,11 @@ defmodule Teiserver.Battle.LobbyServerTest do
     c = LobbyLib.call_lobby(lobby_id, :get_lobby_state)
     assert c.id == lobby_id
     assert c.name == "base name | Rating between: 10 - 50"
+
+    # Try renaming with nil user
+    LobbyLib.rename_lobby(lobby_id, "other name", nil)
+    c = LobbyLib.call_lobby(lobby_id, :get_lobby_state)
+    assert c.id == lobby_id
+    assert c.name == "other name | Rating between: 10 - 50"
   end
 end

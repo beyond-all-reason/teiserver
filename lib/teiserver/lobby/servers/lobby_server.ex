@@ -507,7 +507,7 @@ defmodule Teiserver.Battle.LobbyServer do
           # Just a min rating
           consul_state.maximum_rating_to_play >= 1000
           && consul_state.minimum_rating_to_play > 0 ->
-            "Max rating: #{consul_state.minimum_rating_to_play}"
+            "Min rating: #{consul_state.minimum_rating_to_play}"
 
           # Rating range
           consul_state.maximum_rating_to_play < 1000
