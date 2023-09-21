@@ -1449,7 +1449,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         state
 
       senderid != lobby.founder_id ->
-        Battle.rename_lobby(state.lobby_id, new_name, senderid)
+        # We have to do this so we don't block the get_state call from the LobbyServer
+        # when it tries to query the rating values
+        spawn(fn ->
+          :timer.sleep(500)
+          Battle.rename_lobby(state.lobby_id, new_name, senderid)
+        end)
+
         ConsulServer.say_command(cmd, state)
 
         downcase_name = new_name |> String.downcase()
@@ -1468,7 +1474,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             state.lobby_id
           )
         end
-
         state
 
       lobby.player_rename ->
