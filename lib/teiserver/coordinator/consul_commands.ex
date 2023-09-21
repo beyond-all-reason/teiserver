@@ -41,7 +41,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         pos ->
           if Enum.member?(state.low_priority_join_queue, senderid) do
-            "You are at position #{pos + 1} but in the low prority queue so other users may be added in front of you"
+            "You are at position #{pos + 1} but in the low priority queue so other users may be added in front of you"
           else
             "You are at position #{pos + 1} in the queue"
           end
@@ -1405,7 +1405,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     cond do
       new_name == "" ->
-        Lobby.rename_lobby(state.lobby_id, lobby.name, nil)
+        Battle.rename_lobby(state.lobby_id, lobby.name, nil)
         state
 
       WordLib.flagged_words(new_name) > 0 ->
@@ -1449,7 +1449,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         state
 
       senderid != lobby.founder_id ->
-        Lobby.rename_lobby(state.lobby_id, new_name, senderid)
+        Battle.rename_lobby(state.lobby_id, new_name, senderid)
         ConsulServer.say_command(cmd, state)
 
         downcase_name = new_name |> String.downcase()
@@ -1469,13 +1469,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           )
         end
 
-        %{state | rename_string: ""}
+        state
 
       lobby.player_rename ->
         state
 
       true ->
-        Lobby.rename_lobby(state.lobby_id, new_name, nil)
+        Battle.rename_lobby(state.lobby_id, new_name, nil)
         state
     end
   end

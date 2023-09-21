@@ -7,7 +7,7 @@ defmodule Teiserver.Game.QueueMatchServer do
 
   use GenServer
   require Logger
-  alias Teiserver.{Lobby, Config}
+  alias Teiserver.{Lobby, Battle, Config}
   alias Teiserver.Battle.{BalanceLib}
   alias Teiserver.Data.{Matchmaking, QueueGroup}
   alias Phoenix.PubSub
@@ -285,7 +285,7 @@ defmodule Teiserver.Game.QueueMatchServer do
 
     Lobby.silence_lobby(state.lobby_id)
     Lobby.lock_lobby(state.lobby_id)
-    Lobby.rename_lobby(state.lobby_id, "Matchmaking #{state.db_queue.name}", nil)
+    Battle.rename_lobby(state.lobby_id, "Matchmaking #{state.db_queue.name}", nil)
 
     # Wait for all the kicks to take place, then move people
     :timer.sleep(1000)

@@ -211,11 +211,12 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   def handle_cast({:rename_lobby, new_base_name, renamer_id}, state) do
-    player_rename = not Account.has_any_role?(renamer_id, "bot")
+    # player_rename = not Account.has_any_role?(renamer_id, "bot")
 
-    if player_rename do
-      Telemetry.log_complex_lobby_event(renamer_id, state.match_id, "command.rename", %{name: new_base_name})
-    end
+    # if player_rename do
+    #   Telemetry.log_complex_lobby_event(renamer_id, state.match_id, "command.rename", %{name: new_base_name})
+    # end
+    player_rename = false
 
     new_name = generate_name(%{state | lobby: %{state.lobby | base_name: new_base_name}})
     new_state = do_update_values(state, %{

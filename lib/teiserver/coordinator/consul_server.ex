@@ -1343,9 +1343,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       afk_check_at: nil,
       last_seen_map: %{},
 
-      # Base string used to rename lobbies
-      rename_string: "",
-
       # Toggle with Coordinator.cast_consul(lobby_id, {:put, :unready_can_play, true})
       unready_can_play: false,
       last_queue_state: [],

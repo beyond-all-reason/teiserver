@@ -443,24 +443,14 @@ defmodule Teiserver.Lobby do
     end
   end
 
-  @spec rename_lobby(T.lobby_id(), String.t()) :: :ok
   @spec rename_lobby(T.lobby_id(), String.t(), T.userid) :: :ok
-  def rename_lobby(lobby_id, new_name, player_rename \\ false) do
+  def rename_lobby(lobby_id, new_name, userid) do
     case Battle.lobby_exists?(lobby_id) do
       false ->
         nil
 
       true ->
-        if player_rename do
-          match_id = Battle.get_lobby_match_id(lobby_id)
-          Telemetry.log_complex_lobby_event(nil, match_id, "lobby.rename", %{name: new_name})
-        end
-
         Battle.rename_lobby(lobby_id, new_name, userid)
-        # Battle.update_lobby_values(lobby_id, %{
-        #   name: new_name,
-        #   player_rename: player_rename
-        # })
     end
 
     :ok
