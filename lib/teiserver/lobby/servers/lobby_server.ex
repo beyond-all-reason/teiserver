@@ -455,6 +455,24 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, state}
   end
 
+  def handle_info(%{channel: "teiserver_lobby_chat" <> _, userid: _userid, message: _msg}, state) do
+    {:noreply, state}
+  end
+
+  def handle_info(%{channel: "teiserver_server", event: "stop"}, state) do
+    Battle.say(
+      state.coordinator_id,
+      "Server update taking place, see discord for details/issues.",
+      state.id
+    )
+
+    {:noreply, state}
+  end
+
+  def handle_info(%{channel: "teiserver_server"}, state) do
+    {:noreply, state}
+  end
+
   # Internal
   @spec get_player_list(map()) :: {list(), map()}
   defp get_player_list(%{state: :lobby} = state) do
@@ -584,6 +602,8 @@ defmodule Teiserver.Battle.LobbyServer do
     )
 
     Logger.metadata(request_id: "LobbyServer##{id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
 
     :timer.send_interval(2_000, :tick)
 
@@ -602,6 +622,7 @@ defmodule Teiserver.Battle.LobbyServer do
        id: id,
        lobby: data.lobby,
        founder_id: data.lobby.founder_id,
+       coordinator_id: Coordinator.get_coordinator_userid(),
        modoptions: options,
        server_uuid: server_uuid,
        match_uuid: match_uuid,
