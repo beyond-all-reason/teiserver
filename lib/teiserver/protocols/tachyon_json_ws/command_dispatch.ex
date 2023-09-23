@@ -3,25 +3,6 @@ defmodule Teiserver.Tachyon.CommandDispatch do
 
   """
 
-  alias Teiserver.Tachyon.Handlers
-
-  @modules [
-    Handlers.Account.WhoamiRequest,
-    Handlers.Communication.SendDirectMessageRequest,
-    Handlers.Lobby.ListLobbiesRequest,
-    Handlers.Lobby.JoinRequest,
-    Handlers.Lobby.LeaveRequest,
-    Handlers.Lobby.UpdateStatusRequest,
-    Handlers.LobbyChat.SayRequest,
-    Handlers.LobbyHost.CreateRequest,
-    Handlers.LobbyHost.RespondToJoinRequestRequest,
-    Handlers.System.DisconnectRequest,
-    Handlers.System.ForceErrorRequest,
-    Handlers.Telemetry.EventRequest,
-    Handlers.Telemetry.PropertyRequest,
-    Handlers.System.PingRequest
-  ]
-
   def dispatch(conn, object, meta) do
     handler = get_dispatch_handler(meta["command"])
 
@@ -36,8 +17,17 @@ defmodule Teiserver.Tachyon.CommandDispatch do
 
   @spec build_dispatch_cache :: :ok
   def build_dispatch_cache do
-    lookup =
-      @modules
+    # Get every single module in that namespace
+    # if it has a dispatch_handlers function we make use of it
+    {:ok, module_list} = :application.get_key(:central, :modules)
+    lookup = module_list
+      |> Enum.filter(fn m ->
+        m |> Module.split |> Enum.take(3) == ["Teiserver", "Tachyon", "Handlers"]
+      end)
+      |> Enum.filter(fn m ->
+        Code.ensure_loaded(m)
+        function_exported?(m, :dispatch_handlers, 0)
+      end)
       |> Enum.reduce(%{}, fn module, acc ->
         Map.merge(acc, module.dispatch_handlers())
       end)
@@ -53,7 +43,8 @@ defmodule Teiserver.Tachyon.CommandDispatch do
       Central.store_put(:tachyon_dispatches, key, func)
     end)
 
-    no_command_func = &Handlers.System.NoCommandErrorRequest.execute/3
+    # Special case
+    no_command_func = &Teiserver.Tachyon.Handlers.System.NoCommandErrorRequest.execute/3
     Central.store_put(:tachyon_dispatches, "no_command", no_command_func)
 
     # Delete out-dated keys

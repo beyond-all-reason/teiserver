@@ -235,7 +235,12 @@ defmodule Teiserver.Game.QueueWaitServer do
   end
 
   def handle_info({:refresh_from_db, db_queue}, state) do
-    update_state_from_db(state, db_queue)
+    new_state = update_state_from_db(state, db_queue)
+
+    :timer.cancel(state.tick_timer_ref)
+    tick_timer_ref = :timer.send_interval(new_state.tick_interval, :tick)
+
+    {:noreply, %{new_state | tick_timer_ref: tick_timer_ref}}
   end
 
   def handle_info(:increase_range, %{range_counter: range_counter} = state) do
@@ -319,7 +324,6 @@ defmodule Teiserver.Game.QueueWaitServer do
   end
 
   def handle_info(:tick, %{skip: true} = state) do
-    :timer.send_after(state.tick_interval, :tick)
     {:noreply, state}
   end
 
@@ -350,7 +354,6 @@ defmodule Teiserver.Game.QueueWaitServer do
           }
       end
 
-    :timer.send_after(state.tick_interval, :tick)
     {:noreply, new_state}
   end
 
@@ -723,9 +726,12 @@ defmodule Teiserver.Game.QueueWaitServer do
         },
         opts.queue
       )
+      |> Map.merge(%{
+        tick_timer_ref: nil
+      })
 
-    send(self(), :tick)
+    tick_timer_ref = :timer.send_interval(state.tick_interval, :tick)
 
-    {:ok, state}
+    {:ok, %{state | tick_timer_ref: tick_timer_ref}}
   end
 end

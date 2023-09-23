@@ -266,7 +266,7 @@ defmodule Teiserver.Battle do
   # end
 
   alias Teiserver.Battle.{MatchMonitorServer, MatchLib}
-  alias Teiserver.Lobby.{LobbyLib}
+  alias Teiserver.Lobby.{ChatLib, LobbyLib}
 
   @spec start_match(nil | T.lobby_id()) :: :ok
   def start_match(nil), do: :ok
@@ -644,6 +644,9 @@ defmodule Teiserver.Battle do
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
   defdelegate update_lobby(lobby, data, reason), to: LobbyLib
 
+  @spec rename_lobby(T.lobby_id, String.t, T.userid) :: :ok | nil
+  defdelegate rename_lobby(lobby_id, new_base_name, renamer_id), to: LobbyLib
+
   # Requests
   @spec can_join?(T.userid(), T.lobby_id(), String.t() | nil) ::
           {:failure, String.t()} | true
@@ -652,6 +655,16 @@ defmodule Teiserver.Battle do
   @spec server_allows_join?(T.userid(), T.lobby_id(), String.t() | nil) ::
           {:failure, String.t()} | true
   defdelegate server_allows_join?(userid, lobby_id, password \\ nil), to: Lobby
+
+  # Chat
+  @spec say(T.userid(), String.t(), T.lobby_id()) :: :ok | {:error, any}
+  defdelegate say(userid, msg, lobby_id), to: ChatLib
+
+  @spec sayex(T.userid(), String.t(), T.lobby_id()) :: :ok | {:error, any}
+  defdelegate sayex(userid, msg, lobby_id), to: ChatLib
+
+  @spec sayprivateex(T.userid(), T.userid(), String.t(), T.lobby_id()) :: :ok | {:error, any}
+  defdelegate sayprivateex(from_id, to_id, msg, lobby_id), to: ChatLib
 
   # Bots
   @spec get_bots(T.lobby_id()) :: map() | nil

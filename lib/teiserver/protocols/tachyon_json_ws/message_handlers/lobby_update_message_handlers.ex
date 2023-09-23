@@ -5,6 +5,7 @@ defmodule Teiserver.Tachyon.MessageHandlers.LobbyUpdateMessageHandlers do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Tachyon.Responses.Lobby.{AddUserClientResponse, RemoveUserClientResponse, ClosedResponse}
   alias Teiserver.Tachyon.Responses.User.UpdatedUserClientResponse
+  require Logger
 
   @spec handle(map(), T.tachyon_conn()) ::
           {:ok, T.tachyon_conn()} | {:ok, map() | list(), T.tachyon_conn()}
@@ -60,8 +61,13 @@ defmodule Teiserver.Tachyon.MessageHandlers.LobbyUpdateMessageHandlers do
     end
   end
 
+  def handle(%{event: :update_values}, conn) do
+    Logger.error("No handler for msg of :update_values in LobbyUpdateMessageHandlers")
+    {:ok, conn}
+  end
+
   def handle(msg, conn) do
     raise "No handler for msg of #{msg.event} in LobbyUpdateMessageHandlers"
-    {:ok, [], conn}
+    {:ok, conn}
   end
 end

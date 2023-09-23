@@ -2,8 +2,7 @@ defmodule Teiserver.Battle.LobbyServer do
   @moduledoc false
   use GenServer
   require Logger
-  alias Teiserver.Config
-  alias Teiserver.{Account, Battle}
+  alias Teiserver.{Account, Battle, Config, Telemetry, Coordinator}
   alias Teiserver.Bridge.BridgeServer
   alias Phoenix.PubSub
 
@@ -192,50 +191,40 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   # Generic updates
-  def handle_cast({:update_values, new_values}, state) do
-    new_values =
-      new_values
-      |> Map.filter(fn {k, v} ->
-        Map.has_key?(state.lobby, k) and v != Map.get(state.lobby, k)
-      end)
-
-    new_lobby = Map.merge(state.lobby, new_values)
-
-    broadcast_values =
-      new_values
-      |> Map.filter(fn {k, _} ->
-        Enum.member?(@broadcast_update_keys, k)
-      end)
-
-    if not Enum.empty?(broadcast_values) do
-      PubSub.broadcast(
-        Teiserver.PubSub,
-        "teiserver_lobby_updates:#{state.id}",
-        %{
-          channel: "teiserver_lobby_updates",
-          event: :update_values,
-          lobby_id: state.id,
-          changes: broadcast_values
-        }
-      )
-
-      PubSub.broadcast(
-        Teiserver.PubSub,
-        "teiserver_global_lobby_updates",
-        %{
-          channel: "teiserver_global_lobby_updates",
-          event: :updated_values,
-          lobby_id: state.id,
-          new_values: broadcast_values
-        }
-      )
-    end
-
-    {:noreply, %{state | lobby: new_lobby}}
+  def handle_cast({:update_values, raw_values}, state) do
+    new_state = do_update_values(state, raw_values)
+    {:noreply, new_state}
   end
 
   def handle_cast({:update_lobby, new_lobby}, state) do
     {:noreply, %{state | lobby: new_lobby}}
+  end
+
+  # Specific/limited updates
+  def handle_cast(:refresh_name, state) do
+    new_name = generate_name(state)
+    new_state = do_update_values(state, %{
+      name: new_name
+    })
+
+    {:noreply, new_state}
+  end
+
+  def handle_cast({:rename_lobby, new_base_name, renamer_id}, state) do
+    player_rename = not Account.has_any_role?(renamer_id, "bot")
+
+    if player_rename do
+      Telemetry.log_complex_lobby_event(renamer_id, state.match_id, "command.rename", %{name: new_base_name})
+    end
+
+    new_name = generate_name(%{state | lobby: %{state.lobby | base_name: new_base_name}})
+    new_state = do_update_values(state, %{
+      base_name: new_base_name,
+      player_rename: player_rename,
+      name: new_name
+    })
+
+    {:noreply, new_state}
   end
 
   # Enable/Disable units
@@ -466,6 +455,24 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, state}
   end
 
+  def handle_info(%{channel: "teiserver_lobby_chat" <> _, userid: _userid, message: _msg}, state) do
+    {:noreply, state}
+  end
+
+  def handle_info(%{channel: "teiserver_server", event: "stop"}, state) do
+    Battle.say(
+      state.coordinator_id,
+      "Server update taking place, see discord for details/issues.",
+      state.id
+    )
+
+    {:noreply, state}
+  end
+
+  def handle_info(%{channel: "teiserver_server"}, state) do
+    {:noreply, state}
+  end
+
   # Internal
   @spec get_player_list(map()) :: {list(), map()}
   defp get_player_list(%{state: :lobby} = state) do
@@ -493,6 +500,92 @@ defmodule Teiserver.Battle.LobbyServer do
     {state.player_list, state}
   end
 
+  defp generate_name(state) do
+    consul_state = Coordinator.call_consul(state.id, :get_consul_state)
+
+    parts = [
+      "",
+
+      # Rating stuff here
+      (
+        cond do
+          consul_state == nil ->
+            nil
+
+          # Default ratings
+          consul_state.maximum_rating_to_play >= 1000
+          && consul_state.minimum_rating_to_play <= 0 ->
+            nil
+
+          # Just a max rating
+          consul_state.maximum_rating_to_play < 1000
+          && consul_state.minimum_rating_to_play <= 0 ->
+            "Max rating: #{consul_state.maximum_rating_to_play}"
+
+          # Just a min rating
+          consul_state.maximum_rating_to_play >= 1000
+          && consul_state.minimum_rating_to_play > 0 ->
+            "Min rating: #{consul_state.minimum_rating_to_play}"
+
+          # Rating range
+          consul_state.maximum_rating_to_play < 1000
+          || consul_state.minimum_rating_to_play > 0 ->
+            "Rating between: #{consul_state.minimum_rating_to_play} - #{consul_state.maximum_rating_to_play}"
+
+          true ->
+            nil
+        end
+      )
+    ]
+    |> Enum.reject(&(&1 == nil))
+    |> Enum.join(" | ")
+
+    "#{state.lobby.base_name}#{parts}"
+  end
+
+  @spec do_update_values(map, map) :: map
+  defp do_update_values(state, raw_values) do
+    new_values =
+      raw_values
+      |> Map.filter(fn {k, v} ->
+        Map.has_key?(state.lobby, k) and v != Map.get(state.lobby, k)
+      end)
+
+    new_lobby = Map.merge(state.lobby, new_values)
+
+    broadcast_values =
+      new_values
+      |> Map.filter(fn {k, _} ->
+        Enum.member?(@broadcast_update_keys, k)
+      end)
+
+    if not Enum.empty?(broadcast_values) do
+      PubSub.broadcast(
+        Teiserver.PubSub,
+        "teiserver_lobby_updates:#{state.id}",
+        %{
+          channel: "teiserver_lobby_updates",
+          event: :update_values,
+          lobby_id: state.id,
+          changes: broadcast_values
+        }
+      )
+
+      PubSub.broadcast(
+        Teiserver.PubSub,
+        "teiserver_global_lobby_updates",
+        %{
+          channel: "teiserver_global_lobby_updates",
+          event: :updated_values,
+          lobby_id: state.id,
+          new_values: broadcast_values
+        }
+      )
+    end
+
+    %{state | lobby: new_lobby}
+  end
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -509,6 +602,8 @@ defmodule Teiserver.Battle.LobbyServer do
     )
 
     Logger.metadata(request_id: "LobbyServer##{id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
 
     :timer.send_interval(2_000, :tick)
 
@@ -527,6 +622,7 @@ defmodule Teiserver.Battle.LobbyServer do
        id: id,
        lobby: data.lobby,
        founder_id: data.lobby.founder_id,
+       coordinator_id: Coordinator.get_coordinator_userid(),
        modoptions: options,
        server_uuid: server_uuid,
        match_uuid: match_uuid,

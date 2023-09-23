@@ -31,7 +31,7 @@ defmodule Teiserver.Tachyon.Handlers.{Section}.{Action}Request do
 end
 ```
 
-You will then need to add a reference to it in `Teiserver.Tachyon.CommandDispatch`
+If you implement the correct module naming convention and `dispatch_handlers` function it will be automatically loaded by `Teiserver.Tachyon.CommandDispatch` on startup. If you need to reload the dispatches you can use `Teiserver.Tachyon.CommandDispatch.build_dispatch_cache()`.
 
 ## Response generators
 For creating protocol responses

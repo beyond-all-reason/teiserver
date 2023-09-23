@@ -1,7 +1,9 @@
 defmodule Teiserver.Battle.LobbyServerTest do
+  @moduledoc false
   # Cannot be async because some other tests will call for a list of all lobbies
   use Central.DataCase, async: false
   alias Teiserver.Lobby.LobbyLib
+  alias Teiserver.Coordinator
 
   test "server test" do
     host = Teiserver.TeiserverTestLib.new_user()
@@ -57,5 +59,62 @@ defmodule Teiserver.Battle.LobbyServerTest do
     # assert r == nil
 
     LobbyLib.stop_lobby_server(lobby_id)
+  end
+
+  test "rename test" do
+    host = Teiserver.TeiserverTestLib.new_user()
+
+    lobby = %{
+      id: 123,
+      founder_id: host.id,
+      founder_name: host.name,
+      cmd: "c.lobby.create",
+      name: "ServerName",
+      base_name: "ServerName",
+      nattype: "none",
+      port: 1234,
+      game_hash: "string_of_characters",
+      map_hash: "string_of_characters",
+      map_name: "koom valley",
+      game_name: "BAR",
+      engine_name: "spring-105",
+      engine_version: "105.1.2.3",
+      settings: %{
+        max_players: 12
+      }
+    }
+
+    lobby_id = lobby.id
+
+    p = LobbyLib.start_lobby_server(lobby)
+    Coordinator.start_consul(lobby_id)
+    assert is_pid(p)
+
+    LobbyLib.rename_lobby(lobby_id, "base name", host.id)
+    c = LobbyLib.call_lobby(lobby_id, :get_lobby_state)
+    assert c.id == lobby_id
+    assert c.name == "base name"
+
+    # Now set a max rating
+    Coordinator.cast_consul(lobby_id, {:put, :maximum_rating_to_play, 50})
+    LobbyLib.cast_lobby(lobby_id, :refresh_name)
+
+    c = LobbyLib.call_lobby(lobby_id, :get_lobby_state)
+    assert c.id == lobby_id
+    assert c.name == "base name | Max rating: 50"
+
+    # Now set a min rating
+    Coordinator.cast_consul(lobby_id, {:put, :minimum_rating_to_play, 10})
+    LobbyLib.cast_lobby(lobby_id, :refresh_name)
+
+    c = LobbyLib.call_lobby(lobby_id, :get_lobby_state)
+    assert c.id == lobby_id
+    assert c.name == "base name | Rating between: 10 - 50"
+
+    # Try renaming with nil user
+    LobbyLib.rename_lobby(lobby_id, "other name", nil)
+    c = LobbyLib.call_lobby(lobby_id, :get_lobby_state)
+    assert c.id == lobby_id
+    assert c.name == "other name | Rating between: 10 - 50"
   end
 end

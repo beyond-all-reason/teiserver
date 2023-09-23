@@ -483,20 +483,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, new_state}
   end
 
-  def handle_info(%{channel: "teiserver_server", event: "stop"}, state) do
-    Lobby.say(
-      state.coordinator_id,
-      "Teiserver update taking place, see discord for details/issues.",
-      state.lobby_id
-    )
-
-    {:noreply, state}
-  end
-
-  def handle_info(%{channel: "teiserver_server"}, state) do
-    {:noreply, state}
-  end
-
   # Chat handler
   @spec handle_lobby_chat(T.userid(), String.t(), map()) :: map()
   defp handle_lobby_chat(
@@ -1343,9 +1329,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       afk_check_at: nil,
       last_seen_map: %{},
 
-      # Base string used to rename lobbies
-      rename_string: "",
-
       # Toggle with Coordinator.cast_consul(lobby_id, {:put, :unready_can_play, true})
       unready_can_play: false,
       last_queue_state: [],
@@ -1394,7 +1377,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
     Logger.metadata(request_id: "ConsulServer##{lobby_id}")
 
     # Update the queue pids cache to point to this process

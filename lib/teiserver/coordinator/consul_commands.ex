@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Config
   alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
   alias Teiserver.{Account, Battle, Lobby, Coordinator, User, Client, Telemetry}
-  alias Teiserver.Lobby.{ChatLib}
+  alias Teiserver.Lobby.{ChatLib, LobbyLib}
   alias Teiserver.Chat.WordLib
   alias Teiserver.Data.Types, as: T
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
@@ -41,7 +41,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         pos ->
           if Enum.member?(state.low_priority_join_queue, senderid) do
-            "You are at position #{pos + 1} but in the low prority queue so other users may be added in front of you"
+            "You are at position #{pos + 1} but in the low priority queue so other users may be added in front of you"
           else
             "You are at position #{pos + 1} in the queue"
           end
@@ -756,11 +756,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "resetratinglevels", remaining: ""} = cmd, state) do
     ConsulServer.say_command(cmd, state)
+    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
     %{state | minimum_rating_to_play: 0, maximum_rating_to_play: 1000}
   end
 
   def handle_command(%{command: "minratinglevel", remaining: ""} = cmd, state) do
     ConsulServer.say_command(cmd, state)
+    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
     %{state | minimum_rating_to_play: 0}
   end
 
@@ -784,7 +786,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         {level, _} ->
           ConsulServer.say_command(cmd, state)
-
+          LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
           %{
             state
             | minimum_rating_to_play: level |> max(0) |> min(state.maximum_rating_to_play - 1)
@@ -798,6 +800,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "maxratinglevel", remaining: ""} = cmd, state) do
     ConsulServer.say_command(cmd, state)
+    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
     %{state | maximum_rating_to_play: 1000}
   end
 
@@ -821,7 +824,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         {level, _} ->
           ConsulServer.say_command(cmd, state)
-
+          LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
           %{
             state
             | maximum_rating_to_play: level |> min(1000) |> max(state.minimum_rating_to_play + 1)
@@ -870,7 +873,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
               max_level = max(min_level_o, max_level_o)
 
               ConsulServer.say_command(cmd, state)
-
+              LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
               %{
                 state
                 | minimum_rating_to_play: max(min_level, 0),
@@ -898,11 +901,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "resetranklevels", remaining: ""} = cmd, state) do
     ConsulServer.say_command(cmd, state)
+    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
     %{state | minimum_rank_to_play: 0, maximum_rank_to_play: 1000}
   end
 
   def handle_command(%{command: "minranklevel", remaining: ""} = cmd, state) do
     ConsulServer.say_command(cmd, state)
+    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
     %{state | minimum_rank_to_play: 0}
   end
 
@@ -925,12 +930,14 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
       {level, _} ->
         ConsulServer.say_command(cmd, state)
+        LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
         %{state | minimum_rank_to_play: level |> max(0) |> min(state.maximum_rank_to_play - 1)}
     end
   end
 
   def handle_command(%{command: "maxranklevel", remaining: ""} = cmd, state) do
     ConsulServer.say_command(cmd, state)
+    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
     %{state | maximum_rank_to_play: 1000}
   end
 
@@ -953,6 +960,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
       {level, _} ->
         ConsulServer.say_command(cmd, state)
+        LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
         %{state | maximum_rank_to_play: level |> min(1000) |> max(state.minimum_rank_to_play + 1)}
     end
   end
@@ -993,7 +1001,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             max_level = max(min_level_o, max_level_o)
 
             ConsulServer.say_command(cmd, state)
-
+            LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
             %{
               state
               | minimum_rank_to_play: max(min_level, 0),
@@ -1017,11 +1025,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "resetuncertaintylevels", remaining: ""} = cmd, state) do
     ConsulServer.say_command(cmd, state)
+    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
     %{state | minimum_uncertainty_to_play: 0, maximum_uncertainty_to_play: 1000}
   end
 
   def handle_command(%{command: "minuncertaintylevel", remaining: ""} = cmd, state) do
     ConsulServer.say_command(cmd, state)
+    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
     %{state | minimum_uncertainty_to_play: 0}
   end
 
@@ -1044,7 +1054,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
       {level, _} ->
         ConsulServer.say_command(cmd, state)
-
+        LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
         %{
           state
           | minimum_uncertainty_to_play:
@@ -1055,6 +1065,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "maxuncertaintylevel", remaining: ""} = cmd, state) do
     ConsulServer.say_command(cmd, state)
+    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
     %{state | maximum_uncertainty_to_play: 1000}
   end
 
@@ -1077,7 +1088,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
       {level, _} ->
         ConsulServer.say_command(cmd, state)
-
+        LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
         %{
           state
           | maximum_uncertainty_to_play:
@@ -1122,7 +1133,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             max_level = max(min_level_o, max_level_o)
 
             ConsulServer.say_command(cmd, state)
-
+            LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
             %{
               state
               | minimum_uncertainty_to_play: max(min_level, 0),
@@ -1394,7 +1405,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     cond do
       new_name == "" ->
-        Lobby.rename_lobby(state.lobby_id, lobby.name, false)
+        Battle.rename_lobby(state.lobby_id, lobby.name, nil)
         state
 
       WordLib.flagged_words(new_name) > 0 ->
@@ -1438,7 +1449,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         state
 
       senderid != lobby.founder_id ->
-        Lobby.rename_lobby(state.lobby_id, new_name, true)
+        # We have to do this so we don't block the get_state call from the LobbyServer
+        # when it tries to query the rating values
+        spawn(fn ->
+          :timer.sleep(500)
+          Battle.rename_lobby(state.lobby_id, new_name, senderid)
+        end)
+
         ConsulServer.say_command(cmd, state)
 
         downcase_name = new_name |> String.downcase()
@@ -1457,14 +1474,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             state.lobby_id
           )
         end
+        state
 
-        %{state | rename_string: ""}
-
-      lobby.consul_rename ->
+      lobby.player_rename ->
         state
 
       true ->
-        Lobby.rename_lobby(state.lobby_id, new_name, false)
+        Battle.rename_lobby(state.lobby_id, new_name, nil)
         state
     end
   end
@@ -1894,7 +1910,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "reset"} = _cmd, state) do
-    Battle.update_lobby_values(state.lobby_id, %{consul_rename: false})
+    Battle.update_lobby_values(state.lobby_id, %{player_rename: false})
 
     ConsulServer.empty_state(state.lobby_id)
     |> ConsulServer.broadcast_update("reset")
