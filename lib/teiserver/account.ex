@@ -2049,6 +2049,12 @@ defmodule Teiserver.Account do
   @spec has_all_roles?(T.userid() | T.user() | nil, String.t | [String.t]) :: boolean()
   defdelegate has_all_roles?(user_or_userid, roles), to: Teiserver.User
 
+  @spec is_moderator?(T.userid()) :: boolean()
+  defdelegate is_moderator?(userid), to: Teiserver.User
+
+  @spec is_bot?(T.userid()) :: boolean()
+  defdelegate is_bot?(userid), to: Teiserver.User
+
   # Client stuff
   alias Teiserver.Account.ClientLib
 

@@ -136,6 +136,7 @@ defmodule Central.Application do
         concache_sup(:discord_bridge_account_codes, global_ttl: 300_000),
 
         # Lobbies
+        concache_perm_sup(:lobby_command_cache),
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.LobbySupervisor},
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.ClientSupervisor},
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.PartySupervisor},

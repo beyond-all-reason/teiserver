@@ -1,5 +1,9 @@
 defmodule Teiserver.Data.Types do
-  # alias Teiserver.Data.Types, as: T
+  @doc """
+  A list of types in one place to make it easier to reference them
+
+  alias Teiserver.Data.Types, as: T
+  """
 
   @type userid() :: non_neg_integer()
   @type party_id() :: String.t()

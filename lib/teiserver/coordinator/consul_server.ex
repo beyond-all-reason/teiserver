@@ -17,10 +17,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
   # Commands that are always forwarded to the coordinator itself, not the consul server
   @coordinator_bot ~w(whoami whois check discord help coc ignore mute ignore unmute unignore matchmaking website party modparty unparty)
 
-  @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? explain newlobby jazlobby tournament)
+  @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? newlobby jazlobby tournament)
   @boss_commands ~w(balancemode gatekeeper welcome-message meme reset-approval rename resetratinglevels minratinglevel maxratinglevel setratinglevels)
   @vip_boss_commands ~w(shuffle)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock makebalance)
+
+  # @handled_by_lobby ~w(explain)
 
   @splitter "########################################"
 
@@ -983,6 +985,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     cond do
       client == nil ->
         false
+
+      # Enum.member?(@handled_by_lobby, cmd.command) ->
+      #   false
 
       Enum.member?(@always_allow, cmd.command) ->
         true

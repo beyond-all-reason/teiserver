@@ -3,6 +3,7 @@ defmodule Teiserver.Battle.LobbyServer do
   use GenServer
   require Logger
   alias Teiserver.{Account, Battle, Config, Telemetry, Coordinator}
+  alias Teiserver.Lobby.CommandLib
   alias Teiserver.Bridge.BridgeServer
   alias Phoenix.PubSub
 
@@ -453,6 +454,11 @@ defmodule Teiserver.Battle.LobbyServer do
   @impl true
   def handle_info(:tick, state) do
     {:noreply, state}
+  end
+
+  def handle_info(%{channel: "teiserver_lobby_chat" <> _, userid: userid, message: "$" <> message}, state) do
+    new_state = CommandLib.handle_command(state, userid, message)
+    {:noreply, new_state}
   end
 
   def handle_info(%{channel: "teiserver_lobby_chat" <> _, userid: _userid, message: _msg}, state) do

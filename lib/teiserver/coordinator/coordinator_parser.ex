@@ -4,6 +4,8 @@ defmodule Teiserver.Coordinator.Parser do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle
 
+  @passthrough ~w(explain)
+
   @spec handle_in(Types.userid(), String.t(), Types.lobby_id()) :: :say | :handled
   def handle_in(userid, msg, lobby_id) do
     lobby = Battle.get_lobby(lobby_id)
@@ -14,8 +16,14 @@ defmodule Teiserver.Coordinator.Parser do
       String.slice(msg, 0..1) == "$ " ->
         :say
 
-      String.slice(msg, 0..0) == "$" ->
-        parse_and_handle(userid, msg, lobby)
+      String.slice(msg, 0..0) == "$" and String.length(msg) > 1 ->
+        cmd_name = msg |> String.replace("$", "") |> String.downcase |> String.split(" ") |> hd
+
+        if Enum.member?(@passthrough, cmd_name) do
+          :say
+        else
+          parse_and_handle(userid, msg, lobby)
+        end
 
       true ->
         :say
