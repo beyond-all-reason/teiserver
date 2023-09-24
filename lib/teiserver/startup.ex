@@ -21,6 +21,8 @@ defmodule Teiserver.Startup do
     Teiserver.Tachyon.CommandDispatch.build_dispatch_cache()
     Teiserver.Tachyon.Schema.load_schemas()
 
+    Teiserver.Lobby.CommandLib.cache_lobby_commands()
+
     # Chat stuff
     Central.Account.UserLib.add_report_restriction_types("Chat", [
       "Bridging",

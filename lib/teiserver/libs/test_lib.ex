@@ -1,9 +1,11 @@
 defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
   alias Teiserver.{Client, User, Account, SpringIdServer}
+  alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Protocols.TachyonLib
   alias Teiserver.Coordinator.CoordinatorServer
+  alias Teiserver.Data.Types, as: T
   @host '127.0.0.1'
 
   @spec raw_setup :: %{socket: port()}
@@ -442,6 +444,35 @@ defmodule Teiserver.TeiserverTestLib do
       )
 
     c
+  end
+
+  @spec make_lobby() :: {T.lobby_id, pid}
+  @spec make_lobby(map()) :: {T.lobby_id, pid}
+  def make_lobby(params \\ %{}) do
+    host = new_user()
+
+    lobby = %{
+      id: :rand.uniform(999_999_999_999_999),
+      founder_id: host.id,
+      founder_name: host.name,
+      cmd: "c.lobby.create",
+      name: "ServerName",
+      nattype: "none",
+      port: 1234,
+      game_hash: "string_of_characters",
+      map_hash: "string_of_characters",
+      map_name: "koom valley",
+      game_name: "BAR",
+      engine_name: "spring-105",
+      engine_version: "105.1.2.3",
+      settings: %{
+        max_players: 12
+      }
+    }
+    |> Map.merge(params)
+
+    lobby_pid = LobbyLib.start_lobby_server(lobby)
+    {lobby.id, lobby_pid}
   end
 
   @spec make_clan_membership(Integer.t(), Integer.t(), Map.t()) ::
