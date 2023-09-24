@@ -31,13 +31,6 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
       |> assign(:stage, :type)
       |> get_user_matches
 
-
-    # socket = socket
-    #   |> assign(:type, "chat")
-    #   |> assign(:sub_type, "sub-chat")
-    #   |> assign(:match_id, 123)
-    #   |> assign(:stage, :extra_info)
-
     {:noreply, socket}
   end
 
@@ -49,36 +42,56 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
   end
 
   @impl true
-  def handle_event("submit-extra-info", _event, %{assigns: %{stage: :extra_info}} = socket) do
-    IO.puts ""
-    IO.inspect nil
-    IO.puts ""
+  def handle_event("submit-extra-text", _event, %{assigns: %{stage: :extra_text} = assigns} = socket) do
+    report_group = Moderation.get_or_make_report_group(assigns.user.id, assigns.match_id)
 
-    result = :success
+    report_params = %{
+      reporter_id: assigns.current_user.id,
+      target_id: assigns.user.id,
 
-    {:noreply, socket
-      |> assign(:result, result)
-      |> assign(:stage, :completed)
+      type: assigns.type,
+      sub_type: assigns.sub_type,
+      extra_text: assigns.extra_text,
+
+      match_id: assigns.match_id,
+      report_group_id: report_group.id
     }
+
+    case Moderation.create_report(report_params) do
+      {:ok, _report} ->
+        # Update the report group
+        {:ok, _report_group} = Teiserver.Moderation.update_report_group(report_group, %{
+          report_count: report_group.report_count + 1
+        })
+
+        {:noreply, socket
+          |> assign(:result, :success)
+          |> assign(:stage, :completed)
+        }
+
+      v ->
+        raise v
+        {:noreply, socket}
+    end
   end
 
-  def handle_event("update-extra-info", %{"value" => value}, %{assigns: %{stage: :extra_info}} = socket) do
+  def handle_event("update-extra-text", %{"value" => value}, %{assigns: %{stage: :extra_text}} = socket) do
     {:noreply, socket
-      |> assign(:extra_info, value)
+      |> assign(:extra_text, value)
     }
   end
 
   def handle_event("select-match-" <> match_id_str, _, %{assigns: %{stage: :match}} = socket) do
     {:noreply, socket
-      |> assign(:match_id, match_id_str)
-      |> assign(:stage, :extra_info)
+      |> assign(:match_id, String.to_integer(match_id_str))
+      |> assign(:stage, :extra_text)
     }
   end
 
   def handle_event("select-no-match", _, %{assigns: %{stage: :match}} = socket) do
     {:noreply, socket
       |> assign(:match_id, nil)
-      |> assign(:stage, :extra_info)
+      |> assign(:stage, :extra_text)
     }
   end
 
