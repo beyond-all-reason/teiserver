@@ -36,10 +36,8 @@ type_icons = %{
       <%= label(f, :reason, class: "control-label") %>
       <%= text_input(f, :reason, class: "form-control", autofocus: :autofocus) %>
       <%= error_tag(f, :reason) %>
-    </div>
-
-    <div class="form-group col-md-12 my-3">
-      <div class="float-end">
+      
+      <div class="mt-4">
         <span class="btn btn-outline-secondary" onclick="select_all_keys()">
           Select all keys
         </span>
@@ -47,7 +45,14 @@ type_icons = %{
           Clear all keys
         </span>
       </div>
+    </div>
+    
+    <div class="form-group col-md-12 col-lg-6 my-3">
+      <%= label(f, :extra_values, class: "control-label") %>
+      <textarea name="ban[extra_values]" id="ban_extra_values" rows="4" cols="40" class="form-control"><%= Enum.join(@extra_values, "\n") %></textarea>
+    </div>
 
+    <div class="form-group col-md-12 my-3">
       <label class="control-label">Hashes:</label>
       <table class="table table-sm table-hover">
         <thead>
@@ -59,7 +64,7 @@ type_icons = %{
           </tr>
         </thead>
         <tbody>
-          <%= for key <- @all_keys do %>
+          <%= for key <- @all_user_keys do %>
             <tr>
               <td>
                 <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}>

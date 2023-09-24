@@ -91,7 +91,7 @@ defmodule TeiserverWeb.Moderation.BanController do
           nil
       end
 
-    existing_ban = Moderation.get_ban(nil, search: [source_id: String.to_integer(user_str)])
+    existing_ban = Moderation.get_ban(nil, search: [source_id: user.id])
 
     cond do
       user == nil ->
@@ -116,7 +116,7 @@ defmodule TeiserverWeb.Moderation.BanController do
             Teiserver.User.is_restricted?(user, ["Login"])
           end)
 
-        all_keys =
+        all_user_keys =
           Account.list_smurf_keys(
             search: [
               user_id: user.id
@@ -147,12 +147,13 @@ defmodule TeiserverWeb.Moderation.BanController do
         changeset = Moderation.change_ban(%Ban{source_id: user.id})
 
         conn
+        |> assign(:extra_values, [])
         |> assign(:key_types, key_types)
         |> assign(:matching_users, matching_users)
         |> assign(:changeset, changeset)
         |> assign(:user, user)
         |> assign(:user_stats, user_stats)
-        |> assign(:all_keys, all_keys)
+        |> assign(:all_user_keys, all_user_keys)
         |> add_breadcrumb(name: "New ban for #{user.name}", url: conn.request_path)
         |> render("new_with_user.html")
     end
@@ -208,7 +209,7 @@ defmodule TeiserverWeb.Moderation.BanController do
             Teiserver.User.is_restricted?(user, ["Login"])
           end)
 
-        all_keys =
+        all_user_keys =
           Account.list_smurf_keys(
             search: [
               user_id: user.id
@@ -242,7 +243,7 @@ defmodule TeiserverWeb.Moderation.BanController do
         |> assign(:changeset, changeset)
         |> assign(:user, user)
         |> assign(:user_stats, user_stats)
-        |> assign(:all_keys, all_keys)
+        |> assign(:all_user_keys, all_user_keys)
         |> add_breadcrumb(name: "New ban", url: conn.request_path)
         |> render("new_with_user.html")
     end
@@ -254,7 +255,7 @@ defmodule TeiserverWeb.Moderation.BanController do
 
     changeset = Moderation.change_ban(ban)
 
-    all_keys =
+    all_user_keys =
       Account.list_smurf_keys(
         search: [
           user_id: ban.source_id
@@ -264,9 +265,18 @@ defmodule TeiserverWeb.Moderation.BanController do
         order_by: "Newest first"
       )
 
+    user_key_values = all_user_keys
+      |> Enum.map(fn k -> k.value end)
+
+    extra_values = ban.key_values
+      |> Enum.reject(fn v ->
+        Enum.member?(user_key_values, v)
+      end)
+
     conn
+    |> assign(:extra_values, extra_values)
     |> assign(:ban, ban)
-    |> assign(:all_keys, all_keys)
+    |> assign(:all_user_keys, all_user_keys)
     |> assign(:changeset, changeset)
     |> add_breadcrumb(name: "Edit: #{ban.source.name}", url: conn.request_path)
     |> render("edit.html")
@@ -280,9 +290,15 @@ defmodule TeiserverWeb.Moderation.BanController do
       ban_params["key_values"]
       |> Enum.reject(fn r -> r == "false" end)
 
+    extra_values = ban_params["extra_values"]
+      |> String.split("\n")
+      |> Enum.reject(fn v ->
+        v == "" or v == nil
+      end)
+
     ban_params =
       Map.merge(ban_params, %{
-        "key_values" => key_values
+        "key_values" => Enum.uniq(key_values ++ extra_values)
       })
 
     case Moderation.update_ban(ban, ban_params) do

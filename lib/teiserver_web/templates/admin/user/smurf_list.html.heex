@@ -316,7 +316,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                   </tr>
                 </thead>
                 <tbody>
-                  <%= for key <- @all_keys do %>
+                  <%= for key <- @all_user_keys do %>
                     <tr>
                       <td>
                         <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}>
