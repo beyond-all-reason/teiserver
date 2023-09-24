@@ -58,6 +58,16 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     {:noreply, socket}
   end
 
+  def handle_event("unfriend", _event, %{assigns: %{current_user: current_user, user: user}} = socket) do
+    Account.delete_friend(current_user.id, user.id)
+
+    socket = socket
+      |> put_flash(:success, "You have removed #{user.name} as a friend")
+      |> get_relationships_and_permissions()
+
+    {:noreply, socket}
+  end
+
   def handle_event("reset-relationship-state", _event, %{assigns: %{current_user: current_user, user: user}} = socket) do
     Account.reset_relationship_state(current_user.id, user.id)
 

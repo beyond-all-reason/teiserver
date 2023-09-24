@@ -93,6 +93,16 @@
         Rescind friend request
       </span>
       
+      <span
+        :if={@friendship != nil}
+        phx-click="unfriend"
+        class="btn btn-outline-danger mx-1"
+      >
+        <Fontawesome.icon icon="times" style="regular" />
+        &nbsp;
+        Unfriend <%= @user.name %>
+      </span>
+      
       
       
       
@@ -138,7 +148,7 @@
 
       <.link
         :if={(@relationship == nil || @relationship.state != "follow") && @friendship == nil}
-        navigate={~p"/moderation/report_form/#{@user.id}"}
+        navigate={~p"/moderation/report_user/#{@user.id}"}
         class={"btn btn-outline-#{Teiserver.Moderation.ReportLib.colour()} mx-1 ms-4"}
       >
         <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="regular" />
