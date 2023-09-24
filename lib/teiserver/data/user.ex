@@ -448,6 +448,8 @@ defmodule Teiserver.User do
 
   @spec do_rename_user(T.userid(), String.t()) :: :ok
   defp do_rename_user(userid, new_name) do
+    client = Account.get_client_by_id(userid)
+
     user = get_user_by_id(userid)
     set_flood_level(user.id, 10)
     Client.disconnect(userid, "Rename")
@@ -474,7 +476,10 @@ defmodule Teiserver.User do
     db_user = Account.get_user!(userid)
     Account.update_user(db_user, %{"name" => new_name})
 
-    :timer.sleep(5000)
+    if client != nil do
+      :timer.sleep(5000)
+    end
+
     recache_user(userid)
     :ok
   end
