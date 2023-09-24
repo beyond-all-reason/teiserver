@@ -6,7 +6,6 @@ defmodule Teiserver.Lobby.Commands.ExplainCommand do
 
   alias Teiserver.Data.Types, as: T
   alias Teiserver.{Account, Battle, Coordinator}
-  alias Teiserver.Lobby.CommandLib
   import Teiserver.Helper.NumberHelper, only: [round: 2]
 
   @splitter "---------------------------"
@@ -17,7 +16,7 @@ defmodule Teiserver.Lobby.Commands.ExplainCommand do
 
   @impl true
   @spec execute(T.lobby_server_state, map) :: T.lobby_server_state
-  def execute(state, %{userid: userid} = cmd) do
+  def execute(state, %{userid: userid} = _cmd) do
     balance =
       state.id
       |> Battle.get_lobby_current_balance()
@@ -30,12 +29,12 @@ defmodule Teiserver.Lobby.Commands.ExplainCommand do
               balance.time_taken < 1000 ->
                 "Time taken: #{balance.time_taken}us"
 
-              balance.time_taken < 1000_000 ->
+              balance.time_taken < 1_000_000 ->
                 t = round(balance.time_taken / 1000)
                 "Time taken: #{t}ms"
 
-              balance.time_taken < 1000_000_000 ->
-                t = round(balance.time_taken / 1000_000)
+              balance.time_taken < 1_000_000_000 ->
+                t = round(balance.time_taken / 1_000_000)
                 "Time taken: #{t}s"
             end
 
@@ -73,7 +72,7 @@ defmodule Teiserver.Lobby.Commands.ExplainCommand do
         |> List.flatten()
       )
 
-      CommandLib.say_command(cmd, state)
+      # CommandLib.say_command(cmd, state)
     else
       Coordinator.send_to_user(userid, [
         @splitter,

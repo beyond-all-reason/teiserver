@@ -77,13 +77,13 @@ defmodule Teiserver.Lobby.CommandLib do
 
   def say_command(cmd, lobby_id) do
     message = "$ " <> command_as_message(cmd)
-    Battle.say(cmd.senderid, message, lobby_id)
+    Battle.say(cmd.userid, message, lobby_id)
   end
 
   @spec log_command(map, T.lobby_id) :: any
   def log_command(cmd, lobby_id) do
     message = "$ " <> command_as_message(cmd)
-    sender = Account.get_user_by_id(cmd.senderid)
+    sender = Account.get_user_by_id(cmd.userid)
     ChatLib.persist_message(sender, message, lobby_id, :say)
   end
 
@@ -92,7 +92,7 @@ defmodule Teiserver.Lobby.CommandLib do
     remaining = if Map.get(cmd, :remaining), do: " #{cmd.remaining}", else: ""
     error = if Map.get(cmd, :error), do: " Error: #{cmd.error}", else: ""
 
-    "#{cmd.command}#{remaining}#{error}"
+    "#{cmd.name}#{remaining}#{error}"
     |> String.trim()
   end
 end
