@@ -1,0 +1,106 @@
+<div class="row" style="padding-top: 5vh;">
+  <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4">
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3>
+          <img
+            src="/images/logo/logo_favicon.png"
+            height="42"
+            style="margin-right: 5px;"
+            class="d-inline align-top"
+          />
+          <span :if={@user}>
+            Reporting user: <%= @user.name %>
+          </span>
+        </h3>
+      </div>
+      
+      <div class="card-body" :if={@stage == :loading}>
+        Loading <Fontawesome.icon icon="sync" class="fa-spinner-third" />
+      </div>
+      
+      <div class="card-body" :if={@stage == :user}>
+        User selection is currently not implemented, please select using <a href={~p"/account/relationship/search"}>the relationships section</a>
+      </div>
+      
+      <div class="card-body" :if={@stage == :type}>
+        <h5>Reason for report</h5>
+        <div class="row" id="type-row">
+          <div class="col" :for={{label, name, icon} <- @types}>
+            <div class="menu-card" phx-click="select-type" phx-value-type={name}>
+              <span>
+                <Fontawesome.icon icon={icon} style="regular" size="3x" /><br />
+                <%= label %>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-body" :if={@stage == :sub_type}>
+        <h5>Type of <%= @type %></h5>
+        <div class="row">
+          <div class="col" :for={{label, name, icon} <- @sub_types[@type]}>
+            <div class="menu-card" phx-click="select-sub_type" phx-value-sub_type={name}>
+              <span>
+                <i class={"fa-fw fa-regular #{icon} fa-3x"} id={"icon-sub_type-#{name}"}>
+                </i>
+                <br />
+                <%= label %>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-body" :if={@stage == :match}>
+        <h5>Which match?</h5>
+        Note: If the action took place in the lobby, select the match it took place before.
+                
+        <.table
+          id="match-table"
+          rows={@matches}
+          table_class="table-sm table-hover"
+          row_click={fn match -> "select-match-#{match.id}" end}
+        >
+          <:col :let={match} label="Match"><%= match.label %></:col>
+          <:col :let={match} label=""><%= match.time_ago %></:col>
+        </.table>
+      </div>
+      
+      <div class="card-body" :if={@stage == :extra_info}>
+        <h5>Extra info:</h5>
+        The more information you can provide the better, some useful items include:
+        <ul>
+          <li>A description of what was done or specific words said</li>
+          <li>Links to the replay itself</li>
+          <li>Timestamps (even if approximate) of in-game events</li>
+        </ul>
+        
+        <input
+          type="text"
+          name="extra_text"
+          id="report_extra_text"
+          maxlength="255"
+          value=""
+          class="form-control"
+          phx-keyup="update-extra-info"
+          phx-debounce="200"
+        />
+        <span class={"btn btn-#{@view_colour} float-end mt-2"} phx-click="submit-extra-info">
+          Submit report
+        </span>
+      </div>      
+      
+      <div class="card-body" :if={@stage == :completed}>
+        <div :if={@result == :success}>
+          Your report has been submitted, thank you for taking the time to help improve the community.
+          <br /><br />
+          
+          Please note if you want to then you can ignore, avoid or even block <%= @user.name %> via <a href={~p"/profile/#{@user.id}"}>their profile</a>.
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

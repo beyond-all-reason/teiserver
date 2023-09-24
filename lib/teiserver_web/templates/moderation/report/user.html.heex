@@ -29,7 +29,7 @@
         <div class="float-end">
           <a
             class={"btn btn-outline-#{bsname}"}
-            href={Routes.moderation_report_form_path(@conn, :index, @user.id)}
+            href={~p"/moderation/report_user/#{@user.id}"}
           >
             <%= central_component("icon", icon: icon(), class: "fa-solid") %> &nbsp;
             Report form

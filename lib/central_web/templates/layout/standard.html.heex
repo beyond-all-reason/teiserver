@@ -49,7 +49,7 @@
   </style>
 <% end %>
 
-<%= render(TeiserverWeb.General.PageView, "top_navbar.html", assigns) %>
+<TeiserverWeb.NavComponents.top_navbar active={assigns[:site_menu_active]} current_user={@current_user} />
 
 <main>
   <%= if assigns[:breadcrumb_trails] do %>

@@ -26,6 +26,33 @@ defmodule Teiserver.Moderation.ReportLib do
     }
   end
 
+  def types() do
+    [
+      {"Chat / Communication", "chat", Teiserver.Chat.LobbyMessageLib.icon()},
+      {"In game actions", "actions", Teiserver.Battle.MatchLib.icon()}
+    ]
+  end
+
+  def sub_types() do
+    %{
+      "chat" => [
+        {"Spam", "spam", "fa-envelopes-bulk"},
+        {"Bullying", "bullying", "fa-person-harassing"},
+        {"Hate speech", "hate", "fa-triangle-exclamation"},
+        {"Other", "other", "fa-face-unamused"}
+      ],
+      "actions" => [
+        {"Noob", "noob", "fa-chevrons-up"},
+        {"Griefing", "griefing", "fa-face-angry-horns"},
+        {"Cheating", "cheating", "fa-cards"},
+        {"Other", "other", "fa-face-unamused"}
+      ]
+    }
+  end
+
+
+
+
   def sections() do
     [
       {"Chat / Communication", "chat", Teiserver.Chat.LobbyMessageLib.icon()},

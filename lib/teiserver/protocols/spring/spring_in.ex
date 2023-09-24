@@ -629,7 +629,7 @@ defmodule Teiserver.Protocols.SpringIn do
                 user_id: state.userid,
                 metadata: %{
                   ip: client.ip,
-                  redirect: "/moderation/report_form/#{target_id}",
+                  redirect: "/moderation/report_user/#{target_id}",
                   reason: reason
                 }
               })

@@ -517,6 +517,15 @@ defmodule TeiserverWeb.Router do
         live "/overwatch/target/:target_id", OverwatchLive.Index, :target
         live "/overwatch/report_group/:id", OverwatchLive.ReportGroupDetail, :index
     end
+
+    live_session :report_user,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :mount_current_user},
+        {Teiserver.Communication.NotificationPlug, :load_notifications}
+      ] do
+        live "/report_user", ReportUserLive.Index, :index
+        live "/report_user/:id", ReportUserLive.Index, :selected
+    end
   end
 
   scope "/moderation", TeiserverWeb.Moderation, as: :moderation do
@@ -556,10 +565,6 @@ defmodule TeiserverWeb.Router do
     put("/ban/:id/enable", BanController, :enable)
     get("/ban/new_with_user", BanController, :new_with_user)
     resources("/ban", BanController, only: [:index, :show, :new, :create, :edit, :update])
-
-    get("/report_form/success", ReportFormController, :success)
-    post("/report_form", ReportFormController, :create)
-    get("/report_form/:id", ReportFormController, :index)
   end
 
   scope "/admin", TeiserverWeb.Admin, as: :admin do
