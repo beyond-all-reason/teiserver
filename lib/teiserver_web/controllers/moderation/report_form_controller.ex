@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
   @moduledoc false
   use CentralWeb, :controller
 
-  alias Teiserver.{Account, Battle, Moderation}
+  alias Teiserver.{Account, Battle, Moderation, User}
   alias Moderation.ReportLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
@@ -56,64 +56,71 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
   def create(conn, %{"report" => report}) do
     target_id = report["target_id"] |> int_parse
 
-    if conn.assigns.current_user.id == target_id do
-      conn
-      |> put_status(:unprocessable_entity)
-      |> render("self_report.html")
-    else
-      {match_id, relationship} =
-        case report["match_id"] do
-          "none" ->
-            {nil, nil}
+    cond do
+      User.is_restricted?(conn.assigns.current_user.id, ["Community", "Reporting"]) ->
+        conn
+          |> put_status(:unprocessable_entity)
+          |> render("self_report.html")
 
-          match_id_str ->
-            case Battle.get_match(match_id_str, preload: [:members]) do
-              nil ->
-                {nil, nil}
+      conn.assigns.current_user.id == target_id ->
+        conn
+          |> put_status(:unprocessable_entity)
+          |> render("self_report.html")
 
-              match ->
-                target_member =
-                  match.members
-                  |> Enum.find(fn member -> member.user_id == target_id end)
+      true ->
+        {match_id, relationship} =
+          case report["match_id"] do
+            "none" ->
+              {nil, nil}
 
-                reporter_member =
-                  match.members
-                  |> Enum.find(fn member -> member.user_id == conn.assigns.current_user.id end)
+            match_id_str ->
+              case Battle.get_match(match_id_str, preload: [:members]) do
+                nil ->
+                  {nil, nil}
 
-                relationship =
-                  cond do
-                    reporter_member == nil -> nil
-                    target_member.team_id == reporter_member.team_id -> "Allies"
-                    target_member.team_id != reporter_member.team_id -> "Opponents"
-                  end
+                match ->
+                  target_member =
+                    match.members
+                    |> Enum.find(fn member -> member.user_id == target_id end)
 
-                {match.id, relationship}
-            end
+                  reporter_member =
+                    match.members
+                    |> Enum.find(fn member -> member.user_id == conn.assigns.current_user.id end)
+
+                  relationship =
+                    cond do
+                      reporter_member == nil -> nil
+                      target_member.team_id == reporter_member.team_id -> "Allies"
+                      target_member.team_id != reporter_member.team_id -> "Opponents"
+                    end
+
+                  {match.id, relationship}
+              end
+          end
+
+        result =
+          Moderation.create_report(%{
+            reporter_id: conn.assigns.current_user.id,
+            target_id: report["target_id"],
+            type: report["type"],
+            sub_type: report["sub_type"],
+            extra_text: report["extra_text"],
+            match_id: match_id,
+            relationship: relationship
+          })
+
+        case result do
+          {:ok, _report} ->
+            conn
+            |> redirect(to: Routes.moderation_report_form_path(conn, :success))
+
+          {:error, changeset} ->
+            Logger.error(Kernel.inspect(changeset))
+            raise "Error submitting report"
+
+            conn
+            |> render("index.html")
         end
-
-      result =
-        Moderation.create_report(%{
-          reporter_id: conn.assigns.current_user.id,
-          target_id: report["target_id"],
-          type: report["type"],
-          sub_type: report["sub_type"],
-          extra_text: report["extra_text"],
-          match_id: match_id,
-          relationship: relationship
-        })
-
-      case result do
-        {:ok, _report} ->
-          conn
-          |> redirect(to: Routes.moderation_report_form_path(conn, :success))
-
-        {:error, changeset} ->
-          Logger.error(Kernel.inspect(changeset))
-          raise "Error submitting report"
-
-          conn
-          |> render("index.html")
-      end
     end
   end
 
