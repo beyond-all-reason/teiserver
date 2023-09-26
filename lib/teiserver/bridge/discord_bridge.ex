@@ -273,7 +273,13 @@ defmodule Teiserver.Bridge.DiscordBridge do
         |> Enum.join("\n")
         |> String.replace("\n\n", "\n")
 
-      Api.create_message(channel_id, message)
+      posting_result = Api.create_message(channel_id, message)
+      case posting_result do
+        {:ok, %{id: message_id}} ->
+          Moderation.update_action(action, %{discord_message_id: message_id})
+
+      end
+      posting_result
     end
   end
 
