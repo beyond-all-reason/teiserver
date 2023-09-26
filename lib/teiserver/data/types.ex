@@ -38,4 +38,7 @@ defmodule Teiserver.Data.Types do
   @type lobby_policy_id() :: non_neg_integer()
 
   @type party() :: Teiserver.Account.Party.t()
+
+  # This function exists purely to prevent an error appearing for the module docstring
+  def z_do_nothing, do: :ok
 end
