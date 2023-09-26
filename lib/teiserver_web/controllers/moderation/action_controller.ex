@@ -62,7 +62,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
   def show(conn, %{"id" => id}) do
     action =
       Moderation.get_action!(id,
-        preload: [:target, :reports_and_reporters]
+        preload: [:target]
       )
 
     logs =
@@ -280,6 +280,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     case Moderation.update_action(action, action_params) do
       {:ok, _action} ->
         Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
+        Teiserver.Bridge.DiscordBridge.update_action(action)
 
         add_audit_log(conn, "Moderation:Action updated", %{action_id: action.id})
 
@@ -300,14 +301,28 @@ defmodule TeiserverWeb.Moderation.ActionController do
   def re_post(conn, %{"id" => id}) do
     action = Moderation.get_action!(id)
 
-    Teiserver.Bridge.DiscordBridge.new_action(action)
+    # First we try to update the message (if we have an ID)
+    update_result = if action.discord_message_id do
+      Teiserver.Bridge.DiscordBridge.update_action(action)
+    else
+      {:error, "no message_id"}
+    end
 
-    add_audit_log(conn, "Moderation:Action re_posted", %{action_id: action.id})
     Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
+    case update_result do
+      {:error, _} ->
+        Teiserver.Bridge.DiscordBridge.new_action(action)
+        add_audit_log(conn, "Moderation:Action re_posted", %{action_id: action.id})
 
-    conn
-    |> put_flash(:info, "Action re-posted.")
-    |> redirect(to: Routes.moderation_action_path(conn, :index))
+        conn
+          |> put_flash(:info, "Action re-posted.")
+          |> redirect(to: Routes.moderation_action_path(conn, :index))
+
+      {:ok, _} ->
+        conn
+          |> put_flash(:info, "Action updated.")
+          |> redirect(to: Routes.moderation_action_path(conn, :index))
+    end
   end
 
   @spec halt(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

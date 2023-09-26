@@ -46,30 +46,4 @@
       </tbody>
     </table>
   </div>
-
-  <div class="col-md-6">
-    <table class="table table-sm">
-      <thead>
-        <tr>
-          <th>Reporter</th>
-          <th>&nbsp;</th>
-        </tr>
-      </thead>
-      <tbody>
-        <%= for report <- @action.reports do %>
-          <tr>
-            <td><%= report.reporter.name %></td>
-            <td>
-              <a
-                href={Routes.moderation_report_path(@conn, :show, report.id)}
-                class="btn btn-secondary btn-sm"
-              >
-                Show report
-              </a>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
 </div>

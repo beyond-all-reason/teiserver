@@ -243,35 +243,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
       end
 
     if post_to_discord do
-      until =
-        if action.expires do
-          "Until: " <> TimexHelper.date_to_str(action.expires, format: :ymd_hms) <> " (UTC)"
-        else
-          "Permanent"
-        end
-
-      restriction_list = action.restrictions |> Enum.join(", ")
-
-      restriction_string =
-        if Enum.count(action.restrictions) > 1 do
-          "Restrictions: #{restriction_list}"
-        else
-          "Restriction: #{restriction_list}"
-        end
-
-      formatted_reason =
-        Regex.replace(~r/https:\/\/discord.gg\/\S+/, action.reason, "--discord-link--")
-
-      message =
-        [
-          "--------------------------------------------",
-          "`#{action.target.name}` has been moderated.",
-          "Reason: #{formatted_reason}, #{restriction_string}",
-          until
-        ]
-        |> List.flatten()
-        |> Enum.join("\n")
-        |> String.replace("\n\n", "\n")
+      message = generate_action_text(action)
 
       posting_result = Api.create_message(channel_id, message)
       case posting_result do
@@ -280,7 +252,49 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
       end
       posting_result
+    else
+      nil
     end
+  end
+
+  def update_action(%{discord_message_id: message_id} = action) do
+    channel_id = Config.get_site_config_cache("teiserver.Discord channel #moderation-actions")
+    contents = generate_action_text(action)
+
+    if channel_id && message_id && contents do
+      Api.edit_message(channel_id, message_id, content: contents)
+    end
+  end
+
+  defp generate_action_text(action) do
+    until =
+      if action.expires do
+        "Until: " <> TimexHelper.date_to_str(action.expires, format: :ymd_hms) <> " (UTC)"
+      else
+        "Permanent"
+      end
+
+    restriction_list = action.restrictions |> Enum.join(", ")
+
+    restriction_string =
+      if Enum.count(action.restrictions) > 1 do
+        "Restrictions: #{restriction_list}"
+      else
+        "Restriction: #{restriction_list}"
+      end
+
+    formatted_reason =
+      Regex.replace(~r/https:\/\/discord.gg\/\S+/, action.reason, "--discord-link--")
+
+    [
+      "--------------------------------------------",
+      "`#{action.target.name}` has been moderated.",
+      "Reason: #{formatted_reason}, #{restriction_string}",
+      until
+    ]
+      |> List.flatten()
+      |> Enum.join("\n")
+      |> String.replace("\n\n", "\n")
   end
 
   def gdt_check() do
