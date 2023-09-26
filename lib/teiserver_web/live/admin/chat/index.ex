@@ -18,25 +18,20 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
     {:ok, socket}
   end
 
-  # @impl true
-  # def handle_params(%{"tab" => tab} = params, _url, socket) do
-  #   socket = socket
-  #     |> assign(:tab, tab)
+  @impl true
+  def handle_params(params, _url, %{assigns: %{filters: filters}} = socket) do
+    filters = if params["userid"] do
+      username = Account.get_username_by_id(params["userid"])
+      Map.merge(filters, %{
+        "username" => username,
+        "user-raw-filter" => username
+      })
+    else
+      filters
+    end
 
-  #   {:noreply, apply_action(socket, socket.assigns.live_action, params)}
-  # end
-
-  # defp apply_action(%{assigns: %{tab: "alerts"}} = socket, _, _params) do
-  #   socket
-  #   |> put_flash(:success, "Success flash - #{:rand.uniform(1000)}")
-  #   |> put_flash(:info, "Info flash - #{:rand.uniform(1000)}")
-  #   |> put_flash(:warning, "Warning flash - #{:rand.uniform(1000)}")
-  #   |> put_flash(:error, "Danger/Error flash - #{:rand.uniform(1000)}")
-  # end
-
-  # defp apply_action(socket, _, _params) do
-  #   socket
-  # end
+    {:noreply, assign(socket, :filters, filters)}
+  end
 
   @impl true
   def handle_info(:do_get_messages, socket) do

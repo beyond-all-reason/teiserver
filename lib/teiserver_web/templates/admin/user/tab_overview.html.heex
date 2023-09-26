@@ -48,7 +48,7 @@
     name: "chat",
     text: "Chat",
     icon_class: "fa-solid",
-    link: Routes.ts_admin_user_path(@conn, :full_chat, @user)
+    link: ~p"/admin/chat?userid=#{@user.id}"
   ) %>
 
   <%= central_component("menu_card",
