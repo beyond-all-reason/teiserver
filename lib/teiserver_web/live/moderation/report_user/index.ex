@@ -161,13 +161,16 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
 
   defp allowed_to_use_form(%{assigns: %{current_user: current_user, user: target_user}} = socket) do
     {allowed, failure_reason} = cond do
+      current_user == nil ->
+        {false, "You must be logged in to report someone"}
+
       current_user.id == target_user.id ->
         {false, "You cannot report yourself"}
 
       Account.is_restricted?(current_user, "Reporting") ->
         {false, "You are currently restricted from submitting new reports"}
 
-      true -> true
+      true -> {true, nil}
     end
 
     if allowed do

@@ -6,7 +6,41 @@
       active="index"
       view_colour={@view_colour}
       current_user={@current_user}
-    />
+    >
+      
+      <div :if={@filters["target_id"]} class="float-end">
+        <.section_menu_button
+          :if={allow?(@current_user, "Moderator")}
+          bsname={Teiserver.Moderation.ActionLib.colour()}
+          icon={Teiserver.Moderation.ActionLib.icon()}
+          active={false}
+          url={~p"/moderation/action/new_with_user?userid=#{@filters["target_id"]}"}
+        >
+          Action user
+        </.section_menu_button>
+
+        <.section_menu_button
+          :if={allow?(@current_user, "Moderator")}
+          bsname={Teiserver.Account.UserLib.colour()}
+          icon={Teiserver.Account.UserLib.icon()}
+          active={false}
+          url={~p"/teiserver/admin/user/#{@filters["target_id"]}"}
+        >
+          Admin user
+        </.section_menu_button>
+
+        <.section_menu_button
+          :if={allow?(@current_user, "Moderator")}
+          bsname={Teiserver.Account.UserLib.colour()}
+          icon={Teiserver.Account.UserLib.icon()}
+          active={false}
+          url={~p"/teiserver/admin/users/smurf_search/#{@filters["target_id"]}"}
+        >
+          Smurf search
+        </.section_menu_button>
+      </div>
+      
+    </TeiserverWeb.Moderation.OverwatchComponents.section_menu>
     <br /><br />
     
     <form method="post" class="">
@@ -20,7 +54,7 @@
             phx-change="filter-update"
           />
         </div>
-        
+
         <div class="col">
           <.input type="select"
             label="Open/Closed"

@@ -94,20 +94,28 @@ defmodule TeiserverWeb.Moderation.ActionController do
   end
 
   @spec new_with_user(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def new_with_user(conn, %{"teiserver_user" => user_str}) do
-    user =
-      cond do
-        Integer.parse(user_str) != :error ->
-          {user_id, _} = Integer.parse(user_str)
-          Account.get_user(user_id)
+  def new_with_user(conn, params) do
+    user = case params do
+      %{"userid" => userid_str} ->
+        Account.get_user(userid_str)
 
-        get_hash_id(user_str) != nil ->
-          user_id = get_hash_id(user_str)
-          Account.get_user(user_id)
+      %{"teiserver_user" => userid_str} ->
+        cond do
+          Integer.parse(userid_str) != :error ->
+            {user_id, _} = Integer.parse(userid_str)
+            Account.get_user(user_id)
 
-        true ->
-          nil
-      end
+          get_hash_id(userid_str) != nil ->
+            user_id = get_hash_id(userid_str)
+            Account.get_user(user_id)
+
+          true ->
+            nil
+        end
+
+      _ ->
+        nil
+    end
 
     case user do
       nil ->

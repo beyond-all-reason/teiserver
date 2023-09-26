@@ -4,7 +4,20 @@ defmodule TeiserverWeb.Moderation.OverwatchComponents do
   import TeiserverWeb.NavComponents, only: [section_menu_button: 1]
 
   @doc """
-  <TeiserverWeb.Moderation.OverwatchComponents.section_menu active={active} bsname={} />
+  <TeiserverWeb.Moderation.OverwatchComponents.section_menu
+    active={active}
+    view_colour={@view_colour}
+    current_user={@current_user} />
+
+  or
+
+  <TeiserverWeb.Moderation.OverwatchComponents.section_menu
+    active={active}
+    view_colour={@view_colour}
+    current_user={@current_user}
+  >
+    Content here
+  </TeiserverWeb.Moderation.OverwatchComponents.section_menu>
   """
   attr :view_colour, :string, required: true
   attr :active, :string, required: true

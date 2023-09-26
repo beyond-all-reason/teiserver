@@ -167,11 +167,9 @@ defmodule TeiserverWeb.NavComponents do
             <%#= render(TeiserverWeb.Communication.GeneralView, "notification_dropdown.html", assigns) %>
             <div style="width: 300px; display: inline-block;"></div>
           <% else %>
-            <.top_nav_item
-              text="Sign in"
-              route={~p"/login"}
-              active={false}
-            />
+            <a class="nav-link" href={~p"/login"}>
+              Sign in
+            </a>
           <% end %>
         </div>
         <!-- Right elements -->

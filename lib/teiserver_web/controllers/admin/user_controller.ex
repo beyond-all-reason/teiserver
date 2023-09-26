@@ -584,7 +584,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        all_keys =
+        all_user_keys =
           Account.list_smurf_keys(
             search: [
               user_id: user.id
@@ -595,13 +595,13 @@ defmodule TeiserverWeb.Admin.UserController do
           )
 
         key_count_by_type_name =
-          all_keys
+          all_user_keys
           |> Enum.group_by(fn k -> k.type.name end, fn _ -> 1 end)
           |> Enum.map(fn {k, vs} -> {k, Enum.count(vs)} end)
           |> Enum.sort(&<=/2)
 
         user_key_lookup =
-          all_keys
+          all_user_keys
           |> Map.new(fn k -> {k.value, k} end)
 
         matching_keys = Account.smurf_search(user)
@@ -651,7 +651,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
         conn
         |> add_breadcrumb(name: "List of possible smurf accounts", url: conn.request_path)
-        |> assign(:all_keys, all_keys)
+        |> assign(:all_user_keys, all_user_keys)
         |> assign(:key_count_by_type_name, key_count_by_type_name)
         |> assign(:user, user)
         |> assign(:stats, stats)
