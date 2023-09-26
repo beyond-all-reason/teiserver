@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
     id = String.to_integer(id_str)
     socket = default_mount(socket)
 
-    report_group = Moderation.get_report_group!(id, preload: [:target, :actions, :reports])
+    report_group = get_report_group(id)
 
     report_group
       |> ReportGroupLib.make_favourite()
@@ -45,5 +45,27 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
       |> assign(:filters, new_filters)
 
     {:noreply, socket}
+  end
+
+  def handle_event("close-group", _event, %{assigns: %{report_group: report_group}} = socket) do
+    {:ok, _} = Moderation.update_report_group(report_group, %{"closed" => "true"})
+
+    {:noreply,
+      socket
+        |> assign(:report_group, get_report_group(report_group.id))
+    }
+  end
+
+  def handle_event("open-group", _event, %{assigns: %{report_group: report_group}} = socket) do
+    {:ok, _} = Moderation.update_report_group(report_group, %{"closed" => "false"})
+
+    {:noreply,
+      socket
+        |> assign(:report_group, get_report_group(report_group.id))
+    }
+  end
+
+  defp get_report_group(id) do
+    Moderation.get_report_group!(id, preload: [:target, :actions, :reports])
   end
 end

@@ -68,18 +68,16 @@
       <div class="float-end">
         <%= if allow?(@current_user, "Moderator") do %>
           <%= if @report_group.closed do %>
-            <%= link(raw("<i class='fa-solid fa-fw fa-folder-open'></i> Open"),
-              to: ~p"/moderation/report/#{@report_group.id}/open",
-              method: :put,
-              class: "btn btn-outline-#{@view_colour}"
-            ) %>
+            <span class={"btn btn-outline-#{@view_colour}"} phx-click="open-group">
+              <Fontawesome.icon icon="folder-open" style="solid" />
+              Open
+            </span>
           <% else %>
             <%= if @report_group.action_count == 0 do %>
-              <%= link(raw("<i class='fa-solid fa-fw fa-folder-closed'></i> Close"),
-                to: ~p"/moderation/report/#{@report_group.id}/close",
-                method: :put,
-                class: "btn btn-outline-#{@view_colour}"
-              ) %>
+              <span class={"btn btn-outline-#{@view_colour}"} phx-click="close-group">
+                <Fontawesome.icon icon="folder-closed" style="solid" />
+                Close
+              </span>
             <% end %>
           <% end %>
         <% end %>
