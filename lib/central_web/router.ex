@@ -110,31 +110,6 @@ defmodule TeiserverWeb.Router do
     end
   end
 
-  # scope "/", ApolloWeb do
-  #   pipe_through [:browser, :require_authenticated_user]
-
-  #   live_session :require_authenticated_user,
-  #     on_mount: [{ApolloWeb.UserAuth, :ensure_authenticated}] do
-  #     live "/users/settings", UserSettingsLive, :edit
-  #     live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
-  #   end
-  # end
-
-
-  # scope "/", ApolloWeb do
-  #   pipe_through [:browser, :redirect_if_user_is_authenticated]
-
-  #   live_session :redirect_if_user_is_authenticated,
-  #     on_mount: [{ApolloWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-  #     live "/users/register", UserRegistrationLive, :new
-  #     live "/users/log_in", UserLoginLive, :new
-  #     live "/users/reset_password", UserForgotPasswordLive, :new
-  #     live "/users/reset_password/:token", UserResetPasswordLive, :edit
-  #   end
-
-  #   post "/users/log_in", UserSessionController, :create
-  # end
-
   scope "/", TeiserverWeb.Account, as: :account do
     pipe_through([:browser, :nomenu_layout])
 
@@ -280,12 +255,6 @@ defmodule TeiserverWeb.Router do
 
   scope "/teiserver/account", TeiserverWeb.Account, as: :ts_account do
     pipe_through([:browser, :standard_layout, :protected])
-
-    resources("/preferences", PreferencesController, only: [:index, :edit, :update, :new, :create])
-
-    get("/", GeneralController, :index)
-    get("/customisation_form", GeneralController, :customisation_form)
-    get("/customisation_select/:role", GeneralController, :customisation_select)
 
     get("/details", GeneralController, :edit_details)
     put("/update_details", GeneralController, :update_details)
