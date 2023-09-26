@@ -5,7 +5,7 @@ defmodule Mix.Tasks.Teiserver.CompareBalanceAlgorithms do
 
   use Mix.Task
 
-  @default_iterations 100
+  # @default_iterations 100
 
   @spec run(list()) :: :ok
   def run(args) do

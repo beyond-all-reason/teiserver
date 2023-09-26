@@ -222,9 +222,9 @@ defmodule Teiserver.Config do
     type: String, choose from: string, select, password, boolean, array
       array allows the picking of multiple options
 
-    visible: Boolean, dictates if it is visible in the account settings page
+    visible: Boolean, dictates if it is visible in the account settings page. Defaults to true.
 
-    permissions: Permission list, decides if it can be edited on the account page
+    permissions: Permission list, decides if it can be edited on the account page, defaults to an empty list.
 
     opts: List, used to define options for various data types. If set then only items from the list will be selectable
       - If type is "select" then include a :choices key in your opts list
@@ -251,6 +251,8 @@ defmodule Teiserver.Config do
         %{
           label: default_label,
           value_label: "Value",
+          visible: true,
+          permissions: [],
           description: ""
         },
         config

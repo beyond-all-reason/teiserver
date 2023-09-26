@@ -10,8 +10,12 @@ defmodule Teiserver.Startup do
 
     Teiserver.Logging.Startup.startup()
 
-    # Configs
+    # User Configs
     Teiserver.Config.UserConfigTypes.ProfileConfigs.create()
+    Teiserver.Config.UserConfigTypes.PrivacyConfigs.create()
+
+    # System Configs
+    Teiserver.Config.SiteConfigTypes.SystemConfigs.create()
 
     Teiserver.TeiserverConfigs.teiserver_configs()
 
