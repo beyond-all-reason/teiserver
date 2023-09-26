@@ -192,6 +192,10 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
 
   defp check_if_can_send(%{assigns: %{current_user: current_user}} = socket) do
     allowed = cond do
+      current_user == nil ->
+        "no user found, the website thinks you are not logged into it"
+      Account.get_client_by_id(current_user.id) == nil ->
+         "you are not logged into the client, we are working to fix this but for now you need to be logged in with the client to use this"
       Account.is_restricted?(current_user, ["Login"]) ->
         "you are banned"
       Account.is_restricted?(current_user, ["All chat", "Room chat", "Game chat"]) ->
