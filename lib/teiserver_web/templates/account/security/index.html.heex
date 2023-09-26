@@ -1,8 +1,4 @@
-<%= render(
-  TeiserverWeb.Account.GeneralView,
-  "sub_menu.html",
-  Map.merge(assigns, %{active: "security"})
-) %>
+<TeiserverWeb.AccountComponents.sub_menu active={"security"} view_colour={view_colour()} />
 
 <div class="row">
   <div class="col-md-12">

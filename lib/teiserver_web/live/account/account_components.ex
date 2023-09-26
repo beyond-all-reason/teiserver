@@ -41,6 +41,15 @@ defmodule TeiserverWeb.AccountComponents do
 
       <.sub_menu_button
         bsname={@view_colour}
+        icon="fa-wrench"
+        active={@active == "details"}
+        url={~p"/teiserver/account/details"}
+      >
+        Details
+      </.sub_menu_button>
+
+      <.sub_menu_button
+        bsname={@view_colour}
         icon="fa-lock"
         active={@active == "security"}
         url={~p"/teiserver/account/security"}

@@ -25,9 +25,9 @@
         <TeiserverWeb.NavComponents.top_nav_item
           text="My account"
           active={@site_menu_active == "teiserver_account"}
-          route={~p"/teiserver/account"}
+          route={~p"/profile"}
         />
-        
+
         <%= if @current_user do %>
           <%= central_component("top_nav_item",
             text: "Chat",
