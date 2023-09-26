@@ -54,7 +54,7 @@
                         <%= value %>
                       </td>
 
-                      <td style="min-width:50px;" tal:condition="input_type == 'boolean'">
+                      <td style="min-width:50px;">
                         <%= link("Edit",
                           to: Routes.admin_site_config_path(@conn, :edit, the_config.key),
                           class: "btn btn-secondary btn-sm"

@@ -65,15 +65,6 @@ defmodule TeiserverWeb.Account.ProfileComponents do
             <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon()} style="solid" />
             Relationships
           </.tab_nav>
-
-          <.tab_nav
-            :if={Enum.member?(@profile_permissions, :self)}
-            url={~p"/profile/#{@userid}/settings"}
-            selected={@tab == "settings"}
-          >
-            <Fontawesome.icon icon={Teiserver.Config.UserConfigLib.icon()} style="solid" />
-            Settings
-          </.tab_nav>
         </.tab_header>
       </div>
     </div>

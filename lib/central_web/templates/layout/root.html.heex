@@ -16,6 +16,7 @@
         "Site default" -> get_site_config_cache("user.Default light mode")
         "Light" -> true
         "Dark" -> false
+        _ -> get_site_config_cache("user.Default light mode")
       end %>
 
     <%= if light_mode do %>

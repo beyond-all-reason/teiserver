@@ -62,47 +62,13 @@ defmodule Central.General.Startup do
     })
 
     add_user_config_type(%{
-      key: "general.User message",
-      section: "General",
-      type: "boolean",
-      visible: false,
-      permissions: ["admin.dev.developer"],
-      description: "A message displayed on every page the user visits",
-      opts: [],
-      default: nil
-    })
-
-    add_user_config_type(%{
-      key: "module.Quick action",
-      section: "Modules",
-      type: "boolean",
-      visible: true,
-      permissions: [],
-      description: "Enables the 'Quick Action' shortcut: Ctrl + .",
-      opts: [],
-      default: true,
-      value_label: "Enable quick action shortcut"
-    })
-
-    add_user_config_type(%{
-      key: "general.Homepage",
-      section: "General",
-      type: "string",
-      visible: true,
-      permissions: [],
-      description: "Sets the default homepage for when you first log in",
-      opts: [],
-      default: "/"
-    })
-
-    add_user_config_type(%{
       key: "general.Screen size",
       section: "General",
       type: "string",
       visible: false,
       permissions: ["admin.dev.developer"],
       description:
-        "Last recoreded screen size of the user, used for sizing certain windows accordingly",
+        "Last recorded screen size of the user, used for sizing certain windows accordingly",
       opts: [],
       default: nil
     })

@@ -1,0 +1,89 @@
+<TeiserverWeb.AccountComponents.sub_menu active="settings" view_colour={@view_colour} />
+
+<div class="row mt-4 mb-3">
+  <div class="col">
+    <div :for={{group_name, group_configs} <- @config_types}>
+      <h4><%= group_name %></h4>
+      <table class="table table-hover" style="cursor: pointer;">
+        <tbody>
+          <tr
+            :for={the_config <- group_configs}
+            id={"config-row-#{the_config.key}"}
+          >
+            <td phx-click="open-form" phx-value-key={the_config.key}>
+              <strong>
+                <%= the_config.label %>
+              </strong>
+
+              <%= if the_config.key == @selected_key do %>
+                <br />
+                <em>
+                  <%= raw(the_config.description) %>
+                </em>
+              <% else %>
+                &nbsp;&nbsp;&nbsp;
+                <em>
+                <%= the_config.description |> String.slice(0..90) |> raw %>
+                </em>
+              <% end %>
+            </td>
+
+            <td style="width:250px;" :if={the_config.key != @selected_key}  phx-click="open-form" phx-value-key={the_config.key}>
+              <%= @config_values[the_config.key] ||
+                raw("#{the_config.default} <em>(default)</em>") %>
+            </td>
+
+            <td style="width:700px; text-align: right;" :if={the_config.key == @selected_key}>
+              <%= case the_config.type do %>
+                <% "select" -> %>
+                  <.form for={to_form(%{}, as: :temp_form)} phx-change="set-to" phx-submit="set-to">
+                    <.input type="select"
+                      name="value"
+                      value={@config_values[the_config.key] || the_config.default}
+                      options={the_config.opts}
+                    />
+                  </.form>
+
+                <% "boolean" -> %>
+                  <span class="btn btn-secondary" phx-click="open-form" phx-value-key={the_config.key}>
+                    <Fontawesome.icon icon="cancel" style="regular" size="2x" /><br />
+                    Cancel
+                  </span>
+                  
+                  &nbsp;&nbsp;&nbsp;
+                  
+                  <span class="btn btn-secondary" phx-click="reset-value">
+                    <Fontawesome.icon icon="arrow-rotate-left" style="regular" size="2x" /><br />
+                    Default
+                  </span>
+                  
+                  &nbsp;&nbsp;&nbsp;
+                  
+                  &nbsp;&nbsp;&nbsp;
+                  
+                  <span class="btn btn-danger" phx-click="set-false">
+                    <Fontawesome.icon icon="times" style="solid" size="2x" /><br />
+                    No
+                  </span>
+                  
+                  &nbsp;&nbsp;&nbsp;
+                
+                  <span class="btn btn-success" phx-click="set-true">
+                    <Fontawesome.icon icon="check" style="solid" size="2x" /><br />
+                    Yes
+                  </span>
+                <% _ -> %>
+                  <div class="alert alert-danger monospace" style="text-align: center;">
+                    No handler for user_config.type of '<%= the_config.type %>' for config key '<%= the_config.key %>'
+                  </div>
+              <% end %>
+              <%#= @config_values[the_config.key] ||
+                raw("#{the_config.default} <em>(default)</em>") %>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+  </div>
+</div>

@@ -246,6 +246,14 @@ defmodule TeiserverWeb.Router do
         live "/relationship/avoid", RelationshipLive.Index, :avoid
         live "/relationship/search", RelationshipLive.Index, :search
     end
+
+    live_session :account_settings,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Communication.NotificationPlug, :load_notifications}
+      ] do
+        live "/settings", SettingsLive.Index, :index
+    end
   end
 
   scope "/profile", TeiserverWeb.Account do
@@ -265,7 +273,6 @@ defmodule TeiserverWeb.Router do
         live "/:userid/matches", ProfileLive.Matches, :matches
         live "/:userid/playtime", ProfileLive.Playtime, :playtime
         live "/:userid/achievements", ProfileLive.Achievements, :achievements
-        live "/:userid/settings", ProfileLive.Settings, :settings
         live "/:userid/relationships", ProfileLive.Relationships, :relationships
     end
   end
