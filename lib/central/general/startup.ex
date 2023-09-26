@@ -4,43 +4,6 @@ defmodule Central.General.Startup do
 
   @spec startup :: :ok
   def startup do
-    QuickAction.add_items([
-      %{
-        label: "Admin index",
-        icons: [Central.Admin.AdminLib.icon(), :list],
-        url: "/admin",
-        permissions: "admin.admin.limited"
-      },
-      %{
-        label: "Tools",
-        icons: [Central.Admin.ToolLib.icon()],
-        url: "/admin/tools",
-        permissions: "admin.dev.developer"
-      },
-      %{
-        label: "List users",
-        icons: [Central.Account.UserLib.icon(), :list],
-        input: "s",
-        method: "get",
-        placeholder: "Search username and/or email",
-        url: "/admin/users",
-        permissions: "admin.admin.limited"
-      },
-      %{
-        label: "Coverage",
-        icons: ["fa-regular fa-percent"],
-        url: "/admin/tools/coverage",
-        permissions: "admin.dev.developer"
-      },
-      %{
-        label: "Home",
-        icons: ["fa-regular fa-home"],
-        url: "/"
-      }
-    ])
-
-
-
     add_site_config_type(%{
       key: "user.Default light mode",
       section: "Interface",
