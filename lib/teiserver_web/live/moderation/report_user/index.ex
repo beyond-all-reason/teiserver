@@ -29,6 +29,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
         user_id: user.id
       })
       |> assign(:stage, :type)
+      |> allowed_to_use_form
       |> get_user_matches
 
     {:noreply, socket}
@@ -119,6 +120,10 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
       |> assign(:sub_types, ReportLib.sub_types())
   end
 
+  defp get_user_matches(%{assigns: %{stage: :not_allowed}} = socket) do
+    socket
+  end
+
   defp get_user_matches(%{assigns: %{user: user}} = socket) do
     cutoff = Timex.now() |> Timex.shift(hours: -36)
 
@@ -152,5 +157,25 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
 
     socket
       |> assign(:matches, matches)
+  end
+
+  defp allowed_to_use_form(%{assigns: %{current_user: current_user, user: target_user}} = socket) do
+    {allowed, failure_reason} = cond do
+      current_user.id == target_user.id ->
+        {false, "You cannot report yourself"}
+
+      Account.is_restricted?(current_user, "Reporting") ->
+        {false, "You are currently restricted from submitting new reports"}
+
+      true -> true
+    end
+
+    if allowed do
+      socket
+    else
+      socket
+        |> assign(:failure_reason, failure_reason)
+        |> assign(:stage, :not_allowed)
+    end
   end
 end

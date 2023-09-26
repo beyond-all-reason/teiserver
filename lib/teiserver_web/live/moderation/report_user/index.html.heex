@@ -104,6 +104,12 @@
           
         </div>
       </div>
+      
+      <div class="card-body" :if={@stage == :not_allowed}>
+        <div class="alert alert-warning">
+          <%= @failure_reason %>
+        </div>
+      </div>
     </div>
   </div>
 </div>

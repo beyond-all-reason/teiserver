@@ -1653,7 +1653,7 @@ defmodule Teiserver.Account do
   @spec check_avoid_status(T.userid, [T.userid]) :: :ok | :avoiding | :avoided
   defdelegate check_avoid_status(userid, userid_list), to: RelationshipLib
 
-  @spec profile_view_permissions(T.userid, T.userid, nil | Account.Relationship, nil | Account.Friend, nil | Account.FriendRequest) :: [atom]
+  @spec profile_view_permissions(T.user, T.user, nil | Account.Relationship, nil | Account.Friend, nil | Account.FriendRequest) :: [atom]
   defdelegate profile_view_permissions(u1, u2, relationship, friend, friendship_request), to: RelationshipLib
 
 
@@ -2054,6 +2054,9 @@ defmodule Teiserver.Account do
 
   @spec is_bot?(T.userid()) :: boolean()
   defdelegate is_bot?(userid), to: Teiserver.User
+
+  @spec is_restricted?(T.userid() | T.user(), String.t()) :: boolean()
+  defdelegate is_restricted?(user, restriction), to: Teiserver.User
 
   # Client stuff
   alias Teiserver.Account.ClientLib
