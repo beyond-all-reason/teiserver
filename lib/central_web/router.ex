@@ -1,13 +1,6 @@
 defmodule TeiserverWeb.Router do
   use CentralWeb, :router
 
-  pipeline :dev_auth do
-    plug Bodyguard.Plug.Authorize,
-      policy: Central.Dev,
-      action: :dev_auth,
-      user: {Teiserver.Account.AuthLib, :current_user}
-  end
-
   pipeline :logging_live_auth do
     plug Bodyguard.Plug.Authorize,
       policy: Teiserver.Logging.LiveLib,
