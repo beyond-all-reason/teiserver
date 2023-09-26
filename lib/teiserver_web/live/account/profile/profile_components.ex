@@ -55,6 +55,15 @@ defmodule TeiserverWeb.Account.ProfileComponents do
           </.tab_nav>
 
           <.tab_nav
+            :if={Enum.member?(@profile_permissions, :self)}
+            url={~p"/profile/#{@userid}/appearance"}
+            selected={@tab == "appearance"}
+          >
+            <Fontawesome.icon icon="icons" style="solid" />
+            Appearance
+          </.tab_nav>
+
+          <.tab_nav
             :if={
               (not Enum.member?(@profile_permissions, :self)) and (
                 Enum.member?(@profile_permissions, :friend)
@@ -64,15 +73,6 @@ defmodule TeiserverWeb.Account.ProfileComponents do
           >
             <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon()} style="solid" />
             Relationships
-          </.tab_nav>
-
-          <.tab_nav
-            :if={Enum.member?(@profile_permissions, :self)}
-            url={~p"/profile/#{@userid}/settings"}
-            selected={@tab == "settings"}
-          >
-            <Fontawesome.icon icon={Teiserver.Config.UserConfigLib.icon()} style="solid" />
-            Settings
           </.tab_nav>
         </.tab_header>
       </div>

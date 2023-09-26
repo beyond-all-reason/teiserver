@@ -265,7 +265,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
       message =
         [
           "--------------------------------------------",
-          "#{action.target.name} has been moderated.",
+          "`#{action.target.name}` has been moderated.",
           "Reason: #{formatted_reason}, #{restriction_string}",
           until
         ]

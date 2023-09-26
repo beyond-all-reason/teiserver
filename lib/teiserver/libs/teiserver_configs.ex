@@ -1,12 +1,9 @@
 defmodule Teiserver.TeiserverConfigs do
   @moduledoc false
-  import Teiserver.Config, only: [add_site_config_type: 1, add_user_config_type: 1]
+  import Teiserver.Config, only: [add_site_config_type: 1]
 
   @spec teiserver_configs :: any
   def teiserver_configs do
-    # User configs
-    user_configs()
-
     # Site based configs
     site_configs()
     system_configs()
@@ -112,51 +109,6 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["admin.dev.developer"],
       description: "Prevents users logging in with anything other than Chobby",
       default: false
-    })
-  end
-
-  @spec user_configs() :: any
-  defp user_configs() do
-    add_user_config_type(%{
-      key: "teiserver.Show flag",
-      section: "Teiserver account",
-      type: "boolean",
-      visible: true,
-      permissions: ["account"],
-      description:
-        "When checked the flag associated with your IP will be displayed. If unchecked your flag will be blank. This will take effect next time you login with your client.",
-      default: true
-    })
-
-    add_user_config_type(%{
-      key: "teiserver.Discord notifications",
-      section: "Teiserver account",
-      type: "boolean",
-      visible: true,
-      permissions: ["account"],
-      description:
-        "When checked you will receive discord messages from the Teiserver bridge bot for various in-lobby events. When disabled you will receive no notifications even if the others are enabled.",
-      default: true
-    })
-
-    add_user_config_type(%{
-      key: "teiserver.Notify - Exited the queue",
-      section: "Teiserver account",
-      type: "boolean",
-      visible: true,
-      permissions: ["account"],
-      description: "You will be messaged when you move from being in the queue to being a player",
-      default: true
-    })
-
-    add_user_config_type(%{
-      key: "teiserver.Notify - Game start",
-      section: "Teiserver account",
-      type: "boolean",
-      visible: true,
-      permissions: ["account"],
-      description: "You will be messaged when a lobby you are a player in starts",
-      default: true
     })
   end
 

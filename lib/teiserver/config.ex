@@ -7,6 +7,7 @@ defmodule Teiserver.Config do
   alias Teiserver.Repo
 
   alias Teiserver.Config.UserConfig
+  alias Teiserver.Data.Types, as: T
 
   def get_user_config_cache(%{assigns: %{current_user: nil}}, key) do
     get_user_config_default(key)
@@ -37,7 +38,7 @@ defmodule Teiserver.Config do
     user_configs = get_user_configs!(user_id)
 
     if user_configs[key] != nil do
-      get_user_config!(user_id, key)
+      get_user_config(user_id, key)
       |> delete_user_config
     end
   end
@@ -52,7 +53,7 @@ defmodule Teiserver.Config do
         "value" => value |> to_string
       })
     else
-      get_user_config!(user_id, key)
+      get_user_config(user_id, key)
       |> update_user_config(%{
         "value" => value |> to_string
       })
@@ -66,10 +67,10 @@ defmodule Teiserver.Config do
 
   ## Examples
 
-      iex> get_user_config!(123)
+      iex> get_user_config(123)
       %UserConfig{}
 
-      iex> get_user_config!(456)
+      iex> get_user_config(456)
       ** (Ecto.NoResultsError)
 
   """
@@ -87,9 +88,11 @@ defmodule Teiserver.Config do
     end)
   end
 
-  def get_user_config!(id), do: Repo.get!(UserConfig, id)
+  @spec get_user_config(T.userid) :: UserConfig.t | nil
+  def get_user_config(id), do: Repo.get(UserConfig, id)
 
-  def get_user_config!(user_id, key) do
+  @spec get_user_config(T.userid, String.t) :: UserConfig.t | nil
+  def get_user_config(user_id, key) do
     query =
       from user_config in UserConfig,
         where: user_config.user_id == ^user_id,
@@ -230,6 +233,8 @@ defmodule Teiserver.Config do
 
 
     -- Optional params
+    label: The name shown to users, defaults to everything after the last full-stop character
+
     description: String, Information presented to the user if they edit it on their settings page. Defaults to an empty string.
 
     value_label: The label shown next to the value input. Defaults to "Value"
@@ -237,9 +242,14 @@ defmodule Teiserver.Config do
 
   @spec add_user_config_type(map()) :: :ok
   def add_user_config_type(config) do
+    default_label = config.key
+      |> String.split(".")
+      |> tl
+
     config =
       Map.merge(
         %{
+          label: default_label,
           value_label: "Value",
           description: ""
         },
@@ -377,14 +387,6 @@ defmodule Teiserver.Config do
     end)
   end
 
-  @config_defaults %{
-    opts: [],
-    value_label: "",
-    default: nil,
-    update_callback: nil,
-    tags: []
-  }
-
   @doc """
   Expects a map with the following fields:
 
@@ -406,11 +408,25 @@ defmodule Teiserver.Config do
 
     default: Any, The default value used when the variable is not set,
 
+    -- Optional --
+    label: The name shown to users, defaults to everything after the last full-stop character
+
     update_callback: A function of arity 1 which will be called on an updated value with the new value
   """
   @spec add_site_config_type(map()) :: :ok
   def add_site_config_type(config) do
-    config = Map.merge(@config_defaults, config)
+    default_label = config.key
+      |> String.split(".")
+      |> tl
+
+    config = Map.merge(%{
+        opts: [],
+        label: default_label,
+        value_label: "",
+        default: nil,
+        update_callback: nil,
+        tags: []
+      }, config)
 
     all_config_types =
       (Central.store_get(:config_site_type_store, "all-config-types") || %{})

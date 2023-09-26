@@ -10,8 +10,10 @@ defmodule Teiserver.Startup do
 
     Teiserver.Logging.Startup.startup()
 
+    # Configs
+    Teiserver.Config.UserConfigTypes.ProfileConfigs.create()
+
     Teiserver.TeiserverConfigs.teiserver_configs()
-    Teiserver.TeiserverQuickActions.teiserver_quick_actions()
 
     Teiserver.Communication.build_text_callback_cache()
 

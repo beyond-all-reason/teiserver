@@ -17,18 +17,10 @@
 
   <%= central_component("menu_card",
     icon_class: "fa-duotone",
-    name: "appearance",
-    icon: "fa-solid fa-icons",
-    text: "Appearance",
-    link: Routes.ts_account_general_path(@conn, :customisation_form)
-  ) %>
-
-  <%= central_component("menu_card",
-    icon_class: "fa-duotone",
     name: "",
     icon: Teiserver.Config.UserConfigLib.icon(),
     text: "Preferences",
-    link: Routes.ts_account_preferences_path(@conn, :index)
+    link: ~p"/account/settings"
   ) %>
 
   <%= central_component("menu_card",

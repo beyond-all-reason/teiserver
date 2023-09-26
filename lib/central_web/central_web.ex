@@ -213,7 +213,7 @@ defmodule CentralWeb do
     quote do
       import Teiserver.Account.AuthLib, only: [add_permission_set: 3]
 
-      import Teiserver.Config, only: [add_user_config_type: 1, add_site_config_type: 1]
+      import Teiserver.Config, only: [add_site_config_type: 1]
       import Teiserver.Logging.AuditLogLib, only: [add_audit_types: 1]
       alias Central.General.QuickAction
     end

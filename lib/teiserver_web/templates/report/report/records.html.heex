@@ -10,13 +10,6 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <div
-          class="btn btn-primary2 float-end"
-          onclick="$('.old-help-box, .old-help-box-large').toggle();"
-        >
-          <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
-          Show/Hide help
-        </div>
         <%= render(
           TeiserverWeb.Report.ReportView,
           "section_menu.html",
@@ -27,10 +20,48 @@
           })
         ) %>
         <br /><br />
+        
+        <form action={~p"/teiserver/reports/show/records"} method="post">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+          
+          <div class="row">
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_date_preset" class="control-label">Date range:</label>
+              <%= select(:report, :date_preset, @presets,
+                class: "form-control",
+                selected: @params["date_preset"]
+              ) %>
+            </div>
 
-        <div class="old-help-box-large"></div>
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_start_date" class="control-label">Start date:</label>
+              <input
+                type="text"
+                id="report_start_date"
+                name="report[start_date]"
+                value={@params["start_date"]}
+                class="form-control datepicker"
+              />
+            </div>
 
-        <table class="table">
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_end_date" class="control-label">End date:</label>
+              <input
+                type="text"
+                id="report_end_date"
+                name="report[end_date]"
+                value={@params["end_date"]}
+                class="form-control datepicker"
+              />
+            </div>
+          </div>
+        
+          <button type="submit" class={"btn btn-#{bsname} float-end"}>
+            Submit
+          </button>
+        </form>
+
+        <table class="table table-hover">
           <thead>
             <tr>
               <th>Record</th>

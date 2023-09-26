@@ -21,6 +21,7 @@ defmodule Teiserver.Client do
   def create(client) do
     Map.merge(
       %{
+        connected: false,
         in_game: false,
         away: false,
         rank: 1,
@@ -101,6 +102,7 @@ defmodule Teiserver.Client do
 
     client =
       create(%{
+        connected: true,
         userid: user.id,
         name: user.name,
         tcp_pid: self(),

@@ -24,7 +24,7 @@
             name: "details",
             label: "Account menu",
             active: @active,
-            url: ~p"/teiserver/account",
+            url: ~p"/profile",
             icon: "fa-solid fa-user"
           ) %>
 
@@ -56,7 +56,7 @@
             name: "preferences",
             label: "Preferences",
             active: @active,
-            url: Routes.ts_account_preferences_path(@conn, :index),
+            url: ~p"/account/settings",
             icon: Teiserver.Config.UserConfigLib.icon()
           ) %>
         </div>

@@ -33,10 +33,19 @@ defmodule TeiserverWeb.AccountComponents do
       <.sub_menu_button
         bsname={@view_colour}
         icon={Teiserver.Config.UserConfigLib.icon()}
-        active={@active == "preferences"}
-        url={~p"/teiserver/account/preferences"}
+        active={@active == "settings"}
+        url={~p"/account/settings"}
       >
         Settings
+      </.sub_menu_button>
+
+      <.sub_menu_button
+        bsname={@view_colour}
+        icon="fa-wrench"
+        active={@active == "details"}
+        url={~p"/teiserver/account/details"}
+      >
+        Details
       </.sub_menu_button>
 
       <.sub_menu_button
