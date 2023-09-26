@@ -66,6 +66,12 @@
           <:col :let={match} label="Match"><%= match.label %></:col>
           <:col :let={match} label=""><%= match.time_ago %></:col>
         </.table>
+        
+        If you cannot find the match here then you can submit the report without a match selected but it may mean we cannot find evidence and are thus unable to handle the report.
+        <br /><br />
+        <span class="btn btn-outline-warning" phx-click="select-no-match">
+          Select "no match"
+        </span>
       </div>
       
       <div class="card-body" :if={@stage == :extra_text}>

@@ -12,6 +12,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
       |> assign(:report, %{})
       |> assign(:user, nil)
       |> assign(:stage, :loading)
+      |> assign(:extra_text, "")
       |> add_breadcrumb(name: "Report user", url: ~p"/moderation/report_user")
       |> apply_structure
 
