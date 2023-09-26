@@ -2055,6 +2055,9 @@ defmodule Teiserver.Account do
   @spec is_bot?(T.userid()) :: boolean()
   defdelegate is_bot?(userid), to: Teiserver.User
 
+  @spec is_restricted?(T.userid() | T.user(), String.t()) :: boolean()
+  defdelegate is_restricted?(userid, restriction), to: Teiserver.User
+
   # Client stuff
   alias Teiserver.Account.ClientLib
 

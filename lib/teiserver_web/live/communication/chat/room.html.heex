@@ -1,17 +1,46 @@
 <style type="text/css">
-  .message {
+  .message-content {
     word-wrap: break-word;
     max-width: 70vw;
+    padding-left: 15px;
+  }
+  
+  .time-and-user {
+    border-top: 1px solid rgba(175, 175, 175, 0.1);
+    padding-top: 4px;
+    padding-left: 4px;
   }
 </style>
 
-<div class="row mt-3">
+<div class="row">
   <div class="col-md-12">
 
     <div id={"room-#{@room_name}"}>
       <TeiserverWeb.ChatComponents.message_list messages={@streams.messages} />
       <!-- ... form for a new message -->
     </div>
-      
+    
+    <div id="chat-input-failure-div" :if={@allowed_to_send != true} class="alert">
+      You cannot post messages to this room because <%= @allowed_to_send %>
+    </div>
+    
+    <div id="chat-input-div" :if={@allowed_to_send == true}>
+      <.form :let={f} for={@message_changeset} phx-submit="send-message" class="mt-2">
+        <div class="row">
+          <div class="col-md-10">
+            <%= text_input(f, :content,
+              class: "form-control",
+              autofocus: true,
+              autocomplete: "off"
+            ) %>
+          </div>
+
+          <div class="col-md-2">
+            <%= submit("Send", class: "btn btn-primary btn-block") %>
+          </div>
+        </div>
+      </.form>
+    </div>
+    
   </div>
 </div>
