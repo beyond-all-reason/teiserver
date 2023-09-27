@@ -16,6 +16,7 @@
         "Site default" -> Teiserver.Config.get_site_config_cache("user.Default light mode")
         "Light" -> true
         "Dark" -> false
+        _ -> Teiserver.Config.get_site_config_cache("user.Default light mode")
       end %>
 
     <%= if light_mode do %>
