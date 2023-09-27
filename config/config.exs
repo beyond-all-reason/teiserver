@@ -22,6 +22,7 @@ config :central,
 # Configures the endpoint
 config :central, TeiserverWeb.Endpoint,
   url: [host: "localhost"],
+  # This is overriden in your secret config, it's here only to allow things to run easily
   secret_key_base: "6FN12Jv4ZITAK1fq7ehD0MTRvbLsXYWj+wLY3ifkzzlcUIcpUJK7aG/ptrJSemAy",
   live_view: [signing_salt: "wZVVigZo"],
   render_errors: [
@@ -103,6 +104,7 @@ config :phoenix, :json_library, Jason
 # This secret key is overwritten in prod.secret.exs
 config :central, Teiserver.Account.Guardian,
   issuer: "central",
+  # This is overriden in your secret config, it's here only to allow things to run easily
   secret_key: "9vJcJOYwsjdIQ9IhfOI5F9GQMykuNjBW58FY9S/TqMsq6gRdKgY05jscQAFVKfwa",
   ttl: {30, :days}
 
