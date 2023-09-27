@@ -6,6 +6,8 @@ defmodule Teiserver.Repo.Migrations.CreateMicroblog do
       add :name, :string
       add :colour, :string
       add :icon, :string
+
+      timestamps()
     end
 
     create table(:microblog_posts) do
