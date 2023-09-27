@@ -142,7 +142,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> round
 
     host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
-    profile_link = "https://#{host}/teiserver/profile/#{senderid}"
+    profile_link = "https://#{host}/profile/#{senderid}"
 
     accolades = AccoladeLib.get_player_accolades(senderid)
 
@@ -241,7 +241,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           end
 
         host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
-        profile_link = "https://#{host}/teiserver/profile/#{user.id}"
+        profile_link = "https://#{host}/profile/#{user.id}"
 
         ratings =
           Account.list_ratings(
