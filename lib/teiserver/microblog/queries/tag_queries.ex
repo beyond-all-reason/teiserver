@@ -34,11 +34,6 @@ defmodule Teiserver.Microblog.TagQueries do
       where: tags.id == ^id
   end
 
-  defp _where(query, :between, {start_date, end_date}) do
-    from tags in query,
-      where: between(tags.inserted_at, ^start_date, ^end_date)
-  end
-
   defp _where(query, :title_like, title) do
     utitle = "%" <> title <> "%"
 
