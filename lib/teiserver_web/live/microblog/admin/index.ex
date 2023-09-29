@@ -13,7 +13,15 @@ defmodule TeiserverWeb.Microblog.AdminLive.Index do
 
   @impl true
   def handle_params(params, _url, socket) do
-    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+    case allow?(socket.assigns[:current_user], "Moderator") do
+      true ->
+        {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+
+      false ->
+        {:noreply,
+         socket
+         |> redirect(to: ~p"/microblog")}
+    end
   end
 
   defp apply_action(socket, _action, _params) do
@@ -78,7 +86,7 @@ defmodule TeiserverWeb.Microblog.AdminLive.Index do
     {:ok, server_post} = Microblog.create_post(%{
       poster_id: 3,
       title: "Server post",
-      contents: "Server post contents go here"
+      contents: "Server post contents go here, this is a run-on sentence for testing purposes. This is a run-on sentence for testing purposes. This is a run-on sentence for testing purposes. This is a run-on sentence for testing purposes. This is a run-on sentence for testing purposes. This is a run-on sentence for testing purposes. This is a run-on sentence for testing purposes."
     })
     :timer.sleep(1000)
 

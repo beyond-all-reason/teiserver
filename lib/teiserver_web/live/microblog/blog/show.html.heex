@@ -1,0 +1,33 @@
+<a href={~p"/"} class="btn btn-primary btn-sm">
+  <Fontawesome.icon icon="fa-home" style="solid" />
+  Main site
+</a>
+
+<a href={~p"/microblog"} class="btn btn-primary btn-sm">
+  <Fontawesome.icon icon={Teiserver.Microblog.icon()} style="solid" />
+  Blog home
+</a>
+
+<a href={~p"/microblog/admin"} class="btn btn-primary btn-sm" :if={allow?(@current_user, "Contributor")}>
+  <Fontawesome.icon icon={Central.Admin.AdminLib.icon()} style="solid" />
+  Admin
+</a>
+
+<div class="row" style="padding-top: 5vh;" id="main-blog-div">
+  <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4">
+    <div class="float-end">
+      <%= for tag <- @post.tags do %>
+        <.tag_badge tag={tag} />
+      <% end %>
+    </div>
+    <h3><%= @post.title %></h3>
+    <%= @post.contents %>
+    <br /><br />
+
+    <a href={~p"/microblog"} class="btn btn-secondary">
+      <Fontawesome.icon icon={"arrow-left"} style="solid" />
+      Back to blog
+    </a>
+
+  </div>
+</div>

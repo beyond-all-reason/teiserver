@@ -141,7 +141,7 @@ defmodule TeiserverWeb.Microblog.MicroblogComponents do
       |> assign(:bg_colour, bg_colour)
 
     ~H"""
-    <span class="badge rounded-pill" style={"background-color: #{@bg_colour}; cursor: pointer;"} {@rest}>
+    <span class="badge rounded-pill mx-1" style={"background-color: #{@bg_colour}; cursor: pointer;"} {@rest}>
       <Fontawesome.icon icon={@tag.icon} style="solid" />
       <%= @tag.name %>
     </span>

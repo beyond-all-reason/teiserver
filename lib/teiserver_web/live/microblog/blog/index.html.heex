@@ -8,28 +8,39 @@
   Admin
 </a>
 
-<div class="row" style="padding-top: 15vh;" id="login-div">
+<div class="row" style="padding-top: 5vh;" id="main-blog-div">
   <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4">
-  
-    <h4>Blog</h4>
-    
+    <h3>Blog</h3>
+    This is currently in the early stages so filtering doesn't yet work correctly. Please leave feedback/suggestions for Teifion in the Discord under the #suggestions forum.
+    <br /><br />
+
     <%= for tag <- @tags do %>
       <.tag_badge tag={tag} disabled={not Enum.member?(@filters.enabled_tags, tag.id)} phx-click="toggle-enabled-tag" phx-value-tag-id={tag.id} />
-      &nbsp;
     <% end %>
 
     <.table
       id="post-table"
       rows={@streams.posts}
+      row_click={fn {_id, post} -> JS.navigate(~p"/microblog/show/#{post.id}") end}
     >
       <:col :let={{_id, post}} label="Title"><%= post.title %></:col>
-      <:col :let={{_id, post}} label="Poster"><%= post.poster.name %></:col>
-      <:col :let={{_id, post}} label="Contents"><%= post.contents |> String.slice(0..128) %></:col>
-      
+      <:col :let={{_id, post}} label="Poster">
+        <span class="badge rounded-pill" style={"background-color: #{post.poster.colour}; cursor: pointer;"}>
+          <Fontawesome.icon icon={post.poster.icon} style="solid" />
+          <%= post.poster.name %>
+        </span>
+      </:col>
+      <:col :let={{_id, post}} label="Contents">
+        <%=
+          post.contents |> String.split("\n\n") |> hd |> String.slice(0..128)
+        %>
+        <span :if={String.contains?(post.contents, "\n\n") or String.length(post.contents) > 128}>...</span>
+      </:col>
+
       <:col :let={{_id, post}} label="Tags">
         <.tag_badge tag={tag} :for={tag <- post.tags} />
       </:col>
     </.table>
-  
+
   </div>
 </div>

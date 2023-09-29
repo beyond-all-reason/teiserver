@@ -119,6 +119,7 @@ defmodule TeiserverWeb.Router do
         {Teiserver.Communication.NotificationPlug, :load_notifications}
       ] do
         live "/", BlogLive.Index, :index
+        live "/show/:post_id", BlogLive.Show, :index
     end
 
     live_session :microblog_admin,
