@@ -7,10 +7,9 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   def render(assigns) do
     ~H"""
     <div>
-      <.header>
+      <h3>
         <%= @title %>
-        <:subtitle>Use this form to manage post records in your database.</:subtitle>
-      </.header>
+      </h3>
 
       <.form for={@form}
         phx-target={@myself}

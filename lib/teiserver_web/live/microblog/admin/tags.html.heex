@@ -1,0 +1,43 @@
+<a href={~p"/"} class="btn btn-primary btn-sm">
+  <Fontawesome.icon icon="fa-home" style="solid" />
+  Main site
+</a>
+
+<a href={~p"/microblog"} class="btn btn-primary btn-sm">
+  <Fontawesome.icon icon={Teiserver.Microblog.icon()} style="solid" />
+  Blog home
+</a>
+
+<a href={~p"/microblog/admin"} class="btn btn-primary btn-sm" :if={allow?(@current_user, "Contributor")}>
+  <Fontawesome.icon icon={Central.Admin.AdminLib.icon()} style="solid" />
+  Admin
+</a>
+
+<div class="row mt-4">
+  <div class="col">
+    <.table
+      id="post-table"
+      table_class="table-sm table-hover"
+      rows={@tags}
+    >
+      <:col :let={tag} label="Name"><%= tag.name %></:col>
+      <:col :let={tag} label="Style">
+        <span class="badge rounded-pill" style={"background-color: #{tag.colour}; cursor: pointer;"}>
+          &nbsp;
+          <Fontawesome.icon icon={tag.icon} style="solid" />
+          &nbsp;
+        </span>
+      </:col>
+    </.table>
+  
+    <.live_component
+      module={TeiserverWeb.Microblog.TagFormComponent}
+      id={:new}
+      action={:new}
+      tag={%Teiserver.Microblog.Tag{}}
+      patch={~p"/microblog/admin/tags"}
+      title="New tag form"
+      current_user={@current_user}
+    />
+  </div>
+</div>

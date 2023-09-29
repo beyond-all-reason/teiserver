@@ -26,26 +26,9 @@
   </div>
 </div>
 
-<div :if={allow?(@current_user, "Server")}>
-  <div class="row" style="margin-top: 40px;">
-    <hr />
-    <div class="col">
-      <.live_component
-        module={TeiserverWeb.Microblog.TagFormComponent}
-        id={:new}
-        action={:new}
-        tag={%Teiserver.Microblog.Tag{}}
-        patch={~p"/microblog/admin"}
-        title="New tag form"
-        current_user={@current_user}
-      />
-    </div>
-    
-    <div class="col">
-      <span class="btn" style={"background-color: #{Map.get(@tag, :colour, "#000000")}; font-size: 2em;"}>
-        <Fontawesome.icon icon={Map.get(@tag, :icon, "")} style="solid" />
-        <%= Map.get(@tag, :name, "") %>
-      </span>
-    </div>
-  </div>
+<div :if={allow?(@current_user, "Server")} style="margin-top: 40px;">
+  <a href={~p"/microblog/admin/tags"} class="btn btn-secondary">
+    <Fontawesome.icon icon="tags" style="regular" />
+    Edit tags
+  </a>
 </div>

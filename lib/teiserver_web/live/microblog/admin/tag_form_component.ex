@@ -7,10 +7,10 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
   def render(assigns) do
     ~H"""
     <div>
-      <.header>
+      <hr />
+      <h3>
         <%= @title %>
-        <:subtitle>Use this form to manage tag records in your database.</:subtitle>
-      </.header>
+      </h3>
 
       <.form for={@form}
         phx-target={@myself}
@@ -27,8 +27,7 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
               phx-debounce="100"
             />
           </div>
-        </div>
-        <div class="row mb-4">
+
           <div class="col">
             <label for="tag_colour" class="control-label">Colour</label>
             <.input
@@ -37,8 +36,7 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
               phx-debounce="100"
             />
           </div>
-        </div>
-        <div class="row mb-4">
+
           <div class="col">
             <label for="tag_icon" class="control-label">Icon</label>
             <.input
@@ -50,7 +48,7 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
         </div>
 
         <% disabled = if not @form.source.valid?, do: "disabled" %>
-        <%= submit("Created tag", class: "btn btn-primary btn-block #{disabled}") %>
+        <%= submit("Create tag", class: "btn btn-primary btn-block #{disabled}") %>
       </.form>
     </div>
     """

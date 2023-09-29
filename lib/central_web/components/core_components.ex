@@ -328,7 +328,7 @@ defmodule CentralWeb.CoreComponents do
   def input(%{type: "select"} = assigns) do
     ~H"""
     <div phx-feedback-for={@name}>
-      <.label for={@id}><%= @label %></.label>
+      <.label for={@id} :if={@label}><%= @label %></.label>
       <select
         id={@id}
         name={@name}
@@ -347,7 +347,7 @@ defmodule CentralWeb.CoreComponents do
   def input(%{type: "textarea"} = assigns) do
     ~H"""
     <div phx-feedback-for={@name}>
-      <.label for={@id}><%= @label %></.label>
+      <.label for={@id} :if={@label}><%= @label %></.label>
       <br />
       <textarea
         id={@id || @name}
@@ -367,7 +367,7 @@ defmodule CentralWeb.CoreComponents do
   def input(assigns) do
     ~H"""
     <div phx-feedback-for={@name}>
-      <.label for={@id}><%= @label %></.label>
+      <.label for={@id} :if={@label}><%= @label %></.label>
       <input
         type={@type}
         name={@name}
