@@ -9,7 +9,6 @@ defmodule TeiserverWeb.Microblog.AdminLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
       socket
-        |> assign(:post, %{})
     }
   end
 
@@ -18,22 +17,11 @@ defmodule TeiserverWeb.Microblog.AdminLive.Index do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  defp apply_action(socket, :edit, %{"id" => id}) do
+  defp apply_action(socket, _action, _params) do
     socket
-    |> assign(:page_title, "Edit Post")
-    |> assign(:post, Microblog.get_post!(id))
-  end
-
-  defp apply_action(socket, :new, _params) do
-    socket
-    |> assign(:page_title, "New Post")
-    |> assign(:post, %{})
-  end
-
-  defp apply_action(socket, :index, _params) do
-    socket
-    |> assign(:page_title, "Listing Posts")
-    |> assign(:post, %{})
+    |> assign(:page_title, "Microblog admin page")
+        |> assign(:post, %{})
+        |> assign(:tag, %{})
   end
 
   @impl true
@@ -48,6 +36,21 @@ defmodule TeiserverWeb.Microblog.AdminLive.Index do
 
     {:noreply, socket
       |> assign(:post, post)
+    }
+  end
+
+
+  def handle_info({TeiserverWeb.Microblog.TagFormComponent, {:saved, tag}}, socket) do
+    {:noreply, socket
+      |> put_flash(:info, "Tag created successfully")
+      |> redirect(to: ~p"/microblog/admin")
+    }
+  end
+
+  def handle_info({TeiserverWeb.Microblog.TagFormComponent, {:updated_changeset, %{changes: tag}}}, socket) do
+
+    {:noreply, socket
+      |> assign(:tag, tag)
     }
   end
 
