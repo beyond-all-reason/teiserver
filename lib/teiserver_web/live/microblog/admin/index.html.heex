@@ -1,0 +1,17 @@
+<div class="row">
+  <div class="col">
+    <.live_component
+      module={TeiserverWeb.Microblog.PostFormComponent}
+      id={:new}
+      action={:new}
+      post={%Teiserver.Microblog.Post{}}
+      patch={~p"/microblog/admin"}
+      title="New post form"
+      current_user={@current_user}
+    />
+  </div>
+  
+  <div class="col">
+    <.post_preview post={@post} />
+  </div>
+</div>

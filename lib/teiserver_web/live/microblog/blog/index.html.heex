@@ -1,0 +1,19 @@
+<a href={~p"/microblog/admin"} class="btn btn-primary btn-sm" :if={allow?(@current_user, "Contributor")}>
+  Admin
+</a>
+
+<div class="row" style="padding-top: 15vh;" id="login-div">
+  <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4">
+  
+    <h4>Blog</h4>
+  
+    <div :for={post <- @posts}>
+      <%= if Enum.member?(@show_full_posts, post.id) do %>
+        <.post_complete post={post} />
+      <% else %>
+        <.post_slimline post={post} />
+      <% end %>
+    </div>
+  
+  </div>
+</div>
