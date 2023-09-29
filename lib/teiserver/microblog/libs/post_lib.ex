@@ -2,6 +2,7 @@ defmodule Teiserver.Microblog.PostLib do
   @moduledoc false
   use CentralWeb, :library_newform
   alias Teiserver.Microblog.{Post, PostQueries}
+  alias Phoenix.PubSub
 
   # Functions
   @spec icon :: String.t()
@@ -47,9 +48,23 @@ defmodule Teiserver.Microblog.PostLib do
     |> Repo.one!()
   end
 
+  @spec get_post!(non_neg_integer(), list) :: Post.t
+  def get_post!(post_id, args) do
+    ([id: post_id] ++ args)
+    |> PostQueries.query_posts()
+    |> Repo.one!()
+  end
+
   @spec get_post(non_neg_integer()) :: Post.t | nil
   def get_post(post_id) do
     [id: post_id]
+    |> PostQueries.query_posts()
+    |> Repo.one()
+  end
+
+  @spec get_post(non_neg_integer(), list) :: Post.t | nil
+  def get_post(post_id, args) do
+    ([id: post_id] ++ args)
     |> PostQueries.query_posts()
     |> Repo.one()
   end
@@ -70,7 +85,24 @@ defmodule Teiserver.Microblog.PostLib do
     %Post{}
     |> Post.changeset(attrs)
     |> Repo.insert()
+    |> broadcast_create_post
   end
+
+  defp broadcast_create_post({:ok, %Post{} = post}) do
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "microblog_posts",
+      %{
+        channel: "microblog_posts",
+        event: :post_created,
+        post: post
+      }
+    )
+
+    {:ok, post}
+  end
+
+  defp broadcast_create_post(value), do: value
 
   @doc """
   Updates a post.
@@ -88,7 +120,24 @@ defmodule Teiserver.Microblog.PostLib do
     post
     |> Post.changeset(attrs)
     |> Repo.update()
+    |> broadcast_update_post
   end
+
+  defp broadcast_update_post({:ok, %Post{} = post}) do
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "microblog_posts",
+      %{
+        channel: "microblog_posts",
+        event: :post_updated,
+        post: post
+      }
+    )
+
+    {:ok, post}
+  end
+
+  defp broadcast_update_post(value), do: value
 
   @doc """
   Deletes a post.
@@ -104,7 +153,24 @@ defmodule Teiserver.Microblog.PostLib do
   """
   def delete_post(%Post{} = post) do
     Repo.delete(post)
+    |> broadcast_delete_post
   end
+
+  defp broadcast_delete_post({:ok, %Post{} = post}) do
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "microblog_posts",
+      %{
+        channel: "microblog_posts",
+        event: :post_deleted,
+        post_id: post.id
+      }
+    )
+
+    {:ok, post}
+  end
+
+  defp broadcast_delete_post(value), do: value
 
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking post changes.

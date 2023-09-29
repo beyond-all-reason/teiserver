@@ -6,14 +6,18 @@
   <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4">
   
     <h4>Blog</h4>
-  
-    <div :for={post <- @posts}>
-      <%= if Enum.member?(@show_full_posts, post.id) do %>
-        <.post_complete post={post} />
-      <% else %>
-        <.post_slimline post={post} />
-      <% end %>
-    </div>
+
+    <.table
+      id="post-table"
+      rows={@streams.posts}
+    >
+      <:col :let={{_id, post}} label="Title"><%= post.title %></:col>
+      <:col :let={{_id, post}} label="Contents"><%= post.contents |> String.slice(0..128) %></:col>
+      
+      <:col :let={{_id, post}} label="Tags">
+        <.tag_badge tag={tag} :for={tag <- post.tags} />
+      </:col>
+    </.table>
   
   </div>
 </div>

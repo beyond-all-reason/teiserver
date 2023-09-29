@@ -5,6 +5,30 @@ defmodule TeiserverWeb.Microblog.MicroblogComponents do
   # import TeiserverWeb.NavComponents, only: [sub_menu_button: 1]
 
   @doc """
+  <TeiserverWeb.Microblog.MicroblogComponents.post_list post={post} />
+
+  This is designed to show a small view of the post itself and allow for getting an idea of what is present without having to parse the entire post.
+  """
+  attr :posts, :list, required: true
+  attr :show_full_posts, :list, required: true
+  def post_list(assigns) do
+     assigns =
+      with %{posts: %Phoenix.LiveView.LiveStream{}} <- assigns do
+        assign(assigns, post_id: assigns.post_id || fn {id, _post} -> id end)
+      end
+
+    ~H"""
+    <div :for={{_, post} <- @posts} id={}>
+      <%= if Enum.member?(@show_full_posts, post.id) do %>
+        <.post_complete post={post} />
+      <% else %>
+        <.post_slimline post={post} />
+      <% end %>
+    </div>
+    """
+  end
+
+  @doc """
   <TeiserverWeb.Microblog.MicroblogComponents.post_slimline post={post} />
 
   This is designed to show a small view of the post itself and allow for getting an idea of what is present without having to parse the entire post.

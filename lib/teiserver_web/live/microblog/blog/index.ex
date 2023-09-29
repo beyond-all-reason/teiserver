@@ -3,14 +3,44 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
   use TeiserverWeb, :live_view
   alias Teiserver.Microblog
   import TeiserverWeb.Microblog.MicroblogComponents
+  alias Phoenix.PubSub
 
   @impl true
   def mount(_params, _session, socket) do
+    :ok = PubSub.subscribe(Teiserver.PubSub, "microblog_posts")
+
     {:ok,
       socket
       |> assign(:show_full_posts, [])
       |> list_posts
     }
+  end
+
+  def stuff do
+    Microblog.create_post(%{
+      poster_id: 3,
+      title: ExULID.ULID.generate(),
+      contents: ExULID.ULID.generate()
+    })
+  end
+
+  @impl true
+  def handle_info(%{channel: "microblog_posts", event: :post_created, post: post}, socket) do
+    db_post = Microblog.get_post!(post.id, preload: [:tags])
+
+    {:noreply, stream_insert(socket, :posts, db_post, at: 0)}
+  end
+
+  def handle_info(%{channel: "microblog_posts", event: :post_updated}, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_info(%{channel: "microblog_posts", event: :post_deleted}, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_info(%{channel: "microblog_posts"}, socket) do
+    {:noreply, socket}
   end
 
   @impl true
@@ -42,6 +72,6 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
     )
 
     socket
-      |> assign(:posts, posts)
+      |> stream(:posts, posts)
   end
 end

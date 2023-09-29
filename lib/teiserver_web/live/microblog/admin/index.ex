@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Microblog.AdminLive.Index do
-  @moduledoc false
+@moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.Microblog
   alias Teiserver.Microblog.Post
@@ -40,7 +40,7 @@ defmodule TeiserverWeb.Microblog.AdminLive.Index do
   def handle_info({TeiserverWeb.Microblog.PostFormComponent, {:saved, post}}, socket) do
     {:noreply, socket
       |> put_flash(:info, "Post created successfully")
-      |> redirect(to: ~p"/microblog")
+      |> redirect(to: ~p"/microblog/admin")
     }
   end
 
@@ -52,7 +52,7 @@ defmodule TeiserverWeb.Microblog.AdminLive.Index do
   end
 
 
-  defp fake_data() do
+  def fake_data() do
     alias Teiserver.Microblog
 
     Microblog.create_tag(%{
@@ -78,24 +78,28 @@ defmodule TeiserverWeb.Microblog.AdminLive.Index do
       title: "Server post",
       contents: "Server post contents go here"
     })
+    :timer.sleep(1000)
 
     Microblog.create_post(%{
       poster_id: 3,
       title: "Mapping post",
       contents: "Mapping post contents are here"
     })
+    :timer.sleep(1000)
 
     Microblog.create_post(%{
       poster_id: 3,
       title: "Long long post",
       contents: "Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum"
     })
+    :timer.sleep(1000)
 
     Microblog.create_post(%{
       poster_id: 3,
       title: "XSS post",
       contents: "XSS <script>alert(1)</script>"
     })
+    :timer.sleep(1000)
 
     Microblog.create_post_tag(%{
       post_id: 1,

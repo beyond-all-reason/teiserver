@@ -49,8 +49,14 @@ defmodule Teiserver.Microblog do
   @spec get_post!(non_neg_integer()) :: Post.t
   defdelegate get_post!(post_id), to: PostLib
 
+  @spec get_post!(non_neg_integer, list) :: Post.t
+  defdelegate get_post!(post_id, args), to: PostLib
+
   @spec get_post(non_neg_integer()) :: Post.t | nil
   defdelegate get_post(post_id), to: PostLib
+
+  @spec get_post(non_neg_integer(), list) :: Post.t | nil
+  defdelegate get_post(post_id, args), to: PostLib
 
   @spec create_post() :: {:ok, Post} | {:error, Ecto.Changeset}
   defdelegate create_post(), to: PostLib

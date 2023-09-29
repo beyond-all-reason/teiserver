@@ -17,25 +17,38 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <label for="post_title" class="control-label">Title</label>
-        <.input field={@form[:title]} type="text" autofocus="autofocus" />
-        <br />
+        <div class="row mb-4">
+          <div class="col">
+            <label for="post_title" class="control-label">Title</label>
+            <.input
+              field={@form[:title]}
+              type="text"
+              autofocus="autofocus"
+              phx-debounce="100"
+            />
+            <br />
 
-        <label for="post_tags" class="control-label">Tags</label>
-        <.input type="select"
-          name="tags"
-          value={}
-          options={@tags}
-        />
-        <br />
+            <label for="post_contents" class="control-label">Contents</label>
+            <textarea
+              name="post[contents]"
+              id="post_contents"
+              rows="3"
+              phx-debounce="100"
+              class="form-control"><%= @form[:contents].value %></textarea>
+          </div>
+          <div class="col">
+            <label for="post_tags" class="control-label">Tags</label>
+            <.input type="select"
+              name="post[tags][]"
+              value={@selected_tags}
+              multiple={true}
+              options={@tags}
+            />
+          </div>
+        </div>
 
-        <label for="post_contents" class="control-label">Contents</label>
-        <textarea name="post[contents]" id="post_contents" rows="3" class="form-control"></textarea>
-        <br />
-
-        <%!-- <.input field={@form[:contents]} type="textarea" /> --%>
-
-        <%= submit("Post", class: "btn btn-primary btn-block") %>
+        <% disabled = if not @form.source.valid? or Enum.empty?(@selected_tags), do: "disabled" %>
+        <%= submit("Post", class: "btn btn-primary btn-block #{disabled}") %>
       </.form>
     </div>
     """
@@ -57,12 +70,17 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
     {:ok,
      socket
      |> assign(:tags, tags)
+     |> assign(:selected_tags, [])
      |> assign(assigns)
      |> assign_form(changeset)}
   end
 
   @impl true
   def handle_event("validate", %{"post" => post_params}, socket) do
+    post_params = Map.merge(post_params, %{
+      "poster_id" => socket.assigns.current_user.id
+    })
+
     changeset =
       socket.assigns.post
       |> Microblog.change_post(post_params)
@@ -70,7 +88,10 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
 
     notify_parent({:updated_changeset, changeset})
 
-    {:noreply, assign_form(socket, changeset)}
+    {:noreply, socket
+      |> assign_form(changeset)
+      |> assign(:selected_tags, post_params["tags"] || [])
+    }
   end
 
   def handle_event("save", %{"post" => post_params}, socket) do
@@ -78,8 +99,23 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   end
 
   defp save_post(socket, :edit, post_params) do
+    tag_ids = post_params["tags"]
+      |> Enum.map(fn tag_id_str -> String.to_integer(tag_id_str) end)
+
     case Microblog.update_post(socket.assigns.post, post_params) do
       {:ok, post} ->
+        post_tags = tag_ids
+          |> Enum.map(fn tag_id ->
+            %{
+              tag_id: tag_id,
+              post_id: post.id
+            }
+          end)
+
+        Ecto.Multi.new()
+        |> Ecto.Multi.insert_all(:insert_all, Teiserver.Microblog.PostTag, post_tags)
+        |> Teiserver.Repo.transaction()
+
         notify_parent({:saved, post})
 
         {:noreply,
@@ -97,8 +133,23 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
       "poster_id" => socket.assigns.current_user.id
     })
 
+    tag_ids = post_params["tags"]
+      |> Enum.map(fn tag_id_str -> String.to_integer(tag_id_str) end)
+
     case Microblog.create_post(post_params) do
       {:ok, post} ->
+        post_tags = tag_ids
+          |> Enum.map(fn tag_id ->
+            %{
+              tag_id: tag_id,
+              post_id: post.id
+            }
+          end)
+
+        Ecto.Multi.new()
+        |> Ecto.Multi.insert_all(:insert_all, Teiserver.Microblog.PostTag, post_tags)
+        |> Teiserver.Repo.transaction()
+
         notify_parent({:saved, post})
 
         {:noreply,
