@@ -66,8 +66,6 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
   end
 
   defp get_messages(%{assigns: %{filters: filters}} = socket) do
-    IO.inspect "GETTING MESSAGES"
-
     mode = filters["mode"]
 
     inserted_after =

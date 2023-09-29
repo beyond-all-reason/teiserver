@@ -2,16 +2,24 @@
   Admin
 </a>
 
+<%= inspect @filters %>
+
 <div class="row" style="padding-top: 15vh;" id="login-div">
   <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4">
   
     <h4>Blog</h4>
+    
+    <%= for tag <- @tags do %>
+      <.tag_badge tag={tag} disabled={Enum.member?(@filters.disabled_tags, tag.id)} phx-click="toggle-tag" phx-value-tag-id={tag.id} />
+      &nbsp;
+    <% end %>
 
     <.table
       id="post-table"
       rows={@streams.posts}
     >
       <:col :let={{_id, post}} label="Title"><%= post.title %></:col>
+      <:col :let={{_id, post}} label="Poster"><%= post.poster.name %></:col>
       <:col :let={{_id, post}} label="Contents"><%= post.contents |> String.slice(0..128) %></:col>
       
       <:col :let={{_id, post}} label="Tags">

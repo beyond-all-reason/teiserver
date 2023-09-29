@@ -102,15 +102,35 @@ defmodule Teiserver.Microblog.PostQueries do
   # This just grabs the tags
   defp _preload(query, :tags) do
     from posts in query,
-      left_join: tags in assoc(posts, :tags),
+      join: tags in assoc(posts, :tags),
       preload: [tags: tags]
   end
 
-  # This applies filtering on which posts we get based on ownership of tags
-  defp _preload(query, {:tags, tag_ids}) when is_list(tag_ids) do
+  # This applies filtering on which posts we get based on possession of tags
+  defp _preload(query, {:tags, [], []}) do
     from posts in query,
       join: tags in assoc(posts, :tags),
-      where: tags.id in ^tag_ids,
+      preload: [tags: tags]
+  end
+
+  defp _preload(query, {:tags, [], exclude_ids}) do
+    from posts in query,
+      join: tags in assoc(posts, :tags),
+      where: tags.id not in ^exclude_ids,
+      preload: [tags: tags]
+  end
+
+  defp _preload(query, {:tags, include_ids, []}) do
+    from posts in query,
+      join: tags in assoc(posts, :tags),
+      where: tags.id in ^include_ids,
+      preload: [tags: tags]
+  end
+
+  defp _preload(query, {:tags, include_ids, exclude_ids}) do
+    from posts in query,
+      join: tags in assoc(posts, :tags),
+      where: tags.id in ^include_ids and tags.id not in ^exclude_ids,
       preload: [tags: tags]
   end
 end

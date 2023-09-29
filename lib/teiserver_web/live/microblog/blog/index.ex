@@ -9,9 +9,23 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
   def mount(_params, _session, socket) do
     :ok = PubSub.subscribe(Teiserver.PubSub, "microblog_posts")
 
+    tags = Microblog.list_tags(
+      order_by: [
+        "Name (A-Z)"
+      ]
+    )
+
+    filters = %{
+      disabled_tags: [],
+      enabled_tags: [],
+      enabled_posters: []
+    }
+
     {:ok,
       socket
       |> assign(:show_full_posts, [])
+      |> assign(:tags, tags)
+      |> assign(:filters, filters)
       |> list_posts
     }
   end
@@ -64,11 +78,29 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
     }
   end
 
-  defp list_posts(socket) do
+  def handle_event("toggle-tag", %{"tag-id" => tag_id_str}, %{assigns: assigns} = socket) do
+    tag_id = String.to_integer(tag_id_str)
+
+    new_filters = if Enum.member?(assigns.filters.disabled_tags, tag_id) do
+      new_disabled_tags = List.delete(assigns.filters.disabled_tags, tag_id)
+      Map.put(assigns.filters, :disabled_tags, new_disabled_tags)
+    else
+      new_disabled_tags = [tag_id | assigns.filters.disabled_tags] |> Enum.uniq
+      Map.put(assigns.filters, :disabled_tags, new_disabled_tags)
+    end
+
+
+    {:noreply, socket
+      |> assign(:filters, new_filters)
+      |> list_posts
+    }
+  end
+
+  defp list_posts(%{assigns: %{filters: filters}} = socket) do
     posts = Microblog.list_posts(
       order_by: ["Newest first"],
       limit: 50,
-      preload: [:tags]
+      preload: [{:tags, filters.enabled_tags, filters.disabled_tags}, :poster]
     )
 
     socket
