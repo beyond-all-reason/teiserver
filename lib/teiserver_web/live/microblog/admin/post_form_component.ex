@@ -25,15 +25,6 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
               autofocus="autofocus"
               phx-debounce="100"
             />
-            <br />
-
-            <label for="post_contents" class="control-label">Contents</label>
-            <textarea
-              name="post[contents]"
-              id="post_contents"
-              rows="3"
-              phx-debounce="100"
-              class="form-control"><%= @form[:contents].value %></textarea>
           </div>
           <div class="col">
             <label for="post_tags" class="control-label">Tags</label>
@@ -43,6 +34,17 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
               multiple={true}
               options={@tags}
             />
+          </div>
+        </div>
+        <div class="row mb-4">
+          <div class="col">
+            <label for="post_contents" class="control-label">Contents</label>
+            <textarea
+              name="post[contents]"
+              id="post_contents"
+              rows="5"
+              phx-debounce="100"
+              class="form-control"><%= @form[:contents].value %></textarea>
           </div>
         </div>
 

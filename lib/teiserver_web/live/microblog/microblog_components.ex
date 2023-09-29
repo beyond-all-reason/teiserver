@@ -117,7 +117,7 @@ defmodule TeiserverWeb.Microblog.MicroblogComponents do
         <%= Map.get(@post, :title, "") %> -
         <%= TimexHelper.date_to_str(Timex.now(), :hms_or_ymd) %>
       </h4>
-      <%= Map.get(@post, :contents, "") %>
+      <%= Map.get(@post, :contents, "") |> Earmark.as_html! |> Phoenix.HTML.raw %>
       <br />
     </div>
     """

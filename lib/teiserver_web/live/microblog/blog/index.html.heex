@@ -32,7 +32,7 @@
       </:col>
       <:col :let={{_id, post}} label="Contents">
         <%=
-          post.contents |> String.split("\n\n") |> hd |> String.slice(0..128)
+          post.contents |> String.split("\n\n") |> hd |> Earmark.as_html! |> raw
         %>
         <span :if={String.contains?(post.contents, "\n\n") or String.length(post.contents) > 128}>...</span>
       </:col>

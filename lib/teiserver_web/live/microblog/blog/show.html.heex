@@ -21,7 +21,7 @@
       <% end %>
     </div>
     <h3><%= @post.title %></h3>
-    <%= @post.contents %>
+    <%= @post.contents |> Earmark.as_html! |> raw %>
     <br /><br />
 
     <a href={~p"/microblog"} class="btn btn-secondary">
