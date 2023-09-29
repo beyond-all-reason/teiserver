@@ -3,6 +3,7 @@ defmodule Teiserver.Microblog do
   import Ecto.Query, warn: false
 
 
+  def icon(), do: "fa-blog"
 
   alias Teiserver.Microblog.{Tag, TagLib}
 
@@ -45,9 +46,6 @@ defmodule Teiserver.Microblog do
 
   @spec list_posts(list) :: [Post]
   defdelegate list_posts(args), to: PostLib
-
-  @spec list_posts_complex(list) :: [Post]
-  defdelegate list_posts_complex(args), to: PostLib
 
   @spec get_post!(non_neg_integer()) :: Post.t
   defdelegate get_post!(post_id), to: PostLib

@@ -1,8 +1,12 @@
-<a href={~p"/microblog/admin"} class="btn btn-primary btn-sm" :if={allow?(@current_user, "Contributor")}>
-  Admin
+<a href={~p"/"} class="btn btn-primary btn-sm">
+  <Fontawesome.icon icon="fa-home" style="solid" />
+  Main site
 </a>
 
-<%= inspect @filters %>
+<a href={~p"/microblog/admin"} class="btn btn-primary btn-sm" :if={allow?(@current_user, "Contributor")}>
+  <Fontawesome.icon icon={Central.Admin.AdminLib.icon()} style="solid" />
+  Admin
+</a>
 
 <div class="row" style="padding-top: 15vh;" id="login-div">
   <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4">
@@ -10,7 +14,7 @@
     <h4>Blog</h4>
     
     <%= for tag <- @tags do %>
-      <.tag_badge tag={tag} disabled={Enum.member?(@filters.disabled_tags, tag.id)} phx-click="toggle-tag" phx-value-tag-id={tag.id} />
+      <.tag_badge tag={tag} disabled={not Enum.member?(@filters.enabled_tags, tag.id)} phx-click="toggle-enabled-tag" phx-value-tag-id={tag.id} />
       &nbsp;
     <% end %>
 

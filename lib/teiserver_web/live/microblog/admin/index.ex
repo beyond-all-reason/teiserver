@@ -2,7 +2,6 @@ defmodule TeiserverWeb.Microblog.AdminLive.Index do
 @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.Microblog
-  alias Teiserver.Microblog.Post
   import TeiserverWeb.Microblog.MicroblogComponents
 
   @impl true
@@ -25,7 +24,7 @@ defmodule TeiserverWeb.Microblog.AdminLive.Index do
   end
 
   @impl true
-  def handle_info({TeiserverWeb.Microblog.PostFormComponent, {:saved, post}}, socket) do
+  def handle_info({TeiserverWeb.Microblog.PostFormComponent, {:saved, _post}}, socket) do
     {:noreply, socket
       |> put_flash(:info, "Post created successfully")
       |> redirect(to: ~p"/microblog/admin")
@@ -40,7 +39,7 @@ defmodule TeiserverWeb.Microblog.AdminLive.Index do
   end
 
 
-  def handle_info({TeiserverWeb.Microblog.TagFormComponent, {:saved, tag}}, socket) do
+  def handle_info({TeiserverWeb.Microblog.TagFormComponent, {:saved, _tag}}, socket) do
     {:noreply, socket
       |> put_flash(:info, "Tag created successfully")
       |> redirect(to: ~p"/microblog/admin")
@@ -76,57 +75,75 @@ defmodule TeiserverWeb.Microblog.AdminLive.Index do
       icon: "fa-code-commit"
     })
 
-    Microblog.create_post(%{
+    {:ok, server_post} = Microblog.create_post(%{
       poster_id: 3,
       title: "Server post",
       contents: "Server post contents go here"
     })
     :timer.sleep(1000)
 
-    Microblog.create_post(%{
+    Microblog.create_post_tag(%{
+      post_id: server_post.id,
+      tag_id: 1
+    })
+
+    {:ok, mapping_post} = Microblog.create_post(%{
       poster_id: 3,
       title: "Mapping post",
       contents: "Mapping post contents are here"
     })
     :timer.sleep(1000)
 
-    Microblog.create_post(%{
-      poster_id: 3,
-      title: "Long long post",
-      contents: "Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum"
+    Microblog.create_post_tag(%{
+      post_id: mapping_post.id,
+      tag_id: 2
     })
-    :timer.sleep(1000)
 
-    Microblog.create_post(%{
+    {:ok, dev_post} = Microblog.create_post(%{
       poster_id: 3,
-      title: "XSS post",
-      contents: "XSS <script>alert(1)</script>"
+      title: "Development post",
+      contents: "Development post contents are here"
     })
     :timer.sleep(1000)
 
     Microblog.create_post_tag(%{
-      post_id: 1,
-      tag_id: 1
+      post_id: dev_post.id,
+      tag_id: 3
     })
 
+    {:ok, dev_mapping_post} = Microblog.create_post(%{
+      poster_id: 3,
+      title: "Development and Mapping post",
+      contents: "Development and Mapping post contents are here"
+    })
+    :timer.sleep(1000)
+
     Microblog.create_post_tag(%{
-      post_id: 2,
+      post_id: dev_mapping_post.id,
       tag_id: 2
     })
 
     Microblog.create_post_tag(%{
-      post_id: 1,
+      post_id: dev_mapping_post.id,
       tag_id: 3
     })
 
+    {:ok, dev_server_post} = Microblog.create_post(%{
+      poster_id: 3,
+      title: "Development and Sever post",
+      contents: "Development and Sever post contents are here"
+    })
+    :timer.sleep(1000)
+
     Microblog.create_post_tag(%{
-      post_id: 2,
-      tag_id: 3
+      post_id: dev_server_post.id,
+      tag_id: 1
     })
 
     Microblog.create_post_tag(%{
-      post_id: 3,
+      post_id: dev_server_post.id,
       tag_id: 3
     })
+
   end
 end

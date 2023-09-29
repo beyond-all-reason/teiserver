@@ -17,7 +17,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
 
     filters = %{
       disabled_tags: [],
-      enabled_tags: [],
+      enabled_tags: tags |> Enum.map(fn t -> t.id end),
       enabled_posters: []
     }
 
@@ -78,7 +78,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
     }
   end
 
-  def handle_event("toggle-tag", %{"tag-id" => tag_id_str}, %{assigns: assigns} = socket) do
+  def handle_event("toggle-disabled-tag", %{"tag-id" => tag_id_str}, %{assigns: assigns} = socket) do
     tag_id = String.to_integer(tag_id_str)
 
     new_filters = if Enum.member?(assigns.filters.disabled_tags, tag_id) do
@@ -89,6 +89,22 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
       Map.put(assigns.filters, :disabled_tags, new_disabled_tags)
     end
 
+    {:noreply, socket
+      |> assign(:filters, new_filters)
+      |> list_posts
+    }
+  end
+
+  def handle_event("toggle-enabled-tag", %{"tag-id" => tag_id_str}, %{assigns: assigns} = socket) do
+    tag_id = String.to_integer(tag_id_str)
+
+    new_filters = if Enum.member?(assigns.filters.enabled_tags, tag_id) do
+      new_enabled_tags = List.delete(assigns.filters.enabled_tags, tag_id)
+      Map.put(assigns.filters, :enabled_tags, new_enabled_tags)
+    else
+      new_enabled_tags = [tag_id | assigns.filters.enabled_tags] |> Enum.uniq
+      Map.put(assigns.filters, :enabled_tags, new_enabled_tags)
+    end
 
     {:noreply, socket
       |> assign(:filters, new_filters)
