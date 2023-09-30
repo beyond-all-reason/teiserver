@@ -2,7 +2,10 @@ defmodule Teiserver.Microblog do
   @moduledoc false
   import Ecto.Query, warn: false
 
+  @spec colours :: atom
+  def colours(), do: :primary
 
+  @spec icon :: String.t()
   def icon(), do: "fa-blog"
 
   alias Teiserver.Microblog.{Tag, TagLib}

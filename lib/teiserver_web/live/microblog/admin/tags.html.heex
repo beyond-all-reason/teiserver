@@ -1,17 +1,4 @@
-<a href={~p"/"} class="btn btn-primary btn-sm">
-  <Fontawesome.icon icon="fa-home" style="solid" />
-  Main site
-</a>
-
-<a href={~p"/microblog"} class="btn btn-primary btn-sm">
-  <Fontawesome.icon icon={Teiserver.Microblog.icon()} style="solid" />
-  Blog home
-</a>
-
-<a href={~p"/microblog/admin"} class="btn btn-primary btn-sm" :if={allow?(@current_user, "Contributor")}>
-  <Fontawesome.icon icon={Central.Admin.AdminLib.icon()} style="solid" />
-  Admin
-</a>
+<TeiserverWeb.MicroblogComponents.sub_menu active={"tags"} view_colour={@view_colour} />
 
 <div class="row mt-4">
   <div class="col">

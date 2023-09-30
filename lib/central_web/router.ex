@@ -96,8 +96,6 @@ defmodule TeiserverWeb.Router do
     plug(Guardian.Plug.EnsureAuthenticated)
   end
 
-  # Phoenix.Router.route_info(TeiserverWeb.Router, "GET", "/", "myhost")
-
   scope "/", TeiserverWeb.General do
     pipe_through([:live_browser, :nomenu_live_layout])
 
@@ -111,7 +109,7 @@ defmodule TeiserverWeb.Router do
   end
 
   scope "/microblog", TeiserverWeb.Microblog do
-    pipe_through([:live_browser, :standard_layout])
+    pipe_through([:live_browser, :standard_live_layout])
 
     live_session :microblog_user,
       on_mount: [

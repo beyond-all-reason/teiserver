@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
   @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.Microblog
-  import TeiserverWeb.Microblog.MicroblogComponents
+  import TeiserverWeb.MicroblogComponents
   alias Phoenix.PubSub
 
   @impl true
@@ -26,6 +26,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
       |> assign(:show_full_posts, [])
       |> assign(:tags, tags)
       |> assign(:filters, filters)
+      |> assign(:site_menu_active, "microblog")
       |> list_posts
     }
   end

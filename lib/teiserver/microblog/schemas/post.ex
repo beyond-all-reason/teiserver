@@ -25,6 +25,10 @@ defmodule Teiserver.Microblog.Post do
     tag_ids = params["tags"] || []
       |> Enum.map(fn id -> id end)
 
+    params =
+      params
+      |> trim_strings(~w(title contents)a)
+
     struct
     |> cast(params, ~w(poster_id title contents)a)
     |> cast_assoc(:post_tags, tag_ids)

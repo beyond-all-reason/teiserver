@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
   @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.Microblog
-  import TeiserverWeb.Microblog.MicroblogComponents
+  import TeiserverWeb.MicroblogComponents
   alias Phoenix.PubSub
 
   @impl true
@@ -14,6 +14,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
     {:ok,
       socket
       |> assign(:post, post)
+      |> assign(:site_menu_active, "microblog")
     }
   end
 

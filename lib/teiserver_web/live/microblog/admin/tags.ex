@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Microblog.AdminLive.Tags do
   @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.Microblog
-  import TeiserverWeb.Microblog.MicroblogComponents
+  import TeiserverWeb.MicroblogComponents
 
   @impl true
   def mount(_params, _session, socket) do
@@ -29,6 +29,8 @@ defmodule TeiserverWeb.Microblog.AdminLive.Tags do
     |> assign(:page_title, "Microblog admin page")
     |> assign(:tags, Microblog.list_tags(order_by: ["Name (A-Z)"]))
     |> assign(:tag, %{})
+    |> assign(:site_menu_active, "microblog")
+    |> assign(:view_colour, Teiserver.Microblog.colours())
   end
 
   @impl true

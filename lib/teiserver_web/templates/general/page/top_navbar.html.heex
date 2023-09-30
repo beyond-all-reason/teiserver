@@ -51,6 +51,12 @@
         <% end %>
 
         <%= central_component("top_nav_item",
+          text: "Blog",
+          route: ~p"/microblog",
+          active: @site_menu_active == "microblog"
+        ) %>
+
+        <%= central_component("top_nav_item",
           text: "Lobbies",
           route: ~p"/battle/lobbies",
           active: @site_menu_active == "lobbies"

@@ -1,105 +1,50 @@
-defmodule TeiserverWeb.Microblog.MicroblogComponents do
+defmodule TeiserverWeb.MicroblogComponents do
   @moduledoc false
   use CentralWeb, :component
   alias Teiserver.Helper.TimexHelper
-  # import TeiserverWeb.NavComponents, only: [sub_menu_button: 1]
+  import TeiserverWeb.NavComponents, only: [sub_menu_button: 1]
 
   @doc """
-  <TeiserverWeb.Microblog.MicroblogComponents.post_list post={post} />
-
-  This is designed to show a small view of the post itself and allow for getting an idea of what is present without having to parse the entire post.
+  <TeiserverWeb.MicroblogComponents.sub_menu active={active} view_colour={@view_colour} />
   """
-  attr :posts, :list, required: true
-  attr :show_full_posts, :list, required: true
-  def post_list(assigns) do
-     assigns =
-      with %{posts: %Phoenix.LiveView.LiveStream{}} <- assigns do
-        assign(assigns, post_id: assigns.post_id || fn {id, _post} -> id end)
-      end
-
+  attr :view_colour, :string, required: true
+  attr :active, :string, required: true
+  attr :match_id, :integer, default: nil
+  def sub_menu(assigns) do
     ~H"""
-    <div :for={{_, post} <- @posts} id={}>
-      <%= if Enum.member?(@show_full_posts, post.id) do %>
-        <.post_complete post={post} />
-      <% else %>
-        <.post_slimline post={post} />
-      <% end %>
-    </div>
-    """
-  end
-
-  @doc """
-  <TeiserverWeb.Microblog.MicroblogComponents.post_slimline post={post} />
-
-  This is designed to show a small view of the post itself and allow for getting an idea of what is present without having to parse the entire post.
-  """
-  attr :post, :map, required: true
-  def post_slimline(assigns) do
-    ~H"""
-    <div id={"post-#{@post.id}"} class="mt-4">
-      <div class="float-end">
-        <div :for={tag <- @post.tags} class="d-inline-block mx-1">
-          <.tag_badge tag={tag} />
-        </div>
-      </div>
-
-      <h4>
-        <%= @post.title %> -
-        <%= TimexHelper.date_to_str(@post.inserted_at, :hms_or_ymd) %>
-      </h4>
-      <%= String.slice(@post.contents, 0..256) %>
-
-      <a
-        href="#"
-        phx-click="show-full"
-        phx-value-post-id={@post.id}
-        class="d-block"
-        :if={String.length(@post.contents) > 256}
+    <div class="row sub-menu">
+      <.sub_menu_button
+        bsname={@view_colour}
+        icon={Teiserver.Microblog.icon()}
+        active={@active == "home"}
+        url={~p"/microblog"}
       >
-        Show full contents
-      </a>
+        Blog
+      </.sub_menu_button>
 
-      <br />
-    </div>
-    """
-  end
-
-  @doc """
-  <TeiserverWeb.Microblog.MicroblogComponents.post_complete post={post} />
-
-  This is designed to show a small view of the post itself and allow for getting an idea of what is present without having to parse the entire post.
-  """
-  attr :post, :map, required: true
-  def post_complete(assigns) do
-    ~H"""
-    <div id={"post-#{@post.id}"} class="mt-4">
-      <div class="float-end">
-        <div :for={tag <- @post.tags} class="d-inline-block mx-1">
-          <.tag_badge tag={tag} />
-        </div>
-      </div>
-
-      <h4>
-        <%= @post.title %> -
-        <%= TimexHelper.date_to_str(@post.inserted_at, :hms_or_ymd) %>
-      </h4>
-      <%= @post.contents %>
-
-      <a
-        href="#"
-        phx-click="hide-full"
-        phx-value-post-id={@post.id}
-        class="d-block"
+      <.sub_menu_button
+        bsname={@view_colour}
+        icon={Teiserver.Microblog.PostLib.icon()}
+        active={@active == "posts"}
+        url={~p"/microblog/admin"}
       >
-        Show summary
-      </a>
-      <br />
+        Posts
+      </.sub_menu_button>
+
+      <.sub_menu_button
+        bsname={@view_colour}
+        icon={Teiserver.Microblog.TagLib.icon()}
+        active={@active == "tags"}
+        url={~p"/microblog/admin/tags"}
+      >
+        Tags
+      </.sub_menu_button>
     </div>
     """
   end
 
   @doc """
-  <TeiserverWeb.Microblog.MicroblogComponents.post_complete post={post} />
+  <TeiserverWeb.MicroblogComponents.post_complete post={post} />
 
   This is designed to show a small view of the post itself and allow for getting an idea of what is present without having to parse the entire post.
   """
