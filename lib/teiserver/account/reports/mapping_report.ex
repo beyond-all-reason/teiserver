@@ -41,13 +41,11 @@ defmodule Teiserver.Game.MappingReport do
 
         team1_wins =
           matches
-          |> Enum.filter(fn m -> m.winning_team == 0 end)
-          |> Enum.count()
+          |> Enum.count(fn m -> m.winning_team == 0 end)
 
         team2_wins =
           matches
-          |> Enum.filter(fn m -> m.winning_team == 1 end)
-          |> Enum.count()
+          |> Enum.count(fn m -> m.winning_team == 1 end)
 
         team1_favour = team1_wins / count - team2_wins / count
 
