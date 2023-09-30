@@ -121,7 +121,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "Forum updated successfully")
+         |> put_flash(:info, "Post updated successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -155,7 +155,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "Forum created successfully")
+         |> put_flash(:info, "Post created successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->

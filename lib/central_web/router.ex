@@ -126,7 +126,9 @@ defmodule TeiserverWeb.Router do
         {Teiserver.Communication.NotificationPlug, :load_notifications}
       ] do
         live "/admin", AdminLive.Index, :index
-        live "/admin/tags", AdminLive.Tags, :index
+
+        live "/admin/tags", Admin.TagLive.Index, :index
+        live "/admin/tags/:id", Admin.TagLive.Show, :show
     end
   end
 

@@ -66,10 +66,6 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
 
   @impl true
   def handle_event("validate", %{"tag" => tag_params}, socket) do
-    tag_params = Map.merge(tag_params, %{
-      "tager_id" => socket.assigns.current_user.id
-    })
-
     changeset =
       socket.assigns.tag
       |> Microblog.change_tag(tag_params)
@@ -93,8 +89,8 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "Forum updated successfully")
-         |> push_patch(to: socket.assigns.patch)}
+         |> put_flash(:info, "Tag updated successfully")
+         |> redirect(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
@@ -102,17 +98,13 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
   end
 
   defp save_tag(socket, :new, tag_params) do
-    tag_params = Map.merge(tag_params, %{
-      "tager_id" => socket.assigns.current_user.id
-    })
-
     case Microblog.create_tag(tag_params) do
       {:ok, tag} ->
         notify_parent({:saved, tag})
 
         {:noreply,
          socket
-         |> put_flash(:info, "Forum created successfully")
+         |> put_flash(:info, "Tag created successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->

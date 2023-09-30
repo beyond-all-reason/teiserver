@@ -6,6 +6,7 @@
       id="post-table"
       table_class="table-sm table-hover"
       rows={@tags}
+      row_click={fn tag -> JS.navigate(~p"/microblog/admin/tags/#{tag.id}") end}
     >
       <:col :let={tag} label="Name"><%= tag.name %></:col>
       <:col :let={tag} label="Style">
@@ -16,8 +17,9 @@
         </span>
       </:col>
     </.table>
-  
+
     <.live_component
+      :if={@tag == nil}
       module={TeiserverWeb.Microblog.TagFormComponent}
       id={:new}
       action={:new}
