@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Microblog.BlogLive.Show do
   @moduledoc false
+  require TeiserverWeb.Microblog.BlogLive.Show
   use TeiserverWeb, :live_view
   alias Teiserver.{Microblog, Logging}
   import TeiserverWeb.MicroblogComponents
@@ -7,13 +8,20 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
 
   @impl true
   def mount(%{"post_id" => post_id_str}, _session, socket) do
-    :ok = PubSub.subscribe(Teiserver.PubSub, "microblog_posts")
+    socket = if is_connected?(socket) do
+      :ok = PubSub.subscribe(Teiserver.PubSub, "microblog_posts")
+      post = Microblog.get_post!(post_id_str, preload: [:poster, :tags])
+      Microblog.increment_post_view_count(post.id)
 
-    post = Microblog.get_post!(post_id_str, preload: [:poster, :tags])
+      socket
+        |> assign(:post, post)
+    else
+      socket
+        |> assign(:post, nil)
+    end
 
     {:ok,
       socket
-      |> assign(:post, post)
       |> assign(:site_menu_active, "microblog")
     }
   end

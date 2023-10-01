@@ -7,27 +7,37 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    :ok = PubSub.subscribe(Teiserver.PubSub, "microblog_posts")
+    socket = if is_connected?(socket) do
+      :ok = PubSub.subscribe(Teiserver.PubSub, "microblog_posts")
 
-    tags = Microblog.list_tags(
-      order_by: [
-        "Name (A-Z)"
-      ]
-    )
+      tags = Microblog.list_tags(
+        order_by: [
+          "Name (A-Z)"
+        ]
+      )
 
-    filters = %{
-      disabled_tags: [],
-      enabled_tags: tags |> Enum.map(fn t -> t.id end),
-      enabled_posters: []
-    }
+      filters = %{
+        disabled_tags: [],
+        enabled_tags: tags |> Enum.map(fn t -> t.id end),
+        enabled_posters: []
+      }
+
+      socket
+        |> assign(:show_full_posts, [])
+        |> assign(:tags, tags)
+        |> assign(:filters, filters)
+        |> list_posts
+    else
+      socket
+        |> assign(:show_full_posts, [])
+        |> assign(:tags, [])
+        |> assign(:filters, %{})
+        |> stream(:posts, [])
+    end
 
     {:ok,
       socket
-      |> assign(:show_full_posts, [])
-      |> assign(:tags, tags)
-      |> assign(:filters, filters)
       |> assign(:site_menu_active, "microblog")
-      |> list_posts
     }
   end
 

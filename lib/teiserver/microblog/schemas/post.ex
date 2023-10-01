@@ -7,6 +7,7 @@ defmodule Teiserver.Microblog.Post do
 
     field :title, :string
     field :contents, :string
+    field :view_count, :integer, default: 0
 
     has_many :post_tags, Teiserver.Microblog.PostTag
 
@@ -30,7 +31,7 @@ defmodule Teiserver.Microblog.Post do
       |> trim_strings(~w(title contents)a)
 
     struct
-    |> cast(params, ~w(poster_id title contents)a)
+    |> cast(params, ~w(poster_id title contents view_count)a)
     |> cast_assoc(:post_tags, tag_ids)
     |> validate_required(~w(poster_id title contents)a)
   end

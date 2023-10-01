@@ -80,6 +80,9 @@ defmodule Teiserver.Microblog do
   @spec change_post(Post, map) :: Ecto.Changeset
   defdelegate change_post(post_type, attrs), to: PostLib
 
+  @spec increment_post_view_count(non_neg_integer()) :: Ecto.Changeset
+  defdelegate increment_post_view_count(post_id), to: PostLib
+
 
   alias Teiserver.Microblog.{PostTag, PostTagLib}
 

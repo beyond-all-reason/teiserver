@@ -16,6 +16,8 @@ defmodule Teiserver.Repo.Migrations.CreateMicroblog do
       add :title, :string
       add :contents, :text
 
+      add :view_count, :integer
+
       timestamps()
     end
 
