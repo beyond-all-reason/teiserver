@@ -21,10 +21,10 @@ defmodule Fontawesome do
     size = fa_prefix(assigns[:size])
     weight = fa_prefix(assigns[:weight])
 
-    icon_name = if is_atom(assigns[:icon]) do
-      icon_lookup(assigns[:icon] || assigns[:icon_atom])
-    else
-      fa_prefix(assigns[:icon])
+    icon_name = cond do
+      assigns[:icon] && is_atom(assigns[:icon]) -> icon_lookup(assigns[:icon])
+      assigns[:icon_atom] && is_atom(assigns[:icon_atom]) -> icon_lookup(assigns[:icon_atom])
+      true -> fa_prefix(assigns[:icon])
     end
 
     assigns = assigns
