@@ -11,8 +11,10 @@ defmodule TeiserverWeb.Microblog.Admin.PostLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _url, socket) do
-    case allow?(socket.assigns[:current_user], "Server") do
-      true ->
+    if allow?(socket.assigns[:current_user], "Contributor") do
+      post = Microblog.get_post!(id, preload: [:tags])
+
+      if post.poster_id == socket.assigns.current_user.id or allow?(socket.assigns[:current_user], "Moderator") do
         post = Microblog.get_post!(id, preload: [:tags])
         selected_tags = post.tags |> Enum.map(fn t -> t.id end)
 
@@ -22,11 +24,12 @@ defmodule TeiserverWeb.Microblog.Admin.PostLive.Show do
           |> assign(:site_menu_active, "microblog")
           |> assign(:view_colour, Teiserver.Microblog.colours())
         }
+      else
+        {:noreply, socket |> redirect(to: ~p"/microblog/admin/posts")}
+      end
 
-      false ->
-        {:noreply,
-         socket
-         |> redirect(to: ~p"/microblog")}
+    else
+      {:noreply, socket |> redirect(to: ~p"/microblog")}
     end
   end
 end

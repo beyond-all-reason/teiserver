@@ -20,7 +20,7 @@
     <br /><br />
 
     <div class="float-end">
-      <a class="btn btn-info me-4" :if={@post.poster_id == @current_user.id || allow?(@current_user, "Moderator")} href={~p"/microblog/admin/posts/#{@post.id}"}>
+      <a class="btn btn-info me-4" :if={@current_user && @post.poster_id == @current_user.id || allow?(@current_user, "Moderator")} href={~p"/microblog/admin/posts/#{@post.id}"}>
         <Fontawesome.icon icon="wrench" style="solid" />
         Edit post
       </a>

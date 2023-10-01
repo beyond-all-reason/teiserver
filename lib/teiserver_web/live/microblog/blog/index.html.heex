@@ -6,7 +6,7 @@
     </a>
   
     <h3>Blog</h3>
-    This is currently in the early stages so filtering doesn't yet work correctly. Please leave feedback/suggestions for Teifion in the Discord under the #suggestions forum.
+    This is currently in the early stages so filtering doesn't yet work correctly. Please leave feedback/suggestions for Teifion in the <a href="https://discord.com/channels/549281623154229250/1158097903114530956">Discord suggestion thread</a>.
     <br /><br />
 
     <%= for tag <- @tags do %>
@@ -29,7 +29,7 @@
         <%=
           post.contents |> String.split("\n\n") |> hd |> Earmark.as_html! |> raw
         %>
-        <span :if={String.contains?(post.contents, "\n\n") or String.length(post.contents) > 128}>...</span>
+        <em :if={String.contains?(post.contents, "\n\n") or String.length(post.contents) > 128}>Click for more details</em>
       </:col>
 
       <:col :let={{_id, post}} label="Tags">
