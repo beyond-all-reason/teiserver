@@ -1,6 +1,6 @@
 <div class="row" style="padding-top: 5vh;" id="main-blog-div">
   <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4">
-    <a href={~p"/microblog/admin"} class="btn btn-primary btn-sm float-end" :if={allow?(@current_user, "Contributor")}>
+    <a href={~p"/microblog/admin/posts"} class="btn btn-primary btn-sm float-end" :if={allow?(@current_user, "Contributor")}>
       <Fontawesome.icon icon={Central.Admin.AdminLib.icon()} style="solid" />
       Blog admin
     </a>

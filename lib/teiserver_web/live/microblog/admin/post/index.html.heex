@@ -1,4 +1,4 @@
-<TeiserverWeb.MicroblogComponents.sub_menu active={"posts"} view_colour={@view_colour} />
+<TeiserverWeb.MicroblogComponents.sub_menu active={"posts"} view_colour={@view_colour} current_user={@current_user} />
 
 <div class="row mt-4">
   <div class="col">
@@ -7,7 +7,7 @@
       id={:new}
       action={:new}
       post={%Teiserver.Microblog.Post{}}
-      patch={~p"/microblog/admin"}
+      patch={~p"/microblog/admin/posts"}
       title="New post form"
       current_user={@current_user}
     />
@@ -16,11 +16,4 @@
   <div class="col">
     <.post_preview post={@post} />
   </div>
-</div>
-
-<div :if={allow?(@current_user, "Server")} style="margin-top: 40px;">
-  <a href={~p"/microblog/admin/tags"} class="btn btn-secondary">
-    <Fontawesome.icon icon="tags" style="regular" />
-    Edit tags
-  </a>
 </div>

@@ -125,7 +125,8 @@ defmodule TeiserverWeb.Router do
         {Teiserver.Account.AuthPlug, :ensure_authenticated},
         {Teiserver.Communication.NotificationPlug, :load_notifications}
       ] do
-        live "/admin", AdminLive.Index, :index
+        live "/admin/posts", Admin.PostLive.Index, :index
+        live "/admin/posts/:id", Admin.PostLive.Show, :show
 
         live "/admin/tags", Admin.TagLive.Index, :index
         live "/admin/tags/:id", Admin.TagLive.Show, :show

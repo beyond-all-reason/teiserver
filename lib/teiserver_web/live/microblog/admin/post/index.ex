@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Microblog.AdminLive.Index do
+defmodule TeiserverWeb.Microblog.Admin.PostLive.Index do
 @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.Microblog
@@ -28,9 +28,8 @@ defmodule TeiserverWeb.Microblog.AdminLive.Index do
     socket
     |> assign(:page_title, "Microblog admin page")
     |> assign(:post, %{})
-    |> assign(:tag, %{})
     |> assign(:site_menu_active, "microblog")
-    |> assign(:view_colour, Teiserver.Microblog.colours())
+    |> assign(:view_colour, Microblog.colours())
   end
 
   @impl true

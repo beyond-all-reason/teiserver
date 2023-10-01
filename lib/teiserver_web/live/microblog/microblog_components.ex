@@ -10,6 +10,7 @@ defmodule TeiserverWeb.MicroblogComponents do
   attr :view_colour, :string, required: true
   attr :active, :string, required: true
   attr :match_id, :integer, default: nil
+  attr :current_user, :map, required: true
   def sub_menu(assigns) do
     ~H"""
     <div class="row sub-menu">
@@ -23,15 +24,17 @@ defmodule TeiserverWeb.MicroblogComponents do
       </.sub_menu_button>
 
       <.sub_menu_button
+        :if={allow?(@current_user, "Contributor")}
         bsname={@view_colour}
         icon={Teiserver.Microblog.PostLib.icon()}
         active={@active == "posts"}
-        url={~p"/microblog/admin"}
+        url={~p"/microblog/admin/posts"}
       >
         Posts
       </.sub_menu_button>
 
       <.sub_menu_button
+        :if={allow?(@current_user, "Server")}
         bsname={@view_colour}
         icon={Teiserver.Microblog.TagLib.icon()}
         active={@active == "tags"}
