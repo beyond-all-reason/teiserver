@@ -32,7 +32,22 @@ defmodule Teiserver.Logging.Helpers do
     the_log
   end
 
-  @spec add_audit_log(Plug.Conn.t(), String.t(), Map.t()) :: Teiserver.Logging.AuditLog.t()
+  %Phoenix.LiveView.Socket{}
+
+
+  @spec add_audit_log(Plug.Conn.t() | Phoenix.LiveView.Socket.t(), String.t(), Map.t()) :: Teiserver.Logging.AuditLog.t()
+  def add_audit_log(%Phoenix.LiveView.Socket{} = socket, action, details) do
+    {:ok, the_log} =
+      Logging.create_audit_log(%{
+        action: action,
+        user_id: if(socket.assigns[:current_user], do: socket.assigns[:current_user].id, else: nil),
+        details: details,
+        ip: "."
+      })
+
+    the_log
+  end
+
   def add_audit_log(conn, action, details) do
     {:ok, the_log} =
       Logging.create_audit_log(%{

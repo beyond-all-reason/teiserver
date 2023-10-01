@@ -74,7 +74,9 @@ defmodule Teiserver.Startup do
       "Teiserver:De-bridged user",
       "Teiserver:Changed user rating",
       "Teiserver:Changed user name",
-      "Teiserver:Smurf merge"
+      "Teiserver:Smurf merge",
+
+      "Microblog.delete_post"
     ])
 
     # Permissions setup

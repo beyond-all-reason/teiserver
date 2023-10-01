@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Microblog.BlogLive.Show do
   @moduledoc false
   use TeiserverWeb, :live_view
-  alias Teiserver.Microblog
+  alias Teiserver.{Microblog, Logging}
   import TeiserverWeb.MicroblogComponents
   alias Phoenix.PubSub
 
@@ -56,8 +56,12 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
 
   @impl true
   def handle_event("delete-post", _, %{assigns: assigns} = socket) do
-    if allow?(assigns.current_user, "Moderator") do
+    if assigns.current_user.id == assigns.post.poster_id || allow?(assigns.current_user, "Moderator") do
       Microblog.delete_post(assigns.post)
+      Logging.add_audit_log(socket, "Microblog.delete_post", %{
+        title: assigns.post.title,
+        post_id: assigns.post.id
+      })
 
       {:noreply, socket
         |> redirect(to: ~p"/microblog")
