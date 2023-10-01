@@ -38,12 +38,14 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
     {:noreply, stream_insert(socket, :posts, db_post, at: 0)}
   end
 
-  def handle_info(%{channel: "microblog_posts", event: :post_updated}, socket) do
-    {:noreply, socket}
+  def handle_info(%{channel: "microblog_posts", event: :post_updated, post: post}, socket) do
+    db_post = Microblog.get_post!(post.id, preload: [:tags, :poster])
+
+    {:noreply, stream_insert(socket, :posts, db_post, at: -1)}
   end
 
-  def handle_info(%{channel: "microblog_posts", event: :post_deleted}, socket) do
-    {:noreply, socket}
+  def handle_info(%{channel: "microblog_posts", event: :post_deleted, post: post}, socket) do
+    {:noreply, stream_delete(socket, :posts, post)}
   end
 
   def handle_info(%{channel: "microblog_posts"}, socket) do

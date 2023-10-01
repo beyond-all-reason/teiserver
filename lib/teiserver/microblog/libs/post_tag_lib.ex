@@ -99,6 +99,12 @@ defmodule Teiserver.Microblog.PostTagLib do
     Repo.delete(post_tag)
   end
 
+  @spec delete_post_tags(non_neg_integer(), [non_neg_integer()]) :: {:ok, PostTag} | {:error, Ecto.Changeset}
+  def delete_post_tags(post_id, tag_ids) do
+    query = "DELETE FROM microblog_post_tags WHERE post_id = $1 AND tag_id = ANY($2);"
+    {:ok, _} = Ecto.Adapters.SQL.query(Repo, query, [post_id, tag_ids])
+  end
+
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking post_tag changes.
 

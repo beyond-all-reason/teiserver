@@ -112,4 +112,7 @@ defmodule Teiserver.Microblog do
 
   @spec change_post_tag(PostTag, map) :: Ecto.Changeset
   defdelegate change_post_tag(post_tag_type, attrs), to: PostTagLib
+
+  @spec delete_post_tags(non_neg_integer(), [non_neg_integer()]) :: {:ok, PostTag} | {:error, Ecto.Changeset}
+  defdelegate delete_post_tags(post_id, tag_ids), to: PostTagLib
 end

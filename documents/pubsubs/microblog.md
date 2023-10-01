@@ -13,6 +13,6 @@ Used to communicate regarding new posts and updates to existing posts.
 
 %{
   event: :post_deleted
-  post_id: post_id
+  post: Post object
 }
 ```

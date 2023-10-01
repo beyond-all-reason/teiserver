@@ -65,7 +65,20 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
         </div>
 
         <% disabled = if not @form.source.valid? or Enum.empty?(@selected_tags), do: "disabled" %>
-        <%= submit("Post", class: "btn btn-primary btn-block #{disabled}") %>
+        <%= if @post.id do %>
+          <div class="row">
+            <div class="col">
+              <a href={~p"/microblog/show/#{@post.id}"} class="btn btn-secondary btn-block">
+                Cancel
+              </a>
+            </div>
+            <div class="col">
+              <%= submit("Update post", class: "btn btn-primary btn-block #{disabled}") %>
+            </div>
+          </div>
+        <% else %>
+          <%= submit("Post", class: "btn btn-primary btn-block #{disabled}") %>
+        <% end %>
       </.form>
     </div>
     """
@@ -84,7 +97,8 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
     {:ok,
      socket
      |> assign(:tags, tags)
-     |> assign(:selected_tags, [])
+     |> assign(:selected_tags, assigns[:selected_tags] || [])
+     |> assign(:originally_selected_tags, assigns[:selected_tags] || [])
      |> assign(assigns)
      |> assign_form(changeset)}
   end
@@ -128,7 +142,17 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   defp save_post(socket, :edit, post_params) do
     case Microblog.update_post(socket.assigns.post, post_params) do
       {:ok, post} ->
-        post_tags = socket.assigns.selected_tags
+        deleted_tags = socket.assigns.originally_selected_tags
+          |> Enum.reject(fn tag_id ->
+            Enum.member?(socket.assigns.selected_tags, tag_id)
+          end)
+
+        Microblog.delete_post_tags(post.id, deleted_tags)
+
+        added_tags = socket.assigns.selected_tags
+          |> Enum.reject(fn tag_id ->
+            Enum.member?(socket.assigns.originally_selected_tags, tag_id)
+          end)
           |> Enum.map(fn tag_id ->
             %{
               tag_id: tag_id,
@@ -137,7 +161,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
           end)
 
         Ecto.Multi.new()
-        |> Ecto.Multi.insert_all(:insert_all, Teiserver.Microblog.PostTag, post_tags)
+        |> Ecto.Multi.insert_all(:insert_all, Teiserver.Microblog.PostTag, added_tags)
         |> Teiserver.Repo.transaction()
 
         notify_parent({:saved, post})
@@ -145,7 +169,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Post updated successfully")
-         |> push_patch(to: socket.assigns.patch)}
+         |> redirect(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
