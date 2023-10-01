@@ -123,8 +123,7 @@ defmodule Teiserver.Room do
 
   def remove_user_from_any_room(userid) do
     list_rooms()
-    |> Enum.filter(fn r -> r != nil end)
-    |> Enum.filter(fn r -> Enum.member?(r.members, userid) end)
+    |> Enum.filter(fn r -> r && Enum.member?(r.members, userid) end)
     |> Enum.map(fn r ->
       remove_user_from_room(userid, r.name)
       r.name
@@ -183,41 +182,39 @@ defmodule Teiserver.Room do
         nil ->
           nil
 
-        room ->
-          if from_id in room.members do
-            insert_result = if not Enum.member?(@dont_log_room, room_name) do
-              Chat.create_room_message(%{
-                content: msg,
-                chat_room: room_name,
-                inserted_at: Timex.now(),
-                user_id: from_id
-              })
-            end
-
-            message_object = case insert_result do
-              {:ok, message_object} -> message_object
-              _ -> %{}
-            end
-
-            PubSub.broadcast(
-              Teiserver.PubSub,
-              "room_chat:#{room_name}",
-              %{
-                channel: "room_chat",
-                event: :message_received,
-                room_name: room_name,
-                id: Map.get(message_object, :id, nil),
-                content: msg,
-                user_id: from_id
-              }
-            )
-
-            PubSub.broadcast(
-              Teiserver.PubSub,
-              "room:#{room_name}",
-              {:new_message, from_id, room_name, msg}
-            )
+        _room ->
+          insert_result = if not Enum.member?(@dont_log_room, room_name) do
+            Chat.create_room_message(%{
+              content: msg,
+              chat_room: room_name,
+              inserted_at: Timex.now(),
+              user_id: from_id
+            })
           end
+
+          message_object = case insert_result do
+            {:ok, message_object} -> message_object
+            _ -> %{}
+          end
+
+          PubSub.broadcast(
+            Teiserver.PubSub,
+            "room_chat:#{room_name}",
+            %{
+              channel: "room_chat",
+              event: :message_received,
+              room_name: room_name,
+              id: Map.get(message_object, :id, nil),
+              content: msg,
+              user_id: from_id
+            }
+          )
+
+          PubSub.broadcast(
+            Teiserver.PubSub,
+            "room:#{room_name}",
+            {:new_message, from_id, room_name, msg}
+          )
       end
     end
   end
