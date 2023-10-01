@@ -55,6 +55,9 @@ defmodule TeiserverWeb.MicroblogComponents do
   def post_preview(assigns) do
     ~H"""
     <div id={"post-preview"} class="mt-4">
+      <hr />
+      <h5 style="text-align: center;">--- PREVIEW ---</h5>
+
       <div class="float-end">
         <div :for={tag <- Map.get(@post, :tags, [])} class="d-inline-block mx-1">
           <.tag_badge tag={tag} />

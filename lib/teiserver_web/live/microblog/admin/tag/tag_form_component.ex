@@ -1,4 +1,5 @@
 defmodule TeiserverWeb.Microblog.TagFormComponent do
+  @moduledoc false
   use CentralWeb, :live_component
 
   alias Teiserver.Microblog
@@ -39,6 +40,7 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
 
           <div class="col">
             <label for="tag_icon" class="control-label">Icon</label>
+            <Fontawesome.icon icon={@form[:icon].value} style="solid" />
             <.input
               field={@form[:icon]}
               type="text"
@@ -48,7 +50,20 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
         </div>
 
         <% disabled = if not @form.source.valid?, do: "disabled" %>
-        <%= submit("Create tag", class: "btn btn-primary btn-block #{disabled}") %>
+        <%= if @tag.id do %>
+          <div class="row">
+            <div class="col">
+              <a href={~p"/microblog/admin/tags"} class="btn btn-secondary btn-block">
+                Cancel
+              </a>
+            </div>
+            <div class="col">
+              <%= submit("Update tag", class: "btn btn-primary btn-block #{disabled}") %>
+            </div>
+          </div>
+        <% else %>
+          <%= submit("Create tag", class: "btn btn-primary btn-block #{disabled}") %>
+        <% end %>
       </.form>
     </div>
     """

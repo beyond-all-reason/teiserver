@@ -1,5 +1,7 @@
 defmodule TeiserverWeb.Microblog.PostFormComponent do
+  @moduledoc false
   use CentralWeb, :live_component
+  import Teiserver.Helper.ColourHelper, only: [rgba_css: 2]
 
   alias Teiserver.Microblog
 
@@ -7,6 +9,14 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   def render(assigns) do
     ~H"""
     <div>
+      <style type="text/css">
+        .tag-selector {
+          cursor: pointer;
+          border: 1px solid #FFF;
+          font-size: 1em;
+        }
+      </style>
+
       <h3>
         <%= @title %>
       </h3>
@@ -25,19 +35,8 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
               autofocus="autofocus"
               phx-debounce="100"
             />
-          </div>
-          <div class="col">
-            <label for="post_tags" class="control-label">Tags</label>
-            <.input type="select"
-              name="post[tags][]"
-              value={@selected_tags}
-              multiple={true}
-              options={@tags}
-            />
-          </div>
-        </div>
-        <div class="row mb-4">
-          <div class="col">
+            <br />
+
             <label for="post_contents" class="control-label">Contents</label>
             <textarea
               name="post[contents]"
@@ -45,6 +44,21 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
               rows="5"
               phx-debounce="100"
               class="form-control"><%= @form[:contents].value %></textarea>
+          </div>
+          <div class="col">
+            <%= for tag <- @tags do %>
+              <%= if Enum.member?(@selected_tags, tag.id) do %>
+                <span class="badge rounded-pill mx-1 tag-selector" style={"background-color: #{tag.colour}; "} phx-click="toggle-selected-tag" phx-value-tag={tag.id} phx-target={@myself}>
+                  <Fontawesome.icon icon={tag.icon} style="solid" />
+                  <%= tag.name %>
+                </span>
+              <% else %>
+                <span class="badge rounded-pill mx-1 tag-selector" style={"background-color: #{rgba_css(tag.colour, 0.5)}; border-color: rgba(0,0,0,0);"} phx-click="toggle-selected-tag" phx-value-tag={tag.id} phx-target={@myself}>
+                  <Fontawesome.icon icon={tag.icon} style="regular" />
+                  <%= tag.name %>
+                </span>
+              <% end %>
+            <% end %>
           </div>
         </div>
 
@@ -62,9 +76,6 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
         "Name (A-Z)"
       ]
     )
-    |> Enum.map(fn tag ->
-      {tag.name, tag.id}
-    end)
 
     changeset = Microblog.change_post(post)
 
@@ -91,7 +102,6 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
 
     {:noreply, socket
       |> assign_form(changeset)
-      |> assign(:selected_tags, post_params["tags"] || [])
     }
   end
 
@@ -99,13 +109,24 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
     save_post(socket, socket.assigns.action, post_params)
   end
 
-  defp save_post(socket, :edit, post_params) do
-    tag_ids = post_params["tags"]
-      |> Enum.map(fn tag_id_str -> String.to_integer(tag_id_str) end)
+  def handle_event("toggle-selected-tag", %{"tag" => tag_id_str}, socket) do
+    tag_id = String.to_integer(tag_id_str)
 
+    new_selected_tags = if Enum.member?(socket.assigns.selected_tags, tag_id) do
+      List.delete(socket.assigns.selected_tags, tag_id)
+    else
+      [tag_id | socket.assigns.selected_tags] |> Enum.uniq
+    end
+
+    {:noreply, socket
+      |> assign(:selected_tags, new_selected_tags)
+    }
+  end
+
+  defp save_post(socket, :edit, post_params) do
     case Microblog.update_post(socket.assigns.post, post_params) do
       {:ok, post} ->
-        post_tags = tag_ids
+        post_tags = socket.assigns.selected_tags
           |> Enum.map(fn tag_id ->
             %{
               tag_id: tag_id,
@@ -134,12 +155,9 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
       "poster_id" => socket.assigns.current_user.id
     })
 
-    tag_ids = post_params["tags"]
-      |> Enum.map(fn tag_id_str -> String.to_integer(tag_id_str) end)
-
     case Microblog.create_post(post_params) do
       {:ok, post} ->
-        post_tags = tag_ids
+        post_tags = socket.assigns.selected_tags
           |> Enum.map(fn tag_id ->
             %{
               tag_id: tag_id,
