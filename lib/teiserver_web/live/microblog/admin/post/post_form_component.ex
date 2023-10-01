@@ -28,7 +28,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
       >
         <div class="row mb-4">
           <div class="col">
-            <label for="post_title" class="control-label">Title</label>
+            <label for="post_title" class="control-label">Title:</label>
             <.input
               field={@form[:title]}
               type="text"
@@ -37,7 +37,9 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
             />
             <br />
 
-            <label for="post_contents" class="control-label">Contents</label>
+            <label for="post_contents" class="control-label">Contents:</label>
+            &nbsp;
+            <em>Markdown, use a double-line return to split small version from full version.</em>
             <textarea
               name="post[contents]"
               id="post_contents"

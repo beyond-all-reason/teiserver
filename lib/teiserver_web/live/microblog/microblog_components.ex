@@ -52,11 +52,36 @@ defmodule TeiserverWeb.MicroblogComponents do
   This is designed to show a small view of the post itself and allow for getting an idea of what is present without having to parse the entire post.
   """
   attr :post, :map, required: true
-  def post_preview(assigns) do
+  def post_preview_small(assigns) do
     ~H"""
     <div id={"post-preview"} class="mt-4">
       <hr />
-      <h5 style="text-align: center;">--- PREVIEW ---</h5>
+      <h5 style="text-align: center;">--- Small preview ---</h5>
+
+      <div class="float-end">
+        <div :for={tag <- Map.get(@post, :tags, [])} class="d-inline-block mx-1">
+          <.tag_badge tag={tag} />
+        </div>
+      </div>
+
+      <h4>
+        <%= Map.get(@post, :title, "") %> -
+        <%= TimexHelper.date_to_str(Timex.now(), :hms_or_ymd) %>
+      </h4>
+      <%=
+        Map.get(@post, :contents, "") |> String.split("\n\n") |> hd |> Earmark.as_html! |> Phoenix.HTML.raw
+      %>
+      <br />
+    </div>
+    """
+  end
+
+  attr :post, :map, required: true
+  def post_preview_full(assigns) do
+    ~H"""
+    <div id={"post-preview"} class="mt-4">
+      <hr />
+      <h5 style="text-align: center;">--- Full preview ---</h5>
 
       <div class="float-end">
         <div :for={tag <- Map.get(@post, :tags, [])} class="d-inline-block mx-1">
