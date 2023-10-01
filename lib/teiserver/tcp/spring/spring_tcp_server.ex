@@ -1119,46 +1119,54 @@ defmodule Teiserver.SpringTcpServer do
 
   # Chat
   defp new_chat_message(type, from, room_name, msg, state) do
-    case Client.get_client_by_id(from) do
+    # This allows us to see messages sent by web-users
+    client = case Client.get_client_by_id(from) do
       nil ->
-        # No client? Ignore them
-        state
+        user = Account.get_user_by_id(from)
 
-      client ->
-        # Do they know about the user?
-        state =
-          case Map.has_key?(state.known_users, from) do
-            false ->
-              SpringOut.reply(:user_logged_in, client, nil, state)
-              %{state | known_users: Map.put(state.known_users, from, _blank_user(from))}
-
-            true ->
-              state
-          end
-
-        case type do
-          :direct_message ->
-            SpringOut.reply(:direct_message, {from, msg, state.user}, nil, state)
-
-          :chat_message ->
-            SpringOut.reply(
-              :chat_message,
-              {from, room_name, msg, state.user},
-              nil,
-              state
-            )
-
-          :chat_message_ex ->
-            SpringOut.reply(
-              :chat_message_ex,
-              {from, room_name, msg, state.user},
-              nil,
-              state
-            )
-        end
+        Client.create(%{
+          userid: user.id,
+          name: user.name,
+          rank: 0,
+          moderator: User.is_moderator?(user),
+          bot: User.is_bot?(user)
+        })
+      c ->
+        c
     end
 
-    state
+    # Do they know about the user?
+    state =
+      case Map.has_key?(state.known_users, from) do
+        false ->
+          SpringOut.reply(:user_logged_in, client, nil, state)
+          %{state | known_users: Map.put(state.known_users, from, _blank_user(from))}
+
+        true ->
+          state
+      end
+
+    # Now handle the message itself
+    case type do
+      :direct_message ->
+        SpringOut.reply(:direct_message, {from, msg, state.user}, nil, state)
+
+      :chat_message ->
+        SpringOut.reply(
+          :chat_message,
+          {from, room_name, msg, state.user},
+          nil,
+          state
+        )
+
+      :chat_message_ex ->
+        SpringOut.reply(
+          :chat_message_ex,
+          {from, room_name, msg, state.user},
+          nil,
+          state
+        )
+    end
   end
 
   defp user_join_chat_room(userid, room_name, state) do
