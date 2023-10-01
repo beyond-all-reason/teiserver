@@ -54,21 +54,16 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
     {:noreply, socket}
   end
 
-  # @impl true
-  # def handle_event("toggle-disabled-tag", %{"tag-id" => tag_id_str}, %{assigns: assigns} = socket) do
-  #   tag_id = String.to_integer(tag_id_str)
+  @impl true
+  def handle_event("delete-post", _, %{assigns: assigns} = socket) do
+    if allow?(assigns.current_user, "Moderator") do
+      Microblog.delete_post(assigns.post)
 
-  #   new_filters = if Enum.member?(assigns.filters.disabled_tags, tag_id) do
-  #     new_disabled_tags = List.delete(assigns.filters.disabled_tags, tag_id)
-  #     Map.put(assigns.filters, :disabled_tags, new_disabled_tags)
-  #   else
-  #     new_disabled_tags = [tag_id | assigns.filters.disabled_tags] |> Enum.uniq
-  #     Map.put(assigns.filters, :disabled_tags, new_disabled_tags)
-  #   end
-
-  #   {:noreply, socket
-  #     |> assign(:filters, new_filters)
-  #     |> list_posts
-  #   }
-  # end
+      {:noreply, socket
+        |> redirect(to: ~p"/microblog")
+      }
+    else
+      {:noreply, socket}
+    end
+  end
 end
