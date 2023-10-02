@@ -128,7 +128,7 @@ defmodule TeiserverWeb.UserComponents do
         aria-labelledby="user-dropdown-link"
         style="min-width: 300px; max-width: 500px;"
       >
-        <a class="dropdown-item" href={~p"/teiserver/account"}>
+        <a class="dropdown-item" href={~p"/profile"}>
           <i class={"fa-fw #{Teiserver.Account.icon()}"}></i> &nbsp;
           Account
         </a>

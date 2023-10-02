@@ -67,7 +67,7 @@ defmodule TeiserverWeb.NavComponents do
             <.top_nav_item
               text="My account"
               active={@active == "teiserver_account"}
-              route={~p"/teiserver/account"}
+              route={~p"/profile"}
             />
 
             <.top_nav_item

@@ -57,6 +57,10 @@ defmodule Teiserver.Startup do
       "Warning reminder"
     ])
 
+    Central.Account.UserLib.add_report_restriction_types("Internal", [
+      "Note"
+    ])
+
     add_audit_types([
       "Moderation:Ban enabled",
       "Moderation:Ban disabled",

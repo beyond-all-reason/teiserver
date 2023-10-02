@@ -237,7 +237,8 @@ defmodule Teiserver.Bridge.DiscordBridge do
     post_to_discord =
       cond do
         channel_id == nil -> false
-        action.restrictions == ["Bridging"] -> false
+        Enum.member?(action.restrictions, "Bridging") -> false
+        Enum.member?(action.restrictions, "Note") -> false
         action.reason == "Banned (Automod)" -> false
         true -> true
       end
