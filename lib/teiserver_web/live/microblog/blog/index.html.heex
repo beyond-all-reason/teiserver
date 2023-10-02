@@ -9,8 +9,10 @@
     This is currently in the early stages so filtering doesn't yet work correctly. Please leave feedback/suggestions for Teifion in the <a href="https://discord.com/channels/549281623154229250/1158097903114530956">Discord suggestion thread</a>.
     <br /><br />
 
+    <%= if false do %>
     <%= for tag <- @tags do %>
       <.tag_badge tag={tag} disabled={not Enum.member?(@filters.enabled_tags, tag.id)} phx-click="toggle-enabled-tag" phx-value-tag-id={tag.id} />
+    <% end %>
     <% end %>
 
     <.table
