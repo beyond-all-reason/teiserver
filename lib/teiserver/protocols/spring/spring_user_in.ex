@@ -6,6 +6,27 @@ defmodule Teiserver.Protocols.Spring.UserIn do
   require Logger
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
+  def do_handle("add_friend", usernames_str, msg_id, state) do
+    responses = usernames_str
+      |> String.split("\t")
+      |> Enum.map(fn n ->
+        case Account.get_user_by_name(n) do
+          nil ->
+            {n, :no_user}
+          user ->
+            case Account.get_friend_request(state.userid, user.id) do
+              nil ->
+                {:ok, _} = Teiserver.Account.create_friend_request(state.userid, user.id)
+                {n, :success}
+              _existing ->
+                {n, :existing}
+            end
+        end
+      end)
+
+    reply(:user, :add_friend, responses, msg_id, state)
+  end
+
   def do_handle("reset_relationship", username, msg_id, state) do
     target_id = Account.get_userid_from_name(username)
     if target_id && target_id != state.userid do
