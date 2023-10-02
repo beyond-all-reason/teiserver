@@ -1765,4 +1765,13 @@ defmodule Teiserver.Logging do
 
     Repo.one(query)
   end
+
+
+  # Delegated to helpers
+  @spec add_audit_log(Plug.Conn.t(), String.t(), Map.t()) :: Teiserver.Logging.AuditLog.t()
+  defdelegate add_audit_log(conn, action, details), to: Teiserver.Logging.Helpers
+
+  @spec add_audit_log(non_neg_integer(), String.t(), String.t(), Map.t()) ::
+          Teiserver.Logging.AuditLog.t()
+  defdelegate add_audit_log(userid, ip, action, details), to: Teiserver.Logging.Helpers
 end

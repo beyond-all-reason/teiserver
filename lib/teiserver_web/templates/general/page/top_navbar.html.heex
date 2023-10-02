@@ -15,7 +15,7 @@
         </span>
       </a>
       <!-- Left links -->
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0" :if={@current_user}>
         <TeiserverWeb.NavComponents.top_nav_item
           text="Home"
           active={@site_menu_active == "central_home"}
@@ -49,6 +49,12 @@
             route={~p"/telemetry"}
           />
         <% end %>
+
+        <%= central_component("top_nav_item",
+          text: "Blog",
+          route: ~p"/microblog",
+          active: @site_menu_active == "microblog"
+        ) %>
 
         <%= central_component("top_nav_item",
           text: "Lobbies",

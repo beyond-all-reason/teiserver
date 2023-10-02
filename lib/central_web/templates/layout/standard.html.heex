@@ -4,6 +4,7 @@
       "Site default" -> get_site_config_cache("user.Default light mode")
       "Light" -> true
       "Dark" -> false
+      _ -> get_site_config_cache("user.Default light mode")
     end
 
   {fg, bg, _bsname} = colours(@conn.private.phoenix_view._.view_colour(), light_mode) %>

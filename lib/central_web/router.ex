@@ -89,8 +89,6 @@ defmodule TeiserverWeb.Router do
     plug(Guardian.Plug.EnsureAuthenticated)
   end
 
-  # Phoenix.Router.route_info(TeiserverWeb.Router, "GET", "/", "myhost")
-
   scope "/", TeiserverWeb.General do
     pipe_through([:live_browser, :nomenu_live_layout])
 
@@ -100,6 +98,31 @@ defmodule TeiserverWeb.Router do
         {Teiserver.Communication.NotificationPlug, :load_notifications}
       ] do
         live "/", HomeLive.Index, :index
+    end
+  end
+
+  scope "/microblog", TeiserverWeb.Microblog do
+    pipe_through([:live_browser, :standard_live_layout])
+
+    live_session :microblog_user,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :mount_current_user},
+        {Teiserver.Communication.NotificationPlug, :load_notifications}
+      ] do
+        live "/", BlogLive.Index, :index
+        live "/show/:post_id", BlogLive.Show, :index
+    end
+
+    live_session :microblog_admin,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Communication.NotificationPlug, :load_notifications}
+      ] do
+        live "/admin/posts", Admin.PostLive.Index, :index
+        live "/admin/posts/:id", Admin.PostLive.Show, :show
+
+        live "/admin/tags", Admin.TagLive.Index, :index
+        live "/admin/tags/:id", Admin.TagLive.Show, :show
     end
   end
 

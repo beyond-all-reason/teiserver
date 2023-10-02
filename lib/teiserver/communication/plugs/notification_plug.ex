@@ -21,6 +21,12 @@ defmodule Teiserver.Communication.NotificationPlug do
     assign_notifications(conn, conn.assigns[:current_user])
   end
 
+  def live_call(%{assigns: %{current_user: nil}} = socket) do
+    socket
+    |> assign(:user_notifications, [])
+    |> assign(:user_notifications_unread_count, 0)
+  end
+
   def live_call(socket) do
     notifications =
       socket.assigns.current_user.id
@@ -40,6 +46,7 @@ defmodule Teiserver.Communication.NotificationPlug do
   defp assign_notifications(conn, nil) do
     conn
     |> assign(:user_notifications, [])
+    |> assign(:user_notifications_unread_count, 0)
   end
 
   defp assign_notifications(conn, the_user) do

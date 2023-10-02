@@ -1,0 +1,31 @@
+<TeiserverWeb.MicroblogComponents.sub_menu active={"tags"} view_colour={@view_colour} current_user={@current_user} />
+
+<div class="row mt-4">
+  <div class="col">
+    <.table
+      id="post-table"
+      table_class="table-sm table-hover"
+      rows={@tags}
+      row_click={fn tag -> JS.navigate(~p"/microblog/admin/tags/#{tag.id}") end}
+    >
+      <:col :let={tag} label="Name"><%= tag.name %></:col>
+      <:col :let={tag} label="Style">
+        <span class="badge rounded-pill px-4" style={"background-color: #{tag.colour}; cursor: pointer; font-size: 1em;"}>
+          &nbsp;
+          <Fontawesome.icon icon={tag.icon} style="solid" />
+          &nbsp;
+        </span>
+      </:col>
+    </.table>
+
+    <.live_component
+      module={TeiserverWeb.Microblog.TagFormComponent}
+      id={:new}
+      action={:new}
+      tag={%Teiserver.Microblog.Tag{}}
+      patch={~p"/microblog/admin/tags"}
+      title="New tag form"
+      current_user={@current_user}
+    />
+  </div>
+</div>

@@ -6,7 +6,7 @@ If you've not already setup your server you might want to check out [documents/g
 - Docker installed on your computer
 
 ### prod.secret.exs
-`config/prod.secret.exs` is ignored in the gitignore for obvious reasons. This means you will need to create your own one. Luckily I [made a template for you](/documents/prod/example_prod_secret.exs).
+`config/prod.secret.exs` is ignored in the gitignore for obvious reasons. This means you will need to create your own one. Luckily I [made a template for you](/documents/prod_files/example_prod_secret.exs).
 
 #### Dockerfile
 A docker file is included in the repo but within [documents/prod_files](documents/prod_files) are other docker images providing more control over the building of your image and might be of interest.
