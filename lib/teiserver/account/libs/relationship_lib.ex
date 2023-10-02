@@ -54,7 +54,17 @@ defmodule Teiserver.Account.RelationshipLib do
     Account.upsert_relationship(%{
       from_user_id: from_user_id,
       to_user_id: to_user_id,
-      state: "ignore"
+      ignore: true
+    })
+  end
+
+  @spec unignore_user(T.userid, T.userid) :: {:ok, Account.Relationship.t}
+  def unignore_user(from_user_id, to_user_id) when is_integer(from_user_id) and is_integer(to_user_id) do
+    decache_relationships(from_user_id)
+    Account.upsert_relationship(%{
+      from_user_id: from_user_id,
+      to_user_id: to_user_id,
+      ignore: false
     })
   end
 
@@ -176,7 +186,7 @@ defmodule Teiserver.Account.RelationshipLib do
       Account.list_relationships(
         where: [
           from_user_id: userid,
-          state: "block",
+          state_in: ["avoid", "block"],
         ],
         select: [:to_user_id]
       )
@@ -192,7 +202,7 @@ defmodule Teiserver.Account.RelationshipLib do
       Account.list_relationships(
         where: [
           to_user_id: userid,
-          state: "block",
+          state_in: ["avoid", "block"],
         ],
         select: [:from_user_id]
       )
@@ -208,7 +218,7 @@ defmodule Teiserver.Account.RelationshipLib do
       Account.list_relationships(
         where: [
           from_user_id: userid,
-          state: "ignore",
+          ignore: true,
         ],
         select: [:to_user_id]
       )

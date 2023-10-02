@@ -586,7 +586,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, username] ->
         target_userid = Account.get_userid_from_name(username)
         if target_userid && state.userid do
-          Account.reset_relationship_state(state.userid, target_userid)
+          Account.unignore_user(state.userid, target_userid)
         end
 
       _ ->

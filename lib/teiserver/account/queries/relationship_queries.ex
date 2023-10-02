@@ -56,6 +56,11 @@ defmodule Teiserver.Account.RelationshipQueries do
       where: relationships.state in ^states
   end
 
+  defp _where(query, :ignore, value) do
+    from relationships in query,
+      where: relationships.ignore == ^value
+  end
+
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
   defp do_order_by(query, params) do

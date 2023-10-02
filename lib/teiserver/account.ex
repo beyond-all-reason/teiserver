@@ -1536,6 +1536,7 @@ defmodule Teiserver.Account do
     |> Repo.insert(
       on_conflict: [set: [
         state: Map.get(attrs, "state", Map.get(attrs, :state, nil)),
+        ignore: Map.get(attrs, "ignore", Map.get(attrs, :ignore, nil)),
         notes: Map.get(attrs, "notes", Map.get(attrs, :notes, nil)),
         tags: Map.get(attrs, "tags", Map.get(attrs, :tags, nil))
       ]],
@@ -1601,6 +1602,9 @@ defmodule Teiserver.Account do
 
   @spec ignore_user(T.userid, T.userid) :: {:ok, Relationship.t}
   defdelegate ignore_user(from_user_id, to_user_id), to: RelationshipLib
+
+  @spec unignore_user(T.userid, T.userid) :: {:ok, Relationship.t}
+  defdelegate unignore_user(from_user_id, to_user_id), to: RelationshipLib
 
   @spec avoid_user(T.userid, T.userid) :: {:ok, Relationship.t}
   defdelegate avoid_user(from_user_id, to_user_id), to: RelationshipLib

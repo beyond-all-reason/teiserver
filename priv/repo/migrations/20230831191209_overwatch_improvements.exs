@@ -116,5 +116,12 @@ defmodule Teiserver.Repo.Migrations.OverwatchImprovements do
     alter table(:direct_messages) do
       add :delivered, :boolean, default: false
     end
+
+    alter table(:account_relationships) do
+      add :ignore, :boolean, default: false
+    end
+
+    execute "UPDATE account_relationships SET ignore = true WHERE state IN ('ignore', 'block', 'avoid');"
+    execute "UPDATE account_relationships SET state = null WHERE state = 'ignore';"
   end
 end

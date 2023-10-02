@@ -7,8 +7,9 @@ defmodule Teiserver.Account.Relationship do
     belongs_to :from_user, Central.Account.User, primary_key: true
     belongs_to :to_user, Central.Account.User, primary_key: true
 
-    # Valid states: Avoid, Block, Ignore, None, Follow
+    # Valid states: Avoid, Block, None, Follow
     field :state, :string
+    field :ignore, :boolean, default: false
 
     field :notes, :string
     field :tags, {:array, :string}, default: []
@@ -26,7 +27,7 @@ defmodule Teiserver.Account.Relationship do
       |> trim_strings(~w(state notes)a)
 
     struct
-    |> cast(params, ~w(from_user_id to_user_id state notes tags)a)
+    |> cast(params, ~w(from_user_id to_user_id state notes tags ignore)a)
     |> validate_required(~w(from_user_id to_user_id)a)
   end
 
