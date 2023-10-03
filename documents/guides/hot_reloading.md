@@ -40,13 +40,10 @@ if __name__ == '__main__':
     # Upload
     for module in module_list:
         upload_file(module)
-    
+
     # Print out instructions
     instructions = "ssh to server\n---\ncentralapp remote"
-    for module in module_list:
-      instructions += f"\n:code.load_file({module})"
-      instructions += f"\n:code.purge({module})"
-      instructions += f"\n:code.load_file({module})"
+    instructions += f"\nTeiserver.hot_reload([" + ", ".join(module_list) + "])"
 
     print(instructions)
 ```

@@ -12,6 +12,19 @@ defmodule Teiserver do
   def icon(:friend_request), do: "fa-solid fa-question"
   def icon(:ignore), do: "fa-solid fa-volume-mute"
 
+  def hot_reload(modules) when is_list(modules) do
+    modules
+    |> Enum.each(fn m ->
+      hot_reload(m)
+    end)
+  end
+
+  def hot_reload(module) do
+    :code.load_file(module)
+    :code.purge(module)
+    :code.load_file(module)
+  end
+
   @doc """
   Activates agent mode (if allowed by config)
   """
