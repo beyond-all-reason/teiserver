@@ -310,10 +310,10 @@ defmodule TeiserverWeb.Admin.UserController do
               Account.server_update_user(user, user_params)
 
             allow?(conn, "Admin") ->
-              Account.update_user(user, user_params)
+              Account.server_limited_update_user(user, user_params)
 
             allow?(conn, "Moderator") ->
-              Account.update_user(user, user_params)
+              Account.server_limited_update_user(user, user_params)
           end
 
         case change_result do

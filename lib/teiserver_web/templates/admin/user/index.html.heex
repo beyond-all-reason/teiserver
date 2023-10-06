@@ -1,5 +1,7 @@
 <% bsname = view_colour()
-is_admin = allow?(@conn, "Admin") %>
+is_admin = allow?(@conn, "Admin")
+is_moderator = allow?(@conn, "Moderator")
+%>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -69,7 +71,7 @@ is_admin = allow?(@conn, "Admin") %>
               <th>Moderator</th>
               <th>Registered</th>
 
-              <%= if is_admin do %>
+              <%= if is_moderator do %>
                 <th colspan="2">&nbsp;</th>
               <% else %>
                 <th>&nbsp;</th>
@@ -130,7 +132,7 @@ is_admin = allow?(@conn, "Admin") %>
                   </a>
                 </td>
 
-                <%= if is_admin do %>
+                <%= if is_moderator do %>
                   <td>
                     <a
                       href={~p"/teiserver/admin/user/#{user.id}/edit"}

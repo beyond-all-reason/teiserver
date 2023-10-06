@@ -109,6 +109,15 @@ defmodule Teiserver.Account do
     |> Central.Account.broadcast_update_user()
   end
 
+  def server_limited_update_user(%User{} = user, attrs) do
+    Central.Account.recache_user(user.id)
+
+    user
+    |> User.changeset(attrs, :server_limited_update_user)
+    |> Repo.update()
+    |> Central.Account.broadcast_update_user()
+  end
+
   def server_update_user(%User{} = user, attrs) do
     Central.Account.recache_user(user.id)
 
