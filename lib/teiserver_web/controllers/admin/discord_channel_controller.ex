@@ -131,10 +131,6 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
   def delete(conn, %{"id" => id}) do
     discord_channel = Communication.get_discord_channel!(id)
 
-    discord_channel
-    |> DiscordChannelLib.make_favourite()
-    |> remove_recently(conn)
-
     {:ok, _discord_channel} = Communication.delete_discord_channel(discord_channel)
 
     conn

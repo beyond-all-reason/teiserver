@@ -28,6 +28,7 @@ defmodule Teiserver.Startup do
     Teiserver.Tachyon.Schema.load_schemas()
 
     Teiserver.Lobby.CommandLib.cache_lobby_commands()
+    Teiserver.Communication.pre_cache_discord_channels()
 
     # Chat stuff
     Central.Account.UserLib.add_report_restriction_types("Chat", [

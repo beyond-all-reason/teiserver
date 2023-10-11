@@ -456,4 +456,7 @@ defmodule Teiserver.Communication do
 
   @spec change_discord_channel(DiscordChannel, map) :: Ecto.Changeset
   defdelegate change_discord_channel(discord_channel_type, attrs), to: DiscordChannelLib
+
+  @spec pre_cache_discord_channels() :: :ok
+  defdelegate pre_cache_discord_channels(), to: DiscordChannelLib
 end

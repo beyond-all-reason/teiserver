@@ -72,11 +72,15 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     |> Repo.one!()
   end
 
-  @spec get_discord_channel(non_neg_integer()) :: DiscordChannel.t | nil
-  def get_discord_channel(discord_channel_id) do
+  @spec get_discord_channel(non_neg_integer() | String.t) :: DiscordChannel.t | nil
+  def get_discord_channel(discord_channel_id) when is_integer(discord_channel_id) do
     [id: discord_channel_id]
     |> DiscordChannelQueries.query_discord_channels()
     |> Repo.one()
+  end
+
+  def get_discord_channel(discord_channel_name) do
+    Central.cache_get(:discord_channel_cache, discord_channel_name)
   end
 
   @doc """
@@ -95,6 +99,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     %DiscordChannel{}
     |> DiscordChannel.changeset(attrs)
     |> Repo.insert()
+    |> cache_channel()
   end
 
   @doc """
@@ -113,6 +118,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     discord_channel
     |> DiscordChannel.changeset(attrs)
     |> Repo.update()
+    |> cache_channel()
   end
 
   @doc """
@@ -128,6 +134,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
 
   """
   def delete_discord_channel(%DiscordChannel{} = discord_channel) do
+    Central.cache_delete(:discord_channel_cache, discord_channel.name)
     Repo.delete(discord_channel)
   end
 
@@ -142,5 +149,22 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   """
   def change_discord_channel(%DiscordChannel{} = discord_channel, attrs \\ %{}) do
     DiscordChannel.changeset(discord_channel, attrs)
+  end
+
+  defp cache_channel({:error, channel}), do: {:error, channel}
+  defp cache_channel({:ok, %DiscordChannel{} = channel}) do
+    Central.cache_put(:discord_channel_cache, channel.name, channel)
+    {:ok, channel}
+  end
+  defp cache_channel(%DiscordChannel{} = channel) do
+    Central.cache_put(:discord_channel_cache, channel.name, channel)
+    {:ok, channel}
+  end
+  defp cache_channel(channel), do: channel
+
+  @spec pre_cache_discord_channels() :: :ok
+  def pre_cache_discord_channels() do
+    list_discord_channels()
+    |> Enum.each(&cache_channel/1)
   end
 end
