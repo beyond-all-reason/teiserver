@@ -570,6 +570,10 @@ defmodule TeiserverWeb.Router do
     resources("/text_callbacks", TextCallbackController,
       only: [:index, :new, :create, :show, :edit, :update, :delete]
     )
+
+    resources("/discord_channels", DiscordChannelController,
+      only: [:index, :new, :create, :show, :edit, :update, :delete]
+    )
   end
 
   scope "/teiserver/admin", TeiserverWeb.Admin, as: :admin do

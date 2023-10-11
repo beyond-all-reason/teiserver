@@ -198,7 +198,7 @@ defmodule Central.Application do
 
   defp discord_start do
     if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
-      [{Teiserver.Bridge.DiscordBridge, name: Teiserver.Bridge.DiscordBridge}]
+      [{Teiserver.Bridge.DiscordBridgeBot, name: Teiserver.Bridge.DiscordBridgeBot}]
     else
       []
     end

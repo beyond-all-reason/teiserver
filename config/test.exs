@@ -37,7 +37,7 @@ config :central, Teiserver,
   automod_delay: 1_000,
   user_agreement: "User agreement goes here."
 
-config :central, DiscordBridge,
+config :central, DiscordBridgeBot,
   token: nil,
   bot_name: "Teiserver Bridge TEST",
   bridges: [

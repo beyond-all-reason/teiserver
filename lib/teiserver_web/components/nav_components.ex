@@ -116,7 +116,7 @@ defmodule TeiserverWeb.NavComponents do
     ~H"""
     <div class={"#{@col_classes} menu-card #{@extra_classes}"}>
       <a href={@url} class="block-link" style={@style}>
-        <Fontawesome.icon icon={@icon} style="duotone" size={@icon_size} /><br />
+        <Fontawesome.icon icon={@icon} style={@icon_class} size={@icon_size} /><br />
         <%= render_slot(@inner_block) %>
       </a>
     </div>

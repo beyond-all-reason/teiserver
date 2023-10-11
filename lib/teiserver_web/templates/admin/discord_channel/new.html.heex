@@ -3,7 +3,7 @@
 <%= render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
-  Map.merge(assigns, %{active: "text_callbacks"})
+  Map.merge(assigns, %{active: "discord_channels"})
 ) %>
 
 <div class="row section-menu">
@@ -11,7 +11,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Admin.TextCallbackView,
+          TeiserverWeb.Admin.DiscordChannelView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",
@@ -24,15 +24,7 @@
 
         <%= render(
           "form.html",
-          Map.put(assigns, :action, ~p"/admin/text_callbacks/#{@text_callback}")
-        ) %>
-
-        <hr />
-        <%= link(raw("<i class='far fa-fw fa-trash'></i> Delete"),
-          to: ~p"/admin/text_callbacks/#{@text_callback}",
-          method: :delete,
-          data: [confirm: "Are you sure?"],
-          class: "btn btn-danger btn-outline"
+          Map.put(assigns, :action, ~p"/admin/discord_channels")
         ) %>
       </div>
     </div>

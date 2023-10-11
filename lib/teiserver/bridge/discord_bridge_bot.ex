@@ -1,4 +1,4 @@
-defmodule Teiserver.Bridge.DiscordBridge do
+defmodule Teiserver.Bridge.DiscordBridgeBot do
   @moduledoc """
   This is the module that receives discord events and passes them to the rest of Teiserver.
   """
@@ -49,7 +49,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
     dm_sender = Central.cache_get(:discord_bridge_dm_cache, to_string(channel_id))
 
     cond do
-      author.username == Application.get_env(:central, DiscordBridge)[:bot_name] ->
+      author.username == Application.get_env(:central, DiscordBridgeBot)[:bot_name] ->
         nil
 
       dm_sender != nil ->
@@ -178,7 +178,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
     end
   end
 
-  # Teiserver.Moderation.get_report!(123) |> Teiserver.Bridge.DiscordBridge.new_report()
+  # Teiserver.Moderation.get_report!(123) |> Teiserver.Bridge.DiscordBridgeBot.new_report()
   @spec new_report(Moderation.Report.t()) :: any
   def new_report(report) do
     channel =
@@ -225,7 +225,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
     end
   end
 
-  # Teiserver.Moderation.get_action!(123) |> Teiserver.Bridge.DiscordBridge.new_action()
+  # Teiserver.Moderation.get_action!(123) |> Teiserver.Bridge.DiscordBridgeBot.new_action()
   @spec new_action(Moderation.Action.t()) :: any
   def new_action(%{hidden: true}), do: nil
 

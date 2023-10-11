@@ -1,6 +1,6 @@
 defmodule Teiserver.Bridge.BridgeServer do
   @moduledoc """
-  The server used to read events from Teiserver and then use the DiscordBridge to send onwards
+  The server used to read events from Teiserver and then use the DiscordBridgeBot to send onwards
   """
   use GenServer
   alias Teiserver.{Account, Room, User}
@@ -231,7 +231,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   # pid = Teiserver.Bridge.BridgeServer.get_bridge_pid()
   # send(pid, :gdt_check)
   def handle_info(:gdt_check, state) do
-    Api.list_guild_threads(Application.get_env(:central, DiscordBridge)[:guild_id])
+    Api.list_guild_threads(Application.get_env(:central, DiscordBridgeBot)[:guild_id])
 
     # Api.list_joined_private_archived_threads(channel_id)
     # When a thread in 👇｜game-design-team has gone 48 hours without any new messages:
@@ -289,7 +289,8 @@ defmodule Teiserver.Bridge.BridgeServer do
       username: user.name,
       lobby_host: false,
       user: user,
-      client: client
+      client: client,
+      recent_bridged_messages: %{}
     }
 
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
@@ -370,7 +371,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   defp convert_emoticons(message) do
-    emoticon_map = Teiserver.Bridge.DiscordBridge.get_text_to_emoticon_map()
+    emoticon_map = Teiserver.Bridge.DiscordBridgeBot.get_text_to_emoticon_map()
 
     message
     |> String.replace(Map.keys(emoticon_map), fn text -> emoticon_map[text] end)
@@ -390,7 +391,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         # Make account
         {:ok, account} =
           Account.script_create_user(%{
-            name: "DiscordBridge",
+            name: "DiscordBridgeBot",
             email: "bridge@teiserver",
             icon: "fa-brands fa-discord",
             colour: "#0066AA",

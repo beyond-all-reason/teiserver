@@ -12,7 +12,7 @@ defmodule Teiserver.HookServer do
     case data.event do
       :new_report ->
         if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
-          Teiserver.Bridge.DiscordBridge.new_report(data.report)
+          Teiserver.Bridge.DiscordBridgeBot.new_report(data.report)
         end
 
       :updated_report ->
@@ -20,7 +20,7 @@ defmodule Teiserver.HookServer do
 
       :new_action ->
         if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
-          Teiserver.Bridge.DiscordBridge.new_action(data.action)
+          Teiserver.Bridge.DiscordBridgeBot.new_action(data.action)
         end
 
         Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(data.action.target_id)

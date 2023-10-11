@@ -292,7 +292,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
   def re_post(conn, %{"id" => id}) do
     action = Moderation.get_action!(id)
 
-    Teiserver.Bridge.DiscordBridge.new_action(action)
+    Teiserver.Bridge.DiscordBridgeBot.new_action(action)
 
     add_audit_log(conn, "Moderation:Action re_posted", %{action_id: action.id})
     Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)

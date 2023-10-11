@@ -108,7 +108,7 @@ import Config
 config :central, Teiserver,
   enable_discord_bridge: true
 
-config :central, DiscordBridge,
+config :central, DiscordBridgeBot,
   token: "------",
   bot_name: "Teiserver Bridge DEV",
   bridges: [

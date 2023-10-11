@@ -2,7 +2,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   alias Teiserver.Telemetry
   alias Teiserver.Protocols.{Spring, SpringIn}
   require Logger
-  alias Teiserver.Bridge.DiscordBridge
+  alias Teiserver.Bridge.DiscordBridgeBot
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
   # import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
@@ -30,7 +30,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
                     case Telemetry.create_infolog(params) do
                       {:ok, infolog} ->
                         if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
-                          DiscordBridge.new_infolog(infolog)
+                          DiscordBridgeBot.new_infolog(infolog)
                         end
 
                         reply(:spring, :okay, "upload_infolog - id:#{infolog.id}", msg_id, state)
