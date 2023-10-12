@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   use CentralWeb, :live_component
   import Teiserver.Helper.ColourHelper, only: [rgba_css: 2]
 
-  alias Teiserver.Microblog
+  alias Teiserver.{Communication, Microblog, Account}
 
   @impl true
   def render(assigns) do
@@ -166,6 +166,8 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
 
         notify_parent({:saved, post})
 
+        # update_post_to_discord(post)
+
         {:noreply,
          socket
          |> put_flash(:info, "Post updated successfully")
@@ -197,6 +199,8 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
 
         notify_parent({:saved, post})
 
+        # create_post_to_discord(post)
+
         {:noreply,
          socket
          |> put_flash(:info, "Post created successfully")
@@ -212,4 +216,39 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   end
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
+
+  def create_post_to_discord(%{discord_channel_id: nil}), do: :ok
+  def create_post_to_discord(post) do
+    content = create_discord_text(post)
+    case Communication.new_discord_message(post.discord_channel_id, content) do
+      {:ok, %{id: message_id}} ->
+        Microblog.update_post(post, %{"discord_post_id" => message_id})
+    end
+  end
+
+  def update_post_to_discord(%{discord_channel_id: nil}), do: :ok
+  def update_post_to_discord(%{discord_post_id: nil} = post), do: create_post_to_discord(post)
+  def update_post_to_discord(post) do
+    content = create_discord_text(post)
+    Communication.edit_discord_message(post.discord_channel_id, post.discord_post_id, content)
+  end
+
+  defp create_discord_text(post) do
+    post_content = post.contents
+      |> String.split("\n\n")
+      |> hd
+      |> String.trim()
+
+    user = Account.get_user_by_id(post.poster_id)
+    discord_tag = if user.discord_id do
+      " - Posted by <@#{user.discord_id}>"
+    else
+      ""
+    end
+
+    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
+    url = "https://#{host}/microblog/show/#{post.id}"
+
+    "**#{post.title}**#{discord_tag}\n#{post_content}\n\n[See full text](#{url})"
+  end
 end
