@@ -75,7 +75,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     end
   end
 
-  @spec edit_post(non_neg_integer | String.t, non_neg_integer, String.t) :: nil
+  @spec edit_post(non_neg_integer | String.t, non_neg_integer, String.t) :: map | nil | {:error, String.t}
   def edit_post(channel_id, message_id, new_message) when is_integer(channel_id) and is_integer(message_id) do
     Api.edit_message(channel_id, message_id, content: new_message)
   end
@@ -88,6 +88,24 @@ defmodule Teiserver.Bridge.BridgeServer do
     case Communication.get_discord_channel(channel_name) do
       %{channel_id: channel_id} ->
         edit_post(channel_id, message_id, new_message)
+      _ ->
+        {:error, "No channel found (tried '#{channel_name}')"}
+    end
+  end
+
+  @spec delete_post(non_neg_integer | String.t, non_neg_integer) :: map | nil | {:error, String.t}
+  def delete_post(channel_id, message_id) when is_integer(channel_id) and is_integer(message_id) do
+    Api.delete_message(channel_id, message_id)
+  end
+
+  def delete_post(nil, _) do
+    {:error, "No channel found"}
+  end
+
+  def delete_post(channel_name, message_id) when is_integer(message_id) do
+    case Communication.get_discord_channel(channel_name) do
+      %{channel_id: channel_id} ->
+        delete_post(channel_id, message_id)
       _ ->
         {:error, "No channel found (tried '#{channel_name}')"}
     end
