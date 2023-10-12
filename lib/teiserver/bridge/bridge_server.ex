@@ -1,9 +1,9 @@
 defmodule Teiserver.Bridge.BridgeServer do
   @moduledoc """
-  The server used to read events from Teiserver and then use the DiscordBridge to send onwards
+  The server used to read events from Teiserver and then use the DiscordBridgeBot to send onwards
   """
   use GenServer
-  alias Teiserver.{Account, Room, User}
+  alias Teiserver.{Account, Room, User, Communication}
   alias Teiserver.Chat.WordLib
   alias Phoenix.PubSub
   alias Teiserver.Config
@@ -21,9 +21,22 @@ defmodule Teiserver.Bridge.BridgeServer do
     Central.cache_get(:application_metadata_cache, "teiserver_bridge_userid")
   end
 
-  @spec get_bridge_pid() :: pid
-  def get_bridge_pid() do
-    Central.cache_get(:application_metadata_cache, "teiserver_bridge_pid")
+  @spec call_bridge(any()) :: any()
+  def call_bridge(message) do
+    bridge_pid = get_bridge_pid()
+    GenServer.call(bridge_pid, message)
+  end
+
+  @spec cast_bridge(any()) :: :ok
+  def cast_bridge(message) do
+    bridge_pid = get_bridge_pid()
+    GenServer.cast(bridge_pid, message)
+  end
+
+  @spec send_bridge(any()) :: :ok
+  def send_bridge(message) do
+    bridge_pid = get_bridge_pid()
+    send(bridge_pid, message)
   end
 
   @spec send_direct_message(T.user_id(), String.t()) :: :ok | nil
@@ -37,6 +50,46 @@ defmodule Teiserver.Bridge.BridgeServer do
       true ->
         channel_id = user.discord_dm_channel
         Api.create_message(channel_id, message)
+    end
+  end
+
+  @doc """
+  Given an integer it will take use the channel id, if given a string it will look up
+  the channel name from the database Teiserver.Communication.DiscordChannel objects
+  """
+  @spec new_post(String.t | non_neg_integer(), String.t()) :: map | nil | {:error, String.t}
+  def new_post(channel_id, message) when is_integer(channel_id) do
+    Api.create_message(channel_id, message)
+  end
+
+  def new_post(nil, _) do
+    {:error, "No channel found"}
+  end
+
+  def new_post(channel_name, message) do
+    case Communication.get_discord_channel(channel_name) do
+      %{channel_id: channel_id} ->
+        new_post(channel_id, message)
+      _ ->
+        {:error, "No channel found (tried '#{channel_name}')"}
+    end
+  end
+
+  @spec edit_post(non_neg_integer | String.t, non_neg_integer, String.t) :: nil
+  def edit_post(channel_id, message_id, new_message) when is_integer(channel_id) and is_integer(message_id) do
+    Api.edit_message(channel_id, message_id, content: new_message)
+  end
+
+  def edit_post(nil, _, _) do
+    {:error, "No channel found"}
+  end
+
+  def edit_post(channel_name, message_id, new_message) when is_integer(message_id) do
+    case Communication.get_discord_channel(channel_name) do
+      %{channel_id: channel_id} ->
+        edit_post(channel_id, message_id, new_message)
+      _ ->
+        {:error, "No channel found (tried '#{channel_name}')"}
     end
   end
 
@@ -76,8 +129,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     {:noreply, state}
   end
 
-  # bridge_pid = Teiserver.Bridge.BridgeServer.get_bridge_pid()
-  # send(bridge_pid, :recache)
+  # Teiserver.Bridge.BridgeServer.send_bridge(bridge_pid, :recache)
   def handle_info(:recache, state) do
     Logger.info("Recaching")
     {:noreply, build_local_caches(state)}
@@ -231,7 +283,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   # pid = Teiserver.Bridge.BridgeServer.get_bridge_pid()
   # send(pid, :gdt_check)
   def handle_info(:gdt_check, state) do
-    Api.list_guild_threads(Application.get_env(:central, DiscordBridge)[:guild_id])
+    Api.list_guild_threads(Application.get_env(:central, DiscordBridgeBot)[:guild_id])
 
     # Api.list_joined_private_archived_threads(channel_id)
     # When a thread in 👇｜game-design-team has gone 48 hours without any new messages:
@@ -289,7 +341,8 @@ defmodule Teiserver.Bridge.BridgeServer do
       username: user.name,
       lobby_host: false,
       user: user,
-      client: client
+      client: client,
+      recent_bridged_messages: %{}
     }
 
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
@@ -370,7 +423,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   defp convert_emoticons(message) do
-    emoticon_map = Teiserver.Bridge.DiscordBridge.get_text_to_emoticon_map()
+    emoticon_map = Teiserver.Bridge.DiscordBridgeBot.get_text_to_emoticon_map()
 
     message
     |> String.replace(Map.keys(emoticon_map), fn text -> emoticon_map[text] end)
@@ -390,7 +443,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         # Make account
         {:ok, account} =
           Account.script_create_user(%{
-            name: "DiscordBridge",
+            name: "DiscordBridgeBot",
             email: "bridge@teiserver",
             icon: "fa-brands fa-discord",
             colour: "#0066AA",
@@ -467,5 +520,10 @@ defmodule Teiserver.Bridge.BridgeServer do
     )
 
     {:ok, %{}}
+  end
+
+  @spec get_bridge_pid() :: pid
+  defp get_bridge_pid() do
+    Central.cache_get(:application_metadata_cache, "teiserver_bridge_pid")
   end
 end

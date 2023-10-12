@@ -1,165 +1,169 @@
-<div class="row page-row">
-  <%= if allow?(@conn, "logging.live") do %>
-    <%= central_component("menu_card",
-      icon: "fa-duotone fa-gauge",
-      name: "ts_console",
-      text: "Dashboard",
-      link: Routes.ts_admin_dash_index_path(@conn, :index)
-    ) %>
-  <% end %>
-
-  <%= if allow?(@current_user, "Server") do %>
-    <%= central_component("menu_card",
-      icon: Teiserver.Logging.icon(),
-      text: "Logging",
-      link: ~p"/logging"
-    ) %>
-  <% end %>
+<div class="row">
+  <.menu_card
+    :if={allow?(@conn, "Server")}
+    icon="fa-gauge"
+    url={~p"/admin/dashboard"}
+    size={:small}
+  >
+    Dashboard
+  </.menu_card>
   
-  <%= if allow_any?(@current_user, ~w(Server Engine)) do %>
-    <%= central_component("menu_card",
-      icon: Teiserver.Telemetry.TelemetryLib.icon(),
-      text: "Telemetry",
-      link: ~p"/telemetry"
-    ) %>
-  <% end %>
-
-  <%= if allow?(@conn, "Moderator") do %>
-    <%= central_component("menu_card",
-      icon: "fa-regular fa-users",
-      name: "user_admin",
-      text: "Users",
-      icon_class: "fa-duotone",
-      link: ~p"/teiserver/admin/user"
-    ) %>
-  <% end %>
-
-  <%= if allow?(@conn, "Reviewer") do %>
-    <%= central_component("menu_card",
-      icon: Teiserver.Chat.LobbyMessageLib.icon(),
-      name: "chat",
-      text: "Chat",
-      icon_class: "fa-duotone",
-      link: ~p"/admin/chat"
-    ) %>
-  <% end %>
-
-  <%= if allow?(@conn, "Reviewer") do %>
-    <%= central_component("menu_card",
-      icon: Teiserver.Battle.MatchLib.icon(),
-      name: "matches",
-      text: "Matches",
-      icon_class: "fa-duotone",
-      link: Routes.ts_admin_match_path(@conn, :index)
-    ) %>
-  <% end %>
-
-  <%= if allow?(@conn, "Server") do %>
-    <%= central_component("menu_card",
-      icon: Teiserver.Game.QueueLib.icon(),
-      name: "matchmaking",
-      text: "Matchmaking",
-      icon_class: "fa-duotone",
-      link: Routes.ts_game_queue_path(@conn, :index)
-    ) %>
-  <% end %>
-
-  <%= if allow_any?(@conn, ~w(Contributor Overwatch)) do %>
-    <%= central_component("menu_card",
-      icon: Teiserver.Game.LobbyPolicyLib.icon(),
-      name: "lobby_policies",
-      text: "Lobby policies",
-      icon_class: "fa-duotone",
-      link: ~p"/admin/lobby_policies"
-    ) %>
-  <% end %>
-
-  <%= if allow_any?(@conn, ~w(Moderator Reviewer Overwatch)) do %>
-    <%= central_component("menu_card",
-      icon: Teiserver.Moderation.ReportLib.icon(),
-      name: "moderation_admin",
-      text: "Moderation",
-      icon_class: "fa-duotone",
-      link: Routes.moderation_general_path(@conn, :index)
-    ) %>
-  <% end %>
-
-  <%= if allow?(@conn, "Moderator") do %>
-    <%= central_component("menu_card",
-      icon: Teiserver.Game.AchievementTypeLib.icon(),
-      name: "achievements",
-      text: "Achievements",
-      icon_class: "fa-duotone",
-      link: Routes.ts_admin_achievement_path(@conn, :index)
-    ) %>
-  <% end %>
-
-  <%= if allow?(@conn, "Admin") do %>
-    <%= central_component("menu_card",
-      icon_class: "fa-solid",
-      name: "",
-      icon: Teiserver.Account.BadgeTypeLib.icon(),
-      text: "Badge types",
-      link: Routes.ts_admin_badge_type_path(@conn, :index)
-    ) %>
-  <% end %>
-
-  <%= if allow_any?(@conn, ~w(Contributor Overwatch)) do %>
-    <%= central_component("menu_card",
-      icon: Teiserver.Communication.TextCallbackLib.icon(),
-      name: "text_callbacks",
-      text: "Text callbacks",
-      icon_class: "fa-duotone",
-      link: ~p"/admin/text_callbacks"
-    ) %>
-  <% end %>
+  <.menu_card
+    :if={allow_any?(@current_user, ~w(Moderator Reviewer Overwatch))}
+    icon={Teiserver.Moderation.icon()}
+    url={~p"/moderation"}
+    size={:small}
+  >
+    Moderation
+  </.menu_card>
+  
+  <.menu_card
+    :if={allow_any?(@current_user, ~w(Moderator))}
+    icon={Teiserver.Account.UserLib.icon()}
+    url={~p"/teiserver/admin/user"}
+    size={:small}
+  >
+    Users
+  </.menu_card>
+  
+  <.menu_card
+    :if={allow_any?(@current_user, ~w(Reviewer))}
+    icon={Teiserver.Chat.LobbyMessageLib.icon()}
+    url={~p"/admin/chat"}
+    size={:small}
+  >
+    Chat
+  </.menu_card>
+  
+  <.menu_card
+    :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
+    icon={Teiserver.Helper.StylingHelper.icon(:summary)}
+    url={~p"/teiserver/reports"}
+    size={:small}
+  >
+    Reports
+  </.menu_card>
 </div>
 
 <div class="row">
-  <%= if allow_any?(@conn, ~w(Contributor Overwatch)) do %>
-    <%= central_component("menu_card",
-      icon: Teiserver.Helper.StylingHelper.icon(:summary),
-      name: "reports",
-      text: "Reports",
-      icon_class: "fa-duotone",
-      link: ~p"/teiserver/reports"
-    ) %>
-  <% end %>
+  <.menu_card
+    :if={allow_any?(@current_user, ~w(Server Engine))}
+    icon={Teiserver.Telemetry.TelemetryLib.icon()}
+    url={~p"/telemetry"}
+    size={:small}
+  >
+    Telemetry
+  </.menu_card>
+  
+  <.menu_card
+    :if={allow?(@conn, "Server")}
+    icon={Teiserver.Logging.icon()}
+    url={~p"/logging"}
+    size={:small}
+  >
+    Logging
+  </.menu_card>
+  
+  <.menu_card
+    :if={allow_any?(@current_user, ~w(Reviewer))}
+    icon={Teiserver.Battle.MatchLib.icon()}
+    url={~p"/teiserver/admin/matches"}
+    size={:small}
+  >
+    Matches
+  </.menu_card>
+  
+  <.menu_card
+    :if={allow_any?(@current_user, ~w(Server))}
+    icon={Teiserver.Game.QueueLib.icon()}
+    url={~p"/teiserver/games/queues"}
+    size={:small}
+  >
+    Matchmaking
+  </.menu_card>
+  
+  <.menu_card
+    :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
+    icon={Teiserver.Game.LobbyPolicyLib.icon()}
+    url={~p"/admin/lobby_policies"}
+    size={:small}
+  >
+    Lobby policies
+  </.menu_card>
+  
+  <.menu_card
+    :if={allow_any?(@current_user, ~w(Moderator))}
+    icon={Teiserver.Game.AchievementTypeLib.icon()}
+    url={~p"/teiserver/admin/achievements"}
+    size={:small}
+  >
+    Achievements
+  </.menu_card>
 
-  <%= if allow?(@current_user, "Server") do %>
-    <%= central_component("menu_card",
-      icon_class: "fa-solid",
-      icon: Teiserver.Account.CodeLib.icon(),
-      text: "Codes",
-      link: Routes.admin_code_path(@conn, :index)
-    ) %>
-  <% end %>
+  <.menu_card
+    :if={allow_any?(@conn, ~w(Contributor Overwatch))}
+    icon={Teiserver.Communication.TextCallbackLib.icon()}
+    url={~p"/admin/text_callbacks"}
+    size={:small}
+  >
+    Text callbacks
+  </.menu_card>
 
-  <%= if allow?(@current_user, "Server") do %>
-    <%= central_component("menu_card",
-      icon_class: "fa-solid",
-      icon: Teiserver.Config.SiteConfigLib.icon(),
-      text: "Site config",
-      link: Routes.admin_site_config_path(@conn, :index)
-    ) %>
-  <% end %>
+  <.menu_card
+    :if={allow_any?(@conn, ~w(Server))}
+    icon={Teiserver.Communication.DiscordChannelLib.icon()}
+    url={~p"/admin/discord_channels"}
+    size={:small}
+    icon_class={"fa-brands"}
+  >
+    Discord channels
+  </.menu_card>
+</div>
 
-  <%= if allow?(@current_user, "Server") do %>
-    <%= central_component("menu_card",
-      icon_class: "fa-solid",
-      icon: "fa-fw fa-solid fa-tools",
-      text: "Tools",
-      link: ~p"/teiserver/admin/tools"
-    ) %>
-  <% end %>
+<div class="row">
+  <.menu_card
+    :if={allow_any?(@conn, ~w(Admin))}
+    icon={Teiserver.Account.BadgeTypeLib.icon()}
+    url={~p"/teiserver/admin/badge_types"}
+    size={:small}
+  >
+    Badge types
+  </.menu_card>
+  
+  <.menu_card
+    :if={allow_any?(@conn, ~w(Server))}
+    icon={Teiserver.Account.CodeLib.icon()}
+    url={~p"/teiserver/admin/codes"}
+    size={:small}
+  >
+    Codes
+  </.menu_card>
+  
+  <.menu_card
+    :if={allow_any?(@conn, ~w(Server))}
+    icon={Teiserver.Config.SiteConfigLib.icon()}
+    url={~p"/teiserver/admin/site"}
+    size={:small}
+  >
+    Site config
+  </.menu_card>
+  
+  <.menu_card
+    :if={allow_any?(@conn, ~w(Server))}
+    icon={Central.Admin.ToolLib.icon()}
+    url={~p"/teiserver/admin/tools"}
+    size={:small}
+  >
+    Site config
+  </.menu_card>
 </div>
 
 <div class="row page-row">
-  <%= central_component("menu_card",
-    icon_class: "fa-solid",
-    name: "",
-    icon: StylingHelper.icon(:back),
-    text: "Back",
-    link: ~p"/"
-  ) %>
+  <.menu_card
+    icon={StylingHelper.icon(:back)}
+    url={~p"/"}
+    size={:small}
+  >
+    Back
+  </.menu_card>
 </div>

@@ -117,6 +117,17 @@ defmodule Central.Account.User do
     |> unique_constraint(:email)
   end
 
+  def changeset(user, attrs, :server_limited_update_user) do
+    attrs =
+      attrs
+      |> remove_whitespace([:email])
+
+    user
+    |> cast(attrs, ~w(name email icon colour clan_id behaviour_score trust_score data roles permissions)a)
+    |> validate_required(~w(name email)a)
+    |> unique_constraint(:email)
+  end
+
   def changeset(user, attrs, :limited_with_data) do
     attrs =
       attrs

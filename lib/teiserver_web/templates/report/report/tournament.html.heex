@@ -13,6 +13,14 @@ value_types = [
   Map.merge(assigns, %{active: "reports"})
 ) %>
 
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    var selected_tab = window.location.hash.substr(1).replace("_tab", "");
+    $('#the_tabs a:first').tab('show');
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
+  });
+</script>
+
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
@@ -45,7 +53,7 @@ value_types = [
           <div class="row">
             <div class="col-md-8 col-lg-6 col-xl-4 my-2">
               <label for="report_names" class="control-label">
-                Player names (commas and/or newlines to separate names):
+                Player names (newlines for each team, commas within one line to group players):
               </label>
               <textarea
                 name="report[names]"
@@ -54,6 +62,7 @@ value_types = [
                 cols="40"
                 class="form-control"
               ><%= @params["names"] %></textarea>
+              Optionally use <span class="monospace">#123</span> (where 123 is their ID) to reference the ID of a user.
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
@@ -110,9 +119,7 @@ value_types = [
           <div class="col">
             <h5>Missing names</h5>
             <textarea rows="3" class="form-control" style="font-family: monospace;"><%=
-      @name_to_id_map
-        |> Enum.filter(fn {_, id} -> id == nil end)
-        |> Enum.map(fn {name, _} -> name end)
+      @missing_names
         |> Enum.join("\n")
     %></textarea>
           </div>
@@ -124,10 +131,42 @@ value_types = [
         |> Enum.join("\n")
     %></textarea>
           </div>
-        </div>
 
-        <div class="row mt-2">
           <div class="col">
+            <h5>As IDs</h5>
+            <textarea
+              rows="3"
+              class="form-control"
+            ><%= @teams_as_ids %></textarea>
+          </div>
+        </div>
+        <br />
+        
+        <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+          <li>
+            <a href="#user_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              Individual
+              <Fontawesome.icon icon="user" style="regular" />
+            </a>
+          </li>
+          
+          <li class="nav-item" role="presentation">
+            <a href="#team_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              Teams
+              <Fontawesome.icon icon="users" style="regular" />
+            </a>
+          </li>
+
+          <li class="nav-item" role="presentation" :if={allow?(@current_user, "Admin")}>
+            <a href="#admin_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              Admin
+              <Fontawesome.icon icon={Central.Admin.AdminLib.icon} style="regular" />
+            </a>
+          </li>
+        </ul>
+        
+        <div class="tab-content">
+          <div class="tab-pane" id="user_tab" style="padding:5px;">
             <h5>
               Found <%= Enum.count(@ratings) %> of <%= Enum.count(@name_to_id_map) %> players
             </h5>
@@ -167,40 +206,12 @@ value_types = [
                     </td>
 
                     <td>
-                      <% user_r = %{restrictions: rating.user.data["restrictions"] || []}
-
-                      banned = Teiserver.User.is_restricted?(user_r, ["Login"])
-
-                      muted =
-                        Teiserver.User.is_restricted?(user_r, [
-                          "All chat",
-                          "Room chat",
-                          "Direct chat",
-                          "Lobby chat",
-                          "Battle chat"
-                        ])
-
-                      warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"]) %>
-
-                      <%= if banned do %>
-                        <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}>
-                        </i>
-                      <% end %>
-
-                      <%= if muted do %>
-                        <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Mute")}"}>
-                        </i>
-                      <% end %>
-
-                      <%= if warned do %>
-                        <i class={"fa-fw text-warning #{Teiserver.Moderation.ActionLib.action_icon("Warn")}"}>
-                        </i>
-                      <% end %>
+                      <TeiserverWeb.UserComponents.status_icon user={rating.user} />
                     </td>
 
                     <td>
                       <%= if Enum.member?(rating.user.roles, "Tournament") do %>
-                        <i class="fa-fw fa-solid fa-trophy"></i>
+                        <Fontawesome.icon icon="fa-trophy" style="solid" />
                       <% end %>
                     </td>
 
@@ -218,15 +229,31 @@ value_types = [
                 <% end %>
               </tbody>
             </table>
+          </div>
 
-            <%= if allow?(@conn, "admin.dev") do %>
-              <% id_list_str =
-                @name_to_id_map
-                |> Map.values()
-                |> Enum.reject(&(&1 == nil))
-                |> Enum.join(", ") %>
-              <h4>Mass set-player snippet</h4>
-              <textarea rows="8" class="form-control" style="font-family: monospace;">
+          <div class="tab-pane" id="team_tab" style="padding:5px;">
+            <.table id="users" rows={@team_data} table_class="table-sm table-hover">
+              <:col :let={{team, _}} label="Team"><%= team + 1 %></:col>
+              <:col :let={{_, ratings}} label="Captain"><%= ratings.captain_name %> (<%= ratings.captain_rating %>)</:col>
+              
+              <:col :let={{_, ratings}} label="Size"><%= ratings.count %></:col>
+              <:col :let={{_, ratings}} label="Min"><%= ratings.min %></:col>
+              <:col :let={{_, ratings}} label="Max"><%= ratings.max %></:col>
+              
+              <:col :let={{_, ratings}} label="Mean"><%= ratings.mean %></:col>
+              <:col :let={{_, ratings}} label="Median"><%= ratings.median %></:col>
+              <:col :let={{_, ratings}} label="Standard Deviation"><%= ratings.stdev %></:col>
+            </.table>
+          </div>
+
+          <div class="tab-pane" id="admin_tab" style="padding:5px;" :if={allow?(@current_user, "Admin")}>
+            <% id_list_str =
+              @name_to_id_map
+              |> Map.values()
+              |> Enum.reject(&(&1 == nil))
+              |> Enum.join(", ") %>
+            <h4>Mass set-player snippet</h4>
+            <textarea rows="20" class="form-control" style="font-family: monospace;">
 ids = [<%= id_list_str %>]
 
 (
@@ -252,10 +279,10 @@ ids = [<%= id_list_str %>]
     Teiserver.Account.update_cache_user(userid, %{roles: new_roles})
   end)
 )
-              </textarea>
-            <% end %>
+            </textarea>
           </div>
         </div>
+
       </div>
     </div>
   </div>

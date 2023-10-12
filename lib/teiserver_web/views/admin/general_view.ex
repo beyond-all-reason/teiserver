@@ -19,6 +19,7 @@ defmodule TeiserverWeb.Admin.GeneralView do
   def view_colour("matches"), do: Teiserver.Battle.MatchLib.colours()
   def view_colour("badge_types"), do: Teiserver.Account.BadgeTypeLib.colours()
   def view_colour("text_callbacks"), do: Teiserver.Communication.TextCallbackLib.colours()
+  def view_colour("discord_channels"), do: Teiserver.Communication.DiscordChannelLib.colours()
   def view_colour("achievements"), do: Teiserver.Game.AchievementTypeLib.colour()
   def view_colour("config"), do: Teiserver.Config.SiteConfigLib.colours()
   def view_colour("tool"), do: Central.Admin.ToolLib.colours()

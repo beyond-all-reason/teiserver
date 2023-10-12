@@ -1,7 +1,9 @@
 defmodule Teiserver.Account.TournamentReport do
+  @moduledoc false
   alias Teiserver.{Account}
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Helper.TimexHelper
+  import Teiserver.Helper.NumberHelper, only: [round: 2]
 
   @spec icon() :: String.t()
   def icon(), do: Teiserver.Account.RatingLib.icon()
@@ -9,29 +11,57 @@ defmodule Teiserver.Account.TournamentReport do
   @spec permissions() :: String.t()
   def permissions(), do: "Moderator"
 
+  defp get_player_id("#" <> id_str), do: String.to_integer(id_str)
+  defp get_player_id(name) do
+    Account.get_userid_from_name(name)
+  end
+
+  @spec make_split_data(String.t) :: %{non_neg_integer => {String.t, non_neg_integer()}}
+  defp make_split_data(data) do
+    data
+      |> String.trim()
+      |> String.split("\n")
+      |> Enum.with_index
+      |> Map.new(fn {row, team_idx} ->
+        id_map = row
+        |> String.split(",")
+        |> Enum.map(&String.trim/1)
+        |> Enum.filter(fn
+            "" -> false
+            _ -> true
+        end)
+        |> Enum.map(fn name ->
+          {String.trim(name), get_player_id(name)}
+        end)
+        |> Enum.reject(fn {_, n} -> n == nil end)
+
+        {team_idx, id_map}
+      end)
+  end
+
   @spec run(Plug.Conn.t(), map()) :: {nil, map()}
   def run(_conn, params) do
     params = apply_defaults(params)
 
-    name_to_id_map =
-      (params["names"] || "")
+    # First we take our lines and break them into teams
+    split_data = make_split_data(params["names"] || "")
+
+    name_to_id_map = split_data
+      |> Map.values()
+      |> List.flatten
+      |> Map.new
+
+    missing_names = (params["names"] || "")
       |> String.trim()
       |> String.replace(",", "\n")
       |> String.split("\n")
-      |> Enum.filter(fn s ->
-        s = String.trim(s)
-
-        cond do
-          s == "" -> false
-          true -> true
-        end
-      end)
-      |> Map.new(fn name ->
-        {String.trim(name), Account.get_userid_from_name(name)}
+      |> Enum.map(&String.trim/1)
+      |> Enum.reject(fn name ->
+        Map.has_key?(name_to_id_map, name)
       end)
 
     if params["make_players"] == "true" do
-      id_list = Map.values(name_to_id_map) |> Enum.reject(&(&1 == nil))
+      id_list = name_to_id_map |> Map.values() |> Enum.reject(&(&1 == nil))
 
       Account.list_users(
         search: [id_in: id_list],
@@ -88,16 +118,89 @@ defmodule Teiserver.Account.TournamentReport do
       |> Map.new()
       |> Map.keys()
 
-    assigns = %{
+    teams_as_ids = split_data
+      |> Map.values()
+      |> Enum.map_join("\n", fn team_data ->
+        team_data
+        |> Enum.map_join(", ", fn {_name, id} -> "##{id}" end)
+      end)
+
+    rating_values = ratings
+      |> Map.new(fn rating ->
+        value = case params["value_type"] do
+          "Leaderboard rating" -> rating.leaderboard_rating
+          "Game rating" -> rating.rating_value
+          "Skill value" -> rating.skill
+        end
+
+        {rating.user_id, value}
+      end)
+
+    %{
       params: params,
       name_to_id_map: name_to_id_map,
       game_types: MatchRatingLib.rating_type_list(),
       no_ratings: no_ratings,
       ratings: ratings,
+      missing_names: missing_names,
+      teams_as_ids: teams_as_ids,
+      team_data: make_team_data(split_data, rating_values),
       csv_data: make_csv_data(ratings, params["value_type"])
     }
+  end
 
-    {nil, assigns}
+  defp make_team_data(split_data, rating_values) do
+    split_data
+      |> Map.new(fn {team_id, members} ->
+        name_rating_pairs = members
+          |> Enum.map(fn {name, userid} -> {name, rating_values[userid]} end)
+          |> Enum.reject(fn {_, rating} -> rating == nil end)
+
+        aggregate_data = name_rating_pairs
+          |> Enum.map(fn {_, rating} -> rating end)
+          |> aggregate_team_ratings
+
+        captain = name_rating_pairs
+          |> Enum.sort_by(fn {_, rating} -> rating end, &>=/2)
+          |> Enum.take(1)
+
+        aggregate_data = case captain do
+          [{name, rating}] ->
+            Map.merge(aggregate_data, %{
+              captain_name: name,
+              captain_rating: rating |> round(2)
+            })
+          _ ->
+            aggregate_data
+        end
+
+        {team_id, aggregate_data}
+      end)
+  end
+
+  defp aggregate_team_ratings([]) do
+    %{
+      mean: 0,
+      median: 0,
+      stdev: 0,
+      count: 0,
+      max: 0,
+      min: 0,
+      captain_name: "",
+      captain_rating: 0
+    }
+  end
+  defp aggregate_team_ratings(ratings) do
+    %{
+      mean: Statistics.mean(ratings) |> round(2),
+      median: Statistics.median(ratings) |> round(2),
+      stdev: Statistics.stdev(ratings) |> round(2),
+      count: Enum.count(ratings),
+      max: Enum.max(ratings) |> round(2),
+      min: Enum.min(ratings) |> round(2),
+      captain_name: "",
+      captain_rating: 0
+    }
   end
 
   defp add_csv_headings(output, value_type) do

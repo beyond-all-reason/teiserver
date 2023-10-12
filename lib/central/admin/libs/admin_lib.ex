@@ -6,7 +6,7 @@ defmodule Central.Admin.AdminLib do
   def colours(), do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-user-circle"
+  def icon(), do: "fa-user-circle"
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
   def authorize(_, conn, _), do: Teiserver.Account.AuthLib.allow?(conn, "Admin")

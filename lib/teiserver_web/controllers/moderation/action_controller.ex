@@ -303,7 +303,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
     # First we try to update the message (if we have an ID)
     update_result = if action.discord_message_id do
-      Teiserver.Bridge.DiscordBridge.update_action(action)
+      Teiserver.Bridge.DiscordBridgeBot.update_action(action)
     else
       {:error, "no message_id"}
     end

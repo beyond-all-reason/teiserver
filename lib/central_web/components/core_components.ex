@@ -443,6 +443,11 @@ defmodule CentralWeb.CoreComponents do
         <:col :let={user} label="id"><%= user.id %></:col>
         <:col :let={user} label="username"><%= user.username %></:col>
       </.table>
+
+      <.table id="users" rows={@users} table_class="table-sm table-hover">
+        <:col :let={user} label="id"><%= user.id %></:col>
+        <:col :let={user} label="username"><%= user.username %></:col>
+      </.table>
   """
   attr :id, :string, required: true
   attr :rows, :list, required: true

@@ -20,7 +20,7 @@ Congratulations, your bot is set up!
 Add to your `config/prod.secret.exs` the following block.
 
 ```
-config :central, DiscordBridge,
+config :central, DiscordBridgeBot,
   token: "TOKEN",
   bot_name: "BOT NAME",
   bridges: [

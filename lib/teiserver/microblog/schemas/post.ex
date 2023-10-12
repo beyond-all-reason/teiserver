@@ -9,6 +9,9 @@ defmodule Teiserver.Microblog.Post do
     field :contents, :string
     field :view_count, :integer, default: 0
 
+    belongs_to :discord_channel, Teiserver.Communication.DiscordChannel
+    field :discord_post_id, :integer
+
     has_many :post_tags, Teiserver.Microblog.PostTag
 
     many_to_many :tags, Teiserver.Microblog.Tag,
@@ -31,7 +34,7 @@ defmodule Teiserver.Microblog.Post do
       |> trim_strings(~w(title contents)a)
 
     struct
-    |> cast(params, ~w(poster_id title contents view_count)a)
+    |> cast(params, ~w(poster_id title contents view_count discord_channel_id discord_post_id)a)
     |> cast_assoc(:post_tags, tag_ids)
     |> validate_required(~w(poster_id title contents)a)
   end

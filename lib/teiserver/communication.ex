@@ -422,4 +422,41 @@ defmodule Teiserver.Communication do
 
   @spec lookup_text_callback_from_trigger(String.t()) :: TextCallback.t() | nil
   defdelegate lookup_text_callback_from_trigger(trigger), to: TextCallbackLib
+
+
+  # Discord channels
+  alias Teiserver.Communication.{DiscordChannel, DiscordChannelLib}
+
+  @spec list_discord_channels() :: [DiscordChannel]
+  defdelegate list_discord_channels(), to: DiscordChannelLib
+
+  @spec list_discord_channels(list) :: [DiscordChannel]
+  defdelegate list_discord_channels(args), to: DiscordChannelLib
+
+  @spec get_discord_channel!(non_neg_integer()) :: DiscordChannel.t
+  defdelegate get_discord_channel!(discord_channel_id), to: DiscordChannelLib
+
+  @spec get_discord_channel(non_neg_integer()) :: DiscordChannel.t | nil
+  defdelegate get_discord_channel(discord_channel_id), to: DiscordChannelLib
+
+  @spec create_discord_channel() :: {:ok, DiscordChannel} | {:error, Ecto.Changeset}
+  defdelegate create_discord_channel(), to: DiscordChannelLib
+
+  @spec create_discord_channel(map) :: {:ok, DiscordChannel} | {:error, Ecto.Changeset}
+  defdelegate create_discord_channel(attrs), to: DiscordChannelLib
+
+  @spec update_discord_channel(DiscordChannel, map) :: {:ok, DiscordChannel} | {:error, Ecto.Changeset}
+  defdelegate update_discord_channel(discord_channel, attrs), to: DiscordChannelLib
+
+  @spec delete_discord_channel(DiscordChannel) :: {:ok, DiscordChannel} | {:error, Ecto.Changeset}
+  defdelegate delete_discord_channel(discord_channel), to: DiscordChannelLib
+
+  @spec change_discord_channel(DiscordChannel) :: Ecto.Changeset
+  defdelegate change_discord_channel(discord_channel), to: DiscordChannelLib
+
+  @spec change_discord_channel(DiscordChannel, map) :: Ecto.Changeset
+  defdelegate change_discord_channel(discord_channel_type, attrs), to: DiscordChannelLib
+
+  @spec pre_cache_discord_channels() :: :ok
+  defdelegate pre_cache_discord_channels(), to: DiscordChannelLib
 end
