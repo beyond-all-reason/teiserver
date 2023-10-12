@@ -21,9 +21,22 @@ defmodule Teiserver.Bridge.BridgeServer do
     Central.cache_get(:application_metadata_cache, "teiserver_bridge_userid")
   end
 
-  @spec get_bridge_pid() :: pid
-  def get_bridge_pid() do
-    Central.cache_get(:application_metadata_cache, "teiserver_bridge_pid")
+  @spec call_bridge(any()) :: any()
+  def call_bridge(message) do
+    bridge_pid = get_bridge_pid()
+    GenServer.call(bridge_pid, message)
+  end
+
+  @spec cast_bridge(any()) :: :ok
+  def cast_bridge(message) do
+    bridge_pid = get_bridge_pid()
+    GenServer.cast(bridge_pid, message)
+  end
+
+  @spec send_bridge(any()) :: :ok
+  def send_bridge(message) do
+    bridge_pid = get_bridge_pid()
+    send(bridge_pid, message)
   end
 
   @spec send_direct_message(T.user_id(), String.t()) :: :ok | nil
@@ -76,8 +89,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     {:noreply, state}
   end
 
-  # bridge_pid = Teiserver.Bridge.BridgeServer.get_bridge_pid()
-  # send(bridge_pid, :recache)
+  # Teiserver.Bridge.BridgeServer.send_bridge(bridge_pid, :recache)
   def handle_info(:recache, state) do
     Logger.info("Recaching")
     {:noreply, build_local_caches(state)}
@@ -468,5 +480,10 @@ defmodule Teiserver.Bridge.BridgeServer do
     )
 
     {:ok, %{}}
+  end
+
+  @spec get_bridge_pid() :: pid
+  defp get_bridge_pid() do
+    Central.cache_get(:application_metadata_cache, "teiserver_bridge_pid")
   end
 end

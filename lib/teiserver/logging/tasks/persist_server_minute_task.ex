@@ -30,11 +30,13 @@ defmodule Teiserver.Logging.Tasks.PersistServerMinuteTask do
     if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
       if rem(Timex.now().minute(), 10) == 0 do
         if Config.get_site_config_cache("teiserver.Bridge player numbers") do
-          bridge_pid = BridgeServer.get_bridge_pid()
-          send(bridge_pid, {:update_stats, :client_count, Enum.count(data.client.total)})
-          send(bridge_pid, {:update_stats, :player_count, Enum.count(data.client.player)})
-          send(bridge_pid, {:update_stats, :match_count, data.battle.in_progress})
-          send(bridge_pid, {:update_stats, :lobby_count, data.battle.lobby})
+          [
+            {:update_stats, :client_count, Enum.count(data.client.total)},
+            {:update_stats, :player_count, Enum.count(data.client.player)},
+            {:update_stats, :match_count, data.battle.in_progress},
+            {:update_stats, :lobby_count, data.battle.lobby}
+          ]
+          |> Enum.each(&BridgeServer.send_bridge/1)
         end
       end
     end
