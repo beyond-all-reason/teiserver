@@ -4,6 +4,9 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   import Teiserver.Helper.ColourHelper, only: [rgba_css: 2]
 
   alias Teiserver.{Communication, Microblog, Account}
+  alias Teiserver.Account.AuthLib
+
+  @default_channel_name "Dev updates"
 
   @impl true
   def render(assigns) do
@@ -43,24 +46,41 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
             <textarea
               name="post[contents]"
               id="post_contents"
-              rows="5"
+              rows="8"
               phx-debounce="100"
               class="form-control"><%= @form[:contents].value %></textarea>
           </div>
           <div class="col">
+            <h4>Tags</h4>
             <%= for tag <- @tags do %>
               <%= if Enum.member?(@selected_tags, tag.id) do %>
-                <span class="badge rounded-pill mx-1 tag-selector" style={"background-color: #{tag.colour}; "} phx-click="toggle-selected-tag" phx-value-tag={tag.id} phx-target={@myself}>
+                <span class="badge rounded-pill m-1 tag-selector" style={"background-color: #{tag.colour}; "} phx-click="toggle-selected-tag" phx-value-tag={tag.id} phx-target={@myself}>
                   <Fontawesome.icon icon={tag.icon} style="solid" />
                   <%= tag.name %>
                 </span>
               <% else %>
-                <span class="badge rounded-pill mx-1 tag-selector" style={"background-color: #{rgba_css(tag.colour, 0.5)}; border-color: rgba(0,0,0,0);"} phx-click="toggle-selected-tag" phx-value-tag={tag.id} phx-target={@myself}>
+                <span class="badge rounded-pill m-1 tag-selector" style={"background-color: #{rgba_css(tag.colour, 0.5)}; border-color: rgba(0,0,0,0);"} phx-click="toggle-selected-tag" phx-value-tag={tag.id} phx-target={@myself}>
                   <Fontawesome.icon icon={tag.icon} style="regular" />
                   <%= tag.name %>
                 </span>
               <% end %>
             <% end %>
+            <br /><br />
+
+            <h4>Discord channel</h4>
+            <.input
+              field={@form[:discord_channel_id]}
+              type="select"
+              options={@discord_channels}
+            />
+            <%= if false and @current_user.discord_id == nil do %>
+              <div class="alert alert-info mt-4" style="font-size: 0.9em;">
+                You have not linked your discord account with your game account. Currently you can do this by chatting <span class="monospace">$discord</span> in a public room and the server will send you a one time code to send the bridge.
+
+                You can still post microblog messages to discord but it will not include your name/profile in them.
+              </div>
+            <% end %>
+
           </div>
         </div>
 
@@ -92,11 +112,35 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
       ]
     )
 
-    changeset = Microblog.change_post(post)
+    discord_channels = Communication.list_discord_channels(
+      order_by: [
+        "Name (A-Z)"
+      ]
+    )
+    |> Enum.filter(fn channel ->
+      not String.contains?(channel.name, "(counter)")
+      and
+      AuthLib.allow?(assigns.current_user, channel.post_permission)
+    end)
+    |> Enum.map(fn channel ->
+      {channel.name, channel.id}
+    end)
+
+    changeset = if post.id do
+      Microblog.change_post(post)
+    else
+      default_channel_id = case Communication.get_discord_channel(@default_channel_name) do
+        nil -> nil
+        %{id: id} -> id
+      end
+
+      Microblog.change_post(post, %{discord_channel_id: default_channel_id})
+    end
 
     {:ok,
      socket
      |> assign(:tags, tags)
+     |> assign(:discord_channels, [{"No channel", nil} | discord_channels])
      |> assign(:selected_tags, assigns[:selected_tags] || [])
      |> assign(:originally_selected_tags, assigns[:selected_tags] || [])
      |> assign(assigns)
@@ -223,6 +267,9 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
     case Communication.new_discord_message(post.discord_channel_id, content) do
       {:ok, %{id: message_id}} ->
         Microblog.update_post(post, %{"discord_post_id" => message_id})
+
+      _ ->
+        :ok
     end
   end
 
@@ -230,7 +277,12 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   defp update_post_to_discord(%{discord_post_id: nil} = post), do: create_post_to_discord(post)
   defp update_post_to_discord(post) do
     content = create_discord_text(post)
-    Communication.edit_discord_message(post.discord_channel_id, post.discord_post_id, content)
+    case Communication.edit_discord_message(post.discord_channel_id, post.discord_post_id, content) do
+      {:ok, _new_message} ->
+        :ok
+      {:error, %{status_code: 404}} ->
+        create_post_to_discord(post)
+    end
   end
 
   defp create_discord_text(post) do
@@ -243,12 +295,12 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
     discord_tag = if user.discord_id do
       " - Posted by <@#{user.discord_id}>"
     else
-      ""
+      " - Posted by #{user.name}"
     end
 
     host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/microblog/show/#{post.id}"
 
-    "**#{post.title}**#{discord_tag}\n#{post_content}\n\n[See full text](#{url})"
+    "-------------------------------\n**#{post.title}**#{discord_tag}\n#{post_content}\n\n[See full text](#{url})"
   end
 end

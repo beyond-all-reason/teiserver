@@ -23,6 +23,7 @@ defmodule Teiserver.Communication.DiscordChannel do
     struct
     |> cast(params, ~w(name channel_id colour icon view_permission post_permission)a)
     |> validate_required(~w(name channel_id colour icon)a)
+    |> unique_constraint(:name)
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean

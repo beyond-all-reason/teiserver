@@ -7,6 +7,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   def special_channels do
     [
       "Announcements",
+      "Dev updates",
       "Main chat",
       "Looking for players",
       "New player chat",
@@ -14,7 +15,9 @@ defmodule Teiserver.Communication.DiscordChannelLib do
       "Overwatch reports",
       "Moderation reports",
       "Server updates",
-      "Error updates"
+      "Error updates",
+      "Github updates",
+      "Dev channel"
     ]
   end
 

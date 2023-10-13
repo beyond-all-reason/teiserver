@@ -133,7 +133,7 @@ defmodule Central.Application do
         # Bridge
         Teiserver.Bridge.BridgeServer,
         concache_sup(:discord_bridge_dm_cache),
-        concache_sup(:discord_channel_cache),
+        concache_perm_sup(:discord_channel_cache),
         concache_sup(:discord_bridge_account_codes, global_ttl: 300_000),
 
         # Lobbies
