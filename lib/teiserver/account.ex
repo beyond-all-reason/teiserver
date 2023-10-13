@@ -1920,10 +1920,14 @@ defmodule Teiserver.Account do
   end
 
   def create_friend_request(from_user_id, to_user_id) do
-    create_friend_request(%{
-      from_user_id: from_user_id,
-      to_user_id: to_user_id
-    })
+    if from_user_id == to_user_id do
+      {:error, "Cannot add yourself as a friend"}
+    else
+      create_friend_request(%{
+        from_user_id: from_user_id,
+        to_user_id: to_user_id
+      })
+    end
   end
 
   @doc """
