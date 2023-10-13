@@ -70,7 +70,6 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
 
     discord_channel_params = Map.put(params, "name", name)
 
-
     case Communication.create_discord_channel(discord_channel_params) do
       {:ok, _discord_channel} ->
         conn
@@ -139,6 +138,9 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
   end
 
   defp get_special_names() do
+    existing_names = Communication.list_discord_channels(select: [:name], limit: :infinity)
+      |> Enum.map(fn %{name: name} -> name end)
+
     [
       "-- Channels",
       DiscordChannelLib.special_channels(),
@@ -147,5 +149,8 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
       DiscordChannelLib.counter_channels()
     ]
     |> List.flatten
+    |> Enum.reject(fn name ->
+      Enum.member?(existing_names, name)
+    end)
   end
 end
