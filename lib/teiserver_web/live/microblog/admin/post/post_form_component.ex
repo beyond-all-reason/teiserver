@@ -166,7 +166,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
 
         notify_parent({:saved, post})
 
-        # update_post_to_discord(post)
+        update_post_to_discord(post)
 
         {:noreply,
          socket
@@ -199,7 +199,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
 
         notify_parent({:saved, post})
 
-        # create_post_to_discord(post)
+        create_post_to_discord(post)
 
         {:noreply,
          socket
@@ -217,8 +217,8 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
 
-  def create_post_to_discord(%{discord_channel_id: nil}), do: :ok
-  def create_post_to_discord(post) do
+  defp create_post_to_discord(%{discord_channel_id: nil}), do: :ok
+  defp create_post_to_discord(post) do
     content = create_discord_text(post)
     case Communication.new_discord_message(post.discord_channel_id, content) do
       {:ok, %{id: message_id}} ->
@@ -226,9 +226,9 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
     end
   end
 
-  def update_post_to_discord(%{discord_channel_id: nil}), do: :ok
-  def update_post_to_discord(%{discord_post_id: nil} = post), do: create_post_to_discord(post)
-  def update_post_to_discord(post) do
+  defp update_post_to_discord(%{discord_channel_id: nil}), do: :ok
+  defp update_post_to_discord(%{discord_post_id: nil} = post), do: create_post_to_discord(post)
+  defp update_post_to_discord(post) do
     content = create_discord_text(post)
     Communication.edit_discord_message(post.discord_channel_id, post.discord_post_id, content)
   end

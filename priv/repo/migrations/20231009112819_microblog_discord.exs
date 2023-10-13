@@ -17,7 +17,7 @@ defmodule Teiserver.Repo.Migrations.MicroblogDiscord do
 
     alter table(:microblog_posts) do
       add :discord_channel_id, references(:communication_discord_channels, on_delete: :nothing)
-      add :discord_post_id, :integer
+      add :discord_post_id, :bigint
     end
   end
 end
