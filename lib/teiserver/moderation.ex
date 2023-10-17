@@ -228,6 +228,24 @@ defmodule Teiserver.Moderation do
 
 
 
+  def create_report_group_and_report(report_params) do
+    report_group = get_or_make_report_group(report_params.target_id, report_params.match_id)
+
+    report_params = Map.merge(report_params, %{
+      report_group_id: report_group.id
+    })
+
+    case create_report(report_params) do
+      {:ok, report} ->
+        {:ok, report_group} = Teiserver.Moderation.update_report_group(report_group, %{
+          report_count: report_group.report_count + 1
+        })
+        {:ok, report_group, report}
+      result ->
+        result
+    end
+  end
+
 
   alias Teiserver.Moderation.ReportGroupLib
 

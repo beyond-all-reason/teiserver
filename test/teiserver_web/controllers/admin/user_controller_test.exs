@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   # alias Teiserver.TeiserverTestLib
 
   setup do
-    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.root_permissions())
+    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.server_permissions())
     |> Teiserver.TeiserverTestLib.conn_setup()
   end
 

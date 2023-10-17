@@ -280,7 +280,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     case Moderation.update_action(action, action_params) do
       {:ok, _action} ->
         Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
-        Teiserver.Bridge.DiscordBridge.update_action(action)
+        Teiserver.Bridge.DiscordBridgeBot.update_action(action)
 
         add_audit_log(conn, "Moderation:Action updated", %{action_id: action.id})
 
@@ -311,7 +311,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
     case update_result do
       {:error, _} ->
-        Teiserver.Bridge.DiscordBridge.new_action(action)
+        Teiserver.Bridge.DiscordBridgeBot.new_action(action)
         add_audit_log(conn, "Moderation:Action re_posted", %{action_id: action.id})
 
         conn

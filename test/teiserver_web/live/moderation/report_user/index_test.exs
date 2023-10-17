@@ -7,7 +7,7 @@ defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
   alias Teiserver.{Moderation, TeiserverTestLib}
 
   defp auth_setup(_) do
-    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
+    GeneralTestLib.conn_setup(TeiserverTestLib.player_permissions())
     |> TeiserverTestLib.conn_setup()
   end
 
@@ -33,7 +33,7 @@ defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
 
   describe "Index" do
     setup [:auth_setup]
-    test "anon index", %{conn: conn} do
+    test "anon index", %{conn: conn, user: conn_user} do
       user = TeiserverTestLib.new_user()
 
       # Ensure no existing groups
@@ -93,6 +93,8 @@ defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
 
       [report] = Moderation.list_reports(where: [target_id: user.id])
       assert report.extra_text == "The extra text in my report"
+      assert report.target_id == user.id
+      assert report.reporter_id == conn_user.id
     end
   end
 end

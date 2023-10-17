@@ -406,14 +406,24 @@ defmodule Teiserver.TeiserverTestLib do
     {:ok, data}
   end
 
-  @spec root_permissions() :: [String.t()]
-  def root_permissions do
-    admin_permissions() ++ ["admin.dev.developer"]
+  @spec server_permissions() :: [String.t()]
+  def server_permissions do
+    ["Server"] ++ admin_permissions()
   end
 
   @spec admin_permissions() :: [String.t()]
   def admin_permissions do
-    ["Server", "Admin"] ++ staff_permissions()
+    ["Admin", "Moderator"] ++ staff_permissions()
+  end
+
+  @spec moderator_permissions() :: [String.t()]
+  def moderator_permissions do
+    ["Moderator"] ++ overwatch_permissions()
+  end
+
+  @spec overwatch_permissions() :: [String.t()]
+  def overwatch_permissions do
+    ["Overwatch"]
   end
 
   @spec staff_permissions() :: [String.t()]
@@ -569,6 +579,19 @@ defmodule Teiserver.TeiserverTestLib do
     end
   end
 
+  def create_moderation_user_report(target_id, reporter_id, params \\ %{}) do
+    Teiserver.Moderation.create_report_group_and_report(Map.merge(%{
+      reporter_id: reporter_id,
+      target_id: target_id,
+
+      type: "chat",
+      sub_type: "hate",
+      extra_text: "default extra text",
+
+      match_id: nil
+    }, params))
+  end
+
   def seed() do
     CoordinatorServer.get_coordinator_account()
     Teiserver.Account.AccoladeBotServer.get_accolade_account()
@@ -590,7 +613,6 @@ defmodule Teiserver.TeiserverTestLib do
     Teiserver.Telemetry.get_or_add_complex_client_event_type("client.user_event")
 
     Teiserver.Telemetry.get_or_add_simple_lobby_event_type("remove_user_from_lobby")
-
 
     seed_badge_types()
   end

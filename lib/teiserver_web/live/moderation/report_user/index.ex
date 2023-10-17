@@ -45,8 +45,6 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
 
   @impl true
   def handle_event("submit-extra-text", _event, %{assigns: %{stage: :extra_text} = assigns} = socket) do
-    report_group = Moderation.get_or_make_report_group(assigns.user.id, assigns.match_id)
-
     report_params = %{
       reporter_id: assigns.current_user.id,
       target_id: assigns.user.id,
@@ -55,17 +53,11 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
       sub_type: assigns.sub_type,
       extra_text: assigns.extra_text,
 
-      match_id: assigns.match_id,
-      report_group_id: report_group.id
+      match_id: assigns.match_id
     }
 
-    case Moderation.create_report(report_params) do
-      {:ok, _report} ->
-        # Update the report group
-        {:ok, _report_group} = Teiserver.Moderation.update_report_group(report_group, %{
-          report_count: report_group.report_count + 1
-        })
-
+    case Moderation.create_report_group_and_report(report_params) do
+      {:ok, report_group, report} ->
         {:noreply, socket
           |> assign(:result, :success)
           |> assign(:stage, :completed)
