@@ -3,7 +3,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   The server used to read events from Teiserver and then use the DiscordBridgeBot to send onwards
   """
   use GenServer
-  alias Teiserver.{Account, Room, User, Communication}
+  alias Teiserver.{Account, Room, User}
   alias Teiserver.Chat.WordLib
   alias Phoenix.PubSub
   alias Teiserver.Config
@@ -53,45 +53,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     end
   end
 
-  @doc """
-  Given an integer it will take use the channel id, if given a string it will look up
-  the channel name from the database Teiserver.Communication.DiscordChannel objects
-  """
-  @spec new_post(String.t | non_neg_integer(), String.t()) :: map | nil | {:error, String.t}
-  def new_post(channel_id, message) when is_integer(channel_id) do
-    Api.create_message(channel_id, message)
-  end
 
-  def new_post(nil, _) do
-    {:error, "No channel found"}
-  end
-
-  def new_post(channel_name, message) do
-    case Communication.get_discord_channel(channel_name) do
-      %{channel_id: channel_id} ->
-        new_post(channel_id, message)
-      _ ->
-        {:error, "No channel found (tried '#{channel_name}')"}
-    end
-  end
-
-  @spec edit_post(non_neg_integer | String.t, non_neg_integer, String.t) :: nil
-  def edit_post(channel_id, message_id, new_message) when is_integer(channel_id) and is_integer(message_id) do
-    Api.edit_message(channel_id, message_id, content: new_message)
-  end
-
-  def edit_post(nil, _, _) do
-    {:error, "No channel found"}
-  end
-
-  def edit_post(channel_name, message_id, new_message) when is_integer(message_id) do
-    case Communication.get_discord_channel(channel_name) do
-      %{channel_id: channel_id} ->
-        edit_post(channel_id, message_id, new_message)
-      _ ->
-        {:error, "No channel found (tried '#{channel_name}')"}
-    end
-  end
 
   @impl true
   def handle_call(:client_state, _from, state) do

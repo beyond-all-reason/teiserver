@@ -74,7 +74,7 @@ defmodule Teiserver.Game.MatchRatingLib do
       match.game_duration < 180 ->
         {:error, :too_short}
 
-      Map.get(match.tags, "server/unranked", false) == "true" ->
+      Map.get(match.tags, "game/modoptions/ranked_game", "1") == "0" ->
         {:error, :unranked_tag}
 
       # If override is set to true we skip the next few checks

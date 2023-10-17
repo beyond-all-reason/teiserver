@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
   @moduledoc false
   require TeiserverWeb.Microblog.BlogLive.Show
   use TeiserverWeb, :live_view
-  alias Teiserver.{Microblog, Logging}
+  alias Teiserver.{Microblog, Logging, Communication}
   import TeiserverWeb.MicroblogComponents
   alias Phoenix.PubSub
 
@@ -35,9 +35,9 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
     %{channel: "microblog_posts", event: :post_updated, post: new_post},
     %{assigns: %{post: post}} = socket
   ) do
-
     socket = if post.id == new_post.id do
-      socket |> assign(:post, new_post)
+      db_post = Microblog.get_post!(post.id, preload: [:tags, :poster])
+      socket |> assign(:post, db_post)
     else
       socket
     end
@@ -63,12 +63,17 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
   end
 
   @impl true
-  def handle_event("delete-post", _, %{assigns: assigns} = socket) do
-    if assigns.current_user.id == assigns.post.poster_id || allow?(assigns.current_user, "Moderator") do
-      Microblog.delete_post(assigns.post)
+  def handle_event("delete-post", _, %{assigns: %{post: post} = assigns} = socket) do
+    if assigns.current_user.id == post.poster_id || allow?(assigns.current_user, "Moderator") do
+      Microblog.delete_post(post)
+
+      if post.discord_post_id do
+        Communication.delete_discord_message(post.discord_channel_id, post.discord_post_id)
+      end
+
       Logging.add_audit_log(socket, "Microblog.delete_post", %{
-        title: assigns.post.title,
-        post_id: assigns.post.id
+        title: post.title,
+        post_id: post.id
       })
 
       {:noreply, socket

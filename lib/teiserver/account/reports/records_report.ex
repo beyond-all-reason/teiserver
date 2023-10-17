@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.RecordsReport do
+  @moduledoc false
   alias Teiserver.Repo
   alias Teiserver.Logging
   alias Teiserver.Helper.DatePresets
@@ -92,6 +93,6 @@ defmodule Teiserver.Account.RecordsReport do
   def default_params(params) do
     Map.merge(%{
       "date_preset" => "Last 12 months"
-    }, params["report"])
+    }, params["report"] || %{})
   end
 end

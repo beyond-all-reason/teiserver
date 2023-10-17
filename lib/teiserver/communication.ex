@@ -459,4 +459,13 @@ defmodule Teiserver.Communication do
 
   @spec pre_cache_discord_channels() :: :ok
   defdelegate pre_cache_discord_channels(), to: DiscordChannelLib
+
+  @spec new_discord_message(String.t | non_neg_integer(), String.t()) :: map | nil | {:error, String.t}
+  defdelegate new_discord_message(channel_id, message), to: DiscordChannelLib
+
+  @spec edit_discord_message(non_neg_integer | String.t, non_neg_integer, String.t) :: map | nil | {:error, String.t}
+  defdelegate edit_discord_message(channel_id, message_id, new_message), to: DiscordChannelLib
+
+  @spec delete_discord_message(non_neg_integer | String.t, non_neg_integer) :: map | nil | {:error, String.t}
+  defdelegate delete_discord_message(channel_id, message_id), to: DiscordChannelLib
 end
