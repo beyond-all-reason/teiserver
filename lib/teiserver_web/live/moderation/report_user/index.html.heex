@@ -27,7 +27,7 @@
         <h5>Reason for report</h5>
         <div class="row" id="type-row">
           <div class="col" :for={{label, name, icon} <- @types}>
-            <div class="menu-card" phx-click="select-type" phx-value-type={name}>
+            <div class="menu-card" id={"type-#{name}"} phx-click="select-type" phx-value-type={name}>
               <span>
                 <Fontawesome.icon icon={icon} style="regular" size="3x" /><br />
                 <%= label %>
@@ -41,7 +41,7 @@
         <h5>Type of <%= @type %></h5>
         <div class="row">
           <div class="col" :for={{label, name, icon} <- @sub_types[@type]}>
-            <div class="menu-card" phx-click="select-sub_type" phx-value-sub_type={name}>
+            <div class="menu-card" id={"sub_type-#{name}"} phx-click="select-sub_type" phx-value-sub_type={name}>
               <span>
                 <i class={"fa-fw fa-regular #{icon} fa-3x"} id={"icon-sub_type-#{name}"}>
                 </i>
@@ -69,7 +69,7 @@
         
         If you cannot find the match here then you can submit the report without a match selected but it may mean we cannot find evidence and are thus unable to handle the report.
         <br /><br />
-        <span class="btn btn-outline-warning" phx-click="select-no-match">
+        <span class="btn btn-outline-warning" id="select-no-match-btn" phx-click="select-no-match">
           Select "no match"
         </span>
       </div>
@@ -96,7 +96,7 @@
           phx-keyup="update-extra-text"
           phx-debounce="200"
         />
-        <span class={"btn btn-#{@view_colour} float-end mt-2"} phx-click="submit-extra-text">
+        <span class={"btn btn-#{@view_colour} float-end mt-2"} phx-click="submit-extra-text" id="submit-report-btn">
           Submit report
         </span>
       </div>      
