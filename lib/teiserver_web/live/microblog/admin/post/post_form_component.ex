@@ -291,6 +291,12 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
       |> hd
       |> String.trim()
 
+    ellipses = if post_content == post.contents do
+      ""
+    else
+      "..."
+    end
+
     user = Account.get_user_by_id(post.poster_id)
     discord_tag = if user.discord_id do
       " - Posted by <@#{user.discord_id}>"
@@ -301,6 +307,6 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
     host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/microblog/show/#{post.id}"
 
-    "-------------------------------\n**#{post.title}**#{discord_tag}\n#{post_content}\n\n[See full text](#{url})"
+    "-------------------------------\n**#{post.title}**#{discord_tag}\n#{post_content}#{ellipses}\n\n[See full text](#{url})"
   end
 end

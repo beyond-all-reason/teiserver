@@ -56,7 +56,7 @@
   </.menu_card>
   
   <.menu_card
-    :if={allow?(@conn, "Server")}
+    :if={allow?(@conn, "Admin")}
     icon={Teiserver.Logging.icon()}
     url={~p"/logging"}
     size={:small}
