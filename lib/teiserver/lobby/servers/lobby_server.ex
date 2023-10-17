@@ -619,6 +619,7 @@ defmodule Teiserver.Battle.LobbyServer do
     server_uuid = ExULID.ULID.generate()
 
     options = %{
+      "game/modoptions/ranked_game" => "1",
       "server/match/uuid" => match.server_uuid,
       "server/match/id" => match.id
     }
