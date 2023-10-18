@@ -72,7 +72,7 @@ type_icons = %{
                 &nbsp; <%= key.type.name %>
               </td>
               <td>
-                <%= key.value %>
+                <label for={"ban_type_#{key.value}"} class="control-label"><%= key.value %></label>
               </td>
               <td>
                 <%= date_to_str(key.last_updated, format: :hms_or_ymd) %>
