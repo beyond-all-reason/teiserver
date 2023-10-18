@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
+defmodule TeiserverWeb.Moderation.OverwatchLive.User do
   use TeiserverWeb, :live_view
   alias Teiserver.{Moderation}
   alias Teiserver.Moderation.ReportLib
@@ -10,6 +10,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
       |> assign(:view_colour, Teiserver.Moderation.colour())
       |> assign(:outstanding_report_groups, 0)
       |> assign(:report_groups, nil)
+      |> assign(:actions, nil)
       |> default_filters(params)
       |> add_breadcrumb(name: "Moderation", url: ~p"/moderation")
       |> add_breadcrumb(name: "Overwatch", url: ~p"/moderation/overwatch")
@@ -17,6 +18,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
     socket = if connected?(socket) do
       socket
         |> recalculate_outstanding_report_groups
+      |> get_action_list
     else
       socket
     end
@@ -43,6 +45,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
     socket = socket
       |> assign(:filters, new_filters)
       |> recalculate_outstanding_report_groups
+      |> get_action_list
 
     {:noreply, socket}
   end
@@ -86,11 +89,22 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
         target_id: filters["target_id"]
       ],
       order_by: ["Newest first"],
-      limit: 50,
-      preload: [:target]
+      limit: 50
     )
 
     socket
     |> assign(:report_groups, report_groups)
+  end
+
+  defp get_action_list(%{assigns: %{current_user: _current_user, filters: filters}} = socket) do
+    actions = Moderation.list_actions(
+      search: [
+        target_id: filters["target_id"],
+      ],
+      order_by: "Most recently inserted first"
+    )
+
+    socket
+    |> assign(:actions, actions)
   end
 end

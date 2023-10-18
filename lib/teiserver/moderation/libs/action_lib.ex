@@ -170,7 +170,7 @@ defmodule Teiserver.Moderation.ActionLib do
 
   def preload(query, preloads) do
     query = if :target in preloads, do: _preload_target(query), else: query
-    query = if :reports in preloads, do: _preload_reports(query), else: query
+    query = if :report_groups in preloads, do: _preload_report_groups(query), else: query
 
     query =
       if :report_group_reports_and_reporters in preloads,
@@ -187,11 +187,11 @@ defmodule Teiserver.Moderation.ActionLib do
       preload: [target: targets]
   end
 
-  @spec _preload_reports(Ecto.Query.t()) :: Ecto.Query.t()
-  def _preload_reports(query) do
+  @spec _preload_report_groups(Ecto.Query.t()) :: Ecto.Query.t()
+  def _preload_report_groups(query) do
     from actions in query,
-      left_join: reports in assoc(actions, :reports),
-      preload: [reports: reports]
+      left_join: report_groups in assoc(actions, :report_groups),
+      preload: [report_groups: report_groups]
   end
 
   @spec _preload_report_group_reports_and_reporters(Ecto.Query.t()) :: Ecto.Query.t()

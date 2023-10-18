@@ -453,6 +453,7 @@ defmodule CentralWeb.CoreComponents do
   attr :rows, :list, required: true
   attr :row_id, :any, default: nil, doc: "the function for generating the row id"
   attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
+  attr :row_class, :any, default: nil, doc: "the function for setting the tr class"
 
   attr :table_class, :string, default: ""
 
@@ -490,7 +491,7 @@ defmodule CentralWeb.CoreComponents do
             :for={row <- @rows}
             id={@row_id && @row_id.(row)}
             phx-click={@row_click && @row_click.(row)}
-            class=""
+            class={@row_class && @row_class.(row)}
           >
             <td
               :for={{col, _i} <- Enum.with_index(@col)}

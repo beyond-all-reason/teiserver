@@ -1,0 +1,159 @@
+<TeiserverWeb.Moderation.ModerationComponents.sub_menu active="overwatch" view_colour={@view_colour} />
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <TeiserverWeb.Moderation.OverwatchComponents.section_menu
+      active="index"
+      view_colour={@view_colour}
+      current_user={@current_user}
+    >
+      
+      <div :if={@filters["target_id"]} class="float-end">
+        <.section_menu_button
+          :if={allow?(@current_user, "Moderator")}
+          bsname={Teiserver.Moderation.ActionLib.colour()}
+          icon={Teiserver.Moderation.ActionLib.icon()}
+          active={false}
+          url={~p"/moderation/action/new_with_user?userid=#{@filters["target_id"]}"}
+        >
+          Action user
+        </.section_menu_button>
+
+        <.section_menu_button
+          :if={allow?(@current_user, "Moderator")}
+          bsname={Teiserver.Account.UserLib.colour()}
+          icon={Teiserver.Account.UserLib.icon()}
+          active={false}
+          url={~p"/teiserver/admin/user/#{@filters["target_id"]}"}
+        >
+          Admin user
+        </.section_menu_button>
+
+        <.section_menu_button
+          :if={allow?(@current_user, "Moderator")}
+          bsname={Teiserver.Account.UserLib.colour()}
+          icon={Teiserver.Account.UserLib.icon()}
+          active={false}
+          url={~p"/teiserver/admin/users/smurf_search/#{@filters["target_id"]}"}
+        >
+          Smurf search
+        </.section_menu_button>
+      </div>
+      
+    </TeiserverWeb.Moderation.OverwatchComponents.section_menu>
+    <br /><br />
+    
+    <form method="post" class="">
+      <div class="row">
+        <div class="col">
+          <.input type="select"
+            label="Action status"
+            options={["Actioned", "Un-actioned", "All"]}
+            name="actioned-filter"
+            value={@filters["actioned-filter"]}
+            phx-change="filter-update"
+          />
+        </div>
+
+        <div class="col">
+          <.input type="select"
+            label="Open/Closed"
+            options={["Open", "Closed", "All"]}
+            name="closed-filter"
+            value={@filters["closed-filter"]}
+            phx-change="filter-update"
+          />
+        </div>
+
+        <div class="col">
+          <.input type="select"
+            label="Timeframe"
+            options={[
+              {"Standard timeframe (#{ReportLib.get_outstanding_report_max_days()} days)", "standard"}, {"All time", "all"}
+            ]}
+            name="timeframe-filter"
+            value={@filters["timeframe-filter"]}
+            phx-change="filter-update"
+          />
+        </div>
+      </div>
+    </form>
+    <hr />
+    
+  </div>
+</div>
+
+
+<div class="row">
+  <div class="col">
+    <h4>Report groups</h4>
+    <.table
+      :if={@report_groups}
+      id="report_groups-table"
+      table_class="table-sm table-hover"
+      rows={@report_groups}
+      row_click={fn report_group -> JS.navigate(~p"/moderation/overwatch/report_group/#{report_group.id}") end}
+      row_class={fn report_group ->
+        cond do
+          report_group.closed -> "bg-warning_transparent"
+          report_group.action_count > 0 -> "bg-primary_transparent"
+          true -> ""
+        end
+      end}
+    >
+      <:col :let={report_group} label="">
+        <span class={"text-#{Teiserver.Moderation.ActionLib.colour()}"} :if={report_group.action_count > 0}>
+          <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />
+        </span>
+      </:col>
+
+      <:col :let={report_group} label="Reports"><%= report_group.report_count %></:col>
+      <:col :let={report_group} label="Votes"><%= report_group.vote_count %></:col>
+      <:col :let={report_group} label="Actions"><%= report_group.action_count %></:col>
+      <:col :let={report_group} label="Created"><%= report_group.inserted_at |> date_to_str(format: :hms_or_ymd) %></:col>
+
+      <:col :let={report_group} label="">
+        <.link
+          :if={report_group.match_id}
+          class="btn btn-secondary btn-sm"
+          navigate={~p"/teiserver/admin/matches/#{report_group.match_id}"}>
+            Match
+        </.link>
+      </:col>
+      
+      <:col :let={report_group} label="">
+        <.link
+          :if={report_group.match_id}
+          class="btn btn-secondary btn-sm"
+          navigate={~p"/battle/chat/#{report_group.match_id}/#{report_group.target_id}"}>
+            Chat
+        </.link>
+      </:col>
+    </.table>
+  </div>
+  <div class="col">
+    <h4>Actions</h4>
+    <.table
+      :if={@actions}
+      id="actions-table"
+      table_class="table-sm table-hover"
+      rows={@actions}
+      row_click={fn action -> JS.navigate(~p"/moderation/action/#{action.id}") end}
+    >
+      <:col :let={action} label="Created"><%= action.inserted_at |> date_to_str(format: :hms_or_ymd) %></:col>
+    
+      <:col :let={action} label="Reason"><%= action.reason |> String.slice(0,100) %></:col>
+      <:col :let={action} label="Reason"><%= action.restrictions |> Enum.join(", ") %></:col>
+      
+      <:col :let={action} label="Duration"><%= duration_to_str(action.inserted_at, action.expires) %></:col>
+      
+      <:col :let={action} label="Expires">
+        <%= if Timex.compare(Timex.now(), action.expires) == 1 do %>
+          Expired
+        <% else %>
+          <%= action.expires |> date_to_str(format: :hms_or_ymd) %>
+        <% end %>
+      </:col>
+    </.table>
+  </div>
+</div>

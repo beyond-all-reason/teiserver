@@ -99,7 +99,7 @@ defmodule Teiserver.Repo.Migrations.OverwatchImprovements do
 
     alter table(:moderation_actions) do
       add :appeal_status, :string, default: nil
-      add :discord_message_id, :integer, default: nil
+      add :discord_message_id, :bigint, default: nil
       add :report_group_id, references(:moderation_report_groups, on_delete: :nothing)
     end
 

@@ -53,24 +53,29 @@ $primary_transparent: #274aAf33;
 $primary-light: #ACF;
 $primary-dark: #172a6f;
 $primary2: #3498db;
+$primary2_transparent: #3498db33;
 $primary2-dark: #0468ab;
 $secondary: #4A5159;
 $success: #108c1a;
 $success_transparent: #108c1a33;
 $success-dark: #006c00;
 $success2: #005c0a;
+$success2_transparent: #005c0a33;
 $info: #008987;
 $info_transparent: #00898733;
 $info-dark: #006967;
 $info2: #A90088;
+$info2_transparent: #A9008833;
 $warning: #c37c02;
 $warning_transparent: #c37c0233;
 $warning2: #CC4400;
+$warning2_transparent: #CC440033;
 $danger-light: #fdd;
 $danger: #a4382c;
 $danger_transparent: #a4382c33;
 $danger-dark: #84180c;
 $danger2: #800000;
+$danger2_transparent: #80000033;
 $light: #e9ecef;
 $dark: #212529;
 
@@ -94,10 +99,15 @@ $theme-colors: (primary: $primary,
   // add any additional color below
   
   primary_transparent: $primary_transparent,
+  primary2_transparent: $primary2_transparent,
   success_transparent: $success_transparent,
+  success2_transparent: $success2_transparent,
   info_transparent: $info_transparent,
+  info2_transparent: $info2_transparent,
   warning_transparent: $warning_transparent,
+  warning2_transparent: $warning2_transparent,
   danger_transparent: $danger_transparent,
+  danger2_transparent: $danger2_transparent,
 
   body-bg: $light,
 );

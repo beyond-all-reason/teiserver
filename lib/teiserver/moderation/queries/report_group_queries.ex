@@ -61,6 +61,17 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
       where: report_groups.closed == ^closed
   end
 
+  defp _where(query, :actioned, true) do
+    from report_groups in query,
+      where: report_groups.action_count > 0
+  end
+
+  defp _where(query, :actioned, false) do
+    from report_groups in query,
+      where: report_groups.action_count == 0
+  end
+  defp _where(query, :actioned, _), do: query
+
   defp _where(query, :inserted_after, datetime) do
     from report_groups in query,
       where: report_groups.inserted_at >= ^datetime

@@ -33,7 +33,7 @@ defmodule TeiserverWeb.Moderation.OverwatchComponents do
       active={@active == "index"}
       url={~p"/moderation/overwatch"}
     >
-      Reports
+      Report groups
     </.section_menu_button>
 
     <.section_menu_button
