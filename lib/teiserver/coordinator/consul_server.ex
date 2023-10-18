@@ -364,6 +364,21 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, state}
   end
 
+  def handle_info(%{channel: "teiserver_lobby_updates", event: :remove_user, client: _client}, state) do
+    new_player_count = get_player_count(state)
+
+    if new_player_count == 0 do
+      new_state = %{state |
+        minimum_rating_to_play: 0,
+        maximum_rating_to_play: 1000
+      }
+
+      {:noreply, new_state}
+    else
+      {:noreply, state}
+    end
+  end
+
   def handle_info(%{channel: "teiserver_lobby_updates", event: :add_user, client: client}, state) do
     min_rate_play = state.minimum_rating_to_play
     max_rate_play = state.maximum_rating_to_play
