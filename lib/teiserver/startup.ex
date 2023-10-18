@@ -81,7 +81,9 @@ defmodule Teiserver.Startup do
       "Teiserver:Changed user name",
       "Teiserver:Smurf merge",
 
-      "Microblog.delete_post"
+      "Microblog.delete_post",
+
+      "Discord.text_callback"
     ])
 
     # Permissions setup

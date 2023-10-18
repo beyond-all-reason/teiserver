@@ -1768,6 +1768,9 @@ defmodule Teiserver.Logging do
 
 
   # Delegated to helpers
+  @spec add_anonymous_audit_log(String.t(), Map.t()) :: Teiserver.Logging.AuditLog.t()
+  defdelegate add_anonymous_audit_log(action, details), to: Teiserver.Logging.Helpers
+
   @spec add_audit_log(Plug.Conn.t(), String.t(), Map.t()) :: Teiserver.Logging.AuditLog.t()
   defdelegate add_audit_log(conn, action, details), to: Teiserver.Logging.Helpers
 

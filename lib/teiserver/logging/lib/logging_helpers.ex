@@ -32,8 +32,6 @@ defmodule Teiserver.Logging.Helpers do
     the_log
   end
 
-  %Phoenix.LiveView.Socket{}
-
 
   @spec add_audit_log(Plug.Conn.t() | Phoenix.LiveView.Socket.t(), String.t(), Map.t()) :: Teiserver.Logging.AuditLog.t()
   def add_audit_log(%Phoenix.LiveView.Socket{} = socket, action, details) do
@@ -60,14 +58,24 @@ defmodule Teiserver.Logging.Helpers do
     the_log
   end
 
-  @spec add_audit_log(non_neg_integer(), String.t(), String.t(), Map.t()) ::
+  @spec add_audit_log(nil | non_neg_integer(), nil | String.t(), String.t(), Map.t()) ::
           Teiserver.Logging.AuditLog.t()
   def add_audit_log(userid, ip, action, details) when is_integer(userid) do
     {:ok, the_log} =
       Logging.create_audit_log(%{
         action: action,
         user_id: userid,
-        group_id: nil,
+        details: details,
+        ip: ip
+      })
+
+    the_log
+  end
+
+  def add_audit_log(nil, ip, action, details) do
+    {:ok, the_log} =
+      Logging.create_audit_log(%{
+        action: action,
         details: details,
         ip: ip
       })

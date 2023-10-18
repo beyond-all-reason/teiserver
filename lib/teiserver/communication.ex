@@ -320,25 +320,36 @@ defmodule Teiserver.Communication do
     |> Repo.one!()
   end
 
-  # Uncomment this if needed, default files do not need this function
-  # @doc """
-  # Gets a single text_callback.
+  @doc """
+  Gets a single text_callback.
 
-  # Returns `nil` if the TextCallback does not exist.
+  Returns `nil` if the TextCallback does not exist.
 
-  # ## Examples
+  ## Examples
 
-  #     iex> get_text_callback(123)
-  #     %TextCallback{}
+      iex> get_text_callback(123)
+      %TextCallback{}
 
-  #     iex> get_text_callback(456)
-  #     nil
+      iex> get_text_callback(456)
+      nil
 
-  # """
-  # def get_text_callback(id, args \\ []) when not is_list(id) do
-  #   lobby_text_callback(id, args)
-  #   |> Repo.one
-  # end
+  """
+  @spec get_text_callback(Integer.t() | List.t()) :: TextCallback.t()
+  @spec get_text_callback(Integer.t(), List.t()) :: TextCallback.t()
+  def get_text_callback(id) when not is_list(id) do
+    lobby_text_callback(id, [])
+    |> Repo.one()
+  end
+
+  def get_text_callback(args) do
+    lobby_text_callback(nil, args)
+    |> Repo.one()
+  end
+
+  def get_text_callback(id, args) do
+    lobby_text_callback(id, args)
+    |> Repo.one()
+  end
 
   @doc """
   Creates a text_callback.
@@ -423,6 +434,11 @@ defmodule Teiserver.Communication do
   @spec lookup_text_callback_from_trigger(String.t()) :: TextCallback.t() | nil
   defdelegate lookup_text_callback_from_trigger(trigger), to: TextCallbackLib
 
+  @spec can_trigger_callback?(non_neg_integer() | TextCallback.t(), non_neg_integer()) :: TextCallback.t() | nil
+  defdelegate can_trigger_callback?(tc_id_or_tc, channel_id), to: TextCallbackLib
+
+  @spec set_last_triggered_time(TextCallback.t, non_neg_integer()) :: any
+  defdelegate set_last_triggered_time(text_callback, channel_id), to: TextCallbackLib
 
   # Discord channels
   alias Teiserver.Communication.{DiscordChannel, DiscordChannelLib}

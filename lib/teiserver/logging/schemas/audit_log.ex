@@ -16,7 +16,7 @@ defmodule Teiserver.Logging.AuditLog do
   def changeset(struct, params) do
     struct
     |> cast(params, ~w(action details ip user_id)a)
-    |> validate_required(~w(action details ip)a)
+    |> validate_required(~w(action details)a)
   end
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean

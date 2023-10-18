@@ -1,6 +1,6 @@
 defmodule Teiserver.Bridge.ChatCommands do
   @moduledoc false
-  alias Teiserver.{Account, User, Communication, Config}
+  alias Teiserver.{Account, User, Communication, Config, Logging}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Bridge.UnitNames
   alias Nostrum.Api
@@ -155,17 +155,29 @@ defmodule Teiserver.Bridge.ChatCommands do
     handle_command(cmd, "whatis", remaining, channel)
   end
 
-  def handle_command({_user, _discord_id, message_id}, "text", remaining, channel) do
+  def handle_command({_user, discord_id, message_id}, "text", remaining, channel) do
     case Communication.lookup_text_callback_from_trigger(remaining) do
       nil ->
         :ignore
 
       text_callback ->
-        if text_callback.rules["delete_trigger"] == "true" do
-          Api.delete_message(channel, message_id)
-        end
+        if Communication.can_trigger_callback?(text_callback, channel) do
+          Logging.add_anonymous_audit_log("Discord.text_callback", %{
+            discord_user_id: discord_id,
+            command: text_callback.id,
+            trigger: remaining
+          })
 
-        reply(channel, text_callback.response)
+          if text_callback.rules["delete_trigger"] == "true" do
+            Api.delete_message(channel, message_id)
+          end
+
+          Communication.set_last_triggered_time(text_callback, channel)
+
+          reply(channel, text_callback.response)
+        else
+          :ok
+        end
     end
   end
 
