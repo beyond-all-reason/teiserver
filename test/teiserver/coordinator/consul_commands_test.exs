@@ -3,7 +3,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   alias Teiserver.Account.ClientLib
   alias Teiserver.Common.PubsubListener
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.{Account, Battle, User, Client, Coordinator, Lobby}
+  alias Teiserver.{Account, Battle, CacheUser, Client, Coordinator, Lobby}
   alias Teiserver.Coordinator.ConsulServer
 
   import Teiserver.TeiserverTestLib,
@@ -15,7 +15,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     %{socket: psocket, user: player} = tachyon_auth_setup()
 
     # User needs to be a moderator (at this time) to start/stop Coordinator mode
-    User.update_user(%{host | moderator: true})
+    CacheUser.update_user(%{host | moderator: true})
     ClientLib.refresh_client(host.id)
 
     lobby_data = %{
@@ -1143,7 +1143,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     # Add the players
     %{user: player1, socket: socket1} = tachyon_auth_setup()
-    User.add_roles(player1.id, ["VIP", "Streamer"])
+    CacheUser.add_roles(player1.id, ["VIP", "Streamer"])
 
     %{user: player2, socket: socket2} = tachyon_auth_setup()
     %{user: player3, socket: socket3} = tachyon_auth_setup()
