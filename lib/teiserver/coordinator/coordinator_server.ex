@@ -234,6 +234,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           |> Enum.filter(fn action ->
             cond do
               Enum.member?(action.restrictions, "Bridging") -> false
+              Enum.member?(action.restrictions, "Note") -> false
               true -> true
             end
           end)
@@ -248,38 +249,40 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
             " - #{action.reason}#{expires}"
           end)
 
-        msg =
-          [
-            "This is a reminder that you received one or more formal moderation actions as listed below:"
-          ] ++ reasons
+        if not Enum.empty?(reasons) do
+          msg =
+            [
+              "This is a reminder that you received one or more formal moderation actions as listed below:"
+            ] ++ reasons
 
-        has_warning =
-          actions
-          |> Enum.map(fn a -> a.restrictions end)
-          |> List.flatten()
-          |> Enum.member?("Warning reminder")
+          has_warning =
+            actions
+            |> Enum.map(fn a -> a.restrictions end)
+            |> List.flatten()
+            |> Enum.member?("Warning reminder")
 
-        # Do we need an acknowledgement? If they are muted then no.
-        msg =
-          cond do
-            User.has_mute?(user) ->
-              msg ++ @dispute_string
+          # Do we need an acknowledgement? If they are muted then no.
+          msg =
+            cond do
+              User.has_mute?(user) ->
+                msg ++ @dispute_string
 
-            has_warning ->
-              Telemetry.log_simple_server_event(user.id, "has_warning.remove_user_from_any_lobby")
-              Lobby.remove_user_from_any_lobby(user.id)
-              Client.set_awaiting_warn_ack(userid)
+              has_warning ->
+                Telemetry.log_simple_server_event(user.id, "has_warning.remove_user_from_any_lobby")
+                Lobby.remove_user_from_any_lobby(user.id)
+                Client.set_awaiting_warn_ack(userid)
 
-              acknowledge_prompt =
-                Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
+                acknowledge_prompt =
+                  Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
 
-              msg ++ [@dispute_string, acknowledge_prompt]
+                msg ++ [@dispute_string, acknowledge_prompt]
 
-            true ->
-              msg ++ @dispute_string
-          end
+              true ->
+                msg ++ @dispute_string
+            end
 
-        Coordinator.send_to_user(userid, msg)
+          Coordinator.send_to_user(userid, msg)
+        end
       end
     end
 

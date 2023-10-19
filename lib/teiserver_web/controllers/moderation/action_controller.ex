@@ -279,6 +279,8 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
     case Moderation.update_action(action, action_params) do
       {:ok, _action} ->
+        action = Moderation.get_action!(id, preload: [:target])
+
         Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
         Teiserver.Bridge.DiscordBridgeBot.update_action(action)
 
