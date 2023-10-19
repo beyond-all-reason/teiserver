@@ -1,7 +1,7 @@
 defmodule Teiserver.Protocols.Coordinator.SetupTest do
   use Central.ServerCase, async: false
   alias Teiserver.Account.ClientLib
-  alias Teiserver.Account.UserCache
+  alias Teiserver.Account.UserCacheLib
   alias Teiserver.TeiserverTestLib
   alias Teiserver.{Battle, Lobby}
   alias Teiserver.Common.PubsubListener
@@ -14,7 +14,7 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
   setup do
     %{socket: socket, user: user, pid: pid} = tachyon_auth_setup()
 
-    UserCache.update_user(%{user | moderator: true})
+    UserCacheLib.update_user(%{user | moderator: true})
     ClientLib.refresh_client(user.id)
 
     {:ok, socket: socket, user: user, pid: pid}

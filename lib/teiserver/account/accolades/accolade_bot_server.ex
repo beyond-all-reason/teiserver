@@ -4,7 +4,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   """
   use GenServer
   alias Teiserver.Config
-  alias Teiserver.{Account, User, Room, Battle, Coordinator}
+  alias Teiserver.{Account, CacheUser, Room, Battle, Coordinator}
   alias Teiserver.Coordinator.CoordinatorCommands
   alias Teiserver.Account.AccoladeLib
   alias Phoenix.PubSub
@@ -41,7 +41,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
     Central.cache_put(:application_metadata_cache, "teiserver_accolade_userid", account.id)
 
     {user, client} =
-      case User.internal_client_login(account.id) do
+      case CacheUser.internal_client_login(account.id) do
         {:ok, user, client} -> {user, client}
         :error -> raise "No accolade user found"
       end
@@ -125,10 +125,10 @@ defmodule Teiserver.Account.AccoladeBotServer do
   end
 
   def handle_info({:direct_message, userid, message}, state) do
-    if not User.is_bot?(userid) do
+    if not CacheUser.is_bot?(userid) do
       case AccoladeLib.cast_accolade_chat(userid, {:user_message, message}) do
         nil ->
-          User.send_direct_message(
+          CacheUser.send_direct_message(
             state.userid,
             userid,
             "I'm not currently awaiting feedback for a player"
@@ -143,7 +143,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   end
 
   def handle_info({:new_accolade, userid}, state) do
-    User.send_direct_message(
+    CacheUser.send_direct_message(
       state.userid,
       userid,
       "You have been awarded a new accolade send $whoami to myself to see your collection."
@@ -167,7 +167,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
     {:noreply, state}
   end
 
-  @spec get_accolade_account() :: Central.Account.User.t()
+  @spec get_accolade_account() :: Central.Account.CacheUser.t()
   def get_accolade_account() do
     user =
       Account.get_user(nil,
@@ -199,7 +199,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
           country_override: Application.get_env(:central, Teiserver)[:server_flag]
         })
 
-        User.recache_user(account.id)
+        CacheUser.recache_user(account.id)
         account
 
       account ->

@@ -5,7 +5,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   """
   use GenServer
   alias Teiserver.Config
-  alias Teiserver.{Account, User, Clans, Room, Coordinator, Client, Moderation, Telemetry}
+  alias Teiserver.{Account, CacheUser, Clans, Room, Coordinator, Client, Moderation, Telemetry}
   alias Teiserver.Lobby
   alias Teiserver.Coordinator.{CoordinatorCommands}
   alias Phoenix.PubSub
@@ -43,7 +43,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     Central.cache_put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
 
     {user, client} =
-      case User.internal_client_login(account.id) do
+      case CacheUser.internal_client_login(account.id) do
         {:ok, user, client} -> {user, client}
         :error -> raise "No coordinator user found"
       end
@@ -90,7 +90,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   # def handle_info({:new_message, userid, "coordinator", _message}, state) do
   #   # If it's us sending it, don't reply
   #   if userid != state.userid do
-  #     username = User.get_username(userid)
+  #     username = CacheUser.get_username(userid)
   #     Room.send_message(state.userid, "coordinator", "I don't currently handle messages, sorry #{username}")
   #   end
   #   {:noreply, state}
@@ -155,14 +155,14 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     case converted_message do
       ^warning_response ->
         Client.clear_awaiting_warn_ack(userid)
-        User.send_direct_message(state.userid, userid, "Thank you")
+        CacheUser.send_direct_message(state.userid, userid, "Thank you")
 
       _ ->
-        user = User.get_user_by_id(userid)
+        user = CacheUser.get_user_by_id(userid)
         Logger.info("CoordinatorServer unhandled DM from #{user.name} of: #{message}")
 
-        if not User.is_bot?(user) do
-          User.send_direct_message(
+        if not CacheUser.is_bot?(user) do
+          CacheUser.send_direct_message(
             state.userid,
             userid,
             "I don't currently handle messages, sorry #{user.name}"
@@ -205,7 +205,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   def handle_info(%{channel: "client_inout"}, state), do: {:noreply, state}
 
   def handle_info({:do_client_inout, :login, userid}, state) do
-    user = User.get_user_by_id(userid)
+    user = CacheUser.get_user_by_id(userid)
 
     if user do
       # Do we have a system welcome message?
@@ -264,7 +264,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           # Do we need an acknowledgement? If they are muted then no.
           msg =
             cond do
-              User.has_mute?(user) ->
+              CacheUser.has_mute?(user) ->
                 msg ++ @dispute_string
 
               has_warning ->
@@ -304,7 +304,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     {:noreply, state}
   end
 
-  @spec get_coordinator_account() :: Central.Account.User.t()
+  @spec get_coordinator_account() :: Central.Account.CacheUser.t()
   def get_coordinator_account() do
     user =
       Account.get_user(nil,
@@ -335,7 +335,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           country_override: Application.get_env(:central, Teiserver)[:server_flag]
         })
 
-        User.recache_user(account.id)
+        CacheUser.recache_user(account.id)
         account
 
       account ->

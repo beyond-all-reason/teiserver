@@ -10,7 +10,7 @@ defmodule Mix.Tasks.Teiserver.CompareBalanceAlgorithms do
   @spec run(list()) :: :ok
   def run(args) do
     IO.puts ""
-    IO.inspect args
+    IO.inspect args, label: "CompareBalanceAlgorithms"
     IO.puts ""
 
     # cases = [@stacked_groups, @master_bel, @team_ffa, @smurf_party, @odd_users, @even_spread, @even_spread_integers, @high_low, @mega_lobby, @mega_lobby_parties]

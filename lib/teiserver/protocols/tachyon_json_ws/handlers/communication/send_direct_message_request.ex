@@ -4,7 +4,7 @@ defmodule Teiserver.Tachyon.Handlers.Communication.SendDirectMessageRequest do
   """
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Tachyon.Responses.Communication.SendDirectMessageResponse
-  alias Teiserver.{User}
+  alias Teiserver.CacheUser
 
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do
@@ -16,7 +16,7 @@ defmodule Teiserver.Tachyon.Handlers.Communication.SendDirectMessageRequest do
   @spec execute(T.tachyon_conn(), T.tachyon_object(), map) ::
           {T.tachyon_response(), T.tachyon_conn()}
   def execute(conn, object, _meta) do
-    result = User.send_direct_message(conn.userid, object["to"], object["message"])
+    result = CacheUser.send_direct_message(conn.userid, object["to"], object["message"])
 
     response = SendDirectMessageResponse.generate(result)
 

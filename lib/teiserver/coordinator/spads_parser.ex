@@ -1,5 +1,5 @@
 defmodule Teiserver.Coordinator.SpadsParser do
-  alias Teiserver.User
+  alias Teiserver.CacheUser
 
   @spec handle_in(String.t(), map()) :: {:host_update, Map.t()} | nil
   def handle_in(msg, state) do
@@ -17,7 +17,7 @@ defmodule Teiserver.Coordinator.SpadsParser do
       # Add a boss
       match = Regex.run(~r/Boss mode enabled for (\S+)/, msg) ->
         [_, player_name] = match
-        player_id = User.get_userid(player_name)
+        player_id = CacheUser.get_userid(player_name)
 
         if player_id do
           new_bosses = [player_id | state.host_bosses]

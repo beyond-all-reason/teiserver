@@ -3,7 +3,7 @@ defmodule TeiserverWeb.ClientLive.Show do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{Account, Client, User, Battle}
+  alias Teiserver.{Account, Client, CacheUser, Battle}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Account.UserLib
 
@@ -51,7 +51,7 @@ defmodule TeiserverWeb.ClientLive.Show do
         id = int_parse(id)
         PubSub.subscribe(Teiserver.PubSub, "teiserver_client_watch:#{id}")
         client = Account.get_client_by_id(id)
-        user = User.get_user_by_id(id)
+        user = CacheUser.get_user_by_id(id)
 
         connection_state =
           cond do
@@ -194,7 +194,7 @@ defmodule TeiserverWeb.ClientLive.Show do
   end
 
   def handle_event("force-flood", _event, socket) do
-    User.set_flood_level(socket.assigns[:id], 100)
+    CacheUser.set_flood_level(socket.assigns[:id], 100)
     Client.disconnect(socket.assigns[:id], "flood protection")
     {:noreply, socket |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))}
   end

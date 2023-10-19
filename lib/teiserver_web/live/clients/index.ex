@@ -3,7 +3,7 @@ defmodule TeiserverWeb.ClientLive.Index do
   alias Phoenix.PubSub
 
   alias Teiserver
-  alias Teiserver.{Client, User}
+  alias Teiserver.{Client, CacheUser}
   alias Teiserver.Account.UserLib
 
   @extra_menu_content """
@@ -25,7 +25,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> Map.new(fn {userid, _} ->
         {
           userid,
-          User.get_user_by_id(userid) |> limited_user
+          CacheUser.get_user_by_id(userid) |> limited_user
         }
       end)
 
@@ -82,7 +82,7 @@ defmodule TeiserverWeb.ClientLive.Index do
         if Map.has_key?(assigns.users, userid) do
           assigns.users[userid]
         else
-          User.get_user_by_id(userid)
+          CacheUser.get_user_by_id(userid)
           |> limited_user
         end
       end)

@@ -65,10 +65,10 @@ defmodule Teiserver.HookServer do
         nil
 
       :create_user ->
-        Teiserver.User.recache_user(payload.id)
+        Teiserver.CacheUser.recache_user(payload.id)
 
       :update_user ->
-        Teiserver.User.recache_user(payload.id)
+        Teiserver.CacheUser.recache_user(payload.id)
 
       :create_report ->
         :ok

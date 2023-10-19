@@ -210,9 +210,9 @@ defmodule Teiserver.Account do
           {:ok, User.t()} | {:error, String.t()}
   def spring_auth_check(conn, user, plain_text_password) do
     tei_user = get_user_by_id(user.id)
-    md5_password = Teiserver.User.spring_md5_password(plain_text_password)
+    md5_password = Teiserver.CacheUser.spring_md5_password(plain_text_password)
 
-    if Teiserver.User.test_password(md5_password, tei_user.password_hash) do
+    if Teiserver.CacheUser.test_password(md5_password, tei_user.password_hash) do
       update_user(user, %{password: plain_text_password})
 
       {:ok, user}
@@ -2004,76 +2004,76 @@ defmodule Teiserver.Account do
   defdelegate rescind_friend_request(req), to: FriendRequestLib
 
   # User functions
-  alias alias Teiserver.Account.UserCache
+  alias alias Teiserver.Account.UserCacheLib
 
   @spec get_username(T.userid()) :: String.t() | nil
-  defdelegate get_username(userid), to: UserCache
+  defdelegate get_username(userid), to: UserCacheLib
 
   @spec get_username_by_id(T.userid()) :: String.t() | nil
-  defdelegate get_username_by_id(userid), to: UserCache
+  defdelegate get_username_by_id(userid), to: UserCacheLib
 
   @spec get_userid_from_name(String.t()) :: integer() | nil
-  def get_userid_from_name(name), do: UserCache.get_userid(name)
+  def get_userid_from_name(name), do: UserCacheLib.get_userid(name)
 
   @spec get_user_by_name(String.t()) :: T.user() | nil
-  defdelegate get_user_by_name(username), to: UserCache
+  defdelegate get_user_by_name(username), to: UserCacheLib
 
   @spec get_user_by_email(String.t()) :: T.user() | nil
-  defdelegate get_user_by_email(email), to: UserCache
+  defdelegate get_user_by_email(email), to: UserCacheLib
 
   @spec get_user_by_discord_id(String.t()) :: T.user() | nil
-  defdelegate get_user_by_discord_id(discord_id), to: UserCache
+  defdelegate get_user_by_discord_id(discord_id), to: UserCacheLib
 
   @spec get_userid_by_discord_id(String.t()) :: T.userid() | nil
-  defdelegate get_userid_by_discord_id(discord_id), to: UserCache
+  defdelegate get_userid_by_discord_id(discord_id), to: UserCacheLib
 
   @spec get_user_by_token(String.t()) :: T.user() | nil
-  defdelegate get_user_by_token(token), to: UserCache
+  defdelegate get_user_by_token(token), to: UserCacheLib
 
   @spec get_user_by_id(T.userid()) :: T.user() | nil
-  defdelegate get_user_by_id(id), to: UserCache
+  defdelegate get_user_by_id(id), to: UserCacheLib
 
   @spec list_users_from_cache(list) :: list
-  def list_users_from_cache(id_list), do: UserCache.list_users(id_list)
+  def list_users_from_cache(id_list), do: UserCacheLib.list_users(id_list)
 
   @spec recache_user(T.userid() | User.t()) :: :ok
-  defdelegate recache_user(id), to: UserCache
+  defdelegate recache_user(id), to: UserCacheLib
 
   @spec convert_user(T.user()) :: T.user()
-  defdelegate convert_user(user), to: UserCache
+  defdelegate convert_user(user), to: UserCacheLib
 
   @spec add_user(T.user()) :: T.user()
-  defdelegate add_user(user), to: UserCache
+  defdelegate add_user(user), to: UserCacheLib
 
   @spec update_cache_user(T.userid(), map()) :: T.user()
-  def update_cache_user(userid, user), do: UserCache.update_cache_user(userid, user)
+  def update_cache_user(userid, user), do: UserCacheLib.update_cache_user(userid, user)
 
   @spec decache_user(T.userid()) :: :ok | :no_user
-  defdelegate decache_user(userid), to: UserCache
+  defdelegate decache_user(userid), to: UserCacheLib
 
   @spec make_bot_password() :: String.t()
   defdelegate make_bot_password(), to: UserLib
 
   @spec rename_user(T.userid(), String.t(), boolean) :: :success | {:error, String.t()}
-  defdelegate rename_user(userid, new_name, admin_action \\ false), to: Teiserver.User
+  defdelegate rename_user(userid, new_name, admin_action \\ false), to: Teiserver.CacheUser
 
   @spec system_change_user_name(T.userid(), String.t()) :: :ok
-  defdelegate system_change_user_name(userid, new_name), to: Teiserver.User
+  defdelegate system_change_user_name(userid, new_name), to: Teiserver.CacheUser
 
   @spec has_any_role?(T.userid() | T.user() | nil, String.t | [String.t]) :: boolean()
-  defdelegate has_any_role?(user_or_userid, roles), to: Teiserver.User
+  defdelegate has_any_role?(user_or_userid, roles), to: Teiserver.CacheUser
 
   @spec has_all_roles?(T.userid() | T.user() | nil, String.t | [String.t]) :: boolean()
-  defdelegate has_all_roles?(user_or_userid, roles), to: Teiserver.User
+  defdelegate has_all_roles?(user_or_userid, roles), to: Teiserver.CacheUser
 
   @spec is_moderator?(T.userid()) :: boolean()
-  defdelegate is_moderator?(userid), to: Teiserver.User
+  defdelegate is_moderator?(userid), to: Teiserver.CacheUser
 
   @spec is_bot?(T.userid()) :: boolean()
-  defdelegate is_bot?(userid), to: Teiserver.User
+  defdelegate is_bot?(userid), to: Teiserver.CacheUser
 
   @spec is_restricted?(T.userid() | T.user(), String.t()) :: boolean()
-  defdelegate is_restricted?(user, restriction), to: Teiserver.User
+  defdelegate is_restricted?(user, restriction), to: Teiserver.CacheUser
 
   # Client stuff
   alias Teiserver.Account.ClientLib

@@ -286,7 +286,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   end
 
   defp login(%{user: _user, expires: _expires} = token, state) do
-    response = Teiserver.User.login_from_token(token, state)
+    response = Teiserver.CacheUser.login_from_token(token, state)
 
     case response do
       {:ok, user} ->

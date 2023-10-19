@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.AccoladeReport do
   alias Teiserver.Helper.DatePresets
-  alias Teiserver.{Account, User}
+  alias Teiserver.{Account, CacheUser}
   alias Teiserver.Account.BadgeTypeLib
 
   @spec icon() :: String.t()
@@ -89,7 +89,7 @@ defmodule Teiserver.Account.AccoladeReport do
     users =
       (giver_ids ++ recipient_ids ++ taker_userids ++ giver_userids)
       |> Enum.uniq()
-      |> Map.new(fn userid -> {userid, User.get_user_by_id(userid)} end)
+      |> Map.new(fn userid -> {userid, CacheUser.get_user_by_id(userid)} end)
 
     assigns = %{
       counts: counts,

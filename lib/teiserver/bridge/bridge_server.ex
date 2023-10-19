@@ -3,7 +3,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   The server used to read events from Teiserver and then use the DiscordBridgeBot to send onwards
   """
   use GenServer
-  alias Teiserver.{Account, Room, User}
+  alias Teiserver.{Account, Room, CacheUser}
   alias Teiserver.Chat.WordLib
   alias Phoenix.PubSub
   alias Teiserver.Config
@@ -41,7 +41,7 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   @spec send_direct_message(T.user_id(), String.t()) :: :ok | nil
   def send_direct_message(userid, message) do
-    user = User.get_user_by_id(userid)
+    user = Account.get_user_by_id(userid)
 
     cond do
       user.discord_dm_channel == nil ->
@@ -135,7 +135,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     do: {:noreply, state}
 
   def handle_info({:new_message, from_id, room_name, message}, state) do
-    user = User.get_user_by_id(from_id)
+    user = Account.get_user_by_id(from_id)
 
     cond do
       from_id == state.userid ->
@@ -151,7 +151,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       message_starts_with?(message, "/") ->
         nil
 
-      User.is_restricted?(user, ["Bridging"]) ->
+      CacheUser.is_restricted?(user, ["Bridging"]) ->
         # Non-bridged user, ignore it
         nil
 
@@ -175,7 +175,7 @@ defmodule Teiserver.Bridge.BridgeServer do
           end
 
         # If they are a bot they're only allowed to post to the promotion channel
-        if User.is_bot?(user) do
+        if CacheUser.is_bot?(user) do
           if room_name == "promote" do
             forward_to_discord(from_id, state.channel_lookup[room_name], message, state)
           end
@@ -198,9 +198,9 @@ defmodule Teiserver.Bridge.BridgeServer do
         data = %{channel: "teiserver_client_messages:" <> _, event: :received_direct_message},
         state
       ) do
-    username = User.get_username(data.sender_id)
+    username = CacheUser.get_username(data.sender_id)
 
-    User.send_direct_message(
+    CacheUser.send_direct_message(
       state.userid,
       data.sender_id,
       "I don't currently handle messages, sorry #{username}"
@@ -295,7 +295,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     Logger.debug("Starting up Bridge server")
     account = get_bridge_account()
     Central.cache_put(:application_metadata_cache, "teiserver_bridge_userid", account.id)
-    {:ok, user, client} = User.internal_client_login(account.id)
+    {:ok, user, client} = CacheUser.internal_client_login(account.id)
 
     state = %{
       ip: "127.0.0.1",
@@ -375,7 +375,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   defp forward_to_discord(from_id, channel, message, _state) do
-    author = User.get_username(from_id)
+    author = CacheUser.get_username(from_id)
 
     new_message =
       message
@@ -391,7 +391,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     |> String.replace(Map.keys(emoticon_map), fn text -> emoticon_map[text] end)
   end
 
-  @spec get_bridge_account() :: Central.Account.User.t()
+  @spec get_bridge_account() :: Central.Account.CacheUser.t()
   def get_bridge_account() do
     user =
       Account.get_user(nil,
@@ -423,7 +423,7 @@ defmodule Teiserver.Bridge.BridgeServer do
           country_override: Application.get_env(:central, Teiserver)[:server_flag]
         })
 
-        User.recache_user(account.id)
+        CacheUser.recache_user(account.id)
         account
 
       account ->

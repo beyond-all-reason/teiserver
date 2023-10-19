@@ -3,7 +3,7 @@ defmodule Teiserver.Account.AccoladeLib do
 
   """
   use CentralWeb, :library
-  alias Teiserver.{Account, User}
+  alias Teiserver.{Account, CacheUser}
   alias Teiserver.Account.{Accolade, AccoladeBotServer, AccoladeChatServer}
   alias Teiserver.Data.Types, as: T
   require Logger
@@ -306,7 +306,7 @@ defmodule Teiserver.Account.AccoladeLib do
   end
 
   defp allow_accolades_for_user?(userid) do
-    if User.is_restricted?(userid, ["Accolades", "Community"]) do
+    if CacheUser.is_restricted?(userid, ["Accolades", "Community"]) do
       false
     else
       stats = Account.get_user_stat_data(userid)

@@ -3,7 +3,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   use GenServer
   alias Teiserver.Config
   import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
-  alias Teiserver.{Account, User, Moderation, Coordinator, Client}
+  alias Teiserver.{Account, CacheUser, Moderation, Coordinator, Client}
   alias Phoenix.PubSub
   require Logger
   alias Teiserver.Data.Types, as: T
@@ -129,7 +129,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   # Internal functions
   @spec check_wrapper(T.userid()) :: String.t()
   defp check_wrapper(userid) do
-    case User.get_user_by_id(userid) do
+    case Account.get_user_by_id(userid) do
       nil ->
         "No user"
 
@@ -159,7 +159,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   end
 
   def do_check(user) do
-    if User.is_restricted?(user, ["Login"]) do
+    if CacheUser.is_restricted?(user, ["Login"]) do
       "Already banned"
     else
       smurf_keys =

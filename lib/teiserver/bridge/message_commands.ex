@@ -1,6 +1,6 @@
 defmodule Teiserver.Bridge.MessageCommands do
   @moduledoc false
-  alias Teiserver.{User, Account}
+  alias Teiserver.{CacheUser, Account}
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Helper.NumberHelper
   alias alias Teiserver.Bridge.UnitNames
@@ -21,10 +21,10 @@ defmodule Teiserver.Bridge.MessageCommands do
 
     [cmd | remaining] = String.split(content, " ")
     remaining = Enum.join(remaining, " ")
-    user = User.get_user_by_discord_id(author)
+    user = CacheUser.get_user_by_discord_id(author)
 
     if user do
-      User.update_user(%{user | discord_dm_channel: channel},
+      CacheUser.update_user(%{user | discord_dm_channel: channel},
         persist: true
       )
     end
@@ -67,13 +67,13 @@ defmodule Teiserver.Bridge.MessageCommands do
 
         if given_code == correct_code do
           Central.cache_delete(:discord_bridge_account_codes, userid)
-          user = User.get_user_by_id(userid)
+          user = CacheUser.get_user_by_id(userid)
 
-          User.update_user(%{user | discord_id: discord_id, discord_dm_channel: channel},
+          CacheUser.update_user(%{user | discord_id: discord_id, discord_dm_channel: channel},
             persist: true
           )
 
-          User.recache_user(user.id)
+          CacheUser.recache_user(user.id)
 
           reply(channel, "Congratulations, your accounts are now linked.")
         else
@@ -235,7 +235,7 @@ defmodule Teiserver.Bridge.MessageCommands do
         true
 
       true ->
-        User.allow?(user, "Moderator")
+        CacheUser.allow?(user, "Moderator")
     end
   end
 

@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{Battle, User, Chat, Lobby, Client}
+  alias Teiserver.{Account, Battle, CacheUser, Chat, Lobby, Client}
   alias Teiserver.Chat.LobbyMessage
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
@@ -50,7 +50,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         index_redirect(socket)
 
       lobby.tournament and
-          not User.has_any_role?(current_user.id, [
+          not CacheUser.has_any_role?(current_user.id, [
             "Moderator",
             "Caster",
             "TourneyPlayer",
@@ -62,14 +62,14 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         index_redirect(socket)
 
       true ->
-        allowed_to_send = not User.has_mute?(current_user.id)
+        allowed_to_send = not CacheUser.has_mute?(current_user.id)
 
         :timer.send_interval(10_000, :tick)
 
         players = Lobby.list_lobby_players!(int_parse(id))
         clients = get_clients(players)
 
-        bar_user = User.get_user_by_id(socket.assigns.current_user.id)
+        bar_user = Account.get_user_by_id(socket.assigns.current_user.id)
         lobby = Map.put(lobby, :uuid, Battle.get_lobby_match_uuid(id))
 
         messages =
@@ -174,7 +174,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     {userid, message} =
       case Regex.run(~r/^<(.*?)> (.+)$/u, message) do
         [_, username, remainder] ->
-          userid = User.get_userid(username) || userid
+          userid = CacheUser.get_userid(username) || userid
           {userid, "g: #{remainder}"}
 
         _ ->
@@ -257,7 +257,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       |> Enum.map(fn {id, _} -> id end)
       |> Enum.uniq()
       |> Enum.filter(fn userid -> not Map.has_key?(user_map, userid) end)
-      |> Map.new(fn userid -> {userid, User.get_user_by_id(userid)} end)
+      |> Map.new(fn userid -> {userid, Account.get_user_by_id(userid)} end)
 
     socket
     |> assign(:user_map, Map.merge(user_map, extra_users))

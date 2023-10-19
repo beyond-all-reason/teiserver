@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.V1.UserIn do
-  alias Teiserver.{Account, User, Client}
+  alias Teiserver.{Account, CacheUser, Client}
   alias Teiserver.Protocols.Tachyon.V1.Tachyon
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
   alias Teiserver.Data.Types, as: T
@@ -12,7 +12,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.UserIn do
   def do_handle("list_users_from_ids", %{"id_list" => id_list} = args, state) do
     users =
       id_list
-      |> User.list_users()
+      |> CacheUser.list_users()
       |> Enum.filter(fn u -> u != nil end)
       |> Enum.map(fn u ->
         stats = Account.get_user_stat_data(u.id)

@@ -9,7 +9,7 @@
 defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
-  alias Teiserver.{Room, User, Account, Telemetry, Clans, Coordinator}
+  alias Teiserver.{Room, CacheUser, Account, Telemetry, Clans, Coordinator}
   alias Teiserver.Lobby
   alias Teiserver.Account.ClientLib
   # alias Teiserver.Helper.TimexHelper
@@ -107,15 +107,15 @@ defmodule Teiserver.Client do
         name: user.name,
         tcp_pid: self(),
         rank: user.rank,
-        moderator: User.is_moderator?(user),
-        bot: User.is_bot?(user),
+        moderator: CacheUser.is_moderator?(user),
+        bot: CacheUser.is_bot?(user),
         away: false,
         in_game: false,
         ip: ip || stats["last_ip"],
         country: stats["country"] || "??",
         lobby_client: stats["lobby_client"],
-        shadowbanned: User.is_shadowbanned?(user),
-        muted: User.has_mute?(user),
+        shadowbanned: CacheUser.is_shadowbanned?(user),
+        muted: CacheUser.has_mute?(user),
         awaiting_warn_ack: false,
         warned: false,
         token_id: token_id,

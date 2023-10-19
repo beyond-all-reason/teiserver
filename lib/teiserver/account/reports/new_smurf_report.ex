@@ -1,5 +1,5 @@
 defmodule Teiserver.Account.NewSmurfReport do
-  alias Teiserver.{Account, User}
+  alias Teiserver.{Account, CacheUser}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
@@ -76,7 +76,7 @@ defmodule Teiserver.Account.NewSmurfReport do
         limit: :infinity
       )
       |> Enum.filter(fn %{user_id: userid} ->
-        User.is_verified?(userid)
+        CacheUser.is_verified?(userid)
       end)
 
     # Extract the found values

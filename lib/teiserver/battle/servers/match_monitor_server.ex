@@ -3,7 +3,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   The server used to monitor the autohosts and get data from them
   """
   use GenServer
-  alias Teiserver.{Account, Room, Client, User, Battle, Telemetry}
+  alias Teiserver.{Account, Room, Client, CacheUser, Battle, Telemetry}
   alias Teiserver.Lobby.ChatLib
   alias Phoenix.PubSub
   alias Teiserver.Account.CalculateSmurfKeyTask
@@ -121,7 +121,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   def handle_info({:direct_message, from_id, "broken_connection " <> username}, state) do
-    if User.is_bot?(from_id) or User.is_moderator?(from_id) do
+    if CacheUser.is_bot?(from_id) or CacheUser.is_moderator?(from_id) do
       user = Account.get_user_by_name(username)
 
       if user do
@@ -146,7 +146,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       [_all, username, event_type_name, game_time] ->
         userid = Account.get_userid_from_name(username)
 
-        if userid && User.is_bot?(userid) do
+        if userid && CacheUser.is_bot?(userid) do
           match_id = Battle.get_match_id_from_userid(from_id)
           if match_id do
             game_time = int_parse(game_time)
@@ -171,7 +171,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           {:ok, json_data} ->
             userid = Account.get_userid_from_name(username)
 
-            if userid && User.is_bot?(userid) do
+            if userid && CacheUser.is_bot?(userid) do
               match_id = Battle.get_match_id_from_userid(from_id)
               if match_id do
                 game_time = int_parse(game_time)
@@ -199,7 +199,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     case Regex.run(~r/<(.*?)> (d|dallies|dspectators): (.+)$/, data) do
       [_all, username, to, msg] ->
         host = Client.get_client_by_id(from_id)
-        user = User.get_user_by_name(username)
+        user = CacheUser.get_user_by_name(username)
 
         case to do
           "d" ->
@@ -237,7 +237,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     case Regex.run(~r/<(.*?)>:<(.*?)> (d|dallies|dspectators): (.+)$/, data) do
       [_all, username, _user_num, to, msg] ->
         host = Client.get_client_by_id(from_id)
-        user = User.get_user_by_name(username)
+        user = CacheUser.get_user_by_name(username)
 
         case to do
           "d" ->
@@ -312,14 +312,14 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   defp handle_json_msg(%{"username" => username, "GPU" => _} = contents, from_id) do
-    case User.get_user_by_name(username) do
+    case CacheUser.get_user_by_name(username) do
       nil ->
         Logger.warn("No username on handle_json_msg: #{username} - #{Kernel.inspect(contents)}")
 
         :ok
 
       user ->
-        if User.is_bot?(from_id) do
+        if CacheUser.is_bot?(from_id) do
           stats = %{
             "hardware:cpuinfo" => contents["CPU"] || "Null CPU",
             "hardware:gpuinfo" => contents["GPU"] || "Null GPU",
@@ -352,7 +352,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     Logger.debug("Starting up Match monitor server")
     account = get_match_monitor_account()
     Central.cache_put(:application_metadata_cache, "teiserver_match_monitor_userid", account.id)
-    {:ok, user, client} = User.internal_client_login(account.id)
+    {:ok, user, client} = CacheUser.internal_client_login(account.id)
 
     rooms = ["autohosts"]
 
@@ -378,7 +378,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     state
   end
 
-  @spec get_match_monitor_account() :: Central.Account.User.t()
+  @spec get_match_monitor_account() :: Central.Account.CacheUser.t()
   def get_match_monitor_account() do
     user =
       Account.get_user(nil,
@@ -409,7 +409,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           country_override: Application.get_env(:central, Teiserver)[:server_flag]
         })
 
-        User.recache_user(account.id)
+        CacheUser.recache_user(account.id)
         account
 
       account ->

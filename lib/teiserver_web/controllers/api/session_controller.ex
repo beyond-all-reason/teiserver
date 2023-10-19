@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.API.SessionController do
   use CentralWeb, :controller
   alias Central.Account
-  alias Teiserver.User
+  alias Teiserver.CacheUser
 
   @spec login(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def login(conn, %{"user" => %{"email" => email, "password" => password}}) do
@@ -11,7 +11,7 @@ defmodule TeiserverWeb.API.SessionController do
   end
 
   defp login_reply({:ok, user}, conn) do
-    token = User.create_token(user)
+    token = CacheUser.create_token(user)
 
     conn
     |> put_status(200)
@@ -88,7 +88,7 @@ defmodule TeiserverWeb.API.SessionController do
                   :ok
 
                 code ->
-                  add_audit_log(conn, "Account:User registration", %{
+                  add_audit_log(conn, "Account:CacheUser registration", %{
                     code_value: code.value,
                     code_creator: code.user_id
                   })
@@ -135,7 +135,7 @@ defmodule TeiserverWeb.API.SessionController do
       end
 
     result =
-      case User.get_user_by_email(email) do
+      case CacheUser.get_user_by_email(email) do
         nil ->
           {:error, "Invalid email"}
 
@@ -152,15 +152,15 @@ defmodule TeiserverWeb.API.SessionController do
               case user.spring_password do
                 true ->
                   # Yes, we can test and update their password accordingly!
-                  md5_password = User.spring_md5_password(raw_password)
+                  md5_password = CacheUser.spring_md5_password(raw_password)
 
-                  case User.test_password(md5_password, user.password_hash) do
+                  case CacheUser.test_password(md5_password, user.password_hash) do
                     true ->
                       # Update the db user then the cached user
                       db_user = Account.get_user!(user.id)
                       Central.Account.update_user(db_user, %{"password" => raw_password})
-                      User.recache_user(user.id)
-                      User.update_user(%{user | spring_password: false}, persist: true)
+                      CacheUser.recache_user(user.id)
+                      CacheUser.update_user(%{user | spring_password: false}, persist: true)
 
                       make_token(conn, user, expires)
 

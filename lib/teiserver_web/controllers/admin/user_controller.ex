@@ -556,7 +556,7 @@ defmodule TeiserverWeb.Admin.UserController do
           case action do
             "recache" ->
               Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user.id)
-              Teiserver.User.recache_user(user.id)
+              Teiserver.CacheUser.recache_user(user.id)
               {:ok, ""}
 
             "reset_flood_protection" ->
@@ -721,7 +721,7 @@ defmodule TeiserverWeb.Admin.UserController do
           |> Enum.count()
 
         # And give the origin the smurfer role
-        Teiserver.User.add_roles(origin_user.id, ["Smurfer"])
+        Teiserver.CacheUser.add_roles(origin_user.id, ["Smurfer"])
         Account.update_user_stat(origin_user.id, %{"smurf_count" => smurf_count})
 
         Teiserver.Client.disconnect(smurf_user.id, "Marked as smurf")
@@ -763,7 +763,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
             # And give the origin the smurfer role
             if smurf_count == 0 do
-              Teiserver.User.remove_roles(origin_user_id, ["Smurfer"])
+              Teiserver.CacheUser.remove_roles(origin_user_id, ["Smurfer"])
             end
 
             Account.update_user_stat(origin_user_id, %{"smurf_count" => smurf_count})
@@ -926,7 +926,7 @@ defmodule TeiserverWeb.Admin.UserController do
     end
 
     Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user.id)
-    Teiserver.User.recache_user(user.id)
+    Teiserver.CacheUser.recache_user(user.id)
 
     # Now we update stats for the origin
     smurf_count =
@@ -971,7 +971,7 @@ defmodule TeiserverWeb.Admin.UserController do
       {true, _} ->
         admin_action = Teiserver.Account.AuthLib.allow?(conn, "admin.dev")
 
-        case Teiserver.User.rename_user(user.id, new_name, admin_action) do
+        case Teiserver.CacheUser.rename_user(user.id, new_name, admin_action) do
           :success ->
             add_audit_log(conn, "Teiserver:Changed user name", %{
               user_id: user.id,

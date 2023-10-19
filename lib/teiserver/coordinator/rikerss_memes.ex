@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.RikerssMemes do
   @moduledoc false
-  alias Teiserver.{User, Battle}
+  alias Teiserver.{Account, Battle}
   alias Teiserver.Lobby.{ChatLib}
   alias Teiserver.Data.Types, as: T
 
@@ -12,7 +12,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
   @spec handle_meme(String.t(), T.userid(), map()) :: [String.t()]
   def handle_meme("ticks", senderid, %{lobby_id: lobby_id} = _state) do
-    sender = User.get_user_by_id(senderid)
+    sender = Account.get_user_by_id(senderid)
 
     labs =
       ~w(armaap armalab armap armavp armhp armshltx armvp armamsub armasy armfhp armplat armshltxuw armsy)
@@ -35,7 +35,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   end
 
   def handle_meme("greenfields", senderid, %{lobby_id: lobby_id} = _state) do
-    sender = User.get_user_by_id(senderid)
+    sender = Account.get_user_by_id(senderid)
 
     Battle.disable_units(lobby_id, ~w(armmex armamex armmoho cormex corexp cormexp cormoho))
 
@@ -43,7 +43,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   end
 
   def handle_meme("deathmatch", senderid, %{lobby_id: lobby_id} = _state) do
-    sender = User.get_user_by_id(senderid)
+    sender = Account.get_user_by_id(senderid)
 
     Battle.set_modoptions(lobby_id, %{
       "game/modoptions/startmetal" => "35000",
@@ -63,14 +63,14 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   end
 
   def handle_meme("poor", senderid, %{lobby_id: lobby_id} = _state) do
-    sender = User.get_user_by_id(senderid)
+    sender = Account.get_user_by_id(senderid)
     Battle.set_modoption(lobby_id, "game/modoptions/resourceincomemultiplier", "0")
 
     ["#{sender.name} has enabled the poor meme. Nobody can produce resources."]
   end
 
   def handle_meme("rich", senderid, %{lobby_id: lobby_id} = _state) do
-    sender = User.get_user_by_id(senderid)
+    sender = Account.get_user_by_id(senderid)
 
     Battle.set_modoptions(lobby_id, %{
       "game/modoptions/startmetal" => "100000000",
@@ -82,7 +82,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   end
 
   def handle_meme("hardt1", senderid, %{lobby_id: lobby_id} = _state) do
-    sender = User.get_user_by_id(senderid)
+    sender = Account.get_user_by_id(senderid)
 
     armada = ~w(armfhp armhp armamsub armplat armalab armavp armaap armasy armshltx armshltxuw)
     cortex = ~w(corfhp corhp coaramsub corplat coravp coralab coraap corgantuw corgant corasy)
@@ -95,7 +95,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   end
 
   def handle_meme("crazy", senderid, %{lobby_id: lobby_id} = _state) do
-    sender = User.get_user_by_id(senderid)
+    sender = Account.get_user_by_id(senderid)
     undo_memes(lobby_id)
     :timer.sleep(100)
 
@@ -150,7 +150,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   end
 
   def handle_meme("nodefence", senderid, %{lobby_id: lobby_id} = _state) do
-    sender = User.get_user_by_id(senderid)
+    sender = Account.get_user_by_id(senderid)
 
     armada_defences =
       ~w(armamb armamd armanni armbeamer armbrtha armclaw armemp armguard armhlt armjuno armmg armpb armsilo armvulc armatl armdl armfhlt armfrt armgplat armkraken armptl armtl)

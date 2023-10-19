@@ -1,7 +1,7 @@
 defmodule Teiserver.Admin.DeleteUserTask do
   @moduledoc false
   alias Teiserver.Repo
-  alias Teiserver.{Account, User}
+  alias Teiserver.{Account, CacheUser}
 
   @doc """
   Expects a list of user ids, returns the results of the query
@@ -73,7 +73,7 @@ defmodule Teiserver.Admin.DeleteUserTask do
 
     # Delete our cache of them
     id_list
-    |> Enum.each(fn userid -> User.decache_user(userid) end)
+    |> Enum.each(fn userid -> CacheUser.decache_user(userid) end)
 
     :ok
   end

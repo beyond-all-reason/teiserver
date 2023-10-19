@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.V1.CommunicationIn do
-  alias Teiserver.{Account, User}
+  alias Teiserver.{Account, CacheUser}
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
@@ -17,7 +17,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.CommunicationIn do
         reply(:communication, :send_direct_message, {:failure, "Recipient offline"}, state)
 
       true ->
-        User.send_direct_message(state.userid, recipient_id, message)
+        CacheUser.send_direct_message(state.userid, recipient_id, message)
         reply(:communication, :send_direct_message, :success, state)
     end
   end

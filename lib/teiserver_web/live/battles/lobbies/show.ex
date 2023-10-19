@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   require Logger
 
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.{Account, Battle, Coordinator, Lobby, User, Telemetry}
+  alias Teiserver.{Account, Battle, Coordinator, Lobby, CacheUser, Telemetry}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @extra_menu_content """
@@ -86,7 +86,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       true ->
         {users, clients, ratings, parties, stats} = get_user_and_clients(lobby.players)
 
-        bar_user = User.get_user_by_id(socket.assigns.current_user.id)
+        bar_user = CacheUser.get_user_by_id(socket.assigns.current_user.id)
         lobby = Map.put(lobby, :uuid, Battle.get_lobby_match_uuid(id))
         modoptions = Battle.get_modoptions(id)
 
@@ -109,7 +109,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
   defp get_user_and_clients(id_list) do
     users =
-      User.list_users(id_list)
+      CacheUser.list_users(id_list)
       |> Map.new(fn u -> {u.id, u} end)
 
     clients =

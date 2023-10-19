@@ -5,7 +5,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   """
   use GenServer
   require Logger
-  alias Teiserver.{Account, Coordinator, Client, User, Lobby, Battle, Telemetry, Config}
+  alias Teiserver.{Account, Coordinator, Client, CacheUser, Lobby, Battle, Telemetry, Config}
   alias Teiserver.Lobby.{ChatLib}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
@@ -159,7 +159,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         unready_at: System.system_time(:millisecond)
       })
 
-      if User.is_restricted?(userid, ["All chat", "Battle chat"]) do
+      if CacheUser.is_restricted?(userid, ["All chat", "Battle chat"]) do
         name = Account.get_username_by_id(userid)
         Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{name}")
       end
@@ -435,7 +435,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     # If the client is muted, we need to tell the host
-    if User.is_restricted?(client.userid, ["All chat", "Battle chat"]) do
+    if CacheUser.is_restricted?(client.userid, ["All chat", "Battle chat"]) do
       spawn(fn ->
         :timer.sleep(500)
         Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{client.name}")
@@ -464,7 +464,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       # If they're not allowed to be a boss, unboss them?
       (host_data[:host_bosses] || [])
       |> Enum.filter(fn userid ->
-        User.is_restricted?(userid, ["Boss"])
+        CacheUser.is_restricted?(userid, ["Boss"])
       end)
       |> Enum.each(fn userid ->
         username = Account.get_username_by_id(userid)
@@ -516,18 +516,18 @@ defmodule Teiserver.Coordinator.ConsulServer do
       [now | user_times]
       |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
 
-    user = User.get_user_by_id(userid)
+    user = CacheUser.get_user_by_id(userid)
 
     cond do
-      User.is_moderator?(user) ->
+      CacheUser.is_moderator?(user) ->
         :ok
 
       Enum.count(new_user_times) >= state.ring_limit_count ->
-        User.set_flood_level(userid, 100)
+        CacheUser.set_flood_level(userid, 100)
         Client.disconnect(userid, "Ring flood")
 
       Enum.count(new_user_times) >= state.ring_limit_count - 1 ->
-        User.ring(userid, state.coordinator_id)
+        CacheUser.ring(userid, state.coordinator_id)
 
         ChatLib.sayprivateex(
           state.coordinator_id,
@@ -549,7 +549,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     is_boss = Enum.member?(state.host_bosses, userid)
 
     if not is_boss do
-      User.send_direct_message(
+      CacheUser.send_direct_message(
         state.coordinator_id,
         userid,
         "Setting tweakdefs requires boss privileges"
@@ -565,7 +565,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     is_boss = Enum.member?(state.host_bosses, userid)
 
     if not is_boss do
-      User.send_direct_message(
+      CacheUser.send_direct_message(
         state.coordinator_id,
         userid,
         "Setting tweakunits requires boss privileges"
@@ -584,7 +584,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       |> String.downcase()
 
     is_boss = Enum.member?(state.host_bosses, userid)
-    is_moderator = User.is_moderator?(userid)
+    is_moderator = CacheUser.is_moderator?(userid)
 
     # If it's CV then strip that out!
     [cmd | args] = String.split(trimmed_msg, " ")
@@ -894,7 +894,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     if Config.get_site_config_cache("teiserver.Require Chobby login") == true do
       if client != nil do
-        user = User.get_user_by_id(userid)
+        user = CacheUser.get_user_by_id(userid)
 
         case user.hw_hash do
           "" ->
@@ -943,7 +943,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         {false, "Err"}
 
       state.tournament_lobby == true and
-          not User.has_any_role?(userid, ["Caster", "TourneyPlayer", "Tournament player"]) ->
+          not CacheUser.has_any_role?(userid, ["Caster", "TourneyPlayer", "Tournament player"]) ->
         {false, "Tournament game"}
 
       Enum.member?(state.approved_users, userid) ->
@@ -1113,7 +1113,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       |> Enum.each(fn user_id ->
         Lobby.force_change_client(state.coordinator_id, user_id, %{player: false})
 
-        User.send_direct_message(
+        CacheUser.send_direct_message(
           state.coordinator_id,
           user_id,
           "You were AFK while waiting for a game and have been moved to spectators."
@@ -1248,7 +1248,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def get_user(name, state) do
     name = String.downcase(name)
 
-    case User.get_userid(name) do
+    case CacheUser.get_userid(name) do
       nil ->
         # Try partial search of players in lobby
         battle = Lobby.get_lobby(state.lobby_id)
@@ -1291,7 +1291,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec log_command(Map.t(), Map.t()) :: Map.t()
   def log_command(cmd, state) do
     message = "$ " <> command_as_message(cmd)
-    sender = User.get_user_by_id(cmd.senderid)
+    sender = CacheUser.get_user_by_id(cmd.senderid)
     ChatLib.persist_message(sender, message, state.lobby_id, :say)
     state
   end

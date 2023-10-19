@@ -1,6 +1,6 @@
 defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
-  alias Teiserver.{Client, User, Account, SpringIdServer}
+  alias Teiserver.{Client, CacheUser, Account, SpringIdServer}
   alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Protocols.TachyonLib
@@ -47,10 +47,10 @@ defmodule Teiserver.TeiserverTestLib do
   def new_user(name \\ nil, params \\ %{}) do
     name = name || new_user_name()
 
-    case User.get_user_by_name(name) do
+    case CacheUser.get_user_by_name(name) do
       nil ->
         {:ok, user} =
-          User.user_register_params_with_md5(
+          CacheUser.user_register_params_with_md5(
             name,
             "#{name}@email.com",
             "X03MO1qnZdYdgyfeuILPmQ==",
@@ -64,10 +64,10 @@ defmodule Teiserver.TeiserverTestLib do
         })
 
         user
-          |> User.convert_user()
+          |> CacheUser.convert_user()
           |> Map.put(:springid, SpringIdServer.get_next_id())
-          |> User.add_user()
-          |> User.verify_user()
+          |> CacheUser.add_user()
+          |> CacheUser.verify_user()
 
       _ ->
         new_user()
@@ -78,9 +78,9 @@ defmodule Teiserver.TeiserverTestLib do
   def async_auth_setup(protocol, user \\ nil) do
     user = if user, do: user, else: new_user()
 
-    token = User.create_token(user)
+    token = CacheUser.create_token(user)
 
-    case User.try_login(token, "127.0.0.1", "AsyncTest", "token1 token2") do
+    case CacheUser.try_login(token, "127.0.0.1", "AsyncTest", "token1 token2") do
       {:ok, _user} -> :ok
       value -> raise "Error setting up user - #{Kernel.inspect(value)}"
     end
@@ -123,7 +123,7 @@ defmodule Teiserver.TeiserverTestLib do
   @spec tachyon_auth_setup(nil | Map.t()) :: %{socket: port(), user: Map.t(), pid: pid()}
   def tachyon_auth_setup(user \\ nil) do
     user = if user, do: user, else: new_user()
-    token = User.create_token(user)
+    token = CacheUser.create_token(user)
 
     %{socket: socket} = tachyon_tls_setup()
 
@@ -401,7 +401,7 @@ defmodule Teiserver.TeiserverTestLib do
   @spec conn_setup({:ok, List.t()}) :: {:ok, List.t()}
   def conn_setup({:ok, data}) do
     user = data[:user]
-    User.recache_user(user.id)
+    CacheUser.recache_user(user.id)
 
     {:ok, data}
   end

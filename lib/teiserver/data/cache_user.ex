@@ -1,9 +1,9 @@
-defmodule Teiserver.User do
+defmodule Teiserver.CacheUser do
   @moduledoc """
   Users here are a combination of Central.Account.User and the data within. They are merged like this into a map as their expected use case is very different.
   """
   alias Teiserver.{Account, Config, Client, Coordinator, Telemetry, Chat, EmailHelper}
-  alias Teiserver.Account.{LoginThrottleServer, UserCache, Guardian}
+  alias Teiserver.Account.{LoginThrottleServer, UserCacheLib, Guardian}
   alias Teiserver.Chat.WordLib
   alias Teiserver.SpringIdServer
   alias Argon2
@@ -522,46 +522,46 @@ defmodule Teiserver.User do
 
   # Cache functions
   @spec get_username(T.userid()) :: String.t() | nil
-  defdelegate get_username(userid), to: UserCache
+  defdelegate get_username(userid), to: UserCacheLib
 
   @spec get_userid(String.t()) :: integer() | nil
-  defdelegate get_userid(username), to: UserCache
+  defdelegate get_userid(username), to: UserCacheLib
 
   @spec get_user_by_name(String.t()) :: T.user() | nil
-  defdelegate get_user_by_name(username), to: UserCache
+  defdelegate get_user_by_name(username), to: UserCacheLib
 
   @spec get_user_by_email(String.t()) :: T.user() | nil
-  defdelegate get_user_by_email(email), to: UserCache
+  defdelegate get_user_by_email(email), to: UserCacheLib
 
   @spec get_user_by_discord_id(String.t()) :: T.user() | nil
-  defdelegate get_user_by_discord_id(discord_id), to: UserCache
+  defdelegate get_user_by_discord_id(discord_id), to: UserCacheLib
 
   @spec get_userid_by_discord_id(String.t()) :: T.userid() | nil
-  defdelegate get_userid_by_discord_id(discord_id), to: UserCache
+  defdelegate get_userid_by_discord_id(discord_id), to: UserCacheLib
 
   @spec get_user_by_token(String.t()) :: T.user() | nil
-  defdelegate get_user_by_token(token), to: UserCache
+  defdelegate get_user_by_token(token), to: UserCacheLib
 
   @spec get_user_by_id(T.userid()) :: T.user() | nil
-  defdelegate get_user_by_id(id), to: UserCache
+  defdelegate get_user_by_id(id), to: UserCacheLib
 
   @spec list_users(list) :: list
-  defdelegate list_users(id_list), to: UserCache
+  defdelegate list_users(id_list), to: UserCacheLib
 
   @spec recache_user(Integer.t()) :: :ok
-  defdelegate recache_user(id), to: UserCache
+  defdelegate recache_user(id), to: UserCacheLib
 
   @spec convert_user(T.user()) :: T.user()
-  defdelegate convert_user(user), to: UserCache
+  defdelegate convert_user(user), to: UserCacheLib
 
   @spec add_user(T.user()) :: T.user()
-  defdelegate add_user(user), to: UserCache
+  defdelegate add_user(user), to: UserCacheLib
 
   @spec update_user(T.user(), boolean) :: T.user()
-  defdelegate update_user(user, persist \\ false), to: UserCache
+  defdelegate update_user(user, persist \\ false), to: UserCacheLib
 
   @spec decache_user(T.userid()) :: :ok | :no_user
-  defdelegate decache_user(userid), to: UserCache
+  defdelegate decache_user(userid), to: UserCacheLib
 
   @spec send_direct_message(T.userid(), T.userid(), String.t()) :: :ok
   def send_direct_message(from_id, to_id, "!start" <> s),

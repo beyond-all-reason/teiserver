@@ -7,7 +7,7 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
 
   alias Teiserver.Repo
   import Ecto.Query, warn: false
-  alias Teiserver.{User, Account}
+  alias Teiserver.Account
   alias alias Teiserver.Logging.UserActivityDayLog
 
   # Teiserver.Account.RecalculateUserDailyStatTask.perform(nil)
@@ -59,8 +59,7 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
         )
         |> Enum.filter(fn {userid, _} ->
           if Enum.member?(user_ids, userid) do
-            username = User.get_username(userid)
-            username != nil
+            Account.get_username(userid) != nil
           end
         end)
         |> Enum.each(fn {userid, data_rows} ->

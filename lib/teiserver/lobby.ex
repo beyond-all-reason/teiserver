@@ -6,7 +6,7 @@ defmodule Teiserver.Lobby do
   alias Phoenix.PubSub
   require Logger
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.{Account, User, Client, Battle, Coordinator, LobbyIdServer, Telemetry}
+  alias Teiserver.{Account, CacheUser, Client, Battle, Coordinator, LobbyIdServer, Telemetry}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby.{ChatLib, LobbyLib}
 
@@ -313,9 +313,9 @@ defmodule Teiserver.Lobby do
 
   @spec kick_user_from_battle(T.userid(), T.lobby_id()) :: nil | :ok | {:error, any}
   def kick_user_from_battle(userid, lobby_id) do
-    user = User.get_user_by_id(userid)
+    user = Account.get_user_by_id(userid)
 
-    if User.is_moderator?(user) do
+    if CacheUser.is_moderator?(user) do
       :ok
     else
       case do_remove_user_from_lobby(userid, lobby_id) do
@@ -560,14 +560,14 @@ defmodule Teiserver.Lobby do
 
     ignore_password =
       Enum.any?([
-        User.is_moderator?(user),
+        CacheUser.is_moderator?(user),
         Enum.member?(user.roles, "Caster"),
         consul_reason == :override_approve
       ])
 
     ignore_locked =
       Enum.any?([
-        User.is_moderator?(user),
+        CacheUser.is_moderator?(user),
         Enum.member?(user.roles, "Caster"),
         consul_reason == :override_approve
       ])
@@ -588,7 +588,7 @@ defmodule Teiserver.Lobby do
       consul_response == false ->
         {:failure, consul_reason}
 
-      User.is_restricted?(user, ["All lobbies", "Joining existing lobbies"]) ->
+      CacheUser.is_restricted?(user, ["All lobbies", "Joining existing lobbies"]) ->
         {:failure, "You are currently banned from joining lobbies"}
 
       true ->
@@ -713,7 +713,7 @@ defmodule Teiserver.Lobby do
       bot == nil ->
         false
 
-      User.is_moderator?(changer.userid) == true ->
+      CacheUser.is_moderator?(changer.userid) == true ->
         true
 
       lobby.founder_id == changer.userid ->
@@ -758,7 +758,7 @@ defmodule Teiserver.Lobby do
       )
 
     cond do
-      User.is_moderator?(changer.userid) == true ->
+      CacheUser.is_moderator?(changer.userid) == true ->
         true
 
       # If the battle has been renamed by the consul then we'll keep it renamed as such
@@ -795,16 +795,16 @@ defmodule Teiserver.Lobby do
       lobby == nil ->
         false
 
-      User.is_shadowbanned?(userid) ->
+      CacheUser.is_shadowbanned?(userid) ->
         false
 
-      User.is_restricted?(userid, ["All chat", "Lobby chat"]) ->
+      CacheUser.is_restricted?(userid, ["All chat", "Lobby chat"]) ->
         false
 
       lobby.founder_id == userid ->
         true
 
-      User.is_moderator?(userid) ->
+      CacheUser.is_moderator?(userid) ->
         true
 
       lobby.silence ->

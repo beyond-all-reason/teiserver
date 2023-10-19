@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.API.HailstormController do
   use CentralWeb, :controller
-  alias Teiserver.{Account, User, Config, Coordinator, Lobby}
+  alias Teiserver.{Account, CacheUser, Config, Coordinator, Lobby}
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Battle.BalanceLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
@@ -29,29 +29,29 @@ defmodule TeiserverWeb.API.HailstormController do
     result =
       case Account.get_user_by_email(email) do
         nil ->
-          case User.register_user(name, email, params["password"]) do
+          case CacheUser.register_user(name, email, params["password"]) do
             :success ->
               db_user = Account.get_user!(nil, search: [email: email])
               Central.Account.update_user(db_user, params["permissions"] || [], :permissions)
 
               # Specific updates
-              User.add_roles(db_user.id, params["roles"])
+              CacheUser.add_roles(db_user.id, params["roles"])
 
               %{userid: db_user.id}
 
             {:error, reason} ->
               %{
                 result: "failure",
-                stage: "User.register_user",
+                stage: "CacheUser.register_user",
                 reason: reason
               }
           end
 
         user ->
           # Update the user
-          User.add_roles(user.id, params["roles"])
+          CacheUser.add_roles(user.id, params["roles"])
 
-          User.set_flood_level(user.id, 0)
+          CacheUser.set_flood_level(user.id, 0)
           %{userid: user.id}
       end
 

@@ -39,7 +39,7 @@ defmodule Teiserver.SpringTokenTest do
         }
       })
 
-    Teiserver.Account.UserCache.recache_user(user.id)
+    Teiserver.Account.UserCacheLib.recache_user(user.id)
 
     %{socket: socket} = spring_tls_setup()
     _welcome = _recv_raw(socket)

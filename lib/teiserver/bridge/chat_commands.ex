@@ -1,6 +1,6 @@
 defmodule Teiserver.Bridge.ChatCommands do
   @moduledoc false
-  alias Teiserver.{Account, User, Communication, Config, Logging}
+  alias Teiserver.{Account, CacheUser, Communication, Config, Logging}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Bridge.UnitNames
   alias Nostrum.Api
@@ -188,13 +188,13 @@ defmodule Teiserver.Bridge.ChatCommands do
 
   @spec allow?(String.t(), map()) :: boolean
   defp allow?("discord", _), do: true
-  defp allow?("gdt", user), do: User.has_any_role?(user, ["Admin", "Moderator", "GDT"])
+  defp allow?("gdt", user), do: CacheUser.has_any_role?(user, ["Admin", "Moderator", "GDT"])
 
   defp allow?(cmd, user) do
     if Enum.member?(@always_allow, cmd) do
       true
     else
-      User.allow?(user, "Moderator")
+      CacheUser.allow?(user, "Moderator")
     end
   end
 

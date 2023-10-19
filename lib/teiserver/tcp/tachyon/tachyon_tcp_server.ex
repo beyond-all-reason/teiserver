@@ -6,7 +6,7 @@ defmodule Teiserver.TachyonTcpServer do
   alias Teiserver.Config
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
-  alias Teiserver.{User, Client, Account}
+  alias Teiserver.{CacheUser, Client, Account}
   alias Teiserver.Data.Types, as: T
 
   @behaviour :ranch_protocol
@@ -554,7 +554,7 @@ defmodule Teiserver.TachyonTcpServer do
 
   defp engage_flood_protection(state) do
     state.protocol_out.reply(:disconnect, "Flood protection", nil, state)
-    User.set_flood_level(state.userid, 10)
+    CacheUser.set_flood_level(state.userid, 10)
     Client.disconnect(state.userid, "TachyonTCPServer.flood_protection")
 
     Logger.error(

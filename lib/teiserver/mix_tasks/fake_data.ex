@@ -56,7 +56,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         data: %{
           lobby_client: "FakeData",
           password_hash:
-            Teiserver.User.encrypt_password(Teiserver.User.spring_md5_password("password"))
+            Teiserver.CacheUser.encrypt_password(Teiserver.CacheUser.spring_md5_password("password"))
         }
       })
 

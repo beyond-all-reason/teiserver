@@ -1,7 +1,7 @@
-defmodule Teiserver.Account.UserCache do
+defmodule Teiserver.Account.UserCacheLib do
   @moduledoc false
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.{Account, User}
+  alias Teiserver.{Account, CacheUser}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Account.Guardian
   require Logger
@@ -161,7 +161,7 @@ defmodule Teiserver.Account.UserCache do
     |> Enum.filter(fn user -> user != nil end)
   end
 
-  @spec recache_user(T.userid() | User.t()) :: :ok
+  @spec recache_user(T.userid() | CacheUser.t()) :: :ok
   def recache_user(id) when is_integer(id) do
     Central.Account.recache_user(id)
     Teiserver.Account.decache_relationships(id)
@@ -187,18 +187,18 @@ defmodule Teiserver.Account.UserCache do
   Given a database user it will convert it into a cached user
   """
 
-  @spec convert_user(User.t() | nil) :: T.user() | nil
+  @spec convert_user(CacheUser.t() | nil) :: T.user() | nil
   def convert_user(nil), do: nil
 
   def convert_user(user) do
     data =
-      User.data_keys()
-      |> Map.new(fn k -> {k, Map.get(user.data || %{}, to_string(k), User.default_data()[k])} end)
+      CacheUser.data_keys()
+      |> Map.new(fn k -> {k, Map.get(user.data || %{}, to_string(k), CacheUser.default_data()[k])} end)
       |> Map.put(:spring_password, user.data["password_hash"] == user.password)
 
     user
-    |> Map.take(User.keys())
-    |> Map.merge(User.default_data())
+    |> Map.take(CacheUser.keys())
+    |> Map.merge(CacheUser.default_data())
     |> Map.merge(data)
   end
 
@@ -224,31 +224,31 @@ defmodule Teiserver.Account.UserCache do
   # Persists the changes into the database so they will
   # be pulled out next time the user is accessed/recached
   # The special case here is to prevent the benchmark and test users causing issues
-  @spec persist_user(User.t()) :: User.t() | nil
+  @spec persist_user(CacheUser.t()) :: CacheUser.t() | nil
   defp persist_user(%{name: "TEST_" <> _}), do: nil
 
   defp persist_user(user) do
     db_user = Account.get_user!(user.id)
 
     data =
-      User.data_keys()
-      |> Map.new(fn k -> {to_string(k), Map.get(user, k, User.default_data()[k])} end)
+      CacheUser.data_keys()
+      |> Map.new(fn k -> {to_string(k), Map.get(user, k, CacheUser.default_data()[k])} end)
 
     obj_attrs =
-      User.keys()
-      |> Map.new(fn k -> {to_string(k), Map.get(user, k, User.default_data()[k])} end)
+      CacheUser.keys()
+      |> Map.new(fn k -> {to_string(k), Map.get(user, k, CacheUser.default_data()[k])} end)
 
     Account.script_update_user(db_user, Map.put(obj_attrs, "data", data))
   end
 
-  @spec update_user(User.t(), boolean) :: User.t()
+  @spec update_user(CacheUser.t(), boolean) :: CacheUser.t()
   def update_user(user, persist \\ false) do
     Central.cache_put(:users, user.id, user)
     if persist, do: persist_user(user)
     user
   end
 
-  @spec update_cache_user(T.userid(), map()) :: User.t()
+  @spec update_cache_user(T.userid(), map()) :: CacheUser.t()
   def update_cache_user(userid, data) do
     user = get_user_by_id(userid)
     new_user = Map.merge(user, data)

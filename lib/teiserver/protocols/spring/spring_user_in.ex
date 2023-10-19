@@ -1,6 +1,6 @@
 defmodule Teiserver.Protocols.Spring.UserIn do
   @moduledoc false
-  alias Teiserver.{Account, Room, User}
+  alias Teiserver.{Account, Room, CacheUser}
   alias Teiserver.Protocols.SpringIn
   import Teiserver.Protocols.SpringOut, only: [reply: 5, do_join_room: 2, do_login_accepted: 3]
   require Logger
@@ -172,7 +172,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
           end
 
         if response do
-          token = User.create_token(user)
+          token = CacheUser.create_token(user)
           reply(:spring, :user_token, {email, token}, msg_id, state)
         else
           reply(:spring, :no, {"c.user.get_token_by_email", "invalid credentials"}, msg_id, state)
@@ -205,7 +205,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
           end
 
         if response do
-          token = User.create_token(user)
+          token = CacheUser.create_token(user)
           reply(:spring, :user_token, {name, token}, msg_id, state)
         else
           reply(:spring, :no, {"c.user.get_token_by_name", "invalid credentials"}, msg_id, state)
@@ -225,7 +225,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
       end
 
     # Now try to login using a token
-    response = User.try_login(token, state.ip, lobby, lobby_hash)
+    response = CacheUser.try_login(token, state.ip, lobby, lobby_hash)
 
     case response do
       {:error, "Unverified", userid} ->

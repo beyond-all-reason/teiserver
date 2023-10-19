@@ -4,7 +4,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   """
 
   alias Phoenix.PubSub
-  alias Teiserver.{Game, User, Client, Battle, Account, Lobby, Coordinator, Telemetry}
+  alias Teiserver.{Game, CacheUser, Client, Battle, Account, Lobby, Coordinator, Telemetry}
   alias Teiserver.Lobby.{ChatLib}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Data.Types, as: T
@@ -204,7 +204,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   def handle_info(%{channel: "teiserver_lobby_updates", event: :add_user, client: client}, state) do
     generate_welcome_message(state)
     |> Enum.each(fn line ->
-      User.send_direct_message(state.userid, client.userid, line)
+      CacheUser.send_direct_message(state.userid, client.userid, line)
     end)
 
     {:noreply, state}
@@ -283,7 +283,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   defp handle_user_chat(senderid, "Lobby policy bot claiming the room", state) do
     sender = Account.get_user_by_id(senderid)
 
-    if User.is_bot?(sender) and User.is_moderator?(sender) do
+    if CacheUser.is_bot?(sender) and CacheUser.is_moderator?(sender) do
       if state.userid > senderid do
         send_dm(state, senderid, "I am senior, leave the lobby")
       else
@@ -418,7 +418,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     # making sure there's no issue we just leave the lobby anyway
     sender = Account.get_user_by_id(senderid)
 
-    if User.is_bot?(sender) and User.is_moderator?(sender) do
+    if CacheUser.is_bot?(sender) and CacheUser.is_moderator?(sender) do
       send(self(), :leave_lobby)
     end
 
@@ -426,7 +426,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   defp handle_direct_message(senderid, "$leave", state) do
-    if User.is_moderator?(senderid) do
+    if CacheUser.is_moderator?(senderid) do
       send(self(), :leave_lobby)
     end
 
@@ -453,11 +453,11 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   defp send_dm(state, userid, msg) do
-    User.send_direct_message(state.userid, userid, msg)
+    CacheUser.send_direct_message(state.userid, userid, msg)
   end
 
   defp send_to_founder(state, msg) do
-    User.send_direct_message(state.userid, state.founder_id, msg)
+    CacheUser.send_direct_message(state.userid, state.founder_id, msg)
   end
 
   @spec leave_lobby(map()) :: map()
@@ -538,7 +538,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     )
 
     {user, _client} =
-      case User.internal_client_login(data.userid) do
+      case CacheUser.internal_client_login(data.userid) do
         {:ok, user, client} -> {user, client}
         :error -> raise "No user found"
       end

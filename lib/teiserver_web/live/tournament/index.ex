@@ -19,7 +19,7 @@ defmodule TeiserverWeb.TournamentLive.Index do
     client = Account.get_client_by_id(socket.assigns[:current_user].id)
 
     can_join =
-      Teiserver.User.has_any_role?(socket.assigns[:current_user].id, [
+      Teiserver.CacheUser.has_any_role?(socket.assigns[:current_user].id, [
         "Moderator",
         "Caster",
         "TourneyPlayer",

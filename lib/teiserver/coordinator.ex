@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator do
   @moduledoc false
-  alias Teiserver.{Battle, User}
+  alias Teiserver.{Battle, CacheUser}
   alias Teiserver.Data.Types, as: T
   require Logger
 
@@ -280,7 +280,7 @@ defmodule Teiserver.Coordinator do
     lobby = Battle.get_lobby(lobby_id)
 
     if lobby do
-      User.send_direct_message(from_id, lobby.founder_id, msg)
+      CacheUser.send_direct_message(from_id, lobby.founder_id, msg)
     end
 
     :ok
@@ -288,7 +288,7 @@ defmodule Teiserver.Coordinator do
 
   @spec send_to_user(T.userid(), String.t()) :: :ok
   def send_to_user(userid, msg) do
-    User.send_direct_message(get_coordinator_userid(), userid, msg)
+    CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
   end
 
   # Debug stuff

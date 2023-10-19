@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.AccoladeController do
   use CentralWeb, :controller
 
-  alias Teiserver.{User, Account}
+  alias Teiserver.Account
   alias Teiserver.Account.Accolade
   alias Teiserver.Account.AccoladeLib
 
@@ -56,7 +56,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
         order_by: "Newest first"
       )
 
-    user = User.get_user_by_id(user_id)
+    user = Account.get_user_by_id(user_id)
 
     conn
     |> assign(:accolades, accolades)

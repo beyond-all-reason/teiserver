@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
-  alias Teiserver.{User, Client, Account}
+  alias Teiserver.{CacheUser, Client, Account}
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
   alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Data.Types, as: T
@@ -10,7 +10,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
   end
 
   def do_handle("get_token", %{"email" => email, "password" => plain_text_password}, state) do
-    case User.get_user_by_email(email) do
+    case CacheUser.get_user_by_email(email) do
       nil ->
         reply(:auth, :user_token, {:failure, "Incorrect credentials"}, state)
 
@@ -19,17 +19,17 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
         case user.spring_password do
           true ->
             # Yes, we can test and update their password accordingly!
-            md5_password = User.spring_md5_password(plain_text_password)
+            md5_password = CacheUser.spring_md5_password(plain_text_password)
 
-            case User.test_password(md5_password, user.password_hash) do
+            case CacheUser.test_password(md5_password, user.password_hash) do
               true ->
                 # Update the db user then the cached user
                 db_user = Account.get_user!(user.id)
                 Central.Account.update_user(db_user, %{"password" => plain_text_password})
-                User.recache_user(user.id)
-                User.update_user(%{user | spring_password: false}, persist: true)
+                CacheUser.recache_user(user.id)
+                CacheUser.update_user(%{user | spring_password: false}, persist: true)
 
-                token = User.create_token(user)
+                token = CacheUser.create_token(user)
                 reply(:auth, :user_token, {:success, token}, state)
 
               false ->
@@ -41,7 +41,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
 
             case Central.Account.User.verify_password(plain_text_password, db_user.password) do
               true ->
-                token = User.create_token(user)
+                token = CacheUser.create_token(user)
                 reply(:auth, :user_token, {:success, token}, state)
 
               false ->
@@ -61,7 +61,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
         },
         state
       ) do
-    response = User.try_login(token, state.ip, "#{lobby_name} #{lobby_version}", lobby_hash)
+    response = CacheUser.try_login(token, state.ip, "#{lobby_name} #{lobby_version}", lobby_hash)
 
     case response do
       {:ok, user} ->
@@ -110,7 +110,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
   end
 
   def do_handle("verify", %{"token" => token, "code" => code}, state) do
-    user = User.get_user_by_token(token)
+    user = CacheUser.get_user_by_token(token)
 
     case user do
       nil ->
@@ -120,7 +120,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
         correct_code = Account.get_user_stat_data(user.id)["verification_code"]
 
         if correct_code == code do
-          user = User.verify_user(user)
+          user = CacheUser.verify_user(user)
           reply(:auth, :verify, {:success, user}, state)
         else
           reply(:auth, :verify, {:failure, "bad code"}, state)
@@ -139,7 +139,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
         %{"username" => username, "email" => email, "password" => password},
         state
       ) do
-    response = User.register_user(username, email, password)
+    response = CacheUser.register_user(username, email, password)
     reply(:auth, :register, response, state)
   end
 

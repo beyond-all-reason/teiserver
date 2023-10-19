@@ -1,6 +1,6 @@
 defmodule Teiserver.ServerUserPlug do
   import Plug.Conn
-  alias Teiserver.User
+  alias Teiserver.CacheUser
 
   def init(_opts) do
     # Keyword.fetch!(opts, :repo)
@@ -14,7 +14,7 @@ defmodule Teiserver.ServerUserPlug do
 
   def call(%{assigns: %{current_user: current_user}} = conn, _opts) do
     userid = current_user.id
-    server_user = User.get_user_by_id(userid)
+    server_user = CacheUser.get_user_by_id(userid)
 
     conn
     |> assign(:server_user, server_user)
@@ -31,7 +31,7 @@ defmodule Teiserver.ServerUserPlug do
 
   def live_call(%{assigns: %{current_user: current_user}} = socket) do
     userid = current_user.id
-    server_user = User.get_user_by_id(userid)
+    server_user = CacheUser.get_user_by_id(userid)
 
     socket
     |> Phoenix.LiveView.Utils.assign(:server_user, server_user)

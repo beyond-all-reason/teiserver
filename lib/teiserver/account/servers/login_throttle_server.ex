@@ -11,7 +11,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   """
   use GenServer
   require Logger
-  alias Teiserver.{Account, User}
+  alias Teiserver.{Account, CacheUser}
   alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Phoenix.PubSub
@@ -412,13 +412,13 @@ defmodule Teiserver.Account.LoginThrottleServer do
     user = Account.get_user_by_id(userid)
 
     cond do
-      User.is_bot?(user) -> :instant
-      User.has_any_role?(user, ["Server"]) -> :instant
-      User.has_any_role?(user, ["Moderator"]) -> :moderator
-      User.has_any_role?(user, ["Core"]) -> :core
-      User.has_any_role?(user, ["Contributor"]) -> :contributor
-      User.has_any_role?(user, ["Overwatch", "Reviewer"]) -> :volunteer
-      User.has_any_role?(user, ["VIP"]) -> :vip
+      CacheUser.is_bot?(user) -> :instant
+      CacheUser.has_any_role?(user, ["Server"]) -> :instant
+      CacheUser.has_any_role?(user, ["Moderator"]) -> :moderator
+      CacheUser.has_any_role?(user, ["Core"]) -> :core
+      CacheUser.has_any_role?(user, ["Contributor"]) -> :contributor
+      CacheUser.has_any_role?(user, ["Overwatch", "Reviewer"]) -> :volunteer
+      CacheUser.has_any_role?(user, ["VIP"]) -> :vip
       user.behaviour_score < 5000 -> :toxic
       true -> :standard
     end

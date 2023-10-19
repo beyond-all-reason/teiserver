@@ -1,7 +1,7 @@
 defmodule Teiserver.SpringTcpServerTest do
   use Central.ServerCase, async: false
 
-  alias Teiserver.Account.UserCache
+  alias Teiserver.Account.UserCacheLib
   alias Teiserver.{Account, Client, Room}
   require Logger
 
@@ -40,10 +40,10 @@ defmodule Teiserver.SpringTcpServerTest do
     reply = _recv_raw(socket)
     assert reply == "REGISTRATIONACCEPTED\n"
 
-    user = UserCache.get_user_by_name(username)
+    user = UserCacheLib.get_user_by_name(username)
     query = "UPDATE account_users SET inserted_at = '2020-01-01 01:01:01' WHERE id = #{user.id}"
     Ecto.Adapters.SQL.query(Repo, query, [])
-    Teiserver.Account.UserCache.recache_user(user.id)
+    Teiserver.Account.UserCacheLib.recache_user(user.id)
 
     _send_raw(
       socket,

@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.TSAuthPlug do
   @moduledoc false
   import Plug.Conn
-  alias Teiserver.User
+  alias Teiserver.CacheUser
 
   def init(_opts) do
     # Keyword.fetch!(opts, :repo)
@@ -10,7 +10,7 @@ defmodule Teiserver.Account.TSAuthPlug do
   def call(%{assigns: %{current_user: nil}} = conn, _opts), do: conn
 
   def call(%{assigns: %{current_user: current_user}} = conn, _opts) do
-    if User.is_restricted?(current_user.id, ["Login"]) do
+    if CacheUser.is_restricted?(current_user.id, ["Login"]) do
       conn
       |> assign(:current_user, nil)
     else
@@ -21,7 +21,7 @@ defmodule Teiserver.Account.TSAuthPlug do
   def live_call(%{assigns: %{current_user: nil}} = socket, _session), do: socket
 
   def live_call(%{assigns: %{current_user: current_user}} = socket, _session) do
-    if User.is_restricted?(current_user.id, ["Login"]) do
+    if CacheUser.is_restricted?(current_user.id, ["Login"]) do
       socket
       |> Phoenix.LiveView.Utils.assign(:current_user, nil)
     else

@@ -4,7 +4,7 @@ defmodule Teiserver.SpringRawTest do
   import Teiserver.TeiserverTestLib,
     only: [raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1, new_user: 0]
 
-  alias Teiserver.Account.UserCache
+  alias Teiserver.Account.UserCacheLib
   alias Central.Account
 
   setup do
@@ -50,7 +50,7 @@ defmodule Teiserver.SpringRawTest do
     _send_raw(socket, "REGISTER #{name} password raw_register_email@email.com\n")
     reply = _recv_raw(socket)
     assert reply =~ "REGISTRATIONACCEPTED\n"
-    user = UserCache.get_user_by_name(name)
+    user = UserCacheLib.get_user_by_name(name)
     assert user != nil
 
     # Now check the DB!
@@ -67,9 +67,9 @@ defmodule Teiserver.SpringRawTest do
 
     _send_raw(socket, "REGISTER #{username} X03MO1qnZdYdgyfeuILPmQ== #{username}@email.e\n")
     _ = _recv_raw(socket)
-    user = UserCache.get_user_by_name(username)
+    user = UserCacheLib.get_user_by_name(username)
     assert user != nil
-    UserCache.update_user(%{user | verified: true})
+    UserCacheLib.update_user(%{user | verified: true})
 
     # First try to login with a bad-case username
     _send_raw(
@@ -87,7 +87,7 @@ defmodule Teiserver.SpringRawTest do
 
     reply = _recv_until(socket)
     [accepted | remainder] = String.split(reply, "\n")
-    user = UserCache.get_user_by_name(username)
+    user = UserCacheLib.get_user_by_name(username)
 
     assert accepted == "ACCEPTED #{username}",
       message:
@@ -129,11 +129,11 @@ defmodule Teiserver.SpringRawTest do
   # test "CONFIRMAGREEMENT", %{socket: socket} do
   #   user = new_user()
   #   Teiserver.Account.update_user_stat(user.id, %{"verification_code" => "123456"})
-  #   user = UserCache.update_user(%{user | verified: false, roles: []}, persist: true)
+  #   user = UserCacheLib.update_user(%{user | verified: false, roles: []}, persist: true)
 
   #   query = "UPDATE account_users SET inserted_at = '2020-01-01 01:01:01' WHERE id = #{user.id}"
   #   Ecto.Adapters.SQL.query(Repo, query, [])
-  #   Teiserver.Account.UserCache.recache_user(user.id)
+  #   Teiserver.Account.UserCacheLib.recache_user(user.id)
   #   _ = _recv_raw(socket)
 
   #   # If we try to login as them we should get a specific failure

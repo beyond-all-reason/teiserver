@@ -5,7 +5,7 @@ defmodule Teiserver.SpringTcpServer do
 
   alias Phoenix.PubSub
   alias Teiserver.Config
-  alias Teiserver.{User, Client, Account, Room}
+  alias Teiserver.{CacheUser, Client, Account, Room}
   alias Teiserver.Protocols.{SpringIn, SpringOut}
   alias Teiserver.Data.Types, as: T
 
@@ -452,7 +452,7 @@ defmodule Teiserver.SpringTcpServer do
     if state.lobby_hash == nil do
       send(self(), :terminate)
     else
-      {:ok, _user} = User.do_login(user, state.ip, state.lobby, state.lobby_hash)
+      {:ok, _user} = CacheUser.do_login(user, state.ip, state.lobby, state.lobby_hash)
     end
 
     {:noreply, new_state}
@@ -786,7 +786,7 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   defp user_updated(fields, state) do
-    new_user = User.get_user_by_id(state.userid)
+    new_user = CacheUser.get_user_by_id(state.userid)
     new_state = %{state | user: new_user}
 
     fields
@@ -1128,8 +1128,8 @@ defmodule Teiserver.SpringTcpServer do
           userid: user.id,
           name: user.name,
           rank: 0,
-          moderator: User.is_moderator?(user),
-          bot: User.is_bot?(user)
+          moderator: CacheUser.is_moderator?(user),
+          bot: CacheUser.is_bot?(user)
         })
       c ->
         c
@@ -1266,7 +1266,7 @@ defmodule Teiserver.SpringTcpServer do
   @spec engage_flood_protection(map()) :: {:stop, String.t(), map()}
   defp engage_flood_protection(state) do
     SpringOut.reply(:disconnect, "Flood protection", nil, state)
-    User.set_flood_level(state.userid, 10)
+    CacheUser.set_flood_level(state.userid, 10)
     Client.disconnect(state.userid, "SpringTCPServer.flood_protection")
 
     Logger.info(

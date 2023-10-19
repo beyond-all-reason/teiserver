@@ -36,7 +36,7 @@ end
 
 defmodule Teiserver.Data.Matchmaking do
   require Logger
-  alias Teiserver.{Account, Game, User}
+  alias Teiserver.{Account, Game, CacheUser}
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Data.{QueueStruct, QueueGroup}
   alias Teiserver.Game.{QueueWaitServer, QueueMatchServer}
@@ -262,7 +262,7 @@ defmodule Teiserver.Data.Matchmaking do
             any_moderated =
               party.members
               |> Stream.map(fn member_id ->
-                User.is_restricted?(member_id, "Matchmaking")
+                CacheUser.is_restricted?(member_id, "Matchmaking")
               end)
               |> Enum.any?()
 
@@ -277,7 +277,7 @@ defmodule Teiserver.Data.Matchmaking do
             :not_party_leader
           end
 
-        User.is_restricted?(userid, "Matchmaking") ->
+        CacheUser.is_restricted?(userid, "Matchmaking") ->
           :moderated
 
         true ->

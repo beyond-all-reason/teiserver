@@ -25,14 +25,6 @@ defmodule Teiserver do
     :code.load_file(module)
   end
 
-  @doc """
-  Activates agent mode (if allowed by config)
-  """
-  @spec agent_mode() :: :ok | {:failure, String.t()}
-  def agent_mode() do
-    Teiserver.Agents.AgentLib.start()
-  end
-
   @spec user_group_id() :: integer()
   def user_group_id(), do: ConCache.get(:application_metadata_cache, "teiserver_user_group")
 

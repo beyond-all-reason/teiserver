@@ -4,7 +4,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   """
   use Oban.Worker, queue: :teiserver
 
-  alias Teiserver.{Account, Battle, User, Coordinator}
+  alias Teiserver.{Account, Battle, Coordinator}
   alias Teiserver.Battle.MatchMembershipLib
   alias Teiserver.Helper.NumberHelper
   alias Teiserver.Config
@@ -83,7 +83,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
     # Tell the host to re-rate some players
     usernames =
       match.members
-      |> Enum.map_join(" ", fn m -> User.get_username(m.user_id) end)
+      |> Enum.map_join(" ", fn m -> Account.get_username(m.user_id) end)
 
     msg = "updateSkill #{usernames}"
     Coordinator.send_to_user(match.founder_id, msg)
@@ -100,7 +100,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
     winning_team =
       memberships
       |> Enum.map(fn m ->
-        username = User.get_username(m.user_id)
+        username = Account.get_username(m.user_id)
         win = Map.get(win_map, username, false)
 
         stats =

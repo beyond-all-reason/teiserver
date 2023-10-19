@@ -45,7 +45,7 @@ defmodule TeiserverWeb.Account.SecurityController do
     case Central.Account.update_user(user, user_params, :password) do
       {:ok, _user} ->
         # User password updated
-        Teiserver.User.set_new_spring_password(user.id, user_params["password"])
+        Teiserver.CacheUser.set_new_spring_password(user.id, user_params["password"])
 
         conn
         |> put_flash(:info, "Account password updated successfully.")

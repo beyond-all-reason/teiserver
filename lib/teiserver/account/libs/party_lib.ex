@@ -11,7 +11,7 @@ end
 
 defmodule Teiserver.Account.PartyLib do
   # alias Phoenix.PubSub
-  alias Teiserver.{Account, Chat, User}
+  alias Teiserver.{Account, Chat, CacheUser}
   alias Teiserver.Account.Party
   alias Teiserver.Data.Types, as: T
   alias Phoenix.PubSub
@@ -197,11 +197,11 @@ defmodule Teiserver.Account.PartyLib do
   @spec do_say(T.userid(), T.party_id(), String.t()) :: :ok | nil
   defp do_say(userid, party_id, msg) do
     msg = trim_message(msg)
-    user = User.get_user_by_id(userid)
+    user = Account.get_user_by_id(userid)
 
     allowed =
       cond do
-        User.is_restricted?(user, ["All chat"]) -> false
+        CacheUser.is_restricted?(user, ["All chat"]) -> false
         true -> true
       end
 

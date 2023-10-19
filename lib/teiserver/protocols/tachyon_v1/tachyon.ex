@@ -3,7 +3,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   Used for library-like functions that are specific to a version.
   """
 
-  alias Teiserver.{Client, User}
+  alias Teiserver.{Client, CacheUser}
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
   require Logger
@@ -115,7 +115,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
 
     Logger.metadata(request_id: "TachyonTcpServer##{user.id}")
 
-    exempt_from_cmd_throttle = User.is_moderator?(user) == true or User.is_bot?(user) == true
+    exempt_from_cmd_throttle = CacheUser.is_moderator?(user) == true or CacheUser.is_bot?(user) == true
 
     %{
       state

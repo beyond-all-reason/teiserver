@@ -5,7 +5,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
 
   use GenServer
   alias Teiserver.Config
-  alias Teiserver.{User, Account}
+  alias Teiserver.{CacheUser, Account}
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Account.AccoladeBotServer
   alias Teiserver.Data.Types, as: T
@@ -25,9 +25,9 @@ defmodule Teiserver.Account.AccoladeChatServer do
       bot_id: AccoladeLib.get_accolade_bot_userid(),
       badge_types: badge_types,
       userid: userid,
-      user: User.get_user_by_id(userid),
+      user: Account.get_user_by_id(userid),
       recipient_id: recipient_id,
-      recipient: User.get_user_by_id(recipient_id),
+      recipient: Account.get_user_by_id(recipient_id),
       match_id: match_id,
       stage: :not_started
     }
@@ -64,7 +64,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
 
           increment_miss_count(state.userid, 3)
 
-          User.send_direct_message(
+          CacheUser.send_direct_message(
             state.bot_id,
             state.userid,
             "Thank you for your feedback, no Accolade will be bestowed."
@@ -76,7 +76,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
         integer_choice == 0 ->
           increment_miss_count(state.userid, 3)
 
-          User.send_direct_message(
+          CacheUser.send_direct_message(
             state.bot_id,
             state.userid,
             "Thank you for your feedback, no Accolade will be bestowed."
@@ -92,7 +92,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
 
           case badge_type do
             [] ->
-              User.send_direct_message(
+              CacheUser.send_direct_message(
                 state.bot_id,
                 state.userid,
                 "None of the listed Accolades match that option"
@@ -116,7 +116,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
 
               decrement_miss_count(state.userid, 5)
 
-              User.send_direct_message(
+              CacheUser.send_direct_message(
                 state.bot_id,
                 state.userid,
                 "Thank you for your feedback, this Accolade will be bestowed."
@@ -127,7 +127,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
           end
 
         :error ->
-          User.send_direct_message(
+          CacheUser.send_direct_message(
             state.bot_id,
             state.userid,
             "I'm sorry but I can't pick an Accolade based on that value"
@@ -187,7 +187,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
       state.badge_types
       |> Enum.map(fn {i, bt} -> "#{i} - #{bt.name}, #{bt.description}" end)
 
-    User.send_direct_message(
+    CacheUser.send_direct_message(
       state.bot_id,
       state.userid,
       [
