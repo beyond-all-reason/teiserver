@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.TextCallbackController do
   use CentralWeb, :controller
 
-  alias Teiserver.{Communication}
+  alias Teiserver.{Communication, Logging, Account}
   alias Teiserver.Communication.TextCallbackLib
   import Teiserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
   alias Teiserver.Helper.StylingHelper
@@ -41,12 +41,32 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
         joins: []
       )
 
+    logs = if allow?(conn.assigns.current_user, "Moderator") do
+      Logging.list_audit_logs(
+        search: [
+          action: "Discord.text_callback",
+          details_equal: {"command", id}
+        ],
+        order_by: "Newest first"
+      )
+      |> Enum.map(fn log ->
+        user = Account.get_user_by_discord_id(log.details["discord_user_id"]) || %{name: nil}
+        channel = Communication.get_discord_channel("id:#{log.details["discord_channel_id"]}") || %{name: nil}
+
+        Map.merge(log, %{
+          username: user.name,
+          channel_name: channel.name
+        })
+      end)
+    end
+
     text_callback
     |> TextCallbackLib.make_favourite()
     |> insert_recently(conn)
 
     conn
     |> assign(:text_callback, text_callback)
+    |> assign(:logs, logs)
     |> add_breadcrumb(name: "Show: #{text_callback.name}", url: conn.request_path)
     |> render("show.html")
   end

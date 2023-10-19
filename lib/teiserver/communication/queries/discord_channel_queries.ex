@@ -39,6 +39,11 @@ defmodule Teiserver.Communication.DiscordChannelQueries do
       where: discord_channels.name == ^name
   end
 
+  defp _where(query, :channel_id, channel_id) do
+    from discord_channels in query,
+      where: discord_channels.channel_id == ^channel_id
+  end
+
   @spec do_order_by(Ecto.Query.t(), list | String.t | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
   defp do_order_by(query, orderings) when is_list(orderings) do

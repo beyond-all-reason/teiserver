@@ -157,10 +157,12 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   defp cache_channel({:error, channel}), do: {:error, channel}
   defp cache_channel({:ok, %DiscordChannel{} = channel}) do
     Central.cache_put(:discord_channel_cache, channel.name, channel)
+    Central.cache_put(:discord_channel_cache, "id:#{channel.channel_id}", channel)
     {:ok, channel}
   end
   defp cache_channel(%DiscordChannel{} = channel) do
     Central.cache_put(:discord_channel_cache, channel.name, channel)
+    Central.cache_put(:discord_channel_cache, "id:#{channel.channel_id}", channel)
     {:ok, channel}
   end
   defp cache_channel(channel), do: channel

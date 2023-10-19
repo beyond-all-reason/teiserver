@@ -47,7 +47,15 @@
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item">
             <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component("icon", icon: "fa-solid fa-file-alt") %> Details
+              <Fontawesome.icon icon="fa-file-alt" style="solid" />
+              Details
+            </a>
+          </li>
+          
+          <li class="nav-item">
+            <a href="#logs_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <Fontawesome.icon icon={Teiserver.Logging.AuditLogLib.icon()} style="solid" />
+              Logs
             </a>
           </li>
         </ul>
@@ -55,6 +63,10 @@
         <div class="tab-content">
           <div class="tab-pane" id="details_tab" style="padding:5px;">
             <%= render("tab_details.html", assigns) %>
+          </div>
+          
+          <div class="tab-pane" id="logs_tab" style="padding:5px;" :if={@logs}>
+            <%= render("tab_logs.html", assigns) %>
           </div>
         </div>
       </div>
