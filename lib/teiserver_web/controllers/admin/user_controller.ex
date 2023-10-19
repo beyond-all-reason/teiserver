@@ -1020,4 +1020,30 @@ defmodule TeiserverWeb.Admin.UserController do
       "limit" => 50
     }
   end
+
+  @spec gdpr_clean(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def gdpr_clean(conn, %{"id" => id}) do
+    user = Account.get_user_by_id(id)
+
+    case Central.Account.UserLib.has_access(user, conn) do
+      {true, _} ->
+        new_user = Map.merge(user, %{
+          country: "??"
+        })
+        Account.update_cache_user(user.id, new_user)
+
+        Account.delete_user_stat_keys(user.id, [
+          "country", "last_ip"
+        ])
+
+        conn
+        |> put_flash(:success, "User GDPR cleaned")
+        |> redirect(to: ~p"/teiserver/admin/user/#{user.id}")
+
+      _ ->
+        conn
+        |> put_flash(:danger, "Unable to access this user")
+        |> redirect(to: ~p"/teiserver/admin/user")
+    end
+  end
 end

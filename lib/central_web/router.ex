@@ -574,6 +574,9 @@ defmodule TeiserverWeb.Router do
     resources("/discord_channels", DiscordChannelController,
       only: [:index, :new, :create, :show, :edit, :update, :delete]
     )
+
+    # User stuff
+    put("/users/gdpr_clean/:id", UserController, :gdpr_clean)
   end
 
   scope "/teiserver/admin", TeiserverWeb.Admin, as: :admin do

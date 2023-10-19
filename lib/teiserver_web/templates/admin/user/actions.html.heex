@@ -3,22 +3,26 @@
     class="dropdown-item"
     href={Routes.ts_admin_user_path(@conn, :perform_action, @user, "recache")}
   >
-    <%= central_component("icon", icon: "fa-solid fa-sync") %> &nbsp;
+    <Fontawesome.icon icon="fa-sync" style="solid" />
+    &nbsp;
     Recache
   </a>
 
   <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :rename_form, @user)}>
-    <%= central_component("icon", icon: "fa-solid fa-pen-field") %> &nbsp;
+    <Fontawesome.icon icon="fa-pen-field" style="solid" />
+    &nbsp;
     Rename
   </a>
 
   <a class="dropdown-item" href={~p"/moderation/report_user/#{@user.id}"}>
-    <%= central_component("icon", icon: Teiserver.Moderation.ReportLib.icon()) %> &nbsp;
+    <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="solid" />
+    &nbsp;
     Report form
   </a>
 
   <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :smurf_search, @user.id)}>
-    <%= central_component("icon", icon: "fa-solid fa-face-angry-horns") %> &nbsp;
+    <Fontawesome.icon icon="fa-face-angry-horns" style="solid" />
+    &nbsp;
     Smurf search
   </a>
 
@@ -28,12 +32,14 @@
     class="dropdown-item"
     href={Routes.ts_admin_user_path(@conn, :perform_action, @user, "reset_flood_protection")}
   >
-    <%= central_component("icon", icon: "fa-solid fa-water-arrow-down") %> &nbsp;
+    <Fontawesome.icon icon="fa-water-arrow-down" style="solid" />
+    &nbsp;
     Reset flood protection
   </a>
 
   <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :reset_password, @user.id)}>
-    <%= central_component("icon", icon: "fa-solid fa-shield-alt") %> &nbsp;
+    <Fontawesome.icon icon="fa-shield-alt" style="solid" />
+    &nbsp;
     Send password reset email
   </a>
 
@@ -41,7 +47,20 @@
     class="dropdown-item"
     href={"#{Routes.moderation_ban_path(@conn, :new_with_user)}?teiserver_user=#{@user.id}"}
   >
-    <%= central_component("icon", icon: Teiserver.Moderation.BanLib.icon()) %> &nbsp;
+    <Fontawesome.icon icon={Teiserver.Moderation.BanLib.icon()} style="solid" />
+    &nbsp;
     Add ban
   </a>
+
+  <.link
+    :if={allow?(@current_user, "Server")}
+    href={~p"/admin/users/gdpr_clean/#{@user.id}"}
+    data-confirm={"Are you sure?"}
+    method="put"
+    class="dropdown-item bg-danger_transparent"
+  >
+    <Fontawesome.icon icon="broom-wide" style="solid" />
+    &nbsp;
+    GDPR clean
+  </.link>
 </div>
