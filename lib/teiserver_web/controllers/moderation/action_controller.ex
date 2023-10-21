@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
   use CentralWeb, :controller
 
   alias Teiserver.Logging
-  alias Teiserver.{Account, Moderation}
+  alias Teiserver.{Account, Moderation, Communication}
   alias Teiserver.Moderation.{Action, ActionLib, ReportLib}
   import Teiserver.Logging.Helpers, only: [add_audit_log: 3]
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
@@ -344,15 +344,19 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
   @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
-    action = Moderation.get_action!(id, preload: [:reports])
+    action = Moderation.get_action!(id)
 
     # Update any reports which were assigned to this
-    action.reports
-    |> Enum.each(fn report ->
-      Moderation.update_report(report, %{result_id: nil})
-    end)
+    # action.report_groups
+    # |> Enum.each(fn report ->
+    #   Moderation.update_report(report, %{result_id: nil})
+    # end)
 
     Moderation.delete_action(action)
+
+    if action.discord_message_id do
+      Communication.delete_discord_message("Public moderation log", action.discord_message_id)
+    end
 
     action_map =
       Map.take(action, ~w(target_id reason restrictions score_modifier expires hidden)a)
