@@ -39,7 +39,7 @@ defmodule Teiserver.Data.Matchmaking do
   alias Teiserver.{Account, Game, CacheUser}
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Data.{QueueStruct, QueueGroup}
-  alias Teiserver.Game.{QueueWaitServer, QueueMatchServer}
+  alias Teiserver.Game.{QueueWaitServer, QueueRoomServer}
   alias Teiserver.Data.Types, as: T
   alias Phoenix.PubSub
 
@@ -143,7 +143,7 @@ defmodule Teiserver.Data.Matchmaking do
 
     {:ok, pid} =
       DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
-        QueueMatchServer,
+        QueueRoomServer,
         data: %{
           match_id: match_id,
           queue_id: queue_id,

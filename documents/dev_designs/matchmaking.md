@@ -53,7 +53,7 @@ Given our use of TrueSkill at the current time my suggested initial settings wou
 - Check rate - `every 250ms`
 
 ## Match found
-Once a pairing is found a MatchServer is created. It selects a lobby, ensures they are both ready and such. If the MatchServer fails it can re-add both of these to the QueueServer at the same priority and rating as when they left and their search can resume.
+Once a pairing is found a RoomServer is created. It selects a lobby, ensures they are both ready and such. If the RoomServer fails it can re-add both of these to the QueueServer at the same priority and rating as when they left and their search can resume.
 
 ## Implementation
 ##### Check function

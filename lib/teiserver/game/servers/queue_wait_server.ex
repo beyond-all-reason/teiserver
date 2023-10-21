@@ -1,7 +1,7 @@
 defmodule Teiserver.Game.QueueWaitServer do
   @moduledoc """
   This is the server used to match players for a battle before passing them off
-  to a QueueMatchServer.
+  to a QueueRoomServer.
   """
 
   use GenServer
@@ -385,7 +385,7 @@ defmodule Teiserver.Game.QueueWaitServer do
   defp select_groups_for_balance(state, group_list, bucket_key) do
     # We just need to find N teams of S people, then we balance it
     # largest groups first, we don't care about which team
-    # they are on, that will be handled by the MatchServer
+    # they are on, that will be handled by the RoomServer
 
     # First we sort the group list, should be biggest groups first followed
     # by the groups closest to the correct bucket

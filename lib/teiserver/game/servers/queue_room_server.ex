@@ -1,4 +1,4 @@
-defmodule Teiserver.Game.QueueMatchServer do
+defmodule Teiserver.Game.QueueRoomServer do
   @moduledoc """
   This server takes the players who are matched together and finds them a
   room to play in. It (if the setting is enabled) also handles readying up
@@ -19,7 +19,7 @@ defmodule Teiserver.Game.QueueMatchServer do
 
   @impl true
   def handle_cast({:player_accept, player_id}, state) when is_integer(player_id) do
-    Logger.info("QueueMatchServer #{state.match_id} player accept #{player_id}")
+    Logger.info("QueueRoomServer #{state.match_id} player accept #{player_id}")
 
     new_state =
       case player_id in state.pending_accepts do
@@ -39,7 +39,7 @@ defmodule Teiserver.Game.QueueMatchServer do
                 find_empty_lobby(interim_state)
               else
                 Logger.info(
-                  "QueueMatchServer cancel_match #{state.match_id} because one or more declined users"
+                  "QueueRoomServer cancel_match #{state.match_id} because one or more declined users"
                 )
 
                 cancel_match(interim_state)
@@ -59,7 +59,7 @@ defmodule Teiserver.Game.QueueMatchServer do
   end
 
   def handle_cast({:player_decline, player_id}, state) when is_integer(player_id) do
-    Logger.info("QueueMatchServer #{state.match_id} player decline #{player_id}")
+    Logger.info("QueueRoomServer #{state.match_id} player decline #{player_id}")
 
     new_state = %{
       state
@@ -92,7 +92,7 @@ defmodule Teiserver.Game.QueueMatchServer do
 
   def handle_info(:end_waiting, state) do
     Logger.info(
-      "QueueMatchServer match cancelled #{state.match_id} because :end_waiting, state: #{inspect(state)}"
+      "QueueRoomServer match cancelled #{state.match_id} because :end_waiting, state: #{inspect(state)}"
     )
 
     cancel_match(state)
@@ -113,7 +113,7 @@ defmodule Teiserver.Game.QueueMatchServer do
   # No more to accept but declines is non-zero
   def handle_info(:tick, %{pending_accepts: []} = state) do
     Logger.info(
-      "QueueMatchServer match cancelled #{state.match_id} because ticked and no pending accepts"
+      "QueueRoomServer match cancelled #{state.match_id} because ticked and no pending accepts"
     )
 
     cancel_match(state)
@@ -126,7 +126,7 @@ defmodule Teiserver.Game.QueueMatchServer do
 
   # :find_timeout
   def handle_info(:find_timeout, %{stage: "Finding empty lobby"} = state) do
-    Logger.info("QueueMatchServer match cancelled #{state.match_id} because find timeout")
+    Logger.info("QueueRoomServer match cancelled #{state.match_id} because find timeout")
     cancel_match(state)
   end
 
@@ -238,7 +238,7 @@ defmodule Teiserver.Game.QueueMatchServer do
       }
     )
 
-    Logger.info("QueueMatchServer match cancelled #{state.match_id}")
+    Logger.info("QueueRoomServer match cancelled #{state.match_id}")
     DynamicSupervisor.terminate_child(Teiserver.Game.QueueSupervisor, self())
     {:noreply, state}
   end
@@ -253,14 +253,14 @@ defmodule Teiserver.Game.QueueMatchServer do
     case empty_lobby do
       nil ->
         Logger.info(
-          "QueueMatchServer #{state.match_id} find_empty_lobby was unable to find an empty lobby"
+          "QueueRoomServer #{state.match_id} find_empty_lobby was unable to find an empty lobby"
         )
 
         # TODO: Use the coordinator to request a new lobby be hosted by SPADS
         %{state | stage: "Finding empty lobby"}
 
       _ ->
-        Logger.info("QueueMatchServer #{state.match_id} find_empty_lobby found empty lobby")
+        Logger.info("QueueRoomServer #{state.match_id} find_empty_lobby found empty lobby")
         setup_lobby(%{state | lobby_id: empty_lobby.id})
     end
   end
@@ -311,7 +311,7 @@ defmodule Teiserver.Game.QueueMatchServer do
     end)
 
     # Coordinator sets up the battle
-    Logger.info("QueueMatchServer #{state.match_id} setup_lobby starting battle setup")
+    Logger.info("QueueRoomServer #{state.match_id} setup_lobby starting battle setup")
     map_name = state.db_queue.map_list |> Enum.random()
 
     [
@@ -325,7 +325,7 @@ defmodule Teiserver.Game.QueueMatchServer do
       :timer.sleep(100)
     end)
 
-    Logger.info("QueueMatchServer #{state.match_id} setup_lobby putting players on teams")
+    Logger.info("QueueRoomServer #{state.match_id} setup_lobby putting players on teams")
 
     state.teams
     |> Enum.map(fn {team_id, team_members} ->
@@ -378,7 +378,7 @@ defmodule Teiserver.Game.QueueMatchServer do
     cond do
       all_players == false ->
         Logger.info(
-          "QueueMatchServer #{state.match_id} setup_lobby cannot start as not all are players #{inspect(all_clients)}"
+          "QueueRoomServer #{state.match_id} setup_lobby cannot start as not all are players #{inspect(all_clients)}"
         )
 
         Lobby.sayex(
@@ -391,7 +391,7 @@ defmodule Teiserver.Game.QueueMatchServer do
 
       all_synced == false ->
         Logger.info(
-          "QueueMatchServer #{state.match_id} setup_lobby cannot start as not all are synced #{inspect(all_clients)}"
+          "QueueRoomServer #{state.match_id} setup_lobby cannot start as not all are synced #{inspect(all_clients)}"
         )
 
         Lobby.sayex(
@@ -403,7 +403,7 @@ defmodule Teiserver.Game.QueueMatchServer do
         Battle.remove_modoptions(lobby.id, ["server/match/match_id", "server/match/queue_id"])
 
       true ->
-        Logger.info("QueueMatchServer #{state.match_id} setup_lobby calling player cv start")
+        Logger.info("QueueRoomServer #{state.match_id} setup_lobby calling player cv start")
 
         Lobby.sayex(
           Coordinator.get_coordinator_userid(),
@@ -422,7 +422,7 @@ defmodule Teiserver.Game.QueueMatchServer do
           :timer.sleep(100)
         end)
 
-        Logger.info("QueueMatchServer #{state.match_id} setup_lobby calling forcestart")
+        Logger.info("QueueRoomServer #{state.match_id} setup_lobby calling forcestart")
         Coordinator.send_to_host(lobby.id, "!forcestart")
         :timer.sleep(100)
 
@@ -496,7 +496,7 @@ defmodule Teiserver.Game.QueueMatchServer do
   def init(opts) do
     send(self(), :initial_setup)
     Process.send_after(self(), :find_timeout, @find_timeout)
-    Logger.metadata(request_id: "QueueMatchServer##{opts.queue_id}/#{opts.match_id}")
+    Logger.metadata(request_id: "QueueRoomServer##{opts.queue_id}/#{opts.match_id}")
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
@@ -543,13 +543,13 @@ defmodule Teiserver.Game.QueueMatchServer do
         send_invites(state)
 
         Logger.info(
-          "QueueMatchServer #{state.match_id} created, sent invites to #{inspect(user_ids)}"
+          "QueueRoomServer #{state.match_id} created, sent invites to #{inspect(user_ids)}"
         )
 
         state
       else
         Logger.info(
-          "QueueMatchServer #{state.match_id} created, accepting all users #{inspect(user_ids)} as 'matchmaking.Use ready check' is false"
+          "QueueRoomServer #{state.match_id} created, accepting all users #{inspect(user_ids)} as 'matchmaking.Use ready check' is false"
         )
 
         %{state | pending_accepts: [], accepted_users: user_ids, stage: "Finding empty lobby"}
