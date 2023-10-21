@@ -109,14 +109,14 @@
         <div class="row" :if={@filters["message-format"] == "Raw"} id="raw-text-block">
           <div class="col-md-12">
             <textarea rows="30" cols="40" class="form-control"><%= for msg <- @messages do %>
-    <%= msg.user.name %>: <%= msg.content %><% end %></textarea>
+    <%= @usernames[msg.user_id] %>: <%= msg.content %><% end %></textarea>
           </div>
         </div>
         
         <div class="row" :if={@filters["message-format"] == "Discord"} id="discord-text-block">
           <div class="col-md-12">
             <textarea rows="30" cols="40" class="form-control"><%= for msg <- @messages do %>
-    **<%= msg.user.name %>**: <%= msg.content %><% end %></textarea>
+    **<%= @usernames[msg.user_id] %>**: <%= msg.content %><% end %></textarea>
           </div>
         </div>
       </div>

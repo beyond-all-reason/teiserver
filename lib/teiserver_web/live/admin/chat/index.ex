@@ -69,6 +69,18 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
     {:noreply, socket}
   end
 
+  def handle_event("format-update", event, socket) do
+    [key] = event["_target"]
+    value = event[key]
+
+    new_filters = Map.put(socket.assigns.filters, key, value)
+
+    {:noreply,
+      socket
+        |> assign(:filters, new_filters)
+    }
+  end
+
   defp default_filters(socket) do
     socket
     |> assign(:filters, %{
