@@ -64,7 +64,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
   def handle_meme("poor", senderid, %{lobby_id: lobby_id} = _state) do
     sender = Account.get_user_by_id(senderid)
-    Battle.set_modoption(lobby_id, "game/modoptions/resourceincomemultiplier", "0")
+    Battle.set_modoption(lobby_id, "game/modoptions/multiplier_resourceincome", "0")
 
     ["#{sender.name} has enabled the poor meme. Nobody can produce resources."]
   end
@@ -75,7 +75,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     Battle.set_modoptions(lobby_id, %{
       "game/modoptions/startmetal" => "100000000",
       "game/modoptions/startenergy" => "100000000",
-      "game/modoptions/resourceincomemultiplier" => "1000"
+      "game/modoptions/multiplier_resourceincome" => "1000"
     })
 
     ["#{sender.name} has enabled the rich meme. Everybody has insane amounts of resources."]
@@ -103,22 +103,22 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/startmetal" => Enum.random(~w(500 750 1000 1500 2500 5000 10000 100000)),
       "game/modoptions/startenergy" =>
         Enum.random(~w(750 1000 1500 2500 5000 10000 100000 500000)),
-      "game/modoptions/resourceincomemultiplier" =>
+      "game/modoptions/multiplier_resourceincome" =>
         Enum.random(~w(0.1 0.25 0.5 0.75 1 1.5 2 5 10)),
       "game/modoptions/maxunits" => Enum.random(~w(100 500 1000 2000 2000 2000 2000)),
       "game/modoptions/norushtime" => Enum.random(~w(1 2 3 4 5 8 10 10)),
-      "game/modoptions/norushmode" => Enum.random(~w(0 0 0 1)),
+      "game/modoptions/norush" => Enum.random(~w(0 0 0 1)),
       "game/modoptions/map_waterlevel" => Enum.random(~w(-200 -100 -50 0 0 0 0 50 100 200)),
       "game/modoptions/lootboxes" => Enum.random(~w(scav_only scav_only scav_only enabled)),
       "game/modoptions/lootboxes_density" =>
         Enum.random(~w(rarer normal normal normal dense verydense)),
       "game/modoptions/teamcolors_anonymous_mode" => Enum.random(~w(0 0 0 1)),
-      "game/modoptions/experimentalshieldpower" => Enum.random(~w(1 1 1 2 3 4)),
+      "game/modoptions/multiplier_shieldpower" => Enum.random(~w(1 1 1 2 3 4)),
       "game/modoptions/disable_fogofwar" => Enum.random(~w(0 0 0 1)),
       "game/modoptions/assistdronesenabled" =>
-        Enum.random(~w(scav_only scav_only scav_only enabled)),
+        Enum.random(~w(pve_only pve_only pve_only enabled)),
       "game/modoptions/assistdronescount" => Enum.random(~w(2 4 8 16)),
-      "game/modoptions/experimentalscavuniqueunits" => Enum.random(~w(0 0 0 1)),
+      "game/modoptions/experimentalextraunits" => Enum.random(~w(0 0 0 1)),
       "game/modoptions/multiplier_maxdamage" => Enum.random(@crazy_multiplier_opts),
       "game/modoptions/multiplier_turnrate" => Enum.random(@crazy_multiplier_opts),
       "game/modoptions/multiplier_builddistance" => Enum.random(@crazy_multiplier_opts_positive),
@@ -192,7 +192,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
   def handle_meme("hoversonly", senderid, %{lobby_id: lobby_id} = _state) do
     sender = Account.get_user_by_id(senderid)
-    new_options = %{"game/modoptions/tweakdefs" => "ZnVuY3Rpb24gZEMoU1QsIGNvcCkKY29wPWNvcCBvciB7fQpsb2NhbCBOVD17fQpjb3BbU1RdPU5UCmZvciBrLCB2IGluIHBhaXJzKFNUKSBkbwppZiB0eXBlKHYpPT0idGFibGUiIHRoZW4KaWYgTlRba109PW5pbCB0aGVuCk5UW2tdPXt9CmVuZApOVFtrXT1jb3Bbdl0gb3IgZEModiwgY29wKQplbHNlCk5UW2tdPXYKZW5kCmVuZApyZXR1cm4gTlQKZW5kCmxvY2FsIHVkID0gVW5pdERlZnMKdWQuYXJtY29tPWRDKHVkLmFybWNoKQp1ZC5jb3Jjb209ZEModWQuY29yY2gpCnVkLmxlZ2NvbT1kQyh1ZC5jb3JjaCkKZm9yIF8sIGEgaW4gcGFpcnMoe1sxXT17ImFybWNvbSIsImFybSIsImFybWNoIn0sWzJdPXsiY29yY29tIiwiY29yIiwiY29yY2gifSxbM109eyJsZWdjb20iLCJhcm0iLCJjb3JjaCJ9fSkgZG8KdWRbYVsxXV0uaWNvbnR5cGU9YVsyXS4uImNvbW1hbmRlciIKdWRbYVsxXV0ucmVjbGFpbWFibGU9ZmFsc2UKdWRbYVsxXV0ud29ya2VydGltZT0zMDAKdWRbYVsxXV0uY3VzdG9tcGFyYW1zPXsKCXVuaXRncm91cD0nYnVpbGRlcicsCglpc2NvbW1hbmRlciA9IHRydWUsCglwYXJhbHl6ZW11bHRpcGxpZXIgPSAwLjAyNSwKfQp1ZFthWzFdXS5zb3VuZHMudW5kZXJhdHRhY2s9Indhcm5pbmcyIgp1ZFthWzFdXS5zb3VuZHMuc2VsZWN0PXsKCVsxXT1hWzJdLi4iY29tc2VsIiwKfQp1ZFthWzFdXS5tZXRhbG1ha2U9Mgp1ZFthWzFdXS5tZXRhbHN0b3JhZ2U9NTAwCnVkW2FbMV1dLmVuZXJneW1ha2U9MjUKdWRbYVsxXV0uZW5lcmd5c3RvcmFnZT01MDAKZW5kCnVkLmxlZ2NvbS5tYXhkYW1hZ2U9MzcwMA",
+    new_options = %{"game/modoptions/tweakdefs" => "ZnVuY3Rpb24gZEMoU1QsIGNvcCkKY29wPWNvcCBvciB7fQpsb2NhbCBOVD17fQpjb3BbU1RdPU5UCmZvciBrLCB2IGluIHBhaXJzKFNUKSBkbwppZiB0eXBlKHYpPT0idGFibGUiIHRoZW4KaWYgTlRba109PW5pbCB0aGVuCk5UW2tdPXt9CmVuZApOVFtrXT1jb3Bbdl0gb3IgZEModiwgY29wKQplbHNlCk5UW2tdPXYKZW5kCmVuZApyZXR1cm4gTlQKZW5kCmxvY2FsIHVkID0gVW5pdERlZnMKdWQuYXJtY29tPWRDKHVkLmFybWNoKQp1ZC5jb3Jjb209ZEModWQuY29yY2gpCnVkLmxlZ2NvbT1kQyh1ZC5jb3JjaCkKZm9yIF8sIGEgaW4gcGFpcnMoe1sxXT17ImFybWNvbSIsImFybSIsImFybWNoIn0sWzJdPXsiY29yY29tIiwiY29yIiwiY29yY2gifSxbM109eyJsZWdjb20iLCJhcm0iLCJjb3JjaCJ9fSkgZG8KdWRbYVsxXV0uaWNvbnR5cGU9YVsyXS4uImNvbW1hbmRlciIKdWRbYVsxXV0ucmVjbGFpbWFibGU9ZmFsc2UKdWRbYVsxXV0ud29ya2VydGltZT0zMDAKdWRbYVsxXV0uY3VzdG9tcGFyYW1zPXsKCXVuaXRncm91cD0nYnVpbGRlcicsCglpc2NvbW1hbmRlciA9IHRydWUsCglwYXJhbHl6ZW11bHRpcGxpZXIgPSAwLjAyNSwKfQp1ZFthWzFdXS5zb3VuZHMudW5kZXJhdHRhY2s9Indhcm5pbmcyIgp1ZFthWzFdXS5zb3VuZHMuc2VsZWN0PXsKCVsxXT1hWzJdLi4iY29tc2VsIiwKfQp1ZFthWzFdXS5tZXRhbG1ha2U9Mgp1ZFthWzFdXS5tZXRhbHN0b3JhZ2U9NTAwCnVkW2FbMV1dLmVuZXJneW1ha2U9MjUKdWRbYVsxXV0uZW5lcmd5c3RvcmFnZT01MDAKZW5kCnVkLmxlZ2NvbS5tYXhkYW1hZ2U9MzcwMA"}
     cor_not_hover_fac = ~w(corsy corlab corvp corap coramsub corplat coravp coralab corasy coraap corgantuw corgant)
     arm_not_hover_fac = ~w(armsy armlab armvp armap armamsub armplat armalab armavp armaap armasy armshltx armshltxuw)
     leg_not_hover_fac = ~w(leglab legvp legap legalab legavp legaap leggant)
@@ -228,19 +228,19 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     new_options = %{
       "game/modoptions/startmetal" => "1000",
       "game/modoptions/startenergy" => "1000",
-      "game/modoptions/resourceincomemultiplier" => "1",
+      "game/modoptions/multiplier_resourceincome" => "1",
       "game/modoptions/maxunits" => "2000",
-      "game/modoptions/norushtime" => "10",
-      "game/modoptions/norushmode" => "0",
+      "game/modoptions/norushtime" => "5",
+      "game/modoptions/norush" => "0",
       "game/modoptions/map_waterlevel" => "0",
       "game/modoptions/lootboxes" => "scav_only",
       "game/modoptions/lootboxes_density" => "normal",
       "game/modoptions/teamcolors_anonymous_mode" => "0",
-      "game/modoptions/experimentalshieldpower" => "1",
+      "game/modoptions/multiplier_shieldpower" => "1",
       "game/modoptions/disable_fogofwar" => "0",
-      "game/modoptions/assistdronesenabled" => "scav_only",
-      "game/modoptions/assistdronescount" => "4",
-      "game/modoptions/experimentalscavuniqueunits" => "0",
+      "game/modoptions/assistdronesenabled" => "pve_only",
+      "game/modoptions/assistdronescount" => "10",
+      "game/modoptions/experimentalextraunits" => "0",
       "game/modoptions/multiplier_maxdamage" => "1",
       "game/modoptions/multiplier_turnrate" => "1",
       "game/modoptions/multiplier_builddistance" => "1",
@@ -252,7 +252,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/multiplier_buildpower" => "1",
       "game/modoptions/multiplier_maxvelocity" => "1",
       "game/modoptions/multiplier_losrange" => "1",
-      "game/modoptions/multiplier_radarrange" => "1"
+      "game/modoptions/multiplier_radarrange" => "1",
       "game/modoptions/tweakdefs" => "ZG8gZW5k"
     }
 
