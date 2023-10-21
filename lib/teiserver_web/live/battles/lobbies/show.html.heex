@@ -76,7 +76,7 @@ spectators =
 
           <%= if @moderator and @lobby.match_id do %>
             <a
-              href={~p"/teiserver/admin/lobbies/#{@lobby.match_id}/lobby_chat"}
+              href={~p"/battle/chat/#{@lobby.match_id}"}
               class={"btn btn-#{bsname}"}
             >
               Full chat
