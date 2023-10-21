@@ -28,7 +28,6 @@ central-*.tar
 *.code-workspace
 *.session.sql
 .elixir_ls/*
-.tool-versions
 .idea
 
 # Temporary files for e.g. tests
