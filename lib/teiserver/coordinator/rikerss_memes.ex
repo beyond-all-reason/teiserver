@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   alias Teiserver.Lobby.{ChatLib}
   alias Teiserver.Data.Types, as: T
 
-  @meme_list ~w(ticks nodefence greenfields poor rich hardt1 crazy undo deathmatch)
+  @meme_list ~w(ticks nodefence greenfields poor rich hardt1 crazy undo deathmatch noscout hoversonly)
 
   @crazy_multiplier_opts ~w(0.3 0.5 0.7 1 1 1 1 1 1 1 1.5 2 4)
   @crazy_multiplier_opts_middler ~w(0.5 0.7 1 1 1 1 1 1 1 1.5 2)
@@ -165,7 +165,9 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     scavt3 =
       ~w(armannit3 cordoomt3 armbotrail armminivulc corhllllt corminibuzz corscavdrag corscavdtf corscavdtl corscavdtm)
 
-    unit_list = armada_defences ++ armada_aa ++ cortex_defences ++ cortex_aa ++ scavt3
+    legion_defences = ~w(legdefcarryt1 legmg)
+
+    unit_list = armada_defences ++ armada_aa ++ cortex_defences ++ cortex_aa ++ scavt3 ++ legion_defences
 
     scav_units =
       unit_list
@@ -175,6 +177,29 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
     [
       "#{sender.name} has enabled the No defence meme. In this game you will not be able to create any defences; good luck!"
+    ]
+  end
+
+  def handle_meme("noscout", senderid, %{lobby_id: lobby_id} = _state) do
+    sender = Account.get_user_by_id(senderid)
+    arm_scouts = ~w(armflea armfav armmark armseer armpeep armawac armrad armspy armarad armeyes armfrad armason armsehak)
+    cor_scouts = ~w(corfav corvoyr corvrad corfink corawac corrad corarad corspy coreyes corfrad corason corhunt)
+    Battle.disable_units(lobby_id, labs ++ defences ++ units ++ cortex)
+    [
+      "#{sender.name} has enabled the No Scouts meme. In this game you will not be able to create any scout, radar, or spy units; good luck!"
+    ]
+  end
+
+  def handle_meme("hoversonly", senderid, %{lobby_id: lobby_id} = _state) do
+    sender = Account.get_user_by_id(senderid)
+    new_options = %{"game/modoptions/tweakdefs" => "ZnVuY3Rpb24gZEMoU1QsIGNvcCkKY29wPWNvcCBvciB7fQpsb2NhbCBOVD17fQpjb3BbU1RdPU5UCmZvciBrLCB2IGluIHBhaXJzKFNUKSBkbwppZiB0eXBlKHYpPT0idGFibGUiIHRoZW4KaWYgTlRba109PW5pbCB0aGVuCk5UW2tdPXt9CmVuZApOVFtrXT1jb3Bbdl0gb3IgZEModiwgY29wKQplbHNlCk5UW2tdPXYKZW5kCmVuZApyZXR1cm4gTlQKZW5kCmxvY2FsIHVkID0gVW5pdERlZnMKdWQuYXJtY29tPWRDKHVkLmFybWNoKQp1ZC5jb3Jjb209ZEModWQuY29yY2gpCnVkLmxlZ2NvbT1kQyh1ZC5jb3JjaCkKZm9yIF8sIGEgaW4gcGFpcnMoe1sxXT17ImFybWNvbSIsImFybSIsImFybWNoIn0sWzJdPXsiY29yY29tIiwiY29yIiwiY29yY2gifSxbM109eyJsZWdjb20iLCJhcm0iLCJjb3JjaCJ9fSkgZG8KdWRbYVsxXV0uaWNvbnR5cGU9YVsyXS4uImNvbW1hbmRlciIKdWRbYVsxXV0ucmVjbGFpbWFibGU9ZmFsc2UKdWRbYVsxXV0ud29ya2VydGltZT0zMDAKdWRbYVsxXV0uY3VzdG9tcGFyYW1zPXsKCXVuaXRncm91cD0nYnVpbGRlcicsCglpc2NvbW1hbmRlciA9IHRydWUsCglwYXJhbHl6ZW11bHRpcGxpZXIgPSAwLjAyNSwKfQp1ZFthWzFdXS5zb3VuZHMudW5kZXJhdHRhY2s9Indhcm5pbmcyIgp1ZFthWzFdXS5zb3VuZHMuc2VsZWN0PXsKCVsxXT1hWzJdLi4iY29tc2VsIiwKfQp1ZFthWzFdXS5tZXRhbG1ha2U9Mgp1ZFthWzFdXS5tZXRhbHN0b3JhZ2U9NTAwCnVkW2FbMV1dLmVuZXJneW1ha2U9MjUKdWRbYVsxXV0uZW5lcmd5c3RvcmFnZT01MDAKZW5kCnVkLmxlZ2NvbS5tYXhkYW1hZ2U9MzcwMA",
+    cor_not_hover_fac = ~w(corsy corlab corvp corap coramsub corplat coravp coralab corasy coraap corgantuw corgant)
+    arm_not_hover_fac = ~w(armsy armlab armvp armap armamsub armplat armalab armavp armaap armasy armshltx armshltxuw)
+    leg_not_hover_fac = ~w(leglab legvp legap legalab legavp legaap leggant)
+    Battle.set_modoptions(lobby_id, new_options)
+    Battle.disable_units(lobby_id, cor_not_hover_fac ++ arm_not_hover_fac ++ leg_not_hover_fac)
+    [
+      "#{sender.name} has enabled the Hovers Only meme. In this game you will be limited to hovers only, including your commander; good luck!"
     ]
   end
 
@@ -228,6 +253,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/multiplier_maxvelocity" => "1",
       "game/modoptions/multiplier_losrange" => "1",
       "game/modoptions/multiplier_radarrange" => "1"
+      "game/modoptions/tweakdefs" => "ZG8gZW5k"
     }
 
     Battle.set_modoptions(lobby_id, new_options)
