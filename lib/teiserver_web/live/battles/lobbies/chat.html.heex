@@ -47,7 +47,7 @@ moderator = allow?(@current_user, "Moderator") %>
 
           <%= if moderator and @lobby.match_id != nil do %>
             <a
-              href={~p"/teiserver/admin/lobbies/#{@lobby.match_id}/lobby_chat"}
+              href={~p"/battle/chat/#{@lobby.match_id}"}
               class={"btn btn-#{bsname}"}
             >
               Full chat
