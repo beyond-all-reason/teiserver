@@ -198,6 +198,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     case Moderation.create_action(action_params) do
       {:ok, action} ->
         Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
+        maybe_create_discord_post(action)
 
         if not Enum.empty?(report_ids) do
           Moderation.list_reports(search: [id_list: report_ids], limit: :infinity)
@@ -282,7 +283,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
         action = Moderation.get_action!(id, preload: [:target])
 
         Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
-        Teiserver.Bridge.DiscordBridgeBot.update_action(action)
+        maybe_update_discord_post(action)
 
         add_audit_log(conn, "Moderation:Action updated", %{action_id: action.id})
 
@@ -301,11 +302,11 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
   @spec re_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def re_post(conn, %{"id" => id}) do
-    action = Moderation.get_action!(id)
+    action = Moderation.get_action!(id, preload: [:target])
 
     # First we try to update the message (if we have an ID)
     update_result = if action.discord_message_id do
-      Teiserver.Bridge.DiscordBridgeBot.update_action(action)
+      maybe_update_discord_post(action)
     else
       {:error, "no message_id"}
     end
@@ -313,7 +314,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
     case update_result do
       {:error, _} ->
-        Teiserver.Bridge.DiscordBridgeBot.new_action(action)
+        maybe_create_discord_post(action)
         add_audit_log(conn, "Moderation:Action re_posted", %{action_id: action.id})
 
         conn
@@ -334,6 +335,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     case Moderation.update_action(action, %{"expires" => Timex.now()}) do
       {:ok, _action} ->
         add_audit_log(conn, "Moderation:Action halted", %{action_id: action.id})
+        maybe_update_discord_post(action)
         Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
 
         conn
@@ -367,5 +369,63 @@ defmodule TeiserverWeb.Moderation.ActionController do
     conn
     |> put_flash(:info, "Action deleted.")
     |> redirect(to: Routes.moderation_action_path(conn, :index))
+  end
+
+  defp maybe_create_discord_post(action) do
+    post_to_discord =
+      cond do
+        action.hidden -> false
+        Enum.member?(action.restrictions, "Bridging") -> false
+        Enum.member?(action.restrictions, "Note") -> false
+        action.reason == "Banned (Automod)" -> false
+        true -> true
+      end
+
+    if post_to_discord do
+      message = ActionLib.generate_discord_message_text(action)
+
+      posting_result = Communication.new_discord_message("Public moderation log", message)
+      case posting_result do
+        {:ok, %{id: message_id}} ->
+          Moderation.update_action(action, %{discord_message_id: message_id})
+
+      end
+      posting_result
+    else
+      nil
+    end
+  end
+
+  defp maybe_update_discord_post(action) do
+    post_to_discord =
+      cond do
+        action.hidden -> false
+        Enum.member?(action.restrictions, "Bridging") -> false
+        Enum.member?(action.restrictions, "Note") -> false
+        action.reason == "Banned (Automod)" -> false
+        true -> true
+      end
+
+    cond do
+      post_to_discord == false ->
+        if action.discord_message_id do
+          Communication.delete_discord_message("Public moderation log", action.discord_message_id)
+          Moderation.update_action(action, %{discord_message_id: nil})
+        end
+        nil
+
+      action.discord_message_id == nil ->
+        maybe_create_discord_post(action)
+
+      true ->
+        message = ActionLib.generate_discord_message_text(action)
+
+        if message do
+          Communication.edit_discord_message("Public moderation log", action.discord_message_id, message)
+        else
+          Communication.delete_discord_message("Public moderation log", action.discord_message_id)
+          Moderation.update_action(action, %{discord_message_id: nil})
+        end
+    end
   end
 end

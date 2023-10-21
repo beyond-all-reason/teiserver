@@ -2,6 +2,7 @@ defmodule Teiserver.Moderation.ActionLib do
   @moduledoc false
   use CentralWeb, :library
   alias Teiserver.Moderation.Action
+  alias Teiserver.Helper.TimexHelper
 
   # Functions
   @spec icon :: String.t()
@@ -201,5 +202,47 @@ defmodule Teiserver.Moderation.ActionLib do
       left_join: reports in assoc(report_groups, :reports),
       left_join: reporters in assoc(reports, :reporter),
       preload: [report_group: {report_groups, reports: {reports, reporter: reporters}}]
+  end
+
+  def generate_discord_message_text(nil), do: nil
+  def generate_discord_message_text(action) do
+    action = if Ecto.assoc_loaded?(action.target) do
+      action
+    else
+      Teiserver.Moderation.get_action(action.id,
+        preload: [:target]
+      )
+    end
+
+    if action do
+      until =
+        if action.expires do
+          "Until: " <> TimexHelper.date_to_str(action.expires, format: :ymd_hms) <> " (UTC)"
+        else
+          "Permanent"
+        end
+
+      restriction_list = action.restrictions |> Enum.join(", ")
+
+      restriction_string =
+        if Enum.count(action.restrictions) > 1 do
+          "Restrictions: #{restriction_list}"
+        else
+          "Restriction: #{restriction_list}"
+        end
+
+      formatted_reason =
+        Regex.replace(~r/https:\/\/discord.gg\/\S+/, action.reason, "--discord-link--")
+
+      [
+        "--------------------------------------------",
+        "`#{action.target.name}` has been moderated.",
+        "Reason: #{formatted_reason}, #{restriction_string}",
+        until
+      ]
+        |> List.flatten()
+        |> Enum.join("\n")
+        |> String.replace("\n\n", "\n")
+    end
   end
 end

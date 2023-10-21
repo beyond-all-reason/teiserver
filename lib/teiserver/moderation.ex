@@ -534,25 +534,36 @@ defmodule Teiserver.Moderation do
     |> Repo.one!()
   end
 
-  # Uncomment this if needed, default files do not need this function
-  # @doc """
-  # Gets a single action.
+  @doc """
+  Gets a single action.
 
-  # Returns `nil` if the Action does not exist.
+  Returns `nil` if the Action does not exist.
 
-  # ## Examples
+  ## Examples
 
-  #     iex> get_action(123)
-  #     %Action{}
+      iex> get_action(123)
+      %Action{}
 
-  #     iex> get_action(456)
-  #     nil
+      iex> get_action(456)
+      nil
 
-  # """
-  # def get_action(id, args \\ []) when not is_list(id) do
-  #   action_query(id, args)
-  #   |> Repo.one
-  # end
+  """
+  @spec get_action(Integer.t() | List.t()) :: Action.t()
+  @spec get_action(Integer.t(), List.t()) :: Action.t()
+  def get_action(id) when not is_list(id) do
+    action_query(id, [])
+    |> Repo.one()
+  end
+
+  def get_action(args) do
+    action_query(nil, args)
+    |> Repo.one()
+  end
+
+  def get_action(id, args) do
+    action_query(id, args)
+    |> Repo.one()
+  end
 
   @doc """
   Creates a action.

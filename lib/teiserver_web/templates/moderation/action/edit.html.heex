@@ -28,14 +28,8 @@
         <%= link(raw("<i class='fa-brands fa-fw fa-discord'></i>&nbsp; Re post to discord"),
           to: ~p"/moderation/action/re-post/#{@action.id}",
           method: :put,
-          data: [confirm: "Are you sure?"],
+          data: [confirm: "Are you sure (this is only needed if you deleted the post)?"],
           class: "btn btn-warning"
-        ) %> &nbsp;&nbsp;&nbsp; <%= link(
-          raw("<i class='fa-solid fa-fw fa-octagon'></i>&nbsp; Update or re-post action"),
-          to: ~p"/moderation/action/re-post/#{@action.id}",
-          method: :put,
-          data: [confirm: "Are you sure?"],
-          class: "btn btn-primary"
         ) %> &nbsp;&nbsp;&nbsp; <%= link(
           raw("<i class='fa-solid fa-fw fa-octagon'></i>&nbsp; Halt action"),
           to: ~p"/moderation/action/halt/#{@action.id}",

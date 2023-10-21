@@ -7,7 +7,6 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   alias Teiserver.{Room, Moderation}
   alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands}
   alias Teiserver.{Config}
-  alias Teiserver.Helper.TimexHelper
   alias Nostrum.Api
   require Logger
 
@@ -223,79 +222,6 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
       Api.create_message(channel, "Moderation report: #{msg}")
     end
-  end
-
-  # Teiserver.Moderation.get_action!(123) |> Teiserver.Bridge.DiscordBridgeBot.new_action()
-  @spec new_action(Moderation.Action.t()) :: any
-  def new_action(%{hidden: true}), do: nil
-
-  def new_action(action) do
-    action = Moderation.get_action!(action.id, preload: [:target])
-
-    channel_id = Config.get_site_config_cache("teiserver.Discord channel #moderation-actions")
-
-    post_to_discord =
-      cond do
-        channel_id == nil -> false
-        Enum.member?(action.restrictions, "Bridging") -> false
-        Enum.member?(action.restrictions, "Note") -> false
-        action.reason == "Banned (Automod)" -> false
-        true -> true
-      end
-
-    if post_to_discord do
-      message = generate_action_text(action)
-
-      posting_result = Api.create_message(channel_id, message)
-      case posting_result do
-        {:ok, %{id: message_id}} ->
-          Moderation.update_action(action, %{discord_message_id: message_id})
-
-      end
-      posting_result
-    else
-      nil
-    end
-  end
-
-  def update_action(%{discord_message_id: message_id} = action) do
-    channel_id = Config.get_site_config_cache("teiserver.Discord channel #moderation-actions")
-    contents = generate_action_text(action)
-
-    if channel_id && message_id && contents do
-      Api.edit_message(channel_id, message_id, content: contents)
-    end
-  end
-
-  defp generate_action_text(action) do
-    until =
-      if action.expires do
-        "Until: " <> TimexHelper.date_to_str(action.expires, format: :ymd_hms) <> " (UTC)"
-      else
-        "Permanent"
-      end
-
-    restriction_list = action.restrictions |> Enum.join(", ")
-
-    restriction_string =
-      if Enum.count(action.restrictions) > 1 do
-        "Restrictions: #{restriction_list}"
-      else
-        "Restriction: #{restriction_list}"
-      end
-
-    formatted_reason =
-      Regex.replace(~r/https:\/\/discord.gg\/\S+/, action.reason, "--discord-link--")
-
-    [
-      "--------------------------------------------",
-      "`#{action.target.name}` has been moderated.",
-      "Reason: #{formatted_reason}, #{restriction_string}",
-      until
-    ]
-      |> List.flatten()
-      |> Enum.join("\n")
-      |> String.replace("\n\n", "\n")
   end
 
   def gdt_check() do

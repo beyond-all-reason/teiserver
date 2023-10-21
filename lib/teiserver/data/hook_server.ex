@@ -19,10 +19,6 @@ defmodule Teiserver.HookServer do
         :ok
 
       :new_action ->
-        if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
-          Teiserver.Bridge.DiscordBridgeBot.new_action(data.action)
-        end
-
         Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(data.action.target_id)
 
       :updated_action ->
