@@ -184,7 +184,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     sender = Account.get_user_by_id(senderid)
     arm_scouts = ~w(armflea armfav armmark armseer armpeep armawac armrad armspy armarad armeyes armfrad armason armsehak)
     cor_scouts = ~w(corfav corvoyr corvrad corfink corawac corrad corarad corspy coreyes corfrad corason corhunt)
-    Battle.disable_units(lobby_id, labs ++ defences ++ units ++ cortex)
+    Battle.disable_units(lobby_id, arm_scouts ++ cor_scouts)
     [
       "#{sender.name} has enabled the No Scouts meme. In this game you will not be able to create any scout, radar, or spy units; good luck!"
     ]
