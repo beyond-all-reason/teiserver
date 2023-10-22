@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   alias Teiserver.Lobby.{ChatLib}
   alias Teiserver.Data.Types, as: T
 
-  @meme_list ~w(ticks nodefence greenfields poor rich hardt1 crazy undo deathmatch noscout hoversonly)
+  @meme_list ~w(ticks nodefence greenfields poor rich hardt1 crazy undo deathmatch noscout hoversonly armonly coronly legonly)
 
   @crazy_multiplier_opts ~w(0.3 0.5 0.7 1 1 1 1 1 1 1 1.5 2 4)
   @crazy_multiplier_opts_middler ~w(0.5 0.7 1 1 1 1 1 1 1 1.5 2)
@@ -203,6 +203,35 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     ]
   end
 
+  def handle_meme("armonly", senderid, %{lobby_id: lobby_id} = _state) do
+    sender = Account.get_user_by_id(senderid)
+    new_options = %{"game/modoptions/faction_limiter" => "armada"}
+    Battle.set_modoptions(lobby_id, new_options)
+    [
+      "#{sender.name} has enabled the Armada Only meme. A fight of Technological Supremacy upon you; good luck!"
+    ]
+  end
+
+  def handle_meme("coronly", senderid, %{lobby_id: lobby_id} = _state) do
+    sender = Account.get_user_by_id(senderid)
+    new_options = %{"game/modoptions/faction_limiter" => "cortex"}
+    Battle.set_modoptions(lobby_id, new_options)
+    [
+      "#{sender.name} has enabled the Cortex Only meme. May pure Brute Strenght grant you Honour in battle; good luck!"
+    ]
+  end
+
+  def handle_meme("legonly", senderid, %{lobby_id: lobby_id} = _state) do
+    sender = Account.get_user_by_id(senderid)
+    new_options = %{"game/modoptions/faction_limiter" => "legion",
+    "game/modoptions/experimentallegionfaction" => "1",
+  }
+    Battle.set_modoptions(lobby_id, new_options)
+    [
+      "#{sender.name} has enabled the Legion Only meme. Scorched Earth be upon us all; good luck!"
+    ]
+  end
+
   def handle_meme("undo", _senderid, %{lobby_id: lobby_id} = _state) do
     undo_memes(lobby_id)
 
@@ -253,7 +282,9 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/multiplier_maxvelocity" => "1",
       "game/modoptions/multiplier_losrange" => "1",
       "game/modoptions/multiplier_radarrange" => "1",
-      "game/modoptions/tweakdefs" => "ZG8gZW5k"
+      "game/modoptions/tweakdefs" => "ZG8gZW5k",
+      "game/modoptions/experimentallegionfaction" => "0",
+      "game/modoptions/faction_limiter" => "0"
     }
 
     Battle.set_modoptions(lobby_id, new_options)
