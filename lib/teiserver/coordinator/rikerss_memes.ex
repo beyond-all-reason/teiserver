@@ -176,7 +176,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     Battle.disable_units(lobby_id, unit_list ++ scav_units)
 
     [
-      "#{sender.name} has enabled the No defence meme. In this game you will not be able to create any defences; good luck!"
+      "#{sender.name} has enabled the No defense meme. In this game you will not be able to create any defences; good luck!"
     ]
   end
 
@@ -226,7 +226,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     new_options = %{"game/modoptions/faction_limiter" => "cortex"}
     Battle.set_modoptions(lobby_id, new_options)
     [
-      "#{sender.name} has enabled the Cortex Only meme. May pure Brute Strenght grant you Honour in battle; good luck!"
+      "#{sender.name} has enabled the Cortex Only meme. May pure Brute Strength grant you Honour in battle; good luck!"
     ]
   end
 
