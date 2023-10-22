@@ -35,7 +35,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Appearance do
 
   defp apply_action(socket, _live_action, _params) do
     socket
-      |> assign(:page_title, "Accolades")
+      |> assign(:page_title, "Appearance")
   end
 
   @impl true
