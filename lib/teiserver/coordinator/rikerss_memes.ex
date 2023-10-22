@@ -22,9 +22,9 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
     cortex =
       ~w(coraap coralab corap coravp corgant corhp corlab corvp corllt corfhp corsy corjuno corhllt corhlt)
-
     Battle.set_modoptions(lobby_id, %{
-      "game/modoptions/map_waterislava" => "1"
+      "game/modoptions/map_waterislava" => "1",
+      "game/modoptions/faction_limiter" => "armada"
     })
 
     Battle.disable_units(lobby_id, labs ++ defences ++ units ++ cortex)
@@ -106,18 +106,18 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/multiplier_resourceincome" =>
         Enum.random(~w(0.1 0.25 0.5 0.75 1 1.5 2 5 10)),
       "game/modoptions/maxunits" => Enum.random(~w(100 500 1000 2000 2000 2000 2000)),
-      "game/modoptions/norushtime" => Enum.random(~w(1 2 3 4 5 8 10 10)),
+      "game/modoptions/norushtimer" => Enum.random(~w(1 2 3 4 5 8 10 10)),
       "game/modoptions/norush" => Enum.random(~w(0 0 0 1)),
       "game/modoptions/map_waterlevel" => Enum.random(~w(-200 -100 -50 0 0 0 0 50 100 200)),
       "game/modoptions/lootboxes" => Enum.random(~w(scav_only scav_only scav_only enabled)),
       "game/modoptions/lootboxes_density" =>
-        Enum.random(~w(rarer normal normal normal dense verydense)),
+        Enum.random(~w(veryrare rarer normal normal normal)),
       "game/modoptions/teamcolors_anonymous_mode" => Enum.random(~w(0 0 0 1)),
       "game/modoptions/multiplier_shieldpower" => Enum.random(~w(1 1 1 2 3 4)),
       "game/modoptions/disable_fogofwar" => Enum.random(~w(0 0 0 1)),
       "game/modoptions/assistdronesenabled" =>
         Enum.random(~w(pve_only pve_only pve_only enabled)),
-      "game/modoptions/assistdronescount" => Enum.random(~w(2 4 8 16)),
+      "game/modoptions/assistdronescount" => Enum.random(~w(2 4 8 10 16)),
       "game/modoptions/experimentalextraunits" => Enum.random(~w(0 0 0 1)),
       "game/modoptions/multiplier_maxdamage" => Enum.random(@crazy_multiplier_opts),
       "game/modoptions/multiplier_turnrate" => Enum.random(@crazy_multiplier_opts),
@@ -137,7 +137,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     # Assist dronse
     new_options =
       if new_options["game/modoptions/assistdronesenabled"] != "enabled" do
-        Map.put(new_options, "game/modoptions/assistdronescount", "8")
+        Map.put(new_options, "game/modoptions/assistdronescount", "10")
       else
         new_options
       end
@@ -268,7 +268,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/startenergy" => "1000",
       "game/modoptions/multiplier_resourceincome" => "1",
       "game/modoptions/maxunits" => "2000",
-      "game/modoptions/norushtime" => "5",
+      "game/modoptions/norushtimer" => "5",
       "game/modoptions/norush" => "0",
       "game/modoptions/map_waterlevel" => "0",
       "game/modoptions/lootboxes" => "scav_only",
