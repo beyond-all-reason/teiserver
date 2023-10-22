@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   alias Teiserver.Lobby.{ChatLib}
   alias Teiserver.Data.Types, as: T
 
-  @meme_list ~w(ticks nodefence greenfields poor rich hardt1 crazy undo deathmatch noscout hoversonly armonly coronly legonly)
+  @meme_list ~w(ticks nodefence greenfields poor rich hardt1 crazy undo deathmatch noscout hoversonly nofusion armonly coronly legonly)
 
   @crazy_multiplier_opts ~w(0.3 0.5 0.7 1 1 1 1 1 1 1 1.5 2 4)
   @crazy_multiplier_opts_middler ~w(0.5 0.7 1 1 1 1 1 1 1 1.5 2)
@@ -200,6 +200,15 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     Battle.disable_units(lobby_id, cor_not_hover_fac ++ arm_not_hover_fac ++ leg_not_hover_fac)
     [
       "#{sender.name} has enabled the Hovers Only meme. In this game you will be limited to hovers only, including your commander; good luck!"
+    ]
+  end
+
+  def handle_meme("nofusion", senderid, %{lobby_id: lobby_id} = _state) do
+    sender = Account.get_user_by_id(senderid)
+    fusion_units = ~w(armfus armafus armuwfus armckfus corfus corafus coruwfus)
+    Battle.disable_units(lobby_id, fusion_units)
+    [
+      "#{sender.name} has enabled the No Fusion meme. In this game you will not be able to create any T2 Fusion Energy production; good luck!"
     ]
   end
 
