@@ -122,15 +122,19 @@ type_icons = %{
                       <%= for key <- @all_user_keys do %>
                         <tr>
                           <td>
-                            <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}>
-                            </i>
-                            &nbsp; <%= key.type.name %>
+                            <label for={"ban_type_#{key.value}"}>
+                              <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}>
+                              </i>
+                              &nbsp; <%= key.type.name %>
+                            </label>
                           </td>
                           <td>
-                            <%= key.value %>
+                            <label for={"ban_type_#{key.value}"}><%= key.value %></label>
                           </td>
                           <td>
-                            <%= date_to_str(key.last_updated, format: :hms_or_ymd) %>
+                            <label for={"ban_type_#{key.value}"}>
+                              <%= date_to_str(key.last_updated, format: :hms_or_ymd) %>
+                            </label>
                           </td>
                           <td>
                             <%= central_component("checkbox",
