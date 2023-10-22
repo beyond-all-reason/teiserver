@@ -9,6 +9,7 @@ defmodule TeiserverWeb.Account.ProfileComponents do
   attr :tab, :string, required: true
   attr :userid, :integer, required: true
   attr :profile_permissions, :list, default: []
+  attr :current_user, :map, required: true
   def profile_tabs(assigns) do
     ~H"""
     <div class="row mt-2 mb-3">
@@ -74,6 +75,15 @@ defmodule TeiserverWeb.Account.ProfileComponents do
             <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon()} style="solid" />
             Relationships
           </.tab_nav>
+
+          <.tab_nav
+            :if={Enum.member?(@profile_permissions, :self) and allow?(@current_user, "BAR+")}
+            url={~p"/profile/#{@userid}/contributor"}
+            selected={@tab == "contributor"}
+          >
+            <Fontawesome.icon icon="fa-code-commit" style="solid" />
+            Contributor
+          </.tab_nav>
         </.tab_header>
       </div>
     </div>
@@ -116,7 +126,7 @@ defmodule TeiserverWeb.Account.ProfileComponents do
       </div>
     </div>
 
-    <TeiserverWeb.Account.ProfileComponents.profile_tabs tab={@active} userid={@user.id} profile_permissions={@profile_permissions} />
+    <TeiserverWeb.Account.ProfileComponents.profile_tabs tab={@active} userid={@user.id} profile_permissions={@profile_permissions} current_user={@current_user} />
     """
   end
 end
