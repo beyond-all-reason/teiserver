@@ -37,7 +37,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   def handle_meme("greenfields", senderid, %{lobby_id: lobby_id} = _state) do
     sender = Account.get_user_by_id(senderid)
 
-    Battle.disable_units(lobby_id, ~w(armmex armamex armmoho cormex corexp cormexp cormoho))
+    Battle.disable_units(lobby_id, ~w(armmex armamex armmoho cormex corexp cormexp cormoho legmex legmext2 legmext15 coruwmex coruwmme armuwmex armuwmme armshockwave))
 
     ["#{sender.name} has enabled the Greenfield meme. Metal extractors are disabled."]
   end
