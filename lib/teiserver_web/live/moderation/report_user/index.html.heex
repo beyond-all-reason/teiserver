@@ -116,6 +116,73 @@
           <%= @failure_reason %>
         </div>
       </div>
+      
+      <div class="card-footer" :if={@stage != :not_allowed}>
+        In addition to reporting this user you can Ignore them. You can also Avoid (don't want to play with) them or Block (don't even want to see) them.
+        <br /><br />
+      
+        <span
+          :if={@relationship == nil || @relationship.ignore != true}
+          phx-click="ignore-user"
+          class="btn btn-outline-warning mx-1"
+        >
+          <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="regular" />
+          &nbsp;
+          Ignore
+        </span>
+        
+        <span
+          :if={@relationship && @relationship.ignore == true}
+          class="btn btn-warning mx-1"
+        >
+          <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="solid" />
+          &nbsp;
+          Ignoring
+        </span>
+        
+        &nbsp;&nbsp;
+        
+        <span
+          :if={@relationship == nil || @relationship && @relationship.state != "avoid"}
+          phx-click="avoid-user"
+          class="btn btn-outline-danger mx-1"
+        >
+          <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="regular" />
+          &nbsp;
+          Avoid
+        </span>
+        
+        <span
+          :if={@relationship && @relationship.state == "avoid"}
+          class="btn btn-danger mx-1"
+        >
+          <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="solid" />
+          &nbsp;
+          Avoiding
+        </span>
+
+        <span
+          :if={@relationship == nil || @relationship && @relationship.state != "block"}
+          phx-click="block-user"
+          class="btn btn-outline-danger2 mx-1"
+        >
+          <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="regular" />
+          &nbsp;
+          Block
+        </span>
+
+        <span
+          :if={@relationship && @relationship.state == "block"}
+          class="btn btn-danger2 mx-1"
+        >
+          <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="solid" />
+          &nbsp;
+          Blocking
+        </span>
+        <br /><br />
+        
+        You can change who you ignore, avoid and block in <a href={~p"/account/relationship"}>your relationships</a> page or for this person specifically on <a href={~p"/profile/#{@user.id}"}>their profile page</a>.
+      </div>
     </div>
   </div>
 </div>

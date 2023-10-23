@@ -117,7 +117,17 @@
       </span>
       
       <span
-        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.ignore != true}
+        :if={@relationship == nil || @relationship.state == "follow"}
+        phx-click="reset-relationship-state"
+        class="btn btn-outline-info mx-1"
+      >
+        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_follow()} style="regular" />
+        &nbsp;
+        Un-Follow
+      </span>
+      
+      <span
+        :if={@friendship == nil && @relationship && @relationship.ignore != true}
         phx-click="ignore-user"
         class="btn btn-outline-warning mx-1"
       >
@@ -147,6 +157,16 @@
       </span>
       
       <span
+        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.state == "avoid"}
+        phx-click="reset-relationship-state"
+        class="btn btn-outline-danger mx-1"
+      >
+        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="regular" />
+        &nbsp;
+        Unavoid
+      </span>
+      
+      <span
         :if={@friendship == nil && @relationship == nil || @relationship && @relationship.state != "block"}
         phx-click="block-user"
         class="btn btn-outline-danger2 mx-1"
@@ -154,6 +174,16 @@
         <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="regular" />
         &nbsp;
         Block
+      </span>
+      
+      <span
+        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.state == "block"}
+        phx-click="reset-relationship-state"
+        class="btn btn-outline-danger2 mx-1"
+      >
+        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="regular" />
+        &nbsp;
+        Unblock
       </span>
 
       <.link

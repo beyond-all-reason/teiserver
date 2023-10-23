@@ -72,7 +72,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     Account.reset_relationship_state(current_user.id, user.id)
 
     socket = socket
-      |> put_flash(:success, "You are now no longer following, ignoring, avoiding or blocking #{user.name}")
+      |> put_flash(:success, "You are now no longer following, avoiding or blocking #{user.name}")
       |> get_relationships_and_permissions()
 
     {:noreply, socket}

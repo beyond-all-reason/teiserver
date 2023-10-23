@@ -1540,17 +1540,38 @@ defmodule Teiserver.Account do
 
   """
   def upsert_relationship(attrs) do
+    conflict_sets = ~w(state ignore notes tags)a
+      |> Enum.filter(fn key ->
+        Map.has_key?(attrs, key) or Map.has_key?(attrs, to_string(key))
+      end)
+      |> Enum.map(fn key ->
+        value = Map.get(attrs, key, Map.get(attrs, to_string(key), nil))
+        {key, value}
+      end)
+      |> Keyword.new
+
+    IO.puts ""
+    IO.inspect conflict_sets
+    IO.puts ""
+
     %Relationship{}
     |> Relationship.changeset(attrs)
     |> Repo.insert(
-      on_conflict: [set: [
-        state: Map.get(attrs, "state", Map.get(attrs, :state, nil)),
-        ignore: Map.get(attrs, "ignore", Map.get(attrs, :ignore, nil)),
-        notes: Map.get(attrs, "notes", Map.get(attrs, :notes, nil)),
-        tags: Map.get(attrs, "tags", Map.get(attrs, :tags, nil))
-      ]],
+      on_conflict: [set: conflict_sets],
       conflict_target: ~w(from_user_id to_user_id)a
     )
+
+    # %Relationship{}
+    # |> Relationship.changeset(attrs)
+    # |> Repo.insert(
+    #   on_conflict: [set: [
+    #     state: Map.get(attrs, "state", Map.get(attrs, :state, nil)),
+    #     ignore: Map.get(attrs, "ignore", Map.get(attrs, :ignore, nil)),
+    #     notes: Map.get(attrs, "notes", Map.get(attrs, :notes, nil)),
+    #     tags: Map.get(attrs, "tags", Map.get(attrs, :tags, nil))
+    #   ]],
+    #   conflict_target: ~w(from_user_id to_user_id)a
+    # )
   end
 
   @doc """

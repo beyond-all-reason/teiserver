@@ -32,6 +32,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
       |> assign(:stage, :type)
       |> allowed_to_use_form
       |> get_user_matches
+      |> get_relationship
 
     {:noreply, socket}
   end
@@ -101,6 +102,36 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
       |> assign(:type, type)
       |> assign(:stage, :sub_type)
     }
+  end
+
+  def handle_event("ignore-user", _event, %{assigns: %{current_user: current_user, user: user}} = socket) do
+    Account.ignore_user(current_user.id, user.id)
+
+    socket = socket
+      |> put_flash(:success, "You are now ignoring #{user.name}")
+      |> get_relationship()
+
+    {:noreply, socket}
+  end
+
+  def handle_event("avoid-user", _event, %{assigns: %{current_user: current_user, user: user}} = socket) do
+    Account.avoid_user(current_user.id, user.id)
+
+    socket = socket
+      |> put_flash(:success, "You are now avoiding #{user.name}")
+      |> get_relationship()
+
+    {:noreply, socket}
+  end
+
+  def handle_event("block-user", _event, %{assigns: %{current_user: current_user, user: user}} = socket) do
+    Account.block_user(current_user.id, user.id)
+
+    socket = socket
+      |> put_flash(:success, "You are now blocking #{user.name}")
+      |> get_relationship()
+
+    {:noreply, socket}
   end
 
   def handle_event(_text, _event, socket) do
@@ -173,5 +204,16 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
         |> assign(:failure_reason, failure_reason)
         |> assign(:stage, :not_allowed)
     end
+  end
+
+  defp get_relationship(%{assigns: %{stage: :not_allowed}} = socket) do
+    socket
+  end
+
+  defp get_relationship(%{assigns: %{current_user: current_user, user: user}} = socket) do
+    relationship = Account.get_relationship(current_user.id, user.id)
+
+    socket
+      |> assign(:relationship, relationship)
   end
 end
