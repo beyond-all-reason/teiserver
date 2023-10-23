@@ -1,4 +1,5 @@
 defmodule TeiserverWeb.Admin.ChatLive.Index do
+  require TeiserverWeb.Admin.ChatLive.Index
   use TeiserverWeb, :live_view
   alias Teiserver.{Account, Coordinator, Chat}
 
@@ -13,7 +14,8 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
       |> add_breadcrumb(name: "Chat", url: "/admin/chat")
       |> default_filters
       |> assign(:searching, false)
-      |> get_messages
+      |> assign(:usernames, %{})
+      |> assign(:messages, [])
 
     {:ok, socket}
   end
@@ -21,16 +23,21 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
   @impl true
   def handle_params(params, _url, %{assigns: %{filters: filters}} = socket) do
     filters = if params["userid"] do
-      username = Account.get_username_by_id(params["userid"])
+      user = Account.get_user_by_id(params["userid"])
+
       Map.merge(filters, %{
-        "username" => username,
-        "user-raw-filter" => username
+        "username" => user.name,
+        "user-raw-filter" => user.name,
+        "userids" => [user.id]
       })
     else
       filters
     end
 
-    {:noreply, assign(socket, :filters, filters)}
+    {:noreply, socket
+      |> assign(:filters, filters)
+      |> get_messages()
+    }
   end
 
   @impl true
@@ -63,8 +70,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
     socket = socket
       |> assign(:filters, new_filters)
       |> assign(:searching, true)
-
-    send(self(), :do_get_messages)
+      |> get_messages()
 
     {:noreply, socket}
   end
@@ -98,7 +104,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
     |> assign(:searching, false)
   end
 
-  defp get_messages(%{assigns: %{filters: filters}} = socket) do
+  defp get_messages(%{assigns: %{filters: filters}} = socket) when is_connected?(socket) do
     mode = filters["mode"]
 
     inserted_after =
@@ -175,5 +181,10 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
       |> assign(:usernames, new_usernames)
       |> assign(:messages, messages)
       |> assign(:searching, false)
+  end
+
+  defp get_messages(socket) do
+    socket
+    |> assign(:searching, false)
   end
 end
