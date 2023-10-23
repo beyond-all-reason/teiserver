@@ -171,7 +171,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   def handle_event("unignore-user", %{"userid" => userid_str}, socket) do
     userid = String.to_integer(userid_str)
 
-    Account.reset_relationship_state(socket.assigns.current_user.id, userid)
+    Account.unignore_user(socket.assigns.current_user.id, userid)
 
     username = Account.get_username_by_id(userid)
 
@@ -191,6 +191,20 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
 
     socket = socket
       |> put_flash(:success, "#{username} is now ignored")
+      |> get_avoids()
+
+    {:noreply, socket}
+  end
+
+  def handle_event("unavoid-user", %{"userid" => userid_str}, socket) do
+    userid = String.to_integer(userid_str)
+
+    Account.reset_relationship_state(socket.assigns.current_user.id, userid)
+
+    username = Account.get_username_by_id(userid)
+
+    socket = socket
+      |> put_flash(:success, "#{username} is now avoided")
       |> get_avoids()
 
     {:noreply, socket}
@@ -338,14 +352,13 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     relationships = Account.list_relationships(
       where: [
         from_user_id: current_user.id,
-        state_in: ~w(ignore avoid block),
       ],
       preload: [:to_user]
     )
 
     ignores = relationships
       |> Enum.filter(fn r ->
-        r.state == "ignore"
+        r.ignore == true
       end)
       |> Enum.sort_by(fn r -> r.to_user.name end, &<=/2)
 

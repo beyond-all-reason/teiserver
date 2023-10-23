@@ -189,13 +189,13 @@
       <:col :let={ignore} label="Name"><%= ignore.to_user.name %></:col>
       <:col :let={avoid} label="">
         <span phx-click="unignore-user" phx-value-userid={avoid.to_user.id} class="btn btn-secondary btn-sm">
-          <Fontawesome.icon icon="arrow-left" style="regular" />
+          <Fontawesome.icon icon="times" style="regular" />
           Un-ignore
         </span>
       </:col>
       <:col :let={ignore} label="">
         <span phx-click="avoid-user" phx-value-userid={ignore.to_user.id} class="btn btn-secondary btn-sm">
-          <Fontawesome.icon icon="arrow-right" style="regular" />
+          <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="regular" />
           Avoid
         </span>
       </:col>
@@ -213,9 +213,9 @@
     <.table id="avoids-table" table_class="table-sm" rows={@avoids}>
       <:col :let={avoid} label="Name"><%= avoid.to_user.name %></:col>
       <:col :let={avoid} label="">
-        <span phx-click="ignore-user" phx-value-userid={avoid.to_user.id} class="btn btn-secondary btn-sm">
-          <Fontawesome.icon icon="arrow-left" style="regular" />
-          Ignore
+        <span phx-click="unavoid-user" phx-value-userid={avoid.to_user.id} class="btn btn-secondary btn-sm">
+          <Fontawesome.icon icon="times" style="regular" />
+          Un-avoid
         </span>
       </:col>
       <:col :let={avoid} label="">
