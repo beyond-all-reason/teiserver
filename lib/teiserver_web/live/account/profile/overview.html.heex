@@ -103,11 +103,8 @@
         Unfriend <%= @user.name %>
       </span>
       
-      
-      
-      
       <span
-        :if={@relationship == nil || @relationship.state != "follow"}
+        :if={@friendship == nil && (@relationship == nil || @relationship.state != "follow")}
         phx-click="follow-user"
         class="btn btn-outline-info mx-1"
       >
@@ -117,7 +114,7 @@
       </span>
       
       <span
-        :if={@relationship == nil || @relationship.state == "follow"}
+        :if={@friendship == nil && @relationship && @relationship.state == "follow"}
         phx-click="reset-relationship-state"
         class="btn btn-outline-info mx-1"
       >
@@ -127,7 +124,7 @@
       </span>
       
       <span
-        :if={@friendship == nil && @relationship && @relationship.ignore != true}
+        :if={@friendship == nil && (@relationship == nil || @relationship.ignore != true)}
         phx-click="ignore-user"
         class="btn btn-outline-warning mx-1"
       >
@@ -147,7 +144,7 @@
       </span>
       
       <span
-        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.state != "avoid"}
+        :if={@friendship == nil && @relationship == nil || @relationship.state != "avoid"}
         phx-click="avoid-user"
         class="btn btn-outline-danger mx-1"
       >
@@ -157,7 +154,7 @@
       </span>
       
       <span
-        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.state == "avoid"}
+        :if={@relationship && @relationship.state == "avoid"}
         phx-click="reset-relationship-state"
         class="btn btn-outline-danger mx-1"
       >
@@ -167,7 +164,7 @@
       </span>
       
       <span
-        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.state != "block"}
+        :if={@friendship == nil && @relationship == nil || @relationship.state != "block"}
         phx-click="block-user"
         class="btn btn-outline-danger2 mx-1"
       >
@@ -177,7 +174,7 @@
       </span>
       
       <span
-        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.state == "block"}
+        :if={@relationship && @relationship.state == "block"}
         phx-click="reset-relationship-state"
         class="btn btn-outline-danger2 mx-1"
       >
