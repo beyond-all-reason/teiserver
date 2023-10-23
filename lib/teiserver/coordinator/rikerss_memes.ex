@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   alias Teiserver.Lobby.{ChatLib}
   alias Teiserver.Data.Types, as: T
 
-  @meme_list ~w(ticks nodefence greenfields poor rich hardt1 crazy undo deathmatch noscout hoversonly nofusion armonly coronly legonly)
+  @meme_list ~w(ticks nodefence nodefence2 greenfields poor rich hardt1 crazy undo deathmatch noscout hoversonly nofusion armonly coronly legonly)
 
   @crazy_multiplier_opts ~w(0.3 0.5 0.7 1 1 1 1 1 1 1 1.5 2 4)
   @crazy_multiplier_opts_middler ~w(0.5 0.7 1 1 1 1 1 1 1 1.5 2)
@@ -177,6 +177,37 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
     [
       "#{sender.name} has enabled the No defense meme. In this game you will not be able to create any defences; good luck!"
+    ]
+  end
+
+  def handle_meme("nodefence2", senderid, %{lobby_id: lobby_id} = _state) do
+    sender = Account.get_user_by_id(senderid)
+
+    armada_defences =
+      ~w(armllt armamb armamd armanni armbeamer armbrtha armclaw armemp armguard armhlt armjuno armmg armpb armsilo armvulc armatl armdl armfhlt armfrt armgplat armkraken armptl armtl)
+
+    armada_aa = ~w(armferret armflak armmercury armrl armfflak armfrock armcir)
+
+    cortex_defences =
+      ~w(corllt corbhmth corbuzz cordoom corexp corfmd corhllt corhlt corjuno cormaw cormexp corpun corsilo cortoast cortron corvipe coratl cordl corfdoom corfhlt corfrock corfrt corgplat corptl cortl corint)
+
+    cortex_aa = ~w(corerad corflak cormadsam corrl corscreamer corenaa)
+
+    scavt3 =
+      ~w(armannit3 cordoomt3 armbotrail armminivulc corhllllt corminibuzz corscavdrag corscavdtf corscavdtl corscavdtm)
+
+    legion_defences = ~w(legdefcarryt1 legmg)
+
+    unit_list = armada_defences ++ armada_aa ++ cortex_defences ++ cortex_aa ++ scavt3 ++ legion_defences
+
+    scav_units =
+      unit_list
+      |> Enum.map(fn unit -> "#{unit}_scav" end)
+
+    Battle.disable_units(lobby_id, unit_list ++ scav_units)
+
+    [
+      "#{sender.name} has enabled the No defense meme, No LLTs ver. In this game you will not be able to create any defences; good luck!"
     ]
   end
 
