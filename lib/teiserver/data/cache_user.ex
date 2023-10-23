@@ -1087,24 +1087,7 @@ defmodule Teiserver.CacheUser do
     ip = Map.get(stats, "ip_override", ip)
 
     # If they don't want a flag shown, don't show it, otherwise check for an override before trying geoip
-    country =
-      cond do
-        Teiserver.Config.get_user_config_cache(user.id, "teiserver.Show flag") == false ->
-          "??"
-
-        stats["country_override"] != nil ->
-          stats["country_override"]
-
-        true ->
-          # Only call to geoip if the IP has changed
-          last_ip = Account.get_user_stat_data(user.id) |> Map.get("last_ip")
-
-          if last_ip != ip or (user.country || "??") == "??" do
-            Teiserver.Geoip.get_flag(ip, user.country)
-          else
-            user.country || "??"
-          end
-      end
+    country = get_country(user, ip)
 
     # Rank
     rank =
@@ -1159,6 +1142,32 @@ defmodule Teiserver.CacheUser do
     end
 
     {:ok, user}
+  end
+
+  @spec get_country(T.user, String.t) :: String.t
+  def get_country(user, ip) do
+    stats = Account.get_user_stat_data(user.id)
+
+    cond do
+      Config.get_user_config_cache(user.id, "teiserver.Show flag") == false ->
+        "??"
+
+      allow?(user, "BAR+") and Map.has_key?(stats, "bar_plus.flag") ->
+        stats["bar_plus.flag"]
+
+      stats["country_override"] != nil ->
+        stats["country_override"]
+
+      true ->
+        # Only call to geoip if the IP has changed
+        last_ip = Account.get_user_stat_data(user.id) |> Map.get("last_ip")
+
+        if last_ip != ip or (user.country || "??") == "??" do
+          Teiserver.Geoip.get_flag(ip, user.country)
+        else
+          user.country || "??"
+        end
+    end
   end
 
   @spec restrict_user(T.userid() | T.user(), String.t()) :: any
@@ -1339,7 +1348,7 @@ defmodule Teiserver.CacheUser do
         is_moderator?(user) or is_bot?(user)
 
       required ->
-        Enum.member?(user.roles, required)
+        Enum.member?(user.permissions, required)
     end
   end
 

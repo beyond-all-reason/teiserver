@@ -244,6 +244,7 @@ defmodule TeiserverWeb.Router do
         {Teiserver.Communication.NotificationPlug, :load_notifications}
       ] do
         live "/settings", SettingsLive.Index, :index
+        live "/settings/:key", SettingsLive.Index, :selected
     end
   end
 
