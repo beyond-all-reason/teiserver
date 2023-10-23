@@ -88,6 +88,16 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     {:noreply, socket}
   end
 
+  def handle_event("unignore-user", _event, %{assigns: %{current_user: current_user, user: user}} = socket) do
+    Account.unignore_user(current_user.id, user.id)
+
+    socket = socket
+      |> put_flash(:success, "You are no longer ignoring #{user.name}")
+      |> get_relationships_and_permissions()
+
+    {:noreply, socket}
+  end
+
   def handle_event("avoid-user", _event, %{assigns: %{current_user: current_user, user: user}} = socket) do
     Account.avoid_user(current_user.id, user.id)
 

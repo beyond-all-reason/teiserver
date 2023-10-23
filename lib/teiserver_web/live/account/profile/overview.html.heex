@@ -34,7 +34,7 @@
         You are following <%= @user.name %>
         <br /><br />
 
-      <% @relationship && @relationship.state == "ignore" -> %>
+      <% @relationship && @relationship.ignore -> %>
         You are ignoring <%= @user.name %>
         <br /><br />
 
@@ -117,13 +117,23 @@
       </span>
       
       <span
-        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.state != "ignore"}
+        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.ignore != true}
         phx-click="ignore-user"
         class="btn btn-outline-warning mx-1"
       >
         <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="regular" />
         &nbsp;
         Ignore
+      </span>
+
+      <span
+        :if={@relationship && @relationship.ignore == true}
+        phx-click="unignore-user"
+        class="btn btn-outline-warning mx-1"
+      >
+        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="regular" />
+        &nbsp;
+        Un-Ignore
       </span>
       
       <span
