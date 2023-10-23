@@ -164,7 +164,7 @@ defmodule Teiserver.Account.UserCacheLib do
   @spec recache_user(T.userid() | CacheUser.t()) :: :ok
   def recache_user(id) when is_integer(id) do
     Central.Account.recache_user(id)
-    decache_user(id)
+    # decache_user(id)
     Teiserver.Account.decache_relationships(id)
 
     Account.get_user(id)
@@ -262,7 +262,7 @@ defmodule Teiserver.Account.UserCacheLib do
   def decache_user(userid) do
     user = get_user_by_id(userid)
 
-    Central.cache_delete(:users, userid)
+    # Central.cache_delete(:users, userid)
     if user do
       Central.cache_delete(:users_lookup_name_with_id, user.id)
       Central.cache_delete(:users_lookup_id_with_name, cachename(user.name))
