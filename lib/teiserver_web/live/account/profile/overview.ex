@@ -189,18 +189,6 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     friendship = Account.get_friend(current_user.id, user.id)
     friendship_request = Account.get_friend_request(nil, nil, [where: [either_user_is: {current_user.id, user.id}]])
 
-    IO.puts "relationship"
-    IO.inspect relationship
-    IO.puts ""
-
-    IO.puts "friendship"
-    IO.inspect friendship
-    IO.puts ""
-
-    IO.puts "friendship_request"
-    IO.inspect friendship_request
-    IO.puts ""
-
     profile_permissions = Account.profile_view_permissions(current_user, user, relationship, friendship, friendship_request)
 
     socket
