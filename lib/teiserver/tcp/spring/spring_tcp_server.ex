@@ -354,6 +354,11 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, state}
   end
 
+  # Relationship messages
+  def handle_info(%{channel: "account_user_relationships:" <> _userid_str}, state) do
+    {:noreply, state}
+  end
+
   def handle_info(
         %{
           channel: "teiserver_global_lobby_updates",

@@ -742,6 +742,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
     :ok = PubSub.subscribe(Teiserver.PubSub, "legacy_all_client_updates")
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{user.id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "account_user_relationships:#{user.id}")
 
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_global_user_updates")
 
