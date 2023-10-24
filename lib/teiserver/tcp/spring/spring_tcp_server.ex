@@ -355,7 +355,8 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # Relationship messages
-  def handle_info(%{channel: "account_user_relationships:" <> _userid_str}, state) do
+  def handle_info(%{channel: "account_user_relationships:" <> _id} = msg, state) do
+    SpringOut.reply(:user, msg.event, msg, nil, state)
     {:noreply, state}
   end
 

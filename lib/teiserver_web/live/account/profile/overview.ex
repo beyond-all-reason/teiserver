@@ -129,10 +129,20 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
   end
 
   def handle_event("accept-friend-request", _event, %{assigns: %{current_user: current_user, user: user}} = socket) do
-    Account.accept_friend_request(current_user.id, user.id)
+    Account.accept_friend_request(user.id, current_user.id)
 
     socket = socket
       |> put_flash(:success, "Request accepted, you are now friends with #{user.name}")
+      |> get_relationships_and_permissions()
+
+    {:noreply, socket}
+  end
+
+  def handle_event("decline-friend-request", _event, %{assigns: %{current_user: current_user, user: user}} = socket) do
+    Account.decline_friend_request(user.id, current_user.id)
+
+    socket = socket
+      |> put_flash(:success, "Friend request declined")
       |> get_relationships_and_permissions()
 
     {:noreply, socket}
@@ -174,10 +184,22 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
       |> assign(:profile_permissions, [])
   end
 
-  def get_relationships_and_permissions(%{assigns: %{current_user: current_user, user: user}} = socket) do
+  def get_relationships_and_permissions(%{assigns: %{current_user: current_user, user: user}} = socket) when is_connected?(socket) do
     relationship = Account.get_relationship(current_user.id, user.id)
     friendship = Account.get_friend(current_user.id, user.id)
     friendship_request = Account.get_friend_request(nil, nil, [where: [either_user_is: {current_user.id, user.id}]])
+
+    IO.puts "relationship"
+    IO.inspect relationship
+    IO.puts ""
+
+    IO.puts "friendship"
+    IO.inspect friendship
+    IO.puts ""
+
+    IO.puts "friendship_request"
+    IO.inspect friendship_request
+    IO.puts ""
 
     profile_permissions = Account.profile_view_permissions(current_user, user, relationship, friendship, friendship_request)
 
@@ -186,5 +208,13 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
       |> assign(:friendship, friendship)
       |> assign(:friendship_request, friendship_request)
       |> assign(:profile_permissions, profile_permissions)
+  end
+
+  def get_relationships_and_permissions(socket) do
+    socket
+      |> assign(:relationship, nil)
+      |> assign(:friendship, nil)
+      |> assign(:friendship_request, nil)
+      |> assign(:profile_permissions, [])
   end
 end

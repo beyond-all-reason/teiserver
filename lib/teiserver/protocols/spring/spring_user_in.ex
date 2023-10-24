@@ -10,13 +10,13 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     responses = usernames_str
       |> String.split("\t")
       |> Enum.map(fn n ->
-        case Account.get_user_by_name(n) do
+        case Account.get_user_by_id(n) do
           nil ->
             {n, :no_user}
           user ->
             case Account.get_friend_request(state.userid, user.id) do
               nil ->
-                {:ok, _} = Teiserver.Account.create_friend_request(state.userid, user.id)
+                {:ok, _} = Account.create_friend_request(state.userid, user.id)
                 {n, :success}
               _existing ->
                 {n, :existing}
@@ -25,6 +25,18 @@ defmodule Teiserver.Protocols.Spring.UserIn do
       end)
 
     reply(:user, :add_friend, responses, msg_id, state)
+  end
+
+  @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
+  def do_handle("whois", userid_str, msg_id, state) do
+    result = case Account.get_user_by_id(userid_str) do
+      nil ->
+        {:no_user, userid_str}
+      user ->
+        {:ok, user}
+    end
+
+    reply(:user, :whois, result, msg_id, state)
   end
 
   def do_handle("reset_relationship", username, msg_id, state) do

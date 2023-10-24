@@ -4,6 +4,7 @@ defmodule Teiserver.Account do
   alias Teiserver.Repo
   require Logger
   alias Teiserver.Data.Types, as: T
+  alias Phoenix.PubSub
 
   @spec icon :: String.t()
   def icon, do: "fa-duotone fa-user-alt"
@@ -1550,10 +1551,6 @@ defmodule Teiserver.Account do
       end)
       |> Keyword.new
 
-    IO.puts ""
-    IO.inspect conflict_sets
-    IO.puts ""
-
     %Relationship{}
     |> Relationship.changeset(attrs)
     |> Repo.insert(
@@ -1937,6 +1934,17 @@ defmodule Teiserver.Account do
 
     case result do
       {:ok, friend_request} ->
+        PubSub.broadcast(
+          Teiserver.PubSub,
+          "account_user_relationships:#{friend_request.to_user_id}",
+          %{
+            channel: "account_user_relationships:#{friend_request.to_user_id}",
+            event: :new_incoming_friend_request,
+            userid: friend_request.to_user_id,
+            from_id: friend_request.from_user_id
+          }
+        )
+
         Central.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
       _ ->
         :ok

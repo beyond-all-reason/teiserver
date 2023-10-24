@@ -3,6 +3,7 @@ defmodule Teiserver.Account.FriendRequestLib do
   alias Teiserver.Account
   alias Account.FriendRequest
   alias Teiserver.Data.Types, as: T
+  alias Phoenix.PubSub
 
   @spec colours :: atom
   def colours(), do: :success
@@ -27,6 +28,18 @@ defmodule Teiserver.Account.FriendRequestLib do
       nil ->
         {:ok, _friend} = Account.create_friend(req.from_user_id, req.to_user_id)
         Account.delete_friend_request(req)
+
+        PubSub.broadcast(
+          Teiserver.PubSub,
+          "account_user_relationships:#{req.from_user_id}",
+          %{
+            channel: "account_user_relationships:#{req.from_user_id}",
+            event: :friend_request_accepted,
+            userid: req.from_user_id,
+            accepter_id: req.to_user_id
+          }
+        )
+
         :ok
 
       _ ->
@@ -48,6 +61,18 @@ defmodule Teiserver.Account.FriendRequestLib do
   @spec decline_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
   def decline_friend_request(%FriendRequest{} = req) do
     Account.delete_friend_request(req)
+
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "account_user_relationships:#{req.from_user_id}",
+      %{
+        channel: "account_user_relationships:#{req.from_user_id}",
+        event: :friend_request_declined,
+        userid: req.from_user_id,
+        decliner_id: req.to_user_id
+      }
+    )
+
     :ok
   end
 
@@ -68,6 +93,18 @@ defmodule Teiserver.Account.FriendRequestLib do
   @spec rescind_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
   def rescind_friend_request(%FriendRequest{} = req) do
     Account.delete_friend_request(req)
+
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "account_user_relationships:#{req.to_user_id}",
+      %{
+        channel: "account_user_relationships:#{req.to_user_id}",
+        event: :friend_request_rescinded,
+        userid: req.to_user_id,
+        rescinder_id: req.from_user_id
+      }
+    )
+
     :ok
   end
 

@@ -3,7 +3,7 @@
 #### Features
 
 - New spring friendship commands added
-- 
+- Spring `c.user.whois` command added
 
 #### Bugfixes
 
