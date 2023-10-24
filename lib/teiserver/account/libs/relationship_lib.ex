@@ -3,6 +3,7 @@ defmodule Teiserver.Account.RelationshipLib do
   alias Teiserver.{Account, Config}
   alias Teiserver.Account.AuthLib
   alias Teiserver.Data.Types, as: T
+  alias Phoenix.PubSub
 
   @spec colour :: atom
   def colour(), do: :success
@@ -41,6 +42,18 @@ defmodule Teiserver.Account.RelationshipLib do
   @spec follow_user(T.userid, T.userid) :: {:ok, Account.Relationship.t}
   def follow_user(from_user_id, to_user_id) when is_integer(from_user_id) and is_integer(to_user_id) do
     decache_relationships(from_user_id)
+
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "account_user_relationships:#{to_user_id}",
+      %{
+        channel: "account_user_relationships:#{to_user_id}",
+        event: :new_follower,
+        userid: to_user_id,
+        follower_id: from_user_id
+      }
+    )
+
     Account.upsert_relationship(%{
       from_user_id: from_user_id,
       to_user_id: to_user_id,

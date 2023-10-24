@@ -32,6 +32,15 @@ defmodule Teiserver.Account.RelationshipReport do
 
     limit = int_parse(params["limit"])
 
+    main_where = case state_type do
+      "ignore" -> "AND rels.ignore = true"
+
+      "follow" -> "AND rels.state = 'follow'"
+      "avoid" -> "AND rels.state IN ('block', 'avoid')"
+      "block" -> "AND rels.state = 'avoid'"
+      _ -> raise "No handler for state_type of `#{state_type}`"
+    end
+
     query = """
       SELECT
         to_user.id AS userid,
@@ -47,14 +56,14 @@ defmodule Teiserver.Account.RelationshipReport do
         from_user.last_played > $1
         AND from_user.smurf_of_id is null
         AND to_user.smurf_of_id is null
-        AND rels.state = $2
+        #{main_where}
         #{exclude_banned}
       GROUP BY to_user.id, to_user.name
       ORDER BY counter DESC
-      LIMIT $3
+      LIMIT $2
     """
 
-    results = case Ecto.Adapters.SQL.query(Repo, query, [start_date, state_type, limit]) do
+    results = case Ecto.Adapters.SQL.query(Repo, query, [start_date, limit]) do
       {:ok, results} ->
         results.rows
 
