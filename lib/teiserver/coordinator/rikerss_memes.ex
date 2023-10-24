@@ -112,7 +112,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/lootboxes" => Enum.random(~w(scav_only scav_only scav_only enabled)),
       "game/modoptions/lootboxes_density" =>
         Enum.random(~w(veryrare rarer normal normal normal)),
-      "game/modoptions/teamcolors_anonymous_mode" => Enum.random(~w(0 0 0 1)),
+      "game/modoptions/teamcolors_anonymous_mode" => Enum.random(~w(disabled disabled disabled disco)),
       "game/modoptions/multiplier_shieldpower" => Enum.random(~w(1 1 1 2 3 4)),
       "game/modoptions/disable_fogofwar" => Enum.random(~w(0 0 0 1)),
       "game/modoptions/assistdronesenabled" =>
@@ -315,7 +315,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/map_waterlevel" => "0",
       "game/modoptions/lootboxes" => "scav_only",
       "game/modoptions/lootboxes_density" => "normal",
-      "game/modoptions/teamcolors_anonymous_mode" => "0",
+      "game/modoptions/teamcolors_anonymous_mode" => "disabled",
       "game/modoptions/multiplier_shieldpower" => "1",
       "game/modoptions/disable_fogofwar" => "0",
       "game/modoptions/assistdronesenabled" => "pve_only",
