@@ -80,6 +80,9 @@ defmodule TeiserverWeb.Report.ReportController do
         "tournament" ->
           Teiserver.Account.TournamentReport
 
+        "microblog" ->
+          Teiserver.Communication.MicroblogReport
+
         # Moderation
         "moderation_activity" ->
           Teiserver.Moderation.ActivityReport
