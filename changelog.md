@@ -4,6 +4,8 @@
 
 - New spring friendship commands added
 - Spring `c.user.whois` command added
+- Added microblog report
+- ... Currently working on making tag filters work for the microblog ...
 
 #### Bugfixes
 
