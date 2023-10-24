@@ -38,7 +38,7 @@ defmodule Teiserver.Microblog do
   defdelegate change_tag(tag), to: TagLib
 
   @spec change_tag(Tag, map) :: Ecto.Changeset
-  defdelegate change_tag(tag_type, attrs), to: TagLib
+  defdelegate change_tag(tag, attrs), to: TagLib
 
 
 
@@ -78,7 +78,7 @@ defmodule Teiserver.Microblog do
   defdelegate change_post(post), to: PostLib
 
   @spec change_post(Post, map) :: Ecto.Changeset
-  defdelegate change_post(post_type, attrs), to: PostLib
+  defdelegate change_post(post, attrs), to: PostLib
 
   @spec increment_post_view_count(non_neg_integer()) :: Ecto.Changeset
   defdelegate increment_post_view_count(post_id), to: PostLib
@@ -114,8 +114,47 @@ defmodule Teiserver.Microblog do
   defdelegate change_post_tag(post_tag), to: PostTagLib
 
   @spec change_post_tag(PostTag, map) :: Ecto.Changeset
-  defdelegate change_post_tag(post_tag_type, attrs), to: PostTagLib
+  defdelegate change_post_tag(post_tag, attrs), to: PostTagLib
 
   @spec delete_post_tags(non_neg_integer(), [non_neg_integer()]) :: {:ok, PostTag} | {:error, Ecto.Changeset}
   defdelegate delete_post_tags(post_id, tag_ids), to: PostTagLib
+
+
+  alias Teiserver.Microblog.{UserPreference, UserPreferenceLib}
+
+  @spec list_user_preferences() :: [UserPreference]
+  defdelegate list_user_preferences(), to: UserPreferenceLib
+
+  @spec list_user_preferences(list) :: [UserPreference]
+  defdelegate list_user_preferences(args), to: UserPreferenceLib
+
+  @spec get_user_preference!(non_neg_integer()) :: UserPreference.t
+  defdelegate get_user_preference!(user_preference_id), to: UserPreferenceLib
+
+  @spec get_user_preference!(non_neg_integer, list) :: UserPreference.t
+  defdelegate get_user_preference!(user_preference_id, args), to: UserPreferenceLib
+
+  @spec get_user_preference(non_neg_integer()) :: UserPreference.t | nil
+  defdelegate get_user_preference(user_preference_id), to: UserPreferenceLib
+
+  @spec get_user_preference(non_neg_integer(), list) :: UserPreference.t | nil
+  defdelegate get_user_preference(user_preference_id, args), to: UserPreferenceLib
+
+  @spec create_user_preference() :: {:ok, UserPreference} | {:error, Ecto.Changeset}
+  defdelegate create_user_preference(), to: UserPreferenceLib
+
+  @spec create_user_preference(map) :: {:ok, UserPreference} | {:error, Ecto.Changeset}
+  defdelegate create_user_preference(attrs), to: UserPreferenceLib
+
+  @spec update_user_preference(UserPreference, map) :: {:ok, UserPreference} | {:error, Ecto.Changeset}
+  defdelegate update_user_preference(user_preference, attrs), to: UserPreferenceLib
+
+  @spec delete_user_preference(UserPreference) :: {:ok, UserPreference} | {:error, Ecto.Changeset}
+  defdelegate delete_user_preference(user_preference), to: UserPreferenceLib
+
+  @spec change_user_preference(UserPreference) :: Ecto.Changeset
+  defdelegate change_user_preference(user_preference), to: UserPreferenceLib
+
+  @spec change_user_preference(UserPreference, map) :: Ecto.Changeset
+  defdelegate change_user_preference(user_preference, attrs), to: UserPreferenceLib
 end

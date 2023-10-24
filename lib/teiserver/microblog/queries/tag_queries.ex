@@ -34,6 +34,11 @@ defmodule Teiserver.Microblog.TagQueries do
       where: tags.id == ^id
   end
 
+  defp _where(query, :id_in, ids) do
+    from tags in query,
+      where: tags.id in ^ids
+  end
+
   defp _where(query, :title_like, title) do
     utitle = "%" <> title <> "%"
 

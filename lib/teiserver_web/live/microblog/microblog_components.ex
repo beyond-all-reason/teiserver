@@ -104,6 +104,7 @@ defmodule TeiserverWeb.MicroblogComponents do
   """
   attr :tag, :map, required: true
   attr :disabled, :boolean, default: false
+  attr :class, :string, default: ""
   attr :rest, :global, include: ~w()
 
   def tag_badge(assigns) do
@@ -117,7 +118,7 @@ defmodule TeiserverWeb.MicroblogComponents do
       |> assign(:bg_colour, bg_colour)
 
     ~H"""
-    <span class="badge rounded-pill mx-1" style={"background-color: #{@bg_colour}; cursor: pointer;"} {@rest}>
+    <span class={"badge rounded-pill mx-1 #{@class}"} style={"background-color: #{@bg_colour}; cursor: pointer;"} {@rest}>
       <Fontawesome.icon icon={@tag.icon} style="solid" />
       <%= @tag.name %>
     </span>

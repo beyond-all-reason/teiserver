@@ -1,7 +1,7 @@
 defmodule Teiserver.Microblog.PostQueries do
   @moduledoc false
   use CentralWeb, :queries
-  alias Teiserver.Microblog.Post
+  alias Teiserver.Microblog.{Post, PostTagQueries}
 
   # Queries
   @spec query_posts(list) :: Ecto.Query.t()
@@ -40,11 +40,13 @@ defmodule Teiserver.Microblog.PostQueries do
       where: posts.poster_id == ^poster_id
   end
 
+  defp _where(query, :poster_id_in, []), do: query
   defp _where(query, :poster_id_in, poster_ids) when is_list(poster_ids) do
     from posts in query,
       where: posts.poster_id in ^poster_ids
   end
 
+  defp _where(query, :poster_id_not_in, []), do: query
   defp _where(query, :poster_id_not_in, poster_ids) when is_list(poster_ids) do
     from posts in query,
       where: posts.poster_id not in ^poster_ids
@@ -53,6 +55,22 @@ defmodule Teiserver.Microblog.PostQueries do
   defp _where(query, :between, {start_date, end_date}) do
     from posts in query,
       where: between(posts.inserted_at, ^start_date, ^end_date)
+  end
+
+  defp _where(query, :enabled_tags, []), do: query
+  defp _where(query, :enabled_tags, tag_ids) do
+    tag_query = PostTagQueries.query_post_tags(where: [tag_id_in: tag_ids], select: [:post_id])
+
+    from posts in query,
+      where: posts.id in subquery(tag_query)
+  end
+
+  defp _where(query, :disabled_tags, []), do: query
+  defp _where(query, :disabled_tags, tag_ids) do
+    tag_query = PostTagQueries.query_post_tags(where: [tag_id_in: tag_ids], select: [:post_id])
+
+    from posts in query,
+      where: posts.id not in subquery(tag_query)
   end
 
   defp _where(query, :title_like, title) do
@@ -110,27 +128,6 @@ defmodule Teiserver.Microblog.PostQueries do
   defp _preload(query, {:tags, [], []}) do
     from posts in query,
       join: tags in assoc(posts, :tags),
-      preload: [tags: tags]
-  end
-
-  defp _preload(query, {:tags, [], exclude_ids}) do
-    from posts in query,
-      join: tags in assoc(posts, :tags),
-      where: tags.id not in ^exclude_ids,
-      preload: [tags: tags]
-  end
-
-  defp _preload(query, {:tags, include_ids, []}) do
-    from posts in query,
-      join: tags in assoc(posts, :tags),
-      where: tags.id in ^include_ids,
-      preload: [tags: tags]
-  end
-
-  defp _preload(query, {:tags, include_ids, exclude_ids}) do
-    from posts in query,
-      join: tags in assoc(posts, :tags),
-      where: tags.id in ^include_ids and tags.id not in ^exclude_ids,
       preload: [tags: tags]
   end
 end

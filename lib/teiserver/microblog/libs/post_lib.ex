@@ -20,7 +20,7 @@ defmodule Teiserver.Microblog.PostLib do
       [%Post{}, ...]
 
   """
-  @spec list_posts(list) :: list
+  @spec list_posts(list) :: [Post]
   def list_posts(args \\ []) do
     args
     |> PostQueries.query_posts()

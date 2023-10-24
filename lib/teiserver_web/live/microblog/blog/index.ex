@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Microblog.BlogLive.Index do
   @moduledoc false
+  require TeiserverWeb.Microblog.BlogLive.Index
   use TeiserverWeb, :live_view
   alias Teiserver.Microblog
   import TeiserverWeb.MicroblogComponents
@@ -16,20 +17,12 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
         ]
       )
 
-      filters = %{
-        disabled_tags: [],
-        enabled_tags: tags |> Enum.map(fn t -> t.id end),
-        enabled_posters: []
-      }
-
       socket
-        |> assign(:show_full_posts, [])
         |> assign(:tags, tags)
-        |> assign(:filters, filters)
+        |> load_preferences()
         |> list_posts
     else
       socket
-        |> assign(:show_full_posts, [])
         |> assign(:tags, [])
         |> assign(:filters, %{})
         |> stream(:posts, [])
@@ -97,14 +90,48 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
     }
   end
 
-  defp list_posts(%{assigns: %{filters: filters}} = socket) do
+  defp list_posts(%{assigns: %{filters: filters}} = socket) when is_connected?(socket) do
     posts = Microblog.list_posts(
+      where: [
+        enabled_tags: filters.enabled_tags,
+        disabled_tags: filters.disabled_tags,
+
+        poster_id_in: [],
+        poster_id_not_in: []
+      ],
       order_by: ["Newest first"],
       limit: 50,
-      preload: [{:tags, filters.enabled_tags, filters.disabled_tags}, :poster]
+      preload: [:tags, :poster]
     )
 
     socket
       |> stream(:posts, posts)
   end
+  defp list_posts(socket), do: socket
+
+  defp load_preferences(%{assigns: %{current_user: current_user}} = socket) when is_connected?(socket) do
+    filters = case Microblog.get_user_preference(current_user.id) do
+      nil ->
+        %{
+          enabled_tags: socket.assigns.tags |> Enum.map(fn t -> t.id end),
+          disabled_tags: [],
+
+          enabled_posters: [],
+          disabled_posters: []
+        }
+
+      user_preference ->
+        %{
+          enabled_tags: user_preference.enabled_tags || [],
+          disabled_tags: user_preference.disabled_tags || [],
+
+          enabled_posters: user_preference.enabled_posters || [],
+          disabled_posters: user_preference.disabled_posters || []
+        }
+    end
+
+    socket
+      |> assign(:filters, filters)
+  end
+  defp load_preferences(socket), do: socket
 end
