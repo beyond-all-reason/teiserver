@@ -22,9 +22,9 @@ defmodule Teiserver.Protocols.Spring.UserOut do
     result_list
     |> Enum.map_join("", fn
       {name, :success} -> "s.user.add_friend #{name}\tsuccess\n"
-      {name, :no_user} -> "s.user.add_friend #{name}\failure\tno user of that name\n"
-      {name, :existing} -> "s.user.add_friend #{name}\failure\texisting friend request\n"
-      {name, reason} -> "s.user.add_friend #{name}\failure\tno failure catch for #{reason}\n"
+      {name, :no_user} -> "s.user.add_friend #{name}\tfailure\tno user of that name\n"
+      {name, :existing} -> "s.user.add_friend #{name}\tfailure\texisting friend request\n"
+      {name, reason} -> "s.user.add_friend #{name}\tfailure\tno failure catch for #{reason}\n"
     end)
   end
 
