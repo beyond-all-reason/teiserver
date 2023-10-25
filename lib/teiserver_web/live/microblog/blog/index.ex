@@ -1,6 +1,5 @@
 defmodule TeiserverWeb.Microblog.BlogLive.Index do
   @moduledoc false
-  require TeiserverWeb.Microblog.BlogLive.Index
   use TeiserverWeb, :live_view
   alias Teiserver.Microblog
   import TeiserverWeb.MicroblogComponents
@@ -108,6 +107,19 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
       |> stream(:posts, posts)
   end
   defp list_posts(socket), do: socket
+
+  defp load_preferences(%{assigns: %{current_user: nil}} = socket) when is_connected?(socket) do
+    filters = %{
+      enabled_tags: [],
+      disabled_tags: [],
+
+      enabled_posters: [],
+      disabled_posters: []
+    }
+
+    socket
+      |> assign(:filters, filters)
+  end
 
   defp load_preferences(%{assigns: %{current_user: current_user}} = socket) when is_connected?(socket) do
     filters = case Microblog.get_user_preference(current_user.id) do
