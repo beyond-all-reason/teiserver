@@ -39,6 +39,18 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     reply(:user, :whois, result, msg_id, state)
   end
 
+  @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
+  def do_handle("whoisName", userid_str, msg_id, state) do
+    result = case Account.get_user_by_name(userid_str) do
+      nil ->
+        {:no_user, userid_str}
+      user ->
+        {:ok, user}
+    end
+
+    reply(:user, :whois_name, result, msg_id, state)
+  end
+
   def do_handle("reset_relationship", username, msg_id, state) do
     target_id = Account.get_userid_from_name(username)
     if target_id && target_id != state.userid do

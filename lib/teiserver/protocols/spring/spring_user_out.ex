@@ -21,11 +21,24 @@ defmodule Teiserver.Protocols.Spring.UserOut do
   def do_reply(:add_friend, result_list, _state) do
     result_list
     |> Enum.map_join("", fn
-      {name, :success} -> "s.user.add_friend #{name}\tsuccess\n"
-      {name, :no_user} -> "s.user.add_friend #{name}\tfailure\tno user of that name\n"
-      {name, :existing} -> "s.user.add_friend #{name}\tfailure\texisting friend request\n"
-      {name, reason} -> "s.user.add_friend #{name}\tfailure\tno failure catch for #{reason}\n"
+      {id, :success} -> "s.user.add_friend #{id}\tsuccess\n"
+      {id, :no_user} -> "s.user.add_friend #{id}\tfailure\tno user of that id\n"
+      {id, :existing} -> "s.user.add_friend #{id}\tfailure\texisting friend request\n"
+      {id, reason} -> "s.user.add_friend #{id}\tfailure\tno failure catch for #{reason}\n"
     end)
+  end
+
+  def do_reply(:whois_name, {:no_user, username}, _state) do
+    "s.user.whois error: No user found for name:#{username}\n"
+  end
+
+  def do_reply(:whois_name, {:ok, user}, _state) do
+    encoded_data = user
+      |> Map.take(~w(name country icon colour)a)
+      |> Jason.encode!()
+      |> Base.encode64(padding: false)
+
+    "s.user.whois #{user.name} #{encoded_data}\n"
   end
 
   def do_reply(:whois, {:no_user, userid}, _state) do
