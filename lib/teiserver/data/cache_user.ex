@@ -1148,7 +1148,7 @@ defmodule Teiserver.CacheUser do
   def get_country(user, ip) do
     stats = Account.get_user_stat_data(user.id)
 
-    cond do
+    raw_country = cond do
       Config.get_user_config_cache(user.id, "teiserver.Show flag") == false ->
         "??"
 
@@ -1168,6 +1168,10 @@ defmodule Teiserver.CacheUser do
           user.country || "??"
         end
     end
+
+    raw_country
+    |> String.trim()
+    |> String.upcase()
   end
 
   @spec restrict_user(T.userid() | T.user(), String.t()) :: any
