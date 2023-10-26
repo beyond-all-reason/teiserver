@@ -319,12 +319,12 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
         conn
           |> put_flash(:info, "Action re-posted.")
-          |> redirect(to: Routes.moderation_action_path(conn, :index))
+          |> redirect(to: Routes.moderation_action_path(conn, :show, action.id))
 
       {:ok, _} ->
         conn
           |> put_flash(:info, "Action updated.")
-          |> redirect(to: Routes.moderation_action_path(conn, :index))
+          |> redirect(to: Routes.moderation_action_path(conn, :show, action.id))
     end
   end
 
@@ -340,7 +340,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
         conn
         |> put_flash(:info, "Action halted.")
-        |> redirect(to: Routes.moderation_action_path(conn, :index))
+        |> redirect(to: Routes.moderation_action_path(conn, :show, action.id))
     end
   end
 
