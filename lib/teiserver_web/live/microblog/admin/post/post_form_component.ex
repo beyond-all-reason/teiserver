@@ -5,6 +5,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
 
   alias Teiserver.{Communication, Microblog, Account}
   alias Teiserver.Account.AuthLib
+  alias Teiserver.Microblog.PostLib
 
   @default_channel_name "Dev updates"
 
@@ -286,10 +287,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   end
 
   defp create_discord_text(post) do
-    post_content = post.contents
-      |> String.split("\n\n")
-      |> hd
-      |> String.trim()
+    post_content = PostLib.get_summary(post)
 
     ellipses = if post_content == post.contents do
       ""

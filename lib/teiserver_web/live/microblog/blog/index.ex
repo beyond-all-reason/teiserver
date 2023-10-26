@@ -29,6 +29,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
 
     {:ok,
       socket
+      |> assign(:rss_feed, ~p"/microblog/rss")
       |> assign(:site_menu_active, "microblog")
     }
   end

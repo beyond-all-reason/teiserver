@@ -126,6 +126,10 @@ defmodule TeiserverWeb.Router do
     end
   end
 
+  scope "/microblog", TeiserverWeb.Microblog do
+    get "/rss", RssController, :index
+  end
+
   scope "/", TeiserverWeb.Account, as: :account do
     pipe_through([:browser, :nomenu_layout])
 

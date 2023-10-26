@@ -205,4 +205,11 @@ defmodule Teiserver.Microblog.PostLib do
     query = "UPDATE microblog_posts SET view_count = view_count + 1 WHERE id = $1;"
     {:ok, _} = Ecto.Adapters.SQL.query(Repo, query, [post_id])
   end
+
+  def get_summary(%{contents: contents}) do
+    contents
+      |> String.split("\n\n")
+      |> hd
+      |> String.trim()
+  end
 end
