@@ -47,12 +47,12 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
             <textarea
               name="post[contents]"
               id="post_contents"
-              rows="8"
+              rows="12"
               phx-debounce="100"
               class="form-control"><%= @form[:contents].value %></textarea>
           </div>
           <div class="col">
-            <h4>Tags</h4>
+            <h4>Tags (<%= Enum.count(@selected_tags) %>)</h4>
             <%= for tag <- @tags do %>
               <%= if Enum.member?(@selected_tags, tag.id) do %>
                 <span class="badge rounded-pill m-1 tag-selector" style={"background-color: #{tag.colour}; "} phx-click="toggle-selected-tag" phx-value-tag={tag.id} phx-target={@myself}>

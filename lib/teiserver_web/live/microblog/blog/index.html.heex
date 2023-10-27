@@ -6,7 +6,12 @@
         <Fontawesome.icon icon="rss" style="solid" />
         RSS
       </a>
-      
+
+      <a href={~p"/microblog/preferences"} class="btn btn-primary2 btn-sm" :if={@current_user}>
+        <Fontawesome.icon icon="cog" style="solid" />
+        Preferences
+      </a>
+
       <a href={~p"/microblog/admin/posts"} class="btn btn-primary btn-sm" :if={allow?(@current_user, "Contributor")}>
         <Fontawesome.icon icon={Central.Admin.AdminLib.icon()} style="solid" />
         Blog admin
@@ -15,28 +20,32 @@
   
     <h3>Blog</h3>
     <div class="row" id="sub-blog-div">
-      <div class="col-md-10" id="blog-posts-div">
+      <div class="col" id="blog-posts-div">
         <.table
           id="post-table"
           rows={@streams.posts}
           row_click={fn {_id, post} -> JS.navigate(~p"/microblog/show/#{post.id}") end}
         >
-          <:col :let={{_id, post}} label="Title"><%= post.title %></:col>
-          <:col :let={{_id, post}} label="Poster">
-            <span class="badge rounded-pill" style={"background-color: #{post.poster.colour}; cursor: pointer;"}>
-              <Fontawesome.icon icon={post.poster.icon} style="solid" />
-              <%= post.poster.name %>
-            </span>
-          </:col>
-          <:col :let={{_id, post}} label="Contents">
+          <:col :let={{_id, post}}>
+            <div class="float-end">
+              <.tag_badge tag={tag} :for={tag <- post.tags} />
+            </div>
+            <h5>
+              <%= post.title %>
+              
+              &nbsp;&nbsp;&nbsp;&nbsp;
+              
+              <span style={"color: #{post.poster.colour};"}>
+                <Fontawesome.icon icon={post.poster.icon} style="solid" />
+                <%= post.poster.name %>
+              </span>
+            </h5>
+            <br />
+          
             <%=
               post.contents |> String.split("\n\n") |> hd |> Earmark.as_html! |> raw
             %>
             <em :if={String.contains?(post.contents, "\n\n") or String.length(post.contents) > 128}>Click for more details</em>
-          </:col>
-
-          <:col :let={{_id, post}} label="Tags">
-            <.tag_badge tag={tag} :for={tag <- post.tags} />
           </:col>
         </.table>
       </div>

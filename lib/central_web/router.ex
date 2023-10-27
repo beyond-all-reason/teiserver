@@ -104,13 +104,21 @@ defmodule TeiserverWeb.Router do
   scope "/microblog", TeiserverWeb.Microblog do
     pipe_through([:live_browser, :standard_live_layout])
 
-    live_session :microblog_user,
+    live_session :microblog_root,
       on_mount: [
         {Teiserver.Account.AuthPlug, :mount_current_user},
         {Teiserver.Communication.NotificationPlug, :load_notifications}
       ] do
         live "/", BlogLive.Index, :index
         live "/show/:post_id", BlogLive.Show, :index
+    end
+
+    live_session :microblog_user,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Communication.NotificationPlug, :load_notifications}
+      ] do
+        live "/preferences", BlogLive.Preferences, :index
     end
 
     live_session :microblog_admin,

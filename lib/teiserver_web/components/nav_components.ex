@@ -71,25 +71,24 @@ defmodule TeiserverWeb.NavComponents do
             />
 
             <.top_nav_item
+              text="Blog"
+              active={@active == "microblog"}
+              route={~p"/microblog"}
+            />
+
+            <.top_nav_item
               :if={@current_user}
               text="Chat"
               active={@active == "chat"}
               route={~p"/chat"}
             />
 
-            <%= if allow?(@current_user, "Server") do %>
-              <.top_nav_item
-                text="Logging"
-                active={@active == "logging"}
-                route={~p"/logging"}
-              />
-
-              <.top_nav_item
-                text="Telemetry"
-                active={@active == "telemetry"}
-                route={~p"/telemetry"}
-              />
-            <% end %>
+            <.top_nav_item
+              :if={allow?(@current_user, "Server")}
+              text="Logging"
+              active={@active == "logging"}
+              route={~p"/logging"}
+            />
 
             <.top_nav_item
               text="Lobbies"
@@ -121,37 +120,33 @@ defmodule TeiserverWeb.NavComponents do
               active={@active == "leaderboard"}
             />
 
-            <%= if allow_any?(@current_user, ~w(Contributor Overwatch)) do %>
-              <.top_nav_item
-                text="Reports"
-                route={~p"/teiserver/reports"}
-                active={@active == "teiserver_report"}
-              />
-            <% end %>
+            <.top_nav_item
+              :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
+              text="Reports"
+              route={~p"/teiserver/reports"}
+              active={@active == "teiserver_report"}
+            />
 
-            <%= if allow?(@current_user, "Moderator") do %>
-              <.top_nav_item
-                text="Users"
-                route={~p"/teiserver/admin/user"}
-                active={@active == "teiserver_user"}
-              />
-            <% end %>
+            <.top_nav_item
+              :if={allow?(@current_user, "Moderator")}
+              text="Users"
+              route={~p"/teiserver/admin/user"}
+              active={@active == "teiserver_user"}
+            />
 
-            <%= if allow?(@current_user, "Overwatch") do %>
-              <.top_nav_item
-                text="Moderation"
-                route={~p"/moderation"}
-                active={@active == "moderation"}
-              />
-            <% end %>
+            <.top_nav_item
+              :if={allow?(@current_user, "Overwatch")}
+              text="Moderation"
+              route={~p"/moderation"}
+              active={@active == "moderation"}
+            />
 
-            <%= if allow_any?(@current_user, ~w(Contributor Overwatch)) do %>
-              <.top_nav_item
-                text="Admin"
-                route={~p"/teiserver/admin"}
-                active={@active == "admin"}
-              />
-            <% end %>
+            <.top_nav_item
+              :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
+              text="Admin"
+              route={~p"/teiserver/admin"}
+              active={@active == "admin"}
+            />
           </ul>
           <!-- Left links -->
         </div>

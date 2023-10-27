@@ -13,6 +13,7 @@
 - Relationships report now correctly combines Block/Avoid
 - Relationships report correctly reports on Ignore counts
 - Fixed issue where a LobbyPolicy bot could repeatedly rename a lobby
+- Fixed incorrect output of `c.user.list_relationships`
 
 ## v1.1.1
 

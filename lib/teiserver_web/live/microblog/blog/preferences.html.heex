@@ -1,0 +1,41 @@
+<TeiserverWeb.MicroblogComponents.sub_menu active={"preferences"} view_colour={@view_colour} current_user={@current_user} />
+
+<div class="row mt-4">
+  <div class="col">
+    <span class="btn btn-secondary float-end" phx-click="toggle-help">
+      <Fontawesome.icon icon="question" style="solid" />
+      Toggle help
+    </span>
+    <div class="help-box" :if={@show_help_box}>
+      If you block a tag, any post with that tag will not be shown to you; regardless of other settings.
+      <br />
+      Enabled tags are off by default, if you activate enabled tags then only posts with an enabled tag will be shown to you (and even then only if they don't contain any blocked tags).
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col">
+    <h4>Enabled tags</h4>
+    <%= for tag_id <- @user_preferences.enabled_tags do %>
+      <% tag = @tags[tag_id] %>
+      <.tag_badge tag={tag} phx-click="toggle-enabled-tag" phx-value-tag-id={tag.id} class="d-block m-2 p-2" id={"tag-#{tag_id}"} />
+    <% end %>
+  </div>
+
+  <div class="col">
+    <h4>Other tags</h4>
+    <%= for tag_id <- @dont_care_tags do %>
+      <% tag = @tags[tag_id] %>
+      <.tag_badge tag={tag} phx-click="toggle-enabled-tag" phx-value-tag-id={tag.id} class="d-block m-2 p-2" id={"tag-#{tag_id}"} />
+    <% end %>
+  </div>
+
+  <div class="col">
+    <h4>Blocked tags</h4>
+    <%= for tag_id <- @user_preferences.disabled_tags do %>
+      <% tag = @tags[tag_id] %>
+      <.tag_badge tag={tag} phx-click="toggle-enabled-tag" phx-value-tag-id={tag.id} class="d-block m-2 p-2" id={"tag-#{tag_id}"} />
+    <% end %>
+  </div>
+</div>

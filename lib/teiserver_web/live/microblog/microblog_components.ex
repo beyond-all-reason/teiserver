@@ -24,6 +24,16 @@ defmodule TeiserverWeb.MicroblogComponents do
       </.sub_menu_button>
 
       <.sub_menu_button
+        :if={@current_user}
+        bsname={@view_colour}
+        icon={"fa-cog"}
+        active={@active == "preferences"}
+        url={~p"/microblog/preferences"}
+      >
+        Preferences
+      </.sub_menu_button>
+
+      <.sub_menu_button
         :if={allow?(@current_user, "Contributor")}
         bsname={@view_colour}
         icon={Teiserver.Microblog.PostLib.icon()}
