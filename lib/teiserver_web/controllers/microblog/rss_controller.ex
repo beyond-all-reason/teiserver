@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Microblog.RssController do
       ],
       order_by: ["Newest first"],
       limit: 50,
-      preload: [:tags, :poster]
+      preload: [:tags, :poster, :discord_channel]
     )
 
     conn

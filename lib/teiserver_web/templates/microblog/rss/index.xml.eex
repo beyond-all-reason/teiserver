@@ -14,12 +14,15 @@
     <%= for post <- @posts do %>
       <item>
         <title><%= post.title %></title>
+        <author><%= post.poster.name %></author>
+        <posted_to><%= post.discord_channel.name %></posted_to>
         <link><%= ~p"/microblog/show/#{post.id}" %></link>
-        <guid><%= ~p"/microblog/show/#{post.id}" %></guid>
+        <id><%= post.id %></id>
+        <guid><%= "#{post.id}/#{post.updated_at |> Timex.to_unix()}" %></guid>
+        <last_updated><%= post.updated_at |> to_rfc822 %></last_updated>
         <description><%= "<![CDATA[#{Teiserver.Microblog.PostLib.get_summary(post)}]]>" %></description>
-        <category>Catgeroy goes here</category>
+        <tags><%= post.tags |> Enum.map(fn t -> t.name end) |> Enum.join(", ") %></tags>
         <pubDate><%= post.inserted_at |> to_rfc822 %></pubDate>
-        <source url="<%= ~p"/microblog/show/#{post.id}" %>">Blog Title</source>
       </item>
     <% end %>
   </channel>
