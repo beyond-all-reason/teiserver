@@ -29,16 +29,16 @@ defmodule Teiserver.Protocols.Spring.UserOut do
   end
 
   def do_reply(:whois_name, {:no_user, username}, _state) do
-    "s.user.whois error: No user found for name:#{username}\n"
+    "s.user.whoisName error: No user found for name:#{username}\n"
   end
 
   def do_reply(:whois_name, {:ok, user}, _state) do
     encoded_data = user
-      |> Map.take(~w(name country icon colour)a)
+      |> Map.take(~w(id name country icon colour)a)
       |> Jason.encode!()
       |> Base.encode64(padding: false)
 
-    "s.user.whois #{user.name} #{encoded_data}\n"
+    "s.user.whoisName #{user.name} #{encoded_data}\n"
   end
 
   def do_reply(:whois, {:no_user, userid}, _state) do
