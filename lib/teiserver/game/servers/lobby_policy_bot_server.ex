@@ -101,7 +101,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     new_state = %{state | lobby_id: lobby_id, founder_id: lobby.founder_id}
 
     lobby_name = generate_lobby_name(state)
-    send_chat(new_state, "$rename #{lobby_name}")
+    Battle.rename_lobby(lobby_id, lobby_name, state.userid)
 
     pick_random_map(new_state)
 
@@ -174,7 +174,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
           leave_lobby(state)
 
         lobby.name != correct_lobby_name ->
-          send_chat(state, "$rename #{correct_lobby_name}")
+          Battle.rename_lobby(state.lobby_id, correct_lobby_name, state.userid)
           state
 
         true ->

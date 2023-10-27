@@ -12,6 +12,7 @@
 
 - Relationships report now correctly combines Block/Avoid
 - Relationships report correctly reports on Ignore counts
+- Fixed issue where a LobbyPolicy bot could repeatedly rename a lobby
 
 ## v1.1.1
 

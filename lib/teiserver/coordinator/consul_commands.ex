@@ -1432,6 +1432,14 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       #   )
       #   state
 
+      lobby.lobby_policy_id && String.starts_with?(stripped_name, "SML") ->
+        Lobby.sayex(
+          state.coordinator_id,
+          "This is not a server managed lobby, you cannot call it an SML",
+          state.lobby_id
+        )
+        state
+
       not_all_welcome && allwelcome_name?(stripped_name) ->
         Lobby.sayex(
           state.coordinator_id,
