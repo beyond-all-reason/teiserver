@@ -39,6 +39,7 @@ defmodule Central.Application do
 
         concache_sup(:account_friend_cache),
         concache_sup(:account_incoming_friend_request_cache),
+        concache_sup(:account_outgoing_friend_request_cache),
 
         concache_sup(:account_follow_cache),
         concache_sup(:account_ignore_cache),

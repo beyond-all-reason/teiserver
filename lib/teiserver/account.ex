@@ -1946,6 +1946,7 @@ defmodule Teiserver.Account do
         )
 
         Central.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
+        Central.cache_delete(:account_outgoing_friend_request_cache, friend_request.to_user_id)
       _ ->
         :ok
     end
@@ -1995,6 +1996,7 @@ defmodule Teiserver.Account do
   """
   def delete_friend_request(%FriendRequest{} = friend_request) do
     Central.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
+    Central.cache_delete(:account_outgoing_friend_request_cache, friend_request.from_user_id)
     Repo.delete(friend_request)
   end
 
@@ -2010,6 +2012,9 @@ defmodule Teiserver.Account do
   def change_friend_request(%FriendRequest{} = friend_request, attrs \\ %{}) do
     FriendRequest.changeset(friend_request, attrs)
   end
+
+  @spec list_outgoing_friend_requests_of_userid(T.userid) :: [T.userid]
+  defdelegate list_outgoing_friend_requests_of_userid(userid), to: FriendRequestLib
 
   @spec list_incoming_friend_requests_of_userid(T.userid) :: [T.userid]
   defdelegate list_incoming_friend_requests_of_userid(userid), to: FriendRequestLib

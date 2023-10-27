@@ -163,11 +163,13 @@ defmodule Teiserver.Protocols.Spring.UserIn do
 
   def do_handle("list_relationships", _, msg_id, state) do
     data = %{
-      friends: Account.list_friend_ids_of_user(state.userid) |> Enum.map(&Account.get_username_by_id/1),
-      follows: Account.list_userids_followed_by_userid(state.userid) |> Enum.map(&Account.get_username_by_id/1),
-      ignores: Account.list_userids_ignored_by_userid(state.userid) |> Enum.map(&Account.get_username_by_id/1),
-      avoids: Account.list_userids_avoided_by_userid(state.userid) |> Enum.map(&Account.get_username_by_id/1),
-      blocks: Account.list_userids_blocked_by_userid(state.userid) |> Enum.map(&Account.get_username_by_id/1)
+      friends: Account.list_friend_ids_of_user(state.userid),
+      follows: Account.list_userids_followed_by_userid(state.userid),
+      incoming_friend_requests: Account.list_incoming_friend_requests_of_userid(state.userid),
+      outgoing_friend_requests: Account.list_outgoing_friend_requests_of_userid(state.userid),
+      ignores: Account.list_userids_ignored_by_userid(state.userid),
+      avoids: Account.list_userids_avoided_by_userid(state.userid),
+      blocks: Account.list_userids_blocked_by_userid(state.userid)
     }
 
     reply(:user, :list_relationships, data, msg_id, state)

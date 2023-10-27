@@ -122,4 +122,19 @@ defmodule Teiserver.Account.FriendRequestLib do
         end)
     end)
   end
+
+  @spec list_outgoing_friend_requests_of_userid(T.userid) :: [T.userid]
+  def list_outgoing_friend_requests_of_userid(userid) do
+    Central.cache_get_or_store(:account_outgoing_friend_request_cache, userid, fn ->
+      Account.list_friend_requests(
+        where: [
+          from_user_id: userid
+        ],
+        select: [:to_user_id]
+      )
+        |> Enum.map(fn %{to_user_id: to_user_id} ->
+          to_user_id
+        end)
+    end)
+  end
 end
