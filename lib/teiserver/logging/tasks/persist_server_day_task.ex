@@ -385,7 +385,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       Account.list_users(
         search: [
           inserted_after: date |> Timex.to_datetime(),
-          inserted_before: tomorrow |> Timex.to_datetime()
+          inserted_before: tomorrow |> Timex.to_datetime(),
+          smurf_of: false
         ],
         limit: :infinity
       )

@@ -33,7 +33,8 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
       Account.list_users(
         search: [
           data_greater_than: {"last_login_mins", start_date |> to_string},
-          data_equal: {"bot", "false"}
+          data_equal: {"bot", "false"},
+          smurf_of: false
         ],
         limit: :infinity,
         select: [:id]
