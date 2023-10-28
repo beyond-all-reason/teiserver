@@ -15,7 +15,7 @@
     <h3>
       <%= @post.title %>
       -
-      <%= Teiserver.Helper.TimexHelper.date_to_str(@post.inserted_at, :hms_or_ymd) %>
+      <%= Teiserver.Helper.TimexHelper.date_to_str(@post.inserted_at, :ymd_hms) %>
     </h3>
     
     <%= @post.contents |> Earmark.as_html! |> raw %>

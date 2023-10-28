@@ -56,6 +56,9 @@ defmodule Teiserver.Helper.TimexHelper do
         :hms_dmy ->
           Timex.format!(the_time, "{h24}:{m}:{s} {0D}/{0M}/{YYYY}")
 
+        :hms_ymd ->
+          Timex.format!(the_time, "{h24}:{m}:{s} {YYYY}-{0M}-{0D}")
+
         :ymd_hms ->
           Timex.format!(the_time, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}")
 

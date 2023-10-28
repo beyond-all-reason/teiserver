@@ -1,6 +1,6 @@
 <div class="row" style="padding-top: 5vh;" id="main-blog-div">
   <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4">
-  
+
     <div class="float-end">
       <a href={~p"/microblog/rss"} class="btn btn-warning2 btn-sm mx-1">
         <Fontawesome.icon icon="rss" style="solid" />
@@ -11,7 +11,7 @@
         <Fontawesome.icon icon="filter-slash" style="regular" />
         Show all posts
       </a>
-      
+
       <a href={~p"/microblog"} class="btn btn-info btn-sm mx-1" :if={@user_preference && @live_action == :all}>
         <Fontawesome.icon icon="filter" style="regular" />
         Use filters
@@ -27,7 +27,7 @@
         Blog admin
       </a>
     </div>
-  
+
     <h3>Blog</h3>
     <div class="row" id="sub-blog-div">
       <div class="col" id="blog-posts-div">
@@ -50,7 +50,8 @@
                 <%= post.poster.name %>
               </span>
             </h5>
-            <br />
+            Posted at <%= date_to_str(post.inserted_at, format: :ymd_hms) %>
+            <br /><br />
           
             <%=
               post.contents |> String.split("\n\n") |> hd |> Earmark.as_html! |> raw
