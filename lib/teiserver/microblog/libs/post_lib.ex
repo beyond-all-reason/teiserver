@@ -1,7 +1,7 @@
 defmodule Teiserver.Microblog.PostLib do
   @moduledoc false
   use CentralWeb, :library_newform
-  alias Teiserver.Microblog.{Post, PostQueries}
+  alias Teiserver.Microblog.{Post, PostQueries, UserPreference}
   alias Phoenix.PubSub
 
   # Functions
@@ -23,6 +23,36 @@ defmodule Teiserver.Microblog.PostLib do
   @spec list_posts(list) :: [Post]
   def list_posts(args \\ []) do
     args
+    |> PostQueries.query_posts()
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns the list of posts.
+
+  ## Examples
+
+      iex> list_posts()
+      [%Post{}, ...]
+
+  """
+  @spec list_posts_using_preferences(UserPreference.t() | nil, list) :: [Post]
+  def list_posts_using_preferences(up), do: list_posts_using_preferences(up, [])
+
+  def list_posts_using_preferences(nil, args) do
+    list_posts(args)
+  end
+
+  def list_posts_using_preferences(user_preference, args) do
+    extra_where = [
+        enabled_tags: user_preference.enabled_tags,
+        disabled_tags: user_preference.disabled_tags,
+
+        # poster_id_in: [],
+        # poster_id_not_in: []
+      ]
+
+    args ++ [where: extra_where]
     |> PostQueries.query_posts()
     |> Repo.all()
   end

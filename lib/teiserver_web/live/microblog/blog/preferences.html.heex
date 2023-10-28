@@ -7,35 +7,97 @@
       Toggle help
     </span>
     <div class="help-box" :if={@show_help_box}>
-      If you block a tag, any post with that tag will not be shown to you; regardless of other settings.
-      <br />
-      Enabled tags are off by default, if you activate enabled tags then only posts with an enabled tag will be shown to you (and even then only if they don't contain any blocked tags).
+      <h4>Tag modes</h4>
+      Tag modes allows you to control which posts you see based on the presence (or absence) of tags.
+      <ul>
+        <li><strong>Filter</strong>: You will only see posts with one or more enabled tags</li>
+        <li><strong>Block</strong>: You will see every post except those with a blocked tag</li>
+        <li><strong>Filter and block</strong>: You will only see posts with one or more enabled tags except where blocked</li>
+      </ul>
     </div>
+  </div>
+</div>
+
+<%
+  user_preferences = @user_preferences || @default_preferences
+%>
+
+<div class="row mt-4">
+  <div class="col">
+    <.form for={} phx-change="change-tag-mode">
+    <label for="tag-mode-select" class="control-label">Mode</label>
+    <.input id="tag-mode-selct" name="tag-mode" type="select" value={user_preferences.tag_mode} options={@tag_mode_list} />
+    </.form>
   </div>
 </div>
 
 <div class="row mt-4">
   <div class="col">
+    <h4>Un-assigned tags</h4>
+    <.table id="remaining-tags-table" rows={for tag_id <- @remaining_tags, do: @tag_map[tag_id]} table_class="table-sm">
+      <:col :let={tag}>
+        <.tag_badge tag={tag} phx-value-tag-id={tag.id} class="d-block" id={"tag-#{tag.id}"} />
+      </:col>
+      <:col :let={tag} :if={Enum.member?(["Filter", "Filter and block"], user_preferences.tag_mode)}>
+        <span class="badge rounded-pill mx-1 bg-success cursor-pointer" phx-click="enable-tag" phx-value-tag-id={tag.id}>
+          &nbsp;
+          <Fontawesome.icon icon="check" style="solid" size="fa-lg" />
+          &nbsp;
+        </span>
+      </:col>
+      <:col :let={tag} :if={Enum.member?(["Block", "Filter and block"], user_preferences.tag_mode)}>
+        <span class="badge rounded-pill mx-1 bg-danger cursor-pointer" phx-click="disable-tag" phx-value-tag-id={tag.id}>
+          &nbsp;
+          <Fontawesome.icon icon="ban" style="solid" size="fa-lg" />
+          &nbsp;
+        </span>
+      </:col>
+    </.table>
+  </div>
+  
+  <div class="col" :if={Enum.member?(["Filter", "Filter and block"], user_preferences.tag_mode)}>
     <h4>Enabled tags</h4>
-    <%= for tag_id <- @user_preferences.enabled_tags do %>
-      <% tag = @tags[tag_id] %>
-      <.tag_badge tag={tag} phx-click="toggle-enabled-tag" phx-value-tag-id={tag.id} class="d-block m-2 p-2" id={"tag-#{tag_id}"} />
-    <% end %>
+    <.table id="enabled-tags-table" rows={for tag_id <- user_preferences.enabled_tags, do: @tag_map[tag_id]} table_class="table-sm">
+      <:col :let={tag}>
+        <.tag_badge tag={tag} phx-value-tag-id={tag.id} class="d-block" id={"tag-#{tag.id}"} />
+      </:col>
+      <:col :let={tag}>
+        <span class="badge rounded-pill mx-1 bg-info cursor-pointer" phx-click="reset-tag" phx-value-tag-id={tag.id}>
+          &nbsp;
+          <Fontawesome.icon icon="sync" style="solid" size="fa-lg" />
+          &nbsp;
+        </span>
+      </:col>
+      <:col :let={tag} :if={Enum.member?(["Block", "Filter and block"], user_preferences.tag_mode)}>
+        <span class="badge rounded-pill mx-1 bg-danger cursor-pointer" phx-click="disable-tag" phx-value-tag-id={tag.id}>
+          &nbsp;
+          <Fontawesome.icon icon="ban" style="solid" size="fa-lg" />
+          &nbsp;
+        </span>
+      </:col>
+    </.table>
   </div>
 
-  <div class="col">
-    <h4>Other tags</h4>
-    <%= for tag_id <- @dont_care_tags do %>
-      <% tag = @tags[tag_id] %>
-      <.tag_badge tag={tag} phx-click="toggle-enabled-tag" phx-value-tag-id={tag.id} class="d-block m-2 p-2" id={"tag-#{tag_id}"} />
-    <% end %>
-  </div>
-
-  <div class="col">
+  <div class="col" :if={Enum.member?(["Block", "Filter and block"], user_preferences.tag_mode)}>
     <h4>Blocked tags</h4>
-    <%= for tag_id <- @user_preferences.disabled_tags do %>
-      <% tag = @tags[tag_id] %>
-      <.tag_badge tag={tag} phx-click="toggle-enabled-tag" phx-value-tag-id={tag.id} class="d-block m-2 p-2" id={"tag-#{tag_id}"} />
-    <% end %>
+    <.table id="disabled-tags-table" rows={for tag_id <- user_preferences.disabled_tags, do: @tag_map[tag_id]} table_class="table-sm">
+      <:col :let={tag}>
+        <.tag_badge tag={tag} phx-value-tag-id={tag.id} class="d-block" id={"tag-#{tag.id}"} />
+      </:col>
+      <:col :let={tag}>
+        <span class="badge rounded-pill mx-1 bg-info cursor-pointer" phx-click="reset-tag" phx-value-tag-id={tag.id}>
+          &nbsp;
+          <Fontawesome.icon icon="sync" style="solid" size="fa-lg" />
+          &nbsp;
+        </span>
+      </:col>
+      <:col :let={tag} :if={Enum.member?(["Block", "Filter and block"], user_preferences.tag_mode)}>
+        <span class="badge rounded-pill mx-1 bg-success cursor-pointer" phx-click="enable-tag" phx-value-tag-id={tag.id}>
+          &nbsp;
+          <Fontawesome.icon icon="check" style="solid" size="fa-lg" />
+          &nbsp;
+        </span>
+      </:col>
+    </.table>
   </div>
 </div>

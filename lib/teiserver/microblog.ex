@@ -8,6 +8,7 @@ defmodule Teiserver.Microblog do
   @spec icon :: String.t()
   def icon(), do: "fa-blog"
 
+  alias Teiserver.Microblog.UserPreference
   alias Teiserver.Microblog.{Tag, TagLib}
 
   @spec list_tags() :: [Tag]
@@ -49,6 +50,9 @@ defmodule Teiserver.Microblog do
 
   @spec list_posts(list) :: [Post]
   defdelegate list_posts(args), to: PostLib
+
+  @spec list_posts_using_preferences(UserPreference.t() | nil, list) :: [Post]
+  defdelegate list_posts_using_preferences(preference, args), to: PostLib
 
   @spec get_post!(non_neg_integer()) :: Post.t
   defdelegate get_post!(post_id), to: PostLib

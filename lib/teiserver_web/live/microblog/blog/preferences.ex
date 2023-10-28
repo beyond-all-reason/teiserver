@@ -3,50 +3,46 @@ defmodule TeiserverWeb.Microblog.BlogLive.Preferences do
   use TeiserverWeb, :live_view
   alias Teiserver.Microblog
   import TeiserverWeb.MicroblogComponents
+  alias Teiserver.Microblog.UserPreferenceLib
+
+  @default_preferences %{
+    tag_mode: "Block",
+    enabled_tags: [],
+    disabled_tags: [],
+
+    enabled_posters: [],
+    disabled_posters: []
+  }
 
   @impl true
   def mount(_params, _session, socket) do
     socket = if is_connected?(socket) do
-      tags = Microblog.list_tags()
+      tags = Microblog.list_tags(order_by: "Name (A-Z)")
+
+      tag_order = tags |> Enum.map(fn t -> t.id end)
+
+      tag_map = tags
       |> Map.new(fn tag -> {tag.id, tag} end)
 
       socket
-        |> assign(:tags, tags)
+        |> assign(:tag_order, tag_order)
+        |> assign(:tag_map, tag_map)
     else
       socket
-        |> assign(:tags, %{})
+        |> assign(:tag_order, [])
+        |> assign(:tag_map, %{})
     end
 
     {:ok,
       socket
       |> assign(:show_help_box, false)
       |> assign(:site_menu_active, "microblog")
-      |> load_preferences()
-      |> calculate_dont_care_tags
       |> assign(:view_colour, Microblog.colours())
+      |> assign(:tag_mode_list, UserPreferenceLib.tag_mode_list())
+      |> assign(:default_preferences, @default_preferences)
+      |> load_preferences()
     }
   end
-
-  # @impl true
-  # def handle_info(%{channel: "microblog_posts", event: :post_created, post: post}, socket) do
-  #   db_post = Microblog.get_post!(post.id, preload: [:tags, :poster])
-
-  #   {:noreply, stream_insert(socket, :posts, db_post, at: 0)}
-  # end
-
-  # def handle_info(%{channel: "microblog_posts", event: :post_updated, post: post}, socket) do
-  #   db_post = Microblog.get_post!(post.id, preload: [:tags, :poster])
-
-  #   {:noreply, stream_insert(socket, :posts, db_post, at: -1)}
-  # end
-
-  # def handle_info(%{channel: "microblog_posts", event: :post_deleted, post: post}, socket) do
-  #   {:noreply, stream_delete(socket, :posts, post)}
-  # end
-
-  # def handle_info(%{channel: "microblog_posts"}, socket) do
-  #   {:noreply, socket}
-  # end
 
   @impl true
   def handle_event("toggle-help", _, %{assigns: assigns} = socket) do
@@ -54,97 +50,155 @@ defmodule TeiserverWeb.Microblog.BlogLive.Preferences do
       |> assign(:show_help_box, not assigns.show_help_box)}
   end
 
-  def handle_event("toggle-disabled-tag", %{"tag-id" => tag_id_str}, %{assigns: assigns} = socket) do
+  def handle_event("change-tag-mode", %{"tag-mode" => new_mode}, socket) do
+    socket = maybe_make_user_preferences(socket)
+
+    socket = if socket.assigns.user_preferences.tag_mode == new_mode do
+      socket
+    else
+      {enabled, disabled} = case new_mode do
+        "Block" ->
+          {[], socket.assigns.user_preferences.disabled_tags}
+        "Filter" ->
+          {socket.assigns.user_preferences.enabled_tags, []}
+        "Filter and block" ->
+          {socket.assigns.user_preferences.enabled_tags, socket.assigns.user_preferences.disabled_tags}
+      end
+
+      {:ok, new_user_preferences} = Microblog.update_user_preference(
+        socket.assigns.user_preferences,
+        %{
+          tag_mode: new_mode,
+          enabled_tags: enabled,
+          disabled_tags: disabled
+        }
+      )
+
+      socket
+        |> assign(:user_preferences, new_user_preferences)
+        |> calculate_remaining_tags
+    end
+
+    {:noreply, socket}
+  end
+
+  def handle_event("enable-tag", %{"tag-id" => tag_id_str}, socket) do
+    socket = maybe_make_user_preferences(socket)
     tag_id = String.to_integer(tag_id_str)
 
-    new_user_preferences = if Enum.member?(assigns.user_preferences.disabled_tags, tag_id) do
-      new_disabled_tags = List.delete(assigns.user_preferences.disabled_tags, tag_id)
-      Map.put(assigns.user_preferences, :disabled_tags, new_disabled_tags)
-    else
-      new_disabled_tags = [tag_id | assigns.user_preferences.disabled_tags] |> Enum.uniq
-      Map.put(assigns.user_preferences, :disabled_tags, new_disabled_tags)
-    end
+    user_preferences = socket.assigns.user_preferences
+
+    new_enabled = [tag_id | user_preferences.enabled_tags] |> Enum.uniq
+    new_disabled = List.delete(user_preferences.disabled_tags, tag_id)
+
+    {:ok, new_user_preferences} = Microblog.update_user_preference(
+      user_preferences,
+      %{
+        enabled_tags: new_enabled,
+        disabled_tags: new_disabled
+      }
+    )
 
     {:noreply, socket
       |> assign(:user_preferences, new_user_preferences)
+      |> calculate_remaining_tags
     }
   end
 
-  def handle_event("toggle-enabled-tag", %{"tag-id" => tag_id_str}, %{assigns: assigns} = socket) do
+  def handle_event("disable-tag", %{"tag-id" => tag_id_str}, socket) do
+    socket = maybe_make_user_preferences(socket)
     tag_id = String.to_integer(tag_id_str)
 
-    new_user_preferences = if Enum.member?(assigns.user_preferences.enabled_tags, tag_id) do
-      new_enabled_tags = List.delete(assigns.user_preferences.enabled_tags, tag_id)
-      Map.put(assigns.user_preferences, :enabled_tags, new_enabled_tags)
-    else
-      new_enabled_tags = [tag_id | assigns.user_preferences.enabled_tags] |> Enum.uniq
-      Map.put(assigns.user_preferences, :enabled_tags, new_enabled_tags)
-    end
+    user_preferences = socket.assigns.user_preferences
+
+    new_enabled = List.delete(user_preferences.enabled_tags, tag_id)
+    new_disabled = [tag_id | user_preferences.disabled_tags] |> Enum.uniq
+
+    {:ok, new_user_preferences} = Microblog.update_user_preference(
+      user_preferences,
+      %{
+        enabled_tags: new_enabled,
+        disabled_tags: new_disabled
+      }
+    )
 
     {:noreply, socket
       |> assign(:user_preferences, new_user_preferences)
+      |> calculate_remaining_tags
+    }
+  end
+
+  def handle_event("reset-tag", %{"tag-id" => tag_id_str}, socket) do
+    socket = maybe_make_user_preferences(socket)
+    tag_id = String.to_integer(tag_id_str)
+
+    user_preferences = socket.assigns.user_preferences
+
+    new_enabled = List.delete(user_preferences.enabled_tags, tag_id)
+    new_disabled = List.delete(user_preferences.disabled_tags, tag_id)
+
+    {:ok, new_user_preferences} = Microblog.update_user_preference(
+      user_preferences,
+      %{
+        enabled_tags: new_enabled,
+        disabled_tags: new_disabled
+      }
+    )
+
+    {:noreply, socket
+      |> assign(:user_preferences, new_user_preferences)
+      |> calculate_remaining_tags
     }
   end
 
   defp load_preferences(%{assigns: %{current_user: nil}} = socket) do
-    user_preferences = %{
-      enabled_tags: [],
-      disabled_tags: [],
-
-      enabled_posters: [],
-      disabled_posters: []
-    }
-
     socket
-      |> assign(:user_preferences, user_preferences)
+      |> assign(:user_preferences, nil)
+      |> calculate_remaining_tags
   end
 
   defp load_preferences(%{assigns: %{current_user: current_user}} = socket) when is_connected?(socket) do
-    user_preferences = case Microblog.get_user_preference(current_user.id) do
-      nil ->
-        %{
-          enabled_tags: [],
-          disabled_tags: [],
-
-          enabled_posters: [],
-          disabled_posters: []
-        }
-
-      user_preference ->
-        %{
-          enabled_tags: user_preference.enabled_tags || [],
-          disabled_tags: user_preference.disabled_tags || [],
-
-          enabled_posters: user_preference.enabled_posters || [],
-          disabled_posters: user_preference.disabled_posters || []
-        }
-    end
+    user_preferences = Microblog.get_user_preference(current_user.id)
 
     socket
       |> assign(:user_preferences, user_preferences)
+      |> calculate_remaining_tags
   end
 
   defp load_preferences(socket) do
-    user_preferences = %{
-      enabled_tags: [],
-      disabled_tags: [],
-
-      enabled_posters: [],
-      disabled_posters: []
-    }
-
     socket
-      |> assign(:user_preferences, user_preferences)
+      |> assign(:user_preferences, nil)
+      |> calculate_remaining_tags
   end
 
-  defp calculate_dont_care_tags(%{assigns: assigns} = socket) do
-    combined_tags = assigns.user_preferences.enabled_tags ++ assigns.user_preferences.disabled_tags
+  defp calculate_remaining_tags(%{assigns: assigns} = socket) do
+    taken_tag_ids = case assigns.user_preferences do
+      nil ->
+        []
 
-    dont_care_tags = assigns.tags
-      |> Map.keys()
-      |> Enum.reject(fn tag_id -> Enum.member?(combined_tags, tag_id) end)
+      %{tag_mode: "Filter"} ->
+        assigns.user_preferences.enabled_tags
+
+      %{tag_mode: "Filter and block"} ->
+        assigns.user_preferences.enabled_tags ++ assigns.user_preferences.disabled_tags
+
+      %{tag_mode: _block} ->
+        assigns.user_preferences.disabled_tags
+    end
+
+    remaining_tags = assigns.tag_order
+      |> Enum.reject(fn tag_id -> Enum.member?(taken_tag_ids, tag_id) end)
 
     socket
-      |> assign(:dont_care_tags, dont_care_tags)
+      |> assign(:remaining_tags, remaining_tags)
   end
+
+  defp maybe_make_user_preferences(%{assigns: %{user_preferences: nil}} = socket) do
+    params = Map.put(@default_preferences, :user_id, socket.assigns.current_user.id)
+    {:ok, new_user_preferences} = Microblog.create_user_preference(params)
+
+    socket
+      |> assign(:user_preferences, new_user_preferences)
+  end
+  defp maybe_make_user_preferences(socket), do: socket
 end

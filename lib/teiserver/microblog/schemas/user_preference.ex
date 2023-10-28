@@ -6,11 +6,13 @@ defmodule Teiserver.Microblog.UserPreference do
   schema "microblog_user_preferences" do
     belongs_to :user, Central.Account.User, primary_key: true
 
-    field :enabled_tags, {:array, :integer}
-    field :disabled_tags, {:array, :integer}
+    field :tag_mode, :string
 
-    field :enabled_posters, {:array, :integer}
-    field :disabled_posters, {:array, :integer}
+    field :enabled_tags, {:array, :integer}, default: []
+    field :disabled_tags, {:array, :integer}, default: []
+
+    field :enabled_posters, {:array, :integer}, default: []
+    field :disabled_posters, {:array, :integer}, default: []
 
     timestamps()
   end
@@ -21,7 +23,7 @@ defmodule Teiserver.Microblog.UserPreference do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, ~w(user_id enabled_tags disabled_tags enabled_posters disabled_posters)a)
+    |> cast(params, ~w(user_id tag_mode enabled_tags disabled_tags enabled_posters disabled_posters)a)
     |> validate_required(~w(user_id)a)
   end
 

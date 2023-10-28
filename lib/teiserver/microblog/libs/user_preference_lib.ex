@@ -10,6 +10,15 @@ defmodule Teiserver.Microblog.UserPreferenceLib do
   @spec colours :: atom
   def colours, do: :primary2
 
+  @spec tag_mode_list() :: [String.t()]
+  def tag_mode_list() do
+    [
+      "Block",
+      "Filter",
+      "Filter and block"
+    ]
+  end
+
   @doc """
   Returns the list of user_preferences.
 

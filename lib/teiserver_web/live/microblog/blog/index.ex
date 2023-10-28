@@ -23,8 +23,8 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
     else
       socket
         |> assign(:tags, [])
-        |> assign(:filters, %{})
         |> stream(:posts, [])
+        |> load_preferences()
     end
 
     {:ok,
@@ -55,50 +55,8 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
     {:noreply, socket}
   end
 
-  @impl true
-  def handle_event("toggle-disabled-tag", %{"tag-id" => tag_id_str}, %{assigns: assigns} = socket) do
-    tag_id = String.to_integer(tag_id_str)
-
-    new_filters = if Enum.member?(assigns.filters.disabled_tags, tag_id) do
-      new_disabled_tags = List.delete(assigns.filters.disabled_tags, tag_id)
-      Map.put(assigns.filters, :disabled_tags, new_disabled_tags)
-    else
-      new_disabled_tags = [tag_id | assigns.filters.disabled_tags] |> Enum.uniq
-      Map.put(assigns.filters, :disabled_tags, new_disabled_tags)
-    end
-
-    {:noreply, socket
-      |> assign(:filters, new_filters)
-      |> list_posts
-    }
-  end
-
-  def handle_event("toggle-enabled-tag", %{"tag-id" => tag_id_str}, %{assigns: assigns} = socket) do
-    tag_id = String.to_integer(tag_id_str)
-
-    new_filters = if Enum.member?(assigns.filters.enabled_tags, tag_id) do
-      new_enabled_tags = List.delete(assigns.filters.enabled_tags, tag_id)
-      Map.put(assigns.filters, :enabled_tags, new_enabled_tags)
-    else
-      new_enabled_tags = [tag_id | assigns.filters.enabled_tags] |> Enum.uniq
-      Map.put(assigns.filters, :enabled_tags, new_enabled_tags)
-    end
-
-    {:noreply, socket
-      |> assign(:filters, new_filters)
-      |> list_posts
-    }
-  end
-
-  defp list_posts(%{assigns: %{filters: filters}} = socket) when is_connected?(socket) do
+  defp list_posts(%{assigns: %{live_action: :all}} = socket) when is_connected?(socket) do
     posts = Microblog.list_posts(
-      where: [
-        enabled_tags: filters.enabled_tags,
-        disabled_tags: filters.disabled_tags,
-
-        poster_id_in: [],
-        poster_id_not_in: []
-      ],
       order_by: ["Newest first"],
       limit: 50,
       preload: [:tags, :poster]
@@ -107,44 +65,36 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
     socket
       |> stream(:posts, posts)
   end
-  defp list_posts(socket), do: socket
 
-  defp load_preferences(%{assigns: %{current_user: nil}} = socket) when is_connected?(socket) do
-    filters = %{
-      enabled_tags: [],
-      disabled_tags: [],
-
-      enabled_posters: [],
-      disabled_posters: []
-    }
+  defp list_posts(%{assigns: %{user_preference: user_preference}} = socket) when is_connected?(socket) do
+    posts = Microblog.list_posts_using_preferences(
+      user_preference,
+      order_by: ["Newest first"],
+      limit: 50,
+      preload: [:tags, :poster]
+    )
 
     socket
-      |> assign(:filters, filters)
+      |> stream(:posts, posts)
   end
 
+  defp list_posts(socket) do
+    socket
+      |> stream(:posts, [])
+  end
+
+
+
+  defp load_preferences(%{assigns: %{current_user: nil}} = socket) do
+    socket
+      |> assign(:user_preference, nil)
+  end
   defp load_preferences(%{assigns: %{current_user: current_user}} = socket) when is_connected?(socket) do
-    filters = case Microblog.get_user_preference(current_user.id) do
-      nil ->
-        %{
-          enabled_tags: socket.assigns.tags |> Enum.map(fn t -> t.id end),
-          disabled_tags: [],
-
-          enabled_posters: [],
-          disabled_posters: []
-        }
-
-      user_preference ->
-        %{
-          enabled_tags: user_preference.enabled_tags || [],
-          disabled_tags: user_preference.disabled_tags || [],
-
-          enabled_posters: user_preference.enabled_posters || [],
-          disabled_posters: user_preference.disabled_posters || []
-        }
-    end
-
     socket
-      |> assign(:filters, filters)
+      |> assign(:user_preference, Microblog.get_user_preference(current_user.id))
   end
-  defp load_preferences(socket), do: socket
+  defp load_preferences(socket) do
+    socket
+      |> assign(:user_preference, nil)
+  end
 end
