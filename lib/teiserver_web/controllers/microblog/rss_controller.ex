@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.Microblog.RssController do
   use CentralWeb, :controller
   alias Teiserver.Microblog
+  alias Teiserver.Helper.TimexHelper
 
   plug :put_layout, false
   plug :put_root_layout, false
@@ -19,9 +20,15 @@ defmodule TeiserverWeb.Microblog.RssController do
       preload: [:tags, :poster, :discord_channel]
     )
 
+    last_build_date = posts
+      |> Enum.map(fn p -> p.updated_at end)
+      |> Enum.sort_by(fn v -> v end, &TimexHelper.greater_than/2)
+      |> hd
+
     conn
-    |> put_resp_content_type("text/xml")
-    |> assign(:posts, posts)
-    |> render("index.xml")
+      |> put_resp_content_type("text/xml")
+      |> assign(:posts, posts)
+      |> assign(:last_build_date, last_build_date)
+      |> render("index.xml")
   end
 end

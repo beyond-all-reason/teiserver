@@ -7,7 +7,7 @@
     <description>Beyond all Reason developer blog </description>
     <language>en</language>
     <copyright>Copyright <%= Timex.now().year %> Beyond all Reason</copyright>
-    <lastBuildDate><%= Timex.now() |> to_rfc822 %></lastBuildDate>
+    <lastBuildDate><%= @last_build_date |> to_rfc822 %></lastBuildDate>
     <category>Computer gaming</category>
     <ttl>60</ttl>
 
