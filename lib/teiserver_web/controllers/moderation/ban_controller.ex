@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Moderation.BanController do
 
   alias Teiserver.Logging
   alias Teiserver.{Account, Moderation}
-  alias Teiserver.Moderation.{Ban, BanLib}
+  alias Teiserver.Moderation.{Ban, BanLib, ActionLib}
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,
@@ -181,13 +181,14 @@ defmodule TeiserverWeb.Moderation.BanController do
     case Moderation.create_ban(ban_params) do
       {:ok, ban} ->
         # Now ban the user themselves
-        Moderation.create_action(%{
+        {:ok, action} = Moderation.create_action(%{
           target_id: ban.source_id,
           reason: ban.reason,
           restrictions: ["Login"],
           score_modifier: 0,
           expires: Timex.now() |> Timex.shift(years: 1000)
         })
+        ActionLib.maybe_create_discord_post(action)
 
         Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(ban.source_id)
 

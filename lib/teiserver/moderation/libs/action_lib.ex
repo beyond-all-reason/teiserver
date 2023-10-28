@@ -1,6 +1,7 @@
 defmodule Teiserver.Moderation.ActionLib do
   @moduledoc false
   use CentralWeb, :library
+  alias Teiserver.{Communication, Moderation}
   alias Teiserver.Moderation.Action
   alias Teiserver.Helper.TimexHelper
 
@@ -243,6 +244,66 @@ defmodule Teiserver.Moderation.ActionLib do
         |> List.flatten()
         |> Enum.join("\n")
         |> String.replace("\n\n", "\n")
+    end
+  end
+
+  @spec maybe_create_discord_post(Action.t()) :: any
+  def maybe_create_discord_post(action) do
+    post_to_discord =
+      cond do
+        action.hidden -> false
+        Enum.member?(action.restrictions, "Bridging") -> false
+        Enum.member?(action.restrictions, "Note") -> false
+        action.reason == "Banned (Automod)" -> false
+        true -> true
+      end
+
+    if post_to_discord do
+      message = generate_discord_message_text(action)
+
+      posting_result = Communication.new_discord_message("Public moderation log", message)
+      case posting_result do
+        {:ok, %{id: message_id}} ->
+          Moderation.update_action(action, %{discord_message_id: message_id})
+
+      end
+      posting_result
+    else
+      nil
+    end
+  end
+
+  @spec maybe_update_discord_post(Action.t()) :: any
+  def maybe_update_discord_post(action) do
+    post_to_discord =
+      cond do
+        action.hidden -> false
+        Enum.member?(action.restrictions, "Bridging") -> false
+        Enum.member?(action.restrictions, "Note") -> false
+        action.reason == "Banned (Automod)" -> false
+        true -> true
+      end
+
+    cond do
+      post_to_discord == false ->
+        if action.discord_message_id do
+          Communication.delete_discord_message("Public moderation log", action.discord_message_id)
+          Moderation.update_action(action, %{discord_message_id: nil})
+        end
+        nil
+
+      action.discord_message_id == nil ->
+        maybe_create_discord_post(action)
+
+      true ->
+        message = generate_discord_message_text(action)
+
+        if message do
+          Communication.edit_discord_message("Public moderation log", action.discord_message_id, message)
+        else
+          Communication.delete_discord_message("Public moderation log", action.discord_message_id)
+          Moderation.update_action(action, %{discord_message_id: nil})
+        end
     end
   end
 end
