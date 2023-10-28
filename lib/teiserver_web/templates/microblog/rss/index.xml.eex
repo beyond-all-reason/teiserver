@@ -21,6 +21,7 @@
         <guid><%= "#{post.id}/#{post.updated_at |> Timex.to_unix()}" %></guid>
         <last_updated><%= post.updated_at |> to_rfc822 %></last_updated>
         <description><%= "<![CDATA[#{Teiserver.Microblog.PostLib.get_summary(post)}]]>" %></description>
+        <contents><%= "<![CDATA[#{post.contents}]]>"  %></contents>
         <tags><%= post.tags |> Enum.map(fn t -> t.name end) |> Enum.join(", ") %></tags>
         <pubDate><%= post.inserted_at |> to_rfc822 %></pubDate>
       </item>
