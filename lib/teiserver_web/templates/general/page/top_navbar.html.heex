@@ -125,7 +125,6 @@
     <!-- Right elements -->
     <div class="d-flex align-items-center">
       <%= if @current_user do %>
-        <%= render(TeiserverWeb.Communication.GeneralView, "notification_dropdown.html", assigns) %>
         <%= render(TeiserverWeb.General.SectionsView, "user_recents.html", assigns) %>
         <%= render(TeiserverWeb.General.SectionsView, "user_dropdown.html", assigns) %>
         <div style="width: 300px; display: inline-block;"></div>

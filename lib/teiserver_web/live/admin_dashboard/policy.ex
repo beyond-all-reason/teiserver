@@ -15,7 +15,6 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
     socket =
       socket
       |> AuthPlug.live_call(session)
-      |> NotificationPlug.live_call()
       |> assign(:id, int_parse(id))
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Dashboard", url: "/admin/dashboard")

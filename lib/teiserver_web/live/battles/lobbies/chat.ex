@@ -18,7 +18,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       socket
       |> AuthPlug.live_call(session)
       |> TSAuthPlug.live_call(session)
-      |> NotificationPlug.live_call()
 
     socket =
       socket

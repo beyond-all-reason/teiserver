@@ -21,7 +21,6 @@ defmodule TeiserverWeb.Router do
     plug(Teiserver.Account.AuthPlug)
     plug(Teiserver.Account.TSAuthPlug)
     plug(Central.General.CachePlug)
-    plug(Teiserver.Communication.NotificationPlug)
   end
 
   pipeline :live_browser do
@@ -36,7 +35,6 @@ defmodule TeiserverWeb.Router do
     plug(Teiserver.Account.AuthPlug)
     plug(Teiserver.Account.TSAuthPlug)
     plug(Central.General.CachePlug)
-    plug(Teiserver.Communication.NotificationPlug)
   end
 
   # layout: {CentralWeb.LayoutView, :standard_live}
@@ -94,8 +92,7 @@ defmodule TeiserverWeb.Router do
 
     live_session :general_index,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Communication.NotificationPlug, :load_notifications}
+        {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
         live "/", HomeLive.Index, :index
     end
@@ -106,8 +103,7 @@ defmodule TeiserverWeb.Router do
 
     live_session :microblog_root,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :mount_current_user},
-        {Teiserver.Communication.NotificationPlug, :load_notifications}
+        {Teiserver.Account.AuthPlug, :mount_current_user}
       ] do
         live "/", BlogLive.Index, :index
         live "/all", BlogLive.Index, :all
@@ -116,16 +112,14 @@ defmodule TeiserverWeb.Router do
 
     live_session :microblog_user,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Communication.NotificationPlug, :load_notifications}
+        {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
         live "/preferences", BlogLive.Preferences, :index
     end
 
     live_session :microblog_admin,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Communication.NotificationPlug, :load_notifications}
+        {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
         live "/admin/posts", Admin.PostLive.Index, :index
         live "/admin/posts/:id", Admin.PostLive.Show, :show
@@ -205,14 +199,6 @@ defmodule TeiserverWeb.Router do
     post("/match/month_metrics", MatchLogController, :month_metrics_list)
   end
 
-  scope "/communication", TeiserverWeb.Communication, as: :communication do
-    pipe_through([:browser, :protected, :standard_layout])
-
-    get("/notifications/delete_all", NotificationController, :delete_all)
-    get("/notifications/mark_all", NotificationController, :mark_all)
-    resources("/notifications", NotificationController, only: [:index, :delete])
-  end
-
   # Live dashboard
   import Phoenix.LiveDashboard.Router
 
@@ -241,8 +227,7 @@ defmodule TeiserverWeb.Router do
 
     live_session :relationships,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Communication.NotificationPlug, :load_notifications}
+        {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
         live "/relationship", RelationshipLive.Index, :friend
         live "/relationship/friend", RelationshipLive.Index, :friend
@@ -253,8 +238,7 @@ defmodule TeiserverWeb.Router do
 
     live_session :account_settings,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Communication.NotificationPlug, :load_notifications}
+        {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
         live "/settings", SettingsLive.Index, :index
         live "/settings/:key", SettingsLive.Index, :selected
@@ -266,8 +250,7 @@ defmodule TeiserverWeb.Router do
 
     live_session :profiles,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :mount_current_user},
-        {Teiserver.Communication.NotificationPlug, :load_notifications}
+        {Teiserver.Account.AuthPlug, :mount_current_user}
       ] do
         live "/", ProfileLive.Self, :index
         live "/name/:username", ProfileLive.Username, :index
@@ -319,8 +302,7 @@ defmodule TeiserverWeb.Router do
 
     live_session :board_view,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Communication.NotificationPlug, :load_notifications}
+        {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
         live "/ratings", MatchLive.Ratings, :index
         live "/ratings/:rating_type", MatchLive.Ratings, :index
@@ -518,8 +500,7 @@ defmodule TeiserverWeb.Router do
 
     live_session :overwatch,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Communication.NotificationPlug, :load_notifications}
+        {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
         live "/overwatch", OverwatchLive.Index, :index
         live "/overwatch/target/:target_id", OverwatchLive.User, :user
@@ -528,8 +509,7 @@ defmodule TeiserverWeb.Router do
 
     live_session :report_user,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :mount_current_user},
-        {Teiserver.Communication.NotificationPlug, :load_notifications}
+        {Teiserver.Account.AuthPlug, :mount_current_user}
       ] do
         live "/report_user", ReportUserLive.Index, :index
         live "/report_user/:id", ReportUserLive.Index, :selected
@@ -610,8 +590,7 @@ defmodule TeiserverWeb.Router do
 
     live_session :chat_liveview,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Communication.NotificationPlug, :load_notifications}
+        {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
         live "/", ChatLive.Index, :index
         live "/room", ChatLive.Room, :index
@@ -624,8 +603,7 @@ defmodule TeiserverWeb.Router do
 
     live_session :live_test_page_view,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Communication.NotificationPlug, :load_notifications}
+        {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
         live "/test_page", TestPageLive.Index, :index
         live "/test_page/:tab", TestPageLive.Index, :index
@@ -633,8 +611,7 @@ defmodule TeiserverWeb.Router do
 
     live_session :admin_chat_liveview,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Communication.NotificationPlug, :load_notifications}
+        {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
         live "/chat", ChatLive.Index, :index
     end

@@ -32,7 +32,6 @@ defmodule TeiserverWeb.ClientLive.Index do
     socket =
       socket
       |> AuthPlug.live_call(session)
-      |> NotificationPlug.live_call()
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Clients", url: "/teiserver/admin/client")

@@ -14,7 +14,6 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
       socket
       |> AuthPlug.live_call(session)
       |> TSAuthPlug.live_call(session)
-      |> NotificationPlug.live_call()
 
     client = Account.get_client_by_id(socket.assigns.user_id)
 

@@ -7,8 +7,6 @@ defmodule TeiserverWeb.UserSocket do
   # channel "room:*", CentralWeb.RoomChannel
 
   channel("live_search:*", TeiserverWeb.LiveSearch.Channel)
-  channel("communication_notification:*", TeiserverWeb.Communication.NotificationChannel)
-  channel("communication_reloads:*", TeiserverWeb.Communication.NotificationChannel)
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After

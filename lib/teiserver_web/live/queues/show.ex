@@ -22,7 +22,6 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
     socket =
       socket
       |> AuthPlug.live_call(session)
-      |> NotificationPlug.live_call()
 
     extra_content = @extra_menu_content
 

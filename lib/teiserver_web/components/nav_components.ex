@@ -158,8 +158,6 @@ defmodule TeiserverWeb.NavComponents do
             <TeiserverWeb.UserComponents.recents_dropdown current_user={@current_user} />
             <TeiserverWeb.UserComponents.account_dropdown current_user={@current_user} />
 
-            <%!-- TODO: Add notifications dropdown --%>
-            <%#= render(TeiserverWeb.Communication.GeneralView, "notification_dropdown.html", assigns) %>
             <div style="width: 300px; display: inline-block;"></div>
           <% else %>
             <a class="nav-link" href={~p"/login"}>

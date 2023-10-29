@@ -43,7 +43,6 @@ defmodule Teiserver.Admin.DeleteUserTask do
       "DELETE FROM teiserver_account_smurf_keys WHERE user_id = ANY($1)",
       "DELETE FROM account_codes WHERE user_id = ANY($1)",
       "DELETE FROM config_user WHERE user_id = ANY($1)",
-      "DELETE FROM communication_notifications WHERE user_id = ANY($1)",
 
       # Logs
       "DELETE FROM page_view_logs WHERE user_id = ANY($1)",

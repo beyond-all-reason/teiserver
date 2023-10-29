@@ -23,7 +23,7 @@ defmodule TeiserverWeb.General.Home.IndexLiveTest do
       {:ok, _index_live, html} = live(conn, ~p"/")
 
       assert html =~ "Logout"
-      assert html =~ "Notifications"
+      assert html =~ "Account"
     end
   end
 end

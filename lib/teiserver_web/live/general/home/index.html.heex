@@ -108,25 +108,6 @@
 
 
 <div class="row">
-  <%# Notification stuff %>
-  <.menu_card
-    :if={@user_notifications_unread_count > 0}
-    icon={Teiserver.Communication.NotificationLib.icon_full()}
-    icon_class="fa-duotone"
-    url={~p"/communication/notifications"}
-  >
-    Notifications (<%= @user_notifications_unread_count %>)
-  </.menu_card>
-
-  <.menu_card
-    :if={@user_notifications_unread_count == 0}
-    icon={Teiserver.Communication.NotificationLib.icon_empty()}
-    icon_class="fa-duotone"
-    url={~p"/communication/notifications"}
-  >
-    Notifications
-  </.menu_card>
-
   <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
     <.link
       href={~p"/logout"}

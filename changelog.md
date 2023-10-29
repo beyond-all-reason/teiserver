@@ -8,6 +8,7 @@
 - Added RSS feed to microblog
 - Tags for the microblog can now be filtered
 - Microblog posts now have a datetime shown beneath their title
+- Completely removed notification system
 
 #### Bugfixes
 

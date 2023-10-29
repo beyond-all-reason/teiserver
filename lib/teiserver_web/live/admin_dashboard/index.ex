@@ -28,7 +28,6 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     socket =
       socket
       |> AuthPlug.live_call(session)
-      |> NotificationPlug.live_call()
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Dashboard", url: "/admin/dashboard")
       |> assign(:site_menu_active, "admin")

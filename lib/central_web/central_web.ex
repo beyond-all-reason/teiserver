@@ -124,7 +124,6 @@ defmodule CentralWeb do
       import Teiserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
       import Teiserver.Helper.NumberHelper,
         only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
-      alias Teiserver.Communication.NotificationPlug
       import Teiserver.Helper.TimexHelper
       alias Teiserver.Helper.StylingHelper
 

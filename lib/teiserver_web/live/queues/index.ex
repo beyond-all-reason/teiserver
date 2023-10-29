@@ -15,7 +15,6 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     socket =
       socket
       |> AuthPlug.live_call(session)
-      |> NotificationPlug.live_call()
 
     client = Client.get_client_by_id(socket.assigns[:current_user].id)
 
