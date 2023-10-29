@@ -17,6 +17,7 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
         phx-target={@myself}
         phx-change="validate"
         phx-submit="save"
+        id="tag-form"
       >
         <div class="row mb-4">
           <div class="col">

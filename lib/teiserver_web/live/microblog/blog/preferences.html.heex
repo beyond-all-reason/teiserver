@@ -24,9 +24,9 @@
 
 <div class="row mt-4">
   <div class="col">
-    <.form for={} phx-change="change-tag-mode">
-    <label for="tag-mode-select" class="control-label">Mode</label>
-    <.input id="tag-mode-selct" name="tag-mode" type="select" value={user_preferences.tag_mode} options={@tag_mode_list} />
+    <.form for={} phx-change="change-tag-mode" id="change-tag-mode-form">
+      <label for="tag-mode-select" class="control-label">Mode</label>
+      <.input id="tag-mode-selct" name="tag-mode" type="select" value={user_preferences.tag_mode} options={@tag_mode_list} />
     </.form>
   </div>
 </div>
@@ -39,14 +39,14 @@
         <.tag_badge tag={tag} phx-value-tag-id={tag.id} class="d-block" id={"tag-#{tag.id}"} />
       </:col>
       <:col :let={tag} :if={Enum.member?(["Filter", "Filter and block"], user_preferences.tag_mode)}>
-        <span class="badge rounded-pill mx-1 bg-success cursor-pointer" phx-click="enable-tag" phx-value-tag-id={tag.id}>
+        <span class="badge rounded-pill mx-1 bg-success cursor-pointer" id={"unassigned-enable-#{tag.id}"} phx-click="enable-tag" phx-value-tag-id={tag.id}>
           &nbsp;
           <Fontawesome.icon icon="check" style="solid" size="fa-lg" />
           &nbsp;
         </span>
       </:col>
       <:col :let={tag} :if={Enum.member?(["Block", "Filter and block"], user_preferences.tag_mode)}>
-        <span class="badge rounded-pill mx-1 bg-danger cursor-pointer" phx-click="disable-tag" phx-value-tag-id={tag.id}>
+        <span class="badge rounded-pill mx-1 bg-danger cursor-pointer" id={"unassigned-disable-#{tag.id}"}phx-click="disable-tag" phx-value-tag-id={tag.id}>
           &nbsp;
           <Fontawesome.icon icon="ban" style="solid" size="fa-lg" />
           &nbsp;
@@ -62,14 +62,14 @@
         <.tag_badge tag={tag} phx-value-tag-id={tag.id} class="d-block" id={"tag-#{tag.id}"} />
       </:col>
       <:col :let={tag}>
-        <span class="badge rounded-pill mx-1 bg-info cursor-pointer" phx-click="reset-tag" phx-value-tag-id={tag.id}>
+        <span class="badge rounded-pill mx-1 bg-info cursor-pointer" id={"enabled-reset-#{tag.id}"}phx-click="reset-tag" phx-value-tag-id={tag.id}>
           &nbsp;
           <Fontawesome.icon icon="sync" style="solid" size="fa-lg" />
           &nbsp;
         </span>
       </:col>
       <:col :let={tag} :if={Enum.member?(["Block", "Filter and block"], user_preferences.tag_mode)}>
-        <span class="badge rounded-pill mx-1 bg-danger cursor-pointer" phx-click="disable-tag" phx-value-tag-id={tag.id}>
+        <span class="badge rounded-pill mx-1 bg-danger cursor-pointer" id={"enabled-disable-#{tag.id}"} phx-click="disable-tag" phx-value-tag-id={tag.id}>
           &nbsp;
           <Fontawesome.icon icon="ban" style="solid" size="fa-lg" />
           &nbsp;
@@ -85,14 +85,14 @@
         <.tag_badge tag={tag} phx-value-tag-id={tag.id} class="d-block" id={"tag-#{tag.id}"} />
       </:col>
       <:col :let={tag}>
-        <span class="badge rounded-pill mx-1 bg-info cursor-pointer" phx-click="reset-tag" phx-value-tag-id={tag.id}>
+        <span class="badge rounded-pill mx-1 bg-info cursor-pointer" id={"disabled-reset-#{tag.id}"}phx-click="reset-tag" phx-value-tag-id={tag.id}>
           &nbsp;
           <Fontawesome.icon icon="sync" style="solid" size="fa-lg" />
           &nbsp;
         </span>
       </:col>
       <:col :let={tag} :if={Enum.member?(["Block", "Filter and block"], user_preferences.tag_mode)}>
-        <span class="badge rounded-pill mx-1 bg-success cursor-pointer" phx-click="enable-tag" phx-value-tag-id={tag.id}>
+        <span class="badge rounded-pill mx-1 bg-success cursor-pointer" id={"disabled-enable-#{tag.id}"}phx-click="enable-tag" phx-value-tag-id={tag.id}>
           &nbsp;
           <Fontawesome.icon icon="check" style="solid" size="fa-lg" />
           &nbsp;

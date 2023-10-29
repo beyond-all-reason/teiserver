@@ -57,6 +57,10 @@
               post.contents |> String.split("\n\n") |> hd |> Earmark.as_html! |> raw
             %>
             <em :if={String.contains?(post.contents, "\n\n") or String.length(post.contents) > 128}>Click for more details</em>
+
+            <div class="sr-only">
+              <.link navigate={~p"/microblog/show/#{post.id}"}>Show</.link>
+            </div>
           </:col>
         </.table>
       </div>

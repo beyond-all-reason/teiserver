@@ -51,28 +51,28 @@ defmodule Teiserver.Microblog.UserPreferenceLib do
   """
   @spec get_user_preference!(non_neg_integer()) :: UserPreference.t
   def get_user_preference!(user_preference_id) do
-    [id: user_preference_id]
+    [user_id: user_preference_id]
     |> UserPreferenceQueries.query_user_preferences()
     |> Repo.one!()
   end
 
   @spec get_user_preference!(non_neg_integer(), list) :: UserPreference.t
   def get_user_preference!(user_preference_id, args) do
-    ([id: user_preference_id] ++ args)
+    ([user_id: user_preference_id] ++ args)
     |> UserPreferenceQueries.query_user_preferences()
     |> Repo.one!()
   end
 
   @spec get_user_preference(non_neg_integer()) :: UserPreference.t | nil
   def get_user_preference(user_preference_id) do
-    [id: user_preference_id]
+    [user_id: user_preference_id]
     |> UserPreferenceQueries.query_user_preferences()
     |> Repo.one()
   end
 
   @spec get_user_preference(non_neg_integer(), list) :: UserPreference.t | nil
   def get_user_preference(user_preference_id, args) do
-    ([id: user_preference_id] ++ args)
+    ([user_id: user_preference_id] ++ args)
     |> UserPreferenceQueries.query_user_preferences()
     |> Repo.one()
   end
