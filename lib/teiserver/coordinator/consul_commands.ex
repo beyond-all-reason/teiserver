@@ -1403,6 +1403,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       true -> false
     end
 
+    starts_with_lobby_policy = new_name
+      |> String.downcase
+      |> String.starts_with?("preset")
+
     cond do
       new_name == "" ->
         Battle.rename_lobby(state.lobby_id, lobby.name, nil)
@@ -1432,10 +1436,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       #   )
       #   state
 
-      lobby.lobby_policy_id && String.starts_with?(stripped_name, "SML") ->
+      lobby.lobby_policy_id && starts_with_lobby_policy ->
         Lobby.sayex(
           state.coordinator_id,
-          "This is not a server managed lobby, you cannot call it an SML",
+          "This is not a server managed lobby, you cannot use that name",
           state.lobby_id
         )
         state
