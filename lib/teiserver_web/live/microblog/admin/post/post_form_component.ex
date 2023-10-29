@@ -29,6 +29,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
         phx-target={@myself}
         phx-change="validate"
         phx-submit="save"
+        id="post-form"
       >
         <div class="row mb-4">
           <div class="col">
@@ -55,12 +56,12 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
             <h4>Tags (<%= Enum.count(@selected_tags) %>)</h4>
             <%= for tag <- @tags do %>
               <%= if Enum.member?(@selected_tags, tag.id) do %>
-                <span class="badge rounded-pill m-1 tag-selector" style={"background-color: #{tag.colour}; "} phx-click="toggle-selected-tag" phx-value-tag={tag.id} phx-target={@myself}>
+                <span class="badge rounded-pill m-1 tag-selector" style={"background-color: #{tag.colour}; "} phx-click="toggle-selected-tag" phx-value-tag={tag.id} phx-target={@myself} id={"tag-#{tag.id}"}>
                   <Fontawesome.icon icon={tag.icon} style="solid" />
                   <%= tag.name %>
                 </span>
               <% else %>
-                <span class="badge rounded-pill m-1 tag-selector" style={"background-color: #{rgba_css(tag.colour, 0.5)}; border-color: rgba(0,0,0,0);"} phx-click="toggle-selected-tag" phx-value-tag={tag.id} phx-target={@myself}>
+                <span class="badge rounded-pill m-1 tag-selector" style={"background-color: #{rgba_css(tag.colour, 0.5)}; border-color: rgba(0,0,0,0);"} phx-click="toggle-selected-tag" phx-value-tag={tag.id} phx-target={@myself} id={"tag-#{tag.id}"}>
                   <Fontawesome.icon icon={tag.icon} style="regular" />
                   <%= tag.name %>
                 </span>
@@ -74,8 +75,8 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
               type="select"
               options={@discord_channels}
             />
-            <%= if false and @current_user.discord_id == nil do %>
-              <div class="alert alert-info mt-4" style="font-size: 0.9em;">
+            <%= if @current_user.data["discord_id"] == nil do %>
+              <div class="mt-4" style="font-size: 0.9em;">
                 You have not linked your discord account with your game account. Currently you can do this by chatting <span class="monospace">$discord</span> in a public room and the server will send you a one time code to send the bridge.
 
                 You can still post microblog messages to discord but it will not include your name/profile in them.
@@ -283,6 +284,8 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
         :ok
       {:error, %{status_code: 404}} ->
         create_post_to_discord(post)
+      {:error, :discord_disabled} ->
+        :ok
     end
   end
 

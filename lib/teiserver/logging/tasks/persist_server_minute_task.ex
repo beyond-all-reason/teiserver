@@ -27,7 +27,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMinuteTask do
       Telemetry.get_totals_and_reset()
       |> Map.drop([:cycle])
 
-    if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
+    if Teiserver.Communication.use_discord?() do
       if rem(Timex.now().minute(), 10) == 0 do
         if Config.get_site_config_cache("teiserver.Bridge player numbers") do
           [

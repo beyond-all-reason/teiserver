@@ -484,4 +484,10 @@ defmodule Teiserver.Communication do
 
   @spec delete_discord_message(non_neg_integer | String.t, non_neg_integer) :: map | nil | {:error, String.t}
   defdelegate delete_discord_message(channel_id, message_id), to: DiscordChannelLib
+
+  @doc """
+  Returns true if we are using discord in this environment and false if we are not.
+  """
+  @spec use_discord?() :: boolean
+  defdelegate use_discord?(), to: DiscordChannelLib
 end

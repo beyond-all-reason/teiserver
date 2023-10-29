@@ -12,7 +12,7 @@ defmodule Teiserver.MicroblogFixtures do
     {:ok, tag} =
       attrs
       |> Enum.into(%{
-        colour: "some colour",
+        colour: "#AA0000",
         icon: "some icon",
         name: "some name"
       })
@@ -39,6 +39,29 @@ defmodule Teiserver.MicroblogFixtures do
       |> Microblog.create_post()
 
     post
+  end
+
+  @doc """
+  Generate a post.
+  """
+  def post_with_tag_fixture(attrs \\ %{}) do
+    user = AccountFixtures.user_fixture()
+    tag = tag_fixture()
+
+    {:ok, post} =
+      attrs
+      |> Enum.into(%{
+        poster_id: user.id,
+        contents: "some contents",
+        discord_post_id: 42,
+        title: "some title",
+        view_count: 42
+      })
+      |> Microblog.create_post()
+
+    post_tag = post_tag_fixture(post_id: post.id, tag_id: tag.id)
+
+    {post, tag, post_tag}
   end
 
   @doc """

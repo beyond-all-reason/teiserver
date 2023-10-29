@@ -9,8 +9,8 @@
 #     GeneralTestLib.conn_setup(~w(horizon.manage))
 #   end
 
-#   @create_attrs %{colour: "some colour", icon: "fa-regular fa-home", name: "some name"}
-#   @update_attrs %{colour: "some updated colour", icon: "fa-solid fa-wrench", name: "some updated name"}
+#   @create_attrs %{colour: "#AA0000", icon: "fa-regular fa-home", name: "some name"}
+#   @update_attrs %{colour: "#0000AA", icon: "fa-solid fa-wrench", name: "some updated name"}
 #   @invalid_attrs %{colour: nil, icon: nil, name: nil}
 
 #   describe "index" do
@@ -77,7 +77,7 @@
 #       assert redirected_to(conn) == Routes.account_badge_type_path(conn, :index)
 
 #       conn = get(conn, Routes.account_badge_type_path(conn, :show, badge_type))
-#       assert html_response(conn, 200) =~ "some updated colour"
+#       assert html_response(conn, 200) =~ "#0000AA"
 #     end
 
 #     test "renders errors when data is invalid", %{conn: conn} do

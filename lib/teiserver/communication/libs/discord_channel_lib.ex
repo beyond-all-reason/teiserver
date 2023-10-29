@@ -180,25 +180,37 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   """
   @spec new_discord_message(String.t | non_neg_integer(), String.t()) :: map | nil | {:error, String.t}
   def new_discord_message(maybe_channel_id, message) do
-    case get_channel_id_from_any(maybe_channel_id) do
-      nil -> {:error, "No channel found"}
-      channel_id -> Nostrum.Api.create_message(channel_id, message)
+    if use_discord?() do
+      case get_channel_id_from_any(maybe_channel_id) do
+        nil -> {:error, "No channel found"}
+        channel_id -> Nostrum.Api.create_message(channel_id, message)
+      end
+    else
+      {:error, :discord_disabled}
     end
   end
 
   @spec edit_discord_message(non_neg_integer | String.t, non_neg_integer, String.t) :: map | nil | {:error, String.t}
   def edit_discord_message(maybe_channel_id, message_id, new_message) when is_integer(message_id) do
-    case get_channel_id_from_any(maybe_channel_id) do
-      nil -> {:error, "No channel found"}
-      channel_id -> Nostrum.Api.edit_message(channel_id, message_id, content: new_message)
+    if use_discord?() do
+      case get_channel_id_from_any(maybe_channel_id) do
+        nil -> {:error, "No channel found"}
+        channel_id -> Nostrum.Api.edit_message(channel_id, message_id, content: new_message)
+      end
+    else
+      {:error, :discord_disabled}
     end
   end
 
   @spec delete_discord_message(non_neg_integer | String.t, non_neg_integer) :: map | nil | {:error, String.t}
   def delete_discord_message(maybe_channel_id, message_id) do
-    case get_channel_id_from_any(maybe_channel_id) do
-      nil -> {:error, "No channel found"}
-      channel_id -> Nostrum.Api.delete_message(channel_id, message_id)
+    if use_discord?() do
+      case get_channel_id_from_any(maybe_channel_id) do
+        nil -> {:error, "No channel found"}
+        channel_id -> Nostrum.Api.delete_message(channel_id, message_id)
+      end
+    else
+      {:error, :discord_disabled}
     end
   end
 
@@ -220,5 +232,10 @@ defmodule Teiserver.Communication.DiscordChannelLib do
       nil -> nil
       %{channel_id: channel_id} -> channel_id
     end
+  end
+
+  @spec use_discord?() :: boolean
+  def use_discord?() do
+    Application.get_env(:central, Teiserver)[:enable_discord_bridge]
   end
 end

@@ -29,7 +29,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
 
                     case Telemetry.create_infolog(params) do
                       {:ok, infolog} ->
-                        if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
+                        if Teiserver.Communication.use_discord?() do
                           DiscordBridgeBot.new_infolog(infolog)
                         end
 

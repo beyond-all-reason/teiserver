@@ -8,7 +8,7 @@ defmodule Central.AccountTest do
     alias Central.Account.User
 
     @valid_attrs %{
-      colour: "some colour",
+      colour: "#AA0000",
       icon: "fa-regular fa-home",
       name: "some name",
       permissions: [],
@@ -16,7 +16,7 @@ defmodule Central.AccountTest do
       password: "some password"
     }
     @update_attrs %{
-      colour: "some updated colour",
+      colour: "#0000AA",
       icon: "fa-solid fa-wrench",
       permissions: [],
       name: "some updated name",
@@ -43,7 +43,7 @@ defmodule Central.AccountTest do
 
     test "create_user/1 with valid data creates a user" do
       assert {:ok, %User{} = user} = Account.create_user(@valid_attrs)
-      assert user.colour == "some colour"
+      assert user.colour == "#AA0000"
       assert user.icon == "fa-regular fa-home"
       assert user.name == "some name"
       assert user.permissions == []
@@ -70,7 +70,7 @@ defmodule Central.AccountTest do
     test "update_user/2 with valid data updates the user" do
       user = AccountTestLib.user_fixture()
       assert {:ok, %User{} = user} = Account.update_user(user, @update_attrs)
-      assert user.colour == "some updated colour"
+      assert user.colour == "#0000AA"
       assert user.icon == "fa-solid fa-wrench"
       assert user.name == "some updated name"
       assert user.permissions == []

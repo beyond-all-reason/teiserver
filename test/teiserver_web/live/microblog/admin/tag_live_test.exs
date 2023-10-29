@@ -6,8 +6,8 @@ defmodule TeiserverWeb.TagLiveTest do
   import Teiserver.MicroblogFixtures
   alias Teiserver.Microblog
 
-  @create_attrs %{colour: "some colour", icon: "some icon", name: "some name"}
-  @update_attrs %{colour: "some updated colour", icon: "some updated icon", name: "some updated name"}
+  @create_attrs %{colour: "#AA0000", icon: "some icon", name: "some name"}
+  @update_attrs %{colour: "#0000AA", icon: "some updated icon", name: "some updated name"}
   @invalid_attrs %{colour: nil, icon: nil, name: nil}
 
   defp auth_setup(_) do
@@ -16,9 +16,38 @@ defmodule TeiserverWeb.TagLiveTest do
     |> Teiserver.TeiserverTestLib.conn_setup()
   end
 
+  defp unauth_setup(_) do
+    Central.Helpers.GeneralTestLib.conn_setup()
+    |> Teiserver.TeiserverTestLib.conn_setup()
+  end
+
   defp create_tag(_) do
     tag = tag_fixture()
     %{tag: tag}
+  end
+
+  describe "Anon auth test" do
+    setup [:create_tag]
+
+    test "anon", %{conn: conn, tag: tag} do
+      {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/tags")
+      assert resp == %{flash: %{"error" => "You must log in to access this page."}, to: ~p"/login"}
+
+      {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/tags/#{tag}")
+      assert resp == %{flash: %{"error" => "You must log in to access this page."}, to: ~p"/login"}
+    end
+  end
+
+  describe "Basic auth test" do
+    setup [:unauth_setup, :create_tag]
+
+    test "basic user", %{tag: tag, conn: conn} do
+      {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/tags")
+      assert resp == %{flash: %{"info" => "Welcome back!"}, to: ~p"/microblog"}
+
+      {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/tags/#{tag}")
+      assert resp == %{flash: %{"info" => "Welcome back!"}, to: ~p"/microblog"}
+    end
   end
 
   describe "Index" do
@@ -52,7 +81,7 @@ defmodule TeiserverWeb.TagLiveTest do
       assert_redirect(index_live, ~p"/microblog/admin/tags")
 
       {:ok, _index_live, html} = live(conn, ~p"/microblog/admin/tags")
-      assert html =~ "some colour"
+      assert html =~ "#AA0000"
     end
   end
 
@@ -80,7 +109,7 @@ defmodule TeiserverWeb.TagLiveTest do
       assert_redirect(edit_live, ~p"/microblog/admin/tags")
 
       {:ok, _index_live, html} = live(conn, ~p"/microblog/admin/tags")
-      assert html =~ "some updated colour"
+      assert html =~ "#0000AA"
     end
   end
 end

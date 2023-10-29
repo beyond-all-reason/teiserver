@@ -27,7 +27,7 @@
         Edit post
       </a>
 
-      <span class="btn btn-danger" :if={allow?(@current_user, "Moderator")} phx-click="delete-post">
+      <span class="btn btn-danger" :if={allow?(@current_user, "Moderator")} id="delete-post-button" phx-click="delete-post">
         <Fontawesome.icon icon="trash" style="solid" />
         Delete post
       </span>

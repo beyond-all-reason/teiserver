@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Game.QueueControllerTest do
   end
 
   @create_attrs %{
-    colour: "some colour",
+    colour: "#AA0000",
     icon: "fa-regular fa-home",
     name: "some name",
     team_size: 1,
@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Game.QueueControllerTest do
     settings: %{}
   }
   @update_attrs %{
-    colour: "some updated colour",
+    colour: "#0000AA",
     icon: "fa-solid fa-wrench",
     name: "some updated name",
     team_size: 2,
@@ -125,7 +125,7 @@ defmodule TeiserverWeb.Game.QueueControllerTest do
       assert redirected_to(conn) == Routes.ts_game_queue_path(conn, :index)
 
       conn = get(conn, Routes.ts_game_queue_path(conn, :show, queue))
-      assert html_response(conn, 200) =~ "some updated colour"
+      assert html_response(conn, 200) =~ "#0000AA"
     end
 
     test "renders errors when data is invalid", %{conn: conn} do

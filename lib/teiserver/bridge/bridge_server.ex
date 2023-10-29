@@ -468,7 +468,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   @impl true
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
-    if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
+    if Teiserver.Communication.use_discord?() do
       send(self(), :begin)
     end
 

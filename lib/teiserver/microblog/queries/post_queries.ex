@@ -134,7 +134,7 @@ defmodule Teiserver.Microblog.PostQueries do
 
   defp _preload(query, :discord_channel) do
     from posts in query,
-      join: discord_channels in assoc(posts, :discord_channel),
+      left_join: discord_channels in assoc(posts, :discord_channel),
       preload: [discord_channel: discord_channels]
   end
 end

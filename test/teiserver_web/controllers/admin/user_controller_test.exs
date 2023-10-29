@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   end
 
   # @create_attrs %{
-  #   colour: "some colour",
+  #   colour: "#AA0000",
   #   email: "some email",
   #   icon: "fa-regular fa-home",
   #   name: "some name",
@@ -20,7 +20,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   #   data: "{}"
   # }
   @update_attrs %{
-    colour: "some updated colour",
+    colour: "#0000AA",
     icon: "fa-solid fa-wrench",
     name: "some updated name",
     username: "some updated username"
@@ -110,7 +110,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       # assert redirected_to(conn) == ~p"/teiserver/admin/user"
 
       conn = get(conn, ~p"/teiserver/admin/user/#{user}")
-      assert html_response(conn, 200) =~ "some updated colour"
+      assert html_response(conn, 200) =~ "#0000AA"
     end
 
     test "renders errors when data is invalid", %{conn: conn, user: user} do

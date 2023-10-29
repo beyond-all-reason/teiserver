@@ -16,6 +16,11 @@
 - Fixed issue where a LobbyPolicy bot could repeatedly rename a lobby
 - Fixed incorrect output of `c.user.list_relationships`
 
+#### Internal improvements
+
+- Added `Communication.use_discord?/1` to make it easier to not make discord calls in dev
+- Unit tests for microblog system
+
 ## v1.1.1
 
 * Report forms now include the option to ignore players along with buttons to avoid or block them

@@ -22,10 +22,10 @@ defmodule Teiserver.MicroblogTest do
     end
 
     test "create_tag/1 with valid data creates a tag" do
-      valid_attrs = %{colour: "some colour", icon: "some icon", name: "some name"}
+      valid_attrs = %{colour: "#AA0000", icon: "some icon", name: "some name"}
 
       assert {:ok, %Tag{} = tag} = Microblog.create_tag(valid_attrs)
-      assert tag.colour == "some colour"
+      assert tag.colour == "#AA0000"
       assert tag.icon == "some icon"
       assert tag.name == "some name"
     end
@@ -36,10 +36,10 @@ defmodule Teiserver.MicroblogTest do
 
     test "update_tag/2 with valid data updates the tag" do
       tag = tag_fixture()
-      update_attrs = %{colour: "some updated colour", icon: "some updated icon", name: "some updated name"}
+      update_attrs = %{colour: "#0000AA", icon: "some updated icon", name: "some updated name"}
 
       assert {:ok, %Tag{} = tag} = Microblog.update_tag(tag, update_attrs)
-      assert tag.colour == "some updated colour"
+      assert tag.colour == "#0000AA"
       assert tag.icon == "some updated icon"
       assert tag.name == "some updated name"
     end

@@ -15,7 +15,7 @@
       <item>
         <title><%= post.title %></title>
         <author><%= post.poster.name %></author>
-        <posted_to><%= post.discord_channel.name %></posted_to>
+        <posted_to><%= if post.discord_channel, do: post.discord_channel.name, else: "none" %></posted_to>
         <link><%= ~p"/microblog/show/#{post.id}" %></link>
         <id><%= post.id %></id>
         <guid><%= "#{post.id}/#{post.updated_at |> Timex.to_unix()}" %></guid>
