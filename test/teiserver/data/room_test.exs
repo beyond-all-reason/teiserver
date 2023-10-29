@@ -1,4 +1,5 @@
 defmodule Teiserver.Data.RoomTest do
+  @moduledoc false
   use Teiserver.DataCase, async: true
   alias Teiserver.{Room}
   alias Teiserver.Account.UserCacheLib
@@ -12,7 +13,7 @@ defmodule Teiserver.Data.RoomTest do
     bad_clan_user = new_user("test_user_bad_clan_room")
     bad_clan_user = UserCacheLib.update_user(%{bad_clan_user | clan_id: 2})
     moderator_user = new_user("test_user_moderator_room")
-    moderator_user = UserCacheLib.update_user(%{moderator_user | moderator: true})
+    moderator_user = UserCacheLib.update_user(%{moderator_user | moderator: true, roles: ["Moderator"]})
 
     Room.get_or_make_room("normal", author_user.id)
     Room.get_or_make_room("clan", author_user.id, 1)

@@ -20,6 +20,8 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     pid = LoginThrottleServer.get_login_throttle_server_pid()
     Config.update_site_config("system.User limit", 10)
 
+    throttle_listener = PubsubListener.new_listener(["teiserver_liveview_login_throttle"])
+
     bot = new_user()
     Account.update_cache_user(bot.id, %{roles: ["Bot"]})
     bot_listener = PubsubListener.new_listener([])
@@ -43,6 +45,8 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     toxic = new_user()
     Account.update_cache_user(toxic.id, %{behaviour_score: 1})
     toxic_listener = PubsubListener.new_listener([])
+
+    assert PubsubListener.get(throttle_listener) == []
 
     send(pid, %{
       channel: "teiserver_telemetry",
@@ -133,6 +137,9 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     assert PubsubListener.get(standard_listener) == []
     assert PubsubListener.get(toxic_listener) == []
 
+    # Flush the throttle messages
+    PubsubListener.get(throttle_listener)
+
     # Now approve the rest of them
     # the toxic one will have to wait a bit longer though
     send(pid, %{
@@ -148,9 +155,19 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     state = :sys.get_state(pid)
     assert state.remaining_capacity == 6
 
+    throttle_messages = PubsubListener.get(throttle_listener)
+    assert throttle_messages == [
+      %{
+        channel: "teiserver_liveview_login_throttle",
+        event: :updated_capacity,
+        remaining_capacity: 6
+      }
+    ]
+
     # Dequeue the next more
     send(pid, :tick)
     :timer.sleep(500)
+
     assert PubsubListener.get(moderator_listener) == []
     assert PubsubListener.get(contributor_listener) == [{:login_accepted, contributor.id}]
     assert PubsubListener.get(vip_listener) == []

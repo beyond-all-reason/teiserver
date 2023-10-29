@@ -384,7 +384,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   # When a login is accepted and we want to update certain metrics right away
   defp accept_login(
          %{recent_logins: recent_logins, remaining_capacity: remaining_capacity} = state,
-         _userid
+         userid
        ) do
     new_recent_logins = [System.system_time(:millisecond) | recent_logins]
     new_remaining_capacity = remaining_capacity - 1
@@ -418,7 +418,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
       CacheUser.has_any_role?(user, ["Core"]) -> :core
       CacheUser.has_any_role?(user, ["Contributor"]) -> :contributor
       CacheUser.has_any_role?(user, ["Overwatch", "Reviewer"]) -> :volunteer
-      CacheUser.has_any_role?(user, ["VIP"]) -> :vip
+      CacheUser.has_any_role?(user, ["VIP", "BAR+"]) -> :vip
       user.behaviour_score < 5000 -> :toxic
       true -> :standard
     end

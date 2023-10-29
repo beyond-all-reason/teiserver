@@ -1,8 +1,9 @@
 defmodule Teiserver.Account.AccoladeBotTest do
+  @moduledoc false
   use Teiserver.ServerCase, async: false
   # alias Phoenix.PubSub
 
-  alias Teiserver.{Battle, Account, User}
+  alias Teiserver.{Battle, Account, CacheUser}
   alias Teiserver.Account.AccoladeLib
   require Logger
 
@@ -309,7 +310,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
     assert Account.list_accolades(search: [giver_id: player11.id]) == []
 
     # restrict player11 from getting accolades
-    User.restrict_user(player12.id, "Accolades")
+    CacheUser.restrict_user(player12.id, "Accolades")
     :timer.sleep(100)
 
     AccoladeLib.cast_accolade_bot(%{
