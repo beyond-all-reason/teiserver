@@ -6,8 +6,8 @@ defmodule Teiserver.Protocols.Spring.UserIn do
   require Logger
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
-  def do_handle("add_friend", usernames_str, msg_id, state) do
-    responses = usernames_str
+  def do_handle("add_friend", userids_str, msg_id, state) do
+    responses = userids_str
       |> String.split("\t")
       |> Enum.map(fn n ->
         case Account.get_user_by_id(n) do
@@ -25,6 +25,27 @@ defmodule Teiserver.Protocols.Spring.UserIn do
       end)
 
     reply(:user, :add_friend, responses, msg_id, state)
+  end
+
+  @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
+  def do_handle("rescind_friend_request", userids_str, msg_id, state) do
+    responses = userids_str
+      |> String.split("\t")
+      |> Enum.map(fn n ->
+        case Account.get_user_by_id(n) do
+          nil ->
+            {n, :no_user}
+          user ->
+            case Account.rescind_friend_request(state.userid, user.id) do
+              {:error, "no request"} ->
+                {n, :no_request}
+              _ ->
+                {n, :success}
+            end
+        end
+      end)
+
+    reply(:user, :rescind_friend_request, responses, msg_id, state)
   end
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()

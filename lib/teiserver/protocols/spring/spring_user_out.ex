@@ -28,6 +28,16 @@ defmodule Teiserver.Protocols.Spring.UserOut do
     end)
   end
 
+  def do_reply(:rescind_friend_request, result_list, _state) do
+    result_list
+    |> Enum.map_join("", fn
+      {id, :success} -> "s.user.rescind_friend_request #{id}\tsuccess\n"
+      {id, :no_user} -> "s.user.rescind_friend_request #{id}\tfailure\tno user of that id\n"
+      {id, :existing} -> "s.user.rescind_friend_request #{id}\tfailure\tno friend request\n"
+      {id, reason} -> "s.user.rescind_friend_request #{id}\tfailure\tno failure catch for #{reason}\n"
+    end)
+  end
+
   def do_reply(:whois_name, {:no_user, username}, _state) do
     "s.user.whoisName error: No user found for name:#{username}\n"
   end
