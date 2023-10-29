@@ -1,5 +1,5 @@
 defmodule Teiserver.ModerationTest do
-  use Central.DataCase, async: true
+  use Teiserver.DataCase, async: true
 
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ModerationTestLib

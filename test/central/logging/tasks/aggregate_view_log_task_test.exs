@@ -1,5 +1,5 @@
 defmodule Teiserver.Logging.AggregateViewLogsTaskTest do
-  use Central.DataCase, async: true
+  use Teiserver.DataCase, async: true
 
   alias Teiserver.Logging.AggregateViewLogsTask
 

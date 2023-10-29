@@ -1,5 +1,5 @@
 defmodule CentralWeb.Account.ForgottenPasswordControllerTest do
-  use CentralWeb.ConnCase
+  use TeiserverWeb.ConnCase
   alias Central.Account
   alias Central.Helpers.GeneralTestLib
   use Bamboo.Test

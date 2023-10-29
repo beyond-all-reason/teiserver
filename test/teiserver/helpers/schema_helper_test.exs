@@ -1,5 +1,5 @@
 defmodule Teiserver.Helper.SchemaHelperTest do
-  use Central.DataCase, async: true
+  use Teiserver.DataCase, async: true
 
   alias Teiserver.Helper.SchemaHelper
 

@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Moderation.ActionControllerTest do
   @moduledoc false
-  use CentralWeb.ConnCase
+  use TeiserverWeb.ConnCase
 
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ModerationTestLib

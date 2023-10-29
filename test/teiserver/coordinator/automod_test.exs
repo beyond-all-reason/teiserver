@@ -1,5 +1,5 @@
 defmodule Teiserver.Coordinator.AutomodTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   alias Teiserver.{Config}
   alias Teiserver.{Account, User, Client, Moderation, Logging}
   alias Teiserver.Coordinator.{CoordinatorServer, AutomodServer}

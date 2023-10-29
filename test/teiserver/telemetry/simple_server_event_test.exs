@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.SimpleServerEventTest do
   @moduledoc false
-  use Central.DataCase
+  use Teiserver.DataCase
   alias Teiserver.{Telemetry}
   alias Teiserver.TeiserverTestLib
 

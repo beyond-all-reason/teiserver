@@ -1,5 +1,5 @@
-defmodule Central.General.StylingHelpersTest do
-  use Central.DataCase, async: true
+defmodule Teiserver.General.StylingHelpersTest do
+  use Teiserver.DataCase, async: true
 
   alias Teiserver.Helper.StylingHelper
 

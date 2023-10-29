@@ -1,5 +1,5 @@
 defmodule Teiserver.Bridge.UnitNamesTest do
-  use Central.ServerCase, async: true
+  use Teiserver.ServerCase, async: true
   alias Teiserver.Bridge.UnitNames
 
   test "unit names" do

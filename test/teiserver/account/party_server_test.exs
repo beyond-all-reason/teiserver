@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.PartyServerTest do
   @moduledoc false
-  use Central.DataCase, async: true
+  use Teiserver.DataCase, async: true
   alias Teiserver.Account.PartyLib
   alias Teiserver.Account.Party
 

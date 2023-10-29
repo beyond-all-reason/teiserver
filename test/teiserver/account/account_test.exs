@@ -1,5 +1,5 @@
 defmodule Teiserver.AccountTest do
-  use Central.DataCase, async: true
+  use Teiserver.DataCase, async: true
 
   alias Teiserver.Account
   alias Teiserver.Account.AccountTestLib

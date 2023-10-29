@@ -1,5 +1,5 @@
 defmodule Teiserver.Coordinator.HostUpdateTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   alias Teiserver.{Lobby, Client, Coordinator}
 
   import Teiserver.TeiserverTestLib,

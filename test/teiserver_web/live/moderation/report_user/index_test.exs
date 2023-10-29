@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
   @moduledoc false
-  use CentralWeb.ConnCase, async: false
+  use TeiserverWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib

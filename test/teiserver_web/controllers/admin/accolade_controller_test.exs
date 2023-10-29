@@ -1,5 +1,5 @@
 # defmodule TeiserverWeb.Account.AccoladeControllerTest do
-#   use CentralWeb.ConnCase
+#   use TeiserverWeb.ConnCase
 
 #   alias Teiserver.Account
 #   alias Teiserver.AccountTestLib

@@ -1,6 +1,6 @@
 defmodule Teiserver.Battle.LoserPicksBalanceTest do
   @moduledoc false
-  use Central.DataCase, async: true
+  use Teiserver.DataCase, async: true
   alias Teiserver.Battle.BalanceLib
 
   @algorithm "loser_picks"

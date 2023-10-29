@@ -1,5 +1,5 @@
 defmodule CentralWeb.Account.SessionControllerTest do
-  use CentralWeb.ConnCase
+  use TeiserverWeb.ConnCase
 
   alias Central.{Account, Config}
   alias Central.Helpers.GeneralTestLib

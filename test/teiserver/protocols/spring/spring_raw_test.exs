@@ -1,5 +1,5 @@
 defmodule Teiserver.SpringRawTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
 
   import Teiserver.TeiserverTestLib,
     only: [raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1, new_user: 0]

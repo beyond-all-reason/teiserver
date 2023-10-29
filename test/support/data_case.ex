@@ -1,4 +1,4 @@
-defmodule Central.DataCase do
+defmodule Teiserver.DataCase do
   @moduledoc """
   This module defines the setup for tests requiring
   access to the application's data layer.
@@ -10,7 +10,7 @@ defmodule Central.DataCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use Central.DataCase, async: true`, although
+  by setting `use Teiserver.DataCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -23,7 +23,7 @@ defmodule Central.DataCase do
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
-      import Central.DataCase
+      import Teiserver.DataCase
     end
   end
 

@@ -1,5 +1,5 @@
 defmodule Teiserver.Data.UserTest do
-  use Central.ServerCase
+  use Teiserver.ServerCase
   alias Teiserver.{User, Account}
   alias Teiserver.TeiserverTestLib
 

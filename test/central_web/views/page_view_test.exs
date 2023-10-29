@@ -1,3 +1,3 @@
 defmodule CentralWeb.PageViewTest do
-  use CentralWeb.ConnCase, async: true
+  use TeiserverWeb.ConnCase, async: true
 end

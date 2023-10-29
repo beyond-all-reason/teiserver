@@ -1,5 +1,5 @@
 defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTaskTest do
-  use Central.DataCase
+  use Teiserver.DataCase
   alias Teiserver.{Telemetry, Account, User}
   alias Teiserver.Telemetry.Tasks.{PersistServerMonthTask, PersistServerDayTask}
 

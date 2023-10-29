@@ -1,5 +1,5 @@
 defmodule Teiserver.SpringBattleHostTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   require Logger
   alias Teiserver.{Coordinator, Battle, Lobby}
   alias Teiserver.Protocols.Spring

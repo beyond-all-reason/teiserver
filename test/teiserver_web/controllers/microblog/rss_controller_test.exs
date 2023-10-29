@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Microblog.RssControllerTest do
   @moduledoc false
-  use CentralWeb.ConnCase
+  use TeiserverWeb.ConnCase
   import Teiserver.MicroblogFixtures
 
   defp auth_setup(_) do

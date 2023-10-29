@@ -1,7 +1,7 @@
 defmodule Teiserver.Battle.LobbyServerTest do
   @moduledoc false
   # Cannot be async because some other tests will call for a list of all lobbies
-  use Central.DataCase, async: false
+  use Teiserver.DataCase, async: false
   alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Coordinator
 

@@ -1,5 +1,5 @@
 defmodule Teiserver.Coordinator.SpadsParserTest do
-  use Central.DataCase, async: true
+  use Teiserver.DataCase, async: true
   alias Teiserver.Coordinator.SpadsParser
   import Teiserver.TeiserverTestLib, only: [new_user: 0]
 

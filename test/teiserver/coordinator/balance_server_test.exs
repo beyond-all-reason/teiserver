@@ -1,5 +1,5 @@
 defmodule Teiserver.Coordinator.BalanceServerTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   alias Teiserver.Account.ClientLib
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.{Account, Lobby, Battle, User, Client, Coordinator}

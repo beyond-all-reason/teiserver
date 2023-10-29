@@ -1,5 +1,5 @@
 defmodule Teiserver.Chat.WordLibTest do
-  use Central.DataCase
+  use Teiserver.DataCase
   alias Teiserver.Chat.WordLib
   alias Teiserver.{Coordinator, Room, User}
   alias Teiserver.Lobby.ChatLib

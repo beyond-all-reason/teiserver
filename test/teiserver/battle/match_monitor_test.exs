@@ -1,5 +1,5 @@
 defmodule Teiserver.Battle.MatchMonitorTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
 
   import Teiserver.TeiserverTestLib,
     only: [

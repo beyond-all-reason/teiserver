@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Admin.UserControllerTest do
-  use CentralWeb.ConnCase
+  use TeiserverWeb.ConnCase
 
   alias Central.Helpers.GeneralTestLib
   # alias Teiserver.TeiserverTestLib

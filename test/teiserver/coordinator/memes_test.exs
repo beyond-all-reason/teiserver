@@ -1,5 +1,5 @@
 defmodule Teiserver.Coordinator.MemesTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   alias Teiserver.Account.ClientLib
   alias Teiserver.{User, Client, Coordinator, Lobby}
   require Logger

@@ -20,6 +20,7 @@
 
 - Added `Communication.use_discord?/1` to make it easier to not make discord calls in dev
 - Unit tests for microblog system
+- Converted some tests for old pages into the new liveview pages
 
 ## v1.1.1
 

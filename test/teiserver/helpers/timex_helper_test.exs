@@ -1,5 +1,5 @@
 defmodule Teiserver.Helper.TimexHelperTest do
-  use Central.DataCase, async: true
+  use Teiserver.DataCase, async: true
 
   alias Teiserver.Helper.TimexHelper
 
@@ -36,7 +36,7 @@ defmodule Teiserver.Helper.TimexHelperTest do
     end
 
     # Now test it runs with just a "now" argument
-    assert TimexHelper.date_to_str(@today) == "04/12/2013"
+    assert TimexHelper.date_to_str(@today) == "2013-12-04"
   end
 
   test "date_to_str until" do

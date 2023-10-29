@@ -1,6 +1,6 @@
 defmodule Teiserver.MicroblogTest do
   @moduledoc false
-  use Central.DataCase
+  use Teiserver.DataCase
 
   alias Teiserver.Microblog
 

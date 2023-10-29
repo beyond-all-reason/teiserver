@@ -1,5 +1,5 @@
 defmodule Teiserver.Coordinator.JoiningTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   alias Teiserver.Common.PubsubListener
   alias Teiserver.Account.ClientLib
   alias Teiserver.Coordinator

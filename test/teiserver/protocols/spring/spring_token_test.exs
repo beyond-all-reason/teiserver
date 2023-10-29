@@ -1,5 +1,5 @@
 defmodule Teiserver.SpringTokenTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   require Logger
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.Client

@@ -1,5 +1,5 @@
-defmodule Central.General.StringHelpersTest do
-  use Central.DataCase, async: true
+defmodule Teiserver.General.StringHelpersTest do
+  use Teiserver.DataCase, async: true
 
   alias Teiserver.Helper.StringHelper
 

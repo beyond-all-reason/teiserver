@@ -1,6 +1,6 @@
 defmodule Teiserver.Battle.ForcePartyBalanceTest do
   @moduledoc false
-  use Central.DataCase, async: true
+  use Teiserver.DataCase, async: true
   alias Teiserver.Battle.BalanceLib
 
   @algorithm "force_party"

@@ -1,5 +1,5 @@
 defmodule Teiserver.Coordinator.MatchMonitorServerTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   alias Teiserver.{User, Chat, Client, Lobby}
   alias Teiserver.Coordinator.{CoordinatorServer}
 

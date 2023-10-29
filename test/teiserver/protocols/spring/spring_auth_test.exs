@@ -1,5 +1,5 @@
 defmodule Teiserver.SpringAuthTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   require Logger
   alias Teiserver.BitParse
   alias Teiserver.{User, Account, Client}

@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Microblog.Blog.PreferenceLiveTest do
   @moduledoc false
-  use CentralWeb.ConnCase
+  use TeiserverWeb.ConnCase
 
   import Phoenix.LiveViewTest
   import Teiserver.MicroblogFixtures

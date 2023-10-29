@@ -1,5 +1,5 @@
 defmodule Teiserver.Coordinator.ModerationTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   alias Teiserver.{User, Coordinator, Client, Moderation}
   import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
   alias Teiserver.Moderation.RefreshUserRestrictionsTask

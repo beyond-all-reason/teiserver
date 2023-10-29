@@ -1,5 +1,5 @@
 # defmodule TeiserverWeb.Logging.AggregateViewLogControllerTest do
-#   use CentralWeb.ConnCase, async: true
+#   use TeiserverWeb.ConnCase, async: true
 
 #   alias TeiserverWeb.General.TimexHelpers
 

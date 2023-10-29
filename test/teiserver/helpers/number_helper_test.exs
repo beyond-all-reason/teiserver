@@ -1,5 +1,5 @@
-defmodule Central.General.NumberHelperTest do
-  use Central.DataCase, async: true
+defmodule Teiserver.General.NumberHelperTest do
+  use Teiserver.DataCase, async: true
 
   alias Teiserver.Helper.NumberHelper
   alias Decimal

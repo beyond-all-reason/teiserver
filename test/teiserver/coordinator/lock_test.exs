@@ -1,5 +1,5 @@
 defmodule Teiserver.Coordinator.LockTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   alias Teiserver.{Client, Coordinator, Lobby}
 
   import Teiserver.TeiserverTestLib,

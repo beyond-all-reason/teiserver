@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Report.ComplexClientEventControllerTest do
-  use CentralWeb.ConnCase
+  use TeiserverWeb.ConnCase
 
   alias Central.Helpers.GeneralTestLib
 

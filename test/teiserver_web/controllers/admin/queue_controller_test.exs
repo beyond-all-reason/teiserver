@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Game.QueueControllerTest do
-  use CentralWeb.ConnCase
+  use TeiserverWeb.ConnCase
 
   alias Teiserver.Game
   alias Teiserver.TeiserverTestLib

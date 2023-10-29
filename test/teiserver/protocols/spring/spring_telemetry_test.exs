@@ -1,5 +1,5 @@
 defmodule Teiserver.SpringTelemetryTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   alias Teiserver.Telemetry
 
   import Teiserver.TeiserverTestLib,

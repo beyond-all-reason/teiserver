@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.API.SpadsControllerTest do
-  use CentralWeb.ConnCase, async: false
+  use TeiserverWeb.ConnCase, async: false
   alias Teiserver.Account
   alias Teiserver.Lobby
   alias Teiserver.Game.MatchRatingLib

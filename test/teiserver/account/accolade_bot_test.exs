@@ -1,5 +1,5 @@
 defmodule Teiserver.Account.AccoladeBotTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   # alias Phoenix.PubSub
 
   alias Teiserver.{Battle, Account, User}

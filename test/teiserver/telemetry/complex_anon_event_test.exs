@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.ComplexAnonEventTest do
   @moduledoc false
-  use Central.DataCase
+  use Teiserver.DataCase
   alias Teiserver.{Telemetry}
 
   test "complex anon events" do

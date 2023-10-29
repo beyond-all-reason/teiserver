@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Live.BattleTest do
-  use CentralWeb.ConnCase, async: false
+  use TeiserverWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib

@@ -1,5 +1,5 @@
 # defmodule Teiserver.ClanTest do
-#   use Central.DataCase
+#   use Teiserver.DataCase
 
 #   describe "clans" do
 #     alias Teiserver.Clans.Clan

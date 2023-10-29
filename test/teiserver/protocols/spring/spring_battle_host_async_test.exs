@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.Spring.SpringBattleHostAsyncTest do
-  use Central.ServerCase, async: true
+  use Teiserver.ServerCase, async: true
   alias Teiserver.Protocols.Spring
   alias Teiserver.Client
 

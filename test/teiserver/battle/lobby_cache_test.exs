@@ -1,5 +1,5 @@
 defmodule Teiserver.Lobby.LobbyLibTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   alias Teiserver.{Account, Lobby}
 
   import Teiserver.TeiserverTestLib,

@@ -1,5 +1,5 @@
 defmodule Teiserver.SpringRegressionTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   require Logger
   alias Teiserver.Lobby
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]

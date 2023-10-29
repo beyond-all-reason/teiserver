@@ -1,5 +1,5 @@
 defmodule Teiserver.BridgeServerTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   alias Teiserver.{User, Room}
   alias Teiserver.Bridge.BridgeServer
 

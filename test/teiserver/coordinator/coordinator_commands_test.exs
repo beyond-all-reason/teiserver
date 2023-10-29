@@ -1,5 +1,5 @@
 defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
-  use Central.ServerCase, async: false
+  use Teiserver.ServerCase, async: false
   alias Teiserver.{User, Coordinator, Account}
 
   import Teiserver.TeiserverTestLib,

@@ -1,5 +1,5 @@
 defmodule Teiserver.Coordinator.CoordinatorParserTest do
-  use Central.DataCase, async: true
+  use Teiserver.DataCase, async: true
   alias Teiserver.Coordinator.Parser
 
   test "parsing commands" do

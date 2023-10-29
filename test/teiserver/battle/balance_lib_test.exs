@@ -1,6 +1,6 @@
 defmodule Teiserver.Battle.BalanceLibTest do
   @moduledoc false
-  use Central.DataCase, async: true
+  use Teiserver.DataCase, async: true
   alias Teiserver.Battle.BalanceLib
 
   test "balance algorithms - no players" do

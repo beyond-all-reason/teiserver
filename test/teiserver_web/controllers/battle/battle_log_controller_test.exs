@@ -1,5 +1,5 @@
 # defmodule TeiserverWeb.Battle.MatchControllerTest do
-#   use CentralWeb.ConnCase
+#   use TeiserverWeb.ConnCase
 
 #   alias Teiserver.Battle
 #   alias Teiserver.BattleTestLib
