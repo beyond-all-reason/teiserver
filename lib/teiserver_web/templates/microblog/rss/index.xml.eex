@@ -7,7 +7,7 @@
     <description>Beyond all Reason developer blog </description>
     <language>en</language>
     <copyright>Copyright <%= Timex.now().year %> Beyond all Reason</copyright>
-    <lastBuildDate><%= @last_build_date |> to_rfc822 %></lastBuildDate>
+    <lastBuildDate><%= @last_build_date |> format_date %></lastBuildDate>
     <category>Computer gaming</category>
     <ttl>60</ttl>
 
@@ -19,11 +19,11 @@
         <link><%= ~p"/microblog/show/#{post.id}" %></link>
         <id><%= post.id %></id>
         <guid><%= "#{post.id}/#{post.updated_at |> Timex.to_unix()}" %></guid>
-        <last_updated><%= post.updated_at |> to_rfc822 %></last_updated>
+        <last_updated><%= post.updated_at |> format_date %></last_updated>
         <description><%= "<![CDATA[#{Teiserver.Microblog.PostLib.get_summary(post)}]]>" %></description>
         <contents><%= "<![CDATA[#{post.contents}]]>"  %></contents>
         <tags><%= post.tags |> Enum.map(fn t -> t.name end) |> Enum.join(", ") %></tags>
-        <pubDate><%= post.inserted_at |> to_rfc822 %></pubDate>
+        <pubDate><%= post.inserted_at |> format_date %></pubDate>
       </item>
     <% end %>
   </channel>
