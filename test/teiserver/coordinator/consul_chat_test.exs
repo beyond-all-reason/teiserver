@@ -1,7 +1,8 @@
 defmodule Teiserver.Coordinator.ConsulChatTest do
+  @moduledoc false
   use Teiserver.ServerCase, async: false
   alias Teiserver.Account.ClientLib
-  alias Teiserver.{User, Client, Coordinator, Lobby}
+  alias Teiserver.{CacheUser, Client, Coordinator, Lobby}
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
@@ -12,7 +13,7 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
     %{socket: psocket, user: player} = tachyon_auth_setup()
 
     # User needs to be a moderator (at this time) to start/stop Coordinator mode
-    User.update_user(%{host | moderator: true})
+    CacheUser.update_user(%{host | roles: ["Moderator"]})
     ClientLib.refresh_client(host.id)
 
     lobby_data = %{

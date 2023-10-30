@@ -137,7 +137,15 @@ defmodule Teiserver.TeiserverTestLib do
     }
 
     _tachyon_send(socket, data)
-    _tachyon_recv(socket)
+    reply = _tachyon_recv(socket)
+
+    case reply do
+      [%{"result" => "unverified"} | _] ->
+        raise "You are creating a user without verifying in"
+
+      _ ->
+        :ok
+    end
 
     pid = Client.get_client_by_id(user.id).tcp_pid
     %{socket: socket, user: user, pid: pid}

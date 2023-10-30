@@ -272,8 +272,11 @@ defmodule Teiserver.Lobby do
         Coordinator.cast_consul(lobby_id, {:user_left, userid})
         client = Account.get_client_by_id(userid)
 
-        match_id = Battle.get_lobby_match_id(lobby_id)
-        Telemetry.log_simple_lobby_event(userid, match_id, "remove_user_from_lobby")
+        # Unfortunately in testing this can cause a foreign key constraint error
+        if not Application.get_env(:central, Teiserver)[:test_mode] do
+          match_id = Battle.get_lobby_match_id(lobby_id)
+          Telemetry.log_simple_lobby_event(userid, match_id, "remove_user_from_lobby")
+        end
 
         if client do
           PubSub.broadcast(

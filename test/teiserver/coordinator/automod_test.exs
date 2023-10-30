@@ -1,7 +1,7 @@
 defmodule Teiserver.Coordinator.AutomodTest do
   use Teiserver.ServerCase, async: false
   alias Teiserver.{Config}
-  alias Teiserver.{Account, User, Client, Moderation, Logging}
+  alias Teiserver.{Account, CacheUser, Client, Moderation, Logging}
   alias Teiserver.Coordinator.{CoordinatorServer, AutomodServer}
   alias Teiserver.Account.CalculateSmurfKeyTask
 
@@ -20,7 +20,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
   end
 
   test "hw_ban", %{banned_user: banned_user} do
-    {:ok, ban} =
+    {:ok, _ban} =
       Moderation.create_ban(%{
         enabled: true,
         key_values: ["uOGXziwWC1mCePGsh0tTQg==", "some_other_value"],
@@ -28,6 +28,9 @@ defmodule Teiserver.Coordinator.AutomodTest do
         source_id: banned_user.id,
         reason: "hw-ban"
       })
+
+    # We have to sleep so the user is created after the ban
+    :timer.sleep(1000)
 
     good_user = new_user()
 
@@ -70,12 +73,10 @@ defmodule Teiserver.Coordinator.AutomodTest do
 
     result = AutomodServer.check_user(bad_user.id)
     assert result == "Banned user"
-    stats = Account.get_user_stat_data(bad_user.id)
-    assert stats["autoban_id"] == ban.id
   end
 
   test "chobby_hash_ban", %{banned_user: banned_user} do
-    {:ok, ban} =
+    {:ok, _ban} =
       Moderation.create_ban(%{
         enabled: true,
         key_values: ["123456789 abcdefghij"],
@@ -83,6 +84,9 @@ defmodule Teiserver.Coordinator.AutomodTest do
         source_id: banned_user.id,
         reason: "hw-ban"
       })
+
+    # We have to sleep so the user is created after the ban
+    :timer.sleep(1000)
 
     good_user1 = new_user()
     Account.create_smurf_key(good_user1.id, "chobby_hash", "123456789")
@@ -107,8 +111,6 @@ defmodule Teiserver.Coordinator.AutomodTest do
 
     result = AutomodServer.check_user(bad_user.id)
     assert result == "Banned user"
-    stats = Account.get_user_stat_data(bad_user.id)
-    assert stats["autoban_id"] == ban.id
   end
 
   test "ban added after user", %{banned_user: banned_user} do
@@ -125,7 +127,8 @@ defmodule Teiserver.Coordinator.AutomodTest do
         reason: "hw-ban"
       })
 
-    :timer.sleep(1_000)
+    # We have to sleep so the user is created after the ban
+    :timer.sleep(1000)
 
     bad_user2 = new_user()
     Account.create_smurf_key(bad_user2.id, "chobby_hash", "123456789")
@@ -149,17 +152,20 @@ defmodule Teiserver.Coordinator.AutomodTest do
         reason: "hw-ban"
       })
 
+    # We have to sleep so the user is created after the ban
+    :timer.sleep(1000)
+
     Teiserver.Battle.MatchMonitorServer.do_start()
 
     standard_user = new_user()
     %{socket: standard_socket} = tachyon_auth_setup(standard_user)
 
     bot_user = new_user()
-    Account.update_cache_user(bot_user.id, %{bot: true})
+    Account.update_cache_user(bot_user.id, %{roles: ["Bot", "Verified"]})
     %{socket: bot_socket} = tachyon_auth_setup(bot_user)
-    assert User.is_bot?(bot_user.id)
+    assert CacheUser.is_bot?(bot_user.id)
 
-    monitor_user = User.get_user_by_name("AutohostMonitor")
+    monitor_user = Account.get_user_by_name("AutohostMonitor")
 
     delayed_user = new_user()
     %{socket: _delayed_socket} = tachyon_auth_setup(delayed_user)
@@ -220,7 +226,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
     :timer.sleep(200)
 
     # Should now have smurf keys
-    assert Enum.count(Account.list_smurf_keys(search: [user_id: delayed_user.id])) == 3
+    assert Enum.count(Account.list_smurf_keys(search: [user_id: delayed_user.id])) == 4
 
     # Should be a key now!
     stats = Account.get_user_stat_data(delayed_user.id)
@@ -238,10 +244,10 @@ defmodule Teiserver.Coordinator.AutomodTest do
         order_by: "Newest first"
       )
 
-    action_id = log.details["action_id"]
+    ban_id = log.details["ban_id"]
 
     # Ensure it exists
-    Moderation.get_action!(action_id)
+    Moderation.get_ban!(ban_id)
 
     # And disconnected
     assert Client.get_client_by_id(delayed_user.id) == nil

@@ -1,8 +1,9 @@
 defmodule Teiserver.Coordinator.BalanceServerTest do
+  @moduledoc false
   use Teiserver.ServerCase, async: false
   alias Teiserver.Account.ClientLib
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.{Account, Lobby, Battle, User, Client, Coordinator}
+  alias Teiserver.{Account, Lobby, Battle, CacheUser, Client, Coordinator}
   alias Teiserver.Coordinator.ConsulServer
 
   import Teiserver.TeiserverTestLib,
@@ -21,7 +22,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     %{socket: psocket, user: player} = tachyon_auth_setup()
 
     # User needs to be a moderator (at this time) to start/stop Coordinator mode
-    User.update_user(%{host | moderator: true})
+    CacheUser.update_user(%{host | roles: ["Moderator"]})
     ClientLib.refresh_client(host.id)
 
     lobby_data = %{
@@ -400,6 +401,8 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
     assert balance_result.balance_mode == :grouped
     refute balance_result.ratings == %{1 => 239.0, 2 => 239.0}
+
+    :timer.sleep(3000)
   end
 
   test "server balance - ffa", %{
@@ -491,6 +494,8 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
              Map.drop(balance_result, [:hash, :time_taken, :logs])
 
     assert grouped_balance_result.hash != balance_result.hash
+
+    :timer.sleep(3000)
   end
 
   test "server balance - team ffa", %{
@@ -638,5 +643,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     assert grouped_balance_result.deviation == 7
     assert grouped_balance_result.ratings == %{1 => 117.0, 2 => 109.0, 3 => 106.0}
     assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
+
+    :timer.sleep(3000)
   end
 end
