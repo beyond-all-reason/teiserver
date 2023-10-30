@@ -14,6 +14,7 @@ defmodule Teiserver.Lobby.LobbyLibTest do
       name: "Coordinator #{:rand.uniform(999_999_999)}",
       nattype: "none",
       port: 1234,
+      type: "normal",
       game_hash: "string_of_characters",
       map_hash: "string_of_characters",
       map_name: "koom valley",
@@ -22,7 +23,8 @@ defmodule Teiserver.Lobby.LobbyLibTest do
       engine_version: "105.1.2.3",
       settings: %{
         max_players: 12
-      }
+      },
+      module: to_string(__MODULE__)
     }
 
     data = %{cmd: "c.lobby.create", lobby: lobby_data}

@@ -72,6 +72,7 @@ defmodule Teiserver.Battle.LobbyServerTest do
       name: "ServerName",
       base_name: "ServerName",
       nattype: "none",
+      type: "normal",
       port: 1234,
       game_hash: "string_of_characters",
       map_hash: "string_of_characters",
@@ -81,7 +82,8 @@ defmodule Teiserver.Battle.LobbyServerTest do
       engine_version: "105.1.2.3",
       settings: %{
         max_players: 12
-      }
+      },
+      module: to_string(__MODULE__)
     }
 
     lobby_id = lobby.id

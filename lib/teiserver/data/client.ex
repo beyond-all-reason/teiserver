@@ -284,7 +284,7 @@ defmodule Teiserver.Client do
 
     # If a test goes wrong this can bork things and make it harder to
     # identify what actually went wrong
-    if client.lobby_client != "ex" do
+    if not Application.get_env(:central, Teiserver)[:test_mode] do
       Account.update_cache_user(client.userid, %{last_logout: Timex.now()})
     end
 
