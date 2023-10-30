@@ -215,7 +215,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         Coordinator.send_to_user(userid, welcome_message)
       end
 
-      if user.lobby == "skylobby" do
+      if Map.get(user, :lobby_client, nil) == "skylobby" do
         Coordinator.send_to_user(userid, "skylobby is not supported so is not benefiting from new features. Future server improvements are likely to break it; please instead use the official Chobby client available from our website - https://www.beyondallreason.info/download")
       end
 
