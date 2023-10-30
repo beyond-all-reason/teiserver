@@ -35,9 +35,14 @@ defmodule Teiserver.Telemetry.ComplexMatchEventQueries do
       where: complex_match_events.id == ^id
   end
 
+  defp _where(query, :user_id, userid) do
+    from complex_match_events in query,
+      where: complex_match_events.user_id == ^userid
+  end
+
   defp _where(query, :match_id, match_id) do
-    from simple_server_events in query,
-      where: simple_server_events.match_id == ^match_id
+    from complex_match_events in query,
+      where: complex_match_events.match_id == ^match_id
   end
 
   defp _where(query, :between, {start_date, end_date}) do

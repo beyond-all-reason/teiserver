@@ -1,7 +1,7 @@
 defmodule Teiserver.Chat.WordLibTest do
   use Teiserver.DataCase
   alias Teiserver.Chat.WordLib
-  alias Teiserver.{Coordinator, Room, User}
+  alias Teiserver.{Coordinator, Room, CacheUser}
   alias Teiserver.Lobby.ChatLib
 
   import Teiserver.TeiserverTestLib,
@@ -43,60 +43,60 @@ defmodule Teiserver.Chat.WordLibTest do
   test "de-bridging - chat send_message" do
     chatty_user = new_user()
 
-    chatty_user = User.get_user_by_id(chatty_user.id)
+    chatty_user = CacheUser.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == []
 
     Room.send_message(chatty_user.id, "test_room", "harmless message")
-    chatty_user = User.get_user_by_id(chatty_user.id)
+    chatty_user = CacheUser.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == []
 
     Room.send_message(chatty_user.id, "test_room", "night night tards")
-    chatty_user = User.get_user_by_id(chatty_user.id)
+    chatty_user = CacheUser.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == ["Bridging"]
   end
 
   test "de-bridging - chat send_message_ex" do
     chatty_user = new_user()
 
-    chatty_user = User.get_user_by_id(chatty_user.id)
+    chatty_user = CacheUser.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == []
 
     Room.send_message_ex(chatty_user.id, "test_room", "harmless message")
-    chatty_user = User.get_user_by_id(chatty_user.id)
+    chatty_user = CacheUser.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == []
 
     Room.send_message_ex(chatty_user.id, "test_room", "night night tards")
-    chatty_user = User.get_user_by_id(chatty_user.id)
+    chatty_user = CacheUser.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == ["Bridging"]
   end
 
   test "de-bridging - lobby send_message" do
     chatty_user = new_user()
 
-    chatty_user = User.get_user_by_id(chatty_user.id)
+    chatty_user = CacheUser.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == []
 
     ChatLib.say(chatty_user.id, "harmless message", 1)
-    chatty_user = User.get_user_by_id(chatty_user.id)
+    chatty_user = CacheUser.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == []
 
     ChatLib.say(chatty_user.id, "night night tards", 1)
-    chatty_user = User.get_user_by_id(chatty_user.id)
+    chatty_user = CacheUser.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == ["Bridging"]
   end
 
   test "de-bridging - lobby send_message_ex" do
     chatty_user = new_user()
 
-    chatty_user = User.get_user_by_id(chatty_user.id)
+    chatty_user = CacheUser.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == []
 
     ChatLib.sayex(chatty_user.id, "harmless message", 1)
-    chatty_user = User.get_user_by_id(chatty_user.id)
+    chatty_user = CacheUser.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == []
 
     ChatLib.sayex(chatty_user.id, "night night tards", 1)
-    chatty_user = User.get_user_by_id(chatty_user.id)
+    chatty_user = CacheUser.get_user_by_id(chatty_user.id)
     assert chatty_user.restrictions == ["Bridging"]
   end
 end

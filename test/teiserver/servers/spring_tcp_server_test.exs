@@ -95,8 +95,7 @@ defmodule Teiserver.SpringTcpServerTest do
     # And send something very long
     msg =
       1..1800
-      |> Enum.map(fn _ -> "x" end)
-      |> Enum.join("")
+      |> Enum.map_join("", fn _ -> "x" end)
 
     # This is long enough it should trigger a splitting
     _send_raw(socket, "SAY mpchan #{msg}\n")
@@ -213,8 +212,8 @@ defmodule Teiserver.SpringTcpServerTest do
       script_password: "script_password"
     })
 
-    r = _recv_raw(socket)
-    assert r == "JOINEDBATTLE #{lobby_id} #{u1.name}\n"
+    r = _recv_until(socket)
+    assert r == "CLIENTSTATUS #{u1.name} 0\nJOINEDBATTLE #{lobby_id} #{u1.name}\n"
 
     assert GenServer.call(tcp_pid, {:get, :known_users}) == %{
              user.id => %{lobby_id: nil},
@@ -234,7 +233,7 @@ defmodule Teiserver.SpringTcpServerTest do
     })
 
     r = _recv_raw(socket)
-    assert r == :timeout
+    assert r == "CLIENTSTATUS #{u1.name} 0\n"
 
     assert GenServer.call(tcp_pid, {:get, :known_users}) == %{
              user.id => %{lobby_id: nil},
@@ -265,7 +264,7 @@ defmodule Teiserver.SpringTcpServerTest do
              coordinator_userid => %{lobby_id: nil}
            }
 
-    assert r == "JOINEDBATTLE #{lobby_id + 1} #{u1.name}\n"
+    assert r == "CLIENTSTATUS #{u1.name} 0\nJOINEDBATTLE #{lobby_id + 1} #{u1.name}\n"
     # TODO: Find out why the below doesn't happen
     # assert r == "LEFTBATTLE #{lobby_id} #{u1.name}\nJOINEDBATTLE #{lobby_id + 1} #{u1.name}\n"
 
@@ -279,7 +278,7 @@ defmodule Teiserver.SpringTcpServerTest do
     })
 
     r = _recv_raw(socket)
-    assert r == :timeout
+    assert r == "CLIENTSTATUS #{u1.name} 0\n"
 
     # Log the user out and then get them to join a battle
     send(tcp_pid, %{channel: "client_inout", event: :disconnect, userid: u1.id})
@@ -430,18 +429,21 @@ defmodule Teiserver.SpringTcpServerTest do
     assert r ==
              "ADDUSER #{dud.name} ?? #{dud.id} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nSAIDEX roomname #{dud.name} msgmsg\n"
 
-    # Now the non-user, should be nothing since they're not actually logged in
+    # Now the non-user, should get a whole new adding of a user, even though that user isn't logged in
     send(tcp_pid, {:direct_message, non_user.id, "msgmsg"})
     r = _recv_until(socket)
-    assert r == ""
+    assert r == "ADDUSER #{non_user.name}  #{non_user.id} \nCLIENTSTATUS #{non_user.name} 0\nSAIDPRIVATE #{non_user.name} msgmsg\n"
+    assert Account.get_client_by_id(non_user.id) == nil
 
     send(tcp_pid, {:new_message, non_user.id, "roomname", "msgmsg"})
     r = _recv_until(socket)
-    assert r == ""
+    assert r == "SAID roomname #{non_user.name} msgmsg\n"
+    assert Account.get_client_by_id(non_user.id) == nil
 
     send(tcp_pid, {:new_message_ex, non_user.id, "roomname", "msgmsg"})
     r = _recv_until(socket)
-    assert r == ""
+    assert r == "SAIDEX roomname #{non_user.name} msgmsg\n"
+    assert Account.get_client_by_id(non_user.id) == nil
 
     # Join room stuff
     Room.get_or_make_room("dud_room", dud.id)

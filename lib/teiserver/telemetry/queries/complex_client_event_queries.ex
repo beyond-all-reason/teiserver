@@ -35,6 +35,11 @@ defmodule Teiserver.Telemetry.ComplexClientEventQueries do
       where: complex_client_events.id == ^id
   end
 
+  defp _where(query, :user_id, userid) do
+    from complex_client_events in query,
+      where: complex_client_events.user_id == ^userid
+  end
+
   defp _where(query, :between, {start_date, end_date}) do
     from complex_client_events in query,
       where: between(complex_client_events.timestamp, ^start_date, ^end_date)

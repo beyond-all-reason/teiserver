@@ -1,7 +1,8 @@
-defmodule Teiserver.Telemetry.Tasks.PersistServerDayTaskTest do
+defmodule Teiserver.Logging.Tasks.PersistServerDayTaskTest do
+  @moduledoc false
   use Teiserver.DataCase
-  alias Teiserver.{Telemetry, Account, User}
-  alias Teiserver.Telemetry.Tasks.PersistServerDayTask
+  alias Teiserver.{Logging, Account, CacheUser}
+  alias Teiserver.Logging.Tasks.PersistServerDayTask
 
   test "perform task" do
     # Make some data
@@ -11,7 +12,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTaskTest do
     assert :ok == PersistServerDayTask.perform(%{})
 
     # Now ensure it ran
-    log = Telemetry.get_server_day_log(Timex.to_date({2021, 1, 1}))
+    log = Logging.get_server_day_log(Timex.to_date({2021, 1, 1}))
 
     assert log.date == Timex.to_date({2021, 1, 1})
     assert is_integer(log.data["aggregates"]["minutes"]["lobby"])
@@ -24,7 +25,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTaskTest do
 
     user_ids =
       all_ids
-      |> User.list_users()
+      |> CacheUser.list_users()
       |> Enum.filter(fn u -> u.bot == false end)
       |> Enum.map(fn u -> u.id end)
 
@@ -86,7 +87,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTaskTest do
       }
     ]
     |> Enum.map(fn params ->
-      Telemetry.create_server_minute_log(params)
+      Logging.create_server_minute_log(params)
     end)
   end
 end

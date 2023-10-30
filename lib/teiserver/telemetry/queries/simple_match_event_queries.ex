@@ -35,6 +35,11 @@ defmodule Teiserver.Telemetry.SimpleMatchEventQueries do
       where: simple_match_events.id == ^id
   end
 
+  defp _where(query, :user_id, userid) do
+    from simple_match_events in query,
+      where: simple_match_events.user_id == ^userid
+  end
+
   defp _where(query, :match_id, match_id) do
     from simple_server_events in query,
       where: simple_server_events.match_id == ^match_id

@@ -9,7 +9,7 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventTest do
 
     user = TeiserverTestLib.new_user("simple_lobby_event_user")
 
-    {:ok, lobby} =
+    {:ok, match} =
       Battle.create_match(%{
         uuid: ExULID.ULID.generate(),
         map: "red desert",
@@ -34,13 +34,13 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventTest do
 
     # Log the event
     {result, _} =
-      Telemetry.log_simple_lobby_event(user.id, lobby.id, "lobby.simple_user_event-#{r}")
+      Telemetry.log_simple_lobby_event(user.id, match.id, "lobby.simple_user_event-#{r}")
 
     assert result == :ok
 
     assert Telemetry.list_simple_lobby_events() |> Enum.count() == 1
     assert Telemetry.list_simple_lobby_events(where: [user_id: user.id]) |> Enum.count() == 1
-    assert Telemetry.list_simple_lobby_events(where: [lobby_id: lobby.id]) |> Enum.count() == 1
+    assert Telemetry.list_simple_lobby_events(where: [match_id: match.id]) |> Enum.count() == 1
 
     # Ensure the lobby event types exist too
     type_list = Telemetry.list_simple_lobby_event_types()

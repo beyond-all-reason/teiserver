@@ -14,11 +14,12 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventLib do
   def icon(), do: "fa-people-group"
 
   @spec log_complex_lobby_event(T.userid, T.match_id, String, map()) :: {:error, Ecto.Changeset} | {:ok, ComplexLobbyEvent}
-  def log_complex_lobby_event(userid, lobby_id, event_type_name, value) do
+  def log_complex_lobby_event(userid, match_id, event_type_name, value) do
     event_type_id = Telemetry.get_or_add_complex_lobby_event_type(event_type_name)
 
     result = create_complex_lobby_event(%{
       user_id: userid,
+      match_id: match_id,
       event_type_id: event_type_id,
       value: value,
       timestamp: Timex.now()
@@ -32,7 +33,7 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventLib do
             "telemetry_complex_lobby_events",
             %{
               channel: "telemetry_complex_lobby_events",
-              lobby_id: lobby_id,
+              match_id: match_id,
               userid: userid,
               event_type_name: event_type_name,
               event_value: value

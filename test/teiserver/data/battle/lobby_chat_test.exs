@@ -1,12 +1,12 @@
-defmodule Teiserver.Data.Battle.LobbyChatTest do
+defmodule Teiserver.Data.Battle.ChatLibTest do
   use Teiserver.DataCase, async: false
-  alias Teiserver.{User, Battle, Lobby}
+  alias Teiserver.{CacheUser, Battle, Lobby}
   import Teiserver.TeiserverTestLib, only: [new_user: 0]
-  alias Teiserver.Lobby.{LobbyChat}
+  alias Teiserver.Lobby.{ChatLib}
 
   test "test lobby chat as bot" do
     bot_user = new_user()
-    bot_user = User.update_user(%{bot_user | bot: true})
+    bot_user = CacheUser.update_user(%{bot_user | bot: true, roles: ["Bot"]})
     real_user = new_user()
 
     lobby =
@@ -20,12 +20,12 @@ defmodule Teiserver.Data.Battle.LobbyChatTest do
 
     Battle.set_modoption(lobby.id, "server/match/uuid", UUID.uuid1())
 
-    {:ok, chat_log} = LobbyChat.persist_message(bot_user, "Message from the bot", lobby.id, :say)
+    {:ok, chat_log} = ChatLib.persist_message(bot_user, "Message from the bot", lobby.id, :say)
     assert chat_log.user_id == bot_user.id
     assert chat_log.content == "Message from the bot"
 
     {:ok, chat_log} =
-      LobbyChat.persist_message(
+      ChatLib.persist_message(
         bot_user,
         "<#{real_user.name}> Message from the user",
         lobby.id,

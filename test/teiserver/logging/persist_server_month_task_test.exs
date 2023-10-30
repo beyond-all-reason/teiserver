@@ -1,9 +1,12 @@
-defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTaskTest do
+defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
+  @moduledoc false
   use Teiserver.DataCase
-  alias Teiserver.{Telemetry, Account, User}
-  alias Teiserver.Telemetry.Tasks.{PersistServerMonthTask, PersistServerDayTask}
+  alias Teiserver.{Logging, Account, CacheUser}
+  alias Teiserver.Logging.Tasks.{PersistServerMonthTask, PersistServerDayTask}
 
   test "perform task" do
+    flunk "We do not create the user_activity_log data so this always fails"
+
     # Make some data
     create_day_data(1)
     create_day_data(2)
@@ -13,7 +16,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTaskTest do
     assert :ok == PersistServerMonthTask.perform(%{})
 
     # Now ensure it ran
-    log = Telemetry.get_server_month_log({2021, 1})
+    log = Logging.get_server_month_log({2021, 1})
 
     assert log.year == 2021
     assert log.month == 1
@@ -27,7 +30,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTaskTest do
 
     user_ids =
       all_ids
-      |> User.list_users()
+      |> CacheUser.list_users()
       |> Enum.filter(fn u -> u.bot == false end)
       |> Enum.map(fn u -> u.id end)
 
@@ -88,8 +91,8 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTaskTest do
         }
       }
     ]
-    |> Enum.map(fn params ->
-      Telemetry.create_server_minute_log(params)
+    |> Enum.each(fn params ->
+      Logging.create_server_minute_log(params)
     end)
 
     # Now create the day data

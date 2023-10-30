@@ -16,7 +16,7 @@ defmodule Teiserver.Telemetry.ComplexLobbyEvent do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, ~w(user_id event_type_id timestamp)a)
+    |> cast(params, ~w(user_id event_type_id match_id timestamp value)a)
     |> validate_required(~w(event_type_id timestamp)a)
   end
 

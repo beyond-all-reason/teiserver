@@ -35,6 +35,16 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventQueries do
       where: simple_lobby_events.id == ^id
   end
 
+  defp _where(query, :user_id, userid) do
+    from simple_lobby_events in query,
+      where: simple_lobby_events.user_id == ^userid
+  end
+
+  defp _where(query, :match_id, match_id) do
+    from simple_lobby_events in query,
+      where: simple_lobby_events.match_id == ^match_id
+  end
+
   defp _where(query, :between, {start_date, end_date}) do
     from simple_lobby_events in query,
       where: between(simple_lobby_events.timestamp, ^start_date, ^end_date)

@@ -35,6 +35,11 @@ defmodule Teiserver.Telemetry.SimpleServerEventQueries do
       where: simple_server_events.id == ^id
   end
 
+  defp _where(query, :user_id, userid) do
+    from simple_server_events in query,
+      where: simple_server_events.user_id == ^userid
+  end
+
   defp _where(query, :between, {start_date, end_date}) do
     from simple_server_events in query,
       where: between(simple_server_events.timestamp, ^start_date, ^end_date)
