@@ -149,6 +149,8 @@ defmodule Teiserver.Account.LoginThrottleServer do
     # Strip out invalid heartbeats
     heartbeat_max_age = System.system_time(:millisecond) - @heartbeat_expiry
 
+    # Dropped users are users who've not updated their heartbeat for a bit
+    # we assume they've left the queue
     dropped_users =
       state.heartbeats
       |> Map.filter(fn {_key, {_pid, last_time}} ->
@@ -233,8 +235,15 @@ defmodule Teiserver.Account.LoginThrottleServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:set_tick_period, new_period}, state) do
+  def handle_info(:disable_tick_timer, state) do
     :timer.cancel(state.tick_timer_ref)
+    {:noreply, %{state | tick_timer_ref: nil}}
+  end
+
+  def handle_info({:set_tick_period, new_period}, state) do
+    if state.tick_timer_ref do
+      :timer.cancel(state.tick_timer_ref)
+    end
     tick_timer_ref = :timer.send_interval(new_period, :tick)
 
     {:noreply, %{state | tick_timer_ref: tick_timer_ref}}
@@ -384,7 +393,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   # When a login is accepted and we want to update certain metrics right away
   defp accept_login(
          %{recent_logins: recent_logins, remaining_capacity: remaining_capacity} = state,
-         userid
+         _userid
        ) do
     new_recent_logins = [System.system_time(:millisecond) | recent_logins]
     new_remaining_capacity = remaining_capacity - 1
