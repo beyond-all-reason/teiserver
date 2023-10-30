@@ -131,6 +131,7 @@ defmodule TeiserverWeb.Router do
 
   scope "/microblog", TeiserverWeb.Microblog do
     get "/rss", RssController, :index
+    get "/rss/html", RssController, :html_mode
   end
 
   scope "/", TeiserverWeb.Account, as: :account do
