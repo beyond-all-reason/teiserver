@@ -129,14 +129,18 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
       next_match = Battle.get_next_match(match)
       prev_match = Battle.get_prev_match(match)
 
+      lobby = Battle.get_lobby_by_match_id(match.id)
+
       socket
         |> assign(:match, match)
         |> assign(:next_match, next_match)
         |> assign(:prev_match, prev_match)
         |> assign(:match_name, match_name)
+        |> assign(:lobby, lobby)
     else
       socket
         |> assign(:match, nil)
+        |> assign(:lobby, nil)
         |> assign(:match_name, "Loading...")
     end
   end

@@ -42,6 +42,14 @@
       Next match
     </.link>
 
+    <.link
+      :if={@lobby}
+      patch={~p"/battle/lobbies/chat/#{@lobby.id}"}
+      class="btn btn-outline-secondary"
+    >
+      Live chat
+    </.link>
+
     <hr />
 
     <div class="float-end">
@@ -60,7 +68,7 @@
       &nbsp;&nbsp;&nbsp;&nbsp;
       Messages: <%= Teiserver.Helper.StringHelper.format_number Enum.count(@messages) %>
     </h3>
-    
+
     <form method="post" class="">
       <div class="row">
         <div class="col d-none">
