@@ -13,8 +13,8 @@
 
     <%= for post <- @posts do %>
       <%
-        summary = Teiserver.Microblog.PostLib.get_summary(post) |> Earmark.as_html! |> raw
-        contents = post.contents |> Earmark.as_html! |> raw
+        summary = Teiserver.Microblog.PostLib.get_summary(post)
+        contents = post.contents
       %>
       <item>
         <title><%= post.title %></title>
