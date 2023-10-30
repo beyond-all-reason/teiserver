@@ -54,12 +54,13 @@ defmodule Teiserver.Account.FriendQueries do
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
-  defp do_order_by(query, params) do
+  defp do_order_by(query, params) when is_list(params) do
     params
     |> Enum.reduce(query, fn key, query_acc ->
       _order_by(query_acc, key)
     end)
   end
+  defp do_order_by(query, param) when is_bitstring(param), do: do_order_by(query, [param])
 
   defp _order_by(query, nil), do: query
 
