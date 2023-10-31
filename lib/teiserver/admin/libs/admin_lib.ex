@@ -1,6 +1,6 @@
 defmodule Teiserver.Admin.AdminLib do
   @moduledoc false
-  use CentralWeb, :library
+  use TeiserverWeb, :library
 
   @spec colours :: atom
   def colours(), do: :info2

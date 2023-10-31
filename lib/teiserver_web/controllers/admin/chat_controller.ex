@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Admin.ChatController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.{Coordinator, Chat}
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]

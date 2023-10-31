@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Battle.MatchController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.{Battle, Game, Account}
   alias Teiserver.Game.MatchRatingLib

@@ -1,5 +1,5 @@
 defmodule Teiserver.Clans.Clan do
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "teiserver_clans" do
     field :name, :string
@@ -16,11 +16,11 @@ defmodule Teiserver.Clans.Clan do
     has_many :memberships, Teiserver.Clans.ClanMembership, foreign_key: :clan_id
     has_many :invites, Teiserver.Clans.ClanInvite, foreign_key: :clan_id
 
-    many_to_many :members, Central.Account.User,
+    many_to_many :members, Teiserver.Account.User,
       join_through: "teiserver_clan_memberships",
       join_keys: [clan_id: :id, user_id: :id]
 
-    many_to_many :invitees, Central.Account.User,
+    many_to_many :invitees, Teiserver.Account.User,
       join_through: "teiserver_clan_invites",
       join_keys: [clan_id: :id, user_id: :id]
 

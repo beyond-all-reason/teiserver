@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.SimpleAnonEventLib do
   @moduledoc false
-  use CentralWeb, :library_newform
+  use TeiserverWeb, :library_newform
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.{SimpleAnonEvent, SimpleAnonEventQueries}
   alias Phoenix.PubSub

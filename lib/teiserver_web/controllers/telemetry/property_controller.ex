@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Telemetry.PropertyController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.{AnonPropertyQueries, UserPropertyQueries, ExportPropertiesTask}
   require Logger

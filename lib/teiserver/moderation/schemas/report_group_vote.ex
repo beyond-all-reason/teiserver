@@ -1,10 +1,10 @@
 defmodule Teiserver.Moderation.ReportGroupVote do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "moderation_report_group_votes" do
     belongs_to :report_group, Teiserver.Moderation.ReportGroup
-    belongs_to :user, Central.Account.User
+    belongs_to :user, Teiserver.Account.User
 
     field :action, :string
     field :accuracy, :string

@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Game.QueueController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.Game
   alias Teiserver.Game.Queue

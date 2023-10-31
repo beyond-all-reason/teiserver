@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Admin.LobbyPolicyController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.{Game}
   alias Teiserver.Game.LobbyPolicyLib

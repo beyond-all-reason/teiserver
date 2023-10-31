@@ -1,9 +1,9 @@
 defmodule Teiserver.Account.UserStat do
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   @primary_key false
   schema "teiserver_account_user_stats" do
-    belongs_to :user, Central.Account.User, primary_key: true
+    belongs_to :user, Teiserver.Account.User, primary_key: true
     field :data, :map, default: %{}
   end
 

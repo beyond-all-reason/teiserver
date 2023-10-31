@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.MicroblogComponents do
   @moduledoc false
-  use CentralWeb, :component
+  use TeiserverWeb, :component
   alias Teiserver.Helper.TimexHelper
   import TeiserverWeb.NavComponents, only: [sub_menu_button: 1]
 

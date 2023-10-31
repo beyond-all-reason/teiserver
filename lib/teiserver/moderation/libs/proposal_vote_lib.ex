@@ -1,6 +1,6 @@
 defmodule Teiserver.Moderation.ProposalVoteLib do
   @moduledoc false
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.Moderation.ProposalVote
 
   # Queries

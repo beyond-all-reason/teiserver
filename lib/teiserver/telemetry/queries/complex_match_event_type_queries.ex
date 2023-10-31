@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.ComplexMatchEventTypeQueries do
   @moduledoc false
-  use CentralWeb, :queries
+  use TeiserverWeb, :queries
   alias Teiserver.Telemetry.ComplexMatchEventType
 
   # Queries

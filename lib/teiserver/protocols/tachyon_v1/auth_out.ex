@@ -27,7 +27,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthOut do
     %{
       "cmd" => "s.auth.login",
       "result" => "unverified",
-      "agreement" => Application.get_env(:central, Teiserver)[:user_agreement]
+      "agreement" => Application.get_env(:teiserver, Teiserver)[:user_agreement]
     }
   end
 

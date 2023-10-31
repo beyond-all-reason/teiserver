@@ -2,14 +2,14 @@ defmodule TeiserverWeb.NavComponents do
   @moduledoc false
   use Phoenix.Component
   # alias Phoenix.LiveView.JS
-  # import CentralWeb.Gettext
+  # import TeiserverWeb.Gettext
 
   import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
 
   use Phoenix.VerifiedRoutes,
     endpoint: TeiserverWeb.Endpoint,
     router: TeiserverWeb.Router,
-    statics: CentralWeb.static_paths()
+    statics: TeiserverWeb.static_paths()
 
   @doc """
   <TeiserverWeb.NavComponents.top_nav_item active={active} route={route} icon={icon} />
@@ -48,12 +48,12 @@ defmodule TeiserverWeb.NavComponents do
           <!-- Navbar brand -->
           <a class="navbar-brand mt-2 mt-lg-0" href="/">
             <i
-              class={"fa-fw #{Application.get_env(:central, Central)[:site_icon]}"}
+              class={"fa-fw #{Application.get_env(:teiserver, Teiserver)[:site_icon]}"}
               style="margin: -4px 20px 0 0px;"
             >
             </i>
             <span id="page-title">
-              <%= Application.get_env(:central, Central)[:site_title] %>
+              <%= Application.get_env(:teiserver, Teiserver)[:site_title] %>
             </span>
           </a>
           <!-- Left links -->

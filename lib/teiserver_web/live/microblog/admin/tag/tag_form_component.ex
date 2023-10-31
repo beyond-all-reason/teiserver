@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Microblog.TagFormComponent do
   @moduledoc false
-  use CentralWeb, :live_component
+  use TeiserverWeb, :live_component
 
   alias Teiserver.Microblog
 

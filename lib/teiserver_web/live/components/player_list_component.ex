@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Components.PlayerListComponent do
   @moduledoc false
-  use CentralWeb, :live_component
+  use TeiserverWeb, :live_component
   import Teiserver.Account.AuthLib, only: [allow?: 2]
 
   @impl true

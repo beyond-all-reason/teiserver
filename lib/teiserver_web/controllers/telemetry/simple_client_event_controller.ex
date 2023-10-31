@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Telemetry.SimpleClientEventController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
   alias Teiserver.{Account, Telemetry}
   alias Teiserver.Telemetry.{ExportSimpleClientEventsTask, SimpleClientEventQueries}
   require Logger

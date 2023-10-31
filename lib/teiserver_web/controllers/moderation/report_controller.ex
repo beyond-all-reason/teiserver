@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Moderation.ReportController do
   @moduledoc false
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.{Moderation, Account}
   alias Teiserver.Account.UserLib
@@ -179,7 +179,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
     stats = Account.get_user_stat_data(user.id)
 
     conn
-    |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
+    |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
     |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
     |> assign(:user, user)
     |> assign(:reports_made, reports_made)

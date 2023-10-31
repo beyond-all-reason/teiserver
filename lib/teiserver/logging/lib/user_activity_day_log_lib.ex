@@ -1,6 +1,6 @@
 defmodule Teiserver.Logging.UserActivityDayLogLib do
   @moduledoc false
-  use CentralWeb, :library
+  use TeiserverWeb, :library
 
   alias Teiserver.Logging.UserActivityDayLog
 

@@ -1,5 +1,5 @@
 defmodule Teiserver.Game.RatingType do
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "teiserver_game_rating_types" do
     field :name, :string

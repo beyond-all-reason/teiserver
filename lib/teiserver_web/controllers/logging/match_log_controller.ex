@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Logging.MatchLogController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
   alias Teiserver.Logging
   alias Teiserver.Helper.{TimexHelper, DatePresets}
   alias Teiserver.Battle.{ExportRawMatchMetricsTask}

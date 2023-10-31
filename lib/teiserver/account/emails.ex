@@ -23,7 +23,7 @@ defmodule Teiserver.Account.Emails do
         code
       end
 
-    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/password_reset/#{code.value}"
 
     html_body = """
@@ -44,13 +44,13 @@ defmodule Teiserver.Account.Emails do
 
     date = TimexHelper.date_to_str(Timex.now(), format: :email_date)
     message_id = UUID.uuid1()
-    subject = Application.get_env(:central, Teiserver)[:game_name] <> " - Password reset"
+    subject = Application.get_env(:teiserver, Teiserver)[:game_name] <> " - Password reset"
 
     Email.new_email()
     |> Email.to({user.name, user.email})
     |> Email.from(
-      {Application.get_env(:central, Central.Mailer)[:noreply_name],
-       Central.Mailer.noreply_address()}
+      {Application.get_env(:teiserver, Teiserver.Mailer)[:noreply_name],
+       Teiserver.Mailer.noreply_address()}
     )
     |> Email.subject(subject)
     |> Email.put_header("Date", date)

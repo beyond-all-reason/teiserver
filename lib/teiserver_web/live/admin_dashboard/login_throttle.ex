@@ -28,7 +28,7 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
 
     :timer.send_interval(5_000, :tick)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, :standard_live}}
+    {:ok, socket}
   end
 
   @impl true

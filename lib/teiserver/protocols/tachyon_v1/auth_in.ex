@@ -25,7 +25,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
               true ->
                 # Update the db user then the cached user
                 db_user = Account.get_user!(user.id)
-                Central.Account.update_user(db_user, %{"password" => plain_text_password})
+                Teiserver.Account.update_user(db_user, %{"password" => plain_text_password})
                 CacheUser.recache_user(user.id)
                 CacheUser.update_user(%{user | spring_password: false}, persist: true)
 
@@ -39,7 +39,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
           false ->
             db_user = Account.get_user!(user.id)
 
-            case Central.Account.User.verify_password(plain_text_password, db_user.password) do
+            case Teiserver.Account.User.verify_password(plain_text_password, db_user.password) do
               true ->
                 token = CacheUser.create_token(user)
                 reply(:auth, :user_token, {:success, token}, state)

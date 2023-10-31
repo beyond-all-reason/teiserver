@@ -32,7 +32,7 @@ defmodule Teiserver.Account.SmurfMergeTask do
   #     end)
 
   #   Ecto.Multi.new()
-  #     |> Ecto.Multi.insert_all(:insert_all, Central.Account.Report, new_reports)
+  #     |> Ecto.Multi.insert_all(:insert_all, Teiserver.Account.Report, new_reports)
   #     |> Repo.transaction()
 
   #   :ok

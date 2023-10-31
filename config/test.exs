@@ -4,7 +4,7 @@ import Config
 config :argon2_elixir, t_cost: 1, m_cost: 8
 
 # Configure your database
-config :central, Teiserver.Repo,
+config :teiserver, Teiserver.Repo,
   username: "teiserver_test",
   password: "123456789",
   database: "teiserver_test",
@@ -15,7 +15,7 @@ config :central, Teiserver.Repo,
   pool_size: 50,
   timeout: 300_000
 
-config :central, Teiserver,
+config :teiserver, Teiserver,
   certs: [
     keyfile: "priv/certs/localhost.key",
     certfile: "priv/certs/localhost.crt",
@@ -37,7 +37,7 @@ config :central, Teiserver,
   automod_delay: 1_000,
   user_agreement: "User agreement goes here."
 
-config :central, DiscordBridgeBot,
+config :teiserver, DiscordBridgeBot,
   token: nil,
   bot_name: "Teiserver Bridge TEST",
   bridges: [
@@ -46,19 +46,19 @@ config :central, DiscordBridgeBot,
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
-config :central, TeiserverWeb.Endpoint,
+config :teiserver, TeiserverWeb.Endpoint,
   http: [port: 4002],
   server: false
 
 # Print only warnings and errors during test
 config :logger, level: :warning
 
-config :central, Oban, testing: :manual
+config :teiserver, Oban, testing: :manual
 # queues: false,
 # plugins: false,
 # crontab: false
 
-config :central, Central.Mailer,
+config :teiserver, Teiserver.Mailer,
   adapter: Bamboo.TestAdapter,
   noreply_address: "noreply@testsite.co.uk",
   contact_address: "info@testsite.co.uk"

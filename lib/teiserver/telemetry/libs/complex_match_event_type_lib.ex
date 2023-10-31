@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.ComplexMatchEventTypeLib do
   @moduledoc false
-  use CentralWeb, :library_newform
+  use TeiserverWeb, :library_newform
   alias Teiserver.Telemetry.{ComplexMatchEventType, ComplexMatchEventTypeQueries}
 
   # Helper function
@@ -8,7 +8,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTypeLib do
   def get_or_add_complex_match_event_type(name) do
     name = String.trim(name)
 
-    Central.cache_get_or_store(:telemetry_complex_match_event_types_cache, name, fn ->
+    Teiserver.cache_get_or_store(:telemetry_complex_match_event_types_cache, name, fn ->
       query = ComplexMatchEventTypeQueries.query_complex_match_event_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
       case Repo.all(query) do
         [] ->

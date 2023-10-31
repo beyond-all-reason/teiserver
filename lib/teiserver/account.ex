@@ -5,207 +5,69 @@ defmodule Teiserver.Account do
   require Logger
   alias Teiserver.Data.Types, as: T
   alias Phoenix.PubSub
+  alias Teiserver.Helper.QueryHelpers
+
+  alias Teiserver.Account.UserLib
 
   @spec icon :: String.t()
   def icon, do: "fa-duotone fa-user-alt"
 
-  # Mostly a wrapper around Central.Account
-  alias Central.Account.User
-  alias Teiserver.Account.{UserLib}
-  alias Teiserver.Helper.QueryHelpers
+  @spec list_users() :: [User]
+  defdelegate list_users(), to: UserLib
 
-  @doc """
-  Returns the list of user.
+  @spec list_users(list) :: [User]
+  defdelegate list_users(args), to: UserLib
 
-  ## Examples
+  @spec get_user!(non_neg_integer()) :: User.t
+  defdelegate get_user!(user_id), to: UserLib
 
-      iex> list_user()
-      [%User{}, ...]
+  @spec get_user!(non_neg_integer(), list) :: User.t | nil
+  defdelegate get_user!(user_id, args), to: UserLib
 
-  """
-  def list_users(args \\ []) do
-    UserLib.get_user()
-    |> UserLib.search(args[:search])
-    |> UserLib.preload(args[:joins])
-    |> UserLib.order_by(args[:order_by])
-    |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> QueryHelpers.query_select(args[:select])
-    |> Repo.all()
-  end
+  @spec get_user(non_neg_integer()) :: User.t | nil
+  defdelegate get_user(user_id), to: UserLib
 
-  @doc """
-  Gets a single user.
+  @spec get_user(non_neg_integer(), list) :: User.t | nil
+  defdelegate get_user(user_id, args), to: UserLib
 
-  Raises `Ecto.NoResultsError` if the User does not exist.
+  @spec create_user() :: {:ok, User} | {:error, Ecto.Changeset}
+  defdelegate create_user(), to: UserLib
 
-  ## Examples
+  @spec create_user(map) :: {:ok, User} | {:error, Ecto.Changeset}
+  defdelegate create_user(attrs), to: UserLib
 
-      iex> get_user!(123)
-      %User{}
+  @spec script_create_user(map) :: {:ok, User} | {:error, Ecto.Changeset}
+  defdelegate script_create_user(attrs), to: UserLib
 
-      iex> get_user!(456)
-      ** (Ecto.NoResultsError)
+  @spec update_user(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  defdelegate update_user(user, attrs), to: UserLib
 
-  """
-  def get_user!(id, args \\ []) do
-    UserLib.get_user()
-    |> UserLib.search(%{id: id})
-    |> UserLib.search(args[:search])
-    |> UserLib.preload(args[:joins])
-    |> Repo.one!()
-  end
+  @spec update_user_password(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  defdelegate update_user_password(user, attrs), to: UserLib
 
-  def get_user(id, args \\ []) do
-    UserLib.get_user()
-    |> UserLib.search(%{id: id})
-    |> UserLib.search(args[:search])
-    |> UserLib.preload(args[:joins])
-    |> Repo.one()
-  end
+  @spec update_user_user_form(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  defdelegate update_user_user_form(user, attrs), to: UserLib
 
-  @doc """
-  Creates a user.
+  @spec server_limited_update_user(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  defdelegate server_limited_update_user(user, attrs), to: UserLib
 
-  ## Examples
+  @spec server_update_user(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  defdelegate server_update_user(user, attrs), to: UserLib
 
-      iex> create_user(%{field: value})
-      {:ok, %User{}}
+  @spec script_update_user(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  defdelegate script_update_user(user, attrs), to: UserLib
 
-      iex> create_user(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+  @spec delete_user(User) :: {:ok, User} | {:error, Ecto.Changeset}
+  defdelegate delete_user(user), to: UserLib
 
-  """
-  def create_user(attrs \\ %{}) do
-    %User{}
-    |> User.changeset(attrs)
-    |> Repo.insert()
-    |> Central.Account.broadcast_create_user()
-  end
+  @spec change_user(User) :: Ecto.Changeset
+  defdelegate change_user(user), to: UserLib
 
-  def script_create_user(attrs \\ %{}) do
-    %User{}
-    |> User.changeset(attrs, :script)
-    |> Repo.insert()
-    |> Central.Account.broadcast_create_user()
-  end
+  @spec change_user(User, map) :: Ecto.Changeset
+  defdelegate change_user(user, attrs), to: UserLib
 
-  @doc """
-  Updates a user.
 
-  ## Examples
 
-      iex> update_user(user, %{field: new_value})
-      {:ok, %User{}}
-
-      iex> update_user(user, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_user(%User{} = user, attrs) do
-    Central.Account.recache_user(user.id)
-
-    user
-    |> User.changeset(attrs, :limited_with_data)
-    |> Repo.update()
-    |> Central.Account.broadcast_update_user()
-  end
-
-  def server_limited_update_user(%User{} = user, attrs) do
-    Central.Account.recache_user(user.id)
-
-    user
-    |> User.changeset(attrs, :server_limited_update_user)
-    |> Repo.update()
-    |> Central.Account.broadcast_update_user()
-  end
-
-  def server_update_user(%User{} = user, attrs) do
-    Central.Account.recache_user(user.id)
-
-    user
-    |> User.changeset(attrs)
-    |> Repo.update()
-    |> Central.Account.broadcast_update_user()
-  end
-
-  def script_update_user(%User{} = user, attrs) do
-    Central.Account.recache_user(user.id)
-
-    user
-    |> User.changeset(attrs, :script)
-    |> Repo.update()
-    |> Central.Account.broadcast_update_user()
-  end
-
-  @doc """
-  Deletes a User.
-
-  ## Examples
-
-      iex> delete_user(user)
-      {:ok, %User{}}
-
-      iex> delete_user(user)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_user(%User{} = user) do
-    Repo.delete(user)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking user changes.
-
-  ## Examples
-
-      iex> change_user(user)
-      %Ecto.Changeset{source: %User{}}
-
-  """
-  def change_user(%User{} = user) do
-    User.changeset(user, %{})
-  end
-
-  def user_as_json(users) when is_list(users) do
-    users
-    |> Enum.map(&user_as_json/1)
-  end
-
-  def user_as_json(user) do
-    %{
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      icon: user.icon,
-      colour: user.colour,
-      html_label: "#{user.name}",
-      html_value: "##{user.id}, #{user.name}"
-    }
-  end
-
-  @spec smurf_search(User.t()) :: [{{String.t(), String.t()}, [SmurfKey.t()]}]
-  def smurf_search(user) do
-    values =
-      list_smurf_keys(
-        search: [
-          user_id: user.id
-        ],
-        limit: :infinity,
-        select: [:value]
-      )
-      |> Enum.map(fn %{value: value} -> value end)
-
-    list_smurf_keys(
-      search: [
-        value_in: values,
-        not_user_id: user.id
-      ],
-      preload: [:user, :type],
-      limit: :infinity
-    )
-    |> Enum.group_by(fn sk -> {sk.type.name, sk.value} end)
-    |> Enum.sort_by(fn {key, _value} -> key end, &<=/2)
-  end
 
   @spec spring_auth_check(Plug.Conn.t(), User.t(), String.t()) ::
           {:ok, User.t()} | {:error, String.t()}
@@ -280,7 +142,7 @@ defmodule Teiserver.Account do
 
   @spec get_user_stat_data(integer()) :: Map.t()
   def get_user_stat_data(userid) do
-    Central.cache_get_or_store(:teiserver_user_stat_cache, userid, fn ->
+    Teiserver.cache_get_or_store(:teiserver_user_stat_cache, userid, fn ->
       case get_user_stat(userid) do
         nil ->
           %{}
@@ -318,7 +180,7 @@ defmodule Teiserver.Account do
         create_user_stat(%{user_id: userid, data: data})
 
       user_stat ->
-        Central.cache_delete(:teiserver_user_stat_cache, userid)
+        Teiserver.cache_delete(:teiserver_user_stat_cache, userid)
         new_data = Map.merge(user_stat.data, data)
         update_user_stat(user_stat, %{data: new_data})
     end
@@ -337,7 +199,7 @@ defmodule Teiserver.Account do
         :ok
 
       user_stat ->
-        Central.cache_delete(:teiserver_user_stat_cache, userid)
+        Teiserver.cache_delete(:teiserver_user_stat_cache, userid)
         new_data = Map.drop(user_stat.data, keys)
         update_user_stat(user_stat, %{data: new_data})
     end
@@ -345,7 +207,7 @@ defmodule Teiserver.Account do
 
   @spec delete_user_stat(UserStat.t()) :: {:ok, UserStat.t()} | {:error, Ecto.Changeset.t()}
   def delete_user_stat(%UserStat{} = user_stat) do
-    Central.cache_delete(:teiserver_user_stat_cache, user_stat.user_id)
+    Teiserver.cache_delete(:teiserver_user_stat_cache, user_stat.user_id)
     Repo.delete(user_stat)
   end
 
@@ -858,6 +720,30 @@ defmodule Teiserver.Account do
     SmurfKey.changeset(smurf_key, %{})
   end
 
+  @spec smurf_search(User.t()) :: [{{String.t(), String.t()}, [SmurfKey.t()]}]
+  def smurf_search(user) do
+    values =
+      list_smurf_keys(
+        search: [
+          user_id: user.id
+        ],
+        limit: :infinity,
+        select: [:value]
+      )
+      |> Enum.map(fn %{value: value} -> value end)
+
+    list_smurf_keys(
+      search: [
+        value_in: values,
+        not_user_id: user.id
+      ],
+      preload: [:user, :type],
+      limit: :infinity
+    )
+    |> Enum.group_by(fn sk -> {sk.type.name, sk.value} end)
+    |> Enum.sort_by(fn {key, _value} -> key end, &<=/2)
+  end
+
   alias Teiserver.Account.SmurfKeyType
   alias Teiserver.Account.SmurfKeyTypeLib
 
@@ -963,7 +849,7 @@ defmodule Teiserver.Account do
   def get_or_add_smurf_key_type(name) do
     name = String.trim(name)
 
-    Central.cache_get_or_store(:teiserver_account_smurf_key_types, name, fn ->
+    Teiserver.cache_get_or_store(:teiserver_account_smurf_key_types, name, fn ->
       case list_smurf_key_types(
              search: [name: name],
              select: [:id],
@@ -1033,7 +919,7 @@ defmodule Teiserver.Account do
 
   def get_rating(user_id, rating_type_id)
       when is_integer(user_id) and is_integer(rating_type_id) do
-    Central.cache_get_or_store(:teiserver_user_ratings, {user_id, rating_type_id}, fn ->
+    Teiserver.cache_get_or_store(:teiserver_user_ratings, {user_id, rating_type_id}, fn ->
       rating_query(
         search: [
           user_id: user_id,
@@ -1106,7 +992,7 @@ defmodule Teiserver.Account do
 
   @spec update_rating(Rating.t(), map()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
   def update_rating(%Rating{} = rating, attrs) do
-    Central.cache_delete(:teiserver_user_ratings, {rating.user_id, rating.rating_type_id})
+    Teiserver.cache_delete(:teiserver_user_ratings, {rating.user_id, rating.rating_type_id})
 
     rating
     |> Rating.changeset(attrs)
@@ -1138,7 +1024,7 @@ defmodule Teiserver.Account do
   """
   @spec delete_rating(Rating.t()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
   def delete_rating(%Rating{} = rating) do
-    Central.cache_delete(:teiserver_user_ratings, {rating.user_id, rating.rating_type_id})
+    Teiserver.cache_delete(:teiserver_user_ratings, {rating.user_id, rating.rating_type_id})
     Repo.delete(rating)
   end
 
@@ -1773,8 +1659,8 @@ defmodule Teiserver.Account do
 
     case result do
       {:ok, friend} ->
-        Central.cache_delete(:account_friend_cache, friend.user1_id)
-        Central.cache_delete(:account_friend_cache, friend.user2_id)
+        Teiserver.cache_delete(:account_friend_cache, friend.user1_id)
+        Teiserver.cache_delete(:account_friend_cache, friend.user2_id)
       _ ->
         :ok
     end
@@ -1821,8 +1707,8 @@ defmodule Teiserver.Account do
 
   """
   def delete_friend(%Friend{} = friend) do
-    Central.cache_delete(:account_friend_cache, friend.user1_id)
-    Central.cache_delete(:account_friend_cache, friend.user2_id)
+    Teiserver.cache_delete(:account_friend_cache, friend.user1_id)
+    Teiserver.cache_delete(:account_friend_cache, friend.user2_id)
     Repo.delete(friend)
   end
 
@@ -1945,8 +1831,8 @@ defmodule Teiserver.Account do
           }
         )
 
-        Central.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
-        Central.cache_delete(:account_outgoing_friend_request_cache, friend_request.to_user_id)
+        Teiserver.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
+        Teiserver.cache_delete(:account_outgoing_friend_request_cache, friend_request.to_user_id)
       _ ->
         :ok
     end
@@ -1995,8 +1881,8 @@ defmodule Teiserver.Account do
 
   """
   def delete_friend_request(%FriendRequest{} = friend_request) do
-    Central.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
-    Central.cache_delete(:account_outgoing_friend_request_cache, friend_request.from_user_id)
+    Teiserver.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
+    Teiserver.cache_delete(:account_outgoing_friend_request_cache, friend_request.from_user_id)
     Repo.delete(friend_request)
   end
 
@@ -2038,7 +1924,7 @@ defmodule Teiserver.Account do
   defdelegate rescind_friend_request(req), to: FriendRequestLib
 
   # User functions
-  alias alias Teiserver.Account.UserCacheLib
+  alias Teiserver.Account.UserCacheLib
 
   @spec get_username(T.userid()) :: String.t() | nil
   defdelegate get_username(userid), to: UserCacheLib

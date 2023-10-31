@@ -38,7 +38,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   def handle_info(:begin, _state) do
     Logger.debug("Starting up Accolade server")
     account = get_accolade_account()
-    Central.cache_put(:application_metadata_cache, "teiserver_accolade_userid", account.id)
+    Teiserver.cache_put(:application_metadata_cache, "teiserver_accolade_userid", account.id)
 
     {user, client} =
       case CacheUser.internal_client_login(account.id) do
@@ -64,7 +64,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
 
     # We only subscribe to this if we're not in test, if we are it'll generate a bunch of SQL errors
     # without actually breaking anything
-    if not Application.get_env(:central, Teiserver)[:test_mode] do
+    if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
       :ok = PubSub.subscribe(Teiserver.PubSub, "global_match_updates")
     end
 
@@ -167,7 +167,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
     {:noreply, state}
   end
 
-  @spec get_accolade_account() :: Central.Account.CacheUser.t()
+  @spec get_accolade_account() :: Teiserver.Account.CacheUser.t()
   def get_accolade_account() do
     user =
       Account.get_user(nil,
@@ -196,7 +196,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
           })
 
         Account.update_user_stat(account.id, %{
-          country_override: Application.get_env(:central, Teiserver)[:server_flag]
+          country_override: Application.get_env(:teiserver, Teiserver)[:server_flag]
         })
 
         CacheUser.recache_user(account.id)

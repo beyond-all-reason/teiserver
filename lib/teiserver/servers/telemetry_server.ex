@@ -119,7 +119,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
       }
     )
 
-    Central.cache_put(:application_temp_cache, :telemetry_data, data)
+    Teiserver.cache_put(:application_temp_cache, :telemetry_data, data)
 
     PubSub.broadcast(
       Teiserver.PubSub,

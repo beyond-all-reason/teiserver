@@ -251,7 +251,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   def handle_info(:startup, _) do
     tick_timer_ref = :timer.send_interval(@default_tick_period, :tick)
-    telemetry_data = Central.cache_get(:application_temp_cache, :telemetry_data) || %{}
+    telemetry_data = Teiserver.cache_get(:application_temp_cache, :telemetry_data) || %{}
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_telemetry")
 
     state =

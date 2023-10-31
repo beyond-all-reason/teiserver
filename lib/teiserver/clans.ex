@@ -53,7 +53,7 @@ defmodule Teiserver.Clans do
 
   """
   def get_clan!(id) when not is_list(id) do
-    Central.cache_get_or_store(:teiserver_clan_cache_bang, id, fn ->
+    Teiserver.cache_get_or_store(:teiserver_clan_cache_bang, id, fn ->
       clan_query(id, [])
       |> Repo.one!()
     end)
@@ -124,7 +124,7 @@ defmodule Teiserver.Clans do
 
   """
   def update_clan(%Clan{} = clan, attrs) do
-    Central.cache_delete(:teiserver_clan_cache_bang, clan.id)
+    Teiserver.cache_delete(:teiserver_clan_cache_bang, clan.id)
 
     clan
     |> Clan.changeset(attrs)

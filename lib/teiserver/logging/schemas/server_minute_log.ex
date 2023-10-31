@@ -1,5 +1,5 @@
 defmodule Teiserver.Logging.ServerMinuteLog do
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   @primary_key false
   schema "teiserver_server_minute_logs" do

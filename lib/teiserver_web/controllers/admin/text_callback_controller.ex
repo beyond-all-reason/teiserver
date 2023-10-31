@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Admin.TextCallbackController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.{Communication, Logging, Account}
   alias Teiserver.Communication.TextCallbackLib

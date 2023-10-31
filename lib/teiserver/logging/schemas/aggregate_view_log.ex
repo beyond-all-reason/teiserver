@@ -1,6 +1,6 @@
 defmodule Teiserver.Logging.AggregateViewLog do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   @primary_key false
   schema "aggregate_view_logs" do

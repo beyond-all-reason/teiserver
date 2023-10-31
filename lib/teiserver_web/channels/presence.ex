@@ -10,8 +10,8 @@ defmodule TeiserverWeb.Presence do
   Presences can be tracked in your channel after joining:
 
       defmodule Demo.MyChannel do
-        use Central, :channel
-        alias Central.Presence
+        use Teiserver, :channel
+        alias Teiserver.Presence
 
         def join("some:topic", _params, socket) do
           send(self(), :after_join)
@@ -69,6 +69,6 @@ defmodule TeiserverWeb.Presence do
   original presence data.
   """
   use Phoenix.Presence,
-    otp_app: :central,
+    otp_app: :teiserver,
     pubsub_server: Teiserver.PubSub
 end

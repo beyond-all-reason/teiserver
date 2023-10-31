@@ -324,7 +324,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     # Clear rating caches
     [u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12, u13, u14, u15, u16]
     |> Enum.each(fn %{id: userid} ->
-      Central.cache_delete(:teiserver_user_ratings, {userid, rating_type_id})
+      Teiserver.cache_delete(:teiserver_user_ratings, {userid, rating_type_id})
     end)
 
     # Leave the party

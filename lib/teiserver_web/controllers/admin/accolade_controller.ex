@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Admin.AccoladeController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.Account
   alias Teiserver.Account.Accolade

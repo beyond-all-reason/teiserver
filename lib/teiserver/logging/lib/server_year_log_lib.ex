@@ -1,5 +1,5 @@
 defmodule Teiserver.Logging.ServerYearLogLib do
-  use CentralWeb, :library
+  use TeiserverWeb, :library
 
   alias Teiserver.Logging.ServerYearLog
 

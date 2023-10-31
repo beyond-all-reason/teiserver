@@ -2,12 +2,12 @@ defmodule TeiserverWeb.UserComponents do
   @moduledoc false
   use Phoenix.Component
   # alias Phoenix.LiveView.JS
-  # import CentralWeb.Gettext
+  # import TeiserverWeb.Gettext
 
   use Phoenix.VerifiedRoutes,
     endpoint: TeiserverWeb.Endpoint,
     router: TeiserverWeb.Router,
-    statics: CentralWeb.static_paths()
+    statics: TeiserverWeb.static_paths()
 
   @doc """
   <TeiserverWeb.UserComponents.status_icon user={user} />

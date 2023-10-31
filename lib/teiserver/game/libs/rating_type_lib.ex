@@ -1,5 +1,5 @@
 defmodule Teiserver.Game.RatingTypeLib do
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.Game.RatingType
 
   # Functions

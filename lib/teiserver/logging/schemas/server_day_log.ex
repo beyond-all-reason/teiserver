@@ -1,5 +1,5 @@
 defmodule Teiserver.Logging.ServerDayLog do
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   @primary_key false
   schema "teiserver_server_day_logs" do

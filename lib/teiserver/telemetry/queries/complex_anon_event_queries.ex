@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.ComplexAnonEventQueries do
   @moduledoc false
-  use CentralWeb, :queries
+  use TeiserverWeb, :queries
   alias Teiserver.Telemetry.ComplexAnonEvent
 
   # Queries

@@ -1,9 +1,9 @@
 defmodule Teiserver.Account.Rating do
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   @primary_key false
   schema "teiserver_account_ratings" do
-    belongs_to :user, Central.Account.User, primary_key: true
+    belongs_to :user, Teiserver.Account.User, primary_key: true
     belongs_to :rating_type, Teiserver.Game.RatingType, primary_key: true
 
     field :rating_value, :float

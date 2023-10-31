@@ -1,5 +1,5 @@
 defmodule Teiserver.Account.BadgeTypeLib do
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.Account.BadgeType
 
   # Functions

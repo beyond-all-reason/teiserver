@@ -51,7 +51,7 @@ defmodule TeiserverWeb.TournamentLive.Show do
       |> assign(:moderator, moderator)
       |> assign(:admin_dev, admin_dev)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, :standard_live}}
+    {:ok, socket}
   end
 
   @impl true

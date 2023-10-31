@@ -100,7 +100,7 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
     player1_stamps = timestamps[player1.id]
     assert Enum.count(player1_stamps) == 4
 
-    flood_count = Central.cache_get(:teiserver_login_count, player1.id)
+    flood_count = Teiserver.cache_get(:teiserver_login_count, player1.id)
     assert flood_count == 1
 
     data = %{cmd: "c.lobby.message", message: "!ring other_player"}
@@ -110,7 +110,7 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
     player1_stamps = timestamps[player1.id]
     assert Enum.count(player1_stamps) == 5
 
-    flood_count = Central.cache_get(:teiserver_login_count, player1.id)
+    flood_count = Teiserver.cache_get(:teiserver_login_count, player1.id)
     assert flood_count > 1
 
     message = Coordinator.call_consul(lobby_id, {:get, :welcome_message})

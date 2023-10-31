@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Admin.CodeController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.Account
   alias Teiserver.Account.{Code, CodeLib}

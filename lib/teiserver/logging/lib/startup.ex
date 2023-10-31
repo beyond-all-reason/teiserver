@@ -1,6 +1,6 @@
 defmodule Teiserver.Logging.Startup do
   @moduledoc false
-  use CentralWeb, :startup
+  use TeiserverWeb, :startup
 
   def startup do
     add_permission_set("logging", "page_view", ~w(show delete report))

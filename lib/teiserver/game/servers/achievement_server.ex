@@ -156,7 +156,7 @@ defmodule Teiserver.Game.AchievementServer do
     Logger.metadata(request_id: "AchievementServer")
 
     # If it's a test server this will break as the SQL connection will bork
-    if not Application.get_env(:central, Teiserver)[:test_mode] do
+    if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
       :timer.send_after(10_000, :refresh_type_map)
       :timer.send_interval(300_000, :refresh_type_map)
     end

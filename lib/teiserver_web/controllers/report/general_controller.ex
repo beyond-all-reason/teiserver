@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Report.GeneralController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",

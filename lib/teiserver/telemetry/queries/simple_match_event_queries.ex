@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.SimpleMatchEventQueries do
   @moduledoc false
-  use CentralWeb, :queries
+  use TeiserverWeb, :queries
   alias Teiserver.Telemetry.SimpleMatchEvent
 
   # Queries

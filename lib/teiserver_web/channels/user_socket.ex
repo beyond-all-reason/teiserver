@@ -4,9 +4,7 @@ defmodule TeiserverWeb.UserSocket do
   alias Teiserver.Account.Guardian
 
   ## Channels
-  # channel "room:*", CentralWeb.RoomChannel
-
-  channel("live_search:*", TeiserverWeb.LiveSearch.Channel)
+  # channel "room:*", TeiserverWeb.RoomChannel
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After

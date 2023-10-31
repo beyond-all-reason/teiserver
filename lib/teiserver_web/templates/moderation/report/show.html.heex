@@ -14,14 +14,10 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
-          TeiserverWeb.Moderation.ReportView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            show_search: false,
-            active: "show"
-          })
-        ) %>
+        <TeiserverWeb.Moderation.ReportComponents.section_menu
+          active={"show"}
+          view_colour={view_colour()}
+          current_user={@current_user} />
         <hr />
 
         <div class="float-end">

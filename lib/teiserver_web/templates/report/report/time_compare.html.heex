@@ -7,7 +7,7 @@
 ) %>
 
 <%= central_component("picker_script",
-  module: Central.Account.UserLib,
+  module: Teiserver.Account.UserLib,
   name: "account_user",
   title: "User search"
 ) %>
@@ -193,19 +193,6 @@
                 description: ""
               ) %>
             </div>
-            <!--
-            <div class="col-md-3 col-xl-2 search-form-input">
-              <label for="report_tabular" class="control-label">Tabular data:</label>
-              <%= central_component "checkbox",
-                name: "report[tabular]",
-                id: "report_tabular",
-                value: "true",
-                label: "Show a week of tabular data",
-                checked: @params["tabular"] == "true",
-
-                description: "" %>
-            </div>
-          -->
           </div>
 
           <div class="row">

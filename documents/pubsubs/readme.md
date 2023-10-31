@@ -15,7 +15,7 @@ These items are due to be stripped out
 #### room:#{room_name}
 All updates about the room and content for the room. Likely to be kept as is and renamed as a teiserver channel due to its nature.
 
-## Central
+## Teiserver
 #### account_hooks
 Used for hooking into account related activities such as updating users.
 

@@ -1,6 +1,6 @@
 defmodule Teiserver.Moderation.ReportGroupLib do
   @moduledoc false
-  use CentralWeb, :library_newform
+  use TeiserverWeb, :library_newform
   # alias Teiserver.Moderation
   alias Teiserver.Moderation.{ReportGroup, ReportGroupQueries}
   # alias Phoenix.PubSub

@@ -40,7 +40,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   def handle_info(:begin, _state) do
     Logger.debug("Starting up Coordinator main server")
     account = get_coordinator_account()
-    Central.cache_put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
+    Teiserver.cache_put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
 
     {user, client} =
       case CacheUser.internal_client_login(account.id) do
@@ -308,7 +308,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     {:noreply, state}
   end
 
-  @spec get_coordinator_account() :: Central.Account.CacheUser.t()
+  @spec get_coordinator_account() :: Teiserver.Account.CacheUser.t()
   def get_coordinator_account() do
     user =
       Account.get_user(nil,
@@ -336,7 +336,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           })
 
         Account.update_user_stat(account.id, %{
-          country_override: Application.get_env(:central, Teiserver)[:server_flag]
+          country_override: Application.get_env(:teiserver, Teiserver)[:server_flag]
         })
 
         CacheUser.recache_user(account.id)

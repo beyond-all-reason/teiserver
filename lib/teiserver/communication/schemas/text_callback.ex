@@ -1,6 +1,6 @@
 defmodule Teiserver.Communication.TextCallback do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "communication_text_callbacks" do
     field :name, :string

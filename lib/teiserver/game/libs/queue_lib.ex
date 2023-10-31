@@ -1,5 +1,5 @@
 defmodule Teiserver.Game.QueueLib do
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.Game.Queue
 
   # Functions

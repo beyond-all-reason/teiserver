@@ -1,10 +1,10 @@
 defmodule Teiserver.Moderation.Report do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "moderation_reports" do
-    belongs_to :reporter, Central.Account.User
-    belongs_to :target, Central.Account.User
+    belongs_to :reporter, Teiserver.Account.User
+    belongs_to :target, Teiserver.Account.User
 
     field :type, :string
     field :sub_type, :string

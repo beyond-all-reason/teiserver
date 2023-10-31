@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.API.SpadsController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
   alias Teiserver.Config
   alias Teiserver.{Account, Coordinator, Battle}
   alias Teiserver.Battle.BalanceLib

@@ -2,7 +2,7 @@ defmodule TeiserverWeb.ChatComponents do
   @moduledoc false
   use Phoenix.Component
   # alias Phoenix.LiveView.JS
-  # import CentralWeb.Gettext
+  # import TeiserverWeb.Gettext
 
   @doc """
   <TeiserverWeb.ChatComponents.message_list messages={@messages} />

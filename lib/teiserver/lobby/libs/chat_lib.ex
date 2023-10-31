@@ -29,7 +29,7 @@ defmodule Teiserver.Lobby.ChatLib do
         }
       })
 
-    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
 
     Coordinator.send_to_user(userid, [

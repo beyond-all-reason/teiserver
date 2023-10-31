@@ -16,7 +16,7 @@ defmodule Teiserver.Account.UserCacheLib do
   def get_username_by_id(userid) do
     userid = int_parse(userid)
 
-    Central.cache_get_or_store(:users_lookup_name_with_id, int_parse(userid), fn ->
+    Teiserver.cache_get_or_store(:users_lookup_name_with_id, int_parse(userid), fn ->
       case get_user_by_id(userid) do
         nil -> nil
         user -> user.name
@@ -31,7 +31,7 @@ defmodule Teiserver.Account.UserCacheLib do
   def get_userid(username) do
     username = cachename(username)
 
-    Central.cache_get_or_store(:users_lookup_id_with_name, username, fn ->
+    Teiserver.cache_get_or_store(:users_lookup_id_with_name, username, fn ->
       user =
         Account.get_user(nil,
           search: [
@@ -69,7 +69,7 @@ defmodule Teiserver.Account.UserCacheLib do
     cachename_email = cachename(email)
 
     id =
-      Central.cache_get_or_store(:users_lookup_id_with_email, cachename_email, fn ->
+      Teiserver.cache_get_or_store(:users_lookup_id_with_email, cachename_email, fn ->
         user =
           Account.get_user(nil,
             search: [
@@ -112,7 +112,7 @@ defmodule Teiserver.Account.UserCacheLib do
   def get_user_by_id(id) do
     id = int_parse(id)
 
-    Central.cache_get_or_store(:users, id, fn ->
+    Teiserver.cache_get_or_store(:users, id, fn ->
       Account.get_user(id)
       |> convert_user
       |> add_user
@@ -123,7 +123,7 @@ defmodule Teiserver.Account.UserCacheLib do
   def get_userid_by_discord_id(nil), do: nil
 
   def get_userid_by_discord_id(discord_id) do
-    Central.cache_get_or_store(:users_lookup_id_with_discord, discord_id, fn ->
+    Teiserver.cache_get_or_store(:users_lookup_id_with_discord, discord_id, fn ->
       user =
         Account.get_user(nil,
           search: [
@@ -163,7 +163,11 @@ defmodule Teiserver.Account.UserCacheLib do
 
   @spec recache_user(T.userid() | CacheUser.t()) :: :ok
   def recache_user(id) when is_integer(id) do
-    Central.Account.recache_user(id)
+    Teiserver.cache_delete(:account_user_cache, id)
+    Teiserver.cache_delete(:account_user_cache_bang, id)
+    Teiserver.cache_delete(:account_membership_cache, id)
+    Teiserver.cache_delete(:config_user_cache, id)
+
     # decache_user(id)
     Teiserver.Account.decache_relationships(id)
 
@@ -175,7 +179,7 @@ defmodule Teiserver.Account.UserCacheLib do
   end
 
   def recache_user(user) do
-    Central.Account.recache_user(user.id)
+    Teiserver.Account.recache_user(user.id)
 
     user
     |> convert_user
@@ -211,12 +215,12 @@ defmodule Teiserver.Account.UserCacheLib do
 
   def add_user(user) do
     update_user(user)
-    Central.cache_put(:users_lookup_name_with_id, user.id, user.name)
-    Central.cache_put(:users_lookup_id_with_name, cachename(user.name), user.id)
-    Central.cache_put(:users_lookup_id_with_email, cachename(user.email), user.id)
+    Teiserver.cache_put(:users_lookup_name_with_id, user.id, user.name)
+    Teiserver.cache_put(:users_lookup_id_with_name, cachename(user.name), user.id)
+    Teiserver.cache_put(:users_lookup_id_with_email, cachename(user.email), user.id)
 
     if user.discord_id do
-      Central.cache_put(:users_lookup_id_with_discord, user.discord_id, user.id)
+      Teiserver.cache_put(:users_lookup_id_with_discord, user.discord_id, user.id)
     end
 
     user
@@ -244,7 +248,7 @@ defmodule Teiserver.Account.UserCacheLib do
 
   @spec update_user(CacheUser.t(), boolean) :: CacheUser.t()
   def update_user(user, persist \\ false) do
-    Central.cache_put(:users, user.id, user)
+    Teiserver.cache_put(:users, user.id, user)
     if persist, do: persist_user(user)
     user
   end
@@ -253,7 +257,7 @@ defmodule Teiserver.Account.UserCacheLib do
   def update_cache_user(userid, data) do
     user = get_user_by_id(userid)
     new_user = Map.merge(user, data)
-    Central.cache_put(:users, user.id, new_user)
+    Teiserver.cache_put(:users, user.id, new_user)
     persist_user(new_user)
     user
   end
@@ -262,14 +266,14 @@ defmodule Teiserver.Account.UserCacheLib do
   def decache_user(userid) do
     user = get_user_by_id(userid)
 
-    # Central.cache_delete(:users, userid)
+    # Teiserver.cache_delete(:users, userid)
     if user do
-      Central.cache_delete(:users_lookup_name_with_id, user.id)
-      Central.cache_delete(:users_lookup_id_with_name, cachename(user.name))
-      Central.cache_delete(:users_lookup_id_with_email, cachename(user.email))
+      Teiserver.cache_delete(:users_lookup_name_with_id, user.id)
+      Teiserver.cache_delete(:users_lookup_id_with_name, cachename(user.name))
+      Teiserver.cache_delete(:users_lookup_id_with_email, cachename(user.email))
 
       if user.discord_id do
-        Central.cache_delete(:users_lookup_id_with_discord, user.discord_id)
+        Teiserver.cache_delete(:users_lookup_id_with_discord, user.discord_id)
       end
 
       :ok

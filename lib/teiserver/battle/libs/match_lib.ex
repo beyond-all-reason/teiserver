@@ -1,6 +1,6 @@
 defmodule Teiserver.Battle.MatchLib do
   @moduledoc false
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.{Battle, Account}
   alias Teiserver.Battle.{Match, MatchMembership}
   alias Teiserver.Data.Types, as: T

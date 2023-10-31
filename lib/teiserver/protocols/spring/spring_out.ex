@@ -37,7 +37,7 @@ defmodule Teiserver.Protocols.SpringOut do
         :spring -> do_reply(reply_cmd, data)
       end
 
-    if Application.get_env(:central, Teiserver)[:extra_logging] == true or
+    if Application.get_env(:teiserver, Teiserver)[:extra_logging] == true or
          state.print_server_messages do
       if is_list(msg) do
         msg
@@ -82,7 +82,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:redirect, url) do
-    "REDIRECT #{url} #{Application.get_env(:central, Teiserver)[:ports][:tcp]}\n"
+    "REDIRECT #{url} #{Application.get_env(:teiserver, Teiserver)[:ports][:tcp]}\n"
   end
 
   defp do_reply(:compflags, nil) do
@@ -99,7 +99,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:agreement, nil) do
     agreement_rows =
-      Application.get_env(:central, Teiserver)[:user_agreement]
+      Application.get_env(:teiserver, Teiserver)[:user_agreement]
       |> String.split("\n")
       |> Enum.map_join("\n", fn s -> "AGREEMENT #{s}" end)
 
@@ -696,7 +696,7 @@ defmodule Teiserver.Protocols.SpringOut do
     end)
 
     if not state.exempt_from_cmd_throttle do
-      :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
+      :timer.sleep(Application.get_env(:teiserver, Teiserver)[:post_login_delay])
     end
 
     # Battle entry commands
@@ -816,7 +816,7 @@ defmodule Teiserver.Protocols.SpringOut do
       end)
 
     if not state.exempt_from_cmd_throttle do
-      :timer.sleep(Application.get_env(:central, Teiserver)[:spring_post_state_change_delay])
+      :timer.sleep(Application.get_env(:teiserver, Teiserver)[:spring_post_state_change_delay])
     end
 
     members =

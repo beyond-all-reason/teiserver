@@ -27,7 +27,7 @@ defmodule TeiserverWeb.ConnCase do
       alias TeiserverWeb.Router.Helpers, as: Routes
 
       # The default endpoint for testing
-      unquote(CentralWeb.verified_routes())
+      unquote(TeiserverWeb.verified_routes())
       @endpoint TeiserverWeb.Endpoint
     end
   end

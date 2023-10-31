@@ -51,8 +51,8 @@
             value: @log.user.name,
             link: %{
               path: ~p"/teiserver/admin/user/#{@log.user_id}",
-              bsname: elem(Central.Account.UserLib.colours() |> colours(), 2),
-              icon: Central.Account.UserLib.icon()
+              bsname: elem(Teiserver.Account.UserLib.colours() |> colours(), 2),
+              icon: Teiserver.Account.UserLib.icon()
             }
           ) %>
         <% else %>

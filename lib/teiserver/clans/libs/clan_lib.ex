@@ -1,5 +1,5 @@
 defmodule Teiserver.Clans.ClanLib do
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.Clans.Clan
 
   # Functions

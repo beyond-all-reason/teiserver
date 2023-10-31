@@ -1,9 +1,9 @@
 defmodule Teiserver.Account.Accolade do
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "teiserver_account_accolades" do
-    belongs_to :recipient, Central.Account.User
-    belongs_to :giver, Central.Account.User
+    belongs_to :recipient, Teiserver.Account.User
+    belongs_to :giver, Teiserver.Account.User
     belongs_to :badge_type, Teiserver.Account.BadgeType
     belongs_to :match, Teiserver.Battle.Match
     field :inserted_at, :utc_datetime

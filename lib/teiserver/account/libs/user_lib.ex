@@ -1,9 +1,10 @@
 defmodule Teiserver.Account.UserLib do
   @moduledoc false
-  use CentralWeb, :library
+  use TeiserverWeb, :library_newform
   require Logger
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Account.RoleLib
+  alias Phoenix.PubSub
+  alias Teiserver.{Account, Logging}
+  alias Teiserver.Account.{User, RoleLib, UserQueries}
 
   # Functions
   @spec icon :: String.t()
@@ -15,7 +16,7 @@ defmodule Teiserver.Account.UserLib do
   @spec colour :: atom
   def colour, do: :success
 
-  @spec make_favourite(Central.Account.User.t()) :: Map.t()
+  @spec make_favourite(Teiserver.Account.User.t()) :: Map.t()
   def make_favourite(user) do
     %{
       type_colour: StylingHelper.colours(colours()) |> elem(0),
@@ -27,391 +28,6 @@ defmodule Teiserver.Account.UserLib do
       item_label: "#{user.name}",
       url: "/teiserver/admin/user/#{user.id}"
     }
-  end
-
-  # Queries
-  @spec get_user() :: Ecto.Query.t()
-  def get_user, do: Central.Account.UserLib.get_users()
-
-  @spec search(Ecto.Query.t(), map | nil) :: Ecto.Query.t()
-  def search(query, nil), do: query
-
-  def search(query, params) do
-    params
-    |> Enum.reduce(query, fn {key, value}, query_acc ->
-      _search(query_acc, key, value)
-    end)
-  end
-
-  @spec _search(Ecto.Query.t(), atom, any) :: Ecto.Query.t()
-  def _search(query, _, ""), do: query
-  def _search(query, _, nil), do: query
-  def _search(query, _, "Any"), do: query
-
-  def _search(query, :data_equal, {field, value}) do
-    from users in query,
-      where: fragment("? ->> ? = ?", users.data, ^field, ^value)
-  end
-
-  def _search(query, :data_greater_than, {field, value}) do
-    from users in query,
-      where: fragment("? ->> ? > ?", users.data, ^field, ^value)
-  end
-
-  def _search(query, :data_less_than, {field, value}) do
-    from users in query,
-      where: fragment("? ->> ? < ?", users.data, ^field, ^value)
-  end
-
-  def _search(query, :data_not, {field, value}) do
-    from users in query,
-      where: fragment("? ->> ? != ?", users.data, ^field, ^value)
-  end
-
-  # https://www.postgresql.org/docs/current/functions-json.html - Unable to find a function for this :(
-  def _search(query, :data_contains, {field, value}) do
-    from users in query,
-      where: fragment("? ->> ? @> ?", users.data, ^field, ^value)
-  end
-
-  def _search(query, :data_not_contains, {field, value}) do
-    from users in query,
-      where: fragment("not ? ->> ? @> ?", users.data, ^field, ^value)
-  end
-
-  def _search(query, :data_contains_key, field) do
-    from users in query,
-      where: fragment("? @> ?", users.data, ^field)
-  end
-
-  # E.g. [data_contains_number: {"ignored", 9265}]
-  def _search(query, :data_contains_number, {field, value}) when is_number(value) do
-    from users in query,
-      where: fragment("(? ->> ?)::jsonb @> ?::jsonb", users.data, ^field, ^value)
-  end
-
-  def _search(query, :has_role, role_name) do
-    from users in query,
-      where: ^role_name in users.roles
-  end
-
-  def _search(query, :not_has_role, role_name) do
-    from users in query,
-      where: ^role_name not in users.roles
-  end
-
-  def _search(query, :bot, "Person") do
-    Logger.error("user.data['bot'] is being queried, this property is due to be depreciated")
-
-    from users in query,
-      where: fragment("? ->> ? = ?", users.data, "bot", "false")
-  end
-
-  def _search(query, :bot, "Robot") do
-    Logger.error("user.data['bot'] is being queried, this property is due to be depreciated")
-
-    from users in query,
-      where: fragment("? ->> ? = ?", users.data, "bot", "true")
-  end
-
-  def _search(query, :moderator, "User") do
-    Logger.error(
-      "user.data['moderator'] is being queried, this property is due to be depreciated"
-    )
-
-    from users in query,
-      where: fragment("? ->> ? = ?", users.data, "moderator", "false")
-  end
-
-  def _search(query, :moderator, "Moderator") do
-    Logger.error(
-      "user.data['moderator'] is being queried, this property is due to be depreciated"
-    )
-
-    from users in query,
-      where: fragment("? ->> ? = ?", users.data, "moderator", "true")
-  end
-
-  def _search(query, :smurf_of, userid) when is_integer(userid) do
-    from users in query,
-      where: users.smurf_of_id == ^userid
-  end
-
-  def _search(query, :smurf_of, "Smurf"), do: _search(query, :smurf_of, true)
-  def _search(query, :smurf_of, "Non-smurf"), do: _search(query, :smurf_of, false)
-
-  def _search(query, :smurf_of, true) do
-    from users in query,
-      where: not is_nil(users.smurf_of_id)
-  end
-
-  def _search(query, :smurf_of, false) do
-    from users in query,
-      where: is_nil(users.smurf_of_id)
-  end
-
-  def _search(query, :verified, "Verified"), do: _search(query, :verified, true)
-  def _search(query, :verified, "Unverified"), do: _search(query, :verified, false)
-
-  def _search(query, :verified, true) do
-    from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Verified\"")
-  end
-
-  def _search(query, :verified, false) do
-    from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Verified\"")
-  end
-
-  def _search(query, :mod_action, "Banned") do
-    from users in query,
-      where: fragment("? -> ? @> ?", users.data, "restrictions", "\"Login\"")
-  end
-
-  def _search(query, :mod_action, "Not banned") do
-    from users in query,
-      where: not fragment("? -> ? @> ?", users.data, "restrictions", "\"Login\"")
-  end
-
-  def _search(query, :mod_action, "Muted") do
-    from users in query,
-      where: fragment("? -> ? @> ?", users.data, "restrictions", "\"All chat\"")
-  end
-
-  def _search(query, :mod_action, "Shadowbanned") do
-    from users in query,
-      where: fragment("? ->> ? = ?", users.data, "shadowbanned", "true")
-  end
-
-  def _search(query, :mod_action, "Warned") do
-    from users in query,
-      where: fragment("? -> ? @> ?", users.data, "restrictions", "\"Warning reminder\"")
-  end
-
-  def _search(query, :mod_action, "Any action") do
-    from users in query,
-      where: fragment("? -> ? @> ?", users.data, "restrictions", "\"Warning reminder\"")
-  end
-
-  def _search(query, :mod_action, "Muted or banned") do
-    from users in query,
-      where:
-        fragment("? -> ? @> ?", users.data, "restrictions", "\"Login\"") or
-          fragment("? -> ? @> ?", users.data, "restrictions", "\"All chat\"")
-  end
-
-  def _search(query, :mod_action, "not muted or banned") do
-    from users in query,
-      where:
-        not (fragment("? -> ? @> ?", users.data, "restrictions", "\"Login\"") or
-               fragment("? -> ? @> ?", users.data, "restrictions", "\"All chat\""))
-  end
-
-  def _search(query, :mod_action, "Any user") do
-    query
-  end
-
-  def _search(query, :tester, "Trusted") do
-    from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Trusted\"")
-  end
-
-  def _search(query, :tester, "Tester") do
-    from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Tester\"")
-  end
-
-  def _search(query, :tester, "Normal") do
-    from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Tester\"")
-  end
-
-  def _search(query, :streamer, "Streamer") do
-    from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Streamer\"")
-  end
-
-  def _search(query, :streamer, "Normal") do
-    from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Streamer\"")
-  end
-
-  def _search(query, :donor, "Donor") do
-    from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Donor\"")
-  end
-
-  def _search(query, :donor, "Normal") do
-    from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Donor\"")
-  end
-
-  def _search(query, :gdt_member, "GDT") do
-    from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"GDT\"")
-  end
-
-  def _search(query, :gdt_member, "Normal") do
-    from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"GDT\"")
-  end
-
-  def _search(query, :contributor, "Contributor") do
-    from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Contributor\"")
-  end
-
-  def _search(query, :contributor, "Normal") do
-    from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Contributor\"")
-  end
-
-  def _search(query, :developer, "Developer") do
-    from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Developer\"")
-  end
-
-  def _search(query, :developer, "Normal") do
-    from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Developer\"")
-  end
-
-  def _search(query, :overwatch, "Overwatch") do
-    from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Overwatch\"")
-  end
-
-  def _search(query, :overwatch, "Normal") do
-    from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Overwatch\"")
-  end
-
-  def _search(query, :caster, "Caster") do
-    from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Caster\"")
-  end
-
-  def _search(query, :caster, "Normal") do
-    from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Caster\"")
-  end
-
-  def _search(query, :tournament_player, "Player") do
-    from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Tournament player\"")
-  end
-
-  def _search(query, :tournament_player, "Normal") do
-    from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Tournament player\"")
-  end
-
-  def _search(query, :vip, "VIP") do
-    from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"VIP\"")
-  end
-
-  def _search(query, :vip, "Normal") do
-    from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"VIP\"")
-  end
-
-  def _search(query, :lobby_client, lobby_client) do
-    from users in query,
-      where: fragment("? ->> ? = ?", users.data, "lobby_client", ^lobby_client)
-  end
-
-  def _search(query, :previous_names, name) do
-    uname = "%" <> name <> "%"
-
-    from users in query,
-      where: ilike(users.name, ^uname)
-  end
-
-  def _search(query, :last_played_after, timestamp) do
-    from users in query,
-      where: users.last_played >= ^timestamp
-  end
-
-  def _search(query, :last_played_before, timestamp) do
-    from users in query,
-      where: users.last_played < ^timestamp
-  end
-
-  def _search(query, :last_login_after, timestamp) do
-    from users in query,
-      where: users.last_login >= ^timestamp
-  end
-
-  def _search(query, :last_login_before, timestamp) do
-    from users in query,
-      where: users.last_login < ^timestamp
-  end
-
-  def _search(query, key, value) do
-    Central.Account.UserLib._search(query, key, value)
-  end
-
-  @spec order_by(Ecto.Query.t(), tuple() | String.t() | nil) :: Ecto.Query.t()
-  def order_by(query, nil), do: query
-
-  def order_by(query, orders) when is_list(orders) do
-    orders
-    |> Enum.reduce(query, fn order_value, query_acc ->
-      Teiserver.Account.UserLib.order_by(query_acc, order_value)
-    end)
-  end
-
-  def order_by(query, "Last logged in") do
-    field = "last_login"
-
-    from users in query,
-      order_by: [desc: fragment("? -> ?", users.data, ^field)]
-  end
-
-  # def order_by(query, "Last logged in") do
-  #   from users in query,
-  #     order_by: [desc: users.last_login]
-  # end
-
-  def order_by(query, "Last played") do
-    from users in query,
-      order_by: [desc: users.last_played]
-  end
-
-  def order_by(query, "Last logged out") do
-    from users in query,
-      order_by: [desc: users.last_logout]
-  end
-
-  def order_by(query, {:data, field, :asc}) do
-    from users in query,
-      order_by: [asc: fragment("? -> ?", users.data, ^field)]
-  end
-
-  def order_by(query, {:data, field, :desc}) do
-    from users in query,
-      order_by: [desc: fragment("? -> ?", users.data, ^field)]
-  end
-
-  def order_by(query, key), do: Central.Account.UserLib.order(query, key)
-
-  @spec preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()
-  def preload(query, nil), do: query
-
-  def preload(query, preloads) do
-    query = Central.Account.UserLib.preload(query, preloads)
-
-    query = if :user_stat in preloads, do: _preload_user_stat(query), else: query
-
-    query
-  end
-
-  @spec _preload_user_stat(Ecto.Query.t()) :: Ecto.Query.t()
-  def _preload_user_stat(query) do
-    from user in query,
-      left_join: user_stats in assoc(user, :user_stat),
-      preload: [user_stat: user_stats]
   end
 
   @spec generate_user_icons(T.user()) :: map()
@@ -430,5 +46,305 @@ defmodule Teiserver.Account.UserLib do
   @spec make_bot_password() :: String.t()
   def make_bot_password() do
     :crypto.strong_rand_bytes(64) |> Base.encode64(padding: false) |> binary_part(0, 64)
+  end
+
+  @doc """
+  Returns the list of users.
+
+  ## Examples
+
+      iex> list_users()
+      [%User{}, ...]
+
+  """
+  @spec list_users(list) :: list
+  def list_users(args \\ []) do
+    args
+    |> UserQueries.query_users()
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single user.
+
+  Raises `Ecto.NoResultsError` if the User does not exist.
+
+  ## Examples
+
+      iex> get_user!(123)
+      %User{}
+
+      iex> get_user!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_user!(non_neg_integer()) :: User.t
+  def get_user!(user_id, args \\ []) do
+    (args ++ [id: user_id])
+    |> UserQueries.query_users()
+    |> Repo.one!()
+  end
+
+  @spec get_user(non_neg_integer(), list) :: User.t | nil
+  def get_user(user_id, args \\ []) do
+    (args ++ [id: user_id])
+    |> UserQueries.query_users()
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a user.
+
+  ## Examples
+
+      iex> create_user(%{field: value})
+      {:ok, %User{}}
+
+      iex> create_user(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_user(attrs \\ %{}) do
+    %User{}
+    |> User.changeset(attrs)
+    |> Repo.insert()
+    |> broadcast_create_user()
+  end
+
+  def script_create_user(attrs \\ %{}) do
+    %User{}
+    |> User.changeset(attrs, :script)
+    |> Repo.insert()
+    |> broadcast_create_user()
+  end
+
+  @doc """
+  Updates a user.
+
+  ## Examples
+
+      iex> update_user(user, %{field: new_value})
+      {:ok, %User{}}
+
+      iex> update_user(user, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user(%User{} = user, attrs) do
+    Account.recache_user(user.id)
+
+    user
+    |> User.changeset(attrs, :limited_with_data)
+    |> Repo.update()
+    |> broadcast_update_user()
+  end
+
+  def update_user_password(%User{} = user, attrs) do
+    Account.recache_user(user.id)
+
+    user
+    |> User.changeset(attrs, :password)
+    |> Repo.update()
+    |> broadcast_update_user()
+  end
+
+  def update_user_user_form(%User{} = user, attrs) do
+    Account.recache_user(user.id)
+
+    user
+    |> User.changeset(attrs, :user_form)
+    |> Repo.update()
+    |> broadcast_update_user()
+  end
+
+  def server_limited_update_user(%User{} = user, attrs) do
+    Account.recache_user(user.id)
+
+    user
+    |> User.changeset(attrs, :server_limited_update_user)
+    |> Repo.update()
+    |> broadcast_update_user()
+  end
+
+  def server_update_user(%User{} = user, attrs) do
+    Account.recache_user(user.id)
+
+    user
+    |> User.changeset(attrs)
+    |> Repo.update()
+    |> broadcast_update_user()
+  end
+
+  def script_update_user(%User{} = user, attrs) do
+    Account.recache_user(user.id)
+
+    user
+    |> User.changeset(attrs, :script)
+    |> Repo.update()
+    |> broadcast_update_user()
+  end
+
+  @doc """
+  Deletes a user.
+
+  ## Examples
+
+      iex> delete_user(user)
+      {:ok, %User{}}
+
+      iex> delete_user(user)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_user(%User{} = user) do
+    Repo.delete(user)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking user changes.
+
+  ## Examples
+
+      iex> change_user(user)
+      %Ecto.Changeset{data: %User{}}
+
+  """
+  def change_user(%User{} = user, attrs \\ %{}) do
+    User.changeset(user, attrs)
+  end
+
+
+  def broadcast_create_user(u), do: broadcast_create_user(u, :create)
+
+  def broadcast_create_user({:ok, user}, reason) do
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "account_hooks",
+      {:account_hooks, :create_user, user, reason}
+    )
+
+    {:ok, user}
+  end
+
+  def broadcast_create_user(v, _), do: v
+
+  def broadcast_update_user(u), do: broadcast_update_user(u, :update)
+
+  def broadcast_update_user({:ok, user}, reason) do
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "account_hooks",
+      {:account_hooks, :update_user, user, reason}
+    )
+
+    {:ok, user}
+  end
+
+  def broadcast_update_user(v, _), do: v
+
+  def merge_default_params(user_params) do
+    Map.merge(
+      %{
+        "icon" => "fa-solid fa-" <> Teiserver.Helper.StylingHelper.random_icon(),
+        "colour" => Teiserver.Helper.StylingHelper.random_colour()
+      },
+      user_params
+    )
+  end
+
+  def authenticate_user(conn, %User{} = user, plain_text_password) do
+    if User.verify_password(plain_text_password, user.password) do
+      {:ok, user}
+    else
+      # Authentication failure handler
+      Teiserver.Account.spring_auth_check(conn, user, plain_text_password)
+    end
+  end
+
+  def authenticate_user(_conn, "", _plain_text_password) do
+    Argon2.no_user_verify()
+    Argon2.no_user_verify()
+    {:error, "Invalid credentials"}
+  end
+
+  def authenticate_user(_conn, _, "") do
+    Argon2.no_user_verify()
+    Argon2.no_user_verify()
+    {:error, "Invalid credentials"}
+  end
+
+  def authenticate_user(conn, email, plain_text_password) do
+    user = get_user(where: [email: email])
+
+    case user do
+      nil ->
+        Argon2.no_user_verify()
+        Argon2.no_user_verify()
+        Logging.add_anonymous_audit_log(conn, "Account:Failed login", %{reason: "No user", email: email})
+        {:error, "Invalid credentials"}
+
+      user ->
+        authenticate_user(conn, user, plain_text_password)
+    end
+  end
+
+  @spec has_access(integer() | map(), Plug.Conn.t()) :: {boolean, nil | :not_found | :no_access}
+  def has_access(target_user_id, conn) when is_integer(target_user_id) do
+    if allow?(conn.permissions, "Server") do
+      {true, nil}
+    else
+      {false, :no_access}
+    end
+  end
+
+  def has_access(nil, _user), do: {false, :not_found}
+
+  def has_access(target_user, conn) do
+    cond do
+      # Server can access anything
+      allow?(conn, "Server") ->
+        {true, nil}
+
+      # Admin can access anything except Server
+      not allow?(conn, "Server") and allow?(target_user, "Server") ->
+        {false, :restricted_user}
+
+      allow?(conn, "Admin") ->
+        {true, nil}
+
+      not allow?(conn, "Admin") and allow?(target_user, "Admin") ->
+        {false, :restricted_user}
+
+      allow?(conn, "Moderator") ->
+        {true, nil}
+
+      # By default, nobody can access other users
+      true ->
+        {false, :no_access}
+    end
+  end
+
+  @spec has_access!(integer() | map(), Plug.Conn.t()) :: boolean
+  def has_access!(target_user, conn) do
+    {result, _} = has_access(target_user, conn)
+    result
+  end
+
+  @spec add_report_restriction_types(String.t(), list) :: :ok
+  def add_report_restriction_types(key, items) do
+    categories = Teiserver.store_get(:restriction_lookup_store, :categories) || []
+    new_categories = categories ++ [key]
+
+    Teiserver.store_put(:restriction_lookup_store, :categories, new_categories)
+    Teiserver.store_put(:restriction_lookup_store, key, items)
+    :ok
+  end
+
+  @spec list_restrictions :: list
+  def list_restrictions() do
+    Teiserver.store_get(:restriction_lookup_store, :categories)
+    |> Enum.map(fn key ->
+      {key, Teiserver.store_get(:restriction_lookup_store, key)}
+    end)
   end
 end

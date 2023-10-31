@@ -1,12 +1,12 @@
 defmodule TeiserverWeb.API.SessionController do
-  use CentralWeb, :controller
-  alias Central.Account
-  alias Teiserver.CacheUser
+  use TeiserverWeb, :controller
+  alias Teiserver.{Account, CacheUser}
+  alias Teiserver.Account.UserLib
 
   @spec login(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def login(conn, %{"user" => %{"email" => email, "password" => password}}) do
     conn
-    |> Account.authenticate_user(email, password)
+    |> UserLib.authenticate_user(email, password)
     |> login_reply(conn)
   end
 
@@ -26,7 +26,7 @@ defmodule TeiserverWeb.API.SessionController do
 
   @spec register(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def register(conn, %{"user" => user_params}) do
-    user_params = Account.merge_default_params(user_params)
+    user_params = Account.UserLib.merge_default_params(user_params)
     config_setting = Teiserver.Config.get_site_config_cache("user.Enable user registrations")
 
     {allowed, reason} =
@@ -81,7 +81,7 @@ defmodule TeiserverWeb.API.SessionController do
           {:error, "Missing parameter 'password'"}
 
         true ->
-          case Account.self_create_user(user_params) do
+          case Account.create_user(user_params) do
             {:ok, user} ->
               case Teiserver.Account.get_code(user_params["code"]) do
                 nil ->
@@ -143,7 +143,7 @@ defmodule TeiserverWeb.API.SessionController do
           # First, try to do it without using the spring password
           db_user = Account.get_user!(user.id)
 
-          case Central.Account.User.verify_password(raw_password, db_user.password) do
+          case Teiserver.Account.User.verify_password(raw_password, db_user.password) do
             true ->
               make_token(conn, user, expires)
 
@@ -158,7 +158,7 @@ defmodule TeiserverWeb.API.SessionController do
                     true ->
                       # Update the db user then the cached user
                       db_user = Account.get_user!(user.id)
-                      Central.Account.update_user(db_user, %{"password" => raw_password})
+                      Teiserver.Account.update_user(db_user, %{"password" => raw_password})
                       CacheUser.recache_user(user.id)
                       CacheUser.update_user(%{user | spring_password: false}, persist: true)
 

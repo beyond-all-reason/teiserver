@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Battle.GeneralController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   plug(:add_breadcrumb, name: 'Battle', url: '/battle')
 

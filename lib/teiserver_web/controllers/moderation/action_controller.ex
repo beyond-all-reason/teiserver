@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Moderation.ActionController do
   @moduledoc false
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.Logging
   alias Teiserver.{Account, Moderation, Communication}
@@ -159,7 +159,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
         |> assign(:reports, reports)
         |> assign(:past_actions, past_actions)
         |> assign(:selected_report_ids, [])
-        |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
+        |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
         |> add_breadcrumb(name: "New action for #{user.name}", url: conn.request_path)
         |> render("new_with_user.html")
     end
@@ -243,7 +243,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
         |> assign(:changeset, changeset)
         |> assign(:reports, reports)
         |> assign(:selected_report_ids, report_ids)
-        |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
+        |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
         |> assign(:past_actions, past_actions)
         |> add_breadcrumb(name: "New action for #{user.name}", url: conn.request_path)
         |> render("new_with_user.html")
@@ -259,7 +259,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     conn
     |> assign(:action, action)
     |> assign(:changeset, changeset)
-    |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
+    |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
     |> add_breadcrumb(name: "Edit: #{action.target.name}", url: conn.request_path)
     |> render("edit.html")
   end
@@ -295,7 +295,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
         conn
         |> assign(:action, action)
         |> assign(:changeset, changeset)
-        |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
+        |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
         |> render("edit.html")
     end
   end

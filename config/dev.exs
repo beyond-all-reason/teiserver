@@ -1,9 +1,9 @@
 import Config
 
-config :central, Central.Setup, key: "dev_key"
+config :teiserver, Teiserver.Setup, key: "dev_key"
 
 # Configure your database
-config :central, Teiserver.Repo,
+config :teiserver, Teiserver.Repo,
   username: "teiserver_dev",
   password: "123456789",
   database: "teiserver_dev",
@@ -18,7 +18,7 @@ config :central, Teiserver.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
-config :central, TeiserverWeb.Endpoint,
+config :teiserver, TeiserverWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4000],
   debug_errors: true,
   code_reloader: true,
@@ -49,7 +49,7 @@ config :dart_sass,
     cd: Path.expand("../assets", __DIR__)
   ]
 
-config :central, Teiserver,
+config :teiserver, Teiserver,
   certs: [
     keyfile: "priv/certs/localhost.key",
     certfile: "priv/certs/localhost.crt",
@@ -66,12 +66,12 @@ config :central, Teiserver,
   accept_all_emails: true
 
 # Watch static and templates for browser reloading.
-config :central, TeiserverWeb.Endpoint,
+config :teiserver, TeiserverWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/central_web/(controllers|live|components|live_components|views|templates)/.*(ex|heex)$",
+      ~r"lib/teiserver_web/(controllers|live|components|live_components|views|templates)/.*(ex|heex)$",
       ~r"lib/teiserver_web/(controllers|live|components|live_components|views|templates)/.*(ex|heex)$"
     ]
   ]
@@ -84,7 +84,7 @@ config :phoenix, :stacktrace_depth, 20
 config :phoenix, :plug_init_mode, :runtime
 
 # Comment the below block to allow background jobs to happen in dev
-config :central, Oban,
+config :teiserver, Oban,
   queues: false,
   crontab: false
 

@@ -1,5 +1,5 @@
 defmodule Teiserver.Battle.MatchMembershipLib do
-  use CentralWeb, :library
+  use TeiserverWeb, :library
 
   alias Teiserver.Battle.MatchMembership
 

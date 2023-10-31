@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Logging.GeneralController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   plug :add_breadcrumb, name: 'Logging', url: '/logging'
 

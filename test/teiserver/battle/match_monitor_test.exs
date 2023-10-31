@@ -18,7 +18,7 @@ defmodule Teiserver.Battle.MatchMonitorTest do
   test "spring send" do
     %{socket: socket, user: _user} = auth_setup()
 
-    # monitor_userid = Central.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
+    # monitor_userid = Teiserver.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
 
     # Send a direct message to the match monitor server
     short_data =

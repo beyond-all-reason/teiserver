@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.UserPropertyLib do
   @moduledoc false
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.{UserProperty, UserPropertyQueries}
   alias Phoenix.PubSub

@@ -39,7 +39,7 @@ This document serves as a list of steps to convert the game from single to multi
 
 ## Work items
 ##### Propagate data
-Any time an ETS is updated this needs to be propagated. `Central.cache_put` and `Central.cache_delete` are two functions to help with this.
+Any time an ETS is updated this needs to be propagated. `Teiserver.cache_put` and `Teiserver.cache_delete` are two functions to help with this.
 
 ##### PID store
 Various services place their PID into ETS, this should be changed to be a Registry. Long term we might want to swap to a pool system and things being in a Registry will make this easier.

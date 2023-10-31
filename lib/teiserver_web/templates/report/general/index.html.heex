@@ -189,7 +189,7 @@
     <h4>Other</h4>
   </div>
 
-  <%= if allow?(@current_user, Teiserver.Account.AccoladeReport.permissions()) and Application.get_env(:central, Teiserver)[:enable_accolade_mode] == true do %>
+  <%= if allow?(@current_user, Teiserver.Account.AccoladeReport.permissions()) and Application.get_env(:teiserver, Teiserver)[:enable_accolade_mode] == true do %>
     <%= central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.AccoladeReport.icon(),

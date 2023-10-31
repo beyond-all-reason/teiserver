@@ -1,6 +1,6 @@
 defmodule Teiserver.Logging.AuditLogLib do
   @moduledoc false
-  use CentralWeb, :library
+  use TeiserverWeb, :library
 
   alias Teiserver.Logging.AuditLog
 
@@ -13,12 +13,12 @@ defmodule Teiserver.Logging.AuditLogLib do
   @spec add_audit_types([String.t()]) :: :ok
   def add_audit_types(types) do
     new_types = list_audit_types() ++ types
-    Central.store_put(:application_metadata_cache, "audit_types", new_types)
+    Teiserver.store_put(:application_metadata_cache, "audit_types", new_types)
   end
 
   @spec list_audit_types :: [String.t()]
   def list_audit_types() do
-    Central.cache_get(:application_metadata_cache, "audit_types") || []
+    Teiserver.cache_get(:application_metadata_cache, "audit_types") || []
   end
 
   # Queries

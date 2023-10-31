@@ -1,5 +1,5 @@
 defmodule Teiserver.Account.BadgeType do
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "teiserver_account_badge_types" do
     field :name, :string

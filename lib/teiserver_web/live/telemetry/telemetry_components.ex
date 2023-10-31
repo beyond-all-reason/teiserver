@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Telemetry.TelemetryComponents do
   @moduledoc false
-  use CentralWeb, :component
+  use TeiserverWeb, :component
   import TeiserverWeb.NavComponents, only: [sub_menu_button: 1]
 
   @doc """

@@ -1,11 +1,11 @@
 defmodule Teiserver.Chat.LobbyMessage do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "teiserver_lobby_messages" do
     field :content, :string
     field :inserted_at, :utc_datetime
-    belongs_to :user, Central.Account.User
+    belongs_to :user, Teiserver.Account.User
     belongs_to :match, Teiserver.Battle.Match
   end
 

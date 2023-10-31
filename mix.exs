@@ -1,9 +1,9 @@
-defmodule Central.MixProject do
+defmodule Teiserver.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :central,
+      app: :teiserver,
       version: "0.1.0",
       elixir: ">= 1.12.2",
       description: description(),
@@ -32,7 +32,7 @@ defmodule Central.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      mod: {Central.Application, []},
+      mod: {Teiserver.Application, []},
       extra_applications: [:logger, :runtime_tools, :os_mon, :iex]
     ]
   end

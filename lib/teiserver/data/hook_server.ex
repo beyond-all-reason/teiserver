@@ -52,7 +52,7 @@ defmodule Teiserver.HookServer do
 
   def handle_info({:account_hooks, event, payload, _reason}, state) do
     start_completed =
-      Central.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") == true
+      Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") == true
 
     event = if start_completed, do: event, else: nil
 
@@ -110,7 +110,7 @@ defmodule Teiserver.HookServer do
   @impl true
   @spec init(any) :: {:ok, %{}}
   def init(_) do
-    if Application.get_env(:central, Teiserver)[:enable_hooks] do
+    if Application.get_env(:teiserver, Teiserver)[:enable_hooks] do
       :ok = PubSub.subscribe(Teiserver.PubSub, "account_hooks")
       :ok = PubSub.subscribe(Teiserver.PubSub, "global_moderation")
       :ok = PubSub.subscribe(Teiserver.PubSub, "application")

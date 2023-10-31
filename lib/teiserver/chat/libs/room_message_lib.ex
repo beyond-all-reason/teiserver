@@ -1,5 +1,5 @@
 defmodule Teiserver.Chat.RoomMessageLib do
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.Chat.RoomMessage
 
   # Functions

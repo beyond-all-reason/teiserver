@@ -1,5 +1,5 @@
 defmodule Teiserver.Game.UserAchievementLib do
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.Game.UserAchievement
 
   # Functions

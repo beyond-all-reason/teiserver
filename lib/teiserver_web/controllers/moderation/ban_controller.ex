@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Moderation.BanController do
   @moduledoc false
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.Logging
   alias Teiserver.{Account, Moderation}

@@ -1,5 +1,5 @@
 defmodule Teiserver.Game.RatingLogLib do
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.Game.RatingLog
 
   # Functions

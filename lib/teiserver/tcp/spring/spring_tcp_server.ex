@@ -17,9 +17,9 @@ defmodule Teiserver.SpringTcpServer do
         ]
   def get_ssl_opts() do
     {certfile, cacertfile, keyfile} = {
-      Application.get_env(:central, Teiserver)[:certs][:certfile],
-      Application.get_env(:central, Teiserver)[:certs][:cacertfile],
-      Application.get_env(:central, Teiserver)[:certs][:keyfile]
+      Application.get_env(:teiserver, Teiserver)[:certs][:certfile],
+      Application.get_env(:teiserver, Teiserver)[:certs][:cacertfile],
+      Application.get_env(:teiserver, Teiserver)[:certs][:keyfile]
     }
 
     [
@@ -51,7 +51,7 @@ defmodule Teiserver.SpringTcpServer do
         ssl_opts ++
           get_standard_tcp_opts() ++
           [
-            port: Application.get_env(:central, Teiserver)[:ports][:tls]
+            port: Application.get_env(:teiserver, Teiserver)[:ports][:tls]
           ],
         __MODULE__,
         []
@@ -62,7 +62,7 @@ defmodule Teiserver.SpringTcpServer do
         :ranch_tcp,
         get_standard_tcp_opts() ++
           [
-            port: Application.get_env(:central, Teiserver)[:ports][:tcp]
+            port: Application.get_env(:teiserver, Teiserver)[:ports][:tcp]
           ],
         __MODULE__,
         []
@@ -80,7 +80,7 @@ defmodule Teiserver.SpringTcpServer do
   def init(ref, socket, transport) do
     # If we've not started up yet, lets just delay for a moment
     # for some of the stuff to get sorted
-    if Central.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") != true do
+    if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") != true do
       :timer.sleep(1000)
     end
 
@@ -94,7 +94,7 @@ defmodule Teiserver.SpringTcpServer do
     :ranch.accept_ack(ref)
     transport.setopts(socket, [{:active, true}])
 
-    heartbeat = Application.get_env(:central, Teiserver)[:heartbeat_interval]
+    heartbeat = Application.get_env(:teiserver, Teiserver)[:heartbeat_interval]
 
     if heartbeat do
       :timer.send_interval(heartbeat, self(), :heartbeat)
@@ -118,9 +118,9 @@ defmodule Teiserver.SpringTcpServer do
       socket: socket,
       transport: transport,
       protocol_in:
-        Application.get_env(:central, Teiserver)[:default_spring_protocol].protocol_in(),
+        Application.get_env(:teiserver, Teiserver)[:default_spring_protocol].protocol_in(),
       protocol_out:
-        Application.get_env(:central, Teiserver)[:default_spring_protocol].protocol_out(),
+        Application.get_env(:teiserver, Teiserver)[:default_spring_protocol].protocol_out(),
       ip: ip,
 
       # Client state
@@ -295,7 +295,7 @@ defmodule Teiserver.SpringTcpServer do
   def handle_info(:heartbeat, state) do
     diff = System.system_time(:second) - state.last_msg
 
-    if diff > Application.get_env(:central, Teiserver)[:heartbeat_timeout] do
+    if diff > Application.get_env(:teiserver, Teiserver)[:heartbeat_timeout] do
       SpringOut.reply(:disconnect, "Heartbeat", nil, state)
 
       if state.username do

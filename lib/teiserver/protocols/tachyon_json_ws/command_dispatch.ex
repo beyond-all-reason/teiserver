@@ -11,15 +11,15 @@ defmodule Teiserver.Tachyon.CommandDispatch do
 
   defp get_dispatch_handler(command) do
     # Get the relevant handler, if none found the no_command fallback will handle it
-    Central.store_get(:tachyon_dispatches, command) ||
-      Central.store_get(:tachyon_dispatches, "no_command")
+    Teiserver.store_get(:tachyon_dispatches, command) ||
+      Teiserver.store_get(:tachyon_dispatches, "no_command")
   end
 
   @spec build_dispatch_cache :: :ok
   def build_dispatch_cache do
     # Get every single module in that namespace
     # if it has a dispatch_handlers function we make use of it
-    {:ok, module_list} = :application.get_key(:central, :modules)
+    {:ok, module_list} = :application.get_key(:teiserver, :modules)
     lookup = module_list
       |> Enum.filter(fn m ->
         m |> Module.split |> Enum.take(3) == ["Teiserver", "Tachyon", "Handlers"]
@@ -32,20 +32,20 @@ defmodule Teiserver.Tachyon.CommandDispatch do
         Map.merge(acc, module.dispatch_handlers())
       end)
 
-    old = Central.store_get(:tachyon_dispatches, "all") || []
+    old = Teiserver.store_get(:tachyon_dispatches, "all") || []
 
     # Store all keys, we'll use it later for removing old ones
-    Central.store_put(:tachyon_dispatches, "all", Map.keys(lookup))
+    Teiserver.store_put(:tachyon_dispatches, "all", Map.keys(lookup))
 
     # Now store our lookups
     lookup
     |> Enum.each(fn {key, func} ->
-      Central.store_put(:tachyon_dispatches, key, func)
+      Teiserver.store_put(:tachyon_dispatches, key, func)
     end)
 
     # Special case
     no_command_func = &Teiserver.Tachyon.Handlers.System.NoCommandErrorRequest.execute/3
-    Central.store_put(:tachyon_dispatches, "no_command", no_command_func)
+    Teiserver.store_put(:tachyon_dispatches, "no_command", no_command_func)
 
     # Delete out-dated keys
     old
@@ -53,7 +53,7 @@ defmodule Teiserver.Tachyon.CommandDispatch do
       Map.has_key?(lookup, old_key)
     end)
     |> Enum.each(fn old_key ->
-      Central.store_delete(:tachyon_dispatches, old_key)
+      Teiserver.store_delete(:tachyon_dispatches, old_key)
     end)
 
     :ok

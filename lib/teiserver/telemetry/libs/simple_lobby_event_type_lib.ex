@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.SimpleLobbyEventTypeLib do
   @moduledoc false
-  use CentralWeb, :library_newform
+  use TeiserverWeb, :library_newform
   alias Teiserver.Telemetry.{SimpleLobbyEventType, SimpleLobbyEventTypeQueries}
 
   # Helper function
@@ -8,7 +8,7 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventTypeLib do
   def get_or_add_simple_lobby_event_type(name) do
     name = String.trim(name)
 
-    Central.cache_get_or_store(:telemetry_simple_lobby_event_types_cache, name, fn ->
+    Teiserver.cache_get_or_store(:telemetry_simple_lobby_event_types_cache, name, fn ->
       query = SimpleLobbyEventTypeQueries.query_simple_lobby_event_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
       case Repo.all(query) do
         [] ->

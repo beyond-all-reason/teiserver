@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Admin.LobbyController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   alias Teiserver.{Chat, Battle}

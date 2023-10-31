@@ -1,6 +1,6 @@
 defmodule Teiserver.Logging.LoggingTestLib do
   @moduledoc false
-  use CentralWeb, :library
+  use TeiserverWeb, :library
 
   alias Teiserver.Logging.PageViewLog
   alias Teiserver.Logging.PageViewLogLib

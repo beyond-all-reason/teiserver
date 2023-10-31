@@ -5,14 +5,14 @@ defmodule Teiserver.AccountTest do
   alias Teiserver.Account.AccountTestLib
 
   describe "users" do
-    alias Central.Account.User
+    alias Teiserver.Account.User
 
     @valid_attrs %{
       colour: "#AA0000",
       icon: "fa-regular fa-home",
       name: "some name",
       permissions: [],
-      email: "some email",
+      email: "AnEmailAddress@email.com",
       password: "some password"
     }
     @update_attrs %{

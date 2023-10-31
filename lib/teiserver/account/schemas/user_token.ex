@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.UserToken do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "account_user_tokens" do
     field :value, :string
@@ -10,7 +10,7 @@ defmodule Teiserver.Account.UserToken do
     field :expires, :utc_datetime
     field :last_used, :utc_datetime
 
-    belongs_to :user, Central.Account.User
+    belongs_to :user, Teiserver.Account.User
 
     timestamps()
   end

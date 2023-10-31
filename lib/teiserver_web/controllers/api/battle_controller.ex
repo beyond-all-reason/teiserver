@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.API.BattleController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
   # alias Teiserver.Battle
 
   plug(Bodyguard.Plug.Authorize,

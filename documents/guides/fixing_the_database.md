@@ -52,7 +52,7 @@ exit
 sudo systemctl start central.service
 
 # Run the migrations
-centralapp eval "Central.Release.migrate"
+centralapp eval "Teiserver.Release.migrate"
 
 # Restart the app so it can build the initial data needed for various things
 sudo systemctl restart central.service

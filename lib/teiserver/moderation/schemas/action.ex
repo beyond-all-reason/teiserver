@@ -1,10 +1,10 @@
 defmodule Teiserver.Moderation.Action do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
   alias Teiserver.Helper.TimexHelper
 
   schema "moderation_actions" do
-    belongs_to :target, Central.Account.User
+    belongs_to :target, Teiserver.Account.User
     field :reason, :string
     field :appeal_status, :string
     field :notes, :string

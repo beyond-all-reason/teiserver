@@ -1,6 +1,6 @@
 defmodule Teiserver.Config.SiteConfig do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   @primary_key false
   schema "config_site" do

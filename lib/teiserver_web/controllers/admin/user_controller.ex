@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Admin.UserController do
   @moduledoc false
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.{Account, Chat, Game}
   alias Teiserver.Game.MatchRatingLib
-  alias Central.Account.User
+  alias Teiserver.Account.User
   alias Teiserver.Account.{UserLib, RoleLib}
   alias Teiserver.Battle.BalanceLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, float_parse: 1]
@@ -136,7 +136,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def show(conn, %{"id" => id}) do
     user = Account.get_user(id)
 
-    case Central.Account.UserLib.has_access(user, conn) do
+    case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         user
         |> UserLib.make_favourite()
@@ -212,7 +212,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def edit(conn, %{"id" => id}) do
     user = Account.get_user(id)
 
-    case Central.Account.UserLib.has_access(user, conn) do
+    case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         changeset = Account.change_user(user)
 
@@ -302,7 +302,7 @@ defmodule TeiserverWeb.Admin.UserController do
         "roles" => new_roles
       })
 
-    case Central.Account.UserLib.has_access(user, conn) do
+    case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         change_result =
           cond do
@@ -340,7 +340,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def reset_password(conn, %{"id" => id}) do
     user = Account.get_user!(id)
 
-    case Central.Account.UserLib.has_access(user, conn) do
+    case Teiserver.Account.UserLib.has_access(user, conn) do
       {false, :not_found} ->
         conn
         |> put_flash(:danger, "Unable to find that user")
@@ -353,7 +353,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
       {true, _} ->
         Teiserver.Account.Emails.password_reset(user)
-        |> Central.Mailer.deliver_now()
+        |> Teiserver.Mailer.deliver_now()
 
         conn
         |> put_flash(:success, "Password reset email sent to user")
@@ -365,7 +365,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def ratings(conn, %{"id" => id} = params) do
     user = Account.get_user(id)
 
-    case Central.Account.UserLib.has_access(user, conn) do
+    case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         filter = params["filter"]
         filter_type_id = MatchRatingLib.rating_type_name_lookup()[filter]
@@ -429,7 +429,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def ratings_form(conn, %{"id" => id}) do
     user = Account.get_user(id)
 
-    case Central.Account.UserLib.has_access(user, conn) do
+    case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         ratings =
           Account.list_ratings(
@@ -461,7 +461,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def ratings_post(conn, %{"id" => id} = params) do
     user = Account.get_user(id)
 
-    case Central.Account.UserLib.has_access(user, conn) do
+    case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         changes =
           MatchRatingLib.rating_type_list()
@@ -550,7 +550,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def perform_action(conn, %{"id" => id, "action" => action}) do
     user = Account.get_user!(id)
 
-    case Central.Account.UserLib.has_access(user, conn) do
+    case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         result =
           case action do
@@ -582,7 +582,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def smurf_search(conn, %{"id" => id}) do
     user = Account.get_user!(id)
 
-    case Central.Account.UserLib.has_access(user, conn) do
+    case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         all_user_keys =
           Account.list_smurf_keys(
@@ -693,8 +693,8 @@ defmodule TeiserverWeb.Admin.UserController do
     origin_user = Account.get_user!(origin_id)
 
     access = {
-      Central.Account.UserLib.has_access(smurf_user, conn),
-      Central.Account.UserLib.has_access(origin_user, conn)
+      Teiserver.Account.UserLib.has_access(smurf_user, conn),
+      Teiserver.Account.UserLib.has_access(origin_user, conn)
     }
 
     case access do
@@ -742,7 +742,7 @@ defmodule TeiserverWeb.Admin.UserController do
     user = Account.get_user!(id)
     origin_user_id = user.smurf_of_id
 
-    case Central.Account.UserLib.has_access(user, conn) do
+    case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         case Account.script_update_user(user, %{"smurf_of_id" => nil}) do
           {:ok, user} ->
@@ -789,8 +789,8 @@ defmodule TeiserverWeb.Admin.UserController do
     to_user = Account.get_user!(to_id)
 
     access = {
-      Central.Account.UserLib.has_access(from_user, conn),
-      Central.Account.UserLib.has_access(to_user, conn)
+      Teiserver.Account.UserLib.has_access(from_user, conn),
+      Teiserver.Account.UserLib.has_access(to_user, conn)
     }
 
     case access do
@@ -814,8 +814,8 @@ defmodule TeiserverWeb.Admin.UserController do
     to_user = Account.get_user!(to_id)
 
     access = {
-      Central.Account.UserLib.has_access(from_user, conn),
-      Central.Account.UserLib.has_access(to_user, conn)
+      Teiserver.Account.UserLib.has_access(from_user, conn),
+      Teiserver.Account.UserLib.has_access(to_user, conn)
     }
 
     case access do
@@ -949,7 +949,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def rename_form(conn, %{"id" => id}) do
     user = Account.get_user(id)
 
-    case Central.Account.UserLib.has_access(user, conn) do
+    case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         conn
         |> assign(:user, user)
@@ -967,7 +967,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def rename_post(conn, %{"id" => id, "new_name" => new_name}) do
     user = Account.get_user(id)
 
-    case Central.Account.UserLib.has_access(user, conn) do
+    case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         admin_action = Teiserver.Account.AuthLib.allow?(conn, "admin.dev")
 
@@ -1025,7 +1025,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def gdpr_clean(conn, %{"id" => id}) do
     user = Account.get_user_by_id(id)
 
-    case Central.Account.UserLib.has_access(user, conn) do
+    case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         new_user = Map.merge(user, %{
           country: "??"

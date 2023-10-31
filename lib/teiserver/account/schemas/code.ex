@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.Code do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "account_codes" do
     field :value, :string
@@ -9,7 +9,7 @@ defmodule Teiserver.Account.Code do
     field :metadata, :map
     field :expires, :utc_datetime
 
-    belongs_to :user, Central.Account.User
+    belongs_to :user, Teiserver.Account.User
 
     timestamps()
   end

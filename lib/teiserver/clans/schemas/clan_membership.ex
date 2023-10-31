@@ -1,11 +1,11 @@
 defmodule Teiserver.Clans.ClanMembership do
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   @primary_key false
   schema "teiserver_clan_memberships" do
     field :role, :string
 
-    belongs_to :user, Central.Account.User, primary_key: true
+    belongs_to :user, Teiserver.Account.User, primary_key: true
     belongs_to :clan, Teiserver.Clans.Clan, primary_key: true
 
     timestamps()

@@ -88,7 +88,7 @@
   ) %>
 <% end %>
 
-<%= if allow?(@current_user, Teiserver.Account.AccoladeReport.permissions()) and Application.get_env(:central, Teiserver)[:enable_accolade_mode] == true do %>
+<%= if allow?(@current_user, Teiserver.Account.AccoladeReport.permissions()) and Application.get_env(:teiserver, Teiserver)[:enable_accolade_mode] == true do %>
   <%= central_component("section_menu_button",
     name: "accolades",
     label: "Accolades",

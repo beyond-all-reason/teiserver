@@ -209,11 +209,11 @@ defmodule Teiserver.Protocols.Spring.UserIn do
   def do_handle("get_token_by_email", data, msg_id, state) do
     case String.split(data, "\t") do
       [email, plain_text_password] ->
-        user = Central.Account.get_user_by_email(email)
+        user = Teiserver.Account.get_user_by_email(email)
 
         response =
           if user do
-            Central.Account.User.verify_password(plain_text_password, user.password)
+            Teiserver.Account.User.verify_password(plain_text_password, user.password)
           else
             false
           end
@@ -242,11 +242,11 @@ defmodule Teiserver.Protocols.Spring.UserIn do
   def do_handle("get_token_by_name", data, msg_id, state) do
     case String.split(data, "\t") do
       [name, plain_text_password] ->
-        user = Central.Account.get_user_by_name(name)
+        user = Teiserver.Account.get_user_by_name(name)
 
         response =
           if user do
-            Central.Account.User.verify_password(plain_text_password, user.password)
+            Teiserver.Account.User.verify_password(plain_text_password, user.password)
           else
             false
           end

@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Account.GeneralController do
   @moduledoc false
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.Account
 
@@ -43,7 +43,7 @@ defmodule TeiserverWeb.Account.GeneralController do
         Map.drop(user_params, ["name"])
       end
 
-    case Central.Account.update_user(user, user_params, :user_form) do
+    case Account.update_user_user_form(user, user_params) do
       {:ok, _user} ->
         conn
         |> put_flash(:info, "Account details updated successfully.")

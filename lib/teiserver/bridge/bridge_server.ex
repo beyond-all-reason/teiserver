@@ -18,7 +18,7 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   @spec get_bridge_userid() :: T.userid()
   def get_bridge_userid() do
-    Central.cache_get(:application_metadata_cache, "teiserver_bridge_userid")
+    Teiserver.cache_get(:application_metadata_cache, "teiserver_bridge_userid")
   end
 
   @spec call_bridge(any()) :: any()
@@ -76,7 +76,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   @impl true
   def handle_info(:begin, _state) do
     state =
-      if Central.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
+      if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
            true do
         pid = self()
 
@@ -245,7 +245,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   # pid = Teiserver.Bridge.BridgeServer.get_bridge_pid()
   # send(pid, :gdt_check)
   def handle_info(:gdt_check, state) do
-    Api.list_guild_threads(Application.get_env(:central, DiscordBridgeBot)[:guild_id])
+    Api.list_guild_threads(Application.get_env(:teiserver, DiscordBridgeBot)[:guild_id])
 
     # Api.list_joined_private_archived_threads(channel_id)
     # When a thread in 👇｜game-design-team has gone 48 hours without any new messages:
@@ -294,7 +294,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   defp do_begin() do
     Logger.debug("Starting up Bridge server")
     account = get_bridge_account()
-    Central.cache_put(:application_metadata_cache, "teiserver_bridge_userid", account.id)
+    Teiserver.cache_put(:application_metadata_cache, "teiserver_bridge_userid", account.id)
     {:ok, user, client} = CacheUser.internal_client_login(account.id)
 
     state = %{
@@ -365,8 +365,8 @@ defmodule Teiserver.Bridge.BridgeServer do
       :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
     end)
 
-    Central.store_put(:application_metadata_cache, :discord_room_lookup, room_lookup)
-    Central.store_put(:application_metadata_cache, :discord_channel_lookup, channel_lookup)
+    Teiserver.store_put(:application_metadata_cache, :discord_room_lookup, room_lookup)
+    Teiserver.store_put(:application_metadata_cache, :discord_channel_lookup, channel_lookup)
 
     Map.merge(state, %{
       channel_lookup: channel_lookup,
@@ -391,7 +391,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     |> String.replace(Map.keys(emoticon_map), fn text -> emoticon_map[text] end)
   end
 
-  @spec get_bridge_account() :: Central.Account.CacheUser.t()
+  @spec get_bridge_account() :: Teiserver.Account.CacheUser.t()
   def get_bridge_account() do
     user =
       Account.get_user(nil,
@@ -420,7 +420,7 @@ defmodule Teiserver.Bridge.BridgeServer do
           })
 
         Account.update_user_stat(account.id, %{
-          country_override: Application.get_env(:central, Teiserver)[:server_flag]
+          country_override: Application.get_env(:teiserver, Teiserver)[:server_flag]
         })
 
         CacheUser.recache_user(account.id)
@@ -473,7 +473,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     end
 
     Logger.metadata(request_id: "BridgeServer")
-    Central.cache_put(:application_metadata_cache, "teiserver_bridge_pid", self())
+    Teiserver.cache_put(:application_metadata_cache, "teiserver_bridge_pid", self())
 
     Horde.Registry.register(
       Teiserver.ServerRegistry,
@@ -486,6 +486,6 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   @spec get_bridge_pid() :: pid
   defp get_bridge_pid() do
-    Central.cache_get(:application_metadata_cache, "teiserver_bridge_pid")
+    Teiserver.cache_get(:application_metadata_cache, "teiserver_bridge_pid")
   end
 end

@@ -1,5 +1,5 @@
 defmodule Teiserver.Game.AchievementType do
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "teiserver_achievement_types" do
     field :name, :string

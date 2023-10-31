@@ -1,9 +1,9 @@
 defmodule Teiserver.Account.AccountTestLib do
   @moduledoc false
-  use CentralWeb, :library
+  use TeiserverWeb, :library
 
-  # alias Central.Account
-  alias Central.Account.User
+  # alias Teiserver.Account
+  alias Teiserver.Account.User
 
   def user_fixture(data \\ %{}) do
     r = :rand.uniform(999_999_999)

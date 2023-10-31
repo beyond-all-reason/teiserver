@@ -1,6 +1,6 @@
 defmodule Teiserver.Microblog.TagQueries do
   @moduledoc false
-  use CentralWeb, :queries
+  use TeiserverWeb, :queries
   alias Teiserver.Microblog.Tag
 
   # Queries

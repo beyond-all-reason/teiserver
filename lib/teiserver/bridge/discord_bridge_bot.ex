@@ -45,10 +45,10 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
          _ws}
       ) do
     room = bridge_channel_to_room(channel_id)
-    dm_sender = Central.cache_get(:discord_bridge_dm_cache, to_string(channel_id))
+    dm_sender = Teiserver.cache_get(:discord_bridge_dm_cache, to_string(channel_id))
 
     cond do
-      author.username == Application.get_env(:central, DiscordBridgeBot)[:bot_name] ->
+      author.username == Application.get_env(:teiserver, DiscordBridgeBot)[:bot_name] ->
         nil
 
       dm_sender != nil ->
@@ -138,7 +138,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   def new_dm_channel(dm_channel) do
     case dm_channel.recipients do
       [recipient] ->
-        Central.cache_put(:discord_bridge_dm_cache, dm_channel.id, recipient["id"])
+        Teiserver.cache_put(:discord_bridge_dm_cache, dm_channel.id, recipient["id"])
         Logger.info("Discord DM Channel #{dm_channel.id} set to #{recipient["id"]}")
         nil
 
@@ -162,7 +162,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       end
 
     if post_to_discord do
-      host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
+      host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
       url = "https://#{host}/telemetry/infolog/#{infolog.id}"
 
       message =
@@ -192,7 +192,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     if channel do
       report = Moderation.get_report!(report.id, preload: [:reporter, :target])
 
-      host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
+      host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
       url = "https://#{host}/moderation/report?target_id=#{report.target_id}"
 
       match_icon =
@@ -290,7 +290,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   end
 
   defp bridge_channel_to_room(channel_id) do
-    lookup_table = Central.store_get(:application_metadata_cache, :discord_room_lookup)
+    lookup_table = Teiserver.store_get(:application_metadata_cache, :discord_room_lookup)
     lookup_table[channel_id]
   end
 

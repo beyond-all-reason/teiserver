@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.ComplexMatchEventType do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "telemetry_complex_match_event_types" do
     field :name, :string

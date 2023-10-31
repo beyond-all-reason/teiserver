@@ -7,7 +7,7 @@ defmodule Teiserver.Game.Queue do
   Conditions:
 
   """
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "teiserver_game_queues" do
     field :name, :string

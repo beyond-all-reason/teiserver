@@ -110,7 +110,7 @@ defmodule Teiserver.Account.FriendRequestLib do
 
   @spec list_incoming_friend_requests_of_userid(T.userid) :: [T.userid]
   def list_incoming_friend_requests_of_userid(userid) do
-    Central.cache_get_or_store(:account_incoming_friend_request_cache, userid, fn ->
+    Teiserver.cache_get_or_store(:account_incoming_friend_request_cache, userid, fn ->
       Account.list_friend_requests(
         where: [
           to_user_id: userid
@@ -125,7 +125,7 @@ defmodule Teiserver.Account.FriendRequestLib do
 
   @spec list_outgoing_friend_requests_of_userid(T.userid) :: [T.userid]
   def list_outgoing_friend_requests_of_userid(userid) do
-    Central.cache_get_or_store(:account_outgoing_friend_request_cache, userid, fn ->
+    Teiserver.cache_get_or_store(:account_outgoing_friend_request_cache, userid, fn ->
       Account.list_friend_requests(
         where: [
           from_user_id: userid

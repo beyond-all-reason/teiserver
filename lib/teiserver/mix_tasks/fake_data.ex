@@ -21,7 +21,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   @spec run(list()) :: :ok
   def run(_args) do
-    if Application.get_env(:central, Teiserver)[:enable_hailstorm] do
+    if Application.get_env(:teiserver, Teiserver)[:enable_hailstorm] do
       # Start by rebuilding the database
       Mix.Task.run("ecto.reset")
 
@@ -63,6 +63,22 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     user
   end
 
+  @doc """
+  Uses :application_metadata_cache store to generate a random username
+  based on the keys random_names_1, random_names_2 and random_names_3
+  if you override these keys with an empty list you can generate shorter names
+  """
+  @spec generate_throwaway_name() :: String.t()
+  def generate_throwaway_name do
+    [
+      Teiserver.store_get(:application_metadata_cache, "random_names_1"),
+      Teiserver.store_get(:application_metadata_cache, "random_names_2"),
+      Teiserver.store_get(:application_metadata_cache, "random_names_3")
+    ]
+    |> Enum.filter(fn l -> l != [] end)
+    |> Enum.map_join(" ", fn l -> Enum.random(l) |> String.capitalize() end)
+  end
+
   defp make_accounts() do
     root_user = add_root_user()
 
@@ -74,7 +90,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
           minutes = :rand.uniform(24 * 60)
 
           %{
-            name: Central.Account.generate_throwaway_name() |> String.replace(" ", ""),
+            name: generate_throwaway_name() |> String.replace(" ", ""),
             email: UUID.uuid1(),
             password: root_user.password,
             permissions: ["admin.dev.developer"],
@@ -96,7 +112,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       |> List.flatten()
 
     Ecto.Multi.new()
-    |> Ecto.Multi.insert_all(:insert_all, Central.Account.User, new_users)
+    |> Ecto.Multi.insert_all(:insert_all, Teiserver.Account.User, new_users)
     |> Teiserver.Repo.transaction()
   end
 

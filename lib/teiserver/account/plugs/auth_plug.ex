@@ -2,10 +2,10 @@ defmodule Teiserver.Account.AuthPlug do
   @moduledoc false
   import Plug.Conn
 
-  alias Central.Account
+  alias Teiserver.Account
   alias Teiserver.Account.Guardian
   require Logger
-  use CentralWeb, :verified_routes
+  use TeiserverWeb, :verified_routes
 
   def init(_opts) do
     # Keyword.fetch!(opts, :repo)
@@ -131,7 +131,7 @@ defmodule Teiserver.Account.AuthPlug do
         _ -> nil
       end
     end)
-    |> Central.General.CachePlug.live_call
+    |> Teiserver.Plugs.CachePlug.live_call
   end
 
   defp signed_in_path(_conn), do: ~p"/"

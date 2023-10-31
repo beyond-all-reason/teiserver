@@ -41,7 +41,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       |> assign(:view_colour, Lobby.colours())
       |> assign(:lobbies, lobbies)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, :standard_live}}
+    {:ok, socket}
   end
 
   @impl true

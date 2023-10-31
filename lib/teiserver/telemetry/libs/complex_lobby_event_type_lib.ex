@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.ComplexLobbyEventTypeLib do
   @moduledoc false
-  use CentralWeb, :library_newform
+  use TeiserverWeb, :library_newform
   alias Teiserver.Telemetry.{ComplexLobbyEventType, ComplexLobbyEventTypeQueries}
 
   # Helper function
@@ -8,7 +8,7 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventTypeLib do
   def get_or_add_complex_lobby_event_type(name) do
     name = String.trim(name)
 
-    Central.cache_get_or_store(:telemetry_complex_lobby_event_types_cache, name, fn ->
+    Teiserver.cache_get_or_store(:telemetry_complex_lobby_event_types_cache, name, fn ->
       query = ComplexLobbyEventTypeQueries.query_complex_lobby_event_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
       case Repo.all(query) do
         [] ->

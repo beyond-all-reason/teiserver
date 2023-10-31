@@ -5,7 +5,7 @@ defmodule Teiserver.SpringRawTest do
     only: [raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1, new_user: 0]
 
   alias Teiserver.Account.UserCacheLib
-  alias Central.Account
+  alias Teiserver.Account
 
   setup do
     %{socket: socket} = raw_setup()
@@ -180,7 +180,7 @@ defmodule Teiserver.SpringRawTest do
     user = new_user()
 
     # Update the login count
-    Central.cache_put(:teiserver_login_count, user.id, 9999)
+    Teiserver.cache_put(:teiserver_login_count, user.id, 9999)
 
     # Welcome message
     _recv_raw(socket)

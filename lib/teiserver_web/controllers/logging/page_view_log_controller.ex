@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Logging.PageViewLogController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.Logging
   alias Teiserver.Helper.TimexHelper

@@ -1,6 +1,6 @@
 defmodule Teiserver.EmailHelper do
   @moduledoc false
-  alias Central.{Mailer}
+  alias Teiserver.Mailer
   alias Teiserver.Config
   alias Bamboo.Email
   alias Teiserver.Helper.TimexHelper
@@ -18,7 +18,7 @@ defmodule Teiserver.EmailHelper do
 
   def do_new_user(user) do
     stats = Teiserver.Account.get_user_stat_data(user.id)
-    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     website_url = "https://#{host}"
     verification_code = stats["verification_code"]
 
@@ -32,8 +32,8 @@ defmodule Teiserver.EmailHelper do
 
     message_id = "<#{UUID.uuid4()}@#{host}>"
 
-    game_name = Application.get_env(:central, Teiserver)[:game_name]
-    discord = Application.get_env(:central, Teiserver)[:discord]
+    game_name = Application.get_env(:teiserver, Teiserver)[:game_name]
+    discord = Application.get_env(:teiserver, Teiserver)[:discord]
 
     html_body = """
     <p>Welcome to #{game_name}.</p>
@@ -69,6 +69,6 @@ defmodule Teiserver.EmailHelper do
     |> Email.put_header("Message-Id", message_id)
     |> Email.html_body(html_body)
     |> Email.text_body(text_body)
-    |> Central.Mailer.deliver_now()
+    |> Teiserver.Mailer.deliver_now()
   end
 end

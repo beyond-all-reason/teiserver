@@ -1,17 +1,17 @@
 defmodule Teiserver.Moderation.Proposal do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "moderation_proposals" do
-    belongs_to :proposer, Central.Account.User
-    belongs_to :target, Central.Account.User
+    belongs_to :proposer, Teiserver.Account.User
+    belongs_to :target, Teiserver.Account.User
     belongs_to :action, Teiserver.Moderation.Action
 
     field :restrictions, {:array, :string}
     field :reason, :string
     field :duration, :string
 
-    belongs_to :concluder, Central.Account.User
+    belongs_to :concluder, Teiserver.Account.User
     field :conclusion_comments, :string
 
     field :votes_for, :integer

@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Moderation.GeneralController do
   @moduledoc false
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   plug :add_breadcrumb, name: 'Moderation', url: '/moderation'
 

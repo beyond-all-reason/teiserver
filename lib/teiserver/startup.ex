@@ -1,12 +1,44 @@
 defmodule Teiserver.Startup do
   @moduledoc false
-  use CentralWeb, :startup
+  use TeiserverWeb, :startup
   require Logger
   alias Phoenix.PubSub
 
   @spec startup :: :ok
   def startup do
     start_time = System.system_time(:millisecond)
+
+    # Brought over from Central
+    Teiserver.store_put(
+      :application_metadata_cache,
+      "random_names_1",
+      ~w(serene energised humble auspicious decisive exemplary cheerful determined playful spry springy)
+    )
+
+    Teiserver.store_put(:application_metadata_cache, "random_names_2", ~w(
+      maroon cherry rose ruby
+      amber carrot
+      lemon beige
+      mint lime cadmium
+      aqua cerulean
+      lavender indigo
+      magenta amethyst
+    ))
+
+    Teiserver.store_put(
+      :application_metadata_cache,
+      "random_names_3",
+      ~w(hamster gerbil cat dog falcon eagle mole fox tiger panda elephant lion cow dove whale dolphin squid dragon snake platypus badger)
+    )
+
+    add_permission_set("admin", "debug", ~w(debug))
+    add_permission_set("admin", "dev", ~w(developer structure))
+    add_permission_set("admin", "admin", ~w(limited full))
+    add_permission_set("admin", "report", ~w(show update delete report))
+    add_permission_set("admin", "user", ~w(show create update delete report))
+    add_permission_set("admin", "group", ~w(show create update delete report config))
+
+
 
     Teiserver.Logging.Startup.startup()
 
@@ -31,7 +63,7 @@ defmodule Teiserver.Startup do
     Teiserver.Communication.pre_cache_discord_channels()
 
     # Chat stuff
-    Central.Account.UserLib.add_report_restriction_types("Chat", [
+    Teiserver.Account.UserLib.add_report_restriction_types("Chat", [
       "Bridging",
       "Game chat",
       "Room chat",
@@ -39,14 +71,14 @@ defmodule Teiserver.Startup do
     ])
 
     # Lobby interaction
-    Central.Account.UserLib.add_report_restriction_types("Game", [
+    Teiserver.Account.UserLib.add_report_restriction_types("Game", [
       "Low priority",
       "All lobbies",
       "Login",
       "Permanently banned"
     ])
 
-    Central.Account.UserLib.add_report_restriction_types("Other", [
+    Teiserver.Account.UserLib.add_report_restriction_types("Other", [
       "Accolades",
       "Boss",
       "Reporting",
@@ -54,15 +86,24 @@ defmodule Teiserver.Startup do
       "Matchmaking"
     ])
 
-    Central.Account.UserLib.add_report_restriction_types("Warnings", [
+    Teiserver.Account.UserLib.add_report_restriction_types("Warnings", [
       "Warning reminder"
     ])
 
-    Central.Account.UserLib.add_report_restriction_types("Internal", [
+    Teiserver.Account.UserLib.add_report_restriction_types("Internal", [
       "Note"
     ])
 
     add_audit_types([
+      "Account:User password reset",
+      "Account:Failed login",
+      "Account:Created user",
+      "Account:Updated user",
+      "Account:Updated user permissions",
+      "Account:User registration",
+      "Account:Updated report",
+      "Site config:Update value",
+
       "Moderation:Ban enabled",
       "Moderation:Ban disabled",
       "Moderation:Ban updated",
@@ -105,15 +146,15 @@ defmodule Teiserver.Startup do
       ~w(account tester contributor dev streamer donor verified bot moderator)
     )
 
-    Central.store_put(
+    Teiserver.store_put(
       :application_metadata_cache,
       "random_names_3",
       ~w(tick pawn lazarus rocketeer crossbow mace centurion tumbleweed smuggler compass ghost sprinter butler webber platypus hound welder recluse archangel gunslinger sharpshooter umbrella fatboy marauder vanguard razorback titan) ++
         ~w(grunt graverobber aggravator trasher thug bedbug deceiver augur spectre fiend twitcher duck skuttle sumo arbiter manticore termite commando mammoth shiva karganeth catapult behemoth juggernaught)
     )
 
-    Central.cache_put(:lists, :rooms, [])
-    Central.cache_put(:lists, :lobby_policies, [])
+    Teiserver.cache_put(:lists, :rooms, [])
+    Teiserver.cache_put(:lists, :lobby_policies, [])
 
     Teiserver.Data.Matchmaking.pre_cache_queues()
     Teiserver.Game.pre_cache_policies()
@@ -121,14 +162,14 @@ defmodule Teiserver.Startup do
     # Add in achievements
     Teiserver.Game.GenerateAchievementTypes.perform()
 
-    if Application.get_env(:central, Teiserver)[:enable_match_monitor] do
+    if Application.get_env(:teiserver, Teiserver)[:enable_match_monitor] do
       spawn(fn ->
         :timer.sleep(200)
         Teiserver.Battle.start_match_monitor()
       end)
     end
 
-    if Application.get_env(:central, Teiserver)[:enable_coordinator_mode] do
+    if Application.get_env(:teiserver, Teiserver)[:enable_coordinator_mode] do
       spawn(fn ->
         :timer.sleep(200)
         Teiserver.Coordinator.start_coordinator()
@@ -136,15 +177,15 @@ defmodule Teiserver.Startup do
       end)
     end
 
-    if Application.get_env(:central, Teiserver)[:enable_accolade_mode] do
+    if Application.get_env(:teiserver, Teiserver)[:enable_accolade_mode] do
       spawn(fn ->
         :timer.sleep(200)
         Teiserver.Account.AccoladeLib.start_accolade_server()
       end)
     end
 
-    Central.cache_put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
-    Central.cache_put(:application_metadata_cache, "teiserver_full_startup_completed", true)
+    Teiserver.cache_put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
+    Teiserver.cache_put(:application_metadata_cache, "teiserver_full_startup_completed", true)
 
     Teiserver.Account.LoginThrottleServer.startup()
 
@@ -168,6 +209,8 @@ defmodule Teiserver.Startup do
     Teiserver.Telemetry.log_complex_server_event(nil, "Server startup", %{
       time_taken_ms: time_taken
     })
+
+    Teiserver.cache_put(:application_metadata_cache, :node_startup_datetime, Timex.now())
 
     Logger.info("Teiserver startup complete, took #{time_taken}ms")
   end

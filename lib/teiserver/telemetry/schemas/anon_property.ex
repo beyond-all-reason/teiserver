@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.AnonProperty do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   @primary_key false
   schema "telemetry_anon_properties" do

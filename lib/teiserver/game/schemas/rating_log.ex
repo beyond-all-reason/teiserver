@@ -1,9 +1,9 @@
 defmodule Teiserver.Game.RatingLog do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "teiserver_game_rating_logs" do
-    belongs_to :user, Central.Account.User
+    belongs_to :user, Teiserver.Account.User
     belongs_to :rating_type, Teiserver.Game.RatingType
     belongs_to :match, Teiserver.Battle.Match
     field :party_id, :string, default: nil

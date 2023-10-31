@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Moderation.OverwatchComponents do
   @moduledoc false
-  use CentralWeb, :component
+  use TeiserverWeb, :component
   import TeiserverWeb.NavComponents, only: [section_menu_button: 1]
 
   @doc """

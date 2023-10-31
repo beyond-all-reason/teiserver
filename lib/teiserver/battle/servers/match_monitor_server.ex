@@ -29,7 +29,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   @spec get_match_monitor_userid() :: T.userid()
   def get_match_monitor_userid() do
-    Central.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
+    Teiserver.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
   end
 
   @impl true
@@ -50,7 +50,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   @impl true
   def handle_info(:begin, _state) do
     state =
-      if Central.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
+      if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
            true do
         pid = self()
 
@@ -351,7 +351,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   defp do_begin() do
     Logger.debug("Starting up Match monitor server")
     account = get_match_monitor_account()
-    Central.cache_put(:application_metadata_cache, "teiserver_match_monitor_userid", account.id)
+    Teiserver.cache_put(:application_metadata_cache, "teiserver_match_monitor_userid", account.id)
     {:ok, user, client} = CacheUser.internal_client_login(account.id)
 
     rooms = ["autohosts"]
@@ -378,7 +378,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     state
   end
 
-  @spec get_match_monitor_account() :: Central.Account.CacheUser.t()
+  @spec get_match_monitor_account() :: Teiserver.Account.CacheUser.t()
   def get_match_monitor_account() do
     user =
       Account.get_user(nil,
@@ -406,7 +406,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           })
 
         Account.update_user_stat(account.id, %{
-          country_override: Application.get_env(:central, Teiserver)[:server_flag]
+          country_override: Application.get_env(:teiserver, Teiserver)[:server_flag]
         })
 
         CacheUser.recache_user(account.id)

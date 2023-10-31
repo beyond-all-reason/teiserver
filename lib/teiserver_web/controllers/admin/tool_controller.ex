@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Admin.ToolController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   plug(AssignPlug,
     site_menu_active: "admin",

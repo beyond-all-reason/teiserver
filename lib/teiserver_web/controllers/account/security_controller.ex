@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Account.SecurityController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.Account
 
@@ -42,7 +42,7 @@ defmodule TeiserverWeb.Account.SecurityController do
   def update_password(conn, %{"user" => user_params}) do
     user = Account.get_user!(conn.user_id)
 
-    case Central.Account.update_user(user, user_params, :password) do
+    case Account.update_user_password(user, user_params) do
       {:ok, _user} ->
         # User password updated
         Teiserver.CacheUser.set_new_spring_password(user.id, user_params["password"])

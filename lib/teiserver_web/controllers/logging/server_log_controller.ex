@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Logging.ServerLogController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
   alias Teiserver.Logging
   alias Teiserver.Helper.TimexHelper
   alias Teiserver.Logging.{ServerGraphDayLogsTask, GraphMinuteLogsTask}

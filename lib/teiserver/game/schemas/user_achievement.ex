@@ -1,9 +1,9 @@
 defmodule Teiserver.Game.UserAchievement do
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   @primary_key false
   schema "teiserver_user_achievements" do
-    belongs_to :user, Central.Account.User, primary_key: true
+    belongs_to :user, Teiserver.Account.User, primary_key: true
     belongs_to :achievement_type, Teiserver.Game.AchievementType, primary_key: true
 
     field :achieved, :boolean, default: false

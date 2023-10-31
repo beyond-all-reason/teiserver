@@ -32,7 +32,7 @@ defmodule Teiserver.Coordinator do
 
   @spec get_coordinator_userid() :: T.userid()
   def get_coordinator_userid() do
-    Central.cache_get(:application_metadata_cache, "teiserver_coordinator_userid")
+    Teiserver.cache_get(:application_metadata_cache, "teiserver_coordinator_userid")
   end
 
   @spec get_coordinator_pid() :: pid() | nil

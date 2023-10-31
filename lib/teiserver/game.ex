@@ -540,7 +540,7 @@ defmodule Teiserver.Game do
   def get_or_add_rating_type(name) do
     name = String.trim(name)
 
-    Central.cache_get_or_store(:teiserver_game_rating_types, name, fn ->
+    Teiserver.cache_get_or_store(:teiserver_game_rating_types, name, fn ->
       case list_rating_types(search: [name: name], select: [:id], order_by: "ID (Lowest first)") do
         [] ->
           {:ok, rating_type} =

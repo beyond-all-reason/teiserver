@@ -1,6 +1,6 @@
 defmodule Teiserver.Communication.DiscordChannelLib do
   @moduledoc false
-  use CentralWeb, :library_newform
+  use TeiserverWeb, :library_newform
   alias Teiserver.Communication.{DiscordChannel, DiscordChannelQueries}
 
   @spec special_channels() :: [String.t]
@@ -83,7 +83,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   end
 
   def get_discord_channel(discord_channel_name) do
-    Central.cache_get(:discord_channel_cache, discord_channel_name)
+    Teiserver.cache_get(:discord_channel_cache, discord_channel_name)
   end
 
   @doc """
@@ -137,7 +137,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
 
   """
   def delete_discord_channel(%DiscordChannel{} = discord_channel) do
-    Central.cache_delete(:discord_channel_cache, discord_channel.name)
+    Teiserver.cache_delete(:discord_channel_cache, discord_channel.name)
     Repo.delete(discord_channel)
   end
 
@@ -156,13 +156,13 @@ defmodule Teiserver.Communication.DiscordChannelLib do
 
   defp cache_channel({:error, channel}), do: {:error, channel}
   defp cache_channel({:ok, %DiscordChannel{} = channel}) do
-    Central.cache_put(:discord_channel_cache, channel.name, channel)
-    Central.cache_put(:discord_channel_cache, "id:#{channel.channel_id}", channel)
+    Teiserver.cache_put(:discord_channel_cache, channel.name, channel)
+    Teiserver.cache_put(:discord_channel_cache, "id:#{channel.channel_id}", channel)
     {:ok, channel}
   end
   defp cache_channel(%DiscordChannel{} = channel) do
-    Central.cache_put(:discord_channel_cache, channel.name, channel)
-    Central.cache_put(:discord_channel_cache, "id:#{channel.channel_id}", channel)
+    Teiserver.cache_put(:discord_channel_cache, channel.name, channel)
+    Teiserver.cache_put(:discord_channel_cache, "id:#{channel.channel_id}", channel)
     {:ok, channel}
   end
   defp cache_channel(channel), do: channel
@@ -236,6 +236,6 @@ defmodule Teiserver.Communication.DiscordChannelLib do
 
   @spec use_discord?() :: boolean
   def use_discord?() do
-    Application.get_env(:central, Teiserver)[:enable_discord_bridge]
+    Application.get_env(:teiserver, Teiserver)[:enable_discord_bridge]
   end
 end

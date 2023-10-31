@@ -91,7 +91,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         }
       })
 
-    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
 
     Coordinator.send_to_user(senderid, [
@@ -118,7 +118,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         }
       })
 
-    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
 
     msg =
@@ -141,7 +141,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     player_hours = (Map.get(stats, "player_minutes", 0) / 60) |> round
     spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> round
 
-    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     profile_link = "https://#{host}/profile/#{senderid}"
 
     accolades = AccoladeLib.get_player_accolades(senderid)
@@ -240,7 +240,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
             ]
           end
 
-        host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
+        host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
         profile_link = "https://#{host}/profile/#{user.id}"
 
         ratings =
@@ -369,18 +369,18 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       CacheUser.send_direct_message(
         state.userid,
         senderid,
-        "You already have a discord account linked; the discord link is: #{Application.get_env(:central, Teiserver)[:discord]}"
+        "You already have a discord account linked; the discord link is: #{Application.get_env(:teiserver, Teiserver)[:discord]}"
       )
     else
       code = (:rand.uniform(899_999) + 100_000) |> to_string
-      Central.cache_put(:discord_bridge_account_codes, senderid, code)
+      Teiserver.cache_put(:discord_bridge_account_codes, senderid, code)
 
       CacheUser.send_direct_message(state.userid, senderid, [
         @splitter,
         "To link your discord account, message the the discord bot (Teiserver Bridge) with the message",
         "$discord #{senderid}-#{code}",
         "This code will expire after 5 minutes",
-        "The discord link is: #{Application.get_env(:central, Teiserver)[:discord]}"
+        "The discord link is: #{Application.get_env(:teiserver, Teiserver)[:discord]}"
       ])
     end
 
@@ -508,7 +508,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         metadata: %{ip: client.ip}
       })
 
-    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
 
     Coordinator.send_to_user(

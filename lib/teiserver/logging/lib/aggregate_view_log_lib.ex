@@ -1,6 +1,6 @@
 defmodule Teiserver.Logging.AggregateViewLogLib do
   @moduledoc false
-  use CentralWeb, :library
+  use TeiserverWeb, :library
 
   alias Teiserver.Logging.AggregateViewLog
   alias Teiserver.Logging.PageViewLog

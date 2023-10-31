@@ -4,7 +4,7 @@ defmodule Teiserver.Account.RatingLib do
   the module used for balance or ratings.
   """
 
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.Account.{Rating}
   require Logger
 

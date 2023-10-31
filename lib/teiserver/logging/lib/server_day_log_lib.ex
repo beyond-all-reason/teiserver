@@ -1,6 +1,6 @@
 defmodule Teiserver.Logging.ServerDayLogLib do
   @moduledoc false
-  use CentralWeb, :library
+  use TeiserverWeb, :library
 
   alias Teiserver.Logging.ServerDayLog
 

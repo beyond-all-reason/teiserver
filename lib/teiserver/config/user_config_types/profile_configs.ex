@@ -63,7 +63,7 @@ defmodule Teiserver.Config.UserConfigTypes.ProfileConfigs do
       opts: [
         choices: zones
       ],
-      default: Application.get_env(:central, Teiserver.Config)[:defaults].tz
+      default: Application.get_env(:teiserver, Teiserver.Config)[:defaults].tz
     })
 
     add_user_config_type(%{

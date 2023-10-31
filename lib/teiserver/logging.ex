@@ -283,7 +283,7 @@ defmodule Teiserver.Logging do
 
   def get_todays_server_log(recache \\ false) do
     last_time =
-      Central.cache_get(
+      Teiserver.cache_get(
         :application_metadata_cache,
         "teiserver_day_server_metrics_today_last_time"
       )
@@ -299,13 +299,13 @@ defmodule Teiserver.Logging do
     if recache do
       data = Teiserver.Logging.Tasks.PersistServerDayTask.today_so_far()
 
-      Central.cache_put(
+      Teiserver.cache_put(
         :application_metadata_cache,
         "teiserver_day_server_metrics_today_cache",
         data
       )
 
-      Central.cache_put(
+      Teiserver.cache_put(
         :application_metadata_cache,
         "teiserver_day_server_metrics_today_last_time",
         Timex.now()
@@ -313,7 +313,7 @@ defmodule Teiserver.Logging do
 
       data
     else
-      Central.cache_get(:application_metadata_cache, "teiserver_day_server_metrics_today_cache")
+      Teiserver.cache_get(:application_metadata_cache, "teiserver_day_server_metrics_today_cache")
     end
   end
 
@@ -462,7 +462,7 @@ defmodule Teiserver.Logging do
   @spec get_this_months_server_metrics_log(boolean) :: map()
   def get_this_months_server_metrics_log(force_recache \\ false) do
     last_time =
-      Central.cache_get(:application_metadata_cache, "teiserver_month_server_metrics_last_time")
+      Teiserver.cache_get(:application_metadata_cache, "teiserver_month_server_metrics_last_time")
 
     recache =
       cond do
@@ -474,9 +474,9 @@ defmodule Teiserver.Logging do
 
     if recache do
       data = Teiserver.Logging.Tasks.PersistServerMonthTask.month_so_far()
-      Central.cache_put(:application_metadata_cache, "teiserver_month_month_metrics_cache", data)
+      Teiserver.cache_put(:application_metadata_cache, "teiserver_month_month_metrics_cache", data)
 
-      Central.cache_put(
+      Teiserver.cache_put(
         :application_metadata_cache,
         "teiserver_month_server_metrics_last_time",
         Timex.now()
@@ -484,7 +484,7 @@ defmodule Teiserver.Logging do
 
       data
     else
-      Central.cache_get(:application_metadata_cache, "teiserver_month_month_metrics_cache")
+      Teiserver.cache_get(:application_metadata_cache, "teiserver_month_month_metrics_cache")
     end
   end
 
@@ -633,7 +633,7 @@ defmodule Teiserver.Logging do
   @spec get_this_quarters_server_metrics_log(boolean) :: map()
   def get_this_quarters_server_metrics_log(force_recache \\ false) do
     last_time =
-      Central.cache_get(:application_metadata_cache, "teiserver_quarter_server_metrics_last_time")
+      Teiserver.cache_get(:application_metadata_cache, "teiserver_quarter_server_metrics_last_time")
 
     recache =
       cond do
@@ -646,13 +646,13 @@ defmodule Teiserver.Logging do
     if recache do
       data = Teiserver.Logging.Tasks.PersistServerQuarterTask.quarter_so_far()
 
-      Central.cache_put(
+      Teiserver.cache_put(
         :application_metadata_cache,
         "teiserver_quarter_quarter_metrics_cache",
         data
       )
 
-      Central.cache_put(
+      Teiserver.cache_put(
         :application_metadata_cache,
         "teiserver_quarter_server_metrics_last_time",
         Timex.now()
@@ -660,7 +660,7 @@ defmodule Teiserver.Logging do
 
       data
     else
-      Central.cache_get(:application_metadata_cache, "teiserver_quarter_quarter_metrics_cache")
+      Teiserver.cache_get(:application_metadata_cache, "teiserver_quarter_quarter_metrics_cache")
     end
   end
 
@@ -809,7 +809,7 @@ defmodule Teiserver.Logging do
   @spec get_this_years_server_metrics_log(boolean) :: map()
   def get_this_years_server_metrics_log(force_recache \\ false) do
     last_time =
-      Central.cache_get(:application_metadata_cache, "teiserver_year_server_metrics_last_time")
+      Teiserver.cache_get(:application_metadata_cache, "teiserver_year_server_metrics_last_time")
 
     recache =
       cond do
@@ -821,9 +821,9 @@ defmodule Teiserver.Logging do
 
     if recache do
       data = Teiserver.Logging.Tasks.PersistServerYearTask.year_so_far()
-      Central.cache_put(:application_metadata_cache, "teiserver_year_year_metrics_cache", data)
+      Teiserver.cache_put(:application_metadata_cache, "teiserver_year_year_metrics_cache", data)
 
-      Central.cache_put(
+      Teiserver.cache_put(
         :application_metadata_cache,
         "teiserver_year_server_metrics_last_time",
         Timex.now()
@@ -831,7 +831,7 @@ defmodule Teiserver.Logging do
 
       data
     else
-      Central.cache_get(:application_metadata_cache, "teiserver_year_year_metrics_cache")
+      Teiserver.cache_get(:application_metadata_cache, "teiserver_year_year_metrics_cache")
     end
   end
 
@@ -980,7 +980,7 @@ defmodule Teiserver.Logging do
   @spec get_this_weeks_server_metrics_log(boolean) :: map()
   def get_this_weeks_server_metrics_log(force_recache \\ false) do
     last_time =
-      Central.cache_get(:application_metadata_cache, "teiserver_week_server_metrics_last_time")
+      Teiserver.cache_get(:application_metadata_cache, "teiserver_week_server_metrics_last_time")
 
     recache =
       cond do
@@ -992,9 +992,9 @@ defmodule Teiserver.Logging do
 
     if recache do
       data = Teiserver.Logging.Tasks.PersistServerWeekTask.week_so_far()
-      Central.cache_put(:application_metadata_cache, "teiserver_week_week_metrics_cache", data)
+      Teiserver.cache_put(:application_metadata_cache, "teiserver_week_week_metrics_cache", data)
 
-      Central.cache_put(
+      Teiserver.cache_put(
         :application_metadata_cache,
         "teiserver_week_server_metrics_last_time",
         Timex.now()
@@ -1002,7 +1002,7 @@ defmodule Teiserver.Logging do
 
       data
     else
-      Central.cache_get(:application_metadata_cache, "teiserver_week_week_metrics_cache")
+      Teiserver.cache_get(:application_metadata_cache, "teiserver_week_week_metrics_cache")
     end
   end
 
@@ -1145,7 +1145,7 @@ defmodule Teiserver.Logging do
   @spec get_todays_match_log :: map()
   def get_todays_match_log() do
     last_time =
-      Central.cache_get(
+      Teiserver.cache_get(
         :application_metadata_cache,
         "teiserver_day_match_metrics_today_last_time"
       )
@@ -1159,9 +1159,9 @@ defmodule Teiserver.Logging do
 
     if recache do
       data = Teiserver.Logging.Tasks.PersistMatchMonthTask.month_so_far()
-      Central.cache_put(:application_metadata_cache, "teiserver_month_month_metrics_cache", data)
+      Teiserver.cache_put(:application_metadata_cache, "teiserver_month_month_metrics_cache", data)
 
-      Central.cache_put(
+      Teiserver.cache_put(
         :application_metadata_cache,
         "teiserver_month_server_metrics_last_time",
         Timex.now()
@@ -1169,14 +1169,14 @@ defmodule Teiserver.Logging do
 
       data
     else
-      Central.cache_get(:application_metadata_cache, "teiserver_day_match_metrics_today_cache")
+      Teiserver.cache_get(:application_metadata_cache, "teiserver_day_match_metrics_today_cache")
     end
   end
 
   @spec get_this_months_match_metrics_log(boolean) :: map()
   def get_this_months_match_metrics_log(force_recache \\ false) do
     last_time =
-      Central.cache_get(:application_metadata_cache, "teiserver_month_match_metrics_last_time")
+      Teiserver.cache_get(:application_metadata_cache, "teiserver_month_match_metrics_last_time")
 
     recache =
       cond do
@@ -1188,9 +1188,9 @@ defmodule Teiserver.Logging do
 
     if recache do
       data = Teiserver.Logging.Tasks.PersistMatchMonthTask.month_so_far()
-      Central.cache_put(:application_metadata_cache, "teiserver_month_match_metrics_cache", data)
+      Teiserver.cache_put(:application_metadata_cache, "teiserver_month_match_metrics_cache", data)
 
-      Central.cache_put(
+      Teiserver.cache_put(
         :application_metadata_cache,
         "teiserver_month_match_metrics_last_time",
         Timex.now()
@@ -1198,7 +1198,7 @@ defmodule Teiserver.Logging do
 
       data
     else
-      Central.cache_get(:application_metadata_cache, "teiserver_month_match_metrics_cache")
+      Teiserver.cache_get(:application_metadata_cache, "teiserver_month_match_metrics_cache")
     end
   end
 
@@ -1770,6 +1770,10 @@ defmodule Teiserver.Logging do
   # Delegated to helpers
   @spec add_anonymous_audit_log(String.t(), Map.t()) :: Teiserver.Logging.AuditLog.t()
   defdelegate add_anonymous_audit_log(action, details), to: Teiserver.Logging.Helpers
+
+  @spec add_anonymous_audit_log(Plug.Conn.t(), String.t(), Map.t()) ::
+          Teiserver.Logging.AuditLog.t()
+  defdelegate add_anonymous_audit_log(conn, action, details), to: Teiserver.Logging.Helpers
 
   @spec add_audit_log(Plug.Conn.t(), String.t(), Map.t()) :: Teiserver.Logging.AuditLog.t()
   defdelegate add_audit_log(conn, action, details), to: Teiserver.Logging.Helpers

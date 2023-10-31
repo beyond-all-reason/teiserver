@@ -510,7 +510,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
     the_date = Timex.to_datetime(the_date)
 
     battle_minimum_seconds =
-      Application.get_env(:central, Teiserver)[:retention][:battle_minimum_seconds]
+      Application.get_env(:teiserver, Teiserver)[:retention][:battle_minimum_seconds]
 
     Battle.list_matches(
       search: [

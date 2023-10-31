@@ -1,6 +1,6 @@
 defmodule Teiserver.Moderation.ResponseLib do
   @moduledoc false
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.Moderation.Response
 
   # Functions

@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Microblog.RssController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
   alias Teiserver.Microblog
   alias Teiserver.Helper.TimexHelper
 

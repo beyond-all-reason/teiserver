@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     end
 
     test "lists all users - redirect", %{conn: conn} do
-      main_user = Central.Account.get_user_by_name("dud user")
+      main_user = Teiserver.Account.get_user_by_name("dud user")
       conn = get(conn, ~p"/teiserver/admin/user" <> "?s=dud user")
       assert redirected_to(conn) == ~p"/teiserver/admin/user/#{main_user.id}"
     end

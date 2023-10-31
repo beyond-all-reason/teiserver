@@ -8,7 +8,7 @@ defmodule Teiserver.Coordinator.MatchMonitorServerTest do
 
   setup do
     account = CoordinatorServer.get_coordinator_account()
-    Central.cache_put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
+    Teiserver.cache_put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
 
     Teiserver.Battle.start_match_monitor()
     %{socket: hsocket, user: host} = tachyon_auth_setup()

@@ -1,0 +1,61 @@
+<div>
+  <% {fg, bg, _bsname} = Teiserver.Helper.StylingHelper.colours(assigns[:view_colour] || :primary) %>
+  <style type="text/css">
+    @media print {
+      #menu, #header, #navigation {
+        display: none;
+      }
+    }
+
+    #breadcrumb-wrapper {
+      border-bottom: 1px solid <%= fg %> !important;
+      background-color: <%= bg %> !important;
+    }
+    #breadcrumb {
+      background-color: <%= bg %> !important;
+    }
+
+    .nav-tabs .nav-item .active {
+      color: <%= fg %> !important;
+      border-bottom-color: <%= fg %> !important;
+    }
+
+    .line-card a {
+      color: <%= fg %> !important;
+    }
+    .line-card a:hover {
+      background-color: <%= bg %> !important;
+    }
+    
+    .sub-menu-icon a:hover {
+      border-bottom: 5px solid <%= fg %>;
+      color: <%= fg %>;
+    }
+
+    .sub-menu-icon .active {
+      border-bottom-color: <%= fg %>;
+    }
+
+    .sub-menu .active, .sub-menu .active:hover {
+      color: <%= fg %>;
+    }
+  </style>
+
+  <TeiserverWeb.NavComponents.top_navbar active={assigns[:site_menu_active]} current_user={@current_user} />
+
+  <.flash_group flash={@flash} />
+
+  <main>
+    <.breadcrumb_trail :if={assigns[:breadcrumb_trails]} trails={assigns[:breadcrumb_trails]} />
+  
+    <div class="px-3 my-0">
+      <%= @inner_content %>
+    </div>
+  </main>
+
+  <footer class="footer mt-auto pt-2 pb-1 px-2">
+    <div style="text-align: right;">
+      <%= Teiserver.Config.get_site_config_cache("site.Footer credit text") %>
+    </div>
+  </footer>
+</div>

@@ -1,6 +1,6 @@
 defmodule Teiserver.Communication.DiscordChannel do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "communication_discord_channels" do
     field :name, :string

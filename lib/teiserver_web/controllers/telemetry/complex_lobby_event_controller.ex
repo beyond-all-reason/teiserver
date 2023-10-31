@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.{ComplexLobbyEventQueries, ExportComplexLobbyEventsTask}
   require Logger

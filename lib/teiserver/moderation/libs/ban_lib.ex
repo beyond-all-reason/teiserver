@@ -1,6 +1,6 @@
 defmodule Teiserver.Moderation.BanLib do
   @moduledoc false
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.Moderation.Ban
 
   # Functions

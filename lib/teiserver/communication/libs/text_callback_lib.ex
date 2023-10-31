@@ -1,6 +1,6 @@
 defmodule Teiserver.Communication.TextCallbackLib do
   @moduledoc false
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.{Communication}
   alias Teiserver.Communication.{TextCallback}
 
@@ -108,11 +108,11 @@ defmodule Teiserver.Communication.TextCallbackLib do
   def build_text_callback_cache do
     Communication.list_text_callbacks(limit: :infinity)
     |> Enum.each(fn text_callback ->
-      Central.store_put(:text_callback_store, text_callback.id, text_callback)
+      Teiserver.store_put(:text_callback_store, text_callback.id, text_callback)
 
       text_callback.triggers
       |> Enum.each(fn trigger_text ->
-        Central.store_put(:text_callback_trigger_lookup, trigger_text, text_callback.id)
+        Teiserver.store_put(:text_callback_trigger_lookup, trigger_text, text_callback.id)
       end)
     end)
   end
@@ -120,11 +120,11 @@ defmodule Teiserver.Communication.TextCallbackLib do
   @spec update_text_callback_cache({:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}) ::
           {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
   def update_text_callback_cache({:ok, text_callback} = args) do
-    Central.store_put(:text_callback_store, text_callback.id, text_callback)
+    Teiserver.store_put(:text_callback_store, text_callback.id, text_callback)
 
     text_callback.triggers
     |> Enum.each(fn trigger_text ->
-      Central.store_put(:text_callback_trigger_lookup, trigger_text, text_callback.id)
+      Teiserver.store_put(:text_callback_trigger_lookup, trigger_text, text_callback.id)
     end)
 
     args
@@ -139,12 +139,12 @@ defmodule Teiserver.Communication.TextCallbackLib do
       |> String.trim()
       |> String.downcase()
 
-    case Central.store_get(:text_callback_trigger_lookup, trigger) do
+    case Teiserver.store_get(:text_callback_trigger_lookup, trigger) do
       nil ->
         nil
 
       id ->
-        case Central.store_get(:text_callback_store, id) do
+        case Teiserver.store_get(:text_callback_store, id) do
           nil -> nil
           text_callback -> text_callback
         end

@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.SimpleLobbyEventType do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "telemetry_simple_lobby_event_types" do
     field :name, :string

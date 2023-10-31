@@ -1,10 +1,10 @@
 defmodule Teiserver.Telemetry.Infolog do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "telemetry_infologs" do
     field :user_hash, :string
-    belongs_to :user, Central.Account.User
+    belongs_to :user, Teiserver.Account.User
     field :log_type, :string
 
     field :timestamp, :utc_datetime

@@ -1,6 +1,6 @@
 defmodule Teiserver.Microblog.UserPreferenceLib do
   @moduledoc false
-  use CentralWeb, :library_newform
+  use TeiserverWeb, :library_newform
   alias Teiserver.Microblog.{UserPreference, UserPreferenceQueries}
 
   # Functions

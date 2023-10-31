@@ -1,6 +1,6 @@
 defmodule Teiserver.Microblog.PostTag do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   @primary_key false
   schema "microblog_post_tags" do

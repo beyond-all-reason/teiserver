@@ -1,11 +1,11 @@
 defmodule Teiserver.Chat.RoomMessage do
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "teiserver_room_messages" do
     field :content, :string
     field :chat_room, :string
     field :inserted_at, :utc_datetime
-    belongs_to :user, Central.Account.User
+    belongs_to :user, Teiserver.Account.User
   end
 
   @doc """

@@ -1,9 +1,9 @@
 defmodule Teiserver.Telemetry.SimpleMatchEvent do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "telemetry_simple_match_events" do
-    belongs_to :user, Central.Account.User
+    belongs_to :user, Teiserver.Account.User
     belongs_to :match, Teiserver.Battle.Match
     belongs_to :event_type, Teiserver.Telemetry.SimpleMatchEventType
 

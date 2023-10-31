@@ -30,7 +30,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   @spec data_in(String.t(), Map.t()) :: Map.t()
   def data_in(data, state) do
-    if Application.get_env(:central, Teiserver)[:extra_logging] == true or
+    if Application.get_env(:teiserver, Teiserver)[:extra_logging] == true or
          state.print_client_messages do
       if String.contains?(data, "c.user.get_token") or String.contains?(data, "LOGIN") do
         Logger.info("<-- #{state.username}: LOGIN/c.user.get_token")
@@ -373,7 +373,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("RESETPASSWORDREQUEST", _, msg_id, state) do
-    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/password_reset"
 
     reply(:okay, url, msg_id, state)
@@ -634,7 +634,7 @@ defmodule Teiserver.Protocols.SpringIn do
                 }
               })
 
-            host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
+            host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
             url = "https://#{host}/one_time_login/#{code.value}"
 
             Coordinator.send_to_user(state.userid, [
@@ -680,7 +680,7 @@ defmodule Teiserver.Protocols.SpringIn do
     end
 
     if not state.exempt_from_cmd_throttle do
-      :timer.sleep(Application.get_env(:central, Teiserver)[:spring_post_state_change_delay])
+      :timer.sleep(Application.get_env(:teiserver, Teiserver)[:spring_post_state_change_delay])
     end
 
     state
@@ -692,7 +692,7 @@ defmodule Teiserver.Protocols.SpringIn do
     Room.remove_user_from_room(state.userid, room_name)
 
     if not state.exempt_from_cmd_throttle do
-      :timer.sleep(Application.get_env(:central, Teiserver)[:spring_post_state_change_delay])
+      :timer.sleep(Application.get_env(:teiserver, Teiserver)[:spring_post_state_change_delay])
     end
 
     state
@@ -895,7 +895,7 @@ defmodule Teiserver.Protocols.SpringIn do
       end
 
     if not state.exempt_from_cmd_throttle do
-      :timer.sleep(Application.get_env(:central, Teiserver)[:spring_post_state_change_delay])
+      :timer.sleep(Application.get_env(:teiserver, Teiserver)[:spring_post_state_change_delay])
     end
 
     case response do
@@ -1268,7 +1268,7 @@ defmodule Teiserver.Protocols.SpringIn do
     end)
 
     if not state.exempt_from_cmd_throttle do
-      :timer.sleep(Application.get_env(:central, Teiserver)[:spring_post_state_change_delay])
+      :timer.sleep(Application.get_env(:teiserver, Teiserver)[:spring_post_state_change_delay])
     end
 
     %{state | lobby_host: false}
@@ -1287,7 +1287,7 @@ defmodule Teiserver.Protocols.SpringIn do
     Lobby.remove_user_from_battle(state.userid, state.lobby_id)
 
     if not state.exempt_from_cmd_throttle do
-      :timer.sleep(Application.get_env(:central, Teiserver)[:spring_post_state_change_delay])
+      :timer.sleep(Application.get_env(:teiserver, Teiserver)[:spring_post_state_change_delay])
     end
 
     %{state | lobby_host: false}

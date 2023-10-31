@@ -1,6 +1,6 @@
 defmodule Teiserver.Moderation.ReportGroupQueries do
   @moduledoc false
-  use CentralWeb, :queries
+  use TeiserverWeb, :queries
   alias Teiserver.Moderation.ReportGroup
 
   # Queries

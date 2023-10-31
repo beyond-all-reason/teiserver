@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.SimpleClientEventTypeLib do
   @moduledoc false
-  use CentralWeb, :library_newform
+  use TeiserverWeb, :library_newform
   alias Teiserver.Telemetry.{SimpleClientEventType, SimpleClientEventTypeQueries}
 
   # Helper function
@@ -8,7 +8,7 @@ defmodule Teiserver.Telemetry.SimpleClientEventTypeLib do
   def get_or_add_simple_client_event_type(name) do
     name = String.trim(name)
 
-    Central.cache_get_or_store(:telemetry_simple_client_event_types_cache, name, fn ->
+    Teiserver.cache_get_or_store(:telemetry_simple_client_event_types_cache, name, fn ->
       query = SimpleClientEventTypeQueries.query_simple_client_event_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
       case Repo.all(query) do
         [] ->

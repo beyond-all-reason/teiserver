@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Admin.SiteConfigController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.Config
 
   plug Bodyguard.Plug.Authorize,
-    policy: Central.Dev,
+    policy: Teiserver.Auth.Server,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 

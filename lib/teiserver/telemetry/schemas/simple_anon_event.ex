@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.SimpleAnonEvent do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "telemetry_simple_anon_events" do
     field :hash, :string, primary_key: true

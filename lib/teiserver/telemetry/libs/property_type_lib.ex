@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.PropertyTypeLib do
   @moduledoc false
-  use CentralWeb, :library_newform
+  use TeiserverWeb, :library_newform
   alias Teiserver.Telemetry.{PropertyType, PropertyTypeQueries}
 
   @spec icon :: String.t()
@@ -14,7 +14,7 @@ defmodule Teiserver.Telemetry.PropertyTypeLib do
   def get_or_add_property_type(name) do
     name = String.trim(name)
 
-    Central.cache_get_or_store(:telemetry_property_types_cache, name, fn ->
+    Teiserver.cache_get_or_store(:telemetry_property_types_cache, name, fn ->
       query = PropertyTypeQueries.query_property_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
       case Repo.all(query) do
         [] ->

@@ -27,12 +27,12 @@ defmodule Teiserver.Lobby.CommandLib do
 
   @spec get_command_module(String.t) :: module
   def get_command_module(name) do
-    Central.store_get(:lobby_command_cache, name) ||
-      Central.store_get(:lobby_command_cache, "no_command")
+    Teiserver.store_get(:lobby_command_cache, name) ||
+      Teiserver.store_get(:lobby_command_cache, "no_command")
   end
 
   def cache_lobby_commands() do
-    {:ok, module_list} = :application.get_key(:central, :modules)
+    {:ok, module_list} = :application.get_key(:teiserver, :modules)
     lookup = module_list
       |> Enum.filter(fn m ->
         m |> Module.split |> Enum.take(3) == ["Teiserver", "Lobby", "Commands"]
@@ -45,20 +45,20 @@ defmodule Teiserver.Lobby.CommandLib do
         Map.put(acc, module.name(), module)
       end)
 
-    old = Central.store_get(:lobby_command_cache, "all") || []
+    old = Teiserver.store_get(:lobby_command_cache, "all") || []
 
     # Store all keys, we'll use it later for removing old ones
-    Central.store_put(:lobby_command_cache, "all", Map.keys(lookup))
+    Teiserver.store_put(:lobby_command_cache, "all", Map.keys(lookup))
 
     # Now store our lookups
     lookup
     |> Enum.each(fn {key, func} ->
-      Central.store_put(:lobby_command_cache, key, func)
+      Teiserver.store_put(:lobby_command_cache, key, func)
     end)
 
     # Special case
     no_command_module = Teiserver.Lobby.Commands.NoCommand
-    Central.store_put(:lobby_command_cache, "no_command", no_command_module)
+    Teiserver.store_put(:lobby_command_cache, "no_command", no_command_module)
 
     # Delete out-dated keys
     old
@@ -66,7 +66,7 @@ defmodule Teiserver.Lobby.CommandLib do
       Map.has_key?(lookup, old_key)
     end)
     |> Enum.each(fn old_key ->
-      Central.store_delete(:lobby_command_cache, old_key)
+      Teiserver.store_delete(:lobby_command_cache, old_key)
     end)
 
     :ok

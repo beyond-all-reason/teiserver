@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Logging.AuditLogController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   # alias Teiserver.Logging.AuditLog
   alias Teiserver.Logging

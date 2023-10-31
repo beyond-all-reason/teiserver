@@ -3,7 +3,7 @@ import Config
 config :iex,
   ansi_enabled: true
 
-config :central, Central,
+config :teiserver, Teiserver,
   site_title: "BAR",
   site_suffix: "",
   site_description: "",
@@ -11,22 +11,22 @@ config :central, Central,
   credit: "Teifion Jordan"
 
 # Default configs
-config :central, Teiserver.Config,
+config :teiserver, Teiserver.Config,
   defaults: %{
     tz: "UTC"
   }
 
-config :central,
+config :teiserver,
   ecto_repos: [Teiserver.Repo]
 
 # Configures the endpoint
-config :central, TeiserverWeb.Endpoint,
+config :teiserver, TeiserverWeb.Endpoint,
   url: [host: "localhost"],
   # This is overriden in your secret config, it's here only to allow things to run easily
   secret_key_base: "6FN12Jv4ZITAK1fq7ehD0MTRvbLsXYWj+wLY3ifkzzlcUIcpUJK7aG/ptrJSemAy",
   live_view: [signing_salt: "wZVVigZo"],
   render_errors: [
-    formats: [html: CentralWeb.ErrorHTML, json: CentralWeb.ErrorJSON],
+    formats: [html: TeiserverWeb.ErrorHTML, json: TeiserverWeb.ErrorJSON],
     layout: false
   ],
   pubsub_server: Teiserver.PubSub
@@ -40,7 +40,7 @@ config :esbuild,
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]
 
-config :central, Teiserver,
+config :teiserver, Teiserver,
   ports: [
     tcp: 8200,
     tls: 8201,
@@ -102,13 +102,13 @@ config :logger, :console,
 config :phoenix, :json_library, Jason
 
 # This secret key is overwritten in prod.secret.exs
-config :central, Teiserver.Account.Guardian,
-  issuer: "central",
+config :teiserver, Teiserver.Account.Guardian,
+  issuer: "teiserver",
   # This is overriden in your secret config, it's here only to allow things to run easily
   secret_key: "9vJcJOYwsjdIQ9IhfOI5F9GQMykuNjBW58FY9S/TqMsq6gRdKgY05jscQAFVKfwa",
   ttl: {30, :days}
 
-config :central, Oban,
+config :teiserver, Oban,
   repo: Teiserver.Repo,
   plugins: [
     {Oban.Plugins.Pruner, max_age: 3600},
@@ -158,7 +158,7 @@ config :central, Oban,
   ],
   queues: [logging: 1, cleanup: 1, teiserver: 10]
 
-config :central, :time_zone_database, Tzdata.TimeZoneDatabase
+config :teiserver, :time_zone_database, Tzdata.TimeZoneDatabase
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

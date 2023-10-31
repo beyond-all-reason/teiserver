@@ -646,7 +646,7 @@ CLIENTS test_room #{user.name}\n"
         "test_user_bad_id@email.com",
         "X03MO1qnZdYdgyfeuILPmQ=="
       )
-      |> Central.Account.create_user()
+      |> Teiserver.Account.create_user()
 
     bad_user
     |> UserCacheLib.convert_user()

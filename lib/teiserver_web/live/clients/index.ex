@@ -44,7 +44,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> assign(:filters, ["people", "normal"])
       |> apply_filters
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, :standard_live}}
+    {:ok, socket}
   end
 
   @impl true

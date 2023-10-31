@@ -273,7 +273,7 @@ defmodule Teiserver.Lobby do
         client = Account.get_client_by_id(userid)
 
         # Unfortunately in testing this can cause a foreign key constraint error
-        if not Application.get_env(:central, Teiserver)[:test_mode] do
+        if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
           match_id = Battle.get_lobby_match_id(lobby_id)
           Telemetry.log_simple_lobby_event(userid, match_id, "remove_user_from_lobby")
         end

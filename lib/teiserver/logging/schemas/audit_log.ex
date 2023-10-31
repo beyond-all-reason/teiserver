@@ -1,13 +1,13 @@
 defmodule Teiserver.Logging.AuditLog do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "audit_logs" do
     field :action, :string
     field :details, :map
     field :ip, :string
 
-    belongs_to :user, Central.Account.User
+    belongs_to :user, Teiserver.Account.User
 
     timestamps()
   end

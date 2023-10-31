@@ -23,7 +23,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   @impl true
   def mount(_params, session, socket) do
     telemetry_data =
-      Central.cache_get(:application_temp_cache, :telemetry_data) || @empty_telemetry_data
+      Teiserver.cache_get(:application_temp_cache, :telemetry_data) || @empty_telemetry_data
 
     socket =
       socket
@@ -42,7 +42,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
 
     :timer.send_interval(5_000, :tick)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, :standard_live}}
+    {:ok, socket}
   end
 
   @impl true

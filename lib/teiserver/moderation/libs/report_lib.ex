@@ -1,6 +1,6 @@
 defmodule Teiserver.Moderation.ReportLib do
   @moduledoc false
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.Moderation.Report
 
   # Functions

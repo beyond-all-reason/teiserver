@@ -1,9 +1,9 @@
 defmodule Teiserver.Telemetry.SimpleClientEvent do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "telemetry_simple_client_events" do
-    belongs_to :user, Central.Account.User
+    belongs_to :user, Teiserver.Account.User
     belongs_to :event_type, Teiserver.Telemetry.SimpleClientEventType
     field :timestamp, :utc_datetime
   end

@@ -1,9 +1,9 @@
 defmodule Teiserver.Microblog.Post do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "microblog_posts" do
-    belongs_to :poster, Central.Account.User
+    belongs_to :poster, Teiserver.Account.User
 
     field :title, :string
     field :summary, :string

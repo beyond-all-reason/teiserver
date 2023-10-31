@@ -1,5 +1,5 @@
 defmodule Teiserver.Battle.Match do
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "teiserver_battle_matches" do
     field :server_uuid, :string
@@ -17,7 +17,7 @@ defmodule Teiserver.Battle.Match do
     # Scavengers, Raptors, Bots, Duel, Team, FFA, Team FFA
     field :game_type, :string
 
-    belongs_to :founder, Central.Account.User
+    belongs_to :founder, Teiserver.Account.User
     field :bots, :map
 
     # TODO: Clan support?

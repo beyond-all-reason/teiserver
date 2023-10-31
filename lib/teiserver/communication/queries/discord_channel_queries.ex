@@ -1,6 +1,6 @@
 defmodule Teiserver.Communication.DiscordChannelQueries do
   @moduledoc false
-  use CentralWeb, :queries
+  use TeiserverWeb, :queries
   alias Teiserver.Communication.DiscordChannel
 
   # Queries

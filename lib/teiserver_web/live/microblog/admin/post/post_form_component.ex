@@ -1,11 +1,10 @@
 defmodule TeiserverWeb.Microblog.PostFormComponent do
   @moduledoc false
-  use CentralWeb, :live_component
+  use TeiserverWeb, :live_component
   import Teiserver.Helper.ColourHelper, only: [rgba_css: 2]
 
   alias Teiserver.{Communication, Microblog, Account}
   alias Teiserver.Account.AuthLib
-  alias Teiserver.Microblog.PostLib
 
   @default_channel_name "Dev updates"
 
@@ -316,7 +315,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
       " - Posted by #{user.name}"
     end
 
-    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/microblog/show/#{post.id}"
 
     [

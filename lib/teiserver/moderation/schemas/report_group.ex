@@ -1,9 +1,9 @@
 defmodule Teiserver.Moderation.ReportGroup do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "moderation_report_groups" do
-    belongs_to :target, Central.Account.User
+    belongs_to :target, Teiserver.Account.User
     belongs_to :match, Teiserver.Battle.Match
 
     field :closed, :boolean, default: false

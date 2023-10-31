@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Account.SetupController do
-  use CentralWeb, :controller
-  alias Central.Account
+  use TeiserverWeb, :controller
+  alias Teiserver.Account
 
   def setup(conn, %{"key" => key}) do
-    true_key = Application.get_env(:central, Central.Setup)[:key]
+    true_key = Application.get_env(:teiserver, Teiserver.Setup)[:key]
 
     cond do
       key != true_key ->
@@ -17,7 +17,7 @@ defmodule TeiserverWeb.Account.SetupController do
         |> redirect(to: "/")
 
       true ->
-        users = Central.Account.list_users(search: [email: "root@localhost"])
+        users = Teiserver.Account.list_users(search: [email: "root@localhost"])
 
         if users == [] do
           {:ok, _user} =

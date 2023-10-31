@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Admin.DiscordChannelController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.{Communication}
   alias Teiserver.Communication.DiscordChannelLib

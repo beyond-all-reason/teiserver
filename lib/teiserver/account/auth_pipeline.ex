@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.AuthPipeline do
   @moduledoc false
   use Guardian.Plug.Pipeline,
-    otp_app: :central,
+    otp_app: :teiserver,
     error_handler: Teiserver.Account.ErrorHandler,
     module: Teiserver.Account.Guardian
 

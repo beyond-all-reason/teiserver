@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.ComplexLobbyEventQueries do
   @moduledoc false
-  use CentralWeb, :queries
+  use TeiserverWeb, :queries
   alias Teiserver.Telemetry.ComplexLobbyEvent
 
   # Queries

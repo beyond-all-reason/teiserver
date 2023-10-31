@@ -1,6 +1,6 @@
 defmodule Teiserver.Logging.PageViewLog do
   @moduledoc false
-  use CentralWeb, :schema
+  use TeiserverWeb, :schema
 
   schema "page_view_logs" do
     field :path, :string
@@ -10,7 +10,7 @@ defmodule Teiserver.Logging.PageViewLog do
     field :load_time, :integer
     field :status, :integer
 
-    belongs_to :user, Central.Account.User
+    belongs_to :user, Teiserver.Account.User
 
     timestamps()
   end

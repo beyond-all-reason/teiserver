@@ -1,5 +1,5 @@
 defmodule Teiserver.Clans.ClanInviteLib do
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.Clans.ClanInvite
 
   # Queries

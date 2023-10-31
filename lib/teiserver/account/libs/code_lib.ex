@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.CodeLib do
   @moduledoc false
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.Account.Code
 
   @spec colours :: atom

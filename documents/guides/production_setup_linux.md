@@ -334,14 +334,14 @@ DefaultLimitNOFILE=65535
 ### Database migrations
 Once the app is deployed you should be able to run migrations like so. I've not had a chance to test if this works on a fresh install; it is possible the fresh install would have startup errors due to some tables being missing.
 ```
-centralapp eval "Central.Release.migrate"
+centralapp eval "Teiserver.Release.migrate"
 ```
 
 ### Deployment
 [Deployment itself is located in a different file.](/documents/guides/deployment.md), you will need to execute a deployment as part of the setup. There will be additional steps to take after your first deployment.
 
 #### Creating the first user
-To create your first root user make a note of `config :central, Central.Setup, key:` within `config/prod.secret.exs` as you will need that value here. Go to `https://domain.com/initial_setup/$KEY` where `$KEY` is replaced with the value in this config. This link will only work while a user with an email "root@localhost" has not been created. It is advised that once the user is created you set the initial_setup key to be an empty string which will disable the function entirely.
+To create your first root user make a note of `config :central, Teiserver.Setup, key:` within `config/prod.secret.exs` as you will need that value here. Go to `https://domain.com/initial_setup/$KEY` where `$KEY` is replaced with the value in this config. This link will only work while a user with an email "root@localhost" has not been created. It is advised that once the user is created you set the initial_setup key to be an empty string which will disable the function entirely.
 
 A new user with developer level access will be created with the email `root@localhost` and a password identical to the setup key you just used. You can now login as that user, it is advised your first action should be to change/update the password and set the user details (name/email) to the ones you intend to use as admin.
 
@@ -443,7 +443,7 @@ journalctl -u nginx.server
 **Possible SSL related errors:**
 - Certbot files not existing
 - Certbot files not having the right permissions (try to `cat` them)
-- Certs not being referenced by the application (used `Application.get_env(:central, TeiserverWeb.Endpoint)[:https]` within the remote terminal to check the actual paths in the app) 
+- Certs not being referenced by the application (used `Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:https]` within the remote terminal to check the actual paths in the app) 
 
 #### What is "central"?
 I've a few different projects all of which rely on a common core of functionality (users, groups etc). This is stored as the "central" folder which makes it easier to share code and the like between them. It does mean the application launched is called "central" though. The main repo for Central is [https://github.com/Teifion/central](https://github.com/Teifion/central).

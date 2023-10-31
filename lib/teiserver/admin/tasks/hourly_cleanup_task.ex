@@ -15,7 +15,7 @@ defmodule Teiserver.Admin.HourlyCleanupTask do
   end
 
   defp chat_log_cleanup() do
-    days = Application.get_env(:central, Teiserver)[:retention][:room_chat]
+    days = Application.get_env(:teiserver, Teiserver)[:retention][:room_chat]
 
     before_timestamp = Timex.shift(Timex.now(), days: -days)
 
@@ -26,7 +26,7 @@ defmodule Teiserver.Admin.HourlyCleanupTask do
 
     Ecto.Adapters.SQL.query!(Repo, query, [before_timestamp])
 
-    days = Application.get_env(:central, Teiserver)[:retention][:lobby_chat]
+    days = Application.get_env(:teiserver, Teiserver)[:retention][:lobby_chat]
 
     before_timestamp = Timex.shift(Timex.now(), days: -days)
 

@@ -2,7 +2,7 @@ defmodule Teiserver.Account.AccoladeLib do
   @moduledoc """
 
   """
-  use CentralWeb, :library
+  use TeiserverWeb, :library
   alias Teiserver.{Account, CacheUser}
   alias Teiserver.Account.{Accolade, AccoladeBotServer, AccoladeChatServer}
   alias Teiserver.Data.Types, as: T
@@ -206,7 +206,7 @@ defmodule Teiserver.Account.AccoladeLib do
 
   # @spec get_accolade_bot_pid() :: pid()
   # defp get_accolade_bot_pid() do
-  #   Central.cache_get(:teiserver_accolade_server, :accolade_server)
+  #   Teiserver.cache_get(:teiserver_accolade_server, :accolade_server)
   # end
 
   @spec start_accolade_server() :: :ok | {:failure, String.t()}
@@ -248,7 +248,7 @@ defmodule Teiserver.Account.AccoladeLib do
 
   @spec get_accolade_bot_userid() :: T.userid()
   def get_accolade_bot_userid() do
-    Central.cache_get(:application_metadata_cache, "teiserver_accolade_userid")
+    Teiserver.cache_get(:application_metadata_cache, "teiserver_accolade_userid")
   end
 
   @spec get_accolade_bot_pid() :: pid() | nil
@@ -349,7 +349,7 @@ defmodule Teiserver.Account.AccoladeLib do
 
   @spec get_badge_types() :: [{non_neg_integer(), map()}]
   def get_badge_types() do
-    Central.cache_get_or_store(:application_temp_cache, "accolade_badges", fn ->
+    Teiserver.cache_get_or_store(:application_temp_cache, "accolade_badges", fn ->
       Account.list_badge_types(search: [has_purpose: "Accolade"], order_by: "Name (A-Z)")
       |> Enum.with_index()
       |> Enum.map(fn {bt, i} -> {i + 1, bt} end)

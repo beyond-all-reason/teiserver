@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.API.HailstormController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
   alias Teiserver.{Account, CacheUser, Config, Coordinator, Lobby}
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Battle.BalanceLib
@@ -32,7 +32,7 @@ defmodule TeiserverWeb.API.HailstormController do
           case CacheUser.register_user(name, email, params["password"]) do
             :success ->
               db_user = Account.get_user!(nil, search: [email: email])
-              Central.Account.update_user(db_user, params["permissions"] || [], :permissions)
+              Account.script_update_user(db_user, params["permissions"] || [])
 
               # Specific updates
               CacheUser.add_roles(db_user.id, params["roles"])
@@ -204,6 +204,6 @@ end
 defmodule Teiserver.API.HailstormAuth do
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
   def authorize(_, _, _) do
-    Application.get_env(:central, Teiserver)[:enable_hailstorm]
+    Application.get_env(:teiserver, Teiserver)[:enable_hailstorm]
   end
 end

@@ -1,6 +1,6 @@
 defmodule Teiserver.Microblog.UserPreferenceQueries do
   @moduledoc false
-  use CentralWeb, :queries
+  use TeiserverWeb, :queries
   alias Teiserver.Microblog.UserPreference
 
   # Queries

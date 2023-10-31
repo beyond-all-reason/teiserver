@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.RelationshipQueries do
   @moduledoc false
-  use CentralWeb, :queries
+  use TeiserverWeb, :queries
   alias Teiserver.Account.Relationship
 
   @spec query_relationships(list) :: Ecto.Query.t()

@@ -7,7 +7,7 @@ defmodule Teiserver.Account.AuthLib do
 
   @spec get_all_permission_sets() :: Map.t()
   def get_all_permission_sets do
-    Central.store_get(:auth_group_store, :all)
+    Teiserver.store_get(:auth_group_store, :all)
     |> Enum.map(fn key -> {key, get_permission_set(key)} end)
   end
 
@@ -33,7 +33,7 @@ defmodule Teiserver.Account.AuthLib do
 
   @spec get_permission_set({String.t(), String.t()}) :: [String.t()]
   def get_permission_set(key) do
-    Central.store_get(:auth_group_store, key)
+    Teiserver.store_get(:auth_group_store, key)
   end
 
   @spec add_permission_set(String.t(), String.t(), [String.t()]) :: :ok
@@ -45,10 +45,10 @@ defmodule Teiserver.Account.AuthLib do
       end)
 
     key = {module, section}
-    all_auth_keys = [key | Central.store_get(:auth_group_store, :all) || []]
+    all_auth_keys = [key | Teiserver.store_get(:auth_group_store, :all) || []]
 
-    Central.store_put(:auth_group_store, key, permissions)
-    Central.store_put(:auth_group_store, :all, all_auth_keys)
+    Teiserver.store_put(:auth_group_store, key, permissions)
+    Teiserver.store_put(:auth_group_store, :all, all_auth_keys)
     :ok
   end
 
@@ -105,7 +105,7 @@ defmodule Teiserver.Account.AuthLib do
     )
 
     cond do
-      # Enum.member?(Application.get_env(:central, CentralWeb)[:universal_permissions], permission_required) -> true
+      # Enum.member?(Application.get_env(:teiserver, TeiserverWeb)[:universal_permissions], permission_required) -> true
       permissions_held == nil ->
         Logger.debug("AuthLib.allow?() -> No permissions held")
         false

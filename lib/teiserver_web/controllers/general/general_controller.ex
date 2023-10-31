@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.General.GeneralController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   plug(AssignPlug,
     site_menu_active: "teiserver",
@@ -16,16 +16,16 @@ defmodule TeiserverWeb.General.GeneralController do
 
   @spec gdpr(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def gdpr(conn, _params) do
-    host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     website_url = "https://#{host}"
 
     conn
-    |> assign(:game_name, Application.get_env(:central, Teiserver)[:game_name])
-    |> assign(:game_name_short, Application.get_env(:central, Teiserver)[:game_name_short])
-    |> assign(:main_website, Application.get_env(:central, Teiserver)[:main_website])
-    |> assign(:github_repo, Application.get_env(:central, Teiserver)[:github_repo])
+    |> assign(:game_name, Application.get_env(:teiserver, Teiserver)[:game_name])
+    |> assign(:game_name_short, Application.get_env(:teiserver, Teiserver)[:game_name_short])
+    |> assign(:main_website, Application.get_env(:teiserver, Teiserver)[:main_website])
+    |> assign(:github_repo, Application.get_env(:teiserver, Teiserver)[:github_repo])
     |> assign(:website_url, website_url)
-    |> assign(:privacy_email, Application.get_env(:central, Teiserver)[:privacy_email])
+    |> assign(:privacy_email, Application.get_env(:teiserver, Teiserver)[:privacy_email])
     |> render("gdpr.html")
   end
 

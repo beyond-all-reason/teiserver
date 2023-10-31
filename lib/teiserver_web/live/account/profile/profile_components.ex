@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Account.ProfileComponents do
   @moduledoc false
-  use CentralWeb, :component
+  use TeiserverWeb, :component
   import TeiserverWeb.NavComponents, only: [tab_header: 1, tab_nav: 1]
 
   @doc """

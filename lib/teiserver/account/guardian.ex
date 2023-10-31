@@ -1,8 +1,8 @@
 defmodule Teiserver.Account.Guardian do
   @moduledoc false
-  use Guardian, otp_app: :central
+  use Guardian, otp_app: :teiserver
 
-  alias Central.Account
+  alias Teiserver.Account
 
   def subject_for_token(user, _claims) do
     {:ok, to_string(user.id)}

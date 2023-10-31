@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Logging.AggregateViewLogController do
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.Logging
   alias Teiserver.Logging.AggregateViewLogLib

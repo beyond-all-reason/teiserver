@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Moderation.ProposalController do
   @moduledoc false
-  use CentralWeb, :controller
+  use TeiserverWeb, :controller
 
   alias Teiserver.{Account, Moderation}
   alias Teiserver.Moderation.{Proposal, ProposalLib}
@@ -99,7 +99,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
         |> assign(:changeset, changeset)
         |> assign(:reports, reports)
         |> assign(:actions, actions)
-        |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
+        |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
         |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
         |> add_breadcrumb(name: "New proposal for #{user.name}", url: conn.request_path)
         |> render("new_with_user.html")
@@ -164,7 +164,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
           |> assign(:changeset, changeset)
           |> assign(:reports, reports)
           |> assign(:actions, actions)
-          |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
+          |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
           |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
           |> add_breadcrumb(name: "New proposal for #{user.name}", url: conn.request_path)
           |> render("new_with_user.html")
@@ -203,7 +203,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
         conn
         |> assign(:proposal, proposal)
         |> assign(:changeset, changeset)
-        |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
+        |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
         |> add_breadcrumb(name: "Edit: #{proposal.target.name}", url: conn.request_path)
         |> render("edit.html")
     end
@@ -255,7 +255,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
             conn
             |> assign(:proposal, proposal)
             |> assign(:changeset, changeset)
-            |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
+            |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
             |> render("edit.html")
         end
     end
