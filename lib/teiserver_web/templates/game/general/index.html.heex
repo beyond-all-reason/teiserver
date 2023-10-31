@@ -21,7 +21,7 @@
 
   <%= if allow?(@conn, "Admin") do %>
     <%= central_component("menu_card",
-      icon: Central.Admin.ToolLib.icon(),
+      icon: Teiserver.Admin.ToolLib.icon(),
       name: "tools",
       text: "Tools",
       icon_class: "fa-duotone",

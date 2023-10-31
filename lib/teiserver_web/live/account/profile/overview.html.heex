@@ -197,9 +197,9 @@
     <.link
       :if={allow?(@current_user, "Moderator")}
       navigate={~p"/teiserver/admin/user/#{@user.id}"}
-      class={"btn btn-outline-#{Central.Admin.AdminLib.colours()} mx-1 ms-4"}
+      class={"btn btn-outline-#{Teiserver.Admin.AdminLib.colours()} mx-1 ms-4"}
     >
-      <Fontawesome.icon icon={Central.Admin.AdminLib.icon()} style="regular" />
+      <Fontawesome.icon icon={Teiserver.Admin.AdminLib.icon()} style="regular" />
       &nbsp;
       Admin panel
     </.link>

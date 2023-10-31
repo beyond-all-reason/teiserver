@@ -1,4 +1,4 @@
-defmodule Central.Admin.AdminLib do
+defmodule Teiserver.Admin.AdminLib do
   @moduledoc false
   use CentralWeb, :library
 

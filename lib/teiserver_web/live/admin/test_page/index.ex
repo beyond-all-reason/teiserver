@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Admin.TestPageLive.Index do
   def mount(_params, _session, socket) do
     socket = socket
       |> assign(:site_menu_active, "admin")
-      |> assign(:view_colour, Central.Admin.AdminLib.colours())
+      |> assign(:view_colour, Teiserver.Admin.AdminLib.colours())
       |> assign(:tab, @default_tab)
       |> assign(:limited_bsnames, @limited_bsnames)
       |> assign(:full_bsnames, @full_bsnames)
