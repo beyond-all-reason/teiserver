@@ -6,6 +6,7 @@ defmodule Teiserver.Microblog.Post do
     belongs_to :poster, Central.Account.User
 
     field :title, :string
+    field :summary, :string
     field :contents, :string
     field :view_count, :integer, default: 0
 
@@ -31,10 +32,10 @@ defmodule Teiserver.Microblog.Post do
 
     params =
       params
-      |> trim_strings(~w(title contents)a)
+      |> trim_strings(~w(title summary contents)a)
 
     struct
-    |> cast(params, ~w(poster_id title contents view_count discord_channel_id discord_post_id)a)
+    |> cast(params, ~w(poster_id title summary contents view_count discord_channel_id discord_post_id)a)
     |> cast_assoc(:post_tags, tag_ids)
     |> validate_required(~w(poster_id title contents)a)
   end

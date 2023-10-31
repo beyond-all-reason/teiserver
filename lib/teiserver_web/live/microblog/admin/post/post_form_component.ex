@@ -32,7 +32,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
         id="post-form"
       >
         <div class="row mb-4">
-          <div class="col">
+          <div class="col-md-12 col-lg-8 col-xl-6">
             <label for="post_title" class="control-label">Title:</label>
             <.input
               field={@form[:title]}
@@ -42,9 +42,28 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
             />
             <br />
 
+            <label for="post_contents" class="control-label">Summary:</label>
+            <em class="float-end">Plain text, 1-3 lines</em>
+            <textarea
+              name="post[summary]"
+              id="post_summary"
+              rows="3"
+              phx-debounce="100"
+              class="form-control"><%= @form[:summary].value %></textarea>
+            <br />
+
             <label for="post_contents" class="control-label">Contents:</label>
-            &nbsp;
-            <em>Markdown, use a double-line return to split small version from full version.</em>
+            <span class="float-end monospace">
+              <span style="font-size: 1.2em; font-weight: bold;"># Heading</span>
+              &nbsp;&nbsp;
+              <em>__italic__</em>
+              &nbsp;&nbsp;
+              <strong>**bold**</strong>
+              &nbsp;&nbsp;
+              - List item
+              &nbsp;&nbsp;
+              [Link text](url)
+            </span>
             <textarea
               name="post[contents]"
               id="post_contents"
@@ -265,8 +284,8 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
 
   defp create_post_to_discord(%{discord_channel_id: nil}), do: :ok
   defp create_post_to_discord(post) do
-    content = create_discord_text(post)
-    case Communication.new_discord_message(post.discord_channel_id, content) do
+    discord_content = create_discord_text(post)
+    case Communication.new_discord_message(post.discord_channel_id, discord_content) do
       {:ok, %{id: message_id}} ->
         Microblog.update_post(post, %{"discord_post_id" => message_id})
 
@@ -278,8 +297,8 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   defp update_post_to_discord(%{discord_channel_id: nil}), do: :ok
   defp update_post_to_discord(%{discord_post_id: nil} = post), do: create_post_to_discord(post)
   defp update_post_to_discord(post) do
-    content = create_discord_text(post)
-    case Communication.edit_discord_message(post.discord_channel_id, post.discord_post_id, content) do
+    discord_content = create_discord_text(post)
+    case Communication.edit_discord_message(post.discord_channel_id, post.discord_post_id, discord_content) do
       {:ok, _new_message} ->
         :ok
       {:error, %{status_code: 404}} ->
@@ -290,14 +309,6 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   end
 
   defp create_discord_text(post) do
-    post_content = PostLib.get_summary(post)
-
-    ellipses = if post_content == post.contents do
-      ""
-    else
-      "..."
-    end
-
     user = Account.get_user_by_id(post.poster_id)
     discord_tag = if user.discord_id do
       " - Posted by <@#{user.discord_id}>"
@@ -308,6 +319,12 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
     host = Application.get_env(:central, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/microblog/show/#{post.id}"
 
-    "-------------------------------\n**#{post.title}**#{discord_tag}\n#{post_content}#{ellipses}\n\n[See full text](#{url})"
+    [
+      "-------------------------------",
+      "**#{post.title}**#{discord_tag}",
+      "#{post.summary}",
+      "\n[See full text](#{url})"
+    ]
+    |> Enum.join("\n")
   end
 end

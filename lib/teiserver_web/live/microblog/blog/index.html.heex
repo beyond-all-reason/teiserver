@@ -42,9 +42,9 @@
             </div>
             <h5>
               <%= post.title %>
-              
+
               &nbsp;&nbsp;&nbsp;&nbsp;
-              
+
               <span style={"color: #{post.poster.colour};"}>
                 <Fontawesome.icon icon={post.poster.icon} style="solid" />
                 <%= post.poster.name %>
@@ -53,10 +53,9 @@
             Posted at <%= date_to_str(post.inserted_at, format: :ymd_hms) %>
             <br /><br />
           
-            <%=
-              post.contents |> String.split("\n\n") |> hd |> Earmark.as_html! |> raw
-            %>
-            <em :if={String.contains?(post.contents, "\n\n") or String.length(post.contents) > 128}>Click for more details</em>
+            <%= post.summary %>
+            <br /><br />
+            <em>Click for more details</em>
 
             <div class="sr-only">
               <.link navigate={~p"/microblog/show/#{post.id}"}>Show</.link>

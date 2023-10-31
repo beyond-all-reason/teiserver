@@ -14,6 +14,7 @@ defmodule Teiserver.Repo.Migrations.CreateMicroblog do
       add :poster_id, references(:account_users, on_delete: :nothing)
 
       add :title, :string
+      add :summary, :text
       add :contents, :text
 
       add :view_count, :integer

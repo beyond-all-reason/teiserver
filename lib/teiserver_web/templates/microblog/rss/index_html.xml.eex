@@ -13,7 +13,6 @@
 
     <%= for post <- @posts do %>
       <%
-        {:safe, summary} = Teiserver.Microblog.PostLib.get_summary(post) |> Earmark.as_html! |> raw
         {:safe, contents} = post.contents |> Earmark.as_html! |> raw
       %>
       <item>
@@ -24,7 +23,7 @@
         <id><%= post.id %></id>
         <guid><%= "#{post.id}/#{post.updated_at |> guid_date()}" %></guid>
         <last_updated><%= post.updated_at |> format_date %></last_updated>
-        <description><%= "<![CDATA[#{summary}]]>" %></description>
+        <description><%= "<![CDATA[#{post.summary}]]>" %></description>
         <contents><%= "<![CDATA[#{contents}]]>" %></contents>
         <tags><%= post.tags |> Enum.map(fn t -> t.name end) |> Enum.join(", ") %></tags>
         <pubDate><%= post.inserted_at |> format_date %></pubDate>
