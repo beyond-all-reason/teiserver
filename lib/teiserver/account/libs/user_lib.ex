@@ -274,7 +274,7 @@ defmodule Teiserver.Account.UserLib do
   end
 
   def authenticate_user(conn, email, plain_text_password) do
-    user = get_user(where: [email: email])
+    user = get_user(nil, where: [email: email])
 
     case user do
       nil ->

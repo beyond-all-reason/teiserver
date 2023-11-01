@@ -1,19 +1,19 @@
-# /etc/systemd/system/central.service
+# /etc/systemd/system/teiserver.service
 [Unit]
 Description=Teiserver elixir app
 After=network.target
 
 [Service]
 User=deploy
-WorkingDirectory=/etc/central
-ExecStart=/apps/central/bin/central start
-ExecStop=/apps/central/bin/central stop
+WorkingDirectory=/etc/teiserver
+ExecStart=/apps/teiserver/bin/teiserver start
+ExecStop=/apps/teiserver/bin/teiserver stop
 Restart=on-failure
 LimitNOFILE=65536
 RemainAfterExit=yes
 RestartSec=5
 EnvironmentFile=/apps/ts.vars
-SyslogIdentifier=central
+SyslogIdentifier=teiserver
 
 [Install]
 WantedBy=multi-user.target

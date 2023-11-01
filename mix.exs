@@ -80,7 +80,7 @@ defmodule Teiserver.MixProject do
       {:con_cache, "~> 1.0"},
       {:phoenix_pubsub, "~> 2.0"},
       {:elixir_uuid, "~> 1.2"},
-      {:excoveralls, "~> 0.15.3", only: :test},
+      {:excoveralls, "~> 0.15.3", only: :test, runtime: false},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev], runtime: false},
       {:dart_sass, "~> 0.6", only: [:dev]},

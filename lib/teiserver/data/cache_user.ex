@@ -564,9 +564,6 @@ defmodule Teiserver.CacheUser do
   defdelegate decache_user(userid), to: UserCacheLib
 
   @spec send_direct_message(T.userid(), T.userid(), String.t()) :: :ok
-  def send_direct_message(from_id, to_id, "!start" <> s),
-    do: send_direct_message(from_id, to_id, "!cv start" <> s)
-
   def send_direct_message(from_id, to_id, "!joinas" <> s),
     do: send_direct_message(from_id, to_id, "!cv joinas" <> s)
 

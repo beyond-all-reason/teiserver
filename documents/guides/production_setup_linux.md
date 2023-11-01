@@ -138,9 +138,9 @@ openssl dhparam -out dh-params.pem 2048
 ```
 
 #### Enable the site
-Has to be done after the cert!
+Has to be done after the cert. Not the underscore to prevent `default` being used instead of the teiserver file.
 ```bash
-sudo vi /etc/nginx/sites-enabled/central
+sudo vi /etc/nginx/sites-enabled/_teiserver
 ```
 
 
@@ -242,11 +242,11 @@ For this example I've put lots of stuff in the root directory. Feel free to relo
 cd /
 
 # This is the directory it'll run from, we need it to exist or you'll get misleading errors
-sudo mkdir -p /etc/central
-sudo chown -R deploy:deploy /etc/central
+sudo mkdir -p /etc/teiserver
+sudo chown -R deploy:deploy /etc/teiserver
 
 # This is where the app itself will live
-sudo mkdir -p /apps/central
+sudo mkdir -p /apps/teiserver
 sudo chown -R deploy:deploy /apps
 
 # A bunch of bash scripts we'll use
@@ -254,8 +254,8 @@ sudo mkdir -p /scripts
 sudo chown -R deploy:deploy /scripts
 
 # The location of our app logs
-sudo mkdir -p /var/log/central
-sudo chmod -R o+wr /var/log/central
+sudo mkdir -p /var/log/teiserver
+sudo chmod -R o+wr /var/log/teiserver
 
 # This is where we'll be uploading the release tarballs to
 sudo mkdir -p /releases
@@ -289,13 +289,13 @@ Now we have a .bashrc file pointing to them, we need to add some scripts to help
 
 
 #### Service file
-The central.service file is located [documents/prod_files/central.service](/documents/prod_files/central.service)
+The teiserver.service file is located [documents/prod_files/systemd_service_file](/documents/prod_files/systemd_service_file)
 ```
 # Edit/insert the file here
-sudo vi /etc/systemd/system/central.service
+sudo vi /etc/systemd/system/teiserver.service
 
 # Now enable it
-sudo systemctl enable central.service
+sudo systemctl enable teiserver.service
 ```
 
 #### File descriptors limit
@@ -334,14 +334,14 @@ DefaultLimitNOFILE=65535
 ### Database migrations
 Once the app is deployed you should be able to run migrations like so. I've not had a chance to test if this works on a fresh install; it is possible the fresh install would have startup errors due to some tables being missing.
 ```
-centralapp eval "Teiserver.Release.migrate"
+tsapp eval "Teiserver.Release.migrate"
 ```
 
 ### Deployment
 [Deployment itself is located in a different file.](/documents/guides/deployment.md), you will need to execute a deployment as part of the setup. There will be additional steps to take after your first deployment.
 
 #### Creating the first user
-To create your first root user make a note of `config :central, Teiserver.Setup, key:` within `config/prod.secret.exs` as you will need that value here. Go to `https://domain.com/initial_setup/$KEY` where `$KEY` is replaced with the value in this config. This link will only work while a user with an email "root@localhost" has not been created. It is advised that once the user is created you set the initial_setup key to be an empty string which will disable the function entirely.
+To create your first root user make a note of `config :teiserver, Teiserver.Setup, key:` within `config/prod.secret.exs` as you will need that value here. Go to `https://domain.com/initial_setup/$KEY` where `$KEY` is replaced with the value in this config. This link will only work while a user with an email "root@localhost" has not been created. It is advised that once the user is created you set the initial_setup key to be an empty string which will disable the function entirely.
 
 A new user with developer level access will be created with the email `root@localhost` and a password identical to the setup key you just used. You can now login as that user, it is advised your first action should be to change/update the password and set the user details (name/email) to the ones you intend to use as admin.
 
@@ -417,8 +417,8 @@ sudo su -c "echo 'vm.swappiness=10' >> /etc/sysctl.conf"
 #### Website not working
 Ensure the service is running, the logs should be empty
 ```
-sudo systemctl status central
-sudo journalctl -u central.server
+sudo systemctl status teiserver
+sudo journalctl -u teiserver.server
 ```
 
 - `curl http://localhost:8888` should produce `curl: (1) Received HTTP/0.9 when not allowed`
@@ -440,10 +440,12 @@ sudo systemctl status nginx
 journalctl -u nginx.server
 ```
 
+```sh
+sudo nginx -s reload
+sudo nginx -t
+```
+
 **Possible SSL related errors:**
 - Certbot files not existing
 - Certbot files not having the right permissions (try to `cat` them)
 - Certs not being referenced by the application (used `Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:https]` within the remote terminal to check the actual paths in the app) 
-
-#### What is "central"?
-I've a few different projects all of which rely on a common core of functionality (users, groups etc). This is stored as the "central" folder which makes it easier to share code and the like between them. It does mean the application launched is called "central" though. The main repo for Central is [https://github.com/Teifion/central](https://github.com/Teifion/central).

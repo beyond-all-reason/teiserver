@@ -1,21 +1,22 @@
 # Turns the service off and on again (wiping logs in the process)
 # without performing the deployment process
 # I typically used this while testing things
+# vi /scripts/quick_restart.sh
 
 echo "Stopping service"
-/apps/central/bin/central stop
-sudo systemctl stop central.service
+/apps/teiserver/bin/teiserver stop
+sudo systemctl stop teiserver.service
 
 echo "Rotate logs"
-rm /var/log/central/error_old.log
-rm /var/log/central/info_old.log
+rm /var/log/teiserver/error_old.log
+rm /var/log/teiserver/info_old.log
 
-cp /var/log/central/error.log /var/log/central/error_old.log
-cp /var/log/central/info.log /var/log/central/info_old.log
+cp /var/log/teiserver/error.log /var/log/teiserver/error_old.log
+cp /var/log/teiserver/info.log /var/log/teiserver/info_old.log
 
 echo "Wipe logs"
-> /var/log/central/error.log
-> /var/log/central/info.log
+> /var/log/teiserver/error.log
+> /var/log/teiserver/info.log
 
 # We found on a faster server if we started up the app really quickly it would generate
 # very high CPU load for no apparent reason, putting this in places solves it
@@ -25,4 +26,4 @@ echo "Sleeping"
 sleep 5
 
 echo "Starting service"
-sudo systemctl start central.service
+sudo systemctl start teiserver.service
