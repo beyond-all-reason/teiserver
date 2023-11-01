@@ -14,7 +14,6 @@ A docker file is included in the repo but within [documents/prod_files](document
 #### Deploy script
 ```
 #!/usr/bin/env bash
-touch lib/central_web/views/admin/general_view.ex
 sh scripts/build_container.sh
 sh scripts/generate_release.sh
 

@@ -57,9 +57,9 @@ EOF
 
 # Enabled site
 mkdir -p /etc/nginx/sites-enabled/
-> /etc/nginx/sites-enabled/central
-cat >> /etc/nginx/sites-enabled/central << EOF
-upstream central {
+> /etc/nginx/sites-enabled/teiserver
+cat >> /etc/nginx/sites-enabled/teiserver << EOF
+upstream teiserver {
     server 127.0.0.1:8888;
 }
 EOF
@@ -145,11 +145,11 @@ sudo su postgres -c "psql -c \"ALTER USER teiserver_prod WITH SUPERUSER;\""
 
 # This is the directory it'll run from, we need it to exist or you'll get misleading errors
 cd /
-sudo mkdir -p /etc/central
-sudo chown -R deploy:deploy /etc/central
+sudo mkdir -p /etc/teiserver
+sudo chown -R deploy:deploy /etc/teiserver
 
 # This is where the app itself will live
-sudo mkdir -p /apps/central
+sudo mkdir -p /apps/teiserver
 sudo chown -R deploy:deploy /apps
 
 # A bunch of bash scripts we'll use
@@ -157,8 +157,8 @@ sudo mkdir -p /scripts
 sudo chown -R deploy:deploy /scripts
 
 # The location of our app logs
-sudo mkdir -p /var/log/central
-sudo chmod -R o+wr /var/log/central
+sudo mkdir -p /var/log/teiserver
+sudo chmod -R o+wr /var/log/teiserver
 
 # This is where we'll be uploading the release tarballs to
 sudo mkdir -p /releases
@@ -166,30 +166,30 @@ sudo chmod -R o+wr /releases
 
 
 # Systemd
-sudo rm /etc/systemd/system/central.service
-sudo touch /etc/systemd/system/central.service
-sudo chmod -R o+wr /etc/systemd/system/central.service
-cat >> /etc/systemd/system/central.service << EOF
+sudo rm /etc/systemd/system/teiserver.service
+sudo touch /etc/systemd/system/teiserver.service
+sudo chmod -R o+wr /etc/systemd/system/teiserver.service
+cat >> /etc/systemd/system/teiserver.service << EOF
 [Unit]
 Description=Clustering Elixir application
 After=network.target
 
 [Service]
 User=root
-WorkingDirectory=/apps/central
-ExecStart=/apps/central/bin/central start
-ExecStop=/apps/central/bin/central stop
+WorkingDirectory=/apps/teiserver
+ExecStart=/apps/teiserver/bin/teiserver start
+ExecStop=/apps/teiserver/bin/teiserver stop
 Restart=on-failure
 RemainAfterExit=yes
 RestartSec=5
-SyslogIdentifier=central
+SyslogIdentifier=teiserver
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-sudo systemctl enable central.service
-sudo systemctl start central.service
+sudo systemctl enable teiserver.service
+sudo systemctl start teiserver.service
 
 # # IP Tables
 # iptables -P INPUT ACCEPT

@@ -12,7 +12,7 @@ scp -i ~/.ssh/id_rsa backup.tar.gz deploy@yourdomain.com:./restore.db
 Step 2: Remote into the server
 ```
 # Stop Teiserver running
-sudo systemctl stop central.service
+sudo systemctl stop teiserver.service
 
 # Swap to postgres
 sudo su postgres
@@ -29,13 +29,13 @@ exit
 psql --user=teiserver_prod --dbname=teiserver_prod -f ./restore.db
 
 # Start the service up again
-sudo systemctl start central.service
+sudo systemctl start teiserver.service
 ```
 
 #### 2 - Restart from scratch
 ```
 # Stop the service
-sudo systemctl stop central.service
+sudo systemctl stop teiserver.service
 
 # Next wipe and remake the database
 sudo su postgres
@@ -49,12 +49,12 @@ EOF
 exit
 
 # Start the app back up
-sudo systemctl start central.service
+sudo systemctl start teiserver.service
 
 # Run the migrations
-centralapp eval "Teiserver.Release.migrate"
+teiserverapp eval "Teiserver.Release.migrate"
 
 # Restart the app so it can build the initial data needed for various things
-sudo systemctl restart central.service
+sudo systemctl restart teiserver.service
 ```
 

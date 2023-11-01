@@ -10,12 +10,12 @@ defmodule TeiserverWeb.Admin.CodeController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
-    site_menu_active: "central_admin",
+    site_menu_active: "teiservercentral_admin",
     sub_menu_active: "code"
   )
 
-  plug :add_breadcrumb, name: 'Account', url: '/central'
-  plug :add_breadcrumb, name: 'Codes', url: '/central/codes'
+  plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
+  plug :add_breadcrumb, name: 'Codes', url: '/teiserver/admin/codes'
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do

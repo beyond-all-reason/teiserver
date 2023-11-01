@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Endpoint do
 
   @session_options [
     store: :cookie,
-    key: "_central_key",
+    key: "_teiserver_key",
     signing_salt: "zv0zamJX",
     same_site: "Lax",
     max_age: 1_814_400

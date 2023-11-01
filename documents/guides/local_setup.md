@@ -105,10 +105,10 @@ If you want to do things like have a discord bot in development you don't want t
 ```elixir
 import Config
 
-config :central, Teiserver,
+config :teiserver, Teiserver,
   enable_discord_bridge: true
 
-config :central, DiscordBridgeBot,
+config :teiserver, DiscordBridgeBot,
   token: "------",
   bot_name: "Teiserver Bridge DEV",
   bridges: [
@@ -119,7 +119,7 @@ config :central, DiscordBridgeBot,
   ]
 
 # Comment the below block to enable background jobs to take place locally
-config :central, Oban,
+config :teiserver, Oban,
   queues: false,
   crontab: false
 

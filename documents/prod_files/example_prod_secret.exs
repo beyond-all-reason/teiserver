@@ -44,7 +44,7 @@ config :teiserver, TeiserverWeb.Endpoint,
   secret_key_base: secret_key_base
 
 config :teiserver, Teiserver.Account.Guardian,
-  issuer: "central",
+  issuer: "teiserver",
   secret_key: "mix phx.gen.secret"
 
 config :teiserver, Teiserver.Mailer,

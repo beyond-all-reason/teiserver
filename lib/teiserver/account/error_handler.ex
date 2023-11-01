@@ -14,7 +14,7 @@ defmodule Teiserver.Account.ErrorHandler do
 
   def auth_error(conn, {:invalid_token, _message}, _opts) do
     conn
-    |> put_resp_cookie("_central_key", "", max_age: 0)
+    |> put_resp_cookie("_teiserver_key", "", max_age: 0)
     |> Phoenix.Controller.redirect(
       to: TeiserverWeb.Router.Helpers.account_session_path(conn, :login)
     )
