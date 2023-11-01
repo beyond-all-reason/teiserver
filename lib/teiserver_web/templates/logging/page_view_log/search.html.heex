@@ -43,7 +43,7 @@
           <div class="row">
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="central-user-search" class="control-label">User: </label>
-              <%= render(CentralWeb.Account.UserView, "picker.html",
+              <%= render(TeiserverWeb.Account.UserView, "picker.html",
                 input_name: "search[account_user]",
                 value: @params["account_user"]
               ) %>

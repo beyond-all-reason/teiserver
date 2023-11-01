@@ -1,4 +1,4 @@
-defmodule CentralWeb.Account.UserView do
+defmodule TeiserverWeb.Account.UserView do
   use TeiserverWeb, :view
 
   @spec view_colour :: atom

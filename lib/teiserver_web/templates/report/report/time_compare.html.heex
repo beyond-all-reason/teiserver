@@ -151,7 +151,7 @@
                 <label for={"search_account_user#{i}"} class="control-label">
                   User <%= i %>:
                 </label>
-                <%= render(CentralWeb.Account.UserView, "picker.html",
+                <%= render(TeiserverWeb.Account.UserView, "picker.html",
                   input_name: "report[account_user#{i}]",
                   input_id: "report_account_user#{i}",
                   value: @params["account_user#{i}"]
