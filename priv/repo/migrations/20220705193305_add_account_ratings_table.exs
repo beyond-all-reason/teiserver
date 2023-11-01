@@ -13,6 +13,7 @@ defmodule Teiserver.Repo.Migrations.AddAccountRatingsTable do
       add :uncertainty, :float
 
       add :last_updated, :timestamp
+      add :leaderboard_rating, :float
     end
 
     create index(:teiserver_account_ratings, [:user_id])

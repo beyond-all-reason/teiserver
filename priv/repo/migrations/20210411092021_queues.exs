@@ -13,6 +13,8 @@ defmodule Teiserver.Repo.Migrations.Queues do
       add :settings, :jsonb
       add :map_list, {:array, :string}
 
+      add :team_count, :integer
+
       timestamps()
     end
   end

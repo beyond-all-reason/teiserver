@@ -13,7 +13,12 @@ defmodule Teiserver.Repo.Migrations.AddMatchmakingTables do
       add :match_id, references(:teiserver_battle_matches, on_delete: :nothing)
       add :rating_type_id, references(:teiserver_game_rating_types, on_delete: :nothing)
 
+      add :party_id, :string
+      add :inserted_at, :timestamp
       add :value, :jsonb
     end
+
+    create index(:teiserver_game_rating_logs, [:user_id])
+    create index(:teiserver_game_rating_logs, [:match_id])
   end
 end

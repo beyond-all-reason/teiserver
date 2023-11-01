@@ -11,9 +11,5 @@ defmodule Teiserver.Repo.Migrations.ReportResponses do
 
       timestamps()
     end
-
-    alter table(:moderation_reports) do
-      add :closed, :boolean, default: false
-    end
   end
 end

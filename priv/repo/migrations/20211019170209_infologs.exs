@@ -10,6 +10,7 @@ defmodule Teiserver.Repo.Migrations.Infologs do
       add :log_type, :string
       add :metadata, :jsonb
       add :contents, :text
+      add :size, :integer
     end
   end
 end

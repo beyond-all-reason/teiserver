@@ -13,11 +13,20 @@ defmodule Teiserver.Repo.Migrations.TeiserverBattleMatches do
       add :passworded, :boolean
       add :game_type, :string
 
+      add :processed, :boolean
+
       add :founder_id, references(:account_users, on_delete: :nothing)
       add :bots, :jsonb
 
       add :started, :utc_datetime
       add :finished, :utc_datetime
+
+      add :game_duration, :integer
+      add :winning_team, :integer, default: nil, null: true
+
+      add :server_uuid, :string
+
+      add :queue_id, references(:teiserver_game_queues, on_delete: :nothing)
 
       timestamps()
     end
@@ -28,6 +37,10 @@ defmodule Teiserver.Repo.Migrations.TeiserverBattleMatches do
       add :team_id, :integer
       add :user_id, references(:account_users, on_delete: :nothing), primary_key: true
       add :match_id, references(:teiserver_battle_matches, on_delete: :nothing), primary_key: true
+      add :left_after, :integer
+
+      add :win, :boolean, default: nil, null: true
+      add :stats, :jsonb, default: nil, null: true
     end
   end
 end

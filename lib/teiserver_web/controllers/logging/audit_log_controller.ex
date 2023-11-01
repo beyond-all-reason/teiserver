@@ -44,8 +44,7 @@ defmodule TeiserverWeb.Logging.AuditLogController do
       Logging.list_audit_logs(
         search: [
           action: params["action"],
-          user_id: params["user_id"],
-          group_id: params["group_id"]
+          user_id: params["user_id"]
         ],
         joins: [:user],
         order_by: "Newest first",

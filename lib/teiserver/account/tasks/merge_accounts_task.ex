@@ -48,13 +48,7 @@ defmodule Teiserver.Account.MergeAccountsTask do
     Ecto.Adapters.SQL.query!(Repo, query, [keeping_id, deleting_id])
 
     # Reports
-    query = "UPDATE account_reports SET reporter_id = $1 WHERE reporter_id = $2"
 
-    Ecto.Adapters.SQL.query!(Repo, query, [keeping_id, deleting_id])
-
-    query = "UPDATE account_reports SET target_id = $1 WHERE target_id = $2"
-
-    Ecto.Adapters.SQL.query!(Repo, query, [keeping_id, deleting_id])
 
     result = Teiserver.Admin.DeleteUserTask.delete_users([deleting_id])
 

@@ -26,17 +26,6 @@ defmodule Teiserver do
     :code.load_file(module)
   end
 
-  @spec user_group_id() :: integer()
-  def user_group_id(), do: ConCache.get(:application_metadata_cache, "teiserver_user_group")
-
-  @spec umbrella_group_id() :: integer()
-  def umbrella_group_id(),
-    do: ConCache.get(:application_metadata_cache, "teiserver_umbrella_group")
-
-  @spec internal_group_id() :: integer()
-  def internal_group_id(),
-    do: ConCache.get(:application_metadata_cache, "teiserver_internal_group")
-
   # Designed for debugging help
   @spec tachyon(String.t() | :timeout) :: {:ok, List.t() | Map.t()} | {:error, :bad_json}
   def tachyon(v) do

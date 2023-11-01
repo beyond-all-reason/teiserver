@@ -8,7 +8,6 @@ defmodule Teiserver.Repo.Migrations.Logging do
       add :ip, :string
 
       add :user_id, references(:account_users, on_delete: :nothing)
-      add :group_id, references(:account_groups, on_delete: :nothing)
 
       timestamps()
     end
@@ -44,7 +43,6 @@ defmodule Teiserver.Repo.Migrations.Logging do
       add :hourly_uniques, {:array, :integer}
       add :hourly_average_load_times, {:array, :integer}
 
-      add :user_data, :jsonb
       add :section_data, :jsonb
     end
   end

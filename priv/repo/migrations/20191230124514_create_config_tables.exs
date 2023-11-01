@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.CreateConfigUser do
+defmodule Teiserver.Repo.Migrations.CreateConfigTables do
   use Ecto.Migration
 
   def change do
@@ -11,5 +11,12 @@ defmodule Teiserver.Repo.Migrations.CreateConfigUser do
     end
 
     create index(:config_user, [:user_id])
+
+    create table(:config_site, primary_key: false) do
+      add :key, :string, primary_key: true
+      add :value, :string
+
+      timestamps()
+    end
   end
 end

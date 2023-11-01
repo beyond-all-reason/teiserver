@@ -59,30 +59,6 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     end
   end
 
-  # describe "create user" do
-  #   test "redirects to show when data is valid", %{conn: conn, child_group: child_group} do
-  #     conn =
-  #       post(conn, ~p"/teiserver/admin/user",
-  #         user: Map.put(@create_attrs, :admin_group_id, child_group.id)
-  #       )
-
-  #     # assert %{id: id} = redirected_params(conn)
-  #     # assert redirected_to(conn) == ~p"/teiserver/admin/user/#{id}"
-  #     assert redirected_to(conn) == ~p"/teiserver/admin/user"
-
-  #     new_user = Account.list_users(search: [name: @create_attrs.name])
-  #     assert Enum.count(new_user) == 1
-
-  #     # conn = get(conn, ~p"/teiserver/admin/user/#{id}")
-  #     # assert html_response(conn, 200) =~ "Show User"
-  #   end
-
-  #   test "renders errors when data is invalid", %{conn: conn} do
-  #     conn = post(conn, ~p"/teiserver/admin/user", user: @invalid_attrs)
-  #     assert html_response(conn, 200) =~ "Oops, something went wrong!"
-  #   end
-  # end
-
   describe "edit user" do
     test "renders form for editing nil", %{conn: conn} do
       resp = get(conn, ~p"/teiserver/admin/user/#{-1}/edit")

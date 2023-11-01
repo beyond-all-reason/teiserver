@@ -14,6 +14,7 @@ defmodule Teiserver.Repo.Migrations.AddCommunicationTextCallbacks do
       add :response, :text
 
       add :rules, :jsonb
+      add :last_triggered, :jsonb
 
       timestamps()
     end
