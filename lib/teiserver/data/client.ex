@@ -46,7 +46,6 @@ defmodule Teiserver.Client do
         side: 0,
         role: "spectator",
 
-        # TODO: Change client:lobby_id to be client:battle_lobby_id
         lobby_id: nil,
         print_client_messages: false,
         print_server_messages: false,
