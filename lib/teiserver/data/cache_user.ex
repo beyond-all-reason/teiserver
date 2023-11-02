@@ -1108,7 +1108,7 @@ defmodule Teiserver.CacheUser do
 
     # User stats
     Account.update_user_stat(user.id, %{
-      bot: user.bot,
+      bot: is_bot?(user),
       country: country,
       rank: rank,
       lobby_client: lobby_client,
