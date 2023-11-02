@@ -1254,10 +1254,12 @@ defmodule Teiserver.CacheUser do
   def is_moderator?(_), do: false
 
   @spec is_verified?(T.userid() | T.user()) :: boolean()
-  def is_verified?(nil), do: true
-  def is_verified?(userid) when is_integer(userid), do: is_verified?(get_user_by_id(userid))
-  def is_verified?(%{roles: roles}), do: Enum.member?(roles, "Verified")
-  def is_verified?(_), do: false
+  # def is_verified?(nil), do: true
+  # def is_verified?(userid) when is_integer(userid), do: is_verified?(get_user_by_id(userid))
+  # def is_verified?(%{roles: roles}), do: Enum.member?(roles, "Verified")
+  # def is_verified?(_), do: false
+
+  def is_verified?(_), do: true
 
   @spec rank_time(T.userid()) :: non_neg_integer()
   def rank_time(userid) do
