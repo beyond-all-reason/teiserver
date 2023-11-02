@@ -5,7 +5,6 @@ defmodule Teiserver.CacheUser do
   alias Teiserver.{Account, Config, Client, Coordinator, Telemetry, Chat, EmailHelper}
   alias Teiserver.Account.{LoginThrottleServer, UserCacheLib, Guardian}
   alias Teiserver.Chat.WordLib
-  alias Teiserver.SpringIdServer
   alias Argon2
   alias Teiserver.Data.Types, as: T
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
@@ -26,7 +25,7 @@ defmodule Teiserver.CacheUser do
   @spec keys() :: [atom]
   def keys(),
     do:
-      ~w(id name email inserted_at clan_id permissions colour icon behaviour_score trust_score  social_score smurf_of_id last_played last_logout roles)a
+      ~w(id name email inserted_at clan_id permissions colour icon behaviour_score trust_score  social_score smurf_of_id last_played last_logout roles discord_id)a
 
   # This is the version of keys with the extra fields we're going to be moving from data to the object itself
   # def keys(),
@@ -35,21 +34,16 @@ defmodule Teiserver.CacheUser do
   @data_keys [
     :rank,
     :country,
-    :moderator,
     :bot,
-    :friends,
-    :friend_requests,
-    :ignored,
-    :avoided,
     :password_hash,
     :verified,
     :email_change_code,
     :last_login,
     :last_login_mins,
+    :last_login_timex,
     :restrictions,
     :restricted_until,
     :shadowbanned,
-    :springid,
     :lobby_hash,
     :hw_hash,
     :chobby_hash,
@@ -69,19 +63,15 @@ defmodule Teiserver.CacheUser do
     country: "??",
     moderator: false,
     bot: false,
-    friends: [],
-    friend_requests: [],
-    ignored: [],
-    avoided: [],
     password_hash: nil,
     verified: false,
     email_change_code: nil,
     last_login: nil,
     last_login_mins: nil,
+    last_login_timex: nil,
     restrictions: [],
     restricted_until: nil,
     shadowbanned: false,
-    springid: nil,
     lobby_hash: [],
     hw_hash: nil,
     chobby_hash: nil,
@@ -127,9 +117,8 @@ defmodule Teiserver.CacheUser do
       password: encrypted_password,
       colour: @default_colour,
       icon: @default_icon,
-      permissions: [],
-      # TODO: Remove springid
-      springid: SpringIdServer.get_next_id(),
+      roles: ["Verified"],
+      permissions: ["Verified"],
       behaviour_score: 10_000,
       trust_score: 10_000,
       data:
@@ -156,8 +145,8 @@ defmodule Teiserver.CacheUser do
       password: encrypted_password,
       colour: @default_colour,
       icon: @default_icon,
-      permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
-      springid: SpringIdServer.get_next_id(),
+      roles: ["Verified"],
+      permissions: ["Verified"],
       behaviour_score: 10_000,
       trust_score: 10_000,
       data:
@@ -272,7 +261,6 @@ defmodule Teiserver.CacheUser do
         # Now add them to the cache
         user
         |> convert_user
-        |> Map.put(:springid, SpringIdServer.get_next_id())
         |> Map.put(:password_hash, spring_md5_password(password))
         |> Map.put(:spring_password, false)
         |> add_user
@@ -329,7 +317,6 @@ defmodule Teiserver.CacheUser do
         # Now add them to the cache
         user
         |> convert_user
-        |> Map.put(:springid, SpringIdServer.get_next_id())
         |> add_user
 
         if not String.ends_with?(user.email, "@agents") do
@@ -1096,8 +1083,6 @@ defmodule Teiserver.CacheUser do
           calculate_rank(user.id)
       end
 
-    # springid = (if Map.get(user, :springid) != nil, do: user.springid, else: SpringIdServer.get_next_id()) |> int_parse
-
     # We don't care about the lobby version so much as we do about the lobby itself
     lobby_client =
       case Regex.run(~r/^[a-zA-Z\ ]+/, lobby_client) do
@@ -1111,10 +1096,10 @@ defmodule Teiserver.CacheUser do
     user = %{
       user
       | last_login: round(System.system_time(:second) / 60),
+        last_login_timex: Timex.now(),
         last_login_mins: round(System.system_time(:second) / 60),
         country: country,
         rank: rank,
-        springid: user.id,
         lobby_client: lobby_client,
         lobby_hash: lobby_hash
     }

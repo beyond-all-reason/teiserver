@@ -1,0 +1,17 @@
+<div class="row">
+  <div class="col">
+    <h4>DB object (sans data)</h4>
+    <textarea name="" id="" rows="40" cols="40" class="form-control monospace"><%= Jason.encode! @json_user, pretty: true %></textarea>
+  </div>
+  <div class="col">
+    <h4>Cache object</h4>
+    <textarea name="" id="" rows="40" cols="40" class="form-control monospace"><%= Jason.encode! @cache_user, pretty: true %></textarea>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col">
+    <h4>Extra keys in cache</h4>
+    <textarea name="" id="" rows="40" cols="40" class="form-control monospace"><%= Enum.join(@extra_keys, "\n") %></textarea>
+  </div>
+</div>

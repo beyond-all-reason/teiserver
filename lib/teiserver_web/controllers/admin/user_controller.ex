@@ -145,12 +145,24 @@ defmodule TeiserverWeb.Admin.UserController do
         user_stats = Account.get_user_stat_data(user.id)
         client = Account.get_client_by_id(user.id)
 
+        json_user = Map.drop(user, [:__struct__, :__meta__, :user_configs, :clan, :smurf_of, :user_stat, :data])
+        cache_user = Account.get_user_by_id(user.id)
+
+        extra_keys = cache_user
+          |> Map.keys()
+          |> Enum.reject(fn cache_user_key ->
+            Enum.member?(Map.keys(json_user), cache_user_key)
+          end)
+
         conn
         |> assign(:user, user)
         |> assign(:client, client)
         |> assign(:user_stats, user_stats)
         |> assign(:role_data, RoleLib.role_data())
         |> assign(:section_menu_active, "show")
+        |> assign(:json_user, json_user)
+        |> assign(:cache_user, cache_user)
+        |> assign(:extra_keys, extra_keys)
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
         |> render("show.html")
 

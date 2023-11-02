@@ -11,9 +11,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.SystemIn do
   def do_handle("watch", %{"channel" => channel}, state) do
     case channel do
       "friends" ->
-        user = Account.get_user_by_id(state.userid)
-
-        user.friends
+        Account.list_friend_ids_of_user(state.userid)
         |> Enum.each(fn f ->
           send(self(), {:action, {:watch_channel, "teiserver_client_watch:#{f}"}})
         end)
@@ -22,9 +20,9 @@ defmodule Teiserver.Protocols.Tachyon.V1.SystemIn do
 
       "friend:" <> f ->
         f_id = int_parse(f)
-        user = Account.get_user_by_id(state.userid)
+        friends = Account.list_friend_ids_of_user(state.userid)
 
-        if Enum.member?(user.friends, f_id) do
+        if Enum.member?(friends, f_id) do
           send(self(), {:action, {:watch_channel, "teiserver_client_watch:#{f}"}})
           reply(:system, :watch, {:ok, channel}, state)
         else
@@ -59,9 +57,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.SystemIn do
   def do_handle("unwatch", %{"channel" => channel}, state) do
     case channel do
       "friends" ->
-        user = Account.get_user_by_id(state.userid)
-
-        user.friends
+        Account.list_friend_ids_of_user(state.userid)
         |> Enum.each(fn f ->
           send(self(), {:action, {:watch_channel, "teiserver_client_watch:#{f}"}})
         end)

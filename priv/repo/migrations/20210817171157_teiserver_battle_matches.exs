@@ -38,6 +38,7 @@ defmodule Teiserver.Repo.Migrations.TeiserverBattleMatches do
       add :user_id, references(:account_users, on_delete: :nothing), primary_key: true
       add :match_id, references(:teiserver_battle_matches, on_delete: :nothing), primary_key: true
       add :left_after, :integer
+      add :party_id, :string
 
       add :win, :boolean, default: nil, null: true
       add :stats, :jsonb, default: nil, null: true

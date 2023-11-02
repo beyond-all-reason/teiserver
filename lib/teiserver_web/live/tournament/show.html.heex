@@ -156,8 +156,8 @@ spectators =
 
               party_colour = @parties[client.party_id]
 
-              friend = Enum.member?(@server_user.friends, client)
-              ignored = Enum.member?(@server_user.ignored, client) %>
+              friend = Enum.member?(@friends, client.userid)
+              ignored = Enum.member?(@ignored, client.userid) %>
               <%= if user do %>
                 <tr id={"user-row-#{user.id}"}>
                   <td width="100">
@@ -240,8 +240,8 @@ spectators =
               <% user = @users[client.userid]
               {rating_value, uncertainty} = @ratings[client.userid]
 
-              friend = Enum.member?(@server_user.friends, client)
-              ignored = Enum.member?(@server_user.ignored, client) %>
+              friend = Enum.member?(@friends, client.userid)
+              ignored = Enum.member?(@ignored, client.userid) %>
               <%= if user do %>
                 <tr id={"user-row-#{user.id}"}>
                   <td width="100">

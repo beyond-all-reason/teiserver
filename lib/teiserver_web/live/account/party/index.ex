@@ -51,11 +51,6 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
   end
 
   @impl true
-  def render(assigns) do
-    Phoenix.View.render(TeiserverWeb.Account.PartyLiveView, "index.html", assigns)
-  end
-
-  @impl true
   def handle_info(%{channel: "teiserver_party:" <> party_id, event: :closed}, socket) do
     :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
 

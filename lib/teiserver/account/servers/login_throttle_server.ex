@@ -423,7 +423,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     cond do
       CacheUser.is_bot?(user) -> :instant
       CacheUser.has_any_role?(user, ["Server"]) -> :instant
-      CacheUser.has_any_role?(user, ["Moderator"]) -> :moderator
+      CacheUser.is_moderator?(user) -> :moderator
       CacheUser.has_any_role?(user, ["Core"]) -> :core
       CacheUser.has_any_role?(user, ["Contributor"]) -> :contributor
       CacheUser.has_any_role?(user, ["Overwatch", "Reviewer"]) -> :volunteer

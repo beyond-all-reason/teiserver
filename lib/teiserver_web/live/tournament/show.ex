@@ -32,6 +32,8 @@ defmodule TeiserverWeb.TournamentLive.Show do
       end
 
     client = Account.get_client_by_id(socket.assigns[:current_user].id)
+    friends = Account.list_friend_ids_of_user(socket.assigns[:current_user].id)
+    ignored = Account.list_userids_ignored_by_userid(socket.assigns[:current_user].id)
 
     :timer.send_interval(10_000, :tick)
 
@@ -40,6 +42,8 @@ defmodule TeiserverWeb.TournamentLive.Show do
       |> Teiserver.ServerUserPlug.live_call()
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/battle/lobbies")
+      |> assign(:friends, friends)
+      |> assign(:ignored, ignored)
       |> assign(:ratings, %{})
       |> assign(:client, client)
       |> assign(:site_menu_active, "teiserver_lobbies")

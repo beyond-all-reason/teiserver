@@ -488,7 +488,7 @@ defmodule Teiserver.Protocols.SpringIn do
     if CacheUser.allow?(state.userid, :bot) do
       target = CacheUser.get_user_by_name(data)
       hash = target.lobby_hash
-      reply(:user_id, {data, hash, target.springid}, msg_id, state)
+      reply(:user_id, {data, hash, target.id}, msg_id, state)
     else
       state
     end

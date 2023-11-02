@@ -1,6 +1,6 @@
 defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
-  alias Teiserver.{Client, CacheUser, Account, SpringIdServer}
+  alias Teiserver.{Client, CacheUser, Account}
   alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Protocols.TachyonLib
@@ -65,7 +65,6 @@ defmodule Teiserver.TeiserverTestLib do
 
         user
           |> CacheUser.convert_user()
-          |> Map.put(:springid, SpringIdServer.get_next_id())
           |> CacheUser.add_user()
           |> CacheUser.verify_user()
 

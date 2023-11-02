@@ -357,7 +357,7 @@ defmodule Teiserver.Protocols.SpringOut do
     ringer_user = Account.get_user_by_id(ringer_id)
 
     do_ring = cond do
-      ringer_user.moderator == true -> true
+      CacheUser.is_moderator?(ringer_user) == true -> true
       CacheUser.is_bot?(ringer_user) == true -> true
       Account.does_a_ignore_b?(state_userid, ringer_id) -> false
       true -> true
@@ -404,8 +404,8 @@ defmodule Teiserver.Protocols.SpringOut do
     "#{username} is currently bound to #{ip}\n"
   end
 
-  defp do_reply(:user_id, {username, lobby_hash, springid}) do
-    "The ID for #{username} is #{lobby_hash} #{springid}\n"
+  defp do_reply(:user_id, {username, lobby_hash, userid}) do
+    "The ID for #{username} is #{lobby_hash} #{userid}\n"
   end
 
   defp do_reply(:change_email_request_denied, reason) do
@@ -452,7 +452,7 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:direct_message, {from_id, messages, state_user}) when is_list(messages) do
     from_user = Account.get_user_by_id(from_id)
 
-    if not Account.does_a_ignore_b?(state_user.id, from_id) or from_user.moderator == true do
+    if not Account.does_a_ignore_b?(state_user.id, from_id) or CacheUser.is_moderator?(from_user) == true do
       from_name = Account.get_username_by_id(from_id)
 
       messages
@@ -470,7 +470,7 @@ defmodule Teiserver.Protocols.SpringOut do
        when is_list(messages) do
     from_user = Account.get_user_by_id(from_id)
 
-    if not Account.does_a_ignore_b?(state_user.id, from_id) or from_user.moderator == true or
+    if not Account.does_a_ignore_b?(state_user.id, from_id) or CacheUser.is_moderator?(from_user) == true or
          CacheUser.is_bot?(from_user) == true do
       from_name = Account.get_username_by_id(from_id)
 
@@ -489,7 +489,7 @@ defmodule Teiserver.Protocols.SpringOut do
        when is_list(messages) do
     from_user = Account.get_user_by_id(from_id)
 
-    if not Account.does_a_ignore_b?(state_user.id, from_id) or from_user.moderator == true or
+    if not Account.does_a_ignore_b?(state_user.id, from_id) or CacheUser.is_moderator?(from_user) == true or
          CacheUser.is_bot?(from_user) == true do
       from_name = Account.get_username_by_id(from_id)
 
@@ -754,7 +754,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
     Logger.metadata(request_id: "SpringTcpServer##{user.id}")
 
-    exempt_from_cmd_throttle = user.moderator == true or CacheUser.is_bot?(user) == true
+    exempt_from_cmd_throttle = CacheUser.is_moderator?(user) or CacheUser.is_bot?(user) == true
 
     %{
       state

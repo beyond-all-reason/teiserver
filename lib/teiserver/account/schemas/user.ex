@@ -22,13 +22,14 @@ defmodule Teiserver.Account.User do
     field :restricted_until, :utc_datetime
 
     field :shadowbanned, :boolean, default: false
-    field :last_login, :utc_datetime
 
     # Start time of their last match
+    field :last_login, :utc_datetime
     field :last_played, :utc_datetime
     field :last_logout, :utc_datetime
 
     field :discord_id, :integer
+    field :discord_dm_channel_id, :integer
     field :steam_id, :integer
 
     has_many :user_configs, Teiserver.Config.UserConfig

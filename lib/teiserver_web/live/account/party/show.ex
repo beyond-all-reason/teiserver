@@ -26,6 +26,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
       end
 
     user = Account.get_user_by_id(socket.assigns.user_id)
+    friends = Account.list_friend_ids_of_user(socket.assigns.user_id)
 
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{socket.assigns.user_id}")
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_client:#{socket.assigns.user_id}")
@@ -34,6 +35,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
       socket
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Parties", url: "/teiserver/account/parties")
+      |> assign(:friends, friends)
       |> assign(:lobby_user_ids, lobby_user_ids)
       |> assign(:client, client)
       |> assign(:user, user)
@@ -75,11 +77,6 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     else
       {:noreply, socket |> redirect(to: Routes.ts_game_party_index_path(socket, :index))}
     end
-  end
-
-  @impl true
-  def render(assigns) do
-    Phoenix.View.render(TeiserverWeb.Account.PartyLiveView, "show.html", assigns)
   end
 
   @impl true

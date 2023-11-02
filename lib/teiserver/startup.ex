@@ -54,7 +54,6 @@ defmodule Teiserver.Startup do
     Teiserver.Communication.build_text_callback_cache()
 
     Teiserver.LobbyIdServer.start_lobby_id_server()
-    Teiserver.SpringIdServer.start_spring_id_server()
 
     Teiserver.Tachyon.CommandDispatch.build_dispatch_cache()
     Teiserver.Tachyon.Schema.load_schemas()

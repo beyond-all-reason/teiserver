@@ -195,7 +195,7 @@ defmodule Teiserver.Account.UserCacheLib do
   @spec convert_user(CacheUser.t() | nil) :: T.user() | nil
   def convert_user(nil), do: nil
 
-  def convert_user(user) do
+  def convert_user(%Account.User{} = user) do
     data =
       CacheUser.data_keys()
       |> Map.new(fn k -> {k, Map.get(user.data || %{}, to_string(k), CacheUser.default_data()[k])} end)

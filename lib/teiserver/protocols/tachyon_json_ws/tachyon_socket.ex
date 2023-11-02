@@ -302,7 +302,6 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
   @spec new_conn(Teiserver.Account.User.t()) :: map()
   defp new_conn(user) do
-    # exempt_from_cmd_throttle = user.moderator == true or User.is_bot?(user) == true
     exempt_from_cmd_throttle = true
 
     %{

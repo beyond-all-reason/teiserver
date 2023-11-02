@@ -27,8 +27,8 @@ defmodule Teiserver.Repo.Migrations.CreateUsers do
 
       add :shadowbanned, :boolean, default: false
 
-      add :discord_id, :integer
-      add :steam_id, :integer
+      add :discord_id, :bigint
+      add :steam_id, :bigint
 
       add :smurf_of_id, references(:account_users, on_delete: :nothing)
 
