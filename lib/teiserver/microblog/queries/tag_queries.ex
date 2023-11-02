@@ -13,6 +13,7 @@ defmodule Teiserver.Microblog.TagQueries do
     |> do_where(args[:where])
     |> do_order_by(args[:order_by])
     |> query_select(args[:select])
+    |> limit_query(args[:limit] || 50)
   end
 
   @spec do_where(Ecto.Query.t(), list | map | nil) :: Ecto.Query.t()

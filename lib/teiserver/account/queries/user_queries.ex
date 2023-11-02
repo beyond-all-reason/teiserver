@@ -15,6 +15,7 @@ defmodule Teiserver.Account.UserQueries do
     |> do_preload(args[:preload])
     |> do_order_by(args[:order_by])
     |> query_select(args[:select])
+    |> limit_query(args[:limit] || 50)
   end
 
   @spec do_where(Ecto.Query.t(), list | map | nil) :: Ecto.Query.t()
@@ -75,7 +76,7 @@ defmodule Teiserver.Account.UserQueries do
       where: ilike(users.name, ^uname)
   end
 
-  def _where(query, :basic_where, value) do
+  def _where(query, :basic_search, value) do
     from users in query,
       where:
         ilike(users.name, ^"%#{value}%") or
