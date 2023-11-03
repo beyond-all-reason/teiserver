@@ -39,7 +39,11 @@ defmodule Teiserver.Protocols.Spring.UserOut do
   end
 
   def do_reply(:whois_name, {:no_user, username}, _state) do
-    "s.user.whoisName #{username} error user not found\n"
+    encoded_data = %{"error" => "user not found"}
+      |> Jason.encode!()
+      |> Base.encode64(padding: false)
+
+    "s.user.whoisName #{username} #{encoded_data}\n"
   end
 
   def do_reply(:whois_name, {:ok, user}, _state) do
@@ -52,7 +56,11 @@ defmodule Teiserver.Protocols.Spring.UserOut do
   end
 
   def do_reply(:whois, {:no_user, userid}, _state) do
-    "s.user.whois #{userid} error user not found\n"
+    encoded_data = %{"error" => "user not found"}
+      |> Jason.encode!()
+      |> Base.encode64(padding: false)
+
+    "s.user.whois #{userid} #{encoded_data}\n"
   end
 
   def do_reply(:whois, {:ok, user}, _state) do
