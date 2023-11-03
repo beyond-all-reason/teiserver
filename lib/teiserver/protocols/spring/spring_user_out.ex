@@ -39,7 +39,7 @@ defmodule Teiserver.Protocols.Spring.UserOut do
   end
 
   def do_reply(:whois_name, {:no_user, username}, _state) do
-    "s.user.whoisName error: No user found for name:#{username}\n"
+    "s.user.whoisName #{username} error user not found\n"
   end
 
   def do_reply(:whois_name, {:ok, user}, _state) do
@@ -52,7 +52,7 @@ defmodule Teiserver.Protocols.Spring.UserOut do
   end
 
   def do_reply(:whois, {:no_user, userid}, _state) do
-    "s.user.whois error: No user found for id:#{userid}\n"
+    "s.user.whois #{userid} error user not found\n"
   end
 
   def do_reply(:whois, {:ok, user}, _state) do
