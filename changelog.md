@@ -4,6 +4,8 @@
 
 - New spring friendship commands added
 - Spring `c.user.whois` command added
+- Spring `c.user.accept_friend_request` command added
+- Spring `c.user.decline_friend_request` command added
 - Added microblog report
 - Added RSS feed to microblog
 - Tags for the microblog can now be filtered

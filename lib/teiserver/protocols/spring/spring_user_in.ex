@@ -3,6 +3,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
   alias Teiserver.{Account, Room, CacheUser}
   alias Teiserver.Protocols.SpringIn
   import Teiserver.Protocols.SpringOut, only: [reply: 5, do_join_room: 2, do_login_accepted: 3]
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
@@ -25,6 +26,22 @@ defmodule Teiserver.Protocols.Spring.UserIn do
       end)
 
     reply(:user, :add_friend, responses, msg_id, state)
+  end
+
+  @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
+  def do_handle("accept_friend_request", from_id_str, msg_id, state) do
+    from_id = int_parse(from_id_str)
+    result = Account.accept_friend_request(from_id, state.userid)
+
+    reply(:user, :accept_friend_request, {result, from_id_str}, msg_id, state)
+  end
+
+  @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
+  def do_handle("decline_friend_request", from_id_str, msg_id, state) do
+    from_id = int_parse(from_id_str)
+    result = Account.decline_friend_request(from_id, state.userid)
+
+    reply(:user, :decline_friend_request, {result, from_id_str}, msg_id, state)
   end
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
