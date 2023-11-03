@@ -257,7 +257,7 @@ defmodule Teiserver.Account.UserLib do
       {:ok, user}
     else
       # Authentication failure handler
-      Teiserver.Account.spring_auth_check(conn, user, plain_text_password)
+      Account.spring_auth_check(conn, user, plain_text_password)
     end
   end
 
@@ -274,7 +274,7 @@ defmodule Teiserver.Account.UserLib do
   end
 
   def authenticate_user(conn, email, plain_text_password) do
-    user = get_user(nil, where: [email: email])
+    user = get_user(nil, where: [email: email]) || get_user(nil, where: [email_lower: email])
 
     case user do
       nil ->

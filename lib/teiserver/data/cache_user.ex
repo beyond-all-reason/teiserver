@@ -25,7 +25,7 @@ defmodule Teiserver.CacheUser do
   @spec keys() :: [atom]
   def keys(),
     do:
-      ~w(id name email inserted_at clan_id permissions colour icon behaviour_score trust_score  social_score smurf_of_id last_played last_logout roles discord_id)a
+      ~w(id name email inserted_at clan_id permissions colour icon behaviour_score trust_score  social_score smurf_of_id last_login_timex last_played last_logout roles discord_id)a
 
   # This is the version of keys with the extra fields we're going to be moving from data to the object itself
   # def keys(),
@@ -1118,7 +1118,6 @@ defmodule Teiserver.CacheUser do
 
     Telemetry.log_simple_server_event(user.id, "account.user_login")
 
-    # TODO: Replace lobby_hash name with client_app_hash
     if not is_bot?(user) do
       Account.create_smurf_key(user.id, "client_app_hash", lobby_hash)
     end

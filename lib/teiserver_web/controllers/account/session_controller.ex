@@ -3,8 +3,7 @@ defmodule TeiserverWeb.Account.SessionController do
   alias Teiserver.Account
   alias Teiserver.Config
   alias Teiserver.Logging.LoggingPlug
-  alias Teiserver.Account.Guardian
-  alias Teiserver.Account.User
+  alias Account.{Guardian, User, UserLib}
   require Logger
 
   @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
@@ -22,10 +21,11 @@ defmodule TeiserverWeb.Account.SessionController do
         |> redirect(to: "/")
       end
     else
-      render(conn, "new.html",
-        changeset: changeset,
-        action: Routes.account_session_path(conn, :login)
-      )
+      conn
+      |> Guardian.Plug.sign_out(clear_remember_me: true)
+      |> assign(:changeset, changeset)
+      |> assign(:action, Routes.account_session_path(conn, :login))
+      |> render("new.html")
     end
   end
 
@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Account.SessionController do
     email = String.trim(email)
 
     conn
-    |> Account.UserLib.authenticate_user(email, password)
+    |> UserLib.authenticate_user(email, password)
     |> login_reply(conn)
   end
 
@@ -47,7 +47,7 @@ defmodule TeiserverWeb.Account.SessionController do
       |> Enum.join(".")
 
     code =
-      Teiserver.Account.get_code(nil,
+      Account.get_code(nil,
         search: [
           value: value,
           purpose: "one_time_login",
@@ -76,7 +76,7 @@ defmodule TeiserverWeb.Account.SessionController do
 
       true ->
         Logger.debug("SessionController.one_time_login success")
-        Teiserver.Account.delete_code(code)
+        Account.delete_code(code)
 
         user = Account.get_user!(code.user_id)
 
@@ -111,7 +111,8 @@ defmodule TeiserverWeb.Account.SessionController do
     conn
     |> Guardian.Plug.sign_out(clear_remember_me: true)
     |> put_flash(:danger, to_string(reason))
-    |> new(%{})
+    |> assign(:result, to_string(reason))
+    |> render("result.html")
   end
 
   @spec forgot_password(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
@@ -142,7 +143,7 @@ defmodule TeiserverWeb.Account.SessionController do
     expected_value = Teiserver.cache_get(:codes, key)
 
     existing_resets =
-      Teiserver.Account.list_codes(
+      Account.list_codes(
         search: [
           user_id: user.id,
           purpose: "reset_password",
@@ -158,7 +159,8 @@ defmodule TeiserverWeb.Account.SessionController do
       not Enum.empty?(existing_resets) ->
         conn
         |> put_flash(:success, "Existing password reset already sent out")
-        |> redirect(to: "/")
+        |> assign(:result, "Existing password reset already sent out")
+        |> render("result.html")
 
       expected_value == nil ->
         key = UUID.uuid1()
@@ -194,34 +196,37 @@ defmodule TeiserverWeb.Account.SessionController do
         |> render("forgot_password.html")
 
       true ->
-        Teiserver.Account.Emails.password_reset(user)
+        Account.Emails.password_reset(user)
         |> Teiserver.Mailer.deliver_now()
 
         conn
         |> put_flash(:success, "Password reset sent out")
-        |> redirect(to: "/")
+        |> redirect(to: "/login")
     end
   end
 
   @spec password_reset_form(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def password_reset_form(conn, %{"value" => value}) do
-    code = Teiserver.Account.get_code(value, preload: [:user])
+    code = Account.get_code(value, preload: [:user])
 
     cond do
       code == nil ->
         conn
         |> put_flash(:danger, "Unable to find link")
-        |> redirect(to: "/")
+        |> assign(:result, "Unable to find link")
+        |> render("result.html")
 
       code.purpose != "reset_password" ->
         conn
         |> put_flash(:danger, "Link cannot be found")
-        |> redirect(to: "/")
+        |> assign(:result, "Link cannot be found")
+        |> render("result.html")
 
       Timex.compare(Timex.now(), code.expires) == 1 ->
         conn
         |> put_flash(:danger, "Link has expired")
-        |> redirect(to: "/")
+        |> assign(:result, "Link has expired")
+        |> render("result.html")
 
       true ->
         conn
@@ -232,7 +237,7 @@ defmodule TeiserverWeb.Account.SessionController do
 
   @spec password_reset_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def password_reset_post(conn, %{"value" => value, "pass1" => pass1, "pass2" => pass2}) do
-    code = Teiserver.Account.get_code(value, preload: [:user])
+    code = Account.get_code(value, preload: [:user])
 
     cond do
       code == nil ->
@@ -276,7 +281,7 @@ defmodule TeiserverWeb.Account.SessionController do
             )
 
             # Now delete the code, it's been used
-            Teiserver.Account.delete_code(code)
+            Account.delete_code(code)
 
             conn
             |> put_flash(:success, "Your password has been reset; please login using the new details")
