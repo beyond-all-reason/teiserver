@@ -95,6 +95,9 @@ defmodule Teiserver.Helper.TimexHelper do
         :hms_or_ymd ->
           _hms_or_ymd(the_time, now)
 
+        :hms_or_hms_ymd ->
+          _hms_or_hms_ymd(the_time, now)
+
         :hm_or_dmy ->
           _hm_or_dmy(the_time, now)
 
@@ -199,6 +202,15 @@ defmodule Teiserver.Helper.TimexHelper do
       Timex.format!(the_time, "Today at {h24}:{m}:{s}")
     else
       Timex.format!(the_time, "{YYYY}-{0M}-{0D}")
+    end
+  end
+
+  @spec _hms_or_hms_ymd(DateTime.t(), DateTime.t()) :: String.t()
+  defp _hms_or_hms_ymd(the_time, today) do
+    if Timex.compare(the_time |> Timex.to_date(), today) == 0 do
+      Timex.format!(the_time, "Today at {h24}:{m}:{s}")
+    else
+      Timex.format!(the_time, "{h24}:{m}:{s} {YYYY}-{0M}-{0D}")
     end
   end
 
