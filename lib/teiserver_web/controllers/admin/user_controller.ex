@@ -34,6 +34,15 @@ defmodule TeiserverWeb.Admin.UserController do
         limit: 50
       )
 
+    # Sometimes we get a lot of matches so it can be good to put in place exact matches too
+    exact_match = if Enum.count(users) > 20 do
+      Account.list_users(search: [name_lower: Map.get(params, "s", "")])
+    else
+      []
+    end
+
+    users = exact_match ++ users |> Enum.reject(&(&1 == nil))
+
     if Enum.count(users) == 1 do
       conn
       |> redirect(to: Routes.ts_admin_user_path(conn, :show, hd(users).id))
@@ -148,7 +157,7 @@ defmodule TeiserverWeb.Admin.UserController do
         json_user = Map.drop(user, [:__struct__, :__meta__, :user_configs, :clan, :smurf_of, :user_stat, :data])
         cache_user = Account.get_user_by_id(user.id)
 
-        extra_keys = cache_user
+        extra_cache_keys = cache_user
           |> Map.keys()
           |> Enum.reject(fn cache_user_key ->
             Enum.member?(Map.keys(json_user), cache_user_key)
@@ -162,7 +171,7 @@ defmodule TeiserverWeb.Admin.UserController do
         |> assign(:section_menu_active, "show")
         |> assign(:json_user, json_user)
         |> assign(:cache_user, cache_user)
-        |> assign(:extra_keys, extra_keys)
+        |> assign(:extra_cache_keys, extra_cache_keys)
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
         |> render("show.html")
 

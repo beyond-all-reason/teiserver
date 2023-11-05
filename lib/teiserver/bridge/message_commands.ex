@@ -24,7 +24,7 @@ defmodule Teiserver.Bridge.MessageCommands do
     user = CacheUser.get_user_by_discord_id(author)
 
     if user do
-      CacheUser.update_user(%{user | discord_dm_channel: channel},
+      CacheUser.update_user(%{user | discord_dm_channel_id: channel, discord_dm_channel: channel},
         persist: true
       )
     end
@@ -69,7 +69,7 @@ defmodule Teiserver.Bridge.MessageCommands do
           Teiserver.cache_delete(:discord_bridge_account_codes, userid)
           user = CacheUser.get_user_by_id(userid)
 
-          CacheUser.update_user(%{user | discord_id: discord_id, discord_dm_channel: channel},
+          CacheUser.update_user(%{user | discord_id: discord_id, discord_dm_channel: channel, discord_dm_channel_id: channel},
             persist: true
           )
 

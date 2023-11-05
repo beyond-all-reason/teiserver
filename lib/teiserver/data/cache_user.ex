@@ -54,6 +54,7 @@ defmodule Teiserver.CacheUser do
     :spring_password,
     :discord_id,
     :discord_dm_channel,
+    :discord_dm_channel_id,
     :steam_id
   ]
   def data_keys(), do: @data_keys
@@ -81,6 +82,7 @@ defmodule Teiserver.CacheUser do
     spring_password: true,
     discord_id: nil,
     discord_dm_channel: nil,
+    discord_dm_channel_id: nil,
     steam_id: nil
   }
 

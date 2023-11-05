@@ -51,7 +51,7 @@ is_moderator = allow?(@conn, "Moderator")
           <% end %>
         <% end %>
 
-        <h4>Listing Users</h4>
+        <h4>Listing Users (<%= Enum.count(@users) %>)</h4>
 
         <table class="table table-sm">
           <thead>

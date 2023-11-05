@@ -44,11 +44,11 @@ defmodule Teiserver.Bridge.BridgeServer do
     user = Account.get_user_by_id(userid)
 
     cond do
-      user.discord_dm_channel == nil ->
+      user.discord_dm_channel && user.discord_dm_channel_id == nil ->
         nil
 
       true ->
-        channel_id = user.discord_dm_channel
+        channel_id = user.discord_dm_channel_id || user.discord_dm_channel
         Api.create_message(channel_id, message)
     end
   end
