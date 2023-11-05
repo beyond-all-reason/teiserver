@@ -40,16 +40,16 @@ defmodule Teiserver.Protocols.Spring.UserOut do
 
   def do_reply(:accept_friend_request, {result, from_id_str}, _state) do
     case result do
-      {:error, reason} -> "s.user.accept_friend_request #{from_id_str}\terror\t#{reason}\n"
-      :ok -> "s.user.accept_friend_request #{from_id_str}\tok\n"
+      {:error, reason} -> "s.user.accept_friend_request #{from_id_str}\tfailure\t#{reason}\n"
+      :ok -> "s.user.accept_friend_request #{from_id_str}\tsuccess\n"
       resp -> "s.user.accept_friend_request #{from_id_str}\t#{inspect resp}\n"
     end
   end
 
   def do_reply(:decline_friend_request, {result, from_id_str}, _state) do
     case result do
-      {:error, reason} -> "s.user.decline_friend_request #{from_id_str}\terror\t#{reason}\n"
-      :ok -> "s.user.decline_friend_request #{from_id_str}\tok\n"
+      {:error, reason} -> "s.user.decline_friend_request #{from_id_str}\tfailure\t#{reason}\n"
+      :ok -> "s.user.decline_friend_request #{from_id_str}\tsuccess\n"
       resp -> "s.user.decline_friend_request #{from_id_str}\t#{inspect resp}\n"
     end
   end
