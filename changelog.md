@@ -11,6 +11,7 @@
 - Tags for the microblog can now be filtered
 - Microblog posts now have a datetime shown beneath their title and we've split the summary out from the content completely
 - Completely removed notification system
+- If avoided or blocked by a lobby boss, you cannot join that lobby
 
 #### Bugfixes
 
