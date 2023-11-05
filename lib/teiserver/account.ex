@@ -1707,6 +1707,28 @@ defmodule Teiserver.Account do
 
   """
   def delete_friend(%Friend{} = friend) do
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "account_user_relationships:#{friend.user1_id}",
+      %{
+        channel: "account_user_relationships:#{friend.user1_id}",
+        event: :friend_deleted,
+        userid: friend.user1_id,
+        from_id: friend.user2_id
+      }
+    )
+
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "account_user_relationships:#{friend.user2_id}",
+      %{
+        channel: "account_user_relationships:#{friend.user2_id}",
+        event: :friend_deleted,
+        userid: friend.user2_id,
+        from_id: friend.user1_id
+      }
+    )
+
     Teiserver.cache_delete(:account_friend_cache, friend.user1_id)
     Teiserver.cache_delete(:account_friend_cache, friend.user2_id)
     Repo.delete(friend)

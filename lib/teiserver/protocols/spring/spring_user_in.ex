@@ -28,7 +28,22 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     reply(:user, :add_friend, responses, msg_id, state)
   end
 
-  @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
+  def do_handle("remove_friend", userids_str, msg_id, state) do
+    responses = userids_str
+      |> String.split("\t")
+      |> Enum.map(fn n ->
+        case Account.get_user_by_id(n) do
+          nil ->
+            {n, :no_user}
+          user ->
+            Account.delete_friend(state.userid, user.id)
+            {n, :success}
+        end
+      end)
+
+    reply(:user, :remove_friend, responses, msg_id, state)
+  end
+
   def do_handle("accept_friend_request", from_id_str, msg_id, state) do
     from_id = int_parse(from_id_str)
     result = Account.accept_friend_request(from_id, state.userid)
@@ -36,7 +51,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     reply(:user, :accept_friend_request, {result, from_id_str}, msg_id, state)
   end
 
-  @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
+
   def do_handle("decline_friend_request", from_id_str, msg_id, state) do
     from_id = int_parse(from_id_str)
     result = Account.decline_friend_request(from_id, state.userid)
@@ -44,7 +59,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     reply(:user, :decline_friend_request, {result, from_id_str}, msg_id, state)
   end
 
-  @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
+
   def do_handle("rescind_friend_request", userids_str, msg_id, state) do
     responses = userids_str
       |> String.split("\t")
@@ -65,7 +80,6 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     reply(:user, :rescind_friend_request, responses, msg_id, state)
   end
 
-  @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
   def do_handle("whois", userid_str, msg_id, state) do
     result = case Account.get_user_by_id(userid_str) do
       nil ->
@@ -77,7 +91,6 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     reply(:user, :whois, result, msg_id, state)
   end
 
-  @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
   def do_handle("whoisName", userid_str, msg_id, state) do
     result = case Account.get_user_by_name(userid_str) do
       nil ->

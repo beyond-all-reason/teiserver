@@ -28,6 +28,15 @@ defmodule Teiserver.Protocols.Spring.UserOut do
     end)
   end
 
+  def do_reply(:remove_friend, result_list, _state) do
+    result_list
+    |> Enum.map_join("", fn
+      {id, :success} -> "s.user.remove_friend #{id}\tsuccess\n"
+      {id, :no_user} -> "s.user.remove_friend #{id}\tfailure\tno user of that id\n"
+      {id, reason} -> "s.user.remove_friend #{id}\tfailure\tno failure catch for #{reason}\n"
+    end)
+  end
+
   def do_reply(:rescind_friend_request, result_list, _state) do
     result_list
     |> Enum.map_join("", fn
@@ -107,6 +116,10 @@ defmodule Teiserver.Protocols.Spring.UserOut do
 
   def do_reply(:new_follower, %{follower_id: follower_id}, _state) do
     "s.user.new_follower #{follower_id}\n"
+  end
+
+  def do_reply(:friend_deleted, %{from_id: from_id}, _state) do
+    "s.user.friend_deleted #{from_id}\n"
   end
 
   def do_reply(event, msg, _state) do
