@@ -940,16 +940,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
           not CacheUser.has_any_role?(userid, ["Caster", "TourneyPlayer", "Tournament player"]) ->
         {false, "Tournament game"}
 
-      Enum.member?(state.approved_users, userid) ->
-        {true, :override_approve}
-
-      state.gatekeeper == "friends" ->
-        if is_on_friendlist?(userid, state, :all) do
-          {true, nil}
-        else
-          {false, "Friends only gatekeeper"}
-        end
-
       block_status == :blocking ->
         Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.blocking")
         {false, "You are blocking too many players in this lobby"}
@@ -961,6 +951,16 @@ defmodule Teiserver.Coordinator.ConsulServer do
       boss_avoid_status == true ->
         Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.boss_blocked")
         {false, "You are blocked by the boss of this lobby"}
+
+      Enum.member?(state.approved_users, userid) ->
+        {true, :override_approve}
+
+      state.gatekeeper == "friends" ->
+        if is_on_friendlist?(userid, state, :all) do
+          {true, nil}
+        else
+          {false, "Friends only gatekeeper"}
+        end
 
       true ->
         {true, nil}
