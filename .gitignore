@@ -19,6 +19,9 @@ erl_crash.dump
 # Also ignore archive artifacts (built via "mix archive.build").
 *.ez
 
+# dialyzer
+priv/plts
+
 # Ignore package tarball (built via "mix hex.build").
 teiserver-*.tar
 central-*.tar

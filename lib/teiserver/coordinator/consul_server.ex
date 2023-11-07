@@ -5,11 +5,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
   """
   use GenServer
   require Logger
-  alias Teiserver.{Account, Coordinator, Client, CacheUser, Lobby, Battle, Telemetry, Config}
+  alias Teiserver.{Account, Coordinator, Client, CacheUser, Lobby, Battle, Telemetry, Config, Communication}
   alias Teiserver.Lobby.{ChatLib}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
-  alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib, SpadsParser}
@@ -1171,7 +1170,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
           if Config.get_user_config_cache(userid, "teiserver.Discord notifications") do
             if Config.get_user_config_cache(userid, "teiserver.Notify - Exited the queue") do
-              BridgeServer.send_direct_message(
+              Communication.send_discord_dm(
                 userid,
                 "You have reached the front of the queue and are now a player."
               )

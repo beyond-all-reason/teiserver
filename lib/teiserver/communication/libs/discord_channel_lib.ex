@@ -1,7 +1,9 @@
 defmodule Teiserver.Communication.DiscordChannelLib do
   @moduledoc false
   use TeiserverWeb, :library_newform
+  alias Teiserver.Account
   alias Teiserver.Communication.{DiscordChannel, DiscordChannelQueries}
+  alias Teiserver.Data.Types, as: T
 
   @spec special_channels() :: [String.t]
   def special_channels do
@@ -211,6 +213,29 @@ defmodule Teiserver.Communication.DiscordChannelLib do
       end
     else
       {:error, :discord_disabled}
+    end
+  end
+
+  @spec send_discord_dm(T.userid, String.t()) :: map | nil | {:error, String.t}
+  def send_discord_dm(userid, message) do
+    if use_discord?() do
+      user = Account.get_user_by_id(userid)
+
+      cond do
+        user == nil ->
+          {:error, "No user"}
+
+        user.discord_dm_channel_id != nil ->
+          new_discord_message(user.discord_dm_channel_id, message)
+
+        user.discord_id != nil ->
+          channel_id = Nostrum.Api.create_dm(user.discord_id)
+          Account.update_user(%{user | discord_dm_channel_id: channel_id}, persist: true)
+          new_discord_message(channel_id, message)
+
+        true ->
+          {:error, "No discord link for user"}
+      end
     end
   end
 

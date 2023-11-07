@@ -2,9 +2,8 @@ defmodule Teiserver.Battle.LobbyServer do
   @moduledoc false
   use GenServer
   require Logger
-  alias Teiserver.{Account, Battle, Config, Telemetry, Coordinator}
+  alias Teiserver.{Account, Battle, Config, Telemetry, Coordinator, Communication}
   alias Teiserver.Lobby.CommandLib
-  alias Teiserver.Bridge.BridgeServer
   alias Phoenix.PubSub
 
   @player_list_cache_age_max 200
@@ -104,7 +103,7 @@ defmodule Teiserver.Battle.LobbyServer do
     |> Enum.each(fn %{userid: userid} ->
       if Config.get_user_config_cache(userid, "teiserver.Discord notifications") do
         if Config.get_user_config_cache(userid, "teiserver.Notify - Game start") do
-          BridgeServer.send_direct_message(userid, "The game you are a player of is starting.")
+          Communication.send_discord_dm(userid, "The game you are a player of is starting.")
         end
       end
     end)

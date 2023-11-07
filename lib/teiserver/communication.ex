@@ -1,7 +1,11 @@
 defmodule Teiserver.Communication do
+  @moduledoc """
+
+  """
   import Ecto.Query, warn: false
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
+  alias Teiserver.Data.Types, as: T
 
   alias Teiserver.Communication.{TextCallback, TextCallbackLib}
 
@@ -231,6 +235,9 @@ defmodule Teiserver.Communication do
 
   @spec delete_discord_message(non_neg_integer | String.t, non_neg_integer) :: map | nil | {:error, String.t}
   defdelegate delete_discord_message(channel_id, message_id), to: DiscordChannelLib
+
+  @spec send_discord_dm(T.userid, String.t()) :: map | nil | {:error, String.t}
+  defdelegate send_discord_dm(userid, message), to: DiscordChannelLib
 
   @doc """
   Returns true if we are using discord in this environment and false if we are not.
