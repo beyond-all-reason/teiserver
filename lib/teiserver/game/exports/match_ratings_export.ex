@@ -11,14 +11,17 @@ defmodule Teiserver.Game.MatchRatingsExport do
   Teiserver.Game.MatchRatingsExport.show_form(nil, %{
     "date_preset" => "All time",
     "end_date" => "",
-    "rating_type" => "Duel",
-    "start_date" => ""
+    "rating_type" => "Team",
+    "start_date" => "2023-06-02"
   })
   """
   alias Teiserver.Helper.{DatePresets, TimexHelper}
-  alias Teiserver.{Battle}
+  alias Teiserver.{Battle, Repo}
   alias Teiserver.Game.MatchRatingLib
   require Logger
+
+  @id_chunk_size 10_000
+  @game_chunk_size 100
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-swords"
@@ -46,31 +49,11 @@ defmodule Teiserver.Game.MatchRatingsExport do
 
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[params["rating_type"]]
 
-    game_ids =
-      Battle.list_matches(
-        search: [
-          started_after: start_date |> Timex.to_datetime(),
-          finished_before: end_date |> Timex.to_datetime(),
-          rating_type_id: rating_type_id,
-          of_interest: true
-        ],
-        limit: :infinity,
-        # limit: 5,
-        select: [:id]
-      )
-      |> Stream.map(fn %{id: id} -> id end)
-      |> Enum.to_list()
-
-    Logger.info("Found #{Enum.count(game_ids)} matches, #{start_date} - #{end_date}")
-
-    data =
-      game_ids
-      |> Stream.chunk_every(100)
-      |> Stream.map(fn id_list ->
-        get_games(id_list)
-      end)
-      |> Enum.to_list()
-      |> List.flatten()
+    data = get_data(
+      start_date |> Timex.to_datetime(),
+      end_date |> Timex.to_datetime(),
+      rating_type_id
+    )
 
     content_type = "application/json"
     path = "/tmp/match_ratings_export.json"
@@ -81,6 +64,87 @@ defmodule Teiserver.Game.MatchRatingsExport do
     Logger.info("Ran #{__MODULE__} export in #{time_taken}s")
 
     {:file, path, "match_ratings.json", content_type}
+  end
+
+  """
+  Teiserver.Game.MatchRatingsExport.show_form(nil, %{"date_preset" => "All time","end_date" => "","rating_type" => "Team","start_date" => "2023-06-02"})
+  """
+  defp get_data(start_date, end_date, rating_type_id) do
+    games_per_chunk = round(@id_chunk_size/@game_chunk_size)
+
+    calculate_match_pages(start_date, end_date, rating_type_id)
+    |> Stream.with_index()
+    |> Stream.map(fn {{offset, limit, total_page_count}, id_chunk_index} ->
+      Logger.info("ID Chunk - #{id_chunk_index + 1}/#{total_page_count}")
+      get_match_ids_in_chunk(start_date, end_date, rating_type_id, offset, limit)
+      |> Stream.chunk_every(@game_chunk_size)
+      |> Stream.with_index()
+      |> Stream.map(fn {id_list, game_chunk_index} ->
+        Logger.info("Game Chunk - #{game_chunk_index}/#{games_per_chunk}")
+        get_games(id_list)
+      end)
+      |> Enum.to_list()
+      |> List.flatten()
+    end)
+    |> Enum.to_list()
+    |> List.flatten()
+  end
+
+  # Gets the list of ids but chunks them so we don't try to do too much at once
+  defp calculate_match_pages(start_date, end_date, rating_type_id) do
+    query = """
+      SELECT COUNT(id)
+      FROM teiserver_battle_matches
+      WHERE
+        started >= $1
+        AND finished < $2
+        AND rating_type_id = $3
+        AND processed = true
+        AND winning_team IS NOT NULL
+        AND finished IS NOT NULL
+        AND started IS NOT NULL
+    """
+
+    match_count = case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date, rating_type_id]) do
+      {:ok, results} ->
+        results.rows |> List.flatten |> hd
+
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
+    Logger.warn("Found #{match_count} matches, #{start_date} - #{end_date}")
+
+    page_count = ceil(match_count / @id_chunk_size)
+
+    Range.new(0, page_count-1)
+    |> Enum.map(fn page_number ->
+      {page_number * @id_chunk_size, @id_chunk_size, page_count}
+    end)
+  end
+
+  defp get_match_ids_in_chunk(start_date, end_date, rating_type_id, offset, limit) do
+    query = """
+      SELECT id
+      FROM teiserver_battle_matches
+      WHERE
+        started >= $1
+        AND finished < $2
+        AND rating_type_id = $3
+        AND processed = true
+        AND winning_team IS NOT NULL
+        AND finished IS NOT NULL
+        AND started IS NOT NULL
+      OFFSET $4
+      LIMIT $5
+    """
+
+    case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date, rating_type_id, offset, limit]) do
+      {:ok, results} ->
+        List.flatten(results.rows)
+
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
   end
 
   defp get_games(id_list) do
@@ -154,11 +218,11 @@ defmodule Teiserver.Game.MatchRatingsExport do
           rating_change: rating_log.value["rating_change"],
           skill_change: rating_log.value["skill_change"],
           uncertainty_change: rating_log.value["uncertainty_change"],
-          old_rating:
-            rating_log.value["rating_value"] - (rating_log.value["rating_value_change"] || 0),
-          old_skill: rating_log.value["skill"] - (rating_log.value["skill_change"] || 0),
-          old_uncertainty:
-            rating_log.value["uncertainty"] - (rating_log.value["uncertainty_change"] || 0)
+          # old_rating:
+          #   rating_log.value["rating_value"] - (rating_log.value["rating_value_change"] || 0),
+          # old_skill: rating_log.value["skill"] - (rating_log.value["skill_change"] || 0),
+          # old_uncertainty:
+          #   rating_log.value["uncertainty"] - (rating_log.value["uncertainty_change"] || 0)
         }
     end)
   end
