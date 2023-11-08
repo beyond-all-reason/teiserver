@@ -1,5 +1,6 @@
 defmodule Teiserver.Coordinator.SpadsParser do
-  alias Teiserver.CacheUser
+  @moduledoc false
+  alias Teiserver.{CacheUser, Account, Telemetry, Battle}
 
   @spec handle_in(String.t(), map()) :: {:host_update, Map.t()} | nil
   def handle_in(msg, state) do
@@ -13,6 +14,16 @@ defmodule Teiserver.Coordinator.SpadsParser do
       match = Regex.run(~r/nbTeams=(\d)+/, msg) ->
         [_, count] = match
         {:host_update, %{host_teamcount: String.to_integer(count)}}
+
+      # Kick or ban a player
+      match = Regex.run(~r/Battle ban added for user "(\S+)" \(duration: .*? by (\S+)\)/, msg) ->
+        [_, _kicked_name, kicker_name] = match
+        kicker_id = Account.get_userid_from_name(kicker_name)
+        match_id = Battle.get_lobby_match_id(state.lobby_id)
+        if kicker_id && match_id do
+          Telemetry.log_simple_lobby_event(kicker_id, match_id, "Kicked user from lobby")
+        end
+        nil
 
       # Add a boss
       match = Regex.run(~r/Boss mode enabled for (\S+)/, msg) ->
