@@ -35,8 +35,8 @@ defmodule TeiserverWeb.Admin.UserController do
       )
 
     # Sometimes we get a lot of matches so it can be good to put in place exact matches too
-    exact_match = if Enum.count(users) > 20 do
-      Account.list_users(search: [name_lower: Map.get(params, "s", "")])
+    exact_match = if Enum.count(users) > 20 && params["s"] do
+      Account.list_users(search: [name_lower: params["s"]])
     else
       []
     end
@@ -688,6 +688,25 @@ defmodule TeiserverWeb.Admin.UserController do
         conn
         |> put_flash(:danger, "Unable to access this user")
         |> redirect(to: ~p"/teiserver/admin/user")
+    end
+  end
+
+  @spec create_smurf_key(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def create_smurf_key(conn, %{"userid" => userid, "key" => key, "value" => value}) do
+    case Account.create_smurf_key(userid, key, value) do
+      {:ok, smurf_key} ->
+        IO.puts ""
+        IO.inspect smurf_key
+        IO.puts ""
+
+        conn
+        |> put_flash(:info, "Key added successfully.")
+        |> redirect(to: ~p"/teiserver/admin/users/smurf_search/#{userid}")
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        conn
+        |> put_flash(:info, "Unable to add that key")
+        |> redirect(to: ~p"/teiserver/admin/users/smurf_search/#{userid}")
     end
   end
 

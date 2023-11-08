@@ -625,6 +625,7 @@ defmodule TeiserverWeb.Router do
     get("/users/action/:id/:action", UserController, :perform_action)
     put("/users/action/:id/:action", UserController, :perform_action)
     get("/users/smurf_search/:id", UserController, :smurf_search)
+    post("/users/create_smurf_key/:userid", UserController, :create_smurf_key)
 
     put("/users/mark_as_smurf_of/:smurf_id/:origin_id", UserController, :mark_as_smurf_of)
     delete("/users/cancel_smurf_mark/:user_id", UserController, :cancel_smurf_mark)

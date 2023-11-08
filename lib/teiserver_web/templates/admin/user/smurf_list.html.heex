@@ -303,50 +303,75 @@ is_moderator = allow?(@conn, "Moderator") %>
             </table>
           </div>
 
-          <%= if allow?(@conn, "admin.dev") do %>
-            <div class="col-xl-8 col-xxl-6">
-              <h4>Key list</h4>
-              <table class="table table-sm">
-                <thead>
+          <div class="col-xl-8 col-xxl-6" :if={allow?(@conn, "Server")}>
+            <h4>Key list</h4>
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Value</th>
+                  <th>Updated</th>
+                  <th>&nbsp;</th>
+                </tr>
+              </thead>
+              <tbody>
+                <%= for key <- @all_user_keys do %>
                   <tr>
-                    <th>Type</th>
-                    <th>Value</th>
-                    <th>Updated</th>
-                    <th>&nbsp;</th>
+                    <td>
+                      <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}>
+                      </i>
+                      &nbsp; <%= key.type.name %>
+                    </td>
+                    <td>
+                      <%= if String.length(key.value) > 50 do %>
+                        <%= key.value |> String.slice(0, 50) %>...
+                      <% else %>
+                        <%= key.value %>
+                      <% end %>
+                    </td>
+                    <td>
+                      <%= date_to_str(key.last_updated, format: :hms_or_ymd) %>
+                    </td>
+                    <td>
+                      <%= link("Delete",
+                        to: Routes.ts_admin_user_path(@conn, :delete_smurf_key, key.id),
+                        class: "btn btn-danger btn-sm",
+                        method: "delete",
+                        data: [confirm: "Are you sure?"]
+                      ) %>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  <%= for key <- @all_user_keys do %>
-                    <tr>
-                      <td>
-                        <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}>
-                        </i>
-                        &nbsp; <%= key.type.name %>
-                      </td>
-                      <td>
-                        <%= if String.length(key.value) > 50 do %>
-                          <%= key.value |> String.slice(0, 50) %>...
-                        <% else %>
-                          <%= key.value %>
-                        <% end %>
-                      </td>
-                      <td>
-                        <%= date_to_str(key.last_updated, format: :hms_or_ymd) %>
-                      </td>
-                      <td>
-                        <%= link("Delete",
-                          to: Routes.ts_admin_user_path(@conn, :delete_smurf_key, key.id),
-                          class: "btn btn-danger btn-sm",
-                          method: "delete",
-                          data: [confirm: "Are you sure?"]
-                        ) %>
-                      </td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
-          <% end %>
+                <% end %>
+
+                <tr>
+                  <form action={~p"/teiserver/admin/users/create_smurf_key/#{@user.id}"} method="post">
+                    <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+                    <td>
+                      <.input type="select"
+                        options={Map.keys(type_icons)}
+                        name="key"
+                        value=""
+                      />
+                    </td>
+                  
+                    <td>
+                      <.input type="text"
+                        name="value"
+                        value=""
+                      />
+                    </td>
+                  
+                    <td colspan="2">
+                      <button type="submit" class={"btn btn-#{bsname} btn-sm btn-block"}>
+                        Add key
+                      </button>
+                    </td>
+                  </form>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
