@@ -4,7 +4,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   """
 
   use Nostrum.Consumer
-  alias Teiserver.{Room, Moderation}
+  alias Teiserver.{Room, Moderation, Communication, Logging}
   alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands}
   alias Teiserver.{Config}
   alias Nostrum.Api
@@ -104,10 +104,6 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     :ignore
   end
 
-  def handle_event({:READY, _, _ws}) do
-    :ignore
-  end
-
   def handle_event({:THREAD_CREATE, _, _ws}) do
     :ignore
   end
@@ -120,6 +116,56 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     :ignore
   end
 
+  def handle_event({:INTERACTION_CREATE, %{data: data} = interaction, _ws}) do
+    options_map = data.options
+      |> Map.new(fn %{name: name, value: value} ->
+        {name, value}
+      end)
+
+    response = case data.name do
+      "textcb" ->
+        case Communication.lookup_text_callback_from_trigger(options_map["reference"]) do
+          nil ->
+            nil
+
+          text_callback ->
+            if Communication.can_trigger_callback?(text_callback, interaction.channel_id) do
+              Logging.add_anonymous_audit_log("Discord.text_callback", %{
+                discord_user_id: interaction.user.id,
+                discord_channel_id: interaction.channel_id,
+                command: text_callback.id,
+                trigger: options_map["reference"]
+              })
+
+              %{
+                type: 4,  # ChannelMessageWithSource
+                data: %{
+                  content: text_callback.response
+                }
+              }
+            else
+              :ok
+            end
+        end
+
+
+      _ ->
+        nil
+    end
+
+    if response do
+      Api.create_interaction_response(interaction, response)
+    else
+      :ignore
+    end
+  end
+
+  def handle_event({:READY, _, _ws}) do
+    BridgeServer.cast_bridge(:READY)
+    add_command(:textcb)
+    :ignore
+  end
+
   # Default event handler, if you don't include this, your consumer WILL crash if
   # you don't have a method definition for each event type.
   def handle_event({_event, _data, _ws}) do
@@ -129,6 +175,51 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     # IO.puts ""
 
     :noop
+  end
+
+  # Teiserver.Bridge.DiscordBridgeBot.add_command(:textcb)
+  @spec add_command(atom) :: any
+  def add_command(:textcb) do
+    callbacks = Communication.list_text_callbacks()
+
+    choices = callbacks
+      |> Enum.map(fn cb ->
+        %{
+          name: cb.name,
+          value: hd(cb.triggers)
+        }
+      end)
+
+    guild_id = Communication.get_guild_id()
+    command = %{
+      name: "textcb",
+      description: "CopyPasta some text",
+      options: [
+        %{
+          # Type3 = String
+          type: 3,
+          name: "reference",
+          description: "The name of the reference",
+          required: true,
+          choices: choices
+        }
+      ],
+      nsfw: false
+    }
+    Nostrum.Api.create_guild_application_command(guild_id, command)
+  end
+
+  # Meant to be used manually
+  # Teiserver.Bridge.DiscordBridgeBot.delete_guild_application_command(name_here)
+  def delete_guild_application_command(name) do
+    guild_id = Communication.get_guild_id()
+    command = %{
+      name: name,
+      description: "About to be deleted"
+    }
+
+    {:ok, %{id: cmd_id}} = Nostrum.Api.create_guild_application_command(guild_id, command)
+    Nostrum.Api.delete_guild_application_command(guild_id, cmd_id)
   end
 
   @spec get_text_to_emoticon_map() :: Map.t()

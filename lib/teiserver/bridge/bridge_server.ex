@@ -53,8 +53,6 @@ defmodule Teiserver.Bridge.BridgeServer do
     end
   end
 
-
-
   @impl true
   def handle_call(:client_state, _from, state) do
     {:reply, state.client, state}
@@ -71,6 +69,11 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   def handle_cast({:merge_client, partial_client}, state) do
     {:noreply, %{state | client: Map.merge(state.client, partial_client)}}
+  end
+
+  # The bridge is ready to start doing stuff
+  def handle_cast(:READY, state) do
+    {:noreply, state}
   end
 
   @impl true

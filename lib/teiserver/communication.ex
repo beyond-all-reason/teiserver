@@ -244,4 +244,7 @@ defmodule Teiserver.Communication do
   """
   @spec use_discord?() :: boolean
   defdelegate use_discord?(), to: DiscordChannelLib
+
+  @spec get_guild_id() :: integer | nil
+  defdelegate get_guild_id(), to: DiscordChannelLib
 end
