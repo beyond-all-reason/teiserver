@@ -1,5 +1,12 @@
 <div>
-  <% {fg, bg, _bsname} = Teiserver.Helper.StylingHelper.colours(assigns[:view_colour] || :primary) %>
+  <%
+    view_colour_value = if assigns[:conn] && Kernel.function_exported?(assigns[:conn].private.phoenix_view._, :view_colour, 0) do
+      @conn.private.phoenix_view._.view_colour()
+    else
+      assigns[:view_colour] || :primary
+    end
+    {fg, bg, _bsname} = Teiserver.Helper.StylingHelper.colours(view_colour_value)
+  %>
   <style type="text/css">
     @media print {
       #menu, #header, #navigation {
