@@ -137,6 +137,9 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
                 trigger: options_map["reference"]
               })
 
+              bridge_user_id = BridgeServer.get_bridge_userid()
+              Room.send_message(bridge_user_id, "main", text_callback.response)
+
               %{
                 type: 4,  # ChannelMessageWithSource
                 data: %{
@@ -144,7 +147,12 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
                 }
               }
             else
-              :ok
+              %{
+                type: 4,  # ChannelMessageWithSource
+                data: %{
+                  content: "Sorry, I don't want to spam messages. Give it a few minutes before asking again."
+                }
+              }
             end
         end
 

@@ -121,6 +121,7 @@ defmodule Teiserver.Communication.TextCallbackLib do
           {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
   def update_text_callback_cache({:ok, text_callback} = args) do
     Teiserver.store_put(:text_callback_store, text_callback.id, text_callback)
+    Teiserver.Bridge.DiscordBridgeBot.add_command(:textcb)
 
     text_callback.triggers
     |> Enum.each(fn trigger_text ->
