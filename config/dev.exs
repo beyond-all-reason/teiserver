@@ -71,7 +71,6 @@ config :teiserver, TeiserverWeb.Endpoint,
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/teiserver_web/(controllers|live|components|live_components|views|templates)/.*(ex|heex)$",
       ~r"lib/teiserver_web/(controllers|live|components|live_components|views|templates)/.*(ex|heex)$"
     ]
   ]
