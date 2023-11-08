@@ -66,9 +66,6 @@ defmodule Teiserver.Game.MatchRatingsExport do
     {:file, path, "match_ratings.json", content_type}
   end
 
-  """
-  Teiserver.Game.MatchRatingsExport.show_form(nil, %{"date_preset" => "All time","end_date" => "","rating_type" => "Team","start_date" => "2023-06-02"})
-  """
   defp get_data(start_date, end_date, rating_type_id) do
     games_per_chunk = round(@id_chunk_size/@game_chunk_size)
 
@@ -112,7 +109,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
       {a, b} ->
         raise "ERR: #{a}, #{b}"
     end
-    Logger.warn("Found #{match_count} matches, #{start_date} - #{end_date}")
+    Logger.info("Found #{match_count} matches, #{start_date} - #{end_date}")
 
     page_count = ceil(match_count / @id_chunk_size)
 

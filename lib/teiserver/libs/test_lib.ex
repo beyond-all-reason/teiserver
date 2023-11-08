@@ -562,7 +562,7 @@ defmodule Teiserver.TeiserverTestLib do
           name: "Badge A",
           icon: "i",
           colour: "c",
-          purposes: ["Accolade"],
+          purpose: "Accolade",
           description: "Description for the first badge"
         })
 
@@ -571,7 +571,7 @@ defmodule Teiserver.TeiserverTestLib do
           name: "Badge B",
           icon: "i",
           colour: "c",
-          purposes: ["Accolade"],
+          purpose: "Accolade",
           description: "Description for the second badge"
         })
 
@@ -580,7 +580,7 @@ defmodule Teiserver.TeiserverTestLib do
           name: "Badge C",
           icon: "i",
           colour: "c",
-          purposes: ["Accolade"],
+          purpose: "Accolade",
           description: "Description for the third badge"
         })
     end

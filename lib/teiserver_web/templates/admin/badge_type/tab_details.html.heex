@@ -1,4 +1,10 @@
 <%= central_component("detail_line",
+  label: "Description",
+  value: @badge_type.description
+) %>
+
+
+<%= central_component("detail_line",
   label: "Purposes",
-  value: @badge_type.purposes |> Enum.join(", ")
+  value: @badge_type.purpose
 ) %>

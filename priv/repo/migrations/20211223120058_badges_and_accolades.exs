@@ -8,7 +8,7 @@ defmodule Teiserver.Repo.Migrations.BadgesAndAccolades do
       add :colour, :string
       add :description, :text
 
-      add :purposes, {:array, :string}
+      add :purpose, :string
 
       timestamps()
     end

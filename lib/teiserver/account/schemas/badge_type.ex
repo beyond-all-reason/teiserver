@@ -7,7 +7,7 @@ defmodule Teiserver.Account.BadgeType do
     field :colour, :string
     field :description, :string
 
-    field :purposes, {:array, :string}, default: []
+    field :purpose, :string
 
     timestamps()
   end
@@ -22,8 +22,8 @@ defmodule Teiserver.Account.BadgeType do
       |> trim_strings(~w(name description)a)
 
     struct
-    |> cast(params, ~w(name icon colour purposes description)a)
-    |> validate_required(~w(name icon colour purposes)a)
+    |> cast(params, ~w(name icon colour purpose description)a)
+    |> validate_required(~w(name icon colour purpose)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

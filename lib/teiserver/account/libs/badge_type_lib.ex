@@ -1,4 +1,7 @@
 defmodule Teiserver.Account.BadgeTypeLib do
+  @moduledoc """
+
+  """
   use TeiserverWeb, :library
   alias Teiserver.Account.BadgeType
 
@@ -10,19 +13,31 @@ defmodule Teiserver.Account.BadgeTypeLib do
   def colours, do: :warning2
 
   @spec purpose_list() :: [String.t()]
-  def purpose_list(), do: ["Accolade", "Improvement", "Criticism", "Observation"]
+  def purpose_list(), do: [
+    # Always positive, limited in how often they can be given out
+    "Accolade",
+
+    # Cheap and easy, thumbs up/thumbs down
+    "Good/Bad",
+
+    # What did they do right, what did they do wrong?
+    "Feedback",
+
+    # What did they get done in this game?
+    "Role"
+  ]
 
   @spec make_favourite(Map.t()) :: Map.t()
   def make_favourite(badge_type) do
     %{
-      type_colour: colours() |> elem(0),
+      type_colour: colours(),
       type_icon: icon(),
       item_id: badge_type.id,
-      item_type: "teiserver_account_badge_type",
+      item_type: "account_badge_type",
       item_colour: badge_type.colour,
       item_icon: badge_type.icon,
       item_label: "#{badge_type.name}",
-      url: "/account/badge_types/#{badge_type.id}"
+      url: "/teiserver/admin/badge_types/#{badge_type.id}"
     }
   end
 
@@ -56,9 +71,9 @@ defmodule Teiserver.Account.BadgeTypeLib do
       where: badge_types.name == ^name
   end
 
-  def _search(query, :has_purpose, purpose) do
+  def _search(query, :purpose, purpose) do
     from badge_types in query,
-      where: ^purpose in badge_types.purposes
+      where: ^purpose == ^purpose
   end
 
   def _search(query, :id_list, id_list) do
