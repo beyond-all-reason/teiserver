@@ -460,8 +460,25 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, new_state}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_chat" <> _, userid: _userid, message: _msg}, state) do
-    {:noreply, state}
+  def handle_info(%{channel: "teiserver_lobby_chat" <> _, userid: userid, message: msg}, state) do
+    new_state = case msg do
+      "!spec " <> _ ->
+        case Regex.run(~r/!spec (\S+)/, msg) do
+          [_, spectated_username] ->
+            spectated_id = Account.get_userid_from_name(spectated_username)
+            Telemetry.log_complex_lobby_event(userid, state.match_id, "Spec command", %{
+              caller_id: userid,
+              spectated_id: spectated_id,
+              given_name: spectated_username
+            })
+          _ ->
+            :ok
+        end
+        state
+      _ ->
+        state
+    end
+    {:noreply, new_state}
   end
 
   def handle_info(%{channel: "teiserver_server", event: "stop"}, state) do

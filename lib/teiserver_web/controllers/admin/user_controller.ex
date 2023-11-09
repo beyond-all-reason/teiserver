@@ -695,15 +695,11 @@ defmodule TeiserverWeb.Admin.UserController do
   def create_smurf_key(conn, %{"userid" => userid, "key" => key, "value" => value}) do
     case Account.create_smurf_key(userid, key, value) do
       {:ok, smurf_key} ->
-        IO.puts ""
-        IO.inspect smurf_key
-        IO.puts ""
-
         conn
         |> put_flash(:info, "Key added successfully.")
         |> redirect(to: ~p"/teiserver/admin/users/smurf_search/#{userid}")
 
-      {:error, %Ecto.Changeset{} = changeset} ->
+      {:error, %Ecto.Changeset{} = _changeset} ->
         conn
         |> put_flash(:info, "Unable to add that key")
         |> redirect(to: ~p"/teiserver/admin/users/smurf_search/#{userid}")

@@ -26,7 +26,7 @@
             active: "key-#{@key}",
             bsname: bsname,
             icon: "",
-            url: "?key=#{key}&tf=#{@tf}"
+            url: "?key=#{key}&tf=#{@timeframe}"
           ) %>
         <% end %>
         &nbsp;&nbsp;&nbsp;&nbsp;
@@ -36,7 +36,7 @@
           <%= central_component("section_menu_button",
             name: "tf-#{tf}",
             label: tf,
-            active: "tf-#{@tf}",
+            active: "tf-#{@timeframe}",
             bsname: bsname,
             icon: "",
             url: "?key=#{@key}&tf=#{tf}"
@@ -54,9 +54,14 @@
             </tr>
           </thead>
           <tbody>
-            <%= for {k, v} <- @event_counts do %>
+            <%= for {k, v} <- @lobby_data do %>
               <tr>
-                <td><%= k %></td>
+                <td :if={Map.has_key?(@usernames, k)}>
+                  <a href={~p"/teiserver/admin/user/#{k}"}>
+                    <%= k %> (<%= @usernames[k] %>)
+                  </a>
+                </td>
+                <td :if={not Map.has_key?(@usernames, k)}><%= k %></td>
                 <td><%= v %></td>
               </tr>
             <% end %>

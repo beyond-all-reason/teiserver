@@ -1152,9 +1152,15 @@ defmodule Teiserver.CacheUser do
         end
     end
 
-    raw_country
-    |> String.trim()
-    |> String.upcase()
+    c = raw_country
+      |> String.trim()
+      |> String.upcase()
+
+    # Handler incase they somehow have an empty country after this
+    case c do
+      "" -> "??"
+      c -> c
+    end
   end
 
   @spec restrict_user(T.userid() | T.user(), String.t()) :: any

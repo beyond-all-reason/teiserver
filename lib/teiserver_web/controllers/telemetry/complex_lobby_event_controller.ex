@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
   use TeiserverWeb, :controller
-  alias Teiserver.Telemetry
+  alias Teiserver.{Telemetry, Account}
   alias Teiserver.Telemetry.{ComplexLobbyEventQueries, ExportComplexLobbyEventsTask}
   require Logger
 
@@ -79,12 +79,32 @@ defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
 
     key = Map.get(params, "key", hd(schema_keys ++ [nil]))
 
+    usernames = if String.ends_with?(key, "id") do
+      lobby_data
+        |> Enum.map(fn {userid, _} ->
+            if userid != nil do
+              case Integer.parse(userid) do
+                {n, _} -> n
+                _ -> nil
+              end
+            end
+        end)
+        |> Enum.filter(fn userid -> is_integer(userid) end)
+        |> Enum.uniq
+        |> Map.new(fn userid ->
+          {to_string(userid), Account.get_username_by_id(userid)}
+        end)
+    else
+      %{}
+    end
+
     conn
     |> assign(:schema_keys, schema_keys)
     |> assign(:key, key)
     |> assign(:timeframe, timeframe)
     |> assign(:event_name, event_name)
     |> assign(:lobby_data, lobby_data)
+    |> assign(:usernames, usernames)
     |> render("detail.html")
   end
 
