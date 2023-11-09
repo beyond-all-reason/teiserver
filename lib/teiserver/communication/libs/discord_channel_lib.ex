@@ -230,7 +230,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
 
         user.discord_id != nil ->
           channel_id = Nostrum.Api.create_dm(user.discord_id)
-          Account.update_user(%{user | discord_dm_channel_id: channel_id}, persist: true)
+          Account.update_cache_user(%{user | discord_dm_channel_id: channel_id}, persist: true)
           new_discord_message(channel_id, message)
 
         true ->
