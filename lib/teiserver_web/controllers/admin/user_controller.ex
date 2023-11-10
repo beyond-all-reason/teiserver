@@ -694,7 +694,7 @@ defmodule TeiserverWeb.Admin.UserController do
   @spec create_smurf_key(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create_smurf_key(conn, %{"userid" => userid, "key" => key, "value" => value}) do
     case Account.create_smurf_key(userid, key, value) do
-      {:ok, smurf_key} ->
+      {:ok, _smurf_key} ->
         conn
         |> put_flash(:info, "Key added successfully.")
         |> redirect(to: ~p"/teiserver/admin/users/smurf_search/#{userid}")

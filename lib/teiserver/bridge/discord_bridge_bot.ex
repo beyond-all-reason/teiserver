@@ -4,8 +4,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   """
 
   use Nostrum.Consumer
-  alias Teiserver.{Room, Moderation, Communication, Logging}
-  alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands}
+  alias Teiserver.{Room, Moderation, Communication}
+  alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands, CommandLib}
   alias Teiserver.{Config}
   alias Nostrum.Api
   require Logger
@@ -122,44 +122,15 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         {name, value}
       end)
 
-    response = case data.name do
-      "textcb" ->
-        case Communication.lookup_text_callback_from_trigger(options_map["reference"]) do
-          nil ->
-            nil
+    response = CommandLib.handle_command(interaction, options_map)
 
-          text_callback ->
-            if Communication.can_trigger_callback?(text_callback, interaction.channel_id) do
-              Logging.add_anonymous_audit_log("Discord.text_callback", %{
-                discord_user_id: interaction.user.id,
-                discord_channel_id: interaction.channel_id,
-                command: text_callback.id,
-                trigger: options_map["reference"]
-              })
+    # response = case data.name do
+    #   "textcb" ->
+    #     Teiserver.Bridge.TextcbCommand.execute(interaction, options_map)
 
-              bridge_user_id = BridgeServer.get_bridge_userid()
-              Room.send_message(bridge_user_id, "main", text_callback.response)
-
-              %{
-                type: 4,  # ChannelMessageWithSource
-                data: %{
-                  content: text_callback.response
-                }
-              }
-            else
-              %{
-                type: 4,  # ChannelMessageWithSource
-                data: %{
-                  content: "Sorry, I don't want to spam messages. Give it a few minutes before asking again."
-                }
-              }
-            end
-        end
-
-
-      _ ->
-        nil
-    end
+    #   _ ->
+    #     nil
+    # end
 
     if response do
       Api.create_interaction_response(interaction, response)
@@ -198,7 +169,6 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         }
       end)
 
-    guild_id = Communication.get_guild_id()
     command = %{
       name: "textcb",
       description: "CopyPasta some text",
@@ -214,7 +184,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       ],
       nsfw: false
     }
-    Nostrum.Api.create_guild_application_command(guild_id, command)
+    Nostrum.Api.create_global_application_command(command)
   end
 
   # Meant to be used manually
