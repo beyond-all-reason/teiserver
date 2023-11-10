@@ -32,6 +32,7 @@
 - Moved nearly all of the `Central` stuff over to be part of Teiserver
 - Started making progress on
 - Added `hms_or_hms_ymd` format to `TimexHelper`
+- Added framework for adding more discord commands
 
 ## v1.1.1
 

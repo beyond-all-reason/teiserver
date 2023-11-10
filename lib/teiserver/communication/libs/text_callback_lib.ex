@@ -163,7 +163,7 @@ defmodule Teiserver.Communication.TextCallbackLib do
 
   def can_trigger_callback?(text_callback, channel_id) do
     last_triggered_time = (text_callback.last_triggered || %{})
-      |> Map.get(channel_id, 0)
+      |> Map.get(to_string(channel_id), 0)
 
     now = System.system_time(:second)
 
@@ -177,8 +177,8 @@ defmodule Teiserver.Communication.TextCallbackLib do
 
   @spec set_last_triggered_time(TextCallback.t, non_neg_integer()) :: any
   def set_last_triggered_time(text_callback, channel_id) do
-    new_times = text_callback.last_triggered || %{}
-      |> Map.put(channel_id, System.system_time(:second))
+    new_times = (text_callback.last_triggered || %{})
+      |> Map.put(to_string(channel_id), System.system_time(:second))
 
     Communication.update_text_callback(text_callback, %{last_triggered: new_times})
   end

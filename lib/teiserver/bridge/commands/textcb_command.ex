@@ -62,6 +62,8 @@ defmodule Teiserver.Bridge.Commands.TextcbCommand do
             Room.send_message(bridge_user_id, "main", text_callback.response)
           end
 
+          Communication.set_last_triggered_time(text_callback, interaction.channel_id)
+
           %{
             type: 4,  # ChannelMessageWithSource
             data: %{
