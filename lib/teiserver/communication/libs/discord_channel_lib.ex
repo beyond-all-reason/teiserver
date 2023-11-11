@@ -229,12 +229,16 @@ defmodule Teiserver.Communication.DiscordChannelLib do
           new_discord_message(user.discord_dm_channel_id, message)
 
         user.discord_id != nil ->
-          channel_id = Nostrum.Api.create_dm(user.discord_id)
-          Account.update_cache_user(%{user | discord_dm_channel_id: channel_id}, persist: true)
-          new_discord_message(channel_id, message)
+          case Nostrum.Api.create_dm(user.discord_id) do
+            {:ok, %{id: channel_id}} ->
+              Account.update_cache_user(user.id, %{discord_dm_channel_id: channel_id})
+              new_discord_message(channel_id, message)
+            _ ->
+              {:error, "Unable to created DM channel"}
+          end
 
         true ->
-          {:error, "No discord link for user"}
+          {:error, "No discord id for user"}
       end
     end
   end

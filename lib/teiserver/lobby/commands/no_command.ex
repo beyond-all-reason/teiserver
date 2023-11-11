@@ -1,12 +1,12 @@
 defmodule Teiserver.Lobby.Commands.NoCommand do
-  @behaviour Teiserver.Lobby.Commands.LobbyCommandBehaviour
+  @behaviour Teiserver.Lobby.LobbyCommandBehaviour
   @moduledoc """
   Documentation for explain command here
   """
 
   alias Teiserver.Data.Types, as: T
   # alias Teiserver.{Account, Battle, Coordinator}
-  # alias Teiserver.Lobby.Commands.LobbyCommandBehaviour
+  # alias Teiserver.Lobby.LobbyCommandBehaviour
   # import Teiserver.Helper.NumberHelper, only: [round: 2]
 
   # @splitter "---------------------------"

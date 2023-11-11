@@ -47,8 +47,10 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     room = bridge_channel_to_room(channel_id)
     dm_sender = Teiserver.cache_get(:discord_bridge_dm_cache, to_string(channel_id))
 
+    discord_bot_user_id = Teiserver.cache_get(:application_metadata_cache, "discord_bot_user_id")
+
     cond do
-      author.username == Application.get_env(:teiserver, DiscordBridgeBot)[:bot_name] ->
+      author.id == discord_bot_user_id ->
         nil
 
       dm_sender != nil ->
@@ -139,7 +141,10 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     end
   end
 
-  def handle_event({:READY, _, _ws}) do
+  def handle_event({:READY, ready_data, _ws}) do
+    discord_bot_user_id = ready_data.user.id
+    Teiserver.cache_put(:application_metadata_cache, "discord_bot_user_id", discord_bot_user_id)
+
     BridgeServer.cast_bridge(:READY)
     add_command(:textcb)
     :ignore

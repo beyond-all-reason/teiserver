@@ -44,9 +44,9 @@ defmodule Teiserver.Lobby.CommandLib do
 
         exports = function_exported?(m, :name, 0) && function_exported?(m, :execute, 2)
 
-        if not exports do
-          Logger.error("LobbyCommand #{inspect m} does not export all the required functions")
-        end
+        # if not exports do
+        #   Logger.error("LobbyCommand #{inspect m} does not export all the required functions")
+        # end
 
         exports
       end)

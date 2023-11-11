@@ -1,4 +1,4 @@
-defmodule Teiserver.Lobby.Commands.LobbyCommandBehaviour do
+defmodule Teiserver.Lobby.LobbyCommandBehaviour do
   alias Teiserver.Data.Types, as: T
   @moduledoc """
   Lobby commands are executed from within lobbies.

@@ -1,5 +1,5 @@
 defmodule Teiserver.Lobby.Commands.ExplainCommand do
-  @behaviour Teiserver.Lobby.Commands.LobbyCommandBehaviour
+  @behaviour Teiserver.Lobby.LobbyCommandBehaviour
   @moduledoc """
   Documentation for explain command here
   """

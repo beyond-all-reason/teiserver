@@ -11,6 +11,8 @@ defmodule Teiserver.Bridge.BridgeServer do
   alias Teiserver.Data.Types, as: T
   alias Nostrum.Api
 
+  def bot_name(), do: "DiscordBridgeBot"
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -408,7 +410,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         # Make account
         {:ok, account} =
           Account.script_create_user(%{
-            name: "DiscordBridgeBot",
+            name: bot_name(),
             email: "bridge@teiserver",
             icon: "fa-brands fa-discord",
             colour: "#0066AA",

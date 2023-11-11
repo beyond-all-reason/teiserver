@@ -200,6 +200,8 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
         "you are muted"
       Account.is_restricted?(current_user, "Bridging") ->
         "you are unbridged and thus cannot use the web-chat"
+      current_user.smurf_of_id != nil ->
+        "this is an alt account, please use the original"
       current_user.last_played == nil ->
         "you have not yet played a game, once you have played a game you will be able to send messages"
       true ->
