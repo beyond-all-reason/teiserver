@@ -259,7 +259,7 @@ defmodule Teiserver.Account.UserCacheLib do
     new_user = Map.merge(user, data)
     Teiserver.cache_put(:users, user.id, new_user)
     persist_user(new_user)
-    user
+    new_user
   end
 
   @spec decache_user(T.userid()) :: :ok | :no_user

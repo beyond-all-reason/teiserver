@@ -440,6 +440,8 @@ defmodule Teiserver.CacheUser do
     client = Account.get_client_by_id(userid)
 
     user = get_user_by_id(userid)
+    old_name = user.name
+
     set_flood_level(user.id, 10)
     Client.disconnect(userid, "Rename")
     :timer.sleep(100)
@@ -455,7 +457,7 @@ defmodule Teiserver.CacheUser do
 
     Account.update_user_stat(userid, %{
       "rename_log" => [System.system_time(:second) | rename_log],
-      "previous_names" => Enum.uniq([user.name | previous_names])
+      "previous_names" => Enum.uniq([old_name | previous_names])
     })
 
     # We need to re-get the user to ensure we don't overwrite our banned flag
@@ -469,6 +471,7 @@ defmodule Teiserver.CacheUser do
       :timer.sleep(5000)
     end
 
+    Teiserver.cache_delete(:users_lookup_id_with_name, old_name)
     recache_user(userid)
     :ok
   end

@@ -23,6 +23,7 @@
 - Fixed issue where a LobbyPolicy bot could repeatedly rename a lobby
 - Fixed incorrect output of `c.user.list_relationships`
 - Fixed possible cause of an infinite redirect if cookies are borked
+- Fixed a bug where renaming could leave a cached value pointing to the wrong place
 
 #### Internal improvements
 
