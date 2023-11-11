@@ -433,6 +433,14 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     state
   end
 
+  defp handle_direct_message(senderid, "$quit", state) do
+    if CacheUser.is_moderator?(senderid) do
+      Client.disconnect(state.userid, "Bot disconnect")
+    end
+
+    state
+  end
+
   defp handle_direct_message(senderid, "$settings", state) do
     if Enum.empty?(state.lobby_policy.map_list) do
       send_dm(state, senderid, "I have no maplist")
