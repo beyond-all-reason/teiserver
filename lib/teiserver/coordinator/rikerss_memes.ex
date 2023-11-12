@@ -116,7 +116,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/multiplier_shieldpower" => Enum.random(~w(1 1 1 2 3 4)),
       "game/modoptions/disable_fogofwar" => Enum.random(~w(0 0 0 1)),
       "game/modoptions/assistdronesenabled" =>
-        Enum.random(~w(pve_only pve_only pve_only enabled)),
+        Enum.random(~w(disabled disabled disabled enabled)),
       "game/modoptions/assistdronescount" => Enum.random(~w(2 4 8 10 16)),
       "game/modoptions/experimentalextraunits" => Enum.random(~w(0 0 0 1)),
       "game/modoptions/multiplier_maxdamage" => Enum.random(@crazy_multiplier_opts),
@@ -318,7 +318,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/teamcolors_anonymous_mode" => "disabled",
       "game/modoptions/multiplier_shieldpower" => "1",
       "game/modoptions/disable_fogofwar" => "0",
-      "game/modoptions/assistdronesenabled" => "pve_only",
+      "game/modoptions/assistdronesenabled" => "disabled",
       "game/modoptions/assistdronescount" => "10",
       "game/modoptions/experimentalextraunits" => "0",
       "game/modoptions/multiplier_maxdamage" => "1",
