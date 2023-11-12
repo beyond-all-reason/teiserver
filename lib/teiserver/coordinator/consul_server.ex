@@ -923,7 +923,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         {false, "No client"}
 
       client.awaiting_warn_ack ->
-        {false, "Awaiting acknowledgement"}
+        {false, "Awaiting acknowledgement of your warning - check chat from @Coordinator and follow instructions there. Pay attention to spelling."}
 
       client.moderator ->
         {true, :override_approve}
