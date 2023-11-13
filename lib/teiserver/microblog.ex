@@ -2,7 +2,6 @@ defmodule Teiserver.Microblog do
   @moduledoc """
   Main point of usage for the microblog system
   """
-  import Ecto.Query, warn: false
 
   @spec colours :: atom
   def colours(), do: :primary
