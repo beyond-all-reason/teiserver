@@ -11,7 +11,7 @@ defmodule Teiserver.Repo.Migrations.CreatingPollingDatabase do
 
       add :opens_at, :utc_datetime
       add :closes_at, :utc_datetime
-      add :closed, :boolean
+      add :is_open, :boolean
 
       add :user_permission, :string
       add :results_permission, :string
@@ -41,7 +41,7 @@ defmodule Teiserver.Repo.Migrations.CreatingPollingDatabase do
       add :survey_id, references(:polling_surveys, on_delete: :nothing)
       add :responder_id, references(:account_users, on_delete: :nothing)
 
-      add :completed, :boolean, default: false, null: false
+      add :is_completed, :boolean, default: false, null: false
       add :completed_at, :utc_datetime
 
       add :current_page, :integer

@@ -71,6 +71,16 @@ defmodule Teiserver.Polling.SurveyQueries do
 
   defp _order_by(query, nil), do: query
 
+  defp _order_by(query, "Name (A-Z)") do
+    from surveys in query,
+      order_by: [asc: surveys.name]
+  end
+
+  defp _order_by(query, "Name (Z-A)") do
+    from surveys in query,
+      order_by: [desc: surveys.name]
+  end
+
   defp _order_by(query, "Newest first") do
     from surveys in query,
       order_by: [desc: surveys.inserted_at]
@@ -100,7 +110,7 @@ defmodule Teiserver.Polling.SurveyQueries do
   # This just grabs the tags
   defp _preload(query, :questions) do
     from surveys in query,
-      join: questions in assoc(surveys, :questions),
+      left_join: questions in assoc(surveys, :questions),
       preload: [questions: questions]
   end
 end

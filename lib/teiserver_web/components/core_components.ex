@@ -479,7 +479,7 @@ defmodule TeiserverWeb.CoreComponents do
         <thead class="">
           <tr>
             <th :for={col <- @col} class=""><%= col[:label] %></th>
-            <th class="visually-hidden"><span><%= gettext("Actions") %></span></th>
+            <th><span class="visually-hidden"><%= gettext("Actions") %></span></th>
           </tr>
         </thead>
         <tbody

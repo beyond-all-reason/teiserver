@@ -132,7 +132,9 @@ defmodule TeiserverWeb.Router do
         {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
         live "/surveys", SurveyLive.Index, :index
+        live "/surveys/new", SurveyLive.Show, :new
         live "/surveys/:survey_id", SurveyLive.Show, :show
+        live "/surveys/:survey_id/edit", SurveyLive.Show, :edit
         live "/surveys/:survey_id/:question_id", SurveyLive.Question, :question
     end
 

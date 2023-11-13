@@ -11,7 +11,7 @@ defmodule Teiserver.Polling.Survey do
 
     field :opens_at, :utc_datetime
     field :closes_at, :utc_datetime
-    field :closed, :boolean
+    field :is_open, :boolean
 
     # Who can answer this survey? If nil then anybody can
     field :user_permission, :string
@@ -44,10 +44,10 @@ defmodule Teiserver.Polling.Survey do
       |> trim_strings(~w(name colour icon user_permission results_permission edit_permission)a)
 
     struct
-    |> cast(params, ~w(name author_id colour icon opens_at closes_at closed user_permission results_permission edit_permission)a)
+    |> cast(params, ~w(name author_id colour icon opens_at closes_at is_open user_permission results_permission edit_permission)a)
     |> validate_required(~w(name author_id colour icon)a)
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean
-  def authorize(_action, conn, _params), do: allow?(conn, "Contributor")
+  def authorize(_action, conn, _params), do: allow?(conn, "Polling")
 end

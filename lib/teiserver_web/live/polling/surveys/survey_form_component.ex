@@ -104,7 +104,7 @@ defmodule TeiserverWeb.Polling.SurveyFormComponent do
         <%= if @survey.id do %>
           <div class="row">
             <div class="col">
-              <a href={~p"/microblog/show/#{@survey.id}"} class="btn btn-secondary btn-block">
+              <a href={~p"/polling/surveys/#{@survey.id}"} class="btn btn-secondary btn-block">
                 Cancel
               </a>
             </div>
@@ -113,7 +113,7 @@ defmodule TeiserverWeb.Polling.SurveyFormComponent do
             </div>
           </div>
         <% else %>
-          <%= submit("Survey", class: "btn btn-primary btn-block #{disabled}") %>
+          <%= submit("Create survey", class: "btn btn-primary btn-block #{disabled}") %>
         <% end %>
       </.form>
     </div>
@@ -179,7 +179,7 @@ defmodule TeiserverWeb.Polling.SurveyFormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Survey created successfully")
-         |> push_patch(to: socket.assigns.patch)}
+         |> redirect(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}

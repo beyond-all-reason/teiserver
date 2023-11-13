@@ -1,19 +1,40 @@
 <TeiserverWeb.PollingComponents.sub_menu active={"surveys"} view_colour={@view_colour} current_user={@current_user} />
 
-<div class="row mt-4">
+<div class="row mt-2">
   <div class="col">
-    <.live_component
-      module={TeiserverWeb.Polling.SurveyFormComponent}
-      id={:new}
-      action={:new}
-      survey={%Teiserver.Polling.Survey{
-        author_id: @current_user.id,
-        icon: Teiserver.Helper.StylingHelper.random_icon(),
-        colour: Teiserver.Helper.StylingHelper.random_colour()
-      }}
-      patch={~p"/polling/surveys"}
-      title="New survey form"
-      current_user={@current_user}
-    />
+    <TeiserverWeb.Polling.SurveyComponents.section_menu
+        active={"index"}
+        view_colour={@view_colour}
+        current_user={@current_user} />
+
+    <.table
+      id="surveys-table"
+      rows={for s <- @surveys, do: {"survey-row-#{s.id}", s}}
+      table_class="table-sm table-hover"
+      row_click={fn {_id, survey} -> JS.navigate(~p"/polling/surveys/#{survey.id}") end}
+    >
+      <:col :let={{_id, survey}} label="ID"><%= survey.id %></:col>
+      <:col :let={{_id, survey}} label="Name"><%= survey.name %></:col>
+      <:action :let={{_id, survey}}>
+        <div class="visually-hidden">
+          <.link navigate={~p"/polling/surveys/#{survey.id}"}>Show</.link>
+        </div>
+        <.link
+          class="btn btn-sm btn-secondary mx-1"
+          patch={~p"/polling/surveys/#{survey.id}/edit"}>
+            Edit
+        </.link>
+      </:action> 
+      <:action :let={{id, survey}}>
+        <.link
+          class="btn btn-sm btn-danger mx-1"
+          phx-click={JS.push("delete", value: %{id: survey.id}) |> hide("##{id}")}
+          data-confirm="Are you sure?"
+        >
+          <Fontawesome.icon icon="fa-trash" style="solid" />
+          Delete
+        </.link>
+      </:action>
+    </.table>
   </div>
 </div>

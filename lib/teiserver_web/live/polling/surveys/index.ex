@@ -1,13 +1,27 @@
 defmodule TeiserverWeb.Polling.SurveyLive.Index do
 @moduledoc false
+  require TeiserverWeb.Polling.SurveyLive.Index
   use TeiserverWeb, :live_view
   alias Teiserver.Polling
   import TeiserverWeb.PollingComponents
 
   @impl true
+  def mount(_params, _session, socket) when is_connected?(socket) do
+    surveys = Polling.list_surveys(
+      where: [],
+      order_by: ["Name (A-Z)"]
+    )
+
+    {:ok,
+      socket
+      |> assign(:surveys, surveys)
+    }
+  end
+
   def mount(_params, _session, socket) do
     {:ok,
       socket
+      |> assign(:surveys, [])
     }
   end
 
@@ -29,7 +43,9 @@ defmodule TeiserverWeb.Polling.SurveyLive.Index do
     |> assign(:page_title, "Polling admin page")
     |> assign(:post, %{})
     |> assign(:site_menu_active, "polling")
-    |> assign(:view_colour, Polling.colours())
+    |> assign(:view_colour, Polling.SurveyLib.colours())
+    |> add_breadcrumb(name: "Polling", url: ~p"/polling")
+    |> add_breadcrumb(name: "Surveys", url: ~p"/polling/surveys")
   end
 
   @impl true

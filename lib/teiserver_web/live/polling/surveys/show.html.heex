@@ -1,0 +1,90 @@
+<TeiserverWeb.PollingComponents.sub_menu
+  active={"surveys"}
+  view_colour={@view_colour}
+  current_user={@current_user} />
+
+<div class="row mt-2">
+  <div class="col">
+    <TeiserverWeb.Polling.SurveyComponents.section_menu
+        active={to_string(@live_action)}
+        view_colour={@view_colour}
+        current_user={@current_user}>
+
+      <.section_menu_button
+        :if={@survey.id}
+        bsname={@view_colour}
+        icon={StylingHelper.icon(:edit)}
+        active={@live_action == :edit}
+        url={~p"/polling/surveys/#{@survey.id}/edit"}
+      >
+        Edit
+      </.section_menu_button>
+
+    </TeiserverWeb.Polling.SurveyComponents.section_menu>
+
+    <br /><br />
+
+    <%= if @live_action == :show do %>
+      <h4>
+        Survey details
+
+        <%= cond do %>
+          <% @survey.is_open && @survey.closes_at == nil -> %>
+            <span class="btn btn-sm btn-success">Open</span>
+
+          <% @survey.is_open -> %>
+            <span class="btn btn-sm btn-success2">Open, closes at X</span>
+
+          <% not @survey.is_open && @survey.opens_at == nil -> %>
+            <span class="btn btn-sm btn-danger">Closed</span>
+
+          <% not @survey.is_open -> %>
+            <span class="btn btn-sm btn-danger2">Closed</span>
+        <% end %>
+      </h4>
+
+      <br /><br />
+
+      <h4>Questions</h4>
+      <.table
+        id="questions-table"
+        rows={for o <- @survey.questions, do: {"question-row-#{o.id}", o}}
+        table_class="table-sm table-hover"
+        row_click={fn {_id, question} -> JS.navigate(~p"/question_path/#{question.id}") end}
+      >
+        <:col :let={{_id, question}} label="Id"><%= question.id %></:col>
+        <:col :let={{_id, question}} label="Name"><%= question.name %></:col>
+        <:action :let={{_id, question}}>
+          <div class="visually-hidden">
+            <.link navigate={~p"/question_path/#{question.id}"}>Show</.link>
+          </div>
+          <.link
+            class="btn btn-sm btn-secondary mx-1"
+            patch={~p"/question_path/#{question.id}/edit"}>
+              Edit
+          </.link>
+        </:action>
+        <:action :let={{id, question}}>
+          <.link
+            class="btn btn-sm btn-danger mx-1"
+            phx-click={JS.push("delete", value: %{id: question.id}) |> hide("##{id}")}
+            data-confirm="Are you sure?">
+              <Fontawesome.icon icon="fa-trash" style="solid" />
+              Delete
+          </.link>
+        </:action>
+      </.table>
+
+    <% else %>
+      <.live_component
+        module={TeiserverWeb.Polling.SurveyFormComponent}
+        id={"survey-form-component"}
+        action={@live_action}
+        survey={@survey}
+        patch={~p"/polling/surveys"}
+        title="New survey form"
+        current_user={@current_user}
+      />
+    <% end %>
+  </div>
+</div>
