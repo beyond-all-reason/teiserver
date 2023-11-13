@@ -182,6 +182,17 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     end
   end
 
+  def do_handle("follow_by_id", userid_str, msg_id, state) do
+    target_id = int_parse(userid_str)
+    target = Account.get_username_by_id(target_id)
+    if target && target_id != state.userid do
+      Account.follow_user(state.userid, target_id)
+      reply(:user, :relationship_change, {"follow_by_id", userid_str, :success}, msg_id, state)
+    else
+      reply(:user, :relationship_change, {"follow_by_id", userid_str, :error}, msg_id, state)
+    end
+  end
+
   def do_handle("ignore", username, msg_id, state) do
     target_id = Account.get_userid_from_name(username)
     if target_id && target_id != state.userid do
@@ -189,6 +200,17 @@ defmodule Teiserver.Protocols.Spring.UserIn do
       reply(:spring, :okay, {"c.user.ignore", "userName=#{username}"}, msg_id, state)
     else
       reply(:spring, :no, {"c.user.ignore", "userName=#{username}"}, msg_id, state)
+    end
+  end
+
+  def do_handle("ignore_by_id", userid_str, msg_id, state) do
+    target_id = int_parse(userid_str)
+    target = Account.get_username_by_id(target_id)
+    if target && target_id != state.userid do
+      Account.ignore_user(state.userid, target_id)
+      reply(:user, :relationship_change, {"ignore_by_id", userid_str, :success}, msg_id, state)
+    else
+      reply(:user, :relationship_change, {"ignore_by_id", userid_str, :error}, msg_id, state)
     end
   end
 
@@ -202,6 +224,17 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     end
   end
 
+  def do_handle("block_by_id", userid_str, msg_id, state) do
+    target_id = int_parse(userid_str)
+    target = Account.get_username_by_id(target_id)
+    if target && target_id != state.userid do
+      Account.block_user(state.userid, target_id)
+      reply(:user, :relationship_change, {"block_by_id", userid_str, :success}, msg_id, state)
+    else
+      reply(:user, :relationship_change, {"block_by_id", userid_str, :error}, msg_id, state)
+    end
+  end
+
   def do_handle("avoid", username, msg_id, state) do
     target_id = Account.get_userid_from_name(username)
     if target_id && target_id != state.userid do
@@ -209,6 +242,17 @@ defmodule Teiserver.Protocols.Spring.UserIn do
       reply(:spring, :okay, {"c.user.avoid", "userName=#{username}"}, msg_id, state)
     else
       reply(:spring, :no, {"c.user.avoid", "userName=#{username}"}, msg_id, state)
+    end
+  end
+
+  def do_handle("avoid_by_id", userid_str, msg_id, state) do
+    target_id = int_parse(userid_str)
+    target = Account.get_username_by_id(target_id)
+    if target && target_id != state.userid do
+      Account.avoid_user(state.userid, target_id)
+      reply(:user, :relationship_change, {"avoid_by_id", userid_str, :success}, msg_id, state)
+    else
+      reply(:user, :relationship_change, {"avoid_by_id", userid_str, :error}, msg_id, state)
     end
   end
 
