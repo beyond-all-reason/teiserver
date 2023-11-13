@@ -118,6 +118,15 @@
   >
     Discord channels
   </.menu_card>
+
+  <.menu_card
+    :if={allow_any?(@conn, ~w(Server))}
+    icon={Teiserver.Polling.icon()}
+    url={~p"/polling/surveys"}
+    size={:small}
+  >
+    Polling
+  </.menu_card>
 </div>
 
 <div class="row">

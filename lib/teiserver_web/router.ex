@@ -124,6 +124,27 @@ defmodule TeiserverWeb.Router do
     get "/rss/html", RssController, :html_mode
   end
 
+  scope "/polling", TeiserverWeb.Polling do
+    pipe_through([:live_browser, :app_layout])
+
+    live_session :polling_admin,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :ensure_authenticated}
+      ] do
+        live "/surveys", SurveyLive.Index, :index
+        live "/surveys/:survey_id", SurveyLive.Show, :show
+        live "/surveys/:survey_id/:question_id", SurveyLive.Question, :question
+    end
+
+    live_session :polling_user,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :ensure_authenticated}
+      ] do
+        live "/", ResponseLive.Index, :index
+        live "/:id", ResponseLive.Show, :show
+    end
+  end
+
   scope "/", TeiserverWeb.Account, as: :account do
     pipe_through([:browser, :nomenu_layout])
 

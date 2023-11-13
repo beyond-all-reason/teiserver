@@ -1,0 +1,19 @@
+<TeiserverWeb.PollingComponents.sub_menu active={"surveys"} view_colour={@view_colour} current_user={@current_user} />
+
+<div class="row mt-4">
+  <div class="col">
+    <.live_component
+      module={TeiserverWeb.Polling.SurveyFormComponent}
+      id={:new}
+      action={:new}
+      survey={%Teiserver.Polling.Survey{
+        author_id: @current_user.id,
+        icon: Teiserver.Helper.StylingHelper.random_icon(),
+        colour: Teiserver.Helper.StylingHelper.random_colour()
+      }}
+      patch={~p"/polling/surveys"}
+      title="New survey form"
+      current_user={@current_user}
+    />
+  </div>
+</div>
