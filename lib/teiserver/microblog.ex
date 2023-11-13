@@ -1,5 +1,7 @@
 defmodule Teiserver.Microblog do
-  @moduledoc false
+  @moduledoc """
+  Main point of usage for the microblog system
+  """
   import Ecto.Query, warn: false
 
   @spec colours :: atom
@@ -8,7 +10,6 @@ defmodule Teiserver.Microblog do
   @spec icon :: String.t()
   def icon(), do: "fa-blog"
 
-  alias Teiserver.Microblog.UserPreference
   alias Teiserver.Microblog.{Tag, TagLib}
 
   @spec list_tags() :: [Tag]
