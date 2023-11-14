@@ -11,7 +11,7 @@ You can use [asdf](https://github.com/asdf-vm/asdf) to install correct version.
 
 ### Clone repo
 ```bash
-git clone git@github.com:beyond-all-reason/teiserver.git
+git clone https://github.com/beyond-all-reason/teiserver.git
 cd teiserver
 ```
 
