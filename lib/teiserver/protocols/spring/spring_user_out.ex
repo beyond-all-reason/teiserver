@@ -18,6 +18,14 @@ defmodule Teiserver.Protocols.Spring.UserOut do
     "s.user.closeness userName=#{username}\t#{closeness}\n"
   end
 
+  def do_reply(:relationship_change, {command, id, :success}, _state) do
+    "s.user.#{command} #{id}\tsuccess\t\n"
+  end
+
+  def do_reply(:relationship_change, {command, id, {:error, reason}}, _state) do
+    "s.user.#{command} #{id}\terror\t#{reason}\n"
+  end
+
   def do_reply(:add_friend, result_list, _state) do
     result_list
     |> Enum.map_join("", fn

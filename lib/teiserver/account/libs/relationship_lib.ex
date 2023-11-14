@@ -107,6 +107,7 @@ defmodule Teiserver.Account.RelationshipLib do
     Account.upsert_relationship(%{
       from_user_id: from_user_id,
       to_user_id: to_user_id,
+      ignore: nil,
       state: nil
     })
   end
