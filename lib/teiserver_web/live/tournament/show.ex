@@ -21,7 +21,6 @@ defmodule TeiserverWeb.TournamentLive.Show do
     socket =
       socket
       |> AuthPlug.live_call(session)
-      |> TSAuthPlug.live_call(session)
 
     moderator = allow?(socket, "Moderator")
     admin_dev = allow?(socket, "admin.dev.developer")

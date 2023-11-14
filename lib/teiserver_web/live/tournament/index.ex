@@ -13,7 +13,6 @@ defmodule TeiserverWeb.TournamentLive.Index do
     socket =
       socket
       |> AuthPlug.live_call(session)
-      |> TSAuthPlug.live_call(session)
 
     client = Account.get_client_by_id(socket.assigns[:current_user].id)
 
