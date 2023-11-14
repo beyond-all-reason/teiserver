@@ -135,7 +135,10 @@ defmodule TeiserverWeb.Router do
         live "/surveys/new", SurveyLive.Show, :new
         live "/surveys/:survey_id", SurveyLive.Show, :show
         live "/surveys/:survey_id/edit", SurveyLive.Show, :edit
-        live "/surveys/:survey_id/:question_id", SurveyLive.Question, :question
+
+        live "/surveys/:survey_id/question/new", SurveyLive.Question, :new
+        live "/surveys/:survey_id/question/:question_id", SurveyLive.Question, :show
+        live "/surveys/:survey_id/question/:question_id/edit", SurveyLive.Question, :edit
     end
 
     live_session :polling_user,

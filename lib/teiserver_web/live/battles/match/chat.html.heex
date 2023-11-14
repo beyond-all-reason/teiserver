@@ -62,11 +62,11 @@
         Team <%= @match.winning_team + 1 %> won
         &nbsp;&nbsp;&nbsp;&nbsp;
       <% end %>
-      Duration: <%= duration_to_str_short(@match.game_duration) %>
+      Duration: <%= TimexHelper.duration_to_str_short(@match.game_duration) %>
       &nbsp;&nbsp;&nbsp;&nbsp;
-      Started: <%= date_to_str(@match.started, format: :hms) %>
+      Started: <%= TimexHelper.date_to_str(@match.started, format: :hms) %>
       &nbsp;&nbsp;&nbsp;&nbsp;
-      Messages: <%= Teiserver.Helper.StringHelper.format_number Enum.count(@messages) %>
+      Messages: <%= StringHelper.format_number(Enum.count(@messages)) %>
     </h3>
 
     <form method="post" class="">
@@ -137,7 +137,7 @@
             <tr class={"#{highlighted}"}>
               <td><%= msg.user.name %></td>
               <td class="message"><%= msg.content %></td>
-              <td><%= date_to_str(msg.inserted_at, :hms) %></td>
+              <td><%= TimexHelper.date_to_str(msg.inserted_at, :hms) %></td>
             </tr>
           <% end %>
         </tbody>

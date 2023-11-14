@@ -110,7 +110,7 @@
               <%= round(log.value["skill_change"] - 3 * log.value["uncertainty_change"], 2) %>
             </td>
 
-            <td><%= date_to_str(log.inserted_at, format: :hms_or_dmy) %></td>
+            <td><%= TimexHelper.date_to_str(log.inserted_at, format: :hms_or_dmy) %></td>
 
             <%= if log.match do %>
               <td>

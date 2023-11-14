@@ -113,14 +113,13 @@ defmodule TeiserverWeb do
         layout: {TeiserverWeb.Layouts, :app}
 
       use Breadcrumble
-      alias Teiserver.Account.AuthPlug
-      alias Teiserver.Account.TSAuthPlug
+      alias Teiserver.Account.{AuthPlug, TSAuthPlug}
       import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, mount_require_all: 2, mount_require_any: 2]
       import Teiserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
       import Teiserver.Helper.NumberHelper,
-        only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
-      import Teiserver.Helper.TimexHelper
-      alias Teiserver.Helper.StylingHelper
+        only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2, int_parse: 1]
+
+      alias Teiserver.Helper.{StylingHelper, TimexHelper, StringHelper}
 
       import Teiserver.Account.RecentlyUsedCache,
         only: [remove_recently: 2, insert_recently: 2, insert_recently: 1, get_recently: 1]
@@ -129,7 +128,6 @@ defmodule TeiserverWeb do
       unquote(verified_routes())
       unquote(view_helpers())
       unquote(html_helpers())
-
     end
   end
 

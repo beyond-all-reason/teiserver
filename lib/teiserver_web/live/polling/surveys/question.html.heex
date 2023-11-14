@@ -1,0 +1,42 @@
+<TeiserverWeb.PollingComponents.sub_menu
+  active={"surveys"}
+  view_colour={@view_colour}
+  current_user={@current_user} />
+
+<div class="row mt-2">
+  <div class="col">
+    <TeiserverWeb.Polling.SurveyComponents.section_menu
+        active={"question"}
+        view_colour={@view_colour}
+        current_user={@current_user}>
+
+      <.section_menu_button
+        bsname={@view_colour}
+        icon={Teiserver.Polling.QuestionLib.icon()}
+        active={true}
+        url="#"
+      >
+        Question
+      </.section_menu_button>
+
+    </TeiserverWeb.Polling.SurveyComponents.section_menu>
+
+    <br /><br />
+
+    <%= if @live_action == :show do %>
+      <h4>Question details</h4>
+
+    <% else %>
+      <.live_component
+        module={TeiserverWeb.Polling.QuestionFormComponent}
+        id={"question-form-component"}
+        action={@live_action}
+        survey={@survey}
+        question={@question}
+        patch={~p"/polling/surveys/#{@survey.id}"}
+        title="New question form"
+        current_user={@current_user}
+      />
+    <% end %>
+  </div>
+</div>

@@ -30,37 +30,47 @@
 
         <%= cond do %>
           <% @survey.is_open && @survey.closes_at == nil -> %>
-            <span class="btn btn-sm btn-success">Open</span>
+            <span class="badge rounded-pill bg-success ms-3">Open</span>
 
           <% @survey.is_open -> %>
-            <span class="btn btn-sm btn-success2">Open, closes at X</span>
+            <span class="badge rounded-pill bg-success2 ms-3">Open, closes at X</span>
 
-          <% not @survey.is_open && @survey.opens_at == nil -> %>
-            <span class="btn btn-sm btn-danger">Closed</span>
+          <% @survey.is_open == false && @survey.opens_at == nil -> %>
+            <span class="badge rounded-pill bg-danger ms-3">Completed</span>
 
-          <% not @survey.is_open -> %>
-            <span class="btn btn-sm btn-danger2">Closed</span>
+          <% @survey.is_open == false && @survey.opens_at != nil -> %>
+            <span class="badge rounded-pill bg-danger ms-3">Closed, opens at X</span>
+
+          <% true -> %>
+            <span class="badge rounded-pill bg-danger2 ms-3">Closed</span>
         <% end %>
       </h4>
 
       <br /><br />
 
+      <.link
+        class={"btn btn-#{Teiserver.Polling.QuestionLib.colours()} float-end"}
+        navigate={~p"/polling/surveys/#{@survey.id}/question/new"}
+      ><Fontawesome.icon icon={StylingHelper.icon(:new)} style="regular" />
+        Add Question
+      </.link>
+      
       <h4>Questions</h4>
       <.table
         id="questions-table"
         rows={for o <- @survey.questions, do: {"question-row-#{o.id}", o}}
         table_class="table-sm table-hover"
-        row_click={fn {_id, question} -> JS.navigate(~p"/question_path/#{question.id}") end}
+        row_click={fn {_id, question} -> JS.navigate(~p"/polling/surveys/#{@survey.id}/question/#{question.id}") end}
       >
         <:col :let={{_id, question}} label="Id"><%= question.id %></:col>
-        <:col :let={{_id, question}} label="Name"><%= question.name %></:col>
+        <:col :let={{_id, question}} label="Label"><%= question.label %></:col>
         <:action :let={{_id, question}}>
           <div class="visually-hidden">
-            <.link navigate={~p"/question_path/#{question.id}"}>Show</.link>
+            <.link navigate={~p"/polling/surveys/#{@survey.id}/question/#{question.id}"}>Show</.link>
           </div>
           <.link
             class="btn btn-sm btn-secondary mx-1"
-            patch={~p"/question_path/#{question.id}/edit"}>
+            patch={~p"/polling/surveys/#{@survey.id}/question/#{question.id}/edit"}>
               Edit
           </.link>
         </:action>

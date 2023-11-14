@@ -1,12 +1,12 @@
-defmodule Teiserver.Polling.SurveyQueries do
+defmodule Teiserver.Polling.QuestionQueries do
   @moduledoc false
   use TeiserverWeb, :queries
-  alias Teiserver.Polling.Survey
+  alias Teiserver.Polling.Question
 
   # Queries
-  @spec query_surveys(list) :: Ecto.Query.t()
-  def query_surveys(args) do
-    query = from(surveys in Survey)
+  @spec query_questions(list) :: Ecto.Query.t()
+  def query_questions(args) do
+    query = from(questions in Question)
 
     query
     |> do_where([id: args[:id]])
@@ -31,32 +31,32 @@ defmodule Teiserver.Polling.SurveyQueries do
   defp _where(query, _, nil), do: query
 
   defp _where(query, :id, id) do
-    from surveys in query,
-      where: surveys.id == ^id
+    from questions in query,
+      where: questions.id == ^id
   end
 
   defp _where(query, :author_id, author_id) do
-    from surveys in query,
-      where: surveys.author_id == ^author_id
+    from questions in query,
+      where: questions.author_id == ^author_id
   end
 
   defp _where(query, :author_id_in, []), do: query
   defp _where(query, :author_id_in, author_ids) when is_list(author_ids) do
-    from surveys in query,
-      where: surveys.author_id in ^author_ids
+    from questions in query,
+      where: questions.author_id in ^author_ids
   end
 
   defp _where(query, :author_id_not_in, []), do: query
   defp _where(query, :author_id_not_in, author_ids) when is_list(author_ids) do
-    from surveys in query,
-      where: surveys.author_id not in ^author_ids
+    from questions in query,
+      where: questions.author_id not in ^author_ids
   end
 
   defp _where(query, :name_like, name) do
     uname = "%" <> name <> "%"
 
-    from surveys in query,
-      where: ilike(surveys.name, ^uname)
+    from questions in query,
+      where: ilike(questions.name, ^uname)
   end
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
@@ -72,23 +72,23 @@ defmodule Teiserver.Polling.SurveyQueries do
   defp _order_by(query, nil), do: query
 
   defp _order_by(query, "Name (A-Z)") do
-    from surveys in query,
-      order_by: [asc: surveys.name]
+    from questions in query,
+      order_by: [asc: questions.name]
   end
 
   defp _order_by(query, "Name (Z-A)") do
-    from surveys in query,
-      order_by: [desc: surveys.name]
+    from questions in query,
+      order_by: [desc: questions.name]
   end
 
   defp _order_by(query, "Newest first") do
-    from surveys in query,
-      order_by: [desc: surveys.inserted_at]
+    from questions in query,
+      order_by: [desc: questions.inserted_at]
   end
 
   defp _order_by(query, "Oldest first") do
-    from surveys in query,
-      order_by: [asc: surveys.inserted_at]
+    from questions in query,
+      order_by: [asc: questions.inserted_at]
   end
 
   @spec do_preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
@@ -102,14 +102,8 @@ defmodule Teiserver.Polling.SurveyQueries do
   end
 
   defp _preload(query, :author) do
-    from surveys in query,
-      left_join: authors in assoc(surveys, :author),
+    from questions in query,
+      left_join: authors in assoc(questions, :author),
       preload: [author: authors]
-  end
-
-  defp _preload(query, :questions) do
-    from surveys in query,
-      left_join: questions in assoc(surveys, :questions),
-      preload: [questions: questions]
   end
 end

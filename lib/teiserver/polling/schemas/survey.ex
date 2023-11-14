@@ -11,6 +11,7 @@ defmodule Teiserver.Polling.Survey do
 
     field :opens_at, :utc_datetime
     field :closes_at, :utc_datetime
+    field :questions_last_updated_at, :utc_datetime
     field :is_open, :boolean
 
     # Who can answer this survey? If nil then anybody can
@@ -27,9 +28,9 @@ defmodule Teiserver.Polling.Survey do
 
     # Optionally we may want to later use a many to many for the answers
     # I think this is the correct syntax but check the join_keys
-    # many_to_many :answer_texts, Teiserver.Polling.AnswerString,
+    # many_to_many :answer_strings, Teiserver.Polling.AnswerString,
     #   join_through: "polling_responses",
-    #   join_keys: [survey_id: :id, answer_text_id: :id]
+    #   join_keys: [survey_id: :id, answer_string_id: :id]
 
     timestamps()
   end
@@ -44,7 +45,7 @@ defmodule Teiserver.Polling.Survey do
       |> trim_strings(~w(name colour icon user_permission results_permission edit_permission)a)
 
     struct
-    |> cast(params, ~w(name author_id colour icon opens_at closes_at is_open user_permission results_permission edit_permission)a)
+    |> cast(params, ~w(name author_id colour icon opens_at closes_at is_open user_permission results_permission edit_permission questions_last_updated_at)a)
     |> validate_required(~w(name author_id colour icon)a)
   end
 

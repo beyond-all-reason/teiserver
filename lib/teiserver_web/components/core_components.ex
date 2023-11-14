@@ -348,14 +348,12 @@ defmodule TeiserverWeb.CoreComponents do
     ~H"""
     <div phx-feedback-for={@name}>
       <.label for={@id} :if={@label}><%= @label %></.label>
-      <br />
       <textarea
         id={@id || @name}
         name={@name}
         class={[
-          "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
-          "border-zinc-300 focus:border-zinc-400 focus:ring-zinc-800/5",
-          @errors != [] && "border-rose-400 focus:border-rose-400 focus:ring-rose-400/10"
+          "form-control",
+          @errors != [] && "border-danger"
         ]}
         {@rest}
       ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>

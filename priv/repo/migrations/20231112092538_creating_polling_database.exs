@@ -11,6 +11,7 @@ defmodule Teiserver.Repo.Migrations.CreatingPollingDatabase do
 
       add :opens_at, :utc_datetime
       add :closes_at, :utc_datetime
+      add :questions_last_updated_at, :utc_datetime
       add :is_open, :boolean
 
       add :user_permission, :string
@@ -50,14 +51,14 @@ defmodule Teiserver.Repo.Migrations.CreatingPollingDatabase do
     end
     create index(:polling_responses, [:survey_id])
 
-    create table(:polling_answer_texts, primary_key: false) do
+    create table(:polling_answer_strings, primary_key: false) do
       add :response_id, references(:polling_responses, on_delete: :nothing), primary_key: true
       add :question_id, references(:polling_questions, on_delete: :nothing), primary_key: true
 
-      add :value, :text
+      add :value, :string
     end
-    create index(:polling_answer_texts, [:response_id])
-    create index(:polling_answer_texts, [:question_id])
+    create index(:polling_answer_strings, [:response_id])
+    create index(:polling_answer_strings, [:question_id])
 
     create table(:polling_answer_lists, primary_key: false) do
       add :response_id, references(:polling_responses, on_delete: :nothing), primary_key: true
