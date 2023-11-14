@@ -1,6 +1,3 @@
-# Warning
-Note: at time of writing these commands are actually incorrect, the server will be changing to make them correct and then this warning will be removed.
-
 # Entry types
 Client telemetry events take four main forms: Properties, Simple Events, Complex Events and Live Events.
 

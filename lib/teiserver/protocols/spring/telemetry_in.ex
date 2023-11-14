@@ -73,29 +73,62 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   end
 
   def do_handle("log_client_event", data, _msg_id, state) do
-    client_event(data, state)
+    do_complex_client_event(data, state)
     state
   end
 
   def do_handle("log_client_event_test", data, msg_id, state) do
-    result = client_event(data, state)
+    result = do_complex_client_event(data, state)
     reply(:spring, :okay, result, msg_id, state)
+  end
+
+
+  def do_handle("simple_client_event", data, _msg_id, state) do
+    do_simple_client_event(data, state)
+    state
+  end
+
+  def do_handle("complex_client_event", data, _msg_id, state) do
+    do_complex_client_event(data, state)
+  end
+
+  def do_handle("live_client_event", data, _msg_id, state) do
+    do_live_client_event(data, state)
   end
 
   def do_handle(cmd, data, msg_id, state) do
     SpringIn._no_match(state, "c.telemetry." <> cmd, msg_id, data)
   end
 
-  defp client_event(data, state) do
+  defp do_simple_client_event(data, state) do
+    if String.length(data) < 1024 do
+      case Regex.run(~r/(\S+) (\S+)/u, data) do
+        [_, event_name, hash] ->
+          if state.userid do
+            Telemetry.log_simple_client_event(state.userid, event_name)
+          else
+            Telemetry.log_simple_anon_event(hash, event_name)
+          end
+          "success"
+
+        nil ->
+          "no match"
+      end
+    else
+      "exceeds max_length"
+    end
+  end
+
+  defp do_complex_client_event(data, state) do
     if String.length(data) < 1024 do
       case Regex.run(~r/(\S+) (\S+) (\S+)/u, data) do
-        [_, event, value64, hash] ->
+        [_, event_name, value64, hash] ->
           case Spring.decode_value(value64) do
             {:ok, value} ->
               if state.userid do
-                Telemetry.log_complex_client_event(state.userid, event, value)
+                Telemetry.log_complex_client_event(state.userid, event_name, value)
               else
-                Telemetry.log_complex_anon_event(hash, event, value)
+                Telemetry.log_complex_anon_event(hash, event_name, value)
               end
               "success"
 
@@ -106,6 +139,31 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
 
         nil ->
           # Logger.error("log_client_event:no match - #{data}")
+          "no match"
+      end
+    else
+      "exceeds max_length"
+    end
+  end
+
+  defp do_live_client_event(data, state) do
+    if String.length(data) < 1024 do
+      case Regex.run(~r/(\S+) (\S+)/u, data) do
+        [_, event_name, value64] ->
+          case Spring.decode_value(value64) do
+            {:ok, value} ->
+              if state.userid do
+                # TODO: Do stuff with live client events
+                # Telemetry.log_live_client_event(state.userid, event_name, value)
+                :ok
+              end
+              "success"
+
+            {:error, reason} ->
+              reason
+          end
+
+        nil ->
           "no match"
       end
     else
