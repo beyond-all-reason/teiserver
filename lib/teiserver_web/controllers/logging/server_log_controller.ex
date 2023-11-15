@@ -77,28 +77,107 @@ defmodule TeiserverWeb.Logging.ServerLogController do
            ], fn x -> round(x / 60 / 24) end}
 
         "client-events" ->
-          keys =
+          simple_keys =
             logs
             |> Enum.map(fn %{data: data} ->
               # This is only because not all entries have events
-              (data["events"]["combined"] || %{}) |> Map.keys()
+              (data["events"]["simple_client"] || %{}) |> Map.keys()
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> "events.combined.#{key}" end)
+            |> Enum.map(fn key -> "events.simple_client.#{key}" end)
 
-          {keys, fn x -> x end}
+          complex_keys =
+            logs
+            |> Enum.map(fn %{data: data} ->
+              # This is only because not all entries have events
+              (data["events"]["complex_client"] || %{}) |> Map.keys()
+            end)
+            |> List.flatten()
+            |> Enum.uniq()
+            |> Enum.map(fn key -> "events.complex_client.#{key}" end)
+
+          {simple_keys ++ complex_keys, fn x -> x end}
 
         "server-events" ->
+          simple_keys =
+            logs
+            |> Enum.map(fn %{data: data} ->
+              # This is only because not all entries have events
+              (data["events"]["simple_server"] || %{}) |> Map.keys()
+            end)
+            |> List.flatten()
+            |> Enum.uniq()
+            |> Enum.map(fn key -> {key, "events.simple_server.#{key}", ["events", "simple_server", key]} end)
+
+          complex_keys =
+            logs
+            |> Enum.map(fn %{data: data} ->
+              # This is only because not all entries have events
+              (data["events"]["complex_server"] || %{}) |> Map.keys()
+            end)
+            |> List.flatten()
+            |> Enum.uniq()
+            |> Enum.map(fn key -> {key, "events.complex_server.#{key}", ["events", "complex_server", key]} end)
+
+          {simple_keys ++ complex_keys, fn x -> x end}
+
+        "lobby-events" ->
+          simple_keys =
+            logs
+            |> Enum.map(fn %{data: data} ->
+              # This is only because not all entries have events
+              (data["events"]["simple_lobby"] || %{}) |> Map.keys()
+            end)
+            |> List.flatten()
+            |> Enum.uniq()
+            |> Enum.map(fn key -> {key, "events.simple_lobby.#{key}", ["events", "simple_lobby", key]} end)
+
+          complex_keys =
+            logs
+            |> Enum.map(fn %{data: data} ->
+              # This is only because not all entries have events
+              (data["events"]["complex_lobby"] || %{}) |> Map.keys()
+            end)
+            |> List.flatten()
+            |> Enum.uniq()
+            |> Enum.map(fn key -> {key, "events.complex_lobby.#{key}", ["events", "complex_lobby", key]} end)
+
+          {simple_keys ++ complex_keys, fn x -> x end}
+
+        "match-events" ->
+          simple_keys =
+            logs
+            |> Enum.map(fn %{data: data} ->
+              # This is only because not all entries have events
+              (data["events"]["simple_match"] || %{}) |> Map.keys()
+            end)
+            |> List.flatten()
+            |> Enum.uniq()
+            |> Enum.map(fn key -> {key, "events.simple_match.#{key}", ["events", "simple_match", key]} end)
+
+          complex_keys =
+            logs
+            |> Enum.map(fn %{data: data} ->
+              # This is only because not all entries have events
+              (data["events"]["complex_match"] || %{}) |> Map.keys()
+            end)
+            |> List.flatten()
+            |> Enum.uniq()
+            |> Enum.map(fn key -> {key, "events.complex_match.#{key}", ["events", "complex_match", key]} end)
+
+          {simple_keys ++ complex_keys, fn x -> x end}
+
+        "infologs" ->
           keys =
             logs
             |> Enum.map(fn %{data: data} ->
               # This is only because not all entries have events
-              (data["events"]["server"] || %{}) |> Map.keys()
+              (data["events"]["infologs"] || %{}) |> Map.keys()
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> {key, "events.server.#{key}", ["events", "server", key]} end)
+            |> Enum.map(fn key -> {key, "events.infologs.#{key}", ["events", "infologs", key]} end)
 
           {keys, fn x -> x end}
       end

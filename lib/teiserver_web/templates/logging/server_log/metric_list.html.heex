@@ -19,14 +19,14 @@
         ) %>
         <br /><br />
 
-        <%= central_component("section_menu_button",
-          name: "filter-default",
-          label: "Data list",
-          active: "filter-#{@filter}",
-          icon: StylingHelper.icon(:list),
-          bsname: bsname,
-          url: "?filter=default"
-        ) %>
+        <.section_menu_button
+          bsname={bsname}
+          icon={StylingHelper.icon(:list)}
+          active={@filter == "default"}
+          url="?filter=default"
+        >
+          Overview
+        </.section_menu_button>
 
         <%= if @unit == "day" do %>
           &nbsp;&nbsp; <%= central_component("section_menu_button",
@@ -56,9 +56,12 @@
             url: "?filter=hourly-battles"
           ) %>
         <% end %>
-        &nbsp;&nbsp; <%= central_component("section_menu_button",
+        
+        &nbsp;&nbsp;
+        
+        <%= central_component("section_menu_button",
           name: "filter-graph-unique-users",
-          label: "Unique users",
+          label: "Uniques",
           active: "filter-#{@filter}",
           icon: StylingHelper.icon(:chart),
           bsname: bsname,
@@ -67,7 +70,7 @@
 
         <%= central_component("section_menu_button",
           name: "filter-graph-peak-users",
-          label: "Peak users",
+          label: "Peaks",
           active: "filter-#{@filter}",
           icon: StylingHelper.icon(:chart),
           bsname: bsname,
@@ -83,23 +86,52 @@
           url: "?filter=graph-time"
         ) %>
 
-        <%= central_component("section_menu_button",
-          name: "filter-graph-client-events",
-          label: "Client events",
-          active: "filter-#{@filter}",
-          icon: StylingHelper.icon(:chart),
-          bsname: bsname,
-          url: "?filter=graph-client-events"
-        ) %>
-
-        <%= central_component("section_menu_button",
-          name: "filter-graph-server-events",
-          label: "Server events",
-          active: "filter-#{@filter}",
-          icon: StylingHelper.icon(:chart),
-          bsname: bsname,
-          url: "?filter=graph-server-events"
-        ) %>
+        &nbsp;&nbsp;
+        
+        <.section_menu_button
+          bsname={bsname}
+          icon={StylingHelper.icon(:chart)}
+          active={@filter == "graph-client-events"}
+          url="?filter=graph-client-events"
+        >
+          Client
+        </.section_menu_button>
+        
+        <.section_menu_button
+          bsname={bsname}
+          icon={StylingHelper.icon(:chart)}
+          active={@filter == "graph-server-events"}
+          url="?filter=graph-server-events"
+        >
+          Server
+        </.section_menu_button>
+        
+        <.section_menu_button
+          bsname={bsname}
+          icon={StylingHelper.icon(:chart)}
+          active={@filter == "graph-lobby-events"}
+          url="?filter=graph-lobby-events"
+        >
+          Lobby
+        </.section_menu_button>
+        
+        <.section_menu_button
+          bsname={bsname}
+          icon={StylingHelper.icon(:chart)}
+          active={@filter == "graph-match-events"}
+          url="?filter=graph-match-events"
+        >
+          Match
+        </.section_menu_button>
+        
+        <.section_menu_button
+          bsname={bsname}
+          icon={StylingHelper.icon(:chart)}
+          active={@filter == "graph-infologs"}
+          url="?filter=graph-infologs"
+        >
+          Infolog
+        </.section_menu_button>
 
         <%= if String.starts_with?(@filter, "hourly-") do %>
           &nbsp;&nbsp;&nbsp;&nbsp;

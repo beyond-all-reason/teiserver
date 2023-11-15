@@ -24,7 +24,7 @@
         <guid><%= "#{post.id}/#{post.updated_at |> guid_date()}" %></guid>
         <last_updated><%= post.updated_at |> format_date %></last_updated>
         <description><%= "<![CDATA[#{post.summary |> html_escape |> safe_to_string}]]>" %></description>
-        <contents><%= "<![CDATA[#{contents |> html_escape |> safe_to_string}]]>" %></contents>
+        <contents><%= "<![CDATA[#{contents}]]>" %></contents>
         <tags><%= post.tags |> Enum.map(fn t -> t.name end) |> Enum.join(", ") %></tags>
         <pubDate><%= post.inserted_at |> format_date %></pubDate>
       </item>
