@@ -16,6 +16,10 @@ config :teiserver, Teiserver.Config,
     tz: "UTC"
   }
 
+config :teiserver, ExOauth2Provider,
+  repo: Teiserver.Repo,
+  resource_owner: Teiserver.Account.User
+
 config :teiserver,
   ecto_repos: [Teiserver.Repo]
 
