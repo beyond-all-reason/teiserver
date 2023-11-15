@@ -23,7 +23,7 @@ defmodule TeiserverWeb.Battle.MatchController do
     matches =
       Battle.list_matches(
         search: [
-          user_id: conn.user_id
+          user_id: conn.assigns.current_user.id
         ],
         preload: [
           :queue

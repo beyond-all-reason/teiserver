@@ -91,7 +91,7 @@ defmodule TeiserverWeb.Report.ReportController do
           raise "No handler for name of '#{name}'"
       end
 
-    if allow?(conn.current_user, module.permissions) do
+    if allow?(conn.assigns.current_user, module.permissions) do
       assigns =
         case module.run(conn, params) do
           {data, assigns} -> Map.put(assigns, :data, data)

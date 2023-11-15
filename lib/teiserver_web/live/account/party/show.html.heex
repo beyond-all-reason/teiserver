@@ -1,6 +1,6 @@
 <% bsname = @view_colour
 moderator = allow?(@current_user, "Moderator")
-leader = moderator or @party.leader == @user_id %>
+leader = moderator or @party.leader == @current_user.id %>
 
 <%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
   active: "parties",
@@ -30,7 +30,7 @@ leader = moderator or @party.leader == @user_id %>
                   <%= @user_lookup[m].name %>
                 </td>
                 <td>
-                  <%= if leader and m != @user_id do %>
+                  <%= if leader and m != @current_user.id do %>
                     <span class="btn btn-sm btn-danger" phx-click="kick" phx-value-userid={m}>
                       Kick
                     </span>

@@ -14,7 +14,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
       socket
       |> AuthPlug.live_call(session)
 
-    client = Account.get_client_by_id(socket.assigns.user_id)
+    client = Account.get_client_by_id(socket.assigns.current_user.id)
 
     lobby_user_ids =
       if client != nil and client.lobby_id != nil do
@@ -24,11 +24,11 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
         []
       end
 
-    user = Account.get_user_by_id(socket.assigns.user_id)
-    friends = Account.list_friend_ids_of_user(socket.assigns.user_id)
+    user = Account.get_user_by_id(socket.assigns.current_user.id)
+    friends = Account.list_friend_ids_of_user(socket.assigns.current_user.id)
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{socket.assigns.user_id}")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_client:#{socket.assigns.user_id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{socket.assigns.current_user.id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_client:#{socket.assigns.current_user.id}")
 
     socket =
       socket
@@ -53,7 +53,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     party = Account.get_party(party_id)
 
     if party do
-      if Enum.member?(party.members, socket.assigns.user_id) or
+      if Enum.member?(party.members, socket.assigns.current_user.id) or
            allow?(socket, "Moderator") do
         leader_name = Account.get_username(party.leader)
         :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
@@ -125,7 +125,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
     {:noreply,
      socket
-     |> assign(:client, Account.get_client_by_id(socket.assigns.user_id))}
+     |> assign(:client, Account.get_client_by_id(socket.assigns.current_user.id))}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
@@ -196,8 +196,8 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
   # We kick the user to ensure any connected clients will also update, leaving is normally done
   # by the connected tachyon client
   def handle_event("leave", _, socket) do
-    Account.move_client_to_party(socket.assigns.user_id, nil)
-    Account.leave_party(socket.assigns.party_id, socket.assigns.user_id)
+    Account.move_client_to_party(socket.assigns.current_user.id, nil)
+    Account.leave_party(socket.assigns.party_id, socket.assigns.current_user.id)
     {:noreply, socket |> redirect(to: Routes.ts_game_party_index_path(socket, :index))}
   end
 

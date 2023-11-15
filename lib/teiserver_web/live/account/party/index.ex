@@ -12,9 +12,9 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
       socket
       |> AuthPlug.live_call(session)
 
-    client = Account.get_client_by_id(socket.assigns.user_id)
+    client = Account.get_client_by_id(socket.assigns.current_user.id)
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{socket.assigns.user_id}")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{socket.assigns.current_user.id}")
 
     admin_mode =
       cond do
@@ -90,7 +90,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
     {:noreply,
      socket
-     |> assign(:client, Account.get_client_by_id(socket.assigns.user_id))}
+     |> assign(:client, Account.get_client_by_id(socket.assigns.current_user.id))}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
@@ -121,18 +121,18 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
 
   @impl true
   def handle_event("invite:accept", %{"party_id" => party_id}, socket) do
-    PartyLib.call_party(party_id, {:accept_invite, socket.assigns.user_id})
+    PartyLib.call_party(party_id, {:accept_invite, socket.assigns.current_user.id})
     :timer.sleep(100)
     {:noreply, socket |> redirect(to: Routes.ts_game_party_show_path(socket, :show, party_id))}
   end
 
   def handle_event("invite:decline", %{"party_id" => party_id}, socket) do
-    PartyLib.cast_party(party_id, {:cancel_invite, socket.assigns.user_id})
+    PartyLib.cast_party(party_id, {:cancel_invite, socket.assigns.current_user.id})
     {:noreply, socket}
   end
 
   def handle_event("create_party", _, socket) do
-    party = Account.create_party(socket.assigns.user_id)
+    party = Account.create_party(socket.assigns.current_user.id)
     :timer.sleep(100)
     {:noreply, socket |> redirect(to: Routes.ts_game_party_show_path(socket, :show, party.id))}
   end
@@ -154,9 +154,9 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
 
   defp list_parties(socket) do
     parties =
-      socket.assigns.user_id
+      socket.assigns.current_user.id
       |> Account.list_friend_ids_of_user()
-      |> Kernel.++([socket.assigns.user_id])
+      |> Kernel.++([socket.assigns.current_user.id])
       |> Enum.map(fn user_id -> Account.get_client_by_id(user_id) end)
       |> Enum.reject(&(&1 == nil))
       |> Enum.map(fn c -> c.party_id end)

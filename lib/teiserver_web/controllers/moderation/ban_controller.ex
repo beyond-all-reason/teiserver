@@ -174,7 +174,7 @@ defmodule TeiserverWeb.Moderation.BanController do
 
     ban_params =
       Map.merge(ban_params, %{
-        "added_by_id" => conn.current_user.id,
+        "added_by_id" => conn.assigns.current_user.id,
         "key_values" => key_values
       })
 

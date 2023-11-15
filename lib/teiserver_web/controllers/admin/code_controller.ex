@@ -62,7 +62,7 @@ defmodule TeiserverWeb.Admin.CodeController do
   def create(conn, %{"code" => code_params}) do
     code_params =
       Map.merge(code_params, %{
-        "user_id" => conn.current_user.id
+        "user_id" => conn.assigns.current_user.id
       })
 
     case Account.create_code(code_params) do
