@@ -123,8 +123,14 @@ defmodule Teiserver.Account.GrowthReport do
 
     # Combined events
     field_list = [
-      {"Scenarios started", "events.combined.game_start:singleplayer:scenario_start"},
-      {"Skirmishes", "events.combined.game_start:singleplayer:lone_other_skirmish"}
+      {"Scenarios started", [
+        "events.complex_anon.game_start:singleplayer:scenario_start",
+        "events.complex_client.game_start:singleplayer:scenario_start"
+      ]},
+      {"Skirmishes", [
+        "events.complex_anon.game_start:singleplayer:lone_other_skirmish",
+        "events.complex_client.game_start:singleplayer:lone_other_skirmish"
+      ]}
     ]
 
     columns = ServerGraphDayLogsTask.perform(logs, %{"field_list" => field_list}, fn x -> x end)
