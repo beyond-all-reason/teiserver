@@ -124,6 +124,15 @@ defmodule Teiserver.Account.RoleLib do
       badge: true
     },
 
+    # Staffing but with special access so not all staff
+    %{
+      name: "Polling",
+      colour: "#007700",
+      icon: Teiserver.Polling.icon(),
+      contains: ~w(),
+      badge: false
+    },
+
     # Authority
     %{
       name: "Overwatch",
@@ -143,7 +152,7 @@ defmodule Teiserver.Account.RoleLib do
       name: "Admin",
       colour: "#204A88",
       icon: "fa-solid fa-user-tie",
-      contains: ~w(Moderator Core),
+      contains: ~w(Moderator Core Polling),
       badge: true
     },
     %{

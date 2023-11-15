@@ -60,7 +60,7 @@
       row_click={fn friend -> JS.navigate(~p"/profile/#{friend.other_user.id}") end}
     >
       <:col :let={friend} label="Name"><%= friend.other_user.name %></:col>
-      <:col :let={friend} label="Last played"><%= friend.other_user.last_played |> date_to_str(:hms_or_ymd) %></:col>
+      <:col :let={friend} label="Last played"><%= friend.other_user.last_played |> TimexHelper.date_to_str(:hms_or_ymd) %></:col>
 
       <:col :let={friend} label="">
         <.link
@@ -153,7 +153,7 @@
       row_click={fn follow -> JS.navigate(~p"/profile/#{follow.to_user.id}") end}
     >
       <:col :let={follow} label="Name"><%= follow.to_user.name %></:col>
-      <:col :let={follow} label="Last played"><%= follow.to_user.last_played |> date_to_str(:hms_or_ymd) %></:col>z
+      <:col :let={follow} label="Last played"><%= follow.to_user.last_played |> TimexHelper.date_to_str(:hms_or_ymd) %></:col>z
       
       <:col :let={follow} label="">
         <.link
@@ -328,20 +328,20 @@
           <h4 :if={@found_relationship && @found_relationship.state != nil} class="mb-4">
             <%= case @found_relationship.state do %>
               <% "follow" -> %>
-                Status: <span class={"text-info"}>Following</span>
+                Status: <span class="text-info">Following</span>
               <% "ignore" -> %>
-                Status: <span class={"text-warning"}>Ignoring</span>
+                Status: <span class="text-warning">Ignoring</span>
               <% "avoid" -> %>
-                Status: <span class={"text-danger"}>Avoiding</span>
+                Status: <span class="text-danger">Avoiding</span>
               <% "block" -> %>
-                Status: <span class={"text-danger"}>Blocked</span>
+                Status: <span class="text-danger">Blocked</span>
             <% end %>
           </h4>
 
           <h4 :if={@found_friendship} class="mb-4">
             Status: <span class={"text-#{Teiserver.Account.FriendLib.colours}"}>Friend</span>
           </h4>
-          
+
           <.link
             :if={@found_user}
             navigate={~p"/profile/#{@found_user.id}"}

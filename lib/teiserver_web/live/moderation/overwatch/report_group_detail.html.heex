@@ -111,7 +111,7 @@
           >
             <:col :let={report} label="Type"><%= report.type %>/<%= report.sub_type %></:col>
             <:col :let={report} label="Type"><%= report.extra_text %></:col>
-            <:col :let={report} label="Type"><%= date_to_str(report.inserted_at, format: :hms_or_ymd) %></:col>
+            <:col :let={report} label="Type"><%= TimexHelper.date_to_str(report.inserted_at, format: :hms_or_ymd) %></:col>
           </.table>
         </div>
         <div class="col-md-6">

@@ -65,11 +65,11 @@
         </div>
 
         <div class="col">
-          <strong>Started:</strong> <%= date_to_str(@match.started, format: :ymd_hms, tz: @tz) %>
+          <strong>Started:</strong> <%= TimexHelper.date_to_str(@match.started, format: :ymd_hms, tz: @tz) %>
         </div>
 
         <div class="col">
-          <strong>Finished:</strong> <%= date_to_str(@match.finished, format: :ymd_hms, tz: @tz) %>
+          <strong>Finished:</strong> <%= TimexHelper.date_to_str(@match.finished, format: :ymd_hms, tz: @tz) %>
         </div>
 
         <%= if allow?(@current_user, "admin.dev") do %>
@@ -85,7 +85,7 @@
         </div>
         
         <div class="col">
-          <strong>Duration:</strong> <%= duration_to_str_short(@match.game_duration) %>
+          <strong>Duration:</strong> <%= TimexHelper.duration_to_str_short(@match.game_duration) %>
         </div>
         
         <div class="col">

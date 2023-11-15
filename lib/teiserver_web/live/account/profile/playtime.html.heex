@@ -19,15 +19,15 @@
       <tbody>
         <tr>
           <td>Total</td>
-          <td><%= duration_to_str @total_hours %></td>
+          <td><%= TimexHelper.duration_to_str(@total_hours) %></td>
         </tr>
         <tr>
           <td>Playing</td>
-          <td><%= duration_to_str @player_hours %></td>
+          <td><%= TimexHelper.duration_to_str(@player_hours) %></td>
         </tr>
         <tr>
           <td>Spectating</td>
-          <td><%= duration_to_str @spectator_hours %></td>
+          <td><%= TimexHelper.duration_to_str(@spectator_hours) %></td>
         </tr>
       </tbody>
     </table>

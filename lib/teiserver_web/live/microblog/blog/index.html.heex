@@ -50,7 +50,7 @@
                 <%= post.poster.name %>
               </span>
             </h5>
-            Posted at <%= date_to_str(post.inserted_at, format: :ymd_hms) %>
+            Posted at <%= TimexHelper.date_to_str(post.inserted_at, format: :ymd_hms) %>
             <br /><br />
           
             <%= post.summary %>
