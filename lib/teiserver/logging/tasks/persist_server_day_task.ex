@@ -617,6 +617,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
     complex_match_data = run_match_event_query("complex", start_date, end_date)
     simple_match_data = run_match_event_query("simple", start_date, end_date)
 
+    infologs = count_infologs(start_date, end_date)
+
     Map.put(stats, :events, %{
       complex_client: complex_client_data,
       simple_client: simple_client_data,
@@ -627,7 +629,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       complex_lobby: complex_lobby_data,
       simple_lobby: simple_lobby_data,
       complex_match: complex_match_data,
-      simple_match: simple_match_data
+      simple_match: simple_match_data,
+      infologs: infologs
     })
   end
 
@@ -718,5 +721,33 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       {a, b} ->
         raise "ERR: #{a}, #{b}"
     end
+  end
+
+  defp count_infologs(start_date, end_date) do
+    query = """
+      SELECT
+        l.log_type,
+        COUNT(*)
+      FROM telemetry_infologs l
+      WHERE
+        l.timestamp BETWEEN $1 AND $2
+      GROUP BY
+        l.log_type;
+    """
+
+    count_map = case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
+      {:ok, results} ->
+        results.rows
+        |> Map.new(fn [key, value] -> {key, value} end)
+
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
+
+    total = count_map
+      |> Map.values()
+      |> Enum.sum()
+
+    Map.put(count_map, "total", total)
   end
 end

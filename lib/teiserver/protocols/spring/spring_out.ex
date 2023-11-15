@@ -285,7 +285,7 @@ defmodule Teiserver.Protocols.SpringOut do
       keys
       |> Enum.reject(fn k -> Enum.member?(["", " "], k) end)
 
-    "REMOVESCRIPTTAGS " <> Enum.join(keys, "\t") <> "\n"
+    "REMOVESCRIPTTAGS " <> Enum.join(keys, " ") <> "\n"
   end
 
   defp do_reply(:enable_all_units, _units) do

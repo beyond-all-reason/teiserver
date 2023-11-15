@@ -20,7 +20,6 @@ defmodule TeiserverWeb.ClientLive.Show do
     socket =
       socket
       |> AuthPlug.live_call(session)
-      |> TSAuthPlug.live_call(session)
 
     current_client = Account.get_client_by_id(socket.assigns[:current_user].id)
 

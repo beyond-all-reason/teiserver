@@ -19,7 +19,6 @@ defmodule TeiserverWeb.Router do
     plug(Teiserver.Logging.LoggingPlug)
     plug(Teiserver.Account.AuthPipeline)
     plug(Teiserver.Account.AuthPlug)
-    plug(Teiserver.Account.TSAuthPlug)
     plug(Teiserver.Plugs.CachePlug)
   end
 
@@ -33,7 +32,6 @@ defmodule TeiserverWeb.Router do
     plug(Teiserver.Account.DefaultsPlug)
     plug(Teiserver.Account.AuthPipeline)
     plug(Teiserver.Account.AuthPlug)
-    plug(Teiserver.Account.TSAuthPlug)
     plug(Teiserver.Plugs.CachePlug)
   end
 
@@ -59,7 +57,6 @@ defmodule TeiserverWeb.Router do
     plug(Teiserver.Logging.LoggingPlug)
     plug(Teiserver.Account.AuthPipeline)
     plug(Teiserver.Account.AuthPlug)
-    plug(Teiserver.Account.TSAuthPlug)
     plug(Teiserver.Plugs.CachePlug)
     plug(Guardian.Plug.EnsureAuthenticated)
   end
@@ -72,7 +69,6 @@ defmodule TeiserverWeb.Router do
     plug(Teiserver.Logging.LoggingPlug)
     plug(Teiserver.Account.AuthPipeline)
     plug(Teiserver.Account.AuthPlug)
-    plug(Teiserver.Account.TSAuthPlug)
     plug(Teiserver.Plugs.CachePlug)
     plug(Guardian.Plug.EnsureAuthenticated)
   end

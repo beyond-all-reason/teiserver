@@ -778,17 +778,29 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   defp user_logged_out(userid, username, state) do
-    known_users =
+    {known_users, room_member_cache} =
       case state.known_users[userid] do
         nil ->
-          state.known_users
+          {state.known_users, state.room_member_cache}
 
         _ ->
+          # Remove from rooms
+          new_room_member_cache = state.room_member_cache
+            |> Map.new(fn {room_name, members} ->
+              if Enum.member?(members, userid) do
+                SpringOut.reply(:remove_user_from_room, {userid, room_name}, nil, state)
+                new_members = List.delete(members, userid)
+                {room_name, new_members}
+              else
+                {room_name, members}
+              end
+            end)
+
           SpringOut.reply(:user_logged_out, {userid, username}, nil, state)
-          Map.delete(state.known_users, userid)
+          {Map.delete(state.known_users, userid), new_room_member_cache}
       end
 
-    %{state | known_users: known_users}
+    %{state | known_users: known_users, room_member_cache: room_member_cache}
   end
 
   defp user_updated(fields, state) do

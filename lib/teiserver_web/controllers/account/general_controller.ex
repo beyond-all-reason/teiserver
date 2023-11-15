@@ -18,7 +18,7 @@ defmodule TeiserverWeb.Account.GeneralController do
 
   @spec edit_details(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit_details(conn, _params) do
-    user = Account.get_user!(conn.user_id)
+    user = Account.get_user!(conn.assigns.current_user.id)
     changeset = Account.change_user(user)
 
     conn
@@ -30,7 +30,7 @@ defmodule TeiserverWeb.Account.GeneralController do
 
   @spec update_details(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def update_details(conn, %{"user" => user_params}) do
-    user = Account.get_user!(conn.user_id)
+    user = Account.get_user!(conn.assigns.current_user.id)
 
     Account.decache_user(user.id)
 

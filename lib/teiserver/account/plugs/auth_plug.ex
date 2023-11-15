@@ -18,12 +18,9 @@ defmodule Teiserver.Account.AuthPlug do
         _ -> nil
       end
 
-    user_id = if user, do: user.id, else: nil
-
     user_token =
       if user do
         Guardian.Plug.current_token(conn)
-        # Phoenix.Token.sign(conn, "user socket", user.id)
       else
         ""
       end
@@ -32,13 +29,18 @@ defmodule Teiserver.Account.AuthPlug do
       Logger.metadata([user_id: user.id] ++ Logger.metadata())
     end
 
-    conn
-    |> Map.put(:current_user, user)
-    |> Map.put(:user_id, user_id)
-    |> assign(:user_token, user_token)
-    |> assign(:current_user, user)
-    |> assign(:documentation, [])
-    |> assign(:flags, [])
+    conn = conn
+      |> assign(:user_token, user_token)
+      |> assign(:current_user, user)
+
+    if banned_user?(conn) do
+      conn
+        |> assign(:current_user, nil)
+        |> assign(:user_token, nil)
+        |> Phoenix.Controller.redirect("/logout")
+    else
+      conn
+    end
   end
 
   def live_call(socket, session) do
@@ -48,16 +50,37 @@ defmodule Teiserver.Account.AuthPlug do
         _ -> nil
       end
 
-    user_id = if user, do: user.id, else: nil
-
     if user != nil do
       request_id = ExULID.ULID.generate()
       Logger.metadata([request_id: request_id, user_id: user.id] ++ Logger.metadata())
     end
 
-    socket
-    |> Phoenix.LiveView.Utils.assign(:current_user, user)
-    |> Phoenix.LiveView.Utils.assign(:user_id, user_id)
+    socket = socket
+      |> Phoenix.LiveView.Utils.assign(:current_user, user)
+
+    if banned_user?(socket) do
+      socket
+        |> Phoenix.LiveView.Utils.assign(:current_user, nil)
+        |> Phoenix.LiveView.Utils.assign(:user_token, nil)
+        |> Phoenix.LiveView.redirect("/logout")
+    else
+      socket
+    end
+  end
+
+  defp banned_user?(%{assigns: %{current_user: nil}}), do: false
+
+  defp banned_user?(%{assigns: %{current_user: current_user}} = _conn_or_socket) do
+    cond do
+      Teiserver.CacheUser.is_restricted?(current_user.id, ["Login"]) ->
+        true
+
+      current_user.smurf_of_id != nil ->
+        true
+
+      true ->
+        false
+    end
   end
 
   @doc """

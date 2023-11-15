@@ -324,6 +324,15 @@ defmodule TeiserverWeb.NavComponents do
   <.section_menu_button bsname={bsname} icon={lib} active={true/false} url={url}>
     Text goes here
   </.section_menu_button>
+
+  <.section_menu_button
+      bsname={@view_colour}
+      icon={StylingHelper.icon(:list)}
+      active={@active == "index"}
+      url={~p"/account/relationship"}
+    >
+      List
+    </.section_menu_button>
   """
   attr :icon, :string, default: nil
   attr :url, :string, required: true

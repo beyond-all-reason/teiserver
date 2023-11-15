@@ -65,8 +65,8 @@ moderator = allow?(@current_user, "Moderator") %>
               status =
                 cond do
                   @client == nil -> "disconnected"
-                  Enum.member?(party.members, @user_id) -> "member"
-                  Enum.member?(party.pending_invites, @user_id) -> "invited"
+                  Enum.member?(party.members, @current_user.id) -> "member"
+                  Enum.member?(party.pending_invites, @current_user.id) -> "invited"
                   true -> nil
                 end %>
               <tr>

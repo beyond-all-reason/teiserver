@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Account.SecurityController do
     user_tokens =
       Account.list_user_tokens(
         search: [
-          user_id: conn.user_id
+          user_id: conn.assigns.current_user.id
         ],
         order_by: "Most recently used"
       )
@@ -28,7 +28,7 @@ defmodule TeiserverWeb.Account.SecurityController do
 
   @spec edit_password(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit_password(conn, _params) do
-    user = Account.get_user!(conn.user_id)
+    user = Account.get_user!(conn.assigns.current_user.id)
     changeset = Account.change_user(user)
 
     conn
@@ -40,7 +40,7 @@ defmodule TeiserverWeb.Account.SecurityController do
 
   @spec update_password(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def update_password(conn, %{"user" => user_params}) do
-    user = Account.get_user!(conn.user_id)
+    user = Account.get_user!(conn.assigns.current_user.id)
 
     case Account.update_user_password(user, user_params) do
       {:ok, _user} ->
@@ -61,7 +61,7 @@ defmodule TeiserverWeb.Account.SecurityController do
     token =
       Account.get_user_token(id,
         search: [
-          user_id: conn.user_id
+          user_id: conn.assigns.current_user.id
         ]
       )
 
