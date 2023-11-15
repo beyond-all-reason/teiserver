@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Logging.ServerLogController do
   use TeiserverWeb, :controller
   alias Teiserver.Logging
-  alias Teiserver.Helper.TimexHelper
-  alias Teiserver.Logging.{ServerGraphDayLogsTask, GraphMinuteLogsTask}
+  alias Teiserver.Helper.{TimexHelper, ChartHelper}
+  alias Teiserver.Logging.{GraphMinuteLogsTask}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
@@ -56,146 +56,232 @@ defmodule TeiserverWeb.Logging.ServerLogController do
           )
       end
 
-    {field_list, f} =
+    instructions =
       case graph do
         "unique-users" ->
-          {["aggregates.stats.unique_users", "aggregates.stats.unique_players"], fn x -> x end}
+          [
+            %{
+              name: "Unique users",
+              paths: [~w"aggregates stats unique_users"]
+            },
+            %{
+              name: "Unique players",
+              paths: [~w"aggregates stats unique_players"]
+            }
+          ]
 
         "peak-users" ->
-          {[
-             "aggregates.stats.peak_user_counts.total",
-             "aggregates.stats.peak_user_counts.player"
-           ], fn x -> x end}
+          [
+            %{
+              name: "Peak users",
+              paths: [~w"aggregates stats peak_user_counts total"]
+            },
+            %{
+              name: "Peak players",
+              paths: [~w"aggregates stats peak_user_counts player"]
+            },
+            %{
+              name: "Accounts created",
+              paths: [~w"aggregates stats accounts_created"]
+            }
+          ]
 
         "time" ->
-          {[
-             "aggregates.minutes.player",
-             "aggregates.minutes.spectator",
-             "aggregates.minutes.lobby",
-             "aggregates.minutes.menu",
-             "aggregates.minutes.total"
-           ], fn x -> round(x / 60 / 24) end}
+          [
+            %{
+              name: "Player",
+              paths: [~w"aggregates minutes player"],
+              post_processor: fn x ->
+                round(x / 60 / 24)
+              end
+            },
+            %{
+              name: "Spectator",
+              paths: [~w"aggregates minutes spectator"],
+              post_processor: fn x ->
+                round(x / 60 / 24)
+              end
+            },
+            %{
+              name: "Lobby",
+              paths: [~w"aggregates minutes lobby"],
+              post_processor: fn x ->
+                round(x / 60 / 24)
+              end
+            },
+            %{
+              name: "Menu",
+              paths: [~w"aggregates minutes menu"],
+              post_processor: fn x ->
+                round(x / 60 / 24)
+              end
+            },
+            %{
+              name: "Total",
+              paths: [~w"aggregates minutes total"],
+              post_processor: fn x ->
+                round(x / 60 / 24)
+              end
+            }
+          ]
 
         "client-events" ->
           simple_keys =
             logs
             |> Enum.map(fn %{data: data} ->
-              # This is only because not all entries have events
-              (data["events"]["simple_client"] || %{}) |> Map.keys()
+              data["events"]["simple_client"] |> Map.keys()
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> "events.simple_client.#{key}" end)
+            |> Enum.map(fn key -> %{
+                name: key,
+                paths: [
+                  ~w"events simple_anon #{key}",
+                  ~w"events simple_client #{key}"
+                ],
+                mapper: fn x -> x || 0 end
+              }
+            end)
 
           complex_keys =
             logs
             |> Enum.map(fn %{data: data} ->
-              # This is only because not all entries have events
-              (data["events"]["complex_client"] || %{}) |> Map.keys()
+              data["events"]["complex_client"] |> Map.keys()
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> "events.complex_client.#{key}" end)
+            |> Enum.map(fn key -> %{
+                name: key,
+                paths: [
+                  ~w"events complex_client #{key}",
+                  ~w"events complex_anon #{key}"
+                ],
+                mapper: fn x -> x || 0 end
+              }
+            end)
 
-          {simple_keys ++ complex_keys, fn x -> x end}
+          simple_keys ++ complex_keys
 
         "server-events" ->
           simple_keys =
             logs
             |> Enum.map(fn %{data: data} ->
-              # This is only because not all entries have events
-              (data["events"]["simple_server"] || %{}) |> Map.keys()
+              data["events"]["simple_server"] |> Map.keys()
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> {key, "events.simple_server.#{key}", ["events", "simple_server", key]} end)
+            |> Enum.map(fn key -> %{
+                name: key,
+                paths: [~w"events simple_server #{key}"],
+                mapper: fn x -> x || 0 end
+              }
+            end)
 
           complex_keys =
             logs
             |> Enum.map(fn %{data: data} ->
-              # This is only because not all entries have events
-              (data["events"]["complex_server"] || %{}) |> Map.keys()
+              data["events"]["complex_server"] |> Map.keys()
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> {key, "events.complex_server.#{key}", ["events", "complex_server", key]} end)
+            |> Enum.map(fn key -> %{
+                name: key,
+                paths: [~w"events complex_server #{key}"],
+                mapper: fn x -> x || 0 end
+              }
+            end)
 
-          {simple_keys ++ complex_keys, fn x -> x end}
+          simple_keys ++ complex_keys
 
         "lobby-events" ->
           simple_keys =
             logs
             |> Enum.map(fn %{data: data} ->
-              # This is only because not all entries have events
-              (data["events"]["simple_lobby"] || %{}) |> Map.keys()
+              data["events"]["simple_lobby"] |> Map.keys()
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> {key, "events.simple_lobby.#{key}", ["events", "simple_lobby", key]} end)
+            |> Enum.map(fn key -> %{
+                name: key,
+                paths: [~w"events simple_lobby #{key}"],
+                mapper: fn x -> x || 0 end
+              }
+            end)
 
           complex_keys =
             logs
             |> Enum.map(fn %{data: data} ->
-              # This is only because not all entries have events
-              (data["events"]["complex_lobby"] || %{}) |> Map.keys()
+              data["events"]["complex_lobby"] |> Map.keys()
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> {key, "events.complex_lobby.#{key}", ["events", "complex_lobby", key]} end)
+            |> Enum.map(fn key -> %{
+                name: key,
+                paths: [~w"events complex_lobby #{key}"],
+                mapper: fn x -> x || 0 end
+              }
+            end)
 
-          {simple_keys ++ complex_keys, fn x -> x end}
+          simple_keys ++ complex_keys
 
         "match-events" ->
           simple_keys =
             logs
             |> Enum.map(fn %{data: data} ->
-              # This is only because not all entries have events
-              (data["events"]["simple_match"] || %{}) |> Map.keys()
+              data["events"]["simple_match"] |> Map.keys()
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> {key, "events.simple_match.#{key}", ["events", "simple_match", key]} end)
+            |> Enum.map(fn key -> %{
+                name: key,
+                paths: [~w"events simple_match #{key}"],
+                mapper: fn x -> x || 0 end
+              }
+            end)
 
           complex_keys =
             logs
             |> Enum.map(fn %{data: data} ->
-              # This is only because not all entries have events
-              (data["events"]["complex_match"] || %{}) |> Map.keys()
+              data["events"]["complex_match"] |> Map.keys()
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> {key, "events.complex_match.#{key}", ["events", "complex_match", key]} end)
+            |> Enum.map(fn key -> %{
+                name: key,
+                paths: [~w"events complex_match #{key}"],
+                mapper: fn x -> x || 0 end
+              }
+            end)
 
-          {simple_keys ++ complex_keys, fn x -> x end}
+          simple_keys ++ complex_keys
 
         "infologs" ->
           keys =
             logs
             |> Enum.map(fn %{data: data} ->
-              # This is only because not all entries have events
-              (data["events"]["infologs"] || %{}) |> Map.keys()
+              data["events"]["infologs"] |> Map.keys()
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> {key, "events.infologs.#{key}", ["events", "infologs", key]} end)
+            |> Enum.map(fn key -> %{
+                name: key,
+                paths: [~w"events infologs #{key}"],
+                mapper: fn x -> x || 0 end
+              }
+            end)
 
-          {keys, fn x -> x end}
+          keys
       end
 
-    extra_params = %{"field_list" => field_list}
-
-    columns = ServerGraphDayLogsTask.perform(logs, Map.merge(params, extra_params), f)
-
-    key =
-      logs
-      |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
+    date_keys = ChartHelper.extract_keys(logs, :date, "x")
+    columns = ChartHelper.build_lines(logs, instructions)
 
     conn
     |> assign(:logs, logs)
     |> assign(:filter, params["filter"])
     |> assign(:unit, unit)
     |> assign(:columns, columns)
-    |> assign(:key, key)
+    |> assign(:key, date_keys)
     |> assign(:params, params)
     |> add_breadcrumb(name: "Metric graph", url: conn.request_path)
     |> render("metric_list.html")

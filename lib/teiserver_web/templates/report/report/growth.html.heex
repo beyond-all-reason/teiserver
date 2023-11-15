@@ -38,14 +38,20 @@
       }
     });
   }
+  
+  <%
+    IO.puts "\n"
+    IO.inspect @unique_counts
+    IO.puts ""
+  %>
 
   $(function() {
-    generate_chart("#unique-counts", <%= raw Jason.encode!([["x" | @unique_counts |> elem(0)] | @unique_counts |> elem(1)]) %>);
-    generate_chart("#peak-counts", <%= raw Jason.encode!([["x" | @peak_counts |> elem(0)] | @peak_counts |> elem(1)]) %>);
-    generate_chart("#time-counts", <%= raw Jason.encode!([["x" | @time_counts |> elem(0)] | @time_counts |> elem(1)]) %>);
-    generate_chart("#pvp-counts", <%= raw Jason.encode!([["x" | @pvp_counts |> elem(0)] | @pvp_counts |> elem(1)]) %>);
-    generate_chart("#pve-counts", <%= raw Jason.encode!([["x" | @pve_counts |> elem(0)] | @pve_counts |> elem(1)]) %>);
-    generate_chart("#singleplayer-counts", <%= raw Jason.encode!([["x" | @singleplayer_counts |> elem(0)] | @singleplayer_counts |> elem(1)]) %>);
+    generate_chart("#unique-counts", <%= raw Jason.encode!(@unique_counts) %>);
+    generate_chart("#peak-counts", <%= raw Jason.encode!(@peak_counts) %>);
+    generate_chart("#time-counts", <%= raw Jason.encode!(@time_counts) %>);
+    generate_chart("#pvp-counts", <%= raw Jason.encode!(@pvp_counts) %>);
+    generate_chart("#pve-counts", <%= raw Jason.encode!(@pve_counts) %>);
+    generate_chart("#singleplayer-counts", <%= raw Jason.encode!(@singleplayer_counts) %>);
   });
 </script>
 

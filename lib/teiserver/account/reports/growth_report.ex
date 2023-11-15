@@ -1,9 +1,8 @@
 defmodule Teiserver.Account.GrowthReport do
   @moduledoc false
   alias Teiserver.{Logging}
-  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.{TimexHelper, ChartHelper}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Logging.ServerGraphDayLogsTask
   require Logger
 
   @spec icon() :: String.t()
@@ -24,13 +23,9 @@ defmodule Teiserver.Account.GrowthReport do
       get_server_logs(params["time_unit"], limit)
       |> get_server_metrics()
 
-    assigns =
-      %{
-        params: params
-      }
-      |> Map.merge(server_data)
-
-    {%{}, assigns}
+    Map.merge(server_data, %{
+      params: params
+    })
   end
 
   defp apply_defaults(params) do
@@ -45,109 +40,111 @@ defmodule Teiserver.Account.GrowthReport do
   end
 
   defp get_server_metrics(logs) do
+    date_keys = ChartHelper.extract_keys(logs, :date, "x")
+
     # Unique counts
-    field_list = [
-      {"Unique users", "aggregates.stats.unique_users"},
-      {"Unique players", "aggregates.stats.unique_players"}
-    ]
-
-    columns = ServerGraphDayLogsTask.perform(logs, %{"field_list" => field_list}, fn x -> x end)
-
-    key =
-      logs
-      |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
-
-    unique_counts = {key, columns}
+    unique_counts = ChartHelper.build_lines(logs, [
+      %{
+        name: "Unique users",
+        paths: [~w"aggregates stats unique_users"]
+      },
+      %{
+        name: "Unique players",
+        paths: [~w"aggregates stats unique_players"]
+      }
+    ])
 
     # Peak counts
-    field_list = [
-      {"Peak users", "aggregates.stats.peak_user_counts.total"},
-      {"Peak players", "aggregates.stats.peak_user_counts.player"},
-      {"Accounts created", "aggregates.stats.accounts_created"}
-    ]
-
-    columns = ServerGraphDayLogsTask.perform(logs, %{"field_list" => field_list}, fn x -> x end)
-
-    key =
-      logs
-      |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
-
-    peak_counts = {key, columns}
+    peak_counts = ChartHelper.build_lines(logs, [
+      %{
+        name: "Peak users",
+        paths: [~w"aggregates stats peak_user_counts total"]
+      },
+      %{
+        name: "Peak players",
+        paths: [~w"aggregates stats peak_user_counts player"]
+      },
+      %{
+        name: "Accounts created",
+        paths: [~w"aggregates stats accounts_created"]
+      }
+    ])
 
     # Time counts
-    field_list = [
-      {"Player minutes", "aggregates.minutes.player"},
-      {"Total minutes", "aggregates.minutes.total"}
-    ]
-
-    columns =
-      ServerGraphDayLogsTask.perform(logs, %{"field_list" => field_list}, fn x ->
-        round(x / 60 / 24)
-      end)
-
-    key =
-      logs
-      |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
-
-    time_counts = {key, columns}
+    time_counts = ChartHelper.build_lines(logs, [
+      %{
+        name: "Player minutes",
+        paths: [~w"aggregates minutes player"],
+        post_processor: fn x ->
+          round(x / 60 / 24)
+        end
+      },
+      %{
+        name: "Total minutes",
+        paths: [~w"aggregates minutes total"],
+        post_processor: fn x ->
+          round(x / 60 / 24)
+        end
+      }
+    ])
 
     # PvP Matches
-    field_list = [
-      {"Duels", "matches.counts.duel"},
-      {"Team games", "matches.counts.team"},
-      {"FFA games", "matches.counts.ffa"}
-    ]
-
-    columns = ServerGraphDayLogsTask.perform(logs, %{"field_list" => field_list}, fn x -> x end)
-
-    key =
-      logs
-      |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
-
-    pvp_counts = {key, columns}
+    pvp_counts = ChartHelper.build_lines(logs, [
+      %{
+        name: "Duels",
+        paths: [~w"matches counts duel"]
+      },
+      %{
+        name: "Team games",
+        paths: [~w"matches counts team"]
+      },
+      %{
+        name: "FFA games",
+        paths: [~w"matches counts ffa"]
+      }
+    ])
 
     # PvE Matches
-    field_list = [
-      {"Bot matches", "matches.counts.bots"},
-      {"Raptor matches", "matches.counts.raptors"},
-      {"Scavengers matches", "matches.counts.scavengers"}
-    ]
+    pve_counts = ChartHelper.build_lines(logs, [
+      %{
+        name: "Bot matches",
+        paths: [~w"matches counts bots"]
+      },
+      %{
+        name: "Raptor matches",
+        paths: [~w"matches counts raptors"]
+      },
+      %{
+        name: "Scavengers matches",
+        paths: [~w"matches counts scavengers"]
+      }
+    ])
 
-    columns = ServerGraphDayLogsTask.perform(logs, %{"field_list" => field_list}, fn x -> x end)
-
-    key =
-      logs
-      |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
-
-    pve_counts = {key, columns}
-
-    # Combined events
-    field_list = [
-      {"Scenarios started", [
-        "events.complex_anon.game_start:singleplayer:scenario_start",
-        "events.complex_client.game_start:singleplayer:scenario_start"
-      ]},
-      {"Skirmishes", [
-        "events.complex_anon.game_start:singleplayer:lone_other_skirmish",
-        "events.complex_client.game_start:singleplayer:lone_other_skirmish"
-      ]}
-    ]
-
-    columns = ServerGraphDayLogsTask.perform(logs, %{"field_list" => field_list}, fn x -> x end)
-
-    key =
-      logs
-      |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
-
-    singleplayer_counts = {key, columns}
+    # Singleplayer
+    singleplayer_counts = ChartHelper.build_lines(logs, [
+      %{
+        name: "Scenarios started",
+        paths: [
+          ~w"events complex_anon game_start:singleplayer:scenario_start",
+          ~w"events complex_client game_start:singleplayer:scenario_start"
+        ]
+      },
+      %{
+        name: "Skirmishes",
+        paths: [
+          ~w"events complex_anon game_start:singleplayer:lone_other_skirmish",
+          ~w"events complex_client game_start:singleplayer:lone_other_skirmish"
+        ]
+      }
+    ])
 
     %{
-      unique_counts: unique_counts,
-      peak_counts: peak_counts,
-      time_counts: time_counts,
-      pvp_counts: pvp_counts,
-      pve_counts: pve_counts,
-      singleplayer_counts: singleplayer_counts
+      unique_counts: [date_keys | unique_counts],
+      peak_counts: [date_keys | peak_counts],
+      time_counts: [date_keys | time_counts],
+      pvp_counts: [date_keys | pvp_counts],
+      pve_counts: [date_keys | pve_counts],
+      singleplayer_counts: [date_keys | singleplayer_counts]
     }
   end
 

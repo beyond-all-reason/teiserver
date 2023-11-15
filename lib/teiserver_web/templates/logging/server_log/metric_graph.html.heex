@@ -13,7 +13,7 @@
       bindto: '#chart',
       data: {
         x: 'x',
-        columns: <%= raw Jason.encode!([["x" | @key] | @columns]) %>
+        columns: <%= raw Jason.encode!([@key | @columns]) %>
       },
       axis: {
         x: {
