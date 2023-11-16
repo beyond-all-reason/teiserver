@@ -550,14 +550,11 @@ defmodule Teiserver.Protocols.SpringIn do
     case String.split(data, "=") do
       [_, username] ->
         target_userid = Account.get_userid_from_name(username)
-        if target_userid && state.userid do
-          existing_request = Account.get_friend_request(state.userid, target_userid)
-          if existing_request == nil do
-            Account.create_friend_request(%{
-              from_user_id: state.userid,
-              to_user_id: target_userid
-            })
-          end
+        if Account.can_send_friend_request?(state.userid, target_userid) do
+          Account.create_friend_request(%{
+            from_user_id: state.userid,
+            to_user_id: target_userid
+          })
         end
         state
 

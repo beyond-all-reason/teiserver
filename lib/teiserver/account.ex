@@ -1921,6 +1921,12 @@ defmodule Teiserver.Account do
     FriendRequest.changeset(friend_request, attrs)
   end
 
+  @spec can_send_friend_request?(T.userid(), T.userid()) :: boolean
+  defdelegate can_send_friend_request?(from_id, to_id), to: FriendRequestLib
+
+  @spec can_send_friend_request_with_reason?(T.userid(), T.userid()) :: {true, :ok} | {false, String.t()}
+  defdelegate can_send_friend_request_with_reason?(from_id, to_id), to: FriendRequestLib
+
   @spec list_outgoing_friend_requests_of_userid(T.userid) :: [T.userid]
   defdelegate list_outgoing_friend_requests_of_userid(userid), to: FriendRequestLib
 

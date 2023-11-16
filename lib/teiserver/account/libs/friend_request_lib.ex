@@ -11,6 +11,38 @@ defmodule Teiserver.Account.FriendRequestLib do
   @spec icon :: String.t()
   def icon(), do: "fa-user-question"
 
+  @spec can_send_friend_request?(T.userid(), T.userid()) :: boolean
+  def can_send_friend_request?(from_id, to_id) do
+    {result, _} = can_send_friend_request_with_reason?(from_id, to_id)
+    result
+  end
+
+  @spec can_send_friend_request_with_reason?(T.userid(), T.userid()) :: {true, :ok} | {false, String.t()}
+  def can_send_friend_request_with_reason?(from_id, to_id) do
+    cond do
+      from_id == nil ->
+        {false, "nil from_id"}
+
+      to_id == nil ->
+        {false, "nil to_id"}
+
+      Account.get_friend(from_id, to_id) != nil ->
+        {false, "Already friends"}
+
+      Account.get_friend_request(from_id, to_id) != nil ->
+        {false, "Existing request"}
+
+      Account.does_a_ignore_b?(to_id, from_id) ->
+        {false, "Ignored"}
+
+      Account.does_a_avoid_b?(to_id, from_id) ->
+        {false, "Avoided"}
+
+      true ->
+        {true, :ok}
+    end
+  end
+
   # Functions
   @spec accept_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
   def accept_friend_request(from_id, to_id) do

@@ -32,7 +32,7 @@ defmodule Teiserver.Protocols.Spring.UserOut do
       {id, :success} -> "s.user.add_friend #{id}\tsuccess\n"
       {id, :no_user} -> "s.user.add_friend #{id}\tfailure\tno user of that id\n"
       {id, :existing} -> "s.user.add_friend #{id}\tfailure\texisting friend request\n"
-      {id, reason} -> "s.user.add_friend #{id}\tfailure\tno failure catch for #{reason}\n"
+      {id, reason} -> "s.user.add_friend #{id}\tfailure\t#{reason}\n"
     end)
   end
 
