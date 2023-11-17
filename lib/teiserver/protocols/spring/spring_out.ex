@@ -10,7 +10,7 @@ defmodule Teiserver.Protocols.SpringOut do
   alias Teiserver.{Account, CacheUser, Client, Room, Battle, Coordinator}
   alias Teiserver.Lobby
   alias Teiserver.Protocols.Spring
-  alias Teiserver.Protocols.Spring.{BattleOut, LobbyPolicyOut, UserOut}
+  alias Teiserver.Protocols.Spring.{BattleOut, LobbyPolicyOut, UserOut, SystemOut}
   alias Teiserver.Data.Types, as: T
 
   @motd """
@@ -34,6 +34,7 @@ defmodule Teiserver.Protocols.SpringOut do
         :battle -> BattleOut.do_reply(reply_cmd, data, state)
         :lobby_policy -> LobbyPolicyOut.do_reply(reply_cmd, data, state)
         :user -> UserOut.do_reply(reply_cmd, data, state)
+        :system -> SystemOut.do_reply(reply_cmd, data, state)
         :spring -> do_reply(reply_cmd, data)
       end
 
