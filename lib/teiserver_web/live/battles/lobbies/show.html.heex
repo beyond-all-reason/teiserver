@@ -106,9 +106,10 @@ spectators =
               <li>
                 Queue size: <%= Enum.count(@consul.join_queue ++ @consul.low_priority_join_queue) %>
               </li>
-              <%= if @admin_dev do %>
-                <li>Match UUID:</li>
-                <li>Server UUID:</li>
+              <%= if @server_perms do %>
+                <li>Match ID: <%= Map.get(@modoptions, "server/match/id") %></li>
+                <li>Match UUID: <%= Map.get(@modoptions, "server/match/uuid") %></li>
+                <li>Server UUID: <%= Map.get(@modoptions, "server/host/uuid") %></li>
               <% end %>
             </ul>
           </div>
@@ -301,7 +302,7 @@ spectators =
           <%= live_redirect("Back", to: ~p"/battle/lobbies", class: "btn btn-#{bsname}") %>
         </span>
 
-        <%= if @admin_dev do %>
+        <%= if @server_perms do %>
           <div class="row mt-3" id="admin-data">
             <div class="col-md-6 col-lg-4 col-xl-3">
               <h5>Lobby</h5>

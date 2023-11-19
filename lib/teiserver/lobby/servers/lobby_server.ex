@@ -452,6 +452,7 @@ defmodule Teiserver.Battle.LobbyServer do
 
   @impl true
   def handle_info(:tick, state) do
+    state = check_lobby_values(state)
     {:noreply, state}
   end
 
@@ -606,6 +607,42 @@ defmodule Teiserver.Battle.LobbyServer do
     end
 
     %{state | lobby: new_lobby}
+  end
+
+  # Used to check and ensure the lobby values are as expected
+  @spec check_lobby_values(map()) :: map()
+  defp check_lobby_values(state) do
+    nil_count = [
+      Map.get(state.modoptions, "server/match/id"),
+      Map.get(state.modoptions, "server/match/uuid"),
+      Map.get(state.modoptions, "server/host/uuid"),
+    ]
+    |> Enum.count(&(&1 == nil))
+
+    modoptions = if nil_count > 0 do
+      new_options = %{
+        "server/match/id" => state.match_id,
+        "server/match/uuid" => state.match_uuid,
+        "server/host/uuid" => state.server_uuid
+      }
+
+      PubSub.broadcast(
+        Teiserver.PubSub,
+        "teiserver_lobby_updates:#{state.id}",
+        %{
+          channel: "teiserver_lobby_updates",
+          event: :set_modoptions,
+          lobby_id: state.id,
+          options: new_options
+        }
+      )
+
+      Map.merge(state.modoptions, new_options)
+    else
+      state.modoptions
+    end
+
+    %{state | modoptions: modoptions}
   end
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}

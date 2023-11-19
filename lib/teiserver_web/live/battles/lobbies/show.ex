@@ -22,7 +22,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> AuthPlug.live_call(session)
 
     moderator = allow?(socket, "Moderator")
-    admin_dev = allow?(socket, "admin.dev.developer")
+    server_perms = allow?(socket, "Server")
 
     extra_content =
       if moderator do
@@ -51,7 +51,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> assign(:consul_command, "")
       |> assign(:subbed, true)
       |> assign(:moderator, moderator)
-      |> assign(:admin_dev, admin_dev)
+      |> assign(:server_perms, server_perms)
 
     {:ok, socket}
   end
