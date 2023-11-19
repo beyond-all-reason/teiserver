@@ -19,7 +19,11 @@ defmodule Teiserver.Protocols.Spring.UserOut do
   end
 
   def do_reply(:relationship_change, {command, id, :success}, _state) do
-    "s.user.#{command} #{id}\tsuccess\t\n"
+    "s.user.#{command} #{id}\tsuccess\n"
+  end
+
+  def do_reply(:relationship_change, {command, id, :error}, _state) do
+    "s.user.#{command} #{id}\terror\tNo message\n"
   end
 
   def do_reply(:relationship_change, {command, id, {:error, reason}}, _state) do
