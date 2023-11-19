@@ -8,7 +8,7 @@
 </style>
 
 <div class="row">
-  <div class="col-md-12 col-lg-6">
+  <div class="col-md-12 col-lg-4">
     <h4>Status</h4>
     <%= for role <- @user.roles do %>
       <% data = @role_data[role] %>
@@ -22,7 +22,7 @@
     <% end %>
   </div>
 
-  <div class="col-md-12 col-lg-6">
+  <div class="col-md-12 col-lg-4">
     <h4>Restrictions</h4>
     <div class="row">
       <%= if Enum.empty?(@user.data["restrictions"] || []) do %>
@@ -35,6 +35,15 @@
         </div>
       <% end %>
     </div>
+  </div>
+
+  <div class="col-md-12 col-lg-4" :if={allow?(@current_user, "Server")}>
+    <h4>Scores</h4>
+    <ul>
+      <li>Behaviour: <%= @user.behaviour_score %></li>
+      <li>Trust: <%= @user.trust_score %></li>
+      <li>Social: <%= @user.social_score %></li>
+    </ul>
   </div>
 </div>
 
