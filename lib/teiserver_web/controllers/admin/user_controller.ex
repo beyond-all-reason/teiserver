@@ -77,22 +77,15 @@ defmodule TeiserverWeb.Admin.UserController do
          search: [
            name_or_email: Map.get(params, "name", "") |> String.trim(),
            bot: params["bot"],
-           moderator: params["moderator"],
-           verified: params["verified"],
-           trusted: params["trusted"],
-           tester: params["tester"],
-           streamer: params["streamer"],
-           donor: params["donor"],
-           contributor: params["contributor"],
-           developer: params["developer"],
-           overwatch: params["overwatch"],
-           vip: params["vip"],
-           caster: params["caster"],
-           tournament_player: params["tournament-player"],
+           has_role: params["role"],
+
            ip: params["ip"],
            lobby_client: params["lobby_client"],
            previous_names: params["previous_names"],
-           mod_action: params["mod_action"]
+           mod_action: params["mod_action"],
+
+           behaviour_score_gt: params["behaviour_score_min"],
+           behaviour_score_lt: params["behaviour_score_max"]
          ],
          limit: params["limit"] || 50,
          order_by: params["order"] || "Name (A-Z)"
