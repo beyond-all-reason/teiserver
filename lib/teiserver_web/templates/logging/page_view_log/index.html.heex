@@ -69,9 +69,9 @@
             <tr>
               <th>Timestamp</th>
               <th>User</th>
-              <th>Section</th>
               <th>Path</th>
               <th>Ip</th>
+              <th>Method</th>
               <th>Load time <small>(ms)</small></th>
               <th>Status</th>
 
@@ -91,9 +91,15 @@
                     Guest
                   <% end %>
                 </td>
-                <td><%= page_view_log.section %></td>
-                <td><%= page_view_log.path %></td>
+                <td>
+                  <a href={"/#{page_view_log.section}/#{page_view_log.path}"}>
+                    <%= page_view_log.section %>/<%= page_view_log.path %>
+                  </a>
+                </td>
                 <td><%= page_view_log.ip %></td>
+                <td>
+                  <%= page_view_log.method %>
+                </td>
                 <td><%= round(page_view_log.load_time / 10) / 100 %></td>
                 <td><%= page_view_log.status %></td>
 

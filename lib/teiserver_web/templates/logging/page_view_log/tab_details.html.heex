@@ -31,7 +31,12 @@
 
 <%= central_component("detail_line",
   label: "Full route",
-  value: "#{@page_view_log.section}/#{@page_view_log.path}"
+  value: "#{@page_view_log.section}/#{@page_view_log.path}",
+  link: %{
+    path: "/#{@page_view_log.section}/#{@page_view_log.path}",
+    bsname: "primary",
+    icon: Teiserver.Logging.PageViewLogLib.icon()
+  }
 ) %>
 
 <hr />
