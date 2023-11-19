@@ -12,6 +12,6 @@ defmodule Teiserver.Protocols.Spring.SystemIn do
   # end
 
   def do_handle(cmd, data, msg_id, state) do
-    SpringIn._no_match(state, "c.auth." <> cmd, msg_id, data)
+    SpringIn._no_match(state, "c.system." <> cmd, msg_id, data)
   end
 end
