@@ -239,4 +239,5 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     moderator = allow?(socket, "Moderator")
     moderator or leader_id == user_id
   end
+  defp leader?(_), do: false
 end
