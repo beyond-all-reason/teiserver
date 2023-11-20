@@ -27,6 +27,15 @@
 
         <div class="float-end">
           <a
+            :if={@use_discord && @channel && @action.discord_message_id}
+            href={"https://discord.com/channels/#{@guild_id}/#{@channel.channel_id}/#{@action.discord_message_id}"}
+            class={"btn btn-outline-#{bsname}"}
+          >
+            <Fontawesome.icon icon="discord" style="brands" />
+            Discord link
+          </a>
+        
+          <a
             href={"#{Routes.moderation_action_path(@conn, :index)}?target_id=#{@action.target_id}"}
             class={"btn btn-outline-#{bsname}"}
           >

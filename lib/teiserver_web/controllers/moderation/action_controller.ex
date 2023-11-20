@@ -84,6 +84,9 @@ defmodule TeiserverWeb.Moderation.ActionController do
     |> insert_recently(conn)
 
     conn
+    |> assign(:use_discord, Communication.DiscordChannelLib.use_discord?())
+    |> assign(:guild_id, Communication.DiscordChannelLib.get_guild_id())
+    |> assign(:channel, Communication.DiscordChannelLib.get_discord_channel("Public moderation log"))
     |> assign(:action, action)
     |> assign(:logs, logs)
     |> add_breadcrumb(
