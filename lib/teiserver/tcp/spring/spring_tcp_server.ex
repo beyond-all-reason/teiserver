@@ -1287,11 +1287,7 @@ defmodule Teiserver.SpringTcpServer do
     CacheUser.set_flood_level(state.userid, 10)
     Client.disconnect(state.userid, "SpringTCPServer.flood_protection")
 
-    Logger.info(
-      "Spring command overflow from #{state.username}/#{state.userid} with #{Enum.count(state.cmd_timestamps)} commands. Disconnected and flood protection engaged."
-    )
-
-    {:stop, "Flood protection", state}
+    {:stop, :normal, %{state | userid: nil}}
   end
 
   # @spec introduce_user(T.client() | T.userid() | nil, map()) :: map()
