@@ -273,7 +273,7 @@ defmodule Teiserver.Client do
       Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
     end
 
-    Logger.info("#{client.name}/##{client.userid} disconnected because #{reason}")
+    Telemetry.log_simple_server_event(client.userid, "disconnect:#{reason}")
     Lobby.remove_user_from_any_lobby(client.userid)
     Room.remove_user_from_any_room(client.userid)
     leave_rooms(client.userid)
