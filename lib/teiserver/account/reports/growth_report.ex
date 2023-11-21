@@ -1,12 +1,16 @@
 defmodule Teiserver.Account.GrowthReport do
   @moduledoc false
-  alias Teiserver.{Logging}
-  alias Teiserver.Helper.{TimexHelper, ChartHelper}
+  @behaviour Teiserver.Common.WebReportBehaviour
+  alias Teiserver.Logging
+  alias Teiserver.Helper.ChartHelper
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
+  @spec name() :: String.t()
+  def name(), do: "Growth"
+
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-seedling"
+  def icon(), do: "fa-seedling"
 
   @spec permissions() :: String.t()
   def permissions(), do: "Admin"
