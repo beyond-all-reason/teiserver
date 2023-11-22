@@ -25,6 +25,7 @@
 - Fixed possible cause of an infinite redirect if cookies are borked
 - Fixed a bug where renaming could leave a cached value pointing to the wrong place
 - Fixed a bug where a smurf could still access the website
+- Fixed a bug where match UUIDs might sometimes not be present in the tags
 
 #### Internal improvements
 
@@ -35,6 +36,7 @@
 - Started making progress on
 - Added `hms_or_hms_ymd` format to `TimexHelper`
 - Added framework for adding more discord commands
+- Better internal event tracking for disconnects
 
 ## v1.1.1
 
