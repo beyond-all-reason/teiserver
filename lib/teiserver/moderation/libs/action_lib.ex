@@ -265,7 +265,8 @@ defmodule Teiserver.Moderation.ActionLib do
       case posting_result do
         {:ok, %{id: message_id}} ->
           Moderation.update_action(action, %{discord_message_id: message_id})
-
+        {:error, :discord_disabled} ->
+          nil
       end
       posting_result
     else
