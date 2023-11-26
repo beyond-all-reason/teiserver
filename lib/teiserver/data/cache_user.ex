@@ -426,7 +426,7 @@ defmodule Teiserver.CacheUser do
       clean_name(new_name) != new_name ->
         {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
 
-      get_user_by_name(new_name) ->
+      get_user_by_name(new_name) && get_user_by_name(new_name).name |> String.downcase() == String.downcase(new_name) ->
         {:error, "Username already taken"}
 
       true ->
