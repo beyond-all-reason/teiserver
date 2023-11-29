@@ -3,7 +3,7 @@ defmodule Teiserver.Account.AuthPlug do
   import Plug.Conn
 
   alias Teiserver.Account
-  alias Teiserver.Account.Guardian
+  alias Teiserver.Account.{Guardian, AuthLib}
   require Logger
   use TeiserverWeb, :verified_routes
 
@@ -144,6 +144,19 @@ defmodule Teiserver.Account.AuthPlug do
       {:halt, Phoenix.LiveView.redirect(socket, to: signed_in_path(socket))}
     else
       {:cont, socket}
+    end
+  end
+
+  def on_mount({:authorise, permissions}, _params, _session, socket) do
+    if AuthLib.allow?(socket.assigns.current_user, permissions) do
+      {:cont, socket}
+    else
+      socket =
+        socket
+        |> Phoenix.LiveView.put_flash(:error, "You do not have permission to view that page.")
+        |> Phoenix.LiveView.redirect(to: ~p"/")
+
+      {:halt, socket}
     end
   end
 

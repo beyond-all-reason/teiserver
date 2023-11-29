@@ -105,7 +105,8 @@ defmodule TeiserverWeb.Router do
 
     live_session :microblog_admin,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated}
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Account.AuthPlug, {:authorise, "Contributor"}}
       ] do
         live "/admin/posts", Admin.PostLive.Index, :index
         live "/admin/posts/:id", Admin.PostLive.Show, :show
@@ -487,7 +488,8 @@ defmodule TeiserverWeb.Router do
 
     live_session :overwatch,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated}
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Account.AuthPlug, {:authorise, "Overwatch"}}
       ] do
         live "/overwatch", OverwatchLive.Index, :index
         live "/overwatch/target/:target_id", OverwatchLive.User, :user
@@ -598,7 +600,8 @@ defmodule TeiserverWeb.Router do
 
     live_session :admin_chat_liveview,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated}
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Account.AuthPlug, {:authorise, "Moderator"}}
       ] do
         live "/chat", ChatLive.Index, :index
     end
