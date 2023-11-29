@@ -1,4 +1,5 @@
 defmodule Teiserver.Battle.Tasks.CleanupTask do
+  @moduledoc false
   use Oban.Worker, queue: :cleanup
 
   alias Teiserver.Repo
@@ -134,6 +135,13 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
     Ecto.Adapters.SQL.query!(
       Repo,
       "UPDATE telemetry_complex_lobby_events SET match_id = NULL WHERE match_id = ANY($1)",
+      [ids]
+    )
+
+    # Update report groups
+    Ecto.Adapters.SQL.query!(
+      Repo,
+      "UPDATE moderation_report_groups SET match_id = NULL WHERE match_id = ANY($1)",
       [ids]
     )
 

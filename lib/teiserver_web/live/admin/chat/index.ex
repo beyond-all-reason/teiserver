@@ -5,19 +5,26 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    socket = socket
-      |> assign(:site_menu_active, "chat")
-      |> assign(:view_colour, Teiserver.Chat.LobbyMessageLib.colours())
-      |> assign(:messages, [])
-      |> assign(:usernames, %{})
-      |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
-      |> add_breadcrumb(name: "Chat", url: "/admin/chat")
-      |> default_filters
-      |> assign(:searching, false)
-      |> assign(:usernames, %{})
-      |> assign(:messages, [])
+    case allow?(socket.assigns[:current_user], "Moderator") do
+      true ->
+        socket = socket
+          |> assign(:site_menu_active, "chat")
+          |> assign(:view_colour, Teiserver.Chat.LobbyMessageLib.colours())
+          |> assign(:messages, [])
+          |> assign(:usernames, %{})
+          |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
+          |> add_breadcrumb(name: "Chat", url: "/admin/chat")
+          |> default_filters
+          |> assign(:searching, false)
+          |> assign(:usernames, %{})
+          |> assign(:messages, [])
 
-    {:ok, socket}
+        {:ok, socket}
+      false ->
+        {:ok,
+         socket
+         |> redirect(to: ~p"/")}
+    end
   end
 
   @impl true

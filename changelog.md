@@ -26,6 +26,8 @@
 - Fixed a bug where renaming could leave a cached value pointing to the wrong place
 - Fixed a bug where a smurf could still access the website
 - Fixed a bug where match UUIDs might sometimes not be present in the tags
+- Fixed a bug when cleaning up older battles with a report attached
+- Fixed an auth bug on the admin chat interface
 
 #### Internal improvements
 
