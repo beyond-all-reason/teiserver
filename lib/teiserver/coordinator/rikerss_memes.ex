@@ -165,7 +165,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     scavt3 =
       ~w(armannit3 cordoomt3 armbotrail armminivulc corhllllt corminibuzz corscavdrag corscavdtf corscavdtl corscavdtm)
 
-    legion_defences = ~w(legdefcarryt1 legmg)
+    legion_defences = ~w(legdefcarryt1 legmg legstarfall)
 
     unit_list = armada_defences ++ armada_aa ++ cortex_defences ++ cortex_aa ++ scavt3 ++ legion_defences
 
@@ -196,7 +196,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     scavt3 =
       ~w(armannit3 cordoomt3 armbotrail armminivulc corhllllt corminibuzz corscavdrag corscavdtf corscavdtl corscavdtm)
 
-    legion_defences = ~w(legdefcarryt1 legmg)
+    legion_defences = ~w(legdefcarryt1 legmg legstarfall)
 
     unit_list = armada_defences ++ armada_aa ++ cortex_defences ++ cortex_aa ++ scavt3 ++ legion_defences
 
