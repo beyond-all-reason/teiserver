@@ -812,10 +812,17 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @spec user_allowed_to_play?(T.user(), T.client(), map()) :: boolean()
   defp user_allowed_to_play?(user, client, state) do
+    player_list = list_players(state)
     {player_rating, player_uncertainty} =
       BalanceLib.get_user_rating_value_uncertainty_pair(user.id, "Team")
 
     player_rating = max(player_rating, 1)
+    avoid_status = Account.check_avoid_status(user.id, player_list)
+    boss_avoid_status = state.host_bosses
+      |> Stream.map(fn boss_id ->
+        Account.does_a_avoid_b?(boss_id, user.id)
+      end)
+      |> Enum.any?
 
     cond do
       state.minimum_rating_to_play != nil and player_rating < state.minimum_rating_to_play ->
@@ -839,6 +846,24 @@ defmodule Teiserver.Coordinator.ConsulServer do
         false
 
       not Enum.empty?(client.queues) ->
+        false
+
+      Account.is_moderator?(user) ->
+        true
+
+      avoid_status == :avoiding ->
+        match_id = Battle.get_lobby_match_id(state.lobby_id)
+        Telemetry.log_simple_lobby_event(user.id, match_id, "play_refused.avoiding")
+        false
+
+      avoid_status == :avoided ->
+        match_id = Battle.get_lobby_match_id(state.lobby_id)
+        Telemetry.log_simple_lobby_event(user.id, match_id, "play_refused.avoided")
+        false
+
+      boss_avoid_status == true ->
+        match_id = Battle.get_lobby_match_id(state.lobby_id)
+        Telemetry.log_simple_lobby_event(user.id, match_id, "play_refused.boss_avoided")
         false
 
       true ->

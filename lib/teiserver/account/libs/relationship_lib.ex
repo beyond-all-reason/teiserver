@@ -283,9 +283,18 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec check_block_status(T.userid, [T.userid]) :: :ok | :blocking | :blocked
   def check_block_status(userid, userid_list) do
+    user = Account.get_user_by_id(userid)
     userid_count = Enum.count(userid_list) |> max(1)
-    block_count_needed = Config.get_site_config_cache("lobby.Block count to prevent join")
-    block_percentage_needed = Config.get_site_config_cache("lobby.Block percentage to prevent join")
+
+    {block_count_needed, block_percentage_needed} = cond do
+    user.behaviour_score <= 5000 -> {2, 20}
+    user.behaviour_score <= 8000 -> {3, 30}
+    true ->
+      {
+        Config.get_site_config_cache("lobby.Block count to prevent join"),
+        Config.get_site_config_cache("lobby.Block percentage to prevent join")
+      }
+    end
 
     being_blocked_count = userid
       |> list_userids_blocking_this_userid()
@@ -313,9 +322,18 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec check_avoid_status(T.userid, [T.userid]) :: :ok | :avoiding | :avoided
   def check_avoid_status(userid, userid_list) do
+    user = Account.get_user_by_id(userid)
     userid_count = Enum.count(userid_list) |> max(1)
-    avoid_count_needed = Config.get_site_config_cache("lobby.Avoid count to prevent playing")
-    avoid_percentage_needed = Config.get_site_config_cache("lobby.Avoid percentage to prevent playing")
+
+    {avoid_count_needed, avoid_percentage_needed} = cond do
+      user.behaviour_score <= 5000 -> {2, 20}
+      user.behaviour_score <= 8000 -> {3, 30}
+      true ->
+        {
+          Config.get_site_config_cache("lobby.Avoid count to prevent playing"),
+          Config.get_site_config_cache("lobby.Avoid percentage to prevent playing")
+        }
+    end
 
     being_avoided_count = userid
       |> list_userids_avoiding_this_userid()

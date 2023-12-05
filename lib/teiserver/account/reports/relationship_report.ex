@@ -17,7 +17,10 @@ defmodule Teiserver.Account.RelationshipReport do
     # Excludes banned users
     exclude_banned =
       if params["exclude_banned"] == "true" do
-        "AND not from_user.data -> 'restrictions' @> '\"Login\"'"
+        """
+          AND not from_user.data -> 'restrictions' @> '\"Login\"'
+          AND not to_user.data -> 'restrictions' @> '\"Login\"'
+        """
       else
         ""
       end
