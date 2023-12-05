@@ -15,7 +15,11 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
-  plug(:add_breadcrumb, name: 'Client events', url: '/teiserver/telemetry/complex_client_events/summary')
+
+  plug(:add_breadcrumb,
+    name: 'Client events',
+    url: '/teiserver/telemetry/complex_client_events/summary'
+  )
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
   def summary(conn, params) do
@@ -62,8 +66,11 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
         _ -> Timex.now() |> Timex.shift(days: -7)
       end
 
-    user_data = UserPropertyQueries.get_aggregate_detail(property_type_id, start_datetime, Timex.now())
-    anon_data = AnonPropertyQueries.get_aggregate_detail(property_type_id, start_datetime, Timex.now())
+    user_data =
+      UserPropertyQueries.get_aggregate_detail(property_type_id, start_datetime, Timex.now())
+
+    anon_data =
+      AnonPropertyQueries.get_aggregate_detail(property_type_id, start_datetime, Timex.now())
 
     combined_values =
       (Map.keys(user_data) ++ Map.keys(anon_data))
@@ -97,6 +104,7 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
     Logger.info(
       "ComplexClientEventController property export of #{Kernel.inspect(params)}, took #{time_taken}ms"
     )
+
     conn
     |> put_resp_content_type("text/csv")
     |> put_resp_header("content-disposition", "attachment; filename=\"properties.csv\"")

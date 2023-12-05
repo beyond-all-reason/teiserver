@@ -174,8 +174,6 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
         opts
       })
 
-
-
     assert grouped_balance_result.team_players[1] == [u8.id, u5.id, u3.id, u2.id]
     assert grouped_balance_result.team_players[2] == [u7.id, u6.id, u4.id, u1.id]
     assert grouped_balance_result.deviation == 1
@@ -354,27 +352,29 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
     assert balance_result.balance_mode == :grouped
 
-    assert Enum.sort(balance_result.team_players[1]) == Enum.sort([
-             u16.id,
-             u13.id,
-             u11.id,
-             u10.id,
-             u7.id,
-             u6.id,
-             u4.id,
-             u1.id
-           ])
+    assert Enum.sort(balance_result.team_players[1]) ==
+             Enum.sort([
+               u16.id,
+               u13.id,
+               u11.id,
+               u10.id,
+               u7.id,
+               u6.id,
+               u4.id,
+               u1.id
+             ])
 
-    assert Enum.sort(balance_result.team_players[2]) == Enum.sort([
-             u15.id,
-             u14.id,
-             u12.id,
-             u9.id,
-             u8.id,
-             u5.id,
-             u3.id,
-             u2.id
-           ])
+    assert Enum.sort(balance_result.team_players[2]) ==
+             Enum.sort([
+               u15.id,
+               u14.id,
+               u12.id,
+               u9.id,
+               u8.id,
+               u5.id,
+               u3.id,
+               u2.id
+             ])
 
     assert balance_result.ratings == %{1 => 239.0, 2 => 239.0}
     assert balance_result.deviation == 0

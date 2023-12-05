@@ -50,9 +50,6 @@ defmodule Teiserver.Moderation.ReportLib do
     }
   end
 
-
-
-
   def sections() do
     [
       {"Chat / Communication", "chat", Teiserver.Chat.LobbyMessageLib.icon()},

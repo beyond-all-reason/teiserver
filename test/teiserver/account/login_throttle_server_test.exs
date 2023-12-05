@@ -164,13 +164,14 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     assert state.remaining_capacity == 6
 
     throttle_messages = PubsubListener.get(throttle_listener)
+
     assert throttle_messages == [
-      %{
-        channel: "teiserver_liveview_login_throttle",
-        event: :updated_capacity,
-        remaining_capacity: 6
-      }
-    ]
+             %{
+               channel: "teiserver_liveview_login_throttle",
+               event: :updated_capacity,
+               remaining_capacity: 6
+             }
+           ]
 
     # Dequeue the next more
     send(pid, :tick)

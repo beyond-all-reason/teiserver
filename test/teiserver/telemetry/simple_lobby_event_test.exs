@@ -43,8 +43,9 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventTest do
     assert Telemetry.list_simple_lobby_events(where: [match_id: match.id]) |> Enum.count() == 1
 
     # Ensure the lobby event types exist too
-    type_list = Telemetry.list_simple_lobby_event_types()
-    |> Enum.map(fn %{name: name} -> name end)
+    type_list =
+      Telemetry.list_simple_lobby_event_types()
+      |> Enum.map(fn %{name: name} -> name end)
 
     assert Enum.member?(type_list, "lobby.simple_user_event-#{r}")
   end

@@ -14,7 +14,11 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
 
     client = Account.get_client_by_id(socket.assigns.current_user.id)
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{socket.assigns.current_user.id}")
+    :ok =
+      PubSub.subscribe(
+        Teiserver.PubSub,
+        "teiserver_client_messages:#{socket.assigns.current_user.id}"
+      )
 
     admin_mode =
       cond do

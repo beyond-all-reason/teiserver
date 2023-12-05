@@ -12,6 +12,7 @@ defmodule Teiserver.Repo.Migrations.CreateSmurfKeysTable do
       add :type_id, references(:teiserver_account_smurf_key_types, on_delete: :nothing)
       add :last_updated, :timestamp
     end
+
     create index(:teiserver_account_smurf_keys, [:user_id])
   end
 end

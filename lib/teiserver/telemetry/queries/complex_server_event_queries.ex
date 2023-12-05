@@ -9,7 +9,7 @@ defmodule Teiserver.Telemetry.ComplexServerEventQueries do
     query = from(complex_server_events in ComplexServerEvent)
 
     query
-    |> do_where([id: args[:id]])
+    |> do_where(id: args[:id])
     |> do_where(args[:where])
     |> do_preload(args[:preload])
     |> do_order_by(args[:order_by])
@@ -57,6 +57,7 @@ defmodule Teiserver.Telemetry.ComplexServerEventQueries do
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
+
   defp do_order_by(query, params) do
     params
     |> Enum.reduce(query, fn key, query_acc ->
@@ -124,12 +125,19 @@ defmodule Teiserver.Telemetry.ComplexServerEventQueries do
     ORDER BY key_count DESC
     LIMIT $5
     """
-    case Ecto.Adapters.SQL.query(Repo, query, [key, event_type_id, start_datetime, end_datetime, limit]) do
+
+    case Ecto.Adapters.SQL.query(Repo, query, [
+           key,
+           event_type_id,
+           start_datetime,
+           end_datetime,
+           limit
+         ]) do
       {:ok, results} ->
         results.rows
-          |> Enum.map(fn [key, value] ->
-            {key, value}
-          end)
+        |> Enum.map(fn [key, value] ->
+          {key, value}
+        end)
 
       {a, b} ->
         raise "ERR: #{a}, #{b}"

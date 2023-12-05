@@ -18,16 +18,16 @@ defmodule Teiserver.Account do
   @spec list_users(list) :: [User]
   defdelegate list_users(args), to: UserLib
 
-  @spec get_user!(non_neg_integer()) :: User.t
+  @spec get_user!(non_neg_integer()) :: User.t()
   defdelegate get_user!(user_id), to: UserLib
 
-  @spec get_user!(non_neg_integer(), list) :: User.t | nil
+  @spec get_user!(non_neg_integer(), list) :: User.t() | nil
   defdelegate get_user!(user_id, args), to: UserLib
 
-  @spec get_user(non_neg_integer()) :: User.t | nil
+  @spec get_user(non_neg_integer()) :: User.t() | nil
   defdelegate get_user(user_id), to: UserLib
 
-  @spec get_user(non_neg_integer(), list) :: User.t | nil
+  @spec get_user(non_neg_integer(), list) :: User.t() | nil
   defdelegate get_user(user_id, args), to: UserLib
 
   @spec create_user() :: {:ok, User} | {:error, Ecto.Changeset}
@@ -65,9 +65,6 @@ defmodule Teiserver.Account do
 
   @spec change_user(User, map) :: Ecto.Changeset
   defdelegate change_user(user, attrs), to: UserLib
-
-
-
 
   @spec spring_auth_check(Plug.Conn.t(), User.t(), String.t()) ::
           {:ok, User.t()} | {:error, String.t()}
@@ -1427,7 +1424,8 @@ defmodule Teiserver.Account do
 
   """
   def upsert_relationship(attrs) do
-    conflict_sets = ~w(state ignore notes tags)a
+    conflict_sets =
+      ~w(state ignore notes tags)a
       |> Enum.filter(fn key ->
         Map.has_key?(attrs, key) or Map.has_key?(attrs, to_string(key))
       end)
@@ -1435,7 +1433,7 @@ defmodule Teiserver.Account do
         value = Map.get(attrs, key, Map.get(attrs, to_string(key), nil))
         {key, value}
       end)
-      |> Keyword.new
+      |> Keyword.new()
 
     %Relationship{}
     |> Relationship.changeset(attrs)
@@ -1504,75 +1502,81 @@ defmodule Teiserver.Account do
     Relationship.changeset(relationship, attrs)
   end
 
-  @spec verb_of_state(String.t | map) :: String.t
+  @spec verb_of_state(String.t() | map) :: String.t()
   defdelegate verb_of_state(state), to: RelationshipLib
 
-  @spec past_tense_of_state(String.t | map) :: String.t
+  @spec past_tense_of_state(String.t() | map) :: String.t()
   defdelegate past_tense_of_state(state), to: RelationshipLib
 
-  @spec follow_user(T.userid, T.userid) :: {:ok, Relationship.t}
+  @spec follow_user(T.userid(), T.userid()) :: {:ok, Relationship.t()}
   defdelegate follow_user(from_user_id, to_user_id), to: RelationshipLib
 
-  @spec ignore_user(T.userid, T.userid) :: {:ok, Relationship.t}
+  @spec ignore_user(T.userid(), T.userid()) :: {:ok, Relationship.t()}
   defdelegate ignore_user(from_user_id, to_user_id), to: RelationshipLib
 
-  @spec unignore_user(T.userid, T.userid) :: {:ok, Relationship.t}
+  @spec unignore_user(T.userid(), T.userid()) :: {:ok, Relationship.t()}
   defdelegate unignore_user(from_user_id, to_user_id), to: RelationshipLib
 
-  @spec avoid_user(T.userid, T.userid) :: {:ok, Relationship.t}
+  @spec avoid_user(T.userid(), T.userid()) :: {:ok, Relationship.t()}
   defdelegate avoid_user(from_user_id, to_user_id), to: RelationshipLib
 
-  @spec block_user(T.userid, T.userid) :: {:ok, Relationship.t}
+  @spec block_user(T.userid(), T.userid()) :: {:ok, Relationship.t()}
   defdelegate block_user(from_user_id, to_user_id), to: RelationshipLib
 
-  @spec reset_relationship_state(T.userid, T.userid) :: {:ok, Relationship.t}
+  @spec reset_relationship_state(T.userid(), T.userid()) :: {:ok, Relationship.t()}
   defdelegate reset_relationship_state(from_user_id, to_user_id), to: RelationshipLib
 
-  @spec calculate_relationship_stats(T.userid) :: :ok
+  @spec calculate_relationship_stats(T.userid()) :: :ok
   defdelegate calculate_relationship_stats(userid), to: RelationshipLib
 
-  @spec decache_relationships(T.userid) :: :ok
+  @spec decache_relationships(T.userid()) :: :ok
   defdelegate decache_relationships(userid), to: RelationshipLib
 
-  @spec list_userids_avoiding_this_userid(T.userid) :: [T.userid]
+  @spec list_userids_avoiding_this_userid(T.userid()) :: [T.userid()]
   defdelegate list_userids_avoiding_this_userid(userid), to: RelationshipLib
 
-  @spec list_userids_avoided_by_userid(T.userid) :: [T.userid]
+  @spec list_userids_avoided_by_userid(T.userid()) :: [T.userid()]
   defdelegate list_userids_avoided_by_userid(userid), to: RelationshipLib
 
-  @spec list_userids_blocking_this_userid(T.userid) :: [T.userid]
+  @spec list_userids_blocking_this_userid(T.userid()) :: [T.userid()]
   defdelegate list_userids_blocking_this_userid(userid), to: RelationshipLib
 
-  @spec list_userids_blocked_by_userid(T.userid) :: [T.userid]
+  @spec list_userids_blocked_by_userid(T.userid()) :: [T.userid()]
   defdelegate list_userids_blocked_by_userid(userid), to: RelationshipLib
 
-  @spec list_userids_ignored_by_userid(T.userid) :: [T.userid]
+  @spec list_userids_ignored_by_userid(T.userid()) :: [T.userid()]
   defdelegate list_userids_ignored_by_userid(userid), to: RelationshipLib
 
-  @spec list_userids_followed_by_userid(T.userid) :: [T.userid]
+  @spec list_userids_followed_by_userid(T.userid()) :: [T.userid()]
   defdelegate list_userids_followed_by_userid(userid), to: RelationshipLib
 
-  @spec does_a_follow_b?(T.userid, T.userid) :: boolean
+  @spec does_a_follow_b?(T.userid(), T.userid()) :: boolean
   defdelegate does_a_follow_b?(u1, u2), to: RelationshipLib
 
-  @spec does_a_ignore_b?(T.userid, T.userid) :: boolean
+  @spec does_a_ignore_b?(T.userid(), T.userid()) :: boolean
   defdelegate does_a_ignore_b?(u1, u2), to: RelationshipLib
 
-  @spec does_a_block_b?(T.userid, T.userid) :: boolean
+  @spec does_a_block_b?(T.userid(), T.userid()) :: boolean
   defdelegate does_a_block_b?(u1, u2), to: RelationshipLib
 
-  @spec does_a_avoid_b?(T.userid, T.userid) :: boolean
+  @spec does_a_avoid_b?(T.userid(), T.userid()) :: boolean
   defdelegate does_a_avoid_b?(u1, u2), to: RelationshipLib
 
-  @spec check_block_status(T.userid, [T.userid]) :: :ok | :blocking | :blocked
+  @spec check_block_status(T.userid(), [T.userid()]) :: :ok | :blocking | :blocked
   defdelegate check_block_status(userid, userid_list), to: RelationshipLib
 
-  @spec check_avoid_status(T.userid, [T.userid]) :: :ok | :avoiding | :avoided
+  @spec check_avoid_status(T.userid(), [T.userid()]) :: :ok | :avoiding | :avoided
   defdelegate check_avoid_status(userid, userid_list), to: RelationshipLib
 
-  @spec profile_view_permissions(T.user, T.user, nil | Account.Relationship, nil | Account.Friend, nil | Account.FriendRequest) :: [atom]
-  defdelegate profile_view_permissions(u1, u2, relationship, friend, friendship_request), to: RelationshipLib
-
+  @spec profile_view_permissions(
+          T.user(),
+          T.user(),
+          nil | Account.Relationship,
+          nil | Account.Friend,
+          nil | Account.FriendRequest
+        ) :: [atom]
+  defdelegate profile_view_permissions(u1, u2, relationship, friend, friendship_request),
+    to: RelationshipLib
 
   alias Teiserver.Account.{Friend, FriendLib, FriendQueries}
 
@@ -1650,29 +1654,33 @@ defmodule Teiserver.Account do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_friend() :: {:ok, Friend.t} | {:error, Ecto.Changeset.t}
-  @spec create_friend(map) :: {:ok, Friend.t} | {:error, Ecto.Changeset.t}
+  @spec create_friend() :: {:ok, Friend.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_friend(map) :: {:ok, Friend.t()} | {:error, Ecto.Changeset.t()}
   def create_friend(attrs \\ %{}) do
-    result = %Friend{}
-    |> Friend.changeset(attrs)
-    |> Repo.insert()
+    result =
+      %Friend{}
+      |> Friend.changeset(attrs)
+      |> Repo.insert()
 
     case result do
       {:ok, friend} ->
         Teiserver.cache_delete(:account_friend_cache, friend.user1_id)
         Teiserver.cache_delete(:account_friend_cache, friend.user2_id)
+
       _ ->
         :ok
     end
+
     result
   end
 
-  @spec create_friend(T.userid, T.userid) :: {:ok, Friend.t} | {:error, Ecto.Changeset.t}
+  @spec create_friend(T.userid(), T.userid()) :: {:ok, Friend.t()} | {:error, Ecto.Changeset.t()}
   def create_friend(uid1, uid2) do
     [u1, u2] = Enum.sort([uid1, uid2])
+
     create_friend(%{
       user1_id: u1,
-      user2_id: u2,
+      user2_id: u2
     })
   end
 
@@ -1738,6 +1746,7 @@ defmodule Teiserver.Account do
     case get_friend(u1, u2) do
       nil ->
         :ok
+
       friend ->
         delete_friend(friend)
     end
@@ -1756,7 +1765,7 @@ defmodule Teiserver.Account do
     Friend.changeset(friend, attrs)
   end
 
-  @spec list_friend_ids_of_user(T.userid) :: [T.userid]
+  @spec list_friend_ids_of_user(T.userid()) :: [T.userid()]
   defdelegate list_friend_ids_of_user(userid), to: FriendLib
 
   alias Teiserver.Account.{FriendRequest, FriendRequestLib, FriendRequestQueries}
@@ -1836,9 +1845,10 @@ defmodule Teiserver.Account do
 
   """
   def create_friend_request(attrs \\ %{}) do
-    result = %FriendRequest{}
-    |> FriendRequest.changeset(attrs)
-    |> Repo.insert()
+    result =
+      %FriendRequest{}
+      |> FriendRequest.changeset(attrs)
+      |> Repo.insert()
 
     case result do
       {:ok, friend_request} ->
@@ -1855,9 +1865,11 @@ defmodule Teiserver.Account do
 
         Teiserver.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
         Teiserver.cache_delete(:account_outgoing_friend_request_cache, friend_request.to_user_id)
+
       _ ->
         :ok
     end
+
     result
   end
 
@@ -1924,28 +1936,29 @@ defmodule Teiserver.Account do
   @spec can_send_friend_request?(T.userid(), T.userid()) :: boolean
   defdelegate can_send_friend_request?(from_id, to_id), to: FriendRequestLib
 
-  @spec can_send_friend_request_with_reason?(T.userid(), T.userid()) :: {true, :ok} | {false, String.t()}
+  @spec can_send_friend_request_with_reason?(T.userid(), T.userid()) ::
+          {true, :ok} | {false, String.t()}
   defdelegate can_send_friend_request_with_reason?(from_id, to_id), to: FriendRequestLib
 
-  @spec list_outgoing_friend_requests_of_userid(T.userid) :: [T.userid]
+  @spec list_outgoing_friend_requests_of_userid(T.userid()) :: [T.userid()]
   defdelegate list_outgoing_friend_requests_of_userid(userid), to: FriendRequestLib
 
-  @spec list_incoming_friend_requests_of_userid(T.userid) :: [T.userid]
+  @spec list_incoming_friend_requests_of_userid(T.userid()) :: [T.userid()]
   defdelegate list_incoming_friend_requests_of_userid(userid), to: FriendRequestLib
 
-  @spec accept_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
+  @spec accept_friend_request(T.userid(), T.userid()) :: :ok | {:error, String.t()}
   defdelegate accept_friend_request(from_userid, to_userid), to: FriendRequestLib
 
   @spec accept_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
   defdelegate accept_friend_request(req), to: FriendRequestLib
 
-  @spec decline_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
+  @spec decline_friend_request(T.userid(), T.userid()) :: :ok | {:error, String.t()}
   defdelegate decline_friend_request(from_userid, to_userid), to: FriendRequestLib
 
   @spec decline_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
   defdelegate decline_friend_request(req), to: FriendRequestLib
 
-  @spec rescind_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
+  @spec rescind_friend_request(T.userid(), T.userid()) :: :ok | {:error, String.t()}
   defdelegate rescind_friend_request(from_userid, to_userid), to: FriendRequestLib
 
   @spec rescind_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
@@ -2008,10 +2021,10 @@ defmodule Teiserver.Account do
   @spec system_change_user_name(T.userid(), String.t()) :: :ok
   defdelegate system_change_user_name(userid, new_name), to: Teiserver.CacheUser
 
-  @spec has_any_role?(T.userid() | T.user() | nil, String.t | [String.t]) :: boolean()
+  @spec has_any_role?(T.userid() | T.user() | nil, String.t() | [String.t()]) :: boolean()
   defdelegate has_any_role?(user_or_userid, roles), to: Teiserver.CacheUser
 
-  @spec has_all_roles?(T.userid() | T.user() | nil, String.t | [String.t]) :: boolean()
+  @spec has_all_roles?(T.userid() | T.user() | nil, String.t() | [String.t()]) :: boolean()
   defdelegate has_all_roles?(user_or_userid, roles), to: Teiserver.CacheUser
 
   @spec is_moderator?(T.userid()) :: boolean()

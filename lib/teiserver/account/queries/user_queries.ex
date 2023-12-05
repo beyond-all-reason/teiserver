@@ -9,7 +9,7 @@ defmodule Teiserver.Account.UserQueries do
     query = from(users in User)
 
     query
-    |> do_where([id: args[:id]])
+    |> do_where(id: args[:id])
     |> do_where(args[:where])
     |> do_where(args[:search])
     |> do_preload(args[:preload])
@@ -32,7 +32,6 @@ defmodule Teiserver.Account.UserQueries do
   def _where(query, _, ""), do: query
   def _where(query, _, nil), do: query
   def _where(query, _, "Any"), do: query
-
 
   def _where(query, :id, id) do
     from users in query,
@@ -92,8 +91,6 @@ defmodule Teiserver.Account.UserQueries do
     from users in query,
       where: users.inserted_at < ^timestamp
   end
-
-
 
   def _where(query, :data_equal, {field, value}) do
     from users in query,
@@ -405,18 +402,16 @@ defmodule Teiserver.Account.UserQueries do
       where: users.last_login < ^timestamp
   end
 
-
-
-
-
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
+
   defp do_order_by(query, params) when is_list(params) do
     params
     |> Enum.reduce(query, fn key, query_acc ->
       _order_by(query_acc, key)
     end)
   end
+
   defp do_order_by(query, param) when is_bitstring(param), do: do_order_by(query, [param])
 
   def _order_by(query, "Name (A-Z)") do

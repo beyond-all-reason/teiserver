@@ -80,7 +80,7 @@ defmodule TeiserverWeb.Router do
       on_mount: [
         {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
-        live "/", HomeLive.Index, :index
+      live "/", HomeLive.Index, :index
     end
   end
 
@@ -91,16 +91,16 @@ defmodule TeiserverWeb.Router do
       on_mount: [
         {Teiserver.Account.AuthPlug, :mount_current_user}
       ] do
-        live "/", BlogLive.Index, :index
-        live "/all", BlogLive.Index, :all
-        live "/show/:post_id", BlogLive.Show, :index
+      live "/", BlogLive.Index, :index
+      live "/all", BlogLive.Index, :all
+      live "/show/:post_id", BlogLive.Show, :index
     end
 
     live_session :microblog_user,
       on_mount: [
         {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
-        live "/preferences", BlogLive.Preferences, :index
+      live "/preferences", BlogLive.Preferences, :index
     end
 
     live_session :microblog_admin,
@@ -108,11 +108,11 @@ defmodule TeiserverWeb.Router do
         {Teiserver.Account.AuthPlug, :ensure_authenticated},
         {Teiserver.Account.AuthPlug, {:authorise, "Contributor"}}
       ] do
-        live "/admin/posts", Admin.PostLive.Index, :index
-        live "/admin/posts/:id", Admin.PostLive.Show, :show
+      live "/admin/posts", Admin.PostLive.Index, :index
+      live "/admin/posts/:id", Admin.PostLive.Show, :show
 
-        live "/admin/tags", Admin.TagLive.Index, :index
-        live "/admin/tags/:id", Admin.TagLive.Show, :show
+      live "/admin/tags", Admin.TagLive.Index, :index
+      live "/admin/tags/:id", Admin.TagLive.Show, :show
     end
   end
 
@@ -217,19 +217,19 @@ defmodule TeiserverWeb.Router do
       on_mount: [
         {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
-        live "/relationship", RelationshipLive.Index, :friend
-        live "/relationship/friend", RelationshipLive.Index, :friend
-        live "/relationship/follow", RelationshipLive.Index, :follow
-        live "/relationship/avoid", RelationshipLive.Index, :avoid
-        live "/relationship/search", RelationshipLive.Index, :search
+      live "/relationship", RelationshipLive.Index, :friend
+      live "/relationship/friend", RelationshipLive.Index, :friend
+      live "/relationship/follow", RelationshipLive.Index, :follow
+      live "/relationship/avoid", RelationshipLive.Index, :avoid
+      live "/relationship/search", RelationshipLive.Index, :search
     end
 
     live_session :account_settings,
       on_mount: [
         {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
-        live "/settings", SettingsLive.Index, :index
-        live "/settings/:key", SettingsLive.Index, :selected
+      live "/settings", SettingsLive.Index, :index
+      live "/settings/:key", SettingsLive.Index, :selected
     end
   end
 
@@ -240,18 +240,18 @@ defmodule TeiserverWeb.Router do
       on_mount: [
         {Teiserver.Account.AuthPlug, :mount_current_user}
       ] do
-        live "/", ProfileLive.Self, :index
-        live "/name/:username", ProfileLive.Username, :index
+      live "/", ProfileLive.Self, :index
+      live "/name/:username", ProfileLive.Username, :index
 
-        live "/:userid", ProfileLive.Overview, :overview
-        live "/:userid/overview", ProfileLive.Overview, :overview
-        live "/:userid/accolades", ProfileLive.Accolades, :accolades
-        live "/:userid/matches", ProfileLive.Matches, :matches
-        live "/:userid/playtime", ProfileLive.Playtime, :playtime
-        live "/:userid/achievements", ProfileLive.Achievements, :achievements
-        live "/:userid/appearance", ProfileLive.Appearance, :appearance
-        live "/:userid/relationships", ProfileLive.Relationships, :relationships
-        live "/:userid/contributor", ProfileLive.Contributor, :contributor
+      live "/:userid", ProfileLive.Overview, :overview
+      live "/:userid/overview", ProfileLive.Overview, :overview
+      live "/:userid/accolades", ProfileLive.Accolades, :accolades
+      live "/:userid/matches", ProfileLive.Matches, :matches
+      live "/:userid/playtime", ProfileLive.Playtime, :playtime
+      live "/:userid/achievements", ProfileLive.Achievements, :achievements
+      live "/:userid/appearance", ProfileLive.Appearance, :appearance
+      live "/:userid/relationships", ProfileLive.Relationships, :relationships
+      live "/:userid/contributor", ProfileLive.Contributor, :contributor
     end
   end
 
@@ -292,18 +292,18 @@ defmodule TeiserverWeb.Router do
       on_mount: [
         {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
-        live "/ratings", MatchLive.Ratings, :index
-        live "/ratings/:rating_type", MatchLive.Ratings, :index
+      live "/ratings", MatchLive.Ratings, :index
+      live "/ratings/:rating_type", MatchLive.Ratings, :index
 
-        live "/chat/:id", MatchLive.Chat, :index
-        live "/chat/:id/*userids", MatchLive.Chat, :index
+      live "/chat/:id", MatchLive.Chat, :index
+      live "/chat/:id/*userids", MatchLive.Chat, :index
 
-        live "/", MatchLive.Index, :index
-        live "/:id", MatchLive.Show, :overview
-        live "/:id/overview", MatchLive.Show, :overview
-        live "/:id/players", MatchLive.Show, :players
-        live "/:id/ratings", MatchLive.Show, :ratings
-        live "/:id/balance", MatchLive.Show, :balance
+      live "/", MatchLive.Index, :index
+      live "/:id", MatchLive.Show, :overview
+      live "/:id/overview", MatchLive.Show, :overview
+      live "/:id/players", MatchLive.Show, :players
+      live "/:id/ratings", MatchLive.Show, :ratings
+      live "/:id/balance", MatchLive.Show, :balance
     end
   end
 
@@ -491,17 +491,17 @@ defmodule TeiserverWeb.Router do
         {Teiserver.Account.AuthPlug, :ensure_authenticated},
         {Teiserver.Account.AuthPlug, {:authorise, "Overwatch"}}
       ] do
-        live "/overwatch", OverwatchLive.Index, :index
-        live "/overwatch/target/:target_id", OverwatchLive.User, :user
-        live "/overwatch/report_group/:id", OverwatchLive.ReportGroupDetail, :index
+      live "/overwatch", OverwatchLive.Index, :index
+      live "/overwatch/target/:target_id", OverwatchLive.User, :user
+      live "/overwatch/report_group/:id", OverwatchLive.ReportGroupDetail, :index
     end
 
     live_session :report_user,
       on_mount: [
         {Teiserver.Account.AuthPlug, :mount_current_user}
       ] do
-        live "/report_user", ReportUserLive.Index, :index
-        live "/report_user/:id", ReportUserLive.Index, :selected
+      live "/report_user", ReportUserLive.Index, :index
+      live "/report_user/:id", ReportUserLive.Index, :selected
     end
   end
 
@@ -581,9 +581,9 @@ defmodule TeiserverWeb.Router do
       on_mount: [
         {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
-        live "/", ChatLive.Index, :index
-        live "/room", ChatLive.Room, :index
-        live "/room/:room_name", ChatLive.Room, :index
+      live "/", ChatLive.Index, :index
+      live "/room", ChatLive.Room, :index
+      live "/room/:room_name", ChatLive.Room, :index
     end
   end
 
@@ -594,8 +594,8 @@ defmodule TeiserverWeb.Router do
       on_mount: [
         {Teiserver.Account.AuthPlug, :ensure_authenticated}
       ] do
-        live "/test_page", TestPageLive.Index, :index
-        live "/test_page/:tab", TestPageLive.Index, :index
+      live "/test_page", TestPageLive.Index, :index
+      live "/test_page/:tab", TestPageLive.Index, :index
     end
 
     live_session :admin_chat_liveview,
@@ -603,7 +603,7 @@ defmodule TeiserverWeb.Router do
         {Teiserver.Account.AuthPlug, :ensure_authenticated},
         {Teiserver.Account.AuthPlug, {:authorise, "Moderator"}}
       ] do
-        live "/chat", ChatLive.Index, :index
+      live "/chat", ChatLive.Index, :index
     end
   end
 

@@ -216,7 +216,10 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       end
 
       if Map.get(user, :lobby_client, nil) == "skylobby" do
-        Coordinator.send_to_user(userid, "skylobby is not supported so is not benefiting from new features. Future server improvements are likely to break it; please instead use the official Chobby client available from our website - https://www.beyondallreason.info/download")
+        Coordinator.send_to_user(
+          userid,
+          "skylobby is not supported so is not benefiting from new features. Future server improvements are likely to break it; please instead use the official Chobby client available from our website - https://www.beyondallreason.info/download"
+        )
       end
 
       relevant_restrictions =
@@ -272,7 +275,11 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
                 msg ++ @dispute_string
 
               has_warning ->
-                Telemetry.log_simple_server_event(user.id, "has_warning.remove_user_from_any_lobby")
+                Telemetry.log_simple_server_event(
+                  user.id,
+                  "has_warning.remove_user_from_any_lobby"
+                )
+
                 Lobby.remove_user_from_any_lobby(user.id)
                 Client.set_awaiting_warn_ack(userid)
 

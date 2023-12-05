@@ -36,8 +36,7 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
-    discord_channel =
-      Communication.get_discord_channel!(id)
+    discord_channel = Communication.get_discord_channel!(id)
 
     conn
     |> assign(:discord_channel, discord_channel)
@@ -62,11 +61,12 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
 
   @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def create(conn, %{"discord_channel" => params}) do
-    name = if String.starts_with?(params["special_name"], "--") do
-      params["name"]
-    else
-      params["special_name"]
-    end
+    name =
+      if String.starts_with?(params["special_name"], "--") do
+        params["name"]
+      else
+        params["special_name"]
+      end
 
     discord_channel_params = Map.put(params, "name", name)
 
@@ -138,17 +138,17 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
   end
 
   defp get_special_names() do
-    existing_names = Communication.list_discord_channels(select: [:name], limit: :infinity)
+    existing_names =
+      Communication.list_discord_channels(select: [:name], limit: :infinity)
       |> Enum.map(fn %{name: name} -> name end)
 
     [
       "-- Channels",
       DiscordChannelLib.special_channels(),
-
       "-- Counters",
       DiscordChannelLib.counter_channels()
     ]
-    |> List.flatten
+    |> List.flatten()
     |> Enum.reject(fn name ->
       Enum.member?(existing_names, name)
     end)

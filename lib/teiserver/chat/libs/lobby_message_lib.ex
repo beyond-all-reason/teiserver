@@ -41,6 +41,7 @@ defmodule Teiserver.Chat.LobbyMessageLib do
   end
 
   def _search(query, :user_id_in, []), do: query
+
   def _search(query, :user_id_in, id_list) do
     from lobby_messages in query,
       where: lobby_messages.user_id in ^id_list

@@ -367,7 +367,8 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Lobbies",
       type: "integer",
       permissions: ["Admin"],
-      description: "The raw number of users who would need to block someone to prevent them joining a lobby",
+      description:
+        "The raw number of users who would need to block someone to prevent them joining a lobby",
       default: 8
     })
 
@@ -376,7 +377,8 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Lobbies",
       type: "integer",
       permissions: ["Admin"],
-      description: "The percentage of users who would need to block someone to prevent them joining a lobby",
+      description:
+        "The percentage of users who would need to block someone to prevent them joining a lobby",
       default: 66
     })
 
@@ -385,7 +387,8 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Lobbies",
       type: "integer",
       permissions: ["Admin"],
-      description: "The raw number of players who would need to avoid someone to prevent them becoming a player",
+      description:
+        "The raw number of players who would need to avoid someone to prevent them becoming a player",
       default: 4
     })
 
@@ -394,7 +397,8 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Lobbies",
       type: "integer",
       permissions: ["Admin"],
-      description: "The percentage of players who would need to avoid someone to prevent them becoming a player",
+      description:
+        "The percentage of players who would need to avoid someone to prevent them becoming a player",
       default: 50
     })
   end
@@ -571,7 +575,7 @@ defmodule Teiserver.TeiserverConfigs do
       default: "Leaderboard rating",
       permissions: ["Admin"],
       description: "The value used to assign rank icons at login",
-      opts: [choices: ["Leaderboard rating", "Rating value", "Playtime", "Role"]],
+      opts: [choices: ["Leaderboard rating", "Rating value", "Playtime", "Role"]]
     })
 
     add_site_config_type(%{

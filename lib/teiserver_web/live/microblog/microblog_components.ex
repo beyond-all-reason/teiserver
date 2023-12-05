@@ -11,6 +11,7 @@ defmodule TeiserverWeb.MicroblogComponents do
   attr :active, :string, required: true
   attr :match_id, :integer, default: nil
   attr :current_user, :map, required: true
+
   def sub_menu(assigns) do
     ~H"""
     <div class="row sub-menu">
@@ -26,7 +27,7 @@ defmodule TeiserverWeb.MicroblogComponents do
       <.sub_menu_button
         :if={@current_user}
         bsname={@view_colour}
-        icon={"fa-cog"}
+        icon="fa-cog"
         active={@active == "preferences"}
         url={~p"/microblog/preferences"}
       >
@@ -62,9 +63,10 @@ defmodule TeiserverWeb.MicroblogComponents do
   This is designed to show a small view of the post itself and allow for getting an idea of what is present without having to parse the entire post.
   """
   attr :post, :map, required: true
+
   def post_preview_small(assigns) do
     ~H"""
-    <div id={"post-preview"} class="mt-4">
+    <div id="post-preview" class="mt-4">
       <hr />
       <h5 style="text-align: center;">--- Small preview ---</h5>
 
@@ -75,21 +77,23 @@ defmodule TeiserverWeb.MicroblogComponents do
       </div>
 
       <h4>
-        <%= Map.get(@post, :title, "") %> -
-        <%= TimexHelper.date_to_str(Timex.now(), :hms_or_ymd) %>
+        <%= Map.get(@post, :title, "") %> - <%= TimexHelper.date_to_str(Timex.now(), :hms_or_ymd) %>
       </h4>
-      <%=
-        Map.get(@post, :contents, "") |> String.split("\n\n") |> hd |> Earmark.as_html! |> Phoenix.HTML.raw
-      %>
+      <%= Map.get(@post, :contents, "")
+      |> String.split("\n\n")
+      |> hd
+      |> Earmark.as_html!()
+      |> Phoenix.HTML.raw() %>
       <br />
     </div>
     """
   end
 
   attr :post, :map, required: true
+
   def post_preview_full(assigns) do
     ~H"""
-    <div id={"post-preview"} class="mt-4">
+    <div id="post-preview" class="mt-4">
       <hr />
       <h5 style="text-align: center;">--- Full preview ---</h5>
 
@@ -100,10 +104,9 @@ defmodule TeiserverWeb.MicroblogComponents do
       </div>
 
       <h4>
-        <%= Map.get(@post, :title, "") %> -
-        <%= TimexHelper.date_to_str(Timex.now(), :hms_or_ymd) %>
+        <%= Map.get(@post, :title, "") %> - <%= TimexHelper.date_to_str(Timex.now(), :hms_or_ymd) %>
       </h4>
-      <%= Map.get(@post, :contents, "") |> Earmark.as_html! |> Phoenix.HTML.raw %>
+      <%= Map.get(@post, :contents, "") |> Earmark.as_html!() |> Phoenix.HTML.raw() %>
       <br />
     </div>
     """
@@ -118,17 +121,23 @@ defmodule TeiserverWeb.MicroblogComponents do
   attr :rest, :global, include: ~w()
 
   def tag_badge(assigns) do
-    bg_colour = if assigns[:disabled] do
-      "#777777"
-    else
-      assigns[:tag].colour
-    end
+    bg_colour =
+      if assigns[:disabled] do
+        "#777777"
+      else
+        assigns[:tag].colour
+      end
 
-    assigns = assigns
+    assigns =
+      assigns
       |> assign(:bg_colour, bg_colour)
 
     ~H"""
-    <span class={"badge rounded-pill mx-1 #{@class}"} style={"background-color: #{@bg_colour}; cursor: pointer;"} {@rest}>
+    <span
+      class={"badge rounded-pill mx-1 #{@class}"}
+      style={"background-color: #{@bg_colour}; cursor: pointer;"}
+      {@rest}
+    >
       <Fontawesome.icon icon={@tag.icon} style="solid" />
       <%= @tag.name %>
     </span>

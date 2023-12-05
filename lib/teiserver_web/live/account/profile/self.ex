@@ -6,15 +6,13 @@ defmodule TeiserverWeb.Account.ProfileLive.Self do
   def mount(_params, _session, socket) do
     if socket.assigns.current_user do
       {:ok,
-        socket
-        |> redirect(to: ~p"/profile/#{socket.assigns.current_user.id}")
-      }
+       socket
+       |> redirect(to: ~p"/profile/#{socket.assigns.current_user.id}")}
     else
       {:ok,
-        socket
-        |> put_flash(:info, "You need to be logged in to view your own profile")
-        |> redirect(to: ~p"/")
-      }
+       socket
+       |> put_flash(:info, "You need to be logged in to view your own profile")
+       |> redirect(to: ~p"/")}
     end
   end
 

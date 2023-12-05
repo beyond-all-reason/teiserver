@@ -50,17 +50,19 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
               limit: 100
             )
 
-          user_activity_logs = Logging.list_user_activity_day_logs(
-            search: [
+          user_activity_logs =
+            Logging.list_user_activity_day_logs(
+              search: [
                 start_date: Timex.beginning_of_quarter(log.date),
                 end_date: Timex.end_of_quarter(log.date)
-            ],
-            limit: 100
-          )
+              ],
+              limit: 100
+            )
 
-          data = logs
-          |> Enum.zip(user_activity_logs)
-          |> ServerDayLogLib.aggregate_day_logs()
+          data =
+            logs
+            |> Enum.zip(user_activity_logs)
+            |> ServerDayLogLib.aggregate_day_logs()
 
           {:ok, _} =
             Logging.create_server_quarter_log(%{
@@ -93,17 +95,19 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
           limit: 100
         )
 
-      user_activity_logs = Logging.list_user_activity_day_logs(
-        search: [
+      user_activity_logs =
+        Logging.list_user_activity_day_logs(
+          search: [
             start_date: Timex.beginning_of_quarter(new_date),
             end_date: Timex.end_of_quarter(new_date)
-        ],
-        limit: 100
-      )
+          ],
+          limit: 100
+        )
 
-      data = logs
-      |> Enum.zip(user_activity_logs)
-      |> ServerDayLogLib.aggregate_day_logs()
+      data =
+        logs
+        |> Enum.zip(user_activity_logs)
+        |> ServerDayLogLib.aggregate_day_logs()
 
       {:ok, _} =
         Logging.create_server_quarter_log(%{
@@ -121,12 +125,13 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
   def quarter_so_far() do
     now = Timex.now()
 
-    user_activity_logs = Logging.list_user_activity_day_logs(
-      search: [
-        start_date: Timex.beginning_of_quarter(now)
-      ],
-      limit: 100
-    )
+    user_activity_logs =
+      Logging.list_user_activity_day_logs(
+        search: [
+          start_date: Timex.beginning_of_quarter(now)
+        ],
+        limit: 100
+      )
 
     Logging.list_server_day_logs(
       search: [

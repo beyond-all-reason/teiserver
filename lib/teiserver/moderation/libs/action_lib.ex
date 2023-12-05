@@ -206,14 +206,16 @@ defmodule Teiserver.Moderation.ActionLib do
   end
 
   def generate_discord_message_text(nil), do: nil
+
   def generate_discord_message_text(action) do
-    action = if Ecto.assoc_loaded?(action.target) do
-      action
-    else
-      Teiserver.Moderation.get_action(action.id,
-        preload: [:target]
-      )
-    end
+    action =
+      if Ecto.assoc_loaded?(action.target) do
+        action
+      else
+        Teiserver.Moderation.get_action(action.id,
+          preload: [:target]
+        )
+      end
 
     if action do
       until =
@@ -241,9 +243,9 @@ defmodule Teiserver.Moderation.ActionLib do
         "Reason: #{formatted_reason}, #{restriction_string}",
         until
       ]
-        |> List.flatten()
-        |> Enum.join("\n")
-        |> String.replace("\n\n", "\n")
+      |> List.flatten()
+      |> Enum.join("\n")
+      |> String.replace("\n\n", "\n")
     end
   end
 
@@ -262,12 +264,15 @@ defmodule Teiserver.Moderation.ActionLib do
       message = generate_discord_message_text(action)
 
       posting_result = Communication.new_discord_message("Public moderation log", message)
+
       case posting_result do
         {:ok, %{id: message_id}} ->
           Moderation.update_action(action, %{discord_message_id: message_id})
+
         {:error, :discord_disabled} ->
           nil
       end
+
       posting_result
     else
       nil
@@ -291,6 +296,7 @@ defmodule Teiserver.Moderation.ActionLib do
           Communication.delete_discord_message("Public moderation log", action.discord_message_id)
           Moderation.update_action(action, %{discord_message_id: nil})
         end
+
         nil
 
       action.discord_message_id == nil ->
@@ -300,7 +306,11 @@ defmodule Teiserver.Moderation.ActionLib do
         message = generate_discord_message_text(action)
 
         if message do
-          Communication.edit_discord_message("Public moderation log", action.discord_message_id, message)
+          Communication.edit_discord_message(
+            "Public moderation log",
+            action.discord_message_id,
+            message
+          )
         else
           Communication.delete_discord_message("Public moderation log", action.discord_message_id)
           Moderation.update_action(action, %{discord_message_id: nil})

@@ -12,10 +12,11 @@ defmodule Teiserver.Communication.MicroblogReport do
   def run(_conn, params) do
     params = default_params(params)
 
-    posts = Microblog.list_posts(
-      order_by: params["order_by"],
-      preload: [:poster]
-    )
+    posts =
+      Microblog.list_posts(
+        order_by: params["order_by"],
+        preload: [:poster]
+      )
 
     %{
       posts: posts,
@@ -24,8 +25,11 @@ defmodule Teiserver.Communication.MicroblogReport do
   end
 
   defp default_params(params) do
-    Map.merge(%{
-      "order_by" => "Newest first"
-    }, params)
+    Map.merge(
+      %{
+        "order_by" => "Newest first"
+      },
+      params
+    )
   end
 end

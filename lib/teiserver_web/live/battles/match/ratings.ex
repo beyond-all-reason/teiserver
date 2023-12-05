@@ -18,7 +18,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
         {rating.rating_type.name, rating}
       end)
 
-    socket = socket
+    socket =
+      socket
       |> assign(:site_menu_active, "match")
       |> assign(:view_colour, Battle.MatchLib.colours())
       |> assign(:game_types, game_types)
@@ -36,7 +37,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
 
   @impl true
   def handle_params(params, _url, socket) do
-    socket = socket
+    socket =
+      socket
       |> assign(:rating_type, Map.get(params, "rating_type", "Team"))
       |> update_match_list()
 
@@ -50,14 +52,18 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
 
     new_filters = Map.put(filters, key, value)
 
-    socket = socket
+    socket =
+      socket
       |> assign(:filters, new_filters)
       |> update_match_list
 
     {:noreply, socket}
   end
 
-  defp update_match_list(%{assigns: %{rating_type: rating_type, filters: filters, current_user: current_user}} = socket) do
+  defp update_match_list(
+         %{assigns: %{rating_type: rating_type, filters: filters, current_user: current_user}} =
+           socket
+       ) do
     if connected?(socket) do
       changes = run_match_query(filters, rating_type, current_user)
 

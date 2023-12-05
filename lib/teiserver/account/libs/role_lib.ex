@@ -31,8 +31,13 @@ defmodule Teiserver.Account.RoleLib do
 
     # Property
     %{name: "Trusted", colour: "#FFFFFF", icon: "fa-solid fa-check-square", contains: ~w()},
-    %{name: "BAR+", colour: "#0066AA", icon: "fa-solid fa-hexagon-plus", contains: ~w(),
-      badge: false},
+    %{
+      name: "BAR+",
+      colour: "#0066AA",
+      icon: "fa-solid fa-hexagon-plus",
+      contains: ~w(),
+      badge: false
+    },
     %{name: "Bot", colour: "#777777", icon: "fa-solid fa-user-robot", contains: ~w()},
     %{
       name: "Verified",
@@ -82,8 +87,7 @@ defmodule Teiserver.Account.RoleLib do
       contains: ~w(Streamer Tournament),
       badge: true
     },
-    %{name: "Donor", colour: "#0066AA", icon: "fa-duotone fa-euro", contains: ~w(),
-      badge: true},
+    %{name: "Donor", colour: "#0066AA", icon: "fa-duotone fa-euro", contains: ~w(), badge: true},
 
     # Contributor/Staff
     %{
@@ -114,8 +118,13 @@ defmodule Teiserver.Account.RoleLib do
       icon: "fa-duotone fa-download",
       contains: ~w(Contributor)
     },
-    %{name: "Tester", colour: "#00AAAA", icon: "fa-duotone fa-vial", contains: ~w(Contributor),
-      badge: true},
+    %{
+      name: "Tester",
+      colour: "#00AAAA",
+      icon: "fa-duotone fa-vial",
+      contains: ~w(Contributor),
+      badge: true
+    },
     %{
       name: "Core",
       colour: "#007700",
@@ -137,8 +146,13 @@ defmodule Teiserver.Account.RoleLib do
       icon: "fa-duotone fa-user-magnifying-glass",
       contains: ~w(Overwatch)
     },
-    %{name: "Moderator", colour: "#FFAA00", icon: "fa-duotone fa-gavel", contains: ~w(Reviewer),
-      badge: true},
+    %{
+      name: "Moderator",
+      colour: "#FFAA00",
+      icon: "fa-duotone fa-gavel",
+      contains: ~w(Reviewer),
+      badge: true
+    },
     %{
       name: "Admin",
       colour: "#204A88",
@@ -163,7 +177,8 @@ defmodule Teiserver.Account.RoleLib do
                  |> List.flatten()
                  |> Enum.uniq()
 
-               new_def = @role_defaults
+               new_def =
+                 @role_defaults
                  |> Map.merge(role_def)
                  |> Map.merge(%{
                    contains: extra_contains
@@ -263,11 +278,11 @@ defmodule Teiserver.Account.RoleLib do
 
   def calculate_permissions(roles) do
     roles
-      |> Enum.map(fn role_name ->
-        role_def = role_data(role_name)
-        [role_name | role_def.contains]
-      end)
-      |> List.flatten()
-      |> Enum.uniq()
+    |> Enum.map(fn role_name ->
+      role_def = role_data(role_name)
+      [role_name | role_def.contains]
+    end)
+    |> List.flatten()
+    |> Enum.uniq()
   end
 end

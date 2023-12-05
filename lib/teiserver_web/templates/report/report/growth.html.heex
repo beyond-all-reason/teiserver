@@ -38,12 +38,10 @@
       }
     });
   }
-  
-  <%
-    IO.puts "\n"
+
+  <% IO.puts "\n"
     IO.inspect @unique_counts
-    IO.puts ""
-  %>
+    IO.puts "" %>
 
   $(function() {
     generate_chart("#unique-counts", <%= raw Jason.encode!(@unique_counts) %>);

@@ -16,7 +16,8 @@
     <form method="post" class="">
       <div class="row">
         <div class="col">
-          <.input type="select"
+          <.input
+            type="select"
             label="Game type"
             options={@game_types}
             name="game-type"
@@ -27,30 +28,33 @@
 
         <%= if allow?(@current_user, "BAR+") do %>
           <div class="col">
-            <.input type="text"
+            <.input
+              type="text"
               label="Ally"
               name="ally"
               value={@filters["ally"]}
-              phx-change="filter-update" phx-debounce="400"
+              phx-change="filter-update"
+              phx-debounce="400"
             />
           </div>
-          
+
           <div class="col">
-            <.input type="text"
+            <.input
+              type="text"
               label="Opponent"
               name="opponent"
               value={@filters["opponent"]}
-              phx-change="filter-update" phx-debounce="400"
+              phx-change="filter-update"
+              phx-debounce="400"
             />
           </div>
         <% end %>
       </div>
     </form>
     <hr />
-    
+
     <div class="row mt-2">
       <div class="col">
-
         <.table
           id="matches"
           rows={@matches}
@@ -61,8 +65,7 @@
           <:col :let={match} label="Map"><%= match.map %></:col>
           <:col :let={match} label="Outcome">
             <%= if hd(match.members).win do %>
-              <Fontawesome.icon icon="trophy" style="solid" class="text-success" />
-              &nbsp;
+              <Fontawesome.icon icon="trophy" style="solid" class="text-success" /> &nbsp;
               Win
             <% else %>
               Loss
@@ -70,19 +73,21 @@
           </:col>
           <:col :let={match} label="Team count"><%= match.team_count %></:col>
           <:col :let={match} label="Team size"><%= match.team_size %></:col>
-          <:col :let={match} label="Duration"><%= if match.finished, do: duration_to_str_short(match.game_duration) %></:col>
-          <:col :let={match} label="Ended"><%= date_to_str(match.finished, format: :hms_or_ymd) %></:col>
-          
+          <:col :let={match} label="Duration">
+            <%= if match.finished, do: duration_to_str_short(match.game_duration) %>
+          </:col>
+          <:col :let={match} label="Ended">
+            <%= date_to_str(match.finished, format: :hms_or_ymd) %>
+          </:col>
+
           <:action :let={match}>
             <div class="visually-hidden">
-              <.link
-                navigate={~p"/battle/#{match.id}"}>
-                  Show
+              <.link navigate={~p"/battle/#{match.id}"}>
+                Show
               </.link>
             </div>
           </:action>
         </.table>
-
       </div>
     </div>
   </div>

@@ -62,16 +62,19 @@ defmodule TeiserverWeb.UserComponents do
   <TeiserverWeb.UserComponents.recents_dropdown current_user={@current_user} />
   """
   attr :current_user, :map, required: true
+
   def recents_dropdown(assigns) do
-    recents = assigns[:current_user]
+    recents =
+      assigns[:current_user]
       |> Teiserver.Account.RecentlyUsedCache.get_recently()
       |> Enum.take(15)
 
-    assigns = assigns
+    assigns =
+      assigns
       |> assign(recents: recents)
 
     ~H"""
-    <div class="nav-item dropdown mx-2" :if={not Enum.empty?(@recents)}>
+    <div :if={not Enum.empty?(@recents)} class="nav-item dropdown mx-2">
       <a
         class="dropdown-toggle dropdown-toggle-icon-only"
         href="#"
@@ -91,11 +94,15 @@ defmodule TeiserverWeb.UserComponents do
           Recent items
         </span>
 
-        <a class="dropdown-item" href={r.url} :for={r <- @recents}>
+        <a :for={r <- @recents} class="dropdown-item" href={r.url}>
           <Fontawesome.icon icon={r.type_icon} style="regular" css_style={"color: #{r.type_colour}"} />
 
           <%= if r.item_icon do %>
-            <Fontawesome.icon icon={r.item_icon} style="regular" css_style={"color: #{r.item_colour}"} />
+            <Fontawesome.icon
+              icon={r.item_icon}
+              style="regular"
+              css_style={"color: #{r.item_colour}"}
+            />
           <% else %>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <% end %>
@@ -110,6 +117,7 @@ defmodule TeiserverWeb.UserComponents do
   <TeiserverWeb.UserComponents.account_dropdown current_user={@current_user} />
   """
   attr :current_user, :map, required: true
+
   def account_dropdown(assigns) do
     ~H"""
     <div class="nav-item dropdown mx-2">

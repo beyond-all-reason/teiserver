@@ -26,6 +26,9 @@ defmodule Teiserver.Plugs.CachePlug do
 
   def live_call(socket) do
     socket
-    |> Phoenix.LiveView.Utils.assign(:tz, Application.get_env(:teiserver, Teiserver.Config)[:defaults].tz)
+    |> Phoenix.LiveView.Utils.assign(
+      :tz,
+      Application.get_env(:teiserver, Teiserver.Config)[:defaults].tz
+    )
   end
 end

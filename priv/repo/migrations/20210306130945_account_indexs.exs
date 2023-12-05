@@ -1,5 +1,5 @@
 defmodule Teiserver.Repo.Migrations.AccountIndexes do
-use Ecto.Migration
+  use Ecto.Migration
 
   def up do
     execute "CREATE INDEX lower_username ON account_users (LOWER(name))"

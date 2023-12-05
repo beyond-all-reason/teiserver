@@ -327,6 +327,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
   def handle_error(conn, {:missing_params, param}),
     do: Plug.Conn.send_resp(conn, 400, "Missing parameter(s): #{param}")
+
   def handle_error(conn, "missing_params: " <> param),
     do: Plug.Conn.send_resp(conn, 400, "Missing parameter(s): #{param}")
 

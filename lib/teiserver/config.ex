@@ -88,10 +88,10 @@ defmodule Teiserver.Config do
     end)
   end
 
-  @spec get_user_config(T.userid) :: UserConfig.t | nil
+  @spec get_user_config(T.userid()) :: UserConfig.t() | nil
   def get_user_config(id), do: Repo.get(UserConfig, id)
 
-  @spec get_user_config(T.userid, String.t) :: UserConfig.t | nil
+  @spec get_user_config(T.userid(), String.t()) :: UserConfig.t() | nil
   def get_user_config(user_id, key) do
     query =
       from user_config in UserConfig,
@@ -242,7 +242,8 @@ defmodule Teiserver.Config do
 
   @spec add_user_config_type(map()) :: :ok
   def add_user_config_type(config) do
-    default_label = config.key
+    default_label =
+      config.key
       |> String.split(".")
       |> tl
 
@@ -417,18 +418,23 @@ defmodule Teiserver.Config do
   """
   @spec add_site_config_type(map()) :: :ok
   def add_site_config_type(config) do
-    default_label = config.key
+    default_label =
+      config.key
       |> String.split(".")
       |> tl
 
-    config = Map.merge(%{
-        opts: [],
-        label: default_label,
-        value_label: "",
-        default: nil,
-        update_callback: nil,
-        tags: []
-      }, config)
+    config =
+      Map.merge(
+        %{
+          opts: [],
+          label: default_label,
+          value_label: "",
+          default: nil,
+          update_callback: nil,
+          tags: []
+        },
+        config
+      )
 
     all_config_types =
       (Teiserver.store_get(:config_site_type_store, "all-config-types") || %{})

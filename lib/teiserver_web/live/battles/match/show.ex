@@ -6,7 +6,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
 
   @impl true
   def mount(_params, _session, socket) do
-    socket = socket
+    socket =
+      socket
       |> assign(:site_menu_active, "match")
       |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
       |> assign(:tab, "details")
@@ -16,7 +17,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
 
   @impl true
   def handle_params(%{"id" => id} = params, _url, socket) do
-    socket = socket
+    socket =
+      socket
       |> assign(:id, String.to_integer(id))
       |> get_match()
       |> assign(:tab, socket.assigns.live_action)
@@ -94,18 +96,18 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         |> Map.new()
 
       socket
-        |> assign(:match, match)
-        |> assign(:match_name, match_name)
-        |> assign(:members, members)
-        |> assign(:rating_logs, rating_logs)
-        |> assign(:parties, parties)
+      |> assign(:match, match)
+      |> assign(:match_name, match_name)
+      |> assign(:members, members)
+      |> assign(:rating_logs, rating_logs)
+      |> assign(:parties, parties)
     else
       socket
-        |> assign(:match, nil)
-        |> assign(:match_name, "Loading...")
-        |> assign(:members, [])
-        |> assign(:rating_logs, [])
-        |> assign(:parties, %{})
+      |> assign(:match, nil)
+      |> assign(:match_name, "Loading...")
+      |> assign(:members, [])
+      |> assign(:rating_logs, [])
+      |> assign(:parties, %{})
     end
   end
 end

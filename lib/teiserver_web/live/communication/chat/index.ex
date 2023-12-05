@@ -4,7 +4,8 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    socket = socket
+    socket =
+      socket
       |> assign(:site_menu_active, "chat")
       |> assign(:view_colour, Teiserver.Chat.LobbyMessageLib.colours())
       |> assign(:messages, [])
@@ -43,7 +44,8 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
 
     new_filters = Map.put(filters, key, value)
 
-    socket = socket
+    socket =
+      socket
       |> assign(:filters, new_filters)
       |> get_messages
 
@@ -76,16 +78,18 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
         _ -> nil
       end
 
-    {mode, userid} = if filters["username"] == "" do
-      {mode, nil}
-    else
-      uid = Account.get_userid_from_name(filters["username"])
-      if uid do
-        {mode, uid}
+    {mode, userid} =
+      if filters["username"] == "" do
+        {mode, nil}
       else
-        {nil, nil}
+        uid = Account.get_userid_from_name(filters["username"])
+
+        if uid do
+          {mode, uid}
+        else
+          {nil, nil}
+        end
       end
-    end
 
     excluded_ids =
       if filters["include_bots"] == "true" do
@@ -138,7 +142,8 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
           )
       end
 
-    extra_usernames = messages
+    extra_usernames =
+      messages
       |> Enum.map(fn m -> m.user_id end)
       |> Enum.reject(fn userid ->
         Map.has_key?(socket.assigns.usernames, userid)
@@ -150,7 +155,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
     new_usernames = Map.merge(socket.assigns.usernames, extra_usernames)
 
     socket
-      |> assign(:usernames, new_usernames)
-      |> assign(:messages, messages)
+    |> assign(:usernames, new_usernames)
+    |> assign(:messages, messages)
   end
 end

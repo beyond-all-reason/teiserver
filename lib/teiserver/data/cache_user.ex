@@ -426,7 +426,8 @@ defmodule Teiserver.CacheUser do
       clean_name(new_name) != new_name ->
         {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
 
-      get_user_by_name(new_name) && get_user_by_name(new_name).name |> String.downcase() == String.downcase(new_name) ->
+      get_user_by_name(new_name) &&
+          get_user_by_name(new_name).name |> String.downcase() == String.downcase(new_name) ->
         {:error, "Username already taken"}
 
       true ->
@@ -604,7 +605,7 @@ defmodule Teiserver.CacheUser do
           inserted_at: Timex.now(),
           delivered: true
         })
-        end
+      end
 
       PubSub.broadcast(
         Teiserver.PubSub,
@@ -1130,32 +1131,34 @@ defmodule Teiserver.CacheUser do
     {:ok, user}
   end
 
-  @spec get_country(T.user, String.t) :: String.t
+  @spec get_country(T.user(), String.t()) :: String.t()
   def get_country(user, ip) do
     stats = Account.get_user_stat_data(user.id)
 
-    raw_country = cond do
-      Config.get_user_config_cache(user.id, "teiserver.Show flag") == false ->
-        "??"
+    raw_country =
+      cond do
+        Config.get_user_config_cache(user.id, "teiserver.Show flag") == false ->
+          "??"
 
-      allow?(user, "BAR+") and Map.has_key?(stats, "bar_plus.flag") ->
-        stats["bar_plus.flag"]
+        allow?(user, "BAR+") and Map.has_key?(stats, "bar_plus.flag") ->
+          stats["bar_plus.flag"]
 
-      stats["country_override"] != nil ->
-        stats["country_override"]
+        stats["country_override"] != nil ->
+          stats["country_override"]
 
-      true ->
-        # Only call to geoip if the IP has changed
-        last_ip = Account.get_user_stat_data(user.id) |> Map.get("last_ip")
+        true ->
+          # Only call to geoip if the IP has changed
+          last_ip = Account.get_user_stat_data(user.id) |> Map.get("last_ip")
 
-        if last_ip != ip or (user.country || "??") == "??" do
-          Teiserver.Geoip.get_flag(ip, user.country)
-        else
-          user.country || "??"
-        end
-    end
+          if last_ip != ip or (user.country || "??") == "??" do
+            Teiserver.Geoip.get_flag(ip, user.country)
+          else
+            user.country || "??"
+          end
+      end
 
-    c = raw_country
+    c =
+      raw_country
       |> String.trim()
       |> String.upcase()
 
@@ -1267,12 +1270,12 @@ defmodule Teiserver.CacheUser do
   end
 
   # Based on actual ingame time
-  @spec calculate_rank(T.userid(), String.t) :: non_neg_integer()
+  @spec calculate_rank(T.userid(), String.t()) :: non_neg_integer()
   def calculate_rank(userid, "Playtime") do
     ingame_hours = rank_time(userid)
 
     [5, 15, 30, 100, 300, 1000, 3000]
-      |> Enum.count(fn r -> r <= ingame_hours end)
+    |> Enum.count(fn r -> r <= ingame_hours end)
   end
 
   # Using leaderboard rating
@@ -1284,11 +1287,11 @@ defmodule Teiserver.CacheUser do
   end
 
   def calculate_rank(userid, "Uncertainty") do
-    uncertainty = Account.get_player_lowest_uncertainty(userid)
-    |> :math.ceil()
+    uncertainty =
+      Account.get_player_lowest_uncertainty(userid)
+      |> :math.ceil()
 
-
-    8 - uncertainty
+    (8 - uncertainty)
     |> max(0)
     |> max(7)
   end
@@ -1353,7 +1356,7 @@ defmodule Teiserver.CacheUser do
   @doc """
   If a user possesses any of these roles it returns true
   """
-  @spec has_any_role?(T.userid() | T.user() | nil, String.t | [String.t]) :: boolean()
+  @spec has_any_role?(T.userid() | T.user() | nil, String.t() | [String.t()]) :: boolean()
   def has_any_role?(nil, _), do: false
 
   def has_any_role?(userid, roles) when is_integer(userid),
@@ -1370,7 +1373,7 @@ defmodule Teiserver.CacheUser do
   @doc """
   If a user possesses all of these roles it returns true, if any are lacking it returns false
   """
-  @spec has_all_roles?(T.userid() | T.user() | nil, String.t | [String.t]) :: boolean()
+  @spec has_all_roles?(T.userid() | T.user() | nil, String.t() | [String.t()]) :: boolean()
   def has_all_roles?(nil, _), do: false
 
   def has_all_roles?(userid, roles) when is_integer(userid),

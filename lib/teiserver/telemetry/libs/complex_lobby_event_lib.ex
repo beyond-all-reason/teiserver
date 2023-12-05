@@ -13,17 +13,19 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventLib do
   @spec icon() :: String.t()
   def icon(), do: "fa-people-group"
 
-  @spec log_complex_lobby_event(T.userid, T.match_id, String, map()) :: {:error, Ecto.Changeset} | {:ok, ComplexLobbyEvent}
+  @spec log_complex_lobby_event(T.userid(), T.match_id(), String, map()) ::
+          {:error, Ecto.Changeset} | {:ok, ComplexLobbyEvent}
   def log_complex_lobby_event(userid, match_id, event_type_name, value) do
     event_type_id = Telemetry.get_or_add_complex_lobby_event_type(event_type_name)
 
-    result = create_complex_lobby_event(%{
-      user_id: userid,
-      match_id: match_id,
-      event_type_id: event_type_id,
-      value: value,
-      timestamp: Timex.now()
-    })
+    result =
+      create_complex_lobby_event(%{
+        user_id: userid,
+        match_id: match_id,
+        event_type_id: event_type_id,
+        value: value,
+        timestamp: Timex.now()
+      })
 
     case result do
       {:ok, _event} ->

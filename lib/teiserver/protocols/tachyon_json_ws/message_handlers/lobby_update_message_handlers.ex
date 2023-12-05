@@ -3,7 +3,13 @@ defmodule Teiserver.Tachyon.MessageHandlers.LobbyUpdateMessageHandlers do
 
   """
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Tachyon.Responses.Lobby.{AddUserClientResponse, RemoveUserClientResponse, ClosedResponse}
+
+  alias Teiserver.Tachyon.Responses.Lobby.{
+    AddUserClientResponse,
+    RemoveUserClientResponse,
+    ClosedResponse
+  }
+
   alias Teiserver.Tachyon.Responses.User.UpdatedUserClientResponse
   require Logger
 

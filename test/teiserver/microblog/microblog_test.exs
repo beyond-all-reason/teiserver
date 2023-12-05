@@ -67,7 +67,13 @@ defmodule Teiserver.MicroblogTest do
 
     import Teiserver.{AccountFixtures, MicroblogFixtures}
 
-    @invalid_attrs %{contents: nil, discord_post_id: nil, title: nil, view_count: nil, poster_id: nil}
+    @invalid_attrs %{
+      contents: nil,
+      discord_post_id: nil,
+      title: nil,
+      view_count: nil,
+      poster_id: nil
+    }
 
     test "list_posts/0 returns all posts" do
       post = post_fixture()
@@ -81,7 +87,14 @@ defmodule Teiserver.MicroblogTest do
 
     test "create_post/1 with valid data creates a post" do
       user = user_fixture()
-      valid_attrs = %{contents: "some contents", discord_post_id: 42, title: "some title", view_count: 42, poster_id: user.id}
+
+      valid_attrs = %{
+        contents: "some contents",
+        discord_post_id: 42,
+        title: "some title",
+        view_count: 42,
+        poster_id: user.id
+      }
 
       assert {:ok, %Post{} = post} = Microblog.create_post(valid_attrs)
       assert post.contents == "some contents"
@@ -96,7 +109,13 @@ defmodule Teiserver.MicroblogTest do
 
     test "update_post/2 with valid data updates the post" do
       post = post_fixture()
-      update_attrs = %{contents: "some updated contents", discord_post_id: 43, title: "some updated title", view_count: 43}
+
+      update_attrs = %{
+        contents: "some updated contents",
+        discord_post_id: 43,
+        title: "some updated title",
+        view_count: 43
+      }
 
       assert {:ok, %Post{} = post} = Microblog.update_post(post, update_attrs)
       assert post.contents == "some updated contents"
@@ -168,7 +187,10 @@ defmodule Teiserver.MicroblogTest do
     test "delete_post_tag/1 deletes the post_tag" do
       post_tag = post_tag_fixture()
       assert {:ok, %PostTag{}} = Microblog.delete_post_tag(post_tag)
-      assert_raise Ecto.NoResultsError, fn -> Microblog.get_post_tag!(post_tag.post_id, post_tag.tag_id) end
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Microblog.get_post_tag!(post_tag.post_id, post_tag.tag_id)
+      end
     end
 
     test "change_post_tag/1 returns a post_tag changeset" do
@@ -182,7 +204,14 @@ defmodule Teiserver.MicroblogTest do
 
     import Teiserver.{AccountFixtures, MicroblogFixtures}
 
-    @invalid_attrs %{disabled_posters: nil, disabled_tags: nil, enabled_posters: nil, enabled_tags: nil, tag_mode: nil, user_id: nil}
+    @invalid_attrs %{
+      disabled_posters: nil,
+      disabled_tags: nil,
+      enabled_posters: nil,
+      enabled_tags: nil,
+      tag_mode: nil,
+      user_id: nil
+    }
 
     test "list_user_preferences/0 returns all user_preferences" do
       user_preference = user_preference_fixture()
@@ -196,9 +225,19 @@ defmodule Teiserver.MicroblogTest do
 
     test "create_user_preference/1 with valid data creates a user_preference" do
       user = user_fixture()
-      valid_attrs = %{disabled_posters: [1, 2], disabled_tags: [1, 2], enabled_posters: [1, 2], enabled_tags: [1, 2], tag_mode: "some tag_mode", user_id: user.id}
 
-      assert {:ok, %UserPreference{} = user_preference} = Microblog.create_user_preference(valid_attrs)
+      valid_attrs = %{
+        disabled_posters: [1, 2],
+        disabled_tags: [1, 2],
+        enabled_posters: [1, 2],
+        enabled_tags: [1, 2],
+        tag_mode: "some tag_mode",
+        user_id: user.id
+      }
+
+      assert {:ok, %UserPreference{} = user_preference} =
+               Microblog.create_user_preference(valid_attrs)
+
       assert user_preference.disabled_posters == [1, 2]
       assert user_preference.disabled_tags == [1, 2]
       assert user_preference.enabled_posters == [1, 2]
@@ -212,9 +251,18 @@ defmodule Teiserver.MicroblogTest do
 
     test "update_user_preference/2 with valid data updates the user_preference" do
       user_preference = user_preference_fixture()
-      update_attrs = %{disabled_posters: [1], disabled_tags: [1], enabled_posters: [1], enabled_tags: [1], tag_mode: "some updated tag_mode"}
 
-      assert {:ok, %UserPreference{} = user_preference} = Microblog.update_user_preference(user_preference, update_attrs)
+      update_attrs = %{
+        disabled_posters: [1],
+        disabled_tags: [1],
+        enabled_posters: [1],
+        enabled_tags: [1],
+        tag_mode: "some updated tag_mode"
+      }
+
+      assert {:ok, %UserPreference{} = user_preference} =
+               Microblog.update_user_preference(user_preference, update_attrs)
+
       assert user_preference.disabled_posters == [1]
       assert user_preference.disabled_tags == [1]
       assert user_preference.enabled_posters == [1]
@@ -224,14 +272,20 @@ defmodule Teiserver.MicroblogTest do
 
     test "update_user_preference/2 with invalid data returns error changeset" do
       user_preference = user_preference_fixture()
-      assert {:error, %Ecto.Changeset{}} = Microblog.update_user_preference(user_preference, @invalid_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Microblog.update_user_preference(user_preference, @invalid_attrs)
+
       assert user_preference == Microblog.get_user_preference!(user_preference.user_id)
     end
 
     test "delete_user_preference/1 deletes the user_preference" do
       user_preference = user_preference_fixture()
       assert {:ok, %UserPreference{}} = Microblog.delete_user_preference(user_preference)
-      assert_raise Ecto.NoResultsError, fn -> Microblog.get_user_preference!(user_preference.user_id) end
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Microblog.get_user_preference!(user_preference.user_id)
+      end
     end
 
     test "change_user_preference/1 returns a user_preference changeset" do

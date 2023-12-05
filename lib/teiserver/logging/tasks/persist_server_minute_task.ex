@@ -7,7 +7,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerMinuteTask do
 
   @impl Oban.Worker
   def perform(_) do
-    if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") == true do
+    if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") ==
+         true do
       now = Timex.now() |> Timex.set(microsecond: 0)
 
       case Logging.get_server_minute_log(now) do

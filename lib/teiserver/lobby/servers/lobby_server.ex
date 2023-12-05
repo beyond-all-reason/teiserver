@@ -203,9 +203,11 @@ defmodule Teiserver.Battle.LobbyServer do
   # Specific/limited updates
   def handle_cast(:refresh_name, state) do
     new_name = generate_name(state)
-    new_state = do_update_values(state, %{
-      name: new_name
-    })
+
+    new_state =
+      do_update_values(state, %{
+        name: new_name
+      })
 
     {:noreply, new_state}
   end
@@ -214,15 +216,19 @@ defmodule Teiserver.Battle.LobbyServer do
     player_rename = not Account.has_any_role?(renamer_id, "bot")
 
     if player_rename do
-      Telemetry.log_complex_lobby_event(renamer_id, state.match_id, "command.rename", %{name: new_base_name})
+      Telemetry.log_complex_lobby_event(renamer_id, state.match_id, "command.rename", %{
+        name: new_base_name
+      })
     end
 
     new_name = generate_name(%{state | lobby: %{state.lobby | base_name: new_base_name}})
-    new_state = do_update_values(state, %{
-      base_name: new_base_name,
-      player_rename: player_rename,
-      name: new_name
-    })
+
+    new_state =
+      do_update_values(state, %{
+        base_name: new_base_name,
+        player_rename: player_rename,
+        name: new_name
+      })
 
     {:noreply, new_state}
   end
@@ -456,29 +462,38 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, state}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_chat" <> _, userid: userid, message: "$" <> message}, state) do
+  def handle_info(
+        %{channel: "teiserver_lobby_chat" <> _, userid: userid, message: "$" <> message},
+        state
+      ) do
     new_state = CommandLib.handle_command(state, userid, message)
     {:noreply, new_state}
   end
 
   def handle_info(%{channel: "teiserver_lobby_chat" <> _, userid: userid, message: msg}, state) do
-    new_state = case msg do
-      "!spec " <> _ ->
-        case Regex.run(~r/!spec (\S+)/, msg) do
-          [_, spectated_username] ->
-            spectated_id = Account.get_userid_from_name(spectated_username)
-            Telemetry.log_complex_lobby_event(userid, state.match_id, "Spec command", %{
-              caller_id: userid,
-              spectated_id: spectated_id,
-              given_name: spectated_username
-            })
-          _ ->
-            :ok
-        end
-        state
-      _ ->
-        state
-    end
+    new_state =
+      case msg do
+        "!spec " <> _ ->
+          case Regex.run(~r/!spec (\S+)/, msg) do
+            [_, spectated_username] ->
+              spectated_id = Account.get_userid_from_name(spectated_username)
+
+              Telemetry.log_complex_lobby_event(userid, state.match_id, "Spec command", %{
+                caller_id: userid,
+                spectated_id: spectated_id,
+                given_name: spectated_username
+              })
+
+            _ ->
+              :ok
+          end
+
+          state
+
+        _ ->
+          state
+      end
+
     {:noreply, new_state}
   end
 
@@ -526,42 +541,41 @@ defmodule Teiserver.Battle.LobbyServer do
   defp generate_name(state) do
     consul_state = Coordinator.call_consul(state.id, :get_consul_state)
 
-    parts = [
-      "",
+    parts =
+      [
+        "",
 
-      # Rating stuff here
-      (
+        # Rating stuff here
         cond do
           consul_state == nil ->
             nil
 
           # Default ratings
-          consul_state.maximum_rating_to_play >= 1000
-          && consul_state.minimum_rating_to_play <= 0 ->
+          consul_state.maximum_rating_to_play >= 1000 &&
+              consul_state.minimum_rating_to_play <= 0 ->
             nil
 
           # Just a max rating
-          consul_state.maximum_rating_to_play < 1000
-          && consul_state.minimum_rating_to_play <= 0 ->
+          consul_state.maximum_rating_to_play < 1000 &&
+              consul_state.minimum_rating_to_play <= 0 ->
             "Max rating: #{consul_state.maximum_rating_to_play}"
 
           # Just a min rating
-          consul_state.maximum_rating_to_play >= 1000
-          && consul_state.minimum_rating_to_play > 0 ->
+          consul_state.maximum_rating_to_play >= 1000 &&
+              consul_state.minimum_rating_to_play > 0 ->
             "Min rating: #{consul_state.minimum_rating_to_play}"
 
           # Rating range
-          consul_state.maximum_rating_to_play < 1000
-          || consul_state.minimum_rating_to_play > 0 ->
+          consul_state.maximum_rating_to_play < 1000 ||
+              consul_state.minimum_rating_to_play > 0 ->
             "Rating between: #{consul_state.minimum_rating_to_play} - #{consul_state.maximum_rating_to_play}"
 
           true ->
             nil
         end
-      )
-    ]
-    |> Enum.reject(&(&1 == nil))
-    |> Enum.join(" | ")
+      ]
+      |> Enum.reject(&(&1 == nil))
+      |> Enum.join(" | ")
 
     "#{state.lobby.base_name}#{parts}"
   end
@@ -612,35 +626,37 @@ defmodule Teiserver.Battle.LobbyServer do
   # Used to check and ensure the lobby values are as expected
   @spec check_lobby_values(map()) :: map()
   defp check_lobby_values(state) do
-    nil_count = [
-      Map.get(state.modoptions, "server/match/id"),
-      Map.get(state.modoptions, "server/match/uuid"),
-      Map.get(state.modoptions, "server/host/uuid"),
-    ]
-    |> Enum.count(&(&1 == nil))
+    nil_count =
+      [
+        Map.get(state.modoptions, "server/match/id"),
+        Map.get(state.modoptions, "server/match/uuid"),
+        Map.get(state.modoptions, "server/host/uuid")
+      ]
+      |> Enum.count(&(&1 == nil))
 
-    modoptions = if nil_count > 0 do
-      new_options = %{
-        "server/match/id" => state.match_id,
-        "server/match/uuid" => state.match_uuid,
-        "server/host/uuid" => state.server_uuid
-      }
-
-      PubSub.broadcast(
-        Teiserver.PubSub,
-        "teiserver_lobby_updates:#{state.id}",
-        %{
-          channel: "teiserver_lobby_updates",
-          event: :set_modoptions,
-          lobby_id: state.id,
-          options: new_options
+    modoptions =
+      if nil_count > 0 do
+        new_options = %{
+          "server/match/id" => state.match_id,
+          "server/match/uuid" => state.match_uuid,
+          "server/host/uuid" => state.server_uuid
         }
-      )
 
-      Map.merge(state.modoptions, new_options)
-    else
-      state.modoptions
-    end
+        PubSub.broadcast(
+          Teiserver.PubSub,
+          "teiserver_lobby_updates:#{state.id}",
+          %{
+            channel: "teiserver_lobby_updates",
+            event: :set_modoptions,
+            lobby_id: state.id,
+            options: new_options
+          }
+        )
+
+        Map.merge(state.modoptions, new_options)
+      else
+        state.modoptions
+      end
 
     %{state | modoptions: modoptions}
   end

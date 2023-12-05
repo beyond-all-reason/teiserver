@@ -9,6 +9,7 @@ defmodule TeiserverWeb.Battle.BattleComponents do
   attr :view_colour, :string, required: true
   attr :active, :string, required: true
   attr :match_id, :integer, default: nil
+
   def sub_menu(assigns) do
     ~H"""
     <div class="row sub-menu">
@@ -29,7 +30,6 @@ defmodule TeiserverWeb.Battle.BattleComponents do
       >
         Matchmaking
       </.sub_menu_button>
-
 
       <.sub_menu_button
         bsname={@view_colour}

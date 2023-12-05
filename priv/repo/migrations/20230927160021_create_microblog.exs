@@ -14,6 +14,7 @@ defmodule Teiserver.Repo.Migrations.CreateMicroblog do
 
       timestamps()
     end
+
     create unique_index(:communication_discord_channels, [:name])
 
     create table(:microblog_tags) do

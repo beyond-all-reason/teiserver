@@ -10,18 +10,20 @@ defmodule Teiserver.Telemetry.SimpleClientEventLib do
   @spec colour :: atom
   def colour(), do: :info2
 
-  @spec icon() :: String.t
+  @spec icon() :: String.t()
   def icon(), do: "fa-slider"
 
-  @spec log_simple_client_event(T.userid, String.t) :: {:error, Ecto.Changeset} | {:ok, SimpleClientEvent}
+  @spec log_simple_client_event(T.userid(), String.t()) ::
+          {:error, Ecto.Changeset} | {:ok, SimpleClientEvent}
   def log_simple_client_event(userid, event_type_name) when is_integer(userid) do
     event_type_id = Telemetry.get_or_add_simple_client_event_type(event_type_name)
 
-    result = create_simple_client_event(%{
-      user_id: userid,
-      event_type_id: event_type_id,
-      timestamp: Timex.now()
-    })
+    result =
+      create_simple_client_event(%{
+        user_id: userid,
+        event_type_id: event_type_id,
+        timestamp: Timex.now()
+      })
 
     case result do
       {:ok, _event} ->

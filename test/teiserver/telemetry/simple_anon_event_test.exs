@@ -14,8 +14,7 @@ defmodule Teiserver.Telemetry.SimpleAnonEventTest do
     assert Telemetry.list_simple_anon_events() |> Enum.count() == 0
 
     # Log the event
-    {result, _} =
-      Telemetry.log_simple_anon_event(hash, "anon.simple_user_event-#{r}")
+    {result, _} = Telemetry.log_simple_anon_event(hash, "anon.simple_user_event-#{r}")
 
     assert result == :ok
 
@@ -23,8 +22,9 @@ defmodule Teiserver.Telemetry.SimpleAnonEventTest do
     assert Telemetry.list_simple_anon_events(where: [hash: hash]) |> Enum.count() == 1
 
     # Ensure the anon event types exist too
-    type_list = Telemetry.list_simple_client_event_types()
-    |> Enum.map(fn %{name: name} -> name end)
+    type_list =
+      Telemetry.list_simple_client_event_types()
+      |> Enum.map(fn %{name: name} -> name end)
 
     assert Enum.member?(type_list, "anon.simple_user_event-#{r}")
   end

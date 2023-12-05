@@ -17,10 +17,10 @@ defmodule Teiserver.Microblog do
   @spec list_tags(list) :: [Tag]
   defdelegate list_tags(args), to: TagLib
 
-  @spec get_tag!(non_neg_integer()) :: Tag.t
+  @spec get_tag!(non_neg_integer()) :: Tag.t()
   defdelegate get_tag!(tag_id), to: TagLib
 
-  @spec get_tag(non_neg_integer()) :: Tag.t | nil
+  @spec get_tag(non_neg_integer()) :: Tag.t() | nil
   defdelegate get_tag(tag_id), to: TagLib
 
   @spec create_tag() :: {:ok, Tag} | {:error, Ecto.Changeset}
@@ -41,8 +41,6 @@ defmodule Teiserver.Microblog do
   @spec change_tag(Tag, map) :: Ecto.Changeset
   defdelegate change_tag(tag, attrs), to: TagLib
 
-
-
   alias Teiserver.Microblog.{Post, PostLib}
 
   @spec list_posts() :: [Post]
@@ -54,16 +52,16 @@ defmodule Teiserver.Microblog do
   @spec list_posts_using_preferences(UserPreference.t() | nil, list) :: [Post]
   defdelegate list_posts_using_preferences(preference, args), to: PostLib
 
-  @spec get_post!(non_neg_integer()) :: Post.t
+  @spec get_post!(non_neg_integer()) :: Post.t()
   defdelegate get_post!(post_id), to: PostLib
 
-  @spec get_post!(non_neg_integer, list) :: Post.t
+  @spec get_post!(non_neg_integer, list) :: Post.t()
   defdelegate get_post!(post_id, args), to: PostLib
 
-  @spec get_post(non_neg_integer()) :: Post.t | nil
+  @spec get_post(non_neg_integer()) :: Post.t() | nil
   defdelegate get_post(post_id), to: PostLib
 
-  @spec get_post(non_neg_integer(), list) :: Post.t | nil
+  @spec get_post(non_neg_integer(), list) :: Post.t() | nil
   defdelegate get_post(post_id, args), to: PostLib
 
   @spec create_post() :: {:ok, Post} | {:error, Ecto.Changeset}
@@ -87,7 +85,6 @@ defmodule Teiserver.Microblog do
   @spec increment_post_view_count(non_neg_integer()) :: Ecto.Changeset
   defdelegate increment_post_view_count(post_id), to: PostLib
 
-
   alias Teiserver.Microblog.{PostTag, PostTagLib}
 
   @spec list_post_tags() :: [PostTag]
@@ -96,10 +93,10 @@ defmodule Teiserver.Microblog do
   @spec list_post_tags(list) :: [PostTag]
   defdelegate list_post_tags(args), to: PostTagLib
 
-  @spec get_post_tag!(non_neg_integer(), non_neg_integer()) :: PostTag.t
+  @spec get_post_tag!(non_neg_integer(), non_neg_integer()) :: PostTag.t()
   defdelegate get_post_tag!(post_id, tag_id), to: PostTagLib
 
-  @spec get_post_tag(non_neg_integer(), non_neg_integer()) :: PostTag.t | nil
+  @spec get_post_tag(non_neg_integer(), non_neg_integer()) :: PostTag.t() | nil
   defdelegate get_post_tag(post_id, tag_id), to: PostTagLib
 
   @spec create_post_tag() :: {:ok, PostTag} | {:error, Ecto.Changeset}
@@ -120,9 +117,9 @@ defmodule Teiserver.Microblog do
   @spec change_post_tag(PostTag, map) :: Ecto.Changeset
   defdelegate change_post_tag(post_tag, attrs), to: PostTagLib
 
-  @spec delete_post_tags(non_neg_integer(), [non_neg_integer()]) :: {:ok, PostTag} | {:error, Ecto.Changeset}
+  @spec delete_post_tags(non_neg_integer(), [non_neg_integer()]) ::
+          {:ok, PostTag} | {:error, Ecto.Changeset}
   defdelegate delete_post_tags(post_id, tag_ids), to: PostTagLib
-
 
   alias Teiserver.Microblog.{UserPreference, UserPreferenceLib}
 
@@ -132,16 +129,16 @@ defmodule Teiserver.Microblog do
   @spec list_user_preferences(list) :: [UserPreference]
   defdelegate list_user_preferences(args), to: UserPreferenceLib
 
-  @spec get_user_preference!(non_neg_integer()) :: UserPreference.t
+  @spec get_user_preference!(non_neg_integer()) :: UserPreference.t()
   defdelegate get_user_preference!(user_preference_id), to: UserPreferenceLib
 
-  @spec get_user_preference!(non_neg_integer, list) :: UserPreference.t
+  @spec get_user_preference!(non_neg_integer, list) :: UserPreference.t()
   defdelegate get_user_preference!(user_preference_id, args), to: UserPreferenceLib
 
-  @spec get_user_preference(non_neg_integer()) :: UserPreference.t | nil
+  @spec get_user_preference(non_neg_integer()) :: UserPreference.t() | nil
   defdelegate get_user_preference(user_preference_id), to: UserPreferenceLib
 
-  @spec get_user_preference(non_neg_integer(), list) :: UserPreference.t | nil
+  @spec get_user_preference(non_neg_integer(), list) :: UserPreference.t() | nil
   defdelegate get_user_preference(user_preference_id, args), to: UserPreferenceLib
 
   @spec create_user_preference() :: {:ok, UserPreference} | {:error, Ecto.Changeset}
@@ -150,7 +147,8 @@ defmodule Teiserver.Microblog do
   @spec create_user_preference(map) :: {:ok, UserPreference} | {:error, Ecto.Changeset}
   defdelegate create_user_preference(attrs), to: UserPreferenceLib
 
-  @spec update_user_preference(UserPreference, map) :: {:ok, UserPreference} | {:error, Ecto.Changeset}
+  @spec update_user_preference(UserPreference, map) ::
+          {:ok, UserPreference} | {:error, Ecto.Changeset}
   defdelegate update_user_preference(user_preference, attrs), to: UserPreferenceLib
 
   @spec delete_user_preference(UserPreference) :: {:ok, UserPreference} | {:error, Ecto.Changeset}

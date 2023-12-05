@@ -13,17 +13,19 @@ defmodule Teiserver.Telemetry.ComplexMatchEventLib do
   @spec icon() :: String.t()
   def icon(), do: "fa-scanner-keyboard"
 
-  @spec log_complex_match_event(T.userid, T.match_id, String, non_neg_integer, map()) :: {:error, Ecto.Changeset} | {:ok, ComplexLobbyEvent}
+  @spec log_complex_match_event(T.userid(), T.match_id(), String, non_neg_integer, map()) ::
+          {:error, Ecto.Changeset} | {:ok, ComplexLobbyEvent}
   def log_complex_match_event(userid, match_id, event_type_name, game_time, value) do
     event_type_id = Telemetry.get_or_add_complex_match_event_type(event_type_name)
 
-    result = create_complex_match_event(%{
-      user_id: userid,
-      event_type_id: event_type_id,
-      match_id: match_id,
-      game_time: game_time,
-      value: value
-    })
+    result =
+      create_complex_match_event(%{
+        user_id: userid,
+        event_type_id: event_type_id,
+        match_id: match_id,
+        game_time: game_time,
+        value: value
+      })
 
     case result do
       {:ok, _event} ->

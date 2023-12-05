@@ -9,7 +9,7 @@ defmodule Teiserver.Microblog.PostQueries do
     query = from(posts in Post)
 
     query
-    |> do_where([id: args[:id]])
+    |> do_where(id: args[:id])
     |> do_where(args[:where])
     |> do_preload(args[:preload])
     |> do_order_by(args[:order_by])
@@ -41,12 +41,14 @@ defmodule Teiserver.Microblog.PostQueries do
   end
 
   defp _where(query, :poster_id_in, []), do: query
+
   defp _where(query, :poster_id_in, poster_ids) when is_list(poster_ids) do
     from posts in query,
       where: posts.poster_id in ^poster_ids
   end
 
   defp _where(query, :poster_id_not_in, []), do: query
+
   defp _where(query, :poster_id_not_in, poster_ids) when is_list(poster_ids) do
     from posts in query,
       where: posts.poster_id not in ^poster_ids
@@ -58,6 +60,7 @@ defmodule Teiserver.Microblog.PostQueries do
   end
 
   defp _where(query, :enabled_tags, []), do: query
+
   defp _where(query, :enabled_tags, tag_ids) do
     tag_query = PostTagQueries.query_post_tags(where: [tag_id_in: tag_ids], select: [:post_id])
 
@@ -66,6 +69,7 @@ defmodule Teiserver.Microblog.PostQueries do
   end
 
   defp _where(query, :disabled_tags, []), do: query
+
   defp _where(query, :disabled_tags, tag_ids) do
     tag_query = PostTagQueries.query_post_tags(where: [tag_id_in: tag_ids], select: [:post_id])
 
@@ -82,12 +86,14 @@ defmodule Teiserver.Microblog.PostQueries do
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
+
   defp do_order_by(query, params) when is_list(params) do
     params
     |> Enum.reduce(query, fn key, query_acc ->
       _order_by(query_acc, key)
     end)
   end
+
   defp do_order_by(query, params) when is_bitstring(params), do: do_order_by(query, [params])
 
   defp _order_by(query, nil), do: query

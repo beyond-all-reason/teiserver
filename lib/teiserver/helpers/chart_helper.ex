@@ -115,11 +115,12 @@ defmodule Teiserver.Helper.ChartHelper do
     ["Average load time", 9, 8, 7]
   ]
   """
-  @spec build_lines(list, [{String.t, map()}]) :: list()
+  @spec build_lines(list, [{String.t(), map()}]) :: list()
   def build_lines(logs, field_list) do
     field_list
     |> Enum.map(fn field_instructions ->
-      data = logs
+      data =
+        logs
         |> get_field_data(field_instructions)
         |> aggregate_data(field_instructions)
         |> post_process_data(field_instructions)
@@ -140,7 +141,7 @@ defmodule Teiserver.Helper.ChartHelper do
       |> get_data_from_path(path)
       |> map_raw_data(field_instructions)
     end)
-    |> Enum.zip
+    |> Enum.zip()
   end
 
   defp get_data_from_path(logs, path) do
@@ -148,6 +149,7 @@ defmodule Teiserver.Helper.ChartHelper do
     |> Enum.map(fn
       %{data: log_data} ->
         get_in(log_data, path)
+
       log_data ->
         get_in(log_data, path)
     end)
@@ -158,6 +160,7 @@ defmodule Teiserver.Helper.ChartHelper do
     data
     |> Enum.map(mapper)
   end
+
   defp map_raw_data(data, _no_mapper), do: data
 
   # Take our path(s) of data and turn them into a single combined path of data
@@ -176,12 +179,13 @@ defmodule Teiserver.Helper.ChartHelper do
     data
     |> Enum.map(post_processor)
   end
-  defp post_process_data(data, _no_post_process), do: data
 
+  defp post_process_data(data, _no_post_process), do: data
 
   @spec extract_keys(list, atom, String.t() | nil) :: list
   def extract_keys(logs, :date, prepend_value) do
-    result = logs
+    result =
+      logs
       |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
 
     if prepend_value do

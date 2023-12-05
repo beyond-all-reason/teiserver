@@ -8,8 +8,8 @@ defmodule Teiserver.Account.RelationshipQueries do
     query = from(relationships in Relationship)
 
     query
-    |> do_where([from_user_id: args[:from_user_id]])
-    |> do_where([to_user_id: args[:to_user_id]])
+    |> do_where(from_user_id: args[:from_user_id])
+    |> do_where(to_user_id: args[:to_user_id])
     |> do_where(args[:where])
     |> do_preload(args[:preload])
     |> do_order_by(args[:order_by])
@@ -63,6 +63,7 @@ defmodule Teiserver.Account.RelationshipQueries do
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
+
   defp do_order_by(query, params) do
     params
     |> Enum.reduce(query, fn key, query_acc ->

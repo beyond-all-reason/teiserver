@@ -47,100 +47,106 @@ defmodule Teiserver.Account.GrowthReport do
     date_keys = ChartHelper.extract_keys(logs, :date, "x")
 
     # Unique counts
-    unique_counts = ChartHelper.build_lines(logs, [
-      %{
-        name: "Unique users",
-        paths: [~w"aggregates stats unique_users"]
-      },
-      %{
-        name: "Unique players",
-        paths: [~w"aggregates stats unique_players"]
-      }
-    ])
+    unique_counts =
+      ChartHelper.build_lines(logs, [
+        %{
+          name: "Unique users",
+          paths: [~w"aggregates stats unique_users"]
+        },
+        %{
+          name: "Unique players",
+          paths: [~w"aggregates stats unique_players"]
+        }
+      ])
 
     # Peak counts
-    peak_counts = ChartHelper.build_lines(logs, [
-      %{
-        name: "Peak users",
-        paths: [~w"aggregates stats peak_user_counts total"]
-      },
-      %{
-        name: "Peak players",
-        paths: [~w"aggregates stats peak_user_counts player"]
-      },
-      %{
-        name: "Accounts created",
-        paths: [~w"aggregates stats accounts_created"]
-      }
-    ])
+    peak_counts =
+      ChartHelper.build_lines(logs, [
+        %{
+          name: "Peak users",
+          paths: [~w"aggregates stats peak_user_counts total"]
+        },
+        %{
+          name: "Peak players",
+          paths: [~w"aggregates stats peak_user_counts player"]
+        },
+        %{
+          name: "Accounts created",
+          paths: [~w"aggregates stats accounts_created"]
+        }
+      ])
 
     # Time counts
-    time_counts = ChartHelper.build_lines(logs, [
-      %{
-        name: "Player minutes",
-        paths: [~w"aggregates minutes player"],
-        post_processor: fn x ->
-          round(x / 60 / 24)
-        end
-      },
-      %{
-        name: "Total minutes",
-        paths: [~w"aggregates minutes total"],
-        post_processor: fn x ->
-          round(x / 60 / 24)
-        end
-      }
-    ])
+    time_counts =
+      ChartHelper.build_lines(logs, [
+        %{
+          name: "Player minutes",
+          paths: [~w"aggregates minutes player"],
+          post_processor: fn x ->
+            round(x / 60 / 24)
+          end
+        },
+        %{
+          name: "Total minutes",
+          paths: [~w"aggregates minutes total"],
+          post_processor: fn x ->
+            round(x / 60 / 24)
+          end
+        }
+      ])
 
     # PvP Matches
-    pvp_counts = ChartHelper.build_lines(logs, [
-      %{
-        name: "Duels",
-        paths: [~w"matches counts duel"]
-      },
-      %{
-        name: "Team games",
-        paths: [~w"matches counts team"]
-      },
-      %{
-        name: "FFA games",
-        paths: [~w"matches counts ffa"]
-      }
-    ])
+    pvp_counts =
+      ChartHelper.build_lines(logs, [
+        %{
+          name: "Duels",
+          paths: [~w"matches counts duel"]
+        },
+        %{
+          name: "Team games",
+          paths: [~w"matches counts team"]
+        },
+        %{
+          name: "FFA games",
+          paths: [~w"matches counts ffa"]
+        }
+      ])
 
     # PvE Matches
-    pve_counts = ChartHelper.build_lines(logs, [
-      %{
-        name: "Bot matches",
-        paths: [~w"matches counts bots"]
-      },
-      %{
-        name: "Raptor matches",
-        paths: [~w"matches counts raptors"]
-      },
-      %{
-        name: "Scavengers matches",
-        paths: [~w"matches counts scavengers"]
-      }
-    ])
+    pve_counts =
+      ChartHelper.build_lines(logs, [
+        %{
+          name: "Bot matches",
+          paths: [~w"matches counts bots"]
+        },
+        %{
+          name: "Raptor matches",
+          paths: [~w"matches counts raptors"]
+        },
+        %{
+          name: "Scavengers matches",
+          paths: [~w"matches counts scavengers"]
+        }
+      ])
 
     # Singleplayer
-    singleplayer_counts = ChartHelper.build_lines(logs, [
-      %{
-        name: "Scenarios started",
-        paths: [
-          ~w"events complex_anon game_start:singleplayer:scenario_start",
-          ~w"events complex_client game_start:singleplayer:scenario_start"
-        ]
-      },
-      %{
-        name: "Skirmishes",
-        paths: [
-          ~w"events complex_anon game_start:singleplayer:lone_other_skirmish",
-          ~w"events complex_client game_start:singleplayer:lone_other_skirmish"
-        ]
-      }
-    ])
+    singleplayer_counts =
+      ChartHelper.build_lines(logs, [
+        %{
+          name: "Scenarios started",
+          paths: [
+            ~w"events complex_anon game_start:singleplayer:scenario_start",
+            ~w"events complex_client game_start:singleplayer:scenario_start"
+          ]
+        },
+        %{
+          name: "Skirmishes",
+          paths: [
+            ~w"events complex_anon game_start:singleplayer:lone_other_skirmish",
+            ~w"events complex_client game_start:singleplayer:lone_other_skirmish"
+          ]
+        }
+      ])
 
     %{
       unique_counts: [date_keys | unique_counts],

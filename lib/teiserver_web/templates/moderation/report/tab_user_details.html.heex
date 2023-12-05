@@ -44,19 +44,19 @@
       value: format_number(@user.trust_score),
       width: 200
     ) %>
-    
+
     <%= central_component("detail_line",
       label: "Behaviour score",
       value: format_number(@user.behaviour_score),
       width: 200
     ) %>
-    
+
     <%= central_component("detail_line",
       label: "Previous names",
       value: Enum.join(@stats["previous_names"] || [], ", "),
       width: 200
     ) %>
-    
+
     <% mins = rem(@stats["player_minutes"] || 0, 60)
     hours = (:math.floor(@stats["player_minutes"] || 0) / 60) |> round %>
     <%= central_component("detail_line",

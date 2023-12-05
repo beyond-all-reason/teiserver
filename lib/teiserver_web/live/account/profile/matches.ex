@@ -8,20 +8,21 @@ defmodule TeiserverWeb.Account.ProfileLive.Matches do
     userid = String.to_integer(userid_str)
     user = Account.get_user_by_id(userid)
 
-    socket = cond do
-      user == nil ->
-        socket
+    socket =
+      cond do
+        user == nil ->
+          socket
           |> put_flash(:info, "Unable to find that user")
           |> redirect(to: ~p"/")
 
-      true ->
-        socket
+        true ->
+          socket
           |> assign(:tab, nil)
           |> assign(:site_menu_active, "teiserver_account")
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
-          |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions
-    end
+          |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
+      end
 
     {:ok, socket}
   end

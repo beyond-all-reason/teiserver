@@ -43,8 +43,9 @@ defmodule Teiserver.Telemetry.SimpleMatchEventTest do
     assert Telemetry.list_simple_match_events(where: [match_id: match.id]) |> Enum.count() == 1
 
     # Ensure the match event types exist too
-    type_list = Telemetry.list_simple_match_event_types()
-    |> Enum.map(fn %{name: name} -> name end)
+    type_list =
+      Telemetry.list_simple_match_event_types()
+      |> Enum.map(fn %{name: name} -> name end)
 
     assert Enum.member?(type_list, "match.simple_user_event-#{r}")
   end

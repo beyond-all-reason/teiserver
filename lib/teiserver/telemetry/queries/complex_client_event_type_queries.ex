@@ -9,7 +9,7 @@ defmodule Teiserver.Telemetry.ComplexClientEventTypeQueries do
     query = from(complex_client_event_types in ComplexClientEventType)
 
     query
-    |> do_where([id: args[:id]])
+    |> do_where(id: args[:id])
     |> do_where(args[:where])
     |> do_preload(args[:preload])
     |> do_order_by(args[:order_by])
@@ -47,6 +47,7 @@ defmodule Teiserver.Telemetry.ComplexClientEventTypeQueries do
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
+
   defp do_order_by(query, params) do
     params
     |> Enum.reduce(query, fn key, query_acc ->

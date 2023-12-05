@@ -4,7 +4,8 @@ defmodule TeiserverWeb.General.HomeLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    socket = socket
+    socket =
+      socket
       |> get_server_data()
       |> get_overwatch_data()
       |> get_moderation_data()

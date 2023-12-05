@@ -432,7 +432,10 @@ defmodule Teiserver.SpringTcpServerTest do
     # Now the non-user, should get a whole new adding of a user, even though that user isn't logged in
     send(tcp_pid, {:direct_message, non_user.id, "msgmsg"})
     r = _recv_until(socket)
-    assert r == "ADDUSER #{non_user.name}  #{non_user.id} \nCLIENTSTATUS #{non_user.name} 0\nSAIDPRIVATE #{non_user.name} msgmsg\n"
+
+    assert r ==
+             "ADDUSER #{non_user.name}  #{non_user.id} \nCLIENTSTATUS #{non_user.name} 0\nSAIDPRIVATE #{non_user.name} msgmsg\n"
+
     assert Account.get_client_by_id(non_user.id) == nil
 
     send(tcp_pid, {:new_message, non_user.id, "roomname", "msgmsg"})

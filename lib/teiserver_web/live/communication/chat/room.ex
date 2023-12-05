@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Communication.ChatLive.Room do
-@moduledoc false
+  @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.{Account, Chat}
   alias Teiserver.Chat.RoomMessage
@@ -12,7 +12,8 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
 
   @impl true
   def mount(_params, _session, socket) do
-    socket = socket
+    socket =
+      socket
       |> assign(:site_menu_active, "communication")
       |> assign(:view_colour, Chat.RoomMessageLib.colours())
       |> assign(:usernames, %{})
@@ -27,7 +28,8 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
 
   @impl true
   def handle_params(%{"room_name" => room_name}, _url, socket) do
-    socket = socket
+    socket =
+      socket
       |> assign(:room_name, room_name)
       |> get_messages()
 
@@ -38,7 +40,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
 
   def handle_params(_, _url, socket) do
     socket
-      |> redirect(to: ~p"/chat/room/main")
+    |> redirect(to: ~p"/chat/room/main")
 
     {:noreply, socket}
   end
@@ -57,30 +59,31 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
 
     [message] = add_message_metadata([message], socket.assigns.last_poster_id)
 
-    {:noreply, socket
-      |> stream_insert(:messages, message)
-      |> assign(:last_poster_id, event.user_id)
-      |> assign(:message_changeset, new_message_changeset())
-    }
+    {:noreply,
+     socket
+     |> stream_insert(:messages, message)
+     |> assign(:last_poster_id, event.user_id)
+     |> assign(:message_changeset, new_message_changeset())}
   end
 
   @impl true
   def handle_event("load_more", _params, socket) do
-    messages = Chat.list_room_messages(
-      search: [
-        chat_room: socket.assigns.room_name,
-        id_less_than: socket.assigns.oldest_message_id
-      ],
-      preload: [:user],
-      limit: 10,
-      order_by: "Newest first"
-    )
-    |> add_message_metadata(socket.assigns.last_poster_id)
+    messages =
+      Chat.list_room_messages(
+        search: [
+          chat_room: socket.assigns.room_name,
+          id_less_than: socket.assigns.oldest_message_id
+        ],
+        preload: [:user],
+        limit: 10,
+        order_by: "Newest first"
+      )
+      |> add_message_metadata(socket.assigns.last_poster_id)
 
     {:noreply,
-      socket
-      |> stream_batch_insert(:messages, messages, at: 0)
-      |> assign_oldest_message_id(List.last(messages))}
+     socket
+     |> stream_batch_insert(:messages, messages, at: 0)
+     |> assign_oldest_message_id(List.last(messages))}
   end
 
   def handle_event(
@@ -127,36 +130,38 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
         _event,
         socket
       ) do
-
     {:noreply, socket}
   end
 
   defp get_messages(socket) do
-    messages = Chat.list_room_messages(
-      search: [
-        chat_room: socket.assigns.room_name,
-        inserted_after: Timex.now |> Timex.shift(days: -15)
-      ],
-      preload: [:user],
-      limit: @message_count,
-      order_by: "Newest first"
-    )
+    messages =
+      Chat.list_room_messages(
+        search: [
+          chat_room: socket.assigns.room_name,
+          inserted_after: Timex.now() |> Timex.shift(days: -15)
+        ],
+        preload: [:user],
+        limit: @message_count,
+        order_by: "Newest first"
+      )
 
     last_poster_id = messages |> hd |> Map.get(:user_id)
 
     # Now reverse them for display purposes
-    messages = messages
-      |> Enum.reverse
+    messages =
+      messages
+      |> Enum.reverse()
       |> add_message_metadata(socket.assigns.last_poster_id)
 
     socket
-      |> stream(:messages, messages)
-      |> assign(:last_poster_id, last_poster_id)
-      |> assign_oldest_message_id(List.first(messages))
+    |> stream(:messages, messages)
+    |> assign(:last_poster_id, last_poster_id)
+    |> assign_oldest_message_id(List.first(messages))
   end
 
   defp add_message_metadata(messages, last_poster_id) do
-    {messages, _} = messages
+    {messages, _} =
+      messages
       |> Enum.map_reduce(last_poster_id, fn message, lp_id ->
         same_poster = message.user_id == lp_id
 
@@ -191,31 +196,39 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
   end
 
   defp check_if_can_send(%{assigns: %{current_user: current_user}} = socket) do
-    allowed = cond do
-      current_user == nil ->
-        "no user found, the website thinks you are not logged into it"
-      Account.is_restricted?(current_user, ["Login"]) ->
-        "you are banned"
-      Account.is_restricted?(current_user, ["All chat", "Room chat", "Game chat"]) ->
-        "you are muted"
-      Account.is_restricted?(current_user, "Bridging") ->
-        "you are unbridged and thus cannot use the web-chat"
-      current_user.smurf_of_id != nil ->
-        "this is an alt account, please use the original"
-      current_user.last_played == nil ->
-        "you have not yet played a game, once you have played a game you will be able to send messages"
-      true ->
-        true
-    end
+    allowed =
+      cond do
+        current_user == nil ->
+          "no user found, the website thinks you are not logged into it"
+
+        Account.is_restricted?(current_user, ["Login"]) ->
+          "you are banned"
+
+        Account.is_restricted?(current_user, ["All chat", "Room chat", "Game chat"]) ->
+          "you are muted"
+
+        Account.is_restricted?(current_user, "Bridging") ->
+          "you are unbridged and thus cannot use the web-chat"
+
+        current_user.smurf_of_id != nil ->
+          "this is an alt account, please use the original"
+
+        current_user.last_played == nil ->
+          "you have not yet played a game, once you have played a game you will be able to send messages"
+
+        true ->
+          true
+      end
 
     socket
-      |> assign(:allowed_to_send, allowed)
-      |> assign(:message_changeset, new_message_changeset())
+    |> assign(:allowed_to_send, allowed)
+    |> assign(:message_changeset, new_message_changeset())
   end
 
   # Takes the message and strips off assignment stuff plus commands
   defp strip_message(msg) do
-    msg = msg
+    msg =
+      msg
       |> String.trim()
       |> String.slice(0..256)
 

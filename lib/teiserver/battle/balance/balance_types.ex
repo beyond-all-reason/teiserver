@@ -15,10 +15,10 @@ defmodule Teiserver.Battle.Balance.BalanceTypes do
   @type algorithm_result :: map()
 
   @type balance_result :: %{
-    teams: map,
-    team_groups: map,
-    team_players: map,
-    time_taken: number,
-    logs: list
-  }
+          teams: map,
+          team_groups: map,
+          team_players: map,
+          time_taken: number,
+          logs: list
+        }
 end

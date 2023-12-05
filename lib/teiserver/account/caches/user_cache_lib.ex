@@ -198,7 +198,9 @@ defmodule Teiserver.Account.UserCacheLib do
   def convert_user(%Account.User{} = user) do
     data =
       CacheUser.data_keys()
-      |> Map.new(fn k -> {k, Map.get(user.data || %{}, to_string(k), CacheUser.default_data()[k])} end)
+      |> Map.new(fn k ->
+        {k, Map.get(user.data || %{}, to_string(k), CacheUser.default_data()[k])}
+      end)
       |> Map.put(:spring_password, user.data["password_hash"] == user.password)
 
     user

@@ -15,7 +15,11 @@ defmodule TeiserverWeb.Telemetry.ComplexServerEventController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
-  plug(:add_breadcrumb, name: 'Complex Server events', url: '/telemetry/complex_server_events/summary')
+
+  plug(:add_breadcrumb,
+    name: 'Complex Server events',
+    url: '/telemetry/complex_server_events/summary'
+  )
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
   def summary(conn, params) do
@@ -59,23 +63,25 @@ defmodule TeiserverWeb.Telemetry.ComplexServerEventController do
         _ -> Timex.now() |> Timex.shift(days: -7)
       end
 
-    schema_keys = Telemetry.list_complex_server_events(
-      order_by: ["Newest first"],
-      where: [
-        event_type_id: event_type_id
-      ],
-      limit: 1,
-      select: [:value]
-    )
-    |> hd
-    |> Map.get(:value)
-    |> Map.keys
+    schema_keys =
+      Telemetry.list_complex_server_events(
+        order_by: ["Newest first"],
+        where: [
+          event_type_id: event_type_id
+        ],
+        limit: 1,
+        select: [:value]
+      )
+      |> hd
+      |> Map.get(:value)
+      |> Map.keys()
 
-    default_key = schema_keys |> Enum.sort |> hd
+    default_key = schema_keys |> Enum.sort() |> hd
 
     key = Map.get(params, "key", default_key)
 
-    server_data = ComplexServerEventQueries.get_aggregate_detail(event_type_id, key, start_date, Timex.now())
+    server_data =
+      ComplexServerEventQueries.get_aggregate_detail(event_type_id, key, start_date, Timex.now())
 
     key = Map.get(params, "key", hd(schema_keys ++ [nil]))
 
@@ -108,7 +114,10 @@ defmodule TeiserverWeb.Telemetry.ComplexServerEventController do
 
     conn
     |> put_resp_content_type("application/json")
-    |> put_resp_header("content-disposition", "attachment; filename=\"complex_server_events.json\"")
+    |> put_resp_header(
+      "content-disposition",
+      "attachment; filename=\"complex_server_events.json\""
+    )
     |> send_resp(200, Jason.encode!(data))
   end
 end

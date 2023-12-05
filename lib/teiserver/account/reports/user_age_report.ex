@@ -42,8 +42,8 @@ defmodule Teiserver.Account.UserAgeReport do
         params["end_date"]
       )
 
-    start_date = start_date |> Timex.to_datetime
-    end_date = end_date |> Timex.to_datetime
+    start_date = start_date |> Timex.to_datetime()
+    end_date = end_date |> Timex.to_datetime()
 
     type_where =
       case params["game_type"] do

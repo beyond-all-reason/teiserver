@@ -13,6 +13,7 @@ defmodule Teiserver.Repo.Migrations.CreateRelationshipsTable do
 
       timestamps()
     end
+
     create index(:account_relationships, [:from_user_id])
 
     create(unique_index(:account_relationships, [:from_user_id, :to_user_id]))
@@ -30,6 +31,7 @@ defmodule Teiserver.Repo.Migrations.CreateRelationshipsTable do
 
       timestamps()
     end
+
     create index(:account_relationships, [:to_user_id])
   end
 end

@@ -29,15 +29,16 @@ defmodule Teiserver.Account.AuthPlug do
       Logger.metadata([user_id: user.id] ++ Logger.metadata())
     end
 
-    conn = conn
+    conn =
+      conn
       |> assign(:user_token, user_token)
       |> assign(:current_user, user)
 
     if banned_user?(conn) do
       conn
-        |> assign(:current_user, nil)
-        |> assign(:user_token, nil)
-        |> Phoenix.Controller.redirect("/logout")
+      |> assign(:current_user, nil)
+      |> assign(:user_token, nil)
+      |> Phoenix.Controller.redirect("/logout")
     else
       conn
     end
@@ -55,14 +56,15 @@ defmodule Teiserver.Account.AuthPlug do
       Logger.metadata([request_id: request_id, user_id: user.id] ++ Logger.metadata())
     end
 
-    socket = socket
+    socket =
+      socket
       |> Phoenix.LiveView.Utils.assign(:current_user, user)
 
     if banned_user?(socket) do
       socket
-        |> Phoenix.LiveView.Utils.assign(:current_user, nil)
-        |> Phoenix.LiveView.Utils.assign(:user_token, nil)
-        |> Phoenix.LiveView.redirect("/logout")
+      |> Phoenix.LiveView.Utils.assign(:current_user, nil)
+      |> Phoenix.LiveView.Utils.assign(:user_token, nil)
+      |> Phoenix.LiveView.redirect("/logout")
     else
       socket
     end
@@ -167,7 +169,7 @@ defmodule Teiserver.Account.AuthPlug do
         _ -> nil
       end
     end)
-    |> Teiserver.Plugs.CachePlug.live_call
+    |> Teiserver.Plugs.CachePlug.live_call()
   end
 
   defp signed_in_path(_conn), do: ~p"/"

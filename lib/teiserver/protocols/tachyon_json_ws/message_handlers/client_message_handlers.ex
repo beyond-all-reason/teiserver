@@ -78,7 +78,7 @@ defmodule Teiserver.Tachyon.MessageHandlers.ClientMessageHandlers do
   end
 
   def handle(msg, conn) do
-    raise "No handler for msg of '#{inspect msg.event}' in ClientMessageHandlers"
+    raise "No handler for msg of '#{inspect(msg.event)}' in ClientMessageHandlers"
     {:ok, [], conn}
   end
 end

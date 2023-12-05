@@ -205,7 +205,11 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   defp do_handle(%{command: "whois", senderid: senderid, remaining: remaining} = _cmd, state) do
     case CacheUser.get_user_by_name(remaining) do
       nil ->
-        CacheUser.send_direct_message(state.userid, senderid, "Unable to find a user with that name")
+        CacheUser.send_direct_message(
+          state.userid,
+          senderid,
+          "Unable to find a user with that name"
+        )
 
       user ->
         sender = CacheUser.get_user_by_id(senderid)
@@ -445,7 +449,12 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     |> Enum.reduce(nil, fn target, party_id ->
       case CacheUser.get_userid(target) do
         nil ->
-          CacheUser.send_direct_message(state.userid, senderid, "Unable to find a user '#{target}'")
+          CacheUser.send_direct_message(
+            state.userid,
+            senderid,
+            "Unable to find a user '#{target}'"
+          )
+
           party_id
 
         target_id ->

@@ -27,7 +27,12 @@ defmodule Teiserver.Telemetry.ExportComplexServerEventsTask do
         where: between(complex_server_events.timestamp, ^start_date, ^end_date),
         join: event_types in assoc(complex_server_events, :event_type),
         left_join: users in assoc(complex_server_events, :user),
-        select: [users.name, event_types.name, complex_server_events.timestamp, complex_server_events.value]
+        select: [
+          users.name,
+          event_types.name,
+          complex_server_events.timestamp,
+          complex_server_events.value
+        ]
 
     stream = Repo.stream(query, max_rows: 500)
 

@@ -78,14 +78,14 @@ defmodule Teiserver.Account.UserLib do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_user!(non_neg_integer()) :: User.t
+  @spec get_user!(non_neg_integer()) :: User.t()
   def get_user!(user_id, args \\ []) do
     (args ++ [id: user_id])
     |> UserQueries.query_users()
     |> Repo.one!()
   end
 
-  @spec get_user(non_neg_integer(), list) :: User.t | nil
+  @spec get_user(non_neg_integer(), list) :: User.t() | nil
   def get_user(user_id, args \\ []) do
     (args ++ [id: user_id])
     |> UserQueries.query_users()
@@ -213,7 +213,6 @@ defmodule Teiserver.Account.UserLib do
     User.changeset(user, attrs)
   end
 
-
   def broadcast_create_user(u), do: broadcast_create_user(u, :create)
 
   def broadcast_create_user({:ok, user}, reason) do
@@ -280,7 +279,12 @@ defmodule Teiserver.Account.UserLib do
       nil ->
         Argon2.no_user_verify()
         Argon2.no_user_verify()
-        Logging.add_anonymous_audit_log(conn, "Account:Failed login", %{reason: "No user", email: email})
+
+        Logging.add_anonymous_audit_log(conn, "Account:Failed login", %{
+          reason: "No user",
+          email: email
+        })
+
         {:error, "Invalid credentials"}
 
       user ->

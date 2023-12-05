@@ -635,20 +635,21 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
   end
 
   defp run_event_query(complexity, section, start_date, end_date) do
-    query = """
-      SELECT
-        t.name,
-        COUNT(e)
-      FROM
-        telemetry_{mode}_events e
-      JOIN
-        telemetry_{mode}_event_types t ON e.event_type_id = t.id
-      WHERE
-        e.timestamp BETWEEN $1 AND $2
-      GROUP BY
-        t.name
-    """
-    |> String.replace(
+    query =
+      """
+        SELECT
+          t.name,
+          COUNT(e)
+        FROM
+          telemetry_{mode}_events e
+        JOIN
+          telemetry_{mode}_event_types t ON e.event_type_id = t.id
+        WHERE
+          e.timestamp BETWEEN $1 AND $2
+        GROUP BY
+          t.name
+      """
+      |> String.replace(
         "{mode}",
         "#{complexity}_#{section}"
       )
@@ -664,20 +665,21 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
   end
 
   defp run_anon_event_query(complexity, start_date, end_date) do
-    query = """
-      SELECT
-        t.name,
-        COUNT(e)
-      FROM
-        telemetry_{complexity}_anon_events e
-      JOIN
-        telemetry_{complexity}_client_event_types t ON e.event_type_id = t.id
-      WHERE
-        e.timestamp BETWEEN $1 AND $2
-      GROUP BY
-        t.name
-    """
-    |> String.replace(
+    query =
+      """
+        SELECT
+          t.name,
+          COUNT(e)
+        FROM
+          telemetry_{complexity}_anon_events e
+        JOIN
+          telemetry_{complexity}_client_event_types t ON e.event_type_id = t.id
+        WHERE
+          e.timestamp BETWEEN $1 AND $2
+        GROUP BY
+          t.name
+      """
+      |> String.replace(
         "{complexity}",
         complexity
       )
@@ -693,22 +695,23 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
   end
 
   defp run_match_event_query(complexity, start_date, end_date) do
-    query = """
-      SELECT
-        t.name,
-        COUNT(e)
-      FROM
-        telemetry_{complexity}_match_events e
-      JOIN
-        telemetry_{complexity}_match_event_types t ON e.event_type_id = t.id
-      JOIN
-        teiserver_battle_matches m ON m.id = e.match_id
-      WHERE
-        m.started BETWEEN $1 AND $2
-      GROUP BY
-        t.name;
-    """
-    |> String.replace(
+    query =
+      """
+        SELECT
+          t.name,
+          COUNT(e)
+        FROM
+          telemetry_{complexity}_match_events e
+        JOIN
+          telemetry_{complexity}_match_event_types t ON e.event_type_id = t.id
+        JOIN
+          teiserver_battle_matches m ON m.id = e.match_id
+        WHERE
+          m.started BETWEEN $1 AND $2
+        GROUP BY
+          t.name;
+      """
+      |> String.replace(
         "{complexity}",
         complexity
       )
@@ -735,16 +738,18 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
         l.log_type;
     """
 
-    count_map = case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
-      {:ok, results} ->
-        results.rows
-        |> Map.new(fn [key, value] -> {key, value} end)
+    count_map =
+      case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
+        {:ok, results} ->
+          results.rows
+          |> Map.new(fn [key, value] -> {key, value} end)
 
-      {a, b} ->
-        raise "ERR: #{a}, #{b}"
-    end
+        {a, b} ->
+          raise "ERR: #{a}, #{b}"
+      end
 
-    total = count_map
+    total =
+      count_map
       |> Map.values()
       |> Enum.sum()
 

@@ -18,7 +18,6 @@ defmodule Central.Helpers.GeneralTestLib do
 
   alias TeiserverWeb.UserSocket
 
-
   # def make_combos(data), do: CombinatorLib.make_combos(data)
 
   def user_fixture(), do: make_user(%{"permissions" => []})

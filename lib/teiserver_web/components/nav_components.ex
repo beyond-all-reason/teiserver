@@ -38,6 +38,7 @@ defmodule TeiserverWeb.NavComponents do
   """
   attr :current_user, :map, required: true
   attr :active, :string, required: true
+
   def top_navbar(assigns) do
     ~H"""
     <nav class="navbar navbar-expand-lg m-0 p-0" id="top-nav">
@@ -58,11 +59,7 @@ defmodule TeiserverWeb.NavComponents do
           </a>
           <!-- Left links -->
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <.top_nav_item
-              text="Home"
-              active={@active == "central_home"}
-              route={~p"/"}
-            />
+            <.top_nav_item text="Home" active={@active == "central_home"} route={~p"/"} />
 
             <.top_nav_item
               text="My account"
@@ -70,11 +67,7 @@ defmodule TeiserverWeb.NavComponents do
               route={~p"/profile"}
             />
 
-            <.top_nav_item
-              text="Blog"
-              active={@active == "microblog"}
-              route={~p"/microblog"}
-            />
+            <.top_nav_item text="Blog" active={@active == "microblog"} route={~p"/microblog"} />
 
             <.top_nav_item
               :if={@current_user}
@@ -90,11 +83,7 @@ defmodule TeiserverWeb.NavComponents do
               route={~p"/logging"}
             />
 
-            <.top_nav_item
-              text="Lobbies"
-              active={@active == "lobbies"}
-              route={~p"/battle/lobbies"}
-            />
+            <.top_nav_item text="Lobbies" active={@active == "lobbies"} route={~p"/battle/lobbies"} />
 
             <.top_nav_item
               text="Matchmaking"
@@ -108,11 +97,7 @@ defmodule TeiserverWeb.NavComponents do
               active={@active == "parties"}
             />
 
-            <.top_nav_item
-              text="Matches"
-              route={~p"/battle"}
-              active={@active == "match"}
-            />
+            <.top_nav_item text="Matches" route={~p"/battle"} active={@active == "match"} />
 
             <.top_nav_item
               text="Leaderboard"
@@ -168,7 +153,6 @@ defmodule TeiserverWeb.NavComponents do
         <!-- Right elements -->
       </div>
     </nav>
-
     """
   end
 
@@ -184,29 +168,27 @@ defmodule TeiserverWeb.NavComponents do
 
   def tab_header(assigns) do
     ~H"""
-      <ul class="nav nav-tabs" role="tablist">
-        <%= render_slot(@inner_block) %>
-      </ul>
+    <ul class="nav nav-tabs" role="tablist">
+      <%= render_slot(@inner_block) %>
+    </ul>
     """
   end
 
-  attr :selected, :boolean, required: :true
-  attr :url, :string, required: :true
+  attr :selected, :boolean, required: true
+  attr :url, :string, required: true
   slot :inner_block, required: true
 
   def tab_nav(assigns) do
-    assigns = assigns
-      |> assign(:active_class, (if assigns[:selected], do: "active"))
+    assigns =
+      assigns
+      |> assign(:active_class, if(assigns[:selected], do: "active"))
 
     ~H"""
-      <li class="nav-item">
-        <.link
-          patch={@url}
-          class={"nav-link #{@active_class}"}
-        >
-          <%= render_slot(@inner_block) %>
-        </.link>
-      </li>
+    <li class="nav-item">
+      <.link patch={@url} class={"nav-link #{@active_class}"}>
+        <%= render_slot(@inner_block) %>
+      </.link>
+    </li>
     """
   end
 
@@ -253,7 +235,8 @@ defmodule TeiserverWeb.NavComponents do
         nil -> assigns[:col_classes] || "fa-4x"
       end
 
-    assigns = assigns
+    assigns =
+      assigns
       |> assign(:col_classes, col_classes)
       |> assign(:extra_classes, extra_classes)
       |> assign(:icon_size, icon_size)
@@ -269,7 +252,7 @@ defmodule TeiserverWeb.NavComponents do
     """
   end
 
-    @doc """
+  @doc """
   <.sub_menu_button bsname={bsname} icon={lib} active={true/false} url={url}>
     Text goes here
   </.sub_menu_button>
@@ -279,14 +262,21 @@ defmodule TeiserverWeb.NavComponents do
   attr :bsname, :string, default: "secondary"
   attr :active, :boolean, default: false
   slot :inner_block, required: true
+
   def sub_menu_button(assigns) do
-    assigns = assigns
-      |> assign(:active_class, (if assigns[:active], do: "active"))
+    assigns =
+      assigns
+      |> assign(:active_class, if(assigns[:active], do: "active"))
 
     ~H"""
     <div class="col sub-menu-icon">
       <a href={@url} class={"block-link #{@active_class}"}>
-        <Fontawesome.icon icon={@icon} style={if @active, do: "solid", else: "regular"} size="2x" :if={@icon} /><br />
+        <Fontawesome.icon
+          :if={@icon}
+          icon={@icon}
+          style={if @active, do: "solid", else: "regular"}
+          size="2x"
+        /><br />
         <%= render_slot(@inner_block) %>
       </a>
     </div>
@@ -305,17 +295,14 @@ defmodule TeiserverWeb.NavComponents do
   slot :inner_block, required: true
 
   def section_menu_button(assigns) do
-    assigns = assigns
-    |> assign(:active_class, (if assigns[:active], do: "active"))
+    assigns =
+      assigns
+      |> assign(:active_class, if(assigns[:active], do: "active"))
 
     ~H"""
-    <.link
-      navigate={@url}
-      class={"btn btn-outline-#{@bsname} #{@active_class}"}
-    >
-      <Fontawesome.icon icon={@icon} style={if @active, do: "solid", else: "regular"} :if={@icon} />
-      &nbsp;
-      <%= render_slot(@inner_block) %>
+    <.link navigate={@url} class={"btn btn-outline-#{@bsname} #{@active_class}"}>
+      <Fontawesome.icon :if={@icon} icon={@icon} style={if @active, do: "solid", else: "regular"} />
+      &nbsp; <%= render_slot(@inner_block) %>
     </.link>
     """
   end
@@ -341,15 +328,13 @@ defmodule TeiserverWeb.NavComponents do
   slot :inner_block, required: true
 
   def section_menu_button_patch(assigns) do
-    assigns = assigns
-    |> assign(:active_class, (if assigns[:active], do: "active"))
+    assigns =
+      assigns
+      |> assign(:active_class, if(assigns[:active], do: "active"))
 
     ~H"""
-    <.link
-      patch={@url}
-      class={"btn btn-outline-#{@bsname} #{@active_class}"}
-    >
-      <Fontawesome.icon icon={@icon} style={if @active, do: "solid", else: "regular"} :if={@icon} />
+    <.link patch={@url} class={"btn btn-outline-#{@bsname} #{@active_class}"}>
+      <Fontawesome.icon :if={@icon} icon={@icon} style={if @active, do: "solid", else: "regular"} />
       <%= render_slot(@inner_block) %>
     </.link>
     """

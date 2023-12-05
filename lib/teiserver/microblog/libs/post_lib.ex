@@ -45,14 +45,14 @@ defmodule Teiserver.Microblog.PostLib do
 
   def list_posts_using_preferences(user_preference, args) do
     extra_where = [
-        enabled_tags: user_preference.enabled_tags,
-        disabled_tags: user_preference.disabled_tags,
+      enabled_tags: user_preference.enabled_tags,
+      disabled_tags: user_preference.disabled_tags
 
-        # poster_id_in: [],
-        # poster_id_not_in: []
-      ]
+      # poster_id_in: [],
+      # poster_id_not_in: []
+    ]
 
-    args ++ [where: extra_where]
+    (args ++ [where: extra_where])
     |> PostQueries.query_posts()
     |> Repo.all()
   end
@@ -71,28 +71,28 @@ defmodule Teiserver.Microblog.PostLib do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_post!(non_neg_integer()) :: Post.t
+  @spec get_post!(non_neg_integer()) :: Post.t()
   def get_post!(post_id) do
     [id: post_id]
     |> PostQueries.query_posts()
     |> Repo.one!()
   end
 
-  @spec get_post!(non_neg_integer(), list) :: Post.t
+  @spec get_post!(non_neg_integer(), list) :: Post.t()
   def get_post!(post_id, args) do
     ([id: post_id] ++ args)
     |> PostQueries.query_posts()
     |> Repo.one!()
   end
 
-  @spec get_post(non_neg_integer()) :: Post.t | nil
+  @spec get_post(non_neg_integer()) :: Post.t() | nil
   def get_post(post_id) do
     [id: post_id]
     |> PostQueries.query_posts()
     |> Repo.one()
   end
 
-  @spec get_post(non_neg_integer(), list) :: Post.t | nil
+  @spec get_post(non_neg_integer(), list) :: Post.t() | nil
   def get_post(post_id, args) do
     ([id: post_id] ++ args)
     |> PostQueries.query_posts()
@@ -123,6 +123,7 @@ defmodule Teiserver.Microblog.PostLib do
       # We sleep this because sometimes the message is seen fast enough the database doesn't
       # show as having the new data (row lock maybe?)
       :timer.sleep(1000)
+
       PubSub.broadcast(
         Teiserver.PubSub,
         "microblog_posts",
@@ -163,6 +164,7 @@ defmodule Teiserver.Microblog.PostLib do
       # We sleep this because sometimes the message is seen fast enough the database doesn't
       # show as having the new data (row lock maybe?)
       :timer.sleep(1000)
+
       PubSub.broadcast(
         Teiserver.PubSub,
         "microblog_posts",
@@ -227,8 +229,6 @@ defmodule Teiserver.Microblog.PostLib do
   def change_post(%Post{} = post, attrs \\ %{}) do
     Post.changeset(post, attrs)
   end
-
-
 
   @spec increment_post_view_count(non_neg_integer()) :: Ecto.Changeset
   def increment_post_view_count(post_id) when is_integer(post_id) do

@@ -31,10 +31,18 @@ defmodule TeiserverWeb.PostLiveTest do
 
     test "anon", %{conn: conn, post: post} do
       {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/posts")
-      assert resp == %{flash: %{"error" => "You must log in to access this page."}, to: ~p"/login"}
+
+      assert resp == %{
+               flash: %{"error" => "You must log in to access this page."},
+               to: ~p"/login"
+             }
 
       {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/posts/#{post}")
-      assert resp == %{flash: %{"error" => "You must log in to access this page."}, to: ~p"/login"}
+
+      assert resp == %{
+               flash: %{"error" => "You must log in to access this page."},
+               to: ~p"/login"
+             }
     end
   end
 
@@ -119,8 +127,8 @@ defmodule TeiserverWeb.PostLiveTest do
       assert html =~ "Delete post"
 
       show_live
-          |> element("#delete-post-button")
-          |> render_click()
+      |> element("#delete-post-button")
+      |> render_click()
 
       assert_redirect(show_live, ~p"/microblog")
 

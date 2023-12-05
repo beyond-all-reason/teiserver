@@ -7,7 +7,8 @@ defmodule TeiserverWeb.Admin.TestPageLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    socket = socket
+    socket =
+      socket
       |> assign(:site_menu_active, "admin")
       |> assign(:view_colour, Teiserver.Admin.AdminLib.colours())
       |> assign(:tab, @default_tab)
@@ -22,7 +23,8 @@ defmodule TeiserverWeb.Admin.TestPageLive.Index do
 
   @impl true
   def handle_params(%{"tab" => tab} = params, _url, socket) do
-    socket = socket
+    socket =
+      socket
       |> assign(:tab, tab)
 
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
@@ -42,20 +44,24 @@ defmodule TeiserverWeb.Admin.TestPageLive.Index do
 
   @impl true
   def handle_event("create-flash", %{"name" => name}, socket) do
-    socket = case name do
-      "success" ->
-        socket
-        |> put_flash(:success, "Success flash - #{:rand.uniform(1000)}")
-      "info" ->
-        socket
-        |> put_flash(:info, "Info flash - #{:rand.uniform(1000)}")
-      "warning" ->
-        socket
+    socket =
+      case name do
+        "success" ->
+          socket
+          |> put_flash(:success, "Success flash - #{:rand.uniform(1000)}")
+
+        "info" ->
+          socket
+          |> put_flash(:info, "Info flash - #{:rand.uniform(1000)}")
+
+        "warning" ->
+          socket
           |> put_flash(:warning, "Warning flash - #{:rand.uniform(1000)}")
-      "danger" ->
-        socket
+
+        "danger" ->
+          socket
           |> put_flash(:error, "Danger/Error flash - #{:rand.uniform(1000)}")
-    end
+      end
 
     {:noreply, socket}
   end

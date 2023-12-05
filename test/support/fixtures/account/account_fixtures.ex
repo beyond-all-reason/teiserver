@@ -10,7 +10,8 @@ defmodule Teiserver.AccountFixtures do
   Generate a tag.
   """
   def user_fixture(attrs \\ %{}) do
-    permissions = attrs
+    permissions =
+      attrs
       |> Map.get(:permissions, [])
       |> AuthLib.split_permissions()
 

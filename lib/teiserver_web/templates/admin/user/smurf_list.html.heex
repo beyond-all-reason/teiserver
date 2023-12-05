@@ -57,7 +57,10 @@ is_moderator = allow?(@conn, "Moderator") %>
             Toggle dates
           </div>
 
-          <div class="btn btn-primary2" onclick="$('.old-help-box, .old-help-box-large').toggle();">
+          <div
+            class="btn btn-primary2"
+            onclick="$('.old-help-box, .old-help-box-large').toggle();"
+          >
             <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
             Show/Hide help
           </div>
@@ -303,7 +306,7 @@ is_moderator = allow?(@conn, "Moderator") %>
             </table>
           </div>
 
-          <div class="col-xl-8 col-xxl-6" :if={allow?(@conn, "Server")}>
+          <div :if={allow?(@conn, "Server")} class="col-xl-8 col-xxl-6">
             <h4>Key list</h4>
             <table class="table table-sm">
               <thead>
@@ -344,23 +347,19 @@ is_moderator = allow?(@conn, "Moderator") %>
                 <% end %>
 
                 <tr>
-                  <form action={~p"/teiserver/admin/users/create_smurf_key/#{@user.id}"} method="post">
+                  <form
+                    action={~p"/teiserver/admin/users/create_smurf_key/#{@user.id}"}
+                    method="post"
+                  >
                     <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
                     <td>
-                      <.input type="select"
-                        options={Map.keys(type_icons)}
-                        name="key"
-                        value=""
-                      />
+                      <.input type="select" options={Map.keys(type_icons)} name="key" value="" />
                     </td>
-                  
+
                     <td>
-                      <.input type="text"
-                        name="value"
-                        value=""
-                      />
+                      <.input type="text" name="value" value="" />
                     </td>
-                  
+
                     <td colspan="2">
                       <button type="submit" class={"btn btn-#{bsname} btn-sm btn-block"}>
                         Add key
@@ -368,7 +367,6 @@ is_moderator = allow?(@conn, "Moderator") %>
                     </td>
                   </form>
                 </tr>
-
               </tbody>
             </table>
           </div>

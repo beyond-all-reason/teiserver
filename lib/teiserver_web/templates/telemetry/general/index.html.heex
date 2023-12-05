@@ -1,4 +1,4 @@
-<div class="row mt-2" >
+<div class="row mt-2">
   <.menu_card
     :if={allow?(@current_user, "Engine")}
     icon={Teiserver.Telemetry.InfologLib.icon()}
@@ -15,10 +15,10 @@
     size={:small}
   >
     Properties
-  </.menu_card>  
+  </.menu_card>
 </div>
 
-<div class="row mt-2" :if={allow?(@current_user, "Server")}>
+<div :if={allow?(@current_user, "Server")} class="row mt-2">
   <.menu_card
     icon={Teiserver.Telemetry.SimpleClientEventLib.icon()}
     url={~p"/telemetry/simple_client_events/summary"}
@@ -26,7 +26,7 @@
   >
     Simple client
   </.menu_card>
-  
+
   <.menu_card
     icon={Teiserver.Telemetry.ComplexClientEventLib.icon()}
     url={~p"/telemetry/complex_client_events/summary"}
@@ -34,7 +34,7 @@
   >
     Complex client
   </.menu_card>
-  
+
   <.menu_card
     icon={Teiserver.Telemetry.SimpleServerEventLib.icon()}
     url={~p"/telemetry/simple_server_events/summary"}
@@ -42,7 +42,7 @@
   >
     Simple server
   </.menu_card>
-  
+
   <.menu_card
     icon={Teiserver.Telemetry.ComplexServerEventLib.icon()}
     url={~p"/telemetry/complex_server_events/summary"}
@@ -51,8 +51,8 @@
     Complex server
   </.menu_card>
 </div>
-  
-<div class="row mt-2" :if={allow?(@current_user, "Server")}>
+
+<div :if={allow?(@current_user, "Server")} class="row mt-2">
   <.menu_card
     icon={Teiserver.Telemetry.SimpleLobbyEventLib.icon()}
     url={~p"/telemetry/simple_lobby_events/summary"}
@@ -60,7 +60,7 @@
   >
     Simple lobby
   </.menu_card>
-  
+
   <.menu_card
     icon={Teiserver.Telemetry.ComplexLobbyEventLib.icon()}
     url={~p"/telemetry/complex_lobby_events/summary"}
@@ -68,7 +68,7 @@
   >
     Complex lobby
   </.menu_card>
-  
+
   <.menu_card
     icon={Teiserver.Telemetry.SimpleMatchEventLib.icon()}
     url={~p"/telemetry/simple_match_events/summary"}
@@ -76,7 +76,7 @@
   >
     Simple match
   </.menu_card>
-  
+
   <.menu_card
     icon={Teiserver.Telemetry.ComplexMatchEventLib.icon()}
     url={~p"/telemetry/complex_match_events/summary"}

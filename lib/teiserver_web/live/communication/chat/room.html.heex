@@ -4,7 +4,7 @@
     max-width: 70vw;
     padding-left: 15px;
   }
-  
+
   .time-and-user {
     border-top: 1px solid rgba(175, 175, 175, 0.1);
     padding-top: 4px;
@@ -14,17 +14,16 @@
 
 <div class="row">
   <div class="col-md-12">
-
     <div id={"room-#{@room_name}"}>
       <TeiserverWeb.ChatComponents.message_list messages={@streams.messages} />
       <!-- ... form for a new message -->
     </div>
-    
-    <div id="chat-input-failure-div" :if={@allowed_to_send != true} class="alert">
+
+    <div :if={@allowed_to_send != true} id="chat-input-failure-div" class="alert">
       You cannot post messages to this room because <%= @allowed_to_send %>
     </div>
-    
-    <div id="chat-input-div" :if={@allowed_to_send == true}>
+
+    <div :if={@allowed_to_send == true} id="chat-input-div">
       <.form :let={f} for={@message_changeset} phx-submit="send-message" class="mt-2">
         <div class="row">
           <div class="col-md-10">
@@ -41,6 +40,5 @@
         </div>
       </.form>
     </div>
-    
   </div>
 </div>

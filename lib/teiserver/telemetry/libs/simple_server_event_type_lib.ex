@@ -9,7 +9,13 @@ defmodule Teiserver.Telemetry.SimpleServerEventTypeLib do
     name = String.trim(name)
 
     Teiserver.cache_get_or_store(:telemetry_simple_server_event_types_cache, name, fn ->
-      query = SimpleServerEventTypeQueries.query_simple_server_event_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
+      query =
+        SimpleServerEventTypeQueries.query_simple_server_event_types(
+          where: [name: name],
+          select: [:id],
+          order_by: ["ID (Lowest first)"]
+        )
+
       case Repo.all(query) do
         [] ->
           {:ok, event_type} =
@@ -80,8 +86,10 @@ defmodule Teiserver.Telemetry.SimpleServerEventTypeLib do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_simple_server_event_type() :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
-  @spec create_simple_server_event_type(map) :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  @spec create_simple_server_event_type() ::
+          {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  @spec create_simple_server_event_type(map) ::
+          {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
   def create_simple_server_event_type(attrs \\ %{}) do
     %SimpleServerEventType{}
     |> SimpleServerEventType.changeset(attrs)
@@ -100,7 +108,8 @@ defmodule Teiserver.Telemetry.SimpleServerEventTypeLib do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_simple_server_event_type(SimpleServerEventType, map) :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  @spec update_simple_server_event_type(SimpleServerEventType, map) ::
+          {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
   def update_simple_server_event_type(%SimpleServerEventType{} = simple_server_event_type, attrs) do
     simple_server_event_type
     |> SimpleServerEventType.changeset(attrs)
@@ -119,7 +128,8 @@ defmodule Teiserver.Telemetry.SimpleServerEventTypeLib do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_simple_server_event_type(SimpleServerEventType) :: {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
+  @spec delete_simple_server_event_type(SimpleServerEventType) ::
+          {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
   def delete_simple_server_event_type(%SimpleServerEventType{} = simple_server_event_type) do
     Repo.delete(simple_server_event_type)
   end
@@ -135,7 +145,10 @@ defmodule Teiserver.Telemetry.SimpleServerEventTypeLib do
   """
   @spec change_simple_server_event_type(SimpleServerEventType) :: Ecto.Changeset
   @spec change_simple_server_event_type(SimpleServerEventType, map) :: Ecto.Changeset
-  def change_simple_server_event_type(%SimpleServerEventType{} = simple_server_event_type, attrs \\ %{}) do
+  def change_simple_server_event_type(
+        %SimpleServerEventType{} = simple_server_event_type,
+        attrs \\ %{}
+      ) do
     SimpleServerEventType.changeset(simple_server_event_type, attrs)
   end
 end

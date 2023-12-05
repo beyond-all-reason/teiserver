@@ -6,9 +6,7 @@ defmodule TeiserverWeb.Microblog.Admin.TagLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok,
-      socket
-    }
+    {:ok, socket}
   end
 
   @impl true
@@ -35,16 +33,18 @@ defmodule TeiserverWeb.Microblog.Admin.TagLive.Index do
 
   @impl true
   def handle_info({TeiserverWeb.Microblog.TagFormComponent, {:saved, _tag}}, socket) do
-    {:noreply, socket
-      |> put_flash(:info, "Tag created successfully")
-      |> redirect(to: ~p"/microblog/admin/tags")
-    }
+    {:noreply,
+     socket
+     |> put_flash(:info, "Tag created successfully")
+     |> redirect(to: ~p"/microblog/admin/tags")}
   end
 
-  def handle_info({TeiserverWeb.Microblog.TagFormComponent, {:updated_changeset, %{changes: tag}}}, socket) do
-
-    {:noreply, socket
-      |> assign(:tag, tag)
-    }
+  def handle_info(
+        {TeiserverWeb.Microblog.TagFormComponent, {:updated_changeset, %{changes: tag}}},
+        socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(:tag, tag)}
   end
 end

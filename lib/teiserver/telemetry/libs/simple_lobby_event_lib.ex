@@ -10,19 +10,21 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventLib do
   @spec colour :: atom
   def colour(), do: :info2
 
-  @spec icon() :: String.t
+  @spec icon() :: String.t()
   def icon(), do: "fa-user-group"
 
-  @spec log_simple_lobby_event(T.userid, T.match_id, String.t) :: {:error, Ecto.Changeset} | {:ok, SimpleLobbyEvent}
+  @spec log_simple_lobby_event(T.userid(), T.match_id(), String.t()) ::
+          {:error, Ecto.Changeset} | {:ok, SimpleLobbyEvent}
   def log_simple_lobby_event(userid, match_id, event_type_name) do
     event_type_id = Telemetry.get_or_add_simple_lobby_event_type(event_type_name)
 
-    result = create_simple_lobby_event(%{
-      user_id: userid,
-      event_type_id: event_type_id,
-      match_id: match_id,
-      timestamp: Timex.now()
-    })
+    result =
+      create_simple_lobby_event(%{
+        user_id: userid,
+        event_type_id: event_type_id,
+        match_id: match_id,
+        timestamp: Timex.now()
+      })
 
     case result do
       {:ok, _event} ->

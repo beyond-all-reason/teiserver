@@ -220,12 +220,14 @@ defmodule Teiserver.Bridge.BridgeServer do
     if Config.get_site_config_cache("teiserver.Bridge from server") do
       # Main
       channel_id = Config.get_site_config_cache("teiserver.Discord channel #main")
+
       if channel_id do
         Api.create_message(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
       end
 
       # Server
       channel_id = Config.get_site_config_cache("teiserver.Discord channel #server-updates")
+
       if channel_id do
         Api.create_message(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
       end
@@ -237,6 +239,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   def handle_info(%{channel: "teiserver_server", event: :prep_stop}, state) do
     if Config.get_site_config_cache("teiserver.Bridge from server") do
       channel_id = Config.get_site_config_cache("teiserver.Discord channel #server-updates")
+
       if channel_id do
         Api.create_message(channel_id, "Teiserver shutdown for node #{Teiserver.node_name()}")
       end

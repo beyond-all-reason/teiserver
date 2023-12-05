@@ -15,5 +15,4 @@ defmodule Teiserver.Repo.Migrations.AccountCodes do
 
     create index(:account_codes, [:value])
   end
-
 end

@@ -25,7 +25,7 @@ defmodule Teiserver.Account.RecordsReport do
       {"Player time (days)", get_top(~w(aggregates minutes player), params) |> minutes_to_days}
     ]
 
-    force_recache = (Map.get(params, "recache", false) == "true")
+    force_recache = Map.get(params, "recache", false) == "true"
     today = Logging.get_todays_server_log(force_recache)
 
     today_data = %{
@@ -91,8 +91,11 @@ defmodule Teiserver.Account.RecordsReport do
   end
 
   def default_params(params) do
-    Map.merge(%{
-      "date_preset" => "Last 12 months"
-    }, params["report"] || %{})
+    Map.merge(
+      %{
+        "date_preset" => "Last 12 months"
+      },
+      params["report"] || %{}
+    )
   end
 end

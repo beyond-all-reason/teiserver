@@ -79,8 +79,7 @@
               log.value["skill_change"] > 0 -> {"text-success", "up"}
               log.value["skill_change"] < 0 -> {"text-danger", "down"}
               true -> {"text-warning", "pause"}
-            end
-              %>
+            end %>
           <tr phx-click={"[[\"navigate\",{\"href\":\"/battle/#{log.match_id}\",\"replace\":false}]]"}>
             <%= if log.match do %>
               <td><%= log.match.map %></td>
@@ -115,9 +114,8 @@
             <%= if log.match do %>
               <td>
                 <div class="visually-hidden">
-                  <.link
-                    navigate={~p"/battle/#{log.match_id}"}>
-                      Show
+                  <.link navigate={~p"/battle/#{log.match_id}"}>
+                    Show
                   </.link>
                 </div>
               </td>
@@ -130,4 +128,3 @@
     </table>
   </div>
 </div>
-

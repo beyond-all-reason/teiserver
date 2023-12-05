@@ -1,7 +1,13 @@
 defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
   use TeiserverWeb, :controller
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.{ComplexClientEventQueries, ComplexAnonEventQueries, ExportComplexClientEventsTask}
+
+  alias Teiserver.Telemetry.{
+    ComplexClientEventQueries,
+    ComplexAnonEventQueries,
+    ExportComplexClientEventsTask
+  }
+
   require Logger
 
   plug(AssignPlug,
@@ -15,7 +21,11 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
-  plug(:add_breadcrumb, name: 'Complex client events', url: '/telemetry/complex_client_events/summary')
+
+  plug(:add_breadcrumb,
+    name: 'Complex client events',
+    url: '/telemetry/complex_client_events/summary'
+  )
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
   def summary(conn, params) do
@@ -62,40 +72,46 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
         _ -> Timex.now() |> Timex.shift(days: -7)
       end
 
-    one_client_event = Telemetry.list_complex_client_events(
-      order_by: ["Newest first"],
-      where: [
-        event_type_id: event_type_id
-      ],
-      limit: 1,
-      select: [:value]
-    )
+    one_client_event =
+      Telemetry.list_complex_client_events(
+        order_by: ["Newest first"],
+        where: [
+          event_type_id: event_type_id
+        ],
+        limit: 1,
+        select: [:value]
+      )
 
-    schema_keys = case one_client_event do
-      [event] ->
-        event
+    schema_keys =
+      case one_client_event do
+        [event] ->
+          event
           |> Map.get(:value)
-          |> Map.keys
-      _ ->
-        Telemetry.list_complex_anon_events(
-          order_by: ["Newest first"],
-          where: [
-            event_type_id: event_type_id
-          ],
-          limit: 1,
-          select: [:value]
-        )
-        |> hd
-        |> Map.get(:value)
-        |> Map.keys
-    end
+          |> Map.keys()
 
-    default_key = schema_keys |> Enum.sort |> hd
+        _ ->
+          Telemetry.list_complex_anon_events(
+            order_by: ["Newest first"],
+            where: [
+              event_type_id: event_type_id
+            ],
+            limit: 1,
+            select: [:value]
+          )
+          |> hd
+          |> Map.get(:value)
+          |> Map.keys()
+      end
+
+    default_key = schema_keys |> Enum.sort() |> hd
 
     key = Map.get(params, "key", default_key)
 
-    client_data = ComplexClientEventQueries.get_aggregate_detail(event_type_id, key, start_date, Timex.now())
-    anon_data = ComplexAnonEventQueries.get_aggregate_detail(event_type_id, key, start_date, Timex.now())
+    client_data =
+      ComplexClientEventQueries.get_aggregate_detail(event_type_id, key, start_date, Timex.now())
+
+    anon_data =
+      ComplexAnonEventQueries.get_aggregate_detail(event_type_id, key, start_date, Timex.now())
 
     combined_values =
       (Map.keys(client_data) ++ Map.keys(anon_data))

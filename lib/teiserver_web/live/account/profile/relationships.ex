@@ -8,22 +8,23 @@ defmodule TeiserverWeb.Account.ProfileLive.Relationships do
     userid = String.to_integer(userid_str)
     user = Account.get_user_by_id(userid)
 
-    socket = cond do
-      user == nil ->
-        socket
+    socket =
+      cond do
+        user == nil ->
+          socket
           |> put_flash(:info, "Unable to find that user")
           |> redirect(to: ~p"/")
 
-      true ->
-        socket
+        true ->
+          socket
           |> assign(:tab, nil)
           |> assign(:site_menu_active, "teiserver_account")
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
-          |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions
+          |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
           |> get_mutuals
           |> check_page_permissions
-    end
+      end
 
     {:ok, socket}
   end
@@ -35,7 +36,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Relationships do
 
   defp apply_action(socket, _live_action, _params) do
     socket
-      |> assign(:page_title, "Relationships")
+    |> assign(:page_title, "Relationships")
   end
 
   @impl true
@@ -47,28 +48,30 @@ defmodule TeiserverWeb.Account.ProfileLive.Relationships do
     your_friends = Account.list_friend_ids_of_user(socket.assigns.current_user.id)
     their_friends = Account.list_friend_ids_of_user(socket.assigns.user.id)
 
-    mutual_friend_ids = your_friends
-    |> Enum.filter(fn friend_id ->
-      Enum.member?(their_friends, friend_id)
-    end)
+    mutual_friend_ids =
+      your_friends
+      |> Enum.filter(fn friend_id ->
+        Enum.member?(their_friends, friend_id)
+      end)
 
-    mutual_friends = Account.list_users_from_cache(mutual_friend_ids)
+    mutual_friends =
+      Account.list_users_from_cache(mutual_friend_ids)
       |> Enum.sort_by(fn user -> user.name end, &<=/2)
 
     socket
-      |> assign(:mutual_friends, mutual_friends)
+    |> assign(:mutual_friends, mutual_friends)
   end
 
   defp check_page_permissions(%{assigns: assigns} = socket) do
-    allowed = (not Enum.member?(assigns.profile_permissions, :self)) and (
-                Enum.member?(assigns.profile_permissions, :friend)
-              )
+    allowed =
+      not Enum.member?(assigns.profile_permissions, :self) and
+        Enum.member?(assigns.profile_permissions, :friend)
 
     if allowed do
       socket
     else
       socket
-        |> redirect(to: ~p"/profile/#{assigns.user.id}")
+      |> redirect(to: ~p"/profile/#{assigns.user.id}")
     end
   end
 end

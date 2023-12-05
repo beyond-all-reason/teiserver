@@ -19,7 +19,7 @@ defmodule Teiserver.Battle.Balance.ForceParty do
   @doc """
 
   """
-  @spec perform([BT.expanded_group_or_pair], non_neg_integer(), list()) :: BT.algorithm_result
+  @spec perform([BT.expanded_group_or_pair()], non_neg_integer(), list()) :: BT.algorithm_result()
   def perform(raw_groups, team_count, opts) do
     Teiserver.Battle.Balance.LoserPicks.perform(raw_groups, team_count, opts)
   end

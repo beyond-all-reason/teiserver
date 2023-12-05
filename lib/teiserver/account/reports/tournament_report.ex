@@ -12,31 +12,33 @@ defmodule Teiserver.Account.TournamentReport do
   def permissions(), do: "Moderator"
 
   defp get_player_id("#" <> id_str), do: String.to_integer(id_str)
+
   defp get_player_id(name) do
     Account.get_userid_from_name(name)
   end
 
-  @spec make_split_data(String.t) :: %{non_neg_integer => {String.t, non_neg_integer()}}
+  @spec make_split_data(String.t()) :: %{non_neg_integer => {String.t(), non_neg_integer()}}
   defp make_split_data(data) do
     data
-      |> String.trim()
-      |> String.split("\n")
-      |> Enum.with_index
-      |> Map.new(fn {row, team_idx} ->
-        id_map = row
+    |> String.trim()
+    |> String.split("\n")
+    |> Enum.with_index()
+    |> Map.new(fn {row, team_idx} ->
+      id_map =
+        row
         |> String.split(",")
         |> Enum.map(&String.trim/1)
         |> Enum.filter(fn
-            "" -> false
-            _ -> true
+          "" -> false
+          _ -> true
         end)
         |> Enum.map(fn name ->
           {String.trim(name), get_player_id(name)}
         end)
         |> Enum.reject(fn {_, n} -> n == nil end)
 
-        {team_idx, id_map}
-      end)
+      {team_idx, id_map}
+    end)
   end
 
   @spec run(Plug.Conn.t(), map()) :: {nil, map()}
@@ -46,12 +48,14 @@ defmodule Teiserver.Account.TournamentReport do
     # First we take our lines and break them into teams
     split_data = make_split_data(params["names"] || "")
 
-    name_to_id_map = split_data
+    name_to_id_map =
+      split_data
       |> Map.values()
-      |> List.flatten
-      |> Map.new
+      |> List.flatten()
+      |> Map.new()
 
-    missing_names = (params["names"] || "")
+    missing_names =
+      (params["names"] || "")
       |> String.trim()
       |> String.replace(",", "\n")
       |> String.split("\n")
@@ -68,7 +72,7 @@ defmodule Teiserver.Account.TournamentReport do
         limit: Enum.count(id_list)
       )
       |> Enum.each(fn user ->
-        new_roles = ["Tournament" | (user.roles || [])] |> Enum.uniq()
+        new_roles = ["Tournament" | user.roles || []] |> Enum.uniq()
         new_data = user.data |> Map.put("roles", new_roles)
 
         Account.update_user(user, %{"data" => new_data})
@@ -118,20 +122,23 @@ defmodule Teiserver.Account.TournamentReport do
       |> Map.new()
       |> Map.keys()
 
-    teams_as_ids = split_data
+    teams_as_ids =
+      split_data
       |> Map.values()
       |> Enum.map_join("\n", fn team_data ->
         team_data
         |> Enum.map_join(", ", fn {_name, id} -> "##{id}" end)
       end)
 
-    rating_values = ratings
+    rating_values =
+      ratings
       |> Map.new(fn rating ->
-        value = case params["value_type"] do
-          "Leaderboard rating" -> rating.leaderboard_rating
-          "Game rating" -> rating.rating_value
-          "Skill value" -> rating.skill
-        end
+        value =
+          case params["value_type"] do
+            "Leaderboard rating" -> rating.leaderboard_rating
+            "Game rating" -> rating.rating_value
+            "Skill value" -> rating.skill
+          end
 
         {rating.user_id, value}
       end)
@@ -151,31 +158,36 @@ defmodule Teiserver.Account.TournamentReport do
 
   defp make_team_data(split_data, rating_values) do
     split_data
-      |> Map.new(fn {team_id, members} ->
-        name_rating_pairs = members
-          |> Enum.map(fn {name, userid} -> {name, rating_values[userid]} end)
-          |> Enum.reject(fn {_, rating} -> rating == nil end)
+    |> Map.new(fn {team_id, members} ->
+      name_rating_pairs =
+        members
+        |> Enum.map(fn {name, userid} -> {name, rating_values[userid]} end)
+        |> Enum.reject(fn {_, rating} -> rating == nil end)
 
-        aggregate_data = name_rating_pairs
-          |> Enum.map(fn {_, rating} -> rating end)
-          |> aggregate_team_ratings
+      aggregate_data =
+        name_rating_pairs
+        |> Enum.map(fn {_, rating} -> rating end)
+        |> aggregate_team_ratings
 
-        captain = name_rating_pairs
-          |> Enum.sort_by(fn {_, rating} -> rating end, &>=/2)
-          |> Enum.take(1)
+      captain =
+        name_rating_pairs
+        |> Enum.sort_by(fn {_, rating} -> rating end, &>=/2)
+        |> Enum.take(1)
 
-        aggregate_data = case captain do
+      aggregate_data =
+        case captain do
           [{name, rating}] ->
             Map.merge(aggregate_data, %{
               captain_name: name,
               captain_rating: rating |> round(2)
             })
+
           _ ->
             aggregate_data
         end
 
-        {team_id, aggregate_data}
-      end)
+      {team_id, aggregate_data}
+    end)
   end
 
   defp aggregate_team_ratings([]) do
@@ -190,6 +202,7 @@ defmodule Teiserver.Account.TournamentReport do
       captain_rating: 0
     }
   end
+
   defp aggregate_team_ratings(ratings) do
     %{
       mean: Statistics.mean(ratings) |> round(2),

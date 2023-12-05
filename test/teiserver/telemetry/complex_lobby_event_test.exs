@@ -34,7 +34,10 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventTest do
 
     # Log the event
     {result, _} =
-      Telemetry.log_complex_lobby_event(user.id, match.id, "lobby.complex_user_event-#{r}", %{"key1" => "value1", "key2" => "value2"})
+      Telemetry.log_complex_lobby_event(user.id, match.id, "lobby.complex_user_event-#{r}", %{
+        "key1" => "value1",
+        "key2" => "value2"
+      })
 
     assert result == :ok
 
@@ -43,8 +46,9 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventTest do
     assert Telemetry.list_complex_lobby_events(where: [match_id: match.id]) |> Enum.count() == 1
 
     # Ensure the lobby event types exist too
-    type_list = Telemetry.list_complex_lobby_event_types()
-    |> Enum.map(fn %{name: name} -> name end)
+    type_list =
+      Telemetry.list_complex_lobby_event_types()
+      |> Enum.map(fn %{name: name} -> name end)
 
     assert Enum.member?(type_list, "lobby.complex_user_event-#{r}")
   end

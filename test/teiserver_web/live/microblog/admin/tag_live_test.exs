@@ -31,10 +31,18 @@ defmodule TeiserverWeb.TagLiveTest do
 
     test "anon", %{conn: conn, tag: tag} do
       {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/tags")
-      assert resp == %{flash: %{"error" => "You must log in to access this page."}, to: ~p"/login"}
+
+      assert resp == %{
+               flash: %{"error" => "You must log in to access this page."},
+               to: ~p"/login"
+             }
 
       {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/tags/#{tag}")
-      assert resp == %{flash: %{"error" => "You must log in to access this page."}, to: ~p"/login"}
+
+      assert resp == %{
+               flash: %{"error" => "You must log in to access this page."},
+               to: ~p"/login"
+             }
     end
   end
 
@@ -99,8 +107,8 @@ defmodule TeiserverWeb.TagLiveTest do
       {:ok, edit_live, _html} = live(conn, ~p"/microblog/admin/tags/#{tag}")
 
       assert edit_live
-              |> form("#tag-form", tag: @invalid_attrs)
-              |> render_change() =~ "can&#39;t be blank"
+             |> form("#tag-form", tag: @invalid_attrs)
+             |> render_change() =~ "can&#39;t be blank"
 
       assert edit_live
              |> form("#tag-form", tag: @update_attrs)

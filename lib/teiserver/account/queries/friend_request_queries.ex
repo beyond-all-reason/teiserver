@@ -8,8 +8,8 @@ defmodule Teiserver.Account.FriendRequestQueries do
     query = from(friend_requests in FriendRequest)
 
     query
-    |> do_where([from_user_id: args[:from_user_id]])
-    |> do_where([to_user_id: args[:to_user_id]])
+    |> do_where(from_user_id: args[:from_user_id])
+    |> do_where(to_user_id: args[:to_user_id])
     |> do_where(args[:where])
     |> do_preload(args[:preload])
     |> do_order_by(args[:order_by])
@@ -48,12 +48,14 @@ defmodule Teiserver.Account.FriendRequestQueries do
 
   defp _where(query, :either_user_is, {u1, u2}) do
     from friend_requests in query,
-      where: (friend_requests.from_user_id == ^u1 and friend_requests.to_user_id == ^u2)
-        or (friend_requests.from_user_id == ^u2 and friend_requests.to_user_id == ^u1)
+      where:
+        (friend_requests.from_user_id == ^u1 and friend_requests.to_user_id == ^u2) or
+          (friend_requests.from_user_id == ^u2 and friend_requests.to_user_id == ^u1)
   end
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
+
   defp do_order_by(query, params) do
     params
     |> Enum.reduce(query, fn key, query_acc ->

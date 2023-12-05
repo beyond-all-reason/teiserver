@@ -49,7 +49,6 @@ defmodule Teiserver.Account.MergeAccountsTask do
 
     # Reports
 
-
     result = Teiserver.Admin.DeleteUserTask.delete_users([deleting_id])
 
     case result do

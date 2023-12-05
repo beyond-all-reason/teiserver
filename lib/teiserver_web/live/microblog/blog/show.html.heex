@@ -1,41 +1,55 @@
 <div class="row" style="padding-top: 5vh;" id="main-blog-div">
-  <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4" :if={@post}>
+  <div
+    :if={@post}
+    class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4"
+  >
     <div class="float-end">
       <%= for tag <- @post.tags do %>
         <.tag_badge tag={tag} />
       <% end %>
-      
       &nbsp;&nbsp;&nbsp;
-      
-      <span class="badge badge-sm rounded-pill me-4" style={"background-color: #{@post.poster.colour}; font-size: 1em;"}>
+      <span
+        class="badge badge-sm rounded-pill me-4"
+        style={"background-color: #{@post.poster.colour}; font-size: 1em;"}
+      >
         <Fontawesome.icon icon={@post.poster.icon} style="solid" />
         <%= @post.poster.name %>
       </span>
     </div>
     <h3>
-      <%= @post.title %>
-      -
-      <%= Teiserver.Helper.TimexHelper.date_to_str(@post.inserted_at, :ymd_hms) %>
+      <%= @post.title %> - <%= Teiserver.Helper.TimexHelper.date_to_str(
+        @post.inserted_at,
+        :ymd_hms
+      ) %>
     </h3>
-    
-    <%= @post.contents |> Earmark.as_html! |> raw %>
+
+    <%= @post.contents |> Earmark.as_html!() |> raw %>
     <br /><br />
 
     <div class="float-end">
-      <a class="btn btn-info me-4" :if={@current_user && @post.poster_id == @current_user.id || allow?(@current_user, "Moderator")} href={~p"/microblog/admin/posts/#{@post.id}"}>
-        <Fontawesome.icon icon="wrench" style="solid" />
-        Edit post
+      <a
+        :if={
+          (@current_user && @post.poster_id == @current_user.id) ||
+            allow?(@current_user, "Moderator")
+        }
+        class="btn btn-info me-4"
+        href={~p"/microblog/admin/posts/#{@post.id}"}
+      >
+        <Fontawesome.icon icon="wrench" style="solid" /> Edit post
       </a>
 
-      <span class="btn btn-danger" :if={allow?(@current_user, "Moderator")} id="delete-post-button" phx-click="delete-post">
-        <Fontawesome.icon icon="trash" style="solid" />
-        Delete post
+      <span
+        :if={allow?(@current_user, "Moderator")}
+        class="btn btn-danger"
+        id="delete-post-button"
+        phx-click="delete-post"
+      >
+        <Fontawesome.icon icon="trash" style="solid" /> Delete post
       </span>
     </div>
 
     <a href={~p"/microblog"} class="btn btn-secondary">
-      <Fontawesome.icon icon={"arrow-left"} style="solid" />
-      Back to blog
+      <Fontawesome.icon icon="arrow-left" style="solid" /> Back to blog
     </a>
   </div>
 </div>

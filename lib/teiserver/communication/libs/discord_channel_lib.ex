@@ -5,7 +5,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   alias Teiserver.Communication.{DiscordChannel, DiscordChannelQueries}
   alias Teiserver.Data.Types, as: T
 
-  @spec special_channels() :: [String.t]
+  @spec special_channels() :: [String.t()]
   def special_channels do
     [
       "Announcements",
@@ -23,7 +23,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     ]
   end
 
-  @spec counter_channels() :: [String.t]
+  @spec counter_channels() :: [String.t()]
   def counter_channels do
     [
       "Lobbies (counter)",
@@ -70,14 +70,14 @@ defmodule Teiserver.Communication.DiscordChannelLib do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_discord_channel!(non_neg_integer()) :: DiscordChannel.t
+  @spec get_discord_channel!(non_neg_integer()) :: DiscordChannel.t()
   def get_discord_channel!(discord_channel_id) do
     [id: discord_channel_id]
     |> DiscordChannelQueries.query_discord_channels()
     |> Repo.one!()
   end
 
-  @spec get_discord_channel(non_neg_integer() | String.t) :: DiscordChannel.t | nil
+  @spec get_discord_channel(non_neg_integer() | String.t()) :: DiscordChannel.t() | nil
   def get_discord_channel(discord_channel_id) when is_integer(discord_channel_id) do
     [id: discord_channel_id]
     |> DiscordChannelQueries.query_discord_channels()
@@ -157,16 +157,19 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   end
 
   defp cache_channel({:error, channel}), do: {:error, channel}
+
   defp cache_channel({:ok, %DiscordChannel{} = channel}) do
     Teiserver.cache_put(:discord_channel_cache, channel.name, channel)
     Teiserver.cache_put(:discord_channel_cache, "id:#{channel.channel_id}", channel)
     {:ok, channel}
   end
+
   defp cache_channel(%DiscordChannel{} = channel) do
     Teiserver.cache_put(:discord_channel_cache, channel.name, channel)
     Teiserver.cache_put(:discord_channel_cache, "id:#{channel.channel_id}", channel)
     {:ok, channel}
   end
+
   defp cache_channel(channel), do: channel
 
   @spec pre_cache_discord_channels() :: :ok
@@ -175,12 +178,12 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     |> Enum.each(&cache_channel/1)
   end
 
-
   @doc """
   Given an integer it will take use the channel id, if given a string it will look up
   the channel name from the database Teiserver.Communication.DiscordChannel objects
   """
-  @spec new_discord_message(String.t | non_neg_integer(), String.t()) :: map | nil | {:error, String.t}
+  @spec new_discord_message(String.t() | non_neg_integer(), String.t()) ::
+          map | nil | {:error, String.t()}
   def new_discord_message(maybe_channel_id, message) do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
@@ -192,8 +195,10 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     end
   end
 
-  @spec edit_discord_message(non_neg_integer | String.t, non_neg_integer, String.t) :: map | nil | {:error, String.t}
-  def edit_discord_message(maybe_channel_id, message_id, new_message) when is_integer(message_id) do
+  @spec edit_discord_message(non_neg_integer | String.t(), non_neg_integer, String.t()) ::
+          map | nil | {:error, String.t()}
+  def edit_discord_message(maybe_channel_id, message_id, new_message)
+      when is_integer(message_id) do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
         nil -> {:error, "No channel found"}
@@ -204,7 +209,8 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     end
   end
 
-  @spec delete_discord_message(non_neg_integer | String.t, non_neg_integer) :: map | nil | {:error, String.t}
+  @spec delete_discord_message(non_neg_integer | String.t(), non_neg_integer) ::
+          map | nil | {:error, String.t()}
   def delete_discord_message(maybe_channel_id, message_id) do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
@@ -216,7 +222,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     end
   end
 
-  @spec send_discord_dm(T.userid, String.t()) :: map | nil | {:error, String.t}
+  @spec send_discord_dm(T.userid(), String.t()) :: map | nil | {:error, String.t()}
   def send_discord_dm(userid, message) do
     if use_discord?() do
       user = Account.get_user_by_id(userid)
@@ -233,6 +239,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
             {:ok, %{id: channel_id}} ->
               Account.update_cache_user(user.id, %{discord_dm_channel_id: channel_id})
               new_discord_message(channel_id, message)
+
             _ ->
               {:error, "Unable to created DM channel"}
           end
@@ -256,6 +263,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   end
 
   defp get_channel_id_from_any(%{channel_id: channel_id}), do: channel_id
+
   defp get_channel_id_from_any(identifier) do
     case get_discord_channel(identifier) do
       nil -> nil

@@ -64,13 +64,14 @@ defmodule Teiserver.Account.ActiveReport do
       |> Map.new()
 
     # If we run this at the start of the month it'll error
-    total_player_count = if Enum.empty?(cumulative_player_counts) do
-      0
-    else
-      cumulative_player_counts
+    total_player_count =
+      if Enum.empty?(cumulative_player_counts) do
+        0
+      else
+        cumulative_player_counts
         |> Map.values()
-        |> Enum.max
-    end
+        |> Enum.max()
+      end
 
     assigns = %{
       params: params,

@@ -24,6 +24,7 @@ defmodule Teiserver.Lobby.Commands.ExplainCommandTest do
 
     # We expect to see it in the lobby
     messages = PubsubListener.get(chat_listener)
+
     expected_message = %{
       channel: "teiserver_lobby_chat:#{lobby_id}",
       event: :say,
@@ -31,22 +32,26 @@ defmodule Teiserver.Lobby.Commands.ExplainCommandTest do
       message: "$explain",
       userid: user.id
     }
+
     assert Enum.member?(messages, expected_message)
 
     # And we expect to see a direct message about the balance
     messages = PubsubListener.get(client_listener)
+
     expected_message = %{
       channel: "teiserver_client_messages:#{user.id}",
       event: :received_direct_message,
-      message_content: ["---------------------------",
-       "No balance has been created for this room",
-       "---------------------------"],
+      message_content: [
+        "---------------------------",
+        "No balance has been created for this room",
+        "---------------------------"
+      ],
       sender_id: Coordinator.get_coordinator_userid()
     }
+
     assert Enum.member?(messages, expected_message)
   end
 end
-
 
 # PubSub.broadcast(
 #   Teiserver.PubSub,

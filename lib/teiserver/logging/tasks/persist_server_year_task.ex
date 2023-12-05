@@ -49,17 +49,19 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
               limit: 366
             )
 
-          user_activity_logs = Logging.list_user_activity_day_logs(
-            search: [
+          user_activity_logs =
+            Logging.list_user_activity_day_logs(
+              search: [
                 start_date: Timex.beginning_of_year(log.date),
                 end_date: Timex.end_of_year(log.date)
-            ],
-            limit: 366
-          )
+              ],
+              limit: 366
+            )
 
-          data = logs
-          |> Enum.zip(user_activity_logs)
-          |> ServerDayLogLib.aggregate_day_logs()
+          data =
+            logs
+            |> Enum.zip(user_activity_logs)
+            |> ServerDayLogLib.aggregate_day_logs()
 
           {:ok, _} =
             Logging.create_server_year_log(%{
@@ -90,17 +92,19 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
           limit: 366
         )
 
-      user_activity_logs = Logging.list_user_activity_day_logs(
-        search: [
-          start_date: Timex.beginning_of_year(new_date),
-          end_date: Timex.end_of_year(new_date)
-        ],
-        limit: 366
-      )
+      user_activity_logs =
+        Logging.list_user_activity_day_logs(
+          search: [
+            start_date: Timex.beginning_of_year(new_date),
+            end_date: Timex.end_of_year(new_date)
+          ],
+          limit: 366
+        )
 
-      data = logs
-      |> Enum.zip(user_activity_logs)
-      |> ServerDayLogLib.aggregate_day_logs()
+      data =
+        logs
+        |> Enum.zip(user_activity_logs)
+        |> ServerDayLogLib.aggregate_day_logs()
 
       {:ok, _} =
         Logging.create_server_year_log(%{
@@ -117,12 +121,13 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
   def year_so_far() do
     now = Timex.now()
 
-    user_activity_logs = Logging.list_user_activity_day_logs(
-      search: [
-        start_date: Timex.beginning_of_year(now)
-      ],
-      limit: 366
-    )
+    user_activity_logs =
+      Logging.list_user_activity_day_logs(
+        search: [
+          start_date: Timex.beginning_of_year(now)
+        ],
+        limit: 366
+      )
 
     Logging.list_server_day_logs(
       search: [

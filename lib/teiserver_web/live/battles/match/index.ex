@@ -4,9 +4,10 @@ defmodule TeiserverWeb.Battle.MatchLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    game_types = ["Any type" | Teiserver.Battle.MatchLib.list_game_types]
+    game_types = ["Any type" | Teiserver.Battle.MatchLib.list_game_types()]
 
-    socket = socket
+    socket =
+      socket
       |> assign(:site_menu_active, "match")
       |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
       |> assign(:game_types, game_types)
@@ -24,7 +25,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Index do
 
     new_filters = Map.put(filters, key, value)
 
-    socket = socket
+    socket =
+      socket
       |> assign(:filters, new_filters)
       |> update_match_list
 
@@ -52,30 +54,33 @@ defmodule TeiserverWeb.Battle.MatchLive.Index do
   end
 
   defp run_match_query(filters, user) do
-    opponent_id = if filters["opponent"] != "" do
-      Account.get_userid_from_name(filters["opponent"]) || -1
-    else
-      nil
-    end
+    opponent_id =
+      if filters["opponent"] != "" do
+        Account.get_userid_from_name(filters["opponent"]) || -1
+      else
+        nil
+      end
 
-    ally_id = if filters["ally"] != "" do
-      Account.get_userid_from_name(filters["ally"]) || -1
-    else
-      nil
-    end
+    ally_id =
+      if filters["ally"] != "" do
+        Account.get_userid_from_name(filters["ally"]) || -1
+      else
+        nil
+      end
 
-    matches = Battle.list_matches(
-      search: [
-        has_started: true,
-        # user_id: user.id,
-        game_type: filters["game-type"],
-        ally_opponent: {user.id, ally_id, opponent_id}
-      ],
-      preload: [
-        :queue
-      ],
-      order_by: "Newest first"
-    )
+    matches =
+      Battle.list_matches(
+        search: [
+          has_started: true,
+          # user_id: user.id,
+          game_type: filters["game-type"],
+          ally_opponent: {user.id, ally_id, opponent_id}
+        ],
+        preload: [
+          :queue
+        ],
+        order_by: "Newest first"
+      )
 
     matches
   end

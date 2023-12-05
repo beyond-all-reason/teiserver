@@ -8,8 +8,10 @@
   });
 </script>
 
-<TeiserverWeb.Moderation.ModerationComponents.sub_menu active={"actions"} view_colour={view_colour()} />
-
+<TeiserverWeb.Moderation.ModerationComponents.sub_menu
+  active="actions"
+  view_colour={view_colour()}
+/>
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -31,10 +33,9 @@
             href={"https://discord.com/channels/#{@guild_id}/#{@channel.channel_id}/#{@action.discord_message_id}"}
             class={"btn btn-outline-#{bsname}"}
           >
-            <Fontawesome.icon icon="discord" style="brands" />
-            Discord link
+            <Fontawesome.icon icon="discord" style="brands" /> Discord link
           </a>
-        
+
           <a
             href={"#{Routes.moderation_action_path(@conn, :index)}?target_id=#{@action.target_id}"}
             class={"btn btn-outline-#{bsname}"}

@@ -20,14 +20,11 @@
 
         <div class="row mt-4">
           <div class="col">
-            <a
-              href={~p"/login"}
-              class="btn btn-secondary btn-block"
-            >
+            <a href={~p"/login"} class="btn btn-secondary btn-block">
               Login form
             </a>
           </div>
-          
+
           <%= if Teiserver.Config.get_site_config_cache("site.Main site link") do %>
             <div class="col">
               <a

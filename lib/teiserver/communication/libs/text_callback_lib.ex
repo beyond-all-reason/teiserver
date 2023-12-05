@@ -152,7 +152,8 @@ defmodule Teiserver.Communication.TextCallbackLib do
     end
   end
 
-  @spec can_trigger_callback?(non_neg_integer() | TextCallback.t(), non_neg_integer()) :: TextCallback.t() | nil
+  @spec can_trigger_callback?(non_neg_integer() | TextCallback.t(), non_neg_integer()) ::
+          TextCallback.t() | nil
   def can_trigger_callback?(nil, _), do: false
   def can_trigger_callback?(_, nil), do: false
 
@@ -162,22 +163,25 @@ defmodule Teiserver.Communication.TextCallbackLib do
   end
 
   def can_trigger_callback?(text_callback, channel_id) do
-    last_triggered_time = (text_callback.last_triggered || %{})
+    last_triggered_time =
+      (text_callback.last_triggered || %{})
       |> Map.get(to_string(channel_id), 0)
 
     now = System.system_time(:second)
 
-    minimum_repeat_time = text_callback
+    minimum_repeat_time =
+      text_callback
       |> Map.get(:rules, %{})
       |> Map.get(:minimum_repeat_time, 60)
 
     # And now the result
-    (now - last_triggered_time) > minimum_repeat_time
+    now - last_triggered_time > minimum_repeat_time
   end
 
-  @spec set_last_triggered_time(TextCallback.t, non_neg_integer()) :: any
+  @spec set_last_triggered_time(TextCallback.t(), non_neg_integer()) :: any
   def set_last_triggered_time(text_callback, channel_id) do
-    new_times = (text_callback.last_triggered || %{})
+    new_times =
+      (text_callback.last_triggered || %{})
       |> Map.put(to_string(channel_id), System.system_time(:second))
 
     Communication.update_text_callback(text_callback, %{last_triggered: new_times})

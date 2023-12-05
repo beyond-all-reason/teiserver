@@ -15,7 +15,11 @@ defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
-  plug(:add_breadcrumb, name: 'Complex Lobby events', url: '/telemetry/complex_lobby_events/summary')
+
+  plug(:add_breadcrumb,
+    name: 'Complex Lobby events',
+    url: '/telemetry/complex_lobby_events/summary'
+  )
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
   def summary(conn, params) do
@@ -59,44 +63,47 @@ defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
         _ -> Timex.now() |> Timex.shift(days: -7)
       end
 
-    schema_keys = Telemetry.list_complex_lobby_events(
-      order_by: ["Newest first"],
-      where: [
-        event_type_id: event_type_id
-      ],
-      limit: 1,
-      select: [:value]
-    )
-    |> hd
-    |> Map.get(:value)
-    |> Map.keys
+    schema_keys =
+      Telemetry.list_complex_lobby_events(
+        order_by: ["Newest first"],
+        where: [
+          event_type_id: event_type_id
+        ],
+        limit: 1,
+        select: [:value]
+      )
+      |> hd
+      |> Map.get(:value)
+      |> Map.keys()
 
-    default_key = schema_keys |> Enum.sort |> hd
+    default_key = schema_keys |> Enum.sort() |> hd
 
     key = Map.get(params, "key", default_key)
 
-    lobby_data = ComplexLobbyEventQueries.get_aggregate_detail(event_type_id, key, start_date, Timex.now())
+    lobby_data =
+      ComplexLobbyEventQueries.get_aggregate_detail(event_type_id, key, start_date, Timex.now())
 
     key = Map.get(params, "key", hd(schema_keys ++ [nil]))
 
-    usernames = if String.ends_with?(key, "id") do
-      lobby_data
+    usernames =
+      if String.ends_with?(key, "id") do
+        lobby_data
         |> Enum.map(fn {userid, _} ->
-            if userid != nil do
-              case Integer.parse(userid) do
-                {n, _} -> n
-                _ -> nil
-              end
+          if userid != nil do
+            case Integer.parse(userid) do
+              {n, _} -> n
+              _ -> nil
             end
+          end
         end)
         |> Enum.filter(fn userid -> is_integer(userid) end)
-        |> Enum.uniq
+        |> Enum.uniq()
         |> Map.new(fn userid ->
           {to_string(userid), Account.get_username_by_id(userid)}
         end)
-    else
-      %{}
-    end
+      else
+        %{}
+      end
 
     conn
     |> assign(:schema_keys, schema_keys)
@@ -128,7 +135,10 @@ defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
 
     conn
     |> put_resp_content_type("application/json")
-    |> put_resp_header("content-disposition", "attachment; filename=\"complex_lobby_events.json\"")
+    |> put_resp_header(
+      "content-disposition",
+      "attachment; filename=\"complex_lobby_events.json\""
+    )
     |> send_resp(200, Jason.encode!(data))
   end
 end

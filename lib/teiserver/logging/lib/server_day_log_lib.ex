@@ -81,7 +81,7 @@ defmodule Teiserver.Logging.ServerDayLogLib do
       complex_lobby: %{},
       simple_lobby: %{},
       complex_match: %{},
-      simple_match: %{},
+      simple_match: %{}
     },
 
     # Monthly totals
@@ -137,16 +137,25 @@ defmodule Teiserver.Logging.ServerDayLogLib do
 
       # Telemetry events
       events: %{
-        complex_client: add_maps(existing.events.complex_client, get_in(data, ~w(events complex_client))),
-        simple_client: add_maps(existing.events.simple_client, get_in(data, ~w(events simple_client))),
-        complex_anon: add_maps(existing.events.complex_anon, get_in(data, ~w(events complex_anon))),
+        complex_client:
+          add_maps(existing.events.complex_client, get_in(data, ~w(events complex_client))),
+        simple_client:
+          add_maps(existing.events.simple_client, get_in(data, ~w(events simple_client))),
+        complex_anon:
+          add_maps(existing.events.complex_anon, get_in(data, ~w(events complex_anon))),
         simple_anon: add_maps(existing.events.simple_anon, get_in(data, ~w(events simple_anon))),
-        complex_server: add_maps(existing.events.complex_server, get_in(data, ~w(events complex_server))),
-        simple_server: add_maps(existing.events.simple_server, get_in(data, ~w(events simple_server))),
-        complex_lobby: add_maps(existing.events.complex_lobby, get_in(data, ~w(events complex_lobby))),
-        simple_lobby: add_maps(existing.events.simple_lobby, get_in(data, ~w(events simple_lobby))),
-        complex_match: add_maps(existing.events.complex_match, get_in(data, ~w(events complex_match))),
-        simple_match: add_maps(existing.events.simple_match, get_in(data, ~w(events simple_match)))
+        complex_server:
+          add_maps(existing.events.complex_server, get_in(data, ~w(events complex_server))),
+        simple_server:
+          add_maps(existing.events.simple_server, get_in(data, ~w(events simple_server))),
+        complex_lobby:
+          add_maps(existing.events.complex_lobby, get_in(data, ~w(events complex_lobby))),
+        simple_lobby:
+          add_maps(existing.events.simple_lobby, get_in(data, ~w(events simple_lobby))),
+        complex_match:
+          add_maps(existing.events.complex_match, get_in(data, ~w(events complex_match))),
+        simple_match:
+          add_maps(existing.events.simple_match, get_in(data, ~w(events simple_match)))
       },
 
       # Monthly totals

@@ -30,15 +30,16 @@
         <.table id="posts" rows={@posts} table_class="table-sm table-hover">
           <:col :let={post} label="Title"><%= post.title %></:col>
           <:col :let={post} label="Poster"><%= post.poster.name %></:col>
-          <:col :let={post} label="View count"><%= format_number post.view_count %></:col>
-          <:col :let={post} label="Posted"><%= date_to_str(post.inserted_at, format: :hms_or_ymd) %></:col>
+          <:col :let={post} label="View count"><%= format_number(post.view_count) %></:col>
+          <:col :let={post} label="Posted">
+            <%= date_to_str(post.inserted_at, format: :hms_or_ymd) %>
+          </:col>
           <:col :let={post} label="">
             <a href={~p"/microblog/show/#{post.id}"} class="btn btn-secondary btn-sm">
               <Fontawesome.icon icon="link" style="regular" />
             </a>
           </:col>
         </.table>
-        
       </div>
     </div>
   </div>

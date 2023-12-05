@@ -5,7 +5,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
   alias Teiserver.Logging.Tasks.{PersistServerMonthTask, PersistServerDayTask}
 
   test "perform task" do
-    flunk "We do not create the user_activity_log data so this always fails"
+    flunk("We do not create the user_activity_log data so this always fails")
 
     # Make some data
     create_day_data(1)

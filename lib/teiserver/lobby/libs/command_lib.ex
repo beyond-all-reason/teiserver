@@ -8,7 +8,7 @@ defmodule Teiserver.Lobby.CommandLib do
   alias Teiserver.Data.Types, as: T
   require Logger
 
-  @spec handle_command(T.lobby_server_state, T.userid, String.t) :: T.lobby_server_state
+  @spec handle_command(T.lobby_server_state(), T.userid(), String.t()) :: T.lobby_server_state()
   def handle_command(state, userid, message) do
     [name | args] = String.split(message, " ")
     name = String.downcase(name)
@@ -26,7 +26,7 @@ defmodule Teiserver.Lobby.CommandLib do
     module.execute(state, command)
   end
 
-  @spec get_command_module(String.t) :: module
+  @spec get_command_module(String.t()) :: module
   def get_command_module(name) do
     Teiserver.store_get(:lobby_command_cache, name) ||
       Teiserver.store_get(:lobby_command_cache, "no_command")
@@ -35,9 +35,11 @@ defmodule Teiserver.Lobby.CommandLib do
   @spec cache_lobby_commands() :: :ok
   def cache_lobby_commands() do
     {:ok, module_list} = :application.get_key(:teiserver, :modules)
-    lookup = module_list
+
+    lookup =
+      module_list
       |> Enum.filter(fn m ->
-        m |> Module.split |> Enum.take(3) == ["Teiserver", "Lobby", "Commands"]
+        m |> Module.split() |> Enum.take(3) == ["Teiserver", "Lobby", "Commands"]
       end)
       |> Enum.filter(fn m ->
         Code.ensure_loaded(m)
@@ -89,7 +91,7 @@ defmodule Teiserver.Lobby.CommandLib do
     Battle.say(cmd.userid, message, lobby_id)
   end
 
-  @spec log_command(map, T.lobby_id) :: any
+  @spec log_command(map, T.lobby_id()) :: any
   def log_command(cmd, lobby_id) do
     message = "$ " <> command_as_message(cmd)
     sender = Account.get_user_by_id(cmd.userid)

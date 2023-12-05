@@ -1,6 +1,10 @@
 <% bsname = view_colour() %>
 
-<TeiserverWeb.Telemetry.TelemetryComponents.sub_menu active={"infologs"} view_colour={view_colour()} current_user={@current_user} />
+<TeiserverWeb.Telemetry.TelemetryComponents.sub_menu
+  active="infologs"
+  view_colour={view_colour()}
+  current_user={@current_user}
+/>
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -17,10 +21,7 @@
         <hr />
 
         <div class="float-end">
-          <a
-            href={~p"/telemetry/infolog/download/#{@infolog.id}"}
-            class="btn btn-secondary"
-          >
+          <a href={~p"/telemetry/infolog/download/#{@infolog.id}"} class="btn btn-secondary">
             <i class="fa-fw fa-solid fa-download"></i> Download
           </a>
           &nbsp;

@@ -41,13 +41,13 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
       )
 
     badge_type
-      |> BadgeTypeLib.make_favourite()
-      |> insert_recently(conn)
+    |> BadgeTypeLib.make_favourite()
+    |> insert_recently(conn)
 
     conn
-      |> assign(:badge_type, badge_type)
-      |> add_breadcrumb(name: "Show: #{badge_type.name}", url: conn.request_path)
-      |> render("show.html")
+    |> assign(:badge_type, badge_type)
+    |> add_breadcrumb(name: "Show: #{badge_type.name}", url: conn.request_path)
+    |> render("show.html")
   end
 
   @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
@@ -86,10 +86,10 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
     changeset = Account.change_badge_type(badge_type)
 
     conn
-      |> assign(:badge_type, badge_type)
-      |> assign(:changeset, changeset)
-      |> add_breadcrumb(name: "Edit: #{badge_type.name}", url: conn.request_path)
-      |> render("edit.html")
+    |> assign(:badge_type, badge_type)
+    |> assign(:changeset, changeset)
+    |> add_breadcrumb(name: "Edit: #{badge_type.name}", url: conn.request_path)
+    |> render("edit.html")
   end
 
   @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
@@ -115,8 +115,8 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
     badge_type = Account.get_badge_type!(id)
 
     badge_type
-      |> BadgeTypeLib.make_favourite()
-      |> remove_recently(conn)
+    |> BadgeTypeLib.make_favourite()
+    |> remove_recently(conn)
 
     {:ok, _badge_type} = Account.delete_badge_type(badge_type)
 

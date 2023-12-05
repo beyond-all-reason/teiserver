@@ -21,9 +21,7 @@ defmodule TeiserverWeb.ChatComponents do
           class="time-and-user"
           style={"border-color: #{message.user.colour}; color: #{message.user.colour}"}
         >
-          <%= Teiserver.Helper.TimexHelper.date_to_str(message.inserted_at, format: :hms) %>
-          &nbsp;
-
+          <%= Teiserver.Helper.TimexHelper.date_to_str(message.inserted_at, format: :hms) %> &nbsp;
           <Fontawesome.icon icon={message.user.icon} style="regular" />
           <strong><%= message.user.name %></strong>
         </div>
@@ -36,5 +34,4 @@ defmodule TeiserverWeb.ChatComponents do
     </div>
     """
   end
-
 end

@@ -21,13 +21,15 @@ defmodule Fontawesome do
     size = fa_prefix(assigns[:size])
     weight = fa_prefix(assigns[:weight])
 
-    icon_name = cond do
-      assigns[:icon] && is_atom(assigns[:icon]) -> icon_lookup(assigns[:icon])
-      assigns[:icon_atom] && is_atom(assigns[:icon_atom]) -> icon_lookup(assigns[:icon_atom])
-      true -> fa_prefix(assigns[:icon])
-    end
+    icon_name =
+      cond do
+        assigns[:icon] && is_atom(assigns[:icon]) -> icon_lookup(assigns[:icon])
+        assigns[:icon_atom] && is_atom(assigns[:icon_atom]) -> icon_lookup(assigns[:icon_atom])
+        true -> fa_prefix(assigns[:icon])
+      end
 
-    assigns = assigns
+    assigns =
+      assigns
       |> assign(:class, "fa-fw #{style} #{size} #{weight} #{icon_name} #{assigns[:class]}")
 
     ~H"""
@@ -75,7 +77,6 @@ defmodule Fontawesome do
   def icon_lookup(:month), do: "fa-calendar-range"
   def icon_lookup(:quarter), do: "fa-calendar"
   def icon_lookup(:year), do: "fa-circle-calendar"
-
 
   def brand_icons do
     ~w(42-group 500px accessible-icon accusoft adn adversal affiliatetheme airbnb algolia alipay amazon-pay amazon amilia android angellist angrycreative angular apper apple-pay apple app-store-ios app-store artstation asymmetrik atlassian audible autoprefixer avianex aviato aws bandcamp battle-net behance bilibili bimobject bitbucket bitcoin bity blackberry black-tie blogger-b blogger bluetooth-b bluetooth bootstrap bots btc buffer buromobelexperte buy-n-large buysellads canadian-maple-leaf cc-amazon-pay cc-amex cc-apple-pay cc-diners-club cc-discover cc-jcb cc-mastercard cc-paypal cc-stripe cc-visa centercode centos chromecast chrome cloudflare cloudscale cloudsmith cloudversify cmplid codepen codiepie confluence connectdevelop contao cotton-bureau cpanel creative-commons-by creative-commons-nc-eu creative-commons-nc-jp creative-commons-nc creative-commons-nd creative-commons-pd-alt creative-commons-pd creative-commons-remix creative-commons-sampling-plus creative-commons-sampling creative-commons-sa creative-commons-share creative-commons creative-commons-zero critical-role css3-alt css3 cuttlefish dailymotion d-and-d-beyond d-and-d dashcube deezer delicious deploydog deskpro deviantart dev dhl diaspora digg digital-ocean discord discourse dochub docker draft2digital dribbble dropbox drupal dyalog earlybirds ebay edge-legacy edge elementor ello ember empire envira erlang ethereum etsy evernote expeditedssl facebook-f facebook-messenger facebook fantasy-flight-games fedex fedora figma firefox-browser firefox firstdraft first-order-alt first-order flickr flipboard fly font-awesome fonticons-fi fonticons fort-awesome-alt fort-awesome forumbee foursquare freebsd free-code-camp fulcrum galactic-republic galactic-senate get-pocket gg-circle gg git-alt github-alt github gitkraken gitlab git gitter glide-g glide gofore golang goodreads-g goodreads google-drive google-pay google-play google-plus-g google-plus google google-wallet gratipay grav gripfire grunt guilded gulp hacker-news hackerrank hashnode hips hire-a-helper hive hooli hornbill hotjar houzz html5 hubspot ideal imdb instagram instalod intercom internet-explorer invision ioxhost itch-io itunes-note itunes java jedi-order jenkins jira joget joomla jsfiddle js kaggle keybase keycdn kickstarter-k kickstarter korvue laravel lastfm leanpub less line linkedin-in linkedin linode linux lyft magento mailchimp mandalorian markdown mastodon maxcdn mdb medapps medium medrt meetup megaport mendeley meta microblog microsoft mixcloud mixer mix mizuni modx monero napster neos nfc-directional nfc-symbol nimblr node-js node npm ns8 nutritionix octopus-deploy odnoklassniki odysee old-republic opencart openid opera optin-monster orcid osi padlet page4 pagelines palfed patreon paypal perbyte periscope phabricator phoenix-framework phoenix-squadron php pied-piper-alt pied-piper-hat pied-piper-pp pied-piper pinterest-p pinterest pix playstation product-hunt pushed python qq quinscape quora raspberry-pi ravelry reacteurope react readme rebel reddit-alien reddit redhat red-river renren replyd researchgate resolving rev rocketchat rockrms r-project rust safari salesforce sass schlix screenpal scribd searchengin sellcast sellsy servicestack shirtsinbulk shopify shopware simplybuilt sistrix sith sitrox sketch skyatlas skype slack slideshare snapchat soundcloud sourcetree space-awesome speakap speaker-deck spotify square-behance square-dribbble square-facebook square-font-awesome-stroke square-font-awesome square-github square-gitlab square-git square-google-plus square-hacker-news square-instagram square-js square-lastfm square-odnoklassniki square-pied-piper square-pinterest square-reddit square-snapchat squarespace square-steam square-tumblr square-twitter square-viadeo square-vimeo square-whatsapp square-xing square-youtube stack-exchange stack-overflow stackpath staylinked steam steam-symbol sticker-mule strava stripe-s stripe stubber studiovinari stumbleupon-circle stumbleupon superpowers supple suse swift symfony teamspeak telegram tencent-weibo themeco themeisle the-red-yeti think-peaks tiktok trade-federation trello tumblr twitch twitter typo3 uber ubuntu uikit umbraco uncharted uniregistry unity unsplash untappd ups usb usps ussunnah vaadin viacoin viadeo viber vimeo vimeo-v vine vk vnv vuejs watchman-monitoring waze weebly weibo weixin whatsapp whmcs wikipedia-w windows wirsindhandwerk wix wizards-of-the-coast wodu wolf-pack-battalion wordpress-simple wordpress wpbeginner wpexplorer wpforms wpressr xbox xing yahoo yammer yandex-international yandex yarn y-combinator yelp yoast youtube zhihu)

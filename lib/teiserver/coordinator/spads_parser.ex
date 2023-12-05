@@ -20,9 +20,11 @@ defmodule Teiserver.Coordinator.SpadsParser do
         [_, _kicked_name, kicker_name] = match
         kicker_id = Account.get_userid_from_name(kicker_name)
         match_id = Battle.get_lobby_match_id(state.lobby_id)
+
         if kicker_id && match_id do
           Telemetry.log_simple_lobby_event(kicker_id, match_id, "Kicked user from lobby")
         end
+
         nil
 
       # Add a boss

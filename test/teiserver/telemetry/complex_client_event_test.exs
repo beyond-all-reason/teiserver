@@ -16,7 +16,10 @@ defmodule Teiserver.Telemetry.ComplexClientEventTest do
 
     # Log the event
     {result, _} =
-      Telemetry.log_complex_client_event(user.id, "client.complex_user_event-#{r}", %{"key1" => "value1", "key2" => "value2"})
+      Telemetry.log_complex_client_event(user.id, "client.complex_user_event-#{r}", %{
+        "key1" => "value1",
+        "key2" => "value2"
+      })
 
     assert result == :ok
 
@@ -24,8 +27,9 @@ defmodule Teiserver.Telemetry.ComplexClientEventTest do
     assert Telemetry.list_complex_client_events(where: [user_id: user.id]) |> Enum.count() == 1
 
     # Ensure the client event types exist too
-    type_list = Telemetry.list_complex_client_event_types()
-    |> Enum.map(fn %{name: name} -> name end)
+    type_list =
+      Telemetry.list_complex_client_event_types()
+      |> Enum.map(fn %{name: name} -> name end)
 
     assert Enum.member?(type_list, "client.complex_user_event-#{r}")
   end

@@ -125,7 +125,10 @@ defmodule Teiserver.Account.User do
       |> remove_whitespace([:email])
 
     user
-    |> cast(attrs, ~w(name email icon colour clan_id behaviour_score trust_score data roles permissions)a)
+    |> cast(
+      attrs,
+      ~w(name email icon colour clan_id behaviour_score trust_score data roles permissions)a
+    )
     |> validate_required(~w(name email)a)
     |> unique_constraint(:email)
   end

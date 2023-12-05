@@ -15,8 +15,7 @@ defmodule Teiserver.Telemetry.SimpleClientEventTest do
     assert Telemetry.list_simple_client_events() |> Enum.count() == 0
 
     # Log the event
-    {result, _} =
-      Telemetry.log_simple_client_event(user.id, "client.simple_user_event-#{r}")
+    {result, _} = Telemetry.log_simple_client_event(user.id, "client.simple_user_event-#{r}")
 
     assert result == :ok
 
@@ -24,8 +23,9 @@ defmodule Teiserver.Telemetry.SimpleClientEventTest do
     assert Telemetry.list_simple_client_events(where: [user_id: user.id]) |> Enum.count() == 1
 
     # Ensure the client event types exist too
-    type_list = Telemetry.list_simple_client_event_types()
-    |> Enum.map(fn %{name: name} -> name end)
+    type_list =
+      Telemetry.list_simple_client_event_types()
+      |> Enum.map(fn %{name: name} -> name end)
 
     assert Enum.member?(type_list, "client.simple_user_event-#{r}")
   end

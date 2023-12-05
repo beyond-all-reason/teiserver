@@ -9,7 +9,13 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventTypeLib do
     name = String.trim(name)
 
     Teiserver.cache_get_or_store(:telemetry_simple_lobby_event_types_cache, name, fn ->
-      query = SimpleLobbyEventTypeQueries.query_simple_lobby_event_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
+      query =
+        SimpleLobbyEventTypeQueries.query_simple_lobby_event_types(
+          where: [name: name],
+          select: [:id],
+          order_by: ["ID (Lowest first)"]
+        )
+
       case Repo.all(query) do
         [] ->
           {:ok, event_type} =
@@ -81,7 +87,8 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventTypeLib do
 
   """
   @spec create_simple_lobby_event_type() :: {:ok, SimpleLobbyEventType} | {:error, Ecto.Changeset}
-  @spec create_simple_lobby_event_type(map) :: {:ok, SimpleLobbyEventType} | {:error, Ecto.Changeset}
+  @spec create_simple_lobby_event_type(map) ::
+          {:ok, SimpleLobbyEventType} | {:error, Ecto.Changeset}
   def create_simple_lobby_event_type(attrs \\ %{}) do
     %SimpleLobbyEventType{}
     |> SimpleLobbyEventType.changeset(attrs)
@@ -100,7 +107,8 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventTypeLib do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_simple_lobby_event_type(SimpleLobbyEventType, map) :: {:ok, SimpleLobbyEventType} | {:error, Ecto.Changeset}
+  @spec update_simple_lobby_event_type(SimpleLobbyEventType, map) ::
+          {:ok, SimpleLobbyEventType} | {:error, Ecto.Changeset}
   def update_simple_lobby_event_type(%SimpleLobbyEventType{} = simple_lobby_event_type, attrs) do
     simple_lobby_event_type
     |> SimpleLobbyEventType.changeset(attrs)
@@ -119,7 +127,8 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventTypeLib do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_simple_lobby_event_type(SimpleLobbyEventType) :: {:ok, SimpleLobbyEventType} | {:error, Ecto.Changeset}
+  @spec delete_simple_lobby_event_type(SimpleLobbyEventType) ::
+          {:ok, SimpleLobbyEventType} | {:error, Ecto.Changeset}
   def delete_simple_lobby_event_type(%SimpleLobbyEventType{} = simple_lobby_event_type) do
     Repo.delete(simple_lobby_event_type)
   end
@@ -135,7 +144,10 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventTypeLib do
   """
   @spec change_simple_lobby_event_type(SimpleLobbyEventType) :: Ecto.Changeset
   @spec change_simple_lobby_event_type(SimpleLobbyEventType, map) :: Ecto.Changeset
-  def change_simple_lobby_event_type(%SimpleLobbyEventType{} = simple_lobby_event_type, attrs \\ %{}) do
+  def change_simple_lobby_event_type(
+        %SimpleLobbyEventType{} = simple_lobby_event_type,
+        attrs \\ %{}
+      ) do
     SimpleLobbyEventType.changeset(simple_lobby_event_type, attrs)
   end
 end

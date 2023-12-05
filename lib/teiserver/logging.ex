@@ -474,7 +474,12 @@ defmodule Teiserver.Logging do
 
     if recache do
       data = Teiserver.Logging.Tasks.PersistServerMonthTask.month_so_far()
-      Teiserver.cache_put(:application_metadata_cache, "teiserver_month_month_metrics_cache", data)
+
+      Teiserver.cache_put(
+        :application_metadata_cache,
+        "teiserver_month_month_metrics_cache",
+        data
+      )
 
       Teiserver.cache_put(
         :application_metadata_cache,
@@ -633,7 +638,10 @@ defmodule Teiserver.Logging do
   @spec get_this_quarters_server_metrics_log(boolean) :: map()
   def get_this_quarters_server_metrics_log(force_recache \\ false) do
     last_time =
-      Teiserver.cache_get(:application_metadata_cache, "teiserver_quarter_server_metrics_last_time")
+      Teiserver.cache_get(
+        :application_metadata_cache,
+        "teiserver_quarter_server_metrics_last_time"
+      )
 
     recache =
       cond do
@@ -1159,7 +1167,12 @@ defmodule Teiserver.Logging do
 
     if recache do
       data = Teiserver.Logging.Tasks.PersistMatchMonthTask.month_so_far()
-      Teiserver.cache_put(:application_metadata_cache, "teiserver_month_month_metrics_cache", data)
+
+      Teiserver.cache_put(
+        :application_metadata_cache,
+        "teiserver_month_month_metrics_cache",
+        data
+      )
 
       Teiserver.cache_put(
         :application_metadata_cache,
@@ -1188,7 +1201,12 @@ defmodule Teiserver.Logging do
 
     if recache do
       data = Teiserver.Logging.Tasks.PersistMatchMonthTask.month_so_far()
-      Teiserver.cache_put(:application_metadata_cache, "teiserver_month_match_metrics_cache", data)
+
+      Teiserver.cache_put(
+        :application_metadata_cache,
+        "teiserver_month_match_metrics_cache",
+        data
+      )
 
       Teiserver.cache_put(
         :application_metadata_cache,
@@ -1765,7 +1783,6 @@ defmodule Teiserver.Logging do
 
     Repo.one(query)
   end
-
 
   # Delegated to helpers
   @spec add_anonymous_audit_log(String.t(), Map.t()) :: Teiserver.Logging.AuditLog.t()

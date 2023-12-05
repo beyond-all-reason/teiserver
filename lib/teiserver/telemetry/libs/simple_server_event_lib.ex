@@ -10,18 +10,20 @@ defmodule Teiserver.Telemetry.SimpleServerEventLib do
   @spec colour :: atom
   def colour(), do: :info2
 
-  @spec icon() :: String.t
+  @spec icon() :: String.t()
   def icon(), do: "fa-server"
 
-  @spec log_simple_server_event(integer, String.t) :: {:error, Ecto.Changeset} | {:ok, SimpleServerEvent}
+  @spec log_simple_server_event(integer, String.t()) ::
+          {:error, Ecto.Changeset} | {:ok, SimpleServerEvent}
   def log_simple_server_event(userid, event_type_name) do
     event_type_id = Telemetry.get_or_add_simple_server_event_type(event_type_name)
 
-    result = create_simple_server_event(%{
-      user_id: userid,
-      event_type_id: event_type_id,
-      timestamp: Timex.now()
-    })
+    result =
+      create_simple_server_event(%{
+        user_id: userid,
+        event_type_id: event_type_id,
+        timestamp: Timex.now()
+      })
 
     case result do
       {:ok, _event} ->
