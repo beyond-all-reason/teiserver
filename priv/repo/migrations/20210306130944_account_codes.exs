@@ -15,11 +15,5 @@ defmodule Teiserver.Repo.Migrations.AccountCodes do
 
     create index(:account_codes, [:value])
   end
-  def up do
-    execute "CREATE INDEX lower_username ON account_users (LOWER(name))"
-  end
 
-  def down do
-    execute "DROP INDEX lower_username"
-  end
 end
