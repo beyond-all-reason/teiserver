@@ -661,15 +661,17 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   #################### Boss
   def handle_command(%{command: "balancemode", remaining: remaining, senderid: senderid}, state) do
-    remaining = remaining
-      |> String.downcase
-      |> String.trim
+    remaining =
+      remaining
+      |> String.downcase()
+      |> String.trim()
 
-    allowed_choices = if CacheUser.is_moderator?(senderid) do
-      Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
-    else
-      ~w(loser_picks cheeky_switcher_smart)
-    end
+    allowed_choices =
+      if CacheUser.is_moderator?(senderid) do
+        Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
+      else
+        ~w(loser_picks cheeky_switcher_smart)
+      end
 
     if Enum.member?(allowed_choices, remaining) do
       ChatLib.say(
@@ -691,8 +693,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       state
     end
   end
-
-
 
   def handle_command(%{command: "gatekeeper", remaining: mode, senderid: senderid} = cmd, state) do
     state =
@@ -787,13 +787,19 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         {level, _} ->
           ConsulServer.say_command(cmd, state)
           LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+
           %{
             state
             | minimum_rating_to_play: level |> max(0) |> min(state.maximum_rating_to_play - 1)
           }
       end
     else
-      Lobby.sayex(state.coordinator_id, "You cannot set a rating limit if all are welcome to the game", state.lobby_id)
+      Lobby.sayex(
+        state.coordinator_id,
+        "You cannot set a rating limit if all are welcome to the game",
+        state.lobby_id
+      )
+
       state
     end
   end
@@ -808,8 +814,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{command: "maxratinglevel", remaining: remaining, senderid: senderid} = cmd,
         state
       ) do
-      if allowed_to_set_rating_limit?(state) do
-        case Integer.parse(remaining |> String.trim()) do
+    if allowed_to_set_rating_limit?(state) do
+      case Integer.parse(remaining |> String.trim()) do
         :error ->
           Lobby.sayprivateex(
             state.coordinator_id,
@@ -825,13 +831,19 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         {level, _} ->
           ConsulServer.say_command(cmd, state)
           LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+
           %{
             state
             | maximum_rating_to_play: level |> min(1000) |> max(state.minimum_rating_to_play + 1)
           }
       end
     else
-      Lobby.sayex(state.coordinator_id, "You cannot set a rating limit if all are welcome to the game", state.lobby_id)
+      Lobby.sayex(
+        state.coordinator_id,
+        "You cannot set a rating limit if all are welcome to the game",
+        state.lobby_id
+      )
+
       state
     end
   end
@@ -874,13 +886,19 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
               ConsulServer.say_command(cmd, state)
               LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+
               %{
                 state
                 | minimum_rating_to_play: max(min_level, 0),
                   maximum_rating_to_play: min(max_level, 1000)
               }
             else
-              Lobby.sayex(state.coordinator_id, "You cannot set a rating limit if all are welcome to the game", state.lobby_id)
+              Lobby.sayex(
+                state.coordinator_id,
+                "You cannot set a rating limit if all are welcome to the game",
+                state.lobby_id
+              )
+
               state
             end
         end
@@ -1002,6 +1020,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
             ConsulServer.say_command(cmd, state)
             LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+
             %{
               state
               | minimum_rank_to_play: max(min_level, 0),
@@ -1055,6 +1074,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       {level, _} ->
         ConsulServer.say_command(cmd, state)
         LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+
         %{
           state
           | minimum_uncertainty_to_play:
@@ -1089,6 +1109,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       {level, _} ->
         ConsulServer.say_command(cmd, state)
         LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+
         %{
           state
           | maximum_uncertainty_to_play:
@@ -1134,6 +1155,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
             ConsulServer.say_command(cmd, state)
             LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+
             %{
               state
               | minimum_uncertainty_to_play: max(min_level, 0),
@@ -1390,21 +1412,25 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "rename", remaining: new_name, senderid: senderid} = cmd, state) do
     new_name = String.trim(new_name)
-    stripped_name = case Regex.run(~r/^[a-zA-Z0-9_\-\[\] \<\>\+\|:]+$/, new_name) do
-      [s] -> s
-      _ -> ""
-    end
+
+    stripped_name =
+      case Regex.run(~r/^[a-zA-Z0-9_\-\[\] \<\>\+\|:]+$/, new_name) do
+        [s] -> s
+        _ -> ""
+      end
 
     lobby = Lobby.get_lobby(state.lobby_id)
 
-    not_all_welcome = cond do
-      state.maximum_rating_to_play < 1000 -> true
-      state.minimum_rating_to_play > 0 -> true
-      true -> false
-    end
+    not_all_welcome =
+      cond do
+        state.maximum_rating_to_play < 1000 -> true
+        state.minimum_rating_to_play > 0 -> true
+        true -> false
+      end
 
-    starts_with_lobby_policy = new_name
-      |> String.downcase
+    starts_with_lobby_policy =
+      new_name
+      |> String.downcase()
       |> String.starts_with?("preset")
 
     cond do
@@ -1418,6 +1444,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "That lobby name been rejected. Please be aware that misuse of the lobby naming system can cause your chat privileges to be revoked.",
           state.lobby_id
         )
+
         state
 
       state.lobby_policy_id != nil ->
@@ -1426,6 +1453,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "This is a server managed lobby, you cannot rename it",
           state.lobby_id
         )
+
         state
 
       # String.length(new_name) > 20 ->
@@ -1442,6 +1470,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "This is not a server managed lobby, you cannot use that name",
           state.lobby_id
         )
+
         state
 
       not_all_welcome && allwelcome_name?(stripped_name) ->
@@ -1450,6 +1479,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "You cannot declare a lobby to be welcome to all if there is a rating limit",
           state.lobby_id
         )
+
         state
 
       new_name != stripped_name ->
@@ -1458,6 +1488,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "That name contains one or more invalid characters (alphanumeric, spaces and some special characters allowed)",
           state.lobby_id
         )
+
         state
 
       senderid != lobby.founder_id ->
@@ -1486,6 +1517,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             state.lobby_id
           )
         end
+
         state
 
       lobby.player_rename ->
@@ -1979,7 +2011,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   defp allowed_to_set_rating_limit?(state) do
-    name = state.lobby_id
+    name =
+      state.lobby_id
       |> Battle.get_lobby()
       |> Map.get(:name)
 
@@ -1990,8 +2023,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   defp allwelcome_name?(name) do
-    name = name
-      |> String.downcase
+    name =
+      name
+      |> String.downcase()
       |> String.replace(" ", "")
 
     cond do

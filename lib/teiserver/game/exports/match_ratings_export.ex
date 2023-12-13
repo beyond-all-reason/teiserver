@@ -49,11 +49,12 @@ defmodule Teiserver.Game.MatchRatingsExport do
 
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[params["rating_type"]]
 
-    data = get_data(
-      start_date |> Timex.to_datetime(),
-      end_date |> Timex.to_datetime(),
-      rating_type_id
-    )
+    data =
+      get_data(
+        start_date |> Timex.to_datetime(),
+        end_date |> Timex.to_datetime(),
+        rating_type_id
+      )
 
     content_type = "application/json"
     path = "/tmp/match_ratings_export.json"
@@ -67,12 +68,13 @@ defmodule Teiserver.Game.MatchRatingsExport do
   end
 
   defp get_data(start_date, end_date, rating_type_id) do
-    games_per_chunk = round(@id_chunk_size/@game_chunk_size)
+    games_per_chunk = round(@id_chunk_size / @game_chunk_size)
 
     calculate_match_pages(start_date, end_date, rating_type_id)
     |> Stream.with_index()
     |> Stream.map(fn {{offset, limit, total_page_count}, id_chunk_index} ->
       Logger.info("ID Chunk - #{id_chunk_index + 1}/#{total_page_count}")
+
       get_match_ids_in_chunk(start_date, end_date, rating_type_id, offset, limit)
       |> Stream.chunk_every(@game_chunk_size)
       |> Stream.with_index()
@@ -102,18 +104,20 @@ defmodule Teiserver.Game.MatchRatingsExport do
         AND started IS NOT NULL
     """
 
-    match_count = case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date, rating_type_id]) do
-      {:ok, results} ->
-        results.rows |> List.flatten |> hd
+    match_count =
+      case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date, rating_type_id]) do
+        {:ok, results} ->
+          results.rows |> List.flatten() |> hd
 
-      {a, b} ->
-        raise "ERR: #{a}, #{b}"
-    end
+        {a, b} ->
+          raise "ERR: #{a}, #{b}"
+      end
+
     Logger.info("Found #{match_count} matches, #{start_date} - #{end_date}")
 
     page_count = ceil(match_count / @id_chunk_size)
 
-    Range.new(0, page_count-1)
+    Range.new(0, page_count - 1)
     |> Enum.map(fn page_number ->
       {page_number * @id_chunk_size, @id_chunk_size, page_count}
     end)
@@ -135,7 +139,13 @@ defmodule Teiserver.Game.MatchRatingsExport do
       LIMIT $5
     """
 
-    case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date, rating_type_id, offset, limit]) do
+    case Ecto.Adapters.SQL.query(Repo, query, [
+           start_date,
+           end_date,
+           rating_type_id,
+           offset,
+           limit
+         ]) do
       {:ok, results} ->
         List.flatten(results.rows)
 
@@ -214,7 +224,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
           new_uncertainty: rating_log.value["uncertainty"],
           rating_change: rating_log.value["rating_change"],
           skill_change: rating_log.value["skill_change"],
-          uncertainty_change: rating_log.value["uncertainty_change"],
+          uncertainty_change: rating_log.value["uncertainty_change"]
           # old_rating:
           #   rating_log.value["rating_value"] - (rating_log.value["rating_value_change"] || 0),
           # old_skill: rating_log.value["skill"] - (rating_log.value["skill_change"] || 0),

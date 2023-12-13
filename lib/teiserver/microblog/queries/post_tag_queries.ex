@@ -9,7 +9,7 @@ defmodule Teiserver.Microblog.PostTagQueries do
     query = from(post_tags in PostTag)
 
     query
-    |> do_where([id: args[:id]])
+    |> do_where(id: args[:id])
     |> do_where(args[:where])
     |> query_select(args[:select])
   end

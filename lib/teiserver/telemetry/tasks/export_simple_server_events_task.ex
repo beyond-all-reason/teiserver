@@ -22,6 +22,7 @@ defmodule Teiserver.Telemetry.ExportSimpleServerEventsTask do
   def perform(_) do
     %{}
   end
+
   defp add_csv_headings(output) do
     headings = [
       [

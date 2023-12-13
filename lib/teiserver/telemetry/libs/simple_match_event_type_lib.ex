@@ -9,7 +9,13 @@ defmodule Teiserver.Telemetry.SimpleMatchEventTypeLib do
     name = String.trim(name)
 
     Teiserver.cache_get_or_store(:telemetry_simple_match_event_types_cache, name, fn ->
-      query = SimpleMatchEventTypeQueries.query_simple_match_event_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
+      query =
+        SimpleMatchEventTypeQueries.query_simple_match_event_types(
+          where: [name: name],
+          select: [:id],
+          order_by: ["ID (Lowest first)"]
+        )
+
       case Repo.all(query) do
         [] ->
           {:ok, event_type} =
@@ -81,7 +87,8 @@ defmodule Teiserver.Telemetry.SimpleMatchEventTypeLib do
 
   """
   @spec create_simple_match_event_type() :: {:ok, SimpleMatchEventType} | {:error, Ecto.Changeset}
-  @spec create_simple_match_event_type(map) :: {:ok, SimpleMatchEventType} | {:error, Ecto.Changeset}
+  @spec create_simple_match_event_type(map) ::
+          {:ok, SimpleMatchEventType} | {:error, Ecto.Changeset}
   def create_simple_match_event_type(attrs \\ %{}) do
     %SimpleMatchEventType{}
     |> SimpleMatchEventType.changeset(attrs)
@@ -100,7 +107,8 @@ defmodule Teiserver.Telemetry.SimpleMatchEventTypeLib do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_simple_match_event_type(SimpleMatchEventType, map) :: {:ok, SimpleMatchEventType} | {:error, Ecto.Changeset}
+  @spec update_simple_match_event_type(SimpleMatchEventType, map) ::
+          {:ok, SimpleMatchEventType} | {:error, Ecto.Changeset}
   def update_simple_match_event_type(%SimpleMatchEventType{} = simple_match_event_type, attrs) do
     simple_match_event_type
     |> SimpleMatchEventType.changeset(attrs)
@@ -119,7 +127,8 @@ defmodule Teiserver.Telemetry.SimpleMatchEventTypeLib do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_simple_match_event_type(SimpleMatchEventType) :: {:ok, SimpleMatchEventType} | {:error, Ecto.Changeset}
+  @spec delete_simple_match_event_type(SimpleMatchEventType) ::
+          {:ok, SimpleMatchEventType} | {:error, Ecto.Changeset}
   def delete_simple_match_event_type(%SimpleMatchEventType{} = simple_match_event_type) do
     Repo.delete(simple_match_event_type)
   end
@@ -135,7 +144,10 @@ defmodule Teiserver.Telemetry.SimpleMatchEventTypeLib do
   """
   @spec change_simple_match_event_type(SimpleMatchEventType) :: Ecto.Changeset
   @spec change_simple_match_event_type(SimpleMatchEventType, map) :: Ecto.Changeset
-  def change_simple_match_event_type(%SimpleMatchEventType{} = simple_match_event_type, attrs \\ %{}) do
+  def change_simple_match_event_type(
+        %SimpleMatchEventType{} = simple_match_event_type,
+        attrs \\ %{}
+      ) do
     SimpleMatchEventType.changeset(simple_match_event_type, attrs)
   end
 end

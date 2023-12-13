@@ -1,4 +1,8 @@
-<TeiserverWeb.MicroblogComponents.sub_menu active={"tags"} view_colour={@view_colour} current_user={@current_user} />
+<TeiserverWeb.MicroblogComponents.sub_menu
+  active="tags"
+  view_colour={@view_colour}
+  current_user={@current_user}
+/>
 
 <div class="row mt-4">
   <div class="col">
@@ -10,10 +14,11 @@
     >
       <:col :let={tag} label="Name"><%= tag.name %></:col>
       <:col :let={tag} label="Style">
-        <span class="badge rounded-pill px-4" style={"background-color: #{tag.colour}; cursor: pointer; font-size: 1em;"}>
-          &nbsp;
-          <Fontawesome.icon icon={tag.icon} style="solid" />
-          &nbsp;
+        <span
+          class="badge rounded-pill px-4"
+          style={"background-color: #{tag.colour}; cursor: pointer; font-size: 1em;"}
+        >
+          &nbsp; <Fontawesome.icon icon={tag.icon} style="solid" /> &nbsp;
         </span>
       </:col>
     </.table>

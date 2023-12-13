@@ -27,32 +27,37 @@
     </div>
 
     <div class="col my-2">
-      <%= label(f, :special_name, class: "control-label") %> (if used, this overwrites the name)
-      <%= select(f, :special_name, @special_names, class: "form-control") %>
+      <%= label(f, :special_name, class: "control-label") %> (if used, this overwrites the name) <%= select(
+        f,
+        :special_name,
+        @special_names,
+        class: "form-control"
+      ) %>
       <%= error_tag(f, :special_name) %>
     </div>
 
-    <div class="col my-2" :if={@special_names}>
-      <%= label(f, :channel_id, class: "control-label") %> id
-      <%= text_input(f, :channel_id, class: "form-control") %>
+    <div :if={@special_names} class="col my-2">
+      <%= label(f, :channel_id, class: "control-label") %> id <%= text_input(f, :channel_id,
+        class: "form-control"
+      ) %>
       <%= error_tag(f, :channel_id) %>
     </div>
   </div>
-  
+
   <div class="row">
     <div class="col my-2">
       <%= label(f, :read_permission, class: "control-label") %>
       <%= text_input(f, :read_permission, class: "form-control") %>
       <%= error_tag(f, :read_permission) %>
     </div>
-    
+
     <div class="col my-2">
       <%= label(f, :post_permission, class: "control-label") %>
       <%= text_input(f, :post_permission, class: "form-control") %>
       <%= error_tag(f, :post_permission) %>
     </div>
   </div>
-  
+
   <div class="row">
     <div class="col-lg-6 my-2">
       <%= input_with_type(f, :colour, "color") %>

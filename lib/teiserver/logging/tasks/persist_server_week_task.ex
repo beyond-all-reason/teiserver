@@ -49,16 +49,18 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
               ]
             )
 
-          user_activity_logs = Logging.list_user_activity_day_logs(
-            search: [
+          user_activity_logs =
+            Logging.list_user_activity_day_logs(
+              search: [
                 start_date: Timex.beginning_of_week(log.date),
                 end_date: Timex.end_of_week(log.date)
-            ]
-          )
+              ]
+            )
 
-          data = logs
-          |> Enum.zip(user_activity_logs)
-          |> ServerDayLogLib.aggregate_day_logs()
+          data =
+            logs
+            |> Enum.zip(user_activity_logs)
+            |> ServerDayLogLib.aggregate_day_logs()
 
           {:ok, _} =
             Logging.create_server_week_log(%{
@@ -90,16 +92,18 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
           ]
         )
 
-      user_activity_logs = Logging.list_user_activity_day_logs(
-        search: [
+      user_activity_logs =
+        Logging.list_user_activity_day_logs(
+          search: [
             start_date: Timex.beginning_of_week(new_date),
             end_date: Timex.end_of_week(new_date)
-        ]
-      )
+          ]
+        )
 
-      data = logs
-      |> Enum.zip(user_activity_logs)
-      |> ServerDayLogLib.aggregate_day_logs()
+      data =
+        logs
+        |> Enum.zip(user_activity_logs)
+        |> ServerDayLogLib.aggregate_day_logs()
 
       {:ok, _} =
         Logging.create_server_week_log(%{
@@ -117,11 +121,12 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
   def week_so_far() do
     now = Timex.now()
 
-    user_activity_logs = Logging.list_user_activity_day_logs(
-      search: [
-        start_date: Timex.beginning_of_week(now)
-      ]
-    )
+    user_activity_logs =
+      Logging.list_user_activity_day_logs(
+        search: [
+          start_date: Timex.beginning_of_week(now)
+        ]
+      )
 
     Logging.list_server_day_logs(
       search: [

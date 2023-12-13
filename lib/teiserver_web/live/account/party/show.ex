@@ -27,8 +27,17 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     user = Account.get_user_by_id(socket.assigns.current_user.id)
     friends = Account.list_friend_ids_of_user(socket.assigns.current_user.id)
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{socket.assigns.current_user.id}")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_client:#{socket.assigns.current_user.id}")
+    :ok =
+      PubSub.subscribe(
+        Teiserver.PubSub,
+        "teiserver_client_messages:#{socket.assigns.current_user.id}"
+      )
+
+    :ok =
+      PubSub.subscribe(
+        Teiserver.PubSub,
+        "teiserver_liveview_client:#{socket.assigns.current_user.id}"
+      )
 
     socket =
       socket
@@ -239,5 +248,6 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     moderator = allow?(socket, "Moderator")
     moderator or leader_id == user_id
   end
+
   defp leader?(_), do: false
 end

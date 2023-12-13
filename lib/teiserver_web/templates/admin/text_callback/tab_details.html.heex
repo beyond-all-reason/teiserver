@@ -6,7 +6,7 @@
     <br />
     <h4>Response:</h4>
     <textarea rows="8" class="form-control"><%= @text_callback.response %></textarea>
-    
+
     <%= if allow?(@current_user, "Server") do %>
       <br />
       <h4>Last triggered:</h4>

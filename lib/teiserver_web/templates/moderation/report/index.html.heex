@@ -1,14 +1,17 @@
 <% bsname = view_colour() %>
 
-<TeiserverWeb.Moderation.ModerationComponents.sub_menu active={"reports"} view_colour={view_colour()} />
+<TeiserverWeb.Moderation.ModerationComponents.sub_menu
+  active="reports"
+  view_colour={view_colour()}
+/>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <TeiserverWeb.Moderation.ReportComponents.section_menu
-      active={"index"}
+      active="index"
       view_colour={view_colour()}
-      current_user={@current_user} />
-
+      current_user={@current_user}
+    />
 
     <div class="float-end">
       <%= if @target_id do %>
@@ -17,8 +20,7 @@
             class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
             href={~p"/teiserver/admin/user/#{@target_id}"}
           >
-            <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" />
-            &nbsp;
+            <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" /> &nbsp;
             View user
           </a>
         <% end %>
@@ -27,14 +29,13 @@
           class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
           href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@target_id}_"}
         >
-          <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />
-          &nbsp;
+          <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" /> &nbsp;
           Action user
         </a>
       <% end %>
     </div>
     <br /><br />
-    
+
     <%= if @target && @target.smurf_of_id do %>
       <div class="alert alert-primary">
         <%= @target.name %> has been flagged as a smurf, these reports are not worth acting on.
@@ -87,7 +88,10 @@
                 href={Routes.moderation_report_path(@conn, :user, report.target_id)}
                 class={"btn btn-sm btn-#{Teiserver.Account.UserLib.colour()}"}
               >
-                <Fontawesome.icon icon={Teiserver.Helper.StylingHelper.icon(:user)} style="regular" />
+                <Fontawesome.icon
+                  icon={Teiserver.Helper.StylingHelper.icon(:user)}
+                  style="regular"
+                />
               </a>
               &nbsp; <%= report.target.name %>
             </td>
@@ -125,7 +129,9 @@
               </td>
               <td>
                 <a
-                  href={~p"/battle/chat/#{report.match_id}/#{report.target_id}/#{report.reporter_id}"}
+                  href={
+                    ~p"/battle/chat/#{report.match_id}/#{report.target_id}/#{report.reporter_id}"
+                  }
                   class="btn btn-secondary btn-sm"
                 >
                   Chat
@@ -139,6 +145,5 @@
         <% end %>
       </tbody>
     </table>
-
   </div>
 </div>

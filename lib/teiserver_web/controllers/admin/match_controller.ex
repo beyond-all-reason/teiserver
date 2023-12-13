@@ -16,7 +16,6 @@ defmodule TeiserverWeb.Admin.MatchController do
     sub_menu_active: "match"
   )
 
-
   plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
   plug :add_breadcrumb, name: 'Matches', url: '/teiserver/admin/matches'
 
@@ -138,30 +137,40 @@ defmodule TeiserverWeb.Admin.MatchController do
     # What about new balance?
     new_balance = generate_new_balance_data(match)
 
-    raw_events = Telemetry.list_simple_match_events(where: [match_id: match.id], preload: [:event_types])
+    raw_events =
+      Telemetry.list_simple_match_events(where: [match_id: match.id], preload: [:event_types])
 
-    events_by_type = raw_events
-      |> Enum.group_by(fn e ->
-        e.event_type.name
-      end, fn _ ->
-        1
-      end)
+    events_by_type =
+      raw_events
+      |> Enum.group_by(
+        fn e ->
+          e.event_type.name
+        end,
+        fn _ ->
+          1
+        end
+      )
       |> Enum.map(fn {name, vs} ->
         {name, Enum.count(vs)}
       end)
       |> Enum.sort_by(fn v -> v end, &<=/2)
 
-    team_lookup = members
+    team_lookup =
+      members
       |> Map.new(fn m ->
         {m.user_id, m.team_id}
       end)
 
-    events_by_team_and_type = raw_events
-      |> Enum.group_by(fn e ->
-        {team_lookup[e.user_id] || -1, e.event_type.name}
-      end, fn _ ->
-        1
-      end)
+    events_by_team_and_type =
+      raw_events
+      |> Enum.group_by(
+        fn e ->
+          {team_lookup[e.user_id] || -1, e.event_type.name}
+        end,
+        fn _ ->
+          1
+        end
+      )
       |> Enum.map(fn {key, vs} ->
         {key, Enum.count(vs)}
       end)

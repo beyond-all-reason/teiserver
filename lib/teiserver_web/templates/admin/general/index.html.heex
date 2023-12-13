@@ -7,7 +7,7 @@
   >
     Dashboard
   </.menu_card>
-  
+
   <.menu_card
     :if={allow_any?(@current_user, ~w(Moderator Reviewer Overwatch))}
     icon={Teiserver.Moderation.icon()}
@@ -16,7 +16,7 @@
   >
     Moderation
   </.menu_card>
-  
+
   <.menu_card
     :if={allow_any?(@current_user, ~w(Moderator))}
     icon={Teiserver.Account.UserLib.icon()}
@@ -25,7 +25,7 @@
   >
     Users
   </.menu_card>
-  
+
   <.menu_card
     :if={allow_any?(@current_user, ~w(Reviewer))}
     icon={Teiserver.Chat.LobbyMessageLib.icon()}
@@ -34,7 +34,7 @@
   >
     Chat
   </.menu_card>
-  
+
   <.menu_card
     :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
     icon={Teiserver.Helper.StylingHelper.icon(:summary)}
@@ -54,7 +54,7 @@
   >
     Telemetry
   </.menu_card>
-  
+
   <.menu_card
     :if={allow?(@conn, "Admin")}
     icon={Teiserver.Logging.icon()}
@@ -63,7 +63,7 @@
   >
     Logging
   </.menu_card>
-  
+
   <.menu_card
     :if={allow_any?(@current_user, ~w(Reviewer))}
     icon={Teiserver.Battle.MatchLib.icon()}
@@ -72,7 +72,7 @@
   >
     Matches
   </.menu_card>
-  
+
   <.menu_card
     :if={allow_any?(@current_user, ~w(Server))}
     icon={Teiserver.Game.QueueLib.icon()}
@@ -81,7 +81,7 @@
   >
     Matchmaking
   </.menu_card>
-  
+
   <.menu_card
     :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
     icon={Teiserver.Game.LobbyPolicyLib.icon()}
@@ -90,7 +90,7 @@
   >
     Lobby policies
   </.menu_card>
-  
+
   <.menu_card
     :if={allow_any?(@current_user, ~w(Moderator))}
     icon={Teiserver.Game.AchievementTypeLib.icon()}
@@ -114,7 +114,7 @@
     icon={Teiserver.Communication.DiscordChannelLib.icon()}
     url={~p"/admin/discord_channels"}
     size={:small}
-    icon_class={"fa-brands"}
+    icon_class="fa-brands"
   >
     Discord channels
   </.menu_card>
@@ -129,7 +129,7 @@
   >
     Badge types
   </.menu_card>
-  
+
   <.menu_card
     :if={allow_any?(@conn, ~w(Server))}
     icon={Teiserver.Account.CodeLib.icon()}
@@ -138,7 +138,7 @@
   >
     Codes
   </.menu_card>
-  
+
   <.menu_card
     :if={allow_any?(@conn, ~w(Server))}
     icon={Teiserver.Config.SiteConfigLib.icon()}
@@ -147,7 +147,7 @@
   >
     Site config
   </.menu_card>
-  
+
   <.menu_card
     :if={allow_any?(@conn, ~w(Server))}
     icon={Teiserver.Admin.ToolLib.icon()}
@@ -159,11 +159,7 @@
 </div>
 
 <div class="row page-row">
-  <.menu_card
-    icon={StylingHelper.icon(:back)}
-    url={~p"/"}
-    size={:small}
-  >
+  <.menu_card icon={StylingHelper.icon(:back)} url={~p"/"} size={:small}>
     Back
   </.menu_card>
 </div>

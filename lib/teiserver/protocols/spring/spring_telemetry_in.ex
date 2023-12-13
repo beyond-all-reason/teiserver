@@ -82,7 +82,6 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
     reply(:spring, :okay, result, msg_id, state)
   end
 
-
   def do_handle("simple_client_event", data, _msg_id, state) do
     do_simple_client_event(data, state)
     state
@@ -109,6 +108,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
           else
             Telemetry.log_simple_anon_event(hash, event_name)
           end
+
           "success"
 
         nil ->
@@ -130,6 +130,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
               else
                 Telemetry.log_complex_anon_event(hash, event_name, value)
               end
+
               "success"
 
             {:error, reason} ->
@@ -157,6 +158,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
                 # Telemetry.log_live_client_event(state.userid, event_name, value)
                 :ok
               end
+
               "success"
 
             {:error, reason} ->
@@ -185,6 +187,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
             else
               Telemetry.log_anon_property(hash, event, value)
             end
+
             "success"
           else
             # Logger.error("update_client_property:bad base64 value - #{data}")

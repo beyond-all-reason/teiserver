@@ -41,24 +41,28 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
         joins: []
       )
 
-    logs = if allow?(conn.assigns.current_user, "Moderator") do
-      Logging.list_audit_logs(
-        search: [
-          action: "Discord.text_callback",
-          details_equal: {"command", id}
-        ],
-        order_by: "Newest first"
-      )
-      |> Enum.map(fn log ->
-        user = Account.get_user_by_discord_id(log.details["discord_user_id"]) || %{name: nil}
-        channel = Communication.get_discord_channel("id:#{log.details["discord_channel_id"]}") || %{name: nil}
+    logs =
+      if allow?(conn.assigns.current_user, "Moderator") do
+        Logging.list_audit_logs(
+          search: [
+            action: "Discord.text_callback",
+            details_equal: {"command", id}
+          ],
+          order_by: "Newest first"
+        )
+        |> Enum.map(fn log ->
+          user = Account.get_user_by_discord_id(log.details["discord_user_id"]) || %{name: nil}
 
-        Map.merge(log, %{
-          username: user.name,
-          channel_name: channel.name
-        })
-      end)
-    end
+          channel =
+            Communication.get_discord_channel("id:#{log.details["discord_channel_id"]}") ||
+              %{name: nil}
+
+          Map.merge(log, %{
+            username: user.name,
+            channel_name: channel.name
+          })
+        end)
+      end
 
     text_callback
     |> TextCallbackLib.make_favourite()

@@ -25,8 +25,9 @@ defmodule Teiserver.Telemetry.AnonPropertyTest do
     assert property.value == "value"
 
     # Ensure the anon property types exist too
-    type_list = Telemetry.list_property_types()
-    |> Enum.map(fn %{name: name} -> name end)
+    type_list =
+      Telemetry.list_property_types()
+      |> Enum.map(fn %{name: name} -> name end)
 
     assert Enum.member?(type_list, "anon.anon_property-#{r}")
 

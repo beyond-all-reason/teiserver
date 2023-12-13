@@ -39,7 +39,9 @@ defmodule TeiserverWeb.Microblog.Blog.PreferenceLiveTest do
       assert user_preference.disabled_tags == [tag1.id]
 
       # Change mode
-      html = index_live |> element("#change-tag-mode-form") |> render_change(%{"tag-mode" => "Filter"})
+      html =
+        index_live |> element("#change-tag-mode-form") |> render_change(%{"tag-mode" => "Filter"})
+
       refute html =~ "disabled-reset-#{tag1.id}"
       refute html =~ "disabled-reset-#{tag2.id}"
       refute html =~ "disabled-reset-#{tag3.id}"
@@ -60,8 +62,7 @@ defmodule TeiserverWeb.Microblog.Blog.PreferenceLiveTest do
       # Enable two tags
       index_live |> element("#unassigned-enable-#{tag2.id}") |> render_click()
 
-      html = index_live
-        |> element("#unassigned-enable-#{tag1.id}") |> render_click()
+      html = index_live |> element("#unassigned-enable-#{tag1.id}") |> render_click()
 
       refute html =~ "disabled-reset-#{tag1.id}"
       refute html =~ "disabled-reset-#{tag2.id}"
@@ -99,7 +100,6 @@ defmodule TeiserverWeb.Microblog.Blog.PreferenceLiveTest do
       assert html =~ "disabled-reset-#{tag2.id}"
       refute html =~ "enabled-reset-#{tag3.id}"
       refute html =~ "disabled-reset-#{tag3.id}"
-
 
       # Enable tag3
       html = index_live |> element("#unassigned-enable-#{tag3.id}") |> render_click()

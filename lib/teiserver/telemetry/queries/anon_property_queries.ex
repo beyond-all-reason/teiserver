@@ -9,8 +9,8 @@ defmodule Teiserver.Telemetry.AnonPropertyQueries do
     query = from(anon_properties in AnonProperty)
 
     query
-    |> do_where([hash: args[:hash]])
-    |> do_where([property_type_id: args[:property_type_id]])
+    |> do_where(hash: args[:hash])
+    |> do_where(property_type_id: args[:property_type_id])
     |> do_where(args[:where])
     |> do_preload(args[:preload])
     |> do_order_by(args[:order_by])
@@ -58,6 +58,7 @@ defmodule Teiserver.Telemetry.AnonPropertyQueries do
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
+
   defp do_order_by(query, params) do
     params
     |> Enum.reduce(query, fn key, query_acc ->
@@ -115,12 +116,13 @@ defmodule Teiserver.Telemetry.AnonPropertyQueries do
       AND p.last_updated BETWEEN $2 AND $3
       GROUP BY value
     """
+
     case Ecto.Adapters.SQL.query(Repo, query, [property_type_id, start_datetime, end_datetime]) do
       {:ok, results} ->
         results.rows
-          |> Map.new(fn [key, value] ->
-            {key, value}
-          end)
+        |> Map.new(fn [key, value] ->
+          {key, value}
+        end)
 
       {a, b} ->
         raise "ERR: #{a}, #{b}"

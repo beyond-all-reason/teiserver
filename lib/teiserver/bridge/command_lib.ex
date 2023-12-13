@@ -11,7 +11,7 @@ defmodule Teiserver.Bridge.CommandLib do
     module.execute(interaction, options_map)
   end
 
-  @spec get_command_module(String.t) :: module
+  @spec get_command_module(String.t()) :: module
   def get_command_module(name) do
     Teiserver.store_get(:discord_command_cache, name) ||
       Teiserver.store_get(:discord_command_cache, "no_command")
@@ -22,19 +22,22 @@ defmodule Teiserver.Bridge.CommandLib do
   @spec cache_discord_commands() :: :ok
   def cache_discord_commands() do
     {:ok, module_list} = :application.get_key(:teiserver, :modules)
-    lookup = module_list
+
+    lookup =
+      module_list
       |> Enum.filter(fn m ->
-        m |> Module.split |> Enum.take(3) == ["Teiserver", "Bridge", "Commands"]
+        m |> Module.split() |> Enum.take(3) == ["Teiserver", "Bridge", "Commands"]
       end)
       |> Enum.filter(fn m ->
         Code.ensure_loaded(m)
 
-        exports = function_exported?(m, :name, 0)
-          && function_exported?(m, :cmd_definition, 0)
-          && function_exported?(m, :execute, 2)
+        exports =
+          function_exported?(m, :name, 0) &&
+            function_exported?(m, :cmd_definition, 0) &&
+            function_exported?(m, :execute, 2)
 
         if not exports do
-          Logger.error("DiscordCommand #{inspect m} does not export all the required functions")
+          Logger.error("DiscordCommand #{inspect(m)} does not export all the required functions")
         end
 
         exports
@@ -69,17 +72,21 @@ defmodule Teiserver.Bridge.CommandLib do
   @spec re_cache_discord_command(String.t()) :: :ok
   def re_cache_discord_command(name) do
     m = get_command_module(name)
+
     if m do
       Code.ensure_loaded(m)
 
-      exports = function_exported?(m, :name, 0)
-        && function_exported?(m, :cmd_definition, 0)
-        && function_exported?(m, :execute, 2)
+      exports =
+        function_exported?(m, :name, 0) &&
+          function_exported?(m, :cmd_definition, 0) &&
+          function_exported?(m, :execute, 2)
 
       if exports do
         Teiserver.store_put(:discord_command_cache, name, m)
       else
-        Logger.error("DiscordCommand (recache) #{inspect m} does not export all the required functions")
+        Logger.error(
+          "DiscordCommand (recache) #{inspect(m)} does not export all the required functions"
+        )
       end
     end
 

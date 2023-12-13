@@ -183,19 +183,21 @@ defmodule Teiserver.Room do
           nil
 
         _room ->
-          insert_result = if not Enum.member?(@dont_log_room, room_name) do
-            Chat.create_room_message(%{
-              content: msg,
-              chat_room: room_name,
-              inserted_at: Timex.now(),
-              user_id: from_id
-            })
-          end
+          insert_result =
+            if not Enum.member?(@dont_log_room, room_name) do
+              Chat.create_room_message(%{
+                content: msg,
+                chat_room: room_name,
+                inserted_at: Timex.now(),
+                user_id: from_id
+              })
+            end
 
-          message_object = case insert_result do
-            {:ok, message_object} -> message_object
-            _ -> %{}
-          end
+          message_object =
+            case insert_result do
+              {:ok, message_object} -> message_object
+              _ -> %{}
+            end
 
           PubSub.broadcast(
             Teiserver.PubSub,

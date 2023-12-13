@@ -12,7 +12,7 @@
 
   <.menu_card
     :if={false and allow?(@current_user, "Moderator")}
-    icon={"question"}
+    icon="question"
     icon_class="fa-duotone"
     url={~p"/teiserver/admin"}
   >
@@ -39,22 +39,14 @@
 </div>
 
 <div class="row">
-  <.menu_card
-    icon={Teiserver.Chat.RoomMessageLib.icon()}
-    icon_class="fa-duotone"
-    url={~p"/chat"}
-  >
+  <.menu_card icon={Teiserver.Chat.RoomMessageLib.icon()} icon_class="fa-duotone" url={~p"/chat"}>
     Chat
   </.menu_card>
-  
-  <.menu_card
-    icon={Teiserver.Lobby.icon()}
-    icon_class="fa-duotone"
-    url={~p"/battle/lobbies"}
-  >
+
+  <.menu_card icon={Teiserver.Lobby.icon()} icon_class="fa-duotone" url={~p"/battle/lobbies"}>
     Lobbies
   </.menu_card>
-  
+
   <.menu_card
     icon={Teiserver.Account.PartyLib.icon()}
     icon_class="fa-duotone"
@@ -62,7 +54,7 @@
   >
     Parties
   </.menu_card>
-  
+
   <.menu_card
     icon={Teiserver.Game.QueueLib.icon()}
     icon_class="fa-duotone"
@@ -70,33 +62,21 @@
   >
     Matchmaking
   </.menu_card>
-  
-  <.menu_card
-    icon={Teiserver.Battle.MatchLib.icon()}
-    icon_class="fa-duotone"
-    url={~p"/battle"}
-  >
+
+  <.menu_card icon={Teiserver.Battle.MatchLib.icon()} icon_class="fa-duotone" url={~p"/battle"}>
     Matches
   </.menu_card>
-  
-  <.menu_card
-    icon={Teiserver.Microblog.icon()}
-    icon_class="fa-duotone"
-    url={~p"/microblog"}
-  >
+
+  <.menu_card icon={Teiserver.Microblog.icon()} icon_class="fa-duotone" url={~p"/microblog"}>
     Microblog
   </.menu_card>
 </div>
 
 <div class="row">
-  <.menu_card
-    icon={Teiserver.Account.UserLib.icon()}
-    icon_class="fa-duotone"
-    url={~p"/profile"}
-  >
+  <.menu_card icon={Teiserver.Account.UserLib.icon()} icon_class="fa-duotone" url={~p"/profile"}>
     Account
   </.menu_card>
-  
+
   <.menu_card
     icon={Teiserver.Account.RelationshipLib.icon()}
     icon_class="fa-duotone"
@@ -106,17 +86,11 @@
   </.menu_card>
 </div>
 
-
 <div class="row">
   <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
-    <.link
-      href={~p"/logout"}
-      method="post"
-      class="link"
-    >
+    <.link href={~p"/logout"} method="post" class="link">
       <Fontawesome.icon icon="sign-out-alt" style="duotone" size="4x" />
-      <br />
-      Logout
+      <br /> Logout
     </.link>
   </div>
 </div>

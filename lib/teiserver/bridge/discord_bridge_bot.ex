@@ -119,7 +119,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   end
 
   def handle_event({:INTERACTION_CREATE, %{data: data} = interaction, _ws}) do
-    options_map = data.options
+    options_map =
+      data.options
       |> Map.new(fn %{name: name, value: value} ->
         {name, value}
       end)
@@ -166,7 +167,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   def add_command(:textcb) do
     callbacks = Communication.list_text_callbacks()
 
-    choices = callbacks
+    choices =
+      callbacks
       |> Enum.map(fn cb ->
         %{
           name: cb.name,
@@ -189,6 +191,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       ],
       nsfw: false
     }
+
     Nostrum.Api.create_global_application_command(command)
   end
 
@@ -196,6 +199,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   # Teiserver.Bridge.DiscordBridgeBot.delete_guild_application_command(name_here)
   def delete_guild_application_command(name) do
     guild_id = Communication.get_guild_id()
+
     command = %{
       name: name,
       description: "About to be deleted"

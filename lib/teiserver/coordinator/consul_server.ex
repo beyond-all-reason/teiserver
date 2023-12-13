@@ -5,7 +5,19 @@ defmodule Teiserver.Coordinator.ConsulServer do
   """
   use GenServer
   require Logger
-  alias Teiserver.{Account, Coordinator, Client, CacheUser, Lobby, Battle, Telemetry, Config, Communication}
+
+  alias Teiserver.{
+    Account,
+    Coordinator,
+    Client,
+    CacheUser,
+    Lobby,
+    Battle,
+    Telemetry,
+    Config,
+    Communication
+  }
+
   alias Teiserver.Lobby.{ChatLib}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
@@ -279,7 +291,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
             # with the same engine version as the starting lobby
             Lobby.find_empty_lobby(fn a ->
               a.engine_version == old_lobby.engine_version and
-              a.passworded == false
+                a.passworded == false
             end)
           else
             %{id: client.lobby_id}
@@ -363,14 +375,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, state}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_updates", event: :remove_user, client: _client}, state) do
+  def handle_info(
+        %{channel: "teiserver_lobby_updates", event: :remove_user, client: _client},
+        state
+      ) do
     new_player_count = get_player_count(state)
 
     if new_player_count == 0 do
-      new_state = %{state |
-        minimum_rating_to_play: 0,
-        maximum_rating_to_play: 1000
-      }
+      new_state = %{state | minimum_rating_to_play: 0, maximum_rating_to_play: 1000}
 
       {:noreply, new_state}
     else
@@ -812,10 +824,20 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @spec user_allowed_to_play?(T.user(), T.client(), map()) :: boolean()
   defp user_allowed_to_play?(user, client, state) do
+    player_list = list_players(state)
+
     {player_rating, player_uncertainty} =
       BalanceLib.get_user_rating_value_uncertainty_pair(user.id, "Team")
 
     player_rating = max(player_rating, 1)
+    avoid_status = Account.check_avoid_status(user.id, player_list)
+
+    boss_avoid_status =
+      state.host_bosses
+      |> Stream.map(fn boss_id ->
+        Account.does_a_avoid_b?(boss_id, user.id)
+      end)
+      |> Enum.any?()
 
     cond do
       state.minimum_rating_to_play != nil and player_rating < state.minimum_rating_to_play ->
@@ -841,13 +863,32 @@ defmodule Teiserver.Coordinator.ConsulServer do
       not Enum.empty?(client.queues) ->
         false
 
+      Account.is_moderator?(user) ->
+        true
+
+      avoid_status == :avoiding ->
+        match_id = Battle.get_lobby_match_id(state.lobby_id)
+        Telemetry.log_simple_lobby_event(user.id, match_id, "play_refused.avoiding")
+        false
+
+      avoid_status == :avoided ->
+        match_id = Battle.get_lobby_match_id(state.lobby_id)
+        Telemetry.log_simple_lobby_event(user.id, match_id, "play_refused.avoided")
+        false
+
+      boss_avoid_status == true ->
+        match_id = Battle.get_lobby_match_id(state.lobby_id)
+        Telemetry.log_simple_lobby_event(user.id, match_id, "play_refused.boss_avoided")
+        false
+
       true ->
         true
     end
   end
 
   def is_on_friendlist?(userid, state, :players) do
-    player_ids = list_players(state)
+    player_ids =
+      list_players(state)
       |> Enum.map(fn %{userid: player_id} -> player_id end)
 
     # If battle has no players it'll succeed regardless
@@ -862,12 +903,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
         |> Enum.map(fn player_id ->
           Enum.member?(friend_ids, player_id)
         end)
-        |> Enum.any?
+        |> Enum.any?()
     end
   end
 
   def is_on_friendlist?(userid, state, :all) do
-    member_ids = Battle.get_lobby(state.lobby_id)
+    member_ids =
+      Battle.get_lobby(state.lobby_id)
       |> Map.get(:players, [])
 
     # If battle has no players it'll succeed regardless
@@ -882,7 +924,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         |> Enum.map(fn player_id ->
           Enum.member?(friend_ids, player_id)
         end)
-        |> Enum.any?
+        |> Enum.any?()
     end
   end
 
@@ -912,18 +954,21 @@ defmodule Teiserver.Coordinator.ConsulServer do
     match_id = Battle.get_lobby_match_id(state.lobby_id)
 
     block_status = Account.check_block_status(userid, member_list)
-    boss_avoid_status = state.host_bosses
+
+    boss_avoid_status =
+      state.host_bosses
       |> Stream.map(fn boss_id ->
         Account.does_a_avoid_b?(boss_id, userid)
       end)
-      |> Enum.any?
+      |> Enum.any?()
 
     cond do
       client == nil ->
         {false, "No client"}
 
       client.awaiting_warn_ack ->
-        {false, "Awaiting acknowledgement of your warning - check chat from @Coordinator and follow instructions there. Pay attention to spelling."}
+        {false,
+         "Awaiting acknowledgement of your warning - check chat from @Coordinator and follow instructions there. Pay attention to spelling."}
 
       client.moderator ->
         {true, :override_approve}

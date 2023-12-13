@@ -9,7 +9,13 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTypeLib do
     name = String.trim(name)
 
     Teiserver.cache_get_or_store(:telemetry_complex_match_event_types_cache, name, fn ->
-      query = ComplexMatchEventTypeQueries.query_complex_match_event_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
+      query =
+        ComplexMatchEventTypeQueries.query_complex_match_event_types(
+          where: [name: name],
+          select: [:id],
+          order_by: ["ID (Lowest first)"]
+        )
+
       case Repo.all(query) do
         [] ->
           {:ok, event_type} =
@@ -80,8 +86,10 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTypeLib do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_complex_match_event_type() :: {:ok, ComplexMatchEventType} | {:error, Ecto.Changeset}
-  @spec create_complex_match_event_type(map) :: {:ok, ComplexMatchEventType} | {:error, Ecto.Changeset}
+  @spec create_complex_match_event_type() ::
+          {:ok, ComplexMatchEventType} | {:error, Ecto.Changeset}
+  @spec create_complex_match_event_type(map) ::
+          {:ok, ComplexMatchEventType} | {:error, Ecto.Changeset}
   def create_complex_match_event_type(attrs \\ %{}) do
     %ComplexMatchEventType{}
     |> ComplexMatchEventType.changeset(attrs)
@@ -100,7 +108,8 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTypeLib do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_complex_match_event_type(ComplexMatchEventType, map) :: {:ok, ComplexMatchEventType} | {:error, Ecto.Changeset}
+  @spec update_complex_match_event_type(ComplexMatchEventType, map) ::
+          {:ok, ComplexMatchEventType} | {:error, Ecto.Changeset}
   def update_complex_match_event_type(%ComplexMatchEventType{} = complex_match_event_type, attrs) do
     complex_match_event_type
     |> ComplexMatchEventType.changeset(attrs)
@@ -119,7 +128,8 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTypeLib do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_complex_match_event_type(ComplexMatchEventType) :: {:ok, ComplexMatchEventType} | {:error, Ecto.Changeset}
+  @spec delete_complex_match_event_type(ComplexMatchEventType) ::
+          {:ok, ComplexMatchEventType} | {:error, Ecto.Changeset}
   def delete_complex_match_event_type(%ComplexMatchEventType{} = complex_match_event_type) do
     Repo.delete(complex_match_event_type)
   end
@@ -135,7 +145,10 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTypeLib do
   """
   @spec change_complex_match_event_type(ComplexMatchEventType) :: Ecto.Changeset
   @spec change_complex_match_event_type(ComplexMatchEventType, map) :: Ecto.Changeset
-  def change_complex_match_event_type(%ComplexMatchEventType{} = complex_match_event_type, attrs \\ %{}) do
+  def change_complex_match_event_type(
+        %ComplexMatchEventType{} = complex_match_event_type,
+        attrs \\ %{}
+      ) do
     ComplexMatchEventType.changeset(complex_match_event_type, attrs)
   end
 end

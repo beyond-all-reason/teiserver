@@ -12,7 +12,15 @@ defmodule Teiserver.Protocols.SpringIn do
   import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
   alias Teiserver.Protocols.{Spring, SpringOut}
-  alias Teiserver.Protocols.Spring.{AuthIn, TelemetryIn, BattleIn, LobbyPolicyIn, UserIn, SystemIn}
+
+  alias Teiserver.Protocols.Spring.{
+    AuthIn,
+    TelemetryIn,
+    BattleIn,
+    LobbyPolicyIn,
+    UserIn,
+    SystemIn
+  }
 
   @optimisation_level %{
     "LuaLobby Chobby" => :partial,
@@ -509,9 +517,11 @@ defmodule Teiserver.Protocols.SpringIn do
     case String.split(data, "=") do
       [_, username] ->
         target_userid = Account.get_userid_from_name(username)
+
         case Account.get_friend(state.userid, target_userid) do
           nil ->
             state
+
           friend_object ->
             Account.delete_friend(friend_object)
             state
@@ -526,9 +536,11 @@ defmodule Teiserver.Protocols.SpringIn do
     case String.split(data, "=") do
       [_, username] ->
         target_userid = Account.get_userid_from_name(username)
+
         if target_userid && state.userid do
           Account.accept_friend_request(target_userid, state.userid)
         end
+
         state
 
       _ ->
@@ -540,9 +552,11 @@ defmodule Teiserver.Protocols.SpringIn do
     case String.split(data, "=") do
       [_, username] ->
         target_userid = Account.get_userid_from_name(username)
+
         if target_userid && state.userid do
           Account.decline_friend_request(target_userid, state.userid)
         end
+
         state
 
       _ ->
@@ -554,12 +568,14 @@ defmodule Teiserver.Protocols.SpringIn do
     case String.split(data, "=") do
       [_, username] ->
         target_userid = Account.get_userid_from_name(username)
+
         if Account.can_send_friend_request?(state.userid, target_userid) do
           Account.create_friend_request(%{
             from_user_id: state.userid,
             to_user_id: target_userid
           })
         end
+
         state
 
       _ ->
@@ -571,6 +587,7 @@ defmodule Teiserver.Protocols.SpringIn do
     case String.split(data, "=") do
       [_, username] ->
         target_userid = Account.get_userid_from_name(username)
+
         if target_userid && state.userid do
           Account.ignore_user(state.userid, target_userid)
         end
@@ -586,6 +603,7 @@ defmodule Teiserver.Protocols.SpringIn do
     case String.split(data, "=") do
       [_, username] ->
         target_userid = Account.get_userid_from_name(username)
+
         if target_userid && state.userid do
           Account.unignore_user(state.userid, target_userid)
         end
@@ -706,7 +724,8 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("SAY", data, msg_id, state) do
     case Regex.run(~r/(\w+) (.+)/u, data) do
       [_, room_name, msg] ->
-        msg = msg
+        msg =
+          msg
           |> String.trim()
           |> String.slice(0..256)
 
@@ -722,7 +741,8 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("SAYEX", data, msg_id, state) do
     case Regex.run(~r/(\w+) (.+)/u, data) do
       [_, room_name, msg] ->
-        msg = msg
+        msg =
+          msg
           |> String.trim()
           |> String.slice(0..256)
 
@@ -1165,25 +1185,27 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("SAYBATTLE", msg, _msg_id, state) do
-  if Lobby.allow?(state.userid, :saybattle, state.lobby_id) do
-    lowercase_msg = String.downcase(msg)
+    if Lobby.allow?(state.userid, :saybattle, state.lobby_id) do
+      lowercase_msg = String.downcase(msg)
 
-    msg_sliced = cond do
-      CacheUser.is_bot?(state.userid) ->
-        msg
+      msg_sliced =
+        cond do
+          CacheUser.is_bot?(state.userid) ->
+            msg
 
-      String.starts_with?(lowercase_msg, "!bset tweakdefs") || String.starts_with?(lowercase_msg, "!bset tweakunits") ->
-        msg |> String.trim() |> String.slice(0..16384)
+          String.starts_with?(lowercase_msg, "!bset tweakdefs") ||
+              String.starts_with?(lowercase_msg, "!bset tweakunits") ->
+            msg |> String.trim() |> String.slice(0..16384)
 
-      String.starts_with?(lowercase_msg, "$welcome-message") ->
-        msg |> String.trim() |> String.slice(0..1024)
+          String.starts_with?(lowercase_msg, "$welcome-message") ->
+            msg |> String.trim() |> String.slice(0..1024)
 
-      true ->
-        msg |> String.trim() |> String.slice(0..256)
+          true ->
+            msg |> String.trim() |> String.slice(0..256)
+        end
+
+      Lobby.say(state.userid, msg_sliced, state.lobby_id)
     end
-
-    Lobby.say(state.userid, msg_sliced, state.lobby_id)
-  end
 
     state
   end
@@ -1192,28 +1214,27 @@ defmodule Teiserver.Protocols.SpringIn do
     if Lobby.allow?(state.userid, :saybattleex, state.lobby_id) do
       lowercase_msg = String.downcase(msg)
 
-      msg_sliced = cond do
-        CacheUser.is_bot?(state.userid) ->
-          msg
+      msg_sliced =
+        cond do
+          CacheUser.is_bot?(state.userid) ->
+            msg
 
-        String.starts_with?(lowercase_msg, "!bset tweakdefs") || String.starts_with?(lowercase_msg, "!bset tweakunits") ->
-          msg |> String.trim() |> String.slice(0..16384)
+          String.starts_with?(lowercase_msg, "!bset tweakdefs") ||
+              String.starts_with?(lowercase_msg, "!bset tweakunits") ->
+            msg |> String.trim() |> String.slice(0..16384)
 
-        String.starts_with?(lowercase_msg, "$welcome-message") ->
-          msg |> String.trim() |> String.slice(0..1024)
+          String.starts_with?(lowercase_msg, "$welcome-message") ->
+            msg |> String.trim() |> String.slice(0..1024)
 
-        true ->
-          msg |> String.trim() |> String.slice(0..256)
-      end
+          true ->
+            msg |> String.trim() |> String.slice(0..256)
+        end
 
       Lobby.sayex(state.userid, msg_sliced, state.lobby_id)
     end
 
     state
   end
-
-
-
 
   # SAYBATTLEPRIVATEEX username
   defp do_handle("SAYBATTLEPRIVATEEX", data, msg_id, state) do

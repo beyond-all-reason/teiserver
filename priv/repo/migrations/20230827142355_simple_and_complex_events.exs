@@ -8,15 +8,18 @@ defmodule Teiserver.Repo.Migrations.SimpleAndComplexEvents do
     execute "ALTER TABLE teiserver_telemetry_client_events RENAME TO telemetry_complex_client_events"
 
     execute "ALTER TABLE teiserver_telemetry_property_types RENAME TO telemetry_property_types"
+
     execute "ALTER TABLE teiserver_telemetry_client_properties RENAME TO telemetry_user_properties"
 
     execute "ALTER TABLE teiserver_telemetry_unauth_properties RENAME TO telemetry_anon_properties"
+
     execute "ALTER TABLE teiserver_telemetry_unauth_events RENAME TO telemetry_complex_anon_events"
 
     execute "ALTER TABLE teiserver_telemetry_match_events RENAME TO telemetry_simple_match_events"
     execute "ALTER TABLE telemetry_match_event_types RENAME TO telemetry_simple_match_event_types"
 
     execute "ALTER TABLE telemetry_server_event_types RENAME TO telemetry_complex_server_event_types"
+
     execute "ALTER TABLE teiserver_telemetry_server_events RENAME TO telemetry_complex_server_events"
 
     execute "ALTER TABLE teiserver_telemetry_infologs RENAME TO telemetry_infologs"

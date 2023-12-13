@@ -91,22 +91,22 @@
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item" role="presentation">
             <a href="#overview_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <Fontawesome.icon icon={Teiserver.Helper.StylingHelper.icon(:overview)} style="solid" />
-              Overview
+              <Fontawesome.icon
+                icon={Teiserver.Helper.StylingHelper.icon(:overview)}
+                style="solid"
+              /> Overview
             </a>
           </li>
 
           <li class="nav-item" role="presentation">
             <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <Fontawesome.icon icon="fa-file-alt" style="solid" />
-              Details
+              <Fontawesome.icon icon="fa-file-alt" style="solid" /> Details
             </a>
           </li>
 
-          <li class="nav-item" role="presentation" :if={allow?(@current_user, "Server")}>
+          <li :if={allow?(@current_user, "Server")} class="nav-item" role="presentation">
             <a href="#raw_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <Fontawesome.icon icon="fa-brackets-curly" style="solid" />
-              Raw
+              <Fontawesome.icon icon="fa-brackets-curly" style="solid" /> Raw
             </a>
           </li>
         </ul>
@@ -120,7 +120,12 @@
             <%= render("tab_details.html", assigns) %>
           </div>
 
-          <div class="tab-pane" id="raw_tab" style="padding:5px;" :if={allow?(@current_user, "Server")}>
+          <div
+            :if={allow?(@current_user, "Server")}
+            class="tab-pane"
+            id="raw_tab"
+            style="padding:5px;"
+          >
             <%= render("tab_raw.html", assigns) %>
           </div>
         </div>

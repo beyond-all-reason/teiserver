@@ -10,19 +10,21 @@ defmodule Teiserver.Telemetry.ComplexAnonEventLib do
   @spec colour :: atom
   def colour(), do: :info2
 
-  @spec icon() :: String.t
+  @spec icon() :: String.t()
   def icon(), do: "fa-sliders-up"
 
-  @spec log_complex_anon_event(String.t, String.t, map) :: {:error, Ecto.Changeset} | {:ok, ComplexAnonEvent}
+  @spec log_complex_anon_event(String.t(), String.t(), map) ::
+          {:error, Ecto.Changeset} | {:ok, ComplexAnonEvent}
   def log_complex_anon_event(hash, event_type_name, value) do
     event_type_id = Telemetry.get_or_add_complex_client_event_type(event_type_name)
 
-    result = create_complex_anon_event(%{
-      hash: hash,
-      event_type_id: event_type_id,
-      value: value,
-      timestamp: Timex.now()
-    })
+    result =
+      create_complex_anon_event(%{
+        hash: hash,
+        event_type_id: event_type_id,
+        value: value,
+        timestamp: Timex.now()
+      })
 
     case result do
       {:ok, _event} ->

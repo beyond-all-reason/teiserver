@@ -2,7 +2,11 @@
 
 <% timeframes = ["Today", "Yesterday", "7 days", "14 days", "31 days"] %>
 
-<TeiserverWeb.Telemetry.TelemetryComponents.sub_menu active={"simple_client_events"} view_colour={view_colour()} current_user={@current_user} />
+<TeiserverWeb.Telemetry.TelemetryComponents.sub_menu
+  active="simple_client_events"
+  view_colour={view_colour()}
+  current_user={@current_user}
+/>
 
 <div class="row section-menu">
   <div class="col-md-12 mb-4">
@@ -28,7 +32,7 @@
       ) %>
     <% end %>
   </div>
-  
+
   <div class="col-lg-6">
     <h4>Count by user</h4>
     <table class="table table-sm table-hover">
@@ -47,10 +51,9 @@
             <td>
               <.link
                 navigate={~p"/teiserver/admin/user/#{userid}"}
-                class={"btn btn-sm btn-secondary"}
+                class="btn btn-sm btn-secondary"
               >
-                <Fontawesome.icon icon={:show} style="solid" />
-                Show
+                <Fontawesome.icon icon={:show} style="solid" /> Show
               </.link>
             </td>
           </tr>

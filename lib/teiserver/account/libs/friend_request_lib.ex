@@ -17,7 +17,8 @@ defmodule Teiserver.Account.FriendRequestLib do
     result
   end
 
-  @spec can_send_friend_request_with_reason?(T.userid(), T.userid()) :: {true, :ok} | {false, String.t()}
+  @spec can_send_friend_request_with_reason?(T.userid(), T.userid()) ::
+          {true, :ok} | {false, String.t()}
   def can_send_friend_request_with_reason?(from_id, to_id) do
     cond do
       from_id == nil ->
@@ -44,11 +45,12 @@ defmodule Teiserver.Account.FriendRequestLib do
   end
 
   # Functions
-  @spec accept_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
+  @spec accept_friend_request(T.userid(), T.userid()) :: :ok | {:error, String.t()}
   def accept_friend_request(from_id, to_id) do
     case Account.get_friend_request(from_id, to_id) do
       nil ->
         {:error, "no request"}
+
       req ->
         accept_friend_request(req)
     end
@@ -80,11 +82,12 @@ defmodule Teiserver.Account.FriendRequestLib do
     end
   end
 
-  @spec decline_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
+  @spec decline_friend_request(T.userid(), T.userid()) :: :ok | {:error, String.t()}
   def decline_friend_request(from_id, to_id) do
     case Account.get_friend_request(from_id, to_id) do
       nil ->
         {:error, "no request"}
+
       req ->
         decline_friend_request(req)
     end
@@ -112,11 +115,12 @@ defmodule Teiserver.Account.FriendRequestLib do
   The same as declining for now but intended to be used where the person declining
   is the sender
   """
-  @spec rescind_friend_request(T.userid, T.userid) :: :ok | {:error, String.t()}
+  @spec rescind_friend_request(T.userid(), T.userid()) :: :ok | {:error, String.t()}
   def rescind_friend_request(from_id, to_id) do
     case Account.get_friend_request(from_id, to_id) do
       nil ->
         {:error, "no request"}
+
       req ->
         rescind_friend_request(req)
     end
@@ -140,7 +144,7 @@ defmodule Teiserver.Account.FriendRequestLib do
     :ok
   end
 
-  @spec list_incoming_friend_requests_of_userid(T.userid) :: [T.userid]
+  @spec list_incoming_friend_requests_of_userid(T.userid()) :: [T.userid()]
   def list_incoming_friend_requests_of_userid(userid) do
     Teiserver.cache_get_or_store(:account_incoming_friend_request_cache, userid, fn ->
       Account.list_friend_requests(
@@ -149,13 +153,13 @@ defmodule Teiserver.Account.FriendRequestLib do
         ],
         select: [:from_user_id]
       )
-        |> Enum.map(fn %{from_user_id: from_user_id} ->
-          from_user_id
-        end)
+      |> Enum.map(fn %{from_user_id: from_user_id} ->
+        from_user_id
+      end)
     end)
   end
 
-  @spec list_outgoing_friend_requests_of_userid(T.userid) :: [T.userid]
+  @spec list_outgoing_friend_requests_of_userid(T.userid()) :: [T.userid()]
   def list_outgoing_friend_requests_of_userid(userid) do
     Teiserver.cache_get_or_store(:account_outgoing_friend_request_cache, userid, fn ->
       Account.list_friend_requests(
@@ -164,9 +168,9 @@ defmodule Teiserver.Account.FriendRequestLib do
         ],
         select: [:to_user_id]
       )
-        |> Enum.map(fn %{to_user_id: to_user_id} ->
-          to_user_id
-        end)
+      |> Enum.map(fn %{to_user_id: to_user_id} ->
+        to_user_id
+      end)
     end)
   end
 end

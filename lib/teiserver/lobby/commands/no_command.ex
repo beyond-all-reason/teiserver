@@ -12,11 +12,11 @@ defmodule Teiserver.Lobby.Commands.NoCommand do
   # @splitter "---------------------------"
 
   @impl true
-  @spec name() :: String.t
+  @spec name() :: String.t()
   def name(), do: "no-command"
 
   @impl true
-  @spec execute(T.lobby_server_state, map) :: T.lobby_server_state
+  @spec execute(T.lobby_server_state(), map) :: T.lobby_server_state()
   def execute(state, _cmd) do
     state
   end

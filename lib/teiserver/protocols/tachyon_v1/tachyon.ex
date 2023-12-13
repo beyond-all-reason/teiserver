@@ -115,7 +115,8 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
 
     Logger.metadata(request_id: "TachyonTcpServer##{user.id}")
 
-    exempt_from_cmd_throttle = CacheUser.is_moderator?(user) == true or CacheUser.is_bot?(user) == true
+    exempt_from_cmd_throttle =
+      CacheUser.is_moderator?(user) == true or CacheUser.is_bot?(user) == true
 
     %{
       state

@@ -15,7 +15,11 @@ defmodule TeiserverWeb.Telemetry.SimpleClientEventController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
-  plug(:add_breadcrumb, name: 'Simple client events', url: '/telemetry/simple_client_events/summary')
+
+  plug(:add_breadcrumb,
+    name: 'Simple client events',
+    url: '/telemetry/simple_client_events/summary'
+  )
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
   def summary(conn, params) do
@@ -59,7 +63,8 @@ defmodule TeiserverWeb.Telemetry.SimpleClientEventController do
         _ -> Timex.now() |> Timex.shift(days: -7)
       end
 
-    client_events = SimpleClientEventQueries.get_aggregate_detail(event_type_id, start_datetime, Timex.now())
+    client_events =
+      SimpleClientEventQueries.get_aggregate_detail(event_type_id, start_datetime, Timex.now())
       |> Enum.sort_by(fn {_userid, value} -> value end, &>=/2)
       |> Enum.take(500)
       |> Enum.map(fn {userid, value} ->

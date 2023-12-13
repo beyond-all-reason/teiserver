@@ -8,7 +8,7 @@ defmodule Teiserver.Protocols.Spring.SystemOut do
   # end
 
   def do_reply(event, msg, _state) do
-    Logger.error("No handler for event `#{event}` with msg #{inspect msg}")
+    Logger.error("No handler for event `#{event}` with msg #{inspect(msg)}")
     "\n"
   end
 end

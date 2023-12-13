@@ -357,12 +357,13 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:ring, {ringer_id, state_userid}) do
     ringer_user = Account.get_user_by_id(ringer_id)
 
-    do_ring = cond do
-      CacheUser.is_moderator?(ringer_user) == true -> true
-      CacheUser.is_bot?(ringer_user) == true -> true
-      Account.does_a_ignore_b?(state_userid, ringer_id) -> false
-      true -> true
-    end
+    do_ring =
+      cond do
+        CacheUser.is_moderator?(ringer_user) == true -> true
+        CacheUser.is_bot?(ringer_user) == true -> true
+        Account.does_a_ignore_b?(state_userid, ringer_id) -> false
+        true -> true
+      end
 
     if do_ring do
       ringer_name = Account.get_username_by_id(ringer_id)
@@ -453,7 +454,8 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:direct_message, {from_id, messages, state_user}) when is_list(messages) do
     from_user = Account.get_user_by_id(from_id)
 
-    if not Account.does_a_ignore_b?(state_user.id, from_id) or CacheUser.is_moderator?(from_user) == true do
+    if not Account.does_a_ignore_b?(state_user.id, from_id) or
+         CacheUser.is_moderator?(from_user) == true do
       from_name = Account.get_username_by_id(from_id)
 
       messages
@@ -471,7 +473,8 @@ defmodule Teiserver.Protocols.SpringOut do
        when is_list(messages) do
     from_user = Account.get_user_by_id(from_id)
 
-    if not Account.does_a_ignore_b?(state_user.id, from_id) or CacheUser.is_moderator?(from_user) == true or
+    if not Account.does_a_ignore_b?(state_user.id, from_id) or
+         CacheUser.is_moderator?(from_user) == true or
          CacheUser.is_bot?(from_user) == true do
       from_name = Account.get_username_by_id(from_id)
 
@@ -490,7 +493,8 @@ defmodule Teiserver.Protocols.SpringOut do
        when is_list(messages) do
     from_user = Account.get_user_by_id(from_id)
 
-    if not Account.does_a_ignore_b?(state_user.id, from_id) or CacheUser.is_moderator?(from_user) == true or
+    if not Account.does_a_ignore_b?(state_user.id, from_id) or
+         CacheUser.is_moderator?(from_user) == true or
          CacheUser.is_bot?(from_user) == true do
       from_name = Account.get_username_by_id(from_id)
 

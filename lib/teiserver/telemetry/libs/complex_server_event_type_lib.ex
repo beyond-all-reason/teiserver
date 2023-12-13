@@ -9,7 +9,13 @@ defmodule Teiserver.Telemetry.ComplexServerEventTypeLib do
     name = String.trim(name)
 
     Teiserver.cache_get_or_store(:telemetry_complex_server_event_types_cache, name, fn ->
-      query = ComplexServerEventTypeQueries.query_complex_server_event_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
+      query =
+        ComplexServerEventTypeQueries.query_complex_server_event_types(
+          where: [name: name],
+          select: [:id],
+          order_by: ["ID (Lowest first)"]
+        )
+
       case Repo.all(query) do
         [] ->
           {:ok, event_type} =
@@ -80,8 +86,10 @@ defmodule Teiserver.Telemetry.ComplexServerEventTypeLib do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_complex_server_event_type() :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
-  @spec create_complex_server_event_type(map) :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  @spec create_complex_server_event_type() ::
+          {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  @spec create_complex_server_event_type(map) ::
+          {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
   def create_complex_server_event_type(attrs \\ %{}) do
     %ComplexServerEventType{}
     |> ComplexServerEventType.changeset(attrs)
@@ -100,8 +108,12 @@ defmodule Teiserver.Telemetry.ComplexServerEventTypeLib do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_complex_server_event_type(ComplexServerEventType, map) :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
-  def update_complex_server_event_type(%ComplexServerEventType{} = complex_server_event_type, attrs) do
+  @spec update_complex_server_event_type(ComplexServerEventType, map) ::
+          {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  def update_complex_server_event_type(
+        %ComplexServerEventType{} = complex_server_event_type,
+        attrs
+      ) do
     complex_server_event_type
     |> ComplexServerEventType.changeset(attrs)
     |> Repo.update()
@@ -119,7 +131,8 @@ defmodule Teiserver.Telemetry.ComplexServerEventTypeLib do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_complex_server_event_type(ComplexServerEventType) :: {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
+  @spec delete_complex_server_event_type(ComplexServerEventType) ::
+          {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
   def delete_complex_server_event_type(%ComplexServerEventType{} = complex_server_event_type) do
     Repo.delete(complex_server_event_type)
   end
@@ -135,7 +148,10 @@ defmodule Teiserver.Telemetry.ComplexServerEventTypeLib do
   """
   @spec change_complex_server_event_type(ComplexServerEventType) :: Ecto.Changeset
   @spec change_complex_server_event_type(ComplexServerEventType, map) :: Ecto.Changeset
-  def change_complex_server_event_type(%ComplexServerEventType{} = complex_server_event_type, attrs \\ %{}) do
+  def change_complex_server_event_type(
+        %ComplexServerEventType{} = complex_server_event_type,
+        attrs \\ %{}
+      ) do
     ComplexServerEventType.changeset(complex_server_event_type, attrs)
   end
 end

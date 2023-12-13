@@ -1,11 +1,16 @@
-<TeiserverWeb.Admin.AdminComponents.sub_menu active="chat" view_colour={@view_colour} current_user={@current_user} />
+<TeiserverWeb.Admin.AdminComponents.sub_menu
+  active="chat"
+  view_colour={@view_colour}
+  current_user={@current_user}
+/>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <form method="post" class="">
       <div class="row">
         <div class="col">
-          <.input type="text"
+          <.input
+            type="text"
             label="Term"
             name="term"
             value={@filters["term"]}
@@ -16,7 +21,8 @@
         </div>
 
         <div class="col">
-          <.input type="select"
+          <.input
+            type="select"
             label="Timeframe"
             options={["1 day", "2 days", "7 days", "Forever"]}
             name="timeframe"
@@ -26,7 +32,8 @@
         </div>
 
         <div class="col">
-          <.input type="select"
+          <.input
+            type="select"
             label="Mode"
             options={["Lobby", "Room", "Party"]}
             name="mode"
@@ -34,9 +41,10 @@
             phx-change="filter-update"
           />
         </div>
-        
+
         <div class="col d-none">
-          <.input type="select"
+          <.input
+            type="select"
             label="Bots"
             options={["Include bot messages", "Exclude bot messages"]}
             name="bot-messages"
@@ -44,9 +52,10 @@
             phx-change="filter-update"
           />
         </div>
-        
+
         <div class="col">
-          <.input type="select"
+          <.input
+            type="select"
             label="Format"
             options={["Table", "Raw", "Discord"]}
             name="message-format"
@@ -56,25 +65,29 @@
         </div>
 
         <div class="col">
-          <.input type="text"
+          <.input
+            type="text"
             label="User filter (split with commas)"
             name="user-raw-filter"
             value={@filters["user-raw-filter"]}
-            phx-change="filter-update" phx-debounce="400"
+            phx-change="filter-update"
+            phx-debounce="400"
           />
         </div>
       </div>
     </form>
     <br />
-    
-    <div :if={@searching}>
-      Searching
-      <Fontawesome.icon icon="spinner" style="regular" class="fa-spin-pulse" />
-    </div>
-    
-    <div :if={not Enum.empty?(@messages)}>
 
-      <table class="table table-sm table-hover" :if={@filters["message-format"] == "Table"} id="rich-text-block">
+    <div :if={@searching}>
+      Searching <Fontawesome.icon icon="spinner" style="regular" class="fa-spin-pulse" />
+    </div>
+
+    <div :if={not Enum.empty?(@messages)}>
+      <table
+        :if={@filters["message-format"] == "Table"}
+        class="table table-sm table-hover"
+        id="rich-text-block"
+      >
         <thead>
           <tr>
             <th>Location</th>
@@ -88,7 +101,7 @@
             <tr>
               <td :if={@filters["mode"] == "Lobby"}>
                 <a href={~p"/battle/chat/#{msg.match_id}/#{msg.user_id}"}>
-                <%= msg.match_id %>
+                  <%= msg.match_id %>
                 </a>
               </td>
               <td :if={@filters["mode"] == "Room"}>
@@ -106,14 +119,14 @@
         </tbody>
       </table>
 
-      <div class="row" :if={@filters["message-format"] == "Raw"} id="raw-text-block">
+      <div :if={@filters["message-format"] == "Raw"} class="row" id="raw-text-block">
         <div class="col-md-12">
           <textarea rows="30" cols="40" class="form-control"><%= for msg <- @messages do %>
   <%= @usernames[msg.user_id] %>: <%= msg.content %><% end %></textarea>
         </div>
       </div>
-      
-      <div class="row" :if={@filters["message-format"] == "Discord"} id="discord-text-block">
+
+      <div :if={@filters["message-format"] == "Discord"} class="row" id="discord-text-block">
         <div class="col-md-12">
           <textarea rows="30" cols="40" class="form-control"><%= for msg <- @messages do %>
   **<%= @usernames[msg.user_id] %>**: <%= msg.content %><% end %></textarea>
@@ -122,5 +135,3 @@
     </div>
   </div>
 </div>
-
-

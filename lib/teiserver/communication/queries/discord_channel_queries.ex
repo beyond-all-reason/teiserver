@@ -9,7 +9,7 @@ defmodule Teiserver.Communication.DiscordChannelQueries do
     query = from(discord_channels in DiscordChannel)
 
     query
-    |> do_where([id: args[:id]])
+    |> do_where(id: args[:id])
     |> do_where(args[:where])
     |> do_order_by(args[:order_by])
     |> query_select(args[:select])
@@ -44,14 +44,16 @@ defmodule Teiserver.Communication.DiscordChannelQueries do
       where: discord_channels.channel_id == ^channel_id
   end
 
-  @spec do_order_by(Ecto.Query.t(), list | String.t | nil) :: Ecto.Query.t()
+  @spec do_order_by(Ecto.Query.t(), list | String.t() | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
+
   defp do_order_by(query, orderings) when is_list(orderings) do
     orderings
     |> Enum.reduce(query, fn key, query_acc ->
       _order_by(query_acc, key)
     end)
   end
+
   defp do_order_by(query, ordering), do: do_order_by(query, [ordering])
 
   defp _order_by(query, nil), do: query

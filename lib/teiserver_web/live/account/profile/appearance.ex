@@ -9,21 +9,22 @@ defmodule TeiserverWeb.Account.ProfileLive.Appearance do
     userid = String.to_integer(userid_str)
     user = Account.get_user_by_id(userid)
 
-    socket = cond do
-      user == nil ->
-        socket
+    socket =
+      cond do
+        user == nil ->
+          socket
           |> put_flash(:info, "Unable to find that user")
           |> redirect(to: ~p"/")
 
-      true ->
-        socket
+        true ->
+          socket
           |> assign(:tab, nil)
           |> assign(:site_menu_active, "teiserver_account")
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
-          |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions
+          |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
           |> list_icons
-    end
+      end
 
     {:ok, socket}
   end
@@ -35,12 +36,13 @@ defmodule TeiserverWeb.Account.ProfileLive.Appearance do
 
   defp apply_action(socket, _live_action, _params) do
     socket
-      |> assign(:page_title, "Appearance")
+    |> assign(:page_title, "Appearance")
   end
 
   @impl true
   def handle_event("select-style", %{"role" => role_name}, %{assigns: assigns} = socket) do
-    available = assigns.options
+    available =
+      assigns.options
       |> Enum.map(fn r -> r.name end)
 
     role_def =
@@ -62,9 +64,9 @@ defmodule TeiserverWeb.Account.ProfileLive.Appearance do
         icon: role_def.icon
       })
 
-    {:noreply, socket
-      |> assign(:current_user, user)
-    }
+    {:noreply,
+     socket
+     |> assign(:current_user, user)}
   end
 
   def handle_event(_string, _event, socket) do
@@ -88,6 +90,6 @@ defmodule TeiserverWeb.Account.ProfileLive.Appearance do
       end)
 
     socket
-      |> assign(:options, options)
+    |> assign(:options, options)
   end
 end

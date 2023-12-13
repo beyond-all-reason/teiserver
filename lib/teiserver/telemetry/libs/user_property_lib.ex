@@ -14,16 +14,18 @@ defmodule Teiserver.Telemetry.UserPropertyLib do
   @spec colours :: atom
   def colours, do: :default
 
-  @spec log_user_property(T.userid, String.t, String.t) :: {:error, Ecto.Changeset} | {:ok, UserProperty}
+  @spec log_user_property(T.userid(), String.t(), String.t()) ::
+          {:error, Ecto.Changeset} | {:ok, UserProperty}
   def log_user_property(userid, property_type_name, value) do
     property_type_id = Telemetry.get_or_add_property_type(property_type_name)
 
-    result = upsert_user_property(%{
-      user_id: userid,
-      property_type_id: property_type_id,
-      value: value,
-      last_updated: Timex.now(),
-    })
+    result =
+      upsert_user_property(%{
+        user_id: userid,
+        property_type_id: property_type_id,
+        value: value,
+        last_updated: Timex.now()
+      })
 
     case result do
       {:ok, _property} ->
@@ -79,7 +81,7 @@ defmodule Teiserver.Telemetry.UserPropertyLib do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_user_property!(T.userid, String.t() | non_neg_integer()) :: UserProperty.t
+  @spec get_user_property!(T.userid(), String.t() | non_neg_integer()) :: UserProperty.t()
   def get_user_property!(userid, property_type_id) when is_integer(property_type_id) do
     [user_id: userid, property_type_id: property_type_id]
     |> UserPropertyQueries.query_user_properties()
@@ -91,8 +93,7 @@ defmodule Teiserver.Telemetry.UserPropertyLib do
     get_user_property!(userid, property_type_id)
   end
 
-
-  @spec get_user_property(T.userid, String.t() | non_neg_integer()) :: UserProperty.t | nil
+  @spec get_user_property(T.userid(), String.t() | non_neg_integer()) :: UserProperty.t() | nil
   def get_user_property(userid, property_type_id) when is_integer(property_type_id) do
     [user_id: userid, property_type_id: property_type_id]
     |> UserPropertyQueries.query_user_properties()
@@ -185,10 +186,12 @@ defmodule Teiserver.Telemetry.UserPropertyLib do
     %UserProperty{}
     |> UserProperty.changeset(attrs)
     |> Repo.insert(
-      on_conflict: [set: [
-        last_updated: Map.get(attrs, "last_updated", Map.get(attrs, :last_updated, nil)),
-        value: Map.get(attrs, "value", Map.get(attrs, :value, nil))
-      ]],
+      on_conflict: [
+        set: [
+          last_updated: Map.get(attrs, "last_updated", Map.get(attrs, :last_updated, nil)),
+          value: Map.get(attrs, "value", Map.get(attrs, :value, nil))
+        ]
+      ],
       conflict_target: ~w(user_id property_type_id)a
     )
   end

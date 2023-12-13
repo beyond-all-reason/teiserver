@@ -9,7 +9,7 @@ defmodule Teiserver.Microblog.UserPreferenceQueries do
     query = from(user_preferences in UserPreference)
 
     query
-    |> do_where([user_id: args[:user_id]])
+    |> do_where(user_id: args[:user_id])
     # |> do_where(args[:where])
     |> query_select(args[:select])
   end

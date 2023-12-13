@@ -8,22 +8,22 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
 
   @impl true
   def mount(%{"post_id" => post_id_str}, _session, socket) do
-    socket = if is_connected?(socket) do
-      :ok = PubSub.subscribe(Teiserver.PubSub, "microblog_posts")
-      post = Microblog.get_post!(post_id_str, preload: [:poster, :tags])
-      Microblog.increment_post_view_count(post.id)
+    socket =
+      if is_connected?(socket) do
+        :ok = PubSub.subscribe(Teiserver.PubSub, "microblog_posts")
+        post = Microblog.get_post!(post_id_str, preload: [:poster, :tags])
+        Microblog.increment_post_view_count(post.id)
 
-      socket
+        socket
         |> assign(:post, post)
-    else
-      socket
+      else
+        socket
         |> assign(:post, nil)
-    end
+      end
 
     {:ok,
-      socket
-      |> assign(:site_menu_active, "microblog")
-    }
+     socket
+     |> assign(:site_menu_active, "microblog")}
   end
 
   @impl true
@@ -32,27 +32,28 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
   end
 
   def handle_info(
-    %{channel: "microblog_posts", event: :post_updated, post: new_post},
-    %{assigns: %{post: post}} = socket
-  ) do
-    socket = if post.id == new_post.id do
-      db_post = Microblog.get_post!(post.id, preload: [:tags, :poster])
-      socket |> assign(:post, db_post)
-    else
-      socket
-    end
+        %{channel: "microblog_posts", event: :post_updated, post: new_post},
+        %{assigns: %{post: post}} = socket
+      ) do
+    socket =
+      if post.id == new_post.id do
+        db_post = Microblog.get_post!(post.id, preload: [:tags, :poster])
+        socket |> assign(:post, db_post)
+      else
+        socket
+      end
 
     {:noreply, socket}
   end
 
   def handle_info(
-    %{channel: "microblog_posts", event: :post_deleted, post_id: post_id},
-    %{assigns: %{post: post}} = socket
-  ) do
+        %{channel: "microblog_posts", event: :post_deleted, post_id: post_id},
+        %{assigns: %{post: post}} = socket
+      ) do
     if post_id == post.id do
-      {:noreply, socket
-        |> redirect(to: ~p"/microblog")
-      }
+      {:noreply,
+       socket
+       |> redirect(to: ~p"/microblog")}
     else
       {:noreply, socket}
     end
@@ -76,9 +77,9 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
         post_id: post.id
       })
 
-      {:noreply, socket
-        |> redirect(to: ~p"/microblog")
-      }
+      {:noreply,
+       socket
+       |> redirect(to: ~p"/microblog")}
     else
       {:noreply, socket}
     end

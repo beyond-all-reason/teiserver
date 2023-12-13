@@ -244,6 +244,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     if state.tick_timer_ref do
       :timer.cancel(state.tick_timer_ref)
     end
+
     tick_timer_ref = :timer.send_interval(new_period, :tick)
 
     {:noreply, %{state | tick_timer_ref: tick_timer_ref}}

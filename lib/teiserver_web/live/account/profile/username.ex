@@ -9,15 +9,13 @@ defmodule TeiserverWeb.Account.ProfileLive.Username do
 
     if userid do
       {:ok,
-        socket
-        |> redirect(to: ~p"/profile/#{userid}")
-      }
+       socket
+       |> redirect(to: ~p"/profile/#{userid}")}
     else
       {:ok,
-        socket
-        |> put_flash(:info, "No user of that name")
-        |> redirect(to: ~p"/")
-      }
+       socket
+       |> put_flash(:info, "No user of that name")
+       |> redirect(to: ~p"/")}
     end
   end
 

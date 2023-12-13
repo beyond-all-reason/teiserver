@@ -13,19 +13,20 @@ defmodule Teiserver.Account.BadgeTypeLib do
   def colours, do: :warning2
 
   @spec purpose_list() :: [String.t()]
-  def purpose_list(), do: [
-    # Always positive, limited in how often they can be given out
-    "Accolade",
+  def purpose_list(),
+    do: [
+      # Always positive, limited in how often they can be given out
+      "Accolade",
 
-    # Cheap and easy, thumbs up/thumbs down
-    "Good/Bad",
+      # Cheap and easy, thumbs up/thumbs down
+      "Good/Bad",
 
-    # What did they do right, what did they do wrong?
-    "Feedback",
+      # What did they do right, what did they do wrong?
+      "Feedback",
 
-    # What did they get done in this game?
-    "Role"
-  ]
+      # What did they get done in this game?
+      "Role"
+    ]
 
   @spec make_favourite(Map.t()) :: Map.t()
   def make_favourite(badge_type) do

@@ -1,51 +1,46 @@
-<TeiserverWeb.Admin.AdminComponents.sub_menu active={"test_page"} view_colour={@view_colour} current_user={@current_user} />
+<TeiserverWeb.Admin.AdminComponents.sub_menu
+  active="test_page"
+  view_colour={@view_colour}
+  current_user={@current_user}
+/>
 
 <div class="row mt-4">
   <div class="col-md-12">
     <.tab_header>
-      <.tab_nav
-        url={~p"/admin/test_page/icons"}
-        selected={@tab == "icons"}
-      >
+      <.tab_nav url={~p"/admin/test_page/icons"} selected={@tab == "icons"}>
         Icons
       </.tab_nav>
-      
-      <.tab_nav
-        url={~p"/admin/test_page/colours"}
-        selected={@tab == "colours"}
-      >
+
+      <.tab_nav url={~p"/admin/test_page/colours"} selected={@tab == "colours"}>
         Colours
       </.tab_nav>
-      
-      <.tab_nav
-        url={~p"/admin/test_page/alerts"}
-        selected={@tab == "alerts"}
-      >
+
+      <.tab_nav url={~p"/admin/test_page/alerts"} selected={@tab == "alerts"}>
         Alerts
       </.tab_nav>
-      
     </.tab_header>
-    
-    <div :if={@tab == "icons"} class="p-4">
-    
-    </div>
-    
-    <div :if={@tab == "colours"} class="p-4">
-    
-    </div>
-    
+
+    <div :if={@tab == "icons"} class="p-4"></div>
+
+    <div :if={@tab == "colours"} class="p-4"></div>
+
     <div :if={@tab == "alerts"} class="row p-4">
       <div class="col-md-8">
-        <div :for={name <- ~w(success info warning danger)} class={"btn btn-#{name} mx-2"} phx-click="create-flash" phx-value-name={name}>
+        <div
+          :for={name <- ~w(success info warning danger)}
+          class={"btn btn-#{name} mx-2"}
+          phx-click="create-flash"
+          phx-value-name={name}
+        >
           Flash <%= name %>
         </div>
         <br /><br />
-        
+
         <div :for={name <- @limited_bsnames} class={"alert alert-#{name}"}>
           <%= name %> alert
         </div>
       </div>
-      
+
       <div class="col-md-4">
         Quae eum aut officia doloribus neque et. Sunt eligendi dolor quam mollitia earum. Id adipisci et unde fugit laudantium. Aliquam velit molestiae commodi aliquam sequi. Similique ullam cupiditate consequatur. Dignissimos doloribus sit ut.
 

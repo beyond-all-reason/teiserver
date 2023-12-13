@@ -9,7 +9,7 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
     query = from(report_groups in ReportGroup)
 
     query
-    |> do_where([id: args[:id]])
+    |> do_where(id: args[:id])
     |> do_where(args[:where])
     |> do_preload(args[:preload])
     |> do_order_by(args[:order_by])
@@ -70,6 +70,7 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
     from report_groups in query,
       where: report_groups.action_count == 0
   end
+
   defp _where(query, :actioned, _), do: query
 
   defp _where(query, :inserted_after, datetime) do
@@ -79,12 +80,14 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
+
   defp do_order_by(query, params) when is_list(params) do
     params
     |> Enum.reduce(query, fn key, query_acc ->
       _order_by(query_acc, key)
     end)
   end
+
   defp do_order_by(query, params), do: do_order_by(query, [params])
 
   defp _order_by(query, nil), do: query

@@ -43,7 +43,7 @@ defmodule Teiserver.Account.Emails do
     """
 
     date = TimexHelper.date_to_str(Timex.now(), format: :email_date)
-    message_id = UUID.uuid1()
+    message_id = "<#{UUID.uuid1()}@#{Application.get_env(:teiserver, Teiserver)[:host]}>"
     subject = Application.get_env(:teiserver, Teiserver)[:game_name] <> " - Password reset"
 
     Email.new_email()

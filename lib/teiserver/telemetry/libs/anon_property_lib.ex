@@ -11,7 +11,8 @@ defmodule Teiserver.Telemetry.AnonPropertyLib do
   @spec colours :: atom
   def colours, do: :default
 
-  @spec log_anon_property(String.t, String.t, String.t) :: {:error, Ecto.Changeset} | {:ok, AnonProperty}
+  @spec log_anon_property(String.t(), String.t(), String.t()) ::
+          {:error, Ecto.Changeset} | {:ok, AnonProperty}
   def log_anon_property(hash, value_name, value) do
     property_type_id = Telemetry.get_or_add_property_type(value_name)
 
@@ -19,7 +20,7 @@ defmodule Teiserver.Telemetry.AnonPropertyLib do
       hash: hash,
       property_type_id: property_type_id,
       value: value,
-      last_updated: Timex.now(),
+      last_updated: Timex.now()
     })
   end
 
@@ -53,7 +54,7 @@ defmodule Teiserver.Telemetry.AnonPropertyLib do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_anon_property!(String.t, String.t() | non_neg_integer()) :: UserProperty.t
+  @spec get_anon_property!(String.t(), String.t() | non_neg_integer()) :: UserProperty.t()
   def get_anon_property!(hash, property_type_id) when is_integer(property_type_id) do
     [hash: hash, property_type_id: property_type_id]
     |> AnonPropertyQueries.query_anon_properties()
@@ -65,8 +66,7 @@ defmodule Teiserver.Telemetry.AnonPropertyLib do
     get_anon_property!(hash, property_type_id)
   end
 
-
-  @spec get_anon_property(String.t, String.t() | non_neg_integer()) :: UserProperty.t | nil
+  @spec get_anon_property(String.t(), String.t() | non_neg_integer()) :: UserProperty.t() | nil
   def get_anon_property(hash, property_type_id) when is_integer(property_type_id) do
     [hash: hash, property_type_id: property_type_id]
     |> AnonPropertyQueries.query_anon_properties()
@@ -159,10 +159,12 @@ defmodule Teiserver.Telemetry.AnonPropertyLib do
     %AnonProperty{}
     |> AnonProperty.changeset(attrs)
     |> Repo.insert(
-      on_conflict: [set: [
-        last_updated: Map.get(attrs, "last_updated", Map.get(attrs, :last_updated, nil)),
-        value: Map.get(attrs, "value", Map.get(attrs, :value, nil))
-      ]],
+      on_conflict: [
+        set: [
+          last_updated: Map.get(attrs, "last_updated", Map.get(attrs, :last_updated, nil)),
+          value: Map.get(attrs, "value", Map.get(attrs, :value, nil))
+        ]
+      ],
       conflict_target: ~w(hash property_type_id)a
     )
   end

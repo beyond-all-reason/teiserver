@@ -17,12 +17,15 @@ defmodule Teiserver.Account.RelationshipReport do
     # Excludes banned users
     exclude_banned =
       if params["exclude_banned"] == "true" do
-        "AND not from_user.data -> 'restrictions' @> '\"Login\"'"
+        """
+          AND not from_user.data -> 'restrictions' @> '\"Login\"'
+          AND not to_user.data -> 'restrictions' @> '\"Login\"'
+        """
       else
         ""
       end
 
-    state_type = params["state"] |> String.downcase
+    state_type = params["state"] |> String.downcase()
 
     days = int_parse(params["days"])
 
@@ -32,14 +35,14 @@ defmodule Teiserver.Account.RelationshipReport do
 
     limit = int_parse(params["limit"])
 
-    main_where = case state_type do
-      "ignore" -> "AND rels.ignore = true"
-
-      "follow" -> "AND rels.state = 'follow'"
-      "avoid" -> "AND rels.state IN ('block', 'avoid')"
-      "block" -> "AND rels.state = 'avoid'"
-      _ -> raise "No handler for state_type of `#{state_type}`"
-    end
+    main_where =
+      case state_type do
+        "ignore" -> "AND rels.ignore = true"
+        "follow" -> "AND rels.state = 'follow'"
+        "avoid" -> "AND rels.state IN ('block', 'avoid')"
+        "block" -> "AND rels.state = 'avoid'"
+        _ -> raise "No handler for state_type of `#{state_type}`"
+      end
 
     query = """
       SELECT
@@ -63,13 +66,14 @@ defmodule Teiserver.Account.RelationshipReport do
       LIMIT $2
     """
 
-    results = case Ecto.Adapters.SQL.query(Repo, query, [start_date, limit]) do
-      {:ok, results} ->
-        results.rows
+    results =
+      case Ecto.Adapters.SQL.query(Repo, query, [start_date, limit]) do
+        {:ok, results} ->
+          results.rows
 
-      {a, b} ->
-        raise "ERR: #{a}, #{b}"
-    end
+        {a, b} ->
+          raise "ERR: #{a}, #{b}"
+      end
 
     state_past_tense = RelationshipLib.past_tense_of_state(state_type)
 

@@ -34,7 +34,7 @@
   </div>
 
   <div class="form-group row px-3 py-2">
-    <div class="col" :if={allow?(@conn, "Server")}>
+    <div :if={allow?(@conn, "Server")} class="col">
       <h5>Management</h5>
       <%= for r <- @management_roles do %>
         <% style = @role_styling_map[r]
@@ -56,7 +56,7 @@
       <% end %>
     </div>
 
-    <div class="col" :if={allow?(@conn, "Admin")}>
+    <div :if={allow?(@conn, "Admin")} class="col">
       <h5>Moderation</h5>
       <%= for r <- @moderation_roles do %>
         <% style = @role_styling_map[r]
@@ -78,7 +78,7 @@
       <% end %>
     </div>
 
-    <div class="col" :if={allow?(@conn, "Admin")}>
+    <div :if={allow?(@conn, "Admin")} class="col">
       <h5>Staff</h5>
       <%= for r <- @staff_roles do %>
         <% style = @role_styling_map[r]
@@ -100,7 +100,7 @@
       <% end %>
     </div>
 
-    <div class="col" :if={allow?(@conn, "Admin")}>
+    <div :if={allow?(@conn, "Admin")} class="col">
       <h5>Community</h5>
       <%= for r <- @community_roles do %>
         <% style = @role_styling_map[r]
@@ -122,7 +122,7 @@
       <% end %>
     </div>
 
-    <div class="col" :if={allow?(@conn, "Admin")}>
+    <div :if={allow?(@conn, "Admin")} class="col">
       <h5>Privileged</h5>
       <%= for r <- @privileged_roles do %>
         <% style = @role_styling_map[r]
@@ -167,7 +167,7 @@
     </div>
   </div>
 
-  <div class="row mt-2" :if={allow?(@conn, "Admin")}>
+  <div :if={allow?(@conn, "Admin")} class="row mt-2">
     <div class="col">
       <%= input_with_type(f, :colour, "color") %>
     </div>
@@ -177,7 +177,7 @@
     </div>
   </div>
 
-  <div class="row mt-2" :if={allow?(@conn, "Server")}>
+  <div :if={allow?(@conn, "Server")} class="row mt-2">
     <div class="col">
       <%= label(f, :behaviour_score, class: "control-label") %>
       <%= text_input(f, :behaviour_score, class: "form-control") %>

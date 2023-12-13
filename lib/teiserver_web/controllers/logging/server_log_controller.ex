@@ -133,7 +133,8 @@ defmodule TeiserverWeb.Logging.ServerLogController do
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> %{
+            |> Enum.map(fn key ->
+              %{
                 name: key,
                 paths: [
                   ~w"events simple_anon #{key}",
@@ -150,7 +151,8 @@ defmodule TeiserverWeb.Logging.ServerLogController do
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> %{
+            |> Enum.map(fn key ->
+              %{
                 name: key,
                 paths: [
                   ~w"events complex_client #{key}",
@@ -170,7 +172,8 @@ defmodule TeiserverWeb.Logging.ServerLogController do
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> %{
+            |> Enum.map(fn key ->
+              %{
                 name: key,
                 paths: [~w"events simple_server #{key}"],
                 mapper: fn x -> x || 0 end
@@ -184,7 +187,8 @@ defmodule TeiserverWeb.Logging.ServerLogController do
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> %{
+            |> Enum.map(fn key ->
+              %{
                 name: key,
                 paths: [~w"events complex_server #{key}"],
                 mapper: fn x -> x || 0 end
@@ -201,7 +205,8 @@ defmodule TeiserverWeb.Logging.ServerLogController do
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> %{
+            |> Enum.map(fn key ->
+              %{
                 name: key,
                 paths: [~w"events simple_lobby #{key}"],
                 mapper: fn x -> x || 0 end
@@ -215,7 +220,8 @@ defmodule TeiserverWeb.Logging.ServerLogController do
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> %{
+            |> Enum.map(fn key ->
+              %{
                 name: key,
                 paths: [~w"events complex_lobby #{key}"],
                 mapper: fn x -> x || 0 end
@@ -232,7 +238,8 @@ defmodule TeiserverWeb.Logging.ServerLogController do
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> %{
+            |> Enum.map(fn key ->
+              %{
                 name: key,
                 paths: [~w"events simple_match #{key}"],
                 mapper: fn x -> x || 0 end
@@ -246,7 +253,8 @@ defmodule TeiserverWeb.Logging.ServerLogController do
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> %{
+            |> Enum.map(fn key ->
+              %{
                 name: key,
                 paths: [~w"events complex_match #{key}"],
                 mapper: fn x -> x || 0 end
@@ -263,7 +271,8 @@ defmodule TeiserverWeb.Logging.ServerLogController do
             end)
             |> List.flatten()
             |> Enum.uniq()
-            |> Enum.map(fn key -> %{
+            |> Enum.map(fn key ->
+              %{
                 name: key,
                 paths: [~w"events infologs #{key}"],
                 mapper: fn x -> x || 0 end

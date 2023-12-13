@@ -56,7 +56,9 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         data: %{
           lobby_client: "FakeData",
           password_hash:
-            Teiserver.CacheUser.encrypt_password(Teiserver.CacheUser.spring_md5_password("password"))
+            Teiserver.CacheUser.encrypt_password(
+              Teiserver.CacheUser.spring_md5_password("password")
+            )
         }
       })
 
@@ -152,7 +154,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
           total = [menu, lobby, player, spectator] |> List.flatten()
 
-          timestamp = date
+          timestamp =
+            date
             |> Timex.to_datetime()
             |> Timex.shift(minutes: m)
             |> Timex.to_unix()

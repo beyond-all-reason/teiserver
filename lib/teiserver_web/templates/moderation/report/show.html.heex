@@ -8,16 +8,20 @@
   });
 </script>
 
-<TeiserverWeb.Moderation.ModerationComponents.sub_menu active={"reports"} view_colour={view_colour()} />
+<TeiserverWeb.Moderation.ModerationComponents.sub_menu
+  active="reports"
+  view_colour={view_colour()}
+/>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <TeiserverWeb.Moderation.ReportComponents.section_menu
-          active={"show"}
+          active="show"
           view_colour={view_colour()}
-          current_user={@current_user} />
+          current_user={@current_user}
+        />
         <hr />
 
         <div class="float-end">

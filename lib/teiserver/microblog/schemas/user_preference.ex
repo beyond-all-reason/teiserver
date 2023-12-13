@@ -23,7 +23,10 @@ defmodule Teiserver.Microblog.UserPreference do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, ~w(user_id tag_mode enabled_tags disabled_tags enabled_posters disabled_posters)a)
+    |> cast(
+      params,
+      ~w(user_id tag_mode enabled_tags disabled_tags enabled_posters disabled_posters)a
+    )
     |> validate_required(~w(user_id)a)
   end
 

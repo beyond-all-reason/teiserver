@@ -40,8 +40,7 @@ defmodule Teiserver.Battle.BalanceLib do
     }
   end
 
-
-  @spec algorithm_modules() :: %{String.t => module}
+  @spec algorithm_modules() :: %{String.t() => module}
   def algorithm_modules() do
     %{
       "loser_picks" => Teiserver.Battle.Balance.LoserPicks,
@@ -70,7 +69,7 @@ defmodule Teiserver.Battle.BalanceLib do
     mean_diff_max: the maximum difference in mean between the party and paired parties
     stddev_diff_max: the maximum difference in stddev between the party and paired parties
   """
-  @spec create_balance([BT.player_group], non_neg_integer, list) :: map
+  @spec create_balance([BT.player_group()], non_neg_integer, list) :: map
   def create_balance([], _team_count, _opts) do
     %{
       logs: [],
@@ -85,7 +84,6 @@ defmodule Teiserver.Battle.BalanceLib do
       stdevs: %{}
     }
   end
-
 
   def create_balance(groups, team_count, opts) do
     start_time = System.system_time(:microsecond)
@@ -107,24 +105,29 @@ defmodule Teiserver.Battle.BalanceLib do
       end)
 
     # Now we pass this to the algorithm and it does the rest!
-    balance_result = case algorithm_modules()[opts[:algorithm] || "loser_picks"] do
-      nil ->
-        raise "No balance module by the name of '#{opts[:algorithm] || "loser_picks"}'"
-      m ->
-        m.perform(expanded_groups, team_count, opts)
-    end
+    balance_result =
+      case algorithm_modules()[opts[:algorithm] || "loser_picks"] do
+        nil ->
+          raise "No balance module by the name of '#{opts[:algorithm] || "loser_picks"}'"
+
+        m ->
+          m.perform(expanded_groups, team_count, opts)
+      end
 
     # Now expand the results and calculate stats
     balance_result
-      |> expand_balance_result()
-      |> calculate_balance_stats
-      |> cleanup_result
-      |> Map.put(:time_taken, System.system_time(:microsecond) - start_time)
+    |> expand_balance_result()
+    |> calculate_balance_stats
+    |> cleanup_result
+    |> Map.put(:time_taken, System.system_time(:microsecond) - start_time)
   end
 
   # Removes various keys we don't care about
   defp cleanup_result(result) do
-    Map.take(result, ~w(team_groups team_players ratings captains team_sizes deviation means stdevs logs)a)
+    Map.take(
+      result,
+      ~w(team_groups team_players ratings captains team_sizes deviation means stdevs logs)a
+    )
   end
 
   # Take the balance result and add some extra fields to make using it easier
@@ -152,15 +155,14 @@ defmodule Teiserver.Battle.BalanceLib do
     })
   end
 
-
   @doc """
   We return a list of groups, a list of solo players and logs generated in the process
   the purpose of this function is to go through the groups, work out which ones we can keep as
   groups and with the ones we can't, break them up and add them back into the pool of solo
   players for other groups
   """
-  @spec matchup_groups([BT.expanded_group], [BT.expanded_group], list()) ::
-          {[BT.expanded_group], [BT.expanded_group], [String.t()]}
+  @spec matchup_groups([BT.expanded_group()], [BT.expanded_group()], list()) ::
+          {[BT.expanded_group()], [BT.expanded_group()], [String.t()]}
   def matchup_groups([], solo_players, _opts), do: {[], solo_players, []}
 
   def matchup_groups(groups, solo_players, opts) do
@@ -187,8 +189,8 @@ defmodule Teiserver.Battle.BalanceLib do
   # 1: paired groups
   # 2: non-paired groups
   # 3: logs
-  @spec do_matchup_groups([BT.expanded_group], [String.t()], [BT.expanded_group], list()) ::
-          {[BT.expanded_group], [BT.expanded_group], [String.t()]}
+  @spec do_matchup_groups([BT.expanded_group()], [String.t()], [BT.expanded_group()], list()) ::
+          {[BT.expanded_group()], [BT.expanded_group()], [String.t()]}
   # No groups, no logs
   defp do_matchup_groups([], [], previous_paired_groups, _opts) do
     {previous_paired_groups, [], []}
@@ -347,6 +349,7 @@ defmodule Teiserver.Battle.BalanceLib do
   @doc """
   Given a map from create_balance it will add in some stats
   """
+
   # @spec calculate_balance_stats(map()) :: map()
   # def calculate_balance_stats(%{team_players: []}) do
 
@@ -360,16 +363,18 @@ defmodule Teiserver.Battle.BalanceLib do
       end)
 
     # The highest rated member of each team is the "captain" by default
-    captains = if Map.has_key?(data, :captains) do
-      data.captains
-    else
-      data.team_players
+    captains =
+      if Map.has_key?(data, :captains) do
+        data.captains
+      else
+        data.team_players
         |> Map.new(fn
           {team_id, []} ->
             {team_id, nil}
 
           {team_id, players} ->
-            top_player = players
+            top_player =
+              players
               |> Enum.map(fn userid ->
                 {ratings[userid], userid}
               end)
@@ -379,7 +384,7 @@ defmodule Teiserver.Battle.BalanceLib do
 
             {team_id, top_player}
         end)
-    end
+      end
 
     team_sizes =
       data.team_players
@@ -430,7 +435,7 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
   @spec get_user_rating_value_uncertainty_pair(T.userid(), String.t() | non_neg_integer()) ::
-          {BT.rating_value, number()}
+          {BT.rating_value(), number()}
   def get_user_rating_value_uncertainty_pair(userid, rating_type_id)
       when is_integer(rating_type_id) do
     rating = Account.get_rating(userid, rating_type_id) || default_rating()
@@ -449,7 +454,7 @@ defmodule Teiserver.Battle.BalanceLib do
   @doc """
   Used to get the rating value of the user for public/reporting purposes
   """
-  @spec get_user_rating_value(T.userid(), String.t() | non_neg_integer()) :: BT.rating_value
+  @spec get_user_rating_value(T.userid(), String.t() | non_neg_integer()) :: BT.rating_value()
   def get_user_rating_value(userid, rating_type_id) when is_integer(rating_type_id) do
     Account.get_rating(userid, rating_type_id) |> convert_rating()
   end
@@ -466,7 +471,7 @@ defmodule Teiserver.Battle.BalanceLib do
   different from public/reporting
   """
   @spec get_user_balance_rating_value(T.userid(), String.t() | non_neg_integer()) ::
-          BT.rating_value
+          BT.rating_value()
   def get_user_balance_rating_value(userid, rating_type_id) when is_integer(rating_type_id) do
     real_rating = get_user_rating_value(userid, rating_type_id)
 
@@ -486,7 +491,7 @@ defmodule Teiserver.Battle.BalanceLib do
   @doc """
   Given a Rating object or nil, return a value representing the rating to be used
   """
-  @spec convert_rating(map() | nil) :: BT.rating_value
+  @spec convert_rating(map() | nil) :: BT.rating_value()
   def convert_rating(nil) do
     default_rating() |> convert_rating()
   end
@@ -499,8 +504,6 @@ defmodule Teiserver.Battle.BalanceLib do
   def calculate_rating_value(skill, uncertainty) do
     max(skill - uncertainty, 0)
   end
-
-
 
   @doc """
   Expects a map of %{team_id => rating_value}
@@ -540,7 +543,7 @@ defmodule Teiserver.Battle.BalanceLib do
   @doc """
   Given a list of groups, return the combined number of members
   """
-  @spec sum_group_membership_size([BT.expanded_group]) :: non_neg_integer()
+  @spec sum_group_membership_size([BT.expanded_group()]) :: non_neg_integer()
   def sum_group_membership_size([]), do: 0
 
   def sum_group_membership_size(groups) do
@@ -552,7 +555,7 @@ defmodule Teiserver.Battle.BalanceLib do
   @doc """
   Given a list of groups, return the combined rating (summed)
   """
-  @spec sum_group_rating([BT.expanded_group]) :: non_neg_integer()
+  @spec sum_group_rating([BT.expanded_group()]) :: non_neg_integer()
   def sum_group_rating([]), do: 0
 
   def sum_group_rating(groups) do
@@ -596,8 +599,8 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
   # Stage one, filter out players notably better/worse than the party
-  @spec find_comparable_group(BT.expanded_group, [BT.expanded_group], list()) ::
-          :no_possible_players | :no_possible_combinations | BT.expanded_group
+  @spec find_comparable_group(BT.expanded_group(), [BT.expanded_group()], list()) ::
+          :no_possible_players | :no_possible_combinations | BT.expanded_group()
   defp find_comparable_group(group, solo_players, opts) do
     rating_lower_bound =
       Enum.min(group.ratings) - (opts[:rating_lower_boundary] || @rating_lower_boundary)
@@ -619,8 +622,8 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
   # Now we've trimmed our playerlist a bit lets check out the different combinations
-  @spec filter_down_possibles(BT.expanded_group, [BT.expanded_group], list()) ::
-          :no_possible_combinations | BT.expanded_group
+  @spec filter_down_possibles(BT.expanded_group(), [BT.expanded_group()], list()) ::
+          :no_possible_combinations | BT.expanded_group()
   defp filter_down_possibles(group, possible_players, opts) do
     group_mean = Enum.sum(group.ratings) / Enum.count(group.ratings)
     group_stddev = Statistics.stdev(group.ratings)

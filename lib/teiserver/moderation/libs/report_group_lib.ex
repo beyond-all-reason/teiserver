@@ -11,7 +11,7 @@ defmodule Teiserver.Moderation.ReportGroupLib do
   @spec icon() :: String.t()
   def icon(), do: "fa-house-flag"
 
-  @spec make_favourite(ReportGroup.t) :: Map.t
+  @spec make_favourite(ReportGroup.t()) :: Map.t()
   def make_favourite(report_group) do
     %{
       type_colour: Teiserver.Moderation.colour(),
@@ -65,7 +65,7 @@ defmodule Teiserver.Moderation.ReportGroupLib do
     |> Repo.one!()
   end
 
-  @spec get_report_group(non_neg_integer(), T.match_id) :: ReportGroup.t | nil
+  @spec get_report_group(non_neg_integer(), T.match_id()) :: ReportGroup.t() | nil
   def get_report_group(id, args) when is_list(args) do
     args = args ++ [id: id]
 
@@ -148,29 +148,33 @@ defmodule Teiserver.Moderation.ReportGroupLib do
     ReportGroup.changeset(report_group, attrs)
   end
 
-  @spec get_or_make_report_group(T.userid, T.match_id) :: ReportGroup.t
+  @spec get_or_make_report_group(T.userid(), T.match_id()) :: ReportGroup.t()
   def get_or_make_report_group(target_id, match_id) when is_integer(match_id) do
     case get_report_group(target_id, match_id) do
       nil ->
         {:ok, rg} = create_report_group(%{target_id: target_id, match_id: match_id})
         rg
+
       r ->
         r
     end
   end
 
   def get_or_make_report_group(target_id, nil) do
-    report_group = get_report_group(nil,
-      where: [
-        target_id: target_id,
-        match_id: false,
-        closed: false
-      ]
-    )
+    report_group =
+      get_report_group(nil,
+        where: [
+          target_id: target_id,
+          match_id: false,
+          closed: false
+        ]
+      )
+
     case report_group do
       nil ->
         {:ok, rg} = create_report_group(%{target_id: target_id})
         rg
+
       _ ->
         report_group
     end

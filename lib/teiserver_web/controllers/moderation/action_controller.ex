@@ -86,7 +86,10 @@ defmodule TeiserverWeb.Moderation.ActionController do
     conn
     |> assign(:use_discord, Communication.DiscordChannelLib.use_discord?())
     |> assign(:guild_id, Communication.DiscordChannelLib.get_guild_id())
-    |> assign(:channel, Communication.DiscordChannelLib.get_discord_channel("Public moderation log"))
+    |> assign(
+      :channel,
+      Communication.DiscordChannelLib.get_discord_channel("Public moderation log")
+    )
     |> assign(:action, action)
     |> assign(:logs, logs)
     |> add_breadcrumb(
@@ -98,27 +101,28 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
   @spec new_with_user(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def new_with_user(conn, params) do
-    user = case params do
-      %{"userid" => userid_str} ->
-        Account.get_user(userid_str)
+    user =
+      case params do
+        %{"userid" => userid_str} ->
+          Account.get_user(userid_str)
 
-      %{"teiserver_user" => userid_str} ->
-        cond do
-          Integer.parse(userid_str) != :error ->
-            {user_id, _} = Integer.parse(userid_str)
-            Account.get_user(user_id)
+        %{"teiserver_user" => userid_str} ->
+          cond do
+            Integer.parse(userid_str) != :error ->
+              {user_id, _} = Integer.parse(userid_str)
+              Account.get_user(user_id)
 
-          get_hash_id(userid_str) != nil ->
-            user_id = get_hash_id(userid_str)
-            Account.get_user(user_id)
+            get_hash_id(userid_str) != nil ->
+              user_id = get_hash_id(userid_str)
+              Account.get_user(user_id)
 
-          true ->
-            nil
-        end
+            true ->
+              nil
+          end
 
-      _ ->
-        nil
-    end
+        _ ->
+          nil
+      end
 
     case user do
       nil ->
@@ -308,26 +312,28 @@ defmodule TeiserverWeb.Moderation.ActionController do
     action = Moderation.get_action!(id, preload: [:target])
 
     # First we try to update the message (if we have an ID)
-    update_result = if action.discord_message_id do
-      ActionLib.maybe_update_discord_post(action)
-    else
-      {:error, "no message_id"}
-    end
+    update_result =
+      if action.discord_message_id do
+        ActionLib.maybe_update_discord_post(action)
+      else
+        {:error, "no message_id"}
+      end
 
     Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
+
     case update_result do
       {:error, _} ->
         ActionLib.maybe_create_discord_post(action)
         add_audit_log(conn, "Moderation:Action re_posted", %{action_id: action.id})
 
         conn
-          |> put_flash(:info, "Action re-posted.")
-          |> redirect(to: Routes.moderation_action_path(conn, :show, action.id))
+        |> put_flash(:info, "Action re-posted.")
+        |> redirect(to: Routes.moderation_action_path(conn, :show, action.id))
 
       {:ok, _} ->
         conn
-          |> put_flash(:info, "Action updated.")
-          |> redirect(to: Routes.moderation_action_path(conn, :show, action.id))
+        |> put_flash(:info, "Action updated.")
+        |> redirect(to: Routes.moderation_action_path(conn, :show, action.id))
     end
   end
 

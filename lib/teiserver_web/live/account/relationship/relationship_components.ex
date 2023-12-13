@@ -10,6 +10,7 @@ defmodule TeiserverWeb.Account.RelationshipComponents do
   attr :active, :string, required: true
   attr :current_user, :map, required: true
   attr :match_id, :integer, default: nil
+
   def section_menu(assigns) do
     ~H"""
     <.section_menu_button

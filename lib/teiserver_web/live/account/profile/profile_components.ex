@@ -10,49 +10,31 @@ defmodule TeiserverWeb.Account.ProfileComponents do
   attr :userid, :integer, required: true
   attr :profile_permissions, :list, default: []
   attr :current_user, :map, required: true
+
   def profile_tabs(assigns) do
     ~H"""
     <div class="row mt-2 mb-3">
       <div class="col" id="nav-col">
         <.tab_header>
-          <.tab_nav
-            url={~p"/profile/#{@userid}/overview"}
-            selected={@tab == "overview"}
-          >
-            <Fontawesome.icon icon_atom={:summary} style="solid" />
-            Overview
+          <.tab_nav url={~p"/profile/#{@userid}/overview"} selected={@tab == "overview"}>
+            <Fontawesome.icon icon_atom={:summary} style="solid" /> Overview
           </.tab_nav>
 
-          <.tab_nav
-            url={~p"/profile/#{@userid}/matches"}
-            selected={@tab == "matches"}
-          >
-            <Fontawesome.icon icon={Teiserver.Battle.MatchLib.icon()} style="solid" />
-            Matches
+          <.tab_nav url={~p"/profile/#{@userid}/matches"} selected={@tab == "matches"}>
+            <Fontawesome.icon icon={Teiserver.Battle.MatchLib.icon()} style="solid" /> Matches
           </.tab_nav>
 
-          <.tab_nav
-            url={~p"/profile/#{@userid}/accolades"}
-            selected={@tab == "accolades"}
-          >
-            <Fontawesome.icon icon={Teiserver.Account.AccoladeLib.icon()} style="solid" />
-            Accolades
+          <.tab_nav url={~p"/profile/#{@userid}/accolades"} selected={@tab == "accolades"}>
+            <Fontawesome.icon icon={Teiserver.Account.AccoladeLib.icon()} style="solid" /> Accolades
           </.tab_nav>
 
-          <.tab_nav
-            url={~p"/profile/#{@userid}/achievements"}
-            selected={@tab == "achievements"}
-          >
+          <.tab_nav url={~p"/profile/#{@userid}/achievements"} selected={@tab == "achievements"}>
             <Fontawesome.icon icon={Teiserver.Game.AchievementTypeLib.icon()} style="solid" />
             Achievements
           </.tab_nav>
 
-          <.tab_nav
-            url={~p"/profile/#{@userid}/playtime"}
-            selected={@tab == "playtime"}
-          >
-            <Fontawesome.icon icon="fa-timer" style="solid" />
-            Playtime
+          <.tab_nav url={~p"/profile/#{@userid}/playtime"} selected={@tab == "playtime"}>
+            <Fontawesome.icon icon="fa-timer" style="solid" /> Playtime
           </.tab_nav>
 
           <.tab_nav
@@ -60,15 +42,14 @@ defmodule TeiserverWeb.Account.ProfileComponents do
             url={~p"/profile/#{@userid}/appearance"}
             selected={@tab == "appearance"}
           >
-            <Fontawesome.icon icon="icons" style="solid" />
-            Appearance
+            <Fontawesome.icon icon="icons" style="solid" /> Appearance
           </.tab_nav>
 
           <.tab_nav
             :if={
-              (not Enum.member?(@profile_permissions, :self)) and (
+              not Enum.member?(@profile_permissions, :self) and
                 Enum.member?(@profile_permissions, :friend)
-              )}
+            }
             url={~p"/profile/#{@userid}/relationships"}
             selected={@tab == "relationships"}
           >
@@ -81,13 +62,11 @@ defmodule TeiserverWeb.Account.ProfileComponents do
             url={~p"/profile/#{@userid}/contributor"}
             selected={@tab == "contributor"}
           >
-            <Fontawesome.icon icon="fa-code-commit" style="solid" />
-            Contributor
+            <Fontawesome.icon icon="fa-code-commit" style="solid" /> Contributor
           </.tab_nav>
         </.tab_header>
       </div>
     </div>
-
     """
   end
 
@@ -116,9 +95,7 @@ defmodule TeiserverWeb.Account.ProfileComponents do
             <Fontawesome.icon icon={@user.icon} style="regular" size="sm" />
           </div>
 
-          <%= @user.name %>
-
-          &nbsp;&nbsp;&nbsp;&nbsp;
+          <%= @user.name %> &nbsp;&nbsp;&nbsp;&nbsp;
           <span style="font-size: 0.7em;">
             Chevron rank: <%= @user.rank || 0 %>
           </span>
@@ -126,7 +103,12 @@ defmodule TeiserverWeb.Account.ProfileComponents do
       </div>
     </div>
 
-    <TeiserverWeb.Account.ProfileComponents.profile_tabs tab={@active} userid={@user.id} profile_permissions={@profile_permissions} current_user={@current_user} />
+    <TeiserverWeb.Account.ProfileComponents.profile_tabs
+      tab={@active}
+      userid={@user.id}
+      profile_permissions={@profile_permissions}
+      current_user={@current_user}
+    />
     """
   end
 end

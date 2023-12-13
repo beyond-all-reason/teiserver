@@ -121,22 +121,28 @@ defmodule TeiserverWeb.CoreComponents do
   attr :id, :string, default: "flash", doc: "the optional id of flash container"
   attr :flash, :map, default: %{}, doc: "the map of flash messages to display"
   attr :title, :string, default: nil
-  attr :kind, :atom, values: [:info, :success, :warning, :error], doc: "used for styling and flash lookup"
+
+  attr :kind, :atom,
+    values: [:info, :success, :warning, :error],
+    doc: "used for styling and flash lookup"
+
   attr :autoshow, :boolean, default: true, doc: "whether to auto show the flash on mount"
   attr :close, :boolean, default: true, doc: "whether the flash can be closed"
   attr :rest, :global, doc: "the arbitrary HTML attributes to add to the flash container"
   slot :inner_block, doc: "the optional inner block that renders the flash message"
 
   def flash(assigns) do
-    text_colour = case assigns[:kind] do
-      :info -> "info"
-      :success -> "success"
-      :warning -> "warning"
-      :error -> "danger"
-      _ -> ""
-    end
+    text_colour =
+      case assigns[:kind] do
+        :info -> "info"
+        :success -> "success"
+        :warning -> "warning"
+        :error -> "danger"
+        _ -> ""
+      end
 
-    assigns = assigns
+    assigns =
+      assigns
       |> assign(:text_colour, text_colour)
 
     ~H"""
@@ -158,16 +164,11 @@ defmodule TeiserverWeb.CoreComponents do
       {@rest}
     >
       <div class={"toast-header border-#{@text_colour}"}>
-        <Fontawesome.icon icon="stop" style="solid" class={"text-#{@text_colour}"} />
-        &nbsp;
+        <Fontawesome.icon icon="stop" style="solid" class={"text-#{@text_colour}"} /> &nbsp;
         <small class="text-body-secondary">just now</small>
 
-        <button
-          :if={@close}
-          type="button"
-          class="btn btn-close"
-          aria-label={gettext("close")}
-        ></button>
+        <button :if={@close} type="button" class="btn btn-close" aria-label={gettext("close")}>
+        </button>
       </div>
       <div class="toast-body">
         <%= msg %>
@@ -314,7 +315,14 @@ defmodule TeiserverWeb.CoreComponents do
     ~H"""
     <div class="form-check">
       <input name={@name} type="hidden" value="false" />
-      <input name={@name} id={@id} class="form-check-input" type="checkbox" value="true" checked={@checked} />
+      <input
+        name={@name}
+        id={@id}
+        class="form-check-input"
+        type="checkbox"
+        value="true"
+        checked={@checked}
+      />
       <label class="form-check-label" for={@id}>
         <strong><%= @label %></strong><%= assigns[:text] %>
         <%= if assigns[:description] do %>
@@ -328,14 +336,8 @@ defmodule TeiserverWeb.CoreComponents do
   def input(%{type: "select"} = assigns) do
     ~H"""
     <div phx-feedback-for={@name}>
-      <.label for={@id} :if={@label}><%= @label %></.label>
-      <select
-        id={@id}
-        name={@name}
-        class="form-control"
-        multiple={@multiple}
-        {@rest}
-      >
+      <.label :if={@label} for={@id}><%= @label %></.label>
+      <select id={@id} name={@name} class="form-control" multiple={@multiple} {@rest}>
         <option :if={@prompt} value=""><%= @prompt %></option>
         <%= Phoenix.HTML.Form.options_for_select(@options, @value) %>
       </select>
@@ -347,7 +349,7 @@ defmodule TeiserverWeb.CoreComponents do
   def input(%{type: "textarea"} = assigns) do
     ~H"""
     <div phx-feedback-for={@name}>
-      <.label for={@id} :if={@label}><%= @label %></.label>
+      <.label :if={@label} for={@id}><%= @label %></.label>
       <br />
       <textarea
         id={@id || @name}
@@ -367,7 +369,7 @@ defmodule TeiserverWeb.CoreComponents do
   def input(assigns) do
     ~H"""
     <div phx-feedback-for={@name}>
-      <.label for={@id} :if={@label}><%= @label %></.label>
+      <.label :if={@label} for={@id}><%= @label %></.label>
       <input
         type={@type}
         name={@name}
@@ -493,18 +495,12 @@ defmodule TeiserverWeb.CoreComponents do
             phx-click={@row_click && @row_click.(row)}
             class={@row_class && @row_class.(row)}
           >
-            <td
-              :for={{col, _i} <- Enum.with_index(@col)}
-              class={["", @row_click && "cursor-pointer"]}
-            >
+            <td :for={{col, _i} <- Enum.with_index(@col)} class={["", @row_click && "cursor-pointer"]}>
               <%= render_slot(col, @row_item.(row)) %>
             </td>
             <td :if={@action != []}>
               <div class="">
-                <span
-                  :for={action <- @action}
-                  class=""
-                >
+                <span :for={action <- @action} class="">
                   <%= render_slot(action, @row_item.(row)) %>
                 </span>
               </div>

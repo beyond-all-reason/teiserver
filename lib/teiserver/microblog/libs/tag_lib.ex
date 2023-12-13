@@ -40,14 +40,14 @@ defmodule Teiserver.Microblog.TagLib do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_tag!(non_neg_integer()) :: Tag.t
+  @spec get_tag!(non_neg_integer()) :: Tag.t()
   def get_tag!(tag_id) do
     [id: tag_id]
     |> TagQueries.query_tags()
     |> Repo.one!()
   end
 
-  @spec get_tag(non_neg_integer()) :: Tag.t | nil
+  @spec get_tag(non_neg_integer()) :: Tag.t() | nil
   def get_tag(tag_id) do
     [id: tag_id]
     |> TagQueries.query_tags()

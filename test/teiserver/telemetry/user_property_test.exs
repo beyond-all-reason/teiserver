@@ -26,8 +26,9 @@ defmodule Teiserver.Telemetry.UserPropertyTest do
     assert property.value == "value"
 
     # Ensure the user property types exist too
-    type_list = Telemetry.list_property_types()
-    |> Enum.map(fn %{name: name} -> name end)
+    type_list =
+      Telemetry.list_property_types()
+      |> Enum.map(fn %{name: name} -> name end)
 
     assert Enum.member?(type_list, "user.user_property-#{r}")
 

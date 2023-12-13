@@ -83,6 +83,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
         Account.merge_update_client(msg.userid, %{app_status: :accepted})
 
         client = Account.get_client_by_id(msg.userid)
+
         if client do
           send(client.tcp_pid, {:put, :app_status, :accepted})
         end
@@ -94,6 +95,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
       "hardware:sysInfoHash" ->
         Account.create_smurf_key(msg.userid, "chobby_sysinfo_hash", msg.value)
         Account.update_cache_user(msg.userid, %{chobby_sysinfo_hash: msg.value})
+
       _ ->
         :ok
     end

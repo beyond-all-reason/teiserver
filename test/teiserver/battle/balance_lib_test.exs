@@ -6,24 +6,26 @@ defmodule Teiserver.Battle.BalanceLibTest do
   test "balance algorithms - no players" do
     # We don't care about the result, just that they don't error
     BalanceLib.algorithm_modules()
-      |> Map.keys()
-      |> Enum.each(fn algorithm_name ->
-        result = BalanceLib.create_balance(
+    |> Map.keys()
+    |> Enum.each(fn algorithm_name ->
+      result =
+        BalanceLib.create_balance(
           [],
           2,
           algorithm: algorithm_name
         )
 
-        assert result != nil
-      end)
+      assert result != nil
+    end)
   end
 
   test "balance algorithms - one player" do
     # We don't care about the result, just that they don't error
     BalanceLib.algorithm_modules()
-      |> Map.keys()
-      |> Enum.each(fn algorithm_name ->
-        result = BalanceLib.create_balance(
+    |> Map.keys()
+    |> Enum.each(fn algorithm_name ->
+      result =
+        BalanceLib.create_balance(
           [
             %{1 => 5}
           ],
@@ -31,16 +33,17 @@ defmodule Teiserver.Battle.BalanceLibTest do
           algorithm: algorithm_name
         )
 
-        assert result != nil
-      end)
+      assert result != nil
+    end)
   end
 
   test "balance algorithms - 2v2" do
     # We don't care about the result, just that they don't error
     BalanceLib.algorithm_modules()
-      |> Map.keys()
-      |> Enum.each(fn algorithm_name ->
-        result = BalanceLib.create_balance(
+    |> Map.keys()
+    |> Enum.each(fn algorithm_name ->
+      result =
+        BalanceLib.create_balance(
           [
             %{1 => 5},
             %{2 => 6},
@@ -51,16 +54,17 @@ defmodule Teiserver.Battle.BalanceLibTest do
           algorithm: algorithm_name
         )
 
-        assert result != nil
-      end)
+      assert result != nil
+    end)
   end
 
   test "balance algorithms - ffa" do
     # We don't care about the result, just that they don't error
     BalanceLib.algorithm_modules()
-      |> Map.keys()
-      |> Enum.each(fn algorithm_name ->
-        result = BalanceLib.create_balance(
+    |> Map.keys()
+    |> Enum.each(fn algorithm_name ->
+      result =
+        BalanceLib.create_balance(
           [
             %{1 => 5},
             %{2 => 6},
@@ -71,16 +75,17 @@ defmodule Teiserver.Battle.BalanceLibTest do
           algorithm: algorithm_name
         )
 
-        assert result != nil
-      end)
+      assert result != nil
+    end)
   end
 
   test "balance algorithms - team ffa" do
     # We don't care about the result, just that they don't error
     BalanceLib.algorithm_modules()
-      |> Map.keys()
-      |> Enum.each(fn algorithm_name ->
-        result = BalanceLib.create_balance(
+    |> Map.keys()
+    |> Enum.each(fn algorithm_name ->
+      result =
+        BalanceLib.create_balance(
           [
             %{1 => 5},
             %{2 => 6},
@@ -93,16 +98,17 @@ defmodule Teiserver.Battle.BalanceLibTest do
           algorithm: algorithm_name
         )
 
-        assert result != nil
-      end)
+      assert result != nil
+    end)
   end
 
   test "balance algorithms - bigger game with groups" do
     # We don't care about the result, just that they don't error
     BalanceLib.algorithm_modules()
-      |> Map.keys()
-      |> Enum.each(fn algorithm_name ->
-        result = BalanceLib.create_balance(
+    |> Map.keys()
+    |> Enum.each(fn algorithm_name ->
+      result =
+        BalanceLib.create_balance(
           [
             # Two high tier players partied together
             %{101 => 41, 102 => 35},
@@ -128,7 +134,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
           algorithm: algorithm_name
         )
 
-        assert result != nil
-      end)
+      assert result != nil
+    end)
   end
 end

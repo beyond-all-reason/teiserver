@@ -10,6 +10,7 @@ defmodule TeiserverWeb.Moderation.ModerationComponents do
   attr :active, :string, required: true
   # attr :current_user, :map, required: true
   attr :match_id, :integer, default: nil
+
   def sub_menu(assigns) do
     ~H"""
     <div class="row sub-menu">

@@ -7,7 +7,8 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
   def mount(_params, _session, socket) do
     case allow?(socket.assigns[:current_user], "Moderator") do
       true ->
-        socket = socket
+        socket =
+          socket
           |> assign(:site_menu_active, "chat")
           |> assign(:view_colour, Teiserver.Chat.LobbyMessageLib.colours())
           |> assign(:messages, [])
@@ -20,6 +21,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
           |> assign(:messages, [])
 
         {:ok, socket}
+
       false ->
         {:ok,
          socket
@@ -29,22 +31,23 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
 
   @impl true
   def handle_params(params, _url, %{assigns: %{filters: filters}} = socket) do
-    filters = if params["userid"] do
-      user = Account.get_user_by_id(params["userid"])
+    filters =
+      if params["userid"] do
+        user = Account.get_user_by_id(params["userid"])
 
-      Map.merge(filters, %{
-        "username" => user.name,
-        "user-raw-filter" => user.name,
-        "userids" => [user.id]
-      })
-    else
-      filters
-    end
+        Map.merge(filters, %{
+          "username" => user.name,
+          "user-raw-filter" => user.name,
+          "userids" => [user.id]
+        })
+      else
+        filters
+      end
 
-    {:noreply, socket
-      |> assign(:filters, filters)
-      |> get_messages()
-    }
+    {:noreply,
+     socket
+     |> assign(:filters, filters)
+     |> get_messages()}
   end
 
   @impl true
@@ -60,21 +63,25 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
 
     new_filters = Map.put(filters, key, value)
 
-    new_filters = case key do
-      "user-raw-filter" ->
-        userids = value
-          |> String.split(",")
-          |> Enum.map(fn name ->
-            Account.get_userid_from_name(name)
-          end)
-          |> Enum.reject(&(&1 == nil))
+    new_filters =
+      case key do
+        "user-raw-filter" ->
+          userids =
+            value
+            |> String.split(",")
+            |> Enum.map(fn name ->
+              Account.get_userid_from_name(name)
+            end)
+            |> Enum.reject(&(&1 == nil))
 
-        Map.put(new_filters, "userids", userids)
+          Map.put(new_filters, "userids", userids)
 
-      _ -> new_filters
-    end
+        _ ->
+          new_filters
+      end
 
-    socket = socket
+    socket =
+      socket
       |> assign(:filters, new_filters)
       |> assign(:searching, true)
       |> get_messages()
@@ -89,9 +96,8 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
     new_filters = Map.put(socket.assigns.filters, key, value)
 
     {:noreply,
-      socket
-        |> assign(:filters, new_filters)
-    }
+     socket
+     |> assign(:filters, new_filters)}
   end
 
   defp default_filters(socket) do
@@ -173,7 +179,8 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
           )
       end
 
-    extra_usernames = messages
+    extra_usernames =
+      messages
       |> Enum.map(fn m -> m.user_id end)
       |> Enum.reject(fn userid ->
         Map.has_key?(socket.assigns.usernames, userid)
@@ -185,9 +192,9 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
     new_usernames = Map.merge(socket.assigns.usernames, extra_usernames)
 
     socket
-      |> assign(:usernames, new_usernames)
-      |> assign(:messages, messages)
-      |> assign(:searching, false)
+    |> assign(:usernames, new_usernames)
+    |> assign(:messages, messages)
+    |> assign(:searching, false)
   end
 
   defp get_messages(socket) do

@@ -10,7 +10,7 @@ defmodule Teiserver.Chat.DirectMessageLib do
     query = from(direct_messages in DirectMessage)
 
     query
-    |> do_where([id: args[:id]])
+    |> do_where(id: args[:id])
     |> do_where(args[:where])
     |> do_preload(args[:preload])
     |> do_order_by(args[:order_by])
@@ -38,7 +38,7 @@ defmodule Teiserver.Chat.DirectMessageLib do
 
   defp _where(query, :members, {u1, u2}) when is_integer(u1) and is_integer(u2) do
     from direct_messages in query,
-      where: (direct_messages.to_id in [^u1, ^u2] or direct_messages.from_id in [^u1, ^u2])
+      where: direct_messages.to_id in [^u1, ^u2] or direct_messages.from_id in [^u1, ^u2]
   end
 
   defp _where(query, :id_in, id_list) do
@@ -48,6 +48,7 @@ defmodule Teiserver.Chat.DirectMessageLib do
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
+
   defp do_order_by(query, params) do
     params
     |> Enum.reduce(query, fn key, query_acc ->

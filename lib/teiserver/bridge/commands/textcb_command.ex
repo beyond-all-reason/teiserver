@@ -14,7 +14,8 @@ defmodule Teiserver.Bridge.Commands.TextcbCommand do
   @impl true
   @spec cmd_definition() :: map()
   def cmd_definition() do
-    choices = Communication.list_text_callbacks()
+    choices =
+      Communication.list_text_callbacks()
       |> Enum.map(fn cb ->
         %{
           name: cb.name,
@@ -57,6 +58,7 @@ defmodule Teiserver.Bridge.Commands.TextcbCommand do
           })
 
           main_id = Config.get_site_config_cache("teiserver.Discord channel #main")
+
           if interaction.channel_id == main_id do
             bridge_user_id = BridgeServer.get_bridge_userid()
             Room.send_message(bridge_user_id, "main", text_callback.response)
@@ -65,20 +67,22 @@ defmodule Teiserver.Bridge.Commands.TextcbCommand do
           Communication.set_last_triggered_time(text_callback, interaction.channel_id)
 
           %{
-            type: 4,  # ChannelMessageWithSource
+            # ChannelMessageWithSource
+            type: 4,
             data: %{
               content: text_callback.response
             }
           }
         else
           %{
-            type: 4,  # ChannelMessageWithSource
+            # ChannelMessageWithSource
+            type: 4,
             data: %{
-              content: "Sorry, I don't want to spam messages. Give it a few minutes before asking again."
+              content:
+                "Sorry, I don't want to spam messages. Give it a few minutes before asking again."
             }
           }
         end
     end
   end
-
 end

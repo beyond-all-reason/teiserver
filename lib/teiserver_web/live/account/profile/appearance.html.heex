@@ -14,20 +14,19 @@
 
 <div class="row mt-2 mb-3">
   <div class="col">
-    
     <h4>Select icon/colour</h4>
     This combination will be how you appear on user lists such as the post match data. You can change it at any time.
-    <br /><br />
-    Your appearance is currently set as:
+    <br /><br /> Your appearance is currently set as:
     <div class="col-sm-4 col-md-3 col-lg-2 col-xl-1 col-xxl-1 menu-card">
-      <span class="block-link" style={"background-color: #{@current_user.colour}; color: #FFFFFF;"}>
-        <Fontawesome.icon icon={@current_user.icon} style="duotone" size="3x" /><br />
-        &nbsp;
+      <span
+        class="block-link"
+        style={"background-color: #{@current_user.colour}; color: #FFFFFF;"}
+      >
+        <Fontawesome.icon icon={@current_user.icon} style="duotone" size="3x" /><br /> &nbsp;
       </span>
     </div>
 
     <br /><br /> Click a box below to change it.
-
     <div class="row">
       <%= for role <- @options do %>
         <div

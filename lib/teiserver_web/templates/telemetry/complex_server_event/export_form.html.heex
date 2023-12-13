@@ -4,7 +4,11 @@
 <script src={Routes.static_path(@conn, "/js/select2.js")}>
 </script>
 
-<TeiserverWeb.Telemetry.TelemetryComponents.sub_menu active={"complex_server_events"} view_colour={view_colour()} current_user={@current_user} />
+<TeiserverWeb.Telemetry.TelemetryComponents.sub_menu
+  active="complex_server_events"
+  view_colour={view_colour()}
+  current_user={@current_user}
+/>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {

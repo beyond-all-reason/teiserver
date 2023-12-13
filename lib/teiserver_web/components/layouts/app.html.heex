@@ -1,12 +1,13 @@
 <div>
-  <%
-    view_colour_value = if assigns[:conn] && Kernel.function_exported?(assigns[:conn].private.phoenix_view._, :view_colour, 0) do
+  <% view_colour_value =
+    if assigns[:conn] &&
+         Kernel.function_exported?(assigns[:conn].private.phoenix_view._, :view_colour, 0) do
       @conn.private.phoenix_view._.view_colour()
     else
       assigns[:view_colour] || :primary
     end
-    {fg, bg, _bsname} = Teiserver.Helper.StylingHelper.colours(view_colour_value)
-  %>
+
+  {fg, bg, _bsname} = Teiserver.Helper.StylingHelper.colours(view_colour_value) %>
   <style type="text/css">
     @media print {
       #menu, #header, #navigation {
@@ -33,7 +34,7 @@
     .line-card a:hover {
       background-color: <%= bg %> !important;
     }
-    
+
     .sub-menu-icon a:hover {
       border-bottom: 5px solid <%= fg %>;
       color: <%= fg %>;
@@ -48,13 +49,16 @@
     }
   </style>
 
-  <TeiserverWeb.NavComponents.top_navbar active={assigns[:site_menu_active]} current_user={@current_user} />
+  <TeiserverWeb.NavComponents.top_navbar
+    active={assigns[:site_menu_active]}
+    current_user={@current_user}
+  />
 
   <.flash_group flash={@flash} />
 
   <main>
     <.breadcrumb_trail :if={assigns[:breadcrumb_trails]} trails={assigns[:breadcrumb_trails]} />
-  
+
     <div class="px-3 my-0">
       <%= @inner_content %>
     </div>

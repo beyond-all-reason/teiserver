@@ -80,7 +80,8 @@ defmodule Teiserver.SpringTcpServer do
   def init(ref, socket, transport) do
     # If we've not started up yet, lets just delay for a moment
     # for some of the stuff to get sorted
-    if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") != true do
+    if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
+         true do
       :timer.sleep(1000)
     end
 
@@ -375,7 +376,8 @@ defmodule Teiserver.SpringTcpServer do
       else
         keys = Map.keys(new_values)
 
-        if Enum.member?(keys, :locked) or Enum.member?(keys, :map_name) or Enum.member?(keys, :spectator_count) do
+        if Enum.member?(keys, :locked) or Enum.member?(keys, :map_name) or
+             Enum.member?(keys, :spectator_count) do
           SpringOut.reply(:update_battle, lobby_id, nil, state)
         else
           state
@@ -785,7 +787,8 @@ defmodule Teiserver.SpringTcpServer do
 
         _ ->
           # Remove from rooms
-          new_room_member_cache = state.room_member_cache
+          new_room_member_cache =
+            state.room_member_cache
             |> Map.new(fn {room_name, members} ->
               if Enum.member?(members, userid) do
                 SpringOut.reply(:remove_user_from_room, {userid, room_name}, nil, state)
@@ -1138,20 +1141,22 @@ defmodule Teiserver.SpringTcpServer do
   # Chat
   defp new_chat_message(type, from, room_name, msg, state) do
     # This allows us to see messages sent by web-users
-    client = case Client.get_client_by_id(from) do
-      nil ->
-        user = Account.get_user_by_id(from)
+    client =
+      case Client.get_client_by_id(from) do
+        nil ->
+          user = Account.get_user_by_id(from)
 
-        Client.create(%{
-          userid: user.id,
-          name: user.name,
-          rank: 0,
-          moderator: CacheUser.is_moderator?(user),
-          bot: CacheUser.is_bot?(user)
-        })
-      c ->
-        c
-    end
+          Client.create(%{
+            userid: user.id,
+            name: user.name,
+            rank: 0,
+            moderator: CacheUser.is_moderator?(user),
+            bot: CacheUser.is_bot?(user)
+          })
+
+        c ->
+          c
+      end
 
     # Do they know about the user?
     state =

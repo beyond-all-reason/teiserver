@@ -15,7 +15,13 @@ defmodule Teiserver.Telemetry.PropertyTypeLib do
     name = String.trim(name)
 
     Teiserver.cache_get_or_store(:telemetry_property_types_cache, name, fn ->
-      query = PropertyTypeQueries.query_property_types(where: [name: name], select: [:id], order_by: ["ID (Lowest first)"])
+      query =
+        PropertyTypeQueries.query_property_types(
+          where: [name: name],
+          select: [:id],
+          order_by: ["ID (Lowest first)"]
+        )
+
       case Repo.all(query) do
         [] ->
           {:ok, event_type} =

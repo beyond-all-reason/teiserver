@@ -258,7 +258,7 @@
       link: Routes.ts_reports_report_path(@conn, :show, "moderation_activity")
     ) %>
   <% end %>
-  
+
   <.menu_card
     :if={allow?(@current_user, Teiserver.Communication.MicroblogReport.permissions())}
     icon={Teiserver.Communication.MicroblogReport.icon()}

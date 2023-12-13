@@ -131,7 +131,8 @@ defmodule Teiserver.Account.AuthLib do
   @doc """
   Allows us to perform an auth check and force a redirect
   """
-  @spec mount_require_all(Plug.Conn.t() | Phoenix.LiveView.Socket.t(), String.t() | [String.t()]) :: Phoenix.LiveView.Socket
+  @spec mount_require_all(Plug.Conn.t() | Phoenix.LiveView.Socket.t(), String.t() | [String.t()]) ::
+          Phoenix.LiveView.Socket
   def mount_require_all(obj, requirements) do
     if do_require(obj, List.flatten([requirements]), :all) do
       obj
@@ -142,7 +143,10 @@ defmodule Teiserver.Account.AuthLib do
     end
   end
 
-  @spec mount_require_any(Map.t() | Plug.Conn.t() | Phoenix.LiveView.Socket.t(), String.t() | [String.t()]) :: Phoenix.LiveView.Socket
+  @spec mount_require_any(
+          Map.t() | Plug.Conn.t() | Phoenix.LiveView.Socket.t(),
+          String.t() | [String.t()]
+        ) :: Phoenix.LiveView.Socket
   def mount_require_any(obj, requirements) do
     if do_require(obj, List.flatten([requirements]), :any) do
       obj

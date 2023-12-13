@@ -290,7 +290,8 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
   # Takes the message and strips off assignment stuff plus commands
   defp strip_message(msg) do
-    msg = msg
+    msg =
+      msg
       |> String.trim()
       |> String.slice(0..256)
 

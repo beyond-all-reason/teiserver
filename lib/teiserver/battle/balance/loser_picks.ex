@@ -22,11 +22,11 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
   import Teiserver.Helper.NumberHelper, only: [round: 2]
 
   @type algorithm_state :: %{
-    teams: map,
-    logs: list,
-    solo_players: list,
-    opts: list
-  }
+          teams: map,
+          logs: list,
+          solo_players: list,
+          opts: list
+        }
 
   @doc """
   Each round the team with the lowest score picks, if a team has the maximum number of players
@@ -34,7 +34,7 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
 
   groups is a list of tuples: {members, rating, member_count}
   """
-  @spec perform([BT.expanded_group_or_pair], non_neg_integer(), list()) :: BT.algorithm_result
+  @spec perform([BT.expanded_group_or_pair()], non_neg_integer(), list()) :: BT.algorithm_result()
   def perform(raw_groups, team_count, opts) do
     teams =
       Range.new(1, team_count || 1)
@@ -92,7 +92,7 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
     do_loser_picks(state)
   end
 
-  @spec do_loser_picks(algorithm_state) :: BT.algorithm_result
+  @spec do_loser_picks(algorithm_state) :: BT.algorithm_result()
   defp do_loser_picks(%{remaining_picks: []} = state), do: state
 
   # defp do_loser_picks([picked | remaining_groups], teams, max_teamsize, logs, opts) do
@@ -143,10 +143,11 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
               "Picked #{names} for team #{current_team}, adding #{round(picked.group_rating, 2)} points for new total of #{round(new_total, 2)}"
             ]
 
-        do_loser_picks(%{state |
-          remaining_picks: remaining_picks,
-          teams: new_teams_map,
-          logs: new_logs
+        do_loser_picks(%{
+          state
+          | remaining_picks: remaining_picks,
+            teams: new_teams_map,
+            logs: new_logs
         })
 
       # Groups, so we just merge a bunch of them into teams
@@ -176,10 +177,11 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
 
         new_logs = state.logs ++ extra_logs
 
-        do_loser_picks(%{state |
-          remaining_picks: remaining_picks,
-          teams: new_teams_map,
-          logs: new_logs
+        do_loser_picks(%{
+          state
+          | remaining_picks: remaining_picks,
+            teams: new_teams_map,
+            logs: new_logs
         })
     end
   end

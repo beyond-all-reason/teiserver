@@ -52,10 +52,17 @@ defmodule Teiserver.Protocols.Spring.UserOut do
   def do_reply(:rescind_friend_request, result_list, _state) do
     result_list
     |> Enum.map_join("", fn
-      {id, :success} -> "s.user.rescind_friend_request #{id}\tsuccess\n"
-      {id, :no_user} -> "s.user.rescind_friend_request #{id}\tfailure\tno user of that id\n"
-      {id, :existing} -> "s.user.rescind_friend_request #{id}\tfailure\tno friend request\n"
-      {id, reason} -> "s.user.rescind_friend_request #{id}\tfailure\tno failure catch for #{reason}\n"
+      {id, :success} ->
+        "s.user.rescind_friend_request #{id}\tsuccess\n"
+
+      {id, :no_user} ->
+        "s.user.rescind_friend_request #{id}\tfailure\tno user of that id\n"
+
+      {id, :existing} ->
+        "s.user.rescind_friend_request #{id}\tfailure\tno friend request\n"
+
+      {id, reason} ->
+        "s.user.rescind_friend_request #{id}\tfailure\tno failure catch for #{reason}\n"
     end)
   end
 
@@ -63,7 +70,7 @@ defmodule Teiserver.Protocols.Spring.UserOut do
     case result do
       {:error, reason} -> "s.user.accept_friend_request #{from_id_str}\tfailure\t#{reason}\n"
       :ok -> "s.user.accept_friend_request #{from_id_str}\tsuccess\n"
-      resp -> "s.user.accept_friend_request #{from_id_str}\t#{inspect resp}\n"
+      resp -> "s.user.accept_friend_request #{from_id_str}\t#{inspect(resp)}\n"
     end
   end
 
@@ -71,12 +78,13 @@ defmodule Teiserver.Protocols.Spring.UserOut do
     case result do
       {:error, reason} -> "s.user.decline_friend_request #{from_id_str}\tfailure\t#{reason}\n"
       :ok -> "s.user.decline_friend_request #{from_id_str}\tsuccess\n"
-      resp -> "s.user.decline_friend_request #{from_id_str}\t#{inspect resp}\n"
+      resp -> "s.user.decline_friend_request #{from_id_str}\t#{inspect(resp)}\n"
     end
   end
 
   def do_reply(:whois_name, {:no_user, username}, _state) do
-    encoded_data = %{"error" => "user not found"}
+    encoded_data =
+      %{"error" => "user not found"}
       |> Jason.encode!()
       |> Base.encode64(padding: false)
 
@@ -84,7 +92,8 @@ defmodule Teiserver.Protocols.Spring.UserOut do
   end
 
   def do_reply(:whois_name, {:ok, user}, _state) do
-    encoded_data = user
+    encoded_data =
+      user
       |> Map.take(~w(id name country icon colour)a)
       |> Jason.encode!()
       |> Base.encode64(padding: false)
@@ -93,7 +102,8 @@ defmodule Teiserver.Protocols.Spring.UserOut do
   end
 
   def do_reply(:whois, {:no_user, userid}, _state) do
-    encoded_data = %{"error" => "user not found"}
+    encoded_data =
+      %{"error" => "user not found"}
       |> Jason.encode!()
       |> Base.encode64(padding: false)
 
@@ -101,7 +111,8 @@ defmodule Teiserver.Protocols.Spring.UserOut do
   end
 
   def do_reply(:whois, {:ok, user}, _state) do
-    encoded_data = user
+    encoded_data =
+      user
       |> Map.take(~w(name country icon colour)a)
       |> Jason.encode!()
       |> Base.encode64(padding: false)
@@ -135,7 +146,7 @@ defmodule Teiserver.Protocols.Spring.UserOut do
   end
 
   def do_reply(event, msg, _state) do
-    Logger.error("No handler for event `#{event}` with msg #{inspect msg}")
+    Logger.error("No handler for event `#{event}` with msg #{inspect(msg)}")
     "\n"
   end
 end

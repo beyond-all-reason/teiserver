@@ -37,7 +37,7 @@
     </div>
   </div>
 
-  <div class="col-md-12 col-lg-4" :if={allow?(@current_user, "Server")}>
+  <div :if={allow?(@current_user, "Server")} class="col-md-12 col-lg-4">
     <h4>Scores</h4>
     <ul>
       <li>Behaviour: <%= @user.behaviour_score %></li>

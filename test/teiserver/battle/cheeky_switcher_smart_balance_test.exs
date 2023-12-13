@@ -20,36 +20,36 @@ defmodule Teiserver.Battle.CheekySwitcherSmartBalanceTest do
       |> Map.drop([:logs, :time_taken])
 
     assert result == %{
-      team_groups: %{
-        1 => [
-          %{count: 1, group_rating: 6, members: [2], ratings: [6]},
-          %{count: 1, group_rating: 7, members: [3], ratings: [7]}
-        ],
-        2 => [
-          %{count: 1, group_rating: 5, members: [1], ratings: [5]},
-          %{count: 1, group_rating: 8, members: [4], ratings: [8]}
-        ]
-      },
-      team_players: %{
-        1 => [2, 3],
-        2 => [1, 4]
-      },
-      ratings: %{
-        1 => 13,
-        2 => 13
-      },
-      captains: %{
-        1 => 3,
-        2 => 4
-      },
-      team_sizes: %{
-        1 => 2,
-        2 => 2
-      },
-      deviation: 0,
-      means: %{1 => 6.5, 2 => 6.5},
-      stdevs: %{1 => 0.5, 2 => 1.5}
-    }
+             team_groups: %{
+               1 => [
+                 %{count: 1, group_rating: 6, members: [2], ratings: [6]},
+                 %{count: 1, group_rating: 7, members: [3], ratings: [7]}
+               ],
+               2 => [
+                 %{count: 1, group_rating: 5, members: [1], ratings: [5]},
+                 %{count: 1, group_rating: 8, members: [4], ratings: [8]}
+               ]
+             },
+             team_players: %{
+               1 => [2, 3],
+               2 => [1, 4]
+             },
+             ratings: %{
+               1 => 13,
+               2 => 13
+             },
+             captains: %{
+               1 => 3,
+               2 => 4
+             },
+             team_sizes: %{
+               1 => 2,
+               2 => 2
+             },
+             deviation: 0,
+             means: %{1 => 6.5, 2 => 6.5},
+             stdevs: %{1 => 0.5, 2 => 1.5}
+           }
   end
 
   # test "ffa" do

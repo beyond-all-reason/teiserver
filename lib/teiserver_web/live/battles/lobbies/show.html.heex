@@ -75,10 +75,7 @@ spectators =
           ) %>
 
           <%= if @moderator and @lobby.match_id do %>
-            <a
-              href={~p"/battle/chat/#{@lobby.match_id}"}
-              class={"btn btn-#{bsname}"}
-            >
+            <a href={~p"/battle/chat/#{@lobby.match_id}"} class={"btn btn-#{bsname}"}>
               Full chat
             </a>
           <% end %>

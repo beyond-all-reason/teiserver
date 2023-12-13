@@ -15,6 +15,7 @@ defmodule TeiserverWeb.Telemetry.SimpleLobbyEventController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
+
   plug(:add_breadcrumb, name: 'Simple lobby events', url: '/telemetry/simple_lobby_events/summary')
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -59,7 +60,8 @@ defmodule TeiserverWeb.Telemetry.SimpleLobbyEventController do
         _ -> Timex.now() |> Timex.shift(days: -7)
       end
 
-    lobby_events = SimpleLobbyEventQueries.get_aggregate_detail(event_type_id, start_datetime, Timex.now())
+    lobby_events =
+      SimpleLobbyEventQueries.get_aggregate_detail(event_type_id, start_datetime, Timex.now())
       |> Enum.sort_by(fn {_userid, value} -> value end, &>=/2)
       |> Enum.take(500)
       |> Enum.map(fn {userid, value} ->

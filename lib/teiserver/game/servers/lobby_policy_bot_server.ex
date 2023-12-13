@@ -144,11 +144,11 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     empty_lobby =
       Lobby.find_empty_lobby(fn l ->
         String.contains?(l.name, "ENGINE TEST") == false and
-        l.passworded == false and
+          l.passworded == false and
           l.locked == false and
           l.tournament == false and
           l.in_progress == false and
-          (not String.contains?(l.name, "ENGINE TEST"))
+          not String.contains?(l.name, "ENGINE TEST")
       end)
 
     case empty_lobby do
@@ -388,7 +388,8 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   defp handle_founder_chat(
-         "* Automatic random map rotation: next map is" <> map_and_quotes, _userid,
+         "* Automatic random map rotation: next map is" <> map_and_quotes,
+         _userid,
          state
        ) do
     current_map =

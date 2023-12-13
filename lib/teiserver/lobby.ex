@@ -446,7 +446,7 @@ defmodule Teiserver.Lobby do
     end
   end
 
-  @spec rename_lobby(T.lobby_id(), String.t(), T.userid) :: :ok
+  @spec rename_lobby(T.lobby_id(), String.t(), T.userid()) :: :ok
   def rename_lobby(lobby_id, new_name, userid) do
     case Battle.lobby_exists?(lobby_id) do
       false ->
@@ -665,9 +665,8 @@ defmodule Teiserver.Lobby do
         changed_values =
           new_values
           |> Enum.filter(fn {field, new_value} ->
-            allow?(changer, field, lobby)
-            and
-            new_value != Map.get(client, field)
+            allow?(changer, field, lobby) and
+              new_value != Map.get(client, field)
           end)
           |> Map.new(fn {k, v} -> {k, v} end)
 

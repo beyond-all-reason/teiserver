@@ -14,20 +14,26 @@
           </span>
         </h3>
       </div>
-      
-      <div class="card-body" :if={@stage == :loading}>
+
+      <div :if={@stage == :loading} class="card-body">
         Loading <Fontawesome.icon icon="sync" class="fa-spinner-third" />
       </div>
-      
-      <div class="card-body" :if={@stage == :user}>
-        User selection is currently not implemented, please select using <a href={~p"/account/relationship/search"}>the relationships section</a>
+
+      <div :if={@stage == :user} class="card-body">
+        User selection is currently not implemented, please select using
+        <a href={~p"/account/relationship/search"}>the relationships section</a>
       </div>
-      
-      <div class="card-body" :if={@stage == :type}>
+
+      <div :if={@stage == :type} class="card-body">
         <h5>Reason for report</h5>
         <div class="row" id="type-row">
-          <div class="col" :for={{label, name, icon} <- @types}>
-            <div class="menu-card" id={"type-#{name}"} phx-click="select-type" phx-value-type={name}>
+          <div :for={{label, name, icon} <- @types} class="col">
+            <div
+              class="menu-card"
+              id={"type-#{name}"}
+              phx-click="select-type"
+              phx-value-type={name}
+            >
               <span>
                 <Fontawesome.icon icon={icon} style="regular" size="3x" /><br />
                 <%= label %>
@@ -36,15 +42,19 @@
           </div>
         </div>
       </div>
-      
-      <div class="card-body" :if={@stage == :sub_type}>
+
+      <div :if={@stage == :sub_type} class="card-body">
         <h5>Type of <%= @type %></h5>
         <div class="row">
-          <div class="col" :for={{label, name, icon} <- @sub_types[@type]}>
-            <div class="menu-card" id={"sub_type-#{name}"} phx-click="select-sub_type" phx-value-sub_type={name}>
+          <div :for={{label, name, icon} <- @sub_types[@type]} class="col">
+            <div
+              class="menu-card"
+              id={"sub_type-#{name}"}
+              phx-click="select-sub_type"
+              phx-value-sub_type={name}
+            >
               <span>
-                <i class={"fa-fw fa-regular #{icon} fa-3x"} id={"icon-sub_type-#{name}"}>
-                </i>
+                <i class={"fa-fw fa-regular #{icon} fa-3x"} id={"icon-sub_type-#{name}"}></i>
                 <br />
                 <%= label %>
               </span>
@@ -52,11 +62,10 @@
           </div>
         </div>
       </div>
-      
-      <div class="card-body" :if={@stage == :match}>
+
+      <div :if={@stage == :match} class="card-body">
         <h5>Which match?</h5>
         Note: If the action took place in the lobby, select the match it took place before.
-                
         <.table
           id="match-table"
           rows={@matches}
@@ -66,15 +75,14 @@
           <:col :let={match} label="Match"><%= match.label %></:col>
           <:col :let={match} label=""><%= match.time_ago %></:col>
         </.table>
-        
         If you cannot find the match here then you can submit the report without a match selected but it may mean we cannot find evidence and are thus unable to handle the report.
         <br /><br />
         <span class="btn btn-outline-warning" id="select-no-match-btn" phx-click="select-no-match">
           Select "no match"
         </span>
       </div>
-      
-      <div class="card-body" :if={@stage == :extra_text}>
+
+      <div :if={@stage == :extra_text} class="card-body">
         <h5>Extra info:</h5>
         The more information you can provide the better, some useful items include:
         <ul>
@@ -83,9 +91,7 @@
           <li>Timestamps (even if approximate) of in-game events</li>
         </ul>
         <br /><br />
-        
         We may ignore reports with descriptions stating simply "spec cheating", if you want to accuse someone of that, please provide a link to the replay and concrete examples of what you think is suspicious, with timestamps. If you'd like, open a ticket on the Discord to accompany the report.
-        
         <input
           type="text"
           name="extra_text"
@@ -96,54 +102,55 @@
           phx-keyup="update-extra-text"
           phx-debounce="200"
         />
-        <span class={"btn btn-#{@view_colour} float-end mt-2"} phx-click="submit-extra-text" id="submit-report-btn">
+        <span
+          class={"btn btn-#{@view_colour} float-end mt-2"}
+          phx-click="submit-extra-text"
+          id="submit-report-btn"
+        >
           Submit report
         </span>
-      </div>      
-      
-      <div class="card-body" :if={@stage == :completed}>
+      </div>
+
+      <div :if={@stage == :completed} class="card-body">
         <div :if={@result == :success}>
           Your report has been submitted, thank you for taking the time to help improve the community.
           <br /><br />
-          
-          Please note if you want to then you can ignore, avoid or even block <%= @user.name %> via <a href={~p"/profile/#{@user.id}"}>their profile</a>.
-          
+          Please note if you want to then you can ignore, avoid or even block <%= @user.name %> via <a href={
+            ~p"/profile/#{@user.id}"
+          }>their profile</a>.
         </div>
       </div>
-      
-      <div class="card-body" :if={@stage == :not_allowed}>
+
+      <div :if={@stage == :not_allowed} class="card-body">
         <div class="alert alert-warning">
           <%= @failure_reason %>
         </div>
       </div>
-      
-      <div class="card-footer" :if={@stage != :not_allowed}>
+
+      <div :if={@stage != :not_allowed} class="card-footer">
         In addition to reporting this user you can Ignore them. You can also Avoid (don't want to play with) them or Block (don't even want to see) them.
         <br /><br />
-      
+
         <span
           :if={@relationship == nil || @relationship.ignore != true}
           phx-click="ignore-user"
           class="btn btn-outline-warning mx-1"
         >
-          <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="regular" />
-          &nbsp;
+          <Fontawesome.icon
+            icon={Teiserver.Account.RelationshipLib.icon_ignore()}
+            style="regular"
+          /> &nbsp;
           Ignore
         </span>
-        
-        <span
-          :if={@relationship && @relationship.ignore == true}
-          class="btn btn-warning mx-1"
-        >
+
+        <span :if={@relationship && @relationship.ignore == true} class="btn btn-warning mx-1">
           <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="solid" />
           &nbsp;
           Ignoring
         </span>
-        
         &nbsp;&nbsp;
-        
         <span
-          :if={@relationship == nil || @relationship && @relationship.state != "avoid"}
+          :if={@relationship == nil || (@relationship && @relationship.state != "avoid")}
           phx-click="avoid-user"
           class="btn btn-outline-danger mx-1"
         >
@@ -151,18 +158,15 @@
           &nbsp;
           Avoid
         </span>
-        
-        <span
-          :if={@relationship && @relationship.state == "avoid"}
-          class="btn btn-danger mx-1"
-        >
+
+        <span :if={@relationship && @relationship.state == "avoid"} class="btn btn-danger mx-1">
           <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="solid" />
           &nbsp;
           Avoiding
         </span>
 
         <span
-          :if={@relationship == nil || @relationship && @relationship.state != "block"}
+          :if={@relationship == nil || (@relationship && @relationship.state != "block")}
           phx-click="block-user"
           class="btn btn-outline-danger2 mx-1"
         >
@@ -171,17 +175,14 @@
           Block
         </span>
 
-        <span
-          :if={@relationship && @relationship.state == "block"}
-          class="btn btn-danger2 mx-1"
-        >
+        <span :if={@relationship && @relationship.state == "block"} class="btn btn-danger2 mx-1">
           <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="solid" />
           &nbsp;
           Blocking
         </span>
-        <br /><br />
-        
-        You can change who you ignore, avoid and block in <a href={~p"/account/relationship"}>your relationships</a> page or for this person specifically on <a href={~p"/profile/#{@user.id}"}>their profile page</a>.
+        <br /><br /> You can change who you ignore, avoid and block in
+        <a href={~p"/account/relationship"}>your relationships</a>
+        page or for this person specifically on <a href={~p"/profile/#{@user.id}"}>their profile page</a>.
       </div>
     </div>
   </div>

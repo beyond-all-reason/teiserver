@@ -102,7 +102,7 @@ defmodule TeiserverWeb.Moderation.BanController do
 
       existing_ban != nil ->
         conn
-          |> redirect(to: Routes.moderation_ban_path(conn, :show, existing_ban.id))
+        |> redirect(to: Routes.moderation_ban_path(conn, :show, existing_ban.id))
 
       true ->
         matching_users =
@@ -181,13 +181,15 @@ defmodule TeiserverWeb.Moderation.BanController do
     case Moderation.create_ban(ban_params) do
       {:ok, ban} ->
         # Now ban the user themselves
-        {:ok, action} = Moderation.create_action(%{
-          target_id: ban.source_id,
-          reason: ban.reason,
-          restrictions: ["Login"],
-          score_modifier: 0,
-          expires: Timex.now() |> Timex.shift(years: 1000)
-        })
+        {:ok, action} =
+          Moderation.create_action(%{
+            target_id: ban.source_id,
+            reason: ban.reason,
+            restrictions: ["Login"],
+            score_modifier: 0,
+            expires: Timex.now() |> Timex.shift(years: 1000)
+          })
+
         ActionLib.maybe_create_discord_post(action)
 
         Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(ban.source_id)
@@ -266,10 +268,12 @@ defmodule TeiserverWeb.Moderation.BanController do
         order_by: "Newest first"
       )
 
-    user_key_values = all_user_keys
+    user_key_values =
+      all_user_keys
       |> Enum.map(fn k -> k.value end)
 
-    extra_values = ban.key_values
+    extra_values =
+      ban.key_values
       |> Enum.reject(fn v ->
         Enum.member?(user_key_values, v)
       end)
@@ -291,7 +295,8 @@ defmodule TeiserverWeb.Moderation.BanController do
       ban_params["key_values"]
       |> Enum.reject(fn r -> r == "false" end)
 
-    extra_values = ban_params["extra_values"]
+    extra_values =
+      ban_params["extra_values"]
       |> String.split("\n")
       |> Enum.reject(fn v ->
         v == "" or v == nil

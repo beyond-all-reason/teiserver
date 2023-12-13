@@ -1,36 +1,32 @@
-<TeiserverWeb.Battle.BattleComponents.sub_menu active={"matches"} view_colour={@view_colour} />
+<TeiserverWeb.Battle.BattleComponents.sub_menu active="matches" view_colour={@view_colour} />
 
 <style type="text/css">
- .uh-0 td {background-color: rgba(255, 0, 0, 0.1);}
- .uh-1 td {background-color: rgba(0, 255, 0, 0.1);}
- .uh-2 td {background-color: rgba(0, 0, 255, 0.1);}
- .uh-3 td {background-color: rgba(255, 255, 0, 0.1);}
- .uh-4 td {background-color: rgba(255, 0, 255, 0.1);}
- .uh-5 td {background-color: rgba(0, 255, 255, 0.1);}
- .uh-6 td {background-color: rgba(255, 255, 255, 0.1);}
- .uh-7 td {background-color: rgba(255, 255, 255, 0.1);}
- .uh-8 td {background-color: rgba(255, 255, 255, 0.1);}
- .uh-9 td {background-color: rgba(255, 255, 255, 0.1);}
+  .uh-0 td {background-color: rgba(255, 0, 0, 0.1);}
+  .uh-1 td {background-color: rgba(0, 255, 0, 0.1);}
+  .uh-2 td {background-color: rgba(0, 0, 255, 0.1);}
+  .uh-3 td {background-color: rgba(255, 255, 0, 0.1);}
+  .uh-4 td {background-color: rgba(255, 0, 255, 0.1);}
+  .uh-5 td {background-color: rgba(0, 255, 255, 0.1);}
+  .uh-6 td {background-color: rgba(255, 255, 255, 0.1);}
+  .uh-7 td {background-color: rgba(255, 255, 255, 0.1);}
+  .uh-8 td {background-color: rgba(255, 255, 255, 0.1);}
+  .uh-9 td {background-color: rgba(255, 255, 255, 0.1);}
 </style>
 
-<div class="row section-menu" :if={@match}>
+<div :if={@match} class="row section-menu">
   <div class="col-md-12">
     <TeiserverWeb.Battle.MatchComponents.section_menu
       active="chat"
       view_colour={@view_colour}
       current_user={@current_user}
       match_id={@match.id}
-    />
-
-    &nbsp;&nbsp;&nbsp;
-
+    /> &nbsp;&nbsp;&nbsp;
     <.link
       :if={@prev_match}
       patch={~p"/battle/chat/#{@prev_match.id}/#{@extra_url_parts}"}
       class="btn btn-outline-secondary"
     >
-      <Fontawesome.icon icon="arrow-left" style="regular" />
-      Prev match
+      <Fontawesome.icon icon="arrow-left" style="regular" /> Prev match
     </.link>
 
     <.link
@@ -38,8 +34,7 @@
       patch={~p"/battle/chat/#{@next_match.id}/#{@extra_url_parts}"}
       class="btn btn-outline-secondary"
     >
-      <Fontawesome.icon icon="arrow-right" style="regular" />
-      Next match
+      <Fontawesome.icon icon="arrow-right" style="regular" /> Next match
     </.link>
 
     <.link
@@ -62,17 +57,16 @@
         Team <%= @match.winning_team + 1 %> won
         &nbsp;&nbsp;&nbsp;&nbsp;
       <% end %>
-      Duration: <%= duration_to_str_short(@match.game_duration) %>
-      &nbsp;&nbsp;&nbsp;&nbsp;
-      Started: <%= date_to_str(@match.started, format: :hms) %>
-      &nbsp;&nbsp;&nbsp;&nbsp;
-      Messages: <%= Teiserver.Helper.StringHelper.format_number Enum.count(@messages) %>
+      Duration: <%= duration_to_str_short(@match.game_duration) %> &nbsp;&nbsp;&nbsp;&nbsp;
+      Started: <%= date_to_str(@match.started, format: :hms) %> &nbsp;&nbsp;&nbsp;&nbsp;
+      Messages: <%= Teiserver.Helper.StringHelper.format_number(Enum.count(@messages)) %>
     </h3>
 
     <form method="post" class="">
       <div class="row">
         <div class="col d-none">
-          <.input type="select"
+          <.input
+            type="select"
             label="Bots"
             options={["Include bot messages", "Exclude bot messages"]}
             name="bot-messages"
@@ -80,9 +74,10 @@
             phx-change="filter-update"
           />
         </div>
-        
+
         <div class="col">
-          <.input type="select"
+          <.input
+            type="select"
             label="Format"
             options={["Table", "Raw", "Discord"]}
             name="message-format"
@@ -92,38 +87,48 @@
         </div>
 
         <div class="col">
-          <.input type="text"
+          <.input
+            type="text"
             label="Message contains"
             name="message-contains"
             value={@filters["message-contains"]}
-            phx-change="filter-update" phx-debounce="400"
+            phx-change="filter-update"
+            phx-debounce="400"
           />
         </div>
-        
+
         <div class="col">
-          <.input type="text"
+          <.input
+            type="text"
             label="User filter (split with commas)"
             name="user-raw-filter"
             value={@filters["user-raw-filter"]}
-            phx-change="filter-update" phx-debounce="400"
+            phx-change="filter-update"
+            phx-debounce="400"
           />
         </div>
-        
-        <div class="col" :if={@filters["message-format"] == "Table"}>
-          <.input type="text"
+
+        <div :if={@filters["message-format"] == "Table"} class="col">
+          <.input
+            type="text"
             label="User highlight (split with commas)"
             name="user-raw-highlight"
             value={@filters["user-raw-highlight"]}
-            phx-change="change-user-highlight" phx-debounce="400"
+            phx-change="change-user-highlight"
+            phx-debounce="400"
           />
         </div>
       </div>
     </form>
     <br />
-    
+
     <h4>Lobby chat</h4>
     <div :if={assigns[:messages]}>
-      <table class="table table-sm table-hover" :if={@filters["message-format"] == "Table"} id="rich-text-block">
+      <table
+        :if={@filters["message-format"] == "Table"}
+        class="table table-sm table-hover"
+        id="rich-text-block"
+      >
         <thead>
           <tr>
             <th>Sender</th>
@@ -143,14 +148,14 @@
         </tbody>
       </table>
 
-      <div class="row" :if={@filters["message-format"] == "Raw"} id="raw-text-block">
+      <div :if={@filters["message-format"] == "Raw"} class="row" id="raw-text-block">
         <div class="col-md-12">
           <textarea rows="30" cols="40" class="form-control"><%= for msg <- @messages do %>
   <%= msg.user.name %>: <%= msg.content %><% end %></textarea>
         </div>
       </div>
-      
-      <div class="row" :if={@filters["message-format"] == "Discord"} id="discord-text-block">
+
+      <div :if={@filters["message-format"] == "Discord"} class="row" id="discord-text-block">
         <div class="col-md-12">
           <textarea rows="30" cols="40" class="form-control"><%= for msg <- @messages do %>
   **<%= msg.user.name %>**: <%= msg.content %><% end %></textarea>
@@ -159,5 +164,3 @@
     </div>
   </div>
 </div>
-
-

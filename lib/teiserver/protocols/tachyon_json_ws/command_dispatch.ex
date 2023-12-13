@@ -20,9 +20,11 @@ defmodule Teiserver.Tachyon.CommandDispatch do
     # Get every single module in that namespace
     # if it has a dispatch_handlers function we make use of it
     {:ok, module_list} = :application.get_key(:teiserver, :modules)
-    lookup = module_list
+
+    lookup =
+      module_list
       |> Enum.filter(fn m ->
-        m |> Module.split |> Enum.take(3) == ["Teiserver", "Tachyon", "Handlers"]
+        m |> Module.split() |> Enum.take(3) == ["Teiserver", "Tachyon", "Handlers"]
       end)
       |> Enum.filter(fn m ->
         Code.ensure_loaded(m)

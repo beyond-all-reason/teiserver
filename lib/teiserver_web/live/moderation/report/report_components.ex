@@ -51,7 +51,7 @@ defmodule TeiserverWeb.Moderation.ReportComponents do
       bsname={@view_colour}
       icon={StylingHelper.icon(:show)}
       active={true}
-      url={"#"}
+      url="#"
     >
       Show
     </.section_menu_button>
@@ -61,7 +61,7 @@ defmodule TeiserverWeb.Moderation.ReportComponents do
       bsname={@view_colour}
       icon={StylingHelper.icon(:user)}
       active={true}
-      url={"#"}
+      url="#"
     >
       User
     </.section_menu_button>
@@ -71,7 +71,7 @@ defmodule TeiserverWeb.Moderation.ReportComponents do
       bsname={@view_colour}
       icon={StylingHelper.icon(:edit)}
       active={true}
-      url={"#"}
+      url="#"
     >
       Edit
     </.section_menu_button>

@@ -15,6 +15,7 @@ defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
+
   plug(:add_breadcrumb, name: 'Simple match events', url: '/telemetry/simple_match_events/summary')
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -59,11 +60,21 @@ defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
         _ -> Timex.now() |> Timex.shift(days: -7)
       end
 
-    data_by_match_id = SimpleMatchEventQueries.get_aggregate_detail_by_match_id(event_type_id, start_datetime, Timex.now())
+    data_by_match_id =
+      SimpleMatchEventQueries.get_aggregate_detail_by_match_id(
+        event_type_id,
+        start_datetime,
+        Timex.now()
+      )
       |> Enum.sort_by(fn {_match_id, value} -> value end, &>=/2)
       |> Enum.take(500)
 
-    data_by_user_id = SimpleMatchEventQueries.get_aggregate_detail_by_user_id(event_type_id, start_datetime, Timex.now())
+    data_by_user_id =
+      SimpleMatchEventQueries.get_aggregate_detail_by_user_id(
+        event_type_id,
+        start_datetime,
+        Timex.now()
+      )
       |> Enum.sort_by(fn {_userid, value} -> value end, &>=/2)
       |> Enum.map(fn {userid, value} ->
         {userid, Account.get_username_by_id(userid), value}

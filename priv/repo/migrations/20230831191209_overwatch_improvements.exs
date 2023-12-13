@@ -22,7 +22,9 @@ defmodule Teiserver.Repo.Migrations.OverwatchImprovements do
     end
 
     create table(:moderation_report_group_votes, primary_key: false) do
-      add :report_group_id, references(:moderation_report_groups, on_delete: :nothing), primary_key: true
+      add :report_group_id, references(:moderation_report_groups, on_delete: :nothing),
+        primary_key: true
+
       add :user_id, references(:account_users, on_delete: :nothing), primary_key: true
 
       add :action, :string

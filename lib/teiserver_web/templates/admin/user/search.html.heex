@@ -133,7 +133,7 @@
         />
       </div>
 
-      <div class={search_col_class} :if={allow?(@current_user, "Server")}>
+      <div :if={allow?(@current_user, "Server")} class={search_col_class}>
         <label for="search_behaviour_score_min" class="control-label">
           Behaviour score min
         </label>
@@ -146,8 +146,8 @@
           class="form-control"
         />
       </div>
-      
-      <div class={search_col_class} :if={allow?(@current_user, "Server")}>
+
+      <div :if={allow?(@current_user, "Server")} class={search_col_class}>
         <label for="search_behaviour_score_max" class="control-label">
           Behaviour score max
         </label>

@@ -28,7 +28,9 @@ defmodule Teiserver.Data.UserTest do
     result = CacheUser.register_user_with_md5("DUPE_NAME", "DUPE@email.e", "md5_password", "ip")
     assert result == {:error, "Username already taken"}
 
-    result = CacheUser.register_user_with_md5("non_dupe_name", "DUPE@email.e", "md5_password", "ip")
+    result =
+      CacheUser.register_user_with_md5("non_dupe_name", "DUPE@email.e", "md5_password", "ip")
+
     assert result == {:error, "Email already attached to a user (DUPE@email.e)"}
   end
 

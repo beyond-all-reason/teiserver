@@ -36,18 +36,15 @@ defmodule Teiserver.Application do
         concache_sup(:account_user_cache),
         concache_sup(:account_user_cache_bang),
         concache_sup(:account_membership_cache),
-
         concache_sup(:account_friend_cache),
         concache_sup(:account_incoming_friend_request_cache),
         concache_sup(:account_outgoing_friend_request_cache),
-
         concache_sup(:account_follow_cache),
         concache_sup(:account_ignore_cache),
         concache_sup(:account_avoid_cache),
         concache_sup(:account_block_cache),
         concache_sup(:account_avoiding_this_cache),
         concache_sup(:account_blocking_this_cache),
-
         concache_perm_sup(:recently_used_cache),
         concache_perm_sup(:auth_group_store),
         concache_perm_sup(:restriction_lookup_store),
@@ -95,7 +92,6 @@ defmodule Teiserver.Application do
         concache_perm_sup(:telemetry_complex_match_event_types_cache),
         concache_perm_sup(:telemetry_simple_server_event_types_cache),
         concache_perm_sup(:telemetry_complex_server_event_types_cache),
-
         concache_perm_sup(:teiserver_account_smurf_key_types),
         concache_sup(:teiserver_user_ratings, global_ttl: 60_000),
         concache_sup(:teiserver_game_rating_types, global_ttl: 60_000),

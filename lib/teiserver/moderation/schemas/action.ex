@@ -29,7 +29,10 @@ defmodule Teiserver.Moderation.Action do
       |> parse_humantimes(~w(expires)a)
 
     struct
-    |> cast(params, ~w(target_id report_group_id reason restrictions score_modifier expires notes hidden discord_message_id appeal_status)a)
+    |> cast(
+      params,
+      ~w(target_id report_group_id reason restrictions score_modifier expires notes hidden discord_message_id appeal_status)a
+    )
     |> validate_required(~w(target_id reason restrictions expires score_modifier)a)
     |> adjust_restrictions
     |> validate_length(:restrictions, min: 1)

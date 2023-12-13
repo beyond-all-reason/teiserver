@@ -126,6 +126,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
       if user do
         Telemetry.log_complex_server_event(user.id, "spads.broken_connection", %{from_id: from_id})
+
         Client.disconnect(user.id, "reported broken connection")
       end
     end
@@ -148,6 +149,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
         if userid && CacheUser.is_bot?(userid) do
           match_id = Battle.get_match_id_from_userid(from_id)
+
           if match_id do
             game_time = int_parse(game_time)
             Telemetry.log_simple_match_event(userid, match_id, event_type_name, game_time)
@@ -173,9 +175,17 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
             if userid && CacheUser.is_bot?(userid) do
               match_id = Battle.get_match_id_from_userid(from_id)
+
               if match_id do
                 game_time = int_parse(game_time)
-                Telemetry.log_complex_match_event(userid, match_id, event_type_name, game_time, json_data)
+
+                Telemetry.log_complex_match_event(
+                  userid,
+                  match_id,
+                  event_type_name,
+                  game_time,
+                  json_data
+                )
               end
             end
 

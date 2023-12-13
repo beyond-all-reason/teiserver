@@ -12,7 +12,11 @@ defmodule TeiserverWeb.General.Home.IndexLiveTest do
   describe "Anon" do
     test "index", %{conn: conn} do
       {:error, {:redirect, resp}} = live(conn, ~p"/")
-      assert resp == %{flash: %{"error" => "You must log in to access this page."}, to: ~p"/login"}
+
+      assert resp == %{
+               flash: %{"error" => "You must log in to access this page."},
+               to: ~p"/login"
+             }
     end
   end
 

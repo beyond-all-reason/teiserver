@@ -19,37 +19,27 @@
   <div class="col">
     <%= cond do %>
       <% @friendship -> %>
-        You are friends
-        <br /><br />
-
+        You are friends <br /><br />
       <% @friendship_request && @friendship_request.from_user_id == @current_user.id -> %>
         You have sent <%= @user.name %> a friend request and are waiting for a response
         <br /><br />
-
       <% @friendship_request && @friendship_request.from_user_id != @current_user.id -> %>
-        They have sent you a friend request and are waiting for a response
-        <br /><br />
-
+        They have sent you a friend request and are waiting for a response <br /><br />
       <% @relationship && @relationship.state == "follow" -> %>
         You are following <%= @user.name %>
         <br /><br />
-
       <% @relationship && @relationship.ignore -> %>
         You are ignoring <%= @user.name %>
         <br /><br />
-
       <% @relationship && @relationship.state == "avoid" -> %>
         You are avoiding <%= @user.name %>
         <br /><br />
-
       <% @relationship && @relationship.state == "block" -> %>
         You are blocking <%= @user.name %>
         <br /><br />
-
       <% true -> %>
-        
     <% end %>
-    
+
     <%!-- Actions --%>
     <%= if @current_user && @current_user.id != @user.id do %>
       <%!-- Friend stuff --%>
@@ -62,47 +52,48 @@
         &nbsp;
         Add friend
       </span>
-      
+
       <span
-        :if={@friendship == nil && @friendship_request && @friendship_request.to_user_id == @current_user.id}
+        :if={
+          @friendship == nil && @friendship_request &&
+            @friendship_request.to_user_id == @current_user.id
+        }
         phx-click="accept-friend-request"
         class="btn btn-outline-success mx-1"
       >
-        <Fontawesome.icon icon="check" style="regular" />
-        &nbsp;
+        <Fontawesome.icon icon="check" style="regular" /> &nbsp;
         Accept friend request
       </span>
-      
+
       <span
-        :if={@friendship == nil && @friendship_request && @friendship_request.to_user_id == @current_user.id}
+        :if={
+          @friendship == nil && @friendship_request &&
+            @friendship_request.to_user_id == @current_user.id
+        }
         phx-click="decline-friend-request"
         class="btn btn-outline-danger mx-1"
       >
-        <Fontawesome.icon icon="times" style="regular" />
-        &nbsp;
+        <Fontawesome.icon icon="times" style="regular" /> &nbsp;
         Decline friend request
       </span>
-      
+
       <span
-        :if={@friendship == nil && @friendship_request && @friendship_request.from_user_id == @current_user.id}
+        :if={
+          @friendship == nil && @friendship_request &&
+            @friendship_request.from_user_id == @current_user.id
+        }
         phx-click="rescind-friend-request"
         class="btn btn-outline-danger mx-1"
       >
-        <Fontawesome.icon icon="times" style="regular" />
-        &nbsp;
+        <Fontawesome.icon icon="times" style="regular" /> &nbsp;
         Rescind friend request
       </span>
-      
-      <span
-        :if={@friendship != nil}
-        phx-click="unfriend"
-        class="btn btn-outline-danger mx-1"
-      >
-        <Fontawesome.icon icon="times" style="regular" />
-        &nbsp;
+
+      <span :if={@friendship != nil} phx-click="unfriend" class="btn btn-outline-danger mx-1">
+        <Fontawesome.icon icon="times" style="regular" /> &nbsp;
         Unfriend <%= @user.name %>
       </span>
-      
+
       <span
         :if={@friendship == nil && (@relationship == nil || @relationship.state != "follow")}
         phx-click="follow-user"
@@ -112,7 +103,7 @@
         &nbsp;
         Follow
       </span>
-      
+
       <span
         :if={@friendship == nil && @relationship && @relationship.state == "follow"}
         phx-click="reset-relationship-state"
@@ -122,7 +113,7 @@
         &nbsp;
         Un-Follow
       </span>
-      
+
       <span
         :if={@friendship == nil && (@relationship == nil || @relationship.ignore != true)}
         phx-click="ignore-user"
@@ -142,9 +133,12 @@
         &nbsp;
         Un-Ignore
       </span>
-      
+
       <span
-        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.state != "avoid"}
+        :if={
+          (@friendship == nil && @relationship == nil) ||
+            (@relationship && @relationship.state != "avoid")
+        }
         phx-click="avoid-user"
         class="btn btn-outline-danger mx-1"
       >
@@ -152,7 +146,7 @@
         &nbsp;
         Avoid
       </span>
-      
+
       <span
         :if={@relationship && @relationship.state == "avoid"}
         phx-click="reset-relationship-state"
@@ -162,9 +156,12 @@
         &nbsp;
         Unavoid
       </span>
-      
+
       <span
-        :if={@friendship == nil && @relationship == nil || @relationship && @relationship.state != "block"}
+        :if={
+          (@friendship == nil && @relationship == nil) ||
+            (@relationship && @relationship.state != "block")
+        }
         phx-click="block-user"
         class="btn btn-outline-danger2 mx-1"
       >
@@ -172,7 +169,7 @@
         &nbsp;
         Block
       </span>
-      
+
       <span
         :if={@relationship && @relationship.state == "block"}
         phx-click="reset-relationship-state"
@@ -188,19 +185,17 @@
         navigate={~p"/moderation/report_user/#{@user.id}"}
         class={"btn btn-outline-#{Teiserver.Moderation.ReportLib.colour()} mx-1 ms-4"}
       >
-        <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="regular" />
-        &nbsp;
+        <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="regular" /> &nbsp;
         Report user
       </.link>
     <% end %>
-    
+
     <.link
       :if={allow?(@current_user, "Moderator")}
       navigate={~p"/teiserver/admin/user/#{@user.id}"}
       class={"btn btn-outline-#{Teiserver.Admin.AdminLib.colours()} mx-1 ms-4"}
     >
-      <Fontawesome.icon icon={Teiserver.Admin.AdminLib.icon()} style="regular" />
-      &nbsp;
+      <Fontawesome.icon icon={Teiserver.Admin.AdminLib.icon()} style="regular" /> &nbsp;
       Admin panel
     </.link>
   </div>
@@ -220,9 +215,7 @@
         </div>
       <% end %>
     <% end %>
-    <br /><br />
-    
-    Once we have some privacy controls we will be adding:
+    <br /><br /> Once we have some privacy controls we will be adding:
     <ul>
       <li>Recent matches</li>
       <li>Accolades</li>
@@ -230,6 +223,5 @@
       <li>Play time (maybe even in graph form!)</li>
       <li>Mutual friends</li>
     </ul>
-    
   </div>
 </div>

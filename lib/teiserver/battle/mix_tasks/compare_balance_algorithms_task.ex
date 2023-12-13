@@ -9,9 +9,9 @@ defmodule Mix.Tasks.Teiserver.CompareBalanceAlgorithms do
 
   @spec run(list()) :: :ok
   def run(args) do
-    IO.puts ""
-    IO.inspect args, label: "CompareBalanceAlgorithms"
-    IO.puts ""
+    IO.puts("")
+    IO.inspect(args, label: "CompareBalanceAlgorithms")
+    IO.puts("")
 
     # cases = [@stacked_groups, @master_bel, @team_ffa, @smurf_party, @odd_users, @even_spread, @even_spread_integers, @high_low, @mega_lobby, @mega_lobby_parties]
     # algorithms = [:cheeky_switcher, :loser_picks, :cheeky_switcher_rating, :cheeky_switcher_smart]
@@ -96,7 +96,6 @@ defmodule Mix.Tasks.Teiserver.CompareBalanceAlgorithms do
   # #   compare_algorithm_results(stacked_groups["groups"], stacked_groups["team_count"], stacked_groups["name"])
   # #   compare_algorithm_times(stacked_groups["groups"], stacked_groups["team_count"], stacked_groups["name"])
   # # end
-
 
   # # @tag runnable: false
   # # test "Compare algorithms MasterBel2 case" do

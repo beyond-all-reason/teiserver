@@ -13,16 +13,18 @@ defmodule Teiserver.Telemetry.ComplexServerEventLib do
   @spec icon() :: String.t()
   def icon(), do: "fa-database"
 
-  @spec log_complex_server_event(T.userid | nil, String, map()) :: {:error, Ecto.Changeset} | {:ok, ComplexServerEvent}
+  @spec log_complex_server_event(T.userid() | nil, String, map()) ::
+          {:error, Ecto.Changeset} | {:ok, ComplexServerEvent}
   def log_complex_server_event(userid, event_type_name, value) do
     event_type_id = Telemetry.get_or_add_complex_server_event_type(event_type_name)
 
-    result = create_complex_server_event(%{
-      user_id: userid,
-      event_type_id: event_type_id,
-      value: value,
-      timestamp: Timex.now()
-    })
+    result =
+      create_complex_server_event(%{
+        user_id: userid,
+        event_type_id: event_type_id,
+        value: value,
+        timestamp: Timex.now()
+      })
 
     case result do
       {:ok, _event} ->

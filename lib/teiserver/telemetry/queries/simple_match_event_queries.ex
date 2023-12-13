@@ -9,7 +9,7 @@ defmodule Teiserver.Telemetry.SimpleMatchEventQueries do
     query = from(simple_match_events in SimpleMatchEvent)
 
     query
-    |> do_where([id: args[:id]])
+    |> do_where(id: args[:id])
     |> do_where(args[:where])
     |> do_preload(args[:preload])
     |> do_order_by(args[:order_by])
@@ -63,6 +63,7 @@ defmodule Teiserver.Telemetry.SimpleMatchEventQueries do
 
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
+
   defp do_order_by(query, params) do
     params
     |> Enum.reduce(query, fn key, query_acc ->
@@ -128,12 +129,13 @@ defmodule Teiserver.Telemetry.SimpleMatchEventQueries do
       AND m.started BETWEEN $2 AND $3
       GROUP BY match_id
     """
+
     case Ecto.Adapters.SQL.query(Repo, query, [event_type_id, start_datetime, end_datetime]) do
       {:ok, results} ->
         results.rows
-          |> Map.new(fn [key, value] ->
-            {key, value}
-          end)
+        |> Map.new(fn [key, value] ->
+          {key, value}
+        end)
 
       {a, b} ->
         raise "ERR: #{a}, #{b}"
@@ -150,12 +152,13 @@ defmodule Teiserver.Telemetry.SimpleMatchEventQueries do
       AND m.started BETWEEN $2 AND $3
       GROUP BY user_id
     """
+
     case Ecto.Adapters.SQL.query(Repo, query, [event_type_id, start_datetime, end_datetime]) do
       {:ok, results} ->
         results.rows
-          |> Map.new(fn [key, value] ->
-            {key, value}
-          end)
+        |> Map.new(fn [key, value] ->
+          {key, value}
+        end)
 
       {a, b} ->
         raise "ERR: #{a}, #{b}"

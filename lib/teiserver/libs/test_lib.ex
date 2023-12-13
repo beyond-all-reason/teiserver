@@ -64,9 +64,9 @@ defmodule Teiserver.TeiserverTestLib do
         })
 
         user
-          |> CacheUser.convert_user()
-          |> CacheUser.add_user()
-          |> CacheUser.verify_user()
+        |> CacheUser.convert_user()
+        |> CacheUser.add_user()
+        |> CacheUser.verify_user()
 
       _ ->
         new_user()
@@ -463,30 +463,31 @@ defmodule Teiserver.TeiserverTestLib do
     c
   end
 
-  @spec make_lobby() :: {T.lobby_id, pid}
-  @spec make_lobby(map()) :: {T.lobby_id, pid}
+  @spec make_lobby() :: {T.lobby_id(), pid}
+  @spec make_lobby(map()) :: {T.lobby_id(), pid}
   def make_lobby(params \\ %{}) do
     host = new_user()
 
-    lobby = %{
-      id: :rand.uniform(999_999_999_999_999),
-      founder_id: host.id,
-      founder_name: host.name,
-      cmd: "c.lobby.create",
-      name: "ServerName",
-      nattype: "none",
-      port: 1234,
-      game_hash: "string_of_characters",
-      map_hash: "string_of_characters",
-      map_name: "koom valley",
-      game_name: "BAR",
-      engine_name: "spring-105",
-      engine_version: "105.1.2.3",
-      settings: %{
-        max_players: 12
+    lobby =
+      %{
+        id: :rand.uniform(999_999_999_999_999),
+        founder_id: host.id,
+        founder_name: host.name,
+        cmd: "c.lobby.create",
+        name: "ServerName",
+        nattype: "none",
+        port: 1234,
+        game_hash: "string_of_characters",
+        map_hash: "string_of_characters",
+        map_name: "koom valley",
+        game_name: "BAR",
+        engine_name: "spring-105",
+        engine_version: "105.1.2.3",
+        settings: %{
+          max_players: 12
+        }
       }
-    }
-    |> Map.merge(params)
+      |> Map.merge(params)
 
     lobby_pid = LobbyLib.start_lobby_server(lobby)
     {lobby.id, lobby_pid}
@@ -587,16 +588,19 @@ defmodule Teiserver.TeiserverTestLib do
   end
 
   def create_moderation_user_report(target_id, reporter_id, params \\ %{}) do
-    Teiserver.Moderation.create_report_group_and_report(Map.merge(%{
-      reporter_id: reporter_id,
-      target_id: target_id,
-
-      type: "chat",
-      sub_type: "hate",
-      extra_text: "default extra text",
-
-      match_id: nil
-    }, params))
+    Teiserver.Moderation.create_report_group_and_report(
+      Map.merge(
+        %{
+          reporter_id: reporter_id,
+          target_id: target_id,
+          type: "chat",
+          sub_type: "hate",
+          extra_text: "default extra text",
+          match_id: nil
+        },
+        params
+      )
+    )
   end
 
   def seed() do

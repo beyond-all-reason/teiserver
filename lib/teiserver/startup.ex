@@ -38,8 +38,6 @@ defmodule Teiserver.Startup do
     add_permission_set("admin", "user", ~w(show create update delete report))
     add_permission_set("admin", "group", ~w(show create update delete report config))
 
-
-
     Teiserver.Logging.Startup.startup()
 
     # User Configs
@@ -103,7 +101,6 @@ defmodule Teiserver.Startup do
       "Account:User registration",
       "Account:Updated report",
       "Site config:Update value",
-
       "Moderation:Ban enabled",
       "Moderation:Ban disabled",
       "Moderation:Ban updated",
@@ -121,9 +118,7 @@ defmodule Teiserver.Startup do
       "Teiserver:Changed user rating",
       "Teiserver:Changed user name",
       "Teiserver:Smurf merge",
-
       "Microblog.delete_post",
-
       "Discord.text_callback"
     ])
 

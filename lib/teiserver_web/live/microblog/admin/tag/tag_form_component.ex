@@ -13,40 +13,22 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
         <%= @title %>
       </h3>
 
-      <.form for={@form}
-        phx-target={@myself}
-        phx-change="validate"
-        phx-submit="save"
-        id="tag-form"
-      >
+      <.form for={@form} phx-target={@myself} phx-change="validate" phx-submit="save" id="tag-form">
         <div class="row mb-4">
           <div class="col">
             <label for="tag_name" class="control-label">Name</label>
-            <.input
-              field={@form[:name]}
-              type="text"
-              autofocus="autofocus"
-              phx-debounce="100"
-            />
+            <.input field={@form[:name]} type="text" autofocus="autofocus" phx-debounce="100" />
           </div>
 
           <div class="col">
             <label for="tag_colour" class="control-label">Colour</label>
-            <.input
-              field={@form[:colour]}
-              type="color"
-              phx-debounce="100"
-            />
+            <.input field={@form[:colour]} type="color" phx-debounce="100" />
           </div>
 
           <div class="col">
             <label for="tag_icon" class="control-label">Icon</label>
             <Fontawesome.icon icon={@form[:icon].value} style="solid" />
-            <.input
-              field={@form[:icon]}
-              type="text"
-              phx-debounce="100"
-            />
+            <.input field={@form[:icon]} type="text" phx-debounce="100" />
           </div>
         </div>
 
@@ -89,9 +71,9 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
 
     notify_parent({:updated_changeset, changeset})
 
-    {:noreply, socket
-      |> assign_form(changeset)
-    }
+    {:noreply,
+     socket
+     |> assign_form(changeset)}
   end
 
   def handle_event("save", %{"tag" => tag_params}, socket) do

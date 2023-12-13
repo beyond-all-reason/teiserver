@@ -20,10 +20,10 @@
           })
         ) %>
         <br /><br />
-        
+
         <form action={~p"/teiserver/reports/show/records"} method="post">
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
-          
+
           <div class="row">
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="report_date_preset" class="control-label">Date range:</label>
@@ -55,7 +55,7 @@
               />
             </div>
           </div>
-        
+
           <button type="submit" class={"btn btn-#{bsname} float-end"}>
             Submit
           </button>

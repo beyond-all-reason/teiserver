@@ -9,6 +9,7 @@ defmodule TeiserverWeb.AccountComponents do
   attr :view_colour, :string, required: true
   attr :active, :string, required: true
   attr :match_id, :integer, default: nil
+
   def sub_menu(assigns) do
     ~H"""
     <div class="row sub-menu">

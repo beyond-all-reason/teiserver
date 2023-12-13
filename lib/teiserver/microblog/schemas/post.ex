@@ -27,15 +27,20 @@ defmodule Teiserver.Microblog.Post do
   """
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
-    tag_ids = params["tags"] || []
-      |> Enum.map(fn id -> id end)
+    tag_ids =
+      params["tags"] ||
+        []
+        |> Enum.map(fn id -> id end)
 
     params =
       params
       |> trim_strings(~w(title summary contents)a)
 
     struct
-    |> cast(params, ~w(poster_id title summary contents view_count discord_channel_id discord_post_id)a)
+    |> cast(
+      params,
+      ~w(poster_id title summary contents view_count discord_channel_id discord_post_id)a
+    )
     |> cast_assoc(:post_tags, tag_ids)
     |> validate_required(~w(poster_id title contents)a)
   end

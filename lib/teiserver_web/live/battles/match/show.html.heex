@@ -4,7 +4,7 @@
   Map.merge(assigns, %{active: "matches"})
 ) %>
 
-<div class="row section-menu" :if={@match}>
+<div :if={@match} class="row section-menu">
   <div class="col-md-12">
     <TeiserverWeb.Battle.MatchComponents.section_menu
       active="show"
@@ -25,31 +25,19 @@
       <% end %>
     </h3>
     <br />
-    
+
     <.tab_header>
-      <.tab_nav
-        url={~p"/battle/#{@match.id}/overview"}
-        selected={@tab == :overview}
-      >
-        <Fontawesome.icon icon="file-alt" style="solid" />
-        Overview
+      <.tab_nav url={~p"/battle/#{@match.id}/overview"} selected={@tab == :overview}>
+        <Fontawesome.icon icon="file-alt" style="solid" /> Overview
       </.tab_nav>
-      
-      <.tab_nav
-        url={~p"/battle/#{@match.id}/players"}
-        selected={@tab == :players}
-      >
-        <Fontawesome.icon icon="users" style="solid" />
-        Players
+
+      <.tab_nav url={~p"/battle/#{@match.id}/players"} selected={@tab == :players}>
+        <Fontawesome.icon icon="users" style="solid" /> Players
       </.tab_nav>
-      
+
       <%= if @rating_logs != %{} and allow?(@current_user, "Reviewer") do %>
-        <.tab_nav
-          url={~p"/battle/#{@match.id}/ratings"}
-          selected={@tab == :ratings}
-        >
-          <Fontawesome.icon icon={Teiserver.Account.RatingLib.icon()} style="solid" />
-          Ratings
+        <.tab_nav url={~p"/battle/#{@match.id}/ratings"} selected={@tab == :ratings}>
+          <Fontawesome.icon icon={Teiserver.Account.RatingLib.icon()} style="solid" /> Ratings
         </.tab_nav>
       <% end %>
     </.tab_header>
@@ -83,18 +71,17 @@
         <div class="col">
           <strong>Host:</strong> <%= @match.founder.name %>
         </div>
-        
+
         <div class="col">
           <strong>Duration:</strong> <%= duration_to_str_short(@match.game_duration) %>
         </div>
-        
+
         <div class="col">
           <strong>Bot count:</strong> <%= Enum.count(@match.bots) %>
         </div>
       </div>
       <hr />
-      
-      
+
       <%= if allow?(@current_user, "Moderator") do %>
         Match data <textarea class="form-control" style="font-family: monospace" rows="20"><%= Jason.encode!(@match.data, pretty: true) %></textarea> Match bots <textarea
           class="form-control"
@@ -173,7 +160,8 @@
                 <%= case m.exit_status do %>
                   <% :stayed -> %>
                   <% :early -> %>
-                    <i class="fa-fw fa-solid fa-clock text-warning"></i> &nbsp; <%= play_percentage %>%
+                    <i class="fa-fw fa-solid fa-clock text-warning"></i>
+                    &nbsp; <%= play_percentage %>%
                   <% :abandoned -> %>
                     <i class="fa-fw fa-solid fa-person-running text-danger"></i>
                     &nbsp; <%= play_percentage %>%
@@ -214,7 +202,6 @@
           <% end %>
         </tbody>
       </table>
-
     </div>
 
     <%= if allow?(@current_user, "Reviewer") do %>
@@ -240,8 +227,7 @@
                   rating.value["rating_value_change"] > 0 -> {"text-success", "up"}
                   rating.value["rating_value_change"] < 0 -> {"text-danger", "down"}
                   true -> {"text-warning", "pause"}
-                end
-              %>
+                end %>
               <tr>
                 <td style={"background-color: #{m.user.colour}; color: #FFF;"} width="22">
                   <%= if m.team_id == @match.winning_team do %>
@@ -260,12 +246,17 @@
                     <Fontawesome.icon icon={party_idx} style="solid" size="lg" />
                   </td>
                 <% else %>
-                  <td style={"background-color: #{rgba_css m.user.colour};"} width="50">&nbsp;</td>
+                  <td style={"background-color: #{rgba_css m.user.colour};"} width="50">
+                    &nbsp;
+                  </td>
                 <% end %>
 
                 <td><%= m.team_id + 1 %></td>
 
-                <td><%= (rating.value["rating_value"] - rating.value["rating_value_change"]) |> round(2) %></td>
+                <td>
+                  <%= (rating.value["rating_value"] - rating.value["rating_value_change"])
+                  |> round(2) %>
+                </td>
                 <td><%= rating.value["rating_value"] |> round(2) %></td>
                 <td class={text_class}>
                   <Fontawesome.icon icon={icon} style="solid" />
@@ -279,5 +270,3 @@
     <% end %>
   </div>
 </div>
-
-

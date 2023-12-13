@@ -61,8 +61,9 @@ value_types = [
                 rows="3"
                 cols="40"
                 class="form-control"
-              ><%= @params["names"] %></textarea>
-              Optionally use <span class="monospace">#123</span> (where 123 is their ID) to reference the ID of a user.
+              ><%= @params["names"] %></textarea> Optionally use
+              <span class="monospace">#123</span>
+              (where 123 is their ID) to reference the ID of a user.
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
@@ -134,37 +135,31 @@ value_types = [
 
           <div class="col">
             <h5>As IDs</h5>
-            <textarea
-              rows="3"
-              class="form-control"
-            ><%= @teams_as_ids %></textarea>
+            <textarea rows="3" class="form-control"><%= @teams_as_ids %></textarea>
           </div>
         </div>
         <br />
-        
+
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li>
             <a href="#user_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              Individual
-              <Fontawesome.icon icon="user" style="regular" />
-            </a>
-          </li>
-          
-          <li class="nav-item" role="presentation">
-            <a href="#team_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              Teams
-              <Fontawesome.icon icon="users" style="regular" />
+              Individual <Fontawesome.icon icon="user" style="regular" />
             </a>
           </li>
 
-          <li class="nav-item" role="presentation" :if={allow?(@current_user, "Admin")}>
+          <li class="nav-item" role="presentation">
+            <a href="#team_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              Teams <Fontawesome.icon icon="users" style="regular" />
+            </a>
+          </li>
+
+          <li :if={allow?(@current_user, "Admin")} class="nav-item" role="presentation">
             <a href="#admin_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              Admin
-              <Fontawesome.icon icon={Teiserver.Admin.AdminLib.icon} style="regular" />
+              Admin <Fontawesome.icon icon={Teiserver.Admin.AdminLib.icon()} style="regular" />
             </a>
           </li>
         </ul>
-        
+
         <div class="tab-content">
           <div class="tab-pane" id="user_tab" style="padding:5px;">
             <h5>
@@ -234,19 +229,26 @@ value_types = [
           <div class="tab-pane" id="team_tab" style="padding:5px;">
             <.table id="users" rows={@team_data} table_class="table-sm table-hover">
               <:col :let={{team, _}} label="Team"><%= team + 1 %></:col>
-              <:col :let={{_, ratings}} label="Captain"><%= ratings.captain_name %> (<%= ratings.captain_rating %>)</:col>
-              
+              <:col :let={{_, ratings}} label="Captain">
+                <%= ratings.captain_name %> (<%= ratings.captain_rating %>)
+              </:col>
+
               <:col :let={{_, ratings}} label="Size"><%= ratings.count %></:col>
               <:col :let={{_, ratings}} label="Min"><%= ratings.min %></:col>
               <:col :let={{_, ratings}} label="Max"><%= ratings.max %></:col>
-              
+
               <:col :let={{_, ratings}} label="Mean"><%= ratings.mean %></:col>
               <:col :let={{_, ratings}} label="Median"><%= ratings.median %></:col>
               <:col :let={{_, ratings}} label="Standard Deviation"><%= ratings.stdev %></:col>
             </.table>
           </div>
 
-          <div class="tab-pane" id="admin_tab" style="padding:5px;" :if={allow?(@current_user, "Admin")}>
+          <div
+            :if={allow?(@current_user, "Admin")}
+            class="tab-pane"
+            id="admin_tab"
+            style="padding:5px;"
+          >
             <% id_list_str =
               @name_to_id_map
               |> Map.values()
@@ -282,7 +284,6 @@ ids = [<%= id_list_str %>]
             </textarea>
           </div>
         </div>
-
       </div>
     </div>
   </div>

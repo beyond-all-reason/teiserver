@@ -1,9 +1,13 @@
-<TeiserverWeb.MicroblogComponents.sub_menu active={"tags"} view_colour={@view_colour} current_user={@current_user} />
+<TeiserverWeb.MicroblogComponents.sub_menu
+  active="tags"
+  view_colour={@view_colour}
+  current_user={@current_user}
+/>
 
 <.live_component
   module={TeiserverWeb.Microblog.TagFormComponent}
   id={@tag.id}
-  title={"Edit tag"}
+  title="Edit tag"
   action={:edit}
   tag={@tag}
   patch={~p"/microblog/admin/tags"}

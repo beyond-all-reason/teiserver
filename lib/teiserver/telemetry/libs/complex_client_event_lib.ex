@@ -13,16 +13,18 @@ defmodule Teiserver.Telemetry.ComplexClientEventLib do
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-sliders"
 
-  @spec log_complex_client_event(integer, String.t, map) :: {:error, Ecto.Changeset} | {:ok, ComplexClientEvent}
+  @spec log_complex_client_event(integer, String.t(), map) ::
+          {:error, Ecto.Changeset} | {:ok, ComplexClientEvent}
   def log_complex_client_event(userid, event_type_name, value) when is_integer(userid) do
     event_type_id = Telemetry.get_or_add_complex_client_event_type(event_type_name)
 
-    result = create_complex_client_event(%{
-      user_id: userid,
-      event_type_id: event_type_id,
-      value: value,
-      timestamp: Timex.now()
-    })
+    result =
+      create_complex_client_event(%{
+        user_id: userid,
+        event_type_id: event_type_id,
+        value: value,
+        timestamp: Timex.now()
+      })
 
     case result do
       {:ok, _event} ->

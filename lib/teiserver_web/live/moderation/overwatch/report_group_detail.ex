@@ -11,12 +11,16 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
     report_group = get_report_group(id)
 
     report_group
-      |> ReportGroupLib.make_favourite()
-      |> insert_recently(socket)
+    |> ReportGroupLib.make_favourite()
+    |> insert_recently(socket)
 
-    socket = socket
+    socket =
+      socket
       |> assign(:report_group, report_group)
-      |> add_breadcrumb(name: "Report group #{report_group.target.name}", url: ~p"/moderation/overwatch/report_group/#{id}")
+      |> add_breadcrumb(
+        name: "Report group #{report_group.target.name}",
+        url: ~p"/moderation/overwatch/report_group/#{id}"
+      )
 
     {:ok, socket}
   end
@@ -27,11 +31,11 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
 
   defp default_mount(socket) do
     socket
-      |> assign(:site_menu_active, "moderation")
-      |> assign(:view_colour, Teiserver.Moderation.colour())
-      |> assign(:report_group, nil)
-      |> add_breadcrumb(name: "Moderation", url: ~p"/moderation")
-      |> add_breadcrumb(name: "Overwatch", url: ~p"/moderation/overwatch")
+    |> assign(:site_menu_active, "moderation")
+    |> assign(:view_colour, Teiserver.Moderation.colour())
+    |> assign(:report_group, nil)
+    |> add_breadcrumb(name: "Moderation", url: ~p"/moderation")
+    |> add_breadcrumb(name: "Overwatch", url: ~p"/moderation/overwatch")
   end
 
   @impl true
@@ -41,7 +45,8 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
 
     new_filters = Map.put(filters, key, value)
 
-    socket = socket
+    socket =
+      socket
       |> assign(:filters, new_filters)
 
     {:noreply, socket}
@@ -51,18 +56,16 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
     {:ok, _} = Moderation.update_report_group(report_group, %{"closed" => "true"})
 
     {:noreply,
-      socket
-        |> assign(:report_group, get_report_group(report_group.id))
-    }
+     socket
+     |> assign(:report_group, get_report_group(report_group.id))}
   end
 
   def handle_event("open-group", _event, %{assigns: %{report_group: report_group}} = socket) do
     {:ok, _} = Moderation.update_report_group(report_group, %{"closed" => "false"})
 
     {:noreply,
-      socket
-        |> assign(:report_group, get_report_group(report_group.id))
-    }
+     socket
+     |> assign(:report_group, get_report_group(report_group.id))}
   end
 
   defp get_report_group(id) do

@@ -34,7 +34,13 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTest do
 
     # Log the event
     {result, _} =
-      Telemetry.log_complex_match_event(user.id, match.id, "match.complex_user_event-#{r}", 100, %{"key1" => "value1", "key2" => "value2"})
+      Telemetry.log_complex_match_event(
+        user.id,
+        match.id,
+        "match.complex_user_event-#{r}",
+        100,
+        %{"key1" => "value1", "key2" => "value2"}
+      )
 
     assert result == :ok
 
@@ -43,8 +49,9 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTest do
     assert Telemetry.list_complex_match_events(where: [match_id: match.id]) |> Enum.count() == 1
 
     # Ensure the match event types exist too
-    type_list = Telemetry.list_complex_match_event_types()
-    |> Enum.map(fn %{name: name} -> name end)
+    type_list =
+      Telemetry.list_complex_match_event_types()
+      |> Enum.map(fn %{name: name} -> name end)
 
     assert Enum.member?(type_list, "match.complex_user_event-#{r}")
   end

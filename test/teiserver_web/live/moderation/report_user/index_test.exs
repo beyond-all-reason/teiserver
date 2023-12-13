@@ -17,6 +17,7 @@ defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
 
   describe "Anon" do
     setup [:anon_setup]
+
     test "index", %{conn: conn} do
       user = TeiserverTestLib.new_user()
       {:ok, _index_live, html} = live(conn, ~p"/moderation/report_user/#{user.id}")
@@ -33,6 +34,7 @@ defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
 
   describe "Index" do
     setup [:auth_setup]
+
     test "anon index", %{conn: conn, user: conn_user} do
       user = TeiserverTestLib.new_user()
 
@@ -75,7 +77,11 @@ defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
 
       # Insert extra info
 
-      html = index_live |> element("#report_extra_text") |> render_keyup(%{"value" => "The extra text in my report"})
+      html =
+        index_live
+        |> element("#report_extra_text")
+        |> render_keyup(%{"value" => "The extra text in my report"})
+
       assert html =~ "Extra info:"
       # assert html =~ "The extra text in my report"
 

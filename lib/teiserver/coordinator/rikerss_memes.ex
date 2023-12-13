@@ -22,6 +22,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
     cortex =
       ~w(coraap coralab corap coravp corgant corhp corlab corvp corllt corfhp corsy corjuno corhllt corhlt)
+
     Battle.set_modoptions(lobby_id, %{
       "game/modoptions/map_waterislava" => "1",
       "game/modoptions/faction_limiter" => "armada"
@@ -37,7 +38,10 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   def handle_meme("greenfields", senderid, %{lobby_id: lobby_id} = _state) do
     sender = Account.get_user_by_id(senderid)
 
-    Battle.disable_units(lobby_id, ~w(armmex armamex armmoho cormex corexp cormexp cormoho legmex legmext2 legmext15 coruwmex coruwmme armuwmex armuwmme armshockwave))
+    Battle.disable_units(
+      lobby_id,
+      ~w(armmex armamex armmoho cormex corexp cormexp cormoho legmex legmext2 legmext15 coruwmex coruwmme armuwmex armuwmme armshockwave)
+    )
 
     ["#{sender.name} has enabled the Greenfield meme. Metal extractors are disabled."]
   end
@@ -110,9 +114,9 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/norush" => Enum.random(~w(0 0 0 1)),
       "game/modoptions/map_waterlevel" => Enum.random(~w(-200 -100 -50 0 0 0 0 50 100 200)),
       "game/modoptions/lootboxes" => Enum.random(~w(scav_only scav_only scav_only enabled)),
-      "game/modoptions/lootboxes_density" =>
-        Enum.random(~w(veryrare rarer normal normal normal)),
-      "game/modoptions/teamcolors_anonymous_mode" => Enum.random(~w(disabled disabled disabled disco)),
+      "game/modoptions/lootboxes_density" => Enum.random(~w(veryrare rarer normal normal normal)),
+      "game/modoptions/teamcolors_anonymous_mode" =>
+        Enum.random(~w(disabled disabled disabled disco)),
       "game/modoptions/multiplier_shieldpower" => Enum.random(~w(1 1 1 2 3 4)),
       "game/modoptions/disable_fogofwar" => Enum.random(~w(0 0 0 1)),
       "game/modoptions/assistdronesenabled" =>
@@ -167,7 +171,8 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
     legion_defences = ~w(legdefcarryt1 legmg legstarfall)
 
-    unit_list = armada_defences ++ armada_aa ++ cortex_defences ++ cortex_aa ++ scavt3 ++ legion_defences
+    unit_list =
+      armada_defences ++ armada_aa ++ cortex_defences ++ cortex_aa ++ scavt3 ++ legion_defences
 
     scav_units =
       unit_list
@@ -198,7 +203,8 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
     legion_defences = ~w(legdefcarryt1 legmg legstarfall)
 
-    unit_list = armada_defences ++ armada_aa ++ cortex_defences ++ cortex_aa ++ scavt3 ++ legion_defences
+    unit_list =
+      armada_defences ++ armada_aa ++ cortex_defences ++ cortex_aa ++ scavt3 ++ legion_defences
 
     scav_units =
       unit_list
@@ -213,9 +219,15 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
   def handle_meme("noscout", senderid, %{lobby_id: lobby_id} = _state) do
     sender = Account.get_user_by_id(senderid)
-    arm_scouts = ~w(armflea armfav armmark armseer armpeep armawac armrad armspy armarad armeyes armfrad armason armsehak)
-    cor_scouts = ~w(corfav corvoyr corvrad corfink corawac corrad corarad corspy coreyes corfrad corason corhunt)
+
+    arm_scouts =
+      ~w(armflea armfav armmark armseer armpeep armawac armrad armspy armarad armeyes armfrad armason armsehak)
+
+    cor_scouts =
+      ~w(corfav corvoyr corvrad corfink corawac corrad corarad corspy coreyes corfrad corason corhunt)
+
     Battle.disable_units(lobby_id, arm_scouts ++ cor_scouts)
+
     [
       "#{sender.name} has enabled the No Scouts meme. In this game you will not be able to create any scout, radar, or spy units; good luck!"
     ]
@@ -226,9 +238,11 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     new_options = %{"game/modoptions/tweakdefs" => "bG9jYWwgZnVuY3Rpb24gZEMoU1QsIGNvcCkKCWNvcD1jb3Agb3Ige30KCWxvY2FsIE5UPXt9Cgljb3BbU1RdPU5UCglmb3IgaywgdiBpbiBwYWlycyhTVCkgZG8KCQlpZiB0eXBlKHYpPT0idGFibGUiIHRoZW4KCQkJaWYgTlRba109PW5pbCB0aGVuIE5UW2tdPXt9IGVuZAoJCQlOVFtrXT1jb3Bbdl0gb3IgZEModiwgY29wKQoJCWVsc2UgTlRba109diBlbmQKCWVuZAoJcmV0dXJuIE5UCmVuZApsb2NhbCB1ZCA9IFVuaXREZWZzCmZvciBjb20saW5mIGluIHBhaXJzKHthcm1jb209eyJhcm0iLCJhcm1jaCJ9LGNvcmNvbT17ImNvciIsImNvcmNoIn0sfSkgZG8KCWxvY2FsIHRlbXAgPSBkQyh1ZFtjb21dLmJ1aWxkb3B0aW9ucykKCWxvY2FsIHRlbXAyID0gZEModWRbY29tXS5jdXN0b21wYXJhbXMpCgl1ZFtjb21dPWRDKHVkW2luZlsyXV0pCgl1ZFtjb21dLmJ1aWxkb3B0aW9ucyA9IHRlbXAKCXVkW2NvbV0uY3VzdG9tcGFyYW1zID0gdGVtcDIKCXVkW2NvbV0uaWNvbnR5cGU9aW5mWzFdLi4iY29tbWFuZGVyIgoJdWRbY29tXS5zb3VuZHMudW5kZXJhdHRhY2s9Indhcm5pbmcyIgoJdWRbY29tXS5zb3VuZHMuc2VsZWN0PXtbMV09aW5mWzFdLi4iY29tc2VsIn0KCWZvciBwYXJtLCB2YWwgaW4gcGFpcnMoe3JlY2xhaW1hYmxlPWZhbHNlLHdvcmtlcnRpbWU9MzAwLG1ldGFsbWFrZT0yLG1ldGFsc3RvcmFnZT01MDAsZW5lcmd5bWFrZT0yNSxlbmVyZ3lzdG9yYWdlPTUwMCxoZWFsdGg9MzcwMCxhdXRvaGVhbD01LHNob3dwbGF5ZXJuYW1lPXRydWUsY2FubWFudWFsZmlyZT10cnVlLH0pIGRvCgkJdWRbY29tXVtwYXJtXSA9IHZhbAoJZW5kCmVuZAp1ZC5sZWdjb20gPSBkQyh1ZC5jb3Jjb20p"}
     cor_not_hover_fac = ~w(corsy corlab corvp corap coramsub corplat coravp coralab corasy coraap corgantuw corgant)
     arm_not_hover_fac = ~w(armsy armlab armvp armap armamsub armplat armalab armavp armaap armasy armshltx armshltxuw)
+
     leg_not_hover_fac = ~w(leglab legvp legap legalab legavp legaap leggant)
     Battle.set_modoptions(lobby_id, new_options)
     Battle.disable_units(lobby_id, cor_not_hover_fac ++ arm_not_hover_fac ++ leg_not_hover_fac)
+
     [
       "#{sender.name} has enabled the Hovers Only meme. In this game you will be limited to hovers only, including your commander; good luck!"
     ]
@@ -238,6 +252,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     sender = Account.get_user_by_id(senderid)
     fusion_units = ~w(armfus armafus armuwfus armckfus corfus corafus coruwfus)
     Battle.disable_units(lobby_id, fusion_units)
+
     [
       "#{sender.name} has enabled the No Fusion meme. In this game you will not be able to create any T2 Fusion Energy production; good luck!"
     ]
@@ -247,6 +262,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     sender = Account.get_user_by_id(senderid)
     new_options = %{"game/modoptions/faction_limiter" => "armada"}
     Battle.set_modoptions(lobby_id, new_options)
+
     [
       "#{sender.name} has enabled the Armada Only meme. A fight of Technological Supremacy upon you; good luck!"
     ]
@@ -256,6 +272,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     sender = Account.get_user_by_id(senderid)
     new_options = %{"game/modoptions/faction_limiter" => "cortex"}
     Battle.set_modoptions(lobby_id, new_options)
+
     [
       "#{sender.name} has enabled the Cortex Only meme. May pure Brute Strength grant you Honour in battle; good luck!"
     ]
@@ -263,10 +280,14 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
   def handle_meme("legonly", senderid, %{lobby_id: lobby_id} = _state) do
     sender = Account.get_user_by_id(senderid)
-    new_options = %{"game/modoptions/faction_limiter" => "legion",
-    "game/modoptions/experimentallegionfaction" => "1",
-  }
+
+    new_options = %{
+      "game/modoptions/faction_limiter" => "legion",
+      "game/modoptions/experimentallegionfaction" => "1"
+    }
+
     Battle.set_modoptions(lobby_id, new_options)
+
     [
       "#{sender.name} has enabled the Legion Only meme. Scorched Earth be upon us all; good luck!"
     ]
@@ -274,9 +295,10 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
   def handle_meme("armvcor", senderid, %{lobby_id: lobby_id} = _state) do
     sender = Account.get_user_by_id(senderid)
-    new_options = %{"game/modoptions/faction_limiter" => "armada,cortex,legion",
-  }
+    new_options = %{"game/modoptions/faction_limiter" => "armada,cortex,legion"}
+
     Battle.set_modoptions(lobby_id, new_options)
+
     [
       "#{sender.name} has enabled the Armada vs Cortex (+vs legion if enabled) mode. Show them which faction is clearly better!"
     ]

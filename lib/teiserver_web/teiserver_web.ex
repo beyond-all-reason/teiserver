@@ -114,10 +114,15 @@ defmodule TeiserverWeb do
 
       use Breadcrumble
       alias Teiserver.Account.AuthPlug
-      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, mount_require_all: 2, mount_require_any: 2]
+
+      import Teiserver.Account.AuthLib,
+        only: [allow?: 2, allow_any?: 2, mount_require_all: 2, mount_require_any: 2]
+
       import Teiserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
+
       import Teiserver.Helper.NumberHelper,
         only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
+
       import Teiserver.Helper.TimexHelper
       alias Teiserver.Helper.StylingHelper
 
@@ -128,7 +133,6 @@ defmodule TeiserverWeb do
       unquote(verified_routes())
       unquote(view_helpers())
       unquote(html_helpers())
-
     end
   end
 

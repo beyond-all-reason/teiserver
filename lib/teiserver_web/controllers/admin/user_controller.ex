@@ -35,13 +35,14 @@ defmodule TeiserverWeb.Admin.UserController do
       )
 
     # Sometimes we get a lot of matches so it can be good to put in place exact matches too
-    exact_match = if Enum.count(users) > 20 && params["s"] do
-      Account.list_users(search: [name_lower: params["s"]])
-    else
-      []
-    end
+    exact_match =
+      if Enum.count(users) > 20 && params["s"] do
+        Account.list_users(search: [name_lower: params["s"]])
+      else
+        []
+      end
 
-    users = exact_match ++ users |> Enum.reject(&(&1 == nil))
+    users = (exact_match ++ users) |> Enum.reject(&(&1 == nil))
 
     if Enum.count(users) == 1 do
       conn
@@ -78,12 +79,10 @@ defmodule TeiserverWeb.Admin.UserController do
            name_or_email: Map.get(params, "name", "") |> String.trim(),
            bot: params["bot"],
            has_role: params["role"],
-
            ip: params["ip"],
            lobby_client: params["lobby_client"],
            previous_names: params["previous_names"],
            mod_action: params["mod_action"],
-
            behaviour_score_gt: params["behaviour_score_min"],
            behaviour_score_lt: params["behaviour_score_max"]
          ],
@@ -147,10 +146,21 @@ defmodule TeiserverWeb.Admin.UserController do
         user_stats = Account.get_user_stat_data(user.id)
         client = Account.get_client_by_id(user.id)
 
-        json_user = Map.drop(user, [:__struct__, :__meta__, :user_configs, :clan, :smurf_of, :user_stat, :data])
+        json_user =
+          Map.drop(user, [
+            :__struct__,
+            :__meta__,
+            :user_configs,
+            :clan,
+            :smurf_of,
+            :user_stat,
+            :data
+          ])
+
         cache_user = Account.get_user_by_id(user.id)
 
-        extra_cache_keys = cache_user
+        extra_cache_keys =
+          cache_user
           |> Map.keys()
           |> Enum.reject(fn cache_user_key ->
             Enum.member?(Map.keys(json_user), cache_user_key)
@@ -1056,13 +1066,16 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        new_user = Map.merge(user, %{
-          country: "??"
-        })
+        new_user =
+          Map.merge(user, %{
+            country: "??"
+          })
+
         Account.update_cache_user(user.id, new_user)
 
         Account.delete_user_stat_keys(user.id, [
-          "country", "last_ip"
+          "country",
+          "last_ip"
         ])
 
         conn

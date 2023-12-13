@@ -1,4 +1,7 @@
-<TeiserverWeb.Moderation.ModerationComponents.sub_menu active="overwatch" view_colour={@view_colour} />
+<TeiserverWeb.Moderation.ModerationComponents.sub_menu
+  active="overwatch"
+  view_colour={@view_colour}
+/>
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -7,7 +10,6 @@
       view_colour={@view_colour}
       current_user={@current_user}
     >
-      
       <div :if={@filters["target_id"]} class="float-end">
         <.section_menu_button
           :if={allow?(@current_user, "Moderator")}
@@ -39,14 +41,14 @@
           Smurf search
         </.section_menu_button>
       </div>
-      
     </TeiserverWeb.Moderation.OverwatchComponents.section_menu>
     <br /><br />
-    
+
     <form method="post" class="">
       <div class="row">
         <div class="col">
-          <.input type="select"
+          <.input
+            type="select"
             label="Action status"
             options={["Actioned", "Un-actioned", "All"]}
             name="actioned-filter"
@@ -56,7 +58,8 @@
         </div>
 
         <div class="col">
-          <.input type="select"
+          <.input
+            type="select"
             label="Open/Closed"
             options={["Open", "Closed", "All"]}
             name="closed-filter"
@@ -66,10 +69,13 @@
         </div>
 
         <div class="col">
-          <.input type="select"
+          <.input
+            type="select"
             label="Timeframe"
             options={[
-              {"Standard timeframe (#{ReportLib.get_outstanding_report_max_days()} days)", "standard"}, {"All time", "all"}
+              {"Standard timeframe (#{ReportLib.get_outstanding_report_max_days()} days)",
+               "standard"},
+              {"All time", "all"}
             ]}
             name="timeframe-filter"
             value={@filters["timeframe-filter"]}
@@ -79,17 +85,17 @@
       </div>
     </form>
     <hr />
-    
   </div>
 </div>
-
 
 <.table
   :if={@report_groups}
   id="report_groups-table"
   table_class="table-sm table-hover"
   rows={@report_groups}
-  row_click={fn report_group -> JS.navigate(~p"/moderation/overwatch/report_group/#{report_group.id}") end}
+  row_click={
+    fn report_group -> JS.navigate(~p"/moderation/overwatch/report_group/#{report_group.id}") end
+  }
 >
   <:col :let={report_group} label="">
     <%= if report_group.action_count > 0 do %>
@@ -104,36 +110,41 @@
       </span>
     <% end %>
   </:col>
-  
+
   <:col :let={report_group} label="Target"><%= report_group.target.name %></:col>
   <:col :let={report_group} label="Reports"><%= report_group.report_count %></:col>
   <:col :let={report_group} label="Votes"><%= report_group.vote_count %></:col>
   <:col :let={report_group} label="Actions"><%= report_group.action_count %></:col>
-  <:col :let={report_group} label="Created"><%= report_group.inserted_at |> date_to_str(format: :hms_or_ymd) %></:col>
+  <:col :let={report_group} label="Created">
+    <%= report_group.inserted_at |> date_to_str(format: :hms_or_ymd) %>
+  </:col>
 
   <:col :let={report_group} label="">
     <.link
       class="btn btn-secondary btn-sm"
-      navigate={~p"/moderation/overwatch/report_group/#{report_group.id}"}>
-        Details
+      navigate={~p"/moderation/overwatch/report_group/#{report_group.id}"}
+    >
+      Details
     </.link>
   </:col>
-  
+
   <:col :let={report_group} label="">
     <.link
       :if={report_group.match_id}
       class="btn btn-secondary btn-sm"
-      navigate={~p"/teiserver/admin/matches/#{report_group.match_id}"}>
-        Match
+      navigate={~p"/teiserver/admin/matches/#{report_group.match_id}"}
+    >
+      Match
     </.link>
   </:col>
-  
+
   <:col :let={report_group} label="">
     <.link
       :if={report_group.match_id}
       class="btn btn-secondary btn-sm"
-      navigate={~p"/battle/chat/#{report_group.match_id}/#{report_group.target_id}"}>
-        Chat
+      navigate={~p"/battle/chat/#{report_group.match_id}/#{report_group.target_id}"}
+    >
+      Chat
     </.link>
   </:col>
 </.table>
