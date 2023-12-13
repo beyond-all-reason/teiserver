@@ -211,7 +211,7 @@ defmodule Teiserver.Bridge.MessageCommands do
   def handle_command({_sender, _}, "help", _remaining, channel) do
     reply(
       channel,
-      "Currently we don't have a list of commands, please feel free to suggest them to Teifion though!."
+      "Currently we don't have a list of commands, please feel free to suggest them to the devs though!."
     )
   end
 

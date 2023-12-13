@@ -123,7 +123,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
     msg =
       [
-        "Matchmaking is still in development so please report any bugs in it to Teifion (I'm the one creating it) in the discord.",
+        "Matchmaking is still in development so please report any bugs in it to the devs in the discord.",
         "To join/leave queues you will need to use the website, you can access it with this link - #{url}"
       ]
       |> List.flatten()
