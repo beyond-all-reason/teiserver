@@ -1,7 +1,9 @@
-## in progress:
-
+## In progress
 #### Features
+- Added `country` to public [leaderboard API response](https://server4.beyondallreason.info/teiserver/api/public/leaderboard/Team)
 
+## v1.2.0
+#### Features
 - New spring friendship commands added
 - Spring `c.user.whois` command added
 - Spring `c.user.accept_friend_request` command added
@@ -17,7 +19,6 @@
 - Added ability to manually add smurf keys
 
 #### Bugfixes
-
 - Relationships report now correctly combines Block/Avoid
 - Relationships report correctly reports on Ignore counts
 - Fixed issue where a LobbyPolicy bot could repeatedly rename a lobby
@@ -30,7 +31,6 @@
 - Fixed an auth bug on the admin chat interface
 
 #### Internal improvements
-
 - Added `Communication.use_discord?/1` to make it easier to not make discord calls in dev
 - Unit tests for microblog system
 - Converted some tests for old pages into the new liveview pages
@@ -41,7 +41,6 @@
 - Better internal event tracking for disconnects
 
 ## v1.1.1
-
 * Report forms now include the option to ignore players along with buttons to avoid or block them
 * Ignoring is now separate from avoiding or blocking
 * The `$meme` commands have been expanded significantly (credit: robertthepie)
