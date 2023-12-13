@@ -83,6 +83,7 @@ defmodule Teiserver.Helper.QueryHelpers do
 
   @spec limit_query(Ecto.Query.t(), Integer.t() | :infinity) :: Ecto.Query.t()
   def limit_query(query, :infinity), do: query
+  def limit_query(query, nil), do: query
 
   def limit_query(query, amount) do
     query

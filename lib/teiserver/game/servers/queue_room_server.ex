@@ -407,7 +407,7 @@ defmodule Teiserver.Game.QueueRoomServer do
 
         Lobby.sayex(
           Coordinator.get_coordinator_userid(),
-          "Attempting to start the game, if this doesn't work feel free to start it yourselves and report the error to Teifion.",
+          "Attempting to start the game, if this doesn't work feel free to start it yourselves and report the error to the devs.",
           lobby.id
         )
 
