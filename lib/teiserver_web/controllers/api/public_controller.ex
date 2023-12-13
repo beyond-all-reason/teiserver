@@ -31,6 +31,7 @@ defmodule TeiserverWeb.API.PublicController do
             %{
               name: rating.user.name,
               icon: rating.user.icon,
+              country: Map.get(rating.user.data, "country", "??"),
               colour: rating.user.colour,
               rating: rating.leaderboard_rating,
               age: Timex.diff(Timex.now(), rating.last_updated, :days)

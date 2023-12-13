@@ -1,3 +1,7 @@
+## In progress
+#### Features
+- Added `country` to public [leaderboard API response](https://server4.beyondallreason.info/teiserver/api/public/leaderboard/Team)
+
 ## v1.2.0
 #### Features
 - New spring friendship commands added
