@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
 
   use TeiserverWeb, :live_view
 
+  alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Lobby
 
@@ -19,12 +20,19 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
           |> redirect(to: ~p"/")
 
         true ->
+          :ok =
+            PubSub.subscribe(
+              Teiserver.PubSub,
+              "teiserver_client_messages:#{userid}"
+            )
+
           socket
           |> assign(:tab, nil)
           |> assign(:site_menu_active, "teiserver_account")
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
           |> assign(:role_data, Account.RoleLib.role_data())
+          |> assign(:client, Account.get_client_by_id(userid))
           |> get_relationships_and_permissions
       end
 
@@ -49,6 +57,30 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
   defp apply_action(%{assigns: %{user: user}} = socket, :achievements, _params) do
     socket
     |> assign(:page_title, "#{user.name} - Achievements")
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
+    user_id = socket.assigns.user.id
+
+    socket = assign(socket, :client, Account.get_client_by_id(user_id))
+
+    {:noreply, socket}
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
+    {:noreply, assign(socket, :client, nil)}
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :client_updated}, socket) do
+    user_id = socket.assigns.user.id
+
+    socket = assign(socket, :client, Account.get_client_by_id(user_id))
+
+    {:noreply, socket}
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _}, socket) do
+    {:noreply, socket}
   end
 
   @impl true

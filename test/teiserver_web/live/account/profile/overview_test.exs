@@ -34,6 +34,22 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
       assert user.id in Battle.get_lobby_member_list(lobby_id)
     end
 
+    test "only renders join button when user to join is in a lobby", %{conn: conn, profile_user: profile_user} do
+      lobby_id = TeiserverTestLib.make_lobby()
+
+      {:ok, view, _html} = live(conn, "/profile/#{profile_user.id}")
+
+      refute view
+        |> element("span[phx-click=join]")
+        |> has_element?()
+
+      Battle.force_add_user_to_lobby(profile_user.id, lobby_id)
+
+      assert view
+        |> element("span[phx-click=join]")
+        |> has_element?()
+    end
+
     test "renders error flash when client is not connected", %{conn: conn, profile_user: profile_user} do
       # Skip client login
 

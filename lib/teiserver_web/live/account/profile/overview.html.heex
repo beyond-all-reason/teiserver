@@ -190,7 +190,7 @@
       </.link>
     <% end %>
 
-    <span phx-click="join" class="btn btn-outline-info mx-1">
+    <span :if={not is_nil(@client[:lobby_id])} phx-click="join" class="btn btn-outline-info mx-1">
       Join
     </span>
 
