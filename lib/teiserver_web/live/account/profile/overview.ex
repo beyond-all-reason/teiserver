@@ -1,7 +1,10 @@
 defmodule TeiserverWeb.Account.ProfileLive.Overview do
   @moduledoc false
+
   use TeiserverWeb, :live_view
+
   alias Teiserver.Account
+  alias Teiserver.Lobby
 
   @impl true
   def mount(%{"userid" => userid_str}, _session, socket) do
@@ -248,6 +251,38 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     |> assign(:friendship, [])
     |> assign(:friendship_request, [])
     |> assign(:profile_permissions, [])
+  end
+
+  def handle_event("join", _params, %{assigns: assigns} = socket) do
+    user_id = assigns.user.id
+    current_user_id = assigns.current_user.id
+    lobby_id = assigns.client.lobby_id
+
+    with true <- client_connected(current_user_id),
+         {:ok, _} <- join_lobby(lobby_id, current_user_id) do
+      {:noreply, put_flash(socket, :success, "Lobby joined")}
+    else
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :warning, reason)}
+    end
+  end
+
+  defp client_connected(user_id) do
+    client = Account.get_client_by_id(user_id)
+
+    if not is_nil(client) do
+      true
+    else
+      {:error, "Client is not connected"}
+    end
+  end
+
+  defp join_lobby(lobby_id, user_id) do
+    if :ok == Lobby.force_add_user_to_lobby(user_id, lobby_id) do
+      {:ok, nil}
+    else
+      {:error, "Failed to join lobby"}
+    end
   end
 
   def get_relationships_and_permissions(

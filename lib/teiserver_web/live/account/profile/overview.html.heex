@@ -190,6 +190,10 @@
       </.link>
     <% end %>
 
+    <span phx-click="join" class="btn btn-outline-info mx-1">
+      Join
+    </span>
+
     <.link
       :if={allow?(@current_user, "Moderator")}
       navigate={~p"/teiserver/admin/user/#{@user.id}"}
