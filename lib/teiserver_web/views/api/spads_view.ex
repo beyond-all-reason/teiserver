@@ -4,7 +4,7 @@ defmodule TeiserverWeb.API.SpadsView do
 
   def render("rating.json", assigns) do
     %{
-      rating_value: assigns.rating_value |> round(2) |> max(1),
+      rating_value: assigns.rating_value |> round(2),
       uncertainty: assigns.uncertainty |> round(2)
     }
   end
