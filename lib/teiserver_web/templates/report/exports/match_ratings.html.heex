@@ -1,7 +1,7 @@
 <% bsname = view_colour() %>
 
 <%= render(
-  TeiserverWeb.Report.GeneralView,
+  BarserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "exports"})
 ) %>
@@ -18,7 +18,7 @@
           Show/Hide help
         </div>
         <%= render(
-          TeiserverWeb.Report.ExportsView,
+          BarserverWeb.Report.ExportsView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",

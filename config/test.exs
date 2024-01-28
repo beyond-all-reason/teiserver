@@ -5,9 +5,9 @@ config :argon2_elixir, t_cost: 1, m_cost: 8
 
 # Configure your database
 config :teiserver, Barserver.Repo,
-  username: "teiserver_test",
+  username: "barserver_test",
   password: "123456789",
-  database: "teiserver_test",
+  database: "barserver_test",
   hostname: "localhost",
   queue_target: 5000,
   queue_interval: 100_000,
@@ -62,3 +62,14 @@ config :teiserver, Barserver.Mailer,
   adapter: Bamboo.TestAdapter,
   noreply_address: "noreply@testsite.co.uk",
   contact_address: "info@testsite.co.uk"
+
+
+try do
+  import_config "test.secret.exs"
+rescue
+  _ in File.Error ->
+    nil
+
+  error ->
+    reraise error, __STACKTRACE__
+end

@@ -8,7 +8,7 @@
 </script>
 
 <%= render(
-  TeiserverWeb.Logging.GeneralView,
+  BarserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "page_view"})
 ) %>
@@ -17,14 +17,14 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(TeiserverWeb.Logging.PageViewLogView, "section_menu.html",
+        <%= render(BarserverWeb.Logging.PageViewLogView, "section_menu.html",
           conn: @conn,
           permissions: @current_user.permissions,
           active: if(@show_search, do: "search", else: "index")
         ) %>
 
         <%= if @show_search do %>
-          <%= render(TeiserverWeb.Logging.PageViewLogView, "search.html",
+          <%= render(BarserverWeb.Logging.PageViewLogView, "search.html",
             conn: @conn,
             params: @params,
             permissions: @current_user.permissions,

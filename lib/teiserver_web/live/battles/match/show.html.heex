@@ -1,12 +1,12 @@
 <%= render(
-  TeiserverWeb.Battle.GeneralView,
+  BarserverWeb.Battle.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "matches"})
 ) %>
 
 <div :if={@match} class="row section-menu">
   <div class="col-md-12">
-    <TeiserverWeb.Battle.MatchComponents.section_menu
+    <BarserverWeb.Battle.MatchComponents.section_menu
       active="show"
       view_colour={@view_colour}
       current_user={@current_user}
@@ -37,7 +37,7 @@
 
       <%= if @rating_logs != %{} and allow?(@current_user, "Reviewer") do %>
         <.tab_nav url={~p"/battle/#{@match.id}/ratings"} selected={@tab == :ratings}>
-          <Fontawesome.icon icon={Teiserver.Account.RatingLib.icon()} style="solid" /> Ratings
+          <Fontawesome.icon icon={Barserver.Account.RatingLib.icon()} style="solid" /> Ratings
         </.tab_nav>
       <% end %>
     </.tab_header>
@@ -194,7 +194,7 @@
                   href={~p"/moderation/report_user/#{m.user_id}"}
                   class="btn btn-sm btn-warning"
                 >
-                  <i class={"fa-fw #{Teiserver.Moderation.ReportLib.icon()}"}></i> &nbsp;
+                  <i class={"fa-fw #{Barserver.Moderation.ReportLib.icon()}"}></i> &nbsp;
                   Report
                 </a>
               </td>

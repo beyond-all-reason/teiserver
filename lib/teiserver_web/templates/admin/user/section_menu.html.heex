@@ -6,7 +6,7 @@
       name: "client_admin",
       label: "Client admin",
       active: @active,
-      icon: Teiserver.Account.ClientLib.icon(),
+      icon: Barserver.Account.ClientLib.icon(),
       bsname: bsname,
       url: ~p"/teiserver/admin/client"
     ) %>
@@ -15,7 +15,7 @@
       name: "list",
       label: "List",
       active: @active,
-      icon: Teiserver.Helper.StylingHelper.icon(:list),
+      icon: Barserver.Helper.StylingHelper.icon(:list),
       bsname: bsname,
       url: ~p"/teiserver/admin/user"
     ) %>
@@ -24,7 +24,7 @@
       name: "advanced_search",
       label: "Advanced search",
       active: @active,
-      icon: Teiserver.Helper.StylingHelper.icon(:search),
+      icon: Barserver.Helper.StylingHelper.icon(:search),
       bsname: bsname,
       url: ~p"/teiserver/admin/user" <> "?search=true"
     ) %>
@@ -45,7 +45,7 @@
         name: "show",
         label: "Show",
         active: @active,
-        icon: Teiserver.Helper.StylingHelper.icon(:detail),
+        icon: Barserver.Helper.StylingHelper.icon(:detail),
         bsname: bsname,
         url: "#"
       ) %>
@@ -56,7 +56,7 @@
         name: "edit",
         label: "Edit",
         active: @active,
-        icon: Teiserver.Helper.StylingHelper.icon(:edit),
+        icon: Barserver.Helper.StylingHelper.icon(:edit),
         bsname: bsname,
         url: "#"
       ) %>
@@ -89,7 +89,7 @@
         name: "ratings",
         label: "Ratings",
         active: @active,
-        icon: "fa-solid #{Teiserver.Account.RatingLib.icon()}",
+        icon: "fa-solid #{Barserver.Account.RatingLib.icon()}",
         bsname: bsname,
         url: "#"
       ) %>
@@ -100,7 +100,7 @@
         name: "ratings_form",
         label: "Ratings form",
         active: @active,
-        icon: "fa-solid #{Teiserver.Account.RatingLib.icon()}",
+        icon: "fa-solid #{Barserver.Account.RatingLib.icon()}",
         bsname: bsname,
         url: "#"
       ) %>
@@ -111,7 +111,7 @@
         name: "moderation",
         label: "Moderation",
         active: @active,
-        icon: "fa-solid #{Teiserver.Moderation.icon()}",
+        icon: "fa-solid #{Barserver.Moderation.icon()}",
         bsname: bsname,
         url: "#"
       ) %>

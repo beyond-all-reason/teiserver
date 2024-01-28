@@ -2,7 +2,7 @@
 user_moderator = allow?(@current_user, "Moderator") %>
 
 <%= render(
-  TeiserverWeb.Report.GeneralView,
+  BarserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
 ) %>
@@ -19,7 +19,7 @@ user_moderator = allow?(@current_user, "Moderator") %>
           Show/Hide help
         </div>
         <%= render(
-          TeiserverWeb.Report.ReportView,
+          BarserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",
@@ -139,7 +139,7 @@ user_moderator = allow?(@current_user, "Moderator") %>
                 <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
                   <%= central_component("icon", icon: rating.user.icon) %>
                 </td>
-                <td><TeiserverWeb.UserComponents.status_icon user={rating.user} /></td>
+                <td><BarserverWeb.UserComponents.status_icon user={rating.user} /></td>
                 <td><%= rating.user.name %></td>
 
                 <td><%= rating.leaderboard_rating |> round(2) %></td>

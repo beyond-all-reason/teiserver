@@ -11,7 +11,7 @@ scp -i ~/.ssh/id_rsa backup.tar.gz deploy@yourdomain.com:./restore.db
 
 Step 2: Remote into the server
 ```
-# Stop Teiserver running
+# Stop Barserver running
 sudo systemctl stop teiserver.service
 
 # Swap to postgres
@@ -52,7 +52,7 @@ exit
 sudo systemctl start teiserver.service
 
 # Run the migrations
-teiserverapp eval "Teiserver.Release.migrate"
+teiserverapp eval "Barserver.Release.migrate"
 
 # Restart the app so it can build the initial data needed for various things
 sudo systemctl restart teiserver.service

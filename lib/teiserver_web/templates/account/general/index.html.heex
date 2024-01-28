@@ -10,7 +10,7 @@
   <%= central_component("menu_card",
     icon_class: "fa-duotone",
     name: "",
-    icon: Teiserver.icon(:relationship),
+    icon: Barserver.icon(:relationship),
     text: "Friends/Mutes/Invites",
     link: ~p"/account/relationship"
   ) %>
@@ -18,13 +18,13 @@
   <%= central_component("menu_card",
     icon_class: "fa-duotone",
     name: "",
-    icon: Teiserver.Config.UserConfigLib.icon(),
+    icon: Barserver.Config.UserConfigLib.icon(),
     text: "Preferences",
     link: ~p"/account/settings"
   ) %>
 
   <%= central_component("menu_card",
-    icon: Teiserver.Account.icon(),
+    icon: Barserver.Account.icon(),
     text: "Account details",
     icon_class: "fa-duotone",
     link: Routes.ts_account_general_path(@conn, :edit_details)

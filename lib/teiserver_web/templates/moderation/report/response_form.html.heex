@@ -8,7 +8,7 @@
   <% end %>
 
   <div class="row mt-2">
-    <%= for {action, icon} <- Teiserver.Moderation.ResponseLib.list_actions() do %>
+    <%= for {action, icon} <- Barserver.Moderation.ResponseLib.list_actions() do %>
       <div class="col">
         <%= central_component("radio",
           name: "response[action]",

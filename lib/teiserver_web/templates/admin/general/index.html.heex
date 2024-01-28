@@ -10,7 +10,7 @@
 
   <.menu_card
     :if={allow_any?(@current_user, ~w(Moderator Reviewer Overwatch))}
-    icon={Teiserver.Moderation.icon()}
+    icon={Barserver.Moderation.icon()}
     url={~p"/moderation"}
     size={:small}
   >
@@ -19,7 +19,7 @@
 
   <.menu_card
     :if={allow_any?(@current_user, ~w(Moderator))}
-    icon={Teiserver.Account.UserLib.icon()}
+    icon={Barserver.Account.UserLib.icon()}
     url={~p"/teiserver/admin/user"}
     size={:small}
   >
@@ -28,7 +28,7 @@
 
   <.menu_card
     :if={allow_any?(@current_user, ~w(Reviewer))}
-    icon={Teiserver.Chat.LobbyMessageLib.icon()}
+    icon={Barserver.Chat.LobbyMessageLib.icon()}
     url={~p"/admin/chat"}
     size={:small}
   >
@@ -37,7 +37,7 @@
 
   <.menu_card
     :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
-    icon={Teiserver.Helper.StylingHelper.icon(:summary)}
+    icon={Barserver.Helper.StylingHelper.icon(:summary)}
     url={~p"/teiserver/reports"}
     size={:small}
   >
@@ -48,7 +48,7 @@
 <div class="row">
   <.menu_card
     :if={allow_any?(@current_user, ~w(Server Engine))}
-    icon={Teiserver.Telemetry.TelemetryLib.icon()}
+    icon={Barserver.Telemetry.TelemetryLib.icon()}
     url={~p"/telemetry"}
     size={:small}
   >
@@ -57,7 +57,7 @@
 
   <.menu_card
     :if={allow?(@conn, "Admin")}
-    icon={Teiserver.Logging.icon()}
+    icon={Barserver.Logging.icon()}
     url={~p"/logging"}
     size={:small}
   >
@@ -66,7 +66,7 @@
 
   <.menu_card
     :if={allow_any?(@current_user, ~w(Reviewer))}
-    icon={Teiserver.Battle.MatchLib.icon()}
+    icon={Barserver.Battle.MatchLib.icon()}
     url={~p"/teiserver/admin/matches"}
     size={:small}
   >
@@ -75,7 +75,7 @@
 
   <.menu_card
     :if={allow_any?(@current_user, ~w(Server))}
-    icon={Teiserver.Game.QueueLib.icon()}
+    icon={Barserver.Game.QueueLib.icon()}
     url={~p"/teiserver/games/queues"}
     size={:small}
   >
@@ -84,7 +84,7 @@
 
   <.menu_card
     :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
-    icon={Teiserver.Game.LobbyPolicyLib.icon()}
+    icon={Barserver.Game.LobbyPolicyLib.icon()}
     url={~p"/admin/lobby_policies"}
     size={:small}
   >
@@ -93,7 +93,7 @@
 
   <.menu_card
     :if={allow_any?(@current_user, ~w(Moderator))}
-    icon={Teiserver.Game.AchievementTypeLib.icon()}
+    icon={Barserver.Game.AchievementTypeLib.icon()}
     url={~p"/teiserver/admin/achievements"}
     size={:small}
   >
@@ -102,7 +102,7 @@
 
   <.menu_card
     :if={allow_any?(@conn, ~w(Contributor Overwatch))}
-    icon={Teiserver.Communication.TextCallbackLib.icon()}
+    icon={Barserver.Communication.TextCallbackLib.icon()}
     url={~p"/admin/text_callbacks"}
     size={:small}
   >
@@ -111,7 +111,7 @@
 
   <.menu_card
     :if={allow_any?(@conn, ~w(Server))}
-    icon={Teiserver.Communication.DiscordChannelLib.icon()}
+    icon={Barserver.Communication.DiscordChannelLib.icon()}
     url={~p"/admin/discord_channels"}
     size={:small}
     icon_class="fa-brands"
@@ -123,7 +123,7 @@
 <div class="row">
   <.menu_card
     :if={allow_any?(@conn, ~w(Admin))}
-    icon={Teiserver.Account.BadgeTypeLib.icon()}
+    icon={Barserver.Account.BadgeTypeLib.icon()}
     url={~p"/teiserver/admin/badge_types"}
     size={:small}
   >
@@ -132,7 +132,7 @@
 
   <.menu_card
     :if={allow_any?(@conn, ~w(Server))}
-    icon={Teiserver.Account.CodeLib.icon()}
+    icon={Barserver.Account.CodeLib.icon()}
     url={~p"/teiserver/admin/codes"}
     size={:small}
   >
@@ -141,7 +141,7 @@
 
   <.menu_card
     :if={allow_any?(@conn, ~w(Server))}
-    icon={Teiserver.Config.SiteConfigLib.icon()}
+    icon={Barserver.Config.SiteConfigLib.icon()}
     url={~p"/teiserver/admin/site"}
     size={:small}
   >
@@ -150,7 +150,7 @@
 
   <.menu_card
     :if={allow_any?(@conn, ~w(Server))}
-    icon={Teiserver.Admin.ToolLib.icon()}
+    icon={Barserver.Admin.ToolLib.icon()}
     url={~p"/teiserver/admin/tools"}
     size={:small}
   >

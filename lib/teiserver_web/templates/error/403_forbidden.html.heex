@@ -7,7 +7,7 @@
     <meta name="description" content="" />
     <meta name="author" content="" />
 
-    <title><%= Application.get_env(:teiserver, TeiserverWeb)[:page_title] %></title>
+    <title><%= Application.get_env(:teiserver, BarserverWeb)[:page_title] %></title>
 
     <% light_mode =
       case get_user_config_cache(assigns[:current_user], "general.Colour scheme") do
@@ -76,7 +76,7 @@
                 <% else %>
                   You must be logged in to access this page. <br /><br />
 
-                  <% changeset = Teiserver.Account.change_user(%Teiserver.Account.User{}) %>
+                  <% changeset = Barserver.Account.change_user(%Barserver.Account.User{}) %>
 
                   <%= form_for changeset, Routes.account_session_path(@conn, :login), fn f -> %>
                     <div class="form-group">

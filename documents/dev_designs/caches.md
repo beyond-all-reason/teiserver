@@ -39,7 +39,7 @@
 - GenerateAchievement types
 
 #### Keep - Changes needed to backend before clustering but otherwise can remain as they are
-- Permission sets (needs to become a Teiserver.store system)
+- Permission sets (needs to become a Barserver.store system)
 - Update group caches for new groups (only needs to be run if the groups don't already exist)
 
 #### Replace with Singleton GenServer

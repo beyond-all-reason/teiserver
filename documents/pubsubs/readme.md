@@ -1,9 +1,9 @@
-Teiserver makes use of the Phoenix pubsub. This document is designed to list the different channels and how they are used.
+Barserver makes use of the Phoenix pubsub. This document is designed to list the different channels and how they are used.
 
 Anything prefixed with "legacy" is something only present because of the nature of the spring protocol and is going to be removed as soon as we're able to.
 Anything prefixed with "teiserver" is something added after the spring protocol was implemented and follows better practices with clearer documentation.
 
-Teiserver channels always send a map as the object and include the channel name (as a string) under the `channel` key.
+Barserver channels always send a map as the object and include the channel name (as a string) under the `channel` key.
 
 
 
@@ -15,7 +15,7 @@ These items are due to be stripped out
 #### room:#{room_name}
 All updates about the room and content for the room. Likely to be kept as is and renamed as a teiserver channel due to its nature.
 
-## Teiserver
+## Barserver
 #### account_hooks
 Used for hooking into account related activities such as updating users.
 

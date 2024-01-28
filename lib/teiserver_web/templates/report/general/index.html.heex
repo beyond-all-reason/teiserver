@@ -7,7 +7,7 @@
     <%= if allow?(@current_user, "Admin") do %>
       <%= central_component("menu_card",
         size: :small,
-        icon: Teiserver.Account.RatingLib.icon(),
+        icon: Barserver.Account.RatingLib.icon(),
         name: "ratings",
         text: "Ratings",
         link: Routes.ts_reports_rating_path(@conn, :distribution_table)
@@ -17,7 +17,7 @@
     <%= if allow?(@current_user, "Engine") do %>
       <%= central_component("menu_card",
         size: :small,
-        icon: Teiserver.Telemetry.InfologLib.icon(),
+        icon: Barserver.Telemetry.InfologLib.icon(),
         name: "infolog",
         text: "Infologs",
         link: ~p"/telemetry/infolog"
@@ -37,30 +37,30 @@
     <h4>Individual users</h4>
   </div>
 
-  <%= if allow?(@current_user, Teiserver.Account.TimeSpentReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.TimeSpentReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.TimeSpentReport.icon(),
+      icon: Barserver.Account.TimeSpentReport.icon(),
       name: "time_spent",
       text: "Time spent",
       link: Routes.ts_reports_report_path(@conn, :show, "time_spent")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.RelationshipReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.RelationshipReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.RelationshipReport.icon(),
+      icon: Barserver.Account.RelationshipReport.icon(),
       name: "relationships",
       text: "Relationships",
       link: Routes.ts_reports_report_path(@conn, :show, "relationships")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.TimeCompareReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.TimeCompareReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.TimeCompareReport.icon(),
+      icon: Barserver.Account.TimeCompareReport.icon(),
       name: "time_compare",
       text: "Time compare",
       link: Routes.ts_reports_report_path(@conn, :show, "time_compare")
@@ -73,110 +73,110 @@
     <h4>Account summaries</h4>
   </div>
 
-  <%= if allow?(@current_user, Teiserver.Account.ActiveReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.ActiveReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.ActiveReport.icon(),
+      icon: Barserver.Account.ActiveReport.icon(),
       name: "active",
       text: "Active",
       link: Routes.ts_reports_report_path(@conn, :show, "active")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.UserAgeReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.UserAgeReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.UserAgeReport.icon(),
+      icon: Barserver.Account.UserAgeReport.icon(),
       name: "user_age",
       text: "User age",
       link: Routes.ts_reports_report_path(@conn, :show, "user_age")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.VerifiedReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.VerifiedReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.VerifiedReport.icon(),
+      icon: Barserver.Account.VerifiedReport.icon(),
       name: "verified",
       text: "Verified",
       link: Routes.ts_reports_report_path(@conn, :show, "verified")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.RetentionReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.RetentionReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.RetentionReport.icon(),
+      icon: Barserver.Account.RetentionReport.icon(),
       name: "retention",
       text: "Retention",
       link: Routes.ts_reports_report_path(@conn, :show, "retention")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.PopulationReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.PopulationReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.PopulationReport.icon(),
+      icon: Barserver.Account.PopulationReport.icon(),
       name: "population",
       text: "Population",
       link: Routes.ts_reports_report_path(@conn, :show, "population")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.NewUserFunnelReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.NewUserFunnelReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.NewUserFunnelReport.icon(),
+      icon: Barserver.Account.NewUserFunnelReport.icon(),
       name: "new_user_funnel",
       text: "New user funnel",
       link: Routes.ts_reports_report_path(@conn, :show, "new_user_funnel")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.RecordsReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.RecordsReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.RecordsReport.icon(),
+      icon: Barserver.Account.RecordsReport.icon(),
       name: "records",
       text: "Records",
       link: Routes.ts_reports_report_path(@conn, :show, "records")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.NewSmurfReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.NewSmurfReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.NewSmurfReport.icon(),
+      icon: Barserver.Account.NewSmurfReport.icon(),
       name: "new_smurf",
       text: "New smurfs",
       link: Routes.ts_reports_report_path(@conn, :show, "new_smurf")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.BanEvasionReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.BanEvasionReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.BanEvasionReport.icon(),
+      icon: Barserver.Account.BanEvasionReport.icon(),
       name: "ban_evasion",
       text: "Ban evasion",
       link: Routes.ts_reports_report_path(@conn, :show, "ban_evasion")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.GrowthReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.GrowthReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.GrowthReport.icon(),
+      icon: Barserver.Account.GrowthReport.icon(),
       name: "growth",
       text: "Growth",
       link: Routes.ts_reports_report_path(@conn, :show, "growth")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.WeekOnWeekReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.WeekOnWeekReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.WeekOnWeekReport.icon(),
+      icon: Barserver.Account.WeekOnWeekReport.icon(),
       name: "week_on_week",
       text: "Week on Week",
       link: Routes.ts_reports_report_path(@conn, :show, "week_on_week")
@@ -189,17 +189,17 @@
     <h4>Other</h4>
   </div>
 
-  <%= if allow?(@current_user, Teiserver.Account.AccoladeReport.permissions()) and Application.get_env(:teiserver, Teiserver)[:enable_accolade_mode] == true do %>
+  <%= if allow?(@current_user, Barserver.Account.AccoladeReport.permissions()) and Application.get_env(:teiserver, Barserver)[:enable_accolade_mode] == true do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.AccoladeReport.icon(),
+      icon: Barserver.Account.AccoladeReport.icon(),
       name: "accolades",
       text: "Accolades",
       link: Routes.ts_reports_report_path(@conn, :show, "accolades")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.TournamentReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.TournamentReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
       icon: "fa-regular fa-ranking-star",
@@ -209,50 +209,50 @@
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.LeaderboardReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.LeaderboardReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.LeaderboardReport.icon(),
+      icon: Barserver.Account.LeaderboardReport.icon(),
       name: "leaderboard",
       text: "Leaderboard",
       link: Routes.ts_reports_report_path(@conn, :show, "leaderboard")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.ReviewReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.ReviewReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.ReviewReport.icon(),
+      icon: Barserver.Account.ReviewReport.icon(),
       name: "review",
       text: "Review",
       link: Routes.ts_reports_report_path(@conn, :show, "review")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.OpenSkillReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Account.OpenSkillReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Account.OpenSkillReport.icon(),
+      icon: Barserver.Account.OpenSkillReport.icon(),
       name: "open_skill",
       text: "Open Skill",
       link: Routes.ts_reports_report_path(@conn, :show, "open_skill")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Game.MappingReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Game.MappingReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Game.MappingReport.icon(),
+      icon: Barserver.Game.MappingReport.icon(),
       name: "mapping",
       text: "Mapping",
       link: Routes.ts_reports_report_path(@conn, :show, "mapping")
     ) %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Moderation.ActivityReport.permissions()) do %>
+  <%= if allow?(@current_user, Barserver.Moderation.ActivityReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: Teiserver.Moderation.ActivityReport.icon(),
+      icon: Barserver.Moderation.ActivityReport.icon(),
       name: "moderation_activity",
       text: "Moderation",
       link: Routes.ts_reports_report_path(@conn, :show, "moderation_activity")
@@ -260,8 +260,8 @@
   <% end %>
 
   <.menu_card
-    :if={allow?(@current_user, Teiserver.Communication.MicroblogReport.permissions())}
-    icon={Teiserver.Communication.MicroblogReport.icon()}
+    :if={allow?(@current_user, Barserver.Communication.MicroblogReport.permissions())}
+    icon={Barserver.Communication.MicroblogReport.icon()}
     url={~p"/teiserver/reports/show/microblog"}
     size={:small}
   >

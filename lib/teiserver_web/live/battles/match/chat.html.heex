@@ -1,4 +1,4 @@
-<TeiserverWeb.Battle.BattleComponents.sub_menu active="matches" view_colour={@view_colour} />
+<BarserverWeb.Battle.BattleComponents.sub_menu active="matches" view_colour={@view_colour} />
 
 <style type="text/css">
   .uh-0 td {background-color: rgba(255, 0, 0, 0.1);}
@@ -15,7 +15,7 @@
 
 <div :if={@match} class="row section-menu">
   <div class="col-md-12">
-    <TeiserverWeb.Battle.MatchComponents.section_menu
+    <BarserverWeb.Battle.MatchComponents.section_menu
       active="chat"
       view_colour={@view_colour}
       current_user={@current_user}
@@ -59,7 +59,7 @@
       <% end %>
       Duration: <%= duration_to_str_short(@match.game_duration) %> &nbsp;&nbsp;&nbsp;&nbsp;
       Started: <%= date_to_str(@match.started, format: :hms) %> &nbsp;&nbsp;&nbsp;&nbsp;
-      Messages: <%= Teiserver.Helper.StringHelper.format_number(Enum.count(@messages)) %>
+      Messages: <%= Barserver.Helper.StringHelper.format_number(Enum.count(@messages)) %>
     </h3>
 
     <form method="post" class="">

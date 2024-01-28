@@ -1,5 +1,5 @@
 # Objective
-Currently Teiserver runs on a single node, we would like to run it on multiple nodes. After performing all these steps Teiserver should be able to run across multiple nodes in a transparent manner without compromising the ability to run it on a single node.
+Currently Barserver runs on a single node, we would like to run it on multiple nodes. After performing all these steps Barserver should be able to run across multiple nodes in a transparent manner without compromising the ability to run it on a single node.
 
 This document serves as a list of steps to convert the game from single to multi node 
 
@@ -10,7 +10,7 @@ This document serves as a list of steps to convert the game from single to multi
 - [X] **Stage 3:** Cache actions should use the new functions in `Central`
 
 ##### PID store
-- [X] **Stage 1:** Change each server process to register it's `pid` with `Teiserver.ServerRegistry`.
+- [X] **Stage 1:** Change each server process to register it's `pid` with `Barserver.ServerRegistry`.
 - [X] **Stage 2:** Ensure on a running server each of the servers expected appears in the registry list
 - [X] **Stage 3:** Update all `get_server_pid` functions to call the registry, test them
 - [X] **Stage 4:** Remove the ETS table and calls to it
@@ -31,7 +31,7 @@ This document serves as a list of steps to convert the game from single to multi
 ##### Per node processes
 - [X] **Stage 1:** List each type of process we track.
 - [X] **Stage 2:** Convert these to use a Horde DynamicSupervisor
-- [ ] **Stage 3:** Have them all startup from Teiserver.Startup where they can check for existing PIDs
+- [ ] **Stage 3:** Have them all startup from Barserver.Startup where they can check for existing PIDs
 - [ ] **Stage 4:** Scheduled Oban jobs
 
 ## Known issues
@@ -39,7 +39,7 @@ This document serves as a list of steps to convert the game from single to multi
 
 ## Work items
 ##### Propagate data
-Any time an ETS is updated this needs to be propagated. `Teiserver.cache_put` and `Teiserver.cache_delete` are two functions to help with this.
+Any time an ETS is updated this needs to be propagated. `Barserver.cache_put` and `Barserver.cache_delete` are two functions to help with this.
 
 ##### PID store
 Various services place their PID into ETS, this should be changed to be a Registry. Long term we might want to swap to a pool system and things being in a Registry will make this easier.
@@ -66,9 +66,9 @@ We can use Horde to run a process with a single name and have it automatically g
 - **Stage 3:** Aside from one-time build caches, all cache actions should use the new functions in `Central`
 
 ##### PID store
-- **Stage 1:** Change each server process to register it's `pid` with `Teiserver.ServerRegistry`.
+- **Stage 1:** Change each server process to register it's `pid` with `Barserver.ServerRegistry`.
 - **Stage 2:** Ensure on a running server each of the servers expected appears in the registry list.
-  Use the code snippet `Registry.select(Teiserver.ServerRegistry, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}])`
+  Use the code snippet `Registry.select(Barserver.ServerRegistry, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}])`
 - **Stage 3:** Update all `get_server_pid` functions to call the registry, test them
 - **Stage 4:** Remove the ETS table and calls to it
 
@@ -103,7 +103,7 @@ Note: This ties in with the "Per node process" item.
     - TelemetryServer
     - AchievementServer
 - **Stage 2:** Convert these to use a Horde DynamicSupervisor
-- **Stage 3:** Have them all startup from Teiserver.Startup where they can check for existing PIDs
+- **Stage 3:** Have them all startup from Barserver.Startup where they can check for existing PIDs
 - **Stage 4:** Discover how scheduled Oban jobs will work, some of them are long running and we don't want to duplicate them
 
 ## Lessons learned

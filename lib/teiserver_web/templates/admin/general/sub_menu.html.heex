@@ -36,7 +36,7 @@
               label: "Matches",
               active: @active,
               url: Routes.ts_admin_match_path(@conn, :index),
-              icon: Teiserver.Battle.MatchLib.icon()
+              icon: Barserver.Battle.MatchLib.icon()
             ) %>
 
             <%= central_component("sub_menu_icon",
@@ -44,7 +44,7 @@
               label: "Chat",
               active: @active,
               url: ~p"/admin/chat",
-              icon: Teiserver.Chat.LobbyMessageLib.icon()
+              icon: Barserver.Chat.LobbyMessageLib.icon()
             ) %>
           <% end %>
 
@@ -54,7 +54,7 @@
               label: "Achievements",
               active: @active,
               url: Routes.ts_admin_achievement_path(@conn, :index),
-              icon: Teiserver.Game.AchievementTypeLib.icon()
+              icon: Barserver.Game.AchievementTypeLib.icon()
             ) %>
           <% end %>
 
@@ -64,7 +64,7 @@
               label: "Moderation",
               active: @active,
               url: Routes.moderation_general_path(@conn, :index),
-              icon: Teiserver.Moderation.ReportLib.icon()
+              icon: Barserver.Moderation.ReportLib.icon()
             ) %>
           <% end %>
         </div>

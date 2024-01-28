@@ -1,4 +1,4 @@
-<TeiserverWeb.AccountComponents.sub_menu active="details" view_colour={view_colour()} />
+<BarserverWeb.AccountComponents.sub_menu active="details" view_colour={view_colour()} />
 
 <div class="row" style="padding-top: 10vh;">
   <div class="col-sm-10 col-sm-offset-1 col-md-6 offset-md-3 col-xl-6 offset-xl-3">
@@ -22,7 +22,7 @@
             </div>
           <% end %>
 
-          <%= if Teiserver.Config.get_site_config_cache("user.Enable renames") do %>
+          <%= if Barserver.Config.get_site_config_cache("user.Enable renames") do %>
             <div class="form-group mt-3">
               <%= label(f, :name) %>
               <%= text_input(f, :name, class: "form-control", required: "", autofocus: "autofocus") %>

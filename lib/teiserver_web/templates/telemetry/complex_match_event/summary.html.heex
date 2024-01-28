@@ -1,6 +1,6 @@
 <% bsname = view_colour() %>
 
-<TeiserverWeb.Telemetry.TelemetryComponents.sub_menu
+<BarserverWeb.Telemetry.TelemetryComponents.sub_menu
   active="complex_match_events"
   view_colour={view_colour()}
   current_user={@current_user}
@@ -31,7 +31,7 @@
         </div>
 
         <%= render(
-          TeiserverWeb.Telemetry.ComplexMatchEventView,
+          BarserverWeb.Telemetry.ComplexMatchEventView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",
@@ -62,7 +62,7 @@
                         href={~p"/telemetry/complex_match_events/#{event_type}/detail"}
                         class={"btn btn-#{bsname} btn-sm"}
                       >
-                        <i class={"fa-fw far #{Teiserver.Helper.StylingHelper.icon(:overview)}"}>
+                        <i class={"fa-fw far #{Barserver.Helper.StylingHelper.icon(:overview)}"}>
                         </i>
                       </a>
                     </td>

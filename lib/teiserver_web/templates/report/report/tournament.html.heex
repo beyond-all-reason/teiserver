@@ -8,7 +8,7 @@ value_types = [
 ] %>
 
 <%= render(
-  TeiserverWeb.Report.GeneralView,
+  BarserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
 ) %>
@@ -33,7 +33,7 @@ value_types = [
           Show/Hide help
         </div>
         <%= render(
-          TeiserverWeb.Report.ReportView,
+          BarserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",
@@ -155,7 +155,7 @@ value_types = [
 
           <li :if={allow?(@current_user, "Admin")} class="nav-item" role="presentation">
             <a href="#admin_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              Admin <Fontawesome.icon icon={Teiserver.Admin.AdminLib.icon()} style="regular" />
+              Admin <Fontawesome.icon icon={Barserver.Admin.AdminLib.icon()} style="regular" />
             </a>
           </li>
         </ul>
@@ -201,7 +201,7 @@ value_types = [
                     </td>
 
                     <td>
-                      <TeiserverWeb.UserComponents.status_icon user={rating.user} />
+                      <BarserverWeb.UserComponents.status_icon user={rating.user} />
                     </td>
 
                     <td>
@@ -260,25 +260,25 @@ ids = [<%= id_list_str %>]
 
 (
   # Find existing players
-  Teiserver.Account.list_users(
+  Barserver.Account.list_users(
     search: [tournament_player: "Player"],
     select: [:id],
     limit: :infinity
   )
   |> Enum.reject(fn %{id: userid} -> Enum.member?(ids, userid) end)
   |> Enum.each(fn %{id: userid} ->
-    user = Teiserver.Account.get_user_by_id(userid)
+    user = Barserver.Account.get_user_by_id(userid)
     new_roles = List.delete(user.roles, "Tournament player")
-    Teiserver.Account.update_cache_user(userid, %{roles: new_roles})
+    Barserver.Account.update_cache_user(userid, %{roles: new_roles})
   end)
 )
 
 (
   ids
   |> Enum.each(fn userid ->
-    user = Teiserver.Account.get_user_by_id(userid)
+    user = Barserver.Account.get_user_by_id(userid)
     new_roles = ["Tournament player" | user.roles] |> Enum.uniq
-    Teiserver.Account.update_cache_user(userid, %{roles: new_roles})
+    Barserver.Account.update_cache_user(userid, %{roles: new_roles})
   end)
 )
             </textarea>

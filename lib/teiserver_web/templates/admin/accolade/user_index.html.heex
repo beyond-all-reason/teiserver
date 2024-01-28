@@ -1,7 +1,7 @@
 <% bsname = view_colour() %>
 
 <%= render(
-  TeiserverWeb.Admin.GeneralView,
+  BarserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "accolades"})
 ) %>
@@ -18,7 +18,7 @@
         </a>
 
         <%= render(
-          TeiserverWeb.Admin.AccoladeView,
+          BarserverWeb.Admin.AccoladeView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,

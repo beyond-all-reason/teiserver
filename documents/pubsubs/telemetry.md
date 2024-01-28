@@ -33,7 +33,7 @@ Similar to the `teiserver_telemetry` channel but specifically limited to be publ
 ```
 
 #### teiserver_telemetry_client_events
-Used for broadcasting specific client telemetry events as defined in Teiserver.Telemetry. Does not broadcast anonymous events.
+Used for broadcasting specific client telemetry events as defined in Barserver.Telemetry. Does not broadcast anonymous events.
 ```elixir
 %{
   userid: userid,
@@ -43,7 +43,7 @@ Used for broadcasting specific client telemetry events as defined in Teiserver.T
 ```
 
 #### teiserver_telemetry_client_properties
-Used for broadcasting specific client telemetry property updates as defined in Teiserver.Telemetry. Does not broadcast anonymous property updates.
+Used for broadcasting specific client telemetry property updates as defined in Barserver.Telemetry. Does not broadcast anonymous property updates.
 ```elixir
 %{
   userid: userid,

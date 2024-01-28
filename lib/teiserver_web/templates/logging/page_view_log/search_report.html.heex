@@ -1,7 +1,7 @@
 <% bsname = view_colour() %>
 
 <%= central_component("picker_script",
-  module: Teiserver.Account.UserLib,
+  module: Barserver.Account.UserLib,
   name: "account_user",
   title: "User search"
 ) %>
@@ -35,7 +35,7 @@
 
             <div class="col-md-4 col-xl-2">
               <label for="teiserver-user-search" class="control-label">Specific user: </label>
-              <%= render(TeiserverWeb.Account.UserView, "picker.html") %>
+              <%= render(BarserverWeb.Account.UserView, "picker.html") %>
             </div>
 
             <div class="col-md-4 col-xl-2">

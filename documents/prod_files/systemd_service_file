@@ -1,6 +1,6 @@
 # /etc/systemd/system/teiserver.service
 [Unit]
-Description=Teiserver elixir app
+Description=Barserver elixir app
 After=network.target
 
 [Service]

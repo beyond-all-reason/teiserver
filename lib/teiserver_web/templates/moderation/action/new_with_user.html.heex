@@ -1,4 +1,4 @@
-<% discord_link = Application.get_env(:teiserver, Teiserver)[:discord]
+<% discord_link = Application.get_env(:teiserver, Barserver)[:discord]
 bsname = view_colour() %>
 
 <script type="text/javascript" charset="utf-8">
@@ -17,7 +17,7 @@ bsname = view_colour() %>
   }
 </script>
 
-<TeiserverWeb.Moderation.ModerationComponents.sub_menu
+<BarserverWeb.Moderation.ModerationComponents.sub_menu
   active="actions"
   view_colour={view_colour()}
 />
@@ -27,7 +27,7 @@ bsname = view_colour() %>
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Moderation.ActionView,
+          BarserverWeb.Moderation.ActionView,
           "section_menu.html",
           Map.merge(assigns, %{
             basic_search: "",

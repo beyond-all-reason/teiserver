@@ -1,4 +1,4 @@
-<TeiserverWeb.MicroblogComponents.sub_menu
+<BarserverWeb.MicroblogComponents.sub_menu
   active="tags"
   view_colour={@view_colour}
   current_user={@current_user}
@@ -24,10 +24,10 @@
     </.table>
 
     <.live_component
-      module={TeiserverWeb.Microblog.TagFormComponent}
+      module={BarserverWeb.Microblog.TagFormComponent}
       id={:new}
       action={:new}
-      tag={%Teiserver.Microblog.Tag{}}
+      tag={%Barserver.Microblog.Tag{}}
       patch={~p"/microblog/admin/tags"}
       title="New tag form"
       current_user={@current_user}

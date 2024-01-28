@@ -1,4 +1,4 @@
-# Teiserver
+# Barserver
 alias nginxlog='sudo grc tail /var/log/nginx/error.log -n 60 -f'
 alias sitelog='grc --config=elixir.log tail -f /var/log/teiserver/error.log -n 60'
 alias siteinfo='grc --config=elixir.log tail -f /var/log/teiserver/info.log -n 60'

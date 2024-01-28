@@ -34,7 +34,7 @@
 - Added `Communication.use_discord?/1` to make it easier to not make discord calls in dev
 - Unit tests for microblog system
 - Converted some tests for old pages into the new liveview pages
-- Moved nearly all of the `Central` stuff over to be part of Teiserver
+- Moved nearly all of the `Central` stuff over to be part of Barserver
 - Started making progress on
 - Added `hms_or_hms_ymd` format to `TimexHelper`
 - Added framework for adding more discord commands

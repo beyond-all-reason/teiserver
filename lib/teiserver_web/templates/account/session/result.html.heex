@@ -25,10 +25,10 @@
             </a>
           </div>
 
-          <%= if Teiserver.Config.get_site_config_cache("site.Main site link") do %>
+          <%= if Barserver.Config.get_site_config_cache("site.Main site link") do %>
             <div class="col">
               <a
-                href={Teiserver.Config.get_site_config_cache("site.Main site link")}
+                href={Barserver.Config.get_site_config_cache("site.Main site link")}
                 class="btn btn-secondary btn-block"
               >
                 Main site

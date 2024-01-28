@@ -24,7 +24,7 @@ spectators =
   |> Enum.map(fn p -> @clients[p] end)
   |> Enum.sort_by(& &1[:name]) %>
 
-<%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+<%= render(BarserverWeb.Battle.GeneralView, "sub_menu.html", %{
   active: "tournaments",
   conn: Map.put(@socket, :permissions, @current_user.permissions)
 }) %>
@@ -73,7 +73,7 @@ spectators =
         <% extra = "#{@lobby.name} - #{@lobby.map_name}" %>
         <%= if @lobby.in_progress do %>
           <h4>
-            Match in progress - <%= Teiserver.Helper.TimexHelper.duration_to_str_short(
+            Match in progress - <%= Barserver.Helper.TimexHelper.duration_to_str_short(
               System.system_time(:second) - (@lobby.started_at || 1_652_282_031)
             ) %> - <%= extra %>
           </h4>
@@ -162,10 +162,10 @@ spectators =
                 <tr id={"user-row-#{user.id}"}>
                   <td width="100">
                     <%= if friend do %>
-                      <i class={"text-success fa-fw #{Teiserver.icon(:friend)}"}></i>
+                      <i class={"text-success fa-fw #{Barserver.icon(:friend)}"}></i>
                     <% end %>
                     <%= if ignored do %>
-                      <i class={"text-danger fa-fw #{Teiserver.icon(:ignore)}"}></i>
+                      <i class={"text-danger fa-fw #{Barserver.icon(:ignore)}"}></i>
                     <% end %>
                   </td>
                   <td><%= user.name %></td>
@@ -178,9 +178,9 @@ spectators =
                     <td width="50">&nbsp;</td>
                   <% end %>
 
-                  <td><%= Teiserver.Helper.NumberHelper.round(rating_value, 2) %></td>
+                  <td><%= Barserver.Helper.NumberHelper.round(rating_value, 2) %></td>
                   <%= if @moderator do %>
-                    <td><%= Teiserver.Helper.NumberHelper.round(uncertainty, 2) %></td>
+                    <td><%= Barserver.Helper.NumberHelper.round(uncertainty, 2) %></td>
 
                     <td><%= @stats[user.id]["win_rate.team"] %></td>
                     <td><%= @stats[user.id]["recent_count.team"] %></td>
@@ -246,17 +246,17 @@ spectators =
                 <tr id={"user-row-#{user.id}"}>
                   <td width="100">
                     <%= if friend do %>
-                      <i class={"text-success fa-fw #{Teiserver.icon(:friend)}"}></i>
+                      <i class={"text-success fa-fw #{Barserver.icon(:friend)}"}></i>
                     <% end %>
                     <%= if ignored do %>
-                      <i class={"text-danger fa-fw #{Teiserver.icon(:ignore)}"}></i>
+                      <i class={"text-danger fa-fw #{Barserver.icon(:ignore)}"}></i>
                     <% end %>
                   </td>
                   <td><%= user.name %></td>
 
-                  <td><%= Teiserver.Helper.NumberHelper.round(rating_value, 2) %></td>
+                  <td><%= Barserver.Helper.NumberHelper.round(rating_value, 2) %></td>
                   <%= if @moderator do %>
-                    <td><%= Teiserver.Helper.NumberHelper.round(uncertainty, 2) %></td>
+                    <td><%= Barserver.Helper.NumberHelper.round(uncertainty, 2) %></td>
                   <% end %>
 
                   <%= if @moderator do %>

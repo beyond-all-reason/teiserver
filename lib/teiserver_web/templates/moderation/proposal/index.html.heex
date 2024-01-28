@@ -1,7 +1,7 @@
 <% bsname = view_colour() %>
 
 <%= render(
-  TeiserverWeb.Moderation.GeneralView,
+  BarserverWeb.Moderation.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "proposals"})
 ) %>
@@ -11,7 +11,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Moderation.ProposalView,
+          BarserverWeb.Moderation.ProposalView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
@@ -26,7 +26,7 @@
         <br /><br />
 
         <%= if @conn.params["search"] != nil do %>
-          <%= render(TeiserverWeb.Moderation.ProposalView, "search.html", assigns) %>
+          <%= render(BarserverWeb.Moderation.ProposalView, "search.html", assigns) %>
         <% end %>
 
         <h4>Listing Proposals</h4>

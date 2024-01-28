@@ -2,7 +2,7 @@
 
 <% timeframes = ["Today", "Yesterday", "7 days", "14 days", "31 days"] %>
 
-<TeiserverWeb.Telemetry.TelemetryComponents.sub_menu
+<BarserverWeb.Telemetry.TelemetryComponents.sub_menu
   active="complex_lobby_events"
   view_colour={view_colour()}
   current_user={@current_user}
@@ -13,7 +13,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Telemetry.ComplexLobbyEventView,
+          BarserverWeb.Telemetry.ComplexLobbyEventView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",

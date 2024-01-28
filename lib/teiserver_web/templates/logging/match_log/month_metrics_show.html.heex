@@ -19,7 +19,7 @@
 </style>
 
 <%= render(
-  TeiserverWeb.Logging.GeneralView,
+  BarserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "match"})
 ) %>
@@ -29,7 +29,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Logging.MatchLogView,
+          BarserverWeb.Logging.MatchLogView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",

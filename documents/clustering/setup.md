@@ -32,6 +32,6 @@ You can now run [documents/clustering/scripts/ssh_setup.sh](scripts/ssh_setup.sh
 At this stage you should be able ssh into the boxes using `ssh deploy@ip_address` and not require a password.
 
 ## Software install
-Next we need to install some of the software required to run Teiserver.
+Next we need to install some of the software required to run Barserver.
 
 You can do this by running [documents/clustering/scripts/install.sh](scripts/install.sh)

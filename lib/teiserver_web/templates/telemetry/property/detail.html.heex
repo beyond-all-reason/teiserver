@@ -1,4 +1,4 @@
-<TeiserverWeb.Telemetry.TelemetryComponents.sub_menu
+<BarserverWeb.Telemetry.TelemetryComponents.sub_menu
   active="properties"
   view_colour={view_colour()}
   current_user={@current_user}
@@ -9,7 +9,7 @@
     <div class="card">
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Telemetry.PropertyView,
+          BarserverWeb.Telemetry.PropertyView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",

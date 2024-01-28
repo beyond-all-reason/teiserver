@@ -3,7 +3,7 @@
 <div class="row">
   <.menu_card
     :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
-    icon={Teiserver.icon()}
+    icon={Barserver.icon()}
     icon_class="fa-duotone"
     url={~p"/teiserver/admin"}
   >
@@ -21,7 +21,7 @@
 
   <.menu_card
     :if={allow?(@current_user, "Overwatch")}
-    icon={Teiserver.Moderation.overwatch_icon()}
+    icon={Barserver.Moderation.overwatch_icon()}
     icon_class="fa-duotone"
     url={~p"/moderation/overwatch"}
   >
@@ -39,16 +39,16 @@
 </div>
 
 <div class="row">
-  <.menu_card icon={Teiserver.Chat.RoomMessageLib.icon()} icon_class="fa-duotone" url={~p"/chat"}>
+  <.menu_card icon={Barserver.Chat.RoomMessageLib.icon()} icon_class="fa-duotone" url={~p"/chat"}>
     Chat
   </.menu_card>
 
-  <.menu_card icon={Teiserver.Lobby.icon()} icon_class="fa-duotone" url={~p"/battle/lobbies"}>
+  <.menu_card icon={Barserver.Lobby.icon()} icon_class="fa-duotone" url={~p"/battle/lobbies"}>
     Lobbies
   </.menu_card>
 
   <.menu_card
-    icon={Teiserver.Account.PartyLib.icon()}
+    icon={Barserver.Account.PartyLib.icon()}
     icon_class="fa-duotone"
     url={~p"/teiserver/account/parties"}
   >
@@ -56,29 +56,29 @@
   </.menu_card>
 
   <.menu_card
-    icon={Teiserver.Game.QueueLib.icon()}
+    icon={Barserver.Game.QueueLib.icon()}
     icon_class="fa-duotone"
     url={~p"/teiserver/matchmaking/queues"}
   >
     Matchmaking
   </.menu_card>
 
-  <.menu_card icon={Teiserver.Battle.MatchLib.icon()} icon_class="fa-duotone" url={~p"/battle"}>
+  <.menu_card icon={Barserver.Battle.MatchLib.icon()} icon_class="fa-duotone" url={~p"/battle"}>
     Matches
   </.menu_card>
 
-  <.menu_card icon={Teiserver.Microblog.icon()} icon_class="fa-duotone" url={~p"/microblog"}>
+  <.menu_card icon={Barserver.Microblog.icon()} icon_class="fa-duotone" url={~p"/microblog"}>
     Microblog
   </.menu_card>
 </div>
 
 <div class="row">
-  <.menu_card icon={Teiserver.Account.UserLib.icon()} icon_class="fa-duotone" url={~p"/profile"}>
+  <.menu_card icon={Barserver.Account.UserLib.icon()} icon_class="fa-duotone" url={~p"/profile"}>
     Account
   </.menu_card>
 
   <.menu_card
-    icon={Teiserver.Account.RelationshipLib.icon()}
+    icon={Barserver.Account.RelationshipLib.icon()}
     icon_class="fa-duotone"
     url={~p"/account/relationship"}
   >

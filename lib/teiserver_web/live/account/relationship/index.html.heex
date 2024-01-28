@@ -1,4 +1,4 @@
-<TeiserverWeb.AccountComponents.sub_menu active="relationship" view_colour={@view_colour} />
+<BarserverWeb.AccountComponents.sub_menu active="relationship" view_colour={@view_colour} />
 
 <div class="row mt-2 mb-3">
   <div class="col">
@@ -31,7 +31,7 @@
   <div class="col">
     <h4 class="text-success">
       Friends
-      &nbsp; <Fontawesome.icon icon={Teiserver.Account.FriendLib.icon()} style="regular" />
+      &nbsp; <Fontawesome.icon icon={Barserver.Account.FriendLib.icon()} style="regular" />
     </h4>
     <div :if={@show_help} class="help-box">
       Friends can instantly jump into the same lobby as each other and see additional information when looking at each other's profiles.
@@ -122,7 +122,7 @@
     <h4 class="text-info">
       Follows
       &nbsp;
-      <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_follow()} style="regular" />
+      <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_follow()} style="regular" />
     </h4>
     <div :if={@show_help} class="help-box">
       While it currently doesn't do anything, following will be a way to keep track of those you want to without them having to accept you as a friend (e.g. streamers, devs or other figures of interest).
@@ -139,7 +139,7 @@
       </:col>z
       <:col :let={follow} label="">
         <.link class="btn btn-secondary btn-sm" navigate={~p"/profile/#{follow.to_user.id}"}>
-          <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="regular" /> Profile
+          <Fontawesome.icon icon={Barserver.Account.UserLib.icon()} style="regular" /> Profile
         </.link>
       </:col>
 
@@ -161,7 +161,7 @@
     <h4 class="text-warning">
       Ignores
       &nbsp;
-      <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="regular" />
+      <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_ignore()} style="regular" />
     </h4>
     <div :if={@show_help} class="help-box">
       If someone is ignored they cannot direct message you and you will not see their chat messages in the lobby. Muting ingame is currently a separate action and not linked to this.
@@ -183,7 +183,7 @@
           phx-value-userid={ignore.to_user.id}
           class="btn btn-secondary btn-sm"
         >
-          <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="regular" />
+          <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_avoid()} style="regular" />
           Avoid
         </span>
       </:col>
@@ -193,7 +193,7 @@
     <h4 class="text-danger">
       Avoids
       &nbsp;
-      <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="regular" />
+      <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_avoid()} style="regular" />
     </h4>
     <div :if={@show_help} class="help-box">
       In addition to the effects of ignoring; if enough players in a lobby are avoiding someone they will not be able to become a player themselves. They will still be able to spectate though.
@@ -224,7 +224,7 @@
     <h4 class="text-danger2">
       Blocks
       &nbsp;
-      <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="regular" />
+      <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_block()} style="regular" />
     </h4>
     <div :if={@show_help} class="help-box">
       In addition to the effects of avoiding; if enough members of a lobby are blocking someone they will not be able to join the lobby at all.
@@ -338,7 +338,7 @@
           </h4>
 
           <h4 :if={@found_friendship} class="mb-4">
-            Status: <span class={"text-#{Teiserver.Account.FriendLib.colours}"}>Friend</span>
+            Status: <span class={"text-#{Barserver.Account.FriendLib.colours}"}>Friend</span>
           </h4>
 
           <.link
@@ -346,15 +346,15 @@
             navigate={~p"/profile/#{@found_user.id}"}
             class={"btn btn-lg btn-#{@view_colour} mx-1"}
           >
-            <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" /> See profile
+            <Fontawesome.icon icon={Barserver.Account.UserLib.icon()} style="solid" /> See profile
           </.link>
 
           <.link
             :if={@found_user.id != @current_user.id and @found_friendship == nil}
             navigate={~p"/moderation/report_user/#{@found_user.id}"}
-            class={"btn btn-lg btn-#{Teiserver.Moderation.ReportLib.colour()} mx-1"}
+            class={"btn btn-lg btn-#{Barserver.Moderation.ReportLib.colour()} mx-1"}
           >
-            <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="solid" />
+            <Fontawesome.icon icon={Barserver.Moderation.ReportLib.icon()} style="solid" />
             Report user
           </.link>
         </div>
@@ -365,7 +365,7 @@
               <% Enum.member?(@found_user.data["restrictions"], "Permanently banned") -> %>
                 <div class="role-badge">
                   <Fontawesome.icon
-                    icon={Teiserver.Moderation.ActionLib.action_icon("Ban")}
+                    icon={Barserver.Moderation.ActionLib.action_icon("Ban")}
                     style="solid"
                     size="2x"
                     class="text-danger"
@@ -375,7 +375,7 @@
               <% Enum.member?(@found_user.data["restrictions"], "Login") -> %>
                 <div class="role-badge">
                   <Fontawesome.icon
-                    icon={Teiserver.Moderation.ActionLib.action_icon("Suspend")}
+                    icon={Barserver.Moderation.ActionLib.action_icon("Suspend")}
                     style="solid"
                     size="2x"
                     class="text-danger"
@@ -385,7 +385,7 @@
               <% Enum.member?(@found_user.data["restrictions"], "All chat") -> %>
                 <div class="role-badge">
                   <Fontawesome.icon
-                    icon={Teiserver.Moderation.ActionLib.action_icon("Mute")}
+                    icon={Barserver.Moderation.ActionLib.action_icon("Mute")}
                     style="solid"
                     size="2x"
                     class="text-danger"

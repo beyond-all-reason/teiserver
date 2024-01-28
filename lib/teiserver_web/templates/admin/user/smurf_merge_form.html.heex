@@ -1,7 +1,7 @@
 <% bsname = view_colour() %>
 
 <%= render(
-  TeiserverWeb.Admin.GeneralView,
+  BarserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "users"})
 ) %>
@@ -19,7 +19,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Admin.UserView,
+          BarserverWeb.Admin.UserView,
           "section_menu.html",
           Map.merge(assigns, %{
             active: "smurf_merge_form"
@@ -69,8 +69,8 @@
 
           <div class="row">
             <div class="col-md-12 m-3">
-              <h5 class={"text-#{Teiserver.Account.RatingLib.colours}"}>
-                <%= central_component("icon", icon: Teiserver.Account.RatingLib.icon()) %> &nbsp;
+              <h5 class={"text-#{Barserver.Account.RatingLib.colours}"}>
+                <%= central_component("icon", icon: Barserver.Account.RatingLib.icon()) %> &nbsp;
                 <label for="" class="control-label">Ratings</label>
               </h5>
               <%= central_component("checkbox",
@@ -88,7 +88,7 @@
             <div class="col-md-12 m-3">
               <h5 class="text-warning">
                 <%= central_component("icon",
-                  icon: Teiserver.Helper.StylingHelper.icon(:moderation)
+                  icon: Barserver.Helper.StylingHelper.icon(:moderation)
                 ) %> &nbsp; <label for="" class="control-label">Moderation reports/actions</label>
               </h5>
               <%= central_component("checkbox",
@@ -106,7 +106,7 @@
           <div class="row">
             <div class="col-md-12 m-3">
               <h5 class="text-danger">
-                <%= central_component("icon", icon: Teiserver.Account.RelationshipReport.icon()) %> &nbsp;
+                <%= central_component("icon", icon: Barserver.Account.RelationshipReport.icon()) %> &nbsp;
                 <label for="" class="control-label">Mutes/Ignores</label>
               </h5>
               <%= central_component("checkbox",
@@ -142,7 +142,7 @@
           <div class="row">
             <div class="col-md-12 m-3 innactive">
               <h5 class="text-warning2">
-                <%= central_component("icon", icon: Teiserver.Account.UserLib.icon()) %> &nbsp;
+                <%= central_component("icon", icon: Barserver.Account.UserLib.icon()) %> &nbsp;
                 <label for="" class="control-label">Old account (<%= @from_user.name %>)</label>
               </h5>
               <%= central_component("checkbox",

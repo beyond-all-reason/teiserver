@@ -1,7 +1,7 @@
 <% bsname = view_colour() %>
 
 <%= render(
-  TeiserverWeb.Report.GeneralView,
+  BarserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
 ) %>
@@ -11,7 +11,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Report.ReportView,
+          BarserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",
@@ -98,7 +98,7 @@
               <tr>
                 <td><%= user.name %></td>
                 <td>
-                  <TeiserverWeb.UserComponents.status_icon user={user} />
+                  <BarserverWeb.UserComponents.status_icon user={user} />
                 </td>
 
                 <td>

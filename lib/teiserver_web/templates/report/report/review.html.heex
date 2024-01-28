@@ -2,7 +2,7 @@
 show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0 %>
 
 <%= render(
-  TeiserverWeb.Report.GeneralView,
+  BarserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
 ) %>
@@ -20,7 +20,7 @@ show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0 %>
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Report.ReportView,
+          BarserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",
@@ -114,7 +114,7 @@ show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0 %>
             <ul class="nav nav-tabs" role="tablist" id="the_tabs">
               <li class="nav-item">
                 <a href="#server_details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                  <%= central_component("icon", icon: Teiserver.Logging.ServerDayLogLib.icon()) %> This timeframe
+                  <%= central_component("icon", icon: Barserver.Logging.ServerDayLogLib.icon()) %> This timeframe
                 </a>
               </li>
 
@@ -125,7 +125,7 @@ show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0 %>
                   class="nav-link"
                   data-bs-toggle="tab"
                 >
-                  <%= central_component("icon", icon: Teiserver.Logging.ServerDayLogLib.icon()) %> Past timeframe (<%= date_to_str(
+                  <%= central_component("icon", icon: Barserver.Logging.ServerDayLogLib.icon()) %> Past timeframe (<%= date_to_str(
                     @data.past_start_date,
                     format: :ymd
                   ) %> - <%= date_to_str(@data.past_end_date, format: :ymd) %>)
@@ -140,7 +140,7 @@ show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0 %>
                     class="nav-link"
                     data-bs-toggle="tab"
                   >
-                    <%= central_component("icon", icon: Teiserver.Logging.ServerDayLogLib.icon()) %> Compare
+                    <%= central_component("icon", icon: Barserver.Logging.ServerDayLogLib.icon()) %> Compare
                   </a>
                 </li>
               <% end %>
@@ -148,13 +148,13 @@ show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0 %>
 
             <div class="tab-content">
               <div class="tab-pane" id="server_details_tab" style="padding:5px;">
-                <%= render(TeiserverWeb.Logging.ServerLogView, "tab_month_details.html",
+                <%= render(BarserverWeb.Logging.ServerLogView, "tab_month_details.html",
                   data: @data.server
                 ) %>
               </div>
 
               <div class="tab-pane" id="past_server_details_tab" style="padding:5px;">
-                <%= render(TeiserverWeb.Logging.ServerLogView, "tab_month_details.html",
+                <%= render(BarserverWeb.Logging.ServerLogView, "tab_month_details.html",
                   data: @data.past_server
                 ) %>
               </div>

@@ -1,4 +1,4 @@
-This is still a work in progress but loosely the sequence of steps you will need to take to setup a Teiserver is:
+This is still a work in progress but loosely the sequence of steps you will need to take to setup a Barserver is:
 
 ## Local/Dev
 ### Install services
@@ -105,12 +105,12 @@ If you want to do things like have a discord bot in development you don't want t
 ```elixir
 import Config
 
-config :teiserver, Teiserver,
+config :teiserver, Barserver,
   enable_discord_bridge: true
 
 config :teiserver, DiscordBridgeBot,
   token: "------",
-  bot_name: "Teiserver Bridge DEV",
+  bot_name: "Barserver Bridge DEV",
   bridges: [
     {"---", "main"},
     {"---", "promote"},
@@ -139,8 +139,8 @@ When running locally it's likely you won't want to connect the server to an emai
 Run your server with `iex -S mix phx.server` and then once it has started up use the following code to update your password.
 
 ```elixir
-user = Teiserver.Account.get_user_by_email("root@localhost")
-Teiserver.Account.update_user(user, %{"password" => "your password here"})
+user = Barserver.Account.get_user_by_email("root@localhost")
+Barserver.Account.update_user(user, %{"password" => "your password here"})
 ```
 
 ### Main 3rd party dependencies

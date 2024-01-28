@@ -96,7 +96,7 @@
           </tr>
         </thead>
         <tbody>
-          <%= for {action, icon} <- Teiserver.Moderation.ResponseLib.list_actions() do %>
+          <%= for {action, icon} <- Barserver.Moderation.ResponseLib.list_actions() do %>
             <tr>
               <td>
                 <i class={"fa-fw #{icon}"}></i>

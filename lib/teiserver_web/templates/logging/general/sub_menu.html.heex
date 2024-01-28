@@ -22,7 +22,7 @@
         <div class="row">
           <%= if allow?(@current_user, "Admin") do %>
             <%= central_component("sub_menu_icon",
-              icon: Teiserver.Logging.ServerDayLogLib.icon(),
+              icon: Barserver.Logging.ServerDayLogLib.icon(),
               name: "server",
               label: "Server",
               active: @active,
@@ -32,7 +32,7 @@
 
           <%= if allow?(@current_user, "Admin") do %>
             <%= central_component("sub_menu_icon",
-              icon: Teiserver.Battle.MatchLib.icon(),
+              icon: Barserver.Battle.MatchLib.icon(),
               name: "match",
               label: "Match",
               active: @active,
@@ -46,7 +46,7 @@
               label: "Web",
               active: @active,
               url: Routes.logging_page_view_log_path(@conn, :index),
-              icon: Teiserver.Logging.PageViewLogLib.icon()
+              icon: Barserver.Logging.PageViewLogLib.icon()
             ) %>
           <% end %>
 
@@ -56,7 +56,7 @@
               label: "Aggregate web",
               active: @active,
               url: Routes.logging_aggregate_view_log_path(@conn, :index),
-              icon: Teiserver.Logging.AggregateViewLogLib.icon()
+              icon: Barserver.Logging.AggregateViewLogLib.icon()
             ) %>
           <% end %>
 
@@ -66,7 +66,7 @@
               label: "Audit",
               active: @active,
               url: Routes.logging_audit_log_path(@conn, :index),
-              icon: Teiserver.Logging.AuditLogLib.icon()
+              icon: Barserver.Logging.AuditLogLib.icon()
             ) %>
           <% end %>
 

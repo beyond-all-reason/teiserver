@@ -37,7 +37,7 @@ To get a channel ID in your discord settings enable developer mode in advanced s
 Finally you need to enable the bot in either `config/prod.secret.exs` or `config/prod.exs`.
 
 ```
-config :teiserver, Teiserver,
+config :teiserver, Barserver,
   enable_discord_bridge: true
 ```
 

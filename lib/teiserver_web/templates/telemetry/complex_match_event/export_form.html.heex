@@ -4,7 +4,7 @@
 <script src={Routes.static_path(@conn, "/js/select2.js")}>
 </script>
 
-<TeiserverWeb.Telemetry.TelemetryComponents.sub_menu
+<BarserverWeb.Telemetry.TelemetryComponents.sub_menu
   active="complex_match_events"
   view_colour={view_colour()}
   current_user={@current_user}
@@ -23,7 +23,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Telemetry.ComplexMatchEventView,
+          BarserverWeb.Telemetry.ComplexMatchEventView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",
@@ -65,7 +65,7 @@
                 name: "timeframe",
                 id: "timeframe",
                 enumerable:
-                  for(p <- Teiserver.Helper.DatePresets.short_ranges(), do: %{id: p, name: p})
+                  for(p <- Barserver.Helper.DatePresets.short_ranges(), do: %{id: p, name: p})
               ) %>
             </div>
           </div>
