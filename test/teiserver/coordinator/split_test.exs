@@ -1,11 +1,11 @@
-defmodule Teiserver.Coordinator.SplitTest do
-  use Teiserver.ServerCase, async: false
-  alias Teiserver.Account.ClientLib
-  alias Teiserver.Common.PubsubListener
-  alias Teiserver.{User, Client, Coordinator, Lobby}
-  alias Teiserver.Coordinator.CoordinatorLib
+defmodule Barserver.Coordinator.SplitTest do
+  use Barserver.ServerCase, async: false
+  alias Barserver.Account.ClientLib
+  alias Barserver.Common.PubsubListener
+  alias Barserver.{User, Client, Coordinator, Lobby}
+  alias Barserver.Coordinator.CoordinatorLib
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
 
   setup do

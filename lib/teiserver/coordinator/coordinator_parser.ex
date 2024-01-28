@@ -1,8 +1,8 @@
-defmodule Teiserver.Coordinator.Parser do
+defmodule Barserver.Coordinator.Parser do
   require Logger
-  alias Teiserver.Coordinator
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Battle
+  alias Barserver.Coordinator
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Battle
 
   @passthrough ~w(explain)
 

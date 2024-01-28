@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Telemetry do
+defmodule BarserverWeb.Telemetry do
   @moduledoc false
   use Supervisor
   import Telemetry.Metrics
@@ -53,11 +53,11 @@ defmodule TeiserverWeb.Telemetry do
       ),
 
       # Database Time Metrics
-      summary("Teiserver.Repo.query.total_time", unit: {:native, :millisecond}),
-      summary("Teiserver.Repo.query.decode_time", unit: {:native, :millisecond}),
-      summary("Teiserver.Repo.query.query_time", unit: {:native, :millisecond}),
-      summary("Teiserver.Repo.query.queue_time", unit: {:native, :millisecond}),
-      summary("Teiserver.Repo.query.idle_time", unit: {:native, :millisecond}),
+      summary("Barserver.Repo.query.total_time", unit: {:native, :millisecond}),
+      summary("Barserver.Repo.query.decode_time", unit: {:native, :millisecond}),
+      summary("Barserver.Repo.query.query_time", unit: {:native, :millisecond}),
+      summary("Barserver.Repo.query.queue_time", unit: {:native, :millisecond}),
+      summary("Barserver.Repo.query.idle_time", unit: {:native, :millisecond}),
 
       # VM Metrics
       summary("vm.memory.total", unit: {:byte, :kilobyte}),
@@ -65,14 +65,14 @@ defmodule TeiserverWeb.Telemetry do
       summary("vm.total_run_queue_lengths.cpu"),
       summary("vm.total_run_queue_lengths.io")
     ] ++
-      Teiserver.Telemetry.metrics()
+      Barserver.Telemetry.metrics()
 
     # Metrics end
   end
 
   defp periodic_measurements do
     [] ++
-      Teiserver.Telemetry.periodic_measurements()
+      Barserver.Telemetry.periodic_measurements()
 
     # Periodic measurements end
   end

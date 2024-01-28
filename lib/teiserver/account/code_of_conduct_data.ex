@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.CodeOfConductData do
+defmodule Barserver.Account.CodeOfConductData do
   @moduledoc false
 
   @spec data() :: %{String.t() => %{String.t() => String.t()}}

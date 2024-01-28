@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
-  use TeiserverWeb, :live_view
-  alias Teiserver.{Moderation}
-  alias Teiserver.Moderation.ReportGroupLib
+defmodule BarserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
+  use BarserverWeb, :live_view
+  alias Barserver.{Moderation}
+  alias Barserver.Moderation.ReportGroupLib
 
   @impl true
   def mount(%{"id" => id_str}, _session, socket) when is_connected?(socket) do
@@ -32,7 +32,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
   defp default_mount(socket) do
     socket
     |> assign(:site_menu_active, "moderation")
-    |> assign(:view_colour, Teiserver.Moderation.colour())
+    |> assign(:view_colour, Barserver.Moderation.colour())
     |> assign(:report_group, nil)
     |> add_breadcrumb(name: "Moderation", url: ~p"/moderation")
     |> add_breadcrumb(name: "Overwatch", url: ~p"/moderation/overwatch")

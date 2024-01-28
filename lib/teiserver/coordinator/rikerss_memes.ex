@@ -1,8 +1,8 @@
-defmodule Teiserver.Coordinator.RikerssMemes do
+defmodule Barserver.Coordinator.RikerssMemes do
   @moduledoc false
-  alias Teiserver.{Account, Battle}
-  alias Teiserver.Lobby.{ChatLib}
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.{Account, Battle}
+  alias Barserver.Lobby.{ChatLib}
+  alias Barserver.Data.Types, as: T
 
   @meme_list ~w(ticks nodefence nodefence2 greenfields poor rich hardt1 crazy undo deathmatch noscout hoversonly nofusion armonly coronly legonly armvcor)
 

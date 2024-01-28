@@ -1,11 +1,11 @@
-defmodule Teiserver.Account.AuthPlug do
+defmodule Barserver.Account.AuthPlug do
   @moduledoc false
   import Plug.Conn
 
-  alias Teiserver.Account
-  alias Teiserver.Account.{Guardian, AuthLib}
+  alias Barserver.Account
+  alias Barserver.Account.{Guardian, AuthLib}
   require Logger
-  use TeiserverWeb, :verified_routes
+  use BarserverWeb, :verified_routes
 
   def init(_opts) do
     # Keyword.fetch!(opts, :repo)
@@ -74,7 +74,7 @@ defmodule Teiserver.Account.AuthPlug do
 
   defp banned_user?(%{assigns: %{current_user: current_user}} = _conn_or_socket) do
     cond do
-      Teiserver.CacheUser.is_restricted?(current_user.id, ["Login"]) ->
+      Barserver.CacheUser.is_restricted?(current_user.id, ["Login"]) ->
         true
 
       current_user.smurf_of_id != nil ->
@@ -169,7 +169,7 @@ defmodule Teiserver.Account.AuthPlug do
         _ -> nil
       end
     end)
-    |> Teiserver.Plugs.CachePlug.live_call()
+    |> Barserver.Plugs.CachePlug.live_call()
   end
 
   defp signed_in_path(_conn), do: ~p"/"

@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.Admin.SiteConfigView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Admin.SiteConfigView do
+  use BarserverWeb, :view
 
   def config_name(config_key) do
     config_key
@@ -8,8 +8,8 @@ defmodule TeiserverWeb.Admin.SiteConfigView do
   end
 
   @spec view_colour :: atom()
-  def view_colour(), do: Teiserver.Config.SiteConfigLib.colours()
+  def view_colour(), do: Barserver.Config.SiteConfigLib.colours()
 
   @spec icon :: String.t()
-  def icon(), do: Teiserver.Config.SiteConfigLib.icon()
+  def icon(), do: Barserver.Config.SiteConfigLib.icon()
 end

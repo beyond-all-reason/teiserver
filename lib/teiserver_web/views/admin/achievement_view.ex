@@ -1,9 +1,9 @@
-defmodule TeiserverWeb.Admin.AchievementView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Admin.AchievementView do
+  use BarserverWeb, :view
 
   @spec view_colour() :: atom
-  def view_colour(), do: Teiserver.Game.AchievementTypeLib.colour()
+  def view_colour(), do: Barserver.Game.AchievementTypeLib.colour()
 
   @spec icon() :: String.t()
-  defdelegate icon(), to: Teiserver.Game.AchievementTypeLib
+  defdelegate icon(), to: Barserver.Game.AchievementTypeLib
 end

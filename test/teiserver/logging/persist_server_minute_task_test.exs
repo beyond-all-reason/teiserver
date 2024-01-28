@@ -1,7 +1,7 @@
-defmodule Teiserver.Logging.Tasks.PersistServerMinuteTaskTest do
-  use Teiserver.DataCase
-  alias Teiserver.{Logging}
-  alias Teiserver.Logging.Tasks.PersistServerMinuteTask
+defmodule Barserver.Logging.Tasks.PersistServerMinuteTaskTest do
+  use Barserver.DataCase
+  alias Barserver.{Logging}
+  alias Barserver.Logging.Tasks.PersistServerMinuteTask
 
   test "perform task" do
     # Run the task

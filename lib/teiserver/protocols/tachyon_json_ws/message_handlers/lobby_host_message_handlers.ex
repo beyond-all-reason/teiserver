@@ -1,9 +1,9 @@
-defmodule Teiserver.Tachyon.MessageHandlers.LobbyHostMessageHandlers do
+defmodule Barserver.Tachyon.MessageHandlers.LobbyHostMessageHandlers do
   @moduledoc """
 
   """
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Tachyon.Responses.LobbyHost.JoinRequestReponse
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Tachyon.Responses.LobbyHost.JoinRequestReponse
 
   @spec handle(map(), T.tachyon_conn()) ::
           {:ok, T.tachyon_conn()} | {:ok, map() | list(), T.tachyon_conn()}

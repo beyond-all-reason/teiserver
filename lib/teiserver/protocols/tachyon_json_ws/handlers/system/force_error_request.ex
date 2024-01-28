@@ -1,9 +1,9 @@
-defmodule Teiserver.Tachyon.Handlers.System.ForceErrorRequest do
+defmodule Barserver.Tachyon.Handlers.System.ForceErrorRequest do
   @moduledoc """
 
   """
 
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do

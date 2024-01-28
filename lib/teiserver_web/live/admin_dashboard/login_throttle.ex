@@ -1,15 +1,15 @@
-defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
-  use TeiserverWeb, :live_view
+defmodule BarserverWeb.AdminDashLive.LoginThrottle do
+  use BarserverWeb, :live_view
   alias Phoenix.PubSub
 
-  alias Teiserver
-  alias Teiserver.{Game}
-  # alias Teiserver.Account.AccoladeLib
-  # alias Teiserver.Data.Matchmaking
+  alias Barserver
+  alias Barserver.{Game}
+  # alias Barserver.Account.AccoladeLib
+  # alias Barserver.Data.Matchmaking
 
   @impl true
   def mount(_params, session, socket) do
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_login_throttle")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_liveview_login_throttle")
 
     socket =
       socket
@@ -18,7 +18,7 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
       |> add_breadcrumb(name: "Dashboard", url: ~p"/admin/dashboard")
       |> add_breadcrumb(name: "Login throttle", url: ~p"/admin/dashboard/login_throttle")
       |> assign(:site_menu_active, "admin")
-      |> assign(:view_colour, Teiserver.Admin.AdminLib.colours())
+      |> assign(:view_colour, Barserver.Admin.AdminLib.colours())
       |> assign(:heartbeats, %{})
       |> assign(:queues, nil)
       |> assign(:recent_logins, [])

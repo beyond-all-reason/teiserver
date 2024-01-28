@@ -1,10 +1,10 @@
-defmodule Teiserver.Telemetry.ExportPropertiesTask do
+defmodule Barserver.Telemetry.ExportPropertiesTask do
   @moduledoc false
-  alias Teiserver.Helper.{TimexHelper, DatePresets}
-  alias Teiserver.Telemetry.{UserProperty, AnonProperty}
-  alias Teiserver.Repo
+  alias Barserver.Helper.{TimexHelper, DatePresets}
+  alias Barserver.Telemetry.{UserProperty, AnonProperty}
+  alias Barserver.Repo
   import Ecto.Query, warn: false
-  import Teiserver.Helper.QueryHelpers
+  import Barserver.Helper.QueryHelpers
 
   def perform(params) do
     do_query(params)

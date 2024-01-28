@@ -1,6 +1,6 @@
-defmodule Teiserver.Communication.TextCallback do
+defmodule Barserver.Communication.TextCallback do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "communication_text_callbacks" do
     field :name, :string

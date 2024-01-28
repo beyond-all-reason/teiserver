@@ -1,6 +1,6 @@
-defmodule TeiserverWeb.Admin.LobbyPolicyView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Admin.LobbyPolicyView do
+  use BarserverWeb, :view
 
-  def view_colour, do: Teiserver.Game.LobbyPolicyLib.colours()
-  def icon, do: Teiserver.Game.LobbyPolicyLib.icon()
+  def view_colour, do: Barserver.Game.LobbyPolicyLib.colours()
+  def icon, do: Barserver.Game.LobbyPolicyLib.icon()
 end

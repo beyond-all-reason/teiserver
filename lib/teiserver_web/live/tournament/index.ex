@@ -1,12 +1,12 @@
-defmodule TeiserverWeb.TournamentLive.Index do
+defmodule BarserverWeb.TournamentLive.Index do
   @moduledoc false
-  use TeiserverWeb, :live_view
+  use BarserverWeb, :live_view
   alias Phoenix.PubSub
 
-  alias Teiserver
-  alias Teiserver.{Battle, Account, Lobby}
+  alias Barserver
+  alias Barserver.{Battle, Account, Lobby}
 
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @impl true
   def mount(_params, session, socket) do
@@ -17,7 +17,7 @@ defmodule TeiserverWeb.TournamentLive.Index do
     client = Account.get_client_by_id(socket.assigns[:current_user].id)
 
     can_join =
-      Teiserver.CacheUser.has_any_role?(socket.assigns[:current_user].id, [
+      Barserver.CacheUser.has_any_role?(socket.assigns[:current_user].id, [
         "Moderator",
         "Caster",
         "TourneyPlayer",
@@ -112,11 +112,11 @@ defmodule TeiserverWeb.TournamentLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_lobby_index_updates")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_liveview_lobby_index_updates")
 
     :ok =
       PubSub.subscribe(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_client_messages:#{socket.assigns[:current_user].id}"
       )
 

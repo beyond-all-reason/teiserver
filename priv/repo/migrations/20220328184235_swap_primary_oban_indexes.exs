@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.SwapPrimaryObanIndexes do
+defmodule Barserver.Repo.Migrations.SwapPrimaryObanIndexes do
   use Ecto.Migration
 
   @disable_ddl_transaction true

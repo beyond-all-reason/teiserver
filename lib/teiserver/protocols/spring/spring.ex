@@ -1,13 +1,13 @@
-defmodule Teiserver.Protocols.Spring do
+defmodule Barserver.Protocols.Spring do
   @moduledoc false
-  alias Teiserver.BitParse
-  alias Teiserver.Protocols.SpringIn
-  alias Teiserver.Protocols.SpringOut
+  alias Barserver.BitParse
+  alias Barserver.Protocols.SpringIn
+  alias Barserver.Protocols.SpringOut
 
-  @spec protocol_in :: Teiserver.Protocols.SpringIn
+  @spec protocol_in :: Barserver.Protocols.SpringIn
   def protocol_in(), do: SpringIn
 
-  @spec protocol_out :: Teiserver.Protocols.SpringOut
+  @spec protocol_out :: Barserver.Protocols.SpringOut
   def protocol_out(), do: SpringOut
 
   @spec parse_client_status(String.t()) :: Map.t()

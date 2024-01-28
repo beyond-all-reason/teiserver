@@ -1,7 +1,7 @@
-defmodule Teiserver.Telemetry.AnonPropertyQueries do
+defmodule Barserver.Telemetry.AnonPropertyQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
-  alias Teiserver.Telemetry.AnonProperty
+  use BarserverWeb, :queries
+  alias Barserver.Telemetry.AnonProperty
 
   # Queries
   @spec query_anon_properties(list) :: Ecto.Query.t()

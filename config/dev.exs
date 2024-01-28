@@ -1,9 +1,9 @@
 import Config
 
-config :teiserver, Teiserver.Setup, key: "dev_key"
+config :teiserver, Barserver.Setup, key: "dev_key"
 
 # Configure your database
-config :teiserver, Teiserver.Repo,
+config :teiserver, Barserver.Repo,
   username: "teiserver_dev",
   password: "123456789",
   database: "teiserver_dev",
@@ -18,7 +18,7 @@ config :teiserver, Teiserver.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
-config :teiserver, TeiserverWeb.Endpoint,
+config :teiserver, BarserverWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4000],
   debug_errors: true,
   code_reloader: true,
@@ -49,7 +49,7 @@ config :dart_sass,
     cd: Path.expand("../assets", __DIR__)
   ]
 
-config :teiserver, Teiserver,
+config :teiserver, Barserver,
   certs: [
     keyfile: "priv/certs/localhost.key",
     certfile: "priv/certs/localhost.crt",
@@ -66,7 +66,7 @@ config :teiserver, Teiserver,
   accept_all_emails: true
 
 # Watch static and templates for browser reloading.
-config :teiserver, TeiserverWeb.Endpoint,
+config :teiserver, BarserverWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",

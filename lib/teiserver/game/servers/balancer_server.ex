@@ -1,9 +1,9 @@
-defmodule Teiserver.Game.BalancerServer do
+defmodule Barserver.Game.BalancerServer do
   use GenServer
   require Logger
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Battle.BalanceLib
-  alias Teiserver.{Battle, Coordinator}
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Battle.BalanceLib
+  alias Barserver.{Battle, Coordinator}
 
   @tick_interval 2_000
 
@@ -285,12 +285,12 @@ defmodule Teiserver.Game.BalancerServer do
     Logger.metadata(request_id: "BalancerServer##{opts.lobby_id}")
 
     # These were never actually used
-    # :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-    # :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
+    # :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    # :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_server")
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
-      Teiserver.BalancerRegistry,
+      Barserver.BalancerRegistry,
       lobby_id,
       lobby_id
     )

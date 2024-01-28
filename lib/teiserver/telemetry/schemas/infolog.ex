@@ -1,10 +1,10 @@
-defmodule Teiserver.Telemetry.Infolog do
+defmodule Barserver.Telemetry.Infolog do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "telemetry_infologs" do
     field :user_hash, :string
-    belongs_to :user, Teiserver.Account.User
+    belongs_to :user, Barserver.Account.User
     field :log_type, :string
 
     field :timestamp, :utc_datetime

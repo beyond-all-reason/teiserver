@@ -1,13 +1,13 @@
-defmodule TeiserverWeb.Battle.RatingsController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Battle.RatingsController do
+  use BarserverWeb, :controller
 
-  alias Teiserver.{Account}
-  alias Teiserver.Game.MatchRatingLib
+  alias Barserver.{Account}
+  alias Barserver.Game.MatchRatingLib
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Battle.Match,
+    policy: Barserver.Battle.Match,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "leaderboard",

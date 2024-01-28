@@ -1,24 +1,24 @@
-defmodule TeiserverWeb.PostLiveTest do
+defmodule BarserverWeb.PostLiveTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase
+  use BarserverWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Teiserver.MicroblogFixtures
-  alias Teiserver.Microblog
+  import Barserver.MicroblogFixtures
+  alias Barserver.Microblog
 
   @create_attrs %{contents: "some contents", title: "some title"}
   @update_attrs %{contents: "some updated contents", title: "some updated title"}
   @invalid_attrs %{contents: nil, title: nil}
 
   defp auth_setup(_) do
-    Teiserver.TeiserverTestLib.server_permissions()
+    Barserver.BarserverTestLib.server_permissions()
     |> Central.Helpers.GeneralTestLib.conn_setup()
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    |> Barserver.BarserverTestLib.conn_setup()
   end
 
   defp unauth_setup(_) do
     Central.Helpers.GeneralTestLib.conn_setup()
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    |> Barserver.BarserverTestLib.conn_setup()
   end
 
   defp create_post(_) do

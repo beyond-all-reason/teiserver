@@ -1,4 +1,4 @@
-defmodule Teiserver.Benchmark.StatsClient do
+defmodule Barserver.Benchmark.StatsClient do
   @moduledoc """
   A client that tracks various statistics
   """
@@ -20,7 +20,7 @@ defmodule Teiserver.Benchmark.StatsClient do
 
   def handle_info(:report, state) do
     average_ping = Enum.sum(state.pings) / max(Enum.count(state.pings), 1)
-    users = Registry.count(Teiserver.Benchmark.UserRegistry)
+    users = Registry.count(Barserver.Benchmark.UserRegistry)
 
     # Print stats
     IO.puts("
@@ -60,8 +60,8 @@ Avg ping: #{round(average_ping * 100) / 100}ms, Pings: #{Enum.count(state.pings)
       id = state.tick * 1000 + i
 
       {:ok, _pid} =
-        DynamicSupervisor.start_child(Teiserver.Benchmark.UserSupervisor, {
-          Teiserver.Benchmark.UserClient,
+        DynamicSupervisor.start_child(Barserver.Benchmark.UserSupervisor, {
+          Barserver.Benchmark.UserClient,
           name: via_user_tuple(id),
           data: %{
             interval: @user_action_interval,
@@ -92,6 +92,6 @@ Avg ping: #{round(average_ping * 100) / 100}ms, Pings: #{Enum.count(state.pings)
   end
 
   defp via_user_tuple(id) do
-    {:via, Registry, {Teiserver.Benchmark.UserRegistry, id}}
+    {:via, Registry, {Barserver.Benchmark.UserRegistry, id}}
   end
 end

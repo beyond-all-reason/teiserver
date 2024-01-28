@@ -5,7 +5,7 @@ Tachyon is a protocol specification as defined in [the Tachyon repo](https://git
 For handling protocol requests
 
 ```elixir
-defmodule Teiserver.Tachyon.Handlers.{Section}.{Action}Request do
+defmodule Barserver.Tachyon.Handlers.{Section}.{Action}Request do
   @moduledoc false
   
   alias Teiserver.Data.Types, as: T

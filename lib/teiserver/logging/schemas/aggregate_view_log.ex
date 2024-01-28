@@ -1,6 +1,6 @@
-defmodule Teiserver.Logging.AggregateViewLog do
+defmodule Barserver.Logging.AggregateViewLog do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   @primary_key false
   schema "aggregate_view_logs" do

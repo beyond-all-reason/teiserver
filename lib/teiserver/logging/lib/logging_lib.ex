@@ -1,4 +1,4 @@
-defmodule Teiserver.Logging.LoggingLib do
+defmodule Barserver.Logging.LoggingLib do
   @moduledoc false
   import Plug.Conn, only: [assign: 3]
 
@@ -14,5 +14,5 @@ defmodule Teiserver.Logging.LoggingLib do
   end
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
-  def authorize(_, conn, _), do: Teiserver.Account.AuthLib.allow?(conn, "Admin")
+  def authorize(_, conn, _), do: Barserver.Account.AuthLib.allow?(conn, "Admin")
 end

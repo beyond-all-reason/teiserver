@@ -1,6 +1,6 @@
-defmodule TeiserverWeb.Admin.ChatView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Admin.ChatView do
+  use BarserverWeb, :view
 
-  def view_colour, do: Teiserver.Chat.LobbyMessageLib.colours()
-  def icon, do: Teiserver.Chat.LobbyMessageLib.icon()
+  def view_colour, do: Barserver.Chat.LobbyMessageLib.colours()
+  def icon, do: Barserver.Chat.LobbyMessageLib.icon()
 end

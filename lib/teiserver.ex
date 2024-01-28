@@ -1,7 +1,7 @@
-defmodule Teiserver do
+defmodule Barserver do
   @moduledoc false
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Helpers.CacheHelper
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Helpers.CacheHelper
 
   # def icon(), do: "fa-duotone fa-robot"
   @spec icon :: String.t()
@@ -29,24 +29,24 @@ defmodule Teiserver do
   # Designed for debugging help
   @spec tachyon(String.t() | :timeout) :: {:ok, List.t() | Map.t()} | {:error, :bad_json}
   def tachyon(v) do
-    Teiserver.Protocols.TachyonLib.decode(v)
+    Barserver.Protocols.TachyonLib.decode(v)
   end
 
   @spec accolade_status :: nil | :ok
   def accolade_status() do
     Application.put_env(:elixir, :ansi_enabled, true)
-    Teiserver.Account.AccoladeLib.live_debug()
+    Barserver.Account.AccoladeLib.live_debug()
   end
 
   @spec manually_delete_user(T.userid()) :: {:ok, map()} | {:error, map()}
   def manually_delete_user(id) do
     Application.put_env(:elixir, :ansi_enabled, true)
-    Teiserver.Admin.DeleteUserTask.delete_users([id])
+    Barserver.Admin.DeleteUserTask.delete_users([id])
   end
 
   @spec node_name() :: String.t()
   def node_name() do
-    Application.get_env(:teiserver, Teiserver)[:node_name] || to_string(Node.self())
+    Application.get_env(:teiserver, Barserver)[:node_name] || to_string(Node.self())
   end
 
   # Cache stuff
@@ -87,6 +87,6 @@ defmodule Teiserver do
   defdelegate store_get_or_store(table, key, func), to: CacheHelper
 
   # Delegate some stuff
-  defdelegate rate_match(match), to: Teiserver.Game.MatchRatingLib
-  defdelegate rate_match(match, override), to: Teiserver.Game.MatchRatingLib
+  defdelegate rate_match(match), to: Barserver.Game.MatchRatingLib
+  defdelegate rate_match(match, override), to: Barserver.Game.MatchRatingLib
 end

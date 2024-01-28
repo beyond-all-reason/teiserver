@@ -1,5 +1,5 @@
-defmodule Teiserver.Logging.ServerQuarterLog do
-  use TeiserverWeb, :schema
+defmodule Barserver.Logging.ServerQuarterLog do
+  use BarserverWeb, :schema
 
   @primary_key false
   schema "teiserver_server_quarter_logs" do

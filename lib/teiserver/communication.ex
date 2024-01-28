@@ -1,13 +1,13 @@
-defmodule Teiserver.Communication do
+defmodule Barserver.Communication do
   @moduledoc """
 
   """
   import Ecto.Query, warn: false
-  alias Teiserver.Helper.QueryHelpers
-  alias Teiserver.Repo
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Helper.QueryHelpers
+  alias Barserver.Repo
+  alias Barserver.Data.Types, as: T
 
-  alias Teiserver.Communication.{TextCallback, TextCallbackLib}
+  alias Barserver.Communication.{TextCallback, TextCallbackLib}
 
   @spec lobby_text_callback(List.t()) :: Ecto.Query.t()
   def lobby_text_callback(args) do
@@ -193,7 +193,7 @@ defmodule Teiserver.Communication do
   defdelegate set_last_triggered_time(text_callback, channel_id), to: TextCallbackLib
 
   # Discord channels
-  alias Teiserver.Communication.{DiscordChannel, DiscordChannelLib}
+  alias Barserver.Communication.{DiscordChannel, DiscordChannelLib}
 
   @spec list_discord_channels() :: [DiscordChannel]
   defdelegate list_discord_channels(), to: DiscordChannelLib

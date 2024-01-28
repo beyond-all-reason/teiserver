@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.Microblog.RssView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Microblog.RssView do
+  use BarserverWeb, :view
 
   def format_date(date) do
     date

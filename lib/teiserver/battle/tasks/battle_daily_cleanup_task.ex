@@ -1,10 +1,10 @@
-defmodule Teiserver.Battle.Tasks.CleanupTask do
+defmodule Barserver.Battle.Tasks.CleanupTask do
   @moduledoc false
   use Oban.Worker, queue: :cleanup
 
-  alias Teiserver.Repo
-  alias Teiserver.{Battle}
-  alias Teiserver.Helper.StringHelper
+  alias Barserver.Repo
+  alias Barserver.{Battle}
+  alias Barserver.Helper.StringHelper
   require Logger
 
   @strip_data_days 35
@@ -29,7 +29,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
   end
 
   defp get_days() do
-    Application.get_env(:teiserver, Teiserver)[:retention][:lobby_chat] + 1
+    Application.get_env(:teiserver, Barserver)[:retention][:lobby_chat] + 1
   end
 
   def delete_unstarted_matches() do
@@ -66,7 +66,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
   def delete_old_matches() do
     # Rated matches - We don't delete them, they have rating logs attached to them
     # battle_match_rated_days =
-    #   Application.get_env(:teiserver, Teiserver)[:retention][:battle_match_rated]
+    #   Application.get_env(:teiserver, Barserver)[:retention][:battle_match_rated]
 
     # Battle.list_matches(
     #   search: [
@@ -81,7 +81,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
 
     # Unrated matches
     battle_match_unrated_days =
-      Application.get_env(:teiserver, Teiserver)[:retention][:battle_match_unrated]
+      Application.get_env(:teiserver, Barserver)[:retention][:battle_match_unrated]
 
     Battle.list_matches(
       search: [

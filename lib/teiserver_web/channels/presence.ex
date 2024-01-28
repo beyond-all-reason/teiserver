@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Presence do
+defmodule BarserverWeb.Presence do
   @moduledoc """
   Provides presence tracking to channels and processes.
 
@@ -10,8 +10,8 @@ defmodule TeiserverWeb.Presence do
   Presences can be tracked in your channel after joining:
 
       defmodule Demo.MyChannel do
-        use Teiserver, :channel
-        alias Teiserver.Presence
+        use Barserver, :channel
+        alias Barserver.Presence
 
         def join("some:topic", _params, socket) do
           send(self(), :after_join)
@@ -70,5 +70,5 @@ defmodule TeiserverWeb.Presence do
   """
   use Phoenix.Presence,
     otp_app: :teiserver,
-    pubsub_server: Teiserver.PubSub
+    pubsub_server: Barserver.PubSub
 end

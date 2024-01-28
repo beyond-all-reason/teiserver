@@ -1,6 +1,6 @@
-defmodule Teiserver.Account.RecentlyUsedCache do
+defmodule Barserver.Account.RecentlyUsedCache do
   @moduledoc false
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @recently_used_limit 50
 
@@ -14,7 +14,7 @@ defmodule Teiserver.Account.RecentlyUsedCache do
       end)
       |> Enum.take(@recently_used_limit)
 
-    Teiserver.cache_put(:recently_used_cache, user_id, [item | new_items])
+    Barserver.cache_put(:recently_used_cache, user_id, [item | new_items])
 
     item
   end
@@ -43,7 +43,7 @@ defmodule Teiserver.Account.RecentlyUsedCache do
   end
 
   def get_recently(user_id) do
-    Teiserver.cache_get(:recently_used_cache, user_id) || []
+    Barserver.cache_get(:recently_used_cache, user_id) || []
   end
 
   @spec remove_recently(map()) :: :ok
@@ -55,7 +55,7 @@ defmodule Teiserver.Account.RecentlyUsedCache do
         r.item_id != item.item_id or r.item_type != item.item_type
       end)
 
-    Teiserver.cache_put(:recently_used_cache, user_id, new_items)
+    Barserver.cache_put(:recently_used_cache, user_id, new_items)
 
     :ok
   end

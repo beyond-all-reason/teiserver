@@ -1,15 +1,15 @@
-defmodule TeiserverWeb.Admin.MatchController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Admin.MatchController do
+  use BarserverWeb, :controller
 
-  alias Teiserver.{Battle, Game, Account, Telemetry}
-  alias Teiserver.Battle.{MatchLib, BalanceLib}
-  import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
+  alias Barserver.{Battle, Game, Account, Telemetry}
+  alias Barserver.Battle.{MatchLib, BalanceLib}
+  import Barserver.Helper.StringHelper, only: [get_hash_id: 1]
   require Logger
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Staff.MatchAdmin,
+    policy: Barserver.Staff.MatchAdmin,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "teiserver_user",
@@ -101,7 +101,7 @@ defmodule TeiserverWeb.Admin.MatchController do
       |> Map.drop([nil])
       |> Map.filter(fn {_id, members} -> Enum.count(members) > 1 end)
       |> Map.keys()
-      |> Enum.zip(Teiserver.Helper.StylingHelper.bright_hex_colour_list())
+      |> Enum.zip(Barserver.Helper.StylingHelper.bright_hex_colour_list())
       |> Map.new()
 
     # Now for balance related stuff

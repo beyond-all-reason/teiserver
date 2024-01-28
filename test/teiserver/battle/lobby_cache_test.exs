@@ -1,8 +1,8 @@
-defmodule Teiserver.Lobby.LobbyLibTest do
-  use Teiserver.ServerCase, async: false
-  alias Teiserver.{Account, Lobby}
+defmodule Barserver.Lobby.LobbyLibTest do
+  use Barserver.ServerCase, async: false
+  alias Barserver.{Account, Lobby}
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
 
   setup do

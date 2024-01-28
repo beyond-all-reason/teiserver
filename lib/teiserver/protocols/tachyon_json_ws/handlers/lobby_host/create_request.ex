@@ -1,8 +1,8 @@
-defmodule Teiserver.Tachyon.Handlers.LobbyHost.CreateRequest do
+defmodule Barserver.Tachyon.Handlers.LobbyHost.CreateRequest do
   @moduledoc false
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Tachyon.Responses.LobbyHost.CreateResponse
-  alias Teiserver.{Lobby, Account}
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Tachyon.Responses.LobbyHost.CreateResponse
+  alias Barserver.{Lobby, Account}
 
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do

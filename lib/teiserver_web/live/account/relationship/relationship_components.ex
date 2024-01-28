@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.Account.RelationshipComponents do
+defmodule BarserverWeb.Account.RelationshipComponents do
   @moduledoc false
-  use TeiserverWeb, :component
-  import TeiserverWeb.NavComponents, only: [section_menu_button: 1]
+  use BarserverWeb, :component
+  import BarserverWeb.NavComponents, only: [section_menu_button: 1]
 
   @doc """
-  <TeiserverWeb.Account.RelationshipComponents.section_menu active={active} bsname={} />
+  <BarserverWeb.Account.RelationshipComponents.section_menu active={active} bsname={} />
   """
   attr :view_colour, :string, required: true
   attr :active, :string, required: true

@@ -1,4 +1,4 @@
-defmodule Teiserver.Microblog do
+defmodule Barserver.Microblog do
   @moduledoc """
   Main point of usage for the microblog system
   """
@@ -9,7 +9,7 @@ defmodule Teiserver.Microblog do
   @spec icon :: String.t()
   def icon(), do: "fa-blog"
 
-  alias Teiserver.Microblog.{Tag, TagLib}
+  alias Barserver.Microblog.{Tag, TagLib}
 
   @spec list_tags() :: [Tag]
   defdelegate list_tags(), to: TagLib
@@ -41,7 +41,7 @@ defmodule Teiserver.Microblog do
   @spec change_tag(Tag, map) :: Ecto.Changeset
   defdelegate change_tag(tag, attrs), to: TagLib
 
-  alias Teiserver.Microblog.{Post, PostLib}
+  alias Barserver.Microblog.{Post, PostLib}
 
   @spec list_posts() :: [Post]
   defdelegate list_posts(), to: PostLib
@@ -85,7 +85,7 @@ defmodule Teiserver.Microblog do
   @spec increment_post_view_count(non_neg_integer()) :: Ecto.Changeset
   defdelegate increment_post_view_count(post_id), to: PostLib
 
-  alias Teiserver.Microblog.{PostTag, PostTagLib}
+  alias Barserver.Microblog.{PostTag, PostTagLib}
 
   @spec list_post_tags() :: [PostTag]
   defdelegate list_post_tags(), to: PostTagLib
@@ -121,7 +121,7 @@ defmodule Teiserver.Microblog do
           {:ok, PostTag} | {:error, Ecto.Changeset}
   defdelegate delete_post_tags(post_id, tag_ids), to: PostTagLib
 
-  alias Teiserver.Microblog.{UserPreference, UserPreferenceLib}
+  alias Barserver.Microblog.{UserPreference, UserPreferenceLib}
 
   @spec list_user_preferences() :: [UserPreference]
   defdelegate list_user_preferences(), to: UserPreferenceLib

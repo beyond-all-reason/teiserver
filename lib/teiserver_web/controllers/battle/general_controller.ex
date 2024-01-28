@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.Battle.GeneralController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Battle.GeneralController do
+  use BarserverWeb, :controller
 
   plug(:add_breadcrumb, name: 'Battle', url: '/battle')
 
@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Battle.GeneralController do
     sub_menu_active: ""
   )
 
-  plug(Teiserver.ServerUserPlug)
+  plug(Barserver.ServerUserPlug)
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do

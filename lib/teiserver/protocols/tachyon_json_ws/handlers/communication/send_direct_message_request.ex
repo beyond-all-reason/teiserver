@@ -1,10 +1,10 @@
-defmodule Teiserver.Tachyon.Handlers.Communication.SendDirectMessageRequest do
+defmodule Barserver.Tachyon.Handlers.Communication.SendDirectMessageRequest do
   @moduledoc """
 
   """
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Tachyon.Responses.Communication.SendDirectMessageResponse
-  alias Teiserver.CacheUser
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Tachyon.Responses.Communication.SendDirectMessageResponse
+  alias Barserver.CacheUser
 
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do

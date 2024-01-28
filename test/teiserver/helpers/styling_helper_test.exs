@@ -1,7 +1,7 @@
-defmodule Teiserver.General.StylingHelpersTest do
-  use Teiserver.DataCase, async: true
+defmodule Barserver.General.StylingHelpersTest do
+  use Barserver.DataCase, async: true
 
-  alias Teiserver.Helper.StylingHelper
+  alias Barserver.Helper.StylingHelper
 
   test "colours" do
     params = [

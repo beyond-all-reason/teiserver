@@ -1,10 +1,10 @@
-defmodule Teiserver.BridgeServerTest do
+defmodule Barserver.BridgeServerTest do
   @moduledoc false
-  use Teiserver.ServerCase, async: false
-  alias Teiserver.{CacheUser, Room}
-  alias Teiserver.Bridge.BridgeServer
+  use Barserver.ServerCase, async: false
+  alias Barserver.{CacheUser, Room}
+  alias Barserver.Bridge.BridgeServer
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [auth_setup: 0]
 
   test "bridge server" do

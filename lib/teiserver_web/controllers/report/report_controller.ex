@@ -1,6 +1,6 @@
-defmodule TeiserverWeb.Report.ReportController do
-  use TeiserverWeb, :controller
-  import Teiserver.Account.AuthLib, only: [allow?: 2]
+defmodule BarserverWeb.Report.ReportController do
+  use BarserverWeb, :controller
+  import Barserver.Account.AuthLib, only: [allow?: 2]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
@@ -8,9 +8,9 @@ defmodule TeiserverWeb.Report.ReportController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Staff,
+    policy: Barserver.Staff,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Reports', url: '/teiserver/reports')
 
@@ -21,71 +21,71 @@ defmodule TeiserverWeb.Report.ReportController do
     module =
       case name do
         "time_spent" ->
-          Teiserver.Account.TimeSpentReport
+          Barserver.Account.TimeSpentReport
 
         "time_compare" ->
-          Teiserver.Account.TimeCompareReport
+          Barserver.Account.TimeCompareReport
 
         "active" ->
-          Teiserver.Account.ActiveReport
+          Barserver.Account.ActiveReport
 
         "user_age" ->
-          Teiserver.Account.UserAgeReport
+          Barserver.Account.UserAgeReport
 
         "verified" ->
-          Teiserver.Account.VerifiedReport
+          Barserver.Account.VerifiedReport
 
         "retention" ->
-          Teiserver.Account.RetentionReport
+          Barserver.Account.RetentionReport
 
         "population" ->
-          Teiserver.Account.PopulationReport
+          Barserver.Account.PopulationReport
 
         "new_user_funnel" ->
-          Teiserver.Account.NewUserFunnelReport
+          Barserver.Account.NewUserFunnelReport
 
         "accolades" ->
-          Teiserver.Account.AccoladeReport
+          Barserver.Account.AccoladeReport
 
         "relationships" ->
-          Teiserver.Account.RelationshipReport
+          Barserver.Account.RelationshipReport
 
         "mapping" ->
-          Teiserver.Game.MappingReport
+          Barserver.Game.MappingReport
 
         "leaderboard" ->
-          Teiserver.Account.LeaderboardReport
+          Barserver.Account.LeaderboardReport
 
         "review" ->
-          Teiserver.Account.ReviewReport
+          Barserver.Account.ReviewReport
 
         "new_smurf" ->
-          Teiserver.Account.NewSmurfReport
+          Barserver.Account.NewSmurfReport
 
         "ban_evasion" ->
-          Teiserver.Account.BanEvasionReport
+          Barserver.Account.BanEvasionReport
 
         "growth" ->
-          Teiserver.Account.GrowthReport
+          Barserver.Account.GrowthReport
 
         "week_on_week" ->
-          Teiserver.Account.WeekOnWeekReport
+          Barserver.Account.WeekOnWeekReport
 
         "records" ->
-          Teiserver.Account.RecordsReport
+          Barserver.Account.RecordsReport
 
         "open_skill" ->
-          Teiserver.Account.OpenSkillReport
+          Barserver.Account.OpenSkillReport
 
         "tournament" ->
-          Teiserver.Account.TournamentReport
+          Barserver.Account.TournamentReport
 
         "microblog" ->
-          Teiserver.Communication.MicroblogReport
+          Barserver.Communication.MicroblogReport
 
         # Moderation
         "moderation_activity" ->
-          Teiserver.Moderation.ActivityReport
+          Barserver.Moderation.ActivityReport
 
         _ ->
           raise "No handler for name of '#{name}'"

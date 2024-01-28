@@ -1,15 +1,15 @@
-defmodule Teiserver.Account.RecacheUserStatsTask do
+defmodule Barserver.Account.RecacheUserStatsTask do
   @moduledoc """
   Used to recalculate certain user stats after various events
   """
-  # alias Teiserver.Repo
+  # alias Barserver.Repo
   # import Ecto.Query, warn: false
-  alias Teiserver.{Account, Game}
-  alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Battle.MatchLib
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Helper.TimexHelper
-  import Teiserver.Helper.NumberHelper, only: [percent: 2]
+  alias Barserver.{Account, Game}
+  alias Barserver.Game.MatchRatingLib
+  alias Barserver.Battle.MatchLib
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Helper.TimexHelper
+  import Barserver.Helper.NumberHelper, only: [percent: 2]
 
   @match_cache_recent_days 7
   @match_cache_max_days 31

@@ -1,6 +1,6 @@
-defmodule Teiserver.Startup do
+defmodule Barserver.Startup do
   @moduledoc false
-  use TeiserverWeb, :startup
+  use BarserverWeb, :startup
   require Logger
   alias Phoenix.PubSub
 
@@ -9,13 +9,13 @@ defmodule Teiserver.Startup do
     start_time = System.system_time(:millisecond)
 
     # Brought over from Central
-    Teiserver.store_put(
+    Barserver.store_put(
       :application_metadata_cache,
       "random_names_1",
       ~w(serene energised humble auspicious decisive exemplary cheerful determined playful spry springy)
     )
 
-    Teiserver.store_put(:application_metadata_cache, "random_names_2", ~w(
+    Barserver.store_put(:application_metadata_cache, "random_names_2", ~w(
       maroon cherry rose ruby
       amber carrot
       lemon beige
@@ -25,7 +25,7 @@ defmodule Teiserver.Startup do
       magenta amethyst
     ))
 
-    Teiserver.store_put(
+    Barserver.store_put(
       :application_metadata_cache,
       "random_names_3",
       ~w(hamster gerbil cat dog falcon eagle mole fox tiger panda elephant lion cow dove whale dolphin squid dragon snake platypus badger)
@@ -38,30 +38,30 @@ defmodule Teiserver.Startup do
     add_permission_set("admin", "user", ~w(show create update delete report))
     add_permission_set("admin", "group", ~w(show create update delete report config))
 
-    Teiserver.Logging.Startup.startup()
+    Barserver.Logging.Startup.startup()
 
     # User Configs
-    Teiserver.Config.UserConfigTypes.ProfileConfigs.create()
-    Teiserver.Config.UserConfigTypes.PrivacyConfigs.create()
+    Barserver.Config.UserConfigTypes.ProfileConfigs.create()
+    Barserver.Config.UserConfigTypes.PrivacyConfigs.create()
 
     # System Configs
-    Teiserver.Config.SiteConfigTypes.SystemConfigs.create()
+    Barserver.Config.SiteConfigTypes.SystemConfigs.create()
 
-    Teiserver.TeiserverConfigs.teiserver_configs()
+    Barserver.BarserverConfigs.teiserver_configs()
 
-    Teiserver.Communication.build_text_callback_cache()
+    Barserver.Communication.build_text_callback_cache()
 
-    Teiserver.LobbyIdServer.start_lobby_id_server()
+    Barserver.LobbyIdServer.start_lobby_id_server()
 
-    Teiserver.Tachyon.CommandDispatch.build_dispatch_cache()
-    Teiserver.Tachyon.Schema.load_schemas()
+    Barserver.Tachyon.CommandDispatch.build_dispatch_cache()
+    Barserver.Tachyon.Schema.load_schemas()
 
-    Teiserver.Lobby.CommandLib.cache_lobby_commands()
-    Teiserver.Bridge.CommandLib.cache_discord_commands()
-    Teiserver.Communication.pre_cache_discord_channels()
+    Barserver.Lobby.CommandLib.cache_lobby_commands()
+    Barserver.Bridge.CommandLib.cache_discord_commands()
+    Barserver.Communication.pre_cache_discord_channels()
 
     # Chat stuff
-    Teiserver.Account.UserLib.add_report_restriction_types("Chat", [
+    Barserver.Account.UserLib.add_report_restriction_types("Chat", [
       "Bridging",
       "Game chat",
       "Room chat",
@@ -69,14 +69,14 @@ defmodule Teiserver.Startup do
     ])
 
     # Lobby interaction
-    Teiserver.Account.UserLib.add_report_restriction_types("Game", [
+    Barserver.Account.UserLib.add_report_restriction_types("Game", [
       "Low priority",
       "All lobbies",
       "Login",
       "Permanently banned"
     ])
 
-    Teiserver.Account.UserLib.add_report_restriction_types("Other", [
+    Barserver.Account.UserLib.add_report_restriction_types("Other", [
       "Accolades",
       "Boss",
       "Reporting",
@@ -84,11 +84,11 @@ defmodule Teiserver.Startup do
       "Matchmaking"
     ])
 
-    Teiserver.Account.UserLib.add_report_restriction_types("Warnings", [
+    Barserver.Account.UserLib.add_report_restriction_types("Warnings", [
       "Warning reminder"
     ])
 
-    Teiserver.Account.UserLib.add_report_restriction_types("Internal", [
+    Barserver.Account.UserLib.add_report_restriction_types("Internal", [
       "Note"
     ])
 
@@ -112,12 +112,12 @@ defmodule Teiserver.Startup do
       "Moderation:Action created",
       "Moderation:De-bridged user",
       "Moderation:Mark as smurf",
-      "Teiserver:Updated automod action",
-      "Teiserver:Automod action enacted",
-      "Teiserver:De-bridged user",
-      "Teiserver:Changed user rating",
-      "Teiserver:Changed user name",
-      "Teiserver:Smurf merge",
+      "Barserver:Updated automod action",
+      "Barserver:Automod action enacted",
+      "Barserver:De-bridged user",
+      "Barserver:Changed user rating",
+      "Barserver:Changed user name",
+      "Barserver:Smurf merge",
       "Microblog.delete_post",
       "Discord.text_callback"
     ])
@@ -141,55 +141,55 @@ defmodule Teiserver.Startup do
       ~w(account tester contributor dev streamer donor verified bot moderator)
     )
 
-    Teiserver.store_put(
+    Barserver.store_put(
       :application_metadata_cache,
       "random_names_3",
       ~w(tick pawn lazarus rocketeer crossbow mace centurion tumbleweed smuggler compass ghost sprinter butler webber platypus hound welder recluse archangel gunslinger sharpshooter umbrella fatboy marauder vanguard razorback titan) ++
         ~w(grunt graverobber aggravator trasher thug bedbug deceiver augur spectre fiend twitcher duck skuttle sumo arbiter manticore termite commando mammoth shiva karganeth catapult behemoth juggernaught)
     )
 
-    Teiserver.cache_put(:lists, :rooms, [])
-    Teiserver.cache_put(:lists, :lobby_policies, [])
+    Barserver.cache_put(:lists, :rooms, [])
+    Barserver.cache_put(:lists, :lobby_policies, [])
 
-    Teiserver.Data.Matchmaking.pre_cache_queues()
-    Teiserver.Game.pre_cache_policies()
+    Barserver.Data.Matchmaking.pre_cache_queues()
+    Barserver.Game.pre_cache_policies()
 
     # Add in achievements
-    Teiserver.Game.GenerateAchievementTypes.perform()
+    Barserver.Game.GenerateAchievementTypes.perform()
 
-    if Application.get_env(:teiserver, Teiserver)[:enable_match_monitor] do
+    if Application.get_env(:teiserver, Barserver)[:enable_match_monitor] do
       spawn(fn ->
         :timer.sleep(200)
-        Teiserver.Battle.start_match_monitor()
+        Barserver.Battle.start_match_monitor()
       end)
     end
 
-    if Application.get_env(:teiserver, Teiserver)[:enable_coordinator_mode] do
+    if Application.get_env(:teiserver, Barserver)[:enable_coordinator_mode] do
       spawn(fn ->
         :timer.sleep(200)
-        Teiserver.Coordinator.start_coordinator()
-        Teiserver.Coordinator.AutomodServer.start_automod_server()
+        Barserver.Coordinator.start_coordinator()
+        Barserver.Coordinator.AutomodServer.start_automod_server()
       end)
     end
 
-    if Application.get_env(:teiserver, Teiserver)[:enable_accolade_mode] do
+    if Application.get_env(:teiserver, Barserver)[:enable_accolade_mode] do
       spawn(fn ->
         :timer.sleep(200)
-        Teiserver.Account.AccoladeLib.start_accolade_server()
+        Barserver.Account.AccoladeLib.start_accolade_server()
       end)
     end
 
-    Teiserver.cache_put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
-    Teiserver.cache_put(:application_metadata_cache, "teiserver_full_startup_completed", true)
+    Barserver.cache_put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
+    Barserver.cache_put(:application_metadata_cache, "teiserver_full_startup_completed", true)
 
-    Teiserver.Account.LoginThrottleServer.startup()
+    Barserver.Account.LoginThrottleServer.startup()
 
     # Give everything else a chance to have started up
     spawn(fn ->
       :timer.sleep(1000)
 
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_server",
         %{
           channel: "teiserver_server",
@@ -201,12 +201,12 @@ defmodule Teiserver.Startup do
 
     time_taken = System.system_time(:millisecond) - start_time
 
-    Teiserver.Telemetry.log_complex_server_event(nil, "Server startup", %{
+    Barserver.Telemetry.log_complex_server_event(nil, "Server startup", %{
       time_taken_ms: time_taken
     })
 
-    Teiserver.cache_put(:application_metadata_cache, :node_startup_datetime, Timex.now())
+    Barserver.cache_put(:application_metadata_cache, :node_startup_datetime, Timex.now())
 
-    Logger.info("Teiserver startup complete, took #{time_taken}ms")
+    Logger.info("Barserver startup complete, took #{time_taken}ms")
   end
 end

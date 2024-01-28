@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.API.SessionView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.API.SessionView do
+  use BarserverWeb, :view
 
   def render("login.json", %{user: _user, token: token}) do
     %{result: :success, token: token}

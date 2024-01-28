@@ -1,15 +1,15 @@
-defmodule TeiserverWeb.Battle.MatchLive.Show do
+defmodule BarserverWeb.Battle.MatchLive.Show do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  alias Teiserver.{Battle, Game}
-  alias Teiserver.Battle.MatchLib
+  use BarserverWeb, :live_view
+  alias Barserver.{Battle, Game}
+  alias Barserver.Battle.MatchLib
 
   @impl true
   def mount(_params, _session, socket) do
     socket =
       socket
       |> assign(:site_menu_active, "match")
-      |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
+      |> assign(:view_colour, Barserver.Battle.MatchLib.colours())
       |> assign(:tab, "details")
 
     {:ok, socket}
@@ -88,7 +88,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         |> Map.drop([nil])
         |> Map.filter(fn {_id, members} -> Enum.count(members) > 1 end)
         |> Map.keys()
-        |> Enum.zip(Teiserver.Helper.StylingHelper.bright_hex_colour_list())
+        |> Enum.zip(Barserver.Helper.StylingHelper.bright_hex_colour_list())
         |> Enum.zip(~w(dice-one dice-two dice-three dice-four dice-five dice-six))
         |> Enum.map(fn {{party_id, colour}, idx} ->
           {party_id, {colour, idx}}

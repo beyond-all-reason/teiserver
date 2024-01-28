@@ -1,13 +1,13 @@
-defmodule Teiserver.Config do
+defmodule Barserver.Config do
   @moduledoc """
   The Config context.
   """
 
   import Ecto.Query, warn: false
-  alias Teiserver.Repo
+  alias Barserver.Repo
 
-  alias Teiserver.Config.UserConfig
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Config.UserConfig
+  alias Barserver.Data.Types, as: T
 
   def get_user_config_cache(%{assigns: %{current_user: nil}}, key) do
     get_user_config_default(key)
@@ -77,7 +77,7 @@ defmodule Teiserver.Config do
   def get_user_configs!(nil), do: %{}
 
   def get_user_configs!(user_id) do
-    Teiserver.cache_get_or_store(:config_user_cache, user_id, fn ->
+    Barserver.cache_get_or_store(:config_user_cache, user_id, fn ->
       query =
         from user_config in UserConfig,
           where: user_config.user_id == ^user_id,
@@ -126,7 +126,7 @@ defmodule Teiserver.Config do
 
   """
   def create_user_config(attrs \\ %{}) do
-    Teiserver.cache_delete(:config_user_cache, attrs["user_id"])
+    Barserver.cache_delete(:config_user_cache, attrs["user_id"])
 
     %UserConfig{}
     |> UserConfig.changeset(attrs)
@@ -146,7 +146,7 @@ defmodule Teiserver.Config do
 
   """
   def update_user_config(%UserConfig{} = user_config, attrs) do
-    Teiserver.cache_delete(:config_user_cache, user_config.user_id)
+    Barserver.cache_delete(:config_user_cache, user_config.user_id)
 
     user_config
     |> UserConfig.changeset(attrs)
@@ -166,7 +166,7 @@ defmodule Teiserver.Config do
 
   """
   def delete_user_config(%UserConfig{} = user_config) do
-    Teiserver.cache_delete(:config_user_cache, user_config.user_id)
+    Barserver.cache_delete(:config_user_cache, user_config.user_id)
     Repo.delete(user_config)
   end
 
@@ -180,24 +180,24 @@ defmodule Teiserver.Config do
 
   """
   def change_user_config(%UserConfig{} = user_config) do
-    Teiserver.cache_delete(:config_user_cache, user_config.user_id)
+    Barserver.cache_delete(:config_user_cache, user_config.user_id)
     UserConfig.changeset(user_config, %{})
   end
 
   # User Config Types
   @spec get_user_config_types :: list()
   def get_user_config_types() do
-    Teiserver.store_get(:config_user_type_store, "all-config-types")
+    Barserver.store_get(:config_user_type_store, "all-config-types")
   end
 
   @spec get_user_config_type(String.t()) :: map() | nil
   def get_user_config_type(key) do
-    Teiserver.store_get(:config_user_type_store, key)
+    Barserver.store_get(:config_user_type_store, key)
   end
 
   @spec get_grouped_user_configs :: map()
   def get_grouped_user_configs() do
-    Teiserver.store_get(:config_user_type_store, "all-config-types")
+    Barserver.store_get(:config_user_type_store, "all-config-types")
     |> Map.values()
     |> Enum.filter(fn c ->
       c.visible
@@ -260,11 +260,11 @@ defmodule Teiserver.Config do
       )
 
     all_config_types =
-      (Teiserver.store_get(:config_user_type_store, "all-config-types") || %{})
+      (Barserver.store_get(:config_user_type_store, "all-config-types") || %{})
       |> Map.put(config.key, config)
 
-    Teiserver.store_put(:config_user_type_store, "all-config-types", all_config_types)
-    Teiserver.store_put(:config_user_type_store, config.key, config)
+    Barserver.store_put(:config_user_type_store, "all-config-types", all_config_types)
+    Barserver.store_put(:config_user_type_store, config.key, config)
   end
 
   @spec get_user_config_default(String.t()) :: any
@@ -280,18 +280,18 @@ defmodule Teiserver.Config do
     type = get_user_config_type(type_key)
 
     case type.type do
-      "integer" -> Teiserver.Helper.NumberHelper.int_parse(value)
+      "integer" -> Barserver.Helper.NumberHelper.int_parse(value)
       "boolean" -> if value == "true", do: true, else: false
       "select" -> value
       "string" -> value
     end
   end
 
-  alias Teiserver.Config.SiteConfig
+  alias Barserver.Config.SiteConfig
 
   @spec get_site_config_cache(String.t()) :: any
   def get_site_config_cache(key) do
-    Teiserver.cache_get_or_store(:config_site_cache, key, fn ->
+    Barserver.cache_get_or_store(:config_site_cache, key, fn ->
       case get_site_config(key) do
         nil ->
           default = get_site_config_default(key)
@@ -344,7 +344,7 @@ defmodule Teiserver.Config do
       %{update_callback: callback_func} -> callback_func.(cached_value)
     end
 
-    Teiserver.cache_put(:config_site_cache, key, cached_value)
+    Barserver.cache_put(:config_site_cache, key, cached_value)
   end
 
   @spec delete_site_config(String.t()) :: :ok | {:error, any}
@@ -364,23 +364,23 @@ defmodule Teiserver.Config do
         |> Repo.delete()
     end
 
-    Teiserver.cache_delete(:config_site_cache, key)
+    Barserver.cache_delete(:config_site_cache, key)
   end
 
   # Site Config Types
   @spec get_site_config_types :: list()
   def get_site_config_types() do
-    Teiserver.store_get(:config_site_type_store, "all-config-types")
+    Barserver.store_get(:config_site_type_store, "all-config-types")
   end
 
   @spec get_site_config_type(String.t()) :: map | nil
   def get_site_config_type(key) do
-    Teiserver.store_get(:config_site_type_store, key)
+    Barserver.store_get(:config_site_type_store, key)
   end
 
   @spec get_grouped_site_configs :: map
   def get_grouped_site_configs() do
-    (Teiserver.store_get(:config_site_type_store, "all-config-types") || %{})
+    (Barserver.store_get(:config_site_type_store, "all-config-types") || %{})
     |> Map.values()
     |> Enum.sort(fn c1, c2 ->
       c1.key <= c2.key
@@ -437,11 +437,11 @@ defmodule Teiserver.Config do
       )
 
     all_config_types =
-      (Teiserver.store_get(:config_site_type_store, "all-config-types") || %{})
+      (Barserver.store_get(:config_site_type_store, "all-config-types") || %{})
       |> Map.put(config.key, config)
 
-    Teiserver.store_put(:config_site_type_store, "all-config-types", all_config_types)
-    Teiserver.store_put(:config_site_type_store, config.key, config)
+    Barserver.store_put(:config_site_type_store, "all-config-types", all_config_types)
+    Barserver.store_put(:config_site_type_store, config.key, config)
   end
 
   @spec get_site_config_default(String.t()) :: any
@@ -457,7 +457,7 @@ defmodule Teiserver.Config do
     type = get_site_config_type(type_key)
 
     case type.type do
-      "integer" -> Teiserver.Helper.NumberHelper.int_parse(value)
+      "integer" -> Barserver.Helper.NumberHelper.int_parse(value)
       "boolean" -> if value == "true" or value == true, do: true, else: false
       "select" -> value
       "string" -> value

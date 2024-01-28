@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Endpoint do
+defmodule BarserverWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :teiserver
 
   @session_options [
@@ -11,15 +11,15 @@ defmodule TeiserverWeb.Endpoint do
 
   socket("/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]])
 
-  socket("/socket", TeiserverWeb.UserSocket,
+  socket("/socket", BarserverWeb.UserSocket,
     websocket: true,
     longpoll: false
   )
 
-  socket("/tachyon", Teiserver.Tachyon.TachyonSocket,
+  socket("/tachyon", Barserver.Tachyon.TachyonSocket,
     websocket: [
       connect_info: [:peer_data, :x_headers, :user_agent],
-      error_handler: {Teiserver.Tachyon.TachyonSocket, :handle_error, []}
+      error_handler: {Barserver.Tachyon.TachyonSocket, :handle_error, []}
     ],
     longpoll: false
   )
@@ -32,7 +32,7 @@ defmodule TeiserverWeb.Endpoint do
     at: "/",
     from: :teiserver,
     gzip: true,
-    only: TeiserverWeb.static_paths()
+    only: BarserverWeb.static_paths()
   )
 
   # Code reloading can be explicitly enabled under the
@@ -66,5 +66,5 @@ defmodule TeiserverWeb.Endpoint do
   # Set :encryption_salt if you would also like to encrypt it.
   plug(Plug.Session, @session_options)
 
-  plug(TeiserverWeb.Router)
+  plug(BarserverWeb.Router)
 end

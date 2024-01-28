@@ -1,7 +1,7 @@
-defmodule Teiserver.Telemetry.SimpleLobbyEventQueries do
+defmodule Barserver.Telemetry.SimpleLobbyEventQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
-  alias Teiserver.Telemetry.SimpleLobbyEvent
+  use BarserverWeb, :queries
+  alias Barserver.Telemetry.SimpleLobbyEvent
 
   # Queries
   @spec query_simple_lobby_events(list) :: Ecto.Query.t()

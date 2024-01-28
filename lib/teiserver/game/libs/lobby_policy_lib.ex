@@ -1,10 +1,10 @@
-defmodule Teiserver.Game.LobbyPolicyLib do
+defmodule Barserver.Game.LobbyPolicyLib do
   @moduledoc false
-  use TeiserverWeb, :library
-  alias Teiserver.Config
-  alias Teiserver.{Game, Account}
-  alias Teiserver.Game.{LobbyPolicy, LobbyPolicyOrganiserServer, LobbyPolicyBotServer}
-  alias Teiserver.Data.Types, as: T
+  use BarserverWeb, :library
+  alias Barserver.Config
+  alias Barserver.{Game, Account}
+  alias Barserver.Game.{LobbyPolicy, LobbyPolicyOrganiserServer, LobbyPolicyBotServer}
+  alias Barserver.Data.Types, as: T
   require Logger
 
   # Functions
@@ -128,7 +128,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
       |> String.replace("{agent}", base_name)
       |> String.replace("{id}", "#{lobby_policy.id}")
 
-    email_domain = Application.get_env(:teiserver, Teiserver)[:bot_email_domain]
+    email_domain = Application.get_env(:teiserver, Barserver)[:bot_email_domain]
     email_addr = "#{base_name}_#{lobby_policy.id}_lobby_policy_bot@#{email_domain}"
 
     db_user =
@@ -152,7 +152,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
               data: %{
                 bot: true,
                 moderator: true,
-                lobby_client: "Teiserver Internal Process",
+                lobby_client: "Barserver Internal Process",
                 roles: ["Bot", "Verified", "Moderator"]
               }
             })
@@ -176,10 +176,10 @@ defmodule Teiserver.Game.LobbyPolicyLib do
     user
   end
 
-  @spec start_lobby_policy_bot(LobbyPolicy.t(), String.t(), Teiserver.Account.User.t()) :: pid()
+  @spec start_lobby_policy_bot(LobbyPolicy.t(), String.t(), Barserver.Account.User.t()) :: pid()
   def start_lobby_policy_bot(lobby_policy, base_name, user) do
     {:ok, policy_bot_pid} =
-      DynamicSupervisor.start_child(Teiserver.LobbyPolicySupervisor, {
+      DynamicSupervisor.start_child(Barserver.LobbyPolicySupervisor, {
         LobbyPolicyBotServer,
         name: "lobby_policy_bot_#{lobby_policy.id}_#{user.name}",
         data: %{
@@ -205,7 +205,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
     cache_updated_lobby_policy(lobby_policy)
 
     cond do
-      Application.get_env(:teiserver, Teiserver)[:enable_managed_lobbies] == false ->
+      Application.get_env(:teiserver, Barserver)[:enable_managed_lobbies] == false ->
         :disabled
 
       get_lobby_organiser_pid(lobby_policy.id) != nil ->
@@ -214,7 +214,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
 
       true ->
         result =
-          DynamicSupervisor.start_child(Teiserver.LobbyPolicySupervisor, {
+          DynamicSupervisor.start_child(Barserver.LobbyPolicySupervisor, {
             LobbyPolicyOrganiserServer,
             name: "lobby_policy_supervisor_#{lobby_policy.id}",
             data: %{
@@ -237,7 +237,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
   end
 
   defp cache_updated_lobby_policy(lobby_policy) do
-    Teiserver.cache_update(:lists, :lobby_policies, fn value ->
+    Barserver.cache_update(:lists, :lobby_policies, fn value ->
       new_value =
         [lobby_policy.id | value]
         |> Enum.uniq()
@@ -245,13 +245,13 @@ defmodule Teiserver.Game.LobbyPolicyLib do
       {:ok, new_value}
     end)
 
-    Teiserver.cache_put(:lobby_policies_cache, lobby_policy.id, lobby_policy)
+    Barserver.cache_put(:lobby_policies_cache, lobby_policy.id, lobby_policy)
   end
 
   @spec get_lobby_organiser_pid(T.lobby_policy_id()) :: pid() | nil
   def get_lobby_organiser_pid(lobby_policy_id) when is_integer(lobby_policy_id) do
     case Horde.Registry.lookup(
-           Teiserver.LobbyPolicyRegistry,
+           Barserver.LobbyPolicyRegistry,
            "LobbyPolicyOrganiserServer:#{lobby_policy_id}"
          ) do
       [{pid, _}] -> pid
@@ -261,7 +261,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
 
   @spec list_cached_lobby_policies() :: list()
   def list_cached_lobby_policies() do
-    Teiserver.cache_get(:lists, :lobby_policies)
+    Barserver.cache_get(:lists, :lobby_policies)
     |> Enum.map(fn id ->
       get_cached_lobby_policy(id)
     end)
@@ -269,7 +269,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
 
   @spec get_cached_lobby_policy(non_neg_integer()) :: LobbyPolicy.t()
   def get_cached_lobby_policy(id) do
-    Teiserver.cache_get(:lobby_policies_cache, id)
+    Barserver.cache_get(:lobby_policies_cache, id)
   end
 
   @doc """

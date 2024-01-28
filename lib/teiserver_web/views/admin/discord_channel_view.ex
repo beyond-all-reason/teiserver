@@ -1,9 +1,9 @@
-defmodule TeiserverWeb.Admin.DiscordChannelView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Admin.DiscordChannelView do
+  use BarserverWeb, :view
 
   @spec view_colour() :: atom
-  def view_colour, do: Teiserver.Communication.DiscordChannelLib.colours()
+  def view_colour, do: Barserver.Communication.DiscordChannelLib.colours()
 
   @spec icon() :: String.t()
-  def icon, do: Teiserver.Communication.DiscordChannelLib.icon()
+  def icon, do: Barserver.Communication.DiscordChannelLib.icon()
 end

@@ -1,10 +1,10 @@
-defmodule Teiserver.Logging.AggregateViewLogsTaskTest do
-  use Teiserver.DataCase, async: true
+defmodule Barserver.Logging.AggregateViewLogsTaskTest do
+  use Barserver.DataCase, async: true
 
-  alias Teiserver.Logging.AggregateViewLogsTask
+  alias Barserver.Logging.AggregateViewLogsTask
 
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.Logging.LoggingTestLib
+  alias Barserver.Logging.LoggingTestLib
 
   setup do
     GeneralTestLib.data_setup()

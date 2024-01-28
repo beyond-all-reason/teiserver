@@ -1,8 +1,8 @@
-defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
-  alias Teiserver.{CacheUser, Client, Account}
-  import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
-  alias Teiserver.Account.LoginThrottleServer
-  alias Teiserver.Data.Types, as: T
+defmodule Barserver.Protocols.Tachyon.V1.AuthIn do
+  alias Barserver.{CacheUser, Client, Account}
+  import Barserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
+  alias Barserver.Account.LoginThrottleServer
+  alias Barserver.Data.Types, as: T
 
   @spec do_handle(String.t(), Map.t(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
   def do_handle("get_token", _, %{transport: :ranch_tcp} = state) do
@@ -25,7 +25,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
               true ->
                 # Update the db user then the cached user
                 db_user = Account.get_user!(user.id)
-                Teiserver.Account.update_user(db_user, %{"password" => plain_text_password})
+                Barserver.Account.update_user(db_user, %{"password" => plain_text_password})
                 CacheUser.recache_user(user.id)
                 CacheUser.update_user(%{user | spring_password: false}, persist: true)
 
@@ -39,7 +39,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
           false ->
             db_user = Account.get_user!(user.id)
 
-            case Teiserver.Account.User.verify_password(plain_text_password, db_user.password) do
+            case Barserver.Account.User.verify_password(plain_text_password, db_user.password) do
               true ->
                 token = CacheUser.create_token(user)
                 reply(:auth, :user_token, {:success, token}, state)

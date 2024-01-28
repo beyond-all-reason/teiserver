@@ -1,10 +1,10 @@
-defmodule Teiserver.Account.AccoladeReport do
-  alias Teiserver.Helper.DatePresets
-  alias Teiserver.{Account, CacheUser}
-  alias Teiserver.Account.BadgeTypeLib
+defmodule Barserver.Account.AccoladeReport do
+  alias Barserver.Helper.DatePresets
+  alias Barserver.{Account, CacheUser}
+  alias Barserver.Account.BadgeTypeLib
 
   @spec icon() :: String.t()
-  def icon(), do: Teiserver.Account.AccoladeLib.icon()
+  def icon(), do: Barserver.Account.AccoladeLib.icon()
 
   @spec permissions() :: String.t()
   def permissions(), do: "Admin"

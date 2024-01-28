@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.AddObanJobsTable do
+defmodule Barserver.Repo.Migrations.AddObanJobsTable do
   use Ecto.Migration
 
   def up do

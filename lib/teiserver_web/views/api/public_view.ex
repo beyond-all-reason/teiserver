@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.API.PublicView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.API.PublicView do
+  use BarserverWeb, :view
 
   def render("result.json", assigns) do
     assigns.result

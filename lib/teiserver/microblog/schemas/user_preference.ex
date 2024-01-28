@@ -1,10 +1,10 @@
-defmodule Teiserver.Microblog.UserPreference do
+defmodule Barserver.Microblog.UserPreference do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   @primary_key false
   schema "microblog_user_preferences" do
-    belongs_to :user, Teiserver.Account.User, primary_key: true
+    belongs_to :user, Barserver.Account.User, primary_key: true
 
     field :tag_mode, :string
 

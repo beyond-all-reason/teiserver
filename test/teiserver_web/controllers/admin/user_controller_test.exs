@@ -1,12 +1,12 @@
-defmodule TeiserverWeb.Admin.UserControllerTest do
-  use TeiserverWeb.ConnCase
+defmodule BarserverWeb.Admin.UserControllerTest do
+  use BarserverWeb.ConnCase
 
   alias Central.Helpers.GeneralTestLib
-  # alias Teiserver.TeiserverTestLib
+  # alias Barserver.BarserverTestLib
 
   setup do
-    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.server_permissions())
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    GeneralTestLib.conn_setup(Barserver.BarserverTestLib.server_permissions())
+    |> Barserver.BarserverTestLib.conn_setup()
   end
 
   # @create_attrs %{
@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     end
 
     test "lists all users - redirect", %{conn: conn} do
-      main_user = Teiserver.Account.get_user_by_name("dud user")
+      main_user = Barserver.Account.get_user_by_name("dud user")
       conn = get(conn, ~p"/teiserver/admin/user" <> "?s=dud user")
       assert redirected_to(conn) == ~p"/teiserver/admin/user/#{main_user.id}"
     end
@@ -103,7 +103,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
           "data" => %{}
         })
 
-      Teiserver.CacheUser.recache_user(user.id)
+      Barserver.CacheUser.recache_user(user.id)
 
       conn =
         put(conn, Routes.ts_admin_user_path(conn, :rename_post, user), new_name: "new_test_name")
@@ -121,7 +121,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
           "data" => %{}
         })
 
-      Teiserver.CacheUser.recache_user(user.id)
+      Barserver.CacheUser.recache_user(user.id)
 
       conn =
         put(conn, Routes.ts_admin_user_path(conn, :rename_post, user),
@@ -137,7 +137,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   # Report action takes place through the hookserver which isn't firing in this mode
   # describe "moderation" do
   #   test "apply temporary mute", %{conn: conn} do
-  #     %{user: user} = TeiserverTestLib.tachyon_auth_setup()
+  #     %{user: user} = BarserverTestLib.tachyon_auth_setup()
 
   #     cached_user = UserCacheLib.get_user_by_id(user.id)
   #     assert cached_user.muted == [false, nil]
@@ -156,7 +156,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   #   end
 
   #   test "apply permanent mute", %{conn: conn} do
-  #     %{user: user} = TeiserverTestLib.tachyon_auth_setup()
+  #     %{user: user} = BarserverTestLib.tachyon_auth_setup()
 
   #     cached_user = UserCacheLib.get_user_by_id(user.id)
   #     assert cached_user.muted == [false, nil]
@@ -175,7 +175,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   #   end
 
   #   test "apply temporary ban", %{conn: conn} do
-  #     %{user: user} = TeiserverTestLib.tachyon_auth_setup()
+  #     %{user: user} = BarserverTestLib.tachyon_auth_setup()
 
   #     cached_user = UserCacheLib.get_user_by_id(user.id)
   #     assert cached_user.banned == [false, nil]
@@ -196,7 +196,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   #   end
 
   #   test "apply permanent ban", %{conn: conn} do
-  #     %{user: user} = TeiserverTestLib.tachyon_auth_setup()
+  #     %{user: user} = BarserverTestLib.tachyon_auth_setup()
 
   #     cached_user = UserCacheLib.get_user_by_id(user.id)
   #     assert cached_user.banned == [false, nil]

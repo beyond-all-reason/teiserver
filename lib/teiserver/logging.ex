@@ -1,4 +1,4 @@
-defmodule Teiserver.Logging do
+defmodule Barserver.Logging do
   @moduledoc """
   The Logging context.
   """
@@ -7,10 +7,10 @@ defmodule Teiserver.Logging do
   def icon(), do: "fa-solid fa-bars"
 
   import Ecto.Query, warn: false
-  alias Teiserver.Helper.QueryHelpers
-  alias Teiserver.Repo
+  alias Barserver.Helper.QueryHelpers
+  alias Barserver.Repo
 
-  alias Teiserver.Logging.{ServerMinuteLog, ServerMinuteLogLib}
+  alias Barserver.Logging.{ServerMinuteLog, ServerMinuteLogLib}
 
   defp server_minute_log_query(args) do
     server_minute_log_query(nil, args)
@@ -135,7 +135,7 @@ defmodule Teiserver.Logging do
   end
 
   # Day logs
-  alias Teiserver.Logging.{ServerDayLog, ServerDayLogLib}
+  alias Barserver.Logging.{ServerDayLog, ServerDayLogLib}
 
   defp server_day_log_query(args) do
     server_day_log_query(nil, args)
@@ -283,7 +283,7 @@ defmodule Teiserver.Logging do
 
   def get_todays_server_log(recache \\ false) do
     last_time =
-      Teiserver.cache_get(
+      Barserver.cache_get(
         :application_metadata_cache,
         "teiserver_day_server_metrics_today_last_time"
       )
@@ -297,15 +297,15 @@ defmodule Teiserver.Logging do
       end
 
     if recache do
-      data = Teiserver.Logging.Tasks.PersistServerDayTask.today_so_far()
+      data = Barserver.Logging.Tasks.PersistServerDayTask.today_so_far()
 
-      Teiserver.cache_put(
+      Barserver.cache_put(
         :application_metadata_cache,
         "teiserver_day_server_metrics_today_cache",
         data
       )
 
-      Teiserver.cache_put(
+      Barserver.cache_put(
         :application_metadata_cache,
         "teiserver_day_server_metrics_today_last_time",
         Timex.now()
@@ -313,12 +313,12 @@ defmodule Teiserver.Logging do
 
       data
     else
-      Teiserver.cache_get(:application_metadata_cache, "teiserver_day_server_metrics_today_cache")
+      Barserver.cache_get(:application_metadata_cache, "teiserver_day_server_metrics_today_cache")
     end
   end
 
   # Month logs
-  alias Teiserver.Logging.{ServerMonthLog, ServerMonthLogLib}
+  alias Barserver.Logging.{ServerMonthLog, ServerMonthLogLib}
 
   defp server_month_log_query(args) do
     server_month_log_query(nil, args)
@@ -462,7 +462,7 @@ defmodule Teiserver.Logging do
   @spec get_this_months_server_metrics_log(boolean) :: map()
   def get_this_months_server_metrics_log(force_recache \\ false) do
     last_time =
-      Teiserver.cache_get(:application_metadata_cache, "teiserver_month_server_metrics_last_time")
+      Barserver.cache_get(:application_metadata_cache, "teiserver_month_server_metrics_last_time")
 
     recache =
       cond do
@@ -473,15 +473,15 @@ defmodule Teiserver.Logging do
       end
 
     if recache do
-      data = Teiserver.Logging.Tasks.PersistServerMonthTask.month_so_far()
+      data = Barserver.Logging.Tasks.PersistServerMonthTask.month_so_far()
 
-      Teiserver.cache_put(
+      Barserver.cache_put(
         :application_metadata_cache,
         "teiserver_month_month_metrics_cache",
         data
       )
 
-      Teiserver.cache_put(
+      Barserver.cache_put(
         :application_metadata_cache,
         "teiserver_month_server_metrics_last_time",
         Timex.now()
@@ -489,12 +489,12 @@ defmodule Teiserver.Logging do
 
       data
     else
-      Teiserver.cache_get(:application_metadata_cache, "teiserver_month_month_metrics_cache")
+      Barserver.cache_get(:application_metadata_cache, "teiserver_month_month_metrics_cache")
     end
   end
 
   # Quarter logs
-  alias Teiserver.Logging.{ServerQuarterLog, ServerQuarterLogLib}
+  alias Barserver.Logging.{ServerQuarterLog, ServerQuarterLogLib}
 
   defp server_quarter_log_query(args) do
     server_quarter_log_query(nil, args)
@@ -638,7 +638,7 @@ defmodule Teiserver.Logging do
   @spec get_this_quarters_server_metrics_log(boolean) :: map()
   def get_this_quarters_server_metrics_log(force_recache \\ false) do
     last_time =
-      Teiserver.cache_get(
+      Barserver.cache_get(
         :application_metadata_cache,
         "teiserver_quarter_server_metrics_last_time"
       )
@@ -652,15 +652,15 @@ defmodule Teiserver.Logging do
       end
 
     if recache do
-      data = Teiserver.Logging.Tasks.PersistServerQuarterTask.quarter_so_far()
+      data = Barserver.Logging.Tasks.PersistServerQuarterTask.quarter_so_far()
 
-      Teiserver.cache_put(
+      Barserver.cache_put(
         :application_metadata_cache,
         "teiserver_quarter_quarter_metrics_cache",
         data
       )
 
-      Teiserver.cache_put(
+      Barserver.cache_put(
         :application_metadata_cache,
         "teiserver_quarter_server_metrics_last_time",
         Timex.now()
@@ -668,12 +668,12 @@ defmodule Teiserver.Logging do
 
       data
     else
-      Teiserver.cache_get(:application_metadata_cache, "teiserver_quarter_quarter_metrics_cache")
+      Barserver.cache_get(:application_metadata_cache, "teiserver_quarter_quarter_metrics_cache")
     end
   end
 
   # Year logs
-  alias Teiserver.Logging.{ServerYearLog, ServerYearLogLib}
+  alias Barserver.Logging.{ServerYearLog, ServerYearLogLib}
 
   defp server_year_log_query(args) do
     server_year_log_query(nil, args)
@@ -817,7 +817,7 @@ defmodule Teiserver.Logging do
   @spec get_this_years_server_metrics_log(boolean) :: map()
   def get_this_years_server_metrics_log(force_recache \\ false) do
     last_time =
-      Teiserver.cache_get(:application_metadata_cache, "teiserver_year_server_metrics_last_time")
+      Barserver.cache_get(:application_metadata_cache, "teiserver_year_server_metrics_last_time")
 
     recache =
       cond do
@@ -828,10 +828,10 @@ defmodule Teiserver.Logging do
       end
 
     if recache do
-      data = Teiserver.Logging.Tasks.PersistServerYearTask.year_so_far()
-      Teiserver.cache_put(:application_metadata_cache, "teiserver_year_year_metrics_cache", data)
+      data = Barserver.Logging.Tasks.PersistServerYearTask.year_so_far()
+      Barserver.cache_put(:application_metadata_cache, "teiserver_year_year_metrics_cache", data)
 
-      Teiserver.cache_put(
+      Barserver.cache_put(
         :application_metadata_cache,
         "teiserver_year_server_metrics_last_time",
         Timex.now()
@@ -839,12 +839,12 @@ defmodule Teiserver.Logging do
 
       data
     else
-      Teiserver.cache_get(:application_metadata_cache, "teiserver_year_year_metrics_cache")
+      Barserver.cache_get(:application_metadata_cache, "teiserver_year_year_metrics_cache")
     end
   end
 
   # Week logs
-  alias Teiserver.Logging.{ServerWeekLog, ServerWeekLogLib}
+  alias Barserver.Logging.{ServerWeekLog, ServerWeekLogLib}
 
   defp server_week_log_query(args) do
     server_week_log_query(nil, args)
@@ -988,7 +988,7 @@ defmodule Teiserver.Logging do
   @spec get_this_weeks_server_metrics_log(boolean) :: map()
   def get_this_weeks_server_metrics_log(force_recache \\ false) do
     last_time =
-      Teiserver.cache_get(:application_metadata_cache, "teiserver_week_server_metrics_last_time")
+      Barserver.cache_get(:application_metadata_cache, "teiserver_week_server_metrics_last_time")
 
     recache =
       cond do
@@ -999,10 +999,10 @@ defmodule Teiserver.Logging do
       end
 
     if recache do
-      data = Teiserver.Logging.Tasks.PersistServerWeekTask.week_so_far()
-      Teiserver.cache_put(:application_metadata_cache, "teiserver_week_week_metrics_cache", data)
+      data = Barserver.Logging.Tasks.PersistServerWeekTask.week_so_far()
+      Barserver.cache_put(:application_metadata_cache, "teiserver_week_week_metrics_cache", data)
 
-      Teiserver.cache_put(
+      Barserver.cache_put(
         :application_metadata_cache,
         "teiserver_week_server_metrics_last_time",
         Timex.now()
@@ -1010,13 +1010,13 @@ defmodule Teiserver.Logging do
 
       data
     else
-      Teiserver.cache_get(:application_metadata_cache, "teiserver_week_week_metrics_cache")
+      Barserver.cache_get(:application_metadata_cache, "teiserver_week_week_metrics_cache")
     end
   end
 
   # Match logs
   # Day logs
-  alias Teiserver.Logging.{MatchDayLog, MatchDayLogLib}
+  alias Barserver.Logging.{MatchDayLog, MatchDayLogLib}
 
   defp match_day_log_query(args) do
     match_day_log_query(nil, args)
@@ -1153,7 +1153,7 @@ defmodule Teiserver.Logging do
   @spec get_todays_match_log :: map()
   def get_todays_match_log() do
     last_time =
-      Teiserver.cache_get(
+      Barserver.cache_get(
         :application_metadata_cache,
         "teiserver_day_match_metrics_today_last_time"
       )
@@ -1166,15 +1166,15 @@ defmodule Teiserver.Logging do
       end
 
     if recache do
-      data = Teiserver.Logging.Tasks.PersistMatchMonthTask.month_so_far()
+      data = Barserver.Logging.Tasks.PersistMatchMonthTask.month_so_far()
 
-      Teiserver.cache_put(
+      Barserver.cache_put(
         :application_metadata_cache,
         "teiserver_month_month_metrics_cache",
         data
       )
 
-      Teiserver.cache_put(
+      Barserver.cache_put(
         :application_metadata_cache,
         "teiserver_month_server_metrics_last_time",
         Timex.now()
@@ -1182,14 +1182,14 @@ defmodule Teiserver.Logging do
 
       data
     else
-      Teiserver.cache_get(:application_metadata_cache, "teiserver_day_match_metrics_today_cache")
+      Barserver.cache_get(:application_metadata_cache, "teiserver_day_match_metrics_today_cache")
     end
   end
 
   @spec get_this_months_match_metrics_log(boolean) :: map()
   def get_this_months_match_metrics_log(force_recache \\ false) do
     last_time =
-      Teiserver.cache_get(:application_metadata_cache, "teiserver_month_match_metrics_last_time")
+      Barserver.cache_get(:application_metadata_cache, "teiserver_month_match_metrics_last_time")
 
     recache =
       cond do
@@ -1200,15 +1200,15 @@ defmodule Teiserver.Logging do
       end
 
     if recache do
-      data = Teiserver.Logging.Tasks.PersistMatchMonthTask.month_so_far()
+      data = Barserver.Logging.Tasks.PersistMatchMonthTask.month_so_far()
 
-      Teiserver.cache_put(
+      Barserver.cache_put(
         :application_metadata_cache,
         "teiserver_month_match_metrics_cache",
         data
       )
 
-      Teiserver.cache_put(
+      Barserver.cache_put(
         :application_metadata_cache,
         "teiserver_month_match_metrics_last_time",
         Timex.now()
@@ -1216,12 +1216,12 @@ defmodule Teiserver.Logging do
 
       data
     else
-      Teiserver.cache_get(:application_metadata_cache, "teiserver_month_match_metrics_cache")
+      Barserver.cache_get(:application_metadata_cache, "teiserver_month_match_metrics_cache")
     end
   end
 
   # Month logs
-  alias Teiserver.Logging.{MatchMonthLog, MatchMonthLogLib}
+  alias Barserver.Logging.{MatchMonthLog, MatchMonthLogLib}
 
   defp match_month_log_query(args) do
     match_month_log_query(nil, args)
@@ -1361,7 +1361,7 @@ defmodule Teiserver.Logging do
     end
   end
 
-  alias Teiserver.Logging.{AuditLog, AuditLogLib}
+  alias Barserver.Logging.{AuditLog, AuditLogLib}
 
   defp audit_log_query(args) do
     audit_log_query(nil, args)
@@ -1500,7 +1500,7 @@ defmodule Teiserver.Logging do
     AuditLog.changeset(log, %{})
   end
 
-  alias Teiserver.Logging.{PageViewLog, PageViewLogLib}
+  alias Barserver.Logging.{PageViewLog, PageViewLogLib}
 
   @doc """
   Returns the list of page_view_logs.
@@ -1609,8 +1609,8 @@ defmodule Teiserver.Logging do
     PageViewLog.changeset(page_view_log, %{})
   end
 
-  # alias Teiserver.Logging.AggregateViewLog
-  alias Teiserver.Logging.AggregateViewLogLib
+  # alias Barserver.Logging.AggregateViewLog
+  alias Barserver.Logging.AggregateViewLogLib
 
   @doc """
   Returns the list of logging_logs.
@@ -1649,7 +1649,7 @@ defmodule Teiserver.Logging do
   end
 
   # User activity
-  alias Teiserver.Logging.{UserActivityDayLog, UserActivityDayLogLib}
+  alias Barserver.Logging.{UserActivityDayLog, UserActivityDayLogLib}
 
   defp user_activity_day_log_query(args) do
     user_activity_day_log_query(nil, args)
@@ -1785,17 +1785,17 @@ defmodule Teiserver.Logging do
   end
 
   # Delegated to helpers
-  @spec add_anonymous_audit_log(String.t(), Map.t()) :: Teiserver.Logging.AuditLog.t()
-  defdelegate add_anonymous_audit_log(action, details), to: Teiserver.Logging.Helpers
+  @spec add_anonymous_audit_log(String.t(), Map.t()) :: Barserver.Logging.AuditLog.t()
+  defdelegate add_anonymous_audit_log(action, details), to: Barserver.Logging.Helpers
 
   @spec add_anonymous_audit_log(Plug.Conn.t(), String.t(), Map.t()) ::
-          Teiserver.Logging.AuditLog.t()
-  defdelegate add_anonymous_audit_log(conn, action, details), to: Teiserver.Logging.Helpers
+          Barserver.Logging.AuditLog.t()
+  defdelegate add_anonymous_audit_log(conn, action, details), to: Barserver.Logging.Helpers
 
-  @spec add_audit_log(Plug.Conn.t(), String.t(), Map.t()) :: Teiserver.Logging.AuditLog.t()
-  defdelegate add_audit_log(conn, action, details), to: Teiserver.Logging.Helpers
+  @spec add_audit_log(Plug.Conn.t(), String.t(), Map.t()) :: Barserver.Logging.AuditLog.t()
+  defdelegate add_audit_log(conn, action, details), to: Barserver.Logging.Helpers
 
   @spec add_audit_log(non_neg_integer(), String.t(), String.t(), Map.t()) ::
-          Teiserver.Logging.AuditLog.t()
-  defdelegate add_audit_log(userid, ip, action, details), to: Teiserver.Logging.Helpers
+          Barserver.Logging.AuditLog.t()
+  defdelegate add_audit_log(userid, ip, action, details), to: Barserver.Logging.Helpers
 end

@@ -1,7 +1,7 @@
-defmodule Teiserver.Coordinator.SpadsParserTest do
-  use Teiserver.DataCase, async: true
-  alias Teiserver.Coordinator.SpadsParser
-  import Teiserver.TeiserverTestLib, only: [new_user: 0]
+defmodule Barserver.Coordinator.SpadsParserTest do
+  use Barserver.DataCase, async: true
+  alias Barserver.Coordinator.SpadsParser
+  import Barserver.BarserverTestLib, only: [new_user: 0]
 
   test "parsing teamSize information" do
     result = SpadsParser.handle_in("Global setting changed by marseel (teamSize=5)", %{})

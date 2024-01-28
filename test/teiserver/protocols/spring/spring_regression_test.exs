@@ -1,11 +1,11 @@
-defmodule Teiserver.SpringRegressionTest do
-  use Teiserver.ServerCase, async: false
+defmodule Barserver.SpringRegressionTest do
+  use Barserver.ServerCase, async: false
   require Logger
-  alias Teiserver.Lobby
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Common.PubsubListener
+  alias Barserver.Lobby
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.Common.PubsubListener
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [
       auth_setup: 0,
       _send_raw: 2,

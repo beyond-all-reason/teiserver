@@ -1,4 +1,4 @@
-defmodule Teiserver.Plugs.AssignPlug do
+defmodule Barserver.Plugs.AssignPlug do
   @moduledoc false
   import Plug.Conn
 

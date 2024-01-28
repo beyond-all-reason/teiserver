@@ -1,9 +1,9 @@
-defmodule Teiserver.Account.OpenSkillReport do
+defmodule Barserver.Account.OpenSkillReport do
   require Logger
 
-  alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Repo
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.Game.MatchRatingLib
+  alias Barserver.Repo
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-chart-line"

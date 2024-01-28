@@ -1,11 +1,11 @@
-defmodule Teiserver.Account.AccoladeLib do
+defmodule Barserver.Account.AccoladeLib do
   @moduledoc """
 
   """
-  use TeiserverWeb, :library
-  alias Teiserver.{Account, CacheUser}
-  alias Teiserver.Account.{Accolade, AccoladeBotServer, AccoladeChatServer}
-  alias Teiserver.Data.Types, as: T
+  use BarserverWeb, :library
+  alias Barserver.{Account, CacheUser}
+  alias Barserver.Account.{Accolade, AccoladeBotServer, AccoladeChatServer}
+  alias Barserver.Data.Types, as: T
   require Logger
 
   def miss_count_limit(), do: 20
@@ -25,7 +25,7 @@ defmodule Teiserver.Account.AccoladeLib do
       item_id: accolade.id,
       item_type: "teiserver_account_accolade",
       item_colour: colours() |> elem(0),
-      item_icon: Teiserver.Account.AccoladeLib.icon(),
+      item_icon: Barserver.Account.AccoladeLib.icon(),
       item_label: "#{accolade.name}",
       url: "/account/accolades/#{accolade.id}"
     }
@@ -196,9 +196,9 @@ defmodule Teiserver.Account.AccoladeLib do
   defp do_start() do
     # Start the supervisor server
     {:ok, _accolade_server_pid} =
-      DynamicSupervisor.start_child(Teiserver.Account.AccoladeSupervisor, {
+      DynamicSupervisor.start_child(Barserver.Account.AccoladeSupervisor, {
         AccoladeBotServer,
-        name: Teiserver.Account.AccoladeBotServer, data: %{}
+        name: Barserver.Account.AccoladeBotServer, data: %{}
       })
 
     :ok
@@ -206,7 +206,7 @@ defmodule Teiserver.Account.AccoladeLib do
 
   # @spec get_accolade_bot_pid() :: pid()
   # defp get_accolade_bot_pid() do
-  #   Teiserver.cache_get(:teiserver_accolade_server, :accolade_server)
+  #   Barserver.cache_get(:teiserver_accolade_server, :accolade_server)
   # end
 
   @spec start_accolade_server() :: :ok | {:failure, String.t()}
@@ -248,12 +248,12 @@ defmodule Teiserver.Account.AccoladeLib do
 
   @spec get_accolade_bot_userid() :: T.userid()
   def get_accolade_bot_userid() do
-    Teiserver.cache_get(:application_metadata_cache, "teiserver_accolade_userid")
+    Barserver.cache_get(:application_metadata_cache, "teiserver_accolade_userid")
   end
 
   @spec get_accolade_bot_pid() :: pid() | nil
   def get_accolade_bot_pid() do
-    case Horde.Registry.lookup(Teiserver.AccoladesRegistry, "AccoladeBotServer") do
+    case Horde.Registry.lookup(Barserver.AccoladesRegistry, "AccoladeBotServer") do
       [{pid, _}] ->
         pid
 
@@ -264,7 +264,7 @@ defmodule Teiserver.Account.AccoladeLib do
 
   @spec get_accolade_chat_pid(T.userid()) :: pid() | nil
   def get_accolade_chat_pid(userid) do
-    case Horde.Registry.lookup(Teiserver.AccoladesRegistry, "AccoladeChatServer:#{userid}") do
+    case Horde.Registry.lookup(Barserver.AccoladesRegistry, "AccoladeChatServer:#{userid}") do
       [{pid, _}] ->
         pid
 
@@ -323,7 +323,7 @@ defmodule Teiserver.Account.AccoladeLib do
   @spec start_chat_server(T.userid(), T.userid(), T.lobby_id()) :: pid()
   def start_chat_server(userid, recipient_id, match_id) do
     {:ok, chat_server_pid} =
-      DynamicSupervisor.start_child(Teiserver.Account.AccoladeSupervisor, {
+      DynamicSupervisor.start_child(Barserver.Account.AccoladeSupervisor, {
         AccoladeChatServer,
         name: "accolade_chat_#{userid}",
         data: %{
@@ -349,7 +349,7 @@ defmodule Teiserver.Account.AccoladeLib do
 
   @spec get_badge_types() :: [{non_neg_integer(), map()}]
   def get_badge_types() do
-    Teiserver.cache_get_or_store(:application_temp_cache, "accolade_badges", fn ->
+    Barserver.cache_get_or_store(:application_temp_cache, "accolade_badges", fn ->
       Account.list_badge_types(search: [has_purpose: "Accolade"], order_by: "Name (A-Z)")
       |> Enum.with_index()
       |> Enum.map(fn {bt, i} -> {i + 1, bt} end)
@@ -372,7 +372,7 @@ defmodule Teiserver.Account.AccoladeLib do
 
       pid ->
         state = :sys.get_state(pid)
-        children = DynamicSupervisor.which_children(Teiserver.Account.AccoladeSupervisor)
+        children = DynamicSupervisor.which_children(Barserver.Account.AccoladeSupervisor)
         child_count = Enum.count(children) - 1
 
         Logger.info("Accolade bot found, state is:")
@@ -385,7 +385,7 @@ defmodule Teiserver.Account.AccoladeLib do
           pings =
             children
             |> Parallel.filter(fn {_, _, _, [module]} ->
-              module == Teiserver.Account.AccoladeChatServer
+              module == Barserver.Account.AccoladeChatServer
             end)
             |> Parallel.map(fn {_, pid, _, _} ->
               case GenServer.call(pid, :ping, 5000) do

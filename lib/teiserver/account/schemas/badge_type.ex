@@ -1,5 +1,5 @@
-defmodule Teiserver.Account.BadgeType do
-  use TeiserverWeb, :schema
+defmodule Barserver.Account.BadgeType do
+  use BarserverWeb, :schema
 
   schema "teiserver_account_badge_types" do
     field :name, :string

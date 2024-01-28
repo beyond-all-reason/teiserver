@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.ConnCase do
+defmodule BarserverWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -11,7 +11,7 @@ defmodule TeiserverWeb.ConnCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use TeiserverWeb.ConnCase, async: true`, although
+  by setting `use BarserverWeb.ConnCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -22,21 +22,21 @@ defmodule TeiserverWeb.ConnCase do
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
-      import TeiserverWeb.ConnCase
+      import BarserverWeb.ConnCase
 
-      alias TeiserverWeb.Router.Helpers, as: Routes
+      alias BarserverWeb.Router.Helpers, as: Routes
 
       # The default endpoint for testing
-      unquote(TeiserverWeb.verified_routes())
-      @endpoint TeiserverWeb.Endpoint
+      unquote(BarserverWeb.verified_routes())
+      @endpoint BarserverWeb.Endpoint
     end
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Teiserver.Repo)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Barserver.Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Teiserver.Repo, {:shared, self()})
+      Ecto.Adapters.SQL.Sandbox.mode(Barserver.Repo, {:shared, self()})
     end
 
     {:ok, conn: Phoenix.ConnTest.build_conn()}

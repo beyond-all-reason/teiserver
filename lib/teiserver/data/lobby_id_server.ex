@@ -1,4 +1,4 @@
-defmodule Teiserver.LobbyIdServer do
+defmodule Barserver.LobbyIdServer do
   @moduledoc """
   Used as a singleton to create lobby_ids and ensure we increment the counter
   each time across the cluster.
@@ -10,7 +10,7 @@ defmodule Teiserver.LobbyIdServer do
     case get_server_pid() do
       nil ->
         {:ok, _coordinator_pid} =
-          DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
+          DynamicSupervisor.start_child(Barserver.Coordinator.DynamicSupervisor, {
             __MODULE__,
             name: __MODULE__, data: %{}
           })
@@ -40,7 +40,7 @@ defmodule Teiserver.LobbyIdServer do
 
   @spec get_server_pid() :: pid() | nil
   defp get_server_pid() do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "LobbyIdServer") do
+    case Horde.Registry.lookup(Barserver.ServerRegistry, "LobbyIdServer") do
       [{pid, _}] ->
         pid
 
@@ -65,7 +65,7 @@ defmodule Teiserver.LobbyIdServer do
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
     Horde.Registry.register(
-      Teiserver.ServerRegistry,
+      Barserver.ServerRegistry,
       "LobbyIdServer",
       :lobby_id_server
     )

@@ -1,9 +1,9 @@
-defmodule Teiserver.Tachyon.Responses.Communication.ReceivedDirectMessageResponse do
+defmodule Barserver.Tachyon.Responses.Communication.ReceivedDirectMessageResponse do
   @moduledoc """
 
   """
 
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @spec generate(atom) :: {T.tachyon_command(), T.tachyon_status(), T.tachyon_object()}
   def generate(%{message_content: content, sender_id: sender_id}) do

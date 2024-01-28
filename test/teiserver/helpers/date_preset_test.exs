@@ -1,6 +1,6 @@
-defmodule Teiserver.Helpers.DatePresetTest do
-  use Teiserver.DataCase, async: true
-  alias Teiserver.Helper.DatePresets
+defmodule Barserver.Helpers.DatePresetTest do
+  use Barserver.DataCase, async: true
+  alias Barserver.Helper.DatePresets
 
   test "test basic presets" do
     DatePresets.presets()

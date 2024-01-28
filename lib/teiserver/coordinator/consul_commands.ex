@@ -1,13 +1,13 @@
-defmodule Teiserver.Coordinator.ConsulCommands do
+defmodule Barserver.Coordinator.ConsulCommands do
   @moduledoc false
   require Logger
-  alias Teiserver.Config
-  alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
-  alias Teiserver.{Account, Battle, Lobby, Coordinator, CacheUser, Client, Telemetry}
-  alias Teiserver.Lobby.{ChatLib, LobbyLib}
-  alias Teiserver.Chat.WordLib
-  alias Teiserver.Data.Types, as: T
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
+  alias Barserver.Config
+  alias Barserver.Coordinator.{ConsulServer, RikerssMemes}
+  alias Barserver.{Account, Battle, Lobby, Coordinator, CacheUser, Client, Telemetry}
+  alias Barserver.Lobby.{ChatLib, LobbyLib}
+  alias Barserver.Chat.WordLib
+  alias Barserver.Data.Types, as: T
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
 
   @doc """
     Command has structure:
@@ -668,7 +668,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     allowed_choices =
       if CacheUser.is_moderator?(senderid) do
-        Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
+        Barserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
       else
         ~w(loser_picks cheeky_switcher_smart)
       end

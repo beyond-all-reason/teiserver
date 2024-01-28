@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.Report.ExportsController do
-  use TeiserverWeb, :controller
-  alias Teiserver.{Game, Account}
-  import Teiserver.Account.AuthLib, only: [allow?: 2]
+defmodule BarserverWeb.Report.ExportsController do
+  use BarserverWeb, :controller
+  alias Barserver.{Game, Account}
+  import Barserver.Account.AuthLib, only: [allow?: 2]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
@@ -9,11 +9,11 @@ defmodule TeiserverWeb.Report.ExportsController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Telemetry.Infolog,
+    policy: Barserver.Telemetry.Infolog,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
-  plug(:add_breadcrumb, name: "Teiserver", url: "/teiserver")
+  plug(:add_breadcrumb, name: "Barserver", url: "/teiserver")
   plug(:add_breadcrumb, name: "Reports", url: "/teiserver/reports")
   plug(:add_breadcrumb, name: "Exports", url: "/teiserver/reports/exports")
 

@@ -1,4 +1,4 @@
-defmodule Teiserver.Game.Queue do
+defmodule Barserver.Game.Queue do
   @moduledoc """
   Settings:
     tick_interval: The interval at which the queue will check for matches, primarily used in testing to ensure
@@ -7,7 +7,7 @@ defmodule Teiserver.Game.Queue do
   Conditions:
 
   """
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "teiserver_game_queues" do
     field :name, :string

@@ -1,8 +1,8 @@
-defmodule Teiserver.Logging.LoggingPlug do
+defmodule Barserver.Logging.LoggingPlug do
   @moduledoc false
   alias Plug.Conn
-  alias Teiserver.Logging.PageViewLog
-  alias Teiserver.Repo
+  alias Barserver.Logging.PageViewLog
+  alias Barserver.Repo
 
   @behaviour Plug
 

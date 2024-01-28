@@ -1,14 +1,14 @@
-defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
-  use TeiserverWeb, :live_view
+defmodule BarserverWeb.Matchmaking.QueueLive.Index do
+  use BarserverWeb, :live_view
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver
-  alias Teiserver.Data.Matchmaking
-  alias Teiserver.{Game, Client}
-  alias Teiserver.Game.{QueueLib}
+  alias Barserver
+  alias Barserver.Data.Matchmaking
+  alias Barserver.{Game, Client}
+  alias Barserver.Game.{QueueLib}
 
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @impl true
   def mount(_params, session, socket) do
@@ -18,7 +18,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
 
     client = Client.get_client_by_id(socket.assigns[:current_user].id)
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_all_queues")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_all_queues")
 
     db_queues =
       Game.list_queues()
@@ -269,7 +269,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   defp apply_action(socket, :index, _params) do
     :ok =
       PubSub.subscribe(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_client_messages:#{socket.assigns[:current_user].id}"
       )
 

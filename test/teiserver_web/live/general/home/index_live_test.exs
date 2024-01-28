@@ -1,12 +1,12 @@
-defmodule TeiserverWeb.General.Home.IndexLiveTest do
+defmodule BarserverWeb.General.Home.IndexLiveTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase
+  use BarserverWeb.ConnCase
 
   import Phoenix.LiveViewTest
 
   defp auth_setup(_) do
     Central.Helpers.GeneralTestLib.conn_setup()
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    |> Barserver.BarserverTestLib.conn_setup()
   end
 
   describe "Anon" do

@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.Account.PartyLive.Index do
-  use TeiserverWeb, :live_view
+defmodule BarserverWeb.Account.PartyLive.Index do
+  use BarserverWeb, :live_view
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.Account
-  alias Teiserver.Account.PartyLib
+  alias Barserver.Account
+  alias Barserver.Account.PartyLib
 
   @impl true
   def mount(params, session, socket) do
@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
 
     :ok =
       PubSub.subscribe(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_client_messages:#{socket.assigns.current_user.id}"
       )
 
@@ -31,7 +31,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
 
     socket =
       socket
-      # |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
+      # |> add_breadcrumb(name: "Barserver", url: "/teiserver")
       |> add_breadcrumb(name: "Parties", url: "/teiserver/account/parties")
       |> assign(:mode, mode)
       |> assign(:client, client)
@@ -55,7 +55,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
 
   @impl true
   def handle_info(%{channel: "teiserver_party:" <> party_id, event: :closed}, socket) do
-    :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
+    :ok = PubSub.unsubscribe(Barserver.PubSub, "teiserver_party:#{party_id}")
 
     new_parties =
       socket.assigns.parties
@@ -149,7 +149,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
 
     parties
     |> Enum.each(fn party ->
-      :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party.id}")
+      :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_party:#{party.id}")
     end)
 
     socket
@@ -171,7 +171,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
 
     parties
     |> Enum.each(fn party ->
-      :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party.id}")
+      :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_party:#{party.id}")
     end)
 
     socket

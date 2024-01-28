@@ -1,15 +1,15 @@
-defmodule TeiserverWeb.Moderation.ProposalController do
+defmodule BarserverWeb.Moderation.ProposalController do
   @moduledoc false
-  use TeiserverWeb, :controller
+  use BarserverWeb, :controller
 
-  alias Teiserver.{Account, Moderation}
-  alias Teiserver.Moderation.{Proposal, ProposalLib}
-  import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
+  alias Barserver.{Account, Moderation}
+  alias Barserver.Moderation.{Proposal, ProposalLib}
+  import Barserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Moderation.Proposal,
+    policy: Barserver.Moderation.Proposal,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "moderation",
@@ -99,8 +99,8 @@ defmodule TeiserverWeb.Moderation.ProposalController do
         |> assign(:changeset, changeset)
         |> assign(:reports, reports)
         |> assign(:actions, actions)
-        |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
-        |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
+        |> assign(:restrictions_lists, Barserver.Account.UserLib.list_restrictions())
+        |> assign(:coc_lookup, Barserver.Account.CodeOfConductData.flat_data())
         |> add_breadcrumb(name: "New proposal for #{user.name}", url: conn.request_path)
         |> render("new_with_user.html")
     end
@@ -164,8 +164,8 @@ defmodule TeiserverWeb.Moderation.ProposalController do
           |> assign(:changeset, changeset)
           |> assign(:reports, reports)
           |> assign(:actions, actions)
-          |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
-          |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
+          |> assign(:restrictions_lists, Barserver.Account.UserLib.list_restrictions())
+          |> assign(:coc_lookup, Barserver.Account.CodeOfConductData.flat_data())
           |> add_breadcrumb(name: "New proposal for #{user.name}", url: conn.request_path)
           |> render("new_with_user.html")
       end
@@ -203,7 +203,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
         conn
         |> assign(:proposal, proposal)
         |> assign(:changeset, changeset)
-        |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
+        |> assign(:restrictions_lists, Barserver.Account.UserLib.list_restrictions())
         |> add_breadcrumb(name: "Edit: #{proposal.target.name}", url: conn.request_path)
         |> render("edit.html")
     end
@@ -255,7 +255,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
             conn
             |> assign(:proposal, proposal)
             |> assign(:changeset, changeset)
-            |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
+            |> assign(:restrictions_lists, Barserver.Account.UserLib.list_restrictions())
             |> render("edit.html")
         end
     end

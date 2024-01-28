@@ -1,6 +1,6 @@
-defmodule TeiserverWeb.Account.ProfileLive.Self do
+defmodule BarserverWeb.Account.ProfileLive.Self do
   @moduledoc false
-  use TeiserverWeb, :live_view
+  use BarserverWeb, :live_view
 
   @impl true
   def mount(_params, _session, socket) do

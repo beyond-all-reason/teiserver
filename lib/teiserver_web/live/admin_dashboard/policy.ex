@@ -1,16 +1,16 @@
-defmodule TeiserverWeb.AdminDashLive.Policy do
-  use TeiserverWeb, :live_view
+defmodule BarserverWeb.AdminDashLive.Policy do
+  use BarserverWeb, :live_view
   alias Phoenix.PubSub
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
-  alias Teiserver
-  alias Teiserver.{Game}
-  # alias Teiserver.Account.AccoladeLib
-  # alias Teiserver.Data.Matchmaking
+  alias Barserver
+  alias Barserver.{Game}
+  # alias Barserver.Account.AccoladeLib
+  # alias Barserver.Data.Matchmaking
 
   @impl true
   def mount(%{"id" => id}, session, socket) do
-    :ok = PubSub.subscribe(Teiserver.PubSub, "lobby_policy_updates:#{id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "lobby_policy_updates:#{id}")
 
     socket =
       socket
@@ -20,7 +20,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
       |> add_breadcrumb(name: "Dashboard", url: "/admin/dashboard")
       |> add_breadcrumb(name: "Policy #{id}", url: "/admin/dashboard/policy/#{id}")
       |> assign(:site_menu_active, "admin")
-      |> assign(:view_colour, Teiserver.Admin.AdminLib.colours())
+      |> assign(:view_colour, Barserver.Admin.AdminLib.colours())
       |> get_policy_bots
 
     :timer.send_interval(5_000, :tick)

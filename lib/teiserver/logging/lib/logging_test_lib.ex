@@ -1,13 +1,13 @@
-defmodule Teiserver.Logging.LoggingTestLib do
+defmodule Barserver.Logging.LoggingTestLib do
   @moduledoc false
-  use TeiserverWeb, :library
+  use BarserverWeb, :library
 
-  alias Teiserver.Logging.PageViewLog
-  alias Teiserver.Logging.PageViewLogLib
-  alias Teiserver.Logging.AuditLog
+  alias Barserver.Logging.PageViewLog
+  alias Barserver.Logging.PageViewLogLib
+  alias Barserver.Logging.AuditLog
 
-  alias Teiserver.Logging.AggregateViewLog
-  alias Teiserver.Logging.AggregateViewLogLib
+  alias Barserver.Logging.AggregateViewLog
+  alias Barserver.Logging.AggregateViewLogLib
 
   # def get_audit_log(conn, action) do
   #   Logging.list_audit_logs(search: [

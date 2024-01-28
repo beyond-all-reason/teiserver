@@ -1,10 +1,10 @@
-defmodule Teiserver.Tachyon.Responses.User.UpdatedUserClientResponse do
+defmodule Barserver.Tachyon.Responses.User.UpdatedUserClientResponse do
   @moduledoc """
 
   """
 
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Tachyon.Converters
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Tachyon.Converters
 
   @spec generate(map()) :: {T.tachyon_command(), T.tachyon_object()}
   def generate(client) do

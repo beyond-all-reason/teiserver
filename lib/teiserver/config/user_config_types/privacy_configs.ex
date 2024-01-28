@@ -1,6 +1,6 @@
-defmodule Teiserver.Config.UserConfigTypes.PrivacyConfigs do
+defmodule Barserver.Config.UserConfigTypes.PrivacyConfigs do
   @moduledoc false
-  import Teiserver.Config, only: [add_user_config_type: 1]
+  import Barserver.Config, only: [add_user_config_type: 1]
 
   @spec create() :: :ok
   def create() do

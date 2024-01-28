@@ -1,12 +1,12 @@
-defmodule Teiserver.Account.LeaderboardReport do
-  alias Teiserver.{Account}
-  alias Teiserver.Game.MatchRatingLib
-  # alias Teiserver.Battle.BalanceLib
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Repo
+defmodule Barserver.Account.LeaderboardReport do
+  alias Barserver.{Account}
+  alias Barserver.Game.MatchRatingLib
+  # alias Barserver.Battle.BalanceLib
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.Repo
 
   @spec icon() :: String.t()
-  def icon(), do: Teiserver.Account.RatingLib.icon()
+  def icon(), do: Barserver.Account.RatingLib.icon()
 
   @spec permissions() :: String.t()
   def permissions(), do: "Admin"

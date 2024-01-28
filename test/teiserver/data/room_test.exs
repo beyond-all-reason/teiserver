@@ -1,9 +1,9 @@
-defmodule Teiserver.Data.RoomTest do
+defmodule Barserver.Data.RoomTest do
   @moduledoc false
-  use Teiserver.DataCase, async: true
-  alias Teiserver.{Room}
-  alias Teiserver.Account.UserCacheLib
-  import Teiserver.TeiserverTestLib, only: [new_user: 1]
+  use Barserver.DataCase, async: true
+  alias Barserver.{Room}
+  alias Barserver.Account.UserCacheLib
+  import Barserver.BarserverTestLib, only: [new_user: 1]
 
   test "clan limited rooms" do
     author_user = new_user("test_user_author_room")

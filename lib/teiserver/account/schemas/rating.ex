@@ -1,10 +1,10 @@
-defmodule Teiserver.Account.Rating do
-  use TeiserverWeb, :schema
+defmodule Barserver.Account.Rating do
+  use BarserverWeb, :schema
 
   @primary_key false
   schema "teiserver_account_ratings" do
-    belongs_to :user, Teiserver.Account.User, primary_key: true
-    belongs_to :rating_type, Teiserver.Game.RatingType, primary_key: true
+    belongs_to :user, Barserver.Account.User, primary_key: true
+    belongs_to :rating_type, Barserver.Game.RatingType, primary_key: true
 
     field :rating_value, :float
     field :skill, :float

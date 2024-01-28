@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.DirectMessageStorage do
+defmodule Barserver.Repo.Migrations.DirectMessageStorage do
   use Ecto.Migration
 
   def change do

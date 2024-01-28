@@ -1,13 +1,13 @@
-defmodule TeiserverWeb.Communication.ChatLive.Index do
-  use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Coordinator, Chat}
+defmodule BarserverWeb.Communication.ChatLive.Index do
+  use BarserverWeb, :live_view
+  alias Barserver.{Account, Coordinator, Chat}
 
   @impl true
   def mount(_params, _session, socket) do
     socket =
       socket
       |> assign(:site_menu_active, "chat")
-      |> assign(:view_colour, Teiserver.Chat.LobbyMessageLib.colours())
+      |> assign(:view_colour, Barserver.Chat.LobbyMessageLib.colours())
       |> assign(:messages, [])
       |> assign(:usernames, %{})
       |> add_breadcrumb(name: "Chat", url: "/chat")

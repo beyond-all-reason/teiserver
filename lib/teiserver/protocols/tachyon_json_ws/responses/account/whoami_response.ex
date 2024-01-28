@@ -1,10 +1,10 @@
-defmodule Teiserver.Tachyon.Responses.Account.WhoamiResponse do
+defmodule Barserver.Tachyon.Responses.Account.WhoamiResponse do
   @moduledoc """
   Whoami response - https://github.com/beyond-all-reason/tachyon/blob/master/src/schema/account.ts
   """
 
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.{Account, CacheUser}
+  alias Barserver.Data.Types, as: T
+  alias Barserver.{Account, CacheUser}
 
   @spec generate(T.user(), T.client()) ::
           {T.tachyon_command(), T.tachyon_status(), T.tachyon_object()}

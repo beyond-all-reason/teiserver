@@ -1,13 +1,13 @@
-defmodule Teiserver.Game.MatchRatingLib do
+defmodule Barserver.Game.MatchRatingLib do
   @moduledoc """
   This module is used purely for rating calculations, it is not used
-  to balance matches. For that use Teiserver.Battle.BalanceLib.
+  to balance matches. For that use Barserver.Battle.BalanceLib.
   """
 
-  alias Teiserver.{Account, Coordinator, Game, Battle}
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Repo
-  alias Teiserver.Battle.{BalanceLib, MatchLib}
+  alias Barserver.{Account, Coordinator, Game, Battle}
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Repo
+  alias Barserver.Battle.{BalanceLib, MatchLib}
   require Logger
 
   @rated_match_types ["Team", "Duel", "FFA", "Team FFA", "Partied Team"]
@@ -29,10 +29,10 @@ defmodule Teiserver.Game.MatchRatingLib do
     |> Map.new(fn name -> {name, Game.get_or_add_rating_type(name)} end)
   end
 
-  @spec rate_match(non_neg_integer() | Teiserver.Battle.Match.t()) :: :ok | {:error, :no_match}
+  @spec rate_match(non_neg_integer() | Barserver.Battle.Match.t()) :: :ok | {:error, :no_match}
   def rate_match(match), do: rate_match(match, false)
 
-  @spec rate_match(non_neg_integer() | Teiserver.Battle.Match.t(), boolean()) ::
+  @spec rate_match(non_neg_integer() | Barserver.Battle.Match.t(), boolean()) ::
           :ok | {:error, :no_match}
   def rate_match(match_id, override) when is_integer(match_id) do
     Battle.get_match(match_id, preload: [:members])
@@ -92,7 +92,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     end
   end
 
-  @spec do_rate_match(Teiserver.Battle.Match.t()) :: :ok
+  @spec do_rate_match(Barserver.Battle.Match.t()) :: :ok
   # The algorithm has not been implemented for FFA correctly so we have a clause for
   # 2 teams (correctly implemented) and a special for 3+ teams
   defp do_rate_match(%{team_count: 2} = match) do
@@ -229,8 +229,8 @@ defmodule Teiserver.Game.MatchRatingLib do
       end)
 
     Ecto.Multi.new()
-    |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
-    |> Teiserver.Repo.transaction()
+    |> Ecto.Multi.insert_all(:insert_all, Barserver.Game.RatingLog, win_ratings ++ loss_ratings)
+    |> Barserver.Repo.transaction()
 
     # Update the match to track rating type
     {:ok, _} = Battle.update_match(match, %{rating_type_id: rating_type_id})
@@ -442,8 +442,8 @@ defmodule Teiserver.Game.MatchRatingLib do
     #   |> List.flatten
 
     Ecto.Multi.new()
-    |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
-    |> Teiserver.Repo.transaction()
+    |> Ecto.Multi.insert_all(:insert_all, Barserver.Game.RatingLog, win_ratings ++ loss_ratings)
+    |> Barserver.Repo.transaction()
 
     # Update the match to track rating type
     {:ok, _} = Battle.update_match(match, %{rating_type_id: rating_type_id})

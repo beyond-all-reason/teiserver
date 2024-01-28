@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.Account.UserView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Account.UserView do
+  use BarserverWeb, :view
 
   @spec view_colour :: atom
   def view_colour, do: :success

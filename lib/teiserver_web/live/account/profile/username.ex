@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.Account.ProfileLive.Username do
+defmodule BarserverWeb.Account.ProfileLive.Username do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  alias Teiserver.Account
+  use BarserverWeb, :live_view
+  alias Barserver.Account
 
   @impl true
   def mount(%{"username" => username}, _session, socket) do

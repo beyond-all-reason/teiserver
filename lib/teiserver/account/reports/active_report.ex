@@ -1,6 +1,6 @@
-defmodule Teiserver.Account.ActiveReport do
-  alias Teiserver.Helper.DatePresets
-  alias Teiserver.{Logging}
+defmodule Barserver.Account.ActiveReport do
+  alias Barserver.Helper.DatePresets
+  alias Barserver.{Logging}
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-satellite-dish"

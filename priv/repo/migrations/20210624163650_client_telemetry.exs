@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.ComplexClientEvent do
+defmodule Barserver.Repo.Migrations.ComplexClientEvent do
   use Ecto.Migration
 
   def change do

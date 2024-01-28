@@ -1,10 +1,10 @@
-defmodule Teiserver.Moderation.Ban do
+defmodule Barserver.Moderation.Ban do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "moderation_bans" do
-    belongs_to :source, Teiserver.Account.User
-    belongs_to :added_by, Teiserver.Account.User
+    belongs_to :source, Barserver.Account.User
+    belongs_to :added_by, Barserver.Account.User
 
     field :key_values, {:array, :string}
     field :enabled, :boolean

@@ -1,13 +1,13 @@
-defmodule Teiserver.Game.LobbyPolicyBotServer do
+defmodule Barserver.Game.LobbyPolicyBotServer do
   @moduledoc """
   The LobbyPolicyBots are the accounts present in each managed lobby and involved in managing that lobby specifically
   """
 
   alias Phoenix.PubSub
-  alias Teiserver.{Game, CacheUser, Client, Battle, Account, Lobby, Coordinator, Telemetry}
-  alias Teiserver.Lobby.{ChatLib}
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.{Game, CacheUser, Client, Battle, Account, Lobby, Coordinator, Telemetry}
+  alias Barserver.Lobby.{ChatLib}
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.Data.Types, as: T
   use GenServer
   require Logger
 
@@ -81,7 +81,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   # teiserver_client_messages
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, state) do
     # We've disconnected, time to kill this process
-    DynamicSupervisor.terminate_child(Teiserver.LobbyPolicySupervisor, self())
+    DynamicSupervisor.terminate_child(Barserver.LobbyPolicySupervisor, self())
     {:noreply, state}
   end
 
@@ -89,11 +89,11 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
         %{channel: "teiserver_client_messages:" <> _, event: :added_to_lobby, lobby_id: lobby_id},
         state
       ) do
-    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+    PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
 
-    PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-    PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+    PubSub.subscribe(Barserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.subscribe(Barserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
 
     send_chat(state, "Lobby policy bot claiming the room")
 
@@ -473,8 +473,8 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   defp leave_lobby(%{lobby_id: nil} = state), do: state
 
   defp leave_lobby(state) do
-    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{state.lobby_id}")
-    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{state.lobby_id}")
+    PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_updates:#{state.lobby_id}")
+    PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_chat:#{state.lobby_id}")
 
     Lobby.remove_user_from_battle(state.userid, state.lobby_id)
 
@@ -537,11 +537,11 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   def init(data) do
     id = data.lobby_policy.id
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "lobby_policy_internal:#{id}")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{data.userid}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "lobby_policy_internal:#{id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_client_messages:#{data.userid}")
 
     Horde.Registry.register(
-      Teiserver.LobbyPolicyRegistry,
+      Barserver.LobbyPolicyRegistry,
       "LobbyPolicyBotServer:#{data.userid}",
       id
     )

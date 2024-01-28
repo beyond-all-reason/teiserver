@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.AddMatchmakingTables do
+defmodule Barserver.Repo.Migrations.AddMatchmakingTables do
   use Ecto.Migration
 
   def change do

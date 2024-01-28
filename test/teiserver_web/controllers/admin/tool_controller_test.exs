@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.Admin.ToolControllerTest do
-  use TeiserverWeb.ConnCase
+defmodule BarserverWeb.Admin.ToolControllerTest do
+  use BarserverWeb.ConnCase
 
   alias Central.Helpers.GeneralTestLib
 

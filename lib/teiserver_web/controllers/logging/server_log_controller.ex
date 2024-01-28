@@ -1,9 +1,9 @@
-defmodule TeiserverWeb.Logging.ServerLogController do
-  use TeiserverWeb, :controller
-  alias Teiserver.Logging
-  alias Teiserver.Helper.{TimexHelper, ChartHelper}
-  alias Teiserver.Logging.{GraphMinuteLogsTask}
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+defmodule BarserverWeb.Logging.ServerLogController do
+  use BarserverWeb, :controller
+  alias Barserver.Logging
+  alias Barserver.Helper.{TimexHelper, ChartHelper}
+  alias Barserver.Logging.{GraphMinuteLogsTask}
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
     site_menu_active: "logging",
@@ -11,9 +11,9 @@ defmodule TeiserverWeb.Logging.ServerLogController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Staff.Moderator,
+    policy: Barserver.Staff.Moderator,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: "Logging", url: "/logging")
   plug(:add_breadcrumb, name: "Server", url: "/logging/server")

@@ -1,9 +1,9 @@
-defmodule Teiserver.Account.BadgeTypeLib do
+defmodule Barserver.Account.BadgeTypeLib do
   @moduledoc """
 
   """
-  use TeiserverWeb, :library
-  alias Teiserver.Account.BadgeType
+  use BarserverWeb, :library
+  alias Barserver.Account.BadgeType
 
   # Functions
   @spec icon :: String.t()

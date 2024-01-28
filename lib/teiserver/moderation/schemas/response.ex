@@ -1,11 +1,11 @@
-defmodule Teiserver.Moderation.Response do
+defmodule Barserver.Moderation.Response do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   @primary_key false
   schema "moderation_responses" do
-    belongs_to :report, Teiserver.Moderation.Report, primary_key: true
-    belongs_to :user, Teiserver.Account.User, primary_key: true
+    belongs_to :report, Barserver.Moderation.Report, primary_key: true
+    belongs_to :user, Barserver.Account.User, primary_key: true
 
     field :action, :string, default: "Ignore"
     field :accurate, :boolean, default: false

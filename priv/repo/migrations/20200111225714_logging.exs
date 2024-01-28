@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.Logging do
+defmodule Barserver.Repo.Migrations.Logging do
   use Ecto.Migration
 
   def change do

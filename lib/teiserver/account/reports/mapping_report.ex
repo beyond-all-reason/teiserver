@@ -1,6 +1,6 @@
-defmodule Teiserver.Game.MappingReport do
-  alias Teiserver.Helper.DatePresets
-  alias Teiserver.{Battle}
+defmodule Barserver.Game.MappingReport do
+  alias Barserver.Helper.DatePresets
+  alias Barserver.{Battle}
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-map"

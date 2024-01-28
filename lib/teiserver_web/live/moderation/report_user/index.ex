@@ -1,8 +1,8 @@
-defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
-  use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Battle, Moderation}
-  alias Teiserver.Moderation.ReportLib
-  alias Teiserver.Helper.TimexHelper
+defmodule BarserverWeb.Moderation.ReportUserLive.Index do
+  use BarserverWeb, :live_view
+  alias Barserver.{Account, Battle, Moderation}
+  alias Barserver.Moderation.ReportLib
+  alias Barserver.Helper.TimexHelper
 
   @impl true
   def mount(_params, _session, socket) do

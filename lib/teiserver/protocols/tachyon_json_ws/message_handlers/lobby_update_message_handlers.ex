@@ -1,16 +1,16 @@
-defmodule Teiserver.Tachyon.MessageHandlers.LobbyUpdateMessageHandlers do
+defmodule Barserver.Tachyon.MessageHandlers.LobbyUpdateMessageHandlers do
   @moduledoc """
 
   """
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
-  alias Teiserver.Tachyon.Responses.Lobby.{
+  alias Barserver.Tachyon.Responses.Lobby.{
     AddUserClientResponse,
     RemoveUserClientResponse,
     ClosedResponse
   }
 
-  alias Teiserver.Tachyon.Responses.User.UpdatedUserClientResponse
+  alias Barserver.Tachyon.Responses.User.UpdatedUserClientResponse
   require Logger
 
   @spec handle(map(), T.tachyon_conn()) ::

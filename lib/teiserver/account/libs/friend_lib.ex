@@ -1,6 +1,6 @@
-defmodule Teiserver.Account.FriendLib do
+defmodule Barserver.Account.FriendLib do
   @moduledoc false
-  alias Teiserver.Account
+  alias Barserver.Account
 
   @spec colours :: atom
   def colours(), do: :success
@@ -10,7 +10,7 @@ defmodule Teiserver.Account.FriendLib do
 
   @spec list_friend_ids_of_user(T.userid()) :: [T.userid()]
   def list_friend_ids_of_user(userid) do
-    Teiserver.cache_get_or_store(:account_friend_cache, userid, fn ->
+    Barserver.cache_get_or_store(:account_friend_cache, userid, fn ->
       Account.list_friends(
         where: [either_user_is: userid],
         select: ~w(user1_id user2_id)a

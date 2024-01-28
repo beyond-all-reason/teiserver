@@ -1,9 +1,9 @@
-defmodule TeiserverWeb.Logging.PageViewLogController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Logging.PageViewLogController do
+  use BarserverWeb, :controller
 
-  alias Teiserver.Logging
-  alias Teiserver.Helper.TimexHelper
-  import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
+  alias Barserver.Logging
+  alias Barserver.Helper.TimexHelper
+  import Barserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug :add_breadcrumb, name: 'Logging', url: '/logging'
   plug :add_breadcrumb, name: 'Page views', url: '/logging/page_views'
@@ -14,9 +14,9 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Logging.PageViewLog,
+    policy: Barserver.Logging.PageViewLog,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do

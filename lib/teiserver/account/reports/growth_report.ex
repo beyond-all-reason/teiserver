@@ -1,9 +1,9 @@
-defmodule Teiserver.Account.GrowthReport do
+defmodule Barserver.Account.GrowthReport do
   @moduledoc false
-  @behaviour Teiserver.Common.WebReportBehaviour
-  alias Teiserver.Logging
-  alias Teiserver.Helper.ChartHelper
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  @behaviour Barserver.Common.WebReportBehaviour
+  alias Barserver.Logging
+  alias Barserver.Helper.ChartHelper
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
   @spec name() :: String.t()

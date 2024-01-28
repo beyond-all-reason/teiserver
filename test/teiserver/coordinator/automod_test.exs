@@ -1,18 +1,18 @@
-defmodule Teiserver.Coordinator.AutomodTest do
-  use Teiserver.ServerCase, async: false
-  alias Teiserver.{Config}
-  alias Teiserver.{Account, CacheUser, Client, Moderation, Logging}
-  alias Teiserver.Coordinator.{CoordinatorServer, AutomodServer}
-  alias Teiserver.Account.CalculateSmurfKeyTask
+defmodule Barserver.Coordinator.AutomodTest do
+  use Barserver.ServerCase, async: false
+  alias Barserver.{Config}
+  alias Barserver.{Account, CacheUser, Client, Moderation, Logging}
+  alias Barserver.Coordinator.{CoordinatorServer, AutomodServer}
+  alias Barserver.Account.CalculateSmurfKeyTask
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [new_user: 0, tachyon_auth_setup: 1, _tachyon_send: 2]
 
   setup do
     account = CoordinatorServer.get_coordinator_account()
-    Teiserver.cache_put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
+    Barserver.cache_put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
 
-    Teiserver.Coordinator.AutomodServer.start_automod_server()
+    Barserver.Coordinator.AutomodServer.start_automod_server()
 
     Config.update_site_config("teiserver.Automod action delay", 0)
     banned_user = new_user()
@@ -155,7 +155,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
     # We have to sleep so the user is created after the ban
     :timer.sleep(1000)
 
-    Teiserver.Battle.MatchMonitorServer.do_start()
+    Barserver.Battle.MatchMonitorServer.do_start()
 
     standard_user = new_user()
     %{socket: standard_socket} = tachyon_auth_setup(standard_user)

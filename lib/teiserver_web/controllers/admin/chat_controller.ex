@@ -1,13 +1,13 @@
-defmodule TeiserverWeb.Admin.ChatController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Admin.ChatController do
+  use BarserverWeb, :controller
 
-  alias Teiserver.{Coordinator, Chat}
-  import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
+  alias Barserver.{Coordinator, Chat}
+  import Barserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Chat.LobbyMessage,
+    policy: Barserver.Chat.LobbyMessage,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "chat",

@@ -1,9 +1,9 @@
-defmodule TeiserverWeb.Admin.TextCallbackView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Admin.TextCallbackView do
+  use BarserverWeb, :view
 
   @spec view_colour() :: atom
-  def view_colour, do: Teiserver.Communication.TextCallbackLib.colours()
+  def view_colour, do: Barserver.Communication.TextCallbackLib.colours()
 
   @spec icon() :: String.t()
-  def icon, do: Teiserver.Communication.TextCallbackLib.icon()
+  def icon, do: Barserver.Communication.TextCallbackLib.icon()
 end

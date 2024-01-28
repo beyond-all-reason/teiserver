@@ -1,12 +1,12 @@
-defmodule Mix.Tasks.Teiserver.Fakedata do
+defmodule Mix.Tasks.Barserver.Fakedata do
   @moduledoc """
   Run with mix teiserver.fakedata
   """
 
   use Mix.Task
 
-  alias Teiserver.{Account, Logging, Battle, Moderation}
-  alias Teiserver.Helper.StylingHelper
+  alias Barserver.{Account, Logging, Battle, Moderation}
+  alias Barserver.Helper.StylingHelper
   require Logger
 
   @settings %{
@@ -21,7 +21,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   @spec run(list()) :: :ok
   def run(_args) do
-    if Application.get_env(:teiserver, Teiserver)[:enable_hailstorm] do
+    if Application.get_env(:teiserver, Barserver)[:enable_hailstorm] do
       # Start by rebuilding the database
       Mix.Task.run("ecto.reset")
 
@@ -56,8 +56,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         data: %{
           lobby_client: "FakeData",
           password_hash:
-            Teiserver.CacheUser.encrypt_password(
-              Teiserver.CacheUser.spring_md5_password("password")
+            Barserver.CacheUser.encrypt_password(
+              Barserver.CacheUser.spring_md5_password("password")
             )
         }
       })
@@ -73,9 +73,9 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   @spec generate_throwaway_name() :: String.t()
   def generate_throwaway_name do
     [
-      Teiserver.store_get(:application_metadata_cache, "random_names_1"),
-      Teiserver.store_get(:application_metadata_cache, "random_names_2"),
-      Teiserver.store_get(:application_metadata_cache, "random_names_3")
+      Barserver.store_get(:application_metadata_cache, "random_names_1"),
+      Barserver.store_get(:application_metadata_cache, "random_names_2"),
+      Barserver.store_get(:application_metadata_cache, "random_names_3")
     ]
     |> Enum.filter(fn l -> l != [] end)
     |> Enum.map_join(" ", fn l -> Enum.random(l) |> String.capitalize() end)
@@ -114,8 +114,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       |> List.flatten()
 
     Ecto.Multi.new()
-    |> Ecto.Multi.insert_all(:insert_all, Teiserver.Account.User, new_users)
-    |> Teiserver.Repo.transaction()
+    |> Ecto.Multi.insert_all(:insert_all, Barserver.Account.User, new_users)
+    |> Barserver.Repo.transaction()
   end
 
   defp make_telemetry() do
@@ -206,8 +206,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         end)
 
       Ecto.Multi.new()
-      |> Ecto.Multi.insert_all(:insert_all, Teiserver.Logging.ServerMinuteLog, logs)
-      |> Teiserver.Repo.transaction()
+      |> Ecto.Multi.insert_all(:insert_all, Barserver.Logging.ServerMinuteLog, logs)
+      |> Barserver.Repo.transaction()
     end)
 
     # Now persist day values
@@ -302,7 +302,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
       Ecto.Multi.new()
       |> Ecto.Multi.insert_all(:insert_all, Moderation.Report, basic_reports ++ match_reports)
-      |> Teiserver.Repo.transaction()
+      |> Barserver.Repo.transaction()
     end)
   end
 
@@ -398,17 +398,17 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
           Battle.MatchMembership,
           memberships1 ++ memberships2
         )
-        |> Teiserver.Repo.transaction()
+        |> Barserver.Repo.transaction()
       end)
     end)
 
-    Teiserver.Game.MatchRatingLib.reset_and_re_rate("all")
+    Barserver.Game.MatchRatingLib.reset_and_re_rate("all")
   end
 
   defp make_one_time_code() do
     root_user = Account.get_user_by_email("root@localhost")
 
-    Teiserver.Config.update_site_config("user.Enable one time links", "true")
+    Barserver.Config.update_site_config("user.Enable one time links", "true")
 
     {:ok, _code} =
       Account.create_code(%{

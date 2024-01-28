@@ -1,5 +1,5 @@
-defmodule Teiserver.Game.GenerateAchievementTypes do
-  alias Teiserver.Game
+defmodule Barserver.Game.GenerateAchievementTypes do
+  alias Barserver.Game
 
   @spec perform() :: :ok
   def perform() do

@@ -1,13 +1,13 @@
-defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
-  use TeiserverWeb, :live_view
+defmodule BarserverWeb.Matchmaking.QueueLive.Show do
+  use BarserverWeb, :live_view
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver
-  alias Teiserver.Account
-  alias Teiserver.Data.Matchmaking
-  alias Teiserver.Game.QueueLib
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver
+  alias Barserver.Account
+  alias Barserver.Data.Matchmaking
+  alias Barserver.Game.QueueLib
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @extra_menu_content """
   &nbsp;&nbsp;&nbsp;
@@ -27,8 +27,8 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
 
     socket =
       socket
-      |> Teiserver.ServerUserPlug.live_call()
-      |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
+      |> Barserver.ServerUserPlug.live_call()
+      |> add_breadcrumb(name: "Barserver", url: "/teiserver")
       |> add_breadcrumb(name: "Queues", url: "/teiserver/game/queues")
       |> assign(:site_menu_active, "admin")
       |> assign(:view_colour, QueueLib.colours())
@@ -43,7 +43,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
     # case allow?(socket.assigns[:current_user], "Moderator") do
     #   true ->
     id = int_parse(id)
-    PubSub.subscribe(Teiserver.PubSub, "teiserver_queue:#{id}")
+    PubSub.subscribe(Barserver.PubSub, "teiserver_queue:#{id}")
     queue = Matchmaking.get_queue(id)
 
     queue_state =

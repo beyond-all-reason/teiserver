@@ -1,11 +1,11 @@
-defmodule TeiserverWeb.Account.GeneralControllerTest do
-  use TeiserverWeb.ConnCase
+defmodule BarserverWeb.Account.GeneralControllerTest do
+  use BarserverWeb.ConnCase
 
   alias Central.Helpers.GeneralTestLib
 
   setup do
-    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    GeneralTestLib.conn_setup(Barserver.BarserverTestLib.player_permissions())
+    |> Barserver.BarserverTestLib.conn_setup()
   end
 
   test "index", %{conn: conn} do

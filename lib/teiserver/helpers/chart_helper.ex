@@ -1,4 +1,4 @@
-defmodule Teiserver.Helper.ChartHelper do
+defmodule Barserver.Helper.ChartHelper do
   @moduledoc """
   Used for building chart data for c3 charts. Below is a suggested method using dates
   as the key.
@@ -61,7 +61,7 @@ defmodule Teiserver.Helper.ChartHelper do
   </script>
   """
 
-  alias Teiserver.Helper.TimexHelper
+  alias Barserver.Helper.TimexHelper
 
   @doc """
   Takes a list of log-data and then outputs line-chart

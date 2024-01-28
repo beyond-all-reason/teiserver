@@ -1,11 +1,11 @@
-defmodule TeiserverWeb.Battle.LobbyLive.Index do
-  use TeiserverWeb, :live_view
+defmodule BarserverWeb.Battle.LobbyLive.Index do
+  use BarserverWeb, :live_view
   alias Phoenix.PubSub
 
-  alias Teiserver
-  alias Teiserver.{Battle, Lobby, Account}
+  alias Barserver
+  alias Barserver.{Battle, Lobby, Account}
 
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @impl true
   def mount(_params, session, socket) do
@@ -167,11 +167,11 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_global_lobby_updates")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_global_lobby_updates")
 
     :ok =
       PubSub.subscribe(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_client_messages:#{socket.assigns[:current_user].id}"
       )
 

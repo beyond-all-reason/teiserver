@@ -1,14 +1,14 @@
-defmodule Teiserver.Telemetry.ComplexClientEventTypeLib do
+defmodule Barserver.Telemetry.ComplexClientEventTypeLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
-  alias Teiserver.Telemetry.{ComplexClientEventType, ComplexClientEventTypeQueries}
+  use BarserverWeb, :library_newform
+  alias Barserver.Telemetry.{ComplexClientEventType, ComplexClientEventTypeQueries}
 
   # Helper function
   @spec get_or_add_complex_client_event_type(String.t()) :: non_neg_integer()
   def get_or_add_complex_client_event_type(name) do
     name = String.trim(name)
 
-    Teiserver.cache_get_or_store(:telemetry_complex_client_event_types_cache, name, fn ->
+    Barserver.cache_get_or_store(:telemetry_complex_client_event_types_cache, name, fn ->
       query =
         ComplexClientEventTypeQueries.query_complex_client_event_types(
           where: [name: name],

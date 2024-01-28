@@ -1,13 +1,13 @@
-defmodule Teiserver.Telemetry.InfologCleanupTask do
+defmodule Barserver.Telemetry.InfologCleanupTask do
   @moduledoc false
   use Oban.Worker, queue: :cleanup
 
-  alias Teiserver.Repo
+  alias Barserver.Repo
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    days = Application.get_env(:teiserver, Teiserver)[:retention][:telemetry_infolog]
+    days = Application.get_env(:teiserver, Barserver)[:retention][:telemetry_infolog]
 
     before_timestamp = Timex.shift(Timex.now(), days: -days)
 

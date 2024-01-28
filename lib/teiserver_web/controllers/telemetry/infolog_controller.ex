@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.Telemetry.InfologController do
-  use TeiserverWeb, :controller
-  alias Teiserver.Telemetry
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+defmodule BarserverWeb.Telemetry.InfologController do
+  use BarserverWeb, :controller
+  alias Barserver.Telemetry
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
     site_menu_active: "telemetry",
@@ -9,9 +9,9 @@ defmodule TeiserverWeb.Telemetry.InfologController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Telemetry.Infolog,
+    policy: Barserver.Telemetry.Infolog,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
   plug(:add_breadcrumb, name: 'Infologs', url: '/telemetry/infolog')

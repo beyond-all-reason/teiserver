@@ -1,10 +1,10 @@
-defmodule Teiserver.Tachyon.Handlers.Account.WhoamiRequest do
+defmodule Barserver.Tachyon.Handlers.Account.WhoamiRequest do
   @moduledoc """
 
   """
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Tachyon.Responses.Account.WhoamiResponse
-  alias Teiserver.Account
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Tachyon.Responses.Account.WhoamiResponse
+  alias Barserver.Account
 
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do

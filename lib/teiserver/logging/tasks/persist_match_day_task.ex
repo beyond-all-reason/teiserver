@@ -1,9 +1,9 @@
-defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
+defmodule Barserver.Logging.Tasks.PersistMatchDayTask do
   use Oban.Worker, queue: :teiserver
-  alias Teiserver.{Logging, Battle}
-  alias Teiserver.Battle.Tasks.BreakdownMatchDataTask
+  alias Barserver.{Logging, Battle}
+  alias Barserver.Battle.Tasks.BreakdownMatchDataTask
 
-  alias Teiserver.Repo
+  alias Barserver.Repo
   import Ecto.Query, warn: false
 
   @impl Oban.Worker
@@ -36,7 +36,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
 
         if Timex.compare(new_date, Timex.today()) == -1 do
           %{}
-          |> Teiserver.Logging.Tasks.PersistMatchDayTask.new()
+          |> Barserver.Logging.Tasks.PersistMatchDayTask.new()
           |> Oban.insert()
         end
 
@@ -48,7 +48,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
   end
 
   # To re-run yesterday's data
-  # Teiserver.Logging.Tasks.PersistMatchDayTask.run(Timex.today |> Timex.shift(days: -1))
+  # Barserver.Logging.Tasks.PersistMatchDayTask.run(Timex.today |> Timex.shift(days: -1))
 
   @spec run(%Date{}) :: :ok
   def run(date) do
@@ -70,7 +70,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
 
     # Delete old log if it exists
     delete_query =
-      from logs in Teiserver.Logging.MatchDayLog,
+      from logs in Barserver.Logging.MatchDayLog,
         where: logs.date == ^(date |> Timex.to_date())
 
     Repo.delete_all(delete_query)

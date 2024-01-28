@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.Moderation.ProposalView do
+defmodule BarserverWeb.Moderation.ProposalView do
   @moduledoc false
-  use TeiserverWeb, :view
+  use BarserverWeb, :view
 
   @spec view_colour() :: atom
-  def view_colour, do: Teiserver.Moderation.ProposalLib.colour()
+  def view_colour, do: Barserver.Moderation.ProposalLib.colour()
 
   @spec icon() :: String.t()
-  def icon, do: Teiserver.Moderation.ProposalLib.icon()
+  def icon, do: Barserver.Moderation.ProposalLib.icon()
 end

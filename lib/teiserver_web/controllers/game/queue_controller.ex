@@ -1,16 +1,16 @@
-defmodule TeiserverWeb.Game.QueueController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Game.QueueController do
+  use BarserverWeb, :controller
 
-  alias Teiserver.Game
-  alias Teiserver.Game.Queue
-  alias Teiserver.Game.QueueLib
-  alias Teiserver.Data.Matchmaking
-  alias Teiserver.Helper.StylingHelper
+  alias Barserver.Game
+  alias Barserver.Game.Queue
+  alias Barserver.Game.QueueLib
+  alias Barserver.Data.Matchmaking
+  alias Barserver.Helper.StylingHelper
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Game.Queue,
+    policy: Barserver.Game.Queue,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "admin",

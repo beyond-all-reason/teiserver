@@ -1,14 +1,14 @@
-defmodule Teiserver.Plugs.CachePlug do
+defmodule Barserver.Plugs.CachePlug do
   @moduledoc false
   import Plug.Conn
-  alias Teiserver.Config
+  alias Barserver.Config
 
   def init(_) do
   end
 
   def call(%{user_id: nil} = conn, _) do
     conn
-    |> assign(:tz, Application.get_env(:teiserver, Teiserver.Config)[:defaults].tz)
+    |> assign(:tz, Application.get_env(:teiserver, Barserver.Config)[:defaults].tz)
   end
 
   def call(conn, _) do
@@ -28,7 +28,7 @@ defmodule Teiserver.Plugs.CachePlug do
     socket
     |> Phoenix.LiveView.Utils.assign(
       :tz,
-      Application.get_env(:teiserver, Teiserver.Config)[:defaults].tz
+      Application.get_env(:teiserver, Barserver.Config)[:defaults].tz
     )
   end
 end

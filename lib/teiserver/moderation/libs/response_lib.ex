@@ -1,7 +1,7 @@
-defmodule Teiserver.Moderation.ResponseLib do
+defmodule Barserver.Moderation.ResponseLib do
   @moduledoc false
-  use TeiserverWeb, :library
-  alias Teiserver.Moderation.Response
+  use BarserverWeb, :library
+  alias Barserver.Moderation.Response
 
   # Functions
   @spec icon :: String.t()
@@ -14,10 +14,10 @@ defmodule Teiserver.Moderation.ResponseLib do
   def list_actions() do
     [
       {"Ignore", "fa-solid fa-clock"},
-      {"Warn", Teiserver.Moderation.ActionLib.action_icon("Warn")},
-      {"Mute", Teiserver.Moderation.ActionLib.action_icon("Mute")},
-      {"Suspend", Teiserver.Moderation.ActionLib.action_icon("Suspend")},
-      {"Ban", Teiserver.Moderation.ActionLib.action_icon("Ban")}
+      {"Warn", Barserver.Moderation.ActionLib.action_icon("Warn")},
+      {"Mute", Barserver.Moderation.ActionLib.action_icon("Mute")},
+      {"Suspend", Barserver.Moderation.ActionLib.action_icon("Suspend")},
+      {"Ban", Barserver.Moderation.ActionLib.action_icon("Ban")}
     ]
   end
 

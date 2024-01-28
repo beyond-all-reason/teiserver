@@ -1,4 +1,4 @@
-defmodule Teiserver.Common.PubsubListener do
+defmodule Barserver.Common.PubsubListener do
   @moduledoc """
   A genserver whose sole purpose is to listen to one or more pubusbs and record what they get sent
 
@@ -32,7 +32,7 @@ defmodule Teiserver.Common.PubsubListener do
   defp subscribe_to_item(items) when is_list(items), do: Enum.each(items, &subscribe_to_item/1)
 
   defp subscribe_to_item(item) do
-    :ok = PubSub.subscribe(Teiserver.PubSub, "#{item}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "#{item}")
   end
 
   # GenServer callbacks

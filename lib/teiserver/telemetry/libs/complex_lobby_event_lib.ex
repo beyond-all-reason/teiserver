@@ -1,8 +1,8 @@
-defmodule Teiserver.Telemetry.ComplexLobbyEventLib do
+defmodule Barserver.Telemetry.ComplexLobbyEventLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
-  alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.{ComplexLobbyEvent, ComplexLobbyEventQueries}
+  use BarserverWeb, :library_newform
+  alias Barserver.Telemetry
+  alias Barserver.Telemetry.{ComplexLobbyEvent, ComplexLobbyEventQueries}
   alias Phoenix.PubSub
 
   @broadcast_event_types ~w()
@@ -31,7 +31,7 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventLib do
       {:ok, _event} ->
         if Enum.member?(@broadcast_event_types, event_type_name) do
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "telemetry_complex_lobby_events",
             %{
               channel: "telemetry_complex_lobby_events",

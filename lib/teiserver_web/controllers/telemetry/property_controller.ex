@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.Telemetry.PropertyController do
-  use TeiserverWeb, :controller
-  alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.{AnonPropertyQueries, UserPropertyQueries, ExportPropertiesTask}
+defmodule BarserverWeb.Telemetry.PropertyController do
+  use BarserverWeb, :controller
+  alias Barserver.Telemetry
+  alias Barserver.Telemetry.{AnonPropertyQueries, UserPropertyQueries, ExportPropertiesTask}
   require Logger
 
   plug(AssignPlug,
@@ -10,9 +10,9 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Auth.Server,
+    policy: Barserver.Auth.Server,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
 

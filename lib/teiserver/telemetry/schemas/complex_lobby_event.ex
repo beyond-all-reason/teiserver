@@ -1,11 +1,11 @@
-defmodule Teiserver.Telemetry.ComplexLobbyEvent do
+defmodule Barserver.Telemetry.ComplexLobbyEvent do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "telemetry_complex_lobby_events" do
-    belongs_to :user, Teiserver.Account.User
-    belongs_to :match, Teiserver.Battle.Match
-    belongs_to :event_type, Teiserver.Telemetry.ComplexLobbyEventType
+    belongs_to :user, Barserver.Account.User
+    belongs_to :match, Barserver.Battle.Match
+    belongs_to :event_type, Barserver.Telemetry.ComplexLobbyEventType
     field :timestamp, :utc_datetime
     field :value, :map
   end

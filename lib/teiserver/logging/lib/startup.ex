@@ -1,6 +1,6 @@
-defmodule Teiserver.Logging.Startup do
+defmodule Barserver.Logging.Startup do
   @moduledoc false
-  use TeiserverWeb, :startup
+  use BarserverWeb, :startup
 
   def startup do
     add_permission_set("logging", "page_view", ~w(show delete report))

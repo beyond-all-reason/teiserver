@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.Account.SecurityController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Account.SecurityController do
+  use BarserverWeb, :controller
 
-  alias Teiserver.Account
+  alias Barserver.Account
 
   plug(:add_breadcrumb, name: 'Account', url: '/teiserver/account')
   plug(:add_breadcrumb, name: 'Security', url: '/teiserver/account/security')
@@ -45,7 +45,7 @@ defmodule TeiserverWeb.Account.SecurityController do
     case Account.update_user_password(user, user_params) do
       {:ok, _user} ->
         # User password updated
-        Teiserver.CacheUser.set_new_spring_password(user.id, user_params["password"])
+        Barserver.CacheUser.set_new_spring_password(user.id, user_params["password"])
 
         conn
         |> put_flash(:info, "Account password updated successfully.")

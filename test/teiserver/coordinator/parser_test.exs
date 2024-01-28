@@ -1,6 +1,6 @@
-defmodule Teiserver.Coordinator.CoordinatorParserTest do
-  use Teiserver.DataCase, async: true
-  alias Teiserver.Coordinator.Parser
+defmodule Barserver.Coordinator.CoordinatorParserTest do
+  use Barserver.DataCase, async: true
+  alias Barserver.Coordinator.Parser
 
   test "parsing commands" do
     cmd = Parser.parse_command(1, "$map map_name")

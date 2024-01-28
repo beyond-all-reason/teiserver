@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.ClientLive.Index do
-  use TeiserverWeb, :live_view
+defmodule BarserverWeb.ClientLive.Index do
+  use BarserverWeb, :live_view
   alias Phoenix.PubSub
 
-  alias Teiserver
-  alias Teiserver.{Client, CacheUser}
-  alias Teiserver.Account.UserLib
+  alias Barserver
+  alias Barserver.{Client, CacheUser}
+  alias Barserver.Account.UserLib
 
   @extra_menu_content """
   &nbsp;&nbsp;&nbsp;
@@ -32,7 +32,7 @@ defmodule TeiserverWeb.ClientLive.Index do
     socket =
       socket
       |> AuthPlug.live_call(session)
-      |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
+      |> add_breadcrumb(name: "Barserver", url: "/teiserver")
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Clients", url: "/teiserver/admin/client")
       |> assign(:site_menu_active, "teiserver_user")
@@ -114,7 +114,7 @@ defmodule TeiserverWeb.ClientLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_client_index_updates")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_liveview_client_index_updates")
 
     socket
     |> assign(:page_title, "Listing Clients")

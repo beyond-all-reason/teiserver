@@ -1,11 +1,11 @@
-defmodule TeiserverWeb.AdminDashLive.Index do
-  use TeiserverWeb, :live_view
+defmodule BarserverWeb.AdminDashLive.Index do
+  use BarserverWeb, :live_view
   alias Phoenix.PubSub
 
-  alias Teiserver
-  alias Teiserver.{Battle, Coordinator, Game}
-  alias Teiserver.Account.AccoladeLib
-  alias Teiserver.Data.Matchmaking
+  alias Barserver
+  alias Barserver.{Battle, Coordinator, Game}
+  alias Barserver.Account.AccoladeLib
+  alias Barserver.Data.Matchmaking
 
   @empty_telemetry_data %{
     client: %{
@@ -23,7 +23,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   @impl true
   def mount(_params, session, socket) do
     telemetry_data =
-      Teiserver.cache_get(:application_temp_cache, :telemetry_data) || @empty_telemetry_data
+      Barserver.cache_get(:application_temp_cache, :telemetry_data) || @empty_telemetry_data
 
     socket =
       socket
@@ -31,7 +31,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Dashboard", url: "/admin/dashboard")
       |> assign(:site_menu_active, "admin")
-      |> assign(:view_colour, Teiserver.Admin.AdminLib.colours())
+      |> assign(:view_colour, Barserver.Admin.AdminLib.colours())
       |> assign(:telemetry_client, telemetry_data.client)
       |> assign(:telemetry_battle, telemetry_data.battle)
       |> assign(:total_connected_clients, telemetry_data.total_clients_connected)
@@ -148,7 +148,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
         balancer_pid = Coordinator.get_balancer_pid(lobby_id)
 
         throttle_pid =
-          case Horde.Registry.lookup(Teiserver.ThrottleRegistry, "LobbyThrottle:#{lobby_id}") do
+          case Horde.Registry.lookup(Barserver.ThrottleRegistry, "LobbyThrottle:#{lobby_id}") do
             [{pid, _}] -> pid
             _ -> nil
           end
@@ -167,7 +167,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   @spec update_server_pids(Plug.Socket.t()) :: Plug.Socket.t()
   defp update_server_pids(socket) do
     lobby_id_server_pid =
-      case Horde.Registry.lookup(Teiserver.ServerRegistry, "LobbyIdServer") do
+      case Horde.Registry.lookup(Barserver.ServerRegistry, "LobbyIdServer") do
         [{pid, _}] -> pid
         _ -> nil
       end
@@ -176,8 +176,8 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       {"Lobby ID server", lobby_id_server_pid},
       {"Coordinator", Coordinator.get_coordinator_pid()},
       {"Accolades", AccoladeLib.get_accolade_bot_pid()},
-      {"Match Monitor", Teiserver.Battle.MatchMonitorServer.get_match_monitor_pid()},
-      {"Automod", Teiserver.Coordinator.AutomodServer.get_automod_pid()}
+      {"Match Monitor", Barserver.Battle.MatchMonitorServer.get_match_monitor_pid()},
+      {"Automod", Barserver.Coordinator.AutomodServer.get_automod_pid()}
     ]
 
     socket
@@ -185,7 +185,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_telemetry")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_telemetry")
 
     socket
     |> assign(:page_title, "Admin dashboard")

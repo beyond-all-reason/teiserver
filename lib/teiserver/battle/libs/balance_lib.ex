@@ -1,12 +1,12 @@
-defmodule Teiserver.Battle.BalanceLib do
+defmodule Barserver.Battle.BalanceLib do
   @moduledoc """
-  A set of functions related to balance, if you are looking to see how balance is implemented this is the place. Ratings are calculated via Teiserver.Game.MatchRatingLib and are used here. Please note ratings and balance are two very different things and complaints about imbalanced games need to be correct in addressing balance vs ratings.
+  A set of functions related to balance, if you are looking to see how balance is implemented this is the place. Ratings are calculated via Barserver.Game.MatchRatingLib and are used here. Please note ratings and balance are two very different things and complaints about imbalanced games need to be correct in addressing balance vs ratings.
   """
-  alias Teiserver.{Account, Config}
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Battle.Balance.BalanceTypes, as: BT
-  alias Teiserver.Game.MatchRatingLib
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
+  alias Barserver.{Account, Config}
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Battle.Balance.BalanceTypes, as: BT
+  alias Barserver.Game.MatchRatingLib
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
 
   # These are default values and can be overridden as part of the call to create_balance()
 
@@ -43,9 +43,9 @@ defmodule Teiserver.Battle.BalanceLib do
   @spec algorithm_modules() :: %{String.t() => module}
   def algorithm_modules() do
     %{
-      "loser_picks" => Teiserver.Battle.Balance.LoserPicks,
-      "force_party" => Teiserver.Battle.Balance.ForceParty,
-      "cheeky_switcher_smart" => Teiserver.Battle.Balance.CheekySwitcherSmart
+      "loser_picks" => Barserver.Battle.Balance.LoserPicks,
+      "force_party" => Barserver.Battle.Balance.ForceParty,
+      "cheeky_switcher_smart" => Barserver.Battle.Balance.CheekySwitcherSmart
     }
   end
 

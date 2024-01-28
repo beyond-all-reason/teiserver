@@ -1,9 +1,9 @@
-defmodule TeiserverWeb.Admin.CodeView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Admin.CodeView do
+  use BarserverWeb, :view
 
   @spec view_colour() :: {String.t(), String.t(), String.t()}
-  def view_colour(), do: Teiserver.Account.CodeLib.colours()
+  def view_colour(), do: Barserver.Account.CodeLib.colours()
 
   @spec icon() :: String.t()
-  def icon(), do: Teiserver.Account.CodeLib.icon()
+  def icon(), do: Barserver.Account.CodeLib.icon()
 end

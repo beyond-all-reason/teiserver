@@ -1,7 +1,7 @@
-defmodule Teiserver.Microblog.PostTagLib do
+defmodule Barserver.Microblog.PostTagLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
-  alias Teiserver.Microblog.{PostTag, PostTagQueries}
+  use BarserverWeb, :library_newform
+  alias Barserver.Microblog.{PostTag, PostTagQueries}
 
   @doc """
   Returns the list of post_tags.

@@ -1,15 +1,15 @@
-defmodule TeiserverWeb.Admin.BadgeTypeController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Admin.BadgeTypeController do
+  use BarserverWeb, :controller
 
-  alias Teiserver.Account
-  alias Teiserver.Account.BadgeType
-  alias Teiserver.Account.BadgeTypeLib
-  alias Teiserver.Helper.StylingHelper
+  alias Barserver.Account
+  alias Barserver.Account.BadgeType
+  alias Barserver.Account.BadgeTypeLib
+  alias Barserver.Helper.StylingHelper
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Account.BadgeType,
+    policy: Barserver.Account.BadgeType,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "admin"

@@ -1,5 +1,5 @@
-defmodule Teiserver.Protocols.Tachyon.V1.AuthOut do
-  alias Teiserver.Protocols.Tachyon.V1.Tachyon
+defmodule Barserver.Protocols.Tachyon.V1.AuthOut do
+  alias Barserver.Protocols.Tachyon.V1.Tachyon
 
   @spec do_reply(atom(), any) :: Map.t()
 
@@ -27,7 +27,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthOut do
     %{
       "cmd" => "s.auth.login",
       "result" => "unverified",
-      "agreement" => Application.get_env(:teiserver, Teiserver)[:user_agreement]
+      "agreement" => Application.get_env(:teiserver, Barserver)[:user_agreement]
     }
   end
 

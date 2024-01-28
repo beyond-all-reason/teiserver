@@ -1,11 +1,11 @@
-defmodule TeiserverWeb.Battle.LobbyLive.Chat do
-  use TeiserverWeb, :live_view
+defmodule BarserverWeb.Battle.LobbyLive.Chat do
+  use BarserverWeb, :live_view
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{Account, Battle, CacheUser, Chat, Lobby, Client}
-  alias Teiserver.Chat.LobbyMessage
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.{Account, Battle, CacheUser, Chat, Lobby, Client}
+  alias Barserver.Chat.LobbyMessage
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @message_count 25
 
@@ -20,7 +20,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
     socket =
       socket
-      |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
+      |> add_breadcrumb(name: "Barserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/battle/lobbies")
       |> assign(:site_menu_active, "teiserver_lobbies")
       |> assign(:view_colour, Lobby.colours())
@@ -38,10 +38,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     current_user = socket.assigns[:current_user]
     lobby = Battle.get_lobby(id)
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{id}")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_lobby_updates:#{id}")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_lobby_chat:#{id}")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_user_updates:#{current_user.id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_lobby_chat:#{id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_liveview_lobby_updates:#{id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_liveview_lobby_chat:#{id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_user_updates:#{current_user.id}")
 
     cond do
       lobby == nil ->
@@ -97,7 +97,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
          |> assign(:messages, messages)
          |> assign(:user_map, %{})
          |> assign(:clients, clients)
-         |> assign(:view_colour, Teiserver.Lobby.colours())
+         |> assign(:view_colour, Barserver.Lobby.colours())
          |> update_user_map}
     end
   end

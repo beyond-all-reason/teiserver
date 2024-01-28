@@ -1,24 +1,24 @@
-defmodule Teiserver.Moderation.Proposal do
+defmodule Barserver.Moderation.Proposal do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "moderation_proposals" do
-    belongs_to :proposer, Teiserver.Account.User
-    belongs_to :target, Teiserver.Account.User
-    belongs_to :action, Teiserver.Moderation.Action
+    belongs_to :proposer, Barserver.Account.User
+    belongs_to :target, Barserver.Account.User
+    belongs_to :action, Barserver.Moderation.Action
 
     field :restrictions, {:array, :string}
     field :reason, :string
     field :duration, :string
 
-    belongs_to :concluder, Teiserver.Account.User
+    belongs_to :concluder, Barserver.Account.User
     field :conclusion_comments, :string
 
     field :votes_for, :integer
     field :votes_against, :integer
     field :votes_abstain, :integer
 
-    has_many :votes, Teiserver.Moderation.ProposalVote, foreign_key: :proposal_id
+    has_many :votes, Barserver.Moderation.ProposalVote, foreign_key: :proposal_id
 
     timestamps()
   end

@@ -1,16 +1,16 @@
-defmodule TeiserverWeb.Live.ClientTest do
+defmodule BarserverWeb.Live.ClientTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase, async: false
+  use BarserverWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
 
-  alias Teiserver.Client
+  alias Barserver.Client
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.TeiserverTestLib
-  import Teiserver.TeiserverTestLib, only: [_send_raw: 2]
+  alias Barserver.BarserverTestLib
+  import Barserver.BarserverTestLib, only: [_send_raw: 2]
 
   setup do
-    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
-    |> TeiserverTestLib.conn_setup()
+    GeneralTestLib.conn_setup(Barserver.BarserverTestLib.admin_permissions())
+    |> BarserverTestLib.conn_setup()
   end
 
   @sleep_time 2100
@@ -25,7 +25,7 @@ defmodule TeiserverWeb.Live.ClientTest do
       # Sleeps are to allow for the throttle server to update us
 
       # Time to add a client
-      %{socket: socket1, user: user1} = TeiserverTestLib.auth_setup()
+      %{socket: socket1, user: user1} = BarserverTestLib.auth_setup()
 
       :timer.sleep(@sleep_time)
       html = render(view)
@@ -33,7 +33,7 @@ defmodule TeiserverWeb.Live.ClientTest do
       assert html =~ "#{user1.name}"
 
       # Another
-      %{socket: socket2, user: user2} = TeiserverTestLib.auth_setup()
+      %{socket: socket2, user: user2} = BarserverTestLib.auth_setup()
       :timer.sleep(@sleep_time)
       html = render(view)
       assert html =~ "Clients - "
@@ -58,7 +58,7 @@ defmodule TeiserverWeb.Live.ClientTest do
     end
 
     test "show - valid client", %{conn: conn} do
-      %{socket: socket, user: user} = TeiserverTestLib.auth_setup()
+      %{socket: socket, user: user} = BarserverTestLib.auth_setup()
       # client = Client.get_client_by_id(user.id)
 
       {:ok, view, html} = live(conn, "/teiserver/admin/client/#{user.id}")
@@ -81,7 +81,7 @@ defmodule TeiserverWeb.Live.ClientTest do
     end
 
     test "force disconnect client", %{conn: conn} do
-      %{user: user} = TeiserverTestLib.auth_setup()
+      %{user: user} = BarserverTestLib.auth_setup()
 
       {:ok, view, _html} = live(conn, "/teiserver/admin/client/#{user.id}")
       assert Client.get_client_by_id(user.id) != nil

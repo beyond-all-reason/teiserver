@@ -1,10 +1,10 @@
-defmodule Teiserver.Coordinator.CoordinatorCommands do
-  alias Teiserver.{CacheUser, Account, Client, Coordinator, Moderation}
-  alias Teiserver.Lobby
-  alias Teiserver.Helper.NumberHelper
-  alias Teiserver.Account.{AccoladeLib, CodeOfConductData}
-  alias Teiserver.Coordinator.CoordinatorLib
-  alias Teiserver.Config
+defmodule Barserver.Coordinator.CoordinatorCommands do
+  alias Barserver.{CacheUser, Account, Client, Coordinator, Moderation}
+  alias Barserver.Lobby
+  alias Barserver.Helper.NumberHelper
+  alias Barserver.Account.{AccoladeLib, CodeOfConductData}
+  alias Barserver.Coordinator.CoordinatorLib
+  alias Barserver.Config
 
   @splitter "---------------------------"
   @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore matchmaking website party)
@@ -91,7 +91,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         }
       })
 
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, BarserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
 
     Coordinator.send_to_user(senderid, [
@@ -118,7 +118,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         }
       })
 
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, BarserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
 
     msg =
@@ -141,7 +141,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     player_hours = (Map.get(stats, "player_minutes", 0) / 60) |> round
     spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> round
 
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, BarserverWeb.Endpoint)[:url][:host]
     profile_link = "https://#{host}/profile/#{senderid}"
 
     accolades = AccoladeLib.get_player_accolades(senderid)
@@ -244,7 +244,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
             ]
           end
 
-        host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+        host = Application.get_env(:teiserver, BarserverWeb.Endpoint)[:url][:host]
         profile_link = "https://#{host}/profile/#{user.id}"
 
         ratings =
@@ -373,18 +373,18 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       CacheUser.send_direct_message(
         state.userid,
         senderid,
-        "You already have a discord account linked; the discord link is: #{Application.get_env(:teiserver, Teiserver)[:discord]}"
+        "You already have a discord account linked; the discord link is: #{Application.get_env(:teiserver, Barserver)[:discord]}"
       )
     else
       code = (:rand.uniform(899_999) + 100_000) |> to_string
-      Teiserver.cache_put(:discord_bridge_account_codes, senderid, code)
+      Barserver.cache_put(:discord_bridge_account_codes, senderid, code)
 
       CacheUser.send_direct_message(state.userid, senderid, [
         @splitter,
-        "To link your discord account, message the the discord bot (Teiserver Bridge) with the message",
+        "To link your discord account, message the the discord bot (Barserver Bridge) with the message",
         "$discord #{senderid}-#{code}",
         "This code will expire after 5 minutes",
-        "The discord link is: #{Application.get_env(:teiserver, Teiserver)[:discord]}"
+        "The discord link is: #{Application.get_env(:teiserver, Barserver)[:discord]}"
       ])
     end
 
@@ -517,7 +517,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         metadata: %{ip: client.ip}
       })
 
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, BarserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
 
     Coordinator.send_to_user(

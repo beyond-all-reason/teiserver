@@ -1,10 +1,10 @@
-defmodule Teiserver.Coordinator.ModerationTest do
-  use Teiserver.ServerCase, async: false
-  alias Teiserver.{User, Coordinator, Client, Moderation}
-  import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
-  alias Teiserver.Moderation.RefreshUserRestrictionsTask
+defmodule Barserver.Coordinator.ModerationTest do
+  use Barserver.ServerCase, async: false
+  alias Barserver.{User, Coordinator, Client, Moderation}
+  import Barserver.Helper.TimexHelper, only: [date_to_str: 2]
+  alias Barserver.Moderation.RefreshUserRestrictionsTask
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [new_user: 0, tachyon_auth_setup: 1, _tachyon_send: 2, _tachyon_recv: 1]
 
   setup do
@@ -14,7 +14,7 @@ defmodule Teiserver.Coordinator.ModerationTest do
   end
 
   test "login with warning", %{user: user} do
-    delay = Teiserver.Config.get_site_config_cache("teiserver.Post login action delay")
+    delay = Barserver.Config.get_site_config_cache("teiserver.Post login action delay")
 
     refute User.has_warning?(user.id)
     refute User.has_mute?(user.id)

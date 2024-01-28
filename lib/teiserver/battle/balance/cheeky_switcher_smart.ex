@@ -1,4 +1,4 @@
-defmodule Teiserver.Battle.Balance.CheekySwitcherSmart do
+defmodule Barserver.Battle.Balance.CheekySwitcherSmart do
   @moduledoc """
   Created by fumbleforce as part of PR 139.
 
@@ -18,9 +18,9 @@ defmodule Teiserver.Battle.Balance.CheekySwitcherSmart do
   """
 
   # Alias the types
-  alias Teiserver.Account
-  alias Teiserver.Battle.BalanceLib
-  alias Teiserver.Battle.Balance.BalanceTypes, as: BT
+  alias Barserver.Account
+  alias Barserver.Battle.BalanceLib
+  alias Barserver.Battle.Balance.BalanceTypes, as: BT
 
   # @type algorithm_state :: %{
   #   teams: map,

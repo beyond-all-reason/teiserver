@@ -1,7 +1,7 @@
-defmodule Teiserver.Account.ClientLib do
+defmodule Barserver.Account.ClientLib do
   alias Phoenix.PubSub
-  alias Teiserver.{Account, Battle}
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.{Account, Battle}
+  alias Barserver.Data.Types, as: T
 
   @spec colours() :: atom
   def colours, do: :primary
@@ -38,7 +38,7 @@ defmodule Teiserver.Account.ClientLib do
 
   @spec list_client_ids() :: [T.userid()]
   def list_client_ids() do
-    Horde.Registry.select(Teiserver.ClientRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    Horde.Registry.select(Barserver.ClientRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   @spec list_clients() :: [T.client()]
@@ -108,11 +108,11 @@ defmodule Teiserver.Account.ClientLib do
     # Update the process with it
     cast_client(userid, {:update_client, client})
 
-    # PubSub.broadcast(Teiserver.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
+    # PubSub.broadcast(Barserver.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
 
     if client.lobby_id do
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_lobby_updates:#{client.lobby_id}",
         %{
           channel: "teiserver_lobby_updates",
@@ -154,14 +154,14 @@ defmodule Teiserver.Account.ClientLib do
     cast_client(userid, {:update_client, client})
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "legacy_all_client_updates",
       {:updated_client, client, reason}
     )
 
     if client.lobby_id do
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_lobby_updates:#{client.lobby_id}",
         %{
           channel: "teiserver_lobby_updates",
@@ -202,8 +202,8 @@ defmodule Teiserver.Account.ClientLib do
   @spec start_client_server(T.lobby()) :: pid()
   def start_client_server(client) do
     {:ok, server_pid} =
-      DynamicSupervisor.start_child(Teiserver.ClientSupervisor, {
-        Teiserver.Account.ClientServer,
+      DynamicSupervisor.start_child(Barserver.ClientSupervisor, {
+        Barserver.Account.ClientServer,
         name: "client_#{client.userid}",
         data: %{
           client: client
@@ -215,7 +215,7 @@ defmodule Teiserver.Account.ClientLib do
 
   @spec client_exists?(T.userid()) :: pid() | boolean
   def client_exists?(userid) do
-    case Horde.Registry.lookup(Teiserver.ClientRegistry, userid) do
+    case Horde.Registry.lookup(Barserver.ClientRegistry, userid) do
       [{_pid, _}] -> true
       _ -> false
     end
@@ -223,7 +223,7 @@ defmodule Teiserver.Account.ClientLib do
 
   @spec get_client_pid(T.userid()) :: pid() | nil
   def get_client_pid(userid) do
-    case Horde.Registry.lookup(Teiserver.ClientRegistry, userid) do
+    case Horde.Registry.lookup(Barserver.ClientRegistry, userid) do
       [{pid, _}] -> pid
       _ -> nil
     end
@@ -266,7 +266,7 @@ defmodule Teiserver.Account.ClientLib do
         nil
 
       p ->
-        DynamicSupervisor.terminate_child(Teiserver.ClientSupervisor, p)
+        DynamicSupervisor.terminate_child(Barserver.ClientSupervisor, p)
         :ok
     end
   end
@@ -285,8 +285,8 @@ defmodule Teiserver.Account.ClientLib do
       | userid: user.id,
         name: user.name,
         rank: user.rank,
-        moderator: Teiserver.CacheUser.is_moderator?(user),
-        bot: Teiserver.CacheUser.is_bot?(user),
+        moderator: Barserver.CacheUser.is_moderator?(user),
+        bot: Barserver.CacheUser.is_bot?(user),
         ip: stats["last_ip"],
         country: stats["country"],
         lobby_client: stats["lobby_client"]

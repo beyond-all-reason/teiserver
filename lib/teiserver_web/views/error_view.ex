@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.ErrorView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.ErrorView do
+  use BarserverWeb, :view
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-exclamation-triangle"

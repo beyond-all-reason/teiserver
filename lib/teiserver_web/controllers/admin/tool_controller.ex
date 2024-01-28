@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.Admin.ToolController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Admin.ToolController do
+  use BarserverWeb, :controller
 
   plug(AssignPlug,
     site_menu_active: "admin",
@@ -7,9 +7,9 @@ defmodule TeiserverWeb.Admin.ToolController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Account.Admin,
+    policy: Barserver.Account.Admin,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: "Admin", url: "/teiserver/admin")
   plug(:add_breadcrumb, name: "Tools", url: "/teiserver/admin/tools")

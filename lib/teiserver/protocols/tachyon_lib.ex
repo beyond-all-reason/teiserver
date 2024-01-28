@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.TachyonLib do
+defmodule Barserver.Protocols.TachyonLib do
   require Logger
 
   @spec get_modules :: {module(), module()}
@@ -6,11 +6,11 @@ defmodule Teiserver.Protocols.TachyonLib do
 
   @spec get_modules(String.t()) :: {module(), module()}
   def get_modules("dev") do
-    {Teiserver.Protocols.Tachyon.V1.TachyonIn, Teiserver.Protocols.Tachyon.V1.TachyonOut}
+    {Barserver.Protocols.Tachyon.V1.TachyonIn, Barserver.Protocols.Tachyon.V1.TachyonOut}
   end
 
   def get_modules("v1") do
-    {Teiserver.Protocols.Tachyon.V1.TachyonIn, Teiserver.Protocols.Tachyon.V1.TachyonOut}
+    {Barserver.Protocols.Tachyon.V1.TachyonIn, Barserver.Protocols.Tachyon.V1.TachyonOut}
   end
 
   @spec format_log(String.t()) :: String.t()

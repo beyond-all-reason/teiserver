@@ -1,15 +1,15 @@
-defmodule TeiserverWeb.Admin.TextCallbackController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Admin.TextCallbackController do
+  use BarserverWeb, :controller
 
-  alias Teiserver.{Communication, Logging, Account}
-  alias Teiserver.Communication.TextCallbackLib
-  import Teiserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
-  alias Teiserver.Helper.StylingHelper
+  alias Barserver.{Communication, Logging, Account}
+  alias Barserver.Communication.TextCallbackLib
+  import Barserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
+  alias Barserver.Helper.StylingHelper
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Communication.TextCallback,
+    policy: Barserver.Communication.TextCallback,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "admin",

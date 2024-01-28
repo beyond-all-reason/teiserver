@@ -1,11 +1,11 @@
-defmodule Teiserver.Account.Tasks.DailyCleanupTask do
+defmodule Barserver.Account.Tasks.DailyCleanupTask do
   use Oban.Worker, queue: :cleanup
-  alias Teiserver.Account
+  alias Barserver.Account
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    days = Application.get_env(:teiserver, Teiserver)[:retention][:account_unverified]
+    days = Application.get_env(:teiserver, Barserver)[:retention][:account_unverified]
 
     # Find all unverified users who registered over 14 days ago
     _id_list =

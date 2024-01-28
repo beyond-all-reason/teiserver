@@ -1,7 +1,7 @@
-defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
-  # alias Teiserver.Client
-  alias Teiserver.Data.Matchmaking
-  import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
+defmodule Barserver.Protocols.Tachyon.V1.MatchmakingIn do
+  # alias Barserver.Client
+  alias Barserver.Data.Matchmaking
+  import Barserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
   def do_handle("query", %{"query" => _query}, state) do

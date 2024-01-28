@@ -1,12 +1,12 @@
-defmodule Teiserver.Coordinator.AutomodServer do
+defmodule Barserver.Coordinator.AutomodServer do
   @moduledoc false
   use GenServer
-  alias Teiserver.Config
-  import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
-  alias Teiserver.{Account, CacheUser, Moderation, Coordinator, Client}
+  alias Barserver.Config
+  import Barserver.Logging.Helpers, only: [add_audit_log: 4]
+  alias Barserver.{Account, CacheUser, Moderation, Coordinator, Client}
   alias Phoenix.PubSub
   require Logger
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @tick_interval 60_000
 
@@ -17,7 +17,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @spec start_automod_server() :: :ok | {:failure, String.t()}
   def start_automod_server() do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
+    case Horde.Registry.lookup(Barserver.ServerRegistry, "AutomodServer") do
       [{_pid, _}] ->
         {:failure, "Already started"}
 
@@ -29,9 +29,9 @@ defmodule Teiserver.Coordinator.AutomodServer do
   @spec do_start() :: :ok
   defp do_start() do
     {:ok, _automod_pid} =
-      DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
-        Teiserver.Coordinator.AutomodServer,
-        name: Teiserver.Coordinator.AutomodServer, data: %{}
+      DynamicSupervisor.start_child(Barserver.Coordinator.DynamicSupervisor, {
+        Barserver.Coordinator.AutomodServer,
+        name: Barserver.Coordinator.AutomodServer, data: %{}
       })
 
     :ok
@@ -43,8 +43,8 @@ defmodule Teiserver.Coordinator.AutomodServer do
   end
 
   def handle_info(:begin, state) do
-    :ok = PubSub.subscribe(Teiserver.PubSub, "client_inout")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "telemetry_user_properties")
+    :ok = PubSub.subscribe(Barserver.PubSub, "client_inout")
+    :ok = PubSub.subscribe(Barserver.PubSub, "telemetry_user_properties")
     coordinator_id = Coordinator.get_coordinator_userid()
 
     if coordinator_id != nil do
@@ -119,7 +119,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
     Horde.Registry.register(
-      Teiserver.ServerRegistry,
+      Barserver.ServerRegistry,
       "AutomodServer",
       :automod
     )
@@ -209,7 +209,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @spec get_automod_pid() :: pid() | nil
   def get_automod_pid() do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
+    case Horde.Registry.lookup(Barserver.ServerRegistry, "AutomodServer") do
       [{pid, _}] ->
         pid
 

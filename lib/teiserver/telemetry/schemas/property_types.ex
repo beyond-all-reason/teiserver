@@ -1,6 +1,6 @@
-defmodule Teiserver.Telemetry.PropertyType do
+defmodule Barserver.Telemetry.PropertyType do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "telemetry_property_types" do
     field :name, :string

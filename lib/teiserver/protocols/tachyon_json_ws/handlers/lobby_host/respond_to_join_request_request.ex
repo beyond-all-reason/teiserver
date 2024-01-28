@@ -1,8 +1,8 @@
-defmodule Teiserver.Tachyon.Handlers.LobbyHost.RespondToJoinRequestRequest do
+defmodule Barserver.Tachyon.Handlers.LobbyHost.RespondToJoinRequestRequest do
   @moduledoc false
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Lobby
-  alias Teiserver.Tachyon.Responses.LobbyHost.RespondToJoinRequestResponse
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Lobby
+  alias Barserver.Tachyon.Responses.LobbyHost.RespondToJoinRequestResponse
 
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do

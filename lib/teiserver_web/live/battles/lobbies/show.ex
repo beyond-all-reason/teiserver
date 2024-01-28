@@ -1,11 +1,11 @@
-defmodule TeiserverWeb.Battle.LobbyLive.Show do
-  use TeiserverWeb, :live_view
+defmodule BarserverWeb.Battle.LobbyLive.Show do
+  use BarserverWeb, :live_view
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.Battle.BalanceLib
-  alias Teiserver.{Account, Battle, Coordinator, Lobby, CacheUser, Telemetry}
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.Battle.BalanceLib
+  alias Barserver.{Account, Battle, Coordinator, Lobby, CacheUser, Telemetry}
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @extra_menu_content """
     &nbsp;&nbsp;&nbsp;
@@ -37,8 +37,8 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
     socket =
       socket
-      |> Teiserver.ServerUserPlug.live_call()
-      |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
+      |> Barserver.ServerUserPlug.live_call()
+      |> add_breadcrumb(name: "Barserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/battle/lobbies")
       |> assign(:friends, friends)
       |> assign(:ignored, ignored)
@@ -65,13 +65,13 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     id = int_parse(id)
     current_user = socket.assigns[:current_user]
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_lobby_updates:#{id}")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_user_updates:#{current_user.id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_liveview_lobby_updates:#{id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_user_updates:#{current_user.id}")
     lobby = Battle.get_lobby(id)
 
     :ok =
       PubSub.subscribe(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_client_messages:#{socket.assigns[:current_user].id}"
       )
 
@@ -128,7 +128,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> Map.drop([nil])
       |> Map.filter(fn {_id, members} -> Enum.count(members) > 1 end)
       |> Map.keys()
-      |> Enum.zip(Teiserver.Helper.StylingHelper.bright_hex_colour_list())
+      |> Enum.zip(Barserver.Helper.StylingHelper.bright_hex_colour_list())
       |> Map.new()
 
     stats =
@@ -252,7 +252,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
   def handle_event("send-to-host", %{"msg" => msg}, %{assigns: assigns} = socket) do
     from_id = Coordinator.get_coordinator_userid()
-    Teiserver.Coordinator.Parser.handle_in(from_id, msg, assigns.id)
+    Barserver.Coordinator.Parser.handle_in(from_id, msg, assigns.id)
 
     {:noreply, socket}
   end

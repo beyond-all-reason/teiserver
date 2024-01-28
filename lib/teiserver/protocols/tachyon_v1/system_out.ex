@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Tachyon.V1.SystemOut do
+defmodule Barserver.Protocols.Tachyon.V1.SystemOut do
   @spec do_reply(atom(), any) :: Map.t()
   def do_reply(:pong, _data) do
     %{

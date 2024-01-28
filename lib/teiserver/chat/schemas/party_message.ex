@@ -1,11 +1,11 @@
-defmodule Teiserver.Chat.PartyMessage do
-  use TeiserverWeb, :schema
+defmodule Barserver.Chat.PartyMessage do
+  use BarserverWeb, :schema
 
   schema "teiserver_party_messages" do
     field :content, :string
     field :party_id, :string
     field :inserted_at, :utc_datetime
-    belongs_to :user, Teiserver.Account.User
+    belongs_to :user, Barserver.Account.User
   end
 
   @doc """

@@ -1,4 +1,4 @@
-defmodule Teiserver.Logging.MatchGraphLogsTask do
+defmodule Barserver.Logging.MatchGraphLogsTask do
   @moduledoc false
 
   @spec perform(list, String.t(), String.t()) :: list()

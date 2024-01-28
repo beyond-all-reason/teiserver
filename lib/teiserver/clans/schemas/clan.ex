@@ -1,5 +1,5 @@
-defmodule Teiserver.Clans.Clan do
-  use TeiserverWeb, :schema
+defmodule Barserver.Clans.Clan do
+  use BarserverWeb, :schema
 
   schema "teiserver_clans" do
     field :name, :string
@@ -13,14 +13,14 @@ defmodule Teiserver.Clans.Clan do
     field :rating, :map, default: %{}
     field :homepage, :map, default: %{}
 
-    has_many :memberships, Teiserver.Clans.ClanMembership, foreign_key: :clan_id
-    has_many :invites, Teiserver.Clans.ClanInvite, foreign_key: :clan_id
+    has_many :memberships, Barserver.Clans.ClanMembership, foreign_key: :clan_id
+    has_many :invites, Barserver.Clans.ClanInvite, foreign_key: :clan_id
 
-    many_to_many :members, Teiserver.Account.User,
+    many_to_many :members, Barserver.Account.User,
       join_through: "teiserver_clan_memberships",
       join_keys: [clan_id: :id, user_id: :id]
 
-    many_to_many :invitees, Teiserver.Account.User,
+    many_to_many :invitees, Barserver.Account.User,
       join_through: "teiserver_clan_invites",
       join_keys: [clan_id: :id, user_id: :id]
 

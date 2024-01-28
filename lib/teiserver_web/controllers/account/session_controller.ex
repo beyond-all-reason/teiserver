@@ -1,8 +1,8 @@
-defmodule TeiserverWeb.Account.SessionController do
-  use TeiserverWeb, :controller
-  alias Teiserver.Account
-  alias Teiserver.Config
-  alias Teiserver.Logging.LoggingPlug
+defmodule BarserverWeb.Account.SessionController do
+  use BarserverWeb, :controller
+  alias Barserver.Account
+  alias Barserver.Config
+  alias Barserver.Logging.LoggingPlug
   alias Account.{Guardian, User, UserLib}
   require Logger
 
@@ -119,7 +119,7 @@ defmodule TeiserverWeb.Account.SessionController do
   def forgot_password(conn, _params) do
     key = UUID.uuid1()
     value = UUID.uuid1()
-    Teiserver.cache_put(:codes, key, value)
+    Barserver.cache_put(:codes, key, value)
 
     conn
     |> assign(:key, key)
@@ -140,7 +140,7 @@ defmodule TeiserverWeb.Account.SessionController do
       end
 
     key = params["key"]
-    expected_value = Teiserver.cache_get(:codes, key)
+    expected_value = Barserver.cache_get(:codes, key)
 
     existing_resets =
       Account.list_codes(
@@ -165,7 +165,7 @@ defmodule TeiserverWeb.Account.SessionController do
       expected_value == nil ->
         key = UUID.uuid1()
         value = UUID.uuid1()
-        Teiserver.cache_put(:codes, key, value)
+        Barserver.cache_put(:codes, key, value)
 
         conn
         |> assign(:key, key)
@@ -176,7 +176,7 @@ defmodule TeiserverWeb.Account.SessionController do
       params[key] != expected_value ->
         key = UUID.uuid1()
         value = UUID.uuid1()
-        Teiserver.cache_put(:codes, key, value)
+        Barserver.cache_put(:codes, key, value)
 
         conn
         |> assign(:key, key)
@@ -187,7 +187,7 @@ defmodule TeiserverWeb.Account.SessionController do
       user.id == -1 ->
         key = UUID.uuid1()
         value = UUID.uuid1()
-        Teiserver.cache_put(:codes, key, value)
+        Barserver.cache_put(:codes, key, value)
 
         conn
         |> assign(:key, key)
@@ -197,7 +197,7 @@ defmodule TeiserverWeb.Account.SessionController do
 
       true ->
         Account.Emails.password_reset(user)
-        |> Teiserver.Mailer.deliver_now()
+        |> Barserver.Mailer.deliver_now()
 
         conn
         |> put_flash(:success, "Password reset sent out")
@@ -269,9 +269,9 @@ defmodule TeiserverWeb.Account.SessionController do
         case Account.update_user(code.user, user_params) do
           {:ok, user} ->
             # User password reset successfully
-            Teiserver.CacheUser.set_new_spring_password(user.id, pass1)
+            Barserver.CacheUser.set_new_spring_password(user.id, pass1)
 
-            Teiserver.Logging.Helpers.add_anonymous_audit_log(
+            Barserver.Logging.Helpers.add_anonymous_audit_log(
               conn,
               "Account:User password reset",
               %{

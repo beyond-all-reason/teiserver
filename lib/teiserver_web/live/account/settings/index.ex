@@ -1,8 +1,8 @@
-defmodule TeiserverWeb.Account.SettingsLive.Index do
+defmodule BarserverWeb.Account.SettingsLive.Index do
   @moduledoc false
-  use TeiserverWeb, :live_view
+  use BarserverWeb, :live_view
 
-  alias Teiserver.Config
+  alias Barserver.Config
 
   @impl true
   def mount(_, _session, socket) do
@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Account.SettingsLive.Index do
       socket
       |> assign(:tab, nil)
       |> assign(:site_menu_active, "teiserver_account")
-      |> assign(:view_colour, Teiserver.Account.UserLib.colours())
+      |> assign(:view_colour, Barserver.Account.UserLib.colours())
       |> assign(:show_descriptions, false)
       |> assign(:temp_value, nil)
       |> assign(:selected_key, nil)

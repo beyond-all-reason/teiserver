@@ -1,15 +1,15 @@
-defmodule TeiserverWeb.Battle.MatchLive.Index do
-  use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Battle}
+defmodule BarserverWeb.Battle.MatchLive.Index do
+  use BarserverWeb, :live_view
+  alias Barserver.{Account, Battle}
 
   @impl true
   def mount(_params, _session, socket) do
-    game_types = ["Any type" | Teiserver.Battle.MatchLib.list_game_types()]
+    game_types = ["Any type" | Barserver.Battle.MatchLib.list_game_types()]
 
     socket =
       socket
       |> assign(:site_menu_active, "match")
-      |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
+      |> assign(:view_colour, Barserver.Battle.MatchLib.colours())
       |> assign(:game_types, game_types)
       |> add_breadcrumb(name: "Matches", url: "/battle/matches")
       |> default_filters()

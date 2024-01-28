@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.API.SessionController do
-  use TeiserverWeb, :controller
-  alias Teiserver.{Account, CacheUser}
-  alias Teiserver.Account.UserLib
+defmodule BarserverWeb.API.SessionController do
+  use BarserverWeb, :controller
+  alias Barserver.{Account, CacheUser}
+  alias Barserver.Account.UserLib
 
   @spec login(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def login(conn, %{"user" => %{"email" => email, "password" => password}}) do
@@ -27,7 +27,7 @@ defmodule TeiserverWeb.API.SessionController do
   @spec register(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def register(conn, %{"user" => user_params}) do
     user_params = Account.UserLib.merge_default_params(user_params)
-    config_setting = Teiserver.Config.get_site_config_cache("user.Enable user registrations")
+    config_setting = Barserver.Config.get_site_config_cache("user.Enable user registrations")
 
     {allowed, reason} =
       cond do
@@ -38,7 +38,7 @@ defmodule TeiserverWeb.API.SessionController do
           {false, "disabled"}
 
         # config_setting == "Link only" ->
-        #   code = Teiserver.Account.get_code(user_params["code"] || "!no_code!")
+        #   code = Barserver.Account.get_code(user_params["code"] || "!no_code!")
 
         #   cond do
         #     user_params["code"] == nil ->
@@ -83,7 +83,7 @@ defmodule TeiserverWeb.API.SessionController do
         true ->
           case Account.create_user(user_params) do
             {:ok, user} ->
-              case Teiserver.Account.get_code(user_params["code"]) do
+              case Barserver.Account.get_code(user_params["code"]) do
                 nil ->
                   :ok
 
@@ -143,7 +143,7 @@ defmodule TeiserverWeb.API.SessionController do
           # First, try to do it without using the spring password
           db_user = Account.get_user!(user.id)
 
-          case Teiserver.Account.User.verify_password(raw_password, db_user.password) do
+          case Barserver.Account.User.verify_password(raw_password, db_user.password) do
             true ->
               make_token(conn, user, expires)
 
@@ -158,7 +158,7 @@ defmodule TeiserverWeb.API.SessionController do
                     true ->
                       # Update the db user then the cached user
                       db_user = Account.get_user!(user.id)
-                      Teiserver.Account.update_user(db_user, %{"password" => raw_password})
+                      Barserver.Account.update_user(db_user, %{"password" => raw_password})
                       CacheUser.recache_user(user.id)
                       CacheUser.update_user(%{user | spring_password: false}, persist: true)
 
@@ -190,7 +190,7 @@ defmodule TeiserverWeb.API.SessionController do
 
   defp make_token(conn, user, expires) do
     ip =
-      Teiserver.Logging.LoggingPlug.get_ip_from_conn(conn)
+      Barserver.Logging.LoggingPlug.get_ip_from_conn(conn)
       |> Tuple.to_list()
       |> Enum.join(".")
 
@@ -200,9 +200,9 @@ defmodule TeiserverWeb.API.SessionController do
       |> Map.get("user-agent")
 
     {:ok, token} =
-      Teiserver.Account.create_user_token(%{
+      Barserver.Account.create_user_token(%{
         user_id: user.id,
-        value: Teiserver.Account.create_token_value(),
+        value: Barserver.Account.create_token_value(),
         ip: ip,
         user_agent: user_agent,
         expires: expires

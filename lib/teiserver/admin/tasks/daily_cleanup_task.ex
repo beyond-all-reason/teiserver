@@ -1,8 +1,8 @@
-defmodule Teiserver.Admin.DailyCleanupTask do
+defmodule Barserver.Admin.DailyCleanupTask do
   @moduledoc false
   use Oban.Worker, queue: :cleanup
 
-  alias Teiserver.Repo
+  alias Barserver.Repo
 
   @impl Oban.Worker
   @spec perform(any) :: :ok

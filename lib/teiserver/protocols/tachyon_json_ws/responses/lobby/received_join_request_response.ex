@@ -1,9 +1,9 @@
-defmodule Teiserver.Tachyon.Responses.Lobby.ReceivedJoinRequestResponseResponse do
+defmodule Barserver.Tachyon.Responses.Lobby.ReceivedJoinRequestResponseResponse do
   @moduledoc """
 
   """
 
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @spec generate(map()) ::
           {T.tachyon_command(), :success, T.tachyon_object()}

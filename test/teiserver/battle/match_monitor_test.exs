@@ -1,7 +1,7 @@
-defmodule Teiserver.Battle.MatchMonitorTest do
-  use Teiserver.ServerCase, async: false
+defmodule Barserver.Battle.MatchMonitorTest do
+  use Barserver.ServerCase, async: false
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [
       auth_setup: 0,
       _send_raw: 2,
@@ -10,7 +10,7 @@ defmodule Teiserver.Battle.MatchMonitorTest do
     ]
 
   setup do
-    Teiserver.Battle.start_match_monitor()
+    Barserver.Battle.start_match_monitor()
     {:ok, %{}}
   end
 
@@ -18,7 +18,7 @@ defmodule Teiserver.Battle.MatchMonitorTest do
   test "spring send" do
     %{socket: socket, user: _user} = auth_setup()
 
-    # monitor_userid = Teiserver.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
+    # monitor_userid = Barserver.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
 
     # Send a direct message to the match monitor server
     short_data =

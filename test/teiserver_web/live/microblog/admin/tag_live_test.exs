@@ -1,24 +1,24 @@
-defmodule TeiserverWeb.TagLiveTest do
+defmodule BarserverWeb.TagLiveTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase
+  use BarserverWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Teiserver.MicroblogFixtures
-  alias Teiserver.Microblog
+  import Barserver.MicroblogFixtures
+  alias Barserver.Microblog
 
   @create_attrs %{colour: "#AA0000", icon: "some icon", name: "some name"}
   @update_attrs %{colour: "#0000AA", icon: "some updated icon", name: "some updated name"}
   @invalid_attrs %{colour: nil, icon: nil, name: nil}
 
   defp auth_setup(_) do
-    Teiserver.TeiserverTestLib.server_permissions()
+    Barserver.BarserverTestLib.server_permissions()
     |> Central.Helpers.GeneralTestLib.conn_setup()
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    |> Barserver.BarserverTestLib.conn_setup()
   end
 
   defp unauth_setup(_) do
     Central.Helpers.GeneralTestLib.conn_setup()
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    |> Barserver.BarserverTestLib.conn_setup()
   end
 
   defp create_tag(_) do

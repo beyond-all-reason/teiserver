@@ -1,16 +1,16 @@
-defmodule Teiserver.Account.RecalculateUserDailyStatTask do
+defmodule Barserver.Account.RecalculateUserDailyStatTask do
   @moduledoc """
   Goes through every user that logged on in the last 24 hours (it's meant to run every 12 hours)
   and cache certain values from server day logs
   """
   use Oban.Worker, queue: :cleanup
 
-  alias Teiserver.Repo
+  alias Barserver.Repo
   import Ecto.Query, warn: false
-  alias Teiserver.Account
-  alias Teiserver.Logging.UserActivityDayLog
+  alias Barserver.Account
+  alias Barserver.Logging.UserActivityDayLog
 
-  # Teiserver.Account.RecalculateUserDailyStatTask.perform(nil)
+  # Barserver.Account.RecalculateUserDailyStatTask.perform(nil)
 
   @empty_row %{
     menu: 0,

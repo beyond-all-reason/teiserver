@@ -1,13 +1,13 @@
-defmodule Teiserver.Account.AccoladeBotTest do
+defmodule Barserver.Account.AccoladeBotTest do
   @moduledoc false
-  use Teiserver.ServerCase, async: false
+  use Barserver.ServerCase, async: false
   # alias Phoenix.PubSub
 
-  alias Teiserver.{Battle, Account, CacheUser}
-  alias Teiserver.Account.AccoladeLib
+  alias Barserver.{Battle, Account, CacheUser}
+  alias Barserver.Account.AccoladeLib
   require Logger
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_recv: 1, _tachyon_send: 2]
 
   setup do

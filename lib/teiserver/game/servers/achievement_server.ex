@@ -1,7 +1,7 @@
-defmodule Teiserver.Game.AchievementServer do
+defmodule Barserver.Game.AchievementServer do
   use GenServer
   alias Phoenix.PubSub
-  alias Teiserver.Game
+  alias Barserver.Game
   require Logger
 
   @scenario_lookup %{
@@ -156,12 +156,12 @@ defmodule Teiserver.Game.AchievementServer do
     Logger.metadata(request_id: "AchievementServer")
 
     # If it's a test server this will break as the SQL connection will bork
-    if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
+    if not Application.get_env(:teiserver, Barserver)[:test_mode] do
       :timer.send_after(10_000, :refresh_type_map)
       :timer.send_interval(300_000, :refresh_type_map)
     end
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "telemetry_complex_client_events")
+    :ok = PubSub.subscribe(Barserver.PubSub, "telemetry_complex_client_events")
 
     {:ok,
      %{

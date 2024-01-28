@@ -1,10 +1,10 @@
-defmodule Teiserver.Tachyon.Handlers.System.NoCommandErrorRequest do
+defmodule Barserver.Tachyon.Handlers.System.NoCommandErrorRequest do
   @moduledoc """
 
   """
 
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Tachyon.Responses.System.ErrorResponse
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Tachyon.Responses.System.ErrorResponse
 
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do

@@ -1,8 +1,8 @@
-defmodule Teiserver.Telemetry.ComplexClientEventTest do
+defmodule Barserver.Telemetry.ComplexClientEventTest do
   @moduledoc false
-  use Teiserver.DataCase
-  alias Teiserver.{Telemetry}
-  alias Teiserver.TeiserverTestLib
+  use Barserver.DataCase
+  alias Barserver.{Telemetry}
+  alias Barserver.BarserverTestLib
 
   test "complex client events" do
     r = :rand.uniform(999_999_999)
@@ -11,7 +11,7 @@ defmodule Teiserver.Telemetry.ComplexClientEventTest do
     query = "DELETE FROM telemetry_complex_client_events;"
     Ecto.Adapters.SQL.query(Repo, query, [])
 
-    user = TeiserverTestLib.new_user("complex_client_event_user")
+    user = BarserverTestLib.new_user("complex_client_event_user")
     assert Telemetry.list_complex_client_events() |> Enum.count() == 0
 
     # Log the event

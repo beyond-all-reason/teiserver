@@ -1,8 +1,8 @@
-defmodule Teiserver.Protocols.Tachyon.V1.TachyonOut do
+defmodule Barserver.Protocols.Tachyon.V1.TachyonOut do
   require Logger
-  alias Teiserver.Protocols.TachyonLib
+  alias Barserver.Protocols.TachyonLib
 
-  alias Teiserver.Protocols.Tachyon.V1.{
+  alias Barserver.Protocols.Tachyon.V1.{
     AuthOut,
     ClientOut,
     CommunicationOut,

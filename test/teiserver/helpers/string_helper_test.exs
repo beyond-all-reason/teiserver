@@ -1,7 +1,7 @@
-defmodule Teiserver.General.StringHelpersTest do
-  use Teiserver.DataCase, async: true
+defmodule Barserver.General.StringHelpersTest do
+  use Barserver.DataCase, async: true
 
-  alias Teiserver.Helper.StringHelper
+  alias Barserver.Helper.StringHelper
 
   test "remove_spaces" do
     params = [

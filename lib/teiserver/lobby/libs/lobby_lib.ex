@@ -1,12 +1,12 @@
-defmodule Teiserver.Lobby.LobbyLib do
+defmodule Barserver.Lobby.LobbyLib do
   @moduledoc """
 
   """
 
   alias Phoenix.PubSub
-  alias Teiserver.{Coordinator, Account, Lobby}
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.{Coordinator, Account, Lobby}
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.Data.Types, as: T
   require Logger
 
   @spec get_lobby(T.lobby_id()) :: T.lobby() | nil
@@ -88,7 +88,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
   @spec list_lobby_ids :: [T.lobby_id()]
   def list_lobby_ids() do
-    Horde.Registry.select(Teiserver.LobbyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    Horde.Registry.select(Barserver.LobbyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   @spec list_lobbies() :: [T.lobby()]
@@ -101,7 +101,7 @@ defmodule Teiserver.Lobby.LobbyLib do
   @spec list_throttled_lobbies(atom) :: [T.lobby()]
   def list_throttled_lobbies(type) do
     throttle_pid =
-      case Horde.Registry.lookup(Teiserver.ThrottleRegistry, "LobbyIndexThrottle") do
+      case Horde.Registry.lookup(Barserver.ThrottleRegistry, "LobbyIndexThrottle") do
         [{pid, _}] -> pid
         _ -> nil
       end
@@ -193,7 +193,7 @@ defmodule Teiserver.Lobby.LobbyLib do
   @spec do_create_new_lobby(map) :: T.lobby()
   defp do_create_new_lobby(data) do
     data
-    |> Teiserver.Lobby.create_lobby()
+    |> Barserver.Lobby.create_lobby()
     |> add_lobby()
   end
 
@@ -210,7 +210,7 @@ defmodule Teiserver.Lobby.LobbyLib do
     cast_lobby(lobby_id, {:update_lobby, lobby})
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_lobby_updates:#{lobby.id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -229,7 +229,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
     if Enum.member?([:update_battle_info], reason) do
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_global_lobby_updates",
         %{
           channel: "teiserver_global_lobby_updates",
@@ -240,7 +240,7 @@ defmodule Teiserver.Lobby.LobbyLib do
     end
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_lobby_updates:#{lobby.id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -381,7 +381,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
     :ok =
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_global_lobby_updates",
         %{
           channel: "teiserver_global_lobby_updates",
@@ -396,8 +396,8 @@ defmodule Teiserver.Lobby.LobbyLib do
   @spec start_lobby_server(T.lobby()) :: pid()
   def start_lobby_server(lobby) do
     {:ok, server_pid} =
-      DynamicSupervisor.start_child(Teiserver.LobbySupervisor, {
-        Teiserver.Battle.LobbyServer,
+      DynamicSupervisor.start_child(Barserver.LobbySupervisor, {
+        Barserver.Battle.LobbyServer,
         name: "lobby_#{lobby.id}",
         data: %{
           lobby: lobby
@@ -417,7 +417,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
   @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
   def get_lobby_pid(lobby_id) when is_integer(lobby_id) do
-    case Horde.Registry.lookup(Teiserver.LobbyRegistry, lobby_id) do
+    case Horde.Registry.lookup(Barserver.LobbyRegistry, lobby_id) do
       [{pid, _}] -> pid
       _ -> nil
     end
@@ -466,7 +466,7 @@ defmodule Teiserver.Lobby.LobbyLib do
         nil
 
       p ->
-        DynamicSupervisor.terminate_child(Teiserver.LobbySupervisor, p)
+        DynamicSupervisor.terminate_child(Barserver.LobbySupervisor, p)
         :ok
     end
   end
@@ -481,7 +481,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
     :ok =
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_global_lobby_updates",
         %{
           channel: "teiserver_global_lobby_updates",
@@ -492,7 +492,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
     :ok =
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_lobby_updates:#{lobby.id}",
         %{
           channel: "teiserver_lobby_updates",

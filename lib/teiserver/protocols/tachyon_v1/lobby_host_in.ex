@@ -1,9 +1,9 @@
-defmodule Teiserver.Protocols.Tachyon.V1.LobbyHostIn do
-  alias Teiserver.Lobby
-  alias Teiserver.{Coordinator}
-  import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Data.Types, as: T
+defmodule Barserver.Protocols.Tachyon.V1.LobbyHostIn do
+  alias Barserver.Lobby
+  alias Barserver.{Coordinator}
+  import Barserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.Data.Types, as: T
 
   @spec do_handle(String.t(), Map.t(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
   def do_handle("update_host_status", _, %{userid: nil} = state),

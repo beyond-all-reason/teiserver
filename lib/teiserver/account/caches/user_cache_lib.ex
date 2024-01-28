@@ -1,9 +1,9 @@
-defmodule Teiserver.Account.UserCacheLib do
+defmodule Barserver.Account.UserCacheLib do
   @moduledoc false
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.{Account, CacheUser}
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Account.Guardian
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.{Account, CacheUser}
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Account.Guardian
   require Logger
 
   @spec get_username(T.userid() | nil) :: String.t() | nil
@@ -16,7 +16,7 @@ defmodule Teiserver.Account.UserCacheLib do
   def get_username_by_id(userid) do
     userid = int_parse(userid)
 
-    Teiserver.cache_get_or_store(:users_lookup_name_with_id, int_parse(userid), fn ->
+    Barserver.cache_get_or_store(:users_lookup_name_with_id, int_parse(userid), fn ->
       case get_user_by_id(userid) do
         nil -> nil
         user -> user.name
@@ -31,7 +31,7 @@ defmodule Teiserver.Account.UserCacheLib do
   def get_userid(username) do
     username = cachename(username)
 
-    Teiserver.cache_get_or_store(:users_lookup_id_with_name, username, fn ->
+    Barserver.cache_get_or_store(:users_lookup_id_with_name, username, fn ->
       user =
         Account.get_user(nil,
           search: [
@@ -69,7 +69,7 @@ defmodule Teiserver.Account.UserCacheLib do
     cachename_email = cachename(email)
 
     id =
-      Teiserver.cache_get_or_store(:users_lookup_id_with_email, cachename_email, fn ->
+      Barserver.cache_get_or_store(:users_lookup_id_with_email, cachename_email, fn ->
         user =
           Account.get_user(nil,
             search: [
@@ -112,7 +112,7 @@ defmodule Teiserver.Account.UserCacheLib do
   def get_user_by_id(id) do
     id = int_parse(id)
 
-    Teiserver.cache_get_or_store(:users, id, fn ->
+    Barserver.cache_get_or_store(:users, id, fn ->
       Account.get_user(id)
       |> convert_user
       |> add_user
@@ -123,7 +123,7 @@ defmodule Teiserver.Account.UserCacheLib do
   def get_userid_by_discord_id(nil), do: nil
 
   def get_userid_by_discord_id(discord_id) do
-    Teiserver.cache_get_or_store(:users_lookup_id_with_discord, discord_id, fn ->
+    Barserver.cache_get_or_store(:users_lookup_id_with_discord, discord_id, fn ->
       user =
         Account.get_user(nil,
           search: [
@@ -163,13 +163,13 @@ defmodule Teiserver.Account.UserCacheLib do
 
   @spec recache_user(T.userid() | CacheUser.t()) :: :ok
   def recache_user(id) when is_integer(id) do
-    Teiserver.cache_delete(:account_user_cache, id)
-    Teiserver.cache_delete(:account_user_cache_bang, id)
-    Teiserver.cache_delete(:account_membership_cache, id)
-    Teiserver.cache_delete(:config_user_cache, id)
+    Barserver.cache_delete(:account_user_cache, id)
+    Barserver.cache_delete(:account_user_cache_bang, id)
+    Barserver.cache_delete(:account_membership_cache, id)
+    Barserver.cache_delete(:config_user_cache, id)
 
     # decache_user(id)
-    Teiserver.Account.decache_relationships(id)
+    Barserver.Account.decache_relationships(id)
 
     Account.get_user(id)
     |> convert_user
@@ -179,7 +179,7 @@ defmodule Teiserver.Account.UserCacheLib do
   end
 
   def recache_user(user) do
-    Teiserver.Account.recache_user(user.id)
+    Barserver.Account.recache_user(user.id)
 
     user
     |> convert_user
@@ -217,12 +217,12 @@ defmodule Teiserver.Account.UserCacheLib do
 
   def add_user(user) do
     update_user(user)
-    Teiserver.cache_put(:users_lookup_name_with_id, user.id, user.name)
-    Teiserver.cache_put(:users_lookup_id_with_name, cachename(user.name), user.id)
-    Teiserver.cache_put(:users_lookup_id_with_email, cachename(user.email), user.id)
+    Barserver.cache_put(:users_lookup_name_with_id, user.id, user.name)
+    Barserver.cache_put(:users_lookup_id_with_name, cachename(user.name), user.id)
+    Barserver.cache_put(:users_lookup_id_with_email, cachename(user.email), user.id)
 
     if user.discord_id do
-      Teiserver.cache_put(:users_lookup_id_with_discord, user.discord_id, user.id)
+      Barserver.cache_put(:users_lookup_id_with_discord, user.discord_id, user.id)
     end
 
     user
@@ -250,7 +250,7 @@ defmodule Teiserver.Account.UserCacheLib do
 
   @spec update_user(CacheUser.t(), boolean) :: CacheUser.t()
   def update_user(user, persist \\ false) do
-    Teiserver.cache_put(:users, user.id, user)
+    Barserver.cache_put(:users, user.id, user)
     if persist, do: persist_user(user)
     user
   end
@@ -259,7 +259,7 @@ defmodule Teiserver.Account.UserCacheLib do
   def update_cache_user(userid, data) do
     user = get_user_by_id(userid)
     new_user = Map.merge(user, data)
-    Teiserver.cache_put(:users, user.id, new_user)
+    Barserver.cache_put(:users, user.id, new_user)
     persist_user(new_user)
     new_user
   end
@@ -268,14 +268,14 @@ defmodule Teiserver.Account.UserCacheLib do
   def decache_user(userid) do
     user = get_user_by_id(userid)
 
-    # Teiserver.cache_delete(:users, userid)
+    # Barserver.cache_delete(:users, userid)
     if user do
-      Teiserver.cache_delete(:users_lookup_name_with_id, user.id)
-      Teiserver.cache_delete(:users_lookup_id_with_name, cachename(user.name))
-      Teiserver.cache_delete(:users_lookup_id_with_email, cachename(user.email))
+      Barserver.cache_delete(:users_lookup_name_with_id, user.id)
+      Barserver.cache_delete(:users_lookup_id_with_name, cachename(user.name))
+      Barserver.cache_delete(:users_lookup_id_with_email, cachename(user.email))
 
       if user.discord_id do
-        Teiserver.cache_delete(:users_lookup_id_with_discord, user.discord_id)
+        Barserver.cache_delete(:users_lookup_id_with_discord, user.discord_id)
       end
 
       :ok

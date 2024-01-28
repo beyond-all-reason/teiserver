@@ -1,14 +1,14 @@
-defmodule TeiserverWeb.Admin.AchievementController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Admin.AchievementController do
+  use BarserverWeb, :controller
 
-  alias Teiserver.Game
-  alias Teiserver.Game.{AchievementType, AchievementTypeLib}
-  alias Teiserver.Helper.StylingHelper
+  alias Barserver.Game
+  alias Barserver.Game.{AchievementType, AchievementTypeLib}
+  alias Barserver.Helper.StylingHelper
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Staff.Moderator,
+    policy: Barserver.Staff.Moderator,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "admin",

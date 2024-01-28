@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.Logging.PageViewLogControllerTest do
-  use TeiserverWeb.ConnCase, async: true
+defmodule BarserverWeb.Logging.PageViewLogControllerTest do
+  use BarserverWeb.ConnCase, async: true
 
-  alias Teiserver.Logging
+  alias Barserver.Logging
 
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.Logging.LoggingTestLib
+  alias Barserver.Logging.LoggingTestLib
 
   setup do
     GeneralTestLib.conn_setup(~w(logging.page_view.show), dud_user: true)

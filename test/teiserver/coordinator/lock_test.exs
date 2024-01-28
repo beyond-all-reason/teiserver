@@ -1,8 +1,8 @@
-defmodule Teiserver.Coordinator.LockTest do
-  use Teiserver.ServerCase, async: false
-  alias Teiserver.{Client, Coordinator, Lobby}
+defmodule Barserver.Coordinator.LockTest do
+  use Barserver.ServerCase, async: false
+  alias Barserver.{Client, Coordinator, Lobby}
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
 
   setup do

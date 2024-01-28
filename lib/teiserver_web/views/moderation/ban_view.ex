@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.Moderation.BanView do
+defmodule BarserverWeb.Moderation.BanView do
   @moduledoc false
-  use TeiserverWeb, :view
+  use BarserverWeb, :view
 
   @spec view_colour() :: atom
-  def view_colour, do: Teiserver.Moderation.BanLib.colour()
+  def view_colour, do: Barserver.Moderation.BanLib.colour()
 
   @spec icon() :: String.t()
-  def icon, do: Teiserver.Moderation.BanLib.icon()
+  def icon, do: Barserver.Moderation.BanLib.icon()
 end

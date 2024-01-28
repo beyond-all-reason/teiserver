@@ -1,6 +1,6 @@
-defmodule Teiserver.ServerUserPlug do
+defmodule Barserver.ServerUserPlug do
   import Plug.Conn
-  alias Teiserver.CacheUser
+  alias Barserver.CacheUser
 
   def init(_opts) do
     # Keyword.fetch!(opts, :repo)

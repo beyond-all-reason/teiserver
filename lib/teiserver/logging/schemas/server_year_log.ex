@@ -1,5 +1,5 @@
-defmodule Teiserver.Logging.ServerYearLog do
-  use TeiserverWeb, :schema
+defmodule Barserver.Logging.ServerYearLog do
+  use BarserverWeb, :schema
 
   @primary_key false
   schema "teiserver_server_year_logs" do

@@ -1,17 +1,17 @@
-defmodule TeiserverWeb.Live.BattleTest do
-  use TeiserverWeb.ConnCase, async: false
+defmodule BarserverWeb.Live.BattleTest do
+  use BarserverWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.{Battle, TeiserverTestLib, Lobby}
-  import Teiserver.TeiserverTestLib, only: [_send_raw: 2, _recv_until: 1, _tachyon_send: 2]
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.{Battle, BarserverTestLib, Lobby}
+  import Barserver.BarserverTestLib, only: [_send_raw: 2, _recv_until: 1, _tachyon_send: 2]
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @throttle_wait 500 + 100
 
   setup do
-    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
-    |> TeiserverTestLib.conn_setup()
+    GeneralTestLib.conn_setup(Barserver.BarserverTestLib.player_permissions())
+    |> BarserverTestLib.conn_setup()
   end
 
   describe "battle live" do
@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Live.BattleTest do
 
       # Lets create a battle
       battle1 =
-        TeiserverTestLib.make_battle(%{
+        BarserverTestLib.make_battle(%{
           name: "LiveBattleName"
         })
 
@@ -31,7 +31,7 @@ defmodule TeiserverWeb.Live.BattleTest do
 
       # Another
       battle2 =
-        TeiserverTestLib.make_battle(%{
+        BarserverTestLib.make_battle(%{
           name: "SecondLiveBattle"
         })
 
@@ -50,9 +50,9 @@ defmodule TeiserverWeb.Live.BattleTest do
       refute html =~ "<td>3</td>"
 
       # Lets have some people join battle 1
-      user1 = TeiserverTestLib.new_user()
-      user2 = TeiserverTestLib.new_user()
-      user3 = TeiserverTestLib.new_user()
+      user1 = BarserverTestLib.new_user()
+      user2 = BarserverTestLib.new_user()
+      user3 = BarserverTestLib.new_user()
       Lobby.add_user_to_battle(user1.id, battle1.id, "script_password")
       Lobby.add_user_to_battle(user2.id, battle1.id, "script_password")
       Lobby.add_user_to_battle(user3.id, battle1.id, "script_password")
@@ -78,7 +78,7 @@ defmodule TeiserverWeb.Live.BattleTest do
 
     test "show - valid battle", %{conn: conn} do
       # Lets create a battle
-      %{socket: host_socket, user: _host_user} = TeiserverTestLib.auth_setup()
+      %{socket: host_socket, user: _host_user} = BarserverTestLib.auth_setup()
 
       _send_raw(
         host_socket,
@@ -109,9 +109,9 @@ defmodule TeiserverWeb.Live.BattleTest do
       assert html =~ "LiveBattleShow"
       assert html =~ "Speed metal"
 
-      %{user: user1, socket: socket1} = TeiserverTestLib.auth_setup()
-      %{user: user2, socket: socket2} = TeiserverTestLib.auth_setup()
-      %{user: user3, socket: socket3} = TeiserverTestLib.auth_setup()
+      %{user: user1, socket: socket1} = BarserverTestLib.auth_setup()
+      %{user: user2, socket: socket2} = BarserverTestLib.auth_setup()
+      %{user: user3, socket: socket3} = BarserverTestLib.auth_setup()
 
       _send_raw(socket1, "JOINBATTLE #{lobby_id} empty script_password\n")
       _send_raw(socket2, "JOINBATTLE #{lobby_id} empty script_password\n")
@@ -154,7 +154,7 @@ defmodule TeiserverWeb.Live.BattleTest do
 
     test "chat - valid battle", %{conn: conn} do
       # Lets create a battle
-      %{socket: host_socket, user: _host_user} = TeiserverTestLib.auth_setup()
+      %{socket: host_socket, user: _host_user} = BarserverTestLib.auth_setup()
 
       _send_raw(
         host_socket,
@@ -184,9 +184,9 @@ defmodule TeiserverWeb.Live.BattleTest do
       Battle.set_modoption(lobby_id, "server/match/uuid", UUID.uuid1())
       {:ok, view, _html} = live(conn, "/battle/lobbies/chat/#{lobby_id}")
 
-      %{user: user1, socket: socket1} = TeiserverTestLib.tachyon_auth_setup()
-      %{user: user2, socket: _socket2} = TeiserverTestLib.tachyon_auth_setup()
-      %{user: user3, socket: _socket3} = TeiserverTestLib.tachyon_auth_setup()
+      %{user: user1, socket: socket1} = BarserverTestLib.tachyon_auth_setup()
+      %{user: user2, socket: _socket2} = BarserverTestLib.tachyon_auth_setup()
+      %{user: user3, socket: _socket3} = BarserverTestLib.tachyon_auth_setup()
 
       Lobby.force_add_user_to_lobby(user1.id, lobby_id)
       Lobby.force_add_user_to_lobby(user2.id, lobby_id)

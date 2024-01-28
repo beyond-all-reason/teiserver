@@ -1,15 +1,15 @@
-defmodule TeiserverWeb.Microblog.Blog.IndexLiveTest do
+defmodule BarserverWeb.Microblog.Blog.IndexLiveTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase
+  use BarserverWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Teiserver.MicroblogFixtures
+  import Barserver.MicroblogFixtures
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.{TeiserverTestLib}
+  alias Barserver.{BarserverTestLib}
 
   defp auth_setup(_) do
     GeneralTestLib.conn_setup()
-    |> TeiserverTestLib.conn_setup()
+    |> BarserverTestLib.conn_setup()
   end
 
   defp filler_posts(_) do

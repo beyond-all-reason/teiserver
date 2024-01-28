@@ -1,12 +1,12 @@
-defmodule Teiserver.ModerationTest do
-  use Teiserver.DataCase, async: true
+defmodule Barserver.ModerationTest do
+  use Barserver.DataCase, async: true
 
-  alias Teiserver.Moderation
-  alias Teiserver.Moderation.ModerationTestLib
+  alias Barserver.Moderation
+  alias Barserver.Moderation.ModerationTestLib
   alias Central.Helpers.GeneralTestLib
 
   describe "reports" do
-    alias Teiserver.Moderation.Report
+    alias Barserver.Moderation.Report
 
     @valid_attrs %{
       "type" => "some type",
@@ -71,7 +71,7 @@ defmodule Teiserver.ModerationTest do
   end
 
   describe "actions" do
-    alias Teiserver.Moderation.Action
+    alias Barserver.Moderation.Action
 
     @valid_attrs %{
       "reason" => "some reason",
@@ -137,7 +137,7 @@ defmodule Teiserver.ModerationTest do
   end
 
   describe "bans" do
-    alias Teiserver.Moderation.Ban
+    alias Barserver.Moderation.Ban
 
     @valid_attrs %{"reason" => "some reason", "enabled" => true, "key_values" => ["k1", "k2"]}
     @update_attrs %{
@@ -198,7 +198,7 @@ defmodule Teiserver.ModerationTest do
   end
 
   describe "proposals" do
-    alias Teiserver.Moderation.{Proposal, ProposalVote}
+    alias Barserver.Moderation.{Proposal, ProposalVote}
 
     @valid_attrs %{
       "reason" => "some reason",

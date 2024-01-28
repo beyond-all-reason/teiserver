@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.CalculateSmurfKeyTask do
+defmodule Barserver.Account.CalculateSmurfKeyTask do
   @moduledoc false
 
   @spec calculate_hw1_fingerprint(map()) :: String.t()

@@ -1,9 +1,9 @@
-defmodule Teiserver.EmailHelper do
+defmodule Barserver.EmailHelper do
   @moduledoc false
-  alias Teiserver.Mailer
-  alias Teiserver.Config
+  alias Barserver.Mailer
+  alias Barserver.Config
   alias Bamboo.Email
-  alias Teiserver.Helper.TimexHelper
+  alias Barserver.Helper.TimexHelper
   require Logger
 
   def new_user(user) do
@@ -17,13 +17,13 @@ defmodule Teiserver.EmailHelper do
   end
 
   def do_new_user(user) do
-    stats = Teiserver.Account.get_user_stat_data(user.id)
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+    stats = Barserver.Account.get_user_stat_data(user.id)
+    host = Application.get_env(:teiserver, BarserverWeb.Endpoint)[:url][:host]
     website_url = "https://#{host}"
     verification_code = stats["verification_code"]
 
     {:ok, _code} =
-      Teiserver.Account.create_code(%{
+      Barserver.Account.create_code(%{
         value: UUID.uuid4(),
         purpose: "reset_password",
         expires: Timex.now() |> Timex.shift(hours: 24),
@@ -32,8 +32,8 @@ defmodule Teiserver.EmailHelper do
 
     message_id = "<#{UUID.uuid4()}@#{host}>"
 
-    game_name = Application.get_env(:teiserver, Teiserver)[:game_name]
-    discord = Application.get_env(:teiserver, Teiserver)[:discord]
+    game_name = Application.get_env(:teiserver, Barserver)[:game_name]
+    discord = Application.get_env(:teiserver, Barserver)[:discord]
 
     html_body = """
     <p>Welcome to #{game_name}.</p>
@@ -63,12 +63,12 @@ defmodule Teiserver.EmailHelper do
 
     Email.new_email()
     |> Email.to({user.name, user.email})
-    |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
+    |> Email.from({"BAR Barserver", Mailer.noreply_address()})
     |> Email.subject("BAR - New account")
     |> Email.put_header("Date", date)
     |> Email.put_header("Message-Id", message_id)
     |> Email.html_body(html_body)
     |> Email.text_body(text_body)
-    |> Teiserver.Mailer.deliver_now()
+    |> Barserver.Mailer.deliver_now()
   end
 end

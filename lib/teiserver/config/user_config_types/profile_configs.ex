@@ -1,6 +1,6 @@
-defmodule Teiserver.Config.UserConfigTypes.ProfileConfigs do
+defmodule Barserver.Config.UserConfigTypes.ProfileConfigs do
   @moduledoc false
-  import Teiserver.Config, only: [add_user_config_type: 1]
+  import Barserver.Config, only: [add_user_config_type: 1]
 
   @spec create() :: :ok
   def create() do
@@ -63,7 +63,7 @@ defmodule Teiserver.Config.UserConfigTypes.ProfileConfigs do
       opts: [
         choices: zones
       ],
-      default: Application.get_env(:teiserver, Teiserver.Config)[:defaults].tz
+      default: Application.get_env(:teiserver, Barserver.Config)[:defaults].tz
     })
 
     add_user_config_type(%{
@@ -81,7 +81,7 @@ defmodule Teiserver.Config.UserConfigTypes.ProfileConfigs do
 
     add_user_config_type(%{
       key: "teiserver.Show flag",
-      section: "Teiserver account",
+      section: "Barserver account",
       type: "boolean",
       visible: true,
       permissions: ["account"],
@@ -92,18 +92,18 @@ defmodule Teiserver.Config.UserConfigTypes.ProfileConfigs do
 
     add_user_config_type(%{
       key: "teiserver.Discord notifications",
-      section: "Teiserver account",
+      section: "Barserver account",
       type: "boolean",
       visible: true,
       permissions: ["account"],
       description:
-        "When checked you will receive discord messages from the Teiserver bridge bot for various in-lobby events. When disabled you will receive no notifications even if the others are enabled.",
+        "When checked you will receive discord messages from the Barserver bridge bot for various in-lobby events. When disabled you will receive no notifications even if the others are enabled.",
       default: true
     })
 
     add_user_config_type(%{
       key: "teiserver.Notify - Exited the queue",
-      section: "Teiserver account",
+      section: "Barserver account",
       type: "boolean",
       visible: true,
       permissions: ["account"],
@@ -113,7 +113,7 @@ defmodule Teiserver.Config.UserConfigTypes.ProfileConfigs do
 
     add_user_config_type(%{
       key: "teiserver.Notify - Game start",
-      section: "Teiserver account",
+      section: "Barserver account",
       type: "boolean",
       visible: true,
       permissions: ["account"],

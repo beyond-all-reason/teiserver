@@ -1,4 +1,4 @@
-# defmodule Teiserver.Protocols.Spring.MatchmakingOut do
+# defmodule Barserver.Protocols.Spring.MatchmakingOut do
 #   @spec do_reply(atom(), nil | String.t() | tuple() | list()) :: String.t()
 #   def do_reply(:full_queue_list, queues) when is_list(queues) do
 #     names = queue_list(queues)

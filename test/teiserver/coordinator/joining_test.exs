@@ -1,12 +1,12 @@
-defmodule Teiserver.Coordinator.JoiningTest do
-  use Teiserver.ServerCase, async: false
-  alias Teiserver.Common.PubsubListener
-  alias Teiserver.Account.ClientLib
-  alias Teiserver.Coordinator
+defmodule Barserver.Coordinator.JoiningTest do
+  use Barserver.ServerCase, async: false
+  alias Barserver.Common.PubsubListener
+  alias Barserver.Account.ClientLib
+  alias Barserver.Coordinator
 
-  alias Teiserver.Account.UserCacheLib
+  alias Barserver.Account.UserCacheLib
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
 
   setup do

@@ -1,20 +1,20 @@
-defmodule Teiserver.Moderation.ReportGroup do
+defmodule Barserver.Moderation.ReportGroup do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "moderation_report_groups" do
-    belongs_to :target, Teiserver.Account.User
-    belongs_to :match, Teiserver.Battle.Match
+    belongs_to :target, Barserver.Account.User
+    belongs_to :match, Barserver.Battle.Match
 
     field :closed, :boolean, default: false
     field :report_count, :integer, default: 0
     field :vote_count, :integer, default: 0
     field :action_count, :integer, default: 0
 
-    has_many :actions, Teiserver.Moderation.Action
-    has_many :reports, Teiserver.Moderation.Report
-    has_many :report_group_votes, Teiserver.Moderation.ReportGroupVote
-    has_many :report_group_messages, Teiserver.Moderation.ReportGroupMessage
+    has_many :actions, Barserver.Moderation.Action
+    has_many :reports, Barserver.Moderation.Report
+    has_many :report_group_votes, Barserver.Moderation.ReportGroupVote
+    has_many :report_group_messages, Barserver.Moderation.ReportGroupMessage
 
     timestamps()
   end

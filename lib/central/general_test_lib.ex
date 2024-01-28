@@ -3,20 +3,20 @@ defmodule Central.Helpers.GeneralTestLib do
   import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
 
   import Ecto.Query
-  alias Teiserver.Repo
+  alias Barserver.Repo
   import Phoenix.ChannelTest
   # use Phoenix.ConnTest
 
-  @endpoint TeiserverWeb.Endpoint
+  @endpoint BarserverWeb.Endpoint
 
-  alias Teiserver.Account.AuthLib
+  alias Barserver.Account.AuthLib
 
-  alias Teiserver.Account
-  alias Teiserver.Account.{User, Guardian}
+  alias Barserver.Account
+  alias Barserver.Account.{User, Guardian}
 
-  # alias TeiserverWeb.General.CombinatorLib
+  # alias BarserverWeb.General.CombinatorLib
 
-  alias TeiserverWeb.UserSocket
+  alias BarserverWeb.UserSocket
 
   # def make_combos(data), do: CombinatorLib.make_combos(data)
 
@@ -43,13 +43,13 @@ defmodule Central.Helpers.GeneralTestLib do
   end
 
   def seeded?() do
-    r = Repo.one(from c in Teiserver.Config.SiteConfig, where: c.key == "test.seeded")
+    r = Repo.one(from c in Barserver.Config.SiteConfig, where: c.key == "test.seeded")
     r != nil
   end
 
   def seed() do
-    %Teiserver.Config.SiteConfig{}
-    |> Teiserver.Config.SiteConfig.changeset(%{
+    %Barserver.Config.SiteConfig{}
+    |> Barserver.Config.SiteConfig.changeset(%{
       key: "test.seeded",
       value: "true"
     })
@@ -71,7 +71,7 @@ defmodule Central.Helpers.GeneralTestLib do
     [
       users: users
     ]
-    |> Teiserver.Logging.LoggingTestLib.seed()
+    |> Barserver.Logging.LoggingTestLib.seed()
   end
 
   def login(conn, email) do

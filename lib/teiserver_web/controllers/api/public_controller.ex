@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.API.PublicController do
-  use TeiserverWeb, :controller
-  alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Account
+defmodule BarserverWeb.API.PublicController do
+  use BarserverWeb, :controller
+  alias Barserver.Game.MatchRatingLib
+  alias Barserver.Account
 
   @spec leaderboard(Plug.Conn.t(), map) :: Plug.Conn.t()
   def leaderboard(conn, %{"type" => type_name}) do

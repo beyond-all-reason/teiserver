@@ -1,9 +1,9 @@
-defmodule Teiserver.Communication.MicroblogReport do
+defmodule Barserver.Communication.MicroblogReport do
   @moduledoc false
-  alias Teiserver.Microblog
+  alias Barserver.Microblog
 
   @spec icon() :: String.t()
-  def icon(), do: Teiserver.Microblog.PostLib.icon()
+  def icon(), do: Barserver.Microblog.PostLib.icon()
 
   @spec permissions() :: String.t()
   def permissions(), do: "Server"

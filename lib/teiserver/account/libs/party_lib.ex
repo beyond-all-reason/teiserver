@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.Party do
+defmodule Barserver.Account.Party do
   @enforce_keys [:id, :leader, :members, :pending_invites, :queues]
   defstruct [
     :id,
@@ -9,11 +9,11 @@ defmodule Teiserver.Account.Party do
   ]
 end
 
-defmodule Teiserver.Account.PartyLib do
+defmodule Barserver.Account.PartyLib do
   # alias Phoenix.PubSub
-  alias Teiserver.{Account, Chat, CacheUser}
-  alias Teiserver.Account.Party
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.{Account, Chat, CacheUser}
+  alias Barserver.Account.Party
+  alias Barserver.Data.Types, as: T
   alias Phoenix.PubSub
 
   @spec colours() :: atom
@@ -44,7 +44,7 @@ defmodule Teiserver.Account.PartyLib do
 
   @spec party_exists?(T.party_id()) :: boolean()
   def party_exists?(party_id) do
-    case Horde.Registry.lookup(Teiserver.PartyRegistry, party_id) do
+    case Horde.Registry.lookup(Barserver.PartyRegistry, party_id) do
       [{_pid, _}] -> true
       _ -> false
     end
@@ -52,7 +52,7 @@ defmodule Teiserver.Account.PartyLib do
 
   @spec list_party_ids() :: [T.party_id()]
   def list_party_ids() do
-    Horde.Registry.select(Teiserver.PartyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    Horde.Registry.select(Barserver.PartyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   @spec list_parties() :: [T.party()]
@@ -129,8 +129,8 @@ defmodule Teiserver.Account.PartyLib do
   @spec start_party_server(T.lobby()) :: pid()
   def start_party_server(party) do
     {:ok, server_pid} =
-      DynamicSupervisor.start_child(Teiserver.PartySupervisor, {
-        Teiserver.Account.PartyServer,
+      DynamicSupervisor.start_child(Barserver.PartySupervisor, {
+        Barserver.Account.PartyServer,
         name: "party_#{party.id}",
         data: %{
           party: party
@@ -147,14 +147,14 @@ defmodule Teiserver.Account.PartyLib do
         nil
 
       p ->
-        DynamicSupervisor.terminate_child(Teiserver.PartySupervisor, p)
+        DynamicSupervisor.terminate_child(Barserver.PartySupervisor, p)
         :ok
     end
   end
 
   @spec get_party_pid(T.party_id()) :: pid() | nil
   def get_party_pid(party_id) do
-    case Horde.Registry.lookup(Teiserver.PartyRegistry, party_id) do
+    case Horde.Registry.lookup(Barserver.PartyRegistry, party_id) do
       [{pid, _}] -> pid
       _ -> nil
     end
@@ -209,7 +209,7 @@ defmodule Teiserver.Account.PartyLib do
       persist_message(userid, msg, party_id)
 
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_party:#{party_id}",
         %{
           channel: "teiserver_party:#{party_id}",

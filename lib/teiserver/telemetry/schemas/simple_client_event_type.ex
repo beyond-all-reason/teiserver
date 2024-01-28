@@ -1,6 +1,6 @@
-defmodule Teiserver.Telemetry.SimpleClientEventType do
+defmodule Barserver.Telemetry.SimpleClientEventType do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "telemetry_simple_client_event_types" do
     field :name, :string

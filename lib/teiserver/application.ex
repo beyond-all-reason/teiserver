@@ -1,4 +1,4 @@
-defmodule Teiserver.Application do
+defmodule Barserver.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
@@ -18,15 +18,15 @@ defmodule Teiserver.Application do
          skip: System.get_env("SKIP_MIGRATIONS") == "true"},
 
         # Start phoenix pubsub
-        {Phoenix.PubSub, name: Teiserver.PubSub},
-        TeiserverWeb.Telemetry,
+        {Phoenix.PubSub, name: Barserver.PubSub},
+        BarserverWeb.Telemetry,
 
         # Start the Ecto repository
-        Teiserver.Repo,
+        Barserver.Repo,
         # Start the endpoint when the application starts
-        TeiserverWeb.Endpoint,
-        TeiserverWeb.Presence,
-        {Teiserver.General.CacheClusterServer, name: Teiserver.General.CacheClusterServer},
+        BarserverWeb.Endpoint,
+        BarserverWeb.Presence,
+        {Barserver.General.CacheClusterServer, name: Barserver.General.CacheClusterServer},
         {Oban, oban_config()},
 
         # Store refers to something that is typically only updated at startup
@@ -59,23 +59,23 @@ defmodule Teiserver.Application do
         concache_perm_sup(:tachyon_schemas),
         concache_perm_sup(:tachyon_dispatches),
 
-        # Teiserver stuff
+        # Barserver stuff
         # Global/singleton registries
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ServerRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ThrottleRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.AccoladesRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ConsulRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.BalancerRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.LobbyRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ClientRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.PartyRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueWaitRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueMatchRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.LobbyPolicyRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Barserver.ServerRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Barserver.ThrottleRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Barserver.AccoladesRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Barserver.ConsulRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Barserver.BalancerRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Barserver.LobbyRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Barserver.ClientRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Barserver.PartyRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Barserver.QueueWaitRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Barserver.QueueMatchRegistry]},
+        {Horde.Registry, [keys: :unique, members: :auto, name: Barserver.LobbyPolicyRegistry]},
 
         # These are for tracking the number of servers on the local node
-        {Registry, keys: :duplicate, name: Teiserver.LocalPoolRegistry},
-        {Registry, keys: :duplicate, name: Teiserver.LocalServerRegistry},
+        {Registry, keys: :duplicate, name: Barserver.LocalPoolRegistry},
+        {Registry, keys: :duplicate, name: Barserver.LocalServerRegistry},
 
         # Stores - Tables where changes are not propagated across the cluster
         # Possible stores
@@ -120,15 +120,15 @@ defmodule Teiserver.Application do
 
         # Caches - Chat
         concache_perm_sup(:rooms),
-        {Teiserver.HookServer, name: Teiserver.HookServer},
+        {Barserver.HookServer, name: Barserver.HookServer},
 
         # Liveview throttles
-        Teiserver.Account.ClientIndexThrottle,
-        Teiserver.Battle.LobbyIndexThrottle,
-        {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Throttles.Supervisor},
+        Barserver.Account.ClientIndexThrottle,
+        Barserver.Battle.LobbyIndexThrottle,
+        {DynamicSupervisor, strategy: :one_for_one, name: Barserver.Throttles.Supervisor},
 
         # Bridge
-        Teiserver.Bridge.BridgeServer,
+        Barserver.Bridge.BridgeServer,
         concache_sup(:discord_bridge_dm_cache),
         concache_perm_sup(:discord_channel_cache),
         concache_sup(:discord_bridge_account_codes, global_ttl: 300_000),
@@ -136,31 +136,31 @@ defmodule Teiserver.Application do
 
         # Lobbies
         concache_perm_sup(:lobby_command_cache),
-        {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.LobbySupervisor},
-        {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.ClientSupervisor},
-        {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.PartySupervisor},
-        {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.LobbyPolicySupervisor},
+        {DynamicSupervisor, strategy: :one_for_one, name: Barserver.LobbySupervisor},
+        {DynamicSupervisor, strategy: :one_for_one, name: Barserver.ClientSupervisor},
+        {DynamicSupervisor, strategy: :one_for_one, name: Barserver.PartySupervisor},
+        {DynamicSupervisor, strategy: :one_for_one, name: Barserver.LobbyPolicySupervisor},
 
         # Matchmaking
-        {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueSupervisor},
+        {DynamicSupervisor, strategy: :one_for_one, name: Barserver.Game.QueueSupervisor},
 
         # Coordinator mode
         {DynamicSupervisor,
-         strategy: :one_for_one, name: Teiserver.Coordinator.DynamicSupervisor},
+         strategy: :one_for_one, name: Barserver.Coordinator.DynamicSupervisor},
         {DynamicSupervisor,
-         strategy: :one_for_one, name: Teiserver.Coordinator.BalancerDynamicSupervisor},
+         strategy: :one_for_one, name: Barserver.Coordinator.BalancerDynamicSupervisor},
 
         # Accolades
-        {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Account.AccoladeSupervisor},
+        {DynamicSupervisor, strategy: :one_for_one, name: Barserver.Account.AccoladeSupervisor},
 
         # Achievements
-        {Teiserver.Game.AchievementServer, name: Teiserver.Game.AchievementServer},
+        {Barserver.Game.AchievementServer, name: Barserver.Game.AchievementServer},
 
         # System throttle
-        {Teiserver.Account.LoginThrottleServer, name: Teiserver.Account.LoginThrottleServer},
+        {Barserver.Account.LoginThrottleServer, name: Barserver.Account.LoginThrottleServer},
 
         # Telemetry
-        {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
+        {Barserver.Telemetry.TelemetryServer, name: Barserver.Telemetry.TelemetryServer},
 
         # Text callbacks
         concache_perm_sup(:text_callback_trigger_lookup),
@@ -168,27 +168,27 @@ defmodule Teiserver.Application do
 
         # Ranch servers
         %{
-          id: Teiserver.SSLSpringTcpServer,
-          start: {Teiserver.SpringTcpServer, :start_link, [[ssl: true]]}
+          id: Barserver.SSLSpringTcpServer,
+          start: {Barserver.SpringTcpServer, :start_link, [[ssl: true]]}
         },
         %{
-          id: Teiserver.RawSpringTcpServer,
-          start: {Teiserver.SpringTcpServer, :start_link, [[]]}
+          id: Barserver.RawSpringTcpServer,
+          start: {Barserver.SpringTcpServer, :start_link, [[]]}
         },
         %{
-          id: Teiserver.TachyonTcpServer,
-          start: {Teiserver.TachyonTcpServer, :start_link, [[]]}
+          id: Barserver.TachyonTcpServer,
+          start: {Barserver.TachyonTcpServer, :start_link, [[]]}
         }
       ] ++ discord_start()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Teiserver.Supervisor]
+    opts = [strategy: :one_for_one, name: Barserver.Supervisor]
     start_result = Supervisor.start_link(children, opts)
 
     # We use a logger.error to ensure something appears even on the error logs
     # and we can be sure they're being written to
-    Logger.error("Teiserver.Supervisor start result: #{Kernel.inspect(start_result)}")
+    Logger.error("Barserver.Supervisor start result: #{Kernel.inspect(start_result)}")
 
     startup_sub_functions(start_result)
 
@@ -196,8 +196,8 @@ defmodule Teiserver.Application do
   end
 
   defp discord_start do
-    if Teiserver.Communication.use_discord?() do
-      [{Teiserver.Bridge.DiscordBridgeBot, name: Teiserver.Bridge.DiscordBridgeBot}]
+    if Barserver.Communication.use_discord?() do
+      [{Barserver.Bridge.DiscordBridgeBot, name: Barserver.Bridge.DiscordBridgeBot}]
     else
       []
     end
@@ -244,9 +244,9 @@ defmodule Teiserver.Application do
       [:oban, :circuit, :trip]
     ]
 
-    :telemetry.attach_many("oban-logger", events, &Teiserver.Helper.ObanLogger.handle_event/4, [])
+    :telemetry.attach_many("oban-logger", events, &Barserver.Helper.ObanLogger.handle_event/4, [])
 
-    Teiserver.Startup.startup()
+    Barserver.Startup.startup()
   end
 
   defp oban_config do
@@ -257,7 +257,7 @@ defmodule Teiserver.Application do
   # whenever the application is updated.
   @impl true
   def config_change(changed, _new, removed) do
-    TeiserverWeb.Endpoint.config_change(changed, removed)
+    BarserverWeb.Endpoint.config_change(changed, removed)
     :ok
   end
 
@@ -265,7 +265,7 @@ defmodule Teiserver.Application do
   @spec prep_stop(map()) :: map()
   def prep_stop(state) do
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "application",
       %{
         channel: "application",

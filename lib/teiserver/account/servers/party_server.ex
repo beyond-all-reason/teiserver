@@ -1,10 +1,10 @@
-defmodule Teiserver.Account.PartyServer do
+defmodule Barserver.Account.PartyServer do
   use GenServer
   require Logger
-  alias Teiserver.{Account}
-  alias Teiserver.Data.Matchmaking
+  alias Barserver.{Account}
+  alias Barserver.Data.Matchmaking
   alias Phoenix.PubSub
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @impl true
   def handle_call(:get_party, _from, state) do
@@ -48,7 +48,7 @@ defmodule Teiserver.Account.PartyServer do
           new_invites = [userid | party.pending_invites] |> Enum.uniq()
 
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "teiserver_party:#{party.id}",
             %{
               channel: "teiserver_party:#{party.id}",
@@ -59,7 +59,7 @@ defmodule Teiserver.Account.PartyServer do
           )
 
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "teiserver_client_messages:#{userid}",
             %{
               channel: "teiserver_client_messages:#{userid}",
@@ -83,7 +83,7 @@ defmodule Teiserver.Account.PartyServer do
           new_invites = List.delete(party.pending_invites, userid)
 
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "teiserver_party:#{party.id}",
             %{
               channel: "teiserver_party:#{party.id}",
@@ -115,7 +115,7 @@ defmodule Teiserver.Account.PartyServer do
           Logger.debug("Member left #{userid}, last member, stopping party")
 
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "teiserver_party:#{party.id}",
             %{
               channel: "teiserver_party:#{party.id}",
@@ -125,7 +125,7 @@ defmodule Teiserver.Account.PartyServer do
             }
           )
 
-          Teiserver.Account.PartyLib.stop_party_server(party.id)
+          Barserver.Account.PartyLib.stop_party_server(party.id)
           party
 
         true ->
@@ -162,7 +162,7 @@ defmodule Teiserver.Account.PartyServer do
 
         true ->
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "teiserver_party:#{party.id}",
             %{
               channel: "teiserver_party:#{party.id}",
@@ -206,7 +206,7 @@ defmodule Teiserver.Account.PartyServer do
     new_members = [userid | party.members] |> Enum.uniq()
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_party:#{party.id}",
       %{
         channel: "teiserver_party:#{party.id}",
@@ -216,8 +216,8 @@ defmodule Teiserver.Account.PartyServer do
       }
     )
 
-    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_client_messages:#{userid}")
-    PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{userid}")
+    PubSub.unsubscribe(Barserver.PubSub, "teiserver_client_messages:#{userid}")
+    PubSub.subscribe(Barserver.PubSub, "teiserver_client_messages:#{userid}")
 
     Account.move_client_to_party(userid, party.id)
 
@@ -235,7 +235,7 @@ defmodule Teiserver.Account.PartyServer do
     new_members = List.delete(party.members, userid)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_party:#{party.id}",
       %{
         channel: "teiserver_party:#{party.id}",
@@ -253,11 +253,11 @@ defmodule Teiserver.Account.PartyServer do
       end
 
     # We grab the longest serving member for the new leader
-    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_client_messages:#{userid}")
+    PubSub.unsubscribe(Barserver.PubSub, "teiserver_client_messages:#{userid}")
     Account.move_client_to_party(userid, nil)
 
     if Enum.empty?(new_members) do
-      Teiserver.Account.PartyLib.stop_party_server(party.id)
+      Barserver.Account.PartyLib.stop_party_server(party.id)
     end
 
     # Now leave any queues we were in
@@ -278,12 +278,12 @@ defmodule Teiserver.Account.PartyServer do
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(%{party: %{id: id} = party}) do
     Horde.Registry.register(
-      Teiserver.PartyRegistry,
+      Barserver.PartyRegistry,
       id,
       id
     )
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{party.leader}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_client_messages:#{party.leader}")
 
     Account.move_client_to_party(party.leader, party.id)
     Logger.metadata(request_id: "PartyServer##{id}")

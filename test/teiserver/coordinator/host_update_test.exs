@@ -1,8 +1,8 @@
-defmodule Teiserver.Coordinator.HostUpdateTest do
-  use Teiserver.ServerCase, async: false
-  alias Teiserver.{Lobby, Client, Coordinator}
+defmodule Barserver.Coordinator.HostUpdateTest do
+  use Barserver.ServerCase, async: false
+  alias Barserver.{Lobby, Client, Coordinator}
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
 
   setup do

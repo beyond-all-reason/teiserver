@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.UuidOssp do
+defmodule Barserver.Repo.Migrations.UuidOssp do
   use Ecto.Migration
 
   def up do

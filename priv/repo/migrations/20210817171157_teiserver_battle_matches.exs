@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.TeiserverBattleMatches do
+defmodule Barserver.Repo.Migrations.BarserverBattleMatches do
   use Ecto.Migration
 
   def change do

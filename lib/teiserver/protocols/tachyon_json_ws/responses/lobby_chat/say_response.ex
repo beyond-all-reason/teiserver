@@ -1,9 +1,9 @@
-defmodule Teiserver.Tachyon.Responses.LobbyChat.SayResponse do
+defmodule Barserver.Tachyon.Responses.LobbyChat.SayResponse do
   @moduledoc """
 
   """
 
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @spec generate(true | false | :no_lobby) ::
           {T.tachyon_command(), :success, T.tachyon_object()}

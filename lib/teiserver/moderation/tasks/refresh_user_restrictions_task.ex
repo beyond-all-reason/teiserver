@@ -1,17 +1,17 @@
-defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
+defmodule Barserver.Moderation.RefreshUserRestrictionsTask do
   @moduledoc """
   Refreshes the restrictions applied to a user based on the outstanding actions.
   """
   use Oban.Worker, queue: :teiserver
   require Logger
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
-  alias Teiserver.{Account, Coordinator, Moderation}
+  alias Barserver.{Account, Coordinator, Moderation}
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_job) do
-    if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") ==
+    if Barserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") ==
          true do
       now_as_string = Timex.now() |> Jason.encode!() |> Jason.decode!()
 
@@ -99,11 +99,11 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
     cond do
       Enum.member?(new_restrictions, "Login") ->
         Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
-        Teiserver.Client.disconnect(client.userid, "Banned")
+        Barserver.Client.disconnect(client.userid, "Banned")
 
       Enum.member?(new_restrictions, "All lobbies") ->
         Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
-        Teiserver.Client.disconnect(client.userid, "Removed from lobbies")
+        Barserver.Client.disconnect(client.userid, "Removed from lobbies")
 
       true ->
         pid = Coordinator.get_coordinator_pid()

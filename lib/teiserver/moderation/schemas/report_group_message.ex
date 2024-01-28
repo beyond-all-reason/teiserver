@@ -1,10 +1,10 @@
-defmodule Teiserver.Moderation.ReportGroupMessage do
+defmodule Barserver.Moderation.ReportGroupMessage do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "moderation_report_group_messages" do
-    belongs_to :report_group, Teiserver.Moderation.ReportGroup
-    belongs_to :user, Teiserver.Account.User
+    belongs_to :report_group, Barserver.Moderation.ReportGroup
+    belongs_to :user, Barserver.Account.User
 
     field :content, :string
 

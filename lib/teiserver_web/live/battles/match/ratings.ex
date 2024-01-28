@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.Battle.MatchLive.Ratings do
-  use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Battle, Game}
-  alias Teiserver.Game.MatchRatingLib
+defmodule BarserverWeb.Battle.MatchLive.Ratings do
+  use BarserverWeb, :live_view
+  alias Barserver.{Account, Battle, Game}
+  alias Barserver.Game.MatchRatingLib
 
   @impl true
   def mount(params, _ession, socket) do

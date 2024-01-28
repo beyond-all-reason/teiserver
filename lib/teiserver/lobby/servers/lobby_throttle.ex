@@ -1,4 +1,4 @@
-defmodule Teiserver.Battle.LobbyThrottle do
+defmodule Barserver.Battle.LobbyThrottle do
   @doc """
   lobby_changes lists things that have changed about the battle lobby
   player_changes lists players that have changed (added, updated or removed!)
@@ -13,7 +13,7 @@ defmodule Teiserver.Battle.LobbyThrottle do
   def handle_info({:lobby_update, :closed, _id, _reason}, state) do
     :ok =
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
         {:battle_lobby_throttle, :closed}
       )
@@ -115,7 +115,7 @@ defmodule Teiserver.Battle.LobbyThrottle do
   def terminate(_reason, state) do
     :ok =
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
         {:battle_lobby_throttle, :closed}
       )
@@ -124,7 +124,7 @@ defmodule Teiserver.Battle.LobbyThrottle do
   defp broadcast(state) do
     :ok =
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
         {:battle_lobby_throttle, state.lobby_changes |> Enum.uniq(),
          state.player_changes |> Enum.uniq()}
@@ -145,10 +145,10 @@ defmodule Teiserver.Battle.LobbyThrottle do
     battle_lobby_id = opts.id
     :timer.send_interval(@update_interval, self(), :tick)
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{battle_lobby_id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_lobby_updates:#{battle_lobby_id}")
 
     Horde.Registry.register(
-      Teiserver.ThrottleRegistry,
+      Barserver.ThrottleRegistry,
       "LobbyThrottle:#{battle_lobby_id}",
       battle_lobby_id
     )

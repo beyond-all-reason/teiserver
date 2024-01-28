@@ -1,5 +1,5 @@
-defmodule Teiserver.Protocols.Tachyon.V1.TelemetryIn do
-  alias Teiserver.Telemetry
+defmodule Barserver.Protocols.Tachyon.V1.TelemetryIn do
+  alias Barserver.Telemetry
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
   def do_handle(

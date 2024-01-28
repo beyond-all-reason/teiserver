@@ -1,8 +1,8 @@
-defmodule Teiserver.Account.RelationshipLib do
+defmodule Barserver.Account.RelationshipLib do
   @moduledoc false
-  alias Teiserver.{Account, Config}
-  alias Teiserver.Account.AuthLib
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.{Account, Config}
+  alias Barserver.Account.AuthLib
+  alias Barserver.Data.Types, as: T
   alias Phoenix.PubSub
 
   @spec colour :: atom
@@ -45,7 +45,7 @@ defmodule Teiserver.Account.RelationshipLib do
     decache_relationships(from_user_id)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "account_user_relationships:#{to_user_id}",
       %{
         channel: "account_user_relationships:#{to_user_id}",
@@ -143,19 +143,19 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec decache_relationships(T.userid()) :: :ok
   def decache_relationships(userid) do
-    Teiserver.cache_delete(:account_follow_cache, userid)
-    Teiserver.cache_delete(:account_ignore_cache, userid)
-    Teiserver.cache_delete(:account_avoid_cache, userid)
-    Teiserver.cache_delete(:account_block_cache, userid)
-    Teiserver.cache_delete(:account_avoiding_this_cache, userid)
-    Teiserver.cache_delete(:account_blocking_this_cache, userid)
+    Barserver.cache_delete(:account_follow_cache, userid)
+    Barserver.cache_delete(:account_ignore_cache, userid)
+    Barserver.cache_delete(:account_avoid_cache, userid)
+    Barserver.cache_delete(:account_block_cache, userid)
+    Barserver.cache_delete(:account_avoiding_this_cache, userid)
+    Barserver.cache_delete(:account_blocking_this_cache, userid)
 
     :ok
   end
 
   @spec list_userids_followed_by_userid(T.userid()) :: [T.userid()]
   def list_userids_followed_by_userid(userid) do
-    Teiserver.cache_get_or_store(:account_follow_cache, userid, fn ->
+    Barserver.cache_get_or_store(:account_follow_cache, userid, fn ->
       Account.list_relationships(
         where: [
           from_user_id: userid,
@@ -171,7 +171,7 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec list_userids_avoiding_this_userid(T.userid()) :: [T.userid()]
   def list_userids_avoiding_this_userid(userid) do
-    Teiserver.cache_get_or_store(:account_avoiding_this_cache, userid, fn ->
+    Barserver.cache_get_or_store(:account_avoiding_this_cache, userid, fn ->
       Account.list_relationships(
         where: [
           to_user_id: userid,
@@ -187,7 +187,7 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec list_userids_avoided_by_userid(T.userid()) :: [T.userid()]
   def list_userids_avoided_by_userid(userid) do
-    Teiserver.cache_get_or_store(:account_avoid_cache, userid, fn ->
+    Barserver.cache_get_or_store(:account_avoid_cache, userid, fn ->
       Account.list_relationships(
         where: [
           from_user_id: userid,
@@ -203,7 +203,7 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec list_userids_blocked_by_userid(T.userid()) :: [T.userid()]
   def list_userids_blocked_by_userid(userid) do
-    Teiserver.cache_get_or_store(:account_block_cache, userid, fn ->
+    Barserver.cache_get_or_store(:account_block_cache, userid, fn ->
       Account.list_relationships(
         where: [
           from_user_id: userid,
@@ -219,7 +219,7 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec list_userids_blocking_this_userid(T.userid()) :: [T.userid()]
   def list_userids_blocking_this_userid(userid) do
-    Teiserver.cache_get_or_store(:account_blocking_this_cache, userid, fn ->
+    Barserver.cache_get_or_store(:account_blocking_this_cache, userid, fn ->
       Account.list_relationships(
         where: [
           to_user_id: userid,
@@ -235,7 +235,7 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec list_userids_ignored_by_userid(T.userid()) :: [T.userid()]
   def list_userids_ignored_by_userid(userid) do
-    Teiserver.cache_get_or_store(:account_ignore_cache, userid, fn ->
+    Barserver.cache_get_or_store(:account_ignore_cache, userid, fn ->
       Account.list_relationships(
         where: [
           from_user_id: userid,

@@ -1,7 +1,7 @@
-defmodule Teiserver.Telemetry.InfologLib do
+defmodule Barserver.Telemetry.InfologLib do
   @moduledoc false
-  use TeiserverWeb, :library
-  alias Teiserver.Telemetry.Infolog
+  use BarserverWeb, :library
+  alias Barserver.Telemetry.Infolog
 
   # Functions
   @spec colours :: atom

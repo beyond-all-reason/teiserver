@@ -1,11 +1,11 @@
-defmodule TeiserverWeb.ClientLive.Show do
-  use TeiserverWeb, :live_view
+defmodule BarserverWeb.ClientLive.Show do
+  use BarserverWeb, :live_view
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{Account, Client, CacheUser, Battle}
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Account.UserLib
+  alias Barserver.{Account, Client, CacheUser, Battle}
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.Account.UserLib
 
   @extra_menu_content """
   &nbsp;&nbsp;&nbsp;
@@ -25,13 +25,13 @@ defmodule TeiserverWeb.ClientLive.Show do
 
     :ok =
       PubSub.subscribe(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_client_messages:#{socket.assigns[:current_user].id}"
       )
 
     socket =
       socket
-      |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
+      |> add_breadcrumb(name: "Barserver", url: "/teiserver")
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Clients", url: "/teiserver/admin/client")
       |> assign(:current_client, current_client)
@@ -47,7 +47,7 @@ defmodule TeiserverWeb.ClientLive.Show do
     case allow?(socket.assigns[:current_user], "Moderator") do
       true ->
         id = int_parse(id)
-        PubSub.subscribe(Teiserver.PubSub, "teiserver_client_watch:#{id}")
+        PubSub.subscribe(Barserver.PubSub, "teiserver_client_watch:#{id}")
         client = Account.get_client_by_id(id)
         user = CacheUser.get_user_by_id(id)
 

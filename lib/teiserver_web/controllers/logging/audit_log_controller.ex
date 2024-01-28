@@ -1,19 +1,19 @@
-defmodule TeiserverWeb.Logging.AuditLogController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Logging.AuditLogController do
+  use BarserverWeb, :controller
 
-  # alias Teiserver.Logging.AuditLog
-  alias Teiserver.Logging
-  alias Teiserver.Logging.AuditLogLib
+  # alias Barserver.Logging.AuditLog
+  alias Barserver.Logging
+  alias Barserver.Logging.AuditLogLib
 
-  import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
+  import Barserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug :add_breadcrumb, name: 'Logging', url: '/logging'
   plug :add_breadcrumb, name: 'Audit', url: '/logging/audit'
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Logging.AuditLog,
+    policy: Barserver.Logging.AuditLog,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "logging",

@@ -1,13 +1,13 @@
-defmodule TeiserverWeb.Admin.UserController do
+defmodule BarserverWeb.Admin.UserController do
   @moduledoc false
-  use TeiserverWeb, :controller
+  use BarserverWeb, :controller
 
-  alias Teiserver.{Account, Chat, Game}
-  alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Account.User
-  alias Teiserver.Account.{UserLib, RoleLib}
-  alias Teiserver.Battle.BalanceLib
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1, float_parse: 1]
+  alias Barserver.{Account, Chat, Game}
+  alias Barserver.Game.MatchRatingLib
+  alias Barserver.Account.User
+  alias Barserver.Account.{UserLib, RoleLib}
+  alias Barserver.Battle.BalanceLib
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1, float_parse: 1]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_user",
@@ -15,9 +15,9 @@ defmodule TeiserverWeb.Admin.UserController do
   )
 
   plug(Bodyguard.Plug.Authorize,
-    policy: Teiserver.Account.Auth,
+    policy: Barserver.Account.Auth,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
   )
 
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
@@ -106,7 +106,7 @@ defmodule TeiserverWeb.Admin.UserController do
         []
       else
         id_list =
-          Teiserver.Account.list_user_stats(
+          Barserver.Account.list_user_stats(
             search: [
               data_equal: {"hardware:gpuinfo", params["data_search"]["gpu"]},
               data_equal: {"hardware:cpuinfo", params["data_search"]["cpu"]},
@@ -137,7 +137,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def show(conn, %{"id" => id}) do
     user = Account.get_user(id)
 
-    case Teiserver.Account.UserLib.has_access(user, conn) do
+    case Barserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         user
         |> UserLib.make_favourite()
@@ -236,7 +236,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def edit(conn, %{"id" => id}) do
     user = Account.get_user(id)
 
-    case Teiserver.Account.UserLib.has_access(user, conn) do
+    case Barserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         changeset = Account.change_user(user)
 
@@ -326,7 +326,7 @@ defmodule TeiserverWeb.Admin.UserController do
         "roles" => new_roles
       })
 
-    case Teiserver.Account.UserLib.has_access(user, conn) do
+    case Barserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         change_result =
           cond do
@@ -364,7 +364,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def reset_password(conn, %{"id" => id}) do
     user = Account.get_user!(id)
 
-    case Teiserver.Account.UserLib.has_access(user, conn) do
+    case Barserver.Account.UserLib.has_access(user, conn) do
       {false, :not_found} ->
         conn
         |> put_flash(:danger, "Unable to find that user")
@@ -376,8 +376,8 @@ defmodule TeiserverWeb.Admin.UserController do
         |> redirect(to: ~p"/teiserver/admin/user")
 
       {true, _} ->
-        Teiserver.Account.Emails.password_reset(user)
-        |> Teiserver.Mailer.deliver_now()
+        Barserver.Account.Emails.password_reset(user)
+        |> Barserver.Mailer.deliver_now()
 
         conn
         |> put_flash(:success, "Password reset email sent to user")
@@ -389,7 +389,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def ratings(conn, %{"id" => id} = params) do
     user = Account.get_user(id)
 
-    case Teiserver.Account.UserLib.has_access(user, conn) do
+    case Barserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         filter = params["filter"]
         filter_type_id = MatchRatingLib.rating_type_name_lookup()[filter]
@@ -453,7 +453,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def ratings_form(conn, %{"id" => id}) do
     user = Account.get_user(id)
 
-    case Teiserver.Account.UserLib.has_access(user, conn) do
+    case Barserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         ratings =
           Account.list_ratings(
@@ -485,7 +485,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def ratings_post(conn, %{"id" => id} = params) do
     user = Account.get_user(id)
 
-    case Teiserver.Account.UserLib.has_access(user, conn) do
+    case Barserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         changes =
           MatchRatingLib.rating_type_list()
@@ -554,7 +554,7 @@ defmodule TeiserverWeb.Admin.UserController do
           changes
           |> Enum.map(fn {_, log} -> log.id end)
 
-        add_audit_log(conn, "Teiserver:Changed user rating", %{
+        add_audit_log(conn, "Barserver:Changed user rating", %{
           user_id: user.id,
           log_ids: log_ids
         })
@@ -574,13 +574,13 @@ defmodule TeiserverWeb.Admin.UserController do
   def perform_action(conn, %{"id" => id, "action" => action}) do
     user = Account.get_user!(id)
 
-    case Teiserver.Account.UserLib.has_access(user, conn) do
+    case Barserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         result =
           case action do
             "recache" ->
-              Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user.id)
-              Teiserver.CacheUser.recache_user(user.id)
+              Barserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user.id)
+              Barserver.CacheUser.recache_user(user.id)
               {:ok, ""}
 
             "reset_flood_protection" ->
@@ -606,7 +606,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def smurf_search(conn, %{"id" => id}) do
     user = Account.get_user!(id)
 
-    case Teiserver.Account.UserLib.has_access(user, conn) do
+    case Barserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         all_user_keys =
           Account.list_smurf_keys(
@@ -732,8 +732,8 @@ defmodule TeiserverWeb.Admin.UserController do
     origin_user = Account.get_user!(origin_id)
 
     access = {
-      Teiserver.Account.UserLib.has_access(smurf_user, conn),
-      Teiserver.Account.UserLib.has_access(origin_user, conn)
+      Barserver.Account.UserLib.has_access(smurf_user, conn),
+      Barserver.Account.UserLib.has_access(origin_user, conn)
     }
 
     case access do
@@ -760,10 +760,10 @@ defmodule TeiserverWeb.Admin.UserController do
           |> Enum.count()
 
         # And give the origin the smurfer role
-        Teiserver.CacheUser.add_roles(origin_user.id, ["Smurfer"])
+        Barserver.CacheUser.add_roles(origin_user.id, ["Smurfer"])
         Account.update_user_stat(origin_user.id, %{"smurf_count" => smurf_count})
 
-        Teiserver.Client.disconnect(smurf_user.id, "Marked as smurf")
+        Barserver.Client.disconnect(smurf_user.id, "Marked as smurf")
 
         conn
         |> put_flash(:success, "Applied the changes")
@@ -781,7 +781,7 @@ defmodule TeiserverWeb.Admin.UserController do
     user = Account.get_user!(id)
     origin_user_id = user.smurf_of_id
 
-    case Teiserver.Account.UserLib.has_access(user, conn) do
+    case Barserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         case Account.script_update_user(user, %{"smurf_of_id" => nil}) do
           {:ok, user} ->
@@ -802,7 +802,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
             # And give the origin the smurfer role
             if smurf_count == 0 do
-              Teiserver.CacheUser.remove_roles(origin_user_id, ["Smurfer"])
+              Barserver.CacheUser.remove_roles(origin_user_id, ["Smurfer"])
             end
 
             Account.update_user_stat(origin_user_id, %{"smurf_count" => smurf_count})
@@ -828,8 +828,8 @@ defmodule TeiserverWeb.Admin.UserController do
     to_user = Account.get_user!(to_id)
 
     access = {
-      Teiserver.Account.UserLib.has_access(from_user, conn),
-      Teiserver.Account.UserLib.has_access(to_user, conn)
+      Barserver.Account.UserLib.has_access(from_user, conn),
+      Barserver.Account.UserLib.has_access(to_user, conn)
     }
 
     case access do
@@ -853,20 +853,20 @@ defmodule TeiserverWeb.Admin.UserController do
     to_user = Account.get_user!(to_id)
 
     access = {
-      Teiserver.Account.UserLib.has_access(from_user, conn),
-      Teiserver.Account.UserLib.has_access(to_user, conn)
+      Barserver.Account.UserLib.has_access(from_user, conn),
+      Barserver.Account.UserLib.has_access(to_user, conn)
     }
 
     case access do
       {{true, _}, {true, _}} ->
-        Teiserver.Account.SmurfMergeTask.perform(from_user.id, to_user.id, merge)
+        Barserver.Account.SmurfMergeTask.perform(from_user.id, to_user.id, merge)
 
         fields =
           merge
           |> Enum.filter(fn {_k, v} -> v == "true" end)
           |> Enum.map(fn {k, _} -> k end)
 
-        add_audit_log(conn, "Teiserver:Smurf merge", %{
+        add_audit_log(conn, "Barserver:Smurf merge", %{
           fields: fields,
           from_id: from_user.id,
           to_id: to_user.id
@@ -964,8 +964,8 @@ defmodule TeiserverWeb.Admin.UserController do
       Account.update_user_stat(user.id, %{key => value})
     end
 
-    Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user.id)
-    Teiserver.CacheUser.recache_user(user.id)
+    Barserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user.id)
+    Barserver.CacheUser.recache_user(user.id)
 
     # Now we update stats for the origin
     smurf_count =
@@ -977,7 +977,7 @@ defmodule TeiserverWeb.Admin.UserController do
       )
       |> Enum.count()
 
-    Teiserver.Account.update_user_stat(user.id, %{"smurf_count" => smurf_count})
+    Barserver.Account.update_user_stat(user.id, %{"smurf_count" => smurf_count})
 
     conn
     |> put_flash(:success, "stat #{key} updated")
@@ -988,7 +988,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def rename_form(conn, %{"id" => id}) do
     user = Account.get_user(id)
 
-    case Teiserver.Account.UserLib.has_access(user, conn) do
+    case Barserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         conn
         |> assign(:user, user)
@@ -1006,13 +1006,13 @@ defmodule TeiserverWeb.Admin.UserController do
   def rename_post(conn, %{"id" => id, "new_name" => new_name}) do
     user = Account.get_user(id)
 
-    case Teiserver.Account.UserLib.has_access(user, conn) do
+    case Barserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        admin_action = Teiserver.Account.AuthLib.allow?(conn, "admin.dev")
+        admin_action = Barserver.Account.AuthLib.allow?(conn, "admin.dev")
 
-        case Teiserver.CacheUser.rename_user(user.id, new_name, admin_action) do
+        case Barserver.CacheUser.rename_user(user.id, new_name, admin_action) do
           :success ->
-            add_audit_log(conn, "Teiserver:Changed user name", %{
+            add_audit_log(conn, "Barserver:Changed user name", %{
               user_id: user.id,
               from: user.name,
               to: new_name
@@ -1064,7 +1064,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def gdpr_clean(conn, %{"id" => id}) do
     user = Account.get_user_by_id(id)
 
-    case Teiserver.Account.UserLib.has_access(user, conn) do
+    case Barserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         new_user =
           Map.merge(user, %{

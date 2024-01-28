@@ -1,9 +1,9 @@
-defmodule Teiserver.Tachyon.Responses.Lobby.AddUserClientResponse do
+defmodule Barserver.Tachyon.Responses.Lobby.AddUserClientResponse do
   @moduledoc """
 
   """
 
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @spec generate(T.client(), T.lobby_id()) ::
           {T.tachyon_command(), :success, T.tachyon_object()}

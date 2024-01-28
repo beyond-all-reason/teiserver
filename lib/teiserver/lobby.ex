@@ -1,14 +1,14 @@
-defmodule Teiserver.Lobby do
+defmodule Barserver.Lobby do
   @moduledoc """
   For handling the in-memory instances of lobbies
   """
 
   alias Phoenix.PubSub
   require Logger
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.{Account, CacheUser, Client, Battle, Coordinator, LobbyIdServer, Telemetry}
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Lobby.{ChatLib, LobbyLib}
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.{Account, CacheUser, Client, Battle, Coordinator, LobbyIdServer, Telemetry}
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Lobby.{ChatLib, LobbyLib}
 
   @spec icon :: String.t()
   def icon, do: "fa-regular fa-sword"
@@ -124,9 +124,9 @@ defmodule Teiserver.Lobby do
 
   @spec start_battle_lobby_throttle(T.lobby_id()) :: pid()
   def start_battle_lobby_throttle(battle_lobby_id) do
-    Teiserver.Throttles.start_throttle(
+    Barserver.Throttles.start_throttle(
       battle_lobby_id,
-      Teiserver.Battle.LobbyThrottle,
+      Barserver.Battle.LobbyThrottle,
       "battle_lobby_throttle_#{battle_lobby_id}"
     )
   end
@@ -136,12 +136,12 @@ defmodule Teiserver.Lobby do
     # We send this out because the throttle won't
     :ok =
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_liveview_lobby_updates:#{battle_lobby_id}",
         {:battle_lobby_throttle, :closed}
       )
 
-    Teiserver.Throttles.stop_throttle("LobbyThrottle:#{battle_lobby_id}")
+    Barserver.Throttles.stop_throttle("LobbyThrottle:#{battle_lobby_id}")
     :ok
   end
 
@@ -166,7 +166,7 @@ defmodule Teiserver.Lobby do
     add_user_to_battle(client.userid, lobby_id, script_password)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_client_messages:#{client.userid}",
       %{
         channel: "teiserver_client_messages:#{client.userid}",
@@ -205,7 +205,7 @@ defmodule Teiserver.Lobby do
 
       if client do
         PubSub.broadcast(
-          Teiserver.PubSub,
+          Barserver.PubSub,
           "teiserver_global_user_updates",
           %{
             channel: "teiserver_global_user_updates",
@@ -217,7 +217,7 @@ defmodule Teiserver.Lobby do
         )
 
         PubSub.broadcast(
-          Teiserver.PubSub,
+          Barserver.PubSub,
           "teiserver_client_messages:#{userid}",
           %{
             channel: "teiserver_client_messages:#{userid}",
@@ -228,7 +228,7 @@ defmodule Teiserver.Lobby do
         )
 
         PubSub.broadcast(
-          Teiserver.PubSub,
+          Barserver.PubSub,
           "teiserver_client_watch:#{userid}",
           %{
             channel: "teiserver_client_watch:#{userid}",
@@ -238,7 +238,7 @@ defmodule Teiserver.Lobby do
         )
 
         PubSub.broadcast(
-          Teiserver.PubSub,
+          Barserver.PubSub,
           "teiserver_lobby_updates:#{lobby_id}",
           %{
             channel: "teiserver_lobby_updates",
@@ -273,14 +273,14 @@ defmodule Teiserver.Lobby do
         client = Account.get_client_by_id(userid)
 
         # Unfortunately in testing this can cause a foreign key constraint error
-        if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
+        if not Application.get_env(:teiserver, Barserver)[:test_mode] do
           match_id = Battle.get_lobby_match_id(lobby_id)
           Telemetry.log_simple_lobby_event(userid, match_id, "remove_user_from_lobby")
         end
 
         if client do
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "teiserver_global_user_updates",
             %{
               channel: "teiserver_global_user_updates",
@@ -291,7 +291,7 @@ defmodule Teiserver.Lobby do
           )
 
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "teiserver_client_watch:#{userid}",
             %{
               channel: "teiserver_client_watch:#{userid}",
@@ -301,7 +301,7 @@ defmodule Teiserver.Lobby do
           )
 
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "teiserver_lobby_updates:#{lobby_id}",
             %{
               channel: "teiserver_lobby_updates",
@@ -339,7 +339,7 @@ defmodule Teiserver.Lobby do
 
           if client do
             PubSub.broadcast(
-              Teiserver.PubSub,
+              Barserver.PubSub,
               "teiserver_global_user_updates",
               %{
                 channel: "teiserver_global_user_updates",
@@ -350,7 +350,7 @@ defmodule Teiserver.Lobby do
             )
 
             PubSub.broadcast(
-              Teiserver.PubSub,
+              Barserver.PubSub,
               "teiserver_client_watch:#{userid}",
               %{
                 channel: "teiserver_client_watch:#{userid}",
@@ -360,7 +360,7 @@ defmodule Teiserver.Lobby do
             )
 
             PubSub.broadcast(
-              Teiserver.PubSub,
+              Barserver.PubSub,
               "teiserver_lobby_updates:#{lobby_id}",
               %{
                 channel: "teiserver_lobby_updates",
@@ -518,7 +518,7 @@ defmodule Teiserver.Lobby do
               send(host_client.tcp_pid, {:request_user_join_lobby, userid})
 
               PubSub.broadcast(
-                Teiserver.PubSub,
+                Barserver.PubSub,
                 "teiserver_lobby_host_message:#{lobby_id}",
                 %{
                   channel: "teiserver_lobby_host_message:#{lobby_id}",
@@ -609,7 +609,7 @@ defmodule Teiserver.Lobby do
     end
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_client_messages:#{userid}",
       %{
         channel: "teiserver_client_messages:#{userid}",
@@ -629,7 +629,7 @@ defmodule Teiserver.Lobby do
   @spec deny_join_request(T.userid(), T.lobby_id(), String.t()) :: :ok
   def deny_join_request(userid, lobby_id, reason) do
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_client_messages:#{userid}",
       %{
         channel: "teiserver_client_messages:#{userid}",

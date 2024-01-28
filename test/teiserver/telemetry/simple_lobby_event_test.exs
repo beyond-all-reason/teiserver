@@ -1,13 +1,13 @@
-defmodule Teiserver.Telemetry.SimpleLobbyEventTest do
+defmodule Barserver.Telemetry.SimpleLobbyEventTest do
   @moduledoc false
-  use Teiserver.DataCase
-  alias Teiserver.{Battle, Telemetry}
-  alias Teiserver.TeiserverTestLib
+  use Barserver.DataCase
+  alias Barserver.{Battle, Telemetry}
+  alias Barserver.BarserverTestLib
 
   test "simple lobby events" do
     r = :rand.uniform(999_999_999)
 
-    user = TeiserverTestLib.new_user("simple_lobby_event_user")
+    user = BarserverTestLib.new_user("simple_lobby_event_user")
 
     {:ok, match} =
       Battle.create_match(%{

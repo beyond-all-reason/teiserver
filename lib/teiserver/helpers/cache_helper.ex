@@ -1,4 +1,4 @@
-defmodule Teiserver.Helpers.CacheHelper do
+defmodule Barserver.Helpers.CacheHelper do
   @moduledoc """
 
   """
@@ -22,7 +22,7 @@ defmodule Teiserver.Helpers.CacheHelper do
     end)
 
     Phoenix.PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "cluster_hooks",
       {:cluster_hooks, :delete, Node.self(), table, keys}
     )
@@ -38,7 +38,7 @@ defmodule Teiserver.Helpers.CacheHelper do
     ConCache.put(table, key, value)
 
     Phoenix.PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "cluster_hooks",
       {:cluster_hooks, :put, Node.self(), table, key, value}
     )
@@ -52,7 +52,7 @@ defmodule Teiserver.Helpers.CacheHelper do
     ConCache.insert_new(table, key, value)
 
     Phoenix.PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "cluster_hooks",
       {:cluster_hooks, :insert_new, Node.self(), table, key, value}
     )
@@ -66,7 +66,7 @@ defmodule Teiserver.Helpers.CacheHelper do
     ConCache.update(table, key, func)
 
     Phoenix.PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "cluster_hooks",
       {:cluster_hooks, :update, Node.self(), table, key, func}
     )
@@ -74,7 +74,7 @@ defmodule Teiserver.Helpers.CacheHelper do
 
   # Stores
   @spec store_get(atom, any) :: any
-  def store_get(table, key), do: Teiserver.cache_get(table, key)
+  def store_get(table, key), do: Barserver.cache_get(table, key)
 
   @spec store_delete(atom, any) :: :ok
   def store_delete(table, key), do: ConCache.delete(table, key)

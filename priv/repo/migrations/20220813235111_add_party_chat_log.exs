@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.AddPartyChatLog do
+defmodule Barserver.Repo.Migrations.AddPartyChatLog do
   use Ecto.Migration
 
   def change do

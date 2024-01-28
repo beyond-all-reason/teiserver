@@ -1,6 +1,6 @@
-defmodule TeiserverWeb.Admin.ToolView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Admin.ToolView do
+  use BarserverWeb, :view
 
-  def view_colour, do: Teiserver.Admin.ToolLib.colours()
-  def icon, do: Teiserver.Admin.ToolLib.icon()
+  def view_colour, do: Barserver.Admin.ToolLib.colours()
+  def icon, do: Barserver.Admin.ToolLib.icon()
 end

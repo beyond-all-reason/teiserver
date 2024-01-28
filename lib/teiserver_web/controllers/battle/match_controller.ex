@@ -1,15 +1,15 @@
-defmodule TeiserverWeb.Battle.MatchController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Battle.MatchController do
+  use BarserverWeb, :controller
 
-  alias Teiserver.{Battle, Game, Account}
-  alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Battle.MatchLib
-  alias Teiserver.Helper.TimexHelper
+  alias Barserver.{Battle, Game, Account}
+  alias Barserver.Game.MatchRatingLib
+  alias Barserver.Battle.MatchLib
+  alias Barserver.Helper.TimexHelper
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Battle.Match,
+    policy: Barserver.Battle.Match,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "match",
@@ -71,7 +71,7 @@ defmodule TeiserverWeb.Battle.MatchController do
       |> Map.drop([nil])
       |> Map.filter(fn {_id, members} -> Enum.count(members) > 1 end)
       |> Map.keys()
-      |> Enum.zip(Teiserver.Helper.StylingHelper.bright_hex_colour_list())
+      |> Enum.zip(Barserver.Helper.StylingHelper.bright_hex_colour_list())
       |> Map.new()
 
     conn

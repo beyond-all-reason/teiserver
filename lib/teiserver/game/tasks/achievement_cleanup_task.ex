@@ -1,6 +1,6 @@
-defmodule Teiserver.Game.AchievementCleanupTask do
+defmodule Barserver.Game.AchievementCleanupTask do
   use Oban.Worker, queue: :cleanup
-  alias Teiserver.{Game}
+  alias Barserver.{Game}
   require Logger
 
   @impl Oban.Worker
@@ -98,6 +98,6 @@ defmodule Teiserver.Game.AchievementCleanupTask do
     # Now add them!
     Ecto.Multi.new()
     |> Ecto.Multi.insert_all(:insert_all, Game.UserAchievement, normals_to_add)
-    |> Teiserver.Repo.transaction()
+    |> Barserver.Repo.transaction()
   end
 end

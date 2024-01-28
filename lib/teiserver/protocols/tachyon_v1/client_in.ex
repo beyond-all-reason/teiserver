@@ -1,8 +1,8 @@
-defmodule Teiserver.Protocols.Tachyon.V1.ClientIn do
-  alias Teiserver.{Client}
-  alias Teiserver.Protocols.Tachyon.V1.Tachyon
-  import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
-  alias Teiserver.Data.Types, as: T
+defmodule Barserver.Protocols.Tachyon.V1.ClientIn do
+  alias Barserver.{Client}
+  alias Barserver.Protocols.Tachyon.V1.Tachyon
+  import Barserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
+  alias Barserver.Data.Types, as: T
 
   @spec do_handle(String.t(), Map.t(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
   def do_handle("list_clients_from_ids", %{"id_list" => id_list}, state) do

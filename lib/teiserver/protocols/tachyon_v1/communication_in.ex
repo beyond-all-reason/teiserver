@@ -1,6 +1,6 @@
-defmodule Teiserver.Protocols.Tachyon.V1.CommunicationIn do
-  alias Teiserver.{Account, CacheUser}
-  import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
+defmodule Barserver.Protocols.Tachyon.V1.CommunicationIn do
+  alias Barserver.{Account, CacheUser}
+  import Barserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
   def do_handle("get_latest_game_news", _cmd, state) do

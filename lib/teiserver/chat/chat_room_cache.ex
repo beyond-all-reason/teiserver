@@ -1,10 +1,10 @@
-defmodule Teiserver.Room do
+defmodule Barserver.Room do
   @moduledoc false
   require Logger
-  alias Teiserver.{Account, CacheUser, Chat, Coordinator, Moderation}
-  alias Teiserver.Chat.WordLib
+  alias Barserver.{Account, CacheUser, Chat, Coordinator, Moderation}
+  alias Barserver.Chat.WordLib
   alias Phoenix.PubSub
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @dont_log_room ~w(autohosts)
 
@@ -34,12 +34,12 @@ defmodule Teiserver.Room do
   end
 
   def remove_room(room_name) do
-    Teiserver.cache_delete(:rooms, room_name)
+    Barserver.cache_delete(:rooms, room_name)
   end
 
   @spec get_room(String.t()) :: Map.t()
   def get_room(name) do
-    Teiserver.cache_get(:rooms, name)
+    Barserver.cache_get(:rooms, name)
   end
 
   @spec can_join_room?(T.userid(), String.t()) :: true | {false, String.t()}
@@ -65,7 +65,7 @@ defmodule Teiserver.Room do
   @spec get_or_make_room(String.t(), T.userid()) :: Map.t()
   @spec get_or_make_room(String.t(), T.userid(), T.clan_id()) :: Map.t()
   def get_or_make_room(name, author_id, clan_id \\ nil) do
-    case Teiserver.cache_get(:rooms, name) do
+    case Barserver.cache_get(:rooms, name) do
       nil ->
         # No room, we need to make one!
         create_room(name, author_id, clan_id)
@@ -77,14 +77,14 @@ defmodule Teiserver.Room do
   end
 
   def add_user_to_room(userid, room_name) do
-    Teiserver.cache_update(:rooms, room_name, fn room_state ->
+    Barserver.cache_update(:rooms, room_name, fn room_state ->
       new_state =
         if Enum.member?(room_state.members, userid) do
           # No change takes place, they're already in the room!
           room_state
         else
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "room:#{room_name}",
             {:add_user_to_room, userid, room_name}
           )
@@ -98,11 +98,11 @@ defmodule Teiserver.Room do
   end
 
   def remove_user_from_room(userid, room_name) do
-    Teiserver.cache_update(:rooms, room_name, fn room_state ->
+    Barserver.cache_update(:rooms, room_name, fn room_state ->
       new_state =
         if Enum.member?(room_state.members, userid) do
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "room:#{room_name}",
             {:remove_user_from_room, userid, room_name}
           )
@@ -141,9 +141,9 @@ defmodule Teiserver.Room do
   end
 
   def add_room(room) do
-    Teiserver.cache_put(:rooms, room.name, room)
+    Barserver.cache_put(:rooms, room.name, room)
 
-    Teiserver.cache_update(:lists, :rooms, fn value ->
+    Barserver.cache_update(:lists, :rooms, fn value ->
       new_value =
         [room.name | value]
         |> Enum.uniq()
@@ -155,8 +155,8 @@ defmodule Teiserver.Room do
   end
 
   def list_rooms() do
-    Teiserver.cache_get(:lists, :rooms)
-    |> Enum.map(fn room_name -> Teiserver.cache_get(:rooms, room_name) end)
+    Barserver.cache_get(:lists, :rooms)
+    |> Enum.map(fn room_name -> Barserver.cache_get(:rooms, room_name) end)
   end
 
   @spec send_message(T.userid(), String.t(), String.t()) :: nil | :ok
@@ -200,7 +200,7 @@ defmodule Teiserver.Room do
             end
 
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "room_chat:#{room_name}",
             %{
               channel: "room_chat",
@@ -213,7 +213,7 @@ defmodule Teiserver.Room do
           )
 
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "room:#{room_name}",
             {:new_message, from_id, room_name, msg}
           )
@@ -252,7 +252,7 @@ defmodule Teiserver.Room do
             end
 
             PubSub.broadcast(
-              Teiserver.PubSub,
+              Barserver.PubSub,
               "room:#{room_name}",
               {:new_message_ex, from_id, room_name, msg}
             )

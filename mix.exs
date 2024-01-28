@@ -1,4 +1,4 @@
-defmodule Teiserver.MixProject do
+defmodule Barserver.MixProject do
   use Mix.Project
 
   def project do
@@ -32,7 +32,7 @@ defmodule Teiserver.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      mod: {Teiserver.Application, []},
+      mod: {Barserver.Application, []},
       extra_applications: [:logger, :runtime_tools, :os_mon, :iex]
     ]
   end
@@ -88,7 +88,7 @@ defmodule Teiserver.MixProject do
       {:tzdata, "~> 1.1"},
       {:ex_ulid, "~> 0.1.0"},
 
-      # Teiserver libs
+      # Barserver libs
       {:openskill, git: "https://github.com/Teifion/openskill.ex.git", branch: "master"},
       {:cowboy, "~> 2.9"},
       {:statistics, "~> 0.6.2"},

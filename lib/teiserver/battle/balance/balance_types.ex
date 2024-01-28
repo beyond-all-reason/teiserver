@@ -1,6 +1,6 @@
-defmodule Teiserver.Battle.Balance.BalanceTypes do
+defmodule Barserver.Battle.Balance.BalanceTypes do
   @moduledoc false
-  # alias Teiserver.Battle.Balance.BalanceTypes, as: BT
+  # alias Barserver.Battle.Balance.BalanceTypes, as: BT
 
   @type rating_value() :: float()
   @type player_group() :: %{T.userid() => rating_value()}

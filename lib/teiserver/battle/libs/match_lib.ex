@@ -1,9 +1,9 @@
-defmodule Teiserver.Battle.MatchLib do
+defmodule Barserver.Battle.MatchLib do
   @moduledoc false
-  use TeiserverWeb, :library
-  alias Teiserver.{Battle, Account}
-  alias Teiserver.Battle.{Match, MatchMembership}
-  alias Teiserver.Data.Types, as: T
+  use BarserverWeb, :library
+  alias Barserver.{Battle, Account}
+  alias Barserver.Battle.{Match, MatchMembership}
+  alias Barserver.Data.Types, as: T
   require Logger
 
   @spec icon :: String.t()
@@ -157,7 +157,7 @@ defmodule Teiserver.Battle.MatchLib do
       item_type: "teiserver_battle_match",
       # TODO: Make this colour/icon based on type of match
       item_colour: StylingHelper.colours(colours()) |> elem(0),
-      item_icon: Teiserver.Battle.MatchLib.icon(),
+      item_icon: Barserver.Battle.MatchLib.icon(),
       item_label: make_match_name(match),
       url: "/battle/#{match.id}"
     }

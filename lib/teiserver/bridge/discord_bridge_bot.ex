@@ -1,12 +1,12 @@
-defmodule Teiserver.Bridge.DiscordBridgeBot do
+defmodule Barserver.Bridge.DiscordBridgeBot do
   @moduledoc """
-  This is the module that receives discord events and passes them to the rest of Teiserver.
+  This is the module that receives discord events and passes them to the rest of Barserver.
   """
 
   use Nostrum.Consumer
-  alias Teiserver.{Room, Moderation, Communication}
-  alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands, CommandLib}
-  alias Teiserver.{Config}
+  alias Barserver.{Room, Moderation, Communication}
+  alias Barserver.Bridge.{BridgeServer, MessageCommands, ChatCommands, CommandLib}
+  alias Barserver.{Config}
   alias Nostrum.Api
   require Logger
 
@@ -45,9 +45,9 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
          _ws}
       ) do
     room = bridge_channel_to_room(channel_id)
-    dm_sender = Teiserver.cache_get(:discord_bridge_dm_cache, to_string(channel_id))
+    dm_sender = Barserver.cache_get(:discord_bridge_dm_cache, to_string(channel_id))
 
-    discord_bot_user_id = Teiserver.cache_get(:application_metadata_cache, "discord_bot_user_id")
+    discord_bot_user_id = Barserver.cache_get(:application_metadata_cache, "discord_bot_user_id")
 
     cond do
       author.id == discord_bot_user_id ->
@@ -129,7 +129,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
     # response = case data.name do
     #   "textcb" ->
-    #     Teiserver.Bridge.TextcbCommand.execute(interaction, options_map)
+    #     Barserver.Bridge.TextcbCommand.execute(interaction, options_map)
 
     #   _ ->
     #     nil
@@ -144,7 +144,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
   def handle_event({:READY, ready_data, _ws}) do
     discord_bot_user_id = ready_data.user.id
-    Teiserver.cache_put(:application_metadata_cache, "discord_bot_user_id", discord_bot_user_id)
+    Barserver.cache_put(:application_metadata_cache, "discord_bot_user_id", discord_bot_user_id)
 
     BridgeServer.cast_bridge(:READY)
     add_command(:textcb)
@@ -162,7 +162,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     :noop
   end
 
-  # Teiserver.Bridge.DiscordBridgeBot.add_command(:textcb)
+  # Barserver.Bridge.DiscordBridgeBot.add_command(:textcb)
   @spec add_command(atom) :: any
   def add_command(:textcb) do
     callbacks = Communication.list_text_callbacks()
@@ -196,7 +196,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   end
 
   # Meant to be used manually
-  # Teiserver.Bridge.DiscordBridgeBot.delete_guild_application_command(name_here)
+  # Barserver.Bridge.DiscordBridgeBot.delete_guild_application_command(name_here)
   def delete_guild_application_command(name) do
     guild_id = Communication.get_guild_id()
 
@@ -216,7 +216,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   def new_dm_channel(dm_channel) do
     case dm_channel.recipients do
       [recipient] ->
-        Teiserver.cache_put(:discord_bridge_dm_cache, dm_channel.id, recipient["id"])
+        Barserver.cache_put(:discord_bridge_dm_cache, dm_channel.id, recipient["id"])
         Logger.info("Discord DM Channel #{dm_channel.id} set to #{recipient["id"]}")
         nil
 
@@ -227,7 +227,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     :ok
   end
 
-  @spec new_infolog(Teiserver.Telemetry.Infolog.t()) :: any
+  @spec new_infolog(Barserver.Telemetry.Infolog.t()) :: any
   def new_infolog(infolog) do
     channel_id = Config.get_site_config_cache("teiserver.Discord channel #telemetry-infologs")
 
@@ -240,7 +240,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       end
 
     if post_to_discord do
-      host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+      host = Application.get_env(:teiserver, BarserverWeb.Endpoint)[:url][:host]
       url = "https://#{host}/telemetry/infolog/#{infolog.id}"
 
       message =
@@ -255,7 +255,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     end
   end
 
-  # Teiserver.Moderation.get_report!(123) |> Teiserver.Bridge.DiscordBridgeBot.new_report()
+  # Barserver.Moderation.get_report!(123) |> Barserver.Bridge.DiscordBridgeBot.new_report()
   @spec new_report(Moderation.Report.t()) :: any
   def new_report(report) do
     channel =
@@ -270,7 +270,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     if channel do
       report = Moderation.get_report!(report.id, preload: [:reporter, :target])
 
-      host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+      host = Application.get_env(:teiserver, BarserverWeb.Endpoint)[:url][:host]
       url = "https://#{host}/moderation/report?target_id=#{report.target_id}"
 
       match_icon =
@@ -368,7 +368,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   end
 
   defp bridge_channel_to_room(channel_id) do
-    lookup_table = Teiserver.store_get(:application_metadata_cache, :discord_room_lookup)
+    lookup_table = Barserver.store_get(:application_metadata_cache, :discord_room_lookup)
     lookup_table[channel_id]
   end
 

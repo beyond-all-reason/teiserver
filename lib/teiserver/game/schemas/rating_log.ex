@@ -1,11 +1,11 @@
-defmodule Teiserver.Game.RatingLog do
+defmodule Barserver.Game.RatingLog do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "teiserver_game_rating_logs" do
-    belongs_to :user, Teiserver.Account.User
-    belongs_to :rating_type, Teiserver.Game.RatingType
-    belongs_to :match, Teiserver.Battle.Match
+    belongs_to :user, Barserver.Account.User
+    belongs_to :rating_type, Barserver.Game.RatingType
+    belongs_to :match, Barserver.Battle.Match
     field :party_id, :string, default: nil
 
     field :value, :map

@@ -1,6 +1,6 @@
-defmodule Teiserver.Helper.QueryHelpers do
+defmodule Barserver.Helper.QueryHelpers do
   @moduledoc false
-  alias Teiserver.Repo
+  alias Barserver.Repo
   import Ecto.Query, warn: false
 
   defmacro lower(field) do

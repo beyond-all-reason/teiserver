@@ -1,5 +1,5 @@
-defmodule Teiserver.Battle.Match do
-  use TeiserverWeb, :schema
+defmodule Barserver.Battle.Match do
+  use BarserverWeb, :schema
 
   schema "teiserver_battle_matches" do
     field :server_uuid, :string
@@ -17,22 +17,22 @@ defmodule Teiserver.Battle.Match do
     # Scavengers, Raptors, Bots, Duel, Team, FFA, Team FFA
     field :game_type, :string
 
-    belongs_to :founder, Teiserver.Account.User
+    belongs_to :founder, Barserver.Account.User
     field :bots, :map
 
     # TODO: Clan support?
     # TODO: Tourney support?
 
-    belongs_to :queue, Teiserver.Game.Queue
-    belongs_to :rating_type, Teiserver.Game.RatingType
-    belongs_to :lobby_policy, Teiserver.Game.LobbyPolicy
+    belongs_to :queue, Barserver.Game.Queue
+    belongs_to :rating_type, Barserver.Game.RatingType
+    belongs_to :lobby_policy, Barserver.Game.LobbyPolicy
 
     field :started, :utc_datetime
     field :finished, :utc_datetime
     field :game_duration, :integer
 
-    has_many :members, Teiserver.Battle.MatchMembership
-    has_many :ratings, Teiserver.Game.RatingLog
+    has_many :members, Barserver.Battle.MatchMembership
+    has_many :ratings, Barserver.Game.RatingLog
 
     timestamps()
   end

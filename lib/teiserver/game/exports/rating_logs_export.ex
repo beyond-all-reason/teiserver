@@ -1,23 +1,23 @@
-defmodule Teiserver.Game.RatingLogsExport do
+defmodule Barserver.Game.RatingLogsExport do
   @moduledoc """
   Can be manually run with:
-  Teiserver.Game.RatingLogsExport.show_form(nil, %{
+  Barserver.Game.RatingLogsExport.show_form(nil, %{
     "date_preset" => "All time",
     "end_date" => "",
     "rating_type" => "Team",
     "start_date" => ""
   })
 
-  Teiserver.Game.RatingLogsExport.show_form(nil, %{
+  Barserver.Game.RatingLogsExport.show_form(nil, %{
     "date_preset" => "All time",
     "end_date" => "",
     "rating_type" => "Duel",
     "start_date" => ""
   })
   """
-  alias Teiserver.Helper.{DatePresets}
-  alias Teiserver.Game
-  alias Teiserver.Game.MatchRatingLib
+  alias Barserver.Helper.{DatePresets}
+  alias Barserver.Game
+  alias Barserver.Game.MatchRatingLib
   require Logger
 
   @spec icon() :: String.t()

@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.WeeklyQuarterlyReports do
+defmodule Barserver.Repo.Migrations.WeeklyQuarterlyReports do
   use Ecto.Migration
 
   def change do

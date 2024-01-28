@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.CreateObanPeers do
+defmodule Barserver.Repo.Migrations.CreateObanPeers do
   use Ecto.Migration
 
   def up, do: Oban.Migrations.up(version: 11)

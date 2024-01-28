@@ -1,4 +1,4 @@
-defmodule Teiserver.BitParse do
+defmodule Barserver.BitParse do
   @moduledoc """
   Given an integer represented as a string it will convert it to
   bits on the assumption the length of bits should be bit_length.

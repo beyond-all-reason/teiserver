@@ -1,7 +1,7 @@
-defmodule Teiserver.Telemetry.ComplexMatchEventTypeQueries do
+defmodule Barserver.Telemetry.ComplexMatchEventTypeQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
-  alias Teiserver.Telemetry.ComplexMatchEventType
+  use BarserverWeb, :queries
+  alias Barserver.Telemetry.ComplexMatchEventType
 
   # Queries
   @spec query_complex_match_event_types(list) :: Ecto.Query.t()

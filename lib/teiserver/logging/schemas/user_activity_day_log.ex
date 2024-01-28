@@ -1,6 +1,6 @@
-defmodule Teiserver.Logging.UserActivityDayLog do
+defmodule Barserver.Logging.UserActivityDayLog do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   @primary_key false
   schema "telemetry_user_activity_day_logs" do

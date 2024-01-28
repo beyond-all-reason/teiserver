@@ -1,11 +1,11 @@
-defmodule Teiserver.Lobby.CommandLib do
+defmodule Barserver.Lobby.CommandLib do
   @moduledoc """
 
   """
 
-  alias Teiserver.{Account, Battle}
-  alias Teiserver.Lobby.ChatLib
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.{Account, Battle}
+  alias Barserver.Lobby.ChatLib
+  alias Barserver.Data.Types, as: T
   require Logger
 
   @spec handle_command(T.lobby_server_state(), T.userid(), String.t()) :: T.lobby_server_state()
@@ -28,8 +28,8 @@ defmodule Teiserver.Lobby.CommandLib do
 
   @spec get_command_module(String.t()) :: module
   def get_command_module(name) do
-    Teiserver.store_get(:lobby_command_cache, name) ||
-      Teiserver.store_get(:lobby_command_cache, "no_command")
+    Barserver.store_get(:lobby_command_cache, name) ||
+      Barserver.store_get(:lobby_command_cache, "no_command")
   end
 
   @spec cache_lobby_commands() :: :ok
@@ -39,7 +39,7 @@ defmodule Teiserver.Lobby.CommandLib do
     lookup =
       module_list
       |> Enum.filter(fn m ->
-        m |> Module.split() |> Enum.take(3) == ["Teiserver", "Lobby", "Commands"]
+        m |> Module.split() |> Enum.take(3) == ["Barserver", "Lobby", "Commands"]
       end)
       |> Enum.filter(fn m ->
         Code.ensure_loaded(m)
@@ -56,20 +56,20 @@ defmodule Teiserver.Lobby.CommandLib do
         Map.put(acc, module.name(), module)
       end)
 
-    old = Teiserver.store_get(:lobby_command_cache, "all") || []
+    old = Barserver.store_get(:lobby_command_cache, "all") || []
 
     # Store all keys, we'll use it later for removing old ones
-    Teiserver.store_put(:lobby_command_cache, "all", Map.keys(lookup))
+    Barserver.store_put(:lobby_command_cache, "all", Map.keys(lookup))
 
     # Now store our lookups
     lookup
     |> Enum.each(fn {key, func} ->
-      Teiserver.store_put(:lobby_command_cache, key, func)
+      Barserver.store_put(:lobby_command_cache, key, func)
     end)
 
     # Special case
-    no_command_module = Teiserver.Lobby.Commands.NoCommand
-    Teiserver.store_put(:lobby_command_cache, "no_command", no_command_module)
+    no_command_module = Barserver.Lobby.Commands.NoCommand
+    Barserver.store_put(:lobby_command_cache, "no_command", no_command_module)
 
     # Delete out-dated keys
     old
@@ -77,7 +77,7 @@ defmodule Teiserver.Lobby.CommandLib do
       Map.has_key?(lookup, old_key)
     end)
     |> Enum.each(fn old_key ->
-      Teiserver.store_delete(:lobby_command_cache, old_key)
+      Barserver.store_delete(:lobby_command_cache, old_key)
     end)
 
     :ok

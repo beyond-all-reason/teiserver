@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.LoginThrottleServer do
+defmodule Barserver.Account.LoginThrottleServer do
   @moduledoc """
   Users attempt to login, if they validate the login process a final call is
   made to this server.
@@ -11,9 +11,9 @@ defmodule Teiserver.Account.LoginThrottleServer do
   """
   use GenServer
   require Logger
-  alias Teiserver.{Account, CacheUser}
-  alias Teiserver.Config
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.{Account, CacheUser}
+  alias Barserver.Config
+  alias Barserver.Data.Types, as: T
   alias Phoenix.PubSub
 
   # Order of the queues matters
@@ -104,7 +104,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   end
 
   def get_login_throttle_server_pid() do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "LoginThrottleServer") do
+    case Horde.Registry.lookup(Barserver.ServerRegistry, "LoginThrottleServer") do
       [{pid, _}] ->
         pid
 
@@ -195,7 +195,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     }
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_liveview_login_throttle",
       %{
         channel: "teiserver_liveview_login_throttle",
@@ -252,8 +252,8 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   def handle_info(:startup, _) do
     tick_timer_ref = :timer.send_interval(@default_tick_period, :tick)
-    telemetry_data = Teiserver.cache_get(:application_temp_cache, :telemetry_data) || %{}
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_telemetry")
+    telemetry_data = Barserver.cache_get(:application_temp_cache, :telemetry_data) || %{}
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_telemetry")
 
     state =
       %{
@@ -363,7 +363,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
         new_arrival_times = Map.drop(state.arrival_times, released_users)
 
         PubSub.broadcast(
-          Teiserver.PubSub,
+          Barserver.PubSub,
           "teiserver_liveview_login_throttle",
           %{
             channel: "teiserver_liveview_login_throttle",
@@ -400,7 +400,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     new_remaining_capacity = remaining_capacity - 1
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_liveview_login_throttle",
       %{
         channel: "teiserver_liveview_login_throttle",
@@ -446,7 +446,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     remaining_capacity = total_limit - client_count
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_liveview_login_throttle",
       %{
         channel: "teiserver_liveview_login_throttle",
@@ -470,7 +470,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
-      Teiserver.ServerRegistry,
+      Barserver.ServerRegistry,
       "LoginThrottleServer",
       "LoginThrottleServer"
     )

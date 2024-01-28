@@ -1,11 +1,11 @@
-defmodule Teiserver.Account.RatingLib do
+defmodule Barserver.Account.RatingLib do
   @moduledoc """
-  This module purely deals with functions around Teiserver.Account.Rating, it is not
+  This module purely deals with functions around Barserver.Account.Rating, it is not
   the module used for balance or ratings.
   """
 
-  use TeiserverWeb, :library
-  alias Teiserver.Account.{Rating}
+  use BarserverWeb, :library
+  alias Barserver.Account.{Rating}
   require Logger
 
   # Functions

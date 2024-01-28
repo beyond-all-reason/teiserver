@@ -1,9 +1,9 @@
-defmodule TeiserverWeb.Logging.AggregateViewLogView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Logging.AggregateViewLogView do
+  use BarserverWeb, :view
 
-  def view_colour(), do: Teiserver.Logging.AggregateViewLogLib.colours()
+  def view_colour(), do: Barserver.Logging.AggregateViewLogLib.colours()
   # def gradient(), do: {"#112266", "#6688CC"}
-  def icon(), do: Teiserver.Logging.AggregateViewLogLib.icon()
+  def icon(), do: Barserver.Logging.AggregateViewLogLib.icon()
 
   def convert_load_time(load_time) do
     (round(load_time / 10) / 100)

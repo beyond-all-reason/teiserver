@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.BadgesAndAccolades do
+defmodule Barserver.Repo.Migrations.BadgesAndAccolades do
   use Ecto.Migration
 
   def change do

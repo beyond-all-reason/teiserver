@@ -1,11 +1,11 @@
-defmodule Teiserver.SpringBattleHostTest do
-  use Teiserver.ServerCase, async: false
+defmodule Barserver.SpringBattleHostTest do
+  use Barserver.ServerCase, async: false
   require Logger
-  alias Teiserver.{Coordinator, Battle, Lobby}
-  alias Teiserver.Protocols.Spring
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.{Coordinator, Battle, Lobby}
+  alias Barserver.Protocols.Spring
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [auth_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1]
 
   setup do

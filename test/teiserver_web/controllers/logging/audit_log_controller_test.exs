@@ -1,13 +1,13 @@
-defmodule TeiserverWeb.Logging.AuditLogControllerTest do
-  use TeiserverWeb.ConnCase, async: true
+defmodule BarserverWeb.Logging.AuditLogControllerTest do
+  use BarserverWeb.ConnCase, async: true
 
-  # alias TeiserverWeb.Logging.AuditLog
-  alias Teiserver.Logging.Helpers
+  # alias BarserverWeb.Logging.AuditLog
+  alias Barserver.Logging.Helpers
   # @valid_attrs %{action: "some content", details: "{}", ip: "some content"}
   # @invalid_attrs %{}
 
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.Logging.LoggingTestLib
+  alias Barserver.Logging.LoggingTestLib
 
   setup do
     GeneralTestLib.conn_setup(~w(logging.audit.show))

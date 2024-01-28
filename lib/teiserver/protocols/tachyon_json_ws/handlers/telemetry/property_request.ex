@@ -1,10 +1,10 @@
-defmodule Teiserver.Tachyon.Handlers.Telemetry.PropertyRequest do
+defmodule Barserver.Tachyon.Handlers.Telemetry.PropertyRequest do
   @moduledoc """
 
   """
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Tachyon.Responses.Telemetry.PropertyResponse
-  alias Teiserver.{Telemetry}
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Tachyon.Responses.Telemetry.PropertyResponse
+  alias Barserver.{Telemetry}
 
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do

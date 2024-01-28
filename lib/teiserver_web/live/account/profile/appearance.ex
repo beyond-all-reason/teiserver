@@ -1,8 +1,8 @@
-defmodule TeiserverWeb.Account.ProfileLive.Appearance do
+defmodule BarserverWeb.Account.ProfileLive.Appearance do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  alias Teiserver.Account
-  alias Teiserver.Account.RoleLib
+  use BarserverWeb, :live_view
+  alias Barserver.Account
+  alias Barserver.Account.RoleLib
 
   @impl true
   def mount(%{"userid" => userid_str}, _session, socket) do
@@ -20,9 +20,9 @@ defmodule TeiserverWeb.Account.ProfileLive.Appearance do
           socket
           |> assign(:tab, nil)
           |> assign(:site_menu_active, "teiserver_account")
-          |> assign(:view_colour, Teiserver.Account.UserLib.colours())
+          |> assign(:view_colour, Barserver.Account.UserLib.colours())
           |> assign(:user, user)
-          |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
+          |> BarserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
           |> list_icons
       end
 

@@ -1,8 +1,8 @@
-defmodule Teiserver.SpringTelemetryTest do
-  use Teiserver.ServerCase, async: false
-  alias Teiserver.Telemetry
+defmodule Barserver.SpringTelemetryTest do
+  use Barserver.ServerCase, async: false
+  alias Barserver.Telemetry
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [auth_setup: 0, _send_raw: 2, _recv_raw: 1, raw_setup: 0]
 
   setup do

@@ -1,7 +1,7 @@
-defmodule Teiserver.Microblog.TagLib do
+defmodule Barserver.Microblog.TagLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
-  alias Teiserver.Microblog.{Tag, TagQueries}
+  use BarserverWeb, :library_newform
+  alias Barserver.Microblog.{Tag, TagQueries}
 
   # Functions
   @spec icon :: String.t()

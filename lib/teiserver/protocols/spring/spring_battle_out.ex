@@ -1,6 +1,6 @@
-defmodule Teiserver.Protocols.Spring.BattleOut do
-  alias Teiserver.Account
-  alias Teiserver.Lobby
+defmodule Barserver.Protocols.Spring.BattleOut do
+  alias Barserver.Account
+  alias Barserver.Lobby
 
   @spec do_reply(atom(), nil | String.t() | tuple() | list(), map()) :: String.t()
   def do_reply(_, _, %{userid: nil}), do: ""

@@ -1,22 +1,22 @@
-defmodule Teiserver.Battle.MatchMonitorServer do
+defmodule Barserver.Battle.MatchMonitorServer do
   @moduledoc """
   The server used to monitor the autohosts and get data from them
   """
   use GenServer
-  alias Teiserver.{Account, Room, Client, CacheUser, Battle, Telemetry}
-  alias Teiserver.Lobby.ChatLib
+  alias Barserver.{Account, Room, Client, CacheUser, Battle, Telemetry}
+  alias Barserver.Lobby.ChatLib
   alias Phoenix.PubSub
-  alias Teiserver.Account.CalculateSmurfKeyTask
+  alias Barserver.Account.CalculateSmurfKeyTask
   require Logger
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec do_start() :: :ok
   def do_start() do
     # Start the supervisor server
     {:ok, _monitor_pid} =
-      DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
-        Teiserver.Battle.MatchMonitorServer,
-        name: Teiserver.Battle.MatchMonitorServer, data: %{}
+      DynamicSupervisor.start_child(Barserver.Coordinator.DynamicSupervisor, {
+        Barserver.Battle.MatchMonitorServer,
+        name: Barserver.Battle.MatchMonitorServer, data: %{}
       })
 
     :ok
@@ -29,7 +29,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   @spec get_match_monitor_userid() :: T.userid()
   def get_match_monitor_userid() do
-    Teiserver.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
+    Barserver.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
   end
 
   @impl true
@@ -50,7 +50,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   @impl true
   def handle_info(:begin, _state) do
     state =
-      if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
+      if Barserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
            true do
         pid = self()
 
@@ -221,7 +221,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             ChatLib.persist_message(user, "a: #{msg}", host.lobby_id, :say)
 
             PubSub.broadcast(
-              Teiserver.PubSub,
+              Barserver.PubSub,
               "teiserver_liveview_lobby_chat:#{host.lobby_id}",
               {:liveview_lobby_chat, :say, user.id, "a: #{msg}"}
             )
@@ -230,7 +230,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             ChatLib.persist_message(user, "s: #{msg}", host.lobby_id, :say)
 
             PubSub.broadcast(
-              Teiserver.PubSub,
+              Barserver.PubSub,
               "teiserver_liveview_lobby_chat:#{host.lobby_id}",
               {:liveview_lobby_chat, :say, user.id, "s: #{msg}"}
             )
@@ -259,7 +259,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             ChatLib.persist_message(user, "a: #{msg}", host.lobby_id, :say)
 
             PubSub.broadcast(
-              Teiserver.PubSub,
+              Barserver.PubSub,
               "teiserver_liveview_lobby_chat:#{host.lobby_id}",
               {:liveview_lobby_chat, :say, user.id, "a: #{msg}"}
             )
@@ -268,7 +268,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             ChatLib.persist_message(user, "s: #{msg}", host.lobby_id, :say)
 
             PubSub.broadcast(
-              Teiserver.PubSub,
+              Barserver.PubSub,
               "teiserver_liveview_lobby_chat:#{host.lobby_id}",
               {:liveview_lobby_chat, :say, user.id, "s: #{msg}"}
             )
@@ -291,7 +291,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
     case Base.url_decode64(message) do
       {:ok, compressed_contents} ->
-        case Teiserver.Protocols.Spring.unzip(compressed_contents) do
+        case Barserver.Protocols.Spring.unzip(compressed_contents) do
           {:ok, contents_string} ->
             case Jason.decode(contents_string) do
               {:ok, data} ->
@@ -348,7 +348,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           Account.create_smurf_key(user.id, "hw1", hw1)
           Account.create_smurf_key(user.id, "hw2", hw2)
           Account.create_smurf_key(user.id, "hw3", hw3)
-          Teiserver.Coordinator.AutomodServer.check_user(user.id)
+          Barserver.Coordinator.AutomodServer.check_user(user.id)
         end
     end
   end
@@ -361,7 +361,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   defp do_begin() do
     Logger.debug("Starting up Match monitor server")
     account = get_match_monitor_account()
-    Teiserver.cache_put(:application_metadata_cache, "teiserver_match_monitor_userid", account.id)
+    Barserver.cache_put(:application_metadata_cache, "teiserver_match_monitor_userid", account.id)
     {:ok, user, client} = CacheUser.internal_client_login(account.id)
 
     rooms = ["autohosts"]
@@ -380,15 +380,15 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     |> Enum.each(fn room_name ->
       Room.get_or_make_room(room_name, user.id)
       Room.add_user_to_room(user.id, room_name)
-      :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
+      :ok = PubSub.subscribe(Barserver.PubSub, "room:#{room_name}")
     end)
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "legacy_user_updates:#{user.id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "legacy_user_updates:#{user.id}")
 
     state
   end
 
-  @spec get_match_monitor_account() :: Teiserver.Account.CacheUser.t()
+  @spec get_match_monitor_account() :: Barserver.Account.CacheUser.t()
   def get_match_monitor_account() do
     user =
       Account.get_user(nil,
@@ -411,12 +411,12 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             data: %{
               bot: true,
               moderator: false,
-              lobby_client: "Teiserver Internal Process"
+              lobby_client: "Barserver Internal Process"
             }
           })
 
         Account.update_user_stat(account.id, %{
-          country_override: Application.get_env(:teiserver, Teiserver)[:server_flag]
+          country_override: Application.get_env(:teiserver, Barserver)[:server_flag]
         })
 
         CacheUser.recache_user(account.id)
@@ -434,7 +434,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     Logger.metadata(request_id: "MatchMonitorServer")
 
     Horde.Registry.register(
-      Teiserver.ServerRegistry,
+      Barserver.ServerRegistry,
       "MatchMonitorServer",
       :match_monitor
     )
@@ -444,7 +444,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   @spec get_match_monitor_pid() :: pid() | nil
   def get_match_monitor_pid() do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "MatchMonitorServer") do
+    case Horde.Registry.lookup(Barserver.ServerRegistry, "MatchMonitorServer") do
       [{pid, _}] ->
         pid
 

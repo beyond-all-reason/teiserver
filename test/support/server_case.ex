@@ -1,4 +1,4 @@
-defmodule Teiserver.ServerCase do
+defmodule Barserver.ServerCase do
   @moduledoc """
   This module defines the setup for tests requiring
   access to the application's data layer.
@@ -10,7 +10,7 @@ defmodule Teiserver.ServerCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use Teiserver.DataCase, async: true`, although
+  by setting `use Barserver.DataCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -18,20 +18,20 @@ defmodule Teiserver.ServerCase do
 
   using do
     quote do
-      alias Teiserver.Repo
+      alias Barserver.Repo
 
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
-      import Teiserver.DataCase
+      import Barserver.DataCase
     end
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Teiserver.Repo)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Barserver.Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Teiserver.Repo, {:shared, self()})
+      Ecto.Adapters.SQL.Sandbox.mode(Barserver.Repo, {:shared, self()})
     end
 
     :ok

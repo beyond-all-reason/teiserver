@@ -1,5 +1,5 @@
-defmodule Teiserver.Account.SmurfKeyType do
-  use TeiserverWeb, :schema
+defmodule Barserver.Account.SmurfKeyType do
+  use BarserverWeb, :schema
 
   schema "teiserver_account_smurf_key_types" do
     field :name, :string

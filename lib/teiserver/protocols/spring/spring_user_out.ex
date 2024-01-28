@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Spring.UserOut do
+defmodule Barserver.Protocols.Spring.UserOut do
   @moduledoc false
   require Logger
 

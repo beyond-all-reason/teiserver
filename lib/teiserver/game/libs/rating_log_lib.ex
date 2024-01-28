@@ -1,6 +1,6 @@
-defmodule Teiserver.Game.RatingLogLib do
-  use TeiserverWeb, :library
-  alias Teiserver.Game.RatingLog
+defmodule Barserver.Game.RatingLogLib do
+  use BarserverWeb, :library
+  alias Barserver.Game.RatingLog
 
   # Functions
   @spec icon :: String.t()
@@ -132,7 +132,7 @@ defmodule Teiserver.Game.RatingLogLib do
   @spec _preload_match_membership(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_match_membership(query) do
     from rating_logs in query,
-      left_join: match_memberships in Teiserver.Battle.MatchMembership,
+      left_join: match_memberships in Barserver.Battle.MatchMembership,
       on: match_memberships.match_id == rating_logs.match_id,
       where:
         match_memberships.user_id == rating_logs.user_id and

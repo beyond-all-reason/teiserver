@@ -1,9 +1,9 @@
-defmodule Teiserver.Tachyon.Responses.Lobby.ListLobbiesResponse do
+defmodule Barserver.Tachyon.Responses.Lobby.ListLobbiesResponse do
   @moduledoc """
   Updated status response - https://github.com/beyond-all-reason/tachyon/blob/master/src/schema/lobby_host.ts
   """
 
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @spec generate({:error, String.t()} | T.lobby()) :: T.tachyon_response()
   def generate({:error, reason}) do

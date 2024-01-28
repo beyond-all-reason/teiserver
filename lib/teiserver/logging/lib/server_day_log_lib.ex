@@ -1,8 +1,8 @@
-defmodule Teiserver.Logging.ServerDayLogLib do
+defmodule Barserver.Logging.ServerDayLogLib do
   @moduledoc false
-  use TeiserverWeb, :library
+  use BarserverWeb, :library
 
-  alias Teiserver.Logging.ServerDayLog
+  alias Barserver.Logging.ServerDayLog
 
   @spec colours :: atom
   def colours(), do: :warning

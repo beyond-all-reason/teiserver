@@ -1,4 +1,4 @@
-defmodule Teiserver.Tachyon.Converters do
+defmodule Barserver.Tachyon.Converters do
   @moduledoc """
   Used to convert objects from internal representations into json objects
   for the protocol
@@ -20,7 +20,7 @@ defmodule Teiserver.Tachyon.Converters do
   def convert(user, :user) do
     Map.merge(
       Map.take(user, ~w(id name bot clan_id country)a),
-      %{"icons" => Teiserver.Account.UserLib.generate_user_icons(user)}
+      %{"icons" => Barserver.Account.UserLib.generate_user_icons(user)}
     )
   end
 
@@ -30,7 +30,7 @@ defmodule Teiserver.Tachyon.Converters do
   def convert(user, :user_extended_icons) do
     Map.merge(
       convert(user, :user_extended),
-      %{"icons" => Teiserver.Account.UserLib.generate_user_icons(user)}
+      %{"icons" => Barserver.Account.UserLib.generate_user_icons(user)}
     )
   end
 

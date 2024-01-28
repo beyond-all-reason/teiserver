@@ -1,8 +1,8 @@
-defmodule Teiserver.Account.TimeSpentReport do
-  alias Teiserver.Helper.DatePresets
-  alias Teiserver.{Logging}
-  alias Teiserver.Helper.TimexHelper
-  import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
+defmodule Barserver.Account.TimeSpentReport do
+  alias Barserver.Helper.DatePresets
+  alias Barserver.{Logging}
+  alias Barserver.Helper.TimexHelper
+  import Barserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-watch"

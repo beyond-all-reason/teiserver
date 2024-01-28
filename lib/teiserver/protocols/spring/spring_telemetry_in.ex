@@ -1,10 +1,10 @@
-defmodule Teiserver.Protocols.Spring.TelemetryIn do
-  alias Teiserver.Telemetry
-  alias Teiserver.Protocols.{Spring, SpringIn}
+defmodule Barserver.Protocols.Spring.TelemetryIn do
+  alias Barserver.Telemetry
+  alias Barserver.Protocols.{Spring, SpringIn}
   require Logger
-  alias Teiserver.Bridge.DiscordBridgeBot
-  import Teiserver.Protocols.SpringOut, only: [reply: 5]
-  # import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.Bridge.DiscordBridgeBot
+  import Barserver.Protocols.SpringOut, only: [reply: 5]
+  # import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
   # TODO: Less nested hackyness
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
@@ -29,7 +29,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
 
                     case Telemetry.create_infolog(params) do
                       {:ok, infolog} ->
-                        if Teiserver.Communication.use_discord?() do
+                        if Barserver.Communication.use_discord?() do
                           DiscordBridgeBot.new_infolog(infolog)
                         end
 

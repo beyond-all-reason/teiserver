@@ -1,6 +1,6 @@
-defmodule Teiserver.Logging.GraphMinuteLogsTask do
+defmodule Barserver.Logging.GraphMinuteLogsTask do
   @moduledoc false
-  alias Teiserver.Helper.{NumberHelper, TimexHelper}
+  alias Barserver.Helper.{NumberHelper, TimexHelper}
 
   @spec perform_players(list, non_neg_integer()) :: list()
   def perform_players(logs, chunk_size) do
@@ -239,7 +239,7 @@ defmodule Teiserver.Logging.GraphMinuteLogsTask do
   def perform_beam_process_counts(logs, chunk_size) do
     [
       ["Beam" | extract_value(logs, chunk_size, ~w(os_mon processes beam_total))],
-      ["Teiserver" | extract_value(logs, chunk_size, ~w(os_mon processes teiserver_total))]
+      ["Barserver" | extract_value(logs, chunk_size, ~w(os_mon processes teiserver_total))]
     ]
   end
 

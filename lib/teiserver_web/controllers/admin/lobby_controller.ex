@@ -1,9 +1,9 @@
-defmodule TeiserverWeb.Admin.LobbyController do
-  use TeiserverWeb, :controller
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+defmodule BarserverWeb.Admin.LobbyController do
+  use BarserverWeb, :controller
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
-  alias Teiserver.{Chat, Battle}
-  alias Teiserver.Battle.MatchLib
+  alias Barserver.{Chat, Battle}
+  alias Barserver.Battle.MatchLib
 
   plug(AssignPlug,
     site_menu_active: "admin",
@@ -11,9 +11,9 @@ defmodule TeiserverWeb.Admin.LobbyController do
   )
 
   plug(Bodyguard.Plug.Authorize,
-    policy: Teiserver.Staff.Overwatch,
+    policy: Barserver.Staff.Overwatch,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
   )
 
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')

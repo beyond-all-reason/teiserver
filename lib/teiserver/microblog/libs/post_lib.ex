@@ -1,7 +1,7 @@
-defmodule Teiserver.Microblog.PostLib do
+defmodule Barserver.Microblog.PostLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
-  alias Teiserver.Microblog.{Post, PostQueries, UserPreference}
+  use BarserverWeb, :library_newform
+  alias Barserver.Microblog.{Post, PostQueries, UserPreference}
   alias Phoenix.PubSub
 
   # Functions
@@ -125,7 +125,7 @@ defmodule Teiserver.Microblog.PostLib do
       :timer.sleep(1000)
 
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "microblog_posts",
         %{
           channel: "microblog_posts",
@@ -166,7 +166,7 @@ defmodule Teiserver.Microblog.PostLib do
       :timer.sleep(1000)
 
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "microblog_posts",
         %{
           channel: "microblog_posts",
@@ -203,7 +203,7 @@ defmodule Teiserver.Microblog.PostLib do
 
   defp broadcast_delete_post({:ok, %Post{} = post}) do
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "microblog_posts",
       %{
         channel: "microblog_posts",

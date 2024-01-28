@@ -1,7 +1,7 @@
-defmodule Teiserver.Protocols.Tachyon.V1.PartyOut do
+defmodule Barserver.Protocols.Tachyon.V1.PartyOut do
   @moduledoc false
-  alias Teiserver.Account
-  alias Teiserver.Protocols.Tachyon.V1.Tachyon
+  alias Barserver.Account
+  alias Barserver.Protocols.Tachyon.V1.Tachyon
 
   @spec do_reply(atom(), any) :: Map.t()
   def do_reply(:info_public, party) do

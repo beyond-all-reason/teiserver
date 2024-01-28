@@ -1,12 +1,12 @@
-defmodule Teiserver.Account.TournamentReport do
+defmodule Barserver.Account.TournamentReport do
   @moduledoc false
-  alias Teiserver.{Account}
-  alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Helper.TimexHelper
-  import Teiserver.Helper.NumberHelper, only: [round: 2]
+  alias Barserver.{Account}
+  alias Barserver.Game.MatchRatingLib
+  alias Barserver.Helper.TimexHelper
+  import Barserver.Helper.NumberHelper, only: [round: 2]
 
   @spec icon() :: String.t()
-  def icon(), do: Teiserver.Account.RatingLib.icon()
+  def icon(), do: Barserver.Account.RatingLib.icon()
 
   @spec permissions() :: String.t()
   def permissions(), do: "Moderator"

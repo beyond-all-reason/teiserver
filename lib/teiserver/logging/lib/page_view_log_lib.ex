@@ -1,6 +1,6 @@
-defmodule Teiserver.Logging.PageViewLogLib do
+defmodule Barserver.Logging.PageViewLogLib do
   @moduledoc false
-  use TeiserverWeb, :library
+  use BarserverWeb, :library
 
   @spec colours() :: atom
   def colours(), do: :info
@@ -8,7 +8,7 @@ defmodule Teiserver.Logging.PageViewLogLib do
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-chart-line"
 
-  alias Teiserver.Logging.PageViewLog
+  alias Barserver.Logging.PageViewLog
 
   import Plug.Conn, only: [assign: 3]
 

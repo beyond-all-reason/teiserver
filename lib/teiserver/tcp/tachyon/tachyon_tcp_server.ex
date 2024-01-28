@@ -1,13 +1,13 @@
-defmodule Teiserver.TachyonTcpServer do
+defmodule Barserver.TachyonTcpServer do
   @moduledoc false
   use GenServer
   require Logger
   alias Phoenix.PubSub
-  alias Teiserver.Config
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.Config
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
-  alias Teiserver.{CacheUser, Client, Account}
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.{CacheUser, Client, Account}
+  alias Barserver.Data.Types, as: T
 
   @behaviour :ranch_protocol
   @spec get_ssl_opts :: [
@@ -15,9 +15,9 @@ defmodule Teiserver.TachyonTcpServer do
         ]
   def get_ssl_opts() do
     {certfile, cacertfile, keyfile} = {
-      Application.get_env(:teiserver, Teiserver)[:certs][:certfile],
-      Application.get_env(:teiserver, Teiserver)[:certs][:cacertfile],
-      Application.get_env(:teiserver, Teiserver)[:certs][:keyfile]
+      Application.get_env(:teiserver, Barserver)[:certs][:certfile],
+      Application.get_env(:teiserver, Barserver)[:certs][:cacertfile],
+      Application.get_env(:teiserver, Barserver)[:certs][:keyfile]
     }
 
     [
@@ -37,7 +37,7 @@ defmodule Teiserver.TachyonTcpServer do
       ssl_opts ++
         [
           max_connections: :infinity,
-          port: Application.get_env(:teiserver, Teiserver)[:ports][:tachyon]
+          port: Application.get_env(:teiserver, Barserver)[:ports][:tachyon]
         ],
       __MODULE__,
       []
@@ -62,7 +62,7 @@ defmodule Teiserver.TachyonTcpServer do
     :ranch.accept_ack(ref)
     transport.setopts(socket, [{:active, true}])
 
-    heartbeat = Application.get_env(:teiserver, Teiserver)[:heartbeat_interval]
+    heartbeat = Application.get_env(:teiserver, Barserver)[:heartbeat_interval]
 
     if heartbeat do
       :timer.send_interval(heartbeat, self(), :heartbeat)
@@ -77,11 +77,11 @@ defmodule Teiserver.TachyonTcpServer do
       socket: socket,
       transport: transport,
       ip: ip,
-      protocol: Application.get_env(:teiserver, Teiserver)[:default_tachyon_protocol],
+      protocol: Application.get_env(:teiserver, Barserver)[:default_tachyon_protocol],
       protocol_in:
-        Application.get_env(:teiserver, Teiserver)[:default_tachyon_protocol].protocol_in(),
+        Application.get_env(:teiserver, Barserver)[:default_tachyon_protocol].protocol_in(),
       protocol_out:
-        Application.get_env(:teiserver, Teiserver)[:default_tachyon_protocol].protocol_out(),
+        Application.get_env(:teiserver, Barserver)[:default_tachyon_protocol].protocol_out(),
 
       # Client state
       userid: nil,
@@ -110,7 +110,7 @@ defmodule Teiserver.TachyonTcpServer do
       client_messages: 0
     }
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_server")
 
     :gen_server.enter_loop(__MODULE__, [], state)
   end
@@ -134,7 +134,7 @@ defmodule Teiserver.TachyonTcpServer do
   end
 
   def handle_info(:message_count, state) do
-    Teiserver.Telemetry.cast_to_server({
+    Barserver.Telemetry.cast_to_server({
       :spring_messages_sent,
       state.userid,
       state.server_messages,
@@ -155,7 +155,7 @@ defmodule Teiserver.TachyonTcpServer do
   def handle_info({:login_accepted, userid}, state) do
     user = Account.get_user_by_id(userid)
     send(self(), {:action, {:login_accepted, user}})
-    Teiserver.Protocols.Tachyon.V1.TachyonOut.reply(:auth, :login, {:success, user}, state)
+    Barserver.Protocols.Tachyon.V1.TachyonOut.reply(:auth, :login, {:success, user}, state)
 
     {:noreply, state}
   end
@@ -228,7 +228,7 @@ defmodule Teiserver.TachyonTcpServer do
   def handle_info(:heartbeat, state) do
     diff = System.system_time(:second) - state.last_msg
 
-    if diff > Application.get_env(:teiserver, Teiserver)[:heartbeat_timeout] do
+    if diff > Application.get_env(:teiserver, Barserver)[:heartbeat_timeout] do
       if state.username do
         Logger.info("Heartbeat timeout for #{state.username}")
       end

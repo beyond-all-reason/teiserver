@@ -1,14 +1,14 @@
-defmodule TeiserverWeb.Moderation.OverwatchLive.User do
-  use TeiserverWeb, :live_view
-  alias Teiserver.{Moderation}
-  alias Teiserver.Moderation.ReportLib
+defmodule BarserverWeb.Moderation.OverwatchLive.User do
+  use BarserverWeb, :live_view
+  alias Barserver.{Moderation}
+  alias Barserver.Moderation.ReportLib
 
   @impl true
   def mount(params, _session, socket) do
     socket =
       socket
       |> assign(:site_menu_active, "moderation")
-      |> assign(:view_colour, Teiserver.Moderation.colour())
+      |> assign(:view_colour, Barserver.Moderation.colour())
       |> assign(:outstanding_report_groups, 0)
       |> assign(:report_groups, nil)
       |> assign(:actions, nil)

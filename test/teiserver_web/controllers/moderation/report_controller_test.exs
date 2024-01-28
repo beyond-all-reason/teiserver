@@ -1,14 +1,14 @@
-defmodule TeiserverWeb.Moderation.ReportControllerTest do
+defmodule BarserverWeb.Moderation.ReportControllerTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase
+  use BarserverWeb.ConnCase
 
-  alias Teiserver.Moderation.ModerationTestLib
+  alias Barserver.Moderation.ModerationTestLib
 
   alias Central.Helpers.GeneralTestLib
 
   setup do
     GeneralTestLib.conn_setup(["Reviewer", "Moderator"])
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    |> Barserver.BarserverTestLib.conn_setup()
   end
 
   describe "index" do

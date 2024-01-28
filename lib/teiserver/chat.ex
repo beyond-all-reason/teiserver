@@ -1,10 +1,10 @@
-defmodule Teiserver.Chat do
+defmodule Barserver.Chat do
   @moduledoc false
   import Ecto.Query, warn: false
-  alias Teiserver.Helper.QueryHelpers
-  alias Teiserver.Repo
+  alias Barserver.Helper.QueryHelpers
+  alias Barserver.Repo
 
-  alias Teiserver.Chat.{RoomMessage, RoomMessageLib}
+  alias Barserver.Chat.{RoomMessage, RoomMessageLib}
 
   @spec room_message_query(List.t()) :: Ecto.Query.t()
   def room_message_query(args) do
@@ -160,7 +160,7 @@ defmodule Teiserver.Chat do
     RoomMessage.changeset(room_message, %{})
   end
 
-  alias Teiserver.Chat.{LobbyMessage, LobbyMessageLib}
+  alias Barserver.Chat.{LobbyMessage, LobbyMessageLib}
 
   @spec lobby_message_query(List.t()) :: Ecto.Query.t()
   def lobby_message_query(args) do
@@ -316,7 +316,7 @@ defmodule Teiserver.Chat do
     LobbyMessage.changeset(lobby_message, %{})
   end
 
-  alias Teiserver.Chat.{PartyMessage, PartyMessageLib}
+  alias Barserver.Chat.{PartyMessage, PartyMessageLib}
 
   @spec party_message_query(List.t()) :: Ecto.Query.t()
   def party_message_query(args) do
@@ -472,7 +472,7 @@ defmodule Teiserver.Chat do
     PartyMessage.changeset(party_message, %{})
   end
 
-  alias Teiserver.Chat.{DirectMessage, DirectMessageLib}
+  alias Barserver.Chat.{DirectMessage, DirectMessageLib}
 
   @doc """
   Returns the list of direct_messages.

@@ -1,8 +1,8 @@
-defmodule TeiserverWeb.Microblog.TagFormComponent do
+defmodule BarserverWeb.Microblog.TagFormComponent do
   @moduledoc false
-  use TeiserverWeb, :live_component
+  use BarserverWeb, :live_component
 
-  alias Teiserver.Microblog
+  alias Barserver.Microblog
 
   @impl true
   def render(assigns) do

@@ -1,11 +1,11 @@
-defmodule Teiserver.Account.Friend do
+defmodule Barserver.Account.Friend do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   @primary_key false
   schema "account_friends" do
-    belongs_to :user1, Teiserver.Account.User, primary_key: true
-    belongs_to :user2, Teiserver.Account.User, primary_key: true
+    belongs_to :user1, Barserver.Account.User, primary_key: true
+    belongs_to :user2, Barserver.Account.User, primary_key: true
 
     field :other_user, :map, virtual: true
 

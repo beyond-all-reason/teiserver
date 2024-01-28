@@ -1,7 +1,7 @@
-defmodule Teiserver.Protocols.Tachyon.V1.PartyIn do
-  import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
-  alias Teiserver.{Account}
-  alias Teiserver.Account.PartyLib
+defmodule Barserver.Protocols.Tachyon.V1.PartyIn do
+  import Barserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
+  alias Barserver.{Account}
+  alias Barserver.Account.PartyLib
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
   def do_handle("create", _, state) do

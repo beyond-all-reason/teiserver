@@ -1,8 +1,8 @@
-defmodule Teiserver.Data.Battle.ChatLibTest do
-  use Teiserver.DataCase, async: false
-  alias Teiserver.{CacheUser, Battle, Lobby}
-  import Teiserver.TeiserverTestLib, only: [new_user: 0]
-  alias Teiserver.Lobby.{ChatLib}
+defmodule Barserver.Data.Battle.ChatLibTest do
+  use Barserver.DataCase, async: false
+  alias Barserver.{CacheUser, Battle, Lobby}
+  import Barserver.BarserverTestLib, only: [new_user: 0]
+  alias Barserver.Lobby.{ChatLib}
 
   test "test lobby chat as bot" do
     bot_user = new_user()

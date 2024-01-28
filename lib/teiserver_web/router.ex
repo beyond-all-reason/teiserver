@@ -1,46 +1,46 @@
-defmodule TeiserverWeb.Router do
-  use TeiserverWeb, :router
+defmodule BarserverWeb.Router do
+  use BarserverWeb, :router
 
   pipeline :logging_live_auth do
     plug Bodyguard.Plug.Authorize,
-      policy: Teiserver.Logging.LiveLib,
+      policy: Barserver.Logging.LiveLib,
       action: :live,
-      user: {Teiserver.Account.AuthLib, :current_user}
+      user: {Barserver.Account.AuthLib, :current_user}
   end
 
   pipeline :browser do
     plug(:accepts, ["html"])
     plug(:fetch_session)
     plug(:fetch_live_flash)
-    plug :put_root_layout, {TeiserverWeb.Layouts, :root}
+    plug :put_root_layout, {BarserverWeb.Layouts, :root}
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
-    plug(Teiserver.Account.DefaultsPlug)
-    plug(Teiserver.Logging.LoggingPlug)
-    plug(Teiserver.Account.AuthPipeline)
-    plug(Teiserver.Account.AuthPlug)
-    plug(Teiserver.Plugs.CachePlug)
+    plug(Barserver.Account.DefaultsPlug)
+    plug(Barserver.Logging.LoggingPlug)
+    plug(Barserver.Account.AuthPipeline)
+    plug(Barserver.Account.AuthPlug)
+    plug(Barserver.Plugs.CachePlug)
   end
 
   pipeline :live_browser do
     plug(:accepts, ["html"])
     plug(:fetch_session)
     plug(:fetch_live_flash)
-    plug :put_root_layout, {TeiserverWeb.Layouts, :root}
+    plug :put_root_layout, {BarserverWeb.Layouts, :root}
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
-    plug(Teiserver.Account.DefaultsPlug)
-    plug(Teiserver.Account.AuthPipeline)
-    plug(Teiserver.Account.AuthPlug)
-    plug(Teiserver.Plugs.CachePlug)
+    plug(Barserver.Account.DefaultsPlug)
+    plug(Barserver.Account.AuthPipeline)
+    plug(Barserver.Account.AuthPlug)
+    plug(Barserver.Plugs.CachePlug)
   end
 
   pipeline :app_layout do
-    plug(:put_layout, {TeiserverWeb.Layouts, :app})
+    plug(:put_layout, {BarserverWeb.Layouts, :app})
   end
 
   pipeline :nomenu_layout do
-    plug(:put_layout, {TeiserverWeb.Layouts, :root})
+    plug(:put_layout, {BarserverWeb.Layouts, :root})
   end
 
   pipeline :protected do
@@ -54,10 +54,10 @@ defmodule TeiserverWeb.Router do
   pipeline :token_api do
     plug(:accepts, ["json"])
     plug(:put_secure_browser_headers)
-    plug(Teiserver.Logging.LoggingPlug)
-    plug(Teiserver.Account.AuthPipeline)
-    plug(Teiserver.Account.AuthPlug)
-    plug(Teiserver.Plugs.CachePlug)
+    plug(Barserver.Logging.LoggingPlug)
+    plug(Barserver.Account.AuthPipeline)
+    plug(Barserver.Account.AuthPlug)
+    plug(Barserver.Plugs.CachePlug)
     plug(Guardian.Plug.EnsureAuthenticated)
   end
 
@@ -66,30 +66,30 @@ defmodule TeiserverWeb.Router do
     plug(:fetch_session)
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
-    plug(Teiserver.Logging.LoggingPlug)
-    plug(Teiserver.Account.AuthPipeline)
-    plug(Teiserver.Account.AuthPlug)
-    plug(Teiserver.Plugs.CachePlug)
+    plug(Barserver.Logging.LoggingPlug)
+    plug(Barserver.Account.AuthPipeline)
+    plug(Barserver.Account.AuthPlug)
+    plug(Barserver.Plugs.CachePlug)
     plug(Guardian.Plug.EnsureAuthenticated)
   end
 
-  scope "/", TeiserverWeb.General do
+  scope "/", BarserverWeb.General do
     pipe_through([:live_browser, :nomenu_layout])
 
     live_session :general_index,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated}
+        {Barserver.Account.AuthPlug, :ensure_authenticated}
       ] do
       live "/", HomeLive.Index, :index
     end
   end
 
-  scope "/microblog", TeiserverWeb.Microblog do
+  scope "/microblog", BarserverWeb.Microblog do
     pipe_through([:live_browser, :app_layout])
 
     live_session :microblog_root,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :mount_current_user}
+        {Barserver.Account.AuthPlug, :mount_current_user}
       ] do
       live "/", BlogLive.Index, :index
       live "/all", BlogLive.Index, :all
@@ -98,15 +98,15 @@ defmodule TeiserverWeb.Router do
 
     live_session :microblog_user,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated}
+        {Barserver.Account.AuthPlug, :ensure_authenticated}
       ] do
       live "/preferences", BlogLive.Preferences, :index
     end
 
     live_session :microblog_admin,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Account.AuthPlug, {:authorise, "Contributor"}}
+        {Barserver.Account.AuthPlug, :ensure_authenticated},
+        {Barserver.Account.AuthPlug, {:authorise, "Contributor"}}
       ] do
       live "/admin/posts", Admin.PostLive.Index, :index
       live "/admin/posts/:id", Admin.PostLive.Show, :show
@@ -116,12 +116,12 @@ defmodule TeiserverWeb.Router do
     end
   end
 
-  scope "/microblog", TeiserverWeb.Microblog do
+  scope "/microblog", BarserverWeb.Microblog do
     get "/rss", RssController, :index
     get "/rss/html", RssController, :html_mode
   end
 
-  scope "/", TeiserverWeb.Account, as: :account do
+  scope "/", BarserverWeb.Account, as: :account do
     pipe_through([:browser, :nomenu_layout])
 
     get("/login", SessionController, :new)
@@ -138,7 +138,7 @@ defmodule TeiserverWeb.Router do
     get("/initial_setup/:key", SetupController, :setup)
   end
 
-  scope "/logging", TeiserverWeb.Logging, as: :logging do
+  scope "/logging", BarserverWeb.Logging, as: :logging do
     pipe_through([:browser, :protected, :app_layout])
 
     get("/", GeneralController, :index)
@@ -190,19 +190,19 @@ defmodule TeiserverWeb.Router do
   # Live dashboard
   import Phoenix.LiveDashboard.Router
 
-  scope "/logging/live", TeiserverWeb, as: :logging_live do
+  scope "/logging/live", BarserverWeb, as: :logging_live do
     pipe_through([:browser, :protected, :app_layout, :logging_live_auth])
 
     live_dashboard("/dashboard",
-      metrics: TeiserverWeb.Telemetry,
-      ecto_repos: [Teiserver.Repo],
+      metrics: BarserverWeb.Telemetry,
+      ecto_repos: [Barserver.Repo],
       additional_pages: [
         # live_dashboard_additional_pages
       ]
     )
   end
 
-  scope "/", TeiserverWeb.General, as: :ts_general do
+  scope "/", BarserverWeb.General, as: :ts_general do
     pipe_through([:browser, :nomenu_layout])
 
     get("/code_of_conduct", GeneralController, :code_of_conduct)
@@ -210,12 +210,12 @@ defmodule TeiserverWeb.Router do
     get("/gdpr", GeneralController, :gdpr)
   end
 
-  scope "/account", TeiserverWeb.Account do
+  scope "/account", BarserverWeb.Account do
     pipe_through([:live_browser, :app_layout, :protected])
 
     live_session :relationships,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated}
+        {Barserver.Account.AuthPlug, :ensure_authenticated}
       ] do
       live "/relationship", RelationshipLive.Index, :friend
       live "/relationship/friend", RelationshipLive.Index, :friend
@@ -226,19 +226,19 @@ defmodule TeiserverWeb.Router do
 
     live_session :account_settings,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated}
+        {Barserver.Account.AuthPlug, :ensure_authenticated}
       ] do
       live "/settings", SettingsLive.Index, :index
       live "/settings/:key", SettingsLive.Index, :selected
     end
   end
 
-  scope "/profile", TeiserverWeb.Account do
+  scope "/profile", BarserverWeb.Account do
     pipe_through([:browser, :app_layout])
 
     live_session :profiles,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :mount_current_user}
+        {Barserver.Account.AuthPlug, :mount_current_user}
       ] do
       live "/", ProfileLive.Self, :index
       live "/name/:username", ProfileLive.Username, :index
@@ -255,7 +255,7 @@ defmodule TeiserverWeb.Router do
     end
   end
 
-  scope "/teiserver/account", TeiserverWeb.Account, as: :ts_account do
+  scope "/teiserver/account", BarserverWeb.Account, as: :ts_account do
     pipe_through([:browser, :app_layout, :protected])
 
     get("/details", GeneralController, :edit_details)
@@ -267,12 +267,12 @@ defmodule TeiserverWeb.Router do
     delete("/security/delete_token/:id", SecurityController, :delete_token)
   end
 
-  scope "/teiserver/games", TeiserverWeb.Game, as: :ts_game do
+  scope "/teiserver/games", BarserverWeb.Game, as: :ts_game do
     pipe_through([:browser, :app_layout, :protected])
     resources("/queues", QueueController)
   end
 
-  scope "/battle", TeiserverWeb.Battle.LobbyLive, as: :ts_battle do
+  scope "/battle", BarserverWeb.Battle.LobbyLive, as: :ts_battle do
     pipe_through([:browser, :app_layout, :protected])
 
     live("/lobbies", Index, :index)
@@ -280,7 +280,7 @@ defmodule TeiserverWeb.Router do
     live("/lobbies/chat/:id", Chat, :chat)
   end
 
-  scope "/battle", TeiserverWeb.Battle, as: :ts_battle do
+  scope "/battle", BarserverWeb.Battle, as: :ts_battle do
     pipe_through([:browser, :app_layout, :protected])
 
     get("/ratings/leaderboard", RatingsController, :leaderboard)
@@ -290,7 +290,7 @@ defmodule TeiserverWeb.Router do
 
     live_session :board_view,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated}
+        {Barserver.Account.AuthPlug, :ensure_authenticated}
       ] do
       live "/ratings", MatchLive.Ratings, :index
       live "/ratings/:rating_type", MatchLive.Ratings, :index
@@ -307,21 +307,21 @@ defmodule TeiserverWeb.Router do
     end
   end
 
-  scope "/tournament", TeiserverWeb.TournamentLive, as: :tournament do
+  scope "/tournament", BarserverWeb.TournamentLive, as: :tournament do
     pipe_through([:browser, :app_layout, :protected])
 
     live("/lobbies", Index, :index)
     live("/lobbies/show/:id", Show, :show)
   end
 
-  scope "/teiserver/matchmaking", TeiserverWeb.Matchmaking.QueueLive, as: :ts_game do
+  scope "/teiserver/matchmaking", BarserverWeb.Matchmaking.QueueLive, as: :ts_game do
     pipe_through([:browser, :app_layout, :protected])
 
     live("/queues", Index, :index)
     live("/queues/:id", Show, :show)
   end
 
-  scope "/teiserver/account", TeiserverWeb.Account.PartyLive, as: :ts_game do
+  scope "/teiserver/account", BarserverWeb.Account.PartyLive, as: :ts_game do
     pipe_through([:browser, :app_layout, :protected])
 
     live("/parties", Index, :index)
@@ -329,7 +329,7 @@ defmodule TeiserverWeb.Router do
     live("/parties/show/:id", Show, :show)
   end
 
-  scope "/telemetry", TeiserverWeb.Telemetry do
+  scope "/telemetry", BarserverWeb.Telemetry do
     pipe_through([:browser, :app_layout, :protected])
 
     get("/", GeneralController, :index)
@@ -391,7 +391,7 @@ defmodule TeiserverWeb.Router do
     resources("/infolog", InfologController, only: [:index, :show, :delete])
   end
 
-  scope "/teiserver/reports", TeiserverWeb.Report, as: :ts_reports do
+  scope "/teiserver/reports", BarserverWeb.Report, as: :ts_reports do
     pipe_through([:browser, :app_layout, :protected])
 
     get("/", GeneralController, :index)
@@ -413,7 +413,7 @@ defmodule TeiserverWeb.Router do
   end
 
   # API
-  scope "/tachyon", TeiserverWeb.API do
+  scope "/tachyon", BarserverWeb.API do
     pipe_through :api
     post "/login", SessionController, :login
     post "/register", SessionController, :register
@@ -421,7 +421,7 @@ defmodule TeiserverWeb.Router do
     get "/request_token", SessionController, :request_token_get
   end
 
-  scope "/teiserver/api", TeiserverWeb.API do
+  scope "/teiserver/api", BarserverWeb.API do
     pipe_through :api
     post "/login", SessionController, :login
     post "/register", SessionController, :register
@@ -429,7 +429,7 @@ defmodule TeiserverWeb.Router do
     get "/request_token", SessionController, :request_token_get
   end
 
-  scope "/teiserver/api/hailstorm", TeiserverWeb.API, as: :ts do
+  scope "/teiserver/api/hailstorm", BarserverWeb.API, as: :ts do
     pipe_through([:api])
     post("/start", HailstormController, :start)
     post("/update_site_config", HailstormController, :update_site_config)
@@ -440,7 +440,7 @@ defmodule TeiserverWeb.Router do
     post("/get_server_state", HailstormController, :get_server_state)
   end
 
-  scope "/teiserver/api/spads", TeiserverWeb.API, as: :ts do
+  scope "/teiserver/api/spads", BarserverWeb.API, as: :ts do
     pipe_through([:api])
     get "/get_rating/:target_id/:type", SpadsController, :get_rating
     get "/get_rating/:caller_id/:target_id/:type", SpadsController, :get_rating
@@ -449,19 +449,19 @@ defmodule TeiserverWeb.Router do
     post "/balance_battle", SpadsController, :balance_battle
   end
 
-  scope "/teiserver/api/public", TeiserverWeb.API, as: :ts do
+  scope "/teiserver/api/public", BarserverWeb.API, as: :ts do
     pipe_through([:api])
     get "/leaderboard/:type", PublicController, :leaderboard
   end
 
-  scope "/teiserver/api", TeiserverWeb.API do
+  scope "/teiserver/api", BarserverWeb.API do
     pipe_through([:token_api])
 
     post "/battle/create", BattleController, :create
   end
 
   # ADMIN
-  scope "/admin", TeiserverWeb.AdminDashLive, as: :ts do
+  scope "/admin", BarserverWeb.AdminDashLive, as: :ts do
     pipe_through([:browser, :app_layout, :protected])
 
     live("/dashboard", Index, :index)
@@ -469,27 +469,27 @@ defmodule TeiserverWeb.Router do
     live("/dashboard/policy/:id", Policy, :policy)
   end
 
-  scope "/teiserver/admin", TeiserverWeb.ClientLive, as: :ts_admin do
+  scope "/teiserver/admin", BarserverWeb.ClientLive, as: :ts_admin do
     pipe_through([:browser, :app_layout, :protected])
 
     live("/client", Index, :index)
     live("/client/:id", Show, :show)
   end
 
-  scope "/teiserver/admin", TeiserverWeb.PartyLive, as: :ts_admin do
+  scope "/teiserver/admin", BarserverWeb.PartyLive, as: :ts_admin do
     pipe_through([:browser, :app_layout, :protected])
 
     live("/party", Index, :index)
     live("/party/:id", Show, :show)
   end
 
-  scope "/moderation", TeiserverWeb.Moderation do
+  scope "/moderation", BarserverWeb.Moderation do
     pipe_through([:browser, :app_layout])
 
     live_session :overwatch,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Account.AuthPlug, {:authorise, "Overwatch"}}
+        {Barserver.Account.AuthPlug, :ensure_authenticated},
+        {Barserver.Account.AuthPlug, {:authorise, "Overwatch"}}
       ] do
       live "/overwatch", OverwatchLive.Index, :index
       live "/overwatch/target/:target_id", OverwatchLive.User, :user
@@ -498,14 +498,14 @@ defmodule TeiserverWeb.Router do
 
     live_session :report_user,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :mount_current_user}
+        {Barserver.Account.AuthPlug, :mount_current_user}
       ] do
       live "/report_user", ReportUserLive.Index, :index
       live "/report_user/:id", ReportUserLive.Index, :selected
     end
   end
 
-  scope "/moderation", TeiserverWeb.Moderation, as: :moderation do
+  scope "/moderation", BarserverWeb.Moderation, as: :moderation do
     pipe_through([:browser, :app_layout, :protected])
 
     get("/", GeneralController, :index)
@@ -544,7 +544,7 @@ defmodule TeiserverWeb.Router do
     resources("/ban", BanController, only: [:index, :show, :new, :create, :edit, :update])
   end
 
-  scope "/admin", TeiserverWeb.Admin, as: :admin do
+  scope "/admin", BarserverWeb.Admin, as: :admin do
     pipe_through([:browser, :app_layout, :protected])
 
     resources("/lobby_policies", LobbyPolicyController,
@@ -563,7 +563,7 @@ defmodule TeiserverWeb.Router do
     put("/users/gdpr_clean/:id", UserController, :gdpr_clean)
   end
 
-  scope "/teiserver/admin", TeiserverWeb.Admin, as: :admin do
+  scope "/teiserver/admin", BarserverWeb.Admin, as: :admin do
     pipe_through([:browser, :app_layout, :protected])
 
     # Codes
@@ -574,12 +574,12 @@ defmodule TeiserverWeb.Router do
     resources("/site", SiteConfigController, only: [:index, :edit, :update, :delete])
   end
 
-  scope "/chat", TeiserverWeb.Communication do
+  scope "/chat", BarserverWeb.Communication do
     pipe_through([:live_browser, :protected])
 
     live_session :chat_liveview,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated}
+        {Barserver.Account.AuthPlug, :ensure_authenticated}
       ] do
       live "/", ChatLive.Index, :index
       live "/room", ChatLive.Room, :index
@@ -587,12 +587,12 @@ defmodule TeiserverWeb.Router do
     end
   end
 
-  scope "/admin", TeiserverWeb.Admin do
+  scope "/admin", BarserverWeb.Admin do
     pipe_through([:live_browser, :protected])
 
     live_session :live_test_page_view,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated}
+        {Barserver.Account.AuthPlug, :ensure_authenticated}
       ] do
       live "/test_page", TestPageLive.Index, :index
       live "/test_page/:tab", TestPageLive.Index, :index
@@ -600,14 +600,14 @@ defmodule TeiserverWeb.Router do
 
     live_session :admin_chat_liveview,
       on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Account.AuthPlug, {:authorise, "Moderator"}}
+        {Barserver.Account.AuthPlug, :ensure_authenticated},
+        {Barserver.Account.AuthPlug, {:authorise, "Moderator"}}
       ] do
       live "/chat", ChatLive.Index, :index
     end
   end
 
-  scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do
+  scope "/teiserver/admin", BarserverWeb.Admin, as: :ts_admin do
     pipe_through([:browser, :app_layout, :protected])
 
     get("/", GeneralController, :index)

@@ -1,11 +1,11 @@
-defmodule Teiserver.Telemetry.AnonProperty do
+defmodule Barserver.Telemetry.AnonProperty do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   @primary_key false
   schema "telemetry_anon_properties" do
     field :hash, :string, primary_key: true
-    belongs_to :property_type, Teiserver.Telemetry.PropertyType, primary_key: true
+    belongs_to :property_type, Barserver.Telemetry.PropertyType, primary_key: true
 
     field :last_updated, :utc_datetime
     field :value, :string

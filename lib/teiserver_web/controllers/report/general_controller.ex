@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.Report.GeneralController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Report.GeneralController do
+  use BarserverWeb, :controller
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
@@ -7,9 +7,9 @@ defmodule TeiserverWeb.Report.GeneralController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Staff,
+    policy: Barserver.Staff,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Reports', url: '/teiserver/reports')
 
