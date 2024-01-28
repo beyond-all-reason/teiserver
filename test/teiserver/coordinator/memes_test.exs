@@ -1,7 +1,7 @@
 defmodule Barserver.Coordinator.MemesTest do
   use Barserver.ServerCase, async: false
   alias Barserver.Account.ClientLib
-  alias Barserver.{User, Client, Coordinator, Lobby}
+  alias Barserver.{CacheUser, Client, Coordinator, Lobby}
   require Logger
 
   import Barserver.BarserverTestLib,
@@ -13,7 +13,7 @@ defmodule Barserver.Coordinator.MemesTest do
     %{socket: psocket, user: player} = tachyon_auth_setup()
 
     # User needs to be a moderator (at this time) to start/stop Coordinator mode
-    User.update_user(%{host | moderator: true})
+    CacheUser.update_user(%{host | moderator: true})
     ClientLib.refresh_client(host.id)
 
     lobby_data = %{

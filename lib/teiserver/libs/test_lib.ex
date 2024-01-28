@@ -58,6 +58,18 @@ defmodule Barserver.BarserverTestLib do
           )
           |> Account.create_user()
 
+        # A bit of a hacky fix but test users were not being verified
+        # correctly and this was the easiest way to solve it
+        # TODO: Refactor user verification and remove/replace this block
+        {:ok, user} = Account.script_update_user(user, %{
+          "roles" => ["Verified"],
+          "permissions" => ["Verified"],
+          "data" => Map.merge(user.data, %{
+            "roles" => ["Verified"],
+            "permissions" => ["Verified"],
+          })
+        })
+
         Account.update_user_stat(user.id, %{
           "country" => "??",
           "lobby_client" => "LuaLobby Chobby"
@@ -66,7 +78,6 @@ defmodule Barserver.BarserverTestLib do
         user
         |> CacheUser.convert_user()
         |> CacheUser.add_user()
-        |> CacheUser.verify_user()
 
       _ ->
         new_user()
@@ -140,7 +151,7 @@ defmodule Barserver.BarserverTestLib do
 
     case reply do
       [%{"result" => "unverified"} | _] ->
-        raise "You are creating a user without verifying in"
+        raise "You are creating a user without verifying it"
 
       _ ->
         :ok
