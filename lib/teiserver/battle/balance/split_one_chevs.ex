@@ -1,6 +1,5 @@
 defmodule Teiserver.Battle.Balance.SplitOneChevs do
   alias Teiserver.CacheUser
-  alias Teiserver.Battle.BalanceLib
   @moduledoc"""
     This balance algorithm first sorts the users by visible OS (match rating) descending. Then all rank=0 (one chevs) will be placed at the bottom of this sorted list.
 
@@ -25,8 +24,8 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
   """
   def perform(expanded_group, team_count, opts \\ []) do
     members = flatten_members(expanded_group) |> sort_members()
-    teams = assign_teams(members, team_count)
-    standardise_result(teams)
+    %{teams: teams, logs: logs} = assign_teams(members, team_count)
+    standardise_result(teams, logs)
   end
 
   @doc """
@@ -85,13 +84,19 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
   %{rating: 6, member_id: 2},
   %{rating: 7, member_id: 3}
   ]
+
+  Returns %{teams:teams, logs:logs}
   """
   def assign_teams(member_list, number_of_teams) do
-    Enum.reduce(member_list, create_empty_teams(number_of_teams), fn x, acc ->
-      picking_team = get_picking_team(acc)
+     default_acc = %{teams: create_empty_teams(number_of_teams), logs: []}
+    Enum.reduce(member_list, default_acc, fn x, acc ->
+      picking_team = get_picking_team(acc.teams)
       update_picking_team = Map.merge(picking_team, %{members: [x | picking_team.members]})
-      [update_picking_team | get_non_picking_teams(acc, picking_team)]
+      new_log = "User #{x.member_id} picked for Team #{picking_team.team_id}"
+
+      %{teams: [update_picking_team | get_non_picking_teams(acc.teams, picking_team)], logs: acc.logs ++ [new_log]}
     end)
+
   end
 
   @spec create_empty_teams(any()) :: any()
@@ -132,7 +137,7 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
   end
 
     @doc """
-  raw_input=
+  teams=
      [
              %{
                members: [
@@ -150,13 +155,13 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
              }
            ]
   """
-  def standardise_result(raw_input) do
-      team_groups= standardise_team_groups(raw_input)
+  def standardise_result(teams, logs) do
+      team_groups= standardise_team_groups(teams)
 
     %{
       team_groups: team_groups,
-      team_players: standardise_team_players(raw_input),
-      logs: ["Logs to be added in the future"]
+      team_players: standardise_team_players(teams),
+      logs: logs
     }
 
 
