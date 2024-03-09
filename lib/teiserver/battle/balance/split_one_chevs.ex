@@ -1,7 +1,6 @@
 defmodule Teiserver.Battle.Balance.SplitOneChevs do
   alias Teiserver.CacheUser
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.Battle.Logger
   @moduledoc"""
     This balance algorithm first sorts the users by visible OS (match rating) descending. Then all rank=0 (one chevs) will be placed at the bottom of this sorted list.
 
