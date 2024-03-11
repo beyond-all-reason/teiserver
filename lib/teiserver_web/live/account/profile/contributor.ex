@@ -60,7 +60,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
   def handle_event("revert-country_code", _, %{assigns: assigns} = socket) do
     {:noreply,
      socket
-     |> assign(:temp_country_code, assigns.stats["bar_plus.flag"])}
+     |> assign(:temp_country_code, assigns.stats["bar_plus.flag"])
+     |> assign(:error_message, nil)}
   end
 
   def handle_event("clear-country_code", _, %{assigns: assigns} = socket) do
@@ -70,7 +71,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
 
     {:noreply,
      socket
-     |> assign(:temp_country_code, "")}
+     |> assign(:temp_country_code, "")
+     |> assign(:error_message, nil)}
   end
 
   def handle_event("save-country_code", _, %{assigns: assigns} = socket) do
@@ -83,7 +85,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
 
       {:noreply,
       socket
-      |> assign(:country_code, assigns.temp_country_code)}
+      |> assign(:country_code, assigns.temp_country_code)
+      |> assign(:error_message, nil)}
     else
       {:noreply,
       socket
