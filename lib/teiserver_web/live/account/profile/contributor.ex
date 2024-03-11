@@ -26,6 +26,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
           |> assign(:site_menu_active, "teiserver_account")
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
+          |> assign(:error_message, nil)
           |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
           |> user_assigns
       end
@@ -73,15 +74,21 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
   end
 
   def handle_event("save-country_code", _, %{assigns: assigns} = socket) do
-    Account.update_user_stat(assigns.user.id, %{
-      "bar_plus.flag" => assigns.temp_country_code
-    })
+    if String.match?(assigns.temp_country_code, ~r/^\S+$/) do
+      Account.update_user_stat(assigns.user.id, %{
+        "bar_plus.flag" => assigns.temp_country_code
+      })
 
-    Account.recache_user(assigns.user.id)
+      Account.recache_user(assigns.user.id)
 
-    {:noreply,
-     socket
-     |> assign(:country_code, assigns.temp_country_code)}
+      {:noreply,
+      socket
+      |> assign(:country_code, assigns.temp_country_code)}
+    else
+      {:noreply,
+      socket
+      |> assign(:error_message, "Country code must not contain space")}
+    end
   end
 
   def handle_event(_string, _event, socket) do
