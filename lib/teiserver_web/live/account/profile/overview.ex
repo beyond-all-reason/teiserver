@@ -294,7 +294,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
          :ok <- server_allows_join(lobby_id, current_user_id),
          :ok <- join_lobby(lobby_id, current_user_id) do
       {:noreply, put_flash(socket, :success, "Lobby joined")}
-    else {:error, reason} ->
+    else
+      {:error, reason} ->
         {:noreply, put_flash(socket, :warning, reason)}
     end
   end
