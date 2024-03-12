@@ -45,7 +45,8 @@ defmodule TeiserverWeb.Telemetry.InfologController do
         search: [
           log_type: params["type"],
           engine: params["engine"],
-          game: params["game"]
+          game: params["game"],
+          shorterror: params["shorterror"]
         ],
         preload: [:user],
         select: ~w(id user_hash user_id log_type timestamp metadata size)a,
