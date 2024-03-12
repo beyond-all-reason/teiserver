@@ -290,11 +290,11 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     current_user_id = assigns.current_user.id
     lobby_id = assigns.client.lobby_id
 
-    with true <- client_connected(current_user_id),
-         {:ok, _} <- join_lobby(lobby_id, current_user_id) do
+    with :ok <- client_connected(current_user_id),
+         :ok <- server_allows_join(lobby_id, current_user_id),
+         :ok <- join_lobby(lobby_id, current_user_id) do
       {:noreply, put_flash(socket, :success, "Lobby joined")}
-    else
-      {:error, reason} ->
+    else {:error, reason} ->
         {:noreply, put_flash(socket, :warning, reason)}
     end
   end
@@ -303,15 +303,22 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     client = Account.get_client_by_id(user_id)
 
     if not is_nil(client) do
-      true
+      :ok
     else
       {:error, "Client is not connected"}
     end
   end
 
+  defp server_allows_join(lobby_id, user_id) do
+    case Lobby.server_allows_join?(user_id, lobby_id) do
+      true -> :ok
+      {:failure, reason} -> {:error, reason}
+    end
+  end
+
   defp join_lobby(lobby_id, user_id) do
     if :ok == Lobby.force_add_user_to_lobby(user_id, lobby_id) do
-      {:ok, nil}
+      :ok
     else
       {:error, "Failed to join lobby"}
     end
