@@ -76,7 +76,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
   end
 
   def handle_event("save-country_code", _, %{assigns: assigns} = socket) do
-    if String.match?(assigns.temp_country_code, ~r/^[a-zA-Z0-9-]{2,8}$/) do
+    if String.match?(assigns.temp_country_code, ~r/^[a-zA-Z0-9-]{2,16}$/) do
       Account.update_user_stat(assigns.user.id, %{
         "bar_plus.flag" => assigns.temp_country_code
       })
