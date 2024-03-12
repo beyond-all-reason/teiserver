@@ -81,7 +81,7 @@ config :teiserver, Teiserver,
     "A verification code has been sent to your email address. Please read our terms of service at <<<site_url>>> and the code of conduct at <<<URL>>>. Then enter your six digit code below if you agree to the terms.",
   accept_all_emails: false,
   retention: %{
-    telemetry_infolog: 14,
+    telemetry_infolog: 31,
     telemetry_events: 90,
     battle_match_rated: 365,
     battle_match_unrated: 365,
