@@ -19,7 +19,7 @@ defmodule TeiserverWeb.Telemetry.InfologController do
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
     page = (params["page"] || "0") |> int_parse |> max(0)
-    limit = 50
+    limit = 100
 
     infologs =
       Telemetry.list_infologs(
