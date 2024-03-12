@@ -37,12 +37,17 @@ defmodule Teiserver.Telemetry.InfologLib do
 
   def _search(query, :engine, value) do
     from infologs in query,
-      where: fragment("? ->> ? = ?", infologs.metadata, "engineversion", ^value)
+      where: fragment("? ->> ? ILIKE ?", infologs.metadata, "engineversion", ^"%#{value}%")
   end
 
   def _search(query, :game, value) do
     from infologs in query,
       where: fragment("? ->> ? = ?", infologs.metadata, "gameversion", ^value)
+  end
+
+  def _search(query, :shorterror, value) do
+    from infologs in query,
+      where: fragment("? ->> ? ILIKE ?", infologs.metadata, "shorterror", ^"%#{value}%")
   end
 
   def _search(query, :log_type, "Any"), do: query
