@@ -1,10 +1,10 @@
-defmodule Teiserver.Moderation.ActivityReport do
-  alias Teiserver.Helper.DatePresets
-  alias Teiserver.Moderation
-  alias Teiserver.Helper.TimexHelper
+defmodule Barserver.Moderation.ActivityReport do
+  alias Barserver.Helper.DatePresets
+  alias Barserver.Moderation
+  alias Barserver.Helper.TimexHelper
 
   @spec icon() :: String.t()
-  def icon(), do: Teiserver.Moderation.BanLib.icon()
+  def icon(), do: Barserver.Moderation.BanLib.icon()
 
   @spec permissions() :: String.t()
   def permissions(), do: "Overwatch"

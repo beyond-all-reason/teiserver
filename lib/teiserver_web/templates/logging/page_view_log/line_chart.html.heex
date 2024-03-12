@@ -95,7 +95,7 @@
 <pre></pre>
 -->
 <%= render(
-  TeiserverWeb.Logging.GeneralView,
+  BarserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "page_view"})
 ) %>
@@ -104,7 +104,7 @@
   <div class="col-md-12">
     <div class="card card-<= bsname >">
       <div class="card-body">
-        <%= render(Teiserver.Logging.PageViewLogView, "section_menu.html",
+        <%= render(Barserver.Logging.PageViewLogView, "section_menu.html",
           conn: @conn,
           permissions: @current_user.permissions,
           active: "report"
@@ -114,7 +114,7 @@
   </div>
 </div>
 
-<%= render(Teiserver.Logging.PageViewLogView, "search_report.html",
+<%= render(Barserver.Logging.PageViewLogView, "search_report.html",
   conn: @conn,
   params: @params,
   permissions: @current_user.permissions

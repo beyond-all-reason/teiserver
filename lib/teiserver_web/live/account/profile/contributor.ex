@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.Account.ProfileLive.Contributor do
+defmodule BarserverWeb.Account.ProfileLive.Contributor do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Config}
+  use BarserverWeb, :live_view
+  alias Barserver.{Account, Config}
 
   @impl true
   def mount(%{"userid" => userid_str}, _session, socket) do
@@ -24,9 +24,9 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
           socket
           |> assign(:tab, nil)
           |> assign(:site_menu_active, "teiserver_account")
-          |> assign(:view_colour, Teiserver.Account.UserLib.colours())
+          |> assign(:view_colour, Barserver.Account.UserLib.colours())
           |> assign(:user, user)
-          |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
+          |> BarserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
           |> user_assigns
       end
 

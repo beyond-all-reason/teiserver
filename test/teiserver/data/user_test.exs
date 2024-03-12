@@ -1,14 +1,14 @@
-defmodule Teiserver.Data.UserTest do
-  use Teiserver.ServerCase
-  alias Teiserver.{CacheUser, Account}
-  alias Teiserver.TeiserverTestLib
+defmodule Barserver.Data.UserTest do
+  use Barserver.ServerCase
+  alias Barserver.{CacheUser, Account}
+  alias Barserver.BarserverTestLib
 
   test "adding two bots with the same email" do
     # Spring protocol runs on usernames while this runs on emails as the unique
     # field for users. As such it is possible for there to be a clash.
 
     # This is our base user that will create other users
-    base_user = TeiserverTestLib.new_user("twobot_test_base1")
+    base_user = BarserverTestLib.new_user("twobot_test_base1")
     base_user = CacheUser.update_user(%{base_user | roles: ["Server", "Moderator"]})
 
     user1 = CacheUser.register_bot("twobot_test_base1[01]", base_user.id)
@@ -36,7 +36,7 @@ defmodule Teiserver.Data.UserTest do
 
   # We will now be calculating ranks based on
   # test "calculate rank" do
-  #   user = TeiserverTestLib.new_user()
+  #   user = BarserverTestLib.new_user()
   #   Account.update_user_stat(user.id, %{
   #     "player_minutes" => 60 * 60,
   #     "spectator_minutes" => 60 * 60
@@ -57,7 +57,7 @@ defmodule Teiserver.Data.UserTest do
   # end
 
   test "renaming" do
-    user = TeiserverTestLib.new_user()
+    user = BarserverTestLib.new_user()
 
     assert CacheUser.rename_user(user.id, "rename1") == :success
     assert CacheUser.rename_user(user.id, "rename2") == :success

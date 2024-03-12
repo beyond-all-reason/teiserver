@@ -1,6 +1,6 @@
 <% bsname = view_colour() %>
 
-<%= render(TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "chat"})) %>
+<%= render(BarserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "chat"})) %>
 
 <style type="text/css">
   .message {
@@ -14,7 +14,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Admin.ChatView,
+          BarserverWeb.Admin.ChatView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: true,
@@ -23,7 +23,7 @@
         ) %>
         <hr />
 
-        <%= render(TeiserverWeb.Admin.ChatView, "search.html", assigns) %>
+        <%= render(BarserverWeb.Admin.ChatView, "search.html", assigns) %>
 
         <hr />
 

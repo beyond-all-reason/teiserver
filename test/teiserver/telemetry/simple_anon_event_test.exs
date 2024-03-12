@@ -1,7 +1,7 @@
-defmodule Teiserver.Telemetry.SimpleAnonEventTest do
+defmodule Barserver.Telemetry.SimpleAnonEventTest do
   @moduledoc false
-  use Teiserver.DataCase
-  alias Teiserver.{Telemetry}
+  use Barserver.DataCase
+  alias Barserver.{Telemetry}
 
   test "simple anon events" do
     r = :rand.uniform(999_999_999)

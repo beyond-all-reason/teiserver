@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.Layouts do
+defmodule BarserverWeb.Layouts do
   @moduledoc false
-  use TeiserverWeb, :html
+  use BarserverWeb, :html
   embed_templates "layouts/*"
 end

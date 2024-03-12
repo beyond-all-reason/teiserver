@@ -1,8 +1,8 @@
-defmodule TeiserverWeb.Battle.MatchLive.Chat do
+defmodule BarserverWeb.Battle.MatchLive.Chat do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Battle, Chat}
-  alias Teiserver.Battle.MatchLib
+  use BarserverWeb, :live_view
+  alias Barserver.{Account, Battle, Chat}
+  alias Barserver.Battle.MatchLib
 
   @impl true
   def mount(params, _session, socket) do
@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
       socket
       |> mount_require_all(["Overwatch"])
       |> assign(:site_menu_active, "match")
-      |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
+      |> assign(:view_colour, Barserver.Battle.MatchLib.colours())
       |> assign(:tab, "details")
       |> assign(:highlight_map, %{})
       |> assign(:extra_url_parts, "")
@@ -33,7 +33,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
   end
 
   # @impl true
-  # def handle_info({TeiserverWeb.CategoryLive.FormComponent, {:saved, category}}, socket) do
+  # def handle_info({BarserverWeb.CategoryLive.FormComponent, {:saved, category}}, socket) do
   #   {:noreply, stream_insert(socket, :categories, category)}
   # end
 

@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.Account.RelationshipLive.Index do
+defmodule BarserverWeb.Account.RelationshipLive.Index do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  alias Teiserver.Account
+  use BarserverWeb, :live_view
+  alias Barserver.Account
 
   @impl true
   def mount(_params, _session, socket) do

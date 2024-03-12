@@ -2,7 +2,7 @@
 moderator = allow?(@current_user, "Moderator")
 leader = moderator or @party.leader == @current_user.id %>
 
-<%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+<%= render(BarserverWeb.Battle.GeneralView, "sub_menu.html", %{
   active: "parties",
   conn: Map.put(@socket, :permissions, @current_user.permissions)
 }) %>

@@ -1,6 +1,6 @@
-defmodule Teiserver.Account.User do
+defmodule Barserver.Account.User do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
   @behaviour Bodyguard.Policy
 
   alias Argon2
@@ -33,13 +33,13 @@ defmodule Teiserver.Account.User do
     field :discord_dm_channel_id, :integer
     field :steam_id, :integer
 
-    has_many :user_configs, Teiserver.Config.UserConfig
+    has_many :user_configs, Barserver.Config.UserConfig
 
     # Extra user.ex relations go here
-    belongs_to :clan, Teiserver.Clans.Clan
-    belongs_to :smurf_of, Teiserver.Account.User
+    belongs_to :clan, Barserver.Clans.Clan
+    belongs_to :smurf_of, Barserver.Account.User
 
-    has_one :user_stat, Teiserver.Account.UserStat
+    has_one :user_stat, Barserver.Account.UserStat
 
     field :behaviour_score, :integer, default: 10_000
     field :trust_score, :integer, default: 10_000

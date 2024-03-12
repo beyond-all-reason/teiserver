@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.Admin.TestPageLive.Index do
-  use TeiserverWeb, :live_view
+defmodule BarserverWeb.Admin.TestPageLive.Index do
+  use BarserverWeb, :live_view
 
   @default_tab "icons"
   @limited_bsnames ~w(primary success info warning danger)
@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Admin.TestPageLive.Index do
     socket =
       socket
       |> assign(:site_menu_active, "admin")
-      |> assign(:view_colour, Teiserver.Admin.AdminLib.colours())
+      |> assign(:view_colour, Barserver.Admin.AdminLib.colours())
       |> assign(:tab, @default_tab)
       |> assign(:limited_bsnames, @limited_bsnames)
       |> assign(:full_bsnames, @full_bsnames)

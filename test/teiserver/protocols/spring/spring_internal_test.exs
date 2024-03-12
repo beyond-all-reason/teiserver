@@ -1,6 +1,6 @@
-defmodule Teiserver.SpringInternalTest do
-  use Teiserver.DataCase, async: true
-  alias Teiserver.Protocols.Spring
+defmodule Barserver.SpringInternalTest do
+  use Barserver.DataCase, async: true
+  alias Barserver.Protocols.Spring
 
   test "parse and create loop - clientstatus" do
     statuses = ~w(1 4 16 25)

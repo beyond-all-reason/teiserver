@@ -1,11 +1,11 @@
-<TeiserverWeb.Moderation.ModerationComponents.sub_menu
+<BarserverWeb.Moderation.ModerationComponents.sub_menu
   active="overwatch"
   view_colour={@view_colour}
 />
 
 <div class="row section-menu">
   <div class="col-md-12">
-    <TeiserverWeb.Moderation.OverwatchComponents.section_menu
+    <BarserverWeb.Moderation.OverwatchComponents.section_menu
       :if={@report_group}
       active="show"
       view_colour={@view_colour}
@@ -15,55 +15,55 @@
         class="btn btn-outline-warning"
         href={~p"/moderation/overwatch/target/#{@report_group.target_id}"}
       >
-        <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" />&nbsp;
+        <Fontawesome.icon icon={Barserver.Account.UserLib.icon()} style="solid" />&nbsp;
         Other reports
       </a>
 
       <%= if @report_group.match_id do %>
         <a
           href={~p"/teiserver/admin/matches/#{@report_group.match_id}"}
-          class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}
+          class={"btn btn-outline-#{Barserver.Battle.MatchLib.colours()}"}
         >
-          <Fontawesome.icon icon={Teiserver.Battle.MatchLib.icon()} style="solid" /> Match Details
+          <Fontawesome.icon icon={Barserver.Battle.MatchLib.icon()} style="solid" /> Match Details
         </a>
 
         <a
           href={~p"/battle/chat/#{@report_group.match_id}/#{@report_group.target_id}"}
-          class={"btn btn-outline-#{Teiserver.Chat.LobbyMessageLib.colours()}"}
+          class={"btn btn-outline-#{Barserver.Chat.LobbyMessageLib.colours()}"}
         >
-          <Fontawesome.icon icon={Teiserver.Chat.LobbyMessageLib.icon()} style="solid" />
+          <Fontawesome.icon icon={Barserver.Chat.LobbyMessageLib.icon()} style="solid" />
           Match Chat
         </a>
       <% end %>
 
       <%= if allow?(@current_user, "Moderator") do %>
         <a
-          class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
+          class={"btn btn-outline-#{Barserver.Account.UserLib.colour()}"}
           href={~p"/admin/chat?userid=#{@report_group.target_id}"}
         >
-          <Fontawesome.icon icon={Teiserver.Chat.LobbyMessageLib.icon()} style="solid" />&nbsp;
+          <Fontawesome.icon icon={Barserver.Chat.LobbyMessageLib.icon()} style="solid" />&nbsp;
           User chat
         </a>
 
         <a
-          class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
+          class={"btn btn-outline-#{Barserver.Account.UserLib.colour()}"}
           href={~p"/teiserver/admin/user/#{@report_group.target_id}"}
         >
-          <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" />&nbsp;
+          <Fontawesome.icon icon={Barserver.Account.UserLib.icon()} style="solid" />&nbsp;
           View user
         </a>
 
         <%= if not @report_group.closed do %>
           <a
-            class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
+            class={"btn btn-outline-#{Barserver.Moderation.ActionLib.colour()}"}
             href={"#{Routes.moderation_action_path(@socket, :new_with_user)}?teiserver_user=%23#{@report_group.target_id}_"}
           >
-            <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />&nbsp;
+            <Fontawesome.icon icon={Barserver.Moderation.ActionLib.icon()} style="solid" />&nbsp;
             Action user
           </a>
         <% end %>
       <% end %>
-    </TeiserverWeb.Moderation.OverwatchComponents.section_menu>
+    </BarserverWeb.Moderation.OverwatchComponents.section_menu>
     <br /><br />
 
     <div :if={@report_group}>
@@ -89,7 +89,7 @@
         <%= if @report_group.action_count > 0 do %>
           &nbsp;
           <Fontawesome.icon
-            icon={Teiserver.Moderation.ActionLib.icon()}
+            icon={Barserver.Moderation.ActionLib.icon()}
             style="solid"
             class="text-danger"
           />
@@ -106,9 +106,9 @@
           <h4>
             Reports (<%= Enum.count(@report_group.reports) %>)
             <Fontawesome.icon
-              icon={Teiserver.Moderation.ReportLib.icon()}
+              icon={Barserver.Moderation.ReportLib.icon()}
               style="solid"
-              class={"text-#{Teiserver.Moderation.ReportLib.colour()}"}
+              class={"text-#{Barserver.Moderation.ReportLib.colour()}"}
             />
           </h4>
           <.table
@@ -128,9 +128,9 @@
           <h4>
             Actions (<%= Enum.count(@report_group.actions) %>)
             <Fontawesome.icon
-              icon={Teiserver.Moderation.ActionLib.icon()}
+              icon={Barserver.Moderation.ActionLib.icon()}
               style="solid"
-              class={"text-#{Teiserver.Moderation.ActionLib.colour()}"}
+              class={"text-#{Barserver.Moderation.ActionLib.colour()}"}
             />
           </h4>
           <.table

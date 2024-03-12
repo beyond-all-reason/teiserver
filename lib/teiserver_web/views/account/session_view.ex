@@ -1,3 +1,3 @@
-defmodule TeiserverWeb.Account.SessionView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Account.SessionView do
+  use BarserverWeb, :view
 end

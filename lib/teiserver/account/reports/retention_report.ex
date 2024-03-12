@@ -1,6 +1,6 @@
-defmodule Teiserver.Account.RetentionReport do
-  alias Teiserver.Helper.DatePresets
-  alias Teiserver.{Account, Logging}
+defmodule Barserver.Account.RetentionReport do
+  alias Barserver.Helper.DatePresets
+  alias Barserver.{Account, Logging}
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-campground"

@@ -1,21 +1,21 @@
-defmodule Teiserver.Logging.AggregateViewLogsTask do
+defmodule Barserver.Logging.AggregateViewLogsTask do
   @moduledoc false
 
   use Oban.Worker, queue: :logging
 
-  alias Teiserver.Logging
-  alias Teiserver.Logging.AggregateViewLog
-  alias Teiserver.Logging.PageViewLogLib
+  alias Barserver.Logging
+  alias Barserver.Logging.AggregateViewLog
+  alias Barserver.Logging.PageViewLogLib
 
-  alias Teiserver.Repo
+  alias Barserver.Repo
   import Ecto.Query, warn: false
-  import Teiserver.Helper.QueryHelpers
-  import Teiserver.Helper.NumberHelper, only: [c_round: 1]
+  import Barserver.Helper.QueryHelpers
+  import Barserver.Helper.NumberHelper, only: [c_round: 1]
   alias Decimal
 
   @log_keep_period 180
-  # Oban.insert(Teiserver.Logging.AggregateViewLogsTask.new(%{}))
-  # Teiserver.Logging.AggregateViewLogsTask.run(Timex.today() |> Timex.shift(days: -1))
+  # Oban.insert(Barserver.Logging.AggregateViewLogsTask.new(%{}))
+  # Barserver.Logging.AggregateViewLogsTask.run(Timex.today() |> Timex.shift(days: -1))
 
   @impl Oban.Worker
   def perform(_) do
@@ -37,7 +37,7 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
 
       if Timex.compare(new_date, Timex.today()) == -1 do
         %{}
-        |> Teiserver.Logging.AggregateViewLogsTask.new()
+        |> Barserver.Logging.AggregateViewLogsTask.new()
         |> Oban.insert()
       end
     end

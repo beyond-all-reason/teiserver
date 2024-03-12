@@ -1,3 +1,3 @@
-defmodule TeiserverWeb.ComponentView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.ComponentView do
+  use BarserverWeb, :view
 end

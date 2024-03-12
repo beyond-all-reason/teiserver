@@ -1,11 +1,11 @@
-defmodule Teiserver.Tachyon.Handlers.Lobby.LeaveRequest do
+defmodule Barserver.Tachyon.Handlers.Lobby.LeaveRequest do
   @moduledoc """
 
   """
   alias Phoenix.PubSub
-  alias Teiserver.Lobby
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Tachyon.Responses.Lobby.LeaveResponse
+  alias Barserver.Lobby
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Tachyon.Responses.Lobby.LeaveResponse
 
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do
@@ -20,8 +20,8 @@ defmodule Teiserver.Tachyon.Handlers.Lobby.LeaveRequest do
     # Remove them from all the battles anyways, just in case
     Lobby.remove_user_from_any_lobby(conn.userid)
     |> Enum.each(fn lobby_id ->
-      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+      PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+      PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
     end)
 
     response = LeaveResponse.generate(:ok)

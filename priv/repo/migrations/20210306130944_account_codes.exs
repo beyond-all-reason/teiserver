@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.AccountCodes do
+defmodule Barserver.Repo.Migrations.AccountCodes do
   use Ecto.Migration
 
   def change do

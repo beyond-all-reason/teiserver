@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.SpringOut do
+defmodule Barserver.Protocols.SpringOut do
   @moduledoc """
   Out component of the Spring protocol.
 
@@ -7,15 +7,15 @@ defmodule Teiserver.Protocols.SpringOut do
   """
   require Logger
   alias Phoenix.PubSub
-  alias Teiserver.{Account, CacheUser, Client, Room, Battle, Coordinator}
-  alias Teiserver.Lobby
-  alias Teiserver.Protocols.Spring
-  alias Teiserver.Protocols.Spring.{BattleOut, LobbyPolicyOut, UserOut, SystemOut}
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.{Account, CacheUser, Client, Room, Battle, Coordinator}
+  alias Barserver.Lobby
+  alias Barserver.Protocols.Spring
+  alias Barserver.Protocols.Spring.{BattleOut, LobbyPolicyOut, UserOut, SystemOut}
+  alias Barserver.Data.Types, as: T
 
   @motd """
   Message of the day
-  Welcome to Teiserver
+  Welcome to Barserver
   Connect on port 8201 for TLS
   ---------
   """
@@ -38,7 +38,7 @@ defmodule Teiserver.Protocols.SpringOut do
         :spring -> do_reply(reply_cmd, data)
       end
 
-    if Application.get_env(:teiserver, Teiserver)[:extra_logging] == true or
+    if Application.get_env(:teiserver, Barserver)[:extra_logging] == true or
          state.print_server_messages do
       if is_list(msg) do
         msg
@@ -83,7 +83,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:redirect, url) do
-    "REDIRECT #{url} #{Application.get_env(:teiserver, Teiserver)[:ports][:tcp]}\n"
+    "REDIRECT #{url} #{Application.get_env(:teiserver, Barserver)[:ports][:tcp]}\n"
   end
 
   defp do_reply(:compflags, nil) do
@@ -100,7 +100,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:agreement, nil) do
     agreement_rows =
-      Application.get_env(:teiserver, Teiserver)[:user_agreement]
+      Application.get_env(:teiserver, Barserver)[:user_agreement]
       |> String.split("\n")
       |> Enum.map_join("\n", fn s -> "AGREEMENT #{s}" end)
 
@@ -603,7 +603,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   # defp do_reply(:tachyon, {namespace, function, data, state}) do
-  #   Teiserver.Protocols.Tachyon.V1.TachyonOut.reply(namespace, function, data, state)
+  #   Barserver.Protocols.Tachyon.V1.TachyonOut.reply(namespace, function, data, state)
   # end
 
   defp do_reply(atom, data) do
@@ -616,8 +616,8 @@ defmodule Teiserver.Protocols.SpringOut do
 
   @spec do_leave_battle(map(), T.lobby_id()) :: map()
   def do_leave_battle(state, lobby_id) do
-    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+    PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
     state
   end
 
@@ -627,11 +627,11 @@ defmodule Teiserver.Protocols.SpringOut do
 
     if lobby do
       Lobby.add_user_to_battle(state.userid, lobby.id, script_password)
-      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby.id}")
-      PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby.id}")
+      PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_updates:#{lobby.id}")
+      PubSub.subscribe(Barserver.PubSub, "teiserver_lobby_updates:#{lobby.id}")
 
-      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby.id}")
-      PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby.id}")
+      PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_chat:#{lobby.id}")
+      PubSub.subscribe(Barserver.PubSub, "teiserver_lobby_chat:#{lobby.id}")
 
       reply(:join_battle_success, lobby, nil, state)
       reply(:add_user_to_battle, {state.userid, lobby.id, script_password}, nil, state)
@@ -701,7 +701,7 @@ defmodule Teiserver.Protocols.SpringOut do
     end)
 
     if not state.exempt_from_cmd_throttle do
-      :timer.sleep(Application.get_env(:teiserver, Teiserver)[:post_login_delay])
+      :timer.sleep(Application.get_env(:teiserver, Barserver)[:post_login_delay])
     end
 
     # Battle entry commands
@@ -743,19 +743,19 @@ defmodule Teiserver.Protocols.SpringOut do
 
     send(self(), {:action, {:login_end, nil}})
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "client_inout")
+    :ok = PubSub.subscribe(Barserver.PubSub, "client_inout")
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "legacy_all_client_updates")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{user.id}")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "account_user_relationships:#{user.id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "legacy_all_client_updates")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_client_messages:#{user.id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "account_user_relationships:#{user.id}")
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_global_user_updates")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_global_user_updates")
 
-    PubSub.unsubscribe(Teiserver.PubSub, "legacy_user_updates:#{user.id}")
-    PubSub.subscribe(Teiserver.PubSub, "legacy_user_updates:#{user.id}")
+    PubSub.unsubscribe(Barserver.PubSub, "legacy_user_updates:#{user.id}")
+    PubSub.subscribe(Barserver.PubSub, "legacy_user_updates:#{user.id}")
 
-    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_global_lobby_updates")
-    PubSub.subscribe(Teiserver.PubSub, "teiserver_global_lobby_updates")
+    PubSub.unsubscribe(Barserver.PubSub, "teiserver_global_lobby_updates")
+    PubSub.subscribe(Barserver.PubSub, "teiserver_global_lobby_updates")
 
     Logger.metadata(request_id: "SpringTcpServer##{user.id}")
 
@@ -775,8 +775,8 @@ defmodule Teiserver.Protocols.SpringOut do
     room = Room.get_or_make_room(room_name, state.userid)
     Room.add_user_to_room(state.userid, room_name)
 
-    PubSub.unsubscribe(Teiserver.PubSub, "room:#{room_name}")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
+    PubSub.unsubscribe(Barserver.PubSub, "room:#{room_name}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "room:#{room_name}")
 
     reply(:join_success, room_name, nil, state)
     reply(:add_user_to_room, {state.userid, room_name}, nil, state)
@@ -801,7 +801,7 @@ defmodule Teiserver.Protocols.SpringOut do
                     Map.put(
                       state_acc.known_users,
                       member_id,
-                      Teiserver.SpringTcpServer._blank_user(member_id)
+                      Barserver.SpringTcpServer._blank_user(member_id)
                     )
               }
 
@@ -821,7 +821,7 @@ defmodule Teiserver.Protocols.SpringOut do
       end)
 
     if not state.exempt_from_cmd_throttle do
-      :timer.sleep(Application.get_env(:teiserver, Teiserver)[:spring_post_state_change_delay])
+      :timer.sleep(Application.get_env(:teiserver, Barserver)[:spring_post_state_change_delay])
     end
 
     members =

@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.Microblog.PostFormComponent do
+defmodule BarserverWeb.Microblog.PostFormComponent do
   @moduledoc false
-  use TeiserverWeb, :live_component
-  import Teiserver.Helper.ColourHelper, only: [rgba_css: 2]
+  use BarserverWeb, :live_component
+  import Barserver.Helper.ColourHelper, only: [rgba_css: 2]
 
-  alias Teiserver.{Communication, Microblog, Account}
-  alias Teiserver.Account.AuthLib
+  alias Barserver.{Communication, Microblog, Account}
+  alias Barserver.Account.AuthLib
 
   @default_channel_name "Dev updates"
 
@@ -233,8 +233,8 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
           end)
 
         Ecto.Multi.new()
-        |> Ecto.Multi.insert_all(:insert_all, Teiserver.Microblog.PostTag, added_tags)
-        |> Teiserver.Repo.transaction()
+        |> Ecto.Multi.insert_all(:insert_all, Barserver.Microblog.PostTag, added_tags)
+        |> Barserver.Repo.transaction()
 
         notify_parent({:saved, post})
 
@@ -268,8 +268,8 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
           end)
 
         Ecto.Multi.new()
-        |> Ecto.Multi.insert_all(:insert_all, Teiserver.Microblog.PostTag, post_tags)
-        |> Teiserver.Repo.transaction()
+        |> Ecto.Multi.insert_all(:insert_all, Barserver.Microblog.PostTag, post_tags)
+        |> Barserver.Repo.transaction()
 
         notify_parent({:saved, post})
 
@@ -337,7 +337,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
         " - Posted by #{user.name}"
       end
 
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, BarserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/microblog/show/#{post.id}"
 
     [

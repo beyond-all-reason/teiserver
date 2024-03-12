@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Tachyon.V1.LobbyChatOut do
+defmodule Barserver.Protocols.Tachyon.V1.LobbyChatOut do
   @spec do_reply(atom, any) :: map()
 
   ###########

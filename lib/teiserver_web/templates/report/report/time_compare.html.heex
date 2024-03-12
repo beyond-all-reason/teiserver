@@ -1,13 +1,13 @@
 <% {_fg, _bg, bsname} = view_colour() |> colours() %>
 
 <%= render(
-  TeiserverWeb.Report.GeneralView,
+  BarserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
 ) %>
 
 <%= central_component("picker_script",
-  module: Teiserver.Account.UserLib,
+  module: Barserver.Account.UserLib,
   name: "account_user",
   title: "User search"
 ) %>
@@ -59,7 +59,7 @@
           Show/Hide help
         </div>
         <%= render(
-          TeiserverWeb.Report.ReportView,
+          BarserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",
@@ -151,7 +151,7 @@
                 <label for={"search_account_user#{i}"} class="control-label">
                   User <%= i %>:
                 </label>
-                <%= render(TeiserverWeb.Account.UserView, "picker.html",
+                <%= render(BarserverWeb.Account.UserView, "picker.html",
                   input_name: "report[account_user#{i}]",
                   input_id: "report_account_user#{i}",
                   value: @params["account_user#{i}"]

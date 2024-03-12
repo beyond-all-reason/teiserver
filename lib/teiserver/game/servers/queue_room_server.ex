@@ -1,4 +1,4 @@
-defmodule Teiserver.Game.QueueRoomServer do
+defmodule Barserver.Game.QueueRoomServer do
   @moduledoc """
   This server takes the players who are matched together and finds them a
   room to play in. It (if the setting is enabled) also handles readying up
@@ -7,11 +7,11 @@ defmodule Teiserver.Game.QueueRoomServer do
 
   use GenServer
   require Logger
-  alias Teiserver.{Lobby, Battle, Config}
-  alias Teiserver.Battle.{BalanceLib}
-  alias Teiserver.Data.{Matchmaking, QueueGroup}
+  alias Barserver.{Lobby, Battle, Config}
+  alias Barserver.Battle.{BalanceLib}
+  alias Barserver.Data.{Matchmaking, QueueGroup}
   alias Phoenix.PubSub
-  alias Teiserver.{Account, Coordinator, Battle}
+  alias Barserver.{Account, Coordinator, Battle}
 
   @tick_interval 500
   @ready_wait_time 30_000
@@ -144,7 +144,7 @@ defmodule Teiserver.Game.QueueRoomServer do
     user_ids
     |> Enum.map(fn userid ->
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_client_messages:#{userid}",
         %{
           channel: "teiserver_client_messages:#{userid}",
@@ -177,7 +177,7 @@ defmodule Teiserver.Game.QueueRoomServer do
     |> List.flatten()
     |> Enum.each(fn userid ->
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_client_messages:#{userid}",
         %{
           channel: "teiserver_client_messages:#{userid}",
@@ -198,7 +198,7 @@ defmodule Teiserver.Game.QueueRoomServer do
       Account.remove_client_from_all_queues(userid)
 
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_client_messages:#{userid}",
         %{
           channel: "teiserver_client_messages:#{userid}",
@@ -212,7 +212,7 @@ defmodule Teiserver.Game.QueueRoomServer do
 
     # Now message the QueueWaitServers to let them know what's up
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_global_matchmaking",
       %{
         channel: "teiserver_global_matchmaking",
@@ -229,7 +229,7 @@ defmodule Teiserver.Game.QueueRoomServer do
       end)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_global_matchmaking",
       %{
         channel: "teiserver_global_matchmaking",
@@ -239,7 +239,7 @@ defmodule Teiserver.Game.QueueRoomServer do
     )
 
     Logger.info("QueueRoomServer match cancelled #{state.match_id}")
-    DynamicSupervisor.terminate_child(Teiserver.Game.QueueSupervisor, self())
+    DynamicSupervisor.terminate_child(Barserver.Game.QueueSupervisor, self())
     {:noreply, state}
   end
 
@@ -296,7 +296,7 @@ defmodule Teiserver.Game.QueueRoomServer do
       |> Enum.map(fn group -> group.id end)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_global_matchmaking",
       %{
         channel: "teiserver_global_matchmaking",
@@ -429,7 +429,7 @@ defmodule Teiserver.Game.QueueRoomServer do
         all_clients
         |> Enum.each(fn %{userid: userid} ->
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "teiserver_client_messages:#{userid}",
             %{
               channel: "teiserver_client_messages:#{userid}",
@@ -442,7 +442,7 @@ defmodule Teiserver.Game.QueueRoomServer do
         end)
 
         PubSub.broadcast(
-          Teiserver.PubSub,
+          Barserver.PubSub,
           "teiserver_queue:#{state.queue_id}",
           %{
             channel: "teiserver_queue:#{state.queue_id}",
@@ -457,7 +457,7 @@ defmodule Teiserver.Game.QueueRoomServer do
 
     spawn(fn ->
       :timer.sleep(5_000)
-      DynamicSupervisor.terminate_child(Teiserver.Game.QueueSupervisor, self_pid)
+      DynamicSupervisor.terminate_child(Barserver.Game.QueueSupervisor, self_pid)
     end)
 
     %{state | stage: "Completed"}
@@ -500,13 +500,13 @@ defmodule Teiserver.Game.QueueRoomServer do
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
-      Teiserver.QueueMatchRegistry,
+      Barserver.QueueMatchRegistry,
       opts.match_id,
       opts.match_id
     )
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_queue:#{opts.queue_id}",
       %{
         channel: "teiserver_queue:#{opts.queue_id}",

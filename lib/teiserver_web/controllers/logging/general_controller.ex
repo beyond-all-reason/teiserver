@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.Logging.GeneralController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Logging.GeneralController do
+  use BarserverWeb, :controller
 
   plug :add_breadcrumb, name: 'Logging', url: '/logging'
 
@@ -9,9 +9,9 @@ defmodule TeiserverWeb.Logging.GeneralController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Logging.LoggingLib,
+    policy: Barserver.Logging.LoggingLib,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do

@@ -17,7 +17,7 @@
       </span>
     </div>
     <h3>
-      <%= @post.title %> - <%= Teiserver.Helper.TimexHelper.date_to_str(
+      <%= @post.title %> - <%= Barserver.Helper.TimexHelper.date_to_str(
         @post.inserted_at,
         :ymd_hms
       ) %>

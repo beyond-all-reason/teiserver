@@ -8,7 +8,7 @@
 <link href="/css/c3.min.css" rel="stylesheet" />
 
 <%= render(
-  TeiserverWeb.Report.GeneralView,
+  BarserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
 ) %>
@@ -35,7 +35,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Report.ReportView,
+          BarserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",

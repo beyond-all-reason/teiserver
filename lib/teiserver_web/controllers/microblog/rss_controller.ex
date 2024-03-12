@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.Microblog.RssController do
-  use TeiserverWeb, :controller
-  alias Teiserver.Microblog
-  alias Teiserver.Helper.TimexHelper
+defmodule BarserverWeb.Microblog.RssController do
+  use BarserverWeb, :controller
+  alias Barserver.Microblog
+  alias Barserver.Helper.TimexHelper
 
   plug :put_layout, false
   plug :put_root_layout, false

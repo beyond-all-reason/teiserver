@@ -25,7 +25,7 @@
             label: "Reports",
             active: @active,
             url: Routes.moderation_report_path(@conn, :index),
-            icon: Teiserver.Moderation.ReportLib.icon()
+            icon: Barserver.Moderation.ReportLib.icon()
           ) %>
 
           <%= central_component("sub_menu_icon",
@@ -33,7 +33,7 @@
             label: "Actions",
             active: @active,
             url: Routes.moderation_action_path(@conn, :index),
-            icon: Teiserver.Moderation.ActionLib.icon()
+            icon: Barserver.Moderation.ActionLib.icon()
           ) %>
 
           <%= central_component("sub_menu_icon",
@@ -41,7 +41,7 @@
             label: "Proposals",
             active: @active,
             url: Routes.moderation_proposal_path(@conn, :index),
-            icon: Teiserver.Moderation.ProposalLib.icon()
+            icon: Barserver.Moderation.ProposalLib.icon()
           ) %>
 
           <%= central_component("sub_menu_icon",
@@ -49,7 +49,7 @@
             label: "Bans",
             active: @active,
             url: Routes.moderation_ban_path(@conn, :index),
-            icon: Teiserver.Moderation.BanLib.icon()
+            icon: Barserver.Moderation.BanLib.icon()
           ) %>
         </div>
       </div>

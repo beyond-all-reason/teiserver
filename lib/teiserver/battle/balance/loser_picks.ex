@@ -1,4 +1,4 @@
-defmodule Teiserver.Battle.Balance.LoserPicks do
+defmodule Barserver.Battle.Balance.LoserPicks do
   @moduledoc """
   1: Dealing with parties
     - Go through all groups of 2 or more members and combine their ratings to create one rating for the group
@@ -16,10 +16,10 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
   """
 
   # Alias the types
-  alias Teiserver.Account
-  alias Teiserver.Battle.BalanceLib
-  alias Teiserver.Battle.Balance.BalanceTypes, as: BT
-  import Teiserver.Helper.NumberHelper, only: [round: 2]
+  alias Barserver.Account
+  alias Barserver.Battle.BalanceLib
+  alias Barserver.Battle.Balance.BalanceTypes, as: BT
+  import Barserver.Helper.NumberHelper, only: [round: 2]
 
   @type algorithm_state :: %{
           teams: map,

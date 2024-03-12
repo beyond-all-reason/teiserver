@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.AccountIndexes do
+defmodule Barserver.Repo.Migrations.AccountIndexes do
   use Ecto.Migration
 
   def up do

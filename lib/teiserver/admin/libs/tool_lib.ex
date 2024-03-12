@@ -1,6 +1,6 @@
-defmodule Teiserver.Admin.ToolLib do
+defmodule Barserver.Admin.ToolLib do
   @moduledoc false
-  use TeiserverWeb, :library
+  use BarserverWeb, :library
 
   @spec colours :: atom
   def colours(), do: :info

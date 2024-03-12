@@ -4,10 +4,10 @@ import Config
 config :argon2_elixir, t_cost: 1, m_cost: 8
 
 # Configure your database
-config :teiserver, Teiserver.Repo,
-  username: "teiserver_test",
+config :teiserver, Barserver.Repo,
+  username: "barserver_test",
   password: "123456789",
-  database: "teiserver_test",
+  database: "barserver_test",
   hostname: "localhost",
   queue_target: 5000,
   queue_interval: 100_000,
@@ -15,7 +15,7 @@ config :teiserver, Teiserver.Repo,
   pool_size: 50,
   timeout: 300_000
 
-config :teiserver, Teiserver,
+config :teiserver, Barserver,
   certs: [
     keyfile: "priv/certs/localhost.key",
     certfile: "priv/certs/localhost.crt",
@@ -39,14 +39,14 @@ config :teiserver, Teiserver,
 
 config :teiserver, DiscordBridgeBot,
   token: nil,
-  bot_name: "Teiserver Bridge TEST",
+  bot_name: "Barserver Bridge TEST",
   bridges: [
     {"bridge_test_room", nil}
   ]
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
-config :teiserver, TeiserverWeb.Endpoint,
+config :teiserver, BarserverWeb.Endpoint,
   http: [port: 4002],
   server: false
 
@@ -58,7 +58,18 @@ config :teiserver, Oban, testing: :manual
 # plugins: false,
 # crontab: false
 
-config :teiserver, Teiserver.Mailer,
+config :teiserver, Barserver.Mailer,
   adapter: Bamboo.TestAdapter,
   noreply_address: "noreply@testsite.co.uk",
   contact_address: "info@testsite.co.uk"
+
+
+try do
+  import_config "test.secret.exs"
+rescue
+  _ in File.Error ->
+    nil
+
+  error ->
+    reraise error, __STACKTRACE__
+end

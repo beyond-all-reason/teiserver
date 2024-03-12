@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.Report.ExportsView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Report.ExportsView do
+  use BarserverWeb, :view
 
   @spec view_colour :: atom
   def view_colour(), do: :info

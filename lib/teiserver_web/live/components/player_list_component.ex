@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.Components.PlayerListComponent do
+defmodule BarserverWeb.Components.PlayerListComponent do
   @moduledoc false
-  use TeiserverWeb, :live_component
-  import Teiserver.Account.AuthLib, only: [allow?: 2]
+  use BarserverWeb, :live_component
+  import Barserver.Account.AuthLib, only: [allow?: 2]
 
   @impl true
   def preload(list_of_assigns) do

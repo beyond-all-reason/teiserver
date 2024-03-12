@@ -1,10 +1,10 @@
-defmodule Teiserver.AccountFixtures do
+defmodule Barserver.AccountFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `Teiserver.Microblog` context.
+  entities via the `Barserver.Microblog` context.
   """
-  alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Barserver.Account
+  alias Barserver.Account.AuthLib
 
   @doc """
   Generate a tag.

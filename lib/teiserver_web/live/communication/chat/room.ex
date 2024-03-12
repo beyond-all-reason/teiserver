@@ -1,8 +1,8 @@
-defmodule TeiserverWeb.Communication.ChatLive.Room do
+defmodule BarserverWeb.Communication.ChatLive.Room do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Chat}
-  alias Teiserver.Chat.RoomMessage
+  use BarserverWeb, :live_view
+  alias Barserver.{Account, Chat}
+  alias Barserver.Chat.RoomMessage
   alias Phoenix.PubSub
 
   @message_count 25
@@ -33,7 +33,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
       |> assign(:room_name, room_name)
       |> get_messages()
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "room_chat:#{room_name}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "room_chat:#{room_name}")
 
     {:noreply, socket}
   end
@@ -115,7 +115,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
         })
 
       true ->
-        Teiserver.Room.send_message(current_user.id, room_name, content)
+        Barserver.Room.send_message(current_user.id, room_name, content)
         :ok
     end
 

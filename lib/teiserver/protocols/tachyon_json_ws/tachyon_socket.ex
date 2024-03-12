@@ -1,14 +1,14 @@
-defmodule Teiserver.Tachyon.TachyonSocket do
+defmodule Barserver.Tachyon.TachyonSocket do
   @behaviour Phoenix.Socket.Transport
 
   require Logger
   alias Phoenix.PubSub
-  alias Teiserver.Config
-  alias Teiserver.Account
-  alias Teiserver.Tachyon.{CommandDispatch, MessageHandlers}
-  alias Teiserver.Tachyon.Responses.System.ErrorResponse
-  # alias Teiserver.Tachyon.Socket.PubsubHandlers
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Config
+  alias Barserver.Account
+  alias Barserver.Tachyon.{CommandDispatch, MessageHandlers}
+  alias Barserver.Tachyon.Responses.System.ErrorResponse
+  # alias Barserver.Tachyon.Socket.PubsubHandlers
+  alias Barserver.Data.Types, as: T
 
   @spec child_spec(any) :: :ignore
   def child_spec(_opts) do
@@ -69,8 +69,8 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     :timer.send_after(1500, :connect_to_client)
 
     Logger.metadata(request_id: "TachyonWSServer##{userid}")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_client_messages:#{userid}")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_client_messages:#{userid}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_server")
 
     {:ok, state}
   end
@@ -169,7 +169,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
     # Currently not able to validate errors so leaving it out
     # if response != nil do
-    #   Teiserver.Tachyon.Schema.validate!(response)
+    #   Barserver.Tachyon.Schema.validate!(response)
     # end
 
     {:ok, response, new_conn}
@@ -272,12 +272,12 @@ defmodule Teiserver.Tachyon.TachyonSocket do
 
   @spec terminate(any, any) :: :ok
   def terminate({:error, :closed}, %{conn: %{userid: userid}} = _state) do
-    Teiserver.Client.disconnect(userid, "connection closed by client")
+    Barserver.Client.disconnect(userid, "connection closed by client")
     :ok
   end
 
   def terminate(reason, %{conn: %{userid: userid}} = _state) do
-    Teiserver.Client.disconnect(userid, "ws terminate - reason: #{inspect(reason)}")
+    Barserver.Client.disconnect(userid, "ws terminate - reason: #{inspect(reason)}")
     :ok
   end
 
@@ -286,7 +286,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
   end
 
   defp login(%{user: _user, expires: _expires} = token, state) do
-    response = Teiserver.CacheUser.login_from_token(token, state)
+    response = Barserver.CacheUser.login_from_token(token, state)
 
     case response do
       {:ok, user} ->
@@ -300,7 +300,7 @@ defmodule Teiserver.Tachyon.TachyonSocket do
     end
   end
 
-  @spec new_conn(Teiserver.Account.User.t()) :: map()
+  @spec new_conn(Barserver.Account.User.t()) :: map()
   defp new_conn(user) do
     exempt_from_cmd_throttle = true
 

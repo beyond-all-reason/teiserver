@@ -1,4 +1,4 @@
-defmodule Teiserver.Helper.NumberHelper do
+defmodule Barserver.Helper.NumberHelper do
   @moduledoc false
   require Decimal
 

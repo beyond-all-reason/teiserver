@@ -6,12 +6,12 @@ import Config
 
 secret_key_base = "mix phx.gen.secret"
 
-config :teiserver, Teiserver.Setup,
+config :teiserver, Barserver.Setup,
   key: "---- random string of alpha numeric characters ----"
 
 # This can be part of your standard prod.exs but I wanted it to
 # default to not going into a github repo
-config :teiserver, TeiserverWeb.Endpoint,
+config :teiserver, BarserverWeb.Endpoint,
   url: [host: "yourdomain.com"],
   https: [
     keyfile: "/etc/letsencrypt/live/yourdomain.com/privkey.pem",
@@ -20,7 +20,7 @@ config :teiserver, TeiserverWeb.Endpoint,
   ],
   check_origin: ["//yourdomain.com", "//*.yourdomain.com"]
 
-config :teiserver, Teiserver,
+config :teiserver, Barserver,
   game_name: "My game name",
   game_name_short: "GN",
   main_website: "https://site.com",
@@ -32,22 +32,22 @@ config :teiserver, Teiserver,
     cacertfile: "/etc/letsencrypt/live/yourdomain.com/fullchain.pem"
   ]
 
-config :teiserver, Teiserver.Repo,
+config :teiserver, Barserver.Repo,
   username: "teiserver_prod",
   password: "mix phx.gen.secret",
   database: "teiserver_prod",
   pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
   timeout: 30_000
 
-config :teiserver, TeiserverWeb.Endpoint,
+config :teiserver, BarserverWeb.Endpoint,
   http: [:inet6, port: String.to_integer(System.get_env("PORT") || "4000")],
   secret_key_base: secret_key_base
 
-config :teiserver, Teiserver.Account.Guardian,
+config :teiserver, Barserver.Account.Guardian,
   issuer: "teiserver",
   secret_key: "mix phx.gen.secret"
 
-config :teiserver, Teiserver.Mailer,
+config :teiserver, Barserver.Mailer,
   noreply_address: "noreply@yourdomain.com",
   contact_address: "info@yourdomain.com",
   noreply_name: "Name of your game",

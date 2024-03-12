@@ -1,6 +1,6 @@
-defmodule Teiserver.Telemetry.ComplexMatchEventType do
+defmodule Barserver.Telemetry.ComplexMatchEventType do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "telemetry_complex_match_event_types" do
     field :name, :string

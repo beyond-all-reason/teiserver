@@ -1,7 +1,7 @@
-defmodule Teiserver.Telemetry.PropertyTypeQueries do
+defmodule Barserver.Telemetry.PropertyTypeQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
-  alias Teiserver.Telemetry.PropertyType
+  use BarserverWeb, :queries
+  alias Barserver.Telemetry.PropertyType
 
   # Queries
   @spec query_property_types(list) :: Ecto.Query.t()

@@ -1,10 +1,10 @@
-defmodule Teiserver.Tachyon.Handlers.Telemetry.EventRequest do
+defmodule Barserver.Tachyon.Handlers.Telemetry.EventRequest do
   @moduledoc """
 
   """
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Tachyon.Responses.Telemetry.EventResponse
-  alias Teiserver.{Telemetry}
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Tachyon.Responses.Telemetry.EventResponse
+  alias Barserver.{Telemetry}
 
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do

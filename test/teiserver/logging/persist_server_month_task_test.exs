@@ -1,8 +1,8 @@
-defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
+defmodule Barserver.Logging.Tasks.PersistServerMonthTaskTest do
   @moduledoc false
-  use Teiserver.DataCase
-  alias Teiserver.{Logging, Account, CacheUser}
-  alias Teiserver.Logging.Tasks.{PersistServerMonthTask, PersistServerDayTask}
+  use Barserver.DataCase
+  alias Barserver.{Logging, Account, CacheUser}
+  alias Barserver.Logging.Tasks.{PersistServerMonthTask, PersistServerDayTask}
 
   test "perform task" do
     flunk("We do not create the user_activity_log data so this always fails")

@@ -1,17 +1,17 @@
-defmodule TeiserverWeb.Moderation.ActionController do
+defmodule BarserverWeb.Moderation.ActionController do
   @moduledoc false
-  use TeiserverWeb, :controller
+  use BarserverWeb, :controller
 
-  alias Teiserver.Logging
-  alias Teiserver.{Account, Moderation, Communication}
-  alias Teiserver.Moderation.{Action, ActionLib, ReportLib}
-  import Teiserver.Logging.Helpers, only: [add_audit_log: 3]
-  import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
+  alias Barserver.Logging
+  alias Barserver.{Account, Moderation, Communication}
+  alias Barserver.Moderation.{Action, ActionLib, ReportLib}
+  import Barserver.Logging.Helpers, only: [add_audit_log: 3]
+  import Barserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Moderation.Action,
+    policy: Barserver.Moderation.Action,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "moderation",
@@ -166,7 +166,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
         |> assign(:reports, reports)
         |> assign(:past_actions, past_actions)
         |> assign(:selected_report_ids, [])
-        |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
+        |> assign(:restrictions_lists, Barserver.Account.UserLib.list_restrictions())
         |> add_breadcrumb(name: "New action for #{user.name}", url: conn.request_path)
         |> render("new_with_user.html")
     end
@@ -204,7 +204,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
     case Moderation.create_action(action_params) do
       {:ok, action} ->
-        Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
+        Barserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
         ActionLib.maybe_create_discord_post(action)
 
         if not Enum.empty?(report_ids) do
@@ -250,7 +250,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
         |> assign(:changeset, changeset)
         |> assign(:reports, reports)
         |> assign(:selected_report_ids, report_ids)
-        |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
+        |> assign(:restrictions_lists, Barserver.Account.UserLib.list_restrictions())
         |> assign(:past_actions, past_actions)
         |> add_breadcrumb(name: "New action for #{user.name}", url: conn.request_path)
         |> render("new_with_user.html")
@@ -266,7 +266,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     conn
     |> assign(:action, action)
     |> assign(:changeset, changeset)
-    |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
+    |> assign(:restrictions_lists, Barserver.Account.UserLib.list_restrictions())
     |> add_breadcrumb(name: "Edit: #{action.target.name}", url: conn.request_path)
     |> render("edit.html")
   end
@@ -289,7 +289,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
       {:ok, _action} ->
         action = Moderation.get_action!(id, preload: [:target])
 
-        Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
+        Barserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
         ActionLib.maybe_update_discord_post(action)
 
         add_audit_log(conn, "Moderation:Action updated", %{action_id: action.id})
@@ -302,7 +302,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
         conn
         |> assign(:action, action)
         |> assign(:changeset, changeset)
-        |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
+        |> assign(:restrictions_lists, Barserver.Account.UserLib.list_restrictions())
         |> render("edit.html")
     end
   end
@@ -319,7 +319,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
         {:error, "no message_id"}
       end
 
-    Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
+    Barserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
 
     case update_result do
       {:error, _} ->
@@ -345,7 +345,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
       {:ok, _action} ->
         add_audit_log(conn, "Moderation:Action halted", %{action_id: action.id})
         ActionLib.maybe_update_discord_post(action)
-        Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
+        Barserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
 
         conn
         |> put_flash(:info, "Action halted.")
@@ -373,7 +373,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
       Map.take(action, ~w(target_id reason restrictions score_modifier expires hidden)a)
 
     add_audit_log(conn, "Moderation:Action deleted", %{action: action_map})
-    Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
+    Barserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
 
     conn
     |> put_flash(:info, "Action deleted.")

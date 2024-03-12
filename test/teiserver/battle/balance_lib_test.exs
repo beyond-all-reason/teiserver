@@ -1,7 +1,7 @@
-defmodule Teiserver.Battle.BalanceLibTest do
+defmodule Barserver.Battle.BalanceLibTest do
   @moduledoc false
-  use Teiserver.DataCase, async: true
-  alias Teiserver.Battle.BalanceLib
+  use Barserver.DataCase, async: true
+  alias Barserver.Battle.BalanceLib
 
   test "balance algorithms - no players" do
     # We don't care about the result, just that they don't error

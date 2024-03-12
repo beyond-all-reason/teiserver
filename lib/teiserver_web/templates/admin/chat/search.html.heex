@@ -9,7 +9,7 @@
 </script>
 
 <%= central_component("picker_script",
-  module: Teiserver.Account.UserLib,
+  module: Barserver.Account.UserLib,
   name: "account_user",
   title: "User search"
 ) %>
@@ -54,7 +54,7 @@
 
     <div class="col-md-4 col-lg-3 col-xl-2 my-2">
       <label for="search_account_user" class="control-label">User: </label>
-      <%= render(TeiserverWeb.Account.UserView, "picker.html",
+      <%= render(BarserverWeb.Account.UserView, "picker.html",
         input_name: "search[account_user]",
         value: @params["account_user"]
       ) %>
@@ -89,9 +89,9 @@
         id: "search_mode",
         selected: @params["mode"],
         enumerable: [
-          %{id: "Lobby", icon: Teiserver.Lobby.icon(), colour: fg},
-          %{id: "Party", icon: Teiserver.Account.PartyLib.icon(), colour: fg},
-          %{id: "Room", icon: Teiserver.Chat.LobbyMessageLib.icon(), colour: fg}
+          %{id: "Lobby", icon: Barserver.Lobby.icon(), colour: fg},
+          %{id: "Party", icon: Barserver.Account.PartyLib.icon(), colour: fg},
+          %{id: "Room", icon: Barserver.Chat.LobbyMessageLib.icon(), colour: fg}
         ]
       }) %>
     </div>

@@ -1,10 +1,10 @@
-defmodule Teiserver.Benchmark.UserClient do
+defmodule Barserver.Benchmark.UserClient do
   @moduledoc """
   A client which executes commands a generally just generates
   noise on the server. This one though will report on it's
   ping and the like.
   """
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
   use GenServer
 

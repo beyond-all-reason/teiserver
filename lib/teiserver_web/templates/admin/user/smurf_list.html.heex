@@ -29,7 +29,7 @@ is_moderator = allow?(@conn, "Moderator") %>
 </style>
 
 <%= render(
-  TeiserverWeb.Admin.GeneralView,
+  BarserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "users"})
 ) %>
@@ -39,7 +39,7 @@ is_moderator = allow?(@conn, "Moderator") %>
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Admin.UserView,
+          BarserverWeb.Admin.UserView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
@@ -146,7 +146,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                   <td><%= @user.data["lobby_client"] %></td>
 
                   <td>
-                    <TeiserverWeb.UserComponents.status_icon user={@user} />
+                    <BarserverWeb.UserComponents.status_icon user={@user} />
                   </td>
 
                   <td><%= @stats["win_rate.team"] %></td>
@@ -201,7 +201,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                     <td><%= user.data["lobby_client"] %></td>
 
                     <td>
-                      <TeiserverWeb.UserComponents.status_icon user={user} />
+                      <BarserverWeb.UserComponents.status_icon user={user} />
                     </td>
 
                     <td><%= user_stats["win_rate.team"] %></td>

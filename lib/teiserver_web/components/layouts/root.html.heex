@@ -11,16 +11,16 @@
     <% end %>
 
     <%= live_title_tag(
-      assigns[:page_title] || Application.get_env(:teiserver, Teiserver)[:site_title],
-      suffix: Application.get_env(:teiserver, Teiserver)[:site_suffix]
+      assigns[:page_title] || Application.get_env(:teiserver, Barserver)[:site_title],
+      suffix: Application.get_env(:teiserver, Barserver)[:site_suffix]
     ) %>
 
     <% light_mode =
-      case Teiserver.Config.get_user_config_cache(@current_user, "general.Colour scheme") do
-        "Site default" -> Teiserver.Config.get_site_config_cache("user.Default light mode")
+      case Barserver.Config.get_user_config_cache(@current_user, "general.Colour scheme") do
+        "Site default" -> Barserver.Config.get_site_config_cache("user.Default light mode")
         "Light" -> true
         "Dark" -> false
-        _ -> Teiserver.Config.get_site_config_cache("user.Default light mode")
+        _ -> Barserver.Config.get_site_config_cache("user.Default light mode")
       end %>
 
     <%= if light_mode do %>

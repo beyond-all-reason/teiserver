@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.Account.ProfileComponents do
+defmodule BarserverWeb.Account.ProfileComponents do
   @moduledoc false
-  use TeiserverWeb, :component
-  import TeiserverWeb.NavComponents, only: [tab_header: 1, tab_nav: 1]
+  use BarserverWeb, :component
+  import BarserverWeb.NavComponents, only: [tab_header: 1, tab_nav: 1]
 
   @doc """
-  <TeiserverWeb.Account.ProfileComponents.profile_tabs tab="overview" userid={@userid} self={@current_user && @current_user.id == @userid} />
+  <BarserverWeb.Account.ProfileComponents.profile_tabs tab="overview" userid={@userid} self={@current_user && @current_user.id == @userid} />
   """
   attr :tab, :string, required: true
   attr :userid, :integer, required: true
@@ -21,15 +21,15 @@ defmodule TeiserverWeb.Account.ProfileComponents do
           </.tab_nav>
 
           <.tab_nav url={~p"/profile/#{@userid}/matches"} selected={@tab == "matches"}>
-            <Fontawesome.icon icon={Teiserver.Battle.MatchLib.icon()} style="solid" /> Matches
+            <Fontawesome.icon icon={Barserver.Battle.MatchLib.icon()} style="solid" /> Matches
           </.tab_nav>
 
           <.tab_nav url={~p"/profile/#{@userid}/accolades"} selected={@tab == "accolades"}>
-            <Fontawesome.icon icon={Teiserver.Account.AccoladeLib.icon()} style="solid" /> Accolades
+            <Fontawesome.icon icon={Barserver.Account.AccoladeLib.icon()} style="solid" /> Accolades
           </.tab_nav>
 
           <.tab_nav url={~p"/profile/#{@userid}/achievements"} selected={@tab == "achievements"}>
-            <Fontawesome.icon icon={Teiserver.Game.AchievementTypeLib.icon()} style="solid" />
+            <Fontawesome.icon icon={Barserver.Game.AchievementTypeLib.icon()} style="solid" />
             Achievements
           </.tab_nav>
 
@@ -53,7 +53,7 @@ defmodule TeiserverWeb.Account.ProfileComponents do
             url={~p"/profile/#{@userid}/relationships"}
             selected={@tab == "relationships"}
           >
-            <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon()} style="solid" />
+            <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon()} style="solid" />
             Relationships
           </.tab_nav>
 
@@ -71,7 +71,7 @@ defmodule TeiserverWeb.Account.ProfileComponents do
   end
 
   @doc """
-  <TeiserverWeb.Account.ProfileComponents.profile_header
+  <BarserverWeb.Account.ProfileComponents.profile_header
     active="overview"
     view_colour={@view_colour}
     user={@user}
@@ -86,7 +86,7 @@ defmodule TeiserverWeb.Account.ProfileComponents do
 
   def profile_header(assigns) do
     ~H"""
-    <TeiserverWeb.AccountComponents.sub_menu active="profile" view_colour={@view_colour} />
+    <BarserverWeb.AccountComponents.sub_menu active="profile" view_colour={@view_colour} />
 
     <div class="row mt-2">
       <div class="col">
@@ -103,7 +103,7 @@ defmodule TeiserverWeb.Account.ProfileComponents do
       </div>
     </div>
 
-    <TeiserverWeb.Account.ProfileComponents.profile_tabs
+    <BarserverWeb.Account.ProfileComponents.profile_tabs
       tab={@active}
       userid={@user.id}
       profile_permissions={@profile_permissions}

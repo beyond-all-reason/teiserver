@@ -1,13 +1,13 @@
-defmodule Teiserver.Moderation.ProposalVote do
+defmodule Barserver.Moderation.ProposalVote do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   @primary_key false
   schema "moderation_proposal_votes" do
     field :vote, :integer, default: 0
 
-    belongs_to :user, Teiserver.Account.User, primary_key: true
-    belongs_to :proposal, Teiserver.Moderation.Proposal, primary_key: true
+    belongs_to :user, Barserver.Account.User, primary_key: true
+    belongs_to :proposal, Barserver.Moderation.Proposal, primary_key: true
 
     timestamps()
   end

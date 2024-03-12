@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.CreateConfigTables do
+defmodule Barserver.Repo.Migrations.CreateConfigTables do
   use Ecto.Migration
 
   def change do

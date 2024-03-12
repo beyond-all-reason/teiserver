@@ -1,11 +1,11 @@
-defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
-  alias Teiserver.Lobby
-  alias Teiserver.{Account, Battle, Client, Coordinator}
-  import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
-  alias Teiserver.Protocols.Tachyon.V1.Tachyon
-  alias Teiserver.Protocols.TachyonLib
+defmodule Barserver.Protocols.Tachyon.V1.LobbyIn do
+  alias Barserver.Lobby
+  alias Barserver.{Account, Battle, Client, Coordinator}
+  import Barserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
+  alias Barserver.Protocols.Tachyon.V1.Tachyon
+  alias Barserver.Protocols.TachyonLib
   require Logger
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @spec do_handle(String.t(), Map.t(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
   def do_handle("query", %{"query" => query} = cmd, state) do

@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.Moderation.ModerationComponents do
+defmodule BarserverWeb.Moderation.ModerationComponents do
   @moduledoc false
-  use TeiserverWeb, :component
-  import TeiserverWeb.NavComponents, only: [sub_menu_button: 1]
+  use BarserverWeb, :component
+  import BarserverWeb.NavComponents, only: [sub_menu_button: 1]
 
   @doc """
-  <TeiserverWeb.Moderation.ModerationComponents.sub_menu active={active} view_colour={@view_colour} />
+  <BarserverWeb.Moderation.ModerationComponents.sub_menu active={active} view_colour={@view_colour} />
   """
   attr :view_colour, :string, required: true
   attr :active, :string, required: true
@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Moderation.ModerationComponents do
     <div class="row sub-menu">
       <.sub_menu_button
         bsname={@view_colour}
-        icon={Teiserver.Moderation.overwatch_icon()}
+        icon={Barserver.Moderation.overwatch_icon()}
         active={@active == "overwatch"}
         url={~p"/moderation/overwatch"}
       >
@@ -25,7 +25,7 @@ defmodule TeiserverWeb.Moderation.ModerationComponents do
 
       <.sub_menu_button
         bsname={@view_colour}
-        icon={Teiserver.Moderation.ReportLib.icon()}
+        icon={Barserver.Moderation.ReportLib.icon()}
         active={@active == "reports"}
         url={~p"/moderation/report"}
       >
@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Moderation.ModerationComponents do
 
       <.sub_menu_button
         bsname={@view_colour}
-        icon={Teiserver.Moderation.ActionLib.icon()}
+        icon={Barserver.Moderation.ActionLib.icon()}
         active={@active == "actions"}
         url={~p"/moderation/action"}
       >
@@ -43,7 +43,7 @@ defmodule TeiserverWeb.Moderation.ModerationComponents do
 
       <.sub_menu_button
         bsname={@view_colour}
-        icon={Teiserver.Moderation.BanLib.icon()}
+        icon={Barserver.Moderation.BanLib.icon()}
         active={@active == "bans"}
         url={~p"/moderation/ban"}
       >

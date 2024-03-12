@@ -1,9 +1,9 @@
-defmodule TeiserverWeb.Telemetry.PropertyView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Telemetry.PropertyView do
+  use BarserverWeb, :view
 
   @spec view_colour :: atom
-  def view_colour(), do: Teiserver.Telemetry.PropertyTypeLib.colours()
+  def view_colour(), do: Barserver.Telemetry.PropertyTypeLib.colours()
 
   @spec icon() :: String.t()
-  def icon(), do: Teiserver.Telemetry.PropertyTypeLib.icon()
+  def icon(), do: Barserver.Telemetry.PropertyTypeLib.icon()
 end

@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.AddAccountRatingsTable do
+defmodule Barserver.Repo.Migrations.AddAccountRatingsTable do
   use Ecto.Migration
 
   def change do

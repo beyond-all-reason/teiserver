@@ -1,7 +1,7 @@
 <% bsname = view_colour() %>
 
 <%= render(
-  TeiserverWeb.Report.GeneralView,
+  BarserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "ratings"})
 ) %>
@@ -10,7 +10,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(TeiserverWeb.Report.RatingView, "section_menu.html",
+        <%= render(BarserverWeb.Report.RatingView, "section_menu.html",
           conn: @conn,
           active: "balance_tester"
         ) %>

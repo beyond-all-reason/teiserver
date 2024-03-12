@@ -1,9 +1,9 @@
-defmodule TeiserverWeb.Admin.AccoladeView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Admin.AccoladeView do
+  use BarserverWeb, :view
 
   @spec view_colour() :: atom
-  def view_colour, do: Teiserver.Account.AccoladeLib.colours()
+  def view_colour, do: Barserver.Account.AccoladeLib.colours()
 
   @spec icon() :: String.t()
-  def icon, do: Teiserver.Account.AccoladeLib.icon()
+  def icon, do: Barserver.Account.AccoladeLib.icon()
 end

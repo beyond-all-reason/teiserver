@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.CreateRelationshipsTable do
+defmodule Barserver.Repo.Migrations.CreateRelationshipsTable do
   use Ecto.Migration
 
   def change do

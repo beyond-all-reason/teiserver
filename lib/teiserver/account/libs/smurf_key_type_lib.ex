@@ -1,6 +1,6 @@
-defmodule Teiserver.Account.SmurfKeyTypeLib do
-  use TeiserverWeb, :library
-  alias Teiserver.Account.SmurfKeyType
+defmodule Barserver.Account.SmurfKeyTypeLib do
+  use BarserverWeb, :library
+  alias Barserver.Account.SmurfKeyType
 
   # Functions
   @spec icon :: String.t()

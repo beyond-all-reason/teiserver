@@ -1,10 +1,10 @@
-defmodule Teiserver.Telemetry.ExportComplexServerEventsTask do
+defmodule Barserver.Telemetry.ExportComplexServerEventsTask do
   @moduledoc false
-  alias Teiserver.Telemetry.ComplexServerEvent
-  alias Teiserver.Helper.{DatePresets}
-  alias Teiserver.Repo
+  alias Barserver.Telemetry.ComplexServerEvent
+  alias Barserver.Helper.{DatePresets}
+  alias Barserver.Repo
   import Ecto.Query, warn: false
-  import Teiserver.Helper.QueryHelpers
+  import Barserver.Helper.QueryHelpers
 
   @spec perform(map) :: map()
   def perform(%{"event_types" => event_types, "timeframe" => timeframe}) do

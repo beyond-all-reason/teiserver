@@ -1,10 +1,10 @@
-defmodule Teiserver.Coordinator.ConsulChatTest do
+defmodule Barserver.Coordinator.ConsulChatTest do
   @moduledoc false
-  use Teiserver.ServerCase, async: false
-  alias Teiserver.Account.ClientLib
-  alias Teiserver.{CacheUser, Client, Coordinator, Lobby}
+  use Barserver.ServerCase, async: false
+  alias Barserver.Account.ClientLib
+  alias Barserver.{CacheUser, Client, Coordinator, Lobby}
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
 
   setup do
@@ -100,7 +100,7 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
     player1_stamps = timestamps[player1.id]
     assert Enum.count(player1_stamps) == 4
 
-    flood_count = Teiserver.cache_get(:teiserver_login_count, player1.id)
+    flood_count = Barserver.cache_get(:teiserver_login_count, player1.id)
     assert flood_count == 1
 
     data = %{cmd: "c.lobby.message", message: "!ring other_player"}
@@ -110,7 +110,7 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
     player1_stamps = timestamps[player1.id]
     assert Enum.count(player1_stamps) == 5
 
-    flood_count = Teiserver.cache_get(:teiserver_login_count, player1.id)
+    flood_count = Barserver.cache_get(:teiserver_login_count, player1.id)
     assert flood_count > 1
 
     message = Coordinator.call_consul(lobby_id, {:get, :welcome_message})

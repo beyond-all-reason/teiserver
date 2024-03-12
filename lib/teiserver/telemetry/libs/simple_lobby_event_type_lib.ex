@@ -1,14 +1,14 @@
-defmodule Teiserver.Telemetry.SimpleLobbyEventTypeLib do
+defmodule Barserver.Telemetry.SimpleLobbyEventTypeLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
-  alias Teiserver.Telemetry.{SimpleLobbyEventType, SimpleLobbyEventTypeQueries}
+  use BarserverWeb, :library_newform
+  alias Barserver.Telemetry.{SimpleLobbyEventType, SimpleLobbyEventTypeQueries}
 
   # Helper function
   @spec get_or_add_simple_lobby_event_type(String.t()) :: non_neg_integer()
   def get_or_add_simple_lobby_event_type(name) do
     name = String.trim(name)
 
-    Teiserver.cache_get_or_store(:telemetry_simple_lobby_event_types_cache, name, fn ->
+    Barserver.cache_get_or_store(:telemetry_simple_lobby_event_types_cache, name, fn ->
       query =
         SimpleLobbyEventTypeQueries.query_simple_lobby_event_types(
           where: [name: name],

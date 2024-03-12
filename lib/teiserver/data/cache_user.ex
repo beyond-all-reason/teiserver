@@ -1,13 +1,13 @@
-defmodule Teiserver.CacheUser do
+defmodule Barserver.CacheUser do
   @moduledoc """
-  Users here are a combination of Teiserver.Account.User and the data within. They are merged like this into a map as their expected use case is very different.
+  Users here are a combination of Barserver.Account.User and the data within. They are merged like this into a map as their expected use case is very different.
   """
-  alias Teiserver.{Account, Config, Client, Coordinator, Telemetry, Chat, EmailHelper}
-  alias Teiserver.Account.{LoginThrottleServer, UserCacheLib, Guardian}
-  alias Teiserver.Chat.WordLib
+  alias Barserver.{Account, Config, Client, Coordinator, Telemetry, Chat, EmailHelper}
+  alias Barserver.Account.{LoginThrottleServer, UserCacheLib, Guardian}
+  alias Barserver.Chat.WordLib
   alias Argon2
-  alias Teiserver.Data.Types, as: T
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.Data.Types, as: T
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
   require Logger
   alias Phoenix.PubSub
@@ -312,7 +312,7 @@ defmodule Teiserver.CacheUser do
     case Account.script_create_user(params) do
       {:ok, user} ->
         Account.update_user_stat(user.id, %{
-          "country" => Teiserver.Geoip.get_flag(ip),
+          "country" => Barserver.Geoip.get_flag(ip),
           "verification_code" => (:rand.uniform(899_999) + 100_000) |> to_string
         })
 
@@ -472,7 +472,7 @@ defmodule Teiserver.CacheUser do
       :timer.sleep(5000)
     end
 
-    Teiserver.cache_delete(:users_lookup_id_with_name, old_name)
+    Barserver.cache_delete(:users_lookup_id_with_name, old_name)
     recache_user(userid)
     :ok
   end
@@ -496,8 +496,8 @@ defmodule Teiserver.CacheUser do
   def request_password_reset(user) do
     db_user = Account.get_user!(user.id)
 
-    Teiserver.Account.Emails.password_reset(db_user)
-    |> Teiserver.Mailer.deliver_now()
+    Barserver.Account.Emails.password_reset(db_user)
+    |> Barserver.Mailer.deliver_now()
   end
 
   def request_email_change(nil, _), do: nil
@@ -608,13 +608,13 @@ defmodule Teiserver.CacheUser do
       end
 
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "legacy_user_updates:#{to_id}",
         {:direct_message, sender_id, message_parts}
       )
 
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_client_messages:#{to_id}",
         %{
           channel: "teiserver_client_messages:#{to_id}",
@@ -632,7 +632,7 @@ defmodule Teiserver.CacheUser do
 
   def send_direct_message(from_id, to_id, message) do
     if String.starts_with?(message, "!clan") do
-      host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+      host = Application.get_env(:teiserver, BarserverWeb.Endpoint)[:url][:host]
       website_url = "https://#{host}"
 
       Coordinator.send_to_user(
@@ -665,13 +665,13 @@ defmodule Teiserver.CacheUser do
   @spec ring(T.userid(), T.userid()) :: :ok
   def ring(ringee_id, ringer_id) do
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "legacy_user_updates:#{ringee_id}",
       {:action, {:ring, ringer_id}}
     )
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "client_application:#{ringee_id}",
       %{
         channel: "client_application:#{ringee_id}",
@@ -725,7 +725,7 @@ defmodule Teiserver.CacheUser do
     update_user(%{user | roles: new_roles}, persist: true)
   end
 
-  @spec create_token(Teiserver.Account.User.t()) :: String.t()
+  @spec create_token(Barserver.Account.User.t()) :: String.t()
   def create_token(user) do
     {:ok, jwt, _} = Guardian.encode_and_sign(user)
     jwt
@@ -733,7 +733,7 @@ defmodule Teiserver.CacheUser do
 
   @spec wait_for_startup() :: :ok
   def wait_for_startup() do
-    if Teiserver.cache_get(:application_metadata_cache, "teiserver_partial_startup_completed") !=
+    if Barserver.cache_get(:application_metadata_cache, "teiserver_partial_startup_completed") !=
          true do
       :timer.sleep(@timer_sleep)
       wait_for_startup()
@@ -744,19 +744,19 @@ defmodule Teiserver.CacheUser do
 
   @spec set_flood_level(T.userid(), Integer) :: :ok
   def set_flood_level(userid, value \\ 10) do
-    Teiserver.cache_put(:teiserver_login_count, userid, value)
+    Barserver.cache_put(:teiserver_login_count, userid, value)
     :ok
   end
 
   @spec login_flood_check(T.userid()) :: :allow | :block
   def login_flood_check(userid) do
-    login_count = Teiserver.cache_get(:teiserver_login_count, userid) || 0
+    login_count = Barserver.cache_get(:teiserver_login_count, userid) || 0
     rate_limit = Config.get_site_config_cache("system.Login limit count")
 
     if login_count > rate_limit do
       :block
     else
-      Teiserver.cache_put(:teiserver_login_count, userid, login_count + 1)
+      Barserver.cache_put(:teiserver_login_count, userid, login_count + 1)
       :allow
     end
   end
@@ -768,7 +768,7 @@ defmodule Teiserver.CacheUser do
         :error
 
       user ->
-        {:ok, user} = do_login(user, "127.0.0.1", "Teiserver Internal Client", "IC")
+        {:ok, user} = do_login(user, "127.0.0.1", "Barserver Internal Client", "IC")
         client = Client.login(user, :internal, "127.0.0.1")
         {:ok, user, client}
     end
@@ -777,7 +777,7 @@ defmodule Teiserver.CacheUser do
   @spec server_capacity() :: non_neg_integer()
   def server_capacity() do
     client_count =
-      (Teiserver.cache_get(:application_temp_cache, :telemetry_data) || %{})
+      (Barserver.cache_get(:application_temp_cache, :telemetry_data) || %{})
       |> Map.get(:client, %{})
       |> Map.get(:total, 0)
 
@@ -862,7 +862,7 @@ defmodule Teiserver.CacheUser do
           :timer.sleep(1000)
           do_login(user, ip, application_name, application_hash)
         else
-          Teiserver.cache_put(:teiserver_login_count, user.id, 10)
+          Barserver.cache_put(:teiserver_login_count, user.id, 10)
           {:error, "Existing session, please retry in 20 seconds to clear the cache"}
         end
 
@@ -939,7 +939,7 @@ defmodule Teiserver.CacheUser do
               :timer.sleep(1000)
               do_login(user, ip, lobby, lobby_hash)
             else
-              Teiserver.cache_put(:teiserver_login_count, user.id, 10)
+              Barserver.cache_put(:teiserver_login_count, user.id, 10)
               {:error, "Existing session, please retry in 20 seconds to clear the cache"}
             end
 
@@ -1044,7 +1044,7 @@ defmodule Teiserver.CacheUser do
               :timer.sleep(1000)
               do_login(user, ip, lobby, lobby_hash)
             else
-              Teiserver.cache_put(:teiserver_login_count, user.id, 10)
+              Barserver.cache_put(:teiserver_login_count, user.id, 10)
               {:error, "Existing session, please retry in 20 seconds to clear the cache"}
             end
 
@@ -1151,7 +1151,7 @@ defmodule Teiserver.CacheUser do
           last_ip = Account.get_user_stat_data(user.id) |> Map.get("last_ip")
 
           if last_ip != ip or (user.country || "??") == "??" do
-            Teiserver.Geoip.get_flag(ip, user.country)
+            Barserver.Geoip.get_flag(ip, user.country)
           else
             user.country || "??"
           end
@@ -1388,7 +1388,7 @@ defmodule Teiserver.CacheUser do
   @spec valid_email?(String.t()) :: boolean
   def valid_email?(email) do
     cond do
-      Application.get_env(:teiserver, Teiserver)[:accept_all_emails] -> true
+      Application.get_env(:teiserver, Barserver)[:accept_all_emails] -> true
       not String.contains?(email, "@") -> false
       not String.contains?(email, ".") -> false
       true -> true

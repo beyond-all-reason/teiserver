@@ -1,6 +1,6 @@
-defmodule Teiserver.Game.QueueLib do
-  use TeiserverWeb, :library
-  alias Teiserver.Game.Queue
+defmodule Barserver.Game.QueueLib do
+  use BarserverWeb, :library
+  alias Barserver.Game.Queue
 
   # Functions
   @spec icon :: String.t()

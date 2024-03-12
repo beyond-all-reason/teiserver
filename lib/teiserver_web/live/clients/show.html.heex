@@ -1,6 +1,6 @@
 <% bsname = @view_colour %>
 
-<%= render(TeiserverWeb.Admin.GeneralView, "sub_menu.html", %{
+<%= render(BarserverWeb.Admin.GeneralView, "sub_menu.html", %{
   active: "users",
   conn: Map.put(@socket, :permissions, @current_user.permissions)
 }) %>
@@ -24,8 +24,8 @@
         </h3>
 
         <ul>
-          <li>Bot: <%= Teiserver.CacheUser.is_bot?(@user) %></li>
-          <li>Moderator: <%= Teiserver.CacheUser.is_moderator?(@user) %></li>
+          <li>Bot: <%= Barserver.CacheUser.is_bot?(@user) %></li>
+          <li>Moderator: <%= Barserver.CacheUser.is_moderator?(@user) %></li>
           <li>
             Battle:
             <%= if @client != nil and @client.lobby_id != nil do %>

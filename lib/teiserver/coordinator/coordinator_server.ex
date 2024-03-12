@@ -1,15 +1,15 @@
-defmodule Teiserver.Coordinator.CoordinatorServer do
+defmodule Barserver.Coordinator.CoordinatorServer do
   @moduledoc """
   The coordinator server is the interface point for the Coordinator system. Consuls are invisible (to the players) processes
   performing their actions in the name of the coordinator
   """
   use GenServer
-  alias Teiserver.Config
-  alias Teiserver.{Account, CacheUser, Clans, Room, Coordinator, Client, Moderation, Telemetry}
-  alias Teiserver.Lobby
-  alias Teiserver.Coordinator.{CoordinatorCommands}
+  alias Barserver.Config
+  alias Barserver.{Account, CacheUser, Clans, Room, Coordinator, Client, Moderation, Telemetry}
+  alias Barserver.Lobby
+  alias Barserver.Coordinator.{CoordinatorCommands}
   alias Phoenix.PubSub
-  import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
+  import Barserver.Helper.TimexHelper, only: [date_to_str: 2]
   require Logger
 
   @dispute_string [
@@ -40,7 +40,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   def handle_info(:begin, _state) do
     Logger.debug("Starting up Coordinator main server")
     account = get_coordinator_account()
-    Teiserver.cache_put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
+    Barserver.cache_put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
 
     {user, client} =
       case CacheUser.internal_client_login(account.id) do
@@ -64,7 +64,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     |> Enum.each(fn room_name ->
       Room.get_or_make_room(room_name, user.id)
       Room.add_user_to_room(user.id, room_name)
-      :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
+      :ok = PubSub.subscribe(Barserver.PubSub, "room:#{room_name}")
     end)
 
     # Now join the clan channels
@@ -73,12 +73,12 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       room_name = Room.clan_room_name(clan.tag)
       Room.get_or_make_room(room_name, user.id, clan.id)
       Room.add_user_to_room(user.id, room_name)
-      :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
+      :ok = PubSub.subscribe(Barserver.PubSub, "room:#{room_name}")
     end)
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "client_inout")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "legacy_user_updates:#{user.id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_server")
+    :ok = PubSub.subscribe(Barserver.PubSub, "client_inout")
+    :ok = PubSub.subscribe(Barserver.PubSub, "legacy_user_updates:#{user.id}")
 
     {:noreply, state}
   end
@@ -178,7 +178,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     Room.send_message(
       state.userid,
       "main",
-      "Teiserver update taking place, game rooms will reappear after the update has taken place."
+      "Barserver update taking place, game rooms will reappear after the update has taken place."
     )
 
     {:noreply, state}
@@ -197,7 +197,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   end
 
   def handle_info(%{channel: "client_inout", event: :disconnect, userid: userid}, state) do
-    Teiserver.Account.RecacheUserStatsTask.disconnected(userid)
+    Barserver.Account.RecacheUserStatsTask.disconnected(userid)
 
     {:noreply, state}
   end
@@ -315,7 +315,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     {:noreply, state}
   end
 
-  @spec get_coordinator_account() :: Teiserver.Account.CacheUser.t()
+  @spec get_coordinator_account() :: Barserver.Account.CacheUser.t()
   def get_coordinator_account() do
     user =
       Account.get_user(nil,
@@ -338,12 +338,12 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
             data: %{
               bot: true,
               moderator: true,
-              lobby_client: "Teiserver Internal Process"
+              lobby_client: "Barserver Internal Process"
             }
           })
 
         Account.update_user_stat(account.id, %{
-          country_override: Application.get_env(:teiserver, Teiserver)[:server_flag]
+          country_override: Application.get_env(:teiserver, Barserver)[:server_flag]
         })
 
         CacheUser.recache_user(account.id)
@@ -358,7 +358,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
     Horde.Registry.register(
-      Teiserver.ServerRegistry,
+      Barserver.ServerRegistry,
       "CoordinatorServer",
       :coordinator
     )

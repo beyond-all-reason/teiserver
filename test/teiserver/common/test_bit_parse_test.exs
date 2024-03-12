@@ -1,6 +1,6 @@
-defmodule Teiserver.TestBitParse do
+defmodule Barserver.TestBitParse do
   use ExUnit.Case, async: true
-  alias Teiserver.BitParse
+  alias Barserver.BitParse
 
   test "bit_parse" do
     values = [

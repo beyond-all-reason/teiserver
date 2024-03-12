@@ -1,21 +1,21 @@
-defmodule Teiserver.Microblog.Post do
+defmodule Barserver.Microblog.Post do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "microblog_posts" do
-    belongs_to :poster, Teiserver.Account.User
+    belongs_to :poster, Barserver.Account.User
 
     field :title, :string
     field :summary, :string
     field :contents, :string
     field :view_count, :integer, default: 0
 
-    belongs_to :discord_channel, Teiserver.Communication.DiscordChannel
+    belongs_to :discord_channel, Barserver.Communication.DiscordChannel
     field :discord_post_id, :integer
 
-    has_many :post_tags, Teiserver.Microblog.PostTag
+    has_many :post_tags, Barserver.Microblog.PostTag
 
-    many_to_many :tags, Teiserver.Microblog.Tag,
+    many_to_many :tags, Barserver.Microblog.Tag,
       join_through: "microblog_post_tags",
       join_keys: [post_id: :id, tag_id: :id]
 

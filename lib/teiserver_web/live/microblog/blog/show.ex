@@ -1,16 +1,16 @@
-defmodule TeiserverWeb.Microblog.BlogLive.Show do
+defmodule BarserverWeb.Microblog.BlogLive.Show do
   @moduledoc false
-  require TeiserverWeb.Microblog.BlogLive.Show
-  use TeiserverWeb, :live_view
-  alias Teiserver.{Microblog, Logging, Communication}
-  import TeiserverWeb.MicroblogComponents
+  require BarserverWeb.Microblog.BlogLive.Show
+  use BarserverWeb, :live_view
+  alias Barserver.{Microblog, Logging, Communication}
+  import BarserverWeb.MicroblogComponents
   alias Phoenix.PubSub
 
   @impl true
   def mount(%{"post_id" => post_id_str}, _session, socket) do
     socket =
       if is_connected?(socket) do
-        :ok = PubSub.subscribe(Teiserver.PubSub, "microblog_posts")
+        :ok = PubSub.subscribe(Barserver.PubSub, "microblog_posts")
         post = Microblog.get_post!(post_id_str, preload: [:poster, :tags])
         Microblog.increment_post_view_count(post.id)
 

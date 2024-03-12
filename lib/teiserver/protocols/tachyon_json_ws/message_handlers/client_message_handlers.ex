@@ -1,12 +1,12 @@
-defmodule Teiserver.Tachyon.MessageHandlers.ClientMessageHandlers do
+defmodule Barserver.Tachyon.MessageHandlers.ClientMessageHandlers do
   @moduledoc """
 
   """
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
   alias Phoenix.PubSub
-  alias Teiserver.Tachyon.Responses.Communication.ReceivedDirectMessageResponse
-  alias Teiserver.Tachyon.Responses.Lobby.{ReceivedJoinRequestResponseResponse, JoinedResponse}
-  alias Teiserver.Tachyon.Responses.User.UpdatedUserClientResponse
+  alias Barserver.Tachyon.Responses.Communication.ReceivedDirectMessageResponse
+  alias Barserver.Tachyon.Responses.Lobby.{ReceivedJoinRequestResponseResponse, JoinedResponse}
+  alias Barserver.Tachyon.Responses.User.UpdatedUserClientResponse
 
   @spec handle(map(), T.tachyon_conn()) ::
           {:ok, T.tachyon_conn()} | {:ok, map() | list(), T.tachyon_conn()}
@@ -53,11 +53,11 @@ defmodule Teiserver.Tachyon.MessageHandlers.ClientMessageHandlers do
       when is_integer(lobby_id) do
     case JoinedResponse.generate(lobby_id, msg.script_password) do
       {command, :success, data} ->
-        PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-        PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+        PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+        PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
 
-        PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-        PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+        PubSub.subscribe(Barserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+        PubSub.subscribe(Barserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
 
         resp = %{
           "command" => command,

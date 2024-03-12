@@ -1,6 +1,6 @@
 <% bsname = @view_colour %>
 
-<%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+<%= render(BarserverWeb.Battle.GeneralView, "sub_menu.html", %{
   active: "battle_lobbies",
   conn: Map.put(@socket, :permissions, @current_user.permissions)
 }) %>
@@ -47,7 +47,7 @@
               <td>
                 <%= if lobby.in_progress do %>
                   <i class="fa-fw fa-solid fa-play"></i>
-                  &nbsp; <%= Teiserver.Helper.TimexHelper.duration_to_str_short(
+                  &nbsp; <%= Barserver.Helper.TimexHelper.duration_to_str_short(
                     System.system_time(:second) - (lobby.started_at || 1_652_282_031)
                   ) %>
                 <% end %>

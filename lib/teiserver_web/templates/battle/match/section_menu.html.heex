@@ -11,7 +11,7 @@
 
 <.section_menu_button
   bsname={bsname}
-  icon={Teiserver.Account.RatingLib.icon()}
+  icon={Barserver.Account.RatingLib.icon()}
   active={@active == "ratings"}
   url={~p"/battle/ratings"}
 >
@@ -23,7 +23,7 @@
     name: "show",
     label: "Show",
     active: @active,
-    icon: Teiserver.Helper.StylingHelper.icon(:detail),
+    icon: Barserver.Helper.StylingHelper.icon(:detail),
     bsname: bsname,
     url: "#"
   ) %>
@@ -35,7 +35,7 @@
       name: "admin",
       label: "Admin view",
       active: @active,
-      icon: Teiserver.Admin.AdminLib.icon(),
+      icon: Barserver.Admin.AdminLib.icon(),
       bsname: bsname,
       url: ~p"/teiserver/admin/matches/#{@match.id}"
     ) %>

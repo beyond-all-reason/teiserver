@@ -1,9 +1,9 @@
-defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
+defmodule Barserver.Game.LobbyPolicyOrganiserServer do
   @moduledoc """
   There is one organiser and they each handle one lobby management config.
   """
   alias Phoenix.PubSub
-  alias Teiserver.Game.LobbyPolicyLib
+  alias Barserver.Game.LobbyPolicyLib
   use GenServer
   require Logger
 
@@ -42,7 +42,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
 
         _ ->
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "lobby_policy_internal:#{state.id}",
             %{
               channel: "lobby_policy_internal:#{state.id}",
@@ -92,7 +92,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
 
   def handle_info(:tick, state) do
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "lobby_policy_internal:#{state.id}",
       %{
         channel: "lobby_policy_internal:#{state.id}",
@@ -101,7 +101,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
     )
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "lobby_policy_updates:#{state.id}",
       %{
         channel: "lobby_policy_updates:#{state.id}",
@@ -144,7 +144,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
 
   defp disconnect_all_bots(state) do
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "lobby_policy_internal:#{state.id}",
       %{
         channel: "lobby_policy_internal:#{state.id}",
@@ -153,7 +153,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
     )
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "lobby_policy_updates:#{state.id}",
       %{
         channel: "lobby_policy_updates:#{state.id}",
@@ -177,10 +177,10 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
 
     Logger.metadata(request_id: "LobbyPolicyOrganiserServer##{id}/#{data.lobby_policy.name}")
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "lobby_policy_internal:#{id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "lobby_policy_internal:#{id}")
 
     Horde.Registry.register(
-      Teiserver.LobbyPolicyRegistry,
+      Barserver.LobbyPolicyRegistry,
       "LobbyPolicyOrganiserServer:#{id}",
       id
     )

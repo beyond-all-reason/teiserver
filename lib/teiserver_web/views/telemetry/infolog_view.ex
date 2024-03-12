@@ -1,9 +1,9 @@
-defmodule TeiserverWeb.Telemetry.InfologView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Telemetry.InfologView do
+  use BarserverWeb, :view
 
   @spec view_colour :: atom
-  def view_colour(), do: Teiserver.Telemetry.InfologLib.colours()
+  def view_colour(), do: Barserver.Telemetry.InfologLib.colours()
 
   @spec icon() :: String.t()
-  def icon(), do: Teiserver.Telemetry.InfologLib.icon()
+  def icon(), do: Barserver.Telemetry.InfologLib.icon()
 end

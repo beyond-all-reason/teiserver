@@ -2,7 +2,7 @@
   <%= if allow?(@current_user, "Admin") do %>
     <%= central_component("menu_card",
       size: :medium,
-      icon: Teiserver.Logging.ServerDayLogLib.icon(),
+      icon: Barserver.Logging.ServerDayLogLib.icon(),
       name: "server",
       text: "Server",
       link: ~p"/logging/server"
@@ -12,7 +12,7 @@
   <%= if allow?(@current_user, "Admin") do %>
     <%= central_component("menu_card",
       size: :medium,
-      icon: Teiserver.Battle.MatchLib.icon(),
+      icon: Barserver.Battle.MatchLib.icon(),
       name: "match",
       text: "Match",
       link: ~p"/logging/match/day_metrics"
@@ -23,7 +23,7 @@
     <%= central_component("menu_card",
       size: :medium,
       icon_class: "fa-solid",
-      icon: Teiserver.Logging.PageViewLogLib.icon(),
+      icon: Barserver.Logging.PageViewLogLib.icon(),
       text: "Web views",
       link: ~p"/logging/page_views"
     ) %>
@@ -33,7 +33,7 @@
     <%= central_component("menu_card",
       size: :medium,
       icon_class: "fa-solid",
-      icon: Teiserver.Logging.AggregateViewLogLib.icon(),
+      icon: Barserver.Logging.AggregateViewLogLib.icon(),
       text: "Web aggregate",
       link: ~p"/logging/aggregate_views"
     ) %>
@@ -43,7 +43,7 @@
     <%= central_component("menu_card",
       size: :medium,
       icon_class: "fa-solid",
-      icon: Teiserver.Logging.AuditLogLib.icon(),
+      icon: Barserver.Logging.AuditLogLib.icon(),
       text: "Audit",
       link: ~p"/logging/audit"
     ) %>

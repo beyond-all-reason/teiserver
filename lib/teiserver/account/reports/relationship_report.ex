@@ -1,8 +1,8 @@
-defmodule Teiserver.Account.RelationshipReport do
+defmodule Barserver.Account.RelationshipReport do
   @moduledoc false
-  alias Teiserver.Repo
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Account.RelationshipLib
+  alias Barserver.Repo
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.Account.RelationshipLib
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-arrow-down-up-across-line"

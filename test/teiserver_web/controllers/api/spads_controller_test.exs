@@ -1,12 +1,12 @@
-defmodule TeiserverWeb.API.SpadsControllerTest do
-  use TeiserverWeb.ConnCase, async: false
-  alias Teiserver.Account
-  alias Teiserver.Lobby
-  alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.{Coordinator, User}
-  alias Teiserver.Account.ClientLib
+defmodule BarserverWeb.API.SpadsControllerTest do
+  use BarserverWeb.ConnCase, async: false
+  alias Barserver.Account
+  alias Barserver.Lobby
+  alias Barserver.Game.MatchRatingLib
+  alias Barserver.{Coordinator, User}
+  alias Barserver.Account.ClientLib
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [
       tachyon_auth_setup: 0,
       _tachyon_send: 2,

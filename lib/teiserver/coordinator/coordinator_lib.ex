@@ -1,6 +1,6 @@
-defmodule Teiserver.Coordinator.CoordinatorLib do
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.CacheUser
+defmodule Barserver.Coordinator.CoordinatorLib do
+  alias Barserver.Data.Types, as: T
+  alias Barserver.CacheUser
 
   @spec help(T.user(), boolean(), String.t()) :: String.t()
   def help(user, host, command) do

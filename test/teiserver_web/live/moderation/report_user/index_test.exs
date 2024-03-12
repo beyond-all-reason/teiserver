@@ -1,14 +1,14 @@
-defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
+defmodule BarserverWeb.Moderation.ReportUser.IndexLiveTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase, async: false
+  use BarserverWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.{Moderation, TeiserverTestLib}
+  alias Barserver.{Moderation, BarserverTestLib}
 
   defp auth_setup(_) do
-    GeneralTestLib.conn_setup(TeiserverTestLib.player_permissions())
-    |> TeiserverTestLib.conn_setup()
+    GeneralTestLib.conn_setup(BarserverTestLib.player_permissions())
+    |> BarserverTestLib.conn_setup()
   end
 
   defp anon_setup(_) do
@@ -19,7 +19,7 @@ defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
     setup [:anon_setup]
 
     test "index", %{conn: conn} do
-      user = TeiserverTestLib.new_user()
+      user = BarserverTestLib.new_user()
       {:ok, _index_live, html} = live(conn, ~p"/moderation/report_user/#{user.id}")
 
       assert html =~ "You must be logged in to report someone"
@@ -36,7 +36,7 @@ defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
     setup [:auth_setup]
 
     test "anon index", %{conn: conn, user: conn_user} do
-      user = TeiserverTestLib.new_user()
+      user = BarserverTestLib.new_user()
 
       # Ensure no existing groups
       assert Enum.empty?(Moderation.list_report_groups(where: [target_id: user.id]))

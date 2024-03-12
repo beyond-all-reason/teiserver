@@ -1,4 +1,4 @@
-defmodule Teiserver.Common.WebReportBehaviour do
+defmodule Barserver.Common.WebReportBehaviour do
   @moduledoc """
   A module used to generate reports for the ReportController(s)
   """

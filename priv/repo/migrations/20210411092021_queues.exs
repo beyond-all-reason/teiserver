@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.Queues do
+defmodule Barserver.Repo.Migrations.Queues do
   use Ecto.Migration
 
   def change do

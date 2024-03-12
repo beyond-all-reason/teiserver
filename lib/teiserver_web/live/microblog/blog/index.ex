@@ -1,15 +1,15 @@
-defmodule TeiserverWeb.Microblog.BlogLive.Index do
+defmodule BarserverWeb.Microblog.BlogLive.Index do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  alias Teiserver.Microblog
-  import TeiserverWeb.MicroblogComponents
+  use BarserverWeb, :live_view
+  alias Barserver.Microblog
+  import BarserverWeb.MicroblogComponents
   alias Phoenix.PubSub
 
   @impl true
   def mount(_params, _session, socket) do
     socket =
       if is_connected?(socket) do
-        :ok = PubSub.subscribe(Teiserver.PubSub, "microblog_posts")
+        :ok = PubSub.subscribe(Barserver.PubSub, "microblog_posts")
 
         tags =
           Microblog.list_tags(

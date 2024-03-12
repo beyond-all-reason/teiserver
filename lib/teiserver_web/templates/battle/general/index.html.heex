@@ -1,6 +1,6 @@
 <div class="row page-row">
   <%= central_component("menu_card",
-    icon: Teiserver.Lobby.icon(),
+    icon: Barserver.Lobby.icon(),
     name: "lobbies",
     text: "Lobbies",
     icon_class: "fa-duotone",
@@ -9,7 +9,7 @@
 
   <%= if allow?(@conn, "admin.dev") do %>
     <%= central_component("menu_card",
-      icon: Teiserver.Battle.MatchLib.icon(),
+      icon: Barserver.Battle.MatchLib.icon(),
       name: "battle_logs",
       text: "Battle logs",
       icon_class: "fa-duotone",

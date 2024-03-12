@@ -1,7 +1,7 @@
 <% bsname = view_colour() %>
 
 <%= render(
-  TeiserverWeb.Logging.GeneralView,
+  BarserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "audit"})
 ) %>
@@ -10,7 +10,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(TeiserverWeb.Logging.AuditLogView, "section_menu.html",
+        <%= render(BarserverWeb.Logging.AuditLogView, "section_menu.html",
           conn: @conn,
           show_search: false,
           active: ""
@@ -51,8 +51,8 @@
             value: @log.user.name,
             link: %{
               path: ~p"/teiserver/admin/user/#{@log.user_id}",
-              bsname: elem(Teiserver.Account.UserLib.colours() |> colours(), 2),
-              icon: Teiserver.Account.UserLib.icon()
+              bsname: elem(Barserver.Account.UserLib.colours() |> colours(), 2),
+              icon: Barserver.Account.UserLib.icon()
             }
           ) %>
         <% else %>

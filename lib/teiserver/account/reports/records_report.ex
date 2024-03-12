@@ -1,8 +1,8 @@
-defmodule Teiserver.Account.RecordsReport do
+defmodule Barserver.Account.RecordsReport do
   @moduledoc false
-  alias Teiserver.Repo
-  alias Teiserver.Logging
-  alias Teiserver.Helper.DatePresets
+  alias Barserver.Repo
+  alias Barserver.Logging
+  alias Barserver.Helper.DatePresets
 
   @spec icon() :: String.t()
   def icon(), do: "fa-solid fa-trophy"

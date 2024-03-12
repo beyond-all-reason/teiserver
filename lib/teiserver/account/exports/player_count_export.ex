@@ -1,16 +1,16 @@
-defmodule Teiserver.Account.PlayerCountExport do
+defmodule Barserver.Account.PlayerCountExport do
   @moduledoc """
   Can be manually run with:
-  Teiserver.Game.MatchRatingsExport.show_form(nil, %{
+  Barserver.Game.MatchRatingsExport.show_form(nil, %{
     "date_preset" => "All time",
     "end_date" => "",
     "rating_type" => "Team",
     "start_date" => ""
   })
   """
-  alias Teiserver.Helper.DatePresets
-  alias Teiserver.Logging
-  alias Teiserver.Helper.TimexHelper
+  alias Barserver.Helper.DatePresets
+  alias Barserver.Logging
+  alias Barserver.Helper.TimexHelper
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-users"

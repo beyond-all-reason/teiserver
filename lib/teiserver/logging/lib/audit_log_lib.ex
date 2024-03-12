@@ -1,8 +1,8 @@
-defmodule Teiserver.Logging.AuditLogLib do
+defmodule Barserver.Logging.AuditLogLib do
   @moduledoc false
-  use TeiserverWeb, :library
+  use BarserverWeb, :library
 
-  alias Teiserver.Logging.AuditLog
+  alias Barserver.Logging.AuditLog
 
   @spec colours() :: atom
   def colours(), do: :danger2
@@ -13,12 +13,12 @@ defmodule Teiserver.Logging.AuditLogLib do
   @spec add_audit_types([String.t()]) :: :ok
   def add_audit_types(types) do
     new_types = list_audit_types() ++ types
-    Teiserver.store_put(:application_metadata_cache, "audit_types", new_types)
+    Barserver.store_put(:application_metadata_cache, "audit_types", new_types)
   end
 
   @spec list_audit_types :: [String.t()]
   def list_audit_types() do
-    Teiserver.cache_get(:application_metadata_cache, "audit_types") || []
+    Barserver.cache_get(:application_metadata_cache, "audit_types") || []
   end
 
   # Queries

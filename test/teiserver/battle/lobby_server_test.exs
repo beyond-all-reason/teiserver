@@ -1,12 +1,12 @@
-defmodule Teiserver.Battle.LobbyServerTest do
+defmodule Barserver.Battle.LobbyServerTest do
   @moduledoc false
   # Cannot be async because some other tests will call for a list of all lobbies
-  use Teiserver.DataCase, async: false
-  alias Teiserver.Lobby.LobbyLib
-  alias Teiserver.Coordinator
+  use Barserver.DataCase, async: false
+  alias Barserver.Lobby.LobbyLib
+  alias Barserver.Coordinator
 
   test "server test" do
-    host = Teiserver.TeiserverTestLib.new_user()
+    host = Barserver.BarserverTestLib.new_user()
 
     lobby = %{
       id: 123,
@@ -62,7 +62,7 @@ defmodule Teiserver.Battle.LobbyServerTest do
   end
 
   test "rename test" do
-    host = Teiserver.TeiserverTestLib.new_user()
+    host = Barserver.BarserverTestLib.new_user()
 
     lobby = %{
       id: 123,

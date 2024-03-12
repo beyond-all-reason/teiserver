@@ -137,14 +137,14 @@
           class="btn btn-outline-warning mx-1"
         >
           <Fontawesome.icon
-            icon={Teiserver.Account.RelationshipLib.icon_ignore()}
+            icon={Barserver.Account.RelationshipLib.icon_ignore()}
             style="regular"
           /> &nbsp;
           Ignore
         </span>
 
         <span :if={@relationship && @relationship.ignore == true} class="btn btn-warning mx-1">
-          <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="solid" />
+          <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_ignore()} style="solid" />
           &nbsp;
           Ignoring
         </span>
@@ -154,13 +154,13 @@
           phx-click="avoid-user"
           class="btn btn-outline-danger mx-1"
         >
-          <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="regular" />
+          <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_avoid()} style="regular" />
           &nbsp;
           Avoid
         </span>
 
         <span :if={@relationship && @relationship.state == "avoid"} class="btn btn-danger mx-1">
-          <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="solid" />
+          <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_avoid()} style="solid" />
           &nbsp;
           Avoiding
         </span>
@@ -170,13 +170,13 @@
           phx-click="block-user"
           class="btn btn-outline-danger2 mx-1"
         >
-          <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="regular" />
+          <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_block()} style="regular" />
           &nbsp;
           Block
         </span>
 
         <span :if={@relationship && @relationship.state == "block"} class="btn btn-danger2 mx-1">
-          <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="solid" />
+          <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_block()} style="solid" />
           &nbsp;
           Blocking
         </span>

@@ -8,13 +8,13 @@
 <link href="/css/c3.min.css" rel="stylesheet" />
 
 <%= render(
-  TeiserverWeb.Report.GeneralView,
+  BarserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
 ) %>
 
 <%= central_component("picker_script",
-  module: Teiserver.Account.UserLib,
+  module: Barserver.Account.UserLib,
   name: "account_user",
   title: "User search"
 ) %>
@@ -51,7 +51,7 @@
           Show/Hide help
         </div>
         <%= render(
-          TeiserverWeb.Report.ReportView,
+          BarserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",
@@ -71,7 +71,7 @@
           <div class="row">
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="search_account_user" class="control-label">User: </label>
-              <%= render(TeiserverWeb.Account.UserView, "picker.html",
+              <%= render(BarserverWeb.Account.UserView, "picker.html",
                 input_name: "report[account_user]",
                 value: @params["account_user"]
               ) %>

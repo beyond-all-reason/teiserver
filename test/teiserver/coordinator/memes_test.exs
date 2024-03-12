@@ -1,10 +1,10 @@
-defmodule Teiserver.Coordinator.MemesTest do
-  use Teiserver.ServerCase, async: false
-  alias Teiserver.Account.ClientLib
-  alias Teiserver.{User, Client, Coordinator, Lobby}
+defmodule Barserver.Coordinator.MemesTest do
+  use Barserver.ServerCase, async: false
+  alias Barserver.Account.ClientLib
+  alias Barserver.{CacheUser, Client, Coordinator, Lobby}
   require Logger
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1]
 
   setup do
@@ -13,7 +13,7 @@ defmodule Teiserver.Coordinator.MemesTest do
     %{socket: psocket, user: player} = tachyon_auth_setup()
 
     # User needs to be a moderator (at this time) to start/stop Coordinator mode
-    User.update_user(%{host | moderator: true})
+    CacheUser.update_user(%{host | moderator: true})
     ClientLib.refresh_client(host.id)
 
     lobby_data = %{

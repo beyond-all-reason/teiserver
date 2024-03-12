@@ -1,10 +1,10 @@
 <div class="row page-row">
-  <.menu_card icon={Teiserver.Moderation.overwatch_icon()} url={~p"/moderation/overwatch"}>
+  <.menu_card icon={Barserver.Moderation.overwatch_icon()} url={~p"/moderation/overwatch"}>
     Overwatch
   </.menu_card>
 
   <%= central_component("menu_card",
-    icon: Teiserver.Moderation.ReportLib.icon(),
+    icon: Barserver.Moderation.ReportLib.icon(),
     name: "reports",
     text: "Reports",
     icon_class: "fa-duotone",
@@ -12,7 +12,7 @@
   ) %>
 
   <%= central_component("menu_card",
-    icon: Teiserver.Moderation.ActionLib.icon(),
+    icon: Barserver.Moderation.ActionLib.icon(),
     name: "actions",
     text: "Actions",
     icon_class: "fa-duotone",
@@ -20,7 +20,7 @@
   ) %>
 
   <%= central_component("menu_card",
-    icon: Teiserver.Moderation.BanLib.icon(),
+    icon: Barserver.Moderation.BanLib.icon(),
     name: "bans",
     text: "Bans",
     icon_class: "fa-duotone",

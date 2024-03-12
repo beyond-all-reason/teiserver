@@ -1,5 +1,5 @@
 ## Description
-An API for uploading data about battles fought to Teiserver.
+An API for uploading data about battles fought to Barserver.
 
 ## API Routes
 ### POST /teiserver/api/auth -- Authorises your user

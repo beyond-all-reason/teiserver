@@ -1,9 +1,9 @@
-defmodule Teiserver.Bridge.MessageCommands do
+defmodule Barserver.Bridge.MessageCommands do
   @moduledoc false
-  alias Teiserver.{CacheUser, Account}
-  alias Teiserver.Account.AccoladeLib
-  alias Teiserver.Helper.NumberHelper
-  alias Teiserver.Bridge.UnitNames
+  alias Barserver.{CacheUser, Account}
+  alias Barserver.Account.AccoladeLib
+  alias Barserver.Helper.NumberHelper
+  alias Barserver.Bridge.UnitNames
   alias Nostrum.Api
   require Logger
 
@@ -63,10 +63,10 @@ defmodule Teiserver.Bridge.MessageCommands do
     case String.split(remaining, "-") do
       [userid_str, given_code] ->
         userid = NumberHelper.int_parse(userid_str)
-        correct_code = Teiserver.cache_get(:discord_bridge_account_codes, userid)
+        correct_code = Barserver.cache_get(:discord_bridge_account_codes, userid)
 
         if given_code == correct_code do
-          Teiserver.cache_delete(:discord_bridge_account_codes, userid)
+          Barserver.cache_delete(:discord_bridge_account_codes, userid)
           user = CacheUser.get_user_by_id(userid)
 
           CacheUser.update_user(
@@ -174,7 +174,7 @@ defmodule Teiserver.Bridge.MessageCommands do
     player_hours = (Map.get(stats, "player_minutes", 0) / 60) |> round
     spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> round
 
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, BarserverWeb.Endpoint)[:url][:host]
     profile_link = "https://#{host}/profile/#{user.id}"
 
     accolades = AccoladeLib.get_player_accolades(user.id)

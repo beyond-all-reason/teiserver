@@ -1,7 +1,7 @@
-defmodule Teiserver.Protocols.Spring.LobbyPolicyIn do
-  alias Teiserver.{Game}
-  alias Teiserver.Protocols.SpringIn
-  import Teiserver.Protocols.SpringOut, only: [reply: 5]
+defmodule Barserver.Protocols.Spring.LobbyPolicyIn do
+  alias Barserver.{Game}
+  alias Barserver.Protocols.SpringIn
+  import Barserver.Protocols.SpringOut, only: [reply: 5]
   require Logger
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()

@@ -1,8 +1,8 @@
-defmodule Teiserver.Account.FriendRequestLib do
+defmodule Barserver.Account.FriendRequestLib do
   @moduledoc false
-  alias Teiserver.Account
+  alias Barserver.Account
   alias Account.FriendRequest
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
   alias Phoenix.PubSub
 
   @spec colours :: atom
@@ -64,7 +64,7 @@ defmodule Teiserver.Account.FriendRequestLib do
         Account.delete_friend_request(req)
 
         PubSub.broadcast(
-          Teiserver.PubSub,
+          Barserver.PubSub,
           "account_user_relationships:#{req.from_user_id}",
           %{
             channel: "account_user_relationships:#{req.from_user_id}",
@@ -98,7 +98,7 @@ defmodule Teiserver.Account.FriendRequestLib do
     Account.delete_friend_request(req)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "account_user_relationships:#{req.from_user_id}",
       %{
         channel: "account_user_relationships:#{req.from_user_id}",
@@ -131,7 +131,7 @@ defmodule Teiserver.Account.FriendRequestLib do
     Account.delete_friend_request(req)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "account_user_relationships:#{req.to_user_id}",
       %{
         channel: "account_user_relationships:#{req.to_user_id}",
@@ -146,7 +146,7 @@ defmodule Teiserver.Account.FriendRequestLib do
 
   @spec list_incoming_friend_requests_of_userid(T.userid()) :: [T.userid()]
   def list_incoming_friend_requests_of_userid(userid) do
-    Teiserver.cache_get_or_store(:account_incoming_friend_request_cache, userid, fn ->
+    Barserver.cache_get_or_store(:account_incoming_friend_request_cache, userid, fn ->
       Account.list_friend_requests(
         where: [
           to_user_id: userid
@@ -161,7 +161,7 @@ defmodule Teiserver.Account.FriendRequestLib do
 
   @spec list_outgoing_friend_requests_of_userid(T.userid()) :: [T.userid()]
   def list_outgoing_friend_requests_of_userid(userid) do
-    Teiserver.cache_get_or_store(:account_outgoing_friend_request_cache, userid, fn ->
+    Barserver.cache_get_or_store(:account_outgoing_friend_request_cache, userid, fn ->
       Account.list_friend_requests(
         where: [
           from_user_id: userid

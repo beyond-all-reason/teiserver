@@ -1,6 +1,6 @@
-defmodule Teiserver.TeiserverConfigs do
+defmodule Barserver.BarserverConfigs do
   @moduledoc false
-  import Teiserver.Config, only: [add_site_config_type: 1]
+  import Barserver.Config, only: [add_site_config_type: 1]
 
   @spec teiserver_configs :: any
   def teiserver_configs do

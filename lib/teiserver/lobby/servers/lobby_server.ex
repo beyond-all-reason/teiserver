@@ -1,9 +1,9 @@
-defmodule Teiserver.Battle.LobbyServer do
+defmodule Barserver.Battle.LobbyServer do
   @moduledoc false
   use GenServer
   require Logger
-  alias Teiserver.{Account, Battle, Config, Telemetry, Coordinator, Communication}
-  alias Teiserver.Lobby.CommandLib
+  alias Barserver.{Account, Battle, Config, Telemetry, Coordinator, Communication}
+  alias Barserver.Lobby.CommandLib
   alias Phoenix.PubSub
 
   @player_list_cache_age_max 200
@@ -124,7 +124,7 @@ defmodule Teiserver.Battle.LobbyServer do
 
     # Need to broadcast the new uuid
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -156,7 +156,7 @@ defmodule Teiserver.Battle.LobbyServer do
       })
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -177,7 +177,7 @@ defmodule Teiserver.Battle.LobbyServer do
       })
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -241,7 +241,7 @@ defmodule Teiserver.Battle.LobbyServer do
     new_lobby = %{state.lobby | disabled_units: []}
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -268,7 +268,7 @@ defmodule Teiserver.Battle.LobbyServer do
     new_lobby = %{state.lobby | disabled_units: new_units}
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -286,7 +286,7 @@ defmodule Teiserver.Battle.LobbyServer do
     new_lobby = %{state.lobby | disabled_units: new_units}
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -309,7 +309,7 @@ defmodule Teiserver.Battle.LobbyServer do
     new_lobby = %{state.lobby | start_areas: new_areas}
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -332,7 +332,7 @@ defmodule Teiserver.Battle.LobbyServer do
     new_lobby = %{state.lobby | start_areas: new_areas}
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -348,7 +348,7 @@ defmodule Teiserver.Battle.LobbyServer do
   # Modoptions
   def handle_cast({:set_modoption, key, value}, %{modoptions: modoptions} = state) do
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -363,7 +363,7 @@ defmodule Teiserver.Battle.LobbyServer do
 
   def handle_cast({:set_modoptions, new_modoptions}, %{modoptions: modoptions} = state) do
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -384,7 +384,7 @@ defmodule Teiserver.Battle.LobbyServer do
       |> Enum.filter(fn k -> Enum.member?(existing_keys, k) end)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_lobby_updates:#{state.id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -402,7 +402,7 @@ defmodule Teiserver.Battle.LobbyServer do
     new_bots = Map.put(bots, bot.name, bot)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_lobby_updates:#{id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -425,7 +425,7 @@ defmodule Teiserver.Battle.LobbyServer do
         new_bots = Map.put(bots, botname, new_bot)
 
         PubSub.broadcast(
-          Teiserver.PubSub,
+          Barserver.PubSub,
           "teiserver_lobby_updates:#{id}",
           %{
             channel: "teiserver_lobby_updates",
@@ -443,7 +443,7 @@ defmodule Teiserver.Battle.LobbyServer do
     new_bots = Map.delete(bots, botname)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_lobby_updates:#{id}",
       %{
         channel: "teiserver_lobby_updates",
@@ -598,7 +598,7 @@ defmodule Teiserver.Battle.LobbyServer do
 
     if not Enum.empty?(broadcast_values) do
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_lobby_updates:#{state.id}",
         %{
           channel: "teiserver_lobby_updates",
@@ -609,7 +609,7 @@ defmodule Teiserver.Battle.LobbyServer do
       )
 
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_global_lobby_updates",
         %{
           channel: "teiserver_global_lobby_updates",
@@ -643,7 +643,7 @@ defmodule Teiserver.Battle.LobbyServer do
         }
 
         PubSub.broadcast(
-          Teiserver.PubSub,
+          Barserver.PubSub,
           "teiserver_lobby_updates:#{state.id}",
           %{
             channel: "teiserver_lobby_updates",
@@ -671,14 +671,14 @@ defmodule Teiserver.Battle.LobbyServer do
   def init(%{lobby: %{id: id}} = data) do
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
-      Teiserver.LobbyRegistry,
+      Barserver.LobbyRegistry,
       id,
       id
     )
 
     Logger.metadata(request_id: "LobbyServer##{id}")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{id}")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_lobby_chat:#{id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_server")
 
     :timer.send_interval(2_000, :tick)
 

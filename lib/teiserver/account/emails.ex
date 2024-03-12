@@ -1,7 +1,7 @@
-defmodule Teiserver.Account.Emails do
+defmodule Barserver.Account.Emails do
   @moduledoc false
   alias Bamboo.Email
-  alias Teiserver.Helper.TimexHelper
+  alias Barserver.Helper.TimexHelper
 
   def password_reset(user, code \\ nil) do
     # We need this to enable recreating the email if we know it
@@ -13,7 +13,7 @@ defmodule Teiserver.Account.Emails do
         code
       else
         {:ok, code} =
-          Teiserver.Account.create_code(%{
+          Barserver.Account.create_code(%{
             value: UUID.uuid1(),
             purpose: "reset_password",
             expires: Timex.now() |> Timex.shift(hours: 24),
@@ -23,7 +23,7 @@ defmodule Teiserver.Account.Emails do
         code
       end
 
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, BarserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/password_reset/#{code.value}"
 
     html_body = """
@@ -43,14 +43,14 @@ defmodule Teiserver.Account.Emails do
     """
 
     date = TimexHelper.date_to_str(Timex.now(), format: :email_date)
-    message_id = "<#{UUID.uuid1()}@#{Application.get_env(:teiserver, Teiserver)[:host]}>"
-    subject = Application.get_env(:teiserver, Teiserver)[:game_name] <> " - Password reset"
+    message_id = "<#{UUID.uuid1()}@#{Application.get_env(:teiserver, Barserver)[:host]}>"
+    subject = Application.get_env(:teiserver, Barserver)[:game_name] <> " - Password reset"
 
     Email.new_email()
     |> Email.to({user.name, user.email})
     |> Email.from(
-      {Application.get_env(:teiserver, Teiserver.Mailer)[:noreply_name],
-       Teiserver.Mailer.noreply_address()}
+      {Application.get_env(:teiserver, Barserver.Mailer)[:noreply_name],
+       Barserver.Mailer.noreply_address()}
     )
     |> Email.subject(subject)
     |> Email.put_header("Date", date)

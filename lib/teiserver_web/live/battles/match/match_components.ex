@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.Battle.MatchComponents do
+defmodule BarserverWeb.Battle.MatchComponents do
   @moduledoc false
-  use TeiserverWeb, :component
-  import TeiserverWeb.NavComponents, only: [section_menu_button: 1]
+  use BarserverWeb, :component
+  import BarserverWeb.NavComponents, only: [section_menu_button: 1]
 
   @doc """
-  <TeiserverWeb.Battle.MatchComponents.section_menu active={active} bsname={} />
+  <BarserverWeb.Battle.MatchComponents.section_menu active={active} bsname={} />
   """
   attr :view_colour, :string, required: true
   attr :active, :string, required: true
@@ -24,7 +24,7 @@ defmodule TeiserverWeb.Battle.MatchComponents do
 
     <.section_menu_button
       bsname={@view_colour}
-      icon={Teiserver.Account.RatingLib.icon()}
+      icon={Barserver.Account.RatingLib.icon()}
       active={@active == "ratings"}
       url={~p"/battle/ratings"}
     >

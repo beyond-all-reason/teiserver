@@ -1,8 +1,8 @@
-defmodule Teiserver.Chat.DirectMessageLib do
+defmodule Barserver.Chat.DirectMessageLib do
   @moduledoc false
-  use TeiserverWeb, :library
-  alias Teiserver.Helper.QueryHelpers
-  alias Teiserver.Chat.DirectMessage
+  use BarserverWeb, :library
+  alias Barserver.Helper.QueryHelpers
+  alias Barserver.Chat.DirectMessage
 
   # Queries
   @spec query_direct_messages(list) :: Ecto.Query.t()

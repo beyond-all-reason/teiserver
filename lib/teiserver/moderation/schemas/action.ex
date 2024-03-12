@@ -1,10 +1,10 @@
-defmodule Teiserver.Moderation.Action do
+defmodule Barserver.Moderation.Action do
   @moduledoc false
-  use TeiserverWeb, :schema
-  alias Teiserver.Helper.TimexHelper
+  use BarserverWeb, :schema
+  alias Barserver.Helper.TimexHelper
 
   schema "moderation_actions" do
-    belongs_to :target, Teiserver.Account.User
+    belongs_to :target, Barserver.Account.User
     field :reason, :string
     field :appeal_status, :string
     field :notes, :string
@@ -16,7 +16,7 @@ defmodule Teiserver.Moderation.Action do
 
     field :discord_message_id, :integer
 
-    belongs_to :report_group, Teiserver.Moderation.ReportGroup
+    belongs_to :report_group, Barserver.Moderation.ReportGroup
 
     timestamps()
   end

@@ -1,11 +1,11 @@
-defmodule Teiserver.Account.Accolade do
-  use TeiserverWeb, :schema
+defmodule Barserver.Account.Accolade do
+  use BarserverWeb, :schema
 
   schema "teiserver_account_accolades" do
-    belongs_to :recipient, Teiserver.Account.User
-    belongs_to :giver, Teiserver.Account.User
-    belongs_to :badge_type, Teiserver.Account.BadgeType
-    belongs_to :match, Teiserver.Battle.Match
+    belongs_to :recipient, Barserver.Account.User
+    belongs_to :giver, Barserver.Account.User
+    belongs_to :badge_type, Barserver.Account.BadgeType
+    belongs_to :match, Barserver.Battle.Match
     field :inserted_at, :utc_datetime
   end
 

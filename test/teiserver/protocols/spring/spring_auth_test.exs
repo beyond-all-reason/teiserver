@@ -1,12 +1,12 @@
-defmodule Teiserver.SpringAuthTest do
-  use Teiserver.ServerCase, async: false
+defmodule Barserver.SpringAuthTest do
+  use Barserver.ServerCase, async: false
   require Logger
-  alias Teiserver.BitParse
-  alias Teiserver.{User, Account, Client}
-  alias Teiserver.Account.UserCacheLib
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.BitParse
+  alias Barserver.{User, Account, Client}
+  alias Barserver.Account.UserCacheLib
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [
       auth_setup: 0,
       auth_setup: 1,
@@ -493,7 +493,7 @@ CLIENTS test_room #{user.name}\n"
 
     # No need to send an exit, it's already sorted out!
     # we should try to login though, it should be rejected as rename in progress
-    %{socket: socket} = Teiserver.TeiserverTestLib.raw_setup()
+    %{socket: socket} = Barserver.BarserverTestLib.raw_setup()
     _ = _recv_raw(socket)
 
     # Now we get flood protection after the rename
@@ -646,7 +646,7 @@ CLIENTS test_room #{user.name}\n"
         "test_user_bad_id@email.com",
         "X03MO1qnZdYdgyfeuILPmQ=="
       )
-      |> Teiserver.Account.create_user()
+      |> Barserver.Account.create_user()
 
     bad_user
     |> UserCacheLib.convert_user()

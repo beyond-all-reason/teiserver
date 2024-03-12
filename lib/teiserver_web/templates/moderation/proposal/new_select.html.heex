@@ -1,7 +1,7 @@
 <% bsname = view_colour() %>
 
 <%= render(
-  TeiserverWeb.Moderation.GeneralView,
+  BarserverWeb.Moderation.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "proposals"})
 ) %>
@@ -13,7 +13,7 @@
 </script>
 
 <%= central_component("picker_script",
-  module: Teiserver.Account.UserLib,
+  module: Barserver.Account.UserLib,
   name: "teiserver_user",
   title: "User search"
 ) %>
@@ -23,7 +23,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Moderation.ProposalView,
+          BarserverWeb.Moderation.ProposalView,
           "section_menu.html",
           Map.merge(assigns, %{
             basic_search: "",
@@ -42,7 +42,7 @@
           <div class="row">
             <label for="control_id" class="col-md-2 control-label">Select user:</label>
             <div class="col-md-10">
-              <%= render(TeiserverWeb.Account.GeneralView, "picker.html") %>
+              <%= render(BarserverWeb.Account.GeneralView, "picker.html") %>
             </div>
           </div>
 

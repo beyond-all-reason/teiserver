@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.ErrorHelpers do
+defmodule BarserverWeb.ErrorHelpers do
   @moduledoc """
   Conveniences for translating and building error messages.
   """
@@ -39,9 +39,9 @@ defmodule TeiserverWeb.ErrorHelpers do
     # should be written to the errors.po file. The :count option is
     # set by Ecto and indicates we should also apply plural rules.
     if count = opts[:count] do
-      Gettext.dngettext(TeiserverWeb.Gettext, "errors", msg, msg, count, opts)
+      Gettext.dngettext(BarserverWeb.Gettext, "errors", msg, msg, count, opts)
     else
-      Gettext.dgettext(TeiserverWeb.Gettext, "errors", msg, opts)
+      Gettext.dgettext(BarserverWeb.Gettext, "errors", msg, opts)
     end
   end
 end

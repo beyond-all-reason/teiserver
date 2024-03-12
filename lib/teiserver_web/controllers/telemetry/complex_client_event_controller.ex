@@ -1,8 +1,8 @@
-defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
-  use TeiserverWeb, :controller
-  alias Teiserver.Telemetry
+defmodule BarserverWeb.Telemetry.ComplexClientEventController do
+  use BarserverWeb, :controller
+  alias Barserver.Telemetry
 
-  alias Teiserver.Telemetry.{
+  alias Barserver.Telemetry.{
     ComplexClientEventQueries,
     ComplexAnonEventQueries,
     ExportComplexClientEventsTask
@@ -16,9 +16,9 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Auth.Server,
+    policy: Barserver.Auth.Server,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
 

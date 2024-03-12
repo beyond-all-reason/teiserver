@@ -1,9 +1,9 @@
-defmodule Teiserver.MicroblogFixtures do
+defmodule Barserver.MicroblogFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `Teiserver.Microblog` context.
+  entities via the `Barserver.Microblog` context.
   """
-  alias Teiserver.{Microblog, AccountFixtures}
+  alias Barserver.{Microblog, AccountFixtures}
 
   @doc """
   Generate a tag.

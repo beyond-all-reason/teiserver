@@ -1,8 +1,8 @@
-defmodule Teiserver.Telemetry.AnonPropertyLib do
+defmodule Barserver.Telemetry.AnonPropertyLib do
   @moduledoc false
-  use TeiserverWeb, :library
-  alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.{AnonProperty, AnonPropertyQueries}
+  use BarserverWeb, :library
+  alias Barserver.Telemetry
+  alias Barserver.Telemetry.{AnonProperty, AnonPropertyQueries}
 
   # Functions
   @spec icon :: String.t()

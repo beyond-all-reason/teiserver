@@ -1,8 +1,8 @@
-defmodule Teiserver.Account.MergeAccountsTask do
-  alias Teiserver.Account
-  alias Teiserver.Repo
+defmodule Barserver.Account.MergeAccountsTask do
+  alias Barserver.Account
+  alias Barserver.Repo
   require Logger
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @spec perform(T.userid(), T.userid()) :: :no_user | :ok
   def perform(deleting_id, keeping_id) do
@@ -49,7 +49,7 @@ defmodule Teiserver.Account.MergeAccountsTask do
 
     # Reports
 
-    result = Teiserver.Admin.DeleteUserTask.delete_users([deleting_id])
+    result = Barserver.Admin.DeleteUserTask.delete_users([deleting_id])
 
     case result do
       {:ok, _} ->

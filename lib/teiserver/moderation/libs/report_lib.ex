@@ -1,7 +1,7 @@
-defmodule Teiserver.Moderation.ReportLib do
+defmodule Barserver.Moderation.ReportLib do
   @moduledoc false
-  use TeiserverWeb, :library
-  alias Teiserver.Moderation.Report
+  use BarserverWeb, :library
+  alias Barserver.Moderation.Report
 
   # Functions
   @spec icon :: String.t()
@@ -28,8 +28,8 @@ defmodule Teiserver.Moderation.ReportLib do
 
   def types() do
     [
-      {"Chat / Communication", "chat", Teiserver.Chat.LobbyMessageLib.icon()},
-      {"In game actions", "actions", Teiserver.Battle.MatchLib.icon()}
+      {"Chat / Communication", "chat", Barserver.Chat.LobbyMessageLib.icon()},
+      {"In game actions", "actions", Barserver.Battle.MatchLib.icon()}
     ]
   end
 
@@ -52,8 +52,8 @@ defmodule Teiserver.Moderation.ReportLib do
 
   def sections() do
     [
-      {"Chat / Communication", "chat", Teiserver.Chat.LobbyMessageLib.icon()},
-      {"In game actions", "actions", Teiserver.Battle.MatchLib.icon()}
+      {"Chat / Communication", "chat", Barserver.Chat.LobbyMessageLib.icon()},
+      {"In game actions", "actions", Barserver.Battle.MatchLib.icon()}
     ]
   end
 

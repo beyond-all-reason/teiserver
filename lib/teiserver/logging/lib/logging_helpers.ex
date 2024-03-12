@@ -1,9 +1,9 @@
-defmodule Teiserver.Logging.Helpers do
+defmodule Barserver.Logging.Helpers do
   @moduledoc false
   use Timex
-  alias Teiserver.Logging
+  alias Barserver.Logging
 
-  @spec add_anonymous_audit_log(String.t(), Map.t()) :: Teiserver.Logging.AuditLog.t()
+  @spec add_anonymous_audit_log(String.t(), Map.t()) :: Barserver.Logging.AuditLog.t()
   def add_anonymous_audit_log(action, details) do
     attrs = %{
       user_id: nil,
@@ -18,7 +18,7 @@ defmodule Teiserver.Logging.Helpers do
   end
 
   @spec add_anonymous_audit_log(Plug.Conn.t(), String.t(), Map.t()) ::
-          Teiserver.Logging.AuditLog.t()
+          Barserver.Logging.AuditLog.t()
   def add_anonymous_audit_log(conn, action, details) do
     attrs = %{
       action: action,
@@ -33,7 +33,7 @@ defmodule Teiserver.Logging.Helpers do
   end
 
   @spec add_audit_log(Plug.Conn.t() | Phoenix.LiveView.Socket.t(), String.t(), Map.t()) ::
-          Teiserver.Logging.AuditLog.t()
+          Barserver.Logging.AuditLog.t()
   def add_audit_log(%Phoenix.LiveView.Socket{} = socket, action, details) do
     {:ok, the_log} =
       Logging.create_audit_log(%{
@@ -60,7 +60,7 @@ defmodule Teiserver.Logging.Helpers do
   end
 
   @spec add_audit_log(nil | non_neg_integer(), nil | String.t(), String.t(), Map.t()) ::
-          Teiserver.Logging.AuditLog.t()
+          Barserver.Logging.AuditLog.t()
   def add_audit_log(userid, ip, action, details) when is_integer(userid) do
     {:ok, the_log} =
       Logging.create_audit_log(%{

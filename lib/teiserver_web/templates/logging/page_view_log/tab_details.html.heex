@@ -14,8 +14,8 @@
   value: @page_view_log.user.name,
   link: %{
     path: ~p"/teiserver/admin/user/#{@page_view_log.user_id}",
-    bsname: elem(Teiserver.Account.UserLib.colours() |> colours(), 2),
-    icon: Teiserver.Account.UserLib.icon()
+    bsname: elem(Barserver.Account.UserLib.colours() |> colours(), 2),
+    icon: Barserver.Account.UserLib.icon()
   }
 ) %>
 
@@ -35,7 +35,7 @@
   link: %{
     path: "/#{@page_view_log.section}/#{@page_view_log.path}",
     bsname: "primary",
-    icon: Teiserver.Logging.PageViewLogLib.icon()
+    icon: Barserver.Logging.PageViewLogLib.icon()
   }
 ) %>
 

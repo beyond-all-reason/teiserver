@@ -1,8 +1,8 @@
-defmodule Teiserver.Account.UserAgeReport do
+defmodule Barserver.Account.UserAgeReport do
   @moduledoc false
-  alias Teiserver.Helper.DatePresets
-  alias Teiserver.{Account}
-  alias Teiserver.Repo
+  alias Barserver.Helper.DatePresets
+  alias Barserver.{Account}
+  alias Barserver.Repo
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-chevrons-up"

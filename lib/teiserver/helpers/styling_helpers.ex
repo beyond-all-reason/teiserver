@@ -1,4 +1,4 @@
-defmodule Teiserver.Helper.StylingHelper do
+defmodule Barserver.Helper.StylingHelper do
   @moduledoc false
   alias HTMLIcons
 

@@ -1,4 +1,4 @@
-defmodule Teiserver.Bridge.BridgeCommandBehaviour do
+defmodule Barserver.Bridge.BridgeCommandBehaviour do
   @moduledoc """
   Discord commands used by the bot
   """

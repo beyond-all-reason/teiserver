@@ -1,7 +1,7 @@
 <div class="row mt-2">
   <.menu_card
     :if={allow?(@current_user, "Engine")}
-    icon={Teiserver.Telemetry.InfologLib.icon()}
+    icon={Barserver.Telemetry.InfologLib.icon()}
     url={~p"/telemetry/infolog"}
     size={:small}
   >
@@ -10,7 +10,7 @@
 
   <.menu_card
     :if={allow?(@current_user, "Server")}
-    icon={Teiserver.Telemetry.PropertyTypeLib.icon()}
+    icon={Barserver.Telemetry.PropertyTypeLib.icon()}
     url={~p"/telemetry/properties/summary"}
     size={:small}
   >
@@ -20,7 +20,7 @@
 
 <div :if={allow?(@current_user, "Server")} class="row mt-2">
   <.menu_card
-    icon={Teiserver.Telemetry.SimpleClientEventLib.icon()}
+    icon={Barserver.Telemetry.SimpleClientEventLib.icon()}
     url={~p"/telemetry/simple_client_events/summary"}
     size={:small}
   >
@@ -28,7 +28,7 @@
   </.menu_card>
 
   <.menu_card
-    icon={Teiserver.Telemetry.ComplexClientEventLib.icon()}
+    icon={Barserver.Telemetry.ComplexClientEventLib.icon()}
     url={~p"/telemetry/complex_client_events/summary"}
     size={:small}
   >
@@ -36,7 +36,7 @@
   </.menu_card>
 
   <.menu_card
-    icon={Teiserver.Telemetry.SimpleServerEventLib.icon()}
+    icon={Barserver.Telemetry.SimpleServerEventLib.icon()}
     url={~p"/telemetry/simple_server_events/summary"}
     size={:small}
   >
@@ -44,7 +44,7 @@
   </.menu_card>
 
   <.menu_card
-    icon={Teiserver.Telemetry.ComplexServerEventLib.icon()}
+    icon={Barserver.Telemetry.ComplexServerEventLib.icon()}
     url={~p"/telemetry/complex_server_events/summary"}
     size={:small}
   >
@@ -54,7 +54,7 @@
 
 <div :if={allow?(@current_user, "Server")} class="row mt-2">
   <.menu_card
-    icon={Teiserver.Telemetry.SimpleLobbyEventLib.icon()}
+    icon={Barserver.Telemetry.SimpleLobbyEventLib.icon()}
     url={~p"/telemetry/simple_lobby_events/summary"}
     size={:small}
   >
@@ -62,7 +62,7 @@
   </.menu_card>
 
   <.menu_card
-    icon={Teiserver.Telemetry.ComplexLobbyEventLib.icon()}
+    icon={Barserver.Telemetry.ComplexLobbyEventLib.icon()}
     url={~p"/telemetry/complex_lobby_events/summary"}
     size={:small}
   >
@@ -70,7 +70,7 @@
   </.menu_card>
 
   <.menu_card
-    icon={Teiserver.Telemetry.SimpleMatchEventLib.icon()}
+    icon={Barserver.Telemetry.SimpleMatchEventLib.icon()}
     url={~p"/telemetry/simple_match_events/summary"}
     size={:small}
   >
@@ -78,7 +78,7 @@
   </.menu_card>
 
   <.menu_card
-    icon={Teiserver.Telemetry.ComplexMatchEventLib.icon()}
+    icon={Barserver.Telemetry.ComplexMatchEventLib.icon()}
     url={~p"/telemetry/complex_match_events/summary"}
     size={:small}
   >

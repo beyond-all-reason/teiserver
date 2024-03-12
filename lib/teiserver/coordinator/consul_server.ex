@@ -1,4 +1,4 @@
-defmodule Teiserver.Coordinator.ConsulServer do
+defmodule Barserver.Coordinator.ConsulServer do
   @moduledoc """
   One consul server is created for each battle. It acts as a battle supervisor in addition to any
   host.
@@ -6,7 +6,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   use GenServer
   require Logger
 
-  alias Teiserver.{
+  alias Barserver.{
     Account,
     Coordinator,
     Client,
@@ -18,12 +18,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
     Communication
   }
 
-  alias Teiserver.Lobby.{ChatLib}
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.Lobby.{ChatLib}
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
-  alias Teiserver.Battle.BalanceLib
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib, SpadsParser}
+  alias Barserver.Battle.BalanceLib
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Coordinator.{ConsulCommands, CoordinatorLib, SpadsParser}
 
   # Commands that are always forwarded to the coordinator itself, not the consul server
   @coordinator_bot ~w(whoami whois check discord help coc ignore mute ignore unmute unignore matchmaking website party modparty unparty)
@@ -1013,7 +1013,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def broadcast_update(state, reason \\ nil) do
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_liveview_lobby_updates:#{state.lobby_id}",
       {:liveview_lobby_update, :consul_server_updated, state.lobby_id, reason}
     )
@@ -1235,7 +1235,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def queue_size_changed(state) do
     if state.join_queue != state.last_queue_state do
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_lobby_updates:#{state.lobby_id}",
         %{
           channel: "teiserver_lobby_updates",
@@ -1437,13 +1437,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def init(opts) do
     lobby_id = opts[:lobby_id]
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
     Logger.metadata(request_id: "ConsulServer##{lobby_id}")
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
-      Teiserver.ConsulRegistry,
+      Barserver.ConsulRegistry,
       lobby_id,
       lobby_id
     )

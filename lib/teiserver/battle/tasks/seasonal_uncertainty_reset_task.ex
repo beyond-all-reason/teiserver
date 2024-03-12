@@ -1,6 +1,6 @@
-defmodule Teiserver.Battle.SeasonalUncertaintyResetTask do
-  alias Teiserver.{Account, Game}
-  alias Teiserver.Battle.BalanceLib
+defmodule Barserver.Battle.SeasonalUncertaintyResetTask do
+  alias Barserver.{Account, Game}
+  alias Barserver.Battle.BalanceLib
   require Logger
 
   @spec perform() :: :ok

@@ -1,9 +1,9 @@
-defmodule Teiserver.Account.BanEvasionReport do
+defmodule Barserver.Account.BanEvasionReport do
   @moduledoc """
 
   """
-  alias Teiserver.{Account}
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.{Account}
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
   @spec icon() :: String.t()

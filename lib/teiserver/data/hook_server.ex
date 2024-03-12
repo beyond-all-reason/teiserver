@@ -1,4 +1,4 @@
-defmodule Teiserver.HookServer do
+defmodule Barserver.HookServer do
   use GenServer
   alias Phoenix.PubSub
   require Logger
@@ -11,18 +11,18 @@ defmodule Teiserver.HookServer do
   def handle_info(%{channel: "global_moderation"} = data, state) do
     case data.event do
       :new_report ->
-        if Teiserver.Communication.use_discord?() do
-          Teiserver.Bridge.DiscordBridgeBot.new_report(data.report)
+        if Barserver.Communication.use_discord?() do
+          Barserver.Bridge.DiscordBridgeBot.new_report(data.report)
         end
 
       :updated_report ->
         :ok
 
       :new_action ->
-        Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(data.action.target_id)
+        Barserver.Moderation.RefreshUserRestrictionsTask.refresh_user(data.action.target_id)
 
       :updated_action ->
-        Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(data.action.target_id)
+        Barserver.Moderation.RefreshUserRestrictionsTask.refresh_user(data.action.target_id)
 
       :new_response ->
         :ok
@@ -52,7 +52,7 @@ defmodule Teiserver.HookServer do
 
   def handle_info({:account_hooks, event, payload, _reason}, state) do
     start_completed =
-      Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") == true
+      Barserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") == true
 
     event = if start_completed, do: event, else: nil
 
@@ -61,10 +61,10 @@ defmodule Teiserver.HookServer do
         nil
 
       :create_user ->
-        Teiserver.CacheUser.recache_user(payload.id)
+        Barserver.CacheUser.recache_user(payload.id)
 
       :update_user ->
-        Teiserver.CacheUser.recache_user(payload.id)
+        Barserver.CacheUser.recache_user(payload.id)
 
       :create_report ->
         :ok
@@ -89,7 +89,7 @@ defmodule Teiserver.HookServer do
         # later want to tell each client everything is stopping for a
         # minute or two
         PubSub.broadcast(
-          Teiserver.PubSub,
+          Barserver.PubSub,
           "teiserver_server",
           %{
             channel: "teiserver_server",
@@ -110,10 +110,10 @@ defmodule Teiserver.HookServer do
   @impl true
   @spec init(any) :: {:ok, %{}}
   def init(_) do
-    if Application.get_env(:teiserver, Teiserver)[:enable_hooks] do
-      :ok = PubSub.subscribe(Teiserver.PubSub, "account_hooks")
-      :ok = PubSub.subscribe(Teiserver.PubSub, "global_moderation")
-      :ok = PubSub.subscribe(Teiserver.PubSub, "application")
+    if Application.get_env(:teiserver, Barserver)[:enable_hooks] do
+      :ok = PubSub.subscribe(Barserver.PubSub, "account_hooks")
+      :ok = PubSub.subscribe(Barserver.PubSub, "global_moderation")
+      :ok = PubSub.subscribe(Barserver.PubSub, "application")
     end
 
     {:ok, %{}}

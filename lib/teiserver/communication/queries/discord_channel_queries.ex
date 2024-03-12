@@ -1,7 +1,7 @@
-defmodule Teiserver.Communication.DiscordChannelQueries do
+defmodule Barserver.Communication.DiscordChannelQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
-  alias Teiserver.Communication.DiscordChannel
+  use BarserverWeb, :queries
+  alias Barserver.Communication.DiscordChannel
 
   # Queries
   @spec query_discord_channels(list) :: Ecto.Query.t()

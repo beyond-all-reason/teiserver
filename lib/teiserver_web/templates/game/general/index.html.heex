@@ -11,7 +11,7 @@
 
   <%= if allow?(@conn, "Moderator") do %>
     <%= central_component("menu_card",
-      icon: Teiserver.Game.QueueLib.icon(),
+      icon: Barserver.Game.QueueLib.icon(),
       name: "queue",
       text: "Queues",
       icon_class: "fa-duotone",
@@ -21,7 +21,7 @@
 
   <%= if allow?(@conn, "Admin") do %>
     <%= central_component("menu_card",
-      icon: Teiserver.Admin.ToolLib.icon(),
+      icon: Barserver.Admin.ToolLib.icon(),
       name: "tools",
       text: "Tools",
       icon_class: "fa-duotone",

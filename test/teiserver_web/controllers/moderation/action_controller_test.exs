@@ -1,15 +1,15 @@
-defmodule TeiserverWeb.Moderation.ActionControllerTest do
+defmodule BarserverWeb.Moderation.ActionControllerTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase
+  use BarserverWeb.ConnCase
 
-  alias Teiserver.Moderation
-  alias Teiserver.Moderation.ModerationTestLib
+  alias Barserver.Moderation
+  alias Barserver.Moderation.ModerationTestLib
 
   alias Central.Helpers.GeneralTestLib
 
   setup do
     GeneralTestLib.conn_setup(["Reviewer", "Moderator"])
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    |> Barserver.BarserverTestLib.conn_setup()
   end
 
   @create_attrs %{

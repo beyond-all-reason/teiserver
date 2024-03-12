@@ -1,10 +1,10 @@
-defmodule Teiserver.Account.SmurfMergeTask do
+defmodule Barserver.Account.SmurfMergeTask do
   @moduledoc false
-  alias Teiserver.{Account, Game}
-  alias Teiserver.Battle.BalanceLib
+  alias Barserver.{Account, Game}
+  alias Barserver.Battle.BalanceLib
   require Logger
-  alias Teiserver.Data.Types, as: T
-  # alias Teiserver.Repo
+  alias Barserver.Data.Types, as: T
+  # alias Barserver.Repo
 
   @spec perform(T.userid(), T.userid(), map()) :: :ok
   def perform(from_id, to_id, settings) do
@@ -32,7 +32,7 @@ defmodule Teiserver.Account.SmurfMergeTask do
   #     end)
 
   #   Ecto.Multi.new()
-  #     |> Ecto.Multi.insert_all(:insert_all, Teiserver.Account.Report, new_reports)
+  #     |> Ecto.Multi.insert_all(:insert_all, Barserver.Account.Report, new_reports)
   #     |> Repo.transaction()
 
   #   :ok

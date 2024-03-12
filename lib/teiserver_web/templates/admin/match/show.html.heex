@@ -9,7 +9,7 @@
 </script>
 
 <%= render(
-  TeiserverWeb.Admin.GeneralView,
+  BarserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "matches"})
 ) %>
@@ -19,7 +19,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Admin.MatchView,
+          BarserverWeb.Admin.MatchView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
@@ -57,7 +57,7 @@
           <%= if @rating_logs != %{} and allow?(@conn, "Reviewer") do %>
             <li class="nav-item">
               <a href="#ratings_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                <%= central_component("icon", icon: Teiserver.Account.RatingLib.icon()) %> Ratings
+                <%= central_component("icon", icon: Barserver.Account.RatingLib.icon()) %> Ratings
               </a>
             </li>
 
@@ -72,7 +72,7 @@
             <li class="nav-item">
               <a href="#events_tab" role="tab" class="nav-link" data-bs-toggle="tab">
                 <Fontawesome.icon
-                  icon={Teiserver.Telemetry.SimpleMatchEventLib.icon()}
+                  icon={Barserver.Telemetry.SimpleMatchEventLib.icon()}
                   style="regular"
                 /> &nbsp;
                 Events

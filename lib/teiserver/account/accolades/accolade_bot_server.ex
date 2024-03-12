@@ -1,12 +1,12 @@
-defmodule Teiserver.Account.AccoladeBotServer do
+defmodule Barserver.Account.AccoladeBotServer do
   @moduledoc """
   The accolade server is the interface point for the Accolade system.
   """
   use GenServer
-  alias Teiserver.Config
-  alias Teiserver.{Account, CacheUser, Room, Battle, Coordinator}
-  alias Teiserver.Coordinator.CoordinatorCommands
-  alias Teiserver.Account.AccoladeLib
+  alias Barserver.Config
+  alias Barserver.{Account, CacheUser, Room, Battle, Coordinator}
+  alias Barserver.Coordinator.CoordinatorCommands
+  alias Barserver.Account.AccoladeLib
   alias Phoenix.PubSub
   require Logger
 
@@ -38,7 +38,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   def handle_info(:begin, _state) do
     Logger.debug("Starting up Accolade server")
     account = get_accolade_account()
-    Teiserver.cache_put(:application_metadata_cache, "teiserver_accolade_userid", account.id)
+    Barserver.cache_put(:application_metadata_cache, "teiserver_accolade_userid", account.id)
 
     {user, client} =
       case CacheUser.internal_client_login(account.id) do
@@ -57,15 +57,15 @@ defmodule Teiserver.Account.AccoladeBotServer do
     |> Enum.each(fn room_name ->
       Room.get_or_make_room(room_name, user.id)
       Room.add_user_to_room(user.id, room_name)
-      :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
+      :ok = PubSub.subscribe(Barserver.PubSub, "room:#{room_name}")
     end)
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "legacy_user_updates:#{user.id}")
+    :ok = PubSub.subscribe(Barserver.PubSub, "legacy_user_updates:#{user.id}")
 
     # We only subscribe to this if we're not in test, if we are it'll generate a bunch of SQL errors
     # without actually breaking anything
-    if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
-      :ok = PubSub.subscribe(Teiserver.PubSub, "global_match_updates")
+    if not Application.get_env(:teiserver, Barserver)[:test_mode] do
+      :ok = PubSub.subscribe(Barserver.PubSub, "global_match_updates")
     end
 
     {:noreply, state}
@@ -167,7 +167,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
     {:noreply, state}
   end
 
-  @spec get_accolade_account() :: Teiserver.Account.CacheUser.t()
+  @spec get_accolade_account() :: Barserver.Account.CacheUser.t()
   def get_accolade_account() do
     user =
       Account.get_user(nil,
@@ -184,19 +184,19 @@ defmodule Teiserver.Account.AccoladeBotServer do
             name: "AccoladesBot",
             email: "accolades_bot@teiserver",
             icon:
-              "fa-solid #{Teiserver.Account.AccoladeLib.icon()}" |> String.replace(" far ", " "),
+              "fa-solid #{Barserver.Account.AccoladeLib.icon()}" |> String.replace(" far ", " "),
             colour: "#0066AA",
             password: Account.make_bot_password(),
             roles: ["Bot", "Verified"],
             data: %{
               bot: true,
               moderator: false,
-              lobby_client: "Teiserver Internal Process"
+              lobby_client: "Barserver Internal Process"
             }
           })
 
         Account.update_user_stat(account.id, %{
-          country_override: Application.get_env(:teiserver, Teiserver)[:server_flag]
+          country_override: Application.get_env(:teiserver, Barserver)[:server_flag]
         })
 
         CacheUser.recache_user(account.id)
@@ -230,7 +230,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
     Horde.Registry.register(
-      Teiserver.AccoladesRegistry,
+      Barserver.AccoladesRegistry,
       "AccoladeBotServer",
       :accolade_bot
     )

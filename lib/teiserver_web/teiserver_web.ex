@@ -1,12 +1,12 @@
-defmodule TeiserverWeb do
+defmodule BarserverWeb do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, views, channels and so on.
 
   This can be used in your application as:
 
-      use TeiserverWeb, :controller
-      use TeiserverWeb, :view
+      use BarserverWeb, :controller
+      use BarserverWeb, :view
 
   The definitions below will be executed for every view,
   controller, etc, so keep them short and clean, focused
@@ -22,31 +22,31 @@ defmodule TeiserverWeb do
   def channel do
     quote do
       use Phoenix.Channel
-      import TeiserverWeb.Gettext
+      import BarserverWeb.Gettext
     end
   end
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: TeiserverWeb
+      use Phoenix.Controller, namespace: BarserverWeb
       import Phoenix.LiveView.Controller
       import Plug.Conn
-      import TeiserverWeb.Gettext
+      import BarserverWeb.Gettext
 
       use Breadcrumble
 
-      alias Teiserver.Plugs.AssignPlug
+      alias Barserver.Plugs.AssignPlug
 
-      import Teiserver.Logging.Helpers, only: [add_audit_log: 3]
+      import Barserver.Logging.Helpers, only: [add_audit_log: 3]
 
       alias Bodyguard.Plug.Authorize
 
-      alias TeiserverWeb.Router.Helpers, as: Routes
-      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+      alias BarserverWeb.Router.Helpers, as: Routes
+      import Barserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
 
       unquote(verified_routes())
 
-      import Teiserver.Account.RecentlyUsedCache,
+      import Barserver.Account.RecentlyUsedCache,
         only: [remove_recently: 2, insert_recently: 2, insert_recently: 1, get_recently: 1]
     end
   end
@@ -60,29 +60,29 @@ defmodule TeiserverWeb do
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
 
-      import Teiserver.Helper.StringHelper
-      alias Teiserver.Helper.StylingHelper
-      import Teiserver.Helper.StylingHelper, only: [colours: 1, colours: 2]
+      import Barserver.Helper.StringHelper
+      alias Barserver.Helper.StylingHelper
+      import Barserver.Helper.StylingHelper, only: [colours: 1, colours: 2]
 
-      alias Teiserver.Helper.ColourHelper
-      import Teiserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
+      alias Barserver.Helper.ColourHelper
+      import Barserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
       import Central.Helpers.InputHelper
       import Central.Helpers.ComponentHelper
-      import Teiserver.Helper.TimexHelper
+      import Barserver.Helper.TimexHelper
 
-      import Teiserver.Config, only: [get_user_config_cache: 2, get_site_config_cache: 1]
+      import Barserver.Config, only: [get_user_config_cache: 2, get_site_config_cache: 1]
 
-      import TeiserverWeb.ErrorHelpers
-      import TeiserverWeb.Gettext
-      alias TeiserverWeb.Router.Helpers, as: Routes
+      import BarserverWeb.ErrorHelpers
+      import BarserverWeb.Gettext
+      alias BarserverWeb.Router.Helpers, as: Routes
 
-      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+      import Barserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
 
-      import Teiserver.Helper.NumberHelper,
+      import Barserver.Helper.NumberHelper,
         only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
 
-      import TeiserverWeb.CoreComponents
-      import TeiserverWeb.NavComponents
+      import BarserverWeb.CoreComponents
+      import BarserverWeb.NavComponents
       unquote(verified_routes())
 
       import Phoenix.LiveView
@@ -91,7 +91,7 @@ defmodule TeiserverWeb do
 
       use Phoenix.View,
         root: "lib/teiserver_web/templates",
-        namespace: TeiserverWeb
+        namespace: BarserverWeb
     end
   end
 
@@ -110,23 +110,23 @@ defmodule TeiserverWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {TeiserverWeb.Layouts, :app}
+        layout: {BarserverWeb.Layouts, :app}
 
       use Breadcrumble
-      alias Teiserver.Account.AuthPlug
+      alias Barserver.Account.AuthPlug
 
-      import Teiserver.Account.AuthLib,
+      import Barserver.Account.AuthLib,
         only: [allow?: 2, allow_any?: 2, mount_require_all: 2, mount_require_any: 2]
 
-      import Teiserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
+      import Barserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
 
-      import Teiserver.Helper.NumberHelper,
+      import Barserver.Helper.NumberHelper,
         only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
 
-      import Teiserver.Helper.TimexHelper
-      alias Teiserver.Helper.StylingHelper
+      import Barserver.Helper.TimexHelper
+      alias Barserver.Helper.StylingHelper
 
-      import Teiserver.Account.RecentlyUsedCache,
+      import Barserver.Account.RecentlyUsedCache,
         only: [remove_recently: 2, insert_recently: 2, insert_recently: 1, get_recently: 1]
 
       defguard is_connected?(socket) when socket.transport_pid != nil
@@ -149,10 +149,10 @@ defmodule TeiserverWeb do
     quote do
       use Phoenix.Component
       alias Phoenix.LiveView.JS
-      import TeiserverWeb.Gettext
+      import BarserverWeb.Gettext
 
-      alias Teiserver.Helper.StylingHelper
-      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+      alias Barserver.Helper.StylingHelper
+      import Barserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
 
       unquote(verified_routes())
     end
@@ -161,53 +161,53 @@ defmodule TeiserverWeb do
   def queries do
     quote do
       import Ecto.Query, warn: false
-      import Teiserver.Helper.QueryHelpers
+      import Barserver.Helper.QueryHelpers
       alias Ecto.Multi
-      alias Teiserver.Repo
+      alias Barserver.Repo
     end
   end
 
   def library do
     quote do
-      alias Teiserver.Repo
+      alias Barserver.Repo
       import Ecto.Query, warn: false
       alias Ecto.Multi
 
-      import Teiserver.Helper.QueryHelpers
-      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
-      alias Teiserver.Helper.StylingHelper
-      alias Teiserver.Data.Types, as: T
+      import Barserver.Helper.QueryHelpers
+      import Barserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+      alias Barserver.Helper.StylingHelper
+      alias Barserver.Data.Types, as: T
     end
   end
 
   def library_newform do
     quote do
-      alias Teiserver.Data.Types, as: T
-      alias Teiserver.Repo
-      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
-      alias Teiserver.Helper.{QueryHelpers, StylingHelper}
+      alias Barserver.Data.Types, as: T
+      alias Barserver.Repo
+      import Barserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+      alias Barserver.Helper.{QueryHelpers, StylingHelper}
     end
   end
 
   def report do
     quote do
-      alias Teiserver.Repo
+      alias Barserver.Repo
       import Ecto.Query, warn: false
       alias Ecto.Multi
 
-      import Teiserver.Helper.QueryHelpers
-      alias Teiserver.Helper.DatePresets
-      import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
-      import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+      import Barserver.Helper.QueryHelpers
+      alias Barserver.Helper.DatePresets
+      import Barserver.Helper.TimexHelper, only: [date_to_str: 2]
+      import Barserver.Helper.NumberHelper, only: [int_parse: 1]
     end
   end
 
   def startup do
     quote do
-      import Teiserver.Account.AuthLib, only: [add_permission_set: 3]
+      import Barserver.Account.AuthLib, only: [add_permission_set: 3]
 
-      import Teiserver.Config, only: [add_site_config_type: 1]
-      import Teiserver.Logging.AuditLogLib, only: [add_audit_types: 1]
+      import Barserver.Config, only: [add_site_config_type: 1]
+      import Barserver.Logging.AuditLogLib, only: [add_audit_types: 1]
     end
   end
 
@@ -215,8 +215,8 @@ defmodule TeiserverWeb do
     quote do
       use Ecto.Schema
       import Ecto.Changeset
-      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
-      import Teiserver.Helper.SchemaHelper
+      import Barserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+      import Barserver.Helper.SchemaHelper
     end
   end
 
@@ -239,11 +239,11 @@ defmodule TeiserverWeb do
 
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
-      import TeiserverWeb.{CoreComponents, NavComponents}
+      import BarserverWeb.{CoreComponents, NavComponents}
 
-      import TeiserverWeb.ErrorHelpers
-      import TeiserverWeb.Gettext
-      alias TeiserverWeb.Router.Helpers, as: Routes
+      import BarserverWeb.ErrorHelpers
+      import BarserverWeb.Gettext
+      alias BarserverWeb.Router.Helpers, as: Routes
     end
   end
 
@@ -252,8 +252,8 @@ defmodule TeiserverWeb do
       # HTML escaping functionality
       import Phoenix.HTML
       # Core UI components and translation
-      import TeiserverWeb.{CoreComponents, NavComponents}
-      import TeiserverWeb.Gettext
+      import BarserverWeb.{CoreComponents, NavComponents}
+      import BarserverWeb.Gettext
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
       # Routes generation with the ~p sigil
@@ -264,9 +264,9 @@ defmodule TeiserverWeb do
   def verified_routes do
     quote do
       use Phoenix.VerifiedRoutes,
-        endpoint: TeiserverWeb.Endpoint,
-        router: TeiserverWeb.Router,
-        statics: TeiserverWeb.static_paths()
+        endpoint: BarserverWeb.Endpoint,
+        router: BarserverWeb.Router,
+        statics: BarserverWeb.static_paths()
     end
   end
 

@@ -1,10 +1,10 @@
-# defmodule TeiserverWeb.Account.AccoladeControllerTest do
-#   use TeiserverWeb.ConnCase
+# defmodule BarserverWeb.Account.AccoladeControllerTest do
+#   use BarserverWeb.ConnCase
 
-#   alias Teiserver.Account
-#   alias Teiserver.AccountTestLib
+#   alias Barserver.Account
+#   alias Barserver.AccountTestLib
 
-#   alias Teiserver.Helpers.GeneralTestLib
+#   alias Barserver.Helpers.GeneralTestLib
 #   setup do
 #     GeneralTestLib.conn_setup(~w(horizon.manage))
 #   end

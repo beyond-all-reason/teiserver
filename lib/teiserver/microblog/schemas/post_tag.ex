@@ -1,11 +1,11 @@
-defmodule Teiserver.Microblog.PostTag do
+defmodule Barserver.Microblog.PostTag do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   @primary_key false
   schema "microblog_post_tags" do
-    belongs_to :post, Teiserver.Microblog.Post, primary_key: true
-    belongs_to :tag, Teiserver.Microblog.Tag, primary_key: true
+    belongs_to :post, Barserver.Microblog.Post, primary_key: true
+    belongs_to :tag, Barserver.Microblog.Tag, primary_key: true
   end
 
   @doc """

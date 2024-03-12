@@ -209,7 +209,7 @@ A comment attached to a blog post
 * timestamp :: timestamp
 
 ## UserConfigType
-Built on top of the Teiserver.Config data structures and used in `c.config._user*`
+Built on top of the Barserver.Config data structures and used in `c.config._user*`
 
 * default :: string
 * description :: string
@@ -226,7 +226,7 @@ Built on top of the Teiserver.Config data structures and used in `c.config._user
     "description": "When checked the flag associated with your IP will be displayed. If unchecked your flag will be blank. This will take effect next time you login with your client.",
     "key": "teiserver.Show flag",
     "opts": {},
-    "section": "Teiserver account",
+    "section": "Barserver account",
     "type": "boolean",
     "value_label": "Value"
   }

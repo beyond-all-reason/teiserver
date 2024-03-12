@@ -1,9 +1,9 @@
-defmodule Teiserver.Communication.DiscordChannelLib do
+defmodule Barserver.Communication.DiscordChannelLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
-  alias Teiserver.Account
-  alias Teiserver.Communication.{DiscordChannel, DiscordChannelQueries}
-  alias Teiserver.Data.Types, as: T
+  use BarserverWeb, :library_newform
+  alias Barserver.Account
+  alias Barserver.Communication.{DiscordChannel, DiscordChannelQueries}
+  alias Barserver.Data.Types, as: T
 
   @spec special_channels() :: [String.t()]
   def special_channels do
@@ -85,7 +85,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   end
 
   def get_discord_channel(discord_channel_name) do
-    Teiserver.cache_get(:discord_channel_cache, discord_channel_name)
+    Barserver.cache_get(:discord_channel_cache, discord_channel_name)
   end
 
   @doc """
@@ -139,7 +139,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
 
   """
   def delete_discord_channel(%DiscordChannel{} = discord_channel) do
-    Teiserver.cache_delete(:discord_channel_cache, discord_channel.name)
+    Barserver.cache_delete(:discord_channel_cache, discord_channel.name)
     Repo.delete(discord_channel)
   end
 
@@ -159,14 +159,14 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   defp cache_channel({:error, channel}), do: {:error, channel}
 
   defp cache_channel({:ok, %DiscordChannel{} = channel}) do
-    Teiserver.cache_put(:discord_channel_cache, channel.name, channel)
-    Teiserver.cache_put(:discord_channel_cache, "id:#{channel.channel_id}", channel)
+    Barserver.cache_put(:discord_channel_cache, channel.name, channel)
+    Barserver.cache_put(:discord_channel_cache, "id:#{channel.channel_id}", channel)
     {:ok, channel}
   end
 
   defp cache_channel(%DiscordChannel{} = channel) do
-    Teiserver.cache_put(:discord_channel_cache, channel.name, channel)
-    Teiserver.cache_put(:discord_channel_cache, "id:#{channel.channel_id}", channel)
+    Barserver.cache_put(:discord_channel_cache, channel.name, channel)
+    Barserver.cache_put(:discord_channel_cache, "id:#{channel.channel_id}", channel)
     {:ok, channel}
   end
 
@@ -180,7 +180,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
 
   @doc """
   Given an integer it will take use the channel id, if given a string it will look up
-  the channel name from the database Teiserver.Communication.DiscordChannel objects
+  the channel name from the database Barserver.Communication.DiscordChannel objects
   """
   @spec new_discord_message(String.t() | non_neg_integer(), String.t()) ::
           map | nil | {:error, String.t()}
@@ -273,7 +273,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
 
   @spec use_discord?() :: boolean
   def use_discord?() do
-    Application.get_env(:teiserver, Teiserver)[:enable_discord_bridge]
+    Application.get_env(:teiserver, Barserver)[:enable_discord_bridge]
   end
 
   @spec get_guild_id() :: integer | nil

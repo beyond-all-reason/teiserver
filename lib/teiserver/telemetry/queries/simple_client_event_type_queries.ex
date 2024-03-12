@@ -1,7 +1,7 @@
-defmodule Teiserver.Telemetry.SimpleClientEventTypeQueries do
+defmodule Barserver.Telemetry.SimpleClientEventTypeQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
-  alias Teiserver.Telemetry.SimpleClientEventType
+  use BarserverWeb, :queries
+  alias Barserver.Telemetry.SimpleClientEventType
 
   # Queries
   @spec query_simple_client_event_types(list) :: Ecto.Query.t()

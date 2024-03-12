@@ -1,6 +1,6 @@
-defmodule Teiserver.Clans.ClanLib do
-  use TeiserverWeb, :library
-  alias Teiserver.Clans.Clan
+defmodule Barserver.Clans.ClanLib do
+  use BarserverWeb, :library
+  alias Barserver.Clans.Clan
 
   # Functions
   @spec icon :: String.t()

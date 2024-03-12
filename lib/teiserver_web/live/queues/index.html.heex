@@ -2,7 +2,7 @@
 accepted_app = @client == nil or @client.app_status == :accepted
 # accepted_app = true %>
 
-<%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+<%= render(BarserverWeb.Battle.GeneralView, "sub_menu.html", %{
   active: "matchmaking",
   conn: Map.put(@socket, :permissions, @current_user.permissions)
 }) %>
@@ -30,7 +30,7 @@ accepted_app = @client == nil or @client.app_status == :accepted
               href={Routes.ts_game_queue_path(@socket, :index)}
               class={"btn btn-outline-#{bsname}"}
             >
-              <i class={"fa-fw fa-regular #{Teiserver.Admin.AdminLib.icon()}"}></i> &nbsp;
+              <i class={"fa-fw fa-regular #{Barserver.Admin.AdminLib.icon()}"}></i> &nbsp;
               Admin view
             </a>
           <% end %>
@@ -49,7 +49,7 @@ accepted_app = @client == nil or @client.app_status == :accepted
         <div class="alert alert-warning">
           Matchmaking is in an early stage so there are a few things to bear in mind:
           <ul>
-            <li>Bugs are expected; please post them to the Teiserver channel in the discord</li>
+            <li>Bugs are expected; please post them to the Barserver channel in the discord</li>
             <li>
               This page doesn't always update correctly, if it seems stuck please refresh it
             </li>

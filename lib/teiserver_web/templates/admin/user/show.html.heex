@@ -14,7 +14,7 @@
 </script>
 
 <%= render(
-  TeiserverWeb.Admin.GeneralView,
+  BarserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "users"})
 ) %>
@@ -24,7 +24,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Admin.UserView,
+          BarserverWeb.Admin.UserView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
@@ -69,7 +69,7 @@
               class={class}
               id="section-menu-new"
             >
-              <%= central_component("icon", icon: Teiserver.Account.ClientLib.icon()) %> &nbsp;
+              <%= central_component("icon", icon: Barserver.Account.ClientLib.icon()) %> &nbsp;
               Client view
             </a>
           <% end %>
@@ -92,7 +92,7 @@
           <li class="nav-item" role="presentation">
             <a href="#overview_tab" role="tab" class="nav-link" data-bs-toggle="tab">
               <Fontawesome.icon
-                icon={Teiserver.Helper.StylingHelper.icon(:overview)}
+                icon={Barserver.Helper.StylingHelper.icon(:overview)}
                 style="solid"
               /> Overview
             </a>

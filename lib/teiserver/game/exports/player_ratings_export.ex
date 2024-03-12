@@ -1,22 +1,22 @@
-defmodule Teiserver.Game.PlayerRatingsExport do
+defmodule Barserver.Game.PlayerRatingsExport do
   @moduledoc """
   Can be manually run with:
-  Teiserver.Game.PlayerRatingsExport.show_form(nil, %{
+  Barserver.Game.PlayerRatingsExport.show_form(nil, %{
     "date_preset" => "All time",
     "end_date" => "",
     "rating_type" => "Team",
     "start_date" => ""
   })
 
-  Teiserver.Game.PlayerRatingsExport.show_form(nil, %{
+  Barserver.Game.PlayerRatingsExport.show_form(nil, %{
     "date_preset" => "All time",
     "end_date" => "",
     "rating_type" => "Duel",
     "start_date" => ""
   })
   """
-  alias Teiserver.Account
-  alias Teiserver.Game.MatchRatingLib
+  alias Barserver.Account
+  alias Barserver.Game.MatchRatingLib
   require Logger
 
   @spec icon() :: String.t()

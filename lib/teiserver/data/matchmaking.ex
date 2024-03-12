@@ -1,6 +1,6 @@
-defmodule Teiserver.Data.QueueStruct do
+defmodule Barserver.Data.QueueStruct do
   @moduledoc """
-  A struct representing the in-memory version of Teiserver.Game.DBQueue
+  A struct representing the in-memory version of Barserver.Game.DBQueue
   """
   @enforce_keys ~w(id name team_size team_count icon colour settings conditions map_list)a
   defstruct [
@@ -19,7 +19,7 @@ defmodule Teiserver.Data.QueueStruct do
   ]
 end
 
-defmodule Teiserver.Data.QueueGroup do
+defmodule Barserver.Data.QueueGroup do
   @moduledoc false
   @enforce_keys ~w(id members rating avoid count join_time wait_time)a
   defstruct id: nil,
@@ -34,23 +34,23 @@ defmodule Teiserver.Data.QueueGroup do
             max_distance: 0
 end
 
-defmodule Teiserver.Data.Matchmaking do
+defmodule Barserver.Data.Matchmaking do
   require Logger
-  alias Teiserver.{Account, Game, CacheUser}
-  alias Teiserver.Battle.BalanceLib
-  alias Teiserver.Data.{QueueStruct, QueueGroup}
-  alias Teiserver.Game.{QueueWaitServer, QueueRoomServer}
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.{Account, Game, CacheUser}
+  alias Barserver.Battle.BalanceLib
+  alias Barserver.Data.{QueueStruct, QueueGroup}
+  alias Barserver.Game.{QueueWaitServer, QueueRoomServer}
+  alias Barserver.Data.Types, as: T
   alias Phoenix.PubSub
 
   @spec get_queue(Integer.t()) :: QueueStruct.t() | nil
   def get_queue(id) do
-    Teiserver.cache_get(:teiserver_queues, id)
+    Barserver.cache_get(:teiserver_queues, id)
   end
 
   @spec get_queue_wait_pid(T.queue_id()) :: pid() | nil
   def get_queue_wait_pid(id) when is_integer(id) do
-    case Horde.Registry.lookup(Teiserver.QueueWaitRegistry, id) do
+    case Horde.Registry.lookup(Barserver.QueueWaitRegistry, id) do
       [{pid, _}] ->
         pid
 
@@ -87,7 +87,7 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec get_queue_match_pid(T.mm_match_id()) :: pid() | nil
   def get_queue_match_pid(id) do
-    case Horde.Registry.lookup(Teiserver.QueueMatchRegistry, id) do
+    case Horde.Registry.lookup(Barserver.QueueMatchRegistry, id) do
       [{pid, _}] ->
         pid
 
@@ -125,7 +125,7 @@ defmodule Teiserver.Data.Matchmaking do
   @spec create_match([QueueGroup.t()], T.queue_id()) :: {pid, String.t()}
   def create_match(group_list, queue_id) do
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_global_matchmaking",
       %{
         channel: "teiserver_global_matchmaking",
@@ -142,7 +142,7 @@ defmodule Teiserver.Data.Matchmaking do
     match_id = UUID.uuid1()
 
     {:ok, pid} =
-      DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
+      DynamicSupervisor.start_child(Barserver.Game.QueueSupervisor, {
         QueueRoomServer,
         data: %{
           match_id: match_id,
@@ -156,7 +156,7 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec get_queue_and_info(T.queue_id()) :: {QueueStruct.t(), Map.t()}
   def get_queue_and_info(id) when is_integer(id) do
-    queue = Teiserver.cache_get(:teiserver_queues, id)
+    queue = Barserver.cache_get(:teiserver_queues, id)
     info = call_queue_wait(id, :get_info)
     {queue, info}
   end
@@ -175,7 +175,7 @@ defmodule Teiserver.Data.Matchmaking do
   def add_queue(nil), do: {:error, "no queue"}
 
   def add_queue(queue) do
-    Teiserver.cache_update(:lists, :queues, fn value ->
+    Barserver.cache_update(:lists, :queues, fn value ->
       new_value =
         [queue.id | value]
         |> Enum.uniq()
@@ -189,7 +189,7 @@ defmodule Teiserver.Data.Matchmaking do
       :exists
     else
       result =
-        DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
+        DynamicSupervisor.start_child(Barserver.Game.QueueSupervisor, {
           QueueWaitServer,
           data: %{queue: queue}
         })
@@ -210,25 +210,25 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec update_queue(QueueStruct.t()) :: :ok
   def update_queue(queue) do
-    Teiserver.cache_put(:teiserver_queues, queue.id, queue)
+    Barserver.cache_put(:teiserver_queues, queue.id, queue)
   end
 
   @spec list_queue_ids :: [non_neg_integer()]
   def list_queue_ids() do
-    Teiserver.cache_get(:lists, :queues) || []
+    Barserver.cache_get(:lists, :queues) || []
   end
 
   @spec list_queues :: [QueueStruct.t() | nil]
   def list_queues() do
     list_queue_ids()
-    |> Enum.map(fn queue_id -> Teiserver.cache_get(:teiserver_queues, queue_id) end)
+    |> Enum.map(fn queue_id -> Barserver.cache_get(:teiserver_queues, queue_id) end)
   end
 
   @spec list_queues([Integer.t()]) :: [QueueStruct.t() | nil]
   def list_queues(id_list) do
     id_list
     |> Enum.map(fn queue_id ->
-      Teiserver.cache_get(:teiserver_queues, queue_id)
+      Barserver.cache_get(:teiserver_queues, queue_id)
     end)
   end
 
@@ -445,7 +445,7 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec pre_cache_queues :: :ok
   def pre_cache_queues() do
-    Teiserver.cache_insert_new(:lists, :queues, [])
+    Barserver.cache_insert_new(:lists, :queues, [])
 
     queue_count =
       Game.list_queues(limit: :infinity)
@@ -461,6 +461,6 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec list_match_servers :: [QueueStruct.t() | nil]
   def list_match_servers() do
-    Horde.Registry.select(Teiserver.QueueMatchRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    Horde.Registry.select(Barserver.QueueMatchRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 end

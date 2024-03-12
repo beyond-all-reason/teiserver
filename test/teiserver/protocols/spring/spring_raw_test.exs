@@ -1,11 +1,11 @@
-defmodule Teiserver.SpringRawTest do
-  use Teiserver.ServerCase, async: false
+defmodule Barserver.SpringRawTest do
+  use Barserver.ServerCase, async: false
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1, new_user: 0]
 
-  alias Teiserver.Account.UserCacheLib
-  alias Teiserver.Account
+  alias Barserver.Account.UserCacheLib
+  alias Barserver.Account
 
   setup do
     %{socket: socket} = raw_setup()
@@ -128,12 +128,12 @@ defmodule Teiserver.SpringRawTest do
   # Currently not active
   # test "CONFIRMAGREEMENT", %{socket: socket} do
   #   user = new_user()
-  #   Teiserver.Account.update_user_stat(user.id, %{"verification_code" => "123456"})
+  #   Barserver.Account.update_user_stat(user.id, %{"verification_code" => "123456"})
   #   user = UserCacheLib.update_user(%{user | verified: false, roles: []}, persist: true)
 
   #   query = "UPDATE account_users SET inserted_at = '2020-01-01 01:01:01' WHERE id = #{user.id}"
   #   Ecto.Adapters.SQL.query(Repo, query, [])
-  #   Teiserver.Account.UserCacheLib.recache_user(user.id)
+  #   Barserver.Account.UserCacheLib.recache_user(user.id)
   #   _ = _recv_raw(socket)
 
   #   # If we try to login as them we should get a specific failure
@@ -180,7 +180,7 @@ defmodule Teiserver.SpringRawTest do
     user = new_user()
 
     # Update the login count
-    Teiserver.cache_put(:teiserver_login_count, user.id, 9999)
+    Barserver.cache_put(:teiserver_login_count, user.id, 9999)
 
     # Welcome message
     _recv_raw(socket)

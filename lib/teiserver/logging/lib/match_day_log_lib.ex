@@ -1,7 +1,7 @@
-defmodule Teiserver.Logging.MatchDayLogLib do
-  use TeiserverWeb, :library
+defmodule Barserver.Logging.MatchDayLogLib do
+  use BarserverWeb, :library
 
-  alias Teiserver.Logging.MatchDayLog
+  alias Barserver.Logging.MatchDayLog
 
   @spec colours :: atom
   def colours(), do: :success2

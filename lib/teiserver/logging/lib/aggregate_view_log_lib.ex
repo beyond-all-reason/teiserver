@@ -1,9 +1,9 @@
-defmodule Teiserver.Logging.AggregateViewLogLib do
+defmodule Barserver.Logging.AggregateViewLogLib do
   @moduledoc false
-  use TeiserverWeb, :library
+  use BarserverWeb, :library
 
-  alias Teiserver.Logging.AggregateViewLog
-  alias Teiserver.Logging.PageViewLog
+  alias Barserver.Logging.AggregateViewLog
+  alias Barserver.Logging.PageViewLog
 
   @spec colours() :: atom
   def colours(), do: :info2

@@ -1,11 +1,11 @@
-defmodule TeiserverWeb.Microblog.RssControllerTest do
+defmodule BarserverWeb.Microblog.RssControllerTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase
-  import Teiserver.MicroblogFixtures
+  use BarserverWeb.ConnCase
+  import Barserver.MicroblogFixtures
 
   defp auth_setup(_) do
     Central.Helpers.GeneralTestLib.conn_setup()
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    |> Barserver.BarserverTestLib.conn_setup()
   end
 
   defp filler_posts(_) do

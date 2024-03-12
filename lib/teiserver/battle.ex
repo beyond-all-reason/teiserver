@@ -1,21 +1,21 @@
-defmodule Teiserver.Battle do
+defmodule Barserver.Battle do
   @moduledoc """
   The Battle context.
   """
 
   import Ecto.Query, warn: false
-  alias Teiserver.Helper.QueryHelpers
-  alias Teiserver.Repo
-  alias Teiserver.{Account, Telemetry, Coordinator}
-  alias Teiserver.Lobby
-  alias Teiserver.Battle.{MatchMembership, MatchMembershipLib}
+  alias Barserver.Helper.QueryHelpers
+  alias Barserver.Repo
+  alias Barserver.{Account, Telemetry, Coordinator}
+  alias Barserver.Lobby
+  alias Barserver.Battle.{MatchMembership, MatchMembershipLib}
   alias Phoenix.PubSub
 
-  alias Teiserver.Battle.Match
-  alias Teiserver.Battle.MatchLib
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Battle.Match
+  alias Barserver.Battle.MatchLib
+  alias Barserver.Data.Types, as: T
 
-  alias Teiserver.Protocols.Spring
+  alias Barserver.Protocols.Spring
   require Logger
 
   @spec match_query(List.t()) :: Ecto.Query.t()
@@ -252,7 +252,7 @@ defmodule Teiserver.Battle do
   # It is currently not actually used so might be ripe for removal
   # @spec add_player_to_battle(T.userid(), T.lobby_id()) :: :ok | {:error, String.t()}
   # def add_player_to_battle(userid, lobby_id) do
-  #   case Teiserver.Client.get_client_by_id(userid) do
+  #   case Barserver.Client.get_client_by_id(userid) do
   #     nil ->
   #       {:error, "no client"}
   #     _ ->
@@ -260,13 +260,13 @@ defmodule Teiserver.Battle do
   #         false ->
   #           {:error, "no battle"}
   #         true ->
-  #           Teiserver.Lobby.accept_join_request(userid, lobby_id)
+  #           Barserver.Lobby.accept_join_request(userid, lobby_id)
   #       end
   #   end
   # end
 
-  alias Teiserver.Battle.{MatchMonitorServer, MatchLib}
-  alias Teiserver.Lobby.{ChatLib, LobbyLib}
+  alias Barserver.Battle.{MatchMonitorServer, MatchLib}
+  alias Barserver.Lobby.{ChatLib, LobbyLib}
 
   @spec start_match(nil | T.lobby_id()) :: :ok
   def start_match(nil), do: :ok
@@ -378,7 +378,7 @@ defmodule Teiserver.Battle do
     update_match(match, params)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "global_match_updates",
       %{
         channel: "global_match_updates",

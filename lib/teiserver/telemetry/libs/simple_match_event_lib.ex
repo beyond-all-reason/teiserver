@@ -1,8 +1,8 @@
-defmodule Teiserver.Telemetry.SimpleMatchEventLib do
+defmodule Barserver.Telemetry.SimpleMatchEventLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
-  alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.{SimpleMatchEvent, SimpleMatchEventQueries}
+  use BarserverWeb, :library_newform
+  alias Barserver.Telemetry
+  alias Barserver.Telemetry.{SimpleMatchEvent, SimpleMatchEventQueries}
   alias Phoenix.PubSub
 
   @broadcast_event_types ~w()
@@ -30,7 +30,7 @@ defmodule Teiserver.Telemetry.SimpleMatchEventLib do
       {:ok, _event} ->
         if Enum.member?(@broadcast_event_types, event_type_name) do
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "telemetry_simple_match_events",
             %{
               channel: "telemetry_simple_match_events",

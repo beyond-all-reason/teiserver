@@ -1,22 +1,22 @@
-defmodule Teiserver.Moderation.Report do
+defmodule Barserver.Moderation.Report do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "moderation_reports" do
-    belongs_to :reporter, Teiserver.Account.User
-    belongs_to :target, Teiserver.Account.User
+    belongs_to :reporter, Barserver.Account.User
+    belongs_to :target, Barserver.Account.User
 
     field :type, :string
     field :sub_type, :string
     field :extra_text, :string
     field :closed, :boolean, default: false
 
-    belongs_to :match, Teiserver.Battle.Match
+    belongs_to :match, Barserver.Battle.Match
     field :relationship, :string
-    belongs_to :result, Teiserver.Moderation.Action
-    belongs_to :report_group, Teiserver.Moderation.ReportGroup
+    belongs_to :result, Barserver.Moderation.Action
+    belongs_to :report_group, Barserver.Moderation.ReportGroup
 
-    has_many :responses, Teiserver.Moderation.Response
+    has_many :responses, Barserver.Moderation.Response
 
     timestamps()
   end

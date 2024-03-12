@@ -1,8 +1,8 @@
-defmodule TeiserverWeb.Microblog.Admin.TagLive.Index do
+defmodule BarserverWeb.Microblog.Admin.TagLive.Index do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  alias Teiserver.Microblog
-  import TeiserverWeb.MicroblogComponents
+  use BarserverWeb, :live_view
+  alias Barserver.Microblog
+  import BarserverWeb.MicroblogComponents
 
   @impl true
   def mount(_params, _session, socket) do
@@ -28,11 +28,11 @@ defmodule TeiserverWeb.Microblog.Admin.TagLive.Index do
     |> assign(:tags, Microblog.list_tags(order_by: ["Name (A-Z)"]))
     |> assign(:tag, nil)
     |> assign(:site_menu_active, "microblog")
-    |> assign(:view_colour, Teiserver.Microblog.colours())
+    |> assign(:view_colour, Barserver.Microblog.colours())
   end
 
   @impl true
-  def handle_info({TeiserverWeb.Microblog.TagFormComponent, {:saved, _tag}}, socket) do
+  def handle_info({BarserverWeb.Microblog.TagFormComponent, {:saved, _tag}}, socket) do
     {:noreply,
      socket
      |> put_flash(:info, "Tag created successfully")
@@ -40,7 +40,7 @@ defmodule TeiserverWeb.Microblog.Admin.TagLive.Index do
   end
 
   def handle_info(
-        {TeiserverWeb.Microblog.TagFormComponent, {:updated_changeset, %{changes: tag}}},
+        {BarserverWeb.Microblog.TagFormComponent, {:updated_changeset, %{changes: tag}}},
         socket
       ) do
     {:noreply,

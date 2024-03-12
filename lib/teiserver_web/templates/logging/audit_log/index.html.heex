@@ -46,7 +46,7 @@
 </style>
 
 <%= render(
-  TeiserverWeb.Logging.GeneralView,
+  BarserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "audit"})
 ) %>
@@ -55,7 +55,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(TeiserverWeb.Logging.AuditLogView, "section_menu.html",
+        <%= render(BarserverWeb.Logging.AuditLogView, "section_menu.html",
           conn: @conn,
           show_search: @show_search,
           active: if(@show_search, do: "search", else: "index")
@@ -72,7 +72,7 @@
         </div>
 
         <%= if @show_search do %>
-          <%= render(TeiserverWeb.Logging.AuditLogView, "search.html",
+          <%= render(BarserverWeb.Logging.AuditLogView, "search.html",
             conn: @conn,
             params: @params,
             actions: @actions,

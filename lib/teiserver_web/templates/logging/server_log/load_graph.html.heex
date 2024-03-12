@@ -263,7 +263,7 @@ all_col_class = col_class <> " all-chart" %>
 <% end %>
 
 <%= render(
-  TeiserverWeb.Logging.GeneralView,
+  BarserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "server"})
 ) %>
@@ -273,7 +273,7 @@ all_col_class = col_class <> " all-chart" %>
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Logging.ServerLogView,
+          BarserverWeb.Logging.ServerLogView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",

@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.CreateMicroblog do
+defmodule Barserver.Repo.Migrations.CreateMicroblog do
   use Ecto.Migration
 
   def change do

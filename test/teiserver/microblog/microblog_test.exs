@@ -1,13 +1,13 @@
-defmodule Teiserver.MicroblogTest do
+defmodule Barserver.MicroblogTest do
   @moduledoc false
-  use Teiserver.DataCase
+  use Barserver.DataCase
 
-  alias Teiserver.Microblog
+  alias Barserver.Microblog
 
   describe "tags" do
-    alias Teiserver.Microblog.Tag
+    alias Barserver.Microblog.Tag
 
-    import Teiserver.MicroblogFixtures
+    import Barserver.MicroblogFixtures
 
     @invalid_attrs %{colour: nil, icon: nil, name: nil}
 
@@ -63,9 +63,9 @@ defmodule Teiserver.MicroblogTest do
   end
 
   describe "posts" do
-    alias Teiserver.Microblog.Post
+    alias Barserver.Microblog.Post
 
-    import Teiserver.{AccountFixtures, MicroblogFixtures}
+    import Barserver.{AccountFixtures, MicroblogFixtures}
 
     @invalid_attrs %{
       contents: nil,
@@ -143,9 +143,9 @@ defmodule Teiserver.MicroblogTest do
   end
 
   describe "post_tags" do
-    alias Teiserver.Microblog.PostTag
+    alias Barserver.Microblog.PostTag
 
-    import Teiserver.MicroblogFixtures
+    import Barserver.MicroblogFixtures
 
     @invalid_attrs %{post_id: nil, tag_id: nil}
 
@@ -200,9 +200,9 @@ defmodule Teiserver.MicroblogTest do
   end
 
   describe "user_preferences" do
-    alias Teiserver.Microblog.UserPreference
+    alias Barserver.Microblog.UserPreference
 
-    import Teiserver.{AccountFixtures, MicroblogFixtures}
+    import Barserver.{AccountFixtures, MicroblogFixtures}
 
     @invalid_attrs %{
       disabled_posters: nil,

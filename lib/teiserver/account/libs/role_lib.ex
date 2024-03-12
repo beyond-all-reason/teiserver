@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.RoleLib do
+defmodule Barserver.Account.RoleLib do
   @moduledoc """
   A library with all the hard-coded data regarding user roles.
   """

@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.Telemetry.SimpleLobbyEventController do
-  use TeiserverWeb, :controller
-  alias Teiserver.{Account, Telemetry}
-  alias Teiserver.Telemetry.{ExportSimpleLobbyEventsTask, SimpleLobbyEventQueries}
+defmodule BarserverWeb.Telemetry.SimpleLobbyEventController do
+  use BarserverWeb, :controller
+  alias Barserver.{Account, Telemetry}
+  alias Barserver.Telemetry.{ExportSimpleLobbyEventsTask, SimpleLobbyEventQueries}
   require Logger
 
   plug(AssignPlug,
@@ -10,9 +10,9 @@ defmodule TeiserverWeb.Telemetry.SimpleLobbyEventController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Auth.Server,
+    policy: Barserver.Auth.Server,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
 

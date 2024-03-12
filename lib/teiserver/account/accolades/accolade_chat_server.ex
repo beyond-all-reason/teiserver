@@ -1,14 +1,14 @@
-defmodule Teiserver.Account.AccoladeChatServer do
+defmodule Barserver.Account.AccoladeChatServer do
   @moduledoc """
   Each chat server is for a specific user, when the chat server has done it's job it self-terminates.
   """
 
   use GenServer
-  alias Teiserver.Config
-  alias Teiserver.{CacheUser, Account}
-  alias Teiserver.Account.AccoladeLib
-  alias Teiserver.Account.AccoladeBotServer
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Config
+  alias Barserver.{CacheUser, Account}
+  alias Barserver.Account.AccoladeLib
+  alias Barserver.Account.AccoladeBotServer
+  alias Barserver.Data.Types, as: T
 
   @line_break "-------------------------------------------------"
   @chat_timeout 600_000
@@ -147,7 +147,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
   end
 
   def handle_info(:terminate, state) do
-    DynamicSupervisor.terminate_child(Teiserver.Account.AccoladeSupervisor, self())
+    DynamicSupervisor.terminate_child(Barserver.Account.AccoladeSupervisor, self())
     {:stop, :normal, %{state | userid: nil}}
   end
 
@@ -215,7 +215,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
-      Teiserver.AccoladesRegistry,
+      Barserver.AccoladesRegistry,
       "AccoladeChatServer:#{userid}",
       userid
     )

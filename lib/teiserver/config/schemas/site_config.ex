@@ -1,6 +1,6 @@
-defmodule Teiserver.Config.SiteConfig do
+defmodule Barserver.Config.SiteConfig do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   @primary_key false
   schema "config_site" do

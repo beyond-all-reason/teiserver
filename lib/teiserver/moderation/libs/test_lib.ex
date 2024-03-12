@@ -1,6 +1,6 @@
-defmodule Teiserver.Moderation.ModerationTestLib do
+defmodule Barserver.Moderation.ModerationTestLib do
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.Moderation
+  alias Barserver.Moderation
 
   @spec report_fixture(map) :: Moderation.Report.t()
   def report_fixture(attrs \\ %{}) do

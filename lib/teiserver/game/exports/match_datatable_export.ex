@@ -1,23 +1,23 @@
-defmodule Teiserver.Game.MatchDataTableExport do
+defmodule Barserver.Game.MatchDataTableExport do
   @moduledoc """
   Can be manually run with:
-  Teiserver.Game.MatchDataTableExport.show_form(nil, %{
+  Barserver.Game.MatchDataTableExport.show_form(nil, %{
     "date_preset" => "All time",
     "end_date" => "",
     "rating_type" => "Team",
     "start_date" => ""
   })
 
-  Teiserver.Game.MatchDataTableExport.show_form(nil, %{
+  Barserver.Game.MatchDataTableExport.show_form(nil, %{
     "date_preset" => "All time",
     "end_date" => "",
     "rating_type" => "Duel",
     "start_date" => ""
   })
   """
-  alias Teiserver.Helper.DatePresets
-  alias Teiserver.{Battle}
-  alias Teiserver.Helper.TimexHelper
+  alias Barserver.Helper.DatePresets
+  alias Barserver.{Battle}
+  alias Barserver.Helper.TimexHelper
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-table"

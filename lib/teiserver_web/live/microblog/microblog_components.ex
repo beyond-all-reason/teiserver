@@ -1,11 +1,11 @@
-defmodule TeiserverWeb.MicroblogComponents do
+defmodule BarserverWeb.MicroblogComponents do
   @moduledoc false
-  use TeiserverWeb, :component
-  alias Teiserver.Helper.TimexHelper
-  import TeiserverWeb.NavComponents, only: [sub_menu_button: 1]
+  use BarserverWeb, :component
+  alias Barserver.Helper.TimexHelper
+  import BarserverWeb.NavComponents, only: [sub_menu_button: 1]
 
   @doc """
-  <TeiserverWeb.MicroblogComponents.sub_menu active={active} view_colour={@view_colour} />
+  <BarserverWeb.MicroblogComponents.sub_menu active={active} view_colour={@view_colour} />
   """
   attr :view_colour, :string, required: true
   attr :active, :string, required: true
@@ -17,7 +17,7 @@ defmodule TeiserverWeb.MicroblogComponents do
     <div class="row sub-menu">
       <.sub_menu_button
         bsname={@view_colour}
-        icon={Teiserver.Microblog.icon()}
+        icon={Barserver.Microblog.icon()}
         active={@active == "home"}
         url={~p"/microblog"}
       >
@@ -37,7 +37,7 @@ defmodule TeiserverWeb.MicroblogComponents do
       <.sub_menu_button
         :if={allow?(@current_user, "Contributor")}
         bsname={@view_colour}
-        icon={Teiserver.Microblog.PostLib.icon()}
+        icon={Barserver.Microblog.PostLib.icon()}
         active={@active == "posts"}
         url={~p"/microblog/admin/posts"}
       >
@@ -47,7 +47,7 @@ defmodule TeiserverWeb.MicroblogComponents do
       <.sub_menu_button
         :if={allow?(@current_user, "Server")}
         bsname={@view_colour}
-        icon={Teiserver.Microblog.TagLib.icon()}
+        icon={Barserver.Microblog.TagLib.icon()}
         active={@active == "tags"}
         url={~p"/microblog/admin/tags"}
       >
@@ -58,7 +58,7 @@ defmodule TeiserverWeb.MicroblogComponents do
   end
 
   @doc """
-  <TeiserverWeb.MicroblogComponents.post_complete post={post} />
+  <BarserverWeb.MicroblogComponents.post_complete post={post} />
 
   This is designed to show a small view of the post itself and allow for getting an idea of what is present without having to parse the entire post.
   """

@@ -1,8 +1,8 @@
-defmodule Teiserver.Telemetry.ComplexAnonEventLib do
+defmodule Barserver.Telemetry.ComplexAnonEventLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
-  alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.{ComplexAnonEvent, ComplexAnonEventQueries}
+  use BarserverWeb, :library_newform
+  alias Barserver.Telemetry
+  alias Barserver.Telemetry.{ComplexAnonEvent, ComplexAnonEventQueries}
   alias Phoenix.PubSub
 
   @broadcast_event_types ~w(game_start:singleplayer:scenario_end)
@@ -30,7 +30,7 @@ defmodule Teiserver.Telemetry.ComplexAnonEventLib do
       {:ok, _event} ->
         if Enum.member?(@broadcast_event_types, event_type_name) do
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "telemetry_complex_anon_events",
             %{
               channel: "telemetry_complex_anon_events",

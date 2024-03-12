@@ -1,8 +1,8 @@
-defmodule Teiserver.Lobby.ChatLib do
+defmodule Barserver.Lobby.ChatLib do
   @moduledoc false
-  alias Teiserver.{Account, CacheUser, Chat, Battle, Coordinator, Moderation, Lobby}
+  alias Barserver.{Account, CacheUser, Chat, Battle, Coordinator, Moderation, Lobby}
   alias Phoenix.PubSub
-  alias Teiserver.Chat.WordLib
+  alias Barserver.Chat.WordLib
 
   @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def say(nil, _, _), do: {:error, "No userid"}
@@ -28,7 +28,7 @@ defmodule Teiserver.Lobby.ChatLib do
         }
       })
 
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, BarserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
 
     Coordinator.send_to_user(userid, [
@@ -41,7 +41,7 @@ defmodule Teiserver.Lobby.ChatLib do
   def say(userid, msg, lobby_id) do
     msg = String.replace(msg, "!!joinas spec", "!joinas spec")
 
-    case Teiserver.Coordinator.Parser.handle_in(userid, msg, lobby_id) do
+    case Barserver.Coordinator.Parser.handle_in(userid, msg, lobby_id) do
       :say -> do_say(userid, msg, lobby_id)
       :handled -> :ok
     end
@@ -98,7 +98,7 @@ defmodule Teiserver.Lobby.ChatLib do
       persist_message(user, msg, lobby_id, :say)
 
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_lobby_chat:#{lobby_id}",
         %{
           channel: "teiserver_lobby_chat:#{lobby_id}",
@@ -164,7 +164,7 @@ defmodule Teiserver.Lobby.ChatLib do
       persist_message(user, msg, lobby_id, :sayex)
 
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_lobby_chat:#{lobby_id}",
         %{
           channel: "teiserver_lobby_chat:#{lobby_id}",
@@ -225,7 +225,7 @@ defmodule Teiserver.Lobby.ChatLib do
 
     if allowed do
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_client_messages:#{to_id}",
         %{
           channel: "teiserver_client_messages:#{to_id}",

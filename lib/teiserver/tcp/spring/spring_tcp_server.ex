@@ -1,13 +1,13 @@
-defmodule Teiserver.SpringTcpServer do
+defmodule Barserver.SpringTcpServer do
   @moduledoc false
   use GenServer
   require Logger
 
   alias Phoenix.PubSub
-  alias Teiserver.Config
-  alias Teiserver.{CacheUser, Client, Account, Room}
-  alias Teiserver.Protocols.{SpringIn, SpringOut}
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Config
+  alias Barserver.{CacheUser, Client, Account, Room}
+  alias Barserver.Protocols.{SpringIn, SpringOut}
+  alias Barserver.Data.Types, as: T
 
   @init_timeout 60_000
 
@@ -17,9 +17,9 @@ defmodule Teiserver.SpringTcpServer do
         ]
   def get_ssl_opts() do
     {certfile, cacertfile, keyfile} = {
-      Application.get_env(:teiserver, Teiserver)[:certs][:certfile],
-      Application.get_env(:teiserver, Teiserver)[:certs][:cacertfile],
-      Application.get_env(:teiserver, Teiserver)[:certs][:keyfile]
+      Application.get_env(:teiserver, Barserver)[:certs][:certfile],
+      Application.get_env(:teiserver, Barserver)[:certs][:cacertfile],
+      Application.get_env(:teiserver, Barserver)[:certs][:keyfile]
     }
 
     [
@@ -51,7 +51,7 @@ defmodule Teiserver.SpringTcpServer do
         ssl_opts ++
           get_standard_tcp_opts() ++
           [
-            port: Application.get_env(:teiserver, Teiserver)[:ports][:tls]
+            port: Application.get_env(:teiserver, Barserver)[:ports][:tls]
           ],
         __MODULE__,
         []
@@ -62,7 +62,7 @@ defmodule Teiserver.SpringTcpServer do
         :ranch_tcp,
         get_standard_tcp_opts() ++
           [
-            port: Application.get_env(:teiserver, Teiserver)[:ports][:tcp]
+            port: Application.get_env(:teiserver, Barserver)[:ports][:tcp]
           ],
         __MODULE__,
         []
@@ -80,7 +80,7 @@ defmodule Teiserver.SpringTcpServer do
   def init(ref, socket, transport) do
     # If we've not started up yet, lets just delay for a moment
     # for some of the stuff to get sorted
-    if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
+    if Barserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
          true do
       :timer.sleep(1000)
     end
@@ -95,7 +95,7 @@ defmodule Teiserver.SpringTcpServer do
     :ranch.accept_ack(ref)
     transport.setopts(socket, [{:active, true}])
 
-    heartbeat = Application.get_env(:teiserver, Teiserver)[:heartbeat_interval]
+    heartbeat = Application.get_env(:teiserver, Barserver)[:heartbeat_interval]
 
     if heartbeat do
       :timer.send_interval(heartbeat, self(), :heartbeat)
@@ -119,9 +119,9 @@ defmodule Teiserver.SpringTcpServer do
       socket: socket,
       transport: transport,
       protocol_in:
-        Application.get_env(:teiserver, Teiserver)[:default_spring_protocol].protocol_in(),
+        Application.get_env(:teiserver, Barserver)[:default_spring_protocol].protocol_in(),
       protocol_out:
-        Application.get_env(:teiserver, Teiserver)[:default_spring_protocol].protocol_out(),
+        Application.get_env(:teiserver, Barserver)[:default_spring_protocol].protocol_out(),
       ip: ip,
 
       # Client state
@@ -160,7 +160,7 @@ defmodule Teiserver.SpringTcpServer do
       client_messages: 0
     }
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_server")
 
     redirect_url = Config.get_site_config_cache("system.Redirect url")
 
@@ -229,7 +229,7 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   def handle_info(:message_count, state) do
-    Teiserver.Telemetry.cast_to_server({
+    Barserver.Telemetry.cast_to_server({
       :spring_messages_sent,
       state.userid,
       state.server_messages,
@@ -296,7 +296,7 @@ defmodule Teiserver.SpringTcpServer do
   def handle_info(:heartbeat, state) do
     diff = System.system_time(:second) - state.last_msg
 
-    if diff > Application.get_env(:teiserver, Teiserver)[:heartbeat_timeout] do
+    if diff > Application.get_env(:teiserver, Barserver)[:heartbeat_timeout] do
       SpringOut.reply(:disconnect, "Heartbeat", nil, state)
 
       if state.username do
@@ -316,7 +316,7 @@ defmodule Teiserver.SpringTcpServer do
 
   # Server messages
   def handle_info(%{channel: "teiserver_server", event: "stop"}, state) do
-    coordinator_id = Teiserver.Coordinator.get_coordinator_userid()
+    coordinator_id = Barserver.Coordinator.get_coordinator_userid()
 
     state = SpringOut.reply(:server_restart, nil, nil, state)
 
@@ -325,7 +325,7 @@ defmodule Teiserver.SpringTcpServer do
         :direct_message,
         coordinator_id,
         nil,
-        "Teiserver update taking place, see discord for details/issues.",
+        "Barserver update taking place, see discord for details/issues.",
         state
       )
 
@@ -452,7 +452,7 @@ defmodule Teiserver.SpringTcpServer do
     # Do we have a clan?
     if user.clan_id do
       :timer.sleep(200)
-      clan = Teiserver.Clans.get_clan!(user.clan_id)
+      clan = Barserver.Clans.get_clan!(user.clan_id)
       room_name = Room.clan_room_name(clan.tag)
       SpringOut.do_join_room(new_state, room_name)
     end
@@ -1076,8 +1076,8 @@ defmodule Teiserver.SpringTcpServer do
     userid = client.userid
 
     if userid == state.userid do
-      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+      PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+      PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_chat:#{lobby_id}")
     end
 
     # Do they know about the battle?

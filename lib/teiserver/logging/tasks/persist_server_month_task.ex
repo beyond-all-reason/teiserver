@@ -1,8 +1,8 @@
-defmodule Teiserver.Logging.Tasks.PersistServerMonthTask do
+defmodule Barserver.Logging.Tasks.PersistServerMonthTask do
   @moduledoc false
   use Oban.Worker, queue: :teiserver
-  alias Teiserver.Logging
-  alias Teiserver.Logging.ServerDayLogLib
+  alias Barserver.Logging
+  alias Barserver.Logging.ServerDayLogLib
   import Ecto.Query, warn: false
 
   @impl Oban.Worker
@@ -20,7 +20,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTask do
 
     if log != nil do
       %{}
-      |> Teiserver.Logging.Tasks.PersistServerMonthTask.new()
+      |> Barserver.Logging.Tasks.PersistServerMonthTask.new()
       |> Oban.insert()
     end
 

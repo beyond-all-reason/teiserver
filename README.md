@@ -1,4 +1,4 @@
-# Teiserver
+# Barserver
 
 An Elixir middleware server for game management; primarily used by [Beyond all Reason](https://www.beyondallreason.info/). Currently implementing the Spring protocol but with work being done on a new protocol [Tachyon](https://github.com/beyond-all-reason/tachyon).
 

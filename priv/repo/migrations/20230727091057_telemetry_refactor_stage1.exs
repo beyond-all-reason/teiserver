@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.TelemetryRefactorStage1 do
+defmodule Barserver.Repo.Migrations.TelemetryRefactorStage1 do
   @doc """
   At the time of writing we have a single event type table which is making
   interface design trickier as it was initially designed to just have client events.

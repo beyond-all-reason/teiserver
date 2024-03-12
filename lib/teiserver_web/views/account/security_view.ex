@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.Account.SecurityView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Account.SecurityView do
+  use BarserverWeb, :view
 
   @spec view_colour :: atom
   def view_colour(), do: :danger

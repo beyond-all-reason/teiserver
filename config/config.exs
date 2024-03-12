@@ -3,7 +3,7 @@ import Config
 config :iex,
   ansi_enabled: true
 
-config :teiserver, Teiserver,
+config :teiserver, Barserver,
   site_title: "BAR",
   site_suffix: "",
   site_description: "",
@@ -11,25 +11,25 @@ config :teiserver, Teiserver,
   credit: "Teifion Jordan"
 
 # Default configs
-config :teiserver, Teiserver.Config,
+config :teiserver, Barserver.Config,
   defaults: %{
     tz: "UTC"
   }
 
 config :teiserver,
-  ecto_repos: [Teiserver.Repo]
+  ecto_repos: [Barserver.Repo]
 
 # Configures the endpoint
-config :teiserver, TeiserverWeb.Endpoint,
+config :teiserver, BarserverWeb.Endpoint,
   url: [host: "localhost"],
   # This is overriden in your secret config, it's here only to allow things to run easily
   secret_key_base: "6FN12Jv4ZITAK1fq7ehD0MTRvbLsXYWj+wLY3ifkzzlcUIcpUJK7aG/ptrJSemAy",
   live_view: [signing_salt: "wZVVigZo"],
   render_errors: [
-    formats: [html: TeiserverWeb.ErrorHTML, json: TeiserverWeb.ErrorJSON],
+    formats: [html: BarserverWeb.ErrorHTML, json: BarserverWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: Teiserver.PubSub
+  pubsub_server: Barserver.PubSub
 
 config :esbuild,
   version: "0.14.41",
@@ -40,7 +40,7 @@ config :esbuild,
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]
 
-config :teiserver, Teiserver,
+config :teiserver, Barserver,
   ports: [
     tcp: 8200,
     tls: 8201,
@@ -63,8 +63,8 @@ config :teiserver, Teiserver,
   game_name_short: "Game",
   main_website: "https://site.com/",
   discord: nil,
-  default_spring_protocol: Teiserver.Protocols.Spring,
-  default_tachyon_protocol: Teiserver.Protocols.Tachyon.V1.Tachyon,
+  default_spring_protocol: Barserver.Protocols.Spring,
+  default_tachyon_protocol: Barserver.Protocols.Tachyon.V1.Tachyon,
   github_repo: "https://github.com/beyond-all-reason/teiserver",
   enable_discord_bridge: false,
   enable_coordinator_mode: true,
@@ -102,58 +102,58 @@ config :logger, :console,
 config :phoenix, :json_library, Jason
 
 # This secret key is overwritten in prod.secret.exs
-config :teiserver, Teiserver.Account.Guardian,
+config :teiserver, Barserver.Account.Guardian,
   issuer: "teiserver",
   # This is overriden in your secret config, it's here only to allow things to run easily
   secret_key: "9vJcJOYwsjdIQ9IhfOI5F9GQMykuNjBW58FY9S/TqMsq6gRdKgY05jscQAFVKfwa",
   ttl: {30, :days}
 
 config :teiserver, Oban,
-  repo: Teiserver.Repo,
+  repo: Barserver.Repo,
   plugins: [
     {Oban.Plugins.Pruner, max_age: 3600},
     {Oban.Plugins.Cron,
      crontab: [
        # Every hour
-       {"0 * * * *", Teiserver.Admin.HourlyCleanupTask},
+       {"0 * * * *", Barserver.Admin.HourlyCleanupTask},
 
        # Every day at 1am
-       {"0 1 * * *", Teiserver.Admin.DailyCleanupTask},
+       {"0 1 * * *", Barserver.Admin.DailyCleanupTask},
 
        # Every day at 2am
-       {"0 2 * * *", Teiserver.Logging.AggregateViewLogsTask},
+       {"0 2 * * *", Barserver.Logging.AggregateViewLogsTask},
 
        # 1:07 am
-       {"7 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
-       {"22 1 * * *", Teiserver.Telemetry.EventCleanupTask},
+       {"7 1 * * *", Barserver.Account.Tasks.DailyCleanupTask},
+       {"22 1 * * *", Barserver.Telemetry.EventCleanupTask},
 
        # At 17 minutes past every hour
-       {"17 * * * *", Teiserver.Battle.Tasks.CleanupTask},
+       {"17 * * * *", Barserver.Battle.Tasks.CleanupTask},
 
        # Every minute
-       {"* * * * *", Teiserver.Logging.Tasks.PersistServerMinuteTask},
-       {"* * * * *", Teiserver.Moderation.RefreshUserRestrictionsTask},
+       {"* * * * *", Barserver.Logging.Tasks.PersistServerMinuteTask},
+       {"* * * * *", Barserver.Moderation.RefreshUserRestrictionsTask},
 
        # Every minute
-       {"* * * * *", Teiserver.Battle.Tasks.PostMatchProcessTask},
+       {"* * * * *", Barserver.Battle.Tasks.PostMatchProcessTask},
 
        # 2am
-       {"1 2 * * *", Teiserver.Logging.Tasks.PersistServerDayTask},
-       {"2 2 * * *", Teiserver.Logging.Tasks.PersistServerWeekTask},
-       {"3 2 * * *", Teiserver.Logging.Tasks.PersistServerMonthTask},
-       {"4 2 * * *", Teiserver.Logging.Tasks.PersistServerQuarterTask},
-       {"5 2 * * *", Teiserver.Logging.Tasks.PersistServerYearTask},
-       {"6 2 * * *", Teiserver.Logging.Tasks.PersistMatchDayTask},
-       {"7 2 * * *", Teiserver.Logging.Tasks.PersistMatchMonthTask},
-       {"8 2 * * *", Teiserver.Telemetry.InfologCleanupTask},
-       {"9 2 * * *", Teiserver.Logging.Tasks.PersistUserActivityDayTask},
+       {"1 2 * * *", Barserver.Logging.Tasks.PersistServerDayTask},
+       {"2 2 * * *", Barserver.Logging.Tasks.PersistServerWeekTask},
+       {"3 2 * * *", Barserver.Logging.Tasks.PersistServerMonthTask},
+       {"4 2 * * *", Barserver.Logging.Tasks.PersistServerQuarterTask},
+       {"5 2 * * *", Barserver.Logging.Tasks.PersistServerYearTask},
+       {"6 2 * * *", Barserver.Logging.Tasks.PersistMatchDayTask},
+       {"7 2 * * *", Barserver.Logging.Tasks.PersistMatchMonthTask},
+       {"8 2 * * *", Barserver.Telemetry.InfologCleanupTask},
+       {"9 2 * * *", Barserver.Logging.Tasks.PersistUserActivityDayTask},
 
        # 2:43
-       {"43 2 * * *", Teiserver.Game.AchievementCleanupTask},
+       {"43 2 * * *", Barserver.Game.AchievementCleanupTask},
 
        # 0302 and 1202 every day, gives time for multiple telemetry day tasks to run if needed
-       {"2 3 * * *", Teiserver.Account.RecalculateUserDailyStatTask},
-       {"2 12 * * *", Teiserver.Account.RecalculateUserDailyStatTask}
+       {"2 3 * * *", Barserver.Account.RecalculateUserDailyStatTask},
+       {"2 12 * * *", Barserver.Account.RecalculateUserDailyStatTask}
      ]}
   ],
   queues: [logging: 1, cleanup: 1, teiserver: 10]

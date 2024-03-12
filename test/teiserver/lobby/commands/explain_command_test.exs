@@ -1,9 +1,9 @@
-defmodule Teiserver.Lobby.Commands.ExplainCommandTest do
+defmodule Barserver.Lobby.Commands.ExplainCommandTest do
   @moduledoc false
-  use Teiserver.ServerCase, async: false
-  alias Teiserver.{Battle, Coordinator, TeiserverTestLib}
-  alias Teiserver.Lobby.ChatLib
-  alias Teiserver.Common.PubsubListener
+  use Barserver.ServerCase, async: false
+  alias Barserver.{Battle, Coordinator, BarserverTestLib}
+  alias Barserver.Lobby.ChatLib
+  alias Barserver.Common.PubsubListener
 
   # test "raw call tests" do
 
@@ -12,8 +12,8 @@ defmodule Teiserver.Lobby.Commands.ExplainCommandTest do
   test "text based test" do
     Coordinator.start_coordinator()
 
-    user = TeiserverTestLib.new_user()
-    {lobby_id, _lobby_pid} = TeiserverTestLib.make_lobby()
+    user = BarserverTestLib.new_user()
+    {lobby_id, _lobby_pid} = BarserverTestLib.make_lobby()
     chat_listener = PubsubListener.new_listener(["teiserver_lobby_chat:#{lobby_id}"])
     client_listener = PubsubListener.new_listener(["teiserver_client_messages:#{user.id}"])
 
@@ -54,7 +54,7 @@ defmodule Teiserver.Lobby.Commands.ExplainCommandTest do
 end
 
 # PubSub.broadcast(
-#   Teiserver.PubSub,
+#   Barserver.PubSub,
 #   "teiserver_client_messages:#{to_id}",
 #   %{
 #     channel: "teiserver_client_messages:#{to_id}",

@@ -1,10 +1,10 @@
-defmodule Teiserver.Telemetry.ComplexClientEvent do
+defmodule Barserver.Telemetry.ComplexClientEvent do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "telemetry_complex_client_events" do
-    belongs_to :user, Teiserver.Account.User
-    belongs_to :event_type, Teiserver.Telemetry.ComplexClientEventType
+    belongs_to :user, Barserver.Account.User
+    belongs_to :event_type, Barserver.Telemetry.ComplexClientEventType
 
     field :timestamp, :utc_datetime
     field :value, :map

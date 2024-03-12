@@ -1,14 +1,14 @@
-defmodule Teiserver.Telemetry.ComplexMatchEventTypeLib do
+defmodule Barserver.Telemetry.ComplexMatchEventTypeLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
-  alias Teiserver.Telemetry.{ComplexMatchEventType, ComplexMatchEventTypeQueries}
+  use BarserverWeb, :library_newform
+  alias Barserver.Telemetry.{ComplexMatchEventType, ComplexMatchEventTypeQueries}
 
   # Helper function
   @spec get_or_add_complex_match_event_type(String.t()) :: non_neg_integer()
   def get_or_add_complex_match_event_type(name) do
     name = String.trim(name)
 
-    Teiserver.cache_get_or_store(:telemetry_complex_match_event_types_cache, name, fn ->
+    Barserver.cache_get_or_store(:telemetry_complex_match_event_types_cache, name, fn ->
       query =
         ComplexMatchEventTypeQueries.query_complex_match_event_types(
           where: [name: name],

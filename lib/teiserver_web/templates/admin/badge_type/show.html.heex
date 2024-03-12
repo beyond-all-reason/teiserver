@@ -9,7 +9,7 @@
 </script>
 
 <%= render(
-  TeiserverWeb.Admin.GeneralView,
+  BarserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "badge_types"})
 ) %>
@@ -19,7 +19,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Admin.BadgeTypeView,
+          BarserverWeb.Admin.BadgeTypeView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,

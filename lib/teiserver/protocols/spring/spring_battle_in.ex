@@ -1,8 +1,8 @@
-defmodule Teiserver.Protocols.Spring.BattleIn do
-  alias Teiserver.{Coordinator, Battle, Lobby}
-  alias Teiserver.Protocols.SpringIn
-  import Teiserver.Protocols.SpringOut, only: [reply: 5]
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+defmodule Barserver.Protocols.Spring.BattleIn do
+  alias Barserver.{Coordinator, Battle, Lobby}
+  alias Barserver.Protocols.SpringIn
+  import Barserver.Protocols.SpringOut, only: [reply: 5]
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()

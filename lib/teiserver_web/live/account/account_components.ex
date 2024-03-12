@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.AccountComponents do
+defmodule BarserverWeb.AccountComponents do
   @moduledoc false
-  use TeiserverWeb, :component
-  import TeiserverWeb.NavComponents, only: [sub_menu_button: 1]
+  use BarserverWeb, :component
+  import BarserverWeb.NavComponents, only: [sub_menu_button: 1]
 
   @doc """
-  <TeiserverWeb.AccountComponents.sub_menu active={active} view_colour={@view_colour} />
+  <BarserverWeb.AccountComponents.sub_menu active={active} view_colour={@view_colour} />
   """
   attr :view_colour, :string, required: true
   attr :active, :string, required: true
@@ -15,7 +15,7 @@ defmodule TeiserverWeb.AccountComponents do
     <div class="row sub-menu">
       <.sub_menu_button
         bsname={@view_colour}
-        icon={Teiserver.AccountLib.icon()}
+        icon={Barserver.AccountLib.icon()}
         active={@active == "profile"}
         url={~p"/profile/"}
       >
@@ -24,7 +24,7 @@ defmodule TeiserverWeb.AccountComponents do
 
       <.sub_menu_button
         bsname={@view_colour}
-        icon={Teiserver.Account.RelationshipLib.icon()}
+        icon={Barserver.Account.RelationshipLib.icon()}
         active={@active == "relationship"}
         url={~p"/account/relationship"}
       >
@@ -33,7 +33,7 @@ defmodule TeiserverWeb.AccountComponents do
 
       <.sub_menu_button
         bsname={@view_colour}
-        icon={Teiserver.Config.UserConfigLib.icon()}
+        icon={Barserver.Config.UserConfigLib.icon()}
         active={@active == "settings"}
         url={~p"/account/settings"}
       >

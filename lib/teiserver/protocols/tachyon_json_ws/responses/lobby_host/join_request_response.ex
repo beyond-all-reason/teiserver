@@ -1,7 +1,7 @@
-defmodule Teiserver.Tachyon.Responses.LobbyHost.JoinRequestReponse do
+defmodule Barserver.Tachyon.Responses.LobbyHost.JoinRequestReponse do
   @moduledoc false
 
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @spec generate(T.userid(), T.lobby_id()) :: {T.tachyon_command(), T.tachyon_object()}
   def generate(userid, lobby_id) do

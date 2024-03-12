@@ -1,7 +1,7 @@
-defmodule Teiserver.Telemetry.UserPropertyQueries do
+defmodule Barserver.Telemetry.UserPropertyQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
-  alias Teiserver.Telemetry.UserProperty
+  use BarserverWeb, :queries
+  alias Barserver.Telemetry.UserProperty
 
   # Queries
   @spec query_user_properties(list) :: Ecto.Query.t()

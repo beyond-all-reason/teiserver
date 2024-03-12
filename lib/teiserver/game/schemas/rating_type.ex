@@ -1,5 +1,5 @@
-defmodule Teiserver.Game.RatingType do
-  use TeiserverWeb, :schema
+defmodule Barserver.Game.RatingType do
+  use BarserverWeb, :schema
 
   schema "teiserver_game_rating_types" do
     field :name, :string

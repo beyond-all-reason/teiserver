@@ -1,7 +1,7 @@
-defmodule Teiserver.Account.TimeCompareReport do
-  alias Teiserver.{Logging, Account}
-  alias Teiserver.Helper.TimexHelper
-  import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
+defmodule Barserver.Account.TimeCompareReport do
+  alias Barserver.{Logging, Account}
+  alias Barserver.Helper.TimexHelper
+  import Barserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-code-compare"

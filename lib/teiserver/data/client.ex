@@ -1,4 +1,4 @@
-# defmodule Teiserver.Data.ClientStruct do
+# defmodule Barserver.Data.ClientStruct do
 #   @enforce_keys [:in_game, :away, :rank, :moderator, :bot]
 #   defstruct [
 #     :id, :name, :team_size, :icon, :colour, :settings, :conditions, :map_list,
@@ -6,16 +6,16 @@
 #   ]
 # end
 
-defmodule Teiserver.Client do
+defmodule Barserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
-  alias Teiserver.{Room, CacheUser, Account, Telemetry, Clans, Coordinator}
-  alias Teiserver.Lobby
-  alias Teiserver.Account.ClientLib
-  # alias Teiserver.Helper.TimexHelper
+  alias Barserver.{Room, CacheUser, Account, Telemetry, Clans, Coordinator}
+  alias Barserver.Lobby
+  alias Barserver.Account.ClientLib
+  # alias Barserver.Helper.TimexHelper
   require Logger
 
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @spec create(Map.t()) :: Map.t()
   def create(client) do
@@ -124,7 +124,7 @@ defmodule Teiserver.Client do
     ClientLib.start_client_server(client)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "client_inout",
       %{
         channel: "client_inout",
@@ -135,7 +135,7 @@ defmodule Teiserver.Client do
     )
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_client_messages:#{user.id}",
       %{
         channel: "teiserver_client_messages:#{user.id}",
@@ -144,7 +144,7 @@ defmodule Teiserver.Client do
     )
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_client_watch:#{user.id}",
       %{
         channel: "teiserver_client_watch:#{user.id}",
@@ -282,7 +282,7 @@ defmodule Teiserver.Client do
 
     # If a test goes wrong this can bork things and make it harder to
     # identify what actually went wrong
-    if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
+    if not Application.get_env(:teiserver, Barserver)[:test_mode] do
       Account.update_cache_user(client.userid, %{last_logout: Timex.now()})
     end
 
@@ -296,7 +296,7 @@ defmodule Teiserver.Client do
     ClientLib.stop_client_server(client.userid)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "client_inout",
       %{
         channel: "client_inout",
@@ -307,7 +307,7 @@ defmodule Teiserver.Client do
     )
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_client_messages:#{client.userid}",
       %{
         channel: "teiserver_client_messages:#{client.userid}",
@@ -316,7 +316,7 @@ defmodule Teiserver.Client do
     )
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_client_watch:#{client.userid}",
       %{
         channel: "teiserver_client_watch:#{client.userid}",

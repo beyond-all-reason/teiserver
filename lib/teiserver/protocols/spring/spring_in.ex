@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.SpringIn do
+defmodule Barserver.Protocols.SpringIn do
   @moduledoc """
   In component of the Spring protocol
 
@@ -6,14 +6,14 @@ defmodule Teiserver.Protocols.SpringIn do
   https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html
   """
   require Logger
-  alias Teiserver.{Account, Lobby, Coordinator, Battle, Room, CacheUser, Client}
+  alias Barserver.{Account, Lobby, Coordinator, Battle, Room, CacheUser, Client}
   alias Phoenix.PubSub
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
-  import Teiserver.Protocols.SpringOut, only: [reply: 4]
-  alias Teiserver.Protocols.{Spring, SpringOut}
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
+  import Barserver.Helper.TimexHelper, only: [date_to_str: 2]
+  import Barserver.Protocols.SpringOut, only: [reply: 4]
+  alias Barserver.Protocols.{Spring, SpringOut}
 
-  alias Teiserver.Protocols.Spring.{
+  alias Barserver.Protocols.Spring.{
     AuthIn,
     TelemetryIn,
     BattleIn,
@@ -38,7 +38,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   @spec data_in(String.t(), Map.t()) :: Map.t()
   def data_in(data, state) do
-    if Application.get_env(:teiserver, Teiserver)[:extra_logging] == true or
+    if Application.get_env(:teiserver, Barserver)[:extra_logging] == true or
          state.print_client_messages do
       if String.contains?(data, "c.user.get_token") or String.contains?(data, "LOGIN") do
         Logger.info("<-- #{state.username}: LOGIN/c.user.get_token")
@@ -146,35 +146,35 @@ defmodule Teiserver.Protocols.SpringIn do
   # https://ninenines.eu/docs/en/ranch/1.7/guide/transports/ - Upgrading a TCP socket to SSL
   defp do_handle("STLS", _, msg_id, state) do
     reply(:okay, "STLS", msg_id, state)
-    new_state = Teiserver.SpringTcpServer.upgrade_connection(state)
+    new_state = Barserver.SpringTcpServer.upgrade_connection(state)
     reply(:welcome, nil, msg_id, new_state)
   end
 
   # Swap to the Tachyon protocol
   defp do_handle("TACHYON", "", msg_id, state) do
     reply(:okay, "TACHYON", msg_id, state)
-    {m_in, m_out} = Teiserver.Protocols.TachyonLib.get_modules()
+    {m_in, m_out} = Barserver.Protocols.TachyonLib.get_modules()
 
     %{state | protocol_in: m_in, protocol_out: m_out}
   end
 
   defp do_handle("TACHYON", "dev", msg_id, state) do
     reply(:okay, "TACHYON", msg_id, state)
-    {m_in, m_out} = Teiserver.Protocols.TachyonLib.get_modules("dev")
+    {m_in, m_out} = Barserver.Protocols.TachyonLib.get_modules("dev")
 
     %{state | protocol_in: m_in, protocol_out: m_out}
   end
 
   defp do_handle("TACHYON", "v" <> _ = version, msg_id, state) do
     reply(:okay, "TACHYON", msg_id, state)
-    {m_in, m_out} = Teiserver.Protocols.TachyonLib.get_modules(version)
+    {m_in, m_out} = Barserver.Protocols.TachyonLib.get_modules(version)
 
     %{state | protocol_in: m_in, protocol_out: m_out}
   end
 
   # Use the Tachyon protocol for a single command
   defp do_handle("TACHYON", data, _msg_id, state) do
-    {m_in, _m_out} = Teiserver.Protocols.TachyonLib.get_modules()
+    {m_in, _m_out} = Barserver.Protocols.TachyonLib.get_modules()
     m_in.data_in("#{data}\n", state)
   end
 
@@ -277,7 +277,7 @@ defmodule Teiserver.Protocols.SpringIn do
         # Do we have a clan?
         if user.clan_id do
           :timer.sleep(200)
-          clan = Teiserver.Clans.get_clan!(user.clan_id)
+          clan = Barserver.Clans.get_clan!(user.clan_id)
           room_name = Room.clan_room_name(clan.tag)
           SpringOut.do_join_room(new_state, room_name)
         end
@@ -385,7 +385,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("RESETPASSWORDREQUEST", _, msg_id, state) do
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+    host = Application.get_env(:teiserver, BarserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/password_reset"
 
     reply(:okay, url, msg_id, state)
@@ -653,7 +653,7 @@ defmodule Teiserver.Protocols.SpringIn do
                 }
               })
 
-            host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+            host = Application.get_env(:teiserver, BarserverWeb.Endpoint)[:url][:host]
             url = "https://#{host}/one_time_login/#{code.value}"
 
             Coordinator.send_to_user(state.userid, [
@@ -699,19 +699,19 @@ defmodule Teiserver.Protocols.SpringIn do
     end
 
     if not state.exempt_from_cmd_throttle do
-      :timer.sleep(Application.get_env(:teiserver, Teiserver)[:spring_post_state_change_delay])
+      :timer.sleep(Application.get_env(:teiserver, Barserver)[:spring_post_state_change_delay])
     end
 
     state
   end
 
   defp do_handle("LEAVE", room_name, msg_id, state) do
-    PubSub.unsubscribe(Teiserver.PubSub, "room:#{room_name}")
+    PubSub.unsubscribe(Barserver.PubSub, "room:#{room_name}")
     reply(:left_room, {state.username, room_name}, msg_id, state)
     Room.remove_user_from_room(state.userid, room_name)
 
     if not state.exempt_from_cmd_throttle do
-      :timer.sleep(Application.get_env(:teiserver, Teiserver)[:spring_post_state_change_delay])
+      :timer.sleep(Application.get_env(:teiserver, Barserver)[:spring_post_state_change_delay])
     end
 
     state
@@ -852,11 +852,11 @@ defmodule Teiserver.Protocols.SpringIn do
       {:success, battle} ->
         reply(:battle_opened, battle.id, msg_id, state)
         reply(:open_battle_success, battle.id, msg_id, state)
-        PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{battle.id}")
-        PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{battle.id}")
+        PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_updates:#{battle.id}")
+        PubSub.subscribe(Barserver.PubSub, "teiserver_lobby_updates:#{battle.id}")
 
-        PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{battle.id}")
-        PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{battle.id}")
+        PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_chat:#{battle.id}")
+        PubSub.subscribe(Barserver.PubSub, "teiserver_lobby_chat:#{battle.id}")
 
         reply(:join_battle_success, battle, msg_id, state)
 
@@ -916,14 +916,14 @@ defmodule Teiserver.Protocols.SpringIn do
       end
 
     if not state.exempt_from_cmd_throttle do
-      :timer.sleep(Application.get_env(:teiserver, Teiserver)[:spring_post_state_change_delay])
+      :timer.sleep(Application.get_env(:teiserver, Barserver)[:spring_post_state_change_delay])
     end
 
     case response do
       {:waiting_on_host, script_password} ->
         Lobby.remove_user_from_any_lobby(state.userid)
         |> Enum.each(fn b ->
-          PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{b}")
+          PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_updates:#{b}")
         end)
 
         %{state | script_password: script_password}
@@ -1285,12 +1285,12 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("LEAVEBATTLE", _, _msg_id, %{lobby_id: nil} = state) do
     Lobby.remove_user_from_any_lobby(state.userid)
     |> Enum.each(fn b ->
-      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{b}")
-      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{b}")
+      PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_updates:#{b}")
+      PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_chat:#{b}")
     end)
 
     if not state.exempt_from_cmd_throttle do
-      :timer.sleep(Application.get_env(:teiserver, Teiserver)[:spring_post_state_change_delay])
+      :timer.sleep(Application.get_env(:teiserver, Barserver)[:spring_post_state_change_delay])
     end
 
     %{state | lobby_host: false}
@@ -1300,16 +1300,16 @@ defmodule Teiserver.Protocols.SpringIn do
     # Remove them from all the battles anyways, just in case
     Lobby.remove_user_from_any_lobby(state.userid)
     |> Enum.each(fn b ->
-      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{b}")
-      PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{b}")
+      PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_updates:#{b}")
+      PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_chat:#{b}")
     end)
 
-    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{state.lobby_id}")
-    PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{state.lobby_id}")
+    PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_updates:#{state.lobby_id}")
+    PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_chat:#{state.lobby_id}")
     Lobby.remove_user_from_battle(state.userid, state.lobby_id)
 
     if not state.exempt_from_cmd_throttle do
-      :timer.sleep(Application.get_env(:teiserver, Teiserver)[:spring_post_state_change_delay])
+      :timer.sleep(Application.get_env(:teiserver, Barserver)[:spring_post_state_change_delay])
     end
 
     %{state | lobby_host: false}

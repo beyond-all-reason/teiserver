@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.ErrorHandler do
+defmodule Barserver.Account.ErrorHandler do
   @moduledoc false
   import Plug.Conn
 
@@ -8,7 +8,7 @@ defmodule Teiserver.Account.ErrorHandler do
   def auth_error(conn, {:unauthenticated, _reason}, _opts) do
     conn
     |> Phoenix.Controller.redirect(
-      to: TeiserverWeb.Router.Helpers.account_session_path(conn, :login)
+      to: BarserverWeb.Router.Helpers.account_session_path(conn, :login)
     )
   end
 
@@ -16,7 +16,7 @@ defmodule Teiserver.Account.ErrorHandler do
     conn
     |> put_resp_cookie("_teiserver_key", "", max_age: 0)
     |> Phoenix.Controller.redirect(
-      to: TeiserverWeb.Router.Helpers.account_session_path(conn, :login)
+      to: BarserverWeb.Router.Helpers.account_session_path(conn, :login)
     )
   end
 

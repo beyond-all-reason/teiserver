@@ -8,7 +8,7 @@
   });
 </script>
 
-<TeiserverWeb.Moderation.ModerationComponents.sub_menu
+<BarserverWeb.Moderation.ModerationComponents.sub_menu
   active="reports"
   view_colour={view_colour()}
 />
@@ -18,7 +18,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Moderation.ReportView,
+          BarserverWeb.Moderation.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
@@ -35,11 +35,11 @@
 
           <%= if allow?(@conn, "Moderator") do %>
             <a
-              class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
+              class={"btn btn-outline-#{Barserver.Moderation.ActionLib.colour()}"}
               href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@user.id}_"}
             >
               <%= central_component("icon",
-                icon: Teiserver.Moderation.ActionLib.icon(),
+                icon: Barserver.Moderation.ActionLib.icon(),
                 class: "fa-solid"
               ) %> &nbsp;
               Action user
@@ -48,18 +48,18 @@
 
           <%= if allow?(@conn, "Moderator") do %>
             <a
-              class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
+              class={"btn btn-outline-#{Barserver.Account.UserLib.colour()}"}
               href={~p"/teiserver/admin/user/#{@user}"}
             >
               <%= central_component("icon",
-                icon: Teiserver.Account.UserLib.icon(),
+                icon: Barserver.Account.UserLib.icon(),
                 class: "fa-solid"
               ) %> &nbsp;
               View user
             </a>
 
             <a
-              class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
+              class={"btn btn-outline-#{Barserver.Account.UserLib.colour()}"}
               href={~p"/teiserver/admin/users/smurf_search/#{@user}"}
             >
               <%= central_component("icon",
@@ -98,7 +98,7 @@
           <li class="nav-item" role="presentation">
             <a href="#actions_tab" role="tab" class="nav-link" data-bs-toggle="tab">
               <%= central_component("icon",
-                icon: Teiserver.Moderation.ActionLib.icon(),
+                icon: Barserver.Moderation.ActionLib.icon(),
                 class: "fa-solid"
               ) %> Actions (<%= Enum.count(@actions) %>)
             </a>
@@ -106,7 +106,7 @@
 
           <li class="nav-item" role="presentation">
             <a href="#user_details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="regular" />
+              <Fontawesome.icon icon={Barserver.Account.UserLib.icon()} style="regular" />
               User details
             </a>
           </li>

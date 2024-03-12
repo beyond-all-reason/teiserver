@@ -1,9 +1,9 @@
-defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
+defmodule Barserver.Logging.Tasks.PersistUserActivityDayTask do
   @moduledoc false
   use Oban.Worker, queue: :teiserver
-  alias Teiserver.{Logging}
+  alias Barserver.{Logging}
 
-  alias Teiserver.Repo
+  alias Barserver.Repo
   import Ecto.Query, warn: false
 
   @client_states ~w(lobby menu player spectator total)a
@@ -29,7 +29,7 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
 
       if Timex.compare(new_date, Timex.today()) == -1 do
         %{}
-        |> Teiserver.Logging.Tasks.PersistUserActivityDayTask.new()
+        |> Barserver.Logging.Tasks.PersistUserActivityDayTask.new()
         |> Oban.insert()
       end
     end
@@ -46,7 +46,7 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
 
     # Delete old log if it exists
     delete_query =
-      from logs in Teiserver.Logging.UserActivityDayLog,
+      from logs in Barserver.Logging.UserActivityDayLog,
         where: logs.date == ^(date |> Timex.to_date())
 
     Repo.delete_all(delete_query)

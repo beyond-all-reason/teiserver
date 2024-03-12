@@ -1,8 +1,8 @@
-defmodule Teiserver.Telemetry.SimpleClientEventLib do
+defmodule Barserver.Telemetry.SimpleClientEventLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
-  alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.{SimpleClientEvent, SimpleClientEventQueries}
+  use BarserverWeb, :library_newform
+  alias Barserver.Telemetry
+  alias Barserver.Telemetry.{SimpleClientEvent, SimpleClientEventQueries}
   alias Phoenix.PubSub
 
   @broadcast_event_types ~w(game_start:singleplayer:scenario_end)
@@ -29,7 +29,7 @@ defmodule Teiserver.Telemetry.SimpleClientEventLib do
       {:ok, _event} ->
         if Enum.member?(@broadcast_event_types, event_type_name) do
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "telemetry_simple_client_events",
             %{
               channel: "telemetry_simple_client_events",

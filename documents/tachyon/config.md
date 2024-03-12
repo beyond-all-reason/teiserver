@@ -43,7 +43,7 @@ If a game config hasn't been set or is nil it will be absent from the results.
 ```
 
 ## User configs
-User configs are tied to the Teiserver structured configs that can be accessed on the site itself. These are constrained by data type (though will where possible convert inputs to that data type) and come with defaults.
+User configs are tied to the Barserver structured configs that can be accessed on the site itself. These are constrained by data type (though will where possible convert inputs to that data type) and come with defaults.
 
 ### `c.config.list_user_types`
 Lists the types of configs available to get/set.

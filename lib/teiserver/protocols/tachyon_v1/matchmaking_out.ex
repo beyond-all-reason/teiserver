@@ -1,5 +1,5 @@
-defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingOut do
-  alias Teiserver.Protocols.Tachyon.V1.Tachyon
+defmodule Barserver.Protocols.Tachyon.V1.MatchmakingOut do
+  alias Barserver.Protocols.Tachyon.V1.Tachyon
 
   @spec do_reply(atom(), any) :: Map.t()
 

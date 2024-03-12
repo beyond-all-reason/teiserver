@@ -1,10 +1,10 @@
-defmodule Teiserver.Telemetry.ComplexAnonEvent do
+defmodule Barserver.Telemetry.ComplexAnonEvent do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "telemetry_complex_anon_events" do
     field :hash, :string
-    belongs_to :event_type, Teiserver.Telemetry.ComplexClientEventType
+    belongs_to :event_type, Barserver.Telemetry.ComplexClientEventType
 
     field :timestamp, :utc_datetime
     field :value, :map

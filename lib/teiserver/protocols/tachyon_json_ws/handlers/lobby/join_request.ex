@@ -1,10 +1,10 @@
-defmodule Teiserver.Tachyon.Handlers.Lobby.JoinRequest do
+defmodule Barserver.Tachyon.Handlers.Lobby.JoinRequest do
   @moduledoc """
 
   """
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Battle
-  alias Teiserver.Tachyon.Responses.Lobby.JoinResponse
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Battle
+  alias Barserver.Tachyon.Responses.Lobby.JoinResponse
 
   @spec dispatch_handlers :: map()
   def dispatch_handlers() do

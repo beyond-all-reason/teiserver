@@ -1,13 +1,13 @@
-defmodule Teiserver.Logging.AuditLog do
+defmodule Barserver.Logging.AuditLog do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "audit_logs" do
     field :action, :string
     field :details, :map
     field :ip, :string
 
-    belongs_to :user, Teiserver.Account.User
+    belongs_to :user, Barserver.Account.User
 
     timestamps()
   end

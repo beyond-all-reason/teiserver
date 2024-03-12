@@ -1,9 +1,9 @@
-defmodule Teiserver.Tachyon.Responses.System.PingResponse do
+defmodule Barserver.Tachyon.Responses.System.PingResponse do
   @moduledoc """
 
   """
 
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @spec generate(T.tachyon_conn()) ::
           {T.tachyon_command(), T.tachyon_status(), T.tachyon_object()}

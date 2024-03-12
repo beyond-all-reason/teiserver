@@ -1,9 +1,9 @@
-defmodule Teiserver.Protocols.Spring.SpringBattleHostAsyncTest do
-  use Teiserver.ServerCase, async: true
-  alias Teiserver.Protocols.Spring
-  alias Teiserver.Client
+defmodule Barserver.Protocols.Spring.SpringBattleHostAsyncTest do
+  use Barserver.ServerCase, async: true
+  alias Barserver.Protocols.Spring
+  alias Barserver.Client
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [
       async_auth_setup: 1,
       _send_lines: 2,

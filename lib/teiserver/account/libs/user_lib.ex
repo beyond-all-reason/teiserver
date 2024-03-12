@@ -1,10 +1,10 @@
-defmodule Teiserver.Account.UserLib do
+defmodule Barserver.Account.UserLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
+  use BarserverWeb, :library_newform
   require Logger
   alias Phoenix.PubSub
-  alias Teiserver.{Account, Logging}
-  alias Teiserver.Account.{User, RoleLib, UserQueries}
+  alias Barserver.{Account, Logging}
+  alias Barserver.Account.{User, RoleLib, UserQueries}
 
   # Functions
   @spec icon :: String.t()
@@ -16,7 +16,7 @@ defmodule Teiserver.Account.UserLib do
   @spec colour :: atom
   def colour, do: :success
 
-  @spec make_favourite(Teiserver.Account.User.t()) :: Map.t()
+  @spec make_favourite(Barserver.Account.User.t()) :: Map.t()
   def make_favourite(user) do
     %{
       type_colour: StylingHelper.colours(colours()) |> elem(0),
@@ -217,7 +217,7 @@ defmodule Teiserver.Account.UserLib do
 
   def broadcast_create_user({:ok, user}, reason) do
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "account_hooks",
       {:account_hooks, :create_user, user, reason}
     )
@@ -231,7 +231,7 @@ defmodule Teiserver.Account.UserLib do
 
   def broadcast_update_user({:ok, user}, reason) do
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "account_hooks",
       {:account_hooks, :update_user, user, reason}
     )
@@ -244,8 +244,8 @@ defmodule Teiserver.Account.UserLib do
   def merge_default_params(user_params) do
     Map.merge(
       %{
-        "icon" => "fa-solid fa-" <> Teiserver.Helper.StylingHelper.random_icon(),
-        "colour" => Teiserver.Helper.StylingHelper.random_colour()
+        "icon" => "fa-solid fa-" <> Barserver.Helper.StylingHelper.random_icon(),
+        "colour" => Barserver.Helper.StylingHelper.random_colour()
       },
       user_params
     )
@@ -336,19 +336,19 @@ defmodule Teiserver.Account.UserLib do
 
   @spec add_report_restriction_types(String.t(), list) :: :ok
   def add_report_restriction_types(key, items) do
-    categories = Teiserver.store_get(:restriction_lookup_store, :categories) || []
+    categories = Barserver.store_get(:restriction_lookup_store, :categories) || []
     new_categories = categories ++ [key]
 
-    Teiserver.store_put(:restriction_lookup_store, :categories, new_categories)
-    Teiserver.store_put(:restriction_lookup_store, key, items)
+    Barserver.store_put(:restriction_lookup_store, :categories, new_categories)
+    Barserver.store_put(:restriction_lookup_store, key, items)
     :ok
   end
 
   @spec list_restrictions :: list
   def list_restrictions() do
-    Teiserver.store_get(:restriction_lookup_store, :categories)
+    Barserver.store_get(:restriction_lookup_store, :categories)
     |> Enum.map(fn key ->
-      {key, Teiserver.store_get(:restriction_lookup_store, key)}
+      {key, Barserver.store_get(:restriction_lookup_store, key)}
     end)
   end
 end

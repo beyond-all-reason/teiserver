@@ -1,7 +1,7 @@
-defmodule Teiserver.Telemetry.PropertyTypeLib do
+defmodule Barserver.Telemetry.PropertyTypeLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
-  alias Teiserver.Telemetry.{PropertyType, PropertyTypeQueries}
+  use BarserverWeb, :library_newform
+  alias Barserver.Telemetry.{PropertyType, PropertyTypeQueries}
 
   @spec icon :: String.t()
   def icon, do: "fa-regular fa-tags"
@@ -14,7 +14,7 @@ defmodule Teiserver.Telemetry.PropertyTypeLib do
   def get_or_add_property_type(name) do
     name = String.trim(name)
 
-    Teiserver.cache_get_or_store(:telemetry_property_types_cache, name, fn ->
+    Barserver.cache_get_or_store(:telemetry_property_types_cache, name, fn ->
       query =
         PropertyTypeQueries.query_property_types(
           where: [name: name],

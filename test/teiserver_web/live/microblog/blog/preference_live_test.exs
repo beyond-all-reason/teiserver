@@ -1,15 +1,15 @@
-defmodule TeiserverWeb.Microblog.Blog.PreferenceLiveTest do
+defmodule BarserverWeb.Microblog.Blog.PreferenceLiveTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase
+  use BarserverWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Teiserver.MicroblogFixtures
+  import Barserver.MicroblogFixtures
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.{Microblog, TeiserverTestLib}
+  alias Barserver.{Microblog, BarserverTestLib}
 
   defp auth_setup(_) do
     GeneralTestLib.conn_setup()
-    |> TeiserverTestLib.conn_setup()
+    |> BarserverTestLib.conn_setup()
   end
 
   describe "Preference" do

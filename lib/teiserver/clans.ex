@@ -1,14 +1,14 @@
-defmodule Teiserver.Clans do
+defmodule Barserver.Clans do
   @moduledoc """
   The Clans context.
   """
 
   import Ecto.Query, warn: false
-  alias Teiserver.Helper.QueryHelpers
-  alias Teiserver.Repo
+  alias Barserver.Helper.QueryHelpers
+  alias Barserver.Repo
 
-  alias Teiserver.Clans.Clan
-  alias Teiserver.Clans.ClanLib
+  alias Barserver.Clans.Clan
+  alias Barserver.Clans.ClanLib
 
   def clan_query(args) do
     clan_query(nil, args)
@@ -53,7 +53,7 @@ defmodule Teiserver.Clans do
 
   """
   def get_clan!(id) when not is_list(id) do
-    Teiserver.cache_get_or_store(:teiserver_clan_cache_bang, id, fn ->
+    Barserver.cache_get_or_store(:teiserver_clan_cache_bang, id, fn ->
       clan_query(id, [])
       |> Repo.one!()
     end)
@@ -124,7 +124,7 @@ defmodule Teiserver.Clans do
 
   """
   def update_clan(%Clan{} = clan, attrs) do
-    Teiserver.cache_delete(:teiserver_clan_cache_bang, clan.id)
+    Barserver.cache_delete(:teiserver_clan_cache_bang, clan.id)
 
     clan
     |> Clan.changeset(attrs)
@@ -160,8 +160,8 @@ defmodule Teiserver.Clans do
     Clan.changeset(clan, %{})
   end
 
-  alias Teiserver.Clans.ClanInvite
-  alias Teiserver.Clans.ClanInviteLib
+  alias Barserver.Clans.ClanInvite
+  alias Barserver.Clans.ClanInviteLib
 
   @doc """
   Returns the list of clan_invites.
@@ -292,8 +292,8 @@ defmodule Teiserver.Clans do
     ClanInvite.changeset(clan_invite, %{})
   end
 
-  alias Teiserver.Clans.ClanMembership
-  alias Teiserver.Clans.ClanMembershipLib
+  alias Barserver.Clans.ClanMembership
+  alias Barserver.Clans.ClanMembershipLib
 
   @doc """
   Returns the list of clan_memberships.

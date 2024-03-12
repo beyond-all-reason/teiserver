@@ -1,8 +1,8 @@
-defmodule Teiserver.Bridge.ChatCommands do
+defmodule Barserver.Bridge.ChatCommands do
   @moduledoc false
-  alias Teiserver.{Account, CacheUser, Communication, Config, Logging}
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Bridge.UnitNames
+  alias Barserver.{Account, CacheUser, Communication, Config, Logging}
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Bridge.UnitNames
   alias Nostrum.Api
   require Logger
 

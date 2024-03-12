@@ -1,13 +1,13 @@
-defmodule Teiserver.Account.LoginThrottleServerTest do
+defmodule Barserver.Account.LoginThrottleServerTest do
   @moduledoc false
 
-  use Teiserver.DataCase, async: false
-  alias Teiserver.Config
-  alias Teiserver.Account
-  alias Teiserver.Account.LoginThrottleServer
-  alias Teiserver.Common.PubsubListener
+  use Barserver.DataCase, async: false
+  alias Barserver.Config
+  alias Barserver.Account
+  alias Barserver.Account.LoginThrottleServer
+  alias Barserver.Common.PubsubListener
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [
       new_user: 0
     ]
@@ -22,7 +22,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     # LoginThrottleServer.set_value(:set_tick_period, 60_000)
     send(pid, :disable_tick_timer)
 
-    Teiserver.TeiserverConfigs.teiserver_configs()
+    Barserver.BarserverConfigs.teiserver_configs()
     Config.update_site_config("system.User limit", 10)
 
     throttle_listener = PubsubListener.new_listener(["teiserver_liveview_login_throttle"])

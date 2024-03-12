@@ -13,7 +13,7 @@ I highly recommend you read [A guide to hot code reloading in Elixir](https://bl
 ```python
 #!/usr/bin/env python3
 # Example usage:
-# hot_reload Teiserver.Helper.TimexHelper Teiserver.Coordinator.ConsulCommands
+# hot_reload Barserver.Helper.TimexHelper Barserver.Coordinator.ConsulCommands
 
 import os, sys
 
@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     # Print out instructions
     instructions = "ssh to server\n---\ntsapp remote"
-    instructions += f"\nTeiserver.hot_reload([" + ", ".join(module_list) + "])"
+    instructions += f"\nBarserver.hot_reload([" + ", ".join(module_list) + "])"
 
     print(instructions)
 ```

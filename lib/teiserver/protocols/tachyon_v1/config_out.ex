@@ -1,5 +1,5 @@
-defmodule Teiserver.Protocols.Tachyon.V1.ConfigOut do
-  alias Teiserver.Protocols.Tachyon.V1.Tachyon
+defmodule Barserver.Protocols.Tachyon.V1.ConfigOut do
+  alias Barserver.Protocols.Tachyon.V1.Tachyon
   require Logger
 
   @spec do_reply(atom(), any) :: Map.t()

@@ -10,10 +10,10 @@ defmodule Central.Helpers.ComponentHelper do
   """
 
   def central_component(template, assigns \\ %{}) do
-    TeiserverWeb.ComponentView.render(template <> ".html", assigns)
+    BarserverWeb.ComponentView.render(template <> ".html", assigns)
   end
 
   def central_component(template, assigns, do: block) do
-    TeiserverWeb.ComponentView.render(template <> ".html", Keyword.merge(assigns, do: block))
+    BarserverWeb.ComponentView.render(template <> ".html", Keyword.merge(assigns, do: block))
   end
 end

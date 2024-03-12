@@ -1,13 +1,13 @@
 <% bsname = view_colour() %>
 
-<TeiserverWeb.Moderation.ModerationComponents.sub_menu
+<BarserverWeb.Moderation.ModerationComponents.sub_menu
   active="reports"
   view_colour={view_colour()}
 />
 
 <div class="row section-menu">
   <div class="col-md-12">
-    <TeiserverWeb.Moderation.ReportComponents.section_menu
+    <BarserverWeb.Moderation.ReportComponents.section_menu
       active="index"
       view_colour={view_colour()}
       current_user={@current_user}
@@ -17,19 +17,19 @@
       <%= if @target_id do %>
         <%= if allow?(@conn, "teiserver.staff.moderator") do %>
           <a
-            class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
+            class={"btn btn-outline-#{Barserver.Account.UserLib.colour()}"}
             href={~p"/teiserver/admin/user/#{@target_id}"}
           >
-            <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" /> &nbsp;
+            <Fontawesome.icon icon={Barserver.Account.UserLib.icon()} style="solid" /> &nbsp;
             View user
           </a>
         <% end %>
 
         <a
-          class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
+          class={"btn btn-outline-#{Barserver.Moderation.ActionLib.colour()}"}
           href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@target_id}_"}
         >
-          <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" /> &nbsp;
+          <Fontawesome.icon icon={Barserver.Moderation.ActionLib.icon()} style="solid" /> &nbsp;
           Action user
         </a>
       <% end %>
@@ -43,7 +43,7 @@
     <% end %>
 
     <%= if @conn.params["search"] != nil do %>
-      <%= render(TeiserverWeb.Moderation.ReportView, "search.html", assigns) %>
+      <%= render(BarserverWeb.Moderation.ReportView, "search.html", assigns) %>
     <% end %>
 
     <h4>Listing Reports</h4>
@@ -70,9 +70,9 @@
               <%= if report.result_id do %>
                 <a
                   href={Routes.moderation_action_path(@conn, :show, report.result_id)}
-                  class={"btn btn-sm btn-#{Teiserver.Moderation.ActionLib.colour()}"}
+                  class={"btn btn-sm btn-#{Barserver.Moderation.ActionLib.colour()}"}
                 >
-                  <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />
+                  <Fontawesome.icon icon={Barserver.Moderation.ActionLib.icon()} style="solid" />
                 </a>
               <% end %>
 
@@ -86,10 +86,10 @@
             <td>
               <a
                 href={Routes.moderation_report_path(@conn, :user, report.target_id)}
-                class={"btn btn-sm btn-#{Teiserver.Account.UserLib.colour()}"}
+                class={"btn btn-sm btn-#{Barserver.Account.UserLib.colour()}"}
               >
                 <Fontawesome.icon
-                  icon={Teiserver.Helper.StylingHelper.icon(:user)}
+                  icon={Barserver.Helper.StylingHelper.icon(:user)}
                   style="regular"
                 />
               </a>

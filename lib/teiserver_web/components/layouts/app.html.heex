@@ -7,7 +7,7 @@
       assigns[:view_colour] || :primary
     end
 
-  {fg, bg, _bsname} = Teiserver.Helper.StylingHelper.colours(view_colour_value) %>
+  {fg, bg, _bsname} = Barserver.Helper.StylingHelper.colours(view_colour_value) %>
   <style type="text/css">
     @media print {
       #menu, #header, #navigation {
@@ -49,7 +49,7 @@
     }
   </style>
 
-  <TeiserverWeb.NavComponents.top_navbar
+  <BarserverWeb.NavComponents.top_navbar
     active={assigns[:site_menu_active]}
     current_user={@current_user}
   />
@@ -66,7 +66,7 @@
 
   <footer class="footer mt-auto pt-2 pb-1 px-2">
     <div style="text-align: right;">
-      <%= Teiserver.Config.get_site_config_cache("site.Footer credit text") %>
+      <%= Barserver.Config.get_site_config_cache("site.Footer credit text") %>
     </div>
   </footer>
 </div>

@@ -1,5 +1,5 @@
 ### Spring protocol extensions
-Teiserver implements a collection of additional commands beyond the spring protocol.
+Barserver implements a collection of additional commands beyond the spring protocol.
 
 #### Differences
 All extended commands have a namespaced structure and make use of tabs to separate arguments like so. They still make use of a space to separate the command from the first argument to aid in compatibility. This applies to responses too, the new `NO` response will use a tab to separate the command from the reason.

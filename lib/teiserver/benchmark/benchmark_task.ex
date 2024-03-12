@@ -20,18 +20,18 @@ defmodule Mix.Tasks.Benchmark do
 
     children = [
       # Benchmark stuff
-      {Registry, keys: :unique, name: Teiserver.Benchmark.UserRegistry},
-      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Benchmark.UserSupervisor},
-      {Teiserver.Benchmark.StatsClient, name: Teiserver.Benchmark.StatsClient}
+      {Registry, keys: :unique, name: Barserver.Benchmark.UserRegistry},
+      {DynamicSupervisor, strategy: :one_for_one, name: Barserver.Benchmark.UserSupervisor},
+      {Barserver.Benchmark.StatsClient, name: Barserver.Benchmark.StatsClient}
     ]
 
-    opts = [strategy: :one_for_one, name: Teiserver.Benchmark.Supervisor]
+    opts = [strategy: :one_for_one, name: Barserver.Benchmark.Supervisor]
     start_result = Supervisor.start_link(children, opts)
 
     # Call all our sub function startup
     {:ok, t} = Task.start(fn -> startup() end)
     send(t, :begin)
-    send(Teiserver.Benchmark.StatsClient, {:begin, server, port})
+    send(Barserver.Benchmark.StatsClient, {:begin, server, port})
 
     :timer.sleep(300_000_000)
 

@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.UserSocket do
+defmodule BarserverWeb.UserSocket do
   use Phoenix.Socket
 
-  alias Teiserver.Account.Guardian
+  alias Barserver.Account.Guardian
 
   ## Channels
-  # channel "room:*", TeiserverWeb.RoomChannel
+  # channel "room:*", BarserverWeb.RoomChannel
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
@@ -53,7 +53,7 @@ defmodule TeiserverWeb.UserSocket do
   # Would allow you to broadcast a "disconnect" event and terminate
   # all active sockets and channels for a given user:
   #
-  #     TeiserverWeb.Endpoint.broadcast("user_socket:#{user.id}", "disconnect", %{})
+  #     BarserverWeb.Endpoint.broadcast("user_socket:#{user.id}", "disconnect", %{})
   #
   # Returning `nil` makes this socket anonymous.
   @impl true

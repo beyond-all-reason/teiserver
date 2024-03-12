@@ -1,9 +1,9 @@
-defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
+defmodule Barserver.Logging.Tasks.PersistServerDayTask do
   @moduledoc false
   use Oban.Worker, queue: :teiserver
-  alias Teiserver.{Account, Logging, Battle}
+  alias Barserver.{Account, Logging, Battle}
 
-  alias Teiserver.Repo
+  alias Barserver.Repo
   import Ecto.Query, warn: false
 
   @log_keep_days 30
@@ -157,7 +157,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
 
       if Timex.compare(new_date, Timex.today()) == -1 do
         %{}
-        |> Teiserver.Logging.Tasks.PersistServerDayTask.new()
+        |> Barserver.Logging.Tasks.PersistServerDayTask.new()
         |> Oban.insert()
       end
     end
@@ -183,7 +183,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
 
     # Delete old log if it exists
     delete_query =
-      from logs in Teiserver.Logging.ServerDayLog,
+      from logs in Barserver.Logging.ServerDayLog,
         where: logs.date == ^(date |> Timex.to_date())
 
     Repo.delete_all(delete_query)
@@ -510,7 +510,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
     the_date = Timex.to_datetime(the_date)
 
     battle_minimum_seconds =
-      Application.get_env(:teiserver, Teiserver)[:retention][:battle_minimum_seconds]
+      Application.get_env(:teiserver, Barserver)[:retention][:battle_minimum_seconds]
 
     Battle.list_matches(
       search: [

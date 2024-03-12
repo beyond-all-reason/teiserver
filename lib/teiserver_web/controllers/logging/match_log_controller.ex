@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.Logging.MatchLogController do
-  use TeiserverWeb, :controller
-  alias Teiserver.Logging
-  alias Teiserver.Helper.{TimexHelper, DatePresets}
-  alias Teiserver.Battle.{ExportRawMatchMetricsTask}
-  alias Teiserver.Logging.{MatchGraphLogsTask}
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+defmodule BarserverWeb.Logging.MatchLogController do
+  use BarserverWeb, :controller
+  alias Barserver.Logging
+  alias Barserver.Helper.{TimexHelper, DatePresets}
+  alias Barserver.Battle.{ExportRawMatchMetricsTask}
+  alias Barserver.Logging.{MatchGraphLogsTask}
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
@@ -12,9 +12,9 @@ defmodule TeiserverWeb.Logging.MatchLogController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Staff.Moderator,
+    policy: Barserver.Staff.Moderator,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Reports', url: '/teiserver/reports')
   plug(:add_breadcrumb, name: 'Match metrics', url: '/teiserver/reports/match/day_metrics')

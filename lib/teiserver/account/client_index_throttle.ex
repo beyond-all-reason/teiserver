@@ -1,11 +1,11 @@
-defmodule Teiserver.Account.ClientIndexThrottle do
+defmodule Barserver.Account.ClientIndexThrottle do
   @doc """
   lobby_changes lists things that have changed about the battle lobby
   player_changes lists players that have changed (added, updated or removed!)
   """
   use GenServer
   alias Phoenix.PubSub
-  alias Teiserver.Client
+  alias Barserver.Client
 
   @update_interval 2000
 
@@ -60,7 +60,7 @@ defmodule Teiserver.Account.ClientIndexThrottle do
 
     :ok =
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_liveview_client_index_updates",
         {:client_index_throttle, new_clients_map, removed_clients}
       )
@@ -76,11 +76,11 @@ defmodule Teiserver.Account.ClientIndexThrottle do
     send(self(), :startup)
     :timer.send_interval(@update_interval, self(), :tick)
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_global_user_updates")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "client_inout")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_global_user_updates")
+    :ok = PubSub.subscribe(Barserver.PubSub, "client_inout")
 
     Horde.Registry.register(
-      Teiserver.ThrottleRegistry,
+      Barserver.ThrottleRegistry,
       "ClientIndexThrottle",
       :index
     )

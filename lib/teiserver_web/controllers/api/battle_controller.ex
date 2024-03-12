@@ -1,11 +1,11 @@
-defmodule TeiserverWeb.API.BattleController do
-  use TeiserverWeb, :controller
-  # alias Teiserver.Battle
+defmodule BarserverWeb.API.BattleController do
+  use BarserverWeb, :controller
+  # alias Barserver.Battle
 
   plug(Bodyguard.Plug.Authorize,
-    policy: Teiserver.Battle.ApiAuth,
+    policy: Barserver.Battle.ApiAuth,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
   )
 
   def create(conn, _battle = %{"outcome" => "completed"}) do

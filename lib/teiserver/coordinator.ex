@@ -1,16 +1,16 @@
-defmodule Teiserver.Coordinator do
+defmodule Barserver.Coordinator do
   @moduledoc false
-  alias Teiserver.{Battle, CacheUser}
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.{Battle, CacheUser}
+  alias Barserver.Data.Types, as: T
   require Logger
 
   @spec do_start() :: :ok | :already_started
   defp do_start() do
     # Start the supervisor server
     result =
-      DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
-        Teiserver.Coordinator.CoordinatorServer,
-        name: Teiserver.Coordinator.CoordinatorServer, data: %{}
+      DynamicSupervisor.start_child(Barserver.Coordinator.DynamicSupervisor, {
+        Barserver.Coordinator.CoordinatorServer,
+        name: Barserver.Coordinator.CoordinatorServer, data: %{}
       })
 
     case result do
@@ -32,12 +32,12 @@ defmodule Teiserver.Coordinator do
 
   @spec get_coordinator_userid() :: T.userid()
   def get_coordinator_userid() do
-    Teiserver.cache_get(:application_metadata_cache, "teiserver_coordinator_userid")
+    Barserver.cache_get(:application_metadata_cache, "teiserver_coordinator_userid")
   end
 
   @spec get_coordinator_pid() :: pid() | nil
   def get_coordinator_pid() do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "CoordinatorServer") do
+    case Horde.Registry.lookup(Barserver.ServerRegistry, "CoordinatorServer") do
       [{pid, _}] ->
         pid
 
@@ -65,7 +65,7 @@ defmodule Teiserver.Coordinator do
   # Consul related stuff
   @spec get_consul_pid(T.lobby_id()) :: pid() | nil
   def get_consul_pid(lobby_id) do
-    case Horde.Registry.lookup(Teiserver.ConsulRegistry, lobby_id) do
+    case Horde.Registry.lookup(Barserver.ConsulRegistry, lobby_id) do
       [{pid, _}] ->
         pid
 
@@ -88,8 +88,8 @@ defmodule Teiserver.Coordinator do
   @spec start_consul(T.lobby_id()) :: pid()
   def start_consul(lobby_id) do
     {:ok, consul_pid} =
-      DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
-        Teiserver.Coordinator.ConsulServer,
+      DynamicSupervisor.start_child(Barserver.Coordinator.DynamicSupervisor, {
+        Barserver.Coordinator.ConsulServer,
         name: "consul_#{lobby_id}",
         data: %{
           lobby_id: lobby_id
@@ -140,7 +140,7 @@ defmodule Teiserver.Coordinator do
   # Balancer related stuff
   @spec get_balancer_pid(T.lobby_id()) :: pid() | nil
   def get_balancer_pid(lobby_id) do
-    case Horde.Registry.lookup(Teiserver.BalancerRegistry, lobby_id) do
+    case Horde.Registry.lookup(Barserver.BalancerRegistry, lobby_id) do
       [{pid, _}] ->
         pid
 
@@ -163,8 +163,8 @@ defmodule Teiserver.Coordinator do
   @spec start_balancer(T.lobby_id()) :: pid()
   def start_balancer(lobby_id) do
     {:ok, balancer_pid} =
-      DynamicSupervisor.start_child(Teiserver.Coordinator.BalancerDynamicSupervisor, {
-        Teiserver.Game.BalancerServer,
+      DynamicSupervisor.start_child(Barserver.Coordinator.BalancerDynamicSupervisor, {
+        Barserver.Game.BalancerServer,
         name: "balancer_#{lobby_id}",
         data: %{
           lobby_id: lobby_id
@@ -225,7 +225,7 @@ defmodule Teiserver.Coordinator do
         nil
 
       p ->
-        DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, p)
+        DynamicSupervisor.terminate_child(Barserver.Coordinator.DynamicSupervisor, p)
     end
 
     case get_balancer_pid(lobby_id) do
@@ -233,10 +233,10 @@ defmodule Teiserver.Coordinator do
         nil
 
       p ->
-        DynamicSupervisor.terminate_child(Teiserver.Coordinator.BalancerDynamicSupervisor, p)
+        DynamicSupervisor.terminate_child(Barserver.Coordinator.BalancerDynamicSupervisor, p)
     end
 
-    Teiserver.Throttles.stop_throttle("LobbyThrottle:#{lobby_id}")
+    Barserver.Throttles.stop_throttle("LobbyThrottle:#{lobby_id}")
     :ok
   end
 
@@ -294,6 +294,6 @@ defmodule Teiserver.Coordinator do
   # Debug stuff
   @spec list_all_internal_servers :: [T.lobby_id()]
   def list_all_internal_servers() do
-    Horde.Registry.select(Teiserver.ServerRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    Horde.Registry.select(Barserver.ServerRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 end

@@ -1,6 +1,6 @@
-defmodule Teiserver.Coordinator.SpadsParser do
+defmodule Barserver.Coordinator.SpadsParser do
   @moduledoc false
-  alias Teiserver.{CacheUser, Account, Telemetry, Battle}
+  alias Barserver.{CacheUser, Account, Telemetry, Battle}
 
   @spec handle_in(String.t(), map()) :: {:host_update, Map.t()} | nil
   def handle_in(msg, state) do

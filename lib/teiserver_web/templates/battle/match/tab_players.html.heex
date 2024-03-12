@@ -70,7 +70,7 @@
         <td>
           <%= if m.user_id != @conn.assigns.current_user.id do %>
             <a href={~p"/moderation/report_user/#{m.user_id}"} class="btn btn-sm btn-warning">
-              <i class={"fa-fw #{Teiserver.Moderation.ReportLib.icon()}"}></i> &nbsp;
+              <i class={"fa-fw #{Barserver.Moderation.ReportLib.icon()}"}></i> &nbsp;
               Report
             </a>
           <% end %>

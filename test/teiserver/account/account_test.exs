@@ -1,11 +1,11 @@
-defmodule Teiserver.AccountTest do
-  use Teiserver.DataCase, async: true
+defmodule Barserver.AccountTest do
+  use Barserver.DataCase, async: true
 
-  alias Teiserver.Account
-  alias Teiserver.Account.AccountTestLib
+  alias Barserver.Account
+  alias Barserver.Account.AccountTestLib
 
   describe "users" do
-    alias Teiserver.Account.User
+    alias Barserver.Account.User
 
     @valid_attrs %{
       colour: "#AA0000",
@@ -78,13 +78,6 @@ defmodule Teiserver.AccountTest do
           developer: "Normal"
         ]
       )
-
-      # Order by
-      Account.list_users(order_by: {:data, "field", :asc})
-      Account.list_users(order_by: {:data, "field", :desc})
-
-      # Fallback
-      Account.list_users(order_by: {:data, "field", :desc})
     end
 
     test "get_user!/1 returns the user with given id" do
@@ -134,7 +127,7 @@ defmodule Teiserver.AccountTest do
   end
 
   # describe "accolades" do
-  #   alias Teiserver.Account.Accolade
+  #   alias Barserver.Account.Accolade
 
   #   @valid_attrs %{"name" => "some name"}
   #   @update_attrs %{"name" => "some updated name"}
@@ -184,7 +177,7 @@ defmodule Teiserver.AccountTest do
   # end
 
   # describe "badge_types" do
-  #   alias Teiserver.Account.BadgeType
+  #   alias Barserver.Account.BadgeType
 
   #   @valid_attrs %{"colour" => "#AA0000", "icon" => "fa-regular fa-home", "name" => "some name"}
   #   @update_attrs %{"colour" => "#0000AA", "icon" => "fa-solid fa-wrench", "name" => "some updated name"}

@@ -1,4 +1,4 @@
-defmodule Teiserver.Lobby.LobbyStruct do
+defmodule Barserver.Lobby.LobbyStruct do
   @moduledoc """
   This is the struct used to store data about the lobby itself in memory.
   """

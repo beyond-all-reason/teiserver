@@ -1,6 +1,6 @@
-defmodule Teiserver.Account.PopulationReport do
-  alias Teiserver.Helper.DatePresets
-  alias Teiserver.Repo
+defmodule Barserver.Account.PopulationReport do
+  alias Barserver.Helper.DatePresets
+  alias Barserver.Repo
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-people-group"

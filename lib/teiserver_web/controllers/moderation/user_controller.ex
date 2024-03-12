@@ -1,8 +1,8 @@
-defmodule TeiserverWeb.Moderation.UserController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Moderation.UserController do
+  use BarserverWeb, :controller
 
-  alias Teiserver.{Account, Moderation}
-  alias Teiserver.Account.UserLib
+  alias Barserver.{Account, Moderation}
+  alias Barserver.Account.UserLib
 
   plug(AssignPlug,
     site_menu_active: "moderation",
@@ -10,9 +10,9 @@ defmodule TeiserverWeb.Moderation.UserController do
   )
 
   plug(Bodyguard.Plug.Authorize,
-    policy: Teiserver.Account.Auth,
+    policy: Barserver.Account.Auth,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
   )
 
   plug(:add_breadcrumb, name: 'Moderation', url: '/moderation')
@@ -22,7 +22,7 @@ defmodule TeiserverWeb.Moderation.UserController do
   def show(conn, %{"id" => id}) do
     user = Account.get_user(id)
 
-    case Teiserver.Account.UserLib.has_access(user, conn) do
+    case Barserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         reports_made =
           Moderation.list_reports(
@@ -66,8 +66,8 @@ defmodule TeiserverWeb.Moderation.UserController do
         |> insert_recently(conn)
 
         conn
-        |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
-        |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
+        |> assign(:restrictions_lists, Barserver.Account.UserLib.list_restrictions())
+        |> assign(:coc_lookup, Barserver.Account.CodeOfConductData.flat_data())
         |> assign(:user, user)
         |> assign(:reports_made, reports_made)
         |> assign(:reports_against, reports_against)

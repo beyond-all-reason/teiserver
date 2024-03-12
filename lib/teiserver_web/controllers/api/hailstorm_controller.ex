@@ -1,19 +1,19 @@
-defmodule TeiserverWeb.API.HailstormController do
-  use TeiserverWeb, :controller
-  alias Teiserver.{Account, CacheUser, Config, Coordinator, Lobby}
-  alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Battle.BalanceLib
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+defmodule BarserverWeb.API.HailstormController do
+  use BarserverWeb, :controller
+  alias Barserver.{Account, CacheUser, Config, Coordinator, Lobby}
+  alias Barserver.Game.MatchRatingLib
+  alias Barserver.Battle.BalanceLib
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
   plug(Bodyguard.Plug.Authorize,
-    policy: Teiserver.API.HailstormAuth,
+    policy: Barserver.API.HailstormAuth,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
   )
 
   @spec start(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def start(conn, _params) do
-    Teiserver.Tachyon.CommandDispatch.build_dispatch_cache()
+    Barserver.Tachyon.CommandDispatch.build_dispatch_cache()
 
     conn
     |> put_status(201)
@@ -201,9 +201,9 @@ defmodule TeiserverWeb.API.HailstormController do
   end
 end
 
-defmodule Teiserver.API.HailstormAuth do
+defmodule Barserver.API.HailstormAuth do
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
   def authorize(_, _, _) do
-    Application.get_env(:teiserver, Teiserver)[:enable_hailstorm]
+    Application.get_env(:teiserver, Barserver)[:enable_hailstorm]
   end
 end

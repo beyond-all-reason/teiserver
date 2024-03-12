@@ -1,4 +1,4 @@
-defmodule Teiserver.Game.QueueWaitServer do
+defmodule Barserver.Game.QueueWaitServer do
   @moduledoc """
   This is the server used to match players for a battle before passing them off
   to a QueueRoomServer.
@@ -6,10 +6,10 @@ defmodule Teiserver.Game.QueueWaitServer do
 
   use GenServer
   require Logger
-  alias Teiserver.Data.{Matchmaking, QueueGroup}
+  alias Barserver.Data.{Matchmaking, QueueGroup}
   alias Phoenix.PubSub
-  alias Teiserver.{Account, Telemetry}
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.{Account, Telemetry}
+  alias Barserver.Data.Types, as: T
 
   @default_telemetry_interval 60_000
   @default_range_increase_interval_seconds 30
@@ -49,7 +49,7 @@ defmodule Teiserver.Game.QueueWaitServer do
           end
 
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "teiserver_queue:#{state.queue_id}",
             %{
               channel: "teiserver_queue:#{state.queue_id}",
@@ -64,7 +64,7 @@ defmodule Teiserver.Game.QueueWaitServer do
             Account.add_client_to_queue(userid, state.queue_id)
 
             PubSub.broadcast(
-              Teiserver.PubSub,
+              Barserver.PubSub,
               "teiserver_client_messages:#{userid}",
               %{
                 channel: "teiserver_client_messages:#{userid}",
@@ -88,7 +88,7 @@ defmodule Teiserver.Game.QueueWaitServer do
           new_state = remove_group(group_id, state)
 
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "teiserver_queue:#{state.queue_id}",
             %{
               channel: "teiserver_queue:#{state.queue_id}",
@@ -104,7 +104,7 @@ defmodule Teiserver.Game.QueueWaitServer do
             Account.remove_client_from_queue(userid, state.queue_id)
 
             PubSub.broadcast(
-              Teiserver.PubSub,
+              Barserver.PubSub,
               "teiserver_client_messages:#{userid}",
               %{
                 channel: "teiserver_client_messages:#{userid}",
@@ -174,7 +174,7 @@ defmodule Teiserver.Game.QueueWaitServer do
           }
 
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "teiserver_queue:#{state.queue_id}",
             %{
               channel: "teiserver_queue:#{state.queue_id}",
@@ -189,7 +189,7 @@ defmodule Teiserver.Game.QueueWaitServer do
             Account.add_client_to_queue(userid, state.queue_id)
 
             PubSub.broadcast(
-              Teiserver.PubSub,
+              Barserver.PubSub,
               "teiserver_client_messages:#{userid}",
               %{
                 channel: "teiserver_client_messages:#{userid}",
@@ -297,7 +297,7 @@ defmodule Teiserver.Game.QueueWaitServer do
     mean_wait_time = calculate_mean_wait_time(state)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_all_queues",
       %{
         channel: "teiserver_all_queues",
@@ -309,7 +309,7 @@ defmodule Teiserver.Game.QueueWaitServer do
     )
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_queue:#{state.queue_id}",
       %{
         channel: "teiserver_queue:#{state.queue_id}",
@@ -693,12 +693,12 @@ defmodule Teiserver.Game.QueueWaitServer do
 
     Process.send(self(), :increase_range, [])
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_global_matchmaking")
+    :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_global_matchmaking")
     Logger.metadata(request_id: "QueueWaitServer##{opts.queue.id}")
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
-      Teiserver.QueueWaitRegistry,
+      Barserver.QueueWaitRegistry,
       opts.queue.id,
       opts.queue.id
     )

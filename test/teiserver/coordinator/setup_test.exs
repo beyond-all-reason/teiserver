@@ -1,12 +1,12 @@
-defmodule Teiserver.Protocols.Coordinator.SetupTest do
-  use Teiserver.ServerCase, async: false
-  alias Teiserver.Account.ClientLib
-  alias Teiserver.Account.UserCacheLib
-  alias Teiserver.TeiserverTestLib
-  alias Teiserver.{Battle, Lobby}
-  alias Teiserver.Common.PubsubListener
+defmodule Barserver.Protocols.Coordinator.SetupTest do
+  use Barserver.ServerCase, async: false
+  alias Barserver.Account.ClientLib
+  alias Barserver.Account.UserCacheLib
+  alias Barserver.BarserverTestLib
+  alias Barserver.{Battle, Lobby}
+  alias Barserver.Common.PubsubListener
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_recv: 1]
 
   @sleep 50
@@ -22,7 +22,7 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
 
   test "test command vs no command", %{user: user, socket: socket} do
     lobby =
-      TeiserverTestLib.make_battle(%{
+      BarserverTestLib.make_battle(%{
         founder_id: user.id,
         founder_name: user.name
       })

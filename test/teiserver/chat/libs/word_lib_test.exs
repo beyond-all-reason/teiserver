@@ -1,10 +1,10 @@
-defmodule Teiserver.Chat.WordLibTest do
-  use Teiserver.DataCase
-  alias Teiserver.Chat.WordLib
-  alias Teiserver.{Coordinator, Room, CacheUser}
-  alias Teiserver.Lobby.ChatLib
+defmodule Barserver.Chat.WordLibTest do
+  use Barserver.DataCase
+  alias Barserver.Chat.WordLib
+  alias Barserver.{Coordinator, Room, CacheUser}
+  alias Barserver.Lobby.ChatLib
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [new_user: 0]
 
   setup do

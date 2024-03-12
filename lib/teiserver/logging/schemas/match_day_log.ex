@@ -1,5 +1,5 @@
-defmodule Teiserver.Logging.MatchDayLog do
-  use TeiserverWeb, :schema
+defmodule Barserver.Logging.MatchDayLog do
+  use BarserverWeb, :schema
 
   @primary_key false
   schema "teiserver_match_day_logs" do

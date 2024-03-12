@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.Telemetry.GeneralController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Telemetry.GeneralController do
+  use BarserverWeb, :controller
 
   plug(AssignPlug,
     site_menu_active: "telemetry",
@@ -7,9 +7,9 @@ defmodule TeiserverWeb.Telemetry.GeneralController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Auth.Telemetry,
+    policy: Barserver.Auth.Telemetry,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
 

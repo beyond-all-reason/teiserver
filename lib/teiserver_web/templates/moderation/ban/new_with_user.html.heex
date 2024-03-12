@@ -1,6 +1,6 @@
 <% bsname = view_colour() %>
 
-<TeiserverWeb.Moderation.ModerationComponents.sub_menu active="bans" view_colour={view_colour()} />
+<BarserverWeb.Moderation.ModerationComponents.sub_menu active="bans" view_colour={view_colour()} />
 
 <script type="text/javascript" charset="utf-8">
   function select_all_keys () {
@@ -39,7 +39,7 @@ type_icons = %{
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Moderation.BanView,
+          BarserverWeb.Moderation.BanView,
           "section_menu.html",
           Map.merge(assigns, %{
             basic_search: "",

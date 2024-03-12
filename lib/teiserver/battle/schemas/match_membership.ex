@@ -1,6 +1,6 @@
-defmodule Teiserver.Battle.MatchMembership do
+defmodule Barserver.Battle.MatchMembership do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   @primary_key false
   schema "teiserver_battle_match_memberships" do
@@ -11,8 +11,8 @@ defmodule Teiserver.Battle.MatchMembership do
     field :party_id, :string, default: nil
     field :left_after, :integer, default: nil
 
-    belongs_to :user, Teiserver.Account.User, primary_key: true
-    belongs_to :match, Teiserver.Battle.Match, primary_key: true
+    belongs_to :user, Barserver.Account.User, primary_key: true
+    belongs_to :match, Barserver.Battle.Match, primary_key: true
   end
 
   @doc """

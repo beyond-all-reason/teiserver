@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.DefaultsPlug do
+defmodule Barserver.Account.DefaultsPlug do
   @moduledoc false
   import Plug.Conn
 

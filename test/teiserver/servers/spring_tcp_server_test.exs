@@ -1,15 +1,15 @@
-defmodule Teiserver.SpringTcpServerTest do
-  use Teiserver.ServerCase, async: false
+defmodule Barserver.SpringTcpServerTest do
+  use Barserver.ServerCase, async: false
 
-  alias Teiserver.Account.UserCacheLib
-  alias Teiserver.{Account, Client, Room}
+  alias Barserver.Account.UserCacheLib
+  alias Barserver.{Account, Client, Room}
   require Logger
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1, auth_setup: 0, new_user: 0]
 
   setup do
-    Teiserver.Coordinator.start_coordinator()
+    Barserver.Coordinator.start_coordinator()
     %{socket: socket} = raw_setup()
     {:ok, socket: socket}
   end
@@ -43,7 +43,7 @@ defmodule Teiserver.SpringTcpServerTest do
     user = UserCacheLib.get_user_by_name(username)
     query = "UPDATE account_users SET inserted_at = '2020-01-01 01:01:01' WHERE id = #{user.id}"
     Ecto.Adapters.SQL.query(Repo, query, [])
-    Teiserver.Account.UserCacheLib.recache_user(user.id)
+    Barserver.Account.UserCacheLib.recache_user(user.id)
 
     _send_raw(
       socket,
@@ -111,7 +111,7 @@ defmodule Teiserver.SpringTcpServerTest do
     %{socket: socket, user: user} = auth_setup()
     client = Client.get_client_by_name(user.name)
     tcp_pid = client.tcp_pid
-    coordinator_userid = Teiserver.Coordinator.get_coordinator_userid()
+    coordinator_userid = Barserver.Coordinator.get_coordinator_userid()
 
     # Should be no users but ourselves
     :timer.sleep(300)
@@ -456,7 +456,7 @@ defmodule Teiserver.SpringTcpServerTest do
     _recv_until(socket)
 
     # Join a room when we don't know about dud_user
-    Teiserver.Protocols.SpringOut.do_join_room(state, "dud_room")
+    Barserver.Protocols.SpringOut.do_join_room(state, "dud_room")
     r = _recv_until(socket)
 
     assert r ==

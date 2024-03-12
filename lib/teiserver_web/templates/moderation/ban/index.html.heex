@@ -1,13 +1,13 @@
 <% bsname = view_colour() %>
 
-<TeiserverWeb.Moderation.ModerationComponents.sub_menu active="bans" view_colour={view_colour()} />
+<BarserverWeb.Moderation.ModerationComponents.sub_menu active="bans" view_colour={view_colour()} />
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Moderation.BanView,
+          BarserverWeb.Moderation.BanView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
@@ -22,7 +22,7 @@
         <br /><br />
 
         <%= if @conn.params["search"] != nil do %>
-          <%= render(TeiserverWeb.Moderation.BanView, "search.html", assigns) %>
+          <%= render(BarserverWeb.Moderation.BanView, "search.html", assigns) %>
         <% end %>
 
         <h4>Listing Bans</h4>

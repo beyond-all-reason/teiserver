@@ -1,6 +1,6 @@
-defmodule TeiserverWeb.General.HomeLive.Index do
-  use TeiserverWeb, :live_view
-  # alias Teiserver.{Account, Battle}
+defmodule BarserverWeb.General.HomeLive.Index do
+  use BarserverWeb, :live_view
+  # alias Barserver.{Account, Battle}
 
   @impl true
   def mount(_params, _session, socket) do

@@ -1,11 +1,11 @@
-defmodule Teiserver.Tachyon.Schema do
+defmodule Barserver.Tachyon.Schema do
   @moduledoc """
 
   """
 
   @spec load_schemas :: list
   def load_schemas() do
-    Application.get_env(:teiserver, Teiserver)[:tachyon_schema_path]
+    Application.get_env(:teiserver, Barserver)[:tachyon_schema_path]
     |> Path.wildcard()
     |> Enum.map(fn file_path ->
       contents =
@@ -24,7 +24,7 @@ defmodule Teiserver.Tachyon.Schema do
 
       schema = JsonXema.new(contents)
 
-      Teiserver.store_put(:tachyon_schemas, command, schema)
+      Barserver.store_put(:tachyon_schemas, command, schema)
       command
     end)
   end

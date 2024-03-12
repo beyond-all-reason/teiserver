@@ -1,12 +1,12 @@
-defmodule TeiserverWeb.Admin.BadgeTypeView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Admin.BadgeTypeView do
+  use BarserverWeb, :view
 
   @spec view_colour() :: atom
-  def view_colour(), do: Teiserver.Account.BadgeTypeLib.colours()
+  def view_colour(), do: Barserver.Account.BadgeTypeLib.colours()
 
   @spec icon() :: String.t()
-  defdelegate icon(), to: Teiserver.Account.BadgeTypeLib
+  defdelegate icon(), to: Barserver.Account.BadgeTypeLib
 
   @spec purpose_list() :: [String.t()]
-  defdelegate purpose_list(), to: Teiserver.Account.BadgeTypeLib
+  defdelegate purpose_list(), to: Barserver.Account.BadgeTypeLib
 end

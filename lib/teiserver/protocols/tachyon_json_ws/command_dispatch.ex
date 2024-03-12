@@ -1,4 +1,4 @@
-defmodule Teiserver.Tachyon.CommandDispatch do
+defmodule Barserver.Tachyon.CommandDispatch do
   @moduledoc """
 
   """
@@ -11,8 +11,8 @@ defmodule Teiserver.Tachyon.CommandDispatch do
 
   defp get_dispatch_handler(command) do
     # Get the relevant handler, if none found the no_command fallback will handle it
-    Teiserver.store_get(:tachyon_dispatches, command) ||
-      Teiserver.store_get(:tachyon_dispatches, "no_command")
+    Barserver.store_get(:tachyon_dispatches, command) ||
+      Barserver.store_get(:tachyon_dispatches, "no_command")
   end
 
   @spec build_dispatch_cache :: :ok
@@ -24,7 +24,7 @@ defmodule Teiserver.Tachyon.CommandDispatch do
     lookup =
       module_list
       |> Enum.filter(fn m ->
-        m |> Module.split() |> Enum.take(3) == ["Teiserver", "Tachyon", "Handlers"]
+        m |> Module.split() |> Enum.take(3) == ["Barserver", "Tachyon", "Handlers"]
       end)
       |> Enum.filter(fn m ->
         Code.ensure_loaded(m)
@@ -34,20 +34,20 @@ defmodule Teiserver.Tachyon.CommandDispatch do
         Map.merge(acc, module.dispatch_handlers())
       end)
 
-    old = Teiserver.store_get(:tachyon_dispatches, "all") || []
+    old = Barserver.store_get(:tachyon_dispatches, "all") || []
 
     # Store all keys, we'll use it later for removing old ones
-    Teiserver.store_put(:tachyon_dispatches, "all", Map.keys(lookup))
+    Barserver.store_put(:tachyon_dispatches, "all", Map.keys(lookup))
 
     # Now store our lookups
     lookup
     |> Enum.each(fn {key, func} ->
-      Teiserver.store_put(:tachyon_dispatches, key, func)
+      Barserver.store_put(:tachyon_dispatches, key, func)
     end)
 
     # Special case
-    no_command_func = &Teiserver.Tachyon.Handlers.System.NoCommandErrorRequest.execute/3
-    Teiserver.store_put(:tachyon_dispatches, "no_command", no_command_func)
+    no_command_func = &Barserver.Tachyon.Handlers.System.NoCommandErrorRequest.execute/3
+    Barserver.store_put(:tachyon_dispatches, "no_command", no_command_func)
 
     # Delete out-dated keys
     old
@@ -55,7 +55,7 @@ defmodule Teiserver.Tachyon.CommandDispatch do
       Map.has_key?(lookup, old_key)
     end)
     |> Enum.each(fn old_key ->
-      Teiserver.store_delete(:tachyon_dispatches, old_key)
+      Barserver.store_delete(:tachyon_dispatches, old_key)
     end)
 
     :ok

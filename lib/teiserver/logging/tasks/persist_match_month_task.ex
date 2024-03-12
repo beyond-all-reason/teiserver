@@ -1,6 +1,6 @@
-defmodule Teiserver.Logging.Tasks.PersistMatchMonthTask do
+defmodule Barserver.Logging.Tasks.PersistMatchMonthTask do
   use Oban.Worker, queue: :teiserver
-  alias Teiserver.Logging
+  alias Barserver.Logging
   import Ecto.Query, warn: false
 
   @sections ~w(bots duel ffa raptors scavengers team totals)
@@ -39,7 +39,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchMonthTask do
 
     if log != nil do
       %{}
-      |> Teiserver.Logging.Tasks.PersistMatchMonthTask.new()
+      |> Barserver.Logging.Tasks.PersistMatchMonthTask.new()
       |> Oban.insert()
     end
 

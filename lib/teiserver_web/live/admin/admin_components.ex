@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.Admin.AdminComponents do
+defmodule BarserverWeb.Admin.AdminComponents do
   @moduledoc false
-  use TeiserverWeb, :component
-  import TeiserverWeb.NavComponents, only: [sub_menu_button: 1]
+  use BarserverWeb, :component
+  import BarserverWeb.NavComponents, only: [sub_menu_button: 1]
 
   @doc """
-  <TeiserverWeb.Admin.AdminComponents.sub_menu active={active} view_colour={@view_colour} current_user={@current_user} />
+  <BarserverWeb.Admin.AdminComponents.sub_menu active={active} view_colour={@view_colour} current_user={@current_user} />
   """
   attr :view_colour, :string, required: true
   attr :active, :string, required: true
@@ -17,7 +17,7 @@ defmodule TeiserverWeb.Admin.AdminComponents do
       <.sub_menu_button
         :if={allow?(@current_user, "Moderator")}
         bsname={@view_colour}
-        icon={Teiserver.Account.UserLib.icon()}
+        icon={Barserver.Account.UserLib.icon()}
         active={@active == "users"}
         url={~p"/teiserver/admin/user"}
       >
@@ -27,7 +27,7 @@ defmodule TeiserverWeb.Admin.AdminComponents do
       <.sub_menu_button
         :if={allow?(@current_user, "Reviewer")}
         bsname={@view_colour}
-        icon={Teiserver.Battle.MatchLib.icon()}
+        icon={Barserver.Battle.MatchLib.icon()}
         active={@active == "matches"}
         url={~p"/teiserver/admin/matches/search"}
       >
@@ -37,7 +37,7 @@ defmodule TeiserverWeb.Admin.AdminComponents do
       <.sub_menu_button
         :if={allow?(@current_user, "Reviewer")}
         bsname={@view_colour}
-        icon={Teiserver.Chat.LobbyMessageLib.icon()}
+        icon={Barserver.Chat.LobbyMessageLib.icon()}
         active={@active == "chat"}
         url={~p"/admin/chat"}
       >
@@ -47,7 +47,7 @@ defmodule TeiserverWeb.Admin.AdminComponents do
       <.sub_menu_button
         :if={allow?(@current_user, "Reviewer")}
         bsname={@view_colour}
-        icon={Teiserver.Moderation.icon()}
+        icon={Barserver.Moderation.icon()}
         active={@active == "moderation"}
         url={~p"/moderation"}
       >

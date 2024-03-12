@@ -1,9 +1,9 @@
-defmodule Teiserver.Account.AuthPipeline do
+defmodule Barserver.Account.AuthPipeline do
   @moduledoc false
   use Guardian.Plug.Pipeline,
     otp_app: :teiserver,
-    error_handler: Teiserver.Account.ErrorHandler,
-    module: Teiserver.Account.Guardian
+    error_handler: Barserver.Account.ErrorHandler,
+    module: Barserver.Account.Guardian
 
   # If there is a session token, restrict it to an access token and validate it
   plug Guardian.Plug.VerifySession, claims: %{"typ" => "access"}

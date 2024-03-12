@@ -1,9 +1,9 @@
-defmodule TeiserverWeb.Telemetry.ComplexServerEventView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Telemetry.ComplexServerEventView do
+  use BarserverWeb, :view
 
   @spec view_colour :: atom
-  def view_colour(), do: Teiserver.Telemetry.ComplexServerEventLib.colour()
+  def view_colour(), do: Barserver.Telemetry.ComplexServerEventLib.colour()
 
   @spec icon() :: String.t()
-  def icon(), do: Teiserver.Telemetry.ComplexServerEventLib.icon()
+  def icon(), do: Barserver.Telemetry.ComplexServerEventLib.icon()
 end

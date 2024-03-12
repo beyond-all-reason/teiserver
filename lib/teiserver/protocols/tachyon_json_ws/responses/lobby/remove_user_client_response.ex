@@ -1,9 +1,9 @@
-defmodule Teiserver.Tachyon.Responses.Lobby.RemoveUserClientResponse do
+defmodule Barserver.Tachyon.Responses.Lobby.RemoveUserClientResponse do
   @moduledoc """
 
   """
 
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @spec generate(T.userid(), T.lobby_id()) ::
           {T.tachyon_command(), :success, T.tachyon_object()}

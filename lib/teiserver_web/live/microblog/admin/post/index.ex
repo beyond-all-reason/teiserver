@@ -1,8 +1,8 @@
-defmodule TeiserverWeb.Microblog.Admin.PostLive.Index do
+defmodule BarserverWeb.Microblog.Admin.PostLive.Index do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  alias Teiserver.Microblog
-  import TeiserverWeb.MicroblogComponents
+  use BarserverWeb, :live_view
+  alias Barserver.Microblog
+  import BarserverWeb.MicroblogComponents
 
   @impl true
   def mount(_params, _session, socket) do
@@ -31,7 +31,7 @@ defmodule TeiserverWeb.Microblog.Admin.PostLive.Index do
   end
 
   @impl true
-  def handle_info({TeiserverWeb.Microblog.PostFormComponent, {:saved, _post}}, socket) do
+  def handle_info({BarserverWeb.Microblog.PostFormComponent, {:saved, _post}}, socket) do
     {:noreply,
      socket
      |> put_flash(:info, "Post created successfully")
@@ -39,7 +39,7 @@ defmodule TeiserverWeb.Microblog.Admin.PostLive.Index do
   end
 
   def handle_info(
-        {TeiserverWeb.Microblog.PostFormComponent, {:updated_changeset, %{changes: post}}},
+        {BarserverWeb.Microblog.PostFormComponent, {:updated_changeset, %{changes: post}}},
         socket
       ) do
     {:noreply,

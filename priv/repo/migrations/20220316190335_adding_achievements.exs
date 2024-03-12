@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.Achievements do
+defmodule Barserver.Repo.Migrations.Achievements do
   use Ecto.Migration
 
   def change do

@@ -1,7 +1,7 @@
-defmodule Teiserver.General.NumberHelperTest do
-  use Teiserver.DataCase, async: true
+defmodule Barserver.General.NumberHelperTest do
+  use Barserver.DataCase, async: true
 
-  alias Teiserver.Helper.NumberHelper
+  alias Barserver.Helper.NumberHelper
   alias Decimal
 
   test "int_parse" do

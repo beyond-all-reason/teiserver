@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.Battle.BattleComponents do
+defmodule BarserverWeb.Battle.BattleComponents do
   @moduledoc false
-  use TeiserverWeb, :component
-  import TeiserverWeb.NavComponents, only: [sub_menu_button: 1]
+  use BarserverWeb, :component
+  import BarserverWeb.NavComponents, only: [sub_menu_button: 1]
 
   @doc """
-  <TeiserverWeb.Battle.BattleComponents.sub_menu active={active} view_colour={@view_colour} />
+  <BarserverWeb.Battle.BattleComponents.sub_menu active={active} view_colour={@view_colour} />
   """
   attr :view_colour, :string, required: true
   attr :active, :string, required: true
@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Battle.BattleComponents do
     <div class="row sub-menu">
       <.sub_menu_button
         bsname={@view_colour}
-        icon={Teiserver.Lobby.icon()}
+        icon={Barserver.Lobby.icon()}
         active={@active == "lobbies"}
         url={~p"/battle/lobbies"}
       >
@@ -24,7 +24,7 @@ defmodule TeiserverWeb.Battle.BattleComponents do
 
       <.sub_menu_button
         bsname={@view_colour}
-        icon={Teiserver.Game.QueueLib.icon()}
+        icon={Barserver.Game.QueueLib.icon()}
         active={@active == "matchmaking"}
         url={~p"/teiserver/matchmaking/queues"}
       >
@@ -33,7 +33,7 @@ defmodule TeiserverWeb.Battle.BattleComponents do
 
       <.sub_menu_button
         bsname={@view_colour}
-        icon={Teiserver.Account.PartyLib.icon()}
+        icon={Barserver.Account.PartyLib.icon()}
         active={@active == "parties"}
         url={~p"/teiserver/account/parties"}
       >
@@ -42,7 +42,7 @@ defmodule TeiserverWeb.Battle.BattleComponents do
 
       <.sub_menu_button
         bsname={@view_colour}
-        icon={Teiserver.Battle.MatchLib.icon()}
+        icon={Barserver.Battle.MatchLib.icon()}
         active={@active == "matches"}
         url={~p"/battle"}
       >
@@ -51,7 +51,7 @@ defmodule TeiserverWeb.Battle.BattleComponents do
 
       <.sub_menu_button
         bsname={@view_colour}
-        icon={Teiserver.Account.RatingLib.icon()}
+        icon={Barserver.Account.RatingLib.icon()}
         active={@active == "ratings"}
         url={~p"/battle/ratings/leaderboard"}
       >

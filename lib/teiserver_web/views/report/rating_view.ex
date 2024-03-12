@@ -1,9 +1,9 @@
-defmodule TeiserverWeb.Report.RatingView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.Report.RatingView do
+  use BarserverWeb, :view
 
   @spec view_colour :: atom
-  def view_colour(), do: Teiserver.Account.RatingLib.colours()
+  def view_colour(), do: Barserver.Account.RatingLib.colours()
 
   @spec icon() :: String.t()
-  def icon(), do: Teiserver.Account.RatingLib.icon()
+  def icon(), do: Barserver.Account.RatingLib.icon()
 end

@@ -1,11 +1,11 @@
-defmodule Teiserver.TeiserverTestLib do
+defmodule Barserver.BarserverTestLib do
   @moduledoc false
-  alias Teiserver.{Client, CacheUser, Account}
-  alias Teiserver.Lobby.LobbyLib
-  alias Teiserver.Account.AccoladeLib
-  alias Teiserver.Protocols.TachyonLib
-  alias Teiserver.Coordinator.CoordinatorServer
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.{Client, CacheUser, Account}
+  alias Barserver.Lobby.LobbyLib
+  alias Barserver.Account.AccoladeLib
+  alias Barserver.Protocols.TachyonLib
+  alias Barserver.Coordinator.CoordinatorServer
+  alias Barserver.Data.Types, as: T
   @host '127.0.0.1'
 
   @spec raw_setup :: %{socket: port()}
@@ -58,6 +58,18 @@ defmodule Teiserver.TeiserverTestLib do
           )
           |> Account.create_user()
 
+        # A bit of a hacky fix but test users were not being verified
+        # correctly and this was the easiest way to solve it
+        # TODO: Refactor user verification and remove/replace this block
+        {:ok, user} = Account.script_update_user(user, %{
+          "roles" => ["Verified"],
+          "permissions" => ["Verified"],
+          "data" => Map.merge(user.data, %{
+            "roles" => ["Verified"],
+            "permissions" => ["Verified"],
+          })
+        })
+
         Account.update_user_stat(user.id, %{
           "country" => "??",
           "lobby_client" => "LuaLobby Chobby"
@@ -66,7 +78,6 @@ defmodule Teiserver.TeiserverTestLib do
         user
         |> CacheUser.convert_user()
         |> CacheUser.add_user()
-        |> CacheUser.verify_user()
 
       _ ->
         new_user()
@@ -140,7 +151,7 @@ defmodule Teiserver.TeiserverTestLib do
 
     case reply do
       [%{"result" => "unverified"} | _] ->
-        raise "You are creating a user without verifying in"
+        raise "You are creating a user without verifying it"
 
       _ ->
         :ok
@@ -291,7 +302,7 @@ defmodule Teiserver.TeiserverTestLib do
   def mock_socket() do
     %{
       mock: true,
-      transport: Teiserver.FakeTransport
+      transport: Barserver.FakeTransport
     }
   end
 
@@ -443,10 +454,10 @@ defmodule Teiserver.TeiserverTestLib do
     ["Verified"]
   end
 
-  @spec make_clan(String.t(), Map.t()) :: Teiserver.Clans.Clan.t()
+  @spec make_clan(String.t(), Map.t()) :: Barserver.Clans.Clan.t()
   def make_clan(name, params \\ %{}) do
     {:ok, c} =
-      Teiserver.Clans.create_clan(
+      Barserver.Clans.create_clan(
         Map.merge(
           %{
             "name" => name,
@@ -494,10 +505,10 @@ defmodule Teiserver.TeiserverTestLib do
   end
 
   @spec make_clan_membership(Integer.t(), Integer.t(), Map.t()) ::
-          Teiserver.Clans.ClanMembership.t()
+          Barserver.Clans.ClanMembership.t()
   def make_clan_membership(clan_id, user_id, data \\ %{}) do
     {:ok, gm} =
-      Teiserver.Clans.create_clan_membership(%{
+      Barserver.Clans.create_clan_membership(%{
         "clan_id" => clan_id,
         "user_id" => user_id,
         "role" => data["role"] || "Member"
@@ -506,10 +517,10 @@ defmodule Teiserver.TeiserverTestLib do
     gm
   end
 
-  @spec make_queue(String.t(), Map.t()) :: Teiserver.Game.Queue.t()
+  @spec make_queue(String.t(), Map.t()) :: Barserver.Game.Queue.t()
   def make_queue(name, params \\ %{}) do
     {:ok, q} =
-      Teiserver.Game.create_queue(
+      Barserver.Game.create_queue(
         Map.merge(
           %{
             "name" => name,
@@ -551,8 +562,8 @@ defmodule Teiserver.TeiserverTestLib do
       ip: "127.0.0.1"
     }
     |> Map.merge(params)
-    |> Teiserver.Lobby.create_lobby()
-    |> Teiserver.Lobby.add_lobby()
+    |> Barserver.Lobby.create_lobby()
+    |> Barserver.Lobby.add_lobby()
   end
 
   defp seed_badge_types() do
@@ -588,7 +599,7 @@ defmodule Teiserver.TeiserverTestLib do
   end
 
   def create_moderation_user_report(target_id, reporter_id, params \\ %{}) do
-    Teiserver.Moderation.create_report_group_and_report(
+    Barserver.Moderation.create_report_group_and_report(
       Map.merge(
         %{
           reporter_id: reporter_id,
@@ -605,31 +616,31 @@ defmodule Teiserver.TeiserverTestLib do
 
   def seed() do
     CoordinatorServer.get_coordinator_account()
-    Teiserver.Account.AccoladeBotServer.get_accolade_account()
+    Barserver.Account.AccoladeBotServer.get_accolade_account()
 
-    Teiserver.Account.get_or_add_smurf_key_type("client_app_hash")
-    Teiserver.Account.get_or_add_smurf_key_type("chobby_hash")
-    Teiserver.Account.get_or_add_smurf_key_type("hw1")
-    Teiserver.Account.get_or_add_smurf_key_type("hw2")
-    Teiserver.Account.get_or_add_smurf_key_type("hw3")
+    Barserver.Account.get_or_add_smurf_key_type("client_app_hash")
+    Barserver.Account.get_or_add_smurf_key_type("chobby_hash")
+    Barserver.Account.get_or_add_smurf_key_type("hw1")
+    Barserver.Account.get_or_add_smurf_key_type("hw2")
+    Barserver.Account.get_or_add_smurf_key_type("hw3")
 
-    Teiserver.Game.get_or_add_rating_type("Duel")
-    Teiserver.Game.get_or_add_rating_type("Team")
-    Teiserver.Game.get_or_add_rating_type("FFA")
+    Barserver.Game.get_or_add_rating_type("Duel")
+    Barserver.Game.get_or_add_rating_type("Team")
+    Barserver.Game.get_or_add_rating_type("FFA")
 
-    Teiserver.Telemetry.get_or_add_complex_server_event_type("Server startup")
-    Teiserver.Telemetry.get_or_add_simple_server_event_type("account.user_login")
-    Teiserver.Telemetry.get_or_add_simple_server_event_type("lobby.force_add_user_to_lobby")
-    Teiserver.Telemetry.get_or_add_complex_client_event_type("client.user_event")
-    Teiserver.Telemetry.get_or_add_complex_client_event_type("client.user_event")
+    Barserver.Telemetry.get_or_add_complex_server_event_type("Server startup")
+    Barserver.Telemetry.get_or_add_simple_server_event_type("account.user_login")
+    Barserver.Telemetry.get_or_add_simple_server_event_type("lobby.force_add_user_to_lobby")
+    Barserver.Telemetry.get_or_add_complex_client_event_type("client.user_event")
+    Barserver.Telemetry.get_or_add_complex_client_event_type("client.user_event")
 
-    Teiserver.Telemetry.get_or_add_simple_lobby_event_type("remove_user_from_lobby")
+    Barserver.Telemetry.get_or_add_simple_lobby_event_type("remove_user_from_lobby")
 
     seed_badge_types()
   end
 end
 
-defmodule Teiserver.FakeTransport do
+defmodule Barserver.FakeTransport do
   @moduledoc false
   def send(_transport, _msg), do: nil
 end

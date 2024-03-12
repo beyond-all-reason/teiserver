@@ -1,17 +1,17 @@
-defmodule TeiserverWeb.Logging.AggregateViewLogController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Logging.AggregateViewLogController do
+  use BarserverWeb, :controller
 
-  alias Teiserver.Logging
-  alias Teiserver.Logging.AggregateViewLogLib
-  alias Teiserver.Logging.AggregateViewLogsTask
-  alias Teiserver.Helper.TimexHelper
+  alias Barserver.Logging
+  alias Barserver.Logging.AggregateViewLogLib
+  alias Barserver.Logging.AggregateViewLogsTask
+  alias Barserver.Helper.TimexHelper
 
-  alias Teiserver.Helper.TimexHelper
+  alias Barserver.Helper.TimexHelper
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Logging.AggregateViewLog,
+    policy: Barserver.Logging.AggregateViewLog,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug :add_breadcrumb, name: 'Logging', url: '/logging'
   plug :add_breadcrumb, name: 'Aggregate', url: '/logging/aggregate_views'

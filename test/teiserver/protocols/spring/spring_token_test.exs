@@ -1,10 +1,10 @@
-defmodule Teiserver.SpringTokenTest do
-  use Teiserver.ServerCase, async: false
+defmodule Barserver.SpringTokenTest do
+  use Barserver.ServerCase, async: false
   require Logger
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.Client
+  alias Barserver.Client
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [spring_tls_setup: 0, raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1]
 
   test "c.user.get_token - insecure" do
@@ -39,7 +39,7 @@ defmodule Teiserver.SpringTokenTest do
         }
       })
 
-    Teiserver.Account.UserCacheLib.recache_user(user.id)
+    Barserver.Account.UserCacheLib.recache_user(user.id)
 
     %{socket: socket} = spring_tls_setup()
     _welcome = _recv_raw(socket)
@@ -67,8 +67,8 @@ defmodule Teiserver.SpringTokenTest do
 
     # Token 1 and 2 will almost certainly be different, instead we
     # check to ensure they pull back the same user
-    {:ok, user1, _claims} = Teiserver.Account.Guardian.resource_from_token(token)
-    {:ok, user2, _claims} = Teiserver.Account.Guardian.resource_from_token(token)
+    {:ok, user1, _claims} = Barserver.Account.Guardian.resource_from_token(token)
+    {:ok, user2, _claims} = Barserver.Account.Guardian.resource_from_token(token)
 
     assert user1.id == user.id
     assert user2.id == user.id

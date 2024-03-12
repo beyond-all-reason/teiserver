@@ -1,8 +1,8 @@
-defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
-  use Teiserver.ServerCase, async: false
-  alias Teiserver.{User, Coordinator, Account}
+defmodule Barserver.Coordinator.CoordinatorCommandsTest do
+  use Barserver.ServerCase, async: false
+  alias Barserver.{User, Coordinator, Account}
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, new_user: 0]
 
   setup do

@@ -1,10 +1,10 @@
-defmodule Teiserver.Battle.LobbyIndexThrottle do
+defmodule Barserver.Battle.LobbyIndexThrottle do
   @moduledoc """
 
   """
   use GenServer
   alias Phoenix.PubSub
-  alias Teiserver.Battle
+  alias Barserver.Battle
   require Logger
 
   @update_interval 1_000
@@ -84,7 +84,7 @@ defmodule Teiserver.Battle.LobbyIndexThrottle do
   defp broadcast(_) do
     :ok =
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_liveview_lobby_index_updates",
         %{
           channel: "teiserver_liveview_lobby_index_updates",
@@ -102,7 +102,7 @@ defmodule Teiserver.Battle.LobbyIndexThrottle do
     :timer.send_interval(@update_interval, self(), :tick)
 
     Horde.Registry.register(
-      Teiserver.ThrottleRegistry,
+      Barserver.ThrottleRegistry,
       "LobbyIndexThrottle",
       :index
     )

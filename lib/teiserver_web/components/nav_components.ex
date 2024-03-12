@@ -1,18 +1,18 @@
-defmodule TeiserverWeb.NavComponents do
+defmodule BarserverWeb.NavComponents do
   @moduledoc false
   use Phoenix.Component
   # alias Phoenix.LiveView.JS
-  # import TeiserverWeb.Gettext
+  # import BarserverWeb.Gettext
 
-  import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+  import Barserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
 
   use Phoenix.VerifiedRoutes,
-    endpoint: TeiserverWeb.Endpoint,
-    router: TeiserverWeb.Router,
-    statics: TeiserverWeb.static_paths()
+    endpoint: BarserverWeb.Endpoint,
+    router: BarserverWeb.Router,
+    statics: BarserverWeb.static_paths()
 
   @doc """
-  <TeiserverWeb.NavComponents.top_nav_item active={active} route={route} icon={icon} />
+  <BarserverWeb.NavComponents.top_nav_item active={active} route={route} icon={icon} />
   """
   def top_nav_item(assigns) do
     active = if assigns[:active], do: "active", else: ""
@@ -34,7 +34,7 @@ defmodule TeiserverWeb.NavComponents do
   end
 
   @doc """
-  <TeiserverWeb.NavComponents.top_navbar active={"string"} />
+  <BarserverWeb.NavComponents.top_navbar active={"string"} />
   """
   attr :current_user, :map, required: true
   attr :active, :string, required: true
@@ -49,12 +49,12 @@ defmodule TeiserverWeb.NavComponents do
           <!-- Navbar brand -->
           <a class="navbar-brand mt-2 mt-lg-0" href="/">
             <i
-              class={"fa-fw #{Application.get_env(:teiserver, Teiserver)[:site_icon]}"}
+              class={"fa-fw #{Application.get_env(:teiserver, Barserver)[:site_icon]}"}
               style="margin: -4px 20px 0 0px;"
             >
             </i>
             <span id="page-title">
-              <%= Application.get_env(:teiserver, Teiserver)[:site_title] %>
+              <%= Application.get_env(:teiserver, Barserver)[:site_title] %>
             </span>
           </a>
           <!-- Left links -->
@@ -140,8 +140,8 @@ defmodule TeiserverWeb.NavComponents do
         <!-- Right elements -->
         <div class="d-flex align-items-center">
           <%= if @current_user do %>
-            <TeiserverWeb.UserComponents.recents_dropdown current_user={@current_user} />
-            <TeiserverWeb.UserComponents.account_dropdown current_user={@current_user} />
+            <BarserverWeb.UserComponents.recents_dropdown current_user={@current_user} />
+            <BarserverWeb.UserComponents.account_dropdown current_user={@current_user} />
 
             <div style="width: 300px; display: inline-block;"></div>
           <% else %>

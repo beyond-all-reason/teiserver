@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.AddUserActivityDayLogTable do
+defmodule Barserver.Repo.Migrations.AddUserActivityDayLogTable do
   use Ecto.Migration
 
   def change do

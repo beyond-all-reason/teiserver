@@ -8,7 +8,7 @@
   });
 </script>
 
-<TeiserverWeb.Moderation.ModerationComponents.sub_menu
+<BarserverWeb.Moderation.ModerationComponents.sub_menu
   active="actions"
   view_colour={view_colour()}
 />
@@ -18,7 +18,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Moderation.ActionView,
+          BarserverWeb.Moderation.ActionView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
@@ -53,9 +53,9 @@
 
             <a
               href={~p"/teiserver/admin/user/#{@action.target_id}"}
-              class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
+              class={"btn btn-outline-#{Barserver.Account.UserLib.colour()}"}
             >
-              <%= central_component("icon", icon: Teiserver.Account.UserLib.icon()) %> Administrate user
+              <%= central_component("icon", icon: Barserver.Account.UserLib.icon()) %> Administrate user
             </a>
           <% end %>
         </div>
@@ -73,7 +73,7 @@
 
           <li class="nav-item">
             <a href="#logs_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component("icon", icon: Teiserver.Helper.StylingHelper.icon(:list)) %> Logs (<%= Enum.count(
+              <%= central_component("icon", icon: Barserver.Helper.StylingHelper.icon(:list)) %> Logs (<%= Enum.count(
                 @logs
               ) %>)
             </a>

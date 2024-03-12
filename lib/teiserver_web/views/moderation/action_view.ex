@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.Moderation.ActionView do
+defmodule BarserverWeb.Moderation.ActionView do
   @moduledoc false
-  use TeiserverWeb, :view
+  use BarserverWeb, :view
 
   @spec view_colour() :: atom
-  def view_colour, do: Teiserver.Moderation.ActionLib.colour()
+  def view_colour, do: Barserver.Moderation.ActionLib.colour()
 
   @spec icon() :: String.t()
-  def icon, do: Teiserver.Moderation.ActionLib.icon()
+  def icon, do: Barserver.Moderation.ActionLib.icon()
 end

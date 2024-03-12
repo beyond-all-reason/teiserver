@@ -1,14 +1,14 @@
-defmodule TeiserverWeb.Admin.AccoladeController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Admin.AccoladeController do
+  use BarserverWeb, :controller
 
-  alias Teiserver.Account
-  alias Teiserver.Account.Accolade
-  alias Teiserver.Account.AccoladeLib
+  alias Barserver.Account
+  alias Barserver.Account.Accolade
+  alias Barserver.Account.AccoladeLib
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Staff.Moderator,
+    policy: Barserver.Staff.Moderator,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "teiserver_user",

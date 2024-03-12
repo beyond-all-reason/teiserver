@@ -1,10 +1,10 @@
-defmodule Teiserver.Tachyon.Handlers.System.DisconnectRequest do
+defmodule Barserver.Tachyon.Handlers.System.DisconnectRequest do
   @moduledoc """
 
   """
 
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Tachyon.Responses.System.DisconnectResponse
+  alias Barserver.Data.Types, as: T
+  alias Barserver.Tachyon.Responses.System.DisconnectResponse
 
   # @command_id "system/error"
   @spec dispatch_handlers :: map()
@@ -18,7 +18,7 @@ defmodule Teiserver.Tachyon.Handlers.System.DisconnectRequest do
           {T.tachyon_response(), T.tachyon_conn()}
   def execute(%{userid: userid} = conn, _object, _meta) do
     send(self(), :disconnect)
-    Teiserver.Client.disconnect(userid, "WS disconnect request")
+    Barserver.Client.disconnect(userid, "WS disconnect request")
 
     response = DisconnectResponse.generate("disconnected")
 

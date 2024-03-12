@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.Account.ProfileLive.Overview do
+defmodule BarserverWeb.Account.ProfileLive.Overview do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  alias Teiserver.Account
+  use BarserverWeb, :live_view
+  alias Barserver.Account
 
   @impl true
   def mount(%{"userid" => userid_str}, _session, socket) do
@@ -19,7 +19,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
           socket
           |> assign(:tab, nil)
           |> assign(:site_menu_active, "teiserver_account")
-          |> assign(:view_colour, Teiserver.Account.UserLib.colours())
+          |> assign(:view_colour, Barserver.Account.UserLib.colours())
           |> assign(:user, user)
           |> assign(:role_data, Account.RoleLib.role_data())
           |> get_relationships_and_permissions

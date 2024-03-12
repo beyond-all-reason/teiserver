@@ -1,6 +1,6 @@
-defmodule Teiserver.Chat.PartyMessageLib do
-  use TeiserverWeb, :library
-  alias Teiserver.Chat.PartyMessage
+defmodule Barserver.Chat.PartyMessageLib do
+  use BarserverWeb, :library
+  alias Barserver.Chat.PartyMessage
 
   # Functions
   @spec icon :: String.t()

@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.CitextEmails do
+defmodule Barserver.Repo.Migrations.CitextEmails do
   use Ecto.Migration
 
   def up do

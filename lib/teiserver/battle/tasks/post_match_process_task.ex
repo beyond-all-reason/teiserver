@@ -1,20 +1,20 @@
-defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
+defmodule Barserver.Battle.Tasks.PostMatchProcessTask do
   @moduledoc """
   Used to process data about a match after it has ended.
   """
   use Oban.Worker, queue: :teiserver
 
-  alias Teiserver.{Account, Battle, Coordinator}
-  alias Teiserver.Battle.MatchMembershipLib
-  alias Teiserver.Helper.NumberHelper
-  alias Teiserver.Config
-  alias Teiserver.Repo
-  # alias Teiserver.Data.Types, as: T
+  alias Barserver.{Account, Battle, Coordinator}
+  alias Barserver.Battle.MatchMembershipLib
+  alias Barserver.Helper.NumberHelper
+  alias Barserver.Config
+  alias Barserver.Repo
+  # alias Barserver.Data.Types, as: T
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") ==
+    if Barserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") ==
          true do
       if Config.get_site_config_cache("system.Process matches") do
         Battle.list_matches(
@@ -79,7 +79,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
       })
 
     # We pass match.id to ensure we re-query the match correctly
-    Teiserver.Game.MatchRatingLib.rate_match(match.id)
+    Barserver.Game.MatchRatingLib.rate_match(match.id)
 
     # Tell the host to re-rate some players
     usernames =
@@ -150,7 +150,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
 
     memberships
     |> Enum.map(fn m ->
-      Teiserver.Account.RecacheUserStatsTask.match_processed(match, m.user_id)
+      Barserver.Account.RecacheUserStatsTask.match_processed(match, m.user_id)
     end)
   end
 

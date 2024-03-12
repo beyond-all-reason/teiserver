@@ -1,12 +1,12 @@
-defmodule TeiserverWeb.Admin.SiteConfigController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Admin.SiteConfigController do
+  use BarserverWeb, :controller
 
-  alias Teiserver.Config
+  alias Barserver.Config
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Auth.Server,
+    policy: Barserver.Auth.Server,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   # plug :add_breadcrumb, name: 'Alacrity', url: '/'
   plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
@@ -46,7 +46,7 @@ defmodule TeiserverWeb.Admin.SiteConfigController do
     tab =
       Config.get_site_config_type(key)
       |> Map.get(:section)
-      |> Teiserver.Helper.StringHelper.remove_spaces()
+      |> Barserver.Helper.StringHelper.remove_spaces()
 
     add_audit_log(conn, "Site config:Update value", %{key: key, value: value})
 

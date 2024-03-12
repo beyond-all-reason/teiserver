@@ -1,4 +1,4 @@
-defmodule Teiserver.Bridge.UnitNames do
+defmodule Barserver.Bridge.UnitNames do
   @unit_list [
     {"armaap", "advanced aircraft plant", "advanced aircraft plant"},
     {"armalab", "advanced bot lab", "advanced bot lab"},

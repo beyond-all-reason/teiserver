@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Teiserver.CompareBalanceAlgorithms do
+defmodule Mix.Tasks.Barserver.CompareBalanceAlgorithms do
   @moduledoc """
   Run with mix teiserver.compare_balance_algorithms
   """

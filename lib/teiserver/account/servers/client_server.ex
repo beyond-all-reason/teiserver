@@ -1,8 +1,8 @@
-defmodule Teiserver.Account.ClientServer do
+defmodule Barserver.Account.ClientServer do
   @moduledoc false
   use GenServer
   require Logger
-  alias Teiserver.Lobby.ChatLib
+  alias Barserver.Lobby.ChatLib
   alias Phoenix.PubSub
 
   @impl true
@@ -21,7 +21,7 @@ defmodule Teiserver.Account.ClientServer do
 
       existing_id ->
         PubSub.broadcast(
-          Teiserver.PubSub,
+          Barserver.PubSub,
           "teiserver_client_messages:#{state.userid}",
           %{
             channel: "teiserver_client_messages:#{state.userid}",
@@ -31,7 +31,7 @@ defmodule Teiserver.Account.ClientServer do
         )
 
         PubSub.broadcast(
-          Teiserver.PubSub,
+          Barserver.PubSub,
           "teiserver_client_watch:#{state.userid}",
           %{
             channel: "teiserver_client_watch:#{state.userid}",
@@ -47,7 +47,7 @@ defmodule Teiserver.Account.ClientServer do
 
     if party_id != nil do
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_client_messages:#{state.userid}",
         %{
           channel: "teiserver_client_messages:#{state.userid}",
@@ -57,7 +57,7 @@ defmodule Teiserver.Account.ClientServer do
       )
 
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_client_watch:#{state.userid}",
         %{
           channel: "teiserver_client_watch:#{state.userid}",
@@ -68,7 +68,7 @@ defmodule Teiserver.Account.ClientServer do
     end
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_client_messages:#{state.userid}",
       %{
         channel: "teiserver_client_messages:#{state.userid}",
@@ -86,7 +86,7 @@ defmodule Teiserver.Account.ClientServer do
     new_client = Map.merge(state.client, partial_client)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_client_messages:#{state.userid}",
       %{
         channel: "teiserver_client_messages:#{state.userid}",
@@ -98,7 +98,7 @@ defmodule Teiserver.Account.ClientServer do
 
     if state.client.lobby_id do
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_lobby_updates:#{state.client.lobby_id}",
         %{
           channel: "teiserver_lobby_updates",
@@ -118,7 +118,7 @@ defmodule Teiserver.Account.ClientServer do
     new_client = Map.merge(state.client, partial_client)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_client_messages:#{state.userid}",
       %{
         channel: "teiserver_client_messages:#{state.userid}",
@@ -130,7 +130,7 @@ defmodule Teiserver.Account.ClientServer do
 
     if state.client.lobby_id do
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_lobby_updates:#{state.client.lobby_id}",
         %{
           channel: "teiserver_lobby_updates",
@@ -147,7 +147,7 @@ defmodule Teiserver.Account.ClientServer do
 
   def handle_cast({:update_client, new_client}, state) do
     if state.client.player != new_client.player and
-         not Application.get_env(:teiserver, Teiserver)[:test_mode] do
+         not Application.get_env(:teiserver, Barserver)[:test_mode] do
       if state.client.lobby_id do
         if new_client.player do
           ChatLib.persist_system_message(
@@ -166,7 +166,7 @@ defmodule Teiserver.Account.ClientServer do
     new_client = Map.merge(state.client, new_client)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_client_messages:#{state.userid}",
       %{
         channel: "teiserver_client_messages:#{state.userid}",
@@ -205,10 +205,10 @@ defmodule Teiserver.Account.ClientServer do
   def handle_info(:heartbeat, %{client: client_state} = state) do
     cond do
       client_state.tcp_pid == nil ->
-        DynamicSupervisor.terminate_child(Teiserver.ClientSupervisor, self())
+        DynamicSupervisor.terminate_child(Barserver.ClientSupervisor, self())
 
       Process.alive?(client_state.tcp_pid) == false ->
-        DynamicSupervisor.terminate_child(Teiserver.ClientSupervisor, self())
+        DynamicSupervisor.terminate_child(Barserver.ClientSupervisor, self())
 
       true ->
         :ok
@@ -230,7 +230,7 @@ defmodule Teiserver.Account.ClientServer do
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
-      Teiserver.ClientRegistry,
+      Barserver.ClientRegistry,
       userid,
       state.client.lobby_client
     )

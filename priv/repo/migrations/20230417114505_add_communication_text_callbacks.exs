@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.AddCommunicationTextCallbacks do
+defmodule Barserver.Repo.Migrations.AddCommunicationTextCallbacks do
   use Ecto.Migration
 
   def change do

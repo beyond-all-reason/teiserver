@@ -1,13 +1,13 @@
-defmodule Teiserver.Coordinator.ConsulCommandsTest do
+defmodule Barserver.Coordinator.ConsulCommandsTest do
   @moduledoc false
-  use Teiserver.ServerCase, async: false
-  alias Teiserver.Account.ClientLib
-  alias Teiserver.Common.PubsubListener
-  alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.{Account, Battle, CacheUser, Client, Coordinator, Lobby}
-  alias Teiserver.Coordinator.ConsulServer
+  use Barserver.ServerCase, async: false
+  alias Barserver.Account.ClientLib
+  alias Barserver.Common.PubsubListener
+  alias Barserver.Game.MatchRatingLib
+  alias Barserver.{Account, Battle, CacheUser, Client, Coordinator, Lobby}
+  alias Barserver.Coordinator.ConsulServer
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1]
 
   setup do
@@ -1190,7 +1190,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert Account.get_client_by_id(player9.id).player == false
 
     # player_list =
-    #   Teiserver.Coordinator.ConsulServer.list_players(%{lobby_id: lobby_id})
+    #   Barserver.Coordinator.ConsulServer.list_players(%{lobby_id: lobby_id})
     #   |> Enum.map(fn %{userid: userid} -> userid end)
 
     # Queue should be empty at start

@@ -1,5 +1,5 @@
-defmodule Teiserver.Game.AchievementType do
-  use TeiserverWeb, :schema
+defmodule Barserver.Game.AchievementType do
+  use BarserverWeb, :schema
 
   schema "teiserver_achievement_types" do
     field :name, :string

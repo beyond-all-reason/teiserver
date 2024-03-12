@@ -1,8 +1,8 @@
-defmodule TeiserverWeb.Microblog.Admin.TagLive.Show do
+defmodule BarserverWeb.Microblog.Admin.TagLive.Show do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  alias Teiserver.Microblog
-  import TeiserverWeb.MicroblogComponents
+  use BarserverWeb, :live_view
+  alias Barserver.Microblog
+  import BarserverWeb.MicroblogComponents
 
   @impl true
   def mount(_params, _session, socket) do
@@ -17,7 +17,7 @@ defmodule TeiserverWeb.Microblog.Admin.TagLive.Show do
          socket
          |> assign(:tag, Microblog.get_tag!(id))
          |> assign(:site_menu_active, "microblog")
-         |> assign(:view_colour, Teiserver.Microblog.colours())}
+         |> assign(:view_colour, Barserver.Microblog.colours())}
 
       false ->
         {:noreply,

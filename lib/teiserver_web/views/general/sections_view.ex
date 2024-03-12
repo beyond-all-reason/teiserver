@@ -1,3 +1,3 @@
-defmodule TeiserverWeb.General.SectionsView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.General.SectionsView do
+  use BarserverWeb, :view
 end

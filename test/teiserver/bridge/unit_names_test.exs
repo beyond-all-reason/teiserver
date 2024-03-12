@@ -1,6 +1,6 @@
-defmodule Teiserver.Bridge.UnitNamesTest do
-  use Teiserver.ServerCase, async: true
-  alias Teiserver.Bridge.UnitNames
+defmodule Barserver.Bridge.UnitNamesTest do
+  use Barserver.ServerCase, async: true
+  alias Barserver.Bridge.UnitNames
 
   test "unit names" do
     assert UnitNames.get_name("sumo") == {:reused, {{"corsumo", "mammoth"}, {"corcan", "can"}}}

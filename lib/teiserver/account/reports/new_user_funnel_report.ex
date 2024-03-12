@@ -1,6 +1,6 @@
-defmodule Teiserver.Account.NewUserFunnelReport do
+defmodule Barserver.Account.NewUserFunnelReport do
   @moduledoc false
-  alias Teiserver.{Account, Telemetry, Battle}
+  alias Barserver.{Account, Telemetry, Battle}
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-filter"

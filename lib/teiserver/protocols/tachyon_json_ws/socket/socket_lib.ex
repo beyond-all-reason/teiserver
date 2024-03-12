@@ -1,4 +1,4 @@
-defmodule Teiserver.Tachyon.SocketLib do
+defmodule Barserver.Tachyon.SocketLib do
   @moduledoc """
 
   """

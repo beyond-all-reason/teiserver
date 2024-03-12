@@ -1,6 +1,6 @@
-defmodule Teiserver.Account.UserToken do
+defmodule Barserver.Account.UserToken do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "account_user_tokens" do
     field :value, :string
@@ -10,7 +10,7 @@ defmodule Teiserver.Account.UserToken do
     field :expires, :utc_datetime
     field :last_used, :utc_datetime
 
-    belongs_to :user, Teiserver.Account.User
+    belongs_to :user, Barserver.Account.User
 
     timestamps()
   end

@@ -1,3 +1,3 @@
-defmodule TeiserverWeb.General.CentralView do
-  use TeiserverWeb, :view
+defmodule BarserverWeb.General.CentralView do
+  use BarserverWeb, :view
 end

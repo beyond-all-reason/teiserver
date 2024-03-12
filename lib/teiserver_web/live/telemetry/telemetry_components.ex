@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.Telemetry.TelemetryComponents do
+defmodule BarserverWeb.Telemetry.TelemetryComponents do
   @moduledoc false
-  use TeiserverWeb, :component
-  import TeiserverWeb.NavComponents, only: [sub_menu_button: 1]
+  use BarserverWeb, :component
+  import BarserverWeb.NavComponents, only: [sub_menu_button: 1]
 
   @doc """
-  <TeiserverWeb.Telemetry.TelemetryComponents.sub_menu active={active} view_colour={@view_colour} current_user={@current_user} />
+  <BarserverWeb.Telemetry.TelemetryComponents.sub_menu active={active} view_colour={@view_colour} current_user={@current_user} />
   """
   attr :view_colour, :string, required: true
   attr :active, :string, required: true
@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
     <div class="row sub-menu">
       <.sub_menu_button
         bsname={@view_colour}
-        icon={Teiserver.Telemetry.TelemetryLib.icon()}
+        icon={Barserver.Telemetry.TelemetryLib.icon()}
         active={@active == "telemetry"}
         url={~p"/telemetry"}
       >
@@ -26,7 +26,7 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       <.sub_menu_button
         :if={allow?(@current_user, "Engine")}
         bsname={@view_colour}
-        icon={Teiserver.Telemetry.InfologLib.icon()}
+        icon={Barserver.Telemetry.InfologLib.icon()}
         active={@active == "infologs"}
         url={~p"/telemetry/infolog"}
       >
@@ -36,7 +36,7 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       <.sub_menu_button
         :if={allow?(@current_user, "Server")}
         bsname={@view_colour}
-        icon={Teiserver.Telemetry.PropertyTypeLib.icon()}
+        icon={Barserver.Telemetry.PropertyTypeLib.icon()}
         active={@active == "properties"}
         url={~p"/telemetry/properties/summary"}
       >
@@ -46,7 +46,7 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       <.sub_menu_button
         :if={String.contains?(@active, "_client_events")}
         bsname={@view_colour}
-        icon={Teiserver.Telemetry.SimpleClientEventLib.icon()}
+        icon={Barserver.Telemetry.SimpleClientEventLib.icon()}
         active={@active == "simple_client_events"}
         url={~p"/telemetry/simple_client_events/summary"}
       >
@@ -56,7 +56,7 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       <.sub_menu_button
         :if={String.contains?(@active, "_client_events")}
         bsname={@view_colour}
-        icon={Teiserver.Telemetry.ComplexClientEventLib.icon()}
+        icon={Barserver.Telemetry.ComplexClientEventLib.icon()}
         active={@active == "complex_client_events"}
         url={~p"/telemetry/complex_client_events/summary"}
       >
@@ -66,7 +66,7 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       <.sub_menu_button
         :if={String.contains?(@active, "_server_events")}
         bsname={@view_colour}
-        icon={Teiserver.Telemetry.SimpleServerEventLib.icon()}
+        icon={Barserver.Telemetry.SimpleServerEventLib.icon()}
         active={@active == "simple_server_events"}
         url={~p"/telemetry/simple_server_events/summary"}
       >
@@ -76,7 +76,7 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       <.sub_menu_button
         :if={String.contains?(@active, "_server_events")}
         bsname={@view_colour}
-        icon={Teiserver.Telemetry.ComplexServerEventLib.icon()}
+        icon={Barserver.Telemetry.ComplexServerEventLib.icon()}
         active={@active == "complex_server_events"}
         url={~p"/telemetry/complex_server_events/summary"}
       >
@@ -86,7 +86,7 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       <.sub_menu_button
         :if={String.contains?(@active, "_match_events")}
         bsname={@view_colour}
-        icon={Teiserver.Telemetry.SimpleMatchEventLib.icon()}
+        icon={Barserver.Telemetry.SimpleMatchEventLib.icon()}
         active={@active == "simple_match_events"}
         url={~p"/telemetry/simple_match_events/summary"}
       >
@@ -96,7 +96,7 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       <.sub_menu_button
         :if={String.contains?(@active, "_match_events")}
         bsname={@view_colour}
-        icon={Teiserver.Telemetry.ComplexMatchEventLib.icon()}
+        icon={Barserver.Telemetry.ComplexMatchEventLib.icon()}
         active={@active == "complex_match_events"}
         url={~p"/telemetry/complex_match_events/summary"}
       >
@@ -106,7 +106,7 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       <.sub_menu_button
         :if={String.contains?(@active, "_lobby_events")}
         bsname={@view_colour}
-        icon={Teiserver.Telemetry.SimpleLobbyEventLib.icon()}
+        icon={Barserver.Telemetry.SimpleLobbyEventLib.icon()}
         active={@active == "simple_lobby_events"}
         url={~p"/telemetry/simple_lobby_events/summary"}
       >
@@ -116,7 +116,7 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       <.sub_menu_button
         :if={String.contains?(@active, "_lobby_events")}
         bsname={@view_colour}
-        icon={Teiserver.Telemetry.ComplexLobbyEventLib.icon()}
+        icon={Barserver.Telemetry.ComplexLobbyEventLib.icon()}
         active={@active == "complex_lobby_events"}
         url={~p"/telemetry/complex_lobby_events/summary"}
       >

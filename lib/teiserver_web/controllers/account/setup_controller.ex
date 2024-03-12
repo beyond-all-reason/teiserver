@@ -1,9 +1,9 @@
-defmodule TeiserverWeb.Account.SetupController do
-  use TeiserverWeb, :controller
-  alias Teiserver.Account
+defmodule BarserverWeb.Account.SetupController do
+  use BarserverWeb, :controller
+  alias Barserver.Account
 
   def setup(conn, %{"key" => key}) do
-    true_key = Application.get_env(:teiserver, Teiserver.Setup)[:key]
+    true_key = Application.get_env(:teiserver, Barserver.Setup)[:key]
 
     cond do
       key != true_key ->
@@ -17,7 +17,7 @@ defmodule TeiserverWeb.Account.SetupController do
         |> redirect(to: "/")
 
       true ->
-        users = Teiserver.Account.list_users(search: [email: "root@localhost"])
+        users = Barserver.Account.list_users(search: [email: "root@localhost"])
 
         if users == [] do
           {:ok, _user} =

@@ -1,15 +1,15 @@
-defmodule TeiserverWeb.Admin.LobbyPolicyController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Admin.LobbyPolicyController do
+  use BarserverWeb, :controller
 
-  alias Teiserver.{Game}
-  alias Teiserver.Game.LobbyPolicyLib
-  import Teiserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
-  alias Teiserver.Helper.StylingHelper
+  alias Barserver.{Game}
+  alias Barserver.Game.LobbyPolicyLib
+  import Barserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
+  alias Barserver.Helper.StylingHelper
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Game.LobbyPolicy,
+    policy: Barserver.Game.LobbyPolicy,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "admin",

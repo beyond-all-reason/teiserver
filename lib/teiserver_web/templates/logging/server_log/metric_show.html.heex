@@ -15,7 +15,7 @@
 </style>
 
 <%= render(
-  TeiserverWeb.Logging.GeneralView,
+  BarserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "server"})
 ) %>
@@ -25,7 +25,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Logging.ServerLogView,
+          BarserverWeb.Logging.ServerLogView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",
@@ -47,9 +47,9 @@
                     date_to_str(@date, format: :ymd)
                   )
                 }
-                class={"btn btn-outline-#{TeiserverWeb.Logging.MatchLogView.view_colour}"}
+                class={"btn btn-outline-#{BarserverWeb.Logging.MatchLogView.view_colour}"}
               >
-                <%= central_component("icon", icon: TeiserverWeb.Logging.MatchLogView.icon()) %> &nbsp;
+                <%= central_component("icon", icon: BarserverWeb.Logging.MatchLogView.icon()) %> &nbsp;
                 Match detail
               </a>
 
@@ -89,7 +89,7 @@
               <li class="nav-item">
                 <a href="#event_tab" role="tab" class="nav-link" data-bs-toggle="tab">
                   <%= central_component("icon",
-                    icon: Teiserver.Telemetry.ComplexClientEventLib.icon()
+                    icon: Barserver.Telemetry.ComplexClientEventLib.icon()
                   ) %> Events
                 </a>
               </li>

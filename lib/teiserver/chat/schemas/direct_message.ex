@@ -1,13 +1,13 @@
-defmodule Teiserver.Chat.DirectMessage do
+defmodule Barserver.Chat.DirectMessage do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   schema "direct_messages" do
     field :content, :string
     field :inserted_at, :utc_datetime
     field :delivered, :boolean, default: false
-    belongs_to :from, Teiserver.Account.User
-    belongs_to :to, Teiserver.Account.User
+    belongs_to :from, Barserver.Account.User
+    belongs_to :to, Barserver.Account.User
   end
 
   @doc """

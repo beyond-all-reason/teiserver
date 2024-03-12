@@ -7,7 +7,7 @@
   }
 </style>
 
-<TeiserverWeb.Account.ProfileComponents.profile_header
+<BarserverWeb.Account.ProfileComponents.profile_header
   active="overview"
   view_colour={@view_colour}
   user={@user}
@@ -48,7 +48,7 @@
         phx-click="create-friend-request"
         class="btn btn-outline-success mx-1"
       >
-        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon()} style="regular" />
+        <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon()} style="regular" />
         &nbsp;
         Add friend
       </span>
@@ -99,7 +99,7 @@
         phx-click="follow-user"
         class="btn btn-outline-info mx-1"
       >
-        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_follow()} style="regular" />
+        <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_follow()} style="regular" />
         &nbsp;
         Follow
       </span>
@@ -109,7 +109,7 @@
         phx-click="reset-relationship-state"
         class="btn btn-outline-info mx-1"
       >
-        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_follow()} style="regular" />
+        <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_follow()} style="regular" />
         &nbsp;
         Un-Follow
       </span>
@@ -119,7 +119,7 @@
         phx-click="ignore-user"
         class="btn btn-outline-warning mx-1"
       >
-        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="regular" />
+        <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_ignore()} style="regular" />
         &nbsp;
         Ignore
       </span>
@@ -129,7 +129,7 @@
         phx-click="unignore-user"
         class="btn btn-outline-warning mx-1"
       >
-        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="regular" />
+        <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_ignore()} style="regular" />
         &nbsp;
         Un-Ignore
       </span>
@@ -142,7 +142,7 @@
         phx-click="avoid-user"
         class="btn btn-outline-danger mx-1"
       >
-        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="regular" />
+        <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_avoid()} style="regular" />
         &nbsp;
         Avoid
       </span>
@@ -152,7 +152,7 @@
         phx-click="reset-relationship-state"
         class="btn btn-outline-danger mx-1"
       >
-        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="regular" />
+        <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_avoid()} style="regular" />
         &nbsp;
         Unavoid
       </span>
@@ -165,7 +165,7 @@
         phx-click="block-user"
         class="btn btn-outline-danger2 mx-1"
       >
-        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="regular" />
+        <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_block()} style="regular" />
         &nbsp;
         Block
       </span>
@@ -175,7 +175,7 @@
         phx-click="reset-relationship-state"
         class="btn btn-outline-danger2 mx-1"
       >
-        <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="regular" />
+        <Fontawesome.icon icon={Barserver.Account.RelationshipLib.icon_block()} style="regular" />
         &nbsp;
         Unblock
       </span>
@@ -183,9 +183,9 @@
       <.link
         :if={(@relationship == nil || @relationship.state != "follow") && @friendship == nil}
         navigate={~p"/moderation/report_user/#{@user.id}"}
-        class={"btn btn-outline-#{Teiserver.Moderation.ReportLib.colour()} mx-1 ms-4"}
+        class={"btn btn-outline-#{Barserver.Moderation.ReportLib.colour()} mx-1 ms-4"}
       >
-        <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="regular" /> &nbsp;
+        <Fontawesome.icon icon={Barserver.Moderation.ReportLib.icon()} style="regular" /> &nbsp;
         Report user
       </.link>
     <% end %>
@@ -193,9 +193,9 @@
     <.link
       :if={allow?(@current_user, "Moderator")}
       navigate={~p"/teiserver/admin/user/#{@user.id}"}
-      class={"btn btn-outline-#{Teiserver.Admin.AdminLib.colours()} mx-1 ms-4"}
+      class={"btn btn-outline-#{Barserver.Admin.AdminLib.colours()} mx-1 ms-4"}
     >
-      <Fontawesome.icon icon={Teiserver.Admin.AdminLib.icon()} style="regular" /> &nbsp;
+      <Fontawesome.icon icon={Barserver.Admin.AdminLib.icon()} style="regular" /> &nbsp;
       Admin panel
     </.link>
   </div>

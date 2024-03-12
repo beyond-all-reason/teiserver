@@ -1,12 +1,12 @@
-defmodule TeiserverWeb.Account.PartyLive.Show do
-  use TeiserverWeb, :live_view
+defmodule BarserverWeb.Account.PartyLive.Show do
+  use BarserverWeb, :live_view
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{Account, Battle}
-  alias Teiserver.Account.PartyLib
-  import Teiserver.Helper.StringHelper, only: [possessive: 1]
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.{Account, Battle}
+  alias Barserver.Account.PartyLib
+  import Barserver.Helper.StringHelper, only: [possessive: 1]
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @impl true
   def mount(_params, session, socket) do
@@ -18,7 +18,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
 
     lobby_user_ids =
       if client != nil and client.lobby_id != nil do
-        :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{client.lobby_id}")
+        :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_lobby_updates:#{client.lobby_id}")
         Battle.get_lobby_member_list(client.lobby_id)
       else
         []
@@ -29,19 +29,19 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
 
     :ok =
       PubSub.subscribe(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_client_messages:#{socket.assigns.current_user.id}"
       )
 
     :ok =
       PubSub.subscribe(
-        Teiserver.PubSub,
+        Barserver.PubSub,
         "teiserver_liveview_client:#{socket.assigns.current_user.id}"
       )
 
     socket =
       socket
-      |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
+      |> add_breadcrumb(name: "Barserver", url: "/teiserver")
       |> add_breadcrumb(name: "Parties", url: "/teiserver/account/parties")
       |> assign(:friends, friends)
       |> assign(:lobby_user_ids, lobby_user_ids)
@@ -65,7 +65,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
       if Enum.member?(party.members, socket.assigns.current_user.id) or
            allow?(socket, "Moderator") do
         leader_name = Account.get_username(party.leader)
-        :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
+        :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_party:#{party_id}")
 
         {:noreply,
          socket
@@ -107,7 +107,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     socket =
       case data.event do
         :joined_lobby ->
-          :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{data.lobby_id}")
+          :ok = PubSub.subscribe(Barserver.PubSub, "teiserver_lobby_updates:#{data.lobby_id}")
           lobby_user_ids = Battle.get_lobby_member_list(data.lobby_id) || []
 
           socket
@@ -115,7 +115,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
           |> build_user_lookup
 
         :left_lobby ->
-          :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{data.lobby_id}")
+          :ok = PubSub.unsubscribe(Barserver.PubSub, "teiserver_lobby_updates:#{data.lobby_id}")
 
           socket
           |> assign(:lobby_user_ids, [])

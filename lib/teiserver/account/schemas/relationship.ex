@@ -1,11 +1,11 @@
-defmodule Teiserver.Account.Relationship do
+defmodule Barserver.Account.Relationship do
   @moduledoc false
-  use TeiserverWeb, :schema
+  use BarserverWeb, :schema
 
   @primary_key false
   schema "account_relationships" do
-    belongs_to :from_user, Teiserver.Account.User, primary_key: true
-    belongs_to :to_user, Teiserver.Account.User, primary_key: true
+    belongs_to :from_user, Barserver.Account.User, primary_key: true
+    belongs_to :to_user, Barserver.Account.User, primary_key: true
 
     # Valid states: Avoid, Block, None, Follow
     field :state, :string

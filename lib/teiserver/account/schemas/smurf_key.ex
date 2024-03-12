@@ -1,9 +1,9 @@
-defmodule Teiserver.Account.SmurfKey do
-  use TeiserverWeb, :schema
+defmodule Barserver.Account.SmurfKey do
+  use BarserverWeb, :schema
 
   schema "teiserver_account_smurf_keys" do
-    belongs_to :user, Teiserver.Account.User
-    belongs_to :type, Teiserver.Account.SmurfKeyType
+    belongs_to :user, Barserver.Account.User
+    belongs_to :type, Barserver.Account.SmurfKeyType
     field :value, :string
     field :last_updated, :utc_datetime
   end

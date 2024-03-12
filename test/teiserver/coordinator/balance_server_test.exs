@@ -1,12 +1,12 @@
-defmodule Teiserver.Coordinator.BalanceServerTest do
+defmodule Barserver.Coordinator.BalanceServerTest do
   @moduledoc false
-  use Teiserver.ServerCase, async: false
-  alias Teiserver.Account.ClientLib
-  alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.{Account, Lobby, Battle, CacheUser, Client, Coordinator}
-  alias Teiserver.Coordinator.ConsulServer
+  use Barserver.ServerCase, async: false
+  alias Barserver.Account.ClientLib
+  alias Barserver.Game.MatchRatingLib
+  alias Barserver.{Account, Lobby, Battle, CacheUser, Client, Coordinator}
+  alias Barserver.Coordinator.ConsulServer
 
-  import Teiserver.TeiserverTestLib,
+  import Barserver.BarserverTestLib,
     only: [
       tachyon_auth_setup: 0,
       _tachyon_send: 2,
@@ -322,7 +322,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     # Clear rating caches
     [u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12, u13, u14, u15, u16]
     |> Enum.each(fn %{id: userid} ->
-      Teiserver.cache_delete(:teiserver_user_ratings, {userid, rating_type_id})
+      Barserver.cache_delete(:teiserver_user_ratings, {userid, rating_type_id})
     end)
 
     # Leave the party

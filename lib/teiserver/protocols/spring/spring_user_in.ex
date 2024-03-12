@@ -1,9 +1,9 @@
-defmodule Teiserver.Protocols.Spring.UserIn do
+defmodule Barserver.Protocols.Spring.UserIn do
   @moduledoc false
-  alias Teiserver.{Account, Room, CacheUser}
-  alias Teiserver.Protocols.SpringIn
-  import Teiserver.Protocols.SpringOut, only: [reply: 5, do_join_room: 2, do_login_accepted: 3]
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Barserver.{Account, Room, CacheUser}
+  alias Barserver.Protocols.SpringIn
+  import Barserver.Protocols.SpringOut, only: [reply: 5, do_join_room: 2, do_login_accepted: 3]
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
@@ -356,11 +356,11 @@ defmodule Teiserver.Protocols.Spring.UserIn do
   def do_handle("get_token_by_email", data, msg_id, state) do
     case String.split(data, "\t") do
       [email, plain_text_password] ->
-        user = Teiserver.Account.get_user_by_email(email)
+        user = Barserver.Account.get_user_by_email(email)
 
         response =
           if user do
-            Teiserver.Account.User.verify_password(plain_text_password, user.password)
+            Barserver.Account.User.verify_password(plain_text_password, user.password)
           else
             false
           end
@@ -390,11 +390,11 @@ defmodule Teiserver.Protocols.Spring.UserIn do
   def do_handle("get_token_by_name", data, msg_id, state) do
     case String.split(data, "\t") do
       [name, plain_text_password] ->
-        user = Teiserver.Account.get_user_by_name(name)
+        user = Barserver.Account.get_user_by_name(name)
 
         response =
           if user do
-            Teiserver.Account.User.verify_password(plain_text_password, user.password)
+            Barserver.Account.User.verify_password(plain_text_password, user.password)
           else
             false
           end
@@ -443,7 +443,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
         # Do we have a clan?
         if user.clan_id do
           :timer.sleep(200)
-          clan = Teiserver.Clans.get_clan!(user.clan_id)
+          clan = Barserver.Clans.get_clan!(user.clan_id)
           room_name = Room.clan_room_name(clan.tag)
           do_join_room(new_state, room_name)
         end

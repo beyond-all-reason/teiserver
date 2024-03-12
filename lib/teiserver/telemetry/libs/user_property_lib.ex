@@ -1,8 +1,8 @@
-defmodule Teiserver.Telemetry.UserPropertyLib do
+defmodule Barserver.Telemetry.UserPropertyLib do
   @moduledoc false
-  use TeiserverWeb, :library
-  alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.{UserProperty, UserPropertyQueries}
+  use BarserverWeb, :library
+  alias Barserver.Telemetry
+  alias Barserver.Telemetry.{UserProperty, UserPropertyQueries}
   alias Phoenix.PubSub
 
   @broadcast_property_types ~w(hardware:cpuinfo hardware:macAddrHash hardware:sysInfoHash)
@@ -31,7 +31,7 @@ defmodule Teiserver.Telemetry.UserPropertyLib do
       {:ok, _property} ->
         if Enum.member?(@broadcast_property_types, property_type_name) do
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Barserver.PubSub,
             "telemetry_user_properties",
             %{
               channel: "telemetry_user_properties",

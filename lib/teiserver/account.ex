@@ -1,13 +1,13 @@
-defmodule Teiserver.Account do
+defmodule Barserver.Account do
   @moduledoc false
   import Ecto.Query, warn: false
-  alias Teiserver.Repo
+  alias Barserver.Repo
   require Logger
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
   alias Phoenix.PubSub
-  alias Teiserver.Helper.QueryHelpers
+  alias Barserver.Helper.QueryHelpers
 
-  alias Teiserver.Account.UserLib
+  alias Barserver.Account.UserLib
 
   @spec icon :: String.t()
   def icon, do: "fa-duotone fa-user-alt"
@@ -70,14 +70,14 @@ defmodule Teiserver.Account do
           {:ok, User.t()} | {:error, String.t()}
   def spring_auth_check(conn, user, plain_text_password) do
     tei_user = get_user_by_id(user.id)
-    md5_password = Teiserver.CacheUser.spring_md5_password(plain_text_password)
+    md5_password = Barserver.CacheUser.spring_md5_password(plain_text_password)
 
-    if Teiserver.CacheUser.test_password(md5_password, tei_user.password_hash) do
+    if Barserver.CacheUser.test_password(md5_password, tei_user.password_hash) do
       update_user(user, %{password: plain_text_password})
 
       {:ok, user}
     else
-      Teiserver.Logging.Helpers.add_anonymous_audit_log(conn, "Account:Failed login", %{
+      Barserver.Logging.Helpers.add_anonymous_audit_log(conn, "Account:Failed login", %{
         reason: "Bad password",
         user_id: user.id,
         email: user.email
@@ -88,8 +88,8 @@ defmodule Teiserver.Account do
   end
 
   # User stat table
-  alias Teiserver.Account.UserStat
-  alias Teiserver.Account.UserStatLib
+  alias Barserver.Account.UserStat
+  alias Barserver.Account.UserStatLib
 
   @spec user_stat_query(nil | maybe_improper_list | map) :: Ecto.Query.t()
   def user_stat_query(args) do
@@ -139,7 +139,7 @@ defmodule Teiserver.Account do
 
   @spec get_user_stat_data(integer()) :: Map.t()
   def get_user_stat_data(userid) do
-    Teiserver.cache_get_or_store(:teiserver_user_stat_cache, userid, fn ->
+    Barserver.cache_get_or_store(:teiserver_user_stat_cache, userid, fn ->
       case get_user_stat(userid) do
         nil ->
           %{}
@@ -177,7 +177,7 @@ defmodule Teiserver.Account do
         create_user_stat(%{user_id: userid, data: data})
 
       user_stat ->
-        Teiserver.cache_delete(:teiserver_user_stat_cache, userid)
+        Barserver.cache_delete(:teiserver_user_stat_cache, userid)
         new_data = Map.merge(user_stat.data, data)
         update_user_stat(user_stat, %{data: new_data})
     end
@@ -196,7 +196,7 @@ defmodule Teiserver.Account do
         :ok
 
       user_stat ->
-        Teiserver.cache_delete(:teiserver_user_stat_cache, userid)
+        Barserver.cache_delete(:teiserver_user_stat_cache, userid)
         new_data = Map.drop(user_stat.data, keys)
         update_user_stat(user_stat, %{data: new_data})
     end
@@ -204,11 +204,11 @@ defmodule Teiserver.Account do
 
   @spec delete_user_stat(UserStat.t()) :: {:ok, UserStat.t()} | {:error, Ecto.Changeset.t()}
   def delete_user_stat(%UserStat{} = user_stat) do
-    Teiserver.cache_delete(:teiserver_user_stat_cache, user_stat.user_id)
+    Barserver.cache_delete(:teiserver_user_stat_cache, user_stat.user_id)
     Repo.delete(user_stat)
   end
 
-  alias Teiserver.Account.{BadgeType, BadgeTypeLib}
+  alias Barserver.Account.{BadgeType, BadgeTypeLib}
 
   @spec badge_type_query(List.t()) :: Ecto.Query.t()
   def badge_type_query(args) do
@@ -362,8 +362,8 @@ defmodule Teiserver.Account do
     BadgeType.changeset(badge_type, %{})
   end
 
-  alias Teiserver.Account.Accolade
-  alias Teiserver.Account.AccoladeLib
+  alias Barserver.Account.Accolade
+  alias Barserver.Account.AccoladeLib
 
   @spec accolade_query(List.t()) :: Ecto.Query.t()
   def accolade_query(args) do
@@ -517,8 +517,8 @@ defmodule Teiserver.Account do
     Accolade.changeset(accolade, %{})
   end
 
-  alias Teiserver.Account.SmurfKey
-  alias Teiserver.Account.SmurfKeyLib
+  alias Barserver.Account.SmurfKey
+  alias Barserver.Account.SmurfKeyLib
 
   @spec smurf_key_query(List.t()) :: Ecto.Query.t()
   def smurf_key_query(args) do
@@ -741,8 +741,8 @@ defmodule Teiserver.Account do
     |> Enum.sort_by(fn {key, _value} -> key end, &<=/2)
   end
 
-  alias Teiserver.Account.SmurfKeyType
-  alias Teiserver.Account.SmurfKeyTypeLib
+  alias Barserver.Account.SmurfKeyType
+  alias Barserver.Account.SmurfKeyTypeLib
 
   @spec smurf_key_type_query(List.t()) :: Ecto.Query.t()
   def smurf_key_type_query(args) do
@@ -846,7 +846,7 @@ defmodule Teiserver.Account do
   def get_or_add_smurf_key_type(name) do
     name = String.trim(name)
 
-    Teiserver.cache_get_or_store(:teiserver_account_smurf_key_types, name, fn ->
+    Barserver.cache_get_or_store(:teiserver_account_smurf_key_types, name, fn ->
       case list_smurf_key_types(
              search: [name: name],
              select: [:id],
@@ -866,7 +866,7 @@ defmodule Teiserver.Account do
     end)
   end
 
-  alias Teiserver.Account.{Rating, RatingLib}
+  alias Barserver.Account.{Rating, RatingLib}
 
   @spec rating_query(List.t()) :: Ecto.Query.t()
   def rating_query(args) do
@@ -916,7 +916,7 @@ defmodule Teiserver.Account do
 
   def get_rating(user_id, rating_type_id)
       when is_integer(user_id) and is_integer(rating_type_id) do
-    Teiserver.cache_get_or_store(:teiserver_user_ratings, {user_id, rating_type_id}, fn ->
+    Barserver.cache_get_or_store(:teiserver_user_ratings, {user_id, rating_type_id}, fn ->
       rating_query(
         search: [
           user_id: user_id,
@@ -989,7 +989,7 @@ defmodule Teiserver.Account do
 
   @spec update_rating(Rating.t(), map()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
   def update_rating(%Rating{} = rating, attrs) do
-    Teiserver.cache_delete(:teiserver_user_ratings, {rating.user_id, rating.rating_type_id})
+    Barserver.cache_delete(:teiserver_user_ratings, {rating.user_id, rating.rating_type_id})
 
     rating
     |> Rating.changeset(attrs)
@@ -1021,12 +1021,12 @@ defmodule Teiserver.Account do
   """
   @spec delete_rating(Rating.t()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
   def delete_rating(%Rating{} = rating) do
-    Teiserver.cache_delete(:teiserver_user_ratings, {rating.user_id, rating.rating_type_id})
+    Barserver.cache_delete(:teiserver_user_ratings, {rating.user_id, rating.rating_type_id})
     Repo.delete(rating)
   end
 
   # Codes
-  alias Teiserver.Account.{Code, CodeLib}
+  alias Barserver.Account.{Code, CodeLib}
 
   def code_query(args) do
     code_query(nil, args)
@@ -1168,7 +1168,7 @@ defmodule Teiserver.Account do
     Code.changeset(code, %{})
   end
 
-  alias Teiserver.Account.{UserToken, UserTokenLib}
+  alias Barserver.Account.{UserToken, UserTokenLib}
 
   def user_token_query(args) do
     user_token_query(nil, args)
@@ -1329,7 +1329,7 @@ defmodule Teiserver.Account do
     |> binary_part(0, length)
   end
 
-  alias Teiserver.Account.{Relationship, RelationshipLib, RelationshipQueries}
+  alias Barserver.Account.{Relationship, RelationshipLib, RelationshipQueries}
 
   @doc """
   Returns the list of relationships.
@@ -1578,7 +1578,7 @@ defmodule Teiserver.Account do
   defdelegate profile_view_permissions(u1, u2, relationship, friend, friendship_request),
     to: RelationshipLib
 
-  alias Teiserver.Account.{Friend, FriendLib, FriendQueries}
+  alias Barserver.Account.{Friend, FriendLib, FriendQueries}
 
   @doc """
   Returns the list of friends.
@@ -1664,8 +1664,8 @@ defmodule Teiserver.Account do
 
     case result do
       {:ok, friend} ->
-        Teiserver.cache_delete(:account_friend_cache, friend.user1_id)
-        Teiserver.cache_delete(:account_friend_cache, friend.user2_id)
+        Barserver.cache_delete(:account_friend_cache, friend.user1_id)
+        Barserver.cache_delete(:account_friend_cache, friend.user2_id)
 
       _ ->
         :ok
@@ -1716,7 +1716,7 @@ defmodule Teiserver.Account do
   """
   def delete_friend(%Friend{} = friend) do
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "account_user_relationships:#{friend.user1_id}",
       %{
         channel: "account_user_relationships:#{friend.user1_id}",
@@ -1727,7 +1727,7 @@ defmodule Teiserver.Account do
     )
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "account_user_relationships:#{friend.user2_id}",
       %{
         channel: "account_user_relationships:#{friend.user2_id}",
@@ -1737,8 +1737,8 @@ defmodule Teiserver.Account do
       }
     )
 
-    Teiserver.cache_delete(:account_friend_cache, friend.user1_id)
-    Teiserver.cache_delete(:account_friend_cache, friend.user2_id)
+    Barserver.cache_delete(:account_friend_cache, friend.user1_id)
+    Barserver.cache_delete(:account_friend_cache, friend.user2_id)
     Repo.delete(friend)
   end
 
@@ -1768,7 +1768,7 @@ defmodule Teiserver.Account do
   @spec list_friend_ids_of_user(T.userid()) :: [T.userid()]
   defdelegate list_friend_ids_of_user(userid), to: FriendLib
 
-  alias Teiserver.Account.{FriendRequest, FriendRequestLib, FriendRequestQueries}
+  alias Barserver.Account.{FriendRequest, FriendRequestLib, FriendRequestQueries}
 
   @doc """
   Returns the list of friend_requests.
@@ -1853,7 +1853,7 @@ defmodule Teiserver.Account do
     case result do
       {:ok, friend_request} ->
         PubSub.broadcast(
-          Teiserver.PubSub,
+          Barserver.PubSub,
           "account_user_relationships:#{friend_request.to_user_id}",
           %{
             channel: "account_user_relationships:#{friend_request.to_user_id}",
@@ -1863,8 +1863,8 @@ defmodule Teiserver.Account do
           }
         )
 
-        Teiserver.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
-        Teiserver.cache_delete(:account_outgoing_friend_request_cache, friend_request.to_user_id)
+        Barserver.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
+        Barserver.cache_delete(:account_outgoing_friend_request_cache, friend_request.to_user_id)
 
       _ ->
         :ok
@@ -1915,8 +1915,8 @@ defmodule Teiserver.Account do
 
   """
   def delete_friend_request(%FriendRequest{} = friend_request) do
-    Teiserver.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
-    Teiserver.cache_delete(:account_outgoing_friend_request_cache, friend_request.from_user_id)
+    Barserver.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
+    Barserver.cache_delete(:account_outgoing_friend_request_cache, friend_request.from_user_id)
     Repo.delete(friend_request)
   end
 
@@ -1965,7 +1965,7 @@ defmodule Teiserver.Account do
   defdelegate rescind_friend_request(req), to: FriendRequestLib
 
   # User functions
-  alias Teiserver.Account.UserCacheLib
+  alias Barserver.Account.UserCacheLib
 
   @spec get_username(T.userid()) :: String.t() | nil
   defdelegate get_username(userid), to: UserCacheLib
@@ -2016,28 +2016,28 @@ defmodule Teiserver.Account do
   defdelegate make_bot_password(), to: UserLib
 
   @spec rename_user(T.userid(), String.t(), boolean) :: :success | {:error, String.t()}
-  defdelegate rename_user(userid, new_name, admin_action \\ false), to: Teiserver.CacheUser
+  defdelegate rename_user(userid, new_name, admin_action \\ false), to: Barserver.CacheUser
 
   @spec system_change_user_name(T.userid(), String.t()) :: :ok
-  defdelegate system_change_user_name(userid, new_name), to: Teiserver.CacheUser
+  defdelegate system_change_user_name(userid, new_name), to: Barserver.CacheUser
 
   @spec has_any_role?(T.userid() | T.user() | nil, String.t() | [String.t()]) :: boolean()
-  defdelegate has_any_role?(user_or_userid, roles), to: Teiserver.CacheUser
+  defdelegate has_any_role?(user_or_userid, roles), to: Barserver.CacheUser
 
   @spec has_all_roles?(T.userid() | T.user() | nil, String.t() | [String.t()]) :: boolean()
-  defdelegate has_all_roles?(user_or_userid, roles), to: Teiserver.CacheUser
+  defdelegate has_all_roles?(user_or_userid, roles), to: Barserver.CacheUser
 
   @spec is_moderator?(T.userid()) :: boolean()
-  defdelegate is_moderator?(userid), to: Teiserver.CacheUser
+  defdelegate is_moderator?(userid), to: Barserver.CacheUser
 
   @spec is_bot?(T.userid()) :: boolean()
-  defdelegate is_bot?(userid), to: Teiserver.CacheUser
+  defdelegate is_bot?(userid), to: Barserver.CacheUser
 
   @spec is_restricted?(T.userid() | T.user(), String.t()) :: boolean()
-  defdelegate is_restricted?(user, restriction), to: Teiserver.CacheUser
+  defdelegate is_restricted?(user, restriction), to: Barserver.CacheUser
 
   # Client stuff
-  alias Teiserver.Account.ClientLib
+  alias Barserver.Account.ClientLib
 
   @spec get_client_by_name(String.t()) :: nil | T.client()
   defdelegate get_client_by_name(name), to: ClientLib
@@ -2098,7 +2098,7 @@ defmodule Teiserver.Account do
   defdelegate call_client(userid, msg), to: ClientLib
 
   # Party stuff
-  alias Teiserver.Account.PartyLib
+  alias Barserver.Account.PartyLib
 
   @spec list_party_ids() :: [T.party_id()]
   defdelegate list_party_ids(), to: PartyLib

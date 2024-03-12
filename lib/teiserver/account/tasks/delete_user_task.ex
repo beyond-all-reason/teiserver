@@ -1,7 +1,7 @@
-defmodule Teiserver.Admin.DeleteUserTask do
+defmodule Barserver.Admin.DeleteUserTask do
   @moduledoc false
-  alias Teiserver.Repo
-  alias Teiserver.{Account, CacheUser}
+  alias Barserver.Repo
+  alias Barserver.{Account, CacheUser}
 
   @doc """
   Expects a list of user ids, returns the results of the query

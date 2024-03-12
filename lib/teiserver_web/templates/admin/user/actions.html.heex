@@ -13,7 +13,7 @@
   </a>
 
   <a class="dropdown-item" href={~p"/moderation/report_user/#{@user.id}"}>
-    <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="solid" /> &nbsp;
+    <Fontawesome.icon icon={Barserver.Moderation.ReportLib.icon()} style="solid" /> &nbsp;
     Report form
   </a>
 
@@ -41,7 +41,7 @@
     class="dropdown-item"
     href={"#{Routes.moderation_ban_path(@conn, :new_with_user)}?teiserver_user=#{@user.id}"}
   >
-    <Fontawesome.icon icon={Teiserver.Moderation.BanLib.icon()} style="solid" /> &nbsp;
+    <Fontawesome.icon icon={Barserver.Moderation.BanLib.icon()} style="solid" /> &nbsp;
     Add ban
   </a>
 

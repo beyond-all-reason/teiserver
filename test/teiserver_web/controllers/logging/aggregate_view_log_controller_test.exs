@@ -1,10 +1,10 @@
-# defmodule TeiserverWeb.Logging.AggregateViewLogControllerTest do
-#   use TeiserverWeb.ConnCase, async: true
+# defmodule BarserverWeb.Logging.AggregateViewLogControllerTest do
+#   use BarserverWeb.ConnCase, async: true
 
-#   alias TeiserverWeb.General.TimexHelpers
+#   alias BarserverWeb.General.TimexHelpers
 
 #   alias Central.Helpers.GeneralTestLib
-#   alias Teiserver.Logging.LoggingTestLib
+#   alias Barserver.Logging.LoggingTestLib
 #   setup do
 #     GeneralTestLib.conn_setup()
 #     |> LoggingTestLib.logging_setup(aggregate_logs: true)

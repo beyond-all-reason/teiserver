@@ -1,7 +1,7 @@
-defmodule Teiserver.Telemetry.TelemetryServer do
+defmodule Barserver.Telemetry.TelemetryServer do
   use GenServer
-  alias Teiserver.{Lobby, Client}
-  alias Teiserver.Account.LoginThrottleServer
+  alias Barserver.{Lobby, Client}
+  alias Barserver.Account.LoginThrottleServer
   require Logger
   alias Phoenix.PubSub
 
@@ -110,7 +110,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
     }
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_telemetry",
       %{
         channel: "teiserver_telemetry",
@@ -119,10 +119,10 @@ defmodule Teiserver.Telemetry.TelemetryServer do
       }
     )
 
-    Teiserver.cache_put(:application_temp_cache, :telemetry_data, data)
+    Barserver.cache_put(:application_temp_cache, :telemetry_data, data)
 
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Barserver.PubSub,
       "teiserver_public_stats",
       %{
         channel: "teiserver_public_stats",
@@ -249,17 +249,17 @@ defmodule Teiserver.Telemetry.TelemetryServer do
     #   end
 
     process_counts = %{
-      system_servers: Horde.Registry.count(Teiserver.ServerRegistry),
-      throttle_servers: Horde.Registry.count(Teiserver.ThrottleRegistry),
-      accolade_servers: Horde.Registry.count(Teiserver.AccoladesRegistry),
-      consul_servers: Horde.Registry.count(Teiserver.ConsulRegistry),
-      balancer_servers: Horde.Registry.count(Teiserver.BalancerRegistry),
-      lobby_servers: Horde.Registry.count(Teiserver.LobbyRegistry),
-      client_servers: Horde.Registry.count(Teiserver.ClientRegistry),
-      party_servers: Horde.Registry.count(Teiserver.PartyRegistry),
-      queue_wait_servers: Horde.Registry.count(Teiserver.QueueWaitRegistry),
-      queue_match_servers: Horde.Registry.count(Teiserver.QueueMatchRegistry),
-      managed_lobby_servers: Horde.Registry.count(Teiserver.LobbyPolicyRegistry)
+      system_servers: Horde.Registry.count(Barserver.ServerRegistry),
+      throttle_servers: Horde.Registry.count(Barserver.ThrottleRegistry),
+      accolade_servers: Horde.Registry.count(Barserver.AccoladesRegistry),
+      consul_servers: Horde.Registry.count(Barserver.ConsulRegistry),
+      balancer_servers: Horde.Registry.count(Barserver.BalancerRegistry),
+      lobby_servers: Horde.Registry.count(Barserver.LobbyRegistry),
+      client_servers: Horde.Registry.count(Barserver.ClientRegistry),
+      party_servers: Horde.Registry.count(Barserver.PartyRegistry),
+      queue_wait_servers: Horde.Registry.count(Barserver.QueueWaitRegistry),
+      queue_match_servers: Horde.Registry.count(Barserver.QueueMatchRegistry),
+      managed_lobby_servers: Horde.Registry.count(Barserver.LobbyPolicyRegistry)
     }
 
     process_counts =

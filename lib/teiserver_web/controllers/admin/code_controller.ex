@@ -1,13 +1,13 @@
-defmodule TeiserverWeb.Admin.CodeController do
-  use TeiserverWeb, :controller
+defmodule BarserverWeb.Admin.CodeController do
+  use BarserverWeb, :controller
 
-  alias Teiserver.Account
-  alias Teiserver.Account.{Code, CodeLib}
+  alias Barserver.Account
+  alias Barserver.Account.{Code, CodeLib}
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Account.Code,
+    policy: Barserver.Account.Code,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "teiservercentral_admin",

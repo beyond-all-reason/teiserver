@@ -1,13 +1,13 @@
-defmodule Teiserver.Game do
+defmodule Barserver.Game do
   @moduledoc """
   The Game context.
   """
 
   import Ecto.Query, warn: false
-  alias Teiserver.Helper.QueryHelpers
-  alias Teiserver.Repo
+  alias Barserver.Helper.QueryHelpers
+  alias Barserver.Repo
 
-  alias Teiserver.Game.{Queue, QueueLib}
+  alias Barserver.Game.{Queue, QueueLib}
 
   @spec queue_query(List.t()) :: Ecto.Query.t()
   def queue_query(args) do
@@ -112,7 +112,7 @@ defmodule Teiserver.Game do
   end
 
   defp cache_new_queue({:ok, queue}) do
-    Teiserver.Data.Matchmaking.add_queue_from_db(queue)
+    Barserver.Data.Matchmaking.add_queue_from_db(queue)
     {:ok, queue}
   end
 
@@ -168,7 +168,7 @@ defmodule Teiserver.Game do
     Queue.changeset(queue, %{})
   end
 
-  alias Teiserver.Game.{AchievementType, AchievementTypeLib}
+  alias Barserver.Game.{AchievementType, AchievementTypeLib}
 
   @spec achievement_type_query(List.t()) :: Ecto.Query.t()
   def achievement_type_query(args) do
@@ -324,7 +324,7 @@ defmodule Teiserver.Game do
     AchievementType.changeset(achievement_type, %{})
   end
 
-  alias Teiserver.Game.{UserAchievement, UserAchievementLib}
+  alias Barserver.Game.{UserAchievement, UserAchievementLib}
 
   @spec user_achievement_query(List.t()) :: Ecto.Query.t()
   def user_achievement_query(args) do
@@ -472,7 +472,7 @@ defmodule Teiserver.Game do
     UserAchievement.changeset(user_achievement, %{})
   end
 
-  alias Teiserver.Game.{RatingType, RatingTypeLib}
+  alias Barserver.Game.{RatingType, RatingTypeLib}
 
   @spec rating_type_query(List.t()) :: Ecto.Query.t()
   def rating_type_query(args) do
@@ -540,7 +540,7 @@ defmodule Teiserver.Game do
   def get_or_add_rating_type(name) do
     name = String.trim(name)
 
-    Teiserver.cache_get_or_store(:teiserver_game_rating_types, name, fn ->
+    Barserver.cache_get_or_store(:teiserver_game_rating_types, name, fn ->
       case list_rating_types(search: [name: name], select: [:id], order_by: "ID (Lowest first)") do
         [] ->
           {:ok, rating_type} =
@@ -650,7 +650,7 @@ defmodule Teiserver.Game do
     RatingType.changeset(rating_type, %{})
   end
 
-  alias Teiserver.Game.{RatingLog, RatingLogLib}
+  alias Barserver.Game.{RatingLog, RatingLogLib}
 
   @spec rating_log_query(List.t()) :: Ecto.Query.t()
   def rating_log_query(args) do
@@ -804,7 +804,7 @@ defmodule Teiserver.Game do
     RatingLog.changeset(rating_log, %{})
   end
 
-  alias Teiserver.Game.{LobbyPolicy, LobbyPolicyLib}
+  alias Barserver.Game.{LobbyPolicy, LobbyPolicyLib}
 
   @spec lobby_policy_query(List.t()) :: Ecto.Query.t()
   def lobby_policy_query(args) do
@@ -960,7 +960,7 @@ defmodule Teiserver.Game do
   end
 
   # Lobby policy lib stuff
-  alias Teiserver.Game.LobbyPolicyLib
+  alias Barserver.Game.LobbyPolicyLib
 
   @spec pre_cache_policies() :: :ok
   defdelegate pre_cache_policies(), to: LobbyPolicyLib

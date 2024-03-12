@@ -1,7 +1,7 @@
-defmodule Teiserver.Battle.CheekySwitcherSmartBalanceTest do
+defmodule Barserver.Battle.CheekySwitcherSmartBalanceTest do
   @moduledoc false
-  use Teiserver.DataCase, async: true
-  alias Teiserver.Battle.BalanceLib
+  use Barserver.DataCase, async: true
+  alias Barserver.Battle.BalanceLib
 
   @algorithm "cheeky_switcher_smart"
 

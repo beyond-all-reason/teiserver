@@ -1,24 +1,24 @@
-defmodule Teiserver.Account.RetentionRateExport do
+defmodule Barserver.Account.RetentionRateExport do
   @moduledoc """
   Can be manually run with:
-  Teiserver.Account.RetentionRateExport.show_form(nil, %{
+  Barserver.Account.RetentionRateExport.show_form(nil, %{
     "date_preset" => "All time",
     "end_date" => "",
     "rating_type" => "user_count_total",
     "start_date" => ""
   })
 
-  Teiserver.Account.RetentionRateExport.show_form(nil, %{
+  Barserver.Account.RetentionRateExport.show_form(nil, %{
     "date_preset" => "All time",
     "end_date" => "",
     "rating_type" => "user_count_total",
     "start_date" => "2023-01-01"
   })
   """
-  alias Teiserver.Helper.DatePresets
-  alias Teiserver.{Account, Logging}
-  alias Teiserver.Helper.TimexHelper
-  alias Teiserver.Helper.TimexHelper
+  alias Barserver.Helper.DatePresets
+  alias Barserver.{Account, Logging}
+  alias Barserver.Helper.TimexHelper
+  alias Barserver.Helper.TimexHelper
   require Logger
 
   @activity_types ~w(total player)

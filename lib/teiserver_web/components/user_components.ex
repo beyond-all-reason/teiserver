@@ -1,16 +1,16 @@
-defmodule TeiserverWeb.UserComponents do
+defmodule BarserverWeb.UserComponents do
   @moduledoc false
   use Phoenix.Component
   # alias Phoenix.LiveView.JS
-  # import TeiserverWeb.Gettext
+  # import BarserverWeb.Gettext
 
   use Phoenix.VerifiedRoutes,
-    endpoint: TeiserverWeb.Endpoint,
-    router: TeiserverWeb.Router,
-    statics: TeiserverWeb.static_paths()
+    endpoint: BarserverWeb.Endpoint,
+    router: BarserverWeb.Router,
+    statics: BarserverWeb.static_paths()
 
   @doc """
-  <TeiserverWeb.UserComponents.status_icon user={user} />
+  <BarserverWeb.UserComponents.status_icon user={user} />
   """
   def status_icon(%{user: %{data: user_data} = user} = assigns) do
     restrictions = user_data["restrictions"] || []
@@ -25,20 +25,20 @@ defmodule TeiserverWeb.UserComponents do
     icons =
       [
         if(assigns.user.smurf_of_id != nil,
-          do: {"primary", Teiserver.Moderation.ActionLib.action_icon("Smurf")}
+          do: {"primary", Barserver.Moderation.ActionLib.action_icon("Smurf")}
         ),
         if(Enum.member?(user.roles, "Smurfer"), do: {"info2", "fa-solid fa-split"}),
         if(ban_status == "banned",
-          do: {"danger2", Teiserver.Moderation.ActionLib.action_icon("Ban")}
+          do: {"danger2", Barserver.Moderation.ActionLib.action_icon("Ban")}
         ),
         if(ban_status == "suspended",
-          do: {"danger", Teiserver.Moderation.ActionLib.action_icon("Suspend")}
+          do: {"danger", Barserver.Moderation.ActionLib.action_icon("Suspend")}
         ),
         if(Enum.member?(restrictions, "All chat"),
-          do: {"danger", Teiserver.Moderation.ActionLib.action_icon("Mute")}
+          do: {"danger", Barserver.Moderation.ActionLib.action_icon("Mute")}
         ),
         if(Enum.member?(restrictions, "Warning reminder"),
-          do: {"warning", Teiserver.Moderation.ActionLib.action_icon("Warn")}
+          do: {"warning", Barserver.Moderation.ActionLib.action_icon("Warn")}
         ),
         if(Enum.member?(user.roles, "Trusted"), do: {"", "fa-solid fa-check"}),
         if(not Enum.member?(user.roles, "Verified"),
@@ -59,14 +59,14 @@ defmodule TeiserverWeb.UserComponents do
   end
 
   @doc """
-  <TeiserverWeb.UserComponents.recents_dropdown current_user={@current_user} />
+  <BarserverWeb.UserComponents.recents_dropdown current_user={@current_user} />
   """
   attr :current_user, :map, required: true
 
   def recents_dropdown(assigns) do
     recents =
       assigns[:current_user]
-      |> Teiserver.Account.RecentlyUsedCache.get_recently()
+      |> Barserver.Account.RecentlyUsedCache.get_recently()
       |> Enum.take(15)
 
     assigns =
@@ -114,7 +114,7 @@ defmodule TeiserverWeb.UserComponents do
   end
 
   @doc """
-  <TeiserverWeb.UserComponents.account_dropdown current_user={@current_user} />
+  <BarserverWeb.UserComponents.account_dropdown current_user={@current_user} />
   """
   attr :current_user, :map, required: true
 
@@ -137,7 +137,7 @@ defmodule TeiserverWeb.UserComponents do
         style="min-width: 300px; max-width: 500px;"
       >
         <a class="dropdown-item" href={~p"/profile"}>
-          <i class={"fa-fw #{Teiserver.Account.icon()}"}></i> &nbsp;
+          <i class={"fa-fw #{Barserver.Account.icon()}"}></i> &nbsp;
           Account
         </a>
 

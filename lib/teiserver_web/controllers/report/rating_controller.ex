@@ -1,7 +1,7 @@
-defmodule TeiserverWeb.Report.RatingController do
-  use TeiserverWeb, :controller
-  alias Teiserver.Account
-  alias Teiserver.Battle.BalanceLib
+defmodule BarserverWeb.Report.RatingController do
+  use BarserverWeb, :controller
+  alias Barserver.Account
+  alias Barserver.Battle.BalanceLib
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
@@ -9,9 +9,9 @@ defmodule TeiserverWeb.Report.RatingController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Staff.Moderator,
+    policy: Barserver.Staff.Moderator,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Barserver.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Reports', url: '/teiserver/reports')
   plug(:add_breadcrumb, name: 'Reports', url: '/teiserver/reports/ratings')

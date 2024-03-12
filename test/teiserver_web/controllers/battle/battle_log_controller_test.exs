@@ -1,10 +1,10 @@
-# defmodule TeiserverWeb.Battle.MatchControllerTest do
-#   use TeiserverWeb.ConnCase
+# defmodule BarserverWeb.Battle.MatchControllerTest do
+#   use BarserverWeb.ConnCase
 
-#   alias Teiserver.Battle
-#   alias Teiserver.BattleTestLib
+#   alias Barserver.Battle
+#   alias Barserver.BattleTestLib
 
-#   alias Teiserver.Helpers.GeneralTestLib
+#   alias Barserver.Helpers.GeneralTestLib
 #   setup do
 #     GeneralTestLib.conn_setup(~w(horizon.manage))
 #   end

@@ -1,8 +1,8 @@
-defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
+defmodule Barserver.Battle.Tasks.BreakdownMatchDataTask do
   @doc """
   Provides aggregate data about matches which took place within a given timeframe
   """
-  alias Teiserver.Battle
+  alias Barserver.Battle
 
   @spec perform(%Date{}) :: map()
   @spec perform(%Date{}, %Date{}) :: map()

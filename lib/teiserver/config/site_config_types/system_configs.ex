@@ -1,6 +1,6 @@
-defmodule Teiserver.Config.SiteConfigTypes.SystemConfigs do
+defmodule Barserver.Config.SiteConfigTypes.SystemConfigs do
   @moduledoc false
-  import Teiserver.Config, only: [add_site_config_type: 1]
+  import Barserver.Config, only: [add_site_config_type: 1]
 
   @spec create() :: :ok
   def create() do

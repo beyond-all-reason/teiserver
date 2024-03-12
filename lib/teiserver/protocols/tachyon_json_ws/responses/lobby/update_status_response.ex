@@ -1,9 +1,9 @@
-defmodule Teiserver.Tachyon.Responses.Lobby.UpdateStatusResponse do
+defmodule Barserver.Tachyon.Responses.Lobby.UpdateStatusResponse do
   @moduledoc """
 
   """
 
-  alias Teiserver.Data.Types, as: T
+  alias Barserver.Data.Types, as: T
 
   @spec generate() ::
           {T.tachyon_command(), :success, T.tachyon_object()}

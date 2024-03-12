@@ -1,7 +1,7 @@
 <% bsname = view_colour() %>
 
 <%= render(
-  TeiserverWeb.Admin.GeneralView,
+  BarserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "users"})
 ) %>
@@ -11,7 +11,7 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render(
-          TeiserverWeb.Admin.UserView,
+          BarserverWeb.Admin.UserView,
           "section_menu.html",
           Map.merge(assigns, %{
             quick_search: "",
@@ -124,7 +124,7 @@
               {exit_status, play_percentage} =
                 if log.match.game_type == "Team" do
                   exit_status =
-                    Teiserver.Battle.MatchLib.calculate_exit_status(
+                    Barserver.Battle.MatchLib.calculate_exit_status(
                       log.match_membership.left_after,
                       log.match.game_duration
                     )

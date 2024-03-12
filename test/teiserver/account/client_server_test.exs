@@ -1,7 +1,7 @@
-defmodule Teiserver.Account.ClientServerTest do
-  use Teiserver.DataCase, async: true
-  alias Teiserver.Client
-  alias Teiserver.Account.ClientLib
+defmodule Barserver.Account.ClientServerTest do
+  use Barserver.DataCase, async: true
+  alias Barserver.Client
+  alias Barserver.Account.ClientLib
 
   test "server test" do
     client = %{

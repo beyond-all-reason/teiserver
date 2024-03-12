@@ -1,4 +1,4 @@
-defmodule Teiserver.General.CacheClusterServer do
+defmodule Barserver.General.CacheClusterServer do
   @moduledoc """
   This allows us to propogate data between nodes in the cluster to ensure the ETS
   tables are kept in sync.
@@ -50,7 +50,7 @@ defmodule Teiserver.General.CacheClusterServer do
   @impl true
   @spec init(any) :: {:ok, %{}}
   def init(_) do
-    :ok = PubSub.subscribe(Teiserver.PubSub, "cluster_hooks")
+    :ok = PubSub.subscribe(Barserver.PubSub, "cluster_hooks")
     {:ok, %{}}
   end
 end

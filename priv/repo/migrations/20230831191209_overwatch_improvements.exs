@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.OverwatchImprovements do
+defmodule Barserver.Repo.Migrations.OverwatchImprovements do
   use Ecto.Migration
 
   def change do

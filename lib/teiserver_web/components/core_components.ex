@@ -1,11 +1,11 @@
-defmodule TeiserverWeb.CoreComponents do
+defmodule BarserverWeb.CoreComponents do
   @moduledoc """
   Provides core UI components.
   """
 
   use Phoenix.Component
   alias Phoenix.LiveView.JS
-  import TeiserverWeb.Gettext
+  import BarserverWeb.Gettext
   alias Fontawesome
 
   @doc """
@@ -627,9 +627,9 @@ defmodule TeiserverWeb.CoreComponents do
     # should be written to the errors.po file. The :count option is
     # set by Ecto and indicates we should also apply plural rules.
     if count = opts[:count] do
-      Gettext.dngettext(TeiserverWeb.Gettext, "errors", msg, msg, count, opts)
+      Gettext.dngettext(BarserverWeb.Gettext, "errors", msg, msg, count, opts)
     else
-      Gettext.dgettext(TeiserverWeb.Gettext, "errors", msg, opts)
+      Gettext.dgettext(BarserverWeb.Gettext, "errors", msg, opts)
     end
   end
 

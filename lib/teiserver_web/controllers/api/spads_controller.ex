@@ -1,9 +1,9 @@
-defmodule TeiserverWeb.API.SpadsController do
-  use TeiserverWeb, :controller
-  alias Teiserver.Config
-  alias Teiserver.{Account, Coordinator, Battle}
-  alias Teiserver.Battle.BalanceLib
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+defmodule BarserverWeb.API.SpadsController do
+  use BarserverWeb, :controller
+  alias Barserver.Config
+  alias Barserver.{Account, Coordinator, Battle}
+  alias Barserver.Battle.BalanceLib
+  import Barserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
   @spec get_rating(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -31,7 +31,7 @@ defmodule TeiserverWeb.API.SpadsController do
 
     conn_ip =
       conn
-      |> Teiserver.Logging.LoggingPlug.get_ip_from_conn()
+      |> Barserver.Logging.LoggingPlug.get_ip_from_conn()
       |> Tuple.to_list()
       |> Enum.join(".")
 
@@ -95,7 +95,7 @@ defmodule TeiserverWeb.API.SpadsController do
     # host_ip = get_member_of_lobby_host_ip(first_player_id)
 
     # conn_ip = conn
-    #   |> Teiserver.Logging.LoggingPlug.get_ip_from_conn
+    #   |> Barserver.Logging.LoggingPlug.get_ip_from_conn
     #   |> Tuple.to_list()
     #   |> Enum.join(".")
 
