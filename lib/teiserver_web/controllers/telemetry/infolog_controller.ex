@@ -19,7 +19,7 @@ defmodule TeiserverWeb.Telemetry.InfologController do
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
     page = (params["page"] || "0") |> int_parse |> max(0)
-    limit = 50
+    limit = 100
 
     infologs =
       Telemetry.list_infologs(
@@ -45,7 +45,8 @@ defmodule TeiserverWeb.Telemetry.InfologController do
         search: [
           log_type: params["type"],
           engine: params["engine"],
-          game: params["game"]
+          game: params["game"],
+          shorterror: params["shorterror"]
         ],
         preload: [:user],
         select: ~w(id user_hash user_id log_type timestamp metadata size)a,

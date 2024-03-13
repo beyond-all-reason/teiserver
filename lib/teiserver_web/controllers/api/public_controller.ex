@@ -25,7 +25,7 @@ defmodule TeiserverWeb.API.PublicController do
             ],
             order_by: "Leaderboard rating high to low",
             preload: [:user],
-            limit: 30
+            limit: 100
           )
           |> Enum.map(fn rating ->
             %{

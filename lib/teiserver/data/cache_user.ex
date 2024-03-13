@@ -193,6 +193,9 @@ defmodule Teiserver.CacheUser do
       valid_email?(email) == false ->
         {:error, "Invalid email"}
 
+      valid_password?(password) == false ->
+        {:error, "Invalid password"}
+
       true ->
         case do_register_user(name, email, password) do
           :ok ->
@@ -235,6 +238,10 @@ defmodule Teiserver.CacheUser do
 
       valid_email?(email) == false ->
         {:error, "Invalid email"}
+
+      # MD5 hash of empty password from Chobby
+      md5_password == "1B2M2Y8AsgTpgAmY7PhCfg==" ->
+        {:error, "Invalid password"}
 
       true ->
         case do_register_user_with_md5(name, email, md5_password, ip) do
@@ -1402,6 +1409,15 @@ defmodule Teiserver.CacheUser do
       not String.contains?(email, "@") -> false
       not String.contains?(email, ".") -> false
       true -> true
+    end
+  end
+
+  @spec valid_password?(String.t()) :: boolean
+  def valid_password?(password) do
+    cond do
+      # Add additional password requirmenets here
+      String.length(password) > 0 -> true
+      true -> false
     end
   end
 end

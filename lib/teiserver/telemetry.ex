@@ -935,7 +935,7 @@ defmodule Teiserver.Telemetry do
   @spec list_infologs(List.t()) :: List.t()
   def list_infologs(args \\ []) do
     infolog_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> QueryHelpers.limit_query(args[:limit] || 100)
     |> Repo.all()
   end
 

@@ -248,30 +248,38 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       [_all, username, _user_num, to, msg] ->
         host = Client.get_client_by_id(from_id)
         user = CacheUser.get_user_by_name(username)
+        if host == nil do
+          Logger.error("No host found for from_id: #{from_id} for message #{to}:#{msg}")
+          # Optionally, handle the case here, such as by sending a message back to the user or taking other corrective actions.
+          # Just returning {:noreply, state} for now.
+          {:noreply, state}
+        else
 
-        case to do
-          "d" ->
-            # We don't persist this as it's already persisted elsewhere
-            # ChatLib.persist_message(user, "g: #{msg}", host.lobby_id, :say)
-            :ok
+          case to do
+            "d" ->
+              # We don't persist this as it's already persisted elsewhere
+              # ChatLib.persist_message(user, "g: #{msg}", host.lobby_id, :say)
+              :ok
 
-          "dallies" ->
-            ChatLib.persist_message(user, "a: #{msg}", host.lobby_id, :say)
+            "dallies" ->
+              ChatLib.persist_message(user, "a: #{msg}", host.lobby_id, :say)
 
-            PubSub.broadcast(
-              Teiserver.PubSub,
-              "teiserver_liveview_lobby_chat:#{host.lobby_id}",
-              {:liveview_lobby_chat, :say, user.id, "a: #{msg}"}
-            )
+              PubSub.broadcast(
+                Teiserver.PubSub,
+                "teiserver_liveview_lobby_chat:#{host.lobby_id}",
+                {:liveview_lobby_chat, :say, user.id, "a: #{msg}"}
+              )
 
-          "dspectators" ->
-            ChatLib.persist_message(user, "s: #{msg}", host.lobby_id, :say)
+            "dspectators" ->
+              ChatLib.persist_message(user, "s: #{msg}", host.lobby_id, :say)
 
-            PubSub.broadcast(
-              Teiserver.PubSub,
-              "teiserver_liveview_lobby_chat:#{host.lobby_id}",
-              {:liveview_lobby_chat, :say, user.id, "s: #{msg}"}
-            )
+              PubSub.broadcast(
+                Teiserver.PubSub,
+                "teiserver_liveview_lobby_chat:#{host.lobby_id}",
+                {:liveview_lobby_chat, :say, user.id, "s: #{msg}"}
+              )
+          end
+          {:noreply, state}
         end
 
       _ ->
