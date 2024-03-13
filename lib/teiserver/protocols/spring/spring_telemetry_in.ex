@@ -17,26 +17,32 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
               {:ok, compressed_contents} ->
                 case Spring.unzip(compressed_contents) do
                   {:ok, contents} ->
-                    params = %{
-                      user_hash: user_hash,
-                      user_id: state.userid,
-                      log_type: log_type,
-                      timestamp: Timex.now(),
-                      metadata: metadata,
-                      contents: contents,
-                      size: String.length(contents)
-                    }
+                    if String.valid?(contents) do
 
-                    case Telemetry.create_infolog(params) do
-                      {:ok, infolog} ->
-                        if Teiserver.Communication.use_discord?() do
-                          DiscordBridgeBot.new_infolog(infolog)
-                        end
+                      params = %{
+                        user_hash: user_hash,
+                        user_id: state.userid,
+                        log_type: log_type,
+                        timestamp: Timex.now(),
+                        metadata: metadata,
+                        contents: contents,
+                        size: String.length(contents)
+                      }
 
-                        reply(:spring, :okay, "upload_infolog - id:#{infolog.id}", msg_id, state)
+                      case Telemetry.create_infolog(params) do
+                        {:ok, infolog} ->
+                          if Teiserver.Communication.use_discord?() do
+                            DiscordBridgeBot.new_infolog(infolog)
+                          end
 
-                      {:error, _changeset} ->
-                        reply(:spring, :no, "upload_infolog - db error", msg_id, state)
+                          reply(:spring, :okay, "upload_infolog - id:#{infolog.id}", msg_id, state)
+
+                        {:error, _changeset} ->
+                          reply(:spring, :no, "upload_infolog - db error", msg_id, state)
+                      end
+                    else
+                      Logger.error("#{state.userid} #{log_type} upload_infolog - contents contain invalid characters")
+                      reply(:spring, :no, "upload_infolog - contents contain invalid characters", msg_id, state)
                     end
 
                   {:error, _} ->
