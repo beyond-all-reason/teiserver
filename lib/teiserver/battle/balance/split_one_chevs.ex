@@ -99,7 +99,7 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
       picking_team = get_picking_team(acc.teams)
       update_picking_team = Map.merge(picking_team, %{members: [x | picking_team.members]})
       username = Account.get_username_by_id(x.member_id)
-      new_log = "#{username} (Rank: #{x.rank}) picked for Team #{picking_team.team_id}"
+      new_log = "#{username} (Chev: #{x.rank+1}) picked for Team #{picking_team.team_id}"
 
       %{
         teams: [update_picking_team | get_non_picking_teams(acc.teams, picking_team)],
