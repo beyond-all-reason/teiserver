@@ -1,5 +1,6 @@
 defmodule Teiserver.Battle.Balance.SplitOneChevs do
   alias Teiserver.CacheUser
+  alias Teiserver.Account
 
   @moduledoc """
     This balance algorithm first sorts the users by visible OS (match rating) descending. Then all rank=0 (one chevs) will be placed at the bottom of this sorted list.
@@ -92,12 +93,13 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
   Returns %{teams:teams, logs:logs}
   """
   def assign_teams(member_list, number_of_teams) do
-    default_acc = %{teams: create_empty_teams(number_of_teams), logs: []}
+    default_acc = %{teams: create_empty_teams(number_of_teams), logs: ["Begin split_one_chevs balance"]}
 
     Enum.reduce(member_list, default_acc, fn x, acc ->
       picking_team = get_picking_team(acc.teams)
       update_picking_team = Map.merge(picking_team, %{members: [x | picking_team.members]})
-      new_log = "User #{x.member_id} picked for Team #{picking_team.team_id}"
+      username = Account.get_username_by_id(x.member_id)
+      new_log = "User #{username} picked for Team #{picking_team.team_id}"
 
       %{
         teams: [update_picking_team | get_non_picking_teams(acc.teams, picking_team)],
