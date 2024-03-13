@@ -84,10 +84,10 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
   @doc """
   member_list: A sorted list of members e.g.
   [
-  %{rating: 8, member_id: 1},
-  %{rating: 5, member_id: 4},
-  %{rating: 6, member_id: 2},
-  %{rating: 7, member_id: 3}
+  %{rating: 8, member_id: 1, rank: 0},
+  %{rating: 5, member_id: 4, rank: 0},
+  %{rating: 6, member_id: 2, rank: 0},
+  %{rating: 7, member_id: 3, rank: 0}
   ]
 
   Returns %{teams:teams, logs:logs}
@@ -99,7 +99,7 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
       picking_team = get_picking_team(acc.teams)
       update_picking_team = Map.merge(picking_team, %{members: [x | picking_team.members]})
       username = Account.get_username_by_id(x.member_id)
-      new_log = "User #{username} picked for Team #{picking_team.team_id}"
+      new_log = "#{username} (Rank: #{x.rank}) picked for Team #{picking_team.team_id}"
 
       %{
         teams: [update_picking_team | get_non_picking_teams(acc.teams, picking_team)],
