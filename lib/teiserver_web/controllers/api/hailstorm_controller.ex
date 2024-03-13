@@ -4,7 +4,6 @@ defmodule TeiserverWeb.API.HailstormController do
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Battle.BalanceLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  require Logger
 
   plug(Bodyguard.Plug.Authorize,
     policy: Teiserver.API.HailstormAuth,

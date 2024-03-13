@@ -360,7 +360,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
 
         response =
           if user do
-            if(CacheUser.is_test_user?(user)) do
+            if Application.get_env(:teiserver, Teiserver)[:enable_hailstorm] do
               true
             else
               Teiserver.Account.User.verify_password(plain_text_password, user.password)
