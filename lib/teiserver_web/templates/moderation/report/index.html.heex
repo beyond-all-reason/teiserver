@@ -85,7 +85,7 @@
 
             <td>
               <a
-                href={Routes.moderation_report_path(@conn, :user, report.target_id)}
+                href={Routes.profile_overview_path(@conn, :overview, report.target_id)}
                 class={"btn btn-sm btn-#{Teiserver.Account.UserLib.colour()}"}
               >
                 <Fontawesome.icon
