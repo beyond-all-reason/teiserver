@@ -360,7 +360,11 @@ defmodule Teiserver.Protocols.Spring.UserIn do
 
         response =
           if user do
-            Teiserver.Account.User.verify_password(plain_text_password, user.password)
+            if(CacheUser.is_test_user?(user)) do
+              true
+            else
+              Teiserver.Account.User.verify_password(plain_text_password, user.password)
+            end
           else
             false
           end

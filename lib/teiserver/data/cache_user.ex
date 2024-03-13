@@ -247,6 +247,25 @@ defmodule Teiserver.CacheUser do
     end
   end
 
+  def is_test_user?(user) do
+    cond do
+      String.ends_with?(user.email, "@agents") ->
+        true
+
+      String.ends_with?(user.email, "@hailstorm") ->
+        true
+
+      String.ends_with?(user.email, "@hailstorm_spring") ->
+        true
+
+      String.ends_with?(user.email, "@hailstorm_tachyon") ->
+        true
+
+      true ->
+        false
+    end
+  end
+
   @spec do_register_user(String.t(), String.t(), String.t()) :: :ok | :error
   defp do_register_user(name, email, password) do
     name = String.trim(name)
@@ -269,16 +288,7 @@ defmodule Teiserver.CacheUser do
         |> update_user(persist: true)
 
         cond do
-          String.ends_with?(user.email, "@agents") ->
-            :ok
-
-          String.ends_with?(user.email, "@hailstorm") ->
-            :ok
-
-          String.ends_with?(user.email, "@hailstorm_spring") ->
-            :ok
-
-          String.ends_with?(user.email, "@hailstorm_tachyon") ->
+          is_test_user?(user) ->
             :ok
 
           true ->
