@@ -1,6 +1,5 @@
 defmodule TeiserverWeb.Microblog.BlogLive.Show do
   @moduledoc false
-  require TeiserverWeb.Microblog.BlogLive.Show
   use TeiserverWeb, :live_view
   alias Teiserver.{Microblog, Logging, Communication}
   import TeiserverWeb.MicroblogComponents
