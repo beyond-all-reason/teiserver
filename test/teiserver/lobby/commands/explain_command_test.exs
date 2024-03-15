@@ -13,7 +13,7 @@ defmodule Teiserver.Lobby.Commands.ExplainCommandTest do
     Coordinator.start_coordinator()
 
     user = TeiserverTestLib.new_user()
-    {lobby_id, _lobby_pid} = TeiserverTestLib.make_lobby()
+    lobby_id = TeiserverTestLib.make_lobby()
     chat_listener = PubsubListener.new_listener(["teiserver_lobby_chat:#{lobby_id}"])
     client_listener = PubsubListener.new_listener(["teiserver_client_messages:#{user.id}"])
 
