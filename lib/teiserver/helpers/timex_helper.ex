@@ -16,6 +16,11 @@ defmodule Teiserver.Helper.TimexHelper do
     end
   end
 
+  @spec date_to_discord_str(DateTime.t()) :: String.t()
+  def date_to_discord_str(the_time) do
+    "<t:#{Timex.to_unix(the_time)}:f>"
+  end
+
   @spec date_to_str(DateTime.t()) :: String.t()
   @spec date_to_str(DateTime.t(), list) :: String.t()
   def date_to_str(the_time), do: date_to_str(the_time, [])

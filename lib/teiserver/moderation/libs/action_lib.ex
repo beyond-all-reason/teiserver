@@ -220,7 +220,7 @@ defmodule Teiserver.Moderation.ActionLib do
     if action do
       until =
         if action.expires do
-          "Until: " <> TimexHelper.date_to_str(action.expires, format: :ymd_hms) <> " (UTC)"
+          "Until: " <> TimexHelper.date_to_discord_str(action.expires)
         else
           "Permanent"
         end

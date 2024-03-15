@@ -1,5 +1,4 @@
 defmodule TeiserverWeb.Admin.ChatLive.Index do
-  require TeiserverWeb.Admin.ChatLive.Index
   use TeiserverWeb, :live_view
   alias Teiserver.{Account, Coordinator, Chat}
 

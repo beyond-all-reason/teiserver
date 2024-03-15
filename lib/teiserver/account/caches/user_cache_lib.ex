@@ -232,7 +232,7 @@ defmodule Teiserver.Account.UserCacheLib do
   # be pulled out next time the user is accessed/recached
   # The special case here is to prevent the benchmark and test users causing issues
   @spec persist_user(CacheUser.t()) :: CacheUser.t() | nil
-  defp persist_user(%{name: "TEST_" <> _}), do: nil
+  defp persist_user(%{name: "test_" <> _}), do: nil
 
   defp persist_user(user) do
     db_user = Account.get_user!(user.id)

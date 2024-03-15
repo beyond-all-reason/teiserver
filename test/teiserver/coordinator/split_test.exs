@@ -2,7 +2,7 @@ defmodule Teiserver.Coordinator.SplitTest do
   use Teiserver.ServerCase, async: false
   alias Teiserver.Account.ClientLib
   alias Teiserver.Common.PubsubListener
-  alias Teiserver.{User, Client, Coordinator, Lobby}
+  alias Teiserver.{CacheUser, Client, Coordinator, Lobby}
   alias Teiserver.Coordinator.CoordinatorLib
 
   import Teiserver.TeiserverTestLib,
@@ -14,8 +14,8 @@ defmodule Teiserver.Coordinator.SplitTest do
     %{socket: hsocket_empty} = tachyon_auth_setup()
     %{socket: psocket, user: player} = tachyon_auth_setup()
 
-    User.update_user(%{host | moderator: true})
-    User.update_user(%{player | moderator: true})
+    CacheUser.update_user(%{host | moderator: true})
+    CacheUser.update_user(%{player | moderator: true})
     ClientLib.refresh_client(host.id)
     ClientLib.refresh_client(player.id)
 
