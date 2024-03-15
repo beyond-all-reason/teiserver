@@ -84,6 +84,19 @@ defmodule TeiserverWeb.Router do
     end
   end
 
+  # Oauth
+  scope "/" do
+    pipe_through :api
+
+    oauth_api_routes()
+  end
+
+  scope "/" do
+    pipe_through [:browser, :protected]
+
+    oauth_routes()
+  end
+
   scope "/microblog", TeiserverWeb.Microblog do
     pipe_through([:live_browser, :app_layout])
 
