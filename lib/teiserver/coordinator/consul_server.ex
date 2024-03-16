@@ -283,7 +283,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
           |> Map.keys()
 
         client = Client.get_client_by_id(split.first_splitter_id)
-        old_lobby = Lobby.get_lobby(client.lobby_id)
+        old_lobby = Lobby.get_lobby(state.lobby_id)
 
         new_lobby =
           if client.lobby_id == state.lobby_id or client.lobby_id == nil do
