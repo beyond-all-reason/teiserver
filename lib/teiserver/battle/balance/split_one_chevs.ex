@@ -56,7 +56,7 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
   end
 
   def get_rank(member_id) do
-    CacheUser.calculate_rank(member_id, "Playtime")
+    Account.get_user_by_id(member_id).rank
   end
 
   @doc """
