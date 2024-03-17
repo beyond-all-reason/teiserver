@@ -13,6 +13,7 @@ config :teiserver, Teiserver.Repo,
   queue_interval: 100_000,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 50,
+  port: 5430,
   timeout: 300_000
 
 config :teiserver, Teiserver,
