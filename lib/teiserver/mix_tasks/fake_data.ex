@@ -81,6 +81,37 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     |> Enum.map_join(" ", fn l -> Enum.random(l) |> String.capitalize() end)
   end
 
+  @spec make_user(any(), any()) :: none()
+  def make_user(name, root_user, opts \\ [])do
+    default_opts = [is_bot?: false, days: 0, minutes: 0]
+    opts = Keyword.merge(default_opts, opts)
+    days = opts[:days]
+    minutes = opts[:minutes]
+    is_bot? = opts[:is_bot?]
+    roles = case is_bot? do
+      true ->   ["Bot", "Verified"]
+      false -> ["Verified"]
+    end
+    %{
+      name: name |> String.replace(" ", ""),
+      email: UUID.uuid1(),
+      password: root_user.password,
+      permissions: ["admin.dev.developer"],
+      icon: "fa-solid #{StylingHelper.random_icon()}",
+      colour: StylingHelper.random_colour(),
+      trust_score: 10_000,
+      behaviour_score: 10_000,
+      roles: roles,
+      data: %{
+        lobby_client: "FakeData",
+        bot: is_bot?,
+        password_hash: root_user.data.password_hash
+      },
+      inserted_at: Timex.shift(Timex.now(), days: -days, minutes: -minutes) |> time_convert,
+      updated_at: Timex.shift(Timex.now(), days: -days, minutes: -minutes) |> time_convert
+    }
+  end
+
   defp make_accounts() do
     root_user = add_root_user()
 
@@ -90,28 +121,14 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         Range.new(0, users_per_day())
         |> Parallel.map(fn _ ->
           minutes = :rand.uniform(24 * 60)
-
-          %{
-            name: generate_throwaway_name() |> String.replace(" ", ""),
-            email: UUID.uuid1(),
-            password: root_user.password,
-            permissions: ["admin.dev.developer"],
-            icon: "fa-solid #{StylingHelper.random_icon()}",
-            colour: StylingHelper.random_colour(),
-            trust_score: 10_000,
-            behaviour_score: 10_000,
-            roles: ["Verified"],
-            data: %{
-              lobby_client: "FakeData",
-              bot: false,
-              password_hash: root_user.data.password_hash
-            },
-            inserted_at: Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert,
-            updated_at: Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert
-          }
+          name = generate_throwaway_name()
+          make_user(name, root_user, days: day, minutes: minutes)
         end)
       end)
       |> List.flatten()
+
+    # Add spads bot
+    new_users=[make_user("spadsbot", root_user, is_bot?: true) | new_users]
 
     Ecto.Multi.new()
     |> Ecto.Multi.insert_all(:insert_all, Teiserver.Account.User, new_users)
