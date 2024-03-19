@@ -572,7 +572,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "profile.Rank method",
       section: "Profiles",
       type: "select",
-      default: "Leaderboard rating",
+      default: "Role",
       permissions: ["Admin"],
       description: "The value used to assign rank icons at login",
       opts: [choices: ["Leaderboard rating", "Rating value", "Playtime", "Role"]]
