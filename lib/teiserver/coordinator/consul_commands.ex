@@ -666,12 +666,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> String.downcase()
       |> String.trim()
 
-    allowed_choices =
-      if CacheUser.is_moderator?(senderid) do
-        Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
-      else
-        ~w(loser_picks cheeky_switcher_smart)
-      end
+    is_moderator = CacheUser.is_moderator?(senderid)
+
+    allowed_choices = Teiserver.Battle.BalanceLib.get_allowed_algorithms(is_moderator)
 
     if Enum.member?(allowed_choices, remaining) do
       ChatLib.say(
@@ -1382,12 +1379,16 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   # Used for some hailstorm tests for now
-  def handle_command(%{command: "makebalance"} = cmd, state) do
-    Coordinator.call_balancer(state.lobby_id, {
+  def handle_command(%{command: "makebalance", senderid: senderid} = cmd, state) do
+    result= Coordinator.call_balancer(state.lobby_id, {
       :make_balance,
       2,
       []
     })
+
+    # Send logs back to Hailstorm
+    logs = Enum.join(result.logs,"\n")
+    Coordinator.send_to_user(senderid, logs)
 
     ConsulServer.say_command(cmd, state)
 

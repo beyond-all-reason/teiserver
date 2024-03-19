@@ -7,6 +7,7 @@ defmodule Teiserver.Battle.BalanceLib do
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   alias Teiserver.Game.MatchRatingLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
+  alias Teiserver.Battle.Logger
 
   # These are default values and can be overridden as part of the call to create_balance()
 
@@ -45,8 +46,20 @@ defmodule Teiserver.Battle.BalanceLib do
     %{
       "loser_picks" => Teiserver.Battle.Balance.LoserPicks,
       "force_party" => Teiserver.Battle.Balance.ForceParty,
-      "cheeky_switcher_smart" => Teiserver.Battle.Balance.CheekySwitcherSmart
+      "cheeky_switcher_smart" => Teiserver.Battle.Balance.CheekySwitcherSmart,
+      "split_one_chevs" => Teiserver.Battle.Balance.SplitOneChevs
     }
+  end
+
+  @doc """
+  Teifion only allowed force_party to be used by mods because it led to noob-stomping unbalanced teams
+  """
+  def get_allowed_algorithms(is_moderator) do
+     if(is_moderator) do
+       Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
+    else
+       Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys() |> List.delete("force_party")
+    end
   end
 
   @doc """
@@ -115,8 +128,16 @@ defmodule Teiserver.Battle.BalanceLib do
       end
 
     # Now expand the results and calculate stats
-    balance_result
-    |> expand_balance_result()
+    fixed_result =
+      if(Map.has_key?(balance_result, :team_groups)) do
+        # For split one chevs algo, the result will already have the team_groups
+        balance_result
+      else
+        balance_result
+        |> expand_balance_result()
+      end
+
+    fixed_result
     |> calculate_balance_stats
     |> cleanup_result
     |> Map.put(:time_taken, System.system_time(:microsecond) - start_time)
@@ -374,13 +395,7 @@ defmodule Teiserver.Battle.BalanceLib do
 
           {team_id, players} ->
             top_player =
-              players
-              |> Enum.map(fn userid ->
-                {ratings[userid], userid}
-              end)
-              |> Enum.sort_by(fn v -> v end, &>=/2)
-              |> hd
-              |> elem(1)
+              get_captain(data.team_groups[team_id])
 
             {team_id, top_player}
         end)
@@ -416,6 +431,37 @@ defmodule Teiserver.Battle.BalanceLib do
       captains: captains,
       deviation: get_deviation(ratings)
     })
+  end
+
+  @doc """
+  Returns the id of the highest rated member
+
+  team_groups =[
+      %{
+        count: 3,
+        ratings: [19, 16, 16],
+        members: [112, 113, 114],
+        group_rating: 51
+      },
+      %{count: 2, ratings: [14, 8], members: [115, 116], group_rating: 22},
+      %{count: 1, ratings: [41], members: [101], group_rating: 41},
+      %{count: 1, ratings: [26], members: [109], group_rating: 26},
+      %{count: 1, ratings: [21], members: [111], group_rating: 21}
+  ]
+  """
+  def get_captain(team_groups) do
+    flatten_members =
+      for %{members: members, ratings: ratings} <- team_groups,
+          # Zipping will create binary tuples from 2 lists
+          {id, rating} <- Enum.zip(members, ratings),
+          # Create result value
+          do: %{member_id: id, rating: rating}
+
+    captain =
+      Enum.sort_by(flatten_members, fn x -> x.rating end, &>=/2)
+      |> Enum.at(0)
+
+    captain.member_id
   end
 
   @spec default_rating :: List.t()
