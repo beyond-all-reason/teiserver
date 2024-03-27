@@ -63,7 +63,9 @@ config :teiserver, Teiserver,
   heartbeat_timeout: nil,
   enable_discord_bridge: false,
   enable_hailstorm: true,
-  accept_all_emails: true
+  accept_all_emails: true,
+  # Enter WSL ip address here if BAR is in Windows and SPADS is in WSL. Otherwise leave nil.
+  spads_ip_override: nil
 
 # Watch static and templates for browser reloading.
 config :teiserver, TeiserverWeb.Endpoint,

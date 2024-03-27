@@ -216,7 +216,13 @@ defmodule Teiserver.Protocols.SpringOut do
     max_players = 16
     rank = 0
 
-    "BATTLEOPENED #{battle.id} #{type} #{nattype} #{battle.founder_name} #{battle.ip} #{battle.port} #{max_players} #{passworded} #{rank} #{battle.map_hash} #{battle.engine_name}\t#{battle.engine_version}\t#{battle.map_name}\t#{battle.name}\t#{battle.game_name}\n"
+    spads_ip_override = Application.get_env(:teiserver, Teiserver)[:spads_ip_override]
+    battle_ip = cond do
+      !!spads_ip_override -> spads_ip_override
+      true -> battle_ip = battle.ip
+    end
+
+    "BATTLEOPENED #{battle.id} #{type} #{nattype} #{battle.founder_name} #{battle_ip} #{battle.port} #{max_players} #{passworded} #{rank} #{battle.map_hash} #{battle.engine_name}\t#{battle.engine_version}\t#{battle.map_name}\t#{battle.name}\t#{battle.game_name}\n"
   end
 
   defp do_reply(:battle_opened, lobby_id) when is_integer(lobby_id) do
