@@ -7,11 +7,18 @@
 
 <div class="row section-menu">
   <div class="col-md-12">
-    <TeiserverWeb.Moderation.ReportComponents.section_menu
-      active="index"
-      view_colour={view_colour()}
-      current_user={@current_user}
-    />
+      <%= render(
+        TeiserverWeb.Moderation.ReportView,
+        "section_menu.html",
+        Map.merge(assigns, %{
+          show_search: false,
+          active:
+            cond do
+              @conn.params["search"] != nil -> "search"
+              true -> "list"
+            end
+        })
+      ) %>
 
     <div class="float-end">
       <%= if @target_id do %>
@@ -85,19 +92,7 @@
 
             <td>
               <a
-<<<<<<< HEAD
-<<<<<<< HEAD
-                href={Routes.profile_overview_path(@conn, :overview, report.target_id)}
-||||||| parent of 2c92ef66 (Fix broken link on reports index page)
                 href={Routes.moderation_report_path(@conn, :user, report.target_id)}
-=======
-                href={Routes.overwatch_user_path(@conn, :user, report.target_id)}
->>>>>>> 2c92ef66 (Fix broken link on reports index page)
-||||||| parent of 2723f9c1 (Proper fix for lack of section menu for moderation reports page)
-                href={Routes.overwatch_user_path(@conn, :user, report.target_id)}
-=======
-                href={Routes.moderation_report_path(@conn, :user, report.target_id)}
->>>>>>> 2723f9c1 (Proper fix for lack of section menu for moderation reports page)
                 class={"btn btn-sm btn-#{Teiserver.Account.UserLib.colour()}"}
               >
                 <Fontawesome.icon
