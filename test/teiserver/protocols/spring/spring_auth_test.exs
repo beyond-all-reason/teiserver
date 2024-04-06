@@ -2,7 +2,7 @@ defmodule Teiserver.SpringAuthTest do
   use Teiserver.ServerCase, async: false
   require Logger
   alias Teiserver.BitParse
-  alias Teiserver.{User, Account, Client}
+  alias Teiserver.{CacheUser, Account, Client}
   alias Teiserver.Account.UserCacheLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
@@ -85,7 +85,7 @@ defmodule Teiserver.SpringAuthTest do
     reply = _recv_raw(socket)
     assert reply == "SERVERMSG Current password entered incorrectly\n"
     user = UserCacheLib.get_user_by_name(user.name)
-    assert User.test_password("X03MO1qnZdYdgyfeuILPmQ==", user.password_hash)
+    assert CacheUser.test_password("X03MO1qnZdYdgyfeuILPmQ==", user.password_hash)
 
     # Change it correctly
     _send_raw(socket, "CHANGEPASSWORD X03MO1qnZdYdgyfeuILPmQ== new_pass\n")
@@ -93,7 +93,7 @@ defmodule Teiserver.SpringAuthTest do
     reply = _recv_raw(socket)
     assert reply == "SERVERMSG Password changed, you will need to use it next time you login\n"
     user = UserCacheLib.get_user_by_name(user.name)
-    assert User.test_password("new_pass", user.password_hash)
+    assert CacheUser.test_password("new_pass", user.password_hash)
 
     # Test no match
     _send_raw(socket, "CHANGEPASSWORD nomatchname\n")
@@ -507,7 +507,7 @@ CLIENTS test_room #{user.name}\n"
     assert accepted == "DENIED Flood protection - Please wait 20 seconds and try again"
 
     # Un-flood them
-    User.set_flood_level(userid, 0)
+    CacheUser.set_flood_level(userid, 0)
 
     # Now they can log in again
     _send_raw(
@@ -619,8 +619,8 @@ CLIENTS test_room #{user.name}\n"
   #   assert Enum.count(Account.list_reports(search: [filter: {"target", target_user.id}])) == 2
 
   #   # Reporting a friend
-  #   User.create_friend_request(user.id, target_user.id)
-  #   User.accept_friend_request(user.id, target_user.id)
+  #   CacheUser.create_friend_request(user.id, target_user.id)
+  #   CacheUser.accept_friend_request(user.id, target_user.id)
 
   #   _send_raw(socket, "c.moderation.report_user #{target_user.name}\tlocation_type\t123\treason with spaces\n")
   #   reply = _recv_raw(socket)
@@ -641,7 +641,7 @@ CLIENTS test_room #{user.name}\n"
 
   test "Bad id ADDUSER", %{user: user, socket: socket} do
     {:ok, bad_user} =
-      User.user_register_params_with_md5(
+      CacheUser.user_register_params_with_md5(
         "test_user_bad_id",
         "test_user_bad_id@email.com",
         "X03MO1qnZdYdgyfeuILPmQ=="
@@ -651,10 +651,10 @@ CLIENTS test_room #{user.name}\n"
     bad_user
     |> UserCacheLib.convert_user()
     |> UserCacheLib.add_user()
-    |> User.verify_user()
+    |> CacheUser.verify_user()
 
     # Need to add it as a client for the :add_user command to work
-    Client.login(User.get_user_by_id(bad_user.id), :spring, "127.0.0.1")
+    Client.login(CacheUser.get_user_by_id(bad_user.id), :spring, "127.0.0.1")
 
     # Now see what happens when we add user
     pid = Client.get_client_by_id(user.id).tcp_pid
