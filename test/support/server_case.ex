@@ -34,6 +34,8 @@ defmodule Teiserver.ServerCase do
       Ecto.Adapters.SQL.Sandbox.mode(Teiserver.Repo, {:shared, self()})
     end
 
+    on_exit(&Teiserver.TeiserverTestLib.clear_all_con_caches/0)
+
     :ok
   end
 
