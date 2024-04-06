@@ -627,6 +627,43 @@ defmodule Teiserver.TeiserverTestLib do
 
     seed_badge_types()
   end
+
+  @doc """
+  Traverse most ConCache tables and delete everything from them.
+  Because ETS tables are global, failing to clear the cache between tests may introduce errors
+  since SQL transactions are rolled back, and so the caches hold values that are no longer in the
+  sandboxed DB used in test.
+
+  TODO:
+  Some tables declared in lib/teiserver/application.ex aren't cleared here, it seems they are important
+  for some tests, but this needs further investigation.
+
+  See https://github.com/sasa1977/con_cache?tab=readme-ov-file#testing-in-your-application
+
+  returns :ok
+  """
+  def clear_all_con_caches() do
+    cache_list = [
+      :telemetry_complex_client_event_types_cache,
+      :telemetry_complex_lobby_event_types_cache,
+      :telemetry_complex_match_event_types_cache,
+      :telemetry_complex_server_event_types_cache,
+      :telemetry_property_types_cache,
+      :telemetry_simple_client_event_types_cache,
+      :telemetry_simple_lobby_event_types_cache,
+      :telemetry_simple_match_event_types_cache,
+      :telemetry_simple_server_event_types_cache,
+    ]
+
+    Enum.each(cache_list, fn cache ->
+      cache
+      |> ConCache.ets()
+      |> :ets.tab2list()
+      |> Enum.each(fn {key, _} -> ConCache.delete(cache, key) end)
+    end)
+
+    :ok
+  end
 end
 
 defmodule Teiserver.FakeTransport do
