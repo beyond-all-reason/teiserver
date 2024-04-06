@@ -19,7 +19,7 @@ defmodule Teiserver.Protocols.Spring.SpringBattleHostAsyncTest do
     Client.disconnect(user.id)
   end
 
-  test "battle commands when not in a battle", %{state: state, user: user, user: user} do
+  test "battle commands when not in a battle", %{state: state, user: user} do
     _send_lines(state, "LEAVEBATTLE\n")
     reply = _recv_lines()
     assert reply == ""
