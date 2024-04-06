@@ -7,21 +7,8 @@
 
 <div class="row section-menu">
   <div class="col-md-12">
-      <%= render(
-        TeiserverWeb.Moderation.ReportView,
-        "section_menu.html",
-        Map.merge(assigns, %{
-          show_search: false,
-          active:
-            cond do
-              @conn.params["search"] != nil -> "search"
-              true -> "list"
-            end
-        })
-      ) %>
-
-    <div class="float-end">
-      <%= if @target_id do %>
+    <%= if @target_id do %>
+      <div class="float-end">
         <%= if allow?(@conn, "teiserver.staff.moderator") do %>
           <a
             class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
@@ -39,9 +26,9 @@
           <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" /> &nbsp;
           Action user
         </a>
-      <% end %>
-    </div>
-    <br /><br />
+      </div>
+      <br /><br />
+    <% end %>
 
     <%= if @target && @target.smurf_of_id do %>
       <div class="alert alert-primary">
@@ -49,9 +36,7 @@
       </div>
     <% end %>
 
-    <%= if @conn.params["search"] != nil do %>
-      <%= render(TeiserverWeb.Moderation.ReportView, "search.html", assigns) %>
-    <% end %>
+    <%= render(TeiserverWeb.Moderation.ReportView, "search.html", assigns) %>
 
     <h4>Listing Reports</h4>
 
