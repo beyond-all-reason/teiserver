@@ -13,7 +13,6 @@ defmodule Teiserver.SpringAuthAsyncTest do
 
   setup do
     %{user: user, state: state} = async_auth_setup(Spring)
-    on_exit(fn -> teardown(user) end)
     {:ok, state: state, user: user}
   end
 
@@ -21,15 +20,17 @@ defmodule Teiserver.SpringAuthAsyncTest do
     Client.disconnect(user.id)
   end
 
-  test "PING", %{state: state} do
+  test "PING", %{state: state, user: user} do
     _send_lines(state, "#4 PING\n")
     reply = _recv_lines()
+    teardown(user)
     assert reply == "#4 PONG\n"
   end
 
   test "GETUSERINFO", %{state: state, user: user} do
     _send_lines(state, "GETUSERINFO\n")
     reply = _recv_lines(3)
+    teardown(user)
     assert reply =~ "SERVERMSG Registration date: "
     assert reply =~ "SERVERMSG Email address: #{user.email}"
     assert reply =~ "SERVERMSG Ingame time: "
