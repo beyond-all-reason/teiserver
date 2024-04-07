@@ -393,6 +393,16 @@ bsname = view_colour() %>
                     Add internal note
                   </div>
                 </div>
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick={"
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('Permanent ban, possibly a previously banned user.');
+        $('#action_expires').val('1100 years');
+      "}
+                  >
+                    Single account permaban
+                  </div>
               </div>
               <div class="row mt-4" id="reports-row">
                 <div class="col">
