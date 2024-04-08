@@ -1,5 +1,8 @@
 defmodule Teiserver.Battle.CheekySwitcherSmartBalanceTest do
-  @moduledoc false
+  @moduledoc """
+  Can run tests in this file only by
+  mix test test/teiserver/battle/cheeky_switcher_smart_balance_test.exs
+  """
   use Teiserver.DataCase, async: true
   alias Teiserver.Battle.BalanceLib
 

@@ -1,5 +1,8 @@
 defmodule Teiserver.Battle.ForcePartyBalanceTest do
-  @moduledoc false
+  @moduledoc """
+  Can run tests in this file only by
+  mix test test/teiserver/battle/force_party_balance_test.exs
+  """
   use Teiserver.DataCase, async: true
   alias Teiserver.Battle.BalanceLib
 
