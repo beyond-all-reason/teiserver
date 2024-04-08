@@ -1,5 +1,8 @@
 defmodule Teiserver.Battle.LoserPicksBalanceTest do
-  @moduledoc false
+  @moduledoc """
+  Can run tests in this file only by
+  mix test test/teiserver/battle/loser_picks_balance_test.exs
+  """
   use Teiserver.DataCase, async: true
   alias Teiserver.Battle.BalanceLib
 
@@ -195,7 +198,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
                2 => 13
              },
              captains: %{
-               1 => 4,
+               1 => 1,
                2 => 3
              },
              team_sizes: %{
@@ -241,7 +244,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
       )
 
     assert Map.drop(result, [:logs, :time_taken]) == %{
-             captains: %{1 => 116, 2 => 110},
+             captains: %{1 => 101, 2 => 102},
              deviation: 2,
              ratings: %{1 => 161, 2 => 164},
              team_groups: %{
@@ -302,7 +305,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
       )
 
     assert Map.drop(result, [:logs, :time_taken]) == %{
-             captains: %{1 => 116, 2 => 115},
+             captains: %{1 => 101, 2 => 104},
              deviation: 0,
              ratings: %{1 => 184, 2 => 184},
              team_groups: %{
@@ -361,7 +364,8 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
       )
 
     assert Map.drop(result, [:logs, :time_taken]) == %{
-             captains: %{1 => 116, 2 => 115},
+      #The captain should be the user with the highest rating on each team
+             captains: %{1 => 104, 2 => 101},
              deviation: 2,
              ratings: %{1 => 248, 2 => 253},
              team_groups: %{
@@ -420,7 +424,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
     # This is very similar to the previous one but a few things about the exact
     # pick order is different
     assert Map.drop(result2, [:logs, :time_taken]) == %{
-             captains: %{1 => 116, 2 => 115},
+             captains: %{1 => 101, 2 => 104},
              deviation: 2,
              ratings: %{1 => 248, 2 => 253},
              team_groups: %{

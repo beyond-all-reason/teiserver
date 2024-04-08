@@ -87,6 +87,7 @@ defmodule Teiserver.MixProject do
       {:libcluster, "~> 3.3"},
       {:tzdata, "~> 1.1"},
       {:ex_ulid, "~> 0.1.0"},
+      {:mock, "~> 0.3.0", only: :test},
 
       # Teiserver libs
       {:openskill, git: "https://github.com/Teifion/openskill.ex.git", branch: "master"},

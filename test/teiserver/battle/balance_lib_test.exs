@@ -1,7 +1,18 @@
 defmodule Teiserver.Battle.BalanceLibTest do
-  @moduledoc false
+  @moduledoc """
+  Can run tests in this file only by
+  mix test test/teiserver/battle/balance_lib_test.exs
+  """
   use Teiserver.DataCase, async: true
   alias Teiserver.Battle.BalanceLib
+
+  #Split one chevs needs to hit the database to determine the rank of a user
+  #So instead of hitting the database we will use mocks
+  setup_with_mocks([
+    Teiserver.SplitOneChevsMocks.get_mocks()
+  ]) do
+    :ok
+  end
 
   test "balance algorithms - no players" do
     # We don't care about the result, just that they don't error
