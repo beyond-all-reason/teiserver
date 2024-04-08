@@ -198,6 +198,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
                1 => 13,
                2 => 13
              },
+            #The captain should be the user with the highest rating on each team
              captains: %{
                1 => 1,
                2 => 3
