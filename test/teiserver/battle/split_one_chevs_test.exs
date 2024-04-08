@@ -13,15 +13,13 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
   # Define constants
   @split_algo "split_one_chevs"
 
-  #Split one chevs needs to hit the database to determine the rank of a user
-  #So instead of hitting the database we will use mocks
+  # Split one chevs needs to hit the database to determine the rank of a user
+  # So instead of hitting the database we will use mocks
   setup_with_mocks([
     Teiserver.SplitOneChevsMocks.get_mocks()
   ]) do
     :ok
   end
-
-
 
   test "mock set up 1" do
     assert 1 == Account.get_user_by_id("test").rank
@@ -107,26 +105,23 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
 
   test "perform" do
     expanded_group = [
-      %{count: 2, members: [100, 4], group_rating: 13, ratings: [8, 5]},
-      %{count: 1, members: [2], group_rating: 6, ratings: [6]},
-      %{count: 1, members: [3], group_rating: 7, ratings: [17]}
+      %{count: 2, members: ["Pro1", "Noob1"], group_rating: 13, ratings: [8, 5]},
+      %{count: 1, members: ["Noob2"], group_rating: 6, ratings: [6]},
+      %{count: 1, members: ["Noob3"], group_rating: 7, ratings: [17]}
     ]
 
     result = SplitOneChevs.perform(expanded_group, 2)
 
-    assert result = %{
-             team_groups: %{
+    assert result.team_groups ==  %{
                1 => [
-                 %{count: 1, members: [3], ratings: [17], group_rating: 17},
-                 %{count: 1, members: [100], ratings: [8], group_rating: 8}
+                 %{count: 1, group_rating: 6, members: ["Noob2"], ratings: [6]},
+                 %{count: 1, group_rating: 8, members: ["Pro1"], ratings: [8]}
                ],
                2 => [
-                 %{count: 1, members: [2], ratings: [6], group_rating: 6},
-                 %{count: 1, members: [4], ratings: [5], group_rating: 5}
+                 %{count: 1, group_rating: 5, members: ["Noob1"], ratings: [5]},
+                 %{count: 1, group_rating: 17, members: ["Noob3"], ratings: [17]}
                ]
-             },
-             team_players: %{1 => [3, 100], 2 => [2, 4]}
-           }
+             }
   end
 
   test "flatten members" do
@@ -147,23 +142,21 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
   end
 
   test "sort members" do
-    members =[
+    members = [
       %{rating: 8, rank: 4, member_id: 100},
       %{rating: 5, rank: 0, member_id: 4},
       %{rating: 6, rank: 0, member_id: 2},
       %{rating: 17, rank: 0, member_id: 3}
     ]
 
-    result =
-      SplitOneChevs.sort_members(members)
+    result = SplitOneChevs.sort_members(members)
 
-    assert result ==[
-      %{rating: 8, rank: 4, member_id: 100},
-      %{rating: 17, rank: 0, member_id: 3},
-      %{rating: 6, rank: 0, member_id: 2},
-      %{rating: 5, rank: 0, member_id: 4}
-    ]
-
+    assert result == [
+             %{rating: 8, rank: 4, member_id: 100},
+             %{rating: 17, rank: 0, member_id: 3},
+             %{rating: 6, rank: 0, member_id: 2},
+             %{rating: 5, rank: 0, member_id: 4}
+           ]
   end
 
   test "assign teams" do
@@ -174,8 +167,7 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
       %{rating: 17, rank: 0, member_id: 3}
     ]
 
-    result =
-      SplitOneChevs.assign_teams(members, 2)
+    result = SplitOneChevs.assign_teams(members, 2)
 
     assert result.teams == [
              %{
@@ -196,8 +188,7 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
   end
 
   test "create empty teams" do
-    result =
-      SplitOneChevs.create_empty_teams(3)
+    result = SplitOneChevs.create_empty_teams(3)
 
     assert result == [
              %{members: [], team_id: 1},
@@ -219,13 +210,13 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
         algorithm: @split_algo
       )
 
-      assert result.logs ==  [
-        "Begin split_one_chevs balance",
-        "Pro2 (Chev: 2) picked for Team 1",
-        "Pro1 (Chev: 2) picked for Team 2",
-        "Noob2 (Chev: 1) picked for Team 3",
-        "Noob1 (Chev: 1) picked for Team 4"
-      ]
+    assert result.logs == [
+             "Begin split_one_chevs balance",
+             "Pro2 (Chev: 2) picked for Team 1",
+             "Pro1 (Chev: 2) picked for Team 2",
+             "Noob2 (Chev: 1) picked for Team 3",
+             "Noob1 (Chev: 1) picked for Team 4"
+           ]
   end
 
   test "logs Team" do
@@ -241,13 +232,12 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
         algorithm: @split_algo
       )
 
-      assert result.logs ==  [
-        "Begin split_one_chevs balance",
-        "Pro2 (Chev: 2) picked for Team 1",
-        "Pro1 (Chev: 2) picked for Team 2",
-        "Noob2 (Chev: 1) picked for Team 2",
-        "Noob1 (Chev: 1) picked for Team 1"
-      ]
+    assert result.logs == [
+             "Begin split_one_chevs balance",
+             "Pro2 (Chev: 2) picked for Team 1",
+             "Pro1 (Chev: 2) picked for Team 2",
+             "Noob2 (Chev: 1) picked for Team 2",
+             "Noob1 (Chev: 1) picked for Team 1"
+           ]
   end
-
 end
