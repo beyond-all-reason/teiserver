@@ -4,6 +4,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
   mix test test/teiserver/battle/loser_picks_balance_test.exs
   """
   use Teiserver.DataCase, async: true
+  @moduletag :balance_test
   alias Teiserver.Battle.BalanceLib
 
   @algorithm "loser_picks"

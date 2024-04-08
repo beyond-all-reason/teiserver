@@ -4,8 +4,9 @@ defmodule Teiserver.Battle.BalanceLibTest do
   mix test test/teiserver/battle/balance_lib_test.exs
   """
   use Teiserver.DataCase, async: true
+  @moduletag :balance_test
   alias Teiserver.Battle.BalanceLib
-
+  import Mock
   #Split one chevs needs to hit the database to determine the rank of a user
   #So instead of hitting the database we will use mocks
   setup_with_mocks([

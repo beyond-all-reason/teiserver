@@ -4,6 +4,7 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
   mix test test/teiserver/battle/split_one_chevs_test.exs
   """
   use ExUnit.Case, async: false
+  @moduletag :balance_test
   alias Teiserver.Battle.Balance.SplitOneChevs
   alias Teiserver.Account
   alias Teiserver.Battle.BalanceLib

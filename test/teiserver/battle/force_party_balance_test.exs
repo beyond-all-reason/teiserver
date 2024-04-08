@@ -4,6 +4,7 @@ defmodule Teiserver.Battle.ForcePartyBalanceTest do
   mix test test/teiserver/battle/force_party_balance_test.exs
   """
   use Teiserver.DataCase, async: true
+  @moduletag :balance_test
   alias Teiserver.Battle.BalanceLib
 
   @algorithm "force_party"

@@ -4,6 +4,8 @@ defmodule Teiserver.Battle.CheekySwitcherSmartBalanceTest do
   mix test test/teiserver/battle/cheeky_switcher_smart_balance_test.exs
   """
   use Teiserver.DataCase, async: true
+  @moduletag :balance_test
+
   alias Teiserver.Battle.BalanceLib
 
   @algorithm "cheeky_switcher_smart"
