@@ -153,11 +153,16 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           if match_id do
             game_time = int_parse(game_time)
             Telemetry.log_simple_match_event(userid, match_id, event_type_name, game_time)
+            Logger.info("match-event: Stored <#{username}> <#{event_type_name}> <#{game_time}> userid #{userid} match_id #{match_id}")
+          else
+            Logger.warn("match-event: Cannot get match_id of userid of #{username}")
           end
+        else
+          Logger.warn("match-event: Cannot get userid of #{username} or is not a bot")
         end
 
       _ ->
-        Logger.error("match_event bad_match error on '#{data}'")
+        Logger.error("match-event bad_match error on '#{data}'")
     end
 
     {:noreply, state}
