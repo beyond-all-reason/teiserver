@@ -206,14 +206,14 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
            ]
   end
 
-  test "logs" do
+  test "logs FFA" do
     result =
       BalanceLib.create_balance(
         [
-          %{1 => 5},
-          %{2 => 6},
-          %{3 => 7},
-          %{4 => 8}
+          %{"Pro1" => 5},
+          %{"Pro2" => 6},
+          %{"Noob1" => 7},
+          %{"Noob2" => 8}
         ],
         4,
         algorithm: @split_algo
@@ -221,10 +221,33 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
 
       assert result.logs ==  [
         "Begin split_one_chevs balance",
-        "4 (Chev: 2) picked for Team 1",
-        "3 (Chev: 2) picked for Team 2",
-        "2 (Chev: 2) picked for Team 3",
-        "1 (Chev: 2) picked for Team 4"
+        "Pro2 (Chev: 2) picked for Team 1",
+        "Pro1 (Chev: 2) picked for Team 2",
+        "Noob2 (Chev: 1) picked for Team 3",
+        "Noob1 (Chev: 1) picked for Team 4"
       ]
   end
+
+  test "logs Team" do
+    result =
+      BalanceLib.create_balance(
+        [
+          %{"Pro1" => 5},
+          %{"Pro2" => 6},
+          %{"Noob1" => 7},
+          %{"Noob2" => 8}
+        ],
+        2,
+        algorithm: @split_algo
+      )
+
+      assert result.logs ==  [
+        "Begin split_one_chevs balance",
+        "Pro2 (Chev: 2) picked for Team 1",
+        "Pro1 (Chev: 2) picked for Team 2",
+        "Noob2 (Chev: 1) picked for Team 2",
+        "Noob1 (Chev: 1) picked for Team 1"
+      ]
+  end
+
 end
