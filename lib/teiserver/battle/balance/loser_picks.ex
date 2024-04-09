@@ -16,7 +16,6 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
   """
 
   # Alias the types
-  alias Teiserver.Account
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   import Teiserver.Helper.NumberHelper, only: [round: 2]
@@ -36,9 +35,8 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
   """
   @spec perform([BT.expanded_group_or_pair()], non_neg_integer(), list()) :: BT.algorithm_result()
   def perform(raw_groups, team_count, opts) do
-    # This module doesn't use names or ranks and they need to be dropped from raw_groups to make existing tests pass
-    # However, this module could be improved to use names from raw_groups instead of calling Teiserver.Account
-    raw_groups = Enum.map(raw_groups, fn x-> Map.drop(x,[:ranks, :names]) end)
+    # This module doesn't use ranks and they need to be dropped from raw_groups to make existing tests pass
+    raw_groups = Enum.map(raw_groups, fn x -> Map.drop(x, [:ranks]) end)
 
     teams =
       Range.new(1, team_count || 1)
@@ -136,8 +134,8 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
         new_teams_map = Map.put(state.teams, current_team, new_team)
 
         names =
-          picked.members
-          |> Enum.map_join(", ", fn userid -> Account.get_username_by_id(userid) || userid end)
+          picked.names
+          |> Enum.map_join(", ", fn x -> x end)
 
         new_total = (hd(team_skills) |> elem(0)) + picked.group_rating
 
@@ -157,6 +155,7 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
       # Groups, so we just merge a bunch of them into teams
       groups ->
         # Generate new team map
+
         new_teams_map =
           team_skills
           |> Enum.zip(groups)
@@ -171,8 +170,16 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
           |> Enum.zip(groups)
           |> Enum.map(fn {{points, team_number}, group} ->
             names =
-              group.members
-              |> Enum.map_join(", ", fn userid -> Account.get_username_by_id(userid) || userid end)
+              cond do
+                Map.has_key?(group, :names) ->
+                  group.names
+                  |> Enum.map_join(", ", fn x -> x end)
+
+                true ->
+                  group.members
+                  # It shouldn't go here unless we made a mistake elsewhere
+                  |> Enum.map_join(", ", fn x -> "#{x}" end)
+              end
 
             new_team_total = points + group.group_rating
 

@@ -162,6 +162,13 @@ defmodule Teiserver.Battle.BalanceLib do
     )
   end
 
+  # Only take keys we need
+  defp clean_groups(groups) do
+    groups |> Enum.map(fn x->
+      Map.take(x, ~w(members count group_rating ratings)a)
+    end)
+  end
+
   # Take the balance result and add some extra fields to make using it easier
   defp expand_balance_result(balance_result) do
     team_groups =
@@ -172,7 +179,7 @@ defmodule Teiserver.Battle.BalanceLib do
         true ->
           balance_result.teams
           |> Map.new(fn {team_id, groups} ->
-            {team_id, Enum.reverse(groups)}
+            {team_id, Enum.reverse(clean_groups((groups)))}
           end)
       end
 
@@ -287,13 +294,14 @@ defmodule Teiserver.Battle.BalanceLib do
     case hd(found_groups) do
       :no_possible_combinations ->
         extra_solos =
-          Enum.zip(group.members, group.ratings)
-          |> Enum.map(fn {userid, rating} ->
+          Enum.zip([group.members, group.ratings, group.names])
+          |> Enum.map(fn {userid, rating, name} ->
             %{
               count: 1,
               group_rating: rating,
               members: [userid],
-              ratings: [rating]
+              ratings: [rating],
+              names: [name]
             }
           end)
 
@@ -314,13 +322,14 @@ defmodule Teiserver.Battle.BalanceLib do
 
       :no_possible_players ->
         extra_solos =
-          Enum.zip(group.members, group.ratings)
-          |> Enum.map(fn {userid, rating} ->
+          Enum.zip([group.members, group.ratings, group.names])
+          |> Enum.map(fn {userid, rating, name} ->
             %{
               count: 1,
               group_rating: rating,
               members: [userid],
-              ratings: [rating]
+              ratings: [rating],
+              names: [name]
             }
           end)
 
