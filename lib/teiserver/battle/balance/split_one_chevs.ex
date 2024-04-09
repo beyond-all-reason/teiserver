@@ -23,7 +23,7 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
   end
 
   @doc """
-  Remove all groups/parties and treats everyone as solo players
+  Remove all groups/parties and treats everyone as solo players. This algorithm doesn't support parties.
   See split_one_chevs_internal_test.exs for sample input
   """
   def flatten_members(expanded_group) do

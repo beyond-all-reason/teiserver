@@ -7,7 +7,6 @@ defmodule Teiserver.Battle.BalanceLib do
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   alias Teiserver.Game.MatchRatingLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
-  require Logger
 
   # These are default values and can be overridden as part of the call to create_balance()
 
@@ -148,11 +147,8 @@ defmodule Teiserver.Battle.BalanceLib do
       end
 
     # Now expand the results and calculate stats
-    fixed_result =
-      balance_result
-      |> expand_balance_result()
-
-    fixed_result
+    balance_result
+    |> expand_balance_result()
     |> calculate_balance_stats
     |> cleanup_result
     |> Map.put(:time_taken, System.system_time(:microsecond) - start_time)
@@ -168,7 +164,6 @@ defmodule Teiserver.Battle.BalanceLib do
 
   # Take the balance result and add some extra fields to make using it easier
   defp expand_balance_result(balance_result) do
-
     team_groups =
       cond do
         Map.has_key?(balance_result, :team_groups) ->
@@ -537,13 +532,12 @@ defmodule Teiserver.Battle.BalanceLib do
     get_user_rating_value(userid, rating_type_id)
   end
 
-  @doc """
-  Used to get the rating value of the user for internal balance purposes which might be
-  different from public/reporting
-  """
+
+  # Used to get the rating value of the user for internal balance purposes which might be
+  # different from public/reporting
   @spec get_user_balance_rating_value(T.userid(), String.t() | non_neg_integer()) ::
           BT.rating_value()
-  def get_user_balance_rating_value(userid, rating_type_id) when is_integer(rating_type_id) do
+  defp get_user_balance_rating_value(userid, rating_type_id) when is_integer(rating_type_id) do
     real_rating = get_user_rating_value(userid, rating_type_id)
 
     stats = Account.get_user_stat_data(userid)
@@ -552,9 +546,9 @@ defmodule Teiserver.Battle.BalanceLib do
     real_rating + adjustment
   end
 
-  def get_user_balance_rating_value(_userid, nil), do: nil
+  defp get_user_balance_rating_value(_userid, nil), do: nil
 
-  def get_user_balance_rating_value(userid, rating_type) do
+  defp get_user_balance_rating_value(userid, rating_type) do
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
     get_user_balance_rating_value(userid, rating_type_id)
   end

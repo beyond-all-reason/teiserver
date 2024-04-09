@@ -1379,13 +1379,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   # Used for some hailstorm tests for now
-  def handle_command(%{command: "makebalance", senderid: senderid} = cmd, state) do
-    result= Coordinator.call_balancer(state.lobby_id, {
+  def handle_command(%{command: "makebalance"} = cmd, state) do
+    Coordinator.call_balancer(state.lobby_id, {
       :make_balance,
       2,
       []
     })
-
 
     ConsulServer.say_command(cmd, state)
 
