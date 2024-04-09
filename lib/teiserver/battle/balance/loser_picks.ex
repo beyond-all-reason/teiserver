@@ -133,9 +133,7 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
         new_team = [picked | state.teams[current_team]]
         new_teams_map = Map.put(state.teams, current_team, new_team)
 
-        names =
-          picked.names
-          |> Enum.map_join(", ", fn x -> x end)
+        names = get_group_names(picked)
 
         new_total = (hd(team_skills) |> elem(0)) + picked.group_rating
 
@@ -169,17 +167,7 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
           team_skills
           |> Enum.zip(groups)
           |> Enum.map(fn {{points, team_number}, group} ->
-            names =
-              cond do
-                Map.has_key?(group, :names) ->
-                  group.names
-                  |> Enum.map_join(", ", fn x -> x end)
-
-                true ->
-                  group.members
-                  # It shouldn't go here unless we made a mistake elsewhere
-                  |> Enum.map_join(", ", fn x -> "#{x}" end)
-              end
+            names = get_group_names(group)
 
             new_team_total = points + group.group_rating
 
@@ -194,6 +182,20 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
             teams: new_teams_map,
             logs: new_logs
         })
+    end
+  end
+
+  @spec get_group_names(BT.expanded_group()) :: String.t()
+  defp get_group_names(group) do
+    cond do
+      Map.has_key?(group, :names) ->
+        group.names
+        |> Enum.map_join(", ", fn x -> x end)
+
+      # It shouldn't go here unless we made a mistake elsewhere
+      true ->
+        group.members
+        |> Enum.map_join(", ", fn x -> "#{x}" end)
     end
   end
 end
