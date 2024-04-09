@@ -11,11 +11,14 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
     This algorithm completely ignores parties.
 
   """
+  alias Teiserver.Battle.Balance.SplitOneChevsTypes, as: ST
+  alias Teiserver.Battle.Balance.BalanceTypes, as: BT
 
   @doc """
   Main entry point used by balance_lib
   See split_one_chevs_internal_test.exs for sample input
   """
+  @spec perform([BT.expanded_group()], non_neg_integer(), list()) :: any()
   def perform(expanded_group, team_count, _opts \\ []) do
     members = flatten_members(expanded_group) |> sort_members()
     %{teams: teams, logs: logs} = assign_teams(members, team_count)
@@ -84,7 +87,6 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
       cond do
         # Team is picker if it has least members
         length(x.members) < length(acc.members) -> x
-
         # Team is picker if it is tied for least and has lower team rating
         length(x.members) == length(acc.members) && get_team_rating(x) < get_team_rating(acc) -> x
         true -> acc
@@ -102,25 +104,7 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
     end)
   end
 
-  @doc """
-  teams=
-     [
-             %{
-               members: [
-                 %{rating: 17, rank: 0, member_id: 3},
-                 %{rating: 8, rank: 4, member_id: 100}
-               ],
-               team_id: 1
-             },
-             %{
-               members: [
-                 %{rating: 6, rank: 0, member_id: 2},
-                 %{rating: 5, rank: 0, member_id: 4}
-               ],
-               team_id: 2
-             }
-           ]
-  """
+  @spec standardise_result([ST.team()], [String.t()]) :: any
   defp standardise_result(teams, logs) do
     team_groups = standardise_team_groups(teams)
 
@@ -135,17 +119,7 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
     Map.new(raw_input, fn x -> {x.team_id, standardise_members(x.members)} end)
   end
 
-  @doc """
-  members=
-  [
-                 %{rating: 6, rank: 0, member_id: 2},
-                 %{rating: 5, rank: 0, member_id: 4}
-               ]
-  output= [
-                 %{members: [2], count: 1, group_rating: 6, ratings: [6]},
-                 %{members: [4], count: 1, group_rating: 5, ratings: [5]}
-               ]
-  """
+  @spec standardise_members([ST.member()]) :: [BT.group()]
   defp standardise_members(members) do
     for %{rating: rating, member_id: member_id} <- members,
         do: %{members: [member_id], count: 1, group_rating: rating, ratings: [rating]}
