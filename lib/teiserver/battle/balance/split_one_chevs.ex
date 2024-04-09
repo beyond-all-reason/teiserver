@@ -1,7 +1,4 @@
 defmodule Teiserver.Battle.Balance.SplitOneChevs do
-  alias Teiserver.CacheUser
-  alias Teiserver.Account
-
   @moduledoc """
     This balance algorithm first sorts the users by visible OS (match rating) descending. Then all rank=0 (one chevs) will be placed at the bottom of this sorted list.
 
@@ -16,13 +13,8 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
   """
 
   @doc """
-  Input:
-  expanded_group:
-  [
-      %{count: 2, members: [1, 4], group_rating: 13, ratings: [8, 5]},
-      %{count: 1, members: [2], group_rating: 6, ratings: [6]},
-      %{count: 1, members: [3], group_rating: 7, ratings: [7]}
-  ]
+  Main entry point used by balance_lib
+  See split_one_chevs_internal_test.exs for sample input
   """
   def perform(expanded_group, team_count, _opts \\ []) do
     members = flatten_members(expanded_group) |> sort_members()
@@ -31,44 +23,20 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
   end
 
   @doc """
-  Input:
-  expanded_group:
-  [
-      %{count: 2, members: [1, 4], group_rating: 13, ratings: [8, 5]},
-      %{count: 1, members: [2], group_rating: 6, ratings: [6]},
-      %{count: 1, members: [3], group_rating: 7, ratings: [7]}
-  ]
-
-  Output:  [
-  %{rating: 8, member_id: 1},
-  %{rating: 5, member_id: 4},
-  %{rating: 6, member_id: 2},
-  %{rating: 7, member_id: 3}
-  ]
+  Remove all groups/parties and treats everyone as solo players
+  See split_one_chevs_internal_test.exs for sample input
   """
   def flatten_members(expanded_group) do
-    for %{members: members, ratings: ratings} <- expanded_group,
+    for %{members: members, ratings: ratings, ranks: ranks, names: names} <- expanded_group,
         # Zipping will create binary tuples from 2 lists
-        {id, rating} <- Enum.zip(members, ratings),
+        {id, rating, rank, name} <- Enum.zip([members, ratings, ranks, names]),
         # Create result value
-        rank = get_rank(id),
-        do: %{member_id: id, rating: rating, rank: rank}
-  end
-
-  def get_rank(member_id) do
-    Account.get_user_by_id(member_id).rank
+        do: %{member_id: id, rating: rating, rank: rank, name: name}
   end
 
   @doc """
-  members=
-  [
-             %{rating: 8, rank: 4, member_id: 100},
-             %{rating: 5, rank: 0, member_id: 4},
-             %{rating: 6, rank: 0, member_id: 2},
-             %{rating: 17, rank: 0, member_id: 3}
-           ]
-
-  Output: Members will be sorted by rank descending; however, rank=0 players will always be last
+  Sorts members by rating but puts one chevs at the bottom
+  See split_one_chevs_internal_test.exs for sample input
   """
   def sort_members(members) do
     non_noobs = Enum.filter(members, fn x -> x.rank != 0 end)
@@ -82,24 +50,20 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
   end
 
   @doc """
-  member_list: A sorted list of members e.g.
-  [
-  %{rating: 8, member_id: 1, rank: 0},
-  %{rating: 5, member_id: 4, rank: 0},
-  %{rating: 6, member_id: 2, rank: 0},
-  %{rating: 7, member_id: 3, rank: 0}
-  ]
-
-  Returns %{teams:teams, logs:logs}
+  Assigns teams using algorithm defined in moduledoc
+  See split_one_chevs_internal_test.exs for sample input
   """
   def assign_teams(member_list, number_of_teams) do
-    default_acc = %{teams: create_empty_teams(number_of_teams), logs: ["Begin split_one_chevs balance"]}
+    default_acc = %{
+      teams: create_empty_teams(number_of_teams),
+      logs: ["Begin split_one_chevs balance"]
+    }
 
     Enum.reduce(member_list, default_acc, fn x, acc ->
       picking_team = get_picking_team(acc.teams)
       update_picking_team = Map.merge(picking_team, %{members: [x | picking_team.members]})
-      username = Account.get_username_by_id(x.member_id)
-      new_log = "#{username} (Chev: #{x.rank+1}) picked for Team #{picking_team.team_id}"
+      username = x.name
+      new_log = "#{username} (Chev: #{x.rank + 1}) picked for Team #{picking_team.team_id}"
 
       %{
         teams: [update_picking_team | get_non_picking_teams(acc.teams, picking_team)],
@@ -108,38 +72,31 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
     end)
   end
 
-  @spec create_empty_teams(any()) :: any()
   def create_empty_teams(count) do
     for i <- 1..count,
         do: %{team_id: i, members: []}
   end
 
-  @spec get_picking_team(any()) :: any()
-  def get_picking_team(teams) do
+  defp get_picking_team(teams) do
     default_picking_team = Enum.at(teams, 0)
 
     Enum.reduce(teams, default_picking_team, fn x, acc ->
-      # Team is picker if it has least members
-      if(length(x.members) < length(acc.members)) do
-        x
-      else
+      cond do
+        # Team is picker if it has least members
+        length(x.members) < length(acc.members) -> x
+
         # Team is picker if it is tied for least and has lower team rating
-        if(
-          length(x.members) == length(acc.members) && get_team_rating(x) < get_team_rating(acc)
-        ) do
-          x
-        else
-          acc
-        end
+        length(x.members) == length(acc.members) && get_team_rating(x) < get_team_rating(acc) -> x
+        true -> acc
       end
     end)
   end
 
-  def get_non_picking_teams(teams, picking_team) do
+  defp get_non_picking_teams(teams, picking_team) do
     Enum.filter(teams, fn x -> x.team_id != picking_team.team_id end)
   end
 
-  def get_team_rating(team) do
+  defp get_team_rating(team) do
     Enum.reduce(team.members, 0, fn x, acc ->
       acc + x.rating
     end)
@@ -164,7 +121,7 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
              }
            ]
   """
-  def standardise_result(teams, logs) do
+  defp standardise_result(teams, logs) do
     team_groups = standardise_team_groups(teams)
 
     %{
@@ -174,7 +131,7 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
     }
   end
 
-  def standardise_team_groups(raw_input) do
+  defp standardise_team_groups(raw_input) do
     Map.new(raw_input, fn x -> {x.team_id, standardise_members(x.members)} end)
   end
 
@@ -189,17 +146,16 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
                  %{members: [4], count: 1, group_rating: 5, ratings: [5]}
                ]
   """
-  def standardise_members(members) do
+  defp standardise_members(members) do
     for %{rating: rating, member_id: member_id} <- members,
         do: %{members: [member_id], count: 1, group_rating: rating, ratings: [rating]}
   end
 
-  def standardise_team_players(raw_input) do
+  defp standardise_team_players(raw_input) do
     Map.new(raw_input, fn x -> {x.team_id, standardise_member_ids(x.members)} end)
   end
 
-  def standardise_member_ids(members) do
-    for %{member_id: member_id} <- members,
-        do: member_id
+  defp standardise_member_ids(members) do
+    Enum.map(members, fn member -> member[:member_id] end)
   end
 end

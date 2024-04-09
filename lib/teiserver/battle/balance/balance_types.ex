@@ -7,6 +7,8 @@ defmodule Teiserver.Battle.Balance.BalanceTypes do
   @type expanded_group() :: %{
           members: [T.userid()],
           ratings: [rating_value()],
+          names: [String.t()],
+          ranks: [non_neg_integer()],
           group_rating: rating_value(),
           count: non_neg_integer()
         }

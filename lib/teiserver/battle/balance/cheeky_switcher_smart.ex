@@ -34,17 +34,7 @@ defmodule Teiserver.Battle.Balance.CheekySwitcherSmart do
 
   @spec perform([BT.expanded_group_or_pair()], non_neg_integer(), list()) :: BT.algorithm_result()
   def perform(raw_groups, team_count, opts) do
-    groups_with_names =
-      raw_groups
-      |> Enum.map(fn group ->
-        Map.put(
-          group,
-          :names,
-          Enum.map(group.members, fn id ->
-            Account.get_username_by_id(id)
-          end)
-        )
-      end)
+    groups_with_names = Enum.map(raw_groups, fn x-> Map.drop(x,[:ranks]) end)
 
     {teams, logs} = do_cheeky_switcher(groups_with_names, team_count, opts, [])
 

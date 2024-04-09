@@ -1386,9 +1386,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       []
     })
 
-    # Send logs back to Hailstorm
-    logs = Enum.join(result.logs,"\n")
-    Coordinator.send_to_user(senderid, logs)
 
     ConsulServer.say_command(cmd, state)
 

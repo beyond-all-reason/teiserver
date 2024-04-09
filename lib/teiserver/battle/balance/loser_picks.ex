@@ -36,6 +36,10 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
   """
   @spec perform([BT.expanded_group_or_pair()], non_neg_integer(), list()) :: BT.algorithm_result()
   def perform(raw_groups, team_count, opts) do
+    # This module doesn't use names or ranks and they need to be dropped to make existing tests pass
+    # However, this module could be improved to use names instead of calling Teiserver.Account
+    raw_groups = Enum.map(raw_groups, fn x-> Map.drop(x,[:ranks, :names]) end)
+
     teams =
       Range.new(1, team_count || 1)
       |> Map.new(fn i ->

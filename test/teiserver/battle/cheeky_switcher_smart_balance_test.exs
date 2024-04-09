@@ -14,10 +14,10 @@ defmodule Teiserver.Battle.CheekySwitcherSmartBalanceTest do
     result =
       BalanceLib.create_balance(
         [
-          %{1 => 5},
-          %{2 => 6},
-          %{3 => 7},
-          %{4 => 8}
+          %{1 => %{rating: 5}},
+          %{2 => %{rating: 6}},
+          %{3 => %{rating: 7}},
+          %{4 => %{rating: 8}}
         ],
         2,
         algorithm: @algorithm

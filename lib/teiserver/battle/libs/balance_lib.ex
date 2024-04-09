@@ -7,7 +7,7 @@ defmodule Teiserver.Battle.BalanceLib do
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   alias Teiserver.Game.MatchRatingLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
-  alias Teiserver.Battle.Logger
+  require Logger
 
   # These are default values and can be overridden as part of the call to create_balance()
 
@@ -55,10 +55,10 @@ defmodule Teiserver.Battle.BalanceLib do
   Teifion only allowed force_party to be used by mods because it led to noob-stomping unbalanced teams
   """
   def get_allowed_algorithms(is_moderator) do
-     if(is_moderator) do
-       Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
+    if(is_moderator) do
+      Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
     else
-       Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys() |> List.delete("force_party")
+      Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.delete("force_party") |> Map.keys()
     end
   end
 
@@ -107,11 +107,31 @@ defmodule Teiserver.Battle.BalanceLib do
       groups
       |> Enum.map(fn members ->
         userids = Map.keys(members)
-        ratings = Map.values(members)
+        ratings = Map.values(members) |> Enum.map(fn x -> x.rating end)
+
+        ranks =
+          Map.values(members)
+          |> Enum.map(fn x ->
+            cond do
+              Map.has_key?(x, :rank) -> x.rank
+              true -> 0
+            end
+          end)
+
+        names =
+          members
+          |> Enum.map(fn {id, details} ->
+            cond do
+              Map.has_key?(details, :name) -> details.name
+              true -> "#{id}"
+            end
+          end)
 
         %{
           members: userids,
           ratings: ratings,
+          ranks: ranks,
+          names: names,
           group_rating: Enum.sum(ratings),
           count: Enum.count(ratings)
         }
@@ -129,13 +149,8 @@ defmodule Teiserver.Battle.BalanceLib do
 
     # Now expand the results and calculate stats
     fixed_result =
-      if(Map.has_key?(balance_result, :team_groups)) do
-        # For split one chevs algo, the result will already have the team_groups
-        balance_result
-      else
-        balance_result
-        |> expand_balance_result()
-      end
+      balance_result
+      |> expand_balance_result()
 
     fixed_result
     |> calculate_balance_stats
@@ -153,22 +168,35 @@ defmodule Teiserver.Battle.BalanceLib do
 
   # Take the balance result and add some extra fields to make using it easier
   defp expand_balance_result(balance_result) do
+
     team_groups =
-      balance_result.teams
-      |> Map.new(fn {team_id, groups} ->
-        {team_id, Enum.reverse(groups)}
-      end)
+      cond do
+        Map.has_key?(balance_result, :team_groups) ->
+          balance_result.team_groups
+
+        true ->
+          balance_result.teams
+          |> Map.new(fn {team_id, groups} ->
+            {team_id, Enum.reverse(groups)}
+          end)
+      end
 
     team_players =
-      team_groups
-      |> Map.new(fn {team, groups} ->
-        players =
-          groups
-          |> Enum.map(fn %{members: members} -> members end)
-          |> List.flatten()
+      cond do
+        Map.has_key?(balance_result, :team_players) ->
+          balance_result.team_players
 
-        {team, players}
-      end)
+        true ->
+          team_groups
+          |> Map.new(fn {team, groups} ->
+            players =
+              groups
+              |> Enum.map(fn %{members: members} -> members end)
+              |> List.flatten()
+
+            {team, players}
+          end)
+      end
 
     Map.merge(balance_result, %{
       team_groups: team_groups,
@@ -393,9 +421,8 @@ defmodule Teiserver.Battle.BalanceLib do
           {team_id, []} ->
             {team_id, nil}
 
-          {team_id, players} ->
-            top_player =
-              get_captain(data.team_groups[team_id])
+          {team_id, _players} ->
+            top_player = get_captain(data.team_groups[team_id])
 
             {team_id, top_player}
         end)
@@ -457,9 +484,7 @@ defmodule Teiserver.Battle.BalanceLib do
           # Create result value
           do: %{member_id: id, rating: rating}
 
-    captain =
-      Enum.sort_by(flatten_members, fn x -> x.rating end, &>=/2)
-      |> Enum.at(0)
+    captain = Enum.max_by(flatten_members, fn x -> x.rating end)
 
     captain.member_id
   end
@@ -532,6 +557,26 @@ defmodule Teiserver.Battle.BalanceLib do
   def get_user_balance_rating_value(userid, rating_type) do
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
     get_user_balance_rating_value(userid, rating_type_id)
+  end
+
+  # Define header to use parameters with default values
+  def get_user_rating_rank(userid, rating_type, fuzz_multiplier \\ 1)
+  def get_user_rating_rank(_userid, nil, _fuzz_multiplier), do: nil
+
+  def get_user_rating_rank(userid, rating_type, fuzz_multiplier) do
+    # These calls don't hit the db in reality because the results would be cached after the user logs in
+    rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
+    rating = get_user_balance_rating_value(userid, rating_type_id)
+    rating = fuzz_rating(rating, fuzz_multiplier)
+    # Should use cache and not db
+    %{rank: rank, name: name} = Account.get_user_by_id(userid)
+    %{rating: rating, rank: rank, name: name}
+  end
+
+  defp fuzz_rating(rating, multiplier) do
+    # Generate something between -1 and 1
+    modifier = 1 - :rand.uniform() * 2
+    rating + modifier * multiplier
   end
 
   @doc """
