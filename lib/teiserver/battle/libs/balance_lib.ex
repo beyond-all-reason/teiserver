@@ -559,14 +559,15 @@ defmodule Teiserver.Battle.BalanceLib do
 
   def get_user_rating_rank(userid, rating_type, fuzz_multiplier) do
     # This call will go to db or cache
-    # The cache for ratings is teiserver_user_stat_cache
+    # The cache for ratings is :teiserver_user_stat_cache
     # which has an expiry of 60s
+    # See application.ex for cache settings
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
     rating = get_user_balance_rating_value(userid, rating_type_id)
     rating = fuzz_rating(rating, fuzz_multiplier)
     # This call will go to db or cache
-    # The cache for users is teiserver_user_stat_cache
-    # which is permanent
+    # The cache for users is :users
+    # which is permanent (and would be instantiated on login)
     # See application.ex for cache settings
     %{rank: rank, name: name} = Account.get_user_by_id(userid)
     %{rating: rating, rank: rank, name: name}
