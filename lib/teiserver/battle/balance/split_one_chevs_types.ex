@@ -1,6 +1,5 @@
 defmodule Teiserver.Battle.Balance.SplitOneChevsTypes do
   @moduledoc false
-  # alias Teiserver.Battle.Balance.BalanceTypes, as: BT
 
   @type member :: %{
           rating: float(),
