@@ -558,11 +558,16 @@ defmodule Teiserver.Battle.BalanceLib do
   def get_user_rating_rank(_userid, nil, _fuzz_multiplier), do: nil
 
   def get_user_rating_rank(userid, rating_type, fuzz_multiplier) do
-    # These calls don't hit the db in reality because the results would be cached after the user logs in
+    # This call will go to db or cache
+    # The cache for ratings is teiserver_user_stat_cache
+    # which has an expiry of 60s
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
     rating = get_user_balance_rating_value(userid, rating_type_id)
     rating = fuzz_rating(rating, fuzz_multiplier)
-    # Should use cache and not db
+    # This call will go to db or cache
+    # The cache for users is teiserver_user_stat_cache
+    # which is permanent
+    # See application.ex for cache settings
     %{rank: rank, name: name} = Account.get_user_by_id(userid)
     %{rating: rating, rank: rank, name: name}
   end
