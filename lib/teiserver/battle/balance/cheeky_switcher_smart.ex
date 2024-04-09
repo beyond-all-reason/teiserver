@@ -18,7 +18,6 @@ defmodule Teiserver.Battle.Balance.CheekySwitcherSmart do
   """
 
   # Alias the types
-  alias Teiserver.Account
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
 
