@@ -59,6 +59,17 @@
             Filter by reporter
           </a>
 
+          <a
+            class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
+            href={~p"/moderation/report/user/#{@report.target_id}"}
+          >
+            <%= central_component("icon",
+              icon: Teiserver.Account.UserLib.icon(),
+              class: "fa-solid"
+            ) %> &nbsp;
+            User mod profile
+          </a>
+
           <%= if allow?(@conn, "Moderator") do %>
             <a
               class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
@@ -79,7 +90,7 @@
                 icon: Teiserver.Account.UserLib.icon(),
                 class: "fa-solid"
               ) %> &nbsp;
-              View user
+              User admin
             </a>
 
             <%= if not @report.closed do %>
