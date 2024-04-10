@@ -475,6 +475,7 @@ bsname = view_colour() %>
                     <th>Name</th>
 
                     <th>Reason</th>
+                    <th>Notes</th>
                     <th>Restrictions</th>
 
                     <th>Started</th>
@@ -489,6 +490,7 @@ bsname = view_colour() %>
                     <tr>
                       <td><%= action.target.name %></td>
                       <td><%= action.reason |> String.slice(0..100) %></td>
+                      <td><%= action.notes && (action.notes |> String.slice(0..100)) %></td>
                       <td><%= action.restrictions |> Enum.join(", ") %></td>
 
                       <td><%= action.inserted_at |> date_to_str(format: :hms_or_ymd) %></td>
