@@ -306,7 +306,7 @@ is_moderator = allow?(@conn, "Moderator") %>
             </table>
           </div>
 
-          <div :if={allow?(@conn, "Server")} class="col-xl-8 col-xxl-6">
+          <div :if={allow?(@conn, "Moderator")} class="col-xl-8 col-xxl-6">
             <h4>Key list</h4>
             <table class="table table-sm">
               <thead>
@@ -335,7 +335,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                     <td>
                       <%= date_to_str(key.last_updated, format: :hms_or_ymd) %>
                     </td>
-                    <td>
+                    <td :if={allow?(@conn, "Server")}>
                       <%= link("Delete",
                         to: Routes.ts_admin_user_path(@conn, :delete_smurf_key, key.id),
                         class: "btn btn-danger btn-sm",
@@ -346,27 +346,30 @@ is_moderator = allow?(@conn, "Moderator") %>
                   </tr>
                 <% end %>
 
-                <tr>
-                  <form
-                    action={~p"/teiserver/admin/users/create_smurf_key/#{@user.id}"}
-                    method="post"
-                  >
-                    <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
-                    <td>
-                      <.input type="select" options={Map.keys(type_icons)} name="key" value="" />
-                    </td>
 
-                    <td>
-                      <.input type="text" name="value" value="" />
-                    </td>
+                <%= if allow?(@conn, "Server") do %>
+                  <tr>
+                    <form
+                      action={~p"/teiserver/admin/users/create_smurf_key/#{@user.id}"}
+                      method="post"
+                    >
+                      <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+                      <td>
+                        <.input type="select" options={Map.keys(type_icons)} name="key" value="" />
+                      </td>
 
-                    <td colspan="2">
-                      <button type="submit" class={"btn btn-#{bsname} btn-sm btn-block"}>
-                        Add key
-                      </button>
-                    </td>
-                  </form>
-                </tr>
+                      <td>
+                        <.input type="text" name="value" value="" />
+                      </td>
+
+                      <td colspan="2">
+                        <button type="submit" class={"btn btn-#{bsname} btn-sm btn-block"}>
+                          Add key
+                        </button>
+                      </td>
+                    </form>
+                  </tr>
+                <% end %>
               </tbody>
             </table>
           </div>

@@ -2,7 +2,7 @@
 
 <div class="page-row row">
   <div class="col-md-6">
-    <%= if allow?(@conn, "Admin") do %>
+    <%= if allow?(@conn, "Moderator") do %>
       <%= central_component("detail_line",
         label: "Email",
         value: @user.email
@@ -102,7 +102,7 @@
   <% end %>
 </div>
 
-<%= if allow?(@conn, "Server") do %>
+<%= if allow?(@conn, "Moderator") do %>
   <div class="row mt-2">
     <div class="col-md-6">
       <textarea id="user_data" rows="28" class="form-control monospace m1"><%= Jason.encode! Map.drop(@user.data, ["password_hash", "ip"]), pretty: true %></textarea>
@@ -125,6 +125,7 @@
         </tbody>
       </table>
 
+      <% if allow?(@conn, "Server") do %>
       <hr />
       <form action={Routes.ts_admin_user_path(@conn, :set_stat)} method="post" class="">
         <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
@@ -145,23 +146,24 @@
 
       <br /><br />
       <hr />
-      <form action={~p"/teiserver/admin/users/data_search"} method="post" class="">
-        <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+        <form action={~p"/teiserver/admin/users/data_search"} method="post" class="">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
-        <input type="hidden" name="data_search[cpu]" value={@user_stats["hardware:cpuinfo"]} />
-        <input type="hidden" name="data_search[gpu]" value={@user_stats["hardware:gpuinfo"]} />
-        <input type="hidden" name="data_search[ram]" value={@user_stats["hardware:raminfo"]} />
-        <input type="hidden" name="data_search[os]" value={@user_stats["hardware:osinfo"]} />
-        <input
-          type="hidden"
-          name="data_search[screen]"
-          value={@user_stats["hardware:displaymax"]}
-        />
+          <input type="hidden" name="data_search[cpu]" value={@user_stats["hardware:cpuinfo"]} />
+          <input type="hidden" name="data_search[gpu]" value={@user_stats["hardware:gpuinfo"]} />
+          <input type="hidden" name="data_search[ram]" value={@user_stats["hardware:raminfo"]} />
+          <input type="hidden" name="data_search[os]" value={@user_stats["hardware:osinfo"]} />
+          <input
+            type="hidden"
+            name="data_search[screen]"
+            value={@user_stats["hardware:displaymax"]}
+          />
 
-        <button type="submit" class={"btn btn-#{bsname}"}>
-          <i class="fa-fw fa-regular fa-search"></i> Data search
-        </button>
-      </form>
+          <button type="submit" class={"btn btn-#{bsname}"}>
+            <i class="fa-fw fa-regular fa-search"></i> Data search
+          </button>
+        </form>
+      <% end %>
     </div>
   </div>
 <% end %>

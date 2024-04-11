@@ -177,14 +177,14 @@ defmodule Teiserver.Moderation.ReportLib do
 
   def _search(query, :state, "Any"), do: query
 
-  def _search(query, :state, "Unhandled") do
+  def _search(query, :state, "Open") do
     from reports in query,
-      where: is_nil(reports.result_id)
+      where: is_nil(reports.result_id) and not reports.closed
   end
 
-  def _search(query, :state, "Actioned") do
+  def _search(query, :state, "Resolved") do
     from reports in query,
-      where: not is_nil(reports.result_id)
+      where: reports.closed or not is_nil(reports.result_id)
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()

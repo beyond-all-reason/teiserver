@@ -7,14 +7,8 @@
 
 <div class="row section-menu">
   <div class="col-md-12">
-    <TeiserverWeb.Moderation.ReportComponents.section_menu
-      active="index"
-      view_colour={view_colour()}
-      current_user={@current_user}
-    />
-
-    <div class="float-end">
-      <%= if @target_id do %>
+    <%= if @target_id do %>
+      <div class="float-end">
         <%= if allow?(@conn, "teiserver.staff.moderator") do %>
           <a
             class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
@@ -32,9 +26,9 @@
           <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" /> &nbsp;
           Action user
         </a>
-      <% end %>
-    </div>
-    <br /><br />
+      </div>
+      <br /><br />
+    <% end %>
 
     <%= if @target && @target.smurf_of_id do %>
       <div class="alert alert-primary">
@@ -42,9 +36,7 @@
       </div>
     <% end %>
 
-    <%= if @conn.params["search"] != nil do %>
-      <%= render(TeiserverWeb.Moderation.ReportView, "search.html", assigns) %>
-    <% end %>
+    <%= render(TeiserverWeb.Moderation.ReportView, "search.html", assigns) %>
 
     <h4>Listing Reports</h4>
 
@@ -85,7 +77,7 @@
 
             <td>
               <a
-                href={Routes.profile_overview_path(@conn, :overview, report.target_id)}
+                href={~p"/moderation/report/user/#{report.target_id}"}
                 class={"btn btn-sm btn-#{Teiserver.Account.UserLib.colour()}"}
               >
                 <Fontawesome.icon

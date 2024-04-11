@@ -137,7 +137,7 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B4 - we take \'reverse\' griefing or vigilantism just as seriously as \'normal\' griefing. If you think someone is griefing, pause the game, discuss with other players whether or not to `!kickban` them, try doing that, and report them after the match. Many matches with griefing are winnable until the griefed party decides to escalate the situation.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B4 - we take \'reverse\' griefing or vigilantism just as seriously as \'normal\' griefing. If you think someone is griefing, quickly pause the game, calmly discuss with other players whether or not to `!kickban` them, and report them after the match if necessary. Many matches with griefing are winnable until the griefed party decides to escalate the situation.');
       "
                   >
                     Reverse griefing
@@ -146,11 +146,55 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B4 - griefing by self-destructing your remaining units to deny them to your team, which lowers your team\'s chances at victory. If you want to stop playing a match, leave and let your players `/take` your stuff.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B4 - griefing by self-destructing your remaining units **out of spite/with intent to deny them to your team**, which lowers your team\'s chances at victory. If you want to stop playing a match, leave and let your players `/take` your stuff.');
       "
                   >
                     Self-d before leaving
                   </div>
+
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) A4 - *Leaving a game very early because you don\'t like the teams is not acceptable, instead call a stop vote `!cv stop`. Note that leaving mid-game is acceptable as you are unlikely to disadvantage your allies to such an extent. If abused persistently it will be moderated.*');
+      "
+                  >
+                    Leaving early
+                  </div>
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) A4 - *Disregarding the teamwork part of team game when done notoriously can result in you being ostracized from team games. You don\'t have to do everything an ally says but at the same time you are part of the team not against it; this includes giving allies an appropriate amount of space to build and respecting their claim to the available resources on the map*');
+      "
+                  >
+                    Teamwork/resources
+                  </div>
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B4 - Examples of griefing include teamkilling, purposefully hurting/**imprisoning**, capturing or reclaiming **allied units without consent** or consistently throwing games with the intent to deny other team members a potential win.');
+      "
+                  >
+                    Stealing units
+                  </div>
+
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B4 - griefing by self-destructing your commander, the last one of your team, while other players are still fighting. If you want to stop playing a match, leave and let your players `/take` your stuff. Comebacks happen; if your team hasn\'t decided it\'s over by a `!resign` vote, don\'t force the result on them.');
+      "
+                  >
+                    Self-d last com
+                  </div>
+
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) A4 - Repeatedly leaving matches in the pre-game phase. There are many valid reasons that a player may need to leave early, but they usualy involve real-life events; not getting the spawn location you want is not a good reason to leave a game.');
+      "
+                  >
+                    Position leave/stop
+                  </div>
+
                 </div>
 
                 <div class="col mt-3">
@@ -158,12 +202,19 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_restriction_Warning_reminder').prop('checked', true);
-        $('#action_restriction_All_chat').prop('checked', true);
         $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) A1, A2 - *Respect for all other members is mandatory. Harassment and baiting of any community member, including developers and contributors, is not acceptable. Harassment includes flaming players for using strategies which may seem subjectively suboptimal (high-risk tactics like commander-drops and such) or just low skill plays.*');
       "
                   >
                     A1/A2 harassment/flaming
+                  </div>
+
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
+              $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) A3. The *personal moderation* tools such as `!kickban` are meant to be used to act quicker than moderation can help you - for example, if you are currently being griefed - or if you don\'t think it\'s worth involving moderation in a matter, or for managing lobbies pre-match as a boss. Starting a `!kickban` vote on an ally in a running game just because they [TODO] is misuse of that tool.');
+              "
+                  >
+                    Kickban abuse
                   </div>
 
                   <div
@@ -186,7 +237,7 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C2 - Spamming the main chat channel.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B2 - Spamming the main chat channel.');
         $('#action_restriction_Room_chat').prop('checked', true);
         $('#action_restriction_Warning_reminder').prop('checked', true);
         $('#action_expires').val('7 days');
@@ -219,6 +270,16 @@ bsname = view_colour() %>
                   >
                     Spec cheating
                   </div>
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick={"
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('Permanent ban, possibly a previously banned user.');
+        $('#action_expires').val('1100 years');
+      "}
+                  >
+                    Single account permaban
+                  </div>
                 </div>
               </div>
               <div class="row">
@@ -228,7 +289,7 @@ bsname = view_colour() %>
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
         $('#action_restriction_Warning_reminder').prop('checked', true);
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C5 - evading moderation by creating new accounts is not okay. If you do it again we may suspend this account. Continued evasion will lead to a permanent ban.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C5 - evading moderation by creating new accounts is not okay. Continued evasion will lead to a permanent ban.');
         $('#action_expires').val('1 day');
       "
                   >
@@ -322,7 +383,26 @@ bsname = view_colour() %>
                   >
                     Unbridge
                   </div>
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick={"
+        $('#action_restriction_Note').prop('checked', true);
+        $('#action_expires').val('1s');
+      "}
+                  >
+                    Add internal note
+                  </div>
                 </div>
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick={"
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('Permanent ban, possibly a previously banned user.');
+        $('#action_expires').val('1100 years');
+      "}
+                  >
+                    Single account permaban
+                  </div>
               </div>
               <div class="row mt-4" id="reports-row">
                 <div class="col">
@@ -395,6 +475,7 @@ bsname = view_colour() %>
                     <th>Name</th>
 
                     <th>Reason</th>
+                    <th>Notes</th>
                     <th>Restrictions</th>
 
                     <th>Started</th>
@@ -409,6 +490,7 @@ bsname = view_colour() %>
                     <tr>
                       <td><%= action.target.name %></td>
                       <td><%= action.reason |> String.slice(0..100) %></td>
+                      <td><%= action.notes && (action.notes |> String.slice(0..100)) %></td>
                       <td><%= action.restrictions |> Enum.join(", ") %></td>
 
                       <td><%= action.inserted_at |> date_to_str(format: :hms_or_ymd) %></td>
