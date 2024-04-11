@@ -220,18 +220,18 @@ defmodule Teiserver.Moderation.ActionLib do
     if action do
       until =
         if action.expires do
-          "Until: " <> TimexHelper.date_to_discord_str(action.expires)
+          "**Until:** " <> TimexHelper.date_to_discord_str(action.expires)
         else
-          "Permanent"
+          "**Permanent**"
         end
 
       restriction_list = action.restrictions |> Enum.join(", ")
 
       restriction_string =
         if Enum.count(action.restrictions) > 1 do
-          "Restrictions: #{restriction_list}"
+          "**Restrictions:** #{restriction_list}"
         else
-          "Restriction: #{restriction_list}"
+          "**Restriction:** #{restriction_list}"
         end
 
       formatted_reason =
@@ -240,7 +240,8 @@ defmodule Teiserver.Moderation.ActionLib do
       [
         "--------------------------------------------",
         "`#{action.target.name}` has been moderated.",
-        "Reason: #{formatted_reason}, #{restriction_string}",
+        "**Reason:** #{formatted_reason}",
+        restriction_string,
         until
       ]
       |> List.flatten()
