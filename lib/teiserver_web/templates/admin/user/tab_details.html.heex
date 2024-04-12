@@ -125,7 +125,7 @@
         </tbody>
       </table>
 
-      <% if allow?(@conn, "Server") do %>
+      <%= if allow?(@conn, "Server") do %>
       <hr />
       <form action={Routes.ts_admin_user_path(@conn, :set_stat)} method="post" class="">
         <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
