@@ -3,6 +3,7 @@
 .card {
   border: 0;
   box-shadow: $card-box-shadow;
+  overflow: scroll;
 
   .bg-image {
     border-top-left-radius: $card-border-radius;
