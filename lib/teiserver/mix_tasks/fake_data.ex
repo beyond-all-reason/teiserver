@@ -86,9 +86,9 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
     new_users =
       Range.new(0, @settings.days)
-      |> Parallel.map(fn day ->
+      |> ParallelStream.map(fn day ->
         Range.new(0, users_per_day())
-        |> Parallel.map(fn _ ->
+        |> ParallelStream.map(fn _ ->
           minutes = :rand.uniform(24 * 60)
 
           %{

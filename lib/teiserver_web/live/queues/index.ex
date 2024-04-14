@@ -38,7 +38,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
 
     queue_membership =
       Map.keys(db_queues)
-      |> Parallel.reject(fn queue_id ->
+      |> ParallelStream.reject(fn queue_id ->
         p = Matchmaking.get_queue_wait_pid(queue_id)
 
         if p != nil do
