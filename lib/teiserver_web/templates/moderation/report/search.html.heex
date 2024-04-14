@@ -34,11 +34,11 @@
         <%= central_component("icon_dropdown", %{
           name: "search[state]",
           id: "search_state",
-          selected: @params["state"] || "Any",
+          selected: @params["state"] || "Open",
           enumerable: [
             %{id: "Any", icon: "fas fa-square", colour: fg},
-            %{id: "Unhandled", icon: "fas fa-question", colour: fg},
-            %{id: "Actioned", icon: "fas #{Teiserver.Moderation.ActionLib.icon()}", colour: fg}
+            %{id: "Open", icon: "fas fa-question", colour: fg},
+            %{id: "Resolved", icon: "fas #{Teiserver.Moderation.ActionLib.icon()}", colour: fg}
           ]
         }) %>
       </div>

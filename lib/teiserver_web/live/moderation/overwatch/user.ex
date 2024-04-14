@@ -58,7 +58,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.User do
       Map.merge(
         %{
           "actioned-filter" => "All",
-          "closed-filter" => "Open",
+          "closed-filter" => "All",
           "timeframe-filter" => "all",
           "target_id" => Map.get(params, "target_id")
         },

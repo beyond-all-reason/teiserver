@@ -27,7 +27,7 @@
             <td>Match:</td>
             <td>
               <a
-                href={Routes.ts_admin_match_path(@conn, :show, @report.match_id)}
+                href={~p"/battle/#{@report.match_id}"}
                 class="btn btn-secondary btn-sm"
               >
                 Details
@@ -52,11 +52,33 @@
           <td>Replay search:</td>
           <td>
             <a
-              href={"https://bar-rts.com/replays/?players=#{@report.target.name}&date=#{date_to_str((if @report.match, do: @report.match.started, else: @report.inserted_at), format: :ymd, tz: @tz)}" <>
+              href={"https://bar-rts.com/replays/?players=#{
+                @report.target.name}&date=#{date_to_str((if @report.match, do: @report.match.started, else: @report.inserted_at), format: :ymd, tz: @tz)
+              }" <>
               (if @report.match, do: "&maps=#{@report.match.map}", else: "") }
               class="btn btn-secondary btn-sm"
             >
-              BAR Live Services
+              Reported player
+            </a>
+            <a
+              href={"https://bar-rts.com/replays/?players=#{
+                @report.target.name}&players=#{@report.reporter.name}&
+                date=#{date_to_str((if @report.match, do: @report.match.started, else: @report.inserted_at), format: :ymd, tz: @tz)
+              }" <>
+              (if @report.match, do: "&maps=#{@report.match.map}", else: "") }
+              class="btn btn-secondary btn-sm"
+            >
+              Both players
+            </a>
+            <a
+              href={"https://bar-rts.com/replays/?players=#{
+                @report.reporter.name}&
+                date=#{date_to_str((if @report.match, do: @report.match.started, else: @report.inserted_at), format: :ymd, tz: @tz)
+              }" <>
+              (if @report.match, do: "&maps=#{@report.match.map}", else: "") }
+              class="btn btn-secondary btn-sm"
+            >
+              Reporter
             </a>
           </td>
         </tr>

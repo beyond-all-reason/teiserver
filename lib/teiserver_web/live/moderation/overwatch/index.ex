@@ -56,7 +56,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
         %{
           "actioned-filter" => "All",
           "closed-filter" => "Open",
-          "timeframe-filter" => "all",
+          "timeframe-filter" => "standard",
           "target_id" => Map.get(params, "target_id")
         },
         socket.assigns[:filters] || %{}

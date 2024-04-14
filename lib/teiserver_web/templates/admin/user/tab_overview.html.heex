@@ -107,7 +107,15 @@
   <%= central_component("menu_card",
     icon: "fa-solid #{Teiserver.Moderation.ReportLib.icon()}",
     name: "moderation",
-    text: "Moderation",
+    text: "Reports",
+    icon_class: "fa-solid",
+    link: ~p"/moderation/report/user/#{@user}"
+  ) %>
+
+  <%= central_component("menu_card",
+    icon: "fa-solid fa-eye}",
+    name: "overwatch",
+    text: "Overwatch",
     icon_class: "fa-solid",
     link: ~p"/moderation/overwatch/target/#{@user.id}"
   ) %>

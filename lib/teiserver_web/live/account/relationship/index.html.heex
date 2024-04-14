@@ -284,7 +284,7 @@
 
         <%= @found_user.name %> &nbsp;&nbsp;&nbsp;&nbsp;
         <span style="font-size: 0.7em;">
-          Chevron rank: <%= @found_user.data["rank"] || 0 %>
+          Chevron level: <%= (@found_user.data["rank"] || 0) + 1 %>
         </span>
       </h3>
 
