@@ -61,6 +61,7 @@
           <th>Players</th>
           <th>Type</th>
           <th colspan="2">Skill</th>
+          <th colspan="2">Uncertainty</th>
           <th colspan="2">
             Match Rating
             <small class="text-secondary">(Skill - Uncertainty, non-negative only)</small>
@@ -94,7 +95,8 @@
 
               <%= round(log.value["skill_change"], 2) %>
             </td>
-
+            <td><%= round(log.value["uncertainty"], 2) %></td>
+            <td><%= round(log.value["uncertainty_change"], 2) %></td>
             <td><%= round(log.value["rating_value"], 2) %></td>
             <td class={text_class}>
               <i class={"fa-fw fa-solid fa-#{icon}"}></i>
