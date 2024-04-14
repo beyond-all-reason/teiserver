@@ -77,14 +77,14 @@
         <%= for log <- @logs do %>
           <% {skill_text_class, skill_icon} =
             cond do
-              log.value["skill_change"] > 0 -> {"text-success", "up"}
-              log.value["skill_change"] < 0 -> {"text-danger", "down"}
+              log.value["skill_change"] > 0 -> {"text-success", "arrow-up"}
+              log.value["skill_change"] < 0 -> {"text-danger", "arrow-down"}
               true -> {"text-warning", "pause"}
             end %>
           <% {uncertainty_text_class, uncertainty_icon} =
             cond do
-              log.value["uncertainty_change"] > 0 -> {"text-success", "up"}
-              log.value["uncertainty_change"] < 0 -> {"text-danger", "down"}
+              log.value["uncertainty_change"] > 0 -> {"text-success", "arrow-up"}
+              log.value["uncertainty_change"] < 0 -> {"text-danger", "arrow-down"}
               true -> {"text-warning", "pause"}
             end %>
           <tr phx-click={"[[\"navigate\",{\"href\":\"/battle/#{log.match_id}\",\"replace\":false}]]"}>
