@@ -1,5 +1,4 @@
 <% bsname = view_colour()
-is_admin = allow?(@conn, "Admin")
 is_moderator = allow?(@conn, "Moderator") %>
 
 <script type="text/javascript" charset="utf-8">
@@ -56,12 +55,12 @@ is_moderator = allow?(@conn, "Moderator") %>
           <thead>
             <tr>
               <th colspan="2">Name</th>
-              <%= if is_admin do %>
+              <%= if is_moderator do %>
                 <th>Email</th>
               <% end %>
               <th>Client</th>
               <th>Status</th>
-              <%= if is_admin do %>
+              <%= if is_moderator do %>
                 <th>HW</th>
                 <th>CHB</th>
               <% end %>
@@ -84,7 +83,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                   <%= central_component("icon", icon: user.icon) %>
                 </td>
                 <td><%= user.name %></td>
-                <%= if is_admin do %>
+                <%= if is_moderator do %>
                   <td><%= user.email %></td>
                 <% end %>
                 <td><%= user.data["lobby_client"] %></td>
@@ -93,7 +92,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                   <TeiserverWeb.UserComponents.status_icon user={user} />
                 </td>
 
-                <%= if is_admin do %>
+                <%= if is_moderator do %>
                   <td>
                     <%= if user.data["hw_hash"] != "" and user.data["hw_hash"] != nil do %>
                       <i class="fa-fw far fa-check"></i>
@@ -103,7 +102,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                   </td>
 
                   <td>
-                    <%= if user.data["chobby_hash"] != "" and user.data["chobby_hash"] != nil do %>
+                    <%= if user.data["lobby_hash"] != "" and user.data["lobby_hash"] != nil do %>
                       <i class="fa-fw far fa-check"></i>
                     <% else %>
                       &nbsp;
