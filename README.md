@@ -1,4 +1,5 @@
 # Teiserver
+[![Build and test status](https://github.com/Beyond-All-Reason/teiserver/actions/workflows/elixir.yml/badge.svg?branch=master)](https://github.com/Beyond-All-Reason/teiserver/actions/workflows/elixir.yml/badge.svg?branch=master)
 
 An Elixir middleware server for game management; primarily used by [Beyond all Reason](https://www.beyondallreason.info/). Currently implementing the Spring protocol but with work being done on a new protocol [Tachyon](https://github.com/beyond-all-reason/tachyon).
 
@@ -28,7 +29,7 @@ An Elixir middleware server for game management; primarily used by [Beyond all R
 
 ### Contributing
 
-All contributors are welcome; if you spot an issue or bug with it mention me on the [BAR discord](https://discord.gg/N968ddE) (@teifion) or open an issue in this repo. Pull requests are also welcome; even if it's just a spelling mistake.
+All contributors are welcome; if you spot an issue or bug open an issue in this repo or visit *#teiserver-spads* channel on [BAR Discord](https://discord.gg/beyond-all-reason). Pull requests are also welcome; even if it's just a spelling mistake.
 
 #### Special thanks
 
