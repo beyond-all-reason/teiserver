@@ -43,6 +43,7 @@ defmodule TeiserverWeb.Admin.UserController do
       end
 
     users = (exact_match ++ users) |> Enum.reject(&(&1 == nil))
+    user_stats = for user <- users, do: Account.get_user_stat_data(user.id)
 
     if Enum.count(users) == 1 do
       conn
@@ -50,7 +51,7 @@ defmodule TeiserverWeb.Admin.UserController do
     else
       conn
       |> add_breadcrumb(name: "List users", url: conn.request_path)
-      |> assign(:users, users)
+      |> assign(:users, Enum.zip(users, user_stats))
       |> assign(:params, search_defaults(conn))
       |> render("index.html")
     end
