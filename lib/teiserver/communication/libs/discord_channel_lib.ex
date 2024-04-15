@@ -19,7 +19,9 @@ defmodule Teiserver.Communication.DiscordChannelLib do
       "Server updates",
       "Error updates",
       "Github updates",
-      "Dev channel"
+      "Dev channel",
+      "Telemetry infologs",
+      "GDT discussion"
     ]
   end
 

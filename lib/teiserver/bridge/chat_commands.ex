@@ -1,5 +1,6 @@
 defmodule Teiserver.Bridge.ChatCommands do
   @moduledoc false
+  alias Teiserver.Communication.DiscordChannelLib
   alias Teiserver.{Account, CacheUser, Communication, Config, Logging}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Bridge.UnitNames
@@ -35,18 +36,16 @@ defmodule Teiserver.Bridge.ChatCommands do
   end
 
   def handle_command({_user, _discord_id, message_id}, "gdt", _remaining, channel_id) do
-    gdt_discussion_channel_id =
-      Config.get_site_config_cache("teiserver.Discord channel #gdt-discussion")
-
+    gdt_discussion_channel_id = DiscordChannelLib.get_discord_channel("GDT discussion")
     if gdt_discussion_channel_id do
       # Post message to channel
-      Api.create_message(
-        channel_id,
+      Communication.new_discord_message(
+        "GDT discussion",
         "Thank you for your suggestion, the game design team will be discussing it. Once they have finished discussing it they will vote on it and post an update to this thread."
       )
 
       # Delete the message that was posted
-      Api.delete_message(channel_id, message_id)
+      Communication.delete_discord_message(channel_id, message_id)
 
       # channel_id = 1071140326644920353
       {:ok, channel} = Api.get_channel(channel_id)
@@ -200,7 +199,7 @@ defmodule Teiserver.Bridge.ChatCommands do
   end
 
   defp reply(channel, message) do
-    Api.create_message(channel, message)
+    Communication.new_discord_message(channel, message)
     :ignore
   end
 end

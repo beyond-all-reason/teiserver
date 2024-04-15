@@ -57,13 +57,6 @@ defmodule Teiserver.Bridge.Commands.TextcbCommand do
             trigger: options_map["reference"]
           })
 
-          main_id = Config.get_site_config_cache("teiserver.Discord channel #main")
-
-          if interaction.channel_id == main_id do
-            bridge_user_id = BridgeServer.get_bridge_userid()
-            Room.send_message(bridge_user_id, "main", text_callback.response)
-          end
-
           Communication.set_last_triggered_time(text_callback, interaction.channel_id)
 
           %{
