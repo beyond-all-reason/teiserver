@@ -3,6 +3,8 @@ defmodule Teiserver.Bridge.BridgeServer do
   The server used to read events from Teiserver and then use the DiscordBridgeBot to send onwards
   """
   use GenServer
+  alias Teiserver.Communication.DiscordChannelLib
+  alias Teiserver.Communication
   alias Teiserver.{Account, Room, CacheUser}
   alias Teiserver.Chat.WordLib
   alias Phoenix.PubSub
@@ -43,16 +45,7 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   @spec send_direct_message(T.user_id(), String.t()) :: :ok | nil
   def send_direct_message(userid, message) do
-    user = Account.get_user_by_id(userid)
-
-    cond do
-      user.discord_dm_channel && user.discord_dm_channel_id == nil ->
-        nil
-
-      true ->
-        channel_id = user.discord_dm_channel_id || user.discord_dm_channel
-        Api.create_message(channel_id, message)
-    end
+    Communication.send_discord_dm(userid, message)
   end
 
   @impl true
@@ -218,19 +211,8 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   def handle_info(%{channel: "teiserver_server", event: :started}, state) do
     if Config.get_site_config_cache("teiserver.Bridge from server") do
-      # Main
-      channel_id = Config.get_site_config_cache("teiserver.Discord channel #main")
-
-      if channel_id do
-        Api.create_message(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
-      end
-
-      # Server
-      channel_id = Config.get_site_config_cache("teiserver.Discord channel #server-updates")
-
-      if channel_id do
-        Api.create_message(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
-      end
+      Communication.new_discord_message("Main chat", "Teiserver startup for node #{Teiserver.node_name()}")
+      Communication.new_discord_message("Server updates", "Teiserver startup for node #{Teiserver.node_name()}")
     end
 
     {:noreply, state}
@@ -238,11 +220,7 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   def handle_info(%{channel: "teiserver_server", event: :prep_stop}, state) do
     if Config.get_site_config_cache("teiserver.Bridge from server") do
-      channel_id = Config.get_site_config_cache("teiserver.Discord channel #server-updates")
-
-      if channel_id do
-        Api.create_message(channel_id, "Teiserver shutdown for node #{Teiserver.node_name()}")
-      end
+      Communication.new_discord_message("Server updates", "Teiserver shutdown for node #{Teiserver.node_name()}")
     end
 
     {:noreply, state}
@@ -322,45 +300,12 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   defp build_local_caches(state) do
-    channel_lookup =
-      [
-        "teiserver.Discord channel #main",
-        "teiserver.Discord channel #newbies",
-        "teiserver.Discord channel #promote",
-        "teiserver.Discord channel #moderation-reports",
-        "teiserver.Discord channel #moderation-actions",
-        "teiserver.Discord channel #server-updates",
-        "teiserver.Discord channel #telemetry-infologs",
-        "teiserver.Discord forum #gdt-discussion",
-        "teiserver.Discord forum #gdt-voting"
-      ]
-      |> Enum.map(fn key ->
-        channel_id = Config.get_site_config_cache(key)
-
-        if channel_id do
-          [_, room] = String.split(key, "#")
-
-          {room, channel_id}
-        end
-      end)
-      |> Enum.reject(&(&1 == nil))
-      |> Map.new()
-
     room_lookup =
       [
-        "teiserver.Discord channel #main",
-        "teiserver.Discord channel #newbies",
-        "teiserver.Discord channel #promote"
+        %{channel_id: DiscordChannelLib.get_discord_channel("Main chat"), room: "#main"},
+        %{channel_id: DiscordChannelLib.get_discord_channel("New player chat"), room: "#newbies"},
+        %{channel_id: DiscordChannelLib.get_discord_channel("Looking for players"), room: "#promote"}
       ]
-      |> Enum.map(fn key ->
-        channel_id = Config.get_site_config_cache(key)
-
-        if channel_id do
-          [_, room] = String.split(key, "#")
-
-          {channel_id, room}
-        end
-      end)
       |> Enum.reject(&(&1 == nil))
       |> Map.new()
 
@@ -374,10 +319,8 @@ defmodule Teiserver.Bridge.BridgeServer do
     end)
 
     Teiserver.store_put(:application_metadata_cache, :discord_room_lookup, room_lookup)
-    Teiserver.store_put(:application_metadata_cache, :discord_channel_lookup, channel_lookup)
 
     Map.merge(state, %{
-      channel_lookup: channel_lookup,
       room_lookup: room_lookup
     })
   end
@@ -389,7 +332,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       message
       |> convert_emoticons
 
-    Api.create_message(channel, "**#{author}**: #{new_message}")
+    Communication.new_discord_message(channel, "**#{author}**: #{new_message}")
   end
 
   defp convert_emoticons(message) do
