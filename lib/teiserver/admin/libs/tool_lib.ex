@@ -6,5 +6,5 @@ defmodule Teiserver.Admin.ToolLib do
   def colours(), do: :info
 
   @spec icon :: String.t()
-  def icon(), do: "fa-regular fa-tools"
+  def icon(), do: "fa-solid fa-tools"
 end
