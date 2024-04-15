@@ -384,10 +384,10 @@ defmodule Teiserver.Account.AccoladeLib do
 
           pings =
             children
-            |> Parallel.filter(fn {_, _, _, [module]} ->
+            |> ParallelStream.filter(fn {_, _, _, [module]} ->
               module == Teiserver.Account.AccoladeChatServer
             end)
-            |> Parallel.map(fn {_, pid, _, _} ->
+            |> ParallelStream.map(fn {_, pid, _, _} ->
               case GenServer.call(pid, :ping, 5000) do
                 :ok -> :ok
                 _ -> :not_okay
