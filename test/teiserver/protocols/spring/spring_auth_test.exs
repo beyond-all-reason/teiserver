@@ -567,7 +567,7 @@ CLIENTS test_room #{user.name}\n"
     assert reply == "SERVERMSG You do not have permission to execute that command\n"
 
     # Give mod access, recache the user
-    UserCacheLib.update_user(%{user | moderator: true}, persist: false)
+    UserCacheLib.update_user(%{user | roles: ["Moderator" | user.roles]}, persist: false)
     :timer.sleep(100)
 
     _send_raw(socket, "CREATEBOTACCOUNT test_bot_account #{user.name}\n")
@@ -678,7 +678,7 @@ CLIENTS test_room #{user.name}\n"
     reply = _recv_raw(socket)
     assert reply == :timeout
 
-    UserCacheLib.update_user(%{user | moderator: true}, persist: false)
+    UserCacheLib.update_user(%{user | roles: ["Moderator" | user.roles]}, persist: false)
     :timer.sleep(500)
     _recv_until(socket)
 
@@ -697,7 +697,7 @@ CLIENTS test_room #{user.name}\n"
     reply = _recv_raw(socket)
     assert reply == :timeout
 
-    UserCacheLib.update_user(%{user | moderator: true}, persist: false)
+    UserCacheLib.update_user(%{user | roles: ["Moderator" | user.roles]}, persist: false)
     :timer.sleep(500)
     _recv_until(socket)
 
