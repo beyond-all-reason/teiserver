@@ -20,6 +20,7 @@ defmodule Teiserver.SpringAuthTest do
 
   setup do
     %{socket: socket, user: user} = auth_setup()
+    on_exit(fn -> Client.disconnect(user.id) end)
     {:ok, socket: socket, user: user}
   end
 
