@@ -1335,21 +1335,23 @@ defmodule Teiserver.CacheUser do
     end
   end
 
-  def get_rank_icon(userid) do
-    stats = Account.get_user_stat_data(userid)
+  @doc"""
+  stats_data will be data column from teiserver_acctoun_users_stats
+  """
+  def get_rank_icon(%{roles: roles} = _user, stats_data) do
+    stats_data
     # Play time Rank
     rank =
       cond do
         # This is only for tournament winners
-        stats["rank_override"] != nil ->
-          stats["rank_override"] |> int_parse
+        stats_data["rank_override"] != nil ->
+          stats_data["rank_override"] |> int_parse
 
         true ->
-          hours = rank_time(stats)
+          hours = rank_time(stats_data)
           convert_hours_to_rank(hours)
       end
 
-    %{roles: roles} = Account.get_user_by_id(userid)
     chev_level = rank + 1
 
     cond do

@@ -91,6 +91,14 @@ defmodule Teiserver.Client do
   @spec login(T.user(), atom(), String.t() | nil) :: T.client()
   def login(user, protocol, ip \\ nil, token_id \\ nil) do
     stats = Account.get_user_stat_data(user.id)
+    is_bot? = CacheUser.is_bot?(user)
+    lobby_client =  stats["lobby_client"]
+
+    rank_icon = cond do
+      lobby_client == "Teiserver Internal Client" -> "Bot"
+      is_bot? -> "Bot"
+      true -> CacheUser.get_rank_icon(user, stats)
+    end
 
     clan_tag =
       case Clans.get_clan(user.clan_id) do
@@ -106,19 +114,20 @@ defmodule Teiserver.Client do
         tcp_pid: self(),
         rank: user.rank,
         moderator: CacheUser.is_moderator?(user),
-        bot: CacheUser.is_bot?(user),
+        bot: is_bot?,
         away: false,
         in_game: false,
         ip: ip || stats["last_ip"],
         country: stats["country"] || "??",
-        lobby_client: stats["lobby_client"],
+        lobby_client: lobby_client,
         shadowbanned: CacheUser.is_shadowbanned?(user),
         muted: CacheUser.has_mute?(user),
         awaiting_warn_ack: false,
         warned: false,
         token_id: token_id,
         clan_tag: clan_tag,
-        protocol: protocol
+        protocol: protocol,
+        rank_icon: rank_icon
       })
 
     ClientLib.start_client_server(client)

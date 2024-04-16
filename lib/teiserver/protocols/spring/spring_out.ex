@@ -147,7 +147,10 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:add_user, %{userid: nil}), do: ""
 
   defp do_reply(:add_user, client) do
-    "ADDUSER #{client.name} #{client.country} #{client.userid} #{client.lobby_client}\n"
+    IO.inspect(client, label: "client", charlists: :as_lists)
+    #rank_icon is not in Spring protocol and is an extra argument
+    #Full definition of client can be found in client.ex in the login function
+    "ADDUSER #{client.name} #{client.country} #{client.userid} #{client.lobby_client} #{client.rank_icon}\n"
   end
 
   defp do_reply(:friendlist, nil), do: "FRIENDLISTBEGIN\FRIENDLISTEND\n"
@@ -328,16 +331,8 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:client_status, nil), do: ""
 
   defp do_reply(:client_status, client) do
-
-    rank_icon = cond do
-      client.lobby_client == "Teiserver Internal Client" -> "Bot"
-      client.bot -> "Bot"
-      true -> CacheUser.get_rank_icon(client.userid)
-    end
-
-
     status = Spring.create_client_status(client)
-    "CLIENTSTATUS #{client.name} #{status} #{rank_icon}\n"
+    "CLIENTSTATUS #{client.name} #{status}\n"
   end
 
   defp do_reply(:client_battlestatus, nil), do: nil
