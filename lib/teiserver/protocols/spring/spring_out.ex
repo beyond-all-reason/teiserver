@@ -328,8 +328,16 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:client_status, nil), do: ""
 
   defp do_reply(:client_status, client) do
+
+    rank_icon = cond do
+      client.lobby_client == "Teiserver Internal Client" -> "Bot"
+      client.bot -> "Bot"
+      true -> CacheUser.get_rank_icon(client.userid)
+    end
+
+
     status = Spring.create_client_status(client)
-    "CLIENTSTATUS #{client.name} #{status}\n"
+    "CLIENTSTATUS #{client.name} #{status} #{rank_icon}\n"
   end
 
   defp do_reply(:client_battlestatus, nil), do: nil

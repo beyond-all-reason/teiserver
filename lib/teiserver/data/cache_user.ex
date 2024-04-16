@@ -1264,14 +1264,18 @@ defmodule Teiserver.CacheUser do
   def is_verified?(%{roles: roles}), do: Enum.member?(roles, "Verified")
   def is_verified?(_), do: false
 
-  @spec rank_time(T.userid()) :: non_neg_integer()
-  def rank_time(userid) do
+  @spec rank_time(T.userid() | map()) :: non_neg_integer()
+  def rank_time(userid) when is_integer(userid) do
     stats = Account.get_user_stat(userid) || %{data: %{}}
 
-    ingame_minutes =
-      (stats.data["player_minutes"] || 0) + (stats.data["spectator_minutes"] || 0) * 0.5
+    rank_time(stats.data)
+  end
 
-    round(ingame_minutes / 60)
+  def rank_time(stats_data) when is_map(stats_data) do
+    ingame_minutes =
+      (stats_data["player_minutes"] || 0) + (stats_data["spectator_minutes"] || 0) * 0.5
+
+    floor(ingame_minutes / 60)
   end
 
   # Based on actual ingame time
@@ -1279,8 +1283,7 @@ defmodule Teiserver.CacheUser do
   def calculate_rank(userid, "Playtime") do
     ingame_hours = rank_time(userid)
 
-    [5, 15, 30, 100, 300, 1000, 3000]
-    |> Enum.count(fn r -> r <= ingame_hours end)
+    convert_hours_to_rank(ingame_hours)
   end
 
   # Using leaderboard rating
@@ -1306,12 +1309,7 @@ defmodule Teiserver.CacheUser do
 
     cond do
       has_any_role?(userid, ~w(Core Contributor)) -> 6
-      ingame_hours > 1000 -> 5
-      ingame_hours > 250 -> 4
-      ingame_hours > 100 -> 3
-      ingame_hours > 15 -> 2
-      ingame_hours > 5 -> 1
-      true -> 0
+      true -> convert_hours_to_rank(ingame_hours)
     end
   end
 
@@ -1319,6 +1317,49 @@ defmodule Teiserver.CacheUser do
   def calculate_rank(userid) do
     method = Config.get_site_config_cache("profile.Rank method")
     calculate_rank(userid, method)
+  end
+
+  @doc """
+  This should match
+  https://www.beyondallreason.info/guide/rating-and-lobby-balance#rank-icons
+  However special ranks are ignored
+  """
+  defp convert_hours_to_rank(hours) do
+    cond do
+      hours >= 1000 -> 5
+      hours >= 250 -> 4
+      hours >= 100 -> 3
+      hours >= 15 -> 2
+      hours >= 5 -> 1
+      true -> 0
+    end
+  end
+
+  def get_rank_icon(userid) do
+    stats = Account.get_user_stat_data(userid)
+    # Play time Rank
+    rank =
+      cond do
+        # This is only for tournament winners
+        stats["rank_override"] != nil ->
+          stats["rank_override"] |> int_parse
+
+        true ->
+          hours = rank_time(stats)
+          convert_hours_to_rank(hours)
+      end
+
+    %{roles: roles} = Account.get_user_by_id(userid)
+    chev_level = rank + 1
+
+    cond do
+      Enum.member?(roles, "Moderator")  -> "#{chev_level}Moderator"
+      Enum.member?(roles, "Contributor")  -> "#{chev_level}Contributor"
+      Enum.member?(roles, "Streamer")  -> "#{chev_level}Streamer"
+      Enum.member?(roles, "Mentor") -> "#{chev_level}Mentor"
+      true -> "#{chev_level}Chev"
+
+    end
   end
 
   # Used to reset the spring password of the user when the site password is updated

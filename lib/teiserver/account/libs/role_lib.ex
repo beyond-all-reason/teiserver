@@ -263,7 +263,7 @@ defmodule Teiserver.Account.RoleLib do
   end
 
   def allowed_role_management("Moderator") do
-    global_roles() ++ moderation_roles() ++ property_roles()
+    global_roles() ++ moderation_roles() ++ property_roles() ++ community_roles()
   end
 
   def allowed_role_management(_) do
