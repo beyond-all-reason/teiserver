@@ -37,7 +37,7 @@ Now for step 3 instead run this on your SPADS folder:
 ```
 perl spadsInstaller.pl --auto BarMinimalMaps
 ```
-This will install SPADS with some BAR-specific configurations. It will ask someone questions and most will be answered automatically. Step 8 may take a while as it downloads BAR. Near the end, it will ask you for a username/password for SPADS to use. Use the bot user you created earlier. Remember all users have password of `password`. _(If you need to change the username/password at a later point, you can edit `etc/spads.conf`)_
+This will install SPADS with some BAR-specific configurations. It will ask some questions and most will be answered automatically. Step 8 may take a while as it downloads BAR. Near the end, it will ask you for a username/password for SPADS to use. Use the bot user you created earlier. Remember all users have password of `password`. _(If you need to change the username/password at a later point, you can edit `etc/spads.conf`)_
 
 Finally it will ask you for another login for autohost owner. You can enter anything here, even a user that doesn't exist. It's not used.
 
