@@ -4,7 +4,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   to balance matches. For that use Teiserver.Battle.BalanceLib.
   """
 
-  alias Teiserver.{Account, Coordinator, Game, Battle}
+  alias Teiserver.{Account, Coordinator, Config, Game, Battle,}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Repo
   alias Teiserver.Battle.{BalanceLib, MatchLib}
@@ -71,7 +71,7 @@ defmodule Teiserver.Game.MatchRatingLib do
       match.team_count < 2 ->
         {:error, :not_enough_teams}
 
-      match.game_duration < 180 ->
+      match.game_duration < Config.get_site_config_cache("matchmaking.Time to treat game as ranked") ->
         {:error, :too_short}
 
       Map.get(match.tags, "game/modoptions/ranked_game", "1") == "0" ->
