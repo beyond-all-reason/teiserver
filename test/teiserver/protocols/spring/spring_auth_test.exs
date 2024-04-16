@@ -138,6 +138,7 @@ defmodule Teiserver.SpringAuthTest do
 
     # Now lets ignore them
     _send_raw(socket1, "IGNORE userName=#{user2.name}\n")
+    _send_raw(socket1, "IGNORELIST\n")
     reply = _recv_raw(socket1)
     assert reply == "IGNORELISTBEGIN
 IGNORELIST userName=#{user2.name}
@@ -150,6 +151,7 @@ IGNORELISTEND\n"
 
     # Now unignore them
     _send_raw(socket1, "UNIGNORE userName=#{user2.name}\n")
+    _send_raw(socket1, "IGNORELIST\n")
     reply = _recv_raw(socket1)
     assert reply == "IGNORELISTBEGIN
 IGNORELISTEND\n"
