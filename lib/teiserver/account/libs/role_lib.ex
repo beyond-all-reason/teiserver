@@ -259,7 +259,7 @@ defmodule Teiserver.Account.RoleLib do
   end
 
   def allowed_role_management("Admin") do
-    staff_roles() ++ privileged_roles() ++ allowed_role_management("Moderator")
+    staff_roles() ++ community_roles() ++ privileged_roles() ++ allowed_role_management("Moderator")
   end
 
   def allowed_role_management("Moderator") do
