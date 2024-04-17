@@ -306,16 +306,16 @@ defmodule Teiserver.Bridge.BridgeServer do
         %{channel_id: DiscordChannelLib.get_discord_channel("New player chat"), room: "#newbies"},
         %{channel_id: DiscordChannelLib.get_discord_channel("Looking for players"), room: "#promote"}
       ]
-      |> Enum.reject(&(&1[:channel_id] == nil))
-      |> Map.new()
+      |> Enum.reject(fn %{channel_id: nil} -> true; _ -> false end)
+      |> Enum.map(fn %{channel_id: channel, room: r} -> %{channel_id: channel.channel_id, room: r} end)
 
-    Map.values(room_lookup)
-    |> Enum.each(fn room_name ->
-      Room.get_or_make_room(room_name, state.user.id)
-      Room.add_user_to_room(state.user.id, room_name)
+    room_lookup
+    |> Enum.each(fn channel_room ->
+      Room.get_or_make_room(channel_room.room, state.user.id)
+      Room.add_user_to_room(state.user.id, channel_room.room)
 
-      :ok = PubSub.unsubscribe(Teiserver.PubSub, "room:#{room_name}")
-      :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
+      :ok = PubSub.unsubscribe(Teiserver.PubSub, "room:#{channel_room.room}")
+      :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{channel_room.room}")
     end)
 
     Teiserver.store_put(:application_metadata_cache, :discord_room_lookup, room_lookup)
