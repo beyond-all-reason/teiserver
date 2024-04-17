@@ -1069,6 +1069,8 @@ defmodule TeiserverWeb.Admin.UserController do
       {true, _} ->
         new_user =
           Map.merge(user, %{
+            email: "#{user.id}@#{user.id}",
+            password: UserLib.make_bot_password(),
             country: "??"
           })
 
