@@ -95,7 +95,7 @@ defmodule Teiserver.Client do
     lobby_client =  stats["lobby_client"]
 
     rank_icon = cond do
-      lobby_client == "Teiserver Internal Client" -> "Bot"
+      protocol == :internal -> "Bot"
       is_bot? -> "Bot"
       true -> CacheUser.get_rank_icon(user, stats)
     end
