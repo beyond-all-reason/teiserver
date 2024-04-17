@@ -306,7 +306,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         %{channel_id: DiscordChannelLib.get_discord_channel("New player chat"), room: "#newbies"},
         %{channel_id: DiscordChannelLib.get_discord_channel("Looking for players"), room: "#promote"}
       ]
-      |> Enum.reject(&(&1 == nil))
+      |> Enum.reject(&(&1[:channel_id] == nil))
       |> Map.new()
 
     Map.values(room_lookup)
