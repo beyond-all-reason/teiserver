@@ -1067,8 +1067,10 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
+
         new_user =
           Map.merge(user, %{
+            name: Ecto.UUID.generate(),
             email: "#{user.id}@#{user.id}",
             password: UserLib.make_bot_password(),
             country: "??"
