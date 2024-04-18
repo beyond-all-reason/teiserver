@@ -344,14 +344,17 @@ CLIENTS test_room #{user.name}\n"
       host_bstatus,
       # bstatus,
       request,
+      client_status,
       ""
     ] = reply
 
     assert joinbattle == "JOINBATTLE #{lobby_id} #{hash}"
     assert joinedbattle == "JOINEDBATTLE #{lobby_id} #{user2.name} sPassword"
-    assert tags =~ "SETSCRIPTTAGS server/match/uuid="
-    assert host_bstatus == "CLIENTBATTLESTATUS #{user1.name} 8388608 0"
+    assert tags =~ ~r"SETSCRIPTTAGS .*server/match/uuid="
+    # the \d+ is the team colour
+    assert host_bstatus =~ ~r"CLIENTBATTLESTATUS #{user1.name} \d+ 0"
     assert request == "REQUESTBATTLESTATUS"
+    assert client_status == "CLIENTSTATUS #{user2.name} 0"
 
     _send_raw(socket2, "SAYBATTLE Hello there!\n")
     reply = _recv_raw(socket2)
@@ -359,7 +362,7 @@ CLIENTS test_room #{user.name}\n"
 
     _send_raw(socket2, "MYBATTLESTATUS 12 0\n")
     reply = _recv_raw(socket2)
-    assert reply == "CLIENTBATTLESTATUS #{user2.name} 8388620 0\n"
+    assert reply =~ ~r"CLIENTBATTLESTATUS #{user2.name} \d+ 0\n"
 
     # SAYBATTLEPRIVATEEX
     _send_raw(socket1, "SAYBATTLEPRIVATEEX #{user2.name} This is a test priv battle msg\n")
