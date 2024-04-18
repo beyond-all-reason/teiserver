@@ -294,6 +294,9 @@ CLIENTS test_room #{user.name}\n"
   test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket1, user: user1} do
     hash = "-1540855590"
 
+    # Give user Bot role so they can manage battle
+    UserCacheLib.update_user(%{user1 | roles: ["Bot" | user1.roles]}, persist: false)
+
     _send_raw(
       socket1,
       "OPENBATTLE 0 0 empty 52200 16 #{hash} 0 1565299817 spring\t104.0.1-1784-gf6173b4 BAR\tauth_joinbattle_test\tEU - 00\tBeyond All Reason test-15658-85bf66d\n"
