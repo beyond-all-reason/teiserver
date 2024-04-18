@@ -511,6 +511,8 @@ CLIENTS test_room #{user.name}\n"
 
     # Un-flood them
     CacheUser.set_flood_level(userid, 0)
+    # And re-verify them
+    user.id |> Teiserver.CacheUser.get_user_by_id() |> Teiserver.CacheUser.verify_user()
 
     # Now they can log in again
     _send_raw(
