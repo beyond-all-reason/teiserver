@@ -20,7 +20,6 @@ defmodule Teiserver.SpringAuthTest do
 
   setup do
     %{socket: socket, user: user} = auth_setup()
-    on_exit(fn -> Client.disconnect(user.id) end)
     {:ok, socket: socket, user: user}
   end
 
@@ -582,6 +581,7 @@ CLIENTS test_room #{user.name}\n"
 
     assert reply ==
              "SERVERMSG No incomming match for CREATEBOTACCOUNT with data '\"nomatchname\"'. Userid #{user.id}\n"
+
   end
 
   # test "c.moderation.report", %{socket: socket, user: user} do

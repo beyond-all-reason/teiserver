@@ -116,6 +116,13 @@ defmodule Teiserver.TeiserverTestLib do
           client.tcp_pid
       end
 
+    # Ensure that the user is cleanly disconnected. Otherwise it t doesn't fails tests,
+    # but you get a ton of errors in the console about connection
+    # pool errors like `Client XXX is still using a connection from owner at location…`
+    # This is because upon disconnecting, the server does a bunch of DB call for logging
+    # and telemetry. The disconnection happen when the tcp socket is closed, and by
+    # that time, the test has ended and the SQL sandbox closed.
+    ExUnit.Callbacks.on_exit(fn -> Teiserver.Client.disconnect(user.id) end)
     %{socket: socket, user: user, pid: pid}
   end
 
@@ -652,7 +659,7 @@ defmodule Teiserver.TeiserverTestLib do
       :telemetry_simple_client_event_types_cache,
       :telemetry_simple_lobby_event_types_cache,
       :telemetry_simple_match_event_types_cache,
-      :telemetry_simple_server_event_types_cache,
+      :telemetry_simple_server_event_types_cache
     ]
 
     Enum.each(cache_list, fn cache ->
