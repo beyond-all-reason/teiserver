@@ -197,49 +197,38 @@ IGNORELISTEND\n"
 
     # Now we send the friend request
     _send_raw(socket2, "FRIENDREQUEST userName=#{user.name}\n")
+
+    # and the target receives it
     reply = _recv_raw(socket1)
-    assert reply == "FRIENDREQUESTLISTBEGIN
-FRIENDREQUESTLIST userName=#{user2.name}
-FRIENDREQUESTLISTEND\n"
+    assert reply == "s.user.new_incoming_friend_request #{user2.id}\n"
 
     # Accept the friend request
     _send_raw(socket1, "ACCEPTFRIENDREQUEST userName=#{user2.name}\n")
-    reply = _recv_raw(socket1)
-    assert reply == "FRIENDLISTBEGIN
-FRIENDLIST userName=#{user2.name}
-FRIENDLISTEND
-FRIENDREQUESTLISTBEGIN
-FRIENDREQUESTLISTEND\n"
+    # there's no expected response for this command
 
     reply = _recv_raw(socket2)
-    assert reply == "FRIENDLISTBEGIN
-FRIENDLIST userName=#{user.name}
-FRIENDLISTEND\n"
+    assert reply == "s.user.friend_request_accepted #{user.id}\n"
 
     # Change of plan, remove them
     _send_raw(socket1, "UNFRIEND userName=#{user2.name}\n")
     reply = _recv_raw(socket1)
-    assert reply == "FRIENDLISTBEGIN
-FRIENDLISTEND\n"
+    assert reply == "s.user.friend_deleted #{user2.id}\n"
 
     reply = _recv_raw(socket2)
-    assert reply == "FRIENDLISTBEGIN
-FRIENDLISTEND\n"
+    assert reply == "s.user.friend_deleted #{user.id}\n"
 
     # Request a friend again so we can decline it
     _send_raw(socket2, "FRIENDREQUEST userName=#{user.name}\n")
     reply = _recv_raw(socket1)
-    assert reply == "FRIENDREQUESTLISTBEGIN
-FRIENDREQUESTLIST userName=#{user2.name}
-FRIENDREQUESTLISTEND\n"
+    assert reply == "s.user.new_incoming_friend_request #{user2.id}\n"
 
     # Decline the friend request
     _send_raw(socket1, "DECLINEFRIENDREQUEST userName=#{user2.name}\n")
-    reply = _recv_raw(socket1)
-    assert reply == "FRIENDREQUESTLISTBEGIN
-FRIENDREQUESTLISTEND\n"
-
+    # the other users receive the notice that it was declined
     reply = _recv_raw(socket2)
+    assert reply == "s.user.friend_request_declined #{user.id}\n"
+
+    reply = _recv_raw(socket1)
     assert reply == :timeout
   end
 
