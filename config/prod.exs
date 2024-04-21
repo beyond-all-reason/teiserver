@@ -14,11 +14,6 @@ config :teiserver, TeiserverWeb.Endpoint,
   https: [
     port: 8888,
     otp_app: :teiserver,
-    keyfile: "/var/www/tls/privkey.pem",
-    certfile: "/var/www/tls/cert.pem",
-    cacertfile: "/var/www/tls/fullchain.pem",
-    versions: [:"tlsv1.2"],
-    dhfile: '/var/www/tls/dh-params.pem',
     ciphers: [
       'ECDHE-ECDSA-AES256-GCM-SHA384',
       'ECDHE-RSA-AES256-GCM-SHA384',
@@ -66,7 +61,6 @@ config :teiserver, TeiserverWeb.Endpoint,
   root: ".",
   cache_static_manifest: "priv/static/cache_manifest.json",
   server: true,
-  check_origin: ["//yourdomain.com", "//*.yourdomain.com"],
   version: Mix.Project.config()[:version]
 
 config :teiserver, Teiserver,

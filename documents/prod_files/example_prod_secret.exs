@@ -6,17 +6,6 @@ import Config
 
 secret_key_base = "mix phx.gen.secret"
 
-# This can be part of your standard prod.exs but I wanted it to
-# default to not going into a github repo
-config :teiserver, TeiserverWeb.Endpoint,
-  url: [host: "yourdomain.com"],
-  https: [
-    keyfile: "/etc/letsencrypt/live/yourdomain.com/privkey.pem",
-    certfile: "/etc/letsencrypt/live/yourdomain.com/cert.pem",
-    cacertfile: "/etc/letsencrypt/live/yourdomain.com/fullchain.pem"
-  ],
-  check_origin: ["//yourdomain.com", "//*.yourdomain.com"]
-
 config :teiserver, Teiserver,
   game_name: "My game name",
   game_name_short: "GN",

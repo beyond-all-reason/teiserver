@@ -24,11 +24,32 @@ end
 # files are automatically recompiled on the fly and thus, config/{dev,test}.exs
 # are just fine
 if config_env() == :prod do
+  # used for mailing, checking origins, finding tls certs…
+  domain_name = System.get_env("DOMAIN_NAME", "beyondallreason.info")
+
+  certificates = [
+    keyfile: System.fetch_env!("TLS_PRIVATE_KEY_PATH"),
+    certfile: System.fetch_env!("TLS_CERT_PATH"),
+    cacertfile: System.fetch_env!("TLS_CA_CERT_PATH")
+  ]
 
   # this is used in lib/teiserver_web/controllers/account/setup_controller.ex
   # as a special endpoint to create the root user. Setting it to empty or nil
   # will disable the functionality completely.
   # There is already a root user, so disable it
   config :teiserver, Teiserver.Setup, key: nil
+
+  config :teiserver, TeiserverWeb.Endpoint,
+    url: [host: domain_name],
+    check_origin: ["//#{domain_name}", "//*.#{domain_name}"],
+    https:
+      certificates ++
+        [
+          versions: [:"tlsv1.2"],
+          # dhfile is not supported for tls 1.3
+          # https://www.erlang.org/doc/man/ssl.html#type-dh_file
+          dhfile: System.fetch_env!("TLS_DH_FILE_PATH")
+        ]
+
 
 end
