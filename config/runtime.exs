@@ -73,6 +73,9 @@ if config_env() == :prod do
     http: [:inet6, port: String.to_integer(System.get_env("PORT", "4000"))],
     secret_key_base: System.fetch_env!("HTTP_SECRET_KEY_BASE")
 
+  config :teiserver, Teiserver.Account.Guardian,
+    issuer: System.fetch_env!("GUARDIAN_ISSUER"),
+    secret_key: System.fetch_env!("GUARDIAN_SECRET_KEY")
 
 
 end

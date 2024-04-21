@@ -6,10 +6,6 @@ import Config
 
 secret_key_base = "mix phx.gen.secret"
 
-config :teiserver, Teiserver.Account.Guardian,
-  issuer: "teiserver",
-  secret_key: "mix phx.gen.secret"
-
 config :teiserver, Teiserver.Mailer,
   noreply_address: "noreply@yourdomain.com",
   contact_address: "info@yourdomain.com",

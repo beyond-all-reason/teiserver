@@ -95,8 +95,4 @@ config :logger, :info_log,
   metadata: [:request_id, :user_id],
   level: :info
 
-# Overwritten in secret
-config :teiserver, Teiserver.Account.Guardian,
-  secret_key: "yix2DcXsA9MzAI8WldmYiJ38j2GyyXf5beWGAOJHl0FKNH04n1VACYbepqutma27"
-
 import_config "prod.secret.exs"
