@@ -25,10 +25,6 @@ config :teiserver, Teiserver.Repo,
   pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
   timeout: 30_000
 
-config :teiserver, TeiserverWeb.Endpoint,
-  http: [:inet6, port: String.to_integer(System.get_env("PORT") || "4000")],
-  secret_key_base: secret_key_base
-
 config :teiserver, Teiserver.Account.Guardian,
   issuer: "teiserver",
   secret_key: "mix phx.gen.secret"

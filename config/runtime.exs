@@ -49,7 +49,10 @@ if config_env() == :prod do
           # dhfile is not supported for tls 1.3
           # https://www.erlang.org/doc/man/ssl.html#type-dh_file
           dhfile: System.fetch_env!("TLS_DH_FILE_PATH")
-        ]
+        ],
+    http: [:inet6, port: String.to_integer(System.get_env("PORT", "4000"))],
+    secret_key_base: System.fetch_env!("HTTP_SECRET_KEY_BASE")
+
 
 
 end
