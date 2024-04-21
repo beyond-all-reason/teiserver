@@ -6,9 +6,6 @@ import Config
 
 secret_key_base = "mix phx.gen.secret"
 
-config :teiserver, Teiserver.Setup,
-  key: "---- random string of alpha numeric characters ----"
-
 # This can be part of your standard prod.exs but I wanted it to
 # default to not going into a github repo
 config :teiserver, TeiserverWeb.Endpoint,

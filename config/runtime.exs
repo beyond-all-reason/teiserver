@@ -24,4 +24,11 @@ end
 # files are automatically recompiled on the fly and thus, config/{dev,test}.exs
 # are just fine
 if config_env() == :prod do
+
+  # this is used in lib/teiserver_web/controllers/account/setup_controller.ex
+  # as a special endpoint to create the root user. Setting it to empty or nil
+  # will disable the functionality completely.
+  # There is already a root user, so disable it
+  config :teiserver, Teiserver.Setup, key: nil
+
 end
