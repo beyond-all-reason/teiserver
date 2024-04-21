@@ -16,7 +16,7 @@ import Config
 #
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
-if System.get_env("PHX_SERVER") do
+if Teiserver.ConfigHelpers.get_env("PHX_SERVER", nil) do
   config :teiserver, TeiserverWeb.Endpoint, server: true
 end
 
@@ -25,12 +25,12 @@ end
 # are just fine
 if config_env() == :prod do
   # used for mailing, checking origins, finding tls certs…
-  domain_name = System.get_env("DOMAIN_NAME", "beyondallreason.info")
+  domain_name = Teiserver.ConfigHelpers.get_env("DOMAIN_NAME", "beyondallreason.info")
 
   certificates = [
-    keyfile: System.fetch_env!("TLS_PRIVATE_KEY_PATH"),
-    certfile: System.fetch_env!("TLS_CERT_PATH"),
-    cacertfile: System.fetch_env!("TLS_CA_CERT_PATH")
+    keyfile: Teiserver.ConfigHelpers.get_env("TLS_PRIVATE_KEY_PATH"),
+    certfile: Teiserver.ConfigHelpers.get_env("TLS_CERT_PATH"),
+    cacertfile: Teiserver.ConfigHelpers.get_env("TLS_CA_CERT_PATH")
   ]
 
   # this is used in lib/teiserver_web/controllers/account/setup_controller.ex
@@ -44,17 +44,17 @@ if config_env() == :prod do
     game_name_short: "BAR",
     main_website: "https://www.beyondallreason.info/",
     privacy_email: "privacy@beyondallreason.info",
-    discord: System.get_env("DISCORD_LINK"),
+    discord: Teiserver.ConfigHelpers.get_env("DISCORD_LINK", nil),
     certs: certificates,
     enable_benchmark: false,
-    node_name: System.fetch_env!("NODE_NAME"),
+    node_name: Teiserver.ConfigHelpers.get_env("NODE_NAME"),
     enable_managed_lobbies: true,
     tachyon_schema_path: "/apps/teiserver/lib/teiserver-0.1.0/priv/tachyon/schema_v1/*/*/*.json"
 
   config :teiserver, Teiserver.Repo,
-    username: System.fetch_env!("DB_USERNAME"),
-    password: System.fetch_env!("DB_PASSWORD"),
-    database: System.fetch_env!("DB_NAME"),
+    username: Teiserver.ConfigHelpers.get_env("DB_USERNAME"),
+    password: Teiserver.ConfigHelpers.get_env("DB_PASSWORD"),
+    database: Teiserver.ConfigHelpers.get_env("DB_NAME"),
     pool_size: 40,
     timeout: 120_000,
     queue_interval: 2000
@@ -68,42 +68,41 @@ if config_env() == :prod do
           versions: [:"tlsv1.2"],
           # dhfile is not supported for tls 1.3
           # https://www.erlang.org/doc/man/ssl.html#type-dh_file
-          dhfile: System.fetch_env!("TLS_DH_FILE_PATH")
+          dhfile: Teiserver.ConfigHelpers.get_env("TLS_DH_FILE_PATH")
         ],
-    http: [:inet6, port: String.to_integer(System.get_env("PORT", "4000"))],
-    secret_key_base: System.fetch_env!("HTTP_SECRET_KEY_BASE")
+    http: [:inet6, port: Teiserver.ConfigHelpers.get_env("PORT", "4000", :int)],
+    secret_key_base: Teiserver.ConfigHelpers.get_env("HTTP_SECRET_KEY_BASE")
 
   config :teiserver, Teiserver.Account.Guardian,
-    issuer: System.fetch_env!("GUARDIAN_ISSUER"),
-    secret_key: System.fetch_env!("GUARDIAN_SECRET_KEY")
+    issuer: Teiserver.ConfigHelpers.get_env("GUARDIAN_ISSUER", "teiserver"),
+    secret_key: Teiserver.ConfigHelpers.get_env("GUARDIAN_SECRET_KEY")
 
   config :teiserver, Teiserver.Mailer,
     noreply_address: "noreply@#{domain_name}",
-    contact_address: "info@#{domain_name}",
-    noreply_name: "Beyond all reason team",
+    noreply_address:
+      Teiserver.ConfigHelpers.get_env("TEI_NOREPLY_EMAIL_ADDRESS", "noreply@#{domain_name}"),
+    contact_address:
+      Teiserver.ConfigHelpers.get_env("TEI_CONTACT_EMAIL_ADDRESS", "info@#{domain_name}"),
     adapter: Bamboo.SMTPAdapter,
-    server: System.fetch_env!("MAILER_SERVER"),
+    server: Teiserver.ConfigHelpers.get_env("MAILER_SERVER"),
     hostname: domain_name,
     # port: 1025,
-    port: String.to_integer(System.get_env("MAILER_PORT", "587")),
+    port: Teiserver.ConfigHelpers.get_env("MAILER_PORT", "587", :bool),
     # or {:system, "SMTP_USERNAME"}
-    username: System.get_env("MAILER_USERNAME", "noreply@#{domain_name}"),
+    username: Teiserver.ConfigHelpers.get_env("MAILER_USERNAME", "noreply@#{domain_name}"),
     # or {:system, "SMTP_PASSWORD"}
-    password: System.fetch_env!("MAILER_PASSWORD"),
+    password: Teiserver.ConfigHelpers.get_env("MAILER_PASSWORD"),
     # tls: :if_available, # can be `:always` or `:never`
     # can be `:always` or `:never`
     tls: :always,
     # or {":system", ALLOWED_TLS_VERSIONS"} w/ comma seprated values (e.g. "tlsv1.1,tlsv1.2")
     allowed_tls_versions: [:tlsv1, :"tlsv1.1", :"tlsv1.2"],
     # can be `true`
-    ssl: false,
-    retries: 1,
-    # can be `true`
     no_mx_lookups: false,
     # auth: :if_available # can be `always`. If your smtp relay requires authentication set it to `always`.
     auth: :always
 
-  log_root_path = System.fetch_env("LOG_ROOT_PATH", "/var/log/teiserver/")
+  log_root_path = Teiserver.ConfigHelpers.get_env("LOG_ROOT_PATH", "/var/log/teiserver/")
 
   config :logger,
     backends: [
