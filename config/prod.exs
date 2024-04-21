@@ -63,36 +63,4 @@ config :teiserver, TeiserverWeb.Endpoint,
   server: true,
   version: Mix.Project.config()[:version]
 
-# Do not print debug messages in production
-config :logger,
-  format: "$date $time [$level] $metadata $message\n",
-  metadata: [:request_id, :user_id],
-  level: :info
-
-config :logger,
-  backends: [
-    {LoggerFileBackend, :error_log},
-    {LoggerFileBackend, :notice_log},
-    {LoggerFileBackend, :info_log},
-    :console
-  ]
-
-config :logger, :error_log,
-  path: "/var/log/teiserver/error.log",
-  format: "$date $time [$level] $metadata $message\n",
-  metadata: [:request_id, :user_id],
-  level: :error
-
-config :logger, :notice_log,
-  path: "/var/log/teiserver/notice.log",
-  format: "$date $time [$level] $metadata $message\n",
-  metadata: [:request_id, :user_id],
-  level: :notice
-
-config :logger, :info_log,
-  path: "/var/log/teiserver/info.log",
-  format: "$date $time [$level] $metadata $message\n",
-  metadata: [:request_id, :user_id],
-  level: :info
-
 import_config "prod.secret.exs"
