@@ -7,6 +7,10 @@ import Config
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
 
+# ## Sensitive values should be passed through the environment. An example
+# EnvironmentFile that can be used with systemd is under
+# documents/prod_files/example-environment-file
+
 # ## Using releases
 #
 # If you use `mix release`, you need to explicitly enable the server

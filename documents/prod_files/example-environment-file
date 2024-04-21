@@ -1,0 +1,41 @@
+# This file is an example of a systemd environment file to configure a running service
+# In the systemd unit file, it should be setup with a line:
+# EnvironmentFile=/etc/sysconfig/teiserver
+# Be careful, if this line is in the systemd unit definition but the file doesn't exist
+# the service will be silently disabled
+
+# For more info, see:
+# https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#EnvironmentFile=
+# and also:
+# https://fedoraproject.org/wiki/Packaging:Systemd#EnvironmentFiles_and_support_for_/etc/sysconfig_files
+
+# To easily load all these in your shell's environment:
+# ```
+# set -o allexport; source documents/prod_files/example-environment-file; set +o allexport
+# ```
+
+# General secrets
+PHX_SERVER=true
+DISCORD_LINK=https://discord.com/whatever-link
+NODE_NAME=staging-node-1
+
+# DB configuration
+DB_USERNAME=teiserver-prod
+DB_PASSWORD=verysecret-password
+DB_NAME=teiserver_prod
+
+# TLS config
+HTTPS_DH_FILE_PATH=/var/www/tls/dh-params.pem
+
+# For cookie encryption
+HTTP_SECRET_KEY_BASE=another-very-long-secret
+
+# For Guardian (authentication)
+GUARDIAN_SECRET_KEY=yet-another-random-key-to-keep-secret
+
+# Email
+MAILER_SERVER=mailserver
+MAILER_USERNAME=noreply@beyondallreason.info
+MAILER_PASSWORD=correct-battery-staple-horse-xkcd-936
+
+# vim: ft=systemd
