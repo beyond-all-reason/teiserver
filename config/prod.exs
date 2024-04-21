@@ -63,11 +63,6 @@ config :teiserver, TeiserverWeb.Endpoint,
   server: true,
   version: Mix.Project.config()[:version]
 
-config :teiserver, Teiserver.Repo,
-  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "40"),
-  timeout: 120_000,
-  queue_interval: 2000
-
 # Do not print debug messages in production
 config :logger,
   format: "$date $time [$level] $metadata $message\n",

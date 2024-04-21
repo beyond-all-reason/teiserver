@@ -6,13 +6,6 @@ import Config
 
 secret_key_base = "mix phx.gen.secret"
 
-config :teiserver, Teiserver.Repo,
-  username: "teiserver_prod",
-  password: "mix phx.gen.secret",
-  database: "teiserver_prod",
-  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-  timeout: 30_000
-
 config :teiserver, Teiserver.Account.Guardian,
   issuer: "teiserver",
   secret_key: "mix phx.gen.secret"

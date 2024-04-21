@@ -51,6 +51,14 @@ if config_env() == :prod do
     enable_managed_lobbies: true,
     tachyon_schema_path: "/apps/teiserver/lib/teiserver-0.1.0/priv/tachyon/schema_v1/*/*/*.json"
 
+  config :teiserver, Teiserver.Repo,
+    username: System.fetch_env!("DB_USERNAME"),
+    password: System.fetch_env!("DB_PASSWORD"),
+    database: System.fetch_env!("DB_NAME"),
+    pool_size: 40,
+    timeout: 120_000,
+    queue_interval: 2000
+
   config :teiserver, TeiserverWeb.Endpoint,
     url: [host: domain_name],
     check_origin: ["//#{domain_name}", "//*.#{domain_name}"],
