@@ -6,18 +6,6 @@ import Config
 
 secret_key_base = "mix phx.gen.secret"
 
-config :teiserver, Teiserver,
-  game_name: "My game name",
-  game_name_short: "GN",
-  main_website: "https://site.com",
-  privacy_email: "privacy@site.com",
-  discord: "My discord link"# Set to nil to not have link,
-  certs: [
-    keyfile: "/etc/letsencrypt/live/yourdomain.com/privkey.pem",
-    certfile: "/etc/letsencrypt/live/yourdomain.com/cert.pem",
-    cacertfile: "/etc/letsencrypt/live/yourdomain.com/fullchain.pem"
-  ]
-
 config :teiserver, Teiserver.Repo,
   username: "teiserver_prod",
   password: "mix phx.gen.secret",

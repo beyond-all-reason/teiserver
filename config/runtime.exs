@@ -39,6 +39,18 @@ if config_env() == :prod do
   # There is already a root user, so disable it
   config :teiserver, Teiserver.Setup, key: nil
 
+  config :teiserver, Teiserver,
+    game_name: "Beyond all reason",
+    game_name_short: "BAR",
+    main_website: "https://www.beyondallreason.info/",
+    privacy_email: "privacy@beyondallreason.info",
+    discord: System.get_env("DISCORD_LINK"),
+    certs: certificates,
+    enable_benchmark: false,
+    node_name: System.fetch_env!("NODE_NAME"),
+    enable_managed_lobbies: true,
+    tachyon_schema_path: "/apps/teiserver/lib/teiserver-0.1.0/priv/tachyon/schema_v1/*/*/*.json"
+
   config :teiserver, TeiserverWeb.Endpoint,
     url: [host: domain_name],
     check_origin: ["//#{domain_name}", "//*.#{domain_name}"],

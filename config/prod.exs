@@ -63,17 +63,6 @@ config :teiserver, TeiserverWeb.Endpoint,
   server: true,
   version: Mix.Project.config()[:version]
 
-config :teiserver, Teiserver,
-  certs: [
-    keyfile: "/var/www/tls/privkey.pem",
-    certfile: "/var/www/tls/cert.pem",
-    cacertfile: "/var/www/tls/fullchain.pem"
-  ],
-  enable_benchmark: false,
-  node_name: "node-name",
-  enable_managed_lobbies: true,
-  tachyon_schema_path: "/apps/teiserver/lib/teiserver-0.1.0/priv/tachyon/schema_v1/*/*/*.json"
-
 config :teiserver, Teiserver.Repo,
   pool_size: String.to_integer(System.get_env("POOL_SIZE") || "40"),
   timeout: 120_000,
