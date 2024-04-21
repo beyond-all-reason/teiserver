@@ -54,7 +54,7 @@
       </div>
     <% end %>
 
-    <table class="table table-sm table-hover mt-3 cursor-pointer">
+    <table class="table table-sm table-hover table-ratings mt-3 cursor-pointer">
       <thead>
         <tr class="">
           <th>Map name</th>
@@ -77,15 +77,15 @@
         <%= for log <- @logs do %>
           <% {skill_text_class, skill_icon} =
             cond do
-              log.value["skill_change"] > 0 -> {"text-success", "arrow-up"}
-              log.value["skill_change"] < 0 -> {"text-danger", "arrow-down"}
-              true -> {"text-warning", "pause"}
+              log.value["skill_change"] > 0 -> {"text-success column-delta", "arrow-up"}
+              log.value["skill_change"] < 0 -> {"text-danger column-delta", "arrow-down"}
+              true -> {"text-warning column-delta", "pause"}
             end %>
           <% {uncertainty_text_class, uncertainty_icon} =
             cond do
-              log.value["uncertainty_change"] > 0 -> {"text-success", "arrow-up"}
-              log.value["uncertainty_change"] < 0 -> {"text-danger", "arrow-down"}
-              true -> {"text-warning", "pause"}
+              log.value["uncertainty_change"] > 0 -> {"text-secondary column-delta", "arrow-up"}
+              log.value["uncertainty_change"] < 0 -> {"text-secondary column-delta", "arrow-down"}
+              true -> {"text-secondary column-delta", "pause"}
             end %>
           <tr phx-click={"[[\"navigate\",{\"href\":\"/battle/#{log.match_id}\",\"replace\":false}]]"}>
             <%= if log.match do %>
