@@ -77,5 +77,30 @@ if config_env() == :prod do
     issuer: System.fetch_env!("GUARDIAN_ISSUER"),
     secret_key: System.fetch_env!("GUARDIAN_SECRET_KEY")
 
+  config :teiserver, Teiserver.Mailer,
+    noreply_address: "noreply@#{domain_name}",
+    contact_address: "info@#{domain_name}",
+    noreply_name: "Beyond all reason team",
+    adapter: Bamboo.SMTPAdapter,
+    server: System.fetch_env!("MAILER_SERVER"),
+    hostname: domain_name,
+    # port: 1025,
+    port: String.to_integer(System.get_env("MAILER_PORT", "587")),
+    # or {:system, "SMTP_USERNAME"}
+    username: System.get_env("MAILER_USERNAME", "noreply@#{domain_name}"),
+    # or {:system, "SMTP_PASSWORD"}
+    password: System.fetch_env!("MAILER_PASSWORD"),
+    # tls: :if_available, # can be `:always` or `:never`
+    # can be `:always` or `:never`
+    tls: :always,
+    # or {":system", ALLOWED_TLS_VERSIONS"} w/ comma seprated values (e.g. "tlsv1.1,tlsv1.2")
+    allowed_tls_versions: [:tlsv1, :"tlsv1.1", :"tlsv1.2"],
+    # can be `true`
+    ssl: false,
+    retries: 1,
+    # can be `true`
+    no_mx_lookups: false,
+    # auth: :if_available # can be `always`. If your smtp relay requires authentication set it to `always`.
+    auth: :always
 
 end

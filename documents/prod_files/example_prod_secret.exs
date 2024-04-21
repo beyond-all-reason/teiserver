@@ -5,29 +5,3 @@
 import Config
 
 secret_key_base = "mix phx.gen.secret"
-
-config :teiserver, Teiserver.Mailer,
-  noreply_address: "noreply@yourdomain.com",
-  contact_address: "info@yourdomain.com",
-  noreply_name: "Name of your game",
-  adapter: Bamboo.SMTPAdapter,
-  server: "mailserver",
-  hostname: "yourdomain.com",
-  # port: 1025,
-  port: 587,
-  # or {:system, "SMTP_USERNAME"}
-  username: "noreply@yourdomain.com",
-  # or {:system, "SMTP_PASSWORD"}
-  password: "mix phx.gen.secret",
-  # tls: :if_available, # can be `:always` or `:never`
-  # can be `:always` or `:never`
-  tls: :always,
-  # or {":system", ALLOWED_TLS_VERSIONS"} w/ comma seprated values (e.g. "tlsv1.1,tlsv1.2")
-  allowed_tls_versions: [:tlsv1, :"tlsv1.1", :"tlsv1.2"],
-  # can be `true`
-  ssl: false,
-  retries: 1,
-  # can be `true`
-  no_mx_lookups: false,
-  # auth: :if_available # can be `always`. If your smtp relay requires authentication set it to `always`.
-  auth: :always
