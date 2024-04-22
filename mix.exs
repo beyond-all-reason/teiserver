@@ -31,9 +31,12 @@ defmodule Teiserver.MixProject do
 
   # Run "mix help compile.app" to learn about applications.
   def application do
+    # get that with mix app.tree nostrum
+    nostrum_extras = [:certifi, :gun, :inets, :jason, :kcl, :mime]
     [
       mod: {Teiserver.Application, []},
-      extra_applications: [:logger, :runtime_tools, :os_mon, :iex]
+      included_applications: [:nostrum],
+      extra_applications: [:logger, :runtime_tools, :os_mon, :iex] ++ nostrum_extras
     ]
   end
 
@@ -99,12 +102,7 @@ defmodule Teiserver.MixProject do
       {:etop, "~> 0.7.0"},
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
       {:json_xema, "~> 0.3"},
-
-      # If you want to connect to discord in dev mode, use this
-      # {:nostrum, "~> 0.8", runtime: Mix.env() != :test},
-
-      # If you only want to connect to discord in prod, use this
-      {:nostrum, "~> 0.8", runtime: Mix.env() == :prod}
+      {:nostrum, "~> 0.8"}
     ]
   end
 
