@@ -63,16 +63,23 @@ if config_env() == :prod do
     timeout: 120_000,
     queue_interval: 2000
 
+  check_origin =
+    if Teiserver.ConfigHelpers.get_env("SHOULD_CHECK_ORIGIN", false, :bool) do
+      ["//#{domain_name}", "//*.#{domain_name}"]
+    else
+      false
+    end
+
   config :teiserver, TeiserverWeb.Endpoint,
     url: [host: domain_name],
-    check_origin: ["//#{domain_name}", "//*.#{domain_name}"],
+    check_origin: check_origin,
     https:
       certificates ++
         [
           versions: [:"tlsv1.2"],
           # dhfile is not supported for tls 1.3
           # https://www.erlang.org/doc/man/ssl.html#type-dh_file
-          dhfile: Teiserver.ConfigHelpers.get_env("TLS_DH_FILE_PATH")
+          dhfile: Teiserver.ConfigHelpers.get_env("TLS_DH_FILE_PATH", "/etc/ssl/dhparam.pem")
         ],
     http: [:inet6, port: Teiserver.ConfigHelpers.get_env("PORT", "4000", :int)],
     secret_key_base: Teiserver.ConfigHelpers.get_env("HTTP_SECRET_KEY_BASE")
