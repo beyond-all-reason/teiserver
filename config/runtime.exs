@@ -94,26 +94,30 @@ if config_env() == :prod do
     issuer: Teiserver.ConfigHelpers.get_env("GUARDIAN_ISSUER", "teiserver"),
     secret_key: Teiserver.ConfigHelpers.get_env("GUARDIAN_SECRET_KEY")
 
+
   config :teiserver, Teiserver.Mailer,
-    noreply_address: "noreply@#{domain_name}",
-    noreply_address:
-      Teiserver.ConfigHelpers.get_env("TEI_NOREPLY_EMAIL_ADDRESS", "noreply@#{domain_name}"),
-    contact_address:
-      Teiserver.ConfigHelpers.get_env("TEI_CONTACT_EMAIL_ADDRESS", "info@#{domain_name}"),
     adapter: Bamboo.SMTPAdapter,
-    server: Teiserver.ConfigHelpers.get_env("MAILER_SERVER"),
-    hostname: domain_name,
+    contact_address:
+      Teiserver.ConfigHelpers.get_env("CONTACT_EMAIL_ADDRESS", "info@#{domain_name}"),
+    noreply_name: "Beyond All Reason",
+    noreply_address:
+      Teiserver.ConfigHelpers.get_env("NOREPLY_EMAIL_ADDRESS", "noreply@#{domain_name}"),
+    smtp_server: Teiserver.ConfigHelpers.get_env("SMTP_SERVER"),
+    hostname: Teiserver.ConfigHelpers.get_env("SMTP_HOSTNAME"),
     # port: 1025,
-    port: Teiserver.ConfigHelpers.get_env("MAILER_PORT", "587", :bool),
-    # or {:system, "SMTP_USERNAME"}
-    username: Teiserver.ConfigHelpers.get_env("MAILER_USERNAME", "noreply@#{domain_name}"),
-    # or {:system, "SMTP_PASSWORD"}
-    password: Teiserver.ConfigHelpers.get_env("MAILER_PASSWORD"),
+    port: Teiserver.ConfigHelpers.get_env("SMTP_PORT", "587", :int),
+    username: Teiserver.ConfigHelpers.get_env("SMTP_USERNAME"),
+    password: Teiserver.ConfigHelpers.get_env("SMTP_PASSWORD"),
     # tls: :if_available, # can be `:always` or `:never`
     # can be `:always` or `:never`
     tls: :always,
+    tls_verify:
+      if(Teiserver.ConfigHelpers.get_env("SMTP_TLS_VERIFY", true, :bool),
+        do: :verify_peer,
+        else: :verify_none
+      ),
     # or {":system", ALLOWED_TLS_VERSIONS"} w/ comma seprated values (e.g. "tlsv1.1,tlsv1.2")
-    allowed_tls_versions: [:tlsv1, :"tlsv1.1", :"tlsv1.2"],
+    allowed_tls_versions: [:"tlsv1.2"],
     # can be `true`
     no_mx_lookups: false,
     # auth: :if_available # can be `always`. If your smtp relay requires authentication set it to `always`.
