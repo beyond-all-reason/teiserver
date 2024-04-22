@@ -5,7 +5,7 @@ If you have a local running version of TeiServer, you can point Chobby to localh
 Run TeiServer locally, login as root@localhost and go to 
 http://localhost:4000/teiserver/admin/user
 
-You should see many users here assuming you have run [Teifioin's fake data script](https://github.com/beyond-all-reason/teiserver/blob/master/documents/guides/local_setup.md#fake-data).
+You should see many users here assuming you have run [Teifion's fake data script](https://github.com/beyond-all-reason/teiserver/blob/master/documents/guides/local_setup.md#fake-data).
 
 Search for a user that has FakeData as the client (i.e. a normal user). Then Edit User > Tick "Bot" and "Verified" > Save Changes
 
