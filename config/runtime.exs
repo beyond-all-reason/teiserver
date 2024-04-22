@@ -44,16 +44,22 @@ if config_env() == :prod do
   config :teiserver, Teiserver.Setup, key: nil
 
   config :teiserver, Teiserver,
-    game_name: "Beyond all reason",
+    game_name: "Beyond All Reason",
     game_name_short: "BAR",
     main_website: "https://www.beyondallreason.info/",
     privacy_email: "privacy@beyondallreason.info",
-    discord: Teiserver.ConfigHelpers.get_env("DISCORD_LINK", nil),
+    discord: "https://discord.gg/beyond-all-reason",
     certs: certificates,
+    website: [
+      url: "beyondallreason.info"
+    ],
+    server_flag: "GB-WLS",
     enable_benchmark: false,
     node_name: Teiserver.ConfigHelpers.get_env("NODE_NAME"),
+    extra_logging: false,
     enable_managed_lobbies: true,
-    tachyon_schema_path: "/apps/teiserver/lib/teiserver-0.1.0/priv/tachyon/schema_v1/*/*/*.json"
+    user_agreement:
+      "A verification code has been sent to your email address. Please read our terms of service at https://#{domain_name}/privacy_policy and the code of conduct at https://www.beyondallreason.info/code-of-conduct. Then enter your six digit code below if you agree to the terms."
 
   config :teiserver, Teiserver.Repo,
     username: Teiserver.ConfigHelpers.get_env("DB_USERNAME"),

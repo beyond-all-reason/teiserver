@@ -16,7 +16,6 @@
 
 # General secrets
 PHX_SERVER=true
-DISCORD_LINK=https://discord.com/whatever-link
 NODE_NAME=staging-node-1
 
 # DB configuration
