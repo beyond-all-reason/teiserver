@@ -1,7 +1,20 @@
 ## In progress
 #### Features
 - Added `country` to public [leaderboard API response](https://server4.beyondallreason.info/teiserver/api/public/leaderboard/Team)
-
+- Display uncertainy values for each match
+- Show intuitive chevron rank number
+- Scroll big tables on narrow screens
+- Better moderation log formatting
+- Extend leaderboards from 30 to 100 positions
+- Documentation improvements
+#### Bugfixes
+- Test fixes
+- Moderation related fixes and improvements
+- Fix splitlobby error when original splitter leaves lobby
+- Not allowing spaces in custom flags
+#### Internal improvements
+- Replace Parallel with ParallelStream
+- Add Github action for tests
 ## v1.2.0
 #### Features
 - New spring friendship commands added

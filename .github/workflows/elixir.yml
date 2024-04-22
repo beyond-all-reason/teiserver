@@ -1,0 +1,92 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Build and test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+# Sets the ENV `MIX_ENV` to `test` for running tests
+env:
+  MIX_ENV: test
+  ELIXIR_VER: '1.16.2'
+  OTP_VER: '25.0.4'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build and test
+
+    # Set up a Postgres DB service. By default, Phoenix applications
+    # use Postgres. This creates a database for running tests.
+    # Additional services can be defined here if required.
+    services:
+      db:
+        image: postgres:15
+        ports: ['5432:5432']
+        env:
+          POSTGRES_DB: teiserver_test
+          POSTGRES_USER: teiserver_test
+          POSTGRES_PASSWORD: 123456789
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    # Step: Setup Elixir + Erlang image as the base.
+    - name: Set up Elixir
+      uses: erlef/setup-beam@v1
+      with:
+        otp-version: ${{ env.OTP_VER }}
+        elixir-version: ${{ env.ELIXIR_VER }}
+
+    # Step: Check out the code.
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Step: Define how to cache deps. Restores existing cache if present.
+    - name: Cache deps
+      id: cache-deps
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-elixir-deps
+      with:
+        path: deps
+        key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{ hashFiles('**/mix.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-mix-${{ env.cache-name }}-
+
+    # Step: Define how to cache the `_build` directory. After the first run,
+    # this speeds up tests runs a lot. This includes not re-compiling our
+    # project's downloaded deps every run.
+    - name: Cache compiled build
+      id: cache-build
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-compiled-build
+      with:
+        path: _build
+        key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{ hashFiles('**/mix.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-mix-${{ env.cache-name }}-
+
+    # Step: Download project dependencies. If unchanged, uses
+    # the cached version.
+    - name: Install dependencies
+      run: mix deps.get
+
+    # Step: Execute the tests.
+    - name: Run tests
+      run: mix test

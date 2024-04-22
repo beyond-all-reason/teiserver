@@ -61,6 +61,7 @@
           <th>Players</th>
           <th>Type</th>
           <th colspan="2">Skill</th>
+          <th colspan="2">Uncertainty</th>
           <th colspan="2">
             Match Rating
             <small class="text-secondary">(Skill - Uncertainty, non-negative only)</small>
@@ -74,10 +75,16 @@
       </thead>
       <tbody>
         <%= for log <- @logs do %>
-          <% {text_class, icon} =
+          <% {skill_text_class, skill_icon} =
             cond do
-              log.value["skill_change"] > 0 -> {"text-success", "up"}
-              log.value["skill_change"] < 0 -> {"text-danger", "down"}
+              log.value["skill_change"] > 0 -> {"text-success", "arrow-up"}
+              log.value["skill_change"] < 0 -> {"text-danger", "arrow-down"}
+              true -> {"text-warning", "pause"}
+            end %>
+          <% {uncertainty_text_class, uncertainty_icon} =
+            cond do
+              log.value["uncertainty_change"] > 0 -> {"text-success", "arrow-up"}
+              log.value["uncertainty_change"] < 0 -> {"text-danger", "arrow-down"}
               true -> {"text-warning", "pause"}
             end %>
           <tr phx-click={"[[\"navigate\",{\"href\":\"/battle/#{log.match_id}\",\"replace\":false}]]"}>
@@ -89,22 +96,27 @@
             <% end %>
             <td><%= @rating_type_id_lookup[log.rating_type_id] %></td>
             <td><%= round(log.value["skill"], 2) %></td>
-            <td class={text_class}>
-              <i class={"fa-fw fa-solid fa-#{icon}"}></i>
+            <td class={skill_text_class}>
+              <i class={"fa-fw fa-solid fa-#{skill_icon}"}></i>
 
               <%= round(log.value["skill_change"], 2) %>
             </td>
+            <td><%= round(log.value["uncertainty"], 2) %></td>
+            <td class={uncertainty_text_class}>
+              <i class={"fa-fw fa-solid fa-#{uncertainty_icon}"}></i>
 
+              <%= round(log.value["uncertainty_change"], 2) %>
+            </td>
             <td><%= round(log.value["rating_value"], 2) %></td>
-            <td class={text_class}>
-              <i class={"fa-fw fa-solid fa-#{icon}"}></i>
+            <td class={skill_text_class}>
+              <i class={"fa-fw fa-solid fa-#{skill_icon}"}></i>
 
               <%= round(log.value["rating_value_change"], 2) %>
             </td>
 
             <td><%= round(log.value["skill"] - 3 * log.value["uncertainty"], 2) %></td>
-            <td class={text_class}>
-              <i class={"fa-fw fa-solid fa-#{icon}"}></i>
+            <td class={skill_text_class}>
+              <i class={"fa-fw fa-solid fa-#{skill_icon}"}></i>
 
               <%= round(log.value["skill_change"] - 3 * log.value["uncertainty_change"], 2) %>
             </td>

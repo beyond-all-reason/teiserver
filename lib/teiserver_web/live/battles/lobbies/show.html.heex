@@ -97,6 +97,7 @@ spectators =
             <ul>
               <li>Max players: <%= @lobby.max_players %></li>
               <li>Locked: <%= @lobby.locked %></li>
+              <li>Rated Game: <%= if @modoptions.rated_game == 1, do: "Yes", else: "No" %></li>
               <%= if @lobby.password != nil do %>
                 <li>Password: <%= @lobby.password %></li>
               <% end %>

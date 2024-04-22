@@ -1,5 +1,4 @@
 <% bsname = view_colour()
-is_admin = allow?(@conn, "Admin")
 is_moderator = allow?(@conn, "Moderator") %>
 
 <script type="text/javascript" charset="utf-8">
@@ -56,18 +55,15 @@ is_moderator = allow?(@conn, "Moderator") %>
           <thead>
             <tr>
               <th colspan="2">Name</th>
-              <%= if is_admin do %>
+              <%= if is_moderator do %>
                 <th>Email</th>
               <% end %>
               <th>Client</th>
               <th>Status</th>
-              <%= if is_admin do %>
+              <%= if is_moderator do %>
                 <th>HW</th>
-                <th>CHB</th>
               <% end %>
-              <th>Trusted</th>
-              <th>Contributor</th>
-              <th>Moderator</th>
+              <th>Roles</th>
               <th>Registered</th>
 
               <%= if is_moderator do %>
@@ -78,46 +74,37 @@ is_moderator = allow?(@conn, "Moderator") %>
             </tr>
           </thead>
           <tbody>
-            <%= for user <- @users do %>
+            <%= for {user, user_stats} <- @users do %>
               <tr>
                 <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
                   <%= central_component("icon", icon: user.icon) %>
                 </td>
                 <td><%= user.name %></td>
-                <%= if is_admin do %>
+                <%= if is_moderator do %>
                   <td><%= user.email %></td>
                 <% end %>
-                <td><%= user.data["lobby_client"] %></td>
+                <td><%= user_stats["lobby_client"] %></td>
 
                 <td>
                   <TeiserverWeb.UserComponents.status_icon user={user} />
                 </td>
 
-                <%= if is_admin do %>
+                <%= if is_moderator do %>
                   <td>
-                    <%= if user.data["hw_hash"] != "" and user.data["hw_hash"] != nil do %>
-                      <i class="fa-fw far fa-check"></i>
+                    <%= if user_stats["hardware:cpuinfo"] != "" and user_stats["hardware:cpuinfo"] != nil do %>
+                      <%= user_stats["hardware:cpuinfo"] %>
+                      <br/>
+                      <%= user_stats["hardware:gpuinfo"] %>
                     <% else %>
                       &nbsp;
                     <% end %>
                   </td>
 
-                  <td>
-                    <%= if user.data["chobby_hash"] != "" and user.data["chobby_hash"] != nil do %>
-                      <i class="fa-fw far fa-check"></i>
-                    <% else %>
-                      &nbsp;
-                    <% end %>
-                  </td>
                 <% end %>
 
                 <td>
-                  <%= if Enum.member?(user.roles || [], "Trusted"), do: "Trusted" %>
-                </td>
-                <td>
-                  <%= if Enum.member?(user.roles || [], "Contributor"), do: "Contributor" %>
-                </td>
-                <td>
+                  <%= if Enum.member?(user.roles || [], "Trusted"), do: "Trusted " %>
+                  <%= if Enum.member?(user.roles || [], "Contributor"), do: "Contributor " %>
                   <%= if Enum.member?(user.roles || [], "Moderator"), do: "Moderator" %>
                 </td>
 

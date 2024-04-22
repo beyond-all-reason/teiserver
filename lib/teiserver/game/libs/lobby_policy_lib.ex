@@ -111,7 +111,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
   def pre_cache_policies() do
     policy_count =
       Game.list_lobby_policies()
-      |> Parallel.map(&add_policy_from_db/1)
+      |> ParallelStream.map(&add_policy_from_db/1)
       |> Enum.count()
 
     Logger.info("pre_cache_policies, got #{policy_count} policies")

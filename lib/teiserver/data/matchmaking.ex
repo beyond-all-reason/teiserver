@@ -449,7 +449,7 @@ defmodule Teiserver.Data.Matchmaking do
 
     queue_count =
       Game.list_queues(limit: :infinity)
-      |> Parallel.map(fn queue ->
+      |> ParallelStream.map(fn queue ->
         queue
         |> convert_queue
         |> add_queue

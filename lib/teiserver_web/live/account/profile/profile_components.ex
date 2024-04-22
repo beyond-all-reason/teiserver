@@ -97,7 +97,7 @@ defmodule TeiserverWeb.Account.ProfileComponents do
 
           <%= @user.name %> &nbsp;&nbsp;&nbsp;&nbsp;
           <span style="font-size: 0.7em;">
-            Chevron rank: <%= @user.rank || 0 %>
+            Chevron level: <%= (@user.rank || 0) + 1 %>
           </span>
         </h3>
       </div>
