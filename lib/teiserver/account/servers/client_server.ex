@@ -114,7 +114,7 @@ defmodule Teiserver.Account.ClientServer do
   end
 
   def handle_cast({:merge_update_client, partial_client}, state) do
-    Logger.warn(":merge_update_client is still being used, instead use :update_values")
+    Logger.warning(":merge_update_client is still being used, instead use :update_values")
     new_client = Map.merge(state.client, partial_client)
 
     PubSub.broadcast(

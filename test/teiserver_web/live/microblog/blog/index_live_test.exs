@@ -17,15 +17,15 @@ defmodule TeiserverWeb.Microblog.Blog.IndexLiveTest do
     tag2 = tag_fixture()
     tag3 = tag_fixture()
 
-    post1 = post_fixture(title: "Post 1 title", contents: "Post 1 line1\n\nPost 1 fold line")
+    post1 = post_fixture(title: "Post 1 title", summary: "Post 1 line1", contents: "Post 1 line1\n\nPost 1 fold line")
     _post1_tag1 = post_tag_fixture(post_id: post1.id, tag_id: tag1.id)
     _post1_tag2 = post_tag_fixture(post_id: post1.id, tag_id: tag2.id)
 
-    post2 = post_fixture(title: "Post 2 title", contents: "Post 2 line1\n\nPost 2 fold line")
+    post2 = post_fixture(title: "Post 2 title", summary: "Post 2 line1", contents: "Post 2 line1\n\nPost 2 fold line")
     _post2_tag1 = post_tag_fixture(post_id: post2.id, tag_id: tag1.id)
     _post2_tag3 = post_tag_fixture(post_id: post2.id, tag_id: tag3.id)
 
-    post3 = post_fixture(title: "Post 3 title", contents: "Post 3 line1\n\nPost 3 fold line")
+    post3 = post_fixture(title: "Post 3 title", summary: "Post 3 line1", contents: "Post 3 line1\n\nPost 3 fold line")
     _post3_tag2 = post_tag_fixture(post_id: post3.id, tag_id: tag2.id)
     _post3_tag3 = post_tag_fixture(post_id: post3.id, tag_id: tag3.id)
 

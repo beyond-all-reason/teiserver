@@ -43,7 +43,7 @@ Avg ping: #{round(average_ping * 100) / 100}ms, Pings: #{Enum.count(state.pings)
         port: port
       })
 
-    Logger.warn("Starting stats")
+    Logger.warning("Starting stats")
     :timer.send_interval(@registration_interval, self(), :register)
     send(self(), :register)
 

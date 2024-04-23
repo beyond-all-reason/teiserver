@@ -56,11 +56,11 @@ defmodule Teiserver.Protocols.TachyonLib do
       :error ->
         # Previously got an error with data 'OK cmd=TACHYON' which suggests
         # it was still in Spring mode
-        Logger.warn("Base64 error, given '#{data}'")
+        Logger.warning("Base64 error, given '#{data}'")
         {:error, :base64_decode}
 
       {:error, :gzip_decompress} ->
-        Logger.warn("Gzip error, given '#{data}'")
+        Logger.warning("Gzip error, given '#{data}'")
         {:error, :gzip_decompress}
 
       {:error, %Jason.DecodeError{}} ->

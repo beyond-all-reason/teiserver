@@ -7,7 +7,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.CommunicationOut do
   ###########
   # Direct messages
   def do_reply(:direct_message, {sender_id, msg}) do
-    Logger.warn(
+    Logger.warning(
       "Using :direct_message instead of :received_direct_message in V1.CommunicationOut"
     )
 

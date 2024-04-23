@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Report.ComplexClientEventControllerTest do
   end
 
   test "index", %{conn: conn} do
-    conn = get(conn, ~p"/telemetry/complex_client/summary")
+    conn = get(conn, ~p"/telemetry/complex_client_events/summary")
 
     assert html_response(conn, 200)
   end

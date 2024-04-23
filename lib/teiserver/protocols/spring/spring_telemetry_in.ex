@@ -156,9 +156,9 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   defp do_live_client_event(data, state) do
     if String.length(data) < 1024 do
       case Regex.run(~r/(\S+) (\S+)/u, data) do
-        [_, event_name, value64] ->
+        [_, _event_name, value64] ->
           case Spring.decode_value(value64) do
-            {:ok, value} ->
+            {:ok, _value} ->
               if state.userid do
                 # TODO: Do stuff with live client events
                 # Telemetry.log_live_client_event(state.userid, event_name, value)

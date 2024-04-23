@@ -2,7 +2,6 @@ defmodule Teiserver.Bridge.CommandLib do
   @moduledoc """
 
   """
-  alias Teiserver.Data.Types, as: T
   require Logger
 
   @spec handle_command(Nostrum.Struct.Interaction.t(), map()) :: map()
