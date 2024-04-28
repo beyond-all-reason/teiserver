@@ -49,6 +49,13 @@ if config_env() == :prod do
     main_website: "https://www.beyondallreason.info/",
     privacy_email: "privacy@beyondallreason.info",
     discord: "https://discord.gg/beyond-all-reason",
+    ports: [
+      tcp: Teiserver.ConfigHelpers.get_env("SPRING_TCP_PORT", 8200, :int),
+      tls: Teiserver.ConfigHelpers.get_env("SPRING_TLS_PORT", 8201, :int),
+      # this can likely be deprecated and removed. It's for an old version
+      # of tachyon running on another TLS socket
+      tachyon: Teiserver.ConfigHelpers.get_env("TACHYON_TLS_PORT", 8202, :int)
+    ],
     certs: certificates,
     website: [
       url: "beyondallreason.info"
