@@ -565,7 +565,7 @@ defmodule Teiserver.Lobby do
       Enum.any?([
         CacheUser.is_moderator?(user),
         Enum.member?(user.roles, "Caster"),
-        consul_reason == :override_approve
+        consul_reason in [:override_approve, :allow_friends]
       ])
 
     ignore_locked =
