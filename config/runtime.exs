@@ -29,12 +29,12 @@ end
 # are just fine
 if config_env() == :prod do
   # used for mailing, checking origins, finding tls certs…
-  domain_name = Teiserver.ConfigHelpers.get_env("DOMAIN_NAME", "beyondallreason.info")
+  domain_name = Teiserver.ConfigHelpers.get_env("TEI_DOMAIN_NAME", "beyondallreason.info")
 
   certificates = [
-    keyfile: Teiserver.ConfigHelpers.get_env("TLS_PRIVATE_KEY_PATH"),
-    certfile: Teiserver.ConfigHelpers.get_env("TLS_CERT_PATH"),
-    cacertfile: Teiserver.ConfigHelpers.get_env("TLS_CA_CERT_PATH")
+    keyfile: Teiserver.ConfigHelpers.get_env("TEI_TLS_PRIVATE_KEY_PATH"),
+    certfile: Teiserver.ConfigHelpers.get_env("TEI_TLS_CERT_PATH"),
+    cacertfile: Teiserver.ConfigHelpers.get_env("TEI_TLS_CA_CERT_PATH")
   ]
 
   # this is used in lib/teiserver_web/controllers/account/setup_controller.ex
@@ -50,11 +50,11 @@ if config_env() == :prod do
     privacy_email: "privacy@beyondallreason.info",
     discord: "https://discord.gg/beyond-all-reason",
     ports: [
-      tcp: Teiserver.ConfigHelpers.get_env("SPRING_TCP_PORT", 8200, :int),
-      tls: Teiserver.ConfigHelpers.get_env("SPRING_TLS_PORT", 8201, :int),
+      tcp: Teiserver.ConfigHelpers.get_env("TEI_SPRING_TCP_PORT", 8200, :int),
+      tls: Teiserver.ConfigHelpers.get_env("TEI_SPRING_TLS_PORT", 8201, :int),
       # this can likely be deprecated and removed. It's for an old version
       # of tachyon running on another TLS socket
-      tachyon: Teiserver.ConfigHelpers.get_env("TACHYON_TLS_PORT", 8202, :int)
+      tachyon: Teiserver.ConfigHelpers.get_env("TEI_TACHYON_TLS_PORT", 8202, :int)
     ],
     certs: certificates,
     website: [
@@ -62,22 +62,22 @@ if config_env() == :prod do
     ],
     server_flag: "GB-WLS",
     enable_benchmark: false,
-    node_name: Teiserver.ConfigHelpers.get_env("NODE_NAME"),
+    node_name: Teiserver.ConfigHelpers.get_env("TEI_NODE_NAME"),
     extra_logging: false,
     enable_managed_lobbies: true,
     user_agreement:
       "A verification code has been sent to your email address. Please read our terms of service at https://#{domain_name}/privacy_policy and the code of conduct at https://www.beyondallreason.info/code-of-conduct. Then enter your six digit code below if you agree to the terms."
 
   config :teiserver, Teiserver.Repo,
-    username: Teiserver.ConfigHelpers.get_env("DB_USERNAME"),
-    password: Teiserver.ConfigHelpers.get_env("DB_PASSWORD"),
-    database: Teiserver.ConfigHelpers.get_env("DB_NAME"),
+    username: Teiserver.ConfigHelpers.get_env("TEI_DB_USERNAME"),
+    password: Teiserver.ConfigHelpers.get_env("TEI_DB_PASSWORD"),
+    database: Teiserver.ConfigHelpers.get_env("TEI_DB_NAME"),
     pool_size: 40,
     timeout: 120_000,
     queue_interval: 2000
 
   check_origin =
-    if Teiserver.ConfigHelpers.get_env("SHOULD_CHECK_ORIGIN", false, :bool) do
+    if Teiserver.ConfigHelpers.get_env("TEI_SHOULD_CHECK_ORIGIN", false, :bool) do
       ["//#{domain_name}", "//*.#{domain_name}"]
     else
       false
@@ -92,36 +92,34 @@ if config_env() == :prod do
           versions: [:"tlsv1.2"],
           # dhfile is not supported for tls 1.3
           # https://www.erlang.org/doc/man/ssl.html#type-dh_file
-          dhfile: Teiserver.ConfigHelpers.get_env("TLS_DH_FILE_PATH", "/etc/ssl/dhparam.pem")
+          dhfile: Teiserver.ConfigHelpers.get_env("TEI_TLS_DH_FILE_PATH", "/etc/ssl/dhparam.pem")
         ],
-    http: [:inet6, port: Teiserver.ConfigHelpers.get_env("PORT", "4000", :int)],
-    secret_key_base: Teiserver.ConfigHelpers.get_env("HTTP_SECRET_KEY_BASE")
+    http: [:inet6, port: Teiserver.ConfigHelpers.get_env("TEI_PORT", "4000", :int)],
+    secret_key_base: Teiserver.ConfigHelpers.get_env("TEI_HTTP_SECRET_KEY_BASE")
 
   config :teiserver, Teiserver.Account.Guardian,
-    issuer: Teiserver.ConfigHelpers.get_env("GUARDIAN_ISSUER", "teiserver"),
-    secret_key: Teiserver.ConfigHelpers.get_env("GUARDIAN_SECRET_KEY")
+    issuer: Teiserver.ConfigHelpers.get_env("TEI_GUARDIAN_ISSUER", "teiserver"),
+    secret_key: Teiserver.ConfigHelpers.get_env("TEI_GUARDIAN_SECRET_KEY")
 
-  if Teiserver.ConfigHelpers.get_env("ENABLE_EMAIL_INTEGRATION", :bool) do
-    smtp_server = Teiserver.ConfigHelpers.get_env("SMTP_HOSTNAME")
-
+  if Teiserver.ConfigHelpers.get_env("TEI_ENABLE_EMAIL_INTEGRATION", :bool) do
     config :teiserver, Teiserver.Mailer,
       adapter: Bamboo.SMTPAdapter,
       contact_address:
-        Teiserver.ConfigHelpers.get_env("CONTACT_EMAIL_ADDRESS", "info@#{domain_name}"),
+        Teiserver.ConfigHelpers.get_env("TEI_CONTACT_EMAIL_ADDRESS", "info@#{domain_name}"),
       noreply_name: "Beyond All Reason",
       noreply_address:
-        Teiserver.ConfigHelpers.get_env("NOREPLY_EMAIL_ADDRESS", "noreply@#{domain_name}"),
-      smtp_server: Teiserver.ConfigHelpers.get_env("SMTP_SERVER"),
-      hostname: Teiserver.ConfigHelpers.get_env("SMTP_HOSTNAME"),
+        Teiserver.ConfigHelpers.get_env("TEI_NOREPLY_EMAIL_ADDRESS", "noreply@#{domain_name}"),
+      smtp_server: Teiserver.ConfigHelpers.get_env("TEI_SMTP_SERVER"),
+      hostname: Teiserver.ConfigHelpers.get_env("TEI_SMTP_HOSTNAME"),
       # port: 1025,
-      port: Teiserver.ConfigHelpers.get_env("SMTP_PORT", "587", :int),
-      username: Teiserver.ConfigHelpers.get_env("SMTP_USERNAME"),
-      password: Teiserver.ConfigHelpers.get_env("SMTP_PASSWORD"),
+      port: Teiserver.ConfigHelpers.get_env("TEI_SMTP_PORT", "587", :int),
+      username: Teiserver.ConfigHelpers.get_env("TEI_SMTP_USERNAME"),
+      password: Teiserver.ConfigHelpers.get_env("TEI_SMTP_PASSWORD"),
       # tls: :if_available, # can be `:always` or `:never`
       # can be `:always` or `:never`
       tls: :always,
       tls_verify:
-        if(Teiserver.ConfigHelpers.get_env("SMTP_TLS_VERIFY", true, :bool),
+        if(Teiserver.ConfigHelpers.get_env("TEI_SMTP_TLS_VERIFY", true, :bool),
           do: :verify_peer,
           else: :verify_none
         ),
@@ -133,7 +131,7 @@ if config_env() == :prod do
       auth: :always
   end
 
-  log_root_path = Teiserver.ConfigHelpers.get_env("LOG_ROOT_PATH", "/var/log/teiserver/")
+  log_root_path = Teiserver.ConfigHelpers.get_env("TEI_LOG_ROOT_PATH", "/var/log/teiserver/")
 
   config :logger,
     backends: [

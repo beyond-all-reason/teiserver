@@ -16,25 +16,25 @@
 
 # General secrets
 PHX_SERVER=true
-NODE_NAME=staging-node-1
+TEI_NODE_NAME=staging-node-1
 
 # DB configuration
-DB_USERNAME=teiserver-prod
-DB_PASSWORD=verysecret-password
-DB_NAME=teiserver_prod
+TEI_DB_USERNAME=teiserver-prod
+TEI_DB_PASSWORD=verysecret-password
+TEI_DB_NAME=teiserver_prod
 
 # TLS config
-HTTPS_DH_FILE_PATH=/var/www/tls/dh-params.pem
+TEI_HTTPS_DH_FILE_PATH=/var/www/tls/dh-params.pem
 
 # For cookie encryption
-HTTP_SECRET_KEY_BASE=another-very-long-secret
+TEI_HTTP_SECRET_KEY_BASE=another-very-long-secret
 
 # For Guardian (authentication)
-GUARDIAN_SECRET_KEY=yet-another-random-key-to-keep-secret
+TEI_GUARDIAN_SECRET_KEY=yet-another-random-key-to-keep-secret
 
 # Email
-SMTP_SERVER=mailserver
-SMTP_USERNAME=noreply@beyondallreason.info
-SMTP_PASSWORD=correct-battery-staple-horse-xkcd-936
+TEI_SMTP_SERVER=mailserver
+TEI_SMTP_USERNAME=noreply@beyondallreason.info
+TEI_SMTP_PASSWORD=correct-battery-staple-horse-xkcd-936
 
 # vim: ft=systemd
