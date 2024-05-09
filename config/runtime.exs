@@ -182,5 +182,10 @@ if config_env() == :prod do
       log_full_events: true,
       log_dispatch_events: true,
       token: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_BOT_TOKEN")
+
+    config :teiserver, Teiserver.Bridge.DiscordBridgeBot,
+      token: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_BOT_TOKEN"),
+      guild_id: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_GUILD_ID"),
+      bot_name: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_BOT_NAME")
   end
 end
