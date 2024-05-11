@@ -69,6 +69,7 @@ if config_env() == :prod do
       "A verification code has been sent to your email address. Please read our terms of service at https://#{domain_name}/privacy_policy and the code of conduct at https://www.beyondallreason.info/code-of-conduct. Then enter your six digit code below if you agree to the terms."
 
   config :teiserver, Teiserver.Repo,
+    hostname: Teiserver.ConfigHelpers.get_env("TEI_DB_HOSTNAME"),
     username: Teiserver.ConfigHelpers.get_env("TEI_DB_USERNAME"),
     password: Teiserver.ConfigHelpers.get_env("TEI_DB_PASSWORD"),
     database: Teiserver.ConfigHelpers.get_env("TEI_DB_NAME"),
