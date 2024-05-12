@@ -109,8 +109,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
             inserted_at: Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert,
             updated_at: Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert
           }
-        end)
-      end)
+        end) |> Enum.to_list()
+      end) |> Enum.to_list()
       |> List.flatten()
 
     Ecto.Multi.new()
