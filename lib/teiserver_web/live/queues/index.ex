@@ -53,6 +53,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
           true
         end
       end)
+      |> Enum.to_list()
 
     is_admin = allow?(socket.assigns[:current_user], "Admin")
 
