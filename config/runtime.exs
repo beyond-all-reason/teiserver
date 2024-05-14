@@ -110,7 +110,7 @@ if config_env() == :prod do
       noreply_name: "Beyond All Reason",
       noreply_address:
         Teiserver.ConfigHelpers.get_env("TEI_NOREPLY_EMAIL_ADDRESS", "noreply@#{domain_name}"),
-      smtp_server: Teiserver.ConfigHelpers.get_env("TEI_SMTP_SERVER"),
+      server: Teiserver.ConfigHelpers.get_env("TEI_SMTP_SERVER"),
       hostname: Teiserver.ConfigHelpers.get_env("TEI_SMTP_HOSTNAME"),
       # port: 1025,
       port: Teiserver.ConfigHelpers.get_env("TEI_SMTP_PORT", "587", :int),
