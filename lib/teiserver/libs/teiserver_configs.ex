@@ -37,6 +37,16 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "matchmaking.Time to treat game as ranked",
+      section: "Matchmaking",
+      type: "integer",
+      permissions: ["Server"],
+      description: "Games shorter than this time in seconds will not be treated as ranked.",
+      default: 90,
+      value_label: "Require ready check"
+    })
+
+    add_site_config_type(%{
       key: "bots.Flag",
       section: "Bots",
       type: "string",

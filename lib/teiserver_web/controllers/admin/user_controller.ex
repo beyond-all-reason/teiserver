@@ -43,6 +43,7 @@ defmodule TeiserverWeb.Admin.UserController do
       end
 
     users = (exact_match ++ users) |> Enum.reject(&(&1 == nil))
+    user_stats = for user <- users, do: Account.get_user_stat_data(user.id)
 
     if Enum.count(users) == 1 do
       conn
@@ -50,7 +51,7 @@ defmodule TeiserverWeb.Admin.UserController do
     else
       conn
       |> add_breadcrumb(name: "List users", url: conn.request_path)
-      |> assign(:users, users)
+      |> assign(:users, Enum.zip(users, user_stats))
       |> assign(:params, search_defaults(conn))
       |> render("index.html")
     end
@@ -1066,8 +1067,12 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
+
         new_user =
           Map.merge(user, %{
+            name: Ecto.UUID.generate(),
+            email: "#{user.id}@#{user.id}",
+            password: UserLib.make_bot_password(),
             country: "??"
           })
 
