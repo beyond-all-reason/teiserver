@@ -92,11 +92,12 @@ defmodule TeiserverWeb.Admin.UserController do
        ) ++
          Account.list_users(search: [id_in: id_list]))
       |> Enum.uniq()
+    user_stats = for user <- users, do: Account.get_user_stat_data(user.id)
 
     conn
     |> add_breadcrumb(name: "User search", url: conn.request_path)
     |> assign(:params, params)
-    |> assign(:users, users)
+    |> assign(:users, Enum.zip(users, user_stats))
     |> render("index.html")
   end
 
@@ -125,12 +126,13 @@ defmodule TeiserverWeb.Admin.UserController do
 
         Account.list_users(search: [id_in: id_list])
       end
+    user_stats = for user <- users, do: Account.get_user_stat_data(user.id)
 
     conn
     |> add_breadcrumb(name: "Data search", url: conn.request_path)
     |> assign(:params, params["data_search"])
     |> assign(:data_search, true)
-    |> assign(:users, users)
+    |> assign(:users, Enum.zip(users, user_stats))
     |> render("index.html")
   end
 
