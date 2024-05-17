@@ -40,6 +40,17 @@
       ) %>
     <% end %>
 
+    <%= if allow?(@current_user, "admin") do %>
+      <%= central_component("section_menu_button",
+        name: "add_user",
+        label: "Add user",
+        active: @active,
+        icon: "fa-regular fa-plus", 
+        bsname: bsname,
+        url: ~p"/teiserver/admin/users/create_form" 
+      ) %>
+    <% end %>
+
     <%= if @active == "show" do %>
       <%= central_component("section_menu_button",
         name: "show",

@@ -55,4 +55,15 @@
     <Fontawesome.icon icon="broom-wide" style="solid" /> &nbsp;
     GDPR clean
   </.link>
+
+  <.link
+    :if={allow?(@current_user, "Server")}
+    href={~p"/admin/users/delete_user/#{@user.id}"}
+    data-confirm="Are you sure?"
+    method="put"
+    class="dropdown-item bg-danger_transparent"
+  >
+    <Fontawesome.icon icon="broom-wide" style="solid" /> &nbsp;
+    Delete user
+  </.link>
 </div>
