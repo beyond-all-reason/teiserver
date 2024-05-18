@@ -500,13 +500,6 @@ defmodule Teiserver.CacheUser do
     :ok
   end
 
-  def request_password_reset(user) do
-    db_user = Account.get_user!(user.id)
-
-    Teiserver.Account.Emails.password_reset(db_user)
-    |> Teiserver.Mailer.deliver_now()
-  end
-
   def request_email_change(nil, _), do: nil
 
   def request_email_change(user, new_email) do
