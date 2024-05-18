@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Admin.UserController do
   @moduledoc false
+  require Logger
   use TeiserverWeb, :controller
 
   alias Teiserver.{Account, Chat, Game}
@@ -379,12 +380,21 @@ defmodule TeiserverWeb.Admin.UserController do
         |> redirect(to: ~p"/teiserver/admin/user")
 
       {true, _} ->
-        Teiserver.Account.Emails.password_reset(user)
-        |> Teiserver.Mailer.deliver_now()
+        case Teiserver.Account.Emails.send_password_reset(user) do
+          :ok ->
+            conn
+            |> put_flash(:success, "Password reset email sent to user")
+            |> redirect(to: ~p"/teiserver/admin/user/#{user}")
 
-        conn
-        |> put_flash(:success, "Password reset email sent to user")
-        |> redirect(to: ~p"/teiserver/admin/user")
+          {:error, error} ->
+            Logger.error(
+              "Failed to send password reset email to user at #{user.email}: #{inspect(error)}"
+            )
+
+            conn
+            |> put_flash(:error, "Oops, something went wrong resetting the password")
+            |> redirect(to: ~p"/teiserver/admin/user/#{user}")
+        end
     end
   end
 
@@ -1069,7 +1079,6 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-
         new_user =
           Map.merge(user, %{
             name: Ecto.UUID.generate(),
