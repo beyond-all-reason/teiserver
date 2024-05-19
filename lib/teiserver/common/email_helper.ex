@@ -69,6 +69,6 @@ defmodule Teiserver.EmailHelper do
     |> Email.put_header("Message-Id", message_id)
     |> Email.html_body(html_body)
     |> Email.text_body(text_body)
-    |> Teiserver.Mailer.deliver_now()
+    |> Teiserver.Mailer.deliver_now(response: true)
   end
 end

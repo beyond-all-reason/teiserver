@@ -296,9 +296,8 @@ defmodule Teiserver.CacheUser do
               :no_verify ->
                 verify_user(get_user_by_id(user.id))
 
-              {:ok, _} ->
+              {:ok, _, _} ->
                 :ok
-                # Logger.error("Email sent, response of #{Kernel.inspect response}")
             end
         end
 
@@ -339,7 +338,7 @@ defmodule Teiserver.CacheUser do
               verify_user(get_user_by_id(user.id))
               :ok
 
-            {:ok, _} ->
+            {:ok, _, _} ->
               :ok
           end
         end
