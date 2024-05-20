@@ -10,8 +10,6 @@ defmodule Teiserver.Startup do
 
     Teiserver.TeiserverConfigs.teiserver_configs()
 
-    Teiserver.Communication.build_text_callback_cache()
-
     Teiserver.LobbyIdServer.start_lobby_id_server()
 
     Teiserver.Tachyon.CommandDispatch.build_dispatch_cache()
