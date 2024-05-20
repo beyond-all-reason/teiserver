@@ -10,7 +10,6 @@ defmodule Teiserver.Startup do
 
     Teiserver.LobbyIdServer.start_lobby_id_server()
 
-    Teiserver.Lobby.CommandLib.cache_lobby_commands()
     Teiserver.Bridge.CommandLib.cache_discord_commands()
     Teiserver.Communication.pre_cache_discord_channels()
 
