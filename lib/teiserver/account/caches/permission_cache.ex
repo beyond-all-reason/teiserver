@@ -50,6 +50,8 @@ defmodule Teiserver.Account.PermissionCache do
       ~w(account tester contributor dev streamer donor verified bot moderator)
     )
 
+    :ok = Teiserver.Logging.Startup.startup()
+
     :ok
   end
 
