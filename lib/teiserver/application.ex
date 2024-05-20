@@ -7,6 +7,9 @@ defmodule Teiserver.Application do
   alias Phoenix.PubSub
   require Logger
 
+  import Teiserver.Helpers.CacheHelper,
+    only: [concache_sup: 1, concache_sup: 2, concache_perm_sup: 1]
+
   @impl true
   def start(_type, _args) do
     # List all child processes to be supervised
@@ -201,34 +204,6 @@ defmodule Teiserver.Application do
     else
       []
     end
-  end
-
-  defp concache_sup(name, opts \\ []) do
-    Supervisor.child_spec(
-      {
-        ConCache,
-        [
-          name: name,
-          ttl_check_interval: 10_000,
-          global_ttl: opts[:global_ttl] || 60_000,
-          touch_on_read: true
-        ]
-      },
-      id: {ConCache, name}
-    )
-  end
-
-  defp concache_perm_sup(name) do
-    Supervisor.child_spec(
-      {
-        ConCache,
-        [
-          name: name,
-          ttl_check_interval: false
-        ]
-      },
-      id: {ConCache, name}
-    )
   end
 
   def startup_sub_functions({:error, _}), do: :error
