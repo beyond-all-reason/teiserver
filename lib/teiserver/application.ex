@@ -162,10 +162,7 @@ defmodule Teiserver.Application do
 
         # Telemetry
         {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
-
-        # Text callbacks
-        concache_perm_sup(:text_callback_trigger_lookup),
-        concache_perm_sup(:text_callback_store),
+        Teiserver.Communication.Cache,
 
         # Ranch servers
         %{
