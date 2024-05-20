@@ -56,9 +56,7 @@ defmodule Teiserver.Application do
         concache_sup(:application_temp_cache),
         concache_sup(:config_user_cache),
 
-        # Tachyon schemas
-        concache_perm_sup(:tachyon_schemas),
-        concache_perm_sup(:tachyon_dispatches),
+        Teiserver.Tachyon.Cache,
 
         # Teiserver stuff
         # Global/singleton registries
