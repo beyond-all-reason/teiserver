@@ -11,6 +11,9 @@ defmodule Teiserver.Admin.DeleteUserTask do
     id_list
     |> Enum.each(&Account.decache_user/1)
 
+
+    int_id_list = Enum.map(id_list, fn x -> String.to_integer(x) end)
+
     [
       # Clan memberships
       "DELETE FROM teiserver_clan_memberships WHERE user_id = ANY($1)",
@@ -33,6 +36,8 @@ defmodule Teiserver.Admin.DeleteUserTask do
       "DELETE FROM telemetry_complex_server_event_types WHERE user_id = ANY($1)",
       "DELETE FROM telemetry_simple_server_event_types WHERE user_id = ANY($1)",
       "DELETE FROM telemetry_user_properties WHERE user_id = ANY($1)",
+      "DELETE FROM telemetry_simple_server_events WHERE user_id = ANY($1)",
+      "DELETE FROM telemetry_simple_lobby_events WHERE user_id = ANY($1)",
 
       # User table extensions/stats
       "DELETE FROM teiserver_account_user_stats WHERE user_id = ANY($1)",
@@ -55,16 +60,17 @@ defmodule Teiserver.Admin.DeleteUserTask do
       "DELETE FROM teiserver_game_rating_logs WHERE user_id = ANY($1)",
 
       # Moderation
-      "DELETE FROM moderation_reports WHERE reporter_id = ANY($1) OR target_id = ANY($1) OR responder_id = ANY($1)",
-      "DELETE FROM moderation_actions WHERE target_id = ANY($1)"
+      "DELETE FROM moderation_reports WHERE reporter_id = ANY($1)",
+      "DELETE FROM moderation_reports WHERE target_id = ANY($1)",
+      "DELETE FROM moderation_actions WHERE responder_id = ANY($1)"
     ]
     |> Enum.each(fn query ->
-      Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+      Ecto.Adapters.SQL.query(Repo, query, [int_id_list])
     end)
 
     # And now the users
     query = "DELETE FROM account_users WHERE id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+    Ecto.Adapters.SQL.query!(Repo, query, [int_id_list])
 
     # Delete our cache of them
     id_list
