@@ -8,7 +8,8 @@ defmodule Teiserver.Config.SiteConfigTypes.Cache do
 
   def start_link(opts) do
     with {:ok, sup} <- Supervisor.start_link(__MODULE__, :ok, opts),
-         :ok <- Teiserver.Config.SiteConfigTypes.SystemConfigs.create() do
+         :ok <- Teiserver.Config.SiteConfigTypes.SystemConfigs.create(),
+         :ok <- Teiserver.TeiserverConfigs.teiserver_configs() do
       {:ok, sup}
     end
   end
