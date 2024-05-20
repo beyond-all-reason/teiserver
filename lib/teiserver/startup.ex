@@ -8,29 +8,6 @@ defmodule Teiserver.Startup do
   def startup do
     start_time = System.system_time(:millisecond)
 
-    # Brought over from Central
-    Teiserver.store_put(
-      :application_metadata_cache,
-      "random_names_1",
-      ~w(serene energised humble auspicious decisive exemplary cheerful determined playful spry springy)
-    )
-
-    Teiserver.store_put(:application_metadata_cache, "random_names_2", ~w(
-      maroon cherry rose ruby
-      amber carrot
-      lemon beige
-      mint lime cadmium
-      aqua cerulean
-      lavender indigo
-      magenta amethyst
-    ))
-
-    Teiserver.store_put(
-      :application_metadata_cache,
-      "random_names_3",
-      ~w(hamster gerbil cat dog falcon eagle mole fox tiger panda elephant lion cow dove whale dolphin squid dragon snake platypus badger)
-    )
-
     Teiserver.TeiserverConfigs.teiserver_configs()
 
     Teiserver.Communication.build_text_callback_cache()
@@ -73,13 +50,6 @@ defmodule Teiserver.Startup do
       "Microblog.delete_post",
       "Discord.text_callback"
     ])
-
-    Teiserver.store_put(
-      :application_metadata_cache,
-      "random_names_3",
-      ~w(tick pawn lazarus rocketeer crossbow mace centurion tumbleweed smuggler compass ghost sprinter butler webber platypus hound welder recluse archangel gunslinger sharpshooter umbrella fatboy marauder vanguard razorback titan) ++
-        ~w(grunt graverobber aggravator trasher thug bedbug deceiver augur spectre fiend twitcher duck skuttle sumo arbiter manticore termite commando mammoth shiva karganeth catapult behemoth juggernaught)
-    )
 
     Teiserver.cache_put(:lists, :rooms, [])
     Teiserver.cache_put(:lists, :lobby_policies, [])
