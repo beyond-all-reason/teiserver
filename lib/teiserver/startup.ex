@@ -17,36 +17,6 @@ defmodule Teiserver.Startup do
     Teiserver.Bridge.CommandLib.cache_discord_commands()
     Teiserver.Communication.pre_cache_discord_channels()
 
-    add_audit_types([
-      "Account:User password reset",
-      "Account:Failed login",
-      "Account:Created user",
-      "Account:Updated user",
-      "Account:Updated user permissions",
-      "Account:User registration",
-      "Account:Updated report",
-      "Site config:Update value",
-      "Moderation:Ban enabled",
-      "Moderation:Ban disabled",
-      "Moderation:Ban updated",
-      "Moderation:Ban enacted",
-      "Moderation:Action deleted",
-      "Moderation:Action halted",
-      "Moderation:Action re_posted",
-      "Moderation:Action updated",
-      "Moderation:Action created",
-      "Moderation:De-bridged user",
-      "Moderation:Mark as smurf",
-      "Teiserver:Updated automod action",
-      "Teiserver:Automod action enacted",
-      "Teiserver:De-bridged user",
-      "Teiserver:Changed user rating",
-      "Teiserver:Changed user name",
-      "Teiserver:Smurf merge",
-      "Microblog.delete_post",
-      "Discord.text_callback"
-    ])
-
     Teiserver.cache_put(:lists, :rooms, [])
     Teiserver.cache_put(:lists, :lobby_policies, [])
 
