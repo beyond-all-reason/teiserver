@@ -8,8 +8,6 @@ defmodule Teiserver.Startup do
   def startup do
     start_time = System.system_time(:millisecond)
 
-    Teiserver.TeiserverConfigs.teiserver_configs()
-
     Teiserver.LobbyIdServer.start_lobby_id_server()
 
     Teiserver.Tachyon.CommandDispatch.build_dispatch_cache()
