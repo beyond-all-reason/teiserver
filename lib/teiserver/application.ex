@@ -133,7 +133,7 @@ defmodule Teiserver.Application do
         concache_perm_sup(:discord_command_cache),
 
         # Lobbies
-        concache_perm_sup(:lobby_command_cache),
+        Teiserver.Lobby.Cache,
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.LobbySupervisor},
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.ClientSupervisor},
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.PartySupervisor},
