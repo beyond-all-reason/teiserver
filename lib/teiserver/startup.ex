@@ -31,13 +31,6 @@ defmodule Teiserver.Startup do
       ~w(hamster gerbil cat dog falcon eagle mole fox tiger panda elephant lion cow dove whale dolphin squid dragon snake platypus badger)
     )
 
-    add_permission_set("admin", "debug", ~w(debug))
-    add_permission_set("admin", "dev", ~w(developer structure))
-    add_permission_set("admin", "admin", ~w(limited full))
-    add_permission_set("admin", "report", ~w(show update delete report))
-    add_permission_set("admin", "user", ~w(show create update delete report))
-    add_permission_set("admin", "group", ~w(show create update delete report config))
-
     Teiserver.Logging.Startup.startup()
 
     # User Configs
@@ -59,38 +52,6 @@ defmodule Teiserver.Startup do
     Teiserver.Lobby.CommandLib.cache_lobby_commands()
     Teiserver.Bridge.CommandLib.cache_discord_commands()
     Teiserver.Communication.pre_cache_discord_channels()
-
-    # Chat stuff
-    Teiserver.Account.UserLib.add_report_restriction_types("Chat", [
-      "Bridging",
-      "Game chat",
-      "Room chat",
-      "All chat"
-    ])
-
-    # Lobby interaction
-    Teiserver.Account.UserLib.add_report_restriction_types("Game", [
-      "Low priority",
-      "All lobbies",
-      "Login",
-      "Permanently banned"
-    ])
-
-    Teiserver.Account.UserLib.add_report_restriction_types("Other", [
-      "Accolades",
-      "Boss",
-      "Reporting",
-      "Renaming",
-      "Matchmaking"
-    ])
-
-    Teiserver.Account.UserLib.add_report_restriction_types("Warnings", [
-      "Warning reminder"
-    ])
-
-    Teiserver.Account.UserLib.add_report_restriction_types("Internal", [
-      "Note"
-    ])
 
     add_audit_types([
       "Account:User password reset",
@@ -121,25 +82,6 @@ defmodule Teiserver.Startup do
       "Microblog.delete_post",
       "Discord.text_callback"
     ])
-
-    # Permissions setup
-    add_permission_set("teiserver", "admin", ~w(account battle clan queue))
-
-    add_permission_set(
-      "teiserver",
-      "staff",
-      ~w(overwatch reviewer moderator admin communication clan telemetry server)
-    )
-
-    add_permission_set("teiserver", "dev", ~w(infolog))
-    add_permission_set("teiserver", "reports", ~w(client server match ratings infolog))
-    add_permission_set("teiserver", "api", ~w(battle))
-
-    add_permission_set(
-      "teiserver",
-      "player",
-      ~w(account tester contributor dev streamer donor verified bot moderator)
-    )
 
     Teiserver.store_put(
       :application_metadata_cache,
