@@ -50,7 +50,7 @@ defmodule Teiserver.Application do
         concache_sup(:account_blocking_this_cache),
         concache_perm_sup(:recently_used_cache),
         Teiserver.Account.PermissionCache,
-        concache_perm_sup(:config_user_type_store),
+        Teiserver.Config.UserConfigTypes.Cache,
         concache_perm_sup(:config_site_type_store),
         concache_perm_sup(:config_site_cache),
         concache_perm_sup(:application_metadata_cache),
