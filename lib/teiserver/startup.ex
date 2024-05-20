@@ -31,9 +31,6 @@ defmodule Teiserver.Startup do
       ~w(hamster gerbil cat dog falcon eagle mole fox tiger panda elephant lion cow dove whale dolphin squid dragon snake platypus badger)
     )
 
-    # System Configs
-    Teiserver.Config.SiteConfigTypes.SystemConfigs.create()
-
     Teiserver.TeiserverConfigs.teiserver_configs()
 
     Teiserver.Communication.build_text_callback_cache()
