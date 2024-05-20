@@ -52,7 +52,7 @@ defmodule Teiserver.Application do
         Teiserver.Account.PermissionCache,
         Teiserver.Config.UserConfigTypes.Cache,
         Teiserver.Config.SiteConfigTypes.Cache,
-        concache_perm_sup(:application_metadata_cache),
+        Teiserver.MetadataCache,
         concache_sup(:application_temp_cache),
         concache_sup(:config_user_cache),
 
