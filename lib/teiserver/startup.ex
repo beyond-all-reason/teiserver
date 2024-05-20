@@ -31,8 +31,6 @@ defmodule Teiserver.Startup do
       ~w(hamster gerbil cat dog falcon eagle mole fox tiger panda elephant lion cow dove whale dolphin squid dragon snake platypus badger)
     )
 
-    Teiserver.Logging.Startup.startup()
-
     # User Configs
     Teiserver.Config.UserConfigTypes.ProfileConfigs.create()
     Teiserver.Config.UserConfigTypes.PrivacyConfigs.create()
