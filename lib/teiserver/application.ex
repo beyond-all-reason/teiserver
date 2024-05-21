@@ -77,7 +77,6 @@ defmodule Teiserver.Application do
 
         # Stores - Tables where changes are not propagated across the cluster
         # Possible stores
-        concache_perm_sup(:teiserver_queues),
         concache_perm_sup(:lobby_policies_cache),
 
         # Telemetry
@@ -95,8 +94,6 @@ defmodule Teiserver.Application do
         concache_sup(:teiserver_game_rating_types, global_ttl: 60_000),
 
         # Caches
-        # Caches - Meta
-        concache_perm_sup(:lists),
 
         # Caches - User
         # concache_sup(:users_lookup_name_with_id, [global_ttl: 300_000]),
@@ -141,6 +138,7 @@ defmodule Teiserver.Application do
 
         # Matchmaking
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueSupervisor},
+        Teiserver.Data.MatchmakingCache,
 
         # Coordinator mode
         {DynamicSupervisor,
