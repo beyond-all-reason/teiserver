@@ -644,7 +644,7 @@ defmodule Teiserver.Protocols.SpringIn do
               Account.create_code(%{
                 value: ExULID.ULID.generate(),
                 purpose: "one_time_login",
-                expires: Timex.now() |> Timex.shift(minutes: 5),
+                expires: Timex.now() |> Timex.shift(minutes: 30),
                 user_id: state.userid,
                 metadata: %{
                   ip: client.ip,
@@ -658,7 +658,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
             Coordinator.send_to_user(state.userid, [
               "To complete your report, please use the form on this link: #{url}",
-              "The link will expire in 5 minutes.",
+              "The link will expire in 30 minutes.",
               "If the link doesn't work, you can also view your matches at https://#{host}/battle and report players from the player tab of the relevant battle."
             ])
 
