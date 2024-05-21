@@ -13,8 +13,6 @@ defmodule Teiserver.Startup do
     Teiserver.Bridge.CommandLib.cache_discord_commands()
     Teiserver.Communication.pre_cache_discord_channels()
 
-    Teiserver.Game.pre_cache_policies()
-
     # Add in achievements
     Teiserver.Game.GenerateAchievementTypes.perform()
 
