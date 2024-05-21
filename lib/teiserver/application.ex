@@ -77,7 +77,7 @@ defmodule Teiserver.Application do
 
         # Stores - Tables where changes are not propagated across the cluster
         # Possible stores
-        concache_perm_sup(:lobby_policies_cache),
+        Teiserver.Data.LobbyPolicyCache,
 
         # Telemetry
         concache_perm_sup(:telemetry_property_types_cache),
