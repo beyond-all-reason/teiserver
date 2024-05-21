@@ -77,7 +77,6 @@ defmodule Teiserver.Application do
 
         # Stores - Tables where changes are not propagated across the cluster
         # Possible stores
-        concache_perm_sup(:teiserver_queues),
         concache_perm_sup(:lobby_policies_cache),
 
         # Telemetry
@@ -96,7 +95,7 @@ defmodule Teiserver.Application do
 
         # Caches
         # Caches - Meta
-        concache_perm_sup(:lists),
+        Teiserver.Data.MatchmakingCache,
 
         # Caches - User
         # concache_sup(:users_lookup_name_with_id, [global_ttl: 300_000]),

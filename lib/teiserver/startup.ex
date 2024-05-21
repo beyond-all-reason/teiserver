@@ -13,10 +13,6 @@ defmodule Teiserver.Startup do
     Teiserver.Bridge.CommandLib.cache_discord_commands()
     Teiserver.Communication.pre_cache_discord_channels()
 
-    Teiserver.cache_put(:lists, :rooms, [])
-    Teiserver.cache_put(:lists, :lobby_policies, [])
-
-    Teiserver.Data.Matchmaking.pre_cache_queues()
     Teiserver.Game.pre_cache_policies()
 
     # Add in achievements
