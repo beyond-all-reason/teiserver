@@ -117,11 +117,11 @@ config :teiserver, Oban,
        # Every hour
        {"0 * * * *", Teiserver.Admin.HourlyCleanupTask},
 
-       # Every day at 1am
-       {"0 1 * * *", Teiserver.Admin.DailyCleanupTask},
+       # Every day at 8am
+       {"0 8 * * *", Teiserver.Admin.DailyCleanupTask},
 
-       # Every day at 2am
-       {"0 2 * * *", Teiserver.Logging.AggregateViewLogsTask},
+       # Every day at 9am
+       {"0 9 * * *", Teiserver.Logging.AggregateViewLogsTask},
 
        # 1:07 am
        {"7 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
@@ -137,19 +137,19 @@ config :teiserver, Oban,
        # Every minute
        {"* * * * *", Teiserver.Battle.Tasks.PostMatchProcessTask},
 
-       # 2am
-       {"1 2 * * *", Teiserver.Logging.Tasks.PersistServerDayTask},
-       {"2 2 * * *", Teiserver.Logging.Tasks.PersistServerWeekTask},
-       {"3 2 * * *", Teiserver.Logging.Tasks.PersistServerMonthTask},
-       {"4 2 * * *", Teiserver.Logging.Tasks.PersistServerQuarterTask},
-       {"5 2 * * *", Teiserver.Logging.Tasks.PersistServerYearTask},
-       {"6 2 * * *", Teiserver.Logging.Tasks.PersistMatchDayTask},
-       {"7 2 * * *", Teiserver.Logging.Tasks.PersistMatchMonthTask},
-       {"8 2 * * *", Teiserver.Telemetry.InfologCleanupTask},
-       {"9 2 * * *", Teiserver.Logging.Tasks.PersistUserActivityDayTask},
+       # 9am
+       {"1 9 * * *", Teiserver.Logging.Tasks.PersistServerDayTask},
+       {"2 9 * * *", Teiserver.Logging.Tasks.PersistServerWeekTask},
+       {"3 9 * * *", Teiserver.Logging.Tasks.PersistServerMonthTask},
+       {"4 9 * * *", Teiserver.Logging.Tasks.PersistServerQuarterTask},
+       {"5 9 * * *", Teiserver.Logging.Tasks.PersistServerYearTask},
+       {"6 9 * * *", Teiserver.Logging.Tasks.PersistMatchDayTask},
+       {"7 9 * * *", Teiserver.Logging.Tasks.PersistMatchMonthTask},
+       {"8 9 * * *", Teiserver.Telemetry.InfologCleanupTask},
+       {"9 9 * * *", Teiserver.Logging.Tasks.PersistUserActivityDayTask},
 
-       # 2:43
-       {"43 2 * * *", Teiserver.Game.AchievementCleanupTask},
+       # 9:43
+       {"43 9 * * *", Teiserver.Game.AchievementCleanupTask},
 
        # 0302 and 1202 every day, gives time for multiple telemetry day tasks to run if needed
        {"2 3 * * *", Teiserver.Account.RecalculateUserDailyStatTask},
