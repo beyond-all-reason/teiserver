@@ -88,7 +88,7 @@ config :teiserver, Oban,
   crontab: false
 
 # Do not include metadata nor timestamps in development logs
-config :logger, :console, format: "[$level] $message\n"
+config :logger, :console, format: "[$level] $message\n",   level: :info
 
 config :logger,
   backends: [

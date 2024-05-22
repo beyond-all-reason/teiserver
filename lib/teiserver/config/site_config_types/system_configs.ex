@@ -39,7 +39,7 @@ defmodule Teiserver.Config.SiteConfigTypes.SystemConfigs do
       type: "boolean",
       permissions: ["Admin"],
       description: "When enabled you will use geoip for country code lookups",
-      default: true,
+      default: false,
       value_label: ""
     })
   end
