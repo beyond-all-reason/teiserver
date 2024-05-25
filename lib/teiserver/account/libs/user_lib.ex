@@ -171,7 +171,6 @@ defmodule Teiserver.Account.UserLib do
 
     user
     |> User.changeset(attrs)
-    |> IO.inspect()
     |> Repo.update()
     |> broadcast_update_user()
   end

@@ -1,6 +1,5 @@
 defmodule Teiserver.Account.User do
   @moduledoc false
-  require Logger
   use TeiserverWeb, :schema
   @behaviour Bodyguard.Policy
 
@@ -63,8 +62,6 @@ defmodule Teiserver.Account.User do
     # adds the attributes into the role array
     attrs = Map.put(attrs, "roles", new_Roles)
     
-
-    Logger.info("trying to get attrs data")
     if attrs["password"] == "" do
       user
       |> cast(
@@ -75,7 +72,6 @@ defmodule Teiserver.Account.User do
       |> unique_constraint(:email)
     else
       user
-      |> IO.inspect()
       |> cast(
         attrs,
         ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login_timex last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id clan_id behaviour_score trust_score social_score)a
