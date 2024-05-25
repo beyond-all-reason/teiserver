@@ -100,11 +100,14 @@ defmodule TeiserverWeb.Account.SessionController do
   end
 
   defp login_reply({:ok, user}, conn) do
+    cookies = Plug.Conn.fetch_cookies(conn, signed: ~w(_redirect_to)).cookies
+
     conn
     |> put_flash(:info, "Welcome back!")
     |> Guardian.Plug.sign_in(user)
     |> Guardian.Plug.remember_me(user)
-    |> redirect(to: "/")
+    |> Plug.Conn.delete_resp_cookie("_redirect_to", sign: true)
+    |> redirect(to: Map.get(cookies, "_redirect_to", "/"))
   end
 
   defp login_reply({:error, reason}, conn) do
