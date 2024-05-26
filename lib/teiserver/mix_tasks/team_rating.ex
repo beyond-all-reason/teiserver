@@ -27,7 +27,7 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
     #Logger.debug("Finished processing small team games")
 
     Logger.debug("Starting to process big team games")
-    process_big_team_games(true)
+    process_big_team_games(0)
     Logger.debug("Finished processing big team games")
   end
 
@@ -63,8 +63,9 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
     end)
   end
 
-  defp process_big_team_games(rate_big_games) do
-    # Get all big team matches
+  defp process_big_team_games(offset) do
+    batch_size = 10_000
+
     big_team_matches =
       Battle.list_matches(
         search: [
@@ -74,25 +75,32 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
           processed: true,
           team_size_greater_than: 4
         ],
-        limit: :infinity,
+        limit: batch_size,
+        offset: offset,
         preload: [:members]
       )
 
-    Logger.debug("Found #{Enum.count(big_team_matches)} big team game matches")
+    match_count = Enum.count(big_team_matches)
+    Logger.debug("Found #{match_count} big team game matches")
 
-    # For big team games only change game type
-    big_team_matches
-    |> Enum.chunk_every(50)
-    |> Enum.each(fn chunk ->
-      chunk
-      |> Enum.each(fn match ->
-        Battle.update_match(match, %{
-          game_type: "Big Team"
-        })
+    if match_count > 0 do
+      big_team_matches
+      |> Enum.chunk_every(50)
+      |> Enum.each(fn chunk ->
+        chunk
+        |> Enum.each(fn match ->
+          Battle.update_match(match, %{
+            game_type: "Big Team"
+          })
 
-        Logger.debug("RATING")
-        Teiserver.rate_match(match)
+          Logger.debug("RATING")
+          Teiserver.rate_match(match)
+        end)
       end)
-    end)
+
+      # Fetch and process the next batch
+      process_big_team_games(offset + batch_size)
+    end
   end
+
 end
