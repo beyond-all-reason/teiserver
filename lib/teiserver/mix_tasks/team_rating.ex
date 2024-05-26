@@ -64,7 +64,7 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
   end
 
   defp process_big_team_games(offset) do
-    batch_size = 10_000
+    batch_size = 50_000
 
     big_team_matches =
       Battle.list_matches(
