@@ -19,12 +19,12 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
       _ -> false
     end
 
-    rating_type_id = Teiserver.Game.MatchRatingLib.rating_type_name_lookup()["Team"]
-    Teiserver.Game.MatchRatingLib.reset_player_ratings(rating_type_id)
+    #rating_type_id = Teiserver.Game.MatchRatingLib.rating_type_name_lookup()["Team"]
+    #Teiserver.Game.MatchRatingLib.reset_player_ratings(rating_type_id)
 
-    Logger.debug("Starting to process small team games..")
-    process_small_team_games()
-    Logger.debug("Finished processing small team games")
+    #Logger.debug("Starting to process small team games..")
+    #process_small_team_games()
+    #Logger.debug("Finished processing small team games")
 
     Logger.debug("Starting to process big team games")
     process_big_team_games(true)
@@ -74,7 +74,8 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
           processed: true,
           team_size_greater_than: 4
         ],
-        limit: :infinity
+        limit: :infinity,
+        preload: [:members]
       )
 
     Logger.debug("Found #{Enum.count(big_team_matches)} big team game matches")
@@ -89,10 +90,8 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
           game_type: "Big Team"
         })
 
-        if rate_big_games do
-          Logger.debug("RATING")
-          Teiserver.rate_match(match)
-        end
+        Logger.debug("RATING")
+        Teiserver.rate_match(match)
       end)
     end)
   end
