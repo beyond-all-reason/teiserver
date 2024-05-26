@@ -10,7 +10,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   alias Teiserver.Battle.{BalanceLib, MatchLib}
   require Logger
 
-  @rated_match_types ["Small Team", "Big Team", "Duel", "FFA", "Team FFA", "Partied Team"]
+  @rated_match_types ["Small Team", "Big Team", "Duel", "Team", "FFA", "Team FFA", "Partied Team"]
 
   @spec rating_type_list() :: [String.t()]
   def rating_type_list() do
