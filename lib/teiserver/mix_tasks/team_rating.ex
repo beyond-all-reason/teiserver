@@ -32,11 +32,12 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
       Battle.list_matches(
         search: [
           server_uuid_not_nil: true,
-          game_type: "Team",
+          game_type_in: ["Team", "Small Team"],
           has_finished: true,
           processed: true,
           team_size_less_than: 5
         ],
+        order_by: "Oldest first",
         limit: :infinity,
         preload: [:members]
       )
@@ -65,11 +66,12 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
       Battle.list_matches(
         search: [
           server_uuid_not_nil: true,
-          game_type: "Team",
+          game_type_in: ["Team", "Small Team"],
           has_finished: true,
           processed: true,
           team_size_greater_than: 4
         ],
+        order_by: "Oldest first",
         limit: batch_size,
         offset: offset,
         preload: [:members]
