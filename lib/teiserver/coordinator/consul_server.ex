@@ -827,7 +827,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     player_list = list_players(state)
 
     {player_rating, player_uncertainty} =
-      BalanceLib.get_user_rating_value_uncertainty_pair(user.id, "Team")
+      # TODO FIX THIS BUG
+      # Teiserver.Battle.MatchLib.game_type/2 maybe to check for game type to get ratings for?
+      BalanceLib.get_user_rating_value_uncertainty_pair(user.id, "Big Team")
 
     player_rating = max(player_rating, 1)
     avoid_status = Account.check_avoid_status(user.id, player_list)

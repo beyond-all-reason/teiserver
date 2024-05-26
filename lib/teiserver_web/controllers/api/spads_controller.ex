@@ -22,7 +22,7 @@ defmodule TeiserverWeb.API.SpadsController do
       }) do
     actual_type =
       case type do
-        "TeamFFA" -> "Team"
+        "TeamFFA" -> "Big Team" # Team FFA uses Big Team rating
         v -> v
       end
 
@@ -160,7 +160,8 @@ defmodule TeiserverWeb.API.SpadsController do
           rating_type =
             cond do
               total_players == 2 -> "Duel"
-              team_count == 2 -> "Team"
+              team_count == 2 and total_players <= 8 -> "Small Team"
+              team_count == 2 and total_players > 8 -> "Big Team"
               total_players == team_count -> "FFA"
               true -> "Team FFA"
             end

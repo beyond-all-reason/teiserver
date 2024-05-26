@@ -27,8 +27,7 @@ defmodule Teiserver.Game.MappingReport do
         search: [
           started_after: start_date |> Timex.to_datetime(),
           started_before: end_date |> Timex.to_datetime(),
-          # game_type_in: ["Duel", "Team", "FFA", "Team FFA"],
-          game_type_in: ["Duel", "Team"],
+          game_type_in: ["Duel", "Small Team", "Big Team"],
           of_interest: true,
           has_winning_team: true
         ],

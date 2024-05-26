@@ -10,7 +10,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   alias Teiserver.Battle.{BalanceLib, MatchLib}
   require Logger
 
-  @rated_match_types ["Team", "Duel", "FFA", "Team FFA", "Partied Team"]
+  @rated_match_types ["Small Team", "Big Team", "Duel", "FFA", "Team FFA", "Partied Team"]
 
   @spec rating_type_list() :: [String.t()]
   def rating_type_list() do
@@ -191,7 +191,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     rate_result = rate_with_ids([winner_ratings, loser_ratings], as_map: true)
 
     status_lookup =
-      if match.game_type == "Team" do
+      if match.game_type in ["Small Team", "Big Team"] do
         match.members
         |> Map.new(fn membership ->
           {membership.user_id,
@@ -357,7 +357,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     win_result = Map.new(win_result)
 
     status_lookup =
-      if Enum.member?(["Team", "Team FFA"], match.game_type) do
+      if Enum.member?(["Small Team", "Big Team", "Team FFA"], match.game_type) do
         match.members
         |> Map.new(fn membership ->
           {membership.user_id,
@@ -771,7 +771,6 @@ defmodule Teiserver.Game.MatchRatingLib do
     results =
       Battle.list_matches(
         search: [
-          # game_type_in: ["Team"],
           game_type_in: @rated_match_types,
           processed: true,
           started_after: Timex.now() |> Timex.shift(days: -31)

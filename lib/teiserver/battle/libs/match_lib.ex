@@ -38,7 +38,8 @@ defmodule Teiserver.Battle.MatchLib do
       String.contains?(bot_names, "Raptor") -> "Raptors"
       Enum.empty?(bots) == false -> "Bots"
       Enum.count(teams) == 2 and max_team_size == 1 -> "Duel"
-      Enum.count(teams) == 2 -> "Team"
+      Enum.count(teams) == 2 and max_team_size <= 4 -> "Small Team" # 2v2, 3v3, 4v4
+      Enum.count(teams) == 2 and max_team_size > 4 -> "Big Team" # 5v5, 6v6, 7v7, 8v8
       max_team_size == 1 -> "FFA"
       true -> "Team FFA"
     end
@@ -47,7 +48,8 @@ defmodule Teiserver.Battle.MatchLib do
   def list_game_types() do
     [
       "Duel",
-      "Team",
+      "Small Team",
+      "Big Team",
       "FFA",
       "Team FFA",
       "Raptors",
@@ -59,7 +61,8 @@ defmodule Teiserver.Battle.MatchLib do
   def list_rated_game_types() do
     [
       "Duel",
-      "Team",
+      "Small Team",
+      "Big Team",
       "FFA",
       "Team FFA"
     ]
@@ -142,7 +145,7 @@ defmodule Teiserver.Battle.MatchLib do
   def make_match_name(match) do
     case match.game_type do
       "Duel" -> "Duel on #{match.map}"
-      "Team" -> "#{match.team_size}v#{match.team_size} on #{match.map}"
+      type when type in ["Small Team", "Big Team"] -> "#{match.team_size}v#{match.team_size} on #{match.map}"
       "FFA" -> "#{match.team_count} way FFA on #{match.map}"
       t -> "#{t} game on #{match.map}"
     end

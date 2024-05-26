@@ -169,10 +169,13 @@ defmodule Teiserver.Game.BalancerServer do
           "Duel"
 
         team_count > 2 ->
-          if player_count > team_count, do: "Team", else: "FFA"
+          if player_count > team_count, do: "Big Team", else: "FFA"
+
+        team_count == 2 ->
+          if player_count > 8, do: "Big Team", else: "Small Team"
 
         true ->
-          "Team"
+          "Big Team"
       end
 
     if opts[:allow_groups] do

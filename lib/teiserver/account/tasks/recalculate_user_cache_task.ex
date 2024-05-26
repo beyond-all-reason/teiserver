@@ -19,7 +19,8 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
     case match.game_type do
       "Duel" -> do_match_processed_duel(userid)
       "FFA" -> do_match_processed_duel(userid)
-      "Team" -> do_match_processed_team(userid)
+      "Small Team" -> do_match_processed_team_small(userid)
+      "Big Team" -> do_match_processed_team_big(userid)
       _ -> :ok
     end
 
@@ -105,8 +106,16 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
     :ok
   end
 
-  def do_match_processed_team(userid) do
-    filter_type_id = MatchRatingLib.rating_type_name_lookup()["Team"]
+  def do_match_processed_team_big(userid) do
+    do_match_processed_team(userid, "Big Team")
+  end
+
+  def do_match_processed_team_small(userid) do
+    do_match_processed_team(userid, "Small Team")
+  end
+
+  defp do_match_processed_team(userid, team_subtype) do
+    filter_type_id = MatchRatingLib.rating_type_name_lookup()[team_subtype]
 
     logs =
       Game.list_rating_logs(

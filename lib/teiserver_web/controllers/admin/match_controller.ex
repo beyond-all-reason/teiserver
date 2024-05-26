@@ -239,8 +239,11 @@ defmodule TeiserverWeb.Admin.MatchController do
         match.team_count > 2 ->
           if match.team_size > 1, do: "Team FFA", else: "FFA"
 
+        match.team_count == 2 ->
+          if match.team_size > 4, do: "Big Team", else: "Small Team"
+
         true ->
-          "Team"
+          "Big Team"
       end
 
     partied_players =
