@@ -53,7 +53,7 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
           game_type: "Small Team"
         })
 
-        Teiserver.rate_match(match)
+        Teiserver.rate_match(match.id)
       end)
     end)
   end
@@ -87,9 +87,7 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
           Battle.update_match(match, %{
             game_type: "Big Team"
           })
-
-          Logger.debug("RATING")
-          Teiserver.rate_match(match)
+          Teiserver.rate_match(match.id)
         end)
       end)
 
