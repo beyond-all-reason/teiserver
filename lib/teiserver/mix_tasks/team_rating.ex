@@ -8,7 +8,6 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
   use Mix.Task
 
   alias Teiserver.Battle
-
   require Logger
 
   @spec run(list()) :: :ok
@@ -20,8 +19,8 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
       _ -> false
     end
 
-    rating_type_id = rating_type_name_lookup()["Team"]
-    reset_player_ratings(rating_type_id)
+    rating_type_id = Teiserver.Game.MatchRatingLib.rating_type_name_lookup()["Team"]
+    Teiserver.Game.MatchRatingLib.reset_player_ratings(rating_type_id)
 
     Logger.debug("Starting to process small team games..")
     process_small_team_games()
