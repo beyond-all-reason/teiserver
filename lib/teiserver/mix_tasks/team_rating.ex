@@ -20,12 +20,15 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
       _ -> false
     end
 
+    rating_type_id = rating_type_name_lookup()["Team"]
+    reset_player_ratings(rating_type_id)
+
     Logger.debug("Starting to process small team games..")
     process_small_team_games()
     Logger.debug("Finished processing small team games")
 
     Logger.debug("Starting to process big team games")
-    process_big_team_games(rate)
+    process_big_team_games(true)
     Logger.debug("Finished processing big team games")
   end
 
@@ -36,6 +39,8 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
         search: [
           server_uuid_not_nil: true,
           game_type: "Team",
+          has_finished: true,
+          processed: true,
           team_size_less_than: 5
         ],
         limit: :infinity,
@@ -66,6 +71,8 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
         search: [
           server_uuid_not_nil: true,
           game_type: "Team",
+          has_finished: true,
+          processed: true,
           team_size_greater_than: 4
         ],
         limit: :infinity
