@@ -66,7 +66,7 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
       Battle.list_matches(
         search: [
           server_uuid_not_nil: true,
-          game_type_in: ["Team", "Small Team"],
+          game_type_in: ["Team", "Big Team"],
           has_finished: true,
           processed: true,
           team_size_greater_than: 4
