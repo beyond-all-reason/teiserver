@@ -14,20 +14,15 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
   def run(args) do
     Application.ensure_all_started(:teiserver)
 
-    rate = case args do
-      ["true"] -> true
-      _ -> false
-    end
+    rating_type_id = Teiserver.Game.MatchRatingLib.rating_type_name_lookup()["Team"]
+    Teiserver.Game.MatchRatingLib.reset_player_ratings(rating_type_id)
 
-    #rating_type_id = Teiserver.Game.MatchRatingLib.rating_type_name_lookup()["Team"]
-    #Teiserver.Game.MatchRatingLib.reset_player_ratings(rating_type_id)
-
-    #Logger.debug("Starting to process small team games..")
-    #process_small_team_games()
-    #Logger.debug("Finished processing small team games")
+    Logger.debug("Starting to process small team games..")
+    process_small_team_games()
+    Logger.debug("Finished processing small team games")
 
     Logger.debug("Starting to process big team games")
-    process_big_team_games(0)
+    process_big_team_games(0, 0)
     Logger.debug("Finished processing big team games")
   end
 
@@ -63,7 +58,7 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
     end)
   end
 
-  defp process_big_team_games(offset) do
+  defp process_big_team_games(offset, i) do
     batch_size = 50_000
 
     big_team_matches =
@@ -81,7 +76,7 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
       )
 
     match_count = Enum.count(big_team_matches)
-    Logger.debug("Found #{match_count} big team game matches")
+    Logger.debug("Batch #{i} - Found #{match_count} big team game matches")
 
     if match_count > 0 do
       big_team_matches
@@ -99,7 +94,7 @@ defmodule Mix.Tasks.Teiserver.Teamrating do
       end)
 
       # Fetch and process the next batch
-      process_big_team_games(offset + batch_size)
+      process_big_team_games(offset + batch_size, i+1)
     end
   end
 
