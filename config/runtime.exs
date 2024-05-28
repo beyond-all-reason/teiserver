@@ -43,12 +43,15 @@ if config_env() == :prod do
   config :teiserver, Teiserver.Setup,
     key: Teiserver.ConfigHelpers.get_env("TEI_SETUP_ROOT_KEY", nil)
 
+  enable_discord_bridge = Teiserver.ConfigHelpers.get_env("TEI_ENABLE_DISCORD_BRIDGE", true, :bool)
+
   config :teiserver, Teiserver,
     game_name: "Beyond All Reason",
     game_name_short: "BAR",
     main_website: "https://www.beyondallreason.info/",
     privacy_email: "privacy@beyondallreason.info",
     discord: "https://discord.gg/beyond-all-reason",
+    enable_discord_bridge: enable_discord_bridge,
     ports: [
       tcp: Teiserver.ConfigHelpers.get_env("TEI_SPRING_TCP_PORT", 8200, :int),
       tls: Teiserver.ConfigHelpers.get_env("TEI_SPRING_TLS_PORT", 8201, :int),
@@ -165,4 +168,24 @@ if config_env() == :prod do
     format: "$date $time [$level] $metadata $message\n",
     metadata: [:request_id, :user_id],
     level: :info
+
+  if enable_discord_bridge do
+    config :nostrum,
+      gateway_intents: [
+        :guilds,
+        :guild_messages,
+        :guild_message_reactions,
+        :direct_messages,
+        :message_content,
+        :direct_message_reactions
+      ],
+      log_full_events: true,
+      log_dispatch_events: true,
+      token: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_BOT_TOKEN")
+
+    config :teiserver, Teiserver.Bridge.DiscordBridgeBot,
+      token: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_BOT_TOKEN"),
+      guild_id: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_GUILD_ID"),
+      bot_name: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_BOT_NAME")
+  end
 end

@@ -48,4 +48,6 @@ TEI_SMTP_USERNAME=noreply@beyondallreason.info
 TEI_SMTP_PASSWORD=correct-battery-staple-horse-xkcd-936
 TEI_SMTP_TLS_VERIFY=false
 
+TEI_ENABLE_DISCORD_BRIDGE=false
+
 # vim: ft=systemd
