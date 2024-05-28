@@ -1,6 +1,11 @@
 defmodule Teiserver.Battle.CheekySwitcherSmartBalanceTest do
-  @moduledoc false
+  @moduledoc """
+  Can run tests in this file only by
+  mix test test/teiserver/battle/cheeky_switcher_smart_balance_test.exs
+  """
   use Teiserver.DataCase, async: true
+  @moduletag :balance_test
+
   alias Teiserver.Battle.BalanceLib
 
   @algorithm "cheeky_switcher_smart"
@@ -9,10 +14,10 @@ defmodule Teiserver.Battle.CheekySwitcherSmartBalanceTest do
     result =
       BalanceLib.create_balance(
         [
-          %{1 => 5},
-          %{2 => 6},
-          %{3 => 7},
-          %{4 => 8}
+          %{1 => %{rating: 5}},
+          %{2 => %{rating: 6}},
+          %{3 => %{rating: 7}},
+          %{4 => %{rating: 8}}
         ],
         2,
         algorithm: @algorithm

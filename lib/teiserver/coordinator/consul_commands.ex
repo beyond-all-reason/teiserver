@@ -666,12 +666,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> String.downcase()
       |> String.trim()
 
-    allowed_choices =
-      if CacheUser.is_moderator?(senderid) do
-        Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
-      else
-        ~w(loser_picks cheeky_switcher_smart)
-      end
+    is_moderator = CacheUser.is_moderator?(senderid)
+
+    allowed_choices = Teiserver.Battle.BalanceLib.get_allowed_algorithms(is_moderator)
 
     if Enum.member?(allowed_choices, remaining) do
       ChatLib.say(
