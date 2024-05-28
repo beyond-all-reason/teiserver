@@ -20,9 +20,6 @@ config :teiserver, Teiserver.Repo,
 # with webpack to recompile .js and .css sources.
 config :teiserver, TeiserverWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4000],
-  debug_errors: true,
-  code_reloader: true,
-  check_origin: false,
   watchers: [
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},

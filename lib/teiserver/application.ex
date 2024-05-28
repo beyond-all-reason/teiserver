@@ -197,7 +197,10 @@ defmodule Teiserver.Application do
 
   defp discord_start do
     if Teiserver.Communication.use_discord?() do
-      [{Teiserver.Bridge.DiscordBridgeBot, name: Teiserver.Bridge.DiscordBridgeBot}]
+      [
+        Nostrum.Application,
+        {Teiserver.Bridge.DiscordBridgeBot, name: Teiserver.Bridge.DiscordBridgeBot}
+      ]
     else
       []
     end

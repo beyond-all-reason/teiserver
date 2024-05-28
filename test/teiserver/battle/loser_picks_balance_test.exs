@@ -1,6 +1,10 @@
 defmodule Teiserver.Battle.LoserPicksBalanceTest do
-  @moduledoc false
+  @moduledoc """
+  Can run tests in this file only by
+  mix test test/teiserver/battle/loser_picks_balance_test.exs
+  """
   use Teiserver.DataCase, async: true
+  @moduletag :balance_test
   alias Teiserver.Battle.BalanceLib
 
   @algorithm "loser_picks"
@@ -9,10 +13,10 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
     result =
       BalanceLib.create_balance(
         [
-          %{1 => 5},
-          %{2 => 6},
-          %{3 => 7},
-          %{4 => 8}
+          %{1 => %{rating: 5}},
+          %{2 => %{rating: 6}},
+          %{3 => %{rating: 7}},
+          %{4 => %{rating: 8}}
         ],
         2,
         algorithm: @algorithm
@@ -56,10 +60,10 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
     result =
       BalanceLib.create_balance(
         [
-          %{1 => 5},
-          %{2 => 6},
-          %{3 => 7},
-          %{4 => 8}
+          %{1 => %{rating: 5}},
+          %{2 => %{rating: 6}},
+          %{3 => %{rating: 7}},
+          %{4 => %{rating: 8}}
         ],
         4,
         algorithm: @algorithm
@@ -107,12 +111,12 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
     result =
       BalanceLib.create_balance(
         [
-          %{1 => 5},
-          %{2 => 6},
-          %{3 => 7},
-          %{4 => 8},
-          %{5 => 9},
-          %{6 => 9}
+          %{1 => %{rating: 5}},
+          %{2 => %{rating: 6}},
+          %{3 => %{rating: 7}},
+          %{4 => %{rating: 8}},
+          %{5 => %{rating: 9}},
+          %{6 => %{rating: 9}}
         ],
         3,
         algorithm: @algorithm
@@ -164,9 +168,9 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
     result =
       BalanceLib.create_balance(
         [
-          %{4 => 5, 1 => 8},
-          %{2 => 6},
-          %{3 => 7}
+          %{4 => %{rating: 5}, 1 => %{rating: 8}},
+          %{2 => %{rating: 6}},
+          %{3 => %{rating: 7}}
         ],
         2,
         algorithm: @algorithm,
@@ -194,8 +198,9 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
                1 => 13,
                2 => 13
              },
+            #The captain should be the user with the highest rating on each team
              captains: %{
-               1 => 4,
+               1 => 1,
                2 => 3
              },
              team_sizes: %{
@@ -213,24 +218,24 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
       BalanceLib.create_balance(
         [
           # Two high tier players partied together
-          %{101 => 41, 102 => 35},
+          %{101 => %{rating: 41}, 102 => %{rating: 35}},
 
           # A bunch of mid-low tier players together
-          %{103 => 20, 104 => 17, 105 => 13.5},
+          %{103 => %{rating: 20}, 104 => %{rating: 17}, 105 => %{rating: 13.5}},
 
           # A smaller bunch of even lower tier players
-          %{106 => 15, 107 => 7.5},
+          %{106 => %{rating: 15}, 107 => %{rating: 7.5}},
 
           # Other players, a range of ratings
-          %{108 => 31},
-          %{109 => 26},
-          %{110 => 25},
-          %{111 => 21},
-          %{112 => 19},
-          %{113 => 16},
-          %{114 => 16},
-          %{115 => 14},
-          %{116 => 8}
+          %{108 => %{rating: 31}},
+          %{109 => %{rating: 26}},
+          %{110 => %{rating: 25}},
+          %{111 => %{rating: 21}},
+          %{112 => %{rating: 19}},
+          %{113 => %{rating: 16}},
+          %{114 => %{rating: 16}},
+          %{115 => %{rating: 14}},
+          %{116 => %{rating: 8}}
         ],
         2,
         algorithm: @algorithm,
@@ -241,7 +246,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
       )
 
     assert Map.drop(result, [:logs, :time_taken]) == %{
-             captains: %{1 => 116, 2 => 110},
+             captains: %{1 => 101, 2 => 102},
              deviation: 2,
              ratings: %{1 => 161, 2 => 164},
              team_groups: %{
@@ -280,29 +285,29 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
       BalanceLib.create_balance(
         [
           # Our smurf party
-          %{101 => 51, 102 => 10, 103 => 10},
+          %{101 => %{rating: 51}, 102 => %{rating: 10}, 103 => %{rating: 10}},
 
           # Other players, a range of ratings
-          %{104 => 35},
-          %{105 => 34},
-          %{106 => 29},
-          %{107 => 28},
-          %{108 => 27},
-          %{109 => 26},
-          %{110 => 25},
-          %{111 => 21},
-          %{112 => 19},
-          %{113 => 16},
-          %{114 => 15},
-          %{115 => 14},
-          %{116 => 8}
+          %{104 => %{rating: 35}},
+          %{105 => %{rating: 34}},
+          %{106 => %{rating: 29}},
+          %{107 => %{rating: 28}},
+          %{108 => %{rating: 27}},
+          %{109 => %{rating: 26}},
+          %{110 => %{rating: 25}},
+          %{111 => %{rating: 21}},
+          %{112 => %{rating: 19}},
+          %{113 => %{rating: 16}},
+          %{114 => %{rating: 15}},
+          %{115 => %{rating: 14}},
+          %{116 => %{rating: 8}}
         ],
         2,
         algorithm: @algorithm
       )
 
     assert Map.drop(result, [:logs, :time_taken]) == %{
-             captains: %{1 => 116, 2 => 115},
+             captains: %{1 => 101, 2 => 104},
              deviation: 0,
              ratings: %{1 => 184, 2 => 184},
              team_groups: %{
@@ -339,29 +344,30 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
       BalanceLib.create_balance(
         [
           # Our high tier party
-          %{101 => 52, 102 => 50, 103 => 49},
+          %{101 => %{rating: 52}, 102 => %{rating: 50}, 103 => %{rating: 49}},
 
           # Our other high tier party
-          %{104 => 51, 105 => 50, 106 => 50},
+          %{104 => %{rating: 51}, 105 => %{rating: 50}, 106 => %{rating: 50}},
 
           # Other players, a range of ratings
-          %{107 => 28},
-          %{108 => 27},
-          %{109 => 26},
-          %{110 => 25},
-          %{111 => 21},
-          %{112 => 19},
-          %{113 => 16},
-          %{114 => 15},
-          %{115 => 14},
-          %{116 => 8}
+          %{107 => %{rating: 28}},
+          %{108 => %{rating: 27}},
+          %{109 => %{rating: 26}},
+          %{110 => %{rating: 25}},
+          %{111 => %{rating: 21}},
+          %{112 => %{rating: 19}},
+          %{113 => %{rating: 16}},
+          %{114 => %{rating: 15}},
+          %{115 => %{rating: 14}},
+          %{116 => %{rating: 8}}
         ],
         2,
         algorithm: @algorithm
       )
 
     assert Map.drop(result, [:logs, :time_taken]) == %{
-             captains: %{1 => 116, 2 => 115},
+      #The captain should be the user with the highest rating on each team
+             captains: %{1 => 104, 2 => 101},
              deviation: 2,
              ratings: %{1 => 248, 2 => 253},
              team_groups: %{
@@ -395,23 +401,23 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
       BalanceLib.create_balance(
         [
           # Our high tier party
-          %{101 => 52, 102 => 50, 103 => 49},
+          %{101 => %{rating: 52}, 102 => %{rating: 50}, 103 => %{rating: 49}},
 
           # Our other high tier party, only 2 people this time
-          %{104 => 51, 105 => 50},
+          %{104 => %{rating: 51}, 105 => %{rating: 50}},
 
           # Other players, a range of ratings
-          %{106 => 50},
-          %{107 => 28},
-          %{108 => 27},
-          %{109 => 26},
-          %{110 => 25},
-          %{111 => 21},
-          %{112 => 19},
-          %{113 => 16},
-          %{114 => 15},
-          %{115 => 14},
-          %{116 => 8}
+          %{106 => %{rating: 50}},
+          %{107 => %{rating: 28}},
+          %{108 => %{rating: 27}},
+          %{109 => %{rating: 26}},
+          %{110 => %{rating: 25}},
+          %{111 => %{rating: 21}},
+          %{112 => %{rating: 19}},
+          %{113 => %{rating: 16}},
+          %{114 => %{rating: 15}},
+          %{115 => %{rating: 14}},
+          %{116 => %{rating: 8}}
         ],
         2,
         algorithm: @algorithm
@@ -420,7 +426,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
     # This is very similar to the previous one but a few things about the exact
     # pick order is different
     assert Map.drop(result2, [:logs, :time_taken]) == %{
-             captains: %{1 => 116, 2 => 115},
+             captains: %{1 => 101, 2 => 104},
              deviation: 2,
              ratings: %{1 => 248, 2 => 253},
              team_groups: %{

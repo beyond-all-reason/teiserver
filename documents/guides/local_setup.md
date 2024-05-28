@@ -149,3 +149,6 @@ The main dependencies of the project are:
 - [Ecto](https://github.com/elixir-ecto/ecto), database ORM
 - [Ranch](https://github.com/ninenines/ranch), a tcp server
 - [Oban](https://github.com/sorentwo/oban), a backend job processing framework.
+
+### Next Steps
+If you want to develop features that interact with the lobby, then you will need to [set up SPADS](/documents/guides/spads_install.md).

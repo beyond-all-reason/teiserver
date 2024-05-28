@@ -1,6 +1,10 @@
 defmodule Teiserver.Battle.BalanceLibTest do
-  @moduledoc false
+  @moduledoc """
+  Can run tests in this file only by
+  mix test test/teiserver/battle/balance_lib_test.exs
+  """
   use Teiserver.DataCase, async: true
+  @moduletag :balance_test
   alias Teiserver.Battle.BalanceLib
 
   test "balance algorithms - no players" do
@@ -27,7 +31,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
       result =
         BalanceLib.create_balance(
           [
-            %{1 => 5}
+            %{1 => %{rating: 5}}
           ],
           2,
           algorithm: algorithm_name
@@ -45,10 +49,10 @@ defmodule Teiserver.Battle.BalanceLibTest do
       result =
         BalanceLib.create_balance(
           [
-            %{1 => 5},
-            %{2 => 6},
-            %{3 => 7},
-            %{4 => 8}
+            %{1 => %{rating: 5}},
+            %{2 => %{rating: 6}},
+            %{3 => %{rating: 7}},
+            %{4 => %{rating: 8}}
           ],
           2,
           algorithm: algorithm_name
@@ -66,10 +70,10 @@ defmodule Teiserver.Battle.BalanceLibTest do
       result =
         BalanceLib.create_balance(
           [
-            %{1 => 5},
-            %{2 => 6},
-            %{3 => 7},
-            %{4 => 8}
+            %{1 => %{rating: 5}},
+            %{2 => %{rating: 6}},
+            %{3 => %{rating: 7}},
+            %{4 => %{rating: 8}}
           ],
           4,
           algorithm: algorithm_name
@@ -87,12 +91,12 @@ defmodule Teiserver.Battle.BalanceLibTest do
       result =
         BalanceLib.create_balance(
           [
-            %{1 => 5},
-            %{2 => 6},
-            %{3 => 7},
-            %{4 => 8},
-            %{5 => 9},
-            %{6 => 9}
+            %{1 => %{rating: 5}},
+            %{2 => %{rating: 6}},
+            %{3 => %{rating: 7}},
+            %{4 => %{rating: 8}},
+            %{5 => %{rating: 9}},
+            %{6 => %{rating: 9}}
           ],
           3,
           algorithm: algorithm_name
@@ -111,24 +115,24 @@ defmodule Teiserver.Battle.BalanceLibTest do
         BalanceLib.create_balance(
           [
             # Two high tier players partied together
-            %{101 => 41, 102 => 35},
+            %{101 => %{rating: 41}, 102 => %{rating: 35}},
 
             # A bunch of mid-low tier players together
-            %{103 => 20, 104 => 17, 105 => 13.5},
+            %{103 => %{rating: 20}, 104 => %{rating: 17}, 105 => %{rating: 13.5}},
 
             # A smaller bunch of even lower tier players
-            %{106 => 15, 107 => 7.5},
+            %{106 => %{rating: 15}, 107 => %{rating: 7.5}},
 
             # Other players, a range of ratings
-            %{108 => 31},
-            %{109 => 26},
-            %{110 => 25},
-            %{111 => 21},
-            %{112 => 19},
-            %{113 => 16},
-            %{114 => 16},
-            %{115 => 14},
-            %{116 => 8}
+            %{108 => %{rating: 31}},
+            %{109 => %{rating: 26}},
+            %{110 => %{rating: 25}},
+            %{111 => %{rating: 21}},
+            %{112 => %{rating: 19}},
+            %{113 => %{rating: 16}},
+            %{114 => %{rating: 16}},
+            %{115 => %{rating: 14}},
+            %{116 => %{rating: 8}}
           ],
           2,
           algorithm: algorithm_name

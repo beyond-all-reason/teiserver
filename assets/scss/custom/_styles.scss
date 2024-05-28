@@ -240,6 +240,29 @@ body {
   padding: 0.25rem 0.6rem;
 }
 
+//Ratings table
+.table-ratings {
+  table-layout: fixed;
+  font-size: 0.9rem;
+}
+
+//Map column for Ratings table
+.table-ratings tr th:nth-child(1) {
+  width: 12.5rem;
+}
+
+.table-ratings th {
+  padding: 0.5rem
+}
+
+.table-ratings td {
+  padding: 0.5rem
+}
+
+// Make the delta column closer to the associated value
+.table-ratings .column-delta {
+  transform: translate(-1.6rem, 0rem)
+}
 
 
 // We want out outline buttons to be filled in when you mouseover or activate them
