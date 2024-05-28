@@ -14,11 +14,6 @@ config :teiserver, TeiserverWeb.Endpoint,
   https: [
     port: 8888,
     otp_app: :teiserver,
-    keyfile: "/var/www/tls/privkey.pem",
-    certfile: "/var/www/tls/cert.pem",
-    cacertfile: "/var/www/tls/fullchain.pem",
-    versions: [:"tlsv1.2"],
-    dhfile: '/var/www/tls/dh-params.pem',
     ciphers: [
       'ECDHE-ECDSA-AES256-GCM-SHA384',
       'ECDHE-RSA-AES256-GCM-SHA384',
@@ -66,59 +61,4 @@ config :teiserver, TeiserverWeb.Endpoint,
   root: ".",
   cache_static_manifest: "priv/static/cache_manifest.json",
   server: true,
-  check_origin: ["//yourdomain.com", "//*.yourdomain.com"],
   version: Mix.Project.config()[:version]
-
-config :teiserver, Teiserver,
-  certs: [
-    keyfile: "/var/www/tls/privkey.pem",
-    certfile: "/var/www/tls/cert.pem",
-    cacertfile: "/var/www/tls/fullchain.pem"
-  ],
-  enable_benchmark: false,
-  node_name: "node-name",
-  enable_managed_lobbies: true,
-  tachyon_schema_path: "/apps/teiserver/lib/teiserver-0.1.0/priv/tachyon/schema_v1/*/*/*.json"
-
-config :teiserver, Teiserver.Repo,
-  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "40"),
-  timeout: 120_000,
-  queue_interval: 2000
-
-# Do not print debug messages in production
-config :logger,
-  format: "$date $time [$level] $metadata $message\n",
-  metadata: [:request_id, :user_id],
-  level: :info
-
-config :logger,
-  backends: [
-    {LoggerFileBackend, :error_log},
-    {LoggerFileBackend, :notice_log},
-    {LoggerFileBackend, :info_log},
-    :console
-  ]
-
-config :logger, :error_log,
-  path: "/var/log/teiserver/error.log",
-  format: "$date $time [$level] $metadata $message\n",
-  metadata: [:request_id, :user_id],
-  level: :error
-
-config :logger, :notice_log,
-  path: "/var/log/teiserver/notice.log",
-  format: "$date $time [$level] $metadata $message\n",
-  metadata: [:request_id, :user_id],
-  level: :notice
-
-config :logger, :info_log,
-  path: "/var/log/teiserver/info.log",
-  format: "$date $time [$level] $metadata $message\n",
-  metadata: [:request_id, :user_id],
-  level: :info
-
-# Overwritten in secret
-config :teiserver, Teiserver.Account.Guardian,
-  secret_key: "yix2DcXsA9MzAI8WldmYiJ38j2GyyXf5beWGAOJHl0FKNH04n1VACYbepqutma27"
-
-import_config "prod.secret.exs"

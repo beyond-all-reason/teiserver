@@ -1,0 +1,51 @@
+# This file is an example of a systemd environment file to configure a running service
+# In the systemd unit file, it should be setup with a line:
+# EnvironmentFile=/etc/sysconfig/teiserver
+# Be careful, if this line is in the systemd unit definition but the file doesn't exist
+# the service will be silently disabled
+
+# For more info, see:
+# https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#EnvironmentFile=
+# and also:
+# https://fedoraproject.org/wiki/Packaging:Systemd#EnvironmentFiles_and_support_for_/etc/sysconfig_files
+
+# To easily load all these in your shell's environment:
+# ```
+# set -o allexport; source documents/prod_files/example-environment-file; set +o allexport
+# ```
+
+# General secrets
+PHX_SERVER=true
+TEI_NODE_NAME=staging-node-1
+
+# DB configuration
+TEI_DB_HOSTNAME=localhost
+TEI_DB_USERNAME=teiserver_dev
+TEI_DB_PASSWORD=123456789
+TEI_DB_NAME=teiserver_dev
+
+# TLS config
+TEI_TLS_PRIVATE_KEY_PATH=priv/certs/localhost.key
+TEI_TLS_CERT_PATH=priv/certs/localhost.crt
+TEI_TLS_CA_CERT_PATH=priv/certs/localhost.crt
+TEI_TLS_DH_FILE_PATH=priv/certs/dh-params.pem
+
+# For cookie encryption, must be at least 64 bytes
+TEI_HTTP_SECRET_KEY_BASE=2f894df108701d787156761fe6c122050a8f0f78426de0ea62593e766b9ffcf0f321ce66aef5e8948bb89dc9cc2f687797e2c30100eb001ff87bab23a005091e
+
+# For Guardian (authentication)
+TEI_GUARDIAN_SECRET_KEY=yet-another-random-key-to-keep-secret
+
+# Email
+TEI_ENABLE_EMAIL_INTEGRATION=true
+# this assume you're running the container smtp4dev as explained in:
+# https://github.com/beyond-all-reason/ansible-teiserver?tab=readme-ov-file#email
+TEI_SMTP_SERVER=127.0.0.1
+TEI_SMTP_PORT=2525
+# the domain of the email
+TEI_SMTP_HOSTNAME=beyondallreason.info
+TEI_SMTP_USERNAME=noreply@beyondallreason.info
+TEI_SMTP_PASSWORD=correct-battery-staple-horse-xkcd-936
+TEI_SMTP_TLS_VERIFY=false
+
+# vim: ft=systemd

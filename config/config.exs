@@ -29,7 +29,10 @@ config :teiserver, TeiserverWeb.Endpoint,
     formats: [html: TeiserverWeb.ErrorHTML, json: TeiserverWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: Teiserver.PubSub
+  pubsub_server: Teiserver.PubSub,
+  debug_errors: Config.config_env() == :dev,
+  code_reloader: Config.config_env() == :dev,
+  check_origin: Config.config_env() == :prod
 
 config :esbuild,
   version: "0.14.41",
