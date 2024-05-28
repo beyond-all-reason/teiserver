@@ -1,47 +1,49 @@
-defmodule TestScript do
+defmodule Mix.Tasks.Teiserver.TestUsers do
   @moduledoc """
-  This module is not used anywhere but it can be called while developing to create 4 users for testing:
-  Alpha, Bravo, Charlie, Delta
-  password is password
-
-
-  Run the server while enabling iex commands:
-
-  iex -S mix phx.server
-  TestScript.run()
+  Run with
+  mix teiserver.test_users
   """
+
+  use Mix.Task
   alias Teiserver.Helper.StylingHelper
   require Logger
   alias Teiserver.{Account, CacheUser}
   alias Teiserver.Game.MatchRatingLib
 
-  def run() do
+  def run(_args) do
+    Application.ensure_all_started(:teiserver)
     if Application.get_env(:teiserver, Teiserver)[:enable_hailstorm] do
       # Start by rebuilding the database
       accounts = [
         %{
-          name: "Alpha",
-          minutes: 360,
+          name: "1Chev",
+          minutes: 1 * 60,
           os: 15
         },
         %{
-          name: "Bravo",
-          minutes: 360,
+          name: "2Chev",
+          minutes: 6* 60,
           os: 20
         },
         %{
-          name: "Charlie",
-          minutes: 0,
-          os: 17
+          name: "3Chev",
+          minutes: 21 * 60,
+          os: 22
         },
         %{
-          name: "Delta",
-          minutes: 0,
-          os: 17
+          name: "4Chev",
+          minutes: 101 * 60,
+          os: 25
         },
         %{
-          name: "spadsbot",
-          is_bot?: true
+          name: "5Chev",
+          minutes: 251 * 60,
+          os: 30
+        },
+        %{
+          name: "6Chev",
+          minutes: 1001 * 60,
+          os: 40
         }
       ]
 
@@ -52,7 +54,7 @@ defmodule TestScript do
         update_stats(x.name, x[:minutes], x[:os])
       end)
 
-      "Test script finished successfully"
+      Logger.info("Test script finished successfully")
     else
       Logger.error("Hailstorm mode is not enabled, you cannot run the fakedata task")
     end
