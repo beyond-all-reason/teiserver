@@ -666,7 +666,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     # if existing.ready == false and new_client.ready == true and existing.unready_at != nil do
     #   time_elapsed = System.system_time(:millisecond) - existing.unready_at
     #   if time_elapsed < 1000 do
-    #     Logger.warn("Ready up in #{time_elapsed}ms by #{existing.userid}/#{existing.name} using #{existing.lobby_client}")
+    #     Logger.warning("Ready up in #{time_elapsed}ms by #{existing.userid}/#{existing.name} using #{existing.lobby_client}")
     #   end
     # end
 
@@ -695,7 +695,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
         if player_count > 4 do
           if user.hw_hash == nil do
-            Logger.warn("hw hash block for #{Account.get_username(userid)}")
+            Logger.warning("hw hash block for #{Account.get_username(userid)}")
             %{new_client | player: false}
           else
             new_client

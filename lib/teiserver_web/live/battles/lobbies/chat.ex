@@ -245,7 +245,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   end
 
   def handle_info(msg, socket) do
-    Logger.warn("No handler in #{__MODULE__} for message #{Kernel.inspect(msg)}")
+    Logger.warning("No handler in #{__MODULE__} for message #{Kernel.inspect(msg)}")
     {:noreply, socket}
   end
 

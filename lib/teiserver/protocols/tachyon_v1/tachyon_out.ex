@@ -43,7 +43,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonOut do
           LobbyOut.do_reply(reply_cmd, data)
 
         :battle ->
-          Logger.warn("Tachyon :battle namespace message #{reply_cmd}")
+          Logger.warning("Tachyon :battle namespace message #{reply_cmd}")
           LobbyOut.do_reply(reply_cmd, data)
 
         :matchmaking ->

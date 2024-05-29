@@ -3,7 +3,7 @@ defmodule Teiserver.Helper.ObanLogger do
   require Logger
 
   def handle_event([:oban, :job, :start], _measure, _meta, _) do
-    # Logger.warn("[Oban] :started #{meta.worker} at #{measure.system_time}")
+    # Logger.warning("[Oban] :started #{meta.worker} at #{measure.system_time}")
   end
 
   def handle_event([:oban, :job, :exception], _measure, meta, _) do
