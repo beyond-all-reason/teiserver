@@ -87,6 +87,11 @@ jobs:
     - name: Install dependencies
       run: mix deps.get
 
+    # Step: Compile the current project. If unchanged, uses
+    # the cached version.
+    - name: Install dependencies
+      run: mix compile
+
     # Step: Execute the tests.
     - name: Run tests
       run: mix test
