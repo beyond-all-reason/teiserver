@@ -199,14 +199,14 @@ defmodule Teiserver.Lobby.LobbyLib do
 
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
   def update_lobby(%{id: lobby_id} = lobby, nil, :silent) do
-    Logger.warn("update_lobby is still being called for :silent")
+    Logger.warning("update_lobby is still being called for :silent")
     cast_lobby(lobby_id, {:update_lobby, lobby})
 
     lobby
   end
 
   def update_lobby(%{id: lobby_id} = lobby, nil, reason) do
-    Logger.warn("update_lobby (no data) is still being called, reason: #{reason}")
+    Logger.warning("update_lobby (no data) is still being called, reason: #{reason}")
     cast_lobby(lobby_id, {:update_lobby, lobby})
 
     PubSub.broadcast(
@@ -224,7 +224,7 @@ defmodule Teiserver.Lobby.LobbyLib do
   end
 
   def update_lobby(%{id: lobby_id} = lobby, data, reason) do
-    Logger.warn("update_lobby (with data) is still being called, reason: #{reason}")
+    Logger.warning("update_lobby (with data) is still being called, reason: #{reason}")
     cast_lobby(lobby_id, {:update_lobby, lobby})
 
     if Enum.member?([:update_battle_info], reason) do

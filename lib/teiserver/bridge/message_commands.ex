@@ -17,7 +17,7 @@ defmodule Teiserver.Bridge.MessageCommands do
         content: "$" <> content,
         attachments: []
       }) do
-    Logger.warn("1")
+    Logger.warning("1")
 
     [cmd | remaining] = String.split(content, " ")
     remaining = Enum.join(remaining, " ")
@@ -45,7 +45,7 @@ defmodule Teiserver.Bridge.MessageCommands do
   end
 
   def handle(_msg) do
-    # Logger.warn("2")
+    # Logger.warning("2")
     # IO.inspect msg
 
     :ok
