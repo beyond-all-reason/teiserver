@@ -1,9 +1,7 @@
 defmodule Teiserver.Protocols.Spring.SystemIn do
   @moduledoc false
 
-  alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Protocols.SpringIn
-  import Teiserver.Protocols.SpringOut, only: [reply: 5]
   require Logger
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
