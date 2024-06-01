@@ -3,7 +3,7 @@ defmodule Teiserver.Battle.LobbyServer do
   use GenServer
   require Logger
   alias Teiserver.{Account, Battle, Config, Telemetry, Coordinator, Communication}
-  alias Teiserver.Lobby.CommandLib
+  alias Teiserver.Lobby.{CommandLib, LobbyRestrictions}
   alias Phoenix.PubSub
 
   @player_list_cache_age_max 200
@@ -544,35 +544,10 @@ defmodule Teiserver.Battle.LobbyServer do
     parts =
       [
         "",
-
+        LobbyRestrictions.get_rank_bounds_for_title(consul_state),
         # Rating stuff here
-        cond do
-          consul_state == nil ->
-            nil
+        LobbyRestrictions.get_rating_bounds_for_title(consul_state),
 
-          # Default ratings
-          consul_state.maximum_rating_to_play >= 1000 &&
-              consul_state.minimum_rating_to_play <= 0 ->
-            nil
-
-          # Just a max rating
-          consul_state.maximum_rating_to_play < 1000 &&
-              consul_state.minimum_rating_to_play <= 0 ->
-            "Max rating: #{consul_state.maximum_rating_to_play}"
-
-          # Just a min rating
-          consul_state.maximum_rating_to_play >= 1000 &&
-              consul_state.minimum_rating_to_play > 0 ->
-            "Min rating: #{consul_state.minimum_rating_to_play}"
-
-          # Rating range
-          consul_state.maximum_rating_to_play < 1000 ||
-              consul_state.minimum_rating_to_play > 0 ->
-            "Rating between: #{consul_state.minimum_rating_to_play} - #{consul_state.maximum_rating_to_play}"
-
-          true ->
-            nil
-        end
       ]
       |> Enum.reject(&(&1 == nil))
       |> Enum.join(" | ")

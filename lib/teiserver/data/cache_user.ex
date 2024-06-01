@@ -567,6 +567,7 @@ defmodule Teiserver.CacheUser do
   def send_direct_message(from_id, to_id, "!joinas" <> s),
     do: send_direct_message(from_id, to_id, "!cv joinas" <> s)
 
+  @spec send_direct_message(T.userid(), T.userid(), list) :: :ok
   def send_direct_message(sender_id, to_id, message_parts) when is_list(message_parts) do
     sender = get_user_by_id(sender_id)
     msg_str = Enum.join(message_parts, "\n")
@@ -1257,6 +1258,12 @@ defmodule Teiserver.CacheUser do
   def is_moderator?(userid) when is_integer(userid), do: is_moderator?(get_user_by_id(userid))
   def is_moderator?(%{roles: roles}), do: Enum.member?(roles, "Moderator")
   def is_moderator?(_), do: false
+
+  @spec is_contributor?(T.userid() | T.user()) :: boolean()
+  def is_contributor?(nil), do: true
+  def is_contributor?(userid) when is_integer(userid), do: is_contributor?(get_user_by_id(userid))
+  def is_contributor?(%{roles: roles}), do: Enum.member?(roles, "Contributor")
+  def is_contributor?(_), do: false
 
   @spec is_verified?(T.userid() | T.user()) :: boolean()
   def is_verified?(nil), do: true
