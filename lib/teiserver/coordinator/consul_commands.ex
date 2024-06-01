@@ -128,7 +128,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     status_msg =
       [
-        @splitter, "Lobby status", @splitter,
+        @splitter,
+        "Lobby status",
+        @splitter,
         "Status for battle ##{state.lobby_id}",
         "Locks: #{locks}",
         "Gatekeeper: #{state.gatekeeper}",
@@ -721,7 +723,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   def handle_command(%{command: "resetratinglevels", remaining: ""} = cmd, state) do
     ConsulServer.say_command(cmd, state)
     LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-    %{state | minimum_rating_to_play: 0, maximum_rating_to_play: LobbyRestrictions.rating_upper_bound()}
+
+    %{
+      state
+      | minimum_rating_to_play: 0,
+        maximum_rating_to_play: LobbyRestrictions.rating_upper_bound()
+    }
   end
 
   def handle_command(%{command: "resetchevlevels", remaining: ""} = cmd, state) do
@@ -730,99 +737,107 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     %{state | minimum_rank_to_play: 0, maximum_rank_to_play: LobbyRestrictions.rank_upper_bound()}
   end
 
-  #Reset min chev level for a lobby by using empty argument
+  # Reset min chev level for a lobby by using empty argument
   def handle_command(%{command: "minchevlevel", remaining: ""} = cmd, state) do
     ConsulServer.say_command(cmd, state)
     LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
     %{state | minimum_rank_to_play: 0}
   end
 
-  #Set min chev level for a lobby
+  # Set min chev level for a lobby
   def handle_command(
         %{command: "minchevlevel", remaining: remaining, senderid: senderid} = cmd,
         state
       ) do
-    {allow, allow_msg} = LobbyRestrictions.allowed_to_set_restrictions(state)
-    if allow == :ok do
-      case Integer.parse(remaining |> String.trim()) do
-        :error ->
-          Lobby.sayprivateex(
-            state.coordinator_id,
-            senderid,
-            [
-              "Unable to turn '#{remaining}' into an integer"
-            ],
-            state.lobby_id
-          )
+    result = LobbyRestrictions.allowed_to_set_restrictions(state)
 
-          state
+    case result do
+      :ok ->
+        # Allowed to set restrictions
+        case Integer.parse(remaining |> String.trim()) do
+          :error ->
+            Lobby.sayprivateex(
+              state.coordinator_id,
+              senderid,
+              [
+                "Unable to turn '#{remaining}' into an integer"
+              ],
+              state.lobby_id
+            )
 
-        {chev_level, _} ->
-          ConsulServer.say_command(cmd, state)
-          LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-          level = chev_level - 1
+            state
 
-          Map.merge(state, %{
-            minimum_rank_to_play: level,
-            maximum_rank_to_play: LobbyRestrictions.rank_upper_bound()
-          })
-      end
-    else
-      Lobby.sayex(
-        state.coordinator_id,
-        allow_msg,
-        state.lobby_id
-      )
+          {chev_level, _} ->
+            ConsulServer.say_command(cmd, state)
+            LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+            level = chev_level - 1
 
-      state
+            Map.merge(state, %{
+              minimum_rank_to_play: level,
+              maximum_rank_to_play: LobbyRestrictions.rank_upper_bound()
+            })
+        end
+
+      # Not Allowed to set restrictions
+      {:error, error_msg} ->
+        Lobby.sayex(
+          state.coordinator_id,
+          error_msg,
+          state.lobby_id
+        )
+
+        state
     end
   end
 
-  #Reset max chev level for a lobby by using empty argument
+  # Reset max chev level for a lobby by using empty argument
   def handle_command(%{command: "maxchevlevel", remaining: ""} = cmd, state) do
     ConsulServer.say_command(cmd, state)
     LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
     %{state | maximum_rank_to_play: LobbyRestrictions.rank_upper_bound()}
   end
 
-  #Setting max chev level we reset min chev level
+  # Setting max chev level we reset min chev level
   def handle_command(
         %{command: "maxchevlevel", remaining: remaining, senderid: senderid} = cmd,
         state
       ) do
-    {allow, allow_msg} = LobbyRestrictions.allowed_to_set_restrictions(state)
-    if allow == :ok do
-      case Integer.parse(remaining |> String.trim()) do
-        :error ->
-          Lobby.sayprivateex(
-            state.coordinator_id,
-            senderid,
-            [
-              "Unable to turn '#{remaining}' into an integer"
-            ],
-            state.lobby_id
-          )
+    result = LobbyRestrictions.allowed_to_set_restrictions(state)
 
-          state
+    case result do
+      :ok ->
+        case Integer.parse(remaining |> String.trim()) do
+          :error ->
+            Lobby.sayprivateex(
+              state.coordinator_id,
+              senderid,
+              [
+                "Unable to turn '#{remaining}' into an integer"
+              ],
+              state.lobby_id
+            )
 
-        {chev_level, _} ->
-          ConsulServer.say_command(cmd, state)
-          LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-          level = chev_level - 1
+            state
 
-          Map.merge(state, %{
-            maximum_rank_to_play: level,
-            minimum_rank_to_play: 0
-          })
-      end
-    else
-      Lobby.sayex(
-        state.coordinator_id,
-        allow_msg,
-        state.lobby_id
-      )
+          {chev_level, _} ->
+            ConsulServer.say_command(cmd, state)
+            LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+            level = chev_level - 1
 
-      state
+            Map.merge(state, %{
+              maximum_rank_to_play: level,
+              minimum_rank_to_play: 0
+            })
+        end
+
+      {:error, error_msg} ->
+        Lobby.sayex(
+          state.coordinator_id,
+          error_msg,
+          state.lobby_id
+        )
+
+        error_msg
     end
   end
 
@@ -836,37 +851,40 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{command: "minratinglevel", remaining: remaining, senderid: senderid} = cmd,
         state
       ) do
-    {allow, allow_msg} =  LobbyRestrictions.allowed_to_set_restrictions(state)
-    if allow==:ok do
-      case Integer.parse(remaining |> String.trim()) do
-        :error ->
-          Lobby.sayprivateex(
-            state.coordinator_id,
-            senderid,
-            [
-              "Unable to turn '#{remaining}' into an integer"
-            ],
-            state.lobby_id
-          )
+    result = LobbyRestrictions.allowed_to_set_restrictions(state)
 
-          state
+    case result do
+      :ok ->
+        case Integer.parse(remaining |> String.trim()) do
+          :error ->
+            Lobby.sayprivateex(
+              state.coordinator_id,
+              senderid,
+              [
+                "Unable to turn '#{remaining}' into an integer"
+              ],
+              state.lobby_id
+            )
 
-        {level, _} ->
-          ConsulServer.say_command(cmd, state)
-          LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+            state
 
-          Map.merge(state, %{
-            minimum_rating_to_play: level |> max(0) |> min(state.maximum_rating_to_play - 1)
-          })
-      end
-    else
-      Lobby.sayex(
-        state.coordinator_id,
-        allow_msg,
-        state.lobby_id
-      )
+          {level, _} ->
+            ConsulServer.say_command(cmd, state)
+            LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
 
-      state
+            Map.merge(state, %{
+              minimum_rating_to_play: level |> max(0) |> min(state.maximum_rating_to_play - 1)
+            })
+        end
+
+      {:error, error_msg} ->
+        Lobby.sayex(
+          state.coordinator_id,
+          error_msg,
+          state.lobby_id
+        )
+
+        state
     end
   end
 
@@ -880,38 +898,42 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{command: "maxratinglevel", remaining: remaining, senderid: senderid} = cmd,
         state
       ) do
-    {allow, allow_msg} = LobbyRestrictions.allowed_to_set_restrictions(state)
-    if allow == :ok do
-      case Integer.parse(remaining |> String.trim()) do
-        :error ->
-          Lobby.sayprivateex(
-            state.coordinator_id,
-            senderid,
-            [
-              "Unable to turn '#{remaining}' into an integer"
-            ],
-            state.lobby_id
-          )
+    result = LobbyRestrictions.allowed_to_set_restrictions(state)
 
-          state
+    case result do
+      :ok ->
+        case Integer.parse(remaining |> String.trim()) do
+          :error ->
+            Lobby.sayprivateex(
+              state.coordinator_id,
+              senderid,
+              [
+                "Unable to turn '#{remaining}' into an integer"
+              ],
+              state.lobby_id
+            )
 
-        {level, _} ->
-          ConsulServer.say_command(cmd, state)
-          LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-
-          %{
             state
-            | maximum_rating_to_play: level |> min(1000) |> max(state.minimum_rating_to_play + 1)
-          }
-      end
-    else
-      Lobby.sayex(
-        state.coordinator_id,
-        allow_msg,
-        state.lobby_id
-      )
 
-      state
+          {level, _} ->
+            ConsulServer.say_command(cmd, state)
+            LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+
+            %{
+              state
+              | maximum_rating_to_play:
+                  level |> min(1000) |> max(state.minimum_rating_to_play + 1)
+            }
+        end
+
+      {:error, error_msg} ->
+        Lobby.sayex(
+          state.coordinator_id,
+          error_msg,
+          state.lobby_id
+        )
+
+        state
     end
   end
 
@@ -947,27 +969,30 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             state
 
           {{min_level_o, _}, {max_level_o, _}} ->
-            {allow, allow_msg} = LobbyRestrictions.allowed_to_set_restrictions(state)
-            if allow == :ok do
-              min_level = min(min_level_o, max_level_o)
-              max_level = max(min_level_o, max_level_o)
+            result = LobbyRestrictions.allowed_to_set_restrictions(state)
 
-              ConsulServer.say_command(cmd, state)
-              LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+            case result do
+              :ok ->
+                min_level = min(min_level_o, max_level_o)
+                max_level = max(min_level_o, max_level_o)
 
-              %{
+                ConsulServer.say_command(cmd, state)
+                LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+
+                %{
+                  state
+                  | minimum_rating_to_play: max(min_level, 0),
+                    maximum_rating_to_play: min(max_level, 1000)
+                }
+
+              {:error, error_msg} ->
+                Lobby.sayex(
+                  state.coordinator_id,
+                  error_msg,
+                  state.lobby_id
+                )
+
                 state
-                | minimum_rating_to_play: max(min_level, 0),
-                  maximum_rating_to_play: min(max_level, 1000)
-              }
-            else
-              Lobby.sayex(
-                state.coordinator_id,
-                allow_msg,
-                state.lobby_id
-              )
-
-              state
             end
         end
 
@@ -1572,9 +1597,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         ConsulServer.say_command(cmd, state)
 
         if check_name_msg != nil do
-          #Send coordinator message which can be long; appears on right
+          # Send coordinator message which can be long; appears on right
           CacheUser.send_direct_message(state.coordinator_id, senderid, check_name_msg)
-
         end
 
         state

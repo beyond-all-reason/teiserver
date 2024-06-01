@@ -379,13 +379,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
         %{channel: "teiserver_lobby_updates", event: :remove_user, client: _client},
         state
       ) do
-
-    #Get count of people in lobby - both players and specs
+    # Get count of people in lobby - both players and specs
     new_member_count = get_member_count(state)
 
     if new_member_count == 0 do
-      #Remove filters from the lobby
-      #reset stuff to default
+      # Remove filters from the lobby
+      # reset stuff to default
       new_state =
         Map.merge(state, %{
           minimum_rating_to_play: 0,
@@ -396,7 +395,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
           welcome_message: nil
         })
 
-      #Remove filters from lobby name
+      # Remove filters from lobby name
       lobby = Lobby.get_lobby(state.lobby_id)
       old_name = lobby.name
       new_name = String.split(old_name, "|", trim: true) |> Enum.at(0)
@@ -810,7 +809,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
     player_list = list_players(state)
     userid = user.id
 
-
     avoid_status = Account.check_avoid_status(user.id, player_list)
 
     boss_avoid_status =
@@ -820,21 +818,20 @@ defmodule Teiserver.Coordinator.ConsulServer do
       end)
       |> Enum.any?()
 
-    {rating_check_passed, rating_check_msg} =
-      LobbyRestrictions.check_rating_to_play(userid, state)
+    rating_check_result = LobbyRestrictions.check_rating_to_play(userid, state)
 
-    {rank_check_passed, rank_check_msg} = LobbyRestrictions.check_rank_to_play(user, state)
+    rank_check_result = LobbyRestrictions.check_rank_to_play(user, state)
 
     cond do
-       rating_check_passed != :ok->
+      rating_check_result != :ok ->
         # Send message
-        msg = rating_check_msg
+        {_, msg} = rating_check_result
         CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
         false
 
-        rank_check_passed != :ok ->
+      rank_check_result != :ok ->
         # Send message
-        msg = rank_check_msg
+        {_, msg} = rank_check_result
         CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
         false
 
@@ -1240,8 +1237,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @spec list_players(map()) :: [T.client()]
   def list_players(%{lobby_id: lobby_id}) do
-    list_members((%{lobby_id: lobby_id}))
-        |> Enum.filter(fn client -> client.player == true end)
+    list_members(%{lobby_id: lobby_id})
+    |> Enum.filter(fn client -> client.player end)
   end
 
   @spec get_player_count(map()) :: non_neg_integer
@@ -1250,12 +1247,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
     |> Enum.count()
   end
 
-
-  @doc"""
+  @doc """
   Lists members which includes players and non players but excludes the SPADS bot.
   """
   def list_members(%{lobby_id: lobby_id}) do
     member_list = Battle.get_lobby_member_list(lobby_id)
+
     case member_list do
       nil ->
         []
@@ -1268,7 +1265,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  #Get count of members which includes players and non players but excludes the SPADS bot.
+  # Get count of members which includes players and non players but excludes the SPADS bot.
   defp get_member_count(%{lobby_id: lobby_id}) do
     list_members(%{lobby_id: lobby_id})
     |> Enum.count()
