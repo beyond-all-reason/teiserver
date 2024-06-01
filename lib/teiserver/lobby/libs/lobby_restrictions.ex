@@ -127,7 +127,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     ]
   end
 
-  @spec check_rank_to_play(any(), any()) :: :ok | {:error, String.t()}
+  @spec check_rank_to_play(any(), any()) :: :ok | {:error, iodata()}
   def check_rank_to_play(user, consul_state) do
     state = consul_state
 
@@ -160,7 +160,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   But with the lobby, we want to use the target team size/count defined by the dropdowns in the lobby.
   So if there are two players in the lobby, but the team size dropdown is 8, we want to use the "Team" rating.
   """
-  @spec check_rating_to_play(any(), any()) :: :ok | {:error, String.t()}
+  @spec check_rating_to_play(any(), any()) :: :ok | {:error, iodata()}
   def check_rating_to_play(user_id, consul_state) do
     state = consul_state
     team_size = state.host_teamsize
