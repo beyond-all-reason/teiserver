@@ -197,7 +197,8 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   @doc """
   You cannot have all welcome lobby name if there are restrictions
   """
-  @spec check_lobby_name(String.t(), any()) :: {:error, String.t()} | {:ok, String.t()}
+  @spec check_lobby_name(String.t(), any()) ::
+          {:error, String.t()} | {:ok, String.t()} | {:ok, nil}
   def check_lobby_name(name, consul_state) do
     cond do
       has_restrictions?(consul_state) and allwelcome_name?(name) ->
