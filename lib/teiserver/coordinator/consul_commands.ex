@@ -856,8 +856,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
 
           Map.merge(state, %{
-            minimum_rating_to_play: level,
-            maximum_rating_to_play: LobbyRestrictions.rating_upper_bound()
+            minimum_rating_to_play: level |> max(0) |> min(state.maximum_rating_to_play - 1)
           })
       end
     else
