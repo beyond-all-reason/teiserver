@@ -1268,9 +1268,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  @doc"""
-  Get count of members which includes players and non players but excludes the SPADS bot.
-  """
+  #Get count of members which includes players and non players but excludes the SPADS bot.
   defp get_member_count(%{lobby_id: lobby_id}) do
     list_members(%{lobby_id: lobby_id})
     |> Enum.count()

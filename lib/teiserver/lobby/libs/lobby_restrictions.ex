@@ -215,9 +215,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     ]
   end
 
-  @doc """
-  Check if lobby has restrictions for playing
-  """
+  #Check if lobby has restrictions for playing
   defp has_restrictions?(consul_state) do
     state = consul_state
 
