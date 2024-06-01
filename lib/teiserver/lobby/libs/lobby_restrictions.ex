@@ -19,9 +19,12 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     play_rank_bounds = get_rank_bounds_text(state)
 
     cond do
-      play_level_bounds == nil && play_rank_bounds == nil -> []
-      true -> ["This lobby has the following play restrictions:", play_level_bounds, play_rank_bounds]
-      |> Enum.filter(fn x-> x != nil end)
+      play_level_bounds == nil && play_rank_bounds == nil ->
+        []
+
+      true ->
+        ["This lobby has the following play restrictions:", play_level_bounds, play_rank_bounds]
+        |> Enum.filter(fn x -> x != nil end)
     end
   end
 
@@ -38,30 +41,31 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   end
 
   def get_rank_bounds_for_title(consul_state) do
-    default_state = %{maximum_rank_to_play: @rank_upper_bound, minimum_rank_to_play: 0}
-    consul_state = Map.merge(default_state, consul_state)
+    max_rank_to_play = Map.get(consul_state, :maximum_rank_to_play, @rank_upper_bound)
+    min_rank_to_play = Map.get(consul_state, :minimum_rank_to_play, 0)
+
     # Chevlevel stuff here
     cond do
       # Default chev levels
-      consul_state.maximum_rank_to_play >= @rank_upper_bound &&
-          consul_state.minimum_rank_to_play <= 0 ->
+      max_rank_to_play >= @rank_upper_bound &&
+          min_rank_to_play <= 0 ->
         nil
 
       # Just a max rating
-      consul_state.maximum_rank_to_play < @rank_upper_bound &&
-          consul_state.minimum_rank_to_play <= 0 ->
-        "Max chev: #{consul_state.maximum_rank_to_play + 1}"
+      max_rank_to_play < @rank_upper_bound &&
+          min_rank_to_play <= 0 ->
+        "Max chev: #{max_rank_to_play + 1}"
 
       # Just a min rating
-      consul_state.maximum_rank_to_play >= @rank_upper_bound &&
-          consul_state.minimum_rank_to_play > 0 ->
-        "Min chev: #{consul_state.minimum_rank_to_play + 1}"
+      max_rank_to_play >= @rank_upper_bound &&
+          min_rank_to_play > 0 ->
+        "Min chev: #{min_rank_to_play + 1}"
 
       # Chev range
       # It shouldn't go here
-      consul_state.maximum_rank_to_play < @rank_upper_bound ||
-          consul_state.minimum_rank_to_play > 0 ->
-        "Chev between: #{consul_state.minimum_rank_to_play} - #{consul_state.maximum_rank_to_play}"
+      max_rank_to_play < @rank_upper_bound ||
+          min_rank_to_play > 0 ->
+        "Chev between: #{min_rank_to_play} - #{max_rank_to_play}"
 
       true ->
         nil
@@ -73,29 +77,29 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   end
 
   def get_rating_bounds_for_title(consul_state) do
-    default_state = %{maximum_rating_to_play: @rating_upper_bound, minimum_rating_to_play: 0}
-    consul_state = Map.merge(default_state, consul_state)
+    max_rating_to_play = Map.get(consul_state, :maximum_rating_to_play, @rating_upper_bound)
+    min_rating_to_play = Map.get(consul_state, :minimum_rating_to_play, 0)
 
     cond do
       # Default ratings
-      consul_state.maximum_rating_to_play >= @rating_upper_bound &&
-          consul_state.minimum_rating_to_play <= 0 ->
+      max_rating_to_play >= @rating_upper_bound &&
+          min_rating_to_play <= 0 ->
         nil
 
       # Just a max rating
-      consul_state.maximum_rating_to_play < @rating_upper_bound &&
-          consul_state.minimum_rating_to_play <= 0 ->
-        "Max rating: #{consul_state.maximum_rating_to_play}"
+      max_rating_to_play < @rating_upper_bound &&
+          min_rating_to_play <= 0 ->
+        "Max rating: #{max_rating_to_play}"
 
       # Just a min rating
-      consul_state.maximum_rating_to_play >= @rating_upper_bound &&
-          consul_state.minimum_rating_to_play > 0 ->
-        "Min rating: #{consul_state.minimum_rating_to_play}"
+      max_rating_to_play >= @rating_upper_bound &&
+          min_rating_to_play > 0 ->
+        "Min rating: #{min_rating_to_play}"
 
       # Rating range
-      consul_state.maximum_rating_to_play < @rating_upper_bound ||
-          consul_state.minimum_rating_to_play > 0 ->
-        "Rating between: #{consul_state.minimum_rating_to_play} - #{consul_state.maximum_rating_to_play}"
+      max_rating_to_play < @rating_upper_bound ||
+          min_rating_to_play > 0 ->
+        "Rating between: #{min_rating_to_play} - #{max_rating_to_play}"
 
       true ->
         nil
@@ -123,9 +127,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     ]
   end
 
-  @doc """
-  Returns {:ok, nil} or {:error,msg}
-  """
+  @spec check_rank_to_play(any(), any()) :: :ok | {:error, String.t()}
   def check_rank_to_play(user, consul_state) do
     state = consul_state
 
@@ -133,7 +135,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     is_contributor? = CacheUser.is_contributor?(user)
 
     if is_contributor? do
-      {:ok, nil}
+      :ok
     else
       cond do
         state.minimum_rank_to_play != nil and user.rank < state.minimum_rank_to_play ->
@@ -147,19 +149,25 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
           {:error, msg}
 
         true ->
-          {:ok, nil}
+          :ok
       end
     end
   end
 
   @doc """
-  Returns {:ok, nil} or {:error,msg}
+  Determining the rating type is slightly different for lobby restrictions compared to rating a match.
+  When rating a match we want to use the number of players and team count in the match.
+  But with the lobby, we want to use the target team size/count defined by the dropdowns in the lobby.
+  So if there are two players in the lobby, but the team size dropdown is 8, we want to use the "Team" rating.
   """
+  @spec check_rating_to_play(any(), any()) :: :ok | {:error, String.t()}
   def check_rating_to_play(user_id, consul_state) do
     state = consul_state
     team_size = state.host_teamsize
     team_count = state.host_teamcount
 
+    # TODO Change this when Lexon does split Team to Big/Small Teams
+    # Can see if we can reuse a function elsewhere
     rating_type =
       cond do
         team_count > 2 && team_size == 1 -> "FFA"
@@ -182,15 +190,14 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
 
       true ->
         # All good
-        {:ok, nil}
+        :ok
     end
   end
 
   @doc """
   You cannot have all welcome lobby name if there are restrictions
-  Returns {:ok, nil}
-  Or {:error, msg}
   """
+  @spec check_lobby_name(String.t(), any()) :: {:error, String.t()} | {:ok, String.t()}
   def check_lobby_name(name, consul_state) do
     cond do
       has_restrictions?(consul_state) and allwelcome_name?(name) ->
@@ -198,7 +205,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
          "* You cannot declare a lobby to be all welcome if there are player restrictions"}
 
       is_noob_title?(name) ->
-        {:ok,  get_noob_looby_tips()}
+        {:ok, get_noob_looby_tips()}
 
       true ->
         {:ok, nil}
@@ -207,7 +214,9 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
 
   defp get_noob_looby_tips() do
     [
-      @splitter, "Noob lobby tips", @splitter,
+      @splitter,
+      "Noob lobby tips",
+      @splitter,
       "To restrict this lobby to players who are new, use command:",
       "$maxchevlevel <chevlevel>",
       "To ensure new players are distributed evenly across teams, use command:",
@@ -215,7 +224,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     ]
   end
 
-  #Check if lobby has restrictions for playing
+  # Check if lobby has restrictions for playing
   defp has_restrictions?(consul_state) do
     state = consul_state
 
@@ -229,6 +238,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   end
 
   # Teifion added code to prevent setting restrictions to All Welcome lobbies
+  @spec allowed_to_set_restrictions(map()) :: :ok | {:error, String.t()}
   def allowed_to_set_restrictions(state) do
     name =
       state.lobby_id
@@ -236,8 +246,11 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
       |> Map.get(:name)
 
     cond do
-      allwelcome_name?(name) -> {:error, "You cannot set a rating limit if all are welcome to the game"}
-      true -> {:ok, nil}
+      allwelcome_name?(name) ->
+        {:error, "You cannot set a rating limit if all are welcome to the game"}
+
+      true ->
+        :ok
     end
   end
 
@@ -256,6 +269,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   @doc """
   Checks if the lobby title indicates a noob lobby
   """
+  @spec is_noob_title?(String.t()) :: boolean()
   def is_noob_title?(title) do
     title =
       title
@@ -272,9 +286,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
       Regex.scan(anti_noob_regex, title)
       |> Enum.count()
 
-    cond do
-      noob_matches > 0 && anti_noob_matches == 0 -> true
-      true -> false
-    end
+    # Returns true if both critera met
+    noob_matches > 0 && anti_noob_matches == 0
   end
 end

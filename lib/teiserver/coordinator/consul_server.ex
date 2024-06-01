@@ -818,21 +818,20 @@ defmodule Teiserver.Coordinator.ConsulServer do
       end)
       |> Enum.any?()
 
-    {rating_check_passed, rating_check_msg} =
-      LobbyRestrictions.check_rating_to_play(userid, state)
+    rating_check_result = LobbyRestrictions.check_rating_to_play(userid, state)
 
-    {rank_check_passed, rank_check_msg} = LobbyRestrictions.check_rank_to_play(user, state)
+    rank_check_result = LobbyRestrictions.check_rank_to_play(user, state)
 
     cond do
-      rating_check_passed != :ok ->
+      rating_check_result != :ok ->
         # Send message
-        msg = rating_check_msg
+        {_, msg} = rating_check_result
         CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
         false
 
-      rank_check_passed != :ok ->
+      rank_check_result != :ok ->
         # Send message
-        msg = rank_check_msg
+        {_, msg} = rank_check_result
         CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
         false
 
@@ -1239,7 +1238,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec list_players(map()) :: [T.client()]
   def list_players(%{lobby_id: lobby_id}) do
     list_members(%{lobby_id: lobby_id})
-    |> Enum.filter(fn client -> client.player == true end)
+    |> Enum.filter(fn client -> client.player end)
   end
 
   @spec get_player_count(map()) :: non_neg_integer
