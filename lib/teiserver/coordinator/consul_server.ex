@@ -1337,7 +1337,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     |> String.trim()
   end
 
-  def get_coordinator_userid do
+  defp get_coordinator_userid do
     Coordinator.get_coordinator_userid()
   end
 
