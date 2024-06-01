@@ -8,7 +8,15 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
   @splitter "---------------------------"
   @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore matchmaking website party)
+  #These commands are handled by coordinator commands, but are not on the always allow list
+  @mod_allow  ~w(check modparty unparty)
   @forward_to_consul ~w(s status players follow joinq leaveq splitlobby y yes n no explain)
+
+  def is_coordinator_command?(command) do
+    #The list of allowed commands are now defined in this file
+    #They used to be defined in consul_server.ex under @coordinator_bot variable
+    Enum.member?(@always_allow, command) || Enum.member?(@mod_allow, command)
+  end
 
   @spec allow_command?(Map.t(), Map.t()) :: boolean()
   defp allow_command?(%{senderid: senderid} = cmd, state) do
