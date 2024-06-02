@@ -3,25 +3,16 @@ defmodule Teiserver.Lobby.Libs.LobbyRestrictionsTest do
   use ExUnit.Case
   alias Teiserver.Lobby.LobbyRestrictions
 
-  # test "raw call tests" do
-
-  # end
-
   test "check for noob title" do
-    result = LobbyRestrictions.is_noob_title?("Noobs 1v1")
-    assert result == true
+    assert LobbyRestrictions.is_noob_title?("Noobs 1v1")
 
-    result = LobbyRestrictions.is_noob_title?("No Noobs 1v1")
-    assert result == false
+    refute LobbyRestrictions.is_noob_title?("No Noobs 1v1")
 
-    result = LobbyRestrictions.is_noob_title?("All Welcome 1v1")
-    assert result == false
+    refute LobbyRestrictions.is_noob_title?("All Welcome 1v1")
 
-    result = LobbyRestrictions.is_noob_title?("Newbies 1v1")
-    assert result == true
+    assert LobbyRestrictions.is_noob_title?("Newbies 1v1")
 
-    result = LobbyRestrictions.is_noob_title?("Nubs 1v1")
-    assert result == true
+    assert LobbyRestrictions.is_noob_title?("Nubs 1v1")
   end
 
   test "get title based on consul state rank filters" do
