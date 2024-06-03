@@ -1,0 +1,41 @@
+---
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: no-commit-to-branch
+        args:
+          - -b
+          - master
+          - -b
+          - production
+          - -b
+          - staging
+  - repo: local
+    hooks:
+      - id: mix-format
+        name: "elixir: mix format"
+        entry: mix format --check-formatted
+        language: system
+        files: \.exs*$
+      - id: mix-compile
+        name: "elixir: mix compile"
+        entry: mix compile --force #--warnings-as-errors
+        language: system
+        pass_filenames: false
+        files: \.ex$
+      # - id: mix-credo
+      #   name: "elixir: mix credo"
+      #   entry: mix credo
+      #   language: system
+      #   pass_filenames: false
+      #   files: \.exs*$
+      - id: mix-dialyzer
+        name: "elixir: mix dialyzer"
+        entry: mix dialyzer
+        language: system
+        pass_filenames: false
+        files: \.exs*$
+      
