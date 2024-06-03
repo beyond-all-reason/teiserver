@@ -25,7 +25,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: mix format
+    name: Dialyzer
 
     steps:
     # Step: Setup Elixir + Erlang image as the base.
@@ -70,10 +70,29 @@ jobs:
     - name: Install dependencies
       run: mix deps.get
 
-    # Step: Compile the current project. If unchanged, uses
-    # the cached version.
-    - name: Install dependencies
-      run: mix compile
+    - name: Restore PLT cache
+      uses: actions/cache/restore@v3
+      id: plt_cache
+      with:
+        key: |
+          ${{ runner.os }}-${{ env.ELIXIR_VER }}-${{ env.OTP_VER }}-plt
+        restore-keys: |
+          ${{ runner.os }}-${{ env.ELIXIR_VER }}-${{ env.OTP_VER }}-plt
+        path: |
+          priv/plts
 
-    - name: mix format
-      run: mix format --check-formatted
+    - name: Create PLTs
+      run: mix dialyzer --plt
+
+    - name: Save PLT cache
+      uses: actions/cache/save@v3
+      if: steps.plt_cache.outputs.cache-hit != 'true'
+      id: plt_cache_save
+      with:
+        key: |
+          ${{ runner.os }}-${{ env.ELIXIR_VER }}-${{ env.OTP_VER }}-plt
+        path: |
+          priv/plts
+
+    - name: Run dialyzer
+      run: mix dialyzer --format github
