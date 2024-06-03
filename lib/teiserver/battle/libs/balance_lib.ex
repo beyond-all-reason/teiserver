@@ -164,7 +164,8 @@ defmodule Teiserver.Battle.BalanceLib do
 
   # Only take keys we need
   defp clean_groups(groups) do
-    groups |> Enum.map(fn x->
+    groups
+    |> Enum.map(fn x ->
       Map.take(x, ~w(members count group_rating ratings)a)
     end)
   end
@@ -179,7 +180,7 @@ defmodule Teiserver.Battle.BalanceLib do
         true ->
           balance_result.teams
           |> Map.new(fn {team_id, groups} ->
-            {team_id, Enum.reverse(clean_groups((groups)))}
+            {team_id, Enum.reverse(clean_groups(groups))}
           end)
       end
 
@@ -540,7 +541,6 @@ defmodule Teiserver.Battle.BalanceLib do
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
     get_user_rating_value(userid, rating_type_id)
   end
-
 
   # Used to get the rating value of the user for internal balance purposes which might be
   # different from public/reporting

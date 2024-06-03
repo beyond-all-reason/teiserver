@@ -33,6 +33,7 @@ defmodule Teiserver.MixProject do
   def application do
     # get that with mix app.tree nostrum
     nostrum_extras = [:certifi, :gun, :inets, :jason, :kcl, :mime]
+
     [
       mod: {Teiserver.Application, []},
       included_applications: [:nostrum],

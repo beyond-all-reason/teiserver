@@ -85,7 +85,6 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
     assert result.team_players == %{1 => [4, 1], 2 => [2, 3]}
   end
 
-
   test "logs FFA" do
     result =
       BalanceLib.create_balance(
