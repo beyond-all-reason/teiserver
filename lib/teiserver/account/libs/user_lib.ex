@@ -364,7 +364,7 @@ defmodule Teiserver.Account.UserLib do
         {:error, "You are banned"}
 
       user.smurf_of_id != nil ->
-        {:error, "Smurf detected"}
+        {:error, "Alt account detected. Please log in using your original account instead. If you're not sure what that account is or have trouble accessing it, please contact the moderation team at https://discord.gg/beyond-all-reason -> #open-ticket"}
 
       true ->
         :ok
