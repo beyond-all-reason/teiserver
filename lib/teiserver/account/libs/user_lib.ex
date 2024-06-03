@@ -361,7 +361,7 @@ defmodule Teiserver.Account.UserLib do
   defp can_login(user) do
     cond do
       Teiserver.CacheUser.is_restricted?(user.id, ["Login"]) ->
-        {:error, "You are banned"}
+        {:error, "Your account is currently suspended. Check the suspension's status at https://discord.gg/beyond-all-reason -> #moderation-bot"}
 
       user.smurf_of_id != nil ->
         {:error, "Alt account detected. Please log in using your original account instead. If you're not sure what that account is or have trouble accessing it, please contact the moderation team at https://discord.gg/beyond-all-reason -> #open-ticket"}
