@@ -252,11 +252,17 @@ defmodule Teiserver.Account.UserLib do
   end
 
   def authenticate_user(conn, %User{} = user, plain_text_password) do
-    if User.verify_password(plain_text_password, user.password) do
+    verified_user =
+      if User.verify_password(plain_text_password, user.password) do
+        {:ok, user}
+      else
+        # Authentication failure handler
+        Account.spring_auth_check(conn, user, plain_text_password)
+      end
+
+    with {:ok, user} <- verified_user,
+         :ok <- can_login(user) do
       {:ok, user}
-    else
-      # Authentication failure handler
-      Account.spring_auth_check(conn, user, plain_text_password)
     end
   end
 
@@ -350,5 +356,18 @@ defmodule Teiserver.Account.UserLib do
     |> Enum.map(fn key ->
       {key, Teiserver.store_get(:restriction_lookup_store, key)}
     end)
+  end
+
+  defp can_login(user) do
+    cond do
+      Teiserver.CacheUser.is_restricted?(user.id, ["Login"]) ->
+        {:error, "Your account is currently suspended. Check the suspension's status at https://discord.gg/beyond-all-reason -> #moderation-bot"}
+
+      user.smurf_of_id != nil ->
+        {:error, "Alt account detected. Please log in using your original account instead. If you're not sure what that account is or have trouble accessing it, please contact the moderation team at https://discord.gg/beyond-all-reason -> #open-ticket"}
+
+      true ->
+        :ok
+    end
   end
 end

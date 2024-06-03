@@ -38,7 +38,9 @@ defmodule Teiserver.Account.AuthPlug do
       conn
       |> assign(:current_user, nil)
       |> assign(:user_token, nil)
-      |> Phoenix.Controller.redirect("/logout")
+      |> Phoenix.Controller.put_flash(:danger, "You are banned")
+      |> Guardian.Plug.sign_out(clear_remember_me: true)
+      |> Phoenix.Controller.redirect(to: ~p"/logout")
     else
       conn
     end
@@ -64,7 +66,7 @@ defmodule Teiserver.Account.AuthPlug do
       socket
       |> Phoenix.LiveView.Utils.assign(:current_user, nil)
       |> Phoenix.LiveView.Utils.assign(:user_token, nil)
-      |> Phoenix.LiveView.redirect("/logout")
+      |> Phoenix.LiveView.redirect(to: ~p"/logout")
     else
       socket
     end
