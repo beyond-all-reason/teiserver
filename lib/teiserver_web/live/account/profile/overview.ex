@@ -1,7 +1,11 @@
 defmodule TeiserverWeb.Account.ProfileLive.Overview do
   @moduledoc false
+
   use TeiserverWeb, :live_view
+
+  alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Lobby
 
   @impl true
   def mount(%{"userid" => userid_str}, _session, socket) do
@@ -16,12 +20,19 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
           |> redirect(to: ~p"/")
 
         true ->
+          :ok =
+            PubSub.subscribe(
+              Teiserver.PubSub,
+              "teiserver_client_messages:#{userid}"
+            )
+
           socket
           |> assign(:tab, nil)
           |> assign(:site_menu_active, "teiserver_account")
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
           |> assign(:role_data, Account.RoleLib.role_data())
+          |> assign(:client, Account.get_client_by_id(userid))
           |> get_relationships_and_permissions
       end
 
@@ -46,6 +57,30 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
   defp apply_action(%{assigns: %{user: user}} = socket, :achievements, _params) do
     socket
     |> assign(:page_title, "#{user.name} - Achievements")
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
+    user_id = socket.assigns.user.id
+
+    socket = assign(socket, :client, Account.get_client_by_id(user_id))
+
+    {:noreply, socket}
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
+    {:noreply, assign(socket, :client, nil)}
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :client_updated}, socket) do
+    user_id = socket.assigns.user.id
+
+    socket = assign(socket, :client, Account.get_client_by_id(user_id))
+
+    {:noreply, socket}
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _}, socket) do
+    {:noreply, socket}
   end
 
   @impl true
@@ -248,6 +283,46 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     |> assign(:friendship, [])
     |> assign(:friendship_request, [])
     |> assign(:profile_permissions, [])
+  end
+
+  def handle_event("join", _params, %{assigns: assigns} = socket) do
+    user_id = assigns.user.id
+    current_user_id = assigns.current_user.id
+    lobby_id = assigns.client.lobby_id
+
+    with :ok <- client_connected(current_user_id),
+         :ok <- server_allows_join(lobby_id, current_user_id),
+         :ok <- join_lobby(lobby_id, current_user_id) do
+      {:noreply, put_flash(socket, :success, "Lobby joined")}
+    else
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :warning, reason)}
+    end
+  end
+
+  defp client_connected(user_id) do
+    client = Account.get_client_by_id(user_id)
+
+    if not is_nil(client) do
+      :ok
+    else
+      {:error, "Client is not connected"}
+    end
+  end
+
+  defp server_allows_join(lobby_id, user_id) do
+    case Lobby.server_allows_join?(user_id, lobby_id) do
+      true -> :ok
+      {:failure, reason} -> {:error, reason}
+    end
+  end
+
+  defp join_lobby(lobby_id, user_id) do
+    if :ok == Lobby.force_add_user_to_lobby(user_id, lobby_id) do
+      :ok
+    else
+      {:error, "Failed to join lobby"}
+    end
   end
 
   def get_relationships_and_permissions(

@@ -495,9 +495,10 @@ defmodule Teiserver.TeiserverTestLib do
         }
       }
       |> Map.merge(params)
+      |> Teiserver.Lobby.create_lobby()
+      |> Teiserver.Lobby.add_lobby()
 
-    lobby_pid = LobbyLib.start_lobby_server(lobby)
-    {lobby.id, lobby_pid}
+    lobby.id
   end
 
   @spec make_clan_membership(Integer.t(), Integer.t(), Map.t()) ::
