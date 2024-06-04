@@ -560,6 +560,15 @@ CLIENTS test_room #{user.name}\n"
     assert new_user.email_change_code == [nil, nil]
   end
 
+  test "CHANGEEMAIL to email already taken", %{socket: socket, user: user} do
+    other_user = Teiserver.TeiserverTestLib.new_user()
+
+    # Make the request
+    _send_raw(socket, "CHANGEEMAILREQUEST #{other_user.email}\n")
+    reply = _recv_raw(socket)
+    assert reply == "CHANGEEMAILREQUESTDENIED Email already in use\n"
+  end
+
   test "CREATEBOTACCOUNT - no mod", %{socket: socket, user: user} do
     _send_raw(socket, "CREATEBOTACCOUNT test_bot_account_no_mod #{user.name}\n")
     reply = _recv_raw(socket)

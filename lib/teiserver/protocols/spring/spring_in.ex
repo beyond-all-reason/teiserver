@@ -392,14 +392,14 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("CHANGEEMAILREQUEST", new_email, msg_id, state) do
-    new_user = CacheUser.request_email_change(state.user, new_email)
+    result = CacheUser.request_email_change(state.user, new_email)
 
-    case new_user do
-      nil ->
-        reply(:change_email_request_denied, "no user", msg_id, state)
+    case result do
+      {:error, reason} ->
+        reply(:change_email_request_denied, reason, msg_id, state)
         state
 
-      _ ->
+      {:ok, new_user} ->
         reply(:change_email_request_accepted, nil, msg_id, state)
         %{state | user: new_user}
     end
