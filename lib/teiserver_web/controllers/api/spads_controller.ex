@@ -239,7 +239,7 @@ defmodule TeiserverWeb.API.SpadsController do
 
   defp get_team_subtype(lobby) do
     teams =
-      lobby.member_list
+      lobby.players
       |> Account.list_clients()
       |> Enum.filter(fn c -> c.player == true end)
       |> Enum.group_by(fn c -> c.team_number end)
