@@ -24,7 +24,10 @@ defmodule TeiserverWeb.API.SpadsController do
 
     target_id = int_parse(target_id_str)
     lobby = get_member_lobby(target_id)
-    host_ip = get_lobby_host_ip(lobby)
+    host_ip = case lobby do
+      nil -> nil
+      _ -> Account.get_client_by_id(lobby.founder_id).ip
+    end
 
     actual_type =
       case type do
@@ -219,32 +222,20 @@ defmodule TeiserverWeb.API.SpadsController do
     end
   end
 
-  def get_member_of_lobby_host_ip(nil), do: nil
+  defp get_member_lobby(nil), do: nil
 
-  def get_member_lobby(userid) do
+  @spec get_member_lobby(non_neg_integer()) :: T.lobby() | nil
+  defp get_member_lobby(userid) do
     case Account.get_client_by_id(userid) do
       nil ->
         nil
 
       client ->
-        Battle.get_lobby(userid)
+        Battle.get_lobby(client.lobby_id)
     end
   end
 
-  def get_lobby_host_ip(nil), do: nil
-
-  def get_lobby_host_ip(lobby_id) do
-    case Battle.get_lobby(lobby_id) do
-      nil ->
-        nil
-
-      lobby ->
-        host = Account.get_client_by_id(lobby.founder_id)
-        host.ip
-    end
-  end
-
-  def get_lobby_host_ip(nil), do: "Big Team"
+  defp get_team_subtype(nil), do: "Big Team"
 
   defp get_team_subtype(lobby) do
     teams =
