@@ -19,15 +19,19 @@ defmodule TeiserverWeb.API.SpadsController do
   def get_rating(conn, %{
         "target_id" => target_id_str,
         "type" => type
-      }) do
+      }
+  ) do
+
+    target_id = int_parse(target_id_str)
+    lobby = get_member_lobby(target_id)
+    host_ip = get_lobby_host_ip(lobby)
+
     actual_type =
       case type do
+        "Team" -> get_team_subtype(lobby)
         "TeamFFA" -> "Big Team" # Team FFA uses Big Team rating
         v -> v
       end
-
-    target_id = int_parse(target_id_str)
-    host_ip = get_member_of_lobby_host_ip(target_id)
 
     conn_ip =
       conn
@@ -217,13 +221,13 @@ defmodule TeiserverWeb.API.SpadsController do
 
   def get_member_of_lobby_host_ip(nil), do: nil
 
-  def get_member_of_lobby_host_ip(userid) do
+  def get_member_lobby(userid) do
     case Account.get_client_by_id(userid) do
       nil ->
         nil
 
       client ->
-        get_lobby_host_ip(client.lobby_id)
+        Battle.get_lobby(userid)
     end
   end
 
@@ -237,6 +241,30 @@ defmodule TeiserverWeb.API.SpadsController do
       lobby ->
         host = Account.get_client_by_id(lobby.founder_id)
         host.ip
+    end
+  end
+
+  def get_lobby_host_ip(nil), do: "Big Team"
+
+  defp get_team_subtype(lobby) do
+    teams =
+      lobby.member_list
+      |> Account.list_clients()
+      |> Enum.filter(fn c -> c.player == true end)
+      |> Enum.group_by(fn c -> c.team_number end)
+
+    max_team_size =
+      case Enum.map(teams, fn {_, team} -> Enum.count(team) end) do
+        [] ->
+          0
+
+        counts ->
+          Enum.max(counts)
+      end
+
+    cond do
+      Enum.count(teams) == 2 and max_team_size <= 4 -> "Small Team" # 2v2, 3v3, 4v4
+      true -> "Big Team"
     end
   end
 end
