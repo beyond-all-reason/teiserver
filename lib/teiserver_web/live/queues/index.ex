@@ -207,7 +207,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
         } = data,
         socket
       ) do
-    Logger.warn("index.ex Match ready")
+    Logger.warning("index.ex Match ready")
 
     {:noreply,
      socket

@@ -28,17 +28,8 @@ defmodule Teiserver.ServerCase do
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Teiserver.Repo)
-
-    unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Teiserver.Repo, {:shared, self()})
-    end
-
+    Teiserver.DataCase.setup_sandbox(tags)
     on_exit(&Teiserver.TeiserverTestLib.clear_all_con_caches/0)
-
-    :ok = Supervisor.terminate_child(Teiserver.Supervisor, Teiserver.Repo)
-    {:ok, _} = Supervisor.restart_child(Teiserver.Supervisor, Teiserver.Repo)
-
     :ok
   end
 

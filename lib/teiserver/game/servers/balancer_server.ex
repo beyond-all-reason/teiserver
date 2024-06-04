@@ -216,17 +216,14 @@ defmodule Teiserver.Game.BalancerServer do
           |> Enum.map(fn userid ->
             %{
               userid =>
-                BalanceLib.get_user_balance_rating_value(userid, rating_type)
-                |> fuzz_rating(opts[:fuzz_multiplier])
+                BalanceLib.get_user_rating_rank(userid, rating_type, opts[:fuzz_multiplier])
             }
           end)
 
         {_party_id, player_id_list} ->
           player_id_list
           |> Map.new(fn userid ->
-            {userid,
-             BalanceLib.get_user_balance_rating_value(userid, rating_type)
-             |> fuzz_rating(opts[:fuzz_multiplier])}
+            {userid, BalanceLib.get_user_rating_rank(userid, rating_type, opts[:fuzz_multiplier])}
           end)
       end)
       |> List.flatten()
@@ -243,8 +240,7 @@ defmodule Teiserver.Game.BalancerServer do
       |> Enum.map(fn %{userid: userid} ->
         %{
           userid =>
-            BalanceLib.get_user_balance_rating_value(userid, rating_type)
-            |> fuzz_rating(opts[:fuzz_multiplier])
+            BalanceLib.get_user_rating_rank(userid, rating_type, opts[:fuzz_multiplier])
         }
       end)
 
@@ -255,12 +251,6 @@ defmodule Teiserver.Game.BalancerServer do
       logs: new_logs,
       balance_mode: :solo
     })
-  end
-
-  defp fuzz_rating(rating, multiplier) do
-    # Generate something between -1 and 1
-    modifier = 1 - :rand.uniform() * 2
-    rating + modifier * multiplier
   end
 
   @spec empty_state(T.lobby_id()) :: T.balance_server_state()

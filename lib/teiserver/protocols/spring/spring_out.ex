@@ -855,7 +855,7 @@ defmodule Teiserver.Protocols.SpringOut do
     # I've made the mistake of forgetting it and wondering
     # why stuff wasn't working so it's staying here
     if not String.ends_with?(msg, "\n") do
-      Logger.warn("Attempting to send message without newline at the end - #{msg}")
+      Logger.warning("Attempting to send message without newline at the end - #{msg}")
     end
 
     msg =

@@ -258,13 +258,13 @@ defmodule TeiserverWeb.Admin.MatchController do
         {nil, player_id_list} ->
           player_id_list
           |> Enum.map(fn userid ->
-            %{userid => BalanceLib.get_user_balance_rating_value(userid, rating_type)}
+            %{userid => BalanceLib.get_user_rating_rank(userid, rating_type)}
           end)
 
         {_party_id, player_id_list} ->
           player_id_list
           |> Map.new(fn userid ->
-            {userid, BalanceLib.get_user_balance_rating_value(userid, rating_type)}
+            {userid, BalanceLib.get_user_rating_rank(userid, rating_type)}
           end)
       end)
       |> List.flatten()

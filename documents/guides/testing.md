@@ -3,6 +3,12 @@ Run as above (`mix run --no-halt`) and load up Chobby. Set Chobby's server to `l
 
 You can login using the normal login command but it's much easier to login using `LI <username>` which is currently in place for testing purposes. `test_data.ex` has a bunch of existing users for testing purposes but you can use the protocols `REGISTER username password email` command to create a new user. State is currently not persisted over restarts. If you are familiar with Elixir then starting it with `iex -S mix` will put it in console mode and you can execute commands through the modules there too.
 
+## Testing modules with specific tags
+The balance test cases have `@moduletag :balance_test` and you can test them while excluding others:
+```
+mix test --only balance_test
+```
+
 ## Integration tests
 We have a separate project to perform integration tests on Teiserver called [Hailstorm](https://github.com/beyond-all-reason/hailstorm). All Hailstorm documentation is located on the Hailstorm repo.
 

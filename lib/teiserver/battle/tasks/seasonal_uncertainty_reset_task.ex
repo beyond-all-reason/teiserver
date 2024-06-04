@@ -25,35 +25,38 @@ defmodule Teiserver.Battle.SeasonalUncertaintyResetTask do
     )
   end
 
-  defp reset_rating(existing, new_uncertainty, new_last_updated) do
-    new_rating_value = BalanceLib.calculate_rating_value(existing.skill, new_uncertainty)
+  defp reset_rating(existing, _new_uncertainty, new_last_updated) do
+	  # Use the greater of the existing uncertainty or the minimum value (5.0)
+	  new_uncertainty = max(existing.uncertainty, 5.0)
 
-    new_leaderboard_rating =
-      BalanceLib.calculate_leaderboard_rating(existing.skill, new_uncertainty)
+	  new_rating_value = BalanceLib.calculate_rating_value(existing.skill, new_uncertainty)
 
-    Account.update_rating(existing, %{
-      rating_value: new_rating_value,
-      uncertainty: new_uncertainty,
-      leaderboard_rating: new_leaderboard_rating,
-      last_updated: new_last_updated
-    })
+	  new_leaderboard_rating =
+		BalanceLib.calculate_leaderboard_rating(existing.skill, new_uncertainty)
 
-    log_params = %{
-      user_id: existing.user_id,
-      rating_type_id: existing.rating_type_id,
-      match_id: nil,
-      inserted_at: new_last_updated,
-      value: %{
-        reason: "Seasonal reset",
-        rating_value: new_rating_value,
-        skill: existing.skill,
-        uncertainty: new_uncertainty,
-        rating_value_change: new_rating_value - existing.rating_value,
-        skill_change: 0,
-        uncertainty_change: new_uncertainty - existing.uncertainty
-      }
-    }
+	  Account.update_rating(existing, %{
+		rating_value: new_rating_value,
+		uncertainty: new_uncertainty,
+		leaderboard_rating: new_leaderboard_rating,
+		last_updated: new_last_updated
+	  })
 
-    {:ok, _} = Game.create_rating_log(log_params)
-  end
+	  log_params = %{
+		user_id: existing.user_id,
+		rating_type_id: existing.rating_type_id,
+		match_id: nil,
+		inserted_at: new_last_updated,
+		value: %{
+		  reason: "Seasonal reset",
+		  rating_value: new_rating_value,
+		  skill: existing.skill,
+		  uncertainty: new_uncertainty,
+		  rating_value_change: new_rating_value - existing.rating_value,
+		  skill_change: 0,
+		  uncertainty_change: new_uncertainty - existing.uncertainty
+		}
+	  }
+
+	  {:ok, _} = Game.create_rating_log(log_params)
+	end
 end

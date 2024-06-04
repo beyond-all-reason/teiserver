@@ -392,14 +392,14 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("CHANGEEMAILREQUEST", new_email, msg_id, state) do
-    new_user = CacheUser.request_email_change(state.user, new_email)
+    result = CacheUser.request_email_change(state.user, new_email)
 
-    case new_user do
-      nil ->
-        reply(:change_email_request_denied, "no user", msg_id, state)
+    case result do
+      {:error, reason} ->
+        reply(:change_email_request_denied, reason, msg_id, state)
         state
 
-      _ ->
+      {:ok, new_user} ->
         reply(:change_email_request_accepted, nil, msg_id, state)
         %{state | user: new_user}
     end
@@ -644,7 +644,7 @@ defmodule Teiserver.Protocols.SpringIn do
               Account.create_code(%{
                 value: ExULID.ULID.generate(),
                 purpose: "one_time_login",
-                expires: Timex.now() |> Timex.shift(minutes: 5),
+                expires: Timex.now() |> Timex.shift(minutes: 30),
                 user_id: state.userid,
                 metadata: %{
                   ip: client.ip,
@@ -658,7 +658,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
             Coordinator.send_to_user(state.userid, [
               "To complete your report, please use the form on this link: #{url}",
-              "The link will expire in 5 minutes.",
+              "The link will expire in 30 minutes.",
               "If the link doesn't work, you can also view your matches at https://#{host}/battle and report players from the player tab of the relevant battle."
             ])
 
@@ -1408,11 +1408,11 @@ defmodule Teiserver.Protocols.SpringIn do
 
     cond do
       Enum.count(status_timestamps) > 10 ->
-        Logger.warn("status_flood_protection:10 - #{state.username}/#{state.userid}")
+        Logger.warning("status_flood_protection:10 - #{state.username}/#{state.userid}")
         {true, %{state | status_timestamps: status_timestamps}}
 
       Enum.count(recent_timestamps) > 3 ->
-        Logger.warn("status_flood_protection:3 - #{state.username}/#{state.userid}")
+        Logger.warning("status_flood_protection:3 - #{state.username}/#{state.userid}")
         {true, %{state | status_timestamps: status_timestamps}}
 
       true ->

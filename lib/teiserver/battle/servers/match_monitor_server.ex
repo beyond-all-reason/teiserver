@@ -155,10 +155,10 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             Telemetry.log_simple_match_event(userid, match_id, event_type_name, game_time)
             Logger.info("match-event: Stored <#{username}> <#{event_type_name}> <#{game_time}> userid #{userid} match_id #{match_id}")
           else
-            Logger.warn("match-event: Cannot get match_id of userid of #{username}")
+            Logger.warning("match-event: Cannot get match_id of userid of #{username}")
           end
         else
-          Logger.warn("match-event: Cannot get userid of #{username} or is not a bot")
+          Logger.warning("match-event: Cannot get userid of #{username} or is not a bot")
         end
 
       _ ->
@@ -242,7 +242,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         end
 
       _ ->
-        Logger.warn("match-chat nomatch from: #{from_id}: match-chat #{data}")
+        Logger.warning("match-chat nomatch from: #{from_id}: match-chat #{data}")
     end
 
     {:noreply, state}
@@ -288,7 +288,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         end
 
       _ ->
-        Logger.warn("match-chat-name nomatch from: #{from_id}: match-chat [[#{data}]]")
+        Logger.warning("match-chat-name nomatch from: #{from_id}: match-chat [[#{data}]]")
     end
 
     {:noreply, state}
@@ -311,15 +311,15 @@ defmodule Teiserver.Battle.MatchMonitorServer do
                 handle_json_msg(data, from_id)
 
               _ ->
-                Logger.warn("AHM DM no catch, no json-decode - '#{contents_string}'")
+                Logger.warning("AHM DM no catch, no json-decode - '#{contents_string}'")
             end
 
           _ ->
-            Logger.warn("AHM DM no catch, no decompress - '#{compressed_contents}'")
+            Logger.warning("AHM DM no catch, no decompress - '#{compressed_contents}'")
         end
 
       _ ->
-        Logger.warn("AHM DM no catch, no base64 - '#{message}'")
+        Logger.warning("AHM DM no catch, no base64 - '#{message}'")
     end
 
     {:noreply, state}
@@ -327,7 +327,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   # Catchall handle_info
   def handle_info(msg, state) do
-    Logger.warn(
+    Logger.warning(
       "Match monitor Server handle_info error. No handler for msg of #{Kernel.inspect(msg)}"
     )
 
@@ -337,7 +337,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   defp handle_json_msg(%{"username" => username, "GPU" => _} = contents, from_id) do
     case CacheUser.get_user_by_name(username) do
       nil ->
-        Logger.warn("No username on handle_json_msg: #{username} - #{Kernel.inspect(contents)}")
+        Logger.warning("No username on handle_json_msg: #{username} - #{Kernel.inspect(contents)}")
 
         :ok
 
@@ -367,7 +367,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   defp handle_json_msg(contents, _from_id) do
-    Logger.warn("No catch on handle_json_msg: #{Kernel.inspect(contents)}")
+    Logger.warning("No catch on handle_json_msg: #{Kernel.inspect(contents)}")
     :ok
   end
 

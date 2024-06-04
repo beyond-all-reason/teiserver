@@ -34,7 +34,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock makebalance)
 
   # @handled_by_lobby ~w(explain)
-
+  @default_balance_algorithm "loser_picks"
   @splitter "########################################"
 
   @afk_check_duration 40_000
@@ -375,14 +375,23 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, state}
   end
 
+  @doc"""
+  This method handles state when all players have left the lobby
+  """
   def handle_info(
         %{channel: "teiserver_lobby_updates", event: :remove_user, client: _client},
         state
       ) do
     new_player_count = get_player_count(state)
 
+    # Everyone left the lobby
+    # Restore some settings to default
     if new_player_count == 0 do
-      new_state = %{state | minimum_rating_to_play: 0, maximum_rating_to_play: 1000}
+      new_state = %{state |
+        minimum_rating_to_play: 0,
+        maximum_rating_to_play: 1000,
+        balance_algorithm: @default_balance_algorithm
+      }
 
       {:noreply, new_state}
     else
@@ -657,7 +666,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     # if existing.ready == false and new_client.ready == true and existing.unready_at != nil do
     #   time_elapsed = System.system_time(:millisecond) - existing.unready_at
     #   if time_elapsed < 1000 do
-    #     Logger.warn("Ready up in #{time_elapsed}ms by #{existing.userid}/#{existing.name} using #{existing.lobby_client}")
+    #     Logger.warning("Ready up in #{time_elapsed}ms by #{existing.userid}/#{existing.name} using #{existing.lobby_client}")
     #   end
     # end
 
@@ -686,7 +695,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
         if player_count > 4 do
           if user.hw_hash == nil do
-            Logger.warn("hw hash block for #{Account.get_username(userid)}")
+            Logger.warning("hw hash block for #{Account.get_username(userid)}")
             %{new_client | player: false}
           else
             new_client
@@ -1397,7 +1406,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       unready_can_play: false,
       last_queue_state: [],
       balance_result: nil,
-      balance_algorithm: "loser_picks",
+      balance_algorithm: @default_balance_algorithm,
       player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
       showmatch: true
     }

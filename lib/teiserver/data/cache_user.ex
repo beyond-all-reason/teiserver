@@ -296,9 +296,8 @@ defmodule Teiserver.CacheUser do
               :no_verify ->
                 verify_user(get_user_by_id(user.id))
 
-              {:ok, _} ->
+              {:ok, _, _} ->
                 :ok
-                # Logger.error("Email sent, response of #{Kernel.inspect response}")
             end
         end
 
@@ -339,7 +338,7 @@ defmodule Teiserver.CacheUser do
               verify_user(get_user_by_id(user.id))
               :ok
 
-            {:ok, _} ->
+            {:ok, _, _} ->
               :ok
           end
         end
@@ -500,18 +499,18 @@ defmodule Teiserver.CacheUser do
     :ok
   end
 
-  def request_password_reset(user) do
-    db_user = Account.get_user!(user.id)
-
-    Teiserver.Account.Emails.password_reset(db_user)
-    |> Teiserver.Mailer.deliver_now()
-  end
-
-  def request_email_change(nil, _), do: nil
+  @spec request_email_change(T.user() | nil, String.t()) :: {:ok, T.user()} | {:error, String.t()}
+  def request_email_change(nil, _), do: {:error, "no user"}
 
   def request_email_change(user, new_email) do
-    code = :rand.uniform(899_999) + 100_000
-    update_user(%{user | email_change_code: ["#{code}", new_email]})
+    case get_user_by_email(new_email) do
+      nil ->
+        code = :rand.uniform(899_999) + 100_000
+        {:ok, update_user(%{user | email_change_code: ["#{code}", new_email]})}
+
+      _ ->
+        {:error, "Email already in use"}
+    end
   end
 
   @spec change_email(T.user(), String.t()) :: T.user()

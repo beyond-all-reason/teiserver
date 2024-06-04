@@ -1,4 +1,5 @@
 defmodule TeiserverWeb.Live.BattleTest do
+  alias Teiserver.CacheUser
   use TeiserverWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
 
@@ -15,14 +16,16 @@ defmodule TeiserverWeb.Live.BattleTest do
   end
 
   describe "battle live" do
-    test "index", %{conn: conn} do
+    test "index", %{conn: conn, user: user} do
       {:ok, view, html} = live(conn, "/battle/lobbies")
       assert html =~ "No lobbies found"
 
       # Lets create a battle
       battle1 =
         TeiserverTestLib.make_battle(%{
-          name: "LiveBattleName"
+          name: "LiveBattleName",
+          founder_id: user.id,
+          founder_name: user.name
         })
 
       html = render(view)
@@ -32,7 +35,9 @@ defmodule TeiserverWeb.Live.BattleTest do
       # Another
       battle2 =
         TeiserverTestLib.make_battle(%{
-          name: "SecondLiveBattle"
+          name: "SecondLiveBattle",
+          founder_id: user.id,
+          founder_name: user.name
         })
 
       html = render(view)
@@ -78,7 +83,8 @@ defmodule TeiserverWeb.Live.BattleTest do
 
     test "show - valid battle", %{conn: conn} do
       # Lets create a battle
-      %{socket: host_socket, user: _host_user} = TeiserverTestLib.auth_setup()
+      %{socket: host_socket, user: host_user} = TeiserverTestLib.auth_setup()
+      CacheUser.add_roles(host_user, ["Bot"])
 
       _send_raw(
         host_socket,
@@ -154,7 +160,8 @@ defmodule TeiserverWeb.Live.BattleTest do
 
     test "chat - valid battle", %{conn: conn} do
       # Lets create a battle
-      %{socket: host_socket, user: _host_user} = TeiserverTestLib.auth_setup()
+      %{socket: host_socket, user: host_user} = TeiserverTestLib.auth_setup()
+      CacheUser.add_roles(host_user, ["Bot"])
 
       _send_raw(
         host_socket,
