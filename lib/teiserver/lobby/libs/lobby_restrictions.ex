@@ -2,7 +2,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   @moduledoc """
   Helper methods for lobby policies
   """
-  alias Teiserver.CacheUser
+  alias Teiserver.{CacheUser, Config}
   require Logger
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle
@@ -15,8 +15,8 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   def rating_upper_bound, do: @rating_upper_bound
 
   def get_lobby_restrictions_welcome_text(state) do
-    play_level_bounds = get_rating_bounds_text(state)
-    play_rank_bounds = get_rank_bounds_text(state)
+    play_level_bounds = get_rating_bounds_for_title(state)
+    play_rank_bounds = get_rank_bounds_for_title(state)
 
     cond do
       play_level_bounds == nil && play_rank_bounds == nil ->
@@ -26,14 +26,6 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
         ["This lobby has the following play restrictions:", play_level_bounds, play_rank_bounds]
         |> Enum.filter(fn x -> x != nil end)
     end
-  end
-
-  def get_rating_bounds_text(state) do
-    get_rating_bounds_for_title(state)
-  end
-
-  def get_rank_bounds_text(state) do
-    get_rank_bounds_for_title(state)
   end
 
   def get_rank_bounds_for_title(consul_state) when consul_state == nil do
@@ -127,14 +119,18 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     ]
   end
 
+  defp allow_bypass_rank_check?(user) do
+    method = Config.get_site_config_cache("profile.Rank method")
+    # When using Role method for ranks,
+    # contributors auto pass since their ranks are not defined on playtime. To be fixed seperately.
+    method == "Role" && CacheUser.is_contributor?(user)
+  end
+
   @spec check_rank_to_play(any(), any()) :: :ok | {:error, iodata()}
   def check_rank_to_play(user, consul_state) do
     state = consul_state
 
-    # Contributors auto pass since their ranks are not defined on playtime. To be fixed seperately.
-    is_contributor? = CacheUser.is_contributor?(user)
-
-    if is_contributor? do
+    if allow_bypass_rank_check?(user) do
       :ok
     else
       cond do
