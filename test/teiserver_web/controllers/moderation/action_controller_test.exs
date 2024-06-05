@@ -22,6 +22,7 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   @invalid_attrs %{reason: nil, restrictions: %{}}
 
   describe "index" do
+    @tag :needs_attention
     test "lists all actions", %{conn: conn} do
       conn = get(conn, Routes.moderation_action_path(conn, :index))
       assert html_response(conn, 200) =~ "Listing Actions"
@@ -33,6 +34,7 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
       assert html_response(conn, 200) =~ "Listing Actions"
     end
 
+    @tag :needs_attention
     test "search", %{conn: conn} do
       conn =
         post(
@@ -43,6 +45,7 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
       assert html_response(conn, 200) =~ "Listing Actions"
     end
 
+    @tag :needs_attention
     test "list actions for a user", %{conn: conn} do
       action = ModerationTestLib.action_fixture()
 
@@ -100,12 +103,14 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   end
 
   describe "show action" do
+    @tag :needs_attention
     test "renders show page", %{conn: conn} do
       action = ModerationTestLib.action_fixture()
       resp = get(conn, Routes.moderation_action_path(conn, :show, action))
       assert html_response(resp, 200) =~ "Edit action"
     end
 
+    @tag :needs_attention
     test "renders show nil item", %{conn: conn} do
       assert_error_sent 404, fn ->
         get(conn, Routes.moderation_action_path(conn, :show, -1))
@@ -128,6 +133,7 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   end
 
   describe "update action" do
+    @tag :needs_attention
     test "redirects when data is valid", %{conn: conn} do
       action = ModerationTestLib.action_fixture()
 
@@ -157,6 +163,7 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   end
 
   describe "halt action" do
+    @tag :needs_attention
     test "halts chosen action", %{conn: conn} do
       action = ModerationTestLib.action_fixture()
       assert Timex.compare(action.expires, Timex.now()) == 1

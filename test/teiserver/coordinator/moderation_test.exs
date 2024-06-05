@@ -13,6 +13,7 @@ defmodule Teiserver.Coordinator.ModerationTest do
     {:ok, user: user}
   end
 
+  @tag :needs_attention
   test "login with warning", %{user: user} do
     delay = Teiserver.Config.get_site_config_cache("teiserver.Post login action delay")
 

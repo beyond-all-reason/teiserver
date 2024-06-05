@@ -58,6 +58,7 @@ defmodule Teiserver.SpringRawTest do
     assert Enum.count(db_users) == 1
   end
 
+  @tag :needs_attention
   test "LOGIN", %{socket: socket} do
     username = "test_user_raw"
 

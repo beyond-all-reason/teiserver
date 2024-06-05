@@ -7,6 +7,15 @@ defmodule Teiserver.Chat.WordLibTest do
   import Teiserver.TeiserverTestLib,
     only: [new_user: 0]
 
+  # this module is flakey but only because of other tests not correctly isolated.
+  # Failed with
+  # ** (Ecto.ConstraintError) constraint error when attempting to insert struct:
+  #
+  #   * "teiserver_lobby_messages_match_id_fkey" (foreign_key_constraint)
+  # on seed 638462
+  # not sure if it'll be reproduceable later on though
+  @moduletag :needs_attention
+
   setup do
     Coordinator.start_coordinator()
     :ok

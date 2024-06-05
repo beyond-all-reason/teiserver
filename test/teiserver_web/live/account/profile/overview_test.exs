@@ -57,6 +57,7 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
              |> has_element?()
     end
 
+    @tag :needs_attention
     test "renders error flash when client is not connected", %{
       conn: conn,
       profile_user: profile_user

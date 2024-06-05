@@ -16,6 +16,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
 
   # For reasons unknown this test often results in the wrong number of people
   # being released at various stages. I have no idea why (but it does work in prod)
+  @tag :needs_attention
   test "multiple queues" do
     pid = LoginThrottleServer.get_login_throttle_server_pid()
     LoginThrottleServer.set_value(:releases_per_tick, 1)
