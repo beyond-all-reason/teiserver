@@ -102,8 +102,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         ["Parties:" | party_list]
       end
 
-    play_level_bounds = LobbyRestrictions.get_rating_bounds_text(state)
-    play_rank_bounds = LobbyRestrictions.get_rank_bounds_text(state)
+    play_level_bounds = LobbyRestrictions.get_rating_bounds_for_title(state)
+    play_rank_bounds = LobbyRestrictions.get_rank_bounds_for_title(state)
 
     welcome_message =
       if state.welcome_message do
