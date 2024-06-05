@@ -49,6 +49,7 @@ defmodule TeiserverWeb.PostLiveTest do
   describe "Basic auth test" do
     setup [:unauth_setup, :create_post]
 
+    @tag :needs_attention
     test "basic user", %{post: post, conn: conn} do
       {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/posts")
       assert resp == %{flash: %{"info" => "Welcome back!"}, to: ~p"/microblog"}

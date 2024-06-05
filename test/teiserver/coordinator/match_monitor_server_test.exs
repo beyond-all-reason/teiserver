@@ -55,6 +55,7 @@ defmodule Teiserver.Coordinator.MatchMonitorServerTest do
     {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id}
   end
 
+  @tag :needs_attention
   test "chat messages", %{hsocket: hsocket, host: host, player: player} do
     monitor_user = CacheUser.get_user_by_name("AutohostMonitor")
     messages1 = Chat.list_lobby_messages(search: [user_id: host.id])

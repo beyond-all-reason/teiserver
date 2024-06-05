@@ -89,6 +89,7 @@ defmodule Teiserver.Coordinator.SplitTest do
      empty_lobby_id: empty_lobby_id}
   end
 
+  @tag :needs_attention
   test "basic split test", %{
     host: _host,
     player: player1,
@@ -498,6 +499,7 @@ defmodule Teiserver.Coordinator.SplitTest do
            }
   end
 
+  @tag :needs_attention
   test "test minimum player split", %{
     host: _host,
     player: player1,

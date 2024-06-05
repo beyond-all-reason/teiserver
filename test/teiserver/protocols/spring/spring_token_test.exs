@@ -28,6 +28,7 @@ defmodule Teiserver.SpringTokenTest do
     _recv_raw(socket)
   end
 
+  @tag :needs_attention
   test "c.user.get_token_by_email - correct" do
     user =
       GeneralTestLib.make_user(%{

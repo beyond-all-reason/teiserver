@@ -4,6 +4,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
   alias Teiserver.{Logging, Account, CacheUser}
   alias Teiserver.Logging.Tasks.{PersistServerMonthTask, PersistServerDayTask}
 
+  @tag :needs_attention
   test "perform task" do
     flunk("We do not create the user_activity_log data so this always fails")
 
