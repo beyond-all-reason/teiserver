@@ -60,10 +60,10 @@
     :if={allow?(@current_user, "Server")}
     href={~p"/admin/users/delete_user/#{@user.id}"}
     data-confirm="Are you sure?"
-    method="put"
+    method="delete"
     class="dropdown-item bg-danger_transparent"
   >
-    <Fontawesome.icon icon="broom-wide" style="solid" /> &nbsp;
+    <Fontawesome.icon icon="fa-trash" style="solid" /> &nbsp;
     Delete user
   </.link>
 </div>

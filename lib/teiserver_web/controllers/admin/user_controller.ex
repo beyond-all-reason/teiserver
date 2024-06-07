@@ -21,8 +21,8 @@ defmodule TeiserverWeb.Admin.UserController do
     user: {Teiserver.Account.AuthLib, :current_user}
   )
 
-  plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
-  plug(:add_breadcrumb, name: 'Users', url: '/teiserver/admin/user')
+  plug(:add_breadcrumb, name: "Admin", url: "/teiserver/admin")
+  plug(:add_breadcrumb, name: "Users", url: "/teiserver/admin/user")
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
@@ -212,51 +212,56 @@ defmodule TeiserverWeb.Admin.UserController do
 
   @spec create_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create_form(conn, _) do
-    conn
-    |> render("create_form.html")
+    if allow?(conn, "Server") do
+      conn
+      |> render("create_form.html")
+    else
+      conn
+      |> put_flash(:info, "No permission")
+      |> redirect(to: ~p"/teiserver/admin/user")
+    end
   end
 
   @spec create_post(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create_post(conn, params \\ %{}) do
-    (params["name"] || "" == "")
+    if is_nil(params["name"]) or String.trim(params["name"]) == "" do
+      conn
+      |> put_flash(:danger, "Invalid user name")
+      |> redirect(to: ~p"/teiserver/admin/user")
+    end
 
-    passwordfn = fn -> if is_nil(params["password"]) or String.trim(params["password"]) == "" do "password" else params["password"] end end
-    emailfn = fn -> if is_nil(params["email"]) or String.trim(params["email"]) == "" do UUID.uuid1() else params["email"] end end
+    if allow?(conn, "Server") do
+      password =
+        if is_nil(params["password"]) or String.trim(params["password"]) == "" do
+          "password"
+        else
+          params["password"]
+        end
 
+      email =
+        if is_nil(params["email"]) or String.trim(params["email"]) == "" do
+          UUID.uuid1()
+        else
+          params["email"]
+        end
 
-    user_params = %{
-      "name" => params["name"],
-      "password" => passwordfn.(),
-      "email" => emailfn.(),
-      "permissions" => [],
-      "icon" => "fa-solid #{Teiserver.Helper.StylingHelper.random_icon()}",
-      "colour" => Teiserver.Helper.StylingHelper.random_colour(),
-      "trust_score" => 10_000,
-      "behaviour_score" => 10_000,
-      "data" => %{
-        "lobby_client" => "webui",
-        "rank" => 1,
-        "friends" => [],
-        "friend_requests" => [],
-        "ignored" => [],
-        "roles" => [],
-        "bot" => "false",
-        "moderator" => "false",
-        "password_hash" => 
-            Teiserver.CacheUser.encrypt_password(
-              Teiserver.CacheUser.spring_md5_password(passwordfn.())
-            )
-      }
-    }
+      case Teiserver.CacheUser.register_user(params["name"], email, password) do
+        :success ->
+          conn
+          |> put_flash(:info, "User created successfully.")
+          |> redirect(to: ~p"/teiserver/admin/user")
 
-    case Account.create_user(user_params) do
-      {:ok, _user} ->
-        conn
-        |> put_flash(:info, "User created successfully.")
-        |> redirect(to: ~p"/teiserver/admin/user")
+        {:failure, str} ->
+          conn
+          |> put_flash(:error, "Problem creating user: " <> str)
+          |> redirect(to: ~p"/teiserver/admin/user")
+      end
+    else
+      conn
+      |> put_flash(:danger, "No access.")
+      |> redirect(to: ~p"/teiserver/admin/user")
     end
   end
-
 
   @spec create(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create(conn, %{"user" => user_params}) do
@@ -1155,23 +1160,30 @@ defmodule TeiserverWeb.Admin.UserController do
     end
   end
 
-
   @spec delete_user(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete_user(conn, %{"id" => id}) do
     user = Account.get_user_by_id(id)
 
     case Teiserver.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        Teiserver.manually_delete_user(id)
-
-        conn
-        |> put_flash(:success, "User deleted")
-        |> redirect(to: ~p"/teiserver/admin/user/")
+        case Teiserver.Admin.DeleteUserTask.delete_users([id]) do
+          :ok ->
+            conn
+            |> put_flash(:success, "User deleted")
+            |> redirect(to: ~p"/teiserver/admin/user/")
+        end
 
       _ ->
         conn
         |> put_flash(:danger, "Unable to access this user")
         |> redirect(to: ~p"/teiserver/admin/user")
     end
+  end
+
+  def delete_user(conn, %{}) do
+    # catch case, when no id is provided
+    conn
+    |> put_flash(:danger, "No user_id provided")
+    |> redirect(to: ~p"/teiserver/admin/user")
   end
 end
