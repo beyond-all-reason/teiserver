@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Game.QueueControllerTest do
 
   @create_attrs %{
     colour: "#AA0000",
-    icon: "fa-regular fa-home",
+    icon: "fa-solid fa-home",
     name: "some name",
     team_size: 1,
     map_list: [],

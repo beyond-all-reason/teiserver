@@ -21,7 +21,7 @@ defmodule Teiserver.AccountFixtures do
         name: "Test",
         email: "email@email#{:rand.uniform(999_999_999_999)}",
         colour: "#00AA00",
-        icon: "fa-regular fa-user",
+        icon: "fa-solid fa-user",
         permissions: permissions,
         password: "password",
         password_confirmation: "password",

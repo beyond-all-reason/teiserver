@@ -7,7 +7,7 @@ config :teiserver, Teiserver,
   site_title: "BAR",
   site_suffix: "",
   site_description: "",
-  site_icon: "fa-duotone fa-robot",
+  site_icon: "fa-solid fa-robot",
   credit: "Teifion Jordan"
 
 # Default configs
