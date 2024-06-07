@@ -24,16 +24,12 @@
 
         <div class="row mt-4">
           <div class="col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
-            <h4>Create with default values: </h4> 
+            <h4>Create with default values:</h4>
             <h5>(random name; random email; password = "password")</h5>
-            <form
-              action={Routes.ts_admin_user_path(@conn, :create_post)}
-              method="post"
-              class=""
-            >
+            <form method="post" action={Routes.ts_admin_user_path(@conn, :create_post)} class="">
               <% random_name = "User#{:rand.uniform(899_999_999) + 100_000_000}" %>
               <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
-              <input type="hidden" name="_method" value="PUT" />
+              <input type="hidden" name="_method" value="POST" />
               <input type="hidden" name="name" value={random_name} />
 
               <button type="submit" class={"btn btn-#{bsname}2 btn-block"}>
@@ -41,20 +37,14 @@
               </button>
             </form>
 
-
             <br />
             <hr />
             <br />
 
-
             <h4>Create with chosen values:</h4>
-            <form
-              action={Routes.ts_admin_user_path(@conn, :create_post)}
-              method="post"
-              class=""
-            >
+            <form method="post" action={Routes.ts_admin_user_path(@conn, :create_post)} class="">
               <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
-              <input type="hidden" name="_method" value="PUT" />
+              <input type="hidden" name="_method" value="POST" />
 
               <div class="row mt-2">
                 <label for="name" class="col-sm-2 control-label">User name:</label>
@@ -109,7 +99,6 @@
                 </div>
               </div>
             </form>
-
           </div>
         </div>
       </div>

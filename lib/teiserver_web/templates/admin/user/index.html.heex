@@ -72,6 +72,9 @@ is_system = allow?(@conn, "System") %>
               <% else %>
                 <th>&nbsp;</th>
               <% end %>
+              <%= if is_system do %>
+                <th colspan="1">&nbsp;</th>
+              <% end %>
             </tr>
           </thead>
           <tbody>
@@ -94,13 +97,12 @@ is_system = allow?(@conn, "System") %>
                   <td>
                     <%= if user_stats["hardware:cpuinfo"] != "" and user_stats["hardware:cpuinfo"] != nil do %>
                       <%= user_stats["hardware:cpuinfo"] %>
-                      <br/>
+                      <br />
                       <%= user_stats["hardware:gpuinfo"] %>
                     <% else %>
                       &nbsp;
                     <% end %>
                   </td>
-
                 <% end %>
 
                 <td>
@@ -131,14 +133,14 @@ is_system = allow?(@conn, "System") %>
                 <% end %>
                 <%= if is_system do %>
                   <td>
-                    <a
-                      data-confirm="Are you sure?"
+                    <.link
                       href={~p"/admin/users/delete_user/#{user.id}"}
-                      method="put"
+                      data-confirm="Are you sure?"
+                      method="delete"
                       class="btn btn-secondary btn-sm"
                     >
                       Delete
-                    </a>
+                    </.link>
                   </td>
                 <% end %>
               </tr>
