@@ -5,7 +5,7 @@ defmodule Teiserver.Account.RelationshipReport do
   alias Teiserver.Account.RelationshipLib
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-arrow-down-up-across-line"
+  def icon(), do: "fa-solid fa-arrow-down-up-across-line"
 
   @spec permissions() :: String.t()
   def permissions(), do: "Reviewer"

@@ -274,7 +274,7 @@ defmodule TeiserverWeb.NavComponents do
         <Fontawesome.icon
           :if={@icon}
           icon={@icon}
-          style={if @active, do: "solid", else: "regular"}
+          style="solid"
           size="2x"
         /><br />
         <%= render_slot(@inner_block) %>

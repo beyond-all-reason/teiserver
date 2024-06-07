@@ -24,7 +24,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
   @game_chunk_size 100
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-swords"
+  def icon(), do: "fa-solid fa-explosion"
 
   @spec permissions() :: String.t()
   def permissions(), do: "Admin"

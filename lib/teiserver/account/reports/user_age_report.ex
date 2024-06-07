@@ -5,7 +5,7 @@ defmodule Teiserver.Account.UserAgeReport do
   alias Teiserver.Repo
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-chevrons-up"
+  def icon(), do: "fa-solid fa-chevron-up"
 
   @spec permissions() :: String.t()
   def permissions(), do: "Admin"

@@ -7,7 +7,7 @@ defmodule Teiserver.Account.BanEvasionReport do
   require Logger
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-user-ninja"
+  def icon(), do: "fa-solid fa-user-ninja"
 
   @spec permissions() :: String.t()
   def permissions(), do: "Moderator"
