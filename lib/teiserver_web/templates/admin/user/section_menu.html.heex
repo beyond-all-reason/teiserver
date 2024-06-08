@@ -40,7 +40,7 @@
       ) %>
     <% end %>
 
-    <%= if allow?(@current_user, "admin") do %>
+    <%= if allow?(@current_user, "server") and Application.get_env(:teiserver, Teiserver)[:test_mode] do %>
       <%= central_component("section_menu_button",
         name: "add_user",
         label: "Add user",

@@ -230,7 +230,7 @@ defmodule TeiserverWeb.Admin.UserController do
       |> redirect(to: ~p"/teiserver/admin/user")
     end
 
-    if allow?(conn, "Server") do
+    if allow?(conn, "Server") and Application.get_env(:teiserver, Teiserver)[:test_mode] do
       password =
         if is_nil(params["password"]) or String.trim(params["password"]) == "" do
           "password"
@@ -1162,6 +1162,12 @@ defmodule TeiserverWeb.Admin.UserController do
 
   @spec delete_user(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete_user(conn, %{"id" => id}) do
+    if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
+      conn
+      |> put_flash(:danger, "not in testmode")
+      |> redirect(to: ~p"/teiserver/admin/user")
+    end
+
     user = Account.get_user_by_id(id)
 
     case Teiserver.Account.UserLib.has_access(user, conn) do

@@ -1,6 +1,6 @@
 <% bsname = view_colour()
 is_moderator = allow?(@conn, "Moderator")
-is_system = allow?(@conn, "System") %>
+allow_delete = allow?(@conn, "Server") and Application.get_env(:teiserver, Teiserver)[:test_mode] %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -72,7 +72,7 @@ is_system = allow?(@conn, "System") %>
               <% else %>
                 <th>&nbsp;</th>
               <% end %>
-              <%= if is_system do %>
+              <%= if allow_delete do %>
                 <th colspan="1">&nbsp;</th>
               <% end %>
             </tr>
@@ -131,7 +131,7 @@ is_system = allow?(@conn, "System") %>
                     </a>
                   </td>
                 <% end %>
-                <%= if is_system do %>
+                <%= if allow_delete do %>
                   <td>
                     <.link
                       href={~p"/admin/users/delete_user/#{user.id}"}

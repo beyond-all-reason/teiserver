@@ -57,7 +57,9 @@
   </.link>
 
   <.link
-    :if={allow?(@current_user, "Server")}
+    :if={
+      allow?(@current_user, "Server") and Application.get_env(:teiserver, Teiserver)[:test_mode]
+    }
     href={~p"/admin/users/delete_user/#{@user.id}"}
     data-confirm="Are you sure?"
     method="delete"
