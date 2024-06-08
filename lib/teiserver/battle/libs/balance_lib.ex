@@ -163,19 +163,12 @@ defmodule Teiserver.Battle.BalanceLib do
     groups
     |> Enum.map(fn group ->
       # Iterate over our map
-      {_ignored, better_map} =
-        Enum.map_reduce(group, %{}, fn {user_id, value}, acc ->
-          fixed_value =
-            cond do
-              # We're missing data so need to fetch it
-              is_number(value) -> get_user_rating_rank_old(user_id, value)
-              true -> value
-            end
-
-          {nil, Map.put(acc, user_id, fixed_value)}
-        end)
-
-      better_map
+      Map.new(group, fn {user_id, value} ->
+        cond do
+          is_number(value) -> {user_id, get_user_rating_rank_old(user_id, value)}
+          true -> {user_id, value}
+        end
+      end)
     end)
   end
 
