@@ -33,6 +33,7 @@ defmodule Teiserver.MixProject do
   def application do
     # get that with mix app.tree nostrum
     nostrum_extras = [:certifi, :gun, :inets, :jason, :kcl, :mime]
+
     [
       mod: {Teiserver.Application, []},
       included_applications: [:nostrum],
@@ -90,6 +91,7 @@ defmodule Teiserver.MixProject do
       {:libcluster, "~> 3.3"},
       {:tzdata, "~> 1.1"},
       {:ex_ulid, "~> 0.1.0"},
+      {:mock, "~> 0.3.0", only: :test},
 
       # Teiserver libs
       {:openskill, git: "https://github.com/StanczakDominik/openskill.ex.git", branch: "master"},
