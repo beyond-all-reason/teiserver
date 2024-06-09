@@ -73,7 +73,7 @@ defmodule Teiserver.Coordinator.MemesTest do
 
     assert reply == %{
              "cmd" => "s.lobby.update_values",
-             "lobby_id" =>   lobby_id,
+             "lobby_id" => lobby_id,
              "new_values" => %{
                "disabled_units" =>
                  ~w(armaap armalab armap armavp armhp armshltx armvp armamsub armasy armfhp armplat armshltxuw armsy armmg armllt armbeamer armhlt arm armdrag armclaw armguard armjuno armham armjeth armpw armrectr armrock armwar coraap coralab corap coravp corgant corhp corlab corvp corllt corfhp corsy corjuno corhllt corhlt)

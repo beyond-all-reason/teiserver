@@ -28,8 +28,10 @@ defmodule Teiserver.Battle.MatchLib do
       String.contains?(bot_names, "Raptor") -> "Raptors"
       Enum.empty?(bots) == false -> "Bots"
       team_count == 2 and team_size == 1 -> "Duel"
-      team_count == 2 and team_size <= 5 -> "Small Team" # 2v2, 3v3, 4v4, 5v5
-      team_count == 2 and team_size > 5 -> "Big Team" # 6v6, 7v7, 8v8
+      # 2v2, 3v3, 4v4, 5v5
+      team_count == 2 and team_size <= 5 -> "Small Team"
+      # 6v6, 7v7, 8v8
+      team_count == 2 and team_size > 5 -> "Big Team"
       team_size == 1 -> "FFA"
       true -> "Team FFA"
     end
