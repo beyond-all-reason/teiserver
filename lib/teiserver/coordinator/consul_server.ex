@@ -1012,7 +1012,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       state.gatekeeper == "friends" ->
         if is_on_friendlist?(userid, state, :all) do
-          {true, nil}
+          {true, :allow_friends}
         else
           {false, "Friends only gatekeeper"}
         end
