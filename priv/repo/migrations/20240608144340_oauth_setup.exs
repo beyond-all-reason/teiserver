@@ -12,6 +12,17 @@ defmodule Teiserver.Repo.Migrations.OauthSetup do
 
       timestamps(type: :utc_datetime)
     end
-    create_if_not_exists unique_index(:oauth_applications, [:uid])
+
+    create_if_not_exists table(:oauth_codes, comment: "authorisation codes") do
+      add :value, :string, null: false
+      add :owner_id, references(:account_users, on_delete: :delete_all), null: false
+      add :application_id, references(:oauth_applications, on_delete: :delete_all), null: false
+      add :scopes, {:array, :string}, null: false
+      add :expires_at, :utc_datetime, null: false
+
+      timestamps(type: :utc_datetime)
+    end
+    create_if_not_exists unique_index(:oauth_codes, [:value])
+
   end
 end
