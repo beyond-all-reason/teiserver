@@ -4,7 +4,7 @@ defmodule Teiserver.Battle.SplitOneChevsInternalTest do
   Can run tests in this file only by
   mix test test/teiserver/battle/split_one_chevs_internal_test.exs
   """
-  use Teiserver.DataCase, async: true
+  use ExUnit.Case
   @moduletag :balance_test
   alias Teiserver.Battle.Balance.SplitOneChevs
 
