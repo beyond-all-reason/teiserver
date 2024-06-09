@@ -203,7 +203,7 @@ defmodule TeiserverWeb.NavComponents do
   """
   attr :url, :string, required: true
   attr :icon, :string, required: true
-  attr :icon_class, :string, default: "duotone"
+  attr :icon_class, :string, default: "solid"
   attr :size, :atom, default: nil
   slot :inner_block, required: true
 
@@ -271,12 +271,7 @@ defmodule TeiserverWeb.NavComponents do
     ~H"""
     <div class="col sub-menu-icon">
       <a href={@url} class={"block-link #{@active_class}"}>
-        <Fontawesome.icon
-          :if={@icon}
-          icon={@icon}
-          style={if @active, do: "solid", else: "regular"}
-          size="2x"
-        /><br />
+        <Fontawesome.icon :if={@icon} icon={@icon} style="solid" size="2x" /><br />
         <%= render_slot(@inner_block) %>
       </a>
     </div>

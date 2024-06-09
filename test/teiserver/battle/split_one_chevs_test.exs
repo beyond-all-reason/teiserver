@@ -3,7 +3,7 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
   Can run tests in this file only by
   mix test test/teiserver/battle/split_one_chevs_test.exs
   """
-  use Teiserver.DataCase, async: true
+  use ExUnit.Case
   @moduletag :balance_test
   alias Teiserver.Battle.BalanceLib
 
@@ -84,7 +84,6 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
 
     assert result.team_players == %{1 => [4, 1], 2 => [2, 3]}
   end
-
 
   test "logs FFA" do
     result =

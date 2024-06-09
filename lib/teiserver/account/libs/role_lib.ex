@@ -42,7 +42,7 @@ defmodule Teiserver.Account.RoleLib do
     %{
       name: "Verified",
       colour: "#66AA66",
-      icon: "fa-duotone fa-check",
+      icon: "fa-solid fa-check",
       contains: ~w()
     },
 
@@ -50,85 +50,85 @@ defmodule Teiserver.Account.RoleLib do
     %{
       name: "Community team",
       colour: "#66AA66",
-      icon: "fa-duotone fa-thought-bubble",
+      icon: "fa-solid fa-thought-bubble",
       contains: ~w(),
       badge: true
     },
     %{
       name: "Mentor",
       colour: "#66AA66",
-      icon: "fa-duotone fa-thought-bubble",
+      icon: "fa-solid fa-thought-bubble",
       contains: ["Community team"],
       badge: true
     },
     %{
       name: "Academy manager",
       colour: "#66AA66",
-      icon: "fa-duotone fa-thought-bubble",
+      icon: "fa-solid fa-thought-bubble",
       contains: ["Community team"],
       badge: true
     },
     %{
       name: "Promo team",
       colour: "#66AA66",
-      icon: "fa-duotone fa-thought-bubble",
+      icon: "fa-solid fa-thought-bubble",
       contains: ["Community team"],
       badge: true
     },
 
     # Privileged
-    %{name: "VIP", colour: "#AA8833", icon: "fa-duotone fa-sparkles", contains: ["BAR+"]},
+    %{name: "VIP", colour: "#AA8833", icon: "fa-solid fa-sparkles", contains: ["BAR+"]},
     %{name: "Streamer", colour: "#660066", icon: "fa-brands fa-twitch", contains: ~w()},
-    %{name: "Tournament", colour: "#0000AA", icon: "fa-duotone fa-trophy", contains: ~w()},
+    %{name: "Tournament", colour: "#0000AA", icon: "fa-solid fa-trophy", contains: ~w()},
     %{
       name: "Caster",
       colour: "#660066",
-      icon: "fa-duotone fa-microphone-lines",
+      icon: "fa-solid fa-microphone-lines",
       contains: ~w(Streamer Tournament),
       badge: true
     },
-    %{name: "Donor", colour: "#0066AA", icon: "fa-duotone fa-euro", contains: ~w(), badge: true},
+    %{name: "Donor", colour: "#0066AA", icon: "fa-solid fa-euro", contains: ~w(), badge: true},
 
     # Contributor/Staff
     %{
       name: "Contributor",
       colour: "#66AA66",
-      icon: "fa-duotone fa-code-commit",
+      icon: "fa-solid fa-code-commit",
       contains: ["Trusted", "BAR+"],
       badge: true
     },
-    %{name: "Engine", colour: "#007700", icon: "fa-duotone fa-engine", contains: ~w(Contributor)},
-    %{name: "Mapping", colour: "#007700", icon: "fa-duotone fa-map", contains: ~w(Contributor)},
+    %{name: "Engine", colour: "#007700", icon: "fa-solid fa-engine", contains: ~w(Contributor)},
+    %{name: "Mapping", colour: "#007700", icon: "fa-solid fa-map", contains: ~w(Contributor)},
     %{
       name: "Gameplay",
       colour: "#AA0000",
-      icon: "fa-duotone fa-pen-ruler",
+      icon: "fa-solid fa-pen-ruler",
       contains: ~w(Contributor),
       badge: true
     },
     %{
       name: "Infrastructure",
       colour: "#007700",
-      icon: "fa-duotone fa-server",
+      icon: "fa-solid fa-server",
       contains: ~w(Contributor)
     },
     %{
       name: "Data export",
       colour: "#007700",
-      icon: "fa-duotone fa-download",
+      icon: "fa-solid fa-download",
       contains: ~w(Contributor)
     },
     %{
       name: "Tester",
       colour: "#00AAAA",
-      icon: "fa-duotone fa-vial",
+      icon: "fa-solid fa-vial",
       contains: ~w(Contributor),
       badge: true
     },
     %{
       name: "Core",
       colour: "#007700",
-      icon: "fa-duotone fa-code-branch",
+      icon: "fa-solid fa-code-branch",
       contains: ~w(Contributor),
       badge: true
     },
@@ -137,19 +137,19 @@ defmodule Teiserver.Account.RoleLib do
     %{
       name: "Overwatch",
       colour: "#AA7733",
-      icon: "fa-duotone fa-clipboard-list-check",
+      icon: "fa-solid fa-clipboard-list-check",
       contains: ["BAR+"]
     },
     %{
       name: "Reviewer",
       colour: "#AA7700",
-      icon: "fa-duotone fa-user-magnifying-glass",
+      icon: "fa-solid fa-user-magnifying-glass",
       contains: ~w(Overwatch)
     },
     %{
       name: "Moderator",
       colour: "#FFAA00",
-      icon: "fa-duotone fa-gavel",
+      icon: "fa-solid fa-gavel",
       contains: ~w(Reviewer),
       badge: true
     },
@@ -259,7 +259,8 @@ defmodule Teiserver.Account.RoleLib do
   end
 
   def allowed_role_management("Admin") do
-    staff_roles() ++ community_roles() ++ privileged_roles() ++ allowed_role_management("Moderator")
+    staff_roles() ++
+      community_roles() ++ privileged_roles() ++ allowed_role_management("Moderator")
   end
 
   def allowed_role_management("Moderator") do

@@ -1,6 +1,6 @@
 <div class="row page-row">
   <%= central_component("menu_card",
-    icon_class: "fa-duotone",
+    icon_class: "fa-solid",
     name: "profile",
     icon: "fa-solid fa-user-circle",
     text: "My profile",
@@ -8,7 +8,7 @@
   ) %>
 
   <%= central_component("menu_card",
-    icon_class: "fa-duotone",
+    icon_class: "fa-solid",
     name: "",
     icon: Teiserver.icon(:relationship),
     text: "Friends/Mutes/Invites",
@@ -16,7 +16,7 @@
   ) %>
 
   <%= central_component("menu_card",
-    icon_class: "fa-duotone",
+    icon_class: "fa-solid",
     name: "",
     icon: Teiserver.Config.UserConfigLib.icon(),
     text: "Preferences",
@@ -26,14 +26,14 @@
   <%= central_component("menu_card",
     icon: Teiserver.Account.icon(),
     text: "Account details",
-    icon_class: "fa-duotone",
+    icon_class: "fa-solid",
     link: Routes.ts_account_general_path(@conn, :edit_details)
   ) %>
 
   <%= central_component("menu_card",
-    icon: "fa-duotone fa-lock",
+    icon: "fa-lock",
     text: "Security",
-    icon_class: "fa-duotone",
+    icon_class: "fa-solid",
     link: Routes.ts_account_security_path(@conn, :index)
   ) %>
 </div>

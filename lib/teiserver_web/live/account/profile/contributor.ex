@@ -84,13 +84,13 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
       Account.recache_user(assigns.user.id)
 
       {:noreply,
-      socket
-      |> assign(:country_code, assigns.temp_country_code)
-      |> assign(:error_message, nil)}
+       socket
+       |> assign(:country_code, assigns.temp_country_code)
+       |> assign(:error_message, nil)}
     else
       {:noreply,
-      socket
-      |> assign(:error_message, "Country code must not contain space")}
+       socket
+       |> assign(:error_message, "Country code must not contain space")}
     end
   end
 

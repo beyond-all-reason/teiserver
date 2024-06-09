@@ -198,7 +198,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
                1 => 13,
                2 => 13
              },
-            #The captain should be the user with the highest rating on each team
+             # The captain should be the user with the highest rating on each team
              captains: %{
                1 => 1,
                2 => 3
@@ -366,7 +366,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
       )
 
     assert Map.drop(result, [:logs, :time_taken]) == %{
-      #The captain should be the user with the highest rating on each team
+             # The captain should be the user with the highest rating on each team
              captains: %{1 => 104, 2 => 101},
              deviation: 2,
              ratings: %{1 => 248, 2 => 253},

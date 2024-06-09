@@ -51,7 +51,7 @@ defmodule TeiserverWeb.AccountComponents do
 
       <.sub_menu_button
         bsname={@view_colour}
-        icon="fa-lock"
+        icon="fa-solid fa-lock"
         active={@active == "security"}
         url={~p"/teiserver/account/security"}
       >

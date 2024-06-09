@@ -99,6 +99,7 @@ defmodule Teiserver.Battle.BalanceLib do
 
   def create_balance(groups, team_count, opts) do
     start_time = System.system_time(:microsecond)
+    groups = standardise_groups(groups)
 
     # We perform all our group calculations here and assign each group
     # an ID that's used purely for this run of balance
@@ -154,6 +155,23 @@ defmodule Teiserver.Battle.BalanceLib do
     |> Map.put(:time_taken, System.system_time(:microsecond) - start_time)
   end
 
+  @doc """
+  Sometimes groups have missing data so we need to refetch it.
+  If we go through balancer_server then all the required data should be there
+  """
+  def standardise_groups(groups) do
+    groups
+    |> Enum.map(fn group ->
+      # Iterate over our map
+      Map.new(group, fn {user_id, value} ->
+        cond do
+          is_number(value) -> {user_id, get_user_rating_rank_old(user_id, value)}
+          true -> {user_id, value}
+        end
+      end)
+    end)
+  end
+
   # Removes various keys we don't care about
   defp cleanup_result(result) do
     Map.take(
@@ -164,7 +182,8 @@ defmodule Teiserver.Battle.BalanceLib do
 
   # Only take keys we need
   defp clean_groups(groups) do
-    groups |> Enum.map(fn x->
+    groups
+    |> Enum.map(fn x ->
       Map.take(x, ~w(members count group_rating ratings)a)
     end)
   end
@@ -179,7 +198,7 @@ defmodule Teiserver.Battle.BalanceLib do
         true ->
           balance_result.teams
           |> Map.new(fn {team_id, groups} ->
-            {team_id, Enum.reverse(clean_groups((groups)))}
+            {team_id, Enum.reverse(clean_groups(groups))}
           end)
       end
 
@@ -541,7 +560,6 @@ defmodule Teiserver.Battle.BalanceLib do
     get_user_rating_value(userid, rating_type_id)
   end
 
-
   # Used to get the rating value of the user for internal balance purposes which might be
   # different from public/reporting
   @spec get_user_balance_rating_value(T.userid(), String.t() | non_neg_integer()) ::
@@ -580,6 +598,14 @@ defmodule Teiserver.Battle.BalanceLib do
     # See application.ex for cache settings
     %{rank: rank, name: name} = Account.get_user_by_id(userid)
     %{rating: rating, rank: rank, name: name}
+  end
+
+  @doc """
+  This is used by some screens to calculate a theoretical balance based on old ratings
+  """
+  def get_user_rating_rank_old(userid, rating_value) do
+    %{rank: rank, name: name} = Account.get_user_by_id(userid)
+    %{rating: rating_value, rank: rank, name: name}
   end
 
   defp fuzz_rating(rating, multiplier) do

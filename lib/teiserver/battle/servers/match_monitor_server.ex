@@ -153,7 +153,10 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           if match_id do
             game_time = int_parse(game_time)
             Telemetry.log_simple_match_event(userid, match_id, event_type_name, game_time)
-            Logger.info("match-event: Stored <#{username}> <#{event_type_name}> <#{game_time}> userid #{userid} match_id #{match_id}")
+
+            Logger.info(
+              "match-event: Stored <#{username}> <#{event_type_name}> <#{game_time}> userid #{userid} match_id #{match_id}"
+            )
           else
             Logger.warning("match-event: Cannot get match_id of userid of #{username}")
           end
@@ -253,13 +256,14 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       [_all, username, _user_num, to, msg] ->
         host = Client.get_client_by_id(from_id)
         user = CacheUser.get_user_by_name(username)
+
         if host == nil do
           Logger.error("No host found for from_id: #{from_id} for message #{to}:#{msg}")
+
           # Optionally, handle the case here, such as by sending a message back to the user or taking other corrective actions.
           # Just returning {:noreply, state} for now.
           {:noreply, state}
         else
-
           case to do
             "d" ->
               # We don't persist this as it's already persisted elsewhere
@@ -284,6 +288,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
                 {:liveview_lobby_chat, :say, user.id, "s: #{msg}"}
               )
           end
+
           {:noreply, state}
         end
 
@@ -337,7 +342,9 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   defp handle_json_msg(%{"username" => username, "GPU" => _} = contents, from_id) do
     case CacheUser.get_user_by_name(username) do
       nil ->
-        Logger.warning("No username on handle_json_msg: #{username} - #{Kernel.inspect(contents)}")
+        Logger.warning(
+          "No username on handle_json_msg: #{username} - #{Kernel.inspect(contents)}"
+        )
 
         :ok
 

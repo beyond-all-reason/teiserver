@@ -3,9 +3,9 @@ defmodule Teiserver do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.CacheHelper
 
-  # def icon(), do: "fa-duotone fa-robot"
+  # def icon(), do: "fa-solid fa-robot"
   @spec icon :: String.t()
-  def icon(), do: "fa-duotone fa-server"
+  def icon(), do: "fa-solid fa-server"
 
   @spec icon(:friend | :friend_request | :ignore | :relationship) :: String.t()
   def icon(:relationship), do: "fa-solid fa-users"

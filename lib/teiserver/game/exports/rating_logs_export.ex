@@ -21,7 +21,7 @@ defmodule Teiserver.Game.RatingLogsExport do
   require Logger
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-rectangle-vertical-history"
+  def icon(), do: "fa-solid fa-layer-group"
 
   @spec permissions() :: String.t()
   def permissions(), do: "teiserver.admin"

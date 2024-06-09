@@ -3,7 +3,7 @@ defmodule Teiserver.Account.ReviewReport do
   alias Teiserver.{Logging}
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-champagne-glasses"
+  def icon(), do: "fa-solid fa-champagne-glasses"
 
   @spec permissions() :: String.t()
   def permissions(), do: "Admin"

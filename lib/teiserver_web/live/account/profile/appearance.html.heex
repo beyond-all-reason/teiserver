@@ -22,7 +22,7 @@
         class="block-link"
         style={"background-color: #{@current_user.colour}; color: #FFFFFF;"}
       >
-        <Fontawesome.icon icon={@current_user.icon} style="duotone" size="3x" /><br /> &nbsp;
+        <Fontawesome.icon icon={@current_user.icon} style="solid" size="3x" /><br /> &nbsp;
       </span>
     </div>
 
@@ -35,7 +35,7 @@
           phx-value-role={role.name}
         >
           <span class="block-link" style={"background-color: #{role.colour}; color: #FFFFFF;"}>
-            <Fontawesome.icon icon={role.icon} style="duotone" size="3x" /><br />
+            <Fontawesome.icon icon={role.icon} style="solid" size="3x" /><br />
             <%= role.name %>
           </span>
         </div>

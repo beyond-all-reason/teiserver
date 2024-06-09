@@ -6,7 +6,10 @@ defmodule Teiserver.Account.ErrorHandler do
   @impl Guardian.Plug.ErrorHandler
 
   def auth_error(conn, {:unauthenticated, _reason}, _opts) do
+    redirect_to = "#{conn.request_path}?#{conn.query_string}"
+
     conn
+    |> put_resp_cookie("_redirect_to", redirect_to, sign: true, max_age: 60 * 5)
     |> Phoenix.Controller.redirect(
       to: TeiserverWeb.Router.Helpers.account_session_path(conn, :login)
     )

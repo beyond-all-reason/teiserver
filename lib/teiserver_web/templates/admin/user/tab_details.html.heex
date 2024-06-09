@@ -126,26 +126,26 @@
       </table>
 
       <%= if allow?(@conn, "Admin") do %>
-      <hr />
-      <form action={Routes.ts_admin_user_path(@conn, :set_stat)} method="post" class="">
-        <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
-        <input type="hidden" name="userid" value={@user.id} />
+        <hr />
+        <form action={Routes.ts_admin_user_path(@conn, :set_stat)} method="post" class="">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+          <input type="hidden" name="userid" value={@user.id} />
 
-        <div class="row" style="padding: 10px;">
-          <input type="text" name="key" value="" class="form-control" placeholder="key" />
-        </div>
+          <div class="row" style="padding: 10px;">
+            <input type="text" name="key" value="" class="form-control" placeholder="key" />
+          </div>
 
-        <div class="row" style="padding: 10px;">
-          <input type="text" name="value" value="" class="form-control" placeholder="value" />
-        </div>
+          <div class="row" style="padding: 10px;">
+            <input type="text" name="value" value="" class="form-control" placeholder="value" />
+          </div>
 
-        <button type="submit" class={"btn btn-#{bsname} float-end"}>
-          Set stat
-        </button>
-      </form>
+          <button type="submit" class={"btn btn-#{bsname} float-end"}>
+            Set stat
+          </button>
+        </form>
 
-      <br /><br />
-      <hr />
+        <br /><br />
+        <hr />
         <form action={~p"/teiserver/admin/users/data_search"} method="post" class="">
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 

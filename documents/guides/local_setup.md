@@ -83,7 +83,7 @@ iex -S mix phx.server
 If all goes to plan you should be able to access your site locally at [http://localhost:4000/](http://localhost:4000/).
 
 ### Libraries you need to get yourself
-The site makes liberal use of [FontAwesome](https://fontawesome.com/) so if you are using the site you'll need to download it and do the following
+The site makes liberal use of [FontAwesome](https://fontawesome.com/) so if you are using the site you'll need to download the free version and do the following
 ```bash
 fontawesome/css/all.css -> priv/static/css/fontawesome.css
 fontawesome/webfonts -> priv/static/webfonts
@@ -149,6 +149,18 @@ The main dependencies of the project are:
 - [Ecto](https://github.com/elixir-ecto/ecto), database ORM
 - [Ranch](https://github.com/ninenines/ranch), a tcp server
 - [Oban](https://github.com/sorentwo/oban), a backend job processing framework.
+
+### Ignore large `mix format` passes in `git blame`
+In ![PR #304](https://github.com/beyond-all-reason/teiserver/pull/304) we've started requiring compliance with `mix format` - this meant we had to use that on the entire codebase.
+
+This obviously breaks `git blame`, but you can sidestep that by using
+```bash
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
+The attached `.git-blame-ignore-revs` file contains a list of commit hashes which modify a large number of lines with trivial changes.
+
+See [this blog post by Stefan Judis](https://www.stefanjudis.com/today-i-learned/how-to-exclude-commits-from-git-blame/) for reference.
 
 ### Next Steps
 If you want to develop features that interact with the lobby, then you will need to [set up SPADS](/documents/guides/spads_install.md).

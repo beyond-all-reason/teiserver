@@ -26,7 +26,7 @@
 
     <%= central_component("menu_card",
       size: :small,
-      icon: "fa-regular fa-download",
+      icon: "fa-solid fa-download",
       name: "exports",
       text: "Data exports",
       link: Routes.ts_reports_exports_path(@conn, :index)
@@ -202,7 +202,7 @@
   <%= if allow?(@current_user, Teiserver.Account.TournamentReport.permissions()) do %>
     <%= central_component("menu_card",
       size: :small,
-      icon: "fa-regular fa-ranking-star",
+      icon: "fa-solid fa-ranking-star",
       name: "tournament",
       text: "Tournament",
       link: Routes.ts_reports_report_path(@conn, :show, "tournament")
