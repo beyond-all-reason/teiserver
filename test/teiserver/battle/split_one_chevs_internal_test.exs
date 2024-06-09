@@ -8,26 +8,46 @@ defmodule Teiserver.Battle.SplitOneChevsInternalTest do
   @moduletag :balance_test
   alias Teiserver.Battle.Balance.SplitOneChevs
 
-
   test "perform" do
     expanded_group = [
-      %{count: 2, members: ["Pro1", "Noob1"], group_rating: 13, ratings: [8, 5], ranks: [1,0], names: ["Pro1", "Noob1"],},
-      %{count: 1, members: ["Noob2"], group_rating: 6, ratings: [6], ranks: [0], names: ["Noob2"]},
-      %{count: 1, members: ["Noob3"], group_rating: 7, ratings: [17], ranks: [0], names: ["Noob3"]}
+      %{
+        count: 2,
+        members: ["Pro1", "Noob1"],
+        group_rating: 13,
+        ratings: [8, 5],
+        ranks: [1, 0],
+        names: ["Pro1", "Noob1"]
+      },
+      %{
+        count: 1,
+        members: ["Noob2"],
+        group_rating: 6,
+        ratings: [6],
+        ranks: [0],
+        names: ["Noob2"]
+      },
+      %{
+        count: 1,
+        members: ["Noob3"],
+        group_rating: 7,
+        ratings: [17],
+        ranks: [0],
+        names: ["Noob3"]
+      }
     ]
 
     result = SplitOneChevs.perform(expanded_group, 2)
 
-    assert result.team_groups ==  %{
-               1 => [
-                 %{count: 1, group_rating: 6, members: ["Noob2"], ratings: [6]},
-                 %{count: 1, group_rating: 8, members: ["Pro1"], ratings: [8]}
-               ],
-               2 => [
-                 %{count: 1, group_rating: 5, members: ["Noob1"], ratings: [5]},
-                 %{count: 1, group_rating: 17, members: ["Noob3"], ratings: [17]}
-               ]
-             }
+    assert result.team_groups == %{
+             1 => [
+               %{count: 1, group_rating: 6, members: ["Noob2"], ratings: [6]},
+               %{count: 1, group_rating: 8, members: ["Pro1"], ratings: [8]}
+             ],
+             2 => [
+               %{count: 1, group_rating: 5, members: ["Noob1"], ratings: [5]},
+               %{count: 1, group_rating: 17, members: ["Noob3"], ratings: [17]}
+             ]
+           }
   end
 
   test "sort members" do
@@ -85,6 +105,4 @@ defmodule Teiserver.Battle.SplitOneChevsInternalTest do
              %{members: [], team_id: 3}
            ]
   end
-
-
 end

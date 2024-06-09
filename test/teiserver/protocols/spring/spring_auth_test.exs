@@ -590,7 +590,6 @@ CLIENTS test_room #{user.name}\n"
 
     assert reply ==
              "SERVERMSG No incomming match for CREATEBOTACCOUNT with data '\"nomatchname\"'. Userid #{user.id}\n"
-
   end
 
   # test "c.moderation.report", %{socket: socket, user: user} do

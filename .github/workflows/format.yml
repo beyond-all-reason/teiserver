@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Build and test
+name: Lint and style checks
 
 on:
   push:
@@ -16,8 +16,8 @@ on:
 # Sets the ENV `MIX_ENV` to `test` for running tests
 env:
   MIX_ENV: test
-  ELIXIR_VER: '1.16.2'
-  OTP_VER: '25.0.4'
+  ELIXIR_VER: '1.14.3'
+  OTP_VER: '25.2.3'
 
 permissions:
   contents: read
@@ -25,24 +25,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Build and test
-
-    # Set up a Postgres DB service. By default, Phoenix applications
-    # use Postgres. This creates a database for running tests.
-    # Additional services can be defined here if required.
-    services:
-      db:
-        image: postgres:15
-        ports: ['5432:5432']
-        env:
-          POSTGRES_DB: teiserver_test
-          POSTGRES_USER: teiserver_test
-          POSTGRES_PASSWORD: 123456789
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    name: mix format
 
     steps:
     # Step: Setup Elixir + Erlang image as the base.
@@ -92,6 +75,5 @@ jobs:
     - name: Install dependencies
       run: mix compile
 
-    # Step: Execute the tests.
-    - name: Run tests
-      run: mix test
+    - name: mix format
+      run: mix format --check-formatted

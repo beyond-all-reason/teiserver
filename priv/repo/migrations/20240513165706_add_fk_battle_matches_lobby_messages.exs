@@ -1,5 +1,6 @@
 defmodule Teiserver.Repo.Migrations.AddFkBattleMatchesLobbyMessages do
   use Ecto.Migration
+
   # This change is being done to reduce the CPU load of the hourly Teiserver.Battle.Tasks.CleanupTask
   # As deleting rows from tables with non-indexed foreign keys is probably expensive
   # This migration adds indexes on the columns used as foreign key on the battle_matches table

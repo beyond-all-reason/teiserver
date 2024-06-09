@@ -93,13 +93,12 @@ is_moderator = allow?(@conn, "Moderator") %>
                   <td>
                     <%= if user_stats["hardware:cpuinfo"] != "" and user_stats["hardware:cpuinfo"] != nil do %>
                       <%= user_stats["hardware:cpuinfo"] %>
-                      <br/>
+                      <br />
                       <%= user_stats["hardware:gpuinfo"] %>
                     <% else %>
                       &nbsp;
                     <% end %>
                   </td>
-
                 <% end %>
 
                 <td>

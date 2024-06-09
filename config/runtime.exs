@@ -43,7 +43,8 @@ if config_env() == :prod do
   config :teiserver, Teiserver.Setup,
     key: Teiserver.ConfigHelpers.get_env("TEI_SETUP_ROOT_KEY", nil)
 
-  enable_discord_bridge = Teiserver.ConfigHelpers.get_env("TEI_ENABLE_DISCORD_BRIDGE", true, :bool)
+  enable_discord_bridge =
+    Teiserver.ConfigHelpers.get_env("TEI_ENABLE_DISCORD_BRIDGE", true, :bool)
 
   config :teiserver, Teiserver,
     game_name: "Beyond All Reason",
