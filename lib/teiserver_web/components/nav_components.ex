@@ -271,12 +271,7 @@ defmodule TeiserverWeb.NavComponents do
     ~H"""
     <div class="col sub-menu-icon">
       <a href={@url} class={"block-link #{@active_class}"}>
-        <Fontawesome.icon
-          :if={@icon}
-          icon={@icon}
-          style="solid"
-          size="2x"
-        /><br />
+        <Fontawesome.icon :if={@icon} icon={@icon} style="solid" size="2x" /><br />
         <%= render_slot(@inner_block) %>
       </a>
     </div>
