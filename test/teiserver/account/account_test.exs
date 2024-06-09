@@ -78,6 +78,13 @@ defmodule Teiserver.AccountTest do
           developer: "Normal"
         ]
       )
+
+      # Order by
+      Account.list_users(order_by: [{:data, "field", :asc}])
+      Account.list_users(order_by: [{:data, "field", :desc}])
+
+      # Fallback
+      Account.list_users(order_by: [{:data, "field", :desc}])
     end
 
     test "get_user!/1 returns the user with given id" do

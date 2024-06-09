@@ -17,6 +17,8 @@ defmodule Teiserver.Battle.MatchLib do
   end
 
   def game_type(team_size, team_count, bots) do
+    max_small_team_size = Config.get_site_config_cache("lobby.Small team game limit")
+
     bot_names =
       bots
       |> Map.keys()
@@ -28,10 +30,8 @@ defmodule Teiserver.Battle.MatchLib do
       String.contains?(bot_names, "Raptor") -> "Raptors"
       Enum.empty?(bots) == false -> "Bots"
       team_count == 2 and team_size == 1 -> "Duel"
-      # 2v2, 3v3, 4v4, 5v5
-      team_count == 2 and team_size <= 5 -> "Small Team"
-      # 6v6, 7v7, 8v8
-      team_count == 2 and team_size > 5 -> "Big Team"
+      team_count == 2 and team_size <= max_small_team_size -> "Small Team"
+      team_count == 2 and team_size > max_small_team_size -> "Big Team"
       team_size == 1 -> "FFA"
       true -> "Team FFA"
     end
@@ -80,8 +80,10 @@ defmodule Teiserver.Battle.MatchLib do
       |> Enum.group_by(fn c -> c.team_number end)
 
     if teams != %{} do
-      team_count = Enum.count(teams)
-      team_size = Enum.max(Enum.map(teams, fn {_, t} -> Enum.count(t) end), fn -> 0 end)
+      team_count = teams |> count
+      team_size = teams
+        |> Enum.map(fn {_, t} -> (t |> count) end)
+        |> Enum.max(fn -> 0 end)
       game_type = game_type(team_size, team_count, bots)
 
       match = %{

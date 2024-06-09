@@ -232,6 +232,8 @@ defmodule TeiserverWeb.API.SpadsController do
   defp get_team_subtype(nil), do: "Big Team"
 
   defp get_team_subtype(lobby) do
+    max_small_team_size = Config.get_site_config_cache("lobby.Small team game limit")
+
     teams =
       lobby.players
       |> Account.list_clients()
@@ -248,8 +250,7 @@ defmodule TeiserverWeb.API.SpadsController do
       end
 
     cond do
-      # 2v2, 3v3, 4v4, 5v5
-      Enum.count(teams) == 2 and max_team_size <= 5 -> "Small Team"
+      Enum.count(teams) == 2 and max_team_size <= max_small_team_size -> "Small Team"
       true -> "Big Team"
     end
   end

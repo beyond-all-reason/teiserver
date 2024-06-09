@@ -166,7 +166,10 @@ defmodule Teiserver.Game.BalancerServer do
       players
       |> Enum.group_by(fn c -> c.team_number end)
 
-    team_size = Enum.max(Enum.map(teams, fn {_, t} -> Enum.count(t) end), fn -> 0 end)
+    team_size = teams
+      |> Enum.map(fn {_, t} -> Enum.count(t) end)
+      |> Enum.max(fn -> 0 end)
+
     game_type = MatchLib.game_type(team_size, team_count)
 
     if opts[:allow_groups] do
