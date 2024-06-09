@@ -93,6 +93,7 @@ defmodule TeiserverWeb.Admin.UserController do
        ) ++
          Account.list_users(search: [id_in: id_list]))
       |> Enum.uniq()
+
     user_stats = for user <- users, do: Account.get_user_stat_data(user.id)
 
     conn
@@ -127,6 +128,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
         Account.list_users(search: [id_in: id_list])
       end
+
     user_stats = for user <- users, do: Account.get_user_stat_data(user.id)
 
     conn

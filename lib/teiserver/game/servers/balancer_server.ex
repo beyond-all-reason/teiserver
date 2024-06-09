@@ -236,8 +236,7 @@ defmodule Teiserver.Game.BalancerServer do
       players
       |> Enum.map(fn %{userid: userid} ->
         %{
-          userid =>
-            BalanceLib.get_user_rating_rank(userid, rating_type, opts[:fuzz_multiplier])
+          userid => BalanceLib.get_user_rating_rank(userid, rating_type, opts[:fuzz_multiplier])
         }
       end)
 

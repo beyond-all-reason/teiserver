@@ -150,5 +150,17 @@ The main dependencies of the project are:
 - [Ranch](https://github.com/ninenines/ranch), a tcp server
 - [Oban](https://github.com/sorentwo/oban), a backend job processing framework.
 
+### Ignore large `mix format` passes in `git blame`
+In ![PR #304](https://github.com/beyond-all-reason/teiserver/pull/304) we've started requiring compliance with `mix format` - this meant we had to use that on the entire codebase.
+
+This obviously breaks `git blame`, but you can sidestep that by using
+```bash
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
+The attached `.git-blame-ignore-revs` file contains a list of commit hashes which modify a large number of lines with trivial changes.
+
+See [this blog post by Stefan Judis](https://www.stefanjudis.com/today-i-learned/how-to-exclude-commits-from-git-blame/) for reference.
+
 ### Next Steps
 If you want to develop features that interact with the lobby, then you will need to [set up SPADS](/documents/guides/spads_install.md).

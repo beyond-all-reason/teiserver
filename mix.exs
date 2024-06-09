@@ -86,7 +86,7 @@ defmodule Teiserver.MixProject do
       {:elixir_uuid, "~> 1.2"},
       {:excoveralls, "~> 0.15.3", only: :test, runtime: false},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.1", only: [:dev], runtime: false},
+      {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       {:dart_sass, "~> 0.6", only: [:dev]},
       {:libcluster, "~> 3.3"},
       {:tzdata, "~> 1.1"},

@@ -18,7 +18,6 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
                 case Spring.unzip(compressed_contents) do
                   {:ok, contents} ->
                     if String.valid?(contents) do
-
                       params = %{
                         user_hash: user_hash,
                         user_id: state.userid,
@@ -35,14 +34,29 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
                             DiscordBridgeBot.new_infolog(infolog)
                           end
 
-                          reply(:spring, :okay, "upload_infolog - id:#{infolog.id}", msg_id, state)
+                          reply(
+                            :spring,
+                            :okay,
+                            "upload_infolog - id:#{infolog.id}",
+                            msg_id,
+                            state
+                          )
 
                         {:error, _changeset} ->
                           reply(:spring, :no, "upload_infolog - db error", msg_id, state)
                       end
                     else
-                      Logger.error("#{state.userid} #{log_type} upload_infolog - contents contain invalid characters")
-                      reply(:spring, :no, "upload_infolog - contents contain invalid characters", msg_id, state)
+                      Logger.error(
+                        "#{state.userid} #{log_type} upload_infolog - contents contain invalid characters"
+                      )
+
+                      reply(
+                        :spring,
+                        :no,
+                        "upload_infolog - contents contain invalid characters",
+                        msg_id,
+                        state
+                      )
                     end
 
                   {:error, _} ->

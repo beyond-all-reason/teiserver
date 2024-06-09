@@ -36,7 +36,9 @@ defmodule Teiserver.Data.UserTest do
 
   test "registering with empty password" do
     # 1B2M2Y8AsgTpgAmY7PhCfg== md5 hash of empty password Chobby sends
-    result = CacheUser.register_user_with_md5("name", "name@email.e", "1B2M2Y8AsgTpgAmY7PhCfg==", "ip")
+    result =
+      CacheUser.register_user_with_md5("name", "name@email.e", "1B2M2Y8AsgTpgAmY7PhCfg==", "ip")
+
     assert result == {:error, "Invalid password"}
 
     result = CacheUser.register_user("name", "name@email.e", "")

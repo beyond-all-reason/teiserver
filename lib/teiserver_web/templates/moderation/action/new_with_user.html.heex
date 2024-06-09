@@ -194,7 +194,6 @@ bsname = view_colour() %>
                   >
                     Position leave/stop
                   </div>
-
                 </div>
 
                 <div class="col mt-3">
@@ -272,14 +271,14 @@ bsname = view_colour() %>
                   </div>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
-                    onclick={"
+                    onclick="
         $('#action_restriction_Login').prop('checked', true);
         $('#action_restriction_All_lobbies').prop('checked', true);
         $('#action_restriction_All_chat').prop('checked', true);
         $('#action_restriction_Note').prop('checked', true);
         $('#action_reason').val('Permanent ban, possibly a previously banned user.');
         $('#action_expires').val('1100 years');
-      "}
+      "
                   >
                     One-off accont permaban (for previous ban evaders)
                   </div>
@@ -388,24 +387,24 @@ bsname = view_colour() %>
                   </div>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
-                    onclick={"
+                    onclick="
         $('#action_restriction_Note').prop('checked', true);
         $('#action_expires').val('1s');
-      "}
+      "
                   >
                     Add internal note
                   </div>
                 </div>
-                  <div
-                    class={"btn btn-outline-#{bsname} btn-block"}
-                    onclick={"
+                <div
+                  class={"btn btn-outline-#{bsname} btn-block"}
+                  onclick="
         $('#action_restriction_Login').prop('checked', true);
         $('#action_reason').val('Permanent ban, possibly a previously banned user.');
         $('#action_expires').val('1100 years');
-      "}
-                  >
-                    Single account permaban
-                  </div>
+      "
+                >
+                  Single account permaban
+                </div>
               </div>
               <div class="row mt-4" id="reports-row">
                 <div class="col">
@@ -493,7 +492,7 @@ bsname = view_colour() %>
                     <tr>
                       <td><%= action.target.name %></td>
                       <td><%= action.reason |> String.slice(0..100) %></td>
-                      <td><%= action.notes && (action.notes |> String.slice(0..100)) %></td>
+                      <td><%= action.notes && action.notes |> String.slice(0..100) %></td>
                       <td><%= action.restrictions |> Enum.join(", ") %></td>
 
                       <td><%= action.inserted_at |> date_to_str(format: :hms_or_ymd) %></td>

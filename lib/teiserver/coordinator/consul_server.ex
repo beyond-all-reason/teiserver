@@ -375,7 +375,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, state}
   end
 
-  @doc"""
+  @doc """
   This method handles state when all players have left the lobby
   """
   def handle_info(
@@ -387,10 +387,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
     # Everyone left the lobby
     # Restore some settings to default
     if new_player_count == 0 do
-      new_state = %{state |
-        minimum_rating_to_play: 0,
-        maximum_rating_to_play: 1000,
-        balance_algorithm: @default_balance_algorithm
+      new_state = %{
+        state
+        | minimum_rating_to_play: 0,
+          maximum_rating_to_play: 1000,
+          balance_algorithm: @default_balance_algorithm
       }
 
       {:noreply, new_state}
