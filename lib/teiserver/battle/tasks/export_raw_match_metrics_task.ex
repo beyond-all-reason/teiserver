@@ -31,7 +31,7 @@ defmodule Teiserver.Battle.ExportRawMatchMetricsTask do
   defp do_output(data, _params) do
     data
     |> Stream.filter(fn match ->
-      match.game_type == "Team"
+      match.game_type in ["Small Team", "Big Team"]
     end)
     |> Stream.map(fn match ->
       members =

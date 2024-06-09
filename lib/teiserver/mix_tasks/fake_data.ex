@@ -7,6 +7,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   alias Teiserver.{Account, Logging, Battle, Moderation}
   alias Teiserver.Helper.StylingHelper
+  alias Teiserver.Battle.MatchLib
   require Logger
 
   @settings %{
@@ -333,6 +334,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         team1 = shuffled_users |> Enum.take(team_size)
         team2 = shuffled_users |> Enum.reverse() |> Enum.take(team_size)
 
+        game_type = MatchLib.game_type(team_size, 2)
+
         team1_score =
           team1
           |> Enum.map(fn {_, name} -> String.length(name) end)
@@ -358,7 +361,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
             team_size: team_size,
             passworded: false,
             processed: true,
-            game_type: if(team_size == 1, do: "Duel", else: "Team"),
+            game_type: game_type,
 
             # All rooms are hosted by the same user for now
             founder_id: 1,

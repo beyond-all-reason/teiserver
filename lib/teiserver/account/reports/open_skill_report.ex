@@ -69,7 +69,7 @@ defmodule Teiserver.Account.OpenSkillReport do
   defp apply_defaults(params) do
     Map.merge(
       %{
-        "rating_type" => "Team",
+        "rating_type" => "Big Team",
         "metric" => "Game Rating",
         "last_active" => "7 days",
         "uncertainty" => "5"

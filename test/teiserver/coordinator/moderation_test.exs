@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.ModerationTest do
   use Teiserver.ServerCase, async: false
-  alias Teiserver.{User, Coordinator, Client, Moderation}
+  alias Teiserver.{CacheUser, Coordinator, Client, Moderation}
   import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
 
@@ -16,9 +16,9 @@ defmodule Teiserver.Coordinator.ModerationTest do
   test "login with warning", %{user: user} do
     delay = Teiserver.Config.get_site_config_cache("teiserver.Post login action delay")
 
-    refute User.has_warning?(user.id)
-    refute User.has_mute?(user.id)
-    refute User.is_restricted?(user.id, ["Login"])
+    refute CacheUser.has_warning?(user.id)
+    refute CacheUser.has_mute?(user.id)
+    refute CacheUser.is_restricted?(user.id, ["Login"])
 
     {:ok, action} =
       Moderation.create_action(%{
@@ -33,9 +33,9 @@ defmodule Teiserver.Coordinator.ModerationTest do
     RefreshUserRestrictionsTask.refresh_user(user.id)
 
     # Did it take?
-    assert User.has_warning?(user.id)
-    refute User.has_mute?(user.id)
-    refute User.is_restricted?(user.id, ["Login"])
+    assert CacheUser.has_warning?(user.id)
+    refute CacheUser.has_mute?(user.id)
+    refute CacheUser.is_restricted?(user.id, ["Login"])
 
     # Now login
     %{socket: socket} = tachyon_auth_setup(user)

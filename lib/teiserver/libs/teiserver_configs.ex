@@ -411,6 +411,15 @@ defmodule Teiserver.TeiserverConfigs do
         "The percentage of players who would need to avoid someone to prevent them becoming a player",
       default: 50
     })
+
+    add_site_config_type(%{
+      key: "lobby.Small team game limit",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["Admin"],
+      description: "Maximum team size to be considered as a small team game",
+      default: 5
+    })
   end
 
   defp discord_configs() do

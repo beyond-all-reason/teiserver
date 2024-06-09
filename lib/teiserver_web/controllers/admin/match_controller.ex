@@ -231,17 +231,7 @@ defmodule TeiserverWeb.Admin.MatchController do
   end
 
   defp generate_new_balance_data(match) do
-    rating_type =
-      cond do
-        match.team_size == 1 ->
-          "Duel"
-
-        match.team_count > 2 ->
-          if match.team_size > 1, do: "Team FFA", else: "FFA"
-
-        true ->
-          "Team"
-      end
+    rating_type = MatchLib.game_type(match.team_size, match.team_count)
 
     partied_players =
       match.members

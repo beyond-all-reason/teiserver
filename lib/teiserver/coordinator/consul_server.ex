@@ -21,7 +21,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Lobby.{ChatLib}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
-  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Battle.{BalanceLib, MatchLib}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib, SpadsParser}
 
@@ -835,9 +835,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec user_allowed_to_play?(T.user(), T.client(), map()) :: boolean()
   defp user_allowed_to_play?(user, client, state) do
     player_list = list_players(state)
+    rating_type = MatchLib.game_type(state.host_teamsize, state.host_teamcount)
 
     {player_rating, player_uncertainty} =
-      BalanceLib.get_user_rating_value_uncertainty_pair(user.id, "Team")
+      BalanceLib.get_user_rating_value_uncertainty_pair(user.id, rating_type)
 
     player_rating = max(player_rating, 1)
     avoid_status = Account.check_avoid_status(user.id, player_list)
