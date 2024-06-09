@@ -6,7 +6,7 @@ defmodule Teiserver.Communication.TextCallbackLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-webhook"
+  def icon, do: "fa-regular fa-voicemail"
 
   @spec colours :: atom
   def colours, do: :success2

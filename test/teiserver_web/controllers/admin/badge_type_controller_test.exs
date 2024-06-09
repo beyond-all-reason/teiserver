@@ -9,7 +9,7 @@
 #     GeneralTestLib.conn_setup(~w(horizon.manage))
 #   end
 
-#   @create_attrs %{colour: "#AA0000", icon: "fa-regular fa-home", name: "some name"}
+#   @create_attrs %{colour: "#AA0000", icon: "fa-solid fa-home", name: "some name"}
 #   @update_attrs %{colour: "#0000AA", icon: "fa-solid fa-wrench", name: "some updated name"}
 #   @invalid_attrs %{colour: nil, icon: nil, name: nil}
 

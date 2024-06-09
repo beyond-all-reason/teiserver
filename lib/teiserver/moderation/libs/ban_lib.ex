@@ -5,7 +5,7 @@ defmodule Teiserver.Moderation.BanLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-gavel"
+  def icon, do: "fa-solid fa-gavel"
 
   @spec colour :: atom
   def colour, do: :danger

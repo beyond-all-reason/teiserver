@@ -12,7 +12,7 @@ defmodule Teiserver.Account.AccoladeLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-award"
+  def icon, do: "fa-solid fa-award"
 
   @spec colours :: atom
   def colours, do: :info

@@ -10,7 +10,7 @@ defmodule Teiserver.Account.RatingLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-screen-users"
+  def icon, do: "fa-solid fa-chart-column"
 
   @spec colours :: atom
   def colours, do: :info

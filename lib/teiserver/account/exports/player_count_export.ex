@@ -13,7 +13,7 @@ defmodule Teiserver.Account.PlayerCountExport do
   alias Teiserver.Helper.TimexHelper
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-users"
+  def icon(), do: "fa-solid fa-users"
 
   @spec permissions() :: String.t()
   def permissions(), do: "Admin"

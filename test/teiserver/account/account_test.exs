@@ -9,7 +9,7 @@ defmodule Teiserver.AccountTest do
 
     @valid_attrs %{
       colour: "#AA0000",
-      icon: "fa-regular fa-home",
+      icon: "fa-solid fa-home",
       name: "some name",
       permissions: [],
       email: "AnEmailAddress@email.com",
@@ -95,7 +95,7 @@ defmodule Teiserver.AccountTest do
     test "create_user/1 with valid data creates a user" do
       assert {:ok, %User{} = user} = Account.create_user(@valid_attrs)
       assert user.colour == "#AA0000"
-      assert user.icon == "fa-regular fa-home"
+      assert user.icon == "fa-solid fa-home"
       assert user.name == "some name"
       assert user.permissions == []
       assert user.name == "some name"
@@ -186,7 +186,7 @@ defmodule Teiserver.AccountTest do
   # describe "badge_types" do
   #   alias Teiserver.Account.BadgeType
 
-  #   @valid_attrs %{"colour" => "#AA0000", "icon" => "fa-regular fa-home", "name" => "some name"}
+  #   @valid_attrs %{"colour" => "#AA0000", "icon" => "fa-solid fa-home", "name" => "some name"}
   #   @update_attrs %{"colour" => "#0000AA", "icon" => "fa-solid fa-wrench", "name" => "some updated name"}
   #   @invalid_attrs %{"colour" => nil, "icon" => nil, "name" => nil}
 
@@ -203,7 +203,7 @@ defmodule Teiserver.AccountTest do
   #   test "create_badge_type/1 with valid data creates a badge_type" do
   #     assert {:ok, %BadgeType{} = badge_type} = Account.create_badge_type(@valid_attrs)
   #     assert badge_type.colour == "#AA0000"
-  #     assert badge_type.icon == "fa-regular fa-home"
+  #     assert badge_type.icon == "fa-solid fa-home"
   #     assert badge_type.name == "some name"
   #   end
 

@@ -10,7 +10,7 @@ defmodule Teiserver.Account do
   alias Teiserver.Account.UserLib
 
   @spec icon :: String.t()
-  def icon, do: "fa-duotone fa-user-alt"
+  def icon, do: "fa-solid fa-user-alt"
 
   @spec list_users() :: [User]
   defdelegate list_users(), to: UserLib

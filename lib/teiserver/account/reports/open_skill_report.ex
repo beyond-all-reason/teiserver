@@ -6,7 +6,7 @@ defmodule Teiserver.Account.OpenSkillReport do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-chart-line"
+  def icon(), do: "fa-solid fa-chart-line"
 
   @spec permissions() :: String.t()
   def permissions(), do: "Admin"

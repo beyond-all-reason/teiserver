@@ -3,7 +3,7 @@ defmodule Teiserver.Account.RetentionReport do
   alias Teiserver.{Account, Logging}
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-campground"
+  def icon(), do: "fa-solid fa-campground"
 
   @spec permissions() :: String.t()
   def permissions(), do: "Admin"

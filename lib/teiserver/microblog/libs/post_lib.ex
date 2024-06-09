@@ -6,7 +6,7 @@ defmodule Teiserver.Microblog.PostLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-circle-envelope"
+  def icon, do: "fa-solid fa-envelope"
 
   @spec colours :: atom
   def colours, do: :primary

@@ -203,7 +203,7 @@ defmodule TeiserverWeb.NavComponents do
   """
   attr :url, :string, required: true
   attr :icon, :string, required: true
-  attr :icon_class, :string, default: "duotone"
+  attr :icon_class, :string, default: "solid"
   attr :size, :atom, default: nil
   slot :inner_block, required: true
 
@@ -274,7 +274,7 @@ defmodule TeiserverWeb.NavComponents do
         <Fontawesome.icon
           :if={@icon}
           icon={@icon}
-          style={if @active, do: "solid", else: "regular"}
+          style="solid"
           size="2x"
         /><br />
         <%= render_slot(@inner_block) %>

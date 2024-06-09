@@ -83,7 +83,7 @@ iex -S mix phx.server
 If all goes to plan you should be able to access your site locally at [http://localhost:4000/](http://localhost:4000/).
 
 ### Libraries you need to get yourself
-The site makes liberal use of [FontAwesome](https://fontawesome.com/) so if you are using the site you'll need to download it and do the following
+The site makes liberal use of [FontAwesome](https://fontawesome.com/) so if you are using the site you'll need to download the free version and do the following
 ```bash
 fontawesome/css/all.css -> priv/static/css/fontawesome.css
 fontawesome/webfonts -> priv/static/webfonts

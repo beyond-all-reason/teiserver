@@ -1,17 +1,6 @@
 <% is_active = @active == @name
 
-icon =
-  if is_active do
-    @icon
-    |> String.replace("far ", "fa-duotone ")
-    |> String.replace("fa-regular ", "fa-duotone ")
-    |> String.replace("fal ", "fa-duotone ")
-    |> String.replace("fa-light ", "fa-duotone ")
-    |> String.replace("fas ", "fa-duotone ")
-    |> String.replace("fa-solid ", "fa-duotone ")
-  else
-    @icon
-  end
+icon = @icon
 
 disabled = if assigns[:disabled], do: "color: #888; cursor: default;"
 active_class = if is_active, do: "active" %>
