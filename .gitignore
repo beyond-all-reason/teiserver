@@ -65,6 +65,7 @@ runtime/
 /source_deploy.tar.gz
 central.tar.gz
 /bin
+.vscode/launch.json
 
 # I'm storing server output here, don't want to push it to git
 example_output

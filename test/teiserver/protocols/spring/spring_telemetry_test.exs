@@ -100,16 +100,16 @@ defmodule Teiserver.SpringTelemetryTest do
     reply = _recv_raw(socket)
     assert reply == :timeout
 
-    assert Enum.count(Telemetry.list_anon_events()) == 0
-    assert Enum.count(Telemetry.list_client_events()) == 0
+    assert Enum.count(Telemetry.list_complex_anon_events()) == 0
+    assert Enum.count(Telemetry.list_complex_client_events()) == 0
 
     # Good data
     _send_raw(socket, "c.telemetry.log_client_event event_name e30= TXlWYWx1ZUdvZXNoZXJl\n")
     reply = _recv_raw(socket)
     assert reply == :timeout
 
-    assert Enum.count(Telemetry.list_anon_events()) == 0
-    assert Enum.count(Telemetry.list_client_events()) == 1
+    assert Enum.count(Telemetry.list_complex_anon_events()) == 0
+    assert Enum.count(Telemetry.list_complex_client_events()) == 1
 
     # Unauth
     %{socket: socket_raw} = raw_setup()
@@ -118,8 +118,8 @@ defmodule Teiserver.SpringTelemetryTest do
     reply = _recv_raw(socket_raw)
     assert reply == :timeout
 
-    assert Enum.count(Telemetry.list_anon_events()) == 1
-    assert Enum.count(Telemetry.list_client_events()) == 1
+    assert Enum.count(Telemetry.list_complex_anon_events()) == 1
+    assert Enum.count(Telemetry.list_complex_client_events()) == 1
   end
 
   test "update_client_property call", %{socket: socket} do
@@ -132,7 +132,7 @@ defmodule Teiserver.SpringTelemetryTest do
     reply = _recv_raw(socket)
     assert reply == :timeout
 
-    assert Enum.count(Telemetry.list_anon_properties()) == 0
+    assert Enum.count(Telemetry.list_complex_anon_events()) == 0
     assert Enum.count(Telemetry.list_client_properties()) == 0
 
     # Good data
@@ -144,7 +144,7 @@ defmodule Teiserver.SpringTelemetryTest do
     reply = _recv_raw(socket)
     assert reply == :timeout
 
-    assert Enum.count(Telemetry.list_anon_properties()) == 0
+    assert Enum.count(Telemetry.list_complex_anon_events()) == 0
     assert Enum.count(Telemetry.list_client_properties()) == 1
 
     # Unauth
@@ -159,7 +159,7 @@ defmodule Teiserver.SpringTelemetryTest do
     reply = _recv_raw(socket_raw)
     assert reply == :timeout
 
-    assert Enum.count(Telemetry.list_anon_properties()) == 1
+    assert Enum.count(Telemetry.list_complex_anon_events()) == 1
     assert Enum.count(Telemetry.list_client_properties()) == 1
   end
 end

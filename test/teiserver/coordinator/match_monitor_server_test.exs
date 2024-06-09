@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.MatchMonitorServerTest do
   use Teiserver.ServerCase, async: false
-  alias Teiserver.{User, Chat, Client, Lobby}
+  alias Teiserver.{CacheUser, Chat, Client, Lobby}
   alias Teiserver.Coordinator.{CoordinatorServer}
 
   import Teiserver.TeiserverTestLib,
@@ -13,7 +13,7 @@ defmodule Teiserver.Coordinator.MatchMonitorServerTest do
     Teiserver.Battle.start_match_monitor()
     %{socket: hsocket, user: host} = tachyon_auth_setup()
     %{socket: psocket, user: player} = tachyon_auth_setup()
-    User.update_user(%{host | bot: true})
+    CacheUser.update_user(%{host | bot: true})
 
     battle_data = %{
       cmd: "c.lobby.create",
@@ -56,7 +56,7 @@ defmodule Teiserver.Coordinator.MatchMonitorServerTest do
   end
 
   test "chat messages", %{hsocket: hsocket, host: host, player: player} do
-    monitor_user = User.get_user_by_name("AutohostMonitor")
+    monitor_user = CacheUser.get_user_by_name("AutohostMonitor")
     messages1 = Chat.list_lobby_messages(search: [user_id: host.id])
     messages2 = Chat.list_lobby_messages(search: [user_id: player.id])
 
