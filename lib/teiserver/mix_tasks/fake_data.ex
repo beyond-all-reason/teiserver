@@ -7,6 +7,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   alias Teiserver.{Account, Logging, Battle, Moderation}
   alias Teiserver.Helper.StylingHelper
+  alias Teiserver.Battle.MatchLib
   require Logger
 
   @settings %{
@@ -331,11 +332,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         team1 = shuffled_users |> Enum.take(team_size)
         team2 = shuffled_users |> Enum.reverse() |> Enum.take(team_size)
 
-        game_type = cond do
-          team_size == 1 -> "Duel"
-          team_size <= 4 -> "Small Team"
-          true -> "Big Team"
-        end
+        game_type = MatchLib.game_type(team_size, 2)
 
         team1_score =
           team1

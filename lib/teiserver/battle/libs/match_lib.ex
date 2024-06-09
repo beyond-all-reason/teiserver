@@ -12,38 +12,29 @@ defmodule Teiserver.Battle.MatchLib do
   @spec colours :: atom
   def colours, do: :success2
 
-  @spec game_type(T.lobby(), map()) :: <<_::24, _::_*8>>
-  def game_type(lobby, teams) do
-    bots = Battle.get_bots(lobby.id)
+  def game_type(team_size, team_count) do
+    game_type(team_size, team_count, %{})
+  end
 
+  def game_type(team_size, team_count, bots) do
     bot_names =
       bots
       |> Map.keys()
       |> Enum.join(" ")
-
-    # It is possible for it to be purely bots v bots which will make it appear to be empty teams
-    # this would cause an error with Enum.max, hence the case statement
-    max_team_size =
-      case Enum.map(teams, fn {_, team} -> Enum.count(team) end) do
-        [] ->
-          0
-
-        counts ->
-          Enum.max(counts)
-      end
 
     cond do
       String.contains?(bot_names, "Scavenger") -> "Scavengers"
       String.contains?(bot_names, "Chicken") -> "Raptors"
       String.contains?(bot_names, "Raptor") -> "Raptors"
       Enum.empty?(bots) == false -> "Bots"
-      Enum.count(teams) == 2 and max_team_size == 1 -> "Duel"
-      Enum.count(teams) == 2 and max_team_size <= 4 -> "Small Team" # 2v2, 3v3, 4v4
-      Enum.count(teams) == 2 and max_team_size > 4 -> "Big Team" # 5v5, 6v6, 7v7, 8v8
-      max_team_size == 1 -> "FFA"
+      team_count == 2 and team_size == 1 -> "Duel"
+      team_count == 2 and team_size <= 5 -> "Small Team" # 2v2, 3v3, 4v4, 5v5
+      team_count == 2 and team_size > 5 -> "Big Team" # 6v6, 7v7, 8v8
+      team_size == 1 -> "FFA"
       true -> "Team FFA"
     end
   end
+
 
   def list_game_types() do
     [
@@ -88,7 +79,9 @@ defmodule Teiserver.Battle.MatchLib do
       |> Enum.group_by(fn c -> c.team_number end)
 
     if teams != %{} do
-      the_game_type = game_type(lobby, teams)
+      team_count = Enum.count(teams)
+      team_size = Enum.max(Enum.map(teams, fn {_, t} -> Enum.count(t) end), fn -> 0 end)
+      game_type = game_type(team_size, team_count, bots)
 
       match = %{
         uuid: match_uuid,
@@ -96,10 +89,10 @@ defmodule Teiserver.Battle.MatchLib do
         map: lobby.map_name,
         data: nil,
         tags: modoptions,
-        team_count: Enum.count(teams),
-        team_size: Enum.max(Enum.map(teams, fn {_, t} -> Enum.count(t) end)),
+        team_count: team_count,
+        team_size: team_size,
         passworded: lobby.passworded,
-        game_type: the_game_type,
+        game_type: game_type,
         founder_id: lobby.founder_id,
         bots: bots,
         queue_id: queue_id,

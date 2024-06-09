@@ -11,6 +11,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   require Logger
 
   @rated_match_types ["Small Team", "Big Team", "Duel", "Team", "FFA", "Team FFA", "Partied Team"]
+  # TODO Remove "Team" from here once the split is done
 
   @spec rating_type_list() :: [String.t()]
   def rating_type_list() do

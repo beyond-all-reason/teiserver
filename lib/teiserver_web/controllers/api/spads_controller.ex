@@ -2,7 +2,7 @@ defmodule TeiserverWeb.API.SpadsController do
   use TeiserverWeb, :controller
   alias Teiserver.Config
   alias Teiserver.{Account, Coordinator, Battle}
-  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Battle.{BalanceLib, MatchLib}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
@@ -154,24 +154,17 @@ defmodule TeiserverWeb.API.SpadsController do
 
         if balance_result do
           # Get some counts for later
-          total_players =
-            balance_result.team_sizes
-            |> Map.values()
-            |> Enum.sum()
-
           team_count =
             balance_result.team_sizes
             |> Enum.count()
 
-          # Calculate the rating type
-          rating_type =
-            cond do
-              total_players == 2 -> "Duel"
-              team_count == 2 and total_players <= 8 -> "Small Team"
-              team_count == 2 and total_players > 8 -> "Big Team"
-              total_players == team_count -> "FFA"
-              true -> "Team FFA"
-            end
+          team_size =
+            balance_result.team_sizes
+            |> Map.values()
+            |> Enum.max()
+
+          # Get the rating type
+          rating_type = MatchLib.game_type(team_size, team_count)
 
           # Temporary solution until Team FFA ratings are fixed
           rating_type =
@@ -254,7 +247,7 @@ defmodule TeiserverWeb.API.SpadsController do
       end
 
     cond do
-      Enum.count(teams) == 2 and max_team_size <= 4 -> "Small Team" # 2v2, 3v3, 4v4
+      Enum.count(teams) == 2 and max_team_size <= 5 -> "Small Team" # 2v2, 3v3, 4v4, 5v5
       true -> "Big Team"
     end
   end
