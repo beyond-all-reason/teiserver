@@ -546,8 +546,7 @@ defmodule Teiserver.Battle.LobbyServer do
         "",
         LobbyRestrictions.get_rank_bounds_for_title(consul_state),
         # Rating stuff here
-        LobbyRestrictions.get_rating_bounds_for_title(consul_state),
-
+        LobbyRestrictions.get_rating_bounds_for_title(consul_state)
       ]
       |> Enum.reject(&(&1 == nil))
       |> Enum.join(" | ")
