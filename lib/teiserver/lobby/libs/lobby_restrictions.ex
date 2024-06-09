@@ -4,7 +4,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   """
   alias Teiserver.{CacheUser, Config}
   require Logger
-  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Battle.{BalanceLib, MatchLib}
   alias Teiserver.Battle
 
   @rank_upper_bound 1000
@@ -162,15 +162,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     team_size = state.host_teamsize
     team_count = state.host_teamcount
 
-    # TODO Change this when Lexon does split Team to Big/Small Teams
-    # Can see if we can reuse a function elsewhere
-    rating_type =
-      cond do
-        team_count > 2 && team_size == 1 -> "FFA"
-        team_count > 2 && team_size > 1 -> "Team FFA"
-        team_size == 1 -> "Duel"
-        true -> "Team"
-      end
+    rating_type = MatchLib.game_type(team_size, team_count)
 
     {player_rating, _player_uncertainty} =
       BalanceLib.get_user_rating_value_uncertainty_pair(user_id, rating_type)
