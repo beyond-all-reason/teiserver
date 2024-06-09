@@ -1,7 +1,7 @@
 defmodule Teiserver.Coordinator.MemesTest do
   use Teiserver.ServerCase, async: false
   alias Teiserver.Account.ClientLib
-  alias Teiserver.{User, Client, Coordinator, Lobby}
+  alias Teiserver.{CacheUser, Client, Coordinator, Lobby}
   require Logger
 
   import Teiserver.TeiserverTestLib,
@@ -13,7 +13,7 @@ defmodule Teiserver.Coordinator.MemesTest do
     %{socket: psocket, user: player} = tachyon_auth_setup()
 
     # User needs to be a moderator (at this time) to start/stop Coordinator mode
-    User.update_user(%{host | moderator: true})
+    CacheUser.update_user(%{host | moderator: true})
     ClientLib.refresh_client(host.id)
 
     lobby_data = %{
@@ -102,7 +102,7 @@ defmodule Teiserver.Coordinator.MemesTest do
              "cmd" => "s.lobby.set_modoptions",
              "lobby_id" => lobby_id,
              "new_options" => %{
-               "game/modoptions/resourceincomemultiplier" => "0"
+               "game/modoptions/multiplier_resourceincome" => "0"
              }
            }
   end
@@ -115,7 +115,7 @@ defmodule Teiserver.Coordinator.MemesTest do
              "cmd" => "s.lobby.set_modoptions",
              "lobby_id" => lobby_id,
              "new_options" => %{
-               "game/modoptions/resourceincomemultiplier" => "1000",
+               "game/modoptions/multiplier_resourceincome" => "1000",
                "game/modoptions/startenergy" => "100000000",
                "game/modoptions/startmetal" => "100000000"
              }

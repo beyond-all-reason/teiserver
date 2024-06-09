@@ -4,7 +4,7 @@ defmodule Teiserver.Account.NewSmurfReport do
   require Logger
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-face-angry-horns"
+  def icon(), do: "fa-solid fa-face-angry"
 
   @spec permissions() :: String.t()
   def permissions(), do: "Moderator"

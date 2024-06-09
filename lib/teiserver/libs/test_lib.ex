@@ -1,7 +1,6 @@
 defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
   alias Teiserver.{Client, CacheUser, Account}
-  alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Protocols.TachyonLib
   alias Teiserver.Coordinator.CoordinatorServer
@@ -622,7 +621,8 @@ defmodule Teiserver.TeiserverTestLib do
     Teiserver.Account.get_or_add_smurf_key_type("hw3")
 
     Teiserver.Game.get_or_add_rating_type("Duel")
-    Teiserver.Game.get_or_add_rating_type("Team")
+    Teiserver.Game.get_or_add_rating_type("Small Team")
+    Teiserver.Game.get_or_add_rating_type("Big Team")
     Teiserver.Game.get_or_add_rating_type("FFA")
 
     Teiserver.Telemetry.get_or_add_complex_server_event_type("Server startup")

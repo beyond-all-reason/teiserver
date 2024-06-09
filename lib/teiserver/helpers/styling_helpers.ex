@@ -80,7 +80,7 @@ defmodule Teiserver.Helper.StylingHelper do
 
   def icon(:filter, fa_type), do: "fa-#{fa_type} fa-filter"
 
-  def icon(:summary, fa_type), do: "fa-#{fa_type} fa-user-chart"
+  def icon(:summary, fa_type), do: "fa-#{fa_type} fa-clipboard-list"
 
   def icon(:chart, fa_type), do: "fa-#{fa_type} fa-chart-line"
 

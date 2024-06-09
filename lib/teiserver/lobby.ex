@@ -11,7 +11,7 @@ defmodule Teiserver.Lobby do
   alias Teiserver.Lobby.{ChatLib, LobbyLib}
 
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-sword"
+  def icon, do: "fa-solid fa-dungeon"
 
   @spec colours :: atom
   def colours, do: :primary2
@@ -565,7 +565,7 @@ defmodule Teiserver.Lobby do
       Enum.any?([
         CacheUser.is_moderator?(user),
         Enum.member?(user.roles, "Caster"),
-        consul_reason == :override_approve
+        consul_reason in [:override_approve, :allow_friends]
       ])
 
     ignore_locked =

@@ -4,7 +4,7 @@ defmodule Teiserver.Account.TimeCompareReport do
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-code-compare"
+  def icon(), do: "fa-solid fa-code-compare"
 
   @spec permissions() :: String.t()
   def permissions(), do: "Moderator"

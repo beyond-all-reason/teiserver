@@ -22,14 +22,6 @@ defmodule Teiserver.EmailHelper do
     website_url = "https://#{host}"
     verification_code = stats["verification_code"]
 
-    {:ok, _code} =
-      Teiserver.Account.create_code(%{
-        value: UUID.uuid4(),
-        purpose: "reset_password",
-        expires: Timex.now() |> Timex.shift(hours: 24),
-        user_id: user.id
-      })
-
     message_id = "<#{UUID.uuid4()}@#{host}>"
 
     game_name = Application.get_env(:teiserver, Teiserver)[:game_name]

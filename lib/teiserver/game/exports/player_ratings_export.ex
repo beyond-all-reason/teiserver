@@ -20,7 +20,7 @@ defmodule Teiserver.Game.PlayerRatingsExport do
   require Logger
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-user-shield"
+  def icon(), do: "fa-solid fa-user-shield"
 
   @spec permissions() :: String.t()
   def permissions(), do: "teiserver.admin"

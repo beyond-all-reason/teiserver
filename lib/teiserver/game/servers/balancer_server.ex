@@ -4,6 +4,7 @@ defmodule Teiserver.Game.BalancerServer do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.{Battle, Coordinator}
+  alias Teiserver.Battle.MatchLib
 
   @tick_interval 2_000
 
@@ -161,28 +162,25 @@ defmodule Teiserver.Game.BalancerServer do
 
   @spec do_make_balance(non_neg_integer(), [T.client()], List.t()) :: map()
   defp do_make_balance(team_count, players, opts) do
-    player_count = Enum.count(players)
+    teams =
+      players
+      |> Enum.group_by(fn c -> c.team_number end)
 
-    rating_type =
-      cond do
-        player_count == 2 ->
-          "Duel"
+    team_size =
+      teams
+      |> Enum.map(fn {_, t} -> Enum.count(t) end)
+      |> Enum.max(fn -> 0 end)
 
-        team_count > 2 ->
-          if player_count > team_count, do: "Team", else: "FFA"
-
-        true ->
-          "Team"
-      end
+    game_type = MatchLib.game_type(team_size, team_count)
 
     if opts[:allow_groups] do
-      party_result = make_grouped_balance(team_count, players, rating_type, opts)
+      party_result = make_grouped_balance(team_count, players, game_type, opts)
 
       if party_result.deviation > opts[:max_deviation] do
         make_solo_balance(
           team_count,
           players,
-          rating_type,
+          game_type,
           [
             "Tried grouped mode, got a deviation of #{party_result.deviation} and reverted to solo mode"
           ],
@@ -192,12 +190,12 @@ defmodule Teiserver.Game.BalancerServer do
         party_result
       end
     else
-      make_solo_balance(team_count, players, rating_type, [], opts)
+      make_solo_balance(team_count, players, game_type, [], opts)
     end
   end
 
   @spec make_grouped_balance(non_neg_integer(), [T.client()], String.t(), list()) :: map()
-  defp make_grouped_balance(team_count, players, rating_type, opts) do
+  defp make_grouped_balance(team_count, players, game_type, opts) do
     # Group players into parties
     partied_players =
       players
@@ -212,15 +210,14 @@ defmodule Teiserver.Game.BalancerServer do
           player_id_list
           |> Enum.map(fn userid ->
             %{
-              userid =>
-                BalanceLib.get_user_rating_rank(userid, rating_type, opts[:fuzz_multiplier])
+              userid => BalanceLib.get_user_rating_rank(userid, game_type, opts[:fuzz_multiplier])
             }
           end)
 
         {_party_id, player_id_list} ->
           player_id_list
           |> Map.new(fn userid ->
-            {userid, BalanceLib.get_user_rating_rank(userid, rating_type, opts[:fuzz_multiplier])}
+            {userid, BalanceLib.get_user_rating_rank(userid, game_type, opts[:fuzz_multiplier])}
           end)
       end)
       |> List.flatten()
@@ -231,12 +228,12 @@ defmodule Teiserver.Game.BalancerServer do
 
   @spec make_solo_balance(non_neg_integer(), [T.client()], String.t(), [String.t()], list()) ::
           map()
-  defp make_solo_balance(team_count, players, rating_type, initial_logs, opts) do
+  defp make_solo_balance(team_count, players, game_type, initial_logs, opts) do
     groups =
       players
       |> Enum.map(fn %{userid: userid} ->
         %{
-          userid => BalanceLib.get_user_rating_rank(userid, rating_type, opts[:fuzz_multiplier])
+          userid => BalanceLib.get_user_rating_rank(userid, game_type, opts[:fuzz_multiplier])
         }
       end)
 

@@ -21,7 +21,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Lobby.{ChatLib, LobbyRestrictions}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
-  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Battle.{BalanceLib, MatchLib}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib, SpadsParser, CoordinatorCommands}
 
@@ -976,7 +976,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       state.gatekeeper == "friends" ->
         if is_on_friendlist?(userid, state, :all) do
-          {true, nil}
+          {true, :allow_friends}
         else
           {false, "Friends only gatekeeper"}
         end
