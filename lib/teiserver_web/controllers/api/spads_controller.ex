@@ -19,20 +19,21 @@ defmodule TeiserverWeb.API.SpadsController do
   def get_rating(conn, %{
         "target_id" => target_id_str,
         "type" => type
-      }
-  ) do
-
+      }) do
     target_id = int_parse(target_id_str)
     lobby = get_member_lobby(target_id)
-    host_ip = case lobby do
-      nil -> nil
-      _ -> Account.get_client_by_id(lobby.founder_id).ip
-    end
+
+    host_ip =
+      case lobby do
+        nil -> nil
+        _ -> Account.get_client_by_id(lobby.founder_id).ip
+      end
 
     actual_type =
       case type do
         "Team" -> get_team_subtype(lobby)
-        "TeamFFA" -> "Big Team" # Team FFA uses Big Team rating
+        # Team FFA uses Big Team rating
+        "TeamFFA" -> "Big Team"
         v -> v
       end
 
@@ -247,7 +248,8 @@ defmodule TeiserverWeb.API.SpadsController do
       end
 
     cond do
-      Enum.count(teams) == 2 and max_team_size <= 5 -> "Small Team" # 2v2, 3v3, 4v4, 5v5
+      # 2v2, 3v3, 4v4, 5v5
+      Enum.count(teams) == 2 and max_team_size <= 5 -> "Small Team"
       true -> "Big Team"
     end
   end

@@ -35,7 +35,6 @@ defmodule Teiserver.Battle.MatchLib do
     end
   end
 
-
   def list_game_types() do
     [
       "Duel",
@@ -137,10 +136,17 @@ defmodule Teiserver.Battle.MatchLib do
 
   def make_match_name(match) do
     case match.game_type do
-      "Duel" -> "Duel on #{match.map}"
-      type when type in ["Small Team", "Big Team"] -> "#{match.team_size}v#{match.team_size} on #{match.map}"
-      "FFA" -> "#{match.team_count} way FFA on #{match.map}"
-      t -> "#{t} game on #{match.map}"
+      "Duel" ->
+        "Duel on #{match.map}"
+
+      type when type in ["Small Team", "Big Team"] ->
+        "#{match.team_size}v#{match.team_size} on #{match.map}"
+
+      "FFA" ->
+        "#{match.team_count} way FFA on #{match.map}"
+
+      t ->
+        "#{t} game on #{match.map}"
     end
   end
 

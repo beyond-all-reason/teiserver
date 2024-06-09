@@ -165,6 +165,7 @@ defmodule Teiserver.Game.BalancerServer do
     teams =
       players
       |> Enum.group_by(fn c -> c.team_number end)
+
     team_size = Enum.max(Enum.map(teams, fn {_, t} -> Enum.count(t) end), fn -> 0 end)
     game_type = MatchLib.game_type(team_size, team_count)
 
@@ -205,8 +206,7 @@ defmodule Teiserver.Game.BalancerServer do
           player_id_list
           |> Enum.map(fn userid ->
             %{
-              userid =>
-                BalanceLib.get_user_rating_rank(userid, game_type, opts[:fuzz_multiplier])
+              userid => BalanceLib.get_user_rating_rank(userid, game_type, opts[:fuzz_multiplier])
             }
           end)
 
@@ -229,8 +229,7 @@ defmodule Teiserver.Game.BalancerServer do
       players
       |> Enum.map(fn %{userid: userid} ->
         %{
-          userid =>
-            BalanceLib.get_user_rating_rank(userid, game_type, opts[:fuzz_multiplier])
+          userid => BalanceLib.get_user_rating_rank(userid, game_type, opts[:fuzz_multiplier])
         }
       end)
 

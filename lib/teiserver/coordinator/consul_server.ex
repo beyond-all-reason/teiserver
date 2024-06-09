@@ -838,7 +838,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     rating_type = MatchLib.game_type(state.host_teamsize, state.host_teamcount)
 
     {player_rating, player_uncertainty} =
-      BalanceLib.get_user_rating_value_uncertainty_pair(user.id, "Big Team")
+      BalanceLib.get_user_rating_value_uncertainty_pair(user.id, rating_type)
 
     player_rating = max(player_rating, 1)
     avoid_status = Account.check_avoid_status(user.id, player_list)
