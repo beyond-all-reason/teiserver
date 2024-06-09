@@ -412,14 +412,12 @@ defmodule Teiserver.TeiserverConfigs do
       default: 50
     })
 
-
     add_site_config_type(%{
       key: "lobby.Small team game limit",
       section: "Lobbies",
       type: "integer",
       permissions: ["Admin"],
-      description:
-        "Maximum team size to be considered as a small team game",
+      description: "Maximum team size to be considered as a small team game",
       default: 5
     })
   end

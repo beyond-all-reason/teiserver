@@ -166,7 +166,8 @@ defmodule Teiserver.Game.BalancerServer do
       players
       |> Enum.group_by(fn c -> c.team_number end)
 
-    team_size = teams
+    team_size =
+      teams
       |> Enum.map(fn {_, t} -> Enum.count(t) end)
       |> Enum.max(fn -> 0 end)
 
