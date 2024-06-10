@@ -31,7 +31,7 @@ defmodule Teiserver.Battle.MatchLib do
       Enum.empty?(bots) == false -> "Bots"
       team_count == 2 and team_size == 1 -> "Duel"
       team_count == 2 and team_size <= max_small_team_size -> "Small Team"
-      team_count == 2 and team_size > max_small_team_size -> "Big Team"
+      team_count == 2 and team_size > max_small_team_size -> "Large Team"
       team_size == 1 -> "FFA"
       true -> "Team FFA"
     end
@@ -41,7 +41,7 @@ defmodule Teiserver.Battle.MatchLib do
     [
       "Duel",
       "Small Team",
-      "Big Team",
+      "Large Team",
       "FFA",
       "Team FFA",
       "Raptors",
@@ -54,7 +54,7 @@ defmodule Teiserver.Battle.MatchLib do
     [
       "Duel",
       "Small Team",
-      "Big Team",
+      "Large Team",
       "FFA",
       "Team FFA"
     ]
@@ -146,7 +146,7 @@ defmodule Teiserver.Battle.MatchLib do
       "Duel" ->
         "Duel on #{match.map}"
 
-      type when type in ["Small Team", "Big Team"] ->
+      type when type in ["Small Team", "Large Team"] ->
         "#{match.team_size}v#{match.team_size} on #{match.map}"
 
       "FFA" ->

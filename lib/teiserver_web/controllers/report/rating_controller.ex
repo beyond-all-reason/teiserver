@@ -56,7 +56,7 @@ defmodule TeiserverWeb.Report.RatingController do
       cond do
         Enum.count(player_ids) == 2 -> "Duel"
         # TODO Should probably get rating based on team size instad
-        true -> "Big Team"
+        true -> "Large Team"
       end
 
     rating_lookup =

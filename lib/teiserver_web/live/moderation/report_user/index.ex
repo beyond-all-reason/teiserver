@@ -191,7 +191,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
       |> Enum.map(fn match ->
         label =
           case match.game_type do
-            type when type in ["Small Team", "Big Team"] ->
+            type when type in ["Small Team", "Large Team"] ->
               "#{match.team_size} vs #{match.team_size} on #{match.map}"
 
             "FFA" ->
