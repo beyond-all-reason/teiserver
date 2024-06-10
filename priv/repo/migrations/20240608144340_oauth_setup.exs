@@ -24,5 +24,19 @@ defmodule Teiserver.Repo.Migrations.OauthSetup do
     end
     create_if_not_exists unique_index(:oauth_codes, [:value])
 
+    create_if_not_exists table(:oauth_tokens, comment: "auth tokens and refresh") do
+      add :value, :string, null: false
+      add :owner_id, references(:account_users, on_delete: :delete_all), null: false
+      add :application_id, references(:oauth_applications, on_delete: :delete_all), null: false
+      add :scopes, {:array, :string}, null: false
+      add :expires_at, :utc_datetime, null: false
+      add :type, :string, null: false
+      # we should create a new refresh token when deleting an auth token and vice versa
+      add :refresh_token_id, references(:oauth_tokens)
+
+      timestamps(type: :utc_datetime)
+    end
+    create_if_not_exists unique_index(:oauth_tokens, [:value])
+
   end
 end
