@@ -14,7 +14,7 @@ defmodule Teiserver.Battle.Match do
     field :team_size, :integer
     field :passworded, :boolean
     field :processed, :boolean, default: false
-    # Scavengers, Raptors, Bots, Duel, Small Team, Big Team, FFA, Team FFA
+    # Scavengers, Raptors, Bots, Duel, Small Team, Large Team, FFA, Team FFA
     field :game_type, :string
 
     belongs_to :founder, Teiserver.Account.User

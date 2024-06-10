@@ -20,7 +20,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
       "Duel" -> do_match_processed_duel(userid)
       "FFA" -> do_match_processed_duel(userid)
       "Small Team" -> do_match_processed_team_small(userid)
-      "Big Team" -> do_match_processed_team_big(userid)
+      "Large Team" -> do_match_processed_team_large(userid)
       _ -> :ok
     end
 
@@ -106,8 +106,8 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
     :ok
   end
 
-  def do_match_processed_team_big(userid) do
-    do_match_processed_team(userid, "Big Team")
+  def do_match_processed_team_large(userid) do
+    do_match_processed_team(userid, "Large Team")
   end
 
   def do_match_processed_team_small(userid) do

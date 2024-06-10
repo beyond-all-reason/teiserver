@@ -48,9 +48,9 @@ defmodule Teiserver.Account.UserAgeReport do
     type_where =
       case params["game_type"] do
         "Duel" -> "AND m.game_type = 'Duel'"
-        "Team" -> "AND m.game_type IN ('Small Team', 'Big Team')"
+        "Team" -> "AND m.game_type IN ('Small Team', 'Large Team')"
         "Small Team" -> "AND m.game_type = 'Small Team'"
-        "Big Team" -> "AND m.game_type = 'Big Team'"
+        "Large Team" -> "AND m.game_type = 'Large Team'"
         "FFA" -> "AND m.game_type = 'FFA'"
         "Raptors" -> "AND m.game_type = 'Raptors'"
         "Scavengers" -> "AND m.game_type = 'Scavengers'"

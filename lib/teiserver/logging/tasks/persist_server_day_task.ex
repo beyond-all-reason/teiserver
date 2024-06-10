@@ -563,7 +563,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
         "Bots" -> :bots
         "Duel" -> :duel
         "Small Team" -> :small_team
-        "Big Team" -> :big_team
+        "Large Team" -> :large_team
         "FFA" -> :ffa
         "Team FFA" -> :team_ffa
       end

@@ -622,7 +622,7 @@ defmodule Teiserver.TeiserverTestLib do
 
     Teiserver.Game.get_or_add_rating_type("Duel")
     Teiserver.Game.get_or_add_rating_type("Small Team")
-    Teiserver.Game.get_or_add_rating_type("Big Team")
+    Teiserver.Game.get_or_add_rating_type("Large Team")
     Teiserver.Game.get_or_add_rating_type("FFA")
 
     Teiserver.Telemetry.get_or_add_complex_server_event_type("Server startup")
