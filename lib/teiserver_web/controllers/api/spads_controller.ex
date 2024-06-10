@@ -3,6 +3,7 @@ defmodule TeiserverWeb.API.SpadsController do
   alias Teiserver.Config
   alias Teiserver.{Account, Coordinator, Battle}
   alias Teiserver.Battle.{BalanceLib, MatchLib}
+  alias Teiserver.Data.Types, as: T
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
@@ -215,8 +216,6 @@ defmodule TeiserverWeb.API.SpadsController do
         |> render("empty.json")
     end
   end
-
-  defp get_member_lobby(nil), do: nil
 
   @spec get_member_lobby(non_neg_integer()) :: T.lobby() | nil
   defp get_member_lobby(userid) do
