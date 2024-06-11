@@ -80,11 +80,11 @@ defmodule Teiserver.Battle.MatchLib do
       |> Enum.group_by(fn c -> c.team_number end)
 
     if teams != %{} do
-      team_count = teams |> count
+      team_count = teams |> Enum.count()
 
       team_size =
         teams
-        |> Enum.map(fn {_, t} -> t |> count end)
+        |> Enum.map(fn {_, t} -> t |> Enum.count() end)
         |> Enum.max(fn -> 0 end)
 
       game_type = game_type(team_size, team_count, bots)
