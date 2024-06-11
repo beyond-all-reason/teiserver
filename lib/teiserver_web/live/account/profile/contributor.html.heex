@@ -19,7 +19,7 @@
       <%= if @show_flag_config do %>
         You can enter any
         <a href="https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes">
-          ISO Country code <Fontawesome.icon icon="arrow-up-right-from-square" style="regular" />
+          ISO Country code <Fontawesome.icon icon="arrow-up-right-from-square" style="solid" />
         </a>
         and even a few extra ones. <br /><br />
         Your current country code is: "<span class="monospace"><%= @country_code %></span>".
@@ -42,12 +42,12 @@
 
         <div :if={@temp_country_code && @country_code != @temp_country_code} class="pt-2">
           <span class="btn btn-secondary" phx-click="revert-country_code">
-            <Fontawesome.icon icon="cancel" style="regular" size="2x" /><br />
+            <Fontawesome.icon icon="cancel" style="solid" size="2x" /><br />
             Revert to <%= @country_code %>
           </span>
           &nbsp;&nbsp;&nbsp;
           <span class="btn btn-secondary" phx-click="clear-country_code">
-            <Fontawesome.icon icon="arrow-rotate-left" style="regular" size="2x" /><br /> Clear
+            <Fontawesome.icon icon="arrow-rotate-left" style="solid" size="2x" /><br /> Clear
           </span>
           &nbsp;&nbsp;&nbsp;
           <span class="btn btn-success" phx-click="save-country_code">
