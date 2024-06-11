@@ -19,6 +19,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     "Team FFA",
     "Partied Team"
   ]
+
   # TODO Remove "Team" from here once the split is done
 
   @spec rating_type_list() :: [String.t()]
