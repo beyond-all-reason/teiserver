@@ -19,6 +19,7 @@ defmodule Teiserver.Repo.Migrations.OauthSetup do
       add :application_id, references(:oauth_applications, on_delete: :delete_all), null: false
       add :scopes, {:array, :string}, null: false
       add :expires_at, :utc_datetime, null: false
+      add :redirect_uri, :string
 
       timestamps(type: :utc_datetime)
     end

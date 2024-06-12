@@ -25,28 +25,35 @@ defmodule Teiserver.OAuth do
   Create an authorization token for the given user and application.
   The token scopes are the same as the application
   """
-  @spec create_code(User.t() | T.userid(), Application.t(), options()) ::
+  @spec create_code(
+          User.t() | T.userid(),
+          Application.t(),
+          %{redirect_uri: String.t()},
+          options()
+        ) ::
           {:ok, Code.t()} | {:error, Ecto.Changeset.t()}
-  def create_code(user, application, opts \\ [])
+  def create_code(user, application, params \\ %{}, opts \\ [])
 
-  def create_code(%User{} = user, application, opts) do
-    create_code(user.id, application, opts)
+  def create_code(%User{} = user, application, params, opts) do
+    create_code(user.id, application, params, opts)
   end
 
-  def create_code(user, application, opts) when is_map(user) do
-    create_code(user.id, application, opts)
+  def create_code(user, application, params, opts) when is_map(user) do
+    create_code(user.id, application, params, opts)
   end
 
-  def create_code(user_id, application, opts) do
+  def create_code(user_id, application, params, opts) do
     now = Keyword.get(opts, :now, Timex.now())
 
-    attrs = %{
-      value: Base.hex_encode32(:crypto.strong_rand_bytes(32)),
-      owner_id: user_id,
-      application_id: application.id,
-      scopes: application.scopes,
-      expires_at: Timex.add(now, Timex.Duration.from_minutes(5))
-    }
+    attrs =
+      %{
+        value: Base.hex_encode32(:crypto.strong_rand_bytes(32)),
+        owner_id: user_id,
+        application_id: application.id,
+        scopes: application.scopes,
+        expires_at: Timex.add(now, Timex.Duration.from_minutes(5))
+      }
+      |> Map.put(:redirect_uri, Map.get(params, :redirect_uri))
 
     %Code{}
     |> Code.changeset(attrs)
@@ -76,7 +83,11 @@ defmodule Teiserver.OAuth do
     end
   end
 
-  @spec create_token(User.t() | T.userid(), Application.t(), options()) ::
+  @spec create_token(
+          User.t() | T.userid(),
+          %{id: integer(), scopes: Application.scopes()},
+          options()
+        ) ::
           {:ok, Token.t()} | {:error, Ecto.Changeset.t()}
   def create_token(user_id, application, opts \\ [])
 
@@ -140,6 +151,34 @@ defmodule Teiserver.OAuth do
         else
           {:ok, token}
         end
+    end
+  end
+
+  @doc """
+  Given an authorization code, creates and return an authentication token
+  (and its associated refresh token).
+  """
+  @spec exchange_code(Code.t(), String.t() | nil, options()) ::
+          {:ok, Token.t()} | {:error, term()}
+  def exchange_code(code, redirect_uri \\ nil, opts \\ []) do
+    now = Keyword.get(opts, :now, Timex.now())
+
+    cond do
+      expired?(code, now) ->
+        {:error, :expired}
+
+      code.redirect_uri != redirect_uri ->
+        {:error, :redirect_uri_mismatch}
+
+      true ->
+        Repo.transaction(fn ->
+          Repo.delete!(code)
+
+          {:ok, token} =
+            create_token(code.owner_id, %{id: code.application_id, scopes: code.scopes}, opts)
+
+          token
+        end)
     end
   end
 
