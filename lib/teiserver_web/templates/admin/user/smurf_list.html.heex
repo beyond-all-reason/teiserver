@@ -132,17 +132,12 @@ is_moderator = allow?(@conn, "Moderator") %>
               </thead>
               <tbody>
                 <tr class="selected-user-row">
-                  <% email_domain =
-                    @user.email
-                    |> String.split("@")
-                    |> Enum.reverse()
-                    |> hd %>
 
                   <td style={"background-color: #{@user.colour}; color: #FFF;"} width="22">
                     <%= central_component("icon", icon: @user.icon) %>
                   </td>
                   <td><%= @user.name %></td>
-                  <td><%= email_domain %></td>
+                  <td><%= @user.email %></td>
                   <td><%= @user.data["lobby_client"] %></td>
 
                   <td>
@@ -185,19 +180,15 @@ is_moderator = allow?(@conn, "Moderator") %>
 
                 <%= for user <- @users do %>
                   <% user_stats = @stats_map[user.id]
-
-                  email_domain =
-                    user.email
-                    |> String.split("@")
-                    |> Enum.reverse()
-                    |> hd %>
+                  games_allied = @games_allied[user.id]
+                  games_vs = @games_vs[user.id] %>
 
                   <tr>
                     <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
                       <%= central_component("icon", icon: user.icon) %>
                     </td>
                     <td><%= user.name %></td>
-                    <td><%= email_domain %></td>
+                    <td><%= user.email %></td>
                     <td><%= user.data["lobby_client"] %></td>
 
                     <td>
