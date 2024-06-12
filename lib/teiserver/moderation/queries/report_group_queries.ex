@@ -78,6 +78,14 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
       where: report_groups.inserted_at >= ^datetime
   end
 
+  defp _where(query, :has_reports_of_kind, kind) do
+    from report_groups in query,
+      join: reports in assoc(report_groups, :reports),
+      where: fragment("? ~* ?", reports.type, ^kind)
+  end
+
+  defp _where(query, :has_reports_of_kind, nil), do: query
+
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
 

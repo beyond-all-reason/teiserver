@@ -60,6 +60,17 @@
         <div class="col">
           <.input
             type="select"
+            label="Kind"
+            options={["Any", "Actions", "Chat"]}
+            name="kind-filter"
+            value={@filters["kind-filter"]}
+            phx-change="filter-update"
+          />
+        </div>
+
+        <div class="col">
+          <.input
+            type="select"
             label="Open/Closed"
             options={["Open", "Closed", "All"]}
             name="closed-filter"
