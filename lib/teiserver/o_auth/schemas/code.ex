@@ -9,7 +9,8 @@ defmodule Teiserver.OAuth.Code do
           owner: User.t(),
           application: OAuth.Application.t(),
           scopes: OAuth.Application.scopes(),
-          expires_at: DateTime.t()
+          expires_at: DateTime.t(),
+          redirect_uri: String.t() | nil
         }
 
   schema "oauth_codes" do
@@ -18,6 +19,7 @@ defmodule Teiserver.OAuth.Code do
     belongs_to :application, OAuth.Application, primary_key: true
     field :scopes, {:array, :string}
     field :expires_at, :utc_datetime
+    field :redirect_uri, :string
 
     timestamps()
   end
@@ -26,8 +28,21 @@ defmodule Teiserver.OAuth.Code do
     attrs = attrs |> uniq_lists(~w(scopes)a)
 
     code
-    |> cast(attrs, [:value, :owner_id, :application_id, :scopes, :expires_at])
-    |> validate_required([:value, :owner_id, :application_id, :scopes, :expires_at])
+    |> cast(attrs, [
+      :value,
+      :owner_id,
+      :application_id,
+      :scopes,
+      :expires_at,
+      :redirect_uri
+    ])
+    |> validate_required([
+      :value,
+      :owner_id,
+      :application_id,
+      :scopes,
+      :expires_at
+    ])
     |> Ecto.Changeset.validate_subset(:scopes, OAuth.Application.allowed_scopes())
   end
 end
