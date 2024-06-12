@@ -60,10 +60,7 @@
           <% end %>
 
           <%= if not @last_page or @page != 0 do %>
-            <a
-              href={"/teiserver/admin/lobbies/#{@match.id}/lobby_chat/all"}
-              class="btn btn-outline-secondary"
-            >
+            <a href={~p"/battle/chat/#{@match.id}/"} class="btn btn-outline-secondary">
               <i class="fa-fw fa-solid fa-list"></i> &nbsp;
               Full chat
             </a>
