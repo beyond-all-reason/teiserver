@@ -1,0 +1,81 @@
+<%= if @rating_logs != %{} do %>
+  <style type="text/css">
+    .raw-row {
+      display: none;
+    }
+  </style>
+
+  <table class="table table-sm">
+    <thead>
+      <tr>
+        <th colspan="4">&nbsp;</th>
+
+        <th colspan="3" style="text-align: center; bbackground-color: #FEE;">Rating</th>
+
+        <th>&nbsp;</th>
+
+        <th colspan="3" style="text-align: center; bbackground-color: #EEF;">Change</th>
+
+        <th>&nbsp;</th>
+      </tr>
+
+      <tr>
+        <th colspan="3">Name</th>
+        <th>Team</th>
+
+        <th>Rating</th>
+        <th>Skill</th>
+        <th>Uncertainty</th>
+
+        <th>&nbsp;</th>
+
+        <th>Rating</th>
+        <th>Skill</th>
+        <th>Uncertainty</th>
+
+        <th>&nbsp;</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%= for m <- @members do %>
+        <% rating = @rating_logs[m.user_id] %>
+        <tr>
+          <td style={"background-color: #{m.user.colour}; color: #FFF;"} width="22">
+            <%= if m.team_id == @match.winning_team do %>
+              <i class="fa-fw fa-solid fa-trophy"></i>
+            <% end %>
+          </td>
+          <td style={"background-color: #{m.user.colour}; color: #FFF;"} width="22">
+            <%= central_component("icon", icon: m.user.icon) %>
+          </td>
+          <td style={"background-color: #{rgba_css m.user.colour};"}><%= m.user.name %></td>
+          <td><%= m.team_id + 1 %></td>
+
+          <td><%= rating.value["rating_value"] |> round(2) %></td>
+          <td><%= rating.value["skill"] |> round(2) %></td>
+          <td><%= rating.value["uncertainty"] |> round(2) %></td>
+
+          <td>&nbsp;</td>
+
+          <td><%= rating.value["rating_value_change"] |> round(2) %></td>
+          <td><%= rating.value["skill_change"] |> round(2) %></td>
+          <td><%= rating.value["uncertainty_change"] |> round(2) %></td>
+
+          <td>
+            <span
+              class="btn btn-secondary btn-sm"
+              onclick={"$('#raw-row-#{m.user_id}').toggleClass('raw-row');"}
+            >
+              Show/Hide raw
+            </span>
+          </td>
+        </tr>
+        <tr class="raw-row" id={"raw-row-#{m.user_id}"}>
+          <td colspan="12">
+            <textarea name="" id="" rows="8" cols="40" class="form-control monospace"><%= Jason.encode!(rating.value, pretty: true) %></textarea>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

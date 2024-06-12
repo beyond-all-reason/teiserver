@@ -21,12 +21,12 @@ defmodule Teiserver.Battle.BalanceLibInternalTest do
 
     assert fixed_groups == [
              %{
-               user1.id => %{name: "User_1", rank: 0, rating: 19},
-               user2.id => %{name: "User_2", rank: 0, rating: 20}
+               user1.id => %{name: user1.name, rank: 0, rating: 19, uncertainty: 0},
+               user2.id => %{name: user2.name, rank: 0, rating: 20, uncertainty: 0}
              },
-             %{user3.id => %{name: "User_3", rank: 0, rating: 18}},
-             %{user4.id => %{name: "User_4", rank: 0, rating: 15}},
-             %{user5.id => %{name: "User_5", rank: 0, rating: 11}}
+             %{user3.id => %{name: user3.name, rank: 0, rating: 18, uncertainty: 0}},
+             %{user4.id => %{name: user4.name, rank: 0, rating: 15, uncertainty: 0}},
+             %{user5.id => %{name: user5.name, rank: 0, rating: 11, uncertainty: 0}}
            ]
 
     # loser_picks algo will hit the databases so let's just test with split_one_chevs
@@ -62,6 +62,59 @@ defmodule Teiserver.Battle.BalanceLibInternalTest do
     # loser_picks algo will hit the databases so let's just test with split_one_chevs
     result = BalanceLib.create_balance(groups, 2, algorithm: "split_one_chevs")
     assert result != nil
+  end
+
+  test "does team have parties" do
+    team = [
+      %{count: 2, group_rating: 13, members: [1, 4], ratings: [8, 5]}
+    ]
+
+    assert BalanceLib.team_has_parties?(team)
+
+    team = [
+      %{count: 1, group_rating: 8, members: [2], ratings: [8]}
+    ]
+
+    refute BalanceLib.team_has_parties?(team)
+  end
+
+  test "does team_groups in balance result have parties" do
+    team_groups = %{
+      1 => [
+        %{count: 2, group_rating: 13, members: [1, 4], ratings: [8, 5]}
+      ],
+      2 => [
+        %{count: 1, group_rating: 6, members: [2], ratings: [6]}
+      ]
+    }
+
+    assert BalanceLib.balanced_teams_has_parties?(team_groups)
+
+    team_groups = %{
+      1 => [
+        %{count: 1, group_rating: 8, members: [1], ratings: [8]},
+        %{count: 1, group_rating: 8, members: [2], ratings: [8]}
+      ],
+      2 => [
+        %{count: 1, group_rating: 6, members: [3], ratings: [6]},
+        %{count: 1, group_rating: 8, members: [4], ratings: [8]}
+      ]
+    }
+
+    refute BalanceLib.balanced_teams_has_parties?(team_groups)
+
+    team_groups = %{
+      1 => [
+        %{count: 1, group_rating: 8, members: [1], ratings: [8]},
+        %{count: 1, group_rating: 8, members: [2], ratings: [8]}
+      ],
+      2 => [
+        %{count: 1, group_rating: 13, members: [3], ratings: [6]},
+        %{count: 2, group_rating: 8, members: [4, 5], ratings: [8, 0]}
+      ]
+    }
+
+    assert BalanceLib.balanced_teams_has_parties?(team_groups)
   end
 
   defp create_test_users do

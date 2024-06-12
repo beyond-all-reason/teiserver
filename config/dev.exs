@@ -60,7 +60,12 @@ config :teiserver, Teiserver,
   heartbeat_timeout: nil,
   enable_discord_bridge: false,
   enable_hailstorm: true,
-  accept_all_emails: true
+  accept_all_emails: true,
+
+  # The balance algorithm to use on the admin/matches/match/:id page
+  # It is purely used for analysis and not for actual games
+  # TODO move this into dropdown on admin/matches/match/:id page
+  analysis_balance_algorithm: "loser_picks"
 
 # Watch static and templates for browser reloading.
 config :teiserver, TeiserverWeb.Endpoint,

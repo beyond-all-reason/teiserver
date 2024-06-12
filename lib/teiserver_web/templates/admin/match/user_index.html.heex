@@ -96,7 +96,10 @@
                 <td><%= date_to_str(match.finished, format: :ymd_hms) %></td>
 
                 <td>
-                  <a href={~p"/battle/#{match.id}"} class="btn btn-secondary btn-sm">
+                  <a
+                    href={Routes.ts_admin_match_path(@conn, :show, match.id)}
+                    class="btn btn-secondary btn-sm"
+                  >
                     Show
                   </a>
                 </td>

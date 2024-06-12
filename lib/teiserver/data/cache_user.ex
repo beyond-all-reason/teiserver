@@ -1277,7 +1277,9 @@ defmodule Teiserver.CacheUser do
     ingame_minutes =
       (stats.data["player_minutes"] || 0) + (stats.data["spectator_minutes"] || 0) * 0.5
 
-    round(ingame_minutes / 60)
+    # Hours are rounded down which helps to determine if a user has hit a
+    # chevron hours threshold. So a user with 4.9 hours is still chevron 1 or rank 0
+    trunc(ingame_minutes / 60)
   end
 
   # Based on actual ingame time
@@ -1310,13 +1312,15 @@ defmodule Teiserver.CacheUser do
   def calculate_rank(userid, "Role") do
     ingame_hours = rank_time(userid)
 
+    # Thresholds should match what is on the website:
+    # https://www.beyondallreason.info/guide/rating-and-lobby-balance#rank-icons
     cond do
       has_any_role?(userid, ~w(Core Contributor)) -> 6
-      ingame_hours > 1000 -> 5
-      ingame_hours > 250 -> 4
-      ingame_hours > 100 -> 3
-      ingame_hours > 15 -> 2
-      ingame_hours > 5 -> 1
+      ingame_hours >= 1000 -> 5
+      ingame_hours >= 250 -> 4
+      ingame_hours >= 100 -> 3
+      ingame_hours >= 15 -> 2
+      ingame_hours >= 5 -> 1
       true -> 0
     end
   end
