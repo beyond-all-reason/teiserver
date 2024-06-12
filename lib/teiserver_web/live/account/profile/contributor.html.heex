@@ -26,12 +26,12 @@
         <br /><br />
 
         <input
-        type="text"
-        name="country_code"
-        value={@temp_country_code}
-        class="form-control"
-        style="max-width: 150px;"
-        phx-keyup="set-temp_country_code"
+          type="text"
+          name="country_code"
+          value={@temp_country_code}
+          class="form-control"
+          style="max-width: 150px;"
+          phx-keyup="set-temp_country_code"
         />
 
         <%= if @error_message do %>
