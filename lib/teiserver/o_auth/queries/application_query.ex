@@ -21,4 +21,14 @@ defmodule Teiserver.OAuth.ApplicationQueries do
     from e in query,
       where: e.uid == ^uid
   end
+
+  def join_application(query, name \\ :application) do
+    if has_named_binding?(query, :application) do
+      query
+    else
+      from token in query,
+        join: app in assoc(token, ^name),
+        as: :application
+    end
+  end
 end

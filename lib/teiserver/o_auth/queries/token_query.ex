@@ -9,7 +9,10 @@ defmodule Teiserver.OAuth.TokenQueries do
   def get_token(nil), do: nil
 
   def get_token(value) do
-    base_query() |> where_token(value) |> with_app() |> Repo.one()
+    base_query()
+    |> where_token(value)
+    |> preload(:application)
+    |> Repo.one()
   end
 
   def base_query() do
@@ -21,23 +24,6 @@ defmodule Teiserver.OAuth.TokenQueries do
   def where_token(query, value) do
     from e in query,
       where: e.value == ^value
-  end
-
-  @doc """
-  ensure the related application is loaded
-  """
-  def with_app(query) do
-    query =
-      if has_named_binding?(query, :app) do
-        query
-      else
-        from token in query,
-          join: app in assoc(token, :application),
-          as: :app
-      end
-
-    from [app: app] in query,
-      preload: [application: app]
   end
 
   @doc """
