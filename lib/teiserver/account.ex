@@ -137,7 +137,7 @@ defmodule Teiserver.Account do
     |> Repo.one()
   end
 
-  @spec get_user_stat_data(integer()) :: Map.t()
+  @spec get_user_stat_data(integer()) :: map()
   def get_user_stat_data(userid) do
     Teiserver.cache_get_or_store(:teiserver_user_stat_cache, userid, fn ->
       case get_user_stat(userid) do

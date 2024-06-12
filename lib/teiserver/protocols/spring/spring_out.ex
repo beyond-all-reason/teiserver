@@ -147,7 +147,9 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:add_user, %{userid: nil}), do: ""
 
   defp do_reply(:add_user, client) do
-    "ADDUSER #{client.name} #{client.country} #{client.userid} #{client.lobby_client}\n"
+    #rank_icon is not in Spring protocol and is an extra argument
+    #Full definition of client can be found in client.ex in the login function
+    "ADDUSER #{client.name} #{client.country} #{client.userid} #{client.lobby_client}\t#{client.rank_icon}\n"
   end
 
   defp do_reply(:friendlist, nil), do: "FRIENDLISTBEGIN\FRIENDLISTEND\n"
