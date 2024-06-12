@@ -55,4 +55,17 @@
     <Fontawesome.icon icon="broom-wide" style="solid" /> &nbsp;
     GDPR clean
   </.link>
+
+  <.link
+    :if={
+      allow?(@current_user, "Server") and Application.get_env(:teiserver, Teiserver)[:test_mode]
+    }
+    href={~p"/admin/users/delete_user/#{@user.id}"}
+    data-confirm="Are you sure?"
+    method="delete"
+    class="dropdown-item bg-danger_transparent"
+  >
+    <Fontawesome.icon icon="fa-trash" style="solid" /> &nbsp;
+    Delete user
+  </.link>
 </div>

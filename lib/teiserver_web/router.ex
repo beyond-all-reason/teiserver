@@ -562,6 +562,10 @@ defmodule TeiserverWeb.Router do
 
     # User stuff
     put("/users/gdpr_clean/:id", UserController, :gdpr_clean)
+
+    if Application.compile_env(:teiserver, Teiserver)[:test_mode] do
+      delete("/users/delete_user/:id", UserController, :delete_user)
+    end
   end
 
   scope "/teiserver/admin", TeiserverWeb.Admin, as: :admin do
@@ -617,6 +621,11 @@ defmodule TeiserverWeb.Router do
     get("/tools", ToolController, :index)
     get("/tools/falist", ToolController, :falist)
     get("/tools/test_page", ToolController, :test_page)
+
+    if Application.compile_env(:teiserver, Teiserver)[:test_mode] do
+      get("/users/create_form", UserController, :create_form)
+      post("/users/create_post", UserController, :create_post)
+    end
 
     get("/users/rename_form/:id", UserController, :rename_form)
     put("/users/rename_post/:id", UserController, :rename_post)

@@ -21,8 +21,8 @@ defmodule TeiserverWeb.Admin.UserController do
     user: {Teiserver.Account.AuthLib, :current_user}
   )
 
-  plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
-  plug(:add_breadcrumb, name: 'Users', url: '/teiserver/admin/user')
+  plug(:add_breadcrumb, name: "Admin", url: "/teiserver/admin")
+  plug(:add_breadcrumb, name: "Users", url: "/teiserver/admin/user")
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
@@ -208,6 +208,59 @@ defmodule TeiserverWeb.Admin.UserController do
     |> assign(:changeset, changeset)
     |> add_breadcrumb(name: "New user", url: conn.request_path)
     |> render("new.html")
+  end
+
+  @spec create_form(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def create_form(conn, _) do
+    if allow?(conn, "Server") do
+      conn
+      |> render("create_form.html")
+    else
+      conn
+      |> put_flash(:info, "No permission")
+      |> redirect(to: ~p"/teiserver/admin/user")
+    end
+  end
+
+  @spec create_post(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def create_post(conn, params \\ %{}) do
+    if is_nil(params["name"]) or String.trim(params["name"]) == "" do
+      conn
+      |> put_flash(:danger, "Invalid user name")
+      |> redirect(to: ~p"/teiserver/admin/user")
+    end
+
+    if allow?(conn, "Server") and Application.get_env(:teiserver, Teiserver)[:test_mode] do
+      password =
+        if is_nil(params["password"]) or String.trim(params["password"]) == "" do
+          "password"
+        else
+          params["password"]
+        end
+
+      email =
+        if is_nil(params["email"]) or String.trim(params["email"]) == "" do
+          UUID.uuid1()
+        else
+          params["email"]
+        end
+
+      case Teiserver.CacheUser.register_user(params["name"], email, password) do
+        :success ->
+          conn
+          |> put_flash(:info, "User created successfully.")
+          |> redirect(to: ~p"/teiserver/admin/user")
+
+        {:failure, str} ->
+          conn
+          |> put_flash(:error, "Problem creating user: " <> str)
+          |> redirect(to: ~p"/teiserver/admin/user")
+      end
+    else
+      conn
+      |> put_flash(:danger, "No access.")
+      |> redirect(to: ~p"/teiserver/admin/user")
+    end
   end
 
   @spec create(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -1105,5 +1158,38 @@ defmodule TeiserverWeb.Admin.UserController do
         |> put_flash(:danger, "Unable to access this user")
         |> redirect(to: ~p"/teiserver/admin/user")
     end
+  end
+
+  @spec delete_user(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def delete_user(conn, %{"id" => id}) do
+    if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
+      conn
+      |> put_flash(:danger, "not in testmode")
+      |> redirect(to: ~p"/teiserver/admin/user")
+    end
+
+    user = Account.get_user_by_id(id)
+
+    case Teiserver.Account.UserLib.has_access(user, conn) do
+      {true, _} ->
+        case Teiserver.Admin.DeleteUserTask.delete_users([id]) do
+          :ok ->
+            conn
+            |> put_flash(:success, "User deleted")
+            |> redirect(to: ~p"/teiserver/admin/user/")
+        end
+
+      _ ->
+        conn
+        |> put_flash(:danger, "Unable to access this user")
+        |> redirect(to: ~p"/teiserver/admin/user")
+    end
+  end
+
+  def delete_user(conn, %{}) do
+    # catch case, when no id is provided
+    conn
+    |> put_flash(:danger, "No user_id provided")
+    |> redirect(to: ~p"/teiserver/admin/user")
   end
 end
