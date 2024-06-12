@@ -30,8 +30,9 @@ bash scripts/dev_compose.sh
 
 - Creates various dynamically generated secrets for development located at `$REPO_ROOT/runtime/dev`.
   These secrets include TLS certificate(s) for Nginx and `teiserver`, database users, passwords, etc.
-  There is no need for you to edit these secrets. This will generate TLS certificates and Diffie Hellman parameters
-  for TLS. These credentials (because it's a development environment) are not rotated upon repeated deployments
+  There is no need for you to edit these secrets. This will generate TLS certificates and fetch Diffie Hellman
+  parameters for TLS. These credentials (because it's a development environment) are not rotated upon repeated
+  deployments
 - Issue the command to docker to build the various containers (Nginx, PostgreSQL, teiserver)
 - Run the containers (when any of their dependent components are healthy and ready to accept connections)
 - Mount all the local development directories and files within the repository into the container.

@@ -1,0 +1,10 @@
+*
+!assets
+!config
+!documents
+!lib
+!priv
+!test
+!**/*.exs
+!**/*.json
+!mix.lock
