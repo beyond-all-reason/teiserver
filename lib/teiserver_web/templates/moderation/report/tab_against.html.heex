@@ -55,6 +55,12 @@
               ) %>
             </a>
           <% end %>
+
+          <%= if report.closed do %>
+            <span class="btn btn-sm btn-warning">
+              <Fontawesome.icon icon="folder-closed" style="solid" />
+            </span>
+          <% end %>
         </td>
 
         <td>
