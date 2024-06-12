@@ -55,6 +55,18 @@ defmodule TeiserverWeb.Moderation.ReportController do
         order_by: params["order"]
       )
 
+    reports =
+      case params["kind"] do
+        "Chat" ->
+          reports |> Enum.filter(fn report -> String.contains?(report.type, "chat") end)
+
+        "Actions" ->
+          reports |> Enum.filter(fn report -> String.contains?(report.type, "actions") end)
+
+        "Any" ->
+          reports
+      end
+
     target =
       if params["target_id"] do
         Account.get_user(params["target_id"])
