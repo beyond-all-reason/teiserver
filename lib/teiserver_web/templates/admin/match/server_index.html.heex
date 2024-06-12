@@ -87,10 +87,7 @@
                 <td><%= date_to_str(match.finished, format: :ymd_hms) %></td>
 
                 <td>
-                  <a
-                    href={~p"/teiserver/admin/matches/#{match.id}"}
-                    class="btn btn-secondary btn-sm"
-                  >
+                  <a href={~p"/battle/#{match.id}"} class="btn btn-secondary btn-sm">
                     Show
                   </a>
                 </td>

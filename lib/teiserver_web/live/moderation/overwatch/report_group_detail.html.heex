@@ -21,7 +21,7 @@
 
       <%= if @report_group.match_id do %>
         <a
-          href={~p"/teiserver/admin/matches/#{@report_group.match_id}"}
+          href={~p"/battle/#{@report_group.match_id}"}
           class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}
         >
           <Fontawesome.icon icon={Teiserver.Battle.MatchLib.icon()} style="solid" /> Match Details

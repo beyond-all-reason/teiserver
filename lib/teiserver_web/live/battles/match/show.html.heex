@@ -41,7 +41,7 @@
         </.tab_nav>
       <% end %>
 
-      <%= if @new_balance != %{} and allow?(@current_user, "Overwatch") do %>
+      <%= if @rating_logs != %{} and allow?(@current_user, "Overwatch") do %>
         <.tab_nav url={~p"/battle/#{@match.id}/balance"} selected={@tab == :balance}>
           <Fontawesome.icon icon="fa-solid fa-scale-balanced" style="solid" /> Balance
         </.tab_nav>

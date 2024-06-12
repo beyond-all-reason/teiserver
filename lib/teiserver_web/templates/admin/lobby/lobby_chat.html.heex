@@ -52,7 +52,7 @@
             <% end %>
             &nbsp;&nbsp;&nbsp;
             <a
-              href={Routes.ts_admin_match_path(@conn, :show, @match.id)}
+              href={~p"/battle/#{@match.id}"}
               class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}
             >
               <%= central_component("icon", icon: Teiserver.Battle.MatchLib.icon()) %> Match details
