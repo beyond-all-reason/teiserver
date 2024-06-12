@@ -94,6 +94,14 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
       end)
       |> Enum.reject(&(&1 == nil))
 
+    user_exclude_list =
+      String.trim(filters["user-raw-exclude"] || "")
+      |> String.split(",")
+      |> Enum.map(fn username ->
+        Account.get_userid_from_name(username)
+      end)
+      |> Enum.reject(&(&1 == nil))
+
     contains_filter =
       filters["message-contains"]
       |> String.trim()
@@ -102,7 +110,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
       Chat.list_lobby_messages(
         search: [
           match_id: match_id,
-          user_id_in: user_id_list
+          user_id_in: user_id_list,
+          user_id_not_in: user_exclude_list
         ],
         preload: [:user],
         limit: 1_000,
@@ -183,6 +192,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
       "bot-messages" => "Include bot messages",
       "message-format" => "Table",
       "user-raw-filter" => "",
+      "user-raw-exclude" => "Coordinator",
       "user-raw-highlight" => highlight_names,
       "message-contains" => "",
       "order_by" => "Oldest first"

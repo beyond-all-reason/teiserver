@@ -14,6 +14,8 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
     |> ReportGroupLib.make_favourite()
     |> insert_recently(socket)
 
+    # TODO also assign reporter info here, it's needed for report authors and chat link
+
     socket =
       socket
       |> assign(:report_group, report_group)

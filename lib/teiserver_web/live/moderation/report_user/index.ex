@@ -186,7 +186,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
           user_id: user.id
         ],
         order_by: "Newest first",
-        select: [:id, :game_type, :team_size, :team_count, :finished, :map]
+        select: [:id, :game_type, :team_size, :team_count, :finished, :map, :game_duration]
       )
       |> Enum.map(fn match ->
         label =

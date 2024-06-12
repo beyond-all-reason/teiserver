@@ -21,7 +21,7 @@
 
       <%= if @report_group.match_id do %>
         <a
-          href={~p"/teiserver/admin/matches/#{@report_group.match_id}"}
+          href={~p"/battle/#{@report_group.match_id}"}
           class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}
         >
           <Fontawesome.icon icon={Teiserver.Battle.MatchLib.icon()} style="solid" /> Match Details
@@ -118,7 +118,7 @@
             row_click={fn report -> JS.navigate(~p"/moderation/report/#{report.id}") end}
           >
             <:col :let={report} label="Type"><%= report.type %>/<%= report.sub_type %></:col>
-            <:col :let={report} label="Type"><%= report.extra_text %></:col>
+            <:col :let={report} label="Description"><%= report.extra_text %></:col>
             <:col :let={report} label="Type">
               <%= date_to_str(report.inserted_at, format: :hms_or_ymd) %>
             </:col>

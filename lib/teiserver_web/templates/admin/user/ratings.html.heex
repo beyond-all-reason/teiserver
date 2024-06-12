@@ -184,10 +184,7 @@
                 <td><%= date_to_str(log.inserted_at, format: :hms_or_dmy) %></td>
                 <%= if log.match do %>
                   <td>
-                    <a
-                      href={Routes.ts_admin_match_path(@conn, :show, log.match.id)}
-                      class="btn btn-secondary btn-sm"
-                    >
+                    <a href={~p"/battle/#{log.match.id}"} class="btn btn-secondary btn-sm">
                       Show
                     </a>
                   </td>

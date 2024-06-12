@@ -67,7 +67,7 @@ defmodule TeiserverWeb.Battle.MatchComponents do
         bsname={@view_colour}
         icon={StylingHelper.icon(:admin)}
         active={false}
-        url={~p"/teiserver/admin/matches/#{@match_id}"}
+        url={~p"/battle/#{@match_id}"}
       >
         Admin view
       </.section_menu_button>

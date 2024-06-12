@@ -78,10 +78,7 @@
             <td><%= match_id %></td>
             <td><%= format_number(count) %></td>
             <td>
-              <.link
-                navigate={~p"/teiserver/admin/matches/#{match_id}"}
-                class="btn btn-sm btn-secondary"
-              >
+              <.link navigate={~p"/battle/#{match_id}"} class="btn btn-sm btn-secondary">
                 <Fontawesome.icon icon={:show} style="solid" /> Show
               </.link>
             </td>

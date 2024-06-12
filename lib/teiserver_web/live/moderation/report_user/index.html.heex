@@ -73,7 +73,11 @@
           row_click={fn match -> "select-match-#{match.id}" end}
         >
           <:col :let={match} label="Match"><%= match.label %></:col>
-          <:col :let={match} label=""><%= match.time_ago %></:col>
+          <:col :let={match} label="Map"><%= match.map %></:col>
+          <:col :let={match} label="When?"><%= match.time_ago %></:col>
+          <:col :let={match} label="Match length">
+            <%= duration_to_str_short(match.game_duration) %>
+          </:col>
         </.table>
         If you cannot find the match here then you can submit the report without a match selected but it may mean we cannot find evidence and are thus unable to handle the report.
         <br /><br />
