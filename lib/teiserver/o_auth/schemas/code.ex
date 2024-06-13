@@ -10,7 +10,9 @@ defmodule Teiserver.OAuth.Code do
           application: OAuth.Application.t(),
           scopes: OAuth.Application.scopes(),
           expires_at: DateTime.t(),
-          redirect_uri: String.t() | nil
+          redirect_uri: String.t() | nil,
+          challenge: String.t() | nil,
+          challenge_method: :plain | :S256 | nil
         }
 
   schema "oauth_codes" do
@@ -20,6 +22,8 @@ defmodule Teiserver.OAuth.Code do
     field :scopes, {:array, :string}
     field :expires_at, :utc_datetime
     field :redirect_uri, :string
+    field :challenge, :string
+    field :challenge_method, Ecto.Enum, values: [:plain, :S256]
 
     timestamps()
   end
@@ -34,14 +38,18 @@ defmodule Teiserver.OAuth.Code do
       :application_id,
       :scopes,
       :expires_at,
-      :redirect_uri
+      :redirect_uri,
+      :challenge,
+      :challenge_method
     ])
     |> validate_required([
       :value,
       :owner_id,
       :application_id,
       :scopes,
-      :expires_at
+      :expires_at,
+      :challenge,
+      :challenge_method
     ])
     |> Ecto.Changeset.validate_subset(:scopes, OAuth.Application.allowed_scopes())
   end

@@ -27,33 +27,41 @@ defmodule Teiserver.OAuth do
   """
   @spec create_code(
           User.t() | T.userid(),
-          Application.t(),
-          %{redirect_uri: String.t()},
+          %{
+            id: integer(),
+            scopes: Application.scopes(),
+            redirect_uri: String.t(),
+            challenge: String.t(),
+            challenge_method: String.t()
+          },
           options()
         ) ::
           {:ok, Code.t()} | {:error, Ecto.Changeset.t()}
-  def create_code(user, application, params \\ %{}, opts \\ [])
+  def create_code(user, attrs, opts \\ [])
 
-  def create_code(%User{} = user, application, params, opts) do
-    create_code(user.id, application, params, opts)
+  def create_code(%User{} = user, attrs, opts) do
+    create_code(user.id, attrs, opts)
   end
 
-  def create_code(user, application, params, opts) when is_map(user) do
-    create_code(user.id, application, params, opts)
+  def create_code(user, attrs, opts) when is_map(user) do
+    create_code(user.id, attrs, opts)
   end
 
-  def create_code(user_id, application, params, opts) do
+  def create_code(user_id, attrs, opts) do
     now = Keyword.get(opts, :now, Timex.now())
 
-    attrs =
-      %{
-        value: Base.hex_encode32(:crypto.strong_rand_bytes(32)),
-        owner_id: user_id,
-        application_id: application.id,
-        scopes: application.scopes,
-        expires_at: Timex.add(now, Timex.Duration.from_minutes(5))
-      }
-      |> Map.put(:redirect_uri, Map.get(params, :redirect_uri))
+    # don't do any validation on the challenge yet, this is done when exchanging
+    # the code for a token
+    attrs = %{
+      value: Base.hex_encode32(:crypto.strong_rand_bytes(32)),
+      owner_id: user_id,
+      application_id: attrs.id,
+      scopes: attrs.scopes,
+      expires_at: Timex.add(now, Timex.Duration.from_minutes(5)),
+      redirect_uri: Map.get(attrs, :redirect_uri),
+      challenge: Map.get(attrs, :challenge),
+      challenge_method: Map.get(attrs, :challenge_method)
+    }
 
     %Code{}
     |> Code.changeset(attrs)
@@ -158,9 +166,9 @@ defmodule Teiserver.OAuth do
   Given an authorization code, creates and return an authentication token
   (and its associated refresh token).
   """
-  @spec exchange_code(Code.t(), String.t() | nil, options()) ::
+  @spec exchange_code(Code.t(), String.t(), String.t() | nil, options()) ::
           {:ok, Token.t()} | {:error, term()}
-  def exchange_code(code, redirect_uri \\ nil, opts \\ []) do
+  def exchange_code(code, verifier, redirect_uri \\ nil, opts \\ []) do
     now = Keyword.get(opts, :now, Timex.now())
 
     cond do
@@ -169,6 +177,9 @@ defmodule Teiserver.OAuth do
 
       code.redirect_uri != redirect_uri ->
         {:error, :redirect_uri_mismatch}
+
+      not code_verified?(code, verifier) ->
+        {:error, :code_verification_failed}
 
       true ->
         Repo.transaction(fn ->
@@ -180,6 +191,30 @@ defmodule Teiserver.OAuth do
           token
         end)
     end
+  end
+
+  @spec code_verified?(Code.t(), String.t()) :: boolean()
+  defp code_verified?(%Code{challenge_method: :plain, challenge: challenge}, verifier) do
+    valid_verifier?(verifier) and :crypto.hash_equals(challenge, verifier)
+  end
+
+  defp code_verified?(%Code{challenge_method: :S256, challenge: challenge}, verifier) do
+    with true <- valid_verifier?(verifier),
+         {:ok, challenge} <- Base.url_decode64(challenge, padding: false, ignore: :whitespace) do
+      hashed_verifier = :crypto.hash(:sha256, verifier)
+      :crypto.hash_equals(challenge, hashed_verifier)
+    else
+      _ ->
+        false
+    end
+  end
+
+  defp code_verified?(_, _), do: false
+
+  # A-Z, a-z, 0-9, and the punctuation characters -._~
+  defp valid_verifier?(verifier) do
+    s = byte_size(verifier)
+    43 <= s and s <= 128 and String.match?(verifier, ~r/[A-Za-z0-9\-._~]/)
   end
 
   @spec refresh_token(Token.t(), options()) :: {:ok, Token.t()} | {:error, term()}

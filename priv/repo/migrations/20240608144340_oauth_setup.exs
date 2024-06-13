@@ -20,6 +20,8 @@ defmodule Teiserver.Repo.Migrations.OauthSetup do
       add :scopes, {:array, :string}, null: false
       add :expires_at, :utc_datetime, null: false
       add :redirect_uri, :string
+      add :challenge, :string
+      add :challenge_method, :string
 
       timestamps(type: :utc_datetime)
     end
