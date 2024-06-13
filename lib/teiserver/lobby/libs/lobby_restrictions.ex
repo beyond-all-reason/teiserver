@@ -91,7 +91,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
       # Rating range
       max_rating_to_play < @rating_upper_bound ||
           min_rating_to_play > 0 ->
-        "Rating between: #{min_rating_to_play} - #{max_rating_to_play}"
+        "Rating: #{min_rating_to_play}-#{max_rating_to_play}"
 
       true ->
         nil
