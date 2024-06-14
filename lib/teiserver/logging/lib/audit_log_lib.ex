@@ -8,7 +8,7 @@ defmodule Teiserver.Logging.AuditLogLib do
   def colours(), do: :danger2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-archive"
+  def icon(), do: "fa-solid fa-archive"
 
   @spec add_audit_types([String.t()]) :: :ok
   def add_audit_types(types) do

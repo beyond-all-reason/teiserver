@@ -9,7 +9,7 @@ defmodule Teiserver.Logging.AggregateViewLogLib do
   def colours(), do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-chart-area"
+  def icon(), do: "fa-solid fa-chart-area"
 
   def get_logs() do
     from(logs in AggregateViewLog)

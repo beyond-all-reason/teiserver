@@ -3,7 +3,7 @@ defmodule Teiserver.Game.MappingReport do
   alias Teiserver.{Battle}
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-map"
+  def icon(), do: "fa-solid fa-map"
 
   @spec permissions() :: String.t()
   def permissions(), do: "Admin"
