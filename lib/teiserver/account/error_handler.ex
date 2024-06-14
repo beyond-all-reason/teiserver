@@ -6,7 +6,12 @@ defmodule Teiserver.Account.ErrorHandler do
   @impl Guardian.Plug.ErrorHandler
 
   def auth_error(conn, {:unauthenticated, _reason}, _opts) do
-    redirect_to = "#{conn.request_path}?#{conn.query_string}"
+    redirect_to =
+      if conn.query_string != nil && conn.query_string != "" do
+        "#{conn.request_path}?#{conn.query_string}"
+      else
+        "#{conn.request_path}"
+      end
 
     conn
     |> put_resp_cookie("_redirect_to", redirect_to, sign: true, max_age: 60 * 5)
