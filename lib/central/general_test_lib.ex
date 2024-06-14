@@ -32,7 +32,7 @@ defmodule Central.Helpers.GeneralTestLib do
         "name" => params["name"] || "Test",
         "email" => params["email"] || "email@email#{:rand.uniform(999_999_999_999)}",
         "colour" => params["colour"] || "#00AA00",
-        "icon" => params["icon"] || "fa-regular fa-user",
+        "icon" => params["icon"] || "fa-solid fa-user",
         "permissions" => permissions,
         "password" => params["password"] || "password",
         "password_confirmation" => params["password"] || "password",
