@@ -588,6 +588,12 @@ defmodule TeiserverWeb.Router do
     end
   end
 
+  scope "/oauth/", TeiserverWeb.OAuth do
+    pipe_through([:browser, :app_layout, :protected])
+    get("/authorize", AuthorizeController, :authorize)
+    post("/authorize", AuthorizeController, :generate_code)
+  end
+
   scope "/admin", TeiserverWeb.Admin do
     pipe_through([:live_browser, :protected])
 
