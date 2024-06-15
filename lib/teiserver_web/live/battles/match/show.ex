@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Battle.MatchLive.Show do
   @moduledoc false
   use TeiserverWeb, :live_view
-  alias Teiserver.{Battle, Game, Account, Telemetry}
+  alias Teiserver.{Battle, Game, Telemetry}
   alias Teiserver.Battle.{MatchLib, BalanceLib}
 
   @impl true
@@ -115,20 +115,22 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
             player_id_list
             |> Enum.filter(fn userid -> rating_logs[userid] != nil end)
             |> Enum.map(fn userid ->
-              %{userid => rating_logs[userid].value["rating_value"]}
+              %{userid => rating_logs[userid].value}
             end)
 
           {_party_id, player_id_list} ->
             player_id_list
             |> Enum.filter(fn userid -> rating_logs[userid] != nil end)
             |> Map.new(fn userid ->
-              {userid, rating_logs[userid].value["rating_value"]}
+              {userid, rating_logs[userid].value}
             end)
         end)
         |> List.flatten()
 
       past_balance =
-        BalanceLib.create_balance(groups, match.team_count, mode: :loser_picks)
+        BalanceLib.create_balance(groups, match.team_count,
+          algorithm: get_analysis_balance_algorithm()
+        )
         |> Map.put(:balance_mode, :grouped)
 
       # What about new balance?
@@ -223,7 +225,14 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       end)
       |> List.flatten()
 
-    BalanceLib.create_balance(groups, match.team_count, mode: :loser_picks)
+    BalanceLib.create_balance(groups, match.team_count,
+      algorithm: get_analysis_balance_algorithm()
+    )
     |> Map.put(:balance_mode, :grouped)
+  end
+
+  defp get_analysis_balance_algorithm() do
+    # TODO move this from config into a dropdown so it can be selected on this page
+    Application.get_env(:teiserver, Teiserver)[:analysis_balance_algorithm] || "loser_picks"
   end
 end
