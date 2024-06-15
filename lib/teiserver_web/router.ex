@@ -304,7 +304,6 @@ defmodule TeiserverWeb.Router do
       live "/:id/players", MatchLive.Show, :players
       live "/:id/ratings", MatchLive.Show, :ratings
       live "/:id/balance", MatchLive.Show, :balance
-      live "/:id/balance/:balancer", MatchLive.Show, :balance
       live "/:id/events", MatchLive.Show, :events
     end
   end

@@ -11,31 +11,24 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:site_menu_active, "match")
       |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
       |> assign(:tab, "details")
+      |> assign(
+        :balancer_options,
+        BalanceLib.get_allowed_algorithms(true)
+      )
+      |> assign(:balancer, BalanceLib.get_default_algorithm())
 
     {:ok, socket}
   end
 
   @impl true
-  def handle_params(params, _url, socket) do
-    id = Map.get(params, "id")
-    default_balancer = BalanceLib.get_default_algorithm()
-    balancer = Map.get(params, "balancer", default_balancer)
+  def handle_params(%{"id" => id} = params, _url, socket) do
+    socket =
+      socket
+      |> assign(:id, String.to_integer(id))
+      |> get_match()
+      |> assign(:tab, socket.assigns.live_action)
 
-    if(!BalanceLib.is_valid_algorithm?(balancer)) do
-      {:noreply,
-       socket
-       |> put_flash(:error, "#{balancer} is not a valid balancer")
-       |> push_patch(to: "/battle/#{id}/balance/#{default_balancer}")}
-    else
-      socket =
-        socket
-        |> assign(:id, String.to_integer(id))
-        |> assign(:balancer, balancer)
-        |> get_match()
-        |> assign(:tab, socket.assigns.live_action)
-
-      {:noreply, apply_action(socket, socket.assigns.live_action, params)}
-    end
+    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
   defp apply_action(%{assigns: %{match_name: match_name}} = socket, :overview, _params) do
@@ -195,7 +188,6 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:new_balance, new_balance)
       |> assign(:events_by_type, events_by_type)
       |> assign(:events_by_team_and_type, events_by_team_and_type)
-      |> assign(:balancer, balancer)
     else
       socket
       |> assign(:match, nil)
@@ -207,7 +199,6 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:new_balance, %{})
       |> assign(:events_by_type, %{})
       |> assign(:events_by_team_and_type, %{})
-      |> assign(:balancer, balancer)
     end
   end
 
@@ -239,5 +230,19 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
 
     BalanceLib.create_balance(groups, match.team_count, algorithm: balancer)
     |> Map.put(:balance_mode, :grouped)
+  end
+
+  @doc """
+  Handles the dropdown for balancer changing
+  """
+  @impl true
+  def handle_event("update-balancer", event, socket) do
+    [key] = event["_target"]
+    value = event[key]
+
+    {:noreply,
+     socket
+     |> assign(:balancer, value)
+     |> get_match()}
   end
 end

@@ -60,6 +60,7 @@ defmodule Teiserver.Battle.BalanceLib do
   @doc """
   Teifion only allowed force_party to be used by mods because it led to noob-stomping unbalanced teams
   """
+  @spec get_allowed_algorithms(boolean()) :: [String.t()]
   def get_allowed_algorithms(is_moderator) do
     if(is_moderator) do
       Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
@@ -179,16 +180,6 @@ defmodule Teiserver.Battle.BalanceLib do
     |> calculate_balance_stats
     |> cleanup_result
     |> Map.put(:time_taken, System.system_time(:microsecond) - start_time)
-  end
-
-  def is_valid_algorithm?(algo_name) do
-    case algorithm_modules()[algo_name] do
-      nil ->
-        false
-
-      _ ->
-        true
-    end
   end
 
   @doc """

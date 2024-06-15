@@ -42,7 +42,7 @@
       <% end %>
 
       <%= if @rating_logs != %{} and allow?(@current_user, "Overwatch") do %>
-        <.tab_nav url={~p"/battle/#{@match.id}/balance/loser_picks"} selected={@tab == :balance}>
+        <.tab_nav url={~p"/battle/#{@match.id}/balance"} selected={@tab == :balance}>
           <Fontawesome.icon icon="fa-solid fa-scale-balanced" style="solid" /> Balance
         </.tab_nav>
       <% end %>
@@ -284,7 +284,18 @@
 
     <%= if allow?(@current_user, "Overwatch") do %>
       <div :if={@tab == :balance} class="p-4">
-        <p>Balancer: <%= @balancer %></p>
+         <form method="post" class="">
+           <.input
+            type="select"
+            label="Balancer"
+            options={@balancer_options}
+            name="balancer"
+            value={@balancer}
+            phx-change="update-balancer"
+           />
+          </form>
+        <br />
+
         <h4>Based on data at the time</h4>
 
         <table class="table">
