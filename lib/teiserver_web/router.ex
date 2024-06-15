@@ -598,7 +598,7 @@ defmodule TeiserverWeb.Router do
   # but I'd rather have all of the oauth stuff contained
   scope "/oauth/", TeiserverWeb.OAuth do
     pipe_through(:api)
-    get("/token", CodeController, :exchange_code)
+    post("/token", CodeController, :exchange_code)
   end
 
   scope "/admin", TeiserverWeb.Admin do
