@@ -21,6 +21,62 @@ defmodule Teiserver.OAuth do
   @type option :: {:now, DateTime.t()}
   @type options :: [option]
 
+  @spec get_application_by_uid(Application.app_id()) :: Application.t() | nil
+  defdelegate get_application_by_uid(uid), to: ApplicationQueries
+
+  @doc """
+  Given an application and a potential encoded redirect_uri, decode the uri
+  and validate it against the registered redirect uris for the application.
+  """
+  @spec get_redirect_uri(Application.t(), String.t()) :: {:ok, URI.t()} | {:error, term()}
+  def get_redirect_uri(app, encoded_uri) do
+    parsed = encoded_uri |> URI.decode_www_form() |> URI.parse()
+
+    # https://www.rfc-editor.org/rfc/rfc6749.html#section-3.1.2
+    cond do
+      not is_nil(parsed.fragment) -> {:error, "Fragment must not be included"}
+      Enum.any?(app.redirect_uris, fn app_uri -> equal_uri?(app_uri, parsed) end) -> {:ok, parsed}
+      true -> {:error, "No matching redirect uri found"}
+    end
+  end
+
+  # Compares two uris, but only the scheme, host and path.
+  # Redirect URI for oauth application shouldn't have query string, and the client
+  # can add some which must be preserved.
+  # If the host is localhost, either "localhost", the ipv4 or ipv6 notations are allowed
+  # If the host is localhost, the port isn't compared since client have the freedom
+  # of choosing it (usually it's whatever they can bind).
+  defp equal_uri?(%URI{} = uri1, %URI{} = uri2) do
+    cond do
+      uri1.scheme != uri2.scheme || uri1.path != uri2.path ->
+        false
+
+      localhost?(uri1) and localhost?(uri2) ->
+        true
+
+      not localhost?(uri1) and not localhost?(uri2) ->
+        uri1.host == uri2.host && uri1.port == uri2.port
+
+      # one is localhost while the other isn't
+      true ->
+        false
+    end
+  end
+
+  defp equal_uri?(uri1, uri2) do
+    equal_uri?(URI.parse(uri1), uri2)
+  end
+
+  # https://www.rfc-editor.org/rfc/rfc8252#section-7.3
+  # although `localhost` is not recommended, it is allowed, see:
+  # and https://www.rfc-editor.org/rfc/rfc8252#section-8.3
+  defp localhost?(%URI{} = uri), do: localhost?(uri.host)
+  defp localhost?("localhost"), do: true
+  defp localhost?("127.0.0.1"), do: true
+  defp localhost?("::1"), do: true
+  defp localhost?("0:0:0:0:0:0:0:1"), do: true
+  defp localhost?(_), do: false
+
   @doc """
   Create an authorization token for the given user and application.
   The token scopes are the same as the application
@@ -244,9 +300,6 @@ defmodule Teiserver.OAuth do
       end)
     end
   end
-
-  @spec get_application_by_uid(Application.app_id()) :: Application.t() | nil
-  defdelegate get_application_by_uid(uid), to: ApplicationQueries
 
   defp expired?(obj, now) do
     Timex.after?(now, Map.fetch!(obj, :expires_at))
