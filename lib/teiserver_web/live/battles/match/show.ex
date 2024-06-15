@@ -16,14 +16,26 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   end
 
   @impl true
-  def handle_params(%{"id" => id} = params, _url, socket) do
-    socket =
-      socket
-      |> assign(:id, String.to_integer(id))
-      |> get_match()
-      |> assign(:tab, socket.assigns.live_action)
+  def handle_params(params, _url, socket) do
+    id = Map.get(params, "id")
+    default_balancer = BalanceLib.get_default_algorithm()
+    balancer = Map.get(params, "balancer", default_balancer)
 
-    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+    if(!BalanceLib.is_valid_algorithm?(balancer)) do
+      {:noreply,
+       socket
+       |> put_flash(:error, "#{balancer} is not a valid balancer")
+       |> push_patch(to: "/battle/#{id}/balance/#{default_balancer}")}
+    else
+      socket =
+        socket
+        |> assign(:id, String.to_integer(id))
+        |> assign(:balancer, balancer)
+        |> get_match()
+        |> assign(:tab, socket.assigns.live_action)
+
+      {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+    end
   end
 
   defp apply_action(%{assigns: %{match_name: match_name}} = socket, :overview, _params) do
@@ -59,7 +71,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   #   {:noreply, assign(socket, :tab, tab)}
   # end
 
-  defp get_match(%{assigns: %{id: id, current_user: _current_user}} = socket) do
+  defp get_match(%{assigns: %{id: id, balancer: balancer, current_user: _current_user}} = socket) do
     if connected?(socket) do
       match =
         Battle.get_match!(id,
@@ -128,13 +140,11 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         |> List.flatten()
 
       past_balance =
-        BalanceLib.create_balance(groups, match.team_count,
-          algorithm: get_analysis_balance_algorithm()
-        )
+        BalanceLib.create_balance(groups, match.team_count, algorithm: balancer)
         |> Map.put(:balance_mode, :grouped)
 
       # What about new balance?
-      new_balance = generate_new_balance_data(match)
+      new_balance = generate_new_balance_data(match, balancer)
 
       raw_events =
         Telemetry.list_simple_match_events(where: [match_id: match.id], preload: [:event_types])
@@ -185,6 +195,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:new_balance, new_balance)
       |> assign(:events_by_type, events_by_type)
       |> assign(:events_by_team_and_type, events_by_team_and_type)
+      |> assign(:balancer, balancer)
     else
       socket
       |> assign(:match, nil)
@@ -196,10 +207,11 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:new_balance, %{})
       |> assign(:events_by_type, %{})
       |> assign(:events_by_team_and_type, %{})
+      |> assign(:balancer, balancer)
     end
   end
 
-  defp generate_new_balance_data(match) do
+  defp generate_new_balance_data(match, balancer) do
     rating_type = MatchLib.game_type(match.team_size, match.team_count)
 
     partied_players =
@@ -225,14 +237,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       end)
       |> List.flatten()
 
-    BalanceLib.create_balance(groups, match.team_count,
-      algorithm: get_analysis_balance_algorithm()
-    )
+    BalanceLib.create_balance(groups, match.team_count, algorithm: balancer)
     |> Map.put(:balance_mode, :grouped)
-  end
-
-  defp get_analysis_balance_algorithm() do
-    # TODO move this from config into a dropdown so it can be selected on this page
-    Application.get_env(:teiserver, Teiserver)[:analysis_balance_algorithm] || "loser_picks"
   end
 end

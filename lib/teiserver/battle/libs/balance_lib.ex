@@ -42,7 +42,7 @@ defmodule Teiserver.Battle.BalanceLib do
     }
   end
 
-  defp get_default_algorithm() do
+  def get_default_algorithm() do
     # For now it's a constant but this could be moved to a configurable value
     @default_balance_algorithm
   end
@@ -179,6 +179,16 @@ defmodule Teiserver.Battle.BalanceLib do
     |> calculate_balance_stats
     |> cleanup_result
     |> Map.put(:time_taken, System.system_time(:microsecond) - start_time)
+  end
+
+  def is_valid_algorithm?(algo_name) do
+    case algorithm_modules()[algo_name] do
+      nil ->
+        false
+
+      _ ->
+        true
+    end
   end
 
   @doc """
