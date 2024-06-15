@@ -3,35 +3,56 @@ defmodule TeiserverWeb.OAuth.CodeController do
   alias Teiserver.OAuth
 
   # https://www.rfc-editor.org/rfc/rfc6749.html#section-4.1.3
-  @spec exchange_code(Conn.t(), %{}) :: Conn.t()
+  @spec token(Conn.t(), %{}) :: Conn.t()
 
-  def exchange_code(conn, %{"grant_type" => grant_type})
-      when grant_type != "authorization_code" do
-    conn
-    |> put_status(400)
-    |> render(:error, error_description: "grant_type must be authorization_code")
-  end
-
-  def exchange_code(conn, params) do
+  def token(conn, %{"grant_type" => "authorization_code"} = params) do
     case Enum.find(
            ["client_id", "code", "redirect_uri", "client_id", "code_verifier", "grant_type"],
            fn key -> not Map.has_key?(params, key) end
          ) do
       nil ->
-        do_exchange_token(conn, params)
+        exchange_token(conn, params)
 
       missing_key ->
         conn |> put_status(400) |> render(:error, error_description: "missing #{missing_key}")
     end
   end
 
-  defp do_exchange_token(conn, params) do
+  def token(conn, %{"grant_type" => "refresh_token"} = params) do
+    case Enum.find(
+           ["grant_type", "refresh_token", "client_id"],
+           fn key -> not Map.has_key?(params, key) end
+         ) do
+      nil ->
+        refresh_token(conn, params)
+
+      missing_key ->
+        conn |> put_status(400) |> render(:error, error_description: "missing #{missing_key}")
+    end
+  end
+
+  def token(conn, _params) do
+    conn |> put_status(400) |> render(:error, error_description: "invalid authorization_code")
+  end
+
+  defp exchange_token(conn, params) do
     with app when app != nil <- OAuth.get_application_by_uid(params["client_id"]),
          {:ok, code} <- OAuth.get_valid_code(params["code"]),
          true <- code.application_id == app.id,
          {:ok, token} <-
            OAuth.exchange_code(code, params["code_verifier"], params["redirect_uri"]) do
       conn |> put_status(200) |> render(:token, token: token)
+    else
+      _ -> conn |> put_status(400) |> render(:error, error_description: "invalid request")
+    end
+  end
+
+  defp refresh_token(conn, params) do
+    with app when app != nil <- OAuth.get_application_by_uid(params["client_id"]),
+         {:ok, token} <- OAuth.get_valid_token(params["refresh_token"]),
+         true <- token.application_id == app.id,
+         {:ok, new_token} <- OAuth.refresh_token(token) do
+      conn |> put_status(200) |> render(:token, token: new_token)
     else
       _ -> conn |> put_status(400) |> render(:error, error_description: "invalid request")
     end
