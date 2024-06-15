@@ -594,6 +594,13 @@ defmodule TeiserverWeb.Router do
     post("/authorize", AuthorizeController, :generate_code)
   end
 
+  # it's slightly weird to mix html and json api endpoints under the same prefix
+  # but I'd rather have all of the oauth stuff contained
+  scope "/oauth/", TeiserverWeb.OAuth do
+    pipe_through(:api)
+    post("/token", CodeController, :exchange_code)
+  end
+
   scope "/admin", TeiserverWeb.Admin do
     pipe_through([:live_browser, :protected])
 
