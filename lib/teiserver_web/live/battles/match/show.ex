@@ -54,8 +54,10 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   end
 
   defp apply_action(%{assigns: %{match_name: match_name}} = socket, :balance, _params) do
+    # Restrict the balance tab to certain roles.
+    # Note that Staff roles like "Tester" also contain Contributor role.
     socket
-    |> mount_require_any(["Reviewer"])
+    |> mount_require_any(["Reviewer", "Contributor"])
     |> assign(:page_title, "#{match_name} - Balance")
   end
 

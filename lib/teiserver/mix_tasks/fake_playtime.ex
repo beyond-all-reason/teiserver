@@ -36,16 +36,8 @@ defmodule Mix.Tasks.Teiserver.FakePlaytime do
     # Now recalculate ranks
     # This calc would usually be done in do_login
     rank = CacheUser.calculate_rank(user_id)
-    user = Teiserver.Account.UserCacheLib.get_user_by_id(user_id)
 
-    user = %{
-      user
-      | rank: rank
-    }
-
-    CacheUser.update_user(user, true)
-
-    Account.update_user_stat(user.id, %{
+    Account.update_user_stat(user_id, %{
       rank: rank
     })
   end

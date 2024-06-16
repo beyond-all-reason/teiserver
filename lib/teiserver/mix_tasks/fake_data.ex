@@ -96,7 +96,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
             name: generate_throwaway_name() |> String.replace(" ", ""),
             email: UUID.uuid1(),
             password: root_user.password,
-            permissions: ["admin.dev.developer"],
+            permissions: [],
             icon: "fa-solid #{StylingHelper.random_icon()}",
             colour: StylingHelper.random_colour(),
             trust_score: 10_000,
