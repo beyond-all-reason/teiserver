@@ -31,8 +31,21 @@ defmodule TeiserverWeb.OAuth.CodeController do
     end
   end
 
+  def token(conn, %{"grant_type" => "client_credentials"} = params) do
+    case Enum.find(
+           ["grant_type", "client_id", "client_secret"],
+           fn key -> not Map.has_key?(params, key) end
+         ) do
+      nil ->
+        get_token_from_credentials(conn, params)
+
+      missing_key ->
+        conn |> put_status(400) |> render(:error, error_description: "missing #{missing_key}")
+    end
+  end
+
   def token(conn, _params) do
-    conn |> put_status(400) |> render(:error, error_description: "invalid authorization_code")
+    conn |> put_status(400) |> render(:error, error_description: "invalid grant_type")
   end
 
   defp exchange_token(conn, params) do
@@ -53,6 +66,15 @@ defmodule TeiserverWeb.OAuth.CodeController do
          true <- token.application_id == app.id,
          {:ok, new_token} <- OAuth.refresh_token(token) do
       conn |> put_status(200) |> render(:token, token: new_token)
+    else
+      _ -> conn |> put_status(400) |> render(:error, error_description: "invalid request")
+    end
+  end
+
+  defp get_token_from_credentials(conn, params) do
+    with {:ok, cred} <- OAuth.get_valid_credentials(params["client_id"], params["client_secret"]),
+         {:ok, token} <- OAuth.get_token_from_credentials(cred) do
+      conn |> put_status(200) |> render(:token, token: token)
     else
       _ -> conn |> put_status(400) |> render(:error, error_description: "invalid request")
     end
