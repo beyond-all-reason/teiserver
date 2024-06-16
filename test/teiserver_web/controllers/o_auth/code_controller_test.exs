@@ -150,6 +150,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
         client_id: credential.client_id,
         client_secret: "definitely-not-the-correct-secret"
       }
+
       resp = post(conn, ~p"/oauth/token", data)
       json_response(resp, 400)
     end
@@ -199,6 +200,27 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
 
       resp = post(conn, ~p"/oauth/token", data)
       assert %{"error" => "invalid_request"} = json_response(resp, 400)
+    end
+  end
+
+  describe "medatata endpoint" do
+    setup :setup_conn
+
+    test "can query oauth metadata", %{conn: conn} do
+      resp = json_response(get(conn, ~p"/.well-known/oauth-authorization-server"), 200)
+
+      assert resp == %{
+               "issuer" => "https://beyondallreason.info",
+               "authorization_endpoint" => "https://beyondallreason.info/oauth/authorize",
+               "token_endpoint" => "https://beyondallreason.info/oauth/token",
+               "token_endpoint_auth_methods_supported" => ["none", "client_secret_post"],
+               "grant_types_supported" => [
+                 "authorization_code",
+                 "refresh_token",
+                 "client_credentials"
+               ],
+               "code_challenge_methods_supported" => ["S256"]
+             }
     end
   end
 end
