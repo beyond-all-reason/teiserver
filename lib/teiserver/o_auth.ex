@@ -177,29 +177,35 @@ defmodule Teiserver.OAuth do
   end
 
   def create_token(user_id, application, opts) do
+    do_create_token(%{owner_id: user_id}, application, opts)
+  end
+
+  defp do_create_token(owner_attr, application, opts \\ []) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
 
-    refresh_attrs = %{
-      value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
-      owner_id: user_id,
-      application_id: application.id,
-      scopes: application.scopes,
-      # there's no real recourse when the refresh token expires and it's
-      # quite annoying, so make it "never" expire.
-      expires_at: Timex.add(now, Timex.Duration.from_days(365 * 100)),
-      type: :refresh,
-      refresh_token: nil
-    }
+    refresh_attrs =
+      %{
+        value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
+        application_id: application.id,
+        scopes: application.scopes,
+        # there's no real recourse when the refresh token expires and it's
+        # quite annoying, so make it "never" expire.
+        expires_at: Timex.add(now, Timex.Duration.from_days(365 * 100)),
+        type: :refresh,
+        refresh_token: nil
+      }
+      |> Map.merge(owner_attr)
 
-    token_attrs = %{
-      value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
-      owner_id: user_id,
-      application_id: application.id,
-      scopes: application.scopes,
-      expires_at: Timex.add(now, Timex.Duration.from_minutes(30)),
-      type: :bearer,
-      refresh_token: refresh_attrs
-    }
+    token_attrs =
+      %{
+        value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
+        application_id: application.id,
+        scopes: application.scopes,
+        expires_at: Timex.add(now, Timex.Duration.from_minutes(30)),
+        type: :access,
+        refresh_token: refresh_attrs
+      }
+      |> Map.merge(owner_attr)
 
     %Token{}
     |> Token.changeset(token_attrs)
@@ -338,9 +344,15 @@ defmodule Teiserver.OAuth do
       hashed_secret: Argon2.hash_pwd_salt(secret)
     }
 
-    %Credential{}
-    |> Credential.changeset(attrs)
-    |> Repo.insert()
+    result =
+      %Credential{}
+      |> Credential.changeset(attrs)
+      |> Repo.insert()
+
+    case result do
+      {:ok, cred} -> {:ok, Repo.preload(cred, :application)}
+      err -> err
+    end
   end
 
   @doc """
@@ -363,6 +375,11 @@ defmodule Teiserver.OAuth do
           {:error, :invalid_password}
         end
     end
+  end
+
+  @spec get_token_from_credentials(Credential.t()) :: {:ok, Token.t()} | {:error, term()}
+  def get_token_from_credentials(credential) do
+    do_create_token(%{autohost_id: credential.autohost_id}, credential.application)
   end
 
   defp expired?(obj, now) do

@@ -22,6 +22,7 @@ defmodule Teiserver.OAuth.Token do
     field :expires_at, :utc_datetime
     field :type, Ecto.Enum, values: [:access, :refresh]
     belongs_to :refresh_token, __MODULE__
+    belongs_to :autohost, Teiserver.Autohost.Autohost
 
     timestamps()
   end
@@ -30,7 +31,7 @@ defmodule Teiserver.OAuth.Token do
     attrs = attrs |> uniq_lists(~w(scopes)a)
 
     token
-    |> cast(attrs, [:value, :owner_id, :application_id, :scopes, :expires_at, :type])
+    |> cast(attrs, [:value, :owner_id, :application_id, :scopes, :expires_at, :type, :autohost_id])
     |> cast_assoc(:refresh_token)
     |> validate_required([:value, :application_id, :scopes, :expires_at, :type])
     |> Ecto.Changeset.validate_subset(:scopes, OAuth.Application.allowed_scopes())
