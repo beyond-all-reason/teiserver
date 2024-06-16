@@ -601,6 +601,12 @@ defmodule TeiserverWeb.Router do
     post("/token", CodeController, :token)
   end
 
+  scope "/", TeiserverWeb.OAuth do
+    pipe_through(:api)
+    # https://datatracker.ietf.org/doc/html/rfc8414
+    get("/.well-known/oauth-authorization-server", CodeController, :metadata)
+  end
+
   scope "/admin", TeiserverWeb.Admin do
     pipe_through([:live_browser, :protected])
 

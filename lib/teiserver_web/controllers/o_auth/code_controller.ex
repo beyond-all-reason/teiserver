@@ -79,4 +79,8 @@ defmodule TeiserverWeb.OAuth.CodeController do
       _ -> conn |> put_status(400) |> render(:error, error_description: "invalid request")
     end
   end
+
+  def metadata(conn, _params) do
+    conn |> put_status(200) |> render(:metadata)
+  end
 end
