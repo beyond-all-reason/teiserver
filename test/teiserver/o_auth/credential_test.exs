@@ -33,4 +33,14 @@ defmodule Teiserver.OAuth.CredentialTest do
     # sanity check to make sure we're not storing cleartext password
     refute cred.hashed_secret =~ "very-secret"
   end
+
+  test "can get a token from credentials", %{app: app, autohost: autohost} do
+    assert {:ok, created_cred} =
+             OAuth.create_credentials(app, autohost, "some-client-id", "very-secret")
+
+    assert {:ok, token} = OAuth.get_token_from_credentials(created_cred)
+    assert token.application_id == app.id
+    assert token.owner_id == nil
+    assert token.autohost_id == autohost.id
+  end
 end
