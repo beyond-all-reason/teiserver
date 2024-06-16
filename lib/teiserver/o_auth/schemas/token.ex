@@ -16,7 +16,7 @@ defmodule Teiserver.OAuth.Token do
 
   schema "oauth_tokens" do
     field :value, :string
-    belongs_to :owner, Teiserver.Account.User, primary_key: true
+    belongs_to :owner, Teiserver.Account.User
     belongs_to :application, OAuth.Application, primary_key: true
     field :scopes, {:array, :string}
     field :expires_at, :utc_datetime
@@ -32,7 +32,7 @@ defmodule Teiserver.OAuth.Token do
     token
     |> cast(attrs, [:value, :owner_id, :application_id, :scopes, :expires_at, :type])
     |> cast_assoc(:refresh_token)
-    |> validate_required([:value, :owner_id, :application_id, :scopes, :expires_at, :type])
+    |> validate_required([:value, :application_id, :scopes, :expires_at, :type])
     |> Ecto.Changeset.validate_subset(:scopes, OAuth.Application.allowed_scopes())
   end
 end
