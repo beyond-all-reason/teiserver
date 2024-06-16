@@ -25,6 +25,7 @@ defmodule Teiserver.Repo.Migrations.OauthSetup do
 
       timestamps(type: :utc_datetime)
     end
+
     create_if_not_exists unique_index(:oauth_codes, [:value])
 
     create_if_not_exists table(:oauth_tokens, comment: "auth tokens and refresh") do
@@ -39,7 +40,18 @@ defmodule Teiserver.Repo.Migrations.OauthSetup do
 
       timestamps(type: :utc_datetime)
     end
+
     create_if_not_exists unique_index(:oauth_tokens, [:value])
 
+    create_if_not_exists table(:oauth_credentials, comment: "for client_credentials flow") do
+      add :application_id, references(:oauth_applications, on_delete: :delete_all), null: false
+      add :autohost_id, references(:teiserver_autohosts, on_delete: :delete_all), null: false
+      add :client_id, :string, null: false
+      add :hashed_secret, :binary, null: false
+
+      timestamps(type: :utc_datetime)
+    end
+
+    create_if_not_exists unique_index(:oauth_credentials, [:client_id])
   end
 end

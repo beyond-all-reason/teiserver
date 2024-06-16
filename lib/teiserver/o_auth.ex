@@ -1,6 +1,19 @@
 defmodule Teiserver.OAuth do
   alias Teiserver.Repo
-  alias Teiserver.OAuth.{Application, Code, Token, ApplicationQueries, CodeQueries, TokenQueries}
+
+  alias Teiserver.Autohost.Autohost
+
+  alias Teiserver.OAuth.{
+    Application,
+    Code,
+    Token,
+    Credential,
+    ApplicationQueries,
+    CodeQueries,
+    TokenQueries,
+    CredentialQueries
+  }
+
   alias Teiserver.Account.User
   alias Teiserver.Data.Types, as: T
 
@@ -298,6 +311,57 @@ defmodule Teiserver.OAuth do
         TokenQueries.delete_refresh_token(token)
         new_token
       end)
+    end
+  end
+
+  @doc """
+  Given a client_id, an application/app_id an autohost/id and a cleartext secret, hash and persist it
+  """
+  @spec create_credentials(
+          Application.t() | Application.app_id(),
+          Autohost.t() | Autohost.id(),
+          String.t(),
+          String.t()
+        ) ::
+          {:ok, Secret.t()} | {:error, term()}
+  def create_credentials(%Application{} = app, autohost, client_id, secret),
+    do: create_credentials(app.id, autohost, client_id, secret)
+
+  def create_credentials(app_id, %Autohost{} = autohost, client_id, secret),
+    do: create_credentials(app_id, autohost.id, client_id, secret)
+
+  def create_credentials(app_id, autohost_id, client_id, secret) do
+    attrs = %{
+      application_id: app_id,
+      autohost_id: autohost_id,
+      client_id: client_id,
+      hashed_secret: Argon2.hash_pwd_salt(secret)
+    }
+
+    %Credential{}
+    |> Credential.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Given a client_id and a cleartext secret, check the secret matches and returns the credentials
+  """
+  @spec get_valid_credentials(String.t(), String.t()) ::
+          {:ok, Credential.t()} | {:error, term()}
+  def get_valid_credentials(client_id, secret) do
+    case CredentialQueries.get_credential(client_id) do
+      nil ->
+        # Treat client_id as "secret" so force a fake computation to avoid
+        # timing attack
+        Argon2.no_user_verify()
+        {:error, :invalid_client_id}
+
+      credential ->
+        if Argon2.verify_pass(secret, credential.hashed_secret) do
+          {:ok, credential}
+        else
+          {:error, :invalid_password}
+        end
     end
   end
 
