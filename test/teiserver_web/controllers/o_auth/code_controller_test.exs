@@ -38,6 +38,17 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
     %{code: code, code_attrs: attrs}
   end
 
+  defp setup_autohost(_context) do
+    {:ok, autohost} = Teiserver.Autohost.create_autohost(%{name: "testing_autohost"})
+    %{autohost: autohost}
+  end
+
+  defp setup_credential(%{autohost: autohost, app: app}) do
+    secret = "very-much-secret"
+    {:ok, cred} = OAuth.create_credentials(app, autohost, "cred-client-id", secret)
+    %{credential: cred, credential_secret: secret}
+  end
+
   defp setup_token(context) do
     {:ok, token} = OAuth.create_token(context[:user], context[:app])
     %{token: token}
@@ -109,6 +120,39 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
 
     # Note: verifier code and redirect URI matching is tested in OAuth.exchange_code
     # so they are omitted here
+  end
+
+  describe "get token from client credentials" do
+    setup [:setup_conn, :setup_app, :setup_autohost, :setup_credential]
+
+    test "it works with the right params", %{
+      conn: conn,
+      credential: credential,
+      credential_secret: secret
+    } do
+      data = %{
+        grant_type: "client_credentials",
+        client_id: credential.client_id,
+        client_secret: secret
+      }
+
+      resp = post(conn, ~p"/oauth/token", data)
+      json_resp = json_response(resp, 200)
+      assert is_binary(json_resp["access_token"]), "has access_token"
+      assert is_integer(json_resp["expires_in"]), "has expires_in"
+      assert is_binary(json_resp["refresh_token"]), "has refresh_token"
+      assert json_resp["token_type"] == "Bearer", "bearer token type"
+    end
+
+    test "must provide correct secret", %{conn: conn, credential: credential} do
+      data = %{
+        grant_type: "client_credentials",
+        client_id: credential.client_id,
+        client_secret: "definitely-not-the-correct-secret"
+      }
+      resp = post(conn, ~p"/oauth/token", data)
+      json_response(resp, 400)
+    end
   end
 
   describe "refresh token" do
