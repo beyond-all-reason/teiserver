@@ -16,6 +16,21 @@ defmodule Teiserver.OAuth.TokenTest do
     {:ok, user: user, app: app}
   end
 
+  test "token must have an owner", %{app: app} do
+    assert {:error, _} =
+             Teiserver.OAuth.Token.changeset(%Teiserver.OAuth.Token{}, %{
+               value: "coucou",
+               application_id: app.id,
+               scopes: ["tachyon.lobby"],
+               expires_at: DateTime.utc_now(),
+               type: :access
+             })
+             |> Ecto.Changeset.check_constraint(:oauth_tokens,
+               name: :token_must_have_exactly_one_owner
+             )
+             |> Teiserver.Repo.insert()
+  end
+
   test "can create a token directly", %{user: user, app: app} do
     assert {:ok, token} = OAuth.create_token(user, app)
     assert token.type == :access
@@ -44,6 +59,7 @@ defmodule Teiserver.OAuth.TokenTest do
 
   test "can refresh a token", %{user: user, app: app} do
     assert {:ok, token} = OAuth.create_token(user, app)
+    assert {:ok, _} = OAuth.get_valid_token(token.refresh_token.value)
     assert {:ok, new_token} = OAuth.refresh_token(token.refresh_token)
 
     # the previous token and its refresh token should have been invalidated
