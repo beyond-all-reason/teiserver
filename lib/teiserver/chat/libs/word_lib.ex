@@ -82,6 +82,7 @@ defmodule Teiserver.Chat.WordLib do
       String.contains?(name, "[lm]") -> true
       String.contains?(name, "[ts]") -> true
       String.contains?(name, "[tei]") -> true
+      String.contains?(name, "Host[") -> true
       true -> false
     end
   end
