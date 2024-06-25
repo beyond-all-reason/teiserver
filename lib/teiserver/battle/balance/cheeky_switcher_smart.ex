@@ -20,6 +20,7 @@ defmodule Teiserver.Battle.Balance.CheekySwitcherSmart do
   # Alias the types
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
+  import Teiserver.Helper.NumberHelper, only: [format: 1]
 
   # @type algorithm_state :: %{
   #   teams: map,
@@ -158,7 +159,7 @@ defmodule Teiserver.Battle.Balance.CheekySwitcherSmart do
             |> Enum.map(fn {group, _} ->
               group.names
               |> Enum.with_index()
-              |> Enum.map(fn {name, i} -> "#{name}[#{Enum.at(group.ratings, i)}]" end)
+              |> Enum.map(fn {name, i} -> "#{name}[#{format(Enum.at(group.ratings, i))}]" end)
             end)
             |> List.flatten()
             |> Enum.join(",")
@@ -168,7 +169,7 @@ defmodule Teiserver.Battle.Balance.CheekySwitcherSmart do
             |> Enum.map(fn {group, _} ->
               group.names
               |> Enum.with_index()
-              |> Enum.map(fn {name, i} -> "#{name}[#{Enum.at(group.ratings, i)}]" end)
+              |> Enum.map(fn {name, i} -> "#{name}[#{format(Enum.at(group.ratings, i))}]" end)
             end)
             |> List.flatten()
             |> Enum.join(",")
@@ -429,11 +430,11 @@ defmodule Teiserver.Battle.Balance.CheekySwitcherSmart do
 
     if next_group.count > 1 do
       [
-        "Group picked #{names |> Enum.join(", ")} for team #{team_key}, adding #{group_rating} points for a new total of #{round(existing_team_rating + group_rating)}"
+        "Group picked #{names |> Enum.join(", ")} for team #{team_key}, adding #{format(group_rating)} points for a new total of #{round(existing_team_rating + group_rating)}"
       ]
     else
       [
-        "Picked #{Enum.at(names, 0)} for team #{team_key}, adding #{group_rating} points for a new total of #{round(existing_team_rating + group_rating)}"
+        "Picked #{Enum.at(names, 0)} for team #{team_key}, adding #{format(group_rating)} points for a new total of #{round(existing_team_rating + group_rating)}"
       ]
     end
   end

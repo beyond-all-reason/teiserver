@@ -18,6 +18,7 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
   """
   alias Teiserver.Battle.Balance.SplitOneChevsTypes, as: ST
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
+  import Teiserver.Helper.NumberHelper, only: [format: 1]
 
   @splitter "---------------------------"
 
@@ -26,10 +27,34 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
   See split_one_chevs_internal_test.exs for sample input
   """
   @spec perform([BT.expanded_group()], non_neg_integer(), list()) :: any()
-  def perform(expanded_group, team_count, _opts \\ []) do
-    members = flatten_members(expanded_group) |> sort_members()
-    %{teams: teams, logs: logs} = assign_teams(members, team_count)
-    standardise_result(teams, logs)
+  def perform(expanded_group, team_count, opts \\ []) do
+    if has_enough_noobs?(expanded_group) do
+      members = flatten_members(expanded_group) |> sort_members()
+      %{teams: teams, logs: logs} = assign_teams(members, team_count)
+      standardise_result(teams, logs)
+    else
+      # Not enough noobs; so call another balancer
+      result = Teiserver.Battle.Balance.LoserPicks.perform(expanded_group, team_count, opts)
+
+      new_logs =
+        ["Not enough noobs; calling another balancer.", @splitter, result.logs]
+        |> List.flatten()
+
+      Map.put(result, :logs, new_logs)
+    end
+  end
+
+  @spec has_enough_noobs?([BT.expanded_group()]) :: bool()
+  def has_enough_noobs?(expanded_group) do
+    ranks =
+      Enum.map(expanded_group, fn x ->
+        Map.get(x, :ranks, [])
+      end)
+      |> List.flatten()
+
+    Enum.any?(ranks, fn x ->
+      x < 2
+    end)
   end
 
   @doc """
@@ -73,16 +98,6 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
     |> List.flatten()
   end
 
-  defp round_number(rating_value) when is_float(rating_value) do
-    rating_value
-    |> Decimal.from_float()
-    |> Decimal.round(1)
-  end
-
-  defp round_number(rating_value) when is_integer(rating_value) do
-    rating_value
-  end
-
   @doc """
   Assigns teams using algorithm defined in moduledoc
   See split_one_chevs_internal_test.exs for sample input
@@ -104,7 +119,7 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
       username = x.name
 
       new_log =
-        "#{username} (#{round_number(x.rating)}, σ: #{round_number(x.uncertainty)}, Chev: #{x.rank + 1}) picked for Team #{picking_team.team_id}"
+        "#{username} (#{format(x.rating)}, σ: #{format(x.uncertainty)}, Chev: #{x.rank + 1}) picked for Team #{picking_team.team_id}"
 
       %{
         teams: [update_picking_team | get_non_picking_teams(acc.teams, picking_team)],

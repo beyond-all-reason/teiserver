@@ -64,7 +64,7 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
         algorithm: @split_algo
       )
 
-    assert result.team_players == %{1 => [1, 5], 2 => [2, 6], 3 => [3, 4]}
+    assert result.team_players == %{1 => [5, 2], 2 => [6, 1], 3 => [4, 3]}
   end
 
   test "split one chevs simple group" do
@@ -83,7 +83,7 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
         algorithm: @split_algo
       )
 
-    assert result.team_players == %{1 => [4, 1], 2 => [2, 3]}
+    assert result.team_players == %{1 => [1, 4], 2 => [2, 3]}
   end
 
   test "logs FFA" do
@@ -133,6 +133,29 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
              "Pro1 (5, σ: 0, Chev: 3) picked for Team 2",
              "Noob1 (7, σ: 7.9, Chev: 1) picked for Team 2",
              "Noob2 (8, σ: 8, Chev: 1) picked for Team 1"
+           ]
+  end
+
+  test "calls another balancer when no noobs" do
+    result =
+      BalanceLib.create_balance(
+        [
+          %{"A" => %{rating: 5, rank: 2}},
+          %{"B" => %{rating: 6, rank: 2}},
+          %{"C" => %{rating: 7, rank: 2, uncertainty: 7.9}},
+          %{"D" => %{rating: 8, rank: 2, uncertainty: 8}}
+        ],
+        2,
+        algorithm: @split_algo
+      )
+
+    assert result.logs == [
+             "Not enough noobs; calling another balancer.",
+             "---------------------------",
+             "Picked D for team 1, adding 8.0 points for new total of 8.0",
+             "Picked C for team 2, adding 7.0 points for new total of 7.0",
+             "Picked B for team 2, adding 6.0 points for new total of 13.0",
+             "Picked A for team 1, adding 5.0 points for new total of 13.0"
            ]
   end
 end

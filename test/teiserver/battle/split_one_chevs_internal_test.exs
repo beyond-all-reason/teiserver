@@ -108,4 +108,76 @@ defmodule Teiserver.Battle.SplitOneChevsInternalTest do
              %{members: [], team_id: 3}
            ]
   end
+
+  test "has enough noobs" do
+    expanded_group = [
+      %{
+        count: 2,
+        members: ["Pro1", "Noob1"],
+        group_rating: 13,
+        ratings: [8, 5],
+        ranks: [1, 0],
+        names: ["Pro1", "Noob1"],
+        uncertainties: [0, 1]
+      },
+      %{
+        count: 1,
+        members: ["Noob2"],
+        group_rating: 6,
+        ratings: [6],
+        ranks: [0],
+        names: ["Noob2"],
+        uncertainties: [2]
+      },
+      %{
+        count: 1,
+        members: ["Noob3"],
+        group_rating: 7,
+        ratings: [17],
+        ranks: [0],
+        names: ["Noob3"],
+        uncertainties: [3]
+      }
+    ]
+
+    result = SplitOneChevs.has_enough_noobs?(expanded_group)
+
+    assert result
+  end
+
+  test "not have enough noobs" do
+    expanded_group = [
+      %{
+        count: 2,
+        members: ["B", "A"],
+        group_rating: 13,
+        ratings: [8, 5],
+        ranks: [2, 2],
+        names: ["B", "A"],
+        uncertainties: [0, 1]
+      },
+      %{
+        count: 1,
+        members: ["C"],
+        group_rating: 6,
+        ratings: [6],
+        ranks: [2],
+        names: ["C"],
+        uncertainties: [2]
+      },
+      %{
+        count: 1,
+        members: ["D"],
+        group_rating: 7,
+        ratings: [17],
+        ranks: [2],
+        names: ["D"],
+        uncertainties: [3]
+      }
+    ]
+
+    result = SplitOneChevs.has_enough_noobs?(expanded_group)
+
+    refute result
+  end
 end
