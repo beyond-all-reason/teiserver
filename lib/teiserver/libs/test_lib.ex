@@ -660,7 +660,12 @@ defmodule Teiserver.TeiserverTestLib do
       :telemetry_simple_client_event_types_cache,
       :telemetry_simple_lobby_event_types_cache,
       :telemetry_simple_match_event_types_cache,
-      :telemetry_simple_server_event_types_cache
+      :telemetry_simple_server_event_types_cache,
+      :users,
+      :users_lookup_id_with_discord,
+      :users_lookup_id_with_email,
+      :users_lookup_id_with_name,
+      :users_lookup_name_with_id
     ]
 
     Enum.each(cache_list, fn cache ->
