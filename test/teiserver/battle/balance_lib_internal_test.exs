@@ -21,12 +21,12 @@ defmodule Teiserver.Battle.BalanceLibInternalTest do
 
     assert fixed_groups == [
              %{
-               user1.id => %{name: "User_1", rank: 0, rating: 19},
-               user2.id => %{name: "User_2", rank: 0, rating: 20}
+               user1.id => %{name: user1.name, rank: 0, rating: 19},
+               user2.id => %{name: user2.name, rank: 0, rating: 20}
              },
-             %{user3.id => %{name: "User_3", rank: 0, rating: 18}},
-             %{user4.id => %{name: "User_4", rank: 0, rating: 15}},
-             %{user5.id => %{name: "User_5", rank: 0, rating: 11}}
+             %{user3.id => %{name: user3.name, rank: 0, rating: 18}},
+             %{user4.id => %{name: user4.name, rank: 0, rating: 15}},
+             %{user5.id => %{name: user5.name, rank: 0, rating: 11}}
            ]
 
     # loser_picks algo will hit the databases so let's just test with split_one_chevs
