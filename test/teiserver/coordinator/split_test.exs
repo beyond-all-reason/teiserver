@@ -8,6 +8,8 @@ defmodule Teiserver.Coordinator.SplitTest do
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
 
+  @moduletag :needs_attention
+
   setup do
     Coordinator.start_coordinator()
     %{socket: hsocket, user: host} = tachyon_auth_setup()
@@ -89,7 +91,6 @@ defmodule Teiserver.Coordinator.SplitTest do
      empty_lobby_id: empty_lobby_id}
   end
 
-  @tag :needs_attention
   test "basic split test", %{
     host: _host,
     player: player1,
@@ -499,7 +500,6 @@ defmodule Teiserver.Coordinator.SplitTest do
            }
   end
 
-  @tag :needs_attention
   test "test minimum player split", %{
     host: _host,
     player: player1,

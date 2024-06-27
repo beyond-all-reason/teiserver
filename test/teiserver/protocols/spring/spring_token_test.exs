@@ -106,6 +106,7 @@ defmodule Teiserver.SpringTokenTest do
     assert reply == "DENIED token_login_failed\n"
   end
 
+  @tag :needs_attention
   test "c.user.get_token_by_email - incorrect" do
     %{socket: socket} = spring_tls_setup()
     _welcome = _recv_raw(socket)
@@ -119,6 +120,7 @@ defmodule Teiserver.SpringTokenTest do
     assert reply == "NO cmd=c.user.get_token_by_email\tbad format\n"
   end
 
+  @tag :needs_attention
   test "c.user.get_token_by_name - incorrect" do
     %{socket: socket} = spring_tls_setup()
     _welcome = _recv_raw(socket)

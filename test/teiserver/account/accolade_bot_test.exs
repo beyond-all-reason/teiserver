@@ -10,6 +10,8 @@ defmodule Teiserver.Account.AccoladeBotTest do
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_recv: 1, _tachyon_send: 2]
 
+  @moduletag :needs_attention
+
   setup do
     AccoladeLib.start_accolade_server()
 

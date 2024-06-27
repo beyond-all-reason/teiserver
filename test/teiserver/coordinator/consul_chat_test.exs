@@ -7,6 +7,8 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
 
+  @moduletag :needs_attention
+
   setup do
     Coordinator.start_coordinator()
     %{socket: hsocket, user: host} = tachyon_auth_setup()

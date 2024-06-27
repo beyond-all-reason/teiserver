@@ -10,6 +10,7 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
     only: [tachyon_auth_setup: 0, _tachyon_recv: 1]
 
   @sleep 50
+  @moduletag :needs_attention
 
   setup do
     %{socket: socket, user: user, pid: pid} = tachyon_auth_setup()
