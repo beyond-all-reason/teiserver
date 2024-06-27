@@ -15,8 +15,9 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
   end
 
   defp setup_conn(_context) do
-    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    conn = Phoenix.ConnTest.build_conn()
+    user = GeneralTestLib.make_user()
+    {:ok, conn: conn, user: user}
   end
 
   defp setup_app(context) do
@@ -154,6 +155,35 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       resp = post(conn, ~p"/oauth/token", data)
       json_response(resp, 400)
     end
+
+    test "can also use basic auth",
+         %{conn: conn, credential: credential, credential_secret: secret} do
+      data = %{grant_type: "client_credentials"}
+      auth_header = Plug.BasicAuth.encode_basic_auth(credential.client_id, secret)
+
+      conn =
+        conn
+        |> put_req_header("authorization", auth_header)
+
+      resp = post(conn, ~p"/oauth/token", data)
+      json_resp = json_response(resp, 200)
+      assert is_binary(json_resp["access_token"]), "has access_token"
+      assert is_integer(json_resp["expires_in"]), "has expires_in"
+      assert is_binary(json_resp["refresh_token"]), "has refresh_token"
+      assert json_resp["token_type"] == "Bearer", "bearer token type"
+    end
+
+    test "basic auth check", %{conn: conn, credential: credential} do
+      data = %{grant_type: "client_credentials"}
+      auth_header = Plug.BasicAuth.encode_basic_auth(credential.client_id, "lolnope")
+
+      conn =
+        conn
+        |> put_req_header("authorization", auth_header)
+
+      resp = post(conn, ~p"/oauth/token", data)
+      json_response(resp, 400)
+    end
   end
 
   describe "refresh token" do
@@ -213,7 +243,11 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
                "issuer" => "https://beyondallreason.info",
                "authorization_endpoint" => "https://beyondallreason.info/oauth/authorize",
                "token_endpoint" => "https://beyondallreason.info/oauth/token",
-               "token_endpoint_auth_methods_supported" => ["none", "client_secret_post"],
+               "token_endpoint_auth_methods_supported" => [
+                 "none",
+                 "client_secret_post",
+                 "client_secret_basic"
+               ],
                "grant_types_supported" => [
                  "authorization_code",
                  "refresh_token",
