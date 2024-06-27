@@ -32,7 +32,8 @@ defmodule Teiserver.Helper.TimexHelperTest do
     ]
 
     for {input_value, format, expected} <- values do
-      assert TimexHelper.date_to_str(input_value, format: format, now: @today) == expected
+      assert TimexHelper.date_to_str(input_value, format: format, now: @today, tz: "Europe/London") ==
+               expected
     end
 
     # Now test it runs with just a "now" argument
@@ -40,10 +41,20 @@ defmodule Teiserver.Helper.TimexHelperTest do
   end
 
   test "date_to_str until" do
-    assert TimexHelper.date_to_str(@from, format: :hms_dmy, now: @today, until: true) ==
+    assert TimexHelper.date_to_str(@from,
+             format: :hms_dmy,
+             now: @today,
+             until: true,
+             tz: "Europe/London"
+           ) ==
              "06:20:05 04/12/2013, in 6 hours"
 
-    assert TimexHelper.date_to_str(@from, format: :hms_dmy, now: @today, until: "until-span-id") ==
+    assert TimexHelper.date_to_str(@from,
+             format: :hms_dmy,
+             now: @today,
+             until: "until-span-id",
+             tz: "Europe/London"
+           ) ==
              "06:20:05 04/12/2013<span id='until-span-id'>, in 6 hours</span>"
   end
 
