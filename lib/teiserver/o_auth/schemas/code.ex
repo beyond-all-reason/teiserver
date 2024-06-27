@@ -3,6 +3,7 @@ defmodule Teiserver.OAuth.Code do
   use TeiserverWeb, :schema
 
   alias Teiserver.OAuth
+  alias Teiserver.Account.User
 
   @type t :: %__MODULE__{
           value: String.t(),

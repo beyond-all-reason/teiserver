@@ -329,7 +329,7 @@ defmodule Teiserver.OAuth do
           String.t(),
           String.t()
         ) ::
-          {:ok, Secret.t()} | {:error, term()}
+          {:ok, Credential.t()} | {:error, term()}
   def create_credentials(%Application{} = app, autohost, client_id, secret),
     do: create_credentials(app.id, autohost, client_id, secret)
 

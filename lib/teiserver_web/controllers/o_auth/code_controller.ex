@@ -3,7 +3,7 @@ defmodule TeiserverWeb.OAuth.CodeController do
   alias Teiserver.OAuth
 
   # https://www.rfc-editor.org/rfc/rfc6749.html#section-4.1.3
-  @spec token(Conn.t(), %{}) :: Conn.t()
+  @spec token(Plug.Conn.t(), %{}) :: Plug.Conn.t()
 
   def token(conn, %{"grant_type" => "authorization_code"} = params) do
     case Enum.find(
