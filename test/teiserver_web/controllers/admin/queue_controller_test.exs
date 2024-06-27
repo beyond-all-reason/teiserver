@@ -41,6 +41,7 @@ defmodule TeiserverWeb.Game.QueueControllerTest do
   end
 
   describe "new queue" do
+    @tag :needs_attention
     test "renders form", %{conn: conn} do
       conn = get(conn, Routes.ts_game_queue_path(conn, :new))
       assert html_response(conn, 200) =~ "Create"
@@ -48,6 +49,7 @@ defmodule TeiserverWeb.Game.QueueControllerTest do
   end
 
   describe "create queue" do
+    @tag :needs_attention
     test "redirects to show when data is valid", %{conn: conn} do
       conn =
         post(conn, Routes.ts_game_queue_path(conn, :create),
@@ -65,6 +67,7 @@ defmodule TeiserverWeb.Game.QueueControllerTest do
       assert Enum.count(new_queue) == 1
     end
 
+    @tag :needs_attention
     test "renders errors when data is invalid", %{conn: conn} do
       conn =
         post(conn, Routes.ts_game_queue_path(conn, :create),
@@ -95,12 +98,14 @@ defmodule TeiserverWeb.Game.QueueControllerTest do
   end
 
   describe "edit queue" do
+    @tag :needs_attention
     test "renders form for editing nil", %{conn: conn} do
       assert_error_sent 404, fn ->
         get(conn, Routes.ts_game_queue_path(conn, :edit, -1))
       end
     end
 
+    @tag :needs_attention
     test "renders form for editing chosen queue", %{conn: conn} do
       queue = TeiserverTestLib.make_queue("admin_edit_form")
       conn = get(conn, Routes.ts_game_queue_path(conn, :edit, queue))
@@ -109,6 +114,7 @@ defmodule TeiserverWeb.Game.QueueControllerTest do
   end
 
   describe "update queue" do
+    @tag :needs_attention
     test "redirects when data is valid", %{conn: conn} do
       queue = TeiserverTestLib.make_queue("update_redirect")
 
@@ -128,6 +134,7 @@ defmodule TeiserverWeb.Game.QueueControllerTest do
       assert html_response(conn, 200) =~ "#0000AA"
     end
 
+    @tag :needs_attention
     test "renders errors when data is invalid", %{conn: conn} do
       queue = TeiserverTestLib.make_queue("update_invalid")
 
@@ -144,6 +151,7 @@ defmodule TeiserverWeb.Game.QueueControllerTest do
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
     end
 
+    @tag :needs_attention
     test "renders errors when nil object", %{conn: conn} do
       assert_error_sent 404, fn ->
         put(conn, Routes.ts_game_queue_path(conn, :update, -1), queue: @invalid_attrs)
@@ -152,6 +160,7 @@ defmodule TeiserverWeb.Game.QueueControllerTest do
   end
 
   describe "delete queue" do
+    @tag :needs_attention
     test "deletes chosen queue", %{conn: conn} do
       queue = TeiserverTestLib.make_queue("delete")
       conn = delete(conn, Routes.ts_game_queue_path(conn, :delete, queue))
@@ -162,6 +171,7 @@ defmodule TeiserverWeb.Game.QueueControllerTest do
       end
     end
 
+    @tag :needs_attention
     test "renders error for deleting nil item", %{conn: conn} do
       assert_error_sent 404, fn ->
         delete(conn, Routes.ts_game_queue_path(conn, :delete, -1))

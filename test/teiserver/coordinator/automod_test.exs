@@ -8,6 +8,8 @@ defmodule Teiserver.Coordinator.AutomodTest do
   import Teiserver.TeiserverTestLib,
     only: [new_user: 0, tachyon_auth_setup: 1, _tachyon_send: 2]
 
+  @moduletag :needs_attention
+
   setup do
     account = CoordinatorServer.get_coordinator_account()
     Teiserver.cache_put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
@@ -142,6 +144,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
     assert result == "Banned user"
   end
 
+  @tag :needs_attention
   test "delayed data", %{banned_user: banned_user} do
     {:ok, _ban} =
       Moderation.create_ban(%{

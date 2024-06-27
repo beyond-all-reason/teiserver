@@ -442,6 +442,9 @@ CLIENTS test_room #{user.name}\n"
     assert reply =~ "s.battles.id_list "
   end
 
+  # this is a flakey test, but only when other tests are running around.
+  # you may be able to reproduce with the seed 846266
+  @tag :needs_attention
   test "RENAMEACCOUNT", %{socket: socket, user: user} do
     old_name = user.name
     new_name = "test_user_rename"

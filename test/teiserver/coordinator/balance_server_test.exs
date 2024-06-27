@@ -16,6 +16,8 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
       new_user: 1
     ]
 
+  @moduletag :needs_attention
+
   setup do
     Coordinator.start_coordinator()
     %{socket: hsocket, user: host} = tachyon_auth_setup()

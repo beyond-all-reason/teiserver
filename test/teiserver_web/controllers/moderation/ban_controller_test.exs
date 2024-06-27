@@ -16,6 +16,7 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
   @invalid_attrs %{"key_values" => []}
 
   describe "index" do
+    @tag :needs_attention
     test "lists all bans", %{conn: conn} do
       conn = get(conn, Routes.moderation_ban_path(conn, :index))
       assert html_response(conn, 200) =~ "Listing Bans"

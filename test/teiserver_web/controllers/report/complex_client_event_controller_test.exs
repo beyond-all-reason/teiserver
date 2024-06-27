@@ -3,6 +3,8 @@ defmodule TeiserverWeb.Report.ComplexClientEventControllerTest do
 
   alias Central.Helpers.GeneralTestLib
 
+  @moduletag :needs_attention
+
   setup do
     GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
     |> Teiserver.TeiserverTestLib.conn_setup()

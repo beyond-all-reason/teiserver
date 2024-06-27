@@ -17,6 +17,7 @@ defmodule Teiserver.SpringRegressionTest do
     {:ok, socket: socket, user: user}
   end
 
+  @tag :needs_attention
   test "Test sending of UPDATEBATTLEINFO", %{socket: socket} do
     global_info = PubsubListener.new_listener(["teiserver_global_lobby_updates"])
 

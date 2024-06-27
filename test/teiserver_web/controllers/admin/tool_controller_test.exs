@@ -7,6 +7,7 @@ defmodule TeiserverWeb.Admin.ToolControllerTest do
     GeneralTestLib.conn_setup(~w(admin.dev.developer))
   end
 
+  @tag :needs_attention
   test "index", %{conn: conn} do
     conn = get(conn, Routes.ts_admin_tool_path(conn, :index))
     assert html_response(conn, 200) =~ "Badge types"
