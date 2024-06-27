@@ -23,7 +23,7 @@ defmodule TeiserverWeb.OAuth.CodeView do
       issuer: base,
       authorization_endpoint: base <> ~p"/oauth/authorize",
       token_endpoint: base <> ~p"/oauth/token",
-      token_endpoint_auth_methods_supported: ["none", "client_secret_post"],
+      token_endpoint_auth_methods_supported: ["none", "client_secret_post", "client_secret_basic"],
       grant_types_supported: [
         "authorization_code",
         "refresh_token",
