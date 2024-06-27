@@ -9,6 +9,8 @@ defmodule Teiserver.Account do
 
   alias Teiserver.Account.UserLib
 
+  @type t :: UserLib.t()
+
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-user-alt"
 
