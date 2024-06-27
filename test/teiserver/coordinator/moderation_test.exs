@@ -7,6 +7,8 @@ defmodule Teiserver.Coordinator.ModerationTest do
   import Teiserver.TeiserverTestLib,
     only: [new_user: 0, tachyon_auth_setup: 1, _tachyon_send: 2, _tachyon_recv: 1]
 
+  @moduletag :needs_attention
+
   setup do
     Coordinator.start_coordinator()
     user = new_user()

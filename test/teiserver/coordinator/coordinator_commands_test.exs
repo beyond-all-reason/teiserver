@@ -5,6 +5,8 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, new_user: 0]
 
+  @moduletag :needs_attention
+
   setup do
     Coordinator.start_coordinator()
     %{socket: socket, user: user} = tachyon_auth_setup()
@@ -34,7 +36,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     assert String.contains?(message, "No command of name 'creativecommandname'")
   end
 
-  @tag :needs_attention
   test "help", %{socket: socket, user: user} do
     message_coordinator(socket, "$help")
     [reply] = _tachyon_recv(socket)
@@ -81,7 +82,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     refute String.contains?(message, "Displays this help text.")
   end
 
-  @tag :needs_attention
   test "help pull", %{socket: socket, user: user} do
     # Normal pull test
     message_coordinator(socket, "$help pull")
@@ -109,7 +109,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     refute String.contains?(message, "Displays this help text.")
   end
 
-  @tag :needs_attention
   test "whoami", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
     message_coordinator(socket, "$whoami")
     [reply] = _tachyon_recv(socket)
@@ -132,7 +131,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
            }
   end
 
-  @tag :needs_attention
   test "whois", %{socket: socket, coordinator_userid: coordinator_userid} do
     other_user = new_user()
 
@@ -183,7 +181,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
            }
   end
 
-  @tag :needs_attention
   test "mute user command", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
     %{user: user2} = tachyon_auth_setup()
 

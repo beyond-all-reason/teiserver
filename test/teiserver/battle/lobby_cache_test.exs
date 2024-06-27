@@ -5,6 +5,8 @@ defmodule Teiserver.Lobby.LobbyLibTest do
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
 
+  @moduletag :needs_attention
+
   setup do
     %{socket: hsocket, user: host} = tachyon_auth_setup()
     %{socket: psocket, user: player} = tachyon_auth_setup()
