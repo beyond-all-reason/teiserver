@@ -12,10 +12,10 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
       |> assign(:tab, "details")
       |> assign(
-        :balancer_options,
+        :algorithm_options,
         BalanceLib.get_allowed_algorithms(true)
       )
-      |> assign(:balancer, BalanceLib.get_default_algorithm())
+      |> assign(:algorithm, BalanceLib.get_default_algorithm())
 
     {:ok, socket}
   end
@@ -66,7 +66,9 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   #   {:noreply, assign(socket, :tab, tab)}
   # end
 
-  defp get_match(%{assigns: %{id: id, balancer: balancer, current_user: _current_user}} = socket) do
+  defp get_match(
+         %{assigns: %{id: id, algorithm: algorithm, current_user: _current_user}} = socket
+       ) do
     if connected?(socket) do
       match =
         Battle.get_match!(id,
@@ -135,11 +137,11 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         |> List.flatten()
 
       past_balance =
-        BalanceLib.create_balance(groups, match.team_count, algorithm: balancer)
+        BalanceLib.create_balance(groups, match.team_count, algorithm: algorithm)
         |> Map.put(:balance_mode, :grouped)
 
       # What about new balance?
-      new_balance = generate_new_balance_data(match, balancer)
+      new_balance = generate_new_balance_data(match, algorithm)
 
       raw_events =
         Telemetry.list_simple_match_events(where: [match_id: match.id], preload: [:event_types])
@@ -204,7 +206,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
     end
   end
 
-  defp generate_new_balance_data(match, balancer) do
+  defp generate_new_balance_data(match, algorithm) do
     rating_type = MatchLib.game_type(match.team_size, match.team_count)
 
     partied_players =
@@ -230,21 +232,21 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       end)
       |> List.flatten()
 
-    BalanceLib.create_balance(groups, match.team_count, algorithm: balancer)
+    BalanceLib.create_balance(groups, match.team_count, algorithm: algorithm)
     |> Map.put(:balance_mode, :grouped)
   end
 
   @doc """
-  Handles the dropdown for balancer changing
+  Handles the dropdown for algorithm changing
   """
   @impl true
-  def handle_event("update-balancer", event, socket) do
+  def handle_event("update-algorithm", event, socket) do
     [key] = event["_target"]
     value = event[key]
 
     {:noreply,
      socket
-     |> assign(:balancer, value)
+     |> assign(:algorithm, value)
      |> get_match()}
   end
 end

@@ -287,11 +287,11 @@
         <form method="post" class="">
           <.input
             type="select"
-            label="Balancer"
-            options={@balancer_options}
-            name="balancer"
-            value={@balancer}
-            phx-change="update-balancer"
+            label="Balance Algorithm"
+            options={@algorithm_options}
+            name="algorithm"
+            value={@algorithm}
+            phx-change="update-algorithm"
           />
         </form>
         <br />

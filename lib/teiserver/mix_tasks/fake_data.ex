@@ -34,6 +34,9 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       make_moderation()
       make_one_time_code()
 
+      # Add fake playtime data to all our non-bot users
+      Mix.Task.run("teiserver.fake_playtime")
+
       :timer.sleep(50)
 
       IO.puts(

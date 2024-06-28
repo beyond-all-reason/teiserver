@@ -1,7 +1,9 @@
 defmodule Mix.Tasks.Teiserver.FakePlaytime do
   @moduledoc """
   Adds fake play time stats to all non bot users
-  Run with
+  This will also be called by the teiserver.fakedata task
+
+  If you want to run this task invidually, use:
   mix teiserver.fake_playtime
   """
 

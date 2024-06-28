@@ -44,6 +44,11 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
     end
   end
 
+  @doc """
+  For now this simply checks there is at least a single 1chev or a single 2chev.
+  However we could modify this in the future to be more complicated e.g. at least a single 1chev
+  or at least two, 2chevs.
+  """
   @spec has_enough_noobs?([BT.expanded_group()]) :: bool()
   def has_enough_noobs?(expanded_group) do
     ranks =
