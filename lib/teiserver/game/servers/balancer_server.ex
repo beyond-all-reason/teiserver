@@ -7,6 +7,8 @@ defmodule Teiserver.Game.BalancerServer do
   alias Teiserver.Battle.MatchLib
 
   @tick_interval 2_000
+  # Balance algos that allow fuzz; randomness will be added to match rating before processing
+  @algos_allowing_fuzz ~w(loser_picks force_party)
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -175,8 +177,9 @@ defmodule Teiserver.Game.BalancerServer do
 
     if opts[:allow_groups] do
       party_result = make_grouped_balance(team_count, players, game_type, opts)
+      has_parties? = Map.get(party_result, :has_parties?, true)
 
-      if party_result.deviation > opts[:max_deviation] do
+      if has_parties? && party_result.deviation > opts[:max_deviation] do
         make_solo_balance(
           team_count,
           players,
@@ -210,14 +213,16 @@ defmodule Teiserver.Game.BalancerServer do
           player_id_list
           |> Enum.map(fn userid ->
             %{
-              userid => BalanceLib.get_user_rating_rank(userid, game_type, opts[:fuzz_multiplier])
+              userid =>
+                BalanceLib.get_user_rating_rank(userid, game_type, get_fuzz_multiplier(opts))
             }
           end)
 
         {_party_id, player_id_list} ->
           player_id_list
           |> Map.new(fn userid ->
-            {userid, BalanceLib.get_user_rating_rank(userid, game_type, opts[:fuzz_multiplier])}
+            {userid,
+             BalanceLib.get_user_rating_rank(userid, game_type, get_fuzz_multiplier(opts))}
           end)
       end)
       |> List.flatten()
@@ -233,7 +238,7 @@ defmodule Teiserver.Game.BalancerServer do
       players
       |> Enum.map(fn %{userid: userid} ->
         %{
-          userid => BalanceLib.get_user_rating_rank(userid, game_type, opts[:fuzz_multiplier])
+          userid => BalanceLib.get_user_rating_rank(userid, game_type, get_fuzz_multiplier(opts))
         }
       end)
 
@@ -244,6 +249,15 @@ defmodule Teiserver.Game.BalancerServer do
       logs: new_logs,
       balance_mode: :solo
     })
+  end
+
+  def get_fuzz_multiplier(opts) do
+    algo = opts[:algorithm]
+
+    case Enum.member?(@algos_allowing_fuzz, algo) do
+      true -> opts[:fuzz_multiplier]
+      false -> 0
+    end
   end
 
   @spec empty_state(T.lobby_id()) :: T.balance_server_state()

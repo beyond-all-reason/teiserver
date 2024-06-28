@@ -1,7 +1,7 @@
 defmodule Teiserver.Battle.CheekySwitcherSmartBalanceTest do
   @moduledoc """
-  Can run tests in this file only by
-  mix test test/teiserver/battle/cheeky_switcher_smart_balance_test.exs
+  Can run all balance tests via
+  mix test --only balance_test
   """
   use Teiserver.DataCase, async: true
   @moduletag :balance_test
@@ -53,7 +53,8 @@ defmodule Teiserver.Battle.CheekySwitcherSmartBalanceTest do
              },
              deviation: 0,
              means: %{1 => 6.5, 2 => 6.5},
-             stdevs: %{1 => 0.5, 2 => 1.5}
+             stdevs: %{1 => 0.5, 2 => 1.5},
+             has_parties?: false
            }
   end
 

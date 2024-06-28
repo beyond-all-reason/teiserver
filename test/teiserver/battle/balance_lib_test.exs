@@ -1,7 +1,7 @@
 defmodule Teiserver.Battle.BalanceLibTest do
   @moduledoc """
-  Can run tests in this file only by
-  mix test test/teiserver/battle/balance_lib_test.exs
+  Can run all balance tests via
+  mix test --only balance_test
   """
   use Teiserver.DataCase, async: true
   @moduletag :balance_test
@@ -20,6 +20,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
         )
 
       assert result != nil
+      refute Map.get(result, :has_parties?, true)
     end)
   end
 
@@ -38,6 +39,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
         )
 
       assert result != nil
+      refute Map.get(result, :has_parties?, true)
     end)
   end
 
@@ -59,6 +61,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
         )
 
       assert result != nil
+      refute Map.get(result, :has_parties?, true)
     end)
   end
 
@@ -80,6 +83,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
         )
 
       assert result != nil
+      refute Map.get(result, :has_parties?, true)
     end)
   end
 
@@ -103,6 +107,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
         )
 
       assert result != nil
+      refute Map.get(result, :has_parties?, true)
     end)
   end
 
@@ -139,6 +144,9 @@ defmodule Teiserver.Battle.BalanceLibTest do
         )
 
       assert result != nil
+      # has_parties? might be true/false depending on the algorithm.
+      # Just check that the key exists
+      assert Map.has_key?(result, :has_parties?)
     end)
   end
 end

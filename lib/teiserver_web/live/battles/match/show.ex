@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Battle.MatchLive.Show do
   @moduledoc false
   use TeiserverWeb, :live_view
-  alias Teiserver.{Battle, Game, Account, Telemetry}
+  alias Teiserver.{Battle, Game, Telemetry}
   alias Teiserver.Battle.{MatchLib, BalanceLib}
 
   @impl true
@@ -11,6 +11,11 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:site_menu_active, "match")
       |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
       |> assign(:tab, "details")
+      |> assign(
+        :algorithm_options,
+        BalanceLib.get_allowed_algorithms(true)
+      )
+      |> assign(:algorithm, BalanceLib.get_default_algorithm())
 
     {:ok, socket}
   end
@@ -49,8 +54,10 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   end
 
   defp apply_action(%{assigns: %{match_name: match_name}} = socket, :balance, _params) do
+    # Restrict the balance tab to certain roles.
+    # Note that Staff roles like "Tester" also contain Contributor role.
     socket
-    |> mount_require_any(["Reviewer"])
+    |> mount_require_any(["Reviewer", "Contributor"])
     |> assign(:page_title, "#{match_name} - Balance")
   end
 
@@ -59,7 +66,9 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   #   {:noreply, assign(socket, :tab, tab)}
   # end
 
-  defp get_match(%{assigns: %{id: id, current_user: _current_user}} = socket) do
+  defp get_match(
+         %{assigns: %{id: id, algorithm: algorithm, current_user: _current_user}} = socket
+       ) do
     if connected?(socket) do
       match =
         Battle.get_match!(id,
@@ -115,24 +124,24 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
             player_id_list
             |> Enum.filter(fn userid -> rating_logs[userid] != nil end)
             |> Enum.map(fn userid ->
-              %{userid => rating_logs[userid].value["rating_value"]}
+              %{userid => rating_logs[userid].value}
             end)
 
           {_party_id, player_id_list} ->
             player_id_list
             |> Enum.filter(fn userid -> rating_logs[userid] != nil end)
             |> Map.new(fn userid ->
-              {userid, rating_logs[userid].value["rating_value"]}
+              {userid, rating_logs[userid].value}
             end)
         end)
         |> List.flatten()
 
       past_balance =
-        BalanceLib.create_balance(groups, match.team_count, mode: :loser_picks)
+        BalanceLib.create_balance(groups, match.team_count, algorithm: algorithm)
         |> Map.put(:balance_mode, :grouped)
 
       # What about new balance?
-      new_balance = generate_new_balance_data(match)
+      new_balance = generate_new_balance_data(match, algorithm)
 
       raw_events =
         Telemetry.list_simple_match_events(where: [match_id: match.id], preload: [:event_types])
@@ -197,7 +206,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
     end
   end
 
-  defp generate_new_balance_data(match) do
+  defp generate_new_balance_data(match, algorithm) do
     rating_type = MatchLib.game_type(match.team_size, match.team_count)
 
     partied_players =
@@ -223,7 +232,21 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       end)
       |> List.flatten()
 
-    BalanceLib.create_balance(groups, match.team_count, mode: :loser_picks)
+    BalanceLib.create_balance(groups, match.team_count, algorithm: algorithm)
     |> Map.put(:balance_mode, :grouped)
+  end
+
+  @doc """
+  Handles the dropdown for algorithm changing
+  """
+  @impl true
+  def handle_event("update-algorithm", event, socket) do
+    [key] = event["_target"]
+    value = event[key]
+
+    {:noreply,
+     socket
+     |> assign(:algorithm, value)
+     |> get_match()}
   end
 end

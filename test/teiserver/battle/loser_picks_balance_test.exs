@@ -1,7 +1,7 @@
 defmodule Teiserver.Battle.LoserPicksBalanceTest do
   @moduledoc """
-  Can run tests in this file only by
-  mix test test/teiserver/battle/loser_picks_balance_test.exs
+  Can run all balance tests via
+  mix test --only balance_test
   """
   use Teiserver.DataCase, async: true
   @moduletag :balance_test
@@ -52,7 +52,8 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
              },
              deviation: 0,
              means: %{1 => 6.5, 2 => 6.5},
-             stdevs: %{1 => 1.5, 2 => 0.5}
+             stdevs: %{1 => 1.5, 2 => 0.5},
+             has_parties?: false
            }
   end
 
@@ -103,7 +104,8 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
              },
              deviation: 13,
              means: %{1 => 8.0, 2 => 7.0, 3 => 6.0, 4 => 5.0},
-             stdevs: %{1 => 0.0, 2 => 0.0, 3 => 0.0, 4 => 0.0}
+             stdevs: %{1 => 0.0, 2 => 0.0, 3 => 0.0, 4 => 0.0},
+             has_parties?: false
            }
   end
 
@@ -160,7 +162,8 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
              },
              deviation: 0,
              means: %{1 => 7.5, 2 => 7.0, 3 => 7.5},
-             stdevs: %{1 => 1.5, 2 => 2.0, 3 => 0.5}
+             stdevs: %{1 => 1.5, 2 => 2.0, 3 => 0.5},
+             has_parties?: false
            }
   end
 
@@ -209,7 +212,8 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
              },
              deviation: 0,
              means: %{1 => 6.5, 2 => 6.5},
-             stdevs: %{1 => 1.5, 2 => 0.5}
+             stdevs: %{1 => 1.5, 2 => 0.5},
+             has_parties?: true
            }
   end
 
@@ -276,7 +280,8 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
              },
              team_sizes: %{1 => 8, 2 => 8},
              means: %{1 => 20.125, 2 => 20.5},
-             stdevs: %{1 => 9.29297449689818, 2 => 8.671072598012312}
+             stdevs: %{1 => 9.29297449689818, 2 => 8.671072598012312},
+             has_parties?: true
            }
   end
 
@@ -335,7 +340,8 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
              team_players: %{1 => 'ejlnprft', 2 => 'hikmoqsg'},
              team_sizes: %{1 => 8, 2 => 8},
              means: %{1 => 23.0, 2 => 23.0},
-             stdevs: %{1 => 12.816005617976296, 2 => 8.674675786448736}
+             stdevs: %{1 => 12.816005617976296, 2 => 8.674675786448736},
+             has_parties?: false
            }
   end
 
@@ -394,7 +400,8 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
              },
              team_sizes: %{1 => 8, 2 => 8},
              means: %{1 => 31.0, 2 => 31.625},
-             stdevs: %{1 => 16.015617378046965, 2 => 15.090870584562046}
+             stdevs: %{1 => 16.015617378046965, 2 => 15.090870584562046},
+             has_parties?: true
            }
 
     result2 =
@@ -453,7 +460,8 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
              },
              team_sizes: %{1 => 8, 2 => 8},
              means: %{1 => 31.0, 2 => 31.625},
-             stdevs: %{1 => 16.0312195418814, 2 => 15.074295174236173}
+             stdevs: %{1 => 16.0312195418814, 2 => 15.074295174236173},
+             has_parties?: true
            }
   end
 end

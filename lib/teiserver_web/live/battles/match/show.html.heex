@@ -41,7 +41,7 @@
         </.tab_nav>
       <% end %>
 
-      <%= if @rating_logs != %{} and allow?(@current_user, "Overwatch") do %>
+      <%= if @rating_logs != %{} and allow_any?(@current_user, ["Overwatch", "Contributor"]) do %>
         <.tab_nav url={~p"/battle/#{@match.id}/balance"} selected={@tab == :balance}>
           <Fontawesome.icon icon="fa-solid fa-scale-balanced" style="solid" /> Balance
         </.tab_nav>
@@ -282,9 +282,22 @@
       </div>
     <% end %>
 
-    <%= if allow?(@current_user, "Overwatch") do %>
+    <%= if allow_any?(@current_user, ["Overwatch", "Contributor"]) do %>
       <div :if={@tab == :balance} class="p-4">
+        <form method="post" class="">
+          <.input
+            type="select"
+            label="Balance Algorithm"
+            options={@algorithm_options}
+            name="algorithm"
+            value={@algorithm}
+            phx-change="update-algorithm"
+          />
+        </form>
+        <br />
+
         <h4>Based on data at the time</h4>
+
         <table class="table">
           <tbody>
             <tr>
