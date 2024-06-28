@@ -99,7 +99,7 @@
           <thead>
             <tr>
               <th>Game</th>
-              <%= if @filter == "Team" do %>
+              <%= if @filter in ["Small Team", "Large Team"] do %>
                 <th>Play</th>
               <% end %>
               <th>Players</th>
@@ -122,7 +122,7 @@
                 end
 
               {exit_status, play_percentage} =
-                if log.match.game_type == "Team" do
+                if log.match.game_type in ["Small Team", "Large Team"] do
                   exit_status =
                     Teiserver.Battle.MatchLib.calculate_exit_status(
                       log.match_membership.left_after,
@@ -142,7 +142,7 @@
                 <%= if log.match do %>
                   <td><%= log.match.map %></td>
 
-                  <%= if @filter == "Team" do %>
+                  <%= if @filter in ["Small Team", "Large Team"] do %>
                     <td>
                       <%= case exit_status do %>
                         <% :stayed -> %>
@@ -184,10 +184,7 @@
                 <td><%= date_to_str(log.inserted_at, format: :hms_or_dmy) %></td>
                 <%= if log.match do %>
                   <td>
-                    <a
-                      href={Routes.ts_admin_match_path(@conn, :show, log.match.id)}
-                      class="btn btn-secondary btn-sm"
-                    >
+                    <a href={~p"/battle/#{log.match.id}"} class="btn btn-secondary btn-sm">
                       Show
                     </a>
                   </td>

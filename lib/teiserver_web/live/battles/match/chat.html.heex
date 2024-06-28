@@ -108,6 +108,17 @@
           />
         </div>
 
+        <div class="col">
+          <.input
+            type="text"
+            label="User exclude (split with commas)"
+            name="user-raw-exclude"
+            value={@filters["user-raw-exclude"]}
+            phx-change="filter-update"
+            phx-debounce="400"
+          />
+        </div>
+
         <div :if={@filters["message-format"] == "Table"} class="col">
           <.input
             type="text"

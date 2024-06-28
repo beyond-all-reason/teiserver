@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
   use Teiserver.ServerCase, async: false
-  alias Teiserver.{User, Coordinator, Account}
+  alias Teiserver.{CacheUser, Coordinator, Account}
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, new_user: 0]
@@ -44,7 +44,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     assert String.contains?(message, "$whoami")
 
     # Moderator help test
-    User.update_user(%{user | moderator: true})
+    CacheUser.update_user(%{user | moderator: true})
     message_coordinator(socket, "$help")
     [reply] = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
@@ -94,7 +94,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     refute String.contains?(message, "Displays this help text.")
 
     # Moderator pull test
-    User.update_user(%{user | moderator: true})
+    CacheUser.update_user(%{user | moderator: true})
     message_coordinator(socket, "$help pull")
     [reply] = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
@@ -195,7 +195,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
              "sender_id" => coordinator_userid
            }
 
-    user = User.get_user_by_id(user.id)
+    user = CacheUser.get_user_by_id(user.id)
     assert user.ignored == [user2.id]
 
     # Now use it again, make sure we don't get a crash
@@ -211,7 +211,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
              "sender_id" => coordinator_userid
            }
 
-    user = User.get_user_by_id(user.id)
+    user = CacheUser.get_user_by_id(user.id)
     assert user.ignored == []
 
     # Now unmute again
@@ -227,7 +227,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
              "sender_id" => coordinator_userid
            }
 
-    user = User.get_user_by_id(user.id)
+    user = CacheUser.get_user_by_id(user.id)
     assert user.ignored == []
   end
 

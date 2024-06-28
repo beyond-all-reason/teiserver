@@ -29,7 +29,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
         team_count: 2,
         team_size: 2,
         passworded: false,
-        game_type: "Team",
+        game_type: "Small Team",
         founder_id: host.id,
         founder_name: host.name,
         server_uuid: "123",

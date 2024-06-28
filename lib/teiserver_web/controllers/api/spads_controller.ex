@@ -2,7 +2,8 @@ defmodule TeiserverWeb.API.SpadsController do
   use TeiserverWeb, :controller
   alias Teiserver.Config
   alias Teiserver.{Account, Coordinator, Battle}
-  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Battle.{BalanceLib, MatchLib}
+  alias Teiserver.Data.Types, as: T
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
@@ -20,14 +21,22 @@ defmodule TeiserverWeb.API.SpadsController do
         "target_id" => target_id_str,
         "type" => type
       }) do
-    actual_type =
-      case type do
-        "TeamFFA" -> "Team"
-        v -> v
+    target_id = int_parse(target_id_str)
+    lobby = get_member_lobby(target_id)
+
+    host_ip =
+      case lobby do
+        nil -> nil
+        _ -> Account.get_client_by_id(lobby.founder_id).ip
       end
 
-    target_id = int_parse(target_id_str)
-    host_ip = get_member_of_lobby_host_ip(target_id)
+    actual_type =
+      case type do
+        "Team" -> get_team_subtype(lobby)
+        # Team FFA uses Large Team rating
+        "TeamFFA" -> "Large Team"
+        v -> v
+      end
 
     conn_ip =
       conn
@@ -147,23 +156,17 @@ defmodule TeiserverWeb.API.SpadsController do
 
         if balance_result do
           # Get some counts for later
-          total_players =
-            balance_result.team_sizes
-            |> Map.values()
-            |> Enum.sum()
-
           team_count =
             balance_result.team_sizes
             |> Enum.count()
 
-          # Calculate the rating type
-          rating_type =
-            cond do
-              total_players == 2 -> "Duel"
-              team_count == 2 -> "Team"
-              total_players == team_count -> "FFA"
-              true -> "Team FFA"
-            end
+          team_size =
+            balance_result.team_sizes
+            |> Map.values()
+            |> Enum.max()
+
+          # Get the rating type
+          rating_type = MatchLib.game_type(team_size, team_count)
 
           # Temporary solution until Team FFA ratings are fixed
           rating_type =
@@ -214,28 +217,40 @@ defmodule TeiserverWeb.API.SpadsController do
     end
   end
 
-  def get_member_of_lobby_host_ip(nil), do: nil
-
-  def get_member_of_lobby_host_ip(userid) do
+  @spec get_member_lobby(non_neg_integer()) :: T.lobby() | nil
+  defp get_member_lobby(userid) do
     case Account.get_client_by_id(userid) do
       nil ->
         nil
 
       client ->
-        get_lobby_host_ip(client.lobby_id)
+        Battle.get_lobby(client.lobby_id)
     end
   end
 
-  def get_lobby_host_ip(nil), do: nil
+  defp get_team_subtype(nil), do: "Large Team"
 
-  def get_lobby_host_ip(lobby_id) do
-    case Battle.get_lobby(lobby_id) do
-      nil ->
-        nil
+  defp get_team_subtype(lobby) do
+    max_small_team_size = Config.get_site_config_cache("lobby.Small team game limit")
 
-      lobby ->
-        host = Account.get_client_by_id(lobby.founder_id)
-        host.ip
+    teams =
+      lobby.players
+      |> Account.list_clients()
+      |> Enum.filter(fn c -> c.player == true end)
+      |> Enum.group_by(fn c -> c.team_number end)
+
+    max_team_size =
+      case Enum.map(teams, fn {_, team} -> Enum.count(team) end) do
+        [] ->
+          0
+
+        counts ->
+          Enum.max(counts)
+      end
+
+    cond do
+      Enum.count(teams) == 2 and max_team_size <= max_small_team_size -> "Small Team"
+      true -> "Large Team"
     end
   end
 end

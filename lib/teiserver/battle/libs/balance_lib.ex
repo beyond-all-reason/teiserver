@@ -99,6 +99,7 @@ defmodule Teiserver.Battle.BalanceLib do
 
   def create_balance(groups, team_count, opts) do
     start_time = System.system_time(:microsecond)
+    groups = standardise_groups(groups)
 
     # We perform all our group calculations here and assign each group
     # an ID that's used purely for this run of balance
@@ -152,6 +153,23 @@ defmodule Teiserver.Battle.BalanceLib do
     |> calculate_balance_stats
     |> cleanup_result
     |> Map.put(:time_taken, System.system_time(:microsecond) - start_time)
+  end
+
+  @doc """
+  Sometimes groups have missing data so we need to refetch it.
+  If we go through balancer_server then all the required data should be there
+  """
+  def standardise_groups(groups) do
+    groups
+    |> Enum.map(fn group ->
+      # Iterate over our map
+      Map.new(group, fn {user_id, value} ->
+        cond do
+          is_number(value) -> {user_id, get_user_rating_rank_old(user_id, value)}
+          true -> {user_id, value}
+        end
+      end)
+    end)
   end
 
   # Removes various keys we don't care about
@@ -580,6 +598,14 @@ defmodule Teiserver.Battle.BalanceLib do
     # See application.ex for cache settings
     %{rank: rank, name: name} = Account.get_user_by_id(userid)
     %{rating: rating, rank: rank, name: name}
+  end
+
+  @doc """
+  This is used by some screens to calculate a theoretical balance based on old ratings
+  """
+  def get_user_rating_rank_old(userid, rating_value) do
+    %{rank: rank, name: name} = Account.get_user_by_id(userid)
+    %{rating: rating_value, rank: rank, name: name}
   end
 
   defp fuzz_rating(rating, multiplier) do

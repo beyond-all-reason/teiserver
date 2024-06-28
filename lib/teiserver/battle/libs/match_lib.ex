@@ -1,45 +1,38 @@
 defmodule Teiserver.Battle.MatchLib do
   @moduledoc false
   use TeiserverWeb, :library
-  alias Teiserver.{Battle, Account}
+  alias Teiserver.{Config, Battle, Account}
   alias Teiserver.Battle.{Match, MatchMembership}
   alias Teiserver.Data.Types, as: T
   require Logger
 
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-swords"
+  def icon, do: "fa-solid fa-explosion"
 
   @spec colours :: atom
   def colours, do: :success2
 
-  @spec game_type(T.lobby(), map()) :: <<_::24, _::_*8>>
-  def game_type(lobby, teams) do
-    bots = Battle.get_bots(lobby.id)
+  def game_type(team_size, team_count) do
+    game_type(team_size, team_count, %{})
+  end
+
+  def game_type(team_size, team_count, bots) do
+    max_small_team_size = Config.get_site_config_cache("lobby.Small team game limit")
 
     bot_names =
       bots
       |> Map.keys()
       |> Enum.join(" ")
 
-    # It is possible for it to be purely bots v bots which will make it appear to be empty teams
-    # this would cause an error with Enum.max, hence the case statement
-    max_team_size =
-      case Enum.map(teams, fn {_, team} -> Enum.count(team) end) do
-        [] ->
-          0
-
-        counts ->
-          Enum.max(counts)
-      end
-
     cond do
       String.contains?(bot_names, "Scavenger") -> "Scavengers"
       String.contains?(bot_names, "Chicken") -> "Raptors"
       String.contains?(bot_names, "Raptor") -> "Raptors"
       Enum.empty?(bots) == false -> "Bots"
-      Enum.count(teams) == 2 and max_team_size == 1 -> "Duel"
-      Enum.count(teams) == 2 -> "Team"
-      max_team_size == 1 -> "FFA"
+      team_count == 2 and team_size == 1 -> "Duel"
+      team_count == 2 and team_size <= max_small_team_size -> "Small Team"
+      team_count == 2 and team_size > max_small_team_size -> "Large Team"
+      team_size == 1 -> "FFA"
       true -> "Team FFA"
     end
   end
@@ -47,7 +40,8 @@ defmodule Teiserver.Battle.MatchLib do
   def list_game_types() do
     [
       "Duel",
-      "Team",
+      "Small Team",
+      "Large Team",
       "FFA",
       "Team FFA",
       "Raptors",
@@ -59,7 +53,8 @@ defmodule Teiserver.Battle.MatchLib do
   def list_rated_game_types() do
     [
       "Duel",
-      "Team",
+      "Small Team",
+      "Large Team",
       "FFA",
       "Team FFA"
     ]
@@ -85,7 +80,14 @@ defmodule Teiserver.Battle.MatchLib do
       |> Enum.group_by(fn c -> c.team_number end)
 
     if teams != %{} do
-      the_game_type = game_type(lobby, teams)
+      team_count = teams |> Enum.count()
+
+      team_size =
+        teams
+        |> Enum.map(fn {_, t} -> t |> Enum.count() end)
+        |> Enum.max(fn -> 0 end)
+
+      game_type = game_type(team_size, team_count, bots)
 
       match = %{
         uuid: match_uuid,
@@ -93,10 +95,10 @@ defmodule Teiserver.Battle.MatchLib do
         map: lobby.map_name,
         data: nil,
         tags: modoptions,
-        team_count: Enum.count(teams),
-        team_size: Enum.max(Enum.map(teams, fn {_, t} -> Enum.count(t) end)),
+        team_count: team_count,
+        team_size: team_size,
         passworded: lobby.passworded,
-        game_type: the_game_type,
+        game_type: game_type,
         founder_id: lobby.founder_id,
         bots: bots,
         queue_id: queue_id,
@@ -141,10 +143,17 @@ defmodule Teiserver.Battle.MatchLib do
 
   def make_match_name(match) do
     case match.game_type do
-      "Duel" -> "Duel on #{match.map}"
-      "Team" -> "#{match.team_size}v#{match.team_size} on #{match.map}"
-      "FFA" -> "#{match.team_count} way FFA on #{match.map}"
-      t -> "#{t} game on #{match.map}"
+      "Duel" ->
+        "Duel on #{match.map}"
+
+      type when type in ["Small Team", "Large Team"] ->
+        "#{match.team_size}v#{match.team_size} on #{match.map}"
+
+      "FFA" ->
+        "#{match.team_count} way FFA on #{match.map}"
+
+      t ->
+        "#{t} game on #{match.map}"
     end
   end
 

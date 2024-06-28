@@ -5,7 +5,8 @@ defmodule Teiserver.Logging.MatchGraphLogsTask do
   def perform(logs, "split", key) do
     [
       {"Duel", "duel.aggregate.#{key}"},
-      {"Team", "team.aggregate.#{key}"},
+      {"Small Team", "team.aggregate.#{key}"},
+      {"Large Team", "team.aggregate.#{key}"},
       {"FFA", "ffa.aggregate.#{key}"},
       {"Team FFA", "team_ffa.aggregate.#{key}"},
       {"Bot", "bots.aggregate.#{key}"},
@@ -34,7 +35,8 @@ defmodule Teiserver.Logging.MatchGraphLogsTask do
         pvp =
           Map.get(l.data["duel"]["aggregate"], key, 0) +
             Map.get(l.data["ffa"]["aggregate"], key, 0) +
-            Map.get(l.data["team"]["aggregate"], key, 0) +
+            Map.get(l.data["small_team"]["aggregate"], key, 0) +
+            Map.get(l.data["large_team"]["aggregate"], key, 0) +
             Map.get(l.data["team_ffa"]["aggregate"], key, 0)
 
         pve =
@@ -84,7 +86,8 @@ defmodule Teiserver.Logging.MatchGraphLogsTask do
         pvp =
           Map.get(l.data["duel"]["aggregate"], key, 0) +
             Map.get(l.data["ffa"]["aggregate"], key, 0) +
-            Map.get(l.data["team"]["aggregate"], key, 0)
+            Map.get(l.data["large_team"]["aggregate"], key, 0) +
+            Map.get(l.data["team_ffa"]["aggregate"], key, 0)
 
         coop =
           Map.get(l.data["raptors"]["aggregate"], key, 0) +

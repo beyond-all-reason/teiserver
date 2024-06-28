@@ -3,7 +3,7 @@ defmodule Teiserver.Account.NewUserFunnelReport do
   alias Teiserver.{Account, Telemetry, Battle}
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-filter"
+  def icon(), do: "fa-solid fa-filter"
 
   @spec permissions() :: String.t()
   def permissions(), do: "Admin"

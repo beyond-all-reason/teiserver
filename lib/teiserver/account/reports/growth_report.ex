@@ -10,7 +10,7 @@ defmodule Teiserver.Account.GrowthReport do
   def name(), do: "Growth"
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-seedling"
+  def icon(), do: "fa-solid fa-seedling"
 
   @spec permissions() :: String.t()
   def permissions(), do: "Admin"

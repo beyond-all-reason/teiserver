@@ -30,7 +30,10 @@
             </a>
           </td>
           <td>
-            <a href={~p"/battle/chat/#{report.match_id}/all"} class="btn btn-secondary btn-sm">
+            <a
+              href={~p"/battle/chat/#{report.match_id}/#{report.target_id}/#{report.reporter_id}"}
+              class="btn btn-secondary btn-sm"
+            >
               Chat
             </a>
           </td>
@@ -51,6 +54,12 @@
                 class: "fa-solid"
               ) %>
             </a>
+          <% end %>
+
+          <%= if report.closed do %>
+            <span class="btn btn-sm btn-warning">
+              <Fontawesome.icon icon="folder-closed" style="solid" />
+            </span>
           <% end %>
         </td>
 

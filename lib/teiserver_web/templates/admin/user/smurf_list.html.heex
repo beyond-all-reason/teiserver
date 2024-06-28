@@ -115,6 +115,9 @@ is_moderator = allow?(@conn, "Moderator") %>
 
                   <th>Winrate</th>
                   <th>Recents</th>
+                  <th>Play time</th>
+                  <th>games allied</th>
+                  <th>games vs</th>
 
                   <%= for type <- @key_types do %>
                     <th><%= short_name[type] || type %></th>
@@ -132,17 +135,11 @@ is_moderator = allow?(@conn, "Moderator") %>
               </thead>
               <tbody>
                 <tr class="selected-user-row">
-                  <% email_domain =
-                    @user.email
-                    |> String.split("@")
-                    |> Enum.reverse()
-                    |> hd %>
-
                   <td style={"background-color: #{@user.colour}; color: #FFF;"} width="22">
                     <%= central_component("icon", icon: @user.icon) %>
                   </td>
                   <td><%= @user.name %></td>
-                  <td><%= email_domain %></td>
+                  <td><%= @user.email %></td>
                   <td><%= @user.data["lobby_client"] %></td>
 
                   <td>
@@ -151,6 +148,10 @@ is_moderator = allow?(@conn, "Moderator") %>
 
                   <td><%= @stats["win_rate.team"] %></td>
                   <td><%= @stats["recent_count.team"] %></td>
+                  <% hours = ((@stats["player_minutes"] || 0) / 60) |> round %>
+                  <td>
+                    <%= "#{hours}h" %>
+                  </td>
 
                   <%= for _type <- @key_types do %>
                     <td>
@@ -185,19 +186,15 @@ is_moderator = allow?(@conn, "Moderator") %>
 
                 <%= for user <- @users do %>
                   <% user_stats = @stats_map[user.id]
-
-                  email_domain =
-                    user.email
-                    |> String.split("@")
-                    |> Enum.reverse()
-                    |> hd %>
+                  games_allied = @games_allied[user.id]
+                  games_vs = @games_vs[user.id] %>
 
                   <tr>
                     <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
                       <%= central_component("icon", icon: user.icon) %>
                     </td>
                     <td><%= user.name %></td>
-                    <td><%= email_domain %></td>
+                    <td><%= user.email %></td>
                     <td><%= user.data["lobby_client"] %></td>
 
                     <td>
@@ -206,6 +203,10 @@ is_moderator = allow?(@conn, "Moderator") %>
 
                     <td><%= user_stats["win_rate.team"] %></td>
                     <td><%= user_stats["recent_count.team"] %></td>
+                    <% hours = ((user_stats["player_minutes"] || 0) / 60) |> round %>
+                    <td>
+                      <%= "#{hours}h" %>
+                    </td>
 
                     <%= for type <- @key_types do %>
                       <td>
@@ -268,9 +269,10 @@ is_moderator = allow?(@conn, "Moderator") %>
                           class: "btn btn-sm btn-warning"
                         ) %>
                       </td>
-                    <% else %>
+                    <% else  # TODO if @user.smurf_of_id == nil, link to parent? %>
                       <td></td>
                     <% end %>
+                    <!-- TODO auto-bump or at least propose smurf warning number based on number of linked accounts? -->
                   </tr>
                 <% end %>
               </tbody>

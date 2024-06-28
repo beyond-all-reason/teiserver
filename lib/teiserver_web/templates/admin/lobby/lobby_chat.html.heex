@@ -52,7 +52,7 @@
             <% end %>
             &nbsp;&nbsp;&nbsp;
             <a
-              href={Routes.ts_admin_match_path(@conn, :show, @match.id)}
+              href={~p"/battle/#{@match.id}"}
               class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}
             >
               <%= central_component("icon", icon: Teiserver.Battle.MatchLib.icon()) %> Match details
@@ -60,10 +60,7 @@
           <% end %>
 
           <%= if not @last_page or @page != 0 do %>
-            <a
-              href={"/teiserver/admin/lobbies/#{@match.id}/lobby_chat/all"}
-              class="btn btn-outline-secondary"
-            >
+            <a href={~p"/battle/chat/#{@match.id}/"} class="btn btn-outline-secondary">
               <i class="fa-fw fa-solid fa-list"></i> &nbsp;
               Full chat
             </a>

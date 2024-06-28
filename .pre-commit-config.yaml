@@ -32,10 +32,10 @@ repos:
       #   language: system
       #   pass_filenames: false
       #   files: \.exs*$
-      - id: mix-dialyzer
-        name: "elixir: mix dialyzer"
-        entry: mix dialyzer
-        language: system
-        pass_filenames: false
-        files: \.exs*$
+      #      - id: mix-dialyzer
+      #        name: "elixir: mix dialyzer"
+      #        entry: mix dialyzer
+      #        language: system
+      #        pass_filenames: false
+      #        files: \.exs*$
       

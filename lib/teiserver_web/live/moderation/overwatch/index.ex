@@ -56,6 +56,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
         %{
           "actioned-filter" => "All",
           "closed-filter" => "Open",
+          "kind-filter" => "Any",
           "timeframe-filter" => "standard",
           "target_id" => Map.get(params, "target_id")
         },
@@ -90,12 +91,20 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
         _ -> nil
       end
 
+    kind =
+      case filters["kind-filter"] do
+        "Any" -> nil
+        "Actions" -> "actions"
+        "Chat" -> "chat"
+      end
+
     report_groups =
       Moderation.list_report_groups(
         where: [
           closed: closed_filter,
           actioned: actioned_filter,
           inserted_after: timeframe,
+          has_reports_of_kind: kind,
           target_id: filters["target_id"]
         ],
         order_by: ["Newest first"],

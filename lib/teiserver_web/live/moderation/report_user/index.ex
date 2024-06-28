@@ -186,14 +186,19 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
           user_id: user.id
         ],
         order_by: "Newest first",
-        select: [:id, :game_type, :team_size, :team_count, :finished, :map]
+        select: [:id, :game_type, :team_size, :team_count, :finished, :map, :game_duration]
       )
       |> Enum.map(fn match ->
         label =
           case match.game_type do
-            "Team" -> "#{match.team_size} vs #{match.team_size} on #{match.map}"
-            "FFA" -> "#{match.team_count} way FFA on #{match.map}"
-            v -> v
+            type when type in ["Small Team", "Large Team"] ->
+              "#{match.team_size} vs #{match.team_size} on #{match.map}"
+
+            "FFA" ->
+              "#{match.team_count} way FFA on #{match.map}"
+
+            v ->
+              v
           end
 
         time_ago =
