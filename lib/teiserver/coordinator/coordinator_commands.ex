@@ -196,12 +196,15 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       end)
       |> Enum.sort()
 
+    chevron_level = Map.get(stats, "rank", 0) + 1
+
     msg =
       [
         @splitter,
         "You are #{sender.name}",
         "#{total_hours} total hours (#{player_hours} h playing, #{spectator_hours} h spectating, #{lobby_hours} h in lobby)",
         "Profile link: #{profile_link}",
+        "Chevron level: #{chevron_level}",
         "Skill ratings:",
         ratings,
         accolades_string
