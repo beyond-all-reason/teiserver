@@ -37,6 +37,7 @@ defmodule Teiserver.DataCase do
 
   setup tags do
     setup_sandbox(tags)
+    on_exit(&Teiserver.TeiserverTestLib.clear_all_con_caches/0)
     :ok
   end
 
