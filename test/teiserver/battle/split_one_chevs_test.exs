@@ -150,7 +150,7 @@ defmodule Teiserver.Battle.SplitOneChevsTest do
       )
 
     assert result.logs == [
-             "Not enough noobs; calling another balancer.",
+             "Not enough new players; will use another balance algorithm.",
              "---------------------------",
              "Picked D for team 1, adding 8.0 points for new total of 8.0",
              "Picked C for team 2, adding 7.0 points for new total of 7.0",

@@ -37,7 +37,7 @@ defmodule Teiserver.Battle.Balance.SplitOneChevs do
       result = Teiserver.Battle.Balance.LoserPicks.perform(expanded_group, team_count, opts)
 
       new_logs =
-        ["Not enough noobs; calling another balancer.", @splitter, result.logs]
+        ["Not enough new players; will use another balance algorithm.", @splitter, result.logs]
         |> List.flatten()
 
       Map.put(result, :logs, new_logs)
