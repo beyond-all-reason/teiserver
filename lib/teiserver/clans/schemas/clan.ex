@@ -1,6 +1,17 @@
 defmodule Teiserver.Clans.Clan do
   use TeiserverWeb, :schema
 
+  # TODO: this type is incomplete
+  @type t :: %__MODULE__{
+          name: String.t(),
+          tag: String.t(),
+          colour: String.t(),
+          icon: String.t(),
+          description: String.t(),
+          rating: String.t(),
+          homepage: String.t()
+        }
+
   schema "teiserver_clans" do
     field :name, :string
     field :tag, :string

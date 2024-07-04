@@ -72,7 +72,7 @@ defmodule Teiserver.TeiserverTestLib do
     end
   end
 
-  @spec async_auth_setup(module(), nil | Map.t()) :: %{user: Map.t(), state: Map.t()}
+  @spec async_auth_setup(module(), nil | map()) :: %{user: map(), state: map()}
   def async_auth_setup(protocol, user \\ nil) do
     user = if user, do: user, else: new_user()
 
@@ -89,7 +89,7 @@ defmodule Teiserver.TeiserverTestLib do
     %{user: user, state: state}
   end
 
-  @spec auth_setup(nil | Map.t()) :: %{socket: port(), user: Map.t(), pid: pid()}
+  @spec auth_setup(nil | map()) :: %{socket: port(), user: map(), pid: pid()}
   def auth_setup(user \\ nil) do
     user = if user, do: user, else: new_user()
 
@@ -125,7 +125,7 @@ defmodule Teiserver.TeiserverTestLib do
     %{socket: socket, user: user, pid: pid}
   end
 
-  @spec tachyon_auth_setup(nil | Map.t()) :: %{socket: port(), user: Map.t(), pid: pid()}
+  @spec tachyon_auth_setup(nil | map()) :: %{socket: port(), user: map(), pid: pid()}
   def tachyon_auth_setup(user \\ nil) do
     user = if user, do: user, else: new_user()
     token = CacheUser.create_token(user)
@@ -411,7 +411,7 @@ defmodule Teiserver.TeiserverTestLib do
     }
   end
 
-  @spec conn_setup({:ok, List.t()}) :: {:ok, List.t()}
+  @spec conn_setup({:ok, list()}) :: {:ok, list()}
   def conn_setup({:ok, data}) do
     user = data[:user]
     CacheUser.recache_user(user.id)
@@ -449,7 +449,7 @@ defmodule Teiserver.TeiserverTestLib do
     ["Verified"]
   end
 
-  @spec make_clan(String.t(), Map.t()) :: Teiserver.Clans.Clan.t()
+  @spec make_clan(String.t(), map()) :: Teiserver.Clans.Clan.t()
   def make_clan(name, params \\ %{}) do
     {:ok, c} =
       Teiserver.Clans.create_clan(
@@ -500,7 +500,7 @@ defmodule Teiserver.TeiserverTestLib do
     lobby.id
   end
 
-  @spec make_clan_membership(Integer.t(), Integer.t(), Map.t()) ::
+  @spec make_clan_membership(integer(), integer(), map()) ::
           Teiserver.Clans.ClanMembership.t()
   def make_clan_membership(clan_id, user_id, data \\ %{}) do
     {:ok, gm} =
@@ -513,7 +513,7 @@ defmodule Teiserver.TeiserverTestLib do
     gm
   end
 
-  @spec make_queue(String.t(), Map.t()) :: Teiserver.Game.Queue.t()
+  @spec make_queue(String.t(), map()) :: Teiserver.Game.Queue.t()
   def make_queue(name, params \\ %{}) do
     {:ok, q} =
       Teiserver.Game.create_queue(
@@ -534,7 +534,7 @@ defmodule Teiserver.TeiserverTestLib do
     q
   end
 
-  @spec make_battle(Map.t()) :: Map.t()
+  @spec make_battle(map()) :: map()
   def make_battle(params \\ %{}) do
     id = :rand.uniform(99_999_999) + 1_000_000
 
