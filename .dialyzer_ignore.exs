@@ -33,6 +33,7 @@
   {"lib/teiserver/account/libs/smurf_key_type_lib.ex", :unknown_type},
   {"lib/teiserver/account/libs/user_lib.ex", :unknown_type},
   {"lib/teiserver/account/libs/user_lib.ex", :call},
+  {"lib/teiserver/account/libs/user_lib.ex", :no_return},
   {"lib/teiserver/account/libs/user_stat_lib.ex", :unknown_type},
   {"lib/teiserver/account/plugs/auth_plug.ex", :call},
   {"lib/teiserver/account/queries/friend_queries.ex", :unknown_type},
@@ -473,6 +474,7 @@
   {"lib/teiserver/telemetry/schemas/user_property.ex", :unknown_type},
   {"lib/teiserver_web/controllers/account/security_controller.ex", :unknown_type},
   {"lib/teiserver_web/controllers/account/session_controller.ex", :unknown_type},
+  {"lib/teiserver_web/controllers/account/session_controller.ex", :pattern_match},
   {"lib/teiserver_web/controllers/admin/accolade_controller.ex", :unknown_type},
   {"lib/teiserver_web/controllers/admin/accolade_controller.ex", :no_return},
   {"lib/teiserver_web/controllers/admin/achievement_controller.ex", :unknown_type},
@@ -505,6 +507,8 @@
   {"lib/teiserver_web/controllers/battle/match_controller.ex", :unknown_type},
   {"lib/teiserver_web/controllers/battle/ratings_controller.ex", :unknown_type},
   {"lib/teiserver_web/controllers/game/queue_controller.ex", :unknown_type},
+  {"lib/teiserver_web/controllers/game/queue_controller.ex", :no_return},
+  {"lib/teiserver_web/controllers/game/queue_controller.ex", :call},
   {"lib/teiserver_web/controllers/general/general_controller.ex", :unknown_type},
   {"lib/teiserver_web/controllers/logging/aggregate_view_log_controller.ex", :unknown_type},
   {"lib/teiserver_web/controllers/logging/aggregate_view_log_controller.ex", :no_return},
@@ -587,5 +591,11 @@
   {"lib/teiserver_web/templates/battle/match/index.html.heex", :call},
   {"lib/teiserver_web/templates/battle/match/ratings.html.heex", :no_return},
   {"lib/teiserver_web/templates/battle/match/ratings.html.heex", :call},
-  {"lib/teiserver_web/views/admin/code_view.ex", :invalid_contract}
+  {"lib/teiserver_web/views/admin/code_view.ex", :invalid_contract},
+  {"lib/teiserver_web/live/account/profile/overview.ex", :unused_fun},
+  {"lib/teiserver_web/live/account/profile/overview.ex", :pattern_match},
+  {"test/support/teiserver_test_lib.ex", :call},
+  {"test/support/teiserver_test_lib.ex", :no_return},
+  {"test/support/teiserver_test_lib.ex", :unused_fun},
+  {"test/support/teiserver_test_lib.ex", :pattern_match}
 ]
