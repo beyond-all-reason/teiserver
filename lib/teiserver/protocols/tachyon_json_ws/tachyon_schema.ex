@@ -3,7 +3,7 @@ defmodule Teiserver.Tachyon.Schema do
 
   """
 
-  @spec load_schemas :: list
+  @spec load_schemas :: {:ok, list}
   def load_schemas() do
     schemas =
       Application.get_env(:teiserver, Teiserver)[:tachyon_schema_path]
