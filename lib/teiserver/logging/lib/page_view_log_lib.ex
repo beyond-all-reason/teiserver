@@ -6,7 +6,7 @@ defmodule Teiserver.Logging.PageViewLogLib do
   def colours(), do: :info
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-chart-line"
+  def icon(), do: "fa-solid fa-chart-line"
 
   alias Teiserver.Logging.PageViewLog
 

@@ -13,12 +13,12 @@ moderator = allow?(@current_user, "Moderator") %>
         <div class="float-end">
           <%= if @client do %>
             <span class={"btn btn-#{bsname}"} phx-click="create_party">
-              <i class="fa-fw fa-regular fa-plus"></i> &nbsp;
+              <i class="fa-fw fa-solid fa-plus"></i> &nbsp;
               Create party
             </span>
           <% else %>
             <span class="btn btn-secondary disabled">
-              <i class="fa-fw fa-regular fa-wifi-exclamation"></i> &nbsp;
+              <i class="fa-fw fa-solid fa-wifi-exclamation"></i> &nbsp;
               Connect with client to enable functionality
             </span>
           <% end %>
@@ -103,7 +103,7 @@ moderator = allow?(@current_user, "Moderator") %>
                         phx-value-party_id={party.id}
                         class="btn btn-sm btn-success btn-block"
                       >
-                        <i class="fa-fw fa-regular fa-check"></i> &nbsp;
+                        <i class="fa-fw fa-solid fa-check"></i> &nbsp;
                         Accept invite
                       </span>
                     </td>
@@ -113,7 +113,7 @@ moderator = allow?(@current_user, "Moderator") %>
                         phx-value-party_id={party.id}
                         class="btn btn-sm btn-warning btn-block"
                       >
-                        <i class="fa-fw fa-regular fa-times"></i> &nbsp;
+                        <i class="fa-fw fa-solid fa-times"></i> &nbsp;
                         Decline invite
                       </span>
                     </td>
@@ -127,7 +127,7 @@ moderator = allow?(@current_user, "Moderator") %>
                       href={Routes.ts_game_party_show_path(@socket, :show, party.id)}
                       class="btn btn-sm btn-secondary"
                     >
-                      <i class="fa-fw fa-regular fa-power-off"></i> &nbsp;
+                      <i class="fa-fw fa-solid fa-power-off"></i> &nbsp;
                       Show as admin
                     </a>
                   </td>
