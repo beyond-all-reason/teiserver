@@ -1311,6 +1311,7 @@ defmodule Teiserver.CacheUser do
     ingame_hours = rank_time(userid)
 
     cond do
+      has_any_role?(userid, ["Tournament winner"]) -> 7
       has_any_role?(userid, ~w(Core Contributor)) -> 6
       ingame_hours > 1000 -> 5
       ingame_hours > 250 -> 4
