@@ -1,5 +1,5 @@
 # Teiserver
-[![Build and test](https://github.com/beyond-all-reason/teiserver/actions/workflows/tests.yml/badge.svg)](https://github.com/beyond-all-reason/teiserver/actions/workflows/tests.yml)
+[![Build and test](https://github.com/beyond-all-reason/teiserver/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/beyond-all-reason/teiserver/actions/workflows/tests.yml)
 
 An Elixir middleware server for game management; primarily used by [Beyond all Reason](https://www.beyondallreason.info/). Currently implementing the Spring protocol but with work being done on a new protocol [Tachyon](https://github.com/beyond-all-reason/tachyon).
 
