@@ -52,6 +52,8 @@ defmodule Teiserver.Helper.StylingHelper do
   def get_bsname(colour), do: elem(colours(colour), 2)
 
   @spec icon(atom) :: String.t()
+  def icon(nil), do: nil
+  def icon(nil, _), do: nil
   def icon(atom), do: icon(atom, "solid")
 
   @spec icon(atom, String.t()) :: String.t()
@@ -82,13 +84,13 @@ defmodule Teiserver.Helper.StylingHelper do
 
   def icon(:summary, fa_type), do: "fa-#{fa_type} fa-clipboard-list"
 
-  def icon(:chart, fa_type), do: "fa-#{fa_type} fa-chart-line"
+  def icon(:chart, _fa_type), do: "fa-solid fa-chart-line"
 
-  def icon(:day, fa_type), do: "fa-#{fa_type} fa-calendar-day"
-  def icon(:week, fa_type), do: "fa-#{fa_type} fa-calendar-week"
-  def icon(:month, fa_type), do: "fa-#{fa_type} fa-calendar-range"
-  def icon(:quarter, fa_type), do: "fa-#{fa_type} fa-calendar"
-  def icon(:year, fa_type), do: "fa-#{fa_type} fa-circle-calendar"
+  def icon(:day, _fa_type), do: ""
+  def icon(:week, _fa_type), do: ""
+  def icon(:month, _fa_type), do: ""
+  def icon(:quarter, _fa_type), do: ""
+  def icon(:year, _fa_type), do: ""
 
   # defp split_colour(c) do
   #   {r, _} = c |> String.slice(1, 2) |> Integer.parse(16)
@@ -224,7 +226,7 @@ defmodule Teiserver.Helper.StylingHelper do
   @spec random_styling() :: Map.t()
   def random_styling() do
     %{
-      "icon" => "fa-regular fa-" <> random_icon(),
+      "icon" => "fa-solid fa-" <> random_icon(),
       "colour" => random_colour()
     }
   end
