@@ -8,6 +8,7 @@ defmodule TeiserverWeb.Report.GeneralControllerTest do
     |> Teiserver.TeiserverTestLib.conn_setup()
   end
 
+  @tag :needs_attention
   test "index", %{conn: conn} do
     conn = get(conn, Routes.ts_reports_general_path(conn, :index))
 

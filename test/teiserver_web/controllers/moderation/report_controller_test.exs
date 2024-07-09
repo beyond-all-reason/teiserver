@@ -6,6 +6,8 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
 
   alias Central.Helpers.GeneralTestLib
 
+  @moduletag :needs_attention
+
   setup do
     GeneralTestLib.conn_setup(["Reviewer", "Moderator"])
     |> Teiserver.TeiserverTestLib.conn_setup()

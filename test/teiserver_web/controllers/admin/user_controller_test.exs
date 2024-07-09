@@ -53,6 +53,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   end
 
   describe "new user" do
+    @tag :needs_attention
     test "renders form", %{conn: conn} do
       conn = get(conn, ~p"/teiserver/admin/user/new")
       assert html_response(conn, 200) =~ "Save changes"
@@ -89,6 +90,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       assert html_response(conn, 200) =~ "#0000AA"
     end
 
+    @tag :needs_attention
     test "renders errors when data is invalid", %{conn: conn, user: user} do
       conn = put(conn, ~p"/teiserver/admin/user/#{user}", user: @invalid_attrs)
       assert html_response(conn, 200) =~ "Oops, something went wrong!"

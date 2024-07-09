@@ -10,6 +10,10 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1]
 
+  # this may have to go completely, or needs *serious* changes since it's based
+  # on old tachyon version (based on direct tls socket and custom proto, not ws)
+  @moduletag :needs_attention
+
   setup do
     Coordinator.start_coordinator()
     %{socket: hsocket, user: host} = tachyon_auth_setup()

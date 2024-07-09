@@ -9,6 +9,18 @@ defmodule Teiserver.Game.Queue do
   """
   use TeiserverWeb, :schema
 
+  # TODO: this type is incomplete
+  @type t :: %__MODULE__{
+          name: String.t(),
+          team_size: integer(),
+          team_count: integer(),
+          icon: String.t(),
+          colour: String.t(),
+          conditions: map(),
+          settings: map(),
+          map_list: list(String.t())
+        }
+
   schema "teiserver_game_queues" do
     field :name, :string
     field :team_size, :integer

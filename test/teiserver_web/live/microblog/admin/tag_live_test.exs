@@ -49,6 +49,7 @@ defmodule TeiserverWeb.TagLiveTest do
   describe "Basic auth test" do
     setup [:unauth_setup, :create_tag]
 
+    @tag :needs_attention
     test "basic user", %{tag: tag, conn: conn} do
       {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/tags")
       assert resp == %{flash: %{"info" => "Welcome back!"}, to: ~p"/microblog"}

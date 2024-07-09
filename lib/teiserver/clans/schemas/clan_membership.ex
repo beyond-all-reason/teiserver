@@ -1,6 +1,13 @@
 defmodule Teiserver.Clans.ClanMembership do
   use TeiserverWeb, :schema
 
+  # TODO: this type is incomplete
+  @type t :: %__MODULE__{
+          role: String.t(),
+          user: any(),
+          clan: any()
+        }
+
   @primary_key false
   schema "teiserver_clan_memberships" do
     field :role, :string
