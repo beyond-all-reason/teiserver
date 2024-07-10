@@ -27,6 +27,8 @@ defmodule Teiserver.Battle.BalanceLib do
   # which one will get to pick first
   @shuffle_first_pick true
 
+  @default_balance_algorithm "loser_picks"
+
   @spec defaults() :: map()
   def defaults() do
     %{
@@ -38,6 +40,11 @@ defmodule Teiserver.Battle.BalanceLib do
       fuzz_multiplier: @fuzz_multiplier,
       shuffle_first_pick: @shuffle_first_pick
     }
+  end
+
+  def get_default_algorithm() do
+    # For now it's a constant but this could be moved to a configurable value
+    @default_balance_algorithm
   end
 
   @spec algorithm_modules() :: %{String.t() => module}
@@ -53,6 +60,7 @@ defmodule Teiserver.Battle.BalanceLib do
   @doc """
   Teifion only allowed force_party to be used by mods because it led to noob-stomping unbalanced teams
   """
+  @spec get_allowed_algorithms(boolean()) :: [String.t()]
   def get_allowed_algorithms(is_moderator) do
     if(is_moderator) do
       Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
@@ -81,6 +89,12 @@ defmodule Teiserver.Battle.BalanceLib do
     mean_diff_max: the maximum difference in mean between the party and paired parties
     stddev_diff_max: the maximum difference in stddev between the party and paired parties
   """
+  @spec create_balance([BT.player_group()], non_neg_integer) :: map
+  def create_balance(groups, team_count) do
+    # This method sets default opts (and makes some warnings go away)
+    create_balance(groups, team_count, [])
+  end
+
   @spec create_balance([BT.player_group()], non_neg_integer, list) :: map
   def create_balance([], _team_count, _opts) do
     %{
@@ -93,7 +107,8 @@ defmodule Teiserver.Battle.BalanceLib do
       team_players: %{},
       team_sizes: %{},
       means: %{},
-      stdevs: %{}
+      stdevs: %{},
+      has_parties?: false
     }
   end
 
@@ -118,6 +133,15 @@ defmodule Teiserver.Battle.BalanceLib do
             end
           end)
 
+        uncertainties =
+          Map.values(members)
+          |> Enum.map(fn x ->
+            cond do
+              Map.has_key?(x, :uncertainty) -> x.uncertainty
+              true -> 0
+            end
+          end)
+
         names =
           members
           |> Enum.map(fn {id, details} ->
@@ -133,15 +157,18 @@ defmodule Teiserver.Battle.BalanceLib do
           ranks: ranks,
           names: names,
           group_rating: Enum.sum(ratings),
-          count: Enum.count(ratings)
+          count: Enum.count(ratings),
+          uncertainties: uncertainties
         }
       end)
 
+    algo_name = opts[:algorithm] || get_default_algorithm()
+
     # Now we pass this to the algorithm and it does the rest!
     balance_result =
-      case algorithm_modules()[opts[:algorithm] || "loser_picks"] do
+      case algorithm_modules()[algo_name] do
         nil ->
-          raise "No balance module by the name of '#{opts[:algorithm] || "loser_picks"}'"
+          raise "No balance module by the name of '#{algo_name}'"
 
         m ->
           m.perform(expanded_groups, team_count, opts)
@@ -164,9 +191,16 @@ defmodule Teiserver.Battle.BalanceLib do
     |> Enum.map(fn group ->
       # Iterate over our map
       Map.new(group, fn {user_id, value} ->
-        cond do
-          is_number(value) -> {user_id, get_user_rating_rank_old(user_id, value)}
-          true -> {user_id, value}
+        case value do
+          x when is_number(x) ->
+            {user_id, get_user_rating_rank_old(user_id, x)}
+
+          # match_controller will use this condition when balancing using old data
+          %{"rating_value" => rating_value, "uncertainty" => uncertainty} ->
+            {user_id, get_user_rating_rank_old(user_id, rating_value, uncertainty)}
+
+          _ ->
+            {user_id, value}
         end
       end)
     end)
@@ -176,7 +210,7 @@ defmodule Teiserver.Battle.BalanceLib do
   defp cleanup_result(result) do
     Map.take(
       result,
-      ~w(team_groups team_players ratings captains team_sizes deviation means stdevs logs)a
+      ~w(team_groups team_players ratings captains team_sizes deviation means stdevs logs has_parties?)a
     )
   end
 
@@ -221,7 +255,8 @@ defmodule Teiserver.Battle.BalanceLib do
 
     Map.merge(balance_result, %{
       team_groups: team_groups,
-      team_players: team_players
+      team_players: team_players,
+      has_parties?: balanced_teams_has_parties?(team_groups)
     })
   end
 
@@ -560,17 +595,10 @@ defmodule Teiserver.Battle.BalanceLib do
     get_user_rating_value(userid, rating_type_id)
   end
 
-  # Used to get the rating value of the user for internal balance purposes which might be
-  # different from public/reporting
   @spec get_user_balance_rating_value(T.userid(), String.t() | non_neg_integer()) ::
           BT.rating_value()
   defp get_user_balance_rating_value(userid, rating_type_id) when is_integer(rating_type_id) do
-    real_rating = get_user_rating_value(userid, rating_type_id)
-
-    stats = Account.get_user_stat_data(userid)
-    adjustment = int_parse(stats["os_global_adjust"])
-
-    real_rating + adjustment
+    get_user_rating_value(userid, rating_type_id)
   end
 
   defp get_user_balance_rating_value(_userid, nil), do: nil
@@ -586,26 +614,39 @@ defmodule Teiserver.Battle.BalanceLib do
 
   def get_user_rating_rank(userid, rating_type, fuzz_multiplier) do
     # This call will go to db or cache
-    # The cache for ratings is :teiserver_user_stat_cache
+    # The cache for ratings is :teiserver_user_ratings
     # which has an expiry of 60s
     # See application.ex for cache settings
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
-    rating = get_user_balance_rating_value(userid, rating_type_id)
+    {skill, uncertainty} = get_user_rating_value_uncertainty_pair(userid, rating_type_id)
+    rating = calculate_rating_value(skill, uncertainty)
     rating = fuzz_rating(rating, fuzz_multiplier)
+
+    # Get stats data
+    # Potentially adjust ratings based on os_global_adjust
+    stats_data = Account.get_user_stat_data(userid)
+    adjustment = int_parse(stats_data["os_global_adjust"])
+    rating = rating + adjustment
+    rank = Map.get(stats_data, "rank", 0)
+
     # This call will go to db or cache
     # The cache for users is :users
     # which is permanent (and would be instantiated on login)
     # See application.ex for cache settings
-    %{rank: rank, name: name} = Account.get_user_by_id(userid)
-    %{rating: rating, rank: rank, name: name}
+
+    %{name: name} = Account.get_user_by_id(userid)
+    %{rating: rating, rank: rank, name: name, uncertainty: uncertainty}
   end
 
   @doc """
   This is used by some screens to calculate a theoretical balance based on old ratings
   """
-  def get_user_rating_rank_old(userid, rating_value) do
-    %{rank: rank, name: name} = Account.get_user_by_id(userid)
-    %{rating: rating_value, rank: rank, name: name}
+  def get_user_rating_rank_old(userid, rating_value, uncertainty \\ 0) do
+    stats_data = Account.get_user_stat_data(userid)
+    rank = Map.get(stats_data, "rank", 0)
+
+    %{name: name} = Account.get_user_by_id(userid)
+    %{rating: rating_value, rank: rank, name: name, uncertainty: uncertainty}
   end
 
   defp fuzz_rating(rating, multiplier) do
@@ -836,5 +877,31 @@ defmodule Teiserver.Battle.BalanceLib do
     else
       for(y <- make_combinations(n - x.count, xs), do: [x | y]) ++ make_combinations(n, xs)
     end
+  end
+
+  @doc """
+  Can be called to detect if a balance result has parties
+  If the result has no parties we do not need to check team deviation
+  """
+  def balanced_teams_has_parties?(team_groups) do
+    Enum.reduce_while(team_groups, false, fn {_key, team}, _acc ->
+      case team_has_parties?(team) do
+        true -> {:halt, true}
+        false -> {:cont, false}
+      end
+    end)
+  end
+
+  @spec team_has_parties?([BT.group()]) :: boolean()
+  def team_has_parties?(team) do
+    Enum.reduce_while(team, false, fn x, _acc ->
+      group_count = x[:count]
+
+      if group_count > 1 do
+        {:halt, true}
+      else
+        {:cont, false}
+      end
+    end)
   end
 end

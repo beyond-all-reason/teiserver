@@ -120,4 +120,20 @@ defmodule Teiserver.Helper.NumberHelper do
   def percent(v, dp) do
     round(v * 100, dp)
   end
+
+  @doc """
+  Use this function for printing floats with only one decimal place.
+  Integers will be returned without modification.
+  If you need to always print the same amount of decimals no matter if float or integer,
+  then use the round function also defined in this module.
+  """
+  def format(rating_value) when is_float(rating_value) do
+    rating_value
+    |> Decimal.from_float()
+    |> Decimal.round(1)
+  end
+
+  def format(rating_value) when is_integer(rating_value) do
+    rating_value
+  end
 end
