@@ -90,7 +90,7 @@
           <tr phx-click={"[[\"navigate\",{\"href\":\"/battle/#{log.match_id}\",\"replace\":false}]]"}>
             <%= if log.match do %>
               <td>
-               <%= live_redirect "#{log.match.map}", to: ~p"/battle/#{log.match_id}" %>
+                <%= live_redirect("#{log.match.map}", to: ~p"/battle/#{log.match_id}") %>
               </td>
               <td><%= log.match.team_size * log.match.team_count %></td>
             <% else %>
