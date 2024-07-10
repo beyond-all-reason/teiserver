@@ -9,7 +9,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
 
   @rank_upper_bound 1000
   @rating_upper_bound 1000
-  @splitter "---------------------------"
+  @splitter "------------------------------------------------------"
   @spec rank_upper_bound() :: number
   def rank_upper_bound, do: @rank_upper_bound
   def rating_upper_bound, do: @rating_upper_bound
@@ -193,23 +193,54 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
         {:error,
          "* You cannot declare a lobby to be all welcome if there are player restrictions"}
 
-      is_noob_title?(name) ->
-        {:ok, get_noob_looby_tips()}
-
       true ->
-        {:ok, nil}
+        {:ok, get_tips(name)}
+    end
+  end
+
+  defp get_tips(name) do
+    tips =
+      case is_noob_title?(name) do
+        true -> get_noob_looby_tips()
+        false -> []
+      end
+
+    tips =
+      case is_rotato_title?(name) do
+        true -> tips ++ get_rotato_tips()
+        false -> tips
+      end
+
+    case length(tips) do
+      0 -> nil
+      _ -> tips
     end
   end
 
   defp get_noob_looby_tips() do
     [
       @splitter,
-      "Noob lobby tips",
+      "Useful commands for Noob lobbies",
       @splitter,
-      "To restrict this lobby to players who are new, use command:",
+      "To restrict this lobby to players who are new, use either:",
       "$maxchevlevel <chevlevel>",
-      "To ensure new players are distributed evenly across teams, use command:",
-      "$balancemode split_one_chevs"
+      "$maxratinglevel <rating>",
+      "",
+      "To ensure new players are distributed evenly across teams:",
+      "$balancemode split_one_chevs",
+      ""
+    ]
+  end
+
+  defp get_rotato_tips() do
+    [
+      # Temporary tips until this is part of Chobby UI
+      @splitter,
+      "Useful commands for map rotation",
+      @splitter,
+      "To turn on/off auto map rotation at end of each match:",
+      "!rotationEndGame <(random|off)>",
+      ""
     ]
   end
 
@@ -277,5 +308,20 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
 
     # Returns true if both critera met
     noob_matches > 0 && anti_noob_matches == 0
+  end
+
+  @spec is_rotato_title?(String.t()) :: boolean()
+  def is_rotato_title?(title) do
+    title =
+      title
+      |> String.downcase()
+
+    regex = ~r/\b(rotat)/
+
+    matches =
+      Regex.scan(regex, title)
+      |> Enum.count()
+
+    matches > 0
   end
 end
