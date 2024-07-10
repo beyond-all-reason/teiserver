@@ -24,4 +24,5 @@ defmodule TeiserverWeb.Admin.GeneralView do
   def view_colour("config"), do: Teiserver.Config.SiteConfigLib.colours()
   def view_colour("tool"), do: Teiserver.Admin.ToolLib.colours()
   def view_colour("codes"), do: Teiserver.Account.CodeLib.colours()
+  def view_colour("oauth_applications"), do: Teiserver.OAuth.ApplicationLib.colours()
 end

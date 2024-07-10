@@ -17,10 +17,19 @@ defmodule Teiserver.OAuth do
   alias Teiserver.Account.User
   alias Teiserver.Data.Types, as: T
 
+  # @spec change_application(Application.t(), map() | nil) :: Ecto.Changeset
+  def change_application(%Application{} = app, attrs \\ %{}) do
+    Application.changeset(app, attrs)
+  end
+
   def create_application(attrs \\ %{}) do
     %Application{}
     |> Application.changeset(attrs)
     |> Repo.insert()
+  end
+
+  def update_application(%Application{} = app, attrs) do
+    app |> change_application(attrs) |> Repo.update()
   end
 
   @spec delete_application(Application.t()) :: :ok | {:error, term()}

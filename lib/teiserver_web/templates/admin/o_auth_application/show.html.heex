@@ -1,0 +1,58 @@
+<div class="container">
+  <h1><%= @app.name %></h1>
+  <div class="row">
+    <div class="col-6">
+      <table class="table">
+        <tbody>
+          <tr>
+            <td>id</td>
+            <td><%= @app.id %></td>
+          </tr>
+          <tr>
+            <td>client id (uid)</td>
+            <td><%= @app.uid %></td>
+          </tr>
+          <tr>
+            <td>owner</td>
+            <td><%= @app.owner.name %> (<%= @app.owner.email %>)</td>
+          </tr>
+          <tr>
+            <td>description</td>
+            <td><%= @app.description %></td>
+          </tr>
+          <tr>
+            <td>scopes</td>
+            <td>
+              <span :for={scope <- @app.scopes} class="badge badge-success"><%= scope %></span>
+            </td>
+          </tr>
+          <tr :if={length(@app.redirect_uris) > 0}>
+            <td>redirect uris</td>
+            <td>
+              <span :for={uri <- @app.redirect_uris} class="badge badge-success"><%= uri %></span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <%!-- TODO: add some application stats, like the number of authorization code, --%>
+  <%!-- bearer token, refresh token and client id/secret associated with this app --%>
+
+  <p>
+    <Phx.link href={~p"/teiserver/admin/oauth_application/#{@app.id}/edit"}>
+      <button type="button" class="btn btn-primary">Edit</button>
+    </Phx.link>
+
+    <%!-- TODO: add a modal confirmation for deleting an app --%>
+    <CC.simple_form
+      for={}
+      action={~p"/teiserver/admin/oauth_application/#{@app.id}"}
+      method="delete"
+    >
+      <:actions>
+        <CC.button type="submit" class="btn-danger">Delete</CC.button>
+      </:actions>
+    </CC.simple_form>
+  </p>
+</div>
