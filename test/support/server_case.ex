@@ -28,6 +28,10 @@ defmodule Teiserver.ServerCase do
   end
 
   setup tags do
+    # clearing the caches *before* shouldn't be needed, but until we clean
+    # all the tests that have side effects, this is a stopgap measure to avoid
+    # more false failures.
+    Teiserver.TeiserverTestLib.clear_all_con_caches()
     Teiserver.DataCase.setup_sandbox(tags)
     on_exit(&Teiserver.TeiserverTestLib.clear_all_con_caches/0)
     :ok

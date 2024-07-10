@@ -145,9 +145,12 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     sender = CacheUser.get_user_by_id(senderid)
     stats = Account.get_user_stat_data(senderid)
 
-    total_hours = (Map.get(stats, "total_minutes", 0) / 60) |> round
-    player_hours = (Map.get(stats, "player_minutes", 0) / 60) |> round
-    spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> round
+    # Hours should be rounded down to make it more
+    # accurate for determining if a chevron threshold is reached
+    total_hours = (Map.get(stats, "total_minutes", 0) / 60) |> trunc
+    player_hours = (Map.get(stats, "player_minutes", 0) / 60) |> trunc
+    spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> trunc
+    lobby_hours = (Map.get(stats, "lobby_minutes", 0) / 60) |> trunc
 
     host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     profile_link = "https://#{host}/profile/#{senderid}"
@@ -193,12 +196,15 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       end)
       |> Enum.sort()
 
+    chevron_level = Map.get(stats, "rank", 0) + 1
+
     msg =
       [
         @splitter,
         "You are #{sender.name}",
-        "Playtime: #{total_hours} hours (#{player_hours} h playing, #{spectator_hours} h spectating)",
+        "#{total_hours} total hours (#{player_hours} h playing, #{spectator_hours} h spectating, #{lobby_hours} h in lobby)",
         "Profile link: #{profile_link}",
+        "Chevron level: #{chevron_level}",
         "Skill ratings:",
         ratings,
         accolades_string
@@ -275,11 +281,14 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           end)
           |> Enum.sort()
 
+        chevron_level = Map.get(stats, "rank", 0) + 1
+
         standard_parts = [
           @splitter,
           "Found #{user.name}",
           if(previous_names != "", do: "Previous names: #{previous_names}"),
           "Profile link: #{profile_link}",
+          "Chevron level: #{chevron_level}",
           ["Ratings:" | ratings],
           moderation_data,
           @splitter

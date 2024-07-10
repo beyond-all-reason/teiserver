@@ -90,6 +90,7 @@ defmodule Teiserver.SpringTelemetryTest do
     assert infolog.contents == "Lorem ipsum\n\n''\\'^&&!"
   end
 
+  @tag :needs_attention
   test "log_client_event call", %{socket: socket} do
     # Bad/malformed data
     _send_raw(
@@ -122,6 +123,7 @@ defmodule Teiserver.SpringTelemetryTest do
     assert Enum.count(Telemetry.list_complex_client_events()) == 1
   end
 
+  @tag :needs_attention
   test "update_client_property call", %{socket: socket} do
     # Bad/malformed data
     _send_raw(

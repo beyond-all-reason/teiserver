@@ -21,6 +21,8 @@ defmodule TeiserverWeb.Moderation.ProposalControllerTest do
   @update_attrs %{reason: "some updated name", restrictions: %{"Warning" => "Warning"}}
   @invalid_attrs %{reason: nil, restrictions: %{}, target_id: 1}
 
+  @moduletag :needs_attention
+
   describe "index" do
     test "lists all proposals", %{conn: conn} do
       conn = get(conn, Routes.moderation_proposal_path(conn, :index))

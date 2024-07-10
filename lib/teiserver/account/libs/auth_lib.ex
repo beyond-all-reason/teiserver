@@ -3,7 +3,7 @@ defmodule Teiserver.Account.AuthLib do
   require Logger
 
   @spec icon :: String.t()
-  def icon(), do: "fa-regular fa-address-card"
+  def icon(), do: "fa-solid fa-address-card"
 
   @spec get_all_permission_sets() :: Map.t()
   def get_all_permission_sets do

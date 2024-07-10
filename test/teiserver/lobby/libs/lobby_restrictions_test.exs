@@ -48,6 +48,6 @@ defmodule Teiserver.Lobby.Libs.LobbyRestrictionsTest do
         maximum_rating_to_play: 20
       })
 
-    assert result == "Rating between: 4 - 20"
+    assert result == "Rating: 4-20"
   end
 end

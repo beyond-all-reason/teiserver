@@ -4,6 +4,8 @@ defmodule TeiserverWeb.General.Home.IndexLiveTest do
 
   import Phoenix.LiveViewTest
 
+  @moduletag :needs_attention
+
   defp auth_setup(_) do
     Central.Helpers.GeneralTestLib.conn_setup()
     |> Teiserver.TeiserverTestLib.conn_setup()

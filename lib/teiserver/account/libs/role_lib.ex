@@ -45,6 +45,12 @@ defmodule Teiserver.Account.RoleLib do
       icon: "fa-solid fa-check",
       contains: ~w()
     },
+    %{
+      name: "Tournament winner",
+      colour: "#AA8833",
+      icon: "fa-solid fa-trophy",
+      contains: ~w()
+    },
 
     # Community team
     %{
@@ -250,7 +256,7 @@ defmodule Teiserver.Account.RoleLib do
 
   @spec property_roles :: [String.t()]
   def property_roles() do
-    ["Trusted", "BAR+", "Verified", "Streamer"]
+    ["Trusted", "BAR+", "Verified", "Streamer", "Tournament winner"]
   end
 
   @spec allowed_role_management(String.t()) :: [String.t()]

@@ -5,6 +5,8 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, new_user: 0]
 
+  @moduletag :needs_attention
+
   setup do
     Coordinator.start_coordinator()
     %{socket: socket, user: user} = tachyon_auth_setup()

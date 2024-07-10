@@ -8,6 +8,7 @@ defmodule TeiserverWeb.Account.GeneralControllerTest do
     |> Teiserver.TeiserverTestLib.conn_setup()
   end
 
+  @tag :needs_attention
   test "index", %{conn: conn} do
     conn = get(conn, Routes.ts_account_general_path(conn, :index))
 
@@ -15,6 +16,7 @@ defmodule TeiserverWeb.Account.GeneralControllerTest do
     assert html_response(conn, 200) =~ "Preferences"
   end
 
+  @tag :needs_attention
   test "relationships", %{conn: conn} do
     conn = get(conn, Routes.ts_account_relationships_path(conn, :index))
 

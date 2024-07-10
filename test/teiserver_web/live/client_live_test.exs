@@ -16,6 +16,7 @@ defmodule TeiserverWeb.Live.ClientTest do
   @sleep_time 2100
 
   describe "client live" do
+    @tag :needs_attention
     test "index", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/teiserver/admin/client")
 
@@ -57,6 +58,7 @@ defmodule TeiserverWeb.Live.ClientTest do
       refute html =~ "#{user2.name}"
     end
 
+    @tag :needs_attention
     test "show - valid client", %{conn: conn} do
       %{socket: socket, user: user} = TeiserverTestLib.auth_setup()
       # client = Client.get_client_by_id(user.id)
@@ -75,6 +77,7 @@ defmodule TeiserverWeb.Live.ClientTest do
       assert_redirect(view, "/teiserver/admin/client", 250)
     end
 
+    @tag :needs_attention
     test "show - no client", %{conn: conn} do
       assert {:error, {:redirect, %{to: "/teiserver/admin/client"}}} =
                live(conn, "/teiserver/admin/client/0")

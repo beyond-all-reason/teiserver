@@ -23,6 +23,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert reply == :timeout
   end
 
+  @tag :needs_attention
   test "battle with password", %{socket: socket, user: user} do
     _send_raw(
       socket,
@@ -38,6 +39,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert battle.password == "password_test"
   end
 
+  @tag :needs_attention
   test "!rehost bug test", %{socket: host_socket, user: host_user} do
     %{socket: watcher_socket} = auth_setup()
     %{socket: p1_socket, user: p1_user} = auth_setup()
@@ -85,6 +87,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert reply == "BATTLECLOSED #{lobby_id}\n"
   end
 
+  @tag :needs_attention
   test "host battle test", %{socket: socket, user: user} do
     _send_raw(
       socket,

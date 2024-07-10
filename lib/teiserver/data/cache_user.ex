@@ -1315,6 +1315,7 @@ defmodule Teiserver.CacheUser do
     # Thresholds should match what is on the website:
     # https://www.beyondallreason.info/guide/rating-and-lobby-balance#rank-icons
     cond do
+      has_any_role?(userid, ["Tournament winner"]) -> 7
       has_any_role?(userid, ~w(Core Contributor)) -> 6
       ingame_hours >= 1000 -> 5
       ingame_hours >= 250 -> 4

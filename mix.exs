@@ -132,8 +132,7 @@ defmodule Teiserver.MixProject do
     [
       plt_core_path: "priv/plts",
       plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
-      # https://stackoverflow.com/questions/51208388/how-to-fix-dialyzer-callback-info-about-the-behaviour-is-not-available
-      plt_add_apps: [:mix]
+      plt_add_apps: [:ex_unit]
     ]
   end
 

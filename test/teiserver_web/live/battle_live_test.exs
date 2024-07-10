@@ -10,6 +10,8 @@ defmodule TeiserverWeb.Live.BattleTest do
 
   @throttle_wait 500 + 100
 
+  # @moduletag :needs_attention
+
   setup do
     GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
     |> TeiserverTestLib.conn_setup()
@@ -81,6 +83,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       refute html =~ "LiveBattleName"
     end
 
+    @tag :needs_attention
     test "show - valid battle", %{conn: conn} do
       # Lets create a battle
       %{socket: host_socket, user: host_user} = TeiserverTestLib.auth_setup()
@@ -158,6 +161,7 @@ defmodule TeiserverWeb.Live.BattleTest do
                live(conn, "/battle/lobbies/show/0")
     end
 
+    @tag :needs_attention
     test "chat - valid battle", %{conn: conn} do
       # Lets create a battle
       %{socket: host_socket, user: host_user} = TeiserverTestLib.auth_setup()

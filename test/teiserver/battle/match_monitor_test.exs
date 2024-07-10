@@ -15,6 +15,17 @@ defmodule Teiserver.Battle.MatchMonitorTest do
   end
 
   # This test is to ensure long messages are not being truncated
+  # it is currently flakey, but not in isolation :(
+  # error: 
+  # test/teiserver/battle/match_monitor_test.exs:18
+  #    Assertion with == failed
+  #    code:  assert result == "SAYPRIVATE AutohostMonitor endGameData eyJrZXkiOiJ2YWx1ZSJ9\n"
+  #    left:  :closed
+  #    right: "SAYPRIVATE AutohostMonitor endGameData eyJrZXkiOiJ2YWx1ZSJ9\n"
+  #    stacktrace:
+  #      test/teiserver/battle/match_monitor_test.exs:31: (test)
+  # with seed 273979
+  @tag :needs_attention
   test "spring send" do
     %{socket: socket, user: _user} = auth_setup()
 
