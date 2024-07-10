@@ -27,6 +27,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? newlobby jazlobby tournament)
   @boss_commands ~w(balancemode gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
+  # A tester can use these commands when there is no boss
+  @tester_commands ~w(balancemode)
   @vip_boss_commands ~w(shuffle)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock makebalance)
 
@@ -1013,6 +1015,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     is_host = senderid == state.host_id
     is_boss = Enum.member?(state.host_bosses, senderid)
     is_vip = Enum.member?(user.roles, "VIP")
+    is_tester = Enum.member?(user.roles, "Tester")
 
     cond do
       client == nil ->
@@ -1031,6 +1034,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
         true
 
       Enum.member?(@boss_commands, cmd.command) and (is_host or is_boss) ->
+        true
+
+      Enum.member?(@tester_commands, cmd.command) and length(state.host_bosses) == 0 and is_tester ->
         true
 
       Enum.member?(@vip_boss_commands, cmd.command) and (is_vip and is_boss) ->
