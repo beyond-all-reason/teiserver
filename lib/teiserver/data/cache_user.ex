@@ -1316,7 +1316,7 @@ defmodule Teiserver.CacheUser do
     # https://www.beyondallreason.info/guide/rating-and-lobby-balance#rank-icons
     cond do
       has_any_role?(userid, ["Tournament winner"]) -> 7
-      has_any_role?(userid, ~w(Core Contributor)) -> 6
+      has_any_role?(userid, ~w(Core Contributor)) and !Account.hide_contributor_rank?(userid) -> 6
       ingame_hours >= 1000 -> 5
       ingame_hours >= 250 -> 4
       ingame_hours >= 100 -> 3

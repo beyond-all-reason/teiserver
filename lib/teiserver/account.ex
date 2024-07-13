@@ -2152,4 +2152,17 @@ defmodule Teiserver.Account do
 
   @spec call_party(T.party_id(), any) :: any | nil
   defdelegate call_party(party_id, msg), to: PartyLib
+
+  @spec hide_contributor_rank?(T.userid()) :: boolean()
+  def hide_contributor_rank?(userid) do
+    stats_data = get_user_stat_data(userid)
+    Map.get(stats_data, "hide_contributor_rank", false)
+  end
+
+  @spec set_hide_contributor_rank(T.userid(), boolean()) :: any()
+  def set_hide_contributor_rank(userid, boolean_value) do
+    update_user_stat(userid, %{
+      "hide_contributor_rank" => boolean_value
+    })
+  end
 end
