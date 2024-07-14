@@ -5,9 +5,7 @@ defmodule Teiserver.Battle.BruteForceTest do
   """
   use Teiserver.DataCase, async: true
   @moduletag :balance_test
-  alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle.Balance.BruteForce
-  alias Teiserver.Helper.CombinationsHelper
 
   test "can process expanded_group" do
     # https://server5.beyondallreason.info/battle/2092529/players

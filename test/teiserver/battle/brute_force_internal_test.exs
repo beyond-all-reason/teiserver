@@ -5,7 +5,6 @@ defmodule Teiserver.Battle.BruteForceInternalTest do
   """
   use Teiserver.DataCase, async: true
   @moduletag :balance_test
-  alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle.Balance.BruteForce
   alias Teiserver.Helper.CombinationsHelper
 
@@ -69,15 +68,15 @@ defmodule Teiserver.Battle.BruteForceInternalTest do
     ]
 
     result = BruteForce.count_broken_parties(first_team, parties)
-    assert result = 1
+    assert result == 1
 
     parties = [["kyutoryu", "fbots1998", "A"], ["Dix", "Dixinormus"]]
     result = BruteForce.count_broken_parties(first_team, parties)
-    assert result = 2
+    assert result == 2
 
     parties = [["A", "B", "C"], ["HungDaddy", "fbots1998"]]
     result = BruteForce.count_broken_parties(first_team, parties)
-    assert result = 0
+    assert result == 0
   end
 
   test "can get all combos" do
