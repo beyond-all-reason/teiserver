@@ -1,6 +1,6 @@
-defmodule Teiserver.OAuth.ApplicationLib do
+defmodule Teiserver.AutohostLib do
   @spec icon :: String.t()
-  def icon, do: "fa-solid fa-passport"
+  def icon, do: "fa-solid fa-robot"
 
   @spec colours :: atom
   def colours, do: :success2

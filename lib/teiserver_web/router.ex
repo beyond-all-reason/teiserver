@@ -688,5 +688,6 @@ defmodule TeiserverWeb.Router do
     get("/lobbies/:id/lobby_chat/:page", LobbyController, :lobby_chat)
 
     resources("/oauth_application", OAuthApplicationController)
+    resources("/autohost", AutohostController)
   end
 end

@@ -1,0 +1,17 @@
+<div class="container">
+  <h1>Autohost: <%= @autohost.name %></h1>
+  <%!-- TODO: add a list of oauth credentials + action to delete them --%>
+
+  <p>
+    <Phx.link href={~p"/teiserver/admin/autohost/#{@autohost.id}/edit"}>
+      <button type="button" class="btn btn-primary">Edit</button>
+    </Phx.link>
+
+    <%!-- TODO: add a modal confirmation for deleting an autohost --%>
+    <CC.simple_form for={} action={~p"/teiserver/admin/autohost/#{@autohost.id}"} method="delete">
+      <:actions>
+        <CC.button type="submit" class="btn-danger">Delete</CC.button>
+      </:actions>
+    </CC.simple_form>
+  </p>
+</div>
