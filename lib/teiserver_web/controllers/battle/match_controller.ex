@@ -88,7 +88,7 @@ defmodule TeiserverWeb.Battle.MatchController do
   def ratings(conn, params) do
     user = conn.assigns.current_user
 
-    filter = params["filter"] || "Team"
+    filter = params["filter"] || "Large Team"
     filter_type_id = MatchRatingLib.rating_type_name_lookup()[filter] || 1
 
     ratings =
@@ -144,7 +144,7 @@ defmodule TeiserverWeb.Battle.MatchController do
   def ratings_graph(conn, params) do
     user = conn.assigns.current_user
 
-    filter = params["filter"] || "Team"
+    filter = params["filter"] || "Large Team"
     filter_type_id = MatchRatingLib.rating_type_name_lookup()[filter] || 1
 
     ratings =

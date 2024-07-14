@@ -143,7 +143,8 @@ defmodule Teiserver.Logging.ServerDayLogLib do
           add_maps(existing.events.simple_client, get_in(data, ~w(events simple_client))),
         complex_anon:
           add_maps(existing.events.complex_anon, get_in(data, ~w(events complex_anon))),
-        simple_anon: add_maps(existing.events.simple_anon, get_in(data, ~w(events simple_anon))),
+        simple_anon:
+          add_maps(existing.events.simple_anon, get_in(data, ~w(events simple_anon))),
         complex_server:
           add_maps(existing.events.complex_server, get_in(data, ~w(events complex_server))),
         simple_server:

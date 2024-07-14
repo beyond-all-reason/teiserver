@@ -1106,7 +1106,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       if Enum.count(player_numbers) != Enum.count(players) do
         players
         |> Enum.map(fn c ->
-          {-c.team_number, BalanceLib.get_user_rating_value(c.userid, "Team"), c}
+          {-c.team_number, BalanceLib.get_user_rating_value(c.userid, "Large Team"), c}
         end)
         |> Enum.sort()
         |> Enum.reverse()
