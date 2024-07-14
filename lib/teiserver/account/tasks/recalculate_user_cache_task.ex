@@ -151,7 +151,8 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         {k, Enum.count(v)}
       end)
 
-    team_type = team_subtype
+    team_type =
+      team_subtype
       |> String.downcase()
       |> String.replace(" ", "_")
 
@@ -164,7 +165,8 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         "exit_status.#{team_type}.count" => total,
         "exit_status.#{team_type}.stayed" => ((statuses[:stayed] || 0) / total) |> percent(1),
         "exit_status.#{team_type}.early" => ((statuses[:early] || 0) / total) |> percent(1),
-        "exit_status.#{team_type}.abandoned" => ((statuses[:abandoned] || 0) / total) |> percent(1),
+        "exit_status.#{team_type}.abandoned" =>
+          ((statuses[:abandoned] || 0) / total) |> percent(1),
         "exit_status.#{team_type}.noshow" => ((statuses[:noshow] || 0) / total) |> percent(1),
         "recent_count.#{team_type}" => total,
         "win_count.#{team_type}" => win_count,
@@ -219,11 +221,14 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
 
       Account.update_user_stat(userid, %{
         "exit_status.#{team_type}_recent.count" => total,
-        "exit_status.#{team_type}_recent.stayed" => ((statuses[:stayed] || 0) / total) |> percent(1),
-        "exit_status.#{team_type}_recent.early" => ((statuses[:early] || 0) / total) |> percent(1),
+        "exit_status.#{team_type}_recent.stayed" =>
+          ((statuses[:stayed] || 0) / total) |> percent(1),
+        "exit_status.#{team_type}_recent.early" =>
+          ((statuses[:early] || 0) / total) |> percent(1),
         "exit_status.#{team_type}_recent.abandoned" =>
           ((statuses[:abandoned] || 0) / total) |> percent(1),
-        "exit_status.#{team_type}_recent.noshow" => ((statuses[:noshow] || 0) / total) |> percent(1),
+        "exit_status.#{team_type}_recent.noshow" =>
+          ((statuses[:noshow] || 0) / total) |> percent(1),
         "recent_count.#{team_type}_recent" => total,
         "win_count.#{team_type}_recent" => win_count,
         "loss_count.#{team_type}_recent" => loss_count,
