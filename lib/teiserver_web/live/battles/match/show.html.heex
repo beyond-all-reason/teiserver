@@ -312,6 +312,10 @@
               <td>Deviation</td>
               <td><%= @past_balance.deviation %></td>
             </tr>
+            <tr>
+              <td>Time Taken (ms)</td>
+              <td><%= @past_balance.time_taken / 1000 %></td>
+            </tr>
           </tbody>
         </table>
 
@@ -333,6 +337,10 @@
             <tr>
               <td>Deviation</td>
               <td><%= @new_balance.deviation %></td>
+            </tr>
+            <tr>
+              <td>Time Taken (ms)</td>
+              <td><%= @new_balance.time_taken / 1000 %></td>
             </tr>
           </tbody>
         </table>

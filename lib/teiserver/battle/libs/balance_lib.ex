@@ -53,7 +53,8 @@ defmodule Teiserver.Battle.BalanceLib do
       "loser_picks" => Teiserver.Battle.Balance.LoserPicks,
       "force_party" => Teiserver.Battle.Balance.ForceParty,
       "cheeky_switcher_smart" => Teiserver.Battle.Balance.CheekySwitcherSmart,
-      "split_one_chevs" => Teiserver.Battle.Balance.SplitOneChevs
+      "split_one_chevs" => Teiserver.Battle.Balance.SplitOneChevs,
+      "brute_force" => Teiserver.Battle.Balance.BruteForce
     }
   end
 
