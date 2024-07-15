@@ -21,4 +21,31 @@ defmodule Teiserver.OAuth.CodeQueries do
     from e in query,
       where: e.value == ^value
   end
+
+  def where_app_ids(query, app_ids) do
+    from [code: code] in query,
+      where: code.application_id in ^app_ids
+  end
+
+  def not_expired(query, as_at \\ nil) do
+    as_at = as_at || DateTime.utc_now()
+
+    from [code: code] in query,
+      where: code.expires_at > ^as_at
+  end
+
+  @spec count_per_apps([Application.id()], DateTime.t() | nil) :: %{Application.id() => non_neg_integer()}
+  def count_per_apps(app_ids, as_at \\ nil) do
+    query =
+      base_query()
+      |> not_expired(as_at)
+      |> where_app_ids(app_ids)
+
+    from([code: code] in query,
+      group_by: code.application_id,
+      select: {code.application_id, count(code.id)}
+    )
+    |> Repo.all()
+    |> Enum.into(%{})
+  end
 end
