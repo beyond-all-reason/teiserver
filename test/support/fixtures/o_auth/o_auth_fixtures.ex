@@ -19,6 +19,7 @@ defmodule Teiserver.OAuthFixtures do
 
   def code_attrs(user_id, app) do
     now = DateTime.utc_now()
+    {verifier, challenge, method} = generate_challenge()
 
     %{
       value: Base.hex_encode32(:crypto.strong_rand_bytes(32)),
@@ -27,8 +28,9 @@ defmodule Teiserver.OAuthFixtures do
       scopes: app.scopes,
       expires_at: Timex.add(now, Timex.Duration.from_minutes(5)),
       redirect_uri: hd(app.redirect_uris),
-      challenge: "TODO",
-      challenge_method: :plain
+      challenge: challenge,
+      challenge_method: method,
+      _verifier: verifier
     }
   end
 
@@ -66,4 +68,21 @@ defmodule Teiserver.OAuthFixtures do
   def create_credential(attrs) do
     %Credential{} |> Credential.changeset(attrs) |> Repo.insert!()
   end
+
+  defp generate_challenge() do
+    # A-Z,a-z,0-9 and -._~ are authorized, but can't be bothered to cover all
+    # of that. hex encoding will fit
+    # hardcoded random bytes generated with :crypto.strong_rand_bytes(32)
+    bytes =
+      <<30, 33, 141, 180, 13, 27, 42, 190, 106, 230, 111, 140, 162, 230, 128, 110, 149, 65, 33,
+        124, 129, 9, 89, 93, 94, 248, 46, 34, 116, 186, 8, 24>>
+
+    verifier = Base.hex_encode32(bytes, padding: false)
+    challenge = hash_verifier(verifier)
+
+    {verifier, challenge, "S256"}
+  end
+
+  def hash_verifier(verifier),
+    do: Base.url_encode64(:crypto.hash(:sha256, verifier), padding: false)
 end

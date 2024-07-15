@@ -1,7 +1,7 @@
 defmodule Teiserver.OAuth.CodeTest do
   use Teiserver.DataCase, async: true
   alias Teiserver.OAuth
-  alias Teiserver.Test.Support.OAuth, as: OAuthTest
+  alias Teiserver.OAuthFixtures
 
   setup do
     user = Teiserver.TeiserverTestLib.new_user()
@@ -12,27 +12,27 @@ defmodule Teiserver.OAuth.CodeTest do
         uid: "test_app_uid",
         owner_id: user.id,
         scopes: ["tachyon.lobby"],
-        redirect_uri: ["http://localhost/callback"]
+        redirect_uris: ["http://localhost/foo"]
       })
 
     {:ok, user: user, app: app}
   end
 
   test "can get valid code", %{user: user, app: app} do
-    assert {:ok, code, _} = OAuthTest.create_code(user, app)
+    assert {:ok, code, _} = create_code(user, app)
     assert {:ok, ^code} = OAuth.get_valid_code(code.value)
     assert {:error, :no_code} = OAuth.get_valid_code(nil)
   end
 
   test "cannot retrieve expired code", %{user: user, app: app} do
     yesterday = Timex.shift(Timex.now(), days: -1)
-    assert {:ok, code, _} = OAuthTest.create_code(user, app, now: yesterday)
+    assert {:ok, code, _} = create_code(user, app, expires_at: yesterday)
     assert {:error, :expired} = OAuth.get_valid_code(code.value)
   end
 
   test "can exchange valid code for token", %{user: user, app: app} do
-    assert {:ok, code, attrs} = OAuthTest.create_code(user, app)
-    assert {:ok, token} = OAuth.exchange_code(code, attrs.verifier, attrs.redirect_uri)
+    assert {:ok, code, attrs} = create_code(user, app)
+    assert {:ok, token} = OAuth.exchange_code(code, attrs._verifier, attrs.redirect_uri)
     assert token.scopes == code.scopes
     assert token.owner_id == user.id
     # the code is now consumed and not available anymore
@@ -41,12 +41,15 @@ defmodule Teiserver.OAuth.CodeTest do
 
   test "cannot exchange expired code for token", %{user: user, app: app} do
     yesterday = Timex.shift(Timex.now(), days: -1)
-    assert {:ok, code, attrs} = OAuthTest.create_code(user, app, now: yesterday)
-    assert {:error, :expired} = OAuth.exchange_code(code, attrs.verifier, attrs.redirect_uri)
+    assert {:ok, code, attrs} = create_code(user, app, expires_at: yesterday)
+    assert {:error, :expired} = OAuth.exchange_code(code, attrs._verifier)
   end
 
   test "must use valid verifier", %{user: user, app: app} do
-    assert {:ok, code, attrs} = OAuthTest.create_code(user, app)
+    assert {:ok, code, attrs} = create_code(user, app)
+    attrs = Map.put(attrs, :id, app.id)
+    no_match = Base.hex_encode32(:crypto.strong_rand_bytes(38), padding: false)
+    assert {:error, _} = OAuth.exchange_code(code, no_match)
 
     no_match =
       "lollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollol"
@@ -56,20 +59,34 @@ defmodule Teiserver.OAuth.CodeTest do
   end
 
   test "verifier cannot be too short", %{user: user, app: app} do
-    assert {:ok, _code, attrs} = OAuthTest.create_code(user, app)
+    assert {:ok, _code, attrs} = create_code(user, app)
+    attrs = Map.put(attrs, :id, app.id)
     verifier = "TOO_SHORT"
-    challenge = OAuthTest.hash_verifier(verifier)
+    challenge = OAuthFixtures.hash_verifier(verifier)
     {:ok, code} = OAuth.create_code(user, %{attrs | challenge: challenge})
     assert {:error, err} = OAuth.exchange_code(code, verifier, attrs.redirect_uri)
     assert err =~ "cannot be less than"
   end
 
   test "verifier cannot be too long", %{user: user, app: app} do
-    assert {:ok, _code, attrs} = OAuthTest.create_code(user, app)
+    assert {:ok, _code, attrs} = create_code(user, app)
+    attrs = Map.put(attrs, :id, app.id)
     verifier = String.duplicate("a", 129)
-    challenge = OAuthTest.hash_verifier(verifier)
+    challenge = OAuthFixtures.hash_verifier(verifier)
     {:ok, code} = OAuth.create_code(user, %{attrs | challenge: challenge})
     assert {:error, err} = OAuth.exchange_code(code, verifier, attrs.redirect_uri)
     assert err =~ "cannot be more than"
+  end
+
+  defp create_code(user, app, opts \\ []) do
+    expires_at =
+      Keyword.get(opts, :expires_at, Timex.add(DateTime.utc_now(), Timex.Duration.from_days(1)))
+
+    attrs =
+      OAuthFixtures.code_attrs(user.id, app)
+      |> Map.put(:expires_at, expires_at)
+
+    code = OAuthFixtures.create_code(attrs)
+    {:ok, code, attrs}
   end
 end

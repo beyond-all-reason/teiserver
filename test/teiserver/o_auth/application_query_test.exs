@@ -2,7 +2,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
   use Teiserver.DataCase
   alias Teiserver.Repo
 
-  alias Teiserver.OAuth.{Application, Code, ApplicationQueries, Token, Credential}
+  alias Teiserver.OAuth.ApplicationQueries
   alias Teiserver.OAuthFixtures
 
   defp setup_app(_context) do
