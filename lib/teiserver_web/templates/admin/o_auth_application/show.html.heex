@@ -36,8 +36,28 @@
       </table>
     </div>
   </div>
-  <%!-- TODO: add some application stats, like the number of authorization code, --%>
-  <%!-- bearer token, refresh token and client id/secret associated with this app --%>
+
+  <h2>Stats</h2>
+  <div class="row">
+    <div class="col-6">
+      <table class="table">
+        <tbody>
+          <tr>
+            <td>Authorization code</td>
+            <td><%= @stats.code_count %></td>
+          </tr>
+          <tr>
+            <td>Authentication token</td>
+            <td><%= @stats.token_count %></td>
+          </tr>
+          <tr>
+            <td>Client credentials</td>
+            <td><%= @stats.credential_count %></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
   <p>
     <Phx.link href={~p"/teiserver/admin/oauth_application/#{@app.id}/edit"}>

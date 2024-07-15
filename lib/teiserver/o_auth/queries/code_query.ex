@@ -1,5 +1,6 @@
 defmodule Teiserver.OAuth.CodeQueries do
   use TeiserverWeb, :queries
+  alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.Code
 
   @doc """
@@ -34,7 +35,9 @@ defmodule Teiserver.OAuth.CodeQueries do
       where: code.expires_at > ^as_at
   end
 
-  @spec count_per_apps([Application.id()], DateTime.t() | nil) :: %{Application.id() => non_neg_integer()}
+  @spec count_per_apps([Application.id()], DateTime.t() | nil) :: %{
+          Application.id() => non_neg_integer()
+        }
   def count_per_apps(app_ids, as_at \\ nil) do
     query =
       base_query()

@@ -18,10 +18,12 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, _params) do
     applications = ApplicationQueries.list_applications()
+    stats = ApplicationQueries.get_stats(Enum.map(applications, fn app -> app.id end))
 
     conn
     |> assign(:page_title, "BAR - oauth apps")
-    |> render("index.html", applications: applications)
+    |> render("index.html", app_and_stats: Enum.zip(applications, stats)
+    )
   end
 
   @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
@@ -73,9 +75,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
   def show(conn, assigns) do
     case ApplicationQueries.get_application_by_id(Map.get(assigns, "id")) do
       %Application{} = app ->
-        conn
-        |> assign(:page_title, "BAR - oauth app #{app.name}")
-        |> render("show.html", app: app)
+        render_show(conn, app)
 
       nil ->
         conn
@@ -111,14 +111,14 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
           {:ok, app} ->
             conn
             |> put_flash(:info, "Application updated")
-            |> render(:show, app: app)
+            |> render_show(app)
 
           {:error, changeset} ->
             changeset = fill_email_error(changeset)
 
             conn
             |> put_status(400)
-            |> render(:edit, app: app, changeset: changeset)
+            |> render("edit.html", app: app, changeset: changeset)
         end
 
       nil ->
@@ -149,6 +149,14 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
         |> put_status(:not_found)
         |> render("not_found.html")
     end
+  end
+
+  defp render_show(conn, app) do
+    [stats] = ApplicationQueries.get_stats(app.id)
+
+    conn
+    |> assign(:page_title, "BAR - oauth app #{app.name}")
+    |> render("show.html", app: app, stats: stats)
   end
 
   # split the comma separated fields and map emails to users

@@ -7,7 +7,7 @@
     </div>
   </p>
 
-  <%= if length(@applications) > 0 do %>
+  <%= if length(@app_and_stats) > 0 do %>
     <table class="table">
       <thead>
         <tr>
@@ -15,18 +15,22 @@
           <th>client id (uid)</th>
           <th>name</th>
           <th>owner</th>
+          <th>code/token/creds</th>
           <th>actions</th>
         </tr>
       </thead>
       <tbody>
-        <%= for app <- @applications do %>
+        <%= for {app, stats} <- @app_and_stats do %>
           <tr>
             <td><%= app.id %></td>
             <td><%= app.uid %></td>
             <td><%= app.name %></td>
             <td><%= app.owner.name %> (<%= app.owner.email %>)</td>
             <td>
-              <a href={~p"/teiserver/admin/oauth_application/#{app.id}"}>
+              <%= stats.code_count %> / <%= stats.token_count %> / <%= stats.credential_count %>
+            </td>
+            <td>
+              <Phx.link href={~p"/teiserver/admin/oauth_application/#{app.id}"}>
                 <button type="button" class="btn btn-primary btn-sm">show</button>
               </Phx.link>
               <Phx.link href={~p"/teiserver/admin/oauth_application/#{app.id}/edit"}>
