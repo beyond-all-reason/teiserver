@@ -35,6 +35,7 @@ defmodule Teiserver.Application do
         # Store refers to something that is typically only updated at startup
         # and should not be clustered
 
+        concache_sup(:lists),
         concache_sup(:codes),
         concache_sup(:account_user_cache),
         concache_sup(:account_user_cache_bang),
