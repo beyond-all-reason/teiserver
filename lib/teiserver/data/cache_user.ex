@@ -96,7 +96,13 @@ defmodule Teiserver.CacheUser do
 
   @spec check_symbol_limit(String.t()) :: Boolean.t()
   def check_symbol_limit(name) do
-    name |> String.replace(~r/[[:alnum:]]/, "") |> String.graphemes |> Enum.frequencies |> Enum.filter(fn {_, val} -> (val > 2) end) |> Enum.count() |> Kernel.>(0)
+    name
+    |> String.replace(~r/[[:alnum:]]/, "")
+    |> String.graphemes()
+    |> Enum.frequencies()
+    |> Enum.filter(fn {_, val} -> val > 2 end)
+    |> Enum.count()
+    |> Kernel.>(0)
   end
 
   @spec encrypt_password(any) :: binary | {binary, binary, {any, any, any, any, any}}
