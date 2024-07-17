@@ -219,7 +219,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
        | join_queue: state.join_queue |> List.delete(userid),
          low_priority_join_queue: state.low_priority_join_queue |> List.delete(userid),
          last_seen_map: state.last_seen_map |> Map.delete(userid),
-         host_bosses: List.delete(state.host_bosses, userid)
+         host_bosses: List.delete(state.host_bosses, userid),
+         founder_bosses: List.delete(state.founder_bosses, userid)
      }}
   end
 
@@ -453,6 +454,27 @@ defmodule Teiserver.Coordinator.ConsulServer do
       new_state =
         state
         |> Map.merge(host_data)
+
+      # A Founder Boss is someone who was bossed when the lobby has very few members
+      # Players on their blocklist cannot join the lobby
+      new_state =
+        if Map.has_key?(host_data, :host_bosses) do
+          cond do
+            Map.get(host_data, :host_bosses) == [] ->
+              # Everyone was unbossed so also remove founder bosses
+              Map.put(new_state, :founder_bosses, new_state.host_bosses)
+
+            get_member_count(state) <=
+                Config.get_site_config_cache("lobby.Max lobby members to gain Founder Boss") ->
+              # The lobby is basically empty, so all host_bosses are added to founder_bosses
+              Map.put(new_state, :founder_bosses, new_state.host_bosses)
+
+            true ->
+              new_state
+          end
+        else
+          new_state
+        end
 
       # If they're not allowed to be a boss, unboss them?
       (host_data[:host_bosses] || [])
@@ -812,7 +834,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     avoid_status = Account.check_avoid_status(user.id, player_list)
 
     boss_avoid_status =
-      state.host_bosses
+      state.founder_bosses
       |> Stream.map(fn boss_id ->
         Account.does_a_avoid_b?(boss_id, user.id)
       end)
@@ -925,13 +947,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     # Blocking using relationships
-    member_list = Battle.get_lobby_member_list(state.lobby_id)
+    player_ids = list_player_ids(state)
     match_id = Battle.get_lobby_match_id(state.lobby_id)
-
-    block_status = Account.check_block_status(userid, member_list)
+    block_status = Account.check_block_status(userid, player_ids)
 
     boss_avoid_status =
-      state.host_bosses
+      state.founder_bosses
       |> Stream.map(fn boss_id ->
         Account.does_a_avoid_b?(boss_id, userid)
       end)
@@ -969,7 +990,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       boss_avoid_status == true ->
         Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.boss_blocked")
-        {false, "You are blocked by the boss of this lobby"}
+        {false, "You are blocked by the founder boss of this lobby"}
 
       Enum.member?(state.approved_users, userid) ->
         {true, :override_approve}
@@ -1235,6 +1256,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
     min(state.host_teamcount * state.host_teamsize, state.player_limit)
   end
 
+  @spec list_player_ids(map()) :: [T.userid()]
+  def list_player_ids(state) do
+    list_players(state)
+    |> Enum.map(fn x ->
+      x[:userid]
+    end)
+  end
+
   @spec list_players(map()) :: [T.client()]
   def list_players(%{lobby_id: lobby_id}) do
     list_members(%{lobby_id: lobby_id})
@@ -1374,6 +1403,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       started_at: Timex.now(),
       approved_users: [],
       host_bosses: [],
+      founder_bosses: [],
       host_preset: nil,
       host_teamsize: 8,
       host_teamcount: 2,

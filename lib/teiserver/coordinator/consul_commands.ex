@@ -62,15 +62,43 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         [] ->
           "Nobody is bossed"
 
-        [boss_id] ->
-          "Host boss is: #{CacheUser.get_username(boss_id)}"
+        _ ->
+          boss_ids =
+            state.host_bosses
+            |> Enum.filter(fn x ->
+              !Enum.member?(state.founder_bosses, x)
+            end)
+
+          case boss_ids do
+            [] ->
+              nil
+
+            _ ->
+              boss_names =
+                boss_ids
+                |> Enum.map_join(", ", fn b -> CacheUser.get_username(b) end)
+
+              "Boss: #{boss_names}"
+          end
+      end
+
+    founder_boss_string =
+      case state.founder_bosses do
+        [] ->
+          nil
 
         boss_ids ->
           boss_names =
             boss_ids
             |> Enum.map_join(", ", fn b -> CacheUser.get_username(b) end)
 
-          "Host bosses are: #{boss_names}"
+          [
+            "",
+            @splitter,
+            "Founder boss: #{boss_names}",
+            @splitter,
+            "Founder boss is someone who was bossed while the lobby was nearly empty. Players on their blocklist cannot join."
+          ]
       end
 
     tourney_mode =
@@ -121,7 +149,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         tourney_mode,
         "Maximum allowed number of players is #{max_player_count} (Host = #{state.host_teamsize * state.host_teamcount}, Coordinator = #{state.player_limit})",
         play_level_bounds,
-        play_rank_bounds
+        play_rank_bounds,
+        founder_boss_string
       ]
       |> List.flatten()
       |> Enum.filter(fn v -> v != nil end)

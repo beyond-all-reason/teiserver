@@ -389,7 +389,7 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["Admin"],
       description:
         "The percentage of users who would need to block someone to prevent them joining a lobby",
-      default: 66
+      default: 50
     })
 
     add_site_config_type(%{
@@ -419,6 +419,16 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["Admin"],
       description: "Maximum team size to be considered as a small team game",
       default: 5
+    })
+
+    add_site_config_type(%{
+      key: "lobby.Max lobby members to gain Founder Boss",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["Admin"],
+      description:
+        "You will become Founder Boss if bossed when the lobby has this number of members or less.",
+      default: 2
     })
   end
 

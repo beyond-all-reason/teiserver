@@ -326,8 +326,8 @@ defmodule Teiserver.Account.RelationshipLib do
       |> list_userids_blocked_by_userid()
       |> Enum.count(fn uid -> Enum.member?(userid_list, uid) end)
 
-    being_blocked_percentage = being_blocked_count / userid_count
-    blocking_percentage = blocking_count / userid_count
+    being_blocked_percentage = being_blocked_count / userid_count * 100
+    blocking_percentage = blocking_count / userid_count * 100
 
     cond do
       # You are being blocked
