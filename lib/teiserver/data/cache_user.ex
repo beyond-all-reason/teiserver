@@ -291,24 +291,15 @@ defmodule Teiserver.CacheUser do
             :ok
 
           true ->
-            case Application.fetch_env(:teiserver, Teiserver.Mailer) do
-              {:ok, _} ->
-                case EmailHelper.new_user(user) do
-                  {:error, error} ->
-                    Logger.error("Error sending new user email - #{user.email} - #{error}")
+            case EmailHelper.new_user(user) do
+              {:error, error} ->
+                Logger.error("Error sending new user email - #{user.email} - #{error}")
 
-                  :no_verify ->
-                    verify_user(get_user_by_id(user.id))
+              :no_verify ->
+                verify_user(get_user_by_id(user.id))
 
-                  {:ok, _, _} ->
-                    :ok
-                end
-
-              :error ->
-                # case, where no mailer is defined, skipping the verification
-                Account.delete_user_stat_keys(user.id, ~w(verification_code))
-
-                Logger.warn("Skipped sending mail, mailer is not defined")
+              {:ok, _, _} ->
+                :ok
             end
         end
 
