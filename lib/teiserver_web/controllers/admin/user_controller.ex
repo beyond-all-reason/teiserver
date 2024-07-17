@@ -1159,31 +1159,4 @@ defmodule TeiserverWeb.Admin.UserController do
         |> redirect(to: ~p"/teiserver/admin/user")
     end
   end
-
-  @spec delete_user(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def delete_user(conn, %{"id" => id}) do
-    user = Account.get_user_by_id(id)
-
-    case Teiserver.Account.UserLib.has_access(user, conn) do
-      {true, _} ->
-        case Teiserver.Admin.DeleteUserTask.delete_users([id]) do
-          :ok ->
-            conn
-            |> put_flash(:success, "User deleted")
-            |> redirect(to: ~p"/teiserver/admin/user/")
-        end
-
-      _ ->
-        conn
-        |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: ~p"/teiserver/admin/user")
-    end
-  end
-
-  def delete_user(conn, %{}) do
-    # catch case, when no id is provided
-    conn
-    |> put_flash(:danger, "No user_id provided")
-    |> redirect(to: ~p"/teiserver/admin/user")
-  end
 end

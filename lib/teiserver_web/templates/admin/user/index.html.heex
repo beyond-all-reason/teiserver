@@ -1,6 +1,5 @@
 <% bsname = view_colour()
-is_moderator = allow?(@conn, "Moderator")
-is_system = allow?(@conn, "System") %>
+is_moderator = allow?(@conn, "Moderator") %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -72,9 +71,6 @@ is_system = allow?(@conn, "System") %>
               <% else %>
                 <th>&nbsp;</th>
               <% end %>
-              <%= if is_system do %>
-                <th colspan="1">&nbsp;</th>
-              <% end %>
             </tr>
           </thead>
           <tbody>
@@ -129,18 +125,6 @@ is_system = allow?(@conn, "System") %>
                     >
                       Edit
                     </a>
-                  </td>
-                <% end %>
-                <%= if is_system do %>
-                  <td>
-                    <.link
-                      href={~p"/admin/users/delete_user/#{user.id}"}
-                      data-confirm="Are you sure?"
-                      method="delete"
-                      class="btn btn-secondary btn-sm"
-                    >
-                      Delete
-                    </.link>
                   </td>
                 <% end %>
               </tr>
