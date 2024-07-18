@@ -133,4 +133,24 @@ defmodule Teiserver.Data.UserTest do
       assert result == expected, message: "Bad result for email '#{value}'"
     end
   end
+
+  test "username symbol restrictions" do
+    data = [
+      {"abc123", false},
+      {"[abc]_123", false},
+      {"a_b_c[[123]]", false},
+      {"[[__]]", false},
+      {"___", true},
+      {"[[[", true},
+      {"]]]", true},
+      {"_abc_123_", true},
+      {"[]_[]_[]_", true},
+      {"[[[abc123]]]", true}
+    ]
+
+    for {value, expected} <- data do
+      result = CacheUser.check_symbol_limit(value)
+      assert result == expected, message: "Bad result for username '#{value}'"
+    end
+  end
 end
