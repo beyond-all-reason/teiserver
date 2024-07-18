@@ -331,11 +331,11 @@ defmodule Teiserver.Account.RelationshipLib do
 
     cond do
       # You are being blocked
-      being_blocked_percentage > block_percentage_needed -> :blocked
-      being_blocked_count > block_count_needed -> :blocked
+      being_blocked_percentage >= block_percentage_needed -> :blocked
+      being_blocked_count >= block_count_needed -> :blocked
       # You are blocking
-      blocking_percentage > block_percentage_needed -> :blocking
-      blocking_count > block_count_needed -> :blocking
+      blocking_percentage >= block_percentage_needed -> :blocking
+      blocking_count >= block_count_needed -> :blocking
       true -> :ok
     end
   end
@@ -375,11 +375,11 @@ defmodule Teiserver.Account.RelationshipLib do
 
     cond do
       # You are being avoided
-      being_avoided_percentage > avoid_percentage_needed -> :avoided
-      being_avoided_count > avoid_count_needed -> :avoided
+      being_avoided_percentage >= avoid_percentage_needed -> :avoided
+      being_avoided_count >= avoid_count_needed -> :avoided
       # You are avoiding
-      avoiding_percentage > avoid_percentage_needed -> :avoiding
-      avoiding_count > avoid_count_needed -> :avoiding
+      avoiding_percentage >= avoid_percentage_needed -> :avoiding
+      avoiding_count >= avoid_count_needed -> :avoiding
       true -> :ok
     end
   end
