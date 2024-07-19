@@ -20,6 +20,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   """
   @splitter "---------------------------"
   @split_delay 60_000
+  @vote_delay 30_000
+  @votable_commands ~w(welcome-message rename minratinglevel maxratinglevel setratinglevels resetratinglevels minchevlevel maxchevlevel resetchevlevels)
   @spec handle_command(Map.t(), Map.t()) :: Map.t()
   @default_ban_reason "Banned"
 
@@ -331,6 +333,136 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(
+        %{command: "cv", remaining: rem, senderid: senderid} = cmd,
+        %{cmd_voting: nil} = state
+      ) do
+    [name | args] = String.split(rem, " ")
+    sender_name = CacheUser.get_username(senderid)
+
+    new_state =
+      cond do
+        name == "" ->
+          ChatLib.sayprivateex(
+            state.coordinator_id,
+            senderid,
+            "You must specify a command to be voted on.",
+            state.lobby_id
+          )
+
+          state
+
+        String.starts_with?(name, "$") ->
+          guess_correct_command =
+            "$cv " <> String.replace_prefix(name, "$", "") <> " " <> Enum.join(args, " ")
+
+          ChatLib.sayprivateex(
+            state.coordinator_id,
+            senderid,
+            "Votes for the '#{name}' command are not allowed. You may try this instead: #{guess_correct_command}",
+            state.lobby_id
+          )
+
+          state
+
+        not Enum.member?(@votable_commands, name) ->
+          ChatLib.sayprivateex(
+            state.coordinator_id,
+            senderid,
+            "Votes for the '#{name}' command are not allowed",
+            state.lobby_id
+          )
+
+          state
+
+        true ->
+          ConsulServer.say_command(cmd, state)
+
+          [
+            "#{sender_name} started a vote to run command: $#{rem}",
+            "Say '$y' to approve, '$n' to reject. You can change your vote at any time.",
+            "The vote will end in #{round(@vote_delay / 1_000)} seconds. #{sender_name} may say '$ev' to cancel the vote."
+          ]
+          |> Enum.each(fn msg ->
+            ChatLib.sayex(
+              state.coordinator_id,
+              msg,
+              state.lobby_id
+            )
+          end)
+
+          vote_uuid = ExULID.ULID.generate()
+
+          new_voting = %{
+            vote_uuid: vote_uuid,
+            cmd: rem,
+            first_voter_id: senderid,
+            voters: Map.put(%{}, senderid, true)
+          }
+
+          :timer.send_after(@vote_delay, {:do_vote, vote_uuid})
+          %{state | cmd_voting: new_voting}
+      end
+
+    new_state
+  end
+
+  def handle_command(
+        %{command: "cv", remaining: _, senderid: senderid} = _,
+        state
+      ) do
+    ChatLib.sayprivateex(
+      state.coordinator_id,
+      senderid,
+      "A lobby vote is already in progress, you cannot start a new one yet",
+      state.lobby_id
+    )
+
+    state
+  end
+
+  def handle_command(
+        %{command: "ev", remaining: _, senderid: senderid} = _,
+        %{cmd_voting: nil} = state
+      ) do
+    ChatLib.sayprivateex(
+      state.coordinator_id,
+      senderid,
+      "There is no lobby vote currently in progress.",
+      state.lobby_id
+    )
+
+    state
+  end
+
+  def handle_command(
+        %{command: "ev", remaining: _, senderid: senderid} = _,
+        %{cmd_voting: %{first_voter_id: first_voter_id}} = state
+      ) do
+    cond do
+      senderid != first_voter_id &&
+        not Enum.member?(state.host_bosses, senderid) &&
+          not CacheUser.is_moderator?(senderid) ->
+        ChatLib.sayprivateex(
+          state.coordinator_id,
+          senderid,
+          "Only a boss or the person who started a lobby vote may end it.",
+          state.lobby_id
+        )
+
+        state
+
+      true ->
+        ChatLib.sayex(
+          state.coordinator_id,
+          "The lobby vote was ended.",
+          state.lobby_id
+        )
+
+        %{state | cmd_voting: nil}
+    end
+  end
+
+  def handle_command(
         %{command: "splitlobby", remaining: rem, senderid: senderid} = cmd,
         %{split: nil} = state
       ) do
@@ -399,13 +531,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state
   end
 
-  # Split commands for when there is no split happening
-  def handle_command(%{command: "y"}, %{split: nil} = state), do: state
-  def handle_command(%{command: "n"}, %{split: nil} = state), do: state
+  # Split/vote commands for when there is no split/vote happening
+  def handle_command(%{command: "y"}, %{split: nil, cmd_voting: nil} = state), do: state
+  def handle_command(%{command: "n"}, %{split: nil, cmd_voting: nil} = state), do: state
   def handle_command(%{command: "follow"}, %{split: nil} = state), do: state
 
   # And for when it is
-  def handle_command(%{command: "n", senderid: senderid} = cmd, state) do
+  def handle_command(%{command: "n", senderid: senderid} = cmd, %{split: %{}} = state) do
     ConsulServer.say_command(cmd, state)
     Logger.info("Split.n from #{senderid}")
 
@@ -414,13 +546,53 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     %{state | split: new_split}
   end
 
-  def handle_command(%{command: "y", senderid: senderid} = cmd, state) do
+  def handle_command(%{command: "y", senderid: senderid} = cmd, %{split: %{}} = state) do
     ConsulServer.say_command(cmd, state)
     Logger.info("Split.y from #{senderid}")
 
     new_splitters = Map.put(state.split.splitters, senderid, true)
     new_split = %{state.split | splitters: new_splitters}
     %{state | split: new_split}
+  end
+
+  def handle_command(%{command: "n", senderid: senderid} = cmd, %{cmd_voting: %{}} = state) do
+    ConsulServer.say_command(cmd, state)
+    # Logger.info("Vote.n from #{senderid}")
+
+    new_voters = Map.put(state.cmd_voting.voters, senderid, false)
+    new_voting = %{state.cmd_voting | voters: new_voters}
+    new_state = %{state | cmd_voting: new_voting}
+
+    num_ys = ConsulServer.count_votes(new_state, true)
+    num_ns = ConsulServer.count_votes(new_state, false)
+
+    ChatLib.sayex(
+      state.coordinator_id,
+      "Current vote totals: $y = #{num_ys}, $n = #{num_ns}",
+      state.lobby_id
+    )
+
+    new_state
+  end
+
+  def handle_command(%{command: "y", senderid: senderid} = cmd, %{cmd_voting: %{}} = state) do
+    ConsulServer.say_command(cmd, state)
+    # Logger.info("Vote.y from #{senderid}")
+
+    new_voters = Map.put(state.cmd_voting.voters, senderid, true)
+    new_voting = %{state.cmd_voting | voters: new_voters}
+    new_state = %{state | cmd_voting: new_voting}
+
+    num_ys = ConsulServer.count_votes(new_state, true)
+    num_ns = ConsulServer.count_votes(new_state, false)
+
+    ChatLib.sayex(
+      state.coordinator_id,
+      "Current vote totals: $y = #{num_ys}, $n = #{num_ns}",
+      state.lobby_id
+    )
+
+    new_state
   end
 
   def handle_command(%{command: "follow", remaining: target, senderid: senderid} = cmd, state) do

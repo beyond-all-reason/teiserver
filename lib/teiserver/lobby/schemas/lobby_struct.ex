@@ -83,6 +83,7 @@ defmodule Teiserver.Lobby.LobbyStruct do
     last_queue_state: [],
     balance_result: nil,
     showmatch: true,
+    cmd_voting: nil,
 
     # Stuff from the consul that needs to move out of the lobby state itself
     split: nil,

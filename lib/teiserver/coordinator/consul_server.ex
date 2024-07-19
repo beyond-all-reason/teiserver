@@ -25,8 +25,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib, SpadsParser, CoordinatorCommands}
 
-  @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? newlobby jazlobby tournament)
-  @boss_commands ~w(balancemode gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
+  @always_allow ~w(status s y n ev follow joinq leaveq splitlobby afks roll players password? newlobby jazlobby tournament)
+  @boss_commands ~w(balancemode gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels cv)
+  @player_without_boss_commands ~w(cv)
   @vip_boss_commands ~w(shuffle)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock makebalance)
 
@@ -249,6 +250,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, state}
   end
 
+  def handle_info({:do_vote, _}, %{cmd_voting: nil} = state) do
+    # This happens every time someone cancels a lobby vote via "$ev", so logging would be noisy.
+    # Logger.info("dovote with no vote to do")
+    {:noreply, state}
+  end
+
   def handle_info(%{channel: "teiserver_lobby_chat:" <> _, userid: userid, message: msg}, state) do
     if state.host_id == userid do
       case SpadsParser.handle_in(msg, state) do
@@ -342,6 +349,51 @@ defmodule Teiserver.Coordinator.ConsulServer do
         # Wrong id, this is a timed out message
         state
       end
+
+    {:noreply, new_state}
+  end
+
+  def handle_info({:do_vote, vote_uuid}, %{cmd_voting: cmd_voting} = state) do
+    # Logger.info("Doing vote")
+
+    new_state =
+      if vote_uuid == cmd_voting.vote_uuid do
+        num_ys = count_votes(state, true)
+        num_ns = count_votes(state, false)
+
+        # Logger.info("Vote tally: #{num_ys} vs #{num_ns}")
+
+        if num_ys > num_ns do
+          ChatLib.sayex(
+            state.coordinator_id,
+            "Vote passed. ($y = #{num_ys}, $n = #{num_ns})",
+            state.lobby_id
+          )
+
+          [name | args] = String.split(cmd_voting.cmd, " ")
+
+          cmd = %{
+            command: name,
+            remaining: Enum.join(args, " "),
+            senderid: state.coordinator_id
+          }
+
+          ConsulCommands.handle_command(cmd, state)
+        else
+          ChatLib.sayex(
+            state.coordinator_id,
+            "Vote did not pass. ($y = #{num_ys}, $n = #{num_ns})",
+            state.lobby_id
+          )
+
+          state
+        end
+      else
+        # Logger.info("Bad UUID for vote")
+        state
+      end
+
+    new_state = %{new_state | cmd_voting: nil}
 
     {:noreply, new_state}
   end
@@ -491,6 +543,16 @@ defmodule Teiserver.Coordinator.ConsulServer do
       end
 
     {:noreply, new_state}
+  end
+
+  def count_votes(%{cmd_voting: %{voters: votes}} = state, count_yes) do
+    player_ids =
+      list_players(state)
+      |> Enum.map(fn player -> player.userid end)
+
+    votes
+    |> Enum.filter(fn {userid, vote} -> vote == count_yes && Enum.member?(player_ids, userid) end)
+    |> Enum.count()
   end
 
   # Chat handler
@@ -1011,6 +1073,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
     user = Account.get_user_by_id(senderid)
 
     is_host = senderid == state.host_id
+    is_player = is_player?(state, senderid)
+    is_boss_present = Enum.count(state.host_bosses) > 0
     is_boss = Enum.member?(state.host_bosses, senderid)
     is_vip = Enum.member?(user.roles, "VIP")
 
@@ -1031,6 +1095,30 @@ defmodule Teiserver.Coordinator.ConsulServer do
         true
 
       Enum.member?(@boss_commands, cmd.command) and (is_host or is_boss) ->
+        true
+
+      Enum.member?(@player_without_boss_commands, cmd.command) and not is_player ->
+        ChatLib.sayprivateex(
+          state.coordinator_id,
+          cmd.senderid,
+          "You must be either a player or a boss to use '#{cmd.command}'",
+          state.lobby_id
+        )
+
+        false
+
+      Enum.member?(@player_without_boss_commands, cmd.command) and is_boss_present ->
+        ChatLib.sayprivateex(
+          state.coordinator_id,
+          cmd.senderid,
+          "You can't use '#{cmd.command}' while a boss is present",
+          state.lobby_id
+        )
+
+        false
+
+      Enum.member?(@player_without_boss_commands, cmd.command) and is_player and
+          not is_boss_present ->
         true
 
       Enum.member?(@vip_boss_commands, cmd.command) and (is_vip and is_boss) ->
@@ -1235,6 +1323,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
     min(state.host_teamcount * state.host_teamsize, state.player_limit)
   end
 
+  @spec is_player?(map(), integer()) :: boolean()
+  def is_player?(state, userid) do
+    list_players(state)
+    |> Enum.map(fn %{userid: userid} -> userid end)
+    |> Enum.member?(userid)
+  end
+
   @spec list_players(map()) :: [T.client()]
   def list_players(%{lobby_id: lobby_id}) do
     list_members(%{lobby_id: lobby_id})
@@ -1383,6 +1478,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       afk_check_list: [],
       afk_check_at: nil,
       last_seen_map: %{},
+      cmd_voting: nil,
 
       # Toggle with Coordinator.cast_consul(lobby_id, {:put, :unready_can_play, true})
       unready_can_play: false,
