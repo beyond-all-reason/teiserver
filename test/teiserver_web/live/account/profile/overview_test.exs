@@ -25,7 +25,7 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
     } do
       login_user(user)
 
-      lobby_id = TeiserverTestLib.make_lobby()
+      lobby_id = TeiserverTestLib.make_lobby(%{name: "OverviewTestJoin"})
 
       Battle.force_add_user_to_lobby(profile_user.id, lobby_id)
 
@@ -42,7 +42,7 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
       conn: conn,
       profile_user: profile_user
     } do
-      lobby_id = TeiserverTestLib.make_lobby()
+      lobby_id = TeiserverTestLib.make_lobby(%{name: "OverviewTestJoinRender"})
 
       {:ok, view, _html} = live(conn, "/profile/#{profile_user.id}")
 
@@ -64,7 +64,7 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
     } do
       # Skip client login
 
-      lobby_id = TeiserverTestLib.make_lobby()
+      lobby_id = TeiserverTestLib.make_lobby(%{name: "OverviewTestFlash"})
 
       Battle.force_add_user_to_lobby(profile_user.id, lobby_id)
 
