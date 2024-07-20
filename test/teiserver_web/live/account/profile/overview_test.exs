@@ -4,6 +4,7 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
 
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.{Battle, TeiserverTestLib, Client}
+  alias Teiserver.Lobby
 
   setup do
     {:ok, data} =
@@ -36,6 +37,10 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
       |> render_click()
 
       assert user.id in Battle.get_lobby_member_list(lobby_id)
+
+      assert Lobby.get_lobby(lobby_id) != nil
+      Lobby.close_lobby(lobby_id)
+      assert Lobby.get_lobby(lobby_id) == nil
     end
 
     test "only renders join button when user to join is in a lobby", %{
@@ -55,6 +60,10 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
       assert view
              |> element("span[phx-click=join]")
              |> has_element?()
+
+      assert Lobby.get_lobby(lobby_id) != nil
+      Lobby.close_lobby(lobby_id)
+      assert Lobby.get_lobby(lobby_id) == nil
     end
 
     @tag :needs_attention
@@ -75,6 +84,10 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
       |> render_click()
 
       assert render(view) =~ "Client is not connected"
+
+      assert Lobby.get_lobby(lobby_id) != nil
+      Lobby.close_lobby(lobby_id)
+      assert Lobby.get_lobby(lobby_id) == nil
     end
   end
 

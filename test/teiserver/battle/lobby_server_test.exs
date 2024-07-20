@@ -119,5 +119,9 @@ defmodule Teiserver.Battle.LobbyServerTest do
     c = LobbyLib.call_lobby(lobby_id, :get_lobby_state)
     assert c.id == lobby_id
     assert c.name == "other name | Rating: 10-50"
+
+    assert LobbyLib.lobby_exists?(lobby_id) == true
+    LobbyLib.stop_lobby_server(lobby_id)
+    assert LobbyLib.lobby_exists?(lobby_id) == false
   end
 end
