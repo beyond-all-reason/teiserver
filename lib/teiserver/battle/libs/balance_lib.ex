@@ -195,9 +195,13 @@ defmodule Teiserver.Battle.BalanceLib do
           x when is_number(x) ->
             {user_id, get_user_rating_rank_old(user_id, x)}
 
-          # match_controller will use this condition when balancing using old data
+          # TeiserverWeb.Battle.MatchLive.Show will use this condition when balancing using old data
+          # It is the data taken from the teiserver_gaming_rating_logs table
           %{"rating_value" => rating_value, "uncertainty" => uncertainty} ->
-            {user_id, get_user_rating_rank_old(user_id, rating_value, uncertainty)}
+            # We might also have rank saved but it's not guaranteed
+            rank = Map.get(value, "rank", 0)
+            opts = [uncertainty: uncertainty, rank: rank]
+            {user_id, get_user_rating_rank_old(user_id, rating_value, opts)}
 
           _ ->
             {user_id, value}
@@ -641,9 +645,20 @@ defmodule Teiserver.Battle.BalanceLib do
   @doc """
   This is used by some screens to calculate a theoretical balance based on old ratings
   """
-  def get_user_rating_rank_old(userid, rating_value, uncertainty \\ 0) do
-    stats_data = Account.get_user_stat_data(userid)
-    rank = Map.get(stats_data, "rank", 0)
+
+  def get_user_rating_rank_old(userid, rating_value, opts \\ []) do
+    uncertainty = Keyword.get(opts, :uncertainty, 0)
+    rank = Keyword.get(opts, :rank, nil)
+
+    rank =
+      case rank do
+        nil ->
+          stats_data = Account.get_user_stat_data(userid)
+          Map.get(stats_data, "rank", 0)
+
+        _ ->
+          rank
+      end
 
     %{name: name} = Account.get_user_by_id(userid)
     %{rating: rating_value, rank: rank, name: name, uncertainty: uncertainty}

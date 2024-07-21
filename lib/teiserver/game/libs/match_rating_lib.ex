@@ -69,7 +69,7 @@ defmodule Teiserver.Game.MatchRatingLib do
       not Enum.member?(@rated_match_types, match.game_type) ->
         {:error, :invalid_game_type}
 
-      match.processed == false ->
+      match.processed == false and !override ->
         {:error, :not_processed}
 
       match.winning_team == nil ->
@@ -90,7 +90,7 @@ defmodule Teiserver.Game.MatchRatingLib do
 
       # If override is set to true we skip the next few checks
       override ->
-        do_rate_match(match)
+        do_rate_match(match, override?: true)
 
       not Enum.empty?(logs) ->
         {:error, :already_rated}
@@ -104,9 +104,19 @@ defmodule Teiserver.Game.MatchRatingLib do
   end
 
   @spec do_rate_match(Teiserver.Battle.Match.t()) :: :ok
+  defp do_rate_match(match) do
+    if(Map.has_key?(match, :team_count)) do
+      do_rate_match(match, [])
+    else
+      :ok
+    end
+  end
+
+  @spec do_rate_match(Teiserver.Battle.Match.t(), any()) :: :ok
   # The algorithm has not been implemented for FFA correctly so we have a clause for
   # 2 teams (correctly implemented) and a special for 3+ teams
-  defp do_rate_match(%{team_count: 2} = match) do
+  defp do_rate_match(%{team_count: 2} = match, opts) do
+    override? = Keyword.get(opts, :override?, false)
     rating_type_id = Game.get_or_add_rating_type(match.game_type)
     partied_rating_type_id = Game.get_or_add_rating_type("Partied Team")
 
@@ -239,9 +249,7 @@ defmodule Teiserver.Game.MatchRatingLib do
         do_update_rating(user_id, match, user_rating, rating_update)
       end)
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
-    |> Teiserver.Repo.transaction()
+    save_rating_logs(match.id, win_ratings, loss_ratings, override?)
 
     # Update the match to track rating type
     {:ok, _} = Battle.update_match(match, %{rating_type_id: rating_type_id})
@@ -256,11 +264,11 @@ defmodule Teiserver.Game.MatchRatingLib do
     :ok
   end
 
-  defp do_rate_match(%{team_count: team_count} = match) do
+  defp do_rate_match(%{team_count: team_count} = match, opts) do
     # When there are more than 2 teams we update the rating as if it was a 2 team game
     # where if you won, the opponent was the best losing team
     # and if you lost the opponent was whoever won
-
+    override? = Keyword.get(opts, :override?, false)
     rating_type_id = Game.get_or_add_rating_type(match.game_type)
     partied_rating_type_id = Game.get_or_add_rating_type("Partied Team")
 
@@ -452,9 +460,8 @@ defmodule Teiserver.Game.MatchRatingLib do
     #   end)
     #   |> List.flatten
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
-    |> Teiserver.Repo.transaction()
+
+    save_rating_logs(match.id, win_ratings, loss_ratings, override?)
 
     # Update the match to track rating type
     {:ok, _} = Battle.update_match(match, %{rating_type_id: rating_type_id})
@@ -469,7 +476,27 @@ defmodule Teiserver.Game.MatchRatingLib do
     :ok
   end
 
-  defp do_rate_match(_), do: :ok
+  # Saves ratings logs to database
+  # If override? then delete existing logs of that match before we insert
+  defp save_rating_logs(match_id, win_ratings, loss_ratings, override?) do
+    if(override?) do
+      Ecto.Multi.new()
+      |> Ecto.Multi.run(:delete_existing, fn repo, _ ->
+        query = """
+        delete from teiserver_game_rating_logs l where
+        l.match_id = $1
+        """
+
+        Ecto.Adapters.SQL.query(repo, query, [match_id])
+      end)
+      |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
+      |> Teiserver.Repo.transaction()
+    else
+      Ecto.Multi.new()
+      |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
+      |> Teiserver.Repo.transaction()
+    end
+  end
 
   # Used to ratio the skill lost when there are more than 2 teams
   @spec apply_change_ratio(map(), {number(), number()}, number()) :: {number(), number()}
@@ -585,6 +612,13 @@ defmodule Teiserver.Game.MatchRatingLib do
       last_updated: match.finished
     })
 
+    # Get stats
+    stats = Account.get_user_stat_data(user_id)
+    play_hours = (Map.get(stats, "player_minutes", 0) / 60) |> trunc()
+    spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> trunc()
+
+    rank = Map.get(stats, "rank", 0)
+
     %{
       user_id: user_id,
       rating_type_id: rating_type_id,
@@ -596,7 +630,10 @@ defmodule Teiserver.Game.MatchRatingLib do
         uncertainty: new_uncertainty,
         rating_value_change: new_rating_value - user_rating.rating_value,
         skill_change: new_skill - user_rating.skill,
-        uncertainty_change: new_uncertainty - user_rating.uncertainty
+        uncertainty_change: new_uncertainty - user_rating.uncertainty,
+        play_hours: play_hours,
+        spectator_hours: spectator_hours,
+        rank: rank
       }
     }
   end
@@ -724,7 +761,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     end
   end
 
-  defp re_rate_specific_matches(ids) do
+  def re_rate_specific_matches(ids) do
     Battle.list_matches(
       search: [
         id_in: ids
@@ -732,7 +769,7 @@ defmodule Teiserver.Game.MatchRatingLib do
       limit: :infinity,
       preload: [:members]
     )
-    |> Enum.map(fn match -> rate_match(match) end)
+    |> Enum.map(fn match -> rate_match(match, true) end)
   end
 
   @spec predict_winning_team([map()], non_neg_integer()) :: map()
