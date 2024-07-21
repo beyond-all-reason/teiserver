@@ -74,6 +74,7 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
       # Skip client login
 
       lobby_id = TeiserverTestLib.make_lobby(%{name: "OverviewTestFlash"})
+      assert Lobby.get_lobby(lobby_id) != nil
 
       Battle.force_add_user_to_lobby(profile_user.id, lobby_id)
 
@@ -85,7 +86,6 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
 
       assert render(view) =~ "Client is not connected"
 
-      assert Lobby.get_lobby(lobby_id) != nil
       Lobby.close_lobby(lobby_id)
       assert Lobby.get_lobby(lobby_id) == nil
     end

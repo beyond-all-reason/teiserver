@@ -92,6 +92,7 @@ defmodule Teiserver.Battle.LobbyServerTest do
     p = LobbyLib.start_lobby_server(lobby)
     Coordinator.start_consul(lobby_id)
     assert is_pid(p)
+    assert LobbyLib.lobby_exists?(lobby_id) == true
 
     LobbyLib.rename_lobby(lobby_id, "base name", host.id)
     c = LobbyLib.call_lobby(lobby_id, :get_lobby_state)
@@ -120,7 +121,6 @@ defmodule Teiserver.Battle.LobbyServerTest do
     assert c.id == lobby_id
     assert c.name == "other name | Rating: 10-50"
 
-    assert LobbyLib.lobby_exists?(lobby_id) == true
     LobbyLib.stop_lobby_server(lobby_id)
     assert LobbyLib.lobby_exists?(lobby_id) == false
   end
