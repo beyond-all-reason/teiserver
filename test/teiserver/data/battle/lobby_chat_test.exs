@@ -17,6 +17,7 @@ defmodule Teiserver.Data.Battle.ChatLibTest do
         id: 1
       })
       |> Lobby.add_lobby()
+
     assert Lobby.get_lobby(lobby.id) != nil
 
     Battle.set_modoption(lobby.id, "server/match/uuid", UUID.uuid1())
