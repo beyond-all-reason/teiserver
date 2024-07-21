@@ -103,16 +103,9 @@ defmodule Teiserver.Game.MatchRatingLib do
     end
   end
 
-  @spec do_rate_match(Teiserver.Battle.Match.t()) :: :ok
-  defp do_rate_match(match) do
-    if(Map.has_key?(match, :team_count)) do
-      do_rate_match(match, [])
-    else
-      :ok
-    end
-  end
-
   @spec do_rate_match(Teiserver.Battle.Match.t(), any()) :: :ok
+  defp do_rate_match(match, opts \\ [])
+
   # The algorithm has not been implemented for FFA correctly so we have a clause for
   # 2 teams (correctly implemented) and a special for 3+ teams
   defp do_rate_match(%{team_count: 2} = match, opts) do
@@ -459,7 +452,6 @@ defmodule Teiserver.Game.MatchRatingLib do
     #       end)
     #   end)
     #   |> List.flatten
-
 
     save_rating_logs(match.id, win_ratings, loss_ratings, override?)
 
