@@ -120,7 +120,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     |> Enum.join(", ")
   end
 
-  @spec log_team([BF.player()]) :: String.t()
+  @spec log_team([SN.player()]) :: String.t()
   defp log_team(team) do
     Enum.map(team, fn x ->
       x.name
@@ -129,7 +129,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     |> Enum.join(", ")
   end
 
-  @spec standardise_team_groups([BF.player()]) :: any()
+  @spec standardise_team_groups([SN.player()]) :: any()
   defp standardise_team_groups(team) do
     team
     |> Enum.map(fn x ->

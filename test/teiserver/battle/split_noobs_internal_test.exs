@@ -396,7 +396,7 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
 
     assert standard_result == %{
              logs: [
-              "------------------------------------------------------",
+               "------------------------------------------------------",
                "Algorithm: split_noobs",
                "------------------------------------------------------",
                "Parties: [kyutoryu, fbots1998]",
@@ -408,7 +408,7 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
                "Team 2: barmalev, Aposis, reddragon2010, jauggy, SLOPPYGAGGER, Dixinormus",
                "Team rating diff penalty: 0.4",
                "Broken party penalty: 0",
-               "Score: 0.4 (lower is better)",
+               "Score: 0.4 (lower is better)"
              ],
              team_groups: %{
                1 => [
