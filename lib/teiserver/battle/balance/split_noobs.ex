@@ -191,7 +191,6 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
 
   @spec do_simple_draft(SN.state()) :: SN.simple_result()
   def do_simple_draft(state) do
-    # This is the best combo with only non noobs
     default_acc = %{
       first_team: [],
       second_team: []
@@ -212,11 +211,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     Enum.reduce(sorted_players, default_acc, fn x, acc ->
       picking_team = get_picking_team(acc.first_team, acc.second_team)
 
-      if(picking_team == 1) do
-        Map.put(acc, :first_team, [x | acc.first_team])
-      else
-        Map.put(acc, :second_team, [x | acc.second_team])
-      end
+      Map.put(acc, picking_team, [x | acc[picking_team]])
     end)
   end
 
@@ -227,14 +222,11 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
 
     noobs = state.noobs
 
+    # Draft the remaining noobs
     Enum.reduce(noobs, default_acc, fn noob, acc ->
       picking_team = get_picking_team(acc.first_team, acc.second_team)
 
-      if(picking_team == 1) do
-        Map.put(acc, :first_team, [noob | acc.first_team])
-      else
-        Map.put(acc, :second_team, [noob | acc.second_team])
-      end
+      Map.put(acc, picking_team, [noob | acc[picking_team]])
     end)
   end
 
@@ -243,9 +235,9 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     second_team_pick_priority = get_pick_priority(second_team)
 
     if(first_team_pick_priority > second_team_pick_priority) do
-      1
+      :first_team
     else
-      2
+      :second_team
     end
   end
 
