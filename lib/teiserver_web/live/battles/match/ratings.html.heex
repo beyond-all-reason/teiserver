@@ -127,9 +127,7 @@
 
             <%= if log.match do %>
               <td>
-                  <.link navigate={~p"/battle/#{log.match_id}"} class="stretched-link">
-                    
-                  </.link>
+                <.link navigate={~p"/battle/#{log.match_id}"} class="stretched-link"></.link>
               </td>
             <% else %>
               <td>&nbsp;</td>
