@@ -18,6 +18,11 @@ defmodule Teiserver.Battle.Balance.SplitNoobsTypes do
           experienced_players: [player]
         }
 
+  @type simple_result :: %{
+          first_team: [player()],
+          second_team: [player()]
+        }
+
   @type result :: %{
           broken_party_penalty: number(),
           rating_diff_penalty: number(),

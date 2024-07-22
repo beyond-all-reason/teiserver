@@ -65,7 +65,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     end
   end
 
-  @spec standardise_result(SN.result(), SN.state()) :: any()
+  @spec standardise_result(SN.result() | SN.simple_result(), SN.state()) :: any()
   def standardise_result(result, state) do
     first_team = result.first_team
     second_team = result.second_team
@@ -189,7 +189,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     }
   end
 
-  @spec do_simple_draft(SN.state()) :: SN.result()
+  @spec do_simple_draft(SN.state()) :: SN.simple_result()
   def do_simple_draft(state) do
     # This is the best combo with only non noobs
     default_acc = %{
