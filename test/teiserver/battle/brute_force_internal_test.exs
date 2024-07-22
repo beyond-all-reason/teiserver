@@ -128,18 +128,25 @@ defmodule Teiserver.Battle.BruteForceInternalTest do
              broken_party_penalty: 0,
              rating_diff_penalty: 0.5100000000000477,
              score: 0.5100000000000477,
-             team: [
-               %{name: "kyutoryu", rating: 12.25, id: 1},
-               %{name: "fbots1998", rating: 13.98, id: 2},
-               %{name: "SLOPPYGAGGER", rating: 8.89, id: 5},
-               %{name: "jauggy", rating: 20.49, id: 6},
-               %{name: "reddragon2010", rating: 18.4, id: 7},
-               %{name: "MaTThiuS_82", rating: 8.26, id: 9}
+             first_team: [
+               %{id: 1, name: "kyutoryu", rating: 12.25},
+               %{id: 2, name: "fbots1998", rating: 13.98},
+               %{id: 5, name: "SLOPPYGAGGER", rating: 8.89},
+               %{id: 6, name: "jauggy", rating: 20.49},
+               %{id: 7, name: "reddragon2010", rating: 18.4},
+               %{id: 9, name: "MaTThiuS_82", rating: 8.26}
+             ],
+             second_team: [
+               %{id: 3, name: "Dixinormus", rating: 18.28},
+               %{id: 4, name: "HungDaddy", rating: 2.8},
+               %{id: 8, name: "Aposis", rating: 20.42},
+               %{id: 10, name: "Noody", rating: 17.64},
+               %{id: 11, name: "[DTG]BamBin0", rating: 20.06},
+               %{id: 12, name: "barmalev", rating: 3.58}
              ]
            }
 
-    result =
-      BruteForce.standardise_result(best_combo, input.players, input.parties) |> Map.drop([:logs])
+    result = BruteForce.standardise_result(best_combo, input.parties) |> Map.drop([:logs])
 
     assert result == %{
              team_groups: %{

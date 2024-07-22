@@ -33,7 +33,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
       :ok ->
         potential_teams = potential_teams(length(input_data.players))
         best_combo = get_best_combo(potential_teams, input_data.players, input_data.parties)
-        standardise_result(best_combo, input_data.players, input_data.parties)
+        standardise_result(best_combo, input_data.parties)
 
       {:error, message} ->
         # Call another balancer
@@ -100,18 +100,36 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     Teiserver.Helper.CombinationsHelper.get_combinations(num_players)
   end
 
+  def get_best_combo(players, parties) do
+    potential_teams = potential_teams(length(players))
+    get_best_combo(potential_teams, players, parties)
+  end
+
   @spec get_best_combo([integer()], [BF.player()], [String.t()]) :: BF.combo_result()
   def get_best_combo(combos, players, parties) do
-    Enum.map(combos, fn x ->
-      get_players_from_indexes(x, players)
-    end)
-    |> Enum.map(fn team ->
-      result = score_combo(team, players, parties)
-      Map.put(result, :team, team)
-    end)
-    |> Enum.min_by(fn z ->
-      z.score
-    end)
+    result =
+      Enum.map(combos, fn x ->
+        get_players_from_indexes(x, players)
+      end)
+      |> Enum.map(fn team ->
+        result = score_combo(team, players, parties)
+        Map.put(result, :first_team, team)
+      end)
+      |> Enum.min_by(fn z ->
+        z.score
+      end)
+
+    first_team = result.first_team
+
+    second_team =
+      players
+      |> Enum.filter(fn x ->
+        !Enum.any?(first_team, fn y ->
+          y.id == x.id
+        end)
+      end)
+
+    Map.put(result, :second_team, second_team)
   end
 
   @spec score_combo([BF.player()], [BF.player()], [String.t()]) :: any()
@@ -173,17 +191,11 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     end)
   end
 
-  @spec standardise_result(BF.combo_result(), [BF.player()], [String.t()]) :: any()
-  def standardise_result(best_combo, all_players, parties) do
-    first_team = best_combo.team
+  @spec standardise_result(BF.combo_result(), [String.t()]) :: any()
+  def standardise_result(best_combo, parties) do
+    first_team = best_combo.first_team
 
-    second_team =
-      all_players
-      |> Enum.filter(fn x ->
-        !Enum.any?(first_team, fn y ->
-          y.id == x.id
-        end)
-      end)
+    second_team = best_combo.second_team
 
     team_groups = %{
       1 => standardise_team_groups(first_team),
