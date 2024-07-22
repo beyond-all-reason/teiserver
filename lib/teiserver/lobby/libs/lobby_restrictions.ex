@@ -199,17 +199,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   end
 
   defp get_tips(name) do
-    tips =
-      case is_noob_title?(name) do
-        true -> get_noob_looby_tips()
-        false -> []
-      end
-
-    tips =
-      case is_rotato_title?(name) do
-        true -> tips ++ get_rotato_tips()
-        false -> tips
-      end
+    tips = [] ++ get_noob_looby_tips(name) ++ get_rotato_tips(name)
 
     case length(tips) do
       0 -> nil
@@ -217,31 +207,43 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     end
   end
 
-  defp get_noob_looby_tips() do
-    [
-      @splitter,
-      "Useful commands for Noob lobbies",
-      @splitter,
-      "To restrict this lobby to players who are new, use either:",
-      "$maxchevlevel <chevlevel>",
-      "$maxratinglevel <rating>",
-      "",
-      "To ensure new players are distributed evenly across teams:",
-      "$balancemode split_one_chevs",
-      ""
-    ]
+  defp get_noob_looby_tips(lobby_title) do
+    case is_noob_title?(lobby_title) do
+      true ->
+        [
+          @splitter,
+          "Useful commands for Noob lobbies",
+          @splitter,
+          "To restrict this lobby to players who are new, use either:",
+          "$maxchevlevel <chevlevel>",
+          "$maxratinglevel <rating>",
+          "",
+          "To ensure new players are distributed evenly across teams:",
+          "$balancemode split_one_chevs",
+          ""
+        ]
+
+      false ->
+        []
+    end
   end
 
-  defp get_rotato_tips() do
-    [
-      # Temporary tips until this is part of Chobby UI
-      @splitter,
-      "Useful commands for map rotation",
-      @splitter,
-      "To turn on/off auto map rotation at end of each match:",
-      "!rotationEndGame <(random|off)>",
-      ""
-    ]
+  defp get_rotato_tips(lobby_title) do
+    case is_rotato_title?(lobby_title) do
+      true ->
+        [
+          # Temporary tips until this is part of Chobby UI
+          @splitter,
+          "Useful commands for map rotation",
+          @splitter,
+          "To turn on/off auto map rotation at end of each match:",
+          "!rotationEndGame <(random|off)>",
+          ""
+        ]
+
+      false ->
+        []
+    end
   end
 
   # Check if lobby has restrictions for playing
@@ -291,37 +293,16 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   """
   @spec is_noob_title?(String.t()) :: boolean()
   def is_noob_title?(title) do
-    title =
-      title
-      |> String.downcase()
+    anti_noob_regex = ~r/no (noob|newb|nub)/i
+    noob_regex = ~r/\b(noob|newb|nub(s|\b))/i
 
-    anti_noob_regex = ~r/no (noob|newb|nub)/
-    noob_regex = ~r/\b(noob|newb|nub(s|\b))/
-
-    noob_matches =
-      Regex.scan(noob_regex, title)
-      |> Enum.count()
-
-    anti_noob_matches =
-      Regex.scan(anti_noob_regex, title)
-      |> Enum.count()
-
-    # Returns true if both critera met
-    noob_matches > 0 && anti_noob_matches == 0
+    Regex.match?(noob_regex, title) && !Regex.match?(anti_noob_regex, title)
   end
 
   @spec is_rotato_title?(String.t()) :: boolean()
   def is_rotato_title?(title) do
-    title =
-      title
-      |> String.downcase()
+    regex = ~r/\b(rotat)/i
 
-    regex = ~r/\b(rotat)/
-
-    matches =
-      Regex.scan(regex, title)
-      |> Enum.count()
-
-    matches > 0
+    Regex.match?(regex, title)
   end
 end
