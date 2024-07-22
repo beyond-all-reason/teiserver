@@ -134,4 +134,127 @@ defmodule Teiserver.Battle.SplitNoobsTest do
              }
            }
   end
+
+  test "can process expanded_group with no parties" do
+    expanded_group = [
+      %{
+        count: 1,
+        members: ["kyutoryu"],
+        ratings: [12.25],
+        names: ["kyutoryu"],
+        uncertainties: [7.1],
+        ranks: [1]
+      },
+      %{
+        count: 1,
+        members: ["Dixinormus"],
+        ratings: [18.28],
+        names: ["Dixinormus"],
+        uncertainties: [2],
+        ranks: [0]
+      },
+      %{
+        count: 1,
+        members: ["HungDaddy"],
+        ratings: [0],
+        names: ["HungDaddy"],
+        uncertainties: [2],
+        ranks: [0]
+      },
+      %{
+        count: 1,
+        members: ["SLOPPYGAGGER"],
+        ratings: [8.89],
+        names: ["SLOPPYGAGGER"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["jauggy"],
+        ratings: [20.49],
+        names: ["jauggy"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["reddragon2010"],
+        ratings: [18.4],
+        names: ["reddragon2010"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["Aposis"],
+        ratings: [20.42],
+        names: ["Aposis"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["MaTThiuS_82"],
+        ratings: [8.26],
+        names: ["MaTThiuS_82"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["Noody"],
+        ratings: [17.64],
+        names: ["Noody"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["[DTG]BamBin0"],
+        ratings: [20.06],
+        names: ["[DTG]BamBin0"],
+        uncertainties: [3],
+        ranks: [2]
+      }
+    ]
+
+    result = SplitNoobs.perform(expanded_group, 2)
+
+    assert result == %{
+             logs: [
+               "------------------------------------------------------",
+               "Algorithm: split_noobs",
+               "------------------------------------------------------",
+               "Parties: None",
+               "Solo Noobs: (Players not in parties that have either high uncertainty or 0 rating.)",
+               "kyutoryu (chev: 2, σ: 7.1)",
+               "HungDaddy (chev: 1, σ: 2)",
+               "------------------------------------------------------",
+               "Team 1: Aposis, [DTG]BamBin0, Noody, MaTThiuS_82, HungDaddy",
+               "Team 2: jauggy, reddragon2010, Dixinormus, SLOPPYGAGGER, kyutoryu",
+               "Teams constructed by simple draft."
+             ],
+             team_groups: %{
+               1 => [
+                 %{count: 1, group_rating: 0, members: ["HungDaddy"], ratings: [0]},
+                 %{count: 1, group_rating: 8.26, members: ["MaTThiuS_82"], ratings: [8.26]},
+                 %{count: 1, group_rating: 17.64, members: ["Noody"], ratings: [17.64]},
+                 %{count: 1, group_rating: 20.06, members: ["[DTG]BamBin0"], ratings: [20.06]},
+                 %{count: 1, group_rating: 20.42, members: ["Aposis"], ratings: [20.42]}
+               ],
+               2 => [
+                 %{count: 1, group_rating: 12.25, members: ["kyutoryu"], ratings: [12.25]},
+                 %{count: 1, group_rating: 8.89, members: ["SLOPPYGAGGER"], ratings: [8.89]},
+                 %{count: 1, group_rating: 18.28, members: ["Dixinormus"], ratings: [18.28]},
+                 %{count: 1, group_rating: 18.4, members: ["reddragon2010"], ratings: [18.4]},
+                 %{count: 1, group_rating: 20.49, members: ["jauggy"], ratings: [20.49]}
+               ]
+             },
+             team_players: %{
+               1 => ["HungDaddy", "MaTThiuS_82", "Noody", "[DTG]BamBin0", "Aposis"],
+               2 => ["kyutoryu", "SLOPPYGAGGER", "Dixinormus", "reddragon2010", "jauggy"]
+             }
+           }
+  end
 end

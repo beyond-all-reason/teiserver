@@ -400,7 +400,7 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
                "Algorithm: split_noobs",
                "------------------------------------------------------",
                "Parties: [kyutoryu, fbots1998]",
-               "Solo Noobs: (Players not in parties and have either high uncertainty or 0 rating.)",
+               "Solo Noobs: (Players not in parties that have either high uncertainty or 0 rating.)",
                "Dixinormus (chev: 3, σ: 8)",
                "HungDaddy (chev: 3, σ: 8)",
                "------------------------------------------------------",

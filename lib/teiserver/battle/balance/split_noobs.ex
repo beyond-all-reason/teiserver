@@ -3,6 +3,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
   Seperate players into noobs and experienced players. Noobs are players without a party and either
   high uncertainty or 0 rating.
 
+  IF THERE ARE PARTIES
   If the number of experienced players is <= 14 feed these players into the brute force algorithm to
   find the best two team combination. This brute force algo will try and keep parties together and keep
   both team ratings close.
@@ -12,6 +13,10 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
 
   If the number of experienced players is > 14 then the brute force algo will take too long so we
   call Teifion's algo instead. We will also call Teifion's algo if team count > 2.
+
+  IF THERE ARE NO PARTIES
+  The teams will draft the experienced players first, preferring higher rating. Then they will draft
+  the noobs preferring higher rank and lower uncertainty.
   """
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   alias Teiserver.Battle.Balance.SplitNoobsTypes, as: SN
@@ -34,6 +39,10 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
         result = get_result(initial_state)
         standardise_result(result, initial_state)
 
+      :no_parties ->
+        result = do_simple_draft(initial_state)
+        standardise_result(result, initial_state)
+
       {:error, message} ->
         # Call another balancer
         result = Teiserver.Battle.Balance.LoserPicks.perform(expanded_group, team_count, opts)
@@ -46,10 +55,11 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     end
   end
 
-  @spec should_use_algo(SN.state(), integer()) :: :ok | {:error, String.t()}
+  @spec should_use_algo(SN.state(), integer()) :: :ok | {:error, String.t()} | :no_parties
   def should_use_algo(initial_state, team_count) do
     cond do
       team_count > 2 -> {:error, "Team count greater than 2."}
+      length(initial_state.parties) == 0 -> :no_parties
       length(initial_state.experienced_players) > 14 -> {:error, "Not enough noobs."}
       true -> :ok
     end
@@ -81,12 +91,25 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
             end)
 
           [
-            "Solo Noobs: (Players not in parties and have either high uncertainty or 0 rating.)",
+            "Solo Noobs: (Players not in parties that have either high uncertainty or 0 rating.)",
             noobs_string
           ]
 
         true ->
           "Solo Noobs: None"
+      end
+
+    brute_force_logs =
+      case Map.has_key?(result, :score) do
+        true ->
+          [
+            "Team rating diff penalty: #{format(result.rating_diff_penalty)}",
+            "Broken party penalty: #{result.broken_party_penalty}",
+            "Score: #{format(result.score)} (lower is better)"
+          ]
+
+        false ->
+          "Teams constructed by simple draft."
       end
 
     logs =
@@ -99,9 +122,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
         @splitter,
         "Team 1: #{log_team(first_team)}",
         "Team 2: #{log_team(second_team)}",
-        "Team rating diff penalty: #{format(result.rating_diff_penalty)}",
-        "Broken party penalty: #{result.broken_party_penalty}",
-        "Score: #{format(result.score)} (lower is better)"
+        brute_force_logs
       ]
       |> List.flatten()
 
@@ -114,10 +135,14 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
 
   @spec log_parties([[String.t()]]) :: String.t()
   def log_parties(parties) do
-    Enum.map(parties, fn party ->
-      "[#{Enum.join(party, ", ")}]"
-    end)
-    |> Enum.join(", ")
+    if(length(parties) == 0) do
+      "None"
+    else
+      Enum.map(parties, fn party ->
+        "[#{Enum.join(party, ", ")}]"
+      end)
+      |> Enum.join(", ")
+    end
   end
 
   @spec log_team([SN.player()]) :: String.t()
@@ -162,6 +187,37 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
       noobs: noobs,
       experienced_players: experienced_players
     }
+  end
+
+  @spec do_simple_draft(SN.state()) :: SN.result()
+  def do_simple_draft(state) do
+    # This is the best combo with only non noobs
+    default_acc = %{
+      first_team: [],
+      second_team: []
+    }
+
+    experienced_players =
+      state.experienced_players
+      |> Enum.sort_by(
+        fn x ->
+          x.rating
+        end,
+        :desc
+      )
+
+    noobs = state.noobs
+    sorted_players = experienced_players ++ noobs
+
+    Enum.reduce(sorted_players, default_acc, fn x, acc ->
+      picking_team = get_picking_team(acc.first_team, acc.second_team)
+
+      if(picking_team == 1) do
+        Map.put(acc, :first_team, [x | acc.first_team])
+      else
+        Map.put(acc, :second_team, [x | acc.second_team])
+      end
+    end)
   end
 
   @spec get_result(SN.state()) :: SN.result()
