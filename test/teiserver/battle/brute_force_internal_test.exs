@@ -102,8 +102,8 @@ defmodule Teiserver.Battle.BruteForceInternalTest do
     assert length(combos) == 462
     first_combo = combos |> Enum.at(0)
     assert first_combo == [0, 1, 2, 3, 4, 5]
-
-    first_potential_team = BruteForce.get_players_from_indexes(first_combo, input.players)
+    players_with_index = Enum.with_index(input.players)
+    first_potential_team = BruteForce.get_players_from_indexes(first_combo, players_with_index)
 
     assert first_potential_team == [
              %{name: "kyutoryu", rating: 12.25, id: 1},

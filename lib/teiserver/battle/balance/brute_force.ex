@@ -107,9 +107,11 @@ defmodule Teiserver.Battle.Balance.BruteForce do
 
   @spec get_best_combo([integer()], [BF.player()], [String.t()]) :: BF.combo_result()
   def get_best_combo(combos, players, parties) do
+    players_with_index = Enum.with_index(players)
+
     result =
       Enum.map(combos, fn x ->
-        get_players_from_indexes(x, players)
+        get_players_from_indexes(x, players_with_index)
       end)
       |> Enum.map(fn team ->
         result = score_combo(team, players, parties)
@@ -149,10 +151,8 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     }
   end
 
-  def get_players_from_indexes(player_indexes, players) do
-    players = Enum.with_index(players)
-
-    Enum.filter(players, fn {_player, index} ->
+  def get_players_from_indexes(player_indexes, players_with_index) do
+    Enum.filter(players_with_index, fn {_player, index} ->
       Enum.member?(player_indexes, index)
     end)
     |> Enum.map(fn {player, _index} ->
