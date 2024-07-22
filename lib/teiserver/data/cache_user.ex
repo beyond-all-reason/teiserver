@@ -94,6 +94,17 @@ defmodule Teiserver.CacheUser do
     |> Regex.replace(name, "")
   end
 
+  @spec check_symbol_limit(String.t()) :: Boolean.t()
+  def check_symbol_limit(name) do
+    name
+    |> String.replace(~r/[[:alnum:]]/, "")
+    |> String.graphemes()
+    |> Enum.frequencies()
+    |> Enum.filter(fn {_, val} -> val > 2 end)
+    |> Enum.count()
+    |> Kernel.>(0)
+  end
+
   @spec encrypt_password(any) :: binary | {binary, binary, {any, any, any, any, any}}
   def encrypt_password(password) do
     Argon2.hash_pwd_salt(password)
@@ -184,6 +195,9 @@ defmodule Teiserver.CacheUser do
       clean_name(name) != name ->
         {:failure, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] and _ allowed)"}
 
+      check_symbol_limit(name) ->
+        {:error, "Too many repeated symbols in name"}
+
       get_user_by_name(name) ->
         {:failure, "Username already taken"}
 
@@ -229,6 +243,9 @@ defmodule Teiserver.CacheUser do
 
       clean_name(name) != name ->
         {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] and _ allowed)"}
+
+      check_symbol_limit(name) ->
+        {:error, "Too many repeated symbols in name"}
 
       get_user_by_name(name) ->
         {:error, "Username already taken"}
@@ -431,6 +448,9 @@ defmodule Teiserver.CacheUser do
 
       clean_name(new_name) != new_name ->
         {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
+
+      check_symbol_limit(new_name) ->
+        {:error, "Too many repeated symbols in name"}
 
       get_user_by_name(new_name) &&
           get_user_by_name(new_name).name |> String.downcase() == String.downcase(new_name) ->
@@ -1277,7 +1297,9 @@ defmodule Teiserver.CacheUser do
     ingame_minutes =
       (stats.data["player_minutes"] || 0) + (stats.data["spectator_minutes"] || 0) * 0.5
 
-    round(ingame_minutes / 60)
+    # Hours are rounded down which helps to determine if a user has hit a
+    # chevron hours threshold. So a user with 4.9 hours is still chevron 1 or rank 0
+    trunc(ingame_minutes / 60)
   end
 
   # Based on actual ingame time
@@ -1310,14 +1332,16 @@ defmodule Teiserver.CacheUser do
   def calculate_rank(userid, "Role") do
     ingame_hours = rank_time(userid)
 
+    # Thresholds should match what is on the website:
+    # https://www.beyondallreason.info/guide/rating-and-lobby-balance#rank-icons
     cond do
       has_any_role?(userid, ["Tournament winner"]) -> 7
-      has_any_role?(userid, ~w(Core Contributor)) -> 6
-      ingame_hours > 1000 -> 5
-      ingame_hours > 250 -> 4
-      ingame_hours > 100 -> 3
-      ingame_hours > 15 -> 2
-      ingame_hours > 5 -> 1
+      has_any_role?(userid, ~w(Core Contributor)) and !Account.hide_contributor_rank?(userid) -> 6
+      ingame_hours >= 1000 -> 5
+      ingame_hours >= 250 -> 4
+      ingame_hours >= 100 -> 3
+      ingame_hours >= 15 -> 2
+      ingame_hours >= 5 -> 1
       true -> 0
     end
   end

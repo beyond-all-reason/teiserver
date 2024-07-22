@@ -61,4 +61,25 @@
       <% end %>
     </div>
   </div>
+  <div class="row mt-3 mb-3">
+    <div class="col">
+      <form>
+        <h4>Contributor Rank Icon</h4>
+        <div class="form-check">
+          <input
+            name="hide-rank-icon"
+            id="hide-rank-icon"
+            class="form-check-input"
+            type="checkbox"
+            value="true"
+            checked={@hide_contributor_rank}
+            phx-change="toggle-hide-contributor-rank"
+          />
+          <label class="form-check-label" for="hide-rank-icon">
+            Hide contributor rank icon
+          </label>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

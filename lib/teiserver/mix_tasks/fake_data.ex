@@ -34,6 +34,9 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       make_moderation()
       make_one_time_code()
 
+      # Add fake playtime data to all our non-bot users
+      Mix.Task.run("teiserver.fake_playtime")
+
       :timer.sleep(50)
 
       IO.puts(
@@ -96,7 +99,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
             name: generate_throwaway_name() |> String.replace(" ", ""),
             email: UUID.uuid1(),
             password: root_user.password,
-            permissions: ["admin.dev.developer"],
+            permissions: [],
             icon: "fa-solid #{StylingHelper.random_icon()}",
             colour: StylingHelper.random_colour(),
             trust_score: 10_000,
