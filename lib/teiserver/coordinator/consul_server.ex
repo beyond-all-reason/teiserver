@@ -864,7 +864,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       boss_avoid_status == true ->
         match_id = Battle.get_lobby_match_id(state.lobby_id)
         Telemetry.log_simple_lobby_event(user.id, match_id, "play_refused.boss_avoided")
-        msg = "You are avoided by the founder boss of this lobby"
+        msg = "You are avoided by the boss of this lobby"
         CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
         false
 
