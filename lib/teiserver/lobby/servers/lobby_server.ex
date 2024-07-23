@@ -545,6 +545,7 @@ defmodule Teiserver.Battle.LobbyServer do
       cond do
         state.lobby.teaser == "" ->
           ""
+
         true ->
           " " <> state.lobby.teaser
       end
