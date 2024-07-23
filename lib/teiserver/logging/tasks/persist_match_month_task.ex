@@ -148,10 +148,10 @@ defmodule Teiserver.Logging.Tasks.PersistMatchMonthTask do
   defp extend_sub_section(existing, data) do
     %{
       aggregate: %{
-        total_count: existing.aggregate.total_count + data["aggregate"]["total_count"] || 0,
+        total_count: existing.aggregate.total_count + (data["aggregate"]["total_count"] || 0),
         total_duration_seconds:
-          existing.aggregate.total_duration_seconds + data["aggregate"]["total_duration_seconds"] ||
-            0,
+          existing.aggregate.total_duration_seconds +
+            (data["aggregate"]["total_duration_seconds"] || 0),
         weighted_count:
           existing.aggregate.weighted_count + (data["aggregate"]["weighted_count"] || 0)
       },
