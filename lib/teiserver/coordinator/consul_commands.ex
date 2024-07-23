@@ -62,15 +62,16 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         [] ->
           "Nobody is bossed"
 
-        [boss_id] ->
-          "Host boss is: #{CacheUser.get_username(boss_id)}"
-
         boss_ids ->
           boss_names =
             boss_ids
             |> Enum.map_join(", ", fn b -> CacheUser.get_username(b) end)
 
-          "Host bosses are: #{boss_names}"
+          if state.host_preset != nil && Regex.match?(~r/custom/i, state.host_preset) do
+            "Boss: #{boss_names} (Custom preset: No votes allowed)"
+          else
+            "Boss: #{boss_names}"
+          end
       end
 
     tourney_mode =

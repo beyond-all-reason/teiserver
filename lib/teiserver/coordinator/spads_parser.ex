@@ -43,9 +43,34 @@ defmodule Teiserver.Coordinator.SpadsParser do
       _match = Regex.run(~r/Boss mode disabled by \S+/, msg) ->
         {:host_update, %{host_bosses: []}}
 
+      Regex.match?(~r/\* BarManager\|/, msg) ->
+        case parse_barmanager_state(msg) do
+          {:ok, barmanager_state} ->
+            {:host_update, %{host_preset: barmanager_state[:preset]}}
+
+          _ ->
+            nil
+        end
+
       # Not handling it, return nil
       true ->
         nil
     end
+  end
+
+  def parse_barmanager_state("* BarManager|" <> json_str) do
+    case Jason.decode(json_str) do
+      {:ok, %{"BattleStateChanged" => new_status}} ->
+        # You can see other possible fields inside lobby_policy_bot_server.ex handle_founder_chat
+        preset = new_status["preset"]
+        {:ok, %{preset: preset}}
+
+      _ ->
+        :error
+    end
+  end
+
+  def parse_barmanager_state(_) do
+    :error
   end
 end
