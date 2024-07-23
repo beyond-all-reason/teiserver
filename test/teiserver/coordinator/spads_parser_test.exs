@@ -44,8 +44,6 @@ defmodule Teiserver.Coordinator.SpadsParserTest do
   end
 
   test "parsing changes to presets" do
-    state = %{host_bosses: []}
-
     message =
       "* BarManager|{\"BattleStateChanged\": {\"locked\": \"unlocked\", \"autoBalance\": \"advanced\", \"teamSize\": \"6\", \"nbTeams\": \"2\", \"balanceMode\": \"clan;skill\", \"preset\": \"default\"}}"
 
@@ -57,8 +55,6 @@ defmodule Teiserver.Coordinator.SpadsParserTest do
   end
 
   test "bad string" do
-    state = %{host_bosses: []}
-
     message = "blah"
 
     result = SpadsParser.handle_in(message, %{host_bosses: []})
