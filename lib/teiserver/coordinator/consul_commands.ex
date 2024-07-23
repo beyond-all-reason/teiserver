@@ -1510,6 +1510,21 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     ConsulServer.say_command(cmd, state)
   end
 
+  def handle_command(%{command: "set-config-teaser", remaining: new_teaser} = cmd, state) do
+    ConsulServer.say_command(cmd, state)
+    new_teaser = String.trim(new_teaser)
+
+    new_teaser =
+      case Regex.run(~r/^[a-zA-Z0-9_\-\[\] \<\>\+\|:]+$/, new_teaser) do
+        [s] -> s
+        _ -> ""
+      end
+
+    Battle.update_lobby_values(state.lobby_id, %{teaser: new_teaser})
+    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+    state
+  end
+
   def handle_command(%{command: "rename", remaining: new_name, senderid: senderid} = cmd, state) do
     new_name = String.trim(new_name)
 
@@ -1530,7 +1545,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     cond do
       new_name == "" ->
-        Battle.rename_lobby(state.lobby_id, lobby.name, nil)
+        Battle.rename_lobby(state.lobby_id, lobby.base_name, nil)
         state
 
       WordLib.flagged_words(new_name) > 0 ->

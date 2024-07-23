@@ -18,7 +18,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     Communication
   }
 
-  alias Teiserver.Lobby.{ChatLib, LobbyRestrictions}
+  alias Teiserver.Lobby.{ChatLib, LobbyRestrictions, LobbyLib}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
   alias Teiserver.Battle.BalanceLib
@@ -28,7 +28,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? newlobby jazlobby tournament)
   @boss_commands ~w(balancemode gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
   @vip_boss_commands ~w(shuffle)
-  @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock makebalance)
+  @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock makebalance set-config-teaser)
 
   # @handled_by_lobby ~w(explain)
   @default_balance_algorithm "loser_picks"
@@ -396,10 +396,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         })
 
       # Remove filters from lobby name
-      lobby = Lobby.get_lobby(state.lobby_id)
-      old_name = lobby.name
-      new_name = String.split(old_name, "|", trim: true) |> Enum.at(0)
-      Battle.rename_lobby(state.lobby_id, new_name, nil)
+      LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
 
       {:noreply, new_state}
     else
