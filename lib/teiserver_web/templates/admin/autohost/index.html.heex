@@ -13,6 +13,7 @@
         <tr>
           <th>id</th>
           <th>name</th>
+          <th>credentials</th>
           <th>actions</th>
         </tr>
       </thead>
@@ -21,6 +22,7 @@
           <tr>
             <td><%= autohost.id %></td>
             <td><%= autohost.name %></td>
+            <td><%= Map.get(@cred_counts, autohost.id, 0) %></td>
             <td>
               <Phx.link href={~p"/teiserver/admin/autohost/#{autohost.id}"}>
                 <button type="button" class="btn btn-primary btn-sm">show</button>

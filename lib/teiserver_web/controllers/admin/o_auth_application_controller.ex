@@ -22,8 +22,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
 
     conn
     |> assign(:page_title, "BAR - oauth apps")
-    |> render("index.html", app_and_stats: Enum.zip(applications, stats)
-    )
+    |> render("index.html", app_and_stats: Enum.zip(applications, stats))
   end
 
   @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()

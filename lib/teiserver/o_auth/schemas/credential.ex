@@ -4,6 +4,7 @@ defmodule Teiserver.OAuth.Credential do
 
   alias Teiserver.OAuth
 
+  @type id :: non_neg_integer()
   @type t :: %__MODULE__{
           application: OAuth.Application.t(),
           autohost: Teiserver.Autohost.Autohost.t(),

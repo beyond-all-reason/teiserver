@@ -378,6 +378,14 @@ defmodule Teiserver.OAuth do
     end
   end
 
+  @spec delete_credential(Credential.t() | Credential.id()) :: :ok | {:error, term()}
+  def delete_credential(%Credential{} = cred) do
+    case Repo.delete(cred) do
+      {:ok, _} -> :ok
+      {:error, err} -> {:error, err}
+    end
+  end
+
   @doc """
   Given a client_id and a cleartext secret, check the secret matches and returns the credentials
   """

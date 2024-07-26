@@ -1,7 +1,9 @@
 defmodule TeiserverWeb.Admin.AutohostControllerTest do
-  use TeiserverWeb.ConnCase
+  use TeiserverWeb.ConnCase, async: true
 
-  alias Teiserver.Autohost
+  alias Teiserver.{Autohost, OAuth}
+  alias Teiserver.OAuth.CredentialQueries
+  alias Teiserver.{OAuthFixtures, AutohostFixture}
 
   defp setup_user(_context) do
     Central.Helpers.GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
@@ -12,6 +14,13 @@ defmodule TeiserverWeb.Admin.AutohostControllerTest do
     {:ok, autohost} = Autohost.create_autohost(%{"name" => "testing autohost"})
 
     %{autohost: autohost}
+  end
+
+  defp setup_app(context) do
+    owner_id = context[:user].id
+    app = OAuthFixtures.app_attrs(owner_id) |> OAuthFixtures.create_app()
+
+    %{app: app}
   end
 
   describe "index" do
@@ -100,6 +109,57 @@ defmodule TeiserverWeb.Admin.AutohostControllerTest do
       assert conn.status == 400
 
       assert autohost == Autohost.get_by_id(autohost.id)
+    end
+  end
+
+  describe "credentials" do
+    setup [:setup_user, :setup_autohost, :setup_app]
+
+    test "create", %{conn: conn, autohost: autohost, app: app} do
+      conn =
+        post(conn, ~p"/teiserver/admin/autohost/#{autohost.id}/credential", application: app.id)
+
+      assert %{id: id} = redirected_params(conn)
+
+      secret = conn.cookies["client_secret"]
+      assert [cred] = CredentialQueries.for_autohost(autohost)
+      assert Argon2.verify_pass(secret, cred.hashed_secret)
+
+      conn = get(conn, ~p"/teiserver/admin/autohost/#{id}")
+
+      # secret only shown once
+      assert is_nil(conn.cookies["client_secret"])
+    end
+
+    test "with invalid app", %{conn: conn, autohost: autohost} do
+      conn =
+        post(conn, ~p"/teiserver/admin/autohost/#{autohost.id}/credential", application: -1234)
+
+      assert conn.status == 404
+    end
+
+    test "delete", %{conn: conn, autohost: autohost, app: app} do
+      {:ok, cred} = OAuth.create_credentials(app.id, autohost.id, "client_id", "verysecret")
+      conn = delete(conn, ~p"/teiserver/admin/autohost/#{autohost.id}/credential/#{cred.id}")
+      assert conn.status == 302
+
+      assert {:error, _} = OAuth.get_valid_credentials("client_id", "verysecret")
+    end
+
+    test "delete invalid id", %{conn: conn, autohost: autohost, app: app} do
+      other_autohost = AutohostFixture.create_autohost("other autohost name")
+
+      {:ok, _cred} =
+        OAuth.create_credentials(app.id, other_autohost.id, "client_id", "verysecret")
+
+      assert {:ok, cred} = OAuth.get_valid_credentials("client_id", "verysecret")
+
+      conn = delete(conn, ~p"/teiserver/admin/autohost/#{autohost.id}/credential/#{cred.id}")
+      assert conn.status == 400
+
+      # cred is still here
+      assert {:ok, cred} = OAuth.get_valid_credentials("client_id", "verysecret")
+      refute is_nil(cred)
     end
   end
 end

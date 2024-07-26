@@ -5,7 +5,8 @@ defmodule TeiserverWeb.Admin.AutohostController do
 
   use TeiserverWeb, :controller
 
-  alias Teiserver.{Autohost, AutohostQueries}
+  alias Teiserver.{Autohost, AutohostQueries, OAuth}
+  alias Teiserver.OAuth.{ApplicationQueries, CredentialQueries}
 
   plug Bodyguard.Plug.Authorize,
     # The policy should be Admin or something fairly high. But while we're
@@ -21,9 +22,10 @@ defmodule TeiserverWeb.Admin.AutohostController do
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, _params) do
     autohosts = AutohostQueries.list_autohosts()
+    cred_counts = CredentialQueries.count_per_autohosts(Enum.map(autohosts, fn a -> a.id end))
 
     conn
-    |> render("index.html", autohosts: autohosts)
+    |> render("index.html", autohosts: autohosts, cred_counts: cred_counts)
   end
 
   @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
@@ -62,9 +64,7 @@ defmodule TeiserverWeb.Admin.AutohostController do
   def show(conn, assigns) do
     case Autohost.get_by_id(Map.get(assigns, "id")) do
       %Autohost.Autohost{} = autohost ->
-        conn
-        |> assign(:page_title, "BAR - autohost #{autohost.name}")
-        |> render("show.html", autohost: autohost)
+        render_show(conn, autohost)
 
       nil ->
         conn
@@ -98,7 +98,7 @@ defmodule TeiserverWeb.Admin.AutohostController do
           {:ok, autohost} ->
             conn
             |> put_flash(:info, "Autohost updated")
-            |> render(:show, autohost: autohost)
+            |> render_show(autohost)
 
           {:error, changeset} ->
             conn
@@ -140,5 +140,81 @@ defmodule TeiserverWeb.Admin.AutohostController do
         |> put_status(:not_found)
         |> render("not_found.html")
     end
+  end
+
+  @spec create_credential(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def create_credential(conn, assigns) do
+    with autohost when not is_nil(autohost) <- Autohost.get_by_id(Map.get(assigns, "id")),
+         app when not is_nil(app) <-
+           ApplicationQueries.get_application_by_id(Map.get(assigns, "application")) do
+      client_id = UUID.uuid4()
+      secret = Base.hex_encode32(:crypto.strong_rand_bytes(32))
+
+      case OAuth.create_credentials(app, autohost, client_id, secret) do
+        {:ok, _cred} ->
+          conn
+          |> put_flash(:info, "credential created")
+          |> Plug.Conn.put_resp_cookie("client_secret", secret, sign: true, max_age: 60)
+          |> redirect(to: ~p"/teiserver/admin/autohost/#{autohost.id}")
+
+        {:error, err} ->
+          conn
+          |> put_flash(:danger, inspect(err))
+          |> render_show(autohost)
+      end
+    else
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> render("not_found.html")
+    end
+  end
+
+  @spec delete_credential(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def delete_credential(conn, assigns) do
+    with autohost when not is_nil(autohost) <- Autohost.get_by_id(Map.get(assigns, "id")),
+         cred when not is_nil(cred) <-
+           CredentialQueries.get_credential_by_id(Map.get(assigns, "cred_id")) do
+      if cred.autohost_id != autohost.id do
+        conn
+        |> put_status(:bad_request)
+        |> put_flash(:danger, "credential doesn't match autohost")
+        |> render_show(autohost)
+      else
+        case OAuth.delete_credential(cred) do
+          :ok ->
+            conn
+            |> put_flash(:info, "credential deleted")
+            |> redirect(to: ~p"/teiserver/admin/autohost/#{autohost.id}")
+
+          {:error, err} ->
+            conn
+            |> put_flash(:danger, inspect(err))
+            |> render_show(autohost)
+        end
+      end
+    else
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> render("not_found.html")
+    end
+  end
+
+  defp render_show(conn, autohost) do
+    applications = ApplicationQueries.list_applications()
+    credentials = CredentialQueries.for_autohost(autohost)
+    cookies = Plug.Conn.fetch_cookies(conn, signed: ["client_secret"]).cookies
+    client_secret = Map.get(cookies, "client_secret")
+
+    conn
+    |> assign(:page_title, "BAR - autohost #{autohost.name}")
+    |> Plug.Conn.delete_resp_cookie("client_secret", sign: true)
+    |> render("show.html",
+      autohost: autohost,
+      applications: applications,
+      credentials: credentials,
+      client_secret: client_secret
+    )
   end
 end
