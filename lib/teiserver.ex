@@ -26,12 +26,6 @@ defmodule Teiserver do
     :code.load_file(module)
   end
 
-  # Designed for debugging help
-  @spec tachyon(String.t() | :timeout) :: {:ok, List.t() | Map.t()} | {:error, :bad_json}
-  def tachyon(v) do
-    Teiserver.Protocols.TachyonLib.decode(v)
-  end
-
   @spec accolade_status :: nil | :ok
   def accolade_status() do
     Application.put_env(:elixir, :ansi_enabled, true)

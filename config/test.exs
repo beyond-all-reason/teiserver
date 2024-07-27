@@ -23,8 +23,7 @@ config :teiserver, Teiserver,
   ],
   ports: [
     tcp: 9200,
-    tls: 9201,
-    tachyon: 9202
+    tls: 9201
   ],
   test_mode: true,
   enable_hooks: false,

@@ -302,9 +302,6 @@ defmodule Teiserver.CacheUser do
           String.ends_with?(user.email, "@hailstorm_spring") ->
             :ok
 
-          String.ends_with?(user.email, "@hailstorm_tachyon") ->
-            :ok
-
           true ->
             case EmailHelper.new_user(user) do
               {:error, error} ->
@@ -812,97 +809,6 @@ defmodule Teiserver.CacheUser do
       |> Map.get(:total, 0)
 
     Config.get_site_config_cache("system.User limit") - client_count
-  end
-
-  @spec ip_to_string(String.t() | tuple()) :: Tuple.t()
-  defp ip_to_string({a, b, c, d}) do
-    "#{a}.#{b}.#{c}.#{d}"
-  end
-
-  defp ip_to_string(ip) do
-    to_string(ip)
-  end
-
-  @spec login_from_token(String.t(), map()) ::
-          {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), T.userid()}
-  def login_from_token(token, ws_state) do
-    ip = get_in(ws_state, [:connect_info, :peer_data, :address]) |> ip_to_string
-    _user_agent = get_in(ws_state, [:connect_info, :user_agent])
-    application_hash = ws_state.params["application_hash"]
-    application_name = ws_state.params["application_name"]
-    application_version = ws_state.params["application_version"]
-
-    wait_for_startup()
-
-    user = get_user_by_id(token.user.id)
-
-    # # If they're a smurf, log them in as the smurf!
-    # user =
-    #   if user.smurf_of_id != nil do
-    #     get_user_by_id(user.smurf_of_id)
-    #   else
-    #     user
-    #   end
-
-    cond do
-      user.smurf_of_id != nil ->
-        Telemetry.log_complex_server_event(user.id, "Banned login", %{
-          error: "Smurf"
-        })
-
-        {:error, @smurf_string}
-
-      token.expires != nil and Timex.compare(token.expires, Timex.now()) == -1 ->
-        {:error, "Token expired"}
-
-      not is_bot?(user) and login_flood_check(user.id) == :block ->
-        {:error, "Flood protection - Please wait 20 seconds and try again"}
-
-      Enum.member?(["", "0", nil], application_hash) == true ->
-        {:error, "Application hash missing in login"}
-
-      is_restricted?(user, ["Permanently banned"]) ->
-        Telemetry.log_complex_server_event(user.id, "Banned login", %{
-          error: "Permanently banned"
-        })
-
-        {:error, "Banned account"}
-
-      is_restricted?(user, ["Login"]) ->
-        Telemetry.log_complex_server_event(user.id, "Banned login", %{
-          error: "Suspended"
-        })
-
-        {:error, @suspended_string}
-
-      not is_verified?(user) ->
-        Account.update_user_stat(user.id, %{
-          application_name: application_name,
-          application_version: application_version,
-          application_hash: application_hash,
-          last_ip: ip
-        })
-
-        {:error, "Unverified", user.id}
-
-      Client.get_client_by_id(user.id) != nil ->
-        Client.disconnect(user.id, "Already logged in")
-
-        if is_bot?(user) do
-          :timer.sleep(1000)
-          do_login(user, ip, application_name, application_hash)
-        else
-          Teiserver.cache_put(:teiserver_login_count, user.id, 10)
-          {:error, "Existing session, please retry in 20 seconds to clear the cache"}
-        end
-
-      true ->
-        {:ok, user} = do_login(user, ip, application_name, application_hash)
-
-        _client = Client.login(user, :tachyon, ip)
-
-        {:ok, user}
-    end
   end
 
   @spec try_login(String.t(), String.t(), String.t(), String.t()) ::

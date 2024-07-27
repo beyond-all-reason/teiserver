@@ -2,7 +2,6 @@ defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
   alias Teiserver.{Client, CacheUser, Account}
   alias Teiserver.Account.AccoladeLib
-  alias Teiserver.Protocols.TachyonLib
   alias Teiserver.Coordinator.CoordinatorServer
   alias Teiserver.Data.Types, as: T
   @host '127.0.0.1'
@@ -19,17 +18,6 @@ defmodule Teiserver.TeiserverTestLib do
   def spring_tls_setup() do
     {:ok, socket} =
       :ssl.connect(@host, 9201,
-        active: false,
-        verify: :verify_none
-      )
-
-    %{socket: socket}
-  end
-
-  @spec tachyon_tls_setup :: %{socket: port()}
-  def tachyon_tls_setup() do
-    {:ok, socket} =
-      :ssl.connect(@host, 9202,
         active: false,
         verify: :verify_none
       )
@@ -125,37 +113,6 @@ defmodule Teiserver.TeiserverTestLib do
     %{socket: socket, user: user, pid: pid}
   end
 
-  @spec tachyon_auth_setup(nil | map()) :: %{socket: port(), user: map(), pid: pid()}
-  def tachyon_auth_setup(user \\ nil) do
-    user = if user, do: user, else: new_user()
-    token = CacheUser.create_token(user)
-
-    %{socket: socket} = tachyon_tls_setup()
-
-    # Now do our login
-    data = %{
-      cmd: "c.auth.login",
-      token: token,
-      lobby_name: "ex_test",
-      lobby_version: "1a",
-      lobby_hash: "t1 t2"
-    }
-
-    _tachyon_send(socket, data)
-    reply = _tachyon_recv(socket)
-
-    case reply do
-      [%{"result" => "unverified"} | _] ->
-        raise "You are creating a user without verifying in"
-
-      _ ->
-        :ok
-    end
-
-    pid = Client.get_client_by_id(user.id).tcp_pid
-    %{socket: socket, user: user, pid: pid}
-  end
-
   def _send_lines(state = %{mock: true}, msg) do
     state.protocol_in.data_in(msg, state)
   end
@@ -238,56 +195,6 @@ defmodule Teiserver.TeiserverTestLib do
     case :gen_tcp.recv(socket, 0, 1000) do
       {:ok, reply} ->
         _recv_until(socket, acc <> to_string(reply))
-
-      {:error, :timeout} ->
-        acc
-    end
-  end
-
-  def _tachyon_send(socket, data) do
-    msg = TachyonLib.encode(data)
-    _send_raw(socket, msg <> "\n")
-  end
-
-  def _tachyon_recv(socket) do
-    case _recv_raw(socket) do
-      :timeout ->
-        :timeout
-
-      :closed ->
-        :closed
-
-      resp ->
-        resp
-        |> String.split("\n")
-        |> Enum.map(fn line ->
-          case TachyonLib.decode(line) do
-            {:ok, msg} -> msg
-            error -> error
-          end
-        end)
-        |> Enum.filter(fn r -> r != nil end)
-    end
-  end
-
-  def _tachyon_recv_until(socket), do: _tachyon_recv_until(socket, [])
-
-  def _tachyon_recv_until(socket = {:sslsocket, _, _}, acc) do
-    case :ssl.recv(socket, 0, 500) do
-      {:ok, reply} ->
-        resp =
-          reply
-          |> to_string
-          |> String.split("\n")
-          |> Enum.map(fn line ->
-            case TachyonLib.decode(line) do
-              {:ok, msg} -> msg
-              error -> error
-            end
-          end)
-          |> Enum.filter(fn r -> r != nil end)
-
-        _tachyon_recv_until(socket, acc ++ resp)
 
       {:error, :timeout} ->
         acc
