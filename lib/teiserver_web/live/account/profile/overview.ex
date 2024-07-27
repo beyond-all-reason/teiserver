@@ -59,6 +59,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     |> assign(:page_title, "#{user.name} - Achievements")
   end
 
+  @impl true
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
     user_id = socket.assigns.user.id
 
