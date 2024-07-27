@@ -1515,8 +1515,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     new_teaser = String.trim(new_teaser)
 
     new_teaser =
-      case Regex.run(~r/^[a-zA-Z0-9_\-\[\] \<\>\+\|:]+$/, new_teaser) do
-        [s] -> s
+      case chars_valid_for_lobby_name?(new_teaser) do
+        true -> new_teaser
         _ -> ""
       end
 
@@ -1529,8 +1529,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     new_name = String.trim(new_name)
 
     stripped_name =
-      case Regex.run(~r/^[a-zA-Z0-9_\-\[\] \<\>\+\|:]+$/, new_name) do
-        [s] -> s
+      case chars_valid_for_lobby_name?(new_name) do
+        true -> new_name
         _ -> ""
       end
 
@@ -2130,6 +2130,14 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
       false ->
         -1
+    end
+  end
+
+  @spec chars_valid_for_lobby_name?(String.t()) :: boolean()
+  defp chars_valid_for_lobby_name?(string) do
+    case Regex.run(~r/^[a-zA-Z0-9_\-\[\] \<\>\+\|:]+$/, string) do
+      [_] -> true
+      _ -> false
     end
   end
 
