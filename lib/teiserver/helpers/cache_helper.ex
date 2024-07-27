@@ -92,4 +92,33 @@ defmodule Teiserver.Helpers.CacheHelper do
   def store_get_or_store(table, key, func) do
     ConCache.get_or_store(table, key, func)
   end
+
+  # Setup and supervisors
+  def concache_sup(name, opts \\ []) do
+    Supervisor.child_spec(
+      {
+        ConCache,
+        [
+          name: name,
+          ttl_check_interval: 10_000,
+          global_ttl: opts[:global_ttl] || 60_000,
+          touch_on_read: true
+        ]
+      },
+      id: {ConCache, name}
+    )
+  end
+
+  def concache_perm_sup(name) do
+    Supervisor.child_spec(
+      {
+        ConCache,
+        [
+          name: name,
+          ttl_check_interval: false
+        ]
+      },
+      id: {ConCache, name}
+    )
+  end
 end

@@ -1,6 +1,27 @@
 defmodule Teiserver.Config.UserConfigTypes.ProfileConfigs do
-  @moduledoc false
+  @moduledoc """
+  Cache and setup for profile configuration
+  """
+
+  use Supervisor
+
   import Teiserver.Config, only: [add_user_config_type: 1]
+
+  def start_link(opts) do
+    with {:ok, sup} <- Supervisor.start_link(__MODULE__, :ok, opts),
+         :ok <- create() do
+      {:ok, sup}
+    end
+  end
+
+  @impl true
+  def init(:ok) do
+    children = [
+      {ConCache, [name: :config_user_type_store, ttl_check_interval: false]}
+    ]
+
+    Supervisor.init(children, strategy: :one_for_one)
+  end
 
   @spec create() :: :ok
   def create() do
