@@ -185,9 +185,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                 </tr>
 
                 <%= for user <- @users do %>
-                  <% user_stats = @stats_map[user.id]
-                  games_allied = @games_allied[user.id]
-                  games_vs = @games_vs[user.id] %>
+                  <% user_stats = @stats_map[user.id] %>
 
                   <tr>
                     <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
