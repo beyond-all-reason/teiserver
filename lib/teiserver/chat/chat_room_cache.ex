@@ -144,6 +144,8 @@ defmodule Teiserver.Room do
     Teiserver.cache_put(:rooms, room.name, room)
 
     Teiserver.cache_update(:lists, :rooms, fn value ->
+      value = value || []
+
       new_value =
         [room.name | value]
         |> Enum.uniq()
@@ -155,7 +157,7 @@ defmodule Teiserver.Room do
   end
 
   def list_rooms() do
-    Teiserver.cache_get(:lists, :rooms)
+    (Teiserver.cache_get(:lists, :rooms) || [])
     |> Enum.map(fn room_name -> Teiserver.cache_get(:rooms, room_name) end)
   end
 
