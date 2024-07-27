@@ -16,14 +16,6 @@ defmodule TeiserverWeb.Endpoint do
     longpoll: false
   )
 
-  socket("/tachyon", Teiserver.Tachyon.TachyonSocket,
-    websocket: [
-      connect_info: [:peer_data, :x_headers, :user_agent],
-      error_handler: {Teiserver.Tachyon.TachyonSocket, :handle_error, []}
-    ],
-    longpoll: false
-  )
-
   # Serve at "/" the static files from "priv/static" directory.
   #
   # You should set gzip to true if you are running phx.digest

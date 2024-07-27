@@ -13,8 +13,6 @@ defmodule TeiserverWeb.API.HailstormController do
 
   @spec start(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def start(conn, _params) do
-    Teiserver.Tachyon.CommandDispatch.build_dispatch_cache()
-
     conn
     |> put_status(201)
     |> assign(:result, %{up: true})
