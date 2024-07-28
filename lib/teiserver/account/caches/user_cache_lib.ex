@@ -248,8 +248,9 @@ defmodule Teiserver.Account.UserCacheLib do
     Account.script_update_user(db_user, Map.put(obj_attrs, "data", data))
   end
 
-  @spec update_user(CacheUser.t(), boolean) :: CacheUser.t()
-  def update_user(user, persist \\ false) do
+  @spec update_user(CacheUser.t(), [persist: boolean()] | nil) :: CacheUser.t()
+  def update_user(user, opts \\ []) do
+    persist = Keyword.get(opts, :persist, false)
     Teiserver.cache_put(:users, user.id, user)
     if persist, do: persist_user(user)
     user
