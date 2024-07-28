@@ -176,6 +176,8 @@ defmodule Teiserver.Data.Matchmaking do
 
   def add_queue(queue) do
     Teiserver.cache_update(:lists, :queues, fn value ->
+      value = value || []
+
       new_value =
         [queue.id | value]
         |> Enum.uniq()

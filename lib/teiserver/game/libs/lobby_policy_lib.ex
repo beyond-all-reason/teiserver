@@ -238,6 +238,8 @@ defmodule Teiserver.Game.LobbyPolicyLib do
 
   defp cache_updated_lobby_policy(lobby_policy) do
     Teiserver.cache_update(:lists, :lobby_policies, fn value ->
+      value = value || []
+
       new_value =
         [lobby_policy.id | value]
         |> Enum.uniq()
@@ -261,7 +263,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
 
   @spec list_cached_lobby_policies() :: list()
   def list_cached_lobby_policies() do
-    Teiserver.cache_get(:lists, :lobby_policies)
+    (Teiserver.cache_get(:lists, :lobby_policies) || [])
     |> Enum.map(fn id ->
       get_cached_lobby_policy(id)
     end)
