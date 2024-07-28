@@ -12,6 +12,8 @@ defmodule Teiserver.CacheUser do
   require Logger
   alias Phoenix.PubSub
 
+  @type t :: T.user()
+
   @timer_sleep 500
 
   @default_colour "#666666"
@@ -1119,7 +1121,7 @@ defmodule Teiserver.CacheUser do
     update_user(%{user | restrictions: new_restrictions}, persist: true)
   end
 
-  @spec is_restricted?(T.userid() | T.user(), String.t()) :: boolean()
+  @spec is_restricted?(T.userid() | T.user(), String.t() | [String.t()]) :: boolean()
   def is_restricted?(nil, _), do: true
 
   def is_restricted?(userid, restriction) when is_integer(userid),
