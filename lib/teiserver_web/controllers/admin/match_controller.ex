@@ -1,8 +1,7 @@
 defmodule TeiserverWeb.Admin.MatchController do
   use TeiserverWeb, :controller
 
-  alias Teiserver.{Battle, Game, Account, Telemetry}
-  alias Teiserver.Battle.{MatchLib, BalanceLib}
+  alias Teiserver.{Battle, Game, Account}
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
   require Logger
 
