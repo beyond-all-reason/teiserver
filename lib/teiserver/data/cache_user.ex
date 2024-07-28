@@ -335,6 +335,7 @@ defmodule Teiserver.CacheUser do
     case Account.script_create_user(params) do
       {:ok, user} ->
         Account.update_user_stat(user.id, %{
+          "first_ip" => ip,
           "country" => Teiserver.Geoip.get_flag(ip),
           "verification_code" => (:rand.uniform(899_999) + 100_000) |> to_string
         })
