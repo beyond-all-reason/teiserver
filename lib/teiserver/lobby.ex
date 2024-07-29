@@ -85,6 +85,7 @@ defmodule Teiserver.Lobby do
         player_rename: false,
         base_name: lobby.name,
         display_name: lobby.name,
+        teaser: "",
 
         # Used to indicate the lobby is subject to a lobby policy
         lobby_policy_id: nil,

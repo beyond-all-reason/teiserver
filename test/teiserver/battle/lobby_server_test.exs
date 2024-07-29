@@ -77,6 +77,7 @@ defmodule Teiserver.Battle.LobbyServerTest do
       game_hash: "string_of_characters",
       map_hash: "string_of_characters",
       map_name: "koom valley",
+      teaser: "",
       game_name: "BAR",
       engine_name: "spring-105",
       engine_version: "105.1.2.3",
