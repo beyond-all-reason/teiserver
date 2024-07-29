@@ -930,13 +930,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     block_status = Account.check_block_status(userid, member_list)
 
-    boss_avoid_status =
-      state.host_bosses
-      |> Stream.map(fn boss_id ->
-        Account.does_a_avoid_b?(boss_id, userid)
-      end)
-      |> Enum.any?()
-
     cond do
       client == nil ->
         {false, "No client"}
@@ -966,10 +959,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       block_status == :blocked ->
         Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.blocked")
         {false, "You are blocked by too many players in this lobby"}
-
-      boss_avoid_status == true ->
-        Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.boss_blocked")
-        {false, "You are blocked by the boss of this lobby"}
 
       Enum.member?(state.approved_users, userid) ->
         {true, :override_approve}
