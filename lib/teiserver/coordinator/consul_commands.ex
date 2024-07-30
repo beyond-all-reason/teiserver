@@ -1618,9 +1618,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         state
 
-      lobby.player_rename ->
-        state
-
       true ->
         Battle.rename_lobby(state.lobby_id, new_name, nil)
 
@@ -2053,8 +2050,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "reset"} = _cmd, state) do
-    Battle.update_lobby_values(state.lobby_id, %{player_rename: false})
-
     ConsulServer.empty_state(state.lobby_id)
     |> ConsulServer.broadcast_update("reset")
   end
