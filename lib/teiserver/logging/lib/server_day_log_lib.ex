@@ -104,13 +104,13 @@ defmodule Teiserver.Logging.ServerDayLogLib do
   def aggregate_day_logs(logs) do
     logs
     |> Enum.reduce(@empty_log, fn log, acc ->
-      extend_segment(acc, {log})
+      extend_segment(acc, log)
     end)
     |> calculate_aggregates()
   end
 
   # Given an existing segment and a batch of logs, calculate the segment and add them together
-  defp extend_segment(existing, {%{data: data} = _server_log}) do
+  defp extend_segment(existing, %{data: data} = _server_log) do
     %{
       # Used to make calculating the end of day stats easier, this will not appear in the final result
       tmp_reduction: %{
