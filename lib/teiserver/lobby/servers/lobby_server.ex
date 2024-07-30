@@ -213,7 +213,6 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   def handle_cast({:rename_lobby, new_base_name, renamer_id}, state) do
-
     Telemetry.log_complex_lobby_event(renamer_id, state.match_id, "command.rename", %{
       name: new_base_name
     })
