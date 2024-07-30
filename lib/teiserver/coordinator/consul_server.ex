@@ -29,6 +29,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @boss_commands ~w(balancemode gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
   @vip_boss_commands ~w(shuffle)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock makebalance set-config-teaser)
+  @admin_commands ~w(playerlimit)
 
   # @handled_by_lobby ~w(explain)
   @default_balance_algorithm "loser_picks"
@@ -1010,6 +1011,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     is_host = senderid == state.host_id
     is_boss = Enum.member?(state.host_bosses, senderid)
     is_vip = Enum.member?(user.roles, "VIP")
+    is_admin = Enum.member?(user.roles, "Admin")
 
     cond do
       client == nil ->
@@ -1021,7 +1023,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
       Enum.member?(@always_allow, cmd.command) ->
         true
 
-      client.moderator == true ->
+      # Allow all commands for Admins
+      is_admin ->
+        true
+
+      # Allow all except Admin only commands for moderators
+      client.moderator and not Enum.member?(@admin_commands, cmd.command) ->
         true
 
       Enum.member?(@host_commands, cmd.command) and is_host ->

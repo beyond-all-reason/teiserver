@@ -1630,27 +1630,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   #################### Moderator only
   # ----------------- General commands
-  def handle_command(
-        %{command: "playerlimit", remaining: value_str, senderid: senderid} = cmd,
-        state
-      ) do
-    case Integer.parse(value_str) do
-      {new_limit, _} ->
-        ConsulServer.say_command(cmd, state)
-        %{state | player_limit: abs(new_limit)}
-
-      _ ->
-        ChatLib.sayprivateex(
-          state.coordinator_id,
-          senderid,
-          "Unable to convert #{value_str} into an integer",
-          state.lobby_id
-        )
-
-        state
-    end
-  end
-
   def handle_command(%{command: "makeready", remaining: ""} = cmd, state) do
     battle = Lobby.get_lobby(state.lobby_id)
 
@@ -2057,6 +2036,29 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     ConsulServer.empty_state(state.lobby_id)
     |> ConsulServer.broadcast_update("reset")
+  end
+
+  #################### Admin only
+  # ----------------- General commands
+  def handle_command(
+        %{command: "playerlimit", remaining: value_str, senderid: senderid} = cmd,
+        state
+      ) do
+    case Integer.parse(value_str) do
+      {new_limit, _} ->
+        ConsulServer.say_command(cmd, state)
+        %{state | player_limit: abs(new_limit)}
+
+      _ ->
+        ChatLib.sayprivateex(
+          state.coordinator_id,
+          senderid,
+          "Unable to convert #{value_str} into an integer",
+          state.lobby_id
+        )
+
+        state
+    end
   end
 
   #################### Internal commands
