@@ -32,9 +32,7 @@ defmodule TeiserverWeb.API.SpadsController do
 
     actual_type =
       case type do
-        "Team" -> get_team_subtype(lobby)
-        # Team FFA uses Large Team rating
-        "TeamFFA" -> "Large Team"
+        "Team FFA" -> "Large Team"
         v -> v
       end
 
@@ -225,32 +223,6 @@ defmodule TeiserverWeb.API.SpadsController do
 
       client ->
         Battle.get_lobby(client.lobby_id)
-    end
-  end
-
-  defp get_team_subtype(nil), do: "Large Team"
-
-  defp get_team_subtype(lobby) do
-    max_small_team_size = Config.get_site_config_cache("lobby.Small team game limit")
-
-    teams =
-      lobby.players
-      |> Account.list_clients()
-      |> Enum.filter(fn c -> c.player == true end)
-      |> Enum.group_by(fn c -> c.team_number end)
-
-    max_team_size =
-      case Enum.map(teams, fn {_, team} -> Enum.count(team) end) do
-        [] ->
-          0
-
-        counts ->
-          Enum.max(counts)
-      end
-
-    cond do
-      Enum.count(teams) == 2 and max_team_size <= max_small_team_size -> "Small Team"
-      true -> "Large Team"
     end
   end
 end
