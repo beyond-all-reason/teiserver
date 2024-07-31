@@ -935,7 +935,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     boss_avoid_status =
       state.host_bosses
       |> Stream.map(fn boss_id ->
-        Account.does_a_avoid_b?(boss_id, user.id)
+        Account.does_a_avoid_b?(boss_id, userid)
       end)
       |> Enum.any?()
 
