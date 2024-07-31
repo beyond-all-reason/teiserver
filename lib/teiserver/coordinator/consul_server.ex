@@ -1011,7 +1011,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     is_host = senderid == state.host_id
     is_boss = Enum.member?(state.host_bosses, senderid)
     is_vip = Enum.member?(user.roles, "VIP")
-    is_admin = Enum.member?(user.roles, "Admin")
+    is_admin = CacheUser.is_admin?(user.roles)
 
     cond do
       client == nil ->

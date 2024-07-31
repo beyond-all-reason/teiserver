@@ -1268,28 +1268,34 @@ defmodule Teiserver.CacheUser do
   end
 
   @spec is_bot?(T.userid() | T.user()) :: boolean()
-  def is_bot?(nil), do: true
+  def is_bot?(nil), do: false
   def is_bot?(userid) when is_integer(userid), do: is_bot?(get_user_by_id(userid))
   def is_bot?(%{roles: roles}), do: Enum.member?(roles, "Bot")
   def is_bot?(_), do: false
 
   @spec is_moderator?(T.userid() | T.user()) :: boolean()
-  def is_moderator?(nil), do: true
+  def is_moderator?(nil), do: false
   def is_moderator?(userid) when is_integer(userid), do: is_moderator?(get_user_by_id(userid))
   def is_moderator?(%{roles: roles}), do: Enum.member?(roles, "Moderator")
   def is_moderator?(_), do: false
 
   @spec is_contributor?(T.userid() | T.user()) :: boolean()
-  def is_contributor?(nil), do: true
+  def is_contributor?(nil), do: false
   def is_contributor?(userid) when is_integer(userid), do: is_contributor?(get_user_by_id(userid))
   def is_contributor?(%{roles: roles}), do: Enum.member?(roles, "Contributor")
   def is_contributor?(_), do: false
 
   @spec is_verified?(T.userid() | T.user()) :: boolean()
-  def is_verified?(nil), do: true
+  def is_verified?(nil), do: false
   def is_verified?(userid) when is_integer(userid), do: is_verified?(get_user_by_id(userid))
   def is_verified?(%{roles: roles}), do: Enum.member?(roles, "Verified")
   def is_verified?(_), do: false
+
+  @spec is_admin?(T.userid() | T.user()) :: boolean()
+  def is_admin?(nil), do: false
+  def is_admin?(userid) when is_integer(userid), do: is_admin?(get_user_by_id(userid))
+  def is_admin?(%{roles: roles}), do: Enum.member?(roles, "Admin")
+  def is_admin?(_), do: false
 
   @spec rank_time(T.userid()) :: non_neg_integer()
   def rank_time(userid) do

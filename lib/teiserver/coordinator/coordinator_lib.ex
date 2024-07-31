@@ -251,7 +251,7 @@ Multiple locks can be engaged at the same time
       :everybody -> true
       :host -> CacheUser.is_moderator?(user) or host
       :moderator -> CacheUser.is_moderator?(user)
-      :admin -> CacheUser.has_any_role?(user, "Admin")
+      :admin -> CacheUser.is_admin?(user)
       _ -> false
     end
   end
