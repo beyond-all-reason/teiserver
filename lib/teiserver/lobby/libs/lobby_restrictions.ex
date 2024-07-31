@@ -154,7 +154,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   Determining the rating type is slightly different for lobby restrictions compared to rating a match.
   When rating a match we want to use the number of players and team count in the match.
   But with the lobby, we want to use the target team size/count defined by the dropdowns in the lobby.
-  So if there are two players in the lobby, but the team size dropdown is 8, we want to use the "Team" rating.
+  So if there are two players in the lobby, but the team size dropdown is 8, we want to use the "Large Team" rating.
   """
   @spec check_rating_to_play(any(), any()) :: :ok | {:error, iodata()}
   def check_rating_to_play(user_id, consul_state) do

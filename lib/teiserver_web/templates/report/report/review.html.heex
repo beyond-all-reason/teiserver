@@ -177,8 +177,10 @@ show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0 %>
                         label: "Peak total users",
                         value:
                           percent(
-                            @data.server["aggregates"]["stats"]["peak_users"] /
-                              @data.past_server["aggregates"]["stats"]["peak_users"]
+                            @data.server["aggregates"]["stats"]["peak_user_counts"]["total"] /
+                              @data.past_server["aggregates"]["stats"]["peak_user_counts"][
+                                "total"
+                              ]
                           ),
                         append: "%"
                       ) %>
@@ -208,8 +210,10 @@ show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0 %>
                         label: "Peak players",
                         value:
                           percent(
-                            @data.server["aggregates"]["stats"]["peak_players"] /
-                              @data.past_server["aggregates"]["stats"]["peak_players"]
+                            @data.server["aggregates"]["stats"]["peak_user_counts"]["players"] /
+                              @data.past_server["aggregates"]["stats"]["peak_user_counts"][
+                                "players"
+                              ]
                           ),
                         append: "%"
                       ) %>

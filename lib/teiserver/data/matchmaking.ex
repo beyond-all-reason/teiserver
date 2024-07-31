@@ -308,7 +308,7 @@ defmodule Teiserver.Data.Matchmaking do
       cond do
         queue.settings["rating_type"] != nil -> queue.settings["rating_type"]
         queue.team_size == 1 -> "Duel"
-        true -> "Team"
+        true -> "Large Team"
       end
 
     BalanceLib.get_user_rating_value(userid, rating_type)

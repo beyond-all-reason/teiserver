@@ -4,7 +4,7 @@ defmodule Teiserver.Game.PlayerRatingsExport do
   Teiserver.Game.PlayerRatingsExport.show_form(nil, %{
     "date_preset" => "All time",
     "end_date" => "",
-    "rating_type" => "Team",
+    "rating_type" => "Large Team",
     "start_date" => ""
   })
 

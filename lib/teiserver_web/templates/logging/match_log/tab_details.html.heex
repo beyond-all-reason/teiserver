@@ -19,8 +19,13 @@
     ) %>
 
     <%= central_component("detail_line",
-      label: "Team",
-      value: format_number(@data["team"]["aggregate"]["total_count"])
+      label: "Small Team",
+      value: format_number(@data["small_team"]["aggregate"]["total_count"])
+    ) %>
+
+    <%= central_component("detail_line",
+      label: "Large Team",
+      value: format_number(@data["large_team"]["aggregate"]["total_count"])
     ) %>
 
     <%= central_component("detail_line",
@@ -59,8 +64,13 @@
     ) %>
 
     <%= central_component("detail_line",
-      label: "Team",
-      value: format_number(@data["team"]["aggregate"]["weighted_count"])
+      label: "Small Team",
+      value: format_number(@data["small_team"]["aggregate"]["weighted_count"])
+    ) %>
+
+    <%= central_component("detail_line",
+      label: "Large Team",
+      value: format_number(@data["large_team"]["aggregate"]["weighted_count"])
     ) %>
 
     <%= central_component("detail_line",

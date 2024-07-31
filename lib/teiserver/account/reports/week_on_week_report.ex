@@ -43,7 +43,7 @@ defmodule Teiserver.Account.WeekOnWeekReport do
         previous_key = {week - 1, weekday}
         previous_value = data_map[previous_key]
 
-        if previous_value do
+        if previous_value not in [nil, 0] do
           delta = NumberHelper.percent(this_value / previous_value) - 100
 
           {key, delta}
@@ -80,7 +80,7 @@ defmodule Teiserver.Account.WeekOnWeekReport do
         previous_key = key - 1
         previous_value = week_data[previous_key]
 
-        if previous_value do
+        if previous_value not in [nil, 0] do
           delta = NumberHelper.percent(this_value / previous_value) - 100
 
           {key, delta}
@@ -118,16 +118,16 @@ defmodule Teiserver.Account.WeekOnWeekReport do
     })
   end
 
-  defp get_metric(data, "Unique users"), do: data["aggregates"]["stats"]["unique_users"]
-  defp get_metric(data, "Unique players"), do: data["aggregates"]["stats"]["unique_players"]
+  defp get_metric(data, "Unique users"), do: data["aggregates"]["stats"]["unique_users"] || 0
+  defp get_metric(data, "Unique players"), do: data["aggregates"]["stats"]["unique_players"] || 0
 
   defp get_metric(data, "Peak users"),
-    do: data["aggregates"]["stats"]["peak_user_counts"]["total"]
+    do: data["aggregates"]["stats"]["peak_user_counts"]["total"] || 0
 
   defp get_metric(data, "Peak players"),
-    do: data["aggregates"]["stats"]["peak_user_counts"]["player"]
+    do: data["aggregates"]["stats"]["peak_user_counts"]["player"] || 0
 
-  defp get_metric(data, "Total time"), do: data["aggregates"]["minutes"]["total"]
-  defp get_metric(data, "Play time"), do: data["aggregates"]["minutes"]["player"]
-  defp get_metric(data, "Registrations"), do: data["aggregates"]["stats"]["accounts_created"]
+  defp get_metric(data, "Total time"), do: data["aggregates"]["minutes"]["total"] || 0
+  defp get_metric(data, "Play time"), do: data["aggregates"]["minutes"]["player"] || 0
+  defp get_metric(data, "Registrations"), do: data["aggregates"]["stats"]["accounts_created"] || 0
 end

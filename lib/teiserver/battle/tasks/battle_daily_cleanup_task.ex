@@ -71,7 +71,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
     # Battle.list_matches(
     #   search: [
     #     inserted_before: Timex.shift(Timex.now(), days: -battle_match_rated_days),
-    #     game_type_in: ["Team", "Duel", "FFA", "Team FFA"]
+    #     game_type_in: ["Small Team", "Large Team", "Duel", "FFA", "Team FFA"]
     #   ],
     #   search: [:id],
     #   limit: :infinity
