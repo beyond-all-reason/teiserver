@@ -20,7 +20,8 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     %{socket: psocket, user: player} = tachyon_auth_setup()
 
     # User needs to be a moderator (at this time) to start/stop Coordinator mode
-    CacheUser.update_user(%{host | roles: ["Moderator"]})
+    # Admin role (contains Moderator) used for playerlimit test
+    CacheUser.update_user(%{host | roles: ["Admin"]})
     ClientLib.refresh_client(host.id)
 
     lobby_data = %{

@@ -126,7 +126,6 @@ Multiple locks can be engaged at the same time
       {"success", [],
        "Sends a \"!y\" message from every player to the game host to make a vote pass.",
        :moderator},
-      {"playerlimit", ["limit"], "Sets a new player limit for this specific host.", :moderator},
       {"check", ["user"],
        "Performs a smurf check against the user mentioned and sends you the result.", :moderator},
       {"pull", ["user"], "Pulls a given user into the battle.", :moderator},
@@ -138,7 +137,10 @@ Multiple locks can be engaged at the same time
       {"reset", [], "Resets the coordinator bot for this lobby to the default.", :moderator},
       {"specafk", [],
        "Everybody is sent a message asking them to confirm they are not afk. If they don't respond within 40 seconds they are moved to spectators. Requires boss privileges.",
-       :moderator}
+       :moderator},
+
+      # --- :admin only ---
+      {"playerlimit", ["limit"], "Sets a new player limit for this specific host.", :admin}
     ]
 
     # $command - Coordinator command
@@ -249,6 +251,7 @@ Multiple locks can be engaged at the same time
       :everybody -> true
       :host -> CacheUser.is_moderator?(user) or host
       :moderator -> CacheUser.is_moderator?(user)
+      :admin -> CacheUser.is_admin?(user)
       _ -> false
     end
   end
