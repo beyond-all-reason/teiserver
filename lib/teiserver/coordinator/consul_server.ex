@@ -803,10 +803,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @spec user_allowed_to_play?(T.user(), T.client(), map()) :: boolean()
   defp user_allowed_to_play?(user, client, state) do
-    player_list = list_players(state)
+    player_ids = list_player_ids(state)
     userid = user.id
 
-    avoid_status = Account.check_avoid_status(user.id, player_list)
+    avoid_status = Account.check_avoid_status(user.id, player_ids)
 
     boss_avoid_status =
       state.host_bosses
@@ -841,16 +841,22 @@ defmodule Teiserver.Coordinator.ConsulServer do
       avoid_status == :avoiding ->
         match_id = Battle.get_lobby_match_id(state.lobby_id)
         Telemetry.log_simple_lobby_event(user.id, match_id, "play_refused.avoiding")
+        msg = "You are avoiding too many players in this lobby"
+        CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
         false
 
       avoid_status == :avoided ->
         match_id = Battle.get_lobby_match_id(state.lobby_id)
         Telemetry.log_simple_lobby_event(user.id, match_id, "play_refused.avoided")
+        msg = "You are avoided by too many players in this lobby"
+        CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
         false
 
       boss_avoid_status == true ->
         match_id = Battle.get_lobby_match_id(state.lobby_id)
         Telemetry.log_simple_lobby_event(user.id, match_id, "play_refused.boss_avoided")
+        msg = "You are avoided by the boss of this lobby"
+        CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
         false
 
       true ->
@@ -922,15 +928,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     # Blocking using relationships
-    member_list = Battle.get_lobby_member_list(state.lobby_id)
+    player_ids = list_player_ids(state)
     match_id = Battle.get_lobby_match_id(state.lobby_id)
-
-    block_status = Account.check_block_status(userid, member_list)
+    block_status = Account.check_block_status(userid, player_ids)
 
     boss_avoid_status =
       state.host_bosses
       |> Stream.map(fn boss_id ->
-        Account.does_a_avoid_b?(boss_id, userid)
+        Account.does_a_avoid_b?(boss_id, user.id)
       end)
       |> Enum.any?()
 
@@ -1230,6 +1235,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def get_max_player_count(state) do
     min(state.host_teamcount * state.host_teamsize, state.player_limit)
+  end
+
+  @spec list_player_ids(map()) :: [T.userid()]
+  def list_player_ids(state) do
+    list_players(state)
+    |> Enum.map(fn x ->
+      x[:userid]
+    end)
   end
 
   @spec list_players(map()) :: [T.client()]
