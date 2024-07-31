@@ -1510,12 +1510,27 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     ConsulServer.say_command(cmd, state)
   end
 
+  def handle_command(%{command: "set-config-teaser", remaining: new_teaser} = cmd, state) do
+    ConsulServer.say_command(cmd, state)
+    new_teaser = String.trim(new_teaser)
+
+    new_teaser =
+      case chars_valid_for_lobby_name?(new_teaser) do
+        true -> new_teaser
+        _ -> ""
+      end
+
+    Battle.update_lobby_values(state.lobby_id, %{teaser: new_teaser})
+    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+    state
+  end
+
   def handle_command(%{command: "rename", remaining: new_name, senderid: senderid} = cmd, state) do
     new_name = String.trim(new_name)
 
     stripped_name =
-      case Regex.run(~r/^[a-zA-Z0-9_\-\[\] \<\>\+\|:]+$/, new_name) do
-        [s] -> s
+      case chars_valid_for_lobby_name?(new_name) do
+        true -> new_name
         _ -> ""
       end
 
@@ -1530,7 +1545,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     cond do
       new_name == "" ->
-        Battle.rename_lobby(state.lobby_id, lobby.name, nil)
+        Battle.rename_lobby(state.lobby_id, lobby.base_name, nil)
         state
 
       WordLib.flagged_words(new_name) > 0 ->
@@ -1603,9 +1618,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         state
 
-      lobby.player_rename ->
-        state
-
       true ->
         Battle.rename_lobby(state.lobby_id, new_name, nil)
 
@@ -1615,27 +1627,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   #################### Moderator only
   # ----------------- General commands
-  def handle_command(
-        %{command: "playerlimit", remaining: value_str, senderid: senderid} = cmd,
-        state
-      ) do
-    case Integer.parse(value_str) do
-      {new_limit, _} ->
-        ConsulServer.say_command(cmd, state)
-        %{state | player_limit: abs(new_limit)}
-
-      _ ->
-        ChatLib.sayprivateex(
-          state.coordinator_id,
-          senderid,
-          "Unable to convert #{value_str} into an integer",
-          state.lobby_id
-        )
-
-        state
-    end
-  end
-
   def handle_command(%{command: "makeready", remaining: ""} = cmd, state) do
     battle = Lobby.get_lobby(state.lobby_id)
 
@@ -2038,10 +2029,31 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "reset"} = _cmd, state) do
-    Battle.update_lobby_values(state.lobby_id, %{player_rename: false})
-
     ConsulServer.empty_state(state.lobby_id)
     |> ConsulServer.broadcast_update("reset")
+  end
+
+  #################### Admin only
+  # ----------------- General commands
+  def handle_command(
+        %{command: "playerlimit", remaining: value_str, senderid: senderid} = cmd,
+        state
+      ) do
+    case Integer.parse(value_str) do
+      {new_limit, _} ->
+        ConsulServer.say_command(cmd, state)
+        %{state | player_limit: abs(new_limit)}
+
+      _ ->
+        ChatLib.sayprivateex(
+          state.coordinator_id,
+          senderid,
+          "Unable to convert #{value_str} into an integer",
+          state.lobby_id
+        )
+
+        state
+    end
   end
 
   #################### Internal commands
@@ -2115,6 +2127,14 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
       false ->
         -1
+    end
+  end
+
+  @spec chars_valid_for_lobby_name?(String.t()) :: boolean()
+  defp chars_valid_for_lobby_name?(string) do
+    case Regex.run(~r/^[a-zA-Z0-9_\-\[\] \<\>\+\|:]+$/, string) do
+      [_] -> true
+      _ -> false
     end
   end
 

@@ -84,8 +84,6 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
       where: fragment("? ~* ?", reports.type, ^kind)
   end
 
-  defp _where(query, :has_reports_of_kind, nil), do: query
-
   @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   defp do_order_by(query, nil), do: query
 

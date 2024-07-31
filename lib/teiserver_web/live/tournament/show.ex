@@ -139,7 +139,7 @@ defmodule TeiserverWeb.TournamentLive.Show do
     ratings =
       users
       |> Map.new(fn {userid, _} ->
-        {userid, BalanceLib.get_user_rating_value_uncertainty_pair(userid, "Team")}
+        {userid, BalanceLib.get_user_rating_value_uncertainty_pair(userid, "Large Team")}
       end)
 
     {users, clients, ratings, parties, stats}

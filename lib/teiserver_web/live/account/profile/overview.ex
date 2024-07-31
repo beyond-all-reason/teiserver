@@ -59,6 +59,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     |> assign(:page_title, "#{user.name} - Achievements")
   end
 
+  @impl true
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
     user_id = socket.assigns.user.id
 
@@ -84,6 +85,20 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
   end
 
   @impl true
+  def handle_event("join", _params, %{assigns: assigns} = socket) do
+    current_user_id = assigns.current_user.id
+    lobby_id = assigns.client.lobby_id
+
+    with :ok <- client_connected(current_user_id),
+         :ok <- server_allows_join(lobby_id, current_user_id),
+         :ok <- join_lobby(lobby_id, current_user_id) do
+      {:noreply, put_flash(socket, :success, "Lobby joined")}
+    else
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :warning, reason)}
+    end
+  end
+
   def handle_event(
         "follow-user",
         _event,
@@ -269,37 +284,6 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     {:noreply, socket}
   end
 
-  def get_relationships_and_permissions(%{assigns: %{current_user: nil}} = socket) do
-    socket
-    |> assign(:relationship, [])
-    |> assign(:friendship, [])
-    |> assign(:friendship_request, [])
-    |> assign(:profile_permissions, [])
-  end
-
-  def get_relationships_and_permissions(%{assigns: %{user: nil}} = socket) do
-    socket
-    |> assign(:relationship, [])
-    |> assign(:friendship, [])
-    |> assign(:friendship_request, [])
-    |> assign(:profile_permissions, [])
-  end
-
-  def handle_event("join", _params, %{assigns: assigns} = socket) do
-    user_id = assigns.user.id
-    current_user_id = assigns.current_user.id
-    lobby_id = assigns.client.lobby_id
-
-    with :ok <- client_connected(current_user_id),
-         :ok <- server_allows_join(lobby_id, current_user_id),
-         :ok <- join_lobby(lobby_id, current_user_id) do
-      {:noreply, put_flash(socket, :success, "Lobby joined")}
-    else
-      {:error, reason} ->
-        {:noreply, put_flash(socket, :warning, reason)}
-    end
-  end
-
   defp client_connected(user_id) do
     client = Account.get_client_by_id(user_id)
 
@@ -323,6 +307,22 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     else
       {:error, "Failed to join lobby"}
     end
+  end
+
+  def get_relationships_and_permissions(%{assigns: %{current_user: nil}} = socket) do
+    socket
+    |> assign(:relationship, [])
+    |> assign(:friendship, [])
+    |> assign(:friendship_request, [])
+    |> assign(:profile_permissions, [])
+  end
+
+  def get_relationships_and_permissions(%{assigns: %{user: nil}} = socket) do
+    socket
+    |> assign(:relationship, [])
+    |> assign(:friendship, [])
+    |> assign(:friendship_request, [])
+    |> assign(:profile_permissions, [])
   end
 
   def get_relationships_and_permissions(

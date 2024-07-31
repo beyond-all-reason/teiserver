@@ -389,7 +389,7 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["Admin"],
       description:
         "The percentage of users who would need to block someone to prevent them joining a lobby",
-      default: 66
+      default: 50
     })
 
     add_site_config_type(%{
@@ -399,7 +399,7 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["Admin"],
       description:
         "The raw number of players who would need to avoid someone to prevent them becoming a player",
-      default: 4
+      default: 6
     })
 
     add_site_config_type(%{

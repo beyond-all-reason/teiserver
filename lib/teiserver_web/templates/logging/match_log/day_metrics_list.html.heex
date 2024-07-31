@@ -38,7 +38,8 @@
               <th>Weighted Total</th>
 
               <th>Duel</th>
-              <th>Team</th>
+              <th>Small Team</th>
+              <th>LargeTeam</th>
               <th>FFA</th>
               <th>Team FFA</th>
               <th>Scav</th>
@@ -58,7 +59,8 @@
                 <td><%= format_number(log.data["totals"]["aggregate"]["weighted_count"]) %></td>
 
                 <td><%= format_number(log.data["duel"]["aggregate"]["total_count"]) %></td>
-                <td><%= format_number(log.data["team"]["aggregate"]["total_count"]) %></td>
+                <td><%= format_number(log.data["small_team"]["aggregate"]["total_count"]) %></td>
+                <td><%= format_number(log.data["large_team"]["aggregate"]["total_count"]) %></td>
                 <td><%= format_number(log.data["ffa"]["aggregate"]["total_count"]) %></td>
                 <td><%= format_number(log.data["team_ffa"]["aggregate"]["total_count"]) %></td>
                 <td><%= format_number(log.data["scavengers"]["aggregate"]["total_count"]) %></td>

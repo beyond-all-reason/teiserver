@@ -1092,6 +1092,7 @@ defmodule TeiserverWeb.Admin.UserController do
         Account.update_cache_user(user.id, new_user)
 
         Account.delete_user_stat_keys(user.id, [
+          "first_ip",
           "country",
           "last_ip"
         ])

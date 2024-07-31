@@ -151,31 +151,37 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         {k, Enum.count(v)}
       end)
 
+    team_type =
+      team_subtype
+      |> String.downcase()
+      |> String.replace(" ", "_")
+
     total = Enum.count(logs)
 
     if total > 0 do
       winrate = win_count / total
 
       Account.update_user_stat(userid, %{
-        "exit_status.team.count" => total,
-        "exit_status.team.stayed" => ((statuses[:stayed] || 0) / total) |> percent(1),
-        "exit_status.team.early" => ((statuses[:early] || 0) / total) |> percent(1),
-        "exit_status.team.abandoned" => ((statuses[:abandoned] || 0) / total) |> percent(1),
-        "exit_status.team.noshow" => ((statuses[:noshow] || 0) / total) |> percent(1),
-        "recent_count.team" => total,
-        "win_count.team" => win_count,
-        "loss_count.team" => loss_count,
-        "win_rate.team" => winrate |> percent(1)
+        "exit_status.#{team_type}.count" => total,
+        "exit_status.#{team_type}.stayed" => ((statuses[:stayed] || 0) / total) |> percent(1),
+        "exit_status.#{team_type}.early" => ((statuses[:early] || 0) / total) |> percent(1),
+        "exit_status.#{team_type}.abandoned" =>
+          ((statuses[:abandoned] || 0) / total) |> percent(1),
+        "exit_status.#{team_type}.noshow" => ((statuses[:noshow] || 0) / total) |> percent(1),
+        "recent_count.#{team_type}" => total,
+        "win_count.#{team_type}" => win_count,
+        "loss_count.#{team_type}" => loss_count,
+        "win_rate.#{team_type}" => winrate |> percent(1)
       })
     end
 
     # For team we also look at their really recent games as that's where we'd expect
     # smurfs to be most active right now
-    do_match_processed_team_recent(userid, logs)
+    do_match_processed_team_recent(userid, logs, team_type)
     :ok
   end
 
-  def do_match_processed_team_recent(userid, logs) do
+  def do_match_processed_team_recent(userid, logs, team_type) do
     # Filter down to just the recent ones rather than re-running the query
     timestamp_after = Timex.now() |> Timex.shift(days: -@match_cache_recent_days)
 
@@ -214,16 +220,19 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
       winrate = win_count / total
 
       Account.update_user_stat(userid, %{
-        "exit_status.team_recent.count" => total,
-        "exit_status.team_recent.stayed" => ((statuses[:stayed] || 0) / total) |> percent(1),
-        "exit_status.team_recent.early" => ((statuses[:early] || 0) / total) |> percent(1),
-        "exit_status.team_recent.abandoned" =>
+        "exit_status.#{team_type}_recent.count" => total,
+        "exit_status.#{team_type}_recent.stayed" =>
+          ((statuses[:stayed] || 0) / total) |> percent(1),
+        "exit_status.#{team_type}_recent.early" =>
+          ((statuses[:early] || 0) / total) |> percent(1),
+        "exit_status.#{team_type}_recent.abandoned" =>
           ((statuses[:abandoned] || 0) / total) |> percent(1),
-        "exit_status.team_recent.noshow" => ((statuses[:noshow] || 0) / total) |> percent(1),
-        "recent_count.team_recent" => total,
-        "win_count.team_recent" => win_count,
-        "loss_count.team_recent" => loss_count,
-        "win_rate.team_recent" => winrate |> percent(1)
+        "exit_status.#{team_type}_recent.noshow" =>
+          ((statuses[:noshow] || 0) / total) |> percent(1),
+        "recent_count.#{team_type}_recent" => total,
+        "win_count.#{team_type}_recent" => win_count,
+        "loss_count.#{team_type}_recent" => loss_count,
+        "win_rate.#{team_type}_recent" => winrate |> percent(1)
       })
     end
 

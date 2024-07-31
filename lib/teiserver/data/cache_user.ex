@@ -94,6 +94,17 @@ defmodule Teiserver.CacheUser do
     |> Regex.replace(name, "")
   end
 
+  @spec check_symbol_limit(String.t()) :: Boolean.t()
+  def check_symbol_limit(name) do
+    name
+    |> String.replace(~r/[[:alnum:]]/, "")
+    |> String.graphemes()
+    |> Enum.frequencies()
+    |> Enum.filter(fn {_, val} -> val > 2 end)
+    |> Enum.count()
+    |> Kernel.>(0)
+  end
+
   @spec encrypt_password(any) :: binary | {binary, binary, {any, any, any, any, any}}
   def encrypt_password(password) do
     Argon2.hash_pwd_salt(password)
@@ -184,6 +195,9 @@ defmodule Teiserver.CacheUser do
       clean_name(name) != name ->
         {:failure, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] and _ allowed)"}
 
+      check_symbol_limit(name) ->
+        {:error, "Too many repeated symbols in name"}
+
       get_user_by_name(name) ->
         {:failure, "Username already taken"}
 
@@ -229,6 +243,9 @@ defmodule Teiserver.CacheUser do
 
       clean_name(name) != name ->
         {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] and _ allowed)"}
+
+      check_symbol_limit(name) ->
+        {:error, "Too many repeated symbols in name"}
 
       get_user_by_name(name) ->
         {:error, "Username already taken"}
@@ -318,6 +335,7 @@ defmodule Teiserver.CacheUser do
     case Account.script_create_user(params) do
       {:ok, user} ->
         Account.update_user_stat(user.id, %{
+          "first_ip" => ip,
           "country" => Teiserver.Geoip.get_flag(ip),
           "verification_code" => (:rand.uniform(899_999) + 100_000) |> to_string
         })
@@ -431,6 +449,9 @@ defmodule Teiserver.CacheUser do
 
       clean_name(new_name) != new_name ->
         {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
+
+      check_symbol_limit(new_name) ->
+        {:error, "Too many repeated symbols in name"}
 
       get_user_by_name(new_name) &&
           get_user_by_name(new_name).name |> String.downcase() == String.downcase(new_name) ->
@@ -1247,28 +1268,34 @@ defmodule Teiserver.CacheUser do
   end
 
   @spec is_bot?(T.userid() | T.user()) :: boolean()
-  def is_bot?(nil), do: true
+  def is_bot?(nil), do: false
   def is_bot?(userid) when is_integer(userid), do: is_bot?(get_user_by_id(userid))
   def is_bot?(%{roles: roles}), do: Enum.member?(roles, "Bot")
   def is_bot?(_), do: false
 
   @spec is_moderator?(T.userid() | T.user()) :: boolean()
-  def is_moderator?(nil), do: true
+  def is_moderator?(nil), do: false
   def is_moderator?(userid) when is_integer(userid), do: is_moderator?(get_user_by_id(userid))
   def is_moderator?(%{roles: roles}), do: Enum.member?(roles, "Moderator")
   def is_moderator?(_), do: false
 
   @spec is_contributor?(T.userid() | T.user()) :: boolean()
-  def is_contributor?(nil), do: true
+  def is_contributor?(nil), do: false
   def is_contributor?(userid) when is_integer(userid), do: is_contributor?(get_user_by_id(userid))
   def is_contributor?(%{roles: roles}), do: Enum.member?(roles, "Contributor")
   def is_contributor?(_), do: false
 
   @spec is_verified?(T.userid() | T.user()) :: boolean()
-  def is_verified?(nil), do: true
+  def is_verified?(nil), do: false
   def is_verified?(userid) when is_integer(userid), do: is_verified?(get_user_by_id(userid))
   def is_verified?(%{roles: roles}), do: Enum.member?(roles, "Verified")
   def is_verified?(_), do: false
+
+  @spec is_admin?(T.userid() | T.user()) :: boolean()
+  def is_admin?(nil), do: false
+  def is_admin?(userid) when is_integer(userid), do: is_admin?(get_user_by_id(userid))
+  def is_admin?(%{roles: roles}), do: Enum.member?(roles, "Admin")
+  def is_admin?(_), do: false
 
   @spec rank_time(T.userid()) :: non_neg_integer()
   def rank_time(userid) do
@@ -1316,7 +1343,7 @@ defmodule Teiserver.CacheUser do
     # https://www.beyondallreason.info/guide/rating-and-lobby-balance#rank-icons
     cond do
       has_any_role?(userid, ["Tournament winner"]) -> 7
-      has_any_role?(userid, ~w(Core Contributor)) -> 6
+      has_any_role?(userid, ~w(Core Contributor)) and !Account.hide_contributor_rank?(userid) -> 6
       ingame_hours >= 1000 -> 5
       ingame_hours >= 250 -> 4
       ingame_hours >= 100 -> 3

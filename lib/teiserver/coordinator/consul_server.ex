@@ -18,7 +18,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     Communication
   }
 
-  alias Teiserver.Lobby.{ChatLib, LobbyRestrictions}
+  alias Teiserver.Lobby.{ChatLib, LobbyRestrictions, LobbyLib}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
   alias Teiserver.Battle.BalanceLib
@@ -28,7 +28,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? newlobby jazlobby tournament)
   @boss_commands ~w(balancemode gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
   @vip_boss_commands ~w(shuffle)
-  @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock makebalance)
+  @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock makebalance set-config-teaser)
+  @admin_commands ~w(playerlimit)
 
   # @handled_by_lobby ~w(explain)
   @default_balance_algorithm "loser_picks"
@@ -396,10 +397,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         })
 
       # Remove filters from lobby name
-      lobby = Lobby.get_lobby(state.lobby_id)
-      old_name = lobby.name
-      new_name = String.split(old_name, "|", trim: true) |> Enum.at(0)
-      Battle.rename_lobby(state.lobby_id, new_name, nil)
+      LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
 
       {:noreply, new_state}
     else
@@ -806,10 +804,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @spec user_allowed_to_play?(T.user(), T.client(), map()) :: boolean()
   defp user_allowed_to_play?(user, client, state) do
-    player_list = list_players(state)
+    player_ids = list_player_ids(state)
     userid = user.id
 
-    avoid_status = Account.check_avoid_status(user.id, player_list)
+    avoid_status = Account.check_avoid_status(user.id, player_ids)
 
     boss_avoid_status =
       state.host_bosses
@@ -844,16 +842,22 @@ defmodule Teiserver.Coordinator.ConsulServer do
       avoid_status == :avoiding ->
         match_id = Battle.get_lobby_match_id(state.lobby_id)
         Telemetry.log_simple_lobby_event(user.id, match_id, "play_refused.avoiding")
+        msg = "You are avoiding too many players in this lobby"
+        CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
         false
 
       avoid_status == :avoided ->
         match_id = Battle.get_lobby_match_id(state.lobby_id)
         Telemetry.log_simple_lobby_event(user.id, match_id, "play_refused.avoided")
+        msg = "You are avoided by too many players in this lobby"
+        CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
         false
 
       boss_avoid_status == true ->
         match_id = Battle.get_lobby_match_id(state.lobby_id)
         Telemetry.log_simple_lobby_event(user.id, match_id, "play_refused.boss_avoided")
+        msg = "You are avoided by the boss of this lobby"
+        CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
         false
 
       true ->
@@ -925,10 +929,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     # Blocking using relationships
-    member_list = Battle.get_lobby_member_list(state.lobby_id)
+    player_ids = list_player_ids(state)
     match_id = Battle.get_lobby_match_id(state.lobby_id)
-
-    block_status = Account.check_block_status(userid, member_list)
+    block_status = Account.check_block_status(userid, player_ids)
 
     boss_avoid_status =
       state.host_bosses
@@ -1013,6 +1016,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     is_host = senderid == state.host_id
     is_boss = Enum.member?(state.host_bosses, senderid)
     is_vip = Enum.member?(user.roles, "VIP")
+    is_admin = Enum.member?(user.roles, "Admin")
 
     cond do
       client == nil ->
@@ -1024,7 +1028,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
       Enum.member?(@always_allow, cmd.command) ->
         true
 
-      client.moderator == true ->
+      # Allow all commands for Admins
+      is_admin ->
+        true
+
+      # Allow all except Admin only commands for moderators
+      client.moderator and not Enum.member?(@admin_commands, cmd.command) ->
         true
 
       Enum.member?(@host_commands, cmd.command) and is_host ->
@@ -1106,7 +1115,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       if Enum.count(player_numbers) != Enum.count(players) do
         players
         |> Enum.map(fn c ->
-          {-c.team_number, BalanceLib.get_user_rating_value(c.userid, "Team"), c}
+          {-c.team_number, BalanceLib.get_user_rating_value(c.userid, "Large Team"), c}
         end)
         |> Enum.sort()
         |> Enum.reverse()
@@ -1233,6 +1242,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def get_max_player_count(state) do
     min(state.host_teamcount * state.host_teamsize, state.player_limit)
+  end
+
+  @spec list_player_ids(map()) :: [T.userid()]
+  def list_player_ids(state) do
+    list_players(state)
+    |> Enum.map(fn x ->
+      x[:userid]
+    end)
   end
 
   @spec list_players(map()) :: [T.client()]

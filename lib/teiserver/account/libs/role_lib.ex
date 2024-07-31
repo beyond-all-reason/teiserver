@@ -81,6 +81,13 @@ defmodule Teiserver.Account.RoleLib do
       contains: ["Community team"],
       badge: true
     },
+    %{
+      name: "Blog helper",
+      colour: "#66AA66",
+      icon: "fa-solid fa-blog",
+      contains: [],
+      badge: true
+    },
 
     # Privileged
     %{name: "VIP", colour: "#AA8833", icon: "fa-solid fa-sparkles", contains: ["BAR+"]},
@@ -97,10 +104,17 @@ defmodule Teiserver.Account.RoleLib do
 
     # Contributor/Staff
     %{
+      name: "Tester",
+      colour: "#00AAAA",
+      icon: "fa-solid fa-vial",
+      contains: ~w(),
+      badge: true
+    },
+    %{
       name: "Contributor",
       colour: "#66AA66",
       icon: "fa-solid fa-code-commit",
-      contains: ["Trusted", "BAR+"],
+      contains: ["Trusted", "BAR+", "Tester", "Blog helper"],
       badge: true
     },
     %{name: "Engine", colour: "#007700", icon: "fa-solid fa-engine", contains: ~w(Contributor)},
@@ -123,13 +137,6 @@ defmodule Teiserver.Account.RoleLib do
       colour: "#007700",
       icon: "fa-solid fa-download",
       contains: ~w(Contributor)
-    },
-    %{
-      name: "Tester",
-      colour: "#00AAAA",
-      icon: "fa-solid fa-vial",
-      contains: ~w(Contributor),
-      badge: true
     },
     %{
       name: "Core",
@@ -246,7 +253,7 @@ defmodule Teiserver.Account.RoleLib do
 
   @spec community_roles :: [String.t()]
   def community_roles() do
-    ["Mentor", "Academy manager", "Promo team", "Community team"]
+    ["Mentor", "Academy manager", "Promo team", "Community team", "Blog helper"]
   end
 
   @spec privileged_roles :: [String.t()]
