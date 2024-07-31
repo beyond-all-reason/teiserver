@@ -56,7 +56,6 @@ defmodule Teiserver.Application do
         Teiserver.MetadataCache,
         concache_sup(:application_temp_cache),
         concache_sup(:config_user_cache),
-        Teiserver.Tachyon.Cache,
 
         # Teiserver stuff
         # Global/singleton registries
@@ -168,10 +167,6 @@ defmodule Teiserver.Application do
         %{
           id: Teiserver.RawSpringTcpServer,
           start: {Teiserver.SpringTcpServer, :start_link, [[]]}
-        },
-        %{
-          id: Teiserver.TachyonTcpServer,
-          start: {Teiserver.TachyonTcpServer, :start_link, [[]]}
         }
       ] ++ discord_start()
 
