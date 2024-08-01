@@ -24,7 +24,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
   import Teiserver.Helper.NumberHelper, only: [format: 1]
   # If player uncertainty is greater than equal to this, that player is considered a noob
   # The lowest uncertainty rank 0 player in integration server at the time of writing this is 6.65
-  @high_uncertainty 6.7
+  @high_uncertainty 6.6
   @splitter "------------------------------------------------------"
 
   @doc """

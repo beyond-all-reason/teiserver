@@ -16,7 +16,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
   import Teiserver.Helper.NumberHelper, only: [format: 1]
   require Integer
 
-  @broken_party_multiplier 3
+  @broken_party_importance 3
   @splitter "------------------------------------------------------"
 
   @doc """
@@ -140,7 +140,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     both_team_rating = get_team_rating(all_players)
 
     rating_diff_penalty = abs(both_team_rating - first_team_rating * 2)
-    broken_party_penalty = count_broken_parties(first_team, parties) * @broken_party_multiplier
+    broken_party_penalty = count_broken_parties(first_team, parties) * @broken_party_importance
 
     score = rating_diff_penalty + broken_party_penalty
 
