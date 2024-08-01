@@ -152,7 +152,7 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
     Map.put(result, :broken_party_count, broken_party_count)
   end
 
-  @spec make_balance(non_neg_integer(), [T.client()], any(), list()) :: map()
+  @spec make_balance(non_neg_integer(), [any()], any(), list()) :: map()
   defp make_balance(team_count, players, rating_logs, opts) do
     party_result = make_grouped_balance(team_count, players, rating_logs, opts)
     has_parties? = Map.get(party_result, :has_parties?, true)
@@ -203,7 +203,7 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
     |> Map.put(:parties, get_parties(partied_players))
   end
 
-  @spec make_solo_balance(non_neg_integer(), [T.client()], any(), list()) ::
+  @spec make_solo_balance(non_neg_integer(), [any()], any(), list()) ::
           map()
   defp make_solo_balance(team_count, players, rating_logs, opts) do
     groups =
