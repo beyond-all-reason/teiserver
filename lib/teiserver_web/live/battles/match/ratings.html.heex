@@ -87,10 +87,10 @@
               log.value["uncertainty_change"] < 0 -> {"text-secondary column-delta", "arrow-down"}
               true -> {"text-secondary column-delta", "pause"}
             end %>
-          <tr>
+          <tr phx-click={"[[\"navigate\",{\"href\":\"/battle/#{log.match_id}\",\"replace\":false}]]"}>
             <%= if log.match do %>
               <td>
-                <%= log.match.map %>
+                <%= live_redirect("#{log.match.map}", to: ~p"/battle/#{log.match_id}") %>
               </td>
               <td><%= log.match.team_size * log.match.team_count %></td>
             <% else %>
@@ -127,7 +127,11 @@
 
             <%= if log.match do %>
               <td>
-                <.link navigate={~p"/battle/#{log.match_id}"} class="stretched-link"></.link>
+                <div class="visually-hidden">
+                  <.link navigate={~p"/battle/#{log.match_id}"}>
+                    Show
+                  </.link>
+                </div>
               </td>
             <% else %>
               <td>&nbsp;</td>
