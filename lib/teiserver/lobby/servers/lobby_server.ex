@@ -545,17 +545,34 @@ defmodule Teiserver.Battle.LobbyServer do
           " " <> state.lobby.teaser
       end
 
+    generate_short_name(
+      state.lobby.base_name,
+      teaser,
+      LobbyRestrictions.get_rank_bounds_for_title(consul_state),
+      LobbyRestrictions.get_rating_bounds_for_title(consul_state)
+    )
+  end
+
+  def generate_short_name(base_name, teaser, rank_bounds, rating_bounds) do
     parts =
       [
         teaser,
-        LobbyRestrictions.get_rank_bounds_for_title(consul_state),
+        rank_bounds,
         # Rating stuff here
-        LobbyRestrictions.get_rating_bounds_for_title(consul_state)
+        rating_bounds
       ]
       |> Enum.reject(&(&1 == nil))
       |> Enum.join(" | ")
 
-    "#{state.lobby.base_name}#{parts}"
+    long_name = "#{base_name}#{parts}"
+
+    max_char_count = 50
+
+    if teaser != "" and String.length(long_name) > max_char_count do
+      generate_short_name(base_name, "", rank_bounds, rating_bounds)
+    else
+      long_name
+    end
   end
 
   @spec do_update_values(map, map) :: map

@@ -4,6 +4,7 @@ defmodule Teiserver.Battle.LobbyServerTest do
   use Teiserver.DataCase, async: false
   alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Coordinator
+  alias Teiserver.Battle.LobbyServer
 
   test "server test" do
     host = Teiserver.TeiserverTestLib.new_user()
@@ -124,5 +125,39 @@ defmodule Teiserver.Battle.LobbyServerTest do
 
     LobbyLib.stop_lobby_server(lobby_id)
     assert LobbyLib.lobby_exists?(lobby_id) == false
+  end
+
+  test "generate short name" do
+    # Teasers are given from SPADS
+    # See https://github.com/beyond-all-reason/spads_config_bar/pull/136/files
+    name =
+      LobbyServer.generate_short_name(
+        "All That Glitters",
+        " | Team 8 v 8",
+        "Min chev: 4",
+        "Max rating: 20"
+      )
+
+    assert name == "All That Glitters | Min chev: 4 | Max rating: 20"
+
+    name =
+      LobbyServer.generate_short_name(
+        "All That Glitters",
+        " | Team 8 v 8",
+        nil,
+        nil
+      )
+
+    assert name == "All That Glitters | Team 8 v 8"
+
+    name =
+      LobbyServer.generate_short_name(
+        "All That Glitters",
+        "",
+        nil,
+        "Max rating: 20"
+      )
+
+    assert name == "All That Glitters | Max rating: 20"
   end
 end
