@@ -83,6 +83,51 @@ defmodule TeiserverWeb.TachyonControllerTest do
       assert conn.status == 400
     end
 
+    test "cannot connect if user is banned", %{conn: conn} do
+      user =
+        GeneralTestLib.make_user(%{
+          "data" => %{
+            "roles" => ["Verified"],
+            "restrictions" => ["Permanently banned"]
+          }
+        })
+
+      conn =
+        valid_tachyon_conn(conn, user)
+        |> get(~p"/tachyon")
+
+      assert %{"error_description" => msg} = json_response(conn, 403)
+      assert msg =~ "Banned account"
+    end
+
+    test "cannot connect if user isn't verified", %{conn: conn} do
+      user = GeneralTestLib.make_user()
+
+      conn =
+        valid_tachyon_conn(conn, user)
+        |> get(~p"/tachyon")
+
+      assert %{"error_description" => msg} = json_response(conn, 403)
+      assert msg =~ "not verified"
+    end
+
+    test "cannot connect if user is suspended", %{conn: conn} do
+      user =
+        GeneralTestLib.make_user(%{
+          "data" => %{
+            "roles" => ["Verified"],
+            "restrictions" => ["Login"]
+          }
+        })
+
+      conn =
+        valid_tachyon_conn(conn, user)
+        |> get(~p"/tachyon")
+
+      assert %{"error_description" => msg} = json_response(conn, 403)
+      assert msg =~ "temporarily suspended"
+    end
+
     test "can upgrade to websocket", %{user: user} do
       %{token: token} = OAuthFixtures.setup_token(user)
 
@@ -101,6 +146,11 @@ defmodule TeiserverWeb.TachyonControllerTest do
       {:ok, client} = WSC.connect(url, opts)
 
       WSC.disconnect(client)
+
+      # make sure we can still connect with chobby
+      %{socket: sock} = Teiserver.TeiserverTestLib.auth_setup(user)
+      assert is_port(sock)
+      Teiserver.Client.disconnect(user.id)
     end
   end
 

@@ -1009,6 +1009,56 @@ defmodule Teiserver.CacheUser do
     end
   end
 
+  @spec tachyon_login(T.user(), String.t(), String.t()) ::
+          {:ok, T.user()} | {:error, String.t()} | {:error, :rate_limited, String.t()}
+  def tachyon_login(user, ip, lobby_client) do
+    lobby_hash = "tachyon_lobby_hash(maybe_useless)"
+
+    user = convert_user(user)
+
+    cond do
+      user.smurf_of_id != nil ->
+        Telemetry.log_complex_server_event(user.id, "Banned login", %{
+          error: "Smurf"
+        })
+
+        {:error, @smurf_string}
+
+      login_flood_check(user.id) == :block ->
+        {:error, :rate_limited, "Flood protection - Please wait 20 seconds and try again"}
+
+      is_restricted?(user, ["Permanently banned"]) ->
+        Telemetry.log_complex_server_event(user.id, "Banned login", %{
+          error: "Permanently banned"
+        })
+
+        {:error, "Banned account"}
+
+      is_restricted?(user, ["Login"]) ->
+        Telemetry.log_complex_server_event(user.id, "Banned login", %{
+          error: "Suspended"
+        })
+
+        {:error, @suspended_string}
+
+      not is_verified?(user) ->
+        # Log them in to save some details we'd not otherwise get
+        do_login(user, ip, lobby_client, lobby_hash)
+
+        Account.update_user_stat(user.id, %{
+          lobby_client: lobby_client,
+          lobby_hash: lobby_hash,
+          last_ip: ip
+        })
+
+        {:error, "Account is not verified"}
+
+      true ->
+        # TODO: copy/paste the capacity restriction and queuing from try_md5_login later
+        do_login(user, ip, lobby_client, lobby_hash)
+    end
+  end
+
   @spec do_login(T.user(), String.t(), String.t(), String.t()) :: {:ok, T.user()}
   def do_login(user, ip, lobby_client, lobby_hash) do
     stats = Account.get_user_stat_data(user.id)

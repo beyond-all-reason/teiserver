@@ -11,8 +11,22 @@ defmodule Teiserver.Player.TachyonHandler do
   @type state :: %{user: T.user()}
 
   @impl Handler
-  def connect(_conn) do
-    {:ok, nil}
+  def connect(conn) do
+    # TODO: get the IP from request (somehow)
+    ip = "127.0.0.1"
+    lobby_client = conn.assigns[:token].application.uid
+    user = conn.assigns[:token].owner
+
+    case Teiserver.CacheUser.tachyon_login(user, ip, lobby_client) do
+      {:ok, user} ->
+        {:ok, %{user: user}}
+
+      {:error, :rate_limited, msg} ->
+        {:error, 429, msg}
+
+      {:error, msg} ->
+        {:error, 403, msg}
+    end
   end
 
   @impl Handler
