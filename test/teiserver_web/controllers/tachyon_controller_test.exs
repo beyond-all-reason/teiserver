@@ -60,6 +60,29 @@ defmodule TeiserverWeb.TachyonControllerTest do
       assert conn.status == 400
     end
 
+    test "must provide a tachyon version", %{conn: conn, user: user} do
+      %{token: token} = OAuthFixtures.setup_token(user)
+
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token.value}")
+        |> get(~p"/tachyon")
+
+      assert conn.status == 400
+    end
+
+    test "must provide correct version", %{conn: conn, user: user} do
+      %{token: token} = OAuthFixtures.setup_token(user)
+
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token.value}")
+        |> put_req_header("sec-websocket-protocol", "v123.tachyon")
+        |> get(~p"/tachyon")
+
+      assert conn.status == 400
+    end
+
     test "can upgrade to websocket", %{user: user} do
       %{token: token} = OAuthFixtures.setup_token(user)
 
@@ -70,6 +93,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
         connection_options: [
           extra_headers: [
             {"authorization", "Bearer #{token.value}"},
+            {"sec-websocket-protocol", "v0.tachyon"}
           ]
         ]
       ]

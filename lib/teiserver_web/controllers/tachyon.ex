@@ -12,8 +12,51 @@ defmodule TeiserverWeb.TachyonController do
   plug Teiserver.OAuth.TokenPlug
 
   def connect(conn, _opts) do
+    with {:ok, handler} <- handler_for_version(conn),
+         {:ok, state} <- handler.connect(conn) do
+      try do
+        conn_state = %{state: state, handler: handler}
+
+        conn
+        |> WebSockAdapter.upgrade(Teiserver.Tachyon.Transport, conn_state, timeout: 20_000)
+        |> halt()
+      rescue
+        e in WebSockAdapter.UpgradeError -> error_resp(conn, 500, e.message)
+      end
+    else
+      :error -> error_resp(conn, 500, "Unknown error")
+      {:error, code, msg} -> error_resp(conn, code, msg)
+    end
+  end
+
+  defp handler_for_version(conn) do
+    hdr_name = "sec-websocket-protocol"
+
+    case get_req_header(conn, hdr_name) do
+      [] ->
+        {:error, 400, "must provide #{hdr_name}"}
+
+      ["v0.tachyon"] ->
+        {:ok, Teiserver.Player.TachyonHandler}
+
+      [x] ->
+        {:error, 400, "unsupported version #{x}"}
+    end
+  end
+
+  # there must be a better way to reply with json, but this'll be enough
+  # for this controller
+  defp error_resp(conn, code, message) do
+    err =
+      case code do
+        400 -> "invalid_request"
+        403 -> "unauthorized_client"
+        429 -> "rate_limited"
+        500 -> "server_error"
+      end
+
     conn
-    |> WebSockAdapter.upgrade(Teiserver.Tachyon.Transport, %{}, timeout: 20_000)
-    |> halt()
+    |> put_resp_header("content-type", "application/json")
+    |> send_resp(code, Jason.encode!(%{error: err, error_description: message}))
   end
 end
