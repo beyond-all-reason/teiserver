@@ -144,6 +144,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
       ]
 
       {:ok, client} = WSC.connect(url, opts)
+      assert is_pid(Teiserver.Player.lookup_connection(user.id))
 
       WSC.disconnect(client)
 

@@ -33,6 +33,9 @@ defmodule Teiserver.Player.TachyonHandler do
   @spec init(state()) :: WebSock.handle_result()
   def init(state) do
     # this is inside the process that maintain the connection
+    # TODO: register may return an error when the same user is already connected
+    # elsewhere. Handle that soon
+    {:ok, _} = Teiserver.Player.Registry.register(state.user.id)
     {:ok, state}
   end
 end
