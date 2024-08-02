@@ -1,6 +1,4 @@
-defmodule Teiserver.Tachyon.System do
-  @moduledoc false
-
+defmodule Teiserver.Autohost.System do
   use Supervisor
 
   def start_link(init_arg) do
@@ -9,7 +7,7 @@ defmodule Teiserver.Tachyon.System do
 
   @impl true
   def init(_) do
-    children = [Teiserver.Autohost.System, Teiserver.Player.System]
+    children = [Teiserver.Autohost.Registry]
     Supervisor.init(children, strategy: :one_for_one)
   end
 end

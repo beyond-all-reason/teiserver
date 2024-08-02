@@ -176,6 +176,8 @@ defmodule TeiserverWeb.TachyonControllerTest do
       ]
 
       {:ok, client} = WSC.connect(tachyon_url(), opts)
+      registered_pid = poll(fn -> Teiserver.Autohost.lookup_autohost(autohost.id) end)
+      assert is_pid(registered_pid)
       WSC.disconnect(client)
     end
   end
@@ -192,5 +194,20 @@ defmodule TeiserverWeb.TachyonControllerTest do
   defp tachyon_url() do
     conf = Application.get_env(:teiserver, TeiserverWeb.Endpoint)
     "ws://#{conf[:url][:host]}:#{conf[:http][:port]}" <> ~p"/tachyon"
+  end
+
+  defp poll(f, n \\ 10) do
+    case f.() do
+      nil ->
+        if n == 0 do
+          raise "poll timeout"
+        else
+          :timer.sleep(1)
+          poll(f, n - 1)
+        end
+
+      x ->
+        x
+    end
   end
 end

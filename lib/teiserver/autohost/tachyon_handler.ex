@@ -20,6 +20,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
   @impl Handler
   @spec init(state()) :: WebSock.handle_result()
   def init(state) do
+    {:ok, _} = Teiserver.Autohost.Registry.register(state.autohost.id)
     {:ok, state}
   end
 
