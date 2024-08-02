@@ -37,7 +37,13 @@ defmodule TeiserverWeb.TachyonController do
         {:error, 400, "must provide #{hdr_name}"}
 
       ["v0.tachyon"] ->
-        {:ok, Teiserver.Player.TachyonHandler}
+        token = conn.assigns[:token]
+
+        cond do
+          not is_nil(token.owner_id) -> {:ok, Teiserver.Player.TachyonHandler}
+          not is_nil(token.autohost_id) -> {:ok, Teiserver.Autohost.TachyonHandler}
+          true -> {:error, 500, "no owner nor autohost found for token, this should never happen"}
+        end
 
       [x] ->
         {:error, 400, "unsupported version #{x}"}

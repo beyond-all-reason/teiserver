@@ -131,8 +131,40 @@ defmodule TeiserverWeb.TachyonControllerTest do
     test "can upgrade to websocket", %{user: user} do
       %{token: token} = OAuthFixtures.setup_token(user)
 
-      conf = Application.get_env(:teiserver, TeiserverWeb.Endpoint)
-      url = "ws://#{conf[:url][:host]}:#{conf[:http][:port]}" <> ~p"/tachyon"
+      opts = [
+        connection_options: [
+          extra_headers: [
+            {"authorization", "Bearer #{token.value}"},
+            {"sec-websocket-protocol", "v0.tachyon"}
+          ]
+        ]
+      ]
+
+      {:ok, client} = WSC.connect(tachyon_url(), opts)
+
+      conn_pid =
+        Teiserver.Support.Tachyon.poll_until_some(fn ->
+          Teiserver.Player.lookup_connection(user.id)
+        end)
+
+      assert is_pid(conn_pid)
+
+      # make sure we can still connect with chobby
+      %{socket: sock} = Teiserver.TeiserverTestLib.auth_setup(user)
+      assert is_port(sock)
+      Teiserver.Client.disconnect(user.id)
+      WSC.disconnect(client)
+    end
+
+    test "autohost can connect too", %{user: user} do
+      app = OAuthFixtures.app_attrs(user.id) |> OAuthFixtures.create_app()
+      autohost = Teiserver.AutohostFixtures.create_autohost("test autohost")
+
+      token =
+        OAuthFixtures.token_attrs(user.id, app)
+        |> Map.drop([:owner_id])
+        |> Map.put(:autohost_id, autohost.id)
+        |> OAuthFixtures.create_token()
 
       opts = [
         connection_options: [
@@ -143,15 +175,8 @@ defmodule TeiserverWeb.TachyonControllerTest do
         ]
       ]
 
-      {:ok, client} = WSC.connect(url, opts)
-      assert is_pid(Teiserver.Player.lookup_connection(user.id))
-
+      {:ok, client} = WSC.connect(tachyon_url(), opts)
       WSC.disconnect(client)
-
-      # make sure we can still connect with chobby
-      %{socket: sock} = Teiserver.TeiserverTestLib.auth_setup(user)
-      assert is_port(sock)
-      Teiserver.Client.disconnect(user.id)
     end
   end
 
@@ -162,5 +187,10 @@ defmodule TeiserverWeb.TachyonControllerTest do
     conn
     |> put_req_header("authorization", "Bearer #{token.value}")
     |> put_req_header("sec-websocket-protocol", "v0.tachyon")
+  end
+
+  defp tachyon_url() do
+    conf = Application.get_env(:teiserver, TeiserverWeb.Endpoint)
+    "ws://#{conf[:url][:host]}:#{conf[:http][:port]}" <> ~p"/tachyon"
   end
 end
