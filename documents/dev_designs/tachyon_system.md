@@ -177,4 +177,44 @@ If a player fail to answer a ready request within a timeout, that player is
 evicted from the queue, and all other players are put back where they were.
 
 
+## Listings
+
+We need a way to list online players + some info, as well as the lobbies. This
+should also support some kind of filtering.
+
+For example:
+* show me all public lobbies from 4v4 and up, with no OS restriction and 1 min chevron.
+* show me all my friends and their status (playing in game, spectating, chilling, in lobby)
+
+This part is the most speculative as of yet. There are basically 3 options:
+
+1) store this data in the DB and query it through SQL.
+  * pros: queries are simple and well understood.
+  * cons: put a limit on scaling based on write capacity of the DB. Need to deal with stale data.
+
+2) store the data in globally unique processes (ETS backed)
+  * pros: simple to implement. No stale data problem (can monitor when entities go away)
+  * cons: potentially requires a lot of memory. Querying may be slow. Single bottleneck.
+
+3) distribute the data across all nodes in their own ETS tables.
+  * pros: scale well. Fairly easy to deal with stale data
+  * cons: querying is a lot more complex, it's more akin to map/reduce.
+
+
+For option 3:
+
+* One local process per node receives updates of local process to update the ETS table of the node.
+  The writer process may be partitionned for throughput.
+
+* Players broadcast relevant updates to the local node's writer(s).
+* The writer creates/updates local ETS store with the data.
+* The writer also monitor the player's session to clear up the ETS store when it goes away.
+
+
+* Querying process call a dedicated query process (can potentially use [poolboy](https://github.com/devinus/poolboy)).
+* Dedicated query process uses [Genserver.multi_call/4](https://hexdocs.pm/elixir/GenServer.html#multi_call/4)
+  to query other dedicated query process on the other nodes + query its own ETS table.
+* Dedicated query process gather data and respond.
+* There should be different pool of processes to answer query from local process vs responding
+  to query from other nodes to avoid any deadlocks.
 
