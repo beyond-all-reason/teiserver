@@ -43,11 +43,11 @@ config :teiserver, DiscordBridgeBot,
     {"bridge_test_room", nil}
   ]
 
-# We don't run a server during test. If one is required,
-# you can enable the server option below.
 config :teiserver, TeiserverWeb.Endpoint,
   http: [port: 4002],
-  server: false
+  # Spawn a real server. This is required for websocket upgrade since it
+  # doesn't work with the test Plug.Conn used for "regular" http requests
+  server: true
 
 # Print only warnings and errors during test
 config :logger, level: :warning
