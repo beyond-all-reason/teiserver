@@ -1,6 +1,11 @@
 defmodule Teiserver.Account.RoleLib do
   @moduledoc """
   A library with all the hard-coded data regarding user roles.
+
+  If you update this file, please run:
+  mix teiserver.update_user_permissions
+
+  to update permissions in the database of each user
   """
 
   @role_defaults %{
