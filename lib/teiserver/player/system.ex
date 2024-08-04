@@ -11,7 +11,12 @@ defmodule Teiserver.Player.System do
 
   @impl true
   def init(_) do
-    children = [Teiserver.Player.Registry]
+    children = [
+      Teiserver.Player.SessionRegistry,
+      Teiserver.Player.SessionSupervisor,
+      Teiserver.Player.Registry
+    ]
+
     Supervisor.init(children, strategy: :one_for_one)
   end
 end

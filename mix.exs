@@ -108,7 +108,7 @@ defmodule Teiserver.MixProject do
       {:nostrum, "~> 0.10.0"},
       {:websocket_sync_client,
        git: "https://github.com/geekingfrog/websocket_sync_client.git",
-       ref: "702f87aa598d095184ab678195d2d50035e63c13",
+       ref: "45e15115ef5f44111196d78198faabf85795795d",
        only: [:dev, :test]}
     ]
   end

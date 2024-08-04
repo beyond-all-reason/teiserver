@@ -21,5 +21,10 @@ defmodule Teiserver.Tachyon.Handler do
   """
   @callback init(term()) :: WebSock.handle_result()
 
+  @doc """
+  Same as `WebSock.handle_info/2`
+  """
+  @callback handle_info(term(), term()) :: WebSock.handle_result()
+
   # TODO: add other callbacks to handle (parsed) tachyon commands
 end

@@ -23,6 +23,26 @@ defmodule Teiserver.Player.Registry do
     {:via, Horde.Registry, {__MODULE__, user_id}}
   end
 
+  @doc """
+  register the player. If the same player is already registered,
+  unregister the existing process and kill it, then register.
+  This ensure a player has at most one connection alive at a time
+  """
+  @spec register_and_kill_existing(T.userid()) :: {:ok, pid()}
+  def register_and_kill_existing(user_id) do
+    case register(user_id) do
+      {:ok, pid} ->
+        {:ok, pid}
+
+      {:error, {:already_registered, _}} ->
+        existing_conn_pid = lookup(user_id)
+        Horde.Registry.unregister(__MODULE__, via_tuple(user_id))
+        Process.send(existing_conn_pid, :force_disconnect, [])
+        :timer.sleep(1)
+        register_and_kill_existing(user_id)
+    end
+  end
+
   @spec register(T.userid()) :: {:ok, pid()} | {:error, {:already_registered, pid()}}
   def register(user_id) do
     # this is needed because the process that handle the ws connection is spawned

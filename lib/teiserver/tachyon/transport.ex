@@ -19,11 +19,20 @@ defmodule Teiserver.Tachyon.Transport do
 
   # dummy handle_in for now
   @impl true
-  def handle_in({text, opts}, state) do
-    Logger.debug("handle in message: #{inspect({text, opts})}")
+  def handle_in({"test_ping\n", opcode: :text}, state) do
+    # this is handy during manual test to ensure the connection is still alive
+    {:reply, :ok, {:text, "test_pong"}, state}
+  end
+
+  def handle_in({"test_ping", opcode: :text}, state) do
+    # this is handy during integration test to ensure the connection is still alive
+    {:reply, :ok, {:text, "test_pong"}, state}
+  end
+
+  def handle_in(_msg, state) do
     # TODO: this is where parsing and validating tachyon command as json payload
     # comes in before passing the parsed version to the handler
-    {:reply, :ok, {:text, "ok"}, state}
+    {:reply, :ok, {:text, "notimplemented!"}, state}
   end
 
   @impl true
@@ -32,18 +41,21 @@ defmodule Teiserver.Tachyon.Transport do
     {:push, {:ping, <<0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>}, state}
   end
 
+  def handle_info(:force_disconnect, state) do
+    # TODO: send a proper tachyon message to inform the client it is getting disconnected
+    {:stop, :normal, state}
+  end
+
   def handle_info(msg, state) do
-    IO.inspect(msg, label: "info msg")
-    {:ok, state}
+    handle_result(state.handler.handle_info(msg, state.state), state)
   end
 
   @impl true
   def terminate(reason, state) do
-    Logger.debug(
-      "Terminating ws connection with reason #{inspect(reason)} and state #{inspect(state)}"
+    Logger.info(
+      "Terminating ws connection #{inspect(self())} with reason #{inspect(reason)} and state #{inspect(state)}"
     )
 
-    # TODO: update playtime and other stats for this player
     :ok
   end
 
