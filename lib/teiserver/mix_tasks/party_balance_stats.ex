@@ -227,7 +227,7 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
     where tbmm.party_id is not null
     and game_type = $1
     order by tbm.inserted_at DESC
-    limit 100
+    limit 1
     """
 
     case Ecto.Adapters.SQL.query(Repo, query, [game_type]) do
