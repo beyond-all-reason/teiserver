@@ -89,7 +89,13 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
             query =
               URI.decode_query(redir_url.query || "")
               |> Map.put(:code, code.value)
-              |> Map.merge(Map.take(params, ["state"]))
+              |> then(fn query ->
+                # only include state if it was provided in the first place
+                case Map.get(params, "state", "") do
+                  "" -> query
+                  st -> Map.put(query, "state", st)
+                end
+              end)
               |> URI.encode_query()
 
             conn |> redirect(external: URI.to_string(%{redir_url | query: query}))

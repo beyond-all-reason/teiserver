@@ -61,6 +61,25 @@ defmodule TeiserverWeb.OAuth.AuthorizeControllerTest do
       assert code.redirect_uri == data.redirect_uri
     end
 
+    test "only include state in redirection if provided", %{conn: conn, app: app} do
+      data = %{
+        client_id: app.uid,
+        response_type: "code",
+        code_challenge: "blah",
+        code_challenge_method: "S256",
+        state: "",
+        redirect_uri: hd(app.redirect_uris)
+        # no state
+      }
+
+      resp = post(conn, ~p"/oauth/authorize", data)
+
+      assert redired = redirected_to(resp, 302)
+      parsed = URI.parse(redired)
+      query = URI.decode_query(parsed.query)
+      refute Map.has_key?(query, "state")
+    end
+
     test "must provide client_id and redirect_uri", %{conn: conn, app: app} do
       data = %{
         client_id: app.uid,
