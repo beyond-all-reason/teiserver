@@ -98,6 +98,20 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       assert is_binary(json_resp["access_token"]), "has access_token"
     end
 
+    test "must not provide client_id twice", %{conn: conn} = setup_data do
+      data = get_valid_data(setup_data)
+
+      client_id = data.client_id
+      auth_header = Plug.BasicAuth.encode_basic_auth(client_id, "")
+
+      resp =
+        conn
+        |> put_req_header("authorization", auth_header)
+        |> post(~p"/oauth/token", data)
+
+      json_response(resp, 400)
+    end
+
     test "must provide grant_type", %{conn: conn} = setup_data do
       data = get_valid_data(setup_data) |> Map.drop([:grant_type])
       resp = post(conn, ~p"/oauth/token", data)
@@ -198,6 +212,38 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
     test "basic auth check", %{conn: conn, credential: credential} do
       data = %{grant_type: "client_credentials"}
       auth_header = Plug.BasicAuth.encode_basic_auth(credential.client_id, "lolnope")
+
+      conn =
+        conn
+        |> put_req_header("authorization", auth_header)
+
+      resp = post(conn, ~p"/oauth/token", data)
+      json_response(resp, 400)
+    end
+
+    test "cannot provide client_id twice", %{
+      conn: conn,
+      credential: credential,
+      credential_secret: secret
+    } do
+      data = %{grant_type: "client_credentials", client_id: credential.client_id}
+      auth_header = Plug.BasicAuth.encode_basic_auth(credential.client_id, secret)
+
+      conn =
+        conn
+        |> put_req_header("authorization", auth_header)
+
+      resp = post(conn, ~p"/oauth/token", data)
+      json_response(resp, 400)
+    end
+
+    test "cannot provide client_secret twice", %{
+      conn: conn,
+      credential: credential,
+      credential_secret: secret
+    } do
+      data = %{grant_type: "client_credentials", client_secret: secret}
+      auth_header = Plug.BasicAuth.encode_basic_auth(credential.client_id, secret)
 
       conn =
         conn

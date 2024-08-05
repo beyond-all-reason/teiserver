@@ -82,15 +82,21 @@ defmodule TeiserverWeb.OAuth.CodeController do
   end
 
   defp get_client_id(conn, params) do
-    case Map.get(params, "client_id") do
-      nil ->
-        case Plug.BasicAuth.parse_basic_auth(conn) do
-          {user, _pass} -> {:ok, user}
-          :error -> {:error, "missing client_id"}
-        end
+    query = Map.get(params, "client_id")
+    basic = Plug.BasicAuth.parse_basic_auth(conn)
 
-      cid ->
-        {:ok, cid}
+    case {basic, query} do
+      {:error, nil} ->
+        {:error, "missing client_id"}
+
+      {{user, _}, client_id} when client_id != nil and user != nil and user != "" ->
+        {:error, "cannot provide client_id through both basic auth header and query parameters"}
+
+      {{user, _}, nil} ->
+        {:ok, user}
+
+      {_, client_id} ->
+        {:ok, client_id}
     end
   end
 
@@ -99,11 +105,26 @@ defmodule TeiserverWeb.OAuth.CodeController do
     post_params = {Map.get(params, "client_id"), Map.get(params, "client_secret")}
 
     case {basic, post_params} do
-      {:error, {nil, nil}} -> {:error, "Invalid basic auth header"}
-      {{user, pass}, _} -> {:ok, user, pass}
-      {_, {nil, _}} -> {:error, "missing client_id"}
-      {_, {_, nil}} -> {:error, "missing client_secret"}
-      {_, {client_id, client_secret}} -> {:ok, client_id, client_secret}
+      {:error, {nil, nil}} ->
+        {:error, "Invalid basic auth header"}
+
+      {{user, _}, {client_id, _}} when user != nil and client_id != nil ->
+        {:error, "Must not provide client_id both in basic auth header and query parameter"}
+
+      {{_, pass}, {_, secret}} when pass != nil and secret != nil ->
+        {:error, "Must not provide client_secret both in basic auth header and query parameter"}
+
+      {{user, pass}, _} ->
+        {:ok, user, pass}
+
+      {_, {nil, _}} ->
+        {:error, "missing client_id"}
+
+      {_, {_, nil}} ->
+        {:error, "missing client_secret"}
+
+      {_, {client_id, client_secret}} ->
+        {:ok, client_id, client_secret}
     end
   end
 
