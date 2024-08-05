@@ -221,9 +221,12 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
 
   defp get_match_ids(game_type) do
     query = """
-    select distinct  tbm.id, tbm.inserted_at  from teiserver_battle_match_memberships tbmm
+    select distinct tbm.id, tbm.inserted_at  from teiserver_battle_match_memberships tbmm
     inner join teiserver_battle_matches tbm
     on tbm.id = tbmm.match_id
+    inner join teiserver_game_rating_logs tgrl
+    on tgrl.match_id = tbm.id
+    and tgrl.value is not null
     where tbmm.party_id is not null
     and game_type = $1
     order by tbm.inserted_at DESC
