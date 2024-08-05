@@ -7,9 +7,14 @@ defmodule TeiserverWeb.OAuth.CodeView do
     %{
       access_token: token.value,
       expires_in: expires_in,
-      refresh_token: token.refresh_token.value,
       token_type: "Bearer"
     }
+    |> then(fn res ->
+      case Map.get(token, :refresh_token) do
+        nil -> res
+        refresh_token -> Map.put(res, :refresh_token, refresh_token.value)
+      end
+    end)
   end
 
   def error(conn) do

@@ -147,7 +147,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       json_resp = json_response(resp, 200)
       assert is_binary(json_resp["access_token"]), "has access_token"
       assert is_integer(json_resp["expires_in"]), "has expires_in"
-      assert is_binary(json_resp["refresh_token"]), "has refresh_token"
+      refute Map.has_key?(json_resp, "refresh_token"), "no refresh token"
       assert json_resp["token_type"] == "Bearer", "bearer token type"
     end
 
@@ -175,7 +175,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       json_resp = json_response(resp, 200)
       assert is_binary(json_resp["access_token"]), "has access_token"
       assert is_integer(json_resp["expires_in"]), "has expires_in"
-      assert is_binary(json_resp["refresh_token"]), "has refresh_token"
+      refute Map.has_key?(json_resp, "refresh_token"), "no refresh token"
       assert json_resp["token_type"] == "Bearer", "bearer token type"
     end
 

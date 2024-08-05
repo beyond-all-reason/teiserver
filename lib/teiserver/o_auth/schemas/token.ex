@@ -12,7 +12,7 @@ defmodule Teiserver.OAuth.Token do
           scopes: OAuth.Application.scopes(),
           expires_at: DateTime.t(),
           type: :access | :refresh,
-          refresh_token: t()
+          refresh_token: t() | nil
         }
 
   schema "oauth_tokens" do

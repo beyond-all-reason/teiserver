@@ -38,6 +38,12 @@ defmodule Teiserver.OAuth.TokenTest do
     assert token.scopes == app.scopes
   end
 
+  test "can create a token without refresh token", %{user: user, app: app} do
+    assert {:ok, token} = OAuth.create_token(user, app, create_refresh: false)
+    assert token.type == :access
+    assert token.refresh_token == nil
+  end
+
   test "can get valid token", %{user: user, app: app} do
     assert {:ok, new_token} = OAuth.create_token(user, app)
     assert {:ok, token} = OAuth.get_valid_token(new_token.value)

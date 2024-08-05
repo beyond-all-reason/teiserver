@@ -7,7 +7,7 @@ defmodule TeiserverWeb.OAuth.CodeController do
 
   def token(conn, %{"grant_type" => "authorization_code"} = params) do
     case Enum.find(
-           ["client_id", "code", "redirect_uri", "client_id", "code_verifier", "grant_type"],
+           ["client_id", "code", "redirect_uri", "code_verifier", "grant_type"],
            fn key -> not Map.has_key?(params, key) end
          ) do
       nil ->

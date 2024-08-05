@@ -158,7 +158,7 @@ defmodule Teiserver.OAuth do
   @spec create_token(
           User.t() | T.userid(),
           %{id: integer(), scopes: Application.scopes()},
-          options()
+          create_refresh: boolean() | options()
         ) ::
           {:ok, Token.t()} | {:error, Ecto.Changeset.t()}
   def create_token(user_id, application, opts \\ [])
@@ -175,21 +175,8 @@ defmodule Teiserver.OAuth do
     do_create_token(%{owner_id: user_id}, application, opts)
   end
 
-  defp do_create_token(owner_attr, application, opts \\ []) do
+  defp do_create_token(owner_attr, application, opts) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
-
-    refresh_attrs =
-      %{
-        value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
-        application_id: application.id,
-        scopes: application.scopes,
-        # there's no real recourse when the refresh token expires and it's
-        # quite annoying, so make it "never" expire.
-        expires_at: Timex.add(now, Timex.Duration.from_days(365 * 100)),
-        type: :refresh,
-        refresh_token: nil
-      }
-      |> Map.merge(owner_attr)
 
     token_attrs =
       %{
@@ -197,10 +184,28 @@ defmodule Teiserver.OAuth do
         application_id: application.id,
         scopes: application.scopes,
         expires_at: Timex.add(now, Timex.Duration.from_minutes(30)),
-        type: :access,
-        refresh_token: refresh_attrs
+        type: :access
       }
       |> Map.merge(owner_attr)
+
+    refresh_attrs =
+      if Keyword.get(opts, :create_refresh, true) do
+        %{
+          value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
+          application_id: application.id,
+          scopes: application.scopes,
+          # there's no real recourse when the refresh token expires and it's
+          # quite annoying, so make it "never" expire.
+          expires_at: Timex.add(now, Timex.Duration.from_days(365 * 100)),
+          type: :refresh,
+          refresh_token: nil
+        }
+        |> Map.merge(owner_attr)
+      else
+        nil
+      end
+
+    token_attrs = Map.put(token_attrs, :refresh_token, refresh_attrs)
 
     %Token{}
     |> Token.changeset(token_attrs)
@@ -388,7 +393,9 @@ defmodule Teiserver.OAuth do
 
   @spec get_token_from_credentials(Credential.t()) :: {:ok, Token.t()} | {:error, term()}
   def get_token_from_credentials(credential) do
-    do_create_token(%{autohost_id: credential.autohost_id}, credential.application)
+    do_create_token(%{autohost_id: credential.autohost_id}, credential.application,
+      create_refresh: false
+    )
   end
 
   defp check_expiry(obj, now) do
