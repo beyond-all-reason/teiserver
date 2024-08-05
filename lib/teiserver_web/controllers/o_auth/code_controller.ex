@@ -46,21 +46,32 @@ defmodule TeiserverWeb.OAuth.CodeController do
   end
 
   defp exchange_token(conn, params) do
-    with app when app != nil <- OAuth.get_application_by_uid(params["client_id"]),
+    with {:ok, app} <- get_app_by_uid(params["client_id"]),
          {:ok, code} <- OAuth.get_valid_code(params["code"]),
-         true <- code.application_id == app.id,
+         :ok <-
+           if(code.application_id == app.id,
+             do: :ok,
+             else: {:error, "code doesn't match application. Invalid code for this client_id"}
+           ),
          {:ok, token} <-
            OAuth.exchange_code(code, params["code_verifier"], params["redirect_uri"]) do
       conn |> put_status(200) |> render(:token, token: token)
     else
-      _ -> conn |> put_status(400) |> render(:error, error_description: "invalid request")
+      {:error, err} ->
+        conn
+        |> put_status(400)
+        |> render(:error, error_description: "invalid request: #{err_message(err)}")
     end
   end
 
   defp refresh_token(conn, params) do
-    with app when app != nil <- OAuth.get_application_by_uid(params["client_id"]),
+    with {:ok, app} <- get_app_by_uid(params["client_id"]),
          {:ok, token} <- OAuth.get_valid_token(params["refresh_token"]),
-         true <- token.application_id == app.id,
+         :ok <-
+           if(token.application_id == app.id,
+             do: :ok,
+             else: {:error, "token doesn't match application. Invalid token for this client_id"}
+           ),
          {:ok, new_token} <- OAuth.refresh_token(token) do
       conn |> put_status(200) |> render(:token, token: new_token)
     else
@@ -92,5 +103,30 @@ defmodule TeiserverWeb.OAuth.CodeController do
 
   def metadata(conn, _params) do
     conn |> put_status(200) |> render(:metadata)
+  end
+
+  defp get_app_by_uid(uid) do
+    case OAuth.get_application_by_uid(uid) do
+      app when not is_nil(app) -> {:ok, app}
+      _ -> {:error, "no application found for uid #{inspect(uid)}"}
+    end
+  end
+
+  defp err_message(err) do
+    # Used to customize the error message to return to the user
+    case err do
+      :no_code ->
+        "no authorization code found"
+
+      :expired ->
+        "authorization code has expired"
+
+      _ ->
+        try do
+          to_string(err)
+        rescue
+          _ -> inspect(err)
+        end
+    end
   end
 end

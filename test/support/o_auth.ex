@@ -18,10 +18,12 @@ defmodule Teiserver.Test.Support.OAuth do
   def create_code(user, app, opts \\ []) do
     {verifier, challenge, method} = generate_challenge()
 
+    redir_uri = Map.get(app, :redirect_uri, "http://some.host/a/path")
+
     attrs = %{
       id: app.id,
       scopes: app.scopes,
-      redirect_uri: "http://some.host/a/path",
+      redirect_uri: redir_uri,
       challenge: challenge,
       challenge_method: method
     }
@@ -33,7 +35,12 @@ defmodule Teiserver.Test.Support.OAuth do
   defp generate_challenge() do
     # A-Z,a-z,0-9 and -._~ are authorized, but can't be bothered to cover all
     # of that. hex encoding will fit
-    verifier = Base.hex_encode32(:crypto.strong_rand_bytes(40), padding: false)
+    # hardcoded random bytes generated with :crypto.strong_rand_bytes(32)
+    bytes =
+      <<30, 33, 141, 180, 13, 27, 42, 190, 106, 230, 111, 140, 162, 230, 128, 110, 149, 65, 33,
+        124, 129, 9, 89, 93, 94, 248, 46, 34, 116, 186, 8, 24>>
+
+    verifier = Base.hex_encode32(bytes, padding: false)
 
     challenge = hash_verifier(verifier)
 

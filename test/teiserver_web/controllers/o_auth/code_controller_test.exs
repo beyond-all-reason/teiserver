@@ -74,10 +74,12 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       resp2 = post(conn, ~p"/oauth/token", data)
 
       # code is now used up and invalid
-      assert json_response(resp2, 400) == %{
-               "error_description" => "invalid request",
-               "error" => "invalid_request"
-             }
+      assert %{
+               "error" => "invalid_request",
+               "error_description" => description
+             } = json_response(resp2, 400)
+
+      assert description =~ "no authorization code"
     end
 
     test "must provide grant_type", %{conn: conn} = setup_data do
@@ -116,7 +118,11 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
 
       data = get_valid_data(setup_data) |> Map.put(:client_id, other_app.uid)
       resp = post(conn, ~p"/oauth/token", data)
-      assert %{"error" => "invalid_request"} = json_response(resp, 400)
+
+      assert %{"error" => "invalid_request", "error_description" => description} =
+               json_response(resp, 400)
+
+      assert description =~ "code doesn't match application"
     end
 
     # Note: verifier code and redirect URI matching is tested in OAuth.exchange_code

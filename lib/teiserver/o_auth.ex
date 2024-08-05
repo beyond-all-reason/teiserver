@@ -151,12 +151,7 @@ defmodule Teiserver.OAuth do
 
       code ->
         now = Keyword.get(opts, :now, Timex.now())
-
-        if expired?(code, now) do
-          {:error, :expired}
-        else
-          {:ok, code}
-        end
+        check_expiry(code, now)
     end
   end
 
@@ -212,8 +207,6 @@ defmodule Teiserver.OAuth do
     |> Repo.insert()
   end
 
-  # TODO: get_valid_token is basically the same as get_valid_code, refactor later
-
   @doc """
   Given a code returns the corresponding db object, making sure
   it is valid (exists, not expired, not revoked)
@@ -228,12 +221,7 @@ defmodule Teiserver.OAuth do
 
       token ->
         now = Keyword.get(opts, :now, Timex.now())
-
-        if Timex.after?(now, token.expires_at) do
-          {:error, :expired}
-        else
-          {:ok, token}
-        end
+        check_expiry(token, now)
     end
   end
 
@@ -246,50 +234,69 @@ defmodule Teiserver.OAuth do
   def exchange_code(code, verifier, redirect_uri \\ nil, opts \\ []) do
     now = Keyword.get(opts, :now, Timex.now())
 
-    cond do
-      expired?(code, now) ->
-        {:error, :expired}
+    with {:ok, code} <- check_expiry(code, now),
+         :ok <-
+           if(code.redirect_uri == redirect_uri, do: :ok, else: {:error, :redirect_uri_mismatch}),
+         :ok <- check_verifier(code, verifier) do
+      Repo.transaction(fn ->
+        Repo.delete!(code)
 
-      code.redirect_uri != redirect_uri ->
-        {:error, :redirect_uri_mismatch}
+        {:ok, token} =
+          create_token(code.owner_id, %{id: code.application_id, scopes: code.scopes}, opts)
 
-      not code_verified?(code, verifier) ->
-        {:error, :code_verification_failed}
-
-      true ->
-        Repo.transaction(fn ->
-          Repo.delete!(code)
-
-          {:ok, token} =
-            create_token(code.owner_id, %{id: code.application_id, scopes: code.scopes}, opts)
-
-          token
-        end)
+        token
+      end)
     end
   end
 
-  @spec code_verified?(Code.t(), String.t()) :: boolean()
-  defp code_verified?(%Code{challenge_method: :plain, challenge: challenge}, verifier) do
-    valid_verifier?(verifier) and :crypto.hash_equals(challenge, verifier)
-  end
-
-  defp code_verified?(%Code{challenge_method: :S256, challenge: challenge}, verifier) do
-    with true <- valid_verifier?(verifier),
-         {:ok, challenge} <- Base.url_decode64(challenge, padding: false, ignore: :whitespace) do
-      hashed_verifier = :crypto.hash(:sha256, verifier)
-      :crypto.hash_equals(challenge, hashed_verifier)
-    else
-      _ ->
-        false
+  @spec check_verifier(Code.t(), String.t()) :: :ok | {:error, term()}
+  defp check_verifier(%Code{challenge_method: :plain, challenge: challenge}, verifier) do
+    with :ok <- valid_verifier(verifier) do
+      compare_hash(challenge, verifier)
     end
   end
 
-  defp code_verified?(_, _), do: false
+  defp check_verifier(%Code{challenge_method: :S256, challenge: challenge}, verifier) do
+    with :ok <- valid_verifier(verifier),
+         {:ok, challenge} <- Base.url_decode64(challenge, padding: false, ignore: :whitespace),
+         :ok <-
+           compare_hash(challenge, :crypto.hash(:sha256, verifier)) do
+      :ok
+    end
+  end
+
+  defp check_verifier(_, _), do: {:error, :invalid_verifier}
 
   # A-Z, a-z, 0-9, and the punctuation characters -._~
-  defp valid_verifier?(verifier) do
+  defp valid_verifier(verifier) do
     s = byte_size(verifier)
-    43 <= s and s <= 128 and String.match?(verifier, ~r/[A-Za-z0-9\-._~]/)
+
+    cond do
+      s < 43 ->
+        {:error, "verifier cannot be less than 43 chars"}
+
+      s > 128 ->
+        {:error, "verifier cannot be more than 128 chars"}
+
+      not String.match?(verifier, ~r/[A-Za-z0-9\-._~]/) ->
+        {:error, "verifier contains illegal characters"}
+
+      true ->
+        :ok
+    end
+  end
+
+  defp compare_hash(challenge, verifier) do
+    cond do
+      String.length(challenge) != String.length(verifier) ->
+        {:error, "challenge and verifier length mismatch"}
+
+      not :crypto.hash_equals(challenge, verifier) ->
+        {:error, "verifier doesn't match challenge"}
+
+      true ->
+        :ok
+    end
   end
 
   @spec refresh_token(Token.t(), options()) :: {:ok, Token.t()} | {:error, term()}
@@ -302,21 +309,23 @@ defmodule Teiserver.OAuth do
   def refresh_token(token, opts) do
     now = Keyword.get(opts, :now, Timex.now())
 
-    if expired?(token, now) do
-      {:error, :expired}
-    else
-      token =
-        if Ecto.assoc_loaded?(token.application) do
-          token
-        else
-          TokenQueries.get_token(token.value)
-        end
+    case check_expiry(token, now) do
+      {:error, :expired} ->
+        {:error, :expired}
 
-      Repo.transaction(fn ->
-        {:ok, new_token} = create_token(token.owner_id, token.application, opts)
-        TokenQueries.delete_refresh_token(token)
-        new_token
-      end)
+      _ ->
+        token =
+          if Ecto.assoc_loaded?(token.application) do
+            token
+          else
+            TokenQueries.get_token(token.value)
+          end
+
+        Repo.transaction(fn ->
+          {:ok, new_token} = create_token(token.owner_id, token.application, opts)
+          TokenQueries.delete_refresh_token(token)
+          new_token
+        end)
     end
   end
 
@@ -382,7 +391,11 @@ defmodule Teiserver.OAuth do
     do_create_token(%{autohost_id: credential.autohost_id}, credential.application)
   end
 
-  defp expired?(obj, now) do
-    Timex.after?(now, Map.fetch!(obj, :expires_at))
+  defp check_expiry(obj, now) do
+    if Timex.after?(now, Map.fetch!(obj, :expires_at)) do
+      {:error, :expired}
+    else
+      {:ok, obj}
+    end
   end
 end

@@ -14,8 +14,8 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
 
       app ->
         case OAuth.get_redirect_uri(app, Map.get(conn.params, "redirect_uri")) do
-          {:error, _err} ->
-            bad_request(conn, "invalid redirection uri")
+          {:error, err} ->
+            bad_request(conn, "invalid redirection uri: #{inspect(err)}")
 
           {:ok, redir_uri} ->
             reject_uri =
