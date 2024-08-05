@@ -16,6 +16,11 @@ defmodule TeiserverWeb.OAuth.CodeController do
     end
   end
 
+  # As per https://datatracker.ietf.org/doc/html/rfc6749#section-6 this
+  # endpoint should accept the parameter `scope`.
+  # As of writing, there is only ever one scope allowed: tachyon.lobby
+  # so this parameter is ignored.
+  # If we ever expand the allowed scopes, this feature should be added
   def token(conn, %{"grant_type" => "refresh_token"} = params) do
     case check_required_keys(params, ["grant_type", "refresh_token", "client_id"]) do
       :ok ->
@@ -68,6 +73,9 @@ defmodule TeiserverWeb.OAuth.CodeController do
 
   defp refresh_token(conn, params) do
     with {:ok, app} <- get_app_by_uid(params["client_id"]),
+         # Once we support more than one single scope, modify this function to allow
+         # changing the scope of the new token
+         {:ok, _scopes} <- check_scopes(app, params),
          {:ok, token} <- OAuth.get_valid_token(params["refresh_token"]),
          :ok <-
            if(token.application_id == app.id,
@@ -134,6 +142,25 @@ defmodule TeiserverWeb.OAuth.CodeController do
       conn |> put_status(200) |> render(:token, token: token)
     else
       _ -> conn |> put_status(400) |> render(:error, error_description: "invalid request")
+    end
+  end
+
+  defp check_scopes(app, params) do
+    scopes = Map.get(params, "scope", "") |> String.split() |> Enum.into(MapSet.new())
+    app_scopes = MapSet.new(app.scopes)
+
+    cond do
+      MapSet.size(scopes) == 0 ->
+        {:ok, app.scopes}
+
+      MapSet.subset?(scopes, app_scopes) ->
+        {:ok, MapSet.to_list(scopes)}
+
+      true ->
+        invalid_scopes = MapSet.difference(scopes, app_scopes)
+
+        {:error,
+         "the following scopes aren't allowed: #{inspect(MapSet.to_list(invalid_scopes))}"}
     end
   end
 

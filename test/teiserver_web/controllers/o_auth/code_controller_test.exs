@@ -299,6 +299,18 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       resp = post(conn, ~p"/oauth/token", data)
       assert %{"error" => "invalid_request"} = json_response(resp, 400)
     end
+
+    test "must provide valid scope", %{conn: conn} = setup_data do
+      data = %{
+        grant_type: "refresh_token",
+        client_id: setup_data[:app].uid,
+        refresh_token: setup_data[:token].refresh_token.value,
+        scope: "lolscope"
+      }
+
+      resp = post(conn, ~p"/oauth/token", data)
+      assert %{"error" => "invalid_request"} = json_response(resp, 400)
+    end
   end
 
   describe "medatata endpoint" do
