@@ -82,6 +82,22 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       assert description =~ "no authorization code"
     end
 
+    test "can use basic auth to exchange", %{conn: conn} = setup_data do
+      data = get_valid_data(setup_data)
+
+      client_id = data.client_id
+      data = Map.drop(data, [:client_id])
+      auth_header = Plug.BasicAuth.encode_basic_auth(client_id, "")
+
+      resp =
+        conn
+        |> put_req_header("authorization", auth_header)
+        |> post(~p"/oauth/token", data)
+
+      json_resp = json_response(resp, 200)
+      assert is_binary(json_resp["access_token"]), "has access_token"
+    end
+
     test "must provide grant_type", %{conn: conn} = setup_data do
       data = get_valid_data(setup_data) |> Map.drop([:grant_type])
       resp = post(conn, ~p"/oauth/token", data)

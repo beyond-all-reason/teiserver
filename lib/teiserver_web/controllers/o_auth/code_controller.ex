@@ -6,28 +6,23 @@ defmodule TeiserverWeb.OAuth.CodeController do
   @spec token(Plug.Conn.t(), %{}) :: Plug.Conn.t()
 
   def token(conn, %{"grant_type" => "authorization_code"} = params) do
-    case Enum.find(
-           ["client_id", "code", "redirect_uri", "code_verifier", "grant_type"],
-           fn key -> not Map.has_key?(params, key) end
-         ) do
-      nil ->
-        exchange_token(conn, params)
-
-      missing_key ->
-        conn |> put_status(400) |> render(:error, error_description: "missing #{missing_key}")
+    with :ok <-
+           check_required_keys(params, ["code", "redirect_uri", "code_verifier", "grant_type"]),
+         {:ok, client_id} <- get_client_id(conn, params) do
+      exchange_token(conn, client_id, params)
+    else
+      {:error, msg} ->
+        conn |> put_status(400) |> render(:error, error_description: msg)
     end
   end
 
   def token(conn, %{"grant_type" => "refresh_token"} = params) do
-    case Enum.find(
-           ["grant_type", "refresh_token", "client_id"],
-           fn key -> not Map.has_key?(params, key) end
-         ) do
-      nil ->
+    case check_required_keys(params, ["grant_type", "refresh_token", "client_id"]) do
+      :ok ->
         refresh_token(conn, params)
 
-      missing_key ->
-        conn |> put_status(400) |> render(:error, error_description: "missing #{missing_key}")
+      {:error, msg} ->
+        conn |> put_status(400) |> render(:error, error_description: msg)
     end
   end
 
@@ -45,8 +40,15 @@ defmodule TeiserverWeb.OAuth.CodeController do
     conn |> put_status(400) |> render(:error, error_description: "invalid grant_type")
   end
 
-  defp exchange_token(conn, params) do
-    with {:ok, app} <- get_app_by_uid(params["client_id"]),
+  defp check_required_keys(params, keys) do
+    case Enum.find(keys, fn key -> not Map.has_key?(params, key) end) do
+      nil -> :ok
+      missing_key -> {:error, "missing #{missing_key}"}
+    end
+  end
+
+  defp exchange_token(conn, client_id, params) do
+    with {:ok, app} <- get_app_by_uid(client_id),
          {:ok, code} <- OAuth.get_valid_code(params["code"]),
          :ok <-
            if(code.application_id == app.id,
@@ -79,12 +81,25 @@ defmodule TeiserverWeb.OAuth.CodeController do
     end
   end
 
+  defp get_client_id(conn, params) do
+    case Map.get(params, "client_id") do
+      nil ->
+        case Plug.BasicAuth.parse_basic_auth(conn) do
+          {user, _pass} -> {:ok, user}
+          :error -> {:error, "missing client_id"}
+        end
+
+      cid ->
+        {:ok, cid}
+    end
+  end
+
   defp get_credentials(conn, params) do
     basic = Plug.BasicAuth.parse_basic_auth(conn)
     post_params = {Map.get(params, "client_id"), Map.get(params, "client_secret")}
 
     case {basic, post_params} do
-      {:error, {nil, nil}} -> {:error, "unauthorized"}
+      {:error, {nil, nil}} -> {:error, "Invalid basic auth header"}
       {{user, pass}, _} -> {:ok, user, pass}
       {_, {nil, _}} -> {:error, "missing client_id"}
       {_, {_, nil}} -> {:error, "missing client_secret"}
