@@ -66,7 +66,9 @@ defmodule Teiserver.Battle.BalanceLib do
     if(is_moderator) do
       Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
     else
-      Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.delete("force_party") |> Map.keys()
+      Teiserver.Battle.BalanceLib.algorithm_modules()
+      |> Map.drop(["force_party", "brute_force"])
+      |> Map.keys()
     end
   end
 
