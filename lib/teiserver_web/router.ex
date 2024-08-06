@@ -618,6 +618,8 @@ defmodule TeiserverWeb.Router do
     get("/tools/falist", ToolController, :falist)
     get("/tools/test_page", ToolController, :test_page)
 
+    get("/users/create_form", UserController, :create_form)
+    post("/users/create_post", UserController, :create_post)
     get("/users/rename_form/:id", UserController, :rename_form)
     put("/users/rename_post/:id", UserController, :rename_post)
     get("/users/reset_password/:id", UserController, :reset_password)
