@@ -4,6 +4,9 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
 
   If you want to run this task invidually, use:
   mix teiserver.party_balance_stats
+
+  On integration server it is recommended you output to a specific path as follows:
+  mix teiserver.party_balance_stats /var/log/teiserver/results.txt
   """
 
   use Mix.Task
@@ -16,7 +19,13 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
 
   def run(args) do
     Logger.info("Args: #{args}")
-    write_log_filepath = args
+
+    write_log_filepath =
+      case args do
+        [filepath] -> filepath
+        _ -> nil
+      end
+
     Application.ensure_all_started(:teiserver)
     game_types = ["Large Team", "Small Team"]
 
@@ -78,7 +87,12 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
 
     num_matches = length(match_ids)
     time_taken = System.system_time(:microsecond) - start_time
-    avg_time_taken = time_taken / num_matches / 1000
+
+    avg_time_taken =
+      case num_matches do
+        0 -> 0
+        _ -> time_taken / num_matches / 1000
+      end
 
     %{
       algo: algo,
@@ -221,21 +235,30 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
     })
   end
 
-  defp get_match_ids(game_type) do
+  defp get_match_ids("Large Team") do
+    get_match_ids(8, 2)
+  end
+
+  defp get_match_ids("Small Team") do
+    get_match_ids(5, 2)
+  end
+
+  defp get_match_ids(team_size, team_count) do
     query = """
-    select distinct tbm.id, tbm.inserted_at  from teiserver_battle_match_memberships tbmm
+    select distinct  tbm.id, tbm.inserted_at  from teiserver_battle_match_memberships tbmm
     inner join teiserver_battle_matches tbm
     on tbm.id = tbmm.match_id
+    and tbm.team_size = $1
+    and tbm.team_count = $2
     inner join teiserver_game_rating_logs tgrl
     on tgrl.match_id = tbm.id
     and tgrl.value is not null
     where tbmm.party_id is not null
-    and game_type = $1
-    order by tbm.inserted_at DESC
-    limit 100
+     order by tbm.inserted_at DESC
+    limit 100;
     """
 
-    case Ecto.Adapters.SQL.query(Repo, query, [game_type]) do
+    case Ecto.Adapters.SQL.query(Repo, query, [team_size, team_count]) do
       {:ok, results} ->
         results.rows
         |> Enum.map(fn [id, _insert_date] ->
@@ -279,7 +302,8 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
       )
 
     case result do
-      {:error, message} -> Logger.error(message)
+      {:error, message} -> Logger.error("Cannot write to #{filepath} #{message}")
+      _ -> Logger.info("Successfully output logs to #{filepath}")
     end
   end
 end
