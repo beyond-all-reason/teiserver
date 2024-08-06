@@ -14,7 +14,9 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
   alias Mix.Tasks.Teiserver.PartyBalanceStatsTypes, as: PB
   alias Teiserver.Config
 
-  def run(_args) do
+  def run(args) do
+    Logger.info("Args: #{args}")
+    write_log_filepath = args
     Application.ensure_all_started(:teiserver)
     game_types = ["Large Team", "Small Team"]
 
@@ -28,7 +30,7 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
     json_result = Jason.encode(result)
 
     case json_result do
-      {:ok, json_string} -> write_to_file(json_string)
+      {:ok, json_string} -> write_to_file(json_string, write_log_filepath)
     end
 
     Logger.info("Finished processing matches")
@@ -261,14 +263,23 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
     end)
   end
 
-  defp write_to_file(contents) do
+  defp write_to_file(contents, nil) do
     app_dir = File.cwd!()
     new_file_path = Path.join([app_dir, "results.txt"])
 
-    File.write(
-      new_file_path,
-      contents,
-      [:write]
-    )
+    write_to_file(contents, new_file_path)
+  end
+
+  defp write_to_file(contents, filepath) do
+    result =
+      File.write(
+        filepath,
+        contents,
+        [:write]
+      )
+
+    case result do
+      {:error, message} -> Logger.error(message)
+    end
   end
 end
