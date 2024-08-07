@@ -244,7 +244,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
   end
 
   @spec leader?(map()) :: boolean
-  defp leader?(socket = %{assigns: %{user_id: user_id, party: %{leader: leader_id}}}) do
+  defp leader?(socket = %{assigns: %{current_user: %{id: user_id}, party: %{leader: leader_id}}}) do
     moderator = allow?(socket, "Moderator")
     moderator or leader_id == user_id
   end
