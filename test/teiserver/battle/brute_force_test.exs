@@ -222,5 +222,42 @@ defmodule Teiserver.Battle.BruteForceTest do
                2 => ["E", "F", "GrandMasterK311", "Mr_Dirac", "earrebarre"]
              }
            }
+
+    # Note the broken party penalty has been set to 3
+    Application.put_env(:teiserver, :party_importance, 3)
+    result = BruteForce.perform(expanded_group, 2)
+
+    assert result == %{
+             logs: [
+               "Algorithm: brute_force",
+               "------------------------------------------------------",
+               "Parties: [A, B, C, D], [E, F]",
+               "Team rating diff penalty: 0.0",
+               "Broken party penalty: 3",
+               "Score: 3.0 (lower is better)",
+               "Team 1: A, D, E, F, GrandMasterK311",
+               "Team 2: B, C, MacDi, Mr_Dirac, earrebarre"
+             ],
+             team_groups: %{
+               1 => [
+                 %{count: 1, group_rating: 23.37, members: ["A"], ratings: [23.37]},
+                 %{count: 1, group_rating: 32.23, members: ["D"], ratings: [32.23]},
+                 %{count: 1, group_rating: 23, members: ["E"], ratings: [23]},
+                 %{count: 1, group_rating: 28.32, members: ["F"], ratings: [28.32]},
+                 %{count: 1, group_rating: 4.5, members: ["GrandMasterK311"], ratings: [4.5]}
+               ],
+               2 => [
+                 %{count: 1, group_rating: 28.2, members: ["B"], ratings: [28.2]},
+                 %{count: 1, group_rating: 16.14, members: ["C"], ratings: [16.14]},
+                 %{count: 1, group_rating: 13.08, members: ["MacDi"], ratings: [13.08]},
+                 %{count: 1, group_rating: 35.62, members: ["Mr_Dirac"], ratings: [35.62]},
+                 %{count: 1, group_rating: 18.4, members: ["earrebarre"], ratings: [18.4]}
+               ]
+             },
+             team_players: %{
+               1 => ["A", "D", "E", "F", "GrandMasterK311"],
+               2 => ["B", "C", "MacDi", "Mr_Dirac", "earrebarre"]
+             }
+           }
   end
 end

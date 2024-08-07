@@ -19,12 +19,10 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
 
   def run(args) do
     Logger.info("Args: #{args}")
+    write_log_filepath = Enum.at(args, 0, nil)
+    party_importance = Enum.at(args, 1, 5)
 
-    write_log_filepath =
-      case args do
-        [filepath] -> filepath
-        _ -> nil
-      end
+    Application.put_env(:teiserver, :party_importance, party_importance)
 
     Application.ensure_all_started(:teiserver)
     game_types = ["Large Team", "Small Team"]
@@ -43,6 +41,7 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
     end
 
     Logger.info("Finished processing matches")
+    Logger.info("party_importance: #{party_importance}")
   end
 
   defp get_balance_test_results(game_type) do

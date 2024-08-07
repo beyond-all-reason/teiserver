@@ -140,7 +140,11 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     both_team_rating = get_team_rating(all_players)
 
     rating_diff_penalty = abs(both_team_rating - first_team_rating * 2)
-    broken_party_penalty = count_broken_parties(first_team, parties) * @broken_party_importance
+
+    party_importance =
+      Application.get_env(:teiserver, :party_importance, @broken_party_importance)
+
+    broken_party_penalty = count_broken_parties(first_team, parties) * party_importance
 
     score = rating_diff_penalty + broken_party_penalty
 
