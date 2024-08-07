@@ -215,11 +215,11 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
           "Useful commands for Noob lobbies",
           @splitter,
           "To restrict this lobby to players who are new, use either:",
-          "$maxchevlevel <chevlevel>",
-          "$maxratinglevel <rating>",
+          "!maxchevlevel <chevlevel>",
+          "!maxratinglevel <rating>",
           "",
           "To ensure new players are distributed evenly across teams:",
-          "$balancemode split_one_chevs",
+          "!balancealgorithm split_one_chevs",
           ""
         ]
 
