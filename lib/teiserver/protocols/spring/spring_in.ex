@@ -1359,10 +1359,33 @@ defmodule Teiserver.Protocols.SpringIn do
     state
   end
 
-  defp do_handle("RING", username, _msg_id, state) do
-    userid = CacheUser.get_userid(username)
-    CacheUser.ring(userid, state.userid)
-    state
+  # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#RING:client
+  # extended to accept originator as a second argument (only allowed when sent by bots)
+  # this allows spads to inform clients who originally rang them with spads-command !ring
+  defp do_handle("RING", data, _msg_id, state) do
+    case Regex.run(~r/(\S+) (\S+)/, data) do
+      [_, _, originator] ->
+        client = Client.get_client_by_id(state.userid)
+
+        cond do
+          client == nil ->
+            {:failure, "No client"}
+
+          not CacheUser.is_bot?(state.userid) ->
+            {:failure, "Not a bot"}
+
+          true ->
+            userid = CacheUser.get_userid(data)
+            originatorid = CacheUser.get_userid(originator)
+            CacheUser.ring(userid, originatorid)
+            state
+        end
+
+      _ ->
+        userid = CacheUser.get_userid(data)
+        CacheUser.ring(userid, state.userid)
+        state
+    end
   end
 
   # Not handled catcher
