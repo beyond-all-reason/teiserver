@@ -16,7 +16,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
   import Teiserver.Helper.NumberHelper, only: [format: 1]
   require Integer
 
-  @broken_party_importance 5
+  @broken_party_importance 7
   @splitter "------------------------------------------------------"
 
   @doc """
