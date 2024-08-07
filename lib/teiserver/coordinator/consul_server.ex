@@ -977,7 +977,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       Enum.member?(state.approved_users, userid) ->
         {true, :override_approve}
 
-      state.gatekeeper == "friends" ->
+      state.gatekeeper == :friends ->
         if is_on_friendlist?(userid, state, :all) do
           {true, :allow_friends}
         else
