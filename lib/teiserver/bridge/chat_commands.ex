@@ -1,7 +1,7 @@
 defmodule Teiserver.Bridge.ChatCommands do
   @moduledoc false
   alias Teiserver.Communication.DiscordChannelLib
-  alias Teiserver.{Account, CacheUser, Communication, Config, Logging}
+  alias Teiserver.{Account, CacheUser, Communication, Logging}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Bridge.UnitNames
   alias Nostrum.Api
@@ -37,6 +37,7 @@ defmodule Teiserver.Bridge.ChatCommands do
 
   def handle_command({_user, _discord_id, message_id}, "gdt", _remaining, channel_id) do
     gdt_discussion_channel_id = DiscordChannelLib.get_discord_channel("GDT discussion")
+
     if gdt_discussion_channel_id do
       # Post message to channel
       Communication.new_discord_message(

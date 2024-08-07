@@ -211,8 +211,15 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   def handle_info(%{channel: "teiserver_server", event: :started}, state) do
     if Config.get_site_config_cache("teiserver.Bridge from server") do
-      Communication.new_discord_message("Main chat", "Teiserver startup for node #{Teiserver.node_name()}")
-      Communication.new_discord_message("Server updates", "Teiserver startup for node #{Teiserver.node_name()}")
+      Communication.new_discord_message(
+        "Main chat",
+        "Teiserver startup for node #{Teiserver.node_name()}"
+      )
+
+      Communication.new_discord_message(
+        "Server updates",
+        "Teiserver startup for node #{Teiserver.node_name()}"
+      )
     end
 
     {:noreply, state}
@@ -220,7 +227,10 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   def handle_info(%{channel: "teiserver_server", event: :prep_stop}, state) do
     if Config.get_site_config_cache("teiserver.Bridge from server") do
-      Communication.new_discord_message("Server updates", "Teiserver shutdown for node #{Teiserver.node_name()}")
+      Communication.new_discord_message(
+        "Server updates",
+        "Teiserver shutdown for node #{Teiserver.node_name()}"
+      )
     end
 
     {:noreply, state}
@@ -304,10 +314,18 @@ defmodule Teiserver.Bridge.BridgeServer do
       [
         %{channel_id: DiscordChannelLib.get_discord_channel("Main chat"), room: "#main"},
         %{channel_id: DiscordChannelLib.get_discord_channel("New player chat"), room: "#newbies"},
-        %{channel_id: DiscordChannelLib.get_discord_channel("Looking for players"), room: "#promote"}
+        %{
+          channel_id: DiscordChannelLib.get_discord_channel("Looking for players"),
+          room: "#promote"
+        }
       ]
-      |> Enum.reject(fn %{channel_id: nil} -> true; _ -> false end)
-      |> Enum.map(fn %{channel_id: channel, room: r} -> %{channel_id: channel.channel_id, room: r} end)
+      |> Enum.reject(fn
+        %{channel_id: nil} -> true
+        _ -> false
+      end)
+      |> Enum.map(fn %{channel_id: channel, room: r} ->
+        %{channel_id: channel.channel_id, room: r}
+      end)
 
     room_lookup
     |> Enum.each(fn channel_room ->

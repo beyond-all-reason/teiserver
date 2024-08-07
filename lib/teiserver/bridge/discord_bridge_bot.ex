@@ -127,19 +127,19 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
     response = CommandLib.handle_command(interaction, options_map)
 
-    response = case data.name do
-      "textcb" ->
-        Teiserver.Bridge.TextcbCommand.execute(interaction, options_map)
+    # response = case data.name do
+    #   "textcb" ->
+    #     Teiserver.Bridge.TextcbCommand.execute(interaction, options_map)
 
-      _ ->
-        nil
-    end
+    #   _ ->
+    #     nil
+    # end
 
-    if response do
-      Api.create_interaction_response(interaction, response)
-    else
-      :ignore
-    end
+    # if response do
+    #   Api.create_interaction_response(interaction, response)
+    # else
+    #   :ignore
+    # end
   end
 
   def handle_event({:READY, ready_data, _ws}) do

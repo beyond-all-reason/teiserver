@@ -2,8 +2,7 @@ defmodule Teiserver.Bridge.Commands.TextcbCommand do
   @moduledoc """
   Calls the bot and tells it to post one of the text-callbacks
   """
-  alias Teiserver.Bridge.{BridgeServer}
-  alias Teiserver.{Communication, Room, Logging, Config}
+  alias Teiserver.{Communication, Logging}
 
   @behaviour Teiserver.Bridge.BridgeCommandBehaviour
 
