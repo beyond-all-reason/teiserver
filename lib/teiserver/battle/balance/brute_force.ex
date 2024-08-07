@@ -7,7 +7,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
   Go through every possible combination and pick the best one. Ideal for keeping parties together.
   The best combination will have the lowest score.
   Score = difference in team rating + broken party penalty
-  broken party penalty = num broken parties * broken party multiplier
+  broken party penalty = num broken parties * party_importance
 
   Only use for games with two teams and <=16 players
   """
@@ -16,7 +16,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
   import Teiserver.Helper.NumberHelper, only: [format: 1]
   require Integer
 
-  @broken_party_multiplier 3
+  @party_importance 7
   @splitter "------------------------------------------------------"
 
   @doc """
@@ -140,7 +140,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     both_team_rating = get_team_rating(all_players)
 
     rating_diff_penalty = abs(both_team_rating - first_team_rating * 2)
-    broken_party_penalty = count_broken_parties(first_team, parties) * @broken_party_multiplier
+    broken_party_penalty = count_broken_parties(first_team, parties) * @party_importance
 
     score = rating_diff_penalty + broken_party_penalty
 
