@@ -122,7 +122,7 @@ defmodule Teiserver.Battle.BruteForceInternalTest do
              score: 11.670000000000044
            }
 
-    best_combo = BruteForce.get_best_combo(combos, input.players, input.parties)
+    best_combo = BruteForce.get_best_combo(combos, input.players, input.parties, 3)
 
     assert best_combo == %{
              broken_party_penalty: 0,
