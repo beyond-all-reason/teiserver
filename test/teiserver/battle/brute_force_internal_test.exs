@@ -114,7 +114,7 @@ defmodule Teiserver.Battle.BruteForceInternalTest do
              %{name: "jauggy", rating: 20.49, id: 6}
            ]
 
-    result = BruteForce.score_combo(first_potential_team, input.players, input.parties)
+    result = BruteForce.score_combo(first_potential_team, input.players, input.parties, 3)
 
     assert result == %{
              broken_party_penalty: 0,

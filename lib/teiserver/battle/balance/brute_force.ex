@@ -29,10 +29,20 @@ defmodule Teiserver.Battle.Balance.BruteForce do
       parties: get_parties(expanded_group)
     }
 
+    party_importance = Keyword.get(opts, :party_importance, @broken_party_importance)
+
     case should_use_algo?(input_data, team_count) do
       :ok ->
         potential_teams = potential_teams(length(input_data.players))
-        best_combo = get_best_combo(potential_teams, input_data.players, input_data.parties)
+
+        best_combo =
+          get_best_combo(
+            potential_teams,
+            input_data.players,
+            input_data.parties,
+            party_importance
+          )
+
         standardise_result(best_combo, input_data.parties)
 
       {:error, message} ->
@@ -100,13 +110,17 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     Teiserver.Helper.CombinationsHelper.get_combinations(num_players)
   end
 
-  def get_best_combo(players, parties) do
-    potential_teams = potential_teams(length(players))
-    get_best_combo(potential_teams, players, parties)
+  def get_best_combo(players, parties, nil) do
+    get_best_combo(players, parties, @broken_party_importance)
   end
 
-  @spec get_best_combo([integer()], [BF.player()], [String.t()]) :: BF.combo_result()
-  def get_best_combo(combos, players, parties) do
+  def get_best_combo(players, parties, party_importance) do
+    potential_teams = potential_teams(length(players))
+    get_best_combo(potential_teams, players, parties, party_importance)
+  end
+
+  @spec get_best_combo([integer()], [BF.player()], [String.t()], number()) :: BF.combo_result()
+  def get_best_combo(combos, players, parties, party_importance) do
     players_with_index = Enum.with_index(players)
 
     result =
@@ -114,7 +128,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
         get_players_from_indexes(x, players_with_index)
       end)
       |> Enum.map(fn team ->
-        result = score_combo(team, players, parties)
+        result = score_combo(team, players, parties, party_importance)
         Map.put(result, :first_team, team)
       end)
       |> Enum.min_by(fn z ->
@@ -134,15 +148,12 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     Map.put(result, :second_team, second_team)
   end
 
-  @spec score_combo([BF.player()], [BF.player()], [String.t()]) :: any()
-  def score_combo(first_team, all_players, parties) do
+  @spec score_combo([BF.player()], [BF.player()], [String.t()], number()) :: any()
+  def score_combo(first_team, all_players, parties, party_importance) do
     first_team_rating = get_team_rating(first_team)
     both_team_rating = get_team_rating(all_players)
 
     rating_diff_penalty = abs(both_team_rating - first_team_rating * 2)
-
-    party_importance =
-      Application.get_env(:teiserver, :party_importance, @broken_party_importance)
 
     broken_party_penalty = count_broken_parties(first_team, parties) * party_importance
 

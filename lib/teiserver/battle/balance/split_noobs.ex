@@ -32,7 +32,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
   """
   @spec perform([BT.expanded_group()], non_neg_integer(), list()) :: any()
   def perform(expanded_group, team_count, opts \\ []) do
-    initial_state = get_initial_state(expanded_group)
+    initial_state = get_initial_state(expanded_group, opts)
 
     case should_use_algo(initial_state, team_count) do
       :ok ->
@@ -174,8 +174,9 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     end)
   end
 
-  @spec get_initial_state([BT.expanded_group()]) :: SN.state()
-  def get_initial_state(expanded_group) do
+  @spec get_initial_state([BT.expanded_group()], any()) :: SN.state()
+  def get_initial_state(expanded_group, opts \\ []) do
+    party_importance = Keyword.get(opts, :party_importance, nil)
     players = flatten_members(expanded_group)
     parties = get_parties(expanded_group)
     noobs = get_noobs(players, parties) |> sort_noobs()
@@ -185,7 +186,8 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
       players: players,
       parties: parties,
       noobs: noobs,
-      experienced_players: experienced_players
+      experienced_players: experienced_players,
+      party_importance: party_importance
     }
   end
 
@@ -218,7 +220,8 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
   @spec get_result(SN.state()) :: SN.result()
   def get_result(state) do
     # This is the best combo with only non noobs
-    default_acc = BruteForce.get_best_combo(state.experienced_players, state.parties)
+    default_acc =
+      BruteForce.get_best_combo(state.experienced_players, state.parties, state.party_importance)
 
     noobs = state.noobs
 

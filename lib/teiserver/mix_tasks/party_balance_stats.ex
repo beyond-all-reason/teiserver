@@ -21,15 +21,14 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
     Logger.info("Args: #{args}")
     write_log_filepath = Enum.at(args, 0, nil)
     party_importance = Enum.at(args, 1, 5)
-
-    Application.put_env(:teiserver, :party_importance, party_importance)
+    opts = [party_importance: party_importance]
 
     Application.ensure_all_started(:teiserver)
     game_types = ["Large Team", "Small Team"]
 
     result =
       Enum.map(game_types, fn game_type ->
-        get_balance_test_results(game_type)
+        get_balance_test_results(game_type, opts)
       end)
 
     # For each match id
@@ -44,14 +43,14 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
     Logger.info("party_importance: #{party_importance}")
   end
 
-  defp get_balance_test_results(game_type) do
+  defp get_balance_test_results(game_type, opts) do
     match_ids = get_match_ids(game_type)
     max_deviation = Config.get_site_config_cache("teiserver.Max deviation")
     balance_algos = ["loser_picks", "cheeky_switcher_smart", "split_noobs", "brute_force"]
 
     balance_result =
       Enum.map(balance_algos, fn algo ->
-        test_balancer(algo, match_ids, max_deviation)
+        test_balancer(algo, match_ids, max_deviation, opts)
       end)
 
     %{
@@ -61,12 +60,12 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
     }
   end
 
-  defp test_balancer(algo, match_ids, max_deviation) do
+  defp test_balancer(algo, match_ids, max_deviation, opts) do
     start_time = System.system_time(:microsecond)
     # For each match id
     result =
       Enum.map(match_ids, fn match_id ->
-        process_match(match_id, algo, max_deviation)
+        process_match(match_id, algo, max_deviation, opts)
       end)
 
     total_broken_parties =
@@ -134,7 +133,7 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
     end
   end
 
-  defp process_match(id, algorithm, max_deviation) do
+  defp process_match(id, algorithm, max_deviation, opts) do
     match =
       Battle.get_match!(id,
         preload: [:members_and_users]
@@ -150,10 +149,13 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
       )
       |> Map.new(fn log -> {log.user_id, log} end)
 
+    party_importance = Keyword.get(opts, :party_importance, nil)
+
     past_balance =
       make_balance(2, members, rating_logs,
         algorithm: algorithm,
-        max_deviation: max_deviation
+        max_deviation: max_deviation,
+        party_importance: party_importance
       )
 
     result = %{

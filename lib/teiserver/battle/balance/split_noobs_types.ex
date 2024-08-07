@@ -15,7 +15,8 @@ defmodule Teiserver.Battle.Balance.SplitNoobsTypes do
           players: [player],
           parties: [String.t()],
           noobs: [player],
-          experienced_players: [player]
+          experienced_players: [player],
+          party_importance: number()
         }
 
   @type simple_result :: %{
