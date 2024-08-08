@@ -1,0 +1,37 @@
+<div class="row" style="padding-top: 15vh;">
+  <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4">
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3>
+          <img
+            src={Routes.static_path(@conn, "/images/logo/logo_favicon.png")}
+            height="42"
+            style="margin-right: 5px;"
+            class="d-inline align-top"
+          /> Authorize
+        </h3>
+      </div>
+
+      <div class="card-body">
+        <p>
+          The application <b><%= @app_name %></b> would like to have access to
+          your Beyond All Reason account.
+        </p>
+
+        <% keys_to_copy =
+          ~w(client_id response_type code_challenge code_challenge_method redirect_uri state) %>
+        <form action={~p"/oauth/authorize"} method="post">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+          <%= for key <- keys_to_copy do %>
+            <input type="hidden" name={key} value={@params[key]} />
+          <% end %>
+          <button type="submit" class="btn btn-primary btn-block">Let's go!</button>
+        </form>
+        <br />
+        <a href={@reject_uri}>
+          <button class="btn btn-danger btn-block">Nope!</button>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

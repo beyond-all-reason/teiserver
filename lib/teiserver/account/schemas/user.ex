@@ -5,6 +5,9 @@ defmodule Teiserver.Account.User do
 
   alias Argon2
 
+  # TODO: this is where a user should be defined. This is only a placeholder for now
+  @type t :: term()
+
   schema "account_users" do
     field :name, :string
     field :email, :string
