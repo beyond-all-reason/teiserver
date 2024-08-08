@@ -53,7 +53,8 @@ defmodule Teiserver.Battle.BalanceLib do
       "loser_picks" => Teiserver.Battle.Balance.LoserPicks,
       "force_party" => Teiserver.Battle.Balance.ForceParty,
       "cheeky_switcher_smart" => Teiserver.Battle.Balance.CheekySwitcherSmart,
-      "split_one_chevs" => Teiserver.Battle.Balance.SplitOneChevs
+      "split_one_chevs" => Teiserver.Battle.Balance.SplitOneChevs,
+      "brute_force" => Teiserver.Battle.Balance.BruteForce
     }
   end
 
@@ -65,7 +66,9 @@ defmodule Teiserver.Battle.BalanceLib do
     if(is_moderator) do
       Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
     else
-      Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.delete("force_party") |> Map.keys()
+      Teiserver.Battle.BalanceLib.algorithm_modules()
+      |> Map.drop(["force_party", "brute_force"])
+      |> Map.keys()
     end
   end
 
