@@ -17,5 +17,7 @@ defmodule Teiserver.Autohost.Autohost do
   def changeset(autohost, attrs) do
     autohost
     |> cast(attrs, [:name])
+    |> Ecto.Changeset.validate_required([:name])
+    |> Ecto.Changeset.validate_length(:name, min: 3, max: 30)
   end
 end

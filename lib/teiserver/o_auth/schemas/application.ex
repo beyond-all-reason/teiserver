@@ -3,6 +3,7 @@ defmodule Teiserver.OAuth.Application do
   use TeiserverWeb, :schema
   alias Teiserver.Account.User
 
+  @type id() :: non_neg_integer()
   @type app_id() :: String.t()
   @type scopes() :: nonempty_list(String.t())
   @type t :: %__MODULE__{

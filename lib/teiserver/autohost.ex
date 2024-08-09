@@ -1,5 +1,6 @@
 defmodule Teiserver.Autohost do
   alias Teiserver.Autohost.Autohost
+  alias Teiserver.AutohostQueries
   alias Teiserver.Repo
 
   def create_autohost(attrs \\ %{}) do
@@ -8,5 +9,21 @@ defmodule Teiserver.Autohost do
     |> Repo.insert()
   end
 
-  defdelegate get_autohost(id), to: Teiserver.AutohostQueries
+  def change_autohost(%Autohost{} = autohost, attrs \\ %{}) do
+    Autohost.changeset(autohost, attrs)
+  end
+
+  def update_autohost(%Autohost{} = autohost, attrs) do
+    autohost |> change_autohost(attrs) |> Repo.update()
+  end
+
+  @spec delete(Autohost.t()) :: :ok | {:error, term()}
+  def delete(%Autohost{} = autohost) do
+    case Repo.delete(autohost) do
+      {:ok, _} -> :ok
+      {:error, err} -> {:error, err}
+    end
+  end
+
+  defdelegate get_by_id(id), to: AutohostQueries
 end

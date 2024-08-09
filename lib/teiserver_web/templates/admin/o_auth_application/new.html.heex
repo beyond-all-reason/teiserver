@@ -1,0 +1,15 @@
+<div class="card page-card">
+  <div class="card-body">
+    <h1>Create a new OAuth application</h1>
+
+    <div class="row d-flex justify-content-center">
+      <div class="col-md-6">
+        <.application_form
+          button_label="Create app"
+          changeset={@changeset}
+          action={~p"/teiserver/admin/oauth_application"}
+        />
+      </div>
+    </div>
+  </div>
+</div>

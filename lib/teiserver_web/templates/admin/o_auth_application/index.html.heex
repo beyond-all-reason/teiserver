@@ -1,0 +1,47 @@
+<div class="container">
+  <h1>List of OAuth applications</h1>
+
+  <p>
+    <div class="btn btn-sm btn-outline-success">
+      <Phx.link href={~p"/teiserver/admin/oauth_application/new"}>Create application</Phx.link>
+    </div>
+  </p>
+
+  <%= if length(@app_and_stats) > 0 do %>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>client id (uid)</th>
+          <th>name</th>
+          <th>owner</th>
+          <th>code/token/creds</th>
+          <th>actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for {app, stats} <- @app_and_stats do %>
+          <tr>
+            <td><%= app.id %></td>
+            <td><%= app.uid %></td>
+            <td><%= app.name %></td>
+            <td><%= app.owner.name %> (<%= app.owner.email %>)</td>
+            <td>
+              <%= stats.code_count %> / <%= stats.token_count %> / <%= stats.credential_count %>
+            </td>
+            <td>
+              <Phx.link href={~p"/teiserver/admin/oauth_application/#{app.id}"}>
+                <button type="button" class="btn btn-primary btn-sm">show</button>
+              </Phx.link>
+              <Phx.link href={~p"/teiserver/admin/oauth_application/#{app.id}/edit"}>
+                <button type="button" class="btn btn-primary btn-sm">Edit</button>
+              </Phx.link>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    No applications!
+  <% end %>
+</div>

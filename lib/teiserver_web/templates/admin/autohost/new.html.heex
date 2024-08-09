@@ -1,0 +1,15 @@
+<div class="card page-card">
+  <div class="card-body">
+    <h1>Create a new autohost</h1>
+
+    <div class="row d-flex justify-content-center">
+      <div class="col-md-6">
+        <.autohost_form
+          button_label="Create autohost"
+          changeset={@changeset}
+          action={~p"/teiserver/admin/autohost"}
+        />
+      </div>
+    </div>
+  </div>
+</div>

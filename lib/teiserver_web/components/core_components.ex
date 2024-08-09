@@ -408,7 +408,7 @@ defmodule TeiserverWeb.CoreComponents do
   def error(assigns) do
     ~H"""
     <p class="phx-no-feedback:hidden mt-3 flex gap-3 text-sm leading-6 text-rose-600">
-      <Fontawesome.icon icon="circle-exclamation" style="regular" />
+      <Fontawesome.icon icon="circle-exclamation" style="solid" />
       <%= render_slot(@inner_block) %>
     </p>
     """
