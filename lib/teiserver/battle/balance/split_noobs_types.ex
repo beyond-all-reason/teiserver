@@ -5,7 +5,8 @@ defmodule Teiserver.Battle.Balance.SplitNoobsTypes do
           rating: float(),
           id: any(),
           name: String.t(),
-          uncertainty: float()
+          uncertainty: float(),
+          in_party?: boolean()
         }
   @type team :: %{
           players: [player],
@@ -15,12 +16,14 @@ defmodule Teiserver.Battle.Balance.SplitNoobsTypes do
           players: [player],
           parties: [String.t()],
           noobs: [player],
-          experienced_players: [player]
+          top_experienced: [player],
+          bottom_experienced: [player]
         }
 
   @type simple_result :: %{
           first_team: [player()],
-          second_team: [player()]
+          second_team: [player()],
+          logs: [String.t()]
         }
 
   @type result :: %{
@@ -28,6 +31,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobsTypes do
           rating_diff_penalty: number(),
           score: number(),
           first_team: [player()],
-          second_team: [player()]
+          second_team: [player()],
+          logs: [String.t()]
         }
 end
