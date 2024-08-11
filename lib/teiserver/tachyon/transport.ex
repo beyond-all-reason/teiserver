@@ -7,6 +7,7 @@ defmodule Teiserver.Tachyon.Transport do
 
   @behaviour WebSock
   require Logger
+  alias Teiserver.Tachyon.Schema
 
   @type connection_state() :: %{handler: term(), state: term()}
 
@@ -29,10 +30,26 @@ defmodule Teiserver.Tachyon.Transport do
     {:reply, :ok, {:text, "test_pong"}, state}
   end
 
-  def handle_in(_msg, state) do
-    # TODO: this is where parsing and validating tachyon command as json payload
-    # comes in before passing the parsed version to the handler
-    {:reply, :ok, {:text, "notimplemented!"}, state}
+  def handle_in({msg, opcode: :text}, state) do
+    with {:ok, parsed} <- Jason.decode(msg),
+         {:ok, _type, message_id, command_id} <- Schema.parse_envelope(parsed) do
+      resp = %{
+        type: "response",
+        status: "failed",
+        reason: "command_unimplemented",
+        commandId: command_id,
+        messageId: message_id
+      } |> Jason.encode!()
+
+      {:reply, :ok, {:text, resp}, state}
+    else
+      {:error, err} ->
+        {:stop, :normal, 1008, [{:text, "Invalid json sent #{inspect(err)}"}], state}
+    end
+  end
+
+  def handle_in({_msg, opcode: :binary}, state) do
+    {:stop, :normal, 1003, state}
   end
 
   @impl true

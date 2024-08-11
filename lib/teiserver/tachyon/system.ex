@@ -9,7 +9,12 @@ defmodule Teiserver.Tachyon.System do
 
   @impl true
   def init(_) do
-    children = [Teiserver.Autohost.System, Teiserver.Player.System]
+    children = [
+      Teiserver.Tachyon.Schema.cache_spec(),
+      Teiserver.Autohost.System,
+      Teiserver.Player.System
+    ]
+
     Supervisor.init(children, strategy: :one_for_one)
   end
 end
