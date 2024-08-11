@@ -38,11 +38,19 @@ defmodule Teiserver.Matchmaking.QueueServer do
           tick_interval_ms: pos_integer(),
           max_distance: pos_integer()
         }
-  @type state :: %{
-          id: id(),
+
+  @typedoc """
+  immutable specification of the queue
+  """
+  @type queue :: %{
           name: String.t(),
           team_size: pos_integer(),
-          team_count: pos_integer(),
+          team_count: pos_integer()
+        }
+
+  @type state :: %{
+          id: id(),
+          queue: queue(),
           settings: settings(),
           members: [member()]
 
@@ -69,26 +77,29 @@ defmodule Teiserver.Matchmaking.QueueServer do
   def init_state(attrs) do
     %{
       id: attrs.id,
-      name: attrs.name,
-      team_size: attrs.team_size,
-      team_count: attrs.team_count,
+      queue: %{
+        name: attrs.name,
+        team_size: attrs.team_size,
+        team_count: attrs.team_count
+      },
       settings: Map.merge(default_settings(), Map.get(attrs, :settings, %{})),
       members: Map.get(attrs, :members, [])
     }
   end
 
-  def via_tuple(queue_id) do
-    Teiserver.Matchmaking.QueueRegistry.via_tuple(queue_id)
+  def via_tuple(queue_id, queue) do
+    Teiserver.Matchmaking.QueueRegistry.via_tuple(queue_id, queue)
   end
 
   @spec start_link(state()) :: GenServer.on_start()
   def start_link(initial_state) do
-    GenServer.start_link(__MODULE__, initial_state, name: via_tuple(initial_state.id))
+    GenServer.start_link(__MODULE__, initial_state,
+      name: via_tuple(initial_state.id, initial_state.queue)
+    )
   end
 
   @impl true
   def init(state) do
     {:ok, state}
   end
-
 end
