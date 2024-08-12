@@ -1363,29 +1363,22 @@ defmodule Teiserver.Protocols.SpringIn do
   # extended to accept originator as a second argument (only allowed when sent by bots)
   # this allows spads to inform clients who originally rang them with spads-command !ring
   defp do_handle("RING", data, _msg_id, state) do
-    case Regex.run(~r/(\S+) (\S+)/, data) do
-      [_, _, originator] ->
+    userid = CacheUser.get_userid(data)
+
+    case String.split(data) do
+      [_, originator] ->
         client = Client.get_client_by_id(state.userid)
 
-        cond do
-          client == nil ->
-            {:failure, "No client"}
-
-          not CacheUser.is_bot?(state.userid) ->
-            {:failure, "Not a bot"}
-
-          true ->
-            userid = CacheUser.get_userid(data)
-            originatorid = CacheUser.get_userid(originator)
-            CacheUser.ring(userid, originatorid)
-            state
+        if client != nil and not CacheUser.is_bot?(state.userid) do
+          originator_id = CacheUser.get_userid(originator)
+          CacheUser.ring(userid, originator_id)
         end
 
       _ ->
-        userid = CacheUser.get_userid(data)
         CacheUser.ring(userid, state.userid)
-        state
     end
+
+    state
   end
 
   # Not handled catcher
