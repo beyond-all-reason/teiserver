@@ -2,6 +2,7 @@ defmodule Teiserver.Lobby.Commands.ExplainCommandTest do
   @moduledoc false
   use Teiserver.ServerCase, async: false
   alias Teiserver.{Battle, Coordinator, TeiserverTestLib}
+  alias Teiserver.Lobby
   alias Teiserver.Lobby.ChatLib
   alias Teiserver.Common.PubsubListener
 
@@ -13,7 +14,8 @@ defmodule Teiserver.Lobby.Commands.ExplainCommandTest do
     Coordinator.start_coordinator()
 
     user = TeiserverTestLib.new_user()
-    lobby_id = TeiserverTestLib.make_lobby()
+    lobby_id = TeiserverTestLib.make_lobby(%{name: "ExplainCommandTestText"})
+    assert Lobby.get_lobby(lobby_id) != nil
     chat_listener = PubsubListener.new_listener(["teiserver_lobby_chat:#{lobby_id}"])
     client_listener = PubsubListener.new_listener(["teiserver_client_messages:#{user.id}"])
 
@@ -50,6 +52,9 @@ defmodule Teiserver.Lobby.Commands.ExplainCommandTest do
     }
 
     assert Enum.member?(messages, expected_message)
+
+    Lobby.close_lobby(lobby_id)
+    assert Lobby.get_lobby(lobby_id) == nil
   end
 end
 

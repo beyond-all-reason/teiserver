@@ -24,7 +24,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
       |> assign(:view_colour, Battle.MatchLib.colours())
       |> assign(:game_types, game_types)
       |> assign(:user_ratings, user_ratings)
-      |> assign(:rating_type, Map.get(params, "rating_type", "Team"))
+      |> assign(:rating_type, Map.get(params, "rating_type", "Large Team"))
       |> assign(:rating_type_list, MatchRatingLib.rating_type_list())
       |> assign(:rating_type_id_lookup, MatchRatingLib.rating_type_id_lookup())
       |> add_breadcrumb(name: "Matches", url: "/battle/matches")
@@ -39,7 +39,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
   def handle_params(params, _url, socket) do
     socket =
       socket
-      |> assign(:rating_type, Map.get(params, "rating_type", "Team"))
+      |> assign(:rating_type, Map.get(params, "rating_type", "Large Team"))
       |> update_match_list()
 
     {:noreply, socket}

@@ -24,13 +24,13 @@ if Teiserver.ConfigHelpers.get_env("PHX_SERVER", nil) do
   config :teiserver, TeiserverWeb.Endpoint, server: true
 end
 
+# used for mailing, checking origins, finding tls certs…
+domain_name = Teiserver.ConfigHelpers.get_env("TEI_DOMAIN_NAME", "beyondallreason.info")
+
 # Only do some runtime configuration in production since in dev and tests the
 # files are automatically recompiled on the fly and thus, config/{dev,test}.exs
 # are just fine
 if config_env() == :prod do
-  # used for mailing, checking origins, finding tls certs…
-  domain_name = Teiserver.ConfigHelpers.get_env("TEI_DOMAIN_NAME", "beyondallreason.info")
-
   certificates = [
     keyfile: Teiserver.ConfigHelpers.get_env("TEI_TLS_PRIVATE_KEY_PATH"),
     certfile: Teiserver.ConfigHelpers.get_env("TEI_TLS_CERT_PATH"),
@@ -190,3 +190,5 @@ if config_env() == :prod do
       bot_name: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_BOT_NAME")
   end
 end
+
+config :teiserver, Teiserver.OAuth, issuer: "https://#{domain_name}"

@@ -13,7 +13,7 @@ defmodule Teiserver.Battle.LobbyServerTest do
       founder_id: host.id,
       founder_name: host.name,
       cmd: "c.lobby.create",
-      name: "ServerName",
+      name: "LobbyServerTest",
       nattype: "none",
       port: 1234,
       game_hash: "string_of_characters",
@@ -69,14 +69,15 @@ defmodule Teiserver.Battle.LobbyServerTest do
       founder_id: host.id,
       founder_name: host.name,
       cmd: "c.lobby.create",
-      name: "ServerName",
-      base_name: "ServerName",
+      name: "LobbyServerTestRename",
+      base_name: "LobbyServerTestRename",
       nattype: "none",
       type: "normal",
       port: 1234,
       game_hash: "string_of_characters",
       map_hash: "string_of_characters",
       map_name: "koom valley",
+      teaser: "",
       game_name: "BAR",
       engine_name: "spring-105",
       engine_version: "105.1.2.3",
@@ -92,6 +93,7 @@ defmodule Teiserver.Battle.LobbyServerTest do
     p = LobbyLib.start_lobby_server(lobby)
     Coordinator.start_consul(lobby_id)
     assert is_pid(p)
+    assert LobbyLib.lobby_exists?(lobby_id) == true
 
     LobbyLib.rename_lobby(lobby_id, "base name", host.id)
     c = LobbyLib.call_lobby(lobby_id, :get_lobby_state)
@@ -119,5 +121,8 @@ defmodule Teiserver.Battle.LobbyServerTest do
     c = LobbyLib.call_lobby(lobby_id, :get_lobby_state)
     assert c.id == lobby_id
     assert c.name == "other name | Rating: 10-50"
+
+    LobbyLib.stop_lobby_server(lobby_id)
+    assert LobbyLib.lobby_exists?(lobby_id) == false
   end
 end

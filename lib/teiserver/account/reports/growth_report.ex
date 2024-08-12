@@ -107,6 +107,14 @@ defmodule Teiserver.Account.GrowthReport do
           paths: [~w"matches counts team"]
         },
         %{
+          name: "Small Team games",
+          paths: [~w"matches counts small_team"]
+        },
+        %{
+          name: "Large Team games",
+          paths: [~w"matches counts large_team"]
+        },
+        %{
           name: "FFA games",
           paths: [~w"matches counts ffa"]
         }

@@ -53,10 +53,10 @@ defmodule Teiserver.Helper.StylingHelper do
 
   @spec icon(atom) :: String.t()
   def icon(nil), do: nil
-  def icon(nil, _), do: nil
   def icon(atom), do: icon(atom, "solid")
 
   @spec icon(atom, String.t()) :: String.t()
+  def icon(nil, _), do: nil
   def icon(:report, fa_type), do: "fa-#{fa_type} fa-signal"
   def icon(:up, fa_type), do: "fa-#{fa_type} fa-level-up"
   def icon(:back, fa_type), do: "fa-#{fa_type} fa-arrow-left"

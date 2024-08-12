@@ -4,7 +4,7 @@ defmodule Teiserver.Game.MatchDataTableExport do
   Teiserver.Game.MatchDataTableExport.show_form(nil, %{
     "date_preset" => "All time",
     "end_date" => "",
-    "rating_type" => "Team",
+    "rating_type" => "Large Team",
     "start_date" => ""
   })
 

@@ -7,6 +7,9 @@ defmodule Teiserver.Application do
   alias Phoenix.PubSub
   require Logger
 
+  import Teiserver.Helpers.CacheHelper,
+    only: [concache_sup: 1, concache_sup: 2, concache_perm_sup: 1]
+
   @impl true
   def start(_type, _args) do
     # List all child processes to be supervised
@@ -32,6 +35,7 @@ defmodule Teiserver.Application do
         # Store refers to something that is typically only updated at startup
         # and should not be clustered
 
+        concache_sup(:lists),
         concache_sup(:codes),
         concache_sup(:account_user_cache),
         concache_sup(:account_user_cache_bang),
@@ -46,18 +50,13 @@ defmodule Teiserver.Application do
         concache_sup(:account_avoiding_this_cache),
         concache_sup(:account_blocking_this_cache),
         concache_perm_sup(:recently_used_cache),
-        concache_perm_sup(:auth_group_store),
-        concache_perm_sup(:restriction_lookup_store),
-        concache_perm_sup(:config_user_type_store),
-        concache_perm_sup(:config_site_type_store),
-        concache_perm_sup(:config_site_cache),
-        concache_perm_sup(:application_metadata_cache),
+        Teiserver.Account.PermissionCache,
+        Teiserver.Config.UserConfigTypes.Cache,
+        Teiserver.Config.SiteConfigTypes.Cache,
+        Teiserver.MetadataCache,
         concache_sup(:application_temp_cache),
         concache_sup(:config_user_cache),
-
-        # Tachyon schemas
-        concache_perm_sup(:tachyon_schemas),
-        concache_perm_sup(:tachyon_dispatches),
+        Teiserver.Tachyon.Cache,
 
         # Teiserver stuff
         # Global/singleton registries
@@ -79,8 +78,7 @@ defmodule Teiserver.Application do
 
         # Stores - Tables where changes are not propagated across the cluster
         # Possible stores
-        concache_perm_sup(:teiserver_queues),
-        concache_perm_sup(:lobby_policies_cache),
+        Teiserver.Data.LobbyPolicyCache,
 
         # Telemetry
         concache_perm_sup(:telemetry_property_types_cache),
@@ -97,8 +95,6 @@ defmodule Teiserver.Application do
         concache_sup(:teiserver_game_rating_types, global_ttl: 60_000),
 
         # Caches
-        # Caches - Meta
-        concache_perm_sup(:lists),
 
         # Caches - User
         # concache_sup(:users_lookup_name_with_id, [global_ttl: 300_000]),
@@ -135,7 +131,7 @@ defmodule Teiserver.Application do
         concache_perm_sup(:discord_command_cache),
 
         # Lobbies
-        concache_perm_sup(:lobby_command_cache),
+        Teiserver.Lobby.Cache,
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.LobbySupervisor},
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.ClientSupervisor},
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.PartySupervisor},
@@ -143,6 +139,7 @@ defmodule Teiserver.Application do
 
         # Matchmaking
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueSupervisor},
+        Teiserver.Data.MatchmakingCache,
 
         # Coordinator mode
         {DynamicSupervisor,
@@ -161,10 +158,7 @@ defmodule Teiserver.Application do
 
         # Telemetry
         {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
-
-        # Text callbacks
-        concache_perm_sup(:text_callback_trigger_lookup),
-        concache_perm_sup(:text_callback_store),
+        Teiserver.Communication.Cache,
 
         # Ranch servers
         %{
@@ -204,34 +198,6 @@ defmodule Teiserver.Application do
     else
       []
     end
-  end
-
-  defp concache_sup(name, opts \\ []) do
-    Supervisor.child_spec(
-      {
-        ConCache,
-        [
-          name: name,
-          ttl_check_interval: 10_000,
-          global_ttl: opts[:global_ttl] || 60_000,
-          touch_on_read: true
-        ]
-      },
-      id: {ConCache, name}
-    )
-  end
-
-  defp concache_perm_sup(name) do
-    Supervisor.child_spec(
-      {
-        ConCache,
-        [
-          name: name,
-          ttl_check_interval: false
-        ]
-      },
-      id: {ConCache, name}
-    )
   end
 
   def startup_sub_functions({:error, _}), do: :error

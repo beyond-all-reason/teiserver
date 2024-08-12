@@ -30,6 +30,7 @@ defmodule Teiserver.Lobby.LobbyStruct do
 
     # Basic variables
     base_name: nil,
+    teaser: "",
     rename_type: nil,
     password: nil,
     locked: nil,

@@ -81,10 +81,9 @@ defmodule Teiserver.Lobby do
         match_id: nil,
 
         # Rename flags
-        # consul rename means it was renamed by a player and overrides spads
-        player_rename: false,
         base_name: lobby.name,
         display_name: lobby.name,
+        teaser: "",
 
         # Used to indicate the lobby is subject to a lobby policy
         lobby_policy_id: nil,
@@ -762,10 +761,6 @@ defmodule Teiserver.Lobby do
     cond do
       CacheUser.is_moderator?(changer.userid) == true ->
         true
-
-      # If the battle has been renamed by the consul then we'll keep it renamed as such
-      battle.player_rename == true and cmd == :update_lobby_title ->
-        false
 
       # Basic stuff
       battle.founder_id == changer.userid ->

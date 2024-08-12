@@ -634,6 +634,8 @@ defmodule Teiserver.TeiserverTestLib do
     Teiserver.Telemetry.get_or_add_simple_lobby_event_type("remove_user_from_lobby")
 
     seed_badge_types()
+
+    seed_matchmaking_queues()
   end
 
   @doc """
@@ -671,6 +673,21 @@ defmodule Teiserver.TeiserverTestLib do
     end)
 
     :ok
+  end
+
+  def seed_matchmaking_queues() do
+    alias Teiserver.Game
+
+    Game.create_queue(%{
+      name: "1v1",
+      team_size: 1,
+      team_count: 2,
+      icon: "fa-user",
+      colour: "red",
+      conditions: %{},
+      settings: %{},
+      map_list: []
+    })
   end
 end
 

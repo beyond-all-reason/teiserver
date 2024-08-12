@@ -7,6 +7,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
   def mount(%{"userid" => userid_str}, _session, socket) do
     userid = String.to_integer(userid_str)
     user = Account.get_user_by_id(userid)
+    hide_contributor_rank = Account.hide_contributor_rank?(userid)
 
     socket =
       cond do
@@ -27,6 +28,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
           |> assign(:error_message, nil)
+          |> assign(:hide_contributor_rank, hide_contributor_rank)
           |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
           |> user_assigns
       end
@@ -92,6 +94,30 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
        socket
        |> assign(:error_message, "Country code must not contain space")}
     end
+  end
+
+  @doc """
+  Handles checkbox to disable contributor rank icon
+  """
+  @impl true
+  def handle_event("toggle-hide-contributor-rank", event, %{assigns: assigns} = socket) do
+    [key] = event["_target"]
+    value = event[key]
+
+    # value will be a string or nil; we will convert to boolean
+    boolean_value =
+      if value do
+        true
+      else
+        false
+      end
+
+    Account.set_hide_contributor_rank(assigns.user.id, boolean_value)
+    Account.recache_user(assigns.user.id)
+
+    {:noreply,
+     socket
+     |> assign(:hide_contributor_rank, boolean_value)}
   end
 
   def handle_event(_string, _event, socket) do

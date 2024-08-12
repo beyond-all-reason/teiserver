@@ -41,7 +41,7 @@
         </.tab_nav>
       <% end %>
 
-      <%= if @rating_logs != %{} and allow_any?(@current_user, ["Overwatch", "Contributor"]) do %>
+      <%= if @rating_logs != %{} and allow_any?(@current_user, ["Overwatch", "Tester"]) do %>
         <.tab_nav url={~p"/battle/#{@match.id}/balance"} selected={@tab == :balance}>
           <Fontawesome.icon icon="fa-solid fa-scale-balanced" style="solid" /> Balance
         </.tab_nav>
@@ -282,7 +282,7 @@
       </div>
     <% end %>
 
-    <%= if allow_any?(@current_user, ["Overwatch", "Contributor"]) do %>
+    <%= if allow_any?(@current_user, ["Overwatch", "Tester"]) do %>
       <div :if={@tab == :balance} class="p-4">
         <form method="post" class="">
           <.input

@@ -117,6 +117,23 @@ defmodule Teiserver.Battle.BalanceLibInternalTest do
     assert BalanceLib.balanced_teams_has_parties?(team_groups)
   end
 
+  test "Allowed algorithms" do
+    is_moderator = true
+    result = BalanceLib.get_allowed_algorithms(is_moderator)
+
+    assert result == [
+             "brute_force",
+             "cheeky_switcher_smart",
+             "force_party",
+             "loser_picks",
+             "split_one_chevs"
+           ]
+
+    is_moderator = false
+    result = BalanceLib.get_allowed_algorithms(is_moderator)
+    assert result == ["cheeky_switcher_smart", "loser_picks", "split_one_chevs"]
+  end
+
   defp create_test_users do
     Enum.map(1..5, fn k ->
       Teiserver.TeiserverTestLib.new_user("User_#{k}")

@@ -3,7 +3,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchMonthTask do
   alias Teiserver.Logging
   import Ecto.Query, warn: false
 
-  @sections ~w(bots duel ffa raptors scavengers team totals)
+  @sections ~w(bots duel ffa raptors scavengers team small_team large_team totals)
 
   # [] List means 1 day segments
   # %{} Dict means total for the month of that key
@@ -148,16 +148,17 @@ defmodule Teiserver.Logging.Tasks.PersistMatchMonthTask do
   defp extend_sub_section(existing, data) do
     %{
       aggregate: %{
-        total_count: existing.aggregate.total_count + data["aggregate"]["total_count"],
+        total_count: existing.aggregate.total_count + (data["aggregate"]["total_count"] || 0),
         total_duration_seconds:
-          existing.aggregate.total_duration_seconds + data["aggregate"]["total_duration_seconds"],
+          existing.aggregate.total_duration_seconds +
+            (data["aggregate"]["total_duration_seconds"] || 0),
         weighted_count:
           existing.aggregate.weighted_count + (data["aggregate"]["weighted_count"] || 0)
       },
-      duration: sum_maps(existing.duration, data["duration"]),
-      maps: sum_maps(existing.maps, data["maps"]),
-      matches_per_hour: sum_maps(existing.matches_per_hour, data["matches_per_hour"]),
-      team_sizes: sum_maps(existing.team_sizes, data["team_sizes"])
+      duration: sum_maps(existing.duration, data["duration"] || 0),
+      maps: sum_maps(existing.maps, data["maps"] || 0),
+      matches_per_hour: sum_maps(existing.matches_per_hour, data["matches_per_hour"] || 0),
+      team_sizes: sum_maps(existing.team_sizes, data["team_sizes"] || 0)
     }
   end
 

@@ -106,7 +106,7 @@ defmodule TeiserverWeb.Router do
     live_session :microblog_admin,
       on_mount: [
         {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Account.AuthPlug, {:authorise, "Contributor"}}
+        {Teiserver.Account.AuthPlug, {:authorise, "Blog helper"}}
       ] do
       live "/admin/posts", Admin.PostLive.Index, :index
       live "/admin/posts/:id", Admin.PostLive.Show, :show
@@ -586,6 +586,25 @@ defmodule TeiserverWeb.Router do
       live "/room", ChatLive.Room, :index
       live "/room/:room_name", ChatLive.Room, :index
     end
+  end
+
+  scope "/oauth/", TeiserverWeb.OAuth do
+    pipe_through([:browser, :app_layout, :protected])
+    get("/authorize", AuthorizeController, :authorize)
+    post("/authorize", AuthorizeController, :generate_code)
+  end
+
+  # it's slightly weird to mix html and json api endpoints under the same prefix
+  # but I'd rather have all of the oauth stuff contained
+  scope "/oauth/", TeiserverWeb.OAuth do
+    pipe_through(:api)
+    post("/token", CodeController, :token)
+  end
+
+  scope "/", TeiserverWeb.OAuth do
+    pipe_through(:api)
+    # https://datatracker.ietf.org/doc/html/rfc8414
+    get("/.well-known/oauth-authorization-server", CodeController, :metadata)
   end
 
   scope "/admin", TeiserverWeb.Admin do

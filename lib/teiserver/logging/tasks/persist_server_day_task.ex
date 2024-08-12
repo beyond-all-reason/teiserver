@@ -488,6 +488,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       bots: 0,
       duel: 0,
       team: 0,
+      small_team: 0,
+      large_team: 0,
       ffa: 0,
       team_ffa: 0,
       passworded: 0
@@ -562,6 +564,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
         "Raptors" -> :raptors
         "Bots" -> :bots
         "Duel" -> :duel
+        "Team" -> :team
         "Small Team" -> :small_team
         "Large Team" -> :large_team
         "FFA" -> :ffa
