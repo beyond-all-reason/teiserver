@@ -382,7 +382,7 @@ defmodule TeiserverWeb.Admin.UserController do
         |> redirect(to: ~p"/teiserver/admin/user")
 
       {true, _} ->
-        case Teiserver.Account.Emails.send_password_reset(user) do
+        case Teiserver.EmailHelper.send_password_reset(user) do
           :ok ->
             conn
             |> put_flash(:success, "Password reset email sent to user")

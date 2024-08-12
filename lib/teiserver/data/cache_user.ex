@@ -308,7 +308,9 @@ defmodule Teiserver.CacheUser do
           true ->
             case EmailHelper.new_user(user) do
               {:error, error} ->
-                Logger.error("Error sending new user email - #{user.email} - #{error}")
+                Logger.error(
+                  "Error sending new user email - #{user.email} - #{Kernel.inspect(error)}"
+                )
 
               :no_verify ->
                 verify_user(get_user_by_id(user.id))
@@ -356,7 +358,7 @@ defmodule Teiserver.CacheUser do
               verify_user(get_user_by_id(user.id))
               :ok
 
-            {:ok, _, _} ->
+            :ok ->
               :ok
           end
         end
