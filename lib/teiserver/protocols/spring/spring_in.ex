@@ -1197,7 +1197,7 @@ defmodule Teiserver.Protocols.SpringIn do
               String.starts_with?(lowercase_msg, "!bset tweakunits") ->
             msg |> String.trim() |> String.slice(0..16384)
 
-          String.starts_with?(lowercase_msg, "$welcome-message") ->
+          String.starts_with?(lowercase_msg, ["$welcome-message", "!welcome-message"]) ->
             msg |> String.trim() |> String.slice(0..1024)
 
           true ->
@@ -1223,7 +1223,7 @@ defmodule Teiserver.Protocols.SpringIn do
               String.starts_with?(lowercase_msg, "!bset tweakunits") ->
             msg |> String.trim() |> String.slice(0..16384)
 
-          String.starts_with?(lowercase_msg, "$welcome-message") ->
+          String.starts_with?(lowercase_msg, ["$welcome-message", "!welcome-message"]) ->
             msg |> String.trim() |> String.slice(0..1024)
 
           true ->
