@@ -219,7 +219,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
           "!maxratinglevel <rating>",
           "",
           "To ensure new players are distributed evenly across teams:",
-          "!balancealgorithm split_one_chevs",
+          "!balancealgorithm split_noobs",
           ""
         ]
 

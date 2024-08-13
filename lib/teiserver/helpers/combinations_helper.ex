@@ -29,6 +29,8 @@ defmodule Teiserver.Helper.CombinationsHelper do
     0..last |> Enum.to_list() |> n_comb()
   end
 
+  # This returns possible combinations of player indexes when num_players is odd.
+  # For even number of players, see function above.
   def get_combinations(num_players) when is_integer(num_players) do
     last = trunc(num_players) - 1
     team_size = (num_players / 2) |> trunc()

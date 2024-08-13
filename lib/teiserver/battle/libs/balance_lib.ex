@@ -67,7 +67,8 @@ defmodule Teiserver.Battle.BalanceLib do
     if(is_moderator) do
       Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
     else
-      mod_only = ["force_party", "brute_force"]
+      # TODO Decomission split_one_chevs and cheeky_switcher_smart if split_noobs works
+      mod_only = ["force_party", "brute_force", "split_one_chevs", "cheeky_switcher_smart"]
       Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.drop(mod_only) |> Map.keys()
     end
   end

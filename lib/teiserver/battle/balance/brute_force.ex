@@ -109,6 +109,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
   def get_best_combo(combos, players, parties) do
     players_with_index = Enum.with_index(players)
 
+    # Go through every possibility and get the combination with the lowest score
     result =
       Enum.map(combos, fn x ->
         get_players_from_indexes(x, players_with_index)

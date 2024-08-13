@@ -32,11 +32,11 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     initial_state = get_initial_state(expanded_group)
 
     case should_use_algo(initial_state, team_count) do
-      :ok ->
+      {:ok, :has_parties} ->
         result = get_result(initial_state)
         standardise_result(result, initial_state)
 
-      :no_parties ->
+      {:ok, :no_parties} ->
         result = do_simple_draft(initial_state)
         standardise_result(result, initial_state)
 
@@ -45,19 +45,20 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
         result = Teiserver.Battle.Balance.LoserPicks.perform(expanded_group, team_count, opts)
 
         new_logs =
-          ["#{message} Will use another balance algorithm instead.", @splitter, result.logs]
+          ["#{message} Will use loser_picks algorithm instead.", @splitter, result.logs]
           |> List.flatten()
 
         Map.put(result, :logs, new_logs)
     end
   end
 
-  @spec should_use_algo(SN.state(), integer()) :: :ok | {:error, String.t()} | :no_parties
+  @spec should_use_algo(SN.state(), integer()) ::
+          {:ok, :no_parties} | {:error, String.t()} | {:ok, :has_parties}
   def should_use_algo(initial_state, team_count) do
     cond do
-      team_count > 2 -> {:error, "Team count greater than 2."}
-      length(initial_state.parties) == 0 -> :no_parties
-      true -> :ok
+      team_count != 2 -> {:error, "Team count not equal to 2."}
+      length(initial_state.parties) == 0 -> {:ok, :no_parties}
+      true -> {:ok, :has_parties}
     end
   end
 
