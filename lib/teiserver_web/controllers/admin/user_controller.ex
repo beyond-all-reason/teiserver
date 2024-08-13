@@ -952,9 +952,23 @@ defmodule TeiserverWeb.Admin.UserController do
   @spec relationships(Plug.Conn.t(), map) :: Plug.Conn.t()
   def relationships(conn, %{"id" => id}) do
     user = Account.get_user!(id)
+    id = user.id
+
+    relationships = %{
+      friends: Account.list_friend_ids_of_user(id),
+      friend_requests: Account.list_incoming_friend_requests_of_userid(id),
+      followed: Account.list_userids_followed_by_userid(id),
+      ignored: Account.list_userids_ignored_by_userid(id),
+      avoided: Account.list_userids_avoided_by_userid(id),
+      avoiding: Account.list_userids_avoiding_this_userid(id),
+      blocked: Account.list_userids_blocked_by_userid(id),
+      blocking: Account.list_userids_blocking_this_userid(id)
+    }
 
     user_ids =
-      (user.data["friends"] ++ user.data["friend_requests"] ++ user.data["ignored"])
+      relationships
+      |> Map.values()
+      |> List.flatten()
       |> Enum.uniq()
 
     lookup =
@@ -964,6 +978,7 @@ defmodule TeiserverWeb.Admin.UserController do
     conn
     |> assign(:user, user)
     |> assign(:lookup, lookup)
+    |> assign(:relationships, relationships)
     |> add_breadcrumb(name: "Show: #{user.name}", url: ~p"/teiserver/admin/user/#{id}")
     |> add_breadcrumb(name: "Relationships", url: conn.request_path)
     |> render("relationships.html")

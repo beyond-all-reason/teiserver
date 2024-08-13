@@ -26,113 +26,52 @@
         </a>
 
         <div class="row">
-          <div class="col-md-4">
-            <h4>Friends (<%= Enum.count(@user.data["friends"]) %>)</h4>
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th colspan="3">Name</th>
-                  <th>&nbsp;</th>
-                </tr>
-              </thead>
-              <tbody>
-                <%= for userid <- @user.data["friends"] do %>
-                  <% user = @lookup[userid] %>
-                  <%= if user != nil do %>
-                    <tr>
-                      <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
-                        <%= central_component("icon", icon: user.icon) %>
-                      </td>
-                      <td style={"background-color: #{rgba_css user.colour};"}>
-                        <%= user.name %>
-                      </td>
-                      <td>&nbsp;</td>
-                      <td>
-                        <a
-                          href={~p"/teiserver/admin/user/#{user.id}"}
-                          class="btn btn-secondary btn-sm"
-                        >
-                          Show
-                        </a>
-                      </td>
-                    </tr>
+          <%= for {relationship_type, title} <- [
+                {:friends, "Friends"},
+                {:friend_requests, "Friend requests"},
+                {:followed, "Follows"},
+                {:ignored, "Ignores"},
+                {:avoided, "Avoids"},
+                {:avoiding, "Avoided by"},
+                {:blocked, "Blocking"},
+                {:blocking, "Blocked by"}
+              ] do %>
+            <div class="col-md-4">
+              <h4><%= title %> (<%= Enum.count(@relationships[relationship_type]) %>)</h4>
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th colspan="3">Name</th>
+                    <th>&nbsp;</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <%= for userid <- @relationships[relationship_type] do %>
+                    <% user = @lookup[userid] %>
+                    <%= if user do %>
+                      <tr>
+                        <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
+                          <%= central_component("icon", icon: user.icon) %>
+                        </td>
+                        <td style={"background-color: #{rgba_css user.colour};"}>
+                          <%= user.name %>
+                        </td>
+                        <td>&nbsp;</td>
+                        <td>
+                          <a
+                            href={~p"/teiserver/admin/user/#{user.id}"}
+                            class="btn btn-secondary btn-sm"
+                          >
+                            Show
+                          </a>
+                        </td>
+                      </tr>
+                    <% end %>
                   <% end %>
-                <% end %>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="col-md-4">
-            <h4>Friend requests (<%= Enum.count(@user.data["friend_requests"]) %>)</h4>
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th colspan="3">Name</th>
-                  <th>&nbsp;</th>
-                </tr>
-              </thead>
-              <tbody>
-                <%= for userid <- @user.data["friend_requests"] do %>
-                  <% user = @lookup[userid] %>
-                  <%= if user != nil do %>
-                    <tr>
-                      <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
-                        <%= central_component("icon", icon: user.icon) %>
-                      </td>
-                      <td style={"background-color: #{rgba_css user.colour};"}>
-                        <%= user.name %>
-                      </td>
-                      <td>&nbsp;</td>
-                      <td>
-                        <a
-                          href={~p"/teiserver/admin/user/#{user.id}"}
-                          class="btn btn-secondary btn-sm"
-                        >
-                          Show
-                        </a>
-                      </td>
-                    </tr>
-                  <% end %>
-                <% end %>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="col-md-4">
-            <h4>Ignores (<%= Enum.count(@user.data["ignored"]) %>)</h4>
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th colspan="3">Name</th>
-                  <th>&nbsp;</th>
-                </tr>
-              </thead>
-              <tbody>
-                <%= for userid <- @user.data["ignored"] do %>
-                  <% user = @lookup[userid] %>
-                  <%= if user != nil do %>
-                    <tr>
-                      <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
-                        <%= central_component("icon", icon: user.icon) %>
-                      </td>
-                      <td style={"background-color: #{rgba_css user.colour};"}>
-                        <%= user.name %>
-                      </td>
-                      <td>&nbsp;</td>
-                      <td>
-                        <a
-                          href={~p"/teiserver/admin/user/#{user.id}"}
-                          class="btn btn-secondary btn-sm"
-                        >
-                          Show
-                        </a>
-                      </td>
-                    </tr>
-                  <% end %>
-                <% end %>
-              </tbody>
-            </table>
-          </div>
+                </tbody>
+              </table>
+            </div>
+          <% end %>
         </div>
       </div>
     </div>
