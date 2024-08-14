@@ -207,6 +207,9 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   end
 
   defp generate_new_balance_data(match, algorithm) do
+    # For the section "If balance we made using current ratings", do not fuzz ratings
+    # This means the rating used is exactly equal to what is stored in database
+    fuzz_multiplier = 0
     rating_type = MatchLib.game_type(match.team_size, match.team_count)
 
     partied_players =
@@ -221,13 +224,13 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         {nil, player_id_list} ->
           player_id_list
           |> Enum.map(fn userid ->
-            %{userid => BalanceLib.get_user_rating_rank(userid, rating_type)}
+            %{userid => BalanceLib.get_user_rating_rank(userid, rating_type, fuzz_multiplier)}
           end)
 
         {_party_id, player_id_list} ->
           player_id_list
           |> Map.new(fn userid ->
-            {userid, BalanceLib.get_user_rating_rank(userid, rating_type)}
+            {userid, BalanceLib.get_user_rating_rank(userid, rating_type, fuzz_multiplier)}
           end)
       end)
       |> List.flatten()

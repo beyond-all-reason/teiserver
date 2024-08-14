@@ -621,8 +621,7 @@ defmodule Teiserver.Battle.BalanceLib do
     # which has an expiry of 60s
     # See application.ex for cache settings
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
-    {skill, uncertainty} = get_user_rating_value_uncertainty_pair(userid, rating_type_id)
-    rating = calculate_rating_value(skill, uncertainty)
+    {rating, uncertainty} = get_user_rating_value_uncertainty_pair(userid, rating_type_id)
     rating = fuzz_rating(rating, fuzz_multiplier)
 
     # Get stats data
