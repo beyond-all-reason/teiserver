@@ -12,7 +12,7 @@ defmodule Teiserver.EmailHelper do
         case do_new_user(user) do
           {:ok, _email, _response} ->
             Teiserver.Telemetry.log_complex_server_event(user.id, "email.verification", %{
-              result: "success",
+              result: "success"
             })
 
             :ok
@@ -38,7 +38,7 @@ defmodule Teiserver.EmailHelper do
     case response do
       {:ok, _email, _response} ->
         Teiserver.Telemetry.log_complex_server_event(user.id, "email.password_reset", %{
-          result: "success",
+          result: "success"
         })
 
         :ok
