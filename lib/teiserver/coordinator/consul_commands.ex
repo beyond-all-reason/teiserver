@@ -18,7 +18,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       senderid: userid
     }
   """
-  @splitter "---------------------------"
+  @splitter "------------------------------------------------------"
   @split_delay 60_000
   @spec handle_command(Map.t(), Map.t()) :: Map.t()
   @default_ban_reason "Banned"

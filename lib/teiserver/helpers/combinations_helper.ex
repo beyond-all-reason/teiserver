@@ -22,9 +22,19 @@ defmodule Teiserver.Helper.CombinationsHelper do
   # but doesn't include duplicates. Assumes we need exactly two teams of equal size.
   # E.g. for a 4 player lobby, Team1: [0,1] is a duplicate of Team1: [2,3]
   # since Team1 and Team2 are just swapped
-  def get_combinations(num_players) when is_integer(num_players) do
+  def get_combinations(num_players)
+      when is_integer(num_players) and Integer.is_even(num_players) do
     last = trunc(num_players) - 1
 
     0..last |> Enum.to_list() |> n_comb()
+  end
+
+  # This returns possible combinations of player indexes when num_players is odd.
+  # For even number of players, see function above.
+  def get_combinations(num_players) when is_integer(num_players) do
+    last = trunc(num_players) - 1
+    team_size = (num_players / 2) |> trunc()
+
+    0..last |> Enum.to_list() |> Combination.combine(team_size)
   end
 end

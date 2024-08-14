@@ -7,7 +7,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
   Go through every possible combination and pick the best one. Ideal for keeping parties together.
   The best combination will have the lowest score.
   Score = difference in team rating + broken party penalty
-  broken party penalty = num broken parties * broken party multiplier
+  broken party penalty = num broken parties * party_importance
 
   Only use for games with two teams and <=16 players
   """
@@ -16,7 +16,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
   import Teiserver.Helper.NumberHelper, only: [format: 1]
   require Integer
 
-  @broken_party_multiplier 3
+  @party_importance 7
   @splitter "------------------------------------------------------"
 
   @doc """
@@ -33,7 +33,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
       :ok ->
         potential_teams = potential_teams(length(input_data.players))
         best_combo = get_best_combo(potential_teams, input_data.players, input_data.parties)
-        standardise_result(best_combo, input_data.players, input_data.parties)
+        standardise_result(best_combo, input_data.parties)
 
       {:error, message} ->
         # Call another balancer
@@ -100,18 +100,39 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     Teiserver.Helper.CombinationsHelper.get_combinations(num_players)
   end
 
+  def get_best_combo(players, parties) do
+    potential_teams = potential_teams(length(players))
+    get_best_combo(potential_teams, players, parties)
+  end
+
   @spec get_best_combo([integer()], [BF.player()], [String.t()]) :: BF.combo_result()
   def get_best_combo(combos, players, parties) do
-    Enum.map(combos, fn x ->
-      get_players_from_indexes(x, players)
-    end)
-    |> Enum.map(fn team ->
-      result = score_combo(team, players, parties)
-      Map.put(result, :team, team)
-    end)
-    |> Enum.min_by(fn z ->
-      z.score
-    end)
+    players_with_index = Enum.with_index(players)
+
+    # Go through every possibility and get the combination with the lowest score
+    result =
+      Enum.map(combos, fn x ->
+        get_players_from_indexes(x, players_with_index)
+      end)
+      |> Enum.map(fn team ->
+        result = score_combo(team, players, parties)
+        Map.put(result, :first_team, team)
+      end)
+      |> Enum.min_by(fn z ->
+        z.score
+      end)
+
+    first_team = result.first_team
+
+    second_team =
+      players
+      |> Enum.filter(fn x ->
+        !Enum.any?(first_team, fn y ->
+          y.id == x.id
+        end)
+      end)
+
+    Map.put(result, :second_team, second_team)
   end
 
   @spec score_combo([BF.player()], [BF.player()], [String.t()]) :: any()
@@ -120,7 +141,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     both_team_rating = get_team_rating(all_players)
 
     rating_diff_penalty = abs(both_team_rating - first_team_rating * 2)
-    broken_party_penalty = count_broken_parties(first_team, parties) * @broken_party_multiplier
+    broken_party_penalty = count_broken_parties(first_team, parties) * @party_importance
 
     score = rating_diff_penalty + broken_party_penalty
 
@@ -131,10 +152,8 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     }
   end
 
-  def get_players_from_indexes(player_indexes, players) do
-    players = Enum.with_index(players)
-
-    Enum.filter(players, fn {_player, index} ->
+  def get_players_from_indexes(player_indexes, players_with_index) do
+    Enum.filter(players_with_index, fn {_player, index} ->
       Enum.member?(player_indexes, index)
     end)
     |> Enum.map(fn {player, _index} ->
@@ -173,17 +192,11 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     end)
   end
 
-  @spec standardise_result(BF.combo_result(), [BF.player()], [String.t()]) :: any()
-  def standardise_result(best_combo, all_players, parties) do
-    first_team = best_combo.team
+  @spec standardise_result(BF.combo_result(), [String.t()]) :: any()
+  def standardise_result(best_combo, parties) do
+    first_team = best_combo.first_team
 
-    second_team =
-      all_players
-      |> Enum.filter(fn x ->
-        !Enum.any?(first_team, fn y ->
-          y.id == x.id
-        end)
-      end)
+    second_team = best_combo.second_team
 
     team_groups = %{
       1 => standardise_team_groups(first_team),

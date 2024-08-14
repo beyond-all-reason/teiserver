@@ -126,12 +126,13 @@ defmodule Teiserver.Battle.BalanceLibInternalTest do
              "cheeky_switcher_smart",
              "force_party",
              "loser_picks",
+             "split_noobs",
              "split_one_chevs"
            ]
 
     is_moderator = false
     result = BalanceLib.get_allowed_algorithms(is_moderator)
-    assert result == ["cheeky_switcher_smart", "loser_picks", "split_one_chevs"]
+    assert result == ["loser_picks", "split_noobs"]
   end
 
   defp create_test_users do
