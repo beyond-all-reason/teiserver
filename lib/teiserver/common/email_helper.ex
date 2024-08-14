@@ -13,7 +13,6 @@ defmodule Teiserver.EmailHelper do
           {:ok, _email, _response} ->
             Teiserver.Telemetry.log_complex_server_event(user.id, "email.verification", %{
               result: "success",
-              email: user.email
             })
 
             :ok
@@ -21,7 +20,6 @@ defmodule Teiserver.EmailHelper do
           {:error, error} ->
             Teiserver.Telemetry.log_complex_server_event(user.id, "email.verification", %{
               result: "failure",
-              email: user.email,
               error: error
             })
 
@@ -41,7 +39,6 @@ defmodule Teiserver.EmailHelper do
       {:ok, _email, _response} ->
         Teiserver.Telemetry.log_complex_server_event(user.id, "email.password_reset", %{
           result: "success",
-          email: user.email
         })
 
         :ok
@@ -49,7 +46,6 @@ defmodule Teiserver.EmailHelper do
       {:error, error} ->
         Teiserver.Telemetry.log_complex_server_event(user.id, "email.password_reset", %{
           result: "failure",
-          email: user.email,
           error: error
         })
 
