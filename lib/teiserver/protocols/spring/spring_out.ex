@@ -72,6 +72,10 @@ defmodule Teiserver.Protocols.SpringOut do
     "DENIED #{reason}\n"
   end
 
+  defp do_reply(:protocol_extensions, nil) do
+    "@PROTOCOL_EXTENSIONS@ {\"ring:originator\":1}\n"
+  end
+
   defp do_reply(:motd, nil) do
     @motd
     |> String.split("\n")
@@ -681,6 +685,7 @@ defmodule Teiserver.Protocols.SpringOut do
       })
 
     reply(:login_accepted, user.name, nil, state)
+    reply(:protocol_extensions, nil, nil, state)
     reply(:motd, nil, nil, state)
 
     # Login the client
