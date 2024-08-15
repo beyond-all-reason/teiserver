@@ -32,7 +32,7 @@ defmodule Teiserver.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     # get that with mix app.tree nostrum
-    nostrum_extras = [:certifi, :gun, :inets, :jason, :kcl, :mime]
+    nostrum_extras = [:certifi, :gun, :inets, :jason, :mime]
 
     [
       mod: {Teiserver.Application, []},
@@ -104,7 +104,7 @@ defmodule Teiserver.MixProject do
       {:etop, "~> 0.7.0"},
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
       {:json_xema, "~> 0.3"},
-      {:nostrum, "~> 0.8"}
+      {:nostrum, "~> 0.10.0"}
     ]
   end
 
