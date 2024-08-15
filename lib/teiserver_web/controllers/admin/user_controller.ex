@@ -972,7 +972,7 @@ defmodule TeiserverWeb.Admin.UserController do
       |> Enum.uniq()
 
     lookup =
-      Account.list_users(search: [id_in: user_ids])
+      Account.list_users(search: [id_in: user_ids], limit: :infinity)
       |> Map.new(fn u -> {u.id, u} end)
 
     conn
