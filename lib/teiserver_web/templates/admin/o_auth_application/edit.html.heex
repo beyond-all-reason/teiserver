@@ -1,0 +1,16 @@
+<div class="card page-card">
+  <div class="card-body">
+    <h1>Edit application <%= @app.name %></h1>
+
+    <div class="row d-flex justify-content-center">
+      <div class="col-md-6">
+        <.application_form
+          button_label="Update"
+          changeset={@changeset}
+          action={~p"/teiserver/admin/oauth_application/#{@app.id}"}
+          method="PUT"
+        />
+      </div>
+    </div>
+  </div>
+</div>

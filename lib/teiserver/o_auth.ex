@@ -17,10 +17,19 @@ defmodule Teiserver.OAuth do
   alias Teiserver.Account.User
   alias Teiserver.Data.Types, as: T
 
+  # @spec change_application(Application.t(), map() | nil) :: Ecto.Changeset
+  def change_application(%Application{} = app, attrs \\ %{}) do
+    Application.changeset(app, attrs)
+  end
+
   def create_application(attrs \\ %{}) do
     %Application{}
     |> Application.changeset(attrs)
     |> Repo.insert()
+  end
+
+  def update_application(%Application{} = app, attrs) do
+    app |> change_application(attrs) |> Repo.update()
   end
 
   @spec delete_application(Application.t()) :: :ok | {:error, term()}
@@ -366,6 +375,14 @@ defmodule Teiserver.OAuth do
     case result do
       {:ok, cred} -> {:ok, Repo.preload(cred, :application)}
       err -> err
+    end
+  end
+
+  @spec delete_credential(Credential.t() | Credential.id()) :: :ok | {:error, term()}
+  def delete_credential(%Credential{} = cred) do
+    case Repo.delete(cred) do
+      {:ok, _} -> :ok
+      {:error, err} -> {:error, err}
     end
   end
 

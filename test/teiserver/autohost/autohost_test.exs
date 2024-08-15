@@ -5,6 +5,6 @@ defmodule Teiserver.Autohost.AutohostTest do
   test "can create autohost" do
     {:ok, autohost} = Autohost.create_autohost(%{name: "autohost_test"})
     assert autohost != nil
-    assert Autohost.get_autohost(autohost.id) == autohost
+    assert Autohost.get_by_id(autohost.id) == autohost
   end
 end

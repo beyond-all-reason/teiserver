@@ -2,7 +2,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
   use TeiserverWeb.ConnCase
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.OAuth
-  alias Teiserver.Test.Support.OAuth, as: OAuthTest
+  alias Teiserver.OAuthFixtures
 
   defp get_valid_data(%{app: app, code: code, code_attrs: code_attrs}) do
     %{
@@ -10,7 +10,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       code: code.value,
       redirect_uri: code.redirect_uri,
       client_id: app.uid,
-      code_verifier: code_attrs.verifier
+      code_verifier: code_attrs._verifier
     }
   end
 
@@ -34,7 +34,8 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
   end
 
   defp setup_code(context) do
-    {:ok, code, attrs} = OAuthTest.create_code(context[:user], context[:app])
+    attrs = OAuthFixtures.code_attrs(context[:user].id, context[:app])
+    code = OAuthFixtures.create_code(attrs)
 
     %{code: code, code_attrs: attrs}
   end

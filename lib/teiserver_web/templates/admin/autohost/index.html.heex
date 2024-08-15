@@ -1,0 +1,41 @@
+<div class="container">
+  <h1>List of autohosts</h1>
+
+  <p>
+    <div class="btn btn-sm btn-outline-success">
+      <Phx.link href={~p"/teiserver/admin/autohost/new"}>Create autohost</Phx.link>
+    </div>
+  </p>
+
+  <%= if length(@autohosts) > 0 do %>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>name</th>
+          <th>credentials</th>
+          <th>actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for autohost <- @autohosts do %>
+          <tr>
+            <td><%= autohost.id %></td>
+            <td><%= autohost.name %></td>
+            <td><%= Map.get(@cred_counts, autohost.id, 0) %></td>
+            <td>
+              <Phx.link href={~p"/teiserver/admin/autohost/#{autohost.id}"}>
+                <button type="button" class="btn btn-primary btn-sm">show</button>
+              </Phx.link>
+              <Phx.link href={~p"/teiserver/admin/autohost/#{autohost.id}/edit"}>
+                <button type="button" class="btn btn-primary btn-sm">Edit</button>
+              </Phx.link>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    No autohost!
+  <% end %>
+</div>
