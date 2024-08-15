@@ -42,5 +42,15 @@ defmodule Teiserver.Config.SiteConfigTypes.SystemConfigs do
       default: true,
       value_label: ""
     })
+
+    add_site_config_type(%{
+      key: "system.Run daily cleanup task",
+      section: "System",
+      type: "boolean",
+      permissions: ["Admin"],
+      description: "When enabled daily cleanup task will be ran every day at 8 am",
+      default: true,
+      value_label: "Enabled"
+    })
   end
 end
