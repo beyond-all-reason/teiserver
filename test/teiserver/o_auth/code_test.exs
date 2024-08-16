@@ -78,6 +78,23 @@ defmodule Teiserver.OAuth.CodeTest do
     assert err =~ "cannot be more than"
   end
 
+  test "can delete expired codes", %{user: user, app: app} do
+    assert {:ok, expired_code, _} = create_code(user, app, expires_at: ~U[1980-01-01 12:23:34Z])
+    assert {:ok, valid_code, _} = create_code(user, app, expires_at: ~U[2500-01-01 12:23:34Z])
+    count = OAuth.delete_expired_codes()
+    assert count == 1
+    assert {:error, :no_code} = OAuth.get_valid_code(expired_code.value)
+    assert {:ok, ^valid_code} = OAuth.get_valid_code(valid_code.value)
+  end
+
+  test "can pass custom time when deleting codes", %{user: user, app: app} do
+    assert {:ok, code, _} = create_code(user, app, expires_at: ~U[2500-01-01 12:23:34Z])
+    now = DateTime.add(code.expires_at, 1, :day)
+    count = OAuth.delete_expired_codes(now)
+    assert count == 1
+    assert {:error, :no_code} = OAuth.get_valid_code(code.value)
+  end
+
   defp create_code(user, app, opts \\ []) do
     expires_at =
       Keyword.get(opts, :expires_at, Timex.add(DateTime.utc_now(), Timex.Duration.from_days(1)))
