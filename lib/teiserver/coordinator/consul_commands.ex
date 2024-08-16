@@ -629,7 +629,18 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   #################### Boss
+  # balancemode is deprecated. Use balancealgorithm instead, which is also a SPADS command
   def handle_command(%{command: "balancemode", remaining: remaining, senderid: senderid}, state) do
+    handle_command(
+      %{command: "balancealgorithm", remaining: remaining, senderid: senderid},
+      state
+    )
+  end
+
+  def handle_command(
+        %{command: "balancealgorithm", remaining: remaining, senderid: senderid},
+        state
+      ) do
     remaining =
       remaining
       |> String.downcase()
@@ -642,17 +653,16 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     if Enum.member?(allowed_choices, remaining) do
       ChatLib.say(
         state.coordinator_id,
-        "Balance mode set to #{remaining}",
+        "Balance algorithm set to #{remaining}",
         state.lobby_id
       )
 
       Coordinator.cast_balancer(state.lobby_id, {:set_algorithm, remaining})
       %{state | balance_algorithm: remaining}
     else
-      Lobby.sayprivateex(
+      ChatLib.say(
         state.coordinator_id,
-        senderid,
-        "No balancemode of #{remaining}, options are: #{allowed_choices |> Enum.join(", ")}",
+        "No balance algorithm of #{remaining}. Options are: #{allowed_choices |> Enum.join(", ")}",
         state.lobby_id
       )
 
