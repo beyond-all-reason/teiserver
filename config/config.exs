@@ -129,6 +129,7 @@ config :teiserver, Oban,
        # 1:07 am
        {"7 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
        {"22 1 * * *", Teiserver.Telemetry.EventCleanupTask},
+       {"7 1 * * *", Teiserver.OAuth.Tasks.Cleanup},
 
        # At 17 minutes past every hour
        {"17 * * * *", Teiserver.Battle.Tasks.CleanupTask},
