@@ -35,6 +35,13 @@ defmodule Teiserver.OAuth.CodeQueries do
       where: code.expires_at > ^as_at
   end
 
+  def expired(query, as_at \\ nil) do
+    as_at = as_at || DateTime.utc_now()
+
+    from [code: code] in query,
+      where: code.expires_at <= ^as_at
+  end
+
   @spec count_per_apps([Application.id()], DateTime.t() | nil) :: %{
           Application.id() => non_neg_integer()
         }

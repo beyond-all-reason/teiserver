@@ -37,6 +37,13 @@ defmodule Teiserver.OAuth.TokenQueries do
       where: token.expires_at > ^as_at
   end
 
+  def expired(query, as_at \\ nil) do
+    as_at = as_at || DateTime.utc_now()
+
+    from [token: token] in query,
+      where: token.expires_at <= ^as_at
+  end
+
   @doc """
   given a refresh token, deletes it and its potential associated token
   """

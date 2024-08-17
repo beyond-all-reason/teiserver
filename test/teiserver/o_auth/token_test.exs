@@ -1,5 +1,6 @@
 defmodule Teiserver.OAuth.TokenTest do
   use Teiserver.DataCase, async: true
+  alias Teiserver.OAuthFixtures
   alias Teiserver.OAuth
 
   setup do
@@ -75,5 +76,31 @@ defmodule Teiserver.OAuth.TokenTest do
     # the newly created token is valid
     assert {:ok, new_token_fresh} = OAuth.get_valid_token(new_token.value)
     assert new_token_fresh.id == new_token.id
+  end
+
+  test "can delete expired token", %{user: user, app: app} do
+    assert {:ok, token, _attr} =
+             create_token(user, app,
+               expires_at: ~U[2500-01-01 12:23:34Z],
+               value: "far-future-token"
+             )
+
+    now = DateTime.add(token.expires_at, 1, :day)
+    count = OAuth.delete_expired_tokens(now)
+    assert count == 1
+    assert {:error, :no_token} = OAuth.get_valid_token(token.value)
+  end
+
+  defp create_token(user, app, opts) do
+    expires_at =
+      Keyword.get(opts, :expires_at, Timex.add(DateTime.utc_now(), Timex.Duration.from_days(1)))
+
+    attrs =
+      Enum.into(opts, %{})
+      |> Map.merge(OAuthFixtures.token_attrs(user.id, app))
+      |> Map.put(:expires_at, expires_at)
+
+    code = OAuthFixtures.create_token(attrs)
+    {:ok, code, attrs}
   end
 end

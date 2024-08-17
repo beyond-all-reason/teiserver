@@ -415,6 +415,26 @@ defmodule Teiserver.OAuth do
     )
   end
 
+  @doc """
+  Delete all expired oauth code.
+  """
+  @spec delete_expired_codes(DateTime.t() | nil) :: non_neg_integer()
+  def delete_expired_codes(now \\ nil) do
+    now = now || DateTime.utc_now()
+    {count, _} = CodeQueries.base_query() |> CodeQueries.expired(now) |> Repo.delete_all()
+    count
+  end
+
+  @doc """
+  Delete all expired oauth tokens (access and refresh)
+  """
+  @spec delete_expired_tokens(DateTime.t() | nil) :: non_neg_integer()
+  def delete_expired_tokens(now \\ nil) do
+    now = now || DateTime.utc_now()
+    {count, _} = TokenQueries.base_query() |> TokenQueries.expired(now) |> Repo.delete_all()
+    count
+  end
+
   defp check_expiry(obj, now) do
     if Timex.after?(now, Map.fetch!(obj, :expires_at)) do
       {:error, :expired}
