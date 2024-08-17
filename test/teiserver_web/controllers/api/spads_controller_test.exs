@@ -3,7 +3,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
   alias Teiserver.Account
   alias Teiserver.Lobby
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.{Coordinator, User}
+  alias Teiserver.Coordinator
   alias Teiserver.Account.ClientLib
 
   import Teiserver.TeiserverTestLib,
@@ -106,7 +106,8 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       %{socket: hsocket, user: host} = tachyon_auth_setup()
 
       # User needs to be a moderator (at this time) to start/stop Coordinator mode
-      User.update_user(%{host | moderator: true})
+      # update_user doesn't exist, if/when fixing this test, figure out what to do there
+      # User.update_user(%{host | moderator: true})
       ClientLib.refresh_client(host.id)
 
       lobby_data = %{

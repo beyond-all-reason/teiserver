@@ -563,7 +563,7 @@ CLIENTS test_room #{user.name}\n"
     assert new_user.email_change_code == [nil, nil]
   end
 
-  test "CHANGEEMAIL to email already taken", %{socket: socket, user: user} do
+  test "CHANGEEMAIL to email already taken", %{socket: socket} do
     other_user = Teiserver.TeiserverTestLib.new_user()
 
     # Make the request
