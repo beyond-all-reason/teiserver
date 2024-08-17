@@ -413,6 +413,15 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "lobby.Boss blocks turn off threshold",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["Admin"],
+      description: "Turn off boss blocks when players plus queue size is at least this number",
+      default: 16
+    })
+
+    add_site_config_type(%{
       key: "lobby.Small team game limit",
       section: "Lobbies",
       type: "integer",

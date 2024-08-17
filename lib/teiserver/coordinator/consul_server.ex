@@ -172,8 +172,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
         name = Account.get_username_by_id(userid)
         Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{name}")
       end
-
-      send(self(), :recheck_membership)
     end)
 
     {:noreply, %{state | timeouts: %{}}}
@@ -810,11 +808,17 @@ defmodule Teiserver.Coordinator.ConsulServer do
     avoid_status = Account.check_avoid_status(user.id, player_ids)
 
     boss_avoid_status =
-      state.host_bosses
-      |> Stream.map(fn boss_id ->
-        Account.does_a_avoid_b?(boss_id, user.id)
-      end)
-      |> Enum.any?()
+      case allow_boss_blocks?(state, Enum.count(player_ids)) do
+        true ->
+          state.host_bosses
+          |> Stream.map(fn boss_id ->
+            Account.does_a_avoid_b?(boss_id, user.id)
+          end)
+          |> Enum.any?()
+
+        false ->
+          false
+      end
 
     rating_check_result = LobbyRestrictions.check_rating_to_play(userid, state)
 
@@ -934,11 +938,17 @@ defmodule Teiserver.Coordinator.ConsulServer do
     block_status = Account.check_block_status(userid, player_ids)
 
     boss_avoid_status =
-      state.host_bosses
-      |> Stream.map(fn boss_id ->
-        Account.does_a_avoid_b?(boss_id, userid)
-      end)
-      |> Enum.any?()
+      case allow_boss_blocks?(state, Enum.count(player_ids)) do
+        true ->
+          state.host_bosses
+          |> Stream.map(fn boss_id ->
+            Account.does_a_avoid_b?(boss_id, userid)
+          end)
+          |> Enum.any?()
+
+        false ->
+          false
+      end
 
     cond do
       client == nil ->
@@ -987,6 +997,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
       true ->
         {true, nil}
     end
+  end
+
+  # Once a lobby gets sufficiently popular we disable boss blocks
+  # We consider both player count and queue size
+  defp allow_boss_blocks?(state, player_count) do
+    queue_size = get_queue(state) |> Enum.count()
+    turn_off_threshold = Config.get_site_config_cache("lobby.Boss blocks turn off threshold")
+    queue_size + player_count < turn_off_threshold
   end
 
   def broadcast_update(state, reason \\ nil) do
