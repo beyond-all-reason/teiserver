@@ -807,18 +807,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     avoid_status = Account.check_avoid_status(user.id, player_ids)
 
-    boss_avoid_status =
-      case allow_boss_blocks?(state, Enum.count(player_ids)) do
-        true ->
-          state.host_bosses
-          |> Stream.map(fn boss_id ->
-            Account.does_a_avoid_b?(boss_id, user.id)
-          end)
-          |> Enum.any?()
-
-        false ->
-          false
-      end
+    boss_avoid_status = compute_boss_avoid_status(user.id, player_ids, state)
 
     rating_check_result = LobbyRestrictions.check_rating_to_play(userid, state)
 
@@ -937,18 +926,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     match_id = Battle.get_lobby_match_id(state.lobby_id)
     block_status = Account.check_block_status(userid, player_ids)
 
-    boss_avoid_status =
-      case allow_boss_blocks?(state, Enum.count(player_ids)) do
-        true ->
-          state.host_bosses
-          |> Stream.map(fn boss_id ->
-            Account.does_a_avoid_b?(boss_id, userid)
-          end)
-          |> Enum.any?()
-
-        false ->
-          false
-      end
+    boss_avoid_status = compute_boss_avoid_status(userid, player_ids, state)
 
     cond do
       client == nil ->
@@ -996,6 +974,22 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       true ->
         {true, nil}
+    end
+  end
+
+  # Boss avoiding a player may result in them being unable to play or join
+  # But there is an extra allow_boss_blocks? check
+  defp compute_boss_avoid_status(user_id, player_ids, state) do
+    case allow_boss_blocks?(state, Enum.count(player_ids)) do
+      true ->
+        state.host_bosses
+        |> Stream.map(fn boss_id ->
+          Account.does_a_avoid_b?(boss_id, user_id)
+        end)
+        |> Enum.any?()
+
+      false ->
+        false
     end
   end
 
