@@ -23,7 +23,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Phoenix.PubSub
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib, SpadsParser, CoordinatorCommands}
+
+  alias Teiserver.Coordinator.{
+    ConsulCommands,
+    CoordinatorLib,
+    SpadsParser,
+    CoordinatorCommands,
+    WelcomeHelper
+  }
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? newlobby jazlobby tournament)
   @boss_commands ~w(balancemode balancealgorithm gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
@@ -406,20 +413,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info(%{channel: "teiserver_lobby_updates", event: :add_user, client: client}, state) do
-    restrictions = LobbyRestrictions.get_lobby_restrictions_welcome_text(state)
-
-    welcome_message =
-      if state.welcome_message do
-        String.split(state.welcome_message, "$$")
-      end
-
-    msg =
-      [
-        welcome_message,
-        restrictions
-      ]
-      |> List.flatten()
-      |> Enum.filter(fn s -> s != nil end)
+    msg = WelcomeHelper.get_welcome_message(state)
 
     if not Enum.empty?(msg) do
       Coordinator.send_to_user(client.userid, [@splitter] ++ msg ++ [@splitter])

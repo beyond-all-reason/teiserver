@@ -102,7 +102,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     bounds = get_rank_bounds_for_title(consul_state)
 
     [
-      @splitter,
+      "",
       "You don't meet the chevron requirements for this lobby (#{bounds}). Your chevron level is #{player_rank + 1}. Learn more about chevrons here:",
       "https://www.beyondallreason.info/guide/rating-and-lobby-balance#rank-icons"
     ]
@@ -113,7 +113,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     player_rating_text = player_rating |> Decimal.from_float() |> Decimal.round(2)
 
     [
-      @splitter,
+      "",
       "You don't meet the rating requirements for this lobby (#{bounds}). Your #{rating_type} match rating is #{player_rating_text}. Learn more about rating here:",
       "https://www.beyondallreason.info/guide/rating-and-lobby-balance#openskill"
     ]
