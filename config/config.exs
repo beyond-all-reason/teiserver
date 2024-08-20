@@ -46,15 +46,13 @@ config :esbuild,
 config :teiserver, Teiserver,
   ports: [
     tcp: 8200,
-    tls: 8201,
-    tachyon: 8202
+    tls: 8201
   ],
   website: [
     url: "mywebsite.com"
   ],
   enable_benchmark: false,
   enable_hooks: true,
-  tachyon_schema_path: "priv/tachyon/schema_v1/*/*/*.json",
 
   # Heatbeat interval is ms
   heartbeat_interval: 30_000,
@@ -67,7 +65,6 @@ config :teiserver, Teiserver,
   main_website: "https://site.com/",
   discord: nil,
   default_spring_protocol: Teiserver.Protocols.Spring,
-  default_tachyon_protocol: Teiserver.Protocols.Tachyon.V1.Tachyon,
   github_repo: "https://github.com/beyond-all-reason/teiserver",
   enable_discord_bridge: true,
   enable_coordinator_mode: true,

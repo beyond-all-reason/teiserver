@@ -199,24 +199,6 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "teiserver.Tachyon flood rate limit count",
-      section: "Legacy protocol",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The number of commands required to trip flood protection for Tachyon",
-      default: 20
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Tachyon flood rate window size",
-      section: "Legacy protocol",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The size of the window in seconds for flood protection to trip for Tachyon",
-      default: 6
-    })
-
-    add_site_config_type(%{
       key: "teiserver.Ring flood rate limit count",
       section: "Legacy protocol",
       type: "integer",

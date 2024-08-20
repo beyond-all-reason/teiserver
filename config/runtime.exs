@@ -55,10 +55,7 @@ if config_env() == :prod do
     enable_discord_bridge: enable_discord_bridge,
     ports: [
       tcp: Teiserver.ConfigHelpers.get_env("TEI_SPRING_TCP_PORT", 8200, :int),
-      tls: Teiserver.ConfigHelpers.get_env("TEI_SPRING_TLS_PORT", 8201, :int),
-      # this can likely be deprecated and removed. It's for an old version
-      # of tachyon running on another TLS socket
-      tachyon: Teiserver.ConfigHelpers.get_env("TEI_TACHYON_TLS_PORT", 8202, :int)
+      tls: Teiserver.ConfigHelpers.get_env("TEI_SPRING_TLS_PORT", 8201, :int)
     ],
     certs: certificates,
     website: [
