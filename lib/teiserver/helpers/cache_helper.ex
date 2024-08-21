@@ -3,12 +3,18 @@ defmodule Teiserver.Helpers.CacheHelper do
 
   """
 
+  require Logger
+
   @spec cache_get(atom, any) :: any
   def cache_get(table, key), do: ConCache.get(table, key)
 
   @spec cache_get_or_store(atom, any, function) :: any
   def cache_get_or_store(table, key, func) do
     ConCache.get_or_store(table, key, func)
+  catch
+    :exit, :noproc ->
+      Logger.warning("Cache #{table} is down")
+      func.()
   end
 
   @doc """
