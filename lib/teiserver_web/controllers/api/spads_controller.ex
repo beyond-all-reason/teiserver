@@ -141,8 +141,12 @@ defmodule TeiserverWeb.API.SpadsController do
         |> render("empty.json")
 
       balance_enabled == true ->
+        modoptions = Battle.get_modoptions(client.lobby_id)
+        is_ranked? = modoptions["game/modoptions/ranked_game"] == "1"
+
         opts = [
-          allow_groups: params["balanceMode"] != "skill"
+          allow_groups: params["balanceMode"] != "skill",
+          is_ranked?: is_ranked?
         ]
 
         balance_result =

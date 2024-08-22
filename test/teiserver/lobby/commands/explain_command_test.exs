@@ -44,9 +44,9 @@ defmodule Teiserver.Lobby.Commands.ExplainCommandTest do
       channel: "teiserver_client_messages:#{user.id}",
       event: :received_direct_message,
       message_content: [
-        "---------------------------",
+        "------------------------------------------------------",
         "No balance has been created for this room",
-        "---------------------------"
+        "------------------------------------------------------"
       ],
       sender_id: Coordinator.get_coordinator_userid()
     }

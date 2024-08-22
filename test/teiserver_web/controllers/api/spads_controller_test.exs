@@ -1,15 +1,11 @@
 defmodule TeiserverWeb.API.SpadsControllerTest do
   use TeiserverWeb.ConnCase, async: false
   alias Teiserver.Account
-  alias Teiserver.Lobby
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Coordinator
-  alias Teiserver.Account.ClientLib
 
   import Teiserver.TeiserverTestLib,
     only: [
-      new_user: 0,
-      new_user: 1
+      new_user: 0
     ]
 
   defp make_rating(userid, rating_type_id, rating_value) do

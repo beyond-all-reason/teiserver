@@ -28,10 +28,6 @@ defmodule Teiserver.Battle.BalanceLibInternalTest do
              %{user4.id => %{name: user4.name, rank: 0, rating: 15, uncertainty: 0}},
              %{user5.id => %{name: user5.name, rank: 0, rating: 11, uncertainty: 0}}
            ]
-
-    # loser_picks algo will hit the databases so let's just test with split_one_chevs
-    result = BalanceLib.create_balance(fixed_groups, 2, algorithm: "split_one_chevs")
-    assert result != nil
   end
 
   test "Handle groups with incomplete data in create_balance loser_pics" do
@@ -44,23 +40,7 @@ defmodule Teiserver.Battle.BalanceLibInternalTest do
       %{user5.id => 11}
     ]
 
-    # loser_picks algo will hit the databases so let's just test with split_one_chevs
     result = BalanceLib.create_balance(groups, 2, algorithm: "loser_picks")
-    assert result != nil
-  end
-
-  test "Handle groups with incomplete data in create_balance split_one_chevs" do
-    [user1, user2, user3, user4, user5] = create_test_users()
-
-    groups = [
-      %{user1.id => 19, user2.id => 20},
-      %{user3.id => 18},
-      %{user4.id => 15},
-      %{user5.id => 11}
-    ]
-
-    # loser_picks algo will hit the databases so let's just test with split_one_chevs
-    result = BalanceLib.create_balance(groups, 2, algorithm: "split_one_chevs")
     assert result != nil
   end
 
@@ -123,16 +103,15 @@ defmodule Teiserver.Battle.BalanceLibInternalTest do
 
     assert result == [
              "brute_force",
-             "cheeky_switcher_smart",
              "force_party",
              "loser_picks",
-             "split_noobs",
-             "split_one_chevs"
+             "respect_avoids",
+             "split_noobs"
            ]
 
     is_moderator = false
     result = BalanceLib.get_allowed_algorithms(is_moderator)
-    assert result == ["loser_picks", "split_noobs"]
+    assert result == ["loser_picks", "respect_avoids", "split_noobs"]
   end
 
   defp create_test_users do

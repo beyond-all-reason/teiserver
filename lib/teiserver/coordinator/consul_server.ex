@@ -172,8 +172,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
         name = Account.get_username_by_id(userid)
         Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{name}")
       end
-
-      send(self(), :recheck_membership)
     end)
 
     {:noreply, %{state | timeouts: %{}}}
@@ -812,7 +810,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     boss_avoid_status =
       state.host_bosses
       |> Stream.map(fn boss_id ->
-        Account.does_a_avoid_b?(boss_id, user.id)
+        Account.does_a_block_b?(boss_id, user.id)
       end)
       |> Enum.any?()
 
@@ -936,7 +934,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     boss_avoid_status =
       state.host_bosses
       |> Stream.map(fn boss_id ->
-        Account.does_a_avoid_b?(boss_id, userid)
+        Account.does_a_block_b?(boss_id, userid)
       end)
       |> Enum.any?()
 

@@ -1,27 +1,20 @@
-defmodule Teiserver.Battle.Balance.SplitNoobs do
+defmodule Teiserver.Battle.Balance.RespectAvoids do
   @moduledoc """
-  Seperate players into noobs and experienced players. Noobs are players without a party and either
-  high uncertainty or 0 rating. Experienced players are anyone not in the noob category.
+  A balance algorithm that tries to keep avoided players on seperate teams.
 
-  IF THERE ARE PARTIES
-  The top 14 experienced players are fed into the brute force algorithm to
-  find the best two team combination. To determine the top 14, we prefer players in parties, then prefer higher rating.
-  The brute force algo will try and keep parties together and keep both team ratings close.
+  High uncertainty players are avoid immune because we classify those as noobs and want to spread
+  them evenly across teams (like split_noobs).
 
-  Next the teams will draft the remaining experienced players preferring higher rating. Then the teams will draft the noobs
-  preferring higher rank and lower uncertainty.
-
-  IF THERE ARE NO PARTIES
-  The teams will draft the experienced players first, preferring higher rating. Then they will draft
-  the noobs preferring higher rank and lower uncertainty.
+  Parties are ignored. However, if nobody is avoiding anybody in this lobby, we call a different
+  balance algorithm that supports parties.
   """
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
-  alias Teiserver.Battle.Balance.SplitNoobsTypes, as: SN
-  alias Teiserver.Battle.Balance.BruteForce
+  alias Teiserver.Battle.Balance.RespectAvoidsTypes, as: AP
+  alias Teiserver.Battle.Balance.BruteForceAvoid
   import Teiserver.Helper.NumberHelper, only: [format: 1]
-  # If player uncertainty is greater than equal to this, that player is considered a noob
-  # The lowest uncertainty rank 0 player in integration server at the time of writing this is 6.65
-  @high_uncertainty 6.65
+  alias Teiserver.Account.RelationshipLib
+  alias Teiserver.Battle.Balance.SplitNoobs
+
   @splitter "------------------------------------------------------"
 
   @doc """
@@ -29,44 +22,68 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
   """
   @spec perform([BT.expanded_group()], non_neg_integer(), list()) :: any()
   def perform(expanded_group, team_count, opts \\ []) do
-    initial_state = get_initial_state(expanded_group)
+    is_ranked? = Keyword.get(opts, :is_ranked?, true)
+    debug_mode? = Keyword.get(opts, :debug_mode?, false)
+    initial_state = get_initial_state(expanded_group, is_ranked?, debug_mode?)
 
     case should_use_algo(initial_state, team_count) do
-      {:ok, :has_parties} ->
+      :ok ->
         result = get_result(initial_state)
         standardise_result(result, initial_state)
 
-      {:ok, :no_parties} ->
-        result = do_simple_draft(initial_state)
-        standardise_result(result, initial_state)
-
-      {:error, message} ->
+      {:error, message, alternate_balancer} ->
         # Call another balancer
-        result = Teiserver.Battle.Balance.LoserPicks.perform(expanded_group, team_count, opts)
+        result =
+          case alternate_balancer do
+            "split_noobs" ->
+              Teiserver.Battle.Balance.SplitNoobs.perform(expanded_group, team_count, opts)
+
+            _ ->
+              Teiserver.Battle.Balance.LoserPicks.perform(expanded_group, team_count, opts)
+          end
 
         new_logs =
-          ["#{message} Will use loser_picks algorithm instead.", @splitter, result.logs]
+          (get_initial_logs(initial_state) ++
+             [
+               "#{message} Will use #{alternate_balancer} algorithm instead.",
+               @splitter,
+               result.logs
+             ])
           |> List.flatten()
 
         Map.put(result, :logs, new_logs)
     end
   end
 
-  @spec should_use_algo(SN.state(), integer()) ::
-          {:ok, :no_parties} | {:error, String.t()} | {:ok, :has_parties}
+  @spec should_use_algo(AP.state(), integer()) ::
+          :ok | {:error, String.t(), String.t()}
   def should_use_algo(initial_state, team_count) do
+    has_avoids? = Enum.count(initial_state.avoids) > 0
+
+    # If team count not two, then call loser_picks
+    # If no avoids, then call split_noobs if there exists noobs or loser_picks if no noobs
+    # Otherwise return :ok
     cond do
-      team_count != 2 -> {:error, "Team count not equal to 2."}
-      length(initial_state.parties) == 0 -> {:ok, :no_parties}
-      true -> {:ok, :has_parties}
+      team_count != 2 ->
+        {:error, "Team count not equal to 2.", "loser_picks"}
+
+      !has_avoids? ->
+        msg = "Nobody is avoiding any other player."
+
+        case Enum.count(initial_state.noobs) > 0 do
+          true -> {:error, msg, "split_noobs"}
+          false -> {:error, msg, "loser_picks"}
+        end
+
+      true ->
+        :ok
     end
   end
 
-  @spec standardise_result(SN.result() | SN.simple_result(), SN.state()) :: any()
+  @spec standardise_result(AP.result() | AP.simple_result(), AP.state()) :: any()
   def standardise_result(result, state) do
     first_team = result.first_team
     second_team = result.second_team
-    parties = state.parties
 
     team_groups = %{
       1 => standardise_team_groups(first_team),
@@ -88,30 +105,25 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
             end)
 
           [
-            "Solo noobs:",
+            "High uncertainty players (avoid immune):",
             noobs_string
           ]
 
         true ->
-          "Solo Noobs: None"
+          "New players: None"
       end
 
     logs =
-      [
-        @splitter,
-        "Algorithm: split_noobs",
-        @splitter,
-        "This algorithm will evenly distribute noobs and devalue them. Noobs are non-partied players that have either high uncertainty or 0 rating. Noobs will always be drafted last. For non-noobs, teams will prefer higher rating. For noobs, teams will prefer higher chevrons and lower uncertainty.",
-        @splitter,
-        "Parties: #{log_parties(parties)}",
-        noob_log,
-        @splitter,
-        result.logs,
-        @splitter,
-        "Final result:",
-        "Team 1: #{log_team(first_team)}",
-        "Team 2: #{log_team(second_team)}"
-      ]
+      (get_initial_logs(state) ++
+         [
+           noob_log,
+           @splitter,
+           result.logs,
+           @splitter,
+           "Final result:",
+           "Team 1: #{log_team(first_team)}",
+           "Team 2: #{log_team(second_team)}"
+         ])
       |> List.flatten()
 
     %{
@@ -121,19 +133,30 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     }
   end
 
-  @spec log_parties([[String.t()]]) :: String.t()
-  def log_parties(parties) do
-    if(length(parties) == 0) do
-      "None"
-    else
-      Enum.map(parties, fn party ->
-        "[#{Enum.join(party, ", ")}]"
-      end)
-      |> Enum.join(", ")
-    end
+  defp get_initial_logs(state) do
+    avoid_text =
+      case state.debug_mode? do
+        false -> "Has avoids: #{Enum.count(state.avoids) > 0}"
+        true -> "Number of avoids: #{Enum.count(state.avoids)}"
+      end
+
+    [
+      @splitter,
+      "Algorithm: respect_avoids",
+      @splitter,
+      "This algorithm will try and respect avoids of players so long as it can keep team rating difference within certain bounds. Parties will be ignored if there is at least one player avoiding another player.",
+      "If the game is ranked, only avoids that are at least 24h old will be respected.",
+      "New players will be spread evenly across teams and cannot be avoided.",
+      @splitter,
+      "Lobby details:",
+      "Ranked: #{state.is_ranked?}",
+      avoid_text,
+      "Has parties: #{state.has_parties?}",
+      @splitter
+    ]
   end
 
-  @spec log_team([SN.player()]) :: String.t()
+  @spec log_team([AP.player()]) :: String.t()
   defp log_team(team) do
     Enum.map(team, fn x ->
       x.name
@@ -142,7 +165,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     |> Enum.join(", ")
   end
 
-  @spec standardise_team_groups([SN.player()]) :: any()
+  @spec standardise_team_groups([AP.player()]) :: any()
   defp standardise_team_groups(team) do
     team
     |> Enum.map(fn x ->
@@ -162,18 +185,28 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     end)
   end
 
-  @spec get_initial_state([BT.expanded_group()]) :: SN.state()
-  def get_initial_state(expanded_group) do
+  @spec get_initial_state([BT.expanded_group()], boolean(), boolean()) :: AP.state()
+  def get_initial_state(expanded_group, is_ranked?, debug_mode?) do
     players = flatten_members(expanded_group)
-    parties = get_parties(expanded_group)
+    has_parties? = has_parties?(expanded_group)
+
+    player_ids =
+      players
+      |> Enum.map(fn player ->
+        player.id
+      end)
+
+    avoids = get_avoids(player_ids, is_ranked?, debug_mode?)
     noobs = get_noobs(players) |> sort_noobs()
 
     experienced_players =
-      get_experienced_players(players, noobs)
+      get_experienced_players(players, noobs, avoids)
       |> Enum.with_index(fn element, index ->
         element |> Map.put(:index, index + 1)
       end)
 
+    # top_experienced are the players we will feed into brute force algo
+    # We limit to 14 players or it will take too long
     index_cut_off = 14
 
     top_experienced =
@@ -190,38 +223,21 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
 
     %{
       players: players,
-      parties: parties,
+      avoids: avoids,
       noobs: noobs,
       top_experienced: top_experienced,
-      bottom_experienced: bottom_experienced
+      bottom_experienced: bottom_experienced,
+      is_ranked?: is_ranked?,
+      has_parties?: has_parties?,
+      debug_mode?: debug_mode?
     }
   end
 
-  @spec do_simple_draft(SN.state()) :: SN.simple_result()
-  def do_simple_draft(state) do
-    default_acc = %{
-      first_team: [],
-      second_team: []
-    }
-
-    experienced_players = state.top_experienced ++ state.bottom_experienced
-
-    noobs = state.noobs
-    sorted_players = experienced_players ++ noobs
-
-    Enum.reduce(sorted_players, default_acc, fn x, acc ->
-      picking_team = get_picking_team(acc.first_team, acc.second_team)
-
-      Map.put(acc, picking_team, [x | acc[picking_team]])
-    end)
-    |> Map.put(:logs, ["Teams constructed by simple draft"])
-  end
-
-  @spec get_result(SN.state()) :: SN.result()
+  @spec get_result(AP.state()) :: AP.result()
   def get_result(state) do
     # This is the best combo with only the top 14 experienced players
     # This means we brute force at most 14 playesr
-    combo_result = BruteForce.get_best_combo(state.top_experienced, state.parties)
+    combo_result = BruteForceAvoid.get_best_combo(state.top_experienced, state.avoids)
     # These are the remaining players who were not involved in the brute force algorithm
     remaining = state.bottom_experienced ++ state.noobs
 
@@ -231,7 +247,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
       @splitter,
       "Brute force result:",
       "Team rating diff penalty: #{format(combo_result.rating_diff_penalty)}",
-      "Broken party penalty: #{combo_result.broken_party_penalty}",
+      "Broken avoid penalty: #{combo_result.broken_avoid_penalty}",
       "Score: #{format(combo_result.score)} (lower is better)",
       @splitter,
       "Draft remaining players (ordered from best to worst).",
@@ -327,17 +343,30 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
         }
   end
 
-  @spec get_parties([BT.expanded_group()]) :: [String.t()]
-  def get_parties(expanded_group) do
-    Enum.filter(expanded_group, fn x ->
-      x[:count] >= 2
-    end)
-    |> Enum.map(fn y ->
-      y[:names]
+  @spec has_parties?([BT.expanded_group()]) :: boolean()
+  defp has_parties?(expanded_group) do
+    Enum.any?(expanded_group, fn x ->
+      x.count > 1
     end)
   end
 
-  def get_experienced_players(players, noobs) do
+  @spec get_avoids([any()], boolean(), boolean()) :: [String.t()]
+  def get_avoids(player_ids, is_ranked?, debug_mode? \\ false) do
+    case is_ranked? and !debug_mode? do
+      true ->
+        avoid_min_hours = 24
+        RelationshipLib.get_lobby_avoids(player_ids, avoid_min_hours)
+
+      false ->
+        RelationshipLib.get_lobby_avoids(player_ids)
+    end
+  end
+
+  ## Gets experienced players
+  ## Players that are in avoids (in either direction) are at the front, then sort by rating
+  def get_experienced_players(players, noobs, avoids) do
+    flat_avoids = List.flatten(avoids)
+
     Enum.filter(players, fn player ->
       !Enum.any?(noobs, fn noob ->
         noob.name == player.name
@@ -345,8 +374,13 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     end)
     |> Enum.sort_by(
       fn player ->
+        is_in_avoid_list? =
+          Enum.any?(flat_avoids, fn id ->
+            id == player.id
+          end)
+
         player.rating +
-          case player.in_party? do
+          case is_in_avoid_list? do
             true -> 100
             false -> 0
           end
@@ -355,23 +389,11 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     )
   end
 
-  # Returns noobs that are not part of a party
-  # Noobs have high uncertainty or 0 match rating
-  @spec get_noobs([SN.player()]) :: any()
+  # Noobs have high uncertainty
+  @spec get_noobs([AP.player()]) :: any()
   def get_noobs(players) do
-    # Noobs are those with 0 rating or high uncertainty
-
     Enum.filter(players, fn player ->
-      cond do
-        player.in_party? -> false
-        is_newish_player?(player.rank, player.uncertainty) -> true
-        player.rating <= 0 -> true
-        true -> false
-      end
+      SplitNoobs.is_newish_player?(player.rank, player.uncertainty)
     end)
-  end
-
-  def is_newish_player?(rank, uncertainty) do
-    rank <= 2 && uncertainty >= @high_uncertainty
   end
 end

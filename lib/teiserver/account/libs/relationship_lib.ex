@@ -4,6 +4,7 @@ defmodule Teiserver.Account.RelationshipLib do
   alias Teiserver.Account.AuthLib
   alias Teiserver.Data.Types, as: T
   alias Phoenix.PubSub
+  alias Teiserver.Repo
 
   @spec colour :: atom
   def colour(), do: :success
@@ -298,23 +299,12 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec check_block_status(T.userid(), [T.userid()]) :: :ok | :blocking | :blocked
   def check_block_status(userid, userid_list) do
-    user = Account.get_user_by_id(userid)
     userid_count = Enum.count(userid_list) |> max(1)
 
-    {block_count_needed, block_percentage_needed} =
-      cond do
-        user.behaviour_score <= 5000 ->
-          {2, 20}
-
-        user.behaviour_score <= 8000 ->
-          {3, 30}
-
-        true ->
-          {
-            Config.get_site_config_cache("lobby.Block count to prevent join"),
-            Config.get_site_config_cache("lobby.Block percentage to prevent join")
-          }
-      end
+    {block_count_needed, block_percentage_needed} = {
+      Config.get_site_config_cache("lobby.Block count to prevent join"),
+      Config.get_site_config_cache("lobby.Block percentage to prevent join")
+    }
 
     being_blocked_count =
       userid
@@ -342,23 +332,12 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec check_avoid_status(T.userid(), [T.userid()]) :: :ok | :avoiding | :avoided
   def check_avoid_status(userid, userid_list) do
-    user = Account.get_user_by_id(userid)
     userid_count = Enum.count(userid_list) |> max(1)
 
-    {avoid_count_needed, avoid_percentage_needed} =
-      cond do
-        user.behaviour_score <= 5000 ->
-          {2, 20}
-
-        user.behaviour_score <= 8000 ->
-          {3, 30}
-
-        true ->
-          {
-            Config.get_site_config_cache("lobby.Avoid count to prevent playing"),
-            Config.get_site_config_cache("lobby.Avoid percentage to prevent playing")
-          }
-      end
+    {avoid_count_needed, avoid_percentage_needed} = {
+      Config.get_site_config_cache("lobby.Avoid count to prevent playing"),
+      Config.get_site_config_cache("lobby.Avoid percentage to prevent playing")
+    }
 
     being_avoided_count =
       userid
@@ -382,5 +361,38 @@ defmodule Teiserver.Account.RelationshipLib do
       avoiding_count >= avoid_count_needed -> :avoiding
       true -> :ok
     end
+  end
+
+  def get_lobby_avoids(player_ids) do
+    query = """
+    select from_user_id, to_user_id from account_relationships ar
+    where from_user_id =ANY($1)
+    and to_user_id =ANY($2)
+    and state in('avoid','block')
+    """
+
+    results = Ecto.Adapters.SQL.query!(Repo, query, [player_ids, player_ids])
+
+    results.rows
+  end
+
+  def get_lobby_avoids(player_ids, minimum_time_hours) do
+    query = """
+    select from_user_id, to_user_id from account_relationships ar
+    where from_user_id =ANY($1)
+    and to_user_id =ANY($2)
+    and state in('avoid','block')
+    and inserted_at <= (now() - interval '#{minimum_time_hours} hours')
+    """
+
+    # Not able to use mimimum_time_hours as parameter so have to add into the sql string
+
+    results =
+      Ecto.Adapters.SQL.query!(Repo, query, [
+        player_ids,
+        player_ids
+      ])
+
+    results.rows
   end
 end
