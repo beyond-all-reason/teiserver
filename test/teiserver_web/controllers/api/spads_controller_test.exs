@@ -8,19 +8,6 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       new_user: 0
     ]
 
-  defp make_rating(userid, rating_type_id, rating_value) do
-    {:ok, _} =
-      Account.create_rating(%{
-        user_id: userid,
-        rating_type_id: rating_type_id,
-        rating_value: rating_value,
-        skill: rating_value,
-        uncertainty: 0,
-        leaderboard_rating: rating_value,
-        last_updated: Timex.now()
-      })
-  end
-
   describe "ratings" do
     test "non-user", %{conn: conn} do
       conn = get(conn, Routes.ts_spads_path(conn, :get_rating, -1, "Team"))
