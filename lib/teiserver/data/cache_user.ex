@@ -870,8 +870,8 @@ defmodule Teiserver.CacheUser do
 
           true ->
             if Client.get_client_by_id(user.id) != nil do
-              :timer.sleep(1000)
               Client.disconnect(user.id, "Already logged in")
+              :timer.sleep(1000)
             end
 
             # Okay, we're good, what's capacity looking like?
@@ -969,8 +969,8 @@ defmodule Teiserver.CacheUser do
 
           true ->
             if Client.get_client_by_id(user.id) != nil do
-              :timer.sleep(1000)
               Client.disconnect(user.id, "Already logged in")
+              :timer.sleep(1000)
             end
 
             # Okay, we're good, what's capacity looking like?
