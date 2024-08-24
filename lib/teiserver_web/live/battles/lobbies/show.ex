@@ -23,6 +23,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
     moderator = allow?(socket, "Moderator")
     server_perms = allow?(socket, "Server")
+    tester_perms = allow?(socket, "Tester")
 
     extra_content =
       if moderator do
@@ -52,6 +53,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> assign(:subbed, true)
       |> assign(:moderator, moderator)
       |> assign(:server_perms, server_perms)
+      |> assign(:tester_perms, tester_perms)
 
     {:ok, socket}
   end
