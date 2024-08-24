@@ -63,5 +63,20 @@ defmodule TeiserverWeb.Tachyon.TransportTest do
                "commandId" => "foo/bar/not_implemented"
              } = Jason.decode!(resp)
     end
+
+    test "clean disconnect", %{client: client} do
+      msg =
+        %{
+          messageId: "msgId",
+          commandId: "system/disconnect",
+          type: "request",
+          data: %{reason: "kthxbye"}
+        }
+        |> Jason.encode!()
+
+      WSC.send_message(client, {:text, msg})
+      WSC.send_message(client, {:text, "test_ping"})
+      assert {:error, :disconnected} = WSC.recv(client)
+    end
   end
 end

@@ -32,16 +32,8 @@ defmodule Teiserver.Tachyon.Transport do
 
   def handle_in({msg, opcode: :text}, state) do
     with {:ok, parsed} <- Jason.decode(msg),
-         {:ok, _type, message_id, command_id} <- Schema.parse_envelope(parsed) do
-      resp = %{
-        type: "response",
-        status: "failed",
-        reason: "command_unimplemented",
-        commandId: command_id,
-        messageId: message_id
-      } |> Jason.encode!()
-
-      {:reply, :ok, {:text, resp}, state}
+         {:ok, command_id, message_type, message_id} <- Schema.parse_envelope(parsed) do
+      handle_command(command_id, message_type, message_id, parsed, state)
     else
       {:error, err} ->
         {:stop, :normal, 1008, [{:text, "Invalid json sent #{inspect(err)}"}], state}
@@ -74,6 +66,67 @@ defmodule Teiserver.Tachyon.Transport do
     )
 
     :ok
+  end
+
+  @spec handle_command(
+          Schema.command_id(),
+          Schema.message_type(),
+          Schema.message_id(),
+          term(),
+          connection_state()
+        ) ::
+          WebSock.handle_result()
+  def handle_command(command_id, message_type, message_id, message, state) do
+    case Schema.parse_message(command_id, message_type, message) do
+      :ok ->
+        do_handle_command(command_id, message_type, message_id, message, state)
+
+      :missing_schema ->
+        resp =
+          %{
+            type: :response,
+            status: :failed,
+            reason: :command_unimplemented,
+            commandId: command_id,
+            messageId: message_id
+          }
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+
+      {:error, err} ->
+        resp =
+          %{
+            type: :response,
+            status: :failed,
+            reason: :internal_error,
+            commandId: command_id,
+            messageId: message_id,
+            details: inspect(err)
+          }
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+    end
+  end
+
+  def do_handle_command("system/disconnect", "request", _message_id, _message, state) do
+    {:stop, :normal, state}
+  end
+
+  def do_handle_command(command_id, _message_type, message_id, _message, state) do
+    # TODO: call the handler there
+    resp =
+      %{
+        type: :response,
+        status: :failed,
+        reason: :command_unimplemented,
+        commandId: command_id,
+        messageId: message_id
+      }
+      |> Jason.encode!()
+
+    {:reply, :ok, {:text, resp}, state}
   end
 
   # helper function to use the result from the invoked handler function
