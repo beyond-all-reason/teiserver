@@ -108,6 +108,12 @@ spectators =
               <li>
                 Queue size: <%= Enum.count(@consul.join_queue ++ @consul.low_priority_join_queue) %>
               </li>
+              <%= if @tester_perms do %>
+                <li>
+                  Balance algorithm: <%= @consul.balance_algorithm %>
+                </li>
+              <% end %>
+
               <%= if @server_perms do %>
                 <li>Match ID: <%= Map.get(@modoptions, "server/match/id") %></li>
                 <li>Match UUID: <%= Map.get(@modoptions, "server/match/uuid") %></li>
