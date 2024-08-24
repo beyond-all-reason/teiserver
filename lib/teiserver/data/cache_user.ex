@@ -780,7 +780,7 @@ defmodule Teiserver.CacheUser do
     login_count = Teiserver.cache_get(:teiserver_login_count, userid) || 0
     rate_limit = Config.get_site_config_cache("system.Login limit count")
 
-    if login_count > rate_limit do
+    if login_count >= rate_limit do
       :block
     else
       Teiserver.cache_put(:teiserver_login_count, userid, login_count + 1)
@@ -868,18 +868,12 @@ defmodule Teiserver.CacheUser do
 
             {:error, "Unverified", user.id}
 
-          Client.get_client_by_id(user.id) != nil ->
-            Client.disconnect(user.id, "Already logged in")
-
-            if is_bot?(user) do
+          true ->
+            if Client.get_client_by_id(user.id) != nil do
+              Client.disconnect(user.id, "Already logged in")
               :timer.sleep(1000)
-              do_login(user, ip, lobby, lobby_hash)
-            else
-              Teiserver.cache_put(:teiserver_login_count, user.id, 10)
-              {:error, "Existing session, please retry in 20 seconds to clear the cache"}
             end
 
-          true ->
             # Okay, we're good, what's capacity looking like?
             cond do
               is_bot?(user) ->
@@ -973,18 +967,12 @@ defmodule Teiserver.CacheUser do
 
             {:error, "Unverified", user.id}
 
-          Client.get_client_by_id(user.id) != nil ->
-            Client.disconnect(user.id, "Already logged in")
-
-            if is_bot?(user) do
+          true ->
+            if Client.get_client_by_id(user.id) != nil do
+              Client.disconnect(user.id, "Already logged in")
               :timer.sleep(1000)
-              do_login(user, ip, lobby, lobby_hash)
-            else
-              Teiserver.cache_put(:teiserver_login_count, user.id, 10)
-              {:error, "Existing session, please retry in 20 seconds to clear the cache"}
             end
 
-          true ->
             # Okay, we're good, what's capacity looking like?
             cond do
               is_bot?(user) ->
