@@ -1,4 +1,4 @@
-defmodule Teiserver.AutohostFixture do
+defmodule Teiserver.AutohostFixtures do
   alias Teiserver.Autohost
 
   def create_autohost(name) do
