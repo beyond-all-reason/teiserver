@@ -32,7 +32,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @admin_commands ~w(playerlimit)
 
   # @handled_by_lobby ~w(explain)
-  @default_balance_algorithm "loser_picks"
   @splitter "########################################"
 
   @afk_check_duration 40_000
@@ -392,7 +391,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
           maximum_rating_to_play: LobbyRestrictions.rating_upper_bound(),
           minimum_rank_to_play: 0,
           maximum_rank_to_play: LobbyRestrictions.rank_upper_bound(),
-          balance_algorithm: @default_balance_algorithm,
+          balance_algorithm: BalanceLib.get_default_algorithm(),
           welcome_message: nil
         })
 
@@ -1405,7 +1404,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       unready_can_play: false,
       last_queue_state: [],
       balance_result: nil,
-      balance_algorithm: @default_balance_algorithm,
+      balance_algorithm: BalanceLib.get_default_algorithm(),
       player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
       showmatch: true
     }

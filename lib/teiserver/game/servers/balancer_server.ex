@@ -273,7 +273,7 @@ defmodule Teiserver.Game.BalancerServer do
       lobby_id: lobby_id,
       host_id: founder_id,
       hashes: %{},
-      algorithm: "loser_picks",
+      algorithm: BalanceLib.get_default_algorithm(),
       last_balance_hash: nil
     })
   end

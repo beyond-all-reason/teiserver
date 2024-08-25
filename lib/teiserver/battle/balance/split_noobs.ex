@@ -364,10 +364,14 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     Enum.filter(players, fn player ->
       cond do
         player.in_party? -> false
-        player.uncertainty >= @high_uncertainty -> true
+        is_newish_player?(player.rank, player.uncertainty) -> true
         player.rating <= 0 -> true
         true -> false
       end
     end)
+  end
+
+  def is_newish_player?(rank, uncertainty) do
+    uncertainty >= @high_uncertainty && rank <= 2
   end
 end
