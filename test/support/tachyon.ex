@@ -38,6 +38,55 @@ defmodule Teiserver.Support.Tachyon do
     "ws://#{conf[:url][:host]}:#{conf[:http][:port]}/tachyon"
   end
 
+  # TODO tachyon_mvp: add a json validation here to make sure the request
+  # sent there is conforming
+  def request(command_id, data \\ nil) do
+    req = %{
+      type: :request,
+      commandId: command_id,
+      messageId: UUID.uuid4()
+    }
+
+    if is_nil(data) do
+      req
+    else
+      Map.put(req, :data, data)
+    end
+  end
+
+  # TODO tachyon_mvp: create a version of this function that also check the
+  # the response against the expected json schema
+  def recv_response(client) do
+    case WSC.recv(client) do
+      {:ok, {:text, resp}} -> {:ok, Jason.decode!(resp)}
+      other -> other
+    end
+  end
+
+  @doc """
+  high level function to get the list of matchmaking queues
+  """
+  def list_queues!(client) do
+    req = request("matchmaking/list")
+    :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
+    {:ok, resp} = recv_response(client)
+
+    message_id = req.messageId
+
+    # This checks the server replies with the correct message_id
+    # it only needs to be done once in the test suite so might as well put
+    # put it here since this is the first request implemented
+    # This could (should?) be moved elsewhere later
+    %{
+      "type" => "response",
+      "messageId" => ^message_id,
+      "commandId" => "matchmaking/list",
+      "status" => "success"
+    } = resp
+
+    resp
+  end
+
   @doc """
   Run the given function `f` until `pred` returns true on its result.
   Waits `wait` ms between each tries. Raise an error if `pred` returns false

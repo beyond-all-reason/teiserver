@@ -3,9 +3,11 @@ defmodule Teiserver.Player.TachyonHandler do
   Player specific code to handle tachyon logins and actions
   """
 
+  alias Teiserver.Tachyon.Schema
   alias Teiserver.Tachyon.Handler
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Player
+  alias Teiserver.Matchmaking
 
   @behaviour Handler
 
@@ -51,6 +53,24 @@ defmodule Teiserver.Player.TachyonHandler do
           term(),
           state()
         ) :: WebSock.handle_result()
+  def handle_command("matchmaking/list" = cmd_id, "request", message_id, _message, state) do
+    queues =
+      Matchmaking.list_queues()
+      |> Enum.map(fn {qid, queue} ->
+        %{
+          id: qid,
+          name: queue.name,
+          numOfTeams: queue.team_count,
+          teamSize: queue.team_size,
+          ranked: queue.ranked
+        }
+      end)
+
+    resp = Schema.response(cmd_id, message_id, %{playlists: queues}) |> Jason.encode!()
+
+    {:reply, :ok, {:text, resp}, state}
+  end
+
   def handle_command(command_id, _message_type, message_id, _message, state) do
     resp =
       Schema.error_response(command_id, message_id, :command_unimplemented)

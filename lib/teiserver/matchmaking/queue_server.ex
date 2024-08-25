@@ -45,7 +45,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @type queue :: %{
           name: String.t(),
           team_size: pos_integer(),
-          team_count: pos_integer()
+          team_count: pos_integer(),
+          ranked: boolean()
         }
 
   @type state :: %{
@@ -80,7 +81,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
       queue: %{
         name: attrs.name,
         team_size: attrs.team_size,
-        team_count: attrs.team_count
+        team_count: attrs.team_count,
+        ranked: true
       },
       settings: Map.merge(default_settings(), Map.get(attrs, :settings, %{})),
       members: Map.get(attrs, :members, [])
