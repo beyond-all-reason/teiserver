@@ -9,6 +9,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
   """
 
   use GenServer
+  alias Teiserver.Matchmaking.QueueRegistry
+  alias Teiserver.Data.Types, as: T
 
   @typedoc """
   member of a queue. Holds of the information required to match members together.
@@ -89,8 +91,24 @@ defmodule Teiserver.Matchmaking.QueueServer do
     }
   end
 
+  def via_tuple(queue_id) do
+    QueueRegistry.via_tuple(queue_id)
+  end
+
   def via_tuple(queue_id, queue) do
-    Teiserver.Matchmaking.QueueRegistry.via_tuple(queue_id, queue)
+    QueueRegistry.via_tuple(queue_id, queue)
+  end
+
+  @type join_result :: :ok | {:error, :invalid_queue | :already_queued}
+
+  @doc """
+  Join the specified queue
+  """
+  @spec join_queue(id(), member()) :: join_result()
+  def join_queue(queue_id, member) do
+    GenServer.call(QueueRegistry.via_tuple(queue_id), {:join_queue, member})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_queue}
   end
 
   @spec start_link(state()) :: GenServer.on_start()
@@ -103,5 +121,18 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @impl true
   def init(state) do
     {:ok, state}
+  end
+
+  @impl true
+  def handle_call({:join_queue, new_member}, _from, state) do
+    member_ids =
+      Enum.flat_map(state.members, fn m -> m.player_ids end)
+      |> MapSet.new()
+
+    if MapSet.disjoint?(member_ids, MapSet.new(new_member.player_ids)) do
+      {:reply, :ok, %{state | members: [new_member | state.members]}}
+    else
+      {:reply, {:error, :already_queued}, state}
+    end
   end
 end
