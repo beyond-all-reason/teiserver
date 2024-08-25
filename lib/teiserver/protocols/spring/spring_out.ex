@@ -20,7 +20,7 @@ defmodule Teiserver.Protocols.SpringOut do
   ---------
   """
 
-  @compflags "sp teiserver matchmaking token-auth"
+  @compflags "sp teiserver matchmaking token-auth tachyon"
 
   @spec reply(atom(), nil | String.t() | tuple() | list(), String.t(), map) :: map
   def reply(reply_cmd, data, msg_id, state) do
@@ -73,7 +73,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:protocol_extensions, nil) do
-    "@PROTOCOL_EXTENSIONS@ {\"ring:originator\":1}\n"
+    "SERVERMSG @PROTOCOL_EXTENSIONS@ {\"ring:originator\":1}\n"
   end
 
   defp do_reply(:motd, nil) do
@@ -605,6 +605,10 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:error_log, _) do
     "s.client.errorlog\n"
   end
+
+  # defp do_reply(:tachyon, {namespace, function, data, state}) do
+  #   Teiserver.Protocols.Tachyon.V1.TachyonOut.reply(namespace, function, data, state)
+  # end
 
   defp do_reply(atom, data) do
     Logger.error(

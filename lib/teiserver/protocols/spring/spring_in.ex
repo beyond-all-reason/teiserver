@@ -150,6 +150,34 @@ defmodule Teiserver.Protocols.SpringIn do
     reply(:welcome, nil, msg_id, new_state)
   end
 
+  # Swap to the Tachyon protocol
+  defp do_handle("TACHYON", "", msg_id, state) do
+    reply(:okay, "TACHYON", msg_id, state)
+    {m_in, m_out} = Teiserver.Protocols.TachyonLib.get_modules()
+
+    %{state | protocol_in: m_in, protocol_out: m_out}
+  end
+
+  defp do_handle("TACHYON", "dev", msg_id, state) do
+    reply(:okay, "TACHYON", msg_id, state)
+    {m_in, m_out} = Teiserver.Protocols.TachyonLib.get_modules("dev")
+
+    %{state | protocol_in: m_in, protocol_out: m_out}
+  end
+
+  defp do_handle("TACHYON", "v" <> _ = version, msg_id, state) do
+    reply(:okay, "TACHYON", msg_id, state)
+    {m_in, m_out} = Teiserver.Protocols.TachyonLib.get_modules(version)
+
+    %{state | protocol_in: m_in, protocol_out: m_out}
+  end
+
+  # Use the Tachyon protocol for a single command
+  defp do_handle("TACHYON", data, _msg_id, state) do
+    {m_in, _m_out} = Teiserver.Protocols.TachyonLib.get_modules()
+    m_in.data_in("#{data}\n", state)
+  end
+
   defp do_handle("c.battles.list_ids", _, msg_id, state) do
     reply(:list_battles, Lobby.list_lobby_ids(), msg_id, state)
     state
@@ -1169,7 +1197,7 @@ defmodule Teiserver.Protocols.SpringIn do
               String.starts_with?(lowercase_msg, "!bset tweakunits") ->
             msg |> String.trim() |> String.slice(0..16384)
 
-          String.starts_with?(lowercase_msg, ["$welcome-message", "!welcome-message"]) ->
+          String.starts_with?(lowercase_msg, "$welcome-message") ->
             msg |> String.trim() |> String.slice(0..1024)
 
           true ->
@@ -1195,7 +1223,7 @@ defmodule Teiserver.Protocols.SpringIn do
               String.starts_with?(lowercase_msg, "!bset tweakunits") ->
             msg |> String.trim() |> String.slice(0..16384)
 
-          String.starts_with?(lowercase_msg, ["$welcome-message", "!welcome-message"]) ->
+          String.starts_with?(lowercase_msg, "$welcome-message") ->
             msg |> String.trim() |> String.slice(0..1024)
 
           true ->
@@ -1338,10 +1366,11 @@ defmodule Teiserver.Protocols.SpringIn do
     userid = CacheUser.get_userid(data)
 
     case String.split(data) do
-      [_, originator] ->
+      [sender, originator] ->
+        userid = CacheUser.get_userid(sender)
         client = Client.get_client_by_id(state.userid)
 
-        if client != nil and not CacheUser.is_bot?(state.userid) do
+        if client != nil and CacheUser.is_bot?(state.userid) do
           originator_id = CacheUser.get_userid(originator)
           CacheUser.ring(userid, originator_id)
         end
