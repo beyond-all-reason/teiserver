@@ -43,6 +43,28 @@ defmodule Teiserver.Player.TachyonHandler do
     {:ok, state}
   end
 
+  @impl Handler
+  @spec handle_command(
+          Schema.command_id(),
+          Schema.message_type(),
+          Schema.message_id(),
+          term(),
+          state()
+        ) :: WebSock.handle_result()
+  def handle_command(command_id, _message_type, message_id, _message, state) do
+    resp =
+      %{
+        type: :response,
+        status: :failed,
+        reason: :command_unimplemented,
+        commandId: command_id,
+        messageId: message_id
+      }
+      |> Jason.encode!()
+
+    {:reply, :ok, {:text, resp}, state}
+  end
+
   # Ensure a session is started for the given user id. Register both the session
   # and the connection. If a connection already exists, terminates it and
   # replace it in the player registry.

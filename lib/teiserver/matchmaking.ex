@@ -1,5 +1,6 @@
 defmodule Teiserver.Matchmaking do
   alias Teiserver.Matchmaking
+  alias Teiserver.Data.Types, as: T
 
   @type queue :: Matchmaking.QueueServer.queue()
   @type queue_id :: Matchmaking.QueueServer.id()
