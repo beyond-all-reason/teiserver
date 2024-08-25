@@ -73,7 +73,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:protocol_extensions, nil) do
-    "@PROTOCOL_EXTENSIONS@ {\"ring:originator\":1}\n"
+    "SERVERMSG @PROTOCOL_EXTENSIONS@ {\"ring:originator\":1}\n"
   end
 
   defp do_reply(:motd, nil) do
