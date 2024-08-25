@@ -2,6 +2,14 @@ defmodule Teiserver.Support.Tachyon do
   alias WebsocketSyncClient, as: WSC
   alias Teiserver.OAuthFixtures
 
+  def setup_client() do
+    user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+    %{client: client, token: token} = connect(user)
+
+    ExUnit.Callbacks.on_exit(fn -> WSC.disconnect(client) end)
+    {:ok, user: user, client: client, token: token}
+  end
+
   @doc """
   connects the given user and returns the ws client
   """

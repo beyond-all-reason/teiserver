@@ -6,11 +6,7 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
   alias Teiserver.Player
 
   setup _context do
-    user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
-    %{client: client, token: token} = Tachyon.connect(user)
-
-    on_exit(fn -> WSC.disconnect(client) end)
-    {:ok, user: user, client: client, token: token}
+    Tachyon.setup_client()
   end
 
   test "session is spawned when player connects", %{user: user} do
