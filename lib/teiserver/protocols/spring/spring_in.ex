@@ -1366,10 +1366,11 @@ defmodule Teiserver.Protocols.SpringIn do
     userid = CacheUser.get_userid(data)
 
     case String.split(data) do
-      [_, originator] ->
+      [sender, originator] ->
+        userid = CacheUser.get_userid(sender)
         client = Client.get_client_by_id(state.userid)
 
-        if client != nil and not CacheUser.is_bot?(state.userid) do
+        if client != nil and CacheUser.is_bot?(state.userid) do
           originator_id = CacheUser.get_userid(originator)
           CacheUser.ring(userid, originator_id)
         end
