@@ -101,11 +101,11 @@ defmodule Teiserver.Battle.BalanceLibInternalTest do
     is_moderator = true
     result = BalanceLib.get_allowed_algorithms(is_moderator)
 
-    assert result == ["brute_force", "force_party", "loser_picks", "split_noobs"]
+    assert result == ["brute_force", "default", "force_party", "loser_picks", "split_noobs"]
 
     is_moderator = false
     result = BalanceLib.get_allowed_algorithms(is_moderator)
-    assert result == ["loser_picks", "split_noobs"]
+    assert result == ["default", "split_noobs"]
   end
 
   defp create_test_users do

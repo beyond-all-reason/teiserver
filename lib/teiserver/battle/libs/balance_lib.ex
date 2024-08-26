@@ -27,7 +27,7 @@ defmodule Teiserver.Battle.BalanceLib do
   # which one will get to pick first
   @shuffle_first_pick true
 
-  @default_balance_algorithm "loser_picks"
+  @default_balance_algorithm "default"
 
   @spec defaults() :: map()
   def defaults() do
@@ -53,7 +53,8 @@ defmodule Teiserver.Battle.BalanceLib do
       "loser_picks" => Teiserver.Battle.Balance.LoserPicks,
       "force_party" => Teiserver.Battle.Balance.ForceParty,
       "brute_force" => Teiserver.Battle.Balance.BruteForce,
-      "split_noobs" => Teiserver.Battle.Balance.SplitNoobs
+      "split_noobs" => Teiserver.Battle.Balance.SplitNoobs,
+      "default" => Teiserver.Battle.Balance.DefaultBalance
     }
   end
 
@@ -65,7 +66,7 @@ defmodule Teiserver.Battle.BalanceLib do
     if(is_moderator) do
       Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
     else
-      mod_only = ["force_party", "brute_force"]
+      mod_only = ["force_party", "brute_force", "loser_picks"]
       Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.drop(mod_only) |> Map.keys()
     end
   end
