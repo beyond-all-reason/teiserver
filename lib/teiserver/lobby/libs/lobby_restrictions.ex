@@ -217,9 +217,6 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
           "To restrict this lobby to players who are new, use either:",
           "!maxchevlevel <chevlevel>",
           "!maxratinglevel <rating>",
-          "",
-          "To ensure new players are distributed evenly across teams:",
-          "!balancealgorithm split_noobs",
           ""
         ]
 
