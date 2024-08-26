@@ -70,8 +70,6 @@ defmodule Teiserver.Battle.Balance.DefaultBalance do
         }
   end
 
-  # Returns noobs that are not part of a party
-  # Noobs have high uncertainty or 0 match rating
   @spec has_noobs?([SN.player()]) :: any()
   def has_noobs?(players) do
     Enum.any?(players, fn x ->
