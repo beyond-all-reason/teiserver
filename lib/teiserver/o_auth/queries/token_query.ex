@@ -12,6 +12,8 @@ defmodule Teiserver.OAuth.TokenQueries do
     base_query()
     |> where_token(value)
     |> preload(:application)
+    |> preload(:owner)
+    |> preload(:autohost)
     |> Repo.one()
   end
 

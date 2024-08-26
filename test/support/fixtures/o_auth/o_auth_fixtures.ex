@@ -69,6 +69,19 @@ defmodule Teiserver.OAuthFixtures do
     %Credential{} |> Credential.changeset(attrs) |> Repo.insert!()
   end
 
+  @doc """
+  given a user id, will create a OAuth application and a valid token for that
+  user, returning both
+  """
+  def setup_token(%{user: user}), do: setup_token(user.id)
+  def setup_token(%{id: id}), do: setup_token(id)
+
+  def setup_token(user_id) do
+    app = app_attrs(user_id) |> create_app()
+    token = token_attrs(user_id, app) |> create_token()
+    %{app: app, token: token}
+  end
+
   defp generate_challenge() do
     # A-Z,a-z,0-9 and -._~ are authorized, but can't be bothered to cover all
     # of that. hex encoding will fit

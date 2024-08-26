@@ -599,6 +599,8 @@ defmodule TeiserverWeb.Router do
     get("/.well-known/oauth-authorization-server", CodeController, :metadata)
   end
 
+  get("/tachyon", TeiserverWeb.TachyonController, :connect)
+
   scope "/admin", TeiserverWeb.Admin do
     pipe_through([:live_browser, :protected])
 

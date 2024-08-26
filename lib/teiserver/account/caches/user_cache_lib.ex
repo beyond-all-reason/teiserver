@@ -33,7 +33,7 @@ defmodule Teiserver.Account.UserCacheLib do
 
     Teiserver.cache_get_or_store(:users_lookup_id_with_name, username, fn ->
       user =
-        Account.get_user(nil,
+        Account.query_user(
           search: [
             name_lower: username
           ],
@@ -71,7 +71,7 @@ defmodule Teiserver.Account.UserCacheLib do
     id =
       Teiserver.cache_get_or_store(:users_lookup_id_with_email, cachename_email, fn ->
         user =
-          Account.get_user(nil,
+          Account.query_user(
             search: [
               email_lower: email
             ],
@@ -125,7 +125,7 @@ defmodule Teiserver.Account.UserCacheLib do
   def get_userid_by_discord_id(discord_id) do
     Teiserver.cache_get_or_store(:users_lookup_id_with_discord, discord_id, fn ->
       user =
-        Account.get_user(nil,
+        Account.query_user(
           search: [
             data_equal: {"discord_id", discord_id}
           ],
@@ -248,8 +248,9 @@ defmodule Teiserver.Account.UserCacheLib do
     Account.script_update_user(db_user, Map.put(obj_attrs, "data", data))
   end
 
-  @spec update_user(CacheUser.t(), boolean) :: CacheUser.t()
-  def update_user(user, persist \\ false) do
+  @spec update_user(CacheUser.t(), [persist: boolean()] | nil) :: CacheUser.t()
+  def update_user(user, opts \\ []) do
+    persist = Keyword.get(opts, :persist, false)
     Teiserver.cache_put(:users, user.id, user)
     if persist, do: persist_user(user)
     user

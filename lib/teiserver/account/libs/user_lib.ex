@@ -92,6 +92,12 @@ defmodule Teiserver.Account.UserLib do
     |> Repo.one()
   end
 
+  @spec query_user(list) :: User.t() | nil
+  def query_user(query_args \\ []) do
+    UserQueries.query_users(query_args)
+    |> Repo.one()
+  end
+
   @doc """
   Creates a user.
 

@@ -34,6 +34,8 @@ defmodule TeiserverWeb.ConnCase do
 
   setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Teiserver.Repo)
+    Teiserver.TeiserverTestLib.clear_all_con_caches()
+    on_exit(&Teiserver.TeiserverTestLib.clear_all_con_caches/0)
 
     unless tags[:async] do
       Ecto.Adapters.SQL.Sandbox.mode(Teiserver.Repo, {:shared, self()})

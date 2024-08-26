@@ -26,4 +26,12 @@ defmodule Teiserver.Autohost do
   end
 
   defdelegate get_by_id(id), to: AutohostQueries
+
+  @doc """
+  Returns the pid of the autohost registered with a given id
+  """
+  @spec lookup_autohost(Autohost.id()) :: pid() | nil
+  def lookup_autohost(autohost_id) do
+    Teiserver.Autohost.Registry.lookup(autohost_id)
+  end
 end

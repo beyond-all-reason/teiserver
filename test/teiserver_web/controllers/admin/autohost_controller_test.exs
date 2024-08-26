@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Admin.AutohostControllerTest do
 
   alias Teiserver.{Autohost, OAuth}
   alias Teiserver.OAuth.CredentialQueries
-  alias Teiserver.{OAuthFixtures, AutohostFixture}
+  alias Teiserver.{OAuthFixtures, AutohostFixtures}
 
   defp setup_user(_context) do
     Central.Helpers.GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
@@ -147,7 +147,7 @@ defmodule TeiserverWeb.Admin.AutohostControllerTest do
     end
 
     test "delete invalid id", %{conn: conn, autohost: autohost, app: app} do
-      other_autohost = AutohostFixture.create_autohost("other autohost name")
+      other_autohost = AutohostFixtures.create_autohost("other autohost name")
 
       {:ok, _cred} =
         OAuth.create_credentials(app.id, other_autohost.id, "client_id", "verysecret")

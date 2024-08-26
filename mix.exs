@@ -105,7 +105,11 @@ defmodule Teiserver.MixProject do
       {:etop, "~> 0.7.0"},
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
       {:json_xema, "~> 0.3"},
-      {:nostrum, "~> 0.10.0"}
+      {:nostrum, "~> 0.10.0"},
+      {:websocket_sync_client,
+       git: "https://github.com/geekingfrog/websocket_sync_client.git",
+       ref: "45e15115ef5f44111196d78198faabf85795795d",
+       only: [:dev, :test]}
     ]
   end
 

@@ -26,8 +26,6 @@ defmodule Teiserver.Application do
 
         # Start the Ecto repository
         Teiserver.Repo,
-        # Start the endpoint when the application starts
-        TeiserverWeb.Endpoint,
         TeiserverWeb.Presence,
         {Teiserver.General.CacheClusterServer, name: Teiserver.General.CacheClusterServer},
         {Oban, oban_config()},
@@ -158,6 +156,13 @@ defmodule Teiserver.Application do
         # Telemetry
         {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
         Teiserver.Communication.Cache,
+
+        # this must be before Endpoint. Endpoint takes care of ws connection upgrade
+        # and makes use of the tachyon systems spawned under this module.
+        Teiserver.Tachyon.System,
+
+        # Start the endpoint after the rest of the systems are up
+        TeiserverWeb.Endpoint,
 
         # Ranch servers
         %{
