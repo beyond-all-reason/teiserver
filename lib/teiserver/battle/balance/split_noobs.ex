@@ -319,11 +319,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
           id: id,
           uncertainty: uncertainty,
           rank: rank,
-          in_party?:
-            cond do
-              count <= 1 -> false
-              true -> true
-            end
+          in_party?: count > 1
         }
   end
 

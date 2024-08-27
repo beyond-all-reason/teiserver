@@ -8,7 +8,7 @@ defmodule Teiserver.Lobby.Commands.ExplainCommand do
   alias Teiserver.{Account, Battle, Coordinator}
   import Teiserver.Helper.NumberHelper, only: [round: 2]
 
-  @splitter "---------------------------"
+  @splitter "------------------------------------------------------"
 
   @impl true
   @spec name() :: String.t()

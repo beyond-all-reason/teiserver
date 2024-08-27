@@ -20,6 +20,7 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   import Teiserver.Helper.NumberHelper, only: [round: 2]
 
+  @splitter "------------------------------------------------------"
   @type algorithm_state :: %{
           teams: map,
           logs: list,
@@ -81,9 +82,11 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
 
     max_teamsize = (total_members / Enum.count(teams)) |> :math.ceil() |> round()
 
+    intial_logs = [@splitter, "Algorithm: loser_picks", @splitter]
+
     state = %{
       teams: teams,
-      logs: group_logs,
+      logs: intial_logs ++ group_logs,
       solo_players: solo_players,
       group_pairs: group_pairs,
       max_teamsize: max_teamsize,
