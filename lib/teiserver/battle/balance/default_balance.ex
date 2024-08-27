@@ -4,37 +4,31 @@ defmodule Teiserver.Battle.Balance.DefaultBalance do
   """
   alias Teiserver.Battle.Balance.SplitNoobs
   alias Teiserver.Battle.Balance.LoserPicks
-  alias Teiserver.Battle.Balance.SplitNoobsTypes, as: SN
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
+  alias Teiserver.Battle.Balance.DefaultBalanceTypes, as: DB
 
   @doc """
   Main entry point used by balance_lib
   """
   @spec perform([BT.expanded_group()], non_neg_integer(), list()) :: any()
   def perform(expanded_group, team_count, opts \\ []) do
-    case should_use_algo(expanded_group, team_count) do
-      "split_noobs" ->
-        SplitNoobs.perform(expanded_group, team_count, opts)
-
-      _ ->
-        LoserPicks.perform(expanded_group, team_count, opts)
-    end
+    get_balance_algorithm(expanded_group, team_count).perform(expanded_group, team_count, opts)
   end
 
-  @spec should_use_algo([BT.expanded_group()], integer()) ::
-          String.t()
-  def should_use_algo(expanded_group, team_count) do
+  @spec get_balance_algorithm([BT.expanded_group()], integer()) ::
+          any()
+  def get_balance_algorithm(expanded_group, team_count) do
     cond do
       team_count != 2 ->
-        "loser_picks"
+        LoserPicks
 
       true ->
         players = flatten_members(expanded_group)
         has_noobs? = has_noobs?(players)
 
         cond do
-          has_noobs? -> "split_noobs"
-          true -> "loser_picks"
+          has_noobs? -> SplitNoobs
+          true -> LoserPicks
         end
     end
   end
@@ -42,35 +36,25 @@ defmodule Teiserver.Battle.Balance.DefaultBalance do
   @doc """
   Converts the input to a simple list of players
   """
-  @spec flatten_members([BT.expanded_group()]) :: any()
+  @spec flatten_members([BT.expanded_group()]) :: [DB.player()]
   def flatten_members(expanded_group) do
+    # We only care about ranks and uncertainties for now
+    # However, in the future we may use other data to decide what balance algorithm to use,
+    # e.g. whether there are parties or not, whether it's a high rating lobby, etc.
     for %{
-          members: members,
-          ratings: ratings,
           ranks: ranks,
-          names: names,
-          uncertainties: uncertainties,
-          count: count
+          uncertainties: uncertainties
         } <- expanded_group,
         # Zipping will create binary tuples from 2 lists
-        {id, rating, rank, name, uncertainty} <-
-          Enum.zip([members, ratings, ranks, names, uncertainties]),
-        # Create result value
+        {rank, uncertainty} <-
+          Enum.zip([ranks, uncertainties]),
         do: %{
-          rating: rating,
-          name: name,
-          id: id,
           uncertainty: uncertainty,
-          rank: rank,
-          in_party?:
-            cond do
-              count <= 1 -> false
-              true -> true
-            end
+          rank: rank
         }
   end
 
-  @spec has_noobs?([SN.player()]) :: any()
+  @spec has_noobs?([DB.player()]) :: any()
   def has_noobs?(players) do
     Enum.any?(players, fn x ->
       SplitNoobs.is_newish_player?(x.rank, x.uncertainty)

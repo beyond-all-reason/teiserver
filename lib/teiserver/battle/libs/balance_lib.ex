@@ -27,8 +27,6 @@ defmodule Teiserver.Battle.BalanceLib do
   # which one will get to pick first
   @shuffle_first_pick true
 
-  @default_balance_algorithm "default"
-
   @spec defaults() :: map()
   def defaults() do
     %{
@@ -43,8 +41,7 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
   def get_default_algorithm() do
-    # For now it's a constant but this could be moved to a configurable value
-    @default_balance_algorithm
+    Config.get_site_config_cache("teiserver.Default balance algorithm")
   end
 
   @spec algorithm_modules() :: %{String.t() => module}

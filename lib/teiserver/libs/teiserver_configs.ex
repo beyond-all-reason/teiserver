@@ -328,6 +328,16 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "teiserver.Default balance algorithm",
+      section: "Lobbies",
+      type: "select",
+      default: "loser_picks",
+      permissions: ["Admin"],
+      description: "The default balance algorithm",
+      opts: [choices: ["loser_picks", "default"]]
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Curse word score A",
       section: "Lobbies",
       type: "integer",
