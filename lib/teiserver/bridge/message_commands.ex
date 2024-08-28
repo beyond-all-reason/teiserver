@@ -6,11 +6,12 @@ defmodule Teiserver.Bridge.MessageCommands do
   alias Teiserver.Bridge.UnitNames
   alias Nostrum.Api
   require Logger
+  alias Teiserver.Data.Types, as: T
 
   @unauth ~w(discord)
   @always_allow ~w(whoami help whatwas unit)
 
-  @spec handle(Nostrum.Struct.Message.t()) :: any
+  @spec handle(Nostrum.Consumer.event()) :: any
   def handle(%Nostrum.Struct.Message{
         author: %{id: author},
         channel_id: channel,
@@ -51,7 +52,12 @@ defmodule Teiserver.Bridge.MessageCommands do
     :ok
   end
 
-  @spec handle_command({T.user(), String.t()}, String.t(), String.t(), String.t()) :: any
+  @spec handle_command(
+          {T.user(), String.t()},
+          String.t(),
+          String.t(),
+          Nostrum.Struct.Channel.id()
+        ) :: any
   def handle_command({nil, _discord_id}, "discord", "", channel) do
     reply(
       channel,
