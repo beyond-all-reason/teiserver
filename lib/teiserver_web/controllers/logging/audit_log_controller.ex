@@ -7,8 +7,8 @@ defmodule TeiserverWeb.Logging.AuditLogController do
 
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
-  plug :add_breadcrumb, name: 'Logging', url: '/logging'
-  plug :add_breadcrumb, name: 'Audit', url: '/logging/audit'
+  plug :add_breadcrumb, name: "Logging", url: "/logging"
+  plug :add_breadcrumb, name: "Audit", url: "/logging/audit"
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Logging.AuditLog,

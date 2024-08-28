@@ -16,8 +16,8 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
     sub_menu_active: "discord_channel"
   )
 
-  plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
-  plug :add_breadcrumb, name: 'Discord channels', url: '/admin/discord_channels'
+  plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
+  plug :add_breadcrumb, name: "Discord channels", url: "/admin/discord_channels"
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do

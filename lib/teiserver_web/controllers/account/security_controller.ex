@@ -3,8 +3,8 @@ defmodule TeiserverWeb.Account.SecurityController do
 
   alias Teiserver.Account
 
-  plug(:add_breadcrumb, name: 'Account', url: '/teiserver/account')
-  plug(:add_breadcrumb, name: 'Security', url: '/teiserver/account/security')
+  plug(:add_breadcrumb, name: "Account", url: "/teiserver/account")
+  plug(:add_breadcrumb, name: "Security", url: "/teiserver/account/security")
 
   plug(AssignPlug,
     site_menu_active: "teiserver_account",

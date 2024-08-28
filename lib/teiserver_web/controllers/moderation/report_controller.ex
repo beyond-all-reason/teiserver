@@ -16,8 +16,8 @@ defmodule TeiserverWeb.Moderation.ReportController do
     sub_menu_active: "report"
   )
 
-  plug :add_breadcrumb, name: 'Moderation', url: '/moderation'
-  plug :add_breadcrumb, name: 'Reports', url: '/moderation/reports'
+  plug :add_breadcrumb, name: "Moderation", url: "/moderation"
+  plug :add_breadcrumb, name: "Reports", url: "/moderation/reports"
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do

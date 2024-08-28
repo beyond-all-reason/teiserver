@@ -17,8 +17,8 @@ defmodule TeiserverWeb.Moderation.BanController do
     sub_menu_active: "ban"
   )
 
-  plug :add_breadcrumb, name: 'Moderation', url: '/teiserver'
-  plug :add_breadcrumb, name: 'Bans', url: '/teiserver/bans'
+  plug :add_breadcrumb, name: "Moderation", url: "/teiserver"
+  plug :add_breadcrumb, name: "Bans", url: "/teiserver/bans"
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do

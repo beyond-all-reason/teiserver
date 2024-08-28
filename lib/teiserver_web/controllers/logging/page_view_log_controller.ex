@@ -5,8 +5,8 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
   alias Teiserver.Helper.TimexHelper
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
-  plug :add_breadcrumb, name: 'Logging', url: '/logging'
-  plug :add_breadcrumb, name: 'Page views', url: '/logging/page_views'
+  plug :add_breadcrumb, name: "Logging", url: "/logging"
+  plug :add_breadcrumb, name: "Page views", url: "/logging/page_views"
 
   plug(AssignPlug,
     site_menu_active: "logging",

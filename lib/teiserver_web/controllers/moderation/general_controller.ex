@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Moderation.GeneralController do
   @moduledoc false
   use TeiserverWeb, :controller
 
-  plug :add_breadcrumb, name: 'Moderation', url: '/moderation'
+  plug :add_breadcrumb, name: "Moderation", url: "/moderation"
 
   plug(AssignPlug,
     site_menu_active: "moderation",

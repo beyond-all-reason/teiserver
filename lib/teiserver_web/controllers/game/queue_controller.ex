@@ -17,8 +17,8 @@ defmodule TeiserverWeb.Game.QueueController do
     sub_menu_active: "queue"
   )
 
-  plug :add_breadcrumb, name: 'Game', url: '/teiserver'
-  plug :add_breadcrumb, name: 'Queues', url: '/teiserver/queues'
+  plug :add_breadcrumb, name: "Game", url: "/teiserver"
+  plug :add_breadcrumb, name: "Queues", url: "/teiserver/queues"
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do

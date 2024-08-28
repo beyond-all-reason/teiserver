@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Logging.GeneralController do
   use TeiserverWeb, :controller
 
-  plug :add_breadcrumb, name: 'Logging', url: '/logging'
+  plug :add_breadcrumb, name: "Logging", url: "/logging"
 
   plug(AssignPlug,
     site_menu_active: "logging",

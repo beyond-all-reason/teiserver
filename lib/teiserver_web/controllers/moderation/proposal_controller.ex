@@ -16,8 +16,8 @@ defmodule TeiserverWeb.Moderation.ProposalController do
     sub_menu_active: "proposal"
   )
 
-  plug :add_breadcrumb, name: 'Moderation', url: '/teiserver'
-  plug :add_breadcrumb, name: 'Proposals', url: '/teiserver/proposals'
+  plug :add_breadcrumb, name: "Moderation", url: "/teiserver"
+  plug :add_breadcrumb, name: "Proposals", url: "/teiserver/proposals"
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do

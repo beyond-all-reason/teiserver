@@ -15,8 +15,8 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
     site_menu_active: "admin"
   )
 
-  plug :add_breadcrumb, name: 'Account', url: '/teiserver'
-  plug :add_breadcrumb, name: 'BadgeTypes', url: '/teiserver/badge_types'
+  plug :add_breadcrumb, name: "Account", url: "/teiserver"
+  plug :add_breadcrumb, name: "BadgeTypes", url: "/teiserver/badge_types"
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do

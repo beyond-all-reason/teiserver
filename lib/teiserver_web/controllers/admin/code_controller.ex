@@ -14,8 +14,8 @@ defmodule TeiserverWeb.Admin.CodeController do
     sub_menu_active: "code"
   )
 
-  plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
-  plug :add_breadcrumb, name: 'Codes', url: '/teiserver/admin/codes'
+  plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
+  plug :add_breadcrumb, name: "Codes", url: "/teiserver/admin/codes"
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do

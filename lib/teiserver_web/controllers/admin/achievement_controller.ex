@@ -15,8 +15,8 @@ defmodule TeiserverWeb.Admin.AchievementController do
     sub_menu_active: "achievements"
   )
 
-  plug :add_breadcrumb, name: 'Game', url: '/teiserver'
-  plug :add_breadcrumb, name: 'AchievementTypes', url: '/teiserver/achievement_types'
+  plug :add_breadcrumb, name: "Game", url: "/teiserver"
+  plug :add_breadcrumb, name: "AchievementTypes", url: "/teiserver/achievement_types"
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do

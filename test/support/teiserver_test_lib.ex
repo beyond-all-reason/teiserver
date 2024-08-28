@@ -4,7 +4,7 @@ defmodule Teiserver.TeiserverTestLib do
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Coordinator.CoordinatorServer
   alias Teiserver.Data.Types, as: T
-  @host '127.0.0.1'
+  @host ~c"127.0.0.1"
 
   @spec raw_setup :: %{socket: port()}
   def raw_setup() do

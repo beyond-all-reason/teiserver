@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Battle.GeneralController do
   use TeiserverWeb, :controller
 
-  plug(:add_breadcrumb, name: 'Battle', url: '/battle')
+  plug(:add_breadcrumb, name: "Battle", url: "/battle")
 
   plug(AssignPlug,
     site_menu_active: "teiserver_match",

@@ -16,8 +16,8 @@ defmodule TeiserverWeb.Admin.AutohostController do
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
-  plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
-  plug :add_breadcrumb, name: 'Autohosts', url: '/teiserver/admin/autohost'
+  plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
+  plug :add_breadcrumb, name: "Autohosts", url: "/teiserver/admin/autohost"
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, _params) do

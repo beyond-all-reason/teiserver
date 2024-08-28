@@ -15,8 +15,8 @@ defmodule TeiserverWeb.Moderation.UserController do
     user: {Teiserver.Account.AuthLib, :current_user}
   )
 
-  plug(:add_breadcrumb, name: 'Moderation', url: '/moderation')
-  plug(:add_breadcrumb, name: 'Users', url: '/moderation/users')
+  plug(:add_breadcrumb, name: "Moderation", url: "/moderation")
+  plug(:add_breadcrumb, name: "Users", url: "/moderation/users")
 
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do

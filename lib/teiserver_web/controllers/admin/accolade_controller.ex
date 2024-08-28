@@ -15,8 +15,8 @@ defmodule TeiserverWeb.Admin.AccoladeController do
     sub_menu_active: "accolade"
   )
 
-  plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
-  plug :add_breadcrumb, name: 'Accolades', url: '/teiserver/admin/accolades'
+  plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
+  plug :add_breadcrumb, name: "Accolades", url: "/teiserver/admin/accolades"
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do

@@ -14,11 +14,11 @@ defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
-  plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
+  plug(:add_breadcrumb, name: "Telemetry", url: "/telemetry")
 
   plug(:add_breadcrumb,
-    name: 'Complex Lobby events',
-    url: '/telemetry/complex_lobby_events/summary'
+    name: "Complex Lobby events",
+    url: "/telemetry/complex_lobby_events/summary"
   )
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()

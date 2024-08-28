@@ -13,8 +13,8 @@ defmodule TeiserverWeb.Logging.AggregateViewLogController do
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
-  plug :add_breadcrumb, name: 'Logging', url: '/logging'
-  plug :add_breadcrumb, name: 'Aggregate', url: '/logging/aggregate_views'
+  plug :add_breadcrumb, name: "Logging", url: "/logging"
+  plug :add_breadcrumb, name: "Aggregate", url: "/logging/aggregate_views"
 
   plug(AssignPlug,
     site_menu_active: "logging",

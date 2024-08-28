@@ -18,8 +18,8 @@ defmodule TeiserverWeb.Moderation.ActionController do
     sub_menu_active: "action"
   )
 
-  plug :add_breadcrumb, name: 'Moderation', url: '/teiserver'
-  plug :add_breadcrumb, name: 'Actions', url: '/teiserver/actions'
+  plug :add_breadcrumb, name: "Moderation", url: "/teiserver"
+  plug :add_breadcrumb, name: "Actions", url: "/teiserver/actions"
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
