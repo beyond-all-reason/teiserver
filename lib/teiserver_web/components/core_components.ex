@@ -5,7 +5,7 @@ defmodule TeiserverWeb.CoreComponents do
 
   use Phoenix.Component
   alias Phoenix.LiveView.JS
-  import TeiserverWeb.Gettext
+  use Gettext, backend: TeiserverWeb.Gettext
   alias Fontawesome
 
   @doc """

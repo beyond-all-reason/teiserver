@@ -73,7 +73,7 @@ defmodule TeiserverWeb do
       import Teiserver.Config, only: [get_user_config_cache: 2, get_site_config_cache: 1]
 
       import TeiserverWeb.ErrorHelpers
-      import TeiserverWeb.Gettext
+      use Gettext, backend: TeiserverWeb.Gettext
       alias TeiserverWeb.Router.Helpers, as: Routes
 
       import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
