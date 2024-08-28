@@ -16,7 +16,10 @@ defmodule TeiserverWeb.Telemetry.SimpleLobbyEventController do
 
   plug(:add_breadcrumb, name: "Telemetry", url: "/telemetry")
 
-  plug(:add_breadcrumb, name: "Simple lobby events", url: "/telemetry/simple_lobby_events/summary")
+  plug(:add_breadcrumb,
+    name: "Simple lobby events",
+    url: "/telemetry/simple_lobby_events/summary"
+  )
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
   def summary(conn, params) do

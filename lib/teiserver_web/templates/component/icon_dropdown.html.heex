@@ -6,7 +6,7 @@
       icons =
         if Map.has_key?(row, :icons), do: Enum.join(row.icons, ","), else: Map.get(row, :icon, "") %>
       <option
-        value={row.id || ''}
+        value={row.id || ""}
         data-textcolour={Map.get(row, :text_colour, "#FFFFFF")}
         data-bgcolour={Map.get(row, :colour, "#000000")}
         data-icons={icons}

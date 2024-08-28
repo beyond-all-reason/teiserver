@@ -32,7 +32,11 @@ defmodule Teiserver.Helper.TimexHelperTest do
     ]
 
     for {input_value, format, expected} <- values do
-      assert TimexHelper.date_to_str(input_value, format: format, now: @today, tz: "Europe/London") ==
+      assert TimexHelper.date_to_str(input_value,
+               format: format,
+               now: @today,
+               tz: "Europe/London"
+             ) ==
                expected
     end
 

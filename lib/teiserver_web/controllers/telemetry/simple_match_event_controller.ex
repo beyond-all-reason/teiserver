@@ -16,7 +16,10 @@ defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
 
   plug(:add_breadcrumb, name: "Telemetry", url: "/telemetry")
 
-  plug(:add_breadcrumb, name: "Simple match events", url: "/telemetry/simple_match_events/summary")
+  plug(:add_breadcrumb,
+    name: "Simple match events",
+    url: "/telemetry/simple_match_events/summary"
+  )
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
   def summary(conn, params) do

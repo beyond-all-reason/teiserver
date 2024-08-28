@@ -39,7 +39,9 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
       conn =
         post(
           conn,
-          Routes.moderation_action_path(conn, :search, search: %{"order" => "Latest expiry first"})
+          Routes.moderation_action_path(conn, :search,
+            search: %{"order" => "Latest expiry first"}
+          )
         )
 
       assert html_response(conn, 200) =~ "Listing Actions"
