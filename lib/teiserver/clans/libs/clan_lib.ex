@@ -9,7 +9,7 @@ defmodule Teiserver.Clans.ClanLib do
   @spec colours :: atom
   def colours, do: :info2
 
-  @spec make_favourite(Clan.t()) :: Map.t()
+  @spec make_favourite(Clan.t()) :: map()
   def make_favourite(clan) do
     %{
       type_colour: StylingHelper.colours(colours()) |> elem(0),
@@ -32,7 +32,7 @@ defmodule Teiserver.Clans.ClanLib do
     from(clans in Clan)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do

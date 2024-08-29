@@ -139,7 +139,7 @@ defmodule Teiserver.Account do
     |> Repo.one()
   end
 
-  @spec get_user_stat_data(integer()) :: Map.t()
+  @spec get_user_stat_data(integer()) :: map()
   def get_user_stat_data(userid) do
     Teiserver.cache_get_or_store(:teiserver_user_stat_cache, userid, fn ->
       case get_user_stat(userid) do
@@ -306,7 +306,7 @@ defmodule Teiserver.Account do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_badge_type(Map.t()) :: {:ok, BadgeType.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_badge_type(map()) :: {:ok, BadgeType.t()} | {:error, Ecto.Changeset.t()}
   def create_badge_type(attrs \\ %{}) do
     %BadgeType{}
     |> BadgeType.changeset(attrs)
@@ -325,7 +325,7 @@ defmodule Teiserver.Account do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_badge_type(BadgeType.t(), Map.t()) ::
+  @spec update_badge_type(BadgeType.t(), map()) ::
           {:ok, BadgeType.t()} | {:error, Ecto.Changeset.t()}
   def update_badge_type(%BadgeType{} = badge_type, attrs) do
     badge_type
@@ -461,7 +461,7 @@ defmodule Teiserver.Account do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_accolade(Map.t()) :: {:ok, Accolade.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_accolade(map()) :: {:ok, Accolade.t()} | {:error, Ecto.Changeset.t()}
   def create_accolade(attrs \\ %{}) do
     %Accolade{}
     |> Accolade.changeset(attrs)
@@ -480,7 +480,7 @@ defmodule Teiserver.Account do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_accolade(Accolade.t(), Map.t()) ::
+  @spec update_accolade(Accolade.t(), map()) ::
           {:ok, Accolade.t()} | {:error, Ecto.Changeset.t()}
   def update_accolade(%Accolade{} = accolade, attrs) do
     accolade
@@ -680,7 +680,7 @@ defmodule Teiserver.Account do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_smurf_key(SmurfKey.t(), Map.t()) ::
+  @spec update_smurf_key(SmurfKey.t(), map()) ::
           {:ok, SmurfKey.t()} | {:error, Ecto.Changeset.t()}
   def update_smurf_key(%SmurfKey{} = smurf_key, attrs) do
     smurf_key
@@ -820,7 +820,7 @@ defmodule Teiserver.Account do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_smurf_key_type(Map.t()) :: {:ok, SmurfKeyType.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_smurf_key_type(map()) :: {:ok, SmurfKeyType.t()} | {:error, Ecto.Changeset.t()}
   def create_smurf_key_type(attrs \\ %{}) do
     %SmurfKeyType{}
     |> SmurfKeyType.changeset(attrs)
@@ -982,7 +982,7 @@ defmodule Teiserver.Account do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_rating(Map.t()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_rating(map()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
   def create_rating(attrs \\ %{}) do
     %Rating{}
     |> Rating.changeset(attrs)
@@ -998,7 +998,7 @@ defmodule Teiserver.Account do
     |> Repo.update()
   end
 
-  @spec create_or_update_rating(Map.t()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_or_update_rating(map()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
   def create_or_update_rating(attrs \\ %{}) do
     case get_rating(attrs.user_id, attrs.rating_type_id) do
       nil ->
@@ -2062,18 +2062,18 @@ defmodule Teiserver.Account do
   @spec list_clients([T.userid()]) :: [T.client()]
   defdelegate list_clients(id_list), to: ClientLib
 
-  @spec update_client(T.userid(), Map.t()) :: nil | :ok
+  @spec update_client(T.userid(), map()) :: nil | :ok
   defdelegate update_client(userid, partial_client), to: ClientLib
 
   # TODO: Remove these in favour of update_client
-  @spec merge_update_client(Map.t()) :: nil | :ok
+  @spec merge_update_client(map()) :: nil | :ok
   defdelegate merge_update_client(client), to: ClientLib
 
-  @spec merge_update_client(T.userid(), Map.t()) :: nil | :ok
+  @spec merge_update_client(T.userid(), map()) :: nil | :ok
   defdelegate merge_update_client(userid, client), to: ClientLib
 
   @spec replace_update_client(
-          Map.t(),
+          map(),
           :silent | :client_updated_status | :client_updated_battlestatus
         ) :: T.client()
   defdelegate replace_update_client(client, reason), to: ClientLib

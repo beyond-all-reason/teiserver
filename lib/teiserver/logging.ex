@@ -1785,17 +1785,17 @@ defmodule Teiserver.Logging do
   end
 
   # Delegated to helpers
-  @spec add_anonymous_audit_log(String.t(), Map.t()) :: Teiserver.Logging.AuditLog.t()
+  @spec add_anonymous_audit_log(String.t(), map()) :: Teiserver.Logging.AuditLog.t()
   defdelegate add_anonymous_audit_log(action, details), to: Teiserver.Logging.Helpers
 
-  @spec add_anonymous_audit_log(Plug.Conn.t(), String.t(), Map.t()) ::
+  @spec add_anonymous_audit_log(Plug.Conn.t(), String.t(), map()) ::
           Teiserver.Logging.AuditLog.t()
   defdelegate add_anonymous_audit_log(conn, action, details), to: Teiserver.Logging.Helpers
 
-  @spec add_audit_log(Plug.Conn.t(), String.t(), Map.t()) :: Teiserver.Logging.AuditLog.t()
+  @spec add_audit_log(Plug.Conn.t(), String.t(), map()) :: Teiserver.Logging.AuditLog.t()
   defdelegate add_audit_log(conn, action, details), to: Teiserver.Logging.Helpers
 
-  @spec add_audit_log(non_neg_integer(), String.t(), String.t(), Map.t()) ::
+  @spec add_audit_log(non_neg_integer(), String.t(), String.t(), map()) ::
           Teiserver.Logging.AuditLog.t()
   defdelegate add_audit_log(userid, ip, action, details), to: Teiserver.Logging.Helpers
 end

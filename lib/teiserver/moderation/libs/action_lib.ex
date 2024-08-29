@@ -24,7 +24,7 @@ defmodule Teiserver.Moderation.ActionLib do
 
   def action_icon("Smurf"), do: "fa-solid fa-copy"
 
-  @spec make_favourite(Map.t()) :: Map.t()
+  @spec make_favourite(map()) :: map()
   def make_favourite(action) do
     %{
       type_colour: colour(),
@@ -44,7 +44,7 @@ defmodule Teiserver.Moderation.ActionLib do
     from(actions in Action)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do

@@ -101,7 +101,7 @@ defmodule Teiserver.Chat do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_room_message(Map.t()) :: {:ok, RoomMessage.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_room_message(map()) :: {:ok, RoomMessage.t()} | {:error, Ecto.Changeset.t()}
   def create_room_message(attrs \\ %{}) do
     %RoomMessage{}
     |> RoomMessage.changeset(attrs)
@@ -120,7 +120,7 @@ defmodule Teiserver.Chat do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_room_message(RoomMessage.t(), Map.t()) ::
+  @spec update_room_message(RoomMessage.t(), map()) ::
           {:ok, RoomMessage.t()} | {:error, Ecto.Changeset.t()}
   def update_room_message(%RoomMessage{} = room_message, attrs) do
     room_message
@@ -257,7 +257,7 @@ defmodule Teiserver.Chat do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_lobby_message(Map.t()) :: {:ok, LobbyMessage.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_lobby_message(map()) :: {:ok, LobbyMessage.t()} | {:error, Ecto.Changeset.t()}
   def create_lobby_message(attrs \\ %{}) do
     %LobbyMessage{}
     |> LobbyMessage.changeset(attrs)
@@ -276,7 +276,7 @@ defmodule Teiserver.Chat do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_lobby_message(LobbyMessage.t(), Map.t()) ::
+  @spec update_lobby_message(LobbyMessage.t(), map()) ::
           {:ok, LobbyMessage.t()} | {:error, Ecto.Changeset.t()}
   def update_lobby_message(%LobbyMessage{} = lobby_message, attrs) do
     lobby_message
@@ -413,7 +413,7 @@ defmodule Teiserver.Chat do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_party_message(Map.t()) :: {:ok, PartyMessage.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_party_message(map()) :: {:ok, PartyMessage.t()} | {:error, Ecto.Changeset.t()}
   def create_party_message(attrs \\ %{}) do
     %PartyMessage{}
     |> PartyMessage.changeset(attrs)
@@ -432,7 +432,7 @@ defmodule Teiserver.Chat do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_party_message(PartyMessage.t(), Map.t()) ::
+  @spec update_party_message(PartyMessage.t(), map()) ::
           {:ok, PartyMessage.t()} | {:error, Ecto.Changeset.t()}
   def update_party_message(%PartyMessage{} = party_message, attrs) do
     party_message

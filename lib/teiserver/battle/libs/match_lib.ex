@@ -157,7 +157,7 @@ defmodule Teiserver.Battle.MatchLib do
     end
   end
 
-  @spec make_favourite(Map.t()) :: Map.t()
+  @spec make_favourite(map()) :: map()
   def make_favourite(match) do
     %{
       type_colour: StylingHelper.colours(colours()) |> elem(0),
@@ -178,7 +178,7 @@ defmodule Teiserver.Battle.MatchLib do
     from(matches in Match)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do

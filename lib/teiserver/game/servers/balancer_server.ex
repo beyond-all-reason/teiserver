@@ -279,7 +279,7 @@ defmodule Teiserver.Game.BalancerServer do
   end
 
   @impl true
-  @spec init(Map.t()) :: {:ok, T.balance_server_state()}
+  @spec init(map()) :: {:ok, T.balance_server_state()}
   def init(opts) do
     lobby_id = opts[:lobby_id]
     Logger.metadata(request_id: "BalancerServer##{opts.lobby_id}")

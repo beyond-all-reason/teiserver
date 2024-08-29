@@ -168,7 +168,7 @@ defmodule Teiserver.Battle do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_match(Map.t()) :: {:ok, Match.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_match(map()) :: {:ok, Match.t()} | {:error, Ecto.Changeset.t()}
   def create_match(attrs \\ %{}) do
     %Match{}
     |> Match.changeset(attrs)
@@ -207,7 +207,7 @@ defmodule Teiserver.Battle do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_match(Match.t(), Map.t()) :: {:ok, Match.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_match(Match.t(), map()) :: {:ok, Match.t()} | {:error, Ecto.Changeset.t()}
   def update_match(%Match{} = match, attrs) do
     match
     |> Match.changeset(attrs)

@@ -12,7 +12,7 @@ defmodule Teiserver.Helper.SchemaHelper do
     }
   end
 
-  @spec make_datetime(Datetime.t()) :: Map.t()
+  @spec make_datetime(Datetime.t()) :: map()
   defp make_datetime(d) do
     %{
       "second" => Integer.to_string(d.second),
@@ -24,7 +24,7 @@ defmodule Teiserver.Helper.SchemaHelper do
     }
   end
 
-  @spec parse_datetimes(Map.t(), List.t()) :: Map.t()
+  @spec parse_datetimes(map(), List.t()) :: map()
   def parse_datetimes(params, names) do
     names = Enum.map(names, fn n -> Atom.to_string(n) end) ++ names
 
@@ -127,7 +127,7 @@ defmodule Teiserver.Helper.SchemaHelper do
   #   |> Map.new
   # end
 
-  @spec trim_strings(Map.t(), List.t()) :: Map.t()
+  @spec trim_strings(map(), List.t()) :: map()
   def trim_strings(params, names) do
     names = Enum.map(names, fn n -> Atom.to_string(n) end)
 
@@ -149,7 +149,7 @@ defmodule Teiserver.Helper.SchemaHelper do
     end)
   end
 
-  @spec min_and_max(Map.t(), [atom]) :: Map.t()
+  @spec min_and_max(map(), [atom]) :: map()
   def min_and_max(params, [field1, field2]) do
     field1 = Atom.to_string(field1)
     field2 = Atom.to_string(field2)
@@ -167,7 +167,7 @@ defmodule Teiserver.Helper.SchemaHelper do
     Map.merge(params, mapped_values)
   end
 
-  @spec uniq_lists(Map.t(), List.t()) :: Map.t()
+  @spec uniq_lists(map(), List.t()) :: map()
   def uniq_lists(params, names) do
     names = Enum.map(names, fn n -> Atom.to_string(n) end)
 
@@ -189,7 +189,7 @@ defmodule Teiserver.Helper.SchemaHelper do
     end)
   end
 
-  @spec remove_whitespace(Map.t(), List.t()) :: Map.t()
+  @spec remove_whitespace(map(), List.t()) :: map()
   def remove_whitespace(params, names) do
     names = Enum.map(names, fn n -> Atom.to_string(n) end)
 
@@ -221,7 +221,7 @@ defmodule Teiserver.Helper.SchemaHelper do
   Given a list of fields and a list of patterns, will apply Regex.replace for every
   pattern to each field.
   """
-  @spec remove_characters(Map.t(), List.t(), List.t()) :: Map.t()
+  @spec remove_characters(map(), List.t(), List.t()) :: map()
   def remove_characters(params, names, patterns) do
     names = Enum.map(names, fn n -> Atom.to_string(n) end)
 
@@ -252,7 +252,7 @@ defmodule Teiserver.Helper.SchemaHelper do
     end)
   end
 
-  @spec safe_strings(Map.t(), List.t()) :: Map.t()
+  @spec safe_strings(map(), List.t()) :: map()
   def safe_strings(params, names) do
     names = Enum.map(names, fn n -> Atom.to_string(n) end)
 

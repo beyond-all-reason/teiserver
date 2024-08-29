@@ -15,7 +15,7 @@ defmodule Teiserver.Game.AchievementType do
   @doc """
   Builds a changeset based on the `struct` and `params`.
   """
-  @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
+  @spec changeset(map(), map()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     params =
       params
@@ -26,6 +26,6 @@ defmodule Teiserver.Game.AchievementType do
     |> validate_required(~w(name grouping icon colour description rarity)a)
   end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
+  @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()
   def authorize(_action, conn, _params), do: allow?(conn, "Admin")
 end

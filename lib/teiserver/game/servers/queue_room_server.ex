@@ -492,7 +492,7 @@ defmodule Teiserver.Game.QueueRoomServer do
   end
 
   @impl true
-  @spec init(Map.t()) :: {:ok, Map.t()}
+  @spec init(map()) :: {:ok, map()}
   def init(opts) do
     send(self(), :initial_setup)
     Process.send_after(self(), :find_timeout, @find_timeout)

@@ -11,7 +11,7 @@ defmodule Teiserver.Moderation.ReportGroupLib do
   @spec icon() :: String.t()
   def icon(), do: "fa-house-flag"
 
-  @spec make_favourite(ReportGroup.t()) :: Map.t()
+  @spec make_favourite(ReportGroup.t()) :: map()
   def make_favourite(report_group) do
     %{
       type_colour: Teiserver.Moderation.colour(),

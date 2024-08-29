@@ -543,7 +543,7 @@ defmodule Teiserver.Game.QueueWaitServer do
 
   # Used to remove players from all aspects of the queue, either because
   # they left or their game started
-  @spec remove_group(T.userid() | String.t(), Map.t()) :: Map.t()
+  @spec remove_group(T.userid() | String.t(), map()) :: map()
   defp remove_group(group_id, state) do
     # Drop the selected ids from any bucket values
     new_buckets =
@@ -559,7 +559,7 @@ defmodule Teiserver.Game.QueueWaitServer do
   end
 
   # One or more groups found a match, pause them
-  @spec pause_groups([T.userid() | String.t()], Map.t()) :: Map.t()
+  @spec pause_groups([T.userid() | String.t()], map()) :: map()
   defp pause_groups(group_ids, state) do
     # Drop the selected ids from any bucket values
     new_buckets =
@@ -584,7 +584,7 @@ defmodule Teiserver.Game.QueueWaitServer do
     }
   end
 
-  @spec resume_paused_groups([T.userid() | String.t()], Map.t()) :: Map.t()
+  @spec resume_paused_groups([T.userid() | String.t()], map()) :: map()
   defp resume_paused_groups(group_ids, state) do
     groups =
       group_ids
@@ -632,7 +632,7 @@ defmodule Teiserver.Game.QueueWaitServer do
     }
   end
 
-  @spec remove_paused_groups([T.userid() | String.t()], Map.t()) :: Map.t()
+  @spec remove_paused_groups([T.userid() | String.t()], map()) :: map()
   defp remove_paused_groups(group_ids, state) do
     new_paused_groups_map =
       state.paused_groups_map
@@ -685,7 +685,7 @@ defmodule Teiserver.Game.QueueWaitServer do
     Enum.sum(wait_times) / (Enum.count(wait_times) + 1)
   end
 
-  @spec init(Map.t()) :: {:ok, Map.t()}
+  @spec init(map()) :: {:ok, map()}
   def init(opts) do
     :timer.send_interval(@default_telemetry_interval, self(), :telemetry_tick)
     :timer.send_interval(@update_interval, self(), :broadcast_update)

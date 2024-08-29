@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Logging.GeneralController do
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, _params) do
     render(conn, "index.html")
   end

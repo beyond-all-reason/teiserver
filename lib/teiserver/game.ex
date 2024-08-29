@@ -103,7 +103,7 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_queue(Map.t()) :: {:ok, Queue.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_queue(map()) :: {:ok, Queue.t()} | {:error, Ecto.Changeset.t()}
   def create_queue(attrs \\ %{}) do
     %Queue{}
     |> Queue.changeset(attrs)
@@ -130,7 +130,7 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_queue(Queue.t(), Map.t()) :: {:ok, Queue.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_queue(Queue.t(), map()) :: {:ok, Queue.t()} | {:error, Ecto.Changeset.t()}
   def update_queue(%Queue{} = queue, attrs) do
     queue
     |> Queue.changeset(attrs)
@@ -264,7 +264,7 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_achievement_type(Map.t()) ::
+  @spec create_achievement_type(map()) ::
           {:ok, AchievementType.t()} | {:error, Ecto.Changeset.t()}
   def create_achievement_type(attrs \\ %{}) do
     %AchievementType{}
@@ -284,7 +284,7 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_achievement_type(AchievementType.t(), Map.t()) ::
+  @spec update_achievement_type(AchievementType.t(), map()) ::
           {:ok, AchievementType.t()} | {:error, Ecto.Changeset.t()}
   def update_achievement_type(%AchievementType{} = achievement_type, attrs) do
     achievement_type
@@ -412,7 +412,7 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_user_achievement(Map.t()) ::
+  @spec create_user_achievement(map()) ::
           {:ok, UserAchievement.t()} | {:error, Ecto.Changeset.t()}
   def create_user_achievement(attrs \\ %{}) do
     %UserAchievement{}
@@ -432,7 +432,7 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_user_achievement(UserAchievement.t(), Map.t()) ::
+  @spec update_user_achievement(UserAchievement.t(), map()) ::
           {:ok, UserAchievement.t()} | {:error, Ecto.Changeset.t()}
   def update_user_achievement(%UserAchievement{} = user_achievement, attrs) do
     user_achievement
@@ -592,7 +592,7 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_rating_type(Map.t()) :: {:ok, RatingType.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_rating_type(map()) :: {:ok, RatingType.t()} | {:error, Ecto.Changeset.t()}
   def create_rating_type(attrs \\ %{}) do
     %RatingType{}
     |> RatingType.changeset(attrs)
@@ -611,7 +611,7 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_rating_type(RatingType.t(), Map.t()) ::
+  @spec update_rating_type(RatingType.t(), map()) ::
           {:ok, RatingType.t()} | {:error, Ecto.Changeset.t()}
   def update_rating_type(%RatingType{} = rating_type, attrs) do
     rating_type
@@ -746,7 +746,7 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_rating_log(Map.t()) :: {:ok, RatingLog.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_rating_log(map()) :: {:ok, RatingLog.t()} | {:error, Ecto.Changeset.t()}
   def create_rating_log(attrs \\ %{}) do
     %RatingLog{}
     |> RatingLog.changeset(attrs)
@@ -765,7 +765,7 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_rating_log(RatingLog.t(), Map.t()) ::
+  @spec update_rating_log(RatingLog.t(), map()) ::
           {:ok, RatingLog.t()} | {:error, Ecto.Changeset.t()}
   def update_rating_log(%RatingLog{} = rating_log, attrs) do
     rating_log
@@ -900,7 +900,7 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_lobby_policy(Map.t()) :: {:ok, LobbyPolicy.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_lobby_policy(map()) :: {:ok, LobbyPolicy.t()} | {:error, Ecto.Changeset.t()}
   def create_lobby_policy(attrs \\ %{}) do
     %LobbyPolicy{}
     |> LobbyPolicy.changeset(attrs)
@@ -919,7 +919,7 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_lobby_policy(LobbyPolicy.t(), Map.t()) ::
+  @spec update_lobby_policy(LobbyPolicy.t(), map()) ::
           {:ok, LobbyPolicy.t()} | {:error, Ecto.Changeset.t()}
   def update_lobby_policy(%LobbyPolicy{} = lobby_policy, attrs) do
     lobby_policy

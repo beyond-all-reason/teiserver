@@ -12,7 +12,7 @@ defmodule Teiserver.Moderation.ProposalVote do
     timestamps()
   end
 
-  @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
+  @spec changeset(map(), map()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, ~w(vote user_id proposal_id)a)

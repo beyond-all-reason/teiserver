@@ -39,7 +39,7 @@ defmodule Teiserver.Game.Queue do
   @doc """
   Builds a changeset based on the `struct` and `params`.
   """
-  @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
+  @spec changeset(map(), map()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     params =
       params
@@ -51,7 +51,7 @@ defmodule Teiserver.Game.Queue do
     |> validate_required(~w(name icon colour team_size team_count map_list)a)
   end
 
-  @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean
+  @spec authorize(atom, Plug.Conn.t(), map()) :: boolean
   def authorize(:index, _conn, _params), do: true
   def authorize(:show, _conn, _params), do: true
   def authorize(_action, conn, _params), do: allow?(conn, "Server")

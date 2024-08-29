@@ -207,7 +207,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
     %{state | stage: :awaiting_choice}
   end
 
-  @spec init(Map.t()) :: {:ok, Map.t()}
+  @spec init(map()) :: {:ok, map()}
   def init(opts) do
     userid = opts[:userid]
     recipient_id = opts[:recipient_id]

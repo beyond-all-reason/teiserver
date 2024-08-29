@@ -56,7 +56,7 @@ defmodule TeiserverWeb.Account.SecurityController do
     end
   end
 
-  @spec delete_token(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec delete_token(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete_token(conn, %{"id" => id}) do
     token =
       Account.get_user_token(id,

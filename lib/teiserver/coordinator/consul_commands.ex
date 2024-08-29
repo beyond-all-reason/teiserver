@@ -20,7 +20,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   """
   @splitter "------------------------------------------------------"
   @split_delay 60_000
-  @spec handle_command(Map.t(), Map.t()) :: Map.t()
+  @spec handle_command(map(), map()) :: map()
   @default_ban_reason "Banned"
 
   #################### For everybody

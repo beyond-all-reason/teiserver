@@ -474,7 +474,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   defp message_starts_with?(message, text), do: String.starts_with?(message, text)
 
   @impl true
-  @spec init(Map.t()) :: {:ok, Map.t()}
+  @spec init(map()) :: {:ok, map()}
   def init(_opts) do
     if Teiserver.Communication.use_discord?() do
       send(self(), :begin)

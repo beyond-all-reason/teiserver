@@ -213,7 +213,7 @@ defmodule Teiserver.Coordinator do
   end
 
   # Other stuff
-  @spec attempt_battlestatus_update(T.client(), T.lobby_id()) :: {boolean, Map.t() | nil} | nil
+  @spec attempt_battlestatus_update(T.client(), T.lobby_id()) :: {boolean, map() | nil} | nil
   def attempt_battlestatus_update(client, lobby_id) do
     call_consul(lobby_id, {:request_user_change_status, client})
   end

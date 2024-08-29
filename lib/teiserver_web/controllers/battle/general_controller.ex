@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Battle.GeneralController do
 
   plug(Teiserver.ServerUserPlug)
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, _params) do
     render(conn, "index.html")
   end

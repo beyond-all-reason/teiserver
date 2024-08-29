@@ -30,7 +30,7 @@ defmodule Teiserver.Coordinator.Parser do
     end
   end
 
-  @spec parse_and_handle(Types.userid(), String.t(), Map.t()) :: :handled
+  @spec parse_and_handle(Types.userid(), String.t(), map()) :: :handled
   defp parse_and_handle(_, _, nil), do: :handled
 
   defp parse_and_handle(userid, msg, battle) do
@@ -39,7 +39,7 @@ defmodule Teiserver.Coordinator.Parser do
     :handled
   end
 
-  @spec parse_command(T.userid(), String.t()) :: Map.t()
+  @spec parse_command(T.userid(), String.t()) :: map()
   def parse_command(userid, string) do
     %{
       raw: string,
@@ -63,7 +63,7 @@ defmodule Teiserver.Coordinator.Parser do
     end
   end
 
-  @spec parse_command_name(Map.t()) :: Map.t()
+  @spec parse_command_name(map()) :: map()
   defp parse_command_name(%{remaining: string} = cmd) do
     case Regex.run(~r/\$([a-z0-9\-\?]+) ?/, string) do
       [_, command_name] ->

@@ -11,7 +11,7 @@ defmodule Teiserver.Communication.TextCallbackLib do
   @spec colours :: atom
   def colours, do: :success2
 
-  @spec make_favourite(Queue.t()) :: Map.t()
+  @spec make_favourite(Queue.t()) :: map()
   def make_favourite(text_callback) do
     %{
       type_colour: StylingHelper.colours(colours()) |> elem(0),
@@ -31,7 +31,7 @@ defmodule Teiserver.Communication.TextCallbackLib do
     from(text_callbacks in TextCallback)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do

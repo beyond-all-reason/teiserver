@@ -1331,7 +1331,7 @@ defmodule Teiserver.SpringTcpServer do
 
   # Example of how gen-smtp handles upgrading the connection
   # https://github.com/gen-smtp/gen_smtp/blob/master/src/gen_smtp_server_session.erl#L683-L720
-  @spec upgrade_connection(Map.t()) :: Map.t()
+  @spec upgrade_connection(map()) :: map()
   def upgrade_connection(state) do
     :ok = state.transport.setopts(state.socket, [{:active, false}])
 

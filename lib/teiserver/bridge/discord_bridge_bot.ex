@@ -209,7 +209,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     Nostrum.Api.delete_guild_application_command(guild_id, cmd_id)
   end
 
-  @spec get_text_to_emoticon_map() :: Map.t()
+  @spec get_text_to_emoticon_map() :: map()
   def get_text_to_emoticon_map, do: @text_to_emoticon_map
 
   @spec new_dm_channel(atom | %{:recipients => any, optional(any) => any}) :: :ok

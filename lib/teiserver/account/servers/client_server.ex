@@ -223,7 +223,7 @@ defmodule Teiserver.Account.ClientServer do
   end
 
   @impl true
-  @spec init(Map.t()) :: {:ok, Map.t()}
+  @spec init(map()) :: {:ok, map()}
   def init(%{client: %{userid: userid}} = state) do
     Logger.metadata(request_id: "ClientServer##{userid}")
     :timer.send_interval(6_000, :heartbeat)

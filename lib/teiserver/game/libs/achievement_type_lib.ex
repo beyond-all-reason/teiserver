@@ -9,7 +9,7 @@ defmodule Teiserver.Game.AchievementTypeLib do
   @spec colour :: atom
   def colour, do: :info2
 
-  @spec make_favourite(Map.t()) :: Map.t()
+  @spec make_favourite(map()) :: map()
   def make_favourite(achievement_type) do
     %{
       type_colour: colour(),
@@ -29,7 +29,7 @@ defmodule Teiserver.Game.AchievementTypeLib do
     from(achievement_types in AchievementType)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do

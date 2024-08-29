@@ -10,7 +10,7 @@ defmodule Teiserver.Moderation.BanLib do
   @spec colour :: atom
   def colour, do: :danger
 
-  @spec make_favourite(Map.t()) :: Map.t()
+  @spec make_favourite(map()) :: map()
   def make_favourite(ban) do
     %{
       type_colour: colour(),
@@ -30,7 +30,7 @@ defmodule Teiserver.Moderation.BanLib do
     from(bans in Ban)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do

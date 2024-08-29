@@ -5,7 +5,7 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
-  @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
+  @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
   def do_handle("update_lobby_title", new_name, msg_id, state) do
     if Lobby.allow?(state.userid, :update_lobby_title, state.lobby_id) do
       Battle.rename_lobby(state.lobby_id, new_name, nil)

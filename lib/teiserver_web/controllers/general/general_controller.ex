@@ -8,13 +8,13 @@ defmodule TeiserverWeb.General.GeneralController do
 
   plug(Teiserver.ServerUserPlug)
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, _params) do
     conn
     |> redirect(to: ~p"/")
   end
 
-  @spec gdpr(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec gdpr(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def gdpr(conn, _params) do
     host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     website_url = "https://#{host}"
@@ -29,7 +29,7 @@ defmodule TeiserverWeb.General.GeneralController do
     |> render("gdpr.html")
   end
 
-  @spec code_of_conduct(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec code_of_conduct(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def code_of_conduct(conn, _params) do
     conn
     |> render("code_of_conduct.html")

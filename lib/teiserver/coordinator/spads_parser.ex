@@ -2,7 +2,7 @@ defmodule Teiserver.Coordinator.SpadsParser do
   @moduledoc false
   alias Teiserver.{CacheUser, Account, Telemetry, Battle}
 
-  @spec handle_in(String.t(), map()) :: {:host_update, Map.t()} | nil
+  @spec handle_in(String.t(), map()) :: {:host_update, map()} | nil
   def handle_in(msg, state) do
     cond do
       # Team Size

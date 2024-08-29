@@ -79,25 +79,25 @@ defmodule Teiserver.Account.ClientLib do
   end
 
   # Updates
-  @spec merge_update_client(Map.t()) :: nil | :ok
+  @spec merge_update_client(map()) :: nil | :ok
   def merge_update_client(%{userid: userid} = partial_client) do
     cast_client(userid, {:update_values, partial_client})
   end
 
-  @spec merge_update_client(T.userid(), Map.t()) :: nil | :ok
+  @spec merge_update_client(T.userid(), map()) :: nil | :ok
   def merge_update_client(userid, partial_client) do
     cast_client(userid, {:update_values, partial_client})
   end
 
-  @spec update_client(T.userid(), Map.t()) :: nil | :ok
+  @spec update_client(T.userid(), map()) :: nil | :ok
   def update_client(userid, partial_client) do
     cast_client(userid, {:update_values, partial_client})
   end
 
   @spec replace_update_client(
-          Map.t(),
+          map(),
           :silent | :client_updated_status | :client_updated_battlestatus
-        ) :: Map.t()
+        ) :: map()
   def replace_update_client(%{userid: userid} = client, :silent) do
     # Update the process with it
     cast_client(userid, {:update_client, client})
@@ -273,7 +273,7 @@ defmodule Teiserver.Account.ClientLib do
 
   # Used in tests to update a client based on user data
   # not intended to be used as part of standard operation
-  @spec refresh_client(T.userid()) :: Map.t()
+  @spec refresh_client(T.userid()) :: map()
   def refresh_client(userid) do
     user = Account.get_user_by_id(userid)
     stats = Account.get_user_stat_data(user.id)

@@ -14,13 +14,13 @@ defmodule Teiserver.Telemetry.ComplexMatchEvent do
   @doc """
   Builds a changeset based on the `struct` and `params`.
   """
-  @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
+  @spec changeset(map(), map()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, ~w(user_id match_id event_type_id value game_time)a)
     |> validate_required(~w(match_id event_type_id value game_time)a)
   end
 
-  @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean
+  @spec authorize(atom, Plug.Conn.t(), map()) :: boolean
   def authorize(_action, conn, _params), do: allow?(conn, "Server")
 end

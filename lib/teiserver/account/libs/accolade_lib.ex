@@ -17,7 +17,7 @@ defmodule Teiserver.Account.AccoladeLib do
   @spec colours :: atom
   def colours, do: :info
 
-  @spec make_favourite(Map.t()) :: Map.t()
+  @spec make_favourite(map()) :: map()
   def make_favourite(accolade) do
     %{
       type_colour: StylingHelper.colours(colours()) |> elem(0),
@@ -37,7 +37,7 @@ defmodule Teiserver.Account.AccoladeLib do
     from(accolades in Accolade)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do

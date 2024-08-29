@@ -14,13 +14,13 @@ defmodule TeiserverWeb.Admin.ToolController do
   plug(:add_breadcrumb, name: "Admin", url: "/teiserver/admin")
   plug(:add_breadcrumb, name: "Tools", url: "/teiserver/admin/tools")
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, _params) do
     conn
     |> render("index.html")
   end
 
-  @spec test_page(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec test_page(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def test_page(conn, params) do
     layout =
       case params["layout"] do
@@ -53,7 +53,7 @@ defmodule TeiserverWeb.Admin.ToolController do
   end
 
   # List of font awesome icons
-  @spec falist(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec falist(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def falist(conn, _params) do
     conn
     |> render("falist.html")

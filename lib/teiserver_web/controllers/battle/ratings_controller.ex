@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Battle.RatingsController do
 
   plug :add_breadcrumb, name: "Matches", url: "/teiserver/matches"
 
-  @spec leaderboard(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec leaderboard(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def leaderboard(conn, params) do
     activity_time =
       Timex.today()

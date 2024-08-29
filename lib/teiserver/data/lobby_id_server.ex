@@ -62,7 +62,7 @@ defmodule Teiserver.LobbyIdServer do
     {:noreply, %{state | next_id: next_id}}
   end
 
-  @spec init(Map.t()) :: {:ok, Map.t()}
+  @spec init(map()) :: {:ok, map()}
   def init(_opts) do
     Horde.Registry.register(
       Teiserver.ServerRegistry,

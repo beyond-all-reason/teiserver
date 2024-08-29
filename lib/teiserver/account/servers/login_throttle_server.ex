@@ -434,7 +434,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     end
   end
 
-  @spec apply_server_capacity(Map.t(), Map.t()) :: map()
+  @spec apply_server_capacity(map(), map()) :: map()
   defp apply_server_capacity(state, telemetry_data) do
     total_limit = Config.get_site_config_cache("system.User limit")
 
@@ -464,7 +464,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   end
 
   @impl true
-  @spec init(Map.t()) :: {:ok, Map.t()}
+  @spec init(map()) :: {:ok, map()}
   def init(_) do
     Logger.metadata(request_id: "LoginThrottleServer")
 

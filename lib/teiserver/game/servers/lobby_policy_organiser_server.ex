@@ -171,7 +171,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
   end
 
   @impl true
-  @spec init(Map.t()) :: {:ok, Map.t()}
+  @spec init(map()) :: {:ok, map()}
   def init(data) do
     id = data.lobby_policy.id
 

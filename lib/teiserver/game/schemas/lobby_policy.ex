@@ -37,7 +37,7 @@ defmodule Teiserver.Game.LobbyPolicy do
   @doc """
   Builds a changeset based on the `struct` and `params`.
   """
-  @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
+  @spec changeset(map(), map()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     params =
       params
@@ -56,7 +56,7 @@ defmodule Teiserver.Game.LobbyPolicy do
     |> validate_required(~w(name)a)
   end
 
-  @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean
+  @spec authorize(atom, Plug.Conn.t(), map()) :: boolean
   def authorize(:index, conn, _params), do: allow_any?(conn, ["Overwatch", "Contributor"])
   def authorize(:show, conn, _params), do: allow_any?(conn, ["Overwatch", "Contributor"])
   def authorize(_action, conn, _params), do: allow?(conn, "Server")

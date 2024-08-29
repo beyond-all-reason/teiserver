@@ -23,7 +23,7 @@ defmodule Teiserver.Moderation.Proposal do
     timestamps()
   end
 
-  @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
+  @spec changeset(map(), map()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     params =
       params
@@ -41,7 +41,7 @@ defmodule Teiserver.Moderation.Proposal do
     |> validate_length(:restrictions, min: 1)
   end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
+  @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()
   def authorize(:conclude, conn, _), do: allow?(conn, "Moderator")
   def authorize(_, conn, _), do: allow?(conn, "Overwatch")
 end
