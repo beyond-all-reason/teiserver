@@ -5,7 +5,7 @@ defmodule Teiserver.Account.AuthLib do
   @spec icon :: String.t()
   def icon(), do: "fa-solid fa-address-card"
 
-  @spec get_all_permission_sets() :: map()
+  @spec get_all_permission_sets() :: list()
   def get_all_permission_sets do
     Teiserver.store_get(:auth_group_store, :all)
     |> Enum.map(fn key -> {key, get_permission_set(key)} end)

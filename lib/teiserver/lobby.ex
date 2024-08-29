@@ -397,7 +397,7 @@ defmodule Teiserver.Lobby do
     lobby_ids
   end
 
-  @spec find_empty_lobby(function()) :: map()
+  @spec find_empty_lobby(function()) :: map() | nil
   def find_empty_lobby(filter_func \\ fn _ -> true end) do
     empties =
       stream_lobbies()

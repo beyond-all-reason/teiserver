@@ -874,7 +874,7 @@ defmodule Teiserver.Moderation do
       nil
 
   """
-  @spec get_proposal_vote(T.user_id(), integer()) :: ProposalVote.t() | nil
+  @spec get_proposal_vote(T.userid(), integer()) :: ProposalVote.t() | nil
   def get_proposal_vote(user_id, proposal_id) do
     ProposalVoteLib.query_proposal_votes()
     |> ProposalVoteLib.search(user_id: user_id, proposal_id: proposal_id)
