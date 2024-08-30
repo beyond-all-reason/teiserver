@@ -4,6 +4,7 @@ defmodule Teiserver.Account.RelationshipLib do
   alias Teiserver.Account.AuthLib
   alias Teiserver.Data.Types, as: T
   alias Phoenix.PubSub
+  alias Teiserver.Repo
 
   @spec colour :: atom
   def colour(), do: :success
@@ -169,13 +170,14 @@ defmodule Teiserver.Account.RelationshipLib do
     end)
   end
 
+  # Blocks will be treated as avoids, but avoids will not be treated as blocks
   @spec list_userids_avoiding_this_userid(T.userid()) :: [T.userid()]
   def list_userids_avoiding_this_userid(userid) do
     Teiserver.cache_get_or_store(:account_avoiding_this_cache, userid, fn ->
       Account.list_relationships(
         where: [
           to_user_id: userid,
-          state: "avoid"
+          state_in: ["block", "avoid"]
         ],
         select: [:from_user_id]
       )
@@ -185,13 +187,14 @@ defmodule Teiserver.Account.RelationshipLib do
     end)
   end
 
+  # Blocks will be treated as avoids, but avoids will not be treated as blocks
   @spec list_userids_avoided_by_userid(T.userid()) :: [T.userid()]
   def list_userids_avoided_by_userid(userid) do
     Teiserver.cache_get_or_store(:account_avoid_cache, userid, fn ->
       Account.list_relationships(
         where: [
           from_user_id: userid,
-          state: "avoid"
+          state_in: ["block", "avoid"]
         ],
         select: [:to_user_id]
       )
@@ -207,7 +210,7 @@ defmodule Teiserver.Account.RelationshipLib do
       Account.list_relationships(
         where: [
           from_user_id: userid,
-          state_in: ["avoid", "block"]
+          state_in: ["block"]
         ],
         select: [:to_user_id]
       )
@@ -223,7 +226,7 @@ defmodule Teiserver.Account.RelationshipLib do
       Account.list_relationships(
         where: [
           to_user_id: userid,
-          state_in: ["avoid", "block"]
+          state_in: ["block"]
         ],
         select: [:from_user_id]
       )
@@ -340,47 +343,57 @@ defmodule Teiserver.Account.RelationshipLib do
     end
   end
 
-  @spec check_avoid_status(T.userid(), [T.userid()]) :: :ok | :avoiding | :avoided
-  def check_avoid_status(userid, userid_list) do
-    user = Account.get_user_by_id(userid)
-    userid_count = Enum.count(userid_list) |> max(1)
+  # Given a list of players in lobby, gets all relevant avoids
+  # Use limit to only pull a maximum number from the database (prefer oldest)
+  # Use player_limit to only pull a maximum number per player (prefer oldest)
+  def get_lobby_avoids(player_ids, limit, player_limit) do
+    query = """
+    select from_user_id, to_user_id from (
+    select from_user_id, to_user_id, state, inserted_at, row_number() over (partition by arel.from_user_id  order by arel.inserted_at asc) as rn
+    from account_relationships arel
+      where state in('avoid','block')
+      and from_user_id =ANY($1)
+      and to_user_id =ANY($2)
+      and state in('avoid','block')
+    ) as ar
+    where
+      rn <= $4
+      order by inserted_at asc
+    limit $3
+    """
 
-    {avoid_count_needed, avoid_percentage_needed} =
-      cond do
-        user.behaviour_score <= 5000 ->
-          {2, 20}
+    results = Ecto.Adapters.SQL.query!(Repo, query, [player_ids, player_ids, limit, player_limit])
 
-        user.behaviour_score <= 8000 ->
-          {3, 30}
+    results.rows
+  end
 
-        true ->
-          {
-            Config.get_site_config_cache("lobby.Avoid count to prevent playing"),
-            Config.get_site_config_cache("lobby.Avoid percentage to prevent playing")
-          }
-      end
+  def get_lobby_avoids(player_ids, limit, player_limit, minimum_time_hours) do
+    query = """
+    select from_user_id, to_user_id from (
+    select from_user_id, to_user_id, state, inserted_at, row_number() over (partition by arel.from_user_id  order by arel.inserted_at asc) as rn
+    from account_relationships arel
+    where state in('avoid','block')
+      and from_user_id =ANY($1)
+      and to_user_id =ANY($2)
+      and state in('avoid','block')
+      and inserted_at <= (now() - interval '#{minimum_time_hours} hours')
+    ) as ar
+    where
+      rn <= $4
+    order by inserted_at asc
+    limit $3
+    """
 
-    being_avoided_count =
-      userid
-      |> list_userids_avoiding_this_userid()
-      |> Enum.count(fn uid -> Enum.member?(userid_list, uid) end)
+    # Not able to use mimimum_time_hours as parameter so have to add into the sql string
 
-    avoiding_count =
-      userid
-      |> list_userids_avoided_by_userid()
-      |> Enum.count(fn uid -> Enum.member?(userid_list, uid) end)
+    results =
+      Ecto.Adapters.SQL.query!(Repo, query, [
+        player_ids,
+        player_ids,
+        limit,
+        player_limit
+      ])
 
-    being_avoided_percentage = being_avoided_count / userid_count * 100
-    avoiding_percentage = avoiding_count / userid_count * 100
-
-    cond do
-      # You are being avoided
-      being_avoided_percentage >= avoid_percentage_needed -> :avoided
-      being_avoided_count >= avoid_count_needed -> :avoided
-      # You are avoiding
-      avoiding_percentage >= avoid_percentage_needed -> :avoiding
-      avoiding_count >= avoid_count_needed -> :avoiding
-      true -> :ok
-    end
+    results.rows
   end
 end

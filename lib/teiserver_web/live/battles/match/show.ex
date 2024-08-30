@@ -137,7 +137,10 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         |> List.flatten()
 
       past_balance =
-        BalanceLib.create_balance(groups, match.team_count, algorithm: algorithm)
+        BalanceLib.create_balance(groups, match.team_count,
+          algorithm: algorithm,
+          debug_mode?: true
+        )
         |> Map.put(:balance_mode, :grouped)
 
       # What about new balance?
@@ -235,7 +238,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       end)
       |> List.flatten()
 
-    BalanceLib.create_balance(groups, match.team_count, algorithm: algorithm)
+    BalanceLib.create_balance(groups, match.team_count, algorithm: algorithm, debug_mode?: true)
     |> Map.put(:balance_mode, :grouped)
   end
 
