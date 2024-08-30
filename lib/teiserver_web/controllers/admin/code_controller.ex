@@ -14,10 +14,10 @@ defmodule TeiserverWeb.Admin.CodeController do
     sub_menu_active: "code"
   )
 
-  plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
-  plug :add_breadcrumb, name: 'Codes', url: '/teiserver/admin/codes'
+  plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
+  plug :add_breadcrumb, name: "Codes", url: "/teiserver/admin/codes"
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
     codes =
       Account.list_codes(
@@ -33,7 +33,7 @@ defmodule TeiserverWeb.Admin.CodeController do
     |> render("index.html")
   end
 
-  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec delete(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     code =
       Account.get_code!(nil,
@@ -47,7 +47,7 @@ defmodule TeiserverWeb.Admin.CodeController do
     |> redirect(to: Routes.admin_code_path(conn, :index))
   end
 
-  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset = Account.change_code(%Code{expires: "24 hours"})
 
@@ -58,7 +58,7 @@ defmodule TeiserverWeb.Admin.CodeController do
     |> render("new.html")
   end
 
-  @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(conn, %{"code" => code_params}) do
     code_params =
       Map.merge(code_params, %{
@@ -79,7 +79,7 @@ defmodule TeiserverWeb.Admin.CodeController do
     end
   end
 
-  @spec extend(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec extend(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def extend(conn, %{"id" => id, "hours" => hours}) do
     code = Account.get_code!(nil, search: [id: id])
 

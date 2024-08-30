@@ -12,7 +12,7 @@ defmodule Teiserver.Moderation.ReportLib do
 
   def get_outstanding_report_max_days, do: 31
 
-  @spec make_favourite(Map.t()) :: Map.t()
+  @spec make_favourite(map()) :: map()
   def make_favourite(report) do
     %{
       type_colour: colour(),
@@ -80,7 +80,7 @@ defmodule Teiserver.Moderation.ReportLib do
     from(reports in Report)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do

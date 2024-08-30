@@ -15,10 +15,10 @@ defmodule TeiserverWeb.Admin.AccoladeController do
     sub_menu_active: "accolade"
   )
 
-  plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
-  plug :add_breadcrumb, name: 'Accolades', url: '/teiserver/admin/accolades'
+  plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
+  plug :add_breadcrumb, name: "Accolades", url: "/teiserver/admin/accolades"
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
     accolades =
       Account.list_accolades(
@@ -39,7 +39,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
     |> render("index.html")
   end
 
-  @spec user_show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec user_show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def user_show(conn, %{"user_id" => user_id} = params) do
     accolades =
       Account.list_accolades(
@@ -65,7 +65,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
     |> render("user_index.html")
   end
 
-  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     accolade =
       Account.get_accolade!(id,
@@ -82,7 +82,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
     |> render("show.html")
   end
 
-  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset = Account.change_accolade(%Accolade{})
 
@@ -92,7 +92,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
     |> render("new.html")
   end
 
-  @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(conn, %{"accolade" => accolade_params}) do
     case Account.create_accolade(accolade_params) do
       {:ok, _accolade} ->
@@ -107,7 +107,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
     end
   end
 
-  @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec edit(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     accolade = Account.get_accolade!(id)
 
@@ -120,7 +120,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
     |> render("edit.html")
   end
 
-  @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec update(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "accolade" => accolade_params}) do
     accolade = Account.get_accolade!(id)
 
@@ -138,7 +138,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
     end
   end
 
-  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec delete(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     accolade = Account.get_accolade!(id)
 

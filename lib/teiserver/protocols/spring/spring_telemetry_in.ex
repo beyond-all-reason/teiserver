@@ -7,7 +7,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   # import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   # TODO: Less nested hackyness
-  @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
+  @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
   def do_handle("upload_infolog", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+) (\S+) (\S+)/u, data) do
       [_, log_type, user_hash, metadata64, contents64] ->

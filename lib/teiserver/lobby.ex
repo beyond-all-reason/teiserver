@@ -39,7 +39,7 @@ defmodule Teiserver.Lobby do
     )
   end
 
-  @spec create_lobby(Map.t()) :: T.lobby()
+  @spec create_lobby(map()) :: T.lobby()
   def create_lobby(%{founder_id: _, founder_name: _, name: _} = lobby) do
     passworded = Map.get(lobby, :password) != nil
 
@@ -397,7 +397,7 @@ defmodule Teiserver.Lobby do
     lobby_ids
   end
 
-  @spec find_empty_lobby(function()) :: Map.t()
+  @spec find_empty_lobby(function()) :: map() | nil
   def find_empty_lobby(filter_func \\ fn _ -> true end) do
     empties =
       stream_lobbies()
@@ -649,7 +649,7 @@ defmodule Teiserver.Lobby do
     :ok
   end
 
-  @spec force_change_client(T.userid(), T.userid(), Map.t()) :: :ok
+  @spec force_change_client(T.userid(), T.userid(), map()) :: :ok
   def force_change_client(_, nil, _), do: nil
 
   def force_change_client(changer_id, client_id, new_values) do
@@ -675,7 +675,7 @@ defmodule Teiserver.Lobby do
     end
   end
 
-  @spec change_client_battle_status(Map.t(), Map.t()) :: Map.t()
+  @spec change_client_battle_status(map(), map()) :: map()
   def change_client_battle_status(nil, _), do: nil
   def change_client_battle_status(_, values) when values == %{}, do: nil
 

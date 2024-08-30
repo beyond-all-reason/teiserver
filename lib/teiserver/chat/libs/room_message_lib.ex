@@ -15,7 +15,7 @@ defmodule Teiserver.Chat.RoomMessageLib do
     from(room_messages in RoomMessage)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do

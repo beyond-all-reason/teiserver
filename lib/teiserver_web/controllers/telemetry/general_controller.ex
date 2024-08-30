@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Telemetry.GeneralController do
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
-  plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
+  plug(:add_breadcrumb, name: "Telemetry", url: "/telemetry")
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, _params) do

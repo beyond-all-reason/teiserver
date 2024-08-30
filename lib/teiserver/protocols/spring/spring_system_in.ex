@@ -4,7 +4,7 @@ defmodule Teiserver.Protocols.Spring.SystemIn do
   alias Teiserver.Protocols.SpringIn
   require Logger
 
-  @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
+  @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
   # def do_handle("command", _, _msg_id, state) do
   #   state
   # end

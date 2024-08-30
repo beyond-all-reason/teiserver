@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Moderation.GeneralController do
   @moduledoc false
   use TeiserverWeb, :controller
 
-  plug :add_breadcrumb, name: 'Moderation', url: '/moderation'
+  plug :add_breadcrumb, name: "Moderation", url: "/moderation"
 
   plug(AssignPlug,
     site_menu_active: "moderation",
@@ -14,7 +14,7 @@ defmodule TeiserverWeb.Moderation.GeneralController do
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, _params) do
     render(conn, "index.html")
   end

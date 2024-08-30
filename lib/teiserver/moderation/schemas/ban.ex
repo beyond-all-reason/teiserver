@@ -13,7 +13,7 @@ defmodule Teiserver.Moderation.Ban do
     timestamps()
   end
 
-  @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
+  @spec changeset(map(), map()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     params =
       params
@@ -24,7 +24,7 @@ defmodule Teiserver.Moderation.Ban do
     |> validate_required(~w(source_id added_by_id key_values enabled reason)a)
   end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
+  @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()
   def authorize(:index, conn, _), do: allow?(conn, "Overwatch")
   def authorize(:show, conn, _), do: allow?(conn, "Reviewer")
   def authorize(_, conn, _), do: allow?(conn, "Moderator")

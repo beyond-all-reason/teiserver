@@ -12,9 +12,9 @@ defmodule TeiserverWeb.Report.ReportController do
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
-  plug(:add_breadcrumb, name: 'Reports', url: '/teiserver/reports')
+  plug(:add_breadcrumb, name: "Reports", url: "/teiserver/reports")
 
-  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, params) do
     name = params["name"]
 

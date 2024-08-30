@@ -3,8 +3,8 @@ defmodule TeiserverWeb.Account.SecurityController do
 
   alias Teiserver.Account
 
-  plug(:add_breadcrumb, name: 'Account', url: '/teiserver/account')
-  plug(:add_breadcrumb, name: 'Security', url: '/teiserver/account/security')
+  plug(:add_breadcrumb, name: "Account", url: "/teiserver/account")
+  plug(:add_breadcrumb, name: "Security", url: "/teiserver/account/security")
 
   plug(AssignPlug,
     site_menu_active: "teiserver_account",
@@ -56,7 +56,7 @@ defmodule TeiserverWeb.Account.SecurityController do
     end
   end
 
-  @spec delete_token(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec delete_token(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete_token(conn, %{"id" => id}) do
     token =
       Account.get_user_token(id,

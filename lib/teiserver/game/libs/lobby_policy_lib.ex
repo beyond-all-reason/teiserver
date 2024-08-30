@@ -14,7 +14,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
   @spec colours :: atom
   def colours, do: :success2
 
-  @spec make_favourite(Queue.t()) :: Map.t()
+  @spec make_favourite(Queue.t()) :: map()
   def make_favourite(lobby_policy) do
     %{
       type_colour: StylingHelper.colours(colours()) |> elem(0),
@@ -34,7 +34,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
     from(lobby_policies in LobbyPolicy)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do

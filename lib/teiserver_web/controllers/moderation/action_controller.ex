@@ -18,10 +18,10 @@ defmodule TeiserverWeb.Moderation.ActionController do
     sub_menu_active: "action"
   )
 
-  plug :add_breadcrumb, name: 'Moderation', url: '/teiserver'
-  plug :add_breadcrumb, name: 'Actions', url: '/teiserver/actions'
+  plug :add_breadcrumb, name: "Moderation", url: "/teiserver"
+  plug :add_breadcrumb, name: "Actions", url: "/teiserver/actions"
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
     actions =
       Moderation.list_actions(
@@ -39,7 +39,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     |> render("index.html")
   end
 
-  @spec search(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec search(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def search(conn, %{"search" => params}) do
     actions =
       Moderation.list_actions(
@@ -58,7 +58,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     |> render("index.html")
   end
 
-  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     action =
       Moderation.get_action!(id,
@@ -99,7 +99,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     |> render("show.html")
   end
 
-  @spec new_with_user(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec new_with_user(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new_with_user(conn, params) do
     user =
       case params do
@@ -172,7 +172,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     end
   end
 
-  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset = Moderation.change_action(%Action{})
 
@@ -182,7 +182,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     |> render("new_select.html")
   end
 
-  @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(conn, %{"action" => action_params}) do
     user = Account.get_user(action_params["target_id"])
 
@@ -257,7 +257,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     end
   end
 
-  @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec edit(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     action = Moderation.get_action!(id, preload: [:target])
 
@@ -271,7 +271,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     |> render("edit.html")
   end
 
-  @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec update(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "action" => action_params}) do
     action = Moderation.get_action!(id)
 
@@ -307,7 +307,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     end
   end
 
-  @spec re_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec re_post(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def re_post(conn, %{"id" => id}) do
     action = Moderation.get_action!(id, preload: [:target])
 
@@ -337,7 +337,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     end
   end
 
-  @spec halt(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec halt(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def halt(conn, %{"id" => id}) do
     action = Moderation.get_action!(id)
 
@@ -353,7 +353,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     end
   end
 
-  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec delete(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     action = Moderation.get_action!(id)
 

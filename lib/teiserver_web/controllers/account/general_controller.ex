@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Account.GeneralController do
 
   alias Teiserver.Account
 
-  plug(:add_breadcrumb, name: 'Account', url: '/teiserver/account')
+  plug(:add_breadcrumb, name: "Account", url: "/teiserver/account")
 
   plug(AssignPlug,
     site_menu_active: "teiserver_account",

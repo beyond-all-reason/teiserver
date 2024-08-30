@@ -17,7 +17,7 @@ defmodule Teiserver.Client do
 
   alias Teiserver.Data.Types, as: T
 
-  @spec create(Map.t()) :: Map.t()
+  @spec create(map()) :: map()
   def create(client) do
     Map.merge(
       %{
@@ -70,7 +70,7 @@ defmodule Teiserver.Client do
     )
   end
 
-  @spec reset_battlestatus(Map.t()) :: Map.t()
+  @spec reset_battlestatus(map()) :: map()
   def reset_battlestatus(client) do
     %{
       client
@@ -195,7 +195,7 @@ defmodule Teiserver.Client do
   @spec list_clients([T.userid()]) :: [T.client()]
   defdelegate list_clients(id_list), to: ClientLib
 
-  @spec update(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) ::
+  @spec update(map(), :silent | :client_updated_status | :client_updated_battlestatus) ::
           T.client()
   def update(client, reason), do: ClientLib.replace_update_client(client, reason)
 
@@ -222,7 +222,7 @@ defmodule Teiserver.Client do
     end
   end
 
-  @spec leave_battle(Integer.t() | nil) :: Map.t() | nil
+  @spec leave_battle(Integer.t() | nil) :: map() | nil
   def leave_battle(nil), do: nil
 
   def leave_battle(userid) do

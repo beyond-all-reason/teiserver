@@ -3,7 +3,7 @@ defmodule TeiserverWeb.API.SessionController do
   alias Teiserver.{Account, CacheUser}
   alias Teiserver.Account.UserLib
 
-  @spec login(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec login(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def login(conn, %{"user" => %{"email" => email, "password" => password}}) do
     conn
     |> UserLib.authenticate_user(email, password)
@@ -117,7 +117,7 @@ defmodule TeiserverWeb.API.SessionController do
     |> render("register.json", %{result: :failure, reason: reason})
   end
 
-  @spec request_token(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec request_token(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def request_token(conn, %{"email" => email, "password" => raw_password} = params) do
     expires =
       case Map.get(params, "ttl", nil) do

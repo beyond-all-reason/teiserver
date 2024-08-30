@@ -36,7 +36,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   @action_commands ~w(SAY SAYEX SAYPRIVATE SAYBATTLE SAYBATTLEPRIVATEEX JOINBATTLE LEAVEBATTLE)
 
-  @spec data_in(String.t(), Map.t()) :: Map.t()
+  @spec data_in(String.t(), map()) :: map()
   def data_in(data, state) do
     if Application.get_env(:teiserver, Teiserver)[:extra_logging] == true or
          state.print_client_messages do
@@ -1358,7 +1358,7 @@ defmodule Teiserver.Protocols.SpringIn do
     _no_match(state, cmd, msg_id, data)
   end
 
-  @spec _no_match(Map.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
+  @spec _no_match(map(), String.t(), String.t() | nil, String.t()) :: map()
   def _no_match(state, cmd, msg_id, data) do
     data =
       data

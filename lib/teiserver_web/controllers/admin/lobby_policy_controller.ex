@@ -16,10 +16,10 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
     sub_menu_active: "lobby_policy"
   )
 
-  plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
-  plug :add_breadcrumb, name: 'Lobby policies', url: '/admin/lobby_policies'
+  plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
+  plug :add_breadcrumb, name: "Lobby policies", url: "/admin/lobby_policies"
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
     lobby_policies =
       Game.list_lobby_policies(
@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
     |> render("index.html")
   end
 
-  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     lobby_policy =
       Game.get_lobby_policy!(id,
@@ -51,7 +51,7 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
     |> render("show.html")
   end
 
-  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset =
       Game.change_lobby_policy(%Game.LobbyPolicy{
@@ -65,7 +65,7 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
     |> render("new.html")
   end
 
-  @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(conn, %{"lobby_policy" => lobby_policy_params}) do
     lobby_policy_params =
       Map.merge(lobby_policy_params, %{
@@ -94,7 +94,7 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
     end
   end
 
-  @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec edit(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     lobby_policy = Game.get_lobby_policy!(id)
 
@@ -107,7 +107,7 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
     |> render("edit.html")
   end
 
-  @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec update(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "lobby_policy" => lobby_policy_params}) do
     lobby_policy_params =
       Map.merge(lobby_policy_params, %{
@@ -139,7 +139,7 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
     end
   end
 
-  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec delete(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     lobby_policy = Game.get_lobby_policy!(id)
 

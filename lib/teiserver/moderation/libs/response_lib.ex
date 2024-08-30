@@ -27,7 +27,7 @@ defmodule Teiserver.Moderation.ResponseLib do
     from(responses in Response)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do

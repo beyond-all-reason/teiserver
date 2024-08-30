@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Account.SessionController do
   alias Account.{Guardian, User, UserLib}
   require Logger
 
-  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, _) do
     changeset = Account.change_user(%User{})
     maybe_user = Guardian.Plug.current_resource(conn)
@@ -29,7 +29,7 @@ defmodule TeiserverWeb.Account.SessionController do
     end
   end
 
-  @spec login(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec login(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def login(conn, %{"user" => %{"email" => email, "password" => password}}) do
     email = String.trim(email)
 
@@ -84,7 +84,7 @@ defmodule TeiserverWeb.Account.SessionController do
     end
   end
 
-  @spec logout(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec logout(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def logout(conn, _) do
     conn
     |> Guardian.Plug.sign_out(clear_remember_me: true)
@@ -118,7 +118,7 @@ defmodule TeiserverWeb.Account.SessionController do
     |> render("result.html")
   end
 
-  @spec forgot_password(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec forgot_password(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def forgot_password(conn, _params) do
     key = UUID.uuid1()
     value = UUID.uuid1()
@@ -130,7 +130,7 @@ defmodule TeiserverWeb.Account.SessionController do
     |> render("forgot_password.html")
   end
 
-  @spec send_password_reset(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec send_password_reset(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def send_password_reset(conn, %{"email" => email} = params) do
     # We use the || %{} to allow for the user not existing
     # If we let user be nil it messes up the existing_resets
@@ -217,7 +217,7 @@ defmodule TeiserverWeb.Account.SessionController do
     end
   end
 
-  @spec password_reset_form(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec password_reset_form(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def password_reset_form(conn, %{"value" => value}) do
     code = Account.get_code(value, preload: [:user])
 
@@ -247,7 +247,7 @@ defmodule TeiserverWeb.Account.SessionController do
     end
   end
 
-  @spec password_reset_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec password_reset_post(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def password_reset_post(conn, %{"value" => value, "pass1" => pass1, "pass2" => pass2}) do
     code = Account.get_code(value, preload: [:user])
 

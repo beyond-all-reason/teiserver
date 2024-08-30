@@ -17,10 +17,10 @@ defmodule TeiserverWeb.Moderation.BanController do
     sub_menu_active: "ban"
   )
 
-  plug :add_breadcrumb, name: 'Moderation', url: '/teiserver'
-  plug :add_breadcrumb, name: 'Bans', url: '/teiserver/bans'
+  plug :add_breadcrumb, name: "Moderation", url: "/teiserver"
+  plug :add_breadcrumb, name: "Bans", url: "/teiserver/bans"
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, _params) do
     bans =
       Moderation.list_bans(
@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Moderation.BanController do
     |> render("index.html")
   end
 
-  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     ban =
       Moderation.get_ban!(id,
@@ -75,7 +75,7 @@ defmodule TeiserverWeb.Moderation.BanController do
     |> render("show.html")
   end
 
-  @spec new_with_user(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec new_with_user(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new_with_user(conn, %{"teiserver_user" => user_str}) do
     user =
       cond do
@@ -159,14 +159,14 @@ defmodule TeiserverWeb.Moderation.BanController do
     end
   end
 
-  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, _params) do
     conn
     |> add_breadcrumb(name: "New ban", url: conn.request_path)
     |> render("new_select.html")
   end
 
-  @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(conn, %{"ban" => ban_params}) do
     key_values =
       ban_params["key_values"]
@@ -252,7 +252,7 @@ defmodule TeiserverWeb.Moderation.BanController do
     end
   end
 
-  @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec edit(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     ban = Moderation.get_ban!(id, preload: [:source])
 
@@ -287,7 +287,7 @@ defmodule TeiserverWeb.Moderation.BanController do
     |> render("edit.html")
   end
 
-  @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec update(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "ban" => ban_params}) do
     ban = Moderation.get_ban!(id)
 
@@ -321,7 +321,7 @@ defmodule TeiserverWeb.Moderation.BanController do
     end
   end
 
-  @spec enable(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec enable(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def enable(conn, %{"id" => id}) do
     ban = Moderation.get_ban!(id)
 
@@ -335,7 +335,7 @@ defmodule TeiserverWeb.Moderation.BanController do
     end
   end
 
-  @spec disable(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec disable(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def disable(conn, %{"id" => id}) do
     ban = Moderation.get_ban!(id)
 

@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Admin.GeneralController do
     user: {Teiserver.Account.AuthLib, :current_user}
   )
 
-  plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
+  plug(:add_breadcrumb, name: "Admin", url: "/teiserver/admin")
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, _params) do

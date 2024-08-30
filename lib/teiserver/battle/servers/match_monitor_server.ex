@@ -448,7 +448,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   @impl true
-  @spec init(Map.t()) :: {:ok, Map.t()}
+  @spec init(map()) :: {:ok, map()}
   def init(_opts) do
     send(self(), :begin)
     Logger.metadata(request_id: "MatchMonitorServer")

@@ -114,7 +114,7 @@ defmodule Teiserver.Communication do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_text_callback(Map.t()) :: {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_text_callback(map()) :: {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
   def create_text_callback(attrs \\ %{}) do
     %TextCallback{}
     |> TextCallback.changeset(attrs)
@@ -134,7 +134,7 @@ defmodule Teiserver.Communication do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_text_callback(TextCallback.t(), Map.t()) ::
+  @spec update_text_callback(TextCallback.t(), map()) ::
           {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
   def update_text_callback(%TextCallback{} = text_callback, attrs) do
     text_callback

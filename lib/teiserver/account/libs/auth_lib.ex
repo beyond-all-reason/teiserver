@@ -5,7 +5,7 @@ defmodule Teiserver.Account.AuthLib do
   @spec icon :: String.t()
   def icon(), do: "fa-solid fa-address-card"
 
-  @spec get_all_permission_sets() :: Map.t()
+  @spec get_all_permission_sets() :: list()
   def get_all_permission_sets do
     Teiserver.store_get(:auth_group_store, :all)
     |> Enum.map(fn key -> {key, get_permission_set(key)} end)
@@ -60,7 +60,7 @@ defmodule Teiserver.Account.AuthLib do
   end
 
   # If you don't need permissions then lets not bother checking
-  @spec allow?(Map.t() | Plug.Conn.t() | [String.t()], String.t() | [String.t()]) :: boolean
+  @spec allow?(map() | Plug.Conn.t() | [String.t()], String.t() | [String.t()]) :: boolean
   def allow?(nil, []), do: false
   def allow?(_, nil), do: true
   def allow?(_, ""), do: true
@@ -144,7 +144,7 @@ defmodule Teiserver.Account.AuthLib do
   end
 
   @spec mount_require_any(
-          Map.t() | Plug.Conn.t() | Phoenix.LiveView.Socket.t(),
+          map() | Plug.Conn.t() | Phoenix.LiveView.Socket.t(),
           String.t() | [String.t()]
         ) :: Phoenix.LiveView.Socket
   def mount_require_any(obj, requirements) do

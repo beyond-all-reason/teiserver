@@ -15,10 +15,10 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
     site_menu_active: "admin"
   )
 
-  plug :add_breadcrumb, name: 'Account', url: '/teiserver'
-  plug :add_breadcrumb, name: 'BadgeTypes', url: '/teiserver/badge_types'
+  plug :add_breadcrumb, name: "Account", url: "/teiserver"
+  plug :add_breadcrumb, name: "BadgeTypes", url: "/teiserver/badge_types"
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
     badge_types =
       Account.list_badge_types(
@@ -33,7 +33,7 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
     |> render("index.html")
   end
 
-  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     badge_type =
       Account.get_badge_type!(id,
@@ -50,7 +50,7 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
     |> render("show.html")
   end
 
-  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset =
       Account.change_badge_type(%BadgeType{
@@ -64,7 +64,7 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
     |> render("new.html")
   end
 
-  @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(conn, %{"badge_type" => badge_type_params}) do
     case Account.create_badge_type(badge_type_params) do
       {:ok, _badge_type} ->
@@ -79,7 +79,7 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
     end
   end
 
-  @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec edit(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     badge_type = Account.get_badge_type!(id)
 
@@ -92,7 +92,7 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
     |> render("edit.html")
   end
 
-  @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec update(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "badge_type" => badge_type_params}) do
     badge_type = Account.get_badge_type!(id)
 
@@ -110,7 +110,7 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
     end
   end
 
-  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec delete(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     badge_type = Account.get_badge_type!(id)
 

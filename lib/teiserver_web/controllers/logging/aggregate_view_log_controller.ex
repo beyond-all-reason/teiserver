@@ -13,15 +13,15 @@ defmodule TeiserverWeb.Logging.AggregateViewLogController do
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
-  plug :add_breadcrumb, name: 'Logging', url: '/logging'
-  plug :add_breadcrumb, name: 'Aggregate', url: '/logging/aggregate_views'
+  plug :add_breadcrumb, name: "Logging", url: "/logging"
+  plug :add_breadcrumb, name: "Aggregate", url: "/logging/aggregate_views"
 
   plug(AssignPlug,
     site_menu_active: "logging",
     sub_menu_active: "aggregate"
   )
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, _params) do
     logs =
       Logging.list_aggregate_view_logs(
@@ -36,7 +36,7 @@ defmodule TeiserverWeb.Logging.AggregateViewLogController do
     |> render("index.html")
   end
 
-  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"date" => date}) do
     date = TimexHelper.parse_ymd(date)
 
@@ -47,7 +47,7 @@ defmodule TeiserverWeb.Logging.AggregateViewLogController do
     |> render("show.html")
   end
 
-  @spec perform_form(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec perform_form(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def perform_form(conn, _params) do
     last_date = AggregateViewLogLib.get_last_aggregate_date()
 
@@ -73,7 +73,7 @@ defmodule TeiserverWeb.Logging.AggregateViewLogController do
     end
   end
 
-  @spec perform_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec perform_post(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def perform_post(conn, _params) do
     AggregateViewLogsTask.perform(%{})
 

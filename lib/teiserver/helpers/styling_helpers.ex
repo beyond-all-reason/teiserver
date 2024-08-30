@@ -223,7 +223,7 @@ defmodule Teiserver.Helper.StylingHelper do
     Enum.random(hex_colour_list())
   end
 
-  @spec random_styling() :: Map.t()
+  @spec random_styling() :: map()
   def random_styling() do
     %{
       "icon" => "fa-solid fa-" <> random_icon(),
@@ -231,7 +231,7 @@ defmodule Teiserver.Helper.StylingHelper do
     }
   end
 
-  @spec random_styling(Map.t()) :: Map.t()
+  @spec random_styling(map()) :: map()
   def random_styling(input_dict) do
     Map.merge(random_styling(), input_dict)
   end

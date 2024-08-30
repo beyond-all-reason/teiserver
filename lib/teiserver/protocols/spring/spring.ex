@@ -10,7 +10,7 @@ defmodule Teiserver.Protocols.Spring do
   @spec protocol_out :: Teiserver.Protocols.SpringOut
   def protocol_out(), do: SpringOut
 
-  @spec parse_client_status(String.t()) :: Map.t()
+  @spec parse_client_status(String.t()) :: map()
   def parse_client_status(status_str) do
     status_bits =
       BitParse.parse_bits(status_str, 7)
@@ -27,7 +27,7 @@ defmodule Teiserver.Protocols.Spring do
     }
   end
 
-  @spec create_client_status(Map.t()) :: Integer.t()
+  @spec create_client_status(map()) :: Integer.t()
   def create_client_status(client) do
     [r1, r2, r3] = BitParse.parse_bits("#{client.rank || 1}", 3)
 
@@ -54,7 +54,7 @@ defmodule Teiserver.Protocols.Spring do
   # b22..b23 = sync status (0 = unknown, 1 = synced, 2 = unsynced)
   # b24..b27 = side (e.g.: arm, core, tll, ... Side index can be between 0 and 15, inclusive)
   # b28..b31 = undefined (reserved for future use) Experimental: Use these for ally team no. extension (16->256)
-  @spec parse_battle_status(String.t()) :: Map.t()
+  @spec parse_battle_status(String.t()) :: map()
   def parse_battle_status(status) do
     status_bits =
       BitParse.parse_bits(status, 32)
@@ -138,7 +138,7 @@ defmodule Teiserver.Protocols.Spring do
     }
   end
 
-  @spec create_battle_status(Map.t()) :: Integer.t()
+  @spec create_battle_status(map()) :: Integer.t()
   def create_battle_status(client) do
     sync_value = Map.get(client, :sync, %{})
 

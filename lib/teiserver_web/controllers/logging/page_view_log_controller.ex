@@ -5,8 +5,8 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
   alias Teiserver.Helper.TimexHelper
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
-  plug :add_breadcrumb, name: 'Logging', url: '/logging'
-  plug :add_breadcrumb, name: 'Page views', url: '/logging/page_views'
+  plug :add_breadcrumb, name: "Logging", url: "/logging"
+  plug :add_breadcrumb, name: "Page views", url: "/logging/page_views"
 
   plug(AssignPlug,
     site_menu_active: "logging",
@@ -18,7 +18,7 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
     page_view_logs =
       Logging.list_page_view_logs(
@@ -39,7 +39,7 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
     |> render("index.html")
   end
 
-  @spec search(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec search(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def search(conn, %{"search" => params}) do
     params = form_params(params)
 
@@ -65,14 +65,14 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
     |> render("index.html")
   end
 
-  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     page_view_log = Logging.get_page_view_log!(id, joins: [:user])
 
     render(conn, "show.html", page_view_log: page_view_log)
   end
 
-  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec delete(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     page_view_log = Logging.get_page_view_log!(id)
 
@@ -85,7 +85,7 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
     |> redirect(to: Routes.logging_page_view_log_path(conn, :index))
   end
 
-  @spec form_params(Map.t()) :: Map.t()
+  @spec form_params(map()) :: map()
   defp form_params(params \\ %{}) do
     %{
       "section" => Map.get(params, "section", "any"),

@@ -16,10 +16,10 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
     sub_menu_active: "text_callback"
   )
 
-  plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
-  plug :add_breadcrumb, name: 'Lobby policies', url: '/admin/text_callbacks'
+  plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
+  plug :add_breadcrumb, name: "Lobby policies", url: "/admin/text_callbacks"
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
     text_callbacks =
       Communication.list_text_callbacks(
@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
     |> render("index.html")
   end
 
-  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     text_callback =
       Communication.get_text_callback!(id,
@@ -75,7 +75,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
     |> render("show.html")
   end
 
-  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset =
       Communication.change_text_callback(%Communication.TextCallback{
@@ -89,7 +89,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
     |> render("new.html")
   end
 
-  @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(conn, %{"text_callback" => text_callback_params}) do
     text_callback_params =
       Map.merge(text_callback_params, %{
@@ -113,7 +113,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
     end
   end
 
-  @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec edit(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     text_callback = Communication.get_text_callback!(id)
 
@@ -126,7 +126,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
     |> render("edit.html")
   end
 
-  @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec update(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "text_callback" => text_callback_params}) do
     text_callback_params =
       Map.merge(text_callback_params, %{
@@ -153,7 +153,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
     end
   end
 
-  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec delete(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     text_callback = Communication.get_text_callback!(id)
 

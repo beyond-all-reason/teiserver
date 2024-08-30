@@ -200,7 +200,7 @@ defmodule TeiserverWeb.API.HailstormController do
 end
 
 defmodule Teiserver.API.HailstormAuth do
-  @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
+  @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()
   def authorize(_, _, _) do
     Application.get_env(:teiserver, Teiserver)[:enable_hailstorm]
   end

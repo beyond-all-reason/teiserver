@@ -957,7 +957,7 @@ defmodule Teiserver.Telemetry do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_infolog(Map.t()) :: {:ok, Infolog.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_infolog(map()) :: {:ok, Infolog.t()} | {:error, Ecto.Changeset.t()}
   def create_infolog(attrs \\ %{}) do
     %Infolog{}
     |> Infolog.changeset(attrs)

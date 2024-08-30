@@ -15,10 +15,10 @@ defmodule TeiserverWeb.Admin.AchievementController do
     sub_menu_active: "achievements"
   )
 
-  plug :add_breadcrumb, name: 'Game', url: '/teiserver'
-  plug :add_breadcrumb, name: 'AchievementTypes', url: '/teiserver/achievement_types'
+  plug :add_breadcrumb, name: "Game", url: "/teiserver"
+  plug :add_breadcrumb, name: "AchievementTypes", url: "/teiserver/achievement_types"
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
     achievement_types =
       Game.list_achievement_types(
@@ -33,7 +33,7 @@ defmodule TeiserverWeb.Admin.AchievementController do
     |> render("index.html")
   end
 
-  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     achievement_type =
       Game.get_achievement_type!(id,
@@ -50,7 +50,7 @@ defmodule TeiserverWeb.Admin.AchievementController do
     |> render("show.html")
   end
 
-  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset =
       Game.change_achievement_type(%AchievementType{
@@ -64,7 +64,7 @@ defmodule TeiserverWeb.Admin.AchievementController do
     |> render("new.html")
   end
 
-  @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(conn, %{"achievement_type" => achievement_type_params}) do
     case Game.create_achievement_type(achievement_type_params) do
       {:ok, _achievement_type} ->
@@ -79,7 +79,7 @@ defmodule TeiserverWeb.Admin.AchievementController do
     end
   end
 
-  @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec edit(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     achievement_type = Game.get_achievement_type!(id)
 
@@ -92,7 +92,7 @@ defmodule TeiserverWeb.Admin.AchievementController do
     |> render("edit.html")
   end
 
-  @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec update(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "achievement_type" => achievement_type_params}) do
     achievement_type = Game.get_achievement_type!(id)
 
@@ -110,7 +110,7 @@ defmodule TeiserverWeb.Admin.AchievementController do
     end
   end
 
-  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec delete(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     achievement_type = Game.get_achievement_type!(id)
 

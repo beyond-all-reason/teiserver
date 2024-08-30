@@ -16,10 +16,10 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
     sub_menu_active: "discord_channel"
   )
 
-  plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
-  plug :add_breadcrumb, name: 'Discord channels', url: '/admin/discord_channels'
+  plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
+  plug :add_breadcrumb, name: "Discord channels", url: "/admin/discord_channels"
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
     discord_channels =
       Communication.list_discord_channels(
@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
     |> render("index.html")
   end
 
-  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     discord_channel = Communication.get_discord_channel!(id)
 
@@ -44,7 +44,7 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
     |> render("show.html")
   end
 
-  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset =
       Communication.change_discord_channel(%Communication.DiscordChannel{
@@ -59,7 +59,7 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
     |> render("new.html")
   end
 
-  @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(conn, %{"discord_channel" => params}) do
     name =
       if String.starts_with?(params["special_name"], "--") do
@@ -84,7 +84,7 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
     end
   end
 
-  @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec edit(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     discord_channel = Communication.get_discord_channel!(id)
 
@@ -98,7 +98,7 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
     |> render("edit.html")
   end
 
-  @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec update(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "discord_channel" => discord_channel_params}) do
     discord_channel_params =
       Map.merge(discord_channel_params, %{
@@ -126,7 +126,7 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
     end
   end
 
-  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec delete(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     discord_channel = Communication.get_discord_channel!(id)
 

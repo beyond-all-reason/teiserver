@@ -9,7 +9,7 @@ defmodule Teiserver.Moderation.ProposalVoteLib do
     from(proposal_votes in ProposalVote)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), keyword() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do

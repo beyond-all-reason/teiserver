@@ -135,7 +135,7 @@ defmodule Teiserver.Moderation do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_report(Map.t()) :: {:ok, Report.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_report(map()) :: {:ok, Report.t()} | {:error, Ecto.Changeset.t()}
   def create_report(attrs \\ %{}) do
     %Report{}
     |> Report.changeset(attrs)
@@ -171,7 +171,7 @@ defmodule Teiserver.Moderation do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_report(Report.t(), Map.t()) :: {:ok, Report.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_report(Report.t(), map()) :: {:ok, Report.t()} | {:error, Ecto.Changeset.t()}
   def update_report(%Report{} = report, attrs) do
     report
     |> Report.changeset(attrs)
@@ -380,7 +380,7 @@ defmodule Teiserver.Moderation do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_response(Map.t()) :: {:ok, Response.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_response(map()) :: {:ok, Response.t()} | {:error, Ecto.Changeset.t()}
   def create_response(attrs \\ %{}) do
     %Response{}
     |> Response.changeset(attrs)
@@ -416,7 +416,7 @@ defmodule Teiserver.Moderation do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_response(Response.t(), Map.t()) ::
+  @spec update_response(Response.t(), map()) ::
           {:ok, Response.t()} | {:error, Ecto.Changeset.t()}
   def update_response(%Response{} = response, attrs) do
     response
@@ -579,7 +579,7 @@ defmodule Teiserver.Moderation do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_action(Map.t()) :: {:ok, Action.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_action(map()) :: {:ok, Action.t()} | {:error, Ecto.Changeset.t()}
   def create_action(attrs \\ %{}) do
     %Action{}
     |> Action.changeset(attrs)
@@ -615,7 +615,7 @@ defmodule Teiserver.Moderation do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_action(Action.t(), Map.t()) :: {:ok, Action.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_action(Action.t(), map()) :: {:ok, Action.t()} | {:error, Ecto.Changeset.t()}
   def update_action(%Action{} = action, attrs) do
     action
     |> Action.changeset(attrs)
@@ -766,7 +766,7 @@ defmodule Teiserver.Moderation do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_proposal(Map.t()) :: {:ok, Proposal.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_proposal(map()) :: {:ok, Proposal.t()} | {:error, Ecto.Changeset.t()}
   def create_proposal(attrs \\ %{}) do
     %Proposal{}
     |> Proposal.changeset(attrs)
@@ -802,7 +802,7 @@ defmodule Teiserver.Moderation do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_proposal(Proposal.t(), Map.t()) ::
+  @spec update_proposal(Proposal.t(), map()) ::
           {:ok, Proposal.t()} | {:error, Ecto.Changeset.t()}
   def update_proposal(%Proposal{} = proposal, attrs) do
     proposal
@@ -874,7 +874,7 @@ defmodule Teiserver.Moderation do
       nil
 
   """
-  @spec get_proposal_vote(T.user_id(), integer()) :: ProposalVote.t() | nil
+  @spec get_proposal_vote(T.userid(), integer()) :: ProposalVote.t() | nil
   def get_proposal_vote(user_id, proposal_id) do
     ProposalVoteLib.query_proposal_votes()
     |> ProposalVoteLib.search(user_id: user_id, proposal_id: proposal_id)
@@ -1029,7 +1029,7 @@ defmodule Teiserver.Moderation do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_ban(Map.t()) :: {:ok, Ban.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_ban(map()) :: {:ok, Ban.t()} | {:error, Ecto.Changeset.t()}
   def create_ban(attrs \\ %{}) do
     %Ban{}
     |> Ban.changeset(attrs)
@@ -1065,7 +1065,7 @@ defmodule Teiserver.Moderation do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_ban(Ban.t(), Map.t()) :: {:ok, Ban.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_ban(Ban.t(), map()) :: {:ok, Ban.t()} | {:error, Ecto.Changeset.t()}
   def update_ban(%Ban{} = ban, attrs) do
     ban
     |> Ban.changeset(attrs)

@@ -20,7 +20,7 @@ defmodule Teiserver.Microblog.UserPreference do
   @doc """
   Builds a changeset based on the `struct` and `params`.
   """
-  @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
+  @spec changeset(map(), map()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(
@@ -30,6 +30,6 @@ defmodule Teiserver.Microblog.UserPreference do
     |> validate_required(~w(user_id)a)
   end
 
-  @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean
+  @spec authorize(atom, Plug.Conn.t(), map()) :: boolean
   def authorize(_action, conn, _params), do: allow?(conn, "Contributor")
 end

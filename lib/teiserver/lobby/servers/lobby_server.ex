@@ -645,7 +645,7 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   @impl true
-  @spec init(Map.t()) :: {:ok, Map.t()}
+  @spec init(map()) :: {:ok, map()}
   def init(%{lobby: %{id: id}} = data) do
     # Update the queue pids cache to point to this process
     Horde.Registry.register(

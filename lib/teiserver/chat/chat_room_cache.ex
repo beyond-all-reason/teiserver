@@ -8,9 +8,9 @@ defmodule Teiserver.Room do
 
   @dont_log_room ~w(autohosts)
 
-  @spec create_room(Map.t()) :: Map.t()
-  @spec create_room(String.t(), T.userid()) :: Map.t()
-  @spec create_room(String.t(), T.userid(), T.clan_id()) :: Map.t()
+  @spec create_room(map()) :: map()
+  @spec create_room(String.t(), T.userid()) :: map()
+  @spec create_room(String.t(), T.userid(), T.clan_id()) :: map()
   def create_room(%{name: _} = room) do
     Map.merge(
       %{
@@ -37,7 +37,7 @@ defmodule Teiserver.Room do
     Teiserver.cache_delete(:rooms, room_name)
   end
 
-  @spec get_room(String.t()) :: Map.t()
+  @spec get_room(String.t()) :: map()
   def get_room(name) do
     Teiserver.cache_get(:rooms, name)
   end
@@ -62,8 +62,8 @@ defmodule Teiserver.Room do
     end
   end
 
-  @spec get_or_make_room(String.t(), T.userid()) :: Map.t()
-  @spec get_or_make_room(String.t(), T.userid(), T.clan_id()) :: Map.t()
+  @spec get_or_make_room(String.t(), T.userid()) :: map()
+  @spec get_or_make_room(String.t(), T.userid(), T.clan_id()) :: map()
   def get_or_make_room(name, author_id, clan_id \\ nil) do
     case Teiserver.cache_get(:rooms, name) do
       nil ->
@@ -263,7 +263,7 @@ defmodule Teiserver.Room do
     end
   end
 
-  @spec allow?(Map.t(), String.t()) :: boolean()
+  @spec allow?(map(), String.t()) :: boolean()
   def allow?(userid, _room_name) do
     cond do
       CacheUser.is_shadowbanned?(userid) ->

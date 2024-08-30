@@ -14,11 +14,11 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
-  plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
+  plug(:add_breadcrumb, name: "Telemetry", url: "/telemetry")
 
   plug(:add_breadcrumb,
-    name: 'Complex Match events',
-    url: '/telemetry/complex_match_events/summary'
+    name: "Complex Match events",
+    url: "/telemetry/complex_match_events/summary"
   )
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()

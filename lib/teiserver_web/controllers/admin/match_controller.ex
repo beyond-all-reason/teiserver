@@ -15,10 +15,10 @@ defmodule TeiserverWeb.Admin.MatchController do
     sub_menu_active: "match"
   )
 
-  plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
-  plug :add_breadcrumb, name: 'Matches', url: '/teiserver/admin/matches'
+  plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
+  plug :add_breadcrumb, name: "Matches", url: "/teiserver/admin/matches"
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
     matches =
       Battle.list_matches(
@@ -65,7 +65,7 @@ defmodule TeiserverWeb.Admin.MatchController do
     |> render("index.html")
   end
 
-  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     conn
     |> put_flash(
@@ -75,7 +75,7 @@ defmodule TeiserverWeb.Admin.MatchController do
     |> redirect(to: ~p"/battle/#{id}")
   end
 
-  @spec user_show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec user_show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def user_show(conn, params = %{"user_id" => userid}) do
     matches =
       Battle.list_matches(
@@ -99,7 +99,7 @@ defmodule TeiserverWeb.Admin.MatchController do
     |> render("user_index.html")
   end
 
-  @spec server_index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec server_index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def server_index(conn, %{"uuid" => uuid}) do
     matches =
       Battle.list_matches(

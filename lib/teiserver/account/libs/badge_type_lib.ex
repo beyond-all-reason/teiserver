@@ -28,7 +28,7 @@ defmodule Teiserver.Account.BadgeTypeLib do
       "Role"
     ]
 
-  @spec make_favourite(Map.t()) :: Map.t()
+  @spec make_favourite(map()) :: map()
   def make_favourite(badge_type) do
     %{
       type_colour: colours(),
@@ -48,7 +48,7 @@ defmodule Teiserver.Account.BadgeTypeLib do
     from(badge_types in BadgeType)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do

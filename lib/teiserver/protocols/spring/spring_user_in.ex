@@ -6,7 +6,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
-  @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
+  @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
   def do_handle("add_friend", userids_str, msg_id, state) do
     responses =
       userids_str

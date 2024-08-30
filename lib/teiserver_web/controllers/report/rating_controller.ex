@@ -13,8 +13,8 @@ defmodule TeiserverWeb.Report.RatingController do
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
-  plug(:add_breadcrumb, name: ~c"Reports", url: ~c"/teiserver/reports")
-  plug(:add_breadcrumb, name: ~c"Reports", url: ~c"/teiserver/reports/ratings")
+  plug(:add_breadcrumb, name: "Reports", url: "/teiserver/reports")
+  plug(:add_breadcrumb, name: "Reports", url: "/teiserver/reports/ratings")
 
   @spec distribution_table(Plug.Conn.t(), map) :: Plug.Conn.t()
   def distribution_table(conn, _params) do

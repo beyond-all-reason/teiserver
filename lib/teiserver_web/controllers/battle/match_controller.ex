@@ -16,9 +16,9 @@ defmodule TeiserverWeb.Battle.MatchController do
     sub_menu_active: "match"
   )
 
-  plug :add_breadcrumb, name: 'Matches', url: '/battle'
+  plug :add_breadcrumb, name: "Matches", url: "/battle"
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, _params) do
     matches =
       Battle.list_matches(
@@ -37,7 +37,7 @@ defmodule TeiserverWeb.Battle.MatchController do
     |> render("index.html")
   end
 
-  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     match =
       Battle.get_match!(id,

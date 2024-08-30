@@ -16,10 +16,10 @@ defmodule TeiserverWeb.Moderation.ReportController do
     sub_menu_active: "report"
   )
 
-  plug :add_breadcrumb, name: 'Moderation', url: '/moderation'
-  plug :add_breadcrumb, name: 'Reports', url: '/moderation/reports'
+  plug :add_breadcrumb, name: "Moderation", url: "/moderation"
+  plug :add_breadcrumb, name: "Reports", url: "/moderation/reports"
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
     reports =
       Moderation.list_reports(
@@ -44,7 +44,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
     |> render("index.html")
   end
 
-  @spec search(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec search(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def search(conn, %{"search" => params}) do
     reports =
       Moderation.list_reports(
@@ -80,7 +80,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
     |> render("index.html")
   end
 
-  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     report =
       Moderation.get_report!(id,
@@ -205,7 +205,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
     |> render("user.html")
   end
 
-  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset = Moderation.change_report(%Report{})
 
@@ -215,7 +215,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
     |> render("new.html")
   end
 
-  @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(conn, %{"report" => report_params}) do
     case Moderation.create_report(report_params) do
       {:ok, _report} ->
@@ -230,7 +230,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
     end
   end
 
-  @spec respond(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec respond(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def respond(conn, %{"id" => id, "response" => response_params}) do
     # Ensure the report exists
     Moderation.get_report!(id)
@@ -270,7 +270,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
     end
   end
 
-  @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec edit(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     report = Moderation.get_report!(id)
 
@@ -283,7 +283,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
     |> render("edit.html")
   end
 
-  @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec update(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "report" => report_params}) do
     report = Moderation.get_report!(id)
 
@@ -301,7 +301,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
     end
   end
 
-  @spec close(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec close(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def close(conn, %{"id" => id}) do
     report = Moderation.get_report!(id)
 
@@ -318,7 +318,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
     end
   end
 
-  @spec open(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec open(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def open(conn, %{"id" => id}) do
     report = Moderation.get_report!(id)
 
@@ -335,7 +335,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
     end
   end
 
-  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec delete(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     report = Moderation.get_report!(id, preload: [:target, :reporter])
 

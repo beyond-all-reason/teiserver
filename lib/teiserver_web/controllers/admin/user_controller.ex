@@ -21,8 +21,8 @@ defmodule TeiserverWeb.Admin.UserController do
     user: {Teiserver.Account.AuthLib, :current_user}
   )
 
-  plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
-  plug(:add_breadcrumb, name: 'Users', url: '/teiserver/admin/user')
+  plug(:add_breadcrumb, name: "Admin", url: "/teiserver/admin")
+  plug(:add_breadcrumb, name: "Users", url: "/teiserver/admin/user")
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
@@ -58,7 +58,7 @@ defmodule TeiserverWeb.Admin.UserController do
     end
   end
 
-  @spec search(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec search(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def search(conn, %{"search" => params}) do
     params = Map.merge(search_defaults(conn), params)
 
@@ -1083,7 +1083,7 @@ defmodule TeiserverWeb.Admin.UserController do
     |> redirect(to: ~p"/teiserver/admin/user/#{id}" <> tab)
   end
 
-  @spec search_defaults(Plug.Conn.t()) :: Map.t()
+  @spec search_defaults(Plug.Conn.t()) :: map()
   defp search_defaults(_conn) do
     %{
       "limit" => 50

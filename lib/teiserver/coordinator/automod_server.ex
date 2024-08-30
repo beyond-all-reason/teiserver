@@ -116,7 +116,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
     {:reply, check_wrapper(userid), state}
   end
 
-  @spec init(Map.t()) :: {:ok, Map.t()}
+  @spec init(map()) :: {:ok, map()}
   def init(_opts) do
     Horde.Registry.register(
       Teiserver.ServerRegistry,

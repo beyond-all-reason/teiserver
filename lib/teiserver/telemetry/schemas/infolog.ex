@@ -16,13 +16,13 @@ defmodule Teiserver.Telemetry.Infolog do
   @doc """
   Builds a changeset based on the `struct` and `params`.
   """
-  @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
+  @spec changeset(map(), map()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, ~w(user_hash user_id log_type timestamp metadata contents size)a)
     |> validate_required(~w(user_hash log_type timestamp metadata contents size)a)
   end
 
-  @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean
+  @spec authorize(atom, Plug.Conn.t(), map()) :: boolean
   def authorize(_action, conn, _params), do: allow?(conn, "Engine")
 end

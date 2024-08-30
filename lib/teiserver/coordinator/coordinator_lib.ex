@@ -177,7 +177,7 @@ Multiple locks can be engaged at the same time
 
   When resolve_round finds circular references it drops them and they don't go anywhere.
   """
-  @spec resolve_split(Map.t()) :: Map.t()
+  @spec resolve_split(map()) :: map()
   def resolve_split(split) do
     case resolve_round(split) do
       {:complete, result} -> result
@@ -187,7 +187,7 @@ Multiple locks can be engaged at the same time
     |> Map.new()
   end
 
-  @spec resolve_round(Map.t()) :: {:incomplete | :complete, Map.t()}
+  @spec resolve_round(map()) :: {:incomplete | :complete, map()}
   defp resolve_round(split) do
     players = Map.keys(split)
 
@@ -231,7 +231,7 @@ Multiple locks can be engaged at the same time
     end
   end
 
-  @spec remove_circular(Map.t()) :: Map.t()
+  @spec remove_circular(map()) :: map()
   defp remove_circular(split) do
     split
     |> Map.new(fn {k, v} ->

@@ -16,10 +16,10 @@ defmodule TeiserverWeb.Moderation.ProposalController do
     sub_menu_active: "proposal"
   )
 
-  plug :add_breadcrumb, name: 'Moderation', url: '/teiserver'
-  plug :add_breadcrumb, name: 'Proposals', url: '/teiserver/proposals'
+  plug :add_breadcrumb, name: "Moderation", url: "/teiserver"
+  plug :add_breadcrumb, name: "Proposals", url: "/teiserver/proposals"
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
     proposals =
       Moderation.list_proposals(
@@ -36,7 +36,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
     |> render("index.html")
   end
 
-  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     proposal =
       Moderation.get_proposal!(id,
@@ -54,7 +54,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
     |> render("show.html")
   end
 
-  @spec new_with_user(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec new_with_user(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new_with_user(conn, %{"teiserver_user" => user_str}) do
     user =
       cond do
@@ -106,14 +106,14 @@ defmodule TeiserverWeb.Moderation.ProposalController do
     end
   end
 
-  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, _params) do
     conn
     |> add_breadcrumb(name: "New ban", url: conn.request_path)
     |> render("new_select.html")
   end
 
-  @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(conn, %{"proposal" => proposal_params}) do
     user = Account.get_user(proposal_params["target_id"])
 
@@ -177,7 +177,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
     end
   end
 
-  @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec edit(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     proposal = Moderation.get_proposal!(id, preload: [:target])
 
@@ -209,7 +209,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
     end
   end
 
-  @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec update(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "proposal" => proposal_params}) do
     proposal = Moderation.get_proposal!(id, preload: [:target, :votes])
 
@@ -261,7 +261,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
     end
   end
 
-  @spec vote(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec vote(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def vote(conn, %{"proposal_id" => proposal_id, "direction" => direction}) do
     proposal = Moderation.get_proposal!(proposal_id)
 
@@ -333,7 +333,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
     end
   end
 
-  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec delete(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     proposal = Moderation.get_proposal!(id, preload: [:target])
 
@@ -348,7 +348,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
     |> redirect(to: Routes.moderation_proposal_path(conn, :index))
   end
 
-  @spec conclude(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec conclude(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def conclude(conn, %{"id" => id, "comments" => ""}) do
     conn
     |> put_flash(:danger, "Proposal cannot be concluded without comments")

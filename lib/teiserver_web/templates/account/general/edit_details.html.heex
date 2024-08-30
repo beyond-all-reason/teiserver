@@ -25,7 +25,11 @@
           <%= if Teiserver.Config.get_site_config_cache("user.Enable renames") do %>
             <div class="form-group mt-3">
               <%= label(f, :name) %>
-              <%= text_input(f, :name, class: "form-control", required: "", autofocus: "autofocus") %>
+              <%= text_input(f, :name,
+                class: "form-control",
+                required: "",
+                autofocus: "autofocus"
+              ) %>
               <%= error_tag(f, :name) %>
             </div>
           <% else %>

@@ -18,7 +18,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     Enum.member?(@always_allow, command) || Enum.member?(@mod_allow, command)
   end
 
-  @spec allow_command?(Map.t(), Map.t()) :: boolean()
+  @spec allow_command?(map(), map()) :: boolean()
   defp allow_command?(%{senderid: senderid} = cmd, state) do
     client = Client.get_client_by_id(senderid)
 
@@ -556,7 +556,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     state
   end
 
-  @spec command_as_message(Map.t()) :: String.t()
+  @spec command_as_message(map()) :: String.t()
   defp command_as_message(cmd) do
     remaining = if Map.get(cmd, :remaining), do: " #{cmd.remaining}", else: ""
     error = if Map.get(cmd, :error), do: " Error: #{cmd.error}", else: ""

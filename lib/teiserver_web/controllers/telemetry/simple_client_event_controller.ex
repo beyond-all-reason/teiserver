@@ -14,11 +14,11 @@ defmodule TeiserverWeb.Telemetry.SimpleClientEventController do
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
-  plug(:add_breadcrumb, name: 'Telemetry', url: '/telemetry')
+  plug(:add_breadcrumb, name: "Telemetry", url: "/telemetry")
 
   plug(:add_breadcrumb,
-    name: 'Simple client events',
-    url: '/telemetry/simple_client_events/summary'
+    name: "Simple client events",
+    url: "/telemetry/simple_client_events/summary"
   )
 
   @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()

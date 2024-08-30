@@ -66,7 +66,7 @@ defmodule Teiserver.EmailHelper do
     end
   end
 
-  defp password_reset(user, code \\ nil) do
+  defp password_reset(user, code) do
     # We need this to enable recreating the email if we know it
     # should exist but at the same time we don't want
     # callers of this function to have to create the code

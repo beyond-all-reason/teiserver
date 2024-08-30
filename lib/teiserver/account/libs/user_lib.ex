@@ -16,7 +16,7 @@ defmodule Teiserver.Account.UserLib do
   @spec colour :: atom
   def colour, do: :success
 
-  @spec make_favourite(Teiserver.Account.User.t()) :: Map.t()
+  @spec make_favourite(Teiserver.Account.User.t()) :: map()
   def make_favourite(user) do
     %{
       type_colour: StylingHelper.colours(colours()) |> elem(0),

@@ -8,7 +8,7 @@ defmodule Teiserver.Clans.ClanMembershipLib do
     from(clan_memberships in ClanMembership)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map() | keyword() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do

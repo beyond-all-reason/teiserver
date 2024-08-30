@@ -9,7 +9,7 @@ defmodule Teiserver.Game.RatingLogLib do
   @spec colours :: atom
   def colours, do: :primary2
 
-  @spec make_favourite(RatingLog.t()) :: Map.t()
+  @spec make_favourite(RatingLog.t()) :: map()
   def make_favourite(queue) do
     %{
       type_colour: StylingHelper.colours(colours()) |> elem(0),
@@ -29,7 +29,7 @@ defmodule Teiserver.Game.RatingLogLib do
     from(rating_logs in RatingLog)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do

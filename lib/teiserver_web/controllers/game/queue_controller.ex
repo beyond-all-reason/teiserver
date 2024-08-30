@@ -17,10 +17,10 @@ defmodule TeiserverWeb.Game.QueueController do
     sub_menu_active: "queue"
   )
 
-  plug :add_breadcrumb, name: 'Game', url: '/teiserver'
-  plug :add_breadcrumb, name: 'Queues', url: '/teiserver/queues'
+  plug :add_breadcrumb, name: "Game", url: "/teiserver"
+  plug :add_breadcrumb, name: "Queues", url: "/teiserver/queues"
 
-  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
     queues =
       Game.list_queues(
@@ -35,7 +35,7 @@ defmodule TeiserverWeb.Game.QueueController do
     |> render("index.html")
   end
 
-  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     queue =
       Game.get_queue!(id,
@@ -52,7 +52,7 @@ defmodule TeiserverWeb.Game.QueueController do
     |> render("show.html")
   end
 
-  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset =
       Game.change_queue(%Queue{
@@ -66,7 +66,7 @@ defmodule TeiserverWeb.Game.QueueController do
     |> render("new.html")
   end
 
-  @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(conn, %{"queue" => queue_params}) do
     queue_params =
       Map.merge(queue_params, %{
@@ -90,7 +90,7 @@ defmodule TeiserverWeb.Game.QueueController do
     end
   end
 
-  @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec edit(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     queue = Game.get_queue!(id)
 
@@ -103,7 +103,7 @@ defmodule TeiserverWeb.Game.QueueController do
     |> render("edit.html")
   end
 
-  @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec update(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "queue" => queue_params}) do
     queue = Game.get_queue!(id)
 
@@ -130,7 +130,7 @@ defmodule TeiserverWeb.Game.QueueController do
     end
   end
 
-  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec delete(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     queue = Game.get_queue!(id)
 
