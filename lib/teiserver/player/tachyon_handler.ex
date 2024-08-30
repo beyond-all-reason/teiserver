@@ -71,6 +71,33 @@ defmodule Teiserver.Player.TachyonHandler do
     {:reply, :ok, {:text, resp}, state}
   end
 
+  def handle_command("matchmaking/queue" = cmd_id, "request", message_id, message, state) do
+    queue_ids = message["data"]["queues"]
+
+    response =
+      case Player.Session.join_queues(state.user.id, queue_ids) do
+        :ok ->
+          Schema.response(cmd_id, message_id)
+
+        {:error, reason} ->
+          reason =
+            case reason do
+              :invalid_queue -> :invalid_queue_specified
+              x -> x
+            end
+
+          %{
+            type: :response,
+            status: :failed,
+            commandId: cmd_id,
+            messageId: message_id,
+            reason: reason
+          }
+      end
+
+    {:push, {:text, Jason.encode!(response)}, state}
+  end
+
   def handle_command(command_id, _message_type, message_id, _message, state) do
     resp =
       Schema.error_response(command_id, message_id, :command_unimplemented)

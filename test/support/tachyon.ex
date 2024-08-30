@@ -2,6 +2,7 @@ defmodule Teiserver.Support.Tachyon do
   alias WebsocketSyncClient, as: WSC
   alias Teiserver.OAuthFixtures
 
+  def setup_client(_context), do: setup_client()
   def setup_client() do
     user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
     %{client: client, token: token} = connect(user)
@@ -64,6 +65,16 @@ defmodule Teiserver.Support.Tachyon do
   end
 
   @doc """
+  Cleanly disconnect a client by sending a disconnect message before closing
+  the connection.
+  """
+  def disconnect(client) do
+    req = request("system/disconnect")
+    :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
+    WSC.disconnect(client)
+  end
+
+  @doc """
   high level function to get the list of matchmaking queues
   """
   def list_queues!(client) do
@@ -84,6 +95,13 @@ defmodule Teiserver.Support.Tachyon do
       "status" => "success"
     } = resp
 
+    resp
+  end
+
+  def join_queues!(client, queue_ids) do
+    req = request("matchmaking/queue", %{queues: queue_ids})
+    :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
+    {:ok, resp} = recv_response(client)
     resp
   end
 

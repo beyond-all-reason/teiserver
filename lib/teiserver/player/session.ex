@@ -11,14 +11,19 @@ defmodule Teiserver.Player.Session do
   require Logger
 
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Player
+  alias Teiserver.{Player, Matchmaking}
 
   @type conn_state :: :connected | :reconnecting | :disconnected
+
+  @type matchmaking_state :: %{
+          joined_queues: [Matchmaking.queue_id()]
+        }
 
   @type state :: %{
           user_id: T.userid(),
           mon_ref: reference(),
-          conn_pid: pid() | nil
+          conn_pid: pid() | nil,
+          matchmaking: matchmaking_state()
         }
 
   @spec conn_state(T.userid()) :: conn_state()
@@ -27,6 +32,11 @@ defmodule Teiserver.Player.Session do
   catch
     :exit, {:noproc, _} ->
       :disconnected
+  end
+
+  @spec join_queues(T.userid(), [Matchmaking.queue_id()]) :: Matchmaking.join_result()
+  def join_queues(user_id, queue_ids) do
+    GenServer.call(via_tuple(user_id), {:join_queues, queue_ids})
   end
 
   def start_link({_conn_pid, user_id} = arg) do
@@ -50,7 +60,10 @@ defmodule Teiserver.Player.Session do
     state = %{
       user_id: user_id,
       mon_ref: ref,
-      conn_pid: conn_pid
+      conn_pid: conn_pid,
+      matchmaking_state: %{
+        joined_queues: []
+      }
     }
 
     {:ok, state}
@@ -71,6 +84,38 @@ defmodule Teiserver.Player.Session do
   def handle_call(:conn_state, _from, state) do
     result = if is_nil(state.conn_pid), do: :reconnecting, else: :connected
     {:reply, result, state}
+  end
+
+  def handle_call({:join_queues, queue_ids}, _from, state) do
+    if not Enum.empty?(state.matchmaking_state.joined_queues) do
+      {:reply, {:error, :already_queued}, state}
+    else
+      case join_all_queues(state.user_id, queue_ids, []) do
+        :ok ->
+          {:reply, :ok, put_in(state.matchmaking_state.joined_queues, queue_ids)}
+
+        {:error, err} ->
+          {:reply, {:error, err}, state}
+      end
+    end
+  end
+
+  @spec join_all_queues(T.userid(), [Matchmaking.queue_id()], [Matchmaking.queue_id()]) ::
+          Matchmaking.join_result()
+  defp join_all_queues(_user_id, [], _joined), do: :ok
+
+  defp join_all_queues(user_id, [to_join | rest], joined) do
+    case Matchmaking.join_queue(to_join, user_id) do
+      :ok ->
+        join_all_queues(user_id, rest, [to_join | joined])
+
+      # the `queue` message is all or nothing, so if joining a later queue need
+      # to leave the queues already joined
+      {:error, reason} ->
+        Enum.each(joined, fn qid -> Matchmaking.leave_queue(qid, user_id) end)
+
+        {:error, reason}
+    end
   end
 
   @impl true
