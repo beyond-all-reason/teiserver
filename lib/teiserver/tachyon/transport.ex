@@ -83,27 +83,14 @@ defmodule Teiserver.Tachyon.Transport do
 
       :missing_schema ->
         resp =
-          %{
-            type: :response,
-            status: :failed,
-            reason: :command_unimplemented,
-            commandId: command_id,
-            messageId: message_id
-          }
+          Schema.error_response(command_id, message_id, :command_unimplemented)
           |> Jason.encode!()
 
         {:reply, :ok, {:text, resp}, state}
 
       {:error, err} ->
         resp =
-          %{
-            type: :response,
-            status: :failed,
-            reason: :internal_error,
-            commandId: command_id,
-            messageId: message_id,
-            details: inspect(err)
-          }
+          Schema.error_response(command_id, message_id, :internal_error, inspect(err))
           |> Jason.encode!()
 
         {:reply, :ok, {:text, resp}, state}
@@ -131,15 +118,7 @@ defmodule Teiserver.Tachyon.Transport do
         str_err = inspect({e, __STACKTRACE__})
         Logger.error([inspect(message), str_err])
 
-        resp = %{
-          type: :response,
-          status: :failed,
-          messageId: message_id,
-          commandId: command_id,
-          reason: :internal_error,
-          details: str_err
-        }
-
+        resp = Schema.error_response(command_id, message_id, :internal_error, str_err)
         {:push, {:text, Jason.encode!(resp)}, state}
     end
   end

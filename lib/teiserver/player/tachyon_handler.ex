@@ -53,13 +53,7 @@ defmodule Teiserver.Player.TachyonHandler do
         ) :: WebSock.handle_result()
   def handle_command(command_id, _message_type, message_id, _message, state) do
     resp =
-      %{
-        type: :response,
-        status: :failed,
-        reason: :command_unimplemented,
-        commandId: command_id,
-        messageId: message_id
-      }
+      Schema.error_response(command_id, message_id, :command_unimplemented)
       |> Jason.encode!()
 
     {:reply, :ok, {:text, resp}, state}
