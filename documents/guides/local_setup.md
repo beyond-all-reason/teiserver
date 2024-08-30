@@ -6,8 +6,8 @@ You will need to install:
 - [Elixir/Erlang installed](https://elixir-lang.org/install.html).
 - [Postresql](https://www.postgresql.org/download).
 
-Make sure that Elixir is in correct version (I'm currently using 1.14). You can find required version [here](https://github.com/beyond-all-reason/teiserver/blob/master/mix.exs#L8).
-You can use [asdf](https://github.com/asdf-vm/asdf) to install correct version.
+Make sure that Elixir is in correct version (currently using 1.16). You can find required version [here](https://github.com/beyond-all-reason/teiserver/blob/master/mix.exs#L8).
+You can use [asdf](https://github.com/asdf-vm/asdf) to install correct version, picked up from the file `.tool-version`.
 
 ### Clone repo
 ```bash
