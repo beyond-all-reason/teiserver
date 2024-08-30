@@ -124,7 +124,24 @@ defmodule Teiserver.Tachyon.Transport do
         state.handler_state
       )
 
-    handle_result(result, state)
+    try do
+      handle_result(result, state)
+    rescue
+      e ->
+        str_err = inspect({e, __STACKTRACE__})
+        Logger.error([inspect(message), str_err])
+
+        resp = %{
+          type: :response,
+          status: :failed,
+          messageId: message_id,
+          commandId: command_id,
+          reason: :internal_error,
+          details: str_err
+        }
+
+        {:push, {:text, Jason.encode!(resp)}, state}
+    end
   end
 
   # helper function to use the result from the invoked handler function
