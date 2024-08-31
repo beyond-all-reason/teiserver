@@ -25,4 +25,16 @@ defmodule Teiserver.Matchmaking.QueueSynest do
       assert {:error, :invalid_queue} == Matchmaking.join_queue("INVALID!!", user.id)
     end
   end
+
+  describe "leaving" do
+    test "works", %{user: user, queue_id: queue_id} do
+      assert {:error, :not_queued} = Matchmaking.leave_queue(queue_id, user.id)
+
+      assert {:error, :invalid_queue} =
+               Matchmaking.leave_queue("lolnope that't not a queue", user.id)
+
+      :ok = Matchmaking.join_queue(queue_id, user.id)
+      assert :ok = Matchmaking.leave_queue(queue_id, user.id)
+    end
+  end
 end

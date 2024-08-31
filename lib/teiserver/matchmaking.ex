@@ -6,6 +6,7 @@ defmodule Teiserver.Matchmaking do
   @type queue_id :: Matchmaking.QueueServer.id()
   @type member :: Matchmaking.QueueServer.member()
   @type join_result :: Matchmaking.QueueServer.join_result()
+  @type leave_result :: Matchmaking.QueueServer.leave_result()
 
   @spec lookup_queue(Matchmaking.QueueServer.id()) :: pid() | nil
   def lookup_queue(queue_id) do
@@ -41,5 +42,10 @@ defmodule Teiserver.Matchmaking do
 
   def join_queue(queue_id, member) do
     Matchmaking.QueueServer.join_queue(queue_id, member)
+  end
+
+  @spec leave_queue(queue_id(), T.userid()) :: leave_result()
+  def leave_queue(queue_id, user_id) do
+    Matchmaking.QueueServer.leave_queue(queue_id, user_id)
   end
 end

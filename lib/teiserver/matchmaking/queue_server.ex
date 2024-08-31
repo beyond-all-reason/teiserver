@@ -111,6 +111,19 @@ defmodule Teiserver.Matchmaking.QueueServer do
     :exit, {:noproc, _} -> {:error, :invalid_queue}
   end
 
+  @type leave_result :: :ok | {:error, {:not_queued, :invalid_queue}}
+
+  @doc """
+  Leave the specified queue. If the given player is a member of a party, then
+  the entire party will leave the queue
+  """
+  @spec leave_queue(id(), T.userid()) :: leave_result()
+  def leave_queue(queue_id, player_id) do
+    GenServer.call(QueueRegistry.via_tuple(queue_id), {:leave_queue, player_id})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_queue}
+  end
+
   @spec start_link(state()) :: GenServer.on_start()
   def start_link(initial_state) do
     GenServer.start_link(__MODULE__, initial_state,
@@ -133,6 +146,22 @@ defmodule Teiserver.Matchmaking.QueueServer do
       {:reply, :ok, %{state | members: [new_member | state.members]}}
     else
       {:reply, {:error, :already_queued}, state}
+    end
+  end
+
+  @impl true
+  def handle_call({:leave_queue, player_id}, _from, state) do
+    {to_remove, new_members} =
+      Enum.split_with(state.members, fn member ->
+        Enum.member?(member.player_ids, player_id)
+      end)
+
+    if Enum.empty?(to_remove) do
+      {:reply, {:error, :not_queued}, state}
+    else
+      # TODO tachyon_mvp: need to let all the other players know that they are
+      # being removed from the queue
+      {:reply, :ok, %{state | members: new_members}}
     end
   end
 end
