@@ -32,6 +32,9 @@ defmodule Teiserver.Account.ClientServerTest do
     p = ClientLib.start_client_server(client)
     assert is_pid(p)
 
+    # crappy way to ensure the genserver is registered by the time
+    # call_client is called.
+    :timer.sleep(5)
     # Call it!
     c = ClientLib.call_client(userid, :get_client_state)
     assert c.userid == userid
