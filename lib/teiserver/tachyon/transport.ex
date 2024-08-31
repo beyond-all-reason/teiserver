@@ -97,10 +97,6 @@ defmodule Teiserver.Tachyon.Transport do
     end
   end
 
-  def do_handle_command("system/disconnect", "request", _message_id, _message, state) do
-    {:stop, :normal, state}
-  end
-
   def do_handle_command(command_id, message_type, message_id, message, state) do
     result =
       state.handler.handle_command(

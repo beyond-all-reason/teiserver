@@ -53,6 +53,10 @@ defmodule Teiserver.Player.TachyonHandler do
           term(),
           state()
         ) :: WebSock.handle_result()
+  def handle_command("system/disconnect", "request", _message_id, _message, state) do
+    {:stop, :normal, state}
+  end
+
   def handle_command("matchmaking/list" = cmd_id, "request", message_id, _message, state) do
     queues =
       Matchmaking.list_queues()

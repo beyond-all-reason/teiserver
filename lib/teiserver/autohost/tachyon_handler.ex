@@ -38,6 +38,10 @@ defmodule Teiserver.Autohost.TachyonHandler do
           state()
         ) :: WebSock.handle_result()
 
+  def handle_command("system/disconnect", "request", _message_id, _message, state) do
+    {:stop, :normal, state}
+  end
+
   def handle_command(command_id, _message_type, message_id, _message, state) do
     resp =
       Schema.error_response(command_id, message_id, :command_unimplemented)
