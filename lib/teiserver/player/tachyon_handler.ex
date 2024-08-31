@@ -54,6 +54,8 @@ defmodule Teiserver.Player.TachyonHandler do
           state()
         ) :: WebSock.handle_result()
   def handle_command("system/disconnect", "request", _message_id, _message, state) do
+    Player.Session.disconnect(state.user.id)
+
     {:stop, :normal, state}
   end
 
@@ -124,8 +126,17 @@ defmodule Teiserver.Player.TachyonHandler do
         Player.Registry.register_and_kill_existing(user_id)
 
       {:error, {:already_started, pid}} ->
-        :ok = Player.Session.replace_connection(pid, self())
-        Player.Registry.register_and_kill_existing(user_id)
+        case Player.Session.replace_connection(pid, self()) do
+          # This can happen when the session dies/terminate between the
+          # start_session and the replace_connection. In which case, try again.
+          # When a user disconnect and immediately reconnect it can happen
+          # that the session is still registered
+          :died ->
+            setup_session(user_id)
+
+          :ok ->
+            Player.Registry.register_and_kill_existing(user_id)
+        end
     end
   end
 end

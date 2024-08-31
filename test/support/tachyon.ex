@@ -3,6 +3,7 @@ defmodule Teiserver.Support.Tachyon do
   alias Teiserver.OAuthFixtures
 
   def setup_client(_context), do: setup_client()
+
   def setup_client() do
     user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
     %{client: client, token: token} = connect(user)
@@ -14,12 +15,17 @@ defmodule Teiserver.Support.Tachyon do
   @doc """
   connects the given user and returns the ws client
   """
-  def connect(user) do
-    %{token: token} = OAuthFixtures.setup_token(user)
-
+  def connect(%Teiserver.OAuth.Token{} = token) do
     opts = connect_options(token)
 
     {:ok, client} = WSC.connect(tachyon_url(), opts)
+    client
+  end
+
+  def connect(user) do
+    %{token: token} = OAuthFixtures.setup_token(user)
+
+    client = connect(token)
     %{client: client, token: token}
   end
 
@@ -68,10 +74,18 @@ defmodule Teiserver.Support.Tachyon do
   Cleanly disconnect a client by sending a disconnect message before closing
   the connection.
   """
-  def disconnect(client) do
+  def disconnect!(client) do
     req = request("system/disconnect")
     :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
-    WSC.disconnect(client)
+    :ok = WSC.disconnect(client)
+  end
+
+  @doc """
+  Close the underlying websocket connection without sending the proper message.
+  This can be used to simulate a player crash.
+  """
+  def abrupt_disconnect!(client) do
+    :ok = WSC.disconnect(client)
   end
 
   @doc """

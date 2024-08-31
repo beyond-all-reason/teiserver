@@ -57,5 +57,21 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
       resp = Tachyon.join_queues!(client, [queue_id])
       assert %{"status" => "success"} = resp
     end
+
+    test "with disconnections", %{token: token, client: client, queue_id: queue_id} do
+      %{"status" => "success"} = Tachyon.join_queues!(client, [queue_id])
+
+      # clean disconnection removes user from queue
+      Tachyon.disconnect!(client)
+      client = Tachyon.connect(token)
+      %{"status" => "success"} = Tachyon.join_queues!(client, [queue_id])
+
+      # A crash doesn't remove the player from the queue
+      Tachyon.abrupt_disconnect!(client)
+      client = Tachyon.connect(token)
+
+      %{"status" => "failed", "reason" => "already_queued"} =
+        Tachyon.join_queues!(client, [queue_id])
+    end
   end
 end

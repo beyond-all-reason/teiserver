@@ -34,6 +34,18 @@ defmodule Teiserver.Player.Session do
       :disconnected
   end
 
+  @doc """
+  Cleanly disconnect the user, clearing any state
+  """
+  @spec disconnect(T.userid()) :: :ok
+  def disconnect(user_id) do
+    # the registry will automatically unregister when the process terminates
+    # but that can lead to race conditions when a player disconnect and
+    # reconnect immediately
+    Player.SessionRegistry.unregister(user_id)
+    GenServer.call(via_tuple(user_id), :disconnect)
+  end
+
   @spec join_queues(T.userid(), [Matchmaking.queue_id()]) :: Matchmaking.join_result()
   def join_queues(user_id, queue_ids) do
     GenServer.call(via_tuple(user_id), {:join_queues, queue_ids})
@@ -48,9 +60,12 @@ defmodule Teiserver.Player.Session do
   with another one. This is to avoid having the same player with several
   connections.
   """
-  @spec replace_connection(pid(), pid()) :: :ok
+  @spec replace_connection(pid(), pid()) :: :ok | :died
   def replace_connection(sess_pid, new_conn_pid) do
     GenServer.call(sess_pid, {:replace, new_conn_pid})
+  catch
+    :exit, _ ->
+      :died
   end
 
   @impl true
@@ -61,12 +76,14 @@ defmodule Teiserver.Player.Session do
       user_id: user_id,
       mon_ref: ref,
       conn_pid: conn_pid,
-      matchmaking_state: %{
-        joined_queues: []
-      }
+      matchmaking: initial_matchmaking_state()
     }
 
     {:ok, state}
+  end
+
+  defp initial_matchmaking_state() do
+    %{joined_queues: []}
   end
 
   @impl true
@@ -86,13 +103,23 @@ defmodule Teiserver.Player.Session do
     {:reply, result, state}
   end
 
+  def handle_call(:disconnect, _from, state) do
+    user_id = state.user_id
+
+    Enum.each(state.matchmaking.joined_queues, fn queue_id ->
+      Matchmaking.QueueServer.leave_queue(queue_id, user_id)
+    end)
+
+    {:stop, :normal, :ok, %{state | matchmaking: initial_matchmaking_state()}}
+  end
+
   def handle_call({:join_queues, queue_ids}, _from, state) do
-    if not Enum.empty?(state.matchmaking_state.joined_queues) do
+    if not Enum.empty?(state.matchmaking.joined_queues) do
       {:reply, {:error, :already_queued}, state}
     else
       case join_all_queues(state.user_id, queue_ids, []) do
         :ok ->
-          {:reply, :ok, put_in(state.matchmaking_state.joined_queues, queue_ids)}
+          {:reply, :ok, put_in(state.matchmaking.joined_queues, queue_ids)}
 
         {:error, err} ->
           {:reply, {:error, err}, state}
