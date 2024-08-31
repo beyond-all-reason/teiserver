@@ -104,6 +104,19 @@ defmodule Teiserver.Player.TachyonHandler do
     {:push, {:text, Jason.encode!(response)}, state}
   end
 
+  def handle_command("matchmaking/cancel" = cmd_id, "request", message_id, _message, state) do
+    response =
+      case Player.Session.leave_queues(state.user.id) do
+        :ok ->
+          Schema.response(cmd_id, message_id)
+
+        {:error, reason} ->
+          Schema.error_response(cmd_id, message_id, reason)
+      end
+
+    {:push, {:text, Jason.encode!(response)}, state}
+  end
+
   def handle_command(command_id, _message_type, message_id, _message, state) do
     resp =
       Schema.error_response(command_id, message_id, :command_unimplemented)

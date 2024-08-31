@@ -74,4 +74,16 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
         Tachyon.join_queues!(client, [queue_id])
     end
   end
+
+  describe "leaving queues" do
+    setup [{Tachyon, :setup_client}, :setup_queue]
+
+    test "works", %{client: client, queue_id: queue_id} do
+      assert %{"status" => "success"} = Tachyon.join_queues!(client, [queue_id])
+      assert %{"status" => "success"} = Tachyon.leave_queues!(client)
+
+      assert %{"status" => "failed", "reason" => "not_queued"} =
+               Tachyon.leave_queues!(client)
+    end
+  end
 end

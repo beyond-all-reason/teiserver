@@ -51,6 +51,14 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:join_queues, queue_ids})
   end
 
+  @doc """
+  Leave all the queues, and effectively removes the player from any matchmaking
+  """
+  @spec leave_queues(T.userid()) :: Matchmaking.leave_result()
+  def leave_queues(user_id) do
+    GenServer.call(via_tuple(user_id), :leave_queues)
+  end
+
   def start_link({_conn_pid, user_id} = arg) do
     GenServer.start_link(__MODULE__, arg, name: via_tuple(user_id))
   end
@@ -127,6 +135,30 @@ defmodule Teiserver.Player.Session do
     end
   end
 
+  def handle_call(:leave_queues, _from, state) do
+    if Enum.empty?(state.matchmaking.joined_queues) do
+      {:reply, {:error, :not_queued}, state}
+    else
+      # TODO tachyon_mvp: leaving queue ignore failure there.
+      # It is a bit unclear what kind of failure can happen, and also
+      # what should be done in that case
+      Enum.each(state.matchmaking.joined_queues, fn qid ->
+        Matchmaking.leave_queue(qid, state.user_id)
+      end)
+
+      {:reply, :ok, Map.put(state, :matchmaking, initial_matchmaking_state())}
+    end
+  end
+
+  @impl true
+  def handle_info({:DOWN, ref, :process, _, _reason}, state) when ref == state.mon_ref do
+    {:noreply, %{state | conn_pid: nil}}
+  end
+
+  defp via_tuple(user_id) do
+    Player.SessionRegistry.via_tuple(user_id)
+  end
+
   @spec join_all_queues(T.userid(), [Matchmaking.queue_id()], [Matchmaking.queue_id()]) ::
           Matchmaking.join_result()
   defp join_all_queues(_user_id, [], _joined), do: :ok
@@ -143,14 +175,5 @@ defmodule Teiserver.Player.Session do
 
         {:error, reason}
     end
-  end
-
-  @impl true
-  def handle_info({:DOWN, ref, :process, _, _reason}, state) when ref == state.mon_ref do
-    {:noreply, %{state | conn_pid: nil}}
-  end
-
-  defp via_tuple(user_id) do
-    Player.SessionRegistry.via_tuple(user_id)
   end
 end

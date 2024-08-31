@@ -119,6 +119,13 @@ defmodule Teiserver.Support.Tachyon do
     resp
   end
 
+  def leave_queues!(client) do
+    req = request("matchmaking/cancel")
+    :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
+    {:ok, resp} = recv_response(client)
+    resp
+  end
+
   @doc """
   Run the given function `f` until `pred` returns true on its result.
   Waits `wait` ms between each tries. Raise an error if `pred` returns false
