@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Admin.AutohostControllerTest do
-  use TeiserverWeb.ConnCase, async: true
+  use TeiserverWeb.ConnCase
 
   alias Teiserver.{Autohost, OAuth}
   alias Teiserver.OAuth.CredentialQueries
