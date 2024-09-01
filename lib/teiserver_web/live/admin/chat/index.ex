@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    case allow?(socket.assigns[:current_user], "Moderator") do
+    case allow?(socket.assigns[:current_user], "Reviewer") do
       true ->
         socket =
           socket
