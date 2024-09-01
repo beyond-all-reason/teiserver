@@ -175,6 +175,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
           value: hd(cb.triggers)
         }
       end)
+      # 25 is the Discord limit of choices per / command
+      |> Enum.take(25)
 
     command = %{
       name: "textcb",
