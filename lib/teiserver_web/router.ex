@@ -615,7 +615,7 @@ defmodule TeiserverWeb.Router do
     live_session :admin_chat_liveview,
       on_mount: [
         {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Account.AuthPlug, {:authorise, "Moderator"}}
+        {Teiserver.Account.AuthPlug, {:authorise, "Reviewer"}}
       ] do
       live "/chat", ChatLive.Index, :index
     end
