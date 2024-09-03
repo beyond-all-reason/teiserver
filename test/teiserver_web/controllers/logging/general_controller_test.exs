@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Logging.LoggingControllerTest do
-  use TeiserverWeb.ConnCase, async: true
+  use TeiserverWeb.ConnCase
 
   alias Central.Helpers.GeneralTestLib
 

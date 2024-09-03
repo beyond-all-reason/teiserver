@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Logging.AuditLogControllerTest do
-  use TeiserverWeb.ConnCase, async: true
+  use TeiserverWeb.ConnCase
 
   # alias TeiserverWeb.Logging.AuditLog
   alias Teiserver.Logging.Helpers
