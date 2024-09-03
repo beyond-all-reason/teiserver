@@ -137,7 +137,7 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B4 - we take \'reverse\' griefing or vigilantism just as seriously as \'normal\' griefing. If you think someone is griefing, quickly pause the game, calmly discuss with other players whether or not to `!kickban` them, and report them after the match if necessary. Many matches with griefing are winnable until the griefed party decides to escalate the situation.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B4 - We take \'reverse\' griefing or vigilantism just as seriously as \'normal\' griefing. If you think someone is griefing, quickly pause the game, calmly discuss with other players whether or not to `!kickban` them, and report them after the match if necessary. Many matches with griefing are winnable until the griefed party decides to escalate the situation.');
       "
                   >
                     Reverse griefing
@@ -146,7 +146,7 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B4 - griefing by self-destructing your remaining units **out of spite/with intent to deny them to your team**, which lowers your team\'s chances at victory. If you want to stop playing a match, leave and let your players `/take` your stuff.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B4 - Griefing by self-destructing your remaining units **out of spite/with intent to deny them to your team**, which lowers your team\'s chances at victory. If you want to stop playing a match, resign and let your teammates `/take` your stuff.');
       "
                   >
                     Self-d before leaving
@@ -155,15 +155,7 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) A4 - *Leaving a game very early because you don\'t like the teams is not acceptable, instead call a stop vote `!cv stop`. Note that leaving mid-game is acceptable as you are unlikely to disadvantage your allies to such an extent. If abused persistently it will be moderated.*');
-      "
-                  >
-                    Leaving early
-                  </div>
-                  <div
-                    class={"btn btn-outline-#{bsname} btn-block"}
-                    onclick="
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) A4 - *Disregarding the teamwork part of team game when done notoriously can result in you being ostracized from team games. You don\'t have to do everything an ally says but at the same time you are part of the team not against it; this includes giving allies an appropriate amount of space to build and respecting their claim to the available resources on the map*');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) A4 - *Disregarding the teamwork part of team game when done notoriously can result in you being ostracized from team games. You don\'t have to do everything an ally says but at the same time you are part of the team not against it; this includes giving allies an appropriate amount of space to build and respecting their claim to the available resources on the map.*');
       "
                   >
                     Teamwork/resources
@@ -180,7 +172,7 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B4 - griefing by self-destructing your commander, the last one of your team, while other players are still fighting. If you want to stop playing a match, leave and let your players `/take` your stuff. Comebacks happen; if your team hasn\'t decided it\'s over by a `!resign` vote, don\'t force the result on them.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B4 - Griefing by self-destructing your commander, the last one of your team, while other players are still fighting. If you want to stop playing a match, resign and let your teammates `/take` your stuff. Comebacks happen; if your team hasn\'t decided it\'s over by a `!resign` vote, don\'t force the result on them.');
       "
                   >
                     Self-d last com
@@ -189,10 +181,10 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) A4 - Repeatedly leaving matches in the pre-game phase. There are many valid reasons that a player may need to leave early, but they usualy involve real-life events; not getting the spawn location you want is not a good reason to leave a game.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) A4 - Purposefully unpausing to disrupt a player reconnecting or to disrupt a discussion/vote to kickban a misbehaving player, unless a reasonable amount of time has passed, is unsportsmanlike and to be avoided.');
       "
                   >
-                    Position leave/stop
+                    Unpausing
                   </div>
                 </div>
 
@@ -210,16 +202,18 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-              $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) A3. The *personal moderation* tools such as `!kickban` are meant to be used to act quicker than moderation can help you - for example, if you are currently being griefed - or if you don\'t think it\'s worth involving moderation in a matter, or for managing lobbies pre-match as a boss. Starting a `!kickban` vote on an ally in a running game just because they [TODO] is misuse of that tool.');
-              "
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B1 - Politics has no place in BAR.');
+        $('#action_expires').val('3 days');
+      "
                   >
-                    Kickban abuse
+                    B1 - politics
                   </div>
 
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B2 - *Abuse especially on the grounds or context of sexism, racism, homophobia, disability, religion, ancestry and similar is never acceptable*');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B2 - *Abuse especially on the grounds or context of sexism, racism, homophobia, disability, religion, ancestry and similar is never acceptable.*');
       "
                   >
                     B2 - discrimination
@@ -253,7 +247,7 @@ bsname = view_colour() %>
                     onclick="
         $('#action_restriction_Login').prop('checked', true);
         $('#action_expires').val('5 days');
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C1 - Telling someone else to kill themselves is completely unacceptable.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C2 - Telling someone else to kill themselves is completely unacceptable.');
       "
                   >
                     KYS
@@ -263,11 +257,31 @@ bsname = view_colour() %>
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
         $('#action_restriction_Login').prop('checked', true);
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B5 - spectator cheating is completely unacceptable. Given the severity of this, any future attempts at cheating will result in a permanent ban, as will evasion of the suspension.')
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B5 - Spectator cheating is completely unacceptable. Given the severity of this, any future attempts at cheating will result in a permanent ban, as will evasion of the suspension.')
         $('#action_expires').val('21 days');
       "
                   >
                     Spec cheating
+                  </div>
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B5 - Purposefully and publicly passing on consequential information to players in a game via things like spectator mode (we understand mistakes happen occasionally) is obviously a form of cheating.')
+        $('#action_expires').val('5 days');
+      "
+                  >
+                    Passing Info
+                  </div>
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('Permanent ban.');
+        $('#action_expires').val('1100 years');
+      "
+                  >
+                    One-off accont permaban
                   </div>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
@@ -280,18 +294,18 @@ bsname = view_colour() %>
         $('#action_expires').val('1100 years');
       "
                   >
-                    One-off accont permaban (for previous ban evaders)
+                    One-off accont permaban (hidden, for ban evaders)
                   </div>
                 </div>
               </div>
               <div class="row">
                 <div class="col mt-3">
-                  <h4>Moderation evasion</h4>
+                  <h4>Smurfing/Moderation evasion</h4>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
         $('#action_restriction_Warning_reminder').prop('checked', true);
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C5 - evading moderation by creating new accounts is not okay. Continued evasion will lead to a permanent ban.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C5 - Evading moderation by creating new accounts is not okay. Continued evasion will lead to a permanent ban.');
         $('#action_expires').val('1 day');
       "
                   >
@@ -302,7 +316,7 @@ bsname = view_colour() %>
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
         $('#action_restriction_Login').prop('checked', true);
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C5 - evading moderation, 2nd offense. Continued evasion will lead to a permanent ban.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C5 - Evading moderation, 2nd offense. Continued evasion will lead to a permanent ban.');
         $('#action_expires').val('1 day');
       "
                   >
@@ -313,21 +327,17 @@ bsname = view_colour() %>
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
         $('#action_restriction_Login').prop('checked', true);
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C5 - evading moderation, 3rd offense. We may permanently ban the account if you do not stop trying to evade moderation.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C5 - Evading moderation, 3rd offense. We may permanently ban the account if you do not stop trying to evade moderation.');
         $('#action_expires').val('3 days');
       "
                   >
                     Moderation evasion - 3rd offense
                   </div>
-                </div>
-
-                <div class="col mt-3">
-                  <h4>Smurfing</h4>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick={"
         $('#action_restriction_Warning_reminder').prop('checked', true);
-        $('#action_reason').val('Smurf or alt-accounts are not allowed, if you need an exemption or you think there has been an error please use the #open-ticket discord channel to talk to the moderation team. The discord can be accessed at #{discord_link}');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B5 - Smurf or alt-accounts are not allowed, if you need an exemption or you think there has been an error please use the #open-ticket discord channel to talk to the moderation team. The discord can be accessed at #{discord_link}');
         $('#action_expires').val('1 day');
       "}
                   >
@@ -338,7 +348,7 @@ bsname = view_colour() %>
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
         $('#action_restriction_Login').prop('checked', true);
-        $('#action_reason').val('You are continuing to create smurf/alt-accounts. This is against the code of conduct. We may permanently ban you if this continues.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B5 - You are continuing to create smurf/alt-accounts. This is against the code of conduct. We may permanently ban you if this continues.');
         $('#action_expires').val('1 day');
       "
                   >
@@ -349,11 +359,39 @@ bsname = view_colour() %>
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
         $('#action_restriction_Login').prop('checked', true);
-        $('#action_reason').val('Smurfing/alt-accounting. 3rd offense, if you do it again we may permanently ban your account.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B5 - Smurfing/alt-accounting. 3rd offense, if you do it again we may permanently ban your account.');
         $('#action_expires').val('3 days');
       "
                   >
                     Smurfing - 3rd offense
+                  </div>
+                </div>
+
+                <div class="col mt-3">
+                  <h4>Addons/Clarifications</h4>
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
+        $('#action_reason').val($('#action_reason').val() + '\n\nSuspension duration is based on the number of similar recent offenses.');
+      "
+                  >
+                    + Recent Offenses
+                  </div>
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
+        $('#action_reason').val($('#action_reason').val() + '\n\nThis suspension\'s duration was increased due to the severity of the incident.');
+      "
+                  >
+                    + Incident Severity
+                  </div>
+                  <div
+                    class={"btn btn-outline-#{bsname} btn-block"}
+                    onclick="
+        $('#action_reason').val($('#action_reason').val() + '\n\nLarge Raptor/Bot replays require much more time to review than PvP replays, so offenses in these games are treated more harshly.');
+      "
+                  >
+                    + Long Raptor/Bot Game
                   </div>
                 </div>
 
@@ -368,11 +406,11 @@ bsname = view_colour() %>
         $('#action_restriction_Room_chat').prop('checked', true);
         $('#action_restriction_Matchmaking').prop('checked', true);
         $('#action_restriction_Community').prop('checked', true);
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B3 - **Nicknames and clan tags must not be offensive or inappropriate. Impersonation of other players and real-life figures is also forbidden.** Please rename (use the Account button in the top right, then go to Recover/Change) to a name not in breach of the Code of Conduct and use the #open-ticket discord channel to notify the moderation team and have the restriction lifted. The discord can be accessed at #{discord_link} ');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B3 - **Nicknames and clan tags must not be offensive or inappropriate. Impersonation of other players and real-life figures is also forbidden.** Please rename from `#{@user.name}` (use the Account button in the top right, then go to Recover/Change) to a name not in breach of the Code of Conduct and use the #open-ticket discord channel to notify the moderation team and have the restriction lifted. The discord can be accessed at #{discord_link} ');
         $('#action_expires').val('1100 years');
       "}
                   >
-                    Add rename
+                    Rename
                   </div>
 
                   <div
@@ -392,18 +430,8 @@ bsname = view_colour() %>
         $('#action_expires').val('1s');
       "
                   >
-                    Add internal note
+                    + internal note
                   </div>
-                </div>
-                <div
-                  class={"btn btn-outline-#{bsname} btn-block"}
-                  onclick="
-        $('#action_restriction_Login').prop('checked', true);
-        $('#action_reason').val('Permanent ban, possibly a previously banned user.');
-        $('#action_expires').val('1100 years');
-      "
-                >
-                  Single account permaban
                 </div>
               </div>
               <div class="row mt-4" id="reports-row">
