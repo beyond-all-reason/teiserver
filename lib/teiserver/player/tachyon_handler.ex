@@ -88,17 +88,22 @@ defmodule Teiserver.Player.TachyonHandler do
         {:error, reason} ->
           reason =
             case reason do
-              :invalid_queue -> :invalid_queue_specified
-              x -> x
+              :invalid_queue ->
+                %{reason: :invalid_queue_specified}
+
+              :too_many_players ->
+                %{reason: :invalid_request, details: "too many player for a playlist"}
+
+              x ->
+                %{reason: x}
             end
 
-          %{
+          Map.merge(reason, %{
             type: :response,
             status: :failed,
             commandId: cmd_id,
-            messageId: message_id,
-            reason: reason
-          }
+            messageId: message_id
+          })
       end
 
     {:push, {:text, Jason.encode!(response)}, state}

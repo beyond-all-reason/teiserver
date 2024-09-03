@@ -24,6 +24,19 @@ defmodule Teiserver.Matchmaking.QueueSynest do
     test "invalid queue", %{user: user} do
       assert {:error, :invalid_queue} == Matchmaking.join_queue("INVALID!!", user.id)
     end
+
+    test "party too big", %{user: user, queue_id: queue_id} do
+      member = %{
+        player_ids: [user.id, user.id],
+        rating: %{},
+        avoid: [],
+        joined_at: DateTime.utc_now(),
+        search_distance: 0,
+        increase_distance_after: 10
+      }
+
+      assert {:error, :too_many_players} = Matchmaking.join_queue(queue_id, member)
+    end
   end
 
   describe "leaving" do

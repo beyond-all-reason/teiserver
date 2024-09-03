@@ -73,6 +73,22 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
       %{"status" => "failed", "reason" => "already_queued"} =
         Tachyon.join_queues!(client, [queue_id])
     end
+
+    test "too many player", %{client: client} do
+      id = "emptyqueue"
+
+      {:ok, _} =
+        Teiserver.Matchmaking.QueueServer.init_state(%{
+          id: id,
+          name: id,
+          team_size: 0,
+          team_count: 2
+        })
+        |> Teiserver.Matchmaking.QueueServer.start_link()
+
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.join_queues!(client, [id])
+    end
   end
 
   describe "leaving queues" do

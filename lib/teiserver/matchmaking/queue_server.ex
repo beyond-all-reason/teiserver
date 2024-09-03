@@ -99,7 +99,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     QueueRegistry.via_tuple(queue_id, queue)
   end
 
-  @type join_result :: :ok | {:error, :invalid_queue | :already_queued}
+  @type join_result :: :ok | {:error, :invalid_queue | :already_queued | :too_many_players}
 
   @doc """
   Join the specified queue
@@ -142,10 +142,15 @@ defmodule Teiserver.Matchmaking.QueueServer do
       Enum.flat_map(state.members, fn m -> m.player_ids end)
       |> MapSet.new()
 
-    if MapSet.disjoint?(member_ids, MapSet.new(new_member.player_ids)) do
-      {:reply, :ok, %{state | members: [new_member | state.members]}}
-    else
-      {:reply, {:error, :already_queued}, state}
+    cond do
+      Enum.count(new_member.player_ids) > state.queue.team_size ->
+        {:reply, {:error, :too_many_players}, state}
+
+      MapSet.disjoint?(member_ids, MapSet.new(new_member.player_ids)) ->
+        {:reply, :ok, %{state | members: [new_member | state.members]}}
+
+      true ->
+        {:reply, {:error, :already_queued}, state}
     end
   end
 
