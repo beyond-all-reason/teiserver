@@ -189,6 +189,17 @@ defmodule Teiserver.Matchmaking.QueueServer do
     end
   end
 
+  @impl true
+  def handle_info(:tick, state) do
+    new_state =
+      case match_members(state) do
+        :no_match -> state
+        {:match, _teams} -> state
+      end
+
+    {:noreply, new_state}
+  end
+
   defp remove_player(player_id, state) do
     {to_remove, new_members} =
       Enum.split_with(state.members, fn member ->
@@ -212,6 +223,53 @@ defmodule Teiserver.Matchmaking.QueueServer do
         {:ok, %{state | members: new_members, monitors: refs_to_keep}}
 
         # there is no case with multiple member to remove since this is prevented when adding to a queue
+    end
+  end
+
+  @doc """
+  This function shouldn't be public, but it's helpful for testing to export it
+  Ultimately, as the complexity grows, it could be exported to another module
+  dedicated to matching players, but for now this will do
+
+  This returns a list of potential matches.
+  A match is a list of teams, a team is a list of member
+  """
+  @spec match_members(state()) :: :no_match | {:match, [[[member()]]]}
+  def match_members(state) do
+    case greedy_match(state.queue.team_size, state.queue.team_count, state.members, [], []) do
+      [] -> :no_match
+      teams -> {:match, teams}
+    end
+  end
+
+  defp greedy_match(team_size, team_count, members, current_team, matched) do
+    # tachyon_mvp: this is a temporary algorithm
+    # it only looks at the number of players to fill a team
+    case members do
+      [] ->
+        Enum.chunk_every(matched, team_count, team_count, :discard)
+
+      members ->
+        current_size =
+          current_team |> Enum.map(fn member -> Enum.count(member.player_ids) end) |> Enum.sum()
+
+        case Enum.split_while(members, fn m -> Enum.count(m.player_ids) + current_size > team_size end) do
+          # current team cannot be completed, discard it
+          {_, []} ->
+            greedy_match(team_size, team_count, members, [], matched)
+
+          {too_big, [member | rest]} ->
+            to_add = Enum.count(member.player_ids)
+            rest = too_big ++ rest
+
+            cond do
+              current_size + to_add < team_size ->
+                greedy_match(team_size, team_count, rest, [member | current_team], matched)
+
+              current_size + to_add == team_size ->
+                greedy_match(team_size, team_count, rest, [], [[member | current_team] | matched])
+            end
+        end
     end
   end
 end
