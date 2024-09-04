@@ -1,6 +1,7 @@
 defmodule Teiserver.Matchmaking.MatchmakingTest do
   use TeiserverWeb.ConnCase
   alias Teiserver.Support.Tachyon
+  alias Teiserver.Player
 
   describe "list" do
     setup {Tachyon, :setup_client}
@@ -100,6 +101,24 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
 
       assert %{"status" => "failed", "reason" => "not_queued"} =
                Tachyon.leave_queues!(client)
+    end
+
+    test "session timeout", %{client: client, queue_id: queue_id, user: user, token: token} do
+      assert %{"status" => "success"} = Tachyon.join_queues!(client, [queue_id])
+      Tachyon.abrupt_disconnect!(client)
+
+      # also forcefully terminate the session, this simulates a player
+      # crash without reconnection
+      session_pid = Player.SessionRegistry.lookup(user.id)
+      assert is_pid(session_pid)
+      ref = Player.monitor_session(user.id)
+      Process.exit(session_pid, :kill)
+
+      assert_receive({:DOWN, ^ref, :process, _, _})
+
+      # should have left the queue, so be able to rejoin
+      client = Tachyon.connect(token)
+      assert %{"status" => "success"} = Tachyon.join_queues!(client, [queue_id])
     end
   end
 end

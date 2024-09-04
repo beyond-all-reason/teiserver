@@ -55,7 +55,9 @@ defmodule Teiserver.Matchmaking.QueueServer do
           id: id(),
           queue: queue(),
           settings: settings(),
-          members: [member()]
+          members: [member()],
+          # storing monitors to evict players that disconnect
+          monitors: [{reference(), T.userid()}]
 
           # TODO: add some bits for telemetry (see QueueWaitServer) like avg
           # wait time and join count
@@ -87,7 +89,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
         ranked: true
       },
       settings: Map.merge(default_settings(), Map.get(attrs, :settings, %{})),
-      members: Map.get(attrs, :members, [])
+      members: Map.get(attrs, :members, []),
+      monitors: []
     }
   end
 
@@ -147,7 +150,14 @@ defmodule Teiserver.Matchmaking.QueueServer do
         {:reply, {:error, :too_many_players}, state}
 
       MapSet.disjoint?(member_ids, MapSet.new(new_member.player_ids)) ->
-        {:reply, :ok, %{state | members: [new_member | state.members]}}
+        monitors =
+          Enum.map(new_member.player_ids, fn user_id ->
+            {Teiserver.Player.monitor_session(user_id), user_id}
+          end)
+          |> Enum.filter(fn {x, _} -> x != nil end)
+
+        {:reply, :ok,
+         %{state | members: [new_member | state.members], monitors: monitors ++ state.monitors}}
 
       true ->
         {:reply, {:error, :already_queued}, state}
@@ -156,17 +166,52 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
   @impl true
   def handle_call({:leave_queue, player_id}, _from, state) do
+    case remove_player(player_id, state) do
+      :not_queued ->
+        {:reply, {:error, :not_queued}, state}
+
+      {:ok, state} ->
+        {:reply, :ok, state}
+    end
+  end
+
+  @impl true
+  def handle_info({:DOWN, ref, :process, _object, _reason}, state) do
+    case Enum.find(state.monitors, fn {mref, _} -> mref == ref end) do
+      nil ->
+        {:noreply, state}
+
+      {_ref, user_id} ->
+        case remove_player(user_id, state) do
+          :not_queued -> {:noreply, state}
+          {:ok, state} -> {:noreply, state}
+        end
+    end
+  end
+
+  defp remove_player(player_id, state) do
     {to_remove, new_members} =
       Enum.split_with(state.members, fn member ->
         Enum.member?(member.player_ids, player_id)
       end)
 
-    if Enum.empty?(to_remove) do
-      {:reply, {:error, :not_queued}, state}
-    else
-      # TODO tachyon_mvp: need to let all the other players know that they are
-      # being removed from the queue
-      {:reply, :ok, %{state | members: new_members}}
+    case to_remove do
+      [] ->
+        :not_queued
+
+      [to_remove] ->
+        {refs_to_remove, refs_to_keep} =
+          Enum.split_with(state.monitors, fn {_r, player_id} ->
+            Enum.member?(to_remove.player_ids, player_id)
+          end)
+
+        Enum.each(refs_to_remove, fn {r, _} -> Process.demonitor(r, [:flush]) end)
+
+        # TODO tachyon_mvp: need to let all the other players know that they are
+        # being removed from the queue
+        {:ok, %{state | members: new_members, monitors: refs_to_keep}}
+
+        # there is no case with multiple member to remove since this is prevented when adding to a queue
     end
   end
 end

@@ -28,10 +28,14 @@ defmodule Teiserver.Player do
   @doc """
   To be used when a process is interested in the presence of a given player.
   """
-  @spec monitor_session(T.userid()) :: reference()
+  @spec monitor_session(T.userid()) :: reference() | nil
   def monitor_session(user_id) do
     pid = Player.SessionRegistry.lookup(user_id)
-    Process.monitor(pid)
+    if is_nil(pid) do
+      nil
+    else
+      Process.monitor(pid)
+    end
   end
 
   @spec conn_state(T.userid()) :: Player.Session.conn_state()
