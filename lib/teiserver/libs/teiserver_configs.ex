@@ -334,7 +334,7 @@ defmodule Teiserver.TeiserverConfigs do
       default: "loser_picks",
       permissions: ["Admin"],
       description: "The default balance algorithm",
-      opts: [choices: ["loser_picks", "default"]]
+      opts: [choices: ["loser_picks", "auto"]]
     })
 
     add_site_config_type(%{
