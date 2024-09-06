@@ -144,10 +144,7 @@ if config_env() == :prod do
     ]
 
   # Do not print debug messages in production
-  config :logger,
-    format: "$date $time [$level] $metadata $message\n",
-    metadata: [:request_id, :user_id],
-    level: :info
+  config :logger, :default_handler, false
 
   config :logger, :error_log,
     path: "#{log_root_path}error.log",
