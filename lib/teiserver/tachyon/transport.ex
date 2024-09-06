@@ -9,13 +9,13 @@ defmodule Teiserver.Tachyon.Transport do
   require Logger
   alias Teiserver.Tachyon.Schema
 
-  @type connection_state() :: %{handler: term(), state: term()}
+  @type connection_state() :: %{handler: term(), handler_state: term()}
 
   @impl true
   def init(state) do
     # this is inside the process that maintain the connection
     schedule_ping()
-    handle_result(state.handler.init(state.state), state)
+    handle_result(state.handler.init(state.handler_state), state)
   end
 
   # dummy handle_in for now
@@ -56,7 +56,7 @@ defmodule Teiserver.Tachyon.Transport do
   end
 
   def handle_info(msg, state) do
-    handle_result(state.handler.handle_info(msg, state.state), state)
+    handle_result(state.handler.handle_info(msg, state.handler_state), state)
   end
 
   @impl true
@@ -83,50 +83,40 @@ defmodule Teiserver.Tachyon.Transport do
 
       :missing_schema ->
         resp =
-          %{
-            type: :response,
-            status: :failed,
-            reason: :command_unimplemented,
-            commandId: command_id,
-            messageId: message_id
-          }
+          Schema.error_response(command_id, message_id, :command_unimplemented)
           |> Jason.encode!()
 
         {:reply, :ok, {:text, resp}, state}
 
       {:error, err} ->
         resp =
-          %{
-            type: :response,
-            status: :failed,
-            reason: :internal_error,
-            commandId: command_id,
-            messageId: message_id,
-            details: inspect(err)
-          }
+          Schema.error_response(command_id, message_id, :internal_error, inspect(err))
           |> Jason.encode!()
 
         {:reply, :ok, {:text, resp}, state}
     end
   end
 
-  def do_handle_command("system/disconnect", "request", _message_id, _message, state) do
-    {:stop, :normal, state}
-  end
+  def do_handle_command(command_id, message_type, message_id, message, state) do
+    result =
+      state.handler.handle_command(
+        command_id,
+        message_type,
+        message_id,
+        message,
+        state.handler_state
+      )
 
-  def do_handle_command(command_id, _message_type, message_id, _message, state) do
-    # TODO: call the handler there
-    resp =
-      %{
-        type: :response,
-        status: :failed,
-        reason: :command_unimplemented,
-        commandId: command_id,
-        messageId: message_id
-      }
-      |> Jason.encode!()
+    try do
+      handle_result(result, state)
+    rescue
+      e ->
+        str_err = inspect({e, __STACKTRACE__})
+        Logger.error([inspect(message), str_err])
 
-    {:reply, :ok, {:text, resp}, state}
+        resp = Schema.error_response(command_id, message_id, :internal_error, str_err)
+        {:push, {:text, Jason.encode!(resp)}, state}
+    end
   end
 
   # helper function to use the result from the invoked handler function
@@ -134,22 +124,22 @@ defmodule Teiserver.Tachyon.Transport do
   defp handle_result(result, conn_state) do
     case result do
       {:push, messages, state} ->
-        {:push, messages, %{conn_state | state: state}}
+        {:push, messages, %{conn_state | handler_state: state}}
 
       {:reply, term, messages, state} ->
-        {:reply, term, messages, %{conn_state | state: state}}
+        {:reply, term, messages, %{conn_state | handler_state: state}}
 
       {:ok, state} ->
-        {:ok, %{conn_state | state: state}}
+        {:ok, %{conn_state | handler_state: state}}
 
       {:stop, reason, state} ->
-        {:stop, reason, %{conn_state | state: state}}
+        {:stop, reason, %{conn_state | handler_state: state}}
 
       {:stop, reason, close_details, state} ->
-        {:stop, reason, close_details, %{conn_state | state: state}}
+        {:stop, reason, close_details, %{conn_state | handler_state: state}}
 
       {:stop, reason, close_details, messages, state} ->
-        {:stop, reason, close_details, messages, %{conn_state | state: state}}
+        {:stop, reason, close_details, messages, %{conn_state | handler_state: state}}
     end
   end
 

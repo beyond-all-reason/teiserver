@@ -2,15 +2,30 @@ defmodule Teiserver.Support.Tachyon do
   alias WebsocketSyncClient, as: WSC
   alias Teiserver.OAuthFixtures
 
+  def setup_client(_context), do: setup_client()
+
+  def setup_client() do
+    user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+    %{client: client, token: token} = connect(user)
+
+    ExUnit.Callbacks.on_exit(fn -> WSC.disconnect(client) end)
+    {:ok, user: user, client: client, token: token}
+  end
+
   @doc """
   connects the given user and returns the ws client
   """
-  def connect(user) do
-    %{token: token} = OAuthFixtures.setup_token(user)
-
+  def connect(%Teiserver.OAuth.Token{} = token) do
     opts = connect_options(token)
 
     {:ok, client} = WSC.connect(tachyon_url(), opts)
+    client
+  end
+
+  def connect(user) do
+    %{token: token} = OAuthFixtures.setup_token(user)
+
+    client = connect(token)
     %{client: client, token: token}
   end
 
@@ -28,6 +43,87 @@ defmodule Teiserver.Support.Tachyon do
   def tachyon_url() do
     conf = Application.get_env(:teiserver, TeiserverWeb.Endpoint)
     "ws://#{conf[:url][:host]}:#{conf[:http][:port]}/tachyon"
+  end
+
+  # TODO tachyon_mvp: add a json validation here to make sure the request
+  # sent there is conforming
+  def request(command_id, data \\ nil) do
+    req = %{
+      type: :request,
+      commandId: command_id,
+      messageId: UUID.uuid4()
+    }
+
+    if is_nil(data) do
+      req
+    else
+      Map.put(req, :data, data)
+    end
+  end
+
+  # TODO tachyon_mvp: create a version of this function that also check the
+  # the response against the expected json schema
+  def recv_response(client) do
+    case WSC.recv(client) do
+      {:ok, {:text, resp}} -> {:ok, Jason.decode!(resp)}
+      other -> other
+    end
+  end
+
+  @doc """
+  Cleanly disconnect a client by sending a disconnect message before closing
+  the connection.
+  """
+  def disconnect!(client) do
+    req = request("system/disconnect")
+    :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
+    :ok = WSC.disconnect(client)
+  end
+
+  @doc """
+  Close the underlying websocket connection without sending the proper message.
+  This can be used to simulate a player crash.
+  """
+  def abrupt_disconnect!(client) do
+    :ok = WSC.disconnect(client)
+  end
+
+  @doc """
+  high level function to get the list of matchmaking queues
+  """
+  def list_queues!(client) do
+    req = request("matchmaking/list")
+    :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
+    {:ok, resp} = recv_response(client)
+
+    message_id = req.messageId
+
+    # This checks the server replies with the correct message_id
+    # it only needs to be done once in the test suite so might as well put
+    # put it here since this is the first request implemented
+    # This could (should?) be moved elsewhere later
+    %{
+      "type" => "response",
+      "messageId" => ^message_id,
+      "commandId" => "matchmaking/list",
+      "status" => "success"
+    } = resp
+
+    resp
+  end
+
+  def join_queues!(client, queue_ids) do
+    req = request("matchmaking/queue", %{queues: queue_ids})
+    :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
+    {:ok, resp} = recv_response(client)
+    resp
+  end
+
+  def leave_queues!(client) do
+    req = request("matchmaking/cancel")
+    :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
+    {:ok, resp} = recv_response(client)
+    resp
   end
 
   @doc """

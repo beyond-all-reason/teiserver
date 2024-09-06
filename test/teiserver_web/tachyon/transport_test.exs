@@ -4,11 +4,7 @@ defmodule TeiserverWeb.Tachyon.TransportTest do
   alias Teiserver.Support.Tachyon
 
   setup _context do
-    user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
-    %{client: client, token: token} = Tachyon.connect(user)
-
-    on_exit(fn -> WSC.disconnect(client) end)
-    {:ok, user: user, client: client, token: token}
+    Tachyon.setup_client()
   end
 
   describe "general command handling" do

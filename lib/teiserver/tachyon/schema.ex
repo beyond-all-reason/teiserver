@@ -76,4 +76,40 @@ defmodule Teiserver.Tachyon.Schema do
       end
     end
   end
+
+  @doc """
+  helper to create a tachyon response
+  """
+  @spec response(command_id(), message_id(), term()) :: map()
+  def response(command_id, message_id, data \\ nil) do
+    resp = %{
+      type: :response,
+      status: :success,
+      commandId: command_id,
+      messageId: message_id
+    }
+
+    if is_nil(data) do
+      resp
+    else
+      Map.put(resp, :data, data)
+    end
+  end
+
+  @spec error_response(command_id(), message_id(), term(), String.t() | nil) :: map()
+  def error_response(command_id, message_id, reason, details \\ nil) do
+    resp = %{
+      type: :response,
+      status: :failed,
+      commandId: command_id,
+      messageId: message_id,
+      reason: reason
+    }
+
+    if is_nil(details) do
+      resp
+    else
+      Map.put(resp, :details, details)
+    end
+  end
 end

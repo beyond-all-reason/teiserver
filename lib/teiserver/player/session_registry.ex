@@ -25,6 +25,10 @@ defmodule Teiserver.Player.SessionRegistry do
     end
   end
 
+  def unregister(user_id) do
+    Horde.Registry.unregister(__MODULE__, via_tuple(user_id))
+  end
+
   def child_spec(_) do
     Supervisor.child_spec(Horde.Registry,
       id: __MODULE__,

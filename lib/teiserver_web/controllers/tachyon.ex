@@ -15,7 +15,7 @@ defmodule TeiserverWeb.TachyonController do
     with {:ok, handler} <- handler_for_version(conn),
          {:ok, state} <- handler.connect(conn) do
       try do
-        conn_state = %{state: state, handler: handler}
+        conn_state = %{handler_state: state, handler: handler}
 
         conn
         |> WebSockAdapter.upgrade(Teiserver.Tachyon.Transport, conn_state, timeout: 20_000)

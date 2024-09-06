@@ -3,6 +3,8 @@ defmodule Teiserver.Tachyon.Handler do
   Interface for connecting a tachyon client and process tachyon commands
   """
 
+  alias Teiserver.Tachyon.Schema
+
   @doc """
   Called when upgrading the http connection to websocket.
   It is given the connection object and should do whatever is required for
@@ -26,5 +28,17 @@ defmodule Teiserver.Tachyon.Handler do
   """
   @callback handle_info(term(), term()) :: WebSock.handle_result()
 
-  # TODO: add other callbacks to handle (parsed) tachyon commands
+  @doc """
+  The generic command handler. At that point, the message has already been
+  validated against the corresponding json schema
+  """
+  @callback handle_command(
+              Schema.command_id(),
+              Schema.message_type(),
+              Schema.message_id(),
+              # message
+              term(),
+              # handler's state
+              term()
+            ) :: WebSock.handle_result()
 end
