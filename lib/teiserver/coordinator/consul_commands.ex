@@ -6,6 +6,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.{Account, Battle, Lobby, Coordinator, CacheUser, Client, Telemetry}
   alias Teiserver.Lobby.{ChatLib, LobbyLib, LobbyRestrictions}
   alias Teiserver.Chat.WordLib
+  alias Teiserver.Battle.BalanceLib
   alias Teiserver.Data.Types, as: T
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
 
@@ -633,6 +634,18 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   def handle_command(%{command: "balancemode", remaining: remaining, senderid: senderid}, state) do
     handle_command(
       %{command: "balancealgorithm", remaining: remaining, senderid: senderid},
+      state
+    )
+  end
+
+  def handle_command(
+        %{command: "balancealgorithm", remaining: "default", senderid: senderid},
+        state
+      ) do
+    default_algo = BalanceLib.get_default_algorithm()
+
+    handle_command(
+      %{command: "balancealgorithm", remaining: default_algo, senderid: senderid},
       state
     )
   end
