@@ -9,7 +9,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   """
 
   use GenServer
-  alias Teiserver.Matchmaking.QueueRegistry
+  alias Teiserver.Matchmaking.{QueueRegistry, PairingRoom}
   alias Teiserver.Data.Types, as: T
 
   @typedoc """
@@ -197,8 +197,26 @@ defmodule Teiserver.Matchmaking.QueueServer do
   def handle_info(:tick, state) do
     new_state =
       case match_members(state) do
-        :no_match -> state
-        {:match, _teams} -> state
+        :no_match ->
+          state
+
+        {:match, matches} ->
+          for teams <- matches do
+            {:ok, _pid} = PairingRoom.start(state.id, state.queue, teams)
+          end
+
+          matched_members =
+            for teams <- matches, team <- teams, member <- team do
+              member.id
+            end
+            |> MapSet.new()
+
+          new_members =
+            Enum.filter(state.members, fn m ->
+              not Enum.member?(matched_members, m.id)
+            end)
+
+          Map.put(state, :members, new_members)
       end
 
     {:noreply, new_state}
@@ -242,7 +260,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   def match_members(state) do
     case greedy_match(state.queue.team_size, state.queue.team_count, state.members, [], []) do
       [] -> :no_match
-      teams -> {:match, teams}
+      matches -> {:match, matches}
     end
   end
 
@@ -257,7 +275,9 @@ defmodule Teiserver.Matchmaking.QueueServer do
         current_size =
           current_team |> Enum.map(fn member -> Enum.count(member.player_ids) end) |> Enum.sum()
 
-        case Enum.split_while(members, fn m -> Enum.count(m.player_ids) + current_size > team_size end) do
+        case Enum.split_while(members, fn m ->
+               Enum.count(m.player_ids) + current_size > team_size
+             end) do
           # current team cannot be completed, discard it
           {_, []} ->
             greedy_match(team_size, team_count, members, [], matched)

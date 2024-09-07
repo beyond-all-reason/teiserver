@@ -10,7 +10,7 @@ defmodule Teiserver.Player do
   """
 
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Player
+  alias Teiserver.{Player, Matchmaking}
 
   @doc """
   Returns the pid of the connection registered with a given user id
@@ -41,4 +41,10 @@ defmodule Teiserver.Player do
 
   @spec conn_state(T.userid()) :: Player.Session.conn_state()
   defdelegate conn_state(user_id), to: Player.Session
+
+  @doc """
+  When a queued player is matched with other, need to let them know
+  """
+  @spec notify_found(T.userid(), Matchmaking.queue_id(), timeout()) :: :ok
+  defdelegate notify_found(user_id, queue_id, timeout_ms), to: Player.Session
 end

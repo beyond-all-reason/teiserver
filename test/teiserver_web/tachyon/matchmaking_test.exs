@@ -1,6 +1,7 @@
 defmodule Teiserver.Matchmaking.MatchmakingTest do
   use TeiserverWeb.ConnCase
   alias Teiserver.Support.Tachyon
+  alias Teiserver.OAuthFixtures
   alias Teiserver.Player
 
   describe "list" do
@@ -125,6 +126,51 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
       # should have left the queue, so be able to rejoin
       client = Tachyon.connect(token)
       assert %{"status" => "success"} = Tachyon.join_queues!(client, [queue_id])
+    end
+  end
+
+  describe "pairing" do
+    defp setup_app(_context) do
+      owner = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+
+      app =
+        OAuthFixtures.app_attrs(owner.id)
+        |> Map.put(:uid, UUID.uuid4())
+        |> OAuthFixtures.create_app()
+
+      {:ok, app: app}
+    end
+
+    defp setup_user(app) do
+      user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+      token = OAuthFixtures.token_attrs(user.id, app) |> OAuthFixtures.create_token()
+      client = Tachyon.connect(token)
+      {:ok, %{user: user, token: token, client: client}}
+    end
+
+    setup [:setup_queue, :setup_app]
+
+    test "get found events", %{queue_id: queue_id, app: app, queue_pid: queue_pid} do
+      {:ok, %{user: _user1, client: client1}} = setup_user(app)
+      {:ok, %{user: _user2, client: client2}} = setup_user(app)
+      assert %{"status" => "success"} = Tachyon.join_queues!(client1, [queue_id])
+      assert %{"status" => "success"} = Tachyon.join_queues!(client2, [queue_id])
+      send(queue_pid, :tick)
+
+      Enum.each([client1, client2], fn client ->
+        assert {:ok, resp} = Tachyon.recv_message(client, timeout: 10)
+
+        assert %{
+                 "commandId" => "matchmaking/found",
+                 "data" => %{
+                   "queueId" => ^queue_id
+                 }
+               } = resp
+      end)
+
+      # check that players aren't matched multiple times
+      send(queue_pid, :tick)
+      assert {:error, :timeout} = Tachyon.recv_message(client1, timeout: 10)
     end
   end
 end

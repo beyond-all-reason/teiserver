@@ -21,6 +21,13 @@ defmodule Teiserver.Player.Session do
              %{
                joined_queues: nonempty_list(Matchmaking.queue_id())
              }}
+          | {:pairing,
+             %{
+               pairing_state: :notified,
+               paired_queue: Matchmaking.queue_id(),
+               # a list of the other queues to rejoin in case the pairing fails
+               frozen_queues: [Matchmaking.queue_id()]
+             }}
 
   @type state :: %{
           user_id: T.userid(),
@@ -60,6 +67,11 @@ defmodule Teiserver.Player.Session do
   @spec leave_queues(T.userid()) :: Matchmaking.leave_result()
   def leave_queues(user_id) do
     GenServer.call(via_tuple(user_id), :leave_queues)
+  end
+
+  @spec notify_found(T.userid(), Matchmaking.queue_id(), timeout()) :: :ok
+  def notify_found(user_id, queue_id, timeout_ms) do
+    GenServer.cast(via_tuple(user_id), {:notify_found, queue_id, timeout_ms})
   end
 
   def start_link({_conn_pid, user_id} = arg) do
@@ -165,7 +177,44 @@ defmodule Teiserver.Player.Session do
         end)
 
         {:reply, :ok, Map.put(state, :matchmaking, initial_matchmaking_state())}
+        # TODO add the logic to leave the pairing room as well when leaving queues
     end
+  end
+
+  @impl true
+  def handle_cast(
+        {:notify_found, queue_id, timeout_ms},
+        %{matchmaking: {:searching, %{joined_queues: queue_ids}}} = state
+      ) do
+    if not Enum.member?(queue_ids, queue_id) do
+      {:noreply, state}
+    else
+      # TODO tachyon_mvp: what should server do if the connection is down at that time?
+      # The best is likely to store it and send the notification upon reconnection
+      if state.conn_pid != nil do
+        send(state.conn_pid, {:notify_found, queue_id, timeout_ms})
+      end
+
+      other_queues =
+        for qid <- queue_ids, qid != queue_id do
+          Matchmaking.leave_queue(qid, state.user_id)
+          qid
+        end
+
+      new_mm_state =
+        {:pairing,
+         %{pairing_state: :notified, paired_queue: queue_id, frozen_queues: other_queues}}
+
+      new_state = Map.put(state, :matchmaking, new_mm_state)
+      {:noreply, new_state}
+    end
+  end
+
+  def handle_cast({:notify_found, _queue_id, _}, state) do
+    # we're not searching anything. This can happen as a race when two queues
+    # match the same player at the same time.
+    # TODO tachyon_mvp: need to decline the pairing here
+    {:noreply, state}
   end
 
   @impl true

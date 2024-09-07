@@ -112,4 +112,20 @@ defmodule Teiserver.Tachyon.Schema do
       Map.put(resp, :details, details)
     end
   end
+
+  @spec event(command_id(), term()) :: map()
+  def event(command_id, data \\ nil) do
+    ev = %{
+      type: :event,
+      status: :success,
+      messageId: UUID.uuid4(),
+      commandId: command_id
+    }
+
+    if is_nil(data) do
+      ev
+    else
+      Map.put(ev, :data, data)
+    end
+  end
 end
