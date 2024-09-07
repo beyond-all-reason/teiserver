@@ -63,8 +63,10 @@ defmodule Teiserver.Support.Tachyon do
 
   # TODO tachyon_mvp: create a version of this function that also check the
   # the response against the expected json schema
-  def recv_message(client) do
-    case WSC.recv(client) do
+  def recv_message(client, opts \\ []) do
+    opts = Keyword.put_new(opts, :timeout, 10)
+
+    case WSC.recv(client, opts) do
       {:ok, {:text, resp}} -> {:ok, Jason.decode!(resp)}
       other -> other
     end
