@@ -45,6 +45,6 @@ defmodule Teiserver.Player do
   @doc """
   When a queued player is matched with other, need to let them know
   """
-  @spec notify_found(T.userid(), Matchmaking.queue_id(), timeout()) :: :ok
-  defdelegate notify_found(user_id, queue_id, timeout_ms), to: Player.Session
+  @spec notify_found(T.userid(), Matchmaking.queue_id(), pid(), timeout()) :: :ok
+  defdelegate notify_found(user_id, queue_id, room_pid, timeout_ms), to: Player.Session
 end

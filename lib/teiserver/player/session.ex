@@ -23,8 +23,8 @@ defmodule Teiserver.Player.Session do
              }}
           | {:pairing,
              %{
-               pairing_state: :notified,
                paired_queue: Matchmaking.queue_id(),
+               room: {pid(), reference()},
                # a list of the other queues to rejoin in case the pairing fails
                frozen_queues: [Matchmaking.queue_id()]
              }}
@@ -69,9 +69,9 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), :leave_queues)
   end
 
-  @spec notify_found(T.userid(), Matchmaking.queue_id(), timeout()) :: :ok
-  def notify_found(user_id, queue_id, timeout_ms) do
-    GenServer.cast(via_tuple(user_id), {:notify_found, queue_id, timeout_ms})
+  @spec notify_found(T.userid(), Matchmaking.queue_id(), pid(), timeout()) :: :ok
+  def notify_found(user_id, queue_id, room_pid, timeout_ms) do
+    GenServer.cast(via_tuple(user_id), {:notify_found, queue_id, room_pid, timeout_ms})
   end
 
   def start_link({_conn_pid, user_id} = arg) do
@@ -183,7 +183,7 @@ defmodule Teiserver.Player.Session do
 
   @impl true
   def handle_cast(
-        {:notify_found, queue_id, timeout_ms},
+        {:notify_found, queue_id, room_pid, timeout_ms},
         %{matchmaking: {:searching, %{joined_queues: queue_ids}}} = state
       ) do
     if not Enum.member?(queue_ids, queue_id) do
@@ -201,9 +201,15 @@ defmodule Teiserver.Player.Session do
           qid
         end
 
+      room_ref = Process.monitor(room_pid)
+
       new_mm_state =
         {:pairing,
-         %{pairing_state: :notified, paired_queue: queue_id, frozen_queues: other_queues}}
+         %{
+           paired_queue: queue_id,
+           room: {room_pid, room_ref},
+           frozen_queues: other_queues
+         }}
 
       new_state = Map.put(state, :matchmaking, new_mm_state)
       {:noreply, new_state}
@@ -223,6 +229,24 @@ defmodule Teiserver.Player.Session do
     # should be fairly low (and rate limited) so too many messages isn't an issue
     {:ok, _} = :timer.send_after(30_000, :player_timeout)
     {:noreply, %{state | conn_pid: nil}}
+  end
+
+  def handle_info({:DOWN, ref, :process, _obj, reason}, state) do
+    case state do
+      %{matchmaking: {:pairing, %{room: {_, ^ref}}}} ->
+        # only log in case of abnormal exit. If the queue itself goes down, so be it
+        if reason != :shutdown, do: Logger.warning("Pairing room went down #{inspect(reason)}")
+        # TODO tachyon_mvp: rejoin the room and send `lost` event
+        # For now, just abruptly stop everything
+        {:stop, :normal, state}
+
+      st ->
+        Logger.warning(
+          "unhandled DOWN: #{inspect(ref)} went down because #{reason}. state: #{inspect(st)}"
+        )
+
+        {:noreply, state}
+    end
   end
 
   def handle_info(:player_timeout, state) do
