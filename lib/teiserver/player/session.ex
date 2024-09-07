@@ -15,9 +15,12 @@ defmodule Teiserver.Player.Session do
 
   @type conn_state :: :connected | :reconnecting | :disconnected
 
-  @type matchmaking_state :: %{
-          joined_queues: [Matchmaking.queue_id()]
-        }
+  @type matchmaking_state ::
+          :no_matchmaking
+          | {:searching,
+             %{
+               joined_queues: nonempty_list(Matchmaking.queue_id())
+             }}
 
   @type state :: %{
           user_id: T.userid(),
@@ -91,7 +94,7 @@ defmodule Teiserver.Player.Session do
   end
 
   defp initial_matchmaking_state() do
-    %{joined_queues: []}
+    :no_matchmaking
   end
 
   @impl true
@@ -114,39 +117,54 @@ defmodule Teiserver.Player.Session do
   def handle_call(:disconnect, _from, state) do
     user_id = state.user_id
 
-    Enum.each(state.matchmaking.joined_queues, fn queue_id ->
-      Matchmaking.QueueServer.leave_queue(queue_id, user_id)
-    end)
+    case state.matchmaking do
+      {:searching, %{joined_queues: joined_queues}} ->
+        Enum.each(joined_queues, fn queue_id ->
+          Matchmaking.QueueServer.leave_queue(queue_id, user_id)
+        end)
+
+      _ ->
+        nil
+    end
 
     {:stop, :normal, :ok, %{state | matchmaking: initial_matchmaking_state()}}
   end
 
-  def handle_call({:join_queues, queue_ids}, _from, state) do
-    if not Enum.empty?(state.matchmaking.joined_queues) do
-      {:reply, {:error, :already_queued}, state}
-    else
-      case join_all_queues(state.user_id, queue_ids, []) do
-        :ok ->
-          {:reply, :ok, put_in(state.matchmaking.joined_queues, queue_ids)}
+  # this should never happen because the json schema already checks for minimum length
+  def handle_call({:join_queues, []}, _from, state),
+    do: {:reply, {:error, :invalid_request}, state}
 
-        {:error, err} ->
-          {:reply, {:error, err}, state}
-      end
+  def handle_call({:join_queues, queue_ids}, _from, state) do
+    case state.matchmaking do
+      :no_matchmaking ->
+        case join_all_queues(state.user_id, queue_ids, []) do
+          :ok ->
+            new_mm_state = {:searching, %{joined_queues: queue_ids}}
+            {:reply, :ok, put_in(state.matchmaking, new_mm_state)}
+
+          {:error, err} ->
+            {:reply, {:error, err}, state}
+        end
+
+      {:searching, _} ->
+        {:reply, {:error, :already_queued}, state}
     end
   end
 
   def handle_call(:leave_queues, _from, state) do
-    if Enum.empty?(state.matchmaking.joined_queues) do
-      {:reply, {:error, :not_queued}, state}
-    else
-      # TODO tachyon_mvp: leaving queue ignore failure there.
-      # It is a bit unclear what kind of failure can happen, and also
-      # what should be done in that case
-      Enum.each(state.matchmaking.joined_queues, fn qid ->
-        Matchmaking.leave_queue(qid, state.user_id)
-      end)
+    case state.matchmaking do
+      :no_matchmaking ->
+        {:reply, {:error, :not_queued}, state}
 
-      {:reply, :ok, Map.put(state, :matchmaking, initial_matchmaking_state())}
+      {:searching, %{joined_queues: joined_queues}} ->
+        # TODO tachyon_mvp: leaving queue ignore failure there.
+        # It is a bit unclear what kind of failure can happen, and also
+        # what should be done in that case
+        Enum.each(joined_queues, fn qid ->
+          Matchmaking.leave_queue(qid, state.user_id)
+        end)
+
+        {:reply, :ok, Map.put(state, :matchmaking, initial_matchmaking_state())}
     end
   end
 
