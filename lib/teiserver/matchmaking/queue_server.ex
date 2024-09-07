@@ -17,6 +17,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   A member can be a party of players. Parties must not be broken.
   """
   @type member :: %{
+          id: binary(),
           player_ids: [T.userid()],
           # maybe also add (aggregated) chevron if that's taking into account
           # map keyed by the rating type to {skill, uncertainty}

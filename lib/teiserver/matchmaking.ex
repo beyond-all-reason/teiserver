@@ -27,6 +27,7 @@ defmodule Teiserver.Matchmaking do
   @spec join_queue(queue_id(), T.userid() | member()) :: join_result()
   def join_queue(queue_id, member) when not is_map(member) do
     member = %{
+      id: UUID.uuid4(),
       player_ids: [member],
       # TODO tachyon_mvp: fetch ratings for the player somehow
       rating: %{},
