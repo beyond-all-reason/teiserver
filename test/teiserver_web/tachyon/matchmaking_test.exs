@@ -30,7 +30,13 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
     id = UUID.uuid4()
 
     {:ok, pid} =
-      QueueServer.init_state(%{id: id, name: id, team_size: 1, team_count: 2})
+      QueueServer.init_state(%{
+        id: id,
+        name: id,
+        team_size: 1,
+        team_count: 2,
+        settings: %{tick_interval_ms: :manual, max_distance: 15}
+      })
       |> QueueServer.start_link()
 
     {:ok, queue_id: id, queue_pid: pid}

@@ -37,7 +37,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   ticks and whatnot
   """
   @type settings :: %{
-          tick_interval_ms: pos_integer(),
+          tick_interval_ms: pos_integer() | :manual,
           max_distance: pos_integer()
         }
 
@@ -136,6 +136,10 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
   @impl true
   def init(state) do
+    if state.settings.tick_interval_ms != :manual do
+      :timer.send_interval(state.settings.tick_interval_ms, :tick)
+    end
+
     {:ok, state}
   end
 
