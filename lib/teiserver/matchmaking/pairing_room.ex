@@ -23,6 +23,14 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     GenServer.start(__MODULE__, {queue_id, queue, teams})
   end
 
+  @doc """
+  to tell the room that the given player is ready for the match
+  """
+  @spec ready(pid(), T.userid()) :: :ok | {:error, :no_match}
+  def ready(room_pid, user_id) do
+    GenServer.call(room_pid, {:ready, user_id})
+  end
+
   @type state :: %{
           queue_id: QueueServer.id(),
           queue: QueueServer.queue(),
@@ -53,5 +61,15 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     end)
 
     {:noreply, state}
+  end
+
+  @impl true
+  def handle_call({:ready, user_id}, _from, state) do
+    case Enum.split_with(state.awaiting, fn waiting_id -> waiting_id == user_id end) do
+      {[], _} -> {:reply, {:error, :no_match}, state}
+      # TODO tachyon_mvp: notify other players for readyUpdate event
+      # TODO tachyon_mvp: if no more player is waiting, starts the game
+      {[_], rest} -> {:reply, :ok, %{state | awaiting: rest}}
+    end
   end
 end

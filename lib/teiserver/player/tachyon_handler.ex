@@ -132,6 +132,19 @@ defmodule Teiserver.Player.TachyonHandler do
     {:push, {:text, Jason.encode!(response)}, state}
   end
 
+  def handle_command("matchmaking/ready" = cmd_id, "request", message_id, _message, state) do
+    response =
+      case Player.Session.matchmaking_ready(state.user.id) do
+        :ok ->
+          Schema.response(cmd_id, message_id)
+
+        {:error, :no_match} ->
+          Schema.error_response(cmd_id, message_id, :no_match)
+      end
+
+    {:push, {:text, Jason.encode!(response)}, state}
+  end
+
   def handle_command(command_id, _message_type, message_id, _message, state) do
     resp =
       Schema.error_response(command_id, message_id, :command_unimplemented)

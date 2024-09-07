@@ -172,5 +172,26 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
       send(queue_pid, :tick)
       assert {:error, :timeout} = Tachyon.recv_message(client1, timeout: 10)
     end
+
+    test "handle ready events", %{queue_id: queue_id, app: app, queue_pid: queue_pid} do
+      {:ok, %{client: client1}} = setup_user(app)
+      {:ok, %{client: client2}} = setup_user(app)
+      assert %{"status" => "failed", "reason" => "no_match"} = Tachyon.matchmaking_ready!(client1)
+
+      assert %{"status" => "success"} = Tachyon.join_queues!(client1, [queue_id])
+      assert %{"status" => "success"} = Tachyon.join_queues!(client2, [queue_id])
+
+      assert %{"status" => "failed", "reason" => "no_match"} = Tachyon.matchmaking_ready!(client1)
+
+      send(queue_pid, :tick)
+
+      assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
+               Tachyon.recv_message(client1)
+
+      assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
+               Tachyon.recv_message(client2)
+
+      assert %{"status" => "success"} = Tachyon.matchmaking_ready!(client1)
+    end
   end
 end

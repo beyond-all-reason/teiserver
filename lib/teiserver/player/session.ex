@@ -26,7 +26,8 @@ defmodule Teiserver.Player.Session do
                paired_queue: Matchmaking.queue_id(),
                room: {pid(), reference()},
                # a list of the other queues to rejoin in case the pairing fails
-               frozen_queues: [Matchmaking.queue_id()]
+               frozen_queues: [Matchmaking.queue_id()],
+               readied: boolean()
              }}
 
   @type state :: %{
@@ -72,6 +73,14 @@ defmodule Teiserver.Player.Session do
   @spec notify_found(T.userid(), Matchmaking.queue_id(), pid(), timeout()) :: :ok
   def notify_found(user_id, queue_id, room_pid, timeout_ms) do
     GenServer.cast(via_tuple(user_id), {:notify_found, queue_id, room_pid, timeout_ms})
+  end
+
+  @doc """
+  The player is ready for the match
+  """
+  @spec matchmaking_ready(T.userid()) :: :ok | {:error, :no_match}
+  def matchmaking_ready(user_id) do
+    GenServer.call(via_tuple(user_id), :matchmaking_ready)
   end
 
   def start_link({_conn_pid, user_id} = arg) do
@@ -181,6 +190,17 @@ defmodule Teiserver.Player.Session do
     end
   end
 
+  def handle_call(:matchmaking_ready, _from, state) do
+    case state.matchmaking do
+      {:pairing, %{room: {room_pid, _}} = pairing_state} ->
+        new_state = %{state | matchmaking: {:pairing, %{pairing_state | readied: true}}}
+        {:reply, Matchmaking.ready(room_pid, state.user_id), new_state}
+
+      _ ->
+        {:reply, {:error, :no_match}, state}
+    end
+  end
+
   @impl true
   def handle_cast(
         {:notify_found, queue_id, room_pid, timeout_ms},
@@ -208,7 +228,8 @@ defmodule Teiserver.Player.Session do
          %{
            paired_queue: queue_id,
            room: {room_pid, room_ref},
-           frozen_queues: other_queues
+           frozen_queues: other_queues,
+           readied: false
          }}
 
       new_state = Map.put(state, :matchmaking, new_mm_state)

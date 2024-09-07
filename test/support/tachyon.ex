@@ -128,6 +128,13 @@ defmodule Teiserver.Support.Tachyon do
     resp
   end
 
+  def matchmaking_ready!(client) do
+    req = request("matchmaking/ready")
+    :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
   @doc """
   Run the given function `f` until `pred` returns true on its result.
   Waits `wait` ms between each tries. Raise an error if `pred` returns false
