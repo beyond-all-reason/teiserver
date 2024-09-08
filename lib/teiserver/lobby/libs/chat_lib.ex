@@ -302,7 +302,7 @@ defmodule Teiserver.Lobby.ChatLib do
 
   @valid_mute_chat_regex [
     ~r/^!vote( (y|yes|n|no|b|blank))?$/i,
-    ~r/^!(ev|endvote|help)$/i,
+    ~r/^!(y|n|b|ev|endvote|help)$/i,
     ~r/^!(cv |callvote )?balance$/i,
     ~r/^!(cv |callvote )?start$/i,
     ~r/^!(cv |callvote )?stop$/i,
