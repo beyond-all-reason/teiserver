@@ -338,8 +338,9 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         shuffled_users = Enum.shuffle(users)
         team1 = shuffled_users |> Enum.take(team_size)
         team2 = shuffled_users |> Enum.reverse() |> Enum.take(team_size)
-
-        game_type = MatchLib.game_type(team_size, 2)
+        team_count = 2
+        num_players = team_size * team_count
+        game_type = MatchLib.game_type(team_size, team_count)
 
         team1_score =
           team1
@@ -362,7 +363,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
             data: %{},
             tags: %{},
             winning_team: if(team1_score > team2_score, do: 0, else: 1),
-            team_count: 2,
+            team_count: team_count,
             team_size: team_size,
             passworded: false,
             processed: true,
@@ -383,7 +384,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
               team_id: 0,
               win: match.winning_team == 0,
               stats: %{},
-              party_id: nil,
+              party_id: get_party_id(num_players),
               user_id: userid,
               match_id: match.id
             }
@@ -396,7 +397,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
               team_id: 1,
               win: match.winning_team == 1,
               stats: %{},
-              party_id: nil,
+              party_id: get_party_id(num_players),
               user_id: userid,
               match_id: match.id
             }
@@ -457,5 +458,24 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     |> Enum.filter(fn _ ->
       :rand.uniform() < chance
     end)
+  end
+
+  defp get_party_id(num_players) do
+    case is_in_party?() do
+      true ->
+        num_parties = trunc(num_players / 4)
+        # party id is a string
+        "#{Enum.random(1..num_parties)}"
+
+      false ->
+        nil
+    end
+  end
+
+  defp is_in_party? do
+    chance_in_party = 40
+    # Number from 0 to 100
+    random = Enum.random(0..100)
+    random <= chance_in_party
   end
 end

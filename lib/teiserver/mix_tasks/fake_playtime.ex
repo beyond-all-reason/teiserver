@@ -58,11 +58,11 @@ defmodule Mix.Tasks.Teiserver.FakePlaytime do
 
   @spec get_player_experience() :: :just_installed | :beginner | :average | :pro
   defp get_player_experience do
-    case Enum.random(0..3) do
+    case Enum.random(0..15) do
       0 -> :just_installed
       1 -> :beginner
       2 -> :average
-      3 -> :pro
+      _ -> :pro
     end
   end
 end
