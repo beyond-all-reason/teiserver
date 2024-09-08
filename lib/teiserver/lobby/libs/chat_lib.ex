@@ -312,14 +312,8 @@ defmodule Teiserver.Lobby.ChatLib do
   def msg_allowed_when_muted?(msg) do
     msg = String.replace(msg, ~r/ +/, " ") |> String.trim()
 
-    cond do
-      Enum.any?(@valid_mute_chat_regex, fn regex ->
-        String.match?(msg, regex)
-      end) ->
-        true
-
-      true ->
-        false
-    end
+    Enum.any?(@valid_mute_chat_regex, fn regex ->
+      String.match?(msg, regex)
+    end)
   end
 end
