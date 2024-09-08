@@ -261,4 +261,163 @@ defmodule Teiserver.Battle.SplitNoobsTest do
              }
            }
   end
+
+  test "Very strong captain will usually have noobiest noob" do
+    # After brute force result is calculated there will be some remaining weak players to draft
+    # The team that gets pick priority will be determined by a combination of team rating and captain rating
+    # preferring lower for both
+    expanded_group = [
+      %{
+        count: 2,
+        members: ["LuBaee", "TimeContainer"],
+        ratings: [14, 21],
+        names: ["LuBaee", "TimeContainer"],
+        uncertainties: [0, 1],
+        ranks: [1, 1]
+      },
+      %{
+        count: 1,
+        members: ["colossus"],
+        ratings: [22],
+        names: ["colossus"],
+        uncertainties: [2],
+        ranks: [0]
+      },
+      %{
+        count: 1,
+        members: ["PotatoesHead"],
+        ratings: [22],
+        names: ["PotatoesHead"],
+        uncertainties: [2],
+        ranks: [0]
+      },
+      %{
+        count: 1,
+        members: ["onse"],
+        ratings: [20],
+        names: ["onse"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["976"],
+        ratings: [14],
+        names: ["976"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["HoldButyLeg"],
+        ratings: [12],
+        names: ["HoldButyLeg"],
+        uncertainties: [7.5],
+        ranks: [0]
+      },
+      %{
+        count: 1,
+        members: ["CowOfWar"],
+        ratings: [3],
+        names: ["CowOfWar"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["DUFFY"],
+        ratings: [34],
+        names: ["DUFFY"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["Orii"],
+        ratings: [23],
+        names: ["Orii"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["Theo45"],
+        ratings: [21],
+        names: ["Theo45"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["StinkBee"],
+        ratings: [15],
+        names: ["StinkBee"],
+        uncertainties: [6.7],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["Regithros"],
+        ratings: [12],
+        names: ["Regithros"],
+        uncertainties: [5],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["Darth"],
+        ratings: [11],
+        names: ["Darth"],
+        uncertainties: [5],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["Akio"],
+        ratings: [10],
+        names: ["Akio"],
+        uncertainties: [5],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["nubl"],
+        ratings: [6],
+        names: ["nubl"],
+        uncertainties: [5],
+        ranks: [2]
+      }
+    ]
+
+    result = SplitNoobs.perform(expanded_group, 2)
+
+    assert result.logs == [
+             "------------------------------------------------------",
+             "Algorithm: split_noobs",
+             "------------------------------------------------------",
+             "This algorithm will evenly distribute noobs and devalue them. Noobs are non-partied players that have either high uncertainty or 0 rating. Noobs will always be drafted last. For non-noobs, teams will prefer higher rating. For noobs, teams will prefer higher chevrons and lower uncertainty.",
+             "------------------------------------------------------",
+             "Parties: [LuBaee, TimeContainer]",
+             "Solo noobs:",
+             "StinkBee (chev: 3, σ: 6.7)",
+             "HoldButyLeg (chev: 1, σ: 7.5)",
+             "------------------------------------------------------",
+             "Perform brute force with the following players to get the best score.",
+             "Players: TimeContainer, LuBaee, DUFFY, Orii, colossus, PotatoesHead, Theo45, onse, 976, Regithros, Darth, Akio, nubl, CowOfWar",
+             "------------------------------------------------------",
+             "Brute force result:",
+             "Team rating diff penalty: 1",
+             "Broken party penalty: 0",
+             "Score: 1 (lower is better)",
+             "------------------------------------------------------",
+             "Draft remaining players (ordered from best to worst).",
+             "Remaining: StinkBee, HoldButyLeg",
+             "------------------------------------------------------",
+             "Final result:",
+             "Team 1: CowOfWar, Akio, Regithros, Orii, DUFFY, LuBaee, TimeContainer, HoldButyLeg",
+             "Team 2: nubl, Darth, 976, onse, Theo45, PotatoesHead, colossus, StinkBee"
+           ]
+
+    # Note DUFFY (Strongest captain) is on same team with noobiest noob HoldButyLeg
+  end
 end

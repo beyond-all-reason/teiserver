@@ -260,17 +260,33 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     end
   end
 
+  defp get_captain_rating(team) do
+    if Enum.count(team) > 0 do
+      captain =
+        Enum.max_by(team, fn x ->
+          x.rating
+        end)
+
+      captain[:rating]
+    else
+      0
+    end
+  end
+
   # Higher pick priority means that team should pick
   defp get_pick_priority(team) do
     team_rating = get_team_rating(team)
-
+    captain_rating = get_captain_rating(team)
     # Prefer smaller rating
     rating_importance = -1
     # Prefer team with less players
     size_importance = -100
+    # Prefer weaker captain
+    captain_importance = -1
 
     # Score
-    team_rating * rating_importance + length(team) * size_importance
+    team_rating * rating_importance + length(team) * size_importance +
+      captain_rating * captain_importance
   end
 
   defp get_team_rating(team) do
