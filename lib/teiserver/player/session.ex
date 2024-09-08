@@ -152,7 +152,18 @@ defmodule Teiserver.Player.Session do
 
   @impl true
   def handle_info({:DOWN, ref, :process, _, _reason}, state) when ref == state.mon_ref do
+    # we don't care about cancelling the timer if the player reconnects since reconnection
+    # should be fairly low (and rate limited) so too many messages isn't an issue
+    {:ok, _} = :timer.send_after(30_000, :player_timeout)
     {:noreply, %{state | conn_pid: nil}}
+  end
+
+  def handle_info(:player_timeout, state) do
+    if is_nil(state.conn_pid) do
+      {:stop, :normal, state}
+    else
+      {:noreply, state}
+    end
   end
 
   defp via_tuple(user_id) do
