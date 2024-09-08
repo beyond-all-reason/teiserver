@@ -51,7 +51,7 @@ defmodule Teiserver.Battle.BalanceLib do
       "force_party" => Teiserver.Battle.Balance.ForceParty,
       "brute_force" => Teiserver.Battle.Balance.BruteForce,
       "split_noobs" => Teiserver.Battle.Balance.SplitNoobs,
-      "default" => Teiserver.Battle.Balance.DefaultBalance
+      "auto" => Teiserver.Battle.Balance.DefaultBalance
     }
   end
 
@@ -60,12 +60,15 @@ defmodule Teiserver.Battle.BalanceLib do
   """
   @spec get_allowed_algorithms(boolean()) :: [String.t()]
   def get_allowed_algorithms(is_moderator) do
-    if(is_moderator) do
-      Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
-    else
-      mod_only = ["force_party", "brute_force", "loser_picks"]
-      Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.drop(mod_only) |> Map.keys()
-    end
+    result =
+      if(is_moderator) do
+        Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
+      else
+        mod_only = ["force_party", "brute_force"]
+        Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.drop(mod_only) |> Map.keys()
+      end
+
+    ["default" | result]
   end
 
   @doc """
