@@ -460,6 +460,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     end)
   end
 
+  # Adds a party id or nil
   defp get_party_id(num_players) do
     case is_in_party?() do
       true ->
