@@ -7,6 +7,7 @@ config :teiserver, Teiserver.Repo,
   username: "teiserver_dev",
   password: "123456789",
   database: "teiserver_dev",
+  hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10,
   timeout: 180_000
