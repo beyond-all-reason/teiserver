@@ -34,11 +34,9 @@ If you want to change the username or password then you will need to update the 
 sudo su postgres
 psql postgres postgres <<EOF
 CREATE USER teiserver_dev WITH PASSWORD '123456789';
-GRANT ALL PRIVILEGES ON DATABASE teiserver_dev to teiserver_dev;
 ALTER USER teiserver_dev WITH SUPERUSER;
 
 CREATE USER teiserver_test WITH PASSWORD '123456789';
-GRANT ALL PRIVILEGES ON DATABASE teiserver_test to teiserver_test;
 ALTER USER teiserver_test WITH SUPERUSER;
 EOF
 exit
