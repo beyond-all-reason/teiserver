@@ -34,20 +34,21 @@ If you want to change the username or password then you will need to update the 
 sudo su postgres
 psql postgres postgres <<EOF
 CREATE USER teiserver_dev WITH PASSWORD '123456789';
-CREATE DATABASE teiserver_dev;
-GRANT ALL PRIVILEGES ON DATABASE teiserver_dev to teiserver_dev;
 ALTER USER teiserver_dev WITH SUPERUSER;
 
 CREATE USER teiserver_test WITH PASSWORD '123456789';
-CREATE DATABASE teiserver_test;
-GRANT ALL PRIVILEGES ON DATABASE teiserver_test to teiserver_test;
 ALTER USER teiserver_test WITH SUPERUSER;
 EOF
 exit
 
 # You should now be back in the teiserver folder as yourself
-# this next command will perform database migrations
+# this next command will create the required database.
+# Set the MIX_ENV environment variable to perform tasks in a different mix
+# environment (e.g. `MIX_ENV=test`).
 mix ecto.create
+
+# This next command will run all pending db migrations.
+mix ecto.migrate
 ```
 
 #### Localhost certs
