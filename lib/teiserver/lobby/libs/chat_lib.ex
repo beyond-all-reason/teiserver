@@ -67,7 +67,7 @@ defmodule Teiserver.Lobby.ChatLib do
     allowed =
       cond do
         CacheUser.is_restricted?(user, ["All chat", "Lobby chat"]) ->
-          false
+          msg_allowed_when_muted?(msg)
 
         String.slice(msg, 0..0) == "!" and CacheUser.is_restricted?(user, ["Host commands"]) ->
           false
@@ -133,7 +133,7 @@ defmodule Teiserver.Lobby.ChatLib do
     allowed =
       cond do
         CacheUser.is_restricted?(user, ["All chat", "Lobby chat", "Direct chat"]) ->
-          false
+          msg_allowed_when_muted?(msg)
 
         String.starts_with?(msg, "!") and CacheUser.is_restricted?(user, ["Host commands"]) ->
           false
@@ -298,5 +298,22 @@ defmodule Teiserver.Lobby.ChatLib do
 
   defp trim_message(msg) do
     String.trim(msg)
+  end
+
+  @valid_mute_chat_regex [
+    ~r/^!vote( (y|yes|n|no|b|blank))?$/i,
+    ~r/^!(y|n|b|ev|endvote|help)$/i,
+    ~r/^!(cv |callvote )?balance$/i,
+    ~r/^!(cv |callvote )?start$/i,
+    ~r/^!(cv |callvote )?stop$/i,
+    ~r/^!(cv |callvote )?resign$/i,
+    ~r/^!(cv |callvote )?forcestart$/i
+  ]
+  def msg_allowed_when_muted?(msg) do
+    msg = String.replace(msg, ~r/ +/, " ") |> String.trim()
+
+    Enum.any?(@valid_mute_chat_regex, fn regex ->
+      String.match?(msg, regex)
+    end)
   end
 end

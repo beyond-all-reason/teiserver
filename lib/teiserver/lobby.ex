@@ -795,9 +795,6 @@ defmodule Teiserver.Lobby do
       CacheUser.is_shadowbanned?(userid) ->
         false
 
-      CacheUser.is_restricted?(userid, ["All chat", "Lobby chat"]) ->
-        false
-
       lobby.founder_id == userid ->
         true
 
