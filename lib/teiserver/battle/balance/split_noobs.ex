@@ -32,11 +32,11 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     initial_state = get_initial_state(expanded_group)
 
     case should_use_algo(initial_state, team_count) do
-      {:ok, :has_parties} ->
+      {:ok, :brute_force} ->
         result = get_result(initial_state)
         standardise_result(result, initial_state)
 
-      {:ok, :no_parties} ->
+      {:ok, :simple_draft} ->
         result = do_simple_draft(initial_state)
         standardise_result(result, initial_state)
 
@@ -53,12 +53,26 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
   end
 
   @spec should_use_algo(SN.state(), integer()) ::
-          {:ok, :no_parties} | {:error, String.t()} | {:ok, :has_parties}
+          {:ok, :simple_draft} | {:ok, :brute_force} | {:error, String.t()}
   def should_use_algo(initial_state, team_count) do
     cond do
       team_count != 2 -> {:error, "Team count not equal to 2."}
-      length(initial_state.parties) == 0 -> {:ok, :no_parties}
-      true -> {:ok, :has_parties}
+      has_imbalanced_captains?(initial_state) -> {:ok, :brute_force}
+      length(initial_state.parties) == 0 -> {:ok, :simple_draft}
+      true -> {:ok, :brute_force}
+    end
+  end
+
+  @spec has_imbalanced_captains?(SN.state()) :: boolean()
+  defp has_imbalanced_captains?(state) do
+    if Enum.count(state.top_experienced) < 2 do
+      false
+    else
+      # Check diff of best players
+      best_player = Enum.at(state.top_experienced, 0)
+      second_best_player = Enum.at(state.top_experienced, 1)
+
+      best_player.rating >= second_best_player.rating * 2
     end
   end
 

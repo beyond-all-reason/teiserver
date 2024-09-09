@@ -247,7 +247,7 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
            ]
 
     should_use = SplitNoobs.should_use_algo(initial_state, 2)
-    assert should_use == {:ok, :has_parties}
+    assert should_use == {:ok, :brute_force}
   end
 
   test "split noobs internal functions" do
