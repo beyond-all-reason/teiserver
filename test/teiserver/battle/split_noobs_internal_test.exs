@@ -560,114 +560,114 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
              broken_party_penalty: 0,
              first_team: [
                %{
-                 id: "HungDaddy",
-                 name: "HungDaddy",
+                 id: "Dixinormus",
+                 in_party?: false,
+                 name: "Dixinormus",
                  rank: 2,
-                 rating: 2.8,
-                 uncertainty: 8,
-                 in_party?: false
+                 rating: 18.28,
+                 uncertainty: 8
                },
                %{
                  id: "fbots1998",
+                 in_party?: true,
+                 index: 1,
                  name: "fbots1998",
                  rank: 1,
                  rating: 13.98,
-                 uncertainty: 8,
-                 in_party?: true,
-                 index: 1
+                 uncertainty: 8
                },
                %{
                  id: "kyutoryu",
+                 in_party?: true,
+                 index: 2,
                  name: "kyutoryu",
                  rank: 1,
                  rating: 12.25,
-                 uncertainty: 7.1,
-                 in_party?: true,
-                 index: 2
+                 uncertainty: 7.1
                },
                %{
                  id: "[DTG]BamBin0",
+                 in_party?: false,
+                 index: 5,
                  name: "[DTG]BamBin0",
                  rank: 2,
                  rating: 20.06,
-                 uncertainty: 3,
-                 in_party?: false,
-                 index: 5
+                 uncertainty: 3
                },
                %{
                  id: "Noody",
+                 in_party?: false,
+                 index: 7,
                  name: "Noody",
                  rank: 2,
                  rating: 17.64,
-                 uncertainty: 3,
-                 in_party?: false,
-                 index: 7
+                 uncertainty: 3
                },
                %{
                  id: "MaTThiuS_82",
+                 in_party?: false,
+                 index: 9,
                  name: "MaTThiuS_82",
                  rank: 2,
                  rating: 8.26,
-                 uncertainty: 3,
-                 in_party?: false,
-                 index: 9
+                 uncertainty: 3
                }
              ],
              rating_diff_penalty: 0.4099999999999966,
              score: 0.4099999999999966,
              second_team: [
                %{
-                 id: "Dixinormus",
-                 name: "Dixinormus",
+                 id: "HungDaddy",
+                 in_party?: false,
+                 name: "HungDaddy",
                  rank: 2,
-                 rating: 18.28,
-                 uncertainty: 8,
-                 in_party?: false
+                 rating: 2.8,
+                 uncertainty: 8
                },
                %{
                  id: "jauggy",
+                 in_party?: false,
+                 index: 3,
                  name: "jauggy",
                  rank: 2,
                  rating: 20.49,
-                 uncertainty: 3,
-                 in_party?: false,
-                 index: 3
+                 uncertainty: 3
                },
                %{
                  id: "Aposis",
+                 in_party?: false,
+                 index: 4,
                  name: "Aposis",
                  rank: 2,
                  rating: 20.42,
-                 uncertainty: 3,
-                 in_party?: false,
-                 index: 4
+                 uncertainty: 3
                },
                %{
                  id: "reddragon2010",
+                 in_party?: false,
+                 index: 6,
                  name: "reddragon2010",
                  rank: 2,
                  rating: 18.4,
-                 uncertainty: 3,
-                 in_party?: false,
-                 index: 6
+                 uncertainty: 3
                },
                %{
                  id: "SLOPPYGAGGER",
+                 in_party?: false,
+                 index: 8,
                  name: "SLOPPYGAGGER",
                  rank: 2,
                  rating: 8.89,
-                 uncertainty: 3,
-                 in_party?: false,
-                 index: 8
+                 uncertainty: 3
                },
                %{
                  id: "barmalev",
+                 in_party?: false,
+                 index: 10,
                  name: "barmalev",
                  rank: 2,
                  rating: 3.58,
-                 uncertainty: 3,
-                 in_party?: false,
-                 index: 10
+                 uncertainty: 3
                }
              ]
            }
@@ -675,35 +675,6 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
     standard_result = SplitNoobs.standardise_result(result, initial_state)
 
     assert standard_result == %{
-             team_groups: %{
-               1 => [
-                 %{count: 1, group_rating: 2.8, members: ["HungDaddy"], ratings: [2.8]},
-                 %{count: 1, group_rating: 13.98, members: ["fbots1998"], ratings: [13.98]},
-                 %{count: 1, group_rating: 12.25, members: ["kyutoryu"], ratings: [12.25]},
-                 %{count: 1, group_rating: 20.06, members: ["[DTG]BamBin0"], ratings: [20.06]},
-                 %{count: 1, group_rating: 17.64, members: ["Noody"], ratings: [17.64]},
-                 %{count: 1, group_rating: 8.26, members: ["MaTThiuS_82"], ratings: [8.26]}
-               ],
-               2 => [
-                 %{count: 1, group_rating: 18.28, members: ["Dixinormus"], ratings: [18.28]},
-                 %{count: 1, group_rating: 20.49, members: ["jauggy"], ratings: [20.49]},
-                 %{count: 1, group_rating: 20.42, members: ["Aposis"], ratings: [20.42]},
-                 %{count: 1, group_rating: 18.4, members: ["reddragon2010"], ratings: [18.4]},
-                 %{count: 1, group_rating: 8.89, members: ["SLOPPYGAGGER"], ratings: [8.89]},
-                 %{count: 1, group_rating: 3.58, members: ["barmalev"], ratings: [3.58]}
-               ]
-             },
-             team_players: %{
-               1 => ["HungDaddy", "fbots1998", "kyutoryu", "[DTG]BamBin0", "Noody", "MaTThiuS_82"],
-               2 => [
-                 "Dixinormus",
-                 "jauggy",
-                 "Aposis",
-                 "reddragon2010",
-                 "SLOPPYGAGGER",
-                 "barmalev"
-               ]
-             },
              logs: [
                "------------------------------------------------------",
                "Algorithm: split_noobs",
@@ -727,9 +698,38 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
                "Remaining: Dixinormus, HungDaddy",
                "------------------------------------------------------",
                "Final result:",
-               "Team 1: MaTThiuS_82, Noody, [DTG]BamBin0, kyutoryu, fbots1998, HungDaddy",
-               "Team 2: barmalev, SLOPPYGAGGER, reddragon2010, Aposis, jauggy, Dixinormus"
-             ]
+               "Team 1: MaTThiuS_82, Noody, [DTG]BamBin0, kyutoryu, fbots1998, Dixinormus",
+               "Team 2: barmalev, SLOPPYGAGGER, reddragon2010, Aposis, jauggy, HungDaddy"
+             ],
+             team_groups: %{
+               1 => [
+                 %{count: 1, group_rating: 18.28, members: ["Dixinormus"], ratings: [18.28]},
+                 %{count: 1, group_rating: 13.98, members: ["fbots1998"], ratings: [13.98]},
+                 %{count: 1, group_rating: 12.25, members: ["kyutoryu"], ratings: [12.25]},
+                 %{count: 1, group_rating: 20.06, members: ["[DTG]BamBin0"], ratings: [20.06]},
+                 %{count: 1, group_rating: 17.64, members: ["Noody"], ratings: [17.64]},
+                 %{count: 1, group_rating: 8.26, members: ["MaTThiuS_82"], ratings: [8.26]}
+               ],
+               2 => [
+                 %{count: 1, group_rating: 2.8, members: ["HungDaddy"], ratings: [2.8]},
+                 %{count: 1, group_rating: 20.49, members: ["jauggy"], ratings: [20.49]},
+                 %{count: 1, group_rating: 20.42, members: ["Aposis"], ratings: [20.42]},
+                 %{count: 1, group_rating: 18.4, members: ["reddragon2010"], ratings: [18.4]},
+                 %{count: 1, group_rating: 8.89, members: ["SLOPPYGAGGER"], ratings: [8.89]},
+                 %{count: 1, group_rating: 3.58, members: ["barmalev"], ratings: [3.58]}
+               ]
+             },
+             team_players: %{
+               1 => [
+                 "Dixinormus",
+                 "fbots1998",
+                 "kyutoryu",
+                 "[DTG]BamBin0",
+                 "Noody",
+                 "MaTThiuS_82"
+               ],
+               2 => ["HungDaddy", "jauggy", "Aposis", "reddragon2010", "SLOPPYGAGGER", "barmalev"]
+             }
            }
   end
 end
