@@ -452,7 +452,11 @@ defmodule Teiserver.Battle do
           {:ok, data} ->
             # We have to get the UUID from the script tags sent
             # because the bot itself is in a new lobby since the last one finished
-            id = data["battleContext"]["scriptTags"]["server/match/id"]
+            script_tags = data["battleContext"]["scriptTags"]
+
+            # TODO the server/match/id is legacy and should be removed
+            # After updating Teiserver, there may be some ongoing matches with the legacy tags
+            id = script_tags["game/server_match_id"] || script_tags["server/match/id"]
 
             case get_match(id) do
               nil ->

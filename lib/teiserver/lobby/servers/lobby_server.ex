@@ -117,7 +117,7 @@ defmodule Teiserver.Battle.LobbyServer do
 
     options = %{
       "server/match/uuid" => new_match.server_uuid,
-      "server/match/id" => new_match.id
+      "game/server_match_id" => new_match.id
     }
 
     modoptions = state.modoptions |> Map.merge(options)
@@ -606,7 +606,7 @@ defmodule Teiserver.Battle.LobbyServer do
   defp check_lobby_values(state) do
     nil_count =
       [
-        Map.get(state.modoptions, "server/match/id"),
+        Map.get(state.modoptions, "game/server_match_id"),
         Map.get(state.modoptions, "server/match/uuid"),
         Map.get(state.modoptions, "server/host/uuid")
       ]
@@ -615,7 +615,7 @@ defmodule Teiserver.Battle.LobbyServer do
     modoptions =
       if nil_count > 0 do
         new_options = %{
-          "server/match/id" => state.match_id,
+          "game/server_match_id" => state.match_id,
           "server/match/uuid" => state.match_uuid,
           "server/host/uuid" => state.server_uuid
         }
@@ -668,7 +668,7 @@ defmodule Teiserver.Battle.LobbyServer do
     options = %{
       "game/modoptions/ranked_game" => "1",
       "server/match/uuid" => match.server_uuid,
-      "server/match/id" => match.id
+      "game/server_match_id" => match.id
     }
 
     {:ok,
