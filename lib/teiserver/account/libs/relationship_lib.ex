@@ -345,7 +345,7 @@ defmodule Teiserver.Account.RelationshipLib do
     user = Account.get_user_by_id(userid)
     userid_count = Enum.count(userid_list) |> max(1)
 
-    {avoid_count_needed, avoid_percentage_needed} =
+    {avoiding_you_count_needed, avoiding_others_count_needed, avoid_percentage_needed} =
       cond do
         user.behaviour_score <= 5000 ->
           {2, 20}
@@ -355,7 +355,8 @@ defmodule Teiserver.Account.RelationshipLib do
 
         true ->
           {
-            Config.get_site_config_cache("lobby.Avoid count to prevent playing"),
+            Config.get_site_config_cache("lobby.Avoid you count to prevent playing"),
+            Config.get_site_config_cache("lobby.Avoid others count to prevent playing"),
             Config.get_site_config_cache("lobby.Avoid percentage to prevent playing")
           }
       end
@@ -376,10 +377,10 @@ defmodule Teiserver.Account.RelationshipLib do
     cond do
       # You are being avoided
       being_avoided_percentage >= avoid_percentage_needed -> :avoided
-      being_avoided_count >= avoid_count_needed -> :avoided
+      being_avoided_count >= avoiding_you_count_needed -> :avoided
       # You are avoiding
       avoiding_percentage >= avoid_percentage_needed -> :avoiding
-      avoiding_count >= avoid_count_needed -> :avoiding
+      avoiding_count >= avoiding_others_count_needed -> :avoiding
       true -> :ok
     end
   end

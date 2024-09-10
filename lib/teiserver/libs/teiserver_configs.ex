@@ -385,13 +385,21 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "lobby.Avoid count to prevent playing",
+      key: "lobby.Avoiding you count to prevent playing",
       section: "Lobbies",
       type: "integer",
       permissions: ["Admin"],
-      description:
-        "The raw number of players who would need to avoid someone to prevent them becoming a player",
+      description: "If there are this many players avoiding you, you cannot play.",
       default: 6
+    })
+
+    add_site_config_type(%{
+      key: "lobby.Avoiding others count to prevent playing",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["Admin"],
+      description: "If you are avoiding this number of players, you cannot play",
+      default: 3
     })
 
     add_site_config_type(%{
@@ -399,8 +407,7 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Lobbies",
       type: "integer",
       permissions: ["Admin"],
-      description:
-        "The percentage of players who would need to avoid someone to prevent them becoming a player",
+      description: "The percentage of players avoiding or avoided to prevent someone playing",
       default: 50
     })
 
