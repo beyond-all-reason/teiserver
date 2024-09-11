@@ -26,7 +26,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib, SpadsParser, CoordinatorCommands}
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? newlobby jazlobby tournament)
-  @boss_commands ~w(balancemode balancealgorithm gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
+  @boss_commands ~w(balancealgorithm gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
   @vip_boss_commands ~w(shuffle)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock makebalance set-config-teaser)
   @admin_commands ~w(playerlimit)
