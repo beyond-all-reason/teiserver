@@ -7,7 +7,7 @@ defmodule Teiserver.Protocols.SpringOut do
   """
   require Logger
   alias Phoenix.PubSub
-  alias Teiserver.{Account, CacheUser, Client, Room, Battle, Coordinator}
+  alias Teiserver.{Account, CacheUser, Client, Room, Battle, Coordinator, Config}
   alias Teiserver.Lobby
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.Spring.{BattleOut, LobbyPolicyOut, UserOut, SystemOut}
@@ -38,7 +38,7 @@ defmodule Teiserver.Protocols.SpringOut do
         :spring -> do_reply(reply_cmd, data)
       end
 
-    if Application.get_env(:teiserver, Teiserver)[:extra_logging] == true or
+    if Config.get_site_config_cache("debug.Print outgoing messages") or
          state.print_server_messages do
       if is_list(msg) do
         msg
