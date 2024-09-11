@@ -6,7 +6,7 @@ defmodule Teiserver.Protocols.SpringIn do
   https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html
   """
   require Logger
-  alias Teiserver.{Account, Lobby, Coordinator, Battle, Room, CacheUser, Client}
+  alias Teiserver.{Account, Lobby, Coordinator, Battle, Room, CacheUser, Client, Config}
   alias Phoenix.PubSub
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
@@ -27,10 +27,6 @@ defmodule Teiserver.Protocols.SpringIn do
     "SLTS Client d" => :none
   }
 
-  @none_override_users ~w([teh]cluster1 [teh]clusterEU2 [teh]clusterEU3 [teh]clusterEU4 [teh]clusterEU5 [teh]clusterAU [teh]clusterUS [teh]clusterUS2 [teh]clusterUS3 [teh]clusterUS4)
-
-  @partial_override_users ~w()
-
   @status_3_window 1_000
   @status_10_window 60_000
 
@@ -38,7 +34,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   @spec data_in(String.t(), map()) :: map()
   def data_in(data, state) do
-    if Application.get_env(:teiserver, Teiserver)[:extra_logging] == true or
+      if Config.get_site_config_cache("debug.Print incoming messages") or
          state.print_client_messages do
       if String.contains?(data, "c.user.get_token") or String.contains?(data, "LOGIN") do
         Logger.info("<-- #{state.username}: LOGIN/c.user.get_token")
@@ -232,17 +228,7 @@ defmodule Teiserver.Protocols.SpringIn do
         })
 
       {:ok, user} ->
-        optimisation_level =
-          cond do
-            Enum.member?(@none_override_users, user.name) ->
-              :none
-
-            Enum.member?(@partial_override_users, user.name) ->
-              :partial
-
-            true ->
-              Map.get(@optimisation_level, user.lobby_client, :full)
-          end
+        optimisation_level = Map.get(@optimisation_level, user.lobby_client, :full)
 
         new_state = SpringOut.do_login_accepted(state, user, optimisation_level)
 
