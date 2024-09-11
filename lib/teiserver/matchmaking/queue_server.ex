@@ -58,7 +58,9 @@ defmodule Teiserver.Matchmaking.QueueServer do
           settings: settings(),
           members: [member()],
           # storing monitors to evict players that disconnect
-          monitors: [{reference(), T.userid()}]
+          monitors: [{reference(), T.userid()}],
+          # list of pairing rooms and which players are in it
+          pairings: [{pid(), reference(), [T.userid()]}]
 
           # TODO: add some bits for telemetry (see QueueWaitServer) like avg
           # wait time and join count
@@ -91,7 +93,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
       },
       settings: Map.merge(default_settings(), Map.get(attrs, :settings, %{})),
       members: Map.get(attrs, :members, []),
-      monitors: []
+      monitors: [],
+      pairings: []
     }
   end
 
@@ -150,11 +153,21 @@ defmodule Teiserver.Matchmaking.QueueServer do
       Enum.flat_map(state.members, fn m -> m.player_ids end)
       |> MapSet.new()
 
+    pairing_player_ids =
+      for {_, _, player_ids} <- state.pairings, p_id <- player_ids do
+        p_id
+      end
+      |> MapSet.new()
+
+    new_ids = MapSet.new(new_member.player_ids)
+    is_queuing = !MapSet.disjoint?(member_ids, new_ids)
+    is_pairing = !MapSet.disjoint?(pairing_player_ids, new_ids)
+
     cond do
       Enum.count(new_member.player_ids) > state.queue.team_size ->
         {:reply, {:error, :too_many_players}, state}
 
-      MapSet.disjoint?(member_ids, MapSet.new(new_member.player_ids)) ->
+      !is_queuing && !is_pairing ->
         monitors =
           Enum.map(new_member.player_ids, fn user_id ->
             {Teiserver.Player.monitor_session(user_id), user_id}
@@ -216,9 +229,18 @@ defmodule Teiserver.Matchmaking.QueueServer do
           state
 
         {:match, matches} ->
-          for teams <- matches do
-            {:ok, _pid} = PairingRoom.start(state.id, state.queue, teams)
-          end
+          pairings =
+            for teams <- matches do
+              {:ok, pid} = PairingRoom.start(state.id, state.queue, teams)
+              ref = Process.monitor(pid)
+
+              player_ids =
+                for team <- teams, member <- team, player_id <- member.player_ids do
+                  player_id
+                end
+
+              {pid, ref, player_ids}
+            end
 
           matched_members =
             for teams <- matches, team <- teams, member <- team do
@@ -231,7 +253,9 @@ defmodule Teiserver.Matchmaking.QueueServer do
               not Enum.member?(matched_members, m.id)
             end)
 
-          Map.put(state, :members, new_members)
+          state
+          |> Map.put(:members, new_members)
+          |> Map.update(:pairings, pairings, fn ps -> pairings ++ ps end)
       end
 
     {:noreply, new_state}

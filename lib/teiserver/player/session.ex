@@ -169,6 +169,9 @@ defmodule Teiserver.Player.Session do
 
       {:searching, _} ->
         {:reply, {:error, :already_queued}, state}
+
+      {:pairing, _} ->
+        {:reply, {:error, :already_queued}, state}
     end
   end
 

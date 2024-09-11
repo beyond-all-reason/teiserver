@@ -193,5 +193,33 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
 
       assert %{"status" => "success"} = Tachyon.matchmaking_ready!(client1)
     end
+
+    test "still considered in queue during pairing", %{
+      queue_id: queue_id,
+      app: app,
+      queue_pid: queue_pid
+    } do
+      [client, _] = join_and_pair(app, queue_id, queue_pid, 2)
+      resp = Tachyon.join_queues!(client, [queue_id])
+      assert %{"status" => "failed", "reason" => "already_queued"} = resp
+    end
+  end
+
+  defp join_and_pair(app, queue_id, queue_pid, number_of_player) do
+    clients =
+      Enum.map(1..number_of_player, fn _ ->
+        {:ok, %{client: client}} = setup_user(app)
+        assert %{"status" => "success"} = Tachyon.join_queues!(client, [queue_id])
+        client
+      end)
+
+    send(queue_pid, :tick)
+
+    Enum.each(clients, fn client ->
+      assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
+               Tachyon.recv_message(client)
+    end)
+
+    clients
   end
 end
