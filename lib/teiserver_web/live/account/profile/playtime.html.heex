@@ -17,16 +17,16 @@
       </thead>
       <tbody>
         <tr>
-          <td>Total</td>
-          <td><%= duration_to_str(@total_hours) %></td>
+          <td><b>Total</b></td>
+          <td><%= @total_hours %> hours</td>
         </tr>
         <tr>
           <td>Playing</td>
-          <td><%= duration_to_str(@player_hours) %></td>
+          <td><%= @player_hours %> hours</td>
         </tr>
         <tr>
           <td>Spectating</td>
-          <td><%= duration_to_str(@spectator_hours) %></td>
+          <td><%= @spectator_hours %> hours</td>
         </tr>
       </tbody>
     </table>
