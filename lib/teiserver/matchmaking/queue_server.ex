@@ -184,7 +184,21 @@ defmodule Teiserver.Matchmaking.QueueServer do
   def handle_info({:DOWN, ref, :process, _object, _reason}, state) do
     case Enum.find(state.monitors, fn {mref, _} -> mref == ref end) do
       nil ->
-        {:noreply, state}
+        case(Enum.find(state.pairings, fn {_, mref, _} -> mref == ref end)) do
+          nil ->
+            {:noreply, state}
+
+          {_, _, player_ids} ->
+            new_state =
+              Enum.reduce(player_ids, state, fn p_id, st ->
+                case remove_player(p_id, st) do
+                  :not_queued -> st
+                  {:ok, st} -> st
+                end
+              end)
+
+            {:noreply, new_state}
+        end
 
       {_ref, user_id} ->
         case remove_player(user_id, state) do

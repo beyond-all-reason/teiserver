@@ -31,6 +31,17 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     GenServer.call(room_pid, {:ready, user_id})
   end
 
+  @spec cancel(pid(), T.userid()) :: :ok | {:error, :no_match}
+  def cancel(room_pid, user_id) do
+    GenServer.call(room_pid, {:cancel, user_id})
+  catch
+    # If the pairing room is gone, there's no need to cancel anymore
+    :exit, _ -> :ok
+  end
+
+  # TODO tachyon_mvp: transform this state into a simple state machine when
+  # adding the step to setup the match (finding host and sending start script
+  # to every player)
   @type state :: %{
           queue_id: QueueServer.id(),
           queue: QueueServer.queue(),
@@ -70,6 +81,15 @@ defmodule Teiserver.Matchmaking.PairingRoom do
       # TODO tachyon_mvp: notify other players for readyUpdate event
       # TODO tachyon_mvp: if no more player is waiting, starts the game
       {[_], rest} -> {:reply, :ok, %{state | awaiting: rest}}
+    end
+  end
+
+  def handle_call({:cancel, user_id}, _from, state) do
+    case Enum.split_with(state.awaiting, fn waiting_id -> waiting_id == user_id end) do
+      {[], _} -> {:reply, {:error, :no_match}, state}
+      # TODO tachyon_mvp: notify other players of the cancellation, and then
+      # return the other members to the original queue to resume searching
+      {[_], _rest} -> {:reply, :ok, state}
     end
   end
 end
