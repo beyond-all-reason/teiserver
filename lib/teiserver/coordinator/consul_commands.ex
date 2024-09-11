@@ -630,14 +630,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   #################### Boss
-  # balancemode is deprecated. Use balancealgorithm instead, which is also a SPADS command
-  def handle_command(%{command: "balancemode", remaining: remaining, senderid: senderid}, state) do
-    handle_command(
-      %{command: "balancealgorithm", remaining: remaining, senderid: senderid},
-      state
-    )
-  end
-
   def handle_command(
         %{command: "balancealgorithm", remaining: "default", senderid: senderid},
         state
