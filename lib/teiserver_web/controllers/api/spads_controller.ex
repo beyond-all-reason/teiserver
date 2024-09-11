@@ -153,39 +153,17 @@ defmodule TeiserverWeb.API.SpadsController do
           })
 
         if balance_result do
-          # Get some counts for later
-          team_count =
-            balance_result.team_sizes
-            |> Enum.count()
-
-          team_size =
-            balance_result.team_sizes
-            |> Map.values()
-            |> Enum.max()
-
-          # Get the rating type
-          rating_type = MatchLib.game_type(team_size, team_count)
-
-          # Temporary solution until Team FFA ratings are fixed
-          rating_type =
-            case rating_type do
-              "Team FFA" -> "FFA"
-              v -> v
-            end
-
           player_result =
             balance_result.team_players
-            |> Enum.map(fn {team_id, players} ->
+            |> Enum.flat_map(fn {team_id, players} ->
               players
               |> Enum.map(fn userid ->
-                rating_value = BalanceLib.get_user_rating_value(userid, rating_type)
-                {team_id, rating_value, userid, Account.get_username_by_id(userid)}
+                {team_id, Account.get_username_by_id(userid)}
               end)
             end)
-            |> List.flatten()
             |> Enum.sort(&>=/2)
             |> Enum.with_index()
-            |> Map.new(fn {{team_id, _, _, username}, idx} ->
+            |> Map.new(fn {{team_id, username}, idx} ->
               {username,
                %{
                  "team" => team_id - 1,

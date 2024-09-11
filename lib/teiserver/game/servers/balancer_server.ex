@@ -173,7 +173,12 @@ defmodule Teiserver.Game.BalancerServer do
       |> Enum.map(fn {_, t} -> Enum.count(t) end)
       |> Enum.max(fn -> 0 end)
 
-    game_type = MatchLib.game_type(team_size, team_count)
+    # Use Large Team ratings when balancing Team FFA
+    game_type =
+      case MatchLib.game_type(team_size, team_count) do
+        "Team FFA" -> "Large Team"
+        v -> v
+      end
 
     if opts[:allow_groups] do
       party_result = make_grouped_balance(team_count, players, game_type, opts)
