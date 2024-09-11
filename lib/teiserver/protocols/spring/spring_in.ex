@@ -34,7 +34,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   @spec data_in(String.t(), map()) :: map()
   def data_in(data, state) do
-      if Config.get_site_config_cache("debug.Print incoming messages") or
+    if Config.get_site_config_cache("debug.Print incoming messages") or
          state.print_client_messages do
       if String.contains?(data, "c.user.get_token") or String.contains?(data, "LOGIN") do
         Logger.info("<-- #{state.username}: LOGIN/c.user.get_token")
