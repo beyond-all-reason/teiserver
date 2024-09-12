@@ -247,7 +247,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
       message =
         [
-          "New infolog uploaded: #{infolog.metadata["errortype"]} `#{infolog.metadata["filename"]}`",
+          "New infolog uploaded: **#{infolog.metadata["errortype"]}** `#{infolog.metadata["filename"]}`",
           "`#{infolog.metadata["shorterror"]}`",
           "Link: #{url}"
         ]
@@ -288,19 +288,26 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       outstanding_msg =
         cond do
           outstanding_count > 5 ->
-            " (Outstanding count: #{outstanding_count} :warning:)"
+            "**Outstanding count:** #{outstanding_count} :warning:"
 
           outstanding_count > 1 ->
-            " (Outstanding count: #{outstanding_count})"
+            "**Outstanding count:** #{outstanding_count}"
 
           true ->
             ""
         end
 
       msg =
-        "#{report.target.name} was reported by #{report.reporter.name} because #{report.type}/#{report.sub_type} #{match_icon} - #{report.extra_text} - #{url}#{outstanding_msg}"
+        [
+          "# [Moderation report #{report.type}/#{report.sub_type}](#{url})#{match_icon}",
+          "**Target:** [#{report.target.name}](https://#{host}/teiserver/admin/user/#{report.target.id})",
+          "**Reporter:** [#{report.reporter.name}](https://#{host}/teiserver/admin/user/#{report.reporter.id})",
+          "**Reason:** #{format_link(report.extra_text)}",
+          "#{outstanding_msg}"
+        ]
+        |> Enum.join("\n")
 
-      Api.create_message(channel, "Moderation report: #{msg}")
+      Api.create_message(channel, msg)
     end
   end
 
@@ -378,4 +385,10 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   # def start_link do
   #   Consumer.start_link(__MODULE__)
   # end
+
+  # Surrounds links with <> to disable link preview in Discord
+  defp format_link(link) do
+    ~r/(https?:\/\/[^\s]+)/
+    |> Regex.replace(link, "<\\1>")
+  end
 end
