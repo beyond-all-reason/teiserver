@@ -2,8 +2,7 @@ defmodule Teiserver.Bridge.Commands.TextcbCommand do
   @moduledoc """
   Calls the bot and tells it to post one of the text-callbacks
   """
-  alias Teiserver.Bridge.{BridgeServer}
-  alias Teiserver.{Communication, Room, Logging, Config}
+  alias Teiserver.{Communication, Logging}
 
   @behaviour Teiserver.Bridge.BridgeCommandBehaviour
 
@@ -56,13 +55,6 @@ defmodule Teiserver.Bridge.Commands.TextcbCommand do
             command: text_callback.id,
             trigger: options_map["reference"]
           })
-
-          main_id = Config.get_site_config_cache("teiserver.Discord channel #main")
-
-          if interaction.channel_id == main_id do
-            bridge_user_id = BridgeServer.get_bridge_userid()
-            Room.send_message(bridge_user_id, "main", text_callback.response)
-          end
 
           Communication.set_last_triggered_time(text_callback, interaction.channel_id)
 

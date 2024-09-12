@@ -135,11 +135,11 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     #     nil
     # end
 
-    if response do
-      Api.create_interaction_response(interaction, response)
-    else
-      :ignore
-    end
+    # if response do
+    #   Api.create_interaction_response(interaction, response)
+    # else
+    #   :ignore
+    # end
   end
 
   def handle_event({:READY, ready_data, _ws}) do
@@ -231,11 +231,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
   @spec new_infolog(Teiserver.Telemetry.Infolog.t()) :: any
   def new_infolog(infolog) do
-    channel_id = Config.get_site_config_cache("teiserver.Discord channel #telemetry-infologs")
-
     post_to_discord =
       cond do
-        channel_id == nil -> false
         infolog.metadata["shorterror"] == "Errorlog" -> false
         infolog.metadata["private"] == true -> false
         true -> true
@@ -253,7 +250,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         ]
         |> Enum.join("\n")
 
-      Api.create_message(channel_id, message)
+      Communication.new_discord_message("Telemetry infologs", message)
     end
   end
 
@@ -263,10 +260,10 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     channel =
       cond do
         report.type == "actions" ->
-          Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
+          "Overwatch reports"
 
         true ->
-          Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
+          "Moderation reports"
       end
 
     if channel do
@@ -300,7 +297,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       msg =
         "#{report.target.name} was reported by #{report.reporter.name} because #{report.type}/#{report.sub_type} #{match_icon} - #{report.extra_text} - #{url}#{outstanding_msg}"
 
-      Api.create_message(channel, "Moderation report: #{msg}")
+      Communication.new_discord_message("Moderation report:", msg)
     end
   end
 

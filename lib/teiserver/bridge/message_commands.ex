@@ -1,5 +1,7 @@
 defmodule Teiserver.Bridge.MessageCommands do
   @moduledoc false
+  alias Teiserver.Communication
+  alias Credo.CLI.Command
   alias Teiserver.{CacheUser, Account}
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Helper.NumberHelper
@@ -254,6 +256,6 @@ defmodule Teiserver.Bridge.MessageCommands do
   defp reply(channel, message) when is_list(message), do: reply(channel, Enum.join(message, "\n"))
 
   defp reply(channel, message) do
-    Api.create_message(channel, message)
+    Communication.new_discord_message(channel, message)
   end
 end
