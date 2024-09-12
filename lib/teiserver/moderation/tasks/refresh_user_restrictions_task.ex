@@ -102,8 +102,7 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
         Teiserver.Client.disconnect(client.userid, "Banned")
 
       Enum.member?(new_restrictions, "All lobbies") ->
-        Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
-        Teiserver.Client.disconnect(client.userid, "Removed from lobbies")
+        Coordinator.send_to_host(client.lobby_id, "!bkick #{client.name}")
 
       true ->
         pid = Coordinator.get_coordinator_pid()
