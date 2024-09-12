@@ -68,9 +68,15 @@ defmodule Teiserver.Protocols.SpringIn do
 
   def handle(data, state) do
     tuple =
-      ~r/^(#[0-9]+ )?([a-z_A-Z0-9\.]+)(.*)?$/u
-      |> Regex.run(data)
-      |> _clean()
+      if String.valid?(data) do
+        ~r/^(#[0-9]+ )?([a-z_A-Z0-9\.]+)(.*)?$/u
+        |> Regex.run(data)
+        |> _clean()
+      else
+        Logger.error("Invalid characters in data: '#{data}'")
+
+        nil
+      end
 
     state =
       case tuple do
