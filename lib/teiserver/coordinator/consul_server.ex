@@ -29,7 +29,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @boss_commands ~w(balancealgorithm gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
   @vip_boss_commands ~w(shuffle)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock makebalance set-config-teaser)
-  @admin_commands ~w(playerlimit broadcast)
+  @admin_commands ~w(playerlimit)
 
   # @handled_by_lobby ~w(explain)
   @splitter "########################################"

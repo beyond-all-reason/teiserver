@@ -11,6 +11,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   # These commands are handled by coordinator commands, but are not on the always allow list
   @mod_allow ~w(check modparty unparty)
   @forward_to_consul ~w(s status players follow joinq leaveq splitlobby y yes n no explain)
+  @admin_commands ~w(broadcast)
 
   def is_coordinator_command?(command) do
     # The list of allowed commands are now defined in this file
@@ -21,6 +22,9 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   @spec allow_command?(map(), map()) :: boolean()
   defp allow_command?(%{senderid: senderid} = cmd, state) do
     client = Client.get_client_by_id(senderid)
+    user = Account.get_user_by_id(senderid)
+
+    is_admin = Enum.member?(user.roles, "Admin")
 
     cond do
       client == nil ->
@@ -32,7 +36,12 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       Enum.member?(@always_allow, cmd.command) ->
         true
 
-      client.moderator == true ->
+      # Allow all commands for Admins
+      is_admin ->
+        true
+
+      # Allow all except Admin only commands for moderators
+      client.moderator and not Enum.member?(@admin_commands, cmd.command) ->
         true
 
       not Enum.member?(@always_allow ++ @forward_to_consul, cmd.command) ->
@@ -541,6 +550,19 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       senderid,
       "Your one-time login link is #{url} it will expire in 5 minutes and must be accessed from the same IP you are accessing the game."
     )
+
+    state
+  end
+
+  # Admin commands
+  defp do_handle(
+         %{command: "broadcast", senderid: senderid, remaining: message} = cmd,
+         state
+       ) do
+    Lobby.list_lobby_ids()
+    |> Enum.each(fn lobby_id ->
+      Lobby.say(senderid, message, lobby_id)
+    end)
 
     state
   end
