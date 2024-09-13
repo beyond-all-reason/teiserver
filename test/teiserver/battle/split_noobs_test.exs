@@ -420,4 +420,167 @@ defmodule Teiserver.Battle.SplitNoobsTest do
 
     # Note DUFFY (Strongest captain) is on same team with noobiest noob HoldButyLeg
   end
+
+  test "Imbalanced captains will use brute force" do
+    # If the leader is two times the rating of the next best, use brute force instead of draft
+
+    expanded_group = [
+      %{
+        count: 1,
+        members: ["Raigeki"],
+        ratings: [59.85],
+        names: ["Raigeki"],
+        uncertainties: [0],
+        ranks: [1]
+      },
+      %{
+        count: 1,
+        members: ["FRODODOR"],
+        ratings: [25.68],
+        names: ["FRODODOR"],
+        uncertainties: [0],
+        ranks: [1]
+      },
+      %{
+        count: 1,
+        members: ["MrKicks"],
+        ratings: [0.87],
+        names: ["MrKicks"],
+        uncertainties: [2],
+        ranks: [0]
+      },
+      %{
+        count: 1,
+        members: ["UnreasonableIkko"],
+        ratings: [5.99],
+        names: ["UnreasonableIkko"],
+        uncertainties: [2],
+        ranks: [0]
+      },
+      %{
+        count: 1,
+        members: ["BIL"],
+        ratings: [16.82],
+        names: ["BIL"],
+        uncertainties: [8.3],
+        ranks: [0]
+      },
+      %{
+        count: 1,
+        members: ["Larch"],
+        ratings: [22.04],
+        names: ["Larch"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["Cobaltstore"],
+        ratings: [13.64],
+        names: ["Cobaltstore"],
+        uncertainties: [1],
+        ranks: [0]
+      },
+      %{
+        count: 1,
+        members: ["SHAAARKBATE"],
+        ratings: [9.91],
+        names: ["SHAAARKBATE"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["Engolianth"],
+        ratings: [26.99],
+        names: ["Engolianth"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["ColorlesScum"],
+        ratings: [2.31],
+        names: ["ColorlesScum"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["Renkei"],
+        ratings: [1.15],
+        names: ["Renkei"],
+        uncertainties: [3],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["quest"],
+        ratings: [13.07],
+        names: ["quest"],
+        uncertainties: [2],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["illusiveman2024"],
+        ratings: [6.98],
+        names: ["illusiveman2024"],
+        uncertainties: [5],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["shoeofobama"],
+        ratings: [23.94],
+        names: ["shoeofobama"],
+        uncertainties: [5],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["Demodred"],
+        ratings: [25.97],
+        names: ["Demodred"],
+        uncertainties: [5],
+        ranks: [2]
+      },
+      %{
+        count: 1,
+        members: ["Artifical_Banana"],
+        ratings: [20.14],
+        names: ["Artifical_Banana"],
+        uncertainties: [5],
+        ranks: [2]
+      }
+    ]
+
+    result = SplitNoobs.perform(expanded_group, 2)
+
+    assert result.logs == [
+             "------------------------------------------------------",
+             "Algorithm: split_noobs",
+             "------------------------------------------------------",
+             "This algorithm will evenly distribute noobs and devalue them. Noobs are non-partied players that have either high uncertainty or 0 rating. Noobs will always be drafted last. For non-noobs, teams will prefer higher rating. For noobs, teams will prefer higher chevrons and lower uncertainty.",
+             "------------------------------------------------------",
+             "Parties: None",
+             "Solo noobs:",
+             "BIL (chev: 1, σ: 8.3)",
+             "------------------------------------------------------",
+             "Perform brute force with the following players to get the best score.",
+             "Players: Raigeki, Engolianth, Demodred, FRODODOR, shoeofobama, Larch, Artifical_Banana, Cobaltstore, quest, SHAAARKBATE, illusiveman2024, UnreasonableIkko, ColorlesScum, Renkei",
+             "------------------------------------------------------",
+             "Brute force result:",
+             "Team rating diff penalty: 0.0",
+             "Broken party penalty: 0",
+             "Score: 0.0 (lower is better)",
+             "------------------------------------------------------",
+             "Draft remaining players (ordered from best to worst).",
+             "Remaining: MrKicks, BIL",
+             "------------------------------------------------------",
+             "Final result:",
+             "Team 1: Renkei, ColorlesScum, UnreasonableIkko, SHAAARKBATE, shoeofobama, FRODODOR, Raigeki, BIL",
+             "Team 2: illusiveman2024, quest, Cobaltstore, Artifical_Banana, Larch, Demodred, Engolianth, MrKicks"
+           ]
+  end
 end
