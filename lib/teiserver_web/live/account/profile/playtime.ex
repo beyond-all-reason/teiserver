@@ -46,9 +46,9 @@ defmodule TeiserverWeb.Account.ProfileLive.Playtime do
   defp get_times(socket) do
     stats = Account.get_user_stat_data(socket.assigns.user.id)
 
-    total_hours = Map.get(stats, "total_minutes", 0) * 60
-    player_hours = Map.get(stats, "player_minutes", 0) * 60
-    spectator_hours = Map.get(stats, "spectator_minutes", 0) * 60
+    total_hours = (Map.get(stats, "total_minutes", 0) / 60) |> round
+    player_hours = (Map.get(stats, "player_minutes", 0) / 60) |> round
+    spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> round
 
     socket
     |> assign(:total_hours, total_hours)
