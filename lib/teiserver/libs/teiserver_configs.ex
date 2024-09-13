@@ -385,7 +385,7 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "lobby.Avoiding you count to prevent playing",
+      key: "lobby.Avoid you count to prevent playing",
       section: "Lobbies",
       type: "integer",
       permissions: ["Admin"],
@@ -394,7 +394,7 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "lobby.Avoiding others count to prevent playing",
+      key: "lobby.Avoid others count to prevent playing",
       section: "Lobbies",
       type: "integer",
       permissions: ["Admin"],
