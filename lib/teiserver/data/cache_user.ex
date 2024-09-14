@@ -282,14 +282,16 @@ defmodule Teiserver.CacheUser do
 
     case Account.script_create_user(params) do
       {:ok, user} ->
+        verification_code = (:rand.uniform(899_999) + 100_000) |> to_string
+
         Account.update_user_stat(user.id, %{
-          "verification_code" => (:rand.uniform(899_999) + 100_000) |> to_string
+          "verification_code" => verification_code
         })
 
         # Now add them to the cache
         user
         |> convert_user
-        |> Map.put(:password_hash, spring_md5_password(password))
+        |> Map.put(:password_hash, encrypt_password(spring_md5_password(password)))
         |> Map.put(:spring_password, false)
         |> add_user
         |> update_user(persist: true)
