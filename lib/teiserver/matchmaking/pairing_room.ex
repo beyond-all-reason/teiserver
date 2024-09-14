@@ -68,7 +68,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   @impl true
   def handle_continue(:notify_players, state) do
     Enum.each(state.awaiting, fn player_id ->
-      Teiserver.Player.notify_found(player_id, state.queue_id, self(), @timeout_ms)
+      Teiserver.Player.matchmaking_notify_found(player_id, state.queue_id, self(), @timeout_ms)
     end)
 
     {:noreply, state}

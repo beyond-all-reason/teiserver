@@ -41,7 +41,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   @impl Handler
-  def handle_info({:notify_found, queue_id, timeout_ms}, state) do
+  def handle_info({:matchmaking_notify_found, queue_id, timeout_ms}, state) do
     resp =
       Schema.event("matchmaking/found", %{
         queueId: queue_id,
