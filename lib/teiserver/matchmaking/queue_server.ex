@@ -201,7 +201,11 @@ defmodule Teiserver.Matchmaking.QueueServer do
           nil ->
             {:noreply, state}
 
-          {_, _, player_ids} ->
+          {room_pid, _, player_ids} ->
+            Logger.info(
+              "pairing room went down #{inspect(room_pid)} with players: #{inspect(player_ids)}"
+            )
+
             new_state =
               Enum.reduce(player_ids, state, fn p_id, st ->
                 case remove_player(p_id, st) do
@@ -267,23 +271,26 @@ defmodule Teiserver.Matchmaking.QueueServer do
         Enum.member?(member.player_ids, player_id)
       end)
 
-    case to_remove do
-      [] ->
+    {pairing_to_remove, other_pairings} =
+      Enum.split_with(state.pairings, fn {_, _, members} ->
+        Enum.member?(members, player_id)
+      end)
+
+    case {to_remove, pairing_to_remove} do
+      {[], []} ->
         :not_queued
 
-      [to_remove] ->
-        {refs_to_remove, refs_to_keep} =
-          Enum.split_with(state.monitors, fn {_r, player_id} ->
-            Enum.member?(to_remove.player_ids, player_id)
-          end)
-
-        Enum.each(refs_to_remove, fn {r, _} -> Process.demonitor(r, [:flush]) end)
+      {[to_remove], _} ->
+        monitors = demonitor_players(to_remove.player_ids, state.monitors)
 
         # TODO tachyon_mvp: need to let all the other players know that they are
         # being removed from the queue
-        {:ok, %{state | members: new_members, monitors: refs_to_keep}}
+        {:ok, %{state | members: new_members, monitors: monitors}}
 
-        # there is no case with multiple member to remove since this is prevented when adding to a queue
+      # there is no case with multiple member to remove since this is prevented when adding to a queue
+      {_, [{_, _, canceled_members}]} ->
+        monitors = demonitor_players(canceled_members, state.monitors)
+        {:ok, %{state | pairings: other_pairings, monitors: monitors}}
     end
   end
 
@@ -334,5 +341,15 @@ defmodule Teiserver.Matchmaking.QueueServer do
             end
         end
     end
+  end
+
+  defp demonitor_players(player_ids, monitors) do
+    {refs_to_remove, refs_to_keep} =
+      Enum.split_with(monitors, fn {_r, player_id} ->
+        Enum.member?(player_ids, player_id)
+      end)
+
+    Enum.each(refs_to_remove, fn {r, _} -> Process.demonitor(r, [:flush]) end)
+    refs_to_keep
   end
 end

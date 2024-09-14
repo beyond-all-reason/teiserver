@@ -47,4 +47,13 @@ defmodule Teiserver.Player do
   """
   @spec notify_found(T.userid(), Matchmaking.queue_id(), pid(), timeout()) :: :ok
   defdelegate notify_found(user_id, queue_id, room_pid, timeout_ms), to: Player.Session
+
+  @doc """
+  When a pairing fails because one of the player declines the pairing or leaves
+  the queues
+  """
+  @spec matchmaking_notify_lost(T.userid(), pid()) :: :ok
+  defdelegate matchmaking_notify_lost(user_id, room_pid),
+    to: Player.Session,
+    as: :matchmaking_lost
 end

@@ -83,6 +83,11 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), :matchmaking_ready)
   end
 
+  @spec matchmaking_lost(T.userid(), pid()) :: :ok
+  def matchmaking_lost(user_id, room_pid) do
+    GenServer.cast(via_tuple(user_id), {:matchmaking_lost, room_pid})
+  end
+
   def start_link({_conn_pid, user_id} = arg) do
     GenServer.start_link(__MODULE__, arg, name: via_tuple(user_id))
   end
@@ -181,15 +186,14 @@ defmodule Teiserver.Player.Session do
         {:reply, {:error, :not_queued}, state}
 
       {:searching, %{joined_queues: joined_queues}} ->
-        # TODO tachyon_mvp: leaving queue ignore failure there.
-        # It is a bit unclear what kind of failure can happen, and also
-        # what should be done in that case
-        Enum.each(joined_queues, fn qid ->
-          Matchmaking.leave_queue(qid, state.user_id)
-        end)
+        new_state = leave_all_queues(joined_queues, state)
+        {:reply, :ok, new_state}
 
-        {:reply, :ok, Map.put(state, :matchmaking, initial_matchmaking_state())}
-        # TODO add the logic to leave the pairing room as well when leaving queues
+      {:pairing, %{room: {_, room_ref}} = pairing_state} ->
+        Process.demonitor(room_ref, [:flush])
+        queues_to_leave = [pairing_state.paired_queue | pairing_state.frozen_queues]
+        new_state = leave_all_queues(queues_to_leave, state)
+        {:reply, :ok, new_state}
     end
   end
 
@@ -247,6 +251,33 @@ defmodule Teiserver.Player.Session do
     {:noreply, state}
   end
 
+  def handle_cast({:matchmaking_lost, room_pid}, state) do
+    case state.matchmaking do
+      :no_matchmaking ->
+        {:noreply, state}
+
+      {:searching, _} ->
+        {:noreply, state}
+
+      {:pairing, %{room: {pid, _}}} when pid != room_pid ->
+        {:noreply, state}
+
+      {:pairing, %{paired_queue: q_id, room: {_, ref}, frozen_queues: frozen_queues}} ->
+        Process.demonitor(ref)
+        q_ids = [q_id | frozen_queues]
+
+        case join_all_queues(state.user_id, q_ids, []) do
+          :ok ->
+            new_mm_state = {:searching, %{joined_queues: q_ids}}
+            {:noreply, put_in(state.matchmaking, new_mm_state)}
+
+          {:error, _err} ->
+            # TODO: send a `cancelled` event to the player
+            {:noreply, %{state | matchmaking: initial_matchmaking_state()}}
+        end
+    end
+  end
+
   @impl true
   def handle_info({:DOWN, ref, :process, _, _reason}, state) when ref == state.mon_ref do
     # we don't care about cancelling the timer if the player reconnects since reconnection
@@ -265,9 +296,11 @@ defmodule Teiserver.Player.Session do
         {:stop, :normal, state}
 
       st ->
-        Logger.warning(
-          "unhandled DOWN: #{inspect(ref)} went down because #{reason}. state: #{inspect(st)}"
-        )
+        if reason != :normal do
+          Logger.warning(
+            "unhandled DOWN: #{inspect(ref)} went down because #{reason}. state: #{inspect(st)}"
+          )
+        end
 
         {:noreply, state}
     end
@@ -301,5 +334,16 @@ defmodule Teiserver.Player.Session do
 
         {:error, reason}
     end
+  end
+
+  defp leave_all_queues(queues_to_leave, state) do
+    # TODO tachyon_mvp: leaving queue ignore failure there.
+    # It is a bit unclear what kind of failure can happen, and also
+    # what should be done in that case
+    Enum.each(queues_to_leave, fn qid ->
+      Matchmaking.leave_queue(qid, state.user_id)
+    end)
+
+    Map.put(state, :matchmaking, initial_matchmaking_state())
   end
 end

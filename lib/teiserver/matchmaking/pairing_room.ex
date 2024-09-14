@@ -84,12 +84,19 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     end
   end
 
-  def handle_call({:cancel, user_id}, _from, state) do
+  def handle_call({:cancel, user_id}, from, state) do
     case Enum.split_with(state.awaiting, fn waiting_id -> waiting_id == user_id end) do
-      {[], _} -> {:reply, {:error, :no_match}, state}
-      # TODO tachyon_mvp: notify other players of the cancellation, and then
-      # return the other members to the original queue to resume searching
-      {[_], _rest} -> {:reply, :ok, state}
+      {[], _} ->
+        {:reply, {:error, :no_match}, state}
+
+      {[_], _rest} ->
+        GenServer.reply(from, :ok)
+
+        for p_id <- state.awaiting, p_id != user_id do
+          Teiserver.Player.matchmaking_notify_lost(p_id, self())
+        end
+
+        {:stop, :normal, state}
     end
   end
 end

@@ -26,7 +26,7 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
     end
   end
 
-  defp setup_queue(_context) do
+  defp mk_queue(team_size) do
     alias Teiserver.Matchmaking.QueueServer
     id = UUID.uuid4()
 
@@ -34,13 +34,17 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
       QueueServer.init_state(%{
         id: id,
         name: id,
-        team_size: 1,
+        team_size: team_size,
         team_count: 2,
         settings: %{tick_interval_ms: :manual, max_distance: 15}
       })
       |> QueueServer.start_link()
 
     {:ok, queue_id: id, queue_pid: pid}
+  end
+
+  defp setup_queue(_context) do
+    mk_queue(1)
   end
 
   describe "joining queues" do
@@ -202,6 +206,73 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
       [client, _] = join_and_pair(app, queue_id, queue_pid, 2)
       resp = Tachyon.join_queues!(client, [queue_id])
       assert %{"status" => "failed", "reason" => "already_queued"} = resp
+    end
+
+    test "back in queue if a player decline", %{
+      queue_id: queue_id,
+      app: app,
+      queue_pid: queue_pid
+    } do
+      [client1, client2] = join_and_pair(app, queue_id, queue_pid, 2)
+      assert %{"status" => "success"} = Tachyon.leave_queues!(client1)
+
+      assert %{"status" => "failed", "reason" => "already_queued"} =
+               Tachyon.join_queues!(client2, [queue_id])
+
+      assert %{"status" => "success"} = Tachyon.join_queues!(client1, [queue_id])
+
+      # another tick should match them again
+      send(queue_pid, :tick)
+
+      assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
+               Tachyon.recv_message(client1)
+
+      assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
+               Tachyon.recv_message(client2)
+    end
+
+    test "two pairings on different queues", %{app: app} do
+      {:ok, queue_id: q1v1_id, queue_pid: q1v1_pid} = mk_queue(1)
+      {:ok, queue_id: q2v2_id, queue_pid: q2v2_pid} = mk_queue(2)
+
+      clients =
+        Enum.map(1..5, fn _ ->
+          {:ok, %{client: client}} = setup_user(app)
+          client
+        end)
+
+      [c1, c2, c3, c4, c5] = clients
+
+      for client <- Enum.take(clients, 3) do
+        assert %{"status" => "success"} = Tachyon.join_queues!(client, [q2v2_id])
+      end
+
+      assert %{"status" => "success"} = Tachyon.join_queues!(c4, [q1v1_id])
+      assert %{"status" => "success"} = Tachyon.join_queues!(c5, [q1v1_id, q2v2_id])
+
+      send(q2v2_pid, :tick)
+
+      for client <- [c1, c2, c3, c5] do
+        assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
+                 Tachyon.recv_message(client)
+      end
+
+      # getting paired should withdraw the player from a queue so that it doesn't
+      # get 2 `found` events
+      send(q1v1_pid, :tick)
+
+      # a `found` event should be followed by a `lost` event, but it's not
+      # 100% that the `found` event is sent at all
+      case Tachyon.recv_message(c4, timeout: 5) do
+        {:error, :timeout} ->
+          nil
+
+        {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} ->
+          assert {:ok, %{"status" => "success", "commandId" => "matchmaking/lost"}} =
+                   Tachyon.recv_message(c4, timeout: 5)
+      end
+
+      assert({:error, :timeout} = Tachyon.recv_message(c5, timeout: 3))
     end
   end
 
