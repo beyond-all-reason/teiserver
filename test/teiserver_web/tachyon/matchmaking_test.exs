@@ -274,6 +274,34 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
 
       assert({:error, :timeout} = Tachyon.recv_message(c5, timeout: 3))
     end
+
+    test "foundUpdate event", %{app: app} do
+      {:ok, queue_id: q_id, queue_pid: q_pid} = mk_queue(2)
+
+      clients =
+        Enum.map(1..4, fn _ ->
+          {:ok, %{client: client}} = setup_user(app)
+          client
+        end)
+
+      for client <- clients do
+        assert %{"status" => "success"} = Tachyon.join_queues!(client, [q_id])
+      end
+
+      send(q_pid, :tick)
+
+      for client <- clients do
+        assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
+                 Tachyon.recv_message(client)
+      end
+
+      Enum.with_index(clients, 1)
+      |> Enum.each(fn {client, current} ->
+        Tachyon.matchmaking_ready!(client)
+
+        Enum.each(clients, fn client -> assert_ready_update(client, current) end)
+      end)
+    end
   end
 
   defp join_and_pair(app, queue_id, queue_pid, number_of_player) do
@@ -292,5 +320,15 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
     end)
 
     clients
+  end
+
+  defp assert_ready_update(client, current) do
+    assert {:ok,
+            %{
+              "commandId" => "matchmaking/foundUpdate",
+              "data" => %{
+                "readyCount" => ^current
+              }
+            }} = Tachyon.recv_message(client, timeout: 10)
   end
 end

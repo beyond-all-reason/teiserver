@@ -77,10 +77,19 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   @impl true
   def handle_call({:ready, user_id}, _from, state) do
     case Enum.split_with(state.awaiting, fn waiting_id -> waiting_id == user_id end) do
-      {[], _} -> {:reply, {:error, :no_match}, state}
-      # TODO tachyon_mvp: notify other players for readyUpdate event
+      {[], _} ->
+        {:reply, {:error, :no_match}, state}
+
       # TODO tachyon_mvp: if no more player is waiting, starts the game
-      {[_], rest} -> {:reply, :ok, %{state | awaiting: rest}}
+      {[_], rest} ->
+        max = state.queue.team_count * state.queue.team_size
+        current = max - Enum.count(rest)
+
+        for team <- state.teams, member <- team, p_id <- member.player_ids do
+          Teiserver.Player.matchmaking_found_update(p_id, current, self())
+        end
+
+        {:reply, :ok, %{state | awaiting: rest}}
     end
   end
 

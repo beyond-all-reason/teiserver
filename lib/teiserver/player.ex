@@ -57,4 +57,10 @@ defmodule Teiserver.Player do
   defdelegate matchmaking_notify_lost(user_id, room_pid),
     to: Player.Session,
     as: :matchmaking_lost
+
+  @doc """
+  To send the notification as players ready up for a pairing
+  """
+  @spec matchmaking_found_update(T.userid(), non_neg_integer(), pid()) :: :ok
+  defdelegate matchmaking_found_update(user_id, ready_count, room_pid), to: Player.Session
 end

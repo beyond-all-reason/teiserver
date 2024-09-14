@@ -51,6 +51,15 @@ defmodule Teiserver.Player.TachyonHandler do
     {:push, {:text, resp |> Jason.encode!()}, state}
   end
 
+  def handle_info({:matchmaking_found_update, ready_count}, state) do
+    resp =
+      Schema.event("matchmaking/foundUpdate", %{
+        readyCount: ready_count
+      })
+
+    {:push, {:text, resp |> Jason.encode!()}, state}
+  end
+
   def handle_info(_msg, state) do
     {:ok, state}
   end

@@ -94,6 +94,11 @@ defmodule Teiserver.Player.Session do
     GenServer.cast(via_tuple(user_id), {:matchmaking_lost, room_pid})
   end
 
+  @spec matchmaking_found_update(T.userid(), non_neg_integer(), pid()) :: :ok
+  def matchmaking_found_update(user_id, ready_count, room_pid) do
+    GenServer.cast(via_tuple(user_id), {:matchmaking_found_update, ready_count, room_pid})
+  end
+
   def start_link({_conn_pid, user_id} = arg) do
     GenServer.start_link(__MODULE__, arg, name: via_tuple(user_id))
   end
@@ -277,6 +282,16 @@ defmodule Teiserver.Player.Session do
             # TODO: send a `cancelled` event to the player
             {:noreply, %{state | matchmaking: initial_matchmaking_state()}}
         end
+    end
+  end
+
+  def handle_cast({:matchmaking_found_update, current, room_pid}, state) do
+    case state.matchmaking do
+      {:pairing, %{room: {^room_pid, _}}} ->
+        {:noreply, send_to_player({:matchmaking_found_update, current}, state)}
+
+      _ ->
+        {:noreply, state}
     end
   end
 
