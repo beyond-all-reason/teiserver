@@ -175,7 +175,7 @@ defmodule Teiserver.Account.RelationshipLib do
       Account.list_relationships(
         where: [
           to_user_id: userid,
-          state: "avoid"
+          state_in: ["avoid", "block"]
         ],
         select: [:from_user_id]
       )
@@ -207,7 +207,7 @@ defmodule Teiserver.Account.RelationshipLib do
       Account.list_relationships(
         where: [
           from_user_id: userid,
-          state_in: ["avoid", "block"]
+          state_in: ["block"]
         ],
         select: [:to_user_id]
       )
@@ -223,7 +223,7 @@ defmodule Teiserver.Account.RelationshipLib do
       Account.list_relationships(
         where: [
           to_user_id: userid,
-          state_in: ["avoid", "block"]
+          state_in: ["block"]
         ],
         select: [:from_user_id]
       )
