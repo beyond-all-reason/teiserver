@@ -132,12 +132,16 @@ defmodule Teiserver.Coordinator.ConsulServer do
     |> Enum.each(fn userid ->
       client = Account.get_client_by_id(userid)
 
+      # recheck_membership is called on match end
+      # If someone is already a player, ignore any avoid/block checks
+      opts = [ignore_avoids_blocks?: true]
+
       cond do
-        allow_join(userid, state) |> elem(0) == false ->
+        allow_join(userid, state, opts) |> elem(0) == false ->
           Telemetry.log_simple_server_event(userid, "lobby.recheck_membership_kick")
           Lobby.kick_user_from_battle(userid, state.lobby_id)
 
-        client.player && user_allowed_to_play?(userid, state) == false ->
+        client.player && user_allowed_to_play?(userid, state, opts) == false ->
           Telemetry.log_simple_server_event(userid, "lobby.recheck_membership_spectate")
           Lobby.force_change_client(state.coordinator_id, userid, %{player: false})
 
@@ -640,8 +644,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
     #   end
     # end
 
+    # If the user is pressing the ready button, we should ignore avoids/blocks because they have already made it into the queue
+    # If the user is moving from spec to player then new_client.ready will be false and we should check avoids
+    ignore_avoids_blocks? = new_client.ready == true && existing.ready == false
+    opts = [ignore_avoids_blocks?: ignore_avoids_blocks?]
+
     new_client =
-      if new_client.player == true and user_allowed_to_play?(user, existing, state) do
+      if new_client.player == true and user_allowed_to_play?(user, existing, state, opts) do
         new_client
       else
         %{new_client | player: false}
@@ -792,17 +801,19 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  @spec user_allowed_to_play?(T.userid(), map()) :: boolean()
-  defp user_allowed_to_play?(userid, state) do
+  @spec user_allowed_to_play?(T.userid(), map(), [any()]) :: boolean()
+  defp user_allowed_to_play?(userid, state, opts) do
     user_allowed_to_play?(
       Account.get_user_by_id(userid),
       Account.get_client_by_id(userid),
-      state
+      state,
+      opts
     )
   end
 
-  @spec user_allowed_to_play?(T.user(), T.client(), map()) :: boolean()
-  defp user_allowed_to_play?(user, client, state) do
+  @spec user_allowed_to_play?(T.user(), T.client(), map(), [any()]) :: boolean()
+  defp user_allowed_to_play?(user, client, state, opts) do
+    ignore_avoids_blocks? = Keyword.get(opts, :ignore_avoids_blocks?, false)
     player_ids = list_player_ids(state)
     userid = user.id
 
@@ -836,7 +847,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
         false
 
-      avoid_status == :avoided ->
+      avoid_status == :avoided && !ignore_avoids_blocks? ->
         match_id = Battle.get_lobby_match_id(state.lobby_id)
         Telemetry.log_simple_lobby_event(user.id, match_id, "play_refused.avoided")
         msg = "You are avoided by too many players in this lobby"
@@ -890,8 +901,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  @spec allow_join(T.userid(), map()) :: {true, nil} | {false, String.t()}
-  defp allow_join(userid, state) do
+  @spec allow_join(T.userid(), map(), [any()]) :: {true, nil} | {false, String.t()}
+  defp allow_join(userid, state, opts \\ []) do
+    ignore_avoids_blocks? = Keyword.get(opts, :ignore_avoids_blocks?, false)
     client = Client.get_client_by_id(userid)
     {ban_state, reason} = check_ban_state(userid, state)
 
@@ -942,7 +954,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.blocking")
         {false, "You are blocking too many players in this lobby"}
 
-      block_status == :blocked ->
+      block_status == :blocked && !ignore_avoids_blocks? ->
         Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.blocked")
         {false, "You are blocked by too many players in this lobby"}
 
