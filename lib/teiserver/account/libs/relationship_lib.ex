@@ -169,6 +169,7 @@ defmodule Teiserver.Account.RelationshipLib do
     end)
   end
 
+  # Blocks will also count as avoids (but not the other way round)
   @spec list_userids_avoiding_this_userid(T.userid()) :: [T.userid()]
   def list_userids_avoiding_this_userid(userid) do
     Teiserver.cache_get_or_store(:account_avoiding_this_cache, userid, fn ->
@@ -185,13 +186,14 @@ defmodule Teiserver.Account.RelationshipLib do
     end)
   end
 
+  # Blocks will also count as avoids (but not the other way round)
   @spec list_userids_avoided_by_userid(T.userid()) :: [T.userid()]
   def list_userids_avoided_by_userid(userid) do
     Teiserver.cache_get_or_store(:account_avoid_cache, userid, fn ->
       Account.list_relationships(
         where: [
           from_user_id: userid,
-          state: "avoid"
+          state_in: ["avoid", "block"]
         ],
         select: [:to_user_id]
       )
