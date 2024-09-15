@@ -110,6 +110,9 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
       assert %{"status" => "success"} = Tachyon.join_queues!(client, [queue_id])
       assert %{"status" => "success"} = Tachyon.leave_queues!(client)
 
+      assert %{"commandId" => "matchmaking/cancelled", "data" => %{"reason" => "intentional"}} =
+               Tachyon.recv_message!(client)
+
       assert %{"status" => "failed", "reason" => "not_queued"} =
                Tachyon.leave_queues!(client)
     end
@@ -215,6 +218,9 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
     } do
       [client1, client2] = join_and_pair(app, queue_id, queue_pid, 2)
       assert %{"status" => "success"} = Tachyon.leave_queues!(client1)
+
+      assert %{"commandId" => "matchmaking/cancelled", "data" => %{"reason" => "intentional"}} =
+               Tachyon.recv_message!(client1)
 
       assert %{"status" => "failed", "reason" => "already_queued"} =
                Tachyon.join_queues!(client2, [queue_id])

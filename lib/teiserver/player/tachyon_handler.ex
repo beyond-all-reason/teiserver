@@ -129,16 +129,20 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("matchmaking/cancel" = cmd_id, "request", message_id, _message, state) do
-    response =
-      case Player.Session.leave_queues(state.user.id) do
-        :ok ->
-          Schema.response(cmd_id, message_id)
+    case Player.Session.leave_queues(state.user.id) do
+      :ok ->
+        messages = [
+          {:text, Schema.response(cmd_id, message_id) |> Jason.encode!()},
+          {:text,
+           Schema.event("matchmaking/cancelled", %{reason: :intentional}) |> Jason.encode!()}
+        ]
 
-        {:error, reason} ->
-          Schema.error_response(cmd_id, message_id, reason)
-      end
+        {:push, messages, state}
 
-    {:push, {:text, Jason.encode!(response)}, state}
+      {:error, reason} ->
+        response = Schema.error_response(cmd_id, message_id, reason)
+        {:push, {:text, Jason.encode!(response)}, state}
+    end
   end
 
   def handle_command("matchmaking/ready" = cmd_id, "request", message_id, _message, state) do
