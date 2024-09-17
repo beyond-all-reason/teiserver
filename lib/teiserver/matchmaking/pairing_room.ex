@@ -14,13 +14,12 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Data.Types, as: T
 
-  @timeout_ms 20_000
-
   @type team :: [QueueServer.member()]
 
-  @spec start(QueueServer.id(), QueueServer.queue(), [team()]) :: {:ok, pid()} | {:error, term()}
-  def start(queue_id, queue, teams) do
-    GenServer.start(__MODULE__, {queue_id, queue, teams})
+  @spec start(QueueServer.id(), QueueServer.queue(), [team()], timeout()) ::
+          {:ok, pid()} | {:error, term()}
+  def start(queue_id, queue, teams, timeout) do
+    GenServer.start(__MODULE__, {queue_id, queue, teams, timeout})
   end
 
   @doc """
@@ -50,7 +49,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
         }
 
   @impl true
-  def init({queue_id, queue, teams}) do
+  def init({queue_id, queue, teams, timeout}) do
     initial_state =
       %{
         queue_id: queue_id,
@@ -62,13 +61,13 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           end)
       }
 
-    {:ok, initial_state, {:continue, :notify_players}}
+    {:ok, initial_state, {:continue, {:notify_players, timeout}}}
   end
 
   @impl true
-  def handle_continue(:notify_players, state) do
+  def handle_continue({:notify_players, timeout}, state) do
     Enum.each(state.awaiting, fn player_id ->
-      Teiserver.Player.matchmaking_notify_found(player_id, state.queue_id, self(), @timeout_ms)
+      Teiserver.Player.matchmaking_notify_found(player_id, state.queue_id, self(), timeout)
     end)
 
     {:noreply, state}

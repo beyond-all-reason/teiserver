@@ -39,7 +39,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
   """
   @type settings :: %{
           tick_interval_ms: pos_integer() | :manual,
-          max_distance: pos_integer()
+          max_distance: pos_integer(),
+          pairing_timeout: timeout()
         }
 
   @typedoc """
@@ -68,7 +69,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
   @spec default_settings() :: settings()
   def default_settings() do
-    %{tick_interval_ms: 5_000, max_distance: 15}
+    %{tick_interval_ms: 5_000, max_distance: 15, pairing_timeout: 20_000}
   end
 
   @doc """
@@ -235,7 +236,9 @@ defmodule Teiserver.Matchmaking.QueueServer do
         {:match, matches} ->
           pairings =
             for teams <- matches do
-              {:ok, pid} = PairingRoom.start(state.id, state.queue, teams)
+              {:ok, pid} =
+                PairingRoom.start(state.id, state.queue, teams, state.settings.pairing_timeout)
+
               ref = Process.monitor(pid)
 
               player_ids =
