@@ -45,7 +45,6 @@ or are following someone that voted yes are also moved to that lobby.", :everybo
       {"meme", ["meme"],
        "A predefined bunch of settings for meme games. It's all Rikerss' fault. Requires boss privileges.
 - ticks: Ticks only, don't go Cortex!
-- nodefence: No defences
 - Deathmatch:  35k metal, 1k energy, everything builds fast, runs fast and hits hard. No anti-nuke
 - rich: Infinite money
 - poor: No money generation
