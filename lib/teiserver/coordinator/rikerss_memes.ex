@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   alias Teiserver.Lobby.{ChatLib}
   alias Teiserver.Data.Types, as: T
 
-  @meme_list ~w(ticks nodefence poor rich crazy undo deathmatch)
+  @meme_list ~w(ticks poor rich crazy undo deathmatch)
 
   @crazy_multiplier_opts ~w(0.3 0.5 0.7 1 1 1 1 1 1 1 1.5 2 4)
   @crazy_multiplier_opts_middler ~w(0.5 0.7 1 1 1 1 1 1 1 1.5 2)
@@ -24,7 +24,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       ~w(coraap coralab corap coravp corgant corhp corlab corvp corllt corfhp corsy corjuno corhllt corhlt)
 
     Battle.set_modoptions(lobby_id, %{
-      "game/modoptions/map_waterislava" => "1",
+      "game/modoptions/map_waterislava" => "1"
     })
 
     Battle.disable_units(lobby_id, labs ++ defences ++ units ++ cortex)
@@ -123,38 +123,6 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     ]
   end
 
-  def handle_meme("nodefence", senderid, %{lobby_id: lobby_id} = _state) do
-    sender = Account.get_user_by_id(senderid)
-
-    armada_defences =
-      ~w(armamb armamd armanni armbeamer armbrtha armclaw armemp armguard armhlt armjuno armmg armpb armsilo armvulc armatl armdl armfhlt armfrt armgplat armkraken armptl armtl)
-
-    armada_aa = ~w(armferret armflak armmercury armrl armfflak armfrock armcir)
-
-    cortex_defences =
-      ~w(corbhmth corbuzz cordoom corexp corfmd corhllt corhlt corjuno cormaw cormexp corpun corsilo cortoast cortron corvipe coratl cordl corfdoom corfhlt corfrock corfrt corgplat corptl cortl corint)
-
-    cortex_aa = ~w(corerad corflak cormadsam corrl corscreamer corenaa)
-
-    scavt3 =
-      ~w(armannit3 cordoomt3 armbotrail armminivulc corhllllt corminibuzz corscavdrag corscavdtf corscavdtl corscavdtm)
-
-    legion_defences = ~w(legdefcarryt1 legmg legstarfall)
-
-    unit_list =
-      armada_defences ++ armada_aa ++ cortex_defences ++ cortex_aa ++ scavt3 ++ legion_defences
-
-    scav_units =
-      unit_list
-      |> Enum.map(fn unit -> "#{unit}_scav" end)
-
-    Battle.disable_units(lobby_id, unit_list ++ scav_units)
-
-    [
-      "#{sender.name} has enabled the No defense meme. In this game you will not be able to create any defences; good luck!"
-    ]
-  end
-
   def handle_meme("undo", _senderid, %{lobby_id: lobby_id} = _state) do
     undo_memes(lobby_id)
 
@@ -199,7 +167,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/multiplier_buildpower" => "1",
       "game/modoptions/multiplier_maxvelocity" => "1",
       "game/modoptions/multiplier_losrange" => "1",
-      "game/modoptions/multiplier_radarrange" => "1",
+      "game/modoptions/multiplier_radarrange" => "1"
     }
 
     Battle.set_modoptions(lobby_id, new_options)
