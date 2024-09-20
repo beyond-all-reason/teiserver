@@ -6,6 +6,7 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
   use ExUnit.Case
   @moduletag :balance_test
   alias Teiserver.Battle.Balance.SplitNoobs
+  alias Teiserver.Battle.BalanceLib
 
   test "sort noobs" do
     noobs = [
@@ -347,99 +348,99 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
     assert players == [
              %{
                id: "kyutoryu",
+               in_party?: true,
                name: "kyutoryu",
                rank: 1,
-               rating: 12.25,
-               uncertainty: 7.1,
-               in_party?: true
+               rating: 8.975247524752481,
+               uncertainty: 7.1
              },
              %{
                id: "fbots1998",
+               in_party?: true,
                name: "fbots1998",
                rank: 1,
-               rating: 13.98,
-               uncertainty: 8,
-               in_party?: true
+               rating: 2.768316831683173,
+               uncertainty: 8
              },
              %{
                id: "Dixinormus",
+               in_party?: false,
                name: "Dixinormus",
                rank: 2,
-               rating: 18.28,
-               uncertainty: 8,
-               in_party?: false
+               rating: 3.6198019801980257,
+               uncertainty: 8
              },
              %{
                id: "HungDaddy",
+               in_party?: false,
                name: "HungDaddy",
                rank: 2,
-               rating: 2.8,
-               uncertainty: 8,
-               in_party?: false
+               rating: 0.5544554455445553,
+               uncertainty: 8
              },
              %{
                id: "SLOPPYGAGGER",
+               in_party?: false,
                name: "SLOPPYGAGGER",
                rank: 2,
                rating: 8.89,
-               uncertainty: 3,
-               in_party?: false
+               uncertainty: 3
              },
              %{
                id: "jauggy",
+               in_party?: false,
                name: "jauggy",
                rank: 2,
                rating: 20.49,
-               uncertainty: 3,
-               in_party?: false
+               uncertainty: 3
              },
              %{
                id: "reddragon2010",
+               in_party?: false,
                name: "reddragon2010",
                rank: 2,
                rating: 18.4,
-               uncertainty: 3,
-               in_party?: false
+               uncertainty: 3
              },
              %{
                id: "Aposis",
+               in_party?: false,
                name: "Aposis",
                rank: 2,
                rating: 20.42,
-               uncertainty: 3,
-               in_party?: false
+               uncertainty: 3
              },
              %{
                id: "MaTThiuS_82",
+               in_party?: false,
                name: "MaTThiuS_82",
                rank: 2,
                rating: 8.26,
-               uncertainty: 3,
-               in_party?: false
+               uncertainty: 3
              },
              %{
                id: "Noody",
+               in_party?: false,
                name: "Noody",
                rank: 2,
                rating: 17.64,
-               uncertainty: 3,
-               in_party?: false
+               uncertainty: 3
              },
              %{
                id: "[DTG]BamBin0",
+               in_party?: false,
                name: "[DTG]BamBin0",
                rank: 2,
                rating: 20.06,
-               uncertainty: 3,
-               in_party?: false
+               uncertainty: 3
              },
              %{
                id: "barmalev",
+               in_party?: false,
                name: "barmalev",
                rank: 2,
                rating: 3.58,
-               uncertainty: 3,
-               in_party?: false
+               uncertainty: 3
              }
            ]
 
@@ -451,19 +452,19 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
     assert noobs == [
              %{
                id: "Dixinormus",
+               in_party?: false,
                name: "Dixinormus",
                rank: 2,
-               rating: 18.28,
-               uncertainty: 8,
-               in_party?: false
+               rating: 3.6198019801980257,
+               uncertainty: 8
              },
              %{
                id: "HungDaddy",
+               in_party?: false,
                name: "HungDaddy",
                rank: 2,
-               rating: 2.8,
-               uncertainty: 8,
-               in_party?: false
+               rating: 0.5544554455445553,
+               uncertainty: 8
              }
            ]
 
@@ -471,84 +472,84 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
 
     assert experienced_players == [
              %{
-               id: "fbots1998",
-               name: "fbots1998",
-               rank: 1,
-               rating: 13.98,
-               uncertainty: 8,
-               in_party?: true
-             },
-             %{
                id: "kyutoryu",
+               in_party?: true,
                name: "kyutoryu",
                rank: 1,
-               rating: 12.25,
-               uncertainty: 7.1,
-               in_party?: true
+               rating: 8.975247524752481,
+               uncertainty: 7.1
+             },
+             %{
+               id: "fbots1998",
+               in_party?: true,
+               name: "fbots1998",
+               rank: 1,
+               rating: 2.768316831683173,
+               uncertainty: 8
              },
              %{
                id: "jauggy",
+               in_party?: false,
                name: "jauggy",
                rank: 2,
                rating: 20.49,
-               uncertainty: 3,
-               in_party?: false
+               uncertainty: 3
              },
              %{
                id: "Aposis",
+               in_party?: false,
                name: "Aposis",
                rank: 2,
                rating: 20.42,
-               uncertainty: 3,
-               in_party?: false
+               uncertainty: 3
              },
              %{
                id: "[DTG]BamBin0",
+               in_party?: false,
                name: "[DTG]BamBin0",
                rank: 2,
                rating: 20.06,
-               uncertainty: 3,
-               in_party?: false
+               uncertainty: 3
              },
              %{
                id: "reddragon2010",
+               in_party?: false,
                name: "reddragon2010",
                rank: 2,
                rating: 18.4,
-               uncertainty: 3,
-               in_party?: false
+               uncertainty: 3
              },
              %{
                id: "Noody",
+               in_party?: false,
                name: "Noody",
                rank: 2,
                rating: 17.64,
-               uncertainty: 3,
-               in_party?: false
+               uncertainty: 3
              },
              %{
                id: "SLOPPYGAGGER",
+               in_party?: false,
                name: "SLOPPYGAGGER",
                rank: 2,
                rating: 8.89,
-               uncertainty: 3,
-               in_party?: false
+               uncertainty: 3
              },
              %{
                id: "MaTThiuS_82",
+               in_party?: false,
                name: "MaTThiuS_82",
                rank: 2,
                rating: 8.26,
-               uncertainty: 3,
-               in_party?: false
+               uncertainty: 3
              },
              %{
                id: "barmalev",
+               in_party?: false,
                name: "barmalev",
                rank: 2,
                rating: 3.58,
-               uncertainty: 3,
-               in_party?: false
+               uncertainty: 3
              }
            ]
 
@@ -560,30 +561,30 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
              broken_party_penalty: 0,
              first_team: [
                %{
-                 id: "Dixinormus",
+                 id: "HungDaddy",
                  in_party?: false,
-                 name: "Dixinormus",
+                 name: "HungDaddy",
                  rank: 2,
-                 rating: 18.28,
-                 uncertainty: 8
-               },
-               %{
-                 id: "fbots1998",
-                 in_party?: true,
-                 index: 1,
-                 name: "fbots1998",
-                 rank: 1,
-                 rating: 13.98,
+                 rating: 0.5544554455445553,
                  uncertainty: 8
                },
                %{
                  id: "kyutoryu",
                  in_party?: true,
-                 index: 2,
+                 index: 1,
                  name: "kyutoryu",
                  rank: 1,
-                 rating: 12.25,
+                 rating: 8.975247524752481,
                  uncertainty: 7.1
+               },
+               %{
+                 id: "fbots1998",
+                 in_party?: true,
+                 index: 2,
+                 name: "fbots1998",
+                 rank: 1,
+                 rating: 2.768316831683173,
+                 uncertainty: 8
                },
                %{
                  id: "[DTG]BamBin0",
@@ -595,6 +596,15 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
                  uncertainty: 3
                },
                %{
+                 id: "reddragon2010",
+                 index: 6,
+                 name: "reddragon2010",
+                 uncertainty: 3,
+                 rating: 18.4,
+                 rank: 2,
+                 in_party?: false
+               },
+               %{
                  id: "Noody",
                  in_party?: false,
                  index: 7,
@@ -602,26 +612,17 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
                  rank: 2,
                  rating: 17.64,
                  uncertainty: 3
-               },
-               %{
-                 id: "MaTThiuS_82",
-                 in_party?: false,
-                 index: 9,
-                 name: "MaTThiuS_82",
-                 rank: 2,
-                 rating: 8.26,
-                 uncertainty: 3
                }
              ],
-             rating_diff_penalty: 0.4099999999999966,
-             score: 0.4099999999999966,
+             rating_diff_penalty: 6.203564356435635,
+             score: 6.203564356435635,
              second_team: [
                %{
-                 id: "HungDaddy",
+                 id: "Dixinormus",
                  in_party?: false,
-                 name: "HungDaddy",
+                 name: "Dixinormus",
                  rank: 2,
-                 rating: 2.8,
+                 rating: 3.6198019801980257,
                  uncertainty: 8
                },
                %{
@@ -643,15 +644,6 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
                  uncertainty: 3
                },
                %{
-                 id: "reddragon2010",
-                 in_party?: false,
-                 index: 6,
-                 name: "reddragon2010",
-                 rank: 2,
-                 rating: 18.4,
-                 uncertainty: 3
-               },
-               %{
                  id: "SLOPPYGAGGER",
                  in_party?: false,
                  index: 8,
@@ -659,6 +651,15 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
                  rank: 2,
                  rating: 8.89,
                  uncertainty: 3
+               },
+               %{
+                 id: "MaTThiuS_82",
+                 index: 9,
+                 name: "MaTThiuS_82",
+                 uncertainty: 3,
+                 rating: 8.26,
+                 rank: 2,
+                 in_party?: false
                },
                %{
                  id: "barmalev",
@@ -687,48 +688,68 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
                "HungDaddy (chev: 3, σ: 8)",
                "------------------------------------------------------",
                "Perform brute force with the following players to get the best score.",
-               "Players: fbots1998, kyutoryu, jauggy, Aposis, [DTG]BamBin0, reddragon2010, Noody, SLOPPYGAGGER, MaTThiuS_82, barmalev",
+               "Players: kyutoryu, fbots1998, jauggy, Aposis, [DTG]BamBin0, reddragon2010, Noody, SLOPPYGAGGER, MaTThiuS_82, barmalev",
                "------------------------------------------------------",
                "Brute force result:",
-               "Team rating diff penalty: 0.4",
+               "Team rating diff penalty: 6.2",
                "Broken party penalty: 0",
-               "Score: 0.4 (lower is better)",
+               "Score: 6.2 (lower is better)",
                "------------------------------------------------------",
                "Draft remaining players (ordered from best to worst).",
                "Remaining: Dixinormus, HungDaddy",
                "------------------------------------------------------",
                "Final result:",
-               "Team 1: MaTThiuS_82, Noody, [DTG]BamBin0, kyutoryu, fbots1998, Dixinormus",
-               "Team 2: barmalev, SLOPPYGAGGER, reddragon2010, Aposis, jauggy, HungDaddy"
+               "Team 1: Noody, reddragon2010, [DTG]BamBin0, fbots1998, kyutoryu, HungDaddy",
+               "Team 2: barmalev, MaTThiuS_82, SLOPPYGAGGER, Aposis, jauggy, Dixinormus"
              ],
              team_groups: %{
                1 => [
-                 %{count: 1, group_rating: 18.28, members: ["Dixinormus"], ratings: [18.28]},
-                 %{count: 1, group_rating: 13.98, members: ["fbots1998"], ratings: [13.98]},
-                 %{count: 1, group_rating: 12.25, members: ["kyutoryu"], ratings: [12.25]},
+                 %{
+                   count: 1,
+                   group_rating: 0.5544554455445553,
+                   members: ["HungDaddy"],
+                   ratings: [0.5544554455445553]
+                 },
+                 %{
+                   count: 1,
+                   group_rating: 8.975247524752481,
+                   members: ["kyutoryu"],
+                   ratings: [8.975247524752481]
+                 },
+                 %{
+                   count: 1,
+                   group_rating: 2.768316831683173,
+                   members: ["fbots1998"],
+                   ratings: [2.768316831683173]
+                 },
                  %{count: 1, group_rating: 20.06, members: ["[DTG]BamBin0"], ratings: [20.06]},
-                 %{count: 1, group_rating: 17.64, members: ["Noody"], ratings: [17.64]},
-                 %{count: 1, group_rating: 8.26, members: ["MaTThiuS_82"], ratings: [8.26]}
+                 %{count: 1, members: ["reddragon2010"], ratings: [18.4], group_rating: 18.4},
+                 %{count: 1, group_rating: 17.64, members: ["Noody"], ratings: [17.64]}
                ],
                2 => [
-                 %{count: 1, group_rating: 2.8, members: ["HungDaddy"], ratings: [2.8]},
+                 %{
+                   count: 1,
+                   group_rating: 3.6198019801980257,
+                   members: ["Dixinormus"],
+                   ratings: [3.6198019801980257]
+                 },
                  %{count: 1, group_rating: 20.49, members: ["jauggy"], ratings: [20.49]},
                  %{count: 1, group_rating: 20.42, members: ["Aposis"], ratings: [20.42]},
-                 %{count: 1, group_rating: 18.4, members: ["reddragon2010"], ratings: [18.4]},
                  %{count: 1, group_rating: 8.89, members: ["SLOPPYGAGGER"], ratings: [8.89]},
+                 %{count: 1, members: ["MaTThiuS_82"], ratings: [8.26], group_rating: 8.26},
                  %{count: 1, group_rating: 3.58, members: ["barmalev"], ratings: [3.58]}
                ]
              },
              team_players: %{
                1 => [
-                 "Dixinormus",
-                 "fbots1998",
+                 "HungDaddy",
                  "kyutoryu",
+                 "fbots1998",
                  "[DTG]BamBin0",
-                 "Noody",
-                 "MaTThiuS_82"
+                 "reddragon2010",
+                 "Noody"
                ],
-               2 => ["HungDaddy", "jauggy", "Aposis", "reddragon2010", "SLOPPYGAGGER", "barmalev"]
+               2 => ["Dixinormus", "jauggy", "Aposis", "SLOPPYGAGGER", "MaTThiuS_82", "barmalev"]
              }
            }
   end
