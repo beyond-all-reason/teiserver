@@ -15,11 +15,11 @@ git clone git@github.com:beyond-all-reason/teiserver.git
 cd teiserver
 ```
 
-### Install build tools (gcc, g++, make)
+### Install build tools (gcc, g++, make) and cryptographic libraries
 #### Ubuntu/Debian
 ```bash
 sudo apt update
-sudo apt install build-essential
+sudo apt install build-essential libssl-dev
 ```
 
 ### Elixir setup
