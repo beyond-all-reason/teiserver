@@ -648,25 +648,26 @@ defmodule Teiserver.Protocols.SpringIn do
           :nomatch
       end
 
-    case regex_result do
-      :nomatch ->
-        _no_match(state, "JOIN", msg_id, data)
+    new_state =
+      case regex_result do
+        :nomatch ->
+          _no_match(state, "JOIN", msg_id, data)
 
-      {room_name, _key} ->
-        case Room.can_join_room?(state.userid, room_name) do
-          true ->
-            SpringOut.do_join_room(state, room_name)
+        {room_name, _key} ->
+          case Room.can_join_room?(state.userid, room_name) do
+            true ->
+              SpringOut.do_join_room(state, room_name)
 
-          {false, reason} ->
-            reply(:join_failure, {room_name, reason}, msg_id, state)
-        end
-    end
+            {false, reason} ->
+              reply(:join_failure, {room_name, reason}, msg_id, state)
+          end
+      end
 
-    if not state.exempt_from_cmd_throttle do
+    if not new_state.exempt_from_cmd_throttle do
       :timer.sleep(Application.get_env(:teiserver, Teiserver)[:spring_post_state_change_delay])
     end
 
-    state
+    new_state
   end
 
   defp do_handle("LEAVE", room_name, msg_id, state) do
