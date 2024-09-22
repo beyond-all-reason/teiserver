@@ -51,7 +51,7 @@ defmodule Teiserver.Battle.BalanceLib do
       "force_party" => Teiserver.Battle.Balance.ForceParty,
       "brute_force" => Teiserver.Battle.Balance.BruteForce,
       "split_noobs" => Teiserver.Battle.Balance.SplitNoobs,
-      "auto" => Teiserver.Battle.Balance.DefaultBalance
+      "auto" => Teiserver.Battle.Balance.AutoBalance
     }
   end
 

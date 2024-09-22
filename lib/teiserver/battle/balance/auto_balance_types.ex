@@ -1,4 +1,4 @@
-defmodule Teiserver.Battle.Balance.DefaultBalanceTypes do
+defmodule Teiserver.Battle.Balance.AutoBalanceTypes do
   @moduledoc false
 
   @type player :: %{

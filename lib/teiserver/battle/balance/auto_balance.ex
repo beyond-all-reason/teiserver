@@ -1,11 +1,11 @@
-defmodule Teiserver.Battle.Balance.DefaultBalance do
+defmodule Teiserver.Battle.Balance.AutoBalance do
   @moduledoc """
   This will call other balancers depending on circumstances
   """
   alias Teiserver.Battle.Balance.SplitNoobs
   alias Teiserver.Battle.Balance.LoserPicks
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
-  alias Teiserver.Battle.Balance.DefaultBalanceTypes, as: DB
+  alias Teiserver.Battle.Balance.AutoBalanceTypes, as: DB
 
   @doc """
   Main entry point used by balance_lib
@@ -25,9 +25,11 @@ defmodule Teiserver.Battle.Balance.DefaultBalance do
       true ->
         players = flatten_members(expanded_group)
         has_noobs? = has_noobs?(players)
+        parties_count = get_parties_count(expanded_group)
 
         cond do
           has_noobs? -> SplitNoobs
+          parties_count >= 3 -> SplitNoobs
           true -> LoserPicks
         end
     end
@@ -52,6 +54,14 @@ defmodule Teiserver.Battle.Balance.DefaultBalance do
           uncertainty: uncertainty,
           rank: rank
         }
+  end
+
+  @spec get_parties_count([BT.expanded_group()]) :: number()
+  def get_parties_count(expanded_group) do
+    Enum.filter(expanded_group, fn x ->
+      x[:count] >= 2
+    end)
+    |> Enum.count()
   end
 
   @spec has_noobs?([DB.player()]) :: any()
