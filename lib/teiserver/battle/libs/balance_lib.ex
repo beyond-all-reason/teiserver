@@ -7,7 +7,7 @@ defmodule Teiserver.Battle.BalanceLib do
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   alias Teiserver.Game.MatchRatingLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
-
+  require Logger
   # These are default values and can be overridden as part of the call to create_balance()
 
   # Upper boundary is how far above the group value the members can be, lower is how far below it
@@ -182,6 +182,19 @@ defmodule Teiserver.Battle.BalanceLib do
     |> calculate_balance_stats
     |> cleanup_result
     |> Map.put(:time_taken, System.system_time(:microsecond) - start_time)
+    |> validate_result(groups, team_count, opts)
+  end
+
+  def validate_result(result, groups, team_count, opts) do
+    if(Enum.empty?(result.team_sizes)) do
+      Logger.error("Invalid balance result.")
+      Logger.error(result)
+      Logger.error("groups: #{Kernel.inspect(groups)}")
+      Logger.error("team_count: #{team_count}")
+      Logger.error("opts: #{Kernel.inspect(opts)}")
+    end
+
+    result
   end
 
   @doc """
