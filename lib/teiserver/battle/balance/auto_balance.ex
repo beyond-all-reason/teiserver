@@ -25,11 +25,10 @@ defmodule Teiserver.Battle.Balance.AutoBalance do
       true ->
         players = flatten_members(expanded_group)
         has_noobs? = has_noobs?(players)
-        parties_count = get_parties_count(expanded_group)
 
         cond do
           has_noobs? -> SplitNoobs
-          parties_count >= 3 -> SplitNoobs
+          get_parties_count(expanded_group) >= 3 -> SplitNoobs
           true -> LoserPicks
         end
     end
