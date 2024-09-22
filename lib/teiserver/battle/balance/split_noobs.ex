@@ -141,7 +141,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
       "None"
     else
       Enum.map(parties, fn party ->
-        "[#{Enum.join(party, ", ")}]"
+        "(#{Enum.join(party, ", ")})"
       end)
       |> Enum.join(", ")
     end
