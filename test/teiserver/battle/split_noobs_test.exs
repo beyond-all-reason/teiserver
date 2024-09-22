@@ -402,7 +402,7 @@ defmodule Teiserver.Battle.SplitNoobsTest do
              "------------------------------------------------------",
              "This algorithm will evenly distribute noobs and devalue them. Noobs are non-partied players that have either high uncertainty or 0 rating. Noobs will always be drafted last. For non-noobs, teams will prefer higher rating. For noobs, teams will prefer higher chevrons and lower uncertainty.",
              "------------------------------------------------------",
-             "Parties: [LuBaee, TimeContainer]",
+             "Parties: (LuBaee, TimeContainer)",
              "Solo noobs:",
              "StinkBee (chev: 3, σ: 6.7)",
              "HoldButyLeg (chev: 1, σ: 7.5)",
