@@ -15,6 +15,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   alias Teiserver.Data.Types, as: T
 
   @type team :: [QueueServer.member()]
+  @type lost_reason :: :cancel | :timeout
 
   @spec start(QueueServer.id(), QueueServer.queue(), [team()], timeout()) ::
           {:ok, pid()} | {:error, term()}
@@ -30,9 +31,9 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     GenServer.call(room_pid, {:ready, user_id})
   end
 
-  @spec cancel(pid(), T.userid()) :: :ok | {:error, :no_match}
+  @spec cancel(pid(), T.userid()) :: :ok
   def cancel(room_pid, user_id) do
-    GenServer.call(room_pid, {:cancel, user_id})
+    GenServer.cast(room_pid, {:cancel, user_id})
   catch
     # If the pairing room is gone, there's no need to cancel anymore
     :exit, _ -> :ok
@@ -60,6 +61,8 @@ defmodule Teiserver.Matchmaking.PairingRoom do
             Enum.flat_map(team, fn member -> member.player_ids end)
           end)
       }
+
+    :timer.send_after(timeout, :timeout)
 
     {:ok, initial_state, {:continue, {:notify_players, timeout}}}
   end
@@ -92,19 +95,29 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     end
   end
 
-  def handle_call({:cancel, user_id}, from, state) do
-    case Enum.split_with(state.awaiting, fn waiting_id -> waiting_id == user_id end) do
-      {[], _} ->
-        {:reply, {:error, :no_match}, state}
+  @impl true
+  def handle_cast({:cancel, user_id}, state) do
+    # Assuming that the call is legit, so don't check that user_id is indeed
+    # in the room and directly cancel everyone
+    QueueServer.disband_pairing(state.queue_id, self())
 
-      {[_], _rest} ->
-        GenServer.reply(from, :ok)
-
-        for p_id <- state.awaiting, p_id != user_id do
-          Teiserver.Player.matchmaking_notify_lost(p_id, self())
-        end
-
-        {:stop, :normal, state}
+    for team <- state.teams, member <- team, p_id <- member.player_ids, p_id != user_id do
+      Teiserver.Player.matchmaking_notify_lost(p_id, :cancel)
     end
+
+    {:stop, :normal, state}
+  end
+
+  @impl true
+  def handle_info(:timeout, state) when state.awaiting == [], do: {:noreply, state}
+
+  def handle_info(:timeout, state) do
+    QueueServer.disband_pairing(state.queue_id, self())
+
+    for team <- state.teams, member <- team, player_id <- member.player_ids do
+      Teiserver.Player.matchmaking_notify_lost(player_id, :timeout)
+    end
+
+    {:stop, :normal, state}
   end
 end

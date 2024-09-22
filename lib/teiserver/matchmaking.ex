@@ -7,6 +7,7 @@ defmodule Teiserver.Matchmaking do
   @type member :: Matchmaking.QueueServer.member()
   @type join_result :: Matchmaking.QueueServer.join_result()
   @type leave_result :: Matchmaking.QueueServer.leave_result()
+  @type lost_reason :: Matchmaking.PairingRoom.lost_reason()
 
   @spec lookup_queue(Matchmaking.QueueServer.id()) :: pid() | nil
   def lookup_queue(queue_id) do

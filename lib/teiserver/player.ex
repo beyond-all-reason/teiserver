@@ -53,8 +53,8 @@ defmodule Teiserver.Player do
   When a pairing fails because one of the player declines the pairing or leaves
   the queues
   """
-  @spec matchmaking_notify_lost(T.userid(), pid()) :: :ok
-  defdelegate matchmaking_notify_lost(user_id, room_pid),
+  @spec matchmaking_notify_lost(T.userid(), Matchmaking.lost_reason()) :: :ok
+  defdelegate matchmaking_notify_lost(user_id, reason),
     to: Player.Session,
     as: :matchmaking_lost
 
@@ -63,4 +63,10 @@ defmodule Teiserver.Player do
   """
   @spec matchmaking_found_update(T.userid(), non_neg_integer(), pid()) :: :ok
   defdelegate matchmaking_found_update(user_id, ready_count, room_pid), to: Player.Session
+
+  @doc """
+  Leave all the queues, and effectively removes the player from any matchmaking
+  """
+  @spec matchmaking_leave_queues(T.userid()) :: Matchmaking.leave_result()
+  defdelegate matchmaking_leave_queues(user_id), to: Player.Session, as: :leave_queues
 end

@@ -26,21 +26,30 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
     end
   end
 
-  defp mk_queue(team_size) do
-    alias Teiserver.Matchmaking.QueueServer
+  defp mk_queue_attrs(team_size) do
     id = UUID.uuid4()
 
+    %{
+      id: id,
+      name: id,
+      team_size: team_size,
+      team_count: 2,
+      settings: %{tick_interval_ms: :manual, max_distance: 15}
+    }
+  end
+
+  defp mk_queue(team_size) when is_integer(team_size) do
+    mk_queue(mk_queue_attrs(team_size))
+  end
+
+  defp mk_queue(attrs) do
+    alias Teiserver.Matchmaking.QueueServer
+
     {:ok, pid} =
-      QueueServer.init_state(%{
-        id: id,
-        name: id,
-        team_size: team_size,
-        team_count: 2,
-        settings: %{tick_interval_ms: :manual, max_distance: 15}
-      })
+      QueueServer.init_state(attrs)
       |> QueueServer.start_link()
 
-    {:ok, queue_id: id, queue_pid: pid}
+    {:ok, queue_id: attrs.id, queue_pid: pid}
   end
 
   defp setup_queue(_context) do
@@ -211,6 +220,18 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
       assert %{"status" => "failed", "reason" => "already_queued"} = resp
     end
 
+    test "ready then leave triggers lost events", %{
+      queue_id: queue_id,
+      app: app,
+      queue_pid: queue_pid
+    } do
+      [client1, client2] = join_and_pair(app, queue_id, queue_pid, 2)
+      assert %{"status" => "success"} = Tachyon.matchmaking_ready!(client1)
+      assert %{"status" => "success"} = Tachyon.leave_queues!(client1)
+      assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(client2)
+      assert %{"commandId" => "matchmaking/lost"} = Tachyon.recv_message!(client2)
+    end
+
     test "back in queue if a player decline", %{
       queue_id: queue_id,
       app: app,
@@ -218,6 +239,8 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
     } do
       [client1, client2] = join_and_pair(app, queue_id, queue_pid, 2)
       assert %{"status" => "success"} = Tachyon.leave_queues!(client1)
+
+      assert %{"commandId" => "matchmaking/lost"} = Tachyon.recv_message!(client2)
 
       assert %{"commandId" => "matchmaking/cancelled", "data" => %{"reason" => "intentional"}} =
                Tachyon.recv_message!(client1)
@@ -307,6 +330,48 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
 
         Enum.each(clients, fn client -> assert_ready_update(client, current) end)
       end)
+    end
+
+    test "timeout puts ready players back in queue", %{app: app} do
+      {:ok, queue_id: q_id, queue_pid: q_pid} =
+        mk_queue_attrs(1)
+        |> put_in([:settings, :pairing_timeout], 2)
+        |> mk_queue()
+
+      clients =
+        Enum.map(1..2, fn _ ->
+          {:ok, %{client: client}} = setup_user(app)
+          client
+        end)
+
+      for client <- clients do
+        assert %{"status" => "success"} = Tachyon.join_queues!(client, [q_id])
+      end
+
+      send(q_pid, :tick)
+
+      for client <- clients do
+        assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
+                 Tachyon.recv_message(client)
+      end
+
+      [c1, c2] = clients
+      Tachyon.matchmaking_ready!(c1)
+      assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(c1)
+      assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(c2)
+
+      :timer.sleep(5)
+
+      # TODO: c1 should get lost event and still be in the queue
+      # c2 should get lost event but not be in the queue anymore
+      assert %{"commandId" => "matchmaking/lost"} = Tachyon.recv_message!(c1, timeout: 2)
+      assert %{"commandId" => "matchmaking/lost"} = Tachyon.recv_message!(c2, timeout: 2)
+
+      assert %{"commandId" => "matchmaking/cancelled", "data" => %{"reason" => "ready_timeout"}} =
+               Tachyon.recv_message!(c2, timeout: 2)
+
+      assert %{"reason" => "already_queued"} = Tachyon.join_queues!(c1, [q_id])
+      assert %{"status" => "success"} = Tachyon.join_queues!(c2, [q_id])
     end
   end
 

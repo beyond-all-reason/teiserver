@@ -9,6 +9,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   """
 
   use GenServer
+  require Logger
   alias Teiserver.Matchmaking.{QueueRegistry, PairingRoom}
   alias Teiserver.Data.Types, as: T
 
@@ -132,6 +133,20 @@ defmodule Teiserver.Matchmaking.QueueServer do
     :exit, {:noproc, _} -> {:error, :invalid_queue}
   end
 
+  @doc """
+  When a pairing rooms times out or a player decline. Mark the players there
+  as not pairing anymore, and should be removed from the queue.
+  Rejoining should be done by the player themselves.
+  """
+  @spec disband_pairing(id(), pid()) :: :ok
+  def disband_pairing(queue_id, room_pid) do
+    GenServer.call(via_tuple(queue_id), {:disband_pairing, room_pid})
+  catch
+    # if the queue is gone for whatever reason, the pairing room should be
+    # killed as well, and nothing will happen
+    :exit, {:noproc, _} -> :ok
+  end
+
   @spec start_link(state()) :: GenServer.on_start()
   def start_link(initial_state) do
     GenServer.start_link(__MODULE__, initial_state,
@@ -190,6 +205,17 @@ defmodule Teiserver.Matchmaking.QueueServer do
         {:reply, {:error, :not_queued}, state}
 
       {:ok, state} ->
+        {:reply, :ok, state}
+    end
+  end
+
+  def handle_call({:disband_pairing, room_pid}, _from, state) do
+    case Enum.split_with(state.pairings, fn {p, _, _} -> p == room_pid end) do
+      {[{_, ref, _}], rest} ->
+        Process.demonitor(ref, [:flush])
+        {:reply, :ok, %{state | pairings: rest}}
+
+      _ ->
         {:reply, :ok, state}
     end
   end
@@ -291,8 +317,9 @@ defmodule Teiserver.Matchmaking.QueueServer do
         {:ok, %{state | members: new_members, monitors: monitors}}
 
       # there is no case with multiple member to remove since this is prevented when adding to a queue
-      {_, [{_, _, canceled_members}]} ->
+      {_, [{room_pid, _, canceled_members}]} ->
         monitors = demonitor_players(canceled_members, state.monitors)
+        PairingRoom.cancel(room_pid, player_id)
         {:ok, %{state | pairings: other_pairings, monitors: monitors}}
     end
   end

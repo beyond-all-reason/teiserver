@@ -60,6 +60,23 @@ defmodule Teiserver.Player.TachyonHandler do
     {:push, {:text, resp |> Jason.encode!()}, state}
   end
 
+  def handle_info(:matchmaking_notify_lost, state) do
+    resp = Schema.event("matchmaking/lost")
+    {:push, {:text, resp |> Jason.encode!()}, state}
+  end
+
+  def handle_info({:matchmaking_cancelled, reason}, state) do
+    reason =
+      case reason do
+        :cancel -> :intentional
+        :timeout -> :ready_timeout
+        err -> err
+      end
+
+    resp = Schema.event("matchmaking/cancelled", %{reason: reason})
+    {:push, {:text, resp |> Jason.encode!()}, state}
+  end
+
   def handle_info(_msg, state) do
     {:ok, state}
   end

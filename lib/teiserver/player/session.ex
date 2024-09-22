@@ -89,9 +89,9 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), :matchmaking_ready)
   end
 
-  @spec matchmaking_lost(T.userid(), pid()) :: :ok
-  def matchmaking_lost(user_id, room_pid) do
-    GenServer.cast(via_tuple(user_id), {:matchmaking_lost, room_pid})
+  @spec matchmaking_lost(T.userid(), Matchmaking.lost_reason()) :: :ok
+  def matchmaking_lost(user_id, reason) do
+    GenServer.cast(via_tuple(user_id), {:matchmaking_lost, reason})
   end
 
   @spec matchmaking_found_update(T.userid(), non_neg_integer(), pid()) :: :ok
@@ -258,29 +258,35 @@ defmodule Teiserver.Player.Session do
     {:noreply, state}
   end
 
-  def handle_cast({:matchmaking_lost, room_pid}, state) do
+  def handle_cast({:matchmaking_lost, reason}, state) do
     case state.matchmaking do
       :no_matchmaking ->
         {:noreply, state}
 
       {:searching, _} ->
+        state = send_to_player(:matchmaking_notify_lost, state)
         {:noreply, state}
 
-      {:pairing, %{room: {pid, _}}} when pid != room_pid ->
-        {:noreply, state}
-
-      {:pairing, %{paired_queue: q_id, room: {_, ref}, frozen_queues: frozen_queues}} ->
-        Process.demonitor(ref)
+      {:pairing,
+       %{paired_queue: q_id, room: {_, ref}, frozen_queues: frozen_queues, readied: readied}} ->
+        Process.demonitor(ref, [:flush])
         q_ids = [q_id | frozen_queues]
+        state = send_to_player(:matchmaking_notify_lost, state)
 
-        case join_all_queues(state.user_id, q_ids, []) do
-          :ok ->
-            new_mm_state = {:searching, %{joined_queues: q_ids}}
-            {:noreply, put_in(state.matchmaking, new_mm_state)}
+        if reason == :timeout && not readied do
+          state = leave_all_queues(q_ids, state)
+          state = send_to_player({:matchmaking_cancelled, reason}, state)
+          {:noreply, state}
+        else
+          case join_all_queues(state.user_id, q_ids, []) do
+            :ok ->
+              new_mm_state = {:searching, %{joined_queues: q_ids}}
+              {:noreply, put_in(state.matchmaking, new_mm_state)}
 
-          {:error, _err} ->
-            # TODO: send a `cancelled` event to the player
-            {:noreply, %{state | matchmaking: initial_matchmaking_state()}}
+            {:error, _err} ->
+              state = send_to_player({:matchmaking_cancelled, :server_error}, state)
+              {:noreply, %{state | matchmaking: initial_matchmaking_state()}}
+          end
         end
     end
   end
