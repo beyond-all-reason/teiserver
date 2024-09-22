@@ -766,6 +766,10 @@ defmodule Teiserver.Lobby do
       battle.founder_id == changer.userid ->
         true
 
+      # Coordinator can do anything
+      Coordinator.get_coordinator_userid() == changer.userid ->
+        true
+
       # If they're not a moderator/founder then they can't
       # do founder commands
       mod_command == true ->
