@@ -109,7 +109,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   """
   @spec join_queue(id(), member()) :: join_result()
   def join_queue(queue_id, member) do
-    GenServer.call(QueueRegistry.via_tuple(queue_id), {:join_queue, member})
+    GenServer.call(via_tuple(queue_id), {:join_queue, member})
   catch
     :exit, {:noproc, _} -> {:error, :invalid_queue}
   end
@@ -122,7 +122,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   """
   @spec leave_queue(id(), T.userid()) :: leave_result()
   def leave_queue(queue_id, player_id) do
-    GenServer.call(QueueRegistry.via_tuple(queue_id), {:leave_queue, player_id})
+    GenServer.call(via_tuple(queue_id), {:leave_queue, player_id})
   catch
     :exit, {:noproc, _} -> {:error, :invalid_queue}
   end
