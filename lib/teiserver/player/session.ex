@@ -251,10 +251,15 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_cast({:matchmaking_notify_found, _queue_id, _}, state) do
+  def handle_cast({:matchmaking_notify_found, _queue_id, room_pid, _}, state) do
     # we're not searching anything. This can happen as a race when two queues
     # match the same player at the same time.
-    # TODO tachyon_mvp: need to decline the pairing here
+    # Do log it since it should not happen too often unless something is wrong
+    Logger.info(
+      "Got a matchmaking found but in state #{inspect(state.matchmaking)} for user #{inspect(state.user_id)}"
+    )
+
+    Matchmaking.cancel(room_pid, state.user_id)
     {:noreply, state}
   end
 

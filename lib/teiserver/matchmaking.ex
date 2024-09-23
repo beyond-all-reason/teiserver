@@ -51,6 +51,9 @@ defmodule Teiserver.Matchmaking do
     Matchmaking.QueueServer.leave_queue(queue_id, user_id)
   end
 
+  @spec cancel(pid(), T.userid()) :: :ok
+  defdelegate cancel(room_pid, user_id), to: Matchmaking.PairingRoom
+
   @doc """
   to tell the room that the given player is ready for the match
   """
