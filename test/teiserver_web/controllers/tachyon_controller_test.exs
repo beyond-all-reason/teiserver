@@ -156,6 +156,29 @@ defmodule TeiserverWeb.TachyonControllerTest do
       WSC.disconnect(client)
     end
 
+    test "can upgrade with multiple subprotocol", %{user: user} do
+      %{token: token} = OAuthFixtures.setup_token(user)
+
+      opts = [
+        connection_options: [
+          extra_headers: [
+            {"authorization", "Bearer #{token.value}"},
+            {"sec-websocket-protocol", "something-else"},
+            {"sec-websocket-protocol", "v0.tachyon"}
+          ]
+        ]
+      ]
+
+      {:ok, client} = WSC.connect(tachyon_url(), opts)
+
+      conn_pid =
+        Teiserver.Support.Tachyon.poll_until_some(fn ->
+          Teiserver.Player.lookup_connection(user.id)
+        end)
+
+      assert is_pid(conn_pid)
+    end
+
     test "autohost can connect too", %{user: user} do
       app = OAuthFixtures.app_attrs(user.id) |> OAuthFixtures.create_app()
       autohost = Teiserver.AutohostFixtures.create_autohost("test autohost")

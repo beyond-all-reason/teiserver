@@ -33,21 +33,33 @@ defmodule TeiserverWeb.TachyonController do
   end
 
   defp handler_for_version(conn) do
-    case get_req_header(conn, @subprotocol_hdr_name) do
-      [] ->
+    subprotocol_headers =
+      get_req_header(conn, @subprotocol_hdr_name)
+      |> Enum.flat_map(&String.split(&1, ","))
+      |> Enum.map(&String.trim/1)
+
+    supported_version = "v0.tachyon"
+
+    cond do
+      subprotocol_headers == [] ->
         {:error, 400, "must provide header #{@subprotocol_hdr_name}"}
 
-      ["v0.tachyon" = subprotocol] ->
+      Enum.member?(subprotocol_headers, supported_version) ->
         token = conn.assigns[:token]
 
         cond do
-          not is_nil(token.owner_id) -> {:ok, subprotocol, Teiserver.Player.TachyonHandler}
-          not is_nil(token.autohost_id) -> {:ok, subprotocol, Teiserver.Autohost.TachyonHandler}
-          true -> {:error, 500, "no owner nor autohost found for token, this should never happen"}
+          not is_nil(token.owner_id) ->
+            {:ok, supported_version, Teiserver.Player.TachyonHandler}
+
+          not is_nil(token.autohost_id) ->
+            {:ok, supported_version, Teiserver.Autohost.TachyonHandler}
+
+          true ->
+            {:error, 500, "no owner nor autohost found for token, this should never happen"}
         end
 
-      [x] ->
-        {:error, 400, "unsupported version #{x}"}
+      true ->
+        {:error, 400, "No supported subprotocol version found in #{inspect(subprotocol_headers)}"}
     end
   end
 
