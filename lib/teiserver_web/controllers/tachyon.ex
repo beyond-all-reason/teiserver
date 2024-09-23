@@ -11,13 +11,16 @@ defmodule TeiserverWeb.TachyonController do
 
   plug Teiserver.OAuth.TokenPlug
 
+  @subprotocol_hdr_name "sec-websocket-protocol"
+
   def connect(conn, _opts) do
-    with {:ok, handler} <- handler_for_version(conn),
+    with {:ok, subprotocol, handler} <- handler_for_version(conn),
          {:ok, state} <- handler.connect(conn) do
       try do
         conn_state = %{handler_state: state, handler: handler}
 
         conn
+        |> put_resp_header(@subprotocol_hdr_name, subprotocol)
         |> WebSockAdapter.upgrade(Teiserver.Tachyon.Transport, conn_state, timeout: 20_000)
         |> halt()
       rescue
@@ -30,18 +33,16 @@ defmodule TeiserverWeb.TachyonController do
   end
 
   defp handler_for_version(conn) do
-    hdr_name = "sec-websocket-protocol"
-
-    case get_req_header(conn, hdr_name) do
+    case get_req_header(conn, @subprotocol_hdr_name) do
       [] ->
-        {:error, 400, "must provide #{hdr_name}"}
+        {:error, 400, "must provide header #{@subprotocol_hdr_name}"}
 
-      ["v0.tachyon"] ->
+      ["v0.tachyon" = subprotocol] ->
         token = conn.assigns[:token]
 
         cond do
-          not is_nil(token.owner_id) -> {:ok, Teiserver.Player.TachyonHandler}
-          not is_nil(token.autohost_id) -> {:ok, Teiserver.Autohost.TachyonHandler}
+          not is_nil(token.owner_id) -> {:ok, subprotocol, Teiserver.Player.TachyonHandler}
+          not is_nil(token.autohost_id) -> {:ok, subprotocol, Teiserver.Autohost.TachyonHandler}
           true -> {:error, 500, "no owner nor autohost found for token, this should never happen"}
         end
 
