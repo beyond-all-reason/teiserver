@@ -63,11 +63,18 @@ defmodule Teiserver.Support.Tachyon do
 
   # TODO tachyon_mvp: create a version of this function that also check the
   # the response against the expected json schema
-  def recv_response(client) do
-    case WSC.recv(client) do
+  def recv_message(client, opts \\ []) do
+    opts = Keyword.put_new(opts, :timeout, 20)
+
+    case WSC.recv(client, opts) do
       {:ok, {:text, resp}} -> {:ok, Jason.decode!(resp)}
       other -> other
     end
+  end
+
+  def recv_message!(client, opts \\ []) do
+    {:ok, resp} = recv_message(client, opts)
+    resp
   end
 
   @doc """
@@ -94,7 +101,7 @@ defmodule Teiserver.Support.Tachyon do
   def list_queues!(client) do
     req = request("matchmaking/list")
     :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
-    {:ok, resp} = recv_response(client)
+    {:ok, resp} = recv_message(client)
 
     message_id = req.messageId
 
@@ -115,14 +122,21 @@ defmodule Teiserver.Support.Tachyon do
   def join_queues!(client, queue_ids) do
     req = request("matchmaking/queue", %{queues: queue_ids})
     :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
-    {:ok, resp} = recv_response(client)
+    {:ok, resp} = recv_message(client)
     resp
   end
 
   def leave_queues!(client) do
     req = request("matchmaking/cancel")
     :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
-    {:ok, resp} = recv_response(client)
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def matchmaking_ready!(client) do
+    req = request("matchmaking/ready")
+    :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
+    {:ok, resp} = recv_message(client)
     resp
   end
 

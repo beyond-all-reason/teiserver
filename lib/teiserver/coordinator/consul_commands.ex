@@ -2077,7 +2077,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(
-        %{command: "broadcast", remaining: message, senderid: senderid} = cmd,
+        %{command: "broadcast", remaining: message, senderid: senderid},
         state
       ) do
     Lobby.list_lobby_ids()

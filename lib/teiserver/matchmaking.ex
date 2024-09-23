@@ -7,6 +7,7 @@ defmodule Teiserver.Matchmaking do
   @type member :: Matchmaking.QueueServer.member()
   @type join_result :: Matchmaking.QueueServer.join_result()
   @type leave_result :: Matchmaking.QueueServer.leave_result()
+  @type lost_reason :: Matchmaking.PairingRoom.lost_reason()
 
   @spec lookup_queue(Matchmaking.QueueServer.id()) :: pid() | nil
   def lookup_queue(queue_id) do
@@ -27,6 +28,7 @@ defmodule Teiserver.Matchmaking do
   @spec join_queue(queue_id(), T.userid() | member()) :: join_result()
   def join_queue(queue_id, member) when not is_map(member) do
     member = %{
+      id: UUID.uuid4(),
       player_ids: [member],
       # TODO tachyon_mvp: fetch ratings for the player somehow
       rating: %{},
@@ -48,4 +50,13 @@ defmodule Teiserver.Matchmaking do
   def leave_queue(queue_id, user_id) do
     Matchmaking.QueueServer.leave_queue(queue_id, user_id)
   end
+
+  @spec cancel(pid(), T.userid()) :: :ok
+  defdelegate cancel(room_pid, user_id), to: Matchmaking.PairingRoom
+
+  @doc """
+  to tell the room that the given player is ready for the match
+  """
+  @spec ready(pid(), T.userid()) :: :ok | {:error, term()}
+  defdelegate ready(room_pid, user_id), to: Matchmaking.PairingRoom
 end
