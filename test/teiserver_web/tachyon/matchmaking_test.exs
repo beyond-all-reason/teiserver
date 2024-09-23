@@ -19,6 +19,13 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
             "numOfTeams" => 2,
             "teamSize" => 1,
             "ranked" => true
+          },
+          %{
+            "id" => "2v2",
+            "name" => "2v2",
+            "numOfTeams" => 2,
+            "teamSize" => 2,
+            "ranked" => true
           }
         ])
 
