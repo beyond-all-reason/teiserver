@@ -11,13 +11,16 @@ defmodule TeiserverWeb.TachyonController do
 
   plug Teiserver.OAuth.TokenPlug
 
+  @subprotocol_hdr_name "sec-websocket-protocol"
+
   def connect(conn, _opts) do
-    with {:ok, handler} <- handler_for_version(conn),
+    with {:ok, subprotocol, handler} <- handler_for_version(conn),
          {:ok, state} <- handler.connect(conn) do
       try do
         conn_state = %{handler_state: state, handler: handler}
 
         conn
+        |> put_resp_header(@subprotocol_hdr_name, subprotocol)
         |> WebSockAdapter.upgrade(Teiserver.Tachyon.Transport, conn_state, timeout: 20_000)
         |> halt()
       rescue
@@ -30,23 +33,33 @@ defmodule TeiserverWeb.TachyonController do
   end
 
   defp handler_for_version(conn) do
-    hdr_name = "sec-websocket-protocol"
+    subprotocol_headers =
+      get_req_header(conn, @subprotocol_hdr_name)
+      |> Enum.flat_map(&String.split(&1, ","))
+      |> Enum.map(&String.trim/1)
 
-    case get_req_header(conn, hdr_name) do
-      [] ->
-        {:error, 400, "must provide #{hdr_name}"}
+    supported_version = "v0.tachyon"
 
-      ["v0.tachyon"] ->
+    cond do
+      subprotocol_headers == [] ->
+        {:error, 400, "must provide header #{@subprotocol_hdr_name}"}
+
+      Enum.member?(subprotocol_headers, supported_version) ->
         token = conn.assigns[:token]
 
         cond do
-          not is_nil(token.owner_id) -> {:ok, Teiserver.Player.TachyonHandler}
-          not is_nil(token.autohost_id) -> {:ok, Teiserver.Autohost.TachyonHandler}
-          true -> {:error, 500, "no owner nor autohost found for token, this should never happen"}
+          not is_nil(token.owner_id) ->
+            {:ok, supported_version, Teiserver.Player.TachyonHandler}
+
+          not is_nil(token.autohost_id) ->
+            {:ok, supported_version, Teiserver.Autohost.TachyonHandler}
+
+          true ->
+            {:error, 500, "no owner nor autohost found for token, this should never happen"}
         end
 
-      [x] ->
-        {:error, 400, "unsupported version #{x}"}
+      true ->
+        {:error, 400, "No supported subprotocol version found in #{inspect(subprotocol_headers)}"}
     end
   end
 
