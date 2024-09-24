@@ -93,7 +93,12 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   defp use_export_data(%{data: %{"export_data" => export_data}} = match) do
     win_map =
       export_data["players"]
-      |> Map.new(fn stats -> {stats["name"], stats["win"] == 1} end)
+      |> Map.new(fn stats -> {stats["accountId"], stats["win"] == 1} end)
+
+    # If users renamed after the start of the match but before it gets processed they couldn't be matched to their teamStats
+    name_map =
+      export_data["players"]
+      |> Map.new(fn stats -> {stats["accountId"], stats["name"]} end)
 
     host_game_duration = max(export_data["gameDuration"], 1)
     memberships = Battle.list_match_memberships(search: [match_id: match.id])
@@ -101,12 +106,12 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
     winning_team =
       memberships
       |> Enum.map(fn m ->
-        username = Account.get_username(m.user_id)
-        win = Map.get(win_map, username, false)
+        win = Map.get(win_map, to_string(m.user_id), false)
+        name = Map.get(name_map, to_string(m.user_id), Account.get_username(m.user_id))
 
         stats =
           export_data["teamStats"]
-          |> Map.get(username, %{})
+          |> Map.get(name, %{})
           |> Map.drop(~w(allyTeam frameNb))
           |> Map.new(fn {k, v} ->
             {k,
