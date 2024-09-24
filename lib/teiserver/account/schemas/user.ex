@@ -162,7 +162,7 @@ defmodule Teiserver.Account.User do
           "Please enter your password to change your account details."
         )
 
-      verify_password(attrs["password"], user.password) == false ->
+      verify_any_password(attrs["password"], user.password) == false ->
         user
         |> cast(attrs, [:name, :email])
         |> validate_required([:name, :email])
@@ -186,7 +186,7 @@ defmodule Teiserver.Account.User do
           "Please enter your existing password to change your password."
         )
 
-      verify_password(attrs["existing"], user.password) == false ->
+      verify_any_password(attrs["existing"], user.password) == false ->
         user
         |> change_password(attrs)
         |> add_error(:existing, "Incorrect password")
@@ -216,6 +216,18 @@ defmodule Teiserver.Account.User do
   @spec verify_password(String.t(), String.t()) :: boolean
   def verify_password(plain_text_password, encrypted) do
     Argon2.verify_pass(plain_text_password, encrypted)
+  end
+
+  @spec verify_md5_password(String.t(), String.t()) :: boolean
+  def verify_md5_password(plain_text_password, encrypted) do
+    Teiserver.CacheUser.spring_md5_password(plain_text_password)
+    |> verify_password(encrypted)
+  end
+
+  @spec verify_md5_password(String.t(), String.t()) :: boolean
+  def verify_any_password(plain_text_password, encrypted) do
+    verify_password(plain_text_password, encrypted) or
+      verify_md5_password(plain_text_password, encrypted)
   end
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
