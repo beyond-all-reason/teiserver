@@ -63,7 +63,9 @@ defmodule TeiserverWeb.Account.SessionController do
         |> redirect(to: "/")
 
       code.metadata["ip"] != nil && code.metadata["ip"] != ip ->
-        Logger.debug("SessionController.one_time_login Bad IP. Got #{ip}; want #{code.metadata["ip"]}")
+        Logger.debug(
+          "SessionController.one_time_login Bad IP. Got #{ip}; want #{code.metadata["ip"]}"
+        )
 
         conn
         |> redirect(to: "/")
