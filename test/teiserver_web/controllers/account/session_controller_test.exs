@@ -37,6 +37,28 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
       assert html_response(conn, 200) =~ user.name
     end
 
+    test "Valid code without IP", %{conn: conn, user: user} do
+      rdr = ~p"/profile/" <> Integer.to_string(user.id)
+
+      {:ok, _} =
+        Account.create_code(%{
+          value: "test_code_valid_value",
+          purpose: "one_time_login",
+          expires: Timex.now() |> Timex.shift(days: 5_000),
+          user_id: user.id,
+          metadata: %{
+            redirect: rdr
+          }
+        })
+
+      conn = get(conn, ~p"/one_time_login/test_code_valid_value")
+      assert conn.assigns.flash["info"] =~ "Welcome back!"
+      assert redirected_to(conn) == rdr
+
+      conn = get(conn, rdr)
+      assert html_response(conn, 200) =~ user.name
+    end
+
     test "Unknown one_time_code invalid", %{conn: conn} do
       conn = get(conn, ~p"/one_time_login/some_invalid_code")
       assert redirected_to(conn) == ~p"/"
