@@ -65,7 +65,8 @@ defmodule Teiserver.Tachyon.Schema do
     if String.contains?(command_id, ".") do
       {:error, "Invalid command id #{command_id}"}
     else
-      path = "priv/tachyon/schema/#{command_id}/#{type}.json"
+      schema_path = Path.join(["priv", "tachyon", "schema", command_id, "#{type}.json"])
+      path = Application.app_dir(:teiserver, schema_path)
 
       with {:ok, content} <- File.read(path),
            {:ok, json} <- Jason.decode(content) do
