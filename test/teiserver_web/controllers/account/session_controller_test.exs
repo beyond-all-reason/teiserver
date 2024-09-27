@@ -31,6 +31,10 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
       conn = get(conn, ~p"/one_time_login/test_code_valid_value")
       assert conn.assigns.flash["info"] =~ "Welcome back!"
       assert redirected_to(conn) == rdr
+
+      # Profile page should be accessible.
+      conn = get(conn, rdr)
+      assert html_response(conn, 200) =~ user.name
     end
 
     test "Unknown one_time_code invalid", %{conn: conn} do
