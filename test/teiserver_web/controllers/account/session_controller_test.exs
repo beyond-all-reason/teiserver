@@ -83,6 +83,23 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
       assert redirected_to(conn) == ~p"/"
     end
 
+    test "expired code", %{conn: conn, user: user} do
+      {:ok, _} =
+        Account.create_code(%{
+          value: "test_code_valid_value",
+          purpose: "one_time_login",
+          expires: Timex.now() |> Timex.shift(days: -5_000),
+          user_id: user.id,
+          metadata: %{
+            redirect: ~p"/profile/" <> Integer.to_string(user.id)
+          }
+        })
+
+      conn = get(conn, ~p"/one_time_login/test_code_valid_value")
+      assert conn.assigns.flash["info"] != "Welcome back!"
+      assert redirected_to(conn) == ~p"/"
+    end
+
     test "disabled via site config", %{conn: conn, user: user} do
       Config.update_site_config("user.Enable one time links", false)
 
