@@ -59,6 +59,25 @@ defmodule TeiserverWeb.Account.SessionController do
       code == nil ->
         Logger.debug("SessionController.one_time_login No code matching #{value}")
 
+        if expired_code =
+             Account.get_code(nil,
+               search: [
+                 value: value,
+                 purpose: "one_time_login",
+                 expired: true
+               ]
+             ) do
+          diff =
+            Timex.format_duration(
+              Timex.diff(expired_code.expires, Timex.now(), :duration),
+              :humanized
+            )
+
+          Logger.debug(
+            "SessionController.one_time_login User tried to use expired code (expired for #{diff})"
+          )
+        end
+
         conn
         |> redirect(to: "/")
 
