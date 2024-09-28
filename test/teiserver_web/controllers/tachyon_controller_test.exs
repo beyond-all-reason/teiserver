@@ -199,7 +199,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
       ]
 
       {:ok, client} = WSC.connect(tachyon_url(), opts)
-      registered_pid = poll(fn -> Teiserver.Autohost.lookup_autohost(autohost.id) end)
+      {registered_pid, _} = poll(fn -> Teiserver.Autohost.lookup_autohost(autohost.id) end)
       assert is_pid(registered_pid)
       WSC.disconnect(client)
     end

@@ -8,6 +8,12 @@ defmodule Teiserver.Autohost.Registry do
 
   alias Teiserver.Autohost.Autohost
 
+  @type reg_value :: %{
+          id: Autohost.id(),
+          max_battles: non_neg_integer(),
+          current_battles: non_neg_integer()
+        }
+
   def start_link() do
     Horde.Registry.start_link(keys: :unique, name: __MODULE__)
   end
@@ -20,17 +26,17 @@ defmodule Teiserver.Autohost.Registry do
     {:via, Horde.Registry, {__MODULE__, autohost_id}}
   end
 
-  @spec register(Autohost.id()) :: {:ok, pid()} | {:error, {:already_registered, pid()}}
-  def register(autohost_id) do
+  @spec register(reg_value) :: {:ok, pid()} | {:error, {:already_registered, pid()}}
+  def register(%{id: autohost_id} = val) do
     # this is needed because the process that handle the ws connection is spawned
     # by phoenix, so we can't spawn+register in the same step
-    Horde.Registry.register(__MODULE__, via_tuple(autohost_id), autohost_id)
+    Horde.Registry.register(__MODULE__, via_tuple(autohost_id), val)
   end
 
-  @spec lookup(Autohost.id()) :: pid() | nil
+  @spec lookup(Autohost.id()) :: {pid(), reg_value()} | nil
   def lookup(autohost_id) do
     case Horde.Registry.lookup(__MODULE__, via_tuple(autohost_id)) do
-      [{pid, _}] -> pid
+      [x] -> x
       _ -> nil
     end
   end

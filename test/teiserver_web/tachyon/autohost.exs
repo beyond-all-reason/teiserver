@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
   use TeiserverWeb.ConnCase
   alias Teiserver.OAuthFixtures
   alias Teiserver.Support.Tachyon
+  import Teiserver.Support.Tachyon, only: [poll_until_some: 1]
   alias WebsocketSyncClient, as: WSC
 
   def create_autohost() do
@@ -50,5 +51,14 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     assert :ok == WSC.send_message(client, {:text, req})
     assert %{"status" => "failed", "reason" => "invalid_request"} = Tachyon.recv_message!(client)
     assert {:error, :disconnected} = WSC.send_message(client, {:text, req})
+  end
+
+  test "can lookup after status message", %{token: token} do
+    Tachyon.connect_autohost!(token, 10, 0)
+
+    {pid, %{max_battles: 10, current_battles: 0}} =
+      poll_until_some(fn -> Teiserver.Autohost.lookup_autohost(token.autohost_id) end)
+
+    assert is_pid(pid)
   end
 end

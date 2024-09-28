@@ -1,7 +1,9 @@
 defmodule Teiserver.Autohost do
-  alias Teiserver.Autohost.Autohost
+  alias Teiserver.Autohost.{Autohost, Registry}
   alias Teiserver.AutohostQueries
   alias Teiserver.Repo
+
+  @type reg_value :: Registry.reg_value()
 
   def create_autohost(attrs \\ %{}) do
     %Autohost{}
@@ -30,7 +32,7 @@ defmodule Teiserver.Autohost do
   @doc """
   Returns the pid of the autohost registered with a given id
   """
-  @spec lookup_autohost(Autohost.id()) :: pid() | nil
+  @spec lookup_autohost(Autohost.id()) :: {pid(), reg_value()} | nil
   def lookup_autohost(autohost_id) do
     Teiserver.Autohost.Registry.lookup(autohost_id)
   end

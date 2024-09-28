@@ -29,6 +29,21 @@ defmodule Teiserver.Support.Tachyon do
     %{client: client, token: token}
   end
 
+  @doc """
+  Connect as an autohost and ensure the first `status` event is sent
+  """
+  def connect_autohost!(token, max_battles, current) do
+    client = connect(token)
+
+    :ok =
+      send_event(client, "autohost/status", %{
+        maxBattles: max_battles,
+        currentBattles: current
+      })
+
+    client
+  end
+
   def connect_options(token) do
     [
       connection_options: [
@@ -59,6 +74,18 @@ defmodule Teiserver.Support.Tachyon do
     else
       Map.put(req, :data, data)
     end
+  end
+
+  def event(command_id, data \\ nil) do
+    request(command_id, data) |> Map.put(:type, :event)
+  end
+
+  def send_request(client, command_id, data \\ nil) do
+    WSC.send_message(client, {:text, request(command_id, data) |> Jason.encode!()})
+  end
+
+  def send_event(client, command_id, data \\ nil) do
+    WSC.send_message(client, {:text, event(command_id, data) |> Jason.encode!()})
   end
 
   # TODO tachyon_mvp: create a version of this function that also check the
