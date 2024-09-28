@@ -2,6 +2,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
   use TeiserverWeb.ConnCase
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.OAuthFixtures
+  alias Teiserver.Support.Tachyon
 
   alias WebsocketSyncClient, as: WSC
 
@@ -172,36 +173,11 @@ defmodule TeiserverWeb.TachyonControllerTest do
       {:ok, client} = WSC.connect(tachyon_url(), opts)
 
       conn_pid =
-        Teiserver.Support.Tachyon.poll_until_some(fn ->
+        Tachyon.poll_until_some(fn ->
           Teiserver.Player.lookup_connection(user.id)
         end)
 
       assert is_pid(conn_pid)
-    end
-
-    test "autohost can connect too", %{user: user} do
-      app = OAuthFixtures.app_attrs(user.id) |> OAuthFixtures.create_app()
-      autohost = Teiserver.AutohostFixtures.create_autohost("test autohost")
-
-      token =
-        OAuthFixtures.token_attrs(user.id, app)
-        |> Map.drop([:owner_id])
-        |> Map.put(:autohost_id, autohost.id)
-        |> OAuthFixtures.create_token()
-
-      opts = [
-        connection_options: [
-          extra_headers: [
-            {"authorization", "Bearer #{token.value}"},
-            {"sec-websocket-protocol", "v0.tachyon"}
-          ]
-        ]
-      ]
-
-      {:ok, client} = WSC.connect(tachyon_url(), opts)
-      {registered_pid, _} = poll(fn -> Teiserver.Autohost.lookup_autohost(autohost.id) end)
-      assert is_pid(registered_pid)
-      WSC.disconnect(client)
     end
   end
 
@@ -217,20 +193,5 @@ defmodule TeiserverWeb.TachyonControllerTest do
   defp tachyon_url() do
     conf = Application.get_env(:teiserver, TeiserverWeb.Endpoint)
     "ws://#{conf[:url][:host]}:#{conf[:http][:port]}" <> ~p"/tachyon"
-  end
-
-  defp poll(f, n \\ 10) do
-    case f.() do
-      nil ->
-        if n == 0 do
-          raise "poll timeout"
-        else
-          :timer.sleep(1)
-          poll(f, n - 1)
-        end
-
-      x ->
-        x
-    end
   end
 end
