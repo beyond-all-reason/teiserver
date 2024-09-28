@@ -9,12 +9,12 @@ defmodule Teiserver.Autohost.TachyonHandler do
   alias Teiserver.Autohost.Autohost
   @behaviour Handler
 
-  @type state :: %{autohost: Autohost.t()}
+  @type state :: %{autohost: Autohost.t(), state: :handshaking}
 
   @impl Handler
   def connect(conn) do
     autohost = conn.assigns[:token].autohost
-    {:ok, %{autohost: autohost}}
+    {:ok, %{autohost: autohost, state: :handshaking}}
   end
 
   @impl Handler
@@ -40,6 +40,26 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
   def handle_command("system/disconnect", "request", _message_id, _message, state) do
     {:stop, :normal, state}
+  end
+
+  def handle_command(
+        command_id,
+        _message_type,
+        message_id,
+        _message,
+        %{state: :handshaking} = state
+      ) do
+    resp =
+      Schema.error_response(
+        command_id,
+        message_id,
+        :invalid_request,
+        "The first message after connection must be `status`"
+      )
+      |> Jason.encode!()
+
+    # 1000 = close normal
+    {:stop, :normal, 1000, [{:text, resp}], state}
   end
 
   def handle_command(command_id, _message_type, message_id, _message, state) do
