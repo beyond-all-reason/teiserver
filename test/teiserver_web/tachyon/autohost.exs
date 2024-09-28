@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Tachyon.Autohost do
-  use TeiserverWeb.ConnCase
+  use TeiserverWeb.ConnCase, async: false
   alias Teiserver.OAuthFixtures
   alias Teiserver.Support.Tachyon
-  import Teiserver.Support.Tachyon, only: [poll_until_some: 1]
+  import Teiserver.Support.Tachyon, only: [poll_until_some: 1, poll_until: 3]
   alias WebsocketSyncClient, as: WSC
 
   def create_autohost() do
@@ -60,5 +60,23 @@ defmodule TeiserverWeb.Tachyon.Autohost do
       poll_until_some(fn -> Teiserver.Autohost.lookup_autohost(token.autohost_id) end)
 
     assert is_pid(pid)
+  end
+
+  test "can update status attributes", %{token: token} do
+    client = Tachyon.connect_autohost!(token, 10, 0)
+
+    {_, %{max_battles: 10, current_battles: 0}} =
+      poll_until_some(fn -> Teiserver.Autohost.lookup_autohost(token.autohost_id) end)
+
+    :ok = Tachyon.send_event(client, "autohost/status", %{maxBattles: 15, currentBattles: 3})
+
+    {_, %{max_battles: 15, current_battles: 3}} =
+      poll_until(
+        fn -> Teiserver.Autohost.lookup_autohost(token.autohost_id) end,
+        fn {_, details} ->
+          details != nil && details.max_battles == 15 && details.current_battles == 3
+        end,
+        wait: 5
+      )
   end
 end

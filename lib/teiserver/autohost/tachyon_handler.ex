@@ -74,6 +74,17 @@ defmodule Teiserver.Autohost.TachyonHandler do
     end
   end
 
+  def handle_command("autohost/status", "event", _, msg, state) do
+    %{"data" => %{"maxBattles" => max_battles, "currentBattles" => current}} = msg
+
+    Registry.update_value(state.autohost.id, fn _ ->
+      %{id: state.autohost.id, max_battles: max_battles, current_battles: current}
+    end)
+
+    state = %{state | state: {:connected, %{max_battles: max_battles, current_battles: current}}}
+    {:ok, state}
+  end
+
   def handle_command(
         command_id,
         _message_type,

@@ -41,6 +41,10 @@ defmodule Teiserver.Autohost.Registry do
     end
   end
 
+  def update_value(autohost_id, callback) do
+    Horde.Registry.update_value(__MODULE__, via_tuple(autohost_id), callback)
+  end
+
   def child_spec(_) do
     Supervisor.child_spec(Horde.Registry,
       id: __MODULE__,
