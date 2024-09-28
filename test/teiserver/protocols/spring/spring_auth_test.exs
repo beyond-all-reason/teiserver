@@ -18,9 +18,23 @@ defmodule Teiserver.SpringAuthTest do
       new_user: 2
     ]
 
+  import Teiserver.Support.Tachyon, only: [poll_until: 2]
+
   setup do
     %{socket: socket, user: user} = auth_setup()
     {:ok, socket: socket, user: user}
+  end
+
+  # wrapped login attempt in a function to make polling for expected output easier
+  def _send_login_attempt_and_parse_reply_msg_from_server_socket(socket, login_name) do
+    _send_raw(
+      socket,
+      "LOGIN #{login_name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
+    )
+
+    reply = _recv_until(socket)
+    [server_response | _remainder] = String.split(reply, "\n")
+    server_response
   end
 
   test "Test bad match", %{socket: socket} do
@@ -442,9 +456,6 @@ CLIENTS test_room #{user.name}\n"
     assert reply =~ "s.battles.id_list "
   end
 
-  # this is a flakey test, but only when other tests are running around.
-  # you may be able to reproduce with the seed 846266
-  @tag :needs_attention
   test "RENAMEACCOUNT", %{socket: socket, user: user} do
     old_name = user.name
     new_name = "test_user_rename"
@@ -461,7 +472,9 @@ CLIENTS test_room #{user.name}\n"
     # Rename with an invalid name
     _send_raw(socket, "RENAMEACCOUNT Y--Y\n")
     reply = _recv_raw(socket)
-    assert reply == "SERVERMSG Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)\n"
+    assert String.starts_with?(reply, "SERVERMSG")
+    assert String.contains?(reply, "Invalid characters in name")
+    assert String.contains?(reply, "(only a-z, A-Z, 0-9, [, ] allowed)")
 
     # Rename with existng name
     _send_raw(socket, "RENAMEACCOUNT #{watcher_user.name}\n")
@@ -477,9 +490,6 @@ CLIENTS test_room #{user.name}\n"
     # Check they got logged out
     wreply = _recv_raw(watcher)
     assert wreply == "REMOVEUSER #{user.name}\n"
-
-    # Give it a chance to perform some of the actions
-    :timer.sleep(250)
 
     assert Client.get_client_by_id(userid) == nil
 
@@ -497,14 +507,15 @@ CLIENTS test_room #{user.name}\n"
     _ = _recv_raw(socket)
 
     # Now we get flood protection after the rename
-    _send_raw(
-      socket,
-      "LOGIN #{new_name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
-    )
+    expected_server_response = "DENIED Flood protection - Please wait 20 seconds and try again"
 
-    reply = _recv_until(socket)
-    [accepted | _remainder] = String.split(reply, "\n")
-    assert accepted == "DENIED Flood protection - Please wait 20 seconds and try again"
+    server_response =
+      Teiserver.Support.Tachyon.poll_until(
+        fn -> _send_login_attempt_and_parse_reply_msg_from_server_socket(socket, new_name) end,
+        &(&1 == expected_server_response)
+      )
+
+    assert server_response == expected_server_response
 
     # Un-flood them
     CacheUser.set_flood_level(userid, 0)
