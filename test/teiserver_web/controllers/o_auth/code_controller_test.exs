@@ -334,7 +334,8 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
                  "refresh_token",
                  "client_credentials"
                ],
-               "code_challenge_methods_supported" => ["S256"]
+               "code_challenge_methods_supported" => ["S256"],
+               "response_types_supported" => ["code", "token"]
              }
     end
   end
