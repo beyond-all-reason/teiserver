@@ -6,21 +6,22 @@ defmodule Teiserver.Autohost.TachyonHandler do
   very different roles, have very different behaviour and states.
   """
   alias Teiserver.Tachyon.{Handler, Schema}
-  alias Teiserver.Autohost.Autohost
+  alias Teiserver.Autohost.{Autohost, Registry}
+  require Logger
   @behaviour Handler
 
-  @type state :: %{autohost: Autohost.t()}
+  @type connected_state :: %{max_battles: non_neg_integer(), current_battles: non_neg_integer()}
+  @type state :: %{autohost: Autohost.t(), state: :handshaking | {:connected, connected_state()}}
 
   @impl Handler
   def connect(conn) do
     autohost = conn.assigns[:token].autohost
-    {:ok, %{autohost: autohost}}
+    {:ok, %{autohost: autohost, state: :handshaking}}
   end
 
   @impl Handler
   @spec init(state()) :: WebSock.handle_result()
   def init(state) do
-    {:ok, _} = Teiserver.Autohost.Registry.register(state.autohost.id)
     {:ok, state}
   end
 
@@ -40,6 +41,68 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
   def handle_command("system/disconnect", "request", _message_id, _message, state) do
     {:stop, :normal, state}
+  end
+
+  def handle_command("autohost/status", "event", _msg_id, msg, %{state: :handshaking} = state) do
+    %{"data" => %{"maxBattles" => max_battles, "currentBattles" => current}} = msg
+
+    Logger.info(
+      "Autohost (id=#{state.autohost.id}) connecting #{state.autohost.id} with #{inspect(msg["data"])}"
+    )
+
+    state = %{
+      state
+      | state:
+          {:connected,
+           %{
+             max_battles: max_battles,
+             current_battles: current
+           }}
+    }
+
+    case Registry.register(%{
+           id: state.autohost.id,
+           max_battles: max_battles,
+           current_battles: current
+         }) do
+      {:error, {:already_registered, _pid}} ->
+        # TODO: maybe we should handle that by disconnecting the existing one?
+        {:stop, :normal, state}
+
+      _ ->
+        {:ok, state}
+    end
+  end
+
+  def handle_command("autohost/status", "event", _, msg, state) do
+    %{"data" => %{"maxBattles" => max_battles, "currentBattles" => current}} = msg
+
+    Registry.update_value(state.autohost.id, fn _ ->
+      %{id: state.autohost.id, max_battles: max_battles, current_battles: current}
+    end)
+
+    state = %{state | state: {:connected, %{max_battles: max_battles, current_battles: current}}}
+    {:ok, state}
+  end
+
+  def handle_command(
+        command_id,
+        _message_type,
+        message_id,
+        _message,
+        %{state: :handshaking} = state
+      ) do
+    resp =
+      Schema.error_response(
+        command_id,
+        message_id,
+        :invalid_request,
+        "The first message after connection must be `status`"
+      )
+      |> Jason.encode!()
+
+    # 1000 = close normal
+    {:stop, :normal, 1000, [{:text, resp}], state}
   end
 
   def handle_command(command_id, _message_type, message_id, _message, state) do

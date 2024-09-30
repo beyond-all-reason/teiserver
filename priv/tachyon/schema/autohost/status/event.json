@@ -1,0 +1,24 @@
+{
+    "title": "AutohostStatusEvent",
+    "tachyon": {
+        "source": "autohost",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "event" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "autohost/status" },
+        "data": {
+            "title": "AutohostStatusEventData",
+            "type": "object",
+            "properties": {
+                "maxBattles": { "type": "integer", "minimum": 0 },
+                "currentBattles": { "type": "integer", "minimum": 0 }
+            },
+            "required": ["maxBattles", "currentBattles"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}
