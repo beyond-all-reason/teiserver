@@ -2076,18 +2076,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  def handle_command(
-        %{command: "broadcast", remaining: message, senderid: senderid},
-        state
-      ) do
-    Lobby.list_lobby_ids()
-    |> Enum.each(fn lobby_id ->
-      Lobby.say(senderid, message, lobby_id)
-    end)
-
-    state
-  end
-
   #################### Internal commands
   # Would need to be sent by internal since battlestatus isn't part of the command queue
   def handle_command(
