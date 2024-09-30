@@ -61,9 +61,18 @@ defmodule Teiserver.Tachyon.Transport do
 
   @impl true
   def terminate(reason, state) do
-    Logger.info(
-      "Terminating ws connection #{inspect(self())} with reason #{inspect(reason)} and state #{inspect(state)}"
-    )
+    case reason do
+      :remote ->
+        Logger.debug("Peer abruptly terminated connection #{inspect(state)}")
+
+      {:error, :closed} ->
+        Logger.debug("Peer closed connection #{inspect(state)}")
+
+      _ ->
+        Logger.info(
+          "Terminating ws connection #{inspect(self())} with reason #{inspect(reason)} and state #{inspect(state)}"
+        )
+    end
 
     :ok
   end

@@ -127,6 +127,8 @@ defmodule Teiserver.Player.Session do
       matchmaking: initial_matchmaking_state()
     }
 
+    Logger.debug("init session #{inspect(self())} for player #{user_id}")
+
     {:ok, state}
   end
 
@@ -311,6 +313,7 @@ defmodule Teiserver.Player.Session do
     # we don't care about cancelling the timer if the player reconnects since reconnection
     # should be fairly low (and rate limited) so too many messages isn't an issue
     {:ok, _} = :timer.send_after(30_000, :player_timeout)
+    Logger.debug("Player #{state.user_id} disconnected abruptly")
     {:noreply, %{state | conn_pid: nil}}
   end
 
@@ -336,6 +339,7 @@ defmodule Teiserver.Player.Session do
 
   def handle_info(:player_timeout, state) do
     if is_nil(state.conn_pid) do
+      Logger.debug("Player #{state.user_id} timed out, stopping session")
       {:stop, :normal, state}
     else
       {:noreply, state}
