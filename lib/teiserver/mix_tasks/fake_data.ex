@@ -104,8 +104,6 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
             permissions: [],
             icon: "fa-solid #{StylingHelper.random_icon()}",
             colour: StylingHelper.random_colour(),
-            trust_score: 10_000,
-            behaviour_score: 10_000,
             roles: ["Verified"],
             data: %{
               lobby_client: "FakeData",
