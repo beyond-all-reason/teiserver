@@ -1,0 +1,24 @@
+{
+    "title": "MatchmakingFoundEvent",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "event" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "matchmaking/found" },
+        "data": {
+            "title": "MatchmakingFoundEventData",
+            "type": "object",
+            "properties": {
+                "queueId": { "type": "string" },
+                "timeoutMs": { "type": "integer" }
+            },
+            "required": ["queueId", "timeoutMs"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

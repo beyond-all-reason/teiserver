@@ -785,6 +785,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           {chev_level, _} ->
             ConsulServer.say_command(cmd, state)
             LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+            Process.send_after(self(), :recheck_membership, 0)
             level = chev_level - 1
 
             Map.merge(state, %{
@@ -837,6 +838,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           {chev_level, _} ->
             ConsulServer.say_command(cmd, state)
             LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+            Process.send_after(self(), :recheck_membership, 0)
             level = chev_level - 1
 
             Map.merge(state, %{
@@ -886,6 +888,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           {level, _} ->
             ConsulServer.say_command(cmd, state)
             LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+            Process.send_after(self(), :recheck_membership, 0)
 
             Map.merge(state, %{
               minimum_rating_to_play: level |> max(0) |> min(state.maximum_rating_to_play - 1)
@@ -933,6 +936,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           {level, _} ->
             ConsulServer.say_command(cmd, state)
             LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+            Process.send_after(self(), :recheck_membership, 0)
 
             %{
               state
@@ -993,6 +997,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
                 ConsulServer.say_command(cmd, state)
                 LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+                Process.send_after(self(), :recheck_membership, 0)
 
                 %{
                   state

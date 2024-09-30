@@ -141,7 +141,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
       "None"
     else
       Enum.map(parties, fn party ->
-        "[#{Enum.join(party, ", ")}]"
+        "(#{Enum.join(party, ", ")})"
       end)
       |> Enum.join(", ")
     end
@@ -344,13 +344,35 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
           Enum.zip([members, ratings, ranks, names, uncertainties]),
         # Create result value
         do: %{
-          rating: rating,
+          rating: adjusted_rating(rating, uncertainty, rank),
           name: name,
           id: id,
           uncertainty: uncertainty,
           rank: rank,
           in_party?: count > 1
         }
+  end
+
+  # This balance algorithm will use an adjusted rating for newish players
+  # This will not be displayed in chobby ui or player list; it's only used for balance
+  # It will be used when calculating team deviation
+  defp adjusted_rating(rating, uncertainty, rank) do
+    if(is_newish_player?(rank, uncertainty)) do
+      # For newish players we assume they are the worst in the lobby e.g. 0 match rating and
+      # then they converge to their true rating over time
+      # Once their uncertainty is low enough, we fully trust their rating
+      {_skill, starting_uncertainty} = Openskill.rating()
+
+      uncertainty_cutoff = @high_uncertainty
+
+      min(
+        1,
+        (starting_uncertainty - uncertainty) /
+          (starting_uncertainty - uncertainty_cutoff)
+      ) * rating
+    else
+      rating
+    end
   end
 
   @spec get_parties([BT.expanded_group()]) :: [String.t()]

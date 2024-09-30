@@ -248,7 +248,12 @@ defmodule Teiserver.Battle.SplitNoobsTest do
                  %{count: 1, group_rating: 20.42, members: ["Aposis"], ratings: [20.42]}
                ],
                2 => [
-                 %{count: 1, group_rating: 12.25, members: ["kyutoryu"], ratings: [12.25]},
+                 %{
+                   count: 1,
+                   group_rating: 8.975247524752481,
+                   members: ["kyutoryu"],
+                   ratings: [8.975247524752481]
+                 },
                  %{count: 1, group_rating: 8.89, members: ["SLOPPYGAGGER"], ratings: [8.89]},
                  %{count: 1, group_rating: 18.28, members: ["Dixinormus"], ratings: [18.28]},
                  %{count: 1, group_rating: 18.4, members: ["reddragon2010"], ratings: [18.4]},
@@ -397,7 +402,7 @@ defmodule Teiserver.Battle.SplitNoobsTest do
              "------------------------------------------------------",
              "This algorithm will evenly distribute noobs and devalue them. Noobs are non-partied players that have either high uncertainty or 0 rating. Noobs will always be drafted last. For non-noobs, teams will prefer higher rating. For noobs, teams will prefer higher chevrons and lower uncertainty.",
              "------------------------------------------------------",
-             "Parties: [LuBaee, TimeContainer]",
+             "Parties: (LuBaee, TimeContainer)",
              "Solo noobs:",
              "StinkBee (chev: 3, σ: 6.7)",
              "HoldButyLeg (chev: 1, σ: 7.5)",

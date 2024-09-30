@@ -1,5 +1,5 @@
 defmodule Teiserver.SpringAuthAsyncTest do
-  use Teiserver.ServerCase, async: true
+  use Teiserver.ServerCase, async: false
   alias Teiserver.Client
   alias Teiserver.Protocols.Spring
 

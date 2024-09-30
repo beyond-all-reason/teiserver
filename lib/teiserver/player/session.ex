@@ -15,9 +15,20 @@ defmodule Teiserver.Player.Session do
 
   @type conn_state :: :connected | :reconnecting | :disconnected
 
-  @type matchmaking_state :: %{
-          joined_queues: [Matchmaking.queue_id()]
-        }
+  @type matchmaking_state ::
+          :no_matchmaking
+          | {:searching,
+             %{
+               joined_queues: nonempty_list(Matchmaking.queue_id())
+             }}
+          | {:pairing,
+             %{
+               paired_queue: Matchmaking.queue_id(),
+               room: {pid(), reference()},
+               # a list of the other queues to rejoin in case the pairing fails
+               frozen_queues: [Matchmaking.queue_id()],
+               readied: boolean()
+             }}
 
   @type state :: %{
           user_id: T.userid(),
@@ -59,6 +70,35 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), :leave_queues)
   end
 
+  @doc """
+  A match has been found and the player is expected to ready up
+  """
+  @spec matchmaking_notify_found(T.userid(), Matchmaking.queue_id(), pid(), timeout()) :: :ok
+  def matchmaking_notify_found(user_id, queue_id, room_pid, timeout_ms) do
+    GenServer.cast(
+      via_tuple(user_id),
+      {:matchmaking_notify_found, queue_id, room_pid, timeout_ms}
+    )
+  end
+
+  @doc """
+  The player is ready for the match
+  """
+  @spec matchmaking_ready(T.userid()) :: :ok | {:error, :no_match}
+  def matchmaking_ready(user_id) do
+    GenServer.call(via_tuple(user_id), :matchmaking_ready)
+  end
+
+  @spec matchmaking_lost(T.userid(), Matchmaking.lost_reason()) :: :ok
+  def matchmaking_lost(user_id, reason) do
+    GenServer.cast(via_tuple(user_id), {:matchmaking_lost, reason})
+  end
+
+  @spec matchmaking_found_update(T.userid(), non_neg_integer(), pid()) :: :ok
+  def matchmaking_found_update(user_id, ready_count, room_pid) do
+    GenServer.cast(via_tuple(user_id), {:matchmaking_found_update, ready_count, room_pid})
+  end
+
   def start_link({_conn_pid, user_id} = arg) do
     GenServer.start_link(__MODULE__, arg, name: via_tuple(user_id))
   end
@@ -91,7 +131,7 @@ defmodule Teiserver.Player.Session do
   end
 
   defp initial_matchmaking_state() do
-    %{joined_queues: []}
+    :no_matchmaking
   end
 
   @impl true
@@ -114,39 +154,155 @@ defmodule Teiserver.Player.Session do
   def handle_call(:disconnect, _from, state) do
     user_id = state.user_id
 
-    Enum.each(state.matchmaking.joined_queues, fn queue_id ->
-      Matchmaking.QueueServer.leave_queue(queue_id, user_id)
-    end)
+    case state.matchmaking do
+      {:searching, %{joined_queues: joined_queues}} ->
+        Enum.each(joined_queues, fn queue_id ->
+          Matchmaking.QueueServer.leave_queue(queue_id, user_id)
+        end)
+
+      _ ->
+        nil
+    end
 
     {:stop, :normal, :ok, %{state | matchmaking: initial_matchmaking_state()}}
   end
 
-  def handle_call({:join_queues, queue_ids}, _from, state) do
-    if not Enum.empty?(state.matchmaking.joined_queues) do
-      {:reply, {:error, :already_queued}, state}
-    else
-      case join_all_queues(state.user_id, queue_ids, []) do
-        :ok ->
-          {:reply, :ok, put_in(state.matchmaking.joined_queues, queue_ids)}
+  # this should never happen because the json schema already checks for minimum length
+  def handle_call({:join_queues, []}, _from, state),
+    do: {:reply, {:error, :invalid_request}, state}
 
-        {:error, err} ->
-          {:reply, {:error, err}, state}
-      end
+  def handle_call({:join_queues, queue_ids}, _from, state) do
+    case state.matchmaking do
+      :no_matchmaking ->
+        case join_all_queues(state.user_id, queue_ids, []) do
+          :ok ->
+            new_mm_state = {:searching, %{joined_queues: queue_ids}}
+            {:reply, :ok, put_in(state.matchmaking, new_mm_state)}
+
+          {:error, err} ->
+            {:reply, {:error, err}, state}
+        end
+
+      {:searching, _} ->
+        {:reply, {:error, :already_queued}, state}
+
+      {:pairing, _} ->
+        {:reply, {:error, :already_queued}, state}
     end
   end
 
   def handle_call(:leave_queues, _from, state) do
-    if Enum.empty?(state.matchmaking.joined_queues) do
-      {:reply, {:error, :not_queued}, state}
-    else
-      # TODO tachyon_mvp: leaving queue ignore failure there.
-      # It is a bit unclear what kind of failure can happen, and also
-      # what should be done in that case
-      Enum.each(state.matchmaking.joined_queues, fn qid ->
-        Matchmaking.leave_queue(qid, state.user_id)
-      end)
+    case state.matchmaking do
+      :no_matchmaking ->
+        {:reply, {:error, :not_queued}, state}
 
-      {:reply, :ok, Map.put(state, :matchmaking, initial_matchmaking_state())}
+      {:searching, %{joined_queues: joined_queues}} ->
+        new_state = leave_all_queues(joined_queues, state)
+        {:reply, :ok, new_state}
+
+      {:pairing, %{room: {_, room_ref}} = pairing_state} ->
+        Process.demonitor(room_ref, [:flush])
+        queues_to_leave = [pairing_state.paired_queue | pairing_state.frozen_queues]
+        new_state = leave_all_queues(queues_to_leave, state)
+        {:reply, :ok, new_state}
+    end
+  end
+
+  def handle_call(:matchmaking_ready, _from, state) do
+    case state.matchmaking do
+      {:pairing, %{room: {room_pid, _}} = pairing_state} ->
+        new_state = %{state | matchmaking: {:pairing, %{pairing_state | readied: true}}}
+        {:reply, Matchmaking.ready(room_pid, state.user_id), new_state}
+
+      _ ->
+        {:reply, {:error, :no_match}, state}
+    end
+  end
+
+  @impl true
+  def handle_cast(
+        {:matchmaking_notify_found, queue_id, room_pid, timeout_ms},
+        %{matchmaking: {:searching, %{joined_queues: queue_ids}}} = state
+      ) do
+    if not Enum.member?(queue_ids, queue_id) do
+      {:noreply, state}
+    else
+      state = send_to_player({:matchmaking_notify_found, queue_id, timeout_ms}, state)
+
+      other_queues =
+        for qid <- queue_ids, qid != queue_id do
+          Matchmaking.leave_queue(qid, state.user_id)
+          qid
+        end
+
+      room_ref = Process.monitor(room_pid)
+
+      new_mm_state =
+        {:pairing,
+         %{
+           paired_queue: queue_id,
+           room: {room_pid, room_ref},
+           frozen_queues: other_queues,
+           readied: false
+         }}
+
+      new_state = Map.put(state, :matchmaking, new_mm_state)
+      {:noreply, new_state}
+    end
+  end
+
+  def handle_cast({:matchmaking_notify_found, _queue_id, room_pid, _}, state) do
+    # we're not searching anything. This can happen as a race when two queues
+    # match the same player at the same time.
+    # Do log it since it should not happen too often unless something is wrong
+    Logger.info(
+      "Got a matchmaking found but in state #{inspect(state.matchmaking)} for user #{inspect(state.user_id)}"
+    )
+
+    Matchmaking.cancel(room_pid, state.user_id)
+    {:noreply, state}
+  end
+
+  def handle_cast({:matchmaking_lost, reason}, state) do
+    case state.matchmaking do
+      :no_matchmaking ->
+        {:noreply, state}
+
+      {:searching, _} ->
+        state = send_to_player(:matchmaking_notify_lost, state)
+        {:noreply, state}
+
+      {:pairing,
+       %{paired_queue: q_id, room: {_, ref}, frozen_queues: frozen_queues, readied: readied}} ->
+        Process.demonitor(ref, [:flush])
+        q_ids = [q_id | frozen_queues]
+        state = send_to_player(:matchmaking_notify_lost, state)
+
+        if reason == :timeout && not readied do
+          state = leave_all_queues(q_ids, state)
+          state = send_to_player({:matchmaking_cancelled, reason}, state)
+          {:noreply, state}
+        else
+          case join_all_queues(state.user_id, q_ids, []) do
+            :ok ->
+              new_mm_state = {:searching, %{joined_queues: q_ids}}
+              {:noreply, put_in(state.matchmaking, new_mm_state)}
+
+            {:error, _err} ->
+              state = send_to_player({:matchmaking_cancelled, :server_error}, state)
+              {:noreply, %{state | matchmaking: initial_matchmaking_state()}}
+          end
+        end
+    end
+  end
+
+  def handle_cast({:matchmaking_found_update, current, room_pid}, state) do
+    case state.matchmaking do
+      {:pairing, %{room: {^room_pid, _}}} ->
+        {:noreply, send_to_player({:matchmaking_found_update, current}, state)}
+
+      _ ->
+        {:noreply, state}
     end
   end
 
@@ -156,6 +312,26 @@ defmodule Teiserver.Player.Session do
     # should be fairly low (and rate limited) so too many messages isn't an issue
     {:ok, _} = :timer.send_after(30_000, :player_timeout)
     {:noreply, %{state | conn_pid: nil}}
+  end
+
+  def handle_info({:DOWN, ref, :process, _obj, reason}, state) do
+    case state do
+      %{matchmaking: {:pairing, %{room: {_, ^ref}}}} ->
+        # only log in case of abnormal exit. If the queue itself goes down, so be it
+        if reason != :shutdown, do: Logger.warning("Pairing room went down #{inspect(reason)}")
+        # TODO tachyon_mvp: rejoin the room and send `lost` event
+        # For now, just abruptly stop everything
+        {:stop, :normal, state}
+
+      st ->
+        if reason != :normal do
+          Logger.warning(
+            "unhandled DOWN: #{inspect(ref)} went down because #{reason}. state: #{inspect(st)}"
+          )
+        end
+
+        {:noreply, state}
+    end
   end
 
   def handle_info(:player_timeout, state) do
@@ -186,5 +362,26 @@ defmodule Teiserver.Player.Session do
 
         {:error, reason}
     end
+  end
+
+  defp leave_all_queues(queues_to_leave, state) do
+    # TODO tachyon_mvp: leaving queue ignore failure there.
+    # It is a bit unclear what kind of failure can happen, and also
+    # what should be done in that case
+    Enum.each(queues_to_leave, fn qid ->
+      Matchmaking.leave_queue(qid, state.user_id)
+    end)
+
+    Map.put(state, :matchmaking, initial_matchmaking_state())
+  end
+
+  defp send_to_player(message, state) do
+    # TODO tachyon_mvp: what should server do if the connection is down at that time?
+    # The best is likely to store it and send the notification upon reconnection
+    if state.conn_pid != nil do
+      send(state.conn_pid, message)
+    end
+
+    state
   end
 end

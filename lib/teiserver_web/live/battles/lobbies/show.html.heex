@@ -108,8 +108,8 @@ spectators =
               <li>
                 Queue size: <%= Enum.count(@consul.join_queue ++ @consul.low_priority_join_queue) %>
               </li>
+              <li>Balance algorithm: <%= @consul.balance_algorithm %></li>
               <%= if @tester_perms do %>
-                <li>Balance algorithm: <%= @consul.balance_algorithm %></li>
                 <li>Match ID: <%= Map.get(@modoptions, "game/server_match_id") %></li>
               <% end %>
 
@@ -156,7 +156,7 @@ spectators =
               <th>Party</th>
 
               <th>Rating</th>
-              <%= if @moderator do %>
+              <%= if @tester_perms do %>
                 <th>Uncertainty</th>
 
                 <th>Winrate Team</th>
@@ -202,7 +202,7 @@ spectators =
                   <% end %>
 
                   <td><%= Teiserver.Helper.NumberHelper.round(rating_value, 2) %></td>
-                  <%= if @moderator do %>
+                  <%= if @tester_perms do %>
                     <td><%= Teiserver.Helper.NumberHelper.round(uncertainty, 2) %></td>
 
                     <td><%= @stats[user.id]["win_rate.team"] %></td>
@@ -249,7 +249,7 @@ spectators =
               <th>Name</th>
 
               <th>Rating</th>
-              <%= if @moderator do %>
+              <%= if @tester_perms do %>
                 <th>Uncertainty</th>
               <% end %>
 
@@ -278,7 +278,7 @@ spectators =
                   <td><%= user.name %></td>
 
                   <td><%= Teiserver.Helper.NumberHelper.round(rating_value, 2) %></td>
-                  <%= if @moderator do %>
+                  <%= if @tester_perms do %>
                     <td><%= Teiserver.Helper.NumberHelper.round(uncertainty, 2) %></td>
                   <% end %>
 

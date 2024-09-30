@@ -376,6 +376,8 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
+        $('#action_restriction_All_lobbies').prop('checked', true);
+        $('#action_restriction_All_chat').prop('checked', true);
         $('#action_reason').val($('#action_reason').val() + '\n\nSuspension duration is based on the number of similar recent offenses.');
       "
                   >
@@ -384,6 +386,8 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
+        $('#action_restriction_All_lobbies').prop('checked', true);
+        $('#action_restriction_All_chat').prop('checked', true);
         $('#action_reason').val($('#action_reason').val() + '\n\nThis suspension\'s duration was increased due to the severity of the incident.');
       "
                   >
@@ -392,6 +396,8 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
+        $('#action_restriction_All_lobbies').prop('checked', true);
+        $('#action_restriction_All_chat').prop('checked', true);
         $('#action_reason').val($('#action_reason').val() + '\n\nLarge Raptor/Bot replays require much more time to review than PvP replays, so offenses in these games are treated more harshly.');
       "
                   >

@@ -65,7 +65,8 @@ defmodule Teiserver.Tachyon.Schema do
     if String.contains?(command_id, ".") do
       {:error, "Invalid command id #{command_id}"}
     else
-      path = "priv/tachyon/schema/#{command_id}/#{type}.json"
+      schema_path = Path.join(["priv", "tachyon", "schema", command_id, "#{type}.json"])
+      path = Application.app_dir(:teiserver, schema_path)
 
       with {:ok, content} <- File.read(path),
            {:ok, json} <- Jason.decode(content) do
@@ -110,6 +111,22 @@ defmodule Teiserver.Tachyon.Schema do
       resp
     else
       Map.put(resp, :details, details)
+    end
+  end
+
+  @spec event(command_id(), term()) :: map()
+  def event(command_id, data \\ nil) do
+    ev = %{
+      type: :event,
+      status: :success,
+      messageId: UUID.uuid4(),
+      commandId: command_id
+    }
+
+    if is_nil(data) do
+      ev
+    else
+      Map.put(ev, :data, data)
     end
   end
 end

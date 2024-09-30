@@ -37,6 +37,14 @@ defmodule Teiserver.Matchmaking.QueueSynest do
 
       assert {:error, :too_many_players} = Matchmaking.join_queue(queue_id, member)
     end
+
+    test "paired user still in queue", %{user: user, queue_id: queue_id, queue_pid: queue_pid} do
+      user2 = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+      assert :ok = Matchmaking.join_queue(queue_id, user.id)
+      assert :ok = Matchmaking.join_queue(queue_id, user2.id)
+      send(queue_pid, :tick)
+      assert {:error, :already_queued} == Matchmaking.join_queue(queue_id, user.id)
+    end
   end
 
   describe "leaving" do

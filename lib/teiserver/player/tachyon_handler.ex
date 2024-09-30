@@ -41,6 +41,42 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   @impl Handler
+  def handle_info({:matchmaking_notify_found, queue_id, timeout_ms}, state) do
+    resp =
+      Schema.event("matchmaking/found", %{
+        queueId: queue_id,
+        timeoutMs: timeout_ms
+      })
+
+    {:push, {:text, resp |> Jason.encode!()}, state}
+  end
+
+  def handle_info({:matchmaking_found_update, ready_count}, state) do
+    resp =
+      Schema.event("matchmaking/foundUpdate", %{
+        readyCount: ready_count
+      })
+
+    {:push, {:text, resp |> Jason.encode!()}, state}
+  end
+
+  def handle_info(:matchmaking_notify_lost, state) do
+    resp = Schema.event("matchmaking/lost")
+    {:push, {:text, resp |> Jason.encode!()}, state}
+  end
+
+  def handle_info({:matchmaking_cancelled, reason}, state) do
+    reason =
+      case reason do
+        :cancel -> :intentional
+        :timeout -> :ready_timeout
+        err -> err
+      end
+
+    resp = Schema.event("matchmaking/cancelled", %{reason: reason})
+    {:push, {:text, resp |> Jason.encode!()}, state}
+  end
+
   def handle_info(_msg, state) do
     {:ok, state}
   end
@@ -110,13 +146,30 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("matchmaking/cancel" = cmd_id, "request", message_id, _message, state) do
+    case Player.Session.leave_queues(state.user.id) do
+      :ok ->
+        messages = [
+          {:text, Schema.response(cmd_id, message_id) |> Jason.encode!()},
+          {:text,
+           Schema.event("matchmaking/cancelled", %{reason: :intentional}) |> Jason.encode!()}
+        ]
+
+        {:push, messages, state}
+
+      {:error, reason} ->
+        response = Schema.error_response(cmd_id, message_id, reason)
+        {:push, {:text, Jason.encode!(response)}, state}
+    end
+  end
+
+  def handle_command("matchmaking/ready" = cmd_id, "request", message_id, _message, state) do
     response =
-      case Player.Session.leave_queues(state.user.id) do
+      case Player.Session.matchmaking_ready(state.user.id) do
         :ok ->
           Schema.response(cmd_id, message_id)
 
-        {:error, reason} ->
-          Schema.error_response(cmd_id, message_id, reason)
+        {:error, :no_match} ->
+          Schema.error_response(cmd_id, message_id, :no_match)
       end
 
     {:push, {:text, Jason.encode!(response)}, state}

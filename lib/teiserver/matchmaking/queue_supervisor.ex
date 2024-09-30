@@ -13,6 +13,12 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
         name: "Duel",
         team_size: 1,
         team_count: 2
+      }),
+      QueueServer.init_state(%{
+        id: "2v2",
+        name: "2v2",
+        team_size: 2,
+        team_count: 2
       })
     ]
   end
