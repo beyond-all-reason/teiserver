@@ -25,20 +25,15 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
     poll_until(fn -> Player.conn_state(user.id) end, &(&1 == :reconnecting))
   end
 
-  test "session is restarted if player still connected", %{user: user, client: client} do
+  test "player gets kicked out if session dies", %{user: user, client: client} do
     sess_pid = poll_until_some(fn -> Player.SessionRegistry.lookup(user.id) end)
     Player.monitor_session(user.id)
     Process.exit(sess_pid, :please_die)
     assert_receive({:DOWN, _, :process, _, _})
 
-    poll_until(
-      fn -> Player.SessionRegistry.lookup(user.id) end,
-      fn x -> x != sess_pid end
-    )
-
-    # make sure the existing client is still connected
-    WSC.send_message(client, {:text, "test_ping"})
-    assert {:ok, {:text, "test_pong"}} == WSC.recv(client)
+    # make sure the existing client has been disconnected
+    assert %{"commandId" => "system/disconnected"} = Tachyon.recv_message!(client)
+    assert {:error, :disconnected} == WSC.recv(client)
   end
 
   test "existing connection is terminated when a new one comes in", %{

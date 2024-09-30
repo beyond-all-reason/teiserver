@@ -3,6 +3,7 @@ defmodule Teiserver.Player.TachyonHandler do
   Player specific code to handle tachyon logins and actions
   """
 
+  require Logger
   alias Teiserver.Tachyon.Schema
   alias Teiserver.Tachyon.Handler
   alias Teiserver.Data.Types, as: T
@@ -11,7 +12,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
   @behaviour Handler
 
-  @type state :: %{user: T.user()}
+  @type state :: %{user: T.user(), sess_monitor: reference()}
 
   @impl Handler
   def connect(conn) do
@@ -36,11 +37,27 @@ defmodule Teiserver.Player.TachyonHandler do
   @spec init(%{user: T.user()}) :: WebSock.handle_result()
   def init(initial_state) do
     # this is inside the process that maintain the connection
-    {:ok, _sess_mon_ref} = setup_session(initial_state.user.id)
-    {:ok, initial_state}
+    {:ok, _} = setup_session(initial_state.user.id)
+    sess_monitor = Player.monitor_session(initial_state.user.id)
+    {:ok, Map.put(initial_state, :sess_monitor, sess_monitor)}
   end
 
   @impl Handler
+  def handle_info({:DOWN, _, :process, _, reason}, state) do
+    Logger.warning(
+      "Session for player #{state.user.id} went down because #{inspect(reason)}, terminating connection"
+    )
+
+    resp =
+      Schema.event("system/disconnected", %{
+        reason: :server_error,
+        details: "session process exited with reason #{inspect(reason)}"
+      })
+      |> Jason.encode!()
+
+    {:stop, :normal, 1000, [{:text, resp}], state}
+  end
+
   def handle_info({:matchmaking_notify_found, queue_id, timeout_ms}, state) do
     resp =
       Schema.event("matchmaking/found", %{
@@ -193,7 +210,7 @@ defmodule Teiserver.Player.TachyonHandler do
   # the brand new session.
   defp setup_session(user_id) do
     case Player.SessionSupervisor.start_session(user_id) do
-      {:ok, _session_pid} ->
+      {:ok, _player_conn_pid} ->
         Player.Registry.register_and_kill_existing(user_id)
 
       {:error, {:already_started, pid}} ->
