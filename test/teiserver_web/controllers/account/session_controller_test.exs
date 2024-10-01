@@ -30,8 +30,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
         })
 
       conn = get(conn, ~p"/one_time_login/test_code_valid_value")
-      authenticated_user = Guardian.Plug.current_resource(conn)
-      assert authenticated_user.id == user.id
+      assert Guardian.Plug.current_resource(conn).id == user.id
     end
 
     test "Valid code without IP", %{conn: conn, user: user} do
@@ -49,8 +48,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
         })
 
       conn = get(conn, ~p"/one_time_login/test_code_valid_value")
-      authenticated_user = Guardian.Plug.current_resource(conn)
-      assert authenticated_user.id == user.id
+      assert Guardian.Plug.current_resource(conn).id == user.id
     end
 
     test "Unknown one_time_code invalid", %{conn: conn} do
