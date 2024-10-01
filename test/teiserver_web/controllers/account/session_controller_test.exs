@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
 
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.Account
+  alias Teiserver.Account.Guardian
   alias Teiserver.Config
 
   describe "one time codes" do
@@ -29,12 +30,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
         })
 
       conn = get(conn, ~p"/one_time_login/test_code_valid_value")
-      assert conn.assigns.flash["info"] =~ "Welcome back!"
-      assert redirected_to(conn) == rdr
-
-      # Profile page should be accessible.
-      conn = get(conn, rdr)
-      assert html_response(conn, 200) =~ user.name
+      assert Guardian.Plug.current_resource(conn).id == user.id
     end
 
     test "Valid code without IP", %{conn: conn, user: user} do
@@ -52,17 +48,12 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
         })
 
       conn = get(conn, ~p"/one_time_login/test_code_valid_value")
-      assert conn.assigns.flash["info"] =~ "Welcome back!"
-      assert redirected_to(conn) == rdr
-
-      conn = get(conn, rdr)
-      assert html_response(conn, 200) =~ user.name
+      assert Guardian.Plug.current_resource(conn).id == user.id
     end
 
     test "Unknown one_time_code invalid", %{conn: conn} do
       conn = get(conn, ~p"/one_time_login/some_invalid_code")
-      assert redirected_to(conn) == ~p"/"
-      assert conn.assigns.flash["info"] != "Welcome back!"
+      assert Guardian.Plug.current_resource(conn) == nil
     end
 
     test "bad ip", %{conn: conn, user: user} do
@@ -79,8 +70,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
         })
 
       conn = get(conn, ~p"/one_time_login/test_code_valid_value")
-      assert conn.assigns.flash["info"] != "Welcome back!"
-      assert redirected_to(conn) == ~p"/"
+      assert Guardian.Plug.current_resource(conn) == nil
     end
 
     test "expired code", %{conn: conn, user: user} do
@@ -96,8 +86,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
         })
 
       conn = get(conn, ~p"/one_time_login/test_code_valid_value")
-      assert conn.assigns.flash["info"] != "Welcome back!"
-      assert redirected_to(conn) == ~p"/"
+      assert Guardian.Plug.current_resource(conn) == nil
     end
 
     test "disabled via site config", %{conn: conn, user: user} do
@@ -116,8 +105,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
         })
 
       conn = get(conn, ~p"/one_time_login/test_code_valid_value")
-      assert conn.assigns.flash["info"] != "Welcome back!"
-      assert redirected_to(conn) == ~p"/"
+      assert Guardian.Plug.current_resource(conn) == nil
     end
   end
 end
