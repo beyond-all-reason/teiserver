@@ -29,34 +29,43 @@ defmodule TeiserverWeb.PostLiveTest do
   describe "Anon auth test" do
     setup [:create_post]
 
-    test "anon", %{conn: conn, post: post} do
+    test "anon get posts", %{conn: conn} do
+      conn = get(conn, ~p"/microblog/admin/posts")
+
+      assert redirected_to(conn) == ~p"/login"
+    end
+
+    test "anon visit post", %{conn: conn, post: post} do
+      conn = get(conn, ~p"/microblog/admin/posts/#{post}")
+
+      assert redirected_to(conn) == ~p"/login"
+    end
+
+    test "anon live", %{conn: conn, post: post} do
       {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/posts")
 
-      assert resp == %{
-               flash: %{"error" => "You must log in to access this page."},
-               to: ~p"/login"
-             }
+      assert resp.to == ~p"/login"
 
       {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/posts/#{post}")
 
-      assert resp == %{
-               flash: %{"error" => "You must log in to access this page."},
-               to: ~p"/login"
-             }
+      assert resp.to == ~p"/login"
     end
   end
 
   describe "Basic auth test" do
     setup [:unauth_setup, :create_post]
 
-    @tag :needs_attention
-    test "basic user", %{post: post, conn: conn} do
+    test "cannot visit admin posts", %{post: post, conn: conn} do
       {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/posts")
-      assert resp == %{flash: %{"info" => "Welcome back!"}, to: ~p"/microblog"}
+      assert resp.to == ~p"/"
+    end
 
+    test "cannot visit an admin's post", %{post: post, conn: conn} do
       {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/posts/#{post}")
-      assert resp == %{flash: %{"info" => "Welcome back!"}, to: ~p"/microblog"}
+      assert resp.to == ~p"/"
+    end
 
+    test "can visit my post", %{post: post, conn: conn} do
       {:ok, _show_live, html} = live(conn, ~p"/microblog/show/#{post}")
       refute html =~ "Delete post"
     end
