@@ -11,6 +11,13 @@ defmodule TeiserverWeb.Moderation.Overwatch.IndexLiveTest do
     |> TeiserverTestLib.conn_setup()
   end
 
+  test "cannot access moderation overwatch without authenticating" do
+    {:ok, kw} = GeneralTestLib.conn_setup()
+    {:ok, conn} = Keyword.fetch(kw, :conn)
+    conn = get(conn, ~p"/moderation/overwatch")
+    assert redirected_to(conn) == ~p"/"
+  end
+
   describe "Index" do
     setup [:auth_setup]
 
