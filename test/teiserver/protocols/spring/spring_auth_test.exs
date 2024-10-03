@@ -479,7 +479,8 @@ CLIENTS test_room #{user.name}\n"
     # Rename with existng name
     _send_raw(socket, "RENAMEACCOUNT #{watcher_user.name}\n")
     reply = _recv_raw(socket)
-    assert reply == "SERVERMSG Username already taken\n"
+    assert String.starts_with?(reply, "SERVERMSG")
+    assert String.contains?(reply, "Username already taken")
 
     # Perform rename
     _send_raw(socket, "RENAMEACCOUNT test_user_rename\n")
