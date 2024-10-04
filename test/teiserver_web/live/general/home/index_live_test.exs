@@ -4,21 +4,21 @@ defmodule TeiserverWeb.General.Home.IndexLiveTest do
 
   import Phoenix.LiveViewTest
 
-  @moduletag :needs_attention
-
   defp auth_setup(_) do
     Central.Helpers.GeneralTestLib.conn_setup()
     |> Teiserver.TeiserverTestLib.conn_setup()
   end
 
-  describe "Anon" do
-    test "index", %{conn: conn} do
+  describe "Visit index without authentication" do
+    test "index get", %{conn: conn} do
+      conn = get(conn, ~p"/")
+      assert redirected_to(conn) == ~p"/login"
+    end
+
+    test "index live", %{conn: conn} do
       {:error, {:redirect, resp}} = live(conn, ~p"/")
 
-      assert resp == %{
-               flash: %{"error" => "You must log in to access this page."},
-               to: ~p"/login"
-             }
+      assert resp.to == ~p"/login"
     end
   end
 

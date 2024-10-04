@@ -74,7 +74,7 @@ defmodule TeiserverWeb.Router do
   end
 
   scope "/", TeiserverWeb.General do
-    pipe_through([:live_browser, :nomenu_layout])
+    pipe_through([:live_browser, :nomenu_layout, :protected])
 
     live_session :general_index,
       on_mount: [
@@ -95,6 +95,10 @@ defmodule TeiserverWeb.Router do
       live "/all", BlogLive.Index, :all
       live "/show/:post_id", BlogLive.Show, :index
     end
+  end
+
+  scope "/microblog", TeiserverWeb.Microblog do
+    pipe_through([:live_browser, :app_layout, :protected])
 
     live_session :microblog_user,
       on_mount: [
@@ -477,7 +481,7 @@ defmodule TeiserverWeb.Router do
   end
 
   scope "/moderation", TeiserverWeb.Moderation do
-    pipe_through([:browser, :app_layout])
+    pipe_through([:browser, :app_layout, :protected])
 
     live_session :overwatch,
       on_mount: [
@@ -488,6 +492,10 @@ defmodule TeiserverWeb.Router do
       live "/overwatch/target/:target_id", OverwatchLive.User, :user
       live "/overwatch/report_group/:id", OverwatchLive.ReportGroupDetail, :index
     end
+  end
+
+  scope "/moderation", TeiserverWeb.Moderation do
+    pipe_through([:browser, :app_layout])
 
     live_session :report_user,
       on_mount: [

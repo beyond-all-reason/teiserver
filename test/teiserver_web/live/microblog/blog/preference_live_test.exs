@@ -12,6 +12,17 @@ defmodule TeiserverWeb.Microblog.Blog.PreferenceLiveTest do
     |> TeiserverTestLib.conn_setup()
   end
 
+  test "microblog preferences requires authentication" do
+    {:ok, kw} =
+      GeneralTestLib.conn_setup([], [:no_login])
+      |> Teiserver.TeiserverTestLib.conn_setup()
+
+    {:ok, conn} = Keyword.fetch(kw, :conn)
+
+    conn = get(conn, ~p"/microblog/preferences")
+    assert redirected_to(conn) == ~p"/login"
+  end
+
   describe "Preference" do
     setup [:auth_setup]
 

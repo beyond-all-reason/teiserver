@@ -29,33 +29,26 @@ defmodule TeiserverWeb.TagLiveTest do
   describe "Anon auth test" do
     setup [:create_tag]
 
-    test "anon", %{conn: conn, tag: tag} do
+    test "unauthenticated user cannot visit", %{conn: conn, tag: tag} do
       {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/tags")
 
-      assert resp == %{
-               flash: %{"error" => "You must log in to access this page."},
-               to: ~p"/login"
-             }
+      assert resp.to == ~p"/login"
 
       {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/tags/#{tag}")
 
-      assert resp == %{
-               flash: %{"error" => "You must log in to access this page."},
-               to: ~p"/login"
-             }
+      assert resp.to == ~p"/login"
     end
   end
 
   describe "Basic auth test" do
     setup [:unauth_setup, :create_tag]
 
-    @tag :needs_attention
     test "basic user", %{tag: tag, conn: conn} do
       {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/tags")
-      assert resp == %{flash: %{"info" => "Welcome back!"}, to: ~p"/microblog"}
+      assert resp.to == ~p"/"
 
       {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/tags/#{tag}")
-      assert resp == %{flash: %{"info" => "Welcome back!"}, to: ~p"/microblog"}
+      assert resp.to == ~p"/"
     end
   end
 
