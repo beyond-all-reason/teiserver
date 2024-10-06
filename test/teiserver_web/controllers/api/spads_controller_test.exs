@@ -34,7 +34,6 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       assert data == %{"rating_value" => 16.67, "uncertainty" => 8.33}
     end
 
-    @tag :needs_attention
     test "existing user", %{conn: conn} do
       user = new_user()
       rating_type_id = MatchRatingLib.rating_type_name_lookup()["Team"]
