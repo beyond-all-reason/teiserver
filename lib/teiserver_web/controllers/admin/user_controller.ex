@@ -84,7 +84,7 @@ defmodule TeiserverWeb.Admin.UserController do
            ip: params["ip"],
            lobby_client: params["lobby_client"],
            previous_names: params["previous_names"],
-           mod_action: params["mod_action"],
+           mod_action: params["mod_action"]
          ],
          limit: params["limit"] || 50,
          order_by: params["order"] || "Name (A-Z)"
