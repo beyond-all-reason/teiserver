@@ -37,8 +37,8 @@ defmodule Teiserver.Player.TachyonHandler do
   @spec init(%{user: T.user()}) :: WebSock.handle_result()
   def init(initial_state) do
     # this is inside the process that maintain the connection
-    {:ok, _} = setup_session(initial_state.user.id)
-    sess_monitor = Player.monitor_session(initial_state.user.id)
+    {:ok, session_pid} = setup_session(initial_state.user.id)
+    sess_monitor = Process.monitor(session_pid)
     {:ok, Map.put(initial_state, :sess_monitor, sess_monitor)}
   end
 
@@ -210,8 +210,9 @@ defmodule Teiserver.Player.TachyonHandler do
   # the brand new session.
   defp setup_session(user_id) do
     case Player.SessionSupervisor.start_session(user_id) do
-      {:ok, _player_conn_pid} ->
-        Player.Registry.register_and_kill_existing(user_id)
+      {:ok, session_pid} ->
+        {:ok, _} = Player.Registry.register_and_kill_existing(user_id)
+        {:ok, session_pid}
 
       {:error, {:already_started, pid}} ->
         case Player.Session.replace_connection(pid, self()) do
@@ -223,7 +224,8 @@ defmodule Teiserver.Player.TachyonHandler do
             setup_session(user_id)
 
           :ok ->
-            Player.Registry.register_and_kill_existing(user_id)
+            {:ok, _} = Player.Registry.register_and_kill_existing(user_id)
+            {:ok, pid}
         end
     end
   end
