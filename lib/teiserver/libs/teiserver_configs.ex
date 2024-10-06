@@ -281,6 +281,24 @@ defmodule Teiserver.TeiserverConfigs do
 
   defp lobby_configs() do
     add_site_config_type(%{
+      key: "teiserver.Rating shown to hosts",
+      section: "Lobbies",
+      type: "select",
+      permissions: ["Admin"],
+      description: "What values are used as ratings sent to game hosts (e.g. SPADS).",
+      default: "Rating value",
+      opts: [
+        choices: [
+          "Rating value",
+          "Rank by rating value (1 is lowest)",
+          "Rank by rating value (1 is highest)",
+          "Rank by leaderboard rating (1 is lowest)",
+          "Rank by leaderboard rating (1 is highest)"
+        ]
+      ]
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Uncertainty required to show rating",
       section: "Lobbies",
       type: "integer",
