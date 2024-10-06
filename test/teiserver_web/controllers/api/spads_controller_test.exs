@@ -53,7 +53,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       response = response(conn, 200)
       data = Jason.decode!(response)
 
-      assert data == %{"rating_value" => 20, "uncertainty" => 5}
+      assert data == %{"rating_value" => 16.67, "uncertainty" => 8.33}
     end
   end
 
