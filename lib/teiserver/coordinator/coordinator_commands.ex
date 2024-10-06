@@ -556,7 +556,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
   # Admin commands
   defp do_handle(
-         %{command: "broadcast", senderid: senderid, remaining: message} = cmd,
+         %{command: "broadcast", senderid: senderid, remaining: message},
          state
        ) do
     Lobby.list_lobby_ids()
