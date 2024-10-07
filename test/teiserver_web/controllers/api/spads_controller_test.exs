@@ -52,8 +52,10 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
         })
 
       Client.login(user, :spring, "127.0.0.1")
+
       lobby_id =
         make_lobby(%{name: "Test", founder_id: user.id, founder_name: user.name})
+
       Client.join_battle(user.id, lobby_id, true)
 
       conn = get(conn, Routes.ts_spads_path(conn, :get_rating, user.id, "Team"))
