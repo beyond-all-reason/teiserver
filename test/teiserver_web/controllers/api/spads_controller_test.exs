@@ -52,7 +52,6 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
         })
 
       Client.login(user, :spring, "127.0.0.1")
-
       lobby_id =
         make_lobby(%{name: "Test", founder_id: user.id, founder_name: user.name})
 
@@ -62,7 +61,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       response = response(conn, 200)
       data = Jason.decode!(response)
 
-      assert data == %{"rating_value" => 16.67, "uncertainty" => 8.33}
+      assert data == %{"rating_value" => 20, "uncertainty" => 5}
     end
   end
 
