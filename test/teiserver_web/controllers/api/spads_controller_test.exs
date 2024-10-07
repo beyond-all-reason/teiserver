@@ -52,6 +52,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
         })
 
       Client.login(user, :spring, "127.0.0.1")
+
       lobby_id =
         make_lobby(%{name: "Test", founder_id: user.id, founder_name: user.name})
 
