@@ -1030,6 +1030,42 @@ defmodule Teiserver.Account do
     Repo.delete(rating)
   end
 
+  @doc """
+  Returns the user's rank in the global order list of ratings.
+  """
+  def get_rating_rank(
+        userid,
+        rating_type_id,
+        opts \\ %{rating_type: :rating_value, order: :lowest_first}
+      ) do
+    order_by =
+      cond do
+        opts.rating_type == :rating_value and opts.order == :lowest_first ->
+          "Rating value low to high"
+
+        opts.rating_type == :rating_value and opts.order == :highest_first ->
+          "Rating value high to low"
+
+        opts.rating_type == :leaderboard_rating and opts.order == :lowest_first ->
+          "Leaderboard rating low to high"
+
+        opts.rating_type == :leaderboard_rating and opts.order == :highest_first ->
+          "Leaderboard rating high to low"
+      end
+
+    user_by_rating =
+      rating_query(
+        search: [
+          user_id: userid,
+          rating_type_id: rating_type_id
+        ],
+        order_by: order_by
+      )
+      |> Repo.all()
+
+    (Enum.find_index(user_by_rating, fn r -> r.user_id == userid end) || 0) + 1
+  end
+
   # Codes
   alias Teiserver.Account.{Code, CodeLib}
 
