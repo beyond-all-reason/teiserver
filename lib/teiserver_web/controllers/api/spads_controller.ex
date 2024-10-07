@@ -251,25 +251,25 @@ defmodule TeiserverWeb.API.SpadsController do
         {rating.rating_value, rating.uncertainty}
 
       "Rank by in game rating (1 is lowest)" ->
-        {Account.get_rating_rank(userid, rating_type_id, %{
+        {Account.get_rank_by_rating(userid, rating_type_id, %{
            rating_type: :rating_value,
            order: :lowest_first
          }), 0}
 
       "Rank by in game rating (1 is highest)" ->
-        {Account.get_rating_rank(userid, rating_type_id, %{
+        {Account.get_rank_by_rating(userid, rating_type_id, %{
            rating_type: :rating_value,
            order: :highest_first
          }), 0}
 
       "Rank by leaderboard rating (1 is lowest)" ->
-        {Account.get_rating_rank(userid, rating_type_id, %{
+        {Account.get_rank_by_rating(userid, rating_type_id, %{
            rating_type: :leaderboard_rating,
            order: :lowest_first
          }), 0}
 
       "Rank by leaderboard rating (1 is highest)" ->
-        {Account.get_rating_rank(userid, rating_type_id, %{
+        {Account.get_rank_by_rating(userid, rating_type_id, %{
            rating_type: :leaderboard_rating,
            order: :highest_first
          }), 0}

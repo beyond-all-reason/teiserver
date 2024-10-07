@@ -1031,9 +1031,26 @@ defmodule Teiserver.Account do
   end
 
   @doc """
-  Returns the user's rank in the global order list of ratings.
+  Returns the player's rank when compared to other players by rating.
+
+  As an example, with options {rating_type: :rating_value, order: :lowest_first},
+  the function will return 1 for the player with the lowest rating value for the game type
+  rating_type_id.
+
+  With options {rating_type: :leaderboard_rating, order: :highest_first}, the function will return 1
+  for the player with the highest leaderboard rating for the game type rating_type_id.
+
+  See config option `teiserver.Rating shown to hosts` for more information.
+
+  Possible options for
+  - rating_type
+    - :rating_value
+    - :leaderboard_rating
+  - order
+    - :lowest_first
+    - :highest_first
   """
-  def get_rating_rank(
+  def get_rank_by_rating(
         userid,
         rating_type_id,
         opts \\ %{rating_type: :rating_value, order: :lowest_first}
