@@ -25,18 +25,6 @@ defmodule Teiserver.SpringAuthTest do
     {:ok, socket: socket, user: user}
   end
 
-  # wrapped login attempt in a function to make polling for expected output easier
-  def _send_login_attempt_and_parse_reply_msg_from_server_socket(socket, login_name) do
-    _send_raw(
-      socket,
-      "LOGIN #{login_name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
-    )
-
-    reply = _recv_until(socket)
-    [server_response | _remainder] = String.split(reply, "\n")
-    server_response
-  end
-
   test "Test bad match", %{socket: socket} do
     # Previously a bad match on the data could cause a failure on the next
     # command as it corrupted state. This checks for that regression
@@ -492,7 +480,12 @@ CLIENTS test_room #{user.name}\n"
     wreply = _recv_raw(watcher)
     assert wreply == "REMOVEUSER #{user.name}\n"
 
-    assert Client.get_client_by_id(userid) == nil
+    Teiserver.Support.Tachyon.poll_until(
+      fn -> Client.get_client_by_id(userid) end,
+      &(&1 == nil),
+      limit: 32,
+      wait: 250
+    )
 
     # Lets be REAL sure
     client_ids = Client.list_client_ids()
@@ -510,13 +503,21 @@ CLIENTS test_room #{user.name}\n"
     # Now we get flood protection after the rename
     expected_server_response = "DENIED Flood protection - Please wait 20 seconds and try again"
 
-    server_response =
-      Teiserver.Support.Tachyon.poll_until(
-        fn -> _send_login_attempt_and_parse_reply_msg_from_server_socket(socket, new_name) end,
-        &(&1 == expected_server_response)
-      )
+    Teiserver.Support.Tachyon.poll_until(
+      fn ->
+        _send_raw(
+          socket,
+          "LOGIN #{new_name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
+        )
 
-    assert server_response == expected_server_response
+        reply = _recv_until(socket)
+        [accepted | _remainder] = String.split(reply, "\n")
+        accepted
+      end,
+      &(&1 == expected_server_response),
+      limit: 32,
+      wait: 250
+    )
 
     # Un-flood them
     CacheUser.set_flood_level(userid, 0)
