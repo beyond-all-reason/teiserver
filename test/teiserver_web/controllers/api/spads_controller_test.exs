@@ -5,11 +5,13 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Coordinator
   alias Teiserver.Account.ClientLib
+  alias Teiserver.Client
 
   import Teiserver.TeiserverTestLib,
     only: [
       new_user: 0,
-      new_user: 1
+      new_user: 1,
+      make_lobby: 1
     ]
 
   defp make_rating(userid, rating_type_id, rating_value) do
@@ -49,11 +51,16 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
           last_updated: Timex.now()
         })
 
+      Client.login(user, :spring, "127.0.0.1")
+      lobby_id =
+        make_lobby(%{name: "Test", founder_id: user.id, founder_name: user.name})
+      Client.join_battle(user.id, lobby_id, true)
+
       conn = get(conn, Routes.ts_spads_path(conn, :get_rating, user.id, "Team"))
       response = response(conn, 200)
       data = Jason.decode!(response)
 
-      assert data == %{"rating_value" => 16.67, "uncertainty" => 8.33}
+      assert data == %{"rating_value" => 20, "uncertainty" => 5}
     end
   end
 
