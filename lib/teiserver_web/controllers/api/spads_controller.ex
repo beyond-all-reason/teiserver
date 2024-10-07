@@ -247,8 +247,7 @@ defmodule TeiserverWeb.API.SpadsController do
 
     case Config.get_site_config_cache("teiserver.Rating shown to hosts") do
       "Rating value" ->
-        rating = BalanceLib.get_user_rating_value_uncertainty_pair(userid, rating_type_id)
-        {rating.rating_value, rating.uncertainty}
+        BalanceLib.get_user_rating_value_uncertainty_pair(userid, rating_type_id)
 
       "Rank by in game rating (1 is lowest)" ->
         {Account.get_rank_by_rating(userid, rating_type_id, %{
