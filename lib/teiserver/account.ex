@@ -1570,9 +1570,6 @@ defmodule Teiserver.Account do
   @spec check_block_status(T.userid(), [T.userid()]) :: :ok | :blocking | :blocked
   defdelegate check_block_status(userid, userid_list), to: RelationshipLib
 
-  @spec check_avoid_status(T.userid(), [T.userid()]) :: :ok | :avoiding | :avoided
-  defdelegate check_avoid_status(userid, userid_list), to: RelationshipLib
-
   @spec profile_view_permissions(
           T.user(),
           T.user(),
