@@ -132,34 +132,6 @@
           class="form-control"
         />
       </div>
-
-      <div :if={allow?(@current_user, "Server")} class={search_col_class}>
-        <label for="search_behaviour_score_min" class="control-label">
-          Behaviour score min
-        </label>
-        <input
-          type="text"
-          name="search[behaviour_score_min]"
-          id="search_behaviour_score_min"
-          value={@params["behaviour_score_min"]}
-          placeholder=""
-          class="form-control"
-        />
-      </div>
-
-      <div :if={allow?(@current_user, "Server")} class={search_col_class}>
-        <label for="search_behaviour_score_max" class="control-label">
-          Behaviour score max
-        </label>
-        <input
-          type="text"
-          name="search[behaviour_score_max]"
-          id="search_behaviour_score_max"
-          value={@params["behaviour_score_max"]}
-          placeholder=""
-          class="form-control"
-        />
-      </div>
     </div>
 
     <div class="row">

@@ -429,7 +429,6 @@ defmodule Teiserver.Account.LoginThrottleServer do
       CacheUser.has_any_role?(user, ["Contributor"]) -> :contributor
       CacheUser.has_any_role?(user, ["Overwatch", "Reviewer"]) -> :volunteer
       CacheUser.has_any_role?(user, ["VIP", "BAR+"]) -> :vip
-      user.behaviour_score < 5000 -> :toxic
       true -> :standard
     end
   end

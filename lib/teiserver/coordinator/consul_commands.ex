@@ -226,19 +226,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state
   end
 
-  def handle_command(%{command: "newlobby"} = cmd, state),
-    do: handle_command(Map.put(cmd, :command, "jazlobby"), state)
-
-  def handle_command(%{command: "jazlobby", senderid: senderid}, state) do
-    ChatLib.say(
-      senderid,
-      "You can test out the new client at https://github.com/beyond-all-reason/bar-lobby/releases/latest",
-      state.lobby_id
-    )
-
-    state
-  end
-
   def handle_command(%{command: "tournament", senderid: senderid, remaining: rem} = cmd, state) do
     if Config.get_site_config_cache("teiserver.Allow tournament command") do
       if CacheUser.has_any_role?(senderid, [

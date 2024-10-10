@@ -177,26 +177,6 @@
     </div>
   </div>
 
-  <div :if={allow?(@conn, "Server")} class="row mt-2">
-    <div class="col">
-      <%= label(f, :behaviour_score, class: "control-label") %>
-      <%= text_input(f, :behaviour_score, class: "form-control") %>
-      <%= error_tag(f, :behaviour_score) %>
-    </div>
-
-    <div class="col">
-      <%= label(f, :trust_score, class: "control-label") %>
-      <%= text_input(f, :trust_score, class: "form-control") %>
-      <%= error_tag(f, :trust_score) %>
-    </div>
-
-    <div class="col">
-      <%= label(f, :social_score, class: "control-label") %>
-      <%= text_input(f, :social_score, class: "form-control") %>
-      <%= error_tag(f, :social_score) %>
-    </div>
-  </div>
-
   <div class="form-group m-2 my-4">
     <%= if @changeset.data.id do %>
       <a href={~p"/teiserver/admin/user/#{@user}"} class="btn btn-secondary btn-outline">
