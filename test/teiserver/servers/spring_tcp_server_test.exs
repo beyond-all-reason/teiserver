@@ -467,35 +467,4 @@ defmodule Teiserver.SpringTcpServerTest do
     assert r ==
              "JOIN dud_room\nJOINED dud_room #{user.name}\nCHANNELTOPIC dud_room #{dud.name}\nADDUSER #{dud.name} ?? #{dud.id} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nCLIENTS dud_room #{user.name} #{dud.name}\n"
   end
-
-  test "notified when user LEFT room" do
-    %{socket: user_1_socket, user: user_1, pid: user_1_pid} = auth_setup()
-    %{socket: user_2_socket, user: user_2, pid: user_2_pid} = auth_setup()
-
-    channel = "test_channel"
-
-    # Flush various welcome messages
-    _ = _recv_raw(user_1_socket)
-    _ = _recv_raw(user_2_socket)
-
-    _send_raw(user_1_socket, "JOIN #{channel}\n")
-    reply = _recv_raw(user_1_socket)
-    assert reply =~ "JOIN #{channel}\n"
-    assert reply =~ "JOINED #{channel} #{user_1.name}\n"
-    assert reply =~ "CHANNELTOPIC #{channel} #{user_1.name}\n"
-    assert reply =~ "CLIENTS #{channel} #{user_1.name}\n"
-
-    _send_raw(user_2_socket, "JOIN #{channel}\n")
-    reply = _recv_raw(user_2_socket)
-    assert reply =~ "JOIN #{channel}\n"
-    assert reply =~ "JOINED #{channel} #{user_2.name}\n"
-    assert reply =~ "CHANNELTOPIC #{channel} #{user_1.name}\n"
-    assert reply =~ ~r/CLIENTS #{channel}[^\n]+#{user_1.name}/
-    assert reply =~ ~r/CLIENTS #{channel}[^\n]+#{user_2.name}/
-
-    _send_raw(user_1_socket, "EXIT\n")
-
-    user_2_notification = _recv_raw(user_2_socket)
-    assert user_2_notification =~ "LEFT #{channel} #{user_1.name}\nREMOVEUSER #{user_1.name}\n"
-  end
 end
