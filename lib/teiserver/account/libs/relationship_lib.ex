@@ -302,7 +302,9 @@ defmodule Teiserver.Account.RelationshipLib do
     userid_count = Enum.count(userid_list) |> max(1)
 
     block_count_needed = Config.get_site_config_cache("lobby.Block count to prevent join")
-    block_percentage_needed = Config.get_site_config_cache("lobby.Block percentage to prevent join")
+
+    block_percentage_needed =
+      Config.get_site_config_cache("lobby.Block percentage to prevent join")
 
     being_blocked_count =
       userid
@@ -334,7 +336,9 @@ defmodule Teiserver.Account.RelationshipLib do
     userid_count = Enum.count(userid_list) |> max(1)
 
     avoid_count_needed = Config.get_site_config_cache("lobby.Avoid count to prevent playing")
-    avoid_percentage_needed = Config.get_site_config_cache("lobby.Avoid percentage to prevent playing")
+
+    avoid_percentage_needed =
+      Config.get_site_config_cache("lobby.Avoid percentage to prevent playing")
 
     being_avoided_count =
       userid

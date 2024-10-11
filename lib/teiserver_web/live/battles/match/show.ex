@@ -93,7 +93,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
             match_id: match.id
           ]
         )
-        |> Map.new(fn log -> {log.user_id, log} end)
+        |> Map.new(fn log -> {log.user_id, get_prematch_log(log)} end)
 
       # Creates a map where the party_id refers to an integer
       # but only includes parties with 2 or more members
@@ -182,10 +182,19 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         end)
         |> Enum.sort_by(fn v -> v end, &<=/2)
 
+      balanced_members =
+        Enum.map(members, fn x ->
+          team_id = get_team_id(x.user_id, past_balance.team_players)
+          Map.put(x, :team_id, team_id)
+        end)
+        |> Enum.sort_by(fn m -> rating_logs[m.user.id].value["rating_value"] end, &>=/2)
+        |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
+
       socket
       |> assign(:match, match)
       |> assign(:match_name, match_name)
       |> assign(:members, members)
+      |> assign(:balanced_members, balanced_members)
       |> assign(:rating_logs, rating_logs)
       |> assign(:parties, parties)
       |> assign(:past_balance, past_balance)
@@ -204,6 +213,32 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:events_by_type, %{})
       |> assign(:events_by_team_and_type, %{})
     end
+  end
+
+  # Adjust the logs so that we use the prematch values of rating/uncertainty
+  # Prematch values are more relevant to understanding balance logs
+  defp get_prematch_log(log) do
+    %{
+      "rating_value" => rating_value,
+      "uncertainty" => uncertainty,
+      "rating_value_change" => rating_value_change,
+      "uncertainty_change" => uncertainty_change
+    } = log.value
+
+    old_rating = rating_value - rating_value_change
+    old_uncertainty = uncertainty - uncertainty_change
+
+    Map.put(log, :rating_value, old_rating)
+    |> Map.put(:uncertainty, old_uncertainty)
+  end
+
+  def get_team_id(player_id, team_players) do
+    {team_id, _players} =
+      Enum.find(team_players, fn {_k, player_ids} ->
+        Enum.any?(player_ids, fn x -> x == player_id end)
+      end)
+
+    team_id - 1
   end
 
   defp generate_new_balance_data(match, algorithm) do
