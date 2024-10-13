@@ -304,20 +304,8 @@ defmodule Teiserver.Account.RelationshipLib do
     user = Account.get_user_by_id(userid)
     userid_count = Enum.count(userid_list) |> max(1)
 
-    {block_count_needed, block_percentage_needed} =
-      cond do
-        user.behaviour_score <= 5000 ->
-          {2, 20}
-
-        user.behaviour_score <= 8000 ->
-          {3, 30}
-
-        true ->
-          {
-            Config.get_site_config_cache("lobby.Block count to prevent join"),
-            Config.get_site_config_cache("lobby.Block percentage to prevent join")
-          }
-      end
+    block_count_needed = Config.get_site_config_cache("lobby.Block count to prevent join")
+    block_percentage_needed = Config.get_site_config_cache("lobby.Block percentage to prevent join")
 
     being_blocked_count =
       userid

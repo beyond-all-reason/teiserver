@@ -48,10 +48,6 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     Account.update_cache_user(standard.id, %{roles: ["Standard"]})
     standard_listener = PubsubListener.new_listener([])
 
-    toxic = new_user()
-    Account.update_cache_user(toxic.id, %{behaviour_score: 1})
-    toxic_listener = PubsubListener.new_listener([])
-
     assert PubsubListener.get(throttle_listener) == []
 
     send(pid, %{
@@ -90,16 +86,11 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     assert r == false
     assert PubsubListener.get(standard_listener) == []
 
-    r = LoginThrottleServer.attempt_login(toxic_listener, toxic.id)
-    assert r == false
-    assert PubsubListener.get(toxic_listener) == []
-
     state = :sys.get_state(pid)
     assert state.queues.moderator == [moderator.id]
     assert state.queues.contributor == [contributor.id]
     assert state.queues.vip == [vip.id]
     assert state.queues.standard == [standard.id]
-    assert state.queues.toxic == [toxic.id]
 
     assert Enum.count(state.recent_logins) == 1
 
@@ -126,14 +117,12 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     assert PubsubListener.get(contributor_listener) == []
     assert PubsubListener.get(vip_listener) == []
     assert PubsubListener.get(standard_listener) == []
-    assert PubsubListener.get(toxic_listener) == []
 
     state = :sys.get_state(pid)
     assert state.queues.moderator == []
     assert state.queues.contributor == [contributor.id]
     assert state.queues.vip == [vip.id]
     assert state.queues.standard == [standard.id]
-    assert state.queues.toxic == [toxic.id]
 
     assert Enum.count(state.recent_logins) == 2
 
@@ -144,13 +133,11 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     assert PubsubListener.get(contributor_listener) == []
     assert PubsubListener.get(vip_listener) == []
     assert PubsubListener.get(standard_listener) == []
-    assert PubsubListener.get(toxic_listener) == []
 
     # Flush the throttle messages
     PubsubListener.get(throttle_listener)
 
     # Now approve the rest of them
-    # the toxic one will have to wait a bit longer though
     send(pid, %{
       channel: "teiserver_telemetry",
       event: :data,
@@ -182,7 +169,6 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     assert PubsubListener.get(contributor_listener) == [{:login_accepted, contributor.id}]
     assert PubsubListener.get(vip_listener) == []
     assert PubsubListener.get(standard_listener) == []
-    assert PubsubListener.get(toxic_listener) == []
 
     send(pid, :tick)
 
@@ -193,14 +179,12 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     assert PubsubListener.get(contributor_listener) == [{:login_accepted, contributor.id}]
     assert PubsubListener.get(vip_listener) == [{:login_accepted, vip.id}]
     assert PubsubListener.get(standard_listener) == [{:login_accepted, standard.id}]
-    assert PubsubListener.get(toxic_listener) == []
 
     state = :sys.get_state(pid)
     assert state.queues.moderator == []
     assert state.queues.contributor == []
     assert state.queues.vip == []
     assert state.queues.standard == []
-    assert state.queues.toxic == [toxic.id]
 
     assert Enum.count(state.recent_logins) == 5
   end

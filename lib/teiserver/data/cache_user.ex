@@ -27,11 +27,11 @@ defmodule Teiserver.CacheUser do
   @spec keys() :: [atom]
   def keys(),
     do:
-      ~w(id name email inserted_at clan_id permissions colour icon behaviour_score trust_score  social_score smurf_of_id last_login_timex last_played last_logout roles discord_id)a
+      ~w(id name email inserted_at clan_id permissions colour icon smurf_of_id last_login_timex last_played last_logout roles discord_id)a
 
   # This is the version of keys with the extra fields we're going to be moving from data to the object itself
   # def keys(),
-  #   do: ~w(id name email inserted_at clan_id permissions colour icon behaviour_score trust_score smurf_of_id roles restrictions restricted_until shadowbanned last_login last_played last_logout discord_id steam_id)a
+  #   do: ~w(id name email inserted_at clan_id permissions colour icon smurf_of_id roles restrictions restricted_until shadowbanned last_login last_played last_logout discord_id steam_id)a
 
   @data_keys [
     :rank,
@@ -134,8 +134,6 @@ defmodule Teiserver.CacheUser do
       icon: @default_icon,
       roles: ["Verified"],
       permissions: ["Verified"],
-      behaviour_score: 10_000,
-      trust_score: 10_000,
       data:
         data
         |> Map.merge(%{
@@ -162,8 +160,6 @@ defmodule Teiserver.CacheUser do
       icon: @default_icon,
       roles: ["Verified"],
       permissions: ["Verified"],
-      behaviour_score: 10_000,
-      trust_score: 10_000,
       data:
         data
         |> Map.merge(%{
