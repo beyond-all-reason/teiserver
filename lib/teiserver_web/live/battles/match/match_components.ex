@@ -10,6 +10,7 @@ defmodule TeiserverWeb.Battle.MatchComponents do
   attr :active, :string, required: true
   attr :current_user, :map, required: true
   attr :match_id, :integer, default: nil
+  attr :replay, :string, default: nil
 
   def section_menu(assigns) do
     ~H"""
@@ -63,13 +64,13 @@ defmodule TeiserverWeb.Battle.MatchComponents do
 
     <div class="float-end">
       <.section_menu_button
-        :if={@match_id != nil and allow?(@current_user, "Moderator")}
+        :if={@replay != nil}
         bsname={@view_colour}
-        icon={StylingHelper.icon(:admin)}
+        icon={StylingHelper.icon(:replay)}
         active={false}
-        url={~p"/battle/#{@match_id}"}
+        url={@replay}
       >
-        Admin view
+        Replay
       </.section_menu_button>
     </div>
     """

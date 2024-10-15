@@ -182,6 +182,19 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         end)
         |> Enum.sort_by(fn v -> v end, &<=/2)
 
+      game_id =
+        cond do
+          match.game_id -> match.game_id
+          match.data -> match.data["export_data"]["gameId"]
+          true -> nil
+        end
+
+      replay =
+        if game_id do
+          Application.get_env(:teiserver, Teiserver)[:main_website] <>
+            "/replays?gameId=" <> game_id
+        end
+
       socket
       |> assign(:match, match)
       |> assign(:match_name, match_name)
@@ -192,6 +205,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:new_balance, new_balance)
       |> assign(:events_by_type, events_by_type)
       |> assign(:events_by_team_and_type, events_by_team_and_type)
+      |> assign(:replay, replay)
     else
       socket
       |> assign(:match, nil)
@@ -203,6 +217,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:new_balance, %{})
       |> assign(:events_by_type, %{})
       |> assign(:events_by_team_and_type, %{})
+      |> assign(:replay, nil)
     end
   end
 

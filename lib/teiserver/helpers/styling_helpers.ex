@@ -92,6 +92,8 @@ defmodule Teiserver.Helper.StylingHelper do
   def icon(:quarter, _fa_type), do: ""
   def icon(:year, _fa_type), do: ""
 
+  def icon(:replay, _fa_type), do: "fa-solid fa-arrow-rotate-left"
+
   # defp split_colour(c) do
   #   {r, _} = c |> String.slice(1, 2) |> Integer.parse(16)
   #   {g, _} = c |> String.slice(3, 2) |> Integer.parse(16)
