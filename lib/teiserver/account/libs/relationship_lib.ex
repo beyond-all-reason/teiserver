@@ -263,8 +263,7 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec does_a_ignore_b?(T.userid(), T.userid()) :: boolean
   def does_a_ignore_b?(u1, u2) do
-    Enum.member?(list_userids_ignored_by_userid(u1), u2) or
-      does_a_avoid_b?(u1, u2)
+    Enum.member?(list_userids_ignored_by_userid(u1), u2)
   end
 
   @spec does_a_avoid_b?(T.userid(), T.userid()) :: boolean
