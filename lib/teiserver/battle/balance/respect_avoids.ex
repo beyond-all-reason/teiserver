@@ -476,7 +476,6 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   end
 
   ## Gets experienced players
-  ## Players that are in parties or avoids (in either direction) are at the front, then sort by rating
   def get_experienced_players(players, noobs) do
     Enum.filter(players, fn player ->
       !Enum.any?(noobs, fn noob ->
@@ -485,6 +484,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
     end)
   end
 
+  ## Players that are in parties or avoids (in either direction) are at the front, then sort by rating
   @spec sort_experienced_players([RA.player()], [[number()]]) :: [RA.player()]
   def sort_experienced_players(experienced_players, avoids) do
     flat_avoids = avoids |> List.flatten()

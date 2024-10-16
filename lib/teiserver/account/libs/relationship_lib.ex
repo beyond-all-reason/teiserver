@@ -204,6 +204,8 @@ defmodule Teiserver.Account.RelationshipLib do
     end)
   end
 
+  # Get userids blocked by a userid
+  # Avoids do not count as blocks
   @spec list_userids_blocked_by_userid(T.userid()) :: [T.userid()]
   def list_userids_blocked_by_userid(userid) do
     Teiserver.cache_get_or_store(:account_block_cache, userid, fn ->
@@ -220,6 +222,8 @@ defmodule Teiserver.Account.RelationshipLib do
     end)
   end
 
+  # Get userids blocking a userid
+  # Avoids do not count as blocks
   @spec list_userids_blocking_this_userid(T.userid()) :: [T.userid()]
   def list_userids_blocking_this_userid(userid) do
     Teiserver.cache_get_or_store(:account_blocking_this_cache, userid, fn ->
