@@ -4,6 +4,7 @@ defmodule Teiserver.Battle.Match do
   schema "teiserver_battle_matches" do
     field :server_uuid, :string
     field :uuid, :string
+    field :game_id, :string
     field :map, :string
     # The end of match data to be provided by clients
     field :data, :map, default: %{}
@@ -45,7 +46,7 @@ defmodule Teiserver.Battle.Match do
     struct
     |> cast(
       params,
-      ~w(server_uuid uuid map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id rating_type_id lobby_policy_id game_duration)a
+      ~w(server_uuid uuid game_id map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id rating_type_id lobby_policy_id game_duration)a
     )
     |> validate_required(
       ~w(server_uuid uuid map tags team_count team_size passworded game_type founder_id bots started)a
@@ -57,7 +58,7 @@ defmodule Teiserver.Battle.Match do
     struct
     |> cast(
       params,
-      ~w(server_uuid uuid map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id game_duration)a
+      ~w(server_uuid uuid game_id map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id game_duration)a
     )
     |> validate_required(~w(founder_id)a)
   end
