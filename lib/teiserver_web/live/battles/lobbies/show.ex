@@ -5,6 +5,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.{Account, Battle, Coordinator, Lobby, CacheUser, Telemetry}
+  alias Teiserver.Battle.MatchLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @extra_menu_content """
@@ -88,7 +89,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
         index_redirect(socket)
 
       true ->
-        {users, clients, ratings, parties, stats} = get_user_and_clients(lobby.players)
+        consul_state = get_consul_state(id)
+
+        {users, clients, ratings, parties, stats} =
+          get_user_and_clients(lobby.players, consul_state)
 
         bar_user = CacheUser.get_user_by_id(socket.assigns.current_user.id)
         lobby = Map.put(lobby, :uuid, Battle.get_lobby_match_uuid(id))
@@ -103,7 +107,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
          |> assign(:id, id)
          |> assign(:lobby, lobby)
          |> assign(:modoptions, modoptions)
-         |> get_consul_state
+         |> assign(:consul, consul_state)
          |> assign(:users, users)
          |> assign(:clients, clients)
          |> assign(:stats, stats)
@@ -111,7 +115,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     end
   end
 
-  defp get_user_and_clients(id_list) do
+  defp get_user_and_clients(id_list, consul_state) do
     users =
       CacheUser.list_users(id_list)
       |> Map.new(fn u -> {u.id, u} end)
@@ -140,10 +144,12 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
         {id, Account.get_user_stat_data(id)}
       end)
 
+    rating_type = MatchLib.game_type(consul_state.host_teamsize, consul_state.host_teamcount)
+
     ratings =
       users
       |> Map.new(fn {userid, _} ->
-        {userid, BalanceLib.get_user_rating_value_uncertainty_pair(userid, "Large Team")}
+        {userid, BalanceLib.get_user_rating_value_uncertainty_pair(userid, rating_type)}
       end)
 
     {users, clients, ratings, parties, stats}
@@ -174,9 +180,11 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   end
 
   def handle_info({:liveview_lobby_update, :consul_server_updated, _, _}, socket) do
+    consul_state = get_consul_state(socket)
+
     socket =
       socket
-      |> get_consul_state
+      |> assign(:consul, consul_state)
 
     {:noreply, socket}
   end
@@ -187,12 +195,13 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       ) do
     battle = Lobby.get_lobby(assigns.id)
     modoptions = Battle.get_modoptions(assigns.id)
+    consul_state = get_consul_state(socket)
 
     socket =
       socket
       |> assign(:battle, battle)
       |> assign(:modoptions, modoptions)
-      |> get_consul_state
+      |> assign(:consul, consul_state)
 
     # Players
     # TODO: This can likely be optimised somewhat
@@ -203,7 +212,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
         _ ->
           players = Battle.get_lobby_member_list(assigns.id)
-          {users, clients, ratings, parties, stats} = get_user_and_clients(players)
+          {users, clients, ratings, parties, stats} = get_user_and_clients(players, consul_state)
 
           new_lobby = Map.put(assigns[:lobby], :players, players)
 
@@ -261,12 +270,15 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
   def handle_event("force-update", _, %{assigns: %{id: id}} = socket) do
     battle = Lobby.get_lobby(id)
-    {users, clients, ratings, parties, stats} = get_user_and_clients(battle.players)
+    consul_state = get_consul_state(id)
+
+    {users, clients, ratings, parties, stats} =
+      get_user_and_clients(battle.players, consul_state)
 
     {:noreply,
      socket
      |> assign(:battle, battle)
-     |> get_consul_state
+     |> assign(:consul, consul_state)
      |> assign(:users, users)
      |> assign(:clients, clients)
      |> assign(:ratings, ratings)
@@ -328,9 +340,12 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     {:noreply, socket}
   end
 
-  defp get_consul_state(%{assigns: %{id: id}} = socket) do
-    socket
-    |> assign(:consul, Coordinator.call_consul(id, :get_all))
+  defp get_consul_state(id) when is_number(id) do
+    Coordinator.call_consul(id, :get_all)
+  end
+
+  defp get_consul_state(%{assigns: %{id: id}} = _socket) do
+    Coordinator.call_consul(id, :get_all)
   end
 
   defp page_title(:show), do: "Show Battle"
