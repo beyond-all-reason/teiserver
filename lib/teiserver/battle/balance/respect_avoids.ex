@@ -18,6 +18,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   # The lowest uncertainty rank 0 player at the time of writing this is 6.65
   @high_uncertainty 6.65
   @splitter "------------------------------------------------------"
+  @per_player_avoid_limit 2
 
   @doc """
   Main entry point used by balance_lib
@@ -451,12 +452,9 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
 
   @spec get_avoids([any()], number(), boolean()) :: [String.t()]
   def get_avoids(player_ids, lobby_max_avoids, debug_mode? \\ false) do
-    # The max number of avoids per player to pull from db
-    player_limit = 2
-
     cond do
       debug_mode? ->
-        RelationshipLib.get_lobby_avoids(player_ids, lobby_max_avoids, player_limit)
+        RelationshipLib.get_lobby_avoids(player_ids, lobby_max_avoids, @per_player_avoid_limit)
 
       true ->
         avoid_min_hours = get_avoid_delay()
@@ -464,7 +462,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
         RelationshipLib.get_lobby_avoids(
           player_ids,
           lobby_max_avoids,
-          player_limit,
+          @per_player_avoid_limit,
           avoid_min_hours
         )
     end
@@ -524,6 +522,9 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   end
 
   def is_newish_player?(rank, uncertainty) do
+    # It is possible that someone has high uncertainty due to
+    # playing unranked, playing PvE, or playing a different game mode e.g. 1v1
+    # If they have many hours i.e. chev 4 = 100 hours, we will not consider them newish
     uncertainty >= @high_uncertainty && rank <= 2
   end
 end

@@ -12,10 +12,13 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
 
   This is not a balance algorithm that is callable players. It's a lib that can be used by another balance algorithm.
   """
+  alias Teiserver.Config
   alias Teiserver.Battle.Balance.BruteForceAvoidTypes, as: BF
   require Integer
 
-  @max_team_diff 14
+  # Parties will be split if team diff is too large. It either uses absolute value or percentage
+  # See get_max_team_diff function below for full details
+  @max_team_diff_abs 10
   @max_team_diff_importance 10000
   @party_importance 1000
   @avoid_importance 10
@@ -33,9 +36,7 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
     # Go through every possibility and get the combination with the lowest score
     result =
       Enum.map(combos, fn x ->
-        get_players_from_indexes(x, players_with_index)
-      end)
-      |> Enum.map(fn team ->
+        team = get_players_from_indexes(x, players_with_index)
         result = score_combo(team, players, avoids, parties)
         Map.put(result, :first_team, team)
       end)
@@ -61,16 +62,29 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
     Teiserver.Helper.CombinationsHelper.get_combinations(num_players)
   end
 
+  # Parties/avoids will be ignored if the team rating diff is too large
+  # This function returns the allowed team difference
+  # By default, it is either 10 rating points or 5% of a single team rating - whichever is larger
+  defp get_max_team_diff(total_lobby_rating, num_teams) do
+    # This value is 10% in dev but 5% in production. Can be adjusted by Admin
+    percentage_of_team = Config.get_site_config_cache("teiserver.Max deviation") / 100
+    max(total_lobby_rating / num_teams * percentage_of_team, @max_team_diff_abs)
+  end
+
   @spec score_combo([BF.player()], [BF.player()], [[number()]], [[number()]]) :: any()
   def score_combo(first_team, all_players, avoids, parties) do
     first_team_rating = get_team_rating(first_team)
     both_team_rating = get_team_rating(all_players)
     rating_diff_penalty = abs(both_team_rating - first_team_rating * 2)
+    num_teams = 2
 
     max_team_diff_penalty =
       cond do
-        rating_diff_penalty > @max_team_diff -> @max_team_diff_importance
-        true -> 0
+        rating_diff_penalty > get_max_team_diff(both_team_rating, num_teams) ->
+          @max_team_diff_importance
+
+        true ->
+          0
       end
 
     # If max_team_diff_penalty is non zero don't even bother calculating avoid and party penalty
@@ -97,12 +111,9 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
   end
 
   def get_players_from_indexes(player_indexes, players_with_index) do
-    Enum.filter(players_with_index, fn {_player, index} ->
-      Enum.member?(player_indexes, index)
-    end)
-    |> Enum.map(fn {player, _index} ->
-      player
-    end)
+    players_with_index
+    |> Enum.filter(fn {_player, index} -> index in player_indexes end)
+    |> Enum.map(fn {player, _index} -> player end)
   end
 
   def count_broken_parties(first_team, parties) do
