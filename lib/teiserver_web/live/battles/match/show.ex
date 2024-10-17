@@ -192,6 +192,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         end)
         |> Enum.sort_by(fn m -> rating_logs[m.user.id].value["rating_value"] end, &>=/2)
         |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
+
       game_id =
         cond do
           match.game_id -> match.game_id
