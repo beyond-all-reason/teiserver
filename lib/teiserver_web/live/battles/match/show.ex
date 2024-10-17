@@ -256,6 +256,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         Enum.any?(player_ids, fn x -> x == player_id end)
       end)
 
+    # team_id should start at 0 even though first key is 1
     team_id - 1
   end
 
