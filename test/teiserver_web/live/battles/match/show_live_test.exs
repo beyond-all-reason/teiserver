@@ -6,10 +6,10 @@ defmodule TeiserverWeb.Battle.MatchLive.ShowTest do
     team_players = %{1 => [1, 4], 2 => [2, 3]}
     player_id = 4
     result = Show.get_team_id(player_id, team_players)
-    assert result == 1
+    assert result == 0
 
     player_id = 3
     result = Show.get_team_id(player_id, team_players)
-    assert result == 2
+    assert result == 1
   end
 end
