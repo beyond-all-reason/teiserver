@@ -297,6 +297,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
       "Team rating diff penalty: #{format(combo_result.rating_diff_penalty)}",
       "Broken party penalty: #{combo_result.broken_party_penalty}",
       "Broken avoid penalty: #{combo_result.broken_avoid_penalty}",
+      "Captain rating diff penalty: #{format(combo_result.captain_diff_penalty)}",
       "Score: #{format(combo_result.score)} (lower is better)",
       @splitter,
       "Draft remaining players (ordered from best to worst).",
