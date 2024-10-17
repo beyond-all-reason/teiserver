@@ -305,7 +305,6 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec check_block_status(T.userid(), [T.userid()]) :: :ok | :blocking | :blocked
   def check_block_status(userid, userid_list) do
-    user = Account.get_user_by_id(userid)
     userid_count = Enum.count(userid_list) |> max(1)
 
     block_count_needed = Config.get_site_config_cache("lobby.Block count to prevent join")
