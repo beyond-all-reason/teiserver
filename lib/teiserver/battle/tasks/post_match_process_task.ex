@@ -151,7 +151,11 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
       |> hd_or_x({nil, nil})
       |> elem(0)
 
-    Battle.update_match(match, %{winning_team: winning_team, game_duration: host_game_duration})
+    Battle.update_match(match, %{
+      winning_team: winning_team,
+      game_duration: host_game_duration,
+      game_id: export_data["gameId"]
+    })
 
     memberships
     |> Enum.map(fn m ->

@@ -803,10 +803,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @spec user_allowed_to_play?(T.user(), T.client(), map()) :: boolean()
   defp user_allowed_to_play?(user, client, state) do
-    player_ids = list_player_ids(state)
     userid = user.id
-
-    avoid_status = Account.check_avoid_status(user.id, player_ids)
 
     rating_check_result = LobbyRestrictions.check_rating_to_play(userid, state)
 
@@ -828,20 +825,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       Account.is_moderator?(user) ->
         true
-
-      avoid_status == :avoiding ->
-        match_id = Battle.get_lobby_match_id(state.lobby_id)
-        Telemetry.log_simple_lobby_event(user.id, match_id, "play_refused.avoiding")
-        msg = "You are avoiding too many players in this lobby"
-        CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
-        false
-
-      avoid_status == :avoided ->
-        match_id = Battle.get_lobby_match_id(state.lobby_id)
-        Telemetry.log_simple_lobby_event(user.id, match_id, "play_refused.avoided")
-        msg = "You are avoided by too many players in this lobby"
-        CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
-        false
 
       true ->
         true

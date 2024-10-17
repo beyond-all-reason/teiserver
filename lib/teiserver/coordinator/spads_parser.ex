@@ -43,6 +43,13 @@ defmodule Teiserver.Coordinator.SpadsParser do
       _match = Regex.run(~r/Boss mode disabled by \S+/, msg) ->
         {:host_update, %{host_bosses: []}}
 
+      # Remove an individual boss
+      match = Regex.run(~r/Boss mode disabled for (\S+) \(by \S+\)/, msg) ->
+        [_, player_name] = match
+        player_id = CacheUser.get_userid(player_name)
+
+        {:host_update, %{host_bosses: List.delete(state.host_bosses, player_id)}}
+
       # Not handling it, return nil
       true ->
         nil

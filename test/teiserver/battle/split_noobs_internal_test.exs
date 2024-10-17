@@ -6,7 +6,6 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
   use ExUnit.Case
   @moduletag :balance_test
   alias Teiserver.Battle.Balance.SplitNoobs
-  alias Teiserver.Battle.BalanceLib
 
   test "sort noobs" do
     noobs = [
