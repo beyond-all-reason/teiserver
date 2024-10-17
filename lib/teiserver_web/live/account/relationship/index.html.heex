@@ -196,7 +196,7 @@
       <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="regular" />
     </h4>
     <div :if={@show_help} class="help-box">
-      In addition to the effects of ignoring; if you avoid someone, there's less chance the balance algorithm will place you on the same team. However, avoids will be broken if the algorithm cannot balance teams fairly. This feature is still under development.
+      If you avoid someone, there's less chance the balance algorithm will place you on the same team. However, avoids will be broken if the algorithm cannot balance teams fairly. This feature is still under development.
     </div>
     <.table id="avoids-table" table_class="table-sm" rows={@avoids}>
       <:col :let={avoid} label="Name"><%= avoid.to_user.name %></:col>
