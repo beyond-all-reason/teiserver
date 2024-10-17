@@ -303,26 +303,79 @@
           <tbody>
             <tr>
               <td>Team 1</td>
-              <td><%= @past_balance.ratings[1] |> round(2) %></td>
+              <td>
+                Rating: <%= @past_balance.ratings[1] |> round(2) %>
+              </td>
+              <td>
+                St Dev: <%= @past_balance.stdevs[1] |> round(2) %>
+              </td>
             </tr>
             <tr>
               <td>Team 2</td>
-              <td><%= @past_balance.ratings[2] |> round(2) %></td>
+              <td>
+                Rating: <%= @past_balance.ratings[2] |> round(2) %>
+              </td>
+              <td>
+                St Dev: <%= @past_balance.stdevs[2] |> round(2) %>
+              </td>
             </tr>
+
             <tr>
               <td>Deviation</td>
-              <td><%= @past_balance.deviation %></td>
+              <td colspan="2"><%= @past_balance.deviation %></td>
             </tr>
             <tr>
               <td>Time Taken (ms)</td>
-              <td><%= @past_balance.time_taken / 1000 %></td>
+              <td colspan="2"><%= @past_balance.time_taken / 1000 %></td>
             </tr>
           </tbody>
         </table>
 
         <textarea name="" id="" rows={Enum.count(@past_balance.logs)} class="form-control"><%= @past_balance.logs |> Enum.join("\n") %></textarea>
-
         <hr />
+
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th colspan="2">Name & Party</th>
+              <th>Team</th>
+              <th colspan="1">Rating</th>
+              <th colspan="1">Uncertainty</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for m <- @balanced_members do %>
+              <% rating = @rating_logs[m.user_id]
+              {party_colour, party_idx} = Map.get(@parties, m.party_id, {nil, nil}) %>
+              <tr>
+                <td>
+                  <%= m.user.name %>
+                </td>
+                <%= if party_colour do %>
+                  <td style={"background-color: #{rgba_css(party_colour, 0.3)};"} width="50">
+                    <Fontawesome.icon icon={party_idx} style="solid" size="lg" />
+                  </td>
+                <% else %>
+                  <td width="50">
+                    &nbsp;
+                  </td>
+                <% end %>
+                <td><%= m.team_id + 1 %></td>
+                <td>
+                  <%= if rating != nil do %>
+                    <%= rating.value["rating_value"] |> round(2) %>
+                  <% end %>
+                </td>
+                <td>
+                  <%= if rating != nil do %>
+                    <%= rating.value["uncertainty"] |> round(2) %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+        <br />
 
         <h4>If balance we made using current ratings</h4>
         <table class="table">

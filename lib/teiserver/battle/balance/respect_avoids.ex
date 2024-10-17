@@ -53,7 +53,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
     players = flatten_members(expanded_group)
     parties = get_parties(expanded_group)
 
-    noobs = get_noobs(players) |> sort_noobs()
+    noobs = get_solo_noobs(players) |> sort_noobs()
     experienced_players = get_experienced_players(players, noobs)
     experienced_player_ids = experienced_players |> Enum.map(fn x -> x.id end)
     players_in_parties_count = parties |> List.flatten() |> Enum.count()
@@ -140,7 +140,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
           ]
 
         true ->
-          "New players: None"
+          "Solo new players: None"
       end
 
     logs =
@@ -514,10 +514,10 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   end
 
   # Noobs have high uncertainty and chev 1,2,3
-  @spec get_noobs([RA.player()]) :: any()
-  def get_noobs(players) do
+  @spec get_solo_noobs([RA.player()]) :: any()
+  def get_solo_noobs(players) do
     Enum.filter(players, fn player ->
-      is_newish_player?(player.rank, player.uncertainty)
+      is_newish_player?(player.rank, player.uncertainty) && !player.in_party?
     end)
   end
 
