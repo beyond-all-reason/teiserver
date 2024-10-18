@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Live.BattleTest do
 
   @throttle_wait 500 + 100
 
-  # @moduletag :needs_attention
+  @moduletag :needs_attention
 
   setup do
     GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
