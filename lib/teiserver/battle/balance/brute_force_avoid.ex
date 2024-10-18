@@ -22,7 +22,7 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
   @max_team_diff_importance 10000
   @party_importance 1000
   @avoid_importance 10
-  @captain_diff_importance 1
+  @stdev_diff_importance 2
 
   def get_best_combo(players, avoids, parties) do
     potential_teams = potential_teams(length(players))
@@ -78,11 +78,11 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
     |> Enum.filter(fn player -> !Enum.any?(first_team, fn x -> x.id == player.id end) end)
   end
 
-  @spec get_captain_rating([BF.player()]) :: any()
-  def get_captain_rating(team) do
+  @spec get_st_dev([BF.player()]) :: any()
+  def get_st_dev(team) do
     if(length(team) > 0) do
-      captain = Enum.max_by(team, fn player -> player.rating end, &>=/2)
-      captain.rating
+      ratings = Enum.map(team, fn player -> player.rating end)
+      Statistics.stdev(ratings)
     else
       0
     end
@@ -96,9 +96,9 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
     both_team_rating = get_team_rating(all_players)
     rating_diff_penalty = abs(both_team_rating - first_team_rating * 2)
 
-    captain_diff_penalty =
-      abs(get_captain_rating(first_team) - get_captain_rating(second_team)) *
-        @captain_diff_importance
+    stdev_diff_penalty =
+      abs(get_st_dev(first_team) - get_st_dev(second_team)) *
+        @stdev_diff_importance
 
     num_teams = 2
 
@@ -125,14 +125,14 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
 
     score =
       rating_diff_penalty + broken_avoid_penalty + broken_party_penalty + max_team_diff_penalty +
-        captain_diff_penalty
+        stdev_diff_penalty
 
     %{
       score: score,
       rating_diff_penalty: rating_diff_penalty,
       broken_avoid_penalty: broken_avoid_penalty,
       broken_party_penalty: broken_party_penalty,
-      captain_diff_penalty: captain_diff_penalty
+      stdev_diff_penalty: stdev_diff_penalty
     }
   end
 

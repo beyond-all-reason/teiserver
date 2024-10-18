@@ -127,18 +127,18 @@ defmodule Teiserver.Battle.RespectAvoidsTest do
                "Players: Dixinormus, fbots1998, kyutoryu, HungDaddy, jauggy, Aposis, [DTG]BamBin0, reddragon2010, Noody, SLOPPYGAGGER, MaTThiuS_82, barmalev",
                "------------------------------------------------------",
                "Brute force result:",
-               "Team rating diff penalty: 0.5",
+               "Team rating diff penalty: 1.7",
                "Broken party penalty: 0",
                "Broken avoid penalty: 0",
-               "Captain rating diff penalty: 0.1",
-               "Score: 0.6 (lower is better)",
+               "Stdev diff penalty: 2.9",
+               "Score: 4.5 (lower is better)",
                "------------------------------------------------------",
                "Draft remaining players (ordered from best to worst).",
                "Remaining: ",
                "------------------------------------------------------",
                "Final result:",
-               "Team 1: barmalev, Noody, [DTG]BamBin0, Aposis, HungDaddy, Dixinormus",
-               "Team 2: MaTThiuS_82, SLOPPYGAGGER, reddragon2010, jauggy, kyutoryu, fbots1998"
+               "Team 1: Noody, reddragon2010, HungDaddy, kyutoryu, fbots1998, Dixinormus",
+               "Team 2: barmalev, MaTThiuS_82, SLOPPYGAGGER, [DTG]BamBin0, Aposis, jauggy"
              ]
     end
   end
@@ -264,18 +264,18 @@ defmodule Teiserver.Battle.RespectAvoidsTest do
                "Players: fbots1998, kyutoryu, jauggy, reddragon2010, Aposis, [DTG]BamBin0, Dixinormus, Noody, SLOPPYGAGGER, MaTThiuS_82, barmalev, HungDaddy",
                "------------------------------------------------------",
                "Brute force result:",
-               "Team rating diff penalty: 0.7",
+               "Team rating diff penalty: 1.6",
                "Broken party penalty: 0",
                "Broken avoid penalty: 0",
-               "Captain rating diff penalty: 0.1",
-               "Score: 0.7 (lower is better)",
+               "Stdev diff penalty: 2.9",
+               "Score: 4.5 (lower is better)",
                "------------------------------------------------------",
                "Draft remaining players (ordered from best to worst).",
                "Remaining: ",
                "------------------------------------------------------",
                "Final result:",
-               "Team 1: MaTThiuS_82, SLOPPYGAGGER, Aposis, reddragon2010, kyutoryu, fbots1998",
-               "Team 2: HungDaddy, barmalev, Noody, Dixinormus, [DTG]BamBin0, jauggy"
+               "Team 1: HungDaddy, Noody, Dixinormus, reddragon2010, kyutoryu, fbots1998",
+               "Team 2: barmalev, MaTThiuS_82, SLOPPYGAGGER, [DTG]BamBin0, Aposis, jauggy"
              ]
 
       # Notice in result jauggy no longer on same team as reddragon2010 due to avoidance
@@ -434,8 +434,8 @@ defmodule Teiserver.Battle.RespectAvoidsTest do
                "Team rating diff penalty: 2",
                "Broken party penalty: 0",
                "Broken avoid penalty: 0",
-               "Captain rating diff penalty: 3",
-               "Score: 5 (lower is better)",
+               "Stdev diff penalty: 11.4",
+               "Score: 13.4 (lower is better)",
                "------------------------------------------------------",
                "Draft remaining players (ordered from best to worst).",
                "Remaining: Saffir, Pantsu_Ripper",
