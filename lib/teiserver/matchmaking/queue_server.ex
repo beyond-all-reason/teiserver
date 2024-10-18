@@ -245,6 +245,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
         end
 
       {_ref, user_id} ->
+        Logger.debug("Player #{user_id} went down, removing from queue #{state.id}")
+
         case remove_player(user_id, state) do
           :not_queued -> {:noreply, state}
           {:ok, state} -> {:noreply, state}

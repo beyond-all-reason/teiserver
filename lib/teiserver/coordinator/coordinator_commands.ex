@@ -7,9 +7,9 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.Config
 
   @splitter "---------------------------"
-  @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore matchmaking website party)
+  @always_allow ~w(help whoami whois discord coc mute unmute ignore unignore matchmaking website party)
   # These commands are handled by coordinator commands, but are not on the always allow list
-  @mod_allow ~w(check modparty unparty)
+  @mod_allow ~w(modparty unparty)
   @forward_to_consul ~w(s status players follow joinq leaveq splitlobby y yes n no explain)
   @admin_commands ~w(broadcast)
 
@@ -556,7 +556,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
   # Admin commands
   defp do_handle(
-         %{command: "broadcast", senderid: senderid, remaining: message} = cmd,
+         %{command: "broadcast", senderid: senderid, remaining: message},
          state
        ) do
     Lobby.list_lobby_ids()

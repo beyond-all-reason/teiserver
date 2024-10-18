@@ -385,23 +385,12 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "lobby.Avoid count to prevent playing",
+      key: "lobby.Avoid min hours required",
       section: "Lobbies",
       type: "integer",
       permissions: ["Admin"],
-      description:
-        "The raw number of players who would need to avoid someone to prevent them becoming a player",
-      default: 6
-    })
-
-    add_site_config_type(%{
-      key: "lobby.Avoid percentage to prevent playing",
-      section: "Lobbies",
-      type: "integer",
-      permissions: ["Admin"],
-      description:
-        "The percentage of players who would need to avoid someone to prevent them becoming a player",
-      default: 50
+      description: "Avoids must be at least this old to be considered",
+      default: 2
     })
 
     add_site_config_type(%{

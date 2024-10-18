@@ -365,16 +365,6 @@ defmodule Teiserver.Account.UserQueries do
       where: fragment("? ->> ? = ?", users.data, "lobby_client", ^lobby_client)
   end
 
-  def _where(query, :behaviour_score_gt, score) do
-    from users in query,
-      where: users.behaviour_score > ^score
-  end
-
-  def _where(query, :behaviour_score_lt, score) do
-    from users in query,
-      where: users.behaviour_score < ^score
-  end
-
   def _where(query, :previous_names, name) do
     uname = "%" <> name <> "%"
 
