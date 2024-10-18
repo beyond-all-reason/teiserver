@@ -527,10 +527,9 @@ defmodule Teiserver.TeiserverTestLib do
     Teiserver.Account.get_or_add_smurf_key_type("hw2")
     Teiserver.Account.get_or_add_smurf_key_type("hw3")
 
-    Teiserver.Game.get_or_add_rating_type("Duel")
-    Teiserver.Game.get_or_add_rating_type("Small Team")
-    Teiserver.Game.get_or_add_rating_type("Large Team")
-    Teiserver.Game.get_or_add_rating_type("FFA")
+    Enum.each(Teiserver.Game.MatchRatingLib.rating_type_list(), fn rating_type ->
+      Teiserver.Game.get_or_add_rating_type(rating_type)
+    end)
 
     Teiserver.Telemetry.get_or_add_complex_server_event_type("Server startup")
     Teiserver.Telemetry.get_or_add_simple_server_event_type("account.user_login")
