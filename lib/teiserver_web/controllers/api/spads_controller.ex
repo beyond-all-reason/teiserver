@@ -169,7 +169,7 @@ defmodule TeiserverWeb.API.SpadsController do
           # Temporary solution until Team FFA ratings are fixed
           rating_type =
             case rating_type do
-              "Team FFA" -> "FFA"
+              "Team FFA" -> "Large Team"
               v -> v
             end
 
