@@ -1034,11 +1034,11 @@ defmodule Teiserver.Account do
   Returns the player's rank when compared to other players by rating.
 
   As an example, with options {rating_type: :rating_value, order: :lowest_first},
-  the function will return 1 for the player with the lowest rating value for the game type
+  the function will return 1 for the player with the lowest rating value for a given
   rating_type_id.
 
   With options {rating_type: :leaderboard_rating, order: :highest_first}, the function will return 1
-  for the player with the highest leaderboard rating for the game type rating_type_id.
+  for the player with the highest leaderboard rating for a given rating_type_id.
 
   See config option `teiserver.Rating shown to hosts` for more information.
 
@@ -1068,12 +1068,14 @@ defmodule Teiserver.Account do
 
         opts.rating_type == :leaderboard_rating and opts.order == :highest_first ->
           "Leaderboard rating high to low"
+
+        true ->
+          raise "Account.get_rank_by_rating bad options #{inspect(opts)}"
       end
 
     user_by_rating =
       rating_query(
         search: [
-          user_id: userid,
           rating_type_id: rating_type_id
         ],
         order_by: order_by

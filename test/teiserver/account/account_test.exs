@@ -3,6 +3,7 @@ defmodule Teiserver.AccountTest do
 
   alias Teiserver.Account
   alias Teiserver.Account.AccountTestLib
+  alias Teiserver.Game.MatchRatingLib
 
   describe "users" do
     alias Teiserver.Account.User
@@ -130,6 +131,148 @@ defmodule Teiserver.AccountTest do
     test "change_user/1 returns a user changeset" do
       user = AccountTestLib.user_fixture()
       assert %Ecto.Changeset{} = Account.change_user(user)
+    end
+  end
+
+  describe "ratings" do
+    test "get_rank_by_rating using rating values" do
+      rating_type_id = MatchRatingLib.rating_type_name_lookup()["Small Team"]
+
+      [user_1, user_2, user_3] =
+        for _ <- 1..3, do: AccountTestLib.user_fixture()
+
+      {:ok, _} =
+        Account.create_rating(%{
+          user_id: user_1.id,
+          rating_type_id: rating_type_id,
+          rating_value: 1,
+          leaderboard_rating: 2,
+          skill: 99,
+          uncertainty: 99,
+          last_updated: Timex.now()
+        })
+
+      {:ok, _} =
+        Account.create_rating(%{
+          user_id: user_2.id,
+          rating_type_id: rating_type_id,
+          rating_value: 2,
+          leaderboard_rating: 1,
+          skill: 99,
+          uncertainty: 99,
+          last_updated: Timex.now()
+        })
+
+      {:ok, _} =
+        Account.create_rating(%{
+          user_id: user_3.id,
+          rating_type_id: rating_type_id,
+          rating_value: 3,
+          leaderboard_rating: 1,
+          skill: 99,
+          uncertainty: 99,
+          last_updated: Timex.now()
+        })
+
+      assert Account.get_rank_by_rating(user_1.id, rating_type_id, %{
+               rating_type: :rating_value,
+               order: :lowest_first
+             }) == 1
+
+      assert Account.get_rank_by_rating(user_2.id, rating_type_id, %{
+               rating_type: :rating_value,
+               order: :lowest_first
+             }) == 2
+
+      assert Account.get_rank_by_rating(user_3.id, rating_type_id, %{
+               rating_type: :rating_value,
+               order: :lowest_first
+             }) == 3
+
+      assert Account.get_rank_by_rating(user_1.id, rating_type_id, %{
+               rating_type: :rating_value,
+               order: :highest_first
+             }) == 3
+
+      assert Account.get_rank_by_rating(user_2.id, rating_type_id, %{
+               rating_type: :rating_value,
+               order: :highest_first
+             }) == 2
+
+      assert Account.get_rank_by_rating(user_3.id, rating_type_id, %{
+               rating_type: :rating_value,
+               order: :highest_first
+             }) == 1
+    end
+
+    test "get_rank_by_rating using leaderboard rating" do
+      rating_type_id = MatchRatingLib.rating_type_name_lookup()["Small Team"]
+
+      [user_1, user_2, user_3] =
+        for _ <- 1..3, do: AccountTestLib.user_fixture()
+
+      {:ok, _} =
+        Account.create_rating(%{
+          user_id: user_1.id,
+          rating_type_id: rating_type_id,
+          rating_value: 3,
+          leaderboard_rating: 1,
+          skill: 99,
+          uncertainty: 99,
+          last_updated: Timex.now()
+        })
+
+      {:ok, _} =
+        Account.create_rating(%{
+          user_id: user_2.id,
+          rating_type_id: rating_type_id,
+          rating_value: 2,
+          leaderboard_rating: 2,
+          skill: 99,
+          uncertainty: 99,
+          last_updated: Timex.now()
+        })
+
+      {:ok, _} =
+        Account.create_rating(%{
+          user_id: user_3.id,
+          rating_type_id: rating_type_id,
+          rating_value: 1,
+          leaderboard_rating: 3,
+          skill: 99,
+          uncertainty: 99,
+          last_updated: Timex.now()
+        })
+
+      assert Account.get_rank_by_rating(user_1.id, rating_type_id, %{
+               rating_type: :leaderboard_ratinsg,
+               order: :lowest_first
+             }) == 1
+
+      assert Account.get_rank_by_rating(user_2.id, rating_type_id, %{
+               rating_type: :leaderboard_rating,
+               order: :lowest_first
+             }) == 2
+
+      assert Account.get_rank_by_rating(user_3.id, rating_type_id, %{
+               rating_type: :leaderboard_rating,
+               order: :lowest_first
+             }) == 3
+
+      assert Account.get_rank_by_rating(user_1.id, rating_type_id, %{
+               rating_type: :leaderboard_rating,
+               order: :highest_first
+             }) == 3
+
+      assert Account.get_rank_by_rating(user_2.id, rating_type_id, %{
+               rating_type: :leaderboard_rating,
+               order: :highest_first
+             }) == 2
+
+      assert Account.get_rank_by_rating(user_3.id, rating_type_id, %{
+               rating_type: :leaderboard_rating,
+               order: :highest_first
+             }) == 1
     end
   end
 
