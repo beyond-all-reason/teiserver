@@ -2,16 +2,12 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
   use TeiserverWeb.ConnCase, async: false
   alias Teiserver.Account
   alias Teiserver.Config
-  alias Teiserver.Lobby
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Coordinator
-  alias Teiserver.Account.ClientLib
   alias Teiserver.Client
 
   import Teiserver.TeiserverTestLib,
     only: [
       new_user: 0,
-      new_user: 1,
       make_lobby: 1
     ]
 

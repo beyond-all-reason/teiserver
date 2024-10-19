@@ -245,7 +245,7 @@ defmodule Teiserver.AccountTest do
         })
 
       assert Account.get_rank_by_rating(user_1.id, rating_type_id, %{
-               rating_type: :leaderboard_ratinsg,
+               rating_type: :leaderboard_rating,
                order: :lowest_first
              }) == 1
 
