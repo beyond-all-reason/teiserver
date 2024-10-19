@@ -250,25 +250,25 @@ defmodule TeiserverWeb.API.SpadsController do
         BalanceLib.get_user_rating_value_uncertainty_pair(userid, rating_type_id)
 
       "Position by in game rating (1 is lowest)" ->
-        {Account.get_rank_by_rating(userid, rating_type_id, %{
+        {Account.get_position_by_rating(userid, rating_type_id, %{
            rating_type: :rating_value,
            order: :lowest_first
          }), 0}
 
       "Position by in game rating (1 is highest)" ->
-        {Account.get_rank_by_rating(userid, rating_type_id, %{
+        {Account.get_position_by_rating(userid, rating_type_id, %{
            rating_type: :rating_value,
            order: :highest_first
          }), 0}
 
       "Position by leaderboard rating (1 is lowest)" ->
-        {Account.get_rank_by_rating(userid, rating_type_id, %{
+        {Account.get_position_by_rating(userid, rating_type_id, %{
            rating_type: :leaderboard_rating,
            order: :lowest_first
          }), 0}
 
       "Position by leaderboard rating (1 is highest)" ->
-        {Account.get_rank_by_rating(userid, rating_type_id, %{
+        {Account.get_position_by_rating(userid, rating_type_id, %{
            rating_type: :leaderboard_rating,
            order: :highest_first
          }), 0}
