@@ -235,7 +235,7 @@ defmodule TeiserverWeb.API.SpadsController do
         rating = BalanceLib.default_rating()
         {rating.rating_value, rating.uncertainty}
 
-      "Rank by " <> _ ->
+      "Position by " <> _ ->
         {1, 0}
     end
   end
@@ -249,25 +249,25 @@ defmodule TeiserverWeb.API.SpadsController do
       "Rating value" ->
         BalanceLib.get_user_rating_value_uncertainty_pair(userid, rating_type_id)
 
-      "Rank by in game rating (1 is lowest)" ->
+      "Position by in game rating (1 is lowest)" ->
         {Account.get_rank_by_rating(userid, rating_type_id, %{
            rating_type: :rating_value,
            order: :lowest_first
          }), 0}
 
-      "Rank by in game rating (1 is highest)" ->
+      "Position by in game rating (1 is highest)" ->
         {Account.get_rank_by_rating(userid, rating_type_id, %{
            rating_type: :rating_value,
            order: :highest_first
          }), 0}
 
-      "Rank by leaderboard rating (1 is lowest)" ->
+      "Position by leaderboard rating (1 is lowest)" ->
         {Account.get_rank_by_rating(userid, rating_type_id, %{
            rating_type: :leaderboard_rating,
            order: :lowest_first
          }), 0}
 
-      "Rank by leaderboard rating (1 is highest)" ->
+      "Position by leaderboard rating (1 is highest)" ->
         {Account.get_rank_by_rating(userid, rating_type_id, %{
            rating_type: :leaderboard_rating,
            order: :highest_first

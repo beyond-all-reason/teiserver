@@ -290,10 +290,10 @@ defmodule Teiserver.TeiserverConfigs do
       opts: [
         choices: [
           "Rating value",
-          "Rank by rating value (1 is lowest)",
-          "Rank by rating value (1 is highest)",
-          "Rank by leaderboard rating (1 is lowest)",
-          "Rank by leaderboard rating (1 is highest)"
+          "Position by rating value (1 is lowest)",
+          "Position by rating value (1 is highest)",
+          "Position by leaderboard rating (1 is lowest)",
+          "Position by leaderboard rating (1 is highest)"
         ]
       ]
     })

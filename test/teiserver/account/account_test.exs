@@ -135,7 +135,7 @@ defmodule Teiserver.AccountTest do
   end
 
   describe "ratings" do
-    test "get_rank_by_rating using rating values" do
+    test "get_position_by_rating using rating values" do
       rating_type_id = MatchRatingLib.rating_type_name_lookup()["Small Team"]
 
       [user_1, user_2, user_3] =
@@ -174,38 +174,38 @@ defmodule Teiserver.AccountTest do
           last_updated: Timex.now()
         })
 
-      assert Account.get_rank_by_rating(user_1.id, rating_type_id, %{
+      assert Account.get_position_by_rating(user_1.id, rating_type_id, %{
                rating_type: :rating_value,
                order: :lowest_first
              }) == 1
 
-      assert Account.get_rank_by_rating(user_2.id, rating_type_id, %{
+      assert Account.get_position_by_rating(user_2.id, rating_type_id, %{
                rating_type: :rating_value,
                order: :lowest_first
              }) == 2
 
-      assert Account.get_rank_by_rating(user_3.id, rating_type_id, %{
+      assert Account.get_position_by_rating(user_3.id, rating_type_id, %{
                rating_type: :rating_value,
                order: :lowest_first
              }) == 3
 
-      assert Account.get_rank_by_rating(user_1.id, rating_type_id, %{
+      assert Account.get_position_by_rating(user_1.id, rating_type_id, %{
                rating_type: :rating_value,
                order: :highest_first
              }) == 3
 
-      assert Account.get_rank_by_rating(user_2.id, rating_type_id, %{
+      assert Account.get_position_by_rating(user_2.id, rating_type_id, %{
                rating_type: :rating_value,
                order: :highest_first
              }) == 2
 
-      assert Account.get_rank_by_rating(user_3.id, rating_type_id, %{
+      assert Account.get_position_by_rating(user_3.id, rating_type_id, %{
                rating_type: :rating_value,
                order: :highest_first
              }) == 1
     end
 
-    test "get_rank_by_rating using leaderboard rating" do
+    test "get_position_by_rating using leaderboard rating" do
       rating_type_id = MatchRatingLib.rating_type_name_lookup()["Small Team"]
 
       [user_1, user_2, user_3] =
@@ -244,32 +244,32 @@ defmodule Teiserver.AccountTest do
           last_updated: Timex.now()
         })
 
-      assert Account.get_rank_by_rating(user_1.id, rating_type_id, %{
+      assert Account.get_position_by_rating(user_1.id, rating_type_id, %{
                rating_type: :leaderboard_rating,
                order: :lowest_first
              }) == 1
 
-      assert Account.get_rank_by_rating(user_2.id, rating_type_id, %{
+      assert Account.get_position_by_rating(user_2.id, rating_type_id, %{
                rating_type: :leaderboard_rating,
                order: :lowest_first
              }) == 2
 
-      assert Account.get_rank_by_rating(user_3.id, rating_type_id, %{
+      assert Account.get_position_by_rating(user_3.id, rating_type_id, %{
                rating_type: :leaderboard_rating,
                order: :lowest_first
              }) == 3
 
-      assert Account.get_rank_by_rating(user_1.id, rating_type_id, %{
+      assert Account.get_position_by_rating(user_1.id, rating_type_id, %{
                rating_type: :leaderboard_rating,
                order: :highest_first
              }) == 3
 
-      assert Account.get_rank_by_rating(user_2.id, rating_type_id, %{
+      assert Account.get_position_by_rating(user_2.id, rating_type_id, %{
                rating_type: :leaderboard_rating,
                order: :highest_first
              }) == 2
 
-      assert Account.get_rank_by_rating(user_3.id, rating_type_id, %{
+      assert Account.get_position_by_rating(user_3.id, rating_type_id, %{
                rating_type: :leaderboard_rating,
                order: :highest_first
              }) == 1

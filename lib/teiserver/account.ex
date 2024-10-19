@@ -1031,7 +1031,7 @@ defmodule Teiserver.Account do
   end
 
   @doc """
-  Returns the player's rank when compared to other players by rating.
+  Returns the player's position when compared to other players by rating.
 
   As an example, with options {rating_type: :rating_value, order: :lowest_first},
   the function will return 1 for the player with the lowest rating value for a given
@@ -1050,7 +1050,7 @@ defmodule Teiserver.Account do
     - :lowest_first
     - :highest_first
   """
-  def get_rank_by_rating(
+  def get_position_by_rating(
         userid,
         rating_type_id,
         opts \\ %{rating_type: :rating_value, order: :lowest_first}
@@ -1070,7 +1070,7 @@ defmodule Teiserver.Account do
           "Leaderboard rating high to low"
 
         true ->
-          raise "Account.get_rank_by_rating bad options #{inspect(opts)}"
+          raise "Account.get_position_by_rating bad options #{inspect(opts)}"
       end
 
     user_by_rating =

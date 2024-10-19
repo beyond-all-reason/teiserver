@@ -91,7 +91,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       assert data == %{"rating_value" => 0, "uncertainty" => 99}
     end
 
-    test "rating shown to host is rank by rating value", %{conn: conn} do
+    test "rating shown to host is position by rating value", %{conn: conn} do
       [user_1, user_2, user_3] = for _ <- 1..3, do: new_user()
       rating_type_id = MatchRatingLib.rating_type_name_lookup()["Large Team"]
 
@@ -110,7 +110,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
 
       Config.update_site_config(
         "teiserver.Rating shown to hosts",
-        "Rank by in game rating (1 is lowest)"
+        "Position by in game rating (1 is lowest)"
       )
 
       conn = get(conn, Routes.ts_spads_path(conn, :get_rating, user_1.id, "Large Team"))
@@ -125,7 +125,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
 
       Config.update_site_config(
         "teiserver.Rating shown to hosts",
-        "Rank by in game rating (1 is highest)"
+        "Position by in game rating (1 is highest)"
       )
 
       conn = get(conn, Routes.ts_spads_path(conn, :get_rating, user_1.id, "Large Team"))
@@ -141,7 +141,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       Config.update_site_config("teiserver.Rating shown to hosts", "Rating value")
     end
 
-    test "rating shown to host is rank by leaderboard rating", %{conn: conn} do
+    test "rating shown to host is position by leaderboard rating", %{conn: conn} do
       [user_1, user_2, user_3] = for _ <- 1..3, do: new_user()
       rating_type_id = MatchRatingLib.rating_type_name_lookup()["Large Team"]
 
@@ -160,7 +160,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
 
       Config.update_site_config(
         "teiserver.Rating shown to hosts",
-        "Rank by leaderboard rating (1 is lowest)"
+        "Position by leaderboard rating (1 is lowest)"
       )
 
       conn = get(conn, Routes.ts_spads_path(conn, :get_rating, user_1.id, "Large Team"))
@@ -175,7 +175,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
 
       Config.update_site_config(
         "teiserver.Rating shown to hosts",
-        "Rank by leaderboard rating (1 is highest)"
+        "Position by leaderboard rating (1 is highest)"
       )
 
       conn = get(conn, Routes.ts_spads_path(conn, :get_rating, user_1.id, "Large Team"))
