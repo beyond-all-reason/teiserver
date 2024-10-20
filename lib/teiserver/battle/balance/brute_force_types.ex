@@ -18,6 +18,7 @@ defmodule Teiserver.Battle.Balance.BruteForceTypes do
   @type combo_result :: %{
           broken_party_penalty: number(),
           rating_diff_penalty: number(),
+          stdev_diff_penalty: number(),
           score: number(),
           first_team: [player()],
           second_team: [player()]

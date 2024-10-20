@@ -102,35 +102,36 @@ defmodule Teiserver.Battle.SplitNoobsTest do
 
     result = SplitNoobs.perform(expanded_group, 2) |> Map.drop([:logs])
 
+    # If we use stdev importance less than 4, all 20+ players end up on same team
     assert result == %{
              team_groups: %{
                1 => [
                  %{count: 1, group_rating: 13.98, members: ["fbots1998"], ratings: [13.98]},
                  %{count: 1, group_rating: 12.25, members: ["kyutoryu"], ratings: [12.25]},
                  %{count: 1, group_rating: 20.49, members: ["jauggy"], ratings: [20.49]},
-                 %{count: 1, group_rating: 18.4, members: ["reddragon2010"], ratings: [18.4]},
+                 %{count: 1, group_rating: 20.42, members: ["Aposis"], ratings: [20.42]},
                  %{count: 1, group_rating: 8.89, members: ["SLOPPYGAGGER"], ratings: [8.89]},
-                 %{count: 1, group_rating: 8.26, members: ["MaTThiuS_82"], ratings: [8.26]}
+                 %{count: 1, group_rating: 3.58, members: ["barmalev"], ratings: [3.58]}
                ],
                2 => [
-                 %{count: 1, group_rating: 20.42, members: ["Aposis"], ratings: [20.42]},
                  %{count: 1, group_rating: 20.06, members: ["[DTG]BamBin0"], ratings: [20.06]},
-                 %{count: 1, group_rating: 18.28, members: ["Dixinormus"], ratings: [18.28]},
-                 %{count: 1, group_rating: 17.64, members: ["Noody"], ratings: [17.64]},
-                 %{count: 1, group_rating: 3.58, members: ["barmalev"], ratings: [3.58]},
+                 %{count: 1, group_rating: 18.4, members: ["reddragon2010"], ratings: [18.4]},
+                 %{count: 1, members: ["Dixinormus"], ratings: [18.28], group_rating: 18.28},
+                 %{count: 1, members: ["Noody"], ratings: [17.64], group_rating: 17.64},
+                 %{count: 1, group_rating: 8.26, members: ["MaTThiuS_82"], ratings: [8.26]},
                  %{count: 1, group_rating: 2.8, members: ["HungDaddy"], ratings: [2.8]}
                ]
              },
              team_players: %{
-               1 => [
-                 "fbots1998",
-                 "kyutoryu",
-                 "jauggy",
+               1 => ["fbots1998", "kyutoryu", "jauggy", "Aposis", "SLOPPYGAGGER", "barmalev"],
+               2 => [
+                 "[DTG]BamBin0",
                  "reddragon2010",
-                 "SLOPPYGAGGER",
-                 "MaTThiuS_82"
-               ],
-               2 => ["Aposis", "[DTG]BamBin0", "Dixinormus", "Noody", "barmalev", "HungDaddy"]
+                 "Dixinormus",
+                 "Noody",
+                 "MaTThiuS_82",
+                 "HungDaddy"
+               ]
              }
            }
   end
@@ -413,14 +414,15 @@ defmodule Teiserver.Battle.SplitNoobsTest do
              "Brute force result:",
              "Team rating diff penalty: 1",
              "Broken party penalty: 0",
-             "Score: 1 (lower is better)",
+             "Stdev diff penalty: 0.2",
+             "Score: 1.2 (lower is better)",
              "------------------------------------------------------",
              "Draft remaining players (ordered from best to worst).",
              "Remaining: StinkBee, HoldButyLeg",
              "------------------------------------------------------",
              "Final result:",
-             "Team 1: CowOfWar, Akio, Regithros, Orii, DUFFY, LuBaee, TimeContainer, HoldButyLeg",
-             "Team 2: nubl, Darth, 976, onse, Theo45, PotatoesHead, colossus, StinkBee"
+             "Team 1: Akio, Darth, Regithros, 976, DUFFY, LuBaee, TimeContainer, HoldButyLeg",
+             "Team 2: CowOfWar, nubl, onse, Theo45, PotatoesHead, colossus, Orii, StinkBee"
            ]
 
     # Note DUFFY (Strongest captain) is on same team with noobiest noob HoldButyLeg
@@ -576,16 +578,17 @@ defmodule Teiserver.Battle.SplitNoobsTest do
              "Players: Raigeki, Engolianth, Demodred, FRODODOR, shoeofobama, Larch, Artifical_Banana, Cobaltstore, quest, SHAAARKBATE, illusiveman2024, UnreasonableIkko, ColorlesScum, Renkei",
              "------------------------------------------------------",
              "Brute force result:",
-             "Team rating diff penalty: 0.0",
+             "Team rating diff penalty: 1.5",
              "Broken party penalty: 0",
-             "Score: 0.0 (lower is better)",
+             "Stdev diff penalty: 27.4",
+             "Score: 28.9 (lower is better)",
              "------------------------------------------------------",
              "Draft remaining players (ordered from best to worst).",
              "Remaining: MrKicks, BIL",
              "------------------------------------------------------",
              "Final result:",
-             "Team 1: Renkei, ColorlesScum, UnreasonableIkko, SHAAARKBATE, shoeofobama, FRODODOR, Raigeki, BIL",
-             "Team 2: illusiveman2024, quest, Cobaltstore, Artifical_Banana, Larch, Demodred, Engolianth, MrKicks"
+             "Team 1: UnreasonableIkko, illusiveman2024, SHAAARKBATE, quest, Cobaltstore, Artifical_Banana, Raigeki, BIL",
+             "Team 2: Renkei, ColorlesScum, Larch, shoeofobama, FRODODOR, Demodred, Engolianth, MrKicks"
            ]
   end
 end

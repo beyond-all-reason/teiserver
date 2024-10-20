@@ -102,6 +102,7 @@ defmodule Teiserver.Battle.BruteForceTest do
 
     result = BruteForce.perform(expanded_group, 2) |> Map.drop([:logs])
 
+    # If we us a stdev penalty of less than 4, then all the 20+ players end up on the same team
     assert result == %{
              team_groups: %{
                1 => [
@@ -109,28 +110,28 @@ defmodule Teiserver.Battle.BruteForceTest do
                  %{count: 1, group_rating: 13.98, members: ["fbots1998"], ratings: [13.98]},
                  %{count: 1, group_rating: 8.89, members: ["SLOPPYGAGGER"], ratings: [8.89]},
                  %{count: 1, group_rating: 20.49, members: ["jauggy"], ratings: [20.49]},
-                 %{count: 1, group_rating: 18.4, members: ["reddragon2010"], ratings: [18.4]},
-                 %{count: 1, group_rating: 8.26, members: ["MaTThiuS_82"], ratings: [8.26]}
+                 %{count: 1, group_rating: 20.42, members: ["Aposis"], ratings: [20.42]},
+                 %{count: 1, group_rating: 3.58, members: ["barmalev"], ratings: [3.58]}
                ],
                2 => [
                  %{count: 1, group_rating: 18.28, members: ["Dixinormus"], ratings: [18.28]},
                  %{count: 1, group_rating: 2.8, members: ["HungDaddy"], ratings: [2.8]},
-                 %{count: 1, group_rating: 20.42, members: ["Aposis"], ratings: [20.42]},
-                 %{count: 1, group_rating: 17.64, members: ["Noody"], ratings: [17.64]},
-                 %{count: 1, group_rating: 20.06, members: ["[DTG]BamBin0"], ratings: [20.06]},
-                 %{count: 1, group_rating: 3.58, members: ["barmalev"], ratings: [3.58]}
+                 %{count: 1, group_rating: 18.4, members: ["reddragon2010"], ratings: [18.4]},
+                 %{count: 1, group_rating: 8.26, members: ["MaTThiuS_82"], ratings: [8.26]},
+                 %{count: 1, members: ["Noody"], ratings: [17.64], group_rating: 17.64},
+                 %{count: 1, group_rating: 20.06, members: ["[DTG]BamBin0"], ratings: [20.06]}
                ]
              },
              team_players: %{
-               1 => [
-                 "kyutoryu",
-                 "fbots1998",
-                 "SLOPPYGAGGER",
-                 "jauggy",
+               1 => ["kyutoryu", "fbots1998", "SLOPPYGAGGER", "jauggy", "Aposis", "barmalev"],
+               2 => [
+                 "Dixinormus",
+                 "HungDaddy",
                  "reddragon2010",
-                 "MaTThiuS_82"
-               ],
-               2 => ["Dixinormus", "HungDaddy", "Aposis", "Noody", "[DTG]BamBin0", "barmalev"]
+                 "MaTThiuS_82",
+                 "Noody",
+                 "[DTG]BamBin0"
+               ]
              }
            }
   end

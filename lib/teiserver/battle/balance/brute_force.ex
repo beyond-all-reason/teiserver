@@ -16,6 +16,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
   import Teiserver.Helper.NumberHelper, only: [format: 1]
   require Integer
 
+  @stdev_diff_importance 4
   @party_importance 7
   @splitter "------------------------------------------------------"
 
@@ -110,45 +111,55 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     players_with_index = Enum.with_index(players)
 
     # Go through every possibility and get the combination with the lowest score
-    result =
-      Enum.map(combos, fn x ->
-        get_players_from_indexes(x, players_with_index)
-      end)
-      |> Enum.map(fn team ->
-        result = score_combo(team, players, parties)
-        Map.put(result, :first_team, team)
-      end)
-      |> Enum.min_by(fn z ->
-        z.score
-      end)
-
-    first_team = result.first_team
-
-    second_team =
-      players
-      |> Enum.filter(fn x ->
-        !Enum.any?(first_team, fn y ->
-          y.id == x.id
-        end)
-      end)
-
-    Map.put(result, :second_team, second_team)
+    Enum.map(combos, fn x ->
+      get_players_from_indexes(x, players_with_index)
+    end)
+    |> Enum.map(fn team ->
+      score_combo(team, players, parties)
+    end)
+    |> Enum.min_by(fn z ->
+      z.score
+    end)
   end
 
-  @spec score_combo([BF.player()], [BF.player()], [String.t()]) :: any()
+  @spec get_second_team([BF.player()], [BF.player()]) :: [BF.player()]
+  def get_second_team(first_team, all_players) do
+    all_players
+    |> Enum.filter(fn player -> !Enum.any?(first_team, fn x -> x.id == player.id end) end)
+  end
+
+  @spec get_st_dev([BF.player()]) :: any()
+  def get_st_dev(team) do
+    if(length(team) > 0) do
+      ratings = Enum.map(team, fn player -> player.rating end)
+      Statistics.stdev(ratings)
+    else
+      0
+    end
+  end
+
+  @spec score_combo([BF.player()], [BF.player()], [String.t()]) :: BF.combo_result()
   def score_combo(first_team, all_players, parties) do
+    second_team = get_second_team(first_team, all_players)
     first_team_rating = get_team_rating(first_team)
     both_team_rating = get_team_rating(all_players)
 
     rating_diff_penalty = abs(both_team_rating - first_team_rating * 2)
     broken_party_penalty = count_broken_parties(first_team, parties) * @party_importance
 
-    score = rating_diff_penalty + broken_party_penalty
+    stdev_diff_penalty =
+      abs(get_st_dev(first_team) - get_st_dev(second_team)) *
+        @stdev_diff_importance
+
+    score = rating_diff_penalty + broken_party_penalty + stdev_diff_penalty
 
     %{
       score: score,
       rating_diff_penalty: rating_diff_penalty,
-      broken_party_penalty: broken_party_penalty
+      broken_party_penalty: broken_party_penalty,
+      stdev_diff_penalty: stdev_diff_penalty,
+      first_team: first_team,
+      second_team: second_team
     }
   end
 

@@ -425,7 +425,7 @@ defmodule Teiserver.Battle.RespectAvoidsTest do
                "Avoid min time required: 2 h",
                "Avoids considered: 0 (Max: 6)",
                "------------------------------------------------------",
-               "New players: None",
+               "Solo new players: None",
                "------------------------------------------------------",
                "Perform brute force with the following players to get the best score.",
                "Players: fraqzilla, Spaceh, [DmE], Jeff, Jarial, AcowAdonis, AbyssWatcher, Gmans, MeowCat, mighty, Threekey, Zippo9, Kaa, Faeton",
