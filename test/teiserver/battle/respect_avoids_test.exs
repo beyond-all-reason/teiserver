@@ -12,7 +12,8 @@ defmodule Teiserver.Battle.RespectAvoidsTest do
   alias Teiserver.Config
 
   setup_with_mocks([
-    {Config, [:passthrough], [get_site_config_cache: fn key -> 2 end]}
+    # Set avoid min hours to 2
+    {Config, [:passthrough], [get_site_config_cache: fn _key -> 2 end]}
   ]) do
     :ok
   end
