@@ -4,6 +4,7 @@ defmodule TeiserverWeb.API.SpadsController do
   alias Teiserver.{Account, Coordinator, Battle}
   alias Teiserver.Battle.{BalanceLib, MatchLib}
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Game.MatchRatingLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
@@ -44,9 +45,9 @@ defmodule TeiserverWeb.API.SpadsController do
 
     {rating_value, uncertainty} =
       if host_ip != conn_ip do
-        BalanceLib.get_user_rating_value_uncertainty_pair(-1, "Duel")
+        get_anonymous_rating()
       else
-        BalanceLib.get_user_rating_value_uncertainty_pair(target_id, actual_type)
+        get_spads_rating(target_id, actual_type)
       end
 
     max_uncertainty =
@@ -223,6 +224,54 @@ defmodule TeiserverWeb.API.SpadsController do
 
       client ->
         Battle.get_lobby(client.lobby_id)
+    end
+  end
+
+  # Returns a user's rating value suitable for use when the requestor should not know the
+  # true value.
+  defp get_anonymous_rating() do
+    case Config.get_site_config_cache("teiserver.Rating shown to hosts") do
+      "Rating value" ->
+        rating = BalanceLib.default_rating()
+        {rating.rating_value, rating.uncertainty}
+
+      "Position by " <> _ ->
+        {1, 0}
+    end
+  end
+
+  # Returns a user's rating value suitable for use in a response to SPADS. The
+  # 'Rating shown to hosts' site config may affect what value is returned.
+  defp get_spads_rating(userid, rating_type) do
+    rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
+
+    case Config.get_site_config_cache("teiserver.Rating shown to hosts") do
+      "Rating value" ->
+        BalanceLib.get_user_rating_value_uncertainty_pair(userid, rating_type_id)
+
+      "Position by in game rating (1 is lowest)" ->
+        {Account.get_position_by_rating(userid, rating_type_id, %{
+           rating_type: :rating_value,
+           order: :lowest_first
+         }), 0}
+
+      "Position by in game rating (1 is highest)" ->
+        {Account.get_position_by_rating(userid, rating_type_id, %{
+           rating_type: :rating_value,
+           order: :highest_first
+         }), 0}
+
+      "Position by leaderboard rating (1 is lowest)" ->
+        {Account.get_position_by_rating(userid, rating_type_id, %{
+           rating_type: :leaderboard_rating,
+           order: :lowest_first
+         }), 0}
+
+      "Position by leaderboard rating (1 is highest)" ->
+        {Account.get_position_by_rating(userid, rating_type_id, %{
+           rating_type: :leaderboard_rating,
+           order: :highest_first
+         }), 0}
     end
   end
 end

@@ -1030,6 +1030,61 @@ defmodule Teiserver.Account do
     Repo.delete(rating)
   end
 
+  @doc """
+  Returns the player's position when compared to other players by rating.
+
+  As an example, with options {rating_type: :rating_value, order: :lowest_first},
+  the function will return 1 for the player with the lowest rating value for a given
+  rating_type_id.
+
+  With options {rating_type: :leaderboard_rating, order: :highest_first}, the function will return 1
+  for the player with the highest leaderboard rating for a given rating_type_id.
+
+  See config option `teiserver.Rating shown to hosts` for more information.
+
+  Possible options for
+  - rating_type
+    - :rating_value
+    - :leaderboard_rating
+  - order
+    - :lowest_first
+    - :highest_first
+  """
+  def get_position_by_rating(
+        userid,
+        rating_type_id,
+        opts \\ %{rating_type: :rating_value, order: :lowest_first}
+      ) do
+    order_by =
+      cond do
+        opts.rating_type == :rating_value and opts.order == :lowest_first ->
+          "Rating value low to high"
+
+        opts.rating_type == :rating_value and opts.order == :highest_first ->
+          "Rating value high to low"
+
+        opts.rating_type == :leaderboard_rating and opts.order == :lowest_first ->
+          "Leaderboard rating low to high"
+
+        opts.rating_type == :leaderboard_rating and opts.order == :highest_first ->
+          "Leaderboard rating high to low"
+
+        true ->
+          raise "Account.get_position_by_rating bad options #{inspect(opts)}"
+      end
+
+    user_by_rating =
+      rating_query(
+        search: [
+          rating_type_id: rating_type_id
+        ],
+        order_by: order_by
+      )
+      |> Repo.all()
+
+    (Enum.find_index(user_by_rating, fn r -> r.user_id == userid end) || 0) + 1
+  end
+
   # Codes
   alias Teiserver.Account.{Code, CodeLib}
 
