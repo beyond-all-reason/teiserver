@@ -596,12 +596,12 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
                },
                %{
                  id: "reddragon2010",
+                 in_party?: false,
                  index: 6,
                  name: "reddragon2010",
-                 uncertainty: 3,
-                 rating: 18.4,
                  rank: 2,
-                 in_party?: false
+                 rating: 18.4,
+                 uncertainty: 3
                },
                %{
                  id: "Noody",
@@ -614,7 +614,7 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
                }
              ],
              rating_diff_penalty: 6.203564356435635,
-             score: 6.203564356435635,
+             score: 7.221262567387239,
              second_team: [
                %{
                  id: "Dixinormus",
@@ -653,12 +653,12 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
                },
                %{
                  id: "MaTThiuS_82",
+                 in_party?: false,
                  index: 9,
                  name: "MaTThiuS_82",
-                 uncertainty: 3,
-                 rating: 8.26,
                  rank: 2,
-                 in_party?: false
+                 rating: 8.26,
+                 uncertainty: 3
                },
                %{
                  id: "barmalev",
@@ -669,7 +669,8 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
                  rating: 3.58,
                  uncertainty: 3
                }
-             ]
+             ],
+             stdev_diff_penalty: 1.017698210951604
            }
 
     standard_result = SplitNoobs.standardise_result(result, initial_state)
@@ -692,7 +693,8 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
                "Brute force result:",
                "Team rating diff penalty: 6.2",
                "Broken party penalty: 0",
-               "Score: 6.2 (lower is better)",
+               "Stdev diff penalty: 1.0",
+               "Score: 7.2 (lower is better)",
                "------------------------------------------------------",
                "Draft remaining players (ordered from best to worst).",
                "Remaining: Dixinormus, HungDaddy",
@@ -722,7 +724,7 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
                    ratings: [2.768316831683173]
                  },
                  %{count: 1, group_rating: 20.06, members: ["[DTG]BamBin0"], ratings: [20.06]},
-                 %{count: 1, members: ["reddragon2010"], ratings: [18.4], group_rating: 18.4},
+                 %{count: 1, group_rating: 18.4, members: ["reddragon2010"], ratings: [18.4]},
                  %{count: 1, group_rating: 17.64, members: ["Noody"], ratings: [17.64]}
                ],
                2 => [
@@ -735,7 +737,7 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
                  %{count: 1, group_rating: 20.49, members: ["jauggy"], ratings: [20.49]},
                  %{count: 1, group_rating: 20.42, members: ["Aposis"], ratings: [20.42]},
                  %{count: 1, group_rating: 8.89, members: ["SLOPPYGAGGER"], ratings: [8.89]},
-                 %{count: 1, members: ["MaTThiuS_82"], ratings: [8.26], group_rating: 8.26},
+                 %{count: 1, group_rating: 8.26, members: ["MaTThiuS_82"], ratings: [8.26]},
                  %{count: 1, group_rating: 3.58, members: ["barmalev"], ratings: [3.58]}
                ]
              },

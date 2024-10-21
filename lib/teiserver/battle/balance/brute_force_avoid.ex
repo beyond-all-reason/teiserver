@@ -22,6 +22,7 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
   @max_team_diff_importance 10000
   @party_importance 1000
   @avoid_importance 10
+  @captain_diff_importance 1
 
   def get_best_combo(players, avoids, parties) do
     potential_teams = potential_teams(length(players))
@@ -34,27 +35,13 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
     players_with_index = Enum.with_index(players)
 
     # Go through every possibility and get the combination with the lowest score
-    result =
-      Enum.map(combos, fn x ->
-        team = get_players_from_indexes(x, players_with_index)
-        result = score_combo(team, players, avoids, parties)
-        Map.put(result, :first_team, team)
-      end)
-      |> Enum.min_by(fn z ->
-        z.score
-      end)
-
-    first_team = result.first_team
-
-    second_team =
-      players
-      |> Enum.filter(fn x ->
-        !Enum.any?(first_team, fn y ->
-          y.id == x.id
-        end)
-      end)
-
-    Map.put(result, :second_team, second_team)
+    Enum.map(combos, fn x ->
+      team = get_players_from_indexes(x, players_with_index)
+      score_combo(team, players, avoids, parties)
+    end)
+    |> Enum.min_by(fn z ->
+      z.score
+    end)
   end
 
   @spec potential_teams(integer()) :: any()
@@ -71,11 +58,34 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
     max(total_lobby_rating / num_teams * percentage_of_team, @max_team_diff_abs)
   end
 
-  @spec score_combo([BF.player()], [BF.player()], [[number()]], [[number()]]) :: any()
+  @spec get_second_team([BF.player()], [BF.player()]) :: [BF.player()]
+  def get_second_team(first_team, all_players) do
+    all_players
+    |> Enum.filter(fn player -> !Enum.any?(first_team, fn x -> x.id == player.id end) end)
+  end
+
+  @spec get_captain_rating([BF.player()]) :: any()
+  def get_captain_rating(team) do
+    if(length(team) > 0) do
+      captain = Enum.max_by(team, fn player -> player.rating end, &>=/2)
+      captain.rating
+    else
+      0
+    end
+  end
+
+  @spec score_combo([BF.player()], [BF.player()], [[number()]], [[number()]]) :: BF.combo_result()
   def score_combo(first_team, all_players, avoids, parties) do
+    second_team = get_second_team(first_team, all_players)
     first_team_rating = get_team_rating(first_team)
+
     both_team_rating = get_team_rating(all_players)
     rating_diff_penalty = abs(both_team_rating - first_team_rating * 2)
+
+    captain_diff_penalty =
+      abs(get_captain_rating(first_team) - get_captain_rating(second_team)) *
+        @captain_diff_importance
+
     num_teams = 2
 
     max_team_diff_penalty =
@@ -100,13 +110,17 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
       end
 
     score =
-      rating_diff_penalty + broken_avoid_penalty + broken_party_penalty + max_team_diff_penalty
+      rating_diff_penalty + broken_avoid_penalty + broken_party_penalty + max_team_diff_penalty +
+        captain_diff_penalty
 
     %{
       score: score,
       rating_diff_penalty: rating_diff_penalty,
       broken_avoid_penalty: broken_avoid_penalty,
-      broken_party_penalty: broken_party_penalty
+      broken_party_penalty: broken_party_penalty,
+      captain_diff_penalty: captain_diff_penalty,
+      second_team: second_team,
+      first_team: first_team
     }
   end
 
