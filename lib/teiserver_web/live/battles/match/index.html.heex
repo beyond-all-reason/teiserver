@@ -77,7 +77,7 @@
             <%= if match.finished, do: duration_to_str_short(match.game_duration) %>
           </:col>
           <:col :let={match} label="Ended">
-            <%= date_to_str(match.finished, format: :hms_or_ymd) %>
+            <%= date_to_str(match.finished, format: :hms_or_ymd, tz: @tz) %>
           </:col>
 
           <:action :let={match}>
