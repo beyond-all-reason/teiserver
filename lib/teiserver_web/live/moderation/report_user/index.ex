@@ -177,7 +177,9 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
   end
 
   defp get_user_matches(%{assigns: %{user: user}} = socket) do
-    cutoff = Timex.now() |> Timex.shift(hours: -36)
+    # For testing, change the days to a large number to see more matches
+    cutoff = Timex.now() |> Timex.shift(days: -1, hours: -12)
+    tz = socket.assigns[:tz]
 
     matches =
       Battle.list_matches(
@@ -203,7 +205,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
 
         time_ago =
           if match.finished do
-            TimexHelper.date_to_str(match.finished, format: :hms_or_ymd, until: true)
+            TimexHelper.date_to_str(match.finished, format: :hms_or_ymd, until: true, tz: tz)
           else
             "In progress now"
           end
