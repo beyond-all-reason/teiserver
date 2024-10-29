@@ -87,7 +87,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         |> Enum.sort_by(fn m -> m.user.name end, &<=/2)
         |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
 
-      # For unprocessed matches this will return %{}
+      # For unprocessed or unrated matches this will return %{}
       rating_logs =
         Game.list_rating_logs(
           search: [
@@ -188,8 +188,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
 
       balanced_members =
         cond do
-          # It will go here if the match is unprocessed
-          groups == [] ->
+          # It will go here if the match is unprocessed or if there are no rating logs e.g. unrated match
+          rating_logs == %{} ->
             []
 
           true ->
