@@ -24,7 +24,8 @@ defmodule Teiserver.Telemetry.ComplexMatchEventLib do
         event_type_id: event_type_id,
         match_id: match_id,
         game_time: game_time,
-        value: value
+        value: value,
+        timestamp: Timex.now()
       })
 
     case result do

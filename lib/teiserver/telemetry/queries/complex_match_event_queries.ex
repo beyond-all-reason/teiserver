@@ -120,33 +120,68 @@ defmodule Teiserver.Telemetry.ComplexMatchEventQueries do
   end
 
   def get_aggregate_detail(event_type_id, key, start_datetime, end_datetime, limit \\ 50) do
-    query = """
+    events_query = """
     SELECT
-      (e.value ->> $1) AS key,
-      COUNT(e.id) AS key_count
+      e.value AS event,
+      e.match_id AS match,
+      e.game_time AS game_time
     FROM telemetry_complex_match_events e
-    WHERE e.event_type_id = $2
-      AND e.timestamp BETWEEN $3 AND $4
-    GROUP BY key
-    ORDER BY key_count DESC
+    WHERE e.event_type_id = $1
+      AND e.timestamp BETWEEN $2 AND $3
+    LIMIT $4
+    """
+
+    aggregates_query = """
+    SELECT
+        value->>$1 AS value,
+        COUNT(*) AS count
+    FROM
+        telemetry_complex_match_events e
+    WHERE
+      e.event_type_id = $2 AND e.timestamp BETWEEN $3 AND $4
+    GROUP BY
+        value->>$1
     LIMIT $5
     """
 
-    case Ecto.Adapters.SQL.query(Repo, query, [
-           key,
+    case Ecto.Adapters.SQL.query(Repo, events_query, [
            event_type_id,
            start_datetime,
            end_datetime,
            limit
          ]) do
       {:ok, results} ->
-        results.rows
-        |> Enum.map(fn [key, value] ->
-          {key, value}
-        end)
+        events =
+          Enum.map(results.rows, fn [event, match_id, game_time] ->
+            event
+            |> Map.put("match", match_id)
+            |> Map.put("game_time", game_time)
+          end)
 
-      {a, b} ->
-        raise "ERR: #{a}, #{b}"
+        case Ecto.Adapters.SQL.query(Repo, aggregates_query, [
+               key,
+               event_type_id,
+               start_datetime,
+               end_datetime,
+               limit
+             ]) do
+          {:ok, agg_results} ->
+            aggregates =
+              Enum.map(agg_results.rows, fn [value, count] ->
+                %{value: value, count: count}
+              end)
+
+            %{
+              events: events,
+              aggregates: aggregates
+            }
+
+          {:error, reason} ->
+            raise "Complex match event aggregates query error: #{reason}"
+        end
+
+      {:error, reason} ->
+        raise "Complex match event query error: #{reason}"
     end
   end
 end
