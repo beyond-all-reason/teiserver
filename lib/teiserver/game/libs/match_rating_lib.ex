@@ -60,10 +60,7 @@ defmodule Teiserver.Game.MatchRatingLib do
       |> Enum.map(fn {_, members} -> Enum.count(members) end)
       |> Enum.uniq()
 
-    cheating =
-      match.data
-      |> Map.get("export_data", %{})
-      |> Map.get("cheating", 0)
+    cheating = get_in(match.data || %{}, ["export_data", "cheating"]) || 0
 
     cond do
       not Enum.member?(@rated_match_types, match.game_type) ->
