@@ -30,7 +30,7 @@
             active: "key-#{@key}",
             bsname: bsname,
             icon: "",
-            url: "?key=#{key}&tf=#{@tf}"
+            url: "?key=#{key}&tf=#{@timeframe}"
           ) %>
         <% end %>
         &nbsp;&nbsp;&nbsp;&nbsp;
@@ -40,7 +40,8 @@
           <%= central_component("section_menu_button",
             name: "tf-#{tf}",
             label: tf,
-            active: "tf-#{@tf}",
+            active: "tf-#{@timeframe}",
+            active: "tf-#{@timeframe}",
             bsname: bsname,
             icon: "",
             url: "?key=#{@key}&tf=#{tf}"
@@ -49,23 +50,55 @@
 
         <br /><br />
 
-        <h4>Value counts for <%= @event_name %></h4>
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>Value</th>
-              <th>Count</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for {k, v} <- @event_counts do %>
+        <%= if @match_data.aggregates && @match_data.aggregates != [] do %>
+          <h4>Value counts for <%= @event_name %></h4>
+          <table class="table table-sm">
+            <thead>
               <tr>
-                <td><%= k %></td>
-                <td><%= v %></td>
+                <th><b>VALUE</b></th>
+                <th><b>COUNT</b></th>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <%= for %{value: key, count: count} <- @match_data.aggregates do %>
+                <tr>
+                  <td><%= key %></td>
+                  <td><%= count %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% end %>
+
+        <%= if @match_data.events && @match_data.events != [] do %>
+          <h4>Event list for <%= @event_name %></h4>
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <%= for {key, _} <- Map.to_list(List.first(@match_data.events)) do %>
+                  <th><b><%= String.upcase(key) %></b></th>
+                <% end %>
+              </tr>
+            </thead>
+            <tbody>
+              <%= for event <- @match_data.events do %>
+                <tr>
+                  <%= for {key, value} <- Map.to_list(event) do %>
+                    <td>
+                      <%= if key == "match" do %>
+                        <.link navigate={~p"/battle/#{value}"} class="btn btn-sm btn-secondary">
+                          <Fontawesome.icon icon={:show} style="solid" /> Show
+                        </.link>
+                      <% else %>
+                        <%= value %>
+                      <% end %>
+                    </td>
+                  <% end %>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% end %>
       </div>
     </div>
   </div>

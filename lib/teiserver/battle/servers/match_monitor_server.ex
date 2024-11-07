@@ -181,7 +181,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           {:ok, json_data} ->
             userid = Account.get_userid_from_name(username)
 
-            if userid && CacheUser.is_bot?(userid) do
+            if userid && CacheUser.is_bot?(from_id) do
               match_id = Battle.get_match_id_from_userid(from_id)
 
               if match_id do

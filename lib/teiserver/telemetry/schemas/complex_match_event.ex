@@ -9,6 +9,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEvent do
 
     field :value, :map
     field :game_time, :integer
+    field :timestamp, :utc_datetime
   end
 
   @doc """
@@ -17,8 +18,8 @@ defmodule Teiserver.Telemetry.ComplexMatchEvent do
   @spec changeset(map(), map()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, ~w(user_id match_id event_type_id value game_time)a)
-    |> validate_required(~w(match_id event_type_id value game_time)a)
+    |> cast(params, ~w(user_id match_id event_type_id value game_time timestamp)a)
+    |> validate_required(~w(match_id event_type_id value game_time timestamp)a)
   end
 
   @spec authorize(atom, Plug.Conn.t(), map()) :: boolean
