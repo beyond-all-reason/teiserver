@@ -168,7 +168,7 @@ defmodule Teiserver.Account.RoleLib do
       name: "Moderator",
       colour: "#FFAA00",
       icon: "fa-solid fa-gavel",
-      contains: ~w(Reviewer),
+      contains: ~w(Reviewer Contributor),
       badge: true
     },
     %{
