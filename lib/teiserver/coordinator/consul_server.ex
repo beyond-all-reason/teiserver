@@ -27,9 +27,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll password? tournament)
   @boss_commands ~w(balancealgorithm gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
-  @vip_boss_commands ~w(shuffle)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec lock unlock makebalance set-config-teaser)
-  @admin_commands ~w(playerlimit broadcast)
+  @admin_commands ~w(playerlimit broadcast shuffle)
 
   # @handled_by_lobby ~w(explain)
   @splitter "########################################"
@@ -970,7 +969,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     is_host = senderid == state.host_id
     is_boss = Enum.member?(state.host_bosses, senderid)
-    is_vip = Enum.member?(user.roles, "VIP")
     is_admin = Enum.member?(user.roles, "Admin")
 
     cond do
@@ -996,26 +994,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       Enum.member?(@boss_commands, cmd.command) and (is_host or is_boss) ->
         true
-
-      Enum.member?(@vip_boss_commands, cmd.command) and (is_vip and is_boss) ->
-        true
-
-      Enum.member?(@vip_boss_commands, cmd.command) and not (is_vip and is_boss) ->
-        msg =
-          if is_vip do
-            "You also need to be boss to call '#{cmd.command}'"
-          else
-            "No listed command of '#{cmd.command}'"
-          end
-
-        ChatLib.sayprivateex(
-          state.coordinator_id,
-          cmd.senderid,
-          msg,
-          state.lobby_id
-        )
-
-        false
 
       Enum.member?(@host_commands, cmd.command) and not is_host ->
         ChatLib.sayprivateex(
