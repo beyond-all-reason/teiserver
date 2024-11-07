@@ -323,7 +323,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       :uneven_team_size ->
         {"warning", "Match not rated due to uneven team size!"}
 
-      :not_enough_team ->
+      :not_enough_teams ->
         {"primary", "Match not rated due to not enough teams!"}
 
       :too_short ->
@@ -333,7 +333,10 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         {"info", "Match not rated due to unrated modoption!"}
 
       :cheating_enabled ->
-        {"warning", "Match not rated due to cheating enabled!!"}
+        {"warning", "Match not rated due to cheating enabled!"}
+
+      :no_match ->
+        {"danger", "No match!"}
     end
   end
 

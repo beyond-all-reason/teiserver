@@ -39,11 +39,11 @@ defmodule Teiserver.Game.MatchRatingLib do
     |> Map.new(fn name -> {name, Game.get_or_add_rating_type(name)} end)
   end
 
-  @spec rate_match(non_neg_integer() | Teiserver.Battle.Match.t()) :: :ok | {:error, :no_match}
+  @spec rate_match(non_neg_integer() | Teiserver.Battle.Match.t()) :: :ok | {:error, atom}
   def rate_match(match), do: rate_match(match, false)
 
   @spec rate_match(non_neg_integer() | Teiserver.Battle.Match.t(), boolean()) ::
-          :ok | {:error, :no_match}
+          :ok | {:error, atom}
   def rate_match(match_id, override) when is_integer(match_id) do
     Battle.get_match(match_id, preload: [:members])
     |> rate_match(override)
@@ -60,10 +60,7 @@ defmodule Teiserver.Game.MatchRatingLib do
       |> Enum.map(fn {_, members} -> Enum.count(members) end)
       |> Enum.uniq()
 
-    cheating =
-      match.data
-      |> Map.get("export_data", %{})
-      |> Map.get("cheating", 0)
+    cheating = get_in(match.data || %{}, ["export_data", "cheating"]) || 0
 
     cond do
       not Enum.member?(@rated_match_types, match.game_type) ->
