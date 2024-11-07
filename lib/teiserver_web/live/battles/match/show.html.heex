@@ -27,6 +27,19 @@
     </h3>
     <br />
 
+    <%= if @rating_status != nil and allow?(@current_user, "Tester") do %>
+      <% {alert_type, status} = @rating_status %>
+      <div class={"alert alert-#{alert_type} alert-dismissible fade show"} role="alert">
+        <%= status %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        </button>
+      </div>
+    <% end %>
+
+    <div :if={@match.processed and @match.game_id == nil} class="alert alert-danger">
+      Match data missing!
+    </div>
+
     <.tab_header>
       <.tab_nav url={~p"/battle/#{@match.id}/overview"} selected={@tab == :overview}>
         <Fontawesome.icon icon="file-alt" style="solid" /> Overview

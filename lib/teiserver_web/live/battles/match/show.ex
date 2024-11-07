@@ -214,6 +214,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
             "/replays?gameId=" <> game_id
         end
 
+      match_rating_status = get_match_rating_status(match)
+
       socket
       |> assign(:match, match)
       |> assign(:match_name, match_name)
@@ -226,6 +228,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:events_by_type, events_by_type)
       |> assign(:events_by_team_and_type, events_by_team_and_type)
       |> assign(:replay, replay)
+      |> assign(:rating_status, match_rating_status)
     else
       socket
       |> assign(:match, nil)
@@ -238,6 +241,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:events_by_type, %{})
       |> assign(:events_by_team_and_type, %{})
       |> assign(:replay, nil)
+      |> assign(:rating_status, nil)
     end
   end
 
@@ -299,6 +303,38 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
 
     BalanceLib.create_balance(groups, match.team_count, algorithm: algorithm, debug_mode?: true)
     |> Map.put(:balance_mode, :grouped)
+  end
+
+  defp get_match_rating_status(match) do
+    # Expecting to return an error explaining current match rating status
+    # Unprocessed matches and matches with existing rating logs won't be rated again
+    {_, rating_status} = Teiserver.Game.MatchRatingLib.rate_match(match)
+
+    case rating_status do
+      :invalid_game_type ->
+        {"success", "Unrated game type"}
+
+      :not_processed ->
+        {"danger", "Match not processed!"}
+
+      :no_winning_team ->
+        {"warning", "Match not rated due to no winning team!"}
+
+      :uneven_team_size ->
+        {"warning", "Match not rated due to uneven team size!"}
+
+      :not_enough_team ->
+        {"primary", "Match not rated due to not enough teams!"}
+
+      :too_short ->
+        {"warning", "Match too short to be rated!"}
+
+      :unranked_tag ->
+        {"info", "Match not rated due to unrated modoption!"}
+
+      :cheating_enabled ->
+        {"warning", "Match not rated due to cheating enabled!!"}
+    end
   end
 
   @doc """
