@@ -39,11 +39,11 @@ defmodule Teiserver.Game.MatchRatingLib do
     |> Map.new(fn name -> {name, Game.get_or_add_rating_type(name)} end)
   end
 
-  @spec rate_match(non_neg_integer() | Teiserver.Battle.Match.t()) :: :ok | {:error, :no_match}
+  @spec rate_match(non_neg_integer() | Teiserver.Battle.Match.t()) :: :ok | {:error, atom}
   def rate_match(match), do: rate_match(match, false)
 
   @spec rate_match(non_neg_integer() | Teiserver.Battle.Match.t(), boolean()) ::
-          :ok | {:error, :no_match}
+          :ok | {:error, atom}
   def rate_match(match_id, override) when is_integer(match_id) do
     Battle.get_match(match_id, preload: [:members])
     |> rate_match(override)
