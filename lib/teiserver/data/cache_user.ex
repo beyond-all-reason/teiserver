@@ -406,16 +406,7 @@ defmodule Teiserver.CacheUser do
 
   @spec rename_user(T.userid(), String.t(), boolean) :: :success | {:error, String.t()}
   def rename_user(userid, new_name, admin_action \\ false) do
-    rename_log =
-      Account.get_user_stat_data(userid)
-      |> Map.get("rename_log", [])
-
     new_name = String.trim(new_name)
-
-    now = System.system_time(:second)
-    # since_most_recent_rename = now - (Enum.slice(rename_log, 0..0) ++ [0] |> hd)
-    since_rename_two = now - ((Enum.slice(rename_log, 1..1) ++ [0, 0, 0]) |> hd)
-    since_rename_three = now - ((Enum.slice(rename_log, 2..2) ++ [0, 0, 0]) |> hd)
     max_username_length = Config.get_site_config_cache("teiserver.Username max length")
 
     cond do
@@ -428,15 +419,8 @@ defmodule Teiserver.CacheUser do
       admin_action == false and WordLib.acceptable_name?(new_name) == false ->
         {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}
 
-      # Can't rename more than 2 times in 5 days
-      admin_action == false and since_rename_two < 60 * 60 * 24 * 5 ->
-        {:error,
-         "If you keep changing your name people won't know who you are; give it a bit of time (5 days)"}
-
-      # Can't rename more than 3 times in 30 days
-      admin_action == false and since_rename_three < 60 * 60 * 24 * 30 ->
-        {:error,
-         "If you keep changing your name people won't know who you are; give it a bit of time (30 days)"}
+      admin_action == false and renamed_recently(userid) ->
+        {:error, "Rename limit reached (2 times in 5 days or 3 times in 30 days)"}
 
       admin_action == false and is_restricted?(userid, ["All chat", "Renaming"]) ->
         {:error, "Muted"}
@@ -457,6 +441,27 @@ defmodule Teiserver.CacheUser do
       true ->
         do_rename_user(userid, new_name)
         :success
+    end
+  end
+
+  @spec renamed_recently(T.userid()) :: boolean()
+  defp renamed_recently(user_id) do
+    rename_log =
+      Account.get_user_stat_data(user_id)
+      |> Map.get("rename_log", [])
+
+    now = System.system_time(:second)
+    since_rename_two = now - ((Enum.slice(rename_log, 1..1) ++ [0, 0, 0]) |> hd)
+    since_rename_three = now - ((Enum.slice(rename_log, 2..2) ++ [0, 0, 0]) |> hd)
+
+    cond do
+      # VIPs ignore time based rename restrictions
+      is_vip?(user_id) -> false
+      # Can't rename more than 2 times in 5 days
+      since_rename_two < 60 * 60 * 24 * 5 -> true
+      # Can't rename more than 3 times in 30 days
+      since_rename_three < 60 * 60 * 24 * 30 -> true
+      true -> false
     end
   end
 
@@ -1240,6 +1245,12 @@ defmodule Teiserver.CacheUser do
   def is_admin?(userid) when is_integer(userid), do: is_admin?(get_user_by_id(userid))
   def is_admin?(%{roles: roles}), do: Enum.member?(roles, "Admin")
   def is_admin?(_), do: false
+
+  @spec is_vip?(T.userid() | T.user()) :: boolean()
+  def is_vip?(nil), do: false
+  def is_vip?(userid) when is_integer(userid), do: is_vip?(get_user_by_id(userid))
+  def is_vip?(%{roles: roles}), do: Enum.member?(roles, "VIP")
+  def is_vip?(_), do: false
 
   @spec rank_time(T.userid()) :: non_neg_integer()
   def rank_time(userid) do

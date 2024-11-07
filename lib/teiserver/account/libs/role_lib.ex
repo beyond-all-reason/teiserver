@@ -95,7 +95,7 @@ defmodule Teiserver.Account.RoleLib do
     },
 
     # Privileged
-    %{name: "VIP", colour: "#AA8833", icon: "fa-solid fa-sparkles", contains: ["BAR+"]},
+    %{name: "VIP", colour: "#AA8833", icon: "fa-solid fa-sparkles", contains: ~w()},
     %{name: "Streamer", colour: "#660066", icon: "fa-brands fa-twitch", contains: ~w()},
     %{name: "Tournament", colour: "#0000AA", icon: "fa-solid fa-trophy", contains: ~w()},
     %{
