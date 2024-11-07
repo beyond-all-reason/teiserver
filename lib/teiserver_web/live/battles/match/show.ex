@@ -332,6 +332,9 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       :unranked_tag ->
         {"info", "Match not rated due to unrated modoption!"}
 
+      :already_rated ->
+        {"success", "Match rated successfully"}
+
       :cheating_enabled ->
         {"warning", "Match not rated due to cheating enabled!"}
 
