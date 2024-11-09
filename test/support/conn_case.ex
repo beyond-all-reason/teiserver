@@ -35,6 +35,7 @@ defmodule TeiserverWeb.ConnCase do
   setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Teiserver.Repo)
     Teiserver.TeiserverTestLib.clear_all_con_caches()
+    Teiserver.Config.update_site_config("system.Use geoip", false)
     on_exit(&Teiserver.TeiserverTestLib.clear_all_con_caches/0)
 
     unless tags[:async] do
