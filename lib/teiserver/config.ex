@@ -312,7 +312,7 @@ defmodule Teiserver.Config do
     Repo.one(query)
   end
 
-  @spec update_site_config(String.t(), String.t()) :: :ok
+  @spec update_site_config(String.t(), term()) :: :ok
   def update_site_config(key, value) do
     query =
       from site_config in SiteConfig,
