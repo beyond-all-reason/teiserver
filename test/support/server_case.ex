@@ -33,6 +33,7 @@ defmodule Teiserver.ServerCase do
     # more false failures.
     Teiserver.TeiserverTestLib.clear_all_con_caches()
     Teiserver.DataCase.setup_sandbox(tags)
+    Teiserver.Config.update_site_config("system.Use geoip", false)
     on_exit(&Teiserver.TeiserverTestLib.clear_all_con_caches/0)
     :ok
   end
