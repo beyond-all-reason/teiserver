@@ -571,14 +571,16 @@ defmodule Teiserver.TeiserverTestLib do
       :telemetry_simple_server_event_types_cache
     ]
 
-    Enum.each(cache_list, fn cache ->
-      cache
-      |> ConCache.ets()
-      |> :ets.tab2list()
-      |> Enum.each(fn {key, _} -> ConCache.delete(cache, key) end)
-    end)
+    Enum.each(cache_list, &clear_cache/1)
 
     :ok
+  end
+
+  def clear_cache(cache) do
+    cache
+    |> ConCache.ets()
+    |> :ets.tab2list()
+    |> Enum.each(fn {key, _} -> ConCache.delete(cache, key) end)
   end
 
   def seed_matchmaking_queues() do
