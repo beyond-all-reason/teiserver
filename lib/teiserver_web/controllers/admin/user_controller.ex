@@ -208,6 +208,57 @@ defmodule TeiserverWeb.Admin.UserController do
     |> render("new.html")
   end
 
+  @spec create_form(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def create_form(conn, _) do
+    if allow?(conn, "Server") do
+      conn
+      |> render("create_form.html")
+    else
+      conn
+      |> put_flash(:info, "No permission")
+      |> redirect(to: ~p"/teiserver/admin/user")
+    end
+  end
+
+  @spec create_post(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def create_post(conn, params \\ %{}) do
+    if is_nil(params["name"]) or String.trim(params["name"]) == "" do
+      conn
+      |> put_flash(:danger, "Invalid user name")
+      |> redirect(to: ~p"/teiserver/admin/user")
+    else
+      if allow?(conn, "Server") do
+        do_create_post(conn, params)
+      else
+        conn
+        |> put_flash(:danger, "No access.")
+        |> redirect(to: ~p"/teiserver/admin/user")
+      end
+    end
+  end
+
+  @spec do_create_post(Plug.Conn.t(), map) :: Plug.Conn.t()
+  defp do_create_post(conn, params) do
+    password = Map.get(params, "password", "password")
+    email = Map.get(params, "email", UUID.uuid1())
+
+    case Teiserver.CacheUser.register_user(params["name"], email, password) do
+      :success ->
+        conn
+        |> put_flash(:info, "User created successfully.")
+        |> redirect(to: ~p"/teiserver/admin/user")
+
+      {:failure, str} ->
+        conn
+        |> put_flash(:error, "Problem creating user: " <> str)
+        |> redirect(to: ~p"/teiserver/admin/user")
+
+      _ ->
+        conn
+        |> redirect(to: ~p"/teiserver/admin/user")
+    end
+  end
+
   @spec create(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create(conn, %{"user" => user_params}) do
     user_params =
