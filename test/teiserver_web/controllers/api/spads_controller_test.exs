@@ -38,6 +38,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
 
     test "existing user", %{conn: conn} do
       user = new_user()
+      Teiserver.TeiserverTestLib.clear_cache(:teiserver_game_rating_types)
       rating_type_id = MatchRatingLib.rating_type_name_lookup()["Team"]
 
       {:ok, _} =
