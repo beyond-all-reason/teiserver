@@ -183,5 +183,3 @@ if config_env() == :prod do
       bot_name: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_BOT_NAME")
   end
 end
-
-config :teiserver, Teiserver.OAuth, issuer: "https://#{domain_name}"
