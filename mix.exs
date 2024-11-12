@@ -96,7 +96,7 @@ defmodule Teiserver.MixProject do
       {:mock, "~> 0.3.0", only: :test},
 
       # Teiserver libs
-      {:openskill, git: "https://github.com/StanczakDominik/openskill.ex.git", branch: "master"},
+      {:openskill, git: "https://github.com/beyond-all-reason/openskill.ex.git", branch: "master"},
       {:cowboy, "~> 2.9"},
       {:statistics, "~> 0.6.2"},
       {:csv, "~> 2.4"},
