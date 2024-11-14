@@ -19,6 +19,7 @@ defmodule Teiserver.Support.Tachyon do
     opts = connect_options(token)
 
     {:ok, client} = WSC.connect(tachyon_url(), opts)
+    ExUnit.Callbacks.on_exit(fn -> WSC.disconnect(client) end)
     client
   end
 

@@ -36,4 +36,7 @@ defmodule Teiserver.Autohost do
   def lookup_autohost(autohost_id) do
     Teiserver.Autohost.Registry.lookup(autohost_id)
   end
+
+  @spec list() :: [reg_value()]
+  defdelegate list(), to: Registry
 end
