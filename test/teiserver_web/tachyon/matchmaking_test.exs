@@ -380,6 +380,30 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
       assert %{"reason" => "already_queued"} = Tachyon.join_queues!(c1, [q_id])
       assert %{"status" => "success"} = Tachyon.join_queues!(c2, [q_id])
     end
+
+    test "no autohost", %{app: app, queue_id: queue_id, queue_pid: queue_pid} do
+      clients = join_and_pair(app, queue_id, queue_pid, 2)
+
+      # slurp all the received messages, each client get a foundUpdate event for
+      # every ready sent
+      for client <- clients do
+        assert %{"status" => "success"} = Tachyon.matchmaking_ready!(client)
+
+        for c <- clients do
+          assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(c)
+        end
+      end
+
+      for client <- clients do
+        assert %{"commandId" => "matchmaking/lost"} = Tachyon.recv_message!(client)
+
+        assert %{
+                 "commandId" => "matchmaking/cancelled",
+                 "data" => %{"reason" => "no_host_available"}
+               } =
+                 Tachyon.recv_message!(client)
+      end
+    end
   end
 
   defp join_and_pair(app, queue_id, queue_pid, number_of_player) do

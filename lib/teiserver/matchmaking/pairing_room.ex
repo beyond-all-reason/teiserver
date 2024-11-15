@@ -14,8 +14,10 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Data.Types, as: T
 
+  require Logger
+
   @type team :: [QueueServer.member()]
-  @type lost_reason :: :cancel | :timeout
+  @type lost_reason :: :cancel | :timeout | :no_host_available
 
   @spec start(QueueServer.id(), QueueServer.queue(), [team()], timeout()) ::
           {:ok, pid()} | {:error, term()}
@@ -68,12 +70,36 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   end
 
   @impl true
+  # Let all the player know that they are now ready to start a match and should
+  # ready up asap
   def handle_continue({:notify_players, timeout}, state) do
     Enum.each(state.awaiting, fn player_id ->
       Teiserver.Player.matchmaking_notify_found(player_id, state.queue_id, self(), timeout)
     end)
 
     {:noreply, state}
+  end
+
+  # It's go time! Find an autohost, send it the start script and let all the players
+  # know about the autohost waiting for them.
+  def handle_continue(:start_match, state) do
+    case Teiserver.Autohost.list() do
+      [] ->
+        Logger.warning(
+          "No autohost available to start a paired matchmaking for queue #{inspect(state.queue)}"
+        )
+
+        QueueServer.disband_pairing(state.queue_id, self())
+
+        for team <- state.teams, member <- team, p_id <- member.player_ids do
+          Teiserver.Player.matchmaking_notify_lost(p_id, :no_host_available)
+        end
+
+        {:stop, :normal, state}
+
+      _ ->
+        {:noreply, state}
+    end
   end
 
   @impl true
@@ -91,7 +117,10 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           Teiserver.Player.matchmaking_found_update(p_id, current, self())
         end
 
-        {:reply, :ok, %{state | awaiting: rest}}
+        case rest do
+          [] -> {:reply, :ok, %{state | awaiting: rest}, {:continue, :start_match}}
+          _ -> {:reply, :ok, %{state | awaiting: rest}}
+        end
     end
   end
 

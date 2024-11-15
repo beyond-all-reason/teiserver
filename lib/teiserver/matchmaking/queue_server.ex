@@ -209,6 +209,10 @@ defmodule Teiserver.Matchmaking.QueueServer do
     end
   end
 
+  @doc """
+  The pairing room is gone for one reason or another
+  Rejoining the queue is not handled here, players will do that on their end
+  """
   def handle_call({:disband_pairing, room_pid}, _from, state) do
     case Enum.split_with(state.pairings, fn {p, _, _} -> p == room_pid end) do
       {[{_, ref, _}], rest} ->
