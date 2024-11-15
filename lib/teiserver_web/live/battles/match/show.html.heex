@@ -107,9 +107,11 @@
           <strong>Bot count:</strong> <%= Enum.count(@match.bots) %>
         </div>
 
-        <div class="col">
-          <strong>Map win rate:</strong> <%= @win_rate %>
-        </div>
+        <%= if Enum.count(@match.bots) == 0 do %>
+          <div class="col">
+            <strong>Map win rate:</strong> <%= @win_rate %>
+          </div>
+        <% end %>
       </div>
       <hr />
 
