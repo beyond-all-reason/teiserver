@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.{Battle, Game, Telemetry}
-  alias Teiserver.Battle.{MatchLib, BalanceLib}
+  alias Teiserver.Battle.{MatchLib, BalanceLib, MatchHistoryLib}
 
   @impl true
   def mount(_params, _session, socket) do
@@ -66,15 +66,19 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   #   {:noreply, assign(socket, :tab, tab)}
   # end
 
-  defp get_match(
-         %{assigns: %{id: id, algorithm: algorithm, current_user: _current_user}} = socket
-       ) do
+  defp get_match(%{assigns: %{id: id, algorithm: algorithm, current_user: current_user}} = socket) do
     if connected?(socket) do
       match =
         Battle.get_match!(id,
           preload: [:members_and_users, :founder]
         )
 
+      win_rate_stats =
+        MatchHistoryLib.get_win_rate_stats(current_user.id, match.map, match.started)
+
+      win_rate = (win_rate_stats.win_rate * 100) |> round(1)
+      match_count = win_rate_stats.match_count
+      win_rate_text = "#{win_rate}% (#{match_count} matches)"
       match_name = MatchLib.make_match_name(match)
 
       members =
@@ -229,6 +233,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:events_by_team_and_type, events_by_team_and_type)
       |> assign(:replay, replay)
       |> assign(:rating_status, match_rating_status)
+      |> assign(:win_rate, win_rate_text)
     else
       socket
       |> assign(:match, nil)
