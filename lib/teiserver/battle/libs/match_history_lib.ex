@@ -7,16 +7,13 @@ defmodule Teiserver.Battle.MatchHistoryLib do
   # Includes unrated games but not bot games
   def get_win_rate_stats(user_id, match_map, match_started_date) do
     query = """
-    select tbmm.win from teiserver_game_rating_logs tgrl
-    inner join teiserver_battle_match_memberships tbmm
-    on tbmm.match_id = tgrl.match_id
-    and tgrl.user_id  = $3
-    and tgrl.user_id  = tbmm.user_id
+    select tbmm.win from  teiserver_battle_match_memberships tbmm
     inner join teiserver_battle_matches tbm
     on tbm.id  = tbmm.match_id
     and tbm.map = $1
     and tbm.bots::jsonb = '{}'::jsonb
     and tbm.started  <= $2
+    and tbmm.user_id  = $3
     order by tbm.started desc
     limit 50
     """
