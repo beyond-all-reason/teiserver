@@ -428,11 +428,19 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
       queue_pid: queue_pid,
       autohost_client: autohost_client
     } do
-      join_and_pair(app, queue_id, queue_pid, 2)
-      |> all_ready_up!()
+      clients =
+        join_and_pair(app, queue_id, queue_pid, 2)
+        |> all_ready_up!()
 
       start_req = Tachyon.recv_message!(autohost_client)
       assert %{"commandId" => "autohost/start", "type" => "request", "data" => data} = start_req
+
+      host_data = %{
+        ips: ["127.0.0.1"],
+        port: 48912
+      }
+
+      Tachyon.send_response(autohost_client, start_req, data: host_data)
 
       user_ids =
         for ally_team <- data["allyTeams"],
@@ -449,6 +457,12 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
       for user_id <- user_ids do
         {user_id, _} = Integer.parse(user_id)
         assert is_pid(Player.SessionRegistry.lookup(user_id))
+      end
+
+      for client <- clients do
+        # TODO: same, json schema validation here
+        assert %{"commandId" => "battle/start", "data" => %{"ip" => _ip, "port" => _port}} =
+                 Tachyon.recv_message!(client)
       end
     end
 

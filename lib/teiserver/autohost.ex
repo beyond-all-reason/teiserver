@@ -29,6 +29,8 @@ defmodule Teiserver.Autohost do
           password: String.t()
         }
 
+  @type start_response :: Teiserver.Autohost.TachyonHandler.start_response()
+
   def create_autohost(attrs \\ %{}) do
     %Autohost{}
     |> Autohost.changeset(attrs)
@@ -65,8 +67,7 @@ defmodule Teiserver.Autohost do
   defdelegate list(), to: Registry
 
   @spec start_matchmaking(Autohost.id(), start_script()) ::
-          {:ok, Teiserver.Autohost.TachyonHandler.start_response()}
-          | {:error, term()}
+          {:ok, start_response()} | {:error, term()}
   defdelegate start_matchmaking(autohost_id, start_script),
     to: Teiserver.Autohost.TachyonHandler
 end

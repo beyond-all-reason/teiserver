@@ -30,7 +30,8 @@ defmodule Teiserver.Player.Session do
                room: {pid(), reference()},
                # a list of the other queues to rejoin in case the pairing fails
                frozen_queues: [Matchmaking.queue_id()],
-               readied: boolean()
+               readied: boolean(),
+               battle_password: String.t()
              }}
 
   @type state :: %{
@@ -100,6 +101,11 @@ defmodule Teiserver.Player.Session do
   @spec matchmaking_found_update(T.userid(), non_neg_integer(), pid()) :: :ok
   def matchmaking_found_update(user_id, ready_count, room_pid) do
     GenServer.cast(via_tuple(user_id), {:matchmaking_found_update, ready_count, room_pid})
+  end
+
+  @spec battle_start(T.userid(), Teiserver.Autohost.start_response()) :: :ok
+  def battle_start(user_id, battle_start_data) do
+    GenServer.cast(via_tuple(user_id), {:battle_start, battle_start_data})
   end
 
   def start_link({_conn_pid, user_id} = arg) do
@@ -216,13 +222,19 @@ defmodule Teiserver.Player.Session do
   def handle_call(:matchmaking_ready, _from, state) do
     case state.matchmaking do
       {:pairing, %{room: {room_pid, _}} = pairing_state} ->
-        new_state = %{state | matchmaking: {:pairing, %{pairing_state | readied: true}}}
+        password = :crypto.strong_rand_bytes(16) |> Base.encode16()
 
         data = %{
           user_id: state.user_id,
           # TODO: should have the name available in the state
           name: "player-name-#{state.user_id}",
-          password: :crypto.strong_rand_bytes(16) |> Base.encode16()
+          password: password
+        }
+
+        new_state = %{
+          state
+          | matchmaking:
+              {:pairing, %{pairing_state | readied: true} |> Map.put(:battle_password, password)}
         }
 
         {:reply, Matchmaking.ready(room_pid, data), new_state}
@@ -322,6 +334,28 @@ defmodule Teiserver.Player.Session do
         {:noreply, send_to_player({:matchmaking_found_update, current}, state)}
 
       _ ->
+        {:noreply, state}
+    end
+  end
+
+  def handle_cast({:battle_start, battle_start_data}, state) do
+    case state.matchmaking do
+      {:pairing, %{readied: true, battle_password: pass}} ->
+        data = %{
+          username: "player-name-#{state.user_id}",
+          password: pass,
+          ip: hd(battle_start_data.ips),
+          port: battle_start_data.port
+        }
+
+        state = send_to_player({:battle_start, data}, state)
+        {:noreply, state}
+
+      _ ->
+        Logger.warning(
+          "User #{state.user_id} received a request to start a battle but is not in a state to do so #{inspect(state)}"
+        )
+
         {:noreply, state}
     end
   end

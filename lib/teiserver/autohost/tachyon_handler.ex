@@ -201,4 +201,16 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
     send(reply_to, {:start_matchmaking_response, {:error, msg}})
   end
+
+  defp notify_autohost_started(reply_to, %{"status" => "success", "data" => data}) do
+    send(
+      reply_to,
+      {:start_matchmaking_response,
+       {:ok,
+        %{
+          ips: data["ips"],
+          port: data["port"]
+        }}}
+    )
+  end
 end
