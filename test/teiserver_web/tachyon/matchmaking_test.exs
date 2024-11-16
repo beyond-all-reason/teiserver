@@ -416,17 +416,9 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
 
       autohost_client = Tachyon.connect_autohost!(token, 10, 0)
 
-      clients = join_and_pair(app, queue_id, queue_pid, 2)
-
-      # slurp all the received messages, each client get a foundUpdate event for
-      # every ready sent
-      for client <- clients do
-        assert %{"status" => "success"} = Tachyon.matchmaking_ready!(client)
-
-        for c <- clients do
-          assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(c)
-        end
-      end
+      clients =
+        join_and_pair(app, queue_id, queue_pid, 2)
+        |> all_ready_up!()
 
       start_req = Tachyon.recv_message!(autohost_client)
       assert %{"commandId" => "autohost/start", "type" => "request", "data" => data} = start_req
@@ -461,6 +453,20 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
       assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
                Tachyon.recv_message(client)
     end)
+
+    clients
+  end
+
+  defp all_ready_up!(clients) do
+    # slurp all the received messages, each client get a foundUpdate event for
+    # every ready sent
+    for client <- clients do
+      assert %{"status" => "success"} = Tachyon.matchmaking_ready!(client)
+
+      for c <- clients do
+        assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(c)
+      end
+    end
 
     clients
   end
