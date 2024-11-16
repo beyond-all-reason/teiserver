@@ -438,6 +438,9 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
         for ally_team <- data["allyTeams"],
             team <- ally_team["teams"],
             player <- team["players"] do
+          # TODO: actually run json schema validation on the payloadd instead of that
+          assert Map.has_key?(player, "name")
+          assert Map.has_key?(player, "password")
           player["userId"]
         end
 

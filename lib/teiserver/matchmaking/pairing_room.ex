@@ -18,6 +18,11 @@ defmodule Teiserver.Matchmaking.PairingRoom do
 
   @type team :: [QueueServer.member()]
   @type lost_reason :: :cancel | :timeout | {:server_error, term()}
+  @type ready_data :: %{
+          user_id: T.userid(),
+          name: String.t(),
+          password: String.t()
+        }
 
   @spec start(QueueServer.id(), QueueServer.queue(), [team()], timeout()) ::
           {:ok, pid()} | {:error, term()}
@@ -28,9 +33,9 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   @doc """
   to tell the room that the given player is ready for the match
   """
-  @spec ready(pid(), T.userid()) :: :ok | {:error, :no_match}
-  def ready(room_pid, user_id) do
-    GenServer.call(room_pid, {:ready, user_id})
+  @spec ready(pid(), ready_data()) :: :ok | {:error, :no_match}
+  def ready(room_pid, ready_data) do
+    GenServer.call(room_pid, {:ready, ready_data})
   end
 
   @spec cancel(pid(), T.userid()) :: :ok
@@ -48,7 +53,11 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           queue_id: QueueServer.id(),
           queue: QueueServer.queue(),
           teams: [team(), ...],
-          awaiting: [T.userid()]
+          awaiting: [T.userid()],
+          # holds data from players that have readied up, in a format to be used to
+          # create the start script. Maintain the same structure as `teams` but
+          # the players for members are flatten
+          readied: [[%{user_id: T.userid(), name: String.t(), password: String.t()}], ...]
         }
 
   @impl true
@@ -61,7 +70,15 @@ defmodule Teiserver.Matchmaking.PairingRoom do
         awaiting:
           Enum.flat_map(teams, fn team ->
             Enum.flat_map(team, fn member -> member.player_ids end)
-          end)
+          end),
+        readied:
+          for team <- teams do
+            Enum.flat_map(team, fn member ->
+              for p_id <- member.player_ids do
+                %{user_id: p_id}
+              end
+            end)
+          end
       }
 
     :timer.send_after(timeout, :timeout)
@@ -110,14 +127,22 @@ defmodule Teiserver.Matchmaking.PairingRoom do
 
             {:stop, :normal, state}
 
-          {:ok, _} ->
-            {:noreply, state}
+          {:ok, battle_start_data} ->
+            QueueServer.disband_pairing(state.queue_id, self())
+
+            for team <- state.teams, member <- team, p_id <- member.player_ids do
+              Teiserver.Player.battle_start(p_id, battle_start_data)
+            end
+
+            {:stop, :normal, state}
         end
     end
   end
 
   @impl true
-  def handle_call({:ready, user_id}, _from, state) do
+  def handle_call({:ready, ready_data}, _from, state) do
+    user_id = ready_data.user_id
+
     case Enum.split_with(state.awaiting, fn waiting_id -> waiting_id == user_id end) do
       {[], _} ->
         {:reply, {:error, :no_match}, state}
@@ -131,9 +156,22 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           Teiserver.Player.matchmaking_found_update(p_id, current, self())
         end
 
+        readied =
+          for team <- state.readied do
+            for player <- team do
+              if player.user_id == user_id do
+                ready_data
+              else
+                player
+              end
+            end
+          end
+
+        new_state = %{state | awaiting: rest, readied: readied}
+
         case rest do
-          [] -> {:reply, :ok, %{state | awaiting: rest}, {:continue, :start_match}}
-          _ -> {:reply, :ok, %{state | awaiting: rest}}
+          [] -> {:reply, :ok, new_state, {:continue, :start_match}}
+          _ -> {:reply, :ok, new_state}
         end
     end
   end
@@ -178,22 +216,14 @@ defmodule Teiserver.Matchmaking.PairingRoom do
 
   @spec get_ally_teams(state()) :: [Teiserver.Autohost.ally_team(), ...]
   defp get_ally_teams(state) do
-    Enum.map(state.teams, fn team ->
+    for team <- state.readied do
       teams =
-        for member <- team do
-          players =
-            for player_id <- member.player_ids do
-              %{
-                userId: player_id,
-                name: "player-name-#{player_id}",
-                password: :crypto.strong_rand_bytes(16) |> Base.encode16()
-              }
-            end
-
-          %{players: players}
+        for player <- team do
+          player = player |> Map.drop([:user_id]) |> Map.put(:userId, to_string(player.user_id))
+          %{players: [player]}
         end
 
       %{teams: teams}
-    end)
+    end
   end
 end

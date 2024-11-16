@@ -217,7 +217,15 @@ defmodule Teiserver.Player.Session do
     case state.matchmaking do
       {:pairing, %{room: {room_pid, _}} = pairing_state} ->
         new_state = %{state | matchmaking: {:pairing, %{pairing_state | readied: true}}}
-        {:reply, Matchmaking.ready(room_pid, state.user_id), new_state}
+
+        data = %{
+          user_id: state.user_id,
+          # TODO: should have the name available in the state
+          name: "player-name-#{state.user_id}",
+          password: :crypto.strong_rand_bytes(16) |> Base.encode16()
+        }
+
+        {:reply, Matchmaking.ready(room_pid, data), new_state}
 
       _ ->
         {:reply, {:error, :no_match}, state}

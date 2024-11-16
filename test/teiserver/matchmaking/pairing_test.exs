@@ -28,14 +28,18 @@ defmodule Teiserver.Matchmaking.PairingTest do
       [m1, m2] = [make_member(), make_member()]
       teams = [[m1], [m2]]
       {:ok, pid} = PairingRoom.start("queue_id", queue_attrs(), teams, 20_000)
-      assert {:error, :no_match} = PairingRoom.ready(pid, -81234)
+
+      assert {:error, :no_match} =
+               PairingRoom.ready(pid, %{user_id: -81234, name: "irrelevant", password: "pass"})
     end
 
     test "can join" do
       [m1, m2] = [make_member(), make_member()]
       teams = [[m1], [m2]]
       {:ok, pid} = PairingRoom.start("queue_id", queue_attrs(), teams, 20_000)
-      assert {:error, :no_match} = PairingRoom.ready(pid, m1.id)
+
+      assert {:error, :no_match} =
+               PairingRoom.ready(pid, %{user_id: m1.id, name: "irrelevant", password: "pass"})
     end
   end
 end
