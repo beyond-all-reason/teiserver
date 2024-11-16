@@ -404,6 +404,47 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
                  Tachyon.recv_message!(client)
       end
     end
+
+    test "happy full path", %{app: app, queue_id: queue_id, queue_pid: queue_pid} do
+      autohost = Teiserver.AutohostFixtures.create_autohost()
+
+      token =
+        OAuthFixtures.token_attrs(nil, app)
+        |> Map.drop([:owner_id])
+        |> Map.put(:autohost_id, autohost.id)
+        |> OAuthFixtures.create_token()
+
+      autohost_client = Tachyon.connect_autohost!(token, 10, 0)
+
+      clients = join_and_pair(app, queue_id, queue_pid, 2)
+
+      # slurp all the received messages, each client get a foundUpdate event for
+      # every ready sent
+      for client <- clients do
+        assert %{"status" => "success"} = Tachyon.matchmaking_ready!(client)
+
+        for c <- clients do
+          assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(c)
+        end
+      end
+
+      start_req = Tachyon.recv_message!(autohost_client)
+      assert %{"commandId" => "autohost/start", "type" => "request", "data" => data} = start_req
+
+      user_ids =
+        for ally_team <- data["allyTeams"],
+            team <- ally_team["teams"],
+            player <- team["players"] do
+          player["userId"]
+        end
+
+      assert Enum.count(user_ids) == 2
+
+      for user_id <- user_ids do
+        {user_id, _} = Integer.parse(user_id)
+        assert is_pid(Player.SessionRegistry.lookup(user_id))
+      end
+    end
   end
 
   defp join_and_pair(app, queue_id, queue_pid, number_of_player) do

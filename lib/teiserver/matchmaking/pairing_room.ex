@@ -97,7 +97,9 @@ defmodule Teiserver.Matchmaking.PairingRoom do
 
         {:stop, :normal, state}
 
-      _ ->
+      [%{id: id} | _] ->
+        start_script = hardcoded_start_script(state)
+        Teiserver.Autohost.start_matchmaking(id, start_script)
         {:noreply, state}
     end
   end
@@ -148,5 +150,38 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     end
 
     {:stop, :normal, state}
+  end
+
+  @spec hardcoded_start_script(state()) :: Teiserver.Autohost.start_script()
+  defp hardcoded_start_script(state) do
+    %{
+      battleId: UUID.uuid4(),
+      engineVersion: "105.1.1-2590-gb9462a0 bar",
+      gameName: "Beyond All Reason test-26929-d709d32",
+      mapName: "Red Comet Remake 1.8",
+      startPosType: :ingame,
+      allyTeams: get_ally_teams(state)
+    }
+  end
+
+  @spec get_ally_teams(state()) :: [Teiserver.Autohost.ally_team(), ...]
+  defp get_ally_teams(state) do
+    Enum.map(state.teams, fn team ->
+      teams =
+        for member <- team do
+          players =
+            for player_id <- member.player_ids do
+              %{
+                userId: player_id,
+                name: "player-name-#{player_id}",
+                password: :crypto.strong_rand_bytes(16) |> Base.encode16()
+              }
+            end
+
+          %{players: players}
+        end
+
+      %{teams: teams}
+    end)
   end
 end

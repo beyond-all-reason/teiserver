@@ -1,0 +1,66 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/autohost/start/response.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AutohostStartResponse",
+    "tachyon": {
+        "source": "autohost",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "anyOf": [
+        {
+            "title": "AutohostStartOkResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "autohost/start" },
+                "status": { "const": "success" },
+                "data": {
+                    "title": "AutohostStartOkResponseData",
+                    "type": "object",
+                    "properties": {
+                        "ips": {
+                            "type": "array",
+                            "items": {
+                                "anyOf": [
+                                    { "type": "string", "format": "ipv4" },
+                                    { "type": "string", "format": "ipv6" }
+                                ]
+                            }
+                        },
+                        "port": {
+                            "type": "integer",
+                            "minimum": 1024,
+                            "maximum": 65535
+                        }
+                    },
+                    "required": ["ips", "port"]
+                }
+            },
+            "required": ["type", "messageId", "commandId", "status", "data"]
+        },
+        {
+            "title": "AutohostStartFailResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "autohost/start" },
+                "status": { "const": "failed" },
+                "reason": {
+                    "enum": [
+                        "battle_already_exists",
+                        "engine_version_not_available",
+                        "internal_error",
+                        "unauthorized",
+                        "invalid_request",
+                        "command_unimplemented"
+                    ]
+                },
+                "details": { "type": "string" }
+            },
+            "required": ["type", "messageId", "commandId", "status", "reason"]
+        }
+    ]
+}
