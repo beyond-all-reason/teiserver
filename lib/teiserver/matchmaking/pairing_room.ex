@@ -47,7 +47,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   @type state :: %{
           queue_id: QueueServer.id(),
           queue: QueueServer.queue(),
-          teams: [QueueServer.member()],
+          teams: [team(), ...],
           awaiting: [T.userid()]
         }
 
