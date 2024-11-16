@@ -404,21 +404,32 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
                  Tachyon.recv_message!(client)
       end
     end
+  end
 
-    test "happy full path", %{app: app, queue_id: queue_id, queue_pid: queue_pid} do
-      autohost = Teiserver.AutohostFixtures.create_autohost()
+  def setup_autohost(context) do
+    autohost = Teiserver.AutohostFixtures.create_autohost()
 
-      token =
-        OAuthFixtures.token_attrs(nil, app)
-        |> Map.drop([:owner_id])
-        |> Map.put(:autohost_id, autohost.id)
-        |> OAuthFixtures.create_token()
+    token =
+      OAuthFixtures.token_attrs(nil, context.app)
+      |> Map.drop([:owner_id])
+      |> Map.put(:autohost_id, autohost.id)
+      |> OAuthFixtures.create_token()
 
-      autohost_client = Tachyon.connect_autohost!(token, 10, 0)
+    client = Tachyon.connect_autohost!(token, 10, 0)
+    {:ok, autohost: autohost, autohost_client: client}
+  end
 
-      clients =
-        join_and_pair(app, queue_id, queue_pid, 2)
-        |> all_ready_up!()
+  describe "join with autohost" do
+    setup [{Tachyon, :setup_client}, :setup_app, :setup_queue, :setup_autohost]
+
+    test "happy full path", %{
+      app: app,
+      queue_id: queue_id,
+      queue_pid: queue_pid,
+      autohost_client: autohost_client
+    } do
+      join_and_pair(app, queue_id, queue_pid, 2)
+      |> all_ready_up!()
 
       start_req = Tachyon.recv_message!(autohost_client)
       assert %{"commandId" => "autohost/start", "type" => "request", "data" => data} = start_req
