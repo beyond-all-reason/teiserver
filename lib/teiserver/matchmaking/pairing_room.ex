@@ -17,7 +17,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   require Logger
 
   @type team :: [QueueServer.member()]
-  @type lost_reason :: :cancel | :timeout | :no_host_available
+  @type lost_reason :: :cancel | :timeout | {:server_error, term()}
 
   @spec start(QueueServer.id(), QueueServer.queue(), [team()], timeout()) ::
           {:ok, pid()} | {:error, term()}
@@ -92,15 +92,27 @@ defmodule Teiserver.Matchmaking.PairingRoom do
         QueueServer.disband_pairing(state.queue_id, self())
 
         for team <- state.teams, member <- team, p_id <- member.player_ids do
-          Teiserver.Player.matchmaking_notify_lost(p_id, :no_host_available)
+          Teiserver.Player.matchmaking_notify_lost(p_id, {:server_error, :no_host_available})
         end
 
         {:stop, :normal, state}
 
       [%{id: id} | _] ->
         start_script = hardcoded_start_script(state)
-        Teiserver.Autohost.start_matchmaking(id, start_script)
-        {:noreply, state}
+
+        case Teiserver.Autohost.start_matchmaking(id, start_script) do
+          {:error, reason} ->
+            QueueServer.disband_pairing(state.queue_id, self())
+
+            for team <- state.teams, member <- team, p_id <- member.player_ids do
+              Teiserver.Player.matchmaking_notify_lost(p_id, {:server_error, reason})
+            end
+
+            {:stop, :normal, state}
+
+          {:ok, _} ->
+            {:noreply, state}
+        end
     end
   end
 

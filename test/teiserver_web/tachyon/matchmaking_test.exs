@@ -399,7 +399,7 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
 
         assert %{
                  "commandId" => "matchmaking/cancelled",
-                 "data" => %{"reason" => "no_host_available"}
+                 "data" => %{"reason" => "server_error", "details" => "no_host_available"}
                } =
                  Tachyon.recv_message!(client)
       end
@@ -446,6 +446,37 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
       for user_id <- user_ids do
         {user_id, _} = Integer.parse(user_id)
         assert is_pid(Player.SessionRegistry.lookup(user_id))
+      end
+    end
+
+    test "autohost errors propagates to clients",
+         %{
+           app: app,
+           queue_id: queue_id,
+           queue_pid: queue_pid,
+           autohost_client: autohost_client
+         } do
+      clients =
+        join_and_pair(app, queue_id, queue_pid, 2)
+        |> all_ready_up!()
+
+      start_req = Tachyon.recv_message!(autohost_client)
+      assert %{"commandId" => "autohost/start", "type" => "request", "data" => _data} = start_req
+
+      resp_data = [reason: "engine_version_not_available"]
+      assert :ok = Tachyon.send_response(autohost_client, start_req, resp_data)
+
+      for client <- clients do
+        assert %{"commandId" => "matchmaking/lost"} = Tachyon.recv_message!(client)
+
+        assert %{
+                 "commandId" => "matchmaking/cancelled",
+                 "data" => %{
+                   "reason" => "server_error",
+                   "details" => "engine_version_not_available"
+                 }
+               } =
+                 Tachyon.recv_message!(client)
       end
     end
   end

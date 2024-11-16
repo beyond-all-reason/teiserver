@@ -3,6 +3,7 @@ defmodule Teiserver.Autohost do
   alias Teiserver.AutohostQueries
   alias Teiserver.Repo
 
+  @type id :: Teiserver.Autohost.Autohost.id()
   @type reg_value :: Registry.reg_value()
 
   @type start_script :: %{
@@ -64,7 +65,8 @@ defmodule Teiserver.Autohost do
   defdelegate list(), to: Registry
 
   @spec start_matchmaking(Autohost.id(), start_script()) ::
-          :ok | {:no_autohost, Autohost.id()}
+          {:ok, Teiserver.Autohost.TachyonHandler.start_response()}
+          | {:error, term()}
   defdelegate start_matchmaking(autohost_id, start_script),
     to: Teiserver.Autohost.TachyonHandler
 end

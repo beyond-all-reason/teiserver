@@ -283,20 +283,27 @@ defmodule Teiserver.Player.Session do
         q_ids = [q_id | frozen_queues]
         state = send_to_player(:matchmaking_notify_lost, state)
 
-        if reason == :no_host_available || (reason == :timeout && not readied) do
-          state = leave_all_queues(q_ids, state)
-          state = send_to_player({:matchmaking_cancelled, reason}, state)
-          {:noreply, state}
-        else
-          case join_all_queues(state.user_id, q_ids, []) do
-            :ok ->
-              new_mm_state = {:searching, %{joined_queues: q_ids}}
-              {:noreply, put_in(state.matchmaking, new_mm_state)}
+        case reason do
+          :timeout when not readied ->
+            state = leave_all_queues(q_ids, state)
+            state = send_to_player({:matchmaking_cancelled, reason}, state)
+            {:noreply, state}
 
-            {:error, _err} ->
-              state = send_to_player({:matchmaking_cancelled, :server_error}, state)
-              {:noreply, %{state | matchmaking: initial_matchmaking_state()}}
-          end
+          {:server_error, _details} ->
+            state = leave_all_queues(q_ids, state)
+            state = send_to_player({:matchmaking_cancelled, reason}, state)
+            {:noreply, state}
+
+          _ ->
+            case join_all_queues(state.user_id, q_ids, []) do
+              :ok ->
+                new_mm_state = {:searching, %{joined_queues: q_ids}}
+                {:noreply, put_in(state.matchmaking, new_mm_state)}
+
+              {:error, _err} ->
+                state = send_to_player({:matchmaking_cancelled, :server_error}, state)
+                {:noreply, %{state | matchmaking: initial_matchmaking_state()}}
+            end
         end
     end
   end

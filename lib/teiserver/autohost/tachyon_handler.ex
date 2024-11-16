@@ -22,6 +22,11 @@ defmodule Teiserver.Autohost.TachyonHandler do
   """
   @type pending_response :: {reference(), term()}
 
+  @type start_response :: %{
+          ips: [String.t()],
+          port: integer()
+        }
+
   @impl Handler
   def connect(conn) do
     autohost = conn.assigns[:token].autohost
@@ -158,7 +163,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
   # TODO: there should be some kind of retry here
   @spec start_matchmaking(Autohost.id(), Teiserver.Autohost.start_script()) ::
-          :ok | {:error, term()}
+          {:ok, start_response()} | {:error, term()}
   def start_matchmaking(autohost_id, start_script) do
     case Registry.lookup(autohost_id) do
       {pid, _} ->
@@ -175,7 +180,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
         end
 
       _ ->
-        {:error, :no_autohost}
+        {:error, :no_host_available}
     end
   end
 
