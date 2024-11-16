@@ -14,13 +14,8 @@ defmodule Teiserver.Autohost.TachyonHandler do
   @type state :: %{
           autohost: Autohost.t(),
           state: :handshaking | {:connected, connected_state()},
-          pending_responses: %{String.t() => pending_response()}
+          pending_responses: Handler.pending_responses()
         }
-
-  @typedoc """
-  {timeout ref, whatever is required to process the response}
-  """
-  @type pending_response :: {reference(), term()}
 
   @type start_response :: %{
           ips: [String.t()],
