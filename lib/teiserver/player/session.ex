@@ -340,7 +340,7 @@ defmodule Teiserver.Player.Session do
 
   def handle_cast({:battle_start, battle_start_data}, state) do
     case state.matchmaking do
-      {:pairing, %{readied: true, battle_password: pass}} ->
+      {:pairing, %{readied: true, battle_password: pass, room: {_pid, mon_ref}}} ->
         data = %{
           username: "player-name-#{state.user_id}",
           password: pass,
@@ -349,7 +349,8 @@ defmodule Teiserver.Player.Session do
         }
 
         state = send_to_player({:battle_start, data}, state)
-        {:noreply, state}
+        Process.demonitor(mon_ref, [:flush])
+        {:noreply, %{state | matchmaking: :no_matchmaking}}
 
       _ ->
         Logger.warning(
