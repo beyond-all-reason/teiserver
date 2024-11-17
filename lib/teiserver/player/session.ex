@@ -374,7 +374,7 @@ defmodule Teiserver.Player.Session do
     case state do
       %{matchmaking: {:pairing, %{room: {_, ^ref}}}} ->
         # only log in case of abnormal exit. If the queue itself goes down, so be it
-        if reason != :shutdown, do: Logger.warning("Pairing room went down #{inspect(reason)}")
+        if reason != :normal, do: Logger.warning("Pairing room went down #{inspect(reason)}")
         # TODO tachyon_mvp: rejoin the room and send `lost` event
         # For now, just abruptly stop everything
         {:stop, :normal, state}

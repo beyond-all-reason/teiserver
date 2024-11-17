@@ -62,6 +62,9 @@ defmodule Teiserver.Tachyon.Transport do
   @impl true
   def terminate(reason, state) do
     case reason do
+      :normal ->
+        nil
+
       :remote ->
         Logger.debug("Peer abruptly terminated connection #{inspect(state)}")
 
