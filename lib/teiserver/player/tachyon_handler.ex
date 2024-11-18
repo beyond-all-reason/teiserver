@@ -114,7 +114,13 @@ defmodule Teiserver.Player.TachyonHandler do
     {:push, {:text, [req |> Jason.encode!()]}, new_state}
   end
 
-  def handle_info(_msg, state) do
+  def handle_info({:timeout, message_id}, state)
+      when is_map_key(state.pending_responses, message_id) do
+    Logger.debug("User(#{state.user.id}) did not reply in time to request with id #{message_id}")
+    {:stop, :normal, state}
+  end
+
+  def handle_info(%{}, state) do
     {:ok, state}
   end
 
