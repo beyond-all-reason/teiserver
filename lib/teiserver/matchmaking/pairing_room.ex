@@ -81,6 +81,11 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           end
       }
 
+    Logger.debug(
+      "Pairing room for queue #{initial_state.queue_id} starting for players " <>
+        Enum.join(initial_state.awaiting, ",")
+    )
+
     :timer.send_after(timeout, :timeout)
 
     {:ok, initial_state, {:continue, {:notify_players, timeout}}}
@@ -129,6 +134,16 @@ defmodule Teiserver.Matchmaking.PairingRoom do
 
           {:ok, battle_start_data} ->
             QueueServer.disband_pairing(state.queue_id, self())
+
+            ids =
+              for team <- state.teams, member <- team, p_id <- member.player_ids do
+                p_id
+              end
+
+            Logger.debug(
+              "Pairing completed for queue #{state.queue_id} is starting for players " <>
+                Enum.join(ids, ",")
+            )
 
             for team <- state.teams, member <- team, p_id <- member.player_ids do
               Teiserver.Player.battle_start(p_id, battle_start_data)
