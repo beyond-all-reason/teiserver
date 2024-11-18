@@ -35,7 +35,7 @@ defmodule Teiserver.Player.Session do
              }}
 
   @type state :: %{
-          user_id: T.userid(),
+          user: T.user(),
           mon_ref: reference(),
           conn_pid: pid() | nil,
           matchmaking: matchmaking_state()
@@ -108,8 +108,8 @@ defmodule Teiserver.Player.Session do
     GenServer.cast(via_tuple(user_id), {:battle_start, battle_start_data})
   end
 
-  def start_link({_conn_pid, user_id} = arg) do
-    GenServer.start_link(__MODULE__, arg, name: via_tuple(user_id))
+  def start_link({_conn_pid, user} = arg) do
+    GenServer.start_link(__MODULE__, arg, name: via_tuple(user.id))
   end
 
   @doc """
@@ -126,17 +126,17 @@ defmodule Teiserver.Player.Session do
   end
 
   @impl true
-  def init({conn_pid, user_id}) do
+  def init({conn_pid, user}) do
     ref = Process.monitor(conn_pid)
 
     state = %{
-      user_id: user_id,
+      user: user,
       mon_ref: ref,
       conn_pid: conn_pid,
       matchmaking: initial_matchmaking_state()
     }
 
-    Logger.debug("init session #{inspect(self())} for player #{user_id}")
+    Logger.debug("init session #{inspect(self())} for player #{user.id}")
 
     {:ok, state}
   end
@@ -163,7 +163,7 @@ defmodule Teiserver.Player.Session do
   end
 
   def handle_call(:disconnect, _from, state) do
-    user_id = state.user_id
+    user_id = state.user.id
 
     case state.matchmaking do
       {:searching, %{joined_queues: joined_queues}} ->
@@ -185,7 +185,7 @@ defmodule Teiserver.Player.Session do
   def handle_call({:join_queues, queue_ids}, _from, state) do
     case state.matchmaking do
       :no_matchmaking ->
-        case join_all_queues(state.user_id, queue_ids, []) do
+        case join_all_queues(state.user.id, queue_ids, []) do
           :ok ->
             new_mm_state = {:searching, %{joined_queues: queue_ids}}
             {:reply, :ok, put_in(state.matchmaking, new_mm_state)}
@@ -225,9 +225,8 @@ defmodule Teiserver.Player.Session do
         password = :crypto.strong_rand_bytes(16) |> Base.encode16()
 
         data = %{
-          user_id: state.user_id,
-          # TODO: should have the name available in the state
-          name: "player-name-#{state.user_id}",
+          user_id: state.user.id,
+          name: state.user.name,
           password: password
         }
 
@@ -256,7 +255,7 @@ defmodule Teiserver.Player.Session do
 
       other_queues =
         for qid <- queue_ids, qid != queue_id do
-          Matchmaking.leave_queue(qid, state.user_id)
+          Matchmaking.leave_queue(qid, state.user.id)
           qid
         end
 
@@ -281,10 +280,10 @@ defmodule Teiserver.Player.Session do
     # match the same player at the same time.
     # Do log it since it should not happen too often unless something is wrong
     Logger.info(
-      "Got a matchmaking found but in state #{inspect(state.matchmaking)} for user #{inspect(state.user_id)}"
+      "Got a matchmaking found but in state #{inspect(state.matchmaking)} for user #{inspect(state.user.id)}"
     )
 
-    Matchmaking.cancel(room_pid, state.user_id)
+    Matchmaking.cancel(room_pid, state.user.id)
     {:noreply, state}
   end
 
@@ -315,7 +314,7 @@ defmodule Teiserver.Player.Session do
             {:noreply, state}
 
           _ ->
-            case join_all_queues(state.user_id, q_ids, []) do
+            case join_all_queues(state.user.id, q_ids, []) do
               :ok ->
                 new_mm_state = {:searching, %{joined_queues: q_ids}}
                 {:noreply, put_in(state.matchmaking, new_mm_state)}
@@ -342,7 +341,7 @@ defmodule Teiserver.Player.Session do
     case state.matchmaking do
       {:pairing, %{readied: true, battle_password: pass, room: {_pid, mon_ref}}} ->
         data = %{
-          username: "player-name-#{state.user_id}",
+          username: state.user.name,
           password: pass,
           ip: hd(battle_start_data.ips),
           port: battle_start_data.port
@@ -354,7 +353,7 @@ defmodule Teiserver.Player.Session do
 
       _ ->
         Logger.warning(
-          "User #{state.user_id} received a request to start a battle but is not in a state to do so #{inspect(state)}"
+          "User #{state.user.id} received a request to start a battle but is not in a state to do so #{inspect(state)}"
         )
 
         {:noreply, state}
@@ -366,7 +365,7 @@ defmodule Teiserver.Player.Session do
     # we don't care about cancelling the timer if the player reconnects since reconnection
     # should be fairly low (and rate limited) so too many messages isn't an issue
     {:ok, _} = :timer.send_after(30_000, :player_timeout)
-    Logger.debug("Player #{state.user_id} disconnected abruptly")
+    Logger.debug("Player #{state.user.id} disconnected abruptly")
     {:noreply, %{state | conn_pid: nil}}
   end
 
@@ -392,7 +391,7 @@ defmodule Teiserver.Player.Session do
 
   def handle_info(:player_timeout, state) do
     if is_nil(state.conn_pid) do
-      Logger.debug("Player #{state.user_id} timed out, stopping session")
+      Logger.debug("Player #{state.user.id} timed out, stopping session")
       {:stop, :normal, state}
     else
       {:noreply, state}
@@ -426,7 +425,7 @@ defmodule Teiserver.Player.Session do
     # It is a bit unclear what kind of failure can happen, and also
     # what should be done in that case
     Enum.each(queues_to_leave, fn qid ->
-      Matchmaking.leave_queue(qid, state.user_id)
+      Matchmaking.leave_queue(qid, state.user.id)
     end)
 
     Map.put(state, :matchmaking, initial_matchmaking_state())

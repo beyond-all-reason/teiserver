@@ -41,7 +41,7 @@ defmodule Teiserver.Player.TachyonHandler do
   @spec init(%{user: T.user()}) :: WebSock.handle_result()
   def init(initial_state) do
     # this is inside the process that maintain the connection
-    {:ok, session_pid} = setup_session(initial_state.user.id)
+    {:ok, session_pid} = setup_session(initial_state.user)
     sess_monitor = Process.monitor(session_pid)
 
     {:ok,
@@ -245,10 +245,10 @@ defmodule Teiserver.Player.TachyonHandler do
   # restarting the connection (through the supervisor) isn't enough.
   # The state associated with the connected player will not match
   # the brand new session.
-  defp setup_session(user_id) do
-    case Player.SessionSupervisor.start_session(user_id) do
+  defp setup_session(user) do
+    case Player.SessionSupervisor.start_session(user) do
       {:ok, session_pid} ->
-        {:ok, _} = Player.Registry.register_and_kill_existing(user_id)
+        {:ok, _} = Player.Registry.register_and_kill_existing(user.id)
         {:ok, session_pid}
 
       {:error, {:already_started, pid}} ->
@@ -258,10 +258,10 @@ defmodule Teiserver.Player.TachyonHandler do
           # When a user disconnect and immediately reconnect it can happen
           # that the session is still registered
           :died ->
-            setup_session(user_id)
+            setup_session(user)
 
           :ok ->
-            {:ok, _} = Player.Registry.register_and_kill_existing(user_id)
+            {:ok, _} = Player.Registry.register_and_kill_existing(user.id)
             {:ok, pid}
         end
     end
