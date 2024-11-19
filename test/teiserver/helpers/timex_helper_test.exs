@@ -41,7 +41,7 @@ defmodule Teiserver.Helper.TimexHelperTest do
     end
 
     # Now test it runs with just a "now" argument
-    assert TimexHelper.date_to_str(@today) == "2013-12-04"
+    assert TimexHelper.date_to_str(@today, tz: "Europe/London") == "2013-12-04"
   end
 
   test "date_to_str until" do
