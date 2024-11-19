@@ -319,11 +319,12 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
 
     test "can query oauth metadata", %{conn: conn} do
       resp = json_response(get(conn, ~p"/.well-known/oauth-authorization-server"), 200)
+      endpoint = TeiserverWeb.Endpoint.static_url()
 
       assert resp == %{
-               "issuer" => "https://beyondallreason.info",
-               "authorization_endpoint" => "https://beyondallreason.info/oauth/authorize",
-               "token_endpoint" => "https://beyondallreason.info/oauth/token",
+               "issuer" => "#{endpoint}",
+               "authorization_endpoint" => "#{endpoint}/oauth/authorize",
+               "token_endpoint" => "#{endpoint}/oauth/token",
                "token_endpoint_auth_methods_supported" => [
                  "none",
                  "client_secret_post",
