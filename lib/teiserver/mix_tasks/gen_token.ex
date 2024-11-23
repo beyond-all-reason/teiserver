@@ -20,7 +20,8 @@ defmodule Mix.Tasks.Teiserver.GenToken do
     {parsed, _, _errors} = OptionParser.parse(args, strict: [user: :string, app: :string])
     shell.info("parsed args: #{inspect(parsed)}")
 
-    Mix.Task.run("ecto.setup")
+    Application.ensure_all_started([:ecto, :ecto_sql, :tzdata])
+    Teiserver.Repo.start_link()
 
     case parsed[:user] do
       nil ->
