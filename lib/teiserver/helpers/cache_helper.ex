@@ -32,6 +32,9 @@ defmodule Teiserver.Helpers.CacheHelper do
       "cluster_hooks",
       {:cluster_hooks, :delete, Node.self(), table, keys}
     )
+  catch
+    :exit, :noproc ->
+      Logger.warning("Cache #{table} is down")
   end
 
   def cache_delete(table, key), do: cache_delete(table, [key])
@@ -48,6 +51,9 @@ defmodule Teiserver.Helpers.CacheHelper do
       "cluster_hooks",
       {:cluster_hooks, :put, Node.self(), table, key, value}
     )
+  catch
+    :exit, :noproc ->
+      Logger.warning("Cache #{table} is down")
   end
 
   @doc """
