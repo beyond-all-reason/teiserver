@@ -19,6 +19,7 @@ defmodule Teiserver.Support.Tachyon do
     opts = connect_options(token)
 
     {:ok, client} = WSC.connect(tachyon_url(), opts)
+    ExUnit.Callbacks.on_exit(fn -> WSC.disconnect(client) end)
     client
   end
 
@@ -76,12 +77,45 @@ defmodule Teiserver.Support.Tachyon do
     end
   end
 
+  def response(request, opts) do
+    resp = %{
+      type: :response,
+      commandId: request["commandId"],
+      messageId: request["messageId"]
+    }
+
+    cond do
+      not is_nil(opts[:data]) ->
+        resp
+        |> Map.put(:status, :success)
+        |> Map.put(:data, opts[:data])
+
+      not is_nil(opts[:reason]) ->
+        resp =
+          resp
+          |> Map.put(:status, :failed)
+          |> Map.put(:reason, opts[:reason])
+
+        case opts[:details] do
+          nil -> resp
+          x -> Map.put(resp, :details, x)
+        end
+    end
+  end
+
   def event(command_id, data \\ nil) do
     request(command_id, data) |> Map.put(:type, :event)
   end
 
   def send_request(client, command_id, data \\ nil) do
     WSC.send_message(client, {:text, request(command_id, data) |> Jason.encode!()})
+  end
+
+  def send_response(client, request, opts \\ []) do
+    WSC.send_message(
+      client,
+      {:text, response(request, opts) |> Jason.encode!()}
+    )
   end
 
   def send_event(client, command_id, data \\ nil) do

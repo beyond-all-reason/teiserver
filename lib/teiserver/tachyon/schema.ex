@@ -129,4 +129,23 @@ defmodule Teiserver.Tachyon.Schema do
       Map.put(ev, :data, data)
     end
   end
+
+  @spec request(command_id(), term()) :: %{
+          type: :request,
+          messageId: message_id(),
+          commandId: command_id()
+        }
+  def request(command_id, data) do
+    ev = %{
+      type: :request,
+      messageId: UUID.uuid4(),
+      commandId: command_id
+    }
+
+    if is_nil(data) do
+      ev
+    else
+      Map.put(ev, :data, data)
+    end
+  end
 end

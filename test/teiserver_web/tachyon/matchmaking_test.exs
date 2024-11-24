@@ -380,6 +380,122 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
       assert %{"reason" => "already_queued"} = Tachyon.join_queues!(c1, [q_id])
       assert %{"status" => "success"} = Tachyon.join_queues!(c2, [q_id])
     end
+
+    test "no autohost", %{app: app, queue_id: queue_id, queue_pid: queue_pid} do
+      clients = join_and_pair(app, queue_id, queue_pid, 2)
+
+      # slurp all the received messages, each client get a foundUpdate event for
+      # every ready sent
+      for client <- clients do
+        assert %{"status" => "success"} = Tachyon.matchmaking_ready!(client)
+
+        for c <- clients do
+          assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(c)
+        end
+      end
+
+      for client <- clients do
+        assert %{"commandId" => "matchmaking/lost"} = Tachyon.recv_message!(client)
+
+        assert %{
+                 "commandId" => "matchmaking/cancelled",
+                 "data" => %{"reason" => "server_error", "details" => "no_host_available"}
+               } =
+                 Tachyon.recv_message!(client)
+      end
+    end
+  end
+
+  def setup_autohost(context) do
+    autohost = Teiserver.AutohostFixtures.create_autohost()
+
+    token =
+      OAuthFixtures.token_attrs(nil, context.app)
+      |> Map.drop([:owner_id])
+      |> Map.put(:autohost_id, autohost.id)
+      |> OAuthFixtures.create_token()
+
+    client = Tachyon.connect_autohost!(token, 10, 0)
+    {:ok, autohost: autohost, autohost_client: client}
+  end
+
+  describe "join with autohost" do
+    setup [{Tachyon, :setup_client}, :setup_app, :setup_queue, :setup_autohost]
+
+    test "happy full path", %{
+      app: app,
+      queue_id: queue_id,
+      queue_pid: queue_pid,
+      autohost_client: autohost_client
+    } do
+      clients =
+        join_and_pair(app, queue_id, queue_pid, 2)
+        |> all_ready_up!()
+
+      start_req = Tachyon.recv_message!(autohost_client)
+      assert %{"commandId" => "autohost/start", "type" => "request", "data" => data} = start_req
+
+      host_data = %{
+        ips: ["127.0.0.1"],
+        port: 48912
+      }
+
+      Tachyon.send_response(autohost_client, start_req, data: host_data)
+
+      user_ids =
+        for ally_team <- data["allyTeams"],
+            team <- ally_team["teams"],
+            player <- team["players"] do
+          # TODO: actually run json schema validation on the payloadd instead of that
+          assert Map.has_key?(player, "name")
+          assert Map.has_key?(player, "password")
+          player["userId"]
+        end
+
+      assert Enum.count(user_ids) == 2
+
+      for user_id <- user_ids do
+        {user_id, _} = Integer.parse(user_id)
+        assert is_pid(Player.SessionRegistry.lookup(user_id))
+      end
+
+      for client <- clients do
+        # TODO: same, json schema validation here
+        assert %{"commandId" => "battle/start", "data" => %{"ip" => _ip, "port" => _port}} =
+                 Tachyon.recv_message!(client)
+      end
+    end
+
+    test "autohost errors propagates to clients",
+         %{
+           app: app,
+           queue_id: queue_id,
+           queue_pid: queue_pid,
+           autohost_client: autohost_client
+         } do
+      clients =
+        join_and_pair(app, queue_id, queue_pid, 2)
+        |> all_ready_up!()
+
+      start_req = Tachyon.recv_message!(autohost_client)
+      assert %{"commandId" => "autohost/start", "type" => "request", "data" => _data} = start_req
+
+      resp_data = [reason: "engine_version_not_available"]
+      assert :ok = Tachyon.send_response(autohost_client, start_req, resp_data)
+
+      for client <- clients do
+        assert %{"commandId" => "matchmaking/lost"} = Tachyon.recv_message!(client)
+
+        assert %{
+                 "commandId" => "matchmaking/cancelled",
+                 "data" => %{
+                   "reason" => "server_error",
+                   "details" => "engine_version_not_available"
+                 }
+               } =
+                 Tachyon.recv_message!(client)
+      end
+    end
   end
 
   defp join_and_pair(app, queue_id, queue_pid, number_of_player) do
@@ -396,6 +512,20 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
       assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
                Tachyon.recv_message(client)
     end)
+
+    clients
+  end
+
+  defp all_ready_up!(clients) do
+    # slurp all the received messages, each client get a foundUpdate event for
+    # every ready sent
+    for client <- clients do
+      assert %{"status" => "success"} = Tachyon.matchmaking_ready!(client)
+
+      for c <- clients do
+        assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(c)
+      end
+    end
 
     clients
   end

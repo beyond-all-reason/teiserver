@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
   use TeiserverWeb.ConnCase, async: false
   alias Teiserver.OAuthFixtures
   alias Teiserver.Support.Tachyon
-  import Teiserver.Support.Tachyon, only: [poll_until_some: 1, poll_until: 3]
+  import Teiserver.Support.Tachyon, only: [poll_until_some: 1, poll_until: 2, poll_until: 3]
   alias WebsocketSyncClient, as: WSC
 
   def create_autohost() do
@@ -78,5 +78,28 @@ defmodule TeiserverWeb.Tachyon.Autohost do
         end,
         wait: 5
       )
+  end
+
+  test "can list connected autohosts", %{app: app, autohost: autohost, token: token} do
+    other_autohost = create_autohost()
+    {:ok, creds: _, token: other_token} = setup_token(%{app: app, autohost: other_autohost})
+
+    # make sure the other tests aren't interfering
+    poll_until(&Teiserver.Autohost.list/0, fn l -> Enum.empty?(l) end)
+
+    Tachyon.connect_autohost!(token, 10, 0)
+    Tachyon.connect_autohost!(other_token, 15, 1)
+
+    list =
+      poll_until(&Teiserver.Autohost.list/0, fn l -> Enum.count(l) == 2 end)
+      |> MapSet.new()
+
+    expected =
+      MapSet.new([
+        %{id: autohost.id, max_battles: 10, current_battles: 0},
+        %{id: other_autohost.id, max_battles: 15, current_battles: 1}
+      ])
+
+    assert list == expected
   end
 end

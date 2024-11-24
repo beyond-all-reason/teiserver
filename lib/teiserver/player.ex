@@ -53,7 +53,7 @@ defmodule Teiserver.Player do
   When a pairing fails because one of the player declines the pairing or leaves
   the queues
   """
-  @spec matchmaking_notify_lost(T.userid(), Matchmaking.lost_reason()) :: :ok
+  @spec matchmaking_notify_lost(T.userid(), term()) :: :ok
   defdelegate matchmaking_notify_lost(user_id, reason),
     to: Player.Session,
     as: :matchmaking_lost
@@ -69,4 +69,10 @@ defmodule Teiserver.Player do
   """
   @spec matchmaking_leave_queues(T.userid()) :: Matchmaking.leave_result()
   defdelegate matchmaking_leave_queues(user_id), to: Player.Session, as: :leave_queues
+
+  @doc """
+  It's go time! the player should join a game
+  """
+  @spec battle_start(T.userid(), Teiserver.Autohost.start_response()) :: :ok
+  defdelegate battle_start(user_id, battle_start_data), to: Player.Session
 end

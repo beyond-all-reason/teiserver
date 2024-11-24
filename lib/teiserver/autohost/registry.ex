@@ -45,6 +45,14 @@ defmodule Teiserver.Autohost.Registry do
     Horde.Registry.update_value(__MODULE__, via_tuple(autohost_id), callback)
   end
 
+  @doc """
+  Returns all the currently registered autohosts
+  """
+  @spec list() :: [reg_value()]
+  def list() do
+    Horde.Registry.select(__MODULE__, [{{:_, :_, :"$1"}, [], [:"$1"]}])
+  end
+
   def child_spec(_) do
     Supervisor.child_spec(Horde.Registry,
       id: __MODULE__,

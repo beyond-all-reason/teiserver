@@ -3,7 +3,33 @@ defmodule Teiserver.Autohost do
   alias Teiserver.AutohostQueries
   alias Teiserver.Repo
 
+  @type id :: Teiserver.Autohost.Autohost.id()
   @type reg_value :: Registry.reg_value()
+
+  @type start_script :: %{
+          battleId: String.t(),
+          engineVersion: String.t(),
+          gameName: String.t(),
+          mapName: String.t(),
+          startPosType: :fixed | :random | :ingame | :beforegame,
+          allyTeams: [ally_team(), ...]
+        }
+
+  @type ally_team :: %{
+          teams: [team(), ...]
+        }
+
+  @type team :: %{
+          players: [player()]
+        }
+
+  @type player :: %{
+          userId: String.t(),
+          name: String.t(),
+          password: String.t()
+        }
+
+  @type start_response :: Teiserver.Autohost.TachyonHandler.start_response()
 
   def create_autohost(attrs \\ %{}) do
     %Autohost{}
@@ -36,4 +62,12 @@ defmodule Teiserver.Autohost do
   def lookup_autohost(autohost_id) do
     Teiserver.Autohost.Registry.lookup(autohost_id)
   end
+
+  @spec list() :: [reg_value()]
+  defdelegate list(), to: Registry
+
+  @spec start_matchmaking(Autohost.id(), start_script()) ::
+          {:ok, start_response()} | {:error, term()}
+  defdelegate start_matchmaking(autohost_id, start_script),
+    to: Teiserver.Autohost.TachyonHandler
 end

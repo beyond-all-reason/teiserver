@@ -5,6 +5,12 @@ defmodule Teiserver.Tachyon.Handler do
 
   alias Teiserver.Tachyon.Schema
 
+  @typedoc """
+  A map to keep track of the response that are expected.
+  The value is a pair of {timeout ref, opaque payload of data to handle the response}
+  """
+  @type pending_responses :: %{Schema.message_id() => {reference(), term()}}
+
   @doc """
   Called when upgrading the http connection to websocket.
   It is given the connection object and should do whatever is required for

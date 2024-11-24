@@ -8,6 +8,7 @@ defmodule Teiserver.Matchmaking do
   @type join_result :: Matchmaking.QueueServer.join_result()
   @type leave_result :: Matchmaking.QueueServer.leave_result()
   @type lost_reason :: Matchmaking.PairingRoom.lost_reason()
+  @type ready_data :: Matchmaking.PairingRoom.ready_data()
 
   @spec lookup_queue(Matchmaking.QueueServer.id()) :: pid() | nil
   def lookup_queue(queue_id) do
@@ -57,6 +58,6 @@ defmodule Teiserver.Matchmaking do
   @doc """
   to tell the room that the given player is ready for the match
   """
-  @spec ready(pid(), T.userid()) :: :ok | {:error, term()}
+  @spec ready(pid(), ready_data()) :: :ok | {:error, term()}
   defdelegate ready(room_pid, user_id), to: Matchmaking.PairingRoom
 end
