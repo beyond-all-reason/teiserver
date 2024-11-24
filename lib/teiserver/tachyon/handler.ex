@@ -11,6 +11,24 @@ defmodule Teiserver.Tachyon.Handler do
   """
   @type pending_responses :: %{Schema.message_id() => {reference(), term()}}
 
+  @type request_opt :: {:timeout, timeout()} | {:cb_state, term()}
+  @type request_opts :: [request_opt()]
+
+  @typedoc """
+  Value to return to send an event to the peer.
+  {:event, cmd_id, payload, state}
+  {:response, cmd_id, payload, state}
+  {:request, cmd_id, paylcad, opts, state}
+  """
+  @type tachyon_result ::
+          {:event, Schema.command_id(), term(), term()}
+          | {:response, Schema.command_id(), term(), term()}
+          | {:request, Schema.command_id(), term(), request_opts(), term()}
+
+  @type result :: tachyon_result() | WebSock.handle_result()
+
+  @optional_callbacks handle_response: 4
+
   @doc """
   Called when upgrading the http connection to websocket.
   It is given the connection object and should do whatever is required for
@@ -35,6 +53,14 @@ defmodule Teiserver.Tachyon.Handler do
   @callback handle_info(term(), term()) :: WebSock.handle_result()
 
   @doc """
+  Called when receiving response before the timeout
+  The second argument is the callback payload supplied in the :tachyon_reply tuple
+  The third argument is the parsed response
+  The fourth argument is the state
+  """
+  @callback handle_response(Schema.command_id(), term(), term(), term()) :: result()
+
+  @doc """
   The generic command handler. At that point, the message has already been
   validated against the corresponding json schema
   """
@@ -46,5 +72,5 @@ defmodule Teiserver.Tachyon.Handler do
               term(),
               # handler's state
               term()
-            ) :: WebSock.handle_result()
+            ) :: result()
 end

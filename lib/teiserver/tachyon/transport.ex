@@ -7,15 +7,23 @@ defmodule Teiserver.Tachyon.Transport do
 
   @behaviour WebSock
   require Logger
-  alias Teiserver.Tachyon.Schema
+  alias Teiserver.Tachyon.{Schema, Handler}
 
-  @type connection_state() :: %{handler: term(), handler_state: term()}
+  @type connection_state() :: %{
+          handler: term(),
+          handler_state: term(),
+          pending_responses: Handler.pending_responses()
+        }
 
   @impl true
   def init(state) do
     # this is inside the process that maintain the connection
     schedule_ping()
-    handle_result(state.handler.init(state.handler_state), state)
+
+    handle_result(
+      state.handler.init(state.handler_state),
+      Map.put(state, :pending_responses, %{})
+    )
   end
 
   # dummy handle_in for now
@@ -53,6 +61,19 @@ defmodule Teiserver.Tachyon.Transport do
   def handle_info(:force_disconnect, state) do
     # TODO: send a proper tachyon message to inform the client it is getting disconnected
     {:stop, :normal, state}
+  end
+
+  def handle_info({:timeout, message_id}, state) do
+    {_, pendings} = Map.pop(state.pending_responses, message_id)
+
+    timeout =
+      Schema.event("system/disconnected", %{
+        reason: :response_timeout,
+        details: "Response to request with message id #{message_id} not received in time."
+      })
+
+    {:stop, :timeout, 1000, [{:text, Jason.encode!(timeout)}],
+     %{state | pending_responses: pendings}}
   end
 
   def handle_info(msg, state) do
@@ -109,6 +130,32 @@ defmodule Teiserver.Tachyon.Transport do
     end
   end
 
+  def do_handle_command(command_id, "response", message_id, message, state) do
+    case Map.get(state.pending_responses, message_id) do
+      # We got a response but nothing registered, which is invalid
+      nil ->
+        invalid_req =
+          Schema.event("system/disconnected", %{
+            reason: :protocol_violation,
+            details: "Received response to message id #{message_id} but no request pending."
+          })
+
+        {:stop, :normal, 1000, [{:text, Jason.encode!(invalid_req)}], state}
+
+      {tref, cb_state} ->
+        :erlang.cancel_timer(tref)
+
+        if function_exported?(state.handler, :handle_response, 4) do
+          result =
+            state.handler.handle_response(command_id, cb_state, message, state.handler_state)
+
+          handle_result(result, message_id, state)
+        else
+          {:ok, state}
+        end
+    end
+  end
+
   def do_handle_command(command_id, message_type, message_id, message, state) do
     result =
       state.handler.handle_command(
@@ -120,7 +167,7 @@ defmodule Teiserver.Tachyon.Transport do
       )
 
     try do
-      handle_result(result, state)
+      handle_result(result, message_id, state)
     rescue
       e ->
         str_err = inspect({e, __STACKTRACE__})
@@ -131,10 +178,38 @@ defmodule Teiserver.Tachyon.Transport do
     end
   end
 
+  @spec handle_result(Handler.result(), connection_state()) :: WebSock.handle_result()
+  defp handle_result(result, conn_state), do: handle_result(result, nil, conn_state)
+
   # helper function to use the result from the invoked handler function
-  @spec handle_result(WebSock.handle_result(), connection_state()) :: WebSock.handle_result()
-  defp handle_result(result, conn_state) do
+  @spec handle_result(Handler.result(), Schema.message_id() | nil, connection_state()) ::
+          WebSock.handle_result()
+  defp handle_result(result, message_id, conn_state) do
     case result do
+      {:event, cmd_id, payload, state} ->
+        message = Schema.event(cmd_id, payload) |> Jason.encode!()
+        {:push, [{:text, message}], %{conn_state | handler_state: state}}
+
+      {:response, cmd_id, payload, state} ->
+        message = Schema.response(cmd_id, message_id, payload)
+        {:push, {:text, Jason.encode!(message)}, %{conn_state | handler_state: state}}
+
+      {:request, cmd_id, payload, opts, state} ->
+        req = Schema.request(cmd_id, payload)
+        message_id = req.messageId
+        timeout = Keyword.get(opts, :timeout, :timer.seconds(10))
+        tref = :erlang.send_after(timeout, self(), {:timeout, message_id})
+
+        new_state =
+          conn_state
+          |> Map.update(:pending_responses, %{}, fn pendings ->
+            Map.put(pendings, message_id, {tref, opts[:cb_state]})
+          end)
+          |> Map.put(:handler_state, state)
+
+        {:push, {:text, Jason.encode!(req)}, new_state}
+
+      # then the websock result
       {:push, messages, state} ->
         {:push, messages, %{conn_state | handler_state: state}}
 

@@ -36,17 +36,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
   @impl Handler
   def handle_info({:start_matchmaking, start_script, sender}, state) do
-    start_matchmaking_message = Schema.request("autohost/start", start_script)
-    message_id = start_matchmaking_message.messageId
-    # arbitrary timeout for the autohost to reply
-    tref = :erlang.send_after(10_000, self(), {:timeout, message_id})
-
-    new_state =
-      Map.update(state, :pending_responses, %{}, fn pendings ->
-        Map.put(pendings, message_id, {tref, sender})
-      end)
-
-    {:push, {:text, [start_matchmaking_message |> Jason.encode!()]}, new_state}
+    {:request, "autohost/start", start_script, [cb_state: sender], state}
   end
 
   def handle_info({:timeout, msg_id}, state) do
@@ -141,32 +131,18 @@ defmodule Teiserver.Autohost.TachyonHandler do
     {:stop, :normal, 1000, [{:text, resp}], state}
   end
 
-  # Generic handler for when a response arrives too late
-  def handle_command(command_id, "response", message_id, _, state)
-      when not is_map_key(state.pending_responses, message_id) do
-    # we do expect autohost to be responsive and well behaved, so log timeouts
-    Logger.warning(
-      "Autohost(#{state.autohost.id}) response timeout for command #{command_id}, message #{message_id}"
-    )
-
-    {:ok, state}
-  end
-
-  def handle_command("autohost/start", "response", message_id, message, state)
-      when is_map_key(state.pending_responses, message_id) do
-    {{tref, reply_to}, pendings} = Map.pop(state.pending_responses, message_id)
-    :erlang.cancel_timer(tref)
-    new_state = %{state | pending_responses: pendings}
-    notify_autohost_started(reply_to, message)
-    {:ok, new_state}
-  end
-
   def handle_command(command_id, _message_type, message_id, _message, state) do
     resp =
       Schema.error_response(command_id, message_id, :command_unimplemented)
       |> Jason.encode!()
 
     {:reply, :ok, {:text, resp}, state}
+  end
+
+  @impl true
+  def handle_response("autohost/start", reply_to, response, state) do
+    notify_autohost_started(reply_to, response)
+    {:ok, state}
   end
 
   # TODO: there should be some kind of retry here
