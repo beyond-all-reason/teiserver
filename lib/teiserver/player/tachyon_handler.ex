@@ -102,16 +102,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_info({:battle_start, data}, state) do
-    req = Schema.request("battle/start", data)
-    message_id = req.messageId
-    tref = :erlang.send_after(10_000, self(), {:timeout, message_id})
-
-    new_state =
-      Map.update(state, :pending_responses, %{}, fn pendings ->
-        Map.put(pendings, message_id, {tref, nil})
-      end)
-
-    {:push, {:text, [req |> Jason.encode!()]}, new_state}
+    {:request, "battle/start", data, [], state}
   end
 
   def handle_info({:timeout, message_id}, state)
@@ -136,17 +127,6 @@ defmodule Teiserver.Player.TachyonHandler do
     Player.Session.disconnect(state.user.id)
 
     {:stop, :normal, state}
-  end
-
-  # Generic handler for when a response arrives too late
-  def handle_command(command_id, "response", message_id, _, state)
-      when not is_map_key(state.pending_responses, message_id) do
-    # we do expect autohost to be responsive and well behaved, so log timeouts
-    Logger.warning(
-      "Player(#{state.user.id}) response timeout for command #{command_id}, message #{message_id}"
-    )
-
-    {:ok, state}
   end
 
   def handle_command("matchmaking/list" = cmd_id, "request", message_id, _message, state) do
