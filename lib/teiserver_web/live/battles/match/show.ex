@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   use TeiserverWeb, :live_view
   alias Teiserver.{Battle, Game, Telemetry}
   alias Teiserver.Battle.{MatchLib, BalanceLib}
+  alias Teiserver.Helper.NumberHelper
 
   @impl true
   def mount(_params, _session, socket) do
@@ -95,6 +96,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
           ]
         )
         |> Map.new(fn log -> {log.user_id, get_prematch_log(log)} end)
+
+      prediction_text = get_prediction_text(rating_logs, members)
 
       # Creates a map where the party_id refers to an integer
       # but only includes parties with 2 or more members
@@ -229,6 +232,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:events_by_team_and_type, events_by_team_and_type)
       |> assign(:replay, replay)
       |> assign(:rating_status, match_rating_status)
+      |> assign(:prediction_text, prediction_text)
     else
       socket
       |> assign(:match, nil)
@@ -242,6 +246,71 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:events_by_team_and_type, %{})
       |> assign(:replay, nil)
       |> assign(:rating_status, nil)
+    end
+  end
+
+  defp get_prediction_text(rating_logs, members) do
+    if(rating_logs == %{}) do
+      # Unrated match will not have rating logs
+      nil
+    else
+      simple_rating_logs =
+        Enum.map(members, fn m ->
+          logs = rating_logs[m.user_id].value
+
+          %{
+            team_id: m.team_id,
+            old_skill: logs["skill"] - logs["skill_change"],
+            old_uncertainty: logs["uncertainty"] - logs["uncertainty_change"]
+          }
+        end)
+        |> Enum.group_by(fn x -> x.team_id end)
+        |> Enum.map(fn {_key, value} ->
+          Enum.map(value, fn y ->
+            {y.old_skill, y.old_uncertainty}
+          end)
+        end)
+
+      # predict_win may not be reliable if team count not equal to 2
+      if length(simple_rating_logs) == 2 do
+        prediction = Openskill.predict_win(simple_rating_logs)
+
+        prediction_text_values =
+          Enum.map(prediction, fn x ->
+            percentage = (x * 100) |> NumberHelper.round(1)
+            "#{percentage}%"
+          end)
+
+        team_ratings =
+          Openskill.Util.team_rating(simple_rating_logs)
+
+        skill_text_values =
+          Enum.map(team_ratings, fn {skill, _sigma_sq, _extra1, _extra2} ->
+            "#{skill |> NumberHelper.round(1)}"
+          end)
+
+        uncertainty_text_values =
+          Enum.map(team_ratings, fn {_skill, sigma_sq, _extra1, _extra2} ->
+            "#{sigma_sq |> NumberHelper.round(1)}"
+          end)
+
+        [
+          %{
+            label: "Openskill library win predict: ",
+            value: "[#{prediction_text_values |> Enum.join(", ")}]"
+          },
+          %{
+            label: "Team skill (μ): ",
+            value: "[#{skill_text_values |> Enum.join(", ")}]"
+          },
+          %{
+            label: "Team uncertainty squared (σ²): ",
+            value: "[#{uncertainty_text_values |> Enum.join(", ")}]"
+          }
+        ]
+      else
+        nil
+      end
     end
   end
 
