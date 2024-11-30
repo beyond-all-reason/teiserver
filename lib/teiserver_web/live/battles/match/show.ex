@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   use TeiserverWeb, :live_view
   alias Teiserver.{Battle, Game, Telemetry}
   alias Teiserver.Battle.{MatchLib, BalanceLib}
+  alias Teiserver.Helper.NumberHelper
 
   @impl true
   def mount(_params, _session, socket) do
@@ -276,11 +277,37 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
 
         prediction_text_values =
           Enum.map(prediction, fn x ->
-            percentage = (x * 100) |> round(1)
+            percentage = (x * 100) |> NumberHelper.round(1)
             "#{percentage}%"
           end)
 
-        "Openskill library win prediction: [#{prediction_text_values |> Enum.join(", ")}]"
+        team_ratings =
+          Openskill.Util.team_rating(simple_rating_logs)
+
+        skill_text_values =
+          Enum.map(team_ratings, fn {skill, _sigma_sq, _extra1, _extra2} ->
+            "#{skill |> NumberHelper.round(1)}"
+          end)
+
+        uncertainty_text_values =
+          Enum.map(team_ratings, fn {_skill, sigma_sq, _extra1, _extra2} ->
+            "#{sigma_sq |> NumberHelper.round(1)}"
+          end)
+
+        [
+          %{
+            label: "Openskill library win predict: ",
+            value: "[#{prediction_text_values |> Enum.join(", ")}]"
+          },
+          %{
+            label: "Team skill (μ): ",
+            value: "[#{skill_text_values |> Enum.join(", ")}]"
+          },
+          %{
+            label: "Team uncertainty squared (σ²): ",
+            value: "[#{uncertainty_text_values |> Enum.join(", ")}]"
+          }
+        ]
       else
         nil
       end

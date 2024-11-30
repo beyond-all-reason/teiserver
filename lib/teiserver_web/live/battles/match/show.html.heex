@@ -230,9 +230,16 @@
           <% end %>
         </tbody>
       </table>
-      <p>
-        <%= @prediction_text %>
-      </p>
+      <table>
+        <tbody>
+          <%= for m <-  @prediction_text do %>
+            <tr>
+              <td style="padding-right:10px;"><%= m.label %></td>
+              <td><%= m.value %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
     </div>
 
     <%= if allow?(@current_user, "Overwatch") do %>
