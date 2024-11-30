@@ -96,6 +96,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         )
         |> Map.new(fn log -> {log.user_id, get_prematch_log(log)} end)
 
+      prediction_text = get_prediction_text(rating_logs, members)
+
       # Creates a map where the party_id refers to an integer
       # but only includes parties with 2 or more members
       parties =
@@ -229,6 +231,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:events_by_team_and_type, events_by_team_and_type)
       |> assign(:replay, replay)
       |> assign(:rating_status, match_rating_status)
+      |> assign(:prediction_text, prediction_text)
     else
       socket
       |> assign(:match, nil)
@@ -242,6 +245,45 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:events_by_team_and_type, %{})
       |> assign(:replay, nil)
       |> assign(:rating_status, nil)
+    end
+  end
+
+  defp get_prediction_text(rating_logs, members) do
+    if(rating_logs == %{} || rating_logs == nil) do
+      # Unrated match will not have rating logs
+      nil
+    else
+      simple_rating_logs =
+        Enum.map(members, fn m ->
+          logs = rating_logs[m.user_id].value
+
+          %{
+            team_id: m.team_id,
+            old_skill: logs["skill"] - logs["skill_change"],
+            old_uncertainty: logs["uncertainty"] - logs["uncertainty_change"]
+          }
+        end)
+        |> Enum.group_by(fn x -> x.team_id end)
+        |> Enum.map(fn {_key, value} ->
+          Enum.map(value, fn y ->
+            {y.old_skill, y.old_uncertainty}
+          end)
+        end)
+
+      # predict_win may not be reliable if team count not equal to 2
+      if length(simple_rating_logs) == 2 do
+        prediction = Openskill.predict_win(simple_rating_logs)
+
+        prediction_text_values =
+          Enum.map(prediction, fn x ->
+            percentage = (x * 100) |> round(1)
+            "#{percentage}%"
+          end)
+
+        "Openskill library win prediction: [#{prediction_text_values |> Enum.join(", ")}]"
+      else
+        nil
+      end
     end
   end
 
