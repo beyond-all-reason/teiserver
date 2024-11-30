@@ -249,7 +249,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   end
 
   defp get_prediction_text(rating_logs, members) do
-    if(rating_logs == %{} || rating_logs == nil) do
+    if(rating_logs == %{}) do
       # Unrated match will not have rating logs
       nil
     else
