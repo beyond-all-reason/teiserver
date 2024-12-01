@@ -39,19 +39,6 @@ defmodule Teiserver.Autohost.TachyonHandler do
     {:request, "autohost/start", start_script, [cb_state: sender], state}
   end
 
-  def handle_info({:timeout, msg_id}, state) do
-    Logger.warning("Timeout detected for autohost #{state.autohost.id}, terminating")
-
-    resp =
-      Schema.event("system/disconnected", %{
-        reason: :timeout,
-        details: "timeout for message #{msg_id}"
-      })
-      |> Jason.encode!()
-
-    {:stop, :normal, 1000, [{:text, resp}], state}
-  end
-
   def handle_info(_msg, state) do
     {:ok, state}
   end
