@@ -109,7 +109,7 @@ defmodule Teiserver.Tachyon.Transport do
       :ok ->
         do_handle_command(command_id, message_type, message_id, message, state)
 
-      :missing_schema ->
+      {:missing_schema, command_id, _type} ->
         resp =
           Schema.error_response(command_id, message_id, :command_unimplemented)
           |> Jason.encode!()
