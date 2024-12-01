@@ -58,7 +58,7 @@ defmodule Teiserver.Tachyon.Schema do
     end
   end
 
-  defp get_schema(command_id, type) do
+  def parse_schema(command_id, type) do
     # improvement: cache this operation
     # basic check to avoid attack where the client could construct an
     # arbitrary path
@@ -70,11 +70,17 @@ defmodule Teiserver.Tachyon.Schema do
 
       with {:ok, content} <- File.read(path),
            {:ok, json} <- Jason.decode(content) do
-        {:ok, JsonXema.new(json)}
+        {:ok, json}
       else
         {:error, :enoent} -> {:missing_schema, command_id, type}
         {:error, err} -> {:error, err}
       end
+    end
+  end
+
+  defp get_schema(command_id, type) do
+    with {:ok, json} <- parse_schema(command_id, type) do
+      {:ok, JsonXema.new(json)}
     end
   end
 
