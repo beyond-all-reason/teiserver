@@ -54,14 +54,8 @@ defmodule Teiserver.Player.TachyonHandler do
       "Session for player #{state.user.id} went down because #{inspect(reason)}, terminating connection"
     )
 
-    resp =
-      Schema.event("system/disconnected", %{
-        reason: :server_error,
-        details: "session process exited with reason #{inspect(reason)}"
-      })
-      |> Jason.encode!()
-
-    {:stop, :normal, 1000, [{:text, resp}], state}
+    {:stop, :normal,
+     {1008, "Server error: session process exited with reason #{inspect(reason)}"}, state}
   end
 
   def handle_info({:matchmaking_notify_found, queue_id, timeout_ms}, state) do

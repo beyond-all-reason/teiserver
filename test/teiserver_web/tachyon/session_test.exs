@@ -32,7 +32,6 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
     assert_receive({:DOWN, _, :process, _, _})
 
     # make sure the existing client has been disconnected
-    assert %{"commandId" => "system/disconnected"} = Tachyon.recv_message!(client)
     assert {:error, :disconnected} == WSC.recv(client)
   end
 
