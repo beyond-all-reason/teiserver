@@ -1,0 +1,6 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/userId.json",
+    "title": "UserId",
+    "type": "string",
+    "examples": ["351"]
+}

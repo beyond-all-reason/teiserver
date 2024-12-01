@@ -1,0 +1,22 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/allyTeam.json",
+    "title": "AllyTeam",
+    "type": "object",
+    "properties": {
+        "teams": {
+            "type": "array",
+            "items": { "$ref": "../definitions/team.json" },
+            "minItems": 1
+        },
+        "startBox": { "$ref": "../definitions/startBox.json" },
+        "allies": {
+            "description": "0-based indexes into of the other allyteams to ally with",
+            "type": "array",
+            "items": { "type": "integer" }
+        },
+        "customProperties": {
+            "$ref": "../definitions/customStartScriptProperties.json"
+        }
+    },
+    "required": ["teams"]
+}

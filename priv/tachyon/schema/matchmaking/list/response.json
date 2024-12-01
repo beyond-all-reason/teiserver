@@ -1,0 +1,90 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/matchmaking/list/response.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MatchmakingListResponse",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "anyOf": [
+        {
+            "title": "MatchmakingListOkResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "matchmaking/list" },
+                "status": { "const": "success" },
+                "data": {
+                    "title": "MatchmakingListOkResponseData",
+                    "type": "object",
+                    "properties": {
+                        "playlists": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": { "type": "string" },
+                                    "name": { "type": "string" },
+                                    "numOfTeams": { "type": "integer" },
+                                    "teamSize": { "type": "integer" },
+                                    "ranked": { "type": "boolean" }
+                                },
+                                "required": [
+                                    "id",
+                                    "name",
+                                    "numOfTeams",
+                                    "teamSize",
+                                    "ranked"
+                                ]
+                            }
+                        }
+                    },
+                    "required": ["playlists"],
+                    "examples": [
+                        {
+                            "playlists": [
+                                {
+                                    "id": "1v1",
+                                    "name": "Duel",
+                                    "numOfTeams": 2,
+                                    "teamSize": 1,
+                                    "ranked": true
+                                },
+                                {
+                                    "id": "1v1v1",
+                                    "name": "3 Way FFA",
+                                    "numOfTeams": 3,
+                                    "teamSize": 1,
+                                    "ranked": true
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "required": ["type", "messageId", "commandId", "status", "data"]
+        },
+        {
+            "title": "MatchmakingListFailResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "matchmaking/list" },
+                "status": { "const": "failed" },
+                "reason": {
+                    "enum": [
+                        "internal_error",
+                        "unauthorized",
+                        "invalid_request",
+                        "command_unimplemented"
+                    ]
+                },
+                "details": { "type": "string" }
+            },
+            "required": ["type", "messageId", "commandId", "status", "reason"]
+        }
+    ]
+}

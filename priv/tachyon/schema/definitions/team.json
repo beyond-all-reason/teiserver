@@ -1,0 +1,38 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/team.json",
+    "title": "Team",
+    "type": "object",
+    "properties": {
+        "players": {
+            "type": "array",
+            "items": { "$ref": "../definitions/player.json" }
+        },
+        "bots": {
+            "type": "array",
+            "items": { "$ref": "../definitions/bot.json" }
+        },
+        "advantage": { "type": "number", "minimum": -1 },
+        "incomeMultiplier": { "type": "number", "minimum": 0 },
+        "faction": { "type": "string" },
+        "color": {
+            "type": "object",
+            "properties": {
+                "r": { "type": "number", "minimum": 0, "maximum": 1 },
+                "g": { "type": "number", "minimum": 0, "maximum": 1 },
+                "b": { "type": "number", "minimum": 0, "maximum": 1 }
+            },
+            "required": ["r", "g", "b"]
+        },
+        "startPos": {
+            "type": "object",
+            "properties": {
+                "x": { "type": "integer" },
+                "y": { "type": "integer" }
+            },
+            "required": ["x", "y"]
+        },
+        "customProperties": {
+            "$ref": "../definitions/customStartScriptProperties.json"
+        }
+    }
+}

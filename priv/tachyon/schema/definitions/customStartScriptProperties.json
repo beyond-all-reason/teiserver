@@ -1,0 +1,7 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/customStartScriptProperties.json",
+    "title": "CustomStartScriptProperties",
+    "description": "Additional custom properties to set in engine StartScript for this object, must not collide with existing properties",
+    "type": "object",
+    "patternProperties": { "^[a-zA-Z0-9_-]$": { "type": "string" } }
+}

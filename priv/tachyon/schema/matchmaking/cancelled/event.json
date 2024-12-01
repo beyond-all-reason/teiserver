@@ -1,0 +1,32 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/matchmaking/cancelled/event.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MatchmakingCancelledEvent",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "event" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "matchmaking/cancelled" },
+        "data": {
+            "title": "MatchmakingCancelledEventData",
+            "type": "object",
+            "properties": {
+                "reason": {
+                    "enum": [
+                        "intentional",
+                        "server_error",
+                        "party_user_left",
+                        "ready_timeout"
+                    ]
+                }
+            },
+            "required": ["reason"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}
