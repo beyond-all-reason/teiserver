@@ -59,7 +59,6 @@ defmodule Teiserver.Tachyon.Schema do
   end
 
   def parse_schema(command_id, type) do
-    # improvement: cache this operation
     # basic check to avoid attack where the client could construct an
     # arbitrary path
     if String.contains?(command_id, ".") do
@@ -79,9 +78,11 @@ defmodule Teiserver.Tachyon.Schema do
   end
 
   defp get_schema(command_id, type) do
-    with {:ok, json} <- parse_schema(command_id, type) do
-      {:ok, JsonXema.new(json)}
-    end
+    Teiserver.cache_get_or_store(@cache_name, {command_id, type}, fn ->
+      with {:ok, json} <- parse_schema(command_id, type) do
+        {:ok, JsonXema.new(json)}
+      end
+    end)
   end
 
   @doc """
