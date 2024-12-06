@@ -50,7 +50,7 @@ defmodule Teiserver.Tachyon.Schema do
   end
 
   @spec parse_message(command_id(), message_type(), term()) ::
-          :ok | :missing_schema | {:error, map()}
+          :ok | {:missing_schema, command_id(), message_type()} | {:error, map()}
   def parse_message(command_id, type, json) do
     with {:ok, schema} <- get_schema(command_id, type),
          :ok <- JsonXema.validate(schema, json) do
@@ -58,8 +58,7 @@ defmodule Teiserver.Tachyon.Schema do
     end
   end
 
-  defp get_schema(command_id, type) do
-    # improvement: cache this operation
+  def parse_schema(command_id, type) do
     # basic check to avoid attack where the client could construct an
     # arbitrary path
     if String.contains?(command_id, ".") do
@@ -70,12 +69,20 @@ defmodule Teiserver.Tachyon.Schema do
 
       with {:ok, content} <- File.read(path),
            {:ok, json} <- Jason.decode(content) do
-        {:ok, JsonXema.new(json)}
+        {:ok, json}
       else
-        {:error, :enoent} -> :missing_schema
+        {:error, :enoent} -> {:missing_schema, command_id, type}
         {:error, err} -> {:error, err}
       end
     end
+  end
+
+  defp get_schema(command_id, type) do
+    Teiserver.cache_get_or_store(@cache_name, {command_id, type}, fn ->
+      with {:ok, json} <- parse_schema(command_id, type) do
+        {:ok, JsonXema.new(json)}
+      end
+    end)
   end
 
   @doc """

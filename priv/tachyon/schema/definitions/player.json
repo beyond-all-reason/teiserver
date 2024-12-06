@@ -1,0 +1,19 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/player.json",
+    "title": "Player",
+    "type": "object",
+    "properties": {
+        "userId": { "$ref": "../definitions/userId.json" },
+        "name": {
+            "description": "Name of the player, must be unique just like userId",
+            "type": "string"
+        },
+        "password": { "type": "string" },
+        "rank": { "type": "integer" },
+        "countryCode": { "type": "string" },
+        "customProperties": {
+            "$ref": "../definitions/customStartScriptProperties.json"
+        }
+    },
+    "required": ["userId", "name", "password"]
+}

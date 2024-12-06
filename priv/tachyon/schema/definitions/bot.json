@@ -1,0 +1,27 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/bot.json",
+    "title": "Bot",
+    "type": "object",
+    "properties": {
+        "hostUserId": {
+            "description": "UserId of the player hosting this AI",
+            "type": "string",
+            "format": "uuid"
+        },
+        "name": { "type": "string" },
+        "aiShortName": {
+            "description": "Short name of the AI library",
+            "type": "string"
+        },
+        "aiVersion": { "type": "string" },
+        "aiOptions": {
+            "description": "AI-specific options",
+            "type": "object",
+            "patternProperties": { "^(.*)$": { "type": "string" } }
+        },
+        "customProperties": {
+            "$ref": "../definitions/customStartScriptProperties.json"
+        }
+    },
+    "required": ["hostUserId", "aiShortName"]
+}

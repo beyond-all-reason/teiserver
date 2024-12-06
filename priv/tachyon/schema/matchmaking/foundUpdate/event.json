@@ -1,0 +1,23 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/matchmaking/foundUpdate/event.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MatchmakingFoundUpdateEvent",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "event" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "matchmaking/foundUpdate" },
+        "data": {
+            "title": "MatchmakingFoundUpdateEventData",
+            "type": "object",
+            "properties": { "readyCount": { "type": "integer" } },
+            "required": ["readyCount"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

@@ -161,6 +161,8 @@ config :teiserver, Oban,
 
 config :teiserver, :time_zone_database, Tzdata.TimeZoneDatabase
 
+config :xema, loader: Teiserver.Tachyon.SchemaLoader
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

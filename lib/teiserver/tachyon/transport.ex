@@ -66,13 +66,8 @@ defmodule Teiserver.Tachyon.Transport do
   def handle_info({:timeout, message_id}, state) do
     {_, pendings} = Map.pop(state.pending_responses, message_id)
 
-    timeout =
-      Schema.event("system/disconnected", %{
-        reason: :response_timeout,
-        details: "Response to request with message id #{message_id} not received in time."
-      })
-
-    {:stop, :timeout, 1000, [{:text, Jason.encode!(timeout)}],
+    {:stop, :timeout,
+     {1008, "Response to request with message id #{message_id} not received in time."},
      %{state | pending_responses: pendings}}
   end
 
@@ -114,7 +109,7 @@ defmodule Teiserver.Tachyon.Transport do
       :ok ->
         do_handle_command(command_id, message_type, message_id, message, state)
 
-      :missing_schema ->
+      {:missing_schema, command_id, _type} ->
         resp =
           Schema.error_response(command_id, message_id, :command_unimplemented)
           |> Jason.encode!()
@@ -134,13 +129,8 @@ defmodule Teiserver.Tachyon.Transport do
     case Map.get(state.pending_responses, message_id) do
       # We got a response but nothing registered, which is invalid
       nil ->
-        invalid_req =
-          Schema.event("system/disconnected", %{
-            reason: :protocol_violation,
-            details: "Received response to message id #{message_id} but no request pending."
-          })
-
-        {:stop, :normal, 1000, [{:text, Jason.encode!(invalid_req)}], state}
+        {:stop, :normal,
+         {1008, "Received response to message id #{message_id} but no request pending."}, state}
 
       {tref, cb_state} ->
         :erlang.cancel_timer(tref)

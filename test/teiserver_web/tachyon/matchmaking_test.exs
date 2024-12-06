@@ -340,9 +340,11 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
     end
 
     test "timeout puts ready players back in queue", %{app: app} do
+      timeout_ms = 5
+
       {:ok, queue_id: q_id, queue_pid: q_pid} =
         mk_queue_attrs(1)
-        |> put_in([:settings, :pairing_timeout], 2)
+        |> put_in([:settings, :pairing_timeout], timeout_ms)
         |> mk_queue()
 
       clients =
@@ -367,12 +369,13 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
       assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(c1)
       assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(c2)
 
-      :timer.sleep(5)
-
       # TODO: c1 should get lost event and still be in the queue
       # c2 should get lost event but not be in the queue anymore
-      assert %{"commandId" => "matchmaking/lost"} = Tachyon.recv_message!(c1, timeout: 2)
-      assert %{"commandId" => "matchmaking/lost"} = Tachyon.recv_message!(c2, timeout: 2)
+      assert %{"commandId" => "matchmaking/lost"} =
+               Tachyon.recv_message!(c1, timeout: timeout_ms + 3)
+
+      assert %{"commandId" => "matchmaking/lost"} =
+               Tachyon.recv_message!(c2, timeout: timeout_ms + 3)
 
       assert %{"commandId" => "matchmaking/cancelled", "data" => %{"reason" => "ready_timeout"}} =
                Tachyon.recv_message!(c2, timeout: 2)

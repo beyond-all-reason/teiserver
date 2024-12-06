@@ -1,0 +1,28 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/battle/start/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "BattleStartRequest",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "battle/start" },
+        "data": {
+            "title": "BattleStartRequestData",
+            "type": "object",
+            "properties": {
+                "username": { "type": "string" },
+                "password": { "type": "string" },
+                "ip": { "type": "string" },
+                "port": { "type": "number" }
+            },
+            "required": ["username", "password", "ip", "port"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

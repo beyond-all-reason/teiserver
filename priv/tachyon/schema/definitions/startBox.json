@@ -1,0 +1,12 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/startBox.json",
+    "title": "StartBox",
+    "type": "object",
+    "properties": {
+        "top": { "type": "number", "minimum": 0, "maximum": 1 },
+        "bottom": { "type": "number", "minimum": 0, "maximum": 1 },
+        "left": { "type": "number", "minimum": 0, "maximum": 1 },
+        "right": { "type": "number", "minimum": 0, "maximum": 1 }
+    },
+    "required": ["top", "bottom", "left", "right"]
+}

@@ -86,8 +86,6 @@ defmodule Teiserver.Matchmaking.PairingRoom do
         Enum.join(initial_state.awaiting, ",")
     )
 
-    :timer.send_after(timeout, :timeout)
-
     {:ok, initial_state, {:continue, {:notify_players, timeout}}}
   end
 
@@ -98,6 +96,8 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     Enum.each(state.awaiting, fn player_id ->
       Teiserver.Player.matchmaking_notify_found(player_id, state.queue_id, self(), timeout)
     end)
+
+    :timer.send_after(timeout, :timeout)
 
     {:noreply, state}
   end

@@ -1,0 +1,17 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/matchmaking/lost/event.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MatchmakingLostEvent",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "event" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "matchmaking/lost" }
+    },
+    "required": ["type", "messageId", "commandId"]
+}

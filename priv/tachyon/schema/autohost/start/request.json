@@ -1,0 +1,79 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/autohost/start/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AutohostStartRequest",
+    "tachyon": {
+        "source": "server",
+        "target": "autohost",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "autohost/start" },
+        "data": {
+            "title": "AutohostStartRequestData",
+            "type": "object",
+            "properties": {
+                "battleId": { "type": "string", "format": "uuid" },
+                "engineVersion": {
+                    "type": "string",
+                    "pattern": "^[0-9a-zA-Z .+-]+$"
+                },
+                "gameName": { "type": "string" },
+                "mapName": { "type": "string" },
+                "gameArchiveHash": {
+                    "type": "string",
+                    "pattern": "^[a-fA-F0-9]{128}$"
+                },
+                "mapArchiveHash": {
+                    "type": "string",
+                    "pattern": "^[a-fA-F0-9]{128}$"
+                },
+                "startDelay": { "type": "integer" },
+                "startPosType": {
+                    "$ref": "../../definitions/startPosType.json"
+                },
+                "allyTeams": {
+                    "type": "array",
+                    "items": { "$ref": "../../definitions/allyTeam.json" },
+                    "minItems": 1
+                },
+                "spectators": {
+                    "type": "array",
+                    "items": { "$ref": "../../definitions/player.json" }
+                },
+                "mapOptions": {
+                    "type": "object",
+                    "patternProperties": { "^(.*)$": { "type": "string" } }
+                },
+                "gameOptions": {
+                    "type": "object",
+                    "patternProperties": { "^(.*)$": { "type": "string" } }
+                },
+                "restrictions": {
+                    "description": "Mapping from unitDefId to the maximum number of units of that type that can be built.",
+                    "type": "object",
+                    "patternProperties": {
+                        "^(.*)$": { "type": "integer", "minimum": 0 }
+                    }
+                },
+                "luamsgRegexp": {
+                    "description": "When set, battle will generate updates for luamsgs matching this regexp. No updates will be generated if this is not set.",
+                    "type": "string",
+                    "format": "regex"
+                }
+            },
+            "required": [
+                "battleId",
+                "engineVersion",
+                "gameName",
+                "mapName",
+                "startPosType",
+                "allyTeams"
+            ]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

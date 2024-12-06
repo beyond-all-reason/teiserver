@@ -128,8 +128,23 @@ defmodule Teiserver.Support.Tachyon do
     opts = Keyword.put_new(opts, :timeout, 40)
 
     case WSC.recv(client, opts) do
-      {:ok, {:text, resp}} -> {:ok, Jason.decode!(resp)}
-      other -> other
+      {:ok, {:text, resp}} ->
+        with decoded <- Jason.decode!(resp),
+             {:ok, cmd_id, message_type, _msg_id} <-
+               Teiserver.Tachyon.Schema.parse_envelope(decoded),
+             :ok <- Teiserver.Tachyon.Schema.parse_message(cmd_id, message_type, decoded) do
+          {:ok, decoded}
+        else
+          {:error, %JsonXema.ValidationError{} = err} ->
+            IO.inspect(Jason.decode!(resp))
+            {:error, err}
+
+          err ->
+            err
+        end
+
+      other ->
+        other
     end
   end
 
