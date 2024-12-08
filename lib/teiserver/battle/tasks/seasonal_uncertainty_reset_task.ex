@@ -8,12 +8,11 @@ defmodule Teiserver.Battle.SeasonalUncertaintyResetTask do
     start_time = System.system_time(:millisecond)
 
     new_last_updated = Timex.now()
-    {_skill, new_uncertainty} = Openskill.rating()
 
     ratings_count =
       Account.list_ratings(limit: :infinity)
       |> Enum.map(fn rating ->
-        reset_rating(rating, new_uncertainty, new_last_updated)
+        reset_rating(rating, new_last_updated)
         1
       end)
       |> Enum.count()
@@ -25,9 +24,13 @@ defmodule Teiserver.Battle.SeasonalUncertaintyResetTask do
     )
   end
 
-  defp reset_rating(existing, _new_uncertainty, new_last_updated) do
+  defp reset_rating(existing, new_last_updated) do
     # Use the greater of the existing uncertainty or the minimum value (5.0)
-    new_uncertainty = max(existing.uncertainty, 5.0)
+    current_uncertainty = existing.uncertainty
+    # datetime
+    last_updated = existing.last_updated
+
+    new_uncertainty = calculate_new_uncertainty(current_uncertainty, last_updated)
 
     new_rating_value = BalanceLib.calculate_rating_value(existing.skill, new_uncertainty)
 
@@ -58,5 +61,42 @@ defmodule Teiserver.Battle.SeasonalUncertaintyResetTask do
     }
 
     {:ok, _} = Game.create_rating_log(log_params)
+  end
+
+  def calculate_new_uncertainty(current_uncertainty, last_update_datetime) do
+    days_not_played = abs(DateTime.diff(last_update_datetime, Timex.now(), :day))
+    target_uncertainty = calculate_target_uncertainty(days_not_played)
+    # The new uncertainty can increase but never decrease
+    max(target_uncertainty, current_uncertainty)
+  end
+
+  # This is the player's new target uncertainty
+  # If the player hasn't played for a while, their target uncertainty will be higher
+  def calculate_target_uncertainty(days_not_played) do
+    # If you haven't played for more than a year reset uncertainty to default
+    # If you have played within one month, then the target uncertainty equals min_uncertainty
+    # If it's something in between one month and a year, use linear interpolation
+    # Linear interpolation formula: https://www.cuemath.com/linear-interpolation-formula/
+    one_year = 365
+    one_month = one_year / 12
+    min_uncertainty = 5
+    {_skill, max_uncertainty} = Openskill.rating()
+
+    cond do
+      days_not_played >= one_year ->
+        max_uncertainty
+
+      days_not_played <= one_month ->
+        min_uncertainty
+
+      true ->
+        max_days = one_year
+        min_days = one_month
+
+        # linear interpolation will give a value between min_uncertainty and max_uncertainty
+        min_uncertainty +
+          (days_not_played - min_days) * (max_uncertainty - min_uncertainty) /
+            (max_days - min_days)
+    end
   end
 end
