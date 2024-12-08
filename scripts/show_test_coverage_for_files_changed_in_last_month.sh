@@ -18,7 +18,7 @@ git diff HEAD '@{last month}' --name-only > ./cover/files_changed_in_last_month.
 # so the header is also emitted and highlighted
 echo "LINES RELEVANT   MISSED" >> ./cover/files_changed_in_last_month.txt
 
-mix test --cover > ./cover/test_coverage_by_file.txt
+mix test --exclude needs_attention --cover > ./cover/test_coverage_by_file.txt
 
 #grep matches the two files and emits only test coverage information about recently changed files, sorted by coverage percent
 grep -F -f ./cover/files_changed_in_last_month.txt ./cover/test_coverage_by_file.txt | grep -A999 "LINES RELEVANT   MISSED" | sort -g
