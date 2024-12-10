@@ -55,6 +55,8 @@ jobs:
     # Step: Check out the code.
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 99 #assuming this will be adequate for reporting code coverage in the last month
 
     # Step: Define how to cache deps. Restores existing cache if present.
     - name: Cache deps
