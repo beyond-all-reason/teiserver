@@ -56,7 +56,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 99 #assuming this will be adequate for reporting code coverage in the last month
+        ref: ${{ github.event.pull_request.head.sha }}
+        fetch-depth: 0 #all commits
 
     # Step: Define how to cache deps. Restores existing cache if present.
     - name: Cache deps
