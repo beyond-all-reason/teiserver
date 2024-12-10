@@ -97,13 +97,13 @@ jobs:
       run: mkdir -p ./cover/
     
     - name: Run tests and emit coverage to file for use when reporting test coverage of recently changed files
-      run: mix test --exclude needs_attention --cover > ./cover/test_coverage_by_file.txt
+      run: mix test --exclude needs_attention --cover | tee ./cover/test_coverage_by_file.txt
 
     - name: generate list of files changed in the last month
-      run: git diff HEAD '@{last month}' --name-only > ./cover/files_changed_in_last_month.txt
+      run: git diff HEAD '@{last month}' --name-only | tee ./cover/files_changed_in_last_month.txt
 
     - name: echo coverage header to list-of-files-changed file to assist in reporting 
-      run: echo "LINES RELEVANT   MISSED" >> ./cover/files_changed_in_last_month.txt
+      run: echo "LINES RELEVANT   MISSED" | tee -a ./cover/files_changed_in_last_month.txt
 
     - name: use grep to create test coverage report only on recently changed files, sorted by coverage percent
       run: grep -F -f ./cover/files_changed_in_last_month.txt ./cover/test_coverage_by_file.txt | grep -A999 "LINES RELEVANT   MISSED" | sort -g
