@@ -94,16 +94,12 @@ jobs:
     # the cached version.
     - name: Install dependencies
       run: mix compile
-
-    - name: Run tests separately to get test results and error early if tests fail
-      run: mix test --exclude needs_attention
     
     - name: create cover folder if not exists, to cache coverage reporting results
-      run: mkdir -p ./cover/
-    
-      #had to do this test re-run as a separate step because the minimum coverage is currently failing-on-exit and I don't know how to change that
-    - name: Run tests, supressing exit-on-failure, emitting coverage to file for use when reporting test coverage of recently changed files
-      run: mix test --exclude needs_attention --cover | tee ./cover/test_coverage_by_file.txt
+      run: mkdir -p ./cover/    
+      
+    - name: Run tests, failing loudly on error, emitting coverage to file for use when reporting test coverage of recently changed files
+      run: set -eo pipefail; mix test --exclude needs_attention --cover | tee ./cover/test_coverage_by_file.txt
 
     - name: generate list of files changed in the last month
       run: git diff ${{ github.event.pull_request.head.sha }} '@{last month}' --name-only | tee ./cover/files_changed_in_last_month.txt
@@ -113,5 +109,3 @@ jobs:
 
     - name: use grep to create test coverage report only on recently changed files, sorted by coverage percent
       run: grep -F -f ./cover/files_changed_in_last_month.txt ./cover/test_coverage_by_file.txt | grep -A999 "LINES RELEVANT   MISSED" | sort -g
-
-
