@@ -58,6 +58,13 @@ jobs:
       with:
         ref: ${{ github.event.pull_request.head.sha }}
         fetch-depth: 0 #all commits
+        fetch-tags: true
+        
+
+    # per https://github.com/actions/checkout/issues/1662 sometimes just need to run git fetch anyways just to get the commits :/
+    - name: git fetch
+      run: git fetch
+
 
     # Step: Define how to cache deps. Restores existing cache if present.
     - name: Cache deps
