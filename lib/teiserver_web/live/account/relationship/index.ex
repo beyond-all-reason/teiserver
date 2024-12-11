@@ -1,5 +1,7 @@
 defmodule TeiserverWeb.Account.RelationshipLive.Index do
   @moduledoc false
+  alias Teiserver.Account.FriendLib
+  alias Teiserver.Account.RelationshipLib
   use TeiserverWeb, :live_view
   alias Teiserver.Account
 
@@ -12,6 +14,8 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       |> assign(:view_colour, Account.RelationshipLib.colour())
       |> assign(:show_help, false)
       |> put_empty_relationships
+      |> assign(:purge_cutoff, "6 months")
+      |> assign(:purge_cutoff_options, ["1 month", "3 months", "6 months", "1 year"])
 
     {:ok, socket}
   end
@@ -52,6 +56,12 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     |> assign(:role_data, Account.RoleLib.role_data())
     |> put_empty_relationships
     |> update_user_search
+  end
+
+  defp apply_action(socket, :clean, _params) do
+    socket
+    |> assign(:page_title, "Relationships - Cleanup")
+    |> assign(:tab, :clean)
   end
 
   @impl true
@@ -255,6 +265,58 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     {:noreply, socket}
   end
 
+  def handle_event("purge-avoids", _params, socket) do
+    userid = socket.assigns.current_user.id
+    days = get_purge_days_cutoff(socket)
+    num_rows = RelationshipLib.delete_inactive_ignores_avoids_blocks(userid, days)
+
+    socket =
+      socket |> assign(:purge_avoids_message, "#{num_rows} inactive users purged.")
+
+    {:noreply, socket}
+  end
+
+  def handle_event("purge-friends", _params, socket) do
+    days_cutoff = get_purge_days_cutoff(socket)
+
+    # Get all friends of this user
+    friends = socket.assigns[:friends]
+
+    num_friends_deleted =
+      Enum.map(friends, fn friend ->
+        last_login = friend.other_user.last_login
+        days = abs(DateTime.diff(last_login, Timex.now(), :day))
+        should_delete? = days > days_cutoff
+
+        if(should_delete?) do
+          # Delete friend
+          Account.delete_friend(friend)
+        end
+
+        should_delete?
+      end)
+      |> Enum.filter(fn deleted? -> deleted? == true end)
+      |> length()
+
+    socket =
+      socket |> assign(:purge_friends_message, "#{num_friends_deleted} inactive friends purged.")
+
+    {:noreply, socket}
+  end
+
+  @doc """
+  Handles the dropdown for purge cutoff time
+  """
+  @impl true
+  def handle_event("update-purge-cutoff", event, socket) do
+    [key] = event["_target"]
+    value = event[key]
+
+    {:noreply,
+     socket
+     |> assign(:purge_cutoff, value)}
+  end
+
   defp update_user_search(
          %{assigns: %{live_action: :search, search_terms: terms} = assigns} = socket
        ) do
@@ -412,5 +474,22 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     |> assign(:avoids, avoids)
     |> assign(:ignores, ignores)
     |> assign(:blocks, blocks)
+  end
+
+  def get_purge_days_cutoff(socket) do
+    duration = socket.assigns[:purge_cutoff]
+    [_, number, type] = Regex.run(~r/(\d) (month|year)/, duration)
+    {number, _} = Integer.parse(number)
+
+    cond do
+      type == "year" ->
+        number * 365
+
+      type == "month" ->
+        number * 365.0 / 12
+
+      true ->
+        raise("Incorrect value assigned to :purge_cutoff")
+    end
   end
 end
