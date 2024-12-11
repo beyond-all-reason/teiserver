@@ -23,6 +23,9 @@
       <.tab_nav url={~p"/account/relationship/search"} selected={@tab == :search}>
         <Fontawesome.icon icon="search" style="solid" /> Search users
       </.tab_nav>
+      <.tab_nav url={~p"/account/relationship/clean"} selected={@tab == :clean}>
+        <Fontawesome.icon icon="broom" style="solid" /> Cleanup
+      </.tab_nav>
     </.tab_header>
   </div>
 </div>
@@ -410,5 +413,56 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<div :if={@live_action == :clean} class="row mt-2 mb-3">
+  <div class="col-xl-6">
+    <h4 class="text-danger">
+      Avoid Cleanup
+    </h4>
+
+    <form method="post" class="col-md-6 ">
+      <span>
+        Purge users from your ignore, avoid, and block list that have not logged in for:
+      </span>
+      <.input
+        type="select"
+        options={@purge_cutoff_options}
+        name="algorithm"
+        value={@purge_cutoff}
+        phx-change="update-purge-cutoff"
+      />
+      <div class="btn btn-danger btn-sm col-sm-12 mt-2" phx-click="purge-avoids">
+        Purge inactive ignores / avoids / blocks
+      </div>
+      <%= if(assigns[:purge_avoids_message]) do %>
+        <p class="mt-2"><%= @purge_avoids_message %></p>
+      <% end %>
+    </form>
+    <br />
+    <br />
+    <br />
+    <h4 class="text-success">
+      Friend Cleanup
+    </h4>
+    <form method="post" class="col-md-6">
+      <span>
+        Purge users from your friend list that have not logged in for:
+      </span>
+      <.input
+        type="select"
+        options={@purge_cutoff_options}
+        name="algorithm"
+        value={@purge_cutoff}
+        phx-change="update-purge-cutoff"
+      />
+      <div class="btn btn-success btn-sm col-sm-12 mt-2" phx-click="purge-friends">
+        Purge inactive Friends
+      </div>
+      <%= if(assigns[:purge_friends_message]) do %>
+        <p class="mt-2"><%= @purge_friends_message %></p>
+      <% end %>
+    </form>
   </div>
 </div>
