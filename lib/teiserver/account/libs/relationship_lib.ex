@@ -407,6 +407,8 @@ defmodule Teiserver.Account.RelationshipLib do
         days_not_logged_in
       ])
 
+    decache_relationships(user_id)
+
     results.num_rows
   end
 end

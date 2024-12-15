@@ -1,6 +1,5 @@
 defmodule TeiserverWeb.Account.RelationshipLive.Index do
   @moduledoc false
-  alias Teiserver.Account.FriendLib
   alias Teiserver.Account.RelationshipLib
   use TeiserverWeb, :live_view
   alias Teiserver.Account
@@ -14,8 +13,8 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       |> assign(:view_colour, Account.RelationshipLib.colour())
       |> assign(:show_help, false)
       |> put_empty_relationships
-      |> assign(:purge_cutoff, "6 months")
-      |> assign(:purge_cutoff_options, ["1 month", "3 months", "6 months", "1 year"])
+      |> assign(:purge_cutoff, get_default_purge_cutoff_option())
+      |> assign(:purge_cutoff_options, get_purge_cutoff_options())
 
     {:ok, socket}
   end
@@ -267,7 +266,8 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
 
   def handle_event("purge-avoids", _params, socket) do
     userid = socket.assigns.current_user.id
-    days = get_purge_days_cutoff(socket)
+    duration = socket.assigns[:purge_cutoff]
+    days = get_purge_days_cutoff(duration)
     num_rows = RelationshipLib.delete_inactive_ignores_avoids_blocks(userid, days)
 
     socket =
@@ -277,7 +277,8 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   end
 
   def handle_event("purge-friends", _params, socket) do
-    days_cutoff = get_purge_days_cutoff(socket)
+    duration = socket.assigns[:purge_cutoff]
+    days_cutoff = get_purge_days_cutoff(duration)
 
     # Get all friends of this user
     friends = socket.assigns[:friends]
@@ -476,20 +477,28 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     |> assign(:blocks, blocks)
   end
 
-  def get_purge_days_cutoff(socket) do
-    duration = socket.assigns[:purge_cutoff]
-    [_, number, type] = Regex.run(~r/(\d) (month|year)/, duration)
-    {number, _} = Integer.parse(number)
+  def get_purge_cutoff_options() do
+    ["1 month", "3 months", "6 months", "1 year"]
+  end
 
-    cond do
-      type == "year" ->
-        number * 365
+  def get_default_purge_cutoff_option() do
+    "6 months"
+  end
 
-      type == "month" ->
-        number * 365.0 / 12
+  @spec get_purge_days_cutoff(String.t()) :: float()
+  def get_purge_days_cutoff(duration) do
+    with [_, raw_number, type] <- Regex.run(~r/(\d)+ (month|year)/, duration),
+         {number, ""} <- Integer.parse(raw_number) do
+      cond do
+        type == "year" ->
+          number * 365
 
-      true ->
-        raise("Incorrect value assigned to :purge_cutoff")
+        type == "month" ->
+          number * 365.0 / 12
+      end
+    else
+      nil -> {:error, "invalid duration passed: #{duration}"}
+      {_, _rest} -> {:error, "invalid number in duration #{duration}"}
     end
   end
 end
