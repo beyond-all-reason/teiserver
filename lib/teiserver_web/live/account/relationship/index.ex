@@ -316,6 +316,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     {:noreply,
      socket
      |> assign(:purge_cutoff, value)}
+    |> assign(:inactive_friend_count, get_inactive_friend_count(socket))
   end
 
   defp update_user_search(
@@ -383,6 +384,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     |> assign(:found_relationship, nil)
     |> assign(:found_friendship, nil)
     |> assign(:found_friendship_request, nil)
+    |> assign(:inactive_friend_count, 0)
   end
 
   defp get_friends(%{assigns: %{current_user: current_user}} = socket) do
@@ -425,6 +427,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     |> assign(:incoming_friend_requests, incoming_friend_requests)
     |> assign(:outgoing_friend_requests, outgoing_friend_requests)
     |> assign(:friends, friends)
+    |> assign(:inactive_friend_count, get_inactive_friend_count(socket))
   end
 
   defp get_follows(%{assigns: %{current_user: current_user}} = socket) do
@@ -478,7 +481,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   end
 
   def get_purge_cutoff_options() do
-    ["3 months", "6 months", "1 year"]
+    ["1 month", "3 months", "6 months", "1 year"]
   end
 
   def get_default_purge_cutoff_option() do
@@ -500,5 +503,20 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       nil -> {:error, "invalid duration passed: #{duration}"}
       {_, _rest} -> {:error, "invalid number in duration #{duration}"}
     end
+  end
+
+  defp get_inactive_friend_count(%{assigns: %{friends: friends, purge_cutoff: purge_cutoff}}) do
+    days_cutoff = get_purge_days_cutoff(purge_cutoff)
+
+    get_inactive_friend_count(friends, days_cutoff)
+  end
+
+  defp get_inactive_friend_count(friends, days_cutoff) do
+    Enum.filter(friends, fn friend ->
+      last_login = friend.other_user.last_login
+      days = abs(DateTime.diff(last_login, Timex.now(), :day))
+      days > days_cutoff
+    end)
+    |> length()
   end
 end

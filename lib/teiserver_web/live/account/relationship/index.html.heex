@@ -460,7 +460,7 @@
       <div
         class="btn btn-success btn-sm col-sm-12 mt-2"
         phx-click="purge-friends"
-        data-confirm="Are you sure you want to purge inactive users from your friend list?"
+        data-confirm={"Are you sure you want to purge inactive users from your friend list? This will remove #{@inactive_friend_count} friends."}
       >
         Purge inactive Friends
       </div>
