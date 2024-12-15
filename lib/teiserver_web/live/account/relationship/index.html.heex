@@ -457,7 +457,11 @@
         value={@purge_cutoff}
         phx-change="update-purge-cutoff"
       />
-      <div class="btn btn-success btn-sm col-sm-12 mt-2" phx-click="purge-friends" data-confirm="Are you sure you want to purge inactive users from your friend list?">
+      <div
+        class="btn btn-success btn-sm col-sm-12 mt-2"
+        phx-click="purge-friends"
+        data-confirm="Are you sure you want to purge inactive users from your friend list?"
+      >
         Purge inactive Friends
       </div>
       <%= if(assigns[:purge_friends_message]) do %>
