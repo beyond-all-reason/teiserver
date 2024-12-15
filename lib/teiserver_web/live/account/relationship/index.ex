@@ -478,7 +478,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   end
 
   def get_purge_cutoff_options() do
-    ["1 month", "3 months", "6 months", "1 year"]
+    ["3 months", "6 months", "1 year"]
   end
 
   def get_default_purge_cutoff_option() do
