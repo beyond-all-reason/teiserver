@@ -282,22 +282,13 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
 
     # Get all friends of this user
     friends = socket.assigns[:friends]
-    now = Timex.now()
 
     num_friends_deleted =
-      Enum.map(friends, fn friend ->
-        last_login = friend.other_user.last_login_timex
-        days = get_days_diff(last_login, now)
-        should_delete? = days > days_cutoff
-
-        if(should_delete?) do
-          # Delete friend
-          Account.delete_friend(friend)
-        end
-
-        should_delete?
+      get_inactive_friends(friends, days_cutoff)
+      |> Enum.map(fn friend ->
+        Account.delete_friend(friend)
+        nil
       end)
-      |> Enum.filter(fn deleted? -> deleted? == true end)
       |> length()
 
     socket =
@@ -314,10 +305,12 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     [key] = event["_target"]
     value = event[key]
 
-    {:noreply,
-     socket
-     |> assign(:purge_cutoff, value)}
-    |> assign(:inactive_friend_count, get_inactive_friend_count(socket))
+    socket =
+      socket
+      |> assign(:purge_cutoff, value)
+      |> assign(:inactive_friend_count, get_inactive_friend_count(socket))
+
+    {:noreply, socket}
   end
 
   defp update_user_search(
@@ -513,12 +506,16 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   end
 
   defp get_inactive_friend_count(friends, days_cutoff) do
+    get_inactive_friends(friends, days_cutoff)
+    |> length()
+  end
+
+  def get_inactive_friends(friends, days_cutoff) do
     Enum.filter(friends, fn friend ->
       last_login = friend.other_user.last_login_timex
       days = get_days_diff(last_login, Timex.now())
       days > days_cutoff
     end)
-    |> length()
   end
 
   def get_days_diff(datetime1, datetime2) do
