@@ -1,7 +1,5 @@
 defmodule Teiserver.Account.RelationshipLibTest do
   use Teiserver.DataCase, async: true
-  alias Teiserver.Account
-  alias Teiserver.Account.FriendLib
 
   alias Teiserver.Account.AccountTestLib
   alias Teiserver.Account.RelationshipLib
@@ -15,7 +13,7 @@ defmodule Teiserver.Account.RelationshipLibTest do
 
     user3 =
       AccountTestLib.user_fixture(%{
-        "last_login" => old_login
+        "last_login_timex" => old_login
       })
 
     assert user1.id != nil

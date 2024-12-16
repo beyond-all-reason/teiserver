@@ -286,7 +286,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
 
     num_friends_deleted =
       Enum.map(friends, fn friend ->
-        last_login = friend.other_user.last_login
+        last_login = friend.other_user.last_login_timex
         days = get_days_diff(last_login, now)
         should_delete? = days > days_cutoff
 
@@ -514,7 +514,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
 
   defp get_inactive_friend_count(friends, days_cutoff) do
     Enum.filter(friends, fn friend ->
-      last_login = friend.other_user.last_login
+      last_login = friend.other_user.last_login_timex
       days = get_days_diff(last_login, Timex.now())
       days > days_cutoff
     end)
