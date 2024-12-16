@@ -282,11 +282,12 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
 
     # Get all friends of this user
     friends = socket.assigns[:friends]
+    now = Timex.now()
 
     num_friends_deleted =
       Enum.map(friends, fn friend ->
         last_login = friend.other_user.last_login
-        days = abs(DateTime.diff(last_login, Timex.now(), :day))
+        days = get_days_diff(last_login, now)
         should_delete? = days > days_cutoff
 
         if(should_delete?) do
@@ -514,9 +515,17 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   defp get_inactive_friend_count(friends, days_cutoff) do
     Enum.filter(friends, fn friend ->
       last_login = friend.other_user.last_login
-      days = abs(DateTime.diff(last_login, Timex.now(), :day))
+      days = get_days_diff(last_login, Timex.now())
       days > days_cutoff
     end)
     |> length()
+  end
+
+  def get_days_diff(datetime1, datetime2) do
+    cond do
+      datetime1 == nil -> 0
+      datetime2 == nil -> 0
+      true -> abs(DateTime.diff(datetime1, datetime2, :day))
+    end
   end
 end

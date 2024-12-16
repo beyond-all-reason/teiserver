@@ -43,4 +43,15 @@ defmodule TeiserverWeb.Account.RelationshipLive.IndexLiveTest do
     assert Index.get_purge_days_cutoff("x months") ==
              {:error, "invalid duration passed: x months"}
   end
+
+  test "get_days_diff works" do
+    now = Timex.now()
+    other_date = DateTime.add(now, -400, :day)
+    result = Index.get_days_diff(now, other_date)
+    assert result == 400
+
+    other_date = nil
+    result = Index.get_days_diff(now, other_date)
+    assert result == 0
+  end
 end
