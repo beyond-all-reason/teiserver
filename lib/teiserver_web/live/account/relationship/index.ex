@@ -61,6 +61,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     socket
     |> assign(:page_title, "Relationships - Cleanup")
     |> assign(:tab, :clean)
+    |> get_friends()
   end
 
   @impl true
@@ -305,10 +306,13 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     [key] = event["_target"]
     value = event[key]
 
+    friends = socket.assigns[:friends]
+    inactive_friend_count = get_inactive_friend_count(friends, value)
+
     socket =
       socket
       |> assign(:purge_cutoff, value)
-      |> assign(:inactive_friend_count, get_inactive_friend_count(socket))
+      |> assign(:inactive_friend_count, inactive_friend_count)
 
     {:noreply, socket}
   end
@@ -417,11 +421,14 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
         preload: [:to_user]
       )
 
+    inactive_friend_count =
+      get_inactive_friend_count(friends, socket.assigns[:purge_cutoff])
+
     socket
     |> assign(:incoming_friend_requests, incoming_friend_requests)
     |> assign(:outgoing_friend_requests, outgoing_friend_requests)
     |> assign(:friends, friends)
-    |> assign(:inactive_friend_count, get_inactive_friend_count(socket))
+    |> assign(:inactive_friend_count, inactive_friend_count)
   end
 
   defp get_follows(%{assigns: %{current_user: current_user}} = socket) do
@@ -499,13 +506,9 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     end
   end
 
-  defp get_inactive_friend_count(%{assigns: %{friends: friends, purge_cutoff: purge_cutoff}}) do
-    days_cutoff = get_purge_days_cutoff(purge_cutoff)
+  defp get_inactive_friend_count(friends, purge_cutoff_text) do
+    days_cutoff = get_purge_days_cutoff(purge_cutoff_text)
 
-    get_inactive_friend_count(friends, days_cutoff)
-  end
-
-  defp get_inactive_friend_count(friends, days_cutoff) do
     get_inactive_friends(friends, days_cutoff)
     |> length()
   end
