@@ -27,6 +27,10 @@ defmodule Teiserver.Account.RelationshipLibTest do
     assert Enum.member?(avoid_list, user2.id)
     assert Enum.member?(avoid_list, user3.id)
 
+    # Check count of inactive relationships
+    inactive_count = RelationshipLib.get_inactive_ignores_avoids_blocks_count(user1.id, 30)
+    assert inactive_count == 1
+
     # Purge old relationships
     RelationshipLib.delete_inactive_ignores_avoids_blocks(user1.id, 30)
 

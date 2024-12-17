@@ -62,6 +62,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     |> assign(:page_title, "Relationships - Cleanup")
     |> assign(:tab, :clean)
     |> get_friends()
+    |> get_inactive_relationship_count()
   end
 
   @impl true
@@ -306,13 +307,11 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     [key] = event["_target"]
     value = event[key]
 
-    friends = socket.assigns[:friends]
-    inactive_friend_count = get_inactive_friend_count(friends, value)
-
     socket =
       socket
       |> assign(:purge_cutoff, value)
-      |> assign(:inactive_friend_count, inactive_friend_count)
+      |> get_inactive_relationship_count()
+      |> get_inactive_friend_count()
 
     {:noreply, socket}
   end
@@ -385,6 +384,19 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     |> assign(:inactive_friend_count, 0)
   end
 
+  defp get_inactive_relationship_count(
+         %{assigns: %{current_user: current_user, purge_cutoff: purge_cutoff}} = socket
+       ) do
+    user_id = current_user.id
+    days = get_purge_days_cutoff(purge_cutoff)
+
+    inactive_relationship_count =
+      RelationshipLib.get_inactive_ignores_avoids_blocks_count(user_id, days)
+
+    socket = socket |> assign(:inactive_relationship_count, inactive_relationship_count)
+    socket
+  end
+
   defp get_friends(%{assigns: %{current_user: current_user}} = socket) do
     friends =
       Account.list_friends(
@@ -421,14 +433,11 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
         preload: [:to_user]
       )
 
-    inactive_friend_count =
-      get_inactive_friend_count(friends, socket.assigns[:purge_cutoff])
-
     socket
     |> assign(:incoming_friend_requests, incoming_friend_requests)
     |> assign(:outgoing_friend_requests, outgoing_friend_requests)
     |> assign(:friends, friends)
-    |> assign(:inactive_friend_count, inactive_friend_count)
+    |> get_inactive_friend_count()
   end
 
   defp get_follows(%{assigns: %{current_user: current_user}} = socket) do
@@ -504,6 +513,16 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       nil -> {:error, "invalid duration passed: #{duration}"}
       {_, _rest} -> {:error, "invalid number in duration #{duration}"}
     end
+  end
+
+  defp get_inactive_friend_count(socket) do
+    friends = socket.assigns.friends
+    purge_cutoff = socket.assigns.purge_cutoff
+
+    socket =
+      socket |> assign(:inactive_friend_count, get_inactive_friend_count(friends, purge_cutoff))
+
+    socket
   end
 
   defp get_inactive_friend_count(friends, purge_cutoff_text) do
