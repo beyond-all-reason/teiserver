@@ -108,11 +108,6 @@ jobs:
     - name: Run tests, failing loudly on error, emitting coverage to file for use when reporting test coverage of recently changed files
       run: set -eo pipefail; mix test --exclude needs_attention --cover | tee ./cover/test_coverage_by_file.txt
 
-    - name: generate list of files changed in the last month
-      run: git diff ${{ github.event.pull_request.head.sha }} '@{last month}' --name-only | tee ./cover/files_changed_in_last_month.txt
+    - name: emit hint on where to update minimum test coverage
+      run: echo "to update minimum test coverage requirements, edit coveralls.json"
 
-    - name: echo coverage header to list-of-files-changed file to assist in reporting 
-      run: echo "LINES RELEVANT   MISSED" | tee -a ./cover/files_changed_in_last_month.txt
-
-    - name: use grep to create test coverage report only on recently changed files, sorted by coverage percent
-      run: grep -F -f ./cover/files_changed_in_last_month.txt ./cover/test_coverage_by_file.txt | grep -A999 "LINES RELEVANT   MISSED" | sort -g
