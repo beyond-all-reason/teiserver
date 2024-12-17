@@ -14,7 +14,8 @@ defmodule Teiserver.Account.AccountTestLib do
         name: data["name"] || "name_#{r}",
         email: data["email"] || "email_#{r}",
         colour: data["colour"] || "colour",
-        icon: data["icon"] || "icon"
+        icon: data["icon"] || "icon",
+        last_login_timex: data["last_login_timex"] || Timex.now()
       },
       :script
     )
