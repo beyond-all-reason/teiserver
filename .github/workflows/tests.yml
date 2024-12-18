@@ -101,8 +101,8 @@ jobs:
     - name: Run tests, failing loudly on error, emitting coverage to file for use when reporting test coverage in later proposed step
       run: set -eo pipefail; mix test --exclude needs_attention --cover | tee ./cover/test_coverage_by_file.txt
 
-    # run git fetch --shallow-since far enough back to be confident we'll see some merge commits
-    # (running off the end of the commit history causes git log to believe every file has changed, somehow) 
+    # run git fetch --shallow-since far enough back to be confident we'll see some merge commits to the master branch
+    # (running off the end of a shallow commit history causes git log to believe every file has changed, somehow) 
     - name: git fetch more than just the most recent commit
       run: git fetch --shallow-since="6 months"
 
