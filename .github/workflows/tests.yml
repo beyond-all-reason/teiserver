@@ -55,16 +55,6 @@ jobs:
     # Step: Check out the code.
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        ref: ${{ github.event.pull_request.head.sha }}
-        fetch-depth: 0 #all commits
-        fetch-tags: true
-        
-
-    # per https://github.com/actions/checkout/issues/1662 sometimes just need to run git fetch anyways just to get the commits :/
-    - name: git fetch
-      run: git fetch
-
 
     # Step: Define how to cache deps. Restores existing cache if present.
     - name: Cache deps
@@ -111,12 +101,16 @@ jobs:
     - name: Run tests, failing loudly on error, emitting coverage to file for use when reporting test coverage in later proposed step
       run: set -eo pipefail; mix test --exclude needs_attention --cover | tee ./cover/test_coverage_by_file.txt
 
-    # not working correctly in GitHub actions (thus commented out for now), seems to not be getting a deep copy of all commits
-    # - name: generate list of files changed in the last month 
-    #   run: git diff ${{ github.event.pull_request.head.sha }} '@{last month}' --name-only | tee ./cover/files_changed_in_last_month.txt
+    # run git fetch --shallow-since far enough back to be confident we'll see some merge commits
+    # (running off the end of the commit history causes git log to believe every file has changed, somehow) 
+    - name: git fetch more than just the most recent commit
+      run: git fetch --shallow-since="6 months"
 
-    # - name: echo coverage header to list-of-files-changed file to assist in reporting # Requires above step to be fixed
-    #   run: echo "LINES RELEVANT   MISSED" | tee -a ./cover/files_changed_in_last_month.txt
+    - name: generate list of files changed in the last month
+      run: git --no-pager log --name-only --oneline --since='1 month ago' | tee ./cover/files_changed_in_last_month.txt
 
-    # - name: use grep to create test coverage report only on recently changed files, sorted by coverage percent # Requires above step to be fixed
-    #   run: grep -F -f ./cover/files_changed_in_last_month.txt ./cover/test_coverage_by_file.txt | grep -A999 "LINES RELEVANT   MISSED" | sort -g
+    - name: echo coverage header to the files_changed_in_last_month file to assist in reporting
+      run: echo "LINES RELEVANT   MISSED" | tee -a ./cover/files_changed_in_last_month.txt
+
+    - name: use grep to create test coverage report only on recently changed files, sorted by coverage percent
+      run: grep -F -f ./cover/files_changed_in_last_month.txt ./cover/test_coverage_by_file.txt | grep -A999 "LINES RELEVANT   MISSED" | sort -g
