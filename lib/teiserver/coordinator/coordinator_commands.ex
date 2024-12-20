@@ -407,7 +407,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
       CacheUser.send_direct_message(state.userid, senderid, [
         @splitter,
-        "To link your discord account, message the the discord bot (Teiserver Bridge) with the message",
+        "To link your discord account, send a private message to Teiserver Bot on the BAR discord with the message:",
         "$discord #{senderid}-#{code}",
         "This code will expire after 5 minutes",
         "The discord link is: #{Application.get_env(:teiserver, Teiserver)[:discord]}"
