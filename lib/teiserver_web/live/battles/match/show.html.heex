@@ -387,12 +387,14 @@
                 <td><%= m.team_id + 1 %></td>
                 <td>
                   <%= if rating != nil do %>
-                    <%= rating.value["rating_value"] |> round(2) %>
+                    <%= (rating.value["rating_value"] - rating.value["rating_value_change"])
+                    |> round(2) %>
                   <% end %>
                 </td>
                 <td>
                   <%= if rating != nil do %>
-                    <%= rating.value["uncertainty"] |> round(2) %>
+                    <%= (rating.value["uncertainty"] - rating.value["uncertainty_change"])
+                    |> round(2) %>
                   <% end %>
                 </td>
               </tr>

@@ -207,19 +207,39 @@ defmodule Teiserver.Battle.BalanceLib do
     |> Enum.map(fn group ->
       # Iterate over our map
       Map.new(group, fn {user_id, value} ->
-        case value do
-          x when is_number(x) ->
-            {user_id, get_user_rating_rank_old(user_id, x)}
+        cond do
+          is_number(value) ->
+            {user_id, get_user_rating_rank_old(user_id, value)}
 
-          # match_controller will use this condition when balancing using old data
-          %{"rating_value" => rating_value, "uncertainty" => uncertainty} ->
-            {user_id, get_user_rating_rank_old(user_id, rating_value, uncertainty)}
+          # match_controller will use this condition when balancing using old data from game_rating_logs table
+          match?(%{"rating_value" => _}, value) ->
+            pre_match_stats = get_prematch_stats(value)
 
-          _ ->
+            {user_id,
+             get_user_rating_rank_old(
+               user_id,
+               pre_match_stats.rating_value,
+               pre_match_stats.uncertainty
+             )}
+
+          true ->
             {user_id, value}
         end
       end)
     end)
+  end
+
+  # Rating logs use post match data so we must adjust to get prematch data
+  defp get_prematch_stats(rating_log_value) do
+    new_rating_value = rating_log_value["rating_value"]
+    rating_value_change = rating_log_value["rating_value_change"]
+    new_uncertainty = rating_log_value["uncertainty"]
+    uncertainty_change = rating_log_value["uncertainty_change"]
+
+    %{
+      rating_value: new_rating_value - rating_value_change,
+      uncertainty: new_uncertainty - uncertainty_change
+    }
   end
 
   # Removes various keys we don't care about
