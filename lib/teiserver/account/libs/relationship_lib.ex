@@ -388,4 +388,48 @@ defmodule Teiserver.Account.RelationshipLib do
 
     results.rows
   end
+
+  # Deletes inactive users in the ignore/avoid/block list of a user
+  # Returns the number of deletions
+  def delete_inactive_ignores_avoids_blocks(user_id, days_not_logged_in) do
+    query = """
+    delete from account_relationships ar
+      using account_users au
+      where au.id = ar.to_user_id
+      and ar.from_user_id = $1
+      and (au.last_login_timex is null OR
+      abs(DATE_PART('day', (now()- au.last_login_timex ))) > $2);
+    """
+
+    results =
+      Ecto.Adapters.SQL.query!(Repo, query, [
+        user_id,
+        days_not_logged_in
+      ])
+
+    decache_relationships(user_id)
+
+    results.num_rows
+  end
+
+  def get_inactive_ignores_avoids_blocks_count(user_id, days_not_logged_in) do
+    query =
+      """
+      select count(*) from account_relationships ar
+      join account_users au
+      on au.id = ar.to_user_id
+      and ar.from_user_id = $1
+      and (au.last_login_timex is null OR
+      abs(DATE_PART('day', (now()- au.last_login_timex ))) > $2);
+      """
+
+    result =
+      Ecto.Adapters.SQL.query!(Repo, query, [
+        user_id,
+        days_not_logged_in
+      ])
+
+    [[inactive_count]] = result.rows
+    inactive_count
+  end
 end

@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Account.RelationshipLive.Index do
   @moduledoc false
+  alias Teiserver.Account.RelationshipLib
   use TeiserverWeb, :live_view
   alias Teiserver.Account
 
@@ -12,6 +13,8 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       |> assign(:view_colour, Account.RelationshipLib.colour())
       |> assign(:show_help, false)
       |> put_empty_relationships
+      |> assign(:purge_cutoff, get_default_purge_cutoff_option())
+      |> assign(:purge_cutoff_options, get_purge_cutoff_options())
 
     {:ok, socket}
   end
@@ -52,6 +55,14 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     |> assign(:role_data, Account.RoleLib.role_data())
     |> put_empty_relationships
     |> update_user_search
+  end
+
+  defp apply_action(socket, :clean, _params) do
+    socket
+    |> assign(:page_title, "Relationships - Cleanup")
+    |> assign(:tab, :clean)
+    |> get_friends()
+    |> get_inactive_relationship_count()
   end
 
   @impl true
@@ -255,6 +266,56 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     {:noreply, socket}
   end
 
+  def handle_event("purge-avoids", _params, socket) do
+    userid = socket.assigns.current_user.id
+    duration = socket.assigns[:purge_cutoff]
+    days = get_purge_days_cutoff(duration)
+    num_rows = RelationshipLib.delete_inactive_ignores_avoids_blocks(userid, days)
+
+    socket =
+      socket |> assign(:purge_avoids_message, "#{num_rows} inactive users purged.")
+
+    {:noreply, socket}
+  end
+
+  def handle_event("purge-friends", _params, socket) do
+    duration = socket.assigns[:purge_cutoff]
+    days_cutoff = get_purge_days_cutoff(duration)
+
+    # Get all friends of this user
+    friends = socket.assigns[:friends]
+
+    num_friends_deleted =
+      get_inactive_friends(friends, days_cutoff)
+      |> Enum.map(fn friend ->
+        Account.delete_friend(friend)
+        nil
+      end)
+      |> length()
+
+    socket =
+      socket |> assign(:purge_friends_message, "#{num_friends_deleted} inactive friends purged.")
+
+    {:noreply, socket}
+  end
+
+  @doc """
+  Handles the dropdown for purge cutoff time
+  """
+  @impl true
+  def handle_event("update-purge-cutoff", event, socket) do
+    [key] = event["_target"]
+    value = event[key]
+
+    socket =
+      socket
+      |> assign(:purge_cutoff, value)
+      |> get_inactive_relationship_count()
+      |> get_inactive_friend_count()
+
+    {:noreply, socket}
+  end
+
   defp update_user_search(
          %{assigns: %{live_action: :search, search_terms: terms} = assigns} = socket
        ) do
@@ -320,6 +381,20 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     |> assign(:found_relationship, nil)
     |> assign(:found_friendship, nil)
     |> assign(:found_friendship_request, nil)
+    |> assign(:inactive_friend_count, 0)
+  end
+
+  defp get_inactive_relationship_count(
+         %{assigns: %{current_user: current_user, purge_cutoff: purge_cutoff}} = socket
+       ) do
+    user_id = current_user.id
+    days = get_purge_days_cutoff(purge_cutoff)
+
+    inactive_relationship_count =
+      RelationshipLib.get_inactive_ignores_avoids_blocks_count(user_id, days)
+
+    socket = socket |> assign(:inactive_relationship_count, inactive_relationship_count)
+    socket
   end
 
   defp get_friends(%{assigns: %{current_user: current_user}} = socket) do
@@ -362,6 +437,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     |> assign(:incoming_friend_requests, incoming_friend_requests)
     |> assign(:outgoing_friend_requests, outgoing_friend_requests)
     |> assign(:friends, friends)
+    |> get_inactive_friend_count()
   end
 
   defp get_follows(%{assigns: %{current_user: current_user}} = socket) do
@@ -412,5 +488,63 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     |> assign(:avoids, avoids)
     |> assign(:ignores, ignores)
     |> assign(:blocks, blocks)
+  end
+
+  def get_purge_cutoff_options() do
+    ["1 month", "3 months", "6 months", "1 year"]
+  end
+
+  def get_default_purge_cutoff_option() do
+    "6 months"
+  end
+
+  @spec get_purge_days_cutoff(String.t()) :: float()
+  def get_purge_days_cutoff(duration) do
+    with [_, raw_number, type] <- Regex.run(~r/(\d)+ (month|year)/, duration),
+         {number, ""} <- Integer.parse(raw_number) do
+      cond do
+        type == "year" ->
+          number * 365
+
+        type == "month" ->
+          number * 365.0 / 12
+      end
+    else
+      nil -> {:error, "invalid duration passed: #{duration}"}
+      {_, _rest} -> {:error, "invalid number in duration #{duration}"}
+    end
+  end
+
+  defp get_inactive_friend_count(socket) do
+    friends = socket.assigns.friends
+    purge_cutoff = socket.assigns.purge_cutoff
+
+    socket =
+      socket |> assign(:inactive_friend_count, get_inactive_friend_count(friends, purge_cutoff))
+
+    socket
+  end
+
+  defp get_inactive_friend_count(friends, purge_cutoff_text) do
+    days_cutoff = get_purge_days_cutoff(purge_cutoff_text)
+
+    get_inactive_friends(friends, days_cutoff)
+    |> length()
+  end
+
+  def get_inactive_friends(friends, days_cutoff) do
+    Enum.filter(friends, fn friend ->
+      last_login = friend.other_user.last_login_timex
+      days = get_days_diff(last_login, Timex.now())
+      days > days_cutoff
+    end)
+  end
+
+  def get_days_diff(datetime1, datetime2) do
+    cond do
+      datetime1 == nil -> 0
+      datetime2 == nil -> 0
+      true -> abs(DateTime.diff(datetime1, datetime2, :day))
+    end
   end
 end

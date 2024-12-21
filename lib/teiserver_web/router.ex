@@ -226,6 +226,7 @@ defmodule TeiserverWeb.Router do
       live "/relationship/follow", RelationshipLive.Index, :follow
       live "/relationship/avoid", RelationshipLive.Index, :avoid
       live "/relationship/search", RelationshipLive.Index, :search
+      live "/relationship/clean", RelationshipLive.Index, :clean
     end
 
     live_session :account_settings,
