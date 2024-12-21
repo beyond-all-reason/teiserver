@@ -433,8 +433,11 @@
         value={@purge_cutoff}
         phx-change="update-purge-cutoff"
       />
-      <div class="btn btn-danger btn-sm col-sm-12 mt-2" phx-click="purge-avoids"
-      data-confirm={"Are you sure you want to purge inactive users from your ignore/avoid/block lists? This will remove #{@inactive_relationship_count} users."}>
+      <div
+        class="btn btn-danger btn-sm col-sm-12 mt-2"
+        phx-click="purge-avoids"
+        data-confirm={"Are you sure you want to purge inactive users from your ignore/avoid/block lists? This will remove #{@inactive_relationship_count} users."}
+      >
         Purge inactive ignores / avoids / blocks
       </div>
       <%= if(assigns[:purge_avoids_message]) do %>
