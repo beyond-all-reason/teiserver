@@ -55,6 +55,8 @@ jobs:
     # Step: Check out the code.
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     # Step: Define how to cache deps. Restores existing cache if present.
     - name: Cache deps
@@ -93,18 +95,13 @@ jobs:
       run: mix compile
     
     - name: create cover folder if not exists, to cache coverage reporting results
-      run: mkdir -p ./cover/    
+      run: mkdir -p ./cover/
       
     - name: emit hint on where to update minimum test coverage
       run: echo "to update minimum test coverage requirements, edit coveralls.json"
 
     - name: Run tests, failing loudly on error, emitting coverage to file for use when reporting test coverage in later proposed step
       run: set -eo pipefail; mix test --exclude needs_attention --cover | tee ./cover/test_coverage_by_file.txt
-
-    # run git fetch --shallow-since far enough back to be confident we'll see some merge commits to the master branch
-    # (running off the end of a shallow commit history causes git log to believe every file has changed, somehow) 
-    - name: git fetch more than just the most recent commit
-      run: git fetch --shallow-since="6 months"
 
     - name: generate list of files changed in the last month
       run: git --no-pager log --name-only --oneline --since='1 month ago' | tee ./cover/files_changed_in_last_month.txt
